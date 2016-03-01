@@ -71,9 +71,11 @@ bool Method_A::Process (const PedData& peddata,const string& scriptsLocation)
           _passLine[i] = false;
      }
      Log->Write("------------------------Analyzing with Method A-----------------------------");
-     for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
+     //for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
+     for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
      {
-          int frid =  frameNr + peddata.GetMinFrame();
+    	  int frameNr = ite->first;
+    	  int frid =  frameNr + peddata.GetMinFrame();
           if(!(frid%100))
           {
                Log->Write("frame ID = %d",frid);
@@ -100,11 +102,15 @@ void Method_A::WriteFile_N_t(string data)
      if(file.is_open())
      {
           file<<data;
+          file.close();
           string METHOD_A_LOCATION =_projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/";
           string file_N_t ="Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
-          string parameters_N_t="python "+_scriptsLocation+"/_Plot_N_t.py -p \""+ METHOD_A_LOCATION + "\" -n "+file_N_t;
-          system(parameters_N_t.c_str());
-          Log->Write("INFO:\tPlotting N-t diagram!");
+          if(_plotTimeSeries)
+          {
+			  string parameters_N_t="python \""+_scriptsLocation+"/_Plot_N_t.py\" -p \""+ METHOD_A_LOCATION + "\" -n "+file_N_t;
+			  int res = system(parameters_N_t.c_str());
+			  Log->Write("INFO:\tPlotting N-t diagram! Status: %d", res);
+          }
      }
      else
      {
@@ -212,4 +218,9 @@ void Method_A::SetMeasurementArea (MeasurementArea_L* area)
 void Method_A::SetTimeInterval(const int& deltaT)
 {
      _deltaT = deltaT;
+}
+
+void Method_A::SetPlotTimeSeries(bool plotTimeseries)
+{
+     _plotTimeSeries = plotTimeseries;
 }

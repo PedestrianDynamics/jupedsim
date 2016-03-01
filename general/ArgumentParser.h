@@ -57,7 +57,7 @@ private:
      FileFormat _fileFormat;
      std::vector<std::string> _trajectoriesFiles;
 
-     char _vComponent;
+     std::string _vComponent;
      bool _isMethodA;
      bool _isMethodB;
      bool _isMethodC;
@@ -66,7 +66,13 @@ private:
      double _cutRadius;
      int _circleEdges;
      bool _isOutputGraph;
+     bool _isPlotGraph;
+     bool _isPlotTimeSeriesA;
+     bool _isPlotTimeSeriesC;
+     bool _isPlotTimeSeriesD;
+     bool _isOneDimensional;
      bool _isIndividualFD;
+     polygon_2d _areaIndividualFD;
      bool _isGetProfile;
      double _steadyStart;
      double _steadyEnd;
@@ -103,7 +109,7 @@ public:
      double GetLineEndX() const;
      double GetLineEndY() const;
 
-     char GetVComponent() const;
+     std::string GetVComponent() const;
      int GetDelatT_Vins() const;
      int GetTimeIntervalA() const;
      bool GetIsMethodA() const;
@@ -118,7 +124,13 @@ public:
      double GetCutRadius() const;
      int GetCircleEdges() const;
      bool GetIsOutputGraph() const;
+     bool GetIsPlotGraph() const;
+     bool GetIsPlotTimeSeriesA() const;
+     bool GetIsPlotTimeSeriesC() const;
+     bool GetIsPlotTimeSeriesD() const;
+     bool GetIsOneDimensional() const;
      bool GetIsIndividualFD() const;
+     polygon_2d GetAreaIndividualFD() const;
      double GetSteadyStart() const;
      double GetSteadyEnd() const;
      bool GetIsGetProfile() const;

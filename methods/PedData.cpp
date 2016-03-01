@@ -1,7 +1,7 @@
 /**
  * \file        PedData.cpp
- * \date        Oct 10, 2014
- * \version     v0.7
+ * \date        Feb 10, 2016
+ * \version     v0.8
  * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
  *
  * \section License
@@ -44,7 +44,7 @@ PedData::~PedData()
 
 }
 
-bool PedData::ReadData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& trajformat, int deltaF, char vComponent)
+bool PedData::ReadData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& trajformat, int deltaF, std::string vComponent)
 {
      _minID = INT_MAX;
      _minFrame = INT_MAX;
@@ -80,6 +80,7 @@ bool PedData::InitializeVariables(const string& filename)
 {
      vector<double> xs;
      vector<double> ys;
+     vector<string> vcmp; // the direction identification for velocity calculation
      vector<int> _IdsTXT;   // the Id data from txt format trajectory data
      vector<int> _FramesTXT;  // the Frame data from txt format trajectory data
      //string fullTrajectoriesPathName= _projectRootDir+"./"+_trajName;
@@ -115,7 +116,7 @@ bool PedData::InitializeVariables(const string& filename)
                     std::vector<std::string> strs;
                     boost::split(strs, line , boost::is_any_of("\t "),boost::token_compress_on);
 
-                    if(strs.size() <4)
+                    if(strs.size() < 4)
                     {
                          Log->Write("ERROR:\t There is an error in the file at line %d", lineNr);
                          return false;
@@ -125,6 +126,18 @@ bool PedData::InitializeVariables(const string& filename)
                     _FramesTXT.push_back(atoi(strs[1].c_str()));
                     xs.push_back(atof(strs[2].c_str()));
                     ys.push_back(atof(strs[3].c_str()));
+                    if(_vComponent=="F")
+                    {
+						if(strs.size() >= 6)
+						{
+							vcmp.push_back(strs[5].c_str());
+						}
+						else
+						{
+							Log->Write("ERROR:\t There is no indicator for velocity component in trajectory file or ini file!!");
+							return false;
+						}
+                    }
                }
                lineNr++;
           }
@@ -137,16 +150,10 @@ bool PedData::InitializeVariables(const string& filename)
      //Total number of frames
      _numFrames = *max_element(_FramesTXT.begin(),_FramesTXT.end()) - _minFrame+1;
 
+
      //Total number of agents
      _numPeds = *max_element(_IdsTXT.begin(),_IdsTXT.end()) - _minID+1;
-     vector<int> Ids_temp=_IdsTXT;
-     sort (Ids_temp.begin(), Ids_temp.end());
-     Ids_temp.erase(unique(Ids_temp.begin(), Ids_temp.end()), Ids_temp.end());
-     if((unsigned)_numPeds!=Ids_temp.size())
-     {
-          Log->Write("Error:\tThe index of ped ID is not continuous. Please modify the trajectory file!");
-          return false;
-     }
+
      CreateGlobalVariables(_numPeds, _numFrames);
 
      std::vector<int> firstFrameIndex;  //The first frame index of each pedestrian
@@ -165,10 +172,18 @@ bool PedData::InitializeVariables(const string& filename)
           lastFrameIndex.push_back(firstFrameIndex[i] - 1);
      }
      lastFrameIndex.push_back(_IdsTXT.size() - 1);
+
      for (unsigned int i = 0; i < firstFrameIndex.size(); i++)
      {
           _firstFrame[i] = _FramesTXT[firstFrameIndex[i]] - _minFrame;
           _lastFrame[i] = _FramesTXT[lastFrameIndex[i]] - _minFrame;
+          int actual_totalframe=lastFrameIndex[i]-firstFrameIndex[i]+1;
+          int expect_totalframe=_lastFrame[i]-_firstFrame[i]+1;
+          if(actual_totalframe != expect_totalframe)
+          {
+              Log->Write("Error:\tThe trajectory of ped with ID <%d> is not continuous. Please modify the trajectory file!",_IdsTXT[firstFrameIndex[i]]);
+              return false;
+          }
      }
 
      for(unsigned int i = 0; i < _IdsTXT.size(); i++)
@@ -179,6 +194,14 @@ bool PedData::InitializeVariables(const string& filename)
           double y = ys[i]*M2CM;
           _xCor[ID][frm] = x;
           _yCor[ID][frm] = y;
+          if(_vComponent == "F")
+          {
+        	  _vComp[ID][frm] = vcmp[i];
+          }
+          else
+          {
+        	  _vComp[ID][frm] = _vComponent;
+          }
      }
 
      //save the data for each frame
@@ -187,6 +210,7 @@ bool PedData::InitializeVariables(const string& filename)
           int id = _IdsTXT[i]-_minID;
           int t =_FramesTXT[i]- _minFrame;
           _peds_t[t].push_back(id);
+
      }
 
      return true;
@@ -204,15 +228,6 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
           return false;
      }
 
-     //counting the number of frames
-     int frames = 0;
-     for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
-               xFrame = xFrame->NextSiblingElement("frame")) {
-          frames++;
-     }
-     _numFrames = frames;
-     Log->Write("INFO:\tnum Frames = %d",_numFrames);
-
      //Number of agents
 
      TiXmlNode*  xHeader = xRootNode->FirstChild("header"); // header
@@ -227,7 +242,6 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
           Log->Write("INFO:\tFrame rate fps: <%.2f>", _fps);
      }
 
-     CreateGlobalVariables(_numPeds, _numFrames);
 
      //processing the frames node
      TiXmlNode*  xFramesNode = xRootNode->FirstChild("frame");
@@ -237,6 +251,7 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
      }
 
      // obtaining the minimum id and minimum frame
+     int maxFrame=0;
      for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
                xFrame = xFrame->NextSiblingElement("frame"))
      {
@@ -244,6 +259,10 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
           if(frm < _minFrame)
           {
                _minFrame = frm;
+          }
+          if(frm>maxFrame)
+          {
+        	  maxFrame=frm;
           }
           for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
                     xAgent = xAgent->NextSiblingElement("agent"))
@@ -255,10 +274,22 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
                }
           }
      }
-     int frameNr=0;
+
+     //counting the number of frames
+     _numFrames = maxFrame-_minFrame+1;
+     Log->Write("INFO:\tnum Frames = %d",_numFrames);
+
+     CreateGlobalVariables(_numPeds, _numFrames);
+
+     vector<int> totalframes;
+     for (int i = 0; i <_numPeds; i++)
+     {
+    	 totalframes.push_back(0);
+     }
+     //int frameNr=0;
      for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
                xFrame = xFrame->NextSiblingElement("frame")) {
-
+    	  int frameNr = atoi(xFrame->Attribute("ID")) - _minFrame;
           //todo: can be parallelized with OpenMP
           for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
                     xAgent = xAgent->NextSiblingElement("agent")) {
@@ -268,9 +299,27 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
                double y= atof(xAgent->Attribute("y"));
                int ID= atoi(xAgent->Attribute("ID"))-_minID;
 
+
                _peds_t[frameNr].push_back(ID);
                _xCor[ID][frameNr] =  x*M2CM;
                _yCor[ID][frameNr] =  y*M2CM;
+               if(_vComponent == "F")
+               {
+            	   if(xAgent->Attribute("vc"))
+            	   {
+            	       _vComp[ID][frameNr] = *string(xAgent->Attribute("vc")).c_str();
+            	   }
+            	   else
+            	   {
+            		   Log->Write("ERROR:\t There is no indicator for velocity component in trajectory file or ini file!!");
+            		   return false;
+            	   }
+               }
+               else
+			  {
+				  _vComp[ID][frameNr] = _vComponent;
+			  }
+
                if(frameNr < _firstFrame[ID])
                {
                     _firstFrame[ID] = frameNr;
@@ -279,9 +328,22 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
                {
                     _lastFrame[ID] = frameNr;
                }
+               totalframes[ID] +=1;
           }
-          frameNr++;
+          //frameNr++;
      }
+
+     for(int id = 0; id<_numPeds; id++)
+     {
+         int actual_totalframe= totalframes[id];
+         int expect_totalframe=_lastFrame[id]-_firstFrame[id]+1;
+         if(actual_totalframe != expect_totalframe)
+         {
+             Log->Write("Error:\tThe trajectory of ped with ID <%d> is not continuous. Please modify the trajectory file!",id+_minID);
+             return false;
+         }
+     }
+
      return true;
 }
 
@@ -333,10 +395,10 @@ vector<int> PedData::GetIdInFrame(const vector<int>& ids) const
 
 double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor) const
 {
-
+     std::string vcmp = _vComp[ID][Tnow];
      double v=0.0;
-
-     if(_vComponent == 'X')
+    //check the component used in the calculation of velocity
+     if(vcmp == "X" || vcmp == "X+"|| vcmp == "X-")
      {
           if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
           {
@@ -350,8 +412,10 @@ double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID
           {
                v = _fps*CMtoM*(Xcor[ID][Tnow] - Xcor[ID][Tpast])/( _deltaF);  //one dimensional velocity
           }
+          if((vcmp=="X+"&& v<0)||(vcmp=="X-"&& v>0))            //no moveback
+               v=0;
      }
-     if(_vComponent == 'Y')
+     else if(vcmp == "Y" || vcmp == "Y+"|| vcmp == "Y-")
      {
           if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
           {
@@ -365,8 +429,10 @@ double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID
           {
                v = _fps*CMtoM*(Ycor[ID][Tnow] - Ycor[ID][Tpast])/( _deltaF);  //one dimensional velocity
           }
+          if((vcmp=="Y+"&& v<0)||(vcmp=="Y-"&& v>0))        //no moveback
+               v=0;
      }
-     if(_vComponent == 'B')
+     else if(vcmp == "B")
      {
           if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
           {
@@ -389,9 +455,11 @@ void PedData::CreateGlobalVariables(int numPeds, int numFrames)
 {
      _xCor = new double* [numPeds];
      _yCor = new double* [numPeds];
+     _vComp = new string* [numPeds];
      for (int i=0; i<numPeds; i++) {
           _xCor[i] = new double [numFrames];
           _yCor[i] = new double [numFrames];
+          _vComp[i] =new string [numFrames];
      }
      _firstFrame = new int[numPeds];  // Record the first frame of each pedestrian
      _lastFrame = new int[numPeds];  // Record the last frame of each pedestrian
@@ -400,6 +468,7 @@ void PedData::CreateGlobalVariables(int numPeds, int numFrames)
           for (int j = 0; j < numFrames; j++) {
                _xCor[i][j] = 0;
                _yCor[i][j] = 0;
+               _vComp[i][j] ="B";
           }
           _firstFrame[i] = INT_MAX;
           _lastFrame[i] = INT_MIN;

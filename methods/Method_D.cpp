@@ -40,6 +40,7 @@ Method_D::Method_D()
 {
      _grid_size_X = 0.10;
      _grid_size_Y = 0.10;
+     _fps=16;
      _outputVoronoiCellData = false;
      _getProfile = false;
      _geoMinX = 0;
@@ -53,6 +54,8 @@ Method_D::Method_D()
      _calcIndividualFD = false;
      _fVoronoiRhoV = NULL;
      _areaForMethod_D = NULL;
+     _plotVoronoiCellData=false;
+     _isOneDimensional=false;
 }
 
 Method_D::~Method_D()
@@ -62,10 +65,6 @@ Method_D::~Method_D()
 
 bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocation)
 {
-     /*if(false==IsPedInGeometry(peddata.GetNumFrames(), peddata.GetNumPeds(), peddata.GetXCor(), peddata.GetYCor(), peddata.GetFirstFrame(), peddata.GetLastFrame()))
-     {
-          return false;
-     }*/
 	 _scriptsLocation = scriptsLocation;
      _peds_t = peddata.GetPedsFrame();
      _trajName = peddata.GetTrajName();
@@ -79,10 +78,11 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
           OpenFileIndividualFD();
      }
      Log->Write("------------------------Analyzing with Method D-----------------------------");
-     for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
+     //for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
+     for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
      {
-          int frid =  frameNr + minFrame;
-
+    	  int frameNr = ite->first;
+    	  int frid =  frameNr + minFrame;
           //padd the frameid with 0
           std::ostringstream ss;
           ss << std::setw(5) << std::setfill('0') << frid;
@@ -116,23 +116,49 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
           //---------------------------------------------------------------------------------------------------------------
           if(NumPeds>2)
           {
-               vector<polygon_2d> polygons = GetPolygons(XInFrame, YInFrame, VInFrame, IdInFrame);
-               OutputVoronoiResults(polygons, str_frid, VInFrame);
-               if(_calcIndividualFD)
-               {
-                    // if(i>beginstationary&&i<endstationary)
-                    {
-                         GetIndividualFD(polygons,VInFrame, IdInFrame, _areaForMethod_D->_poly, str_frid);
-                    }
-               }
-               if(_getProfile)
-               { //	field analysis
-                    GetProfiles(str_frid, polygons, VInFrame);
-               }
-               if(_outputVoronoiCellData)
-               { // output the Voronoi polygons of a frame
-                    OutputVoroGraph(str_frid, polygons, NumPeds, XInFrame, YInFrame,VInFrame);
-               }
+        	  if(_isOneDimensional)
+        	  {
+                  CalcVoronoiResults1D(XInFrame, VInFrame, IdInFrame, _areaForMethod_D->_poly,str_frid);
+        	  }
+        	  else
+        	  {
+        		  if(IsPointsOnOneLine(XInFrame, YInFrame))
+        		  {
+        			  if(fabs(XInFrame[1]-XInFrame[0])<dmin)
+        			  {
+        				  XInFrame[1]+= offset;
+        			  }
+        			  else
+        			  {
+        				  YInFrame[1]+= offset;
+        			  }
+        		  }
+        		   vector<polygon_2d> polygons = GetPolygons(XInFrame, YInFrame, VInFrame, IdInFrame);
+				   if(!polygons.empty())
+				   {
+					   OutputVoronoiResults(polygons, str_frid, VInFrame);
+					   if(_calcIndividualFD)
+					   {
+							if(false==_isOneDimensional)
+							{
+								 GetIndividualFD(polygons,VInFrame, IdInFrame, _areaIndividualFD, str_frid);
+							}
+					   }
+					   if(_getProfile)
+					   { //	field analysis
+							GetProfiles(str_frid, polygons, VInFrame);
+					   }
+					   if(_outputVoronoiCellData)
+					   { // output the Voronoi polygons of a frame
+							OutputVoroGraph(str_frid, polygons, NumPeds, XInFrame, YInFrame,VInFrame);
+					   }
+				   }
+				   else
+				   {
+					   Log->Write("Warning:\tVoronoi Diagrams are not obtained!\n");
+					   return false;
+				   }
+        	  }
           }
           else
           {
@@ -157,7 +183,14 @@ bool Method_D::OpenFileMethodD()
      }
      else
      {
-          fprintf(_fVoronoiRhoV,"#framerate:\t%.2f\n\n#Frame \t Voronoi density(m^(-2))\t	Voronoi velocity(m/s)\n",_fps);
+         if(_isOneDimensional)
+         {
+        	 fprintf(_fVoronoiRhoV,"#framerate:\t%.2f\n\n#Frame \t Voronoi density(m^(-1))\t	Voronoi velocity(m/s)\n",_fps);
+         }
+         else
+         {
+        	 fprintf(_fVoronoiRhoV,"#framerate:\t%.2f\n\n#Frame \t Voronoi density(m^(-2))\t	Voronoi velocity(m/s)\n",_fps);
+         }
           return true;
      }
 }
@@ -172,7 +205,14 @@ bool Method_D::OpenFileIndividualFD()
      }
      else
      {
-          fprintf(_fIndividualFD,"#framerate:\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-2))\t	Individual velocity(m/s)\n",_fps);
+    	 if(_isOneDimensional)
+    	 {
+    		 fprintf(_fIndividualFD,"#framerate:\t%.2f\n\n#Frame	\t	PedId	\t	headway(m)\t	Individual velocity(m/s)\n",_fps);
+    	 }
+    	 else
+    	 {
+    		 fprintf(_fIndividualFD,"#framerate:\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-2))\t	Individual velocity(m/s)\n",_fps);
+    	 }
           return true;
      }
 }
@@ -381,8 +421,7 @@ void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polyg
           exit(EXIT_FAILURE);
      }
 
-
-     string point=voronoiLocation+"/points"+_trajName+"_id_"+_measureAreaId+"_"+frameId+".dat";
+     /*string point=voronoiLocation+"/points"+_trajName+"_id_"+_measureAreaId+"_"+frameId+".dat";
      ofstream points (point.c_str());
      if( points.is_open())
      {
@@ -395,18 +434,20 @@ void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polyg
      {
           Log->Write("ERROR:\tcannot create the file <%s>",point.c_str());
           exit(EXIT_FAILURE);
+     }*/
+
+     if(_plotVoronoiCellData)
+     {
+		 string parameters_rho="python "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+				 " -g "+_geometryFileName;
+		 string parameters_v="python "+_scriptsLocation+"/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+					 " -g "+_geometryFileName;
+		 //Log->Write("INFO:\t%s",parameters_rho.c_str());
+		 Log->Write("INFO:\tPlotting Voronoi Cell at the frame <%s>",frameId.c_str());
+		 system(parameters_rho.c_str());
+		 system(parameters_v.c_str());
      }
-     string parameters_rho="python "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
-    		 " -x1 "+boost::lexical_cast<std::string>(_geoMinX*CMtoM)+" -x2 "+boost::lexical_cast<std::string>(_geoMaxX*CMtoM)+" -y1 "+
-			 boost::lexical_cast<std::string>(_geoMinY*CMtoM)+" -y2 "+boost::lexical_cast<std::string>(_geoMaxY*CMtoM);
-     string parameters_v="python "+_scriptsLocation+"/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
-         		 " -x1 "+boost::lexical_cast<std::string>(_geoMinX*CMtoM)+" -x2 "+boost::lexical_cast<std::string>(_geoMaxX*CMtoM)+" -y1 "+
-     			 boost::lexical_cast<std::string>(_geoMinY*CMtoM)+" -y2 "+boost::lexical_cast<std::string>(_geoMaxY*CMtoM);
-     //Log->Write("INFO:\t%s",parameters_rho.c_str());
-     Log->Write("INFO:\tPlotting Voronoi Cell at the frame <%s>",frameId.c_str());
-     system(parameters_rho.c_str());
-     system(parameters_v.c_str());
-     points.close();
+     //points.close();
      polys.close();
      velo.close();
 }
@@ -437,6 +478,11 @@ void Method_D::SetCalculateIndividualFD(bool individualFD)
      _calcIndividualFD = individualFD;
 }
 
+void Method_D::SetAreaIndividualFD(polygon_2d areaindividualFD)
+{
+	_areaIndividualFD = areaindividualFD;
+}
+
 void Method_D::Setcutbycircle(double radius,int edges)
 {
 	_cutByCircle=true;
@@ -457,6 +503,11 @@ void Method_D::SetGeometryBoundaries(double minX, double minY, double maxX, doub
 	_geoMaxY = maxY;
 }
 
+void Method_D::SetGeometryFileName(const std::string& geometryFile)
+{
+	_geometryFileName=geometryFile;
+}
+
 void Method_D::SetGridSize(double x, double y)
 {
      _grid_size_X = x;
@@ -473,9 +524,19 @@ void Method_D::SetOutputVoronoiCellData(bool outputCellData)
      _outputVoronoiCellData = outputCellData;
 }
 
+void Method_D::SetPlotVoronoiGraph(bool plotVoronoiGraph)
+{
+     _plotVoronoiCellData = plotVoronoiGraph;
+}
+
 void Method_D::SetMeasurementArea (MeasurementArea_B* area)
 {
      _areaForMethod_D = area;
+}
+
+void Method_D::SetDimensional (bool dimension)
+{
+     _isOneDimensional = dimension;
 }
 
 void Method_D::ReducePrecision(polygon_2d& polygon)
@@ -499,4 +560,122 @@ bool Method_D::IsPedInGeometry(int frames, int peds, double **Xcor, double **Yco
 			}
 		}
 	return true;
+}
+
+void Method_D::CalcVoronoiResults1D(vector<double>& XInFrame, vector<double>& VInFrame, vector<int>& IdInFrame, const polygon_2d & measureArea,const string& frid)
+{
+	vector<double> measurearea_x;
+	for(unsigned int i=0;i<measureArea.outer().size();i++)
+	{
+		measurearea_x.push_back(measureArea.outer()[i].x());
+	}
+	double left_boundary=*min_element(measurearea_x.begin(),measurearea_x.end());
+	double right_boundary=*max_element(measurearea_x.begin(),measurearea_x.end());
+
+	vector<double> voronoi_distance;
+	vector<double> Xtemp=XInFrame;
+	vector<double> dist;
+	vector<double> XLeftNeighbor;
+	vector<double> XLeftTemp;
+	vector<double> XRightNeighbor;
+	vector<double> XRightTemp;
+	sort(Xtemp.begin(),Xtemp.end());
+	dist.push_back(Xtemp[1]-Xtemp[0]);
+	XLeftTemp.push_back(2*Xtemp[0]-Xtemp[1]);
+	XRightTemp.push_back(Xtemp[1]);
+	for(unsigned int i=1;i<Xtemp.size()-1;i++)
+	{
+		dist.push_back((Xtemp[i+1]-Xtemp[i-1])/2.0);
+		XLeftTemp.push_back(Xtemp[i-1]);
+		XRightTemp.push_back(Xtemp[i+1]);
+	}
+	dist.push_back(Xtemp[Xtemp.size()-1]-Xtemp[Xtemp.size()-2]);
+	XLeftTemp.push_back(Xtemp[Xtemp.size()-2]);
+	XRightTemp.push_back(2*Xtemp[Xtemp.size()-1]-Xtemp[Xtemp.size()-2]);
+	for(unsigned int i=0;i<XInFrame.size();i++)
+	{
+		for(unsigned int j=0;j<Xtemp.size();j++)
+		{
+			if(fabs(XInFrame[i]-Xtemp[j])<1.0e-5)
+			{
+				voronoi_distance.push_back(dist[j]);
+				XLeftNeighbor.push_back(XLeftTemp[j]);
+				XRightNeighbor.push_back(XRightTemp[j]);
+				break;
+			}
+		}
+	}
+
+	double VoronoiDensity=0;
+	double VoronoiVelocity=0;
+	for(unsigned int i=0; i<XInFrame.size(); i++)
+	{
+		double ratio=getOverlapRatio((XInFrame[i]+XLeftNeighbor[i])/2.0, (XRightNeighbor[i]+XInFrame[i])/2.0,left_boundary,right_boundary);
+		VoronoiDensity+=ratio;
+		VoronoiVelocity+=(VInFrame[i]*voronoi_distance[i]*ratio*CMtoM);
+		if(_calcIndividualFD)
+		{
+			double headway=(XRightNeighbor[i] - XInFrame[i])*CMtoM;
+			fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\n",frid.c_str(), IdInFrame[i], headway,VInFrame[i]);
+		}
+	}
+	VoronoiDensity/=((right_boundary-left_boundary)*CMtoM);
+	VoronoiVelocity/=((right_boundary-left_boundary)*CMtoM);
+	fprintf(_fVoronoiRhoV,"%s\t%.3f\t%.3f\n",frid.c_str(),VoronoiDensity, VoronoiVelocity);
+
+}
+
+double Method_D::getOverlapRatio(const double& left, const double& right, const double& measurearea_left, const double& measurearea_right)
+{
+	double OverlapRatio=0;
+	double PersonalSpace=right-left;
+	if(left > measurearea_left && right < measurearea_right) //case1
+	{
+		OverlapRatio=1;
+	}
+	else if(right > measurearea_left && right < measurearea_right && left < measurearea_left)
+	{
+		OverlapRatio=(right-measurearea_left)/PersonalSpace;
+	}
+	else if(left < measurearea_left && right > measurearea_right)
+	{
+		OverlapRatio=(measurearea_right - measurearea_left)/PersonalSpace;
+	}
+	else if(left > measurearea_left && left < measurearea_right && right > measurearea_right)
+	{
+		OverlapRatio=(measurearea_right-left)/PersonalSpace;
+	}
+	return OverlapRatio;
+}
+
+bool Method_D::IsPointsOnOneLine(vector<double>& XInFrame, vector<double>& YInFrame)
+{
+	double deltaX=XInFrame[1] - XInFrame[0];
+	bool isOnOneLine=true;
+	if(fabs(deltaX)<dmin)
+	{
+		for(unsigned int i=2; i<XInFrame.size();i++)
+		{
+			if(fabs(XInFrame[i] - XInFrame[0])> dmin)
+			{
+				isOnOneLine=false;
+				break;
+			}
+		}
+	}
+	else
+	{
+		double slope=(YInFrame[1] - YInFrame[0])/deltaX;
+		double intercept=YInFrame[0] - slope*XInFrame[0];
+		for(unsigned int i=2; i<XInFrame.size();i++)
+		{
+			double dist=fabs(slope*XInFrame[i] - YInFrame[i] + intercept)/sqrt(slope*slope +1);
+			if(dist > dmin)
+			{
+				isOnOneLine=false;
+				break;
+			}
+		}
+	}
+	return isOnOneLine;
 }

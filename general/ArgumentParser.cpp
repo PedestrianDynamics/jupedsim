@@ -27,8 +27,7 @@
  **/
 
 
-#include <getopt.h>
-#include <unistd.h>
+
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
@@ -39,6 +38,9 @@
 
 #ifdef _OPENMP
 #include <omp.h>
+#else
+#define omp_get_thread_num() 0
+#define omp_get_max_threads()  1
 #endif
 
 #include "../tinyxml/tinyxml.h"
@@ -53,47 +55,6 @@ void ArgumentParser::Usage(const std::string file)
 
      Log->Write("Usage: \n");
      Log->Write("\t%s input.xml\n",file.c_str());
-     /*
-    fprintf(stderr,
-    		"Usage: program options\n\n"
-    		"With the following options (default values in parenthesis):\n\n"
-    		"	[-t/--trajectory <string>]						name of input trajectory file\n"
-    		"  	[-I/--input path <filepath>]    				path of the input file(./Inputfiles/)\n"
-    		"  	[-O/--output path <filepath>]   				path of the input file(./Outputfiles/)\n"
-    		"	[-g/--geometry <string>]        				path to the geometry file (./Inputfiles/geo.xml)\n"
-    		"	[-m/--measurement area <int>]    			type of measurement area(1)\n"
-    		"                                   							1: Bounding box\n"
-    		"                                       						2: Line\n"
-    		"	[-b/--bounding box  <double>]				p1.x p1.y p2.x p2.y p3.x p3.y p4.x p4.y (in clockwise)\n"
-    		"	[-d/--moving direction <double>]			p1.x p1.y p2.x p2.y \n"
-    		"	[-l/--line <double>]								p1.x p1.y p2.x p2.y \n"
-
-    fprintf(stderr, "-c --> set cutbycircle=true (false)\n");
-    fprintf(stderr, "-a --> set fieldAnalysis=true (false)\n");
-    fprintf(stderr, "-g --> set IsOutputGraph=true (false)\n");
-    fprintf(stderr, "-v --> set calcIndividualfunddata=true (false)\n");
-    fprintf(stderr, "-s scale (3000)\n");
-    fprintf(stderr, "-l --> set IsClassicMethod=true (false)\n");
-    fprintf(stderr, "-F --> set IsFundamentalTinTout=true (false). density is classical. So IsClassicMethod should be true\n");
-    fprintf(stderr, "-V --> set IsFlowVelocity=true (false)\n");
-    fprintf(stderr, "-L x1 y1 x2 y2 (0.0, 300.0, 250.0, 300.0)\n");
-    fprintf(stderr, "-y  beginstationary (700)\n");
-    fprintf(stderr, "-Y  endstationary (1800)\n");
-    fprintf(stderr, "-R Row (65)\n");
-    fprintf(stderr, "-C Column (80)\n");
-    fprintf(stderr, "-m  Meas. Area ax1 (-300)\n");
-    fprintf(stderr, "-n  Meas. Area ay1 (100)\n");
-    fprintf(stderr, "-M  Meas. Area ax2 (300)\n");
-    fprintf(stderr, "-N  Meas. Area ay2 (200)\n");
-    fprintf(stderr, "-o  Outputfile (result.dat)\n");
-    fprintf(stderr, "-O  goes in the name of the polygons, speed and point files (dummy)\n");
-    fprintf(stderr, "-d --> set use_Vxy false (true)\n");
-    fprintf(stderr, "-e --> set use_Vy true (false)\n");
-    fprintf(stderr, "-k --> set use_Vx true (false)\n");
-    fprintf(stderr, "-p fps (10)\n");
-    fprintf(stderr, "-G cor_x cor_y length width (corridor)\n");
-
-      */
      exit(EXIT_SUCCESS);
 }
 
@@ -102,7 +63,7 @@ ArgumentParser::ArgumentParser()
      // Default parameter values
      _geometryFileName = "geo.xml";
 
-     _vComponent = 'B';
+     _vComponent = "B";
      _isMethodA = false;
      _timeIntervalA = 160;
      _delatTVInst = 5;
@@ -111,6 +72,11 @@ ArgumentParser::ArgumentParser()
      _isMethodD = false;
      _isCutByCircle = false;
      _isOutputGraph= false;
+     _isPlotGraph= false;
+     _isPlotTimeSeriesA=false;
+     _isPlotTimeSeriesD=false;
+     _isPlotTimeSeriesC=false;
+     _isOneDimensional=false;
      _isIndividualFD = false;
      _isGetProfile =false;
      _steadyStart =100;
@@ -181,7 +147,7 @@ const vector<string>& ArgumentParser::GetTrajectoriesFiles() const
      return _trajectoriesFiles;
 }
 
-const string& ArgumentParser::ArgumentParser::GetProjectRootDir() const
+const string& ArgumentParser::GetProjectRootDir() const
 {
      return _projectRootDir;
 }
@@ -219,11 +185,11 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
      }
 
      //geometry
-	  if(xMainNode->FirstChild("geometry"))
-	  {
-		   _geometryFileName=_projectRootDir+xMainNode->FirstChildElement("geometry")->Attribute("file");
-		   Log->Write("INFO: \tGeometry File is: <"+_geometryFileName+">");
-	  }
+     if(xMainNode->FirstChild("geometry"))
+     {
+          _geometryFileName=_projectRootDir+xMainNode->FirstChildElement("geometry")->Attribute("file");
+          Log->Write("INFO: \tGeometry File is: <"+_geometryFileName+">");
+     }
 
      //trajectories
      TiXmlNode* xTrajectories = xMainNode->FirstChild("trajectories");
@@ -275,82 +241,103 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
 
           if (xTrajectories->FirstChildElement("path"))
           {
-               _trajectoriesLocation = xTrajectories->FirstChildElement("path")->Attribute("location");
-               if(_trajectoriesLocation.empty())
-                    _trajectoriesLocation="./";
+               if(xTrajectories->FirstChildElement("path")->Attribute("location"))
+               {
+            	   _trajectoriesLocation = xTrajectories->FirstChildElement("path")->Attribute("location");
 
-
+               }
                //hack to find if it is an absolute path
                // ignore the project root in this case
                if ( (boost::algorithm::contains(_trajectoriesLocation,":")==false) && //windows
                          (boost::algorithm::starts_with(_trajectoriesLocation,"/") ==false)) //linux
                     // &&() osx
                {
-                    _trajectoriesLocation=_projectRootDir+_trajectoriesLocation;
-               }
-
-               // in the case no file was specified, collect all xml files in the specified directory
-               if(_trajectoriesFiles.empty())
-               {
-                    DIR *dir;
-                    struct dirent *ent;
-                    if ((dir = opendir (_trajectoriesLocation.c_str())) != NULL)
-                    {
-                         /* print all the files and directories within directory */
-                         while ((ent = readdir (dir)) != NULL)
-                         {
-                              string filename=ent->d_name;
-
-                              if (boost::algorithm::ends_with(filename, fmt))
-                                   //if (filename.find(fmt)!=std::string::npos)
-                              {
-                                   //_trajectoriesFiles.push_back(_projectRootDir+filename);
-                                   _trajectoriesFiles.push_back(filename);
-                                   Log->Write("INFO: \tInput trajectory file is\t<"+ (filename)+">");
-                              }
-                         }
-                         closedir (dir);
-                    }
-                    else
-                    {
-                         /* could not open directory */
-                         Log->Write("ERROR: \tcould not open the directory <"+_trajectoriesLocation+">");
-                         return false;
-                    }
+            	   Log->Write(_trajectoriesLocation);
+            	   _trajectoriesLocation=_projectRootDir+_trajectoriesLocation;
                }
           }
+          else
+          {
+        	  _trajectoriesLocation=_projectRootDir;
+          }
+
           Log->Write("INFO: \tInput directory for loading trajectory is:\t<"+ (_trajectoriesLocation)+">");
+
+          // in the case no file was specified, collect all files in the specified directory
+          if(_trajectoriesFiles.empty())
+          {
+               DIR *dir;
+               struct dirent *ent;
+               if ((dir = opendir (_trajectoriesLocation.c_str())) != NULL)
+               {
+                    /* print all the files and directories within directory */
+                    while ((ent = readdir (dir)) != NULL)
+                    {
+                         string filename=ent->d_name;
+
+                         if (boost::algorithm::ends_with(filename, fmt))
+                              //if (filename.find(fmt)!=std::string::npos)
+                         {
+                              //_trajectoriesFiles.push_back(_projectRootDir+filename);
+                              _trajectoriesFiles.push_back(filename);
+                              Log->Write("INFO: \tInput trajectory file is\t<"+ (filename)+">");
+                         }
+                    }
+                    closedir (dir);
+               }
+               else
+               {
+                    /* could not open directory */
+                    Log->Write("ERROR: \tcould not open the directory <"+_trajectoriesLocation+">");
+                    return false;
+               }
+          }
+
+     }
+
+     //max CPU
+     if(xMainNode->FirstChild("num_threads"))
+     {
+          TiXmlNode* numthreads = xMainNode->FirstChild("num_threads")->FirstChild();
+          if(numthreads)
+          {
+#ifdef _OPENMP
+               omp_set_num_threads(xmltoi(numthreads->Value(),omp_get_max_threads()));
+#endif
+
+          }
+          Log->Write("INFO: \t Using <%d> threads", omp_get_max_threads());
      }
 
      //scripts
-	  if(xMainNode->FirstChild("scripts"))
-	  {
-			 _scriptsLocation=xMainNode->FirstChildElement("scripts")->Attribute("location");
-			 if(_scriptsLocation.empty())
-			 {
-				_scriptsLocation="./";
-			 }
-			if ( (boost::algorithm::contains(_scriptsLocation,":")==false) && //windows
-									 (boost::algorithm::starts_with(_scriptsLocation,"/") ==false)) //linux
-								// &&() osx
-			 {
-				_scriptsLocation=_projectRootDir+_scriptsLocation;
-			 }
-			if (opendir (_scriptsLocation.c_str()) == NULL)
-			{
-				/* could not open directory */
-				Log->Write("ERROR: \tcould not open the directory <"+_scriptsLocation+">");
-				return false;
-			}
-			else
-			{
-				Log->Write("INFO: \tInput directory for loading scripts is:\t<"+_scriptsLocation+">");
-			}
-	  }
+     if(xMainNode->FirstChild("scripts"))
+     {
+          _scriptsLocation=xMainNode->FirstChildElement("scripts")->Attribute("location");
+          if(_scriptsLocation.empty())
+          {
+               _scriptsLocation="./";
+          }
+          if ( (boost::algorithm::contains(_scriptsLocation,":")==false) && //windows
+                    (boost::algorithm::starts_with(_scriptsLocation,"/") ==false)) //linux
+               // &&() osx
+          {
+               _scriptsLocation=_projectRootDir+_scriptsLocation;
+          }
+          if (opendir (_scriptsLocation.c_str()) == NULL)
+          {
+               /* could not open directory */
+               Log->Write("ERROR: \tcould not open the directory <"+_scriptsLocation+">");
+               return false;
+          }
+          else
+          {
+               Log->Write("INFO: \tInput directory for loading scripts is:\t<"+_scriptsLocation+">");
+          }
+     }
 
      //measurement area
-     if(xMainNode->FirstChild("measurement_areas")) {
-
+     if(xMainNode->FirstChild("measurement_areas"))
+     {
           string unit = xMainNode->FirstChildElement("measurement_areas")->Attribute("unit");
           if(unit!="m")
           {
@@ -405,31 +392,70 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
 
      //instantaneous velocity
      TiXmlNode* xVelocity=xMainNode->FirstChild("velocity");
-     if(xVelocity) {
-          string UseXComponent = xVelocity->FirstChildElement("use_x_component")->GetText();
-          string UseYComponent = xVelocity->FirstChildElement("use_y_component")->GetText();
-          string FrameSteps = xVelocity->FirstChildElement("frame_step")->GetText();
-
-          _delatTVInst = atof(FrameSteps.c_str())/2.0;
-          if(UseXComponent == "true"&&UseYComponent == "false")
+     if(xVelocity)
+     {
+		  string FrameSteps = xVelocity->FirstChildElement("frame_step")->GetText();
+		  _delatTVInst = atof(FrameSteps.c_str())/2.0;
+		  TiXmlNode* xVx=xVelocity->FirstChildElement("use_x_component");
+		  TiXmlNode* xVy=xVelocity->FirstChildElement("use_y_component");
+          //decide which component used in velocity calculation
+          if(xVx && xVy)
           {
-               _vComponent = 'X';
-               Log->Write("INFO: \tOnly x-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+               string UseXComponent = xVelocity->FirstChildElement("use_x_component")->GetText();
+               string UseYComponent = xVelocity->FirstChildElement("use_y_component")->GetText();
+               if(UseXComponent == "true"&&UseYComponent == "false")
+               {
+                    _vComponent = "X";
+                    Log->Write("INFO: \tOnly x-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+               }
+               else if(UseXComponent == "false"&&UseYComponent == "true")
+               {
+                    _vComponent = "Y";
+                    Log->Write("INFO: \tOnly y-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+               }
+               else if(UseXComponent == "true"&&UseYComponent == "true")
+               {
+                    _vComponent = "B";  // both components
+                    Log->Write("INFO: \tBoth x and y-component of coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+               }
+               else if(UseXComponent == "false"&&UseYComponent == "false")
+               {
+                    _vComponent = "F";
+                    Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+               }
           }
-          else if(UseXComponent == "false"&&UseYComponent == "true")
+          else if(xVx && !xVy)
           {
-               _vComponent = 'Y';
-               Log->Write("INFO: \tOnly y-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+               string UseXComponent = xVelocity->FirstChildElement("use_x_component")->GetText();
+               if(UseXComponent == "true")
+               {
+                    _vComponent = "X";
+                    Log->Write("INFO: \tOnly x-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+               }
+               else if(UseXComponent == "false")
+               {
+                    _vComponent = "F";
+                    Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+               }
           }
-          else if(UseXComponent == "true"&&UseYComponent == "true")
+          else if(!xVx && xVy)
           {
-               _vComponent = 'B';  // both components
-               Log->Write("INFO: \tBoth x and y-component of coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+               string UseYComponent = xVelocity->FirstChildElement("use_y_component")->GetText();
+               if(UseYComponent == "true")
+               {
+                    _vComponent = "Y";
+                    Log->Write("INFO: \tOnly y-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+               }
+               else if(UseYComponent == "false")
+               {
+                    _vComponent = "F";
+                    Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+               }
           }
           else
           {
-               Log->Write("Error: \tType of velocity is not selected, please check it !!! " );
-               return false;
+               _vComponent = "F";
+               Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <" + FrameSteps + " frames>");
           }
      }
 
@@ -449,6 +475,14 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                     _areaIDforMethodA.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
                }
+               if(xMethod_A->FirstChildElement("plot_time_series"))
+               {
+				   if ( string(xMethod_A->FirstChildElement("plot_time_series")->Attribute("enabled"))=="true")
+				   {
+					   _isPlotTimeSeriesA=true;
+					   Log->Write("INFO: \tThe Time series N-t measured with Method A will be plotted!!");
+				   }
+            	}
           }
      }
      // method B
@@ -479,6 +513,14 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                     _areaIDforMethodC.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
                }
+               if (xMethod_C->FirstChildElement("plot_time_series"))
+               {
+				   if ( string(xMethod_C->FirstChildElement("plot_time_series")->Attribute("enabled"))=="true")
+				   {
+					   _isPlotTimeSeriesC=true;
+					   Log->Write("INFO: \tThe Time series measured with Method C will be plotted!!");
+				   }
+               }
           }
      // method D
      TiXmlElement* xMethod_D=xMainNode->FirstChildElement("method_D");
@@ -487,21 +529,29 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           {
                _isMethodD = true;
                Log->Write("INFO: \tMethod D is selected" );
-               _isOutputGraph =  (string(xMethod_D->Attribute("output_graph")) == "true");
-               if(_isOutputGraph)
-               {
-                    Log->Write("INFO: \tVoronoi graph is asked to output" );
-               }
-               _isIndividualFD = (string(xMethod_D->Attribute("individual_FD")) == "true");
-               if(_isIndividualFD)
-               {
-                    Log->Write("INFO: \tIndividual fundamental diagram data will be calculated" );
-               }
+
                for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_D")->FirstChildElement("measurement_area");
                          xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
                {
                     _areaIDforMethodD.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
+               }
+               if (xMethod_D->FirstChildElement("one_dimensional"))
+               {
+				   if ( string(xMethod_D->FirstChildElement("one_dimensional")->Attribute("enabled"))=="true")
+				   {
+					   _isOneDimensional=true;
+					   Log->Write("INFO: \tThe data will be analyzed with one dimensional way!!");
+				   }
+               }
+
+               if (xMethod_D->FirstChildElement("plot_time_series"))
+               {
+				   if ( string(xMethod_D->FirstChildElement("plot_time_series")->Attribute("enabled"))=="true")
+				   {
+					   _isPlotTimeSeriesD=true;
+					   Log->Write("INFO: \tThe Time series measured with Method D will be plotted!!");
+				   }
                }
                if ( xMethod_D->FirstChildElement("cut_by_circle"))
                {
@@ -515,6 +565,34 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                     }
                }
 
+               if ( xMethod_D->FirstChildElement("output_voronoi_cells"))
+               {
+                    if ( string(xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("enabled"))=="true")
+                    {
+                    	_isOutputGraph=true;
+                    	 Log->Write("INFO: \tData of voronoi diagram is asked to output" );
+                    	 if(string(xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("plot_graphs"))=="true")
+                    	 {
+							_isPlotGraph=true;
+							if(_isPlotGraph)
+							{
+								Log->Write("INFO: \tGraph of voronoi diagram will be plotted" );
+							}
+                    	 }
+                    }
+               }
+
+               if ( xMethod_D->FirstChildElement("individual_FD"))
+               {
+                    if ( string(xMethod_D->FirstChildElement("individual_FD")->Attribute("enabled"))=="true")
+                    {
+                    	_isIndividualFD=true;
+                    	int areaId=xmltoi(xMethod_D->FirstChildElement("individual_FD")->Attribute("measurement_area_id"));
+                        _areaIndividualFD=((MeasurementArea_B *)(_measurementAreas[areaId]))->_poly;
+                        Log->Write("INFO: \tIndividual fundamental diagram data will be calculated over the measurement area with id <%d>! ", areaId);
+                    }
+               }
+
                if ( xMethod_D->FirstChildElement("steadyState"))
                {
                     _steadyStart =xmltof(xMethod_D->FirstChildElement("steadyState")->Attribute("start"));
@@ -523,6 +601,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                }
 
                if(xMethod_D->FirstChildElement("profiles"))
+               {
                     if ( string(xMethod_D->FirstChildElement("profiles")->Attribute("enabled"))=="true")
                     {
                          _isGetProfile = true;
@@ -531,6 +610,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                          Log->Write("INFO: \tProfiles will be calculated" );
                          Log->Write("INFO: \tThe discretized grid size in x, y direction is: < %f >m by < %f >m ",_grid_size_X*CMtoM, _grid_size_Y*CMtoM);
                     }
+               }
           }
      }
      Log->Write("INFO: \tFinish parsing inifile");
@@ -573,7 +653,7 @@ const string& ArgumentParser::GetTrajectoriesFilename() const
      return _trajectoriesFilename;
 }
 
-char	ArgumentParser::GetVComponent() const
+std::string	ArgumentParser::GetVComponent() const
 {
      return _vComponent;
 }
@@ -628,9 +708,39 @@ bool ArgumentParser::GetIsOutputGraph() const
      return _isOutputGraph;
 }
 
+bool ArgumentParser::GetIsPlotGraph() const
+{
+     return _isPlotGraph;
+}
+
+bool ArgumentParser::GetIsPlotTimeSeriesA() const
+{
+	return _isPlotTimeSeriesA;
+}
+
+bool ArgumentParser::GetIsPlotTimeSeriesC() const
+{
+	return _isPlotTimeSeriesC;
+}
+
+bool ArgumentParser::GetIsPlotTimeSeriesD() const
+{
+	return _isPlotTimeSeriesD;
+}
+
+bool ArgumentParser::GetIsOneDimensional() const
+{
+	return _isOneDimensional;
+}
+
 bool ArgumentParser::GetIsIndividualFD() const
 {
      return _isIndividualFD;
+}
+
+polygon_2d ArgumentParser::GetAreaIndividualFD() const
+{
+     return _areaIndividualFD;
 }
 
 bool ArgumentParser::GetIsGetProfile() const
@@ -682,7 +792,12 @@ vector<int> ArgumentParser::GetAreaIDforMethodD() const
 MeasurementArea* ArgumentParser::GetMeasurementArea(int id)
 {
      if (_measurementAreas.count(id) == 0)
-          return NULL;
+     {
+          Log->Write("ERROR:\t measurement id [%d] not found.",id);
+          Log->Write("      \t check your configuration files");
+          exit(EXIT_FAILURE);
+          //return NULL;
+     }
      return _measurementAreas[id];
 
 }

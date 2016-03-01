@@ -86,5 +86,5 @@ if __name__ == '__main__':
                            plotRhoT(pathfile,figname_rho,fps,title,data_Classic,data_Voronoi)
                            plotVT(pathfile,figname_v,fps,title,data_Classic,data_Voronoi)
                    else:
-                           plotRhoT(pathfile,figname_rho,fps,title,data_Voronoi)
-                           plotVT(pathfile,figname_v,fps,title,data_Voronoi)
+                           plotRhoT(pathfile,figname_rho,fps,title,data_Voronoi=data_Voronoi)
+                           plotVT(pathfile,figname_v,fps,title,data_Voronoi=data_Voronoi)

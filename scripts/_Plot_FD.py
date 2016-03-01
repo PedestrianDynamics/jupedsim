@@ -29,7 +29,7 @@ def plotRhoJs(pathfile,figname,namefile,steadyfile):
                 steady_rho_v=zeros(len(d_rho_v[0]))
                 for i in range(len(d_steady)):
                         rho_v=d_rho_v[d_rho_v[:,0]>d_steady[i,0]]
-                        rho_v=rho_v[rho_v[:,0]>d_steady[i,1]]
+                        rho_v=rho_v[rho_v[:,0]<d_steady[i,1]]
                         steady_rho_v=vstack((steady_rho_v,rho_v))
                 steady_rho_v = delete(steady_rho_v, (0), axis=0)
                 plt.plot(steady_rho_v[:,1],steady_rho_v[:,1]*steady_rho_v[:,2], 'o', lw=3, label=f_rho_v)
@@ -53,7 +53,7 @@ def plotRhoV(pathfile,figname,namefile,steadyfile):
                 steady_rho_v=zeros(len(d_rho_v[0]))
                 for i in range(len(d_steady)):
                         rho_v=d_rho_v[d_rho_v[:,0]>d_steady[i,0]]
-                        rho_v=rho_v[rho_v[:,0]>d_steady[i,1]]
+                        rho_v=rho_v[rho_v[:,0]<d_steady[i,1]]
                         steady_rho_v=vstack((steady_rho_v,rho_v))
                 steady_rho_v = delete(steady_rho_v, (0), axis=0)
                 plt.plot(steady_rho_v[:,1],steady_rho_v[:,2], 'o', lw=3, label=f_rho_v)

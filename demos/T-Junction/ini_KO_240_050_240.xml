@@ -10,6 +10,7 @@
 	</trajectories>
 	<!----give relative path based on the location inifile or give the absolute path--->
 	<scripts location="../../scripts/"/> 
+
 	
 	<measurement_areas unit="m">
 		<area_B id="1" type="BoundingBox">
@@ -28,9 +29,8 @@
 	<velocity>
 		<use_x_component>true</use_x_component>
 		<use_y_component>true</use_y_component>
-
-		<!-- half of the time interval that used to calculate instantaneous velocity 
-			of ped i [fr] here v_i = (X(t+deltaF) - X(t+deltaF))/(2*deltaF). X is location. -->
+        		<!-- The time interval that used to calculate instantaneous velocity 
+			of ped i [fr] here v_i = (X(t+frame_step/2) - X(t+frame_step/2))/frame_step. X is location. -->
 		<frame_step>10</frame_step>
 	</velocity>
 
@@ -42,6 +42,7 @@
 		</frame_interval>
 			<!-- The coordinate of the line used to calculate the flow and velocity -->
 		<measurement_area id="2" />
+		<plot_time_series enabled="false"/>
 	</method_A>
 
 	<!-- Method B (Zhang2011a) Vel and Dens based on Tin and Tout -->
@@ -52,13 +53,17 @@
 	<!-- Method C (Zhang2011a) Classical density and Vel -->
 	<method_C enabled="true">
 		<measurement_area id="1" />
+		<plot_time_series enabled="false"/>
 	</method_C>
 	
 	<!-- Method D (Zhang2011a) Voronoi density and Vel -->
-	<method_D enabled="true" output_graph="true" individual_FD="false"> 
+	<method_D enabled="true"> 
         <measurement_area id="1" /> 
-        <cut_by_circle enabled="false" radius= "1" edges = "10"/> 
-        <!-- edges represent the precision of discretization of the circle ---> 
+		<one_dimensional enabled="false"/>
+		<plot_time_series enabled="false"/>
+        <cut_by_circle enabled="false" radius="1.0" edges="10"/>
+        <output_voronoi_cells enabled="false" plot_graphs="false"/>
+        <individual_FD enabled="false" measurement_area_id="1"/>
         <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/> 
     </method_D> 
 </JPSreport>

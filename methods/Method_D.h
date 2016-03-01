@@ -31,7 +31,7 @@
 #include "PedData.h"
 #include "../Analysis.h"
 #include "VoronoiDiagram.h"
-
+#include <algorithm>
 
 #ifdef __linux__
 #include <sys/stat.h>
@@ -43,6 +43,9 @@
 #include <direct.h>
 #endif
 
+//handle more than two person are in one line
+#define dmin 200
+#define offset 200
 
 
 class Method_D
@@ -52,13 +55,17 @@ public:
      virtual ~Method_D();
      bool Process (const PedData& peddata,const std::string& scriptsLocation);
      void SetCalculateIndividualFD(bool individualFD);
+     void SetAreaIndividualFD(polygon_2d areaindividualFD);
      void Setcutbycircle(double radius,int edges);
      void SetGeometryPolygon(polygon_2d geometryPolygon);
+     void SetGeometryFileName(const std::string& geometryFile);
      void SetGeometryBoundaries(double minX, double minY, double maxX, double maxY);
      void SetGridSize(double x, double y);
      void SetCalculateProfiles(bool calcProfile);
      void SetOutputVoronoiCellData(bool outputCellData);
+     void SetPlotVoronoiGraph(bool plotVoronoiGraph);
      void SetMeasurementArea (MeasurementArea_B* area);
+     void SetDimensional (bool dimension);
 
 private:
      std::map<int , std::vector<int> > _peds_t;
@@ -68,8 +75,11 @@ private:
      std::string _projectRootDir;
      std::string _scriptsLocation;
      bool _calcIndividualFD;
+     polygon_2d _areaIndividualFD;
      bool _getProfile;
      bool _outputVoronoiCellData;
+     bool _plotVoronoiCellData;
+     bool _isOneDimensional;
      bool _cutByCircle;       //Adjust whether cut each original voronoi cell by a circle
      double _cutRadius;
      int _circleEdges;
@@ -85,6 +95,7 @@ private:
      float _fps;
      bool OpenFileMethodD();
      bool OpenFileIndividualFD();
+     std::string _geometryFileName;
 
      std::vector<polygon_2d> GetPolygons(std::vector<double>& XInFrame, std::vector<double>& YInFrame,
                std::vector<double>& VInFrame, std::vector<int>& IdInFrame);
@@ -96,13 +107,15 @@ private:
      void OutputVoroGraph(const std::string & frameId, std::vector<polygon_2d>& polygons, int numPedsInFrame,std::vector<double>& XInFrame,
                std::vector<double>& YInFrame,const std::vector<double>& VInFrame);
      void GetIndividualFD(const std::vector<polygon_2d>& polygon, const std::vector<double>& Velocity, const std::vector<int>& Id, const polygon_2d& measureArea, const std::string& frid);
-
      /**
       * Reduce the precision of the points to two digits
       * @param polygon
       */
+     void CalcVoronoiResults1D(std::vector<double>& XInFrame, std::vector<double>& VInFrame, std::vector<int>& IdInFrame, const polygon_2d & measureArea, const std::string& frid);
      void ReducePrecision(polygon_2d& polygon);
      bool IsPedInGeometry(int frames, int peds, double **Xcor, double **Ycor, int  *firstFrame, int *lastFrame); //check whether all the pedestrians are in the geometry
+     double getOverlapRatio(const double& left, const double& right, const double& measurearea_left, const double& measurearea_right);
+     bool IsPointsOnOneLine(std::vector<double>& XInFrame, std::vector<double>& YInFrame);
 };
 
 #endif /* METHOD_D_H_ */

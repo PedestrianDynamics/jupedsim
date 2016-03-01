@@ -129,11 +129,18 @@ private:
      double _cutRadius;
      int _circleEdges;
      bool _getProfile;        // Whether make field analysis or not
-     bool _outputGraph;       // Whether output the data for plot the fundamental diagram each frame
+     bool _outputGraph;       // Whether output the data for plot the voronoi diagram each frame
+     bool _plotGraph;       // Whether plot the voronoi diagram each frame
+     bool _plotTimeseriesA;
+     bool _plotTimeseriesC;
+     bool _plotTimeseriesD;
+     bool _isOneDimensional;
      bool _calcIndividualFD;  //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
-     char _vComponent;        // to mark whether x, y or x and y coordinate are used when calculating the velocity
+     polygon_2d _areaIndividualFD;
+     std::string _vComponent;        // to mark whether x, y or x and y coordinate are used when calculating the velocity
      std::string _projectRootDir;
      std::string _scriptsLocation;
+     std::string _geometryFileName;
      FileFormat _trajFormat;  // format of the trajectory file
 
      std::vector<MeasurementArea_L*> _areaForMethod_A;

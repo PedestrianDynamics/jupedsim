@@ -65,7 +65,7 @@ public:
      std::vector<double> GetXInFrame(int frame, const std::vector<int>& ids) const;
      std::vector<double> GetYInFrame(int frame, const std::vector<int>& ids) const;
      std::vector<double> GetVInFrame(int frame, const std::vector<int>& ids) const;
-     bool ReadData(const std::string& projectRootDir, const std::string& path, const std::string& filename, const FileFormat& _trajformat, int deltaF, char vComponent);
+     bool ReadData(const std::string& projectRootDir, const std::string& path, const std::string& filename, const FileFormat& _trajformat, int deltaF, std::string vComponent);
 
 
 private:
@@ -87,12 +87,13 @@ private:
      std::map<int , std::vector<int>> _peds_t;
 
      int _deltaF=5;
-     char _vComponent='X';
+     std::string _vComponent="B";
 
      int *_firstFrame=NULL;   // Record the first frame of each pedestrian
      int *_lastFrame=NULL;    // Record the last frame of each pedestrian
      double **_xCor=NULL;
      double **_yCor=NULL;
+     std::string **_vComp=NULL;
 
 };
 

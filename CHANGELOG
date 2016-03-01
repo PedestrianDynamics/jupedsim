@@ -1,0 +1,101 @@
+# JPSreport v0.9
+
+## Added
+
+## Changed
+
+## Fixed
+
+	
+
+# JPSreport v0.8
+
+
+## Added
+
+- A switch is added in the infile for `method_D` to turn off plotting Voronoi diagrams. Now it is possible to only output data for the diagram but not plot figures.
+
+- Switches for plotting time series of density and velocity are added for `method_C` and `method_D` in inifile.
+
+- A switch for plotting N-t diagram is added for `method_A` in inifile.
+
+- An option for analyzing one dimensional trajectory data is added in `method_D`.
+
+- Issue a warning when the voronoi cell cannot be calculated.
+
+- A warning will will be given and the program stops if trajectory for a given pedestrian ID is not continuous. 
+
+
+## Changed
+
+- Scripts "_Plot_cell_rho.py" and "_Plot_cell_v.py" are modified. Now the geometry is also plotted when plotting voronoi cells.
+
+- The indicator for velocity component can be specified in trajectory files now (.TXT and .XML)
+
+- Scripts "_Plot_FD.py" is modified!
+
+## Fixed
+
+- Output data file "Folw\_NT\_xxxx.dat" is closed before calling script for plotting N-t diagram.
+
+- A bug relating to transformation of units in `method_B` is fixed.
+
+- Fixed error where all trajectories were co-linear.
+
+- A bug for legend in the script "_Plot_timeseries_rho_v.py" is fixed.
+
+- The case that frame ID and Ped ID in trajectory file are not coutinuous can also be analyzed correctly.
+
+- Now when the given file paths in inifile include blank, it still works on windows system.
+
+- when path of trajectory is not given absolutely, the default location is the same folder with the inifile
+
+	
+# JPSreport v0.7
+
+## Added
+
+- Added four demos as examples for using JPSreport
+- Added the option for specifying the location of scripts in configuration file.
+- Embedded python scripts (**\_Plot_N\_t.py**, **\_Plot_timeseries\_rho_v.py**) for plotting N-t diagram (Method A), time series of density/velocity diagram (Method C and D) and Voronoi diagrams (Method D).
+- Added python script (**SteadyState.py**) for automatically detecting steady state of pedestrian flow based on time series of density and velocity. When plotting fundamental diagrams normally only data under steady state are used due to its generality.
+- Added python script (**\_Plot_FD.py**) for plotting fundamenatl diagram based on the detected steady state.
+## Changed
+
+- Changed name of some variables in configuration file:
+
+	**measurementAreas**                --->  **measurement_areas**
+    
+	**Length_in_movement_direction**	---> **length_in_movement_direction**
+	
+	**useXComponent**		            ---> **use_x_component**
+	
+	**useYComponent**		            ---> **use_y_component**
+	
+	**halfFrameNumberToUse**            ---> **frame_step**
+	
+	**timeInterval**	                ---> **frame_interval**
+	
+	**measurementArea**	                ---> **measurement_area**
+	
+	**outputGraph**	                    ---> **output_graph**
+	
+	**individualFDdata**	            ---> **individual_FD**
+	
+	**cutByCircle** 	                ---> **cut_by_circle**
+	
+	**getProfile** 		                ---> **profiles**
+	
+	**scale_x**			                ---> **grid_size_x**
+	
+	**scale_y**			                ---> **grid_size_y**
+- Changed the data type of frame rate (fps) from integer to float
+
+- Changed the way for dealing with pedestrian outside geometry. In old version JPSreport stops when some pedestrians are outside geometry but now it continue working by 
+removing these pedestrians from the list.
+
+- More than one sub rooms in one geometry can be analysed independently.
+	
+## Fixed
+	
+- Fixed bug for dealing with obstacles inside geometry.

@@ -80,7 +80,7 @@ Analysis::Analysis()
      _getProfile = false;   // Whether make field analysis or not
      _outputGraph = false;   // Whether output the data for plot the fundamental diagram each frame
      _calcIndividualFD = false; //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
-     _vComponent = 'B'; // to mark whether x, y or x and y coordinate are used when calculating the velocity
+     _vComponent = "B"; // to mark whether x, y or x and y coordinate are used when calculating the velocity
 
      _grid_size_X = 0.10;   // the size of the grid
      _grid_size_Y = 0.10;
@@ -92,6 +92,12 @@ Analysis::Analysis()
      _cutRadius=1.0;
      _circleEdges=6;
      _trajFormat=FileFormat::FORMAT_PLAIN;
+     _isOneDimensional=false;
+     _plotGraph=false;
+     _plotTimeseriesA=false;
+     _plotTimeseriesC=false;
+     _plotTimeseriesD=false;
+
 }
 
 Analysis::~Analysis()
@@ -180,11 +186,18 @@ void Analysis::InitArgs(ArgumentParser* args)
      _cutByCircle = args->GetIsCutByCircle();
      _getProfile = args->GetIsGetProfile();
      _outputGraph = args->GetIsOutputGraph();
+     _plotGraph = args->GetIsPlotGraph();
+     _plotTimeseriesA=args->GetIsPlotTimeSeriesA();
+     _plotTimeseriesC=args->GetIsPlotTimeSeriesC();
+     _plotTimeseriesD=args->GetIsPlotTimeSeriesD();
+     _isOneDimensional=args->GetIsOneDimensional();
      _calcIndividualFD = args->GetIsIndividualFD();
+     _areaIndividualFD= args->GetAreaIndividualFD();
      _vComponent = args->GetVComponent();
      _grid_size_X = int(args->GetGridSizeX());
      _grid_size_Y = int(args->GetGridSizeY());
      _geoPoly = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_D);
+     _geometryFileName=args->GetGeometryFilename();
      _projectRootDir=args->GetProjectRootDir();
      _trajFormat=args->GetFileFormat();
      _cutRadius=args->GetCutRadius();
@@ -211,7 +224,7 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const std::string& geometryFile
      //loop over all areas
      for(auto&& area: areas)
      {
-    	 //search for the subroom that containst that area
+          //search for the subroom that containst that area
           for (auto&& it_room : _building->GetAllRooms())
           {
                for (auto&& it_sub : it_room.second->GetAllSubRooms())
@@ -281,44 +294,46 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
      std::map<int , std::vector<int> > _peds_t=data.GetPedsFrame();
      for(int frameNr = 0; frameNr < data.GetNumFrames(); frameNr++ )
      {
-    	 vector<int> ids=_peds_t[frameNr];
-    	 vector<int> IdInFrame = data.GetIdInFrame(ids);
-    	 vector<double> XInFrame = data.GetXInFrame(frameNr, ids);
-    	 vector<double> YInFrame = data.GetYInFrame(frameNr, ids);
-    	 for( unsigned int i=0;i<IdInFrame.size();i++)
-		 {
-    		 bool IsInBuilding=false;
-    		 for (auto&& it_room : _building->GetAllRooms())
-    		 {
-    			 for (auto&& it_sub : it_room.second->GetAllSubRooms())
-    			 {
-    				 SubRoom* subroom = it_sub.second.get();
-    				 if(subroom->IsInSubRoom(Point(XInFrame[i]*CMtoM,YInFrame[i]*CMtoM)))
-    				 {
-    					 IsInBuilding=true;
-    					 break;
-    				 }
-    			 }
-    			 if(IsInBuilding)
-				 {
-					 break;
-				 }
-    		 }
-    		 if(false==IsInBuilding)
-			  {
-				  Log->Write("Warning:\tAt %dth frame pedestrian at <x=%.4f, y=%.4f> is not in geometry!", frameNr+data.GetMinFrame(), XInFrame[i]*CMtoM, YInFrame[i]*CMtoM );
-			  }
-		 }
+          vector<int> ids=_peds_t[frameNr];
+          vector<int> IdInFrame = data.GetIdInFrame(ids);
+          vector<double> XInFrame = data.GetXInFrame(frameNr, ids);
+          vector<double> YInFrame = data.GetYInFrame(frameNr, ids);
+          for( unsigned int i=0;i<IdInFrame.size();i++)
+          {
+               bool IsInBuilding=false;
+               for (auto&& it_room : _building->GetAllRooms())
+               {
+                    for (auto&& it_sub : it_room.second->GetAllSubRooms())
+                    {
+                         SubRoom* subroom = it_sub.second.get();
+                         if(subroom->IsInSubRoom(Point(XInFrame[i]*CMtoM,YInFrame[i]*CMtoM)))
+                         {
+                              IsInBuilding=true;
+                              break;
+                         }
+                    }
+                    if(IsInBuilding)
+                    {
+                         break;
+                    }
+               }
+               if(false==IsInBuilding)
+               {
+                    Log->Write("Warning:\tAt %dth frame pedestrian at <x=%.4f, y=%.4f> is not in geometry!", frameNr+data.GetMinFrame(), XInFrame[i]*CMtoM, YInFrame[i]*CMtoM );
+               }
+          }
      }
      //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
      if(_DoesUseMethodA) //Method A
      {
-          for(unsigned int i=0; i<_areaForMethod_A.size(); i++)
+#pragma omp parallel for
+          for(signed int i=0; i<_areaForMethod_A.size(); i++)
           {
                Method_A method_A ;
                method_A.SetMeasurementArea(_areaForMethod_A[i]);
                method_A.SetTimeInterval(_deltaT);
+               method_A.SetPlotTimeSeries(_plotTimeseriesA);
                bool result_A=method_A.Process(data,_scriptsLocation);
                if(result_A)
                {
@@ -333,7 +348,8 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 
      if(_DoesUseMethodB) //Method_B
      {
-          for(unsigned int i=0; i<_areaForMethod_B.size(); i++)
+#pragma omp parallel for
+          for(signed int i=0; i<_areaForMethod_B.size(); i++)
           {
                Method_B method_B;
                method_B.SetMeasurementArea(_areaForMethod_B[i]);
@@ -351,7 +367,8 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 
      if(_DoesUseMethodC) //Method C
      {
-          for(unsigned int i=0; i<_areaForMethod_C.size(); i++)
+#pragma omp parallel for
+          for(signed int i=0; i<_areaForMethod_C.size(); i++)
           {
                Method_C method_C;
                method_C.SetMeasurementArea(_areaForMethod_C[i]);
@@ -359,6 +376,13 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                if(result_C)
                {
                     Log->Write("INFO:\tSuccess with Method C using measurement area id %d!\n",_areaForMethod_C[i]->_id);
+             	   if(_plotTimeseriesC)
+ 					 {
+ 					 string parameters_Timeseries="python \""+_scriptsLocation+"/_Plot_timeseries_rho_v.py\" -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
+ 								" -f "+boost::lexical_cast<std::string>(data.GetFps());
+ 					  int res=system(parameters_Timeseries.c_str());
+ 					  Log->Write("INFO:\t time series result: %d ",res);
+ 					 }
                }
                else
                {
@@ -369,14 +393,19 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 
      if(_DoesUseMethodD) //method_D
      {
-          for(unsigned int i=0; i<_areaForMethod_D.size(); i++)
+#pragma omp parallel for
+          for(signed int i=0; i<_areaForMethod_D.size(); i++)
           {
                Method_D method_D;
                method_D.SetGeometryPolygon(_geoPoly[_areaForMethod_D[i]->_id]);
+               method_D.SetGeometryFileName(_geometryFileName);
                method_D.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
                method_D.SetGridSize(_grid_size_X, _grid_size_Y);
                method_D.SetOutputVoronoiCellData(_outputGraph);
+               method_D.SetPlotVoronoiGraph(_plotGraph);
+               method_D.SetDimensional(_isOneDimensional);
                method_D.SetCalculateIndividualFD(_calcIndividualFD);
+               method_D.SetAreaIndividualFD(_areaIndividualFD);
                method_D.SetCalculateProfiles(_getProfile);
                if(_cutByCircle)
                {
@@ -386,7 +415,14 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                bool result_D = method_D.Process(data,_scriptsLocation);
                if(result_D)
                {
-                    Log->Write("INFO:\tSuccess with Method D using measurement area id %d!\n",_areaForMethod_D[i]->_id);
+            	   Log->Write("INFO:\tSuccess with Method D using measurement area id %d!\n",_areaForMethod_D[i]->_id);
+            	   if(_plotTimeseriesD)
+					 {
+					 string parameters_Timeseries="python \""+_scriptsLocation+"/_Plot_timeseries_rho_v.py\" -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
+								" -f "+boost::lexical_cast<std::string>(data.GetFps());
+					  int res=system(parameters_Timeseries.c_str());
+					  Log->Write("INFO:\t time series result: %d ",res);
+					 }
                }
                else
                {
@@ -394,12 +430,6 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                }
           }
      }
-     if(_DoesUseMethodC || _DoesUseMethodD)
-	 {
-		  string parameters_Timeseries="python "+_scriptsLocation+"/_Plot_timeseries_rho_v.py -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
-											 " -f "+boost::lexical_cast<std::string>(data.GetFps());
-		  system(parameters_Timeseries.c_str());
-	 }
      return 0;
 }
 
