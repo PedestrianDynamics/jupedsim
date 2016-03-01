@@ -392,8 +392,8 @@ if __name__ == '__main__':
     # choose steady state
     ss = open('%s/SteadyState_%s.txt' % (filepath, filename), 'w')
     ss.write('# start end ratio \n')
-    print "start frames: ", starts
-    print "end frames: ", ends
+    print ("start frames: %s" % ", ".join(map(str, starts)))
+    print ("end frames: %s" % ", ".join(map(str, ends)))
     mix_start = max(starts)
     mix_end = min(ends)
     if mix_start < mix_end:
