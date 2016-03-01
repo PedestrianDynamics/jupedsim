@@ -253,8 +253,13 @@ def choose_steady_state(column, theta):
 
 def plot_series(statistics, theta, column):
     fig = plt.figure(figsize=(11, 10), dpi=100)
-    limit = (int((statistics[-1, 0] / frame) / 10) + 1) * 10
-    plt.plot(statistics[:, 0] / frame, statistics[:, 1], 'b--', lw=2, label=r'S$_{k}$')
+    if xlabel == "frame":
+        fps = 1.0  # hack
+    else:
+        fps = frame
+
+    limit = (int((statistics[-1, 0] / fps) / 10) + 1) * 10
+    plt.plot(statistics[:, 0] / fps, statistics[:, 1], 'b--', lw=2, label=r'S$_{k}$')
     plt.plot([0, limit], [theta, theta], 'r-', lw=2, label=r'$\theta$')
     plt.xlabel(xlabel, fontsize=25)
     plt.ylabel('Statistics %d'%column, fontsize=25)
@@ -276,7 +281,7 @@ def plot_steady_state(statistics, data, ref_start, ref_end, info, column):
         fps = frame
 
     limit = (int((statistics[-1, 0] / fps) / 10) + 1) * 10
-    plt.plot((data[:, 0] + minframe) / fps, data[:, 1], 'b-', lw=2)
+    plt.plot((data[:, 0] + minframe) / fps, data[:, column], 'b-', lw=2)
     plt.plot([ref_start / fps, ref_start / fps], [0, 50], 'g--', lw=2, label='reference')
     plt.plot([ref_end / fps, ref_end / fps], [0, 50], 'g--', lw=2)
     for i in range(len(info[:, 0])):
@@ -330,6 +335,22 @@ if __name__ == '__main__':
         exit("Can not open file <%s>" % input_file)
 
     data = data[data[:, 1] != 0] # todo: why?
+    if args.automatic:
+        ref_start = []
+        ref_end = []
+        for c in range(1, len(columns)):
+            print c
+            start_frame = data[0, c]
+            end_frame = data[-1, c]
+            print "start_frame", start_frame
+            print "end_frame", end_frame
+            ref_start.append(3./8*(end_frame-start_frame))
+            ref_end.append(5./8*(end_frame-start_frame))
+
+        print("Automatic mode:")
+        print("ref_start: %s"%", ".join(map(str, ref_start)))
+        print("ref_end: %s"%", ".join(map(str, ref_end)))
+        raw_input()
     minframe = data[0, 0]
     data[:, 0] = data[:, 0] - minframe
 
