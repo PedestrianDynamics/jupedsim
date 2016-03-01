@@ -365,11 +365,14 @@ double StartDistribution::GetRiskTolerance()
         //fprintf(stderr, "%f \t %f \n", _generator, _riskTolerance(_generator));
         return _riskTolerance(_generator);
     }
-    else if(_distribution_type=="beta"){
-        std::uniform_real_distribution<float> noramlize(0.0, 1.0);
-        float rand_norm = noramlize(_generator);
+    else {
+        std::uniform_real_distribution<float> normalize(0.0, 1.0);
+        float rand_norm = normalize(_generator);
         //fprintf(stderr, "%f \n", quantile(_risk_beta_dist, rand_norm));
-        return quantile(_risk_beta_dist, rand_norm);
+        if(_distribution_type=="beta") {
+             return quantile(_risk_beta_dist, rand_norm);
+        }
+        return (double) rand_norm; // todo: ar.graf: check if this quick fix executes and why
     }
 }
 
