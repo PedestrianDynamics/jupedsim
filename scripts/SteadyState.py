@@ -6,6 +6,7 @@ from numpy import *
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from scipy.stats.stats import pearsonr
+import itertools
 
 VERSION = 0.8
 script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -23,18 +24,25 @@ KK = 500
 im = 3.2
 d = 2 * im / KK
 xi = arange(-im, im + 0.0001, d)
-ia = ib = 0
-dnorm = 0
 
 
 def F(x):
+    """
+    :param x:
+    :return:
+    """
     if x > q:
         return 1
     else:
         return -1
 
-
-def func_b(i, k):  # todo what happens if acf==1?
+def func_b(i, k, acf):
+    """
+    :param i:
+    :param k:
+    :param acf:
+    :return:
+    """
     return d * exp(-(xi[i] - xi[k] * acf) * (xi[i] - xi[k] * acf) / (2 * (1 - acf * acf))) / sqrt(
         2 * math.pi * (1 - acf * acf))
 
@@ -44,480 +52,375 @@ def func_b(i, k):  # todo what happens if acf==1?
 # - Unities /
 
 def getParserArgs():
-    parser = argparse.ArgumentParser(description='Detection of Steady State. JuPedSim v%0.1f.' % VERSION)
+    """
+
+    :return:
+    """
+    parser = argparse.ArgumentParser(
+        description='Detection of Steady State. JuPedSim v%0.1f.' % VERSION)
+    parser.add_argument("-a", "--automatic", action='store_true',
+                        help="use calculated reference start and end frames. If given -rs and -re are ignored")
     parser.add_argument("-f", "--input_file", default=demo_file,
                         help='Full name of the input file (default %s). File format is | frame | rho | velocity |' % demo_file)
-    parser.add_argument("-rs", "--reference_rho_start", type=int, default=240,
+    parser.add_argument("-c", "--columns", nargs='+', type=int, default=[0, 1, 2],
+                        help="columns to read from file (default 0, 1, 2)")
+    parser.add_argument("-xl", "--xlabel", type=str, default="t /s",
+                        help="xlabel")
+    parser.add_argument("-yl", "--ylabel", nargs='+', type=str, default=["\rho /m/s", "v m/s"],
+                        help="ylabel")
+    parser.add_argument("-rs", "--reference_start", nargs='+', type=int, default=[240, 240],
                         help='Start frame of the reference process in density (default 240)')
-    parser.add_argument("-re", "--reference_rho_end", type=int, default=640,
+    parser.add_argument("-re", "--reference_end", nargs='+', type=int, default=[640, 640],
                         help='End frame of the reference process in density (default 640)')
-    parser.add_argument("-vs", "--reference_v_start", type=int, default=240,
-                        help='Start frame of the reference process in speed (default 240)')
-    parser.add_argument("-ve", "--reference_v_end", type=int, default=640,
-                        help='End frame of the reference process in speed (default 640)')
-    parser.add_argument("-p", "--plotfigs", default="yes", help='Plot figures (default yes)')
-    parser.add_argument("-r", "--fps", type=int, default=16, help='Frame per second (default 16)')
+    parser.add_argument("-p", "--plotfigs", default="yes",
+                        help='Plot figures (default yes)')
+    parser.add_argument("-r", "--fps", type=int, default=16,
+                        help='Frame per second (default 16)')
     args = parser.parse_args()
     return args
 
+def set_ref_series(data, column, ref_start, ref_end):
+    # calculate ref_mean, ref_std, ref_acf for data[:, column]
+    """
+    data:
+    column:
+    start:
+    end:
+    return: acf, mean, std
+    :param data:
+    :param column:
+    :param ref_start:
+    :param ref_end:
+    :return:
+    """
+    ref_series = data
+    ref_series = ref_series[ref_series[:, 0] >= ref_start - minframe]
+    ref_series = ref_series[ref_series[:, 0] <= ref_end - minframe]
+    ref_series = ref_series[:, column]
+    ref_series_mean = mean(ref_series)
+    ref_series_std = std(ref_series)
+    ref_series_a = ref_series[:-1]
+    ref_series_b = ref_series[1:]
+    ref_series_acf = pearsonr(ref_series_a, ref_series_b)
+    ref_series_acf = ref_series_acf[0]
+    return ref_series_acf, ref_series_mean, ref_series_std
 
-if __name__ == '__main__':
-    rho_max = 8.0
-    args = getParserArgs()
-    input_file = args.input_file
-    ref_rho_start = args.reference_rho_start
-    ref_rho_end = args.reference_rho_end
-    ref_v_start = args.reference_v_start
-    ref_v_end = args.reference_v_end
-    plotfigs = args.plotfigs
-    frame = args.fps
-# input data
-try:
-    # data = loadtxt('%s'%(input_file))
-    data = loadtxt('%s' % (input_file), usecols=[0, 6, 8])
-except IOError:
-    exit("Can not open file <%s>" % input_file)
-
-data = data[data[:, 1] != 0]
-minframe = data[0, 0]
-data[:, 0] = data[:, 0] - minframe
-
-# get filepath and filename
-filename = os.path.basename(input_file)
-filepath = os.path.dirname(input_file)
-print('file path = %s' % filepath)
-print('file name = %s' % filename)
-
-
-def set_ref_rho():
-    # calculate ref_mean, ref_std, ref_acf for rho
+def get_theta(ia, ib, dnorm, acf):
     """
 
-    :rtype: ref_rho_acf
+    :param ia:
+    :param ib:
+    :param dnorm:
+    :param acf:
+    :return:
     """
-    global ref_rho_mean, ref_rho_std, ref_rho_acf
-    ref_rho = data
-    ref_rho = ref_rho[ref_rho[:, 0] >= ref_rho_start - minframe]
-    ref_rho = ref_rho[ref_rho[:, 0] <= ref_rho_end - minframe]
-    ref_rho = ref_rho[:, 1]
-    ref_rho_mean = mean(ref_rho)
-    ref_rho_std = std(ref_rho)
-    ref_rho_a = ref_rho[:-1]
-    ref_rho_b = ref_rho[1:]
-    ref_rho_acf = pearsonr(ref_rho_a, ref_rho_b)
-    ref_rho_acf = ref_rho_acf[0]
-    return ref_rho_acf
+    shape = ((NN + 1) * (KK + 1), 1)
+    bb = matrix(zeros(shape))
+    bb[-1:, 0] = dnorm
+    Ta = [matrix(zeros((KK + 1, KK + 1))) for i in range(NN + 1)]
+    Tb = list(Ta)
+    Tc = list(Ta)
+    Td = [matrix(zeros((KK + 1, 1))) for i in range(NN + 1)]
+    for i in range(NN + 1):
+        begin = (i) * (KK + 1)
+        end = begin + KK + 1
+        Td[i] = bb[begin:end, 0]
+    B1 = matrix(zeros((KK + 1, KK + 1)))
+    B2 = matrix(B1)
+    Id = matrix(B1)
+    for i in range(KK + 1):
+        for j in range(KK + 1):
+            if i < ia or i >= ib:
+                B1[i, j] = func_b(i, j, acf)
+            if i >= ia and i < ib:
+                B2[i, j] = func_b(i, j, acf)
+            if i == j:
+                Id[i, j] = 1
+    Tb[0] = matrix(B2 - Id)
+    Tc[0] = matrix(B2)
+    for i in range(1, NN):
+        Ta[i] = matrix(B1)
+        Tb[i] = matrix(-Id)
+        Tc[i] = matrix(B2)
+    Ta[NN] = matrix(B1)
+    Tb[NN] = matrix(B1 - Id)
+    Tc[0] = linalg.solve(Tb[0], Tc[0])
+    Td[0] = linalg.solve(Tb[0], Td[0])
+    for i in range(1, NN + 1):
+        AA = Tb[i] - Ta[i] * Tc[i - 1]
+        Tc[i] = linalg.solve(AA, Tc[i])
+        Td[i] = linalg.solve(AA, Td[i] - Ta[i] * Td[i - 1])
+    for i in range(NN - 1, -1, -1):
+        Td[i] = Td[i] - Tc[i] * Td[i + 1]
+    Tms = matrix(zeros(shape))
+    for i in range(NN + 1):
+        begin = (i) * (KK + 1)
+        end = begin + KK + 1
+        Tms[begin:end, 0] = Td[i]
+    Tms = Tms / sum(d * Tms)
+    shape = ((NN + 1), 1)
+    Tm = zeros(shape)
+    for j in range(NN + 1):
+        begin = (j) * (KK + 1)
+        end = begin + KK + 1
+        Tm[j, 0] = sum(d * Tms[begin:end, 0])
+    Tps = Tm[0, 0]
+    theta = 1
+    while theta + 1 < len(Tm) and Tps + Tm[theta, 0] < gamma:
+        Tps = Tps + Tm[theta, 0]
+        theta += 1
+    rho_theta = theta
+    return rho_theta
 
-ref_rho_acf = set_ref_rho()
+def init_parameters():
+    """
+    init ia, ib and dnorm
+    :return:
+    """
+    ia = ib = 0
+    dnorm = 0
+    for i in range(len(xi)):
+        if ia == 0 and xi[i + 1] > -q:
+            ia = i
+        if ib == 0 and xi[i] > q:
+            ib = i
+        dnorm += 1 / sqrt(2 * math.pi) * exp(-xi[i] * xi[i] / 2)
 
-# calculate ref_mean, ref_std, ref_acf for v
-ref_v = data
-ref_v = ref_v[ref_v[:, 0] >= ref_v_start - minframe]
-ref_v = ref_v[ref_v[:, 0] <= ref_v_end - minframe]
-ref_v = ref_v[:, 2]
-ref_v_mean = mean(ref_v)
-ref_v_std = std(ref_v)
-ref_v_a = ref_v[:-1]
-ref_v_b = ref_v[1:]
-ref_v_acf = pearsonr(ref_v_a, ref_v_b)
-ref_v_acf = ref_v_acf[0]
+    return ia, ib, dnorm
 
-# calculate theta rho
-acf = ref_rho_acf
+def calculate_statistics(data, column, ref_mean, ref_std):
+    """
+    writes result in file
+    :param data:
+    :param column:
+    :param ref_mean:
+    :param ref_std:
+    """
+    statistics_series = data[:, column]
+    file_s = open('%s/cusum_%d_%s.txt' % (filepath, column, filename), 'w')
+    file_s.write('# frame s \n')
+    s_frame = minframe
+    s = s_max
+    file_s.write('%.0f %.4f \n' % (s_frame, s))
+    for i in statistics_series:
+        s_frame += 1
+        s = min(max(0, s + F(abs((i - ref_mean) / ref_std))), s_max)
+        file_s.write('%.0f %.4f \n' % (s_frame, s))
+    file_s.close()
 
-for i in range(len(xi)):
-    if ia == 0 and xi[i + 1] > -q:
-        ia = i
-    if ib == 0 and xi[i] > q:
-        ib = i
-    dnorm += 1 / sqrt(2 * math.pi) * exp(-xi[i] * xi[i] / 2)
+def choose_steady_state(column, theta):
+    """
 
-shape = ((NN + 1) * (KK + 1), 1)
-bb = matrix(zeros(shape))
-bb[-1:, 0] = dnorm
+    :param column:
+    :param theta:
+    :return:
+    """
+    statistics = loadtxt('%s/cusum_%d_%s.txt' % (filepath, column, filename))
+    ss = open('%s/SteadyState_%d_%s.txt' % (filepath, column, filename), 'w')
+    ss.write('# start end ratio mean std \n')
+    steady = statistics[statistics[:, 1] < theta]
+    steady_start = min(steady[:, 0]) - (s_max - theta)
+    for i in arange(1, len(steady), 1):
+        if steady[i, 0] - steady[i - 1, 0] != 1:
+            steady_end = steady[i - 1, 0] - theta
+            if steady_start < steady_end:
+                series_data = data
+                series_data = series_data[series_data[:, 0] >= steady_start]
+                series_data = series_data[series_data[:, 0] <= steady_end]
+                data_ratio = len(series_data[:, 0]) / len(data[:, 0]) * 100
+                data_mean = mean(series_data[:, column])
+                data_std = std(series_data[:, column])
+                ss.write('%.0f %.0f %.2f %.4f %.4f \n' % (
+                    steady_start, steady_end, data_ratio, data_mean, data_std))
+            steady_start = steady[i, 0] - (s_max - theta)
+    steady_end = max(steady[:, 0]) - theta
+    if steady_start < steady_end:
+        series_data = data
+        series_data = series_data[series_data[:, 0] >= steady_start]
+        series_data = series_data[series_data[:, 0] <= steady_end]
+        data_ratio = len(series_data[:, 0]) / len(data[:, 0]) * 100
+        data_mean = mean(series_data[:, column])
+        data_std = std(series_data[:, column])
+        ss.write('%.0f %.0f %.2f %.4f %.4f \n' % (
+            steady_start, steady_end, data_ratio, data_mean, data_std))
+    ss.close()
+    info_serie = loadtxt('%s/SteadyState_%d_%s.txt' % (filepath, column, filename))
+    if info_serie.shape == (5,):
+        temp = [info_serie]
+        info = array(temp)
 
-Ta = [matrix(zeros((KK + 1, KK + 1))) for i in range(NN + 1)]
-Tb = list(Ta)
-Tc = list(Ta)
-Td = [matrix(zeros((KK + 1, 1))) for i in range(NN + 1)]
+    return info, statistics
 
-for i in range(NN + 1):
-    begin = (i) * (KK + 1)
-    end = begin + KK + 1
-    Td[i] = bb[begin:end, 0]
-
-B1 = matrix(zeros((KK + 1, KK + 1)))
-B2 = matrix(B1)
-Id = matrix(B1)
-
-for i in range(KK + 1):
-    for j in range(KK + 1):
-        if i < ia or i >= ib:
-            B1[i, j] = func_b(i, j)
-        if i >= ia and i < ib:
-            B2[i, j] = func_b(i, j)
-        if i == j:
-            Id[i, j] = 1
-
-Tb[0] = matrix(B2 - Id)
-Tc[0] = matrix(B2)
-for i in range(1, NN):
-    Ta[i] = matrix(B1)
-    Tb[i] = matrix(-Id)
-    Tc[i] = matrix(B2)
-Ta[NN] = matrix(B1)
-Tb[NN] = matrix(B1 - Id)
-
-Tc[0] = linalg.solve(Tb[0], Tc[0])
-Td[0] = linalg.solve(Tb[0], Td[0])
-for i in range(1, NN + 1):
-    AA = Tb[i] - Ta[i] * Tc[i - 1]
-    Tc[i] = linalg.solve(AA, Tc[i])
-    Td[i] = linalg.solve(AA, Td[i] - Ta[i] * Td[i - 1])
-for i in range(NN - 1, -1, -1):
-    Td[i] = Td[i] - Tc[i] * Td[i + 1]
-
-Tms = matrix(zeros(shape))
-for i in range(NN + 1):
-    begin = (i) * (KK + 1)
-    end = begin + KK + 1
-    Tms[begin:end, 0] = Td[i]
-Tms = Tms / sum(d * Tms)
-
-shape = ((NN + 1), 1)
-Tm = zeros(shape)
-for j in range(NN + 1):
-    begin = (j) * (KK + 1)
-    end = begin + KK + 1
-    Tm[j, 0] = sum(d * Tms[begin:end, 0])
-
-Tps = Tm[0, 0]
-theta = 1
-while theta + 1 < len(Tm) and Tps + Tm[theta, 0] < gamma:
-    Tps = Tps + Tm[theta, 0]
-    theta += 1
-
-rho_theta = theta
-print('rho_theta = %.0f' % (rho_theta))
-
-# calculate theta v
-acf = ref_v_acf
-
-for i in range(len(xi)):
-    if ia == 0 and xi[i + 1] > -q:
-        ia = i
-    if ib == 0 and xi[i] > q:
-        ib = i
-    dnorm += 1 / sqrt(2 * math.pi) * exp(-xi[i] * xi[i] / 2)
-
-shape = ((NN + 1) * (KK + 1), 1)
-bb = matrix(zeros(shape))
-bb[-1:, 0] = dnorm
-
-Ta = [matrix(zeros((KK + 1, KK + 1))) for i in range(NN + 1)]
-Tb = list(Ta)
-Tc = list(Ta)
-Td = [matrix(zeros((KK + 1, 1))) for i in range(NN + 1)]
-
-for i in range(NN + 1):
-    begin = (i) * (KK + 1)
-    end = begin + KK + 1
-    Td[i] = bb[begin:end, 0]
-
-B1 = matrix(zeros((KK + 1, KK + 1)))
-B2 = matrix(B1)
-Id = matrix(B1)
-
-for i in range(KK + 1):
-    for j in range(KK + 1):
-        if i < ia or i >= ib:
-            B1[i, j] = func_b(i, j)
-        if i >= ia and i < ib:
-            B2[i, j] = func_b(i, j)
-        if i == j:
-            Id[i, j] = 1
-
-Tb[0] = matrix(B2 - Id)
-Tc[0] = matrix(B2)
-for i in range(1, NN):
-    Ta[i] = matrix(B1)
-    Tb[i] = matrix(-Id)
-    Tc[i] = matrix(B2)
-Ta[NN] = matrix(B1)
-Tb[NN] = matrix(B1 - Id)
-
-Tc[0] = linalg.solve(Tb[0], Tc[0])
-Td[0] = linalg.solve(Tb[0], Td[0])
-for i in range(1, NN + 1):
-    AA = Tb[i] - Ta[i] * Tc[i - 1]
-    Tc[i] = linalg.solve(AA, Tc[i])
-    Td[i] = linalg.solve(AA, Td[i] - Ta[i] * Td[i - 1])
-for i in range(NN - 1, -1, -1):
-    Td[i] = Td[i] - Tc[i] * Td[i + 1]
-
-Tms = matrix(zeros(shape))
-for i in range(NN + 1):
-    begin = (i) * (KK + 1)
-    end = begin + KK + 1
-    Tms[begin:end, 0] = Td[i]
-Tms = Tms / sum(d * Tms)
-
-shape = ((NN + 1), 1)
-Tm = zeros(shape)
-for j in range(NN + 1):
-    begin = (j) * (KK + 1)
-    end = begin + KK + 1
-    Tm[j, 0] = sum(d * Tms[begin:end, 0])
-
-Tps = Tm[0, 0]
-theta = 1
-while theta + 1 < len(Tm) and Tps + Tm[theta, 0] < gamma:
-    Tps = Tps + Tm[theta, 0]
-    theta = theta + 1
-v_theta = theta
-print('v_theta = %.0f' % (v_theta))
-
-# calculate statistics rho
-statistics_rho = data
-statistics_rho = statistics_rho[:, 1]
-file_rho_s = open('%s/cusum_rho_%s.txt' % (filepath, filename), 'w')
-file_rho_s.write('# frame s \n')
-rho_s_frame = minframe
-rho_s = s_max
-file_rho_s.write('%.0f %.4f \n' % (rho_s_frame, rho_s))
-for i in statistics_rho:
-    rho_s_frame = rho_s_frame + 1
-    rho_s = min(max(0, rho_s + F(abs((i - ref_rho_mean) / ref_rho_std))), s_max)
-    file_rho_s.write('%.0f %.4f \n' % (rho_s_frame, rho_s))
-file_rho_s.close()
-
-# calculate statistics v
-statistics_v = data
-statistics_v = statistics_v[:, 2]
-file_v_s = open('%s/cusum_v_%s.txt' % (filepath, filename), 'w')
-file_v_s.write('# frame s \n')
-v_s_frame = minframe
-v_s = s_max
-file_v_s.write('%.0f %.4f \n' % (v_s_frame, v_s))
-for i in statistics_v:
-    v_s_frame = v_s_frame + 1
-    v_s = min(max(0, v_s + F(abs((i - ref_v_mean) / ref_v_std))), s_max)
-    file_v_s.write('%.0f %.4f \n' % (v_s_frame, v_s))
-file_v_s.close()
-
-# choose steady state rho
-statistics_rho = loadtxt('%s/cusum_rho_%s.txt' % (filepath, filename))
-ss_rho = open('%s/SteadyState_rho_%s.txt' % (filepath, filename), 'w')
-ss_rho.write('# start end ratio mean std \n')
-steady_rho = statistics_rho[statistics_rho[:, 1] < rho_theta]
-steady_rho_start = min(steady_rho[:, 0]) - (s_max - rho_theta)
-for i in arange(1, len(steady_rho), 1):
-    if steady_rho[i, 0] - steady_rho[i - 1, 0] != 1:
-        steady_rho_end = steady_rho[i - 1, 0] - rho_theta
-        if steady_rho_start < steady_rho_end:
-            rho_data = data
-            rho_data = rho_data[rho_data[:, 0] >= steady_rho_start]
-            rho_data = rho_data[rho_data[:, 0] <= steady_rho_end]
-            rho_data_ratio = len(rho_data[:, 0]) / len(data[:, 0]) * 100
-            rho_data_mean = mean(rho_data[:, 1])
-            rho_data_std = std(rho_data[:, 1])
-            ss_rho.write('%.0f %.0f %.2f %.4f %.4f \n' % (
-                steady_rho_start, steady_rho_end, rho_data_ratio, rho_data_mean, rho_data_std))
-        steady_rho_start = steady_rho[i, 0] - (s_max - rho_theta)
-
-steady_rho_end = max(steady_rho[:, 0]) - rho_theta
-if steady_rho_start < steady_rho_end:
-    rho_data = data
-    rho_data = rho_data[rho_data[:, 0] >= steady_rho_start]
-    rho_data = rho_data[rho_data[:, 0] <= steady_rho_end]
-    rho_data_ratio = len(rho_data[:, 0]) / len(data[:, 0]) * 100
-    rho_data_mean = mean(rho_data[:, 1])
-    rho_data_std = std(rho_data[:, 1])
-    ss_rho.write('%.0f %.0f %.2f %.4f %.4f \n' % (
-        steady_rho_start, steady_rho_end, rho_data_ratio, rho_data_mean, rho_data_std))
-
-ss_rho.close()
-info_rho = loadtxt('%s/SteadyState_rho_%s.txt' % (filepath, filename))
-if info_rho.shape == (5,):
-    temp = []
-    temp.append(info_rho)
-    info_rho = array(temp)
-
-print('+--------------------------------------------------------------------------------------------+')
-for i in range(info_rho.shape[0]):
-    print('steady state of rho (%d): from %d (%.1f s) to %d (%.1f s) [ratio=%.2f, mean=%.2f, std=%.2f]' % (
-        i,
-        info_rho[i][0], info_rho[i][0] / frame, info_rho[i][1], info_rho[i][1] / frame,
-        info_rho[i][2], info_rho[i][3], info_rho[i][4]))
-
-# choose steady state v
-statistics_v = loadtxt('%s/cusum_v_%s.txt' % (filepath, filename))
-ss_v = open('%s/SteadyState_v_%s.txt' % (filepath, filename), 'w')
-ss_v.write('# start end ratio mean std \n')
-steady_v = statistics_v[statistics_v[:, 1] < v_theta]
-steady_v_start = min(steady_v[:, 0]) - (s_max - v_theta)
-for i in arange(1, len(steady_v), 1):
-    if steady_v[i, 0] - steady_v[i - 1, 0] != 1:
-        steady_v_end = steady_v[i - 1, 0] - v_theta
-        if steady_v_start < steady_v_end:
-            v_data = data
-            v_data = v_data[v_data[:, 0] >= steady_v_start]
-            v_data = v_data[v_data[:, 0] <= steady_v_end]
-            v_data_ratio = len(v_data[:, 0]) / len(data[:, 0]) * 100
-            v_data_mean = mean(v_data[:, 2])
-            v_data_std = std(v_data[:, 2])
-            ss_v.write('%.0f %.0f %.2f %.4f %.4f \n' % (
-                steady_v_start, steady_v_end, v_data_ratio, v_data_mean, v_data_std))
-        steady_v_start = steady_v[i, 0] - (s_max - v_theta)
-
-steady_v_end = max(steady_v[:, 0]) - v_theta
-if steady_v_start < steady_v_end:
-    v_data = data
-    v_data = v_data[v_data[:, 0] >= steady_v_start]
-    v_data = v_data[v_data[:, 0] <= steady_v_end]
-    v_data_ratio = len(v_data[:, 0]) / len(data[:, 0]) * 100
-    v_data_mean = mean(v_data[:, 2])
-    v_data_std = std(v_data[:, 2])
-    ss_v.write('%.0f %.0f %.2f %.4f %.4f \n' % (steady_v_start, steady_v_end, v_data_ratio, v_data_mean, v_data_std))
-
-ss_v.close()
-info_v = loadtxt('%s/SteadyState_v_%s.txt' % (filepath, filename))
-if info_v.shape == (5,):
-    temp = []
-    temp.append(info_v)
-    info_v = array(temp)
-
-print('+--------------------------------------------------------------------------------------------+')
-for i in range(info_v.shape[0]):
-    print('steady state of v (%d): from %d (%.1f s) to %d (%.1f s) [ratio=%.2f, mean=%.2f, std=%.2f]' % (
-        i,
-        info_v[i][0], info_v[i][0] / frame, info_v[i][1], info_v[i][1] / frame,
-        info_v[i][2], info_v[i][3], info_v[i][4]))
-print('+--------------------------------------------------------------------------------------------+')
-
-# calculate steady state
-ss = open('%s/SteadyState_%s.txt' % (filepath, filename), 'w')
-ss.write('# start end ratio \n')
-for i in range(len(info_rho[:, 0])):
-    for j in range(len(info_v[:, 0])):
-        mix_start = max(info_rho[i, 0], info_v[j, 0])
-        mix_end = min(info_rho[i, 1], info_v[j, 1])
-        if mix_start < mix_end:
-            ss_data_ratio = (mix_end - mix_start) / len(data[:, 0]) * 100
-            ss.write('%.0f %.0f %.2f \n' % (mix_start, mix_end, ss_data_ratio))
-ss.close()
-info = loadtxt('%s/SteadyState_%s.txt' % (filepath, filename))
-if info.shape == (3,):
-    temp = []
-    temp.append(info)
-    info = array(temp)
-
-print('final steady state is  from %d (%.1f s) to %d (%.1f s)  [ratio=%.2f]' %
-      (info[0][0], info[0][0] / frame, info[0][1], info[0][1] / frame, info[0][2]))
-print('+--------------------------------------------------------------------------------------------+')
-if plotfigs == 'no':
-    print('No figures are plotted!')
-else:
-    print('Plotting figures...')
-
-    # plot cusum rho
+def plot_series(statistics, theta, column):
     fig = plt.figure(figsize=(11, 10), dpi=100)
-    limit = (int((statistics_rho[-1, 0] / frame) / 10) + 1) * 10
-    plt.plot(statistics_rho[:, 0] / frame, statistics_rho[:, 1], 'b--', lw=2, label=r'S$_{k}$')
-    plt.plot([0, limit], [rho_theta, rho_theta], 'r-', lw=2, label=r'$\theta$')
-    plt.xlabel('t [s]', fontsize=25)
-    plt.ylabel('Statistics rho', fontsize=25)
+    limit = (int((statistics[-1, 0] / frame) / 10) + 1) * 10
+    plt.plot(statistics[:, 0] / frame, statistics[:, 1], 'b--', lw=2, label=r'S$_{k}$')
+    plt.plot([0, limit], [theta, theta], 'r-', lw=2, label=r'$\theta$')
+    plt.xlabel(xlabel, fontsize=25)
+    plt.ylabel('Statistics %d'%column, fontsize=25)
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
     plt.xlim(0, limit)
     plt.ylim(-10, 120)
     plt.legend(numpoints=2, ncol=1, loc=1, fontsize=20)
-    plt.savefig('%s/cusum_rho_%s.png' % (filepath, filename))
+    plt.savefig('%s/cusum_%d_%s.png' % (filepath, column, filename))
     plt.close()
 
-    # plot cusum v
-    fig = plt.figure(figsize=(11, 10), dpi=100)
-    limit = (int((statistics_v[-1, 0] / frame) / 10) + 1) * 10
-    plt.plot(statistics_v[:, 0] / frame, statistics_v[:, 1], 'b--', lw=2, label=r'S$_{k}$')
-    plt.plot([0, limit], [v_theta, v_theta], 'r-', lw=2, label=r'$\theta$')
-    plt.xlabel('t [s]', fontsize=25)
-    plt.ylabel('Statistics v', fontsize=25)
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
-    plt.xlim(0, limit)
-    plt.ylim(-10, 120)
-    plt.legend(numpoints=2, ncol=1, loc=1, fontsize=20)
-    plt.savefig('%s/cusum_v_%s.png' % (filepath, filename))
-    plt.close()
 
-    # plot steady rho
+def plot_steady_state(statistics, data, ref_start, ref_end, info, column):
     fig = plt.figure(figsize=(11, 10), dpi=100)
     ax = fig.add_subplot(111)
-    limit = (int((statistics_rho[-1, 0] / frame) / 10) + 1) * 10
-    plt.plot((data[:, 0] + minframe) / frame, data[:, 1], 'b-', lw=2)
-    plt.plot([ref_rho_start / frame, ref_rho_start / frame], [0, 50], 'g--', lw=2, label='reference')
-    plt.plot([ref_rho_end / frame, ref_rho_end / frame], [0, 50], 'g--', lw=2)
-    for i in range(len(info_rho[:, 0])):
-        ax.add_patch(mpatches.Polygon([[info_rho[i, 0] / frame, 0],
-                                       [info_rho[i, 1] / frame, 0],
-                                       [info_rho[i, 1] / frame, 50],
-                                       [info_rho[i, 0] / frame, 50]],
+    if xlabel == "frame":
+        fps = 1.0  # hack
+    else:
+        fps = frame
+
+    limit = (int((statistics[-1, 0] / fps) / 10) + 1) * 10
+    plt.plot((data[:, 0] + minframe) / fps, data[:, 1], 'b-', lw=2)
+    plt.plot([ref_start / fps, ref_start / fps], [0, 50], 'g--', lw=2, label='reference')
+    plt.plot([ref_end / fps, ref_end / fps], [0, 50], 'g--', lw=2)
+    for i in range(len(info[:, 0])):
+        ax.add_patch(mpatches.Polygon([[info[i, 0] / fps, 0],
+                                       [info[i, 1] / fps, 0],
+                                       [info[i, 1] / fps, 50],
+                                       [info[i, 0] / fps, 50]],
                                       closed=True, fill=False,
-                                      color='r', hatch='/', label='steady (rho)'))
+                                      color='r', hatch='/', label='steady (%d)'%column))
 
     for i in range(len(info[:, 0])):
-        ax.add_patch(mpatches.Polygon([[info[i, 0] / frame, 0],
-                                       [info[i, 1] / frame, 0],
-                                       [info[i, 1] / frame, 50],
-                                       [info[i, 0] / frame, 50]],
+        ax.add_patch(mpatches.Polygon([[info[i, 0] / fps, 0],
+                                       [info[i, 1] / fps, 0],
+                                       [info[i, 1] / fps, 50],
+                                       [info[i, 0] / fps, 50]],
                                       closed=True, fill=True,
                                       color='y', alpha=0.2, label='steady (final)'))
 
-    plt.xlabel('t [s]', fontsize=25)
-    plt.ylabel(r'$\rho$ [m$^{-2}$]', fontsize=25)
+    plt.xlabel(xlabel, fontsize=25)
+    plt.ylabel(r'$%s$'%ylabel[column-1], fontsize=25)
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
     plt.xlim(0, limit)
     plt.ylim(0, int(max(data[:, 1])) + 2)
     plt.legend(numpoints=1, ncol=1, loc=1, fontsize=20)
-    plt.savefig('%s/SteadyState_rho_%s.png' % (filepath, filename))
+    plt.savefig('%s/SteadyState_%d_%s.png' % (filepath, column, filename))
     plt.close()
 
-    # plot steady v
-    fig = plt.figure(figsize=(11, 10), dpi=100)
-    ax = fig.add_subplot(111)
-    limit = (int((statistics_v[-1, 0] / frame) / 10) + 1) * 10
-    plt.plot((data[:, 0] + minframe) / frame, data[:, 2], 'b-', lw=2)
-    plt.plot([ref_v_start / frame, ref_v_start / frame], [0, 50], 'g--', lw=2, label='reference')
-    plt.plot([ref_v_end / frame, ref_v_end / frame], [0, 50], 'g--', lw=2)
-    for i in range(len(info_v[:, 0])):
-        ax.add_patch(mpatches.Polygon([[info_v[i, 0] / frame, 0],
-                                       [info_v[i, 1] / frame, 0],
-                                       [info_v[i, 1] / frame, 50],
-                                       [info_v[i, 0] / frame, 50]],
-                                      closed=True, fill=False,
-                                      color='r', hatch='/', label='steady (rho)'))
+if __name__ == '__main__':
+    rho_max = 8.0
+    args = getParserArgs()
+    input_file = args.input_file
+    ref_start = args.reference_start
+    ref_end = args.reference_end
+    plotfigs = args.plotfigs
+    frame = args.fps
+    columns = args.columns
+    xlabel = args.xlabel
+    ylabel = args.ylabel
+    # sanity check
 
-    for i in range(len(info[:, 0])):
-        ax.add_patch(mpatches.Polygon([[info[i, 0] / frame, 0],
-                                       [info[i, 1] / frame, 0],
-                                       [info[i, 1] / frame, 50],
-                                       [info[i, 0] / frame, 50]],
-                                      closed=True, fill=True,
-                                      color='y', alpha=0.2,
-                                      label='steady (final)'))
+    if not args.automatic: # in case references are manually given, lengths should be correct
+        assert (len(columns)-1) == len(ref_start) == len(ref_end) == len(ylabel),\
+            "mismatch lengths.\n\t columns: %s (first is frame)\n\t ref_start: %s\n\t ref_end: %s\n ylabel: %s"%\
+            (", ".join(map(str, columns)), ", ".join(map(str, ref_start)), ", ".join(map(str, ref_end)), ", ".join(map(str, ylabel)))
 
-    plt.xlabel('t [s]', fontsize=25)
-    plt.ylabel(r'v [m$\cdot$s$^{-1}$]', fontsize=25)
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
-    plt.xlim(0, limit)
-    plt.ylim(0, int(max(data[:, 2])) + 1)
-    plt.legend(numpoints=1, ncol=1, loc=1, fontsize=20)
-    plt.savefig('%s/SteadyState_v_%s.png' % (filepath, filename))
-    plt.close()
+    # read input data
+    try:
+        data = loadtxt('%s' % (input_file), usecols=columns)# [0, 6, 8]
+    except IOError:
+        exit("Can not open file <%s>" % input_file)
 
-os.remove('%s/cusum_rho_%s.txt' % (filepath, filename))
-os.remove('%s/cusum_v_%s.txt' % (filepath, filename))
+    data = data[data[:, 1] != 0] # todo: why?
+    minframe = data[0, 0]
+    data[:, 0] = data[:, 0] - minframe
 
-print('Steady state detected successfully!')
+    # get filepath and filename
+    filename = os.path.basename(input_file).split(".")[0]
+    filepath = os.path.dirname(input_file)
+    print('file path = %s' % filepath)
+    print('file name = %s' % filename)
+
+    ia, ib, dnorm = init_parameters()
+    starts = []  # collect start of steady state for all series
+    ends = [] # collect end of steady state for all series
+    for i in range(len(columns)-1):
+        ref_acf, ref_mean, ref_std = set_ref_series(data, i+1, ref_start[i], ref_end[i])
+        # calculate theta rho
+        theta = get_theta(ia, ib, dnorm, ref_acf)
+        print('theta[%d] = %.0f' % (i, theta))
+        # calculate statistics
+        calculate_statistics(data, i+1, ref_mean, ref_std)
+        # choose steady state
+        info, statistics = choose_steady_state(i+1, theta)
+        print('+------------------------------------------------------------------------------+')
+        for j in range(info.shape[0]):
+            print('steady state of series %d (%d): from %d (%.1f s) to %d (%.1f s) [ratio=%.2f, mean=%.2f, std=%.2f]' % (
+                i, j,
+                info[j][0], info[j][0] / frame, info[j][1], info[j][1] / frame,
+                info[j][2], info[j][3], info[j][4]))
+
+            ends.append(info[j][1])
+            starts.append(info[j][0])
+
+        if plotfigs == 'yes':
+            print('Plotting figures...')
+            # plot cusum
+            plot_series(statistics, theta, i+1)
+            # plot steady
+            plot_steady_state(statistics, data, ref_start[i], ref_end[i], info, i+1)
+
+        print('+------------------------------------------------------------------------------+')
+        os.remove('%s/cusum_%d_%s.txt' % (filepath, i+1, filename))
+
+    # choose steady state
+    ss = open('%s/SteadyState_%s.txt' % (filepath, filename), 'w')
+    ss.write('# start end ratio \n')
+    print "start frames: ", starts
+    print "end frames: ", ends
+    mix_start = max(starts)
+    mix_end = min(ends)
+    if mix_start < mix_end:
+        ss_data_ratio = (mix_end - mix_start) / len(data[:, 0]) * 100
+        ss.write('%.0f %.0f %.2f \n' % (mix_start, mix_end, ss_data_ratio))
+
+    ss.close()
+    info = loadtxt('%s/SteadyState_%s.txt' % (filepath, filename))
+    print('final steady state is  from %d (%.1f s) to %d (%.1f s)  [ratio=%.2f]' %
+          (mix_start, mix_start / frame, mix_end, mix_end / frame, ss_data_ratio))
+
+
+    print('Steady state detected successfully!')
+
+
+
+
+        # choose steady state v
+    # info_v, statistics_v = choose_steady_state(2, v_theta)
+
+    # print('+--------------------------------------------------------------------------------------------+')
+    # for i in range(info_v.shape[0]):
+        # print('steady state of v (%d): from %d (%.1f s) to %d (%.1f s) [ratio=%.2f, mean=%.2f, std=%.2f]' % (
+            # i,
+            # info_v[i][0], info_v[i][0] / frame, info_v[i][1], info_v[i][1] / frame,
+            # info_v[i][2], info_v[i][3], info_v[i][4]))
+        # print('+--------------------------------------------------------------------------------------------+')
+
+    # calculate steady state
+
+        
+    # for i in range(len(info_rho[:, 0])):
+    #     for j in range(len(info_v[:, 0])):
+    #         mix_start = max(info_rho[i, 0], info_v[j, 0])
+    #         mix_end = min(info_rho[i, 1], info_v[j, 1])
+    #         if mix_start < mix_end:
+    #             ss_data_ratio = (mix_end - mix_start) / len(data[:, 0]) * 100
+    #             ss.write('%.0f %.0f %.2f \n' % (mix_start, mix_end, ss_data_ratio))
+    # ss.close()
+    # info = loadtxt('%s/SteadyState_%s.txt' % (filepath, filename))
+    # if info.shape == (3,):
+        # temp = [info]
+        # info = array(temp)
+
+    # print('final steady state is  from %d (%.1f s) to %d (%.1f s)  [ratio=%.2f]' %
+          # (info[0][0], info[0][0] / frame, info[0][1], info[0][1] / frame, info[0][2]))
+    # print('+--------------------------------------------------------------------------------------------+')
+
