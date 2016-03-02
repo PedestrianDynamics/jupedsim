@@ -61,6 +61,7 @@
 
 
 #include "Router.h"
+#include "../general/Macros.h"
 #include "../geometry/Building.h"
 #include "../routing/LocalFloorfieldViaFM.h"
 
@@ -110,6 +111,7 @@ public:
       *
       */
      FFRouter();
+     FFRouter(int id, RoutingStrategy s);
      FFRouter(const Building* const);
 
      /**

@@ -55,6 +55,7 @@
 #include "../routing/DummyRouter.h"
 #include "../routing/SafestPathRouter.h"
 #include "../routing/CognitiveMapRouter.h"
+#include "../routing/ffRouter.h"
 #include "../math/GompertzModel.h"
 #include "../math/GCFMModel.h"
 #include "../math/GradientModel.h"
@@ -1135,6 +1136,12 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
                ///Parsing additional options
                if (!ParseCogMapOpts(e))
                     return false;
+          }
+          else if (strategy == "ff_global_shortest") {
+               pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
+               Router *r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST);
+               _routingengine->AddRouter(r);
+               Log->Write("\nINFO: \tUsing FF Global Shortest Router");
           }
           else {
                Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",

@@ -56,11 +56,15 @@ FFRouter::FFRouter()
 
 }
 
+FFRouter::FFRouter(int id, RoutingStrategy s):Router(id,s) {
+     _building = nullptr;
+}
+
 FFRouter::FFRouter(const Building* const building)
 {
      //FFRouter();
      Init(building);
-     FloydWarshall();
+     //FloydWarshall();
 }
 
 FFRouter::~FFRouter()
@@ -133,6 +137,8 @@ bool FFRouter::Init(const Building* const building)
                }
           }
      }
+     FloydWarshall();
+     Log->Write("INFO: \tFF Router Init done.");
      return true;
 }
 
