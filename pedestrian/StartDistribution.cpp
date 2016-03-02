@@ -372,6 +372,7 @@ double StartDistribution::GetRiskTolerance()
         if(_distribution_type=="beta") {
              return quantile(_risk_beta_dist, rand_norm);
         }
+        Log->Write("Warning:\tDistribution Type invalid or not set. Fallback to uniform distribution");
         return (double) rand_norm; // todo: ar.graf: check if this quick fix executes and why
     }
 }
