@@ -454,9 +454,9 @@ public:
 
      void SetWalkingSpeed(WalkingSpeed* walkingSpeed);
 
-     void WalkingUpstairs(double c, SubRoom* sub, double ped_elevation, double &result) const;
-     void WalkingDownstairs(double &result, double c, SubRoom* sub, double ped_elevation) const;
-     void WalkingInSmoke(double &result) const;
+     void WalkingUpstairs(double c, SubRoom* sub, double ped_elevation, double &walking_speed) const;
+     void WalkingDownstairs(double &walking_speed, double c, SubRoom* sub, double ped_elevation) const;
+     void WalkingInSmoke(double &walking_speed) const;
 
 };
 

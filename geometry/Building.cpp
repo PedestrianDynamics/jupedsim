@@ -62,7 +62,7 @@ Building::Building()
      _routingEngine = nullptr;
      _linkedCellGrid = nullptr;
      _savePathway = false;
-     _WalkingSpeed = new WalkingSpeed(this, "/Users/Benjamin/Desktop/FZJ/JPSfire/walking_speed/FDS/OPTICAL DENSITY/" ,60.0 ,120.0);
+     //_WalkingSpeed = new WalkingSpeed(this, "/Users/Benjamin/Desktop/FZJ/JPSfire/walking_speed/FDS/OPTICAL DENSITY/" ,60.0 ,120.0);
 }
 
 #ifdef _SIMULATOR
@@ -72,8 +72,7 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
      _caption = "no_caption";
      _savePathway = false;
      _linkedCellGrid = nullptr;
-     _WalkingSpeed = new WalkingSpeed(this, rootDir+'/'+distributor.fds_data ,distributor.update_time , distributor.final_time);
-
+     _WalkingSpeed = new WalkingSpeed(this);
      //todo: what happens if any of these  methods failed (return false)? throw exception ?
      if(!LoadGeometry())
      {
@@ -1200,6 +1199,7 @@ bool Building::LoadRoutingInfo(const string &filename)
      Log->Write("INFO:\tdone with loading extra routing information");
      return true;
 }
+
 
 bool Building::LoadTrafficInfo()
 {

@@ -219,7 +219,6 @@ public:
 
      bool Triangulate();
 
-
 private:
      void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);
 

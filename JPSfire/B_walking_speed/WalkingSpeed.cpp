@@ -37,11 +37,10 @@
 #include "../../pedestrian/PedDistributor.h"
 #include <set>
 
-//WalkingSpeed::WalkingSpeed(const Building *b, const std::string &filepath, const double &updateintervall, const double &finalTime)
-WalkingSpeed::WalkingSpeed(const Building * b, const std::string &fds_path, const double &update_time, const double &final_time)
+WalkingSpeed::WalkingSpeed(const Building * b)
 {
 
-    _FMStorage = std::make_shared<FDSMeshStorage>(b,fds_path,update_time,final_time);
+    _FMStorage = std::make_shared<FDSMeshStorage>(b);
     Log->Write("INFO:\tInitialized FDSMeshStorage");
 
 }
@@ -56,12 +55,10 @@ std::string WalkingSpeed::GetName() const
 }
 
 
-double WalkingSpeed::GetOD(const Pedestrian * pedestrian, const Building * b, const std::string &fds_path, const double &update_time, const double &final_time)
+double WalkingSpeed::GetExtinction(const Pedestrian * pedestrian)
 {
-    double OpticalDensity = _FMStorage->get_FDSMesh(pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos().GetX(), pedestrian->GetPos().GetY());
-
-    //std::cout << OpticalDensity << std::endl;
-    return OpticalDensity;
+    double ExtinctionCoefficient = _FMStorage->get_FDSMesh(pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y);
+    return ExtinctionCoefficient;
 }
 
 void WalkingSpeed::set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage)
@@ -73,5 +70,6 @@ const std::shared_ptr<FDSMeshStorage> WalkingSpeed::get_FMStorage()
 {
     return _FMStorage;
 }
+
 
 

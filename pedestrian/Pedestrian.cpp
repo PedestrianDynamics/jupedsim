@@ -34,6 +34,7 @@
 #include "../IO/OutputHandler.h"
 #include "Knowledge.h"
 #include "Pedestrian.h"
+#include "PedDistributor.h"
 
 #include "../JPSfire/B_walking_speed/FDSMesh.h"
 #include "../JPSfire/B_walking_speed/FDSMeshStorage.h"
@@ -427,35 +428,7 @@ const Point& Pedestrian::GetV0() const
 }
 
 
-void Pedestrian::WalkingInSmoke(double &result) const
-{
-    double ExtinctionCoefficient = _WalkingSpeed->GetOD(this, _building, "/Users/Benjamin/Desktop/FZJ/JPSfire/walking_speed/FDS/OPTICAL DENSITY/", 60.0 ,120.0 );
 
-    //std::cout << OpticalDensity << std::endl;
-    double OpticalDensity = ExtinctionCoefficient/2.3;
-
-
-
-    if(OpticalDensity < 0.1)
-    {
-        result = result;
-    }
-    else if(OpticalDensity > 3.0)
-    {
-       result = 0.2;
-    }
-    else
-    {
-        //result = -0.14*ExtinctionCoefficient+1.19; //According to Fridolf2013
-        result = -0.00730625*pow(ExtinctionCoefficient,3)+0.09005492*pow(ExtinctionCoefficient, 2)-0.39402416*ExtinctionCoefficient+1.07845097; //According to Frantzich+Nilsson2003
-        //Check if v0 < v_reduced
-        if(result>_ellipse.GetV0())
-        {
-            result = _ellipse.GetV0();
-        }
-    }
-   fprintf(stderr, "%f \t %f\n", ExtinctionCoefficient, result);
-}
 
 double Pedestrian::GetV0Norm() const
 {
@@ -466,6 +439,7 @@ double Pedestrian::GetV0Norm() const
      const Point& target = _navLine->GetCentre();
      double nav_elevation = sub->GetElevation(target);
      double delta = nav_elevation - ped_elevation;
+     double walking_speed = 0;
 //---------------------------------------------------
      //-----------------------------------------
 
@@ -483,7 +457,7 @@ double Pedestrian::GetV0Norm() const
      //TODO: move _ellipse.GetV0() to _V0Plane
      if(fabs(delta)<J_EPS){
            // fprintf(stderr, "%f  %f  %f  %f\n", pos._x, pos._y, ped_elevation, _ellipse.GetV0());
-          return _ellipse.GetV0();
+          walking_speed =_ellipse.GetV0();
      }
       // we are walking downstairs
      else{
@@ -511,7 +485,9 @@ double Pedestrian::GetV0Norm() const
                  // fprintf(stderr, "%f  %f  %f  %f\n", pos._x, pos._y, ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_down);
                  // fprintf(stderr, "%f  %f   %f  %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_down, GetV().Norm(), ped_elevation);
                  //                  // getc(stdin);
-                 return (1-f*g)*_ellipse.GetV0() + f*g*speed_down;
+
+                 walking_speed =(1-f*g)*_ellipse.GetV0() + f*g*speed_down;
+
            }
            //we are walking upstairs
            else
@@ -536,13 +512,60 @@ double Pedestrian::GetV0Norm() const
                  // fprintf(stderr, "%f  %f   %f  %f %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_up, GetV().Norm(), ped_elevation,  stairInclination*180./3.14159265);
                  // }
                  // getc(stdin);
-                 return (1-f*g)*_ellipse.GetV0() + f*g*speed_up;
+
+                 walking_speed = (1-f*g)*_ellipse.GetV0() + f*g*speed_up;
            }
      }
+
+     //TODO: IF statement that prevents execution of WalkingInSmoke depending on INI file
+     WalkingInSmoke(walking_speed);
+     return walking_speed;
      // orthogonal projection on the stair
      //return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
-
 }
+
+
+void Pedestrian::WalkingInSmoke(double &walking_speed) const
+{
+
+    double ExtinctionCoefficient = _WalkingSpeed->GetExtinction(this);
+    string study = "Frantzich+Nilsson2003";
+    // TO DO: Get study from FDSMeshStorage
+    // string study = FDSMeshStorage->GetStudy();
+
+
+    if (ExtinctionCoefficient!=ExtinctionCoefficient){    //NaN check
+        return;
+    }
+
+    if(ExtinctionCoefficient < 0.23)    //no obstruction by smoke
+    {
+        return;
+    }
+    else if(ExtinctionCoefficient > 6.9)
+    {
+       walking_speed = 0.2;
+    }
+    else
+    {
+            if (study=="Frantzich+Nilsson2003"){
+                walking_speed = -0.00730625*pow(ExtinctionCoefficient,3)+0.09005492*pow(ExtinctionCoefficient, 2)-0.39402416*ExtinctionCoefficient+1.07845097; //According to Frantzich+Nilsson2003
+            }
+            else if (study=="Fridolf2013"){
+                walking_speed = -0.14*ExtinctionCoefficient+1.19; //According to Fridolf2013
+            }
+
+        //Check if v0 < v_reduced
+        if(walking_speed>_ellipse.GetV0())
+        {
+            walking_speed = _ellipse.GetV0();
+        }
+    }
+   fprintf(stderr, "%s \t%f \t%f\n", study.c_str(), ExtinctionCoefficient, walking_speed);
+}
+
+
+
 // get axis in the walking direction
 double Pedestrian::GetLargerAxis() const
 {

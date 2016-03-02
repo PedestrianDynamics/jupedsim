@@ -112,12 +112,6 @@ bool PedDistributor::InitDistributor(const string& fileName, const std::map<int,
           double risk_tolerance_mean= xmltof(e->Attribute("risk_tolerance_mean"), 0);
           double risk_tolerance_sigma= xmltof(e->Attribute("risk_tolerance_sigma"), 0);
 
-          this->fds_data = xmltoa(e->Attribute("fds_data"), "");
-          this->update_time = xmltoi(e->Attribute("update_time"), 0);
-          this->final_time = xmltoi(e->Attribute("final_time"), 0);
-          Log->Write("INFO: \tFDS import from: %s, update time: %.1f s, final time: %.1f s",fds_data.c_str(), update_time, final_time);
-
-
           double x_min=xmltof(e->Attribute("x_min"), -FLT_MAX);
           double x_max=xmltof(e->Attribute("x_max"), FLT_MAX);
           double y_min=xmltof(e->Attribute("y_min"), -FLT_MAX);

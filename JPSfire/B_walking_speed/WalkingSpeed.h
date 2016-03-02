@@ -41,13 +41,14 @@ class WalkingSpeed
 {
 
 public:
-    WalkingSpeed(const Building * b, const std::string &fds_path, const double &update_time, const double &final_time);
+
+    WalkingSpeed(const Building * b);
 
     virtual ~WalkingSpeed();
 
     std::string GetName() const;
     //void execute(const Pedestrian *) const;
-    double GetOD(const Pedestrian *, const Building * b, const std::string &fds_path, const double &update_time, const double &final_time);
+    double GetExtinction(const Pedestrian *);
 
     void set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage);
     const std::shared_ptr<FDSMeshStorage> get_FMStorage();

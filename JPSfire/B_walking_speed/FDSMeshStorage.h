@@ -46,23 +46,23 @@ class FDSMeshStorage
 {
 public:
     FDSMeshStorage();
-    FDSMeshStorage(const Building * const b, const std::string &fds_path, const double &update_time, const double &final_time);
+    FDSMeshStorage(const Building * const b);
     ~FDSMeshStorage();
-    void CreateTimeList(const double &update_time, const double &final_time, const double &startTime=0);
-    //void IdentifyDoors();
+    void CreateTimeList();
     void CreateFDSMeshes();
     const FDSMesh& get_FDSMesh(const double &simTime) const;
+    bool LoadJPSfireInfo();
+    std::string GetStudy();
 
 private:
     const Building *_building;
     FDSMeshContainer _fMContainer;
     std::string _filepath;
+    std::string _study;
     double _updateIntervall;
     double _finalTime;
     std::vector<double> _timelist;
     std::vector<Crossing> _doors;
-
-
 };
 
 #endif // FDSMeshSTORAGE_H
