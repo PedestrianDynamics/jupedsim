@@ -30,7 +30,10 @@
 #include "../../IO/OutputHandler.h"
 #include "../../pedestrian/PedDistributor.h"
 #include "../../geometry/Building.h"
-
+#include <unistd.h>
+#include <stdio.h>
+#include <glob.h>
+#include <string>
 
 FDSMeshStorage::FDSMeshStorage()
 {
@@ -66,9 +69,28 @@ void FDSMeshStorage::CreateTimeList()
 
 void FDSMeshStorage::CreateElevationList()
 {
-    // TODO Import list with elevations of JPSfire meshes with sth like glob.glob
-    _elevationlist.push_back(1.8);
-    _elevationlist.push_back(4.8);
+    glob_t paths;
+    int retval;
+
+    paths.gl_pathc = 0;
+    paths.gl_pathv = NULL;
+    paths.gl_offs = 0;
+
+    // TODO substitute with _filepath -- no matching function error up to now...
+    retval = glob( ("FDS/2_extinction_grids/EXTINCTION_COEFFICIENT/Z_*") , GLOB_NOCHECK | GLOB_NOSORT,
+                   NULL, &paths );
+    if( retval == 0 ) {
+        int idx;
+
+        for( idx = 0; idx < paths.gl_pathc; idx++ ) {
+            std::string glob_str = (paths.gl_pathv[idx]);
+            double elev_dir = std::stod( glob_str.substr( glob_str.rfind("_") + 1 ));
+            _elevationlist.push_back(elev_dir);
+        }
+        globfree( &paths );
+    } else {
+        puts( "glob() failed" );
+    }
     //for(auto elem : _elevationlist)
         //std::cout << elem << std::endl;
 }
@@ -79,11 +101,11 @@ void FDSMeshStorage::CreateFDSMeshes()
     _fMContainer.clear();
         for (auto &i:_elevationlist)
         {
-            std::cout << "i " << i << std::endl;
+            //std::cout << "i " << i << std::endl;
             for (auto &j:_timelist)
             {
                 std::string suffix = "Z_" + std::to_string(i) + "/t_"+std::to_string(j) + ".csv";
-                std::cout << "j " << j << std::endl;
+                //std::cout << "j " << j << std::endl;
                 std::string str = "Z_" + std::to_string(i) + "/t_"+std::to_string(j);
                 //std::cout << _filepath+suffix << std::endl;
                 FDSMesh mesh(_filepath+suffix);
