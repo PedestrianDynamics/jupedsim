@@ -60,12 +60,7 @@ FFRouter::FFRouter(int id, RoutingStrategy s):Router(id,s) {
      _building = nullptr;
 }
 
-FFRouter::FFRouter(const Building* const building)
-{
-     //FFRouter();
-     Init(building);
-     //FloydWarshall();
-}
+//FFRouter::FFRouter(const Building* const building)
 
 FFRouter::~FFRouter()
 {
@@ -74,7 +69,7 @@ FFRouter::~FFRouter()
 
 }
 
-bool FFRouter::Init(const Building* const building)
+bool FFRouter::Init(Building* building)
 {
      _building = building;
      //get global field to manage goals (which are not in a subroom)
@@ -87,17 +82,19 @@ bool FFRouter::Init(const Building* const building)
      goalToLineUIDmap3 = _globalFF->getGoalToLineUIDmap3();
      //get all door UIDs
      _allDoorUIDs.clear();
-     auto allTrans = building->GetAllTransitions();
+     _TransByUID.clear();
+     auto& allTrans = building->GetAllTransitions();
      for(auto& pair : allTrans) {
-          _allDoorUIDs.emplace_back(pair.first);
+          _allDoorUIDs.emplace_back(pair.second->GetUniqueID());
+          _TransByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
           for(auto& pair2 : allTrans){
-               std::pair<int, int> key   = std::make_pair(pair.first, pair2.first);
-               double              value = (pair.first == pair2.first)? 0.0 : DBL_MAX;
+               std::pair<int, int> key   = std::make_pair(pair.second->GetUniqueID(), pair2.second->GetUniqueID());
+               double              value = (pair.second->GetUniqueID() == pair2.second->GetUniqueID())? 0.0 : DBL_MAX;
                //distMatrix[i][j] = 0,   if i==j
                //distMatrix[i][j] = max, else
                _distMatrix.insert(std::make_pair( key , value));
                //pathsMatrix[i][j] = i
-               _pathsMatrix.insert(std::make_pair( key , pair.first ));
+               _pathsMatrix.insert(std::make_pair( key , pair.second->GetUniqueID() ));
           }
      }
 
@@ -107,29 +104,29 @@ bool FFRouter::Init(const Building* const building)
      double tempDistance = 0.;
      //type of allRooms: const std::map<int, std::unique_ptr<Room> >&
      const std::map<int, std::unique_ptr<Room> >& allRooms = _building->GetAllRooms();
-     for(auto& pair : allRooms) {
+     for(auto& pairRoom : allRooms) {
 #ifdef DEBUG
           std::cerr << "Creating Floorfield for Room: " << pair.first << std::endl;
 #endif
-          ptrToNew = new LocalFloorfieldViaFM(pair.second.get(), building, 0.125, 0.125, 0.0, false, "nofile");
-          _locffviafm.insert( std::make_pair( pair.first, ptrToNew ) );
+          ptrToNew = new LocalFloorfieldViaFM(pairRoom.second.get(), building, 0.125, 0.125, 0.0, false, "nofile");
+          _locffviafm.insert( std::make_pair( pairRoom.first, ptrToNew ) );
 
           //SetDistances
-          const vector<int>& doorUIDs = pair.second->GetAllTransitionsIDs();
+          const vector<int>& doorUIDs = pairRoom.second->GetAllTransitionsIDs();
           //loop over upper triangular matrice (i,j) and write to (j,i) as well
           std::vector<int>::const_iterator outerPtr;
           std::vector<int>::const_iterator innerPtr;
           for (outerPtr = doorUIDs.begin(); outerPtr != doorUIDs.end(); ++outerPtr) {
                //if the door is closed, then dont calc distances
-               if (!building->GetAllTransitions().at(*outerPtr)->IsOpen()) {
+               if (!_TransByUID.at(*outerPtr)->IsOpen()) {
                     continue;
                }
                for (innerPtr = outerPtr; innerPtr != doorUIDs.end(); ++innerPtr) {
                     //if outerdoor == innerdoor or the inner door is closed
-                    if (  (*outerPtr == *innerPtr) || (!building->GetAllTransitions().at(*innerPtr)->IsOpen())  ) {
+                    if (  (*outerPtr == *innerPtr) || (!_TransByUID.at(*innerPtr)->IsOpen())  ) {
                          continue;
                     }
-                    tempDistance = _locffviafm[pair.first]->getCostToDestination(*outerPtr, building->GetAllTransitions().at(*innerPtr)->GetCentre());
+                    tempDistance = _locffviafm[pairRoom.first]->getCostToDestination(*outerPtr, _TransByUID.at(*innerPtr)->GetCentre());
                     std::pair<int, int> key_ij = std::make_pair(*outerPtr, *innerPtr);
                     std::pair<int, int> key_ji = std::make_pair(*innerPtr, *outerPtr);
                     _distMatrix[key_ij] = tempDistance;
@@ -144,14 +141,46 @@ bool FFRouter::Init(const Building* const building)
 
 int FFRouter::FindExit(Pedestrian* p)
 {
-     //this function sets
-//     int nav_id= navLine->GetUniqueID();
-//     ped->SetExitIndex(nav_id);
-//     ped->SetExitLine(navLine);
-//     return nav_id;
-     int goalID = p->GetFinalDestination();
+     double minDist = FLT_MAX;
+     int bestDoor = -1;
 
-     return 0;
+     int goalID = p->GetFinalDestination();
+     std::vector<int> validFinalDoor;
+     validFinalDoor.clear();
+     if (goalID == -1) {
+          for (auto& pairGoal : goalToLineUIDmap) {
+               //we add the closest Doors of every goal, goalToLineUIDmap gets
+               //populated in Init()
+               validFinalDoor.emplace_back(pairGoal.second);
+               //todo: ar.graf: if goal == -1, maybe also add goalToLineUIDmap2 and 3
+          }
+     } else {  //only one specific goal
+          if (goalToLineUIDmap.count(goalID) == 0) {
+               Log->Write("ERROR: \t ffRouter: unknown goalID: %d in FindExit(Ped)",goalID);
+          }
+          validFinalDoor.emplace_back(goalToLineUIDmap.at(goalID));
+     }
+
+     //candidates of current room (ID) (provided by Room)
+     std::vector<int> DoorUIDsOfRoom;
+     DoorUIDsOfRoom = _building->GetRoom(p->GetRoomID())->GetAllTransitionsIDs();
+     //auto& allTransMap = _building->GetAllTransitions();
+
+     for(int finalDoor : validFinalDoor) {
+          //translating Door IDs to UIDs and store in candidates
+          //with UIDs, we can ask for shortest path
+          for (int doorUID : DoorUIDsOfRoom) {
+               std::pair<int, int> key = std::make_pair(doorUID, finalDoor);
+               if ((_distMatrix.count(key)!=0)
+                     && (_distMatrix.at(key)<minDist)) {
+                    minDist = _distMatrix.at(key);
+                    bestDoor = key.first;
+               }
+          }
+     }
+     p->SetExitIndex(bestDoor);
+     p->SetExitLine(_TransByUID.at(bestDoor));
+     return bestDoor; //-1 if no way was found, doorUID of best, if path found
 }
 
 void FFRouter::Reset()

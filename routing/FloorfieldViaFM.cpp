@@ -371,7 +371,7 @@ void FloorfieldViaFM::getDirectionToGoalID(const int goalID)
 
                     UID_of_MIN = loctrans.second->GetUniqueID();
                     cost_of_MIN = localcostptr[dummykey];
-                    std::cerr << "Closer Line found: " << UID_of_MIN << std::endl;
+                    std::cerr << std::endl << "Closer Line found: " << UID_of_MIN ;
                     continue;
                 }
                 if (cost_of_MIN2 > localcostptr[dummykey]) {
