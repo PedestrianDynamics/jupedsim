@@ -90,7 +90,7 @@ std::string WalkingSpeed::GetName() const
 
 double WalkingSpeed::GetExtinction(const Pedestrian * pedestrian)
 {
-    double ExtinctionCoefficient = _FMStorage->get_FDSMesh(pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y);
+    double ExtinctionCoefficient = _FMStorage->get_FDSMesh(pedestrian->GetGlobalTime(), pedestrian->GetElevation()).GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y);
     return ExtinctionCoefficient;
 }
 

@@ -39,9 +39,11 @@ FDSMeshStorage::FDSMeshStorage()
 
 FDSMeshStorage::FDSMeshStorage(string filepath, double finalTime, double updateIntervall, string study) :
     _filepath(filepath), _finalTime(finalTime),
-    _updateIntervall(updateIntervall), _study(study)
+    _updateIntervall(updateIntervall), _study(study),
+    _elevationlist(), _timelist()
 {
     CreateTimeList();
+    CreateElevationList();
     CreateFDSMeshes();
 }
 
@@ -62,37 +64,69 @@ void FDSMeshStorage::CreateTimeList()
 }
 
 
+void FDSMeshStorage::CreateElevationList()
+{
+    // TODO Import list with elevations of JPSfire meshes with sth like glob.glob
+    _elevationlist.push_back(1.8);
+    _elevationlist.push_back(4.8);
+    //for(auto elem : _elevationlist)
+        //std::cout << elem << std::endl;
+}
+
+
 void FDSMeshStorage::CreateFDSMeshes()
 {
     _fMContainer.clear();
-        for (auto &i:_timelist)
+        for (auto &i:_elevationlist)
         {
-            std::string suffix = "t_"+std::to_string(i)+".csv";
-            //std::cout << i << std::endl;
-            std::string str = "t_"+std::to_string(i);
-            //std::cout << str << std::endl;
-
-            //std::cout << _filepath+suffix << std::endl;
-            FDSMesh mesh(_filepath+suffix);
-
-            //std::string str = "t_"+std::to_string(i);
-            _fMContainer.insert(std::make_pair(str, mesh));
-
+            std::cout << "i " << i << std::endl;
+            for (auto &j:_timelist)
+            {
+                std::string suffix = "Z_" + std::to_string(i) + "/t_"+std::to_string(j) + ".csv";
+                std::cout << "j " << j << std::endl;
+                std::string str = "Z_" + std::to_string(i) + "/t_"+std::to_string(j);
+                //std::cout << _filepath+suffix << std::endl;
+                FDSMesh mesh(_filepath+suffix);
+                //std::string str = "t_"+std::to_string(i);
+                _fMContainer.insert(std::make_pair(str, mesh));
+            }
         }
 }
 
-const FDSMesh &FDSMeshStorage::get_FDSMesh(const double &simTime) const
+const FDSMesh &FDSMeshStorage::get_FDSMesh(const double &simTime, const double &pedElev)
 {
     //std::cout << "PASSED" << std::endl;
     int simT=simTime/_updateIntervall;
     simT*=_updateIntervall;
+    double _PedEyeHeight = pedElev + 1.8;
+
+    GetNearestHeight(_PedEyeHeight);
 
     if (simT>=_finalTime)
         simT=_finalTime;
 
-    std::string str = "t_"+std::to_string(simT)+".000000";
+    std::string str = "Z_" +  std::to_string(_NearestHeight) + "/t_"+std::to_string(simT)+".000000";
 
+    //std::cout << str << std::endl;
     return _fMContainer.at(str);
+}
+
+double FDSMeshStorage::GetNearestHeight(double _PedEyeHeight)
+{
+    //find the nearest height in the JPSfire data related to the ped elevation
+    double min_val = std::numeric_limits<double>::max();
+    int index = 0;
+
+    for(int i=0;i < _elevationlist.size() ;++i) {
+        double diff = std::abs(_elevationlist[i] - _PedEyeHeight);
+        if(diff < min_val) {
+            min_val = diff;
+            index = i;
+        }
+    }
+    _NearestHeight = _elevationlist[index];
+    std::cout << "NEAREST" << std::endl << _NearestHeight << std::endl;
+    return _NearestHeight;
 }
 
 std::string FDSMeshStorage::GetStudy() const

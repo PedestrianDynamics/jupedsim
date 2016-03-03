@@ -48,8 +48,9 @@ public:
     FDSMeshStorage(std::string filepath, double finalTime, double updateIntervall, std::string study);
     ~FDSMeshStorage();
     void CreateTimeList();
+    void CreateElevationList();
     void CreateFDSMeshes();
-    const FDSMesh& get_FDSMesh(const double &simTime) const;
+    const FDSMesh& get_FDSMesh(const double &simTime, const double &pedElev);
     std::string GetStudy() const;
 
 private:
@@ -59,7 +60,10 @@ private:
     double _updateIntervall;
     double _finalTime;
     std::vector<double> _timelist;
-    std::vector<Crossing> _doors;
+    std::vector<double> _elevationlist;
+    double _PedEyeHeight;
+    double _NearestHeight;
+    double GetNearestHeight(double);
 };
 
 #endif // FDSMeshSTORAGE_H
