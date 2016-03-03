@@ -25,7 +25,29 @@ im = 3.2
 d = 2 * im / KK
 xi = arange(-im, im + 0.0001, d)
 
+def get_overlap(a, b):
+    return max(0, min(a[1], b[1]) - max(a[0], b[0]))
 
+def get_start_end(starts, ends):
+    starts0 = starts
+    ends0 = ends
+    for (s, e) in zip(starts, ends):
+        a = [s, e]
+        n_overlap = 0
+        for (s0, e0) in zip(starts0, ends0):
+            b = [s0, e0]
+            if a != b:
+                n_overlap += get_overlap(a, b)
+                
+        if n_overlap == 0: # this interval is an 'island'
+            starts0.remove(s)
+            ends0.remove(e)
+
+    try:
+        return max(starts0), min(ends0)
+    except ValueError:
+        return 0, 0
+    
 def F(x):
     """
     :param x:
@@ -264,11 +286,12 @@ def plot_series(statistics, theta, column):
     plt.xlim(0, limit)
     plt.ylim(-10, 120)
     plt.legend(numpoints=2, ncol=1, loc=1, fontsize=20)
+    print('--> %s/cusum_%d_%s.png' % (filepath, column, filename))
     plt.savefig('%s/cusum_%d_%s.png' % (filepath, column, filename))
     plt.close()
 
 
-def plot_steady_state(statistics, data, ref_start, ref_end, info, column):
+def plot_steady_state(statistics, data, ref_start, ref_end, info, start, end, column):
     fig = plt.figure(figsize=(11, 10), dpi=100)
     ax = fig.add_subplot(111)
     if xlabel == "frame":
@@ -288,11 +311,11 @@ def plot_steady_state(statistics, data, ref_start, ref_end, info, column):
                                       closed=True, fill=False,
                                       color='r', hatch='/', label='steady (%d)'%column))
 
-    for i in range(len(info[:, 0])):
-        ax.add_patch(mpatches.Polygon([[info[i, 0] / fps, 0],
-                                       [info[i, 1] / fps, 0],
-                                       [info[i, 1] / fps, 50],
-                                       [info[i, 0] / fps, 50]],
+    if start != end:
+        ax.add_patch(mpatches.Polygon([[start / fps, 0],
+                                       [end / fps, 0],
+                                       [end / fps, 50],
+                                       [start / fps, 50]],
                                       closed=True, fill=True,
                                       color='y', alpha=0.2, label='steady (final)'))
 
@@ -303,6 +326,7 @@ def plot_steady_state(statistics, data, ref_start, ref_end, info, column):
     plt.xlim(0, limit)
     plt.ylim(0, int(max(data[:, 1])) + 2)
     plt.legend(numpoints=1, ncol=1, loc=1, fontsize=20)
+    print('--> %s/SteadyState_%d_%s.png' % (filepath, column, filename))
     plt.savefig('%s/SteadyState_%d_%s.png' % (filepath, column, filename))
     plt.close()
 
@@ -341,8 +365,8 @@ if __name__ == '__main__':
             ref_end.append(2./3*(end_frame-start_frame))
 
         print("Automatic mode:")
-        print("ref_start: %s"%", ".join(map(str, ref_start)))
-        print("ref_end: %s"%", ".join(map(str, ref_end)))
+        print("\t ref_start: %s"%", ".join(map(str, ref_start)))
+        print("\t ref_end  : %s"%", ".join(map(str, ref_end)))
 
     minframe = data[0, 0]
     data[:, 0] = data[:, 0] - minframe
@@ -352,7 +376,7 @@ if __name__ == '__main__':
     filepath = os.path.dirname(input_file)
     filepath = os.path.join(filepath, "results_%s"%filename)
     if not os.path.exists(filepath):
-        os.mkdir(filepath)
+        os.makedirs(filepath)
 
     print('file path = %s' % filepath)
     print('file name = %s' % filename)
@@ -360,6 +384,8 @@ if __name__ == '__main__':
     ia, ib, dnorm = init_parameters()
     starts = []  # collect start of steady state for all series
     ends = [] # collect end of steady state for all series
+    infos = []
+    all_statistics = []
     for i in range(len(columns)-1):
         ref_acf, ref_mean, ref_std = set_ref_series(data, i+1, ref_start[i], ref_end[i])
         # calculate theta rho
@@ -369,6 +395,8 @@ if __name__ == '__main__':
         calculate_statistics(data, i+1, ref_mean, ref_std)
         # choose steady state
         info, statistics = choose_steady_state(i+1, theta)
+        infos.append(info)
+        all_statistics.append(statistics)
         print('+------------------------------------------------------------------------------+')
         for j in range(info.shape[0]):
             print('steady state of series %d (%d): from %d (%.1f s) to %d (%.1f s) [ratio=%.2f, mean=%.2f, std=%.2f]' % (
@@ -380,11 +408,8 @@ if __name__ == '__main__':
             starts.append(info[j][0])
 
         if plotfigs == 'yes':
-            print('Plotting figures...')
             # plot cusum
             plot_series(statistics, theta, i+1)
-            # plot steady
-            plot_steady_state(statistics, data, ref_start[i], ref_end[i], info, i+1)
 
         print('+------------------------------------------------------------------------------+')
         os.remove('%s/cusum_%d_%s.txt' % (filepath, i+1, filename))
@@ -394,17 +419,33 @@ if __name__ == '__main__':
     ss.write('# start end ratio \n')
     print ("start frames: %s" % ", ".join(map(str, starts)))
     print ("end frames: %s" % ", ".join(map(str, ends)))
-    mix_start = max(starts)
-    mix_end = min(ends)
+    mix_start, mix_end = get_start_end(starts, ends)
     if mix_start < mix_end:
         ss_data_ratio = (mix_end - mix_start) / len(data[:, 0]) * 100
         ss.write('%.0f %.0f %.2f \n' % (mix_start, mix_end, ss_data_ratio))
         print('final steady state is  from %d (%.1f s) to %d (%.1f s)  [ratio=%.2f]' %
               (mix_start, mix_start / frame, mix_end, mix_end / frame, ss_data_ratio))
         print('Steady state detected successfully!')
+        print('+------------------------------------------------------------------------------+')
     else:
         print('Steady state detected with problems: ')
         print('mix_start: %f'%mix_start)
         print('mix_end: %f'%mix_end)
+        print('+------------------------------------------------------------------------------+')
+
+    if plotfigs == 'yes':
+        # plot steady
+        info = [mix_start, mix_end]
+        for i in range(len(columns)-1):
+            plot_steady_state(
+                all_statistics[i],
+                data,
+                ref_start[i],
+                ref_end[i],
+                infos[i],
+                mix_start,
+                mix_end,
+                i+1
+            )
 
     ss.close()
