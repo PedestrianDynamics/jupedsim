@@ -48,12 +48,16 @@ public:
 
     std::string GetName() const;
     //void execute(const Pedestrian *) const;
+
+    double WalkingInSmoke(const Pedestrian*, double &);
     double GetExtinction(const Pedestrian *);
 
     void set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage);
     const std::shared_ptr<FDSMeshStorage> get_FMStorage();
 
 
+    bool LoadJPSfireInfo(const std::string &projectFilename);
+    bool ReduceWalkingSpeed();
 private:
 
     std::shared_ptr<FDSMeshStorage> _FMStorage;

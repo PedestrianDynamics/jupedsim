@@ -28,6 +28,10 @@ public:
 
     bool statusMesh() const;
 
+    int GetColumn(const double &x, int &col, double restx) const;
+    int GetRow(int &row, double resty, const double &y) const;
+    void ReadMatrix(std::string line, std::vector<std::string> &strVec, std::ifstream &pFile);
+
 private:
     Matrix _matrix;
     double _cellsize;
@@ -36,7 +40,6 @@ private:
     double _ymin;
     double _ymax;
     bool _statMesh;
-
 };
 
 #endif // FDSIMPORT_H

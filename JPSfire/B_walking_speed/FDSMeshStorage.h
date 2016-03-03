@@ -35,7 +35,6 @@
 #include "FDSMesh.h"
 
 
-class Building;
 class Point;
 class Crossing;
 
@@ -46,16 +45,14 @@ class FDSMeshStorage
 {
 public:
     FDSMeshStorage();
-    FDSMeshStorage(const Building * const b);
+    FDSMeshStorage(std::string filepath, double finalTime, double updateIntervall, std::string study);
     ~FDSMeshStorage();
     void CreateTimeList();
     void CreateFDSMeshes();
     const FDSMesh& get_FDSMesh(const double &simTime) const;
-    bool LoadJPSfireInfo();
-    std::string GetStudy();
+    std::string GetStudy() const;
 
 private:
-    const Building *_building;
     FDSMeshContainer _fMContainer;
     std::string _filepath;
     std::string _study;

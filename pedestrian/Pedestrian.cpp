@@ -517,53 +517,15 @@ double Pedestrian::GetV0Norm() const
            }
      }
 
-     //TODO: IF statement that prevents execution of WalkingInSmoke depending on INI file
-     WalkingInSmoke(walking_speed);
+
+     //IF statement that prevents execution of WalkingInSmoke depending on JPSfire section in INI file
+     if(_WalkingSpeed->ReduceWalkingSpeed()) {
+         walking_speed = _WalkingSpeed->WalkingInSmoke(this, walking_speed);
+     }
      return walking_speed;
      // orthogonal projection on the stair
      //return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
 }
-
-
-void Pedestrian::WalkingInSmoke(double &walking_speed) const
-{
-
-    double ExtinctionCoefficient = _WalkingSpeed->GetExtinction(this);
-    string study = "Frantzich+Nilsson2003";
-    // TO DO: Get study from FDSMeshStorage
-    // string study = FDSMeshStorage->GetStudy();
-
-
-    if (ExtinctionCoefficient!=ExtinctionCoefficient){    //NaN check
-        return;
-    }
-
-    if(ExtinctionCoefficient < 0.23)    //no obstruction by smoke
-    {
-        return;
-    }
-    else if(ExtinctionCoefficient > 6.9)
-    {
-       walking_speed = 0.2;
-    }
-    else
-    {
-            if (study=="Frantzich+Nilsson2003"){
-                walking_speed = -0.00730625*pow(ExtinctionCoefficient,3)+0.09005492*pow(ExtinctionCoefficient, 2)-0.39402416*ExtinctionCoefficient+1.07845097; //According to Frantzich+Nilsson2003
-            }
-            else if (study=="Fridolf2013"){
-                walking_speed = -0.14*ExtinctionCoefficient+1.19; //According to Fridolf2013
-            }
-
-        //Check if v0 < v_reduced
-        if(walking_speed>_ellipse.GetV0())
-        {
-            walking_speed = _ellipse.GetV0();
-        }
-    }
-   fprintf(stderr, "%s \t%f \t%f\n", study.c_str(), ExtinctionCoefficient, walking_speed);
-}
-
 
 
 // get axis in the walking direction

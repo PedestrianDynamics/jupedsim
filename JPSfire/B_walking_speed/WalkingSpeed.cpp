@@ -35,19 +35,52 @@
 #include "FDSMesh.h"
 #include "FDSMeshStorage.h"
 #include "../../pedestrian/PedDistributor.h"
+#include "../../tinyxml/tinyxml.h"
 #include <set>
 
 WalkingSpeed::WalkingSpeed(const Building * b)
 {
-
-    _FMStorage = std::make_shared<FDSMeshStorage>(b);
+    _FMStorage = nullptr;
+    LoadJPSfireInfo(b->GetProjectFilename());
     Log->Write("INFO:\tInitialized FDSMeshStorage");
-
 }
 
 WalkingSpeed::~WalkingSpeed()
 {
 }
+
+
+
+bool WalkingSpeed::LoadJPSfireInfo(const std::string &projectFilename )
+{
+   TiXmlDocument doc(projectFilename);
+   if (!doc.LoadFile()) {
+        Log->Write("ERROR: \t%s", doc.ErrorDesc());
+        Log->Write("ERROR: \t could not parse the project file");
+        return false;
+   }
+
+   TiXmlNode* JPSfireNode = doc.RootElement()->FirstChild("JPSfire");
+   if( ! JPSfireNode ) {
+        Log->Write("INFO:\tcould not find any JPSfire information");
+        return true;
+   }
+
+   Log->Write("INFO:\tLoading JPSfire info");
+
+   TiXmlElement* JPSfireCompElem = JPSfireNode->FirstChildElement("B_walking_speed");
+   if(JPSfireCompElem) {
+       std::string _study = xmltoa(JPSfireCompElem->Attribute("study"), "Frantzich+Nilsson2003");
+       std::string _filepath = xmltoa(JPSfireCompElem->Attribute("extinction_grids"), "");
+       double _updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
+       double _finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
+       Log->Write("INFO:\tModule B_walking_speed: study: %s \n\tdata: %s \n\tupdate time: %.1f final time: %.1f", _study.c_str(), _filepath.c_str(), _updateIntervall, _finalTime);
+       _FMStorage = std::make_shared<FDSMeshStorage>(_filepath, _finalTime, _updateIntervall, _study);
+       return true;
+   }
+   return false;
+}
+
 
 std::string WalkingSpeed::GetName() const
 {
@@ -72,4 +105,43 @@ const std::shared_ptr<FDSMeshStorage> WalkingSpeed::get_FMStorage()
 }
 
 
+double WalkingSpeed::WalkingInSmoke(const Pedestrian* p, double &walking_speed)
+{
+    double ExtinctionCoefficient = GetExtinction(p);
+    std::string study = _FMStorage->GetStudy();
 
+    if((ExtinctionCoefficient == 0) || (std::isnan(ExtinctionCoefficient)))   //no obstruction by smoke or NaN check
+    {
+        fprintf(stderr, "%f \t%f\n", ExtinctionCoefficient, walking_speed);
+        return p->GetEllipse().GetV0();
+    }
+    else if(ExtinctionCoefficient > 5)
+    {
+       walking_speed = 0.2;
+    }
+    else
+    {
+            if (study=="Frantzich+Nilsson2003"){
+                walking_speed = -0.01192971*pow(ExtinctionCoefficient,3)+ 0.1621356*pow(ExtinctionCoefficient, 2)-0.75296314*ExtinctionCoefficient+1.6439047; //According to Frantzich+Nilsson2003
+            }
+            else if (study=="Fridolf2013"){
+                walking_speed = 1.19 - 0.14*ExtinctionCoefficient; //According to Fridolf2013
+            }
+            else if (study=="Jin1974"){
+                walking_speed = 0.96 - 0.30*ExtinctionCoefficient; //According to Jin1974
+            }
+
+        //Check if v0 < reduced walking_speed
+        if(walking_speed > p->GetEllipse().GetV0())
+        {
+            walking_speed = p->GetEllipse().GetV0();
+        }
+    }
+   fprintf(stderr, "%f \t%f\n", ExtinctionCoefficient, walking_speed);
+   return walking_speed;
+}
+
+bool WalkingSpeed::ReduceWalkingSpeed()
+{
+   return _FMStorage!=nullptr;
+}

@@ -15,27 +15,23 @@ std::vector<std::string> &split2(const std::string &s, char delim, std::vector<s
 
 
 
-FDSMesh::FDSMesh()
+FDSMesh::FDSMesh() : _statMesh(false)
 {
     //statHeaderRead=false;
-    _statMesh=false;
 }
 
-FDSMesh::FDSMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const double &cellsize)
+FDSMesh::FDSMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const double &cellsize) : _statMesh(false)
 {
     SetUpMesh(xmin,ymin,xmax,ymax,cellsize);
     std::cout << "FDSMesh set up!" << std::endl;
     //statHeaderRead=false;
-    _statMesh=false;
 }
 
-FDSMesh::FDSMesh(const std::string &filename)
+FDSMesh::FDSMesh(const std::string &filename) : _statMesh(false)
 {
     //std::cout << filename << std::endl;
     SetKnotValuesFromFile(filename);
     //statHeaderRead=false;
-    _statMesh=false;
-
 }
 
 FDSMesh::~FDSMesh()
@@ -72,9 +68,6 @@ void FDSMesh::SetUpMesh(const double &xmin, const double &ymin, const double &xm
              _matrix[i][j]=k;
         }
     }
-
-
-
 }
 
 const Matrix &FDSMesh::GetMesh() const
@@ -82,15 +75,8 @@ const Matrix &FDSMesh::GetMesh() const
     return _matrix;
 }
 
-double FDSMesh::GetKnotValue(const double &x, const double &y) const
+int FDSMesh::GetColumn(const double &x, int &col, double restx) const
 {
-    double restx;
-    double resty;
-    int col;
-    int row;
-
-    /// Which knot is the nearest one to (x,y)?
-    ///
     if (x>_xmin && x<_xmax)
     {
         restx = fmod((x-_xmin),_cellsize);
@@ -113,7 +99,11 @@ double FDSMesh::GetKnotValue(const double &x, const double &y) const
         restx=0;
         col=0;
     }
+    return col;
+}
 
+int FDSMesh::GetRow(int &row, double resty, const double &y) const
+{
     if (y>_ymin && y<_ymax)
     {
         resty = fmod((y-_ymin),_cellsize);
@@ -134,8 +124,43 @@ double FDSMesh::GetKnotValue(const double &x, const double &y) const
         resty=0;
         row=0;
     }
+    return row;
+}
+
+double FDSMesh::GetKnotValue(const double &x, const double &y) const
+{
+    double restx;
+    double resty;
+    int col=0;
+    int row=0;
+
+    /// Which knot is the nearest one to (x,y)?
+    ///
+    GetColumn(x, col, restx);
+    GetRow(row, resty, y);
 
     return _matrix[row][col].GetValue();
+}
+
+void FDSMesh::ReadMatrix(std::string line, std::vector<std::string> &strVec, std::ifstream &pFile)
+{
+    int m = 0;
+    int n;
+    while (std::getline(pFile, line)) {
+        n = 0;
+        strVec = split2(line, ',', strVec);
+        for (auto &elem : strVec)
+        {
+            //std::cout << elem << std::endl;
+            _matrix[m][n].SetValue(std::stod(elem));
+            ++n;
+        }
+        strVec.clear();
+        ++m;
+    }
+
+    pFile.close();
+    _statMesh=true;
 }
 
 void FDSMesh::SetKnotValuesFromFile(const std::string &filename)
@@ -173,23 +198,7 @@ void FDSMesh::SetKnotValuesFromFile(const std::string &filename)
         //}
         ///Read matrix
         ///
-        int m = 0;
-        int n;
-        while (std::getline(pFile, line)) {
-            n = 0;
-            strVec = split2(line, ',', strVec);
-            for (auto &elem : strVec)
-            {
-                //std::cout << elem << std::endl;
-                _matrix[m][n].SetValue(std::stod(elem));
-                ++n;
-            }
-            strVec.clear();
-            ++m;
-        }
-
-        pFile.close();
-        _statMesh=true;
+        ReadMatrix(line, strVec, pFile);
     }
     else
     {

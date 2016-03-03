@@ -28,51 +28,19 @@
  **/
 #include "FDSMeshStorage.h"
 #include "../../IO/OutputHandler.h"
-#include "../../tinyxml/tinyxml.h"
 #include "../../pedestrian/PedDistributor.h"
 #include "../../geometry/Building.h"
 
-bool FDSMeshStorage::LoadJPSfireInfo()
-{
-   string _projectFilename = _building->GetProjectFilename();
-
-   TiXmlDocument doc(_projectFilename);
-   if (!doc.LoadFile()) {
-        Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \t could not parse the project file");
-        return false;
-   }
-
-   TiXmlNode* JPSfireNode = doc.RootElement()->FirstChild("JPSfire");
-   if( ! JPSfireNode ) {
-        Log->Write("INFO:\tcould not find any JPSfire information");
-        return true;
-   }
-
-   Log->Write("INFO:\tLoading JPSfire info");
-
-   TiXmlElement* JPSfireCompElem = JPSfireNode->FirstChildElement("B_walking_speed");
-   if(JPSfireCompElem) {
-
-       _study = xmltoa(JPSfireCompElem->Attribute("study"), "Frantzich+Nilsson2003");
-       _filepath = xmltoa(JPSfireCompElem->Attribute("extinction_grids"), "");
-       _updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0);
-       _finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0);
-       Log->Write("INFO:\tModule B_walking_speed: study: %s \n\tdata: %s \n\tupdate time: %.1f final time: %.1f", _study.c_str(), _filepath.c_str(), _updateIntervall, _finalTime);
-       return true;
-   }
-
-}
 
 FDSMeshStorage::FDSMeshStorage()
 {
 
 }
 
-FDSMeshStorage::FDSMeshStorage(const Building * const b)
+FDSMeshStorage::FDSMeshStorage(string filepath, double finalTime, double updateIntervall, string study) :
+    _filepath(filepath), _finalTime(finalTime),
+    _updateIntervall(updateIntervall), _study(study)
 {
-    _building=b;
-    LoadJPSfireInfo();
     CreateTimeList();
     CreateFDSMeshes();
 }
@@ -90,8 +58,6 @@ void FDSMeshStorage::CreateTimeList()
     {
         _timelist.push_back(i);
         i+=_updateIntervall;
-        {
-        }
     }
 }
 
@@ -129,8 +95,7 @@ const FDSMesh &FDSMeshStorage::get_FDSMesh(const double &simTime) const
     return _fMContainer.at(str);
 }
 
-string FDSMeshStorage::GetStudy()
+std::string FDSMeshStorage::GetStudy() const
 {
-   return _study;
+    return _study;
 }
-

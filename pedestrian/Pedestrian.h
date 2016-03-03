@@ -456,7 +456,7 @@ public:
 
      void WalkingUpstairs(double c, SubRoom* sub, double ped_elevation, double &walking_speed) const;
      void WalkingDownstairs(double &walking_speed, double c, SubRoom* sub, double ped_elevation) const;
-     void WalkingInSmoke(double &walking_speed) const;
+
 
 };
 
