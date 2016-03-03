@@ -517,8 +517,7 @@ double Pedestrian::GetV0Norm() const
            }
      }
 
-
-     //IF statement that prevents execution of WalkingInSmoke depending on JPSfire section in INI file
+     //IF execution of WalkingInSmoke depending on JPSfire section in INI file
      if(_WalkingSpeed->ReduceWalkingSpeed()) {
          walking_speed = _WalkingSpeed->WalkingInSmoke(this, walking_speed);
      }

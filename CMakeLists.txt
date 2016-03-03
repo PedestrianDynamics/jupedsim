@@ -319,6 +319,11 @@ set (   source_files
   poly2tri/sweep/cdt.cpp
   events/EventManager.cpp
   events/Event.cpp
+
+  JPSfire/B_walking_speed/FDSMesh.cpp
+  JPSfire/B_walking_speed/FDSMeshStorage.cpp
+  JPSfire/B_walking_speed/Knot.cpp
+  JPSfire/B_walking_speed/WalkingSpeed.cpp
   )
 
 set (   header_files
@@ -429,6 +434,11 @@ set (   header_files
   poly2tri/sweep/sweep.h
   events/EventManager.h
   events/Event.h
+
+  JPSfire/B_walking_speed/FDSMesh.h
+  JPSfire/B_walking_speed/FDSMeshStorage.h
+  JPSfire/B_walking_speed/Knot.h
+  JPSfire/B_walking_speed/WalkingSpeed.h
   )
 
 

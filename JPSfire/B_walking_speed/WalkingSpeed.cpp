@@ -104,6 +104,31 @@ const std::shared_ptr<FDSMeshStorage> WalkingSpeed::get_FMStorage()
     return _FMStorage;
 }
 
+double WalkingSpeed::FrantzichNilsson2003(double &walking_speed, double ExtinctionCoefficient)
+{
+     //According to Frantzich+Nilsson2003
+    walking_speed = -0.01192971*pow(ExtinctionCoefficient,3)+ 0.1621356*pow(ExtinctionCoefficient, 2)-0.75296314*ExtinctionCoefficient+1.6439047;
+    return walking_speed;
+}
+
+double WalkingSpeed::Fridolf2013(double ExtinctionCoefficient, double &walking_speed)
+{
+    //According to Fridolf2013
+    walking_speed = 1.19 - 0.14*ExtinctionCoefficient;
+    return walking_speed;
+}
+
+double WalkingSpeed::Jin1974(double ExtinctionCoefficient, double &walking_speed)
+{
+    //According to Jin1974
+    if(ExtinctionCoefficient > 5) {
+       walking_speed = 0.2;
+    }
+    else {
+    walking_speed = 0.96 - 0.30*ExtinctionCoefficient;
+    }
+    return walking_speed;
+}
 
 double WalkingSpeed::WalkingInSmoke(const Pedestrian* p, double &walking_speed)
 {
@@ -115,27 +140,21 @@ double WalkingSpeed::WalkingInSmoke(const Pedestrian* p, double &walking_speed)
         fprintf(stderr, "%f \t%f\n", ExtinctionCoefficient, walking_speed);
         return p->GetEllipse().GetV0();
     }
-    else if(ExtinctionCoefficient > 5)
-    {
-       walking_speed = 0.2;
-    }
-    else
-    {
+    else {
             if (study=="Frantzich+Nilsson2003"){
-                walking_speed = -0.01192971*pow(ExtinctionCoefficient,3)+ 0.1621356*pow(ExtinctionCoefficient, 2)-0.75296314*ExtinctionCoefficient+1.6439047; //According to Frantzich+Nilsson2003
+                FrantzichNilsson2003(walking_speed, ExtinctionCoefficient);
             }
             else if (study=="Fridolf2013"){
-                walking_speed = 1.19 - 0.14*ExtinctionCoefficient; //According to Fridolf2013
+                Fridolf2013(ExtinctionCoefficient, walking_speed);
             }
             else if (study=="Jin1974"){
-                walking_speed = 0.96 - 0.30*ExtinctionCoefficient; //According to Jin1974
+                Jin1974(ExtinctionCoefficient, walking_speed);
             }
 
-        //Check if v0 < reduced walking_speed
-        if(walking_speed > p->GetEllipse().GetV0())
-        {
-            walking_speed = p->GetEllipse().GetV0();
-        }
+    //Generally check if v0 < reduced walking_speed
+    if(walking_speed > p->GetEllipse().GetV0()) {
+       walking_speed = p->GetEllipse().GetV0();
+    }
     }
    fprintf(stderr, "%f \t%f\n", ExtinctionCoefficient, walking_speed);
    return walking_speed;
