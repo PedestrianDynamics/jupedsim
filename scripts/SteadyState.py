@@ -25,28 +25,45 @@ im = 3.2
 d = 2 * im / KK
 xi = arange(-im, im + 0.0001, d)
 
-def get_overlap(a, b):
-    return max(0, min(a[1], b[1]) - max(a[0], b[0]))
+def overlap(start1, end1, start2, end2):
+    """
+    Does the range (start1, end1) overlap with (start2, end2)?
+    not (end1 < start2 or end2 < start1)
+    De Morgan's laws mean that we can change this condition to:
+    """
+    return end1 >= start2 and end2 >= start1
 
-def get_start_end(starts, ends):
-    starts0 = starts
-    ends0 = ends
-    for (s, e) in zip(starts, ends):
-        a = [s, e]
-        n_overlap = 0
-        for (s0, e0) in zip(starts0, ends0):
-            b = [s0, e0]
-            if a != b:
-                n_overlap += get_overlap(a, b)
-                
-        if n_overlap == 0: # this interval is an 'island'
-            starts0.remove(s)
-            ends0.remove(e)
+def get_start_end(startframes, endframes):
+    is_overlap = 1
+    at_least_one_overlap = 0
+    while is_overlap:
+        is_overlap = 0
+        startframes0 = []
+        endframes0 = []
+        for (s, e) in zip(startframes, endframes):
+            # print startframes
+            # print endframes
+            for (s0, e0) in zip(startframes, endframes):
+                if s != s0 and e != e0 and overlap(s, e, s0, e0):
+                    overlap_s = max(s, s0)
+                    overlap_e = min(e, e0)
+                    is_overlap = 1
+                    # print "[", s, ", ", e, "]", " [", s0, ", ", e0, "]", "overlap: [", overlap_s, ", ", overlap_e, "]"
+                    if not overlap_s in startframes0:
+                        startframes0.append(overlap_s)
 
-    try:
-        return max(starts0), min(ends0)
-    except ValueError:
-        return 0, 0
+                    if not overlap_e in endframes0:
+                        endframes0.append(overlap_e)
+
+        if is_overlap:
+            startframes = startframes0
+            endframes = endframes0
+            at_least_one_overlap = 1
+
+    if at_least_one_overlap:
+        return startframes, endframes
+    else:
+        return startframes0, endframes0
     
 def F(x):
     """
@@ -88,7 +105,7 @@ def getParserArgs():
                         help="columns to read from file (default 0, 1, 2)")
     parser.add_argument("-xl", "--xlabel", type=str, default="t /s",
                         help="xlabel")
-    parser.add_argument("-yl", "--ylabel", nargs='+', type=str, default=["\rho /m/s", "v m/s"],
+    parser.add_argument("-yl", "--ylabel", nargs='+', type=str, default=["\\rho /m/s", "v m/s"],
                         help="ylabel")
     parser.add_argument("-rs", "--reference_start", nargs='+', type=int, default=[240, 240],
                         help='Start frame of the reference process in density (default 240)')
@@ -345,7 +362,7 @@ if __name__ == '__main__':
 
     if not args.automatic: # in case references are manually given, lengths should be correct
         assert (len(columns)-1) == len(ref_start) == len(ref_end) == len(ylabel),\
-            "mismatch lengths.\n\t columns: %s (first is frame)\n\t ref_start: %s\n\t ref_end: %s\n ylabel: %s"%\
+            "mismatch lengths.\n\t columns: %s (first is frame)\n\t ref_start: %s\n\t ref_end: %s\n\t ylabel: %s"%\
             (", ".join(map(str, columns)), ", ".join(map(str, ref_start)), ", ".join(map(str, ref_end)), ", ".join(map(str, ylabel)))
 
     # read input data
@@ -361,8 +378,8 @@ if __name__ == '__main__':
         for c in range(1, len(columns)):
             start_frame = data[0, 0]
             end_frame = data[-1, 0]
-            ref_start.append(1./3*(end_frame-start_frame))
-            ref_end.append(2./3*(end_frame-start_frame))
+            ref_start.append(int(1./3*(end_frame-start_frame)))
+            ref_end.append(int(2./3*(end_frame-start_frame)))
 
         print("Automatic mode:")
         print("\t ref_start: %s"%", ".join(map(str, ref_start)))
@@ -419,33 +436,36 @@ if __name__ == '__main__':
     ss.write('# start end ratio \n')
     print ("start frames: %s" % ", ".join(map(str, starts)))
     print ("end frames: %s" % ", ".join(map(str, ends)))
-    mix_start, mix_end = get_start_end(starts, ends)
-    if mix_start < mix_end:
-        ss_data_ratio = (mix_end - mix_start) / len(data[:, 0]) * 100
-        ss.write('%.0f %.0f %.2f \n' % (mix_start, mix_end, ss_data_ratio))
-        print('final steady state is  from %d (%.1f s) to %d (%.1f s)  [ratio=%.2f]' %
-              (mix_start, mix_start / frame, mix_end, mix_end / frame, ss_data_ratio))
+    mix_starts, mix_ends = get_start_end(starts, ends)
+    if mix_starts and mix_ends: #lists are not empty --> there is overlap(s)
+        for (mix_start, mix_end) in zip(mix_starts, mix_ends):
+            ss_data_ratio = (mix_end - mix_start) / len(data[:, 0]) * 100
+            ss.write('%.0f %.0f %.2f \n' % (mix_start, mix_end, ss_data_ratio))
+            print('+ final steady state is from %d (%.1f s) to %d (%.1f s)  [ratio=%.2f]' %
+                  (mix_start, mix_start / frame, mix_end, mix_end / frame, ss_data_ratio))
+
         print('Steady state detected successfully!')
         print('+------------------------------------------------------------------------------+')
     else:
         print('Steady state detected with problems: ')
-        print('mix_start: %f'%mix_start)
-        print('mix_end: %f'%mix_end)
+        print('mix_starts: %f'%mix_starts)
+        print('mix_ends: %f'%mix_ends)
         print('+------------------------------------------------------------------------------+')
 
     if plotfigs == 'yes':
         # plot steady
-        info = [mix_start, mix_end]
-        for i in range(len(columns)-1):
-            plot_steady_state(
-                all_statistics[i],
-                data,
-                ref_start[i],
-                ref_end[i],
-                infos[i],
-                mix_start,
-                mix_end,
-                i+1
-            )
+        for (mix_start, mix_end) in zip(mix_starts, mix_ends):
+            info = [mix_start, mix_end]
+            for i in range(len(columns)-1):
+                plot_steady_state(
+                    all_statistics[i],
+                    data,
+                    ref_start[i],
+                    ref_end[i],
+                    infos[i],
+                    mix_start,
+                    mix_end,
+                    i+1
+                )
 
     ss.close()
