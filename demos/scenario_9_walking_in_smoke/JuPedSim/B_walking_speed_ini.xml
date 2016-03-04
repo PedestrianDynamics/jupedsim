@@ -28,7 +28,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
   <!-- configuration of fire simulation input -->
   <JPSfire>
   	<A_somoke_sensor/>
-   	<B_walking_speed extinction_grids="../FDS/2_extinction_grids/EXTINCTION_COEFFICIENT/" update_time="10.0" final_time="120.0" study="Jin1974"/>
+   	<B_walking_speed extinction_grids="../FDS/2_extinction_grids/EXTINCTION_COEFFICIENT/" update_time="10.0" final_time="120.0" study="Jin1978"/>
    	<C_toxicity_analysis/>
   </JPSfire>
 
