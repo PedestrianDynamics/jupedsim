@@ -224,15 +224,48 @@ In the section of the chosen model the direction strategy should be specified as
 <p>with <em>num</em> a positive integer.</p>
 <p>The majority of the strategies define how a pedestrian crosses a line <script type="math/tex">L = [P_1, P_2]</script>. Possible values are:  </p>
 <ol>
-<li>The direction of the pedestrian is towards the middle of <script type="math/tex">L</script> (<script type="math/tex">\frac{P_1+P2}{2}</script>)  </li>
-<li>The direction is given by the nearest point on <script type="math/tex">L</script> to the position of the pedestrian.  </li>
-<li>Same as 2, only the line <script type="math/tex">L</script> is shorten by 20 cm.  </li>
-<li>If the nearest point of the pedestrian on the segment line <script type="math/tex">L</script> is outside the segment, then chose the middle point as target.<br />
-   Otherwise the nearest point is chosen.</li>
-<li>This strategy is still beta. It assumes that the simulation scenario has no loops or U-shaped corridors.
-   Pedestrians, are targets towards the exit, even if it is outside their visibility range. In case of intersection with walls or bstacles, the temporary direction is rotaions away from the wall.  </li>
-<li>This strategy does use a floor field rather than heading towards a point on a line segment. For more details see <a href="https://owncloud.zam.kfa-juelich.de/index.php/s/MomKWVu6mFvnrSf" title="Automated Routing in Pedestrian Dynamics Master thesis, Fachhochschule Aachen, 2015">Graf2015</a>.</li>
+<li>
+<p>The direction of the pedestrian is towards the middle of <script type="math/tex">L</script> (<script type="math/tex">\frac{P_1+P2}{2}</script>)  </p>
+</li>
+<li>
+<p>The direction is given by the nearest point on <script type="math/tex">L</script> to the position of the pedestrian.  </p>
+</li>
+<li>
+<p>Same as 2, only the line <script type="math/tex">L</script> is shorten by 20 cm.  </p>
+</li>
+<li>
+<p>If the nearest point of the pedestrian on the segment line <script type="math/tex">L</script> is outside the segment, then chose the middle point as target.<br />
+   Otherwise the nearest point is chosen.</p>
+</li>
+<li>
+<p>This strategy is still beta. It assumes that the simulation scenario has no loops or U-shaped corridors.
+   Pedestrians, are targets towards the exit, even if it is outside their visibility range. In case of intersection with walls or bstacles, the temporary direction is rotaions away from the wall.  </p>
+</li>
+<li>
+<p>-9. Strategies using floor fields (ff) (vector fields); one ff per target (door, line, &hellip;)</p>
+</li>
 </ol>
+<p><img src="/uploads/785cda284f5f44d2b019332d29b8075e/transformFF.png" width="300" height="300" /></p>
+<ul>
+<li>
+<p>6: This strategy does use a floor field rather than heading towards a point on a line segment.</p>
+<p>For more details see <a href="https://owncloud.zam.kfa-juelich.de/index.php/s/MomKWVu6mFvnrSf" title="Automated Routing in Pedestrian Dynamics Master thesis, Fachhochschule Aachen, 2015">Graf2015</a>.</p>
+</li>
+<li>
+<p>7: (<strong>experimental</strong>)</p>
+</li>
+<li>
+<p>8: This strategy uses a floor field collection for each room. </p>
+<p>Thus the floor fields are smaller but cannot steer to targets in a different room. </p>
+<p>The router <strong>must</strong> provide intermediate targets for every agent, the target being in the same room.</p>
+</li>
+<li>
+<p>9: This strategy uses a floor field collection for each __sub__room. </p>
+<p>Thus the floor fields are again smaller but cannot steer to targets in a different __sub__room. </p>
+<p>The router <strong>must</strong> provide intermediate targets for every agent, that target being in the same __sub__room.</p>
+</li>
+</ul>
+<hr />
 <p>Most of the aforementioned strategies were discussed in <a href="http://aimsciences.org/journals/displayPaper.jsp?paperID=6440" title="Chraibi el al. Force-based models of pedestrian dynamics.  Pages: 425 - 442, Volume 6, Issue 3, September 2011">Chraibi2011</a>.</p></div>
         </div>
 

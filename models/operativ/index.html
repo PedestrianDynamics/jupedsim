@@ -267,7 +267,7 @@ sections: </p>
 <li>
 <p><code>&lt;exit_crossing_strategy&gt;3&lt;/exit_crossing_strategy&gt;</code></p>
 <ul>
-<li>Positive values in [1, 6]. See <a href="../direction">Direction strategies</a> for the definition of the strategies.</li>
+<li>Positive values in [1, 9]. See <a href="../direction">Direction strategies</a> for the definition of the strategies.</li>
 </ul>
 </li>
 <li>
@@ -415,10 +415,67 @@ For example: </p>
 </code></pre>
 
 <h3 id="wall-avoidance-model"><a class="toclink" href="#wall-avoidance-model"><a href="https://owncloud.zam.kfa-juelich.de/index.php/s/MomKWVu6mFvnrSf" title="Arne, Graf Master thesis">Wall-avoidance model</a></a></h3>
-<p>A velocity-based model</p>
-<p>Usage:</p>
+<p>A velocity-based model. The Wall-Avoidance Model focuses on valid pedestrian positions. The interaction of agents with walls takes precedence over the agent-to-agent interaction. There are two key aspects:
+ * In the vicinity to walls, agents take on a different behaviour, slowing them down (parameter: slowdowndistance)</p>
+<ul>
+<li>Agents follow special floorfields, directing them to the targets/goals, which will have them avoid walls if possible (free space)</li>
+</ul>
+<p>Valid exit strategies are {6, 8, 9}. Please see details below.</p>
+<p>(Sample) Usage:</p>
 <pre><code class="xml">&lt;model operational_model_id=&quot;4&quot; description=&quot;gradnav&quot;&gt;
-</code></pre></div>
+  &lt;model_parameters&gt;
+    &lt;solver&gt;euler&lt;/solver&gt;
+    &lt;stepsize&gt;0.01&lt;/stepsize&gt;
+    &lt;exit_crossing_strategy&gt;9&lt;/exit_crossing_strategy&gt;
+    &lt;floorfield delta_h=&quot;0.0625&quot; wall_avoid_distance=&quot;0.4&quot; use_wall_avoidance=&quot;true&quot; /&gt;
+    &lt;linkedcells enabled=&quot;true&quot; cell_size=&quot;4.2&quot; /&gt;
+    &lt;force_ped nu=&quot;3&quot; b=&quot;1.0&quot; c=&quot;3.0&quot; /&gt;
+    &lt;force_wall nu=&quot;1&quot; b=&quot;0.70&quot; c=&quot;3.0&quot; /&gt;
+    &lt;anti_clipping slow_down_distance=&quot;.2&quot; /&gt;
+  &lt;/model_parameters&gt;
+  &lt;agent_parameters agent_parameter_id=&quot;0&quot;&gt;
+    &lt;v0 mu=&quot;1.5&quot; sigma=&quot;0.0&quot; /&gt;
+    &lt;bmax mu=&quot;0.25&quot; sigma=&quot;0.001&quot; /&gt;
+    &lt;bmin mu=&quot;0.20&quot; sigma=&quot;0.001&quot; /&gt;
+    &lt;amin mu=&quot;0.18&quot; sigma=&quot;0.001&quot; /&gt;
+    &lt;tau mu=&quot;0.5&quot; sigma=&quot;0.001&quot; /&gt;
+    &lt;atau mu=&quot;0.23&quot; sigma=&quot;0.001&quot; /&gt;
+  &lt;/agent_parameters&gt;
+&lt;/model&gt;
+</code></pre>
+
+<h4 id="parameters"><a class="toclink" href="#parameters">Parameters</a></h4>
+<ul>
+<li>
+<p><code>&lt;exit_crossing_strategy&gt;[6, 8, 9]&lt;/exit_crossing_strategy&gt;</code></p>
+<ul>
+<li>The strategies 6,8,9 differ in the way the floorfield is created:<ul>
+<li>6: one floorfield over all geometry (building); only in 2D geometries; directing every agent to the closest exit</li>
+<li>8: multiple floorfield-objects (one for every <strong>room</strong>); each object can create a floor field on the fly to a target line (or vector of lines) within the room; working in multi-floor-buildings; requires a router that provides intermediate targets in the same room</li>
+<li>9: (<strong>recommended</strong>) multiple floorfield-objects (one for every <strong>subroom</strong>); each object can create a floor field on the fly to a target line (or vector of lines) within the same __sub__room; working in multi-floor-buildings; requires a router that provides intermediate targets in the same __sub__room;</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><code>&lt;floorfield delta_h="0.0625" wall_avoid_distance="0.4" use_wall_avoidance="true" /&gt;</code></p>
+<ul>
+<li>The parameters define:<ul>
+<li><strong>delta_h</strong>: discretization/stepsize of grid-points used by the floor field</li>
+<li><strong>wall_avoid_distance</strong>: below this wall-distance, the floor field will show a wall-repulsive charactor, directing agents away from the wall</li>
+<li><strong>use_wall_avoidance</strong>: {true, false} switch to turn on/off the enhancement of the floor field
+<img src="/uploads/785cda284f5f44d2b019332d29b8075e/transformFF.png" width="500" height="500" /></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><code>&lt;linkedcells enabled="true" cell_size="4.2" /&gt;</code></p>
+<ul>
+<li>range in which other pedestrians are considered neighbours and can influence the current agent. This value defines cell-size of the cell-grid.</li>
+</ul>
+</li>
+</ul></div>
         </div>
 
 	<footer class="col-md-12">
