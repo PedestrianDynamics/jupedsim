@@ -129,6 +129,7 @@ int FDSMesh::GetRow(int &row, double resty, const double &y) const
 
 double FDSMesh::GetKnotValue(const double &x, const double &y) const
 {
+    /// To Do: exception / warning when no knot is available for the pedestrian position
     double restx;
     double resty;
     int col=0;

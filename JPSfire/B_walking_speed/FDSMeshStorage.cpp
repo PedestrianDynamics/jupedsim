@@ -57,7 +57,7 @@ FDSMeshStorage::~FDSMeshStorage()
 
 void FDSMeshStorage::CreateTimeList()
 {
-    // Create time list for mesh refreshment
+    /// Create time list for mesh refreshment
     double i=0;
     while (i<=_finalTime)
     {
@@ -69,7 +69,7 @@ void FDSMeshStorage::CreateTimeList()
 
 void FDSMeshStorage::CreateElevationList()
 {
-    // Create elevation list out of the available Z_* dirs in _filepath
+    /// Create elevation list out of the available Z_* dirs in _filepath
     glob_t paths;
     int retval;
 
@@ -137,7 +137,7 @@ const FDSMesh &FDSMeshStorage::get_FDSMesh(const double &simTime, const double &
 
 double FDSMeshStorage::GetNearestHeight(double _PedEyeHeight)
 {
-    //find the nearest height in the JPSfire data related to the ped elevation
+    ///find the nearest height in the JPSfire data related to the ped elevation
     double min_val = std::numeric_limits<double>::max();
     int index = 0;
 
@@ -149,7 +149,7 @@ double FDSMeshStorage::GetNearestHeight(double _PedEyeHeight)
         }
     }
     _NearestHeight = _elevationlist[index];
-    std::cout << "NEAREST" << std::endl << _NearestHeight << std::endl;
+    //std::cout << "NEAREST" << std::endl << _NearestHeight << std::endl;
     return _NearestHeight;
 }
 

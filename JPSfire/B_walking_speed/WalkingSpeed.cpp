@@ -70,7 +70,7 @@ bool WalkingSpeed::LoadJPSfireInfo(const std::string &projectFilename )
 
    TiXmlElement* JPSfireCompElem = JPSfireNode->FirstChildElement("B_walking_speed");
    if(JPSfireCompElem) {
-       std::string _study = xmltoa(JPSfireCompElem->Attribute("study"), "Frantzich+Nilsson2003");
+       std::string _study = xmltoa(JPSfireCompElem->Attribute("study"), "Jin1974");
        std::string _filepath = xmltoa(JPSfireCompElem->Attribute("extinction_grids"), "");
        double _updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
        double _finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
@@ -135,9 +135,9 @@ double WalkingSpeed::WalkingInSmoke(const Pedestrian* p, double &walking_speed)
     double ExtinctionCoefficient = GetExtinction(p);
     std::string study = _FMStorage->GetStudy();
 
-    if((ExtinctionCoefficient == 0) || (std::isnan(ExtinctionCoefficient)))   //no obstruction by smoke or NaN check
+    if((ExtinctionCoefficient < 10E-6) || (std::isnan(ExtinctionCoefficient)))   //no obstruction by smoke or NaN check
     {
-        fprintf(stderr, "%f \t%f\n", ExtinctionCoefficient, walking_speed);
+        fprintf(stderr, "%f \t%f\n", ExtinctionCoefficient, p->GetEllipse().GetV0());
         return p->GetEllipse().GetV0();
     }
     else {
