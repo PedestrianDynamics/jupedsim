@@ -169,6 +169,7 @@ protected:
      std::map<int, LocalFloorfieldViaFM*>     _locffviafm;
      FloorfieldViaFM*                         _globalFF;
      std::map<int, Transition*>               _TransByUID;
+     std::map<int, Transition*>               _ExitsByUID;
 
      std::map<int, int>     goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
      std::map<int, int>     goalToLineUIDmap2;

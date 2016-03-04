@@ -65,8 +65,13 @@ FFRouter::FFRouter(int id, RoutingStrategy s):Router(id,s) {
 FFRouter::~FFRouter()
 {
      delete _globalFF;
-     //delete localffs todo
-
+     //delete localffs
+     std::map<int, LocalFloorfieldViaFM*>::reverse_iterator delIter;
+     for (delIter = _locffviafm.rbegin();
+          delIter != _locffviafm.rend();
+          ++delIter) {
+          delete (*delIter).second;
+     }
 }
 
 bool FFRouter::Init(Building* building)
@@ -83,10 +88,14 @@ bool FFRouter::Init(Building* building)
      //get all door UIDs
      _allDoorUIDs.clear();
      _TransByUID.clear();
+     _ExitsByUID.clear();
      auto& allTrans = building->GetAllTransitions();
      for(auto& pair : allTrans) {
           _allDoorUIDs.emplace_back(pair.second->GetUniqueID());
           _TransByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
+          if (pair.second->IsExit()) {
+               _ExitsByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
+          }
           for(auto& pair2 : allTrans){
                std::pair<int, int> key   = std::make_pair(pair.second->GetUniqueID(), pair2.second->GetUniqueID());
                double              value = (pair.second->GetUniqueID() == pair2.second->GetUniqueID())? 0.0 : DBL_MAX;
@@ -145,13 +154,13 @@ int FFRouter::FindExit(Pedestrian* p)
      int bestDoor = -1;
 
      int goalID = p->GetFinalDestination();
-     std::vector<int> validFinalDoor;
+     std::vector<int> validFinalDoor; //UIDs of doors
      validFinalDoor.clear();
      if (goalID == -1) {
-          for (auto& pairGoal : goalToLineUIDmap) {
+          for (auto& pairDoor : _ExitsByUID) {
                //we add the closest Doors of every goal, goalToLineUIDmap gets
                //populated in Init()
-               validFinalDoor.emplace_back(pairGoal.second);
+               validFinalDoor.emplace_back(pairDoor.first); //UID
                //todo: ar.graf: if goal == -1, maybe also add goalToLineUIDmap2 and 3
           }
      } else {  //only one specific goal
@@ -167,13 +176,13 @@ int FFRouter::FindExit(Pedestrian* p)
      //auto& allTransMap = _building->GetAllTransitions();
 
      for(int finalDoor : validFinalDoor) {
-          //translating Door IDs to UIDs and store in candidates
           //with UIDs, we can ask for shortest path
           for (int doorUID : DoorUIDsOfRoom) {
+               double locDistToDoor = _locffviafm[p->GetRoomID()]->getCostToDestination(doorUID, p->GetPos());
                std::pair<int, int> key = std::make_pair(doorUID, finalDoor);
                if ((_distMatrix.count(key)!=0)
-                     && (_distMatrix.at(key)<minDist)) {
-                    minDist = _distMatrix.at(key);
+                     && ( (_distMatrix.at(key) + locDistToDoor) < minDist)) {
+                    minDist = _distMatrix.at(key) + locDistToDoor;
                     bestDoor = key.first;
                }
           }
