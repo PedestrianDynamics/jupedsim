@@ -57,7 +57,7 @@ FDSMeshStorage::~FDSMeshStorage()
 
 void FDSMeshStorage::CreateTimeList()
 {
-    //fulfill list with times when new Mesh should be used
+    // Create time list for mesh refreshment
     double i=0;
     while (i<=_finalTime)
     {
@@ -69,6 +69,7 @@ void FDSMeshStorage::CreateTimeList()
 
 void FDSMeshStorage::CreateElevationList()
 {
+    // Create elevation list out of the available Z_* dirs in _filepath
     glob_t paths;
     int retval;
 
@@ -76,8 +77,9 @@ void FDSMeshStorage::CreateElevationList()
     paths.gl_pathv = NULL;
     paths.gl_offs = 0;
 
-    // TODO substitute with _filepath -- no matching function error up to now...
-    retval = glob( ("FDS/2_extinction_grids/EXTINCTION_COEFFICIENT/Z_*") , GLOB_NOCHECK | GLOB_NOSORT,
+    const char * glob_str = (_filepath + "Z_*").c_str();
+    retval = glob( (glob_str) , GLOB_NOCHECK | GLOB_NOSORT,
+
                    NULL, &paths );
     if( retval == 0 ) {
         int idx;
