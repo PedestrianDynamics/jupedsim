@@ -117,7 +117,7 @@ bool VelocityModel::Init (Building* building)
               peds_size--;
               continue;
          }
-         Point target = ped->GetExitLine()->LotPoint(ped->GetPos());
+         Point target = ped->GetExitLine()->LotPoint(ped->GetPos()); // todo: check: ar.graf: LotPoint() or ShortestPoint()
          Point d = target - ped->GetPos();
          double dist = d.Norm();
          if (dist != 0.0) {

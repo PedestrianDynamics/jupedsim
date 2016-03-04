@@ -51,79 +51,96 @@
 
 class FloorfieldViaFM
 {
-    public:
-        FloorfieldViaFM();
-        FloorfieldViaFM(const std::string&);
-        FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg, const double wallAvoidDistance, const bool useDistancefield, const std::string&);
-        virtual ~FloorfieldViaFM();
-        FloorfieldViaFM(const FloorfieldViaFM& other);
-        //FloorfieldViaFM& operator=(const FloorfieldViaFM& other);
+public:
+     FloorfieldViaFM();
+     FloorfieldViaFM(const std::string&);
+     FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg, const double wallAvoidDistance, const bool useDistancefield, const std::string&);
+     virtual ~FloorfieldViaFM();
+     FloorfieldViaFM(const FloorfieldViaFM& other);
+     //FloorfieldViaFM& operator=(const FloorfieldViaFM& other);
 
-        void getDirectionAt(const Point& position, Point& direction);                                   //obsolete
-        //void getDirectionToDestination (const int destID, const Point& position, Point& direction);     //obsolete
-        void getDirectionToUID(int destID, const long int key, Point& direction);
-        void getDirectionToDestination (Pedestrian* ped, Point& direction);
-        void getDirectionToFinalDestination(Pedestrian* ped, Point& direction);
-        double getCostToDestination(const int destID, const Point& position);
-        void getDir2WallAt(const Point& position, Point& direction);
-        double getDistance2WallAt(const Point& position);
+     void getDirectionAt(const Point& position, Point& direction);                                   //obsolete
+     //void getDirectionToDestination (const int destID, const Point& position, Point& direction);     //obsolete
+     void getDirectionToUID(int destID, const long int key, Point& direction);
+     void getDirectionToDestination (Pedestrian* ped, Point& direction);
+     void getDirectionToFinalDestination(Pedestrian* ped, Point& direction);
+     void getDirectionToGoalID(const int goalID);
+     double getCostToDestination(const int destID, const Point& position);
+     void getDir2WallAt(const Point& position, Point& direction);
+     double getDistance2WallAt(const Point& position);
 
-        void parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
-        void prepareForDistanceFieldCalculation(std::vector<Line>& wallArg);
-        void lineScan(std::vector<Line>& wallArg, double* const target, const double outside, const double inside);
-        void drawLinesOnGrid(std::vector<Line>& wallArg, double* const target, const double outside);
-        void setSpeed(bool useDistance2Wall);
-        void clearAndPrepareForFloorfieldReCalc(double* costarray);
-        void setNewGoalAfterTheClear(double* costarray, std::vector<Line>& GoalWallArg);
-        void calculateFloorfield(double* costarray, Point* neggradarray);   //make private
-        void calculateDistanceField(const double thresholdArg);             //make private
+     void parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
+     void prepareForDistanceFieldCalculation(std::vector<Line>& wallArg);
+     void drawLinesOnGrid(std::vector<Line>& wallArg, double* const target, const double outside);
+     void setSpeed(bool useDistance2Wall);
+     void clearAndPrepareForFloorfieldReCalc(double* costarray);
+     void setNewGoalAfterTheClear(double* costarray, std::vector<Line>& GoalWallArg);
+     void calculateFloorfield(double* costarray, Point* neggradarray);   //make private
+     void calculateDistanceField(const double thresholdArg);             //make private
 
-        void checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* &biggest, const long int key, std::function<void (const long int)> checkNeighborsAndCalc);
+     void checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* &biggest, const long int key, std::function<void (const long int)> checkNeighborsAndCalc);
 
-        void checkNeighborsAndCalcDist2Wall(const long int key);
-        void checkNeighborsAndCalcFloorfield(const long int key);
-        //void (*checkNeighborsAndCalc)(const long int key);
+     void checkNeighborsAndCalcDist2Wall(const long int key);
+     void checkNeighborsAndCalcFloorfield(const long int key);
+     //void (*checkNeighborsAndCalc)(const long int key);
 
-        inline double onesidedCalc(double xy, double hDivF);
-        inline double twosidedCalc(double x, double y, double hDivF);
+     inline double onesidedCalc(double xy, double hDivF);
+     inline double twosidedCalc(double x, double y, double hDivF);
 
-        void testoutput(const char*, const char*, const double*);
-        void writeFF(const std::string&);
+     void testoutput(const char*, const char*, const double*);
+     void writeFF(const std::string&);
+
+     std::map<int, int> getGoalToLineUIDmap() const
+     {
+          return goalToLineUIDmap;
+     }
+
+     std::map<int, int> getGoalToLineUIDmap2() const
+     {
+          return goalToLineUIDmap2;
+     }
+
+     std::map<int, int> getGoalToLineUIDmap3() const
+     {
+          return goalToLineUIDmap3;
+     }
 
 #ifdef TESTING
-        void setGrid(RectGrid* gridArg) {grid = gridArg;}
-        Trial* getTrial() {return trialfield;}
+     void setGrid(RectGrid* gridArg) {grid = gridArg;}
+     Trial* getTrial() {return trialfield;}
 #endif //TESTING
 
 protected:
-        RectGrid* grid;
-        std::vector<Line> wall;
-        int numOfExits;
+     RectGrid* grid;
+     std::vector<Line> wall;
+     int numOfExits;
 
-        const Building* building;
+     const Building* building;
 
-        //stuff to handle wrapper grid (unused, cause RectGrid handles offset)
-        double offsetX;
-        double offsetY;
+     //stuff to handle wrapper grid (unused, cause RectGrid handles offset)
+     double offsetX;
+     double offsetY;
 
-        //GridPoint Data in independant arrays (shared primary key)
-        int* flag;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
-        double* dist2Wall;
-        double* speedInitial;
-        double* modifiedspeed;
-        double* cost;
-        long int* secKey;  //secondary key to address ... not used yet
-        Point* neggrad; //gradients
-        Point* dirToWall;
-        Trial* trialfield;
+     //GridPoint Data in independant arrays (shared primary key)
+     int* flag;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
+     double* dist2Wall;
+     double* speedInitial;
+     double* modifiedspeed;
+     double* cost;
+     long int* secKey;  //secondary key to address ... not used yet
+     Point* neggrad; //gradients
+     Point* dirToWall;
+     Trial* trialfield;
 
-        std::map<int, double*> goalcostmap;
-        std::map<int, int>     goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
-        std::map<int, Point*>  goalneggradmap;
-        std::map<int, double*> costmap;
-        std::map<int, Point*>  neggradmap;
+     std::map<int, double*> goalcostmap;
+     std::map<int, int>     goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
+     std::map<int, int>     goalToLineUIDmap2;
+     std::map<int, int>     goalToLineUIDmap3;
+     std::map<int, Point*>  goalneggradmap;
+     std::map<int, double*> costmap;
+     std::map<int, Point*>  neggradmap;
 
-        double threshold;
+     double threshold;
 };
 
 #endif // FLOORFIELDVIAFM_H
