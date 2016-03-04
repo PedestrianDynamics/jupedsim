@@ -35,6 +35,7 @@
 #include <ctime>
 #include <limits.h>
 #include <stdlib.h>
+#include <algorithm>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -468,6 +469,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
      if( parsingModelSuccessful==false)
      {
           Log->Write("ERROR: \tWrong model id [%d]. Choose 1 (GCFM) or 2 (Gompertz) or 3 (Tordeux2015)", pModel);
+          Log->Write("ERROR: \tor 4 (Gradnav)");
           Log->Write("ERROR: \tPlease make sure that all models are specified in the operational_models section");
           Log->Write("ERROR: \tand make sure to use the same ID in th agent section");
           return false;
@@ -475,8 +477,9 @@ bool ArgumentParser::ParseIniFile(string inifile)
 
      //route choice strategy
      TiXmlNode* xRouters = xMainNode->FirstChild("route_choice_models");
+     TiXmlNode* xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
 
-     if(ParseRoutingStrategies(xRouters)==false)
+     if(ParseRoutingStrategies(xRouters, xAgentDistri)==false)
           return false;
      Log->Write("INFO: \tParsing the project file completed");
      return true;
@@ -1084,12 +1087,30 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
      }
 }
 
-bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
+bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode, TiXmlNode *agentsDistri)
 {
      if (!routingNode)
      {
           Log->Write("ERROR: \t route_choice_models section is missing");
           return false;
+     }
+     if (!agentsDistri)
+     {
+          Log->Write("ERROR: \t Agent Distribution section is missing");
+          return false;
+     }
+     //first get list of actually used router
+     std::vector<int> usedRouter;
+     usedRouter.clear();
+     for (TiXmlElement* e = agentsDistri->FirstChildElement("group"); e;
+               e = e->NextSiblingElement("group")) {
+          int router = -1;
+          if (e->Attribute("router_id")) {
+               router = atoi(e->Attribute("router_id"));
+               if(std::find(usedRouter.begin(), usedRouter.end(), router) == usedRouter.end()) {
+                    usedRouter.emplace_back(router);
+               }
+          }
      }
      for (TiXmlElement* e = routingNode->FirstChildElement("router"); e;
                e = e->NextSiblingElement("router")) {
@@ -1097,37 +1118,44 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
           string strategy = e->Attribute("description");
           int id = atoi(e->Attribute("router_id"));
 
-          if (strategy == "local_shortest") {
+          if ((strategy == "local_shortest") &&
+                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_LOCAL_SHORTEST));
                Router *r = new GlobalRouter(id, ROUTING_LOCAL_SHORTEST);
                _routingengine->AddRouter(r);
           }
-          else if (strategy == "global_shortest") {
+          else if ((strategy == "global_shortest") &&
+                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_GLOBAL_SHORTEST));
                Router *r = new GlobalRouter(id, ROUTING_GLOBAL_SHORTEST);
                _routingengine->AddRouter(r);
           }
-          else if (strategy == "quickest") {
+          else if ((strategy == "quickest")  &&
+                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_QUICKEST));
                Router *r = new QuickestPathRouter(id, ROUTING_QUICKEST);
                _routingengine->AddRouter(r);
           }
-          else if (strategy == "nav_mesh") {
+          else if ((strategy == "nav_mesh") &&
+                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_NAV_MESH));
                Router *r = new MeshRouter(id, ROUTING_NAV_MESH);
                _routingengine->AddRouter(r);
           }
-          else if (strategy == "dummy") {
+          else if ((strategy == "dummy") &&
+                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_DUMMY));
                Router *r = new DummyRouter(id, ROUTING_DUMMY);
                _routingengine->AddRouter(r);
           }
-          else if (strategy == "global_safest") {
+          else if ((strategy == "global_safest") &&
+                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_SAFEST));
                Router *r = new SafestPathRouter(id, ROUTING_SAFEST);
                _routingengine->AddRouter(r);
           }
-          else if (strategy == "cognitive_map") {
+          else if ((strategy == "cognitive_map") &&
+                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_COGNITIVEMAP));
                Router *r = new CognitiveMapRouter(id, ROUTING_COGNITIVEMAP);
                _routingengine->AddRouter(r);
@@ -1137,7 +1165,8 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
                if (!ParseCogMapOpts(e))
                     return false;
           }
-          else if (strategy == "ff_global_shortest") {
+          else if ((strategy == "ff_global_shortest") &&
+                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
                Router *r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST);
                _routingengine->AddRouter(r);
