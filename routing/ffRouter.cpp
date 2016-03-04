@@ -230,3 +230,14 @@ void FFRouter::FloydWarshall()
           }
      }
 }
+
+void FFRouter::SetMode(std::string s)
+{
+     if (s == "global_shortest"){
+          _mode = global_shortest;
+          return;
+     }
+
+     _mode = global_shortest;
+     return;
+}

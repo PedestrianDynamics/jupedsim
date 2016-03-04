@@ -1171,6 +1171,10 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode, TiXmlNode *a
                Router *r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST);
                _routingengine->AddRouter(r);
                Log->Write("\nINFO: \tUsing FF Global Shortest Router");
+               ///Parsing additional options
+               if (!ParseFfRouterOps(e)) {
+                    return false;
+               }
           }
           else {
                Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",
@@ -1237,7 +1241,21 @@ bool ArgumentParser::ParseCogMapOpts(TiXmlNode *routerNode)
 
 }
 
+bool ArgumentParser::ParseFfRouterOps(TiXmlNode* routingNode) {
+     //set defaults
+     std::string mode = "global_shortest";
+     FFRouter* r = static_cast<FFRouter*>(_routingengine->GetAvailableRouters().back());
 
+     //parse ini-file-information
+     if (routingNode->FirstChild("parameters")) {
+          TiXmlNode* pParameters = routingNode->FirstChild("parameters");
+          if (pParameters->FirstChild("mode")) {
+               mode = pParameters->FirstChild("mode")->FirstChild()->Value();
+          }
+     }
+     r->SetMode(mode);
+     return true;
+}
 
 bool ArgumentParser::ParseStrategyNodeToObject(const TiXmlNode &strategyNode)
 {

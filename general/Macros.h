@@ -154,6 +154,13 @@ enum LineIntersectType {
 	INTERSECTION,
 	OVERLAP // overlap, parallel, no intersection
 };
+
+enum FFRouterMode {
+     global_shortest = 0,
+     local_shortest,
+     quickest
+};
+
 //global functions for convenience
 
 inline char xmltob(const char * t, char v = 0)

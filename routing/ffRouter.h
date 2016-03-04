@@ -159,6 +159,11 @@ public:
       */
      //void SetDistances();
 
+     /*!
+      * \brief set mode (shortest, quickest, ...)
+      */
+      void SetMode(std::string s);
+
 private:
 
 protected:
@@ -174,6 +179,8 @@ protected:
      std::map<int, int>     goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
      std::map<int, int>     goalToLineUIDmap2;
      std::map<int, int>     goalToLineUIDmap3;
+
+     int _mode;
 };
 
 #endif /* FFROUTER_H_ */
