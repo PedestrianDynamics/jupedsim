@@ -41,17 +41,15 @@ def get_start_end(startframes, endframes):
         startframes0 = []
         endframes0 = []
         for (s, e) in zip(startframes, endframes):
-            # print startframes
-            # print endframes
             for (s0, e0) in zip(startframes, endframes):
                 if s != s0 and e != e0 and overlap(s, e, s0, e0):
                     overlap_s = max(s, s0)
                     overlap_e = min(e, e0)
                     is_overlap = 1
-                    # print "[", s, ", ", e, "]", " [", s0, ", ", e0, "]", "overlap: [", overlap_s, ", ", overlap_e, "]"
+                    # add start of overlap segment
                     if not overlap_s in startframes0:
                         startframes0.append(overlap_s)
-
+                    # add end of overlap segment
                     if not overlap_e in endframes0:
                         endframes0.append(overlap_e)
 
@@ -60,11 +58,11 @@ def get_start_end(startframes, endframes):
             endframes = endframes0
             at_least_one_overlap = 1
 
-    if at_least_one_overlap:
+    if at_least_one_overlap: # this is for the case that we never had overlaps
         return startframes, endframes
     else:
         return startframes0, endframes0
-    
+
 def F(x):
     """
     :param x:
@@ -85,11 +83,6 @@ def func_b(i, k, acf):
     return d * exp(-(xi[i] - xi[k] * acf) * (xi[i] - xi[k] * acf) / (2 * (1 - acf * acf))) / sqrt(
         2 * math.pi * (1 - acf * acf))
 
-
-# - Flow
-# - plot frame x axis
-# - Unities /
-
 def getParserArgs():
     """
 
@@ -105,8 +98,8 @@ def getParserArgs():
                         help="columns to read from file (default 0, 1, 2)")
     parser.add_argument("-xl", "--xlabel", type=str, default="t /s",
                         help="xlabel")
-    parser.add_argument("-yl", "--ylabel", nargs='+', type=str, default=["\\rho /m/s", "v m/s"],
-                        help="ylabel")
+    parser.add_argument("-yl", "--ylabels", nargs='+', type=str, default=["\\rho\; /m^{-2}", "v\; /m/s"],
+                        help="ylabels. separate units with \"\;\"")
     parser.add_argument("-rs", "--reference_start", nargs='+', type=int, default=[240, 240],
                         help='Start frame of the reference process in density (default 240)')
     parser.add_argument("-re", "--reference_end", nargs='+', type=int, default=[640, 640],
@@ -326,7 +319,7 @@ def plot_steady_state(statistics, data, ref_start, ref_end, info, start, end, co
                                        [info[i, 1] / fps, 50],
                                        [info[i, 0] / fps, 50]],
                                       closed=True, fill=False,
-                                      color='r', hatch='/', label='steady (%d)'%column))
+                                      color='r', hatch='/', label='steady ($%s$)'%ylabels[column-1].split("\;")[0]))
 
     if start != end:
         ax.add_patch(mpatches.Polygon([[start / fps, 0],
@@ -337,7 +330,7 @@ def plot_steady_state(statistics, data, ref_start, ref_end, info, start, end, co
                                       color='y', alpha=0.2, label='steady (final)'))
 
     plt.xlabel(xlabel, fontsize=25)
-    plt.ylabel(r'$%s$'%ylabel[column-1], fontsize=25)
+    plt.ylabel(r'$%s$'%ylabels[column-1], fontsize=25)
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
     plt.xlim(0, limit)
@@ -357,13 +350,13 @@ if __name__ == '__main__':
     frame = args.fps
     columns = args.columns
     xlabel = args.xlabel
-    ylabel = args.ylabel
+    ylabels = args.ylabels
     # sanity check
 
     if not args.automatic: # in case references are manually given, lengths should be correct
-        assert (len(columns)-1) == len(ref_start) == len(ref_end) == len(ylabel),\
-            "mismatch lengths.\n\t columns: %s (first is frame)\n\t ref_start: %s\n\t ref_end: %s\n\t ylabel: %s"%\
-            (", ".join(map(str, columns)), ", ".join(map(str, ref_start)), ", ".join(map(str, ref_end)), ", ".join(map(str, ylabel)))
+        assert (len(columns)-1) == len(ref_start) == len(ref_end) == len(ylabels),\
+            "mismatch lengths.\n\t columns: %s (first is frame)\n\t ref_start: %s\n\t ref_end: %s\n\t ylabels: %s"%\
+            (", ".join(map(str, columns)), ", ".join(map(str, ref_start)), ", ".join(map(str, ref_end)), ", ".join(map(str, ylabels)))
 
     # read input data
     try:
