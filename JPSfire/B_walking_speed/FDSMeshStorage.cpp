@@ -34,6 +34,9 @@
 #include <stdio.h>
 #include <glob.h>
 #include <string>
+#include <sys/stat.h>
+
+
 
 FDSMeshStorage::FDSMeshStorage()
 {
@@ -45,9 +48,22 @@ FDSMeshStorage::FDSMeshStorage(string filepath, double finalTime, double updateI
     _updateIntervall(updateIntervall), _study(study),
     _elevationlist(), _timelist()
 {
-    CreateTimeList();
-    CreateElevationList();
-    CreateFDSMeshes();
+    ///Check if _filepath is existent
+    struct stat extinction_grids;
+
+    const char * p = _filepath.c_str();
+    if ( stat(p, &extinction_grids) != 0 )
+    {
+        std::cout << "ERROR:\tCould not find directory " << _filepath << std::endl;
+        // Why does Log not work here??
+        //Log->Write(ERROR:\tERROR:\tCould not find directory %s", _filepath);
+        exit(EXIT_FAILURE);
+    }
+    else {
+        CreateElevationList();
+        CreateTimeList();
+        CreateFDSMeshes();
+    }
 }
 
 FDSMeshStorage::~FDSMeshStorage()
@@ -55,19 +71,9 @@ FDSMeshStorage::~FDSMeshStorage()
 
 }
 
-void FDSMeshStorage::CreateTimeList()
-{
-    /// Create time list for mesh refreshment
-    double i=0;
-    while (i<=_finalTime)
-    {
-        _timelist.push_back(i);
-        i+=_updateIntervall;
-    }
-}
 
 
-void FDSMeshStorage::CreateElevationList()
+bool FDSMeshStorage::CreateElevationList()
 {
     /// Create elevation list out of the available Z_* dirs in _filepath
     glob_t paths;
@@ -78,25 +84,55 @@ void FDSMeshStorage::CreateElevationList()
     paths.gl_offs = 0;
 
     const char * glob_str = (_filepath + "Z_*").c_str();
-    retval = glob( (glob_str) , GLOB_NOCHECK | GLOB_NOSORT,
-
-                   NULL, &paths );
+    retval = glob( (glob_str) , GLOB_NOSORT, NULL, &paths );
     if( retval == 0 ) {
         int idx;
-
         for( idx = 0; idx < paths.gl_pathc; idx++ ) {
             std::string glob_str = (paths.gl_pathv[idx]);
             double elev_dir = std::stod( glob_str.substr( glob_str.rfind("_") + 1 ));
             _elevationlist.push_back(elev_dir);
         }
         globfree( &paths );
-    } else {
-        puts( "glob() failed" );
+        return true;
+    }
+    else {
+        std::cout << "ERROR:\tCould not find suitable grid elevations in " << _filepath << std::endl;
+        // Why does Log not work here??
+        //Log->Write(ERROR:\tCould not find suitable grid elevations in %s", _filepath);
+        exit(EXIT_FAILURE);
     }
     //for(auto elem : _elevationlist)
         //std::cout << elem << std::endl;
 }
 
+
+void FDSMeshStorage::CreateTimeList()
+{
+    /// Create time list for mesh refreshment
+    double i=0;
+    while (i<=_finalTime)
+    {
+        _timelist.push_back(i);
+        i+=_updateIntervall;
+    }
+
+    ///Check if specified final and update times are compliant with available data
+    const char * check_str;
+    struct stat times;
+    for(auto elem : _timelist) {
+        check_str = (_filepath + "Z_" + std::to_string(_elevationlist[0])
+                + "/t_" + std::to_string(elem) + ".csv").c_str();
+
+        if ( stat(check_str, &times) != 0 )
+        {
+            std::cout << "ERROR:\tSpecified times are not compliant with JPSfire data " << check_str << std::endl;
+            // Why does Log not work here??
+            //Log->Write(ERROR:\tSpecified times are not compliant with JPSfire data);
+            exit(EXIT_FAILURE);
+        //std::cout << check_str << std::endl;
+        }
+    }
+}
 
 void FDSMeshStorage::CreateFDSMeshes()
 {
@@ -106,11 +142,10 @@ void FDSMeshStorage::CreateFDSMeshes()
             //std::cout << "i " << i << std::endl;
             for (auto &j:_timelist)
             {
-                std::string suffix = "Z_" + std::to_string(i) + "/t_"+std::to_string(j) + ".csv";
                 //std::cout << "j " << j << std::endl;
                 std::string str = "Z_" + std::to_string(i) + "/t_"+std::to_string(j);
                 //std::cout << _filepath+suffix << std::endl;
-                FDSMesh mesh(_filepath+suffix);
+                FDSMesh mesh(_filepath + str + ".csv");
                 //std::string str = "t_"+std::to_string(i);
                 _fMContainer.insert(std::make_pair(str, mesh));
             }

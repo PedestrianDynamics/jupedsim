@@ -33,13 +33,15 @@
 #include <unordered_map>
 #include <vector>
 #include "FDSMesh.h"
-
+#include "../../IO/OutputHandler.h"
 
 class Point;
 class Crossing;
 
-// Container to store all FDSMeshs. Sorted first by coordinates of the corresponding door, secondly by simulation's global time
+// Container to store all FDSMeshs. Sorted by simulation's global time
 using FDSMeshContainer = std::unordered_map<std::string, FDSMesh>;
+
+extern OutputHandler* Log;
 
 class FDSMeshStorage
 {
@@ -48,7 +50,7 @@ public:
     FDSMeshStorage(std::string filepath, double finalTime, double updateIntervall, std::string study);
     ~FDSMeshStorage();
     void CreateTimeList();
-    void CreateElevationList();
+    bool CreateElevationList();
     void CreateFDSMeshes();
     const FDSMesh& get_FDSMesh(const double &simTime, const double &pedElev);
     std::string GetStudy() const;

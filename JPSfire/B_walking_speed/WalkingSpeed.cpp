@@ -27,11 +27,8 @@
  **/
 
 #include "WalkingSpeed.h"
-//#include "../routing/cognitive_map/NavigationGraph.h"
 #include "../../geometry/Building.h"
-//#include "../routing/cognitive_map/cognitiveMap/cognitivemap.h"
 #include "../../pedestrian/Pedestrian.h"
-//#include "../../geometry/SubRoom.h"
 #include "FDSMesh.h"
 #include "FDSMeshStorage.h"
 #include "../../pedestrian/PedDistributor.h"
@@ -79,6 +76,7 @@ bool WalkingSpeed::LoadJPSfireInfo(const std::string &projectFilename )
        return true;
    }
    return false;
+   // ToDo XML error handling?
 }
 
 
