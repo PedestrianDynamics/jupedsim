@@ -34,8 +34,11 @@
 #include <stdio.h>
 #include <glob.h>
 #include <string>
+#ifdef _WIN32
+#include <direct.h>
+#else
 #include <sys/stat.h>
-
+#endif
 
 
 FDSMeshStorage::FDSMeshStorage()
@@ -101,8 +104,6 @@ bool FDSMeshStorage::CreateElevationList()
         //Log->Write(ERROR:\tCould not find suitable grid elevations in %s", _filepath);
         exit(EXIT_FAILURE);
     }
-    //for(auto elem : _elevationlist)
-        //std::cout << elem << std::endl;
 }
 
 

@@ -34,6 +34,8 @@
 #include "../../pedestrian/PedDistributor.h"
 #include "../../tinyxml/tinyxml.h"
 #include <set>
+#include <algorithm>
+#include <math.h>
 
 WalkingSpeed::WalkingSpeed(const Building * b)
 {
@@ -67,7 +69,7 @@ bool WalkingSpeed::LoadJPSfireInfo(const std::string &projectFilename )
 
    TiXmlElement* JPSfireCompElem = JPSfireNode->FirstChildElement("B_walking_speed");
    if(JPSfireCompElem) {
-       std::string _study = xmltoa(JPSfireCompElem->Attribute("study"), "Jin1978");
+       std::string _study = xmltoa(JPSfireCompElem->Attribute("study"), "");
        std::string _filepath = xmltoa(JPSfireCompElem->Attribute("extinction_grids"), "");
        double _updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
        double _finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
@@ -104,27 +106,18 @@ const std::shared_ptr<FDSMeshStorage> WalkingSpeed::get_FMStorage()
 
 double WalkingSpeed::FrantzichNilsson2003(double &walking_speed, double ExtinctionCoefficient)
 {
-     //According to Frantzich+Nilsson2003
-    walking_speed = -0.01192971*pow(ExtinctionCoefficient,3)+ 0.1621356*pow(ExtinctionCoefficient, 2)-0.75296314*ExtinctionCoefficient+1.6439047;
-    return walking_speed;
-}
-
-double WalkingSpeed::Fridolf2013(double ExtinctionCoefficient, double &walking_speed)
-{
-    //According to Fridolf2013
-    walking_speed = 1.19 - 0.14*ExtinctionCoefficient;
+    //According to Frantzich+Nilsson2003
+    walking_speed = std::max(0.3, walking_speed * (1 + (-0.057 / 0.706) * ExtinctionCoefficient) );
     return walking_speed;
 }
 
 double WalkingSpeed::Jin1978(double ExtinctionCoefficient, double &walking_speed)
 {
     //According to Jin1978
-    if(ExtinctionCoefficient > 5) {
-       walking_speed = 0.2;
-    }
-    else {
-    walking_speed = 0.96 - 0.30*ExtinctionCoefficient;
-    }
+    walking_speed = std::max(0.3, walking_speed * ( -0.54991616 * pow(ExtinctionCoefficient, 3) +
+                                 -0.05957671 * pow(ExtinctionCoefficient, 2)
+                                 -0.06606845 * ExtinctionCoefficient + 1.0025715) );
+
     return walking_speed;
 }
 
@@ -142,11 +135,12 @@ double WalkingSpeed::WalkingInSmoke(const Pedestrian* p, double &walking_speed)
             if (study=="Frantzich+Nilsson2003"){
                 FrantzichNilsson2003(walking_speed, ExtinctionCoefficient);
             }
-            else if (study=="Fridolf2013"){
-                Fridolf2013(ExtinctionCoefficient, walking_speed);
-            }
             else if (study=="Jin1978"){
                 Jin1978(ExtinctionCoefficient, walking_speed);
+            }
+            else {
+                Log->Write("ERROR:\tNo study specified");
+                exit(EXIT_FAILURE);
             }
 
     //Generally check if v0 < reduced walking_speed
