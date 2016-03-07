@@ -57,9 +57,7 @@ FDSMeshStorage::FDSMeshStorage(string filepath, double finalTime, double updateI
     const char * p = _filepath.c_str();
     if ( stat(p, &extinction_grids) != 0 )
     {
-        std::cout << "ERROR:\tCould not find directory " << _filepath << std::endl;
-        // Why does Log not work here??
-        //Log->Write(ERROR:\tERROR:\tCould not find directory %s", _filepath);
+        Log->Write("ERROR:\tCould not find directory %s", _filepath.c_str());
         exit(EXIT_FAILURE);
     }
     else {
@@ -99,9 +97,7 @@ bool FDSMeshStorage::CreateElevationList()
         return true;
     }
     else {
-        std::cout << "ERROR:\tCould not find suitable grid elevations in " << _filepath << std::endl;
-        // Why does Log not work here??
-        //Log->Write(ERROR:\tCould not find suitable grid elevations in %s", _filepath);
+        Log->Write("ERROR:\tCould not find suitable grid elevations in %s", _filepath.c_str());
         exit(EXIT_FAILURE);
     }
 }
@@ -126,11 +122,8 @@ void FDSMeshStorage::CreateTimeList()
 
         if ( stat(check_str, &times) != 0 )
         {
-            std::cout << "ERROR:\tSpecified times are not compliant with JPSfire data " << check_str << std::endl;
-            // Why does Log not work here??
-            //Log->Write(ERROR:\tSpecified times are not compliant with JPSfire data);
+            Log->Write("ERROR:\tSpecified times are not compliant with JPSfire data ", check_str);
             exit(EXIT_FAILURE);
-        //std::cout << check_str << std::endl;
         }
     }
 }
