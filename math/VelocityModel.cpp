@@ -117,7 +117,7 @@ bool VelocityModel::Init (Building* building)
               peds_size--;
               continue;
          }
-         Point target = ped->GetExitLine()->LotPoint(ped->GetPos()); // todo: check: ar.graf: LotPoint() or ShortestPoint()
+         Point target = ped->GetExitLine()->ShortestPoint(ped->GetPos());
          Point d = target - ped->GetPos();
          double dist = d.Norm();
          if (dist != 0.0) {
@@ -444,15 +444,15 @@ Point VelocityModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
           {
                 f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)), centroid, inside);
           }
-           int uid1= goal->GetUniqueID();
-           int uid2=ped->GetExitIndex();
-           // ignore my transition consider closed doors
-           //closed doors are considered as wall
-          
-           if((uid1 != uid2) || (goal->IsOpen()==false ))
-           {
-                 f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)), centroid, inside);
-           }
+//           int uid1= goal->GetUniqueID();
+//           int uid2=ped->GetExitIndex();
+//           // ignore my transition consider closed doors
+//           //closed doors are considered as wall
+//
+//           if((uid1 != uid2) || (goal->IsOpen()==false ))
+//           {
+//                 f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)), centroid, inside);
+//           }
      }
 
      return f;
