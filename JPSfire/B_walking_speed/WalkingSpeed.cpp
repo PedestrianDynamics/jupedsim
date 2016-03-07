@@ -70,11 +70,13 @@ bool WalkingSpeed::LoadJPSfireInfo(const std::string &projectFilename )
    TiXmlElement* JPSfireCompElem = JPSfireNode->FirstChildElement("B_walking_speed");
    if(JPSfireCompElem) {
        std::string _study = xmltoa(JPSfireCompElem->Attribute("study"), "");
+       std::string _irritant = xmltoa(JPSfireCompElem->Attribute("irritant"), "");
        std::string _filepath = xmltoa(JPSfireCompElem->Attribute("extinction_grids"), "");
        double _updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
        double _finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
-       Log->Write("INFO:\tModule B_walking_speed: study: %s \n\tdata: %s \n\tupdate time: %.1f final time: %.1f", _study.c_str(), _filepath.c_str(), _updateIntervall, _finalTime);
-       _FMStorage = std::make_shared<FDSMeshStorage>(_filepath, _finalTime, _updateIntervall, _study);
+       Log->Write("INFO:\tModule B_walking_speed: study: %s \n\tdata: %s \n\tupdate time: %.1f s | final time: %.1f s | irritant: %s",
+                  _study.c_str(), _filepath.c_str(), _updateIntervall, _finalTime, _irritant.c_str());
+       _FMStorage = std::make_shared<FDSMeshStorage>(_filepath, _finalTime, _updateIntervall, _study, _irritant);
        return true;
    }
    return false;
@@ -107,17 +109,37 @@ const std::shared_ptr<FDSMeshStorage> WalkingSpeed::get_FMStorage()
 double WalkingSpeed::FrantzichNilsson2003(double &walking_speed, double ExtinctionCoefficient)
 {
     //According to Frantzich+Nilsson2003
-    walking_speed = std::max(0.3, walking_speed * (1 + (-0.057 / 0.706) * ExtinctionCoefficient) );
+    std::string irritant = _FMStorage->IrritantOrNot();
+    if(irritant=="false") {
+        walking_speed = std::max(0.3, walking_speed * (1 + (-0.057 / 0.706) * ExtinctionCoefficient) );
+    }
+//    elif {
+
+//    }
+    else {
+        Log->Write("ERROR:\tSpecify if irritant or non-irritant smoke shall be cosidered");
+        exit(EXIT_FAILURE);
+    }
     return walking_speed;
 }
 
 double WalkingSpeed::Jin1978(double ExtinctionCoefficient, double &walking_speed)
 {
     //According to Jin1978
-    walking_speed = std::max(0.3, walking_speed * ( -0.54991616 * pow(ExtinctionCoefficient, 3) +
+    std::string irritant = _FMStorage->IrritantOrNot();
+    if(irritant=="false") {
+        walking_speed = std::max(0.3, walking_speed * ( -0.54991616 * pow(ExtinctionCoefficient, 3) +
                                  -0.05957671 * pow(ExtinctionCoefficient, 2)
                                  -0.06606845 * ExtinctionCoefficient + 1.0025715) );
-
+    }
+    else if(irritant=="true") {
+        walking_speed = std::max(0.3, walking_speed *
+                                 (- pow( 112236.0553, (ExtinctionCoefficient-0.532027513) ) + 0.988158598 ));
+    }
+    else {
+        Log->Write("ERROR:\tSpecify if irritant or non-irritant smoke shall be cosidered");
+        exit(EXIT_FAILURE);
+    }
     return walking_speed;
 }
 

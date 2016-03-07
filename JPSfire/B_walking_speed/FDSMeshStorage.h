@@ -47,18 +47,20 @@ class FDSMeshStorage
 {
 public:
     FDSMeshStorage();
-    FDSMeshStorage(std::string filepath, double finalTime, double updateIntervall, std::string study);
+    FDSMeshStorage(std::string filepath, double finalTime, double updateIntervall, std::string study, std::string irritant);
     ~FDSMeshStorage();
     void CreateTimeList();
     bool CreateElevationList();
     void CreateFDSMeshes();
     const FDSMesh& get_FDSMesh(const double &simTime, const double &pedElev);
     std::string GetStudy() const;
+    std::string IrritantOrNot() const;
 
 private:
     FDSMeshContainer _fMContainer;
     std::string _filepath;
     std::string _study;
+    std::string _irritant;
     double _updateIntervall;
     double _finalTime;
     std::vector<double> _timelist;

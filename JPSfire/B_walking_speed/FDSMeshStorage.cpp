@@ -46,10 +46,10 @@ FDSMeshStorage::FDSMeshStorage()
 
 }
 
-FDSMeshStorage::FDSMeshStorage(string filepath, double finalTime, double updateIntervall, string study) :
+FDSMeshStorage::FDSMeshStorage(string filepath, double finalTime, double updateIntervall, string study, string irritant) :
     _filepath(filepath), _finalTime(finalTime),
     _updateIntervall(updateIntervall), _study(study),
-    _elevationlist(), _timelist()
+    _elevationlist(), _timelist(), _irritant(irritant)
 {
     ///Check if _filepath is existent
     struct stat extinction_grids;
@@ -192,4 +192,9 @@ double FDSMeshStorage::GetNearestHeight(double _PedEyeHeight)
 std::string FDSMeshStorage::GetStudy() const
 {
     return _study;
+}
+
+std::string FDSMeshStorage::IrritantOrNot() const
+{
+    return _irritant;
 }
