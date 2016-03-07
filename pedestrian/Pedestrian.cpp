@@ -111,15 +111,66 @@ Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& buil
      _subRoomID(agentsParameters.GetSubroomID()),
      _subRoomUID(building.GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetUID()),
      _patienceTime(agentsParameters.GetPatience()),
-     _premovement(agentsParameters.GetPremovementTime())
+     _premovement(agentsParameters.GetPremovementTime()),
+     _mentalMap(),
+     _destHistory()
 {
-
+     _roomID = -1;
+     _subRoomID = -1;
+     _subRoomUID = -1;
+     _oldRoomID = -1;
+     _oldSubRoomID = -1;
+     _exitIndex = -1;
+     _id = _agentsCreated;//default id
+     _mass = 1;
+     _tau = 0.5;
+     _T = 1.0;
+     _newOrientationFlag = false;
+     _newOrientationDelay = 0; //0 seconds, in steps
+     _tmpFirstOrientation = true;
+     _turninAngle = 0.0;
+     _ellipse = JEllipse();
+     //_navLine = new NavLine(); //FIXME? argraf : rather nullptr and Setter includes correct uid (done below)
+     _navLine = nullptr;
+     _router = NULL;
+     _building = NULL;
+     _reroutingThreshold = 0.0; // new orientation after 10 seconds, value is incremented
+     _timeBeforeRerouting = 0.0;
+     _reroutingEnabled = false;
+     _timeInJam = 0.0;
+     _patienceTime = 5.0;// time after which the ped feels to be in jam
+     _desiredFinalDestination = FINAL_DEST_OUT;
+     _mentalMap = map<int, int>();
+     _destHistory = vector<int>();
+     _deltaT = 0.01;
+     _updateRate = _deltaT;
+     _V0 = Point(0,0);
+     _lastPosition = Point(0,0);
+     _lastCellPosition = -1;
+     _recordingTime = 20; //seconds
+     //_knownDoors = map<int, NavLineState>();
+     _knownDoors.clear();
+     _height = 170;
+     _age = 30;
+     _gender = "male";
+     _trip = vector<int> ();
+     _group = -1;
+     _spotlight = false;
+     _V0UpStairs=0.6;
+     _V0DownStairs=0.6;
+     _EscalatorUpStairs=0.8;
+     _EscalatorDownStairs=0.8;
+     _V0IdleEscalatorUpStairs=0.6;
+     _V0IdleEscalatorDownStairs=0.6;
+     _distToBlockade=0.0;
+     _routingStrategy=ROUTING_GLOBAL_SHORTEST;
+     _lastE0 = Point(0,0);
+     _agentsCreated++;//increase the number of object created
 }
 
 
 Pedestrian::~Pedestrian()
 {
-     if(_navLine) delete _navLine;
 }
 
 
@@ -173,7 +224,7 @@ void Pedestrian::SetExitIndex(int i)
      _exitIndex = i;
      //save that destination for that room
      _mentalMap[GetUniqueRoomID()] = i;
-     _destHistory.push_back(i);
+     //_destHistory.push_back(i);
 }
 
 void Pedestrian::SetExitLine(const NavLine* l) //FIXME? argraf : _navLine = new NavLine(*l); this would have a navLine with consistent uid (done below)
@@ -181,11 +232,13 @@ void Pedestrian::SetExitLine(const NavLine* l) //FIXME? argraf : _navLine = new 
      //_navLine = l;
      //_navLine->SetPoint1(l->GetPoint1());
      //_navLine->SetPoint2(l->GetPoint2());
-     if(l && l != _navLine){
-          if(_navLine)
-               delete _navLine;
-          _navLine = new NavLine(*l);
+     if(l) {
+          _navLine = std::unique_ptr<NavLine>(new NavLine(*l));
      }
+     /*else if(l && _navLine && *l != *_navLine && l->GetUniqueID() != _navLine->GetUniqueID()){
+          delete _navLine;
+          _navLine = new NavLine(*l);
+     }*/
 }
 
 void Pedestrian::SetPos(const Point& pos, bool initial)
@@ -297,7 +350,7 @@ int Pedestrian::GetExitIndex() const
 
 NavLine* Pedestrian::GetExitLine() const
 {
-     return _navLine;
+     return _navLine.get();
 }
 
 const vector<int>& Pedestrian::GetTrip() const
@@ -893,6 +946,7 @@ int Pedestrian::FindRoute()
           Log->Write("ERROR:\t one or more routers does not exit! Check your router_ids");
           return -1;
      }
+     bool isinsub = (_building->GetAllRooms().at(this->GetRoomID())->GetSubRoom(this->GetSubRoomID())->IsInSubRoom(this));
      return _router->FindExit(this);
 }
 
@@ -1039,4 +1093,31 @@ int Pedestrian::GetColor() const
 }
 
 
+bool Pedestrian::Relocate(std::function<void(const Pedestrian&)> flowupdater) {
+     bool assigned = false;
+     auto allRooms = _building->GetAllRooms();
 
+     for (auto& it_room : allRooms)
+     {
+          auto& room=it_room.second;
+          auto subrooms = room->GetAllSubRooms();
+          map<int, std::shared_ptr<SubRoom>>::iterator sub =
+                  std::find_if(subrooms.begin(), subrooms.end(), [&] (std::pair<int, std::shared_ptr<SubRoom>> iterator) {
+                         //if(!(iterator.second->IsDirectlyConnectedWith(allRooms[_roomID]->GetSubRoom(_subRoomID))) && iterator.second->IsInSubRoom(this))
+                         //     Log->Write("WARNING Pedestrian [%d] got pressed into non neighbor-subroom! From [%d/%d] to [%d/%d]", _id, _roomID, _subRoomID, iterator.second->GetSubRoomID(), room->GetID());
+                      return ((iterator.second->IsDirectlyConnectedWith(allRooms[_roomID]->GetSubRoom(_subRoomID))) && iterator.second->IsInSubRoom(this));
+                  });
+          if(sub != subrooms.end()) {
+               allRooms.at(GetRoomID())->SetEgressTime(GetGlobalTime()); //set Egresstime to old room
+               flowupdater(*this); //@todo: ar.graf : this call should move into a critical region? check plz
+               ClearMentalMap(); // reset the destination
+               //ped->FindRoute();
+               SetRoomID(room->GetID(), room->GetCaption());
+               SetSubRoomID(sub->second->GetSubRoomID());
+               SetSubRoomUID(sub->second->GetUID());
+               assigned = true;
+               break;
+          }
+     }
+     return assigned;
+}

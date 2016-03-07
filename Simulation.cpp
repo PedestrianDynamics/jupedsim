@@ -334,50 +334,11 @@ void Simulation::UpdateRoutesAndLocations()
                // the ped is removed from the simulation, if it could not be reassigned
                else if (!sub0->IsInSubRoom(ped))
                {
+
                     bool assigned = false;
-                    auto& allRooms = _building->GetAllRooms();
-
-                    for (auto&& it_room : allRooms)
-                    {
-                         auto&& room=it_room.second;
-                         for (auto&& it_sub : room->GetAllSubRooms())
-                         {
-                              auto&& sub=it_sub.second;
-                              auto&& old_room =allRooms.at(ped->GetRoomID());
-                              auto&& old_sub =old_room->GetSubRoom(
-                                        ped->GetSubRoomID());
-                              if (sub->IsDirectlyConnectedWith(old_sub)
-                                        && sub->IsInSubRoom(ped->GetPos()))
-                              {
-                                   ped->SetRoomID(room->GetID(),
-                                             room->GetCaption());
-                                   ped->SetSubRoomID(sub->GetSubRoomID());
-                                   ped->SetSubRoomUID(sub->GetUID());
-                                   //the agent left the old iroom
-                                   //actualize the egress time for that iroom
-                                   old_room->SetEgressTime(ped->GetGlobalTime());
-
-                                   //the pedestrian did not used the door to exit the room
-                                   //todo: optimize with distance square
-                                   //if(ped->GetDistanceToNextTarget()>0.5)
-                                   //{
-                                   //   Log->Write("WARNING:\t pedestrian [%d] left the room in an unusual way. Please check",ped->GetID());
-                                   //   Log->Write("        \t distance to previous target is %f",ped->GetDistanceToNextTarget());
-                                   //}
-
-                                   //also statistic for internal doors
-                                   UpdateFlowAtDoors(*ped); //@todo: ar.graf : this call should move into a critical region? check plz
-
-                                   ped->ClearMentalMap(); // reset the destination
-                                   //ped->FindRoute();
-
-                                   assigned = true;
-                                   break;
-                              }
-                         }
-                         if (assigned)
-                              break; // stop the loop
-                    }
+                    auto allRooms = _building->GetAllRooms();
+                    std::function<void(const Pedestrian&)> f = std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
+                    assigned = ped->Relocate(f);
                     //this will delete agents, that are pushed outside (maybe even if inside obstacles??)
                     if (!assigned) {
 #pragma omp critical
@@ -388,7 +349,6 @@ void Simulation::UpdateRoutesAndLocations()
 
                     }
                }
-
                //finally actualize the route
                if (ped->FindRoute() == -1) {
                     //a destination could not be found for that pedestrian
@@ -398,6 +358,7 @@ void Simulation::UpdateRoutesAndLocations()
                     pedsToRemove.push_back(ped);
                }
           }
+#pragma omp barrier
      } //omp parallel
 
 #ifdef _USE_PROTOCOL_BUFFER

@@ -102,7 +102,7 @@ bool FFRouter::Init(const Building* const building)
      LocalFloorfieldViaFM* ptrToNew = nullptr;
      double tempDistance = 0.;
      //type of allRooms: const std::map<int, std::unique_ptr<Room> >&
-     const std::map<int, std::unique_ptr<Room> >& allRooms = _building->GetAllRooms();
+     const std::map<int, std::shared_ptr<Room> >& allRooms = _building->GetAllRooms();
      for(auto& pair : allRooms) {
 #ifdef DEBUG
           std::cerr << "Creating Floorfield for Room: " << pair.first << std::endl;
