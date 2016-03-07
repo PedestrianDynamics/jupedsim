@@ -147,14 +147,18 @@ bool PedDistributor::InitDistributor(const string& fileName, const std::map<int,
                double risk_tolerance_sigma = xmltof(e->Attribute("risk_tolerance_sigma"),NAN);
                Log->Write("INFO:\trisk tolerance mu = %f, risk tolerance sigma = %f\n", risk_tolerance_mean, risk_tolerance_sigma);
                dis->InitRiskTolerance(distribution_type,risk_tolerance_mean,risk_tolerance_sigma);
-          }
-
-          if(e->Attribute("risk_tolerance_alpha") && e->Attribute("risk_tolerance_beta")) {
+          } else if(e->Attribute("risk_tolerance_alpha") && e->Attribute("risk_tolerance_beta")) {
                std::string distribution_type="beta";
                double risk_tolerance_alpha = xmltof(e->Attribute("risk_tolerance_alpha"),NAN);
                double risk_tolerance_beta = xmltof(e->Attribute("risk_tolerance_beta"),NAN);
                Log->Write("INFO:\trisk tolerance alpha = %f, risk tolerance beta = %f\n", risk_tolerance_alpha, risk_tolerance_beta);
                dis->InitRiskTolerance(distribution_type,risk_tolerance_alpha,risk_tolerance_beta);
+          } else {
+               std::string distribution_type="normal";
+               double risk_tolerance_mean = 0.;
+               double risk_tolerance_sigma = 1.;
+               Log->Write("INFO:\trisk tolerance mu = %f, risk tolerance sigma = %f\n", risk_tolerance_mean, risk_tolerance_sigma);
+               dis->InitRiskTolerance(distribution_type,risk_tolerance_mean,risk_tolerance_sigma);
           }
 
 

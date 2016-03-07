@@ -149,7 +149,7 @@ private:
       * @input a TiXmlNode with the first child "route_choice_models"
       * fails if no router given or NULL
       */
-     bool ParseRoutingStrategies(TiXmlNode* routingNode);
+     bool ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* agentDistri);
 
      /**
       * @brief ParseCogMapOpts (parsing additional options for the cognitiveMapRouter)

@@ -61,6 +61,7 @@
 
 
 #include "Router.h"
+#include "../general/Macros.h"
 #include "../geometry/Building.h"
 #include "../routing/LocalFloorfieldViaFM.h"
 
@@ -110,7 +111,8 @@ public:
       *
       */
      FFRouter();
-     FFRouter(const Building* const);
+     FFRouter(int id, RoutingStrategy s);
+     //FFRouter(const Building* const);
 
      /**
       * Destructor
@@ -131,7 +133,7 @@ public:
       * \note [any note about the function you might have]
       * \warning [any warning if necessary]
       */
-     virtual bool Init(const Building* const building);
+     virtual bool Init(Building* building);
 
      /*!
       * \brief interface used by __Pedestrian__, sets (*p).exitline/.exitindex
@@ -166,6 +168,8 @@ protected:
      const Building*                          _building;
      std::map<int, LocalFloorfieldViaFM*>     _locffviafm;
      FloorfieldViaFM*                         _globalFF;
+     std::map<int, Transition*>               _TransByUID;
+     std::map<int, Transition*>               _ExitsByUID;
 
      std::map<int, int>     goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
      std::map<int, int>     goalToLineUIDmap2;
