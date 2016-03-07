@@ -28,13 +28,11 @@
  **/
 #include "FDSMeshStorage.h"
 #include "../../IO/OutputHandler.h"
-#include "../../pedestrian/PedDistributor.h"
-#include "../../geometry/Building.h"
 #include <unistd.h>
 #include <stdio.h>
 #include <glob.h>
 #include <string>
-#ifdef _WIN32
+#if defined(_WIN64) || defined(_WIN32)
 #include <direct.h>
 #else
 #include <sys/stat.h>
@@ -46,7 +44,7 @@ FDSMeshStorage::FDSMeshStorage()
 
 }
 
-FDSMeshStorage::FDSMeshStorage(string filepath, double finalTime, double updateIntervall, string study, string irritant) :
+FDSMeshStorage::FDSMeshStorage(std::string filepath, double finalTime, double updateIntervall, std::string study, std::string irritant) :
     _filepath(filepath), _finalTime(finalTime),
     _updateIntervall(updateIntervall), _study(study),
     _elevationlist(), _timelist(), _irritant(irritant)

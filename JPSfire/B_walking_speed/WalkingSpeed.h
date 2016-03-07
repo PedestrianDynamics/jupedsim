@@ -29,7 +29,6 @@
 #ifndef WALKINGSPEED_H
 #define WALKINGSPEED_H 1
 
-//#include "AbstractSensor.h"
 #include <memory>
 
 class Pedestrian;

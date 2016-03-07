@@ -29,7 +29,7 @@
 #include "WalkingSpeed.h"
 #include "../../geometry/Building.h"
 #include "../../pedestrian/Pedestrian.h"
-#include "FDSMesh.h"
+#include "../generic/FDSMesh.h"
 #include "FDSMeshStorage.h"
 #include "../../pedestrian/PedDistributor.h"
 #include "../../tinyxml/tinyxml.h"
@@ -109,17 +109,7 @@ const std::shared_ptr<FDSMeshStorage> WalkingSpeed::get_FMStorage()
 double WalkingSpeed::FrantzichNilsson2003(double &walking_speed, double ExtinctionCoefficient)
 {
     //According to Frantzich+Nilsson2003
-    std::string irritant = _FMStorage->IrritantOrNot();
-    if(irritant=="false") {
-        walking_speed = std::max(0.3, walking_speed * (1 + (-0.057 / 0.706) * ExtinctionCoefficient) );
-    }
-//    elif {
-
-//    }
-    else {
-        Log->Write("ERROR:\tSpecify if irritant or non-irritant smoke shall be cosidered");
-        exit(EXIT_FAILURE);
-    }
+    walking_speed = std::max(0.3, walking_speed * (1 + (-0.057 / 0.706) * ExtinctionCoefficient) );
     return walking_speed;
 }
 
@@ -150,7 +140,7 @@ double WalkingSpeed::WalkingInSmoke(const Pedestrian* p, double &walking_speed)
 
     if((ExtinctionCoefficient < 10E-6) || (std::isnan(ExtinctionCoefficient)))   //no obstruction by smoke or NaN check
     {
-        fprintf(stderr, "%f \t%f\n", ExtinctionCoefficient, p->GetEllipse().GetV0());
+        //fprintf(stderr, "%f \t%f\n", ExtinctionCoefficient, p->GetEllipse().GetV0());
         return p->GetEllipse().GetV0();
     }
     else {
@@ -170,7 +160,7 @@ double WalkingSpeed::WalkingInSmoke(const Pedestrian* p, double &walking_speed)
        walking_speed = p->GetEllipse().GetV0();
     }
     }
-   fprintf(stderr, "%f \t%f\n", ExtinctionCoefficient, walking_speed);
+   //fprintf(stderr, "%f \t%f\n", ExtinctionCoefficient, walking_speed);
    return walking_speed;
 }
 

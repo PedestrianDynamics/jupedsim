@@ -320,9 +320,9 @@ set (   source_files
   events/EventManager.cpp
   events/Event.cpp
 
-  JPSfire/B_walking_speed/FDSMesh.cpp
+  JPSfire/generic/FDSMesh.cpp
+  JPSfire/generic/Knot.cpp
   JPSfire/B_walking_speed/FDSMeshStorage.cpp
-  JPSfire/B_walking_speed/Knot.cpp
   JPSfire/B_walking_speed/WalkingSpeed.cpp
   )
 
@@ -435,9 +435,9 @@ set (   header_files
   events/EventManager.h
   events/Event.h
 
-  JPSfire/B_walking_speed/FDSMesh.h
+  JPSfire/generic/FDSMesh.h
+  JPSfire/generic/Knot.h
   JPSfire/B_walking_speed/FDSMeshStorage.h
-  JPSfire/B_walking_speed/Knot.h
   JPSfire/B_walking_speed/WalkingSpeed.h
   )
 

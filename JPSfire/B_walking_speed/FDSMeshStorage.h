@@ -32,7 +32,7 @@
 
 #include <unordered_map>
 #include <vector>
-#include "FDSMesh.h"
+#include "../generic/FDSMesh.h"
 #include "../../IO/OutputHandler.h"
 
 class Point;

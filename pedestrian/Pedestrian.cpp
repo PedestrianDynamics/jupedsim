@@ -36,9 +36,9 @@
 #include "Pedestrian.h"
 #include "PedDistributor.h"
 
-#include "../JPSfire/B_walking_speed/FDSMesh.h"
+#include "../JPSfire/generic/FDSMesh.h"
 #include "../JPSfire/B_walking_speed/FDSMeshStorage.h"
-#include "../JPSfire/B_walking_speed/Knot.h"
+#include "../JPSfire/generic/Knot.h"
 #include "../JPSfire/B_walking_speed/WalkingSpeed.h"
 
 using namespace std;
