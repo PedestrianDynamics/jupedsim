@@ -244,12 +244,13 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
             if (!(grid->includesPoint(A)) || !(grid->includesPoint(B))) {
                 Log->Write("ERROR: \t Destination ID %d is not in grid!", destID);
                 direction._x = direction._y = 0.;
-                return;
+                //return;
+            } else {
+                neggradmap.emplace(destID, nullptr);
+                costmap.emplace(destID, nullptr);
             }
-            neggradmap.emplace(destID, nullptr);
-            costmap.emplace(destID, nullptr);
         }
-        localneggradptr = neggradmap.at(destID);
+        localneggradptr = neggradmap.at(destID); //will fail if above if-clause was entered
         localcostptr = costmap.at(destID);
         if (localneggradptr == nullptr) {
                 //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)

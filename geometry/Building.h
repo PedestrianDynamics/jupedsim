@@ -152,7 +152,7 @@ public:
      Transition* GetTransitionByUID(int uid) const;
 
      //TOD0: rename later to GetGoal
-     Goal* GetFinalGoal(int id);
+     Goal* GetFinalGoal(int id) const;
 
      /**
       * @return the linked-cell grid used for spatial query
