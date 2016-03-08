@@ -66,7 +66,7 @@ private:
      const Building * const _building;
      CMStorageType cognitive_maps;
      AbstractCognitiveMapCreator * creator;
-     std::vector<ptrLandmark> _landmarks;
+     std::vector<ptrRegion> _regions;
 
 
      void CreateCognitiveMap(CMStorageKeyType ped);

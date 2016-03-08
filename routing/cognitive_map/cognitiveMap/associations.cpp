@@ -5,18 +5,18 @@
 
 Association::Association()
 {
-    _waypoint=nullptr;
-    _associatedWaypoint=nullptr;
+    _landmark=nullptr;
+    _associatedLandmark=nullptr;
 
 }
 
-Association::Association(ptrWaypoint waypoint, ptrWaypoint associated_waypoint, bool connected)
+Association::Association(ptrLandmark landmark, ptrLandmark associated_landmark, bool connected)
 {
-    _waypoint=waypoint;
-    _associatedWaypoint=associated_waypoint;
+    _landmark=landmark;
+    _associatedLandmark=associated_landmark;
 
     if (connected)
-        _connection = std::make_shared<Connection>(_waypoint, _associatedWaypoint);
+        _connection = std::make_shared<Connection>(_landmark, _associatedLandmark);
 
     else
         _connection=nullptr;
@@ -27,8 +27,8 @@ Association::Association(ptrWaypoint waypoint, ptrWaypoint associated_waypoint, 
 Association::Association(ptrConnection connection)
 {
     _connection=connection;
-    _waypoint=nullptr;
-    _associatedWaypoint=nullptr;
+    _landmark=nullptr;
+    _associatedLandmark=nullptr;
 }
 
 Association::~Association()
@@ -36,13 +36,13 @@ Association::~Association()
 
 }
 
-ptrWaypoint Association::GetWaypointAssociation(ptrWaypoint waypoint) const
+ptrLandmark Association::GetLandmarkAssociation(ptrLandmark landmark) const
 {
-    if (waypoint==nullptr)
+    if (landmark==nullptr)
         return nullptr;
-    if (_waypoint==waypoint)
+    if (_landmark==landmark)
     {
-        return _associatedWaypoint;
+        return _associatedLandmark;
     }
     else
         return nullptr;

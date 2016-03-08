@@ -1,10 +1,10 @@
 #include "connection.h"
 #include <utility>
 
-Connection::Connection(ptrWaypoint waypoint1, ptrWaypoint waypoint2)
+Connection::Connection(ptrLandmark landmark1, ptrLandmark landmark2)
 {
-    _waypoint1=waypoint1;
-    _waypoint2=waypoint2;
+    _landmark1=landmark1;
+    _landmark2=landmark2;
 }
 
 Connection::~Connection()
@@ -12,9 +12,9 @@ Connection::~Connection()
 
 }
 
-std::pair<ptrWaypoint, ptrWaypoint> Connection::GetWaypoints() const
+std::pair<ptrLandmark, ptrLandmark> Connection::GetLandmarks() const
 {
-    return std::make_pair(_waypoint1, _waypoint2);
+    return std::make_pair(_landmark1, _landmark2);
 
 }
 

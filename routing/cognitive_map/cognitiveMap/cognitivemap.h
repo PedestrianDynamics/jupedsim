@@ -7,8 +7,7 @@
 
 
 #include "associations.h"
-#include "waypoints.h"
-#include "landmark.h"
+#include "region.h"
 #include "../GraphNetwork.h"
 #include "youareherepointer.h"
 #include "cogmapoutputhandler.h"
@@ -29,7 +28,7 @@ class priorityCheck
 {
 public:
   priorityCheck(){}
-  bool operator() (const ptrWaypoint& lhs, const ptrWaypoint& rhs) const
+  bool operator() (const ptrLandmark& lhs, const ptrLandmark& rhs) const
   {
     if (lhs->GetPriority() > rhs->GetPriority())
       return true;
@@ -39,11 +38,11 @@ public:
 };
 
 
-using SortedWaypoints = std::priority_queue<ptrWaypoint,std::vector<ptrWaypoint>,priorityCheck>;
-using Waypoints = std::vector<ptrWaypoint>;
+using SortedLandmarks = std::priority_queue<ptrLandmark,std::vector<ptrLandmark>,priorityCheck>;
+using Landmarks = std::vector<ptrLandmark>;
+using Regions = std::vector<ptrRegion>;
 using ptrBuilding = const Building*;
 using ptrPed = const Pedestrian*;
-using ptrLandmark = std::shared_ptr<Landmark>;
 using ptrGraphNetwork = std::shared_ptr<GraphNetwork>;
 using ptrOutputHandler = std::shared_ptr<CogMapOutputHandler>;
 using ptrConnection = std::shared_ptr<Connection>;
@@ -60,35 +59,52 @@ public:
     void UpdateMap();
     void UpdateDirection();
     void UpdateYAHPointer(const Point &move);
+    //Regions
+    void AddRegions(Regions regions);
+    void AddRegion(ptrRegion region);
+    ptrRegion GetRegionByID(const int& regionID) const;
     // Landmarks
     void AddLandmarksSC(std::vector<ptrLandmark> landmarks);
     void AddLandmarks(std::vector<ptrLandmark> landmarks);
+    void AddLandmarkInRegion(ptrLandmark landmark, ptrRegion region);
     std::vector<ptrLandmark> LookForLandmarks();
-    // Waypoints and associations
-    Waypoints TriggerAssociations(const std::vector<ptrLandmark> &landmarks);
-    void AddWaypoints(Waypoints waypoints);
+    // Associations
+    Landmarks TriggerAssociations(const std::vector<ptrLandmark> &landmarks);
+    void AddAssociatedLandmarks(Landmarks landmarks);
     void AssessDoors();
     // Calculations
-    std::vector<GraphEdge *> SortConShortestPath(ptrWaypoint waypoint, const GraphVertex::EdgesContainer edges);
-    //bool IsAroundWaypoint(const Waypoint& waypoint, GraphEdge* edge) const;
+    std::vector<GraphEdge *> SortConShortestPath(ptrLandmark landmark, const GraphVertex::EdgesContainer edges);
+    //bool IsAroundLandmark(const Landmark& landmark, GraphEdge* edge) const;
     ptrGraphNetwork GetGraphNetwork() const;
-    double ShortestPathDistance(const GraphEdge *edge, const ptrWaypoint waypoint);
+    double ShortestPathDistance(const GraphEdge *edge, const ptrLandmark landmark);
     const Point& GetOwnPos();
     //WriteXML
     void WriteToFile();
-    //evaluate waypoints
+    //evaluate Landmarks
 
-    // Set new waypoints
-    void SetNewWaypoint();
+    // Set new Landmarks
+    void SetNewLandmark();
 
-    void WaypointReached(ptrWaypoint waypoint);
+    void LandmarkReached(ptrLandmark landmark);
 
     //Connections
     std::vector<ptrConnection> GetAllConnections() const;
     void AddConnection(const ptrConnection &connection);
-    void AddConnection(const ptrWaypoint& waypoint1, const ptrWaypoint& waypoint2);
-    void RemoveConnections(const ptrWaypoint& waypoint);
-    Waypoints ConnectedWith(const ptrWaypoint& waypoint) const;
+    void AddConnection(const ptrLandmark& landmark1, const ptrLandmark& landmark2);
+    void RemoveConnections(const ptrLandmark& landmark);
+    Landmarks ConnectedWith(const ptrLandmark& landmark) const;
+
+    //Locater
+
+    void FindCurrentRegion();
+
+
+    //Find targets
+
+    void FindMainDestination();
+    void FindNextTarget();
+
+
 
 private:
     ptrBuilding _building;
@@ -97,12 +113,17 @@ private:
     Associations _assoContainer;
     std::vector<ptrLandmark> _landmarksSubConcious;
     std::vector<ptrLandmark> _landmarks;
-    SortedWaypoints _waypContainerTargetsSorted;
-    std::queue<ptrWaypoint> _waypContainerRecentlyVisited;
-    Waypoints _waypContainer;
+    SortedLandmarks _waypContainerTargetsSorted;
+    std::queue<ptrLandmark> _waypContainerRecentlyVisited;
+    Landmarks _waypContainer;
     YouAreHerePointer _YAHPointer;
     ptrOutputHandler _outputhandler;
     Connections _connections;
+    ptrLandmark _mainDestination;
+    ptrLandmark _nextTarget;
+    Regions _regions;
+    ptrRegion _currentRegion;
+    ptrRegion _targetRegion;
 
     int _frame;
     int _createdWayP;

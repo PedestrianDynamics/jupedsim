@@ -1,20 +1,20 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H
 
-#include "waypoints.h"
-using ptrWaypoint = std::shared_ptr<Waypoint>;
+#include "landmark.h"
+using ptrLandmark = std::shared_ptr<Landmark>;
 
 class Connection
 {
 public:
-    Connection(ptrWaypoint waypoint1, ptrWaypoint waypoint2);
+    Connection(ptrLandmark landmark1, ptrLandmark landmark2);
     ~Connection();
 
-    std::pair<ptrWaypoint,ptrWaypoint> GetWaypoints() const;
+    std::pair<ptrLandmark,ptrLandmark> GetLandmarks() const;
 
 private:
-    ptrWaypoint _waypoint1;
-    ptrWaypoint _waypoint2;
+    ptrLandmark _landmark1;
+    ptrLandmark _landmark2;
 };
 
 #endif // CONNECTION_H

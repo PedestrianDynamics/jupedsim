@@ -63,7 +63,7 @@ CMStorageValueType CognitiveMapStorage::operator[] (CMStorageKeyType key)
      CMStorageType::iterator it = cognitive_maps.find(key);
      if(it == cognitive_maps.end()) {
           CreateCognitiveMap(key);
-          cognitive_maps[key]->AddLandmarksSC(_landmarks);
+          cognitive_maps[key]->AddRegions(_regions);
      }
 
      return cognitive_maps[key];
@@ -77,26 +77,26 @@ void CognitiveMapStorage::ParseLandmarks()
     if (!docGeo.LoadFile()) {
          Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
          Log->Write("\t could not parse the geometry file");
-         Log->Write("No waypoints specified");
+         Log->Write("No landmarks specified");
          return;
     }
 
     TiXmlElement* xRootNode = docGeo.RootElement();
     if( ! xRootNode ) {
          Log->Write("ERROR:\tRoot element does not exist");
-         Log->Write("No waypoints specified");
+         Log->Write("No landmarks specified");
          return ;
     }
 
     if( xRootNode->ValueStr () != "geometry" ) {
          Log->Write("ERROR:\tRoot element value is not 'geometry'.");
-         Log->Write("No waypoints specified");
+         Log->Write("No landmarks specified");
          return;
     }
     if(xRootNode->Attribute("unit"))
          if(std::string(xRootNode->Attribute("unit")) != "m") {
               Log->Write("ERROR:\tOnly the unit m (meters) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
-              Log->Write("No waypoints specified");
+              Log->Write("No landmarks specified");
               return;
          }
 
@@ -106,75 +106,118 @@ void CognitiveMapStorage::ParseLandmarks()
          Log->Write(" \tWrong geometry version!");
          Log->Write(" \tOnly version >= %s supported",JPS_VERSION);
          Log->Write(" \tPlease update the version of your geometry file to %s",JPS_VERSION);
-         Log->Write("No waypoints specified");
+         Log->Write("No landmarks specified");
          return;
     }
 
-
-    //processing the rooms node
-    TiXmlNode*  xLandmarksNode = xRootNode->FirstChild("landmarks");
-    if (!xLandmarksNode) {
-         Log->Write("ERROR: \tGeometry file without landmark definition!");
-         Log->Write("No waypoints specified");
+    //processing the regions node
+    TiXmlNode*  xRegionsNode = xRootNode->FirstChild("regions");
+    if (!xRegionsNode) {
+         Log->Write("ERROR: \tGeometry file without regions definition!");
+         Log->Write("No landmarks specified");
          return;
     }
 
-    for(TiXmlElement* xLandmark = xLandmarksNode->FirstChildElement("landmark"); xLandmark;
-              xLandmark = xLandmark->NextSiblingElement("landmark"))
+    for(TiXmlElement* xRegion = xRegionsNode->FirstChildElement("region"); xRegion;
+              xRegion = xRegion->NextSiblingElement("region"))
     {
 
-        std::string id = xmltoa(xLandmark->Attribute("id"), "-1");
-        std::string caption = xmltoa(xLandmark->Attribute("caption"));
-        std::string roomId = xmltoa(xLandmark->Attribute("subroom1_id"),"-1");
-        std::string lx = xmltoa(xLandmark->Attribute("px"),"-1");
-        std::string ly = xmltoa(xLandmark->Attribute("py"),"-1");
+        std::string id = xmltoa(xRegion->Attribute("id"), "-1");
+        std::string caption = xmltoa(xRegion->Attribute("caption"));
+        std::string pxinmap = xmltoa(xRegion->Attribute("px"),"-1");
+        std::string pyinmap = xmltoa(xRegion->Attribute("py"),"-1");
+        std::string a = xmltoa(xRegion->Attribute("a"),"-1");
+        std::string b = xmltoa(xRegion->Attribute("b"),"-1");
 
-        ptrLandmark landmark (new Landmark(Point(std::stod(lx),std::stod(ly))));
+        ptrRegion region (new Region(Point(std::stod(pxinmap),std::stod(pyinmap))));
 
-        landmark->SetId(std::stoi(id));
-        landmark->SetCaption(caption);
-        landmark->SetRoom(_building->GetSubRoomByUID(std::stoi(roomId)));
+        region->SetId(std::stoi(id));
+        region->SetCaption(caption);
+        region->SetPosInMap(Point(std::stod(pxinmap),std::stod(pyinmap)));
+        region->SetA(std::stod(a));
+        region->SetB(std::stod(b));
 
-        //processing the rooms node
-        TiXmlNode*  xAssociationsNode = xLandmark->FirstChild("associations");
-        if (!xAssociationsNode) {
-             Log->Write("Landmark with no association!");
-             continue;
+
+
+        //processing the landmarks node
+        TiXmlNode*  xLandmarksNode = xRegion->FirstChild("landmarks");
+        if (!xLandmarksNode) {
+             Log->Write("ERROR: \tGeometry file without landmark definition!");
+             Log->Write("No landmarks specified");
+             return;
         }
 
-        for(TiXmlElement* xAsso = xAssociationsNode->FirstChildElement("association"); xAsso;
-           xAsso = xAsso->NextSiblingElement("association"))
+
+
+        for(TiXmlElement* xLandmark = xLandmarksNode->FirstChildElement("landmark"); xLandmark;
+                  xLandmark = xLandmark->NextSiblingElement("landmark"))
         {
-            std::string asso_id = xmltoa(xAsso->Attribute("id"), "-1");
-            std::string asso_caption = xmltoa(xAsso->Attribute("caption"), "0");
-            //std::string asso_type = xmltoa(xAsso->Attribute("type"),"-1");
-            std::string asso_x = xmltoa(xAsso->Attribute("px"),"-1");
-            std::string asso_y = xmltoa(xAsso->Attribute("py"),"-1");
-            std::string asso_a = xmltoa(xAsso->Attribute("a"),"-1");
-            std::string asso_b = xmltoa(xAsso->Attribute("b"),"-1");
-            int connection = std::stoi(xmltoa(xAsso->Attribute("connectedwith"),"-1"));
-            //std::string priority = xmltoa(xAsso->Attribute("priority"),"-1");
 
-            ptrWaypoint waypoint (new Waypoint(Point(std::stod(asso_x),std::stod(asso_y)),
-                                                std::stod(asso_a),std::stod(asso_b)));
-            waypoint->SetId(std::stod(asso_id));
-            std::cout << waypoint->GetId() << std::endl;
-            waypoint->SetCaption(asso_caption);
-            //waypoint->AddConnection(std::stoi(connection));
-            //waypoint->SetPriority(std::stod(priority));
-            bool connected=false;
-            if (connection==landmark->GetId())
-                connected=true;
-            landmark->AddAssociation(std::make_shared<Association>(landmark,waypoint,connected));
+            std::string id = xmltoa(xLandmark->Attribute("id"), "-1");
+            std::string caption = xmltoa(xLandmark->Attribute("caption"));
+            std::string type = xmltoa(xLandmark->Attribute("type"),"-1");
+            std::string roomId = xmltoa(xLandmark->Attribute("subroom1_id"),"-1");
+            std::string pxreal = xmltoa(xLandmark->Attribute("pxreal"),"-1");
+            std::string pyreal = xmltoa(xLandmark->Attribute("pyreal"),"-1");
+            std::string pxinmap = xmltoa(xLandmark->Attribute("px"),"-1");
+            std::string pyinmap = xmltoa(xLandmark->Attribute("py"),"-1");
+            std::string a = xmltoa(xLandmark->Attribute("a"),"-1");
+            std::string b = xmltoa(xLandmark->Attribute("b"),"-1");
 
+            ptrLandmark landmark (new Landmark(Point(std::stod(pxreal),std::stod(pyreal))));
+
+            landmark->SetId(std::stoi(id));
+            landmark->SetCaption(caption);
+            landmark->SetType(type);
+            landmark->SetRealPos(Point(std::stod(pxreal),std::stod(pyreal)));
+            landmark->SetPosInMap(Point(std::stod(pxinmap),std::stod(pyinmap)));
+            landmark->SetA(std::stod(a));
+            landmark->SetB(std::stod(b));
+            landmark->SetRoom(_building->GetSubRoomByUID(std::stoi(roomId)));
+
+            //processing the rooms node
+            TiXmlNode*  xAssociationsNode = xLandmark->FirstChild("associations");
+            if (!xAssociationsNode) {
+                 Log->Write("Landmark with no association!");
+                 continue;
+            }
+
+            for(TiXmlElement* xAsso = xAssociationsNode->FirstChildElement("association"); xAsso;
+               xAsso = xAsso->NextSiblingElement("association"))
+            {
+                std::string asso_id = xmltoa(xAsso->Attribute("id"), "-1");
+                std::string asso_caption = xmltoa(xAsso->Attribute("caption"), "0");
+                //std::string asso_type = xmltoa(xAsso->Attribute("type"),"-1");
+                std::string asso_x = xmltoa(xAsso->Attribute("px"),"-1");
+                std::string asso_y = xmltoa(xAsso->Attribute("py"),"-1");
+                std::string asso_a = xmltoa(xAsso->Attribute("a"),"-1");
+                std::string asso_b = xmltoa(xAsso->Attribute("b"),"-1");
+                int connection = std::stoi(xmltoa(xAsso->Attribute("connectedwith"),"-1"));
+                //std::string priority = xmltoa(xAsso->Attribute("priority"),"-1");
+
+                ptrLandmark assolandmark (new Landmark(Point(std::stod(asso_x),std::stod(asso_y)),
+                                                    std::stod(asso_a),std::stod(asso_b)));
+                assolandmark->SetId(std::stod(asso_id));
+                std::cout << assolandmark->GetId() << std::endl;
+                assolandmark->SetCaption(asso_caption);
+                //assolandmark->AddConnection(std::stoi(connection));
+                //assolandmark->SetPriority(std::stod(priority));
+                bool connected=false;
+                if (connection==landmark->GetId())
+                    connected=true;
+                landmark->AddAssociation(std::make_shared<Association>(landmark,assolandmark,connected));
+
+
+            }
+
+            region->AddLandmark(landmark);
+            Log->Write("INFO:\tLandmark added!");
 
         }
 
-        _landmarks.push_back(landmark);
-        Log->Write("INFO:\tLandmark added!");
-
+        _regions.push_back(region);
+        Log->Write("INFO:\tRegion added!");
     }
-
 }
 
 void CognitiveMapStorage::CreateCognitiveMap(CMStorageKeyType ped)

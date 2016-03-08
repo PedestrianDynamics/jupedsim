@@ -235,10 +235,12 @@ set (   source_files
   routing/cognitive_map/cognitiveMap/associations.cpp
   routing/cognitive_map/cognitiveMap/connection.cpp
   routing/cognitive_map/cognitiveMap/cognitivemap.cpp
-  routing/cognitive_map/cognitiveMap/waypoints.cpp
   routing/cognitive_map/cognitiveMap/landmark.cpp
+  routing/cognitive_map/cognitiveMap/region.cpp
   routing/cognitive_map/cognitiveMap/youareherepointer.cpp
   routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
+
+  routing/cognitive_map/tools/ellipse.cpp
 
   visiLibity/source_code/visilibity.cpp
 
@@ -288,10 +290,12 @@ set (   header_files
   routing/cognitive_map/cognitiveMap/associations.h
   routing/cognitive_map/cognitiveMap/connection.cpp
   routing/cognitive_map/cognitiveMap/cognitivemap.h
-  routing/cognitive_map/cognitiveMap/waypoints.h
   routing/cognitive_map/cognitiveMap/landmark.h
+  routing/cognitive_map/cognitiveMap/region.h
   routing/cognitive_map/cognitiveMap/youareherepointer.h
-  routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
+  routing/cognitive_map/cognitiveMap/cogmapoutputhandler.h
+
+  routing/cognitive_map/tools/ellipse.h
 
   visiLibity/source_code/visilibity.hpp
 

@@ -9,15 +9,19 @@
 
 using ptrRoom = SubRoom*;
 
+class Association;
+using ptrAssociation = std::shared_ptr<Association>;
+using Associations = std::vector<ptrAssociation>;
+using ptrWaypoint = std::shared_ptr<Waypoint>;
+using Waypoints = std::vector<ptrWaypoint>;
 
-class Waypoint
+class Landmark
 {
-    using ptrWaypoint = std::shared_ptr<Waypoint>;
-    using Waypoints = std::vector<ptrWaypoint>;
+
 public:
-    Waypoint(Point pos, ptrRoom room=nullptr);
-    Waypoint(Point pos, double a, double b, int id=-1, ptrRoom room=nullptr);
-    ~Waypoint();
+    Landmark(Point pos, ptrRoom room=nullptr);
+    Landmark(Point pos, double a, double b, int id=-1, ptrRoom room=nullptr);
+    ~Landmark();
 
     //Setter
     void SetId(int id);
@@ -40,11 +44,15 @@ public:
     // Shortest Distance from waypoint egde (ellipse) to specific point
     Point PointOnShortestRoute(const Point &point) const;
     // Check if Waypoint reached (if YAH-Pointer is in Waypoint)
-    bool WaypointReached(const Point& currentYAH);
+    bool LandmarkReached(const Point& currentYAH);
 
     bool Visited() const;
     void SetVisited(bool stat);
 
+
+    // Associations
+    Associations GetAssociations() const;
+    void AddAssociation(ptrAssociation asso);
 
 
 
@@ -61,6 +69,7 @@ private:
     double _priority;
     bool _visited;
     std::list<int> _connectedWith;
+    Associations _assoContainer;
 };
 
 #endif // WAYPOINTS_H
