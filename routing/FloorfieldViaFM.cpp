@@ -223,14 +223,29 @@ void FloorfieldViaFM::getDirectionToDestination(Pedestrian* ped, Point& directio
 }
 
 void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& direction) {
-    //what if goal == -1, meaning closest exit... is GetExitIndex then -1?
+    //what if goal == -1, meaning closest exit... is GetExitIndex then -1? NO... ExitIndex is UID, given by router
     //if (ped->GetFinalDestination() == -1) /*go to closest exit*/ destID = -1;
 
+    if ((key < 0) || (key >= grid->GetnPoints())) { // @todo: ar.graf: this check in a #ifdef-block?
+        Log->Write("ERROR: \t Floorfield tried to access a key out of grid!");
+        direction._x = 0.;
+        direction._y = 0.;
+        return;
+    }
     Point* localneggradptr;
     double* localcostptr;
     #pragma omp critical
     {
         if (neggradmap.count(destID) == 0) {
+            //check, if distID is in this grid
+            Hline* destLine = building->GetTransOrCrossByUID(destID);
+            Point A = destLine->GetPoint1();
+            Point B = destLine->GetPoint2();
+            if (!(grid->includesPoint(A)) || !(grid->includesPoint(B))) {
+                Log->Write("ERROR: \t Destination ID %d is not in grid!", destID);
+                direction._x = direction._y = 0.;
+                return;
+            }
             neggradmap.emplace(destID, nullptr);
             costmap.emplace(destID, nullptr);
         }
@@ -267,17 +282,28 @@ void FloorfieldViaFM::getDirectionToFinalDestination(Pedestrian* ped, Point& dir
     const Point& position = ped->GetPos();
     const int goalID = ped->GetFinalDestination();
     long int key = grid->getKeyAtPoint(position);
-
-    getDirectionToGoalID(goalID);
+    //we assume, only ground level (planeEquation[2] == 0), which is C == 0, allows to exit to goal
+    if ((goalID == -1) && (building->GetSubRoomByUID(ped->GetSubRoomUID())->GetPlaneEquation()[2] == 0.)) {
+        direction._x = neggrad[key]._x;
+        direction._y = neggrad[key]._y;
+    }
+    createLineToGoalID(goalID);
 
     getDirectionToUID(goalToLineUIDmap.at(goalID), key, direction);
 }
 
-void FloorfieldViaFM::getDirectionToGoalID(const int goalID)
+void FloorfieldViaFM::createLineToGoalID(const int goalID)
 {
     Point* localneggradptr;
     double* localcostptr;
-
+    if (goalID < 0) {
+        Log->Write("WARNING: \t goalID was negative in FloorfieldViaFM::createLineToGoalID");
+        return;
+    }
+    if (!building->GetFinalGoal(goalID)) {
+        Log->Write("WARNING: \t goalID was unknown in FloorfieldViaFM::createLineToGoalID");
+        return;
+    }
 #pragma omp critical
     {
         if (goalcostmap.count(goalID) == 0) { //no entry for goalcostmap, so we need to calc FF
@@ -400,9 +426,13 @@ void FloorfieldViaFM::getDirectionToGoalID(const int goalID)
 }
 
 double FloorfieldViaFM::getCostToDestination(const int destID, const Point& position) { //not implemented: trigger calc of new ff not working yet
-    if (costmap.at(destID) == nullptr) {
+    if ((costmap.count(destID) == 0) || (costmap.at(destID) == nullptr)) {
         Point dummy;
         getDirectionToUID(destID, 0, dummy);         //this call induces the floorfieldcalculation
+    }
+    if (costmap.count(destID) == 0) {
+        Log->Write("ERROR: \t DestinationUID %d is invalid / out of grid.", destID);
+        return DBL_MAX;
     }
     return costmap.at(destID)[grid->getKeyAtPoint(position)];
 }
@@ -421,8 +451,8 @@ double FloorfieldViaFM::getDistance2WallAt(const Point& position) {
 void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY) {
     building = buildingArg;
     //init min/max before parsing
-    double xMin = FLT_MAX;
-    double xMax = -FLT_MAX;
+    double xMin = DBL_MAX;
+    double xMax = -DBL_MAX;
     double yMin = xMin;
     double yMax = xMax;
     costmap.clear();
@@ -975,8 +1005,8 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
     bool pointsUp = false;
     bool pointsRight = false;
 
-    row = FLT_MAX;
-    col = FLT_MAX;
+    row = DBL_MAX;
+    col = DBL_MAX;
     aux = -1;
 
 
@@ -1021,11 +1051,11 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
         col = trialfield[aux].cost[0];
         pointsUp = false;
     }
-    if ((col == FLT_MAX) && (row == FLT_MAX)) {
+    if ((col == DBL_MAX) && (row == DBL_MAX)) {
         std::cerr << "Issue 175 in FloorfieldViaFM: invalid combination of row,col (both on max)" <<std::endl;
         return;
     }
-    if (col == FLT_MAX) { //one sided update with row
+    if (col == DBL_MAX) { //one sided update with row
         trialfield[key].cost[0] = onesidedCalc(row, grid->Gethx()/trialfield[key].speed[0]);
         trialfield[key].flag[0] = 1;
         if (pointsRight && (dNeigh.key[0] != -2)) {
@@ -1038,7 +1068,7 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
         return;
     }
 
-    if (row == FLT_MAX) { //one sided update with col
+    if (row == DBL_MAX) { //one sided update with col
         trialfield[key].cost[0] = onesidedCalc(col, grid->Gethy()/trialfield[key].speed[0]);
         trialfield[key].flag[0] = 1;
         if ((pointsUp) && (dNeigh.key[1] != -2)) {
