@@ -35,6 +35,7 @@
 #include "math/GradientModel.h"
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
+#include <boost/progress.hpp>
 
 #ifdef _USE_PROTOCOL_BUFFER
 #include "matsim/HybridSimulationManager.h"
@@ -314,12 +315,12 @@ void Simulation::UpdateRoutesAndLocations()
 
           for (int p = start; p <= end; ++p) {
                Pedestrian* ped = allPeds[p];
-               Room* room = _building->GetRoom(ped->GetRoomID());
-               SubRoom* sub0 = room->GetSubRoom(ped->GetSubRoomID());
+               Room* Room = _building->GetRoom(ped->GetRoomID());
+               SubRoom* sub0 = Room->GetSubRoom(ped->GetSubRoomID());
 
                //set the new room if needed
                if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
-                         && (room->GetCaption() == "outside")) {
+                         && (Room->GetCaption() == "outside")) {
 #pragma omp critical
                     pedsToRemove.push_back(ped);
                } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
@@ -480,11 +481,6 @@ void Simulation::RunHeader(long nPed)
 
 int Simulation::RunBody(double maxSimTime)
 {
-     //needed to control the execution time PART 1
-     //in the case you want to run in no faster than realtime
-     //time_t starttime, endtime;
-     //time(&starttime);
-
      //take the current time from the pedestrian
      double t=Pedestrian::GetGlobalTime();
 
@@ -499,9 +495,11 @@ int Simulation::RunBody(double maxSimTime)
      //to break the main simulation loop
      ProcessAgentsQueue();
      _nPeds = _building->GetAllPedestrians().size();
-     int initialnPeds = _nPeds;
+     unsigned long initialnPeds = _nPeds;
+     unsigned long actualnPeds = _nPeds;
      // main program loop
-
+     std::cout << "\nINFO:\tStart Simulation with " << _nPeds <<  " pedestrians ..." << std::endl;
+     boost::progress_display show_progress( initialnPeds );
      while ( (_nPeds > 0 || (!_agentSrcManager.IsCompleted() && (_hybridSimManager != nullptr))) && t < maxSimTime)
      //while ( _nPeds && t < maxSimTime)
 
@@ -526,6 +524,7 @@ int Simulation::RunBody(double maxSimTime)
                UpdateRoutesAndLocations();
 
                //other updates
+               actualnPeds = _nPeds;
                //someone might have left the building
                _nPeds = _building->GetAllPedestrians().size();
           }
@@ -537,15 +536,17 @@ int Simulation::RunBody(double maxSimTime)
           if (0 == frameNr % writeInterval) {
                _iod->WriteFrame(frameNr / writeInterval, _building.get());
           }
-          Log->ProgressBar(initialnPeds,   initialnPeds -  _nPeds , t);
 
-          // needed to control the execution time PART 2
-          // time(&endtime);
-          // double timeToWait=t-difftime(endtime, starttime);
-          // clock_t goal = timeToWait*1000 + clock();
-          // while (goal > clock());
+          if(actualnPeds-_nPeds)
+                show_progress += actualnPeds - _nPeds;
+
           ++frameNr;
      }
+     if (_nPeds)
+           std::cout << "WARNING: \t End simulation. " << _nPeds <<  " pedestrians NOT evacuated." << std::endl;
+     else
+           std::cout << "\nINFO: \t End simulation. " << initialnPeds <<  " pedestrians evacuated." << std::endl;
+     
      return (int) t;
 }
 
