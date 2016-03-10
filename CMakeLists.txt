@@ -135,6 +135,10 @@ endif(OPENMP_FOUND)
 #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
+#boost
+find_package(Boost REQUIRED )
+
+
 # test all cpp-files in Utest
 if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
   
@@ -239,6 +243,7 @@ set (   source_files
   routing/cognitive_map/cognitiveMap/region.cpp
   routing/cognitive_map/cognitiveMap/youareherepointer.cpp
   routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
+  routing/cognitive_map/cognitiveMap/landmarknetwork.cpp
 
 
   visiLibity/source_code/visilibity.cpp
@@ -293,6 +298,7 @@ set (   header_files
   routing/cognitive_map/cognitiveMap/region.h
   routing/cognitive_map/cognitiveMap/youareherepointer.h
   routing/cognitive_map/cognitiveMap/cogmapoutputhandler.h
+  routing/cognitive_map/cognitiveMap/landmarknetwork.h
 
   visiLibity/source_code/visilibity.hpp
 
@@ -358,6 +364,18 @@ add_library ( core STATIC ${source_files} )
 add_executable( jpscore  main.cpp )
 
 target_link_libraries(jpscore core )
+
+if(Boost_FOUND)
+  message(STATUS "BOOST FOUND: " ${Boost_LIBRARIES})
+  message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
+  message(STATUS "Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIR})
+  message(STATUS "Boost_LIB_VERSION: " ${Boost_LIB_VERSION})
+  link_directories(${Boost_LIBRARY_DIRS})
+  include_directories(${Boost_INCLUDE_DIR})
+  # todo: is this necessary?
+  #target_link_libraries(jpscore ${Boost_LIBRARIES})
+endif()
+
 
 if(WIN32)
   target_link_libraries (jpscore core wsock32)

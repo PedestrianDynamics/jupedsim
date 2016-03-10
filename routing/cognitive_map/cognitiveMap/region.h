@@ -13,6 +13,7 @@ public:
     ~Region();
 
     void AddLandmark(ptrLandmark landmark);
+    ptrLandmark GetRegionAsLandmark();
 
     //Getter
     Landmarks GetLandmarks() const;

@@ -34,8 +34,7 @@ CognitiveMap::CognitiveMap(ptrBuilding b, ptrPed ped)
 
     //Destination and regions
     _currentRegion=nullptr;
-    _mainDestination=nullptr;
-    _targetRegion=nullptr;
+    FindMainDestination();
     _nextTarget=nullptr;
 
 }
@@ -459,13 +458,13 @@ void CognitiveMap::SetNewLandmark()
 void CognitiveMap::LandmarkReached(ptrLandmark landmark)
 {
     //build connection
-    if (!_waypContainerRecentlyVisited.empty())
-        AddConnection(_waypContainerRecentlyVisited.back(),landmark);
+//    if (!_landmarksRecentlyVisited.empty())
+//        AddConnection(_landmarksRecentlyVisited.back(),landmark);
 
-    _waypContainerRecentlyVisited.push(landmark);
+//    _landmarksRecentlyVisited.push_back(landmark);
 
-    if (_waypContainerRecentlyVisited.size()>2)
-        _waypContainerRecentlyVisited.pop();
+//    if (_landmarksRecentlyVisited.size()>2)
+//        _landmarksRecentlyVisited.pop();
 
 }
 
@@ -521,6 +520,22 @@ void CognitiveMap::FindCurrentRegion()
 
 }
 
+const ptrLandmark CognitiveMap::FindConnectionPoint(const ptrRegion &regionA, const ptrRegion &regionB) const
+{
+    for (ptrLandmark landmarka:regionA->GetLandmarks())
+    {
+        for (ptrLandmark landmarkb:regionB->GetLandmarks())
+        {
+            if (landmarka==landmarkb)
+            {
+                return landmarka;
+            }
+        }
+    }
+    return nullptr;
+
+}
+
 void CognitiveMap::FindMainDestination()
 {
     for (ptrRegion region:_regions)
@@ -535,13 +550,97 @@ void CognitiveMap::FindMainDestination()
             }
         }
     }
+    // if no destination was found
+    _mainDestination=nullptr;
+    _targetRegion=nullptr;
+    return;
 }
 
 void CognitiveMap::FindNextTarget()
 {
-    _nextTarget=_mainDestination;
+    _nextTarget=nullptr;
+    // if not already in the region of the maindestination
+    if (_targetRegion!=_currentRegion)
+    {
+        _nextTarget=FindConnectionPoint(_targetRegion,_currentRegion);
+
+        // if connection point does not exist: Path searching to region
+        if (_nextTarget==nullptr)
+        {
+            //Region is target
+            _nextTarget=_targetRegion->GetRegionAsLandmark();
+            return;
+        }
+
+    }
+    else //destination is in current region
+    {
+       _nextTarget=_mainDestination;
+    }
+
+    ptrLandmark nearLandmark = FindNearLandmarkConnectedToTarget(_nextTarget);
+    if (nearLandmark!=nullptr)
+        _nextTarget=nearLandmark;
+
     if (_nextTarget!=nullptr)
         Log->Write("TargetFound");
+}
+
+const ptrLandmark CognitiveMap::FindNearLandmarkConnectedToTarget(const ptrLandmark &target)
+{
+    Landmarks landmarksConnectedToTarget = FindLandmarksConnectedToTarget(target);
+
+    //if target has no connections return nullptr
+    if (landmarksConnectedToTarget.empty())
+        return nullptr;
+
+    ptrLandmark nearest = nullptr;
+    //look for nearest located landmark
+    for (ptrLandmark landmark:landmarksConnectedToTarget)
+    {
+        double mindistance=FLT_MAX;
+
+        Point vector=landmark->GetPosInMap()-_YAHPointer.GetPos();
+        double distance = vector.absoluteValue();
+        if (distance<=mindistance)
+        {
+            nearest=landmark;
+            mindistance=distance;
+        }
+
+
+    }
+
+    return nearest;
+}
+
+Landmarks CognitiveMap::FindLandmarksConnectedToTarget(const ptrLandmark &target)
+{
+    Landmarks connectedLandmarks = ConnectedWith(target);
+
+    // landmarks directly connected to target
+
+    //for (ptrLandmark )
+    //connectedLandmarks.push_back(ConnectedWith(target));
+
+    //Landmarks connected to landmarks connected to target
+    Landmarks furtherCandidates;
+
+    for (int i=0; i<connectedLandmarks.size(); ++i)
+    {
+        furtherCandidates=ConnectedWith(connectedLandmarks[i]);
+
+        for (ptrLandmark candidate : furtherCandidates)
+        {
+            // if candidate not already taken into account, not visited before or target itself
+            if(std::find(connectedLandmarks.begin(), connectedLandmarks.end(), candidate) != connectedLandmarks.end()
+                    && std::find(_landmarksRecentlyVisited.begin(), _landmarksRecentlyVisited.end(), candidate) != _landmarksRecentlyVisited.end()
+                    && candidate!=target)
+            {
+                connectedLandmarks.push_back(candidate);
+            }
+        }
+    }
 }
 
 

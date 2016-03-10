@@ -13,6 +13,7 @@
 #include "cogmapoutputhandler.h"
 #include "connection.h"
 
+
 #include <queue>
 #include <memory>
 #include <vector>
@@ -101,8 +102,11 @@ public:
 
     //Find targets
 
+    const ptrLandmark FindConnectionPoint(const ptrRegion& regionA, const ptrRegion& regionB) const;
     void FindMainDestination();
     void FindNextTarget();
+    const ptrLandmark FindNearLandmarkConnectedToTarget(const ptrLandmark& target);
+    Landmarks FindLandmarksConnectedToTarget(const ptrLandmark& target);
 
 
 
@@ -114,7 +118,7 @@ private:
     std::vector<ptrLandmark> _landmarksSubConcious;
     std::vector<ptrLandmark> _landmarks;
     SortedLandmarks _waypContainerTargetsSorted;
-    std::queue<ptrLandmark> _waypContainerRecentlyVisited;
+    std::vector<ptrLandmark> _landmarksRecentlyVisited;
     Landmarks _waypContainer;
     YouAreHerePointer _YAHPointer;
     ptrOutputHandler _outputhandler;
@@ -124,6 +128,7 @@ private:
     Regions _regions;
     ptrRegion _currentRegion;
     ptrRegion _targetRegion;
+
 
     int _frame;
     int _createdWayP;

@@ -16,6 +16,11 @@ void Region::AddLandmark(ptrLandmark landmark)
 
 }
 
+ptrLandmark Region::GetRegionAsLandmark()
+{
+    return static_cast<ptrLandmark>(this);
+}
+
 Landmarks Region::GetLandmarks() const
 {
     return _landmarks;

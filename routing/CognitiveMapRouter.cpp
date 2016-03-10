@@ -107,9 +107,13 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
         //Cognitive Map /Associations/ Waypoints/ landmarks
 
 //        (*cm_storage)[p]->UpdateMap();
-        (*cm_storage)[p]->FindMainDestination();
+
+        //--------------------COGMAP----------------------------
+        //Find next appropriate landmark
         (*cm_storage)[p]->FindNextTarget();
+        //Find appropriate door to reach next app. landmark
         (*cm_storage)[p]->AssessDoors();
+        //------------------------------------------------------
 
         //Log->Write(std::to_string((*cm_storage)[p]->GetOwnPos().GetX())+" "+std::to_string((*cm_storage)[p]->GetOwnPos().GetY()));
 

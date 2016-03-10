@@ -92,6 +92,9 @@ public:
      }
 
 
+     /// length if point is vector
+     double absoluteValue() const;
+
 
      /// determinant of the square matrix formed by the vectors [ this, v]
      inline double Determinant(const Point &v) const
