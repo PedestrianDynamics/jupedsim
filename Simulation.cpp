@@ -543,9 +543,9 @@ int Simulation::RunBody(double maxSimTime)
           ++frameNr;
      }
      if (_nPeds)
-           std::cout << "WARNING: \t End simulation. " << _nPeds <<  " pedestrians NOT evacuated." << std::endl;
+           std::cout << "WARNING: \tEnd simulation. " << _nPeds <<  " pedestrians NOT evacuated." << std::endl;
      else
-           std::cout << "\nINFO: \t End simulation. " << initialnPeds <<  " pedestrians evacuated." << std::endl;
+           std::cout << "\nINFO: \tEnd simulation. " << initialnPeds <<  " pedestrians evacuated." << std::endl;
      
      return (int) t;
 }
