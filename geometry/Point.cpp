@@ -100,13 +100,6 @@ Point Point::NormalizedMolified() const
      else return Point(0.0, 0.0);
 }
 
-double Point::absoluteValue() const
-{
-
-    return sqrt(_x*_x+_y*_y);
-
-}
-
 
 Point Point::Normalized() const
 {
