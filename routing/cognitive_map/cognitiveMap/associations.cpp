@@ -15,11 +15,11 @@ Association::Association(ptrLandmark landmark, ptrLandmark associated_landmark, 
     _landmark=landmark;
     _associatedLandmark=associated_landmark;
 
-    if (connected)
-        _connection = std::make_shared<Connection>(_landmark, _associatedLandmark);
+//    if (connected)
+//        _connection = std::make_shared<Connection>(_landmark, _associatedLandmark);
 
-    else
-        _connection=nullptr;
+//    else
+         _connection=nullptr;
 
 
 }

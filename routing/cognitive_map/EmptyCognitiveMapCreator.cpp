@@ -45,7 +45,5 @@ CognitiveMap * EmptyCognitiveMapCreator::CreateCognitiveMap(const Pedestrian * p
 {
      CognitiveMap * cm = new CognitiveMap(_building, ped);
 
-     //cm->AddLandmarks();
-
      return cm;
 }

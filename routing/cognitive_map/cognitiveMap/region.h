@@ -2,9 +2,12 @@
 #define REGION_H
 
 #include "landmark.h"
+#include "connection.h"
 
 using ptrLandmark = std::shared_ptr<Landmark>;
 using Landmarks = std::vector<ptrLandmark>;
+using ptrConnection = std::shared_ptr<Connection>;
+using Connections = std::list<ptrConnection>;
 
 class Region : public Landmark
 {
@@ -18,9 +21,19 @@ public:
     //Getter
     Landmarks GetLandmarks() const;
     ptrLandmark GetLandmarkByID(const int& ID) const;
+    bool ContainsLandmark(const ptrLandmark& landmark) const;
+
+
+    //Connections
+    std::vector<ptrConnection> GetAllConnections() const;
+    void AddConnection(const ptrConnection &connection);
+    void AddConnection(const int &id, const std::string &caption, const std::string &type, const ptrLandmark& landmark1, const ptrLandmark& landmark2);
+    void RemoveConnections(const ptrLandmark& landmark);
+    Landmarks ConnectedWith(const ptrLandmark& landmark) const;
 
 private:
     Landmarks _landmarks;
+    Connections _connections;
 };
 
 #endif // REGION_H

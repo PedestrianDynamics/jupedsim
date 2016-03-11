@@ -215,6 +215,33 @@ void CognitiveMapStorage::ParseLandmarks()
 
         }
 
+        //processing the connections node
+        TiXmlNode*  xConnectionsNode = xRegion->FirstChild("connections");
+        if (!xConnectionsNode) {
+             //Log->Write("ERROR: \tGeometry file without landmark definition!");
+             Log->Write("No connections specified");
+             return;
+        }
+
+
+
+        for(TiXmlElement* xConnection = xConnectionsNode->FirstChildElement("connection"); xConnection;
+                  xConnection = xConnection->NextSiblingElement("connection"))
+        {
+            std::string id = xmltoa(xConnection->Attribute("id"), "-1");
+            std::string caption = xmltoa(xConnection->Attribute("caption"));
+            std::string type = xmltoa(xConnection->Attribute("type"),"-1");
+            std::string landmark1 = xmltoa(xConnection->Attribute("landmark1_id"),"-1");
+            std::string landmark2 = xmltoa(xConnection->Attribute("landmark2_id"),"-1");
+
+
+            ptrConnection connection = std::make_shared<Connection>(std::stoi(id),caption,type,
+                                                                    region->GetLandmarkByID(std::stoi(landmark1)),
+                                                                    region->GetLandmarkByID(std::stoi(landmark2)));
+            region->AddConnection(connection);
+            Log->Write("INFO:\tConnection added!");
+        }
+
         _regions.push_back(region);
         Log->Write("INFO:\tRegion added!");
     }
@@ -224,7 +251,8 @@ void CognitiveMapStorage::CreateCognitiveMap(CMStorageKeyType ped)
 {
      //todo: the possibility to have more then one creator.
      cognitive_maps.insert(std::make_pair(ped, creator->CreateCognitiveMap(ped)));
-
+     cognitive_maps[ped]->AddRegions(_regions);
+     cognitive_maps[ped]->FindMainDestination();
      //debug
      //cognitive_maps[ped]->GetNavigationGraph()->WriteToDotFile(building->GetProjectRootDir());
 }

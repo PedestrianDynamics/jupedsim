@@ -11,7 +11,7 @@
 #include "../GraphNetwork.h"
 #include "youareherepointer.h"
 #include "cogmapoutputhandler.h"
-#include "connection.h"
+
 
 
 #include <queue>
@@ -46,8 +46,6 @@ using ptrBuilding = const Building*;
 using ptrPed = const Pedestrian*;
 using ptrGraphNetwork = std::shared_ptr<GraphNetwork>;
 using ptrOutputHandler = std::shared_ptr<CogMapOutputHandler>;
-using ptrConnection = std::shared_ptr<Connection>;
-using Connections = std::list<ptrConnection>;
 
 
 class CognitiveMap
@@ -86,19 +84,16 @@ public:
     // Set new Landmarks
     void SetNewLandmark();
 
-    void LandmarkReached(ptrLandmark landmark);
 
-    //Connections
-    std::vector<ptrConnection> GetAllConnections() const;
-    void AddConnection(const ptrConnection &connection);
-    void AddConnection(const ptrLandmark& landmark1, const ptrLandmark& landmark2);
-    void RemoveConnections(const ptrLandmark& landmark);
-    Landmarks ConnectedWith(const ptrLandmark& landmark) const;
+    //Find region/landmarks/connections
+    Landmarks GetLandmarksConnectedWith(const ptrLandmark& landmark) const;
+    const ptrRegion GetRegionContaining(const ptrLandmark& landmark) const;
+
 
     //Locater
 
     void FindCurrentRegion();
-
+    void LandmarkReached(ptrLandmark landmark);
 
     //Find targets
 
@@ -122,7 +117,7 @@ private:
     Landmarks _waypContainer;
     YouAreHerePointer _YAHPointer;
     ptrOutputHandler _outputhandler;
-    Connections _connections;
+
     ptrLandmark _mainDestination;
     ptrLandmark _nextTarget;
     Regions _regions;

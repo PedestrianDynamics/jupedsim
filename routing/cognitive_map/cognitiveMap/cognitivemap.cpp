@@ -34,7 +34,8 @@ CognitiveMap::CognitiveMap(ptrBuilding b, ptrPed ped)
 
     //Destination and regions
     _currentRegion=nullptr;
-    FindMainDestination();
+    //Find maindestination in cogmapstorage
+
     _nextTarget=nullptr;
 
 }
@@ -468,56 +469,35 @@ void CognitiveMap::LandmarkReached(ptrLandmark landmark)
 
 }
 
-std::vector<ptrConnection> CognitiveMap::GetAllConnections() const
+Landmarks CognitiveMap::GetLandmarksConnectedWith(const ptrLandmark &landmark) const
 {
-    std::vector<ptrConnection> con{ std::begin(_connections), std::end(_connections) };
-    return con;
-}
+    ptrRegion cRegion = GetRegionContaining(landmark);
 
-void CognitiveMap::AddConnection(const ptrConnection& connection)
-{
-    _connections.push_back(connection);
-}
-
-void CognitiveMap::AddConnection(const ptrLandmark &landmark1, const ptrLandmark &landmark2)
-{
-    _connections.push_back(std::make_shared<Connection>(landmark1,landmark2));
-}
-
-void CognitiveMap::RemoveConnections(const ptrLandmark &landmark)
-{
-    for (ptrConnection connection:_connections)
+    if (cRegion!=nullptr)
     {
-        if (connection->GetLandmarks().first==landmark || connection->GetLandmarks().second==landmark)
-        {
-            _connections.remove(connection);
-        }
+        return cRegion->ConnectedWith(landmark);
+    }
+    else
+    {
+        std::cout << "cRegion ist nullptr" << std::endl;
+        return Landmarks();
     }
 }
 
-Landmarks CognitiveMap::ConnectedWith(const ptrLandmark &landmark) const
+const ptrRegion CognitiveMap::GetRegionContaining(const ptrLandmark &landmark) const
 {
-    Landmarks cLandmarks;
-    for (ptrConnection connection:_connections)
+    for (ptrRegion region:_regions)
     {
-        if (connection->GetLandmarks().first==landmark )
-        {
-            cLandmarks.push_back(connection->GetLandmarks().second);
-        }
-        else if (connection->GetLandmarks().second==landmark )
-        {
-            cLandmarks.push_back(connection->GetLandmarks().first);
-        }
+        if (region->ContainsLandmark(landmark))
+            return region;
     }
-
-
-    return cLandmarks;
-
+    return nullptr;
 }
 
 void CognitiveMap::FindCurrentRegion()
 {
-
+    //for test purposes. has to be changed
+    _currentRegion=_regions[0];
 }
 
 const ptrLandmark CognitiveMap::FindConnectionPoint(const ptrRegion &regionA, const ptrRegion &regionB) const
@@ -616,8 +596,9 @@ const ptrLandmark CognitiveMap::FindNearLandmarkConnectedToTarget(const ptrLandm
 
 Landmarks CognitiveMap::FindLandmarksConnectedToTarget(const ptrLandmark &target)
 {
-    Landmarks connectedLandmarks = ConnectedWith(target);
-
+    Log->Write("INFO: Hier gehts noch!!!!");
+    Landmarks connectedLandmarks = GetLandmarksConnectedWith(target);
+    Log->Write("INFO: Hier gehts noch!!!!");
     // landmarks directly connected to target
 
     //for (ptrLandmark )
@@ -628,7 +609,7 @@ Landmarks CognitiveMap::FindLandmarksConnectedToTarget(const ptrLandmark &target
 
     for (int i=0; i<connectedLandmarks.size(); ++i)
     {
-        furtherCandidates=ConnectedWith(connectedLandmarks[i]);
+        furtherCandidates=GetLandmarksConnectedWith(connectedLandmarks[i]);
 
         for (ptrLandmark candidate : furtherCandidates)
         {
