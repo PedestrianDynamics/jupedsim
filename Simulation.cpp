@@ -495,8 +495,8 @@ int Simulation::RunBody(double maxSimTime)
      //to break the main simulation loop
      ProcessAgentsQueue();
      _nPeds = _building->GetAllPedestrians().size();
-     unsigned long initialnPeds = _nPeds;
-     unsigned long actualnPeds = _nPeds;
+     auto initialnPeds = _nPeds;
+     auto actualnPeds = _nPeds;
      // main program loop
      std::cout << "\nINFO:\tStart Simulation with " << _nPeds <<  " pedestrians ..." << std::endl;
      boost::progress_display show_progress( initialnPeds );
@@ -543,7 +543,7 @@ int Simulation::RunBody(double maxSimTime)
           ++frameNr;
      }
      if (_nPeds)
-           std::cout << "WARNING: \tEnd simulation. " << _nPeds <<  " pedestrians NOT evacuated." << std::endl;
+           std::cout << "\n\nWARNING: \tEnd simulation. " << _nPeds <<  " pedestrians NOT evacuated." << std::endl;
      else
            std::cout << "\nINFO: \tEnd simulation. " << initialnPeds <<  " pedestrians evacuated." << std::endl;
      
