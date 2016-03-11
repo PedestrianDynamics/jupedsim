@@ -141,7 +141,7 @@ void LandmarkNetwork::AddConnection(const ptrConnection &connection)
     }
 
     Point vector = landmarkA->GetRandomPoint()-landmarkB->GetRandomPoint();
-    double distance = vector.absoluteValue();
+    double distance = vector.Norm();
     _connections.push_back(std::pair<Edge,Weight>(Edge(A,B),distance));
 
     boost::add_edge(A,B,distance,_graph);
@@ -151,24 +151,26 @@ void LandmarkNetwork::AddConnection(const ptrConnection &connection)
 double LandmarkNetwork::LengthofShortestPathToTarget(const ptrLandmark &landmark, const ptrLandmark &target) const
 {
 
-
-    std::shared_ptr<Vertex> startVertex = nullptr;
-    std::shared_ptr<Vertex> targetVertex = nullptr;
+    Vertex startVertex=-1;
+    Vertex targetVertex=-1;
 
     // get the start vertex
+
+
     for (auto it=_landmarks.begin(); it!=_landmarks.end(); ++it)
     {
+
         int counter=0;
         if (it->first==landmark)
         {
-            *startVertex=it->second;
+            startVertex=it->second;
             counter++;
             if (counter==2)
                 break;
         }
         else if (it->first==target)
         {
-            *targetVertex=it->second;
+            targetVertex=it->second;
             counter++;
             if (counter==2)
                 break;
@@ -176,7 +178,8 @@ double LandmarkNetwork::LengthofShortestPathToTarget(const ptrLandmark &landmark
 
     }
 
-    if (targetVertex==nullptr || startVertex==nullptr)
+
+    if (targetVertex==-1 || startVertex==-1)
         return -1;
 
     //std::vector<double> edgeWeights;
@@ -190,13 +193,13 @@ double LandmarkNetwork::LengthofShortestPathToTarget(const ptrLandmark &landmark
 //    }
 
     // invoke variant 2 of Dijkstra's algorithm
-    dijkstra_shortest_paths(_graph, *startVertex, boost::distance_map(&d[0]));
-    std::cout << "distance from start vertex to target:" << std::endl;
+    dijkstra_shortest_paths(_graph, startVertex, boost::distance_map(&d[0]));
+    //std::cout << "distance from start vertex to target:" << std::endl;
     //graph_traits<Graph>::vertex_iterator vi;
     //for(vi = vertices(G).first; vi != vertices(G).second; ++vi)
-      std::cout << "distance = "
-                << d[*targetVertex] << std::endl;
-    std::cout << std::endl;
+    //std::cout << "distance = "  << d[targetVertex] << std::endl;
+
+    return d[targetVertex];
 }
 
 void LandmarkNetwork::RemoveAdjacentEdges(const Vertex &vertex)

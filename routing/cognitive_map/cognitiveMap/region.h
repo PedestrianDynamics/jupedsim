@@ -3,9 +3,11 @@
 
 #include "landmark.h"
 #include "connection.h"
+#include "landmarknetwork.h"
 
 using ptrLandmark = std::shared_ptr<Landmark>;
 using Landmarks = std::vector<ptrLandmark>;
+
 using ptrConnection = std::shared_ptr<Connection>;
 using Connections = std::list<ptrConnection>;
 
@@ -23,6 +25,9 @@ public:
     ptrLandmark GetLandmarkByID(const int& ID) const;
     bool ContainsLandmark(const ptrLandmark& landmark) const;
 
+    //LandmarkNetwork
+    void InitLandmarkNetwork();
+    double PathLengthFromLandmarkToTarget(const ptrLandmark& landmark, const ptrLandmark& target);
 
     //Connections
     std::vector<ptrConnection> GetAllConnections() const;
@@ -34,6 +39,7 @@ public:
 private:
     Landmarks _landmarks;
     Connections _connections;
+    LandmarkNetwork _landmarkNetwork;
 };
 
 #endif // REGION_H

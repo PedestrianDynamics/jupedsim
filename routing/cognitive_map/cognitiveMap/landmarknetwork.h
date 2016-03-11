@@ -8,8 +8,10 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
-#include "region.h"
 #include "connection.h"
+#include "landmark.h"
+
+
 
 typedef boost::adjacency_list<boost::listS, boost::vecS, boost::directedS,
                        boost::no_property, boost::property<boost::edge_weight_t, int> > Graph;

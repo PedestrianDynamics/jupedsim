@@ -2,7 +2,9 @@
 #define CONNECTION_H
 
 #include "landmark.h"
+
 using ptrLandmark = std::shared_ptr<Landmark>;
+using Landmarks = std::vector<ptrLandmark>;
 
 class Connection
 {

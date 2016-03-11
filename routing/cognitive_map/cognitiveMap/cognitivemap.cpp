@@ -47,29 +47,20 @@ CognitiveMap::~CognitiveMap()
 
 void CognitiveMap::UpdateMap()
 {
-    AddAssociatedLandmarks(TriggerAssociations(LookForLandmarks()));
-    if (_waypContainerTargetsSorted.empty())
-        return;
-    if (_waypContainerTargetsSorted.top()->LandmarkReached(_YAHPointer.GetPos()))
+    FindCurrentRegion();
+    //AddAssociatedLandmarks(TriggerAssociations(LookForLandmarks()));
+    SubRoom * sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
+    GraphVertex * vertex = (*_network->GetNavigationGraph())[sub_room];
+    const GraphVertex::EdgesContainer edges = *(vertex->GetAllEdges());
+
+    for (GraphEdge* edge:edges)
     {
-        //ptrLandmark cLandmark = _waypContainerTargetsSorted.top();
-        LandmarkReached(_waypContainerTargetsSorted.top());
-        //cLandmark->SetPriority(_waypContainerTargetsSorted.size());
-        _waypContainerTargetsSorted.pop();
-
-        SubRoom * sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
-        GraphVertex * vertex = (*_network->GetNavigationGraph())[sub_room];
-        const GraphVertex::EdgesContainer edges = *(vertex->GetAllEdges());
-
-        for (GraphEdge* edge:edges)
-        {
-            edge->SetFactor(1,"SpatialKnowledge");
-        }
-
-        //_waypContainerTargetsSorted.push(cLandmark);
-        //_waypContainer.pop();
-        //Log->Write("Prio:\t"+std::to_string(_waypContainerTargetsSorted.top()->GetPriority()));
+        edge->SetFactor(1,"SpatialKnowledge");
     }
+
+    // Has landmark been reached?
+    CheckIfLandmarksReached();
+
 }
 
 void CognitiveMap::UpdateDirection()
@@ -124,25 +115,24 @@ void CognitiveMap::AddLandmarksSC(std::vector<ptrLandmark> landmarks)
 
         }
     }
-
 }
 
 void CognitiveMap::AddLandmarks(std::vector<ptrLandmark> landmarks)
 {
-    for (ptrLandmark landmark:landmarks)
-    {
-        if (std::find(_landmarks.begin(), _landmarks.end(), landmark)!=_landmarks.end())
-        {
-            continue;
-        }
-        else
-        {
-            _landmarks.push_back(landmark);
-            _landmarks.back()->SetPosInMap(_landmarks.back()->GetPosInMap()-_YAHPointer.GetPosDiff());
+//    for (ptrLandmark landmark:landmarks)
+//    {
+//        if (std::find(_landmarks.begin(), _landmarks.end(), landmark)!=_landmarks.end())
+//        {
+//            continue;
+//        }
+//        else
+//        {
+//            _landmarks.push_back(landmark);
+//            _landmarks.back()->SetPosInMap(_landmarks.back()->GetPosInMap()-_YAHPointer.GetPosDiff());
 
 
-        }
-    }
+//        }
+//    }
 }
 
 void CognitiveMap::AddLandmarkInRegion(ptrLandmark landmark, ptrRegion region)
@@ -152,22 +142,22 @@ void CognitiveMap::AddLandmarkInRegion(ptrLandmark landmark, ptrRegion region)
 
 std::vector<ptrLandmark> CognitiveMap::LookForLandmarks()
 {
-    SubRoom * sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
+//    SubRoom * sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
 
-    std::vector<ptrLandmark> landmarks_found;
+//    std::vector<ptrLandmark> landmarks_found;
 
-    for (ptrLandmark landmark:_landmarksSubConcious)
-    {
-        if (landmark->GetRoom()==sub_room && std::find(_landmarks.begin(), _landmarks.end(), landmark)==_landmarks.end())
-        {
-           landmarks_found.push_back(landmark);
-           LandmarkReached(landmark);
-        }
-    }
+//    for (ptrLandmark landmark:_landmarksSubConcious)
+//    {
+//        if (landmark->GetRoom()==sub_room && std::find(_landmarks.begin(), _landmarks.end(), landmark)==_landmarks.end())
+//        {
+//           landmarks_found.push_back(landmark);
+//           LandmarkReached(landmark);
+//        }
+//    }
 
-    AddLandmarks(landmarks_found);
+//    AddLandmarks(landmarks_found);
 
-    return landmarks_found;
+//    return landmarks_found;
 }
 
 Landmarks CognitiveMap::TriggerAssociations(const std::vector<ptrLandmark> &landmarks)
@@ -195,32 +185,31 @@ Landmarks CognitiveMap::TriggerAssociations(const std::vector<ptrLandmark> &land
 
 void CognitiveMap::AddAssociatedLandmarks(Landmarks landmarks)
 {
-    for (ptrLandmark landmark:_waypContainer)
-    {
-        landmark->SetPriority(landmark->GetPriority()+landmarks.size());
-    }
-    int n=0;
-    for (ptrLandmark landmark:landmarks)
-    {
-        if (std::find(_waypContainer.begin(), _waypContainer.end(), landmark)!=_waypContainer.end())
-        {
-            continue;
-        }
-        landmark->SetPriority(n);
-        _waypContainer.push_back(landmark);
-        //Add as new target
-        if (!landmark->Visited())
-            _waypContainerTargetsSorted.push(landmark);
-        //Add as already visited
-        else
-        {
-            LandmarkReached(landmark);
-        }
+//    for (ptrLandmark landmark:_waypContainer)
+//    {
+//        landmark->SetPriority(landmark->GetPriority()+landmarks.size());
+//    }
+//    int n=0;
+//    for (ptrLandmark landmark:landmarks)
+//    {
+//        if (std::find(_waypContainer.begin(), _waypContainer.end(), landmark)!=_waypContainer.end())
+//        {
+//            continue;
+//        }
+//        landmark->SetPriority(n);
+//        _waypContainer.push_back(landmark);
+//        //Add as new target
+//        if (!landmark->Visited())
+//            _waypContainerTargetsSorted.push(landmark);
+//        //Add as already visited
+//        else
+//        {
+//            LandmarkReached(landmark);
+//        }
 
-        n++;
+//        n++;
 
-
-    }
+//    }
 
 }
 
@@ -372,76 +361,76 @@ const Point &CognitiveMap::GetOwnPos()
 
 void CognitiveMap::WriteToFile()
 {
-    ++_frame;
-    string data;
-    char tmp[CLENGTH] = "";
+//    ++_frame;
+//    string data;
+//    char tmp[CLENGTH] = "";
 
-    sprintf(tmp, "<frame ID=\"%d\">\n", _frame);
-    data.append(tmp);
-
-
-    for (ptrLandmark landmark:_landmarks)
-    {
-        char tmp1[CLENGTH] = "";
-        sprintf(tmp1, "<landmark ID=\"%d\"\t"
-               "caption=\"%s\"\t"
-               "x=\"%.6f\"\ty=\"%.6f\"\t"
-               "z=\"%.6f\"\t"
-               "rA=\"%.2f\"\trB=\"%.2f\"/>\n",
-               landmark->GetId(), landmark->GetCaption().c_str(), landmark->GetPosInMap().GetX(),
-               landmark->GetPosInMap().GetY(),0.0 ,landmark->GetA(), landmark->GetB());
-
-        data.append(tmp1);
-    }
-    bool current;
-
-    for (ptrLandmark landmark:_waypContainer)
-    {
-        current=false;
-        if (!_waypContainerTargetsSorted.empty())
-        {
-            if (landmark==_waypContainerTargetsSorted.top())
-                current=true;
-        }
+//    sprintf(tmp, "<frame ID=\"%d\">\n", _frame);
+//    data.append(tmp);
 
 
-        char tmp2[CLENGTH] = "";
-        sprintf(tmp2, "<Landmark ID=\"%d\"\t"
-               "caption=\"%s\"\t"
-               "x=\"%.6f\"\ty=\"%.6f\"\t"
-               "z=\"%.6f\"\t"
-               "rA=\"%.2f\"\trB=\"%.2f\"\tcurrent=\"%i\"/>\n",
-               landmark->GetId(),landmark->GetCaption().c_str(), landmark->GetPosInMap().GetX(),
-               landmark->GetPosInMap().GetY(),0.0 ,landmark->GetA(), landmark->GetB(),
-               current);
-        data.append(tmp2);
-    }
-
-    char tmp3[CLENGTH]="";
-    sprintf(tmp3, "<YAHPointer "
-           "x=\"%.6f\"\ty=\"%.6f\"\t"
-           "z=\"%.6f\"\t"
-           "dir=\"%.2f\"/>\n",
-           _YAHPointer.GetPos().GetX(),
-           _YAHPointer.GetPos().GetY(),0.0 ,_YAHPointer.GetDirection());
-
-    data.append(tmp3);
-
-
-//    for (ptrConnection connection:_connections)
+//    for (ptrLandmark landmark:_landmarks)
 //    {
-//        char tmp4[CLENGTH]="";
-//        sprintf(tmp4, "<connection "
-//               "Landmark_landmarkID1=\"%d\"\tLandmark_landmarkID2=\"%d\"/>\n",
-//               connection->GetLandmarks().first->GetId(),
-//               connection->GetLandmarks().second->GetId());
+//        char tmp1[CLENGTH] = "";
+//        sprintf(tmp1, "<landmark ID=\"%d\"\t"
+//               "caption=\"%s\"\t"
+//               "x=\"%.6f\"\ty=\"%.6f\"\t"
+//               "z=\"%.6f\"\t"
+//               "rA=\"%.2f\"\trB=\"%.2f\"/>\n",
+//               landmark->GetId(), landmark->GetCaption().c_str(), landmark->GetPosInMap().GetX(),
+//               landmark->GetPosInMap().GetY(),0.0 ,landmark->GetA(), landmark->GetB());
 
-//        data.append(tmp4);
+//        data.append(tmp1);
+//    }
+//    bool current;
+
+//    for (ptrLandmark landmark:_waypContainer)
+//    {
+//        current=false;
+//        if (!_waypContainerTargetsSorted.empty())
+//        {
+//            if (landmark==_waypContainerTargetsSorted.top())
+//              f  current=true;
+//        }
+
+
+//        char tmp2[CLENGTH] = "";
+//        sprintf(tmp2, "<Landmark ID=\"%d\"\t"
+//               "caption=\"%s\"\t"
+//               "x=\"%.6f\"\ty=\"%.6f\"\t"
+//               "z=\"%.6f\"\t"
+//               "rA=\"%.2f\"\trB=\"%.2f\"\tcurrent=\"%i\"/>\n",
+//               landmark->GetId(),landmark->GetCaption().c_str(), landmark->GetPosInMap().GetX(),
+//               landmark->GetPosInMap().GetY(),0.0 ,landmark->GetA(), landmark->GetB(),
+//               current);
+//        data.append(tmp2);
 //    }
 
+//    char tmp3[CLENGTH]="";
+//    sprintf(tmp3, "<YAHPointer "
+//           "x=\"%.6f\"\ty=\"%.6f\"\t"
+//           "z=\"%.6f\"\t"
+//           "dir=\"%.2f\"/>\n",
+//           _YAHPointer.GetPos().GetX(),
+//           _YAHPointer.GetPos().GetY(),0.0 ,_YAHPointer.GetDirection());
 
-    data.append("</frame>\n");
-    _outputhandler->WriteToFile(data);
+//    data.append(tmp3);
+
+
+////    for (ptrConnection connection:_connections)
+////    {
+////        char tmp4[CLENGTH]="";
+////        sprintf(tmp4, "<connection "
+////               "Landmark_landmarkID1=\"%d\"\tLandmark_landmarkID2=\"%d\"/>\n",
+////               connection->GetLandmarks().first->GetId(),
+////               connection->GetLandmarks().second->GetId());
+
+////        data.append(tmp4);
+////    }
+
+
+//    data.append("</frame>\n");
+//    _outputhandler->WriteToFile(data);
 }
 
 void CognitiveMap::SetNewLandmark()
@@ -456,19 +445,6 @@ void CognitiveMap::SetNewLandmark()
     AddLandmarks(vec);
 }
 
-void CognitiveMap::LandmarkReached(ptrLandmark landmark)
-{
-    //build connection
-//    if (!_landmarksRecentlyVisited.empty())
-//        AddConnection(_landmarksRecentlyVisited.back(),landmark);
-
-//    _landmarksRecentlyVisited.push_back(landmark);
-
-//    if (_landmarksRecentlyVisited.size()>2)
-//        _landmarksRecentlyVisited.pop();
-
-}
-
 Landmarks CognitiveMap::GetLandmarksConnectedWith(const ptrLandmark &landmark) const
 {
     ptrRegion cRegion = GetRegionContaining(landmark);
@@ -479,7 +455,6 @@ Landmarks CognitiveMap::GetLandmarksConnectedWith(const ptrLandmark &landmark) c
     }
     else
     {
-        std::cout << "cRegion ist nullptr" << std::endl;
         return Landmarks();
     }
 }
@@ -500,11 +475,26 @@ void CognitiveMap::FindCurrentRegion()
     _currentRegion=_regions[0];
 }
 
-const ptrLandmark CognitiveMap::FindConnectionPoint(const ptrRegion &regionA, const ptrRegion &regionB) const
+void CognitiveMap::CheckIfLandmarksReached()
 {
-    for (ptrLandmark landmarka:regionA->GetLandmarks())
+    SubRoom * sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
+
+    for (ptrLandmark landmark:_currentRegion->GetLandmarks())
     {
-        for (ptrLandmark landmarkb:regionB->GetLandmarks())
+        if (landmark->GetRoom()==sub_room)
+        {
+            std::string str1 = landmark->GetCaption()+" has been reached.";
+            Log->Write(str1);
+            _landmarksRecentlyVisited.push_back(landmark);
+        }
+    }
+}
+
+const ptrLandmark CognitiveMap::FindConnectionPoint(const ptrRegion &currentRegion, const ptrRegion &targetRegion) const
+{
+    for (ptrLandmark landmarka:currentRegion->GetLandmarks())
+    {
+        for (ptrLandmark landmarkb:targetRegion->GetLandmarks())
         {
             if (landmarka==landmarkb)
             {
@@ -512,6 +502,7 @@ const ptrLandmark CognitiveMap::FindConnectionPoint(const ptrRegion &regionA, co
             }
         }
     }
+
     return nullptr;
 
 }
@@ -538,12 +529,12 @@ void CognitiveMap::FindMainDestination()
 
 void CognitiveMap::FindNextTarget()
 {
+
     _nextTarget=nullptr;
     // if not already in the region of the maindestination
     if (_targetRegion!=_currentRegion)
     {
-        _nextTarget=FindConnectionPoint(_targetRegion,_currentRegion);
-
+        _nextTarget=FindConnectionPoint(_currentRegion,_targetRegion);
         // if connection point does not exist: Path searching to region
         if (_nextTarget==nullptr)
         {
@@ -558,69 +549,129 @@ void CognitiveMap::FindNextTarget()
        _nextTarget=_mainDestination;
     }
 
+    // Function considers that nearLandmark can be the target itself if no nearer was found.
     ptrLandmark nearLandmark = FindNearLandmarkConnectedToTarget(_nextTarget);
-    if (nearLandmark!=nullptr)
-        _nextTarget=nearLandmark;
 
-    if (_nextTarget!=nullptr)
-        Log->Write("TargetFound");
+    _nextTarget=nearLandmark;
+
+
+    //if (_nextTarget!=nullptr)
+        //Log->Write(_nextTarget->GetCaption());
 }
 
 const ptrLandmark CognitiveMap::FindNearLandmarkConnectedToTarget(const ptrLandmark &target)
 {
+
     Landmarks landmarksConnectedToTarget = FindLandmarksConnectedToTarget(target);
 
     //if target has no connections return nullptr
     if (landmarksConnectedToTarget.empty())
-        return nullptr;
+        return target;
 
     ptrLandmark nearest = nullptr;
     //look for nearest located landmark
-    for (ptrLandmark landmark:landmarksConnectedToTarget)
+
+    //look for landmarks within a circle with the radius searchlimit
+    // if no landmarks were found radius will be enlarged
+    // if radius = distance(Pos->target) return target
+
+    Point vector=target->GetPosInMap()-_YAHPointer.GetPos();
+    double distanceToTarget=vector.Norm();
+    int divisor = 16;
+    double searchlimit=distanceToTarget/divisor;
+    Landmarks nearLandmarks;
+
+    while (searchlimit<distanceToTarget && nearLandmarks.empty())
     {
-        double mindistance=FLT_MAX;
-
-        Point vector=landmark->GetPosInMap()-_YAHPointer.GetPos();
-        double distance = vector.absoluteValue();
-        if (distance<=mindistance)
+        for (ptrLandmark landmark:landmarksConnectedToTarget)
         {
-            nearest=landmark;
-            mindistance=distance;
+            vector=landmark->GetPosInMap()-_YAHPointer.GetPos();
+            double distance = vector.Norm();
+            if (distance<=searchlimit)
+            {
+                nearLandmarks.push_back(landmark);
+            }
         }
-
+        searchlimit+=searchlimit;
 
     }
 
-    return nearest;
+    if (nearLandmarks.empty())
+        return target;
+
+    // select best route to target from one of the nearLandmarks
+
+    return FindBestRouteFromOneOf(nearLandmarks);
+
+
 }
 
 Landmarks CognitiveMap::FindLandmarksConnectedToTarget(const ptrLandmark &target)
 {
-    Log->Write("INFO: Hier gehts noch!!!!");
-    Landmarks connectedLandmarks = GetLandmarksConnectedWith(target);
-    Log->Write("INFO: Hier gehts noch!!!!");
-    // landmarks directly connected to target
 
-    //for (ptrLandmark )
-    //connectedLandmarks.push_back(ConnectedWith(target));
+    Landmarks connectedLandmarks;
+
+    // landmarks directly connected to target
+    Landmarks firstCandidates = GetLandmarksConnectedWith(target);
+
+    for (ptrLandmark candidate:firstCandidates)
+    {
+        if(std::find(_landmarksRecentlyVisited.begin(), _landmarksRecentlyVisited.end(), candidate) == _landmarksRecentlyVisited.end())
+        {
+            connectedLandmarks.push_back(candidate);
+        }
+    }
+
+
 
     //Landmarks connected to landmarks connected to target
     Landmarks furtherCandidates;
 
-    for (int i=0; i<connectedLandmarks.size(); ++i)
+    for (auto i=0; i<connectedLandmarks.size(); ++i)
     {
         furtherCandidates=GetLandmarksConnectedWith(connectedLandmarks[i]);
 
         for (ptrLandmark candidate : furtherCandidates)
         {
             // if candidate not already taken into account, not visited before or target itself
-            if(std::find(connectedLandmarks.begin(), connectedLandmarks.end(), candidate) != connectedLandmarks.end()
-                    && std::find(_landmarksRecentlyVisited.begin(), _landmarksRecentlyVisited.end(), candidate) != _landmarksRecentlyVisited.end()
+            if(std::find(connectedLandmarks.begin(), connectedLandmarks.end(), candidate) == connectedLandmarks.end()
+                    && std::find(_landmarksRecentlyVisited.begin(), _landmarksRecentlyVisited.end(), candidate) == _landmarksRecentlyVisited.end()
                     && candidate!=target)
             {
                 connectedLandmarks.push_back(candidate);
+
             }
         }
+    }
+    return connectedLandmarks;
+}
+
+const ptrLandmark CognitiveMap::FindBestRouteFromOneOf(const Landmarks &nearLandmarks)
+{
+    ptrLandmark bestChoice = nullptr;
+    double minDistance = FLT_MAX;
+    double cDistance;
+    for (ptrLandmark landmark:nearLandmarks)
+    {
+        cDistance=_currentRegion->PathLengthFromLandmarkToTarget(landmark, _nextTarget);
+        Log->Write(landmark->GetCaption());
+        Log->Write(std::to_string(cDistance));
+        if (cDistance<minDistance)
+        {
+            minDistance=cDistance;
+
+            bestChoice=landmark;
+        }
+    }
+    return bestChoice;
+
+}
+
+void CognitiveMap::InitLandmarkNetworksInRegions()
+{
+    for (ptrRegion region:_regions)
+    {
+        region->InitLandmarkNetwork();
     }
 }
 

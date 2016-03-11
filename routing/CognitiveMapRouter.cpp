@@ -109,6 +109,8 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
 //        (*cm_storage)[p]->UpdateMap();
 
         //--------------------COGMAP----------------------------
+        //See if Landmarks are visible
+        (*cm_storage)[p]->UpdateMap();
         //Find next appropriate landmark
         (*cm_storage)[p]->FindNextTarget();
         //Find appropriate door to reach next app. landmark

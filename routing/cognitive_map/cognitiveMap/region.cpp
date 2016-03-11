@@ -24,7 +24,6 @@ ptrLandmark Region::GetRegionAsLandmark()
 Landmarks Region::GetLandmarks() const
 {
     return _landmarks;
-
 }
 
 ptrLandmark Region::GetLandmarkByID(const int &ID) const
@@ -45,6 +44,16 @@ bool Region::ContainsLandmark(const ptrLandmark &landmark) const
             return true;
     }
     return false;
+}
+
+void Region::InitLandmarkNetwork()
+{
+    _landmarkNetwork = LandmarkNetwork(GetLandmarks(),GetAllConnections());
+}
+
+double Region::PathLengthFromLandmarkToTarget(const ptrLandmark &landmark, const ptrLandmark &target)
+{
+    return _landmarkNetwork.LengthofShortestPathToTarget(landmark,target);
 }
 
 

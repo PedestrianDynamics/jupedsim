@@ -93,16 +93,19 @@ public:
     //Locater
 
     void FindCurrentRegion();
-    void LandmarkReached(ptrLandmark landmark);
+    void CheckIfLandmarksReached();
 
     //Find targets
 
-    const ptrLandmark FindConnectionPoint(const ptrRegion& regionA, const ptrRegion& regionB) const;
+    const ptrLandmark FindConnectionPoint(const ptrRegion& currentRegion, const ptrRegion& targetRegion) const;
     void FindMainDestination();
     void FindNextTarget();
     const ptrLandmark FindNearLandmarkConnectedToTarget(const ptrLandmark& target);
     Landmarks FindLandmarksConnectedToTarget(const ptrLandmark& target);
+    const ptrLandmark FindBestRouteFromOneOf(const Landmarks& nearLandmarks);
 
+    //Init LandmarkNetworks
+    void InitLandmarkNetworksInRegions();
 
 
 private:
@@ -111,8 +114,8 @@ private:
     ptrGraphNetwork _network;
     Associations _assoContainer;
     std::vector<ptrLandmark> _landmarksSubConcious;
-    std::vector<ptrLandmark> _landmarks;
-    SortedLandmarks _waypContainerTargetsSorted;
+    //std::vector<ptrLandmark> _landmarks;
+    //SortedLandmarks _waypContainerTargetsSorted;
     std::vector<ptrLandmark> _landmarksRecentlyVisited;
     Landmarks _waypContainer;
     YouAreHerePointer _YAHPointer;
@@ -123,6 +126,8 @@ private:
     Regions _regions;
     ptrRegion _currentRegion;
     ptrRegion _targetRegion;
+
+
 
 
     int _frame;

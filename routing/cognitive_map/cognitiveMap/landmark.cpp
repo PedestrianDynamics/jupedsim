@@ -120,16 +120,14 @@ const double &Landmark::GetPriority() const
 
 Point Landmark::GetRandomPoint() const
 {
-    const double pi = std::acos(-1);
+    const double pi = M_PI;//std::acos(-1);
     int alpha1 = std::rand() % 360;
-    int a = std::rand() % (int)_a;
-    double x = _realPos.GetX()+std::cos(alpha1*pi/180.0)*a;
+    double factor_a = (std::rand() % 100)/100.0;
+    double x = _posInMap.GetX()+std::cos(alpha1*pi/180.0)*factor_a*_a;
     int alpha2 = std::rand() % 360;
-    int b = std::rand() % (int)_b;
-    double y = _realPos.GetY()+std::sin(alpha2*pi/180.0)*b;
+    double factor_b = (std::rand() % 100)/100.0;
+    double y = _posInMap.GetY()+std::sin(alpha2*pi/180.0)*factor_b*_b;
 
-    //Log->Write(std::to_string(x));
-    //Log->Write(std::to_string(y));
     return Point(x,y);
 }
 

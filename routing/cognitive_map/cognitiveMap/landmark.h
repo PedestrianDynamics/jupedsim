@@ -17,6 +17,8 @@ using Associations = std::vector<ptrAssociation>;
 class Region;
 using ptrRegion = std::shared_ptr<Region>;
 
+
+
 class Landmark
 {
 
@@ -24,6 +26,8 @@ public:
     Landmark(Point pos, ptrRoom room=nullptr);
     Landmark(Point pos, double a, double b, int id=-1, ptrRoom room=nullptr);
     ~Landmark();
+
+
 
     //Setter
     void SetId(int id);
