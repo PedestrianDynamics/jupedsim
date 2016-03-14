@@ -358,7 +358,6 @@ void Simulation::UpdateRoutesAndLocations()
                     pedsToRemove.push_back(ped);
                }
           }
-#pragma omp barrier
      } //omp parallel
 
 #ifdef _USE_PROTOCOL_BUFFER
