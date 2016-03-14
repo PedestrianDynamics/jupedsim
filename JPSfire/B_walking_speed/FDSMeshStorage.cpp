@@ -52,8 +52,7 @@ FDSMeshStorage::FDSMeshStorage(std::string filepath, double finalTime, double up
     ///Check if _filepath is existent
     struct stat extinction_grids;
 
-    const char * p = _filepath.c_str();
-    if ( stat(p, &extinction_grids) != 0 )
+    if ( stat(_filepath.c_str(), &extinction_grids) != 0 )
     {
         Log->Write("ERROR:\tCould not find directory %s", _filepath.c_str());
         exit(EXIT_FAILURE);
