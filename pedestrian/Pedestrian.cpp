@@ -50,6 +50,7 @@ Pedestrian::Pedestrian()
      _subRoomUID = -1;
      _oldRoomID = -1;
      _oldSubRoomID = -1;
+     _ticksInThisRoom = 0;
      _exitIndex = -1;
      _id = _agentsCreated;//default id
      _mass = 1;
@@ -111,7 +112,8 @@ Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& buil
      _subRoomID(agentsParameters.GetSubroomID()),
      _subRoomUID(building.GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetUID()),
      _patienceTime(agentsParameters.GetPatience()),
-     _premovement(agentsParameters.GetPremovementTime())
+     _premovement(agentsParameters.GetPremovementTime()),
+     _ticksInThisRoom(0)
 {
 
 }
@@ -361,6 +363,8 @@ void Pedestrian::ClearMentalMap()
 {
      _mentalMap.clear();
      _exitIndex = -1;
+     if (_navLine) delete _navLine;
+     _navLine = nullptr;
      // todo: ar.graf: check if we also need to delete/reset _navLine
      //  ^^^^   is anywhere a check, only considering _navLine without checking
      //  ^^^^   exitIndex?? (probably in my code?)

@@ -314,12 +314,15 @@ void Simulation::UpdateRoutesAndLocations()
 
           for (int p = start; p <= end; ++p) {
                Pedestrian* ped = allPeds[p];
-               Room* room = _building->GetRoom(ped->GetRoomID());
-               SubRoom* sub0 = room->GetSubRoom(ped->GetSubRoomID());
+               Room* room0 = _building->GetRoom(ped->GetRoomID());
+               SubRoom* sub0 = room0->GetSubRoom(ped->GetSubRoomID());
+
+               //update ticks
+               (ped->_ticksInThisRoom)+=1;
 
                //set the new room if needed
                if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
-                         && (room->GetCaption() == "outside")) {
+                         && (room0->GetCaption() == "outside")) {
 #pragma omp critical
                     pedsToRemove.push_back(ped);
                } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
@@ -349,9 +352,12 @@ void Simulation::UpdateRoutesAndLocations()
                               if (sub->IsDirectlyConnectedWith(old_sub)
                                         && sub->IsInSubRoom(ped->GetPos()))
                               {
+#pragma omp critical
                                    ped->SetRoomID(room->GetID(),
                                              room->GetCaption());
+#pragma omp critical
                                    ped->SetSubRoomID(sub->GetSubRoomID());
+#pragma omp critical
                                    ped->SetSubRoomUID(sub->GetUID());
                                    //the agent left the old iroom
                                    //actualize the egress time for that iroom
@@ -367,7 +373,7 @@ void Simulation::UpdateRoutesAndLocations()
 
                                    //also statistic for internal doors
                                    UpdateFlowAtDoors(*ped); //@todo: ar.graf : this call should move into a critical region? check plz
-
+#pragma omp critical
                                    ped->ClearMentalMap(); // reset the destination
                                    //ped->FindRoute();
 

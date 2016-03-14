@@ -46,6 +46,11 @@ private:
      std::string _flowAtExit;
 
 public:
+     // last ped that passed was in room {1,2} that many ticks
+     int _lastTickTime1;
+     int _lastTickTime2;
+     int _refresh1;
+     int _refresh2;
 
      /**
       * Cosntructor
