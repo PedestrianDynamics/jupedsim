@@ -1,0 +1,9 @@
+# compile jpscore and run light tests
+before_script:
+   - mkdir build && cd build/
+
+build:
+  script:
+    - cmake .. -DBUILD_TESTING=ON
+    - make -j$(nproc)     
+    - ctest -R Boost                         

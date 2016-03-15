@@ -104,7 +104,7 @@ void NavigationGraph::WriteToDotFile(const std :: string filepath) const
     dot_file << " digraph graphname \n {\n";
     for(VerticesContainer::const_iterator it = vertices.begin(); it != vertices.end(); ++it) {
         dot_file << it->second->GetCaption();
-        dot_file << " [ \n pos =\"" + std::to_string(it->second->GetSubRoom()->GetCentroid().GetX()) +"," + std::to_string(it->second->GetSubRoom()->GetCentroid().GetY()) +"!\"\n shape=box \n";
+        dot_file << " [ \n pos =\"" + std::to_string(it->second->GetSubRoom()->GetCentroid()._x) +"," + std::to_string(it->second->GetSubRoom()->GetCentroid()._y) +"!\"\n shape=box \n";
         if(it->second->HasExit())
             dot_file << "style=filled, color=red\n";
 

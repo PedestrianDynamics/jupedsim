@@ -57,8 +57,8 @@ int testNorm(FILE * f)
      //------------------------------------------------------------------------------
      px = 1;
      py = 0;
-     P.SetX(px);
-     P.SetY(py);
+     P._x =(px);
+     P._y =(py);
      pnorm = P.Norm();
      expected = 1;
      res += ( pnorm == expected )?1:0;
@@ -67,8 +67,8 @@ int testNorm(FILE * f)
      //------------------------------------------------------------------------------
      px = -1;
      py = 0;
-     P.SetX(px);
-     P.SetY(py);
+     P._x =(px);
+     P._y =(py);
      pnorm = P.Norm();
      expected = 1;
      res += ( pnorm == expected )?1:0;
@@ -77,8 +77,8 @@ int testNorm(FILE * f)
      //------------------------------------------------------------------------------
      px = 0;
      py = 1;
-     P.SetX(px);
-     P.SetY(py);
+     P._x =(px);
+     P._y =(py);
      pnorm = P.Norm();
      expected = 1;
      res += ( pnorm == expected )?1:0;
@@ -87,8 +87,8 @@ int testNorm(FILE * f)
      //------------------------------------------------------------------------------
      px = 0;
      py = -1;
-     P.SetX(px);
-     P.SetY(py);
+     P._x =(px);
+     P._y =(py);
      pnorm = P.Norm();
      expected = 1;
      res += ( pnorm == expected )?1:0;
@@ -97,8 +97,8 @@ int testNorm(FILE * f)
      //------------------------------------------------------------------------------
      px = 1;
      py = 1;
-     P.SetX(px);
-     P.SetY(py);
+     P._x =(px);
+     P._y =(py);
      pnorm = P.Norm();
      expected = sqrt(2);
      res += ( pnorm == expected )?1:0;
@@ -107,8 +107,8 @@ int testNorm(FILE * f)
      //------------------------------------------------------------------------------
      px = 3;
      py = 0;
-     P.SetX(px);
-     P.SetY(py);
+     P._x =(px);
+     P._y =(py);
      pnorm = P.Norm();
      expected = 3;
      res += ( pnorm == expected )?1:0;
@@ -117,8 +117,8 @@ int testNorm(FILE * f)
      //------------------------------------------------------------------------------
      px = 0;
      py = -3;
-     P.SetX(px);
-     P.SetY(py);
+     P._x =(px);
+     P._y =(py);
      pnorm = P.Norm();
      expected = 3;
      res += ( pnorm == expected )?1:0;
@@ -328,8 +328,8 @@ int testCoordTransToEllipse(FILE * f)
           fprintf (f, "%2d. res=%2d, P(%.2f, %.2f), T(%.2f, %.2f), E(%.2f, %.2f)\n", ntests, res, Points[i]._x, Points[i]._y, transPoint._x, transPoint._y, expectedPoint._x, expectedPoint._y);
      }
 //--------------------------------------------------------------------------------------
-     Center.SetX(1);
-     Center.SetY(1);
+     Center._x =(1);
+     Center._y =(1);
      cosphi = 0.5; //  pi/3
      sinphi = 0.8660254037844386; //pi/3
      fprintf (f, "\t\tcosphi=%.2f, sinphi=%.2f, Center(%.2f, %.2f)\n", cosphi, sinphi, Center._x, Center._y);
@@ -401,8 +401,8 @@ int testCoordTransToCart(FILE * f)
      }
 //--------------------------------------------------------------------------------------
 
-     Center.SetX(1);
-     Center.SetY(1);
+     Center._x =(1);
+     Center._y =(1);
      cosphi = 0.5; //  pi/3
 
      sinphi = 0.8660254037844386; //pi/3

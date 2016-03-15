@@ -445,8 +445,8 @@ void NavMesh::Convexify()
 
                      //create the CGAL structure
                      for(unsigned int i=0;i<old_node->pHull.size();i++){
-                             double x=pVertices[old_node->pHull[i].id]->pPos.GetX() ;
-                             double y=pVertices[old_node->pHull[i].id]->pPos.GetY() ;
+                             double x=pVertices[old_node->pHull[i].id]->pPos._x ;
+                             double y=pVertices[old_node->pHull[i].id]->pPos._y ;
                              polygon.push_back(Point_2(x, y));
 
                      }
@@ -679,15 +679,15 @@ void NavMesh::WriteToString(std::string& output)
           //if(node->IsConvex()==true) continue;
           //if(node->IsClockwise()==true) continue;
 
-          //file<<"\t\t<label centerX=\""<<node->pCentroid.GetX()*factor -centre.GetX()<<"\" centerY=\""<<node->pCentroid.GetY()*factor-centre.GetY()<<"\" centerZ=\"0\" text=\""<<node->id <<"\" color=\"100\" />"<<endl;
+          //file<<"\t\t<label centerX=\""<<node->pCentroid._x*factor -centre._x<<"\" centerY=\""<<node->pCentroid._y*factor-centre._y<<"\" centerZ=\"0\" text=\""<<node->id <<"\" color=\"100\" />"<<endl;
           //              cout<<"size: "<< node->pHull.size()<<endl;
           //              std::sort(node->pHull.begin(), node->pHull.end());
           //              node->pHull.erase(std::unique(node->pHull.begin(), node->pHull.end()), node->pHull.end());
           //              cout<<"size: "<< node->pHull.size()<<endl;
 
           for(unsigned int i=0; i<node->pHull.size(); i++) {
-               //double x=pVertices[JNode->pHull[i].id]->pPos.GetX()*factor -centre.pX;
-               //double y=pVertices[JNode->pHull[i].id]->pPos.GetY()*factor -centre.pY;
+               //double x=pVertices[JNode->pHull[i].id]->pPos._x*factor -centre.pX;
+               //double y=pVertices[JNode->pHull[i].id]->pPos._y*factor -centre.pY;
                //file<<" \t\t<sphere centerX=\""<<x<<"\" centerY=\""<<y<<"\" centerZ=\"0\" radius=\"5\" color=\"100\" />"<<endl;
                //file<<"\t\t<label centerX=\""<<x<<"\" centerY=\""<<y<<"\" centerZ=\"0\" text=\""<<JNode->pHull[i].id<<"\" color=\"20\" />"<<endl;
 
@@ -695,10 +695,10 @@ void NavMesh::WriteToString(std::string& output)
                //                      unsigned int size= node->pHull.size();
                //                      file<<" \t\t<sphere centerX=\""<<x<<"\" centerY=\""<<y<<"\" centerZ=\"0\" radius=\"5\" color=\"100\" />"<<endl;
                //                      file<<"\t\t<label centerX=\""<<x<<"\" centerY=\""<<y<<"\" centerZ=\"0\" text=\""<<i<<"\" color=\"20\" />"<<endl;
-               //                      double x1=pVertices[node->pHull[i%size].id]->pPos.GetX()*factor -centre.pX;
-               //                      double y1=pVertices[node->pHull[i%size].id]->pPos.GetY()*factor -centre.pY;
-               //                      double x2=pVertices[node->pHull[(i+1)%size].id]->pPos.GetX()*factor -centre.pX;
-               //                      double y2=pVertices[node->pHull[(i+1)%size].id]->pPos.GetY()*factor -centre.pY;
+               //                      double x1=pVertices[node->pHull[i%size].id]->pPos._x*factor -centre.pX;
+               //                      double y1=pVertices[node->pHull[i%size].id]->pPos._y*factor -centre.pY;
+               //                      double x2=pVertices[node->pHull[(i+1)%size].id]->pPos._x*factor -centre.pX;
+               //                      double y2=pVertices[node->pHull[(i+1)%size].id]->pPos._y*factor -centre.pY;
                //                      file<<"\t\t<wall id = \""<<i<<"\">"<<endl;
                //                      file<<"\t\t\t<point xPos=\""<<x1<<"\" yPos=\""<<y1<<"\"/>"<<endl;
                //                      file<<"\t\t\t<point xPos=\""<<x2<<"\" yPos=\""<<y2<<"\"/>"<<endl;
@@ -713,10 +713,10 @@ void NavMesh::WriteToString(std::string& output)
                JObstacle* obst=_obst[i];
 
                if(obst->pNode0==node_id ) {
-                    double x1=obst->pStart.pPos.GetX()*factor-centre._x;
-                    double y1=obst->pStart.pPos.GetY()*factor-centre._y;
-                    double x2=obst->pEnd.pPos.GetX()*factor-centre._x;
-                    double y2=obst->pEnd.pPos.GetY()*factor-centre._y;
+                    double x1=obst->pStart.pPos._x*factor-centre._x;
+                    double y1=obst->pStart.pPos._y*factor-centre._y;
+                    double x2=obst->pEnd.pPos._x*factor-centre._x;
+                    double y2=obst->pEnd.pPos._y*factor-centre._y;
 
                     //file<<"\t\t<label centerX=\""<<0.5*(x1+x2)<<"\" centerY=\""<<0.5*(y1+y2)<<"\" centerZ=\"0\" text=\""<<obst->id<<"\" color=\"20\" />"<<endl;
                     file<<"\t\t<wall id = \""<<i<<"\">"<<endl;
@@ -732,10 +732,10 @@ void NavMesh::WriteToString(std::string& output)
                JEdge* edge=_edges[i];
 
                if(edge->pNode0==node_id || edge->pNode1==node_id) {
-                    double x1=edge->pStart.pPos.GetX()*factor-centre._x;
-                    double y1=edge->pStart.pPos.GetY()*factor-centre._y;
-                    double x2=edge->pEnd.pPos.GetX()*factor-centre._x;
-                    double y2=edge->pEnd.pPos.GetY()*factor-centre._y;
+                    double x1=edge->pStart.pPos._x*factor-centre._x;
+                    double y1=edge->pStart.pPos._y*factor-centre._y;
+                    double x2=edge->pEnd.pPos._x*factor-centre._x;
+                    double y2=edge->pEnd.pPos._y*factor-centre._y;
 
                     //file<<"\t\t<label centerX=\""<<0.5*(x1+x2)<<"\" centerY=\""<<0.5*(y1+y2)<<"\" centerZ=\"0\" text=\""<<edge->id<<"\" color=\"20\" />"<<endl;
                     file<<"\t\t<door id = \""<<i<<"\">"<<endl;
@@ -823,10 +823,10 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName, const std::vector<Point>
      for(unsigned int i=0; i<points.size(); i++) {
 
           unsigned int size= points.size();
-          double x1=points[ i%size].GetX()*factor -centre._x;
-          double y1=points[ i%size].GetY()*factor -centre._y;
-          double x2=points[ (i+1)%size].GetX()*factor -centre._x;
-          double y2=points[ (i+1)%size].GetY()*factor -centre._y;
+          double x1=points[ i%size]._x*factor -centre._x;
+          double y1=points[ i%size]._y*factor -centre._y;
+          double x2=points[ (i+1)%size]._x*factor -centre._x;
+          double y2=points[ (i+1)%size]._y*factor -centre._y;
 
           //              draw the convex hull
           file<<" \t\t<sphere centerX=\""<<x1<<"\" centerY=\""<<y1<<"\" centerZ=\"0\" radius=\"150\" color=\"100\" />"<<endl;
@@ -879,7 +879,7 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName, JNode* node)
 
      int node_id=node->id; //cout<<"node id: "<<node_id<<endl;
 
-     file<<"\t\t<label centerX=\""<<node->pCentroid.GetX()*factor -centre._x<<"\" centerY=\""<<node->pCentroid.GetY()*factor-centre._y<<"\" centerZ=\"0\" text=\""<<node->id <<"\" color=\"100\" />"<<endl;
+     file<<"\t\t<label centerX=\""<<node->pCentroid._x*factor -centre._x<<"\" centerY=\""<<node->pCentroid._y*factor-centre._y<<"\" centerZ=\"0\" text=\""<<node->id <<"\" color=\"100\" />"<<endl;
 
      //              cout<<"size: "<< JNode->pHull.size()<<endl;
      //              std::sort(JNode->pHull.begin(), JNode->pHull.end());
@@ -887,8 +887,8 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName, JNode* node)
      //              cout<<"size: "<< JNode->pHull.size()<<endl;
 
      for(unsigned int i=0; i<node->pHull.size(); i++) {
-          //double x=pVertices[JNode->pHull[i].id]->pPos.GetX()*factor -centre.pX;
-          //double y=pVertices[JNode->pHull[i].id]->pPos.GetY()*factor -centre.pY;
+          //double x=pVertices[JNode->pHull[i].id]->pPos._x*factor -centre.pX;
+          //double y=pVertices[JNode->pHull[i].id]->pPos._y*factor -centre.pY;
           //file<<" \t\t<sphere centerX=\""<<x<<"\" centerY=\""<<y<<"\" centerZ=\"0\" radius=\"5\" color=\"100\" />"<<endl;
           //file<<"\t\t<label centerX=\""<<x<<"\" centerY=\""<<y<<"\" centerZ=\"0\" text=\""<<JNode->pHull[i].id<<"\" color=\"20\" />"<<endl;
 
@@ -896,10 +896,10 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName, JNode* node)
           //                      unsigned int size= node->pHull.size();
           //                      file<<" \t\t<sphere centerX=\""<<x<<"\" centerY=\""<<y<<"\" centerZ=\"0\" radius=\"5\" color=\"100\" />"<<endl;
           //                      file<<"\t\t<label centerX=\""<<x<<"\" centerY=\""<<y<<"\" centerZ=\"0\" text=\""<<i<<"\" color=\"20\" />"<<endl;
-          //                      double x1=pVertices[node->pHull[i%size].id]->pPos.GetX()*factor -centre.pX;
-          //                      double y1=pVertices[node->pHull[i%size].id]->pPos.GetY()*factor -centre.pY;
-          //                      double x2=pVertices[node->pHull[(i+1)%size].id]->pPos.GetX()*factor -centre.pX;
-          //                      double y2=pVertices[node->pHull[(i+1)%size].id]->pPos.GetY()*factor -centre.pY;
+          //                      double x1=pVertices[node->pHull[i%size].id]->pPos._x*factor -centre.pX;
+          //                      double y1=pVertices[node->pHull[i%size].id]->pPos._y*factor -centre.pY;
+          //                      double x2=pVertices[node->pHull[(i+1)%size].id]->pPos._x*factor -centre.pX;
+          //                      double y2=pVertices[node->pHull[(i+1)%size].id]->pPos._y*factor -centre.pY;
           //                      file<<"\t\t<wall id = \""<<i<<"\">"<<endl;
           //                      file<<"\t\t\t<point xPos=\""<<x1<<"\" yPos=\""<<y1<<"\"/>"<<endl;
           //                      file<<"\t\t\t<point xPos=\""<<x2<<"\" yPos=\""<<y2<<"\"/>"<<endl;
@@ -914,10 +914,10 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName, JNode* node)
           JObstacle* obst=_obst[i];
 
           if(obst->pNode0==node_id ) {
-               double x1=obst->pStart.pPos.GetX()*factor-centre._x;
-               double y1=obst->pStart.pPos.GetY()*factor-centre._y;
-               double x2=obst->pEnd.pPos.GetX()*factor-centre._x;
-               double y2=obst->pEnd.pPos.GetY()*factor-centre._y;
+               double x1=obst->pStart.pPos._x*factor-centre._x;
+               double y1=obst->pStart.pPos._y*factor-centre._y;
+               double x2=obst->pEnd.pPos._x*factor-centre._x;
+               double y2=obst->pEnd.pPos._y*factor-centre._y;
 
                file<<"\t\t<wall id = \""<<i<<"\">"<<endl;
                file<<"\t\t\t<point xPos=\""<<x1<<"\" yPos=\""<<y1<<"\"/>"<<endl;
@@ -932,10 +932,10 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName, JNode* node)
           JEdge* edge=_edges[i];
 
           if(edge->pNode0==node_id || edge->pNode1==node_id) {
-               double x1=edge->pStart.pPos.GetX()*factor-centre._x;
-               double y1=edge->pStart.pPos.GetY()*factor-centre._y;
-               double x2=edge->pEnd.pPos.GetX()*factor-centre._x;
-               double y2=edge->pEnd.pPos.GetY()*factor-centre._y;
+               double x1=edge->pStart.pPos._x*factor-centre._x;
+               double y1=edge->pStart.pPos._y*factor-centre._y;
+               double x2=edge->pEnd.pPos._x*factor-centre._x;
+               double y2=edge->pEnd.pPos._y*factor-centre._y;
 
                file<<"\t\t<label centerX=\""<<0.5*(x1+x2)<<"\" centerY=\""<<0.5*(y1+y2)<<"\" centerZ=\"0\" text=\""<<edge->id<<"\" color=\"20\" />"<<endl;
                file<<"\t\t<door id = \""<<i<<"\">"<<endl;
@@ -969,7 +969,7 @@ void NavMesh::WriteToFile(std::string fileName)
      //file<<"# vertices section"<<endl;
      file<<_vertices.size()<<endl;
      for (unsigned int v=0; v<_vertices.size(); v++) {
-          file<<"\t"<<_vertices[v]->pPos.GetX()<<" " <<_vertices[v]->pPos.GetY()<<endl;
+          file<<"\t"<<_vertices[v]->pPos._x<<" " <<_vertices[v]->pPos._y<<endl;
 
      }
 
@@ -977,8 +977,8 @@ void NavMesh::WriteToFile(std::string fileName)
      //file<<endl<<"# edges section"<<endl;
      file<<_edges.size()<<endl;
      for (unsigned int e=0; e<_edges.size(); e++) {
-          //file<<pEdges[e]->pStart.pPos.GetX()<<" " <<pEdges[e]->pStart.pPos.GetY()<<endl;
-          //file<<"\t"<<pEdges[e]->pDisp.GetX()<<" " <<pEdges[e]->pDisp.GetY()<<endl;
+          //file<<pEdges[e]->pStart.pPos._x<<" " <<pEdges[e]->pStart.pPos._y<<endl;
+          //file<<"\t"<<pEdges[e]->pDisp._x<<" " <<pEdges[e]->pDisp._y<<endl;
           file<<"\t";
           file<<_edges[e]->pStart.id<<" " <<_edges[e]->pEnd.id<<" ";
           file<<_edges[e]->pNode0<<" " <<_edges[e]->pNode1<<endl;
@@ -1020,7 +1020,7 @@ void NavMesh::WriteToFile(std::string fileName)
           //assert(JNode->pPortals.size()<20);
           //file<<"nodeid "<<JNode->id<<endl;
           file<<endl;
-          file<<"\t"<<JNode->pCentroid.GetX()<<" "<<JNode->pCentroid.GetY()<<endl;
+          file<<"\t"<<JNode->pCentroid._x<<" "<<JNode->pCentroid._y<<endl;
           file<<"\t"<<JNode->pHull.size()<<" ";
           for(unsigned int i=0; i<JNode->pHull.size(); i++) {
                file<<JNode->pHull[i].id<<" ";
@@ -1152,7 +1152,7 @@ NavMesh::JVertex* NavMesh::GetVertex(const Point& p)
           }
      }
 #ifdef _DEBUG
-     cout<<"JVertex not found: "<< p.GetX()<<":"<<p.GetY()<<endl;
+     cout<<"JVertex not found: "<< p._x<<":"<<p._y<<endl;
      cout<<"Adding "<<endl;
      cout<<"pVertices.size()="<<_vertices.size()<<endl;
 #endif

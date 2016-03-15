@@ -33,8 +33,12 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/SubRoom.h"
 #include "../geometry/Wall.h"
+#include "../routing/FloorfieldViaFM.h"
+#include "../routing/LocalFloorfieldViaFM.h"
 #include "DirectionStrategy.h"
-
+#include <fstream>
+#include <chrono>
+#include <ctime>
 
 
 DirectionStrategy::DirectionStrategy()
@@ -61,7 +65,7 @@ Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) 
      const Point& p2 = ped->GetExitLine()->GetPoint2();
      if(p1 == p2) return p1;
 
-     double length = (p1 - p2).Norm(); 
+     double length = (p1 - p2).Norm();
      if(d >= 0.5*length) return (p1 + p2)*0.5; // return the middle point, since line is anyway too short
      double u = d/length; // d is supposed to be smaller than length, then u is in [0, 1]
      //Point diff = (p1 - p2).Normalized() * d;
@@ -93,10 +97,20 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
     Point Lot = ExitLine.LotPoint( ped->GetPos() );
     Point ExitMiddle = (p1+p2)*0.5;
     double d = 0.2;
+    // fix when using triangulation to avoid steering too near to the walls
+    // double lenSq = ExitLine.LengthSquare();
+    // if (lenSq >= 19 && lenSq < 50)
+    //   d = 1;
+    // else if(lenSq >= 50 &&lenSq < 100)
+    //   d = 2;
+    // else if(lenSq >= 100)
+    //   d = 3;
+
+
     Point diff = (p1 - p2).Normalized() * d;
     Line e_neu = Line(p1 - diff, p2 + diff);
 
-    // if(ped->GetID() == -10)
+    // if(ped->GetID() == )
     // {
     //     printf("=======\nX=[%.2f], Y=[%.2f]\n", ped->GetPos().GetX(), ped->GetPos().GetY());
     //     printf("p1=[%.2f, %.2f], p2=[%.2f, %.2f]\n", p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY());
@@ -134,7 +148,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
       Point diff = (p1 - p2).Normalized() * d;
       Line e_neu = Line(p1 - diff, p2 + diff);
       Point NextPointOnLine =  e_neu.ShortestPoint(ped->GetPos());
-  
+
       Line tmpDirection = Line(ped->GetPos(), NextPointOnLine );//This direction will be rotated if
       // it intersects a wall || obstacle.
       // check for intersection with walls
@@ -163,13 +177,13 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
                   printf("Check wall number %d. Dist = %f (%f)\n", i, dist, minDist);
                   printf("%f    %f --- %f    %f\n===========\n",walls[i].GetPoint1().GetX(),walls[i].GetPoint1().GetY(), walls[i].GetPoint2().GetX(),walls[i].GetPoint2().GetY());
 #endif
- 
+
             }
       }//walls
-     
+
       //============================ WALLS ===========================
 
-     
+
       //============================ OBST ===========================
       const vector<Obstacle*>& obstacles = subroom->GetAllObstacles();
       for(unsigned int obs=0; obs<obstacles.size(); ++obs) {
@@ -197,16 +211,17 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
             if(iObs >= 0){ // obstacle is nearest
                   const vector<Wall>& owalls = obstacles[iObs]->GetAllWalls();
                   angle = tmpDirection.GetObstacleDeviationAngle(owalls, walls);
-      
+
                   // angle =  tmpDirection.GetDeviationAngle(owalls[inear].enlarge(2*ped->GetLargerAxis()));
 
 #if DEBUG
                   printf("COLLISION WITH OBSTACLE %f    %f --- %f    %f\n===========\n",owalls[inear].GetPoint1().GetX(),owalls[inear].GetPoint1().GetY(), owalls[inear].GetPoint2().GetX(),owalls[inear].GetPoint2().GetY());
-      
+
 #endif
             } //iObs
             else{ // wall is nearest
                   angle =  tmpDirection.GetDeviationAngle(walls[inear].Enlarge(2*ped->GetLargerAxis()));
+
 #if DEBUG
                   printf("COLLISION WITH WALL %f    %f --- %f    %f\n===========\n",walls[inear].GetPoint1().GetX(),walls[inear].GetPoint1().GetY(), walls[inear].GetPoint2().GetX(),walls[inear].GetPoint2().GetY());
 #endif
@@ -221,7 +236,8 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
             }
       }
 ////////////////////////////////////////////////////////////
-    
+
+
       Point  G;
       if (fabs(angle) > J_EPS)
             //G  =  tmpDirection.GetPoint2().Rotate(cos(angle), sin(angle)) ;
@@ -229,9 +245,10 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
       else {
             if(ped->GetNewOrientationFlag()) //this pedestrian could not see the target and now he can see it clearly.
                   ped->SetSmoothTurning(); // so the turning should be adapted accordingly.
-          
+
             G  =  NextPointOnLine;
       }
+
 #if DEBUG
       printf("inear=%d, iObs=%d, minDist=%f\n", inear, iObs, minDist);
       printf("PED=%d\n",  ped->GetID());
@@ -240,14 +257,351 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
       printf("angle=%f, G=[%.2f, %.2f]\n", angle, G.GetX(), G.GetY());
       printf("\n----------\nLEAVE function with PED=%d\n----------\n",ped->GetID());
       // getc(stdin);
-      
+
 
 #endif
 
+      // if( ped->GetID() == 21)
+      //       fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d %.2f %.2f %.2f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(),
+      //               ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID(), ped->GetV0().GetX(), ped->GetV0().GetY(), ped->GetGlobalTime());
+// this stderr output can be used with plot_desired_velocity.py
+
+
+
       // if( ped->GetID() == 1)
-            // fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d %.2f %.2f %.2f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), 
+            // fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d %.2f %.2f %.2f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(),
                     // ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID(), ped->GetV0().GetX(), ped->GetV0().GetY(), ped->GetGlobalTime());
 // this stderr output can be used with scripts/plot_desired_velocity.py
 
       return G;
+}
+
+/// 6
+Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
+{
+#if DEBUG
+    if (initDone && (ffviafm != nullptr)) {
+#endif // DEBUG
+
+        Point p;
+        ffviafm->getDirectionToDestination(ped, p);
+        p = p.Normalized();     // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
+        return (p + ped->GetPos());
+
+#if DEBUG
+    }
+#endif // DEBUG
+
+    //this should not execute:
+    std::cerr << "Failure in DirectionFloorfield::GetTarget!!" << std::endl;
+    exit(EXIT_FAILURE);
+}
+
+Point DirectionFloorfield::GetDir2Wall(Pedestrian* ped) const
+{
+    Point p;
+    ffviafm->getDir2WallAt(ped->GetPos(), p);
+    return p;
+}
+
+double DirectionFloorfield::GetDistance2Wall(Pedestrian* ped) const
+{
+    return ffviafm->getDistance2WallAt(ped->GetPos());
+}
+
+void DirectionFloorfield::Init(Building* building, double stepsize,
+                               double threshold, bool useDistancMap) {
+    //implement mechanic, that can read-in an existing floorfield (from a previous run)
+    string s = building->GetGeometryFilename();
+    Log->Write("INFO: \tGeometryFilename <" + s + ">");
+    s.erase(s.find_last_of(".", string::npos)); // delete ending
+    if (s.find_last_of("/") != string::npos) {
+        s.erase(0, s.find_last_of("/")+1);      // delete directories before filename (espacially "..")
+    }
+    string FF_filename = (building->GetProjectRootDir() + "FF_" + s +  "_" + std::to_string(threshold) + ".vtk").c_str();
+    std::ifstream test(FF_filename);
+    if (test.good()) {
+          Log->Write("INFO: \tRead Floorfield from file <" + FF_filename + ">");
+        ffviafm = new FloorfieldViaFM(FF_filename);
+    } else {
+          std::chrono::time_point<std::chrono::system_clock> start, end;
+          start = std::chrono::system_clock::now();
+          Log->Write("INFO: \tCalling Construtor of FloorfieldViaFM");
+          ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold,
+                                        useDistancMap, FF_filename);
+          end = std::chrono::system_clock::now();
+          std::chrono::duration<double> elapsed_seconds = end-start;
+          Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
+    }
+    initDone = true;
+}
+
+DirectionFloorfield::DirectionFloorfield() {
+    ffviafm = nullptr;
+    initDone = false;
+};
+
+DirectionFloorfield::~DirectionFloorfield() {
+    if (ffviafm) {
+        delete ffviafm;
+    }
+}
+
+/// 7
+Point DirectionGoalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
+{
+#if DEBUG
+    if (initDone && (ffviafm != nullptr)) {
+#endif // DEBUG
+
+    Point p;
+    ffviafm->getDirectionToFinalDestination(ped, p);
+    p = p.Normalized();     // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
+    return (p + ped->GetPos());
+
+#if DEBUG
+    }
+#endif // DEBUG
+
+    //this should not execute:
+    std::cerr << "Failure in DirectionFloorfield::GetTarget!!" << std::endl;
+    exit(EXIT_FAILURE);
+}
+
+Point DirectionGoalFloorfield::GetDir2Wall(Pedestrian* ped) const
+{
+    Point p;
+    ffviafm->getDir2WallAt(ped->GetPos(), p);
+    return p;
+}
+
+double DirectionGoalFloorfield::GetDistance2Wall(Pedestrian* ped) const
+{
+    return ffviafm->getDistance2WallAt(ped->GetPos());
+}
+
+void DirectionGoalFloorfield::Init(Building* building, double stepsize,
+                                   double threshold, bool useDistancMap) {
+    //implement mechanic, that can read-in an existing floorfield (from a previous run)
+    string s = building->GetGeometryFilename();
+    Log->Write("INFO: \tGeometryFilename <" + s + ">");
+    s.erase(s.find_last_of(".", string::npos)); // delete ending
+    if (s.find_last_of("/") != string::npos) {
+        s.erase(0, s.find_last_of("/")+1);      // delete directories before filename (espacially "..")
+    }
+    string FF_filename = (building->GetProjectRootDir() + "FF_" + s +  "_"
+                          + std::to_string(threshold) + ".vtk").c_str();
+    std::ifstream test(FF_filename);
+    if (test.good()) {
+        Log->Write("INFO: \tRead Floorfield from file <" + FF_filename + ">");
+        ffviafm = new FloorfieldViaFM(FF_filename);
+    } else {
+        std::chrono::time_point<std::chrono::system_clock> start, end;
+        start = std::chrono::system_clock::now();
+        Log->Write("INFO: \tCalling Construtor of FloorfieldViaFM");
+        ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold,
+                                      useDistancMap, FF_filename);
+        end = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end-start;
+        Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
+    }
+    initDone = true;
+}
+
+DirectionGoalFloorfield::DirectionGoalFloorfield() {
+    ffviafm = nullptr;
+    initDone = false;
+};
+
+DirectionGoalFloorfield::~DirectionGoalFloorfield() {
+    if (ffviafm) {
+        delete ffviafm;
+    }
+}
+
+/// 8
+Point DirectionLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
+{
+#if DEBUG
+     if (initDone && (ffviafm != nullptr)) {
+#endif // DEBUG
+
+     Point p;
+//     if (locffviafm.count(room->GetID())) {
+//#pragma omp critical
+     locffviafm.at(room->GetID())->getDirectionToDestination(ped, p);
+//     } else {
+          //create locffviafm[room->GetID()] - therefore use all members needed for ctor
+          // members will be added to this class
+//          locffviafm.emplace(room->GetID(), new LocalFloorfieldViaFM(room, building,
+//                                      hx, hy, wallAvoidDistance, useDistancefield,
+//                                      filename));
+//          locffviafm[room->GetID()]->getDirectionToDestination(ped, p);
+//     }
+     p = p.Normalized();     // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
+     return (p + ped->GetPos());
+
+#if DEBUG
+     }
+#endif // DEBUG
+
+     //this should not execute:
+     std::cerr << "Failure in DirectionFloorfield::GetTarget!!" << std::endl;
+     exit(EXIT_FAILURE);
+}
+
+Point DirectionLocalFloorfield::GetDir2Wall(Pedestrian* ped) const
+{
+     Point p;
+     int roomID = ped->GetRoomID();
+     locffviafm.at(roomID)->getDir2WallAt(ped->GetPos(), p);
+     return p;
+}
+
+double DirectionLocalFloorfield::GetDistance2Wall(Pedestrian* ped) const
+{
+     return locffviafm.at(ped->GetRoomID())->getDistance2WallAt(ped->GetPos());
+}
+
+void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
+                                    double threshold, bool useDistancMap) {
+     hx = stepsize;
+     hy = stepsize;
+     building = buildingArg;
+     wallAvoidDistance = threshold;
+     useDistancefield = useDistancMap;
+
+     //implement mechanic, that can read-in an existing floorfield (from a previous run)
+     string s = building->GetGeometryFilename();
+     Log->Write("INFO: \tGeometryFilename <" + s + ">");
+     s.erase(s.find_last_of(".", string::npos)); // delete ending
+     if (s.find_last_of("/") != string::npos) {
+          s.erase(0, s.find_last_of("/")+1);      // delete directories before filename (espacially "..")
+     }
+     string FF_filename = (building->GetProjectRootDir() + "FF_" + s +  "_" + std::to_string(threshold) + ".vtk").c_str();
+     std::ifstream test(FF_filename);
+     if (test.good()) {
+          //Log->Write("INFO: \tRead Floorfield from file <" + FF_filename + ">");
+          //ffviafm = new FloorfieldViaFM(FF_filename);
+     } else {
+          std::chrono::time_point<std::chrono::system_clock> start, end;
+          start = std::chrono::system_clock::now();
+          Log->Write("INFO: \tCalling Construtor of LocFloorfieldViaFM");
+          for (auto& roomPair : building->GetAllRooms()) {
+               locffviafm[roomPair.first] = new LocalFloorfieldViaFM(&(*roomPair.second), building,
+                     hx, hy, wallAvoidDistance, useDistancefield, FF_filename);
+          }
+          end = std::chrono::system_clock::now();
+          std::chrono::duration<double> elapsed_seconds = end-start;
+          Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
+     }
+     initDone = true;
+}
+
+DirectionLocalFloorfield::DirectionLocalFloorfield() {
+     //locffviafm = nullptr;
+     initDone = false;
+}
+
+DirectionLocalFloorfield::~DirectionLocalFloorfield() {
+     //if (locffviafm) {
+     for (auto pair : locffviafm) {
+          delete pair.second;
+     }
+     //}
+}
+
+///9
+Point DirectionSubLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
+{
+#if DEBUG
+     if (initDone && (ffviafm != nullptr)) {
+#endif // DEBUG
+
+     Point p;
+//     if (!locffviafm.count(ped->GetSubRoomUID())) {
+//          std::cerr << "Error: no mapentry for key :" << ped->GetSubRoomUID() << std::endl;
+//     } else {
+//          std::cerr << "Mapentry found: " << ped->GetSubRoomUID() << " with ptr: " << locffviafm.at(ped->GetSubRoomUID()) << std::endl;
+//     }
+//#pragma omp critical
+     locffviafm.at(ped->GetSubRoomUID())->getDirectionToDestination(ped, p);
+
+     p = p.Normalized();     // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
+     return (p + ped->GetPos());
+
+#if DEBUG
+     }
+#endif // DEBUG
+
+     //this should not execute:
+     std::cerr << "Failure in DirectionFloorfield::GetTarget!!" << std::endl;
+     exit(EXIT_FAILURE);
+}
+
+Point DirectionSubLocalFloorfield::GetDir2Wall(Pedestrian* ped) const
+{
+     Point p;
+     int key = ped->GetSubRoomID();
+     locffviafm.at(key)->getDir2WallAt(ped->GetPos(), p);
+     return p;
+}
+
+double DirectionSubLocalFloorfield::GetDistance2Wall(Pedestrian* ped) const
+{
+     return locffviafm.at(ped->GetSubRoomID())->getDistance2WallAt(ped->GetPos());
+}
+
+void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
+      double threshold, bool useDistancMap) {
+     hx = stepsize;
+     hy = stepsize;
+     building = buildingArg;
+     wallAvoidDistance = threshold;
+     useDistancefield = useDistancMap;
+
+     //implement mechanic, that can read-in an existing floorfield (from a previous run)
+     string s = building->GetGeometryFilename();
+     Log->Write("INFO: \tGeometryFilename <" + s + ">");
+     s.erase(s.find_last_of(".", string::npos)); // delete ending
+     if (s.find_last_of("/") != string::npos) {
+          s.erase(0, s.find_last_of("/")+1);      // delete directories before filename (espacially "..")
+     }
+     string FF_filename = (building->GetProjectRootDir() + "FF_" + s +  "_" + std::to_string(threshold) + ".vtk").c_str();
+     std::ifstream test(FF_filename);
+     if (test.good()) {
+          //Log->Write("INFO: \tRead Floorfield from file <" + FF_filename + ">");
+          //ffviafm = new FloorfieldViaFM(FF_filename);
+     } else {
+          std::chrono::time_point<std::chrono::system_clock> start, end;
+          start = std::chrono::system_clock::now();
+          Log->Write("INFO: \tCalling Construtor of SubLocFloorfieldViaFM");
+          for (auto& roomPair : building->GetAllRooms()) {
+               for (auto& subRoomPair : roomPair.second->GetAllSubRooms()) {
+                    std::cerr << "Creating SubLocFF at key: " << subRoomPair.second->GetUID() <<std::endl;
+                    locffviafm[subRoomPair.second->GetUID()] = new SubLocalFloorfieldViaFM(
+                          &(*subRoomPair.second), building,
+                          hx, hy, wallAvoidDistance, useDistancefield,
+                          FF_filename);
+               }
+          }
+          end = std::chrono::system_clock::now();
+          std::chrono::duration<double> elapsed_seconds = end-start;
+          Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
+
+     }
+     initDone = true;
+}
+
+DirectionSubLocalFloorfield::DirectionSubLocalFloorfield() {
+     //locffviafm = nullptr;
+     initDone = false;
+}
+
+DirectionSubLocalFloorfield::~DirectionSubLocalFloorfield() {
+     //if (locffviafm) {
+     for (auto pair : locffviafm) {
+          delete pair.second;
+     }
+     //}
 }

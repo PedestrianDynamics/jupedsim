@@ -146,9 +146,10 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
         (*cm_storage)[p]->GetGraphNetwork()->AddDestination(destination);
         sensor_manager->execute(p, SensorManager::NEW_DESTINATION);
 
-
+        //setting crossing to ped
         p->SetExitLine(destination->GetCrossing());
         p->SetExitIndex(destination->GetCrossing()->GetUniqueID());
+
         return 1;
 }
 

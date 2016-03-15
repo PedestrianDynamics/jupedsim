@@ -277,8 +277,8 @@ public:
      double GetObstacleDeviationAngle(const std::vector<Wall>& owalls, const std::vector<Wall>& rwalls) const; 
 
      /**
-      * ???
-      * @param d
+      * Extend the line by d on both extremities. The line becomes larger by 2*d
+      * @param d:
       * @return
       */
      Line Enlarge(double d) const; 

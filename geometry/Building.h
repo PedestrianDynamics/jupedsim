@@ -24,7 +24,7 @@
  *
  *
  **/
- 
+
 
 #ifndef _BUILDING_H
 #define _BUILDING_H
@@ -98,12 +98,15 @@ public:
      Room* GetRoom(std::string caption)const;
 
      Transition* GetTransition(std::string caption) const;
-     Transition* GetTransition(int id) ;
+     Transition* GetTransition(int id) const;
 
      /**
-      * Not implemented
+      * Returns Crossing with a specified ID
+      *
+      * @param ID of Crossing: int
+      * @return Pointer of Crossing
       */
-     Crossing* GetCrossing(int id);
+     Crossing* GetCrossing(int ID);
 
      /**
       * Not implemented
@@ -149,7 +152,7 @@ public:
      Transition* GetTransitionByUID(int uid) const;
 
      //TOD0: rename later to GetGoal
-     Goal* GetFinalGoal(int id);
+     Goal* GetFinalGoal(int id) const;
 
      /**
       * @return the linked-cell grid used for spatial query
@@ -170,10 +173,10 @@ public:
      const std::map<int, Hline*>& GetAllHlines() const;
      const std::map<int, Goal*>& GetAllGoals() const;
 
-     void AddCrossing(Crossing* line);
-     void AddTransition(Transition* line);
-     void AddHline(Hline* line);
-     void AddGoal(Goal* goal);
+     bool AddCrossing(Crossing* line);
+     bool AddTransition(Transition* line);
+     bool AddHline(Hline* line);
+     bool AddGoal(Goal* goal);
 
      const std::string& GetProjectRootDir() const;
      const std::string& GetProjectFilename() const;

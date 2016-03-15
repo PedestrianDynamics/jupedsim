@@ -7,6 +7,7 @@
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8  FATAL_ERROR)
+set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 
 project(JPScore)
 
@@ -18,13 +19,15 @@ set(JPSCORE_VERSION
   ${JPSCORE_MAJOR_VERSION}.${JPSCORE_MINOR_VERSION}.${JPSCORE_PATCH_VERSION})
 message( STATUS "JPSCORE_VERSION: " ${JPSCORE_VERSION} )
 
-if(APPLE)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
-  SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++" )
-  SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libc++" )
-  SET( CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -stdlib=libc++" )
-endif(APPLE)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
+    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(warnings "-Wall -Wextra")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    set(warnings "/W4 /WX /EHsc")
+endif()
+set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${warnings}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${warnings}")
 
 if(NOT BUILD_TESTING)
   set(BUILD_TESTING OFF) # test units & python tests are not generated.
@@ -61,12 +64,15 @@ if(NOT DEFINED PROCESSOR_COUNT)
 endif(NOT DEFINED PROCESSOR_COUNT)
 
 if(PROCESSOR_COUNT)
-  message( STATUS "PROCESSOR_COUNT: " ${PROCESSOR_COUNT})
-  set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
+#  message( STATUS "PROCESSOR_COUNT: " ${PROCESSOR_COUNT})
+#  set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
+  message( STATUS "PROCESSOR_COUNT: 0")
+  set(CTEST_BUILD_FLAGS "-j0")
 endif(PROCESSOR_COUNT)
 
 if(NOT CMAKE_BUILD_TYPE)
-  set (CMAKE_BUILD_TYPE Release)
+#  set (CMAKE_BUILD_TYPE Release)
+  set (CMAKE_BUILD_TYPE Debug)
 endif(NOT CMAKE_BUILD_TYPE)
 message( STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE} )
 
@@ -115,6 +121,45 @@ if(DOXYGEN_FOUND)
     COMMENT "Generating API documentation with Doxygen" VERBATIM
     )
 endif(DOXYGEN_FOUND)
+#http://stackoverflow.com/questions/1487752/how-do-i-instruct-cmake-to-look-for-libraries-installed-by-macports
+if(APPLE)
+  # Detect if the "port" command is valid on this system; if so, return full path
+  execute_process(COMMAND which port RESULT_VARIABLE DETECT_MACPORTS OUTPUT_VARIABLE MACPORTS_PREFIX ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if (${DETECT_MACPORTS} EQUAL 0)
+    # "/opt/local/bin/port" doesn't have libs, so we get the parent directory
+    get_filename_component(MACPORTS_PREFIX ${MACPORTS_PREFIX} DIRECTORY)
+    # "/opt/local/bin" doesn't have libs, so we get the parent directory
+    get_filename_component(MACPORTS_PREFIX ${MACPORTS_PREFIX} DIRECTORY)
+    # "/opt/local" is where MacPorts lives, add `/lib` suffix and link
+    link_directories(${MACPORTS_PREFIX}/lib)
+    message(STATUS "Macports detected: ${MACPORTS_PREFIX}/lib")
+    # SET(CMAKE_SYSTEM_NAME Darwin)
+    # # Add MacPorts
+    # INCLUDE_DIRECTORIES(/opt/local/include)
+
+    # LINK_DIRECTORIES(/opt/local/lib)
+
+  else()
+    # Recommendation, also add a "brew --prefix" custom command to detect a homebrew build environment
+    execute_process(COMMAND brew --prefix RESULT_VARIABLE DETECT_BREW OUTPUT_VARIABLE BREW_PREFIX ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(${DETECT_BREW} EQUAL 0)
+      link_directories(${BREW_PREFIX})
+      message(STATUS "Brew detected: ${BREW_PREFIX}")      
+    endif()  
+  endif()
+
+  
+endif(APPLE)
+
+
+#set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /opt/local/lib)
+#set(Boost_INCLUDE_DIR /opt/local/include/boost)
+#set(Boost_LIBRARY_DIR /usr/local/src/boost_1_46_1/stage/lib)
+# in case boost is a non-default location
+# SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "C:/win32libs/boost")
+# SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "C:/win32libs/boost/lib")
+find_package(Boost REQUIRED )
+
 
 # find the correct OpenMP flag
 FIND_PACKAGE(OpenMP)
@@ -141,10 +186,22 @@ find_package(Boost REQUIRED )
 
 # test all cpp-files in Utest
 if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
-  
+
   find_package(Boost COMPONENTS unit_test_framework REQUIRED)
   IF(CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage --coverage")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
+    set(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules/")
+    INCLUDE(CodeCoverage)
+    set(ENABLE_COVERAGE ON)
+    SETUP_TARGET_FOR_COVERAGE(
+      cov  # Name for custom target.
+      ctest         # Name of the test driver executable that runs the tests.
+      # NOTE! This should always have a ZERO as exit code
+      # otherwise the coverage generation will not complete.
+      coverage            # Name of output directory.
+    )
+
   endif(CMAKE_COMPILER_IS_GNUCXX)
   file(GLOB_RECURSE test_files "${CMAKE_TEST_DIR}/*.cpp")
   #  file(GLOB test_py_files "${CMAKE_TEST_DIR}/*/runtest*.py")
@@ -186,7 +243,10 @@ set (   source_files
   math/ODESolver.cpp
   math/GCFMModel.cpp
   math/GompertzModel.cpp
+  math/GradientModel.cpp
+  math/VelocityModel.cpp
   math/OperationalModel.cpp
+
 
   mpi/LCGrid.cpp
 
@@ -195,14 +255,19 @@ set (   source_files
   pedestrian/Pedestrian.cpp
   pedestrian/AgentsParameters.cpp
   pedestrian/Knowledge.cpp
-  pedestrian/AgentsQueue.cpp		
-  pedestrian/AgentsSource.cpp		
+  pedestrian/AgentsQueue.cpp
+  pedestrian/AgentsSource.cpp
   pedestrian/Pedestrian.cpp
-  pedestrian/AgentsSourcesManager.cpp	
+  pedestrian/AgentsSourcesManager.cpp
   pedestrian/StartDistribution.cpp
 
-  voronoi/VoronoiDiagramGenerator.cpp
 
+  voronoi/VoronoiDiagramGenerator.cpp
+  voronoi-boost/VoronoiPositionGenerator.cpp
+
+  routing/ffRouter.cpp
+  routing/LocalFloorfieldViaFM.cpp
+  routing/FloorfieldViaFM.cpp
   routing/AccessPoint.cpp
   routing/DirectionStrategy.cpp
   routing/DummyRouter.cpp
@@ -215,6 +280,12 @@ set (   source_files
   routing/DTriangulation.cpp
   routing/MeshRouter.cpp
   routing/mesh/Mesh.cpp
+  #header files with scr code need to be added here, in order to be
+  #included in generated project files (codeblocks)
+  #plz do not delete them here
+  routing/mesh/RectGrid.h
+  routing/mesh/Trial.h
+  general/Macros.h
 
   routing/CognitiveMapRouter.cpp
   routing/cognitive_map/GraphNetwork.cpp
@@ -255,9 +326,13 @@ set (   source_files
   poly2tri/sweep/sweep.cpp
   poly2tri/sweep/cdt.cpp
   events/EventManager.cpp
+  events/Event.cpp
   )
 
 set (   header_files
+  routing/ffRouter.h
+  routing/LocalFloorfieldViaFM.h
+  routing/FloorfieldViaFM.h
   routing/NavMesh.h
   routing/DirectionStrategy.h
   routing/DummyRouter.h
@@ -270,6 +345,12 @@ set (   header_files
   routing/DTriangulation.h
   routing/MeshRouter.h
   routing/mesh/Mesh.h
+  routing/mesh/RectGrid.h
+  routing/mesh/Trial.h
+  routing/graph/RoutingGraphStorage.h
+  routing/graph/RoutingGraph.h
+  routing/graph/NavLineState.h
+
 
   routing/CognitiveMapRouter.h
   routing/cognitive_map/GraphNetwork.h
@@ -307,12 +388,13 @@ set (   header_files
   pedestrian/Ellipse.h
   pedestrian/AgentsParameters.h
   pedestrian/Knowledge.h
-  pedestrian/AgentsQueue.h		
-  pedestrian/AgentsSource.h		
+  pedestrian/AgentsQueue.h
+  pedestrian/AgentsSource.h
   pedestrian/Pedestrian.h
-  pedestrian/AgentsSourcesManager.h	
+  pedestrian/AgentsSourcesManager.h
   pedestrian/StartDistribution.h
   voronoi/VoronoiDiagramGenerator.h
+  voronoi-boost/VoronoiPositionGenerator.h
 
   mpi/LCGrid.h
 
@@ -344,7 +426,10 @@ set (   header_files
   math/ODESolver.h
   math/GCFMModel.h
   math/GompertzModel.h
-  math/OperationalModel.h   
+  math/GradientModel.h
+  math/VelocityModel.h
+  math/OperationalModel.h
+
 
   poly2tri/poly2tri.h
   poly2tri/common/shapes.h
@@ -354,14 +439,30 @@ set (   header_files
   poly2tri/sweep/advancing_front.h
   poly2tri/sweep/sweep.h
   events/EventManager.h
+  events/Event.h
   )
 
 
 add_library ( core STATIC ${source_files} )
+
 #add_library ( core SHARED ${source_files} )
 
 #Target
+#add_executable(
+#  jpscore Utest/Fastmarchtest.h
+#)
 add_executable( jpscore  main.cpp )
+
+if(Boost_FOUND)
+  message(STATUS "BOOST FOUND: " ${Boost_LIBRARIES})
+  message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
+  message(STATUS "Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIR})
+  message(STATUS "Boost_LIB_VERSION: " ${Boost_LIB_VERSION})
+  link_directories(${Boost_LIBRARY_DIRS})
+  include_directories(${Boost_INCLUDE_DIR})
+  # todo: is this necessary?
+  #target_link_libraries(jpscore ${Boost_LIBRARIES})
+endif()
 
 target_link_libraries(jpscore core )
 
@@ -381,13 +482,13 @@ if(WIN32)
   target_link_libraries (jpscore core wsock32)
 endif(WIN32)
 
-if(CGAL_FOUND)
-  target_link_libraries (jpscore ${CGAL_CORE_LIBRARY})
-endif(CGAL_FOUND)
+# if(CGAL_FOUND)
+#   target_link_libraries (jpscore ${CGAL_CORE_LIBRARY})
+# endif(CGAL_FOUND)
 
 #protocol buffer
 #find_package(Protobuf)
-#if(PROTOBUF_FOUND)
+#if(PROTOBUF_FOUND && GRPC)
 #  message(STATUS "Protocol buffer library found")
 #
 #  include_directories(${PROTOBUF_INCLUDE_DIRS})
@@ -395,22 +496,22 @@ endif(CGAL_FOUND)
 #  set (hybrid_source_files
 #    matsim/HybridSimulationManager.cpp
 #    matsim/JPSserver.cpp
-#    matsim/JPSclient.cpp                
+#    matsim/JPSclient.cpp
 #    matsim/MATSimInterface.pb.cc
-#    matsim/MATSimInterface.grpc.pb.cc 
+#    matsim/MATSimInterface.grpc.pb.cc
 #    )
 #
 #  set (hybrid_header_files
-#    matsim/JPSclient.h  
-#    matsim/MATSimInterface.grpc.pb.h  
+#    matsim/JPSclient.h
+#    matsim/MATSimInterface.grpc.pb.h
 #    matsim/MATSimInterface.proto
-#    matsim/HybridSimulationManager.h    
-#    matsim/JPSserver.h                 
+#    matsim/HybridSimulationManager.h
+#    matsim/JPSserver.h
 #    matsim/MATSimInterface.pb.h
 #    )
 #    add_library (hybrid STATIC ${hybrid_source_files} )
 #    target_link_libraries (core hybrid grpc++_unsecure grpc gpr ${PROTOBUF_LIBRARY} dl)
-# 	
+#
 #	#PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS foo.proto)
 #	#add_executable(jpscore ${PROTO_SRCS} ${PROTO_HDRS})
 #else()
@@ -442,10 +543,19 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 #--------------------
+if(APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
+  SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++" )
+  SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libc++" )
+  SET( CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -stdlib=libc++" )
+endif(APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+
 if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
   include(CheckCXXCompilerFlag)
   CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
   CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+
   if( COMPILER_SUPPORTS_CXX11)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
   elseif(COMPILER_SUPPORTS_CXX0X)
@@ -454,6 +564,7 @@ if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
   endif()
 endif()
+
 message(STATUS "MSVC: " ${MSVC})
 message(STATUS "MSVC_IDE: " ${MSVC_IDE})
 message(STATUS "MSVC60: " ${MSVC60})
@@ -482,12 +593,13 @@ endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
 # PGI ++ Flags
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")	
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")
 endif()
 
 
 # ----------------------------- cTest ------------------------------------------
 if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
+  set(counter "0")
   SET(BUILD_TEST_TIMEOUT 10800   CACHE STRING "Global timeout on all tests (seconds).")
   SET(DART_TESTING_TIMEOUT "${BUILD_TEST_TIMEOUT}" CACHE STRING "" FORCE)
   message(STATUS "Timeout: " ${BUILD_TEST_TIMEOUT} " s"  )
@@ -496,9 +608,11 @@ if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
   # test if code compiles and runs default setting. Takes about 30 seconds
 
-  link_directories(${Boost_LIBRARY_DIRS})
+  # link_directories(${Boost_LIBRARY_DIRS})
   foreach (test_src ${test_files})
+    MATH(EXPR counter "${counter}+1")
     GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
+    message (STATUS "Add test " ${counter} "  : " ${test})
     add_executable( ${test} ${test_src})
     target_link_libraries (${test} core ${Boost_LIBRARIES})
     add_test(NAME ${test} COMMAND ${test})
@@ -518,8 +632,10 @@ if(BUILD_TESTING)
   find_package(PythonInterp)
   if(PYTHONINTERP_FOUND)
     foreach (test_src ${test_py_files})
+      MATH(EXPR counter "${counter}+1")
       GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
-      message (STATUS "Add python test: " ${test} " | test_src: " ${PYTHON_EXECUTABLE} " " ${test_src})
+      message (STATUS "Add test " ${counter} "  : " ${test})
+      # message (STATUS "Add python test: " ${test} " | test_src: " ${PYTHON_EXECUTABLE} " " ${test_src})
       add_test(NAME ${test} COMMAND ${PYTHON_EXECUTABLE} ${test_src})
     endforeach(test_src ${test_py_files})
     message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
@@ -527,5 +643,6 @@ if(BUILD_TESTING)
     # add_test(NAME flow  COMMAND "${CMAKE_TEST_DIR}/testflow.py" "${test_parameters}")
   endif(PYTHONINTERP_FOUND)
 endif(BUILD_TESTING)
+
 
 install (TARGETS jpscore DESTINATION bin)

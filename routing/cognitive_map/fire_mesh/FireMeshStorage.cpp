@@ -90,11 +90,11 @@ void FireMeshStorage::CreateFireMeshes()
     {
         for (auto &i:_timelist)
         {
-            std::string suffix = "Door_X_" + std::to_string(door.GetCentre().GetX())
-                      + "_Y_" + std::to_string(door.GetCentre().GetY()) + "/t_"+std::to_string(i)+".csv";
+            std::string suffix = "Door_X_" + std::to_string(door.GetCentre()._x)
+                      + "_Y_" + std::to_string(door.GetCentre()._y) + "/t_"+std::to_string(i)+".csv";
             FireMesh mesh(_filepath+suffix);
-            std::string str = "Door_X_"+ std::to_string(door.GetCentre().GetX())
-                    + "_Y_" + std::to_string(door.GetCentre().GetY()) + "_t_"+std::to_string(i);
+            std::string str = "Door_X_"+ std::to_string(door.GetCentre()._x)
+                    + "_Y_" + std::to_string(door.GetCentre()._y) + "_t_"+std::to_string(i);
 
 
             _fMContainer.insert(std::make_pair(str, mesh));
@@ -113,8 +113,8 @@ const FireMesh &FireMeshStorage::get_FireMesh(const Point &doorCentre, const dou
     if (simT>=_finalTime)
         simT=_finalTime;
 
-    std::string str = "Door_X_"+ std::to_string(doorCentre.GetX())
-            + "_Y_" + std::to_string(doorCentre.GetY()) + "_t_"+std::to_string(simT)+".000000";
+    std::string str = "Door_X_"+ std::to_string(doorCentre._x)
+            + "_Y_" + std::to_string(doorCentre._y) + "_t_"+std::to_string(simT)+".000000";
 
     return _fMContainer.at(str);
 }

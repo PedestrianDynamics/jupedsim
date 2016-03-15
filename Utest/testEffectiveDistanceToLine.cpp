@@ -64,7 +64,7 @@ int testEffectiveDistanceToLine()
      E.SetV0(1);
      E.SetV( Point(0,0) );
      E.SetAmin(a);
-     E.SetBmin(b);
+     E.SetBmax(b);
      // parallel y
      Point P1(2*a, 0);
      Point P2(2*a, 3);
@@ -73,48 +73,48 @@ int testEffectiveDistanceToLine()
      dist = E.EffectiveDistanceToLine(L);
      res += (dist==a)?1:0;
      ntests++;
-     fprintf (f, "%2d. dist=%.2f\t Line (%.2f, %.2f)--(%.2f, %.2f) a=%.2f\t b=%.2f\t res=%d\n",ntests, dist, P1.GetX(), P1.GetY(), P2.GetX(), P2.GetY(), a, b, res);
+     fprintf (f, "%2d. dist=%.2f\t Line (%.2f, %.2f)--(%.2f, %.2f) a=%.2f\t b=%.2f\t res=%d\n",ntests, dist, P1._x, P1._y, P2._x, P2._y, a, b, res);
 
      // parallel y
-     P1.SetX(-3*a);
-     P1.SetY(0);
-     P2.SetX(-3*a);
-     P2.SetY(3);
+     P1._x =(-3*a);
+     P1._y =(0);
+     P2._x =(-3*a);
+     P2._y =(3);
      L.SetPoint1( P1 );
      L.SetPoint2( P2 );
 
      dist = E.EffectiveDistanceToLine(L);
      res += (dist==2*a)?1:0;
      ntests++;
-     fprintf (f, "%2d. dist=%.2f\t Line (%.2f, %.2f)--(%.2f, %.2f) a=%.2f\t b=%.2f\t res=%d\n",ntests, dist, P1.GetX(), P1.GetY(), P2.GetX(), P2.GetY(), a, b, res);
+     fprintf (f, "%2d. dist=%.2f\t Line (%.2f, %.2f)--(%.2f, %.2f) a=%.2f\t b=%.2f\t res=%d\n",ntests, dist, P1._x, P1._y, P2._x, P2._y, a, b, res);
 
 // parallel x
-     P1.SetX(0);
-     P1.SetY(2*b*0.5);
-     P2.SetX(3);
-     P2.SetY(2*b*0.5);
+     P1._x =(0);
+     P1._y =(2*b);
+     P2._x =(3);
+     P2._y =(2*b);
      L.SetPoint1( P1 );
      L.SetPoint2( P2 );
 
 
      dist = E.EffectiveDistanceToLine(L);
-     res += (dist==b*0.5)?1:0;
+     res += (dist==b)?1:0;
      ntests++;
-     fprintf (f, "%2d. dist=%.2f\t Line (%.2f, %.2f)--(%.2f, %.2f) a=%.2f\t b=%.2f\t res=%d\n",ntests, dist, P1.GetX(), P1.GetY(), P2.GetX(), P2.GetY(), a, b, res);
+     fprintf (f, "%2d. dist=%.2f\t Line (%.2f, %.2f)--(%.2f, %.2f) a=%.2f\t b=%.2f\t res=%d\n",ntests, dist, P1._x, P1._y, P2._x, P2._y, a, b, res);
 
 // parallel x
-     P1.SetX(0);
-     P1.SetY(-2*b*0.5);
-     P2.SetX(3);
-     P2.SetY(-2*b*0.5);
+     P1._x =(0);
+     P1._y =(-2*b);
+     P2._x =(3);
+     P2._y =(-2*b);
      L.SetPoint1( P1 );
      L.SetPoint2( P2 );
 
 
      dist = E.EffectiveDistanceToLine(L);
-     res += (dist==b*0.5)?1:0;
+     res += (dist==b)?1:0;
      ntests++;
-     fprintf (f, "%2d. dist=%.2f\t Line (%.2f, %.2f)--(%.2f, %.2f) a=%.2f\t b=%.2f\t res=%d\n",ntests, dist, P1.GetX(), P1.GetY(), P2.GetX(), P2.GetY(), a, b, res);
+     fprintf (f, "%2d. dist=%.2f\t Line (%.2f, %.2f)--(%.2f, %.2f) a=%.2f\t b=%.2f\t res=%d\n",ntests, dist, P1._x, P1._y, P2._x, P2._y, a, b, res);
 
 
      fclose(f);

@@ -84,7 +84,7 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
           exit (EXIT_FAILURE);
      }
 
-     //this->AddSurroundingRoom();
+//     this->AddSurroundingRoom();
 
      if(!InitGeometry())
      {
@@ -248,10 +248,10 @@ void Building::AddSurroundingRoom()
           {
                for (auto&& wall:itr_subroom.second->GetAllWalls())
                {
-                    double x1 = wall.GetPoint1().GetX();
-                    double y1 = wall.GetPoint1().GetY();
-                    double x2 = wall.GetPoint2().GetX();
-                    double y2 = wall.GetPoint2().GetY();
+                    double x1 = wall.GetPoint1()._x;
+                    double y1 = wall.GetPoint1()._y;
+                    double x2 = wall.GetPoint2()._x;
+                    double y2 = wall.GetPoint2()._y;
 
                     double xmax = (x1 > x2) ? x1 : x2;
                     double xmin = (x1 > x2) ? x2 : x1;
@@ -270,10 +270,10 @@ void Building::AddSurroundingRoom()
      {
           for(auto&& wall: itr_goal.second->GetAllWalls())
           {
-               double x1 = wall.GetPoint1().GetX();
-               double y1 = wall.GetPoint1().GetY();
-               double x2 = wall.GetPoint2().GetX();
-               double y2 = wall.GetPoint2().GetY();
+               double x1 = wall.GetPoint1()._x;
+               double y1 = wall.GetPoint1()._y;
+               double x2 = wall.GetPoint2()._x;
+               double y2 = wall.GetPoint2()._y;
 
                double xmax = (x1 > x2) ? x1 : x2;
                double xmin = (x1 > x2) ? x2 : x1;
@@ -341,31 +341,32 @@ bool Building::InitGeometry()
                     if(!obst->ConvertLineToPoly())
                          return false;
                }
-               double minElevation = 1000;
-               double maxElevation = -1000;
+
+               double minElevation = FLT_MAX;
+               double maxElevation = -FLT_MAX;
                for(auto && wall:itr_subroom.second->GetAllWalls())
                {
-                     Point P1 = wall.GetPoint1();
-                     Point P2 = wall.GetPoint2();
+                     const Point& P1 = wall.GetPoint1();
+                     const Point& P2 = wall.GetPoint2();
                      if(minElevation > itr_subroom.second->GetElevation(P1))
                      {
                            minElevation = itr_subroom.second->GetElevation(P1);
                      }
-                
+
                      if(maxElevation < itr_subroom.second->GetElevation(P1))
                      {
                            maxElevation = itr_subroom.second->GetElevation(P1);
                      }
-                
+
                      if(minElevation > itr_subroom.second->GetElevation(P2))
                      {
                            minElevation = itr_subroom.second->GetElevation(P2);
                      }
-                
+
                      if(maxElevation < itr_subroom.second->GetElevation(P2))
                      {
                            maxElevation = itr_subroom.second->GetElevation(P2);
-                     }          
+                     }
                }
                itr_subroom.second->SetMaxElevation(maxElevation);
                itr_subroom.second->SetMinElevation(minElevation);
@@ -746,7 +747,7 @@ Room* Building::GetRoom(string caption) const
      exit(EXIT_FAILURE);
 }
 
-void Building::AddCrossing(Crossing* line)
+bool Building::AddCrossing(Crossing* line)
 {
      if (_crossings.count(line->GetID()) != 0) {
           char tmp[CLENGTH];
@@ -757,9 +758,10 @@ void Building::AddCrossing(Crossing* line)
           exit(EXIT_FAILURE);
      }
      _crossings[line->GetID()] = line;
+     return true;
 }
 
-void Building::AddTransition(Transition* line)
+bool Building::AddTransition(Transition* line)
 {
      if (_transitions.count(line->GetID()) != 0) {
           char tmp[CLENGTH];
@@ -770,16 +772,17 @@ void Building::AddTransition(Transition* line)
           exit(EXIT_FAILURE);
      }
      _transitions[line->GetID()] = line;
+     return true;
 }
 
-void Building::AddHline(Hline* line)
+bool Building::AddHline(Hline* line)
 {
      if (_hLines.count(line->GetID()) != 0) {
           // check if the lines are identical
           Hline* ori= _hLines[line->GetID()];
           if(ori->operator ==(*line)) {
                Log->Write("INFO: \tSkipping identical hlines with ID [%d]",line->GetID());
-               return;
+               return false;
           } else {
                Log->Write(
                          "ERROR: Duplicate index for hlines found [%d] in Routing::AddHline(). You have [%d] hlines",
@@ -788,9 +791,10 @@ void Building::AddHline(Hline* line)
           }
      }
      _hLines[line->GetID()] = line;
+     return true;
 }
 
-void Building::AddGoal(Goal* goal)
+bool Building::AddGoal(Goal* goal)
 {
      if (_goals.count(goal->GetId()) != 0) {
           Log->Write(
@@ -799,6 +803,7 @@ void Building::AddGoal(Goal* goal)
           exit(EXIT_FAILURE);
      }
      _goals[goal->GetId()] = goal;
+     return true;
 }
 
 const map<int, Crossing*>& Building::GetAllCrossings() const
@@ -834,10 +839,10 @@ Transition* Building::GetTransition(string caption) const
      exit(EXIT_FAILURE);
 }
 
-Transition* Building::GetTransition(int ID)
+Transition* Building::GetTransition(int ID) const //ar.graf: added const 2015-12-10
 {
      if (_transitions.count(ID) == 1) {
-          return _transitions[ID];
+          return _transitions.at(ID);
      } else {
           if (ID == -1)
                return NULL;
@@ -850,10 +855,26 @@ Transition* Building::GetTransition(int ID)
      }
 }
 
-Goal* Building::GetFinalGoal(int ID)
+Crossing *Building::GetCrossing(int ID)
+{
+    if (_crossings.count(ID) == 1) {
+         return _crossings[ID];
+    } else {
+         if (ID == -1)
+              return NULL;
+         else {
+              Log->Write(
+                        "ERROR: I could not find any crossing with the 'ID' [%d]. You have defined [%d] transitions",
+                        ID, _crossings.size());
+              exit(EXIT_FAILURE);
+         }
+    }
+}
+
+Goal* Building::GetFinalGoal(int ID) const
 {
      if (_goals.count(ID) == 1) {
-          return _goals[ID];
+          return _goals.at(ID);
      } else {
           if (ID == -1)
                return NULL;
@@ -967,7 +988,7 @@ bool Building::IsVisible(const Point& p1, const Point& p2, const std::vector<Sub
      {
           for(auto&& sub: subrooms)
           {
-               if(sub and sub->IsVisible(p1,p2,considerHlines)==false) return false;
+               if(sub && sub->IsVisible(p1,p2,considerHlines)==false) return false;
           }
      }
 
@@ -1032,10 +1053,10 @@ void Building::InitGrid(double cellSize)
           {
                for (auto&& wall:itr_subroom.second->GetAllWalls())
                {
-                    double x1 = wall.GetPoint1().GetX();
-                    double y1 = wall.GetPoint1().GetY();
-                    double x2 = wall.GetPoint2().GetX();
-                    double y2 = wall.GetPoint2().GetY();
+                    double x1 = wall.GetPoint1()._x;
+                    double y1 = wall.GetPoint1()._y;
+                    double x2 = wall.GetPoint2()._x;
+                    double y2 = wall.GetPoint2()._y;
 
                     double xmax = (x1 > x2) ? x1 : x2;
                     double xmin = (x1 > x2) ? x2 : x1;
@@ -1071,6 +1092,9 @@ void Building::InitGrid(double cellSize)
      } else {
           Log->Write("INFO: \tInitializing the grid with cell size: %f ", cellSize);
      }
+
+     //TODO: the number of pedestrian should be calculated using the capacity of the sources
+     //int nped= Pedestrian::GetAgentsCreated() +  for src:sources  src->GetMaxAgents()
 
      _linkedCellGrid = new LCGrid(boundaries, cellSize, Pedestrian::GetAgentsCreated());
      _linkedCellGrid->ShallowCopy(_allPedestians);
@@ -1210,15 +1234,37 @@ bool Building::LoadTrafficInfo()
                     xDoor = xDoor->NextSiblingElement("door")) {
 
                int id = xmltoi(xDoor->Attribute("trans_id"), -1);
-               string state = xmltoa(xDoor->Attribute("state"), "open");
+               if (id!=-1)
+               {
+                   string state = xmltoa(xDoor->Attribute("state"), "open");
 
-               //store transition in a map and call getTransition/getCrossin
-               if (state == "open") {
-                    GetTransition(id)->Open();
-               } else if (state == "close") {
-                    GetTransition(id)->Close();
-               } else {
-                    Log->Write("WARNING:\t Unknown door state: %s", state.c_str());
+                   //store transition in a map and call getTransition/getCrossin
+                   if (state == "open") {
+                        GetTransition(id)->Open();
+                   } else if (state == "close") {
+                        GetTransition(id)->Close();
+                   } else {
+                        Log->Write("WARNING:\t Unknown door state: %s", state.c_str());
+                   }
+               }
+               else
+               {
+                   id = xmltoi(xDoor->Attribute("cross_id"), -1);
+                   if (id!=-1)
+                   {
+                       string state = xmltoa(xDoor->Attribute("state"), "open");
+
+                       //store transition in a map and call getTransition/getCrossin
+                       if (state == "open") {
+                            GetCrossing(id)->Open();
+                       } else if (state == "close") {
+                            GetCrossing(id)->Close();
+                       } else {
+                            Log->Write("WARNING:\t Unknown door state: %s", state.c_str());
+                       }
+                   }
+                   else
+                       Log->Write("WARNING:\t Unknown door id");
                }
           }
      Log->Write("INFO:\tDone with loading traffic info file");
@@ -1252,22 +1298,19 @@ void Building::DeletePedestrian(Pedestrian* &ped)
                }
 
           }
-          //cout << "rescued agent: " << (*it)->GetID()<<endl;
-
-          static int totalPeds= _allPedestians.size();
-          _allPedestians.erase(it);
-
-          int nowPeds= _allPedestians.size();
-          Log->ProgressBar(totalPeds, totalPeds-nowPeds);
      }
      //update the stats before deleting
-     Transition* trans =GetTransitionByUID(ped->GetExitIndex());
-     if(trans)
-     {
-          trans->IncreaseDoorUsage(1, ped->GetGlobalTime());
-     }
+//     Transition* trans =GetTransitionByUID(ped->GetExitIndex());
+//     if(trans)
+//     {
+//          trans->IncreaseDoorUsage(1, ped->GetGlobalTime());
+//          //this can happen if the pedesrians is pushed too hard
+//          // or cant stop due to high velocity
+//          // he will remain in the simulation in that case
+//          //if(trans->IsOpen()==false) return;
+//     }
+     _allPedestians.erase(it);
      delete ped;
-     //ped=nullptr;
 }
 
 const vector<Pedestrian*>& Building::GetAllPedestrians() const
@@ -1363,13 +1406,13 @@ Pedestrian* Building::GetPedestrian(int pedID) const
 
 Transition* Building::GetTransitionByUID(int uid) const
 {
-     //eventually
-     map<int, Transition*>::const_iterator itr;
-     for(itr = _transitions.begin(); itr != _transitions.end(); ++itr) {
-          if (itr->second->GetUniqueID()== uid)
-               return itr->second;
+
+     for(auto && trans: _transitions)
+     {
+          if(trans.second->GetUniqueID()==uid)
+               return trans.second;
      }
-     return NULL;
+     return nullptr;
 }
 
 

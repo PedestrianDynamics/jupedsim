@@ -63,9 +63,10 @@ private:
      int _roomID;
      std::vector<int> _goalIDs; // all navigation lines contained in this subroom
      double _area;
-     //defined by: Z = Ax + By + C
+     //defined by: Z = Ax + By + C, normal vector = (A, B, -1)^T
      double _planeEquation[3];
      double _cosAngleWithHorizontalPlane;
+     double _tanAngleWithHorizontalPlane;
      std::string _type;
      double _minElevation;
      double _maxElevation;
@@ -83,6 +84,8 @@ private:
 protected:
      std::vector<Wall> _walls;
      std::vector<Point> _poly; // Polygonal representation of the subroom
+     std::vector<double> _poly_help_constatnt; //for the function IsInsidePolygon, a.brkic
+     std::vector<double> _poly_help_multiple; //for the function IsInsidePolygon, a.brkic
      std::vector<Obstacle*> _obstacles;
 
 public:
@@ -96,6 +99,8 @@ public:
       * Destructor
       */
      virtual ~SubRoom();
+
+    // void SetHelpVariables();
 
      /**
       * Set/Get the subroom id
@@ -138,11 +143,6 @@ public:
       * @return a reference to all obstacles contained
       */
      const std::vector<Obstacle*>& GetAllObstacles() const;
-
-     /**
-      * @return the number of hlines+transitions+crossings
-      */
-     int GetNumberOfGoalIDs() const;
 
      /**
       * @return a vector containing all Ids
@@ -224,6 +224,12 @@ public:
      double GetCosAngleWithHorizontal() const;
 
      /**
+      * compute the tangent of the dihedral angle with the Horizontal plane Z=h
+      * @return the tangent of the angle
+      */
+     double GetTanAngleWithHorizontal() const;
+
+     /**
       * Compute the area of the subroom.
       * @see GetArea()
       */
@@ -264,11 +270,15 @@ public:
       */
      const std::vector<p2t::Triangle*> GetTriangles();
 
+     /**
+      * @return true if all transitions are not closed.
+      */
+     bool IsAccessible();
 
      //navigation
-     void AddCrossing(Crossing* line);
-     void AddTransition(Transition* line);
-     void AddHline(Hline* line);
+     bool AddCrossing(Crossing* line);
+     bool AddTransition(Transition* line);
+     bool AddHline(Hline* line);
      void AddNeighbor(SubRoom* sub);
 
      const std::vector<Crossing*>& GetAllCrossings() const;
@@ -285,9 +295,9 @@ public:
      bool IsPartOfPolygon(const Point& pt);
 
      /**
-      *
-      * @return true if the Point is inside any obstacle
-      */
+	  *
+	  * @return true if the Point is inside any obstacle
+	  */
      bool IsInObstacle(const Point& pt);
 
      /**
@@ -416,7 +426,6 @@ public:
      std::string WritePolyLine() const;
      virtual void WriteToErrorLog() const;
      virtual bool ConvertLineToPoly(const std::vector<Line*>& goals);
-     bool IsInSubRoom(const Point& ped) const;
 };
 
 #endif  /* _SUBROOM_H */

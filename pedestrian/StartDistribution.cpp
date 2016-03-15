@@ -35,6 +35,7 @@
 #include "../geometry/Point.h"
 #include "../routing/RoutingEngine.h"
 #include "../geometry/SubRoom.h"
+#include "boost/math/distributions.hpp"
 
 using namespace std;
 
@@ -147,6 +148,18 @@ void StartDistribution::SetSubroomID(int subroomId)
 {
      _subroomID = subroomId;
 }
+
+int StartDistribution::GetSubroomUID() const
+{
+     return _subroomUID;
+}
+
+void StartDistribution::SetSubroomUID(int subroomUId)
+{
+     _subroomUID = subroomUId;
+}
+
+
 int StartDistribution::GetRouteId() const
 {
      return _routeID;
@@ -188,6 +201,7 @@ Pedestrian* StartDistribution::GenerateAgent(Building* building, int* pid, vecto
      ped->SetBuilding(building);
      ped->SetRoomID(GetRoomId(),"");
      ped->SetSubRoomID(GetSubroomID());
+     ped->SetSubRoomUID(building->GetRoom(GetRoomId())->GetSubRoom(GetSubroomID())->GetUID());
      ped->SetPatienceTime(GetPatience());
      ped->SetPremovementTime(GetPremovementTime());
      ped->SetRiskTolerance(GetRiskTolerance());
@@ -334,14 +348,32 @@ double StartDistribution::GetPremovementTime() const
      return _premovementTime(_generator);
 }
 
-void StartDistribution::InitRiskTolerance(double mean, double stdv)
+void StartDistribution::InitRiskTolerance(std::string distribution_type, double para1, double para2)
 {
-     _riskTolerance = std::normal_distribution<double>(mean,stdv);
+    _distribution_type = distribution_type;
+    if(distribution_type=="normal"){
+    _riskTolerance = std::normal_distribution<double>(para1, para2);
+    }
+    if(distribution_type=="beta"){
+    _risk_beta_dist = boost::math::beta_distribution<>(para1,  para2);
+    }
 }
 
 double StartDistribution::GetRiskTolerance()
 {
-     return _riskTolerance(_generator);
+    if(_distribution_type=="normal"){
+        //fprintf(stderr, "%f \t %f \n", _generator, _riskTolerance(_generator));
+        return _riskTolerance(_generator);
+    }
+    else {
+        std::uniform_real_distribution<float> normalize(0.0, 1.0);
+        float rand_norm = normalize(_generator);
+        //fprintf(stderr, "%f \n", quantile(_risk_beta_dist, rand_norm));
+        if(_distribution_type=="beta") {
+             return quantile(_risk_beta_dist, rand_norm);
+        }
+        Log->Write("Warning:\tDistribution Type invalid or not set. Fallback to uniform distribution");
+        return (double) rand_norm; // todo: ar.graf: check if this quick fix executes and why
+    }
 }
-
 

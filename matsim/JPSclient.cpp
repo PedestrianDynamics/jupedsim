@@ -51,7 +51,6 @@ JPSclient::~JPSclient()
 void JPSclient::ProcessAgentQueue(Building* building)
 {
      std::vector<Pedestrian*> peds;
-     //cout<<"size:"<<AgentsQueueOut::Size()<<endl;
      AgentsQueueOut::GetandClear(peds);
      for (auto && ped:peds)
      {

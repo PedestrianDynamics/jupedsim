@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_SUITE(SubRoomTest)
         ~ Handler() {delete Log;}
     };
 
-    BOOST_GLOBAL_FIXTURE(Handler)
+    BOOST_GLOBAL_FIXTURE(Handler);
 
 BOOST_AUTO_TEST_CASE(JTol_WallGap_test)
 {
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(JTol_WallGap_test)
     if (sub1.ConvertLineToPoly(goal) == true) {
         std::vector<Point> poly = sub1.GetPolygon();
         for (auto it:poly)
-            BOOST_CHECK_MESSAGE(poly.size() == 10, "x = " << it.GetX() << ", y = " << it.GetY());
+            BOOST_CHECK_MESSAGE(poly.size() == 10, "x = " << it._x << ", y = " << it._y);
     }
     else
         BOOST_CHECK(false);
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(overlap_wall_test)
 
 BOOST_AUTO_TEST_CASE(concave_intersecting_wall_test)
 {
-	BOOST_MESSAGE("starting concave subroom intersecting wall test");
+	BOOST_TEST_MESSAGE("starting concave subroom intersecting wall test");
 	Point P1;
 	Point P2(2, 2);
 	Point P3(2, 0);

@@ -107,8 +107,8 @@ string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
                "zPos=\"%.2f\"\t"
                "radiusA=\"%.2f\"\tradiusB=\"%.2f\"\t"
                "ellipseOrientation=\"%.2f\" ellipseColor=\"%d\"/>\n",
-               ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
-               (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
+               ped->GetID(), (ped->GetPos()._x) * FAKTOR,
+               (ped->GetPos()._y) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
                phi * RAD2DEG, color);
 
      return string(tmp);
@@ -353,8 +353,8 @@ void TrajectoriesFLAT::WriteFrame(int frameNr, Building* building)
      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
      for(unsigned int p=0;p<allPeds.size();p++){
           Pedestrian* ped = allPeds[p];
-          double x = ped->GetPos().GetX();
-          double y = ped->GetPos().GetY();
+          double x = ped->GetPos()._x;
+          double y = ped->GetPos()._y;
           double z = ped->GetElevation();
           sprintf(tmp, "%d\t%d\t%0.2f\t%0.2f\t%0.2f", ped->GetID(), frameNr, x, y,z);
           Write(tmp);
@@ -400,7 +400,7 @@ void TrajectoriesVTK::WriteGeometry(Building* building)
      const vector<NavMesh::JVertex*>& vertices= nv->GetVertices() ;
      tmp<<"POINTS "<<vertices.size()<<" FLOAT"<<endl;
      for (unsigned int v=0; v<vertices.size(); v++) {
-          tmp<<vertices[v]->pPos.GetX()<<" " <<vertices[v]->pPos.GetY() <<" 0.0"<<endl;
+          tmp<<vertices[v]->pPos._x<<" " <<vertices[v]->pPos._y <<" 0.0"<<endl;
      }
      Write(tmp.str());
      tmp.str(std::string());
@@ -499,51 +499,26 @@ void TrajectoriesJPSV06::WriteGeometry(Building* building)
      std::stringstream buffer;
      buffer << t.rdbuf();
      embed_geometry=buffer.str();
-     Write(embed_geometry);
 
      //write the hlines
+     string embed_hlines;
+     embed_hlines.append("\n\t<hlines>");
+     for (const auto& hline: building->GetAllHlines())
+     {
+          embed_hlines.append(hline.second->GetDescription());
+     }
+     embed_hlines.append("\n\t</hlines>");
+     embed_hlines.append("\n\t<goals>");
+     for (const auto& goal: building->GetAllGoals()) {
+          embed_hlines.append(goal.second->Write());
+     }
+     embed_hlines.append("\n\t</goals>");
+     embed_hlines.append("\t</geometry>\n");
 
-     // write the goals
-//     for (map<int, Goal*>::const_iterator itr = building->GetAllGoals().begin();
-//               itr != building->GetAllGoals().end(); ++itr) {
-//          geometry.append(itr->second->Write());
-//     }
+     //append the new string hlines and goals to the old one
+     ReplaceStringInPlace(embed_geometry,"</geometry>",embed_hlines);
 
-     //
-     //
-     //     //collecting the hlines
-     //     std::stringstream hlines_buffer;
-     //     // add the header
-     //     hlines_buffer<<" <routing version=\"0.5\" "
-     //               <<"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-     //               <<"xsi:noNamespaceSchemaLocation=\"http://134.94.2.137/jps_routing.xsd\" >"<<endl
-     //               <<"<Hlines> "<<endl;
-     //
-     //     const map<int, Hline*>& hlines=building->GetAllHlines();
-     //     for (std::map<int, Hline*>::const_iterator it=hlines.begin(); it!=hlines.end(); ++it)
-     //     {
-     //          Hline* hl=it->second;
-     //          hlines_buffer <<"\t<Hline id=\""<< hl->GetID()<<"\" room_id=\""<<hl->GetRoom1()->GetID()
-     //                                        <<"\" subroom_id=\""<< hl->GetSubRoom1()->GetSubRoomID()<<"\">"<<endl;
-     //          hlines_buffer <<"\t\t<vertex px=\""<< hl->GetPoint1()._x<<"\" py=\""<< hl->GetPoint1()._y<<"\" />"<<endl;
-     //          hlines_buffer <<"\t\t<vertex px=\""<< hl->GetPoint2()._x<<"\" py=\""<< hl->GetPoint2()._y<<"\" />"<<endl;
-     //          hlines_buffer <<"\t</Hline>"<<endl;
-     //     }
-     //     hlines_buffer<<"</Hlines> "<<endl;
-     //     hlines_buffer<<"</routing> "<<endl;
-     //
-     //     string hline_string=hlines_buffer.str();
-     //     string to_replace="</geometry>";
-     //     hline_string.append(to_replace);
-     //
-     //     size_t start_pos = embed_geometry.find(to_replace);
-     //     if(start_pos == std::string::npos)
-     //     {
-     //          Log->Write("WARNING:\t missing %s tag while writing the geometry in the trajectory file.",to_replace.c_str());
-     //     }
-     //
-     //     embed_geometry.replace(start_pos, to_replace.length(), hline_string);
-     //     Write(embed_geometry);
+     Write(embed_geometry);
 
      //     Write("\t<AttributeDescription>");
      //     Write("\t\t<property tag=\"x\" description=\"xPosition\"/>");
@@ -582,7 +557,6 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
 
           char tmp1[CLENGTH] = "";
 
-
           int color=ped->GetColor();
           double a = ped->GetLargerAxis();
           double b = ped->GetSmallerAxis();
@@ -592,8 +566,8 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
                     "z=\"%.6f\"\t"
                     "rA=\"%.2f\"\trB=\"%.2f\"\t"
                     "eO=\"%.2f\" eC=\"%d\"/>\n",
-                    ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
-                    (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
+                    ped->GetID(), (ped->GetPos()._x) * FAKTOR,
+                    (ped->GetPos()._y) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
                     phi * RAD2DEG, color);
           data.append(tmp1);
 
@@ -707,8 +681,8 @@ void TrajectoriesJPSV05::WriteFrame(int frameNr, Building* building)
                     "z=\"%.6f\"\t"
                     "rA=\"%.2f\"\trB=\"%.2f\"\t"
                     "eO=\"%.2f\" eC=\"%d\"/>\n",
-                    ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
-                    (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
+                    ped->GetID(), (ped->GetPos()._x) * FAKTOR,
+                    (ped->GetPos()._y) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
                     phi * RAD2DEG, color);
           data.append(s);
      }

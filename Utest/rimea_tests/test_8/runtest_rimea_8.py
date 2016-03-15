@@ -47,7 +47,7 @@ def run_rimea_test8(inifile, trajfile):
         num_evacuated = max(d[:, 1]) # >0 ?
         evac_time = max(d[:, 0])
         logging.info("%d peds evacuated from exit <%s>. Evac_time: %f",
-                     num_evacuated, f.split(".dat")[0].split("_")[-1], evac_time)
+                     num_evacuated, f.split(".dat")[0].split("_id_")[-1], evac_time)
 
 
 

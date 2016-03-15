@@ -105,8 +105,8 @@ void Hline::WriteToErrorLog() const
 {
      string s;
      char tmp[CLENGTH];
-     sprintf(tmp, "\t\tHline: %d (%f, %f) -- (%f, %f)\n", GetID(), GetPoint1().GetX(),
-             GetPoint1().GetY(), GetPoint2().GetX(), GetPoint2().GetY());
+     sprintf(tmp, "\t\tHline: %d (%f, %f) -- (%f, %f)\n", GetID(), GetPoint1()._x,
+             GetPoint1()._y, GetPoint2()._x, GetPoint2()._y);
      s.append(tmp);
      sprintf(tmp, "\t\t\t\tRoom: %d <-> SubRoom: %d\n", _room1->GetID(),
              _subRoom1->GetSubRoomID());
@@ -123,13 +123,13 @@ string Hline::GetDescription() const
      geometry.append(tmp);
      //geometry.append("\t\t<door color=\"250\">\n");
      sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-             (GetPoint1().GetX()) * FAKTOR,
-             (GetPoint1().GetY()) * FAKTOR,
+             (GetPoint1()._x) * FAKTOR,
+             (GetPoint1()._y) * FAKTOR,
              _subRoom1->GetElevation(GetPoint1())*FAKTOR);
      geometry.append(tmp);
      sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-             (GetPoint2().GetX()) * FAKTOR,
-             (GetPoint2().GetY()) * FAKTOR,
+             (GetPoint2()._x) * FAKTOR,
+             (GetPoint2()._y) * FAKTOR,
              _subRoom1->GetElevation(GetPoint2())*FAKTOR);
      geometry.append(tmp);
      geometry.append("\t\t</hline>\n");

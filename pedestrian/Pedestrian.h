@@ -63,6 +63,7 @@ private:
      //gcfm specific parameters
      double _mass; // Mass: 1
      double _tau; // Reaction time: 0.5
+     double _T; // OV function
      double _deltaT; // step size
      JEllipse _ellipse;// the shape of this pedestrian
      Point _V0; //vector V0
@@ -78,9 +79,10 @@ private:
      std::string _roomCaption;
      int _roomID;
      int _subRoomID;
+     int _subRoomUID;
      int _oldRoomID;
      int _oldSubRoomID;
-
+     Point _lastE0;
 
      NavLine* _navLine; // current exit line
      std::map<int, int>_mentalMap; // map the actual room to a destination
@@ -116,15 +118,15 @@ private:
      int _newOrientationDelay; //2 seconds, in steps
 
      /// necessary for smooth turning at sharp bend
-     int _updateRate;
+     double _updateRate;
      double _turninAngle;
      bool _reroutingEnabled;
      bool _tmpFirstOrientation; // possibility to get rid of this variable
      bool _newOrientationFlag; //this is used in the DirectionGeneral::GetTarget()
-     bool _newEventFlag;
 
      // the current time in the simulation
      static double _globalTime;
+     static double _minPremovementTime;
      static AgentColorMode _colorMode;
      bool _spotlight;
 
@@ -145,10 +147,13 @@ public:
      void SetID(int i);
      void SetRoomID(int i, std::string roomCaption);
      void SetSubRoomID(int i);
+     void SetSubRoomUID(int i);
      void SetMass(double m);
      void SetTau(double tau);
      void SetEllipse(const JEllipse& e);
 
+     double GetT() const;
+     void SetT(double T);
      //TODO: merge this two functions
      void SetExitIndex(int i);
      void SetExitLine(const NavLine* l);
@@ -158,7 +163,7 @@ public:
 
      void SetDistToBlockade(double dist);
      double GetDistToBlockade();
-     
+
      // Eigenschaften der Ellipse
      void SetPos(const Point& pos, bool initial=false); // setzt x und y-Koordinaten
      void SetCellPos(int cp);
@@ -175,13 +180,16 @@ public:
      int GetID() const;
      int GetRoomID() const;
      int GetSubRoomID() const;
+     int GetSubRoomUID() const;
      double GetMass() const;
      double GetTau() const;
      const JEllipse& GetEllipse() const;
      int GetExitIndex() const;
      Router* GetRouter() const;
      NavLine* GetExitLine() const;
-
+     double GetUpdateRate() const;
+     Point GetLastE0() const;
+     void SetLastE0(Point E0);
      // Eigenschaften der Ellipse
      const Point& GetPos() const;
      int GetCellPos() const;
@@ -202,12 +210,26 @@ public:
      double GetSmallerAxis() const;
      double GetTimeInJam()const;
      int GetFinalDestination() const;
-     void ClearMentalMap(); // erase the peds memory
+     void ClearMentalMap(); //erase the peds memory
 
-     // functions for known closed Doors (needed for the Graphrouting and Rerouting)
-     void AddKnownClosedDoor(int door, double time);
-     // needed for information sharing
-     const std::map<int, Knowledge>& GetKnownledge() const;
+     /**
+      * Update the knowledge of the pedestrian
+      * @param door
+      * @param ttime
+      * @param state
+      * @param quality
+      */
+     void AddKnownClosedDoor(int door, double ttime, bool state, double quality, double latency);
+
+     /***
+      * @return the knowledge of the pedstrian
+      */
+     std::map<int, Knowledge>& GetKnownledge();
+
+     /**
+      * @return all previous destinations used by this pedestrian
+      */
+     const std::vector<int>& GetLastDestinations() const;
 
      /**
       * For convenience
@@ -224,7 +246,6 @@ public:
      int GetUniqueRoomID() const;
      int GetNextDestination();
      int GetLastDestination();
-     int GetDestinationCount();
      double GetDistanceToNextTarget() const;
      double GetDisTanceToPreviousTarget() const;
      void SetNewOrientationFlag(bool flag);
@@ -265,7 +286,7 @@ public:
       * @param ID, the id of the pedestrian
       * @param pa, the parameter to display (0 for all parameters)
       */
-     void Dump(int ID, int pa = 0);
+     void Dump(int ID, int pa = 0) const;
 
      /**
       * observe the reference pedestrians and collect some data, e.g distance to exit
@@ -334,6 +355,12 @@ public:
       */
      double GetPremovementTime();
 
+     /***
+      * Get min Premovement time of all pedestrians
+      */
+
+     static double GetMinPremovementTime();
+
      /**
       * Set/Get the risk tolerance of a pedestrians.
       * The value should be in the interval [0 1].
@@ -353,7 +380,7 @@ public:
       * Default mode is coded by velocity.
       * @return a value in [-1 255]
       */
-     int GetColor();
+     int GetColor() const;
 
      void ResetTimeInJam();
      void UpdateTimeInJam();

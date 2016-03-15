@@ -32,7 +32,7 @@
  *
  *
  **/
- 
+
 
 #include"LCGrid.h"
 #include "../pedestrian/Pedestrian.h"
@@ -40,7 +40,8 @@
 
 using namespace std;
 
-#define MAX_AGENT_COUNT  0 // 1000000
+//FIXME:
+#define MAX_AGENT_COUNT  10000 // 1000000
 
 LCGrid::LCGrid(double boundaries[4], double cellsize, int nPeds)
 {
@@ -106,9 +107,9 @@ void LCGrid::Update(const vector<Pedestrian*>& peds)
           //Pedestrian* ped = peds[p];
           int id=ped->GetID()-1;
           // determine the cell coordinates of pedestrian i
-          int ix = (int) ((ped->GetPos().GetX() - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
-          int iy = (int) ((ped->GetPos().GetY() - _gridYmin) / _cellSize) + 1;
-          //printf("[%f, %f]  ",ped->GetPos().GetX(), ped->GetPos().GetY());
+          int ix = (int) ((ped->GetPos()._x - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
+          int iy = (int) ((ped->GetPos()._y - _gridYmin) / _cellSize) + 1;
+          //printf("[%f, %f]  ",ped->GetPos()._x, ped->GetPos()._y);
           // create lists
           //printf("[%d=%d] ",ped->GetPedIndex(),id);
           _list[id] = _cellHead[iy][ix];
@@ -119,12 +120,13 @@ void LCGrid::Update(const vector<Pedestrian*>& peds)
 }
 
 // I hope you had called Clear() first
+// todo: can be used to solve the issue with MAX_AGENT_COUNT
 void LCGrid::Update(Pedestrian* ped)
 {
      int id=ped->GetID()-1;
      // determine the cell coordinates of pedestrian i
-     int ix = (int) ((ped->GetPos().GetX() - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
-     int iy = (int) ((ped->GetPos().GetY() - _gridYmin) / _cellSize) + 1;
+     int ix = (int) ((ped->GetPos()._x - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
+     int iy = (int) ((ped->GetPos()._y - _gridYmin) / _cellSize) + 1;
 
      // update the list previously created
      _list[id] = _cellHead[iy][ix];
@@ -202,8 +204,8 @@ void LCGrid::HighlightNeighborhood(int pedID, Building* building)
 void LCGrid::GetNeighbourhood(const Pedestrian* ped, vector<Pedestrian*>& neighbourhood)
 {
 
-     double xPed=ped->GetPos().GetX();
-     double yPed=ped->GetPos().GetY();
+     double xPed=ped->GetPos()._x;
+     double yPed=ped->GetPos()._y;
 
      int l = (int) ((xPed - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
      int k = (int) ((yPed - _gridYmin) / _cellSize) + 1;
@@ -218,8 +220,8 @@ void LCGrid::GetNeighbourhood(const Pedestrian* ped, vector<Pedestrian*>& neighb
                int p = _cellHead[j][i];
                // all peds in one cell
                while (p != LIST_EMPTY) {
-                    // double x=pLocalPedsCopy[p]->GetPos().GetX();
-                    // double y=pLocalPedsCopy[p]->GetPos().GetY();
+                    // double x=pLocalPedsCopy[p]->GetPos()._x;
+                    // double y=pLocalPedsCopy[p]->GetPos()._y;
                     // double dist=((x-xPed)*(x-xPed) + (y-yPed)*(y-yPed));
                     if(p!=myID) {
                          // if((dist<pCellSize*pCellSize) && (p!=myID)) {
@@ -235,8 +237,8 @@ void LCGrid::GetNeighbourhood(const Pedestrian* ped, vector<Pedestrian*>& neighb
 void LCGrid::GetNeighbourhood(const Point& pos, std::vector<Pedestrian*>& neighbourhood)
 {
 
-     double xPed=pos.GetX();
-     double yPed=pos.GetY();
+     double xPed=pos._x;
+     double yPed=pos._y;
 
      int l = (int) ((xPed - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
      int k = (int) ((yPed - _gridYmin) / _cellSize) + 1;

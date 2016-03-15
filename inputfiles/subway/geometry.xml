@@ -15,7 +15,7 @@
           <vertex px="0.0" py="4.0" />
           <vertex px="0.0" py="3.0" />
         </polygon>
-        <obstacle id="0">
+        <obstacle_ id="0">
           <polygon>
             <vertex px="1" py="3"></vertex>
             <vertex px="2" py="3"></vertex>
@@ -23,7 +23,7 @@
             <vertex px="1" py="2"></vertex>
             <vertex px="1" py="3"></vertex>
           </polygon>
-        </obstacle>
+        </obstacle_>
 
       </subroom>
       <subroom id="1" class="stair" A_x="-1.2" B_y="0" C="0">

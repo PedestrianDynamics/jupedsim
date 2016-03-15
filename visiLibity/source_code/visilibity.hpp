@@ -23,7 +23,7 @@ License along with VisiLibity.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /** 
- * \mainpage
+ * 
  * <center> 
  * see also the <a href="../index.html">VisiLibity Project Page</a>
  * </center>
@@ -54,8 +54,7 @@ License along with VisiLibity.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef M_PI
 #define M_PI 3.141592653589793238462643
 #endif
-//#define and &&
-//#define or ||
+
 
 
 #include <cmath>      //math functions in std namespace
@@ -1914,7 +1913,7 @@ namespace VisiLibity
 		       const Polar_Point_With_Edge_Info& ppwei2)
       {
 	if( Polar_Point(ppwei1) == Polar_Point(ppwei2) 
-	    and !ppwei1.is_first and ppwei2.is_first )
+	   && !ppwei1.is_first && ppwei2.is_first )
 	  return true;
 	else
 	  return Polar_Point(ppwei1) < Polar_Point(ppwei2);
@@ -1955,7 +1954,7 @@ namespace VisiLibity
 					   Line_Segment(e2->first,
 							e2->second),
 					   epsilon);
-	if( xing1.size() > 0 and xing2.size() > 0 ){
+	if( xing1.size() > 0 && xing2.size() > 0 ){
 	  k1 = Polar_Point( *observer_pointer,
 			    xing1.first() );
 	  k2 = Polar_Point( *observer_pointer,
@@ -1967,9 +1966,9 @@ namespace VisiLibity
 	//Otherwise infeasible edges are given higher priority, so they
 	//get pushed out the top of the priority_queue's (q2's)
 	//heap.
-	else if( xing1.size() == 0 and xing2.size() > 0 )
+	else if( xing1.size() == 0 && xing2.size() > 0 )
 	  return false;
-	else if( xing1.size() > 0 and xing2.size() == 0 )
+	else if( xing1.size() > 0 && xing2.size() == 0 )
 	  return true;
 	else
 	  return true;
