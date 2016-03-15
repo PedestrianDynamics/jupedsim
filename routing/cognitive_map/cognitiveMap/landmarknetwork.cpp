@@ -151,8 +151,8 @@ void LandmarkNetwork::AddConnection(const ptrConnection &connection)
 double LandmarkNetwork::LengthofShortestPathToTarget(const ptrLandmark &landmark, const ptrLandmark &target) const
 {
 
-    Vertex startVertex=-1;
-    Vertex targetVertex=-1;
+    int startVertex=-1;
+    int targetVertex=-1;
 
     // get the start vertex
 
@@ -195,9 +195,9 @@ double LandmarkNetwork::LengthofShortestPathToTarget(const ptrLandmark &landmark
     // invoke variant 2 of Dijkstra's algorithm
     dijkstra_shortest_paths(_graph, startVertex, boost::distance_map(&d[0]));
     //std::cout << "distance from start vertex to target:" << std::endl;
-    //graph_traits<Graph>::vertex_iterator vi;
-    //for(vi = vertices(G).first; vi != vertices(G).second; ++vi)
-    //std::cout << "distance = "  << d[targetVertex] << std::endl;
+//    boost::graph_traits<Graph>::vertex_iterator vi;
+//    for(vi = boost::vertices(_graph).first; vi != boost::vertices(_graph).second; ++vi)
+//        std::cout << "distance = "  << d[*vi] << std::endl;
 
     return d[targetVertex];
 }
