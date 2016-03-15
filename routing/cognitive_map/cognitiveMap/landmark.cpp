@@ -123,10 +123,10 @@ Point Landmark::GetRandomPoint() const
     const double pi = M_PI;//std::acos(-1);
     int alpha1 = std::rand() % 360;
     double factor_a = (std::rand() % 100)/100.0;
-    double x = _posInMap.GetX()+std::cos(alpha1*pi/180.0)*factor_a*_a;
+    double x = _posInMap._x+std::cos(alpha1*pi/180.0)*factor_a*_a;
     int alpha2 = std::rand() % 360;
     double factor_b = (std::rand() % 100)/100.0;
-    double y = _posInMap.GetY()+std::sin(alpha2*pi/180.0)*factor_b*_b;
+    double y = _posInMap._y+std::sin(alpha2*pi/180.0)*factor_b*_b;
 
     return Point(x,y);
 }
@@ -137,13 +137,13 @@ Point Landmark::PointOnShortestRoute(const Point& point) const
     double distance;
     int alpha_min=1;
     double t_min=0;
-    double min=std::sqrt(std::pow((_realPos.GetX()+t_min*_a*std::cos(pi/180.0))-point.GetX(),2)+std::pow((_realPos.GetX()+t_min*_b*std::sin(pi/180.0))-point.GetY(),2));
+    double min=std::sqrt(std::pow((_realPos._x+t_min*_a*std::cos(pi/180.0))-point._x,2)+std::pow((_realPos._x+t_min*_b*std::sin(pi/180.0))-point._y,2));
 
     for (double t=0.2; t<=1; t+=0.2)
     {
         for (int alpha=11; alpha<=360; alpha+=10)
         {
-            distance=std::sqrt(std::pow((_realPos.GetX()+t*_a*std::cos(alpha*pi/180.0))-point.GetX(),2)+std::pow((_realPos.GetY()+t*_b*std::sin(alpha*pi/180.0))-point.GetY(),2));
+            distance=std::sqrt(std::pow((_realPos._x+t*_a*std::cos(alpha*pi/180.0))-point._x,2)+std::pow((_realPos._y+t*_b*std::sin(alpha*pi/180.0))-point._y,2));
             if (distance<min)
             {
                 min=distance;
@@ -153,15 +153,15 @@ Point Landmark::PointOnShortestRoute(const Point& point) const
         }
     }
     //Log->Write(std::to_string(min));
-    return Point(_realPos.GetX()+_a*std::cos(alpha_min*pi/180.0),_realPos.GetY()+_b*std::sin(alpha_min*pi/180.0));
+    return Point(_realPos._x+_a*std::cos(alpha_min*pi/180.0),_realPos._y+_b*std::sin(alpha_min*pi/180.0));
 }
 
 bool Landmark::LandmarkReached(const Point& currentYAH)
 {
-    if (std::abs(_realPos.GetX()-currentYAH.GetX())<0.75*_a && std::abs(_realPos.GetY()-currentYAH.GetY())<0.75*_b)
+    if (std::abs(_realPos._x-currentYAH._x)<0.75*_a && std::abs(_realPos._y-currentYAH._y)<0.75*_b)
     {
         Log->Write("INFO:\t Landmark reached");
-        Log->Write(std::to_string(currentYAH.GetX())+" "+std::to_string(currentYAH.GetY()));
+        Log->Write(std::to_string(currentYAH._x)+" "+std::to_string(currentYAH._y));
         _visited=true;
         return true;
     }

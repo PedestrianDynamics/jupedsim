@@ -16,7 +16,7 @@ public:
     //Getter
     const Point& GetPos() const;
     const double& GetDirection() const;
-    const ptrPed GetPed() const;
+    ptrPed GetPed() const;
 
     //Setter
     void SetPos(const Point& point);
@@ -33,7 +33,7 @@ private:
     Point _pos;
     Point _oldpos;
 
-    ptrPed _ped;
+     ptrPed _ped;
 
     //Direction
     double _angle;

@@ -30,7 +30,7 @@ const double &YouAreHerePointer::GetDirection() const
     return _angle;
 }
 
-const ptrPed YouAreHerePointer::GetPed() const
+ptrPed YouAreHerePointer::GetPed() const
 {
     return _ped;
 }

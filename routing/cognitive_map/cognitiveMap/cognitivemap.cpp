@@ -65,10 +65,10 @@ void CognitiveMap::UpdateMap()
 
 void CognitiveMap::UpdateDirection()
 {
-    if (_ped->GetV().GetX()!=0 || _ped->GetV().GetY()!=0)
+    if (_ped->GetV()._x!=0 || _ped->GetV()._y!=0)
     {
-        double angle = std::acos(_ped->GetV().GetX()/(std::sqrt(std::pow(_ped->GetV().GetX(),2)+std::pow(_ped->GetV().GetY(),2))));
-        if (_ped->GetV().GetY()<0)
+        double angle = std::acos(_ped->GetV()._x/(std::sqrt(std::pow(_ped->GetV()._x,2)+std::pow(_ped->GetV()._y,2))));
+        if (_ped->GetV()._y<0)
             angle=-angle;
         _YAHPointer.SetDirection(angle);
     }
@@ -316,7 +316,7 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrLandma
     VisiLibity::Polygon room=VisiLibity::Polygon();
     for (Point point:points)
     {
-       room.push_back(VisiLibity::Point(point.GetX(),point.GetY()));
+       room.push_back(VisiLibity::Point(point._x,point._y));
     }
 
 //    for (int i=0; i<room.n();++i)
@@ -337,10 +337,10 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrLandma
     VisiLibity::Environment environment(polygons);
     //environment.reverse_holes();
 
-    VisiLibity::Point edgeP(edge->GetCrossing()->GetCentre().GetX(),edge->GetCrossing()->GetCentre().GetY());
+    VisiLibity::Point edgeP(edge->GetCrossing()->GetCentre()._x,edge->GetCrossing()->GetCentre()._y);
     Point pointOnShortestRoute = landmark->PointOnShortestRoute(edge->GetCrossing()->GetCentre());
     //Log->Write(std::to_string(pointOnShortestRoute.GetX())+" "+std::to_string(pointOnShortestRoute.GetY()));
-    VisiLibity::Point wayP(pointOnShortestRoute.GetX(),pointOnShortestRoute.GetY());//,landmark->GetPos().GetY());
+    VisiLibity::Point wayP(pointOnShortestRoute._x,pointOnShortestRoute._y);//,landmark->GetPos().GetY());
 
     VisiLibity::Polyline polyline=environment.shortest_path(edgeP,wayP,0.1);
 //    for (int i=0; i<polyline.size();++i)
