@@ -117,15 +117,7 @@ bool VelocityModel::Init (Building* building)
               peds_size--;
               continue;
          }
-         double vmean = ped->GetMeanVelOverRecTime();
-         double premovement = ped->GetPremovementTime();
-         double globTime = ped->GetGlobalTime();
 
-         if(globTime > premovement && vmean < 0.001)
-         {
-               Log->Write("WARNING: ped %d with vmean  %f has been deleted at times %f", ped->GetID(), vmean, globTime);
-               //building->DeletePedestrian(ped);
-         }
 
          
          
@@ -197,7 +189,9 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      Log->Write("\tERROR: ped [%d] was removed due to high velocity",ped->GetID());
                      building->DeletePedestrian(ped);
                      exit(EXIT_FAILURE);
+
                 }
+
 
                 Point repPed = Point(0,0);
                 vector<Pedestrian*> neighbours;
@@ -284,6 +278,14 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 Point speed = direction.Normalized() * OptimalSpeed(ped, spacing, winkel);
                 result_acc.push_back(speed);
                 spacings.clear(); //clear for ped p
+
+                // stuck peds get removed. Warning is thrown. low speed due to jam is ommitted.
+                if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime()&& ped->GetMeanVelOverRecTime() < 0.01 && size == 0 ) // size length of peds neighbour vector
+                {
+                      Log->Write("WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time %f s\n", ped->GetID(), ped->GetMeanVelOverRecTime(), ped->GetRoomID(), ped->GetSubRoomID(), ped->GetGlobalTime());
+                      building->DeletePedestrian(ped);
+                }
+
            } // for p
 
            //#pragma omp barrier
