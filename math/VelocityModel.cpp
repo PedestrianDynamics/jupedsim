@@ -117,6 +117,18 @@ bool VelocityModel::Init (Building* building)
               peds_size--;
               continue;
          }
+         double vmean = ped->GetMeanVelOverRecTime();
+         double premovement = ped->GetPremovementTime();
+         double globTime = ped->GetGlobalTime();
+
+         if(globTime > premovement && vmean < 0.001)
+         {
+               Log->Write("WARNING: ped %d with vmean  %f has been deleted at times %f", ped->GetID(), vmean, globTime);
+               //building->DeletePedestrian(ped);
+         }
+
+         
+         
          Point target = ped->GetExitLine()->ShortestPoint(ped->GetPos());
          Point d = target - ped->GetPos();
          double dist = d.Norm();
