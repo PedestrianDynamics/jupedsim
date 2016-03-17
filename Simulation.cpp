@@ -517,7 +517,7 @@ int Simulation::RunBody(double maxSimTime)
                _building->UpdateGrid();
 
                // update the positions
-               _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get(), _periodic);
+                _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get(), _periodic);
 
                //update the events
                _em->ProcessEvent();
