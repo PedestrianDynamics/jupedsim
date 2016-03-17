@@ -64,7 +64,7 @@ public:
      void getDirectionToUID(int destID, const long int key, Point& direction);
      void getDirectionToDestination (Pedestrian* ped, Point& direction);
      void getDirectionToFinalDestination(Pedestrian* ped, Point& direction);
-     void getDirectionToGoalID(const int goalID);
+     void createLineToGoalID(const int goalID);
      double getCostToDestination(const int destID, const Point& position);
      void getDir2WallAt(const Point& position, Point& direction);
      double getDistance2WallAt(const Point& position);

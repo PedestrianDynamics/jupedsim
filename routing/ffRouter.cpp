@@ -80,7 +80,7 @@ bool FFRouter::Init(Building* building)
      //get global field to manage goals (which are not in a subroom)
      _globalFF = new FloorfieldViaFM(building, 0.125, 0.125, 0.0, false, "nofile");
      for (auto& itrGoal : building->GetAllGoals()) {
-          _globalFF->getDirectionToGoalID(itrGoal.first);
+          _globalFF->createLineToGoalID(itrGoal.first);
      }
      goalToLineUIDmap  = _globalFF->getGoalToLineUIDmap();
      goalToLineUIDmap2 = _globalFF->getGoalToLineUIDmap2();
@@ -150,7 +150,7 @@ bool FFRouter::Init(Building* building)
 
 int FFRouter::FindExit(Pedestrian* p)
 {
-     double minDist = FLT_MAX;
+     double minDist = DBL_MAX;
      int bestDoor = -1;
 
      int goalID = p->GetFinalDestination();
@@ -161,13 +161,13 @@ int FFRouter::FindExit(Pedestrian* p)
                //we add the closest Doors of every goal, goalToLineUIDmap gets
                //populated in Init()
                validFinalDoor.emplace_back(pairDoor.first); //UID
-               //todo: ar.graf: if goal == -1, maybe also add goalToLineUIDmap2 and 3
           }
      } else {  //only one specific goal
           if (goalToLineUIDmap.count(goalID) == 0) {
                Log->Write("ERROR: \t ffRouter: unknown goalID: %d in FindExit(Ped)",goalID);
+          } else {
+               validFinalDoor.emplace_back(goalToLineUIDmap.at(goalID));
           }
-          validFinalDoor.emplace_back(goalToLineUIDmap.at(goalID));
      }
 
      //candidates of current room (ID) (provided by Room)
@@ -180,7 +180,7 @@ int FFRouter::FindExit(Pedestrian* p)
           for (int doorUID : DoorUIDsOfRoom) {
                double locDistToDoor = _locffviafm[p->GetRoomID()]->getCostToDestination(doorUID, p->GetPos());
                std::pair<int, int> key = std::make_pair(doorUID, finalDoor);
-               if ((_distMatrix.count(key)!=0)
+               if ((_distMatrix.count(key)!=0) && (_distMatrix.at(key) != DBL_MAX)
                      && ( (_distMatrix.at(key) + locDistToDoor) < minDist)) {
                     minDist = _distMatrix.at(key) + locDistToDoor;
                     bestDoor = key.first;
@@ -229,4 +229,15 @@ void FFRouter::FloydWarshall()
                }
           }
      }
+}
+
+void FFRouter::SetMode(std::string s)
+{
+     if (s == "global_shortest"){
+          _mode = global_shortest;
+          return;
+     }
+
+     _mode = global_shortest;
+     return;
 }

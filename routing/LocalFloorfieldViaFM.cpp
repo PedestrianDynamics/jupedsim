@@ -36,18 +36,7 @@ LocalFloorfieldViaFM::LocalFloorfieldViaFM(const Room* const roomArg,
 
 void LocalFloorfieldViaFM::getDirectionToDestination(Pedestrian* ped,
       Point& direction) {
-     //check, if UID of target is a valid UID inside the room
-     //then call mother-class function
 
-//     if (std::find(room->GetAllTransitionsIDs().begin(),
-//                   room->GetAllTransitionsIDs().end(),
-//                   ped->GetExitIndex()) != room->GetAllTransitionsIDs().end()) {
-//          FloorfieldViaFM::getDirectionToDestination(ped, direction);
-//          return;
-//     }
-
-     //std::cerr << "UID not in room: " << ped->GetExitIndex() << std::endl;
-     //the check above is misleading, as it only checks if UID matches any transition
      FloorfieldViaFM::getDirectionToDestination(ped, direction);
      return;
 }
@@ -61,8 +50,8 @@ void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
 {
      room = roomArg;
      //init min/max before parsing
-     double xMin = FLT_MAX;
-     double xMax = -FLT_MAX;
+     double xMin = DBL_MAX;
+     double xMax = -DBL_MAX;
      double yMin = xMin;
      double yMax = xMax;
      costmap.clear();
@@ -201,8 +190,8 @@ void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
 {
      subroom = roomArg;
      //init min/max before parsing
-     double xMin = FLT_MAX;
-     double xMax = -FLT_MAX;
+     double xMin = DBL_MAX;
+     double xMax = -DBL_MAX;
      double yMin = xMin;
      double yMax = xMax;
      costmap.clear();

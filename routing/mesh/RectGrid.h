@@ -116,7 +116,7 @@ class RectGrid
             //Point nearest = getNearestGridPoint(Point(x,y));
             long int i = (long int)(((x-xMin)/hx)+.5);
             long int j = (long int)(((y-yMin)/hy)+.5);
-            if ((i >= 0) && (i < iMax) && (j >= 0) && (j < jMax))
+            if ((i >= 0) && (i < iMax) && (j >= 0) && (j < jMax)) //@todo: ar.graf: check in #ifdef block
                 return (j*iMax+i); // 0-based; index of (closest gridpoint)
              std::cerr << "ERROR in RectGrid::getKeyAtPoint with:" << std::endl;
              std::cerr << "Point: " << x << ", " << y << std::endl;
@@ -129,7 +129,7 @@ class RectGrid
         long int getKeyAtPoint(const Point p) const {
             long int i = (long int) (((p._x-xMin)/hx)+.5);
             long int j = (long int) (((p._y-yMin)/hy)+.5);
-            if ((i >= 0) && (i < iMax) && (j >= 0) && (j < jMax))
+            if ((i >= 0) && (i < iMax) && (j >= 0) && (j < jMax)) //@todo: ar.graf: check in #ifdef block
                 return (j*iMax+i); // 0-based; index of (closest gridpoint)
              std::cerr << "ERROR in RectGrid::getKeyAtPoint with:" << std::endl;
              std::cerr << "Point: " << p._x << ", " << p._y << std::endl;
@@ -178,8 +178,9 @@ class RectGrid
         }
 
         Point getNearestGridPoint(const Point& currPoint) const {
-            if ((currPoint._x > xMax) || (currPoint._y > yMax) ||
-                (currPoint._x < xMin) || (currPoint._y < yMin)) {
+            //if ((currPoint._x > xMax) || (currPoint._y > yMax) ||
+            //    (currPoint._x < xMin) || (currPoint._y < yMin)) {
+             if (!includesPoint(currPoint)) {
                  std::cerr << "ERROR in RectGrid::getKeyAtPoint with:"
                        << std::endl;
                  std::cerr << "Point: " << currPoint._x << ", " << currPoint._y << std::endl;
@@ -219,6 +220,16 @@ class RectGrid
             neighbors.key[3] = (j == 0) ? -2 : ((j-1)*iMax+i);
 
             return neighbors;
+        }
+
+        bool includesPoint(const Point& point) const {
+             if ((point._x < xMin) ||
+                 (point._x > xMax) ||
+                 (point._y < yMin) ||
+                 (point._y > yMax)) {
+                  return false;
+             }
+             return true;
         }
 
     protected:

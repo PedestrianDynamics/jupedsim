@@ -158,6 +158,13 @@ private:
       */
      bool ParseCogMapOpts(TiXmlNode* routingNode);
 
+     /**
+      * @brief ParseFfRouterOps (parsing additional options for the FFRouter class)
+      * @param routingNode. First Child is parameters
+      * @return false if options don't exist
+      */
+     bool ParseFfRouterOps(TiXmlNode* routingNode);
+
      bool ParseLinkedCells(const TiXmlNode &linkedCellNode);
 
      bool ParseStepSize(TiXmlNode &stepNode);
