@@ -111,7 +111,7 @@ bool VelocityModel::Init (Building* building)
          //a destination could not be found for that pedestrian
          if (ped->FindRoute() == -1) {
               Log->Write(
-                   "ERROR:\tVelocityModel::Init() cannot initialise route. ped %d is deleted.\n",ped->GetID());
+                   "ERROR:\tVelocityModel::Init() cannot initialise route. ped %d is deleted in Room %d %d.\n",ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID());
               building->DeletePedestrian(ped);
               p--;
               peds_size--;

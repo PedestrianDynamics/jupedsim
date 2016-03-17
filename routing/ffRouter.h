@@ -111,7 +111,7 @@ public:
       *
       */
      FFRouter();
-     FFRouter(int id, RoutingStrategy s);
+     FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals);
      //FFRouter(const Building* const);
 
      /**
@@ -175,12 +175,14 @@ protected:
      FloorfieldViaFM*                         _globalFF;
      std::map<int, Transition*>               _TransByUID;
      std::map<int, Transition*>               _ExitsByUID;
+     std::map<int, Crossing*>                 _CroTrByUID;
 
      std::map<int, int>     goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
      std::map<int, int>     goalToLineUIDmap2;
      std::map<int, int>     goalToLineUIDmap3;
 
      int _mode;
+     bool _hasSpecificGoals;
 };
 
 #endif /* FFROUTER_H_ */

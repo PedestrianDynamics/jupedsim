@@ -1102,6 +1102,7 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode, TiXmlNode *a
      //first get list of actually used router
      std::vector<int> usedRouter;
      usedRouter.clear();
+     bool hasSpecificGoals = false;
      for (TiXmlElement* e = agentsDistri->FirstChildElement("group"); e;
                e = e->NextSiblingElement("group")) {
           int router = -1;
@@ -1109,6 +1110,13 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode, TiXmlNode *a
                router = atoi(e->Attribute("router_id"));
                if(std::find(usedRouter.begin(), usedRouter.end(), router) == usedRouter.end()) {
                     usedRouter.emplace_back(router);
+               }
+          }
+          int goal = -1;
+          if (e->Attribute("goal_id")) {
+               goal = atoi(e->Attribute("goal_id"));
+               if (goal != -1) {
+                    hasSpecificGoals = true;
                }
           }
      }
@@ -1168,7 +1176,7 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode, TiXmlNode *a
           else if ((strategy == "ff_global_shortest") &&
                     (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
-               Router *r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST);
+               Router *r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals);
                _routingengine->AddRouter(r);
                Log->Write("\nINFO: \tUsing FF Global Shortest Router");
                ///Parsing additional options
