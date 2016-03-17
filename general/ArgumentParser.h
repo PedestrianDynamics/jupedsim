@@ -149,7 +149,7 @@ private:
       * @input a TiXmlNode with the first child "route_choice_models"
       * fails if no router given or NULL
       */
-     bool ParseRoutingStrategies(TiXmlNode* routingNode);
+     bool ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* agentDistri);
 
      /**
       * @brief ParseCogMapOpts (parsing additional options for the cognitiveMapRouter)
@@ -157,6 +157,13 @@ private:
       * @return false if sensor node and/or cognitiveMapElement doesn't exist
       */
      bool ParseCogMapOpts(TiXmlNode* routingNode);
+
+     /**
+      * @brief ParseFfRouterOps (parsing additional options for the FFRouter class)
+      * @param routingNode. First Child is parameters
+      * @return false if options don't exist
+      */
+     bool ParseFfRouterOps(TiXmlNode* routingNode);
 
      bool ParseLinkedCells(const TiXmlNode &linkedCellNode);
 

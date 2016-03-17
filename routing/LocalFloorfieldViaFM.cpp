@@ -36,29 +36,22 @@ LocalFloorfieldViaFM::LocalFloorfieldViaFM(const Room* const roomArg,
 
 void LocalFloorfieldViaFM::getDirectionToDestination(Pedestrian* ped,
       Point& direction) {
-     //check, if UID of target is a valid UID inside the room
-     //then call mother-class function
 
-//     if (std::find(room->GetAllTransitionsIDs().begin(),
-//                   room->GetAllTransitionsIDs().end(),
-//                   ped->GetExitIndex()) != room->GetAllTransitionsIDs().end()) {
-//          FloorfieldViaFM::getDirectionToDestination(ped, direction);
-//          return;
-//     }
-
-     //std::cerr << "UID not in room: " << ped->GetExitIndex() << std::endl;
-     //the check above is misleading, as it only checks if UID matches any transition
      FloorfieldViaFM::getDirectionToDestination(ped, direction);
      return;
 }
+
+void LocalFloorfieldViaFM::getDirectionToGoalID(const int goalID){
+     std::cerr << "invalid call to LocalFloorfieldViaFM::getDirectionToGoalID!" << std::endl;
+};
 
 void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
       const double hxArg, const double hyArg)
 {
      room = roomArg;
      //init min/max before parsing
-     double xMin = FLT_MAX;
-     double xMax = -FLT_MAX;
+     double xMin = DBL_MAX;
+     double xMax = -DBL_MAX;
      double yMin = xMin;
      double yMax = xMax;
      costmap.clear();
@@ -187,13 +180,18 @@ void SubLocalFloorfieldViaFM::getDirectionToDestination(Pedestrian* ped,
      return;
 }
 
+void SubLocalFloorfieldViaFM::getDirectionToGoalID(const int goalID){
+     std::cerr << "invalid call to SubLocalFloorfieldViaFM::getDirectionToGoalID!" << std::endl;
+};
+
+
 void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
       const double hxArg, const double hyArg)
 {
      subroom = roomArg;
      //init min/max before parsing
-     double xMin = FLT_MAX;
-     double xMax = -FLT_MAX;
+     double xMin = DBL_MAX;
+     double xMax = -DBL_MAX;
      double yMin = xMin;
      double yMax = xMax;
      costmap.clear();

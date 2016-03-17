@@ -111,6 +111,8 @@ bool PedDistributor::InitDistributor(const string& fileName, const std::map<int,
           double premovement_sigma= xmltof(e->Attribute("pre_movement_sigma"), 0);
           double risk_tolerance_mean= xmltof(e->Attribute("risk_tolerance_mean"), 0);
           double risk_tolerance_sigma= xmltof(e->Attribute("risk_tolerance_sigma"), 0);
+          double risk_tolerance_alpha= xmltof(e->Attribute("risk_tolerance_alpha"), 0);
+          double risk_tolerance_beta= xmltof(e->Attribute("risk_tolerance_beta"), 0);
 
           double x_min=xmltof(e->Attribute("x_min"), -FLT_MAX);
           double x_max=xmltof(e->Attribute("x_max"), FLT_MAX);
@@ -139,7 +141,27 @@ bool PedDistributor::InitDistributor(const string& fileName, const std::map<int,
           dis->SetHeight(height);
           dis->SetPatience(patience);
           dis->InitPremovementTime(premovement_mean,premovement_sigma);
-          dis->InitRiskTolerance(risk_tolerance_mean,risk_tolerance_sigma);
+
+          if(e->Attribute("risk_tolerance_mean") && e->Attribute("risk_tolerance_sigma")) {
+               std::string distribution_type="normal";
+               double risk_tolerance_mean = xmltof(e->Attribute("risk_tolerance_mean"),NAN);
+               double risk_tolerance_sigma = xmltof(e->Attribute("risk_tolerance_sigma"),NAN);
+               Log->Write("INFO:\trisk tolerance mu = %f, risk tolerance sigma = %f\n", risk_tolerance_mean, risk_tolerance_sigma);
+               dis->InitRiskTolerance(distribution_type,risk_tolerance_mean,risk_tolerance_sigma);
+          } else if(e->Attribute("risk_tolerance_alpha") && e->Attribute("risk_tolerance_beta")) {
+               std::string distribution_type="beta";
+               double risk_tolerance_alpha = xmltof(e->Attribute("risk_tolerance_alpha"),NAN);
+               double risk_tolerance_beta = xmltof(e->Attribute("risk_tolerance_beta"),NAN);
+               Log->Write("INFO:\trisk tolerance alpha = %f, risk tolerance beta = %f\n", risk_tolerance_alpha, risk_tolerance_beta);
+               dis->InitRiskTolerance(distribution_type,risk_tolerance_alpha,risk_tolerance_beta);
+          } else {
+               std::string distribution_type="normal";
+               double risk_tolerance_mean = 0.;
+               double risk_tolerance_sigma = 1.;
+               Log->Write("INFO:\trisk tolerance mu = %f, risk tolerance sigma = %f\n", risk_tolerance_mean, risk_tolerance_sigma);
+               dis->InitRiskTolerance(distribution_type,risk_tolerance_mean,risk_tolerance_sigma);
+          }
+
 
           if(subroom_id==-1) { // no subroom was supplied
                _start_dis.push_back(dis);

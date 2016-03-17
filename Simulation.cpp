@@ -378,7 +378,7 @@ void Simulation::UpdateRoutesAndLocations()
                          if (assigned)
                               break; // stop the loop
                     }
-
+                    //this will delete agents, that are pushed outside (maybe even if inside obstacles??)
                     if (!assigned) {
 #pragma omp critical
                          pedsToRemove.push_back(ped);
@@ -581,40 +581,32 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
           Transition* trans =_building->GetTransitionByUID(ped.GetExitIndex());
           if(trans)
           {
-               //check if the pedestrian left the door correctly
-               if(ped.GetExitLine()->DistTo(ped.GetPos())>0.5)
-               {
-                    Log->Write("WARNING:\t pedestrian [%d] left room/subroom [%d/%d] in an unusual way. Please check",ped.GetID(), ped.GetRoomID(), ped.GetSubRoomID());
-                    Log->Write("       :\t distance to last door (%d | %d) is %f. That should be smaller.", ped.GetExitLine()->GetUniqueID(), ped.GetExitIndex(), ped.GetExitLine()->DistTo(ped.GetPos()));
-                    Log->Write("       :\t correcting the door statistics");
-                    //ped.Dump(ped.GetID());
-
-                    //checking the history and picking the nearest previous destination
-                    double biggest=0.3;
-                    bool success=false;
-                    for(const auto & dest:ped.GetLastDestinations())
-                    {
-                         if(dest!=-1)
-                         {
-                              Transition* trans_tmp =_building->GetTransitionByUID(dest);
-                              if(trans_tmp&&trans_tmp->DistTo(ped.GetPos())<biggest)
-                              {
-                                   biggest=trans_tmp->DistTo(ped.GetPos());
-                                   trans=trans_tmp;
-                                   Log->Write("       :\t Best match found at door %d",dest);
-                                   success=true;//at least one door was found
-                              }
-                         }
-                    }
-
-                    if(success==false)
-                    {
-                         Log->Write("WARNING       :\t correcting the door statistics");
-                         return; //todo we need to check if the ped is in a subroom neighboring the target. If so, no problems!
+               Room* room = _building->GetRoom(ped.GetRoomID());
+               SubRoom* sub = room->GetSubRoom(ped.GetSubRoomID());
+               auto& allNavs = sub->GetAllGoalIDs();
+               int minUID = -1;
+               int minID = -1;
+               double minDist = FLT_MAX;
+               for(auto idNav : allNavs) {
+                    if (_building->GetTransOrCrossByUID(idNav)->DistTo(ped.GetPos()) < minDist) {
+                         minDist = _building->GetTransOrCrossByUID(idNav)->DistTo(ped.GetPos());
+                         minUID = idNav;
+                         minID = _building->GetTransOrCrossByUID(idNav)->GetID();
+                         trans = _building->GetTransitionByUID(idNav);
                     }
                }
+               //check if the pedestrian left any crossing/transition correctly
+               if(minDist>0.5)
+               {
+                    Log->Write("WARNING:\t pedestrian [%d] left room/subroom [%d/%d] in an unusual way. Please check",ped.GetID(), ped.GetRoomID(), ped.GetSubRoomID());
+                    Log->Write("       :\t distance to closest door (%d | %d) is %f. That should be smaller.", minUID, minID, minDist);
+                    Log->Write("       :\t correcting the door statistics");
+                    //ped.Dump(ped.GetID());
+               }
 #pragma omp critical
-               trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
+               if (trans) {
+                    trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
+               }
           }
      }
 }

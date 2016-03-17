@@ -145,7 +145,7 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
 
 
      int partSize = nSize / nThreads;
-     int debugPed = -33;//10;
+     int debugPed = -10;
      //building->GetGrid()->HighlightNeighborhood(debugPed, building);
 #pragma omp parallel  default(shared) num_threads(nThreads)
      {
@@ -220,8 +220,8 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
 
                // }
                if(ped->GetID() == debugPed ) {
-                    printf("t=%f, Pos1 =[%f, %f]\n", current,ped->GetPos()._x, ped->GetPos()._y);
-                    printf("acc= %f %f, fd= %f, %f,  repPed = %f %f, repWall= %f, %f\n", acc._x, acc._y, fd._x, fd._y, F_rep._x, F_rep._y, repwall._x, repwall._y);
+                    //printf("\nt=%f, Pos1 =[%f, %f]\n", current,ped->GetPos()._x, ped->GetPos()._y);
+                    printf("\nacc= %f %f, fd= %f, %f,  repPed = %f %f, repWall= %f, %f\n", acc._x, acc._y, fd._x, fd._y, F_rep._x, F_rep._y, repwall._x, repwall._y);
                }
 
                result_acc.push_back(acc);
@@ -261,15 +261,29 @@ inline  Point GCFMModel::ForceDriv(Pedestrian* ped, Room* room) const
      Point F_driv;
      const Point& pos = ped->GetPos();
      double dist = ped->GetExitLine()->DistTo(pos);
+     Point lastE0 = ped->GetLastE0();
+     ped->SetLastE0(target-pos);
 
-
-     if (dist > J_EPS_GOAL) {
+     if (  (dynamic_cast<DirectionFloorfield*>(_direction)) ||
+           (dynamic_cast<DirectionLocalFloorfield*>(_direction)) ||
+           (dynamic_cast<DirectionSubLocalFloorfield*>(_direction))  ) {
+          if (dist > 10*J_EPS_GOAL) {
+               const Point& v0 = ped->GetV0(target);
+               F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
+          } else {
+               const Point& v0 = ped->GetV0();
+               F_driv = ((lastE0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
+               ped->SetLastE0(lastE0);
+          }
+     }
+     else if (dist > J_EPS_GOAL) {
           const Point& v0 = ped->GetV0(target);
           F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
      } else {
           const Point& v0 = ped->GetV0();
           F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
      }
+
      return F_driv;
 }
 

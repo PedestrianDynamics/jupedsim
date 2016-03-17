@@ -309,7 +309,7 @@ bool QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
                {
                     *myref=NULL;
                     *flag=UNREACHEABLE_EXIT;
-                    done=true;
+                    //done=true; //this line has no effect, cause of return statement below
                     Log->Write("ERROR: reference ped cannot be found for ped %d within [%f] "
                               "m  around the exit [%d]\n",myself->GetID(),radius,crossing->GetID());
                     return false;
@@ -809,7 +809,8 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           }
           else if(_defaultStrategy==LOCAL_SHORTEST)
           {
-               if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < _cbaThreshold)
+               if (     (dist > minDistGlobal)                   //is longer but ...
+                     && (( (dist-minDistGlobal) / (dist+minDistGlobal) ) < _cbaThreshold)) //not more than 2 * _cbaThreshold
                {
                     if (dist2 < minDistLocal)
                     {

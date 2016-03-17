@@ -875,10 +875,10 @@ Crossing *Building::GetCrossing(int ID)
     }
 }
 
-Goal* Building::GetFinalGoal(int ID)
+Goal* Building::GetFinalGoal(int ID) const
 {
      if (_goals.count(ID) == 1) {
-          return _goals[ID];
+          return _goals.at(ID);
      } else {
           if (ID == -1)
                return NULL;

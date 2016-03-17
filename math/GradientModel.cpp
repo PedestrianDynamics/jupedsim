@@ -270,8 +270,8 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                     ++(*under);
                 }
                 Point movDirection = (result_acc[p-start].Norm() > 1) ? result_acc[p - start].Normalized() : result_acc[p-start];
-                Point toTarget = (_direction->GetTarget(nullptr, ped)); //maybe use building->GetRoom(ped->GetRoomID()) instead of nullptr just in case, GetTarget uses it
-                toTarget = toTarget - ped->GetPos();                    //^^ at the time of writing this, DirectionFloorfield does not use it and looks like never will
+                Point toTarget = (_direction->GetTarget(building->GetRoom(ped->GetRoomID()), ped));
+                toTarget = toTarget - ped->GetPos();
                 if (toTarget.NormSquare() == 0.) {                // this if overcomes shortcomming of floorfield (neggrad[targetpoints] == Point(0., 0.))
                     toTarget += ped->GetV().Normalized();
                 }
@@ -292,8 +292,20 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 movDirection = (movDirection.Norm() > 1.) ? movDirection.Normalized() : movDirection;
 
                 //redirect near wall mechanics:
-                Point dir2Wall = dynamic_cast<DirectionFloorfield*>(_direction)->GetDir2Wall(ped);
-                double distance2Wall =  dynamic_cast<DirectionFloorfield*>(_direction)->GetDistance2Wall(ped);
+                Point dir2Wall = Point{0., 0.};
+                double distance2Wall = -1.;
+                if (dynamic_cast<DirectionFloorfield*>(_direction)) {
+                     dir2Wall = dynamic_cast<DirectionFloorfield*>(_direction)->GetDir2Wall(ped);
+                     distance2Wall = dynamic_cast<DirectionFloorfield*>(_direction)->GetDistance2Wall(ped);
+                } else if (dynamic_cast<DirectionLocalFloorfield*>(_direction)) {
+                     dir2Wall = dynamic_cast<DirectionLocalFloorfield*>(_direction)->GetDir2Wall(ped);
+                     distance2Wall = dynamic_cast<DirectionLocalFloorfield*>(_direction)->GetDistance2Wall(ped);
+                } else if (dynamic_cast<DirectionSubLocalFloorfield*>(_direction)) {
+                     dir2Wall = dynamic_cast<DirectionSubLocalFloorfield*>(_direction)->GetDir2Wall(ped);
+                     distance2Wall = dynamic_cast<DirectionSubLocalFloorfield*>(_direction)->GetDistance2Wall(ped);
+                } else {
+                     Log->Write("ERROR: \t GradNav Model (4) requires any floor field (exit-strat {6,8,9}). None found!");
+                }
                 double dotProduct = 0;
                 double antiClippingFactor = 1;
                 if (distance2Wall < _slowDownDistance) {

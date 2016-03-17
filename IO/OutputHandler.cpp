@@ -57,7 +57,7 @@ int OutputHandler::GetErrors()
 
 void OutputHandler::Write(const string& str)
 {
-          cout << str << endl;
+          cout << endl << str;
 }
 
 void OutputHandler::ProgressBar(double TotalPeds, double NowPeds, double simTime)
@@ -72,7 +72,7 @@ void OutputHandler::ProgressBar(double TotalPeds, double NowPeds, double simTime
 
      // create the "meter"
      int ii=0;
-     printf("Time: %6.2f s | Evacuated: %5d /%5d (%3.0f%% ) [", simTime, (int)NowPeds, (int)TotalPeds,fraction*100);
+     printf("\rTime: %6.2f s | Evacuated: %5d /%5d (%3.0f%% ) [", simTime, (int)NowPeds, (int)TotalPeds,fraction*100);
      // part  that's full already
      for ( ; ii < dotz; ii++) {
           printf("=");
@@ -83,7 +83,7 @@ void OutputHandler::ProgressBar(double TotalPeds, double NowPeds, double simTime
           printf(" ");
      }
      // and back to line begin - do not forget the fflush to avoid output buffering problems!
-     printf("]\r");
+     printf("]");
      fflush(stdout);
 }
 
@@ -99,19 +99,19 @@ void OutputHandler::Write(const char* message,...)
 
     if (str.find("ERROR") != string::npos)
     {
-        cerr << msg << endl;
+        cerr << endl << msg ;
         cerr.flush();
         incrementErrors();
     }
     else if (str.find("WARNING") != string::npos)
     {
-        cerr << msg << endl;
+        cerr << endl << msg ;
         cerr.flush();
         incrementWarnings();
     }
     else
     { // infos
-        cout << msg << endl;
+        cout << endl << msg ;
         cout.flush();
     }
 }
@@ -120,19 +120,19 @@ void STDIOHandler::Write(const string& str)
 {
     if (str.find("ERROR") != string::npos)
        {
-           cerr << str << endl;
+           cerr << endl << str;
            cerr.flush();
            incrementErrors();
        }
        else if (str.find("WARNING") != string::npos)
        {
-           cerr << str << endl;
+           cerr << endl << str;
            cerr.flush();
            incrementWarnings();
        }
        else
        { // infos
-           cout << str << endl;
+           cout << endl << str;
            cout.flush();
        }
 }
