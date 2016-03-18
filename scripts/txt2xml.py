@@ -68,7 +68,8 @@ for inputfile in files:
 	logging.info("<----| outputfile=%s"%outputfile)
 	Ntemp = len(data[:,0])
 	print(max(data[:,0]))
-	Nagents = max(data[:,0]) - min(data[:,0]) + 1 
+	#Nagents = max(data[:,0]) - min(data[:,0]) + 1 
+	Nagents = len(np.unique(data[:,0]))
 	print(Nagents)
 	# if(Ntemp!=Nagents):
 		# Nagents=Ntemp
