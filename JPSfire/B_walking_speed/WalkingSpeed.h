@@ -58,7 +58,7 @@ public:
     bool LoadJPSfireInfo(const std::string &projectFilename);
     bool ReduceWalkingSpeed();
     double FrantzichNilsson2003(double &walking_speed, double ExtinctionCoefficient);
-    double Jin1978(double ExtinctionCoefficient, double &walking_speed);
+    double Jin1978(double &walking_speed, double ExtinctionCoefficient);
 
 private:
 

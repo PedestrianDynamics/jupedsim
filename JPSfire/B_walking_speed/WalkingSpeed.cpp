@@ -113,7 +113,7 @@ double WalkingSpeed::FrantzichNilsson2003(double &walking_speed, double Extincti
     return walking_speed;
 }
 
-double WalkingSpeed::Jin1978(double ExtinctionCoefficient, double &walking_speed)
+double WalkingSpeed::Jin1978(double &walking_speed, double ExtinctionCoefficient)
 {
     //According to Jin1978
     std::string irritant = _FMStorage->IrritantOrNot();
