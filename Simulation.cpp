@@ -298,67 +298,55 @@ void Simulation::UpdateRoutesAndLocations()
      // collect all pedestrians in the simulation.
      const vector<Pedestrian*>& allPeds = _building->GetAllPedestrians();
      const map<int, Goal*>& goals = _building->GetAllGoals();
+     auto allRooms = _building->GetAllRooms();
 
-     unsigned long nSize = allPeds.size();
-     int nThreads = omp_get_max_threads();
-//     int nThreads = 1;
-     int partSize = nSize / nThreads;
+#pragma omp parallel for shared(pedsToRemove, allRooms)
+     for (size_t p = 0; p < allPeds.size(); ++p) {
+          auto ped = allPeds[p];
+          Room* room = _building->GetRoom(ped->GetRoomID());
+          SubRoom* sub0 = room->GetSubRoom(ped->GetSubRoomID());
 
-#pragma omp parallel  default(shared) num_threads(nThreads)
-     {
-          const int threadID = omp_get_thread_num();
-          int start = threadID * partSize;
-          int end = (threadID + 1) * partSize - 1;
-          if ((threadID == nThreads - 1))
-               end = nSize - 1;
-
-          for (int p = start; p <= end; ++p) {
-               Pedestrian* ped = allPeds[p];
-               Room* room = _building->GetRoom(ped->GetRoomID());
-               SubRoom* sub0 = room->GetSubRoom(ped->GetSubRoomID());
-
-               //set the new room if needed
-               if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
-                         && (room->GetCaption() == "outside")) {
+          //set the new room if needed
+          if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
+                    && (room->GetCaption() == "outside")) {
 #pragma omp critical
+               pedsToRemove.push_back(ped);
+          } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
+                    && (goals.at(ped->GetFinalDestination())->Contains(
+                              ped->GetPos()))) {
+#pragma omp critical
+               pedsToRemove.push_back(ped);
+          }
+
+          // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
+          // That may happen if the forces are too high for instance
+          // the ped is removed from the simulation, if it could not be reassigned
+          else if (!sub0->IsInSubRoom(ped))
+          {
+
+               bool assigned = false;
+               std::function<void(const Pedestrian&)> f = std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
+               assigned = ped->Relocate(f);
+               //this will delete agents, that are pushed outside (maybe even if inside obstacles??)
+#pragma omp critical
+               if (!assigned) {
                     pedsToRemove.push_back(ped);
-               } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
-                         && (goals.at(ped->GetFinalDestination())->Contains(
-                                   ped->GetPos()))) {
-#pragma omp critical
-                    pedsToRemove.push_back(ped);
-               }
+                    //the agent left the old room
+                    //actualize the eggress time for that room
+                    allRooms.at(ped->GetRoomID())->SetEgressTime(ped->GetGlobalTime());
 
-               // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
-               // That may happen if the forces are too high for instance
-               // the ped is removed from the simulation, if it could not be reassigned
-               else if (!sub0->IsInSubRoom(ped))
-               {
-
-                    bool assigned = false;
-                    auto allRooms = _building->GetAllRooms();
-                    std::function<void(const Pedestrian&)> f = std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
-                    assigned = ped->Relocate(f);
-                    //this will delete agents, that are pushed outside (maybe even if inside obstacles??)
-                    if (!assigned) {
-#pragma omp critical
-                         pedsToRemove.push_back(ped);
-                         //the agent left the old room
-                         //actualize the eggress time for that room
-                         allRooms.at(ped->GetRoomID())->SetEgressTime(ped->GetGlobalTime());
-
-                    }
-               }
-               //finally actualize the route
-               if (ped->FindRoute() == -1) {
-                    //a destination could not be found for that pedestrian
-                    Log->Write("ERROR: \tCould not find a route for pedestrian %d",ped->GetID());
-                    //exit(EXIT_FAILURE);
-#pragma omp critical
-                    pedsToRemove.push_back(ped);
                }
           }
-     } //omp parallel
+          //finally actualize the route
+          if (ped->FindRoute() == -1) {
+               //a destination could not be found for that pedestrian
+               Log->Write("ERROR: \tCould not find a route for pedestrian %d",ped->GetID());
+               //exit(EXIT_FAILURE);
+#pragma omp critical
+               pedsToRemove.push_back(ped);
+          }
+     }
+
 
 #ifdef _USE_PROTOCOL_BUFFER
      if (_hybridSimManager)

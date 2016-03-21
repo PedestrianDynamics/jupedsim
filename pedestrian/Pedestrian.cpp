@@ -1094,10 +1094,10 @@ int Pedestrian::GetColor() const
 
 
 bool Pedestrian::Relocate(std::function<void(const Pedestrian&)> flowupdater) {
-     bool assigned = false;
+
      auto allRooms = _building->GetAllRooms();
 
-     for (auto& it_room : allRooms)
+     for (auto&it_room : allRooms)
      {
           auto& room=it_room.second;
           auto subrooms = room->GetAllSubRooms();
@@ -1109,15 +1109,17 @@ bool Pedestrian::Relocate(std::function<void(const Pedestrian&)> flowupdater) {
                   });
           if(sub != subrooms.end()) {
                allRooms.at(GetRoomID())->SetEgressTime(GetGlobalTime()); //set Egresstime to old room
+
                flowupdater(*this); //@todo: ar.graf : this call should move into a critical region? check plz
                ClearMentalMap(); // reset the destination
                //ped->FindRoute();
                SetRoomID(room->GetID(), room->GetCaption());
                SetSubRoomID(sub->second->GetSubRoomID());
                SetSubRoomUID(sub->second->GetUID());
-               assigned = true;
-               break;
+#pragma omp critical
+               _router->FindExit(this);
+               return true;
           }
      }
-     return assigned;
+     return false;
 }
