@@ -485,12 +485,12 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
 
     } else if (qName == "agentInfo") {
         double height=std::numeric_limits<double>::quiet_NaN();
-        int color=std::numeric_limits<int>::quiet_NaN();
-        int id=std::numeric_limits<int>::quiet_NaN();
+        double color=std::numeric_limits<double>::quiet_NaN();
+        double id=std::numeric_limits<double>::quiet_NaN();
 
         for(int i=0; i<at.length(); i++) {
             if(at.localName(i)=="ID") {
-                id=at.value(i).toInt();
+                id=at.value(i).toDouble();
             }
             if(at.localName(i)=="height") {
                 height=at.value(i).toDouble()*FAKTOR;
@@ -502,12 +502,12 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
         if(std::isnan(id)) return true;
 
         if(!std::isnan(height)) {
-            _initialPedestriansHeights.append(QString::number(id));
+            _initialPedestriansHeights.append(QString::number(int(id)));
             _initialPedestriansHeights.append(QString::number(height));
         }
         if(!std::isnan(color)) {
-            _initialPedestriansColors.append(QString::number(id));
-            _initialPedestriansColors.append(QString::number(color));
+            _initialPedestriansColors.append(QString::number(int(id)));
+            _initialPedestriansColors.append(QString::number(int(color)));
         }
     }
     return true;

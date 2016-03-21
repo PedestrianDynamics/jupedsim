@@ -1882,7 +1882,7 @@ void MainWindow::slotShowGeometryStructure()
     //_geoStructure.setVisible(! _geoStructure.isVisible());
     //_geoStructure.showColumn(0);
     //_geoStructure.show();
-    _geoStructure.setHidden(not ui.actionShowGeometry_Structure->isChecked());
+    _geoStructure.setHidden(!ui.actionShowGeometry_Structure->isChecked());
     if(_visualisationThread->getGeometry().RefreshView())
     {
         _geoStructure.setWindowTitle("Geometry structure");

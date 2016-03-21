@@ -240,7 +240,6 @@ if("${DESIRED_QT_VERSION}" STREQUAL "5")
   # # other modules must be enabled like this:
   set(QT_USE_QTXML TRUE)  # needed!
   set(QT_USE_QTNETWORK TRUE)
-
   MESSAGE(STATUS "Found Qt version: ${Qt5Core_VERSION_STRING}")
 elseif("${DESIRED_QT_VERSION}" STREQUAL "4")
  
@@ -305,6 +304,8 @@ elseif( ${QT5_INSTALLED})
   ${RCS}
   )
  qt5_use_modules(JPSvis Widgets)
+ target_link_libraries(JPSvis Qt5::Xml)
+  target_link_libraries(JPSvis Qt5::Network)
  target_link_libraries(JPSvis ${Qt5Widgets_LIBRARIES})
 else()
   message(FATAL_ERROR "QT NOT FOUND - ABORT")
@@ -380,6 +381,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 #--------------------
+if(NOT MSVC)
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
@@ -391,6 +393,7 @@ else()
   message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 message(STATUS "Checking for C++11 compiler - available")
+endif(NOT MSVC)
 #---------------------
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   message(STATUS "Using Clang " ${CMAKE_CXX_COMPILER_VERSION})
