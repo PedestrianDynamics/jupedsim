@@ -45,7 +45,8 @@
  *
  **/
 
-#include <float.h>
+#include <cfloat>
+#include <algorithm>
 #include "ffRouter.h"
 #include "../geometry/Building.h"
 #include "../pedestrian/Pedestrian.h"
@@ -59,6 +60,7 @@ FFRouter::FFRouter()
 FFRouter::FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals):Router(id,s) {
      _building = nullptr;
      _hasSpecificGoals = hasSpecificGoals;
+     _globalFF = nullptr;
 }
 
 //FFRouter::FFRouter(const Building* const building)
@@ -82,7 +84,7 @@ bool FFRouter::Init(Building* building)
      _building = building;
      if (_hasSpecificGoals) {
           //get global field to manage goals (which are not in a subroom)
-          _globalFF = new FloorfieldViaFM(building, 0.125, 0.125, 0.0, false, "nofile");
+          _globalFF = new FloorfieldViaFM(building, 0.25, 0.25, 0.0, false, "nofile");
           for (auto &itrGoal : building->GetAllGoals()) {
                _globalFF->createLineToGoalID(itrGoal.first);
           }
@@ -98,25 +100,37 @@ bool FFRouter::Init(Building* building)
      auto& allTrans = building->GetAllTransitions();
      auto& allCross = building->GetAllCrossings();
      for (auto& pair:allTrans) {
-          _allDoorUIDs.emplace_back(pair.second->GetUniqueID());
-          _CroTrByUID.insert(std::make_pair(pair.second->GetUniqueID(), (Crossing*) pair.second));
-          if (pair.second->IsExit()) {
-               _ExitsByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
+          if (pair.second->IsOpen()) {
+               _allDoorUIDs.emplace_back(pair.second->GetUniqueID());
+               _CroTrByUID.insert(std::make_pair(pair.second->GetUniqueID(), (Crossing *) pair.second));
+               if (pair.second->IsExit()) {
+                    _ExitsByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
+               }
           }
      }
      for (auto& pair:allCross) {
-          _allDoorUIDs.emplace_back(pair.second->GetUniqueID());
-          _CroTrByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
+          if (pair.second->IsOpen()) {
+               _allDoorUIDs.emplace_back(pair.second->GetUniqueID());
+               _CroTrByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
+          }
      }
-     for(auto& pair : _CroTrByUID) {
-          for(auto& pair2 : _CroTrByUID){
-               std::pair<int, int> key   = std::make_pair(pair.second->GetUniqueID(), pair2.second->GetUniqueID());
-               double              value = (pair.second->GetUniqueID() == pair2.second->GetUniqueID())? 0.0 : DBL_MAX;
+     //make unique
+     _allDoorUIDs.erase( std::unique(_allDoorUIDs.begin(),_allDoorUIDs.end()), _allDoorUIDs.end());
+
+     //cleanse maps
+     _distMatrix.clear();
+     _pathsMatrix.clear();
+
+     //init, yet no distances, only create map entries
+     for(auto& id1 : _allDoorUIDs) {
+          for(auto& id2 : _allDoorUIDs){
+               std::pair<int, int> key   = std::make_pair(id1, id2);
+               double              value = (id1 == id2)? 0.0 : DBL_MAX;
                //distMatrix[i][j] = 0,   if i==j
                //distMatrix[i][j] = max, else
                _distMatrix.insert(std::make_pair( key , value));
                //pathsMatrix[i][j] = i
-               _pathsMatrix.insert(std::make_pair( key , pair.second->GetUniqueID() ));
+               _pathsMatrix.insert(std::make_pair( key , id1 ));
           }
      }
 
@@ -125,29 +139,37 @@ bool FFRouter::Init(Building* building)
      LocalFloorfieldViaFM* ptrToNew = nullptr;
      double tempDistance = 0.;
      //type of allRooms: const std::map<int, std::unique_ptr<Room> >&
-     const std::map<int, std::unique_ptr<Room> >& allRooms = _building->GetAllRooms();
+     const std::map<int, std::shared_ptr<Room> >& allRooms = _building->GetAllRooms();
      for(auto& pairRoom : allRooms) {
 #ifdef DEBUG
           std::cerr << "Creating Floorfield for Room: " << pair.first << std::endl;
 #endif
-          ptrToNew = new LocalFloorfieldViaFM(pairRoom.second.get(), building, 0.25, 0.25, 0.0, false, "nofile");
+          ptrToNew = new LocalFloorfieldViaFM(pairRoom.second.get(), building, 0.0625, 0.0625, 0.0, false, "nofile");
+          //for (long int i = 0; i < ptrToNew)
+          Log->Write("Created room-scale floorfield for Room %d", pairRoom.first);
           _locffviafm.insert( std::make_pair( pairRoom.first, ptrToNew ) );
 
           //SetDistances
+          bool stillCorrect = true;
           vector<int> doorUIDs;
           doorUIDs.clear();
           for (int transI: pairRoom.second->GetAllTransitionsIDs()) {
-               doorUIDs.emplace_back(transI);
+               if (_CroTrByUID[transI]->IsOpen()) {
+                    doorUIDs.emplace_back(transI);
+               }
           }
 
           for (auto& subI : pairRoom.second->GetAllSubRooms()) {
                for (auto& crossI : subI.second->GetAllCrossings()) {
-                    doorUIDs.emplace_back(crossI->GetUniqueID());
+                    if (crossI->IsOpen()) {
+                         doorUIDs.emplace_back(crossI->GetUniqueID());
+                    }
                }
           }
           //loop over upper triangular matrice (i,j) and write to (j,i) as well
           std::vector<int>::const_iterator outerPtr;
           std::vector<int>::const_iterator innerPtr;
+          Log->Write("Found %d Doors (Cross + Trans)", doorUIDs.size());
           for (outerPtr = doorUIDs.begin(); outerPtr != doorUIDs.end(); ++outerPtr) {
                //if the door is closed, then dont calc distances
                if (!_CroTrByUID.at(*outerPtr)->IsOpen()) {
@@ -158,17 +180,35 @@ bool FFRouter::Init(Building* building)
                     if (  (*outerPtr == *innerPtr) || (!_CroTrByUID.at(*innerPtr)->IsOpen())  ) {
                          continue;
                     }
+                    //tempDistance = 0;
+                    //std::cerr<< std::endl << tempDistance;
                     tempDistance = _locffviafm[pairRoom.first]->getCostToDestination(*outerPtr, _CroTrByUID.at(*innerPtr)->GetCentre());
+//                    tempDistance = ptrToNew->getCostToDestination(*outerPtr, _CroTrByUID[*innerPtr]->GetCentre());
                     std::pair<int, int> key_ij = std::make_pair(*outerPtr, *innerPtr);
                     std::pair<int, int> key_ji = std::make_pair(*innerPtr, *outerPtr);
                     //_distMatrix[key_ij] = tempDistance;
                     //_distMatrix[key_ji] = tempDistance;
+//                    if (tempDistance > 10000) {
+//                         //Log->Write("Von %d \t nach %d \t sind %f", *outerPtr, *innerPtr, tempDistance);
+//                         //std::cerr<< std::endl << tempDistance;
+//                         if (stillCorrect) {
+//                              Log->Write("\t\t\t destID: %d \t point x: %f y: %f key: %d of %d",
+//                                         *outerPtr, _CroTrByUID[*innerPtr]->GetCentre()._x, _CroTrByUID[*innerPtr]->GetCentre()._y,
+//                                         ptrToNew->getGrid()->getKeyAtPoint(_CroTrByUID[*innerPtr]->GetCentre()),
+//                                         ptrToNew->getGrid()->GetnPoints());
+//                         }
+//                         tempDistance = ptrToNew->getCostToDestination(*outerPtr, _CroTrByUID[*innerPtr]->GetCentre());
+//                         stillCorrect = false;
+//                    }
                     _distMatrix.erase(key_ij);
                     _distMatrix.erase(key_ji);
                     _distMatrix.insert(std::make_pair(key_ij, tempDistance));
                     _distMatrix.insert(std::make_pair(key_ji, tempDistance));
                }
           }
+//          if (!stillCorrect) {
+//               Log->Write("ERROR \t Error in tempDistance still exists");
+//          }
      }
      FloydWarshall();
      Log->Write("INFO: \tFF Router Init done.");

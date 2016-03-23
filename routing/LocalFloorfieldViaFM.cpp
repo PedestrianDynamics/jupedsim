@@ -18,9 +18,9 @@ LocalFloorfieldViaFM::LocalFloorfieldViaFM(const Room* const roomArg,
 
      if (hxArg != hyArg) std::cerr << "ERROR: hx != hy <=========";
      //parse building and create list of walls/obstacles (find xmin xmax, ymin, ymax, and add border?)
-     Log->Write("INFO: \tStart Parsing: Room " + roomArg->GetID());
+     Log->Write("INFO: \tStart Parsing: Room %d", roomArg->GetID());
      parseRoom(roomArg, hxArg, hyArg);
-     Log->Write("INFO: \tFinished Parsing: Room " + roomArg->GetID());
+     Log->Write("INFO: \tFinished Parsing: Room %d", roomArg->GetID());
      //testoutput("AALineScan.vtk", "AALineScan.txt", dist2Wall);
 
      prepareForDistanceFieldCalculation(wall);
@@ -157,9 +157,9 @@ SubLocalFloorfieldViaFM::SubLocalFloorfieldViaFM(const SubRoom* const roomArg,
 
      if (hxArg != hyArg) std::cerr << "ERROR: hx != hy <=========";
      //parse building and create list of walls/obstacles (find xmin xmax, ymin, ymax, and add border?)
-     //Log->Write("INFO: \tStart Parsing: Room " + roomArg->GetUID());
+     //Log->Write("INFO: \tStart Parsing: Room %d" , roomArg->GetUID());
      parseRoom(roomArg, hxArg, hyArg);
-     //Log->Write("INFO: \tFinished Parsing: Room " + roomArg->GetUID());
+     //Log->Write("INFO: \tFinished Parsing: Room %d" , roomArg->GetUID());
      //testoutput("AALineScan.vtk", "AALineScan.txt", dist2Wall);
 
      prepareForDistanceFieldCalculation(wall);

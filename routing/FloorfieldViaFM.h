@@ -105,6 +105,11 @@ public:
           return goalToLineUIDmap3;
      }
 
+     RectGrid* getGrid() const
+     {
+          return grid;
+     }
+
 #ifdef TESTING
      void setGrid(RectGrid* gridArg) {grid = gridArg;}
      Trial* getTrial() {return trialfield;}

@@ -32,7 +32,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
-#include <limits>
+#include <cfloat>
 #include <chrono>
 
 #ifdef _OPENMP
@@ -431,11 +431,11 @@ double FloorfieldViaFM::getCostToDestination(const int destID, const Point& posi
         Point dummy;
         getDirectionToUID(destID, 0, dummy);         //this call induces the floorfieldcalculation
     }
-    if (costmap.count(destID) == 0) {
+    if ((costmap.count(destID) == 0) || (costmap.at(destID) == nullptr)) {
         Log->Write("ERROR: \t DestinationUID %d is invalid / out of grid.", destID);
         return DBL_MAX;
     }
-    return costmap.at(destID)[grid->getKeyAtPoint(position)];
+    return (costmap.at(destID))[grid->getKeyAtPoint(position)];
 }
 
 void FloorfieldViaFM::getDir2WallAt(const Point& position, Point& direction){
@@ -731,8 +731,8 @@ void FloorfieldViaFM::setSpeed(bool useDistance2Wall) {
     }
 
     //@todo: ar.graf: below is a fix to prevent folks from taking a shortcut outside of rooms. trying to make passing a transition expensive
-    std::vector<Line> exits(wall.begin(), wall.begin()+numOfExits);
-    drawLinesOnGrid(exits, modifiedspeed, 0.00000000001);
+    //std::vector<Line> exits(wall.begin(), wall.begin()+numOfExits);
+    //drawLinesOnGrid(exits, modifiedspeed, 0.00000000001);
 
 }
 
@@ -1084,6 +1084,9 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
 
     //two sided update
     double precheck = twosidedCalc(row, col, grid->Gethx()/trialfield[key].speed[0]);
+//    if (precheck > 10000) {
+//        Log->Write("ERROR \t\t\t is in twosided");
+//    }
     if (precheck >= 0) {
         trialfield[key].cost[0] = precheck;
         trialfield[key].flag[0] = 2;
@@ -1109,7 +1112,7 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
 }
 
 inline double FloorfieldViaFM::onesidedCalc(double xy, double hDivF) {
-    //if (xy < 0) std::cerr << "error in onesided " << xy << std::endl;   //todo: performance
+    //if ( (xy+hDivF) > 10000) std::cerr << "error in onesided " << xy << std::endl;
     return xy + hDivF;
 }
 
