@@ -420,7 +420,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
                     Log->Write("ERROR: \t mismatch model ID and description. Did you mean gcfm ?");
                     return false;
                }
-               if(ParseGCFMModel(xModel)==false)
+               if(ParseGCFMModel(xModel, xMainNode)==false)
                     return false;
                parsingModelSuccessful=true;
                //only parsing one model
@@ -434,7 +434,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
                     return false;
                }
                //only parsing one model
-               if(ParseGompertzModel(xModel)==false)
+               if(ParseGompertzModel(xModel, xMainNode)==false)
                     return false;
                parsingModelSuccessful=true;
                break;
@@ -446,7 +446,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
                     return false;
                }
                //only parsing one model
-               if(ParseGradientModel(xModel)==false)
+               if(ParseGradientModel(xModel, xMainNode)==false)
                     return false;
                parsingModelSuccessful=true;
                break;
@@ -459,7 +459,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
                     return false;
                }
                //only parsing one model
-               if(ParseVelocityModel(xModel)==false)
+               if(ParseVelocityModel(xModel, xMainNode)==false)
                     return false;
                parsingModelSuccessful=true;
                break;
@@ -485,7 +485,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
      return true;
 }
 
-bool ArgumentParser::ParseGCFMModel(TiXmlElement* xGCFM)
+bool ArgumentParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
 {
      Log->Write("\nINFO:\tUsing the GCFM model");
      Log->Write("INFO:\tParsing the model parameters");
@@ -568,7 +568,8 @@ bool ArgumentParser::ParseGCFMModel(TiXmlElement* xGCFM)
      }
 
      //Parsing the agent parameters
-     ParseAgentParameters(xGCFM);
+     TiXmlNode* xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
+     ParseAgentParameters(xGCFM, xAgentDistri);
      p_op_model = std::shared_ptr<OperationalModel>(new GCFMModel(p_exit_strategy.get(), this->GetNuPed(),
                this->GetNuWall(), this->GetDistEffMaxPed(),
                this->GetDistEffMaxWall(), this->GetIntPWidthPed(),
@@ -579,7 +580,7 @@ bool ArgumentParser::ParseGCFMModel(TiXmlElement* xGCFM)
 }
 
 
-bool ArgumentParser::ParseGompertzModel(TiXmlElement* xGompertz)
+bool ArgumentParser::ParseGompertzModel(TiXmlElement* xGompertz, TiXmlElement* xMainNode)
 {
      //parsing the model parameters
      Log->Write("\nINFO:\tUsing the Gompertz model");
@@ -677,7 +678,8 @@ bool ArgumentParser::ParseGompertzModel(TiXmlElement* xGompertz)
      }
 
      //Parsing the agent parameters
-     ParseAgentParameters(xGompertz);
+     TiXmlNode* xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
+     ParseAgentParameters(xGompertz, xAgentDistri);
      p_op_model = std::shared_ptr<OperationalModel>(new GompertzModel(p_exit_strategy.get(), this->GetNuPed(),
                this->GetaPed(), this->GetbPed(), this->GetcPed(),
                this->GetNuWall(), this->GetaWall(), this->GetbWall(),
@@ -686,7 +688,7 @@ bool ArgumentParser::ParseGompertzModel(TiXmlElement* xGompertz)
      return true;
 }
 
-bool ArgumentParser::ParseGradientModel(TiXmlElement* xGradient) // @todo: change to real model ar.graf
+bool ArgumentParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xMainNode)
 {
 //parsing the model parameters
      Log->Write("\nINFO:\tUsing the Gradient model");
@@ -832,7 +834,8 @@ bool ArgumentParser::ParseGradientModel(TiXmlElement* xGradient) // @todo: chang
      }
 
      //Parsing the agent parameters
-     ParseAgentParameters(xGradient);
+     TiXmlNode* xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
+     ParseAgentParameters(xGradient, xAgentDistri);
      p_op_model = std::shared_ptr<OperationalModel>(new GradientModel(p_exit_strategy.get(), this->GetNuPed(),
                this->GetaPed(), this->GetbPed(), this->GetcPed(),
                this->GetNuWall(), this->GetaWall(), this->GetbWall(),
@@ -843,7 +846,7 @@ bool ArgumentParser::ParseGradientModel(TiXmlElement* xGradient) // @todo: chang
      return true;
 }
 
-bool ArgumentParser::ParseVelocityModel(TiXmlElement* xVelocity)
+bool ArgumentParser::ParseVelocityModel(TiXmlElement* xVelocity, TiXmlElement* xMainNode)
 {
      //parsing the model parameters
      Log->Write("\nINFO:\tUsing Tordeux2015 model");
@@ -930,7 +933,8 @@ bool ArgumentParser::ParseVelocityModel(TiXmlElement* xVelocity)
      }
 
      //Parsing the agent parameters
-     ParseAgentParameters(xVelocity);
+     TiXmlNode* xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
+     ParseAgentParameters(xVelocity, xAgentDistri);
      p_op_model = std::shared_ptr<OperationalModel>(new VelocityModel(p_exit_strategy.get(),
                this->GetaPed(), this->GetDPed(),
                this->GetaWall(), this->GetDWall()
@@ -939,150 +943,161 @@ bool ArgumentParser::ParseVelocityModel(TiXmlElement* xVelocity)
      return true;
 }
 
-void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
+void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel, TiXmlNode *agentsDistri)
 {
      //Parsing the agent parameters
      Log->Write("\nINFO:\tParsing agents  parameters");
+     //first get list of actually used router
+     std::vector<int> usedAgentParams;
+     usedAgentParams.clear();
+     for (TiXmlElement* e = agentsDistri->FirstChildElement("group"); e;
+          e = e->NextSiblingElement("group")) {
+          int agentsParams = -1;
+          if (e->Attribute("agent_parameter_id")) {
+               agentsParams = atoi(e->Attribute("agent_parameter_id"));
+               if(std::find(usedAgentParams.begin(), usedAgentParams.end(), agentsParams) == usedAgentParams.end()) {
+                    usedAgentParams.emplace_back(agentsParams);
+               }
+          }
+     }
      for(TiXmlElement* xAgentPara = operativModel->FirstChildElement("agent_parameters"); xAgentPara;
                xAgentPara = xAgentPara->NextSiblingElement("agent_parameters")) {
 
           //get the group ID
           int para_id= xmltoi(xAgentPara->Attribute("agent_parameter_id"),-1);
-          Log->Write("INFO: \tParsing the group parameter id [%d]",para_id);
+          if (std::find(usedAgentParams.begin(), usedAgentParams.end(), para_id) != usedAgentParams.end() ) {
+               Log->Write("INFO: \tParsing the group parameter id [%d]", para_id);
 
-          auto agentParameters=std::shared_ptr<AgentsParameters>(new AgentsParameters(para_id,pSeed));
-          _agentsParameters[para_id]=agentParameters;
+               auto agentParameters = std::shared_ptr<AgentsParameters>(new AgentsParameters(para_id, pSeed));
+               _agentsParameters[para_id] = agentParameters;
 
-          //desired speed
-          if (xAgentPara->FirstChild("v0"))
-          {
-               double mu = xmltof(xAgentPara->FirstChildElement("v0")->Attribute("mu"),pV0Mu);
-               double sigma = xmltof(xAgentPara->FirstChildElement("v0")->Attribute("sigma"),pV0Sigma);
-               agentParameters->InitV0(mu,sigma);
-               agentParameters->InitV0DownStairs(mu,sigma);
-               agentParameters->InitV0UpStairs(mu,sigma);
-               Log->Write("INFO: \tdesired speed mu=%f , sigma=%f",mu,sigma);
-          }
+               //desired speed
+               if (xAgentPara->FirstChild("v0")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("v0")->Attribute("mu"), pV0Mu);
+                    double sigma = xmltof(xAgentPara->FirstChildElement("v0")->Attribute("sigma"), pV0Sigma);
+                    agentParameters->InitV0(mu, sigma);
+                    agentParameters->InitV0DownStairs(mu, sigma);
+                    agentParameters->InitV0UpStairs(mu, sigma);
+                    Log->Write("INFO: \tdesired speed mu=%f , sigma=%f", mu, sigma);
+               }
 
-          if (xAgentPara->FirstChild("v0_upstairs"))
-          {
-               double mu = xmltof(xAgentPara->FirstChildElement("v0_upstairs")->Attribute("mu"),pV0Mu);
-               double sigma = xmltof(xAgentPara->FirstChildElement("v0_upstairs")->Attribute("sigma"),pV0Sigma);
-               agentParameters->InitV0UpStairs(mu,sigma);
-               Log->Write("INFO: \tdesired speed upstairs mu=%f , sigma=%f",mu,sigma);
-          }
+               if (xAgentPara->FirstChild("v0_upstairs")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("v0_upstairs")->Attribute("mu"), pV0Mu);
+                    double sigma = xmltof(xAgentPara->FirstChildElement("v0_upstairs")->Attribute("sigma"), pV0Sigma);
+                    agentParameters->InitV0UpStairs(mu, sigma);
+                    Log->Write("INFO: \tdesired speed upstairs mu=%f , sigma=%f", mu, sigma);
+               }
 
-          if (xAgentPara->FirstChild("v0_downstairs"))
-          {
-               double mu = xmltof(xAgentPara->FirstChildElement("v0_downstairs")->Attribute("mu"),pV0Mu);
-               double sigma = xmltof(xAgentPara->FirstChildElement("v0_downstairs")->Attribute("sigma"),pV0Sigma);
-               agentParameters->InitV0DownStairs(mu,sigma);
-               Log->Write("INFO: \tdesired speed downstairs mu=%f , sigma=%f",mu,sigma);
-          }//------------------------------------------------------------------------
-          if (xAgentPara->FirstChild("escalator_upstairs"))
-          {
-               double mu = xmltof(xAgentPara->FirstChildElement("escalator_upstairs")->Attribute("mu"), pV0Mu);
-               double sigma = xmltof(xAgentPara->FirstChildElement("escalator_upstairs")->Attribute("sigma"), pV0Sigma);
-               agentParameters->InitEscalatorUpStairs(mu, sigma);
-               Log->Write("INFO: \tspeed of escalator upstairs mu=%f , sigma=%f", mu, sigma);
-          }
-          if (xAgentPara->FirstChild("escalator_downstairs"))
-          {
-               double mu = xmltof(xAgentPara->FirstChildElement("escalator_downstairs")->Attribute("mu"), pV0Mu);
-               double sigma = xmltof(xAgentPara->FirstChildElement("escalator_downstairs")->Attribute("sigma"),pV0Sigma);
-               agentParameters->InitEscalatorDownStairs(mu,sigma);
-               Log->Write("INFO: \tspeed of escalator downstairs mu=%f , sigma=%f", mu, sigma);
-          }          
-          if (xAgentPara->FirstChild("v0_idle_escalator_upstairs"))
-          {
-               double mu = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_upstairs")->Attribute("mu"),pV0Mu);
-               double sigma = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_upstairs")->Attribute("sigma"),pV0Sigma);
-               agentParameters->InitV0IdleEscalatorUpStairs(mu, sigma);
-               Log->Write("INFO: \tdesired speed idle escalator upstairs mu=%f , sigma=%f", mu, sigma);
-          }
-          if (xAgentPara->FirstChild("v0_idle_escalator_downstairs"))
-          {
-               double mu = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_downstairs")->Attribute("mu"),pV0Mu);
-               double sigma = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_downstairs")->Attribute("sigma"),pV0Sigma);
-               agentParameters->InitV0IdleEscalatorDownStairs(mu,sigma);
-               Log->Write("INFO: \tdesired speed idle escalator downstairs mu=%f , sigma=%f", mu, sigma);
-          }
-           //------------------------------------------------------------------------
-          
-          //bmax
-          if (xAgentPara->FirstChild("bmax"))
-          {
-               double mu = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("mu"),pBmaxMu);
-               double sigma = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("sigma"),pBmaxSigma);
-               agentParameters->InitBmax(mu,sigma);
-               Log->Write("INFO: \tBmax mu=%f , sigma=%f",mu,sigma);
-          }
+               if (xAgentPara->FirstChild("v0_downstairs")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("v0_downstairs")->Attribute("mu"), pV0Mu);
+                    double sigma = xmltof(xAgentPara->FirstChildElement("v0_downstairs")->Attribute("sigma"), pV0Sigma);
+                    agentParameters->InitV0DownStairs(mu, sigma);
+                    Log->Write("INFO: \tdesired speed downstairs mu=%f , sigma=%f", mu, sigma);
+               }//------------------------------------------------------------------------
+               if (xAgentPara->FirstChild("escalator_upstairs")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("escalator_upstairs")->Attribute("mu"), pV0Mu);
+                    double sigma = xmltof(xAgentPara->FirstChildElement("escalator_upstairs")->Attribute("sigma"),
+                                          pV0Sigma);
+                    agentParameters->InitEscalatorUpStairs(mu, sigma);
+                    Log->Write("INFO: \tspeed of escalator upstairs mu=%f , sigma=%f", mu, sigma);
+               }
+               if (xAgentPara->FirstChild("escalator_downstairs")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("escalator_downstairs")->Attribute("mu"), pV0Mu);
+                    double sigma = xmltof(xAgentPara->FirstChildElement("escalator_downstairs")->Attribute("sigma"),
+                                          pV0Sigma);
+                    agentParameters->InitEscalatorDownStairs(mu, sigma);
+                    Log->Write("INFO: \tspeed of escalator downstairs mu=%f , sigma=%f", mu, sigma);
+               }
+               if (xAgentPara->FirstChild("v0_idle_escalator_upstairs")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_upstairs")->Attribute("mu"),
+                                       pV0Mu);
+                    double sigma = xmltof(
+                            xAgentPara->FirstChildElement("v0_idle_escalator_upstairs")->Attribute("sigma"), pV0Sigma);
+                    agentParameters->InitV0IdleEscalatorUpStairs(mu, sigma);
+                    Log->Write("INFO: \tdesired speed idle escalator upstairs mu=%f , sigma=%f", mu, sigma);
+               }
+               if (xAgentPara->FirstChild("v0_idle_escalator_downstairs")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_downstairs")->Attribute("mu"),
+                                       pV0Mu);
+                    double sigma = xmltof(
+                            xAgentPara->FirstChildElement("v0_idle_escalator_downstairs")->Attribute("sigma"),
+                            pV0Sigma);
+                    agentParameters->InitV0IdleEscalatorDownStairs(mu, sigma);
+                    Log->Write("INFO: \tdesired speed idle escalator downstairs mu=%f , sigma=%f", mu, sigma);
+               }
+               //------------------------------------------------------------------------
 
-          //bmin
-          if (xAgentPara->FirstChild("bmin"))
-          {
-               double mu = xmltof(xAgentPara->FirstChildElement("bmin")->Attribute("mu"),pBminMu);
-               double sigma = xmltof(xAgentPara->FirstChildElement("bmin")->Attribute("sigma"),pBminSigma);
-               agentParameters->InitBmin(mu,sigma);
-               Log->Write("INFO: \tBmin mu=%f , sigma=%f",mu,sigma);
-          }
+               //bmax
+               if (xAgentPara->FirstChild("bmax")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("mu"), pBmaxMu);
+                    double sigma = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("sigma"), pBmaxSigma);
+                    agentParameters->InitBmax(mu, sigma);
+                    Log->Write("INFO: \tBmax mu=%f , sigma=%f", mu, sigma);
+               }
 
-          //amin
-          if (xAgentPara->FirstChild("amin"))
-          {
-               double mu = xmltof(xAgentPara->FirstChildElement("amin")->Attribute("mu"),pAminMu);
-               double sigma = xmltof(xAgentPara->FirstChildElement("amin")->Attribute("sigma"),pAminSigma);
-               agentParameters->InitAmin(mu,sigma);
-               Log->Write("INFO: \tAmin mu=%f , sigma=%f",mu,sigma);
-          }
-          //tau
-          if (xAgentPara->FirstChild("tau"))
-          {
-               double mu = xmltof(xAgentPara->FirstChildElement("tau")->Attribute("mu"),pTauMu);
-               double sigma = xmltof(xAgentPara->FirstChildElement("tau")->Attribute("sigma"),pTauSigma);
-               agentParameters->InitTau(mu,sigma);
-               Log->Write("INFO: \tTau mu=%f , sigma=%f",mu,sigma);
-          }
-          //atau
-          if (xAgentPara->FirstChild("atau"))
-          {
-               double mu = xmltof(xAgentPara->FirstChildElement("atau")->Attribute("mu"),pAtauMu);
-               double sigma = xmltof(xAgentPara->FirstChildElement("atau")->Attribute("sigma"),pAtauSigma);
-               agentParameters->InitAtau(mu,sigma);
-               Log->Write("INFO: \tAtau mu=%f , sigma=%f",mu,sigma);
-          }
-          // T
-          if (xAgentPara->FirstChild("T"))
-          {
-               double mu = xmltof(xAgentPara->FirstChildElement("T")->Attribute("mu"),pAtauMu);
-               double sigma = xmltof(xAgentPara->FirstChildElement("T")->Attribute("sigma"),pAtauSigma);
-               agentParameters->InitT(mu,sigma);
-               Log->Write("INFO: \tT mu=%f , sigma=%f",mu,sigma);
-          }
-          
-          if(pModel == 2) { // Gompertz
-               double beta_c = 1; /// @todo quick and dirty
-               double max_Ea = agentParameters->GetAmin() + agentParameters->GetAtau()*agentParameters->GetV0();
-               double max_Eb = 0.5*(agentParameters->GetBmin() + 0.49) ; /// @todo hard-coded value should be the same as in pedestrians GetEB
-               double max_Ea_Eb = (max_Ea>max_Eb)?max_Ea:max_Eb;
-               pDistEffMaxPed = 2 * beta_c * max_Ea_Eb;
-               pDistEffMaxWall  = pDistEffMaxPed;
-          }
+               //bmin
+               if (xAgentPara->FirstChild("bmin")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("bmin")->Attribute("mu"), pBminMu);
+                    double sigma = xmltof(xAgentPara->FirstChildElement("bmin")->Attribute("sigma"), pBminSigma);
+                    agentParameters->InitBmin(mu, sigma);
+                    Log->Write("INFO: \tBmin mu=%f , sigma=%f", mu, sigma);
+               }
 
-          if(pModel == 4) { //  Gompertz @todo: ar.graf
-               double beta_c = 2; /// @todo quick and dirty
-               double max_Ea = agentParameters->GetAmin() + agentParameters->GetAtau()*agentParameters->GetV0();
-               double max_Eb = 0.5*(agentParameters->GetBmin() + 0.49) ; /// @todo hard-coded value should be the same as in pedestrians GetEB
-               double max_Ea_Eb = (max_Ea>max_Eb)?max_Ea:max_Eb;
-               pDistEffMaxPed = 2 * beta_c * max_Ea_Eb;
-	       pDistEffMaxWall  = pDistEffMaxPed;
-          }
+               //amin
+               if (xAgentPara->FirstChild("amin")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("amin")->Attribute("mu"), pAminMu);
+                    double sigma = xmltof(xAgentPara->FirstChildElement("amin")->Attribute("sigma"), pAminSigma);
+                    agentParameters->InitAmin(mu, sigma);
+                    Log->Write("INFO: \tAmin mu=%f , sigma=%f", mu, sigma);
+               }
+               //tau
+               if (xAgentPara->FirstChild("tau")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("tau")->Attribute("mu"), pTauMu);
+                    double sigma = xmltof(xAgentPara->FirstChildElement("tau")->Attribute("sigma"), pTauSigma);
+                    agentParameters->InitTau(mu, sigma);
+                    Log->Write("INFO: \tTau mu=%f , sigma=%f", mu, sigma);
+               }
+               //atau
+               if (xAgentPara->FirstChild("atau")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("atau")->Attribute("mu"), pAtauMu);
+                    double sigma = xmltof(xAgentPara->FirstChildElement("atau")->Attribute("sigma"), pAtauSigma);
+                    agentParameters->InitAtau(mu, sigma);
+                    Log->Write("INFO: \tAtau mu=%f , sigma=%f", mu, sigma);
+               }
+               // T
+               if (xAgentPara->FirstChild("T")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("T")->Attribute("mu"), pAtauMu);
+                    double sigma = xmltof(xAgentPara->FirstChildElement("T")->Attribute("sigma"), pAtauSigma);
+                    agentParameters->InitT(mu, sigma);
+                    Log->Write("INFO: \tT mu=%f , sigma=%f", mu, sigma);
+               }
 
-          if(pModel == 3) { // Tordeux2015
-               double max_Eb = 2*agentParameters->GetBmax();
-               pDistEffMaxPed = max_Eb + agentParameters->GetT()*agentParameters->GetV0();
+               if (pModel == 2) { // Gompertz
+                    double beta_c = 1; /// @todo quick and dirty
+                    double max_Ea = agentParameters->GetAmin() + agentParameters->GetAtau() * agentParameters->GetV0();
+                    double max_Eb = 0.5 * (agentParameters->GetBmin() +
+                                           0.49); /// @todo hard-coded value should be the same as in pedestrians GetEB
+                    double max_Ea_Eb = (max_Ea > max_Eb) ? max_Ea : max_Eb;
+                    pDistEffMaxPed = 2 * beta_c * max_Ea_Eb;
+                    pDistEffMaxWall = pDistEffMaxPed;
+               }
 
-               pDistEffMaxWall  = pDistEffMaxPed;
+               if (pModel == 4) { //  Gompertz @todo: ar.graf
+                    double beta_c = 2; /// @todo quick and dirty
+                    double max_Ea = agentParameters->GetAmin() + agentParameters->GetAtau() * agentParameters->GetV0();
+                    double max_Eb = 0.5 * (agentParameters->GetBmin() +
+                                           0.49); /// @todo hard-coded value should be the same as in pedestrians GetEB
+                    double max_Ea_Eb = (max_Ea > max_Eb) ? max_Ea : max_Eb;
+                    pDistEffMaxPed = 2 * beta_c * max_Ea_Eb;
+                    pDistEffMaxWall = pDistEffMaxPed;
+               }
+
+               if (pModel == 3) { // Tordeux2015
+                    double max_Eb = 2 * agentParameters->GetBmax();
+                    pDistEffMaxPed = max_Eb + agentParameters->GetT() * agentParameters->GetV0();
+
+                    pDistEffMaxWall = pDistEffMaxPed;
+               }
           }
      }
 }

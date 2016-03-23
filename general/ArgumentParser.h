@@ -126,11 +126,11 @@ private:
 
 private:
 
-     bool ParseGradientModel(TiXmlElement* xGradient);
-     bool ParseGCFMModel(TiXmlElement* xGCFM);
-     bool ParseGompertzModel(TiXmlElement* xGompertz);
-     bool ParseVelocityModel(TiXmlElement* xVelocity);
-     void ParseAgentParameters(TiXmlElement* operativModel);
+     bool ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xMainNode);
+     bool ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode);
+     bool ParseGompertzModel(TiXmlElement* xGompertz, TiXmlElement* xMainNode);
+     bool ParseVelocityModel(TiXmlElement* xVelocity, TiXmlElement* xMainNode);
+     void ParseAgentParameters(TiXmlElement* operativModel, TiXmlNode* agentsDistri);
      void Usage(const std::string file);
 
      /**
