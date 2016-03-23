@@ -93,11 +93,11 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
      }
 
      //triangulate the geometry
-     if(!Triangulate())
-     {
-          Log->Write("ERROR:\t could not triangulate the geometry!");
-          exit (EXIT_FAILURE);
-     }
+//     if(!Triangulate())
+//     {
+//          Log->Write("ERROR:\t could not triangulate the geometry!");
+//          exit (EXIT_FAILURE);
+//     }
 
      if(!LoadTrafficInfo() )
      {
@@ -202,7 +202,7 @@ int Building::GetNumberOfGoals() const
      return _transitions.size() + _hLines.size() + _crossings.size();
 }
 
-const std::map<int, std::unique_ptr<Room> >& Building::GetAllRooms() const
+const std::map<int, std::shared_ptr<Room> >& Building::GetAllRooms() const
 {
      return _rooms;
 }
@@ -228,7 +228,7 @@ LCGrid* Building::GetGrid() const
 
 void Building::AddRoom(Room* room)
 {
-     _rooms[room->GetID()]=std::unique_ptr<Room>(room);
+     _rooms[room->GetID()]=std::shared_ptr<Room>(room);
 }
 
 void Building::AddSurroundingRoom()
@@ -1014,6 +1014,9 @@ bool Building::SanityCheck()
 {
      Log->Write("INFO: \tChecking the geometry for artifacts");
      bool status = true;
+
+     //only for ffRouter
+     return status;
 
      for(auto&& itr_room: _rooms)
      {
