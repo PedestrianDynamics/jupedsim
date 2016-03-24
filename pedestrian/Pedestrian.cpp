@@ -37,9 +37,10 @@
 #include "PedDistributor.h"
 
 #include "../JPSfire/generic/FDSMesh.h"
-#include "../JPSfire/B_walking_speed/FDSMeshStorage.h"
 #include "../JPSfire/generic/Knot.h"
+#include "../JPSfire/generic/FDSMeshStorage.h"
 #include "../JPSfire/B_walking_speed/WalkingSpeed.h"
+#include "../JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
 
 using namespace std;
 
@@ -524,6 +525,12 @@ double Pedestrian::GetV0Norm() const
      if(_WalkingSpeed->ReduceWalkingSpeed()) {
          walking_speed = _WalkingSpeed->WalkingInSmoke(this, walking_speed);
      }
+
+     //WHERE should the call to that routine be placed properly?
+     if(_ToxicityAnalysis->ConductToxicityAnalysis()) {
+        _ToxicityAnalysis->CalculateFED(this);
+     }
+
      return walking_speed;
      // orthogonal projection on the stair
      //return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
@@ -978,6 +985,11 @@ void Pedestrian::SetBuilding(Building* building)
 void Pedestrian::SetWalkingSpeed(WalkingSpeed* walkingSpeed)
 {
     _WalkingSpeed = walkingSpeed;
+}
+
+void Pedestrian::SetFED(ToxicityAnalysis* toxicityAnalysis)
+{
+    _ToxicityAnalysis = toxicityAnalysis;
 }
 
 void Pedestrian::SetSpotlight(bool spotlight)

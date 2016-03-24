@@ -50,6 +50,7 @@ class LCGrid;
 class ForceModel;
 class PedDistributor;
 class WalkingSpeed;
+class ToxicityAnalysis;
 
 class Building
 {
@@ -73,6 +74,7 @@ private:
      std::ofstream _pathWayStream;
 
      WalkingSpeed * _WalkingSpeed;
+     ToxicityAnalysis * _ToxicityAnalysis;
 
 public:
      /// constructor

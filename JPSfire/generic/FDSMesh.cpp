@@ -140,6 +140,7 @@ double FDSMesh::GetKnotValue(const double &x, const double &y) const
     GetColumn(x, col, restx);
     GetRow(row, resty, y);
 
+    //std::cout << _matrix[row][col].GetValue() << std::endl;
     return _matrix[row][col].GetValue();
 }
 

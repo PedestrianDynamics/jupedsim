@@ -30,7 +30,7 @@
 #include "../../geometry/Building.h"
 #include "../../pedestrian/Pedestrian.h"
 #include "../generic/FDSMesh.h"
-#include "FDSMeshStorage.h"
+#include "../generic/FDSMeshStorage.h"
 #include "../../pedestrian/PedDistributor.h"
 #include "../../tinyxml/tinyxml.h"
 #include <set>
@@ -90,9 +90,10 @@ std::string WalkingSpeed::GetName() const
 }
 
 
-double WalkingSpeed::GetExtinction(const Pedestrian * pedestrian)
+double WalkingSpeed::GetExtinction(const Pedestrian * pedestrian, std::string quantity)
 {
-    double ExtinctionCoefficient = _FMStorage->get_FDSMesh(pedestrian->GetGlobalTime(), pedestrian->GetElevation()).GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y);
+    //std::cout << "\n" << quantity << std::endl;
+    double ExtinctionCoefficient = _FMStorage->get_FDSMesh(pedestrian->GetGlobalTime(), pedestrian->GetElevation(), quantity).GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y);
     return ExtinctionCoefficient;
 }
 
@@ -135,7 +136,9 @@ double WalkingSpeed::Jin1978(double &walking_speed, double ExtinctionCoefficient
 
 double WalkingSpeed::WalkingInSmoke(const Pedestrian* p, double &walking_speed)
 {
-    double ExtinctionCoefficient = GetExtinction(p);
+    double ExtinctionCoefficient = GetExtinction(p, "EXTINCTION_COEFFICIENT");
+    //std::cout << ExtinctionCoefficient << std::endl;
+    //fprintf(stderr, "%f\n", ExtinctionCoefficient);
     std::string study = _FMStorage->GetStudy();
 
     if((ExtinctionCoefficient < 10E-6) || (std::isnan(ExtinctionCoefficient)))   //no obstruction by smoke or NaN check
@@ -145,22 +148,22 @@ double WalkingSpeed::WalkingInSmoke(const Pedestrian* p, double &walking_speed)
     }
     else {
             if (study=="Frantzich+Nilsson2003"){
-                FrantzichNilsson2003(walking_speed, ExtinctionCoefficient);
+                walking_speed = FrantzichNilsson2003(walking_speed, ExtinctionCoefficient);
             }
             else if (study=="Jin1978"){
-                Jin1978(ExtinctionCoefficient, walking_speed);
+                walking_speed = Jin1978(walking_speed, ExtinctionCoefficient);
             }
             else {
                 Log->Write("ERROR:\tNo study specified");
                 exit(EXIT_FAILURE);
             }
-
     //Generally check if v0 < reduced walking_speed
     if(walking_speed > p->GetEllipse().GetV0()) {
        walking_speed = p->GetEllipse().GetV0();
     }
     }
-   //fprintf(stderr, "%f \t%f\n", ExtinctionCoefficient, walking_speed);
+   fprintf(stderr, "%f \t%f \t%f\n", p->GetGlobalTime(), ExtinctionCoefficient, walking_speed);
+
    return walking_speed;
 }
 

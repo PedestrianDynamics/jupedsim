@@ -50,17 +50,22 @@ FDSMeshStorage::FDSMeshStorage(std::string filepath, double finalTime, double up
     _elevationlist(), _timelist(), _irritant(irritant)
 {
     ///Check if _filepath is existent
-    struct stat extinction_grids;
+    struct stat file_path;
 
-    if ( stat(_filepath.c_str(), &extinction_grids) != 0 )
+    if ( stat(_filepath.c_str(), &file_path) != 0 )
     {
         Log->Write("ERROR:\tCould not find directory %s", _filepath.c_str());
         exit(EXIT_FAILURE);
     }
     else {
+        CreateQuantityList();
+        std::cout << "\nQuantityList PASSED\n" << std::endl;
         CreateElevationList();
+        std::cout << "\nCreateElevationList PASSED\n" << std::endl;
         CreateTimeList();
+        std::cout << "CreateTimeList PASSED\n" << std::endl;
         CreateFDSMeshes();
+        std::cout << "CreateFDSMeshes PASSED\n" << std::endl;
     }
 }
 
@@ -70,10 +75,9 @@ FDSMeshStorage::~FDSMeshStorage()
 }
 
 
-
-bool FDSMeshStorage::CreateElevationList()
+bool FDSMeshStorage::CreateQuantityList()
 {
-    /// Create elevation list out of the available Z_* dirs in _filepath
+    /// Create quantity list
     glob_t paths;
     int retval;
 
@@ -81,12 +85,43 @@ bool FDSMeshStorage::CreateElevationList()
     paths.gl_pathv = NULL;
     paths.gl_offs = 0;
 
-    const char * glob_str = (_filepath + "Z_*").c_str();
+    const char * glob_str = (_filepath + "*").c_str();
     retval = glob( (glob_str) , GLOB_NOSORT, NULL, &paths );
     if( retval == 0 ) {
         int idx;
         for( idx = 0; idx < paths.gl_pathc; idx++ ) {
             std::string glob_str = (paths.gl_pathv[idx]);
+            //std::cout << "\n" << paths.gl_pathv[idx] << std::endl;
+            std::string quant_dir =  glob_str.substr( glob_str.rfind("/") + 1 );
+            _quantitylist.push_back(quant_dir);
+        }
+        globfree( &paths );
+        return true;
+    }
+    else {
+        Log->Write("ERROR:\tCould not find suitable quantities in %s", _filepath.c_str());
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+bool FDSMeshStorage::CreateElevationList()
+{
+    /// Create elevation list out of the available Z_* dirs for each quantity
+    glob_t paths;
+    int retval;
+
+    paths.gl_pathc = 0;
+    paths.gl_pathv = NULL;
+    paths.gl_offs = 0;
+
+    const char * glob_str = (_filepath + _quantitylist[0] + "/Z_*").c_str();
+    retval = glob( (glob_str) , GLOB_NOSORT, NULL, &paths );
+    if( retval == 0 ) {
+        int idx;
+        for( idx = 0; idx < paths.gl_pathc; idx++ ) {
+            std::string glob_str = (paths.gl_pathv[idx]);
+            //std::cout << "\n" << paths.gl_pathv[idx] << std::endl;
             double elev_dir = std::stod( glob_str.substr( glob_str.rfind("_") + 1 ));
             _elevationlist.push_back(elev_dir);
         }
@@ -114,7 +149,8 @@ void FDSMeshStorage::CreateTimeList()
     const char * check_str;
     struct stat times;
     for(auto elem : _timelist) {
-        check_str = (_filepath + "Z_" + std::to_string(_elevationlist[0])
+        //std::cout << elem << std::endl;
+        check_str = (_filepath + _quantitylist[0] + "/Z_" + std::to_string(_elevationlist[0])
                 + "/t_" + std::to_string(elem) + ".csv").c_str();
 
         if ( stat(check_str, &times) != 0 )
@@ -128,37 +164,51 @@ void FDSMeshStorage::CreateTimeList()
 void FDSMeshStorage::CreateFDSMeshes()
 {
     _fMContainer.clear();
-        for (auto &i:_elevationlist)
+    for (auto &h:_quantitylist)     //list of quantities
+    {
+        for (auto &i:_elevationlist)    //list of elevations
         {
             //std::cout << "i " << i << std::endl;
-            for (auto &j:_timelist)
+            for (auto &j:_timelist)         //list of times
             {
                 //std::cout << "j " << j << std::endl;
-                std::string str = "Z_" + std::to_string(i) + "/t_"+std::to_string(j);
-                //std::cout << _filepath+suffix << std::endl;
+                std::string str = h + "/Z_" + std::to_string(i) + "/t_"+std::to_string(j);
+                //std::cout << _filepath + str + ".csv" << std::endl;
                 FDSMesh mesh(_filepath + str + ".csv");
                 //std::string str = "t_"+std::to_string(i);
                 _fMContainer.insert(std::make_pair(str, mesh));
             }
         }
+   }
 }
 
-const FDSMesh &FDSMeshStorage::get_FDSMesh(const double &simTime, const double &pedElev)
+const FDSMesh &FDSMeshStorage::get_FDSMesh(const double &simTime, const double &pedElev, std::string &quantity)
 {
-    //std::cout << "PASSED" << std::endl;
     int simT=simTime/_updateIntervall;
     simT*=_updateIntervall;
-    double _PedEyeHeight = pedElev + 1.8;
+    _PedEyeHeight = pedElev + 1.8;
 
     GetNearestHeight(_PedEyeHeight);
 
     if (simT>=_finalTime)
         simT=_finalTime;
 
-    std::string str = "Z_" +  std::to_string(_NearestHeight) + "/t_"+std::to_string(simT)+".000000";
+    //std::cout << "\t" << quantity << std::endl;
+
+    std::string str = quantity + "/Z_" +  std::to_string(_NearestHeight) + "/t_"+std::to_string(simT)+".000000";
 
     //std::cout << str << std::endl;
+
     return _fMContainer.at(str);
+
+//    TODO
+//    if(_fMContainer.??(str) ) {
+//        return _fMContainer.at(str);
+//    }
+//    else {
+//        Log->Write("ERROR:\tCould find no appropriate FDS mesh: ", quantity.c_str(), pedElev, simT);
+//        exit(EXIT_FAILURE);
+//    }
 }
 
 double FDSMeshStorage::GetNearestHeight(double _PedEyeHeight)

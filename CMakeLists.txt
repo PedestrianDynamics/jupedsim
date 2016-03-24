@@ -323,8 +323,9 @@ set (   source_files
 
   JPSfire/generic/FDSMesh.cpp
   JPSfire/generic/Knot.cpp
-  JPSfire/B_walking_speed/FDSMeshStorage.cpp
+  JPSfire/generic/FDSMeshStorage.cpp
   JPSfire/B_walking_speed/WalkingSpeed.cpp
+  JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
   )
 
 set (   header_files
@@ -439,8 +440,9 @@ set (   header_files
 
   JPSfire/generic/FDSMesh.h
   JPSfire/generic/Knot.h
-  JPSfire/B_walking_speed/FDSMeshStorage.h
+  JPSfire/generic/FDSMeshStorage.h
   JPSfire/B_walking_speed/WalkingSpeed.h
+  JPSfire/C_toxicity_analysis/ToxicityAnalysis.h
   )
 
 

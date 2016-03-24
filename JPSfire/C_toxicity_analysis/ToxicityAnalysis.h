@@ -1,5 +1,5 @@
 /**
- * \file        WalkingSpeed.h
+ * \file        ToxicityAnalysis.h
  * \date        Jan 1, 2014
  * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
@@ -26,8 +26,8 @@
  *
  **/
 
-#ifndef WALKINGSPEED_H
-#define WALKINGSPEED_H 1
+#ifndef TOXICITYANALYSIS_H
+#define TOXICITYANALYSIS_H 1
 
 #include <memory>
 
@@ -36,29 +36,28 @@ class Building;
 class Point;
 class FDSMeshStorage;
 
-class WalkingSpeed
+class ToxicityAnalysis
 {
 
 public:
 
-    WalkingSpeed(const Building * b);
+    ToxicityAnalysis(const Building * b);
 
-    virtual ~WalkingSpeed();
+    virtual ~ToxicityAnalysis();
 
     std::string GetName() const;
     //void execute(const Pedestrian *) const;
 
-    double WalkingInSmoke(const Pedestrian*, double &);
-    double GetExtinction(const Pedestrian *, std::string);
+    void CalculateFED(const Pedestrian*);
+    double GetGasConcentration(const Pedestrian *, std::string);
+    void StoreToxicityAnalysis(double, double, double, double);
 
     void set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage);
     const std::shared_ptr<FDSMeshStorage> get_FMStorage();
 
 
     bool LoadJPSfireInfo(const std::string &projectFilename);
-    bool ReduceWalkingSpeed();
-    double FrantzichNilsson2003(double &walking_speed, double ExtinctionCoefficient);
-    double Jin1978(double &walking_speed, double ExtinctionCoefficient);
+    bool ConductToxicityAnalysis();
 
 private:
 
@@ -66,4 +65,4 @@ private:
 
 };
 
-#endif // WalkingSpeed_H
+#endif // ToxicityAnalysis_H

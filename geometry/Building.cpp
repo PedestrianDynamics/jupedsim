@@ -31,6 +31,7 @@
 #include "../geometry/Room.h"
 #include "../tinyxml/tinyxml.h"
 #include "../JPSfire/B_walking_speed/WalkingSpeed.h"
+#include "../JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
 #include "../pedestrian/PedDistributor.h"
 
 #ifdef _SIMULATOR
@@ -73,6 +74,7 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
      _savePathway = false;
      _linkedCellGrid = nullptr;
      _WalkingSpeed = new WalkingSpeed(this);
+     _ToxicityAnalysis = new ToxicityAnalysis(this);
      //todo: what happens if any of these  methods failed (return false)? throw exception ?
      if(!LoadGeometry())
      {
@@ -1334,6 +1336,7 @@ void Building::AddPedestrian(Pedestrian* ped)
      }
      _allPedestians.push_back(ped);
      ped->SetWalkingSpeed(_WalkingSpeed);
+     ped->SetFED(_ToxicityAnalysis);
 }
 
 void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds) const

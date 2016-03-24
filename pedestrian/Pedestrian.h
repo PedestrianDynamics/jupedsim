@@ -140,6 +140,7 @@ private:
      static int _agentsCreated;
 
      WalkingSpeed * _WalkingSpeed;
+     ToxicityAnalysis * _ToxicityAnalysis;
 
 public:
      // constructors
@@ -458,6 +459,7 @@ public:
      void WalkingDownstairs(double &walking_speed, double c, SubRoom* sub, double ped_elevation) const;
 
 
+     void SetFED(ToxicityAnalysis* toxicityAnalysis);
 };
 
 #endif  /* _PEDESTRIAN_H */

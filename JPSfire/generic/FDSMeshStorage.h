@@ -32,7 +32,7 @@
 
 #include <unordered_map>
 #include <vector>
-#include "../generic/FDSMesh.h"
+#include "FDSMesh.h"
 #include "../../IO/OutputHandler.h"
 
 class Point;
@@ -49,12 +49,14 @@ public:
     FDSMeshStorage();
     FDSMeshStorage(std::string filepath, double finalTime, double updateIntervall, std::string study, std::string irritant);
     ~FDSMeshStorage();
+    bool CreateQuantityList();
     void CreateTimeList();
     bool CreateElevationList();
     void CreateFDSMeshes();
-    const FDSMesh& get_FDSMesh(const double &simTime, const double &pedElev);
+    const FDSMesh& get_FDSMesh(const double &simTime, const double &pedElev, std::string &quantity);
     std::string GetStudy() const;
     std::string IrritantOrNot() const;
+
 
 private:
     FDSMeshContainer _fMContainer;
@@ -63,8 +65,9 @@ private:
     std::string _irritant;
     double _updateIntervall;
     double _finalTime;
-    std::vector<double> _timelist;
+    std::vector<std::string> _quantitylist;
     std::vector<double> _elevationlist;
+    std::vector<double> _timelist;
     double _PedEyeHeight;
     double _NearestHeight;
     double GetNearestHeight(double);
