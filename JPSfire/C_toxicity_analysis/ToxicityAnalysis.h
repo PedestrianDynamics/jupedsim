@@ -50,7 +50,7 @@ public:
 
     void CalculateFED(const Pedestrian*);
     double GetGasConcentration(const Pedestrian *, std::string);
-    void StoreToxicityAnalysis(double, double, double, double);
+    void StoreToxicityAnalysis(const Pedestrian *, double, double, double, double);
 
     void set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage);
     const std::shared_ptr<FDSMeshStorage> get_FMStorage();

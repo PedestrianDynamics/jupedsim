@@ -111,12 +111,11 @@ void ToxicityAnalysis::CalculateFED(const Pedestrian* p)
     double FED;
 
     //TODO try and except call for each Gas component?
+    double dt =  p->GetGlobalTime();
     double CO2 = GetGasConcentration(p, "CARBON_DIOXIDE_MASS_FRACTION");
     double CO = GetGasConcentration(p, "CARBON_MONOXIDE_MASS_FRACTION");
     double HCN = GetGasConcentration(p, "HYDROGEN_CYANIDE_MASS_FRACTION");
     //double HCL = GetGasConcentration(p, "HYDROGEN_CHLORIDE_MASS_FRACTION");
-
-    fprintf(stderr, "%f\t%f\t%f\t%f\n", p->GetGlobalTime(), CO2, CO, HCN);
 
     if( std::isnan(CO2) || std::isnan(CO) || std::isnan(HCN) )   //NaN check
     {
@@ -132,13 +131,16 @@ void ToxicityAnalysis::CalculateFED(const Pedestrian* p)
         // t ; CO2; CO; HCN; HCL; FED
         // Once the FED calculation is completed a function to store the
         // information might be called
-        StoreToxicityAnalysis(CO2, CO, HCN, FED);
+        StoreToxicityAnalysis(p, CO2, CO, HCN, FED);
     }
 }
 
-void ToxicityAnalysis::StoreToxicityAnalysis(double CO2, double CO, double HCN, double FED)
+void ToxicityAnalysis::StoreToxicityAnalysis(const Pedestrian* p, double CO2, double CO, double HCN, double FED)
 {
     //TODO store vector - similar to trajectory files?
+
+    //Just for testing purposes
+    fprintf(stderr, "%f\t%f\t%f\t%f\t%f\t%f\n", p->GetGlobalTime(), p->GetID(), CO2, CO, HCN, FED);
 }
 
 bool ToxicityAnalysis::ConductToxicityAnalysis()
