@@ -150,19 +150,22 @@ bool FFRouter::Init(Building* building)
           _locffviafm.insert( std::make_pair( pairRoom.first, ptrToNew ) );
 
           //SetDistances
-          bool stillCorrect = true;
           vector<int> doorUIDs;
           doorUIDs.clear();
           for (int transI: pairRoom.second->GetAllTransitionsIDs()) {
                if (_CroTrByUID[transI]->IsOpen()) {
                     doorUIDs.emplace_back(transI);
+                    //Log->Write("Door UID: %d", transI);
+                    //Log->Write(_CroTrByUID[transI]->GetDescription());
                }
           }
 
           for (auto& subI : pairRoom.second->GetAllSubRooms()) {
-               for (auto& crossI : subI.second->GetAllCrossings()) {
-                    if (crossI->IsOpen()) {
+               for (auto& crossI : subI.second->GetAllCrossings()) { //if clause checks so that only new doors get added
+                    if ((crossI->IsOpen()) && (std::find(doorUIDs.begin(), doorUIDs.end(), crossI->GetUniqueID()) == doorUIDs.end())) {
                          doorUIDs.emplace_back(crossI->GetUniqueID());
+                         //Log->Write("Crossing: %d", crossI->GetUniqueID());
+                         //Log->Write(crossI->GetDescription());
                     }
                }
           }
@@ -180,35 +183,16 @@ bool FFRouter::Init(Building* building)
                     if (  (*outerPtr == *innerPtr) || (!_CroTrByUID.at(*innerPtr)->IsOpen())  ) {
                          continue;
                     }
-                    //tempDistance = 0;
-                    //std::cerr<< std::endl << tempDistance;
                     tempDistance = _locffviafm[pairRoom.first]->getCostToDestination(*outerPtr, _CroTrByUID.at(*innerPtr)->GetCentre());
 //                    tempDistance = ptrToNew->getCostToDestination(*outerPtr, _CroTrByUID[*innerPtr]->GetCentre());
                     std::pair<int, int> key_ij = std::make_pair(*outerPtr, *innerPtr);
                     std::pair<int, int> key_ji = std::make_pair(*innerPtr, *outerPtr);
-                    //_distMatrix[key_ij] = tempDistance;
-                    //_distMatrix[key_ji] = tempDistance;
-//                    if (tempDistance > 10000) {
-//                         //Log->Write("Von %d \t nach %d \t sind %f", *outerPtr, *innerPtr, tempDistance);
-//                         //std::cerr<< std::endl << tempDistance;
-//                         if (stillCorrect) {
-//                              Log->Write("\t\t\t destID: %d \t point x: %f y: %f key: %d of %d",
-//                                         *outerPtr, _CroTrByUID[*innerPtr]->GetCentre()._x, _CroTrByUID[*innerPtr]->GetCentre()._y,
-//                                         ptrToNew->getGrid()->getKeyAtPoint(_CroTrByUID[*innerPtr]->GetCentre()),
-//                                         ptrToNew->getGrid()->GetnPoints());
-//                         }
-//                         tempDistance = ptrToNew->getCostToDestination(*outerPtr, _CroTrByUID[*innerPtr]->GetCentre());
-//                         stillCorrect = false;
-//                    }
                     _distMatrix.erase(key_ij);
                     _distMatrix.erase(key_ji);
                     _distMatrix.insert(std::make_pair(key_ij, tempDistance));
                     _distMatrix.insert(std::make_pair(key_ji, tempDistance));
                }
           }
-//          if (!stillCorrect) {
-//               Log->Write("ERROR \t Error in tempDistance still exists");
-//          }
      }
      FloydWarshall();
      Log->Write("INFO: \tFF Router Init done.");
