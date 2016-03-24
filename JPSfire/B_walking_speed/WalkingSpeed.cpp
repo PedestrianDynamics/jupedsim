@@ -41,7 +41,6 @@ WalkingSpeed::WalkingSpeed(const Building * b)
 {
     _FMStorage = nullptr;
     LoadJPSfireInfo(b->GetProjectFilename());
-    Log->Write("INFO:\tInitialized FDSMeshStorage");
 }
 
 WalkingSpeed::~WalkingSpeed()
@@ -65,22 +64,21 @@ bool WalkingSpeed::LoadJPSfireInfo(const std::string &projectFilename )
         return true;
    }
 
-   Log->Write("INFO:\tLoading JPSfire info");
-
    TiXmlElement* JPSfireCompElem = JPSfireNode->FirstChildElement("B_walking_speed");
    if(JPSfireCompElem) {
-       std::string _study = xmltoa(JPSfireCompElem->Attribute("study"), "");
-       std::string _irritant = xmltoa(JPSfireCompElem->Attribute("irritant"), "");
-       std::string _filepath = xmltoa(JPSfireCompElem->Attribute("extinction_grids"), "");
-       double _updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
-       double _finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
-       Log->Write("INFO:\tModule B_walking_speed: study: %s \n\tdata: %s \n\tupdate time: %.1f s | final time: %.1f s | irritant: %s",
-                  _study.c_str(), _filepath.c_str(), _updateIntervall, _finalTime, _irritant.c_str());
-       _FMStorage = std::make_shared<FDSMeshStorage>(_filepath, _finalTime, _updateIntervall, _study, _irritant);
-       return true;
+       if(JPSfireCompElem->FirstAttribute()){
+           std::string _study = xmltoa(JPSfireCompElem->Attribute("study"), "");
+           std::string _irritant = xmltoa(JPSfireCompElem->Attribute("irritant"), "");
+           std::string _filepath = xmltoa(JPSfireCompElem->Attribute("extinction_grids"), "");
+           double _updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
+           double _finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
+           Log->Write("INFO:\tJPSfire Module B_walking_speed: \n \tstudy: %s \n\tdata: %s \n\tupdate time: %.1f s | final time: %.1f s | irritant: %s",
+                      _study.c_str(), _filepath.c_str(), _updateIntervall, _finalTime, _irritant.c_str());
+           _FMStorage = std::make_shared<FDSMeshStorage>(_filepath, _finalTime, _updateIntervall, _study, _irritant);
+           return true;
+       }
    }
    return false;
-   // ToDo XML error handling?
 }
 
 

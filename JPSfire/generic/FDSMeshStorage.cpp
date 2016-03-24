@@ -59,13 +59,13 @@ FDSMeshStorage::FDSMeshStorage(std::string filepath, double finalTime, double up
     }
     else {
         CreateQuantityList();
-        std::cout << "\nQuantityList PASSED\n" << std::endl;
+        //std::cout << "\nQuantityList PASSED\n" << std::endl;
         CreateElevationList();
-        std::cout << "\nCreateElevationList PASSED\n" << std::endl;
+        //std::cout << "\nCreateElevationList PASSED\n" << std::endl;
         CreateTimeList();
-        std::cout << "CreateTimeList PASSED\n" << std::endl;
+        //std::cout << "CreateTimeList PASSED\n" << std::endl;
         CreateFDSMeshes();
-        std::cout << "CreateFDSMeshes PASSED\n" << std::endl;
+        //std::cout << "CreateFDSMeshes PASSED\n" << std::endl;
     }
 }
 

@@ -41,7 +41,6 @@ ToxicityAnalysis::ToxicityAnalysis(const Building * b)
 {
     _FMStorage = nullptr;
     LoadJPSfireInfo(b->GetProjectFilename());
-    Log->Write("INFO:\tInitialized FDSMeshStorage");
 }
 
 ToxicityAnalysis::~ToxicityAnalysis()
@@ -65,23 +64,22 @@ bool ToxicityAnalysis::LoadJPSfireInfo(const std::string &projectFilename )
         return true;
    }
 
-   Log->Write("INFO:\tLoading JPSfire info");
-
    TiXmlElement* JPSfireCompElem = JPSfireNode->FirstChildElement("C_toxicity_analysis");
    if(JPSfireCompElem) {
-       std::string _filepath = xmltoa(JPSfireCompElem->Attribute("toxicity_grids"), "");
-       double _updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
-       double _finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
-       std::string _study = "";
-       std::string _irritant = "";
-       Log->Write("INFO:\tModule C_toxicity_analysis:\tdata: %s \n\tupdate time: %.1f s | final time: %.1f s",
-                  _filepath.c_str(), _updateIntervall, _finalTime);
-       //TODO Is there a posibility to pass a variable number of arguments to a function?
-       _FMStorage = std::make_shared<FDSMeshStorage>(_filepath, _finalTime, _updateIntervall, _study, _irritant);
-       return true;
+       if(JPSfireCompElem->FirstAttribute()){
+           std::string _filepath = xmltoa(JPSfireCompElem->Attribute("toxicity_grids"), "");
+           double _updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
+           double _finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
+           std::string _study = "";
+           std::string _irritant = "";
+           Log->Write("INFO:\tJPSfire Module C_toxicity_analysis: \n \tdata: %s \n\tupdate time: %.1f s | final time: %.1f s",
+                      _filepath.c_str(), _updateIntervall, _finalTime);
+           //TODO Is there a posibility to pass a variable number of arguments to a function?
+           _FMStorage = std::make_shared<FDSMeshStorage>(_filepath, _finalTime, _updateIntervall, _study, _irritant);
+           return true;
+       }
    }
    return false;
-   // ToDo XML error handling?
 }
 
 
