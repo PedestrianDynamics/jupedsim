@@ -183,7 +183,33 @@ bool FFRouter::Init(Building* building)
                     if (  (*outerPtr == *innerPtr) || (!_CroTrByUID.at(*innerPtr)->IsOpen())  ) {
                          continue;
                     }
-                    tempDistance = _locffviafm[pairRoom.first]->getCostToDestination(*outerPtr, _CroTrByUID.at(*innerPtr)->GetCentre());
+                    //The distance is checked by reading the timecost of a wave starting at the line(!) to reach a point(!)
+                    //That will have the following implications:
+                    //distance (a to b) can be different than distance (b ta a)
+                    //     for this reason, we calc only (a to b) and set (b to a) to the same value
+                    //distance (line to center) can be larger than (line to endpoint). to get closer to the min-distance
+                    //we take the minimum of three shots: center, and a point close to each endpoint
+                    //
+                    //note: we can not assume: (a to c) = (a to b) + (b to c) for the reasons above.
+                    //question: if (a to c) > (a to b) + (b to c), then FloyedWarshall will favour intermediate goal b
+                    //          as a precessor to c. This might be very important, if there are edges among lines, that
+                    //          are not adjacent.
+                    tempDistance = ptrToNew->getCostToDestination(*outerPtr, _CroTrByUID.at(*innerPtr)->GetCentre());
+                    Point endA = _CroTrByUID.at(*innerPtr)->GetCentre() * .9 + _CroTrByUID.at(*innerPtr)->GetPoint1() * .1;
+                    Point endB = _CroTrByUID.at(*innerPtr)->GetCentre() * .9 + _CroTrByUID.at(*innerPtr)->GetPoint2() * .1;
+                    if (ptrToNew->getCostToDestination(*outerPtr, endA) < tempDistance) {
+                         tempDistance = ptrToNew->getCostToDestination(*outerPtr, endA);
+                    }
+                    if (ptrToNew->getCostToDestination(*outerPtr, endB) < tempDistance) {
+                         tempDistance = ptrToNew->getCostToDestination(*outerPtr, endB);
+                    }
+                    if (tempDistance < 0) {
+                         Crossing* crossTest = _CroTrByUID.at(*innerPtr);
+                         Point a = crossTest->GetPoint1();
+                         Point b = crossTest->GetPoint2();
+                         Log->Write(a.toString());
+                         Log->Write(b.toString());
+                    }
 //                    tempDistance = ptrToNew->getCostToDestination(*outerPtr, _CroTrByUID[*innerPtr]->GetCentre());
                     std::pair<int, int> key_ij = std::make_pair(*outerPtr, *innerPtr);
                     std::pair<int, int> key_ji = std::make_pair(*innerPtr, *outerPtr);
@@ -195,6 +221,14 @@ bool FFRouter::Init(Building* building)
           }
      }
      FloydWarshall();
+     Log->Write("1-3: %f \t 1-2: %f \t 2-3: %f",
+                _distMatrix.at(std::make_pair(400, 382)),
+                _distMatrix.at(std::make_pair(400, 381)),
+                _distMatrix.at(std::make_pair(381, 382)));
+     Log->Write("1-3: %f \t 1-2: %f \t 2-3: %f",
+                _distMatrix.at(std::make_pair(382, 400)),
+                _distMatrix.at(std::make_pair(382, 381)),
+                _distMatrix.at(std::make_pair(381, 400)));
      Log->Write("INFO: \tFF Router Init done.");
      return true;
 }
