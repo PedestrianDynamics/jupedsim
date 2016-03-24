@@ -221,14 +221,14 @@ bool FFRouter::Init(Building* building)
           }
      }
      FloydWarshall();
-     Log->Write("1-3: %f \t 1-2: %f \t 2-3: %f",
-                _distMatrix.at(std::make_pair(400, 382)),
-                _distMatrix.at(std::make_pair(400, 381)),
-                _distMatrix.at(std::make_pair(381, 382)));
-     Log->Write("1-3: %f \t 1-2: %f \t 2-3: %f",
-                _distMatrix.at(std::make_pair(382, 400)),
-                _distMatrix.at(std::make_pair(382, 381)),
-                _distMatrix.at(std::make_pair(381, 400)));
+//     Log->Write("1-3: %f \t 1-2: %f \t 2-3: %f",
+//                _distMatrix.at(std::make_pair(400, 382)),
+//                _distMatrix.at(std::make_pair(400, 381)),
+//                _distMatrix.at(std::make_pair(381, 382)));
+//     Log->Write("1-3: %f \t 1-2: %f \t 2-3: %f",
+//                _distMatrix.at(std::make_pair(382, 400)),
+//                _distMatrix.at(std::make_pair(382, 381)),
+//                _distMatrix.at(std::make_pair(381, 400)));
      Log->Write("INFO: \tFF Router Init done.");
      return true;
 }
