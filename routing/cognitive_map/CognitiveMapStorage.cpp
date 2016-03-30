@@ -36,12 +36,15 @@
 #include <memory>
 
 #include "../../geometry/Building.h"
+#include "../../pedestrian/Pedestrian.h"
 //#include "NavigationGraph.h"
 
 
-CognitiveMapStorage::CognitiveMapStorage(const Building * const b, std::string cogMapStatus)
+CognitiveMapStorage::CognitiveMapStorage(const Building * const b, std::string cogMapStatus, std::string cogMapFiles)
      : _building(b)
 {
+    _cogMapStatus=cogMapStatus;
+    _cogMapFiles=cogMapFiles;
     if (cogMapStatus == "empty")
     creator = new EmptyCognitiveMapCreator(b);
     else
@@ -63,40 +66,47 @@ CMStorageValueType CognitiveMapStorage::operator[] (CMStorageKeyType key)
      CMStorageType::iterator it = cognitive_maps.find(key);
      if(it == cognitive_maps.end()) {
           CreateCognitiveMap(key);
-          cognitive_maps[key]->AddRegions(_regions);
      }
 
      return cognitive_maps[key];
 }
 
-void CognitiveMapStorage::ParseLandmarks()
+void CognitiveMapStorage::ParseCogMap(CMStorageKeyType ped)
 {
-    std::string geoFilenameWithPath = _building->GetProjectRootDir() + _building->GetGeometryFilename();
+    _regions.clear();
 
-    TiXmlDocument docGeo(geoFilenameWithPath);
-    if (!docGeo.LoadFile()) {
-         Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
-         Log->Write("\t could not parse the geometry file");
-         Log->Write("No landmarks specified");
+    //create filename
+    int groupId = ped->GetGroup();
+    std::string cMFileName=_cogMapFiles;
+    cMFileName.replace(cMFileName.size()-4,4,std::to_string(groupId)+".xml");
+
+    std::string cogMapFilenameWithPath = _building->GetProjectRootDir() + cMFileName;
+
+    Log->Write(cogMapFilenameWithPath);
+    TiXmlDocument doccogMap(cogMapFilenameWithPath);
+    if (!doccogMap.LoadFile()) {
+         Log->Write("ERROR: \t%s", doccogMap.ErrorDesc());
+         Log->Write("\t could not parse the cognitive map file");
+         Log->Write("Cognitive map not specified");
          return;
     }
 
-    TiXmlElement* xRootNode = docGeo.RootElement();
+    TiXmlElement* xRootNode = doccogMap.RootElement();
     if( ! xRootNode ) {
          Log->Write("ERROR:\tRoot element does not exist");
-         Log->Write("No landmarks specified");
-         return ;
+         Log->Write("Cognitive map not specified");
+         return;
     }
 
-    if( xRootNode->ValueStr () != "geometry" ) {
-         Log->Write("ERROR:\tRoot element value is not 'geometry'.");
-         Log->Write("No landmarks specified");
+    if( xRootNode->ValueStr () != "cognitiveMap" ) {
+         Log->Write("ERROR:\tRoot element value is not 'cognitiveMap'.");
+         Log->Write("Cognitive map not specified");
          return;
     }
     if(xRootNode->Attribute("unit"))
          if(std::string(xRootNode->Attribute("unit")) != "m") {
               Log->Write("ERROR:\tOnly the unit m (meters) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
-              Log->Write("No landmarks specified");
+              Log->Write("Cognitive map not specified");
               return;
          }
 
@@ -106,15 +116,15 @@ void CognitiveMapStorage::ParseLandmarks()
          Log->Write(" \tWrong geometry version!");
          Log->Write(" \tOnly version >= %s supported",JPS_VERSION);
          Log->Write(" \tPlease update the version of your geometry file to %s",JPS_VERSION);
-         Log->Write("No landmarks specified");
+         Log->Write("Cognitive map not specified");
          return;
     }
 
     //processing the regions node
     TiXmlNode*  xRegionsNode = xRootNode->FirstChild("regions");
     if (!xRegionsNode) {
-         Log->Write("ERROR: \tGeometry file without regions definition!");
-         Log->Write("No landmarks specified");
+         Log->Write("ERROR: \tCognitive map file without region definition!");
+         Log->Write("Cognitive map not specified");
          return;
     }
 
@@ -142,7 +152,7 @@ void CognitiveMapStorage::ParseLandmarks()
         //processing the landmarks node
         TiXmlNode*  xLandmarksNode = xRegion->FirstChild("landmarks");
         if (!xLandmarksNode) {
-             Log->Write("ERROR: \tGeometry file without landmark definition!");
+             Log->Write("ERROR: \tCognitive map file without landmark definition!");
              Log->Write("No landmarks specified");
              return;
         }
@@ -251,6 +261,7 @@ void CognitiveMapStorage::CreateCognitiveMap(CMStorageKeyType ped)
 {
      //todo: the possibility to have more then one creator.
      cognitive_maps.insert(std::make_pair(ped, creator->CreateCognitiveMap(ped)));
+     ParseCogMap(ped);
      cognitive_maps[ped]->AddRegions(_regions);
      cognitive_maps[ped]->InitLandmarkNetworksInRegions();
      cognitive_maps[ped]->FindMainDestination();

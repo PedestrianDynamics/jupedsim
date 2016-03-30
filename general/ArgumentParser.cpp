@@ -1233,9 +1233,16 @@ bool ArgumentParser::ParseCogMapOpts(TiXmlNode *routerNode)
 
      std::vector<std::string> cogMapStatus;
      cogMapStatus.push_back(cogMap->Attribute("status"));
-     Log->Write("INFO: \tAll pedestrian starting with a(n) "+cogMapStatus[0]+" cognitive map\n");
-     r->addOption("CognitiveMap",cogMapStatus);
-
+     Log->Write("INFO:\tAll pedestrian starting with a(n) "+cogMapStatus[0]+" cognitive map\n");
+     r->addOption("CognitiveMapStatus",cogMapStatus);
+     std::vector<std::string> cogMapFiles;
+     if (!cogMap->Attribute("files"))
+     {
+        Log->Write("WARNING:\tNo input files for the cognitive map specified!");
+        return true;
+     }
+     cogMapFiles.push_back(cogMap->Attribute("files"));
+     r->addOption("CognitiveMapFiles",cogMapFiles);
 
      return true;
 

@@ -161,14 +161,14 @@ bool CognitiveMapRouter::Init(Building * b)
      building = b;
 
      //Init Cognitive Map Storage, second parameter: decides whether cognitive Map is empty or complete
-     cm_storage = new CognitiveMapStorage(building,getOptions().at("CognitiveMap")[0]);
-     Log->Write("INFO:\tInitialized CognitiveMapStorage");
-     cm_storage->ParseLandmarks();
+     cm_storage = new CognitiveMapStorage(building,getOptions().at("CognitiveMapStatus")[0],getOptions().at("CognitiveMapFiles")[0]);
+     Log->Write("INFO:\tCognitiveMapStorage initialized");
+     //cm_storage->ParseCogMap();
 
      //Init Sensor Manager
      //sensor_manager = SensorManager::InitWithAllSensors(b, cm_storage);
      sensor_manager = SensorManager::InitWithCertainSensors(b, cm_storage, getOptions());
-     Log->Write("INFO:\tInitialized SensorManager");
+     Log->Write("INFO:\tSensorManager initialized");
      return true;
 }
 

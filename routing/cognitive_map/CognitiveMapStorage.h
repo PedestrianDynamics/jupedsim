@@ -55,9 +55,9 @@ typedef std::unordered_map<CMStorageKeyType, CMStorageValueType> CMStorageType;
  */
 class CognitiveMapStorage {
 public:
-     CognitiveMapStorage(const Building * const b, std::string cogMapStatus);
+     CognitiveMapStorage(const Building * const b, std::string cogMapStatus, std::string cogMapFiles="");
      virtual ~CognitiveMapStorage();
-     void ParseLandmarks();
+
 
      CMStorageValueType operator[] (CMStorageKeyType key);
 
@@ -67,9 +67,12 @@ private:
      CMStorageType cognitive_maps;
      AbstractCognitiveMapCreator * creator;
      std::vector<ptrRegion> _regions;
+     std::string _cogMapStatus;
+     std::string _cogMapFiles;
 
 
      void CreateCognitiveMap(CMStorageKeyType ped);
+     void ParseCogMap(CMStorageKeyType ped);
 
 };
 

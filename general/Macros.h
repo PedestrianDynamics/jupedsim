@@ -59,8 +59,8 @@
 #define _SIMULATOR 1
 //#define _USE_PROTOCOL_BUFFER 1
 
-#define JPS_OLD_VERSION "0.5" // this version is still supported
-#define JPS_VERSION_MINOR "7"
+#define JPS_OLD_VERSION "0.7" // this version is still supported
+#define JPS_VERSION_MINOR "81"
 #define JPS_VERSION_MAJOR "0"
 
 #define JPS_VERSION JPS_VERSION_MAJOR "." JPS_VERSION_MINOR
