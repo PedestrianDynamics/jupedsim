@@ -234,7 +234,7 @@ void CognitiveMap::AssessDoors()
         }
 
         //Log->Write(std::to_string(nextDoor->GetCrossing()->GetID()));
-        //Log->Write("INFO: Door assessed!");
+        Log->Write("INFO: Door assessed!");
     }
 
 }
@@ -248,12 +248,14 @@ std::vector<GraphEdge *> CognitiveMap::SortConShortestPath(ptrLandmark landmark,
     sortedEdges.push_back((*edges.begin()));
 
     auto itsortedEdges = sortedEdges.begin();
-    auto it = edges.begin();
-    ++it;
+    //auto it = edges.begin();
+    //++it;
     //starting at the second element
-    for (it; it!=edges.end(); ++it)
+    for (auto it=edges.begin()++; it!=edges.end(); ++it)
     {
         double pathLengthDoorWayP = ShortestPathDistance((*it),landmark);
+        Log->Write(std::to_string((*it)->GetCrossing()->GetID()));
+        Log->Write(std::to_string(pathLengthDoorWayP));
 
         //Point vectorPathPedDoor = (*it)->GetCrossing()->GetCentre()-_ped->GetPos();
         itsortedEdges = sortedEdges.begin();
@@ -279,10 +281,10 @@ std::vector<GraphEdge *> CognitiveMap::SortConShortestPath(ptrLandmark landmark,
         }
     }
 
-//    Log->Write("subroom:\t");
-//    Log->Write(std::to_string(_ped->GetSubRoomID()));
-//    Log->Write("edgeOnShortest:");
-//    Log->Write(std::to_string(edgeOnShortest->GetCrossing()->GetID()))
+    Log->Write("subroom:\t");
+    Log->Write(std::to_string(_ped->GetSubRoomID()));
+    Log->Write("edgeOnShortest:");
+    Log->Write(std::to_string(sortedEdges.front()->GetCrossing()->GetID()));
     std::vector<GraphEdge* > vectorSortedEdges;
     for (GraphEdge* edge:sortedEdges)
     {
@@ -342,7 +344,7 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrLandma
     //Log->Write(std::to_string(pointOnShortestRoute.GetX())+" "+std::to_string(pointOnShortestRoute.GetY()));
     VisiLibity::Point wayP(pointOnShortestRoute._x,pointOnShortestRoute._y);//,landmark->GetPos().GetY());
 
-    VisiLibity::Polyline polyline=environment.shortest_path(edgeP,wayP,0.1);
+    VisiLibity::Polyline polyline=environment.shortest_path(edgeP,wayP,0.01);
 //    for (int i=0; i<polyline.size();++i)
 //    {
 //        Log->Write("Polyline:");
@@ -556,7 +558,7 @@ void CognitiveMap::FindNextTarget()
 
 
     //if (_nextTarget!=nullptr)
-        //Log->Write(_nextTarget->GetCaption());
+    Log->Write(_nextTarget->GetCaption());
 }
 
 const ptrLandmark CognitiveMap::FindNearLandmarkConnectedToTarget(const ptrLandmark &target)
@@ -568,7 +570,7 @@ const ptrLandmark CognitiveMap::FindNearLandmarkConnectedToTarget(const ptrLandm
     if (landmarksConnectedToTarget.empty())
         return target;
 
-    ptrLandmark nearest = nullptr;
+    //ptrLandmark nearest = nullptr;
     //look for nearest located landmark
 
     //look for landmarks within a circle with the radius searchlimit
@@ -577,7 +579,7 @@ const ptrLandmark CognitiveMap::FindNearLandmarkConnectedToTarget(const ptrLandm
 
     Point vector=target->GetPosInMap()-_YAHPointer.GetPos();
     double distanceToTarget=vector.Norm();
-    int divisor = 16;
+    int divisor = 24;
     double searchlimit=distanceToTarget/divisor;
     Landmarks nearLandmarks;
 
@@ -654,8 +656,8 @@ const ptrLandmark CognitiveMap::FindBestRouteFromOneOf(const Landmarks &nearLand
     for (ptrLandmark landmark:nearLandmarks)
     {
         cDistance=_currentRegion->PathLengthFromLandmarkToTarget(landmark, _nextTarget);
-        Log->Write(landmark->GetCaption());
-        Log->Write(std::to_string(cDistance));
+        //Log->Write(landmark->GetCaption());
+        //Log->Write(std::to_string(cDistance));
         if (cDistance<minDistance)
         {
             minDistance=cDistance;

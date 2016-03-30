@@ -137,13 +137,13 @@ Point Landmark::PointOnShortestRoute(const Point& point) const
     double distance;
     int alpha_min=1;
     double t_min=0;
-    double min=std::sqrt(std::pow((_realPos._x+t_min*_a*std::cos(pi/180.0))-point._x,2)+std::pow((_realPos._x+t_min*_b*std::sin(pi/180.0))-point._y,2));
+    double min=std::sqrt(std::pow((_posInMap._x+t_min*_a*std::cos(pi/180.0))-point._x,2)+std::pow((_posInMap._x+t_min*_b*std::sin(pi/180.0))-point._y,2));
 
     for (double t=0.2; t<=1; t+=0.2)
     {
         for (int alpha=11; alpha<=360; alpha+=10)
         {
-            distance=std::sqrt(std::pow((_realPos._x+t*_a*std::cos(alpha*pi/180.0))-point._x,2)+std::pow((_realPos._y+t*_b*std::sin(alpha*pi/180.0))-point._y,2));
+            distance=std::sqrt(std::pow((_posInMap._x+t*_a*std::cos(alpha*pi/180.0))-point._x,2)+std::pow((_posInMap._y+t*_b*std::sin(alpha*pi/180.0))-point._y,2));
             if (distance<min)
             {
                 min=distance;
@@ -153,7 +153,7 @@ Point Landmark::PointOnShortestRoute(const Point& point) const
         }
     }
     //Log->Write(std::to_string(min));
-    return Point(_realPos._x+_a*std::cos(alpha_min*pi/180.0),_realPos._y+_b*std::sin(alpha_min*pi/180.0));
+    return Point(_posInMap._x+_a*std::cos(alpha_min*pi/180.0),_posInMap._y+_b*std::sin(alpha_min*pi/180.0));
 }
 
 bool Landmark::LandmarkReached(const Point& currentYAH)

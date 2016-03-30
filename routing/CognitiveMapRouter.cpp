@@ -119,7 +119,7 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
 
         //Log->Write(std::to_string((*cm_storage)[p]->GetOwnPos().GetX())+" "+std::to_string((*cm_storage)[p]->GetOwnPos().GetY()));
 
-        destination = (*cm_storage)[p]->GetGraphNetwork()->GetDestination();
+        destination = (*cm_storage)[p]->GetGraphNetwork()->GetLocalDestination();
         if(destination == nullptr) {
             //no destination was found, now we could start the discovery!
             //1. run the no_way sensors for room discovery.

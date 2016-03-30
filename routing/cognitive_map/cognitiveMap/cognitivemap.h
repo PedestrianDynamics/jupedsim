@@ -25,21 +25,21 @@ class Building;
 
 
 
-class priorityCheck
-{
-public:
-  priorityCheck(){}
-  bool operator() (const ptrLandmark& lhs, const ptrLandmark& rhs) const
-  {
-    if (lhs->GetPriority() > rhs->GetPriority())
-      return true;
-    else
-        return false;
-  }
-};
+//class priorityCheck
+//{
+//public:
+//  priorityCheck(){}
+//  bool operator() (const ptrLandmark& lhs, const ptrLandmark& rhs) const
+//  {
+//    if (lhs->GetPriority() > rhs->GetPriority())
+//      return true;
+//    else
+//        return false;
+//  }
+//};
 
 
-using SortedLandmarks = std::priority_queue<ptrLandmark,std::vector<ptrLandmark>,priorityCheck>;
+//using SortedLandmarks = std::priority_queue<ptrLandmark,std::vector<ptrLandmark>,priorityCheck>;
 using Landmarks = std::vector<ptrLandmark>;
 using Regions = std::vector<ptrRegion>;
 using ptrBuilding = const Building*;

@@ -241,6 +241,8 @@ const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & positio
         > sameFactorEdges;
 
     for(EdgesContainer::const_iterator it = this->GetAllOutEdges()->begin(); it != this->GetAllOutEdges()->end(); ++it) {
+        //if ((*it)->GetCrossing()->IsExit())
+        //    return (*it);
         edges.push(std::make_pair((*it)->GetFactor(), (*it)));
     }
 
@@ -257,7 +259,7 @@ const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & positio
 //    Log->Write(std::to_string(sameFactorEdges.top().second->GetCrossing()->GetCentre().GetX()));
 //    Log->Write(std::to_string(sameFactorEdges.top().second->GetCrossing()->GetCentre().GetY()));
 
-    if(edges.size() >= 1) return sameFactorEdges.top().second;
+    if(edges.size() >= 1) return edges.top().second;
     else return nullptr;
 //    if(edges.size() > 1) {
 //        double best_factor = edges.top().first;
