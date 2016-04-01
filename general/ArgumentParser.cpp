@@ -1204,17 +1204,7 @@ bool ArgumentParser::ParseCogMapOpts(TiXmlNode *routerNode)
                e = e->NextSiblingElement("sensor"))
      {
           string sensor = e->Attribute("description");
-          ///adding Smoke Sensor specific parameters
-          if (sensor=="Smoke")
-          {
-               std::vector<std::string> smokeOptVec;
 
-               smokeOptVec.push_back(e->Attribute("smoke_factor_grids"));
-               smokeOptVec.push_back(e->Attribute("update_time"));
-               smokeOptVec.push_back(e->Attribute("final_time"));
-               r->addOption("smokeOptions",smokeOptVec);
-
-          }
           sensorVec.push_back(sensor);
 
           Log->Write("INFO: \tSensor "+ sensor + " added");

@@ -44,7 +44,7 @@ FDSMeshStorage::FDSMeshStorage()
 
 }
 
-FDSMeshStorage::FDSMeshStorage(std::string filepath, double finalTime, double updateIntervall, std::string study, std::string irritant) :
+FDSMeshStorage::FDSMeshStorage(const std::string &filepath, const double &finalTime, const double &updateIntervall, const std::string &study, const std::string &irritant) :
     _filepath(filepath), _finalTime(finalTime),
     _updateIntervall(updateIntervall), _study(study),
     _elevationlist(), _timelist(), _irritant(irritant)
@@ -68,6 +68,7 @@ FDSMeshStorage::FDSMeshStorage(std::string filepath, double finalTime, double up
         //std::cout << "CreateFDSMeshes PASSED\n" << std::endl;
     }
 }
+
 
 FDSMeshStorage::~FDSMeshStorage()
 {
@@ -182,7 +183,7 @@ void FDSMeshStorage::CreateFDSMeshes()
    }
 }
 
-const FDSMesh &FDSMeshStorage::get_FDSMesh(const double &simTime, const double &pedElev, std::string &quantity)
+const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &pedElev, const std::string &quantity)
 {
     int simT=simTime/_updateIntervall;
     simT*=_updateIntervall;
@@ -208,7 +209,25 @@ const FDSMesh &FDSMeshStorage::get_FDSMesh(const double &simTime, const double &
 //    else {
 //        Log->Write("ERROR:\tCould find no appropriate FDS mesh: ", quantity.c_str(), pedElev, simT);
 //        exit(EXIT_FAILURE);
-//    }
+    //    }
+}
+
+const FDSMesh &FDSMeshStorage::GetFDSMesh(const Point &doorCentre, const double &simTime, const double &pedElev,const std::string &quantity)
+{
+    //TODO Include QuantityList and ElevationList
+    int simT=simTime/_updateIntervall;
+    simT*=_updateIntervall;
+
+    if (simT>=_finalTime)
+        simT=_finalTime;
+
+    //std::string str = quantity + "/Z_" +  std::to_string(_NearestHeight) + "/t_"+std::to_string(simT)+".000000";
+    std::string str = "Door_X_"+ std::to_string(doorCentre._x)
+                + "_Y_" + std::to_string(doorCentre._y) + "/t_"+std::to_string(simT)+".000000";
+
+    //std::cout << str << std::endl;
+
+    return _fMContainer.at(str);
 }
 
 double FDSMeshStorage::GetNearestHeight(double _PedEyeHeight)

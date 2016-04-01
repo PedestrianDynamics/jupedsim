@@ -1,5 +1,5 @@
 /**
- * \file        Knot.h
+ * \file        SmokeSensor.h
  * \date        Jan 1, 2014
  * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
@@ -21,29 +21,42 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * \section Description
- *
+ * detects smoke in the next rooms
  *
  *
  **/
 
-#ifndef KNOT_H
-#define KNOT_H
+#ifndef SMOKESENSOR_H
+#define SMOKESENSOR_H 1
 
+#include "../../routing/cognitive_map/sensor/AbstractSensor.h"
+#include <memory>
 
-class Knot
+class Point;
+class FDSMeshStorage;
+
+class SmokeSensor : public AbstractSensor
 {
-public:
-    Knot();
-    Knot(const double &x, const double &y, const double &value=0);
-    ~Knot();
 
-    void SetValue(const double &value);
-    const double &GetValue() const;
+public:
+    SmokeSensor(const Building * b);
+
+    virtual ~SmokeSensor();
+
+    bool LoadJPSfireInfo(const std::string &projectFilename);
+
+    std::string GetName() const;
+    void execute(const Pedestrian *, CognitiveMap *) const;
+
+    void set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage);
+    const std::shared_ptr<FDSMeshStorage> get_FMStorage();
+
+
+
 
 private:
-    double _x;
-    double _y;
-    double _value;
+
+    std::shared_ptr<FDSMeshStorage> _FMStorage;
 };
 
-#endif // KNOT_H
+#endif // SMOKESENSOR_H

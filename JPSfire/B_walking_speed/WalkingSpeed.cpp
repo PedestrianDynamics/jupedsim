@@ -67,14 +67,14 @@ bool WalkingSpeed::LoadJPSfireInfo(const std::string &projectFilename )
    TiXmlElement* JPSfireCompElem = JPSfireNode->FirstChildElement("B_walking_speed");
    if(JPSfireCompElem) {
        if(JPSfireCompElem->FirstAttribute()){
-           std::string _study = xmltoa(JPSfireCompElem->Attribute("study"), "");
-           std::string _irritant = xmltoa(JPSfireCompElem->Attribute("irritant"), "");
-           std::string _filepath = xmltoa(JPSfireCompElem->Attribute("extinction_grids"), "");
-           double _updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
-           double _finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
+           std::string study = xmltoa(JPSfireCompElem->Attribute("study"), "");
+           std::string irritant = xmltoa(JPSfireCompElem->Attribute("irritant"), "");
+           std::string filepath = xmltoa(JPSfireCompElem->Attribute("extinction_grids"), "");
+           double updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
+           double finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
            Log->Write("INFO:\tJPSfire Module B_walking_speed: \n \tstudy: %s \n\tdata: %s \n\tupdate time: %.1f s | final time: %.1f s | irritant: %s",
-                      _study.c_str(), _filepath.c_str(), _updateIntervall, _finalTime, _irritant.c_str());
-           _FMStorage = std::make_shared<FDSMeshStorage>(_filepath, _finalTime, _updateIntervall, _study, _irritant);
+                      study.c_str(), filepath.c_str(), updateIntervall, finalTime, irritant.c_str());
+           _FMStorage = std::make_shared<FDSMeshStorage>(filepath, finalTime, updateIntervall, study, irritant);
            return true;
        }
    }
@@ -91,7 +91,7 @@ std::string WalkingSpeed::GetName() const
 double WalkingSpeed::GetExtinction(const Pedestrian * pedestrian, std::string quantity)
 {
     //std::cout << "\n" << quantity << std::endl;
-    double ExtinctionCoefficient = _FMStorage->get_FDSMesh(pedestrian->GetGlobalTime(), pedestrian->GetElevation(), quantity).GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y);
+    double ExtinctionCoefficient = _FMStorage->GetFDSMesh(pedestrian->GetGlobalTime(), pedestrian->GetElevation(), quantity).GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y);
     return ExtinctionCoefficient;
 }
 

@@ -67,15 +67,15 @@ bool ToxicityAnalysis::LoadJPSfireInfo(const std::string &projectFilename )
    TiXmlElement* JPSfireCompElem = JPSfireNode->FirstChildElement("C_toxicity_analysis");
    if(JPSfireCompElem) {
        if(JPSfireCompElem->FirstAttribute()){
-           std::string _filepath = xmltoa(JPSfireCompElem->Attribute("toxicity_grids"), "");
-           double _updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
-           double _finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
-           std::string _study = "";
-           std::string _irritant = "";
+           std::string filepath = xmltoa(JPSfireCompElem->Attribute("toxicity_grids"), "");
+           double updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
+           double finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
+           std::string study = "";
+           std::string irritant = "";
            Log->Write("INFO:\tJPSfire Module C_toxicity_analysis: \n \tdata: %s \n\tupdate time: %.1f s | final time: %.1f s",
-                      _filepath.c_str(), _updateIntervall, _finalTime);
+                      filepath.c_str(), updateIntervall, finalTime);
            //TODO Is there a posibility to pass a variable number of arguments to a function?
-           _FMStorage = std::make_shared<FDSMeshStorage>(_filepath, _finalTime, _updateIntervall, _study, _irritant);
+           _FMStorage = std::make_shared<FDSMeshStorage>(filepath, finalTime, updateIntervall, study, irritant);
            return true;
        }
    }
@@ -92,7 +92,7 @@ std::string ToxicityAnalysis::GetName() const
 double ToxicityAnalysis::GetGasConcentration(const Pedestrian * pedestrian, std::string quantity)
 {
     //std::cout << "\n" << quantity << std::endl;
-    double GasConcentration = _FMStorage->get_FDSMesh(pedestrian->GetGlobalTime(), pedestrian->GetElevation(), quantity).GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y);
+    double GasConcentration = _FMStorage->GetFDSMesh(pedestrian->GetGlobalTime(), pedestrian->GetElevation(), quantity).GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y);
     return GasConcentration;
 }
 

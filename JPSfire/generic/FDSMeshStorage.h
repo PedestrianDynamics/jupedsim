@@ -34,9 +34,9 @@
 #include <vector>
 #include "FDSMesh.h"
 #include "../../IO/OutputHandler.h"
+#include "../../geometry/Building.h"
 
 class Point;
-class Crossing;
 
 // Container to store all FDSMeshs. Sorted by simulation's global time
 using FDSMeshContainer = std::unordered_map<std::string, FDSMesh>;
@@ -47,13 +47,14 @@ class FDSMeshStorage
 {
 public:
     FDSMeshStorage();
-    FDSMeshStorage(std::string filepath, double finalTime, double updateIntervall, std::string study, std::string irritant);
+    FDSMeshStorage(const std::string &filepath, const double &finalTime, const double &updateIntervall, const std::string &study="", const std::string &irritant="");
     ~FDSMeshStorage();
     bool CreateQuantityList();
     void CreateTimeList();
     bool CreateElevationList();
     void CreateFDSMeshes();
-    const FDSMesh& get_FDSMesh(const double &simTime, const double &pedElev, std::string &quantity);
+    const FDSMesh& GetFDSMesh(const double &simTime, const double &pedElev,const std::string &quantity);
+    const FDSMesh& GetFDSMesh(const Point &doorCentre, const double &simTime, const double &pedElev, const std::string &quantity);
     std::string GetStudy() const;
     std::string IrritantOrNot() const;
 
