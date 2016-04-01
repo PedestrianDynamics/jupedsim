@@ -20,7 +20,7 @@ public:
 
     //Setter
     void SetPos(const Point& point);
-    void SetDirection(const double& angle);
+    void SetDirection();
     void SetPed(const ptrPed ped);
 
     //Update

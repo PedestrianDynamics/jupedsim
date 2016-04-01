@@ -140,7 +140,7 @@ void LandmarkNetwork::AddConnection(const ptrConnection &connection)
         }
     }
 
-    Point vector = landmarkA->GetRandomPoint()-landmarkB->GetRandomPoint();
+    Point vector = landmarkA->GetPosInMap()-landmarkB->GetPosInMap();//->GetRandomPoint()-landmarkB->GetRandomPoint();
     double distance = vector.Norm();
     _connections.push_back(std::pair<Edge,Weight>(Edge(A,B),distance));
 

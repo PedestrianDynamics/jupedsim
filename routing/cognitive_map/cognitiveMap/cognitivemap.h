@@ -2,7 +2,7 @@
 #define COGNITIVEMAP_H
 
 #ifndef UPDATE_RATE
-#define UPDATE_RATE 2.0
+#define UPDATE_RATE 1.0
 #endif
 
 
@@ -56,7 +56,6 @@ public:
     ~CognitiveMap();
     //Map Updates
     void UpdateMap();
-    void UpdateDirection();
     void UpdateYAHPointer(const Point &move);
     //Regions
     void AddRegions(Regions regions);
@@ -64,12 +63,12 @@ public:
     ptrRegion GetRegionByID(const int& regionID) const;
     // Landmarks
     void AddLandmarksSC(std::vector<ptrLandmark> landmarks);
-    void AddLandmarks(std::vector<ptrLandmark> landmarks);
+    //void AddLandmarks(std::vector<ptrLandmark> landmarks);
     void AddLandmarkInRegion(ptrLandmark landmark, ptrRegion region);
-    std::vector<ptrLandmark> LookForLandmarks();
+    //std::vector<ptrLandmark> LookForLandmarks();
     // Associations
     Landmarks TriggerAssociations(const std::vector<ptrLandmark> &landmarks);
-    void AddAssociatedLandmarks(Landmarks landmarks);
+    //void AddAssociatedLandmarks(Landmarks landmarks);
     void AssessDoors();
     // Calculations
     std::vector<GraphEdge *> SortConShortestPath(ptrLandmark landmark, const GraphVertex::EdgesContainer edges);
@@ -79,10 +78,12 @@ public:
     const Point& GetOwnPos();
     //WriteXML
     void WriteToFile();
-    //evaluate Landmarks
+
+    //Make it fuzzy
+    double MakeItFuzzy(const double& mean, const double& std);
 
     // Set new Landmarks
-    void SetNewLandmark();
+    //void SetNewLandmark();
 
 
     //Find region/landmarks/connections
@@ -127,7 +128,8 @@ private:
     ptrRegion _currentRegion;
     ptrRegion _targetRegion;
 
-
+    // for shortest path calculations
+    std::vector<Point> _outerBoundary;
 
 
     int _frame;

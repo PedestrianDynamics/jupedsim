@@ -40,7 +40,7 @@ void YouAreHerePointer::SetPos(const Point &point)
     _pos=point;
 }
 
-void YouAreHerePointer::SetDirection(const double &angle)
+void YouAreHerePointer::SetDirection()
 {
 //    double mod = std::fmod(angle,M_PI/4.0);
 //    if (mod>=M_PI/8.0)
@@ -48,7 +48,15 @@ void YouAreHerePointer::SetDirection(const double &angle)
 //    else
 //        _angle=angle-mod;
     //std::cout << _angle << std::endl;
-    _angle=angle;
+
+    if (_ped->GetV()._x!=0 || _ped->GetV()._y!=0)
+    {
+        _angle = std::acos(_ped->GetV()._x/(std::sqrt(std::pow(_ped->GetV()._x,2)+std::pow(_ped->GetV()._y,2))));
+        if (_ped->GetV()._y<0)
+            _angle=-_angle;
+
+    }
+
     //std::cout << std::to_string(angle*180/3.14) << std::endl;
 }
 
@@ -59,6 +67,7 @@ void YouAreHerePointer::SetPed(const ptrPed ped)
 
 void YouAreHerePointer::UpdateYAH(const Point &move)
 {
+    SetDirection();
     _oldpos=_pos;
     double x = std::cos(_angle)*move.Norm();
     //std::cout << std::to_string(std::cos(_angle)*move.Norm()) << std::endl;
@@ -71,6 +80,7 @@ void YouAreHerePointer::UpdateYAH(const Point &move)
 
     _pos=_pos+Point(x,y);//Point(std::cos(_angle)*speed*timeInterval,std::sqrt(1-std::pow(std::cos(_angle),2))*speed*timeInterval);
 
+    //Log->Write(std::to_string(GetPosDiff()._x)+" "+std::to_string(GetPosDiff()._y));
 }
 
 const Point YouAreHerePointer::GetPosDiff()

@@ -230,26 +230,27 @@ void CognitiveMapStorage::ParseCogMap(CMStorageKeyType ped)
         if (!xConnectionsNode) {
              //Log->Write("ERROR: \tGeometry file without landmark definition!");
              Log->Write("No connections specified");
-             return;
+             //return;
         }
 
-
-
-        for(TiXmlElement* xConnection = xConnectionsNode->FirstChildElement("connection"); xConnection;
-                  xConnection = xConnection->NextSiblingElement("connection"))
+        else
         {
-            std::string id = xmltoa(xConnection->Attribute("id"), "-1");
-            std::string caption = xmltoa(xConnection->Attribute("caption"));
-            std::string type = xmltoa(xConnection->Attribute("type"),"-1");
-            std::string landmark1 = xmltoa(xConnection->Attribute("landmark1_id"),"-1");
-            std::string landmark2 = xmltoa(xConnection->Attribute("landmark2_id"),"-1");
+            for(TiXmlElement* xConnection = xConnectionsNode->FirstChildElement("connection"); xConnection;
+                      xConnection = xConnection->NextSiblingElement("connection"))
+            {
+                std::string idC = xmltoa(xConnection->Attribute("id"), "-1");
+                std::string captionC = xmltoa(xConnection->Attribute("caption"));
+                std::string typeC = xmltoa(xConnection->Attribute("type"),"-1");
+                std::string landmark1 = xmltoa(xConnection->Attribute("landmark1_id"),"-1");
+                std::string landmark2 = xmltoa(xConnection->Attribute("landmark2_id"),"-1");
 
 
-            ptrConnection connection = std::make_shared<Connection>(std::stoi(id),caption,type,
-                                                                    region->GetLandmarkByID(std::stoi(landmark1)),
-                                                                    region->GetLandmarkByID(std::stoi(landmark2)));
-            region->AddConnection(connection);
-            Log->Write("INFO:\tConnection added!");
+                ptrConnection connection = std::make_shared<Connection>(std::stoi(idC),captionC,typeC,
+                                                                        region->GetLandmarkByID(std::stoi(landmark1)),
+                                                                        region->GetLandmarkByID(std::stoi(landmark2)));
+                region->AddConnection(connection);
+                Log->Write("INFO:\tConnection added!");
+            }
         }
 
         _regions.push_back(region);

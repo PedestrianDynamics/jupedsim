@@ -1010,6 +1010,35 @@ bool Building::Triangulate()
      return true;
 }
 
+std::vector<Point> Building::GetBoundaryVertices() const
+{
+    double xMin=FLT_MAX;
+    double yMin=FLT_MAX;
+    double xMax=-FLT_MAX;
+    double yMax=-FLT_MAX;
+    for(auto&& itr_room: _rooms)
+    {
+         for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+         {
+             const std::vector<Point> vertices = itr_subroom.second->GetPolygon();
+
+             for (Point point:vertices)
+             {
+                 if (point._x>xMax)
+                     xMax=point._x;
+                 else if (point._x<xMin)
+                     xMin=point._x;
+                 if (point._y>yMax)
+                     yMax=point._y;
+                 else if (point._y<yMin)
+                     yMin=point._y;
+             }
+         }
+
+    }
+    return std::vector<Point>{Point(xMin,xMin),Point(xMin,yMax),Point(xMax,yMin),Point(xMax,yMax)};
+}
+
 bool Building::SanityCheck()
 {
      Log->Write("INFO: \tChecking the geometry for artifacts");

@@ -216,6 +216,12 @@ public:
 
      bool Triangulate();
 
+     /**
+      * @return Vector with the vertices of the geometry's outer boundary rect
+      */
+
+     std::vector<Point> GetBoundaryVertices() const;
+
 
 private:
      void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);

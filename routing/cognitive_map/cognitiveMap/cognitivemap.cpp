@@ -4,6 +4,8 @@
 #include "../../../geometry/Building.h"
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../visiLibity/source_code/visilibity.hpp"
+#include <chrono>
+#include <random>
 
 
 
@@ -63,20 +65,12 @@ void CognitiveMap::UpdateMap()
 
 }
 
-void CognitiveMap::UpdateDirection()
-{
-    if (_ped->GetV()._x!=0 || _ped->GetV()._y!=0)
-    {
-        double angle = std::acos(_ped->GetV()._x/(std::sqrt(std::pow(_ped->GetV()._x,2)+std::pow(_ped->GetV()._y,2))));
-        if (_ped->GetV()._y<0)
-            angle=-angle;
-        _YAHPointer.SetDirection(angle);
-    }
-}
 
 void CognitiveMap::UpdateYAHPointer(const Point& move)
 {
-    _YAHPointer.UpdateYAH(move);
+    double x =  std::fabs(MakeItFuzzy(move._x,0.2*move._x));
+    double y =  std::fabs(MakeItFuzzy(move._y,0.2*move._y));
+    _YAHPointer.UpdateYAH(Point(x,y));
 }
 
 void CognitiveMap::AddRegions(Regions regions)
@@ -117,48 +111,48 @@ void CognitiveMap::AddLandmarksSC(std::vector<ptrLandmark> landmarks)
     }
 }
 
-void CognitiveMap::AddLandmarks(std::vector<ptrLandmark> landmarks)
-{
-//    for (ptrLandmark landmark:landmarks)
-//    {
-//        if (std::find(_landmarks.begin(), _landmarks.end(), landmark)!=_landmarks.end())
-//        {
-//            continue;
-//        }
-//        else
-//        {
-//            _landmarks.push_back(landmark);
-//            _landmarks.back()->SetPosInMap(_landmarks.back()->GetPosInMap()-_YAHPointer.GetPosDiff());
+//void CognitiveMap::AddLandmarks(std::vector<ptrLandmark> landmarks)
+//{
+////    for (ptrLandmark landmark:landmarks)
+////    {
+////        if (std::find(_landmarks.begin(), _landmarks.end(), landmark)!=_landmarks.end())
+////        {
+////            continue;
+////        }
+////        else
+////        {
+////            _landmarks.push_back(landmark);
+////            _landmarks.back()->SetPosInMap(_landmarks.back()->GetPosInMap()-_YAHPointer.GetPosDiff());
 
 
-//        }
-//    }
-}
+////        }
+////    }
+//}
 
 void CognitiveMap::AddLandmarkInRegion(ptrLandmark landmark, ptrRegion region)
 {
     region->AddLandmark(landmark);
 }
 
-std::vector<ptrLandmark> CognitiveMap::LookForLandmarks()
-{
-//    SubRoom * sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
+//std::vector<ptrLandmark> CognitiveMap::LookForLandmarks()
+//{
+////    SubRoom * sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
 
-//    std::vector<ptrLandmark> landmarks_found;
+////    std::vector<ptrLandmark> landmarks_found;
 
-//    for (ptrLandmark landmark:_landmarksSubConcious)
-//    {
-//        if (landmark->GetRoom()==sub_room && std::find(_landmarks.begin(), _landmarks.end(), landmark)==_landmarks.end())
-//        {
-//           landmarks_found.push_back(landmark);
-//           LandmarkReached(landmark);
-//        }
-//    }
+////    for (ptrLandmark landmark:_landmarksSubConcious)
+////    {
+////        if (landmark->GetRoom()==sub_room && std::find(_landmarks.begin(), _landmarks.end(), landmark)==_landmarks.end())
+////        {
+////           landmarks_found.push_back(landmark);
+////           LandmarkReached(landmark);
+////        }
+////    }
 
-//    AddLandmarks(landmarks_found);
+////    AddLandmarks(landmarks_found);
 
-//    return landmarks_found;
-}
+////    return landmarks_found;
+//}
 
 Landmarks CognitiveMap::TriggerAssociations(const std::vector<ptrLandmark> &landmarks)
 {
@@ -183,35 +177,35 @@ Landmarks CognitiveMap::TriggerAssociations(const std::vector<ptrLandmark> &land
     return associatedlandmarks;
 }
 
-void CognitiveMap::AddAssociatedLandmarks(Landmarks landmarks)
-{
-//    for (ptrLandmark landmark:_waypContainer)
-//    {
-//        landmark->SetPriority(landmark->GetPriority()+landmarks.size());
-//    }
-//    int n=0;
-//    for (ptrLandmark landmark:landmarks)
-//    {
-//        if (std::find(_waypContainer.begin(), _waypContainer.end(), landmark)!=_waypContainer.end())
-//        {
-//            continue;
-//        }
-//        landmark->SetPriority(n);
-//        _waypContainer.push_back(landmark);
-//        //Add as new target
-//        if (!landmark->Visited())
-//            _waypContainerTargetsSorted.push(landmark);
-//        //Add as already visited
-//        else
-//        {
-//            LandmarkReached(landmark);
-//        }
+//void CognitiveMap::AddAssociatedLandmarks(Landmarks landmarks)
+//{
+////    for (ptrLandmark landmark:_waypContainer)
+////    {
+////        landmark->SetPriority(landmark->GetPriority()+landmarks.size());
+////    }
+////    int n=0;
+////    for (ptrLandmark landmark:landmarks)
+////    {
+////        if (std::find(_waypContainer.begin(), _waypContainer.end(), landmark)!=_waypContainer.end())
+////        {
+////            continue;
+////        }
+////        landmark->SetPriority(n);
+////        _waypContainer.push_back(landmark);
+////        //Add as new target
+////        if (!landmark->Visited())
+////            _waypContainerTargetsSorted.push(landmark);
+////        //Add as already visited
+////        else
+////        {
+////            LandmarkReached(landmark);
+////        }
 
-//        n++;
+////        n++;
 
-//    }
+////    }
 
-}
+//}
 
 void CognitiveMap::AssessDoors()
 {
@@ -234,14 +228,13 @@ void CognitiveMap::AssessDoors()
         }
 
         //Log->Write(std::to_string(nextDoor->GetCrossing()->GetID()));
-        Log->Write("INFO: Door assessed!");
+        //Log->Write("INFO: Door assessed!");
     }
 
 }
 
 std::vector<GraphEdge *> CognitiveMap::SortConShortestPath(ptrLandmark landmark, const GraphVertex::EdgesContainer edges)
 {
-
     std::list<double> sortedPathLengths;
     sortedPathLengths.push_back(ShortestPathDistance((*edges.begin()),landmark));
     std::list<GraphEdge* > sortedEdges;
@@ -254,8 +247,8 @@ std::vector<GraphEdge *> CognitiveMap::SortConShortestPath(ptrLandmark landmark,
     for (auto it=edges.begin()++; it!=edges.end(); ++it)
     {
         double pathLengthDoorWayP = ShortestPathDistance((*it),landmark);
-        Log->Write(std::to_string((*it)->GetCrossing()->GetID()));
-        Log->Write(std::to_string(pathLengthDoorWayP));
+//        Log->Write(std::to_string((*it)->GetCrossing()->GetID()));
+//        Log->Write(std::to_string(pathLengthDoorWayP));
 
         //Point vectorPathPedDoor = (*it)->GetCrossing()->GetCentre()-_ped->GetPos();
         itsortedEdges = sortedEdges.begin();
@@ -314,6 +307,14 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrLandma
 
     SubRoom* sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
     std::vector<Point> points = sub_room->GetPolygon();
+
+    //Translate room due to errors while path integrating
+    //(position in cogmap - real pos)
+    //for (Point point:points)
+    //{
+    //    point+=(GetOwnPos()-_ped->GetPos());
+    //}
+
     VisiLibity::Polygon boundary=VisiLibity::Polygon();
     VisiLibity::Polygon room=VisiLibity::Polygon();
     for (Point point:points)
@@ -327,10 +328,14 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrLandma
 //        std::cout << std::to_string(room[i].x()) << "\t" << std::to_string(room[i].y()) << std::endl;
 //    }
 
-    boundary.push_back(VisiLibity::Point(-100,-100));
-    boundary.push_back(VisiLibity::Point(100,-100));
-    boundary.push_back(VisiLibity::Point(100,100));
-    boundary.push_back(VisiLibity::Point(-100,100));
+    //_outerBoundary: Point(xMin,yMin),Point(xMin,yMax)...
+    if (_outerBoundary.empty())
+        _outerBoundary=_building->GetBoundaryVertices();
+
+    boundary.push_back(VisiLibity::Point(-100,-100));//_outerBoundary[0]._x-100.0,_outerBoundary[0]._y-100.0));
+    boundary.push_back(VisiLibity::Point(-100,100));//_outerBoundary[1]._x-100.0,_outerBoundary[1]._y+100.0));
+    boundary.push_back(VisiLibity::Point(100,-100));//_outerBoundary[2]._x+100.0,_outerBoundary[2]._y-100.0));
+    boundary.push_back(VisiLibity::Point(100,100));//_outerBoundary[3]._x+100.0,_outerBoundary[3]._y+100.0));
 
     std::vector<VisiLibity::Polygon> polygons;
     polygons.push_back(boundary);
@@ -343,8 +348,10 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrLandma
     Point pointOnShortestRoute = landmark->PointOnShortestRoute(edge->GetCrossing()->GetCentre());
     //Log->Write(std::to_string(pointOnShortestRoute.GetX())+" "+std::to_string(pointOnShortestRoute.GetY()));
     VisiLibity::Point wayP(pointOnShortestRoute._x,pointOnShortestRoute._y);//,landmark->GetPos().GetY());
-
+    Log->Write(std::to_string(wayP.x())+" "+std::to_string(wayP.y()));
+    Log->Write(std::to_string(edgeP.x())+" "+std::to_string(edgeP.y()));
     VisiLibity::Polyline polyline=environment.shortest_path(edgeP,wayP,0.01);
+
 //    for (int i=0; i<polyline.size();++i)
 //    {
 //        Log->Write("Polyline:");
@@ -432,20 +439,35 @@ void CognitiveMap::WriteToFile()
 
 
 //    data.append("</frame>\n");
-//    _outputhandler->WriteToFile(data);
+    //    _outputhandler->WriteToFile(data);
 }
 
-void CognitiveMap::SetNewLandmark()
+double CognitiveMap::MakeItFuzzy(const double &mean, const double &std)
 {
-    double a= 2.0;
-    double b=2.0;
-    ptrLandmark wayP = std::make_shared<Landmark>(_YAHPointer.GetPos(),a,b,_createdWayP);
-    _createdWayP--;
-    wayP->SetVisited(true);
-    std::vector<ptrLandmark> vec;
-    vec.push_back(wayP);
-    AddLandmarks(vec);
+    using myClock = std::chrono::high_resolution_clock;
+    myClock::duration d = myClock::now().time_since_epoch();
+
+    auto seed = d.count();
+
+    std::default_random_engine generator(seed);
+    std::normal_distribution<double> distribution(mean,std);
+
+    double number = distribution(generator);
+
+    return number;
 }
+
+//void CognitiveMap::SetNewLandmark()
+//{
+//    double a= 2.0;
+//    double b=2.0;
+//    ptrLandmark wayP = std::make_shared<Landmark>(_YAHPointer.GetPos(),a,b,_createdWayP);
+//    _createdWayP--;
+//    wayP->SetVisited(true);
+//    std::vector<ptrLandmark> vec;
+//    vec.push_back(wayP);
+//    AddLandmarks(vec);
+//}
 
 Landmarks CognitiveMap::GetLandmarksConnectedWith(const ptrLandmark &landmark) const
 {
@@ -485,8 +507,8 @@ void CognitiveMap::CheckIfLandmarksReached()
     {
         if (landmark->GetRoom()==sub_room)
         {
-            std::string str1 = landmark->GetCaption()+" has been reached.";
-            Log->Write(str1);
+//            std::string str1 = landmark->GetCaption()+" has been reached.";
+//            Log->Write(str1);
             _landmarksRecentlyVisited.push_back(landmark);
         }
     }
@@ -577,7 +599,7 @@ const ptrLandmark CognitiveMap::FindNearLandmarkConnectedToTarget(const ptrLandm
     // if no landmarks were found radius will be enlarged
     // if radius = distance(Pos->target) return target
 
-    Point vector=target->GetPosInMap()-_YAHPointer.GetPos();
+    Point vector=target->GetPosInMap()-_ped->GetPos();//_YAHPointer.GetPos();
     double distanceToTarget=vector.Norm();
     int divisor = 24;
     double searchlimit=distanceToTarget/divisor;
@@ -587,7 +609,7 @@ const ptrLandmark CognitiveMap::FindNearLandmarkConnectedToTarget(const ptrLandm
     {
         for (ptrLandmark landmark:landmarksConnectedToTarget)
         {
-            vector=landmark->GetPosInMap()-_YAHPointer.GetPos();
+            vector=landmark->GetPosInMap()-_ped->GetPos();//_YAHPointer.GetPos();
             double distance = vector.Norm();
             if (distance<=searchlimit)
             {

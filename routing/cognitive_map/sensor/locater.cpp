@@ -19,8 +19,8 @@ std::string Locater::GetName() const
 
 void Locater::execute(const Pedestrian * ped, CognitiveMap * cogMap) const
 {
-   //Log->Write("INFO:\t Update Pointer");
-   cogMap->UpdateDirection();
+   Log->Write("INFO:\t Execute Locater");
+   //cogMap->UpdateDirection();
 
    //std::cout << std::to_string(ped->GetGlobalTime()) << std::endl;
    cogMap->UpdateYAHPointer(ped->GetV()*_updateInterval);
@@ -30,7 +30,7 @@ void Locater::execute(const Pedestrian * ped, CognitiveMap * cogMap) const
 //       cogMap->SetNewWaypoint();
 //   }
 
-   cogMap->WriteToFile();
+   //cogMap->WriteToFile();
 
 }
 
