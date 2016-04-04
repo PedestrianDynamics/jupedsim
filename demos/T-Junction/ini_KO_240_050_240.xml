@@ -20,7 +20,14 @@
 			<vertex x="0" y="1.00" />
 			<length_in_movement_direction distance="2.0" />
 		</area_B>
-		<area_L id="2" type="Line">
+        <area_B id="2" type="BoundingBox">
+			<vertex x="-2.40" y="1.00" /> <!-- Clockwise -->
+			<vertex x="-2.40" y="3.00" />
+			<vertex x="0" y="3.00" />
+			<vertex x="0" y="1.00" />
+			<length_in_movement_direction distance="2.0" />
+		</area_B>
+		<area_L id="3" type="Line">
 			<start x="-2.40" y="1.00" />
 			<end x="0" y="1.00" />
 		</area_L>
@@ -35,13 +42,13 @@
 	</velocity>
 
 	<!-- Method A (Zhang2011a) Flow and Vel -->
-	<method_A enabled="true">
+	<method_A enabled="false">
 		<!-- Time interval used to count the flow [fr] -->
 		<frame_interval unit="frame">
 			100
 		</frame_interval>
 			<!-- The coordinate of the line used to calculate the flow and velocity -->
-		<measurement_area id="2" />
+		<measurement_area id="3" />
 		<plot_time_series enabled="false"/>
 	</method_A>
 
@@ -58,12 +65,12 @@
 	
 	<!-- Method D (Zhang2011a) Voronoi density and Vel -->
 	<method_D enabled="true"> 
-        <measurement_area id="1" /> 
+        <measurement_area id="1" start_frame="None" stop_frame="None" get_individual_FD="false"/> 
+        <measurement_area id="2" start_frame="500" stop_frame="800" get_individual_FD="false"/> 
 		<one_dimensional enabled="false"/>
 		<plot_time_series enabled="false"/>
         <cut_by_circle enabled="false" radius="1.0" edges="10"/>
         <output_voronoi_cells enabled="false" plot_graphs="false"/>
-        <individual_FD enabled="false" measurement_area_id="1"/>
         <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/> 
     </method_D> 
 </JPSreport>

@@ -77,7 +77,6 @@ ArgumentParser::ArgumentParser()
      _isPlotTimeSeriesD=false;
      _isPlotTimeSeriesC=false;
      _isOneDimensional=false;
-     _isIndividualFD = false;
      _isGetProfile =false;
      _steadyStart =100;
      _steadyEnd = 1000;
@@ -535,6 +534,55 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                {
                     _areaIDforMethodD.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
+                    if(xMeasurementArea->Attribute("start_frame"))
+				    {
+					   if(string(xMeasurementArea->Attribute("start_frame"))!="None")
+					   {
+						   _start_frames_MethodD.push_back(xmltoi(xMeasurementArea->Attribute("start_frame")));
+						   Log->Write("INFO: \tFor Measurement area id <%d> the analysis starts from frame <%d>", xmltoi(xMeasurementArea->Attribute("id")),xmltoi(xMeasurementArea->Attribute("start_frame")));
+					   }
+					   else
+					   {
+						   _start_frames_MethodD.push_back(-1);
+					   }
+				    }
+                    else
+                    {
+                    	_start_frames_MethodD.push_back(-1);
+                    }
+                    if(xMeasurementArea->Attribute("stop_frame"))
+					{
+					   if(string(xMeasurementArea->Attribute("stop_frame"))!="None")
+					   {
+						   _stop_frames_MethodD.push_back(xmltoi(xMeasurementArea->Attribute("stop_frame")));
+						   Log->Write("INFO: \tFor Measurement area id <%d> the analysis stops from frame <%d>", xmltoi(xMeasurementArea->Attribute("id")),xmltoi(xMeasurementArea->Attribute("stop_frame")));
+					   }
+					   else
+					   {
+						   _stop_frames_MethodD.push_back(-1);
+					   }
+					}
+				    else
+				    {
+				    	_stop_frames_MethodD.push_back(-1);
+				    }
+                    if(xMeasurementArea->Attribute("get_individual_FD"))
+					{
+						if(string(xMeasurementArea->Attribute("get_individual_FD"))=="true")
+						{
+							_individual_FD_flags.push_back(true);
+							Log->Write("INFO: \tIndividual FD will be calculated in Measurement area id <%d>", xmltoi(xMeasurementArea->Attribute("id")));
+						}
+						else
+						{
+							_individual_FD_flags.push_back(false);
+						}
+					}
+                    else
+                    {
+                    	_individual_FD_flags.push_back(false);
+                    }
+
                }
                if (xMethod_D->FirstChildElement("one_dimensional"))
                {
@@ -579,17 +627,6 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
 								Log->Write("INFO: \tGraph of voronoi diagram will be plotted" );
 							}
                     	 }
-                    }
-               }
-
-               if ( xMethod_D->FirstChildElement("individual_FD"))
-               {
-                    if ( string(xMethod_D->FirstChildElement("individual_FD")->Attribute("enabled"))=="true")
-                    {
-                    	_isIndividualFD=true;
-                    	int areaId=xmltoi(xMethod_D->FirstChildElement("individual_FD")->Attribute("measurement_area_id"));
-                        _areaIndividualFD=((MeasurementArea_B *)(_measurementAreas[areaId]))->_poly;
-                        Log->Write("INFO: \tIndividual fundamental diagram data will be calculated over the measurement area with id <%d>! ", areaId);
                     }
                }
 
@@ -733,7 +770,7 @@ bool ArgumentParser::GetIsOneDimensional() const
 	return _isOneDimensional;
 }
 
-bool ArgumentParser::GetIsIndividualFD() const
+/*bool ArgumentParser::GetIsIndividualFD() const
 {
      return _isIndividualFD;
 }
@@ -742,7 +779,7 @@ polygon_2d ArgumentParser::GetAreaIndividualFD() const
 {
      return _areaIndividualFD;
 }
-
+*/
 bool ArgumentParser::GetIsGetProfile() const
 {
      return _isGetProfile;
@@ -787,6 +824,21 @@ vector<int> ArgumentParser::GetAreaIDforMethodC() const
 vector<int> ArgumentParser::GetAreaIDforMethodD() const
 {
      return _areaIDforMethodD;
+}
+
+vector<int> ArgumentParser::GetStartFramesMethodD() const
+{
+	 return _start_frames_MethodD;
+}
+
+vector<int> ArgumentParser::GetStopFramesMethodD() const
+{
+	 return _stop_frames_MethodD;
+}
+
+vector<bool> ArgumentParser::GetIndividualFDFlags() const
+{
+	 return _individual_FD_flags;
 }
 
 MeasurementArea* ArgumentParser::GetMeasurementArea(int id)

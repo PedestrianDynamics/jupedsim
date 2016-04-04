@@ -56,6 +56,8 @@ Method_D::Method_D()
      _areaForMethod_D = NULL;
      _plotVoronoiCellData=false;
      _isOneDimensional=false;
+     _startFrame =-1;
+     _stopFrame = -1;
 }
 
 Method_D::~Method_D()
@@ -72,6 +74,16 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
      _measureAreaId = boost::lexical_cast<string>(_areaForMethod_D->_id);
      _fps =peddata.GetFps();
      int minFrame = peddata.GetMinFrame();
+     if(_startFrame!=_stopFrame)
+     {
+         	 for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
+         	 {
+         		 if((ite->first + minFrame)<_startFrame || (ite->first + minFrame) >_stopFrame)
+         		 {
+         			_peds_t.erase(ite);
+         		 }
+         	 }
+     }
      OpenFileMethodD();
      if(_calcIndividualFD)
      {
@@ -141,7 +153,7 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
 					   {
 							if(false==_isOneDimensional)
 							{
-								 GetIndividualFD(polygons,VInFrame, IdInFrame, _areaIndividualFD, str_frid);
+								 GetIndividualFD(polygons,VInFrame, IdInFrame, _areaForMethod_D->_poly, str_frid);
 							}
 					   }
 					   if(_getProfile)
@@ -438,10 +450,10 @@ void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polyg
 
      if(_plotVoronoiCellData)
      {
-		 string parameters_rho="python "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
-				 " -g "+_geometryFileName;
+    	 string parameters_rho="python "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+				 " -g "+_geometryFileName+" -p "+_trajectoryPath;
 		 string parameters_v="python "+_scriptsLocation+"/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
-					 " -g "+_geometryFileName;
+					 " -g "+_geometryFileName+" -p "+_trajectoryPath;
 		 //Log->Write("INFO:\t%s",parameters_rho.c_str());
 		 Log->Write("INFO:\tPlotting Voronoi Cell at the frame <%s>",frameId.c_str());
 		 system(parameters_rho.c_str());
@@ -478,9 +490,14 @@ void Method_D::SetCalculateIndividualFD(bool individualFD)
      _calcIndividualFD = individualFD;
 }
 
-void Method_D::SetAreaIndividualFD(polygon_2d areaindividualFD)
+void Method_D::SetStartFrame(int startFrame)
 {
-	_areaIndividualFD = areaindividualFD;
+	_startFrame=startFrame;
+}
+
+void Method_D::SetStopFrame(int stopFrame)
+{
+	_stopFrame=stopFrame;
 }
 
 void Method_D::Setcutbycircle(double radius,int edges)
@@ -506,6 +523,11 @@ void Method_D::SetGeometryBoundaries(double minX, double minY, double maxX, doub
 void Method_D::SetGeometryFileName(const std::string& geometryFile)
 {
 	_geometryFileName=geometryFile;
+}
+
+void Method_D::SetTrajectoriesLocation(const std::string& trajectoryPath)
+{
+     _trajectoryPath=trajectoryPath;
 }
 
 void Method_D::SetGridSize(double x, double y)

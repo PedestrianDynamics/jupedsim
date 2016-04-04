@@ -179,6 +179,9 @@ void Analysis::InitArgs(ArgumentParser* args)
           {
                _areaForMethod_D.push_back(dynamic_cast<MeasurementArea_B*>( args->GetMeasurementArea(Measurement_Area_IDs[i])));
           }
+          _StartFramesMethodD = args->GetStartFramesMethodD();
+          _StopFramesMethodD = args->GetStopFramesMethodD();
+          _IndividualFDFlags = args->GetIndividualFDFlags();
      }
 
      _deltaF = args->GetDelatT_Vins();
@@ -191,8 +194,6 @@ void Analysis::InitArgs(ArgumentParser* args)
      _plotTimeseriesC=args->GetIsPlotTimeSeriesC();
      _plotTimeseriesD=args->GetIsPlotTimeSeriesD();
      _isOneDimensional=args->GetIsOneDimensional();
-     _calcIndividualFD = args->GetIsIndividualFD();
-     _areaIndividualFD= args->GetAreaIndividualFD();
      _vComponent = args->GetVComponent();
      _grid_size_X = int(args->GetGridSizeX());
      _grid_size_Y = int(args->GetGridSizeY());
@@ -397,6 +398,9 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
           for(signed int i=0; i<_areaForMethod_D.size(); i++)
           {
                Method_D method_D;
+               method_D.SetStartFrame(_StartFramesMethodD[i]);
+               method_D.SetStopFrame(_StopFramesMethodD[i]);
+               method_D.SetCalculateIndividualFD(_IndividualFDFlags[i]);
                method_D.SetGeometryPolygon(_geoPoly[_areaForMethod_D[i]->_id]);
                method_D.SetGeometryFileName(_geometryFileName);
                method_D.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
@@ -404,9 +408,8 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                method_D.SetOutputVoronoiCellData(_outputGraph);
                method_D.SetPlotVoronoiGraph(_plotGraph);
                method_D.SetDimensional(_isOneDimensional);
-               method_D.SetCalculateIndividualFD(_calcIndividualFD);
-               method_D.SetAreaIndividualFD(_areaIndividualFD);
                method_D.SetCalculateProfiles(_getProfile);
+               method_D.SetTrajectoriesLocation(path);
                if(_cutByCircle)
                {
                     method_D.Setcutbycircle(_cutRadius, _circleEdges);

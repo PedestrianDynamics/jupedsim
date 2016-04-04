@@ -125,6 +125,9 @@ private:
      bool _DoesUseMethodB;  // Method B (Zhang2011a)
      bool _DoesUseMethodC;       // Method C //calculate and save results of classic in separate file
      bool _DoesUseMethodD;       // Method D--Voronoi method
+     std::vector<int> _StartFramesMethodD;
+     std::vector<int> _StopFramesMethodD;
+     std::vector<bool> _IndividualFDFlags;
      bool _cutByCircle;       //Adjust whether cut each original voronoi cell by a circle
      double _cutRadius;
      int _circleEdges;
@@ -136,7 +139,6 @@ private:
      bool _plotTimeseriesD;
      bool _isOneDimensional;
      bool _calcIndividualFD;  //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
-     polygon_2d _areaIndividualFD;
      std::string _vComponent;        // to mark whether x, y or x and y coordinate are used when calculating the velocity
      std::string _projectRootDir;
      std::string _scriptsLocation;

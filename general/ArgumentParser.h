@@ -71,8 +71,6 @@ private:
      bool _isPlotTimeSeriesC;
      bool _isPlotTimeSeriesD;
      bool _isOneDimensional;
-     bool _isIndividualFD;
-     polygon_2d _areaIndividualFD;
      bool _isGetProfile;
      double _steadyStart;
      double _steadyEnd;
@@ -85,6 +83,9 @@ private:
      float _grid_size_X;
      float _grid_size_Y;
      int _log;
+     std::vector<int> _start_frames_MethodD;
+     std::vector<int> _stop_frames_MethodD;
+     std::vector<bool> _individual_FD_flags;
 
      std::map <int, MeasurementArea*> _measurementAreas;
      void Usage(const std::string file);
@@ -120,6 +121,9 @@ public:
      std::vector<int> GetAreaIDforMethodB() const;
      std::vector<int> GetAreaIDforMethodC() const;
      std::vector<int> GetAreaIDforMethodD() const;
+     std::vector<int> GetStartFramesMethodD() const;
+     std::vector<int> GetStopFramesMethodD() const;
+     std::vector<bool> GetIndividualFDFlags() const;
      bool GetIsCutByCircle() const;
      double GetCutRadius() const;
      int GetCircleEdges() const;
