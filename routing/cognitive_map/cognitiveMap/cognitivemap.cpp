@@ -7,6 +7,13 @@
 #include <chrono>
 #include <random>
 
+//for shortest path calculations
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/dijkstra_shortest_paths.hpp>
+#include <boost/geometry/geometry.hpp>
+#include <boost/geometry/algorithms/intersection.hpp>
+
 
 
 CognitiveMap::CognitiveMap()
@@ -241,10 +248,10 @@ std::vector<GraphEdge *> CognitiveMap::SortConShortestPath(ptrLandmark landmark,
     sortedEdges.push_back((*edges.begin()));
 
     auto itsortedEdges = sortedEdges.begin();
-    //auto it = edges.begin();
-    //++it;
+    auto it = edges.begin();
+    ++it;
     //starting at the second element
-    for (auto it=edges.begin()++; it!=edges.end(); ++it)
+    for (; it!=edges.end(); ++it)
     {
         double pathLengthDoorWayP = ShortestPathDistance((*it),landmark);
 //        Log->Write(std::to_string((*it)->GetCrossing()->GetID()));
@@ -305,52 +312,57 @@ ptrGraphNetwork CognitiveMap::GetGraphNetwork() const
 double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrLandmark landmark)
 {
 
-    SubRoom* sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
-    std::vector<Point> points = sub_room->GetPolygon();
+//    SubRoom* sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
+//    std::vector<Point> points = sub_room->GetPolygon();
 
-    //Translate room due to errors while path integrating
-    //(position in cogmap - real pos)
-    //for (Point point:points)
-    //{
-    //    point+=(GetOwnPos()-_ped->GetPos());
-    //}
+//    //Translate room due to errors while path integrating
+//    //(position in cogmap - real pos)
+//    //for (Point point:points)
+//    //{
+//    //    point+=(GetOwnPos()-_ped->GetPos());
+//    //}
 
-    VisiLibity::Polygon boundary=VisiLibity::Polygon();
-    VisiLibity::Polygon room=VisiLibity::Polygon();
-    for (Point point:points)
-    {
-       room.push_back(VisiLibity::Point(point._x,point._y));
-    }
+//    VisiLibity::Polygon boundary=VisiLibity::Polygon();
+//    VisiLibity::Polygon room=VisiLibity::Polygon();
+////    for (Point point:points)
+////    {
+////       room.push_back(VisiLibity::Point(point._x,point._y));
+////    }
+//    room.push_back(VisiLibity::Point(0,0));
+//    room.push_back(VisiLibity::Point(4,0));
+//    room.push_back(VisiLibity::Point(4,4));
+//    room.push_back(VisiLibity::Point(4,4));
 
-//    for (int i=0; i<room.n();++i)
-//    {
-//        Log->Write("RoomVertices:");
-//        std::cout << std::to_string(room[i].x()) << "\t" << std::to_string(room[i].y()) << std::endl;
-//    }
+////    for (int i=0; i<room.n();++i)
+////    {
+////        Log->Write("RoomVertices:");
+////        std::cout << std::to_string(room[i].x()) << "\t" << std::to_string(room[i].y()) << std::endl;
+////    }
 
-    //_outerBoundary: Point(xMin,yMin),Point(xMin,yMax)...
-    if (_outerBoundary.empty())
-        _outerBoundary=_building->GetBoundaryVertices();
+//    //_outerBoundary: Point(xMin,yMin),Point(xMin,yMax)...
+//    if (_outerBoundary.empty())
+//        _outerBoundary=_building->GetBoundaryVertices();
 
-    boundary.push_back(VisiLibity::Point(-100,-100));//_outerBoundary[0]._x-100.0,_outerBoundary[0]._y-100.0));
-    boundary.push_back(VisiLibity::Point(-100,100));//_outerBoundary[1]._x-100.0,_outerBoundary[1]._y+100.0));
-    boundary.push_back(VisiLibity::Point(100,-100));//_outerBoundary[2]._x+100.0,_outerBoundary[2]._y-100.0));
-    boundary.push_back(VisiLibity::Point(100,100));//_outerBoundary[3]._x+100.0,_outerBoundary[3]._y+100.0));
+//    boundary.push_back(VisiLibity::Point(-100,-100));//_outerBoundary[0]._x-100.0,_outerBoundary[0]._y-100.0));
+//    boundary.push_back(VisiLibity::Point(-100,100));//_outerBoundary[1]._x-100.0,_outerBoundary[1]._y+100.0));
+//    boundary.push_back(VisiLibity::Point(100,100));//_outerBoundary[2]._x+100.0,_outerBoundary[2]._y-100.0));
+//    boundary.push_back(VisiLibity::Point(100,-100));//_outerBoundary[3]._x+100.0,_outerBoundary[3]._y+100.0));
 
-    std::vector<VisiLibity::Polygon> polygons;
-    polygons.push_back(boundary);
-    polygons.push_back(room);
+//    std::vector<VisiLibity::Polygon> polygons;
+//    polygons.push_back(boundary);
+//    polygons.push_back(room);
 
-    VisiLibity::Environment environment(polygons);
-    //environment.reverse_holes();
+//    VisiLibity::Environment environment(polygons);
+//    //environment.reverse_holes();
 
-    VisiLibity::Point edgeP(edge->GetCrossing()->GetCentre()._x,edge->GetCrossing()->GetCentre()._y);
-    Point pointOnShortestRoute = landmark->PointOnShortestRoute(edge->GetCrossing()->GetCentre());
-    //Log->Write(std::to_string(pointOnShortestRoute.GetX())+" "+std::to_string(pointOnShortestRoute.GetY()));
-    VisiLibity::Point wayP(pointOnShortestRoute._x,pointOnShortestRoute._y);//,landmark->GetPos().GetY());
-    Log->Write(std::to_string(wayP.x())+" "+std::to_string(wayP.y()));
-    Log->Write(std::to_string(edgeP.x())+" "+std::to_string(edgeP.y()));
-    VisiLibity::Polyline polyline=environment.shortest_path(edgeP,wayP,0.01);
+//    VisiLibity::Point edgeP(edge->GetCrossing()->GetCentre()._x,edge->GetCrossing()->GetCentre()._y);
+//    Point pointOnShortestRoute = landmark->PointOnShortestRoute(edge->GetCrossing()->GetCentre());
+//    //Log->Write(std::to_string(pointOnShortestRoute.GetX())+" "+std::to_string(pointOnShortestRoute.GetY()));
+//    VisiLibity::Point wayP(pointOnShortestRoute._x,pointOnShortestRoute._y);//,landmark->GetPos().GetY());
+//    //Log->Write(std::to_string(wayP.x())+" "+std::to_string(wayP.y()));
+//    //Log->Write(std::to_string(edgeP.x())+" "+std::to_string(edgeP.y()));
+//    VisiLibity::Polyline polyline=environment.shortest_path(edgeP,wayP);
+//    Log->Write(std::to_string(polyline.length()));
 
 //    for (int i=0; i<polyline.size();++i)
 //    {
@@ -360,7 +372,131 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrLandma
 //    Log->Write("ShortestPathLength");
 //    Log->Write(std::to_string(polyline.length()));
 
-    return polyline.length();
+
+
+//    typedef boost::adjacency_list<boost::listS, boost::vecS, boost::directedS,
+//                           boost::no_property, boost::property<boost::edge_weight_t, double> > Graph;
+//    typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
+//    typedef std::pair<Vertex, Vertex> Edge;
+//    typedef double Weight;
+//    typedef std::vector<Edge> Edges;
+
+
+    SubRoom* sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
+    std::vector<Point> roomPolygon = sub_room->GetPolygon();
+
+    typedef boost::geometry::model::polygon<Point> Polygon;
+
+    Polygon boost_room;
+
+    for (Point point:roomPolygon)
+    {
+        boost::geometry::append(boost_room,point);
+    }
+
+    std::vector<Point> graphPoints;
+    std::vector<Point> helpPoints;
+    for (Point p:roomPolygon)
+    {
+        helpPoints.clear();
+        helpPoints.push_back(Point(p._x+0.1,p._y+0.1));
+        helpPoints.push_back(Point(p._x-0.1,p._y+0.1));
+        helpPoints.push_back(Point(p._x-0.1,p._y-0.1));
+        helpPoints.push_back(Point(p._x+0.1,p._y-0.1));
+        for (Point helpP:helpPoints)
+        {
+            if (!boost::geometry::intersects(helpP,boost_room))
+            {
+                graphPoints.push_back(helpP);
+            }
+        }
+    }
+
+    //Graph
+    Graph graph=Graph();
+
+    //vertices of room
+    for (size_t i=0; i<graphPoints.size(); ++i)
+    {
+        boost::add_vertex(graph);
+    }
+
+    // center of crossing
+    helpPoints.clear();
+    helpPoints.push_back(Point(edge->GetCrossing()->GetCentre()._x+0.1,edge->GetCrossing()->GetCentre()._y));
+    helpPoints.push_back(Point(edge->GetCrossing()->GetCentre()._x,edge->GetCrossing()->GetCentre()._y+0.1));
+    helpPoints.push_back(Point(edge->GetCrossing()->GetCentre()._x-0.1,edge->GetCrossing()->GetCentre()._y));
+    helpPoints.push_back(Point(edge->GetCrossing()->GetCentre()._x,edge->GetCrossing()->GetCentre()._y-0.1));
+
+    Vertex startV;
+
+    for (Point helpP:helpPoints)
+    {
+        if (!boost::geometry::within(helpP,boost_room))
+        {
+            graphPoints.push_back(helpP);
+            startV = boost::add_vertex(graph);
+        }
+    }
+    //target (landmark)
+    if (boost::geometry::within(landmark->GetPosInMap(),boost_room))
+    {
+        Log->Write("ERROR: landmark ist im selben Raum!");
+    }
+    graphPoints.push_back(landmark->GetPosInMap());
+
+    //target (landmark)
+    Vertex targetV = boost::add_vertex(graph);
+
+    size_t m=0;
+    for (auto it = boost::vertices(graph); it.first != it.second; ++it.first)
+    {
+        size_t n=0;
+        for (auto it2 = boost::vertices(graph); it2.first != it2.second; ++it2.first)
+        {
+            if (*it.first!=*it2.first)
+            {
+                if (!LineIntersectsPolygon(std::pair<Point,Point>(graphPoints[m],graphPoints[n]),roomPolygon))
+                {
+                    Point vector = graphPoints[m]-graphPoints[n];
+                    double distance=vector.Norm();
+                    boost::add_edge(*it.first,*it.second,distance,graph);
+                    boost::add_edge(*it.second,*it.first,distance,graph);
+                }
+            }
+
+            ++n;
+        }
+        ++m;
+    }
+
+    std::vector<double> d(boost::num_vertices(graph));
+
+    boost::dijkstra_shortest_paths(graph, startV, boost::distance_map(&d[0]));
+
+    Log->Write(std::to_string(d[targetV]));
+    return d[targetV];
+}
+
+bool CognitiveMap::LineIntersectsPolygon(const std::pair<Point, Point> &line, const std::vector<Point> &polygon)
+{
+    typedef boost::geometry::model::polygon<Point> Polygon;
+
+    typedef boost::geometry::model::linestring<Point> Linestring;
+
+    Polygon boost_polygon;
+
+    for (Point point:polygon)
+    {
+        boost::geometry::append(boost_polygon,point);
+    }
+
+    Linestring lineS;
+    boost::geometry::append(line.first,line);
+    boost::geometry::append(line.second,line);
+
+    return boost::geometry::intersects(lineS,boost_polygon);
+
 }
 
 const Point &CognitiveMap::GetOwnPos()
@@ -651,7 +787,7 @@ Landmarks CognitiveMap::FindLandmarksConnectedToTarget(const ptrLandmark &target
     //Landmarks connected to landmarks connected to target
     Landmarks furtherCandidates;
 
-    for (auto i=0; i<connectedLandmarks.size(); ++i)
+    for (size_t i=0; i<connectedLandmarks.size(); ++i)
     {
         furtherCandidates=GetLandmarksConnectedWith(connectedLandmarks[i]);
 

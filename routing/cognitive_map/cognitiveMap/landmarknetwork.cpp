@@ -89,7 +89,7 @@ void LandmarkNetwork::AddLandmark(const ptrLandmark& landmark)
 {
 
     Vertex v = boost::add_vertex(_graph);
-    std::make_pair<int,int>(1,1);
+    //std::make_pair<int,int>(1,1);
     _landmarks.push_back(std::pair<ptrLandmark,Vertex> (landmark,v));
 
 }
@@ -193,7 +193,7 @@ double LandmarkNetwork::LengthofShortestPathToTarget(const ptrLandmark &landmark
 //    }
 
     // invoke variant 2 of Dijkstra's algorithm
-    dijkstra_shortest_paths(_graph, startVertex, boost::distance_map(&d[0]));
+    boost::dijkstra_shortest_paths(_graph, startVertex, boost::distance_map(&d[0]));
     //std::cout << "distance from start vertex to target:" << std::endl;
 //    boost::graph_traits<Graph>::vertex_iterator vi;
 //    for(vi = boost::vertices(_graph).first; vi != boost::vertices(_graph).second; ++vi)

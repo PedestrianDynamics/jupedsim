@@ -75,6 +75,7 @@ public:
     //bool IsAroundLandmark(const Landmark& landmark, GraphEdge* edge) const;
     ptrGraphNetwork GetGraphNetwork() const;
     double ShortestPathDistance(const GraphEdge *edge, const ptrLandmark landmark);
+    bool LineIntersectsPolygon(const std::pair<Point,Point> &line, const std::vector<Point> &polygon);
     const Point& GetOwnPos();
     //WriteXML
     void WriteToFile();
