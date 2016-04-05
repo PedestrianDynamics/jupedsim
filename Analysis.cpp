@@ -225,7 +225,7 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const std::string& geometryFile
      //loop over all areas
      for(auto&& area: areas)
      {
-          //search for the subroom that containst that area
+          //search for the subroom that contains that area
           for (auto&& it_room : _building->GetAllRooms())
           {
                for (auto&& it_sub : it_room.second->GetAllSubRooms())
