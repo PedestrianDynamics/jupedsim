@@ -4,6 +4,8 @@
 
 - two options "startframe" and "stopframe" are added for each measurement area for method D to assign the time periods for analysis.
 
+- Individual density based on Voronoi method is added for one dimensional case in the output file (Individual headway is moved to the 5th column). 
+
 ## Changed
 
 - The swith for calculating Individual FD is arraged for each measurement area.
