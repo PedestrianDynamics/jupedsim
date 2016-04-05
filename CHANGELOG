@@ -2,11 +2,15 @@
 
 ## Added
 
+- two options "startframe" and "stopframe" are added for each measurement area for method D to assign the time periods for analysis.
+
 ## Changed
+
+- The swith for calculating Individual FD is arraged for each measurement area.
 
 ## Fixed
 
-	
+- The script for plot Voronoi cells is modified so that it work when the trajectory files are not the in the same location as the inifile.	
 
 # JPSreport v0.8
 
