@@ -219,11 +219,11 @@ bool Method_D::OpenFileIndividualFD()
      {
     	 if(_isOneDimensional)
     	 {
-    		 fprintf(_fIndividualFD,"#framerate:\t%.2f\n\n#Frame	\t	PedId	\t	headway(m)\t	Individual velocity(m/s)\n",_fps);
+    		 fprintf(_fIndividualFD,"#framerate (fps):\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-1)) \t 	Individual velocity(m/s)	\t	Headway(m)\n",_fps);
     	 }
     	 else
     	 {
-    		 fprintf(_fIndividualFD,"#framerate:\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-2))\t	Individual velocity(m/s)\n",_fps);
+    		 fprintf(_fIndividualFD,"#framerate (fps):\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-2)) \t 	Individual velocity(m/s)\n",_fps);
     	 }
           return true;
      }
@@ -638,7 +638,8 @@ void Method_D::CalcVoronoiResults1D(vector<double>& XInFrame, vector<double>& VI
 		if(_calcIndividualFD)
 		{
 			double headway=(XRightNeighbor[i] - XInFrame[i])*CMtoM;
-			fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\n",frid.c_str(), IdInFrame[i], headway,VInFrame[i]);
+			double individualDensity = 2.0/((XRightNeighbor[i] - XLeftNeighbor[i])*CMtoM);
+			fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\t%.3f\n",frid.c_str(), IdInFrame[i], individualDensity,VInFrame[i], headway);
 		}
 	}
 	VoronoiDensity/=((right_boundary-left_boundary)*CMtoM);
