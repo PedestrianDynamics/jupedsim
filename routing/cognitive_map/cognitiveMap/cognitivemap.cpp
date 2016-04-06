@@ -394,8 +394,8 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrLandma
         boost::geometry::append(boost_room,point);
     }
 
-    std::vector<Point> graphPoints;
-    std::vector<Point> helpPoints;
+    std::vector<Point> graphPoints={};
+    std::vector<Point> helpPoints={};
     for (Point p:roomPolygon)
     {
         helpPoints.clear();
@@ -432,7 +432,7 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrLandma
 
     for (Point helpP:helpPoints)
     {
-        if (!boost::geometry::within(helpP,boost_room))
+        if (!boost::geometry::intersects(helpP,boost_room))
         {
             graphPoints.push_back(helpP);
             startV = boost::add_vertex(graph);
@@ -441,7 +441,10 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrLandma
     //target (landmark)
     if (boost::geometry::within(landmark->GetPosInMap(),boost_room))
     {
-        Log->Write("ERROR: landmark ist im selben Raum!");
+        Log->Write("INFO: Landmark muesst in meinem Raum sein!");
+        // return always 1.0 so no crossing will be preferred based on information
+        // from the cognitive map
+        return 1.0;
     }
     graphPoints.push_back(landmark->GetPosInMap());
 
@@ -460,8 +463,9 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrLandma
                 {
                     Point vector = graphPoints[m]-graphPoints[n];
                     double distance=vector.Norm();
-                    boost::add_edge(*it.first,*it.second,distance,graph);
-                    boost::add_edge(*it.second,*it.first,distance,graph);
+                    //Log->Write((it.first));
+                    boost::add_edge((*it.first),(*it2.first),distance,graph);
+                    //boost::add_edge(*it.second,*it.first,distance,graph);
                 }
             }
 
@@ -492,8 +496,8 @@ bool CognitiveMap::LineIntersectsPolygon(const std::pair<Point, Point> &line, co
     }
 
     Linestring lineS;
-    boost::geometry::append(line.first,line);
-    boost::geometry::append(line.second,line);
+    boost::geometry::append(lineS,line.first);
+    boost::geometry::append(lineS,line.second);
 
     return boost::geometry::intersects(lineS,boost_polygon);
 
