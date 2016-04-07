@@ -225,8 +225,8 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &p
 
     std::string str = quantity + "/Z_" +  std::to_string(_NearestHeight) + "/t_"+std::to_string(simT)+".000000";
 
-    //std::cout << str << std::endl;
-    if (_fMContainer.count(str)) {
+    if (_fMContainer.count(str) == 0) {
+        //std::cout << str << std::endl;
         throw -1;
     }
     return _fMContainer.at(str);
