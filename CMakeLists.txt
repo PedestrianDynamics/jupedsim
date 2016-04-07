@@ -153,8 +153,8 @@ endif(APPLE)
 
 
 #set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /opt/local/lib)
-#set(Boost_INCLUDE_DIR /opt/local/include/boost)
-#set(Boost_LIBRARY_DIR /usr/local/src/boost_1_46_1/stage/lib)
+#set(Boost_INCLUDE_DIR /opt/local/include/)
+#set(Boost_LIBRARY_DIR /usr/local/lib/)
 # in case boost is a non-default location
 # SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "C:/win32libs/boost")
 # SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "C:/win32libs/boost/lib")
@@ -282,7 +282,6 @@ set (   source_files
   routing/mesh/RectGrid.h
   routing/mesh/Trial.h
   general/Macros.h
-  general/SimpleGlob.h
 
   routing/CognitiveMapRouter.cpp
   routing/cognitive_map/GraphNetwork.cpp
@@ -462,6 +461,12 @@ if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIR})
   # todo: is this necessary?
   #target_link_libraries(jpscore ${Boost_LIBRARIES})
+    find_package(Boost COMPONENTS system filesystem REQUIRED)
+    #...
+    target_link_libraries(jpscore
+      ${Boost_FILESYSTEM_LIBRARY}
+      ${Boost_SYSTEM_LIBRARY}
+)
 endif()
 
 target_link_libraries(jpscore core )
