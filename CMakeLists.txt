@@ -461,11 +461,11 @@ if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIR})
   # todo: is this necessary?
   #target_link_libraries(jpscore ${Boost_LIBRARIES})
-    find_package(Boost COMPONENTS system filesystem REQUIRED)
-    #...
-    target_link_libraries(jpscore
-      ${Boost_FILESYSTEM_LIBRARY}
-      ${Boost_SYSTEM_LIBRARY}
+  find_package(Boost COMPONENTS system filesystem REQUIRED)
+  #...
+  target_link_libraries(jpscore
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY}
 )
 endif()
 

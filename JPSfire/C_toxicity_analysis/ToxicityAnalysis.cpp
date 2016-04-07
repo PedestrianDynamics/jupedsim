@@ -92,8 +92,13 @@ std::string ToxicityAnalysis::GetName() const
 double ToxicityAnalysis::GetGasConcentration(const Pedestrian * pedestrian, std::string quantity)
 {
     //std::cout << "\n" << quantity << std::endl;
-    double GasConcentration = _FMStorage->GetFDSMesh(pedestrian->GetGlobalTime(), pedestrian->GetElevation(), quantity).GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y);
-    return GasConcentration;
+    //try to get gas components, 0 if gas component is not provided by JPSfire
+    try {
+        const FDSMesh& meshref = _FMStorage->GetFDSMesh(pedestrian->GetGlobalTime(), pedestrian->GetElevation(), quantity);
+        return meshref.GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y);
+    } catch (int e) {
+        return 0.0;
+    }
 }
 
 void ToxicityAnalysis::set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage)
@@ -110,14 +115,14 @@ void ToxicityAnalysis::CalculateFED(const Pedestrian* p)
 {
     double FED;
 
-    //TODO try and except call for each Gas component?
     double dt =  p->GetGlobalTime();
-    double CO2 = GetGasConcentration(p, "CARBON_DIOXIDE_MASS_FRACTION");
-    double CO = GetGasConcentration(p, "CARBON_MONOXIDE_MASS_FRACTION");
-    double HCN = GetGasConcentration(p, "HYDROGEN_CYANIDE_MASS_FRACTION");
-    //double HCL = GetGasConcentration(p, "HYDROGEN_CHLORIDE_MASS_FRACTION");
+    double CO2=0., CO=0., HCN=0., HCL=0.;
+    CO2 = GetGasConcentration(p, "CARBON_DIOXIDE_MASS_FRACTION");
+    CO = GetGasConcentration(p, "CARBON_MONOXIDE_MASS_FRACTION");
+    HCN = GetGasConcentration(p, "HYDROGEN_CYANIDE_MASS_FRACTION");
+    HCL = GetGasConcentration(p, "HYDROGEN_CHLORIDE_MASS_FRACTION");
 
-    if( std::isnan(CO2) || std::isnan(CO) || std::isnan(HCN) )   //NaN check
+    if( std::isnan(CO2) || std::isnan(CO) || std::isnan(HCN) ||  std::isnan(HCL) )   //NaN check
     {
         FED = 0.0;
     }
@@ -131,16 +136,16 @@ void ToxicityAnalysis::CalculateFED(const Pedestrian* p)
         // t ; CO2; CO; HCN; HCL; FED
         // Once the FED calculation is completed a function to store the
         // information might be called
-        StoreToxicityAnalysis(p, CO2, CO, HCN, FED);
+        StoreToxicityAnalysis(p, CO2, CO, HCN, HCL, FED);
     }
 }
 
-void ToxicityAnalysis::StoreToxicityAnalysis(const Pedestrian* p, double CO2, double CO, double HCN, double FED)
+void ToxicityAnalysis::StoreToxicityAnalysis(const Pedestrian* p, double CO2, double CO, double HCN, double HCL, double FED)
 {
     //TODO store vector - similar to trajectory files?
 
     //Just for testing purposes
-    fprintf(stderr, "%f\t%i\t%f\t%f\t%f\t%f\n", p->GetGlobalTime(), p->GetID(), CO2, CO, HCN, FED);
+    fprintf(stderr, "%f\t%i\t%f\t%f\t%f\t%f\t%f\n", p->GetGlobalTime(), p->GetID(), CO2, CO, HCN, HCL, FED);
 }
 
 bool ToxicityAnalysis::ConductToxicityAnalysis()

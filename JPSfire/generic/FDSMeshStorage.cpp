@@ -51,13 +51,13 @@ FDSMeshStorage::FDSMeshStorage(const std::string &filepath, const double &finalT
     if ( fs::exists(_filepath.c_str() ) )
     {
         CreateQuantityList();
-        std::cout << "\nCreateQuantityList PASSED\n" << std::endl;
+        //std::cout << "\nCreateQuantityList PASSED\n" << std::endl;
         CreateElevationList();
-        std::cout << "\nCreateElevationList PASSED\n" << std::endl;
+        //std::cout << "\nCreateElevationList PASSED\n" << std::endl;
         CreateDoorList();
-        std::cout << "\nCreateDoorList PASSED\n" << std::endl;
+        //std::cout << "\nCreateDoorList PASSED\n" << std::endl;
         CreateTimeList();
-        std::cout << "CreateTimeList PASSED\n" << std::endl;
+        //std::cout << "CreateTimeList PASSED\n" << std::endl;
         CreateFDSMeshes();
         //std::cout << "CreateFDSMeshes PASSED\n" << std::endl;
     }
@@ -103,7 +103,7 @@ bool FDSMeshStorage::CreateElevationList()
       {
           std::string elev_dir = iter->path().c_str();
           double elev =  std::stod(elev_dir.substr( elev_dir.rfind("_") + 1 ));
-          std::cout << elev_dir << std::endl;
+          //std::cout << elev << std::endl;
           _elevationlist.push_back(elev);
       }
     }
@@ -226,7 +226,9 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &p
     std::string str = quantity + "/Z_" +  std::to_string(_NearestHeight) + "/t_"+std::to_string(simT)+".000000";
 
     //std::cout << str << std::endl;
-
+    if (_fMContainer.count(str)) {
+        throw -1;
+    }
     return _fMContainer.at(str);
 
 //    TODO
@@ -289,3 +291,4 @@ std::string FDSMeshStorage::IrritantOrNot() const
 {
     return _irritant;
 }
+
