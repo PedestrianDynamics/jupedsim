@@ -32,13 +32,9 @@
 #include <stdio.h>
 #include <glob.h>
 #include <string>
-//#include <boost/filesystem.hpp>
-#if defined(_WIN64) || defined(_WIN32)
-#include <direct.h>
-#else
-#include <sys/stat.h>
-#endif
+#include <boost/filesystem.hpp>
 
+namespace fs=boost::filesystem;
 
 FDSMeshStorage::FDSMeshStorage()
 {
@@ -51,16 +47,11 @@ FDSMeshStorage::FDSMeshStorage(const std::string &filepath, const double &finalT
     _elevationlist(), _timelist(), _irritant(irritant)
 {
     ///Check if _filepath is existent
-    struct stat file_path;
 
-    if ( stat(_filepath.c_str(), &file_path) != 0 )
+    if ( fs::exists(_filepath.c_str() ) )
     {
-        Log->Write("ERROR:\tCould not find directory %s", _filepath.c_str());
-        exit(EXIT_FAILURE);
-    }
-    else {
         CreateQuantityList();
-        std::cout << "\nQuantityList PASSED\n" << std::endl;
+        std::cout << "\nCreateQuantityList PASSED\n" << std::endl;
         CreateElevationList();
         std::cout << "\nCreateElevationList PASSED\n" << std::endl;
         CreateDoorList();
@@ -70,6 +61,10 @@ FDSMeshStorage::FDSMeshStorage(const std::string &filepath, const double &finalT
         CreateFDSMeshes();
         //std::cout << "CreateFDSMeshes PASSED\n" << std::endl;
     }
+    else {        
+        Log->Write("ERROR:\tCould not find directory %s", _filepath.c_str());
+        exit(EXIT_FAILURE);
+    }
 }
 
 
@@ -78,33 +73,23 @@ FDSMeshStorage::~FDSMeshStorage()
 
 }
 
-
 bool FDSMeshStorage::CreateQuantityList()
 {
     /// Create quantity list
-    glob_t paths;
-    int retval;
-
-    paths.gl_pathc = 0;
-    paths.gl_pathv = NULL;
-    paths.gl_offs = 0;
-
-    const char * glob_str = (_filepath + "*").c_str();
-    retval = glob( (glob_str) , GLOB_NOSORT, NULL, &paths );
-    if( retval == 0 ) {
-        int idx;
-        for( idx = 0; idx < paths.gl_pathc; idx++ ) {
-            std::string glob_str = (paths.gl_pathv[idx]);
-            //std::cout << "\n" << paths.gl_pathv[idx] << std::endl;
-            std::string quant_dir =  glob_str.substr( glob_str.rfind("/") + 1 );
-            _quantitylist.push_back(quant_dir);
-        }
-        globfree( &paths );
-        return true;
+    fs::directory_iterator end ;
+    for( fs::directory_iterator iter(_filepath) ; iter != end ; ++iter ) {
+      if ( fs::is_directory( *iter ) )
+      {
+          std::string quant_dir = iter->path().c_str();
+          quant_dir =  quant_dir.substr( quant_dir.rfind("/") + 1 );
+          //std::cout << quant_dir << std::endl;
+           _quantitylist.push_back(quant_dir);
+      }
     }
-    else {
+    if (_quantitylist.size() == 0) {
         Log->Write("ERROR:\tCould not find suitable quantities in %s", _filepath.c_str());
         exit(EXIT_FAILURE);
+        return false;
     }
 }
 
@@ -112,54 +97,37 @@ bool FDSMeshStorage::CreateQuantityList()
 bool FDSMeshStorage::CreateElevationList()
 {
     /// Create elevation list out of the available Z_* dirs for each quantity
-    glob_t paths;
-    int retval;
-
-    paths.gl_pathc = 0;
-    paths.gl_pathv = NULL;
-    paths.gl_offs = 0;
-
-    const char * glob_str = (_filepath + _quantitylist[0] + "/Z_*").c_str();
-    retval = glob( (glob_str) , GLOB_NOSORT, NULL, &paths );
-    if( retval == 0 ) {
-        int idx;
-        for( idx = 0; idx < paths.gl_pathc; idx++ ) {
-            std::string glob_str = (paths.gl_pathv[idx]);
-            //std::cout << "\n" << paths.gl_pathv[idx] << std::endl;
-            double elev_dir = std::stod( glob_str.substr( glob_str.rfind("_") + 1 ));
-            _elevationlist.push_back(elev_dir);
-        }
-        globfree( &paths );
-        return true;
+    fs::directory_iterator end ;
+    for( fs::directory_iterator iter(_filepath + _quantitylist[0]) ; iter != end ; ++iter ) {
+      if ( fs::is_directory( *iter ) )
+      {
+          std::string elev_dir = iter->path().c_str();
+          double elev =  std::stod(elev_dir.substr( elev_dir.rfind("_") + 1 ));
+          std::cout << elev_dir << std::endl;
+          _elevationlist.push_back(elev);
+      }
     }
-    else {
+    if (_elevationlist.size() == 0) {
         Log->Write("ERROR:\tCould not find suitable grid elevations in %s", _filepath.c_str());
         exit(EXIT_FAILURE);
+        return false;
     }
 }
+
 
 void FDSMeshStorage::CreateDoorList()
 {
     /// Create door list only neceassry if smoke sensor is active
-    glob_t paths;
-    int retval;
-
-    paths.gl_pathc = 0;
-    paths.gl_pathv = NULL;
-    paths.gl_offs = 0;
-
-    const char * glob_str = (_filepath + _quantitylist[0] +
-            "/Z_" + std::to_string(_elevationlist[0]) + "/Door*").c_str();
-    retval = glob( (glob_str) , GLOB_NOSORT, NULL, &paths );
-    if( retval == 0 ) {
-        int idx;
-        for( idx = 0; idx < paths.gl_pathc; idx++ ) {
-            std::string glob_str = (paths.gl_pathv[idx]);
-            std::cout << "\n" << paths.gl_pathv[idx] << std::endl;
-            std::string door_dir =  glob_str.substr( glob_str.rfind("/") + 1 );
-            _doorlist.push_back(door_dir);
-        }
-        globfree( &paths );
+    fs::directory_iterator end ;
+    for( fs::directory_iterator iter(_filepath + _quantitylist[0] +
+       "/Z_" + std::to_string(_elevationlist[0]) ) ; iter != end ; ++iter ) {
+      if ( fs::is_directory( *iter ) )
+      {
+          std::string door_dir = iter->path().c_str();
+          door_dir =  door_dir.substr( door_dir.rfind("/") + 1 );
+          std::cout << door_dir << std::endl;
+           _doorlist.push_back(door_dir);
+      }
     }
 }
 
@@ -176,20 +144,19 @@ void FDSMeshStorage::CreateTimeList()
 
     ///Check if specified final and update times are compliant with available data
     const char * check_str;
-    struct stat times;
     for(auto elem : _timelist) {
         if (_doorlist.size() > 0) {     // Smoke sensor active
         check_str = (_filepath + _quantitylist[0] + "/Z_" + std::to_string(_elevationlist[0]) + "/" +
                 _doorlist[0] + "/t_" + std::to_string(elem) + ".csv").c_str();
-                std::cout << check_str << std::endl;
+                //std::cout << check_str << std::endl;
         }
         else if (_doorlist.size() == 0) {   // Smoke sensor not active
             check_str = (_filepath + _quantitylist[0] + "/Z_" +
                     std::to_string(_elevationlist[0]) + "/t_" + std::to_string(elem) + ".csv").c_str();
-                    std::cout << check_str << std::endl;
+                    //std::cout << check_str << std::endl;
         }
 
-        if ( stat(check_str, &times) != 0 )
+        if (fs::exists(check_str) == false )
         {
             Log->Write("ERROR:\tSpecified times are not compliant with JPSfire data ", check_str);
             exit(EXIT_FAILURE);
