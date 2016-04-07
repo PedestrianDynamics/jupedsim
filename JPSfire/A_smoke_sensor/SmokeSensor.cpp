@@ -98,9 +98,11 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitiv
 
         double RiskTolerance = pedestrian->GetRiskTolerance();
 
-        double smokeFactor = 1 + (1-RiskTolerance)*_FMStorage->GetFDSMesh(item->GetCrossing()->GetCentre(),
-                                                      pedestrian->GetGlobalTime(), 2.25, "OPTICAL DENSITY").GetKnotValue(pedestrian->GetPos()._x,
-                                                                                                pedestrian->GetPos()._y);
+        double smokeFactor = 1 + (1-RiskTolerance)*
+                _FMStorage->GetFDSMesh(pedestrian->GetElevation(),
+                                       item->GetCrossing()->GetCentre(),
+                                       pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x,
+                                                                                 pedestrian->GetPos()._y);
         /// Set Smoke factor
         item->SetFactor(smokeFactor,GetName());
 

@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <glob.h>
 #include <string>
+//#include <boost/filesystem.hpp>
 #if defined(_WIN64) || defined(_WIN32)
 #include <direct.h>
 #else
@@ -59,11 +60,13 @@ FDSMeshStorage::FDSMeshStorage(const std::string &filepath, const double &finalT
     }
     else {
         CreateQuantityList();
-        //std::cout << "\nQuantityList PASSED\n" << std::endl;
+        std::cout << "\nQuantityList PASSED\n" << std::endl;
         CreateElevationList();
-        //std::cout << "\nCreateElevationList PASSED\n" << std::endl;
+        std::cout << "\nCreateElevationList PASSED\n" << std::endl;
+        CreateDoorList();
+        std::cout << "\nCreateDoorList PASSED\n" << std::endl;
         CreateTimeList();
-        //std::cout << "CreateTimeList PASSED\n" << std::endl;
+        std::cout << "CreateTimeList PASSED\n" << std::endl;
         CreateFDSMeshes();
         //std::cout << "CreateFDSMeshes PASSED\n" << std::endl;
     }
@@ -135,6 +138,31 @@ bool FDSMeshStorage::CreateElevationList()
     }
 }
 
+void FDSMeshStorage::CreateDoorList()
+{
+    /// Create door list only neceassry if smoke sensor is active
+    glob_t paths;
+    int retval;
+
+    paths.gl_pathc = 0;
+    paths.gl_pathv = NULL;
+    paths.gl_offs = 0;
+
+    const char * glob_str = (_filepath + _quantitylist[0] +
+            "/Z_" + std::to_string(_elevationlist[0]) + "/Door*").c_str();
+    retval = glob( (glob_str) , GLOB_NOSORT, NULL, &paths );
+    if( retval == 0 ) {
+        int idx;
+        for( idx = 0; idx < paths.gl_pathc; idx++ ) {
+            std::string glob_str = (paths.gl_pathv[idx]);
+            std::cout << "\n" << paths.gl_pathv[idx] << std::endl;
+            std::string door_dir =  glob_str.substr( glob_str.rfind("/") + 1 );
+            _doorlist.push_back(door_dir);
+        }
+        globfree( &paths );
+    }
+}
+
 
 void FDSMeshStorage::CreateTimeList()
 {
@@ -150,9 +178,16 @@ void FDSMeshStorage::CreateTimeList()
     const char * check_str;
     struct stat times;
     for(auto elem : _timelist) {
-        //std::cout << elem << std::endl;
-        check_str = (_filepath + _quantitylist[0] + "/Z_" + std::to_string(_elevationlist[0])
-                + "/t_" + std::to_string(elem) + ".csv").c_str();
+        if (_doorlist.size() > 0) {     // Smoke sensor active
+        check_str = (_filepath + _quantitylist[0] + "/Z_" + std::to_string(_elevationlist[0]) + "/" +
+                _doorlist[0] + "/t_" + std::to_string(elem) + ".csv").c_str();
+                std::cout << check_str << std::endl;
+        }
+        else if (_doorlist.size() == 0) {   // Smoke sensor not active
+            check_str = (_filepath + _quantitylist[0] + "/Z_" +
+                    std::to_string(_elevationlist[0]) + "/t_" + std::to_string(elem) + ".csv").c_str();
+                    std::cout << check_str << std::endl;
+        }
 
         if ( stat(check_str, &times) != 0 )
         {
@@ -165,30 +200,55 @@ void FDSMeshStorage::CreateTimeList()
 void FDSMeshStorage::CreateFDSMeshes()
 {
     _fMContainer.clear();
-    for (auto &h:_quantitylist)     //list of quantities
-    {
-        for (auto &i:_elevationlist)    //list of elevations
+    if (_doorlist.size() > 0) {     // Smoke sensor active
+        for (auto &h:_quantitylist)     //list of quantities
         {
-            //std::cout << "i " << i << std::endl;
-            for (auto &j:_timelist)         //list of times
+            for (auto &i:_elevationlist)    //list of elevations
             {
-                //std::cout << "j " << j << std::endl;
-                std::string str = h + "/Z_" + std::to_string(i) + "/t_"+std::to_string(j);
-                //std::cout << _filepath + str + ".csv" << std::endl;
-                FDSMesh mesh(_filepath + str + ".csv");
-                //std::string str = "t_"+std::to_string(i);
-                _fMContainer.insert(std::make_pair(str, mesh));
+                for (auto &j:_doorlist)         //list of doors
+                {
+                    //std::cout << "i " << i << std::endl;
+                    for (auto &k:_timelist)         //list of times
+                    {
+                        //std::cout << "k " << j << std::endl;
+                        std::string str = h + "/Z_" + std::to_string(i) +
+                        "/" + j + "/t_"+std::to_string(k);
+                        //std::cout << _filepath + str + ".csv" << std::endl;
+                        FDSMesh mesh(_filepath + str + ".csv");
+                        //std::string str = "t_"+std::to_string(i);
+                        _fMContainer.insert(std::make_pair(str, mesh));
+                    }
+                }
             }
-        }
+       }
+   }
+   else if (_doorlist.size() == 0) {     // Smoke sensor not active
+        for (auto &h:_quantitylist)     //list of quantities
+        {
+            for (auto &i:_elevationlist)    //list of elevations
+            {
+                //std::cout << "i " << i << std::endl;
+                for (auto &k:_timelist)         //list of times
+                {
+                    //std::cout << "k " << j << std::endl;
+                    std::string str = h + "/Z_" + std::to_string(i) +
+                    "/t_"+std::to_string(k);
+                    //std::cout << _filepath + str + ".csv" << std::endl;
+                    FDSMesh mesh(_filepath + str + ".csv");
+                    //std::string str = "t_"+std::to_string(i);
+                    _fMContainer.insert(std::make_pair(str, mesh));
+                }
+            }
+       }
    }
 }
 
 const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &pedElev, const std::string &quantity)
 {
+    //Smoke Sensor NOT active
     int simT=simTime/_updateIntervall;
     simT*=_updateIntervall;
     _PedEyeHeight = pedElev + 1.8;
-
     GetNearestHeight(_PedEyeHeight);
 
     if (simT>=_finalTime)
@@ -212,20 +272,25 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &p
     //    }
 }
 
-const FDSMesh &FDSMeshStorage::GetFDSMesh(const Point &doorCentre, const double &simTime, const double &pedElev,const std::string &quantity)
+const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &doorCentre, const double &simTime)
 {
-    //TODO Include QuantityList and ElevationList
+    //Smoke Sensor active
+
+    std::string quantity = "SOOT_EXTINCTION_COEFFICIENT";
+    _PedEyeHeight = pedElev + 1.8;
+    GetNearestHeight(_PedEyeHeight);
+
     int simT=simTime/_updateIntervall;
     simT*=_updateIntervall;
 
     if (simT>=_finalTime)
         simT=_finalTime;
 
-    //std::string str = quantity + "/Z_" +  std::to_string(_NearestHeight) + "/t_"+std::to_string(simT)+".000000";
-    std::string str = "Door_X_"+ std::to_string(doorCentre._x)
-                + "_Y_" + std::to_string(doorCentre._y) + "/t_"+std::to_string(simT)+".000000";
+    std::string str = quantity + "/Z_" +  std::to_string(_NearestHeight) + "/" +
+    "Door_X_"+ std::to_string(doorCentre._x) + "_Y_" + std::to_string(doorCentre._y) +
+    "/t_"+std::to_string(simT)+".000000";
 
-    //std::cout << str << std::endl;
+    std::cout << str << std::endl;
 
     return _fMContainer.at(str);
 }

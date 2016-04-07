@@ -52,9 +52,10 @@ public:
     bool CreateQuantityList();
     void CreateTimeList();
     bool CreateElevationList();
+    void CreateDoorList();
     void CreateFDSMeshes();
     const FDSMesh& GetFDSMesh(const double &simTime, const double &pedElev,const std::string &quantity);
-    const FDSMesh& GetFDSMesh(const Point &doorCentre, const double &simTime, const double &pedElev, const std::string &quantity);
+    const FDSMesh& GetFDSMesh(const double &pedElev, const Point &doorCentre, const double &simTime);
     std::string GetStudy() const;
     std::string IrritantOrNot() const;
 
@@ -67,12 +68,14 @@ private:
     double _updateIntervall;
     double _finalTime;
     std::vector<std::string> _quantitylist;
+    std::vector<std::string> _doorlist;
     std::vector<double> _elevationlist;
     std::vector<double> _timelist;
     double _PedEyeHeight;
     double _NearestHeight;
     double GetNearestHeight(double);
     const char * glob_str;
+
 };
 
 #endif // FDSMeshSTORAGE_H

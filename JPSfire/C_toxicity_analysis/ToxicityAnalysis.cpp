@@ -119,12 +119,12 @@ void ToxicityAnalysis::CalculateFED(const Pedestrian* p)
 
     if( std::isnan(CO2) || std::isnan(CO) || std::isnan(HCN) )   //NaN check
     {
-        FED = 0;
+        FED = 0.0;
     }
     else
     {
         // TODO: FED Calculation with available gas components (BART?)
-        FED = 0;
+        FED = 0.0;
         //
         // each pedestrian gets a vector that is filled with the
         // gas concentrations per time step in the following format:
@@ -140,7 +140,7 @@ void ToxicityAnalysis::StoreToxicityAnalysis(const Pedestrian* p, double CO2, do
     //TODO store vector - similar to trajectory files?
 
     //Just for testing purposes
-    fprintf(stderr, "%f\t%f\t%f\t%f\t%f\t%f\n", p->GetGlobalTime(), p->GetID(), CO2, CO, HCN, FED);
+    fprintf(stderr, "%f\t%i\t%f\t%f\t%f\t%f\n", p->GetGlobalTime(), p->GetID(), CO2, CO, HCN, FED);
 }
 
 bool ToxicityAnalysis::ConductToxicityAnalysis()
