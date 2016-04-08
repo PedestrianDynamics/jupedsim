@@ -48,7 +48,7 @@ FDSMeshStorage::FDSMeshStorage(const std::string &filepath, const double &finalT
 {
     ///Check if _filepath is existent
 
-    if ( fs::exists(_filepath.c_str() ) )
+    if ( fs::exists(_filepath ) )
     {
         CreateQuantityList();
         //std::cout << "\nCreateQuantityList PASSED\n" << std::endl;
@@ -236,7 +236,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &p
 //        return _fMContainer.at(str);
 //    }
 //    else {
-//        Log->Write("ERROR:\tCould find no appropriate FDS mesh: ", quantity.c_str(), pedElev, simT);
+//        Log->Write("ERROR:\tCould find no appropriate FDS mesh: ", quantity.string(), pedElev, simT);
 //        exit(EXIT_FAILURE);
     //    }
 }
