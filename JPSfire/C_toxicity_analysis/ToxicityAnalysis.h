@@ -31,6 +31,7 @@
 
 #include <memory>
 #include "ToxicityOutputhandler.h"
+#include <string>
 
 class Pedestrian;
 class Building;

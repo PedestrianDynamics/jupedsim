@@ -30,6 +30,7 @@
 #define WALKINGSPEED_H 1
 
 #include <memory>
+#include <string>
 
 class Pedestrian;
 class Building;

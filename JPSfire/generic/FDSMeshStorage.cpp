@@ -28,9 +28,9 @@
  **/
 #include "FDSMeshStorage.h"
 #include "../../IO/OutputHandler.h"
-#include <unistd.h>
+//#include <unistd.h>
 #include <stdio.h>
-#include <glob.h>
+//#include <glob.h>
 #include <string>
 #include <boost/filesystem.hpp>
 
@@ -80,7 +80,7 @@ bool FDSMeshStorage::CreateQuantityList()
     for( fs::directory_iterator iter(_filepath) ; iter != end ; ++iter ) {
       if ( fs::is_directory( *iter ) )
       {
-          std::string quant_dir = iter->path().string();
+		  std::string quant_dir = iter->path().string();
           quant_dir =  quant_dir.substr( quant_dir.rfind("/") + 1 );
           //std::cout << quant_dir << std::endl;
            _quantitylist.push_back(quant_dir);
@@ -267,7 +267,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
 double FDSMeshStorage::GetNearestHeight(double _PedEyeHeight)
 {
     ///find the nearest height in the JPSfire data related to the ped elevation
-    double min_val = std::numeric_limits<double>::max();
+	double min_val = FLT_MAX;// std::numeric_limits<double>::max();
     int index = 0;
 
     for(int i=0;i < _elevationlist.size() ;++i) {
