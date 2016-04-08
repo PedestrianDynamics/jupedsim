@@ -30,6 +30,7 @@
 #define TOXICITYANALYSIS_H 1
 
 #include <memory>
+#include "ToxicityOutputhandler.h"
 
 class Pedestrian;
 class Building;
@@ -61,7 +62,10 @@ public:
 
 private:
 
+    const Building* _building;
     std::shared_ptr<FDSMeshStorage> _FMStorage;
+    std::shared_ptr<ToxicityOutputHandler> _outputhandler;
+    int _frame;
 
 };
 

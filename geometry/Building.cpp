@@ -74,7 +74,8 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
      _savePathway = false;
      _linkedCellGrid = nullptr;
      _WalkingSpeed = new WalkingSpeed(this);
-     _ToxicityAnalysis = new ToxicityAnalysis(this);
+     _ToxicityAnalysis = std::make_shared<ToxicityAnalysis>(this);
+
      //todo: what happens if any of these  methods failed (return false)? throw exception ?
      if(!LoadGeometry())
      {

@@ -323,6 +323,7 @@ set (   source_files
   JPSfire/A_smoke_sensor/SmokeSensor.cpp
   JPSfire/B_walking_speed/WalkingSpeed.cpp
   JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
+  JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
 
 
   )
@@ -439,6 +440,7 @@ set (   header_files
   JPSfire/A_smoke_sensor/SmokeSensor.h
   JPSfire/B_walking_speed/WalkingSpeed.h
   JPSfire/C_toxicity_analysis/ToxicityAnalysis.h
+  JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
   )
 
 

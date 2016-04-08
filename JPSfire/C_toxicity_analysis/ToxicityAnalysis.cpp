@@ -36,18 +36,25 @@
 #include <set>
 #include <algorithm>
 #include <math.h>
+#include "../../IO/OutputHandler.h"
 
 ToxicityAnalysis::ToxicityAnalysis(const Building * b)
 {
+    _building = b;
     _FMStorage = nullptr;
     LoadJPSfireInfo(b->GetProjectFilename());
+
+    std::string str(_building->GetProjectRootDir()+"ToxicityAnalysis.xml");
+    _outputhandler = std::make_shared<ToxicityOutputHandler>(str.c_str());
+    _outputhandler->WriteToFileHeader();
+    _frame=0;
+
 }
 
 ToxicityAnalysis::~ToxicityAnalysis()
 {
+
 }
-
-
 
 bool ToxicityAnalysis::LoadJPSfireInfo(const std::string &projectFilename )
 {
@@ -115,7 +122,7 @@ void ToxicityAnalysis::CalculateFED(const Pedestrian* p)
 {
     double FED;
 
-    double dt =  p->GetGlobalTime();
+    double dt =  p->GetGlobalTime();    //current sim time
     double CO2=0., CO=0., HCN=0., HCL=0.;
     CO2 = GetGasConcentration(p, "CARBON_DIOXIDE_MASS_FRACTION");
     CO = GetGasConcentration(p, "CARBON_MONOXIDE_MASS_FRACTION");
@@ -134,8 +141,6 @@ void ToxicityAnalysis::CalculateFED(const Pedestrian* p)
         // each pedestrian gets a vector that is filled with the
         // gas concentrations per time step in the following format:
         // t ; CO2; CO; HCN; HCL; FED
-        // Once the FED calculation is completed a function to store the
-        // information might be called
         StoreToxicityAnalysis(p, CO2, CO, HCN, HCL, FED);
     }
 }
@@ -144,8 +149,20 @@ void ToxicityAnalysis::StoreToxicityAnalysis(const Pedestrian* p, double CO2, do
 {
     //TODO store vector - similar to trajectory files?
 
-    //Just for testing purposes
-    fprintf(stderr, "%f\t%i\t%f\t%f\t%f\t%f\t%f\n", p->GetGlobalTime(), p->GetID(), CO2, CO, HCN, HCL, FED);
+    //for testing purposes. Can be tunnelled to file via jpscore jpscore ... 2> tox
+    fprintf(stderr, "t\tPed ID\tc_CO2\tc_CO\tc_HCN\tc_HCL\tPed FED"
+                    "\n%f\t%i\t%f\t%f\t%f\t%f\t%f\n",
+            p->GetGlobalTime(), p->GetID(), CO2, CO, HCN, HCL, FED);
+
+    string data;
+    char tmp[CLENGTH] = "";
+
+    sprintf(tmp, "\t<agent ID=\"%i\"\tt=\"%f\"\tc_CO2=\"%f\"\tc_CO=\"%f\"\tc_HCN=\"%f\"\tc_HCL=\"%f\"\tFED=\"%f\"/>\n",
+         p->GetID(), p->GetGlobalTime(), CO2, CO, HCN, HCL, FED);
+
+        data.append(tmp);
+
+    _outputhandler->WriteToFile(data);
 }
 
 bool ToxicityAnalysis::ConductToxicityAnalysis()
