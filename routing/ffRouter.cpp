@@ -129,8 +129,8 @@ bool FFRouter::Init(Building* building)
                //distMatrix[i][j] = 0,   if i==j
                //distMatrix[i][j] = max, else
                _distMatrix.insert(std::make_pair( key , value));
-               //pathsMatrix[i][j] = i
-               _pathsMatrix.insert(std::make_pair( key , id1 ));
+               //pathsMatrix[i][j] = i or j ? (follow wiki:path_reconstruction, it should be j)
+               _pathsMatrix.insert(std::make_pair( key , id2 ));
           }
      }
 
@@ -221,6 +221,15 @@ bool FFRouter::Init(Building* building)
           }
      }
      FloydWarshall();
+
+     //debug output in file
+     std::ofstream matrixfile;
+     matrixfile.open("Matrix.txt");
+
+     for (auto mapItem : _distMatrix) {
+          matrixfile << mapItem.first.first << " to " << mapItem.first.second << " : " << mapItem.second << "\t via \t" << _pathsMatrix[mapItem.first] << std::endl;
+     }
+     matrixfile.close();
 //     Log->Write("1-3: %f \t 1-2: %f \t 2-3: %f",
 //                _distMatrix.at(std::make_pair(400, 382)),
 //                _distMatrix.at(std::make_pair(400, 381)),
@@ -243,11 +252,11 @@ int FFRouter::FindExit(Pedestrian* p)
      validFinalDoor.clear();
      if (goalID == -1) {
           for (auto& pairDoor : _ExitsByUID) {
-               //we add the closest Doors of every goal, goalToLineUIDmap gets
-               //populated in Init()
+               //we add the all exits,
                validFinalDoor.emplace_back(pairDoor.first); //UID
           }
-     } else {  //only one specific goal
+     } else {  //only one specific goal, goalToLineUIDmap gets
+               //populated in Init()
           if (goalToLineUIDmap.count(goalID) == 0) {
                Log->Write("ERROR: \t ffRouter: unknown goalID: %d in FindExit(Ped)",goalID);
           } else {
@@ -298,26 +307,23 @@ void FFRouter::Reset()
 
 void FFRouter::FloydWarshall()
 {
-//     for (int k = 0; k < n; k++)
-//          for (int i = 0; i < n; i++)
-//               for (int j = 0; j < n; j++)
-//                    if (_distMatrix[i][k] + _distMatrix[k][j] < _distMatrix[i][j]) {
-//                         _distMatrix[i][j] = _distMatrix[i][k] + _distMatrix[k][j];
-//                         _pathsMatrix[i][j] = _pathsMatrix[k][j];
-//                    }
-
-     int totalnum = _building->GetAllTransitions().size();
+     int totalnum = _allDoorUIDs.size();
      for(int k = 0; k<totalnum; ++k) {
           for(int i = 0; i<totalnum; ++i) {
                for(int j= 0; j<totalnum; ++j) {
-                    std::pair<int, int> key_ij = std::make_pair(i, j);
-                    std::pair<int, int> key_ik = std::make_pair(i, k);
-                    std::pair<int, int> key_kj = std::make_pair(k, j);
+                    std::pair<int, int> key_ij = std::make_pair(_allDoorUIDs[i], _allDoorUIDs[j]);
+                    std::pair<int, int> key_ik = std::make_pair(_allDoorUIDs[i], _allDoorUIDs[k]);
+                    std::pair<int, int> key_kj = std::make_pair(_allDoorUIDs[k], _allDoorUIDs[j]);
+                    //debug ar.graf
+                    //double a = _distMatrix[key_ij];
+                    //double b = _distMatrix[key_ik];
+                    //double c = _distMatrix[key_kj];
+                    //double sum = b + c;
                     if(_distMatrix[key_ik] + _distMatrix[key_kj] < _distMatrix[key_ij]) {
                          _distMatrix.erase(key_ij);
                          _distMatrix.insert(std::make_pair(key_ij, _distMatrix[key_ik] + _distMatrix[key_kj]));
                          _pathsMatrix.erase(key_ij);
-                         _pathsMatrix.insert(std::make_pair(key_ij, _pathsMatrix[key_kj]));
+                         _pathsMatrix.insert(std::make_pair(key_ij, _pathsMatrix[key_ik]));
                     }
                }
           }
