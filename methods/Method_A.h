@@ -46,8 +46,8 @@ public:
      Method_A();
      virtual ~Method_A();
      void SetMeasurementArea (MeasurementArea_L* area);
-     void SetTimeInterval(const int& deltaT);
-     bool Process (const PedData& peddata,const std::string& scriptsLocation);
+     void SetTimeInterval(int deltaT);
+     bool Process (const PedData& peddata,const std::string& scriptsLocation, const double& zPos_measureArea);
      void SetPlotTimeSeries(bool plotTimeseries);
 
 private:

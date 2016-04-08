@@ -47,6 +47,7 @@ public:
      }
      int _id;
      std::string _type;
+     double _zPos;
 };
 
 class MeasurementArea_B: public MeasurementArea

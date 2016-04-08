@@ -53,7 +53,7 @@ class Method_D
 public:
      Method_D();
      virtual ~Method_D();
-     bool Process (const PedData& peddata,const std::string& scriptsLocation);
+     bool Process (const PedData& peddata,const std::string& scriptsLocation, const double& zPos_measureArea);
      void SetCalculateIndividualFD(bool individualFD);
      void Setcutbycircle(double radius,int edges);
      void SetGeometryPolygon(polygon_2d geometryPolygon);

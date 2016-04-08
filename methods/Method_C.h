@@ -36,7 +36,7 @@ class Method_C
 public:
      Method_C();
      virtual ~Method_C();
-     bool Process (const PedData& peddata);
+     bool Process (const PedData& peddata, const double& zPos_measureArea);
      void SetMeasurementArea (MeasurementArea_B* area);
 
 private:

@@ -45,6 +45,7 @@ Method_A::Method_A()
      _deltaT = 100;
      _fps=16;
      _areaForMethod_A = NULL;
+     _plotTimeSeries = false;
 }
 
 Method_A::~Method_A()
@@ -52,7 +53,7 @@ Method_A::~Method_A()
 
 }
 
-bool Method_A::Process (const PedData& peddata,const string& scriptsLocation)
+bool Method_A::Process (const PedData& peddata,const string& scriptsLocation, const double& zPos_measureArea)
 {
      _trajName = peddata.GetTrajName();
      _projectRootDir = peddata.GetProjectRootDir();
@@ -72,6 +73,7 @@ bool Method_A::Process (const PedData& peddata,const string& scriptsLocation)
      }
      Log->Write("------------------------Analyzing with Method A-----------------------------");
      //for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
+     bool PedInGeometry =false;
      for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
      {
     	  int frameNr = ite->first;
@@ -81,16 +83,28 @@ bool Method_A::Process (const PedData& peddata,const string& scriptsLocation)
                Log->Write("frame ID = %d",frid);
           }
           vector<int> ids=_peds_t[frameNr];
-          const vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids);
-          const vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids);
-          const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids);
-          GetAccumFlowVelocity(frameNr, ids, VInFrame);
-          char tmp[30];
-          sprintf(tmp, "%.2f\t%d\n", frid/_fps, _classicFlow);
-          outputRhoV.append(tmp);
+          vector<int> IdInFrame = peddata.GetIdInFrame(frameNr, ids, zPos_measureArea);
+          const vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids, zPos_measureArea);
+          const vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids, zPos_measureArea);
+          const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
+          if(IdInFrame.size()>0)
+          {
+			  GetAccumFlowVelocity(frameNr, IdInFrame, VInFrame);
+			  char tmp[30];
+			  sprintf(tmp, "%.2f\t%d\n", frid/_fps, _classicFlow);
+			  outputRhoV.append(tmp);
+			  PedInGeometry=true;
+          }
      }
-     FlowRate_Velocity(peddata.GetFps(), _accumPedsPassLine,_accumVPassLine);
-     WriteFile_N_t(outputRhoV);
+     if(PedInGeometry)
+     {
+		 FlowRate_Velocity(peddata.GetFps(), _accumPedsPassLine,_accumVPassLine);
+		 WriteFile_N_t(outputRhoV);
+     }
+     else
+     {
+    	 Log->Write("Warning: No any pedestrian exists on the plane of the selected Measurement area!!");
+     }
      delete []_passLine;
      return true;
 }
@@ -215,7 +229,7 @@ void Method_A::SetMeasurementArea (MeasurementArea_L* area)
      _areaForMethod_A = area;
 }
 
-void Method_A::SetTimeInterval(const int& deltaT)
+void Method_A::SetTimeInterval(int deltaT)
 {
      _deltaT = deltaT;
 }

@@ -80,6 +80,7 @@ bool PedData::InitializeVariables(const string& filename)
 {
      vector<double> xs;
      vector<double> ys;
+     vector<double> zs;
      vector<string> vcmp; // the direction identification for velocity calculation
      vector<int> _IdsTXT;   // the Id data from txt format trajectory data
      vector<int> _FramesTXT;  // the Frame data from txt format trajectory data
@@ -126,6 +127,7 @@ bool PedData::InitializeVariables(const string& filename)
                     _FramesTXT.push_back(atoi(strs[1].c_str()));
                     xs.push_back(atof(strs[2].c_str()));
                     ys.push_back(atof(strs[3].c_str()));
+                    zs.push_back(atof(strs[4].c_str()));
                     if(_vComponent=="F")
                     {
 						if(strs.size() >= 6)
@@ -192,8 +194,10 @@ bool PedData::InitializeVariables(const string& filename)
           int frm = _FramesTXT[i] - _minFrame;
           double x = xs[i]*M2CM;
           double y = ys[i]*M2CM;
+          double z = zs[i]*M2CM;
           _xCor[ID][frm] = x;
           _yCor[ID][frm] = y;
+          _zCor[ID][frm] = z;
           if(_vComponent == "F")
           {
         	  _vComp[ID][frm] = vcmp[i];
@@ -297,12 +301,14 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
                //get agent id, x, y
                double x= atof(xAgent->Attribute("x"));
                double y= atof(xAgent->Attribute("y"));
+               double z= atof(xAgent->Attribute("z"));
                int ID= atoi(xAgent->Attribute("ID"))-_minID;
 
 
                _peds_t[frameNr].push_back(ID);
                _xCor[ID][frameNr] =  x*M2CM;
                _yCor[ID][frameNr] =  y*M2CM;
+               _zCor[ID][frameNr] =  z*M2CM;
                if(_vComponent == "F")
                {
             	   if(xAgent->Attribute("vc"))
@@ -347,18 +353,48 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
      return true;
 }
 
-vector<double> PedData::GetVInFrame(int frame, const vector<int>& ids) const
+vector<double> PedData::GetVInFrame(int frame, const vector<int>& ids, double zPos) const
 {
      vector<double> VInFrame;
      for(unsigned int i=0; i<ids.size();i++)
      {
           int id = ids[i];
           int Tpast = frame - _deltaF;
-          int Tfuture = frame + _deltaF;
-          double v = GetInstantaneousVelocity(frame, Tpast, Tfuture, id, _firstFrame, _lastFrame, _xCor, _yCor);
-          VInFrame.push_back(v);
+		  int Tfuture = frame + _deltaF;
+		  double v = GetInstantaneousVelocity(frame, Tpast, Tfuture, id, _firstFrame, _lastFrame, _xCor, _yCor);
+          if(zPos<1000000.0)
+          {
+        	  if(fabs(_zCor[id][frame]-zPos*M2CM)<J_EPS_EVENT)
+        	  {
+        		  VInFrame.push_back(v);
+        	  }
+          }
+          else
+          {
+        	  VInFrame.push_back(v);
+          }
      }
      return VInFrame;
+}
+
+vector<double> PedData::GetXInFrame(int frame, const vector<int>& ids, double zPos) const
+{
+     vector<double> XInFrame;
+     for(int id:ids)
+     {
+    	 if(zPos<1000000.0)
+		  {
+    		 if(fabs(_zCor[id][frame]-zPos*M2CM)<J_EPS_EVENT)
+			  {
+				  XInFrame.push_back(_xCor[id][frame]);
+			  }
+		  }
+		  else
+		  {
+			  XInFrame.push_back(_xCor[id][frame]);
+		  }
+     }
+     return XInFrame;
 }
 
 vector<double> PedData::GetXInFrame(int frame, const vector<int>& ids) const
@@ -366,9 +402,30 @@ vector<double> PedData::GetXInFrame(int frame, const vector<int>& ids) const
      vector<double> XInFrame;
      for(int id:ids)
      {
-          XInFrame.push_back(_xCor[id][frame]);
+			  XInFrame.push_back(_xCor[id][frame]);
      }
      return XInFrame;
+}
+
+vector<double> PedData::GetYInFrame(int frame, const vector<int>& ids, double zPos) const
+{
+     vector<double> YInFrame;
+     for(unsigned int i=0; i<ids.size();i++)
+     {
+          int id = ids[i];
+          if(zPos<1000000.0)
+          {
+        	  if(fabs(_zCor[id][frame]-zPos*M2CM)<J_EPS_EVENT)
+			  {
+				  YInFrame.push_back(_yCor[id][frame]);
+			  }
+          }
+          else
+          {
+        	  YInFrame.push_back(_yCor[id][frame]);
+          }
+     }
+     return YInFrame;
 }
 
 vector<double> PedData::GetYInFrame(int frame, const vector<int>& ids) const
@@ -382,6 +439,17 @@ vector<double> PedData::GetYInFrame(int frame, const vector<int>& ids) const
      return YInFrame;
 }
 
+vector<double> PedData::GetZInFrame(int frame, const vector<int>& ids) const
+{
+     vector<double> ZInFrame;
+     for(unsigned int i=0; i<ids.size();i++)
+     {
+          int id = ids[i];
+          ZInFrame.push_back(_zCor[id][frame]);
+     }
+     return ZInFrame;
+}
+
 vector<int> PedData::GetIdInFrame(const vector<int>& ids) const
 {
      vector<int> IdInFrame;
@@ -389,6 +457,26 @@ vector<int> PedData::GetIdInFrame(const vector<int>& ids) const
      {
           id = id +_minID;
           IdInFrame.push_back(id);
+     }
+     return IdInFrame;
+}
+
+vector<int> PedData::GetIdInFrame(int frame, const vector<int>& ids, double zPos) const
+{
+     vector<int> IdInFrame;
+     for(int id:ids)
+     {
+          if(zPos<1000000.0)
+          {
+			  if(fabs(_zCor[id][frame]-zPos*M2CM)<J_EPS_EVENT)
+			  {
+				  IdInFrame.push_back(id +_minID);
+			  }
+          }
+          else
+          {
+        	  IdInFrame.push_back(id +_minID);
+          }
      }
      return IdInFrame;
 }
@@ -455,10 +543,12 @@ void PedData::CreateGlobalVariables(int numPeds, int numFrames)
 {
      _xCor = new double* [numPeds];
      _yCor = new double* [numPeds];
+     _zCor = new double* [numPeds];
      _vComp = new string* [numPeds];
      for (int i=0; i<numPeds; i++) {
           _xCor[i] = new double [numFrames];
           _yCor[i] = new double [numFrames];
+          _zCor[i] = new double [numFrames];
           _vComp[i] =new string [numFrames];
      }
      _firstFrame = new int[numPeds];  // Record the first frame of each pedestrian
@@ -468,6 +558,7 @@ void PedData::CreateGlobalVariables(int numPeds, int numFrames)
           for (int j = 0; j < numFrames; j++) {
                _xCor[i][j] = 0;
                _yCor[i][j] = 0;
+               _zCor[i][j] = 0;
                _vComp[i][j] ="B";
           }
           _firstFrame[i] = INT_MAX;
@@ -519,6 +610,11 @@ double** PedData::GetXCor() const
 double** PedData::GetYCor() const
 {
      return _yCor;
+}
+
+double** PedData::GetZCor() const
+{
+     return _zCor;
 }
 
 int* PedData::GetFirstFrame() const

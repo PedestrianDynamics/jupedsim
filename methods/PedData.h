@@ -59,12 +59,17 @@ public:
      std::map<int , std::vector<int>> GetPedsFrame() const;
      double** GetXCor() const;
      double** GetYCor() const;
+     double** GetZCor() const;
      int* GetFirstFrame() const;
      int* GetLastFrame() const;
      std::vector<int> GetIdInFrame(const std::vector<int>& ids) const;
+     std::vector<int> GetIdInFrame(int frame, const std::vector<int>& ids, double zPos) const;
+     std::vector<double> GetXInFrame(int frame, const std::vector<int>& ids, double zPos) const;
+     std::vector<double> GetYInFrame(int frame, const std::vector<int>& ids, double zPos) const;
      std::vector<double> GetXInFrame(int frame, const std::vector<int>& ids) const;
      std::vector<double> GetYInFrame(int frame, const std::vector<int>& ids) const;
-     std::vector<double> GetVInFrame(int frame, const std::vector<int>& ids) const;
+     std::vector<double> GetZInFrame(int frame, const std::vector<int>& ids) const;
+     std::vector<double> GetVInFrame(int frame, const std::vector<int>& ids, double zPos) const;
      bool ReadData(const std::string& projectRootDir, const std::string& path, const std::string& filename, const FileFormat& _trajformat, int deltaF, std::string vComponent);
 
 
@@ -93,6 +98,7 @@ private:
      int *_lastFrame=NULL;    // Record the last frame of each pedestrian
      double **_xCor=NULL;
      double **_yCor=NULL;
+     double **_zCor=NULL;
      std::string **_vComp=NULL;
 
 };

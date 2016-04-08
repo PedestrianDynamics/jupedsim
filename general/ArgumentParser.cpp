@@ -65,7 +65,6 @@ ArgumentParser::ArgumentParser()
 
      _vComponent = "B";
      _isMethodA = false;
-     _timeIntervalA = 160;
      _delatTVInst = 5;
      _isMethodB = false;
      _isMethodC =false;
@@ -73,9 +72,6 @@ ArgumentParser::ArgumentParser()
      _isCutByCircle = false;
      _isOutputGraph= false;
      _isPlotGraph= false;
-     _isPlotTimeSeriesA=false;
-     _isPlotTimeSeriesD=false;
-     _isPlotTimeSeriesC=false;
      _isOneDimensional=false;
      _isGetProfile =false;
      _steadyStart =100;
@@ -350,7 +346,21 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                MeasurementArea_B* areaB = new MeasurementArea_B();
                areaB->_id=xmltoi(xMeasurementArea_B->ToElement()->Attribute("id"));
                areaB->_type=xMeasurementArea_B->ToElement()->Attribute("type");
-
+               if(xMeasurementArea_B->ToElement()->Attribute("zPos"))
+				{
+				   if(string(xMeasurementArea_B->ToElement()->Attribute("zPos"))!="None")
+				   {
+					   areaB->_zPos=xmltof(xMeasurementArea_B->ToElement()->Attribute("zPos"));
+				   }
+				   else
+				   {
+					   areaB->_zPos=10000001.0;
+				   }
+				}
+				else
+				{
+					areaB->_zPos=10000001.0;
+				}
                polygon_2d poly;
                Log->Write("INFO: \tMeasure area id  <%d> with type <%s>",areaB->_id, areaB->_type.c_str());
                for(TiXmlElement* xVertex=xMeasurementArea_B->FirstChildElement("vertex"); xVertex; xVertex=xVertex->NextSiblingElement("vertex") )
@@ -378,6 +388,21 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                MeasurementArea_L* areaL = new MeasurementArea_L();
                areaL->_id=xmltoi(xMeasurementArea_L->ToElement()->Attribute("id"));
                areaL->_type=xMeasurementArea_L->ToElement()->Attribute("type");
+               if(xMeasurementArea_L->ToElement()->Attribute("zPos"))
+				{
+				   if(string(xMeasurementArea_L->ToElement()->Attribute("zPos"))!="None")
+				   {
+					   areaL->_zPos=xmltof(xMeasurementArea_L->ToElement()->Attribute("zPos"));
+				   }
+				   else
+				   {
+					   areaL->_zPos=10000001.0;
+				   }
+				}
+			    else
+			    {
+			    	areaL->_zPos=10000001.0;
+			    }
                Log->Write("INFO: \tMeasure area id  <%d> with type <%s>",areaL->_id,areaL->_type.c_str());
                areaL->_lineStartX = xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("x"))*M2CM;
                areaL->_lineStartY =xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("y"))*M2CM;
@@ -466,22 +491,48 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           {
                _isMethodA = true;
                Log->Write("INFO: \tMethod A is selected" );
-               _timeIntervalA = xmltoi(xMethod_A->FirstChildElement("frame_interval")->GetText());
-               Log->Write("INFO: \tFrame interval used for calculating flow in Method A is <%d> frame",_timeIntervalA);
+/*               _timeIntervalA = xmltoi(xMethod_A->FirstChildElement("frame_interval")->GetText());
+               Log->Write("INFO: \tFrame interval used for calculating flow in Method A is <%d> frame",_timeIntervalA);*/
                for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_A")->FirstChildElement("measurement_area");
                          xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
                {
                     _areaIDforMethodA.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
+
+                    if(xMeasurementArea->Attribute("frame_interval"))
+					{
+						if(string(xMeasurementArea->Attribute("frame_interval"))!="None")
+						{
+							_timeIntervalA.push_back(xmltoi(xMeasurementArea->Attribute("frame_interval")));
+							Log->Write("\tFrame interval used for calculating flow is <%d> frame",xmltoi(xMeasurementArea->Attribute("frame_interval")));
+						}
+						else
+						{
+							_timeIntervalA.push_back(100);
+						}
+					}
+					else
+					{
+						_timeIntervalA.push_back(100);
+					}
+                    if(xMeasurementArea->Attribute("plot_time_series"))
+					{
+						if(string(xMeasurementArea->Attribute("plot_time_series"))=="true")
+						{
+							_isPlotTimeSeriesA.push_back(true);
+							Log->Write("\tThe Time series N-t measured will be plotted!! ");
+						}
+						else
+						{
+							_isPlotTimeSeriesA.push_back(false);
+						}
+					}
+					else
+					{
+						_isPlotTimeSeriesA.push_back(false);
+					}
+
                }
-               if(xMethod_A->FirstChildElement("plot_time_series"))
-               {
-				   if ( string(xMethod_A->FirstChildElement("plot_time_series")->Attribute("enabled"))=="true")
-				   {
-					   _isPlotTimeSeriesA=true;
-					   Log->Write("INFO: \tThe Time series N-t measured with Method A will be plotted!!");
-				   }
-            	}
           }
      }
      // method B
@@ -511,14 +562,23 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                {
                     _areaIDforMethodC.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
-               }
-               if (xMethod_C->FirstChildElement("plot_time_series"))
-               {
-				   if ( string(xMethod_C->FirstChildElement("plot_time_series")->Attribute("enabled"))=="true")
-				   {
-					   _isPlotTimeSeriesC=true;
-					   Log->Write("INFO: \tThe Time series measured with Method C will be plotted!!");
-				   }
+
+                    if(xMeasurementArea->Attribute("plot_time_series"))
+					{
+						if(string(xMeasurementArea->Attribute("plot_time_series"))=="true")
+						{
+							_isPlotTimeSeriesC.push_back(true);
+							Log->Write("\tThe Time series measured will be plotted!! ");
+						}
+						else
+						{
+							_isPlotTimeSeriesC.push_back(false);
+						}
+					}
+					else
+					{
+						_isPlotTimeSeriesC.push_back(false);
+					}
                }
           }
      // method D
@@ -539,7 +599,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
 					   if(string(xMeasurementArea->Attribute("start_frame"))!="None")
 					   {
 						   _start_frames_MethodD.push_back(xmltoi(xMeasurementArea->Attribute("start_frame")));
-						   Log->Write("INFO: \tFor Measurement area id <%d> the analysis starts from frame <%d>", xmltoi(xMeasurementArea->Attribute("id")),xmltoi(xMeasurementArea->Attribute("start_frame")));
+						   Log->Write("\tthe analysis starts from frame <%d>",xmltoi(xMeasurementArea->Attribute("start_frame")));
 					   }
 					   else
 					   {
@@ -555,7 +615,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
 					   if(string(xMeasurementArea->Attribute("stop_frame"))!="None")
 					   {
 						   _stop_frames_MethodD.push_back(xmltoi(xMeasurementArea->Attribute("stop_frame")));
-						   Log->Write("INFO: \tFor Measurement area id <%d> the analysis stops from frame <%d>", xmltoi(xMeasurementArea->Attribute("id")),xmltoi(xMeasurementArea->Attribute("stop_frame")));
+						   Log->Write("\tthe analysis stops from frame <%d>", xmltoi(xMeasurementArea->Attribute("stop_frame")));
 					   }
 					   else
 					   {
@@ -566,12 +626,13 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
 				    {
 				    	_stop_frames_MethodD.push_back(-1);
 				    }
+
                     if(xMeasurementArea->Attribute("get_individual_FD"))
 					{
 						if(string(xMeasurementArea->Attribute("get_individual_FD"))=="true")
 						{
 							_individual_FD_flags.push_back(true);
-							Log->Write("INFO: \tIndividual FD will be calculated in Measurement area id <%d>", xmltoi(xMeasurementArea->Attribute("id")));
+							Log->Write("INFO: \tIndividual FD will be output");
 						}
 						else
 						{
@@ -582,6 +643,22 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                     {
                     	_individual_FD_flags.push_back(false);
                     }
+                    if(xMeasurementArea->Attribute("plot_time_series"))
+					{
+						if(string(xMeasurementArea->Attribute("plot_time_series"))=="true")
+						{
+							_isPlotTimeSeriesD.push_back(true);
+							Log->Write("\tThe Time series will be plotted!! ");
+						}
+						else
+						{
+							_isPlotTimeSeriesD.push_back(false);
+						}
+					}
+					else
+					{
+						_isPlotTimeSeriesD.push_back(false);
+					}
 
                }
                if (xMethod_D->FirstChildElement("one_dimensional"))
@@ -593,14 +670,6 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
 				   }
                }
 
-               if (xMethod_D->FirstChildElement("plot_time_series"))
-               {
-				   if ( string(xMethod_D->FirstChildElement("plot_time_series")->Attribute("enabled"))=="true")
-				   {
-					   _isPlotTimeSeriesD=true;
-					   Log->Write("INFO: \tThe Time series measured with Method D will be plotted!!");
-				   }
-               }
                if ( xMethod_D->FirstChildElement("cut_by_circle"))
                {
                     if ( string(xMethod_D->FirstChildElement("cut_by_circle")->Attribute("enabled"))=="true")
@@ -706,7 +775,7 @@ bool ArgumentParser::GetIsMethodA() const
      return _isMethodA;
 }
 
-int ArgumentParser::GetTimeIntervalA() const
+vector<int> ArgumentParser::GetTimeIntervalA() const
 {
      return _timeIntervalA;
 }
@@ -750,17 +819,17 @@ bool ArgumentParser::GetIsPlotGraph() const
      return _isPlotGraph;
 }
 
-bool ArgumentParser::GetIsPlotTimeSeriesA() const
+vector<bool> ArgumentParser::GetIsPlotTimeSeriesA() const
 {
 	return _isPlotTimeSeriesA;
 }
 
-bool ArgumentParser::GetIsPlotTimeSeriesC() const
+vector<bool> ArgumentParser::GetIsPlotTimeSeriesC() const
 {
 	return _isPlotTimeSeriesC;
 }
 
-bool ArgumentParser::GetIsPlotTimeSeriesD() const
+vector<bool> ArgumentParser::GetIsPlotTimeSeriesD() const
 {
 	return _isPlotTimeSeriesD;
 }
@@ -770,16 +839,6 @@ bool ArgumentParser::GetIsOneDimensional() const
 	return _isOneDimensional;
 }
 
-/*bool ArgumentParser::GetIsIndividualFD() const
-{
-     return _isIndividualFD;
-}
-
-polygon_2d ArgumentParser::GetAreaIndividualFD() const
-{
-     return _areaIndividualFD;
-}
-*/
 bool ArgumentParser::GetIsGetProfile() const
 {
      return _isGetProfile;

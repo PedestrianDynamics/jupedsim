@@ -65,7 +65,7 @@ Method_D::~Method_D()
 
 }
 
-bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocation)
+bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocation, const double& zPos_measureArea)
 {
 	 _scriptsLocation = scriptsLocation;
      _peds_t = peddata.GetPedsFrame();
@@ -105,10 +105,10 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
                Log->Write("frame ID = %d",frid);
           }
           vector<int> ids=_peds_t[frameNr];
-          vector<int> IdInFrame = peddata.GetIdInFrame(ids);
-          vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids);
-          vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids);
-          vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids);
+          vector<int> IdInFrame = peddata.GetIdInFrame(frameNr, ids, zPos_measureArea);
+          vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids, zPos_measureArea);
+          vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids, zPos_measureArea);
+          vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
 
           //vector int to_remove
           //------------------------------Remove peds outside geometry------------------------------------------
