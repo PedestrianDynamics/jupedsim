@@ -36,6 +36,7 @@
 #include <set>
 #include <algorithm>
 #include <math.h>
+#include <string>
 
 WalkingSpeed::WalkingSpeed(const Building * b)
 {
@@ -108,7 +109,7 @@ const std::shared_ptr<FDSMeshStorage> WalkingSpeed::get_FMStorage()
 double WalkingSpeed::FrantzichNilsson2003(double &walking_speed, double ExtinctionCoefficient)
 {
     //According to Frantzich+Nilsson2003
-    walking_speed = std::max(0.3, walking_speed * (1 + (-0.057 / 0.706) * ExtinctionCoefficient) );
+    walking_speed = std::fmax(0.3, walking_speed * (1 + (-0.057 / 0.706) * ExtinctionCoefficient) );
     return walking_speed;
 }
 
@@ -117,13 +118,13 @@ double WalkingSpeed::Jin1978(double &walking_speed, double ExtinctionCoefficient
     //According to Jin1978
     std::string irritant = _FMStorage->IrritantOrNot();
     if(irritant=="false") {
-        walking_speed = std::max(0.3, walking_speed * ( -0.54991616 * pow(ExtinctionCoefficient, 3) +
-                                 -0.05957671 * pow(ExtinctionCoefficient, 2)
+        walking_speed = std::fmax(0.3, walking_speed * ( -0.54991616 * std::pow(ExtinctionCoefficient, 3) +
+                                 -0.05957671 * std::pow(ExtinctionCoefficient, 2)
                                  -0.06606845 * ExtinctionCoefficient + 1.0025715) );
     }
     else if(irritant=="true") {
-        walking_speed = std::max(0.3, walking_speed *
-                                 (- pow( 112236.0553, (ExtinctionCoefficient-0.532027513) ) + 0.988158598 ));
+        walking_speed = std::fmax(0.3, walking_speed *
+                                 (- std::pow( 112236.0553, (ExtinctionCoefficient-0.532027513) ) + 0.988158598 ));
     }
     else {
         Log->Write("ERROR:\tSpecify if irritant or non-irritant smoke shall be cosidered");
