@@ -486,14 +486,18 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
      } else {
           std::chrono::time_point<std::chrono::system_clock> start, end;
           start = std::chrono::system_clock::now();
-          Log->Write("INFO: \tCalling Construtor of LocFloorfieldViaFM");
-          for (auto& roomPair : building->GetAllRooms()) {
-               locffviafm[roomPair.first] = new LocalFloorfieldViaFM(&(*roomPair.second), building,
+          Log->Write("INFO: \tCalling Constructor of LocFloorfieldViaFM");
+#pragma omp parallel for
+         for (int i = 0; i < building->GetAllRooms().size(); ++i) {
+         //for (auto& roomPair : building->GetAllRooms()) {
+             auto roomPairIt = building->GetAllRooms().begin();
+             std::advance(roomPairIt, i);
+             locffviafm[(*roomPairIt).first] = new LocalFloorfieldViaFM(&(*(*roomPairIt).second), building,
                      hx, hy, wallAvoidDistance, useDistancefield, FF_filename);
-          }
-          end = std::chrono::system_clock::now();
-          std::chrono::duration<double> elapsed_seconds = end-start;
-          Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
+         }
+         end = std::chrono::system_clock::now();
+         std::chrono::duration<double> elapsed_seconds = end-start;
+         Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
      }
      initDone = true;
 }
