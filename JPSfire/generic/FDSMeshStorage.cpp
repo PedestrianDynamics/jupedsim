@@ -48,7 +48,7 @@ FDSMeshStorage::FDSMeshStorage(const std::string &filepath, const double &finalT
 {
     ///Check if _filepath is existent
 
-    if ( fs::exists(_filepath.c_str() ) )
+    if ( fs::exists(_filepath ) )
     {
         CreateQuantityList();
         //std::cout << "\nCreateQuantityList PASSED\n" << std::endl;
@@ -80,7 +80,7 @@ bool FDSMeshStorage::CreateQuantityList()
     for( fs::directory_iterator iter(_filepath) ; iter != end ; ++iter ) {
       if ( fs::is_directory( *iter ) )
       {
-          std::string quant_dir = iter->path().c_str();
+          std::string quant_dir = iter->path().string();
           quant_dir =  quant_dir.substr( quant_dir.rfind("/") + 1 );
           //std::cout << quant_dir << std::endl;
            _quantitylist.push_back(quant_dir);
@@ -101,7 +101,7 @@ bool FDSMeshStorage::CreateElevationList()
     for( fs::directory_iterator iter(_filepath + _quantitylist[0]) ; iter != end ; ++iter ) {
       if ( fs::is_directory( *iter ) )
       {
-          std::string elev_dir = iter->path().c_str();
+          std::string elev_dir = iter->path().string();
           double elev =  std::stod(elev_dir.substr( elev_dir.rfind("_") + 1 ));
           //std::cout << elev << std::endl;
           _elevationlist.push_back(elev);
@@ -123,7 +123,7 @@ void FDSMeshStorage::CreateDoorList()
        "/Z_" + std::to_string(_elevationlist[0]) ) ; iter != end ; ++iter ) {
       if ( fs::is_directory( *iter ) )
       {
-          std::string door_dir = iter->path().c_str();
+          std::string door_dir = iter->path().string();
           door_dir =  door_dir.substr( door_dir.rfind("/") + 1 );
           std::cout << door_dir << std::endl;
            _doorlist.push_back(door_dir);
@@ -236,7 +236,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &p
 //        return _fMContainer.at(str);
 //    }
 //    else {
-//        Log->Write("ERROR:\tCould find no appropriate FDS mesh: ", quantity.c_str(), pedElev, simT);
+//        Log->Write("ERROR:\tCould find no appropriate FDS mesh: ", quantity.string(), pedElev, simT);
 //        exit(EXIT_FAILURE);
     //    }
 }
