@@ -12,18 +12,18 @@
 	<scripts location="../../scripts/"/> 
 	
     <measurement_areas unit="m"> 
-        <area_B id="1" type="BoundingBox"> 
+        <area_B id="1" type="BoundingBox" zPos="None"> 
             <vertex x="2.40" y="0.53" /> 
             <vertex x="2.40" y="-0.53" /> 
             <vertex x="-0.60" y="-0.53" /> 
             <vertex x="-0.60" y="0.53" /> 
             <length_in_movement_direction distance="1.0"/> 
         </area_B> 
-        <area_L id="2" type="Line"> 
+        <area_L id="2" type="Line" zPos="None"> 
             <start x="-2.25" y="0.00" /> 
             <end x="4.00" y="0.00" /> 
         </area_L> 
-		<area_L id="4" type="Line">
+		<area_L id="4" type="Line" zPos="None">
             <start x="-2.25" y="0.50" />
             <end x="4.00" y="0.50" />
         </area_L>
@@ -40,13 +40,9 @@
     <!-- Method A (Zhang2011a) Flow and Vel --> 
     <method_A enabled="true"> 
         <!-- Time interval used to count the flow [fr] --> 
-        <frame_interval unit="frame"> 
-            100 
-        </frame_interval> 
         <!-- The coordinate of the line used to calculate the flow and velocity --> 
-        <measurement_area id="2" /> 
-		<measurement_area id="4" />
-		<plot_time_series enabled="true"/>
+        <measurement_area id="2" frame_interval="100" plot_time_series="true"/> 
+		<measurement_area id="4" frame_interval="150" plot_time_series="true"/>
     </method_A> 
 
     <!-- Method B (Zhang2011a) Vel and Dens based on Tin and Tout --> 
@@ -56,15 +52,13 @@
 
     <!-- Method C (Zhang2011a) Classical density and Vel --> 
     <method_C enabled="true"> 
-        <measurement_area id="1" /> 
-		<plot_time_series enabled="true"/>
+        <measurement_area id="1" plot_time_series="true"/> 
     </method_C> 
 
     <!-- Method D (Zhang2011a) Voronoi density and Vel --> 
 	<method_D enabled="true"> 
-        <measurement_area id="1" start_frame="None" stop_frame="None" get_individual_FD="false"/>
+        <measurement_area id="1" start_frame="None" stop_frame="None" plot_time_series="true" get_individual_FD="false"/>
 		<one_dimensional enabled="false"/>		
-		<plot_time_series enabled="true"/>
         <cut_by_circle enabled="true" radius="1.0" edges="10"/>
         <output_voronoi_cells enabled="true" plot_graphs="true"/>
         <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/> 

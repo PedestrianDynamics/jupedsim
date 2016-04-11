@@ -150,7 +150,8 @@ if __name__ == '__main__':
    geoLocation = filepath.split("Output")[0]
    trajName = namefile.split(".")[0]
    trajType = namefile.split(".")[1].split("_")[0]
-   trajFile = geoLocation+trajpath+trajName+"."+trajType
+   trajFile = trajpath+trajName+"."+trajType
+   print(geoLocation)
    frameNr=int(namefile.split("_")[-1])
    geominX, geomaxX, geominY, geomaxY = get_geometry_boundary(geoFile)
    

@@ -109,7 +109,7 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
           vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids, zPos_measureArea);
           vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids, zPos_measureArea);
           vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
-
+          Log->Write("The number of pedestrians is %d",IdInFrame.size());
           //vector int to_remove
           //------------------------------Remove peds outside geometry------------------------------------------
           for( int i=0;i<(int)IdInFrame.size();i++)

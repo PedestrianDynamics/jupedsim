@@ -69,6 +69,7 @@ bool Method_C::Process (const PedData& peddata, const double& zPos_measureArea)
           const vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids, zPos_measureArea);
           const vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids, zPos_measureArea);
           const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
+          Log->Write("The number of pedestrians is %d",IdInFrame.size());
           OutputClassicalResults(frameNr, IdInFrame.size(),XInFrame,YInFrame,VInFrame);
      }
      fclose(_fClassicRhoV);
