@@ -152,7 +152,7 @@ bool FFRouter::Init(Building* building)
           ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), building, 0.0625, 0.0625, 0.0, false,
                                               "nofile");
           //for (long int i = 0; i < ptrToNew)
-          Log->Write("Created room-scale floorfield for Room %d", (*pairRoomIt).first);
+          Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
 #pragma omp critical
           _locffviafm.insert(std::make_pair((*pairRoomIt).first, ptrToNew));
 
@@ -180,7 +180,7 @@ bool FFRouter::Init(Building* building)
           //loop over upper triangular matrice (i,j) and write to (j,i) as well
           std::vector<int>::const_iterator outerPtr;
           std::vector<int>::const_iterator innerPtr;
-          Log->Write("Found %d Doors (Cross + Trans)", doorUIDs.size());
+          Log->Write("INFO: \tFound %d Doors (Cross + Trans) in room %d", doorUIDs.size(), (*pairRoomIt).first);
           for (outerPtr = doorUIDs.begin(); outerPtr != doorUIDs.end(); ++outerPtr) {
                //if the door is closed, then dont calc distances
                if (!_CroTrByUID.at(*outerPtr)->IsOpen()) {
@@ -237,11 +237,14 @@ bool FFRouter::Init(Building* building)
      FloydWarshall();
 
      //debug output in file
+     _locffviafm[4]->writeFF("ffTreppe.vtk", 1267);
      std::ofstream matrixfile;
      matrixfile.open("Matrix.txt");
 
      for (auto mapItem : _distMatrix) {
-          matrixfile << mapItem.first.first << " to " << mapItem.first.second << " : " << mapItem.second << "\t via \t" << _pathsMatrix[mapItem.first] << std::endl;
+          matrixfile << mapItem.first.first << " to " << mapItem.first.second << " : " << mapItem.second << "\t via \t" << _pathsMatrix[mapItem.first];
+          matrixfile << "\t" << _CroTrByUID.at(mapItem.first.first)->GetID() << " to " << _CroTrByUID.at(mapItem.first.second)->GetID() << "\t via \t";
+          matrixfile << _CroTrByUID.at(_pathsMatrix[mapItem.first])->GetID() << std::endl;
      }
      matrixfile.close();
 //     Log->Write("1-3: %f \t 1-2: %f \t 2-3: %f",
@@ -302,6 +305,10 @@ int FFRouter::FindExit(Pedestrian* p)
      if (_CroTrByUID.count(bestDoor)) {
           p->SetExitIndex(bestDoor);
           p->SetExitLine(_CroTrByUID.at(bestDoor));
+     }
+     //debug
+     if (p->GetID() == 10) {
+          Log->Write("\nBest Door %d alias %d", bestDoor, _CroTrByUID.at(bestDoor)->GetID());
      }
      return bestDoor; //-1 if no way was found, doorUID of best, if path found
 }

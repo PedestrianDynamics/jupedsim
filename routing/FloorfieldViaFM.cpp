@@ -767,7 +767,7 @@ void FloorfieldViaFM::calculateFloorfield(double* costarray, Point* neggradarray
     //init narrowband
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
         if (flag[i] == 3) {
-            checkNeighborsAndAddToNarrowband(smallest, biggest, i, [&] (const long int key) { this->checkNeighborsAndCalcFloorfield(key); } );
+            checkNeighborsAndAddToNarrowband(smallest, biggest, i, [&] (const long int key) { this->calcFloorfield(key); } );
         }
     }
 
@@ -776,7 +776,7 @@ void FloorfieldViaFM::calculateFloorfield(double* costarray, Point* neggradarray
         long int keyOfSmallest = smallest->key;
         flag[keyOfSmallest] = 3;
         trialfield[keyOfSmallest].removecurr(smallest, biggest, trialfield+keyOfSmallest);
-        checkNeighborsAndAddToNarrowband(smallest, biggest, keyOfSmallest, [&] (const long int key) { this->checkNeighborsAndCalcFloorfield(key);} );
+        checkNeighborsAndAddToNarrowband(smallest, biggest, keyOfSmallest, [&] (const long int key) { this->calcFloorfield(key);} );
     }
 }
 
@@ -809,7 +809,7 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
 
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
         if (dist2Wall[i] == 0) {
-            checkNeighborsAndAddToNarrowband(smallest, biggest, i, [&] (const long int key) { this->checkNeighborsAndCalcDist2Wall(key);} );
+            checkNeighborsAndAddToNarrowband(smallest, biggest, i, [&] (const long int key) { this->calcDist2Wall(key);} );
         }
     }
     //Log->Write(std::to_string(grid->GetxMax()));
@@ -849,12 +849,12 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
         } else {
             trialfield[keyOfSmallest].removecurr(smallest, biggest, trialfield+keyOfSmallest);
             //Log->Write(std::to_string(debugcounter++) + " " + std::to_string(grid->GetnPoints()));
-            checkNeighborsAndAddToNarrowband(smallest, biggest, keyOfSmallest, [&] (const long int key) { this->checkNeighborsAndCalcDist2Wall(key);} );
+            checkNeighborsAndAddToNarrowband(smallest, biggest, keyOfSmallest, [&] (const long int key) { this->calcDist2Wall(key);} );
         }
     }
 } //calculateDistancField
 
-void FloorfieldViaFM::checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* &biggest, const long int key, std::function<void (const long int)> checkNeighborsAndCalc) {
+void FloorfieldViaFM::checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* &biggest, const long int key, std::function<void (const long int)> calc) {
     long int aux = -1;
 
     directNeighbor dNeigh = grid->getNeighbors(key);
@@ -865,30 +865,30 @@ void FloorfieldViaFM::checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* 
     //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
     if ((aux != -2) && (flag[aux] == 0)) {
         flag[aux] = 4;      //4 = added to trial but not calculated
-        checkNeighborsAndCalc(aux);
+        calc(aux);
         trialfield[aux].insert(smallest, biggest, trialfield + aux);
     }
     aux = dNeigh.key[1];
     if ((aux != -2) && (flag[aux] == 0)) {
         flag[aux] = 4;      //4 = added to trial but not calculated
-        checkNeighborsAndCalc(aux);
+        calc(aux);
         trialfield[aux].insert(smallest, biggest, trialfield + aux);
     }
     aux = dNeigh.key[2];
     if ((aux != -2) && (flag[aux] == 0)) {
         flag[aux] = 4;      //4 = added to trial but not calculated
-        checkNeighborsAndCalc(aux);
+        calc(aux);
         trialfield[aux].insert(smallest, biggest, trialfield + aux);
     }
     aux = dNeigh.key[3];
     if ((aux != -2) && (flag[aux] == 0)) {
         flag[aux] = 4;      //4 = added to trial but not calculated
-        checkNeighborsAndCalc(aux);
+        calc(aux);
         trialfield[aux].insert(smallest, biggest, trialfield + aux);
     }
 }
 
-void FloorfieldViaFM::checkNeighborsAndCalcDist2Wall(const long int key) {
+void FloorfieldViaFM::calcDist2Wall(const long int key) {
     double row;
     double col;
     long int aux;
@@ -999,7 +999,7 @@ void FloorfieldViaFM::checkNeighborsAndCalcDist2Wall(const long int key) {
     dirToWall[key] = dirToWall[key].Normalized();
 }
 
-void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
+void FloorfieldViaFM::calcFloorfield(const long int key) {
     double row;
     double col;
     long int aux;
@@ -1171,8 +1171,8 @@ void FloorfieldViaFM::testoutput(const char* filename1, const char* filename2, c
     //std::cerr << "INFO: \tFile closed: " << filename1 << std::endl;
 }
 
-void FloorfieldViaFM::writeFF(const std::string& filename) {
-    Log->Write("INFO: \tWrite Floorfield to file <" +  filename + ">");
+void FloorfieldViaFM::writeFF(const std::string& filename, int targetID) {
+    Log->Write("INFO: \tWrite Floorfield (targetID: %d) to file", targetID);
     std::ofstream file;
 
     int numX = (int) ((grid->GetxMax()-grid->GetxMin())/grid->Gethx());
@@ -1202,22 +1202,33 @@ void FloorfieldViaFM::writeFF(const std::string& filename) {
         //file2 << iPoint._x /*- grid->GetxMin()*/ << " " << iPoint._y /*- grid->GetyMin()*/ << " " << target[i] << std::endl;
     }
 
-    file << "VECTORS Gradient float" << std::endl;
-    for (int i = 0; i < grid->GetnPoints(); ++i) {
-        file << neggrad[i]._x << " " << neggrad[i]._y << " 0.0" << std::endl;
-    }
-
     file << "VECTORS Dir2Wall float" << std::endl;
     for (int i = 0; i < grid->GetnPoints(); ++i) {
         file << dirToWall[i]._x << " " << dirToWall[i]._y << " 0.0" << std::endl;
     }
 
-    if (cost != nullptr) {
-        file << "SCALARS Cost float 1" << std::endl;
-        file << "LOOKUP_TABLE default" << std::endl;
-        for (long int i = 0; i < grid->GetnPoints(); ++i) {
-            file << cost[i] << std::endl;
-        }
+    if (neggradmap.count(targetID) == 0) {
+        file.close();
+        return;
+    }
+
+    file << "VECTORS GradientTarget float" << std::endl;
+    Point* gradarray = neggradmap.at(targetID);
+    for (int i = 0; i < grid->GetnPoints(); ++i) {
+        file << gradarray[i]._x << " " << gradarray[i]._y << " 0.0" << std::endl;
+    }
+
+    double* costarray = costmap.at(targetID);
+    file << "SCALARS CostTarget float 1" << std::endl;
+    file << "LOOKUP_TABLE default" << std::endl;
+    for (long int i = 0; i < grid->GetnPoints(); ++i) {
+        file << costarray[i] << std::endl;
+    }
+
+    file << "SCALARS Flag float 1" << std::endl;
+    file << "LOOKUP_TABLE default" << std::endl;
+    for (long int i = 0; i < grid->GetnPoints(); ++i) {
+        file << flag[i] << std::endl;
     }
     file.close();
 }

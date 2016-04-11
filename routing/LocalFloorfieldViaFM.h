@@ -47,6 +47,8 @@ public:
      void parseRoom(const Room* const roomArg, const double hxArg, const double hyArg);
      void getDirectionToDestination (Pedestrian* ped, Point& direction);
      void getDirectionToGoalID(const int goalID);
+     void drawBlockerLines();
+     void crossOutOutsideNeighbors(long int key);
 protected:
      const Room* room;
 };

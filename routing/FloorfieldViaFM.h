@@ -78,17 +78,17 @@ public:
      void calculateFloorfield(double* costarray, Point* neggradarray);   //make private
      void calculateDistanceField(const double thresholdArg);             //make private
 
-     void checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* &biggest, const long int key, std::function<void (const long int)> checkNeighborsAndCalc);
+     void checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* &biggest, const long int key, std::function<void (const long int)> calc);
 
-     void checkNeighborsAndCalcDist2Wall(const long int key);
-     void checkNeighborsAndCalcFloorfield(const long int key);
+     void calcDist2Wall(const long int key);
+     void calcFloorfield(const long int key);
      //void (*checkNeighborsAndCalc)(const long int key);
 
      inline double onesidedCalc(double xy, double hDivF);
      inline double twosidedCalc(double x, double y, double hDivF);
 
      void testoutput(const char*, const char*, const double*);
-     void writeFF(const std::string&);
+     void writeFF(const std::string&, int targetID);
 
      std::map<int, int> getGoalToLineUIDmap() const
      {
