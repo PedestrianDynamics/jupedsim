@@ -19,7 +19,7 @@ std::string Locater::GetName() const
 
 void Locater::execute(const Pedestrian * ped, CognitiveMap * cogMap) const
 {
-   Log->Write("INFO:\t Execute Locater");
+   //Log->Write("INFO:\t Execute Locater");
    //cogMap->UpdateDirection();
 
    //std::cout << std::to_string(ped->GetGlobalTime()) << std::endl;

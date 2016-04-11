@@ -74,8 +74,10 @@ public:
     std::vector<GraphEdge *> SortConShortestPath(ptrLandmark landmark, const GraphVertex::EdgesContainer edges);
     //bool IsAroundLandmark(const Landmark& landmark, GraphEdge* edge) const;
     ptrGraphNetwork GetGraphNetwork() const;
+    //shortest path calculations
     double ShortestPathDistance(const GraphEdge *edge, const ptrLandmark landmark);
-    bool LineIntersectsPolygon(const std::pair<Point,Point> &line, const std::vector<Point> &polygon);
+    bool LineIntersectsPolygon(const std::pair<Point,Point> &line, const boost::geometry::model::polygon<Point> &polygon);
+    //Own position
     const Point& GetOwnPos();
     //WriteXML
     void WriteToFile();
@@ -93,15 +95,14 @@ public:
 
 
     //Locater
-
     void FindCurrentRegion();
     void CheckIfLandmarksReached();
 
     //Find targets
-
     const ptrLandmark FindConnectionPoint(const ptrRegion& currentRegion, const ptrRegion& targetRegion) const;
     void FindMainDestination();
     void FindNextTarget();
+    void FindShortCut();
     const ptrLandmark FindNearLandmarkConnectedToTarget(const ptrLandmark& target);
     Landmarks FindLandmarksConnectedToTarget(const ptrLandmark& target);
     const ptrLandmark FindBestRouteFromOneOf(const Landmarks& nearLandmarks);
