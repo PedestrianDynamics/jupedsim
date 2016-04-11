@@ -370,7 +370,7 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrLandma
         }
     }
     //target (landmark)
-    if (boost::geometry::within(landmark->GetPosInMap(),boost_room))
+    if (boost::geometry::intersects(landmark->GetPosInMap(),boost_room))
     {
         Log->Write("INFO: Landmark muesste in meinem Raum sein!");
         // return always 1.0 so no crossing will be preferred based on information
