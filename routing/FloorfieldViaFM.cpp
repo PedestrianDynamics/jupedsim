@@ -771,6 +771,7 @@ void FloorfieldViaFM::calculateFloorfield(double* costarray, Point* neggradarray
         trialfield[i].child = nullptr;
     }
 
+    std::cerr << std::endl << trialfield[0].cost ;
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
         if (costarray[i] == 0.) {
             flag[i] = 3;
@@ -812,7 +813,7 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
 
     //  go thru dist2Wall and add every neighbor of "0"s (only if their flag is 0 and therefore "inside")
 
-    //  HINT: in resetGoalAndCosts, you find: "trialfield[i].cost = dist2Wall + i;"
+    //  HINT: in prepareForDistanceFieldCalculation, you find: "trialfield[i].cost = dist2Wall + i;"
     //        so here, when we write to "cost", we truely write to "dist2Wall"
 
     //  HINT: the argument "threshold" is used as a "stop criterion". In the constructor, when calling this,
@@ -874,7 +875,7 @@ void FloorfieldViaFM::checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* 
 
     //check for valid neigh
     aux = dNeigh.key[0];
-    //hint: trialfield[i].cost = dist2Wall + i; <<< set in parseBuilding after linescan call
+    //hint: trialfield[i].cost = dist2Wall + i; <<< set in prepareForDistanceFieldCalc
     //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside, -5 = blocker)
     if ((aux != -2) && (flag[aux] == 0)) {
         flag[aux] = 4;      //4 = added to trial but not calculated
@@ -1026,7 +1027,6 @@ void FloorfieldViaFM::calcFloorfield(const long int key) {
     row = DBL_MAX;
     col = DBL_MAX;
     aux = -1;
-
 
     directNeighbor dNeigh = grid->getNeighbors(key);
 

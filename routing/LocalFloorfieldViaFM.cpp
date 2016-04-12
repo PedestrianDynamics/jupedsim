@@ -161,7 +161,8 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
      long int key;
      long int deltaX, deltaY, deltaX1, deltaY1, px, py, xe, ye, i; //Bresenham Algorithm
 
-     for (auto& line : exits) {
+     //for (auto& line : exits) {
+     for(auto& line : wall) {
           key = grid->getKeyAtPoint(line.GetPoint1());
           iStart = grid->get_i_fromKey(key);
           jStart = grid->get_j_fromKey(key);
@@ -457,6 +458,10 @@ void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
      //init grid with -3 as unknown distance to any wall
      for(long int i = 0; i < grid->GetnPoints(); ++i) {
           dist2Wall[i] = -3.;
+          cost[i] = -2.;
+          flag[i] = 0;
      }
-     drawLinesOnGrid(wall, dist2Wall, 0.);
+     std::vector<Line> realWalls(wall.begin()+numOfExits, wall.end());
+     drawLinesOnGrid(realWalls, dist2Wall, 0.);
+     drawLinesOnGrid(realWalls, cost, -7.);
 }
