@@ -77,6 +77,8 @@ void CognitiveMapStorage::ParseCogMap(CMStorageKeyType ped)
 
     //create filename
     int groupId = ped->GetGroup();
+    if (_cogMapFiles=="")
+        return;
     std::string cMFileName=_cogMapFiles;
     cMFileName.replace(cMFileName.size()-4,4,std::to_string(groupId)+".xml");
 
@@ -260,6 +262,7 @@ void CognitiveMapStorage::ParseCogMap(CMStorageKeyType ped)
 
 void CognitiveMapStorage::CreateCognitiveMap(CMStorageKeyType ped)
 {
+
      //todo: the possibility to have more then one creator.
      cognitive_maps.insert(std::make_pair(ped, creator->CreateCognitiveMap(ped)));
      ParseCogMap(ped);

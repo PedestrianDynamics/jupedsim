@@ -560,20 +560,24 @@ const ptrRegion CognitiveMap::GetRegionContaining(const ptrLandmark &landmark) c
 void CognitiveMap::FindCurrentRegion()
 {
     //for test purposes. has to be changed
-    _currentRegion=_regions[0];
+    if (!_regions.empty())
+        _currentRegion=_regions[0];
 }
 
 void CognitiveMap::CheckIfLandmarksReached()
 {
     SubRoom * sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
 
-    for (ptrLandmark landmark:_currentRegion->GetLandmarks())
+    if (_currentRegion!=nullptr)
     {
-        if (landmark->GetRoom()==sub_room)
+        for (ptrLandmark landmark:_currentRegion->GetLandmarks())
         {
-//            std::string str1 = landmark->GetCaption()+" has been reached.";
-//            Log->Write(str1);
-            _landmarksRecentlyVisited.push_back(landmark);
+            if (landmark->GetRoom()==sub_room)
+            {
+    //            std::string str1 = landmark->GetCaption()+" has been reached.";
+    //            Log->Write(str1);
+                _landmarksRecentlyVisited.push_back(landmark);
+            }
         }
     }
 }

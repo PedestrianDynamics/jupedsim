@@ -56,15 +56,15 @@ void LastDestinationsSensor::execute(const Pedestrian * pedestrian, CognitiveMap
     for(std::vector<const GraphEdge *>::reverse_iterator it = destinations.rbegin(); it != destinations.rend(); ++it) {
         GraphEdge * to_edge = (*ng[(*it)->GetSrc()->GetSubRoom()])[(*it)->GetCrossing()];
 
-        if(to_edge != NULL && rated.find(to_edge) == rated.end()) {
+        if(to_edge != nullptr && rated.find(to_edge) == rated.end()) {
             to_edge->SetFactor(3000.0 / (i*3) + 100, GetName());
             rated.insert(to_edge);
         }
 
-        if((*it)->GetSrc() != NULL && (*it)->GetDest() != NULL && (*it)->GetCrossing() != NULL) {
+        if((*it)->GetSrc() != nullptr && (*it)->GetDest() != nullptr && (*it)->GetCrossing() != nullptr) {
             GraphEdge * back_edge = (*ng[(*it)->GetDest()->GetSubRoom()])[(*it)->GetCrossing()];
-            if(back_edge != NULL && rated.find(back_edge) == rated.end()) {
-                back_edge->SetFactor(2,GetName());//3000.0 /(i*3) + 100, GetName());
+            if(back_edge != nullptr && rated.find(back_edge) == rated.end()) {
+                back_edge->SetFactor(3000.0 /(i*3) + 100, GetName());
                 rated.insert(back_edge);
             }
         }

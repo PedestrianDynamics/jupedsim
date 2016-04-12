@@ -259,8 +259,8 @@ const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & positio
 //    Log->Write(std::to_string(sameFactorEdges.top().second->GetCrossing()->GetCentre().GetX()));
 //    Log->Write(std::to_string(sameFactorEdges.top().second->GetCrossing()->GetCentre().GetY()));
 
-    if(edges.size() >= 1) return edges.top().second;
-    else return nullptr;
+    if(sameFactorEdges.size() >= 1) return sameFactorEdges.top().second;
+    else return edges.top().second;
 //    if(edges.size() > 1) {
 //        double best_factor = edges.top().first;
 //        const GraphEdge * act_edge = nullptr;

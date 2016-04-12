@@ -110,6 +110,7 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
 
         //--------------------COGMAP----------------------------
         //See if Landmarks are visible
+
         (*cm_storage)[p]->UpdateMap();
         //Find next appropriate landmark
         (*cm_storage)[p]->FindNextTarget();
@@ -161,7 +162,10 @@ bool CognitiveMapRouter::Init(Building * b)
      building = b;
 
      //Init Cognitive Map Storage, second parameter: decides whether cognitive Map is empty or complete
-     cm_storage = new CognitiveMapStorage(building,getOptions().at("CognitiveMapStatus")[0],getOptions().at("CognitiveMapFiles")[0]);
+     if (getOptions().find("CognitiveMapFiles")==getOptions().end())
+        cm_storage = new CognitiveMapStorage(building,getOptions().at("CognitiveMapStatus")[0]);
+     else
+        cm_storage = new CognitiveMapStorage(building,getOptions().at("CognitiveMapStatus")[0],getOptions().at("CognitiveMapFiles")[0]);
      Log->Write("INFO:\tCognitiveMapStorage initialized");
      //cm_storage->ParseCogMap();
 
