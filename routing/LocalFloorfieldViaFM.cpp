@@ -141,8 +141,12 @@ void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
      //init grid with -3 as unknown distance to any wall
      for(long int i = 0; i < grid->GetnPoints(); ++i) {
           dist2Wall[i] = -3.;
+          cost[i] = -2.;
+          flag[i] = 0;
      }
-     drawLinesOnGrid(wall, dist2Wall, 0.);
+     std::vector<Line> realWalls(wall.begin()+numOfExits, wall.end());
+     drawLinesOnGrid(realWalls, dist2Wall, 0.);
+     drawLinesOnGrid(realWalls, cost, -7.);
 }
 
 void LocalFloorfieldViaFM::drawBlockerLines() {
@@ -237,8 +241,8 @@ void LocalFloorfieldViaFM::crossOutOutsideNeighbors(long int key){
 
 
      aux = dNeigh.key[0];
-     if ((aux != -2) && (dist2Wall[aux] > -3.5)) { //aux is key of vaild girdpoint && gridpoint is not on exitline (!=-3)
-          Point trialP = grid->getPointFromKey(aux);
+     if ((aux != -2) && (cost[aux] < -0.1) && (flag[aux] != -7) && (flag[aux] != -5)) { //aux is key of vaild girdpoint && gridpoint is not on exitline (exits have cost = 0 in prepareForDistance..())
+          Point trialP = grid->getPointFromKey(aux);               //^^ and gridpoint is not wall nor blockpoint
           bool isInside = false;
           for (int i = 0; i < subRoomMap.size(); ++i) {
                auto subRoomIt = subRoomMap.begin();
@@ -248,12 +252,14 @@ void LocalFloorfieldViaFM::crossOutOutsideNeighbors(long int key){
                }
           }
           if (!isInside) {
-               flag[aux] = -7;
+               flag[aux] = -5;
                dist2Wall[aux] = 0.; //set dist2Wall == 0 to save this points from updates in FloorfieldViaFM::clearAndPrepareForFloorfieldReCalc
+               speedInitial[aux] = .001;
+               cost[aux]         = -8.;
           }
      }
      aux = dNeigh.key[1];
-     if ((aux != -2) && (dist2Wall[aux] != -3)) {
+     if ((aux != -2) && (cost[aux] < 0.) && (flag[aux] != -7) && (flag[aux] != -5)) {
           Point trialP = grid->getPointFromKey(aux);
           bool isInside = false;
           for (int i = 0; i < subRoomMap.size(); ++i) {
@@ -264,12 +270,14 @@ void LocalFloorfieldViaFM::crossOutOutsideNeighbors(long int key){
                }
           }
           if (!isInside) {
-               flag[aux] = -7;
+               flag[aux] = -5;
                dist2Wall[aux] = 0.;
+               speedInitial[aux] = .001;
+               cost[aux]         = -8.;
           }
      }
      aux = dNeigh.key[2];
-     if ((aux != -2) && (dist2Wall[aux] != -3)) {
+     if ((aux != -2) && (cost[aux] < 0.) && (flag[aux] != -7) && (flag[aux] != -5)) {
           Point trialP = grid->getPointFromKey(aux);
           bool isInside = false;
           for (int i = 0; i < subRoomMap.size(); ++i) {
@@ -280,12 +288,14 @@ void LocalFloorfieldViaFM::crossOutOutsideNeighbors(long int key){
                }
           }
           if (!isInside) {
-               flag[aux] = -7;
+               flag[aux] = -5;
                dist2Wall[aux] = 0.;
+               speedInitial[aux] = .001;
+               cost[aux]         = -8.;
           }
      }
      aux = dNeigh.key[3];
-     if ((aux != -2) && (dist2Wall[aux] != -3)) {
+     if ((aux != -2) && (cost[aux] < 0.) && (flag[aux] != -7) && (flag[aux] != -5)) {
           Point trialP = grid->getPointFromKey(aux);
           bool isInside = false;
           for (int i = 0; i < subRoomMap.size(); ++i) {
@@ -296,8 +306,10 @@ void LocalFloorfieldViaFM::crossOutOutsideNeighbors(long int key){
                }
           }
           if (!isInside) {
-               flag[aux] = -7;
+               flag[aux] = -5;
                dist2Wall[aux] = 0.;
+               speedInitial[aux] = .001;
+               cost[aux]         = -8.;
           }
      }
 }

@@ -218,6 +218,7 @@ bool FFRouter::Init(Building* building)
                          Crossing *crossTest = _CroTrByUID.at(*innerPtr);
                          Point a = crossTest->GetPoint1();
                          Point b = crossTest->GetPoint2();
+                         Log->Write("tempDistance < 0 with crossing: (below)");
                          Log->Write(a.toString());
                          Log->Write(b.toString());
                     }
