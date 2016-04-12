@@ -2,9 +2,15 @@
 
 ## Added
 
-- two options "startframe" and "stopframe" are added for each measurement area for method D to assign the time periods for analysis.
+- Two options "startframe" and "stopframe" are added for each measurement area for method D to assign the time periods for analysis.
 
 - Individual density based on Voronoi method is added for one dimensional case in the output file (Individual headway is moved to the 5th column). 
+
+- z-position of each measurement area can be assigned in inifile so that the trajectories in geometries with several floors can be analyzed.
+
+- The option "plot_time_series" is available for each measurement area.
+
+- The option "frame_interval" for method A now can have different values for different measurement area.
 
 ## Changed
 
@@ -12,7 +18,8 @@
 
 ## Fixed
 
-- The script for plot Voronoi cells is modified so that it work when the trajectory files are not the in the same location as the inifile.	
+- The script for plot Voronoi cells is modified so that it work when the trajectory files are not the in the same location as the inifile.
+
 
 # JPSreport v0.8
 
