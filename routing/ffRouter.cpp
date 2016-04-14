@@ -238,7 +238,7 @@ bool FFRouter::Init(Building* building)
      FloydWarshall();
 
      //debug output in file
-     _locffviafm[4]->writeFF("ffTreppe.vtk", 1267);
+     //_locffviafm[4]->writeFF("ffTreppe.vtk", 1267);
      std::ofstream matrixfile;
      matrixfile.open("Matrix.txt");
 
