@@ -318,7 +318,7 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
       if ( (dynamic_cast<DirectionFloorfield*>(_direction)) ||
            (dynamic_cast<DirectionLocalFloorfield*>(_direction)) ||
            (dynamic_cast<DirectionSubLocalFloorfield*>(_direction))  ) {
-          if (dist > 10*J_EPS_GOAL) {
+          if (dist > 20*J_EPS_GOAL) {
                e0 = target - pos; //ped->GetV0(target);
           } else {
                e0 = lastE0;

@@ -61,6 +61,7 @@ FFRouter::FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals):Router(id,s
      _building = nullptr;
      _hasSpecificGoals = hasSpecificGoals;
      _globalFF = nullptr;
+     _targetWithinSubroom = false; //depending on exit_strat 8 => false, depending on exit_strat 9 => true;
 }
 
 //FFRouter::FFRouter(const Building* const building)
@@ -214,15 +215,17 @@ bool FFRouter::Init(Building* building)
                     if (ptrToNew->getCostToDestination(*outerPtr, endB) < tempDistance) {
                          tempDistance = ptrToNew->getCostToDestination(*outerPtr, endB);
                     }
-                    if (tempDistance < 0) {
-                         Crossing *crossTest = _CroTrByUID.at(*innerPtr);
-                         Point a = crossTest->GetPoint1();
-                         Point b = crossTest->GetPoint2();
-                         Log->Write("tempDistance < 0 with crossing: (below)");
-                         Log->Write(a.toString());
-                         Log->Write(b.toString());
-                    }
+//                    if (tempDistance < 0) {
+//                         Crossing *crossTest = _CroTrByUID.at(*innerPtr);
+//                         Point a = crossTest->GetPoint1();
+//                         Point b = crossTest->GetPoint2();
+//                         Log->Write("tempDistance < 0 with crossing: (below)");
+//                         Log->Write(a.toString());
+//                         Log->Write(b.toString());
+//                    }
                     if (tempDistance < ptrToNew->getGrid()->Gethx()) {
+                         //Log->Write("WARNING:\tDistance of doors %d and %d is too small: %f",*outerPtr, *innerPtr, tempDistance);
+                         //Log->Write("^^^^^^^^\tIf there are scattered subrooms, which are not connected, this is ok.");
                          continue;
                     }
 //                    tempDistance = ptrToNew->getCostToDestination(*outerPtr, _CroTrByUID[*innerPtr]->GetCentre());
@@ -264,6 +267,7 @@ int FFRouter::FindExit(Pedestrian* p)
 {
      double minDist = DBL_MAX;
      int bestDoor = -1;
+     int bestGoal = -1;
 
      int goalID = p->GetFinalDestination();
      std::vector<int> validFinalDoor; //UIDs of doors
@@ -299,8 +303,17 @@ int FFRouter::FindExit(Pedestrian* p)
                if ((_distMatrix.count(key)!=0) && (_distMatrix.at(key) != DBL_MAX)
                      && ( (_distMatrix.at(key) + locDistToDoor) < minDist)) {
                     minDist = _distMatrix.at(key) + locDistToDoor;
-                    bestDoor = key.first;
+                    bestDoor = key.first; //doorUID
+                    bestGoal = key.second;//finalDoor
                }
+          }
+     }
+     //at this point, bestDoor is either a crossing or a transition
+
+     if ((!_targetWithinSubroom) && (_CroTrByUID.count(bestDoor) != 0)) {
+          while (!_CroTrByUID[bestDoor]->IsTransition()) {
+               std::pair<int, int> key = std::make_pair(bestDoor, bestGoal);
+               bestDoor = _pathsMatrix[key];
           }
      }
      if (_CroTrByUID.count(bestDoor)) {
@@ -308,9 +321,9 @@ int FFRouter::FindExit(Pedestrian* p)
           p->SetExitLine(_CroTrByUID.at(bestDoor));
      }
      //debug
-     if (p->GetID() == 10) {
-          Log->Write("\nBest Door %d alias %d", bestDoor, _CroTrByUID.at(bestDoor)->GetID());
-     }
+//     if (p->GetID() == 10) {
+//          Log->Write("\nBest Door %d alias %d", bestDoor, _CroTrByUID.at(bestDoor)->GetID());
+//     }
      return bestDoor; //-1 if no way was found, doorUID of best, if path found
 }
 

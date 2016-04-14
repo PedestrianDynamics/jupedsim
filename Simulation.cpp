@@ -543,7 +543,7 @@ int Simulation::RunBody(double maxSimTime)
           if (0 == frameNr % writeInterval) {
                _iod->WriteFrame(frameNr / writeInterval, _building.get());
           }
-          //Log->ProgressBar(initialnPeds,   initialnPeds -  _nPeds , t);
+          Log->ProgressBar(initialnPeds,   initialnPeds -  _nPeds , t);
 
           // needed to control the execution time PART 2
           // time(&endtime);
