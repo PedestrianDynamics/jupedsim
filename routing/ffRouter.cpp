@@ -241,7 +241,10 @@ bool FFRouter::Init(Building* building)
      FloydWarshall();
 
      //debug output in file
-     _locffviafm[4]->writeFF("ffTreppe.vtk", 1267);
+     //_locffviafm[4]->writeFF("ffTreppe.vtk", 1267);
+     int roomTest = (*(_locffviafm.begin())).first;
+     int transTest = (building->GetRoom(roomTest)->GetAllTransitionsIDs())[0];
+     ((*(_locffviafm.begin())).second)->writeFF("testFF.vtk", transTest);
      std::ofstream matrixfile;
      matrixfile.open("Matrix.txt");
 

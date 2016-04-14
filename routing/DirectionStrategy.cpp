@@ -518,7 +518,7 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
             }
         }
     }
-#pragma omp parallel for
+//#pragma omp parallel for
     for(int i = 0; i < roomAndTargetVector.size(); ++i){
         auto rAndtIT = roomAndTargetVector.begin();
         std::advance(rAndtIT, i);
