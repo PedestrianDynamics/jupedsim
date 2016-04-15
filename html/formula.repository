@@ -1,0 +1,4 @@
+\form#0:$ F_i =\frac{\mathbf{v_0}-\mathbf{v_i}}{\tau}$
+\form#1:$ V(spacing) =\min{v_0, \max{0, (s-l)/T}} $
+\form#2:$ e_0 + \sum_j{R(spacing_{ij})*e_{ij}}$
+\form#3:$\alpha$
