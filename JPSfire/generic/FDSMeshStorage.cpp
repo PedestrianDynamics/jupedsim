@@ -210,7 +210,7 @@ void FDSMeshStorage::CreateFDSMeshes()
    }
 }
 
-const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &pedElev, const std::string &quantity)
+const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &pedElev, const std::string &quantity) throw (int)
 {
     //Smoke Sensor NOT active
     int simT=simTime/_updateIntervall;

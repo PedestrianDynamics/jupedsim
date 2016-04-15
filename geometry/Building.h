@@ -74,7 +74,7 @@ private:
      std::ofstream _pathWayStream;
 
      WalkingSpeed * _WalkingSpeed;
-     ToxicityAnalysis * _ToxicityAnalysis;
+     std::shared_ptr<ToxicityAnalysis> _ToxicityAnalysis;
 
 public:
      /// constructor

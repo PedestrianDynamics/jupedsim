@@ -323,6 +323,7 @@ set (   source_files
   JPSfire/A_smoke_sensor/SmokeSensor.cpp
   JPSfire/B_walking_speed/WalkingSpeed.cpp
   JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
+  JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
 
 
   )
@@ -439,6 +440,7 @@ set (   header_files
   JPSfire/A_smoke_sensor/SmokeSensor.h
   JPSfire/B_walking_speed/WalkingSpeed.h
   JPSfire/C_toxicity_analysis/ToxicityAnalysis.h
+  JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
   )
 
 
@@ -461,12 +463,12 @@ if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIR})
   # todo: is this necessary?
   #target_link_libraries(jpscore ${Boost_LIBRARIES})
-  find_package(Boost REQUIRED)
-  #...
-  #target_link_libraries(jpscore
-  #${Boost_FILESYSTEM_LIBRARY}
-  #${Boost_SYSTEM_LIBRARY}
-#)
+  find_package(Boost COMPONENTS system filesystem REQUIRED)
+
+  target_link_libraries(jpscore
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY}
+)
 endif()
 
 target_link_libraries(jpscore core )

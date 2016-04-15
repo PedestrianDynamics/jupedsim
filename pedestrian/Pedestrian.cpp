@@ -989,7 +989,7 @@ void Pedestrian::SetWalkingSpeed(WalkingSpeed* walkingSpeed)
     _WalkingSpeed = walkingSpeed;
 }
 
-void Pedestrian::SetFED(ToxicityAnalysis* toxicityAnalysis)
+void Pedestrian::SetFED(std::shared_ptr<ToxicityAnalysis>toxicityAnalysis)
 {
     _ToxicityAnalysis = toxicityAnalysis;
 }
