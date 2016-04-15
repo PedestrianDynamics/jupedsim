@@ -85,9 +85,9 @@ bool FFRouter::Init(Building* building)
      _building = building;
      if (_hasSpecificGoals) {
           //get global field to manage goals (which are not in a subroom)
-          _globalFF = new FloorfieldViaFM(building, 0.25, 0.25, 0.0, false, "nofile");
+          _globalFF = new FloorfieldViaFM(building, 0.25, 0.25, 0.0, false, true);
           for (auto &itrGoal : building->GetAllGoals()) {
-               _globalFF->createLineToGoalID(itrGoal.first);
+               _globalFF->createMapEntryInLineToGoalID(itrGoal.first);
           }
           goalToLineUIDmap = _globalFF->getGoalToLineUIDmap();
           goalToLineUIDmap2 = _globalFF->getGoalToLineUIDmap2();
@@ -284,8 +284,8 @@ int FFRouter::FindExit(Pedestrian* p)
           }
      } else {  //only one specific goal, goalToLineUIDmap gets
                //populated in Init()
-          if (goalToLineUIDmap.count(goalID) == 0) {
-               Log->Write("ERROR: \t ffRouter: unknown goalID: %d in FindExit(Ped)",goalID);
+          if ((goalToLineUIDmap.count(goalID) == 0) || (goalToLineUIDmap[goalID] == -1)) {
+               Log->Write("ERROR: \t ffRouter: unknown/unreachable goalID: %d in FindExit(Ped)",goalID);
           } else {
                validFinalDoor.emplace_back(goalToLineUIDmap.at(goalID));
           }
