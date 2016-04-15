@@ -379,6 +379,16 @@
             "location": "/publications/#conferences", 
             "text": "Tordeux, Antoine, Chraibi, Mohcine and Seyfried, Armin  Collision-free speed model for pedestrian dynamics \n    In  Traffic and Granular Flow   15 , to appear.    Andresen, Erik, Chraibi, Mohcine, Seyfried, Armin  Wayfinding and cognitive maps for pedestrian models (Talk) \n     In  Traffic and Granular Flow   15 , to appear.    Kemloh Wagoum, Armel Ulrich, Chraibi, Mohcine, Zhang, Jun and L\u00e4mmel, Gregor. \n    \u201cJuPedSim: An Open Framework for Simulating and Analyzing the Dynamics of Pedestrians.\u201d \n    In  3rd Conference of Transportation Research Group of India , 2015.    Boltes, Maik, Chraibi, Mohcine, Holl, Stefan, Kemloh Wagoum, Armel Ulrich, L\u00e4mmel, Gregor, Liao, Weichen, Mehner, Wolfgang, Tordeux, Antoine,  and Zhang, Jun. \n    \u201cExperimentation, Data Collection, Modeling and Simulation of Pedestrian Dynamics.\u201d \n    In  Statistics, Probability   Numerical Analysis 2014  - Methods   Applications, 2014.    Kemloh Wagoum, Armel Ulrich, Steffen, Bernhard and Seyfried, Armin. \n    \u201cRuntime Optimisation Approaches for a Real-Time Evacuation Assistant.\u201d \n    In  9th Conference on Parallel Processing and Applied Mathematics , edited by R. Wyrzykowski, 7203:386\u201395. \n    Lecture Notes in Computer Science. Springer Berlin/Heidelberg, 2012.    Chraibi, Mohcine, Freialdenhoven, Martina, Schadschneider, Andreas and Seyfried, Armin.  \u201cModeling the Desired Direction in a Force-Based Model for Pedestrian Dynamics,\u201d \n    In  Traffic and Granular Flow   11 , edited by %E Kozlov, Valery V., Buslaev, Alexander P., Bugaev, Alexander S., Yashina, Marina V., Schadschneider, Andreas and Schreckenberg, Michael \n    Springer Berlin Heidelberg, July 5, 2012.    Kemloh Wagoum, Armel Ulrich, and Seyfried, Armin. \n    \u201cOptimizing the Evacuation Time of Pedestrians in a Graph-Based Navigation.\u201d \n    In  Developments in Road Transportation , edited by Mahabir Panda and Ujjal Chattararaj, 188\u201396. Macmillian Publishers India Ltd, 2010.", 
             "title": "Conferences"
+        }, 
+        {
+            "location": "/doxygen/", 
+            "text": "Code documentation\n\n\nDoxygen code documentation\n, used for in-depth code documentation overview.", 
+            "title": "API"
+        }, 
+        {
+            "location": "/doxygen/#code-documentation", 
+            "text": "Doxygen code documentation , used for in-depth code documentation overview.", 
+            "title": "Code documentation"
         }
     ]
 }
