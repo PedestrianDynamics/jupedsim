@@ -183,6 +183,7 @@ protected:
 
      int _mode;
      bool _hasSpecificGoals;
+     bool _targetWithinSubroom;
 };
 
 #endif /* FFROUTER_H_ */

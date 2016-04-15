@@ -62,10 +62,12 @@ public:
      void getDirectionAt(const Point& position, Point& direction);                                   //obsolete
      //void getDirectionToDestination (const int destID, const Point& position, Point& direction);     //obsolete
      void getDirectionToUID(int destID, const long int key, Point& direction);
+     void getDirectionToUIDParallel(int destID, const long int key, Point& direction);
      void getDirectionToDestination (Pedestrian* ped, Point& direction);
      void getDirectionToFinalDestination(Pedestrian* ped, Point& direction);
      void createLineToGoalID(const int goalID);
      double getCostToDestination(const int destID, const Point& position);
+     //double getCostToDestinationParallel(const int destID, const Point& position);
      void getDir2WallAt(const Point& position, Point& direction);
      double getDistance2WallAt(const Point& position);
 

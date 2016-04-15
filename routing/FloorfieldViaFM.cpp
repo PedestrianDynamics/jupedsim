@@ -222,6 +222,25 @@ void FloorfieldViaFM::getDirectionToDestination(Pedestrian* ped, Point& directio
     getDirectionToUID(destID, key, direction);
 }
 
+void FloorfieldViaFM::getDirectionToUIDParallel(const int destID, const long int key, Point& position) {
+    if ((costmap.count(destID) == 0) || (costmap.at(destID) == nullptr)) {
+        int* flagorig = flag;
+        Trial* trialorig = trialfield;
+        flag = new int[grid->GetnPoints()];
+        trialfield = new Trial[grid->GetnPoints()];
+        getDirectionToUID(destID, key, position);         //this call induces the floorfieldcalculation
+        delete[] flag;
+        delete[] trialfield;
+        flag = flagorig;
+        trialfield = trialorig;
+    }
+    if ((costmap.count(destID) == 0) || (costmap.at(destID) == nullptr)) {
+        Log->Write("ERROR: \t DestinationUID %d is invalid / out of grid.", destID);
+        return;
+    }
+    return;
+}
+
 void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& direction) {
     //what if goal == -1, meaning closest exit... is GetExitIndex then -1? NO... ExitIndex is UID, given by router
     //if (ped->GetFinalDestination() == -1) /*go to closest exit*/ destID = -1;
@@ -234,7 +253,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
     }
     Point* localneggradptr;
     double* localcostptr;
-    #pragma omp critical
+    //#pragma omp critical
     {
         if (neggradmap.count(destID) == 0) {
             //check, if distID is in this grid
@@ -246,7 +265,9 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 direction._x = direction._y = 0.;
                 //return;
             } else {
+#pragma omp critical
                 neggradmap.emplace(destID, nullptr);
+#pragma omp critical
                 costmap.emplace(destID, nullptr);
             }
         }
@@ -256,9 +277,13 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)
                 localcostptr =    new double[grid->GetnPoints()];
                 localneggradptr = new Point[grid->GetnPoints()];
+#pragma omp critical
                 neggradmap.erase(destID);
+#pragma omp critical
                 neggradmap.emplace(destID, localneggradptr);
+#pragma omp critical
                 costmap.erase(destID);
+#pragma omp critical
                 costmap.emplace(destID, localcostptr);
                 //create ff (prepare Trial-mechanic, then calc)
                 for (long int i = 0; i < grid->GetnPoints(); ++i) {
@@ -427,10 +452,10 @@ void FloorfieldViaFM::createLineToGoalID(const int goalID)
     }
 }
 
-double FloorfieldViaFM::getCostToDestination(const int destID, const Point& position) { //not implemented: trigger calc of new ff not working yet
+double FloorfieldViaFM::getCostToDestination(const int destID, const Point& position) {
     if ((costmap.count(destID) == 0) || (costmap.at(destID) == nullptr)) {
         Point dummy;
-        getDirectionToUID(destID, 0, dummy);         //this call induces the floorfieldcalculation
+        getDirectionToUIDParallel(destID, 0, dummy);         //this call induces the floorfieldcalculation
     }
     if ((costmap.count(destID) == 0) || (costmap.at(destID) == nullptr)) {
         Log->Write("ERROR: \t DestinationUID %d is invalid / out of grid.", destID);
@@ -606,8 +631,8 @@ void FloorfieldViaFM::prepareForDistanceFieldCalculation(std::vector<Line>& line
 void FloorfieldViaFM::clearAndPrepareForFloorfieldReCalc(double* costarray) {
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
         if (dist2Wall[i] == 0.) {    //wall or blocker
-            //costarray[i]    = -7.;                          //this is done in calculateFloorfield again
-            //flag[i]         = -7;      // meaning wall
+            costarray[i]    = -7.;                          //this is done in calculateFloorfield again
+            flag[i]         = -7;      // meaning wall
         } else {                     //inside
             costarray[i]    = -2.;
             flag[i]         = 0;       // meaning unknown
@@ -757,7 +782,7 @@ void FloorfieldViaFM::calculateFloorfield(double* costarray, Point* neggradarray
     //re-init memory
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
         if (dist2Wall[i] == 0.) {               //wall
-            //flag[i]         = -7;   // -7 => wall
+            flag[i]         = -7;   // -7 => wall
         } else {                                //inside
             flag[i]         = 0;
         }
@@ -771,7 +796,7 @@ void FloorfieldViaFM::calculateFloorfield(double* costarray, Point* neggradarray
         trialfield[i].child = nullptr;
     }
 
-    std::cerr << std::endl << trialfield[0].cost ;
+    //std::cerr << std::endl << trialfield[0].cost ;
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
         if (costarray[i] == 0.) {
             flag[i] = 3;
@@ -1234,12 +1259,12 @@ void FloorfieldViaFM::writeFF(const std::string& filename, int targetID) {
     }
 
     file << "VECTORS GradientTarget float" << std::endl;
-    Point* gradarray = neggradmap.at(targetID);
+    Point* gradarray = neggradmap[targetID];
     for (int i = 0; i < grid->GetnPoints(); ++i) {
         file << gradarray[i]._x << " " << gradarray[i]._y << " 0.0" << std::endl;
     }
 
-    double* costarray = costmap.at(targetID);
+    double* costarray = costmap[targetID];
     file << "SCALARS CostTarget float 1" << std::endl;
     file << "LOOKUP_TABLE default" << std::endl;
     for (long int i = 0; i < grid->GetnPoints(); ++i) {

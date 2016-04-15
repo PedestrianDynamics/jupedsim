@@ -381,8 +381,8 @@ bool GlobalRouter::Init(Building* building)
                _distMatrix[from_door][to_door] = _edgeCost*from_AP->GetNavLine()->DistTo(goal->GetCentroid());
 
                // add a penalty for goals outside due to the direct line assumption while computing the distances
-               //if (_distMatrix[from_door][to_door] > 10.0)
-               //      _distMatrix[from_door][to_door]*=10;
+               if (_distMatrix[from_door][to_door] > 10.0)
+                     _distMatrix[from_door][to_door]*=100;
           }
      }
 
