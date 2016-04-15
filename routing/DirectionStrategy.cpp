@@ -554,7 +554,7 @@ Point DirectionSubLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 //     } else {
 //          std::cerr << "Mapentry found: " << ped->GetSubRoomUID() << " with ptr: " << locffviafm.at(ped->GetSubRoomUID()) << std::endl;
 //     }
-//#pragma omp critical
+#pragma omp critical
      locffviafm.at(ped->GetSubRoomUID())->getDirectionToDestination(ped, p);
 
      p = p.Normalized();     // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
