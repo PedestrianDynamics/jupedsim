@@ -78,7 +78,7 @@ public:
 
      void parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
      void parseBuildingForExits(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
-     void prepareForDistanceFieldCalculation(std::vector<Line>& wallArg);
+     void prepareForDistanceFieldCalculation();
      void drawLinesOnGrid(std::vector<Line>& wallArg, double* const target, const double dbl2draw);
      void drawLinesOnGrid(std::vector<Line>& wallArg, int* const target, const int int2draw);
      void setSpeed(bool useDistance2WallArg);
@@ -87,10 +87,11 @@ public:
      void calculateFloorfield(std::vector<Line>& wallArg, double* costarray, Point* neggradarray);   //make private
      void calculateDistanceField(const double thresholdArg);             //make private
 
-     void checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* &biggest, const long int key, std::function<void (const long int)> calc);
+     void checkNeighborsAndAddToNarrowband(Trial* trialfield, Trial* &smallest, Trial* &biggest, int* flag, const long int key,
+                                           std::function<void (Trial*, int*, const long int)> calc);
 
-     void calcDist2Wall(const long int key);
-     void calcFloorfield(const long int key);
+     void calcDist2Wall(Trial*, int*, const long int key);
+     void calcFloorfield(Trial*, int*, const long int key);
      //void (*checkNeighborsAndCalc)(const long int key);
 
      inline double onesidedCalc(double xy, double hDivF);
@@ -98,6 +99,8 @@ public:
 
      void testoutput(const char*, const char*, const double*);
      void writeFF(const std::string&, int targetID);
+
+     virtual bool isInside(const long int key);
 
      std::map<int, int> getGoalToLineUIDmap() const
      {
@@ -121,7 +124,6 @@ public:
 
 #ifdef TESTING
      void setGrid(RectGrid* gridArg) {grid = gridArg;}
-     Trial* getTrial() {return trialfield;}
 #endif //TESTING
 
 protected:

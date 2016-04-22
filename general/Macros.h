@@ -167,7 +167,7 @@ enum GridCode { //used in floor fields
     OUTSIDE,
     OPEN_CROSSING,
     OPEN_TRANSITION,
-    CLOSED_CROSSING,
+    CLOSED_CROSSING,     //closed crossings and transitions are marked as walls in "parseBuilding"
     CLOSED_TRANSITION
 };
 
