@@ -98,7 +98,7 @@ public:
      inline double twosidedCalc(double x, double y, double hDivF);
 
      void testoutput(const char*, const char*, const double*);
-     void writeFF(const std::string&, int targetID);
+     void writeFF(const std::string&, std::vector<int> targetID);
 
      virtual bool isInside(const long int key);
 

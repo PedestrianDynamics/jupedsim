@@ -141,7 +141,7 @@ bool FFRouter::Init(Building* building)
      const std::map<int, std::shared_ptr<Room> >& allRooms = _building->GetAllRooms();
 #pragma omp parallel for
      //for (auto &pairRoom : allRooms) {
-     for (int i = 0; i < allRooms.size(); ++i) {
+     for (unsigned int i = 0; i < allRooms.size(); ++i) {
 
 #ifdef DEBUG
           std::cerr << "Creating Floorfield for Room: " << pair.first << std::endl;
@@ -205,16 +205,16 @@ bool FFRouter::Init(Building* building)
                     //          are not adjacent.
                     tempDistance = ptrToNew->getCostToDestination(*outerPtr,
                                                                   _CroTrByUID.at(*innerPtr)->GetCentre());
-                    Point endA = _CroTrByUID.at(*innerPtr)->GetCentre() * .9 +
-                                 _CroTrByUID.at(*innerPtr)->GetPoint1() * .1;
-                    Point endB = _CroTrByUID.at(*innerPtr)->GetCentre() * .9 +
-                                 _CroTrByUID.at(*innerPtr)->GetPoint2() * .1;
-                    if (ptrToNew->getCostToDestination(*outerPtr, endA) < tempDistance) {
-                         tempDistance = ptrToNew->getCostToDestination(*outerPtr, endA);
-                    }
-                    if (ptrToNew->getCostToDestination(*outerPtr, endB) < tempDistance) {
-                         tempDistance = ptrToNew->getCostToDestination(*outerPtr, endB);
-                    }
+//                    Point endA = _CroTrByUID.at(*innerPtr)->GetCentre() * .9 +
+//                                 _CroTrByUID.at(*innerPtr)->GetPoint1() * .1;
+//                    Point endB = _CroTrByUID.at(*innerPtr)->GetCentre() * .9 +
+//                                 _CroTrByUID.at(*innerPtr)->GetPoint2() * .1;
+//                    if (ptrToNew->getCostToDestination(*outerPtr, endA) < tempDistance) {
+//                         tempDistance = ptrToNew->getCostToDestination(*outerPtr, endA);
+//                    }
+//                    if (ptrToNew->getCostToDestination(*outerPtr, endB) < tempDistance) {
+//                         tempDistance = ptrToNew->getCostToDestination(*outerPtr, endB);
+//                    }
 //                    if (tempDistance < 0) {
 //                         Crossing *crossTest = _CroTrByUID.at(*innerPtr);
 //                         Point a = crossTest->GetPoint1();
@@ -241,29 +241,26 @@ bool FFRouter::Init(Building* building)
      FloydWarshall();
 
      //debug output in file
-     //_locffviafm[4]->writeFF("ffTreppe.vtk", 1267);
+//     _locffviafm[4]->writeFF("ffTreppe.vtk", _allDoorUIDs);
 
-     int roomTest = (*(_locffviafm.begin())).first;
-     int transTest = (building->GetRoom(roomTest)->GetAllTransitionsIDs())[0];
-     _locffviafm[roomTest]->writeFF("testFF.vtk", transTest);
-
-     std::ofstream matrixfile;
-     matrixfile.open("Matrix.txt");
-
-     for (auto mapItem : _distMatrix) {
-          matrixfile << mapItem.first.first << " to " << mapItem.first.second << " : " << mapItem.second << "\t via \t" << _pathsMatrix[mapItem.first];
-          matrixfile << "\t" << _CroTrByUID.at(mapItem.first.first)->GetID() << " to " << _CroTrByUID.at(mapItem.first.second)->GetID() << "\t via \t";
-          matrixfile << _CroTrByUID.at(_pathsMatrix[mapItem.first])->GetID() << std::endl;
-     }
-     matrixfile.close();
-//     Log->Write("1-3: %f \t 1-2: %f \t 2-3: %f",
-//                _distMatrix.at(std::make_pair(400, 382)),
-//                _distMatrix.at(std::make_pair(400, 381)),
-//                _distMatrix.at(std::make_pair(381, 382)));
-//     Log->Write("1-3: %f \t 1-2: %f \t 2-3: %f",
-//                _distMatrix.at(std::make_pair(382, 400)),
-//                _distMatrix.at(std::make_pair(382, 381)),
-//                _distMatrix.at(std::make_pair(381, 400)));
+     //int roomTest = (*(_locffviafm.begin())).first;
+     //int transTest = (building->GetRoom(roomTest)->GetAllTransitionsIDs())[0];
+//     for (unsigned int i = 0; i < _locffviafm.size(); ++i) {
+//          auto iter = _locffviafm.begin();
+//          std::advance(iter, i);
+//          int roomNr = iter->first;
+//          iter->second->writeFF("testFF" + std::to_string(roomNr) + ".vtk", _allDoorUIDs);
+//     }
+//
+//     std::ofstream matrixfile;
+//     matrixfile.open("Matrix.txt");
+//
+//     for (auto mapItem : _distMatrix) {
+//          matrixfile << mapItem.first.first << " to " << mapItem.first.second << " : " << mapItem.second << "\t via \t" << _pathsMatrix[mapItem.first];
+//          matrixfile << "\t" << _CroTrByUID.at(mapItem.first.first)->GetID() << " to " << _CroTrByUID.at(mapItem.first.second)->GetID() << "\t via \t";
+//          matrixfile << _CroTrByUID.at(_pathsMatrix[mapItem.first])->GetID() << std::endl;
+//     }
+//     matrixfile.close();
      Log->Write("INFO: \tFF Router Init done.");
      return true;
 }
@@ -291,12 +288,35 @@ int FFRouter::FindExit(Pedestrian* p)
           }
      }
 
-     //candidates of current room (ID) (provided by Room)
      std::vector<int> DoorUIDsOfRoom;
-     DoorUIDsOfRoom = _building->GetRoom(p->GetRoomID())->GetAllTransitionsIDs();
-     for(auto& subIPair : _building->GetRoom(p->GetRoomID())->GetAllSubRooms()) {
-          for (auto& crossI : subIPair.second->GetAllCrossings()) {
-               DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
+     if (!_targetWithinSubroom) {
+          //candidates of current room (ID) (provided by Room)
+          for (auto transUID : _building->GetRoom(p->GetRoomID())->GetAllTransitionsIDs()) {
+               if (_CroTrByUID[transUID]->IsOpen()) {
+                    DoorUIDsOfRoom.emplace_back(transUID);
+               }
+          }
+          for (auto &subIPair : _building->GetRoom(p->GetRoomID())->GetAllSubRooms()) {
+               for (auto &crossI : subIPair.second->GetAllCrossings()) {
+                    if (crossI->IsOpen()) {
+                         DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
+                    }
+               }
+          }
+     }
+     else
+     {
+          //candidates of current subroom only
+          for (auto &crossI : _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->GetAllCrossings()) {
+               if (crossI->IsOpen()) {
+                    DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
+               }
+          }
+
+          for (auto &transI : _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->GetAllTransitions()) {
+               if (transI->IsOpen()) {
+                    DoorUIDsOfRoom.emplace_back(transI->GetUniqueID());
+               }
           }
      }
 
@@ -304,6 +324,9 @@ int FFRouter::FindExit(Pedestrian* p)
           //with UIDs, we can ask for shortest path
           for (int doorUID : DoorUIDsOfRoom) {
                double locDistToDoor = _locffviafm[p->GetRoomID()]->getCostToDestination(doorUID, p->GetPos());
+               if (locDistToDoor < 0.) {     //this can happen, if the point is not reachable and therefore has init val -7
+                    continue;
+               }
                std::pair<int, int> key = std::make_pair(doorUID, finalDoor);
                if ((_distMatrix.count(key)!=0) && (_distMatrix.at(key) != DBL_MAX)
                      && ( (_distMatrix.at(key) + locDistToDoor) < minDist)) {
@@ -313,21 +336,37 @@ int FFRouter::FindExit(Pedestrian* p)
                }
           }
      }
-     //at this point, bestDoor is either a crossing or a transition
 
-     if ((!_targetWithinSubroom) && (_CroTrByUID.count(bestDoor) != 0)) {
-          while (!_CroTrByUID[bestDoor]->IsTransition()) {
-               std::pair<int, int> key = std::make_pair(bestDoor, bestGoal);
-               bestDoor = _pathsMatrix[key];
-          }
+     //at this point, bestDoor is either a crossing or a transition
+//     if ((!_targetWithinSubroom) && (_CroTrByUID.count(bestDoor) != 0)) {
+//          while (!_CroTrByUID[bestDoor]->IsTransition()) {
+//               std::pair<int, int> key = std::make_pair(bestDoor, bestGoal);
+//               bestDoor = _pathsMatrix[key];
+//          }
+//     }
+
+     //avoid entering oscillation at doors alongside (real) shortest path
+     while (
+          (std::find(DoorUIDsOfRoom.begin(), DoorUIDsOfRoom.end(), _pathsMatrix[std::make_pair(bestDoor, bestGoal)]) != DoorUIDsOfRoom.end())
+       && (bestDoor != _pathsMatrix[std::make_pair(bestDoor, bestGoal)])        //last door has itself as _pathsMatrix[lastDooronPath]
+           )
+     {
+          bestDoor = _pathsMatrix[std::make_pair(bestDoor, bestGoal)];
      }
      if (_CroTrByUID.count(bestDoor)) {
           p->SetExitIndex(bestDoor);
           p->SetExitLine(_CroTrByUID.at(bestDoor));
      }
      //debug
-//     if (p->GetID() == 10) {
-//          Log->Write("\nBest Door %d alias %d", bestDoor, _CroTrByUID.at(bestDoor)->GetID());
+//     if ((p->GetID() == 15) && ((p->GetSubRoomID() == 24) || (p->GetSubRoomID() == 26))) {
+//          Log->Write("\nBest Door UID %d alias %d to final door %d", bestDoor, _CroTrByUID.at(bestDoor)->GetID(), _CroTrByUID.at(bestGoal)->GetID());
+//          Log->Write("\n(Room) %d\t(Sub) %d \tRouting goes to:", p->GetRoomID(), p->GetSubRoomID());
+//          int temp = bestDoor;
+//          while (temp != bestGoal) {
+//               Log->Write("\t%d", _CroTrByUID.at(temp)->GetID());
+//               std::pair<int, int> key = std::make_pair(temp, bestGoal);
+//               temp = _pathsMatrix[key];
+//          }
 //     }
      return bestDoor; //-1 if no way was found, doorUID of best, if path found
 }
@@ -354,11 +393,6 @@ void FFRouter::FloydWarshall()
                     std::pair<int, int> key_ij = std::make_pair(_allDoorUIDs[i], _allDoorUIDs[j]);
                     std::pair<int, int> key_ik = std::make_pair(_allDoorUIDs[i], _allDoorUIDs[k]);
                     std::pair<int, int> key_kj = std::make_pair(_allDoorUIDs[k], _allDoorUIDs[j]);
-                    //debug ar.graf
-                    //double a = _distMatrix[key_ij];
-                    //double b = _distMatrix[key_ik];
-                    //double c = _distMatrix[key_kj];
-                    //double sum = b + c;
                     if(_distMatrix[key_ik] + _distMatrix[key_kj] < _distMatrix[key_ij]) {
                          _distMatrix.erase(key_ij);
                          _distMatrix.insert(std::make_pair(key_ij, _distMatrix[key_ik] + _distMatrix[key_kj]));

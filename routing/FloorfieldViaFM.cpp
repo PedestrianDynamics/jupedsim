@@ -331,9 +331,11 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
 //                clearAndPrepareForFloorfieldReCalc(localcostptr);
                 std::vector<Line> localline = {Line((Line) *(building->GetTransOrCrossByUID(destID)))};
 //                setNewGoalAfterTheClear(localcostptr, localline);
-                Log->Write("Starting FF for UID %d", destID);
+                //Log->Write("Starting FF for UID %d", destID);
+                //std::cerr << "\rW\tO\tR\tK\tI\tN\tG";
                 calculateFloorfield(localline, localcostptr, localneggradptr);
-                Log->Write("Ending   FF for UID %d", destID);
+                //Log->Write("Ending   FF for UID %d", destID);
+                //std::cerr << "\r W\t O\t R\t K\t I\t N\t G";
         }
     }
     direction._x = (localneggradptr[key]._x);
@@ -495,6 +497,9 @@ double FloorfieldViaFM::getCostToDestination(const int destID, const Point& posi
     if ((costmap.count(destID) == 0) || (costmap.at(destID) == nullptr)) {
         Log->Write("ERROR: \t DestinationUID %d is invalid / out of grid.", destID);
         return DBL_MAX;
+    }
+    if (grid->getKeyAtPoint(position) == -1) {  //position is out of grid
+        return -7;
     }
     return (costmap.at(destID))[grid->getKeyAtPoint(position)];
 }
@@ -1623,8 +1628,8 @@ void FloorfieldViaFM::testoutput(const char* filename1, const char* filename2, c
     //std::cerr << "INFO: \tFile closed: " << filename1 << std::endl;
 }
 
-void FloorfieldViaFM::writeFF(const std::string& filename, int targetID) {
-    Log->Write("INFO: \tWrite Floorfield (targetID: %d) to file", targetID);
+void FloorfieldViaFM::writeFF(const std::string& filename, std::vector<int> targetID) {
+    Log->Write("INFO: \tWrite Floorfield to file");
     std::ofstream file;
 
     int numX = (int) ((grid->GetxMax()-grid->GetxMin())/grid->Gethx());
@@ -1655,28 +1660,32 @@ void FloorfieldViaFM::writeFF(const std::string& filename, int targetID) {
     }
 
     file << "VECTORS Dir2Wall float" << std::endl;
-    for (int i = 0; i < grid->GetnPoints(); ++i) {
+    for (long int i = 0; i < grid->GetnPoints(); ++i) {
         file << dirToWall[i]._x << " " << dirToWall[i]._y << " 0.0" << std::endl;
     }
 
-    if (neggradmap.count(targetID) == 0) {
-        file.close();
-        return;
-    }
+    for (unsigned int iTarget = 0; iTarget < targetID.size(); ++iTarget) {
+        if (neggradmap.count(targetID[iTarget]) == 0) {
+            continue;
+        }
 
-    file << "VECTORS GradientTarget float" << std::endl;
-    Point* gradarray = neggradmap[targetID];
-    for (int i = 0; i < grid->GetnPoints(); ++i) {
-        file << gradarray[i]._x << " " << gradarray[i]._y << " 0.0" << std::endl;
-    }
+        Point *gradarray = neggradmap[targetID[iTarget]];
+        if (gradarray == nullptr) {
+            continue;
+        }
 
-    double* costarray = costmap[targetID];
-    file << "SCALARS CostTarget float 1" << std::endl;
-    file << "LOOKUP_TABLE default" << std::endl;
-    for (long int i = 0; i < grid->GetnPoints(); ++i) {
-        file << costarray[i] << std::endl;
-    }
+        file << "VECTORS GradientTarget" << targetID[iTarget] << " float" << std::endl;
+        for (int i = 0; i < grid->GetnPoints(); ++i) {
+            file << gradarray[i]._x << " " << gradarray[i]._y << " 0.0" << std::endl;
+        }
 
+        double *costarray = costmap[targetID[iTarget]];
+        file << "SCALARS CostTarget" << targetID[iTarget] <<" float 1" << std::endl;
+        file << "LOOKUP_TABLE default" << std::endl;
+        for (long int i = 0; i < grid->GetnPoints(); ++i) {
+            file << costarray[i] << std::endl;
+        }
+    }
     file << "SCALARS GCode float 1" << std::endl;
     file << "LOOKUP_TABLE default" << std::endl;
     for (long int i = 0; i < grid->GetnPoints(); ++i) {

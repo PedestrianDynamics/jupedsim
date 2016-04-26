@@ -116,7 +116,7 @@ class RectGrid
             //Point nearest = getNearestGridPoint(Point(x,y));
             long int i = (long int)(((x-xMin)/hx)+.5);
             long int j = (long int)(((y-yMin)/hy)+.5);
-            if ((i >= 0) && (i < iMax) && (j >= 0) && (j < jMax)) //@todo: ar.graf: check in #ifdef block
+            if ((i >= 0) && (i <= iMax) && (j >= 0) && (j <= jMax)) //@todo: ar.graf: check in #ifdef block
                 return (j*iMax+i); // 0-based; index of (closest gridpoint)
              std::cerr << "ERROR in RectGrid::getKeyAtPoint with:" << std::endl;
              std::cerr << "Point: " << x << ", " << y << std::endl;
@@ -129,7 +129,8 @@ class RectGrid
         long int getKeyAtPoint(const Point p) const {
             long int i = (long int) (((p._x-xMin)/hx)+.5);
             long int j = (long int) (((p._y-yMin)/hy)+.5);
-            if ((i >= 0) && (i < iMax) && (j >= 0) && (j < jMax)) //@todo: ar.graf: check in #ifdef block
+            //if ((i >= 0) && (i <= iMax) && (j >= 0) && (j <= jMax)) //@todo: ar.graf: check in #ifdef block
+            //if (includesPoint(p))             //@todo: ar.graf: this if must be made work
                 return (j*iMax+i); // 0-based; index of (closest gridpoint)
              std::cerr << "ERROR in RectGrid::getKeyAtPoint with:" << std::endl;
              std::cerr << "Point: " << p._x << ", " << p._y << std::endl;

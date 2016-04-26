@@ -321,12 +321,12 @@ void Simulation::UpdateRoutesAndLocations()
                (ped->_ticksInThisRoom)+=1;
 
                //set the new room if needed
-               if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
+               if ((ped->GetFinalDestination() == FINAL_DEST_OUT)               //Final == -1 && ped is outside
                          && (room0->GetCaption() == "outside")) {
 #pragma omp critical
                     pedsToRemove.push_back(ped);
-               } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
-                         && (goals.at(ped->GetFinalDestination())->Contains(
+               } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)        //ped has specific target && he has
+                         && (goals.at(ped->GetFinalDestination())->Contains(    //reached it
                                    ped->GetPos()))) {
 #pragma omp critical
                     pedsToRemove.push_back(ped);
@@ -339,6 +339,9 @@ void Simulation::UpdateRoutesAndLocations()
                {
                     bool assigned = false;
                     auto& allRooms = _building->GetAllRooms();
+                    auto&& old_room =allRooms.at(ped->GetRoomID());
+                    auto&& old_sub =old_room->GetSubRoom(
+                              ped->GetSubRoomID());
 
                     for (auto&& it_room : allRooms)
                     {
@@ -346,9 +349,7 @@ void Simulation::UpdateRoutesAndLocations()
                          for (auto&& it_sub : room->GetAllSubRooms())
                          {
                               auto&& sub=it_sub.second;
-                              auto&& old_room =allRooms.at(ped->GetRoomID());
-                              auto&& old_sub =old_room->GetSubRoom(
-                                        ped->GetSubRoomID());
+
                               if (sub->IsDirectlyConnectedWith(old_sub)
                                         && sub->IsInSubRoom(ped->GetPos()))
                               {
@@ -390,7 +391,7 @@ void Simulation::UpdateRoutesAndLocations()
                          pedsToRemove.push_back(ped);
                          //the agent left the old room
                          //actualize the eggress time for that room
-                         allRooms.at(ped->GetRoomID())->SetEgressTime(ped->GetGlobalTime());
+                         old_room->SetEgressTime(ped->GetGlobalTime());
 
                     }
                }
