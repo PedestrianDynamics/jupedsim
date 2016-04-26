@@ -225,8 +225,8 @@ MainWindow::MainWindow(QWidget *parent) :
                 if(argCount!=arguments.size()-1) {
                     bool ok=false;
                     int port = arguments[++argCount].toInt(&ok);
-                    Debug::
-                            Debug::Messages(" listening port: %d",port);
+//                    Debug::
+//                            Debug::Messages(" listening port: %d",port);
 
                     if (ok) {
                         SystemSettings::setListeningPort(port);
