@@ -89,10 +89,15 @@ std::string WalkingSpeed::GetName() const
 }
 
 
-double WalkingSpeed::GetExtinction(const Pedestrian * pedestrian, std::string quantity)
+double WalkingSpeed::GetExtinction(const Pedestrian * pedestrian)
 {
-    //std::cout << "\n" << quantity << std::endl;
+    std::string quantity = "SOOT_EXTINCTION_COEFFICIENT";
     double ExtinctionCoefficient = _FMStorage->GetFDSMesh(pedestrian->GetGlobalTime(), pedestrian->GetElevation(), quantity).GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y);
+    if(ExtinctionCoefficient > 10)
+    {
+        std::cout << "SOMETHING MAY BE WRONG:" << std::endl;
+    }
+
     return ExtinctionCoefficient;
 }
 
@@ -133,9 +138,9 @@ double WalkingSpeed::Jin1978(double &walking_speed, double ExtinctionCoefficient
     return walking_speed;
 }
 
-double WalkingSpeed::WalkingInSmoke(const Pedestrian* p, double &walking_speed)
+double WalkingSpeed::WalkingInSmoke(const Pedestrian* p, double walking_speed)
 {
-    double ExtinctionCoefficient = GetExtinction(p, "EXTINCTION_COEFFICIENT");
+    double ExtinctionCoefficient = GetExtinction(p);
     //std::cout << ExtinctionCoefficient << std::endl;
     //fprintf(stderr, "%f\n", ExtinctionCoefficient);
     std::string study = _FMStorage->GetStudy();
@@ -143,7 +148,7 @@ double WalkingSpeed::WalkingInSmoke(const Pedestrian* p, double &walking_speed)
     if((ExtinctionCoefficient < 10E-6) || (std::isnan(ExtinctionCoefficient)))   //no obstruction by smoke or NaN check
     {
         //fprintf(stderr, "%f \t%f\n", ExtinctionCoefficient, p->GetEllipse().GetV0());
-        return p->GetEllipse().GetV0();
+        return walking_speed;    // walking_speed is returned as V0 for plane or stairs
     }
     else {
             if (study=="Frantzich+Nilsson2003"){
@@ -157,11 +162,11 @@ double WalkingSpeed::WalkingInSmoke(const Pedestrian* p, double &walking_speed)
                 exit(EXIT_FAILURE);
             }
     //Generally check if v0 < reduced walking_speed
-    if(walking_speed > p->GetEllipse().GetV0()) {
-       walking_speed = p->GetEllipse().GetV0();
+//    if(walking_speed > p->GetEllipse().GetV0()) {
+//       walking_speed = p->GetEllipse().GetV0();
+//    }
     }
-    }
-   fprintf(stderr, "%f \t%f \t%f\n", p->GetGlobalTime(), ExtinctionCoefficient, walking_speed);
+   fprintf(stderr, "%f \t%f \t%f \t%f \n", p->GetGlobalTime(), ExtinctionCoefficient, walking_speed, p->GetV().Norm() );
 
    return walking_speed;
 }
