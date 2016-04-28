@@ -3,7 +3,7 @@ os:
     - linux
     # - osx
 
-# branches:
+branches:
   only:
     - master
     - develop
