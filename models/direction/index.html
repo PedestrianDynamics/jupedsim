@@ -237,10 +237,8 @@ In the section of the chosen model the direction strategy should be specified as
 <p>The direction of the pedestrian is towards the middle of <script type="math/tex">L</script> (<script type="math/tex">\frac{P_1+P2}{2}</script>)  </p>
 </li>
 <li>
-<p>The direction is given by the nearest point on <script type="math/tex">L</script> to the position of the pedestrian.  </p>
-</li>
-<li>
-<p>Same as 2, only the line <script type="math/tex">L</script> is shorten by 20 cm.  </p>
+<p>The direction is given by the nearest point on <script type="math/tex">L</script> to the position of the pedestrian.<br />
+<script type="math/tex">L</script> is shorten by 20 cm.  </p>
 </li>
 <li>
 <p>If the nearest point of the pedestrian on the segment line <script type="math/tex">L</script> is outside the segment, then chose the middle point as target.<br />
@@ -249,6 +247,9 @@ In the section of the chosen model the direction strategy should be specified as
 <li>
 <p>This strategy is still beta. It assumes that the simulation scenario has no loops or U-shaped corridors.
    Pedestrians, are targets towards the exit, even if it is outside their visibility range. In case of intersection with walls or bstacles, the temporary direction is rotaions away from the wall.  </p>
+</li>
+<li>
+<p>Does not exist.</p>
 </li>
 <li>
 <p>-9. Strategies using floor fields (ff) (vector fields); one ff per target (door, line, &hellip;)</p>
