@@ -15,7 +15,10 @@ do
 if grep -R -q "version=" $f; then
     echo "Processing $f"  
     sed -i -e "s/version=\"0.[0-9]\"/version=\"$new_version\"/g" $f
-    read -p "Press [Enter] key to continue..."
+    d=`dirname $f`
+    echo "remove $d/*.xml-e"
+    rm $d/*.xml-e
+    # read -p "Press [Enter] key to continue..."
 else
 	echo "WARNING: File $f does not contain a version number"
 fi
