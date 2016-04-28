@@ -82,11 +82,10 @@ bool SystemSettings::onScreenInfos=true;
 
 bool SystemSettings::recordPNGsequence=false;
 //QString SystemSettings::outputDir =QDir::currentPath()+"/";
-QString SystemSettings::outputDir  = QDir::homePath() +"/Desktop/TraVisTo_Files/";
+QString SystemSettings::outputDir  = QDir::homePath() + QDir::separator() + "Desktop" + QDir::separator() + "TraVisTo_Files" + QDir::separator();
 QString SystemSettings::workingDir  = QDir::currentPath();
 QString SystemSettings::filesPrefix="";
 QString SystemSettings::logfile="log.txt";
-
 //the log file is writting by a different module
 OutputHandler* Log=NULL;
 
@@ -408,6 +407,7 @@ void SystemSettings::CreateLogfile()
         QDir dir;
         if(!dir.mkpath (outputDir )) {
             qDebug()<<"could not create directory: "<< outputDir;
+            qDebug()<<"could not create directory: "<< QDir::homePath();
             outputDir=""; // current
         }
     }
