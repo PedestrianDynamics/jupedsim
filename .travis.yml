@@ -3,10 +3,10 @@ os:
     - linux
     # - osx
 
-branches:
-  only:
-    - master
-    - develop
+# branches:
+#   only:
+#     - master
+#     - develop
     
 compiler:
     - gcc
