@@ -4,9 +4,9 @@ os:
     # - osx
 
 # branches:
-#   only:
-#     - master
-#     - v0.8
+  only:
+    - master
+    - develop
     
 compiler:
     - gcc
