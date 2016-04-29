@@ -1,7 +1,7 @@
 /**
  * \file        main.cpp
  * \date        Jan 15, 2013
- * \version     v0.7
+ * \version     v0.8
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
