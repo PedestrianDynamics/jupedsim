@@ -82,7 +82,7 @@ bool SystemSettings::onScreenInfos=true;
 
 bool SystemSettings::recordPNGsequence=false;
 //QString SystemSettings::outputDir =QDir::currentPath()+"/";
-QString SystemSettings::outputDir  = QDir::homePath() + QDir::separator() + "Desktop" + QDir::separator() + "TraVisTo_Files" + QDir::separator();
+QString SystemSettings::outputDir  = QDir::homePath() + QDir::separator() + "Desktop" + QDir::separator() + "JPSvis_Files" + QDir::separator();
 QString SystemSettings::workingDir  = QDir::currentPath();
 QString SystemSettings::filesPrefix="";
 QString SystemSettings::logfile="log.txt";
