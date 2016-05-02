@@ -26,19 +26,19 @@
       <door trans_id="0" caption="" state="open" />
     </doors>
   </traffic_constraints>
-  <routing>
-    <goals>
-      <goal id="0" final="true" caption="goal">
-        <polygon>
-          <vertex px="14" py="4" />
-          <vertex px="14" py="0" />
-          <vertex px="13" py="0" />
-          <vertex px="13" py="4" />
-          <vertex px="14" py="4" />
-        </polygon>
-      </goal>
-    </goals>
-  </routing>
+  <!-- <routing> -->
+  <!--   <goals> -->
+  <!--     <goal id="0" final="true" caption="goal"> -->
+  <!--       <polygon> -->
+  <!--         <vertex px="14" py="4" /> -->
+  <!--         <vertex px="14" py="0" /> -->
+  <!--         <vertex px="13" py="0" /> -->
+  <!--         <vertex px="13" py="4" /> -->
+  <!--         <vertex px="14" py="4" /> -->
+  <!--       </polygon> -->
+  <!--     </goal> -->
+  <!--   </goals> -->
+  <!-- </routing> -->
 
   <!--persons information and distribution -->
   <agents operational_model_id="[1,2,3]">
@@ -111,14 +111,12 @@
   </operational_models>
 
   <route_choice_models>
-    <router router_id="1" description="quickest">
-      <parameters>
-        <!-- <navigation_lines file="routing.xml" /> -->
-      </parameters>
-    </router>
+    <!-- <router router_id="1" description="quickest"> -->
+    <!--   <parameters> -->
+    <!--   </parameters> -->
+    <!-- </router> -->
     <router router_id="2" description="global_shortest">
       <parameters>
-        <!--<navigation_lines file="routing.xml" />-->
       </parameters>
     </router>
 
