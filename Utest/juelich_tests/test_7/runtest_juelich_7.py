@@ -1,4 +1,14 @@
 #!/usr/bin/env python
+
+"""
+- 6 peds distributed in a room with 2 exits:
+  - Group 1, peds: 1, 2, 3 with router "global_shortest"
+  - Group 2, peds: 4, 5, 6 with router "quickest"
+
+- Group 1 should leave from the exit e1
+- Group 2 should leave from exit e2
+"""
+
 import os
 import sys
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
