@@ -182,8 +182,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 # test all cpp-files in Utest
 if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
-
-  find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+  find_package(Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
   IF(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
     set(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
@@ -450,7 +449,7 @@ if(Boost_FOUND)
   link_directories(${Boost_LIBRARY_DIRS})
   include_directories(${Boost_INCLUDE_DIR})
   # todo: is this necessary?
-  #target_link_libraries(jpscore ${Boost_LIBRARIES})
+  target_link_libraries(jpscore ${Boost_LIBRARIES})
 endif()
 
 target_link_libraries(jpscore core )
