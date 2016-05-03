@@ -102,7 +102,6 @@ public:
       */
      void Dump() const;
 
-     int GetGroupID() const;
      int GetAgentsGenerated() const;
      void SetAgentsGenerated(int agentsGenerated);
      const double* GetBoundaries() const;

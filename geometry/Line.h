@@ -24,7 +24,7 @@
  *
  *
  **/
- 
+
 
 #ifndef _LINE_H
 #define _LINE_H
@@ -32,19 +32,17 @@
 #include "Point.h"
 #include "../IO/OutputHandler.h"
 
-
 #include <string>
 
 //forward declarations
 class OutputHandler;
+
 class Wall;
 
 // external variables
 extern OutputHandler* Log;
 
-
-class Line
-{
+class Line {
 private:
      Point _point1;
      Point _point2;
@@ -57,8 +55,11 @@ private:
 public:
 
      Line();
+
      Line(const Point& p1, const Point& p2);
+
      Line(const Line& orig);
+
      virtual ~Line();
 
      /**
@@ -178,7 +179,7 @@ public:
       * @return 1 if both segments intersect at one point
       * @return 2 if Lines overlap
       */
-     int IntersectionWith(const Point& p1, const Point&p2) const;
+     int IntersectionWith(const Point& p1, const Point& p2) const;
 
      /*
       * @return 0 if no intersection
@@ -197,18 +198,18 @@ public:
       * then the Point of intersection is stored as NaN.
       */
      int IntersectionWith(const Line& L, Point& p3) const;
-    
+
      /**
       * @return the distance squared between the first point and the intersection
       * point with line l. This is exactly the same function
       * as @see IntersectionWith() but returns a double insteed.
       */
-     double GetDistanceToIntersectionPoint(const Line &l) const;
+     double GetDistanceToIntersectionPoint(const Line& l) const;
 
      /**
       * @return true if the segment intersects with the circle of radius r
       */
-     bool IntersectionWithCircle(const Point& centre, double radius=0.30 /*m for pedestrians*/);
+     bool IntersectionWithCircle(const Point& centre, double radius = 0.30 /*m for pedestrians*/);
 
      /**
       * @return true if both segments share at least one common point
@@ -231,12 +232,12 @@ public:
       * @return 0 (Left) or 1 (Right) depending on which side of the line the point is located.
       * The return value is undefined if the points are colinear.
       */
-     int WichSide (const Point& pt);
+     int WichSide(const Point& pt);
 
      /**
       * @return true if the point is located in the left hand side of the line directed from (_point1 to _point2).
       */
-     bool IsLeft (const Point& pt);
+     bool IsLeft(const Point& pt);
 
      /**
       * @return true for horizontal lines
@@ -273,15 +274,26 @@ public:
       */
      double GetDeviationAngle(const Line& l) const;
 
-     double GetAngle(const Line & l) const;
-     double GetObstacleDeviationAngle(const std::vector<Wall>& owalls, const std::vector<Wall>& rwalls) const; 
+     double GetAngle(const Line& l) const;
+
+     double GetObstacleDeviationAngle(const std::vector<Wall>& owalls, const std::vector<Wall>& rwalls) const;
 
      /**
       * Extend the line by d on both extremities. The line becomes larger by 2*d
       * @param d:
       * @return
       */
-     Line Enlarge(double d) const; 
+     Line Enlarge(double d) const;
+
+private:
+
+     //checks whether [a, b] intersects [x y]
+     //derrived from [A,B ) [X, Y) test
+     //see: http://world.std.com/~swmcd/steven/tech/interval.html
+     inline bool IntervalsIntersect(double a, double b, double x, double y) const
+     {
+          return x<=b && a<=y;
+     }
 
 };
 
