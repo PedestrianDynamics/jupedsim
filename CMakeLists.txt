@@ -143,7 +143,7 @@ if (APPLE)
         # Recommendation, also add a "brew --prefix" custom command to detect a homebrew build environment
         execute_process(COMMAND brew --prefix RESULT_VARIABLE DETECT_BREW OUTPUT_VARIABLE BREW_PREFIX ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
         if (${DETECT_BREW} EQUAL 0)
-            link_directories(${BREW_PREFIX})
+            link_directories(${BREW_PREFIX}/lib)
             message(STATUS "Brew detected: ${BREW_PREFIX}")
         endif ()
     endif ()
