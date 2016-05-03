@@ -473,38 +473,38 @@ endif (WIN32)
 # endif(CGAL_FOUND)
 
 ##if (JPS_AS_A_SERVICE)
-find_package(Protobuf REQUIRED)
-set(GRPC_DIR "${CMAKE_SOURCE_DIR}/cmake_modules/")
-find_package(GRPC REQUIRED)
-file(GLOB ProtoFiles "${CMAKE_SOURCE_DIR}/hybrid/*.proto")
-PROTOBUF_GENERATE_CPP(ProtoSources ProtoHeaders ${ProtoFiles})
-PROTOBUF_GENERATE_GRPC_CPP(ProtoGRPCSources ProtoGRPCHeaders ${ProtoFiles})
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-set(hybrid_source_files
-        ${ProtoSources}
-        ${ProtoGRPCSources}
-        hybrid/JPSserver.cpp
-        hybrid/HybridSimulationManager.cpp
-        hybrid/Latches.cpp
-        hybrid/GeometryFromProtobufLoader.cpp
-        hybrid/PedDistributionFromProtobufLoader.cpp
-        hybrid/IniFromProtobufLoader.cpp
-        hybrid/IniFileWriter.cpp hybrid/SimObserver.cpp hybrid/SimObserver.h)
-
-set(hybrid_header_files
-        ${ProtoHeaders}
-        ${ProtoGRPCHeaders}
-        hybrid/JPSserver.h
-        hybrid/HybridSimulationManager.h
-        hybrid/Latches.h
-        hybrid/GeometryFromProtobufLoader.h
-        hybrid/PedDistributionFromProtobufLoader.h
-        hybrid/IniFromProtobufLoader.h
-        hybrid/IniFileWriter.h)
-add_library(hybrid STATIC ${hybrid_source_files})
-target_link_libraries(hybrid grpc++ grpc protobuf dl)
-target_link_libraries(core hybrid)
+#find_package(Protobuf REQUIRED)
+#set(GRPC_DIR "${CMAKE_SOURCE_DIR}/cmake_modules/")
+#find_package(GRPC REQUIRED)
+#file(GLOB ProtoFiles "${CMAKE_SOURCE_DIR}/hybrid/*.proto")
+#PROTOBUF_GENERATE_CPP(ProtoSources ProtoHeaders ${ProtoFiles})
+#PROTOBUF_GENERATE_GRPC_CPP(ProtoGRPCSources ProtoGRPCHeaders ${ProtoFiles})
+#
+#include_directories(${CMAKE_CURRENT_BINARY_DIR})
+#set(hybrid_source_files
+#        ${ProtoSources}
+#        ${ProtoGRPCSources}
+#        hybrid/JPSserver.cpp
+#        hybrid/HybridSimulationManager.cpp
+#        hybrid/Latches.cpp
+#        hybrid/GeometryFromProtobufLoader.cpp
+#        hybrid/PedDistributionFromProtobufLoader.cpp
+#        hybrid/IniFromProtobufLoader.cpp
+#        hybrid/IniFileWriter.cpp hybrid/SimObserver.cpp hybrid/SimObserver.h)
+#
+#set(hybrid_header_files
+#        ${ProtoHeaders}
+#        ${ProtoGRPCHeaders}
+#        hybrid/JPSserver.h
+#        hybrid/HybridSimulationManager.h
+#        hybrid/Latches.h
+#        hybrid/GeometryFromProtobufLoader.h
+#        hybrid/PedDistributionFromProtobufLoader.h
+#        hybrid/IniFromProtobufLoader.h
+#        hybrid/IniFileWriter.h)
+#add_library(hybrid STATIC ${hybrid_source_files})
+#target_link_libraries(hybrid grpc++ grpc protobuf dl)
+#target_link_libraries(core hybrid)
 ##endif (JPS_AS_A_SERVICE)
 
 #----------------------------------------------------------------------
