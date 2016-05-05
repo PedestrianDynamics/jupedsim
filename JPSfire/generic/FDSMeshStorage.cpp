@@ -50,16 +50,21 @@ FDSMeshStorage::FDSMeshStorage(const std::string &filepath, const double &finalT
 
     if ( fs::exists(_filepath ) )
     {
+        std::cout << "\nCreating QuantityList..." << std::endl;
         CreateQuantityList();
-        //std::cout << "\nCreateQuantityList PASSED\n" << std::endl;
+        std::cout << "Success!" << std::endl;
+        std::cout << "\nCreating ElevationList..." << std::endl;
         CreateElevationList();
-        //std::cout << "\nCreateElevationList PASSED\n" << std::endl;
+        std::cout << "Success!" << std::endl;
+        std::cout << "\nCreating DoorList..." << std::endl;
         CreateDoorList();
-        //std::cout << "\nCreateDoorList PASSED\n" << std::endl;
+        std::cout << "Success!" << std::endl;
+        std::cout << "\nCreating TimeList..." << std::endl;
         CreateTimeList();
-        //std::cout << "CreateTimeList PASSED\n" << std::endl;
+        std::cout << "Success!" << std::endl;
+        std::cout << "\nCreating FDSMeshes..." << std::endl;
         CreateFDSMeshes();
-        //std::cout << "CreateFDSMeshes PASSED\n" << std::endl;
+        std::cout << "Success!" << std::endl;
     }
     else {        
         Log->Write("ERROR:\tCould not find directory %s", _filepath.c_str());
@@ -201,7 +206,10 @@ void FDSMeshStorage::CreateFDSMeshes()
                     std::string str = h + "/Z_" + std::to_string(i) +
                     "/t_"+std::to_string(k);
                     //std::cout << _filepath + str + ".csv" << std::endl;
+
                     FDSMesh mesh(_filepath + str + ".csv");
+
+                    //std::cout << _filepath + str + ".csv" << std::endl;
                     //std::string str = "t_"+std::to_string(i);
                     _fMContainer.insert(std::make_pair(str, mesh));
                 }
@@ -226,7 +234,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &p
     std::string str = quantity + "/Z_" +  std::to_string(_NearestHeight) + "/t_"+std::to_string(simT)+".000000";
 
     if (_fMContainer.count(str) == 0) {
-        std::cout << str << std::endl;
+        //std::cout << str << std::endl;
         throw -1;
     }
     return _fMContainer.at(str);
@@ -259,7 +267,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
     "Door_X_"+ std::to_string(doorCentre._x) + "_Y_" + std::to_string(doorCentre._y) +
     "/t_"+std::to_string(simT)+".000000";
 
-    std::cout << str << std::endl;
+    //std::cout << str << std::endl;
 
     return _fMContainer.at(str);
 }

@@ -124,10 +124,10 @@ void ToxicityAnalysis::CalculateFED(const Pedestrian* p)
 
     double dt =  p->GetGlobalTime();    //current sim time
     double CO2=0., CO=0., HCN=0., HCL=0.;
-    CO2 = GetGasConcentration(p, "CARBON_DIOXIDE_MASS_FRACTION");
-    CO = GetGasConcentration(p, "CARBON_MONOXIDE_MASS_FRACTION");
-    HCN = GetGasConcentration(p, "HYDROGEN_CYANIDE_MASS_FRACTION");
-    HCL = GetGasConcentration(p, "HYDROGEN_CHLORIDE_MASS_FRACTION");
+    CO2 = GetGasConcentration(p, "CARBON_DIOXIDE_VOLUME_FRACTION");
+    CO = GetGasConcentration(p, "CARBON_MONOXIDE_VOLUME_FRACTION");
+    HCN = GetGasConcentration(p, "HYDROGEN_CYANIDE_VOLUME_FRACTION");
+    HCL = GetGasConcentration(p, "HYDROGEN_CHLORIDE_VOLUME_FRACTION");
 
     if( std::isnan(CO2) || std::isnan(CO) || std::isnan(HCN) ||  std::isnan(HCL) )   //NaN check
     {
@@ -147,17 +147,17 @@ void ToxicityAnalysis::CalculateFED(const Pedestrian* p)
 
 void ToxicityAnalysis::StoreToxicityAnalysis(const Pedestrian* p, double CO2, double CO, double HCN, double HCL, double FED)
 {
-    //TODO store vector - similar to trajectory files?
 
     //for testing purposes. Can be tunnelled to file via jpscore jpscore ... 2> tox
-    fprintf(stderr, "t\tPed ID\tc_CO2\tc_CO\tc_HCN\tc_HCL\tPed FED"
-                    "\n%f\t%i\t%f\t%f\t%f\t%f\t%f\n",
-            p->GetGlobalTime(), p->GetID(), CO2, CO, HCN, HCL, FED);
+
+//    fprintf(stderr, "t\tPed ID\tc_CO2\tc_CO\tc_HCN\tc_HCL\tPed FED"
+//                    "\n%f\t%i\t%f\t%f\t%f\t%f\t%f\n",
+//            p->GetGlobalTime(), p->GetID(), CO2, CO, HCN, HCL, FED);
 
     string data;
     char tmp[CLENGTH] = "";
 
-    sprintf(tmp, "\t<agent ID=\"%i\"\tt=\"%f\"\tc_CO2=\"%f\"\tc_CO=\"%f\"\tc_HCN=\"%f\"\tc_HCL=\"%f\"\tFED=\"%f\"/>\n",
+    sprintf(tmp, "\t<agent ID=\"%i\"\tt=\"%.1f\"\tc_CO2=\"%.9f\"\tc_CO=\"%.9f\"\tc_HCN=\"%.9f\"\tc_HCL=\"%.9f\"\tFED=\"%.3f\"/>\n",
          p->GetID(), p->GetGlobalTime(), CO2, CO, HCN, HCL, FED);
 
         data.append(tmp);

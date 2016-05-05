@@ -153,7 +153,7 @@ void FDSMesh::ReadMatrix(std::string line, std::vector<std::string> &strVec, std
         strVec = split2(line, ',', strVec);
         for (auto &elem : strVec)
         {
-            //std::cout << elem << std::endl;
+            //std::cout << elem << " col " << n  << " line " << m << std::endl;
             _matrix[m][n].SetValue(std::stod(elem));
             ++n;
         }
@@ -198,9 +198,10 @@ void FDSMesh::SetKnotValuesFromFile(const std::string &filename)
 
             //statHeaderRead=true;
         //}
-        ///Read matrix
-        ///
+        //Read matrix
+
         ReadMatrix(line, strVec, pFile);
+
     }
     else
     {
