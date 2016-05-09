@@ -302,11 +302,7 @@ set(source_files
         routing/cognitive_map/sensor/DiscoverDoorsSensor.cpp
         routing/cognitive_map/sensor/JamSensor.cpp
         routing/cognitive_map/sensor/LastDestinationsSensor.cpp
-        routing/cognitive_map/sensor/SmokeSensor.cpp
         routing/cognitive_map/sensor/locater.cpp
-        routing/cognitive_map/fire_mesh/FireMesh.cpp
-        routing/cognitive_map/fire_mesh/Knot.cpp
-        routing/cognitive_map/fire_mesh/FireMeshStorage.cpp
         routing/cognitive_map/cognitiveMap/associations.cpp
         routing/cognitive_map/cognitiveMap/cognitivemap.cpp
         routing/cognitive_map/cognitiveMap/waypoints.cpp
@@ -373,11 +369,7 @@ set(header_files
         routing/cognitive_map/sensor/DiscoverDoorsSensor.h
         routing/cognitive_map/sensor/JamSensor.h
         routing/cognitive_map/sensor/LastDestinationsSensor.h
-        routing/cognitive_map/sensor/SmokeSensor.h
         routing/cognitive_map/sensor/locater.h
-        routing/cognitive_map/fire_mesh/FireMesh.h
-        routing/cognitive_map/fire_mesh/Knot.h
-        routing/cognitive_map/fire_mesh/FireMeshStorage.h
         routing/cognitive_map/cognitiveMap/associations.h
         routing/cognitive_map/cognitiveMap/cognitivemap.h
         routing/cognitive_map/cognitiveMap/waypoints.h
