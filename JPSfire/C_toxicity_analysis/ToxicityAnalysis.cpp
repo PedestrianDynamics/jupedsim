@@ -104,6 +104,7 @@ double ToxicityAnalysis::GetGasConcentration(const Pedestrian * pedestrian, std:
         const FDSMesh& meshref = _FMStorage->GetFDSMesh(pedestrian->GetGlobalTime(), pedestrian->GetElevation(), quantity);
         return meshref.GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y);
     } catch (int e) {
+        //std::cout <<  pedestrian->GetPos()._x << pedestrian->GetPos()._y << pedestrian->GetElevation() << quantity  << std::endl;
         return 0.0;
     }
 }
@@ -123,8 +124,9 @@ void ToxicityAnalysis::CalculateFED(const Pedestrian* p)
     double FED;
 
     double dt =  p->GetGlobalTime();    //current sim time
-    double CO2=0., CO=0., HCN=0., HCL=0.;
+    double CO2, CO, HCN, HCL;
     CO2 = GetGasConcentration(p, "CARBON_DIOXIDE_VOLUME_FRACTION");
+    fprintf(stderr, "\t%f\t%f\t%f\n", p->GetPos()._x , p->GetPos()._y, CO2);
     CO = GetGasConcentration(p, "CARBON_MONOXIDE_VOLUME_FRACTION");
     HCN = GetGasConcentration(p, "HYDROGEN_CYANIDE_VOLUME_FRACTION");
     HCL = GetGasConcentration(p, "HYDROGEN_CHLORIDE_VOLUME_FRACTION");
@@ -141,8 +143,9 @@ void ToxicityAnalysis::CalculateFED(const Pedestrian* p)
         // each pedestrian gets a vector that is filled with the
         // gas concentrations per time step in the following format:
         // t ; CO2; CO; HCN; HCL; FED
-        StoreToxicityAnalysis(p, CO2, CO, HCN, HCL, FED);
     }
+    std::cout << CO2 << std::endl;
+    StoreToxicityAnalysis(p, CO2, CO, HCN, HCL, FED);
 }
 
 void ToxicityAnalysis::StoreToxicityAnalysis(const Pedestrian* p, double CO2, double CO, double HCN, double HCL, double FED)
@@ -153,6 +156,8 @@ void ToxicityAnalysis::StoreToxicityAnalysis(const Pedestrian* p, double CO2, do
 //    fprintf(stderr, "t\tPed ID\tc_CO2\tc_CO\tc_HCN\tc_HCL\tPed FED"
 //                    "\n%f\t%i\t%f\t%f\t%f\t%f\t%f\n",
 //            p->GetGlobalTime(), p->GetID(), CO2, CO, HCN, HCL, FED);
+
+//    fprintf(stderr, "\t%f\t%f\t%f\t%f\t%f\n", p->GetPos()._x, p->GetPos()._y, p->GetElevation() , CO2, p->GetGlobalTime());
 
     string data;
     char tmp[CLENGTH] = "";

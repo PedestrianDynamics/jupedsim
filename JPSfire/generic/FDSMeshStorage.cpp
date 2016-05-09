@@ -81,6 +81,7 @@ FDSMeshStorage::~FDSMeshStorage()
 bool FDSMeshStorage::CreateQuantityList()
 {
     /// Create quantity list
+    _quantitylist.clear();
     fs::directory_iterator end ;
     for( fs::directory_iterator iter(_filepath) ; iter != end ; ++iter ) {
       if ( fs::is_directory( *iter ) )
@@ -102,6 +103,7 @@ bool FDSMeshStorage::CreateQuantityList()
 bool FDSMeshStorage::CreateElevationList()
 {
     /// Create elevation list out of the available Z_* dirs for each quantity
+    _elevationlist.clear();
     fs::directory_iterator end ;
     for( fs::directory_iterator iter(_filepath + _quantitylist[0]) ; iter != end ; ++iter ) {
       if ( fs::is_directory( *iter ) )
@@ -123,6 +125,7 @@ bool FDSMeshStorage::CreateElevationList()
 void FDSMeshStorage::CreateDoorList()
 {
     /// Create door list only neceassry if smoke sensor is active
+    _doorlist.clear();
     fs::directory_iterator end ;
     for( fs::directory_iterator iter(_filepath + _quantitylist[0] +
        "/Z_" + std::to_string(_elevationlist[0]) ) ; iter != end ; ++iter ) {
@@ -130,7 +133,7 @@ void FDSMeshStorage::CreateDoorList()
       {
           std::string door_dir = iter->path().string();
           door_dir =  door_dir.substr( door_dir.rfind("/") + 1 );
-          std::cout << door_dir << std::endl;
+          //std::cout << door_dir << std::endl;
            _doorlist.push_back(door_dir);
       }
     }
@@ -140,6 +143,7 @@ void FDSMeshStorage::CreateDoorList()
 void FDSMeshStorage::CreateTimeList()
 {
     /// Create time list for mesh refreshment
+    _timelist.clear();
     double i=0;
     while (i<=_finalTime)
     {
@@ -232,6 +236,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &p
     //std::cout << "\t" << quantity << std::endl;
 
     std::string str = quantity + "/Z_" +  std::to_string(_NearestHeight) + "/t_"+std::to_string(simT)+".000000";
+    std::cout << str << std::endl;
 
     if (_fMContainer.count(str) == 0) {
         //std::cout << str << std::endl;
@@ -267,7 +272,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
     "Door_X_"+ std::to_string(doorCentre._x) + "_Y_" + std::to_string(doorCentre._y) +
     "/t_"+std::to_string(simT)+".000000";
 
-    //std::cout << str << std::endl;
+//    std::cout << str << std::endl;
 
     return _fMContainer.at(str);
 }

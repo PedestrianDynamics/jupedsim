@@ -136,12 +136,28 @@ double FDSMesh::GetKnotValue(const double &x, const double &y) const
     int row=0;
 
     /// Which knot is the nearest one to (x,y)?
-    ///
+
     GetColumn(x, col, restx);
     GetRow(row, resty, y);
 
     //std::cout << _matrix[row][col].GetValue() << std::endl;
-    return _matrix[row][col].GetValue();
+    double value;
+
+    // Exception if a mesh can not provide an appropriately located value
+    try{
+        value = _matrix[row][col].GetValue();
+    }
+    catch ( const std::exception& e ) {
+        std::cout << "Standard exception: " << e.what() << std::endl;
+        value = std::numeric_limits<double>::quiet_NaN();
+    }
+
+//    if(_matrix[row][col].GetValue() == 0.) {
+//        std::cout << "(" << row << " , " << col <<  ")" << std::endl;
+//    }
+
+    return value;
+
 }
 
 void FDSMesh::ReadMatrix(std::string line, std::vector<std::string> &strVec, std::ifstream &pFile)

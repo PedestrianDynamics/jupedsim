@@ -527,9 +527,9 @@ double Pedestrian::GetV0Norm() const
      }
 
      //WHERE should the call to that routine be placed properly?
-     //only executed every 5 seconds
+     //only executed every 3 seconds
 
-     if( _ToxicityAnalysis->ConductToxicityAnalysis() && fmod(this->GetGlobalTime(), 5) == 0 ) {
+     if( _ToxicityAnalysis->ConductToxicityAnalysis() && fmod(this->GetGlobalTime(), 3) == 0 ) {
         _ToxicityAnalysis->CalculateFED(this);
      }
 
