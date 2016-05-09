@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<cognitiveMap>
+	<header version = "0.8">
+		<agent>10</agent>
+		<frameRate>2.00</frameRate>
+	</header>
+<<frame ID="1">
+<YAHPointer x="2.827195"	y="3.247816"	z="0.000000"	dir="1.38"/>
+</frame>
+<<frame ID="2">
+<YAHPointer x="2.700899"	y="3.905805"	z="0.000000"	dir="1.76"/>
+</frame>
+<<frame ID="3">
+<YAHPointer x="2.561327"	y="4.561106"	z="0.000000"	dir="1.78"/>
+</frame>
+<<frame ID="4">
+<YAHPointer x="2.421753"	y="5.216407"	z="0.000000"	dir="1.78"/>
+</frame>
+<<frame ID="5">
+<YAHPointer x="2.284339"	y="5.872164"	z="0.000000"	dir="1.78"/>
+</frame>
+<<frame ID="6">
+<YAHPointer x="2.305965"	y="6.541815"	z="0.000000"	dir="1.54"/>
+</frame>
+<<frame ID="7">
+<YAHPointer x="2.157747"	y="7.195214"	z="0.000000"	dir="1.79"/>
+</frame>
+<<frame ID="8">
+<YAHPointer x="2.009525"	y="7.848613"	z="0.000000"	dir="1.79"/>
+</frame>
+<<frame ID="9">
+<YAHPointer x="1.861296"	y="8.502011"	z="0.000000"	dir="1.79"/>
+</frame>
+<<frame ID="10">
+<YAHPointer x="1.713050"	y="9.155404"	z="0.000000"	dir="1.79"/>
+</frame>
+<<f</cognitiveMap>
+
+HPointer x="1.564759"	y="9.808788"	z="0.000000"	dir="1.79"/>
+</frame>
+<<frame ID="12">
+<YAHPointer x="1.416240"	y="10.462119"	z="0.000000"	dir="1.79"/>
+</frame><f</cognitiveMap>
+
+YAHPointer x="1.266412"	y="11.115152"	z="0.000000"	dir="1.80"/>
+</frame<<f<fr</cognitiveMap>
+
+Pointer x="1.112535"	y="11.767242"	z="0.000000"	dir="1.80"/>
+</frame<<f<frame ID="15">
+<YAHPointer x="1.037378"	y="12.078420"	z="0.000000"	dir="1.81"/>
+</frame></cognitiveMap>
+
+
+<YAHPointer x="0.932696"	y="12.501683"	z="0.000000"	dir="1.81"/>
+</frame><f<frame ID="17">
+<YAHPointer x="0.810265"	y="13.001039"	z="0.000000"	dir="1.81"/>
+</frame><f<fra</cognitiveMap>
+
+ointer x="0.671520"	y="13.547887"	z="0.000000"	dir="1.82"/>
+</frame><f<frame ID="19">
+<YAHPointer x="0.555715"	y="13.999564"	z="0.000000"	dir="1.82"/>
+</frame><f<fr</cognitiveMap>
+
+Pointer x="0.422719"	y="14.498899"	z="0.000000"	dir="1.83"/>
+</frame><f<f</cognitiveMap>
+
+HPointer x="0.271790"	y="15.151678"	z="0.000000"	dir="1.80"/>
+</frame><</cognitiveMap>
+
+<YAHPointer x="0.253603"	y="15.821431"	z="0.000000"	dir="1.60"/>
+</frame><f<frame ID="23">
+<YAHPointer x="-0.416394"	y="15.823627"	z="0.000000"	dir="3.14"/>
+</frame<fr</cognitiveMap>
+
+Pointer x="0.339655"	y="15.490451"	z="0.000000"	dir="1.93"/>
+</frame>
+
+</cognitiveMap>
+
