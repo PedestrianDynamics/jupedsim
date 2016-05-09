@@ -475,7 +475,7 @@ int Simulation::RunBody(double maxSimTime)
     _nPeds = _building->GetAllPedestrians().size();
     int initialnPeds = _nPeds;
     // main program loop
-    while ( (_nPeds > 0 || (!_agentSrcManager.IsCompleted() && (_hybridSimManager != nullptr))) && t < maxSimTime) {
+    while ( (_nPeds > 0 || !_agentSrcManager.IsCompleted()) && t < maxSimTime) {
         t = 0+(frameNr-1)*_deltaT;
 
         //process the queue for incoming pedestrians
