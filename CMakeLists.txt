@@ -158,7 +158,7 @@ endif (APPLE)
 # in case boost is a non-default location
 # SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "C:/win32libs/boost")
 # SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "C:/win32libs/boost/lib")
-find_package(Boost REQUIRED)
+find_package(Boost COMPONENTS system filesystem REQUIRED)
 
 
 # find the correct OpenMP flag
