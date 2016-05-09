@@ -67,7 +67,7 @@ FDSMeshStorage::FDSMeshStorage(const std::string &filepath, const double &finalT
         std::cout << "Success!" << std::endl;
     }
     else {        
-        Log->Write("ERROR:\tCould not find directory %s", _filepath.c_str());
+        Log->Write("ERROR:\tCould not find directory <%s>", _filepath.c_str());
         exit(EXIT_FAILURE);
     }
 }
@@ -236,7 +236,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &p
     //std::cout << "\t" << quantity << std::endl;
 
     std::string str = quantity + "/Z_" +  std::to_string(_NearestHeight) + "/t_"+std::to_string(simT)+".000000";
-    std::cout << str << std::endl;
+    //std::cout << str << std::endl;
 
     if (_fMContainer.count(str) == 0) {
         //std::cout << str << std::endl;
@@ -272,7 +272,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
     "Door_X_"+ std::to_string(doorCentre._x) + "_Y_" + std::to_string(doorCentre._y) +
     "/t_"+std::to_string(simT)+".000000";
 
-//    std::cout << str << std::endl;
+    std::cout << str << std::endl;
 
     return _fMContainer.at(str);
 }

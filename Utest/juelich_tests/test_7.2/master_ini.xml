@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
+<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
  
   <seed>1</seed>
   <max_sim_time>200</max_sim_time>
@@ -26,19 +26,6 @@
       <door trans_id="0" caption="" state="open" />
     </doors>
   </traffic_constraints>
-  <routing>
-    <goals>
-      <goal id="0" final="true" caption="goal">
-        <polygon>
-          <vertex px="14" py="4" />
-          <vertex px="14" py="0" />
-          <vertex px="13" py="0" />
-          <vertex px="13" py="4" />
-          <vertex px="14" py="4" />
-        </polygon>
-      </goal>
-    </goals>
-  </routing>
 
   <!--persons information and distribution -->
   <agents operational_model_id="[1,2,3]">
@@ -116,11 +103,11 @@
         <!-- <navigation_lines file="routing.xml" /> -->
       </parameters>
     </router>
-    <router router_id="2" description="global_shortest">
-      <parameters>
+    <!-- <router router_id="2" description="global_shortest"> -->
+    <!--   <parameters> -->
         <!--<navigation_lines file="routing.xml" />-->
-      </parameters>
-    </router>
+    <!--   </parameters> -->
+    <!-- </router> -->
 
   </route_choice_models>
 

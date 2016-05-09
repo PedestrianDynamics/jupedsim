@@ -43,57 +43,55 @@
 //typedef vector<tPoints> GridPoints;
 
 
-class PedDistributor
-{
+class PedDistributor {
 private:
-     std::vector<std::shared_ptr<StartDistribution> > _start_dis; // ID startraum, subroom und Anz
-     std::vector<std::shared_ptr<StartDistribution> > _start_dis_sub; // ID startraum, subroom und Anz
-     std::vector<std::shared_ptr<AgentsSource> > _start_dis_sources; // contain the sources
-     //std::string _projectFilename; // store the file for later user
-     //std::map<int, AgentsParameters*> _agentsParameters;
-     bool InitDistributor(const string&, const std::map<int, std::shared_ptr<AgentsParameters> >&,
-               unsigned int);
-     static std::vector<Point> PositionsOnFixX(double max_x, double min_x, double max_y,
-               double min_y, const SubRoom& r, double bufx, double bufy, double dy);
-     static std::vector<Point> PositionsOnFixY(double max_x, double min_x, double max_y,
-               double min_y, const SubRoom& r, double bufx, double bufy, double dx);
+    std::vector<std::shared_ptr<StartDistribution> > _start_dis; // ID startraum, subroom und Anz
+    std::vector<std::shared_ptr<StartDistribution> > _start_dis_sub; // ID startraum, subroom und Anz
+    std::vector<std::shared_ptr<AgentsSource> > _start_dis_sources; // contain the sources
+    //std::string _projectFilename; // store the file for later user
+    //std::map<int, AgentsParameters*> _agentsParameters;
 
+    static std::vector<Point> PositionsOnFixX(double max_x, double min_x, double max_y,
+                                              double min_y, const SubRoom &r, double bufx, double bufy, double dy);
+
+    static std::vector<Point> PositionsOnFixY(double max_x, double min_x, double max_y,
+                                              double min_y, const SubRoom &r, double bufx, double bufy, double dx);
+
+    const Configuration * _configuration;
 public:
-     /**
-      * constructor
-      */
-     PedDistributor(const string& fileName,
-               const std::map<int, std::shared_ptr<AgentsParameters> >& agentPars,
-               unsigned int seed);
+    /**
+     * constructor
+     */
+    PedDistributor(const Configuration *configuration);
 
-     /**
-      * desctructor
-      */
-     virtual ~PedDistributor();
+    /**
+     * desctructor
+     */
+    virtual ~PedDistributor();
 
-     /**
-      * Return the possible positions for distributing the agents in the subroom
-      */
-     static vector<Point> PossiblePositions(const SubRoom& r);
+    /**
+     * Return the possible positions for distributing the agents in the subroom
+     */
+    static vector<Point> PossiblePositions(const SubRoom &r);
 
-     /**
-      * Distribute the pedestrians in the Subroom with the given parameters
-      */
-     void DistributeInSubRoom(SubRoom* r, int N, std::vector<Point>& positions, int* pid,
-               StartDistribution* parameters, Building* building) const;
+    /**
+     * Distribute the pedestrians in the Subroom with the given parameters
+     */
+    void DistributeInSubRoom(SubRoom *r, int N, std::vector<Point> &positions, int *pid,
+                             StartDistribution *parameters, Building *building) const;
 
-     /**
-      *
-      *Distribute all agents based on the configuration (ini) file
-      * @return true if everything went fine
-      */
-     bool Distribute(Building* building) const;
+    /**
+     *
+     *Distribute all agents based on the configuration (ini) file
+     * @return true if everything went fine
+     */
+    bool Distribute(Building *building) const;
 
-     /**
-      * provided for convenience
-      */
+    /**
+     * provided for convenience
+     */
 
-     const std::vector<std::shared_ptr<AgentsSource> >& GetAgentsSources() const;
+    const std::vector<std::shared_ptr<AgentsSource> > &GetAgentsSources() const;
 
 };
 

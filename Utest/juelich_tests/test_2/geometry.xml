@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<geometry version="0.5" caption="Projectname" unit="m">
+<geometry version="0.8" caption="Projectname" unit="m">
   <rooms>
     <room id="0" caption="bottleneck">
       <subroom id="0" closed="0" class="subroom">
