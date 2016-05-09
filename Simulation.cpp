@@ -35,6 +35,7 @@
 #include "math/GradientModel.h"
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
+#include <boost/progress.hpp>
 
 #ifdef _OPENMP
 
@@ -291,21 +292,21 @@ void Simulation::UpdateRoutesAndLocations()
     int partSize = nSize/nThreads;
 
 #pragma omp parallel  default(shared) num_threads(nThreads)
-    {
-        const int threadID = omp_get_thread_num();
-        int start = threadID*partSize;
-        int end = (threadID+1)*partSize-1;
-        if ((threadID==nThreads-1))
-            end = nSize-1;
+     {
+          const int threadID = omp_get_thread_num();
+          int start = threadID * partSize;
+          int end = (threadID + 1) * partSize - 1;
+          if ((threadID == nThreads - 1))
+               end = nSize - 1;
 
-        for (int p = start; p<=end; ++p) {
-            Pedestrian* ped = allPeds[p];
-            Room* room = _building->GetRoom(ped->GetRoomID());
-            SubRoom* sub0 = room->GetSubRoom(ped->GetSubRoomID());
+          for (int p = start; p <= end; ++p) {
+               Pedestrian* ped = allPeds[p];
+               Room* Room = _building->GetRoom(ped->GetRoomID());
+               SubRoom* sub0 = Room->GetSubRoom(ped->GetSubRoomID());
 
-            //set the new room if needed
-            if ((ped->GetFinalDestination()==FINAL_DEST_OUT)
-                    && (room->GetCaption()=="outside")) {
+               //set the new room if needed
+               if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
+                         && (Room->GetCaption() == "outside")) {
 #pragma omp critical
                 pedsToRemove.push_back(ped);
             }
@@ -459,20 +460,14 @@ void Simulation::RunHeader(long nPed)
 
 int Simulation::RunBody(double maxSimTime)
 {
-    //needed to control the execution time PART 1
-    //in the case you want to run in no faster than realtime
-    //time_t starttime, endtime;
-    //time(&starttime);
-
-    //take the current time from the pedestrian
-    double t = Pedestrian::GetGlobalTime();
+     //take the current time from the pedestrian
+     double t=Pedestrian::GetGlobalTime();
 
     //frame number. This function can be called many times,
     static int frameNr = (int) (1+t/_deltaT); // Frame Number
 
     int writeInterval = (int) ((1./_fps)/_deltaT+0.5);
     writeInterval = (writeInterval<=0) ? 1 : writeInterval; // mustn't be <= 0
-
     //process the queue for incoming pedestrians
     //important since the number of peds is used
     //to break the main simulation loop
@@ -480,7 +475,7 @@ int Simulation::RunBody(double maxSimTime)
     _nPeds = _building->GetAllPedestrians().size();
     int initialnPeds = _nPeds;
     // main program loop
-    while ((_nPeds || !_agentSrcManager.IsCompleted()) && t<maxSimTime) {
+    while ( (_nPeds > 0 || (!_agentSrcManager.IsCompleted() && (_hybridSimManager != nullptr))) && t < maxSimTime) {
         t = 0+(frameNr-1)*_deltaT;
 
         //process the queue for incoming pedestrians
@@ -521,6 +516,7 @@ int Simulation::RunBody(double maxSimTime)
         ++frameNr;
     }
     return (int) t;
+
 }
 
 void Simulation::RunFooter()

@@ -30,6 +30,9 @@
 
 #include "../geometry/SubRoom.h"
 #include "../tinyxml/tinyxml.h"
+#include "../JPSfire/B_walking_speed/WalkingSpeed.h"
+#include "../JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
+#include "../pedestrian/PedDistributor.h"
 
 #ifdef _SIMULATOR
 
@@ -64,6 +67,7 @@ Building::Building()
      _routingEngine = nullptr;
      _linkedCellGrid = nullptr;
      _savePathway = false;
+     //_WalkingSpeed = new WalkingSpeed(this, "/Users/Benjamin/Desktop/FZJ/JPSfire/walking_speed/FDS/OPTICAL DENSITY/" ,60.0 ,120.0);
 }
 
 #ifdef _SIMULATOR
@@ -77,6 +81,8 @@ Building::Building(const Configuration* configuration, PedDistributor& pedDistri
      _caption = "no_caption";
      _savePathway = false;
      _linkedCellGrid = nullptr;
+     _WalkingSpeed = new WalkingSpeed(this);
+     _ToxicityAnalysis = std::make_shared<ToxicityAnalysis>(this);
 
      GeometryReader* parser;//(_configuration);
 
@@ -828,6 +834,8 @@ void Building::AddPedestrian(Pedestrian* ped)
           }
      }
      _allPedestians.push_back(ped);
+     ped->SetWalkingSpeed(_WalkingSpeed);
+     ped->SetFED(_ToxicityAnalysis);
 }
 
 void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds) const

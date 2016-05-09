@@ -38,6 +38,8 @@
 #include "PedDistributionLoader.h"
 #include "../hybrid/PedDistributionFromProtobufLoader.h"
 
+#include "../JPSfire/B_walking_speed/WalkingSpeed.h"
+
 
 using namespace std;
 

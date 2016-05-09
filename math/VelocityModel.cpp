@@ -187,8 +187,8 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
                      // remove the pedestrian and abort
                      Log->Write("\tERROR: ped [%d] was removed due to high velocity",ped->GetID());
-                     building->DeletePedestrian(ped);
-                     exit(EXIT_FAILURE);
+                     //building->DeletePedestrian(ped);
+                     //exit(EXIT_FAILURE);
 
                 }
 

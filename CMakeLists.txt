@@ -153,8 +153,8 @@ endif (APPLE)
 
 
 #set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /opt/local/lib)
-#set(Boost_INCLUDE_DIR /opt/local/include/boost)
-#set(Boost_LIBRARY_DIR /usr/local/src/boost_1_46_1/stage/lib)
+#set(Boost_INCLUDE_DIR /opt/local/include/)
+#set(Boost_LIBRARY_DIR /usr/local/lib/)
 # in case boost is a non-default location
 # SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "C:/win32libs/boost")
 # SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "C:/win32libs/boost/lib")
@@ -324,6 +324,15 @@ set(source_files
         poly2tri/sweep/cdt.cpp
         events/EventManager.cpp
         events/Event.cpp
+
+        JPSfire/generic/FDSMesh.cpp
+        JPSfire/generic/Knot.cpp
+        JPSfire/generic/FDSMeshStorage.cpp
+        JPSfire/A_smoke_sensor/SmokeSensor.cpp
+        JPSfire/B_walking_speed/WalkingSpeed.cpp
+        JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
+        JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
+
         )
 
 set(header_files
@@ -438,8 +447,15 @@ set(header_files
         poly2tri/sweep/sweep.h
         events/EventManager.h
         events/Event.h
-        )
 
+        JPSfire/generic/FDSMesh.h
+        JPSfire/generic/Knot.h
+        JPSfire/generic/FDSMeshStorage.h
+        JPSfire/A_smoke_sensor/SmokeSensor.h
+        JPSfire/B_walking_speed/WalkingSpeed.h
+        JPSfire/C_toxicity_analysis/ToxicityAnalysis.h
+        JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
+        )
 
 add_library(core STATIC ${source_files})
 
@@ -450,7 +466,6 @@ add_library(core STATIC ${source_files})
 #  jpscore Utest/Fastmarchtest.h
 #)
 add_executable(jpscore main.cpp)
-
 if (Boost_FOUND)
     message(STATUS "BOOST FOUND: " ${Boost_LIBRARIES})
     message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})

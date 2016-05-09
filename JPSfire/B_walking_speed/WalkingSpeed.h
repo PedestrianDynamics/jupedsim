@@ -1,5 +1,5 @@
 /**
- * \file        SmokeSensor.h
+ * \file        WalkingSpeed.h
  * \date        Jan 1, 2014
  * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
@@ -26,34 +26,45 @@
  *
  **/
 
-#ifndef SMOKESENSOR_H
-#define SMOKESENSOR_H 1
+#ifndef WALKINGSPEED_H
+#define WALKINGSPEED_H 1
 
-#include "AbstractSensor.h"
 #include <memory>
+#include <string>
 
+class Pedestrian;
+class Building;
 class Point;
-class FireMeshStorage;
+class FDSMeshStorage;
 
-class SmokeSensor : public AbstractSensor
+class WalkingSpeed
 {
 
 public:
-    SmokeSensor(const Building * b, const std::string &filepath, const double &updateintervall, const double &finalTime);
 
-    virtual ~SmokeSensor();
+    WalkingSpeed(const Building * b);
+
+    virtual ~WalkingSpeed();
 
     std::string GetName() const;
-    void execute(const Pedestrian *, CognitiveMap *) const;
+    //void execute(const Pedestrian *) const;
 
-    void set_FMStorage(const std::shared_ptr<FireMeshStorage> fmStorage);
-    const std::shared_ptr<FireMeshStorage> get_FMStorage();
+    double WalkingInSmoke(const Pedestrian*, double);
+    double GetExtinction(const Pedestrian *);
 
+    void set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage);
+    const std::shared_ptr<FDSMeshStorage> get_FMStorage();
+
+
+    bool LoadJPSfireInfo(const std::string &projectFilename);
+    bool ReduceWalkingSpeed();
+    double FrantzichNilsson2003(double &walking_speed, double ExtinctionCoefficient);
+    double Jin1978(double &walking_speed, double ExtinctionCoefficient);
 
 private:
 
-    std::shared_ptr<FireMeshStorage> _FMStorage;
+    std::shared_ptr<FDSMeshStorage> _FMStorage;
 
 };
 
-#endif // SMOKESENSOR_H
+#endif // WalkingSpeed_H

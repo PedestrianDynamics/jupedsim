@@ -40,11 +40,13 @@
 #include "../geometry/NavLine.h"
 #include "AgentsParameters.h"
 #include "PedDistributor.h"
+#include "../JPSfire/B_walking_speed/WalkingSpeed.h"
 
 class Building;
 class NavLine;
 class Router;
 class Knowledge;
+class WalkingSpeed;
 
 class Pedestrian
 {
@@ -136,6 +138,9 @@ private:
      Building * _building;
 
      static int _agentsCreated;
+
+     WalkingSpeed * _WalkingSpeed;
+     std::shared_ptr<ToxicityAnalysis> _ToxicityAnalysis;
 
 public:
      // constructors
@@ -448,6 +453,13 @@ public:
       */
      void SetBuilding(Building* building);
 
+     void SetWalkingSpeed(WalkingSpeed* walkingSpeed);
+
+     void WalkingUpstairs(double c, SubRoom* sub, double ped_elevation, double &walking_speed) const;
+     void WalkingDownstairs(double &walking_speed, double c, SubRoom* sub, double ped_elevation) const;
+
+
+     void SetFED(std::shared_ptr<ToxicityAnalysis> toxicityAnalysis);
 };
 
 #endif  /* _PEDESTRIAN_H */

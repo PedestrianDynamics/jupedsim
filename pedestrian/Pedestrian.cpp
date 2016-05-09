@@ -34,6 +34,13 @@
 #include "../IO/OutputHandler.h"
 #include "Knowledge.h"
 #include "Pedestrian.h"
+#include "PedDistributor.h"
+
+#include "../JPSfire/generic/FDSMesh.h"
+#include "../JPSfire/generic/Knot.h"
+#include "../JPSfire/generic/FDSMeshStorage.h"
+#include "../JPSfire/B_walking_speed/WalkingSpeed.h"
+#include "../JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
 
 using namespace std;
 
@@ -425,6 +432,8 @@ const Point& Pedestrian::GetV0() const
 }
 
 
+
+
 double Pedestrian::GetV0Norm() const
 {
      // @todo: we need to know the difference of the ped_elevation to the old_nav_elevation, and use this in the function f.
@@ -434,6 +443,7 @@ double Pedestrian::GetV0Norm() const
      const Point& target = _navLine->GetCentre();
      double nav_elevation = sub->GetElevation(target);
      double delta = nav_elevation - ped_elevation;
+     double walking_speed = 0;
 //---------------------------------------------------
      //-----------------------------------------
 
@@ -451,7 +461,7 @@ double Pedestrian::GetV0Norm() const
      //TODO: move _ellipse.GetV0() to _V0Plane
      if(fabs(delta)<J_EPS){
            // fprintf(stderr, "%f  %f  %f  %f\n", pos._x, pos._y, ped_elevation, _ellipse.GetV0());
-          return _ellipse.GetV0();
+          walking_speed =_ellipse.GetV0();
      }
       // we are walking downstairs
      else{
@@ -479,7 +489,9 @@ double Pedestrian::GetV0Norm() const
                  // fprintf(stderr, "%f  %f  %f  %f\n", pos._x, pos._y, ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_down);
                  // fprintf(stderr, "%f  %f   %f  %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_down, GetV().Norm(), ped_elevation);
                  //                  // getc(stdin);
-                 return (1-f*g)*_ellipse.GetV0() + f*g*speed_down;
+
+                 walking_speed =(1-f*g)*_ellipse.GetV0() + f*g*speed_down;
+
            }
            //we are walking upstairs
            else
@@ -504,13 +516,29 @@ double Pedestrian::GetV0Norm() const
                  // fprintf(stderr, "%f  %f   %f  %f %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_up, GetV().Norm(), ped_elevation,  stairInclination*180./3.14159265);
                  // }
                  // getc(stdin);
-                 return (1-f*g)*_ellipse.GetV0() + f*g*speed_up;
+
+                 walking_speed = (1-f*g)*_ellipse.GetV0() + f*g*speed_up;
            }
      }
+
+     //IF execution of WalkingInSmoke depending on JPSfire section in INI file
+     if(_WalkingSpeed->ReduceWalkingSpeed()) {
+         walking_speed = _WalkingSpeed->WalkingInSmoke(this, walking_speed);
+     }
+
+     //WHERE should the call to that routine be placed properly?
+     //only executed every 5 seconds
+
+     if( _ToxicityAnalysis->ConductToxicityAnalysis() && fmod(this->GetGlobalTime(), 5) == 0 ) {
+        _ToxicityAnalysis->CalculateFED(this);
+     }
+
+     return walking_speed;
      // orthogonal projection on the stair
      //return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
-
 }
+
+
 // get axis in the walking direction
 double Pedestrian::GetLargerAxis() const
 {
@@ -954,6 +982,16 @@ const Building* Pedestrian::GetBuilding()
 void Pedestrian::SetBuilding(Building* building)
 {
      _building = building;
+}
+
+void Pedestrian::SetWalkingSpeed(WalkingSpeed* walkingSpeed)
+{
+    _WalkingSpeed = walkingSpeed;
+}
+
+void Pedestrian::SetFED(std::shared_ptr<ToxicityAnalysis>toxicityAnalysis)
+{
+    _ToxicityAnalysis = toxicityAnalysis;
 }
 
 void Pedestrian::SetSpotlight(bool spotlight)
