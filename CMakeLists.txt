@@ -184,7 +184,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
-    find_package(Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
+    find_package(Boost COMPONENTS unit_test_framework REQUIRED)
     IF (CMAKE_COMPILER_IS_GNUCXX)
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
         set(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
@@ -450,7 +450,10 @@ set(header_files
         JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
         )
 
-add_library(core STATIC ${source_files})
+      add_library(core STATIC ${source_files})
+      if(Boost_FOUND)
+        target_link_libraries(core ${Boost_LIBRARIES})
+      endif()
 
 #add_library ( core SHARED ${source_files} )
 
@@ -473,9 +476,9 @@ if(Boost_FOUND)
   #target_link_libraries(jpscore ${Boost_LIBRARIES})
   find_package(Boost COMPONENTS system filesystem REQUIRED)
 
-  target_link_libraries(jpscore
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  # target_link_libraries(jpscore
+  # ${Boost_FILESYSTEM_LIBRARY}
+  # ${Boost_SYSTEM_LIBRARY})
 
   target_link_libraries(jpscore ${Boost_LIBRARIES})
 
