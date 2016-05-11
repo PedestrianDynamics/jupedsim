@@ -94,7 +94,7 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
     Log->Write("INFO: \tFinished Parsing: Building");
     //testoutput("AALineScan.vtk", "AALineScan.txt", dist2Wall);
 
-    prepareForDistanceFieldCalculation();
+    prepareForDistanceFieldCalculation(onlyRoomsWithExits);
     Log->Write("INFO: \tGrid initialized: Walls");
 
     calculateDistanceField(-1.); //negative threshold is ignored, so all distances get calculated. this is important since distances is used for slowdown/redirect
@@ -286,8 +286,8 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
         direction._y = 0.;
         return;
     }
-    Point* localneggradptr;
-    double* localcostptr;
+    Point* localneggradptr = nullptr;
+    double* localcostptr = nullptr;
     //#pragma omp critical
     {
         if (neggradmap.count(destID) == 0) {
@@ -306,8 +306,8 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 costmap.emplace(destID, nullptr);
             }
         }
-        localneggradptr = neggradmap.at(destID); //will fail if above if-clause was entered
-        localcostptr = costmap.at(destID);
+        localneggradptr = (neggradmap.count(destID) == 0) ? nullptr : neggradmap.at(destID); //will fail if above if-clause was entered
+        localcostptr = (costmap.count(destID) == 0) ? nullptr : costmap.at(destID);
         if (localneggradptr == nullptr) { //@todo: ar.graf : check here if other thread has started calc of same ff
                 //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)
                 localcostptr =    new double[grid->GetnPoints()];
@@ -461,7 +461,7 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
 
                     UID_of_MIN = loctrans.second->GetUniqueID();
                     cost_of_MIN = localcostptr[dummykey];
-                    std::cerr << std::endl << "Closer Line found: " << UID_of_MIN ;
+                    //std::cerr << std::endl << "Closer Line found: " << UID_of_MIN ;
                     continue;
                 }
                 if (cost_of_MIN2 > localcostptr[dummykey]) {
@@ -495,7 +495,7 @@ double FloorfieldViaFM::getCostToDestination(const int destID, const Point& posi
         getDirectionToUID(destID, 0, dummy);         //this call induces the floorfieldcalculation
     }
     if ((costmap.count(destID) == 0) || (costmap.at(destID) == nullptr)) {
-        Log->Write("ERROR: \t DestinationUID %d is invalid / out of grid.", destID);
+        Log->Write("ERROR: \tDestinationUID %d is invalid / out of grid.", destID);
         return DBL_MAX;
     }
     if (grid->getKeyAtPoint(position) == -1) {  //position is out of grid
@@ -506,13 +506,24 @@ double FloorfieldViaFM::getCostToDestination(const int destID, const Point& posi
 
 void FloorfieldViaFM::getDir2WallAt(const Point& position, Point& direction){
     long int key = grid->getKeyAtPoint(position);
-    direction._x = (dirToWall[key]._x);
-    direction._y = (dirToWall[key]._y);
+    //debug assert
+    if (key < 0) {
+        Log->Write("ERROR: \tgetDir2WallAt error");
+    } else {
+        direction._x = (dirToWall[key]._x);
+        direction._y = (dirToWall[key]._y);
+    }
 }
 
 double FloorfieldViaFM::getDistance2WallAt(const Point& position) {
     long int key = grid->getKeyAtPoint(position);
-    return dist2Wall[key];
+    //debug assert
+    if (key < 0) {
+        Log->Write("ERROR: \tgetDistance2WallAt error");
+        return 1.;
+    } else {
+        return dist2Wall[key];
+    }
 }
 
 /*!
@@ -848,14 +859,14 @@ void FloorfieldViaFM::parseBuildingForExits(const Building* const buildingArg, c
         cost[i] = -2.;
         gcode[i] = OUTSIDE;            //unknown
     }
-    //drawLinesOnGrid(wall, dist2Wall, 0.);
-    //drawLinesOnGrid(wall, cost, -7.);
+    drawLinesOnGrid(wall, dist2Wall, 0.);
+    drawLinesOnGrid(wall, cost, -7.);
     drawLinesOnGrid(wall, gcode, WALL);
     drawLinesOnGrid(exitsFromScope, gcode, OPEN_TRANSITION);
 }
 
 //this function must only be used BEFORE calculateDistanceField(), because we set trialfield[].cost = dist2Wall AND we init dist2Wall with "-3"
-void FloorfieldViaFM::prepareForDistanceFieldCalculation() {
+void FloorfieldViaFM::prepareForDistanceFieldCalculation(const bool onlyRoomsWithExits) { //onlyRoomsWithExits means, outside points must be considered
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
 
         switch (gcode[i]) {
@@ -896,7 +907,7 @@ void FloorfieldViaFM::prepareForDistanceFieldCalculation() {
                 break;
             //this is the main thing in this loop, we want to find and mark inside points (and it is costly!!)
             case OUTSIDE:
-                if (isInside(i)) {
+                if (isInside(i) || onlyRoomsWithExits) {
                     speedInitial[i] = 1.;
                     cost[i] = -2.;
                     gcode[i] = INSIDE;

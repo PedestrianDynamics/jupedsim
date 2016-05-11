@@ -788,7 +788,7 @@ string Pedestrian::GetPath()
 
      for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
           stringstream ss;//create a stringstream
-          ss << iter->first/1000<<":"<<iter->second<<">";
+          ss << iter->first/1000<<":"<<iter->second<<">"; //@todo:ar.graf: has this to do with roomNr*1000+subroom and is now wrong?
           path.append(ss.str());
      }
      return path;

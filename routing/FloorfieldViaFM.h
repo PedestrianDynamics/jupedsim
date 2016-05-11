@@ -78,7 +78,7 @@ public:
 
      void parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
      void parseBuildingForExits(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
-     void prepareForDistanceFieldCalculation();
+     void prepareForDistanceFieldCalculation(const bool withExits);
      void drawLinesOnGrid(std::vector<Line>& wallArg, double* const target, const double dbl2draw);
      void drawLinesOnGrid(std::vector<Line>& wallArg, int* const target, const int int2draw);
      void setSpeed(bool useDistance2WallArg);

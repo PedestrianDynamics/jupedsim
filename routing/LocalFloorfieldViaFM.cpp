@@ -23,9 +23,9 @@ LocalFloorfieldViaFM::LocalFloorfieldViaFM(const Room* const roomArg,
      Log->Write("INFO: \tFinished Parsing: Room %d", roomArg->GetID());
      //testoutput("AALineScan.vtk", "AALineScan.txt", dist2Wall);
 
-     prepareForDistanceFieldCalculation();
+     prepareForDistanceFieldCalculation(false);
      //here we need to draw blocker lines @todo: ar.graf
-     drawBlockerLines();
+     //drawBlockerLines();
      Log->Write("INFO: \tGrid initialized: Walls in room %d", roomArg->GetID());
 
      calculateDistanceField(-1.); //negative threshold is ignored, so all distances get calculated. this is important since distances is used for slowdown/redirect
@@ -163,6 +163,11 @@ void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
      }
      //drawLinesOnGrid(wall, dist2Wall, 0.);
      //drawLinesOnGrid(wall, cost, -7.);
+     //drawLinesOnGrid(wall, gcode, WALL);
+     //drawLinesOnGrid(exitsFromScope, gcode, OPEN_TRANSITION);
+
+     drawLinesOnGrid(wall, dist2Wall, 0.);
+     drawLinesOnGrid(wall, cost, -7.);
      drawLinesOnGrid(wall, gcode, WALL);
      drawLinesOnGrid(exitsFromScope, gcode, OPEN_TRANSITION);
 }
@@ -440,7 +445,7 @@ SubLocalFloorfieldViaFM::SubLocalFloorfieldViaFM(const SubRoom* const roomArg,
      //Log->Write("INFO: \tFinished Parsing: Room %d" , roomArg->GetUID());
      //testoutput("AALineScan.vtk", "AALineScan.txt", dist2Wall);
 
-     prepareForDistanceFieldCalculation();
+     prepareForDistanceFieldCalculation(false);
      //here we need to draw blocker lines @todo: ar.graf
      //Log->Write("INFO: \tGrid initialized: Walls");
 
@@ -496,6 +501,8 @@ void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
                exitsFromScope.emplace_back(Line((Line) *itCross));
                costmap.emplace(itCross->GetUniqueID(), nullptr);
                neggradmap.emplace(itCross->GetUniqueID(), nullptr);
+          } else {
+               wall.emplace_back(Line( (Line) *itCross));
           }
      }
 
@@ -585,6 +592,10 @@ void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
           cost[i] = -2.;
           gcode[i] = OUTSIDE;
      }
+     //drawLinesOnGrid(wall, gcode, WALL);
+     //drawLinesOnGrid(exitsFromScope, gcode, OPEN_TRANSITION);
+     drawLinesOnGrid(wall, dist2Wall, 0.);
+     drawLinesOnGrid(wall, cost, -7.);
      drawLinesOnGrid(wall, gcode, WALL);
      drawLinesOnGrid(exitsFromScope, gcode, OPEN_TRANSITION);
 }

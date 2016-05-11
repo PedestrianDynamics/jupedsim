@@ -61,7 +61,7 @@ FFRouter::FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals):Router(id,s
      _building = nullptr;
      _hasSpecificGoals = hasSpecificGoals;
      _globalFF = nullptr;
-     _targetWithinSubroom = false; //depending on exit_strat 8 => false, depending on exit_strat 9 => true;
+     _targetWithinSubroom = true; //depending on exit_strat 8 => false, depending on exit_strat 9 => true;
 }
 
 //FFRouter::FFRouter(const Building* const building)
@@ -150,7 +150,7 @@ bool FFRouter::Init(Building* building)
           std::advance(pairRoomIt, i);
           LocalFloorfieldViaFM* ptrToNew = nullptr;
           double tempDistance = 0.;
-          ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), building, 0.0625, 0.0625, 0.0, false,
+          ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), building, 0.125, 0.125, 0.0, false,
                                               "nofile");
           //for (long int i = 0; i < ptrToNew)
           Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
@@ -252,15 +252,15 @@ bool FFRouter::Init(Building* building)
 //          iter->second->writeFF("testFF" + std::to_string(roomNr) + ".vtk", _allDoorUIDs);
 //     }
 //
-//     std::ofstream matrixfile;
-//     matrixfile.open("Matrix.txt");
-//
-//     for (auto mapItem : _distMatrix) {
-//          matrixfile << mapItem.first.first << " to " << mapItem.first.second << " : " << mapItem.second << "\t via \t" << _pathsMatrix[mapItem.first];
-//          matrixfile << "\t" << _CroTrByUID.at(mapItem.first.first)->GetID() << " to " << _CroTrByUID.at(mapItem.first.second)->GetID() << "\t via \t";
-//          matrixfile << _CroTrByUID.at(_pathsMatrix[mapItem.first])->GetID() << std::endl;
-//     }
-//     matrixfile.close();
+     std::ofstream matrixfile;
+     matrixfile.open("Matrix.txt");
+
+     for (auto mapItem : _distMatrix) {
+          matrixfile << mapItem.first.first << " to " << mapItem.first.second << " : " << mapItem.second << "\t via \t" << _pathsMatrix[mapItem.first];
+          matrixfile << "\t" << _CroTrByUID.at(mapItem.first.first)->GetID() << " to " << _CroTrByUID.at(mapItem.first.second)->GetID() << "\t via \t";
+          matrixfile << _CroTrByUID.at(_pathsMatrix[mapItem.first])->GetID() << std::endl;
+     }
+     matrixfile.close();
      Log->Write("INFO: \tFF Router Init done.");
      return true;
 }
@@ -289,6 +289,12 @@ int FFRouter::FindExit(Pedestrian* p)
      }
 
      std::vector<int> DoorUIDsOfRoom;
+     DoorUIDsOfRoom.clear();
+     if (_building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->IsInSubRoom(p->GetPos())) {
+          //ped is in the subroom, according to its member attribs
+     } else {
+          Log->Write("ERROR: \tffRouter cannot handle incorrect room/subroom attribs of pedestrian!!");
+     }
      if (!_targetWithinSubroom) {
           //candidates of current room (ID) (provided by Room)
           for (auto transUID : _building->GetRoom(p->GetRoomID())->GetAllTransitionsIDs()) {
@@ -324,7 +330,7 @@ int FFRouter::FindExit(Pedestrian* p)
           //with UIDs, we can ask for shortest path
           for (int doorUID : DoorUIDsOfRoom) {
                double locDistToDoor = _locffviafm[p->GetRoomID()]->getCostToDestination(doorUID, p->GetPos());
-               if (locDistToDoor < 0.) {     //this can happen, if the point is not reachable and therefore has init val -7
+               if (locDistToDoor < J_EPS) {     //this can happen, if the point is not reachable and therefore has init val -7
                     continue;
                }
                std::pair<int, int> key = std::make_pair(doorUID, finalDoor);
@@ -347,9 +353,10 @@ int FFRouter::FindExit(Pedestrian* p)
 
      //avoid entering oscillation at doors alongside (real) shortest path
      while (
-          (std::find(DoorUIDsOfRoom.begin(), DoorUIDsOfRoom.end(), _pathsMatrix[std::make_pair(bestDoor, bestGoal)]) != DoorUIDsOfRoom.end())
-       && (bestDoor != _pathsMatrix[std::make_pair(bestDoor, bestGoal)])        //last door has itself as _pathsMatrix[lastDooronPath]
-           )
+               (std::find(DoorUIDsOfRoom.begin(), DoorUIDsOfRoom.end(), _pathsMatrix[std::make_pair(bestDoor, bestGoal)]) != DoorUIDsOfRoom.end())
+            && (bestDoor != _pathsMatrix[std::make_pair(bestDoor, bestGoal)])        //last door has itself as _pathsMatrix[lastDooronPath]
+            && (bestDoor != bestGoal)
+            )
      {
           bestDoor = _pathsMatrix[std::make_pair(bestDoor, bestGoal)];
      }
