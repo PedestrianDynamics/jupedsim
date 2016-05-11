@@ -2,7 +2,7 @@
  * \file        testClassLine.cpp
  * \date        Jul 4, 2014
  * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \copyright   <2009-2016> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -277,133 +277,6 @@ L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", \
 }
 
 
-// int testGetAngle(FILE * f)
-// {
-//      fprintf (f, "\t+++++ Enter testGetAngle() +++++\n");
-//      int ntests=8,
-//          res=0;
-//      double angle;
-//      Line L1 = Line( Point(1, 2), Point(3, 4));
-//      Line L2 = Line( Point(0, 3), Point(3, 3));
-//      angle = L1.GetAngle(L2);
-//      if ( fabs(pi/4 + angle)< 0.001)
-//           res++;
-//      fprintf (f, "%2d. res=%2d, A=%.2f | \
-// L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f),   \
-// L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", \
-//               ntests, res, angle*180/pi,                         \
-//               L1.GetPoint1()._x,L1.GetPoint1()._y,       \
-//               L1.GetPoint2()._x,L1.GetPoint2()._y,       \
-//               L2.GetPoint1()._x,L2.GetPoint1()._y,       \
-//               L2.GetPoint2()._x,L2.GetPoint2()._y);
-// ////////////////////////////////////////////////
-//      L1 = Line(  Point(3, 4), Point(1, 2));
-//      angle = L1.GetAngle(L2);
-//      if (fabs(pi/4 + angle)< 0.001)
-//           res++;
-//      fprintf (f, "%2d. res=%2d, A=%.2f |  \
-//         L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f),   \
-//         L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", \
-//               ntests, res, angle*180/pi,                         \
-//               L1.GetPoint1()._x,L1.GetPoint1()._y,       \
-//               L1.GetPoint2()._x,L1.GetPoint2()._y,       \
-//               L2.GetPoint1()._x,L2.GetPoint1()._y,       \
-//               L2.GetPoint2()._x,L2.GetPoint2()._y);
-// ////////////////////////////////////////////////
-
-//      L1 = Line(  Point(1, 4),  Point(3, 2));
-//      angle = L1.GetAngle(L2);
-//      if (fabs(angle - pi/4)< 0.001)
-//           res++;
-//      fprintf (f, "%2d. res=%2d, A=%.2f |  \
-//         L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f),   \
-//         L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", \
-//               ntests, res, angle*180/pi,                         \
-//               L1.GetPoint1()._x,L1.GetPoint1()._y,       \
-//               L1.GetPoint2()._x,L1.GetPoint2()._y,       \
-//               L2.GetPoint1()._x,L2.GetPoint1()._y,       \
-//               L2.GetPoint2()._x,L2.GetPoint2()._y);
-// ////////////////////////////////////////////////
-//      L1 = Line(  Point(3, 2), Point(1, 4));
-//      angle = L1.GetAngle(L2);
-//      if (fabs(angle-pi/4)< 0.001)
-//           res++;
-//      fprintf (f, "%2d. res=%2d, A=%.2f |  \
-//         L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f),   \
-//         L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", \
-//               ntests, res, angle*180/pi,                         \
-//               L1.GetPoint1()._x,L1.GetPoint1()._y,       \
-//               L1.GetPoint2()._x,L1.GetPoint2()._y,       \
-//               L2.GetPoint1()._x,L2.GetPoint1()._y,       \
-//               L2.GetPoint2()._x,L2.GetPoint2()._y);
-
-
-// ////////////////////////////////////////////////
-//      L2 = Line(  Point(3, 3), Point(0, 3));
-//      angle = L1.GetAngle(L2);
-//      if (fabs(angle-pi/4)< 0.001)
-//           res++;
-//      fprintf (f, "%2d. res=%2d, A=%.2f |  \
-//         L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f),   \
-//         L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", \
-//               ntests, res, angle*180/pi,                            \
-//               L1.GetPoint1()._x,L1.GetPoint1()._y,          \
-//               L1.GetPoint2()._x,L1.GetPoint2()._y,          \
-//               L2.GetPoint1()._x,L2.GetPoint1()._y,          \
-//               L2.GetPoint2()._x,L2.GetPoint2()._y);
-// ////////////////////////////////////////////////
-//      L2 = Line(  Point(1, 1), Point(3, 3));
-//      L1 = Line(  Point(3, 2), Point(0, 2));
-//      angle = L1.GetAngle(L2);
-//      if (fabs(angle-pi/4)< 0.001)
-//           res++;
-//      fprintf (f, "%2d. res=%2d, A=%.2f |  \
-//         L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f),   \
-//         L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", \
-//               ntests, res, angle*180/pi,                            \
-//               L1.GetPoint1()._x,L1.GetPoint1()._y,          \
-//               L1.GetPoint2()._x,L1.GetPoint2()._y,          \
-//               L2.GetPoint1()._x,L2.GetPoint1()._y,          \
-//               L2.GetPoint2()._x,L2.GetPoint2()._y);
-
-// ////////////////////////////////////////////////
-//      L2 = Line(  Point(3, 3), Point(1, 1) );
-//      L1 = Line(  Point(3, 2), Point(0, 2));
-//      angle = L1.GetAngle(L2);
-//      if (fabs(angle-pi/4)< 0.001)
-//           res++;
-//      fprintf (f, "%2d. res=%2d, A=%.2f |  \
-//         L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f),   \
-//         L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", \
-//               ntests, res, angle*180/pi,                            \
-//               L1.GetPoint1()._x,L1.GetPoint1()._y,          \
-//               L1.GetPoint2()._x,L1.GetPoint2()._y,          \
-//               L2.GetPoint1()._x,L2.GetPoint1()._y,          \
-//               L2.GetPoint2()._x,L2.GetPoint2()._y);
-
-
-// ////////////////////////////////////////////////
-//      L2 = Line(  Point(6, 5), Point(10, 7) );
-//      L1 = Line(  Point(6,5), Point(7.4, 9.28));
-//      angle = L1.GetAngle(L2);
-//      if (fabs(angle+pi/4)< 1)
-//           res++;
-//      fprintf (f, "%2d. res=%2d, A=%.2f |  \
-//         L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f),   \
-//         L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", \
-//               ntests, res, angle*180/pi,                            \
-//               L1.GetPoint1()._x,L1.GetPoint1()._y,          \
-//               L1.GetPoint2()._x,L1.GetPoint2()._y,          \
-//               L2.GetPoint1()._x,L2.GetPoint1()._y,          \
-//               L2.GetPoint2()._x,L2.GetPoint2()._y);
-
-
-
-
-////////////////////////////////////////////////
-//      fprintf (f, "\t+++++ Leave testGetAngle() +++++\n\n");
-//      return (res==ntests)?1:0;
-// }
 
 int main()
 {
@@ -412,6 +285,7 @@ int main()
      char cCurrentPath[FILENAME_MAX];
      f = fopen(fname, "w");
      if (!GetCurrentDir(cCurrentPath, sizeof(cCurrentPath))) {
+          fclose(f); 
           return EXIT_FAILURE;
      }
      cCurrentPath[sizeof(cCurrentPath) - 1] = '\0'; /* not really required */

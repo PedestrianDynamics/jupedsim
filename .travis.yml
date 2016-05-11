@@ -6,7 +6,7 @@ os:
 branches:
   only:
     - master
-    - v0.8
+    - develop
     
 compiler:
     - gcc
@@ -30,8 +30,8 @@ script:
 
 after_success:
     - make cov
-   - ctest -R rimea
-   - ctest -R juelich
+    - ctest -R rimea
+    - ctest -R juelich
     - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
          codecov;
       fi   
@@ -42,4 +42,3 @@ notifications:
        - mohcine@chraibi.de
      on_success: change
      on_failure: always
-

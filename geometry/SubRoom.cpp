@@ -926,18 +926,17 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
     				 return false;
     			 }
     			 else
-    				 ++j;
+                               ++j;
     		 }
-    	 }
+         }
     	 if (j <= 2)
     		 j = 0;
     	 else {
     		 char tmp[CLENGTH];
-    		 sprintf(tmp, "ERROR: \tNormanSubRoom::ConvertLineToPoly(): SubRoom %d Room %d !!\n", GetSubRoomID(), GetRoomID());
+    		 sprintf(tmp, "WARNING: \tNormanSubRoom::ConvertLineToPoly(): SubRoom %d Room %d !!\n", GetSubRoomID(), GetRoomID());
     		 Log->Write(tmp);
-    		 sprintf(tmp, "ERROR: \tWall %s shares edge with multiple walls!!!\n", it.toString().c_str());
-    		 Log->Write(tmp);
-    		 return false;
+    		 sprintf(tmp, "WARNING: \tWall %s shares edge with multiple walls!!! j=%d\n", it.toString().c_str(), j);
+    		 Log->Write(tmp); // why should this return false?
     	 }
     	 ++itr;
      }

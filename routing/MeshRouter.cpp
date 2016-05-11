@@ -677,6 +677,8 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p,int& status)const
      // In the case the agent is in the destination cell
      if(predlist[c_goal_id]==-1) {
           status=-1;
+          delete[] predlist;
+          delete[] predEdgelist;
           return pathedge;
      }
 
