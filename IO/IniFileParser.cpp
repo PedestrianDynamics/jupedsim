@@ -43,6 +43,7 @@
 #include "../routing/DummyRouter.h"
 #include "../routing/SafestPathRouter.h"
 #include "../routing/CognitiveMapRouter.h"
+#include "../routing/ffRouter.h"
 
 IniFileParser::IniFileParser(Configuration* config)
 {
@@ -255,7 +256,7 @@ bool IniFileParser::Parse(std::string iniFile)
                     Log->Write("ERROR: \t mismatch model ID and description. Did you mean gcfm ?");
                     return false;
                }
-               if (!ParseGCFMModel(xModel))
+               if (!ParseGCFMModel(xModel, xMainNode))
                     return false;
                parsingModelSuccessful = true;
                //only parsing one model
@@ -267,7 +268,7 @@ bool IniFileParser::Parse(std::string iniFile)
                     return false;
                }
                //only parsing one model
-               if (!ParseGompertzModel(xModel))
+               if (!ParseGompertzModel(xModel, xMainNode))
                     return false;
                parsingModelSuccessful = true;
                break;
@@ -278,7 +279,7 @@ bool IniFileParser::Parse(std::string iniFile)
                     return false;
                }
                //only parsing one model
-               if (!ParseGradientModel(xModel))
+               if (!ParseGradientModel(xModel, xMainNode))
                     return false;
                parsingModelSuccessful = true;
                break;
@@ -289,7 +290,7 @@ bool IniFileParser::Parse(std::string iniFile)
                     return false;
                }
                //only parsing one model
-               if (!ParseVelocityModel(xModel))
+               if (!ParseVelocityModel(xModel, xMainNode))
                     return false;
                parsingModelSuccessful = true;
                break;
@@ -305,14 +306,15 @@ bool IniFileParser::Parse(std::string iniFile)
 
      //route choice strategy
      TiXmlNode* xRouters = xMainNode->FirstChild("route_choice_models");
+     TiXmlNode* xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
 
-     if (!ParseRoutingStrategies(xRouters))
+     if (!ParseRoutingStrategies(xRouters, xAgentDistri))
           return false;
      Log->Write("INFO: \tParsing the project file completed");
      return true;
 }
 
-bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM)
+bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
 {
      Log->Write("\nINFO:\tUsing the GCFM model");
      Log->Write("INFO:\tParsing the model parameters");
@@ -392,7 +394,8 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM)
      }
 
      //Parsing the agent parameters
-     ParseAgentParameters(xGCFM);
+     TiXmlNode* xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
+     ParseAgentParameters(xGCFM, xAgentDistri);
 
      //TODO: models do not belong in a configuration container [gl march '16]
      _config->SetModel(std::shared_ptr<OperationalModel>(new GCFMModel(_exit_strategy.get(), _config->GetNuPed(),
@@ -404,7 +407,7 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM)
      return true;
 }
 
-bool IniFileParser::ParseGompertzModel(TiXmlElement* xGompertz)
+bool IniFileParser::ParseGompertzModel(TiXmlElement* xGompertz, TiXmlElement* xMainNode)
 {
      //parsing the model parameters
      Log->Write("\nINFO:\tUsing the Gompertz model");
@@ -495,7 +498,8 @@ bool IniFileParser::ParseGompertzModel(TiXmlElement* xGompertz)
      }
 
      //Parsing the agent parameters
-     ParseAgentParameters(xGompertz);
+     TiXmlNode* xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
+     ParseAgentParameters(xGompertz, xAgentDistri);
 
      //TODO: models do not belong in a configuration container [gl march '16]
      _config->SetModel(std::shared_ptr<OperationalModel>(new GompertzModel(_exit_strategy, _config->GetNuPed(),
@@ -506,7 +510,7 @@ bool IniFileParser::ParseGompertzModel(TiXmlElement* xGompertz)
      return true;
 }
 
-bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient)
+bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xMainNode)
 {
      //parsing the model parameters
      Log->Write("\nINFO:\tUsing the Gradient model");
@@ -641,7 +645,8 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient)
      }
 
      //Parsing the agent parameters
-     ParseAgentParameters(xGradient);
+     TiXmlNode* xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
+     ParseAgentParameters(xGradient, xAgentDistri);
 
      //TODO: models do not belong in a configuration container [gl march '16]
      _config->SetModel(std::shared_ptr<OperationalModel>(new GradientModel(_exit_strategy.get(), _config->GetNuPed(),
@@ -653,7 +658,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient)
      return true;
 }
 
-bool IniFileParser::ParseVelocityModel(TiXmlElement* xVelocity)
+bool IniFileParser::ParseVelocityModel(TiXmlElement* xVelocity, TiXmlElement* xMainNode)
 {
      //parsing the model parameters
      Log->Write("\nINFO:\tUsing Tordeux2015 model");
@@ -733,7 +738,8 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement* xVelocity)
      }
 
      //Parsing the agent parameters
-     ParseAgentParameters(xVelocity);
+     TiXmlNode* xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
+     ParseAgentParameters(xVelocity, xAgentDistri);
      _config->SetModel(std::shared_ptr<OperationalModel>(new VelocityModel(_exit_strategy.get(), _config->GetaPed(),
                _config->GetDPed(), _config->GetaWall(),
                _config->GetDWall())));
@@ -741,147 +747,191 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement* xVelocity)
      return true;
 }
 
-void IniFileParser::ParseAgentParameters(TiXmlElement* operativModel)
+void IniFileParser::ParseAgentParameters(TiXmlElement* operativModel, TiXmlNode* agentsDistri)
 {
      //Parsing the agent parameters
      Log->Write("\nINFO:\tParsing agents  parameters");
-     for (TiXmlElement* xAgentPara = operativModel->FirstChildElement("agent_parameters"); xAgentPara;
-          xAgentPara = xAgentPara->NextSiblingElement("agent_parameters")) {
+     //first get list of actually used router
+     std::vector<int> usedAgentParams;
+     usedAgentParams.clear();
+     for (TiXmlElement* e = agentsDistri->FirstChildElement("group"); e;
+          e = e->NextSiblingElement("group")) {
+          int agentsParams = -1;
+          if (e->Attribute("agent_parameter_id")) {
+               agentsParams = atoi(e->Attribute("agent_parameter_id"));
+               if(std::find(usedAgentParams.begin(), usedAgentParams.end(), agentsParams) == usedAgentParams.end()) {
+                    usedAgentParams.emplace_back(agentsParams);
+               }
+          }
+     }
+     for(TiXmlElement* xAgentPara = operativModel->FirstChildElement("agent_parameters"); xAgentPara;
+         xAgentPara = xAgentPara->NextSiblingElement("agent_parameters")) {
 
           //get the group ID
-          int para_id = xmltoi(xAgentPara->Attribute("agent_parameter_id"), -1);
-          Log->Write("INFO: \tParsing the group parameter id [%d]", para_id);
+          int para_id= xmltoi(xAgentPara->Attribute("agent_parameter_id"),-1);
+          if (std::find(usedAgentParams.begin(), usedAgentParams.end(), para_id) != usedAgentParams.end() ) {
+               Log->Write("INFO: \tParsing the group parameter id [%d]", para_id);
 
-          auto agentParameters = std::shared_ptr<AgentsParameters>(new AgentsParameters(para_id, _config->GetSeed()));
-          _config->AddAgentsParameters(agentParameters, para_id);
+               auto agentParameters = std::shared_ptr<AgentsParameters>(new AgentsParameters(para_id, _config->GetSeed()));
+               _config->AddAgentsParameters(agentParameters, para_id);
 
-          //desired speed
-          if (xAgentPara->FirstChild("v0")) {
-               double mu = xmltof(xAgentPara->FirstChildElement("v0")->Attribute("mu"));
-               double sigma = xmltof(xAgentPara->FirstChildElement("v0")->Attribute("sigma"));
-               agentParameters->InitV0(mu, sigma);
-               agentParameters->InitV0DownStairs(mu, sigma);
-               agentParameters->InitV0UpStairs(mu, sigma);
-               Log->Write("INFO: \tdesired speed mu=%f , sigma=%f", mu, sigma);
-          }
+               //desired speed
+               if (xAgentPara->FirstChild("v0")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("v0")->Attribute("mu"));
+                    double sigma = xmltof(xAgentPara->FirstChildElement("v0")->Attribute("sigma"));
+                    agentParameters->InitV0(mu, sigma);
+                    agentParameters->InitV0DownStairs(mu, sigma);
+                    agentParameters->InitV0UpStairs(mu, sigma);
+                    Log->Write("INFO: \tdesired speed mu=%f , sigma=%f", mu, sigma);
+               }
 
-          if (xAgentPara->FirstChild("v0_upstairs")) {
-               double mu = xmltof(xAgentPara->FirstChildElement("v0_upstairs")->Attribute("mu"));
-               double sigma = xmltof(xAgentPara->FirstChildElement("v0_upstairs")->Attribute("sigma"));
-               agentParameters->InitV0UpStairs(mu, sigma);
-               Log->Write("INFO: \tdesired speed upstairs mu=%f , sigma=%f", mu, sigma);
-          }
+               if (xAgentPara->FirstChild("v0_upstairs")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("v0_upstairs")->Attribute("mu"));
+                    double sigma = xmltof(xAgentPara->FirstChildElement("v0_upstairs")->Attribute("sigma"));
+                    agentParameters->InitV0UpStairs(mu, sigma);
+                    Log->Write("INFO: \tdesired speed upstairs mu=%f , sigma=%f", mu, sigma);
+               }
 
-          if (xAgentPara->FirstChild("v0_downstairs")) {
-               double mu = xmltof(xAgentPara->FirstChildElement("v0_downstairs")->Attribute("mu"));
-               double sigma = xmltof(xAgentPara->FirstChildElement("v0_downstairs")->Attribute("sigma"));
-               agentParameters->InitV0DownStairs(mu, sigma);
-               Log->Write("INFO: \tdesired speed downstairs mu=%f , sigma=%f", mu, sigma);
-          }//------------------------------------------------------------------------
-          if (xAgentPara->FirstChild("escalator_upstairs")) {
-               double mu = xmltof(xAgentPara->FirstChildElement("escalator_upstairs")->Attribute("mu"));
-               double sigma = xmltof(xAgentPara->FirstChildElement("escalator_upstairs")->Attribute("sigma"));
-               agentParameters->InitEscalatorUpStairs(mu, sigma);
-               Log->Write("INFO: \tspeed of escalator upstairs mu=%f , sigma=%f", mu, sigma);
-          }
-          if (xAgentPara->FirstChild("escalator_downstairs")) {
-               double mu = xmltof(xAgentPara->FirstChildElement("escalator_downstairs")->Attribute("mu"));
-               double sigma = xmltof(xAgentPara->FirstChildElement("escalator_downstairs")->Attribute("sigma"));
-               agentParameters->InitEscalatorDownStairs(mu, sigma);
-               Log->Write("INFO: \tspeed of escalator downstairs mu=%f , sigma=%f", mu, sigma);
-          }
-          if (xAgentPara->FirstChild("v0_idle_escalator_upstairs")) {
-               double mu = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_upstairs")->Attribute("mu"));
-               double sigma = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_upstairs")->Attribute("sigma"));
-               agentParameters->InitV0IdleEscalatorUpStairs(mu, sigma);
-               Log->Write("INFO: \tdesired speed idle escalator upstairs mu=%f , sigma=%f", mu, sigma);
-          }
-          if (xAgentPara->FirstChild("v0_idle_escalator_downstairs")) {
-               double mu = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_downstairs")->Attribute("mu"));
-               double sigma = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_downstairs")->Attribute("sigma"));
-               agentParameters->InitV0IdleEscalatorDownStairs(mu, sigma);
-               Log->Write("INFO: \tdesired speed idle escalator downstairs mu=%f , sigma=%f", mu, sigma);
-          }
-          //------------------------------------------------------------------------
+               if (xAgentPara->FirstChild("v0_downstairs")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("v0_downstairs")->Attribute("mu"));
+                    double sigma = xmltof(xAgentPara->FirstChildElement("v0_downstairs")->Attribute("sigma"));
+                    agentParameters->InitV0DownStairs(mu, sigma);
+                    Log->Write("INFO: \tdesired speed downstairs mu=%f , sigma=%f", mu, sigma);
+               }//------------------------------------------------------------------------
+               if (xAgentPara->FirstChild("escalator_upstairs")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("escalator_upstairs")->Attribute("mu"));
+                    double sigma = xmltof(xAgentPara->FirstChildElement("escalator_upstairs")->Attribute("sigma"));
+                    agentParameters->InitEscalatorUpStairs(mu, sigma);
+                    Log->Write("INFO: \tspeed of escalator upstairs mu=%f , sigma=%f", mu, sigma);
+               }
+               if (xAgentPara->FirstChild("escalator_downstairs")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("escalator_downstairs")->Attribute("mu"));
+                    double sigma = xmltof(xAgentPara->FirstChildElement("escalator_downstairs")->Attribute("sigma"));
+                    agentParameters->InitEscalatorDownStairs(mu, sigma);
+                    Log->Write("INFO: \tspeed of escalator downstairs mu=%f , sigma=%f", mu, sigma);
+               }
+               if (xAgentPara->FirstChild("v0_idle_escalator_upstairs")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_upstairs")->Attribute("mu"));
+                    double sigma = xmltof(
+                              xAgentPara->FirstChildElement("v0_idle_escalator_upstairs")->Attribute("sigma"));
+                    agentParameters->InitV0IdleEscalatorUpStairs(mu, sigma);
+                    Log->Write("INFO: \tdesired speed idle escalator upstairs mu=%f , sigma=%f", mu, sigma);
+               }
+               if (xAgentPara->FirstChild("v0_idle_escalator_downstairs")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_downstairs")->Attribute("mu"));
+                    double sigma = xmltof(
+                              xAgentPara->FirstChildElement("v0_idle_escalator_downstairs")->Attribute("sigma"));
+                    agentParameters->InitV0IdleEscalatorDownStairs(mu, sigma);
+                    Log->Write("INFO: \tdesired speed idle escalator downstairs mu=%f , sigma=%f", mu, sigma);
+               }
+               //------------------------------------------------------------------------
 
-          //bmax
-          if (xAgentPara->FirstChild("bmax")) {
-               double mu = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("mu"));
-               double sigma = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("sigma"));
-               agentParameters->InitBmax(mu, sigma);
-               Log->Write("INFO: \tBmax mu=%f , sigma=%f", mu, sigma);
-          }
+               //bmax
+               if (xAgentPara->FirstChild("bmax")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("mu"));
+                    double sigma = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("sigma"));
+                    agentParameters->InitBmax(mu, sigma);
+                    Log->Write("INFO: \tBmax mu=%f , sigma=%f", mu, sigma);
+               }
 
-          //bmin
-          if (xAgentPara->FirstChild("bmin")) {
-               double mu = xmltof(xAgentPara->FirstChildElement("bmin")->Attribute("mu"));
-               double sigma = xmltof(xAgentPara->FirstChildElement("bmin")->Attribute("sigma"));
-               agentParameters->InitBmin(mu, sigma);
-               Log->Write("INFO: \tBmin mu=%f , sigma=%f", mu, sigma);
-          }
+               //bmin
+               if (xAgentPara->FirstChild("bmin")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("bmin")->Attribute("mu"));
+                    double sigma = xmltof(xAgentPara->FirstChildElement("bmin")->Attribute("sigma"));
+                    agentParameters->InitBmin(mu, sigma);
+                    Log->Write("INFO: \tBmin mu=%f , sigma=%f", mu, sigma);
+               }
 
-          //amin
-          if (xAgentPara->FirstChild("amin")) {
-               double mu = xmltof(xAgentPara->FirstChildElement("amin")->Attribute("mu"));
-               double sigma = xmltof(xAgentPara->FirstChildElement("amin")->Attribute("sigma"));
-               agentParameters->InitAmin(mu, sigma);
-               Log->Write("INFO: \tAmin mu=%f , sigma=%f", mu, sigma);
-          }
-          //tau
-          if (xAgentPara->FirstChild("tau")) {
-               double mu = xmltof(xAgentPara->FirstChildElement("tau")->Attribute("mu"));
-               double sigma = xmltof(xAgentPara->FirstChildElement("tau")->Attribute("sigma"));
-               agentParameters->InitTau(mu, sigma);
-               Log->Write("INFO: \tTau mu=%f , sigma=%f", mu, sigma);
-          }
-          //atau
-          if (xAgentPara->FirstChild("atau")) {
-               double mu = xmltof(xAgentPara->FirstChildElement("atau")->Attribute("mu"));
-               double sigma = xmltof(xAgentPara->FirstChildElement("atau")->Attribute("sigma"));
-               agentParameters->InitAtau(mu, sigma);
-               Log->Write("INFO: \tAtau mu=%f , sigma=%f", mu, sigma);
-          }
-          // T
-          if (xAgentPara->FirstChild("T")) {
-               double mu = xmltof(xAgentPara->FirstChildElement("T")->Attribute("mu"));
-               double sigma = xmltof(xAgentPara->FirstChildElement("T")->Attribute("sigma"));
-               agentParameters->InitT(mu, sigma);
-               Log->Write("INFO: \tT mu=%f , sigma=%f", mu, sigma);
-          }
+               //amin
+               if (xAgentPara->FirstChild("amin")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("amin")->Attribute("mu"));
+                    double sigma = xmltof(xAgentPara->FirstChildElement("amin")->Attribute("sigma"));
+                    agentParameters->InitAmin(mu, sigma);
+                    Log->Write("INFO: \tAmin mu=%f , sigma=%f", mu, sigma);
+               }
+               //tau
+               if (xAgentPara->FirstChild("tau")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("tau")->Attribute("mu"));
+                    double sigma = xmltof(xAgentPara->FirstChildElement("tau")->Attribute("sigma"));
+                    agentParameters->InitTau(mu, sigma);
+                    Log->Write("INFO: \tTau mu=%f , sigma=%f", mu, sigma);
+               }
+               //atau
+               if (xAgentPara->FirstChild("atau")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("atau")->Attribute("mu"));
+                    double sigma = xmltof(xAgentPara->FirstChildElement("atau")->Attribute("sigma"));
+                    agentParameters->InitAtau(mu, sigma);
+                    Log->Write("INFO: \tAtau mu=%f , sigma=%f", mu, sigma);
+               }
+               // T
+               if (xAgentPara->FirstChild("T")) {
+                    double mu = xmltof(xAgentPara->FirstChildElement("T")->Attribute("mu"));
+                    double sigma = xmltof(xAgentPara->FirstChildElement("T")->Attribute("sigma"));
+                    agentParameters->InitT(mu, sigma);
+                    Log->Write("INFO: \tT mu=%f , sigma=%f", mu, sigma);
+               }
 
-          if (_model==2) { // Gompertz
-               double beta_c = 1; /// @todo quick and dirty
-               double max_Ea = agentParameters->GetAmin()+agentParameters->GetAtau()*agentParameters->GetV0();
-               double max_Eb = 0.5*(agentParameters->GetBmin()
-                         +0.49); /// @todo hard-coded value should be the same as in pedestrians GetEB
-               double max_Ea_Eb = (max_Ea>max_Eb) ? max_Ea : max_Eb;
-               _config->SetDistEffMaxPed(2*beta_c*max_Ea_Eb);
-               _config->SetDistEffMaxWall(_config->GetDistEffMaxPed());
-          }
+               if (_model == 2) { // Gompertz
+                    double beta_c = 1; /// @todo quick and dirty
+                    double max_Ea = agentParameters->GetAmin() + agentParameters->GetAtau() * agentParameters->GetV0();
+                    double max_Eb = 0.5 * (agentParameters->GetBmin() +
+                                           0.49); /// @todo hard-coded value should be the same as in pedestrians GetEB
+                    double max_Ea_Eb = (max_Ea > max_Eb) ? max_Ea : max_Eb;
+                    _config->SetDistEffMaxPed(2 * beta_c * max_Ea_Eb);
+                    _config->SetDistEffMaxWall(_config->GetDistEffMaxPed());
+               }
 
-          if (_model==4) { //  Gompertz @todo: ar.graf
-               double beta_c = 2; /// @todo quick and dirty
-               double max_Ea = agentParameters->GetAmin()+agentParameters->GetAtau()*agentParameters->GetV0();
-               double max_Eb = 0.5*(agentParameters->GetBmin()
-                         +0.49); /// @todo hard-coded value should be the same as in pedestrians GetEB
-               double max_Ea_Eb = (max_Ea>max_Eb) ? max_Ea : max_Eb;
-               _config->SetDistEffMaxPed(2*beta_c*max_Ea_Eb);
-               _config->SetDistEffMaxWall(_config->GetDistEffMaxPed());
-          }
+               if (_model == 4) { //  Gompertz @todo: ar.graf
+                    double beta_c = 2; /// @todo quick and dirty
+                    double max_Ea = agentParameters->GetAmin() + agentParameters->GetAtau() * agentParameters->GetV0();
+                    double max_Eb = 0.5 * (agentParameters->GetBmin() +
+                                           0.49); /// @todo hard-coded value should be the same as in pedestrians GetEB
+                    double max_Ea_Eb = (max_Ea > max_Eb) ? max_Ea : max_Eb;
+                    _config->SetDistEffMaxPed(2 * beta_c * max_Ea_Eb);
+                    _config->SetDistEffMaxWall(_config->GetDistEffMaxPed());
+               }
 
-          if (_model==3) { // Tordeux2015
-               double max_Eb = 2*agentParameters->GetBmax();
-               _config->SetDistEffMaxPed(max_Eb+agentParameters->GetT()*agentParameters->GetV0());
-               _config->SetDistEffMaxWall(_config->GetDistEffMaxPed());
+               if (_model == 3) { // Tordeux2015
+                    double max_Eb = 2 * agentParameters->GetBmax();
+                    _config->SetDistEffMaxPed(max_Eb+agentParameters->GetT()*agentParameters->GetV0());
+                    _config->SetDistEffMaxWall(_config->GetDistEffMaxPed());
+               }
           }
      }
 }
 
-bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode)
+bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* agentsDistri)
 {
      if (!routingNode) {
           Log->Write("ERROR: \t route_choice_models section is missing");
           return false;
+     }
+
+     if (!agentsDistri) {
+          Log->Write("ERROR: \t Agent Distribution section is missing");
+          return false;
+     }
+
+     //first get list of actually used router
+     std::vector<int> usedRouter;
+     usedRouter.clear();
+     bool hasSpecificGoals = false;
+     for (TiXmlElement* e = agentsDistri->FirstChildElement("group"); e;
+          e = e->NextSiblingElement("group")) {
+          int router = -1;
+          if (e->Attribute("router_id")) {
+               router = atoi(e->Attribute("router_id"));
+               if(std::find(usedRouter.begin(), usedRouter.end(), router) == usedRouter.end()) {
+                    usedRouter.emplace_back(router);
+               }
+          }
+          int goal = -1;
+          if (e->Attribute("goal_id")) {
+               goal = atoi(e->Attribute("goal_id"));
+               if (goal != -1) {
+                    hasSpecificGoals = true;
+               }
+          }
      }
      for (TiXmlElement* e = routingNode->FirstChildElement("router"); e;
           e = e->NextSiblingElement("router")) {
@@ -889,32 +939,46 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode)
           string strategy = e->Attribute("description");
           int id = atoi(e->Attribute("router_id"));
 
-          if (strategy=="local_shortest") {
-               Router* r = new GlobalRouter(id, ROUTING_LOCAL_SHORTEST);
+          if ((strategy == "local_shortest") &&
+              (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+               //pRoutingStrategies.push_back(make_pair(id, ROUTING_LOCAL_SHORTEST));
+               Router *r = new GlobalRouter(id, ROUTING_LOCAL_SHORTEST);
                _config->GetRoutingEngine()->AddRouter(r);
           }
-          else if (strategy=="global_shortest") {
-               Router* r = new GlobalRouter(id, ROUTING_GLOBAL_SHORTEST);
+          else if ((strategy == "global_shortest") &&
+                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+               //pRoutingStrategies.push_back(make_pair(id, ROUTING_GLOBAL_SHORTEST));
+               Router *r = new GlobalRouter(id, ROUTING_GLOBAL_SHORTEST);
                _config->GetRoutingEngine()->AddRouter(r);
           }
-          else if (strategy=="quickest") {
-               Router* r = new QuickestPathRouter(id, ROUTING_QUICKEST);
+          else if ((strategy == "quickest")  &&
+                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+               //pRoutingStrategies.push_back(make_pair(id, ROUTING_QUICKEST));
+               Router *r = new QuickestPathRouter(id, ROUTING_QUICKEST);
                _config->GetRoutingEngine()->AddRouter(r);
           }
-          else if (strategy=="nav_mesh") {
-               Router* r = new MeshRouter(id, ROUTING_NAV_MESH);
+          else if ((strategy == "nav_mesh") &&
+                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+               //pRoutingStrategies.push_back(make_pair(id, ROUTING_NAV_MESH));
+               Router *r = new MeshRouter(id, ROUTING_NAV_MESH);
                _config->GetRoutingEngine()->AddRouter(r);
           }
-          else if (strategy=="dummy") {
-               Router* r = new DummyRouter(id, ROUTING_DUMMY);
+          else if ((strategy == "dummy") &&
+                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+               //pRoutingStrategies.push_back(make_pair(id, ROUTING_DUMMY));
+               Router *r = new DummyRouter(id, ROUTING_DUMMY);
                _config->GetRoutingEngine()->AddRouter(r);
           }
-          else if (strategy=="global_safest") {
-               Router* r = new SafestPathRouter(id, ROUTING_SAFEST);
+          else if ((strategy == "global_safest") &&
+                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+               //pRoutingStrategies.push_back(make_pair(id, ROUTING_SAFEST));
+               Router *r = new SafestPathRouter(id, ROUTING_SAFEST);
                _config->GetRoutingEngine()->AddRouter(r);
           }
-          else if (strategy=="cognitive_map") {
-               Router* r = new CognitiveMapRouter(id, ROUTING_COGNITIVEMAP);
+          else if ((strategy == "cognitive_map") &&
+                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+               //pRoutingStrategies.push_back(make_pair(id, ROUTING_COGNITIVEMAP));
+               Router *r = new CognitiveMapRouter(id, ROUTING_COGNITIVEMAP);
                _config->GetRoutingEngine()->AddRouter(r);
 
                Log->Write("\nINFO: \tUsing CognitiveMapRouter");
@@ -922,12 +986,39 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode)
                if (!ParseCogMapOpts(e))
                     return false;
           }
+          else if ((strategy == "ff_global_shortest") &&
+                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+               //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
+               Router *r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals);
+               _config->GetRoutingEngine()->AddRouter(r);
+               Log->Write("\nINFO: \tUsing FF Global Shortest Router");
+               ///Parsing additional options
+               if (!ParseFfRouterOps(e)) {
+                    return false;
+               }
+          }
           else {
                Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",
                          strategy.c_str());
                return false;
           }
      }
+     return true;
+}
+
+bool IniFileParser::ParseFfRouterOps(TiXmlNode* routingNode) {
+     //set defaults
+     std::string mode = "global_shortest";
+     FFRouter* r = static_cast<FFRouter*>(_config->GetRoutingEngine()->GetAvailableRouters().back());
+
+     //parse ini-file-information
+     if (routingNode->FirstChild("parameters")) {
+          TiXmlNode* pParameters = routingNode->FirstChild("parameters");
+          if (pParameters->FirstChild("mode")) {
+               mode = pParameters->FirstChild("mode")->FirstChild()->Value();
+          }
+     }
+     r->SetMode(mode);
      return true;
 }
 

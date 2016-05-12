@@ -122,7 +122,7 @@ int Room::GetNumberOfSubRooms() const
      return _subRooms.size();
 }
 
-const std::map<int, std::unique_ptr<SubRoom> >& Room::GetAllSubRooms() const
+const std::map<int, std::shared_ptr<SubRoom> >& Room::GetAllSubRooms() const
 {
      return _subRooms;
 }
@@ -156,7 +156,7 @@ const RoomState& Room::GetState() const
 void Room::AddSubRoom(SubRoom* r)
 {
      //_subRooms.push_back(r);
-     _subRooms[r->GetSubRoomID()]=std::unique_ptr<SubRoom>(r);
+     _subRooms[r->GetSubRoomID()]=std::shared_ptr<SubRoom>(r);
 }
 
 /*************************************************************

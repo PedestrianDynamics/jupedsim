@@ -203,7 +203,7 @@ int Building::GetNumberOfGoals() const
      return (int) (_transitions.size()+_hLines.size()+_crossings.size());
 }
 
-const std::map<int, std::unique_ptr<Room> >& Building::GetAllRooms() const
+const std::map<int, std::shared_ptr<Room> >& Building::GetAllRooms() const
 {
      return _rooms;
 }
@@ -227,7 +227,7 @@ LCGrid* Building::GetGrid() const
 
 void Building::AddRoom(Room* room)
 {
-     _rooms[room->GetID()] = std::unique_ptr<Room>(room);
+     _rooms[room->GetID()] = std::shared_ptr<Room>(room);
 }
 
 void Building::AddSurroundingRoom()

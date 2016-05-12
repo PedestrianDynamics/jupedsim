@@ -43,17 +43,19 @@ public:
      bool Parse(std::string iniFile);
 
 private:
-     bool ParseGCFMModel(TiXmlElement* xGCFM);
+     bool ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMain);
 
-     bool ParseGompertzModel(TiXmlElement* xGompertz);
+     bool ParseGompertzModel(TiXmlElement* xGompertz, TiXmlElement* xMain);
 
-     bool ParseGradientModel(TiXmlElement* xGradient);
+     bool ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xMain);
 
-     bool ParseVelocityModel(TiXmlElement* xVelocity);
+     bool ParseVelocityModel(TiXmlElement* xVelocity, TiXmlElement* xMain);
 
-     void ParseAgentParameters(TiXmlElement* operativModel);
+     void ParseAgentParameters(TiXmlElement* operativModel, TiXmlNode* agentDistri);
 
-     bool ParseRoutingStrategies(TiXmlNode* routingNode);
+     bool ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* agentDistri);
+
+     bool ParseFfRouterOps(TiXmlNode* routingNode);
 
      bool ParseCogMapOpts(TiXmlNode* routingNode);
 

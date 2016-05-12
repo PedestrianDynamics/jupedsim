@@ -53,7 +53,7 @@ private:
      /// room elevation
      double _zPos;
      /// all subrooms/partitions of the room
-     std::map<int, std::unique_ptr<SubRoom> > _subRooms;
+     std::map<int, std::shared_ptr<SubRoom> > _subRooms;
      /// all transitions ids
      std::vector<int> _transitionsIDs;
      /// needed if the trajectories for this room are to be write in a special way
@@ -120,7 +120,7 @@ public:
      /**
       * @return a vector containing all subrooms
       */
-     const std::map<int, std::unique_ptr<SubRoom> >& GetAllSubRooms() const;
+     const std::map<int, std::shared_ptr<SubRoom> >& GetAllSubRooms() const;
 
      /**
       * @return a vector containing all transitions Ids
