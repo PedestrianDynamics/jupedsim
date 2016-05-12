@@ -62,6 +62,7 @@ Simulation::Simulation(const Configuration* args)
     _iod = new IODispatcher();
     _fps = 1;
     _em = nullptr;
+    _gotSources = false;
 //     _config = args;
 }
 
@@ -218,10 +219,12 @@ bool Simulation::InitArgs()
 
     // Initialize the agents sources that have been collected in the pedestrians distributor
     _agentSrcManager.SetBuilding(_building.get());
+    _gotSources = distributor->GetAgentsSources().size(); // did we have any sources? false if no sources
     for (const auto& src: distributor->GetAgentsSources()) {
         _agentSrcManager.AddSource(src);
         //src->Dump();
     }
+
 
 
 
@@ -480,10 +483,9 @@ int Simulation::RunBody(double maxSimTime)
     _nPeds = _building->GetAllPedestrians().size();
     int initialnPeds = _nPeds;
     // main program loop
-    while ((_nPeds || !_agentSrcManager.IsCompleted()) && t<maxSimTime) {
+    while ((_nPeds || (!_agentSrcManager.IsCompleted()&& _gotSources) ) && t<maxSimTime) {
         t = 0+(frameNr-1)*_deltaT;
-
-        //process the queue for incoming pedestrians
+        //process the queue for incoming pedestriansg
         ProcessAgentsQueue();
 
         if (t>Pedestrian::GetMinPremovementTime()) {
