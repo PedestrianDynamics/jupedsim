@@ -15,6 +15,7 @@ http://www.rimea.de/fileadmin/files/dok/richtlinien/r2.2.1.pdfs
 
 import os
 import sys
+#REMARK: Use new dedicated python console if you run this code with spyder
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
 from sys import *
 sys.path.append(utestdir)
