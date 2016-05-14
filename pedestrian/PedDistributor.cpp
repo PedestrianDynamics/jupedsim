@@ -99,7 +99,6 @@ bool PedDistributor::Distribute(Building *building) const {
 
     //collect the available positions for that subroom
     for (const auto &dist: _start_dis_sub) {
-        nPeds_expected += dist->GetAgentsNumber();
         int roomID = dist->GetRoomId();
         Room *r = building->GetRoom(roomID);
         if (!r) return false;
@@ -112,6 +111,16 @@ bool PedDistributor::Distribute(Building *building) const {
         // the positions were already computed
         if (allFreePosRoom.count(subroomID) > 0)
             continue;
+
+        if(dist->GetAgentsNumber()!=0){
+            nPeds_expected += dist->GetAgentsNumber(); // classical number of agents
+        }
+        else if(dist->GetAgentsDensity()!=0){
+            nPeds_expected += dist->GetAgentsDensity() * sr->GetArea() ; // number of agents = density * area of subroom
+        }
+        else{
+        Log->Write("ERROR: \t Specify either number or density!");
+        return false;}
 
         allFreePosRoom[subroomID] = PedDistributor::PossiblePositions(*sr);
     }
@@ -144,9 +153,17 @@ bool PedDistributor::Distribute(Building *building) const {
         if (!r) continue;
         int roomID = r->GetID();
         int subroomID = dist->GetSubroomID();
-        int N = dist->GetAgentsNumber();
         SubRoom *sr = r->GetSubRoom(subroomID);
         if (!sr) continue;
+
+        int N;
+
+        if(dist->GetAgentsNumber()!=0){
+            N = dist->GetAgentsNumber();    // classical number of agents
+        }
+        else if(dist->GetAgentsDensity()!=0){
+            N = dist->GetAgentsDensity() * sr->GetArea(); // number of agents = density * area of subroom
+        }
 
         if (N < 0) {
             Log->Write("ERROR: \t negative  number of pedestrians!");

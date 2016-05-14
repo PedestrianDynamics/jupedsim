@@ -44,6 +44,7 @@ class StartDistribution
 private:
      int _roomID;
      int _nPeds;
+     int _DPeds;
      int _groupID;
      int _goalID;
      int _routerID;
@@ -87,7 +88,9 @@ public:
      virtual ~StartDistribution();
 
      int GetAgentsNumber() const;
+     double GetAgentsDensity() const;
      void SetRoomID(int id);
+     double SetAgentsDensity(double D);
      void SetAgentsNumber(int N);
      int GetAge() const;
      void SetAge(int age);
