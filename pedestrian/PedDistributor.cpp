@@ -99,6 +99,7 @@ bool PedDistributor::Distribute(Building *building) const {
 
     //collect the available positions for that subroom
     for (const auto &dist: _start_dis_sub) {
+
         int roomID = dist->GetRoomId();
         Room *r = building->GetRoom(roomID);
         if (!r) return false;
@@ -115,10 +116,11 @@ bool PedDistributor::Distribute(Building *building) const {
         if(dist->GetAgentsNumber()!=0){
             nPeds_expected += dist->GetAgentsNumber(); // classical number of agents
         }
-        else if(dist->GetAgentsDensity()!=0){
+        if(dist->GetAgentsDensity()!=0){
             nPeds_expected += dist->GetAgentsDensity() * sr->GetArea() ; // number of agents = density * area of subroom
         }
-        else{
+
+        if(dist->GetAgentsNumber()!=0 && dist->GetAgentsDensity()!=0){
         Log->Write("ERROR: \t Specify either number or density!");
         return false;}
 
@@ -288,11 +290,13 @@ bool PedDistributor::Distribute(Building *building) const {
         }
     }
 
-    if (nPeds_is != nPeds_expected) {
-        Log->Write("ERROR:\t only [%d] agents could be distributed out of [%d] requested", nPeds_is, nPeds_expected);
-    }
+//    if (nPeds_is != nPeds_expected) {
+//        Log->Write("ERROR:\t only [%d] agents could be distributed out of [%d] requested", nPeds_is, nPeds_expected);
+//    }
 
-    return (nPeds_is == nPeds_expected);
+//    return (nPeds_is == nPeds_expected);
+
+    return (nPeds_is);
 }
 
 
