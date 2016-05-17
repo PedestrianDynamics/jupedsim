@@ -406,6 +406,9 @@ bool SubRoom::IsVisible(const Line &wall, const Point &position)
      {
           for(const auto& w: obst->GetAllWalls())
           {
+//               if(w._height <= 1.5) {
+//                    continue;
+//               }
                if(wall_is_vis && ped_wall.IntersectionWith(w)){
                     // fprintf (stdout, "\t\t Wall_is_visible INTERSECTION OBS; L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", w.GetPoint1()._x, w.GetPoint1()._y, w.GetPoint2()._x, w.GetPoint2()._y, ped_wall.GetPoint1()._x, ped_wall.GetPoint1()._y, ped_wall.GetPoint2()._x, ped_wall.GetPoint2()._y);
                     wall_is_vis = false;

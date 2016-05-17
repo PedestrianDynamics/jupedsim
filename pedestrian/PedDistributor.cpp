@@ -86,7 +86,6 @@ const vector<std::shared_ptr<AgentsSource> > &PedDistributor::GetAgentsSources()
     return _start_dis_sources;
 }
 
-
 bool PedDistributor::Distribute(Building *building) const {
     Log->Write("INFO: \tInit Distribute");
     int nPeds_is = 0;
