@@ -997,7 +997,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                     return false;
                }
           }
-          else {
+          else if (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) {
                Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",
                          strategy.c_str());
                return false;
