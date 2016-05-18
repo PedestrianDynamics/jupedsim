@@ -31,6 +31,7 @@ FDSMesh::FDSMesh(const std::string &filename) : _statMesh(false)
 {
     //std::cout << filename << std::endl;
     SetKnotValuesFromFile(filename);
+
     //statHeaderRead=false;
 }
 
@@ -75,8 +76,10 @@ const Matrix &FDSMesh::GetMesh() const
     return _matrix;
 }
 
-int FDSMesh::GetColumn(const double &x, int &col, double restx) const
+int FDSMesh::GetColumn(const double &x, int &col) const
 {
+    double restx;
+
     if (x>_xmin && x<_xmax)
     {
         restx = fmod((x-_xmin),_cellsize);
@@ -102,8 +105,10 @@ int FDSMesh::GetColumn(const double &x, int &col, double restx) const
     return col;
 }
 
-int FDSMesh::GetRow(int &row, double resty, const double &y) const
+int FDSMesh::GetRow(int &row, const double &y) const
 {
+    double resty;
+
     if (y>_ymin && y<_ymax)
     {
         resty = fmod((y-_ymin),_cellsize);
@@ -130,15 +135,13 @@ int FDSMesh::GetRow(int &row, double resty, const double &y) const
 double FDSMesh::GetKnotValue(const double &x, const double &y) const
 {
     /// To Do: exception / warning when no knot is available for the pedestrian position
-    double restx;
-    double resty;
     int col=0;
     int row=0;
 
     /// Which knot is the nearest one to (x,y)?
 
-    GetColumn(x, col, restx);
-    GetRow(row, resty, y);
+    GetColumn(x, col);
+    GetRow(row, y);
 
     //std::cout << _matrix[row][col].GetValue() << std::endl;
     double value;
@@ -170,6 +173,11 @@ void FDSMesh::ReadMatrix(std::string line, std::vector<std::string> &strVec, std
         for (auto &elem : strVec)
         {
             //std::cout << elem << " col " << n  << " line " << m << std::endl;
+            if (elem=="nan")
+            {
+                Log->Write("ERROR: Mesh values consist of nan!");
+                exit(EXIT_FAILURE);
+            }
             _matrix[m][n].SetValue(std::stod(elem));
             ++n;
         }

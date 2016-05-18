@@ -77,26 +77,26 @@ void CognitiveMapStorage::ParseLandmarks()
     if (!docGeo.LoadFile()) {
          Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
          Log->Write("\t could not parse the geometry file");
-         Log->Write("No waypoints specified");
+         Log->Write("WARNING:No waypoints specified");
          return;
     }
 
     TiXmlElement* xRootNode = docGeo.RootElement();
     if( ! xRootNode ) {
          Log->Write("ERROR:\tRoot element does not exist");
-         Log->Write("No waypoints specified");
+         Log->Write("WARNING:No waypoints specified");
          return ;
     }
 
     if( xRootNode->ValueStr () != "geometry" ) {
          Log->Write("ERROR:\tRoot element value is not 'geometry'.");
-         Log->Write("No waypoints specified");
+         Log->Write("WARNING:No waypoints specified");
          return;
     }
     if(xRootNode->Attribute("unit"))
          if(std::string(xRootNode->Attribute("unit")) != "m") {
               Log->Write("ERROR:\tOnly the unit m (meters) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
-              Log->Write("No waypoints specified");
+              Log->Write("WARNING:No waypoints specified");
               return;
          }
 
@@ -106,7 +106,7 @@ void CognitiveMapStorage::ParseLandmarks()
          Log->Write(" \tWrong geometry version!");
          Log->Write(" \tOnly version >= %s supported",JPS_VERSION);
          Log->Write(" \tPlease update the version of your geometry file to %s",JPS_VERSION);
-         Log->Write("No waypoints specified");
+         Log->Write("WARNING:No waypoints specified");
          return;
     }
 
@@ -114,8 +114,8 @@ void CognitiveMapStorage::ParseLandmarks()
     //processing the rooms node
     TiXmlNode*  xLandmarksNode = xRootNode->FirstChild("landmarks");
     if (!xLandmarksNode) {
-         Log->Write("ERROR: \tGeometry file without landmark definition!");
-         Log->Write("No waypoints specified");
+         Log->Write("WARNING: \tGeometry file without landmark definition!");
+         Log->Write("WARNING:No waypoints specified");
          return;
     }
 
