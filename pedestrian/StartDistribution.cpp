@@ -74,6 +74,11 @@ int StartDistribution::GetAgentsNumber() const
      return _nPeds;
 }
 
+double StartDistribution::GetAgentsDensity() const
+{
+     return _DPeds;
+}
+
 void StartDistribution::SetRoomID(int id)
 {
      _roomID = id;
@@ -178,6 +183,11 @@ int StartDistribution::GetRouterId() const
 void StartDistribution::SetRouterId(int routerId)
 {
      _routerID = routerId;
+}
+
+double StartDistribution::SetAgentsDensity(double D)
+{
+     _DPeds = D;
 }
 
 void StartDistribution::SetAgentsNumber(int N)
