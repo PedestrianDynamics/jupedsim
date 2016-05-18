@@ -34,6 +34,13 @@
 #include <string>
 #include <boost/filesystem.hpp>
 
+// to distinguish the slashes of unix and windows
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+static const std::string slash="\\";
+#else
+static const std::string slash="/";
+#endif
+
 namespace fs=boost::filesystem;
 
 FDSMeshStorage::FDSMeshStorage()
@@ -87,7 +94,7 @@ bool FDSMeshStorage::CreateQuantityList()
       if ( fs::is_directory( *iter ) )
       {
 		  std::string quant_dir = iter->path().string();
-          quant_dir =  quant_dir.substr( quant_dir.rfind("/") + 1 );
+          quant_dir =  quant_dir.substr( quant_dir.rfind(slash) + 1 );
           //std::cout << quant_dir << std::endl;
            _quantitylist.push_back(quant_dir);
       }
@@ -97,6 +104,7 @@ bool FDSMeshStorage::CreateQuantityList()
         exit(EXIT_FAILURE);
         return false;
     }
+    return true;
 }
 
 
@@ -105,6 +113,7 @@ bool FDSMeshStorage::CreateElevationList()
     /// Create elevation list out of the available Z_* dirs for each quantity
     _elevationlist.clear();
     fs::directory_iterator end ;
+
     for( fs::directory_iterator iter(_filepath + _quantitylist[0]) ; iter != end ; ++iter ) {
       if ( fs::is_directory( *iter ) )
       {
@@ -119,6 +128,7 @@ bool FDSMeshStorage::CreateElevationList()
         exit(EXIT_FAILURE);
         return false;
     }
+    return true;
 }
 
 
@@ -132,7 +142,7 @@ void FDSMeshStorage::CreateDoorList()
       if ( fs::is_directory( *iter ) )
       {
           std::string door_dir = iter->path().string();
-          door_dir =  door_dir.substr( door_dir.rfind("/") + 1 );
+          door_dir =  door_dir.substr( door_dir.rfind(slash) + 1 );
           //std::cout << door_dir << std::endl;
            _doorlist.push_back(door_dir);
       }
@@ -152,22 +162,22 @@ void FDSMeshStorage::CreateTimeList()
     }
 
     ///Check if specified final and update times are compliant with available data
-    const char * check_str;
+    std::string check_str;
     for(auto elem : _timelist) {
         if (_doorlist.size() > 0) {     // Smoke sensor active
-        check_str = (_filepath + _quantitylist[0] + "/Z_" + std::to_string(_elevationlist[0]) + "/" +
-                _doorlist[0] + "/t_" + std::to_string(elem) + ".csv").c_str();
+        check_str = _filepath + _quantitylist[0] + "/Z_" + std::to_string(_elevationlist[0]) + "/" +
+                _doorlist[0] + "/t_" + std::to_string(elem) + ".csv";
                 //std::cout << check_str << std::endl;
         }
         else if (_doorlist.size() == 0) {   // Smoke sensor not active
-            check_str = (_filepath + _quantitylist[0] + "/Z_" +
-                    std::to_string(_elevationlist[0]) + "/t_" + std::to_string(elem) + ".csv").c_str();
+            check_str = _filepath + _quantitylist[0] + "/Z_" +
+                    std::to_string(_elevationlist[0]) + "/t_" + std::to_string(elem) + ".csv";
                     //std::cout << check_str << std::endl;
         }
 
         if (fs::exists(check_str) == false )
         {
-            Log->Write("ERROR:\tSpecified times are not compliant with JPSfire data ", check_str);
+            Log->Write("ERROR:\tSpecified times are not compliant with JPSfire data " + check_str);
             exit(EXIT_FAILURE);
         }
     }
@@ -175,6 +185,7 @@ void FDSMeshStorage::CreateTimeList()
 
 void FDSMeshStorage::CreateFDSMeshes()
 {
+
     _fMContainer.clear();
     if (_doorlist.size() > 0) {     // Smoke sensor active
         for (auto &h:_quantitylist)     //list of quantities
@@ -189,7 +200,7 @@ void FDSMeshStorage::CreateFDSMeshes()
                         //std::cout << "k " << j << std::endl;
                         std::string str = h + "/Z_" + std::to_string(i) +
                         "/" + j + "/t_"+std::to_string(k);
-                        //std::cout << _filepath + str + ".csv" << std::endl;
+                        std::cout << _filepath + str + ".csv" << std::endl;
                         FDSMesh mesh(_filepath + str + ".csv");
                         //std::string str = "t_"+std::to_string(i);
                         _fMContainer.insert(std::make_pair(str, mesh));

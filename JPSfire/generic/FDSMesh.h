@@ -28,8 +28,8 @@ public:
 
     bool statusMesh() const;
 
-    int GetColumn(const double &x, int &col, double restx) const;
-    int GetRow(int &row, double resty, const double &y) const;
+    int GetColumn(const double &x, int &col) const;
+    int GetRow(int &row, const double &y) const;
     void ReadMatrix(std::string line, std::vector<std::string> &strVec, std::ifstream &pFile);
 
 private:
