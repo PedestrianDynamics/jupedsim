@@ -58,6 +58,7 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
         int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
         int number = xmltoi(e->Attribute("number"), 0);
         double density = xmltof(e->Attribute("density"), 0);
+        string social_group = xmltoa(e->Attribute("social_group"), "false");
         int agent_para_id = xmltoi(e->Attribute("agent_parameter_id"), -1);
 
         int goal_id = xmltoi(e->Attribute("goal_id"), FINAL_DEST_OUT);
@@ -96,6 +97,7 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
         dis->SetAgentsDensity(density);
         dis->SetAge(age);
         dis->SetGender(gender);
+        dis->SetSocialGroup(social_group);
         dis->SetGoalId(goal_id);
         dis->SetRouteId(route_id);
         dis->SetRouterId(router_id);

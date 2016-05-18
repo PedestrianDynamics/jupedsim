@@ -157,7 +157,7 @@ void ToxicityAnalysis::StoreToxicityAnalysis(const Pedestrian* p, double CO2, do
 //                    "\n%f\t%i\t%f\t%f\t%f\t%f\t%f\n",
 //            p->GetGlobalTime(), p->GetID(), CO2, CO, HCN, HCL, FED);
 
-//    fprintf(stderr, "\t%f\t%f\t%f\t%f\t%f\n", p->GetPos()._x, p->GetPos()._y, p->GetElevation() , CO2, p->GetGlobalTime());
+//    fprintf(stderr, "%i\t%f\t%f\t%f\t%f\t%f\n",p->GetID(), p->GetPos()._x, p->GetPos()._y, p->GetElevation(), p->GetGlobalTime(), FED);
 
     string data;
     char tmp[CLENGTH] = "";

@@ -55,6 +55,7 @@ StartDistribution::StartDistribution(int seed)
      _startY = NAN;
      _startZ = NAN;
      _gender = "male";
+     _social_group = "false";
      _patience=5;
      _xMin=-FLT_MAX;
      _xMax=FLT_MAX;
@@ -102,6 +103,16 @@ const std::string& StartDistribution::GetGender() const
 void StartDistribution::SetGender(const std::string& gender)
 {
      _gender = gender;
+}
+
+const std::string& StartDistribution::GetSocialGroup() const
+{
+     return _social_group;
+}
+
+void StartDistribution::SetSocialGroup(const std::string& social_group)
+{
+     _social_group = social_group;
 }
 
 int StartDistribution::GetGoalId() const

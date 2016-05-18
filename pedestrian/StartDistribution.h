@@ -54,6 +54,7 @@ private:
      //demographic parameters
      //TODO: should also follow a distribution, see _premovement
      std::string _gender;
+     std::string _social_group;
      int _age;
      int _height;
      double _patience;
@@ -96,6 +97,8 @@ public:
      void SetAge(int age);
      const std::string& GetGender() const;
      void SetGender(const std::string& gender);
+     const std::string& GetSocialGroup() const;
+     void SetSocialGroup(const std::string& social_group);
      int GetGoalId() const;
      void SetGoalId(int goalId);
      int GetGroupId() const;
