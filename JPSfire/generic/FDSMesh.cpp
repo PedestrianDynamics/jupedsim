@@ -173,11 +173,11 @@ void FDSMesh::ReadMatrix(std::string line, std::vector<std::string> &strVec, std
         for (auto &elem : strVec)
         {
             //std::cout << elem << " col " << n  << " line " << m << std::endl;
-            if (elem=="nan")
-            {
-                Log->Write("ERROR: Mesh values consist of nan!");
-                exit(EXIT_FAILURE);
-            }
+//            if (elem=="nan")
+//            {
+//                Log->Write("ERROR: Mesh values consist of nan!");
+//                exit(EXIT_FAILURE);
+//            }
             _matrix[m][n].SetValue(std::stod(elem));
             ++n;
         }

@@ -74,7 +74,9 @@ private:
      double _yMax;
 
      //pre movement time distribution
-     mutable std::normal_distribution<double> _premovementTime;
+     mutable std::normal_distribution<double> _premovementTimeNormal;
+     mutable std::uniform_real_distribution<double> _premovementTimeUniform;
+     std::string _preDist;
 
      //risk tolerance distribution
      std::string _distribution_type;
@@ -124,7 +126,7 @@ public:
      void Setbounds(double bounds[4]);
      AgentsParameters* GetGroupParameters();
      void SetGroupParameters(AgentsParameters* groupParameters);
-     void InitPremovementTime(double mean, double stdv);
+     void InitPremovementTime(std::string distribution_type, double para1, double para2);
      double GetPremovementTime() const;
      void InitRiskTolerance(std::string distribution_type, double para1, double para2);
      double GetRiskTolerance();
