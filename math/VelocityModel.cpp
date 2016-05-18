@@ -111,7 +111,7 @@ bool VelocityModel::Init (Building* building)
          //a destination could not be found for that pedestrian
          if (ped->FindRoute() == -1) {
               Log->Write(
-                   "ERROR:\tVelocityModel::Init() cannot initialise route. ped %d is deleted.\n",ped->GetID());
+                   "ERROR:\tVelocityModel::Init() cannot initialise route. ped %d is deleted in Room %d %d.\n",ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID());
               building->DeletePedestrian(ped);
               p--;
               peds_size--;
@@ -326,7 +326,20 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
       const Point& pos = ped->GetPos();
       double dist = ped->GetExitLine()->DistTo(pos);
       // check if the molified version works
-      if (dist > J_EPS_GOAL) {
+      Point lastE0 = ped->GetLastE0();
+      ped->SetLastE0(target-pos);
+
+      if ( (dynamic_cast<DirectionFloorfield*>(_direction)) ||
+           (dynamic_cast<DirectionLocalFloorfield*>(_direction)) ||
+           (dynamic_cast<DirectionSubLocalFloorfield*>(_direction))  ) {
+          if (dist > 20*J_EPS_GOAL) {
+               e0 = target - pos; //ped->GetV0(target);
+          } else {
+               e0 = lastE0;
+               ped->SetLastE0(lastE0); //keep old vector (revert set operation done 9 lines above)
+          }
+      }
+      else if (dist > J_EPS_GOAL) {
             e0 = ped->GetV0(target);
       } else {
           ped->SetSmoothTurning();

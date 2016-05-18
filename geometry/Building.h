@@ -69,7 +69,7 @@ private:
      LCGrid* _linkedCellGrid;
      std::vector<Pedestrian*> _allPedestians;
 
-     std::map<int, std::unique_ptr<Room> > _rooms;
+     std::map<int, std::shared_ptr<Room> > _rooms;
      std::map<int, Crossing*> _crossings;
      std::map<int, Transition*> _transitions;
      std::map<int, Hline*> _hLines;
@@ -108,7 +108,7 @@ public:
 
      RoutingEngine* GetRoutingEngine() const;
 
-     const std::map<int, std::unique_ptr<Room> >& GetAllRooms() const;
+     const std::map<int, std::shared_ptr<Room> >& GetAllRooms() const;
 
      const std::vector<Pedestrian*>& GetAllPedestrians() const;
 
