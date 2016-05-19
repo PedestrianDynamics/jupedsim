@@ -163,14 +163,15 @@ double FDSMesh::GetKnotValue(const double &x, const double &y) const
 
 }
 
-void FDSMesh::ReadMatrix(std::string line, std::vector<std::string> &strVec, std::ifstream &pFile)
+void FDSMesh::ReadMatrix(std::string line, std::ifstream &pFile)
 {
     int m = 0;
     int n;
+    std::vector<std::string> strVec;
     while (std::getline(pFile, line)) {
         n = 0;
-        strVec = split2(line, ',', strVec);
-        for (auto &elem : strVec)
+        split2(line, ',', strVec);
+        for (auto elem : strVec)
         {
             //std::cout << elem << " col " << n  << " line " << m << std::endl;
             if (elem=="nan")
@@ -224,7 +225,7 @@ void FDSMesh::SetKnotValuesFromFile(const std::string &filename)
         //}
         //Read matrix
 
-        ReadMatrix(line, strVec, pFile);
+        ReadMatrix(line, pFile);
 
     }
     else

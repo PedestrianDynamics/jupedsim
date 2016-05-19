@@ -34,12 +34,6 @@
 #include <string>
 #include <boost/filesystem.hpp>
 
-// to distinguish the slashes of unix and windows
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
-static const std::string slash="\\";
-#else
-static const std::string slash="/";
-#endif
 
 namespace fs=boost::filesystem;
 
@@ -94,7 +88,7 @@ bool FDSMeshStorage::CreateQuantityList()
       if ( fs::is_directory( *iter ) )
       {
 		  std::string quant_dir = iter->path().string();
-          quant_dir =  quant_dir.substr( quant_dir.rfind(slash) + 1 );
+          quant_dir =  quant_dir.substr( quant_dir.find_last_of("/\\") + 1 );
           //std::cout << quant_dir << std::endl;
            _quantitylist.push_back(quant_dir);
       }
@@ -142,7 +136,7 @@ void FDSMeshStorage::CreateDoorList()
       if ( fs::is_directory( *iter ) )
       {
           std::string door_dir = iter->path().string();
-          door_dir =  door_dir.substr( door_dir.rfind(slash) + 1 );
+          door_dir =  door_dir.substr( door_dir.find_last_of("/\\") + 1 );
           //std::cout << door_dir << std::endl;
            _doorlist.push_back(door_dir);
       }

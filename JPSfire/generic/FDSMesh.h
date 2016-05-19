@@ -30,7 +30,7 @@ public:
 
     int GetColumn(const double &x, int &col) const;
     int GetRow(int &row, const double &y) const;
-    void ReadMatrix(std::string line, std::vector<std::string> &strVec, std::ifstream &pFile);
+    void ReadMatrix(std::string line, std::ifstream &pFile);
 
 private:
     Matrix _matrix;
