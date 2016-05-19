@@ -135,7 +135,6 @@ private:
 
 
 private:
-
      void Usage(const std::string file);
 
      Configuration* _config;

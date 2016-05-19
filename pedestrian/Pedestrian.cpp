@@ -57,6 +57,7 @@ Pedestrian::Pedestrian()
      _subRoomUID = -1;
      _oldRoomID = -1;
      _oldSubRoomID = -1;
+     _ticksInThisRoom = 0;
      _exitIndex = -1;
      _id = _agentsCreated;//default id
      _mass = 1;
@@ -118,7 +119,8 @@ Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& buil
      _subRoomID(agentsParameters.GetSubroomID()),
      _subRoomUID(building.GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetUID()),
      _patienceTime(agentsParameters.GetPatience()),
-     _premovement(agentsParameters.GetPremovementTime())
+     _premovement(agentsParameters.GetPremovementTime()),
+     _ticksInThisRoom(0)
 {
 
 }
@@ -368,6 +370,8 @@ void Pedestrian::ClearMentalMap()
 {
      _mentalMap.clear();
      _exitIndex = -1;
+     if (_navLine) delete _navLine;
+     _navLine = nullptr;
      // todo: ar.graf: check if we also need to delete/reset _navLine
      //  ^^^^   is anywhere a check, only considering _navLine without checking
      //  ^^^^   exitIndex?? (probably in my code?)
@@ -531,6 +535,10 @@ double Pedestrian::GetV0Norm() const
 
      if( _ToxicityAnalysis->ConductToxicityAnalysis() && fmod(this->GetGlobalTime(), 3) == 0 ) {
         _ToxicityAnalysis->CalculateFED(this);
+     }
+
+     if (fmod(this->GetGlobalTime(), 1) == 0 ){
+        fprintf(stderr, "%i, %f, %f, %f, %f, %f\n",this->GetID(), this->GetPos()._x, this->GetPos()._y, this->GetGlobalTime(),this->GetElevation(), walking_speed);
      }
 
      return walking_speed;
@@ -812,7 +820,7 @@ string Pedestrian::GetPath()
 
      for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
           stringstream ss;//create a stringstream
-          ss << iter->first/1000<<":"<<iter->second<<">";
+          ss << iter->first/1000<<":"<<iter->second<<">"; //@todo:ar.graf: has this to do with roomNr*1000+subroom and is now wrong?
           path.append(ss.str());
      }
      return path;

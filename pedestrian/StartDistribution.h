@@ -54,6 +54,7 @@ private:
      //demographic parameters
      //TODO: should also follow a distribution, see _premovement
      std::string _gender;
+     std::string _social_group;
      int _age;
      int _height;
      double _patience;
@@ -73,7 +74,9 @@ private:
      double _yMax;
 
      //pre movement time distribution
-     mutable std::normal_distribution<double> _premovementTime;
+     mutable std::normal_distribution<double> _premovementTimeNormal;
+     mutable std::uniform_real_distribution<double> _premovementTimeUniform;
+     std::string _preDist;
 
      //risk tolerance distribution
      std::string _distribution_type;
@@ -96,6 +99,8 @@ public:
      void SetAge(int age);
      const std::string& GetGender() const;
      void SetGender(const std::string& gender);
+     const std::string& GetSocialGroup() const;
+     void SetSocialGroup(const std::string& social_group);
      int GetGoalId() const;
      void SetGoalId(int goalId);
      int GetGroupId() const;
@@ -121,7 +126,7 @@ public:
      void Setbounds(double bounds[4]);
      AgentsParameters* GetGroupParameters();
      void SetGroupParameters(AgentsParameters* groupParameters);
-     void InitPremovementTime(double mean, double stdv);
+     void InitPremovementTime(std::string distribution_type, double para1, double para2);
      double GetPremovementTime() const;
      void InitRiskTolerance(std::string distribution_type, double para1, double para2);
      double GetRiskTolerance();

@@ -105,10 +105,12 @@ Building::Building(const Configuration* configuration, PedDistributor& pedDistri
      }
 
      //triangulate the geometry
-     if (!Triangulate()) {
-          Log->Write("ERROR:\t could not triangulate the geometry!");
-          exit(EXIT_FAILURE);
-     }
+//     if(!Triangulate())
+//     {
+//          Log->Write("ERROR:\t could not triangulate the geometry!");
+//          exit (EXIT_FAILURE);
+//     }
+
 
      //TODO: check whether traffic info can be loaded before InitGeometry if so call it in LoadBuilding instead and make
      //TODO: LoadTrafficInfo private [gl march '16]
@@ -208,7 +210,7 @@ int Building::GetNumberOfGoals() const
      return (int) (_transitions.size()+_hLines.size()+_crossings.size());
 }
 
-const std::map<int, std::unique_ptr<Room> >& Building::GetAllRooms() const
+const std::map<int, std::shared_ptr<Room> >& Building::GetAllRooms() const
 {
      return _rooms;
 }
@@ -232,7 +234,7 @@ LCGrid* Building::GetGrid() const
 
 void Building::AddRoom(Room* room)
 {
-     _rooms[room->GetID()] = std::unique_ptr<Room>(room);
+     _rooms[room->GetID()] = std::shared_ptr<Room>(room);
 }
 
 void Building::AddSurroundingRoom()
@@ -693,8 +695,13 @@ bool Building::SanityCheck()
      Log->Write("INFO: \tChecking the geometry for artifacts");
      bool status = true;
 
-     for (auto&& itr_room: _rooms) {
-          for (auto&& itr_subroom: itr_room.second->GetAllSubRooms()) {
+     //only for ffRouter
+     return status;
+
+     for(auto&& itr_room: _rooms)
+     {
+          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+          {
                if (!itr_subroom.second->SanityCheck())
                     status = false;
           }

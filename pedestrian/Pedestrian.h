@@ -143,6 +143,9 @@ private:
      std::shared_ptr<ToxicityAnalysis> _ToxicityAnalysis;
 
 public:
+     // public member
+     int _ticksInThisRoom;
+
      // constructors
      Pedestrian();
      explicit Pedestrian(const StartDistribution& agentsParameters, Building& building);

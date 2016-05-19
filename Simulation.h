@@ -88,6 +88,7 @@ private:
     /// hybrid simulation manager
     //HybridSimulationManager
     int _periodic;
+    bool _gotSources; // is true if we got some sources. Otherwise, false.
 public:
     /**
      * Constructor

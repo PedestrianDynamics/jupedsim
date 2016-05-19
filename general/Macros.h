@@ -161,6 +161,16 @@ enum FFRouterMode {
      quickest
 };
 
+enum GridCode { //used in floor fields
+    WALL = 0,
+    INSIDE,
+    OUTSIDE,
+    OPEN_CROSSING,
+    OPEN_TRANSITION,
+    CLOSED_CROSSING,     //closed crossings and transitions are marked as walls in "parseBuilding"
+    CLOSED_TRANSITION
+};
+
 //global functions for convenience
 
 inline char xmltob(const char * t, char v = 0)

@@ -58,6 +58,7 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
         int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
         int number = xmltoi(e->Attribute("number"), 0);
         double density = xmltof(e->Attribute("density"), 0);
+        string social_group = xmltoa(e->Attribute("social_group"), "false");
         int agent_para_id = xmltoi(e->Attribute("agent_parameter_id"), -1);
 
         int goal_id = xmltoi(e->Attribute("goal_id"), FINAL_DEST_OUT);
@@ -69,6 +70,8 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
         double patience = xmltof(e->Attribute("patience"), 5);
         double premovement_mean = xmltof(e->Attribute("pre_movement_mean"), 0);
         double premovement_sigma = xmltof(e->Attribute("pre_movement_sigma"), 0);
+        double premovement_min = xmltof(e->Attribute("pre_movement_min"), 0);
+        double premovement_max = xmltof(e->Attribute("pre_movement_max"), 0);
         double risk_tolerance_mean = xmltof(e->Attribute("risk_tolerance_mean"), 0);
         double risk_tolerance_sigma = xmltof(e->Attribute("risk_tolerance_sigma"), 0);
 
@@ -96,12 +99,25 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
         dis->SetAgentsDensity(density);
         dis->SetAge(age);
         dis->SetGender(gender);
+        dis->SetSocialGroup(social_group);
         dis->SetGoalId(goal_id);
         dis->SetRouteId(route_id);
         dis->SetRouterId(router_id);
         dis->SetHeight(height);
         dis->SetPatience(patience);
-        dis->InitPremovementTime(premovement_mean, premovement_sigma);
+
+        if (e->Attribute("pre_movement_mean") && e->Attribute("pre_movement_sigma")) {
+            std::string distribution_type = "normal";
+            dis->InitPremovementTime(distribution_type, premovement_mean, premovement_sigma);
+        }
+        if (e->Attribute("pre_movement_min") && e->Attribute("pre_movement_max")) {
+            std::string distribution_type = "uniform";
+            if(premovement_min > premovement_max){
+                Log->Write("ERROR:\tpremovement_min > premovement_max!");
+                return false;
+            }
+            dis->InitPremovementTime(distribution_type, premovement_min, premovement_max);
+        }
 
         if (e->Attribute("risk_tolerance_mean") && e->Attribute("risk_tolerance_sigma")) {
             std::string distribution_type = "normal";
