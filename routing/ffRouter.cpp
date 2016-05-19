@@ -293,7 +293,7 @@ int FFRouter::FindExit(Pedestrian* p)
      if (_building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->IsInSubRoom(p->GetPos())) {
           //ped is in the subroom, according to its member attribs
      } else {
-          Log->Write("ERROR: \tffRouter cannot handle incorrect room/subroom attribs of pedestrian!!");
+          //Log->Write("ERROR: \tffRouter cannot handle incorrect room/subroom attribs of pedestrian %d!!", p->GetID());
      }
      if (!_targetWithinSubroom) {
           //candidates of current room (ID) (provided by Room)
@@ -330,7 +330,7 @@ int FFRouter::FindExit(Pedestrian* p)
           //with UIDs, we can ask for shortest path
           for (int doorUID : DoorUIDsOfRoom) {
                double locDistToDoor = _locffviafm[p->GetRoomID()]->getCostToDestination(doorUID, p->GetPos());
-               if (locDistToDoor < J_EPS) {     //this can happen, if the point is not reachable and therefore has init val -7
+               if (locDistToDoor < -J_EPS) {     //this can happen, if the point is not reachable and therefore has init val -7
                     continue;
                }
                std::pair<int, int> key = std::make_pair(doorUID, finalDoor);
