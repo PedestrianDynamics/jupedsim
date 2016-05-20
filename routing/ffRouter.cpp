@@ -187,6 +187,10 @@ bool FFRouter::Init(Building* building)
                if (!_CroTrByUID.at(*outerPtr)->IsOpen()) {
                     continue;
                }
+               // @todo: ar.graf: this following loop and the one directly wrapping this "for (outerPtr = ...)" could be
+               // moved out of the parallel for loop into a follow up part. There we could parallelize the most inner loop
+               // to achieve a better load balancing. You can have a look at DirectionStrategy.cpp at the DirectionLocalFloorfield::Init
+               // and take that scheme.
                for (innerPtr = outerPtr; innerPtr != doorUIDs.end(); ++innerPtr) {
                     //if outerdoor == innerdoor or the inner door is closed
                     if ((*outerPtr == *innerPtr) || (!_CroTrByUID.at(*innerPtr)->IsOpen())) {
@@ -197,7 +201,7 @@ bool FFRouter::Init(Building* building)
                     //distance (a to b) can be different than distance (b ta a)
                     //     for this reason, we calc only (a to b) and set (b to a) to the same value
                     //distance (line to center) can be larger than (line to endpoint). to get closer to the min-distance
-                    //we take the minimum of three shots: center, and a point close to each endpoint
+                    //we did take the minimum of three shots: center, and a point close to each endpoint BUT not anymore
                     //
                     //note: we can not assume: (a to c) = (a to b) + (b to c) for the reasons above.
                     //question: if (a to c) > (a to b) + (b to c), then FloyedWarshall will favour intermediate goal b
