@@ -992,6 +992,9 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                Router *r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals);
                _config->GetRoutingEngine()->AddRouter(r);
                Log->Write("\nINFO: \tUsing FF Global Shortest Router");
+
+               //check if the exit strat is [8]
+
                ///Parsing additional options
                if (!ParseFfRouterOps(e)) {
                     return false;

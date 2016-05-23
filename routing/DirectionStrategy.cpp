@@ -639,6 +639,7 @@ void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
                     auto subroomIt = roomPair.second->GetAllSubRooms().begin();
                     std::advance(subroomIt, i);
                     int subUID = subroomIt->second->GetUID();
+#pragma omp critical
                     subUIDs.emplace_back(subUID);
                     Log->Write("Creating SubLocFF at key: %d", subUID);
                     locffviafm[subUID] = new SubLocalFloorfieldViaFM(
