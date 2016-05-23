@@ -372,7 +372,7 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrLandma
     //target (landmark)
     if (boost::geometry::intersects(landmark->GetPosInMap(),boost_room))
     {
-        Log->Write("INFO: Landmark muesste in meinem Raum sein!");
+        //Log->Write("INFO: Landmark muesste in meinem Raum sein!");
         // return always 1.0 so no crossing will be preferred based on information
         // from the cognitive map
         return 1.0;
@@ -560,8 +560,19 @@ const ptrRegion CognitiveMap::GetRegionContaining(const ptrLandmark &landmark) c
 void CognitiveMap::FindCurrentRegion()
 {
     //for test purposes. has to be changed
-    if (!_regions.empty())
-        _currentRegion=_regions[0];
+    if (_regions.empty())
+        return;
+
+    for (ptrRegion region:_regions)
+    {
+        if (region->Contains(this->_YAHPointer.GetPos()))
+        {
+            _currentRegion=region;
+            return;
+        }
+    }
+    //path searching to region
+    _currentRegion=nullptr;
 }
 
 void CognitiveMap::CheckIfLandmarksReached()
@@ -584,13 +595,16 @@ void CognitiveMap::CheckIfLandmarksReached()
 
 const ptrLandmark CognitiveMap::FindConnectionPoint(const ptrRegion &currentRegion, const ptrRegion &targetRegion) const
 {
-    for (ptrLandmark landmarka:currentRegion->GetLandmarks())
+    if (currentRegion!=nullptr && targetRegion!=nullptr)
     {
-        for (ptrLandmark landmarkb:targetRegion->GetLandmarks())
+        for (ptrLandmark landmarka:currentRegion->GetLandmarks())
         {
-            if (landmarka==landmarkb)
+            for (ptrLandmark landmarkb:targetRegion->GetLandmarks())
             {
-                return landmarka;
+                if (landmarka==landmarkb)
+                {
+                    return landmarka;
+                }
             }
         }
     }
@@ -624,6 +638,10 @@ void CognitiveMap::FindNextTarget()
 
     _nextTarget=nullptr;
     // if not already in the region of the maindestination
+    if (_currentRegion==nullptr || _targetRegion==nullptr)
+    {
+        return;
+    }
     if (_targetRegion!=_currentRegion)
     {
         _nextTarget=FindConnectionPoint(_currentRegion,_targetRegion);
@@ -652,8 +670,8 @@ void CognitiveMap::FindNextTarget()
 
 
 
-    //if (_nextTarget!=nullptr)
-    //Log->Write(_nextTarget->GetCaption());
+//    if (_nextTarget!=nullptr)
+//        Log->Write(_nextTarget->GetCaption());
 }
 
 void CognitiveMap::FindShortCut()
@@ -775,6 +793,25 @@ const ptrLandmark CognitiveMap::FindBestRouteFromOneOf(const Landmarks &nearLand
         }
     }
     return bestChoice;
+
+}
+
+const ptrLandmark CognitiveMap::GetNearestMainTarget(const Landmarks &mainTargets)
+{
+    ptrLandmark nearest = mainTargets[0];
+    double dNearest = (mainTargets[0]->GetRandomPoint()-GetOwnPos()).Norm();
+    for (ptrLandmark landmark:mainTargets)
+    {
+        if (landmark==nearest)
+            continue;
+
+        Point vec = landmark->GetRandomPoint()-GetOwnPos();
+        if (vec.Norm()<dNearest)
+        {
+            dNearest=vec.Norm();
+            nearest=landmark;
+        }
+    }
 
 }
 

@@ -57,14 +57,14 @@ void LastDestinationsSensor::execute(const Pedestrian * pedestrian, CognitiveMap
         GraphEdge * to_edge = (*ng[(*it)->GetSrc()->GetSubRoom()])[(*it)->GetCrossing()];
 
         if(to_edge != nullptr && rated.find(to_edge) == rated.end()) {
-            to_edge->SetFactor(3000.0 / (i*3) + 100, GetName());
+            to_edge->SetFactor(300.0/(i*3.0), GetName());
             rated.insert(to_edge);
         }
 
         if((*it)->GetSrc() != nullptr && (*it)->GetDest() != nullptr && (*it)->GetCrossing() != nullptr) {
             GraphEdge * back_edge = (*ng[(*it)->GetDest()->GetSubRoom()])[(*it)->GetCrossing()];
             if(back_edge != nullptr && rated.find(back_edge) == rated.end()) {
-                back_edge->SetFactor(3000.0 /(i*3) + 100, GetName());
+                back_edge->SetFactor(300.0/(i*3.0), GetName());
                 rated.insert(back_edge);
             }
         }

@@ -54,11 +54,13 @@ public:
     // Shortest Distance from waypoint egde (ellipse) to specific point
     Point PointOnShortestRoute(const Point &point) const;
     // Check if Waypoint reached (if YAH-Pointer is in Waypoint)
-    bool LandmarkReached(const Point& currentYAH);
+    //bool LandmarkReached(const Point& currentYAH);
 
     bool Visited() const;
     void SetVisited(bool stat);
 
+    //check if landmark ellipse in cogmap contains certain point
+    bool Contains(const Point &point);
 
     // Associations
     Associations GetAssociations() const;

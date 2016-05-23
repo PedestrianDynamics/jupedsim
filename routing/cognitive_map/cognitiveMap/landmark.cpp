@@ -156,17 +156,17 @@ Point Landmark::PointOnShortestRoute(const Point& point) const
     return Point(_posInMap._x+_a*std::cos(alpha_min*pi/180.0),_posInMap._y+_b*std::sin(alpha_min*pi/180.0));
 }
 
-bool Landmark::LandmarkReached(const Point& currentYAH)
-{
-    if (std::abs(_realPos._x-currentYAH._x)<0.75*_a && std::abs(_realPos._y-currentYAH._y)<0.75*_b)
-    {
-        Log->Write("INFO:\t Landmark reached");
-        Log->Write(std::to_string(currentYAH._x)+" "+std::to_string(currentYAH._y));
-        _visited=true;
-        return true;
-    }
-    return false;
-}
+//bool Landmark::LandmarkReached(const Point& currentYAH)
+//{
+//    if (std::abs(_realPos._x-currentYAH._x)<0.75*_a && std::abs(_realPos._y-currentYAH._y)<0.75*_b)
+//    {
+//        Log->Write("INFO:\t Landmark reached");
+//        Log->Write(std::to_string(currentYAH._x)+" "+std::to_string(currentYAH._y));
+//        _visited=true;
+//        return true;
+//    }
+//    return false;
+//}
 
 bool Landmark::Visited() const
 {
@@ -176,6 +176,18 @@ bool Landmark::Visited() const
 void Landmark::SetVisited(bool stat)
 {
     _visited=stat;
+}
+
+bool Landmark::Contains(const Point &point)
+{
+    double x = _a-(std::fabs(this->GetPosInMap()._x-point._x));
+    double y = _b-(std::fabs(this->GetPosInMap()._y-point._y));
+
+    if ((std::fabs(this->GetPosInMap()._x-point._x)<=_a && std::pow((1-std::pow(x,2)/std::pow(_a,2)),0.5)*_b<=_b)
+            || (std::fabs(this->GetPosInMap()._y-point._y)<=_b && std::pow((1-std::pow(y,2)/std::pow(_b,2)),0.5)*_a<=_a ))
+        return true;
+
+    return false;
 }
 
 Associations Landmark::GetAssociations() const

@@ -2,7 +2,7 @@
 #define COGNITIVEMAP_H
 
 #ifndef UPDATE_RATE
-#define UPDATE_RATE 1.0
+#define UPDATE_RATE 0.1
 #endif
 
 
@@ -106,6 +106,7 @@ public:
     const ptrLandmark FindNearLandmarkConnectedToTarget(const ptrLandmark& target);
     Landmarks FindLandmarksConnectedToTarget(const ptrLandmark& target);
     const ptrLandmark FindBestRouteFromOneOf(const Landmarks& nearLandmarks);
+    const ptrLandmark GetNearestMainTarget(const Landmarks& mainTargets);
 
     //Init LandmarkNetworks
     void InitLandmarkNetworksInRegions();
