@@ -44,8 +44,10 @@ ToxicityAnalysis::ToxicityAnalysis(const Building * b)
     _FMStorage = nullptr;
     LoadJPSfireInfo(_building->GetProjectFilename());
 
-    std::string str( _building->GetProjectRootDir() + _building->GetProjectFilename() + "_tox.xml" );
-    _outputhandler = std::make_shared<ToxicityOutputHandler>(str.c_str());
+    //std::string str( _building->GetProjectRootDir() + "_tox.xml" );
+
+    std::string ToxAnalysisXML = _building->GetProjectRootDir() + _building->GetProjectFilename() + "_tox.xml";
+    _outputhandler = std::make_shared<ToxicityOutputHandler>(ToxAnalysisXML.c_str());
     _outputhandler->WriteToFileHeader();
     _frame=0;
 
@@ -56,7 +58,7 @@ ToxicityAnalysis::~ToxicityAnalysis()
 
 }
 
-bool ToxicityAnalysis::LoadJPSfireInfo(const std::string &projectFilename )
+bool ToxicityAnalysis::LoadJPSfireInfo(const std::string projectFilename )
 {
    TiXmlDocument doc(projectFilename);
    if (!doc.LoadFile()) {

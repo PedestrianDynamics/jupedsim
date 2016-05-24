@@ -40,7 +40,7 @@
 SmokeSensor::SmokeSensor(const Building *b) : AbstractSensor(b)
 {
     _building = b;
-    LoadJPSfireInfo(b->GetProjectFilename());
+    LoadJPSfireInfo(_building->GetProjectFilename());
 
 }
 
@@ -48,7 +48,7 @@ SmokeSensor::~SmokeSensor()
 {
 }
 
-bool SmokeSensor::LoadJPSfireInfo(const std::string &projectFilename)
+bool SmokeSensor::LoadJPSfireInfo(const std::string projectFilename)
 {
     TiXmlDocument doc(projectFilename);
     if (!doc.LoadFile()) {

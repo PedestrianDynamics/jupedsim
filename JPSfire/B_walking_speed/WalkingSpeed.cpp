@@ -42,7 +42,7 @@ WalkingSpeed::WalkingSpeed(const Building * b)
 {
     _FMStorage = nullptr;
     _building = b;
-    LoadJPSfireInfo(b->GetProjectFilename());
+    LoadJPSfireInfo(_building->GetProjectFilename());
 }
 
 WalkingSpeed::~WalkingSpeed()
@@ -51,7 +51,7 @@ WalkingSpeed::~WalkingSpeed()
 
 
 
-bool WalkingSpeed::LoadJPSfireInfo(const std::string &projectFilename )
+bool WalkingSpeed::LoadJPSfireInfo(const std::string projectFilename )
 {
    TiXmlDocument doc(projectFilename);
    if (!doc.LoadFile()) {

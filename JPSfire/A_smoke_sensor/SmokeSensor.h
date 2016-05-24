@@ -43,7 +43,7 @@ public:
 
     virtual ~SmokeSensor();
 
-    bool LoadJPSfireInfo(const std::string &projectFilename);
+    bool LoadJPSfireInfo(const std::string projectFilename);
 
     std::string GetName() const;
     void execute(const Pedestrian *, CognitiveMap *) const;

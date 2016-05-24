@@ -56,7 +56,7 @@ public:
     const std::shared_ptr<FDSMeshStorage> get_FMStorage();
 
 
-    bool LoadJPSfireInfo(const std::string &projectFilename);
+    bool LoadJPSfireInfo(const std::string projectFilename);
     bool ReduceWalkingSpeed();
     double FrantzichNilsson2003(double &walking_speed, double ExtinctionCoefficient);
     double Jin1978(double &walking_speed, double ExtinctionCoefficient);

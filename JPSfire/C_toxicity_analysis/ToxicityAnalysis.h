@@ -58,7 +58,7 @@ public:
     const std::shared_ptr<FDSMeshStorage> get_FMStorage();
 
 
-    bool LoadJPSfireInfo(const std::string &projectFilename);
+    bool LoadJPSfireInfo(const std::string projectFilename);
     bool ConductToxicityAnalysis();
 
 private:
