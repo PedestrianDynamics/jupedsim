@@ -95,12 +95,7 @@ double WalkingSpeed::GetExtinction(const Pedestrian * pedestrian)
 {
     std::string quantity = "SOOT_EXTINCTION_COEFFICIENT";
     double ExtinctionCoefficient = _FMStorage->GetFDSMesh(pedestrian->GetGlobalTime(), pedestrian->GetElevation(), quantity).GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y);
-    if(ExtinctionCoefficient > 10)
-    {
-        std::cout << "\nSOMETHING MAY BE WRONG\n" << std::endl;
-    }
-
-    return ExtinctionCoefficient;
+ return ExtinctionCoefficient;
 }
 
 void WalkingSpeed::set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage)
@@ -168,7 +163,7 @@ double WalkingSpeed::WalkingInSmoke(const Pedestrian* p, double walking_speed)
 //       walking_speed = p->GetEllipse().GetV0();
 //    }
     }
-   // fprintf(stderr, "%f \t%f \t%f \t%f \n", p->GetGlobalTime(), ExtinctionCoefficient, walking_speed, p->GetV().Norm() );
+   //fprintf(stderr, "%f \t%f \t%f \t%f \n", p->GetGlobalTime(), ExtinctionCoefficient, walking_speed, p->GetV().Norm() );
 
    return walking_speed;
 }

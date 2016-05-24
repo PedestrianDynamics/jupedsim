@@ -538,9 +538,9 @@ double Pedestrian::GetV0Norm() const
         _ToxicityAnalysis->CalculateFED(this);
      }
 
-     // if (fmod(this->GetGlobalTime(), 1) == 0 ){
-        // fprintf(stderr, "%i, %f, %f, %f, %f, %f\n",this->GetID(), this->GetPos()._x, this->GetPos()._y, this->GetGlobalTime(),this->GetElevation(), walking_speed);
-     // }
+//     if (fmod(this->GetGlobalTime(), 1) == 0 ){
+//        fprintf(stderr, "%i, %f, %f, %f, %f, %f\n",this->GetID(), this->GetPos()._x, this->GetPos()._y, this->GetGlobalTime(),this->GetElevation(), walking_speed);
+//     }
      return walking_speed;
      // orthogonal projection on the stair
      //return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();

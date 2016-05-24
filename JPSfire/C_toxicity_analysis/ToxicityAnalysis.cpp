@@ -42,9 +42,9 @@ ToxicityAnalysis::ToxicityAnalysis(const Building * b)
 {
     _building = b;
     _FMStorage = nullptr;
-    LoadJPSfireInfo(b->GetProjectFilename());
+    LoadJPSfireInfo(_building->GetProjectFilename());
 
-    std::string str(_building->GetProjectRootDir()+"ToxicityAnalysis.xml");
+    std::string str( _building->GetProjectRootDir() + _building->GetProjectFilename() + "_tox.xml" );
     _outputhandler = std::make_shared<ToxicityOutputHandler>(str.c_str());
     _outputhandler->WriteToFileHeader();
     _frame=0;
@@ -127,7 +127,7 @@ void ToxicityAnalysis::CalculateFED(const Pedestrian* p)
     double dt =  p->GetGlobalTime();    //current sim time
     double CO2, CO, HCN, HCL;
     CO2 = GetGasConcentration(p, "CARBON_DIOXIDE_VOLUME_FRACTION");
-    fprintf(stderr, "\t%f\t%f\t%f\n", p->GetPos()._x , p->GetPos()._y, CO2);
+    //fprintf(stderr, "\t%f\t%f\t%f\n", p->GetPos()._x , p->GetPos()._y, CO2);
     CO = GetGasConcentration(p, "CARBON_MONOXIDE_VOLUME_FRACTION");
     HCN = GetGasConcentration(p, "HYDROGEN_CYANIDE_VOLUME_FRACTION");
     HCL = GetGasConcentration(p, "HYDROGEN_CHLORIDE_VOLUME_FRACTION");
@@ -145,7 +145,7 @@ void ToxicityAnalysis::CalculateFED(const Pedestrian* p)
         // gas concentrations per time step in the following format:
         // t ; CO2; CO; HCN; HCL; FED
     }
-    std::cout << CO2 << std::endl;
+    //std::cout << CO2 << std::endl;
     StoreToxicityAnalysis(p, CO2, CO, HCN, HCL, FED);
 }
 
