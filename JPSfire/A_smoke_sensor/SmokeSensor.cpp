@@ -39,7 +39,7 @@
 
 SmokeSensor::SmokeSensor(const Building *b) : AbstractSensor(b)
 {
-
+    _building = b;
     LoadJPSfireInfo(b->GetProjectFilename());
 
 }
@@ -66,7 +66,8 @@ bool SmokeSensor::LoadJPSfireInfo(const std::string &projectFilename)
     TiXmlElement* JPSfireCompElem = JPSfireNode->FirstChildElement("A_smoke_sensor");
     if(JPSfireCompElem) {
         if(JPSfireCompElem->FirstAttribute()){
-            std::string filepath = xmltoa(JPSfireCompElem->Attribute("smoke_factor_grids"), "");
+            //std::string filepath = xmltoa(JPSfireCompElem->Attribute("smoke_factor_grids"), "");
+            std::string filepath = _building->GetProjectRootDir() + xmltoa(JPSfireCompElem->Attribute("smoke_factor_grids"), "");
             double updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
             double finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
             Log->Write("INFO:\tJPSfire Module A_smoke_sensor: \n\tdata: %s \n\tupdate time: %.1f s | final time: %.1f s",
