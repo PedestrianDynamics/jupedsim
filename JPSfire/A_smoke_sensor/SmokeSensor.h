@@ -56,6 +56,7 @@ public:
 
 private:
 
+    const Building* _building;
     std::shared_ptr<FDSMeshStorage> _FMStorage;
 };
 
