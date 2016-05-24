@@ -35,7 +35,6 @@
 #include "math/GradientModel.h"
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
-#include <boost/progress.hpp>
 
 #ifdef _OPENMP
 

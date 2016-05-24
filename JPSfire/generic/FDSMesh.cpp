@@ -147,13 +147,10 @@ double FDSMesh::GetKnotValue(const double &x, const double &y) const
     double value;
 
     // Exception if a mesh can not provide an appropriately located value
-    try{
-        value = _matrix[row][col].GetValue();
-    }
-    catch ( const std::exception& e ) {
-        std::cout << "Standard exception: " << e.what() << std::endl;
-        value = std::numeric_limits<double>::quiet_NaN();
-    }
+    if(row < _matrix.size() && col < _matrix[0].size())
+          value = _matrix[row][col].GetValue();
+    else
+          value = std::numeric_limits<double>::quiet_NaN();
 
 //    if(_matrix[row][col].GetValue() == 0.) {
 //        std::cout << "(" << row << " , " << col <<  ")" << std::endl;
