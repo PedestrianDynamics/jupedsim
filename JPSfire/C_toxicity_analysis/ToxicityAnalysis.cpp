@@ -45,7 +45,6 @@ ToxicityAnalysis::ToxicityAnalysis(const Building * b)
     LoadJPSfireInfo(_building->GetProjectFilename());
     string fileNameWithoutExtension = _building->GetProjectFilename().substr(0, _building->GetProjectFilename().find_last_of(".")); 
     std::string ToxAnalysisXML = fileNameWithoutExtension + "_tox.xml";
-    
     _outputhandler = std::make_shared<ToxicityOutputHandler>(ToxAnalysisXML.c_str());
     _outputhandler->WriteToFileHeader();
     _frame=0;
