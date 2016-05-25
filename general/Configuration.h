@@ -78,7 +78,7 @@ public:
 
      void SetPort(int port) { _port = port; };
 
-     unsigned int GetSeed() const { return _port; };
+     unsigned int GetSeed() const { return _seed; };
 
      void SetSeed(unsigned int seed) { _seed = seed; };
 
