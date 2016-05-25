@@ -84,15 +84,23 @@ bool Simulation::InitArgs()
     string s = "Parameter:\n";
 
     switch (_config->GetLog()) {
-    case 0:
-        // no log file
+    case 0: {
+        // no log file. Use default log file
         //Log = new OutputHandler();
+          char default_name[CLENGTH] = "";
+          sprintf(default_name, "%s/log.dat", _config->GetProjectRootDir().c_str());
+          if (Log)
+                delete Log;
+          Log = new FileHandler(default_name);
+
         break;
-    case 1:
+    }
+    case 1: {
         if (Log)
             delete Log;
         Log = new STDIOHandler();
         break;
+    }
     case 2: {
         char name[CLENGTH] = "";
         sprintf(name, "%s.P0.dat", _config->GetErrorLogFile().c_str());
