@@ -481,8 +481,13 @@ int Simulation::RunBody(double maxSimTime)
     //frame number. This function can be called many times,
     static int frameNr = (int) (1+t/_deltaT); // Frame Number
 
+    //##########
+    //PROBLEMATIC: time when frame should be printed out
+    // possibly skipped when using the following lines
+    // NEEDS TO BE FIXED!
     int writeInterval = (int) ((1./_fps)/_deltaT+0.5);
     writeInterval = (writeInterval<=0) ? 1 : writeInterval; // mustn't be <= 0
+    // ##########
 
     //process the queue for incoming pedestrians
     //important since the number of peds is used
