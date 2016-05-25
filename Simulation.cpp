@@ -380,7 +380,7 @@ void Simulation::UpdateRoutesAndLocations()
             if (ped->FindRoute()==-1) {
                 //a destination could not be found for that pedestrian
                 Log->Write("ERROR: \tCould not find a route for pedestrian %d", ped->GetID());
-                ped->FindRoute();
+                ped->FindRoute(); //debug only; can be removed any time @cleanup @todo: ar.graf
                 //exit(EXIT_FAILURE);
 #pragma omp critical
                 if (std::find(pedsToRemove.begin(), pedsToRemove.end(), ped) == pedsToRemove.end()) {

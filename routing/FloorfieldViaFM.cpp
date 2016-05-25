@@ -1641,6 +1641,7 @@ void FloorfieldViaFM::testoutput(const char* filename1, const char* filename2, c
 
 void FloorfieldViaFM::writeFF(const std::string& filename, std::vector<int> targetID) {
     Log->Write("INFO: \tWrite Floorfield to file");
+    Log->Write(filename);
     std::ofstream file;
 
     int numX = (int) ((grid->GetxMax()-grid->GetxMin())/grid->Gethx());

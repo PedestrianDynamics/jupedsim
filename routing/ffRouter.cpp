@@ -196,6 +196,22 @@ bool FFRouter::Init(Building* building)
                     if ((*outerPtr == *innerPtr) || (!_CroTrByUID.at(*innerPtr)->IsOpen())) {
                          continue;
                     }
+
+                    //if the two doors are not within the same subroom, do not consider (ar.graf)
+                    //should fix problems of oscillation caused by doorgaps in the distancegraph
+                    int innerUID1 = (_CroTrByUID.at(*innerPtr)->GetSubRoom1()) ? _CroTrByUID.at(*innerPtr)->GetSubRoom1()->GetUID() : -1 ;
+                    int innerUID2 = (_CroTrByUID.at(*innerPtr)->GetSubRoom2()) ? _CroTrByUID.at(*innerPtr)->GetSubRoom2()->GetUID() : -2 ;
+                    int outerUID1 = (_CroTrByUID.at(*outerPtr)->GetSubRoom1()) ? _CroTrByUID.at(*outerPtr)->GetSubRoom1()->GetUID() : -3 ;
+                    int outerUID2 = (_CroTrByUID.at(*outerPtr)->GetSubRoom2()) ? _CroTrByUID.at(*outerPtr)->GetSubRoom2()->GetUID() : -4 ;
+
+                    if (
+                         (innerUID1 != outerUID1) &&
+                         (innerUID1 != outerUID2) &&
+                         (innerUID2 != outerUID1) &&
+                         (innerUID2 != outerUID2)      ) {
+                         continue;
+                    }
+
                     //The distance is checked by reading the timecost of a wave starting at the line(!) to reach a point(!)
                     //That will have the following implications:
                     //distance (a to b) can be different than distance (b ta a)
