@@ -27,6 +27,7 @@
 
 
 #include <cmath>
+#include <math.h>
 #include "PedDistributor.h"
 #include "../tinyxml/tinyxml.h"
 #include "../geometry/Obstacle.h"
@@ -115,7 +116,7 @@ bool PedDistributor::Distribute(Building *building) const {
             nPeds_expected += dist->GetAgentsNumber(); // classical number of agents
         }
         if(dist->GetAgentsDensity()!=0){
-            nPeds_expected += dist->GetAgentsDensity() * sr->GetArea() ; // number of agents = density * area of subroom
+            nPeds_expected += ceil( dist->GetAgentsDensity() * sr->GetArea() ); // number of agents = density * area of subroom (rounded to next higher int)
         }
 
         if(dist->GetAgentsNumber()!=0 && dist->GetAgentsDensity()!=0){
@@ -167,7 +168,7 @@ bool PedDistributor::Distribute(Building *building) const {
             N = dist->GetAgentsNumber();    // classical number of agents
         }
         else if(dist->GetAgentsDensity()!=0){
-            N = dist->GetAgentsDensity() * sr->GetArea(); // number of agents = density * area of subroom
+            N = ceil( dist->GetAgentsDensity() * sr->GetArea() ); // number of agents = density * area of subroom (rounded to next higher int)
         }
 
         if (N < 0) {
