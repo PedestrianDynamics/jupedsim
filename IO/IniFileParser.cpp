@@ -102,15 +102,13 @@ bool IniFileParser::Parse(std::string iniFile)
           if (seedNode) {
                const char* seedValue = seedNode->Value();
                _config->SetSeed((unsigned int) atoi(seedValue));
-               srand(_config->GetSeed());
-               Log->Write("INFO:\trandom seed <%d>", _config->GetSeed());
           }
           else {
                _config->SetSeed((unsigned int) time(NULL));
-               srand(_config->GetSeed());
-               Log->Write("INFO:\trandom seed <%d>", _config->GetSeed());
           }
      }
+     srand(_config->GetSeed());
+     Log->Write("INFO:\trandom seed <%d>", _config->GetSeed());
 
      // max simulation time
      if (xMainNode->FirstChild("max_sim_time")) {
@@ -133,10 +131,10 @@ bool IniFileParser::Parse(std::string iniFile)
           if (numthreads) {
 #ifdef _OPENMP
                omp_set_num_threads(xmltoi(numthreads->Value(), omp_get_max_threads()));
-#endif
-               _config->SetMaxOpenMPThreads(omp_get_max_threads());
+#endif               
           }
      }
+     _config->SetMaxOpenMPThreads(omp_get_max_threads());
      Log->Write("INFO:\tUsing num_threads <%d> threads", _config->GetMaxOpenMPThreads());
 
      //logfile
