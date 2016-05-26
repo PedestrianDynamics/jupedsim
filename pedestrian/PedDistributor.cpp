@@ -49,8 +49,6 @@ PedDistributor::PedDistributor(const Configuration *configuration) : _configurat
     _start_dis = vector<std::shared_ptr<StartDistribution> >();
     _start_dis_sub = vector<std::shared_ptr<StartDistribution> >();
     _start_dis_sources = vector<std::shared_ptr<AgentsSource> >();
-
-
     PedDistributionLoader * parser;
 
 #ifdef _JPS_AS_A_SERVICE
@@ -90,6 +88,7 @@ bool PedDistributor::Distribute(Building *building) const {
     Log->Write("INFO: \tInit Distribute");
     int nPeds_is = 0;
     int nPeds_expected = 0;
+    mt19937 g(static_cast<uint32_t>(_configuration->GetSeed()));
 
     // store the position in a map since we are not computing for all rooms/subrooms.
     std::map<int, std::map<int, vector<Point> > > allFreePos;
@@ -110,7 +109,9 @@ bool PedDistributor::Distribute(Building *building) const {
         if (allFreePosRoom.count(subroomID) > 0)
             continue;
 
-        allFreePosRoom[subroomID] = PedDistributor::PossiblePositions(*sr);
+        auto possibleSubroomPositions = PedDistributor::PossiblePositions(*sr);
+        shuffle(possibleSubroomPositions.begin(), possibleSubroomPositions.end(), g);
+        allFreePosRoom[subroomID] = possibleSubroomPositions;
     }
 
     //collect the available positions for that room
@@ -127,7 +128,10 @@ bool PedDistributor::Distribute(Building *building) const {
             // the positions were already computed
             if (allFreePosRoom.count(subroomID) > 0)
                 continue;
-            allFreePosRoom[subroomID] = PedDistributor::PossiblePositions(*it_sr.second);
+            
+            auto possibleSubroomPositions = PedDistributor::PossiblePositions(*it_sr.second);
+            shuffle(possibleSubroomPositions.begin(), possibleSubroomPositions.end(), g);
+            allFreePosRoom[subroomID] = possibleSubroomPositions;
         }
     }
 
@@ -461,8 +465,6 @@ vector<Point>  PedDistributor::PossiblePositions(const SubRoom &r) {
             x += dx;
         }
     }
-
-    std::random_shuffle(all_positions.begin(), all_positions.end());
     return all_positions;
 }
 
