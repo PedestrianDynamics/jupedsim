@@ -84,7 +84,6 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
                     group_id, x_min, x_max, y_min, y_max);
             return false;
         }
-
         auto dis = std::shared_ptr<StartDistribution>(new StartDistribution(_configuration->GetSeed()));
         dis->SetRoomID(room_id);
         dis->SetSubroomID(subroom_id);
