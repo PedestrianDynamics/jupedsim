@@ -7,6 +7,8 @@ At the last exit there should be no jam.
 
 Remarks
 =======
+Use new dedicated python console if you run this code with spyder
+
 condition of this test is not clear enough...
 In the last exit there should be no jam. Means:
 J_botl >= J_last

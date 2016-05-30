@@ -8,6 +8,7 @@ but some should (spontaneously) choose the second exit
 
 Remarks
 =======
+Use new dedicated python console if you run this code with spyder
 
 Source
 ======

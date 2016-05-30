@@ -6,6 +6,7 @@ Test description
 
 Remarks
 =======
+Use new dedicated python console if you run this code with spyder
 
 Source
 ======

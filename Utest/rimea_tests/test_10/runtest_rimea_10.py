@@ -7,6 +7,8 @@ Test description
 - The Pedestrians have exactly assigned exit numbers and should evacuate through these.
 Remarks
 =======
+Use new dedicated python console if you run this code with spyder
+
 - We assign pedestrian to two different groups
 - We check if pedestrians in the two groups pass the exits.
 - In the simulation pedestrians disapear once they are outside

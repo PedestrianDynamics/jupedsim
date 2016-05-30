@@ -10,6 +10,8 @@ The flow should nearly be doubled in scenario 1.
 
 Remarks
 =======
+Use new dedicated python console if you run this code with spyder
+
 For simplicity we simulate two identical rooms:
 1. room left: with 4 exits. All of them are open
 2. room right with 4 exits. two of them are closed

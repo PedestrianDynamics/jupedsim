@@ -8,6 +8,8 @@ Check whether they start exactly at the specified times.
 
 Remarks
 =======
+Use new dedicated python console if you run this code with spyder
+
 An error of 1/fps is to be considered.
 
 Source

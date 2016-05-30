@@ -9,6 +9,8 @@ a jam should be observed at the beginning of the stair
 
 Remarks
 =======
+Use new dedicated python console if you run this code with spyder
+
 In case of jam, flow at the beginnning of the stair
 should be smaller than the flow in the corridor.
 

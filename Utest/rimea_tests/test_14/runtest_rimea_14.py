@@ -8,6 +8,8 @@ Pedestrian evacuation to an exit. They have two possible routes:
 
 Remarks
 =======
+Use new dedicated python console if you run this code with spyder
+
 This test has no concrete condition to check for.
 It should be documented whether pedestrians take a long detour or not
 There are 4 stats that should be documented:

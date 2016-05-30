@@ -1,0 +1,56 @@
+-	Edited all master_ini.xml:
+	Deleted the lines which told that 8 kernels need to be used
+
+-	Edited all runtest_rimea_x.py:
+	Added the remarks to run a new dedicated console if the code is used with spyder
+
+
+-	Test_1:
+	-	No changes needed. Added some notes to clearify the pythoncode.
+		Made the geometrydata more readable.
+
+
+	Test_2:
+	-	Changed the calculation of the tolerance of the traveltime.
+		Before:
+		tolerance = 1
+		Now:
+		tolerance = +/- 5% of the mean of the traveltime (Rimea)
+
+	-	Added some notes to clearify the pythoncode. Made the geometrydata more readable.
+
+	-	Changed the geometrydata.
+		Before:
+		Stairlenght along the x-axis:	10.0
+		Stairheight along the z-axis:	6.0
+		---> Real stairlenght:		sqrt(136)
+
+		Now:
+		Stairlenght along the x-axis:	8.0
+		Stairheight along the z-axis:	6.0
+		---> Real stairlenght:		sqrt(100) = 10
+
+
+	Test_3:
+	-	Changed the calculation of the tolerance of the traveltime.
+		Before:
+		tolerance = 1
+		Now:
+		tolerance = +/- 5% of the mean of the traveltime (Rimea)
+
+	-	Added some notes to clearify the pythoncode. Made the geometrydata more readable.
+
+	-	Changed the geometrydata.
+		Before:
+		Stairlenght along the x-axis:	10.0
+		Stairheight along the z-axis:	6.0
+		---> Real stairlenght:		sqrt(136)
+
+		Now:
+		Stairlenght along the x-axis:	8.0
+		Stairheight along the z-axis:	6.0
+		---> Real stairlenght:		sqrt(100) = 10
+	
+
+
+

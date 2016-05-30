@@ -8,6 +8,8 @@ to the investigated parameter.
 
 Remarks
 =======
+Use new dedicated python console if you run this code with spyder
+
 There is no fail criterion in this test. Just documentation.
 
 Source

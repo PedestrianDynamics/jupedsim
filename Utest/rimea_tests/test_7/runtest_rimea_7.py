@@ -13,6 +13,7 @@ Check whether the speed values are within the specified fange.
 
 Remarks
 =======
+Use new dedicated python console if you run this code with spyder
 
 1. The velocities are assumed to be constant and are therefor averaged: v = DX/DT.
 2. The ped-ped repulsive forces are intentionally set to zero, since in diesem

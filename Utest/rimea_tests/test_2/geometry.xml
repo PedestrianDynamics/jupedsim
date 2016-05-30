@@ -3,71 +3,61 @@
 <geometry version="0.8" caption="second life" unit="m"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:noNamespaceSchemaLocation="../../xsd/jps_geometry.xsd">
-  <rooms>
-    <room id="0" caption="basement">
-      <subroom id="0" closed="0" class="subroom" A_x="0" B_y="0" C_z="0">
-	<polygon caption="wall">
-	  <vertex px="0.0" py="2.0" />
-	  <vertex px="-2.0" py="2.0" />
-	  <vertex px="-2.0" py="0.0" />
-	  <vertex px="0.0" py="0.0" />
-	</polygon>
-      </subroom>
+	<rooms>
+		<room id="0" caption="basement">
+			<subroom id="0" closed="0" class="subroom" A_x="0" B_y="0" C_z="0">
+				<polygon caption="wall">
+					<vertex px="0.0" py="2.0" />
+					<vertex px="-2.0" py="2.0" />
+					<vertex px="-2.0" py="0.0" />
+					<vertex px="0.0" py="0.0" />
+				</polygon>
+			</subroom>
       
-      <subroom id="1" closed="0" class="stair" A_x="0.6" B_y="0" C_z="0">
-	<polygon caption="wall">
-	  <vertex px="0.0" py="0.0" />
-	  <vertex px="10.0" py="0.0" />
-	</polygon>
-	<polygon caption="wall">
-	  <vertex px="0.0" py="2.0" />
-	  <vertex px="10.0" py="2.0" />
-	</polygon>
-	<up px="10.0" py="2" />
-	<down px="0.0" py="2" />
-      </subroom>
-      <crossings>
-	<crossing id="1" subroom1_id="0" subroom2_id="1">
-	  <vertex px="0.0" py="0.0" />
-	  <vertex px="0.0" py="2.0" />
-	</crossing>
-      </crossings>
-    </room>
+			<subroom id="1" closed="0" class="stair" A_x="0.75" B_y="0" C_z="0">
+				<polygon caption="wall">
+					<vertex px="0.0" py="0.0" />
+					<vertex px="8.0" py="0.0" />
+				</polygon>
+				<polygon caption="wall">
+					<vertex px="0.0" py="2.0" />
+					<vertex px="8.0" py="2.0" />
+				</polygon>
+				<up px="8.0" py="1.0" />
+				<down px="0.0" py="1.0" />
+			</subroom>
+			<crossings>
+				<crossing id="1" subroom1_id="0" subroom2_id="1">
+					<vertex px="0.0" py="0.0" />
+					<vertex px="0.0" py="2.0" />
+				</crossing>
+			</crossings>
+		</room>
     
-    <room id="1" caption="ground floor">
-      <subroom id="0" closed="0" class="subroom" A_x="0" B_y="0" C_z="6">
-	<polygon caption="wall">
-	  <vertex px="10.0" py="2.0" />
-	  <vertex px="12.0" py="2.0" />		
-	</polygon>
-	<polygon caption="wall">
-	  <vertex px="12.0" py="0.0" />
-	  <vertex px="10.0" py="0.0" />
-	</polygon>
-      </subroom>
-    </room>	
-  </rooms>
+		<room id="1" caption="ground floor">
+			<subroom id="0" closed="0" class="subroom" A_x="0" B_y="0" C_z="6">
+				<polygon caption="wall">
+					<vertex px="8.0" py="2.0" />
+					<vertex px="10.0" py="2.0" />		
+				</polygon>
+				<polygon caption="wall">
+					<vertex px="8.0" py="0.0" />
+					<vertex px="10.0" py="0.0" />
+				</polygon>
+			</subroom>
+		</room>	
+	</rooms>
   
-  <transitions>
-    <!-- exits like crossings but between rooms or to outside (room with index
-	 = -1) -->
-    <transition id="2" caption="main exit" type="emergency"
-		room1_id="1" subroom1_id="0" room2_id="-1" subroom2_id="-1">
-      <vertex px="12.0" py="0.0" />
-      <vertex px="12.0" py="2.0" />
-    </transition>
+	<transitions>
+    <!-- exits like crossings but between rooms or to outside (room with index = -1) -->
+		<transition id="2" caption="main exit" type="emergency" room1_id="1" subroom1_id="0" room2_id="-1" subroom2_id="-1">
+			<vertex px="10.0" py="0.0" />
+			<vertex px="10.0" py="2.0" />
+		</transition>
     
-    <transition id="3" caption="StairUp" type="emergency"
-		room1_id="0" subroom1_id="1" room2_id="1" subroom2_id="0">
-      <vertex px="10.0" py="0.0" />
-      <vertex px="10.0" py="2.0" />
-    </transition>
-    
-    <!-- <transition id="4" caption="StairDown" type="emergency"
-	 room1_id="0" subroom1_id="1" room2_id="0" subroom2_id="0">
-	 <vertex px="10.0" py="0.0" />
-	 <vertex px="10.0" py="2.0" />
-	 </transition> -->
-    
-  </transitions>
+		<transition id="3" caption="StairUp" type="emergency" room1_id="0" subroom1_id="1" room2_id="1" subroom2_id="0">
+			<vertex px="8.0" py="0.0" />
+			<vertex px="8.0" py="2.0" />
+		</transition>
+	</transitions>
 </geometry>

@@ -2,15 +2,26 @@
 """
 Test Description
 ================
-1 ped moving on a 10m long stair.
-It should be shown that the ped can maintain its speed constant.
+One pedestrian is moving along a 10m long stairway upstairs (x-lenght 8m and
+z-height 6m). The geometry is built as a 2m long basement heading into the
+10m long stairway. The stairway is heading into a 2m long ground floor. The
+x-axis of the basement is starting at -2 and ending at 0. The x-axis of the
+ground floor is starting at 8 and is ending at 10. In between there is the
+stairway. The basement, stairway and groundfloor each have a width of 2m.
+
+The pedestrian is starting at x=-1 and y = 1, because the used force-based model
+needs space to accelerate to its constant speed v_0.
+
+The test shows wether the pedestrian can maintain its speed constant or not.
 
 Remarks:
 ========
-In JuPedSim pedestrians adapt their velocity
-from a corridor to a stair *smoothly* (no step function).
-In this test we set v0 == v0Upstairs. Hence, we can avoid any delay related to the transition
-from v0 to v0Upstairs.
+Use new dedicated python console if you run this code with spyder
+
+In JuPedSim pedestrians adapt their velocity from a corridor to a stair
+smoothly (no step function).
+In this test we set v0 = v0_upstairs. Hence, we can avoid any delay related to
+the transition from v0 to v0_upstairs.
 
 See Fig. stairs.png
 
@@ -30,24 +41,25 @@ from utils import *
 
 
 def run_rimea_test2(inifile, trajfile):
-    tolerance = 1     # ped accelerates from 0 to v0 after some time (\tau)
-    v0_upstairs = 0.5    # velocity on stair from master-ini.xml
-    end_stair = 10.0     # values from geometry.xml
-    start_stair = 0.0    # values from geometry.xml
-    must_time = (end_stair - start_stair)/v0_upstairs
+    # Geometry data
+    start_stair = 0.0
+    end_stair = 8.0
+    # Min. and max. traveltime of the pedestrian (Calculated)
+    v0_upstairs = 0.5 # See master_ini
+    must_min_time = 0.95*(end_stair - start_stair)/v0_upstairs # mean_time - 5% * mean_time
+    must_max_time = 1.05*(end_stair - start_stair)/v0_upstairs # mean_time + 5% * mean_time
+    # Pedestrians in force-based models accelerate from 0 to v0 after some time (\tau)
     fps, n, traj = parse_file(trajfile)
-    # filter trajecetries. Consider only the stair
-    # traj_stair = traj[0 <= traj[:, 2]]
-    # traj_stair = traj_stair[traj_stair[:, 2] <= 10]
+    # Pedestrian starting at x = -1, only get traveltime between x = 0 and x = 8
     in_stair = (traj[:, 2] >= start_stair) & (traj[:, 2] <= end_stair)
     traj_stair = traj[in_stair]
     evac_time = (max(traj_stair[:, 1]) - min(traj_stair[:, 1])) / float(fps)
-    if must_time -tolerance <= evac_time <= must_time + tolerance:
-        logging.info("evac_time: %f <= %f <= %f",
-                     must_time-tolerance, evac_time, must_time+tolerance)
+    # Check wether the simulation fits into the wanted range of time 
+    if must_min_time <= evac_time <= must_max_time:
+        logging.info("evac_time: %f <= %f <= %f", must_min_time, evac_time, must_max_time)
     else:
         logging.critical("%s exits with FAILURE. evac_time: %f <= %f <= %f ?",
-                         argv[0], must_time-tolerance, evac_time, must_time+tolerance)
+                         argv[0], must_min_time, evac_time, must_max_time)
         exit(FAILURE)
 
 
@@ -57,10 +69,4 @@ if __name__ == "__main__":
     test.run_test(testfunction=run_rimea_test2)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
-
-
-
-
-
-
 
