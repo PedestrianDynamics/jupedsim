@@ -87,11 +87,11 @@ bool Simulation::InitArgs()
     case 0: {
         // no log file. Use default log file
         //Log = new OutputHandler();
-          char default_name[CLENGTH] = "";
-          sprintf(default_name, "%s/log.dat", _config->GetProjectRootDir().c_str());
-          if (Log)
-                delete Log;
-          Log = new FileHandler(default_name);
+//          char default_name[CLENGTH] = "";
+//          sprintf(default_name, "%s/log.dat", _config->GetProjectRootDir().c_str());
+//          if (Log)
+//                delete Log;
+//          Log = new FileHandler(default_name);
 
         break;
     }
