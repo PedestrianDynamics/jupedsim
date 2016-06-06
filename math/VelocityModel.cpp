@@ -180,17 +180,17 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
                 double normVi = ped->GetV().ScalarProduct(ped->GetV()); //squared
                 double HighVel = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta); //(v0+delta)^2
-                if (normVi > HighVel && ped->GetV0Norm() > 0) {
-                     fprintf(stderr, "WARNING: VelocityModel::ComputeNextTimeStep() actual velocity (%f) of iped %d "
-                             "is bigger than desired velocity (%f) at time: %fs\n",
-                             sqrt(normVi), ped->GetID(), ped->GetV0Norm(), current);
+//                if (normVi > HighVel && ped->GetV0Norm() > 0) {
+//                     fprintf(stderr, "WARNING: VelocityModel::ComputeNextTimeStep() actual velocity (%f) of iped %d "
+//                             "is bigger than desired velocity (%f) at time: %fs\n",
+//                             sqrt(normVi), ped->GetID(), ped->GetV0Norm(), current);
 
-                     // remove the pedestrian and abort
-                     Log->Write("\tERROR: ped [%d] was removed due to high velocity",ped->GetID());
-                     //building->DeletePedestrian(ped);
-                     //exit(EXIT_FAILURE);
+//                     // remove the pedestrian and abort
+//                     Log->Write("\tERROR: ped [%d] was removed due to high velocity",ped->GetID());
+//                     //building->DeletePedestrian(ped);
+//                     //exit(EXIT_FAILURE);
 
-                }
+//                }
 
 
                 Point repPed = Point(0,0);
@@ -280,7 +280,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 spacings.clear(); //clear for ped p
 
                 // stuck peds get removed. Warning is thrown. low speed due to jam is ommitted.
-                if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime()&& ped->GetMeanVelOverRecTime() < 0.01 && size == 0 ) // size length of peds neighbour vector
+                if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime()&& ped->GetMeanVelOverRecTime() < 0.1 && size == 0 ) // size length of peds neighbour vector
                 {
                       Log->Write("WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time %f s\n", ped->GetID(), ped->GetMeanVelOverRecTime(), ped->GetRoomID(), ped->GetSubRoomID(), ped->GetGlobalTime());
                       building->DeletePedestrian(ped);
