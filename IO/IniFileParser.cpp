@@ -396,7 +396,7 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
      ParseAgentParameters(xGCFM, xAgentDistri);
 
      //TODO: models do not belong in a configuration container [gl march '16]
-     _config->SetModel(std::shared_ptr<OperationalModel>(new GCFMModel(_exit_strategy.get(), _config->GetNuPed(),
+     _config->SetModel(std::shared_ptr<OperationalModel>(new GCFMModel(_exit_strategy, _config->GetNuPed(),
                _config->GetNuWall(), _config->GetDistEffMaxPed(),
                _config->GetDistEffMaxWall(), _config->GetIntPWidthPed(),
                _config->GetIntPWidthWall(), _config->GetMaxFPed(),
@@ -647,7 +647,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
      ParseAgentParameters(xGradient, xAgentDistri);
 
      //TODO: models do not belong in a configuration container [gl march '16]
-     _config->SetModel(std::shared_ptr<OperationalModel>(new GradientModel(_exit_strategy.get(), _config->GetNuPed(),
+     _config->SetModel(std::shared_ptr<OperationalModel>(new GradientModel(_exit_strategy, _config->GetNuPed(),
                _config->GetaPed(), _config->GetbPed(), _config->GetcPed(),
                _config->GetNuWall(), _config->GetaWall(), _config->GetbWall(),
                _config->GetcWall(), pDeltaH, pWallAvoidDistance, pUseWallAvoidance,
@@ -738,7 +738,7 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement* xVelocity, TiXmlElement* xM
      //Parsing the agent parameters
      TiXmlNode* xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
      ParseAgentParameters(xVelocity, xAgentDistri);
-     _config->SetModel(std::shared_ptr<OperationalModel>(new VelocityModel(_exit_strategy.get(), _config->GetaPed(),
+     _config->SetModel(std::shared_ptr<OperationalModel>(new VelocityModel(_exit_strategy, _config->GetaPed(),
                _config->GetDPed(), _config->GetaWall(),
                _config->GetDWall())));
 
