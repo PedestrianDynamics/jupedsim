@@ -463,6 +463,7 @@ public:
 
 
      void SetFED(std::shared_ptr<ToxicityAnalysis> toxicityAnalysis);
+     void ConductToxicityAnalysis();
 };
 
 #endif  /* _PEDESTRIAN_H */

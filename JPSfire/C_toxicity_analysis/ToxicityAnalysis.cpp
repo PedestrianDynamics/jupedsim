@@ -163,7 +163,7 @@ void ToxicityAnalysis::StoreToxicityAnalysis(const Pedestrian* p, double CO2, do
     string data;
     char tmp[CLENGTH] = "";
 
-    sprintf(tmp, "\t<agent ID=\"%i\"\tt=\"%.1f\"\tc_CO2=\"%.9f\"\tc_CO=\"%.9f\"\tc_HCN=\"%.9f\"\tc_HCL=\"%.9f\"\tFED=\"%.3f\"/>\n",
+    sprintf(tmp, "\t<agent ID=\"%i\"\tt=\"%.1f\"\tc_CO2=\"%.9f\"\tc_CO=\"%.9f\"\tc_HCN=\"%.9f\"\tc_HCL=\"%.9f\"\tFED=\"%.3f\"/>",
          p->GetID(), p->GetGlobalTime(), CO2, CO, HCN, HCL, FED);
 
         data.append(tmp);

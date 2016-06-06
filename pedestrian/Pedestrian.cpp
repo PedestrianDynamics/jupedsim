@@ -534,18 +534,17 @@ double Pedestrian::GetV0Norm() const
      //WHERE should the call to that routine be placed properly?
      //only executed every 3 seconds
 
-     if( _ToxicityAnalysis->ConductToxicityAnalysis() && fmod(this->GetGlobalTime(), 3) == 0 ) {
-        _ToxicityAnalysis->CalculateFED(this);
-     }
-
-//     if (fmod(this->GetGlobalTime(), 1) == 0 ){
-//        fprintf(stderr, "%i, %f, %f, %f, %f, %f\n",this->GetID(), this->GetPos()._x, this->GetPos()._y, this->GetGlobalTime(),this->GetElevation(), walking_speed);
-//     }
      return walking_speed;
      // orthogonal projection on the stair
      //return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
 }
 
+void Pedestrian::ConductToxicityAnalysis()
+{
+    if( _ToxicityAnalysis->ConductToxicityAnalysis() ) {
+       _ToxicityAnalysis->CalculateFED(this);
+    }
+}
 
 // get axis in the walking direction
 double Pedestrian::GetLargerAxis() const
