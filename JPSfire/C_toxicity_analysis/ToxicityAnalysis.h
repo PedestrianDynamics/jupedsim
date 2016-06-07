@@ -50,7 +50,7 @@ public:
     std::string GetName() const;
     //void execute(const Pedestrian *) const;
 
-    void CalculateFED(const Pedestrian*);
+    void CalculateFED(Pedestrian *);
     double GetGasConcentration(const Pedestrian *, std::string);
     void StoreToxicityAnalysis(const Pedestrian *, double, double, double, double, double);
 

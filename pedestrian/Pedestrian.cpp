@@ -104,6 +104,7 @@ Pedestrian::Pedestrian()
      _routingStrategy=ROUTING_GLOBAL_SHORTEST;
      _lastE0 = Point(0,0);
      _agentsCreated++;//increase the number of object created
+     _FED = 0.0;
 }
 Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& building)
 :    _age(agentsParameters.GetAge()),
@@ -238,6 +239,16 @@ void Pedestrian::SetV0Norm(double v0, double v0UpStairs, double v0DownStairs, do
      _EscalatorDownStairs=escalatorDown;
      _V0IdleEscalatorUpStairs=v0IdleEscalatorUp;
      _V0IdleEscalatorDownStairs=v0IdleEscalatorDown;
+}
+
+
+void Pedestrian::SetFED(double FED)
+{
+     _FED = FED;
+}
+double Pedestrian::GetFED()
+{
+     return _FED;
 }
 
 void Pedestrian::Setdt(double dt)
@@ -996,7 +1007,7 @@ void Pedestrian::SetWalkingSpeed(WalkingSpeed* walkingSpeed)
     _WalkingSpeed = walkingSpeed;
 }
 
-void Pedestrian::SetFED(std::shared_ptr<ToxicityAnalysis>toxicityAnalysis)
+void Pedestrian::SetTox(std::shared_ptr<ToxicityAnalysis>toxicityAnalysis)
 {
     _ToxicityAnalysis = toxicityAnalysis;
 }

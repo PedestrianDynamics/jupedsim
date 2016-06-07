@@ -139,6 +139,7 @@ private:
 
      static int _agentsCreated;
 
+     double _FED;
      WalkingSpeed * _WalkingSpeed;
      std::shared_ptr<ToxicityAnalysis> _ToxicityAnalysis;
 
@@ -165,6 +166,9 @@ public:
      //TODO: merge this two functions
      void SetExitIndex(int i);
      void SetExitLine(const NavLine* l);
+
+     void SetFED(double FED);
+     double GetFED();
 
      void Setdt(double dt);
      double Getdt();
@@ -462,7 +466,7 @@ public:
      void WalkingDownstairs(double &walking_speed, double c, SubRoom* sub, double ped_elevation) const;
 
 
-     void SetFED(std::shared_ptr<ToxicityAnalysis> toxicityAnalysis);
+     void SetTox(std::shared_ptr<ToxicityAnalysis> toxicityAnalysis);
      void ConductToxicityAnalysis();
 };
 

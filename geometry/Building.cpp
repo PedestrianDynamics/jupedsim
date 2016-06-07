@@ -841,7 +841,7 @@ void Building::AddPedestrian(Pedestrian* ped)
      }
      _allPedestians.push_back(ped);
      ped->SetWalkingSpeed(_WalkingSpeed);
-     ped->SetFED(_ToxicityAnalysis);
+     ped->SetTox(_ToxicityAnalysis);
 }
 
 void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds) const

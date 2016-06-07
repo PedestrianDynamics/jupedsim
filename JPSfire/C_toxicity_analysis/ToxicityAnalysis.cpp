@@ -120,32 +120,29 @@ const std::shared_ptr<FDSMeshStorage> ToxicityAnalysis::get_FMStorage()
     return _FMStorage;
 }
 
-void ToxicityAnalysis::CalculateFED(const Pedestrian* p)
+void ToxicityAnalysis::CalculateFED(Pedestrian* p)
 {
-    double FED;
+    double FED = p->GetFED();
 
-    double dt =  p->GetGlobalTime();    //current sim time
-    double CO2, CO, HCN, HCL;
+    double CO2 = 0., CO = 0., HCN = 0., HCL = 0.;
     CO2 = GetGasConcentration(p, "CARBON_DIOXIDE_VOLUME_FRACTION");
     //fprintf(stderr, "\t%f\t%f\t%f\n", p->GetPos()._x , p->GetPos()._y, CO2);
     CO = GetGasConcentration(p, "CARBON_MONOXIDE_VOLUME_FRACTION");
     HCN = GetGasConcentration(p, "HYDROGEN_CYANIDE_VOLUME_FRACTION");
     HCL = GetGasConcentration(p, "HYDROGEN_CHLORIDE_VOLUME_FRACTION");
 
-    if( std::isnan(CO2) || std::isnan(CO) || std::isnan(HCN) ||  std::isnan(HCL) )   //NaN check
-    {
-        FED = 0.0;
-    }
-    else
-    {
-        // TODO: FED Calculation with available gas components (BART?)
-        FED = 0.0;
-        //
-        // each pedestrian gets a vector that is filled with the
-        // gas concentrations per time step in the following format:
-        // t ; CO2; CO; HCN; HCL; FED
-    }
-    //std::cout << CO2 << std::endl;
+//    if( std::isnan(CO2) || std::isnan(CO) || std::isnan(HCN) ||  std::isnan(HCL) )   //NaN check
+//    {
+//        FED += 0.0;
+//    }
+//    else
+//    {
+        // TODO: FED Calculation with available gas components
+        FED += (CO/5705 + HCN/165 + HCL/3800) * (3./60.) * ( 1 + (exp(0.14*CO2)-1)/2 ); //+ CO2*0.05 - 0.02;
+
+//    }
+    p->SetFED(FED);
+
     StoreToxicityAnalysis(p, CO2, CO, HCN, HCL, FED);
 }
 
@@ -163,7 +160,7 @@ void ToxicityAnalysis::StoreToxicityAnalysis(const Pedestrian* p, double CO2, do
     string data;
     char tmp[CLENGTH] = "";
 
-    sprintf(tmp, "\t<agent ID=\"%i\"\tt=\"%.1f\"\tc_CO2=\"%.9f\"\tc_CO=\"%.9f\"\tc_HCN=\"%.9f\"\tc_HCL=\"%.9f\"\tFED=\"%.3f\"/>",
+    sprintf(tmp, "\t<agent ID=\"%i\"\tt=\"%.1f\"\tc_CO2=\"%.9f\"\tc_CO=\"%.9f\"\tc_HCN=\"%.9f\"\tc_HCL=\"%.9f\"\tFED=\"%.9f\"/>",
          p->GetID(), p->GetGlobalTime(), CO2, CO, HCN, HCL, FED);
 
         data.append(tmp);
