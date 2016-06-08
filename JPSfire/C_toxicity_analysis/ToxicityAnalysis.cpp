@@ -101,9 +101,14 @@ double ToxicityAnalysis::GetGasConcentration(const Pedestrian * pedestrian, std:
 {
     //std::cout << "\n" << quantity << std::endl;
     //try to get gas components, 0 if gas component is not provided by JPSfire
+    double concentration;
     try {
         const FDSMesh& meshref = _FMStorage->GetFDSMesh(pedestrian->GetGlobalTime(), pedestrian->GetElevation(), quantity);
-        return meshref.GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y);
+        concentration = (meshref.GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y))*10E6;
+        if(concentration != concentration){
+            concentration = 0.0;
+        }
+        return concentration ;
     } catch (int e) {
         //std::cout <<  pedestrian->GetPos()._x << pedestrian->GetPos()._y << pedestrian->GetElevation() << quantity  << std::endl;
         return 0.0;
@@ -122,31 +127,40 @@ const std::shared_ptr<FDSMeshStorage> ToxicityAnalysis::get_FMStorage()
 
 void ToxicityAnalysis::CalculateFED(Pedestrian* p)
 {
-    double FED = p->GetFED();
+    double FED_In = p->GetFED();
+    double FIC_Im, FIC_In;
 
-    double CO2 = 0., CO = 0., HCN = 0., HCL = 0.;
+    double CO2 = 0., CO = 0., HCN = 0., HCL = 0., O2 = 0.;
+    // all gas species in ppm
     CO2 = GetGasConcentration(p, "CARBON_DIOXIDE_VOLUME_FRACTION");
-    //fprintf(stderr, "\t%f\t%f\t%f\n", p->GetPos()._x , p->GetPos()._y, CO2);
     CO = GetGasConcentration(p, "CARBON_MONOXIDE_VOLUME_FRACTION");
     HCN = GetGasConcentration(p, "HYDROGEN_CYANIDE_VOLUME_FRACTION");
     HCL = GetGasConcentration(p, "HYDROGEN_CHLORIDE_VOLUME_FRACTION");
+    O2 = 210000 - CO2 - CO - HCN - HCL;
 
-//    if( std::isnan(CO2) || std::isnan(CO) || std::isnan(HCN) ||  std::isnan(HCL) )   //NaN check
-//    {
-//        FED += 0.0;
-//    }
-//    else
-//    {
-        // TODO: FED Calculation with available gas components
-        FED += (CO/5705 + HCN/165 + HCL/3800) * (3./60.) * ( 1 + (exp(0.14*CO2)-1)/2 ); //+ CO2*0.05 - 0.02;
+    double VE = 50.; //breath rate (L/min)
+    double D = 20.; //Exposure dose (percent COHb) for incapacitation
+    double dt = 1/20.; //time fraction for which doses are cumulated
 
-//    }
-    p->SetFED(FED);
+    double FED_In_CO = (3.317/(10E5 * D) * pow(CO, 1.036)) * dt ;
+    double FED_In_HCN = (pow(HCN, 2.36)/10E7*2.43) * dt ;
+    double FED_In_O2 = 1/exp(8.13-0.54*(20.9-O2/10000 )) * dt ; //Vol%
+    double VCO2 = exp(CO2/10000/5) ; //Vol%
 
-    StoreToxicityAnalysis(p, CO2, CO, HCN, HCL, FED);
+    // overall FED_In Fractional Effective Dose until incapacitation
+    FED_In += ( FED_In_CO + FED_In_HCN ) * VE * VCO2 + FED_In_O2 ;
+
+    // FIC Fractional Irritant Concentration for impairment and incapacitation
+    // according to SFPE/BS7899-2
+    FIC_Im = HCL/200;
+    FIC_In = HCL/900;
+
+    p->SetFED(FED_In);
+
+    StoreToxicityAnalysis(p, CO2, CO, HCN, HCL, FIC_Im, FED_In);
 }
 
-void ToxicityAnalysis::StoreToxicityAnalysis(const Pedestrian* p, double CO2, double CO, double HCN, double HCL, double FED)
+void ToxicityAnalysis::StoreToxicityAnalysis(const Pedestrian* p, double CO2, double CO, double HCN, double HCL, double FIC, double FED_In)
 {
 
     //for testing purposes. Can be tunnelled to file via jpscore jpscore ... 2> tox
@@ -160,8 +174,8 @@ void ToxicityAnalysis::StoreToxicityAnalysis(const Pedestrian* p, double CO2, do
     string data;
     char tmp[CLENGTH] = "";
 
-    sprintf(tmp, "\t<agent ID=\"%i\"\tt=\"%.1f\"\tc_CO2=\"%.9f\"\tc_CO=\"%.9f\"\tc_HCN=\"%.9f\"\tc_HCL=\"%.9f\"\tFED=\"%.9f\"/>",
-         p->GetID(), p->GetGlobalTime(), CO2, CO, HCN, HCL, FED);
+    sprintf(tmp, "\t<agent ID=\"%i\"\tt=\"%.1f\"\tc_CO2=\"%.0f\"\tc_CO=\"%.0f\"\tc_HCN=\"%.0f\"\tc_HCL=\"%.0f\"\tFIC=\"%.4f\"\tFED_In=\"%.4f\"/>",
+         p->GetID(), p->GetGlobalTime(), CO2, CO, HCN, HCL, FIC, FED_In);
 
         data.append(tmp);
 

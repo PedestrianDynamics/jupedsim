@@ -104,7 +104,7 @@ Pedestrian::Pedestrian()
      _routingStrategy=ROUTING_GLOBAL_SHORTEST;
      _lastE0 = Point(0,0);
      _agentsCreated++;//increase the number of object created
-     _FED = 0.0;
+     _FED_In = 0.0;
 }
 Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& building)
 :    _age(agentsParameters.GetAge()),
@@ -242,13 +242,13 @@ void Pedestrian::SetV0Norm(double v0, double v0UpStairs, double v0DownStairs, do
 }
 
 
-void Pedestrian::SetFED(double FED)
+void Pedestrian::SetFED(double FED_In)
 {
-     _FED = FED;
+     _FED_In = FED_In;
 }
 double Pedestrian::GetFED()
 {
-     return _FED;
+     return _FED_In;
 }
 
 void Pedestrian::Setdt(double dt)
