@@ -44,10 +44,11 @@ ToxicityAnalysis::ToxicityAnalysis(const Building * b)
     _FMStorage = nullptr;
     LoadJPSfireInfo(_building->GetProjectFilename());
     string fileNameWithoutExtension = _building->GetProjectFilename().substr(0, _building->GetProjectFilename().find_last_of(".")); 
-    std::string ToxAnalysisXML = "tox_" + fileNameWithoutExtension + ".xml";
+    std::string ToxAnalysisXML = "fire_" + fileNameWithoutExtension + ".xml";
     _outputhandler = std::make_shared<ToxicityOutputHandler>(ToxAnalysisXML.c_str());
     _outputhandler->WriteToFileHeader();
     _frame=0;
+    _dt = 1/20.; //time fraction for which doses are cumulated
 
 }
 
@@ -97,14 +98,14 @@ std::string ToxicityAnalysis::GetName() const
 }
 
 
-double ToxicityAnalysis::GetGasConcentration(const Pedestrian * pedestrian, std::string quantity)
+double ToxicityAnalysis::GetFDSQuantity(const Pedestrian * pedestrian, std::string quantity)
 {
     //std::cout << "\n" << quantity << std::endl;
     //try to get gas components, 0 if gas component is not provided by JPSfire
     double concentration;
     try {
         const FDSMesh& meshref = _FMStorage->GetFDSMesh(pedestrian->GetGlobalTime(), pedestrian->GetElevation(), quantity);
-        concentration = (meshref.GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y))*1E6;
+        concentration = (meshref.GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y));
         if(concentration != concentration){
             concentration = 0.0;
         }
@@ -125,58 +126,85 @@ const std::shared_ptr<FDSMeshStorage> ToxicityAnalysis::get_FMStorage()
     return _FMStorage;
 }
 
-void ToxicityAnalysis::CalculateFED(Pedestrian* p)
+double ToxicityAnalysis::CalculateFEDIn(Pedestrian* p, double CO2, double CO, double O2, double HCN, double FED_In)
 {
-    double FED_In = p->GetFED();
-    double FIC_Im, FIC_In;
-
-    double CO2 = 0., CO = 0., HCN = 0., HCL = 0., O2 = 0.;
-    // all gas species in ppm
-    CO2 = GetGasConcentration(p, "CARBON_DIOXIDE_VOLUME_FRACTION");
-    CO = GetGasConcentration(p, "CARBON_MONOXIDE_VOLUME_FRACTION");
-    HCN = GetGasConcentration(p, "HYDROGEN_CYANIDE_VOLUME_FRACTION");
-    HCL = GetGasConcentration(p, "HYDROGEN_CHLORIDE_VOLUME_FRACTION");
-    //derive O2 concentration from balance calculation
-    O2 = 210000 - CO2 - CO - HCN - HCL;
-
     double VE = 20.; //breath rate (L/min)
     double D = 30.; //Exposure dose (percent COHb) for incapacitation
-    double dt = 1/20.; //time fraction for which doses are cumulated
 
-    double FED_In_CO = (3.317/(1E5 * D) * pow(CO, 1.036)) * dt ;
-    double FED_In_HCN = (pow(HCN, 2.36)/(2.43*1E7)) * dt ;
-    double FED_In_O2 = 1/exp(8.13-0.54*(20.9-O2/10000)) * dt ; //Vol%
+    double FED_In_CO = (3.317/(1E5 * D) * pow(CO, 1.036)) * _dt ;
+    double FED_In_HCN = (pow(HCN, 2.36)/(2.43*1E7)) * _dt ;
+    double FED_In_O2 = 1/exp(8.13-0.54*(20.9-O2/10000)) * _dt ; //Vol%
     double VCO2 = exp(CO2/10000/5) ; //Vol%
 
     // overall FED_In Fractional Effective Dose until incapacitation
+    FED_In = p->GetFEDIn();
     FED_In += ( ( FED_In_CO + FED_In_HCN ) * VE * VCO2 + FED_In_O2 ) ;
+    p->SetFEDIn(FED_In);
+
+    return FED_In;
+}
+
+double ToxicityAnalysis::CalculateFEDHeat(Pedestrian* p, double T, double FED_Heat)
+{
+    //radiative + convective exposure
+    double T_Skin = 39.;
+    double emissivity = 0.5;
+    double Boltzmann = 5.67 * 1E-8;
+    double h_c = 6.5;
+    double incident_flux;
+    incident_flux = emissivity * Boltzmann * (pow( (T+273.15),4) - pow( (T_Skin+273.15),4)) + h_c*(T-T_Skin)/1000;
+
+    double tolerance_time = 2 * pow(10,31) * pow(T,-16.963) + 4*1E8 * pow(T, -3.7561);
+
+   // overall FED_Heat Fractional Effective Dose
+    FED_Heat = p->GetFEDHeat();
+    FED_Heat += ( 1/tolerance_time ) * _dt;
+    p->SetFEDHeat(FED_Heat);
+
+    return FED_Heat;
+}
+
+void ToxicityAnalysis::HazardAnalysis(Pedestrian* p)
+{
+    double FED_In, FED_Heat, FIC_Im, FIC_In;
+
+    double CO2 = 0., CO = 0., HCN = 0., HCL = 0., O2 = 0.;
+    // gas species in ppm
+    CO2 = GetFDSQuantity(p, "CARBON_DIOXIDE_VOLUME_FRACTION")*1E6;
+    CO = GetFDSQuantity(p, "CARBON_MONOXIDE_VOLUME_FRACTION")*1E6;
+    HCN = GetFDSQuantity(p, "HYDROGEN_CYANIDE_VOLUME_FRACTION")*1E6;
+    HCL = GetFDSQuantity(p, "HYDROGEN_CHLORIDE_VOLUME_FRACTION")*1E6;
+
+    HCL = 200;
+
+    //derive O2 concentration from balance calculation
+    O2 = 210000 - CO2 - CO - HCN - HCL;
+
+    // gas temperature in C
+    double T = 20.;
+    T = GetFDSQuantity(p, "TEMPERATURE");
+
+    //FED Incapacitation dose calculation according to SFPE2016 Chap. 63
+    FED_In = CalculateFEDIn(p, CO2, CO, O2, HCN, FED_In);
+
+    //FED Heat dose calculation according to SFPE2016 Chap. 63
+    FED_Heat = CalculateFEDHeat(p, T, FED_Heat);
 
     // FIC Fractional Irritant Concentration for impairment and incapacitation
     // according to SFPE/BS7899-2
     FIC_Im = HCL/200;
     FIC_In = HCL/900;
 
-    p->SetFED(FED_In);
-
-    StoreToxicityAnalysis(p, CO2, CO, HCN, HCL, FIC_Im, FED_In);
+    StoreHazardAnalysis(p, CO2, CO, HCN, HCL, T, FIC_Im, FIC_In, FED_In, FED_Heat);
 }
 
-void ToxicityAnalysis::StoreToxicityAnalysis(const Pedestrian* p, double CO2, double CO, double HCN, double HCL, double FIC, double FED_In)
+void ToxicityAnalysis::StoreHazardAnalysis(const Pedestrian* p, double CO2, double CO, double HCN, double HCL, double T, double FIC_Im, double FIC_In, double FED_In, double FED_Heat)
 {
-
-    //for testing purposes. Can be tunnelled to file via jpscore jpscore ... 2> tox
-
-//    fprintf(stderr, "t\tPed ID\tc_CO2\tc_CO\tc_HCN\tc_HCL\tPed FED"
-//                    "\n%f\t%i\t%f\t%f\t%f\t%f\t%f\n",
-//            p->GetGlobalTime(), p->GetID(), CO2, CO, HCN, HCL, FED);
-
-//    fprintf(stderr, "%i\t%f\t%f\t%f\t%f\t%f\n",p->GetID(), p->GetPos()._x, p->GetPos()._y, p->GetElevation(), p->GetGlobalTime(), FED);
-
     string data;
     char tmp[CLENGTH] = "";
 
-    sprintf(tmp, "\t<agent ID=\"%i\"\tt=\"%.1f\"\tc_CO2=\"%.0f\"\tc_CO=\"%.0f\"\tc_HCN=\"%.0f\"\tc_HCL=\"%.0f\"\tFIC=\"%.4f\"\tFED_In=\"%.4f\"/>",
-         p->GetID(), p->GetGlobalTime(), CO2, CO, HCN, HCL, FIC, FED_In);
+    sprintf(tmp, "\t<agent ID=\"%i\"\tt=\"%.0f\"\tc_CO2=\"%.0f\"\tc_CO=\"%.0f\"\tc_HCN=\"%.0f\"\tc_HCL=\"%.0f\"\tT=\"%.0f\"\tFIC_Im=\"%.4f\"\tFIC_In=\"%.4f\"\tFED_In=\"%.4f\"\tFED_Heat=\"%.4f\"/>",
+         p->GetID(), p->GetGlobalTime(), CO2, CO, HCN, HCL, T, FIC_Im, FIC_In, FED_In, FED_Heat);
 
         data.append(tmp);
 

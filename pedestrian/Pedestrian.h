@@ -140,6 +140,7 @@ private:
      static int _agentsCreated;
 
      double _FED_In;
+     double _FED_Heat;
 
      WalkingSpeed * _WalkingSpeed;
      std::shared_ptr<ToxicityAnalysis> _ToxicityAnalysis;
@@ -168,8 +169,11 @@ public:
      void SetExitIndex(int i);
      void SetExitLine(const NavLine* l);
 
-     void SetFED(double FED_In);
-     double GetFED();
+     void SetFEDIn(double FED_In);
+     double GetFEDIn();
+
+     void SetFEDHeat(double FED_Heat);
+     double GetFEDHeat();
 
      void Setdt(double dt);
      double Getdt();

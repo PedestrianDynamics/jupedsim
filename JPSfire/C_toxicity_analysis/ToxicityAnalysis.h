@@ -50,9 +50,9 @@ public:
     std::string GetName() const;
     //void execute(const Pedestrian *) const;
 
-    void CalculateFED(Pedestrian *);
-    double GetGasConcentration(const Pedestrian *, std::string);
-    void StoreToxicityAnalysis(const Pedestrian *, double, double, double, double, double, double);
+    void HazardAnalysis(Pedestrian *);
+    double GetFDSQuantity(const Pedestrian *, std::string);
+    void StoreHazardAnalysis(const Pedestrian *, double, double, double, double, double, double, double, double, double);
 
     void set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage);
     const std::shared_ptr<FDSMeshStorage> get_FMStorage();
@@ -61,12 +61,16 @@ public:
     bool LoadJPSfireInfo(const std::string projectFilename);
     bool ConductToxicityAnalysis();
 
+    double CalculateFEDIn(Pedestrian *, double CO2, double CO, double O2, double HCN, double FED_In);
+    double CalculateFEDHeat(Pedestrian *, double T, double FED_Heat);
+
 private:
 
     const Building* _building;
     std::shared_ptr<FDSMeshStorage> _FMStorage;
     std::shared_ptr<ToxicityOutputHandler> _outputhandler;
     int _frame;
+    double _dt;
 
 };
 

@@ -105,6 +105,7 @@ Pedestrian::Pedestrian()
      _lastE0 = Point(0,0);
      _agentsCreated++;//increase the number of object created
      _FED_In = 0.0;
+     _FED_Heat = 0.0;
 }
 Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& building)
 :    _age(agentsParameters.GetAge()),
@@ -242,14 +243,24 @@ void Pedestrian::SetV0Norm(double v0, double v0UpStairs, double v0DownStairs, do
 }
 
 
-void Pedestrian::SetFED(double FED_In)
+void Pedestrian::SetFEDIn(double FED_In)
 {
      _FED_In = FED_In;
 }
-double Pedestrian::GetFED()
+double Pedestrian::GetFEDIn()
 {
      return _FED_In;
 }
+
+void Pedestrian::SetFEDHeat(double FED_Heat)
+{
+     _FED_Heat = FED_Heat;
+}
+double Pedestrian::GetFEDHeat()
+{
+     return _FED_Heat;
+}
+
 
 void Pedestrian::Setdt(double dt)
 {
@@ -553,7 +564,7 @@ double Pedestrian::GetV0Norm() const
 void Pedestrian::ConductToxicityAnalysis()
 {
     if( _ToxicityAnalysis->ConductToxicityAnalysis() ) {
-       _ToxicityAnalysis->CalculateFED(this);
+       _ToxicityAnalysis->HazardAnalysis(this);
     }
 }
 
