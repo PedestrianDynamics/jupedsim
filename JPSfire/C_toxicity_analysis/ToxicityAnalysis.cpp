@@ -166,17 +166,17 @@ double ToxicityAnalysis::CalculateFEDHeat(Pedestrian* p, double T, double FED_He
 
 void ToxicityAnalysis::HazardAnalysis(Pedestrian* p)
 {
-    double FED_In, FED_Heat, FIC_Im, FIC_In;
+    double FEC_Smoke, FED_In, FED_Heat, FIC_Im, FIC_In;
 
-    double CO2 = 0., CO = 0., HCN = 0., HCL = 0., O2 = 0.;
+    // Smoke extinction in 1/m
+    double E = GetFDSQuantity(p, "SOOT_EXTINCTION_COEFFICIENT");
+
     // gas species in ppm
+    double CO2 = 0., CO = 0., HCN = 0., HCL = 0., O2 = 0.;
     CO2 = GetFDSQuantity(p, "CARBON_DIOXIDE_VOLUME_FRACTION")*1E6;
     CO = GetFDSQuantity(p, "CARBON_MONOXIDE_VOLUME_FRACTION")*1E6;
     HCN = GetFDSQuantity(p, "HYDROGEN_CYANIDE_VOLUME_FRACTION")*1E6;
     HCL = GetFDSQuantity(p, "HYDROGEN_CHLORIDE_VOLUME_FRACTION")*1E6;
-
-    HCL = 200;
-
     //derive O2 concentration from balance calculation
     O2 = 210000 - CO2 - CO - HCN - HCL;
 
@@ -184,27 +184,30 @@ void ToxicityAnalysis::HazardAnalysis(Pedestrian* p)
     double T = 20.;
     T = GetFDSQuantity(p, "TEMPERATURE");
 
-    //FED Incapacitation dose calculation according to SFPE2016 Chap. 63
-    FED_In = CalculateFEDIn(p, CO2, CO, O2, HCN, FED_In);
+    // FEC Smoke
+    FEC_Smoke = E/0.1;
 
-    //FED Heat dose calculation according to SFPE2016 Chap. 63
-    FED_Heat = CalculateFEDHeat(p, T, FED_Heat);
+    // FED Incapacitation dose calculation according to SFPE2016 Chap. 63
+    FED_In = CalculateFEDIn(p, CO2, CO, O2, HCN, FED_In);
 
     // FIC Fractional Irritant Concentration for impairment and incapacitation
     // according to SFPE/BS7899-2
     FIC_Im = HCL/200;
     FIC_In = HCL/900;
 
-    StoreHazardAnalysis(p, CO2, CO, HCN, HCL, T, FIC_Im, FIC_In, FED_In, FED_Heat);
+    //FED Heat dose calculation according to SFPE2016 Chap. 63
+    FED_Heat = CalculateFEDHeat(p, T, FED_Heat);
+
+    StoreHazardAnalysis(p, E, FEC_Smoke, CO2, CO, HCN, HCL, FED_In, FIC_Im, FIC_In, T, FED_Heat);
 }
 
-void ToxicityAnalysis::StoreHazardAnalysis(const Pedestrian* p, double CO2, double CO, double HCN, double HCL, double T, double FIC_Im, double FIC_In, double FED_In, double FED_Heat)
+void ToxicityAnalysis::StoreHazardAnalysis(const Pedestrian* p, double E, double FEC_Smoke, double CO2, double CO, double HCN, double HCL, double FED_In, double FIC_Im, double FIC_In, double T, double FED_Heat)
 {
     string data;
     char tmp[CLENGTH] = "";
 
-    sprintf(tmp, "\t<agent ID=\"%i\"\tt=\"%.0f\"\tc_CO2=\"%.0f\"\tc_CO=\"%.0f\"\tc_HCN=\"%.0f\"\tc_HCL=\"%.0f\"\tT=\"%.0f\"\tFIC_Im=\"%.4f\"\tFIC_In=\"%.4f\"\tFED_In=\"%.4f\"\tFED_Heat=\"%.4f\"/>",
-         p->GetID(), p->GetGlobalTime(), CO2, CO, HCN, HCL, T, FIC_Im, FIC_In, FED_In, FED_Heat);
+    sprintf(tmp, "\t<agent ID=\"%i\"\tt=\"%.0f\"\tE=\"%.4f\"\tFEC_Smoke=\"%.4f\"\tc_CO2=\"%.0f\"\tc_CO=\"%.0f\"\tc_HCN=\"%.0f\"\tc_HCl=\"%.0f\"\tFED_In=\"%.4f\"\tFIC_Im=\"%.4f\"\tFIC_In=\"%.4f\"\tT=\"%.1f\"\tFED_Heat=\"%.4f\"/>",
+         p->GetID(), p->GetGlobalTime(), E, FEC_Smoke, CO2, CO, HCN, HCL, FED_In, FIC_Im, FIC_In, T, FED_Heat);
 
         data.append(tmp);
 

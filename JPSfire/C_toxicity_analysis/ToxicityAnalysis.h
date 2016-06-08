@@ -52,7 +52,8 @@ public:
 
     void HazardAnalysis(Pedestrian *);
     double GetFDSQuantity(const Pedestrian *, std::string);
-    void StoreHazardAnalysis(const Pedestrian *, double, double, double, double, double, double, double, double, double);
+    void StoreHazardAnalysis(const Pedestrian *, double, double, double, double, double, double,
+                             double, double, double, double, double);
 
     void set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage);
     const std::shared_ptr<FDSMeshStorage> get_FMStorage();
