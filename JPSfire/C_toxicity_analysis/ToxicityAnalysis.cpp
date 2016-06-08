@@ -104,7 +104,7 @@ double ToxicityAnalysis::GetGasConcentration(const Pedestrian * pedestrian, std:
     double concentration;
     try {
         const FDSMesh& meshref = _FMStorage->GetFDSMesh(pedestrian->GetGlobalTime(), pedestrian->GetElevation(), quantity);
-        concentration = (meshref.GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y))*10E6;
+        concentration = (meshref.GetKnotValue(pedestrian->GetPos()._x , pedestrian->GetPos()._y))*1E6;
         if(concentration != concentration){
             concentration = 0.0;
         }
@@ -136,19 +136,20 @@ void ToxicityAnalysis::CalculateFED(Pedestrian* p)
     CO = GetGasConcentration(p, "CARBON_MONOXIDE_VOLUME_FRACTION");
     HCN = GetGasConcentration(p, "HYDROGEN_CYANIDE_VOLUME_FRACTION");
     HCL = GetGasConcentration(p, "HYDROGEN_CHLORIDE_VOLUME_FRACTION");
+    //derive O2 concentration from balance calculation
     O2 = 210000 - CO2 - CO - HCN - HCL;
 
-    double VE = 50.; //breath rate (L/min)
-    double D = 20.; //Exposure dose (percent COHb) for incapacitation
+    double VE = 20.; //breath rate (L/min)
+    double D = 30.; //Exposure dose (percent COHb) for incapacitation
     double dt = 1/20.; //time fraction for which doses are cumulated
 
-    double FED_In_CO = (3.317/(10E5 * D) * pow(CO, 1.036)) * dt ;
-    double FED_In_HCN = (pow(HCN, 2.36)/10E7*2.43) * dt ;
-    double FED_In_O2 = 1/exp(8.13-0.54*(20.9-O2/10000 )) * dt ; //Vol%
+    double FED_In_CO = (3.317/(1E5 * D) * pow(CO, 1.036)) * dt ;
+    double FED_In_HCN = (pow(HCN, 2.36)/(2.43*1E7)) * dt ;
+    double FED_In_O2 = 1/exp(8.13-0.54*(20.9-O2/10000)) * dt ; //Vol%
     double VCO2 = exp(CO2/10000/5) ; //Vol%
 
     // overall FED_In Fractional Effective Dose until incapacitation
-    FED_In += ( FED_In_CO + FED_In_HCN ) * VE * VCO2 + FED_In_O2 ;
+    FED_In += ( ( FED_In_CO + FED_In_HCN ) * VE * VCO2 + FED_In_O2 ) ;
 
     // FIC Fractional Irritant Concentration for impairment and incapacitation
     // according to SFPE/BS7899-2
