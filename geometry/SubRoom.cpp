@@ -47,7 +47,7 @@ using namespace std;
  SubRoom
  ************************************************************/
 
-int SubRoom::_static_uid=0;
+int SubRoom::_static_uid=1; //must be positive (sideeffect for FloorfieldViaFM::isInside())
 
 SubRoom::SubRoom()
 {

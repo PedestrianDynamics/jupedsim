@@ -164,6 +164,11 @@ public:
       */
       void SetMode(std::string s);
 
+     /*!
+      * \brief notify door about time spent in that room. needed for quickest mode
+      */
+     void notifyDoor(Pedestrian* const p);
+
 private:
 
 protected:

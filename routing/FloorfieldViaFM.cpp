@@ -56,6 +56,7 @@ FloorfieldViaFM::~FloorfieldViaFM()
     if (dist2Wall) delete[] dist2Wall;
     if (speedInitial) delete[] speedInitial;
     if (modifiedspeed) delete[] modifiedspeed;
+    if (densityspeed) delete[] densityspeed;
     //if (cost) delete[] cost;
     //if (neggrad) delete[] neggrad;
     if (dirToWall) delete[] dirToWall;
@@ -135,6 +136,9 @@ building(other.building)
 
     modifiedspeed = new double[otherNumOfPoints];
     std::copy(other.modifiedspeed, other.modifiedspeed + otherNumOfPoints, modifiedspeed);
+
+    densityspeed = new double[otherNumOfPoints];
+    std::copy(other.densityspeed, other.densityspeed + otherNumOfPoints, densityspeed);
 
     cost = new double[otherNumOfPoints];
     std::copy(other.cost, other.cost + otherNumOfPoints, cost);
@@ -526,6 +530,11 @@ double FloorfieldViaFM::getDistance2WallAt(const Point& position) {
     }
 }
 
+int  FloorfieldViaFM::getSubroomUIDAt(const Point &position) {
+    long int key = grid->getKeyAtPoint(position);
+    return subroomUID[key];
+}
+
 /*!
  * \brief Parsing geo-info but conflicts in multi-floor-buildings OBSOLETE
  *
@@ -657,6 +666,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     grid->createGrid();
 
     //create arrays
+    subroomUID = new int[grid->GetnPoints()];
     gcode = new int[grid->GetnPoints()];                  //gcode:
                                                             //    enum GridCode { //used in floor fields
                                                             //         WALL = 0,
@@ -842,6 +852,7 @@ void FloorfieldViaFM::parseBuildingForExits(const Building* const buildingArg, c
 
     //create arrays
     gcode = new int[grid->GetnPoints()];                  //see Macros.h: enum GridCode {...}
+    subroomUID = new int[grid->GetnPoints()];
     dist2Wall = new double[grid->GetnPoints()];
     speedInitial = new double[grid->GetnPoints()];
     modifiedspeed = new double[grid->GetnPoints()];
@@ -911,6 +922,7 @@ void FloorfieldViaFM::prepareForDistanceFieldCalculation(const bool onlyRoomsWit
                     speedInitial[i] = 1.;
                     cost[i] = -2.;
                     gcode[i] = INSIDE;
+                    subroomUID[i] = isInside(i);
                 }
                 break;
         } //switch
@@ -1183,6 +1195,10 @@ void FloorfieldViaFM::setSpeed(bool useDistance2WallArg) {
 }
 
 void FloorfieldViaFM::calculateFloorfield(std::vector<Line>& targetlines, double* costarray, Point* neggradarray) {
+    calculateFloorfield(targetlines, costarray, neggradarray, modifiedspeed);
+}
+
+void FloorfieldViaFM::calculateFloorfield(std::vector<Line>& targetlines, double* costarray, Point* neggradarray, double* speedarray) {
 
     Trial* smallest = nullptr;
     Trial* biggest = nullptr;
@@ -1201,7 +1217,7 @@ void FloorfieldViaFM::calculateFloorfield(std::vector<Line>& targetlines, double
         trialfield[i].flag = flag + i;
         trialfield[i].cost = costarray + i;
         trialfield[i].neggrad = neggradarray + i;
-        trialfield[i].speed = modifiedspeed + i;
+        trialfield[i].speed = speedarray + i;
         trialfield[i].father = nullptr;
         trialfield[i].child = nullptr;
 
@@ -1706,8 +1722,8 @@ void FloorfieldViaFM::writeFF(const std::string& filename, std::vector<int> targ
     file.close();
 }
 
-bool FloorfieldViaFM::isInside(const long int key) {
-    bool temp = false;
+int FloorfieldViaFM::isInside(const long int key) {
+    int temp = 0;
     Point probe = grid->getPointFromKey(key);
 
     const std::map<int, std::shared_ptr<Room>>& roomMap = building->GetAllRooms();
@@ -1722,7 +1738,7 @@ bool FloorfieldViaFM::isInside(const long int key) {
             SubRoom* subRoomPtr = subRoomPair.second.get();
 
             if (subRoomPtr->IsInSubRoom(probe)) {
-                temp = true;
+                temp = subRoomPtr->GetUID();
             }
         }
     }

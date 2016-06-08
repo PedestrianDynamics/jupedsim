@@ -311,6 +311,7 @@ void Simulation::UpdateRoutesAndLocations()
 
         for (int p = start; p<=end; ++p) {
             Pedestrian* ped = allPeds[p];
+            ped->_ticksInThisRoom += 1;
             Room* room = _building->GetRoom(ped->GetRoomID());
             SubRoom* sub0 = room->GetSubRoom(ped->GetSubRoomID());
 
@@ -330,8 +331,10 @@ void Simulation::UpdateRoutesAndLocations()
                 // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
                 // That may happen if the forces are too high for instance
                 // the ped is removed from the simulation, if it could not be reassigned
+                //@todo: ar.graf: condition could be ff::subroom[grid->getKeyAt(ped->GetPosition())] != ped->GetSubRoomUID()
             else if (!sub0->IsInSubRoom(ped)) {
                 bool assigned = false;
+
                 auto& allRooms = _building->GetAllRooms();
 
                 for (auto&& it_room : allRooms) {
@@ -515,6 +518,9 @@ int Simulation::RunBody(double maxSimTime)
             //update the events
             _em->ProcessEvent();
 
+            //update doorticks
+            UpdateDoorticks();
+
             //update the routes and locations
             UpdateRoutesAndLocations();
 
@@ -557,6 +563,21 @@ void Simulation::ProcessAgentsQueue()
         _building->AddPedestrian(ped);
     }
 }
+
+void Simulation::UpdateDoorticks() const {
+
+    auto& allCross = _building->GetAllCrossings();
+    for (auto& crossPair : allCross) {
+        crossPair.second->_refresh1 += 1;
+        crossPair.second->_refresh2 += 1;
+    }
+
+    auto& allTrans = _building->GetAllTransitions();
+    for (auto& transPair : allTrans) {
+        transPair.second->_refresh1 += 1;
+        transPair.second->_refresh2 += 1;
+    }
+};
 
 void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
 {

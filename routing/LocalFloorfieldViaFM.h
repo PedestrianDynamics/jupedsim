@@ -49,7 +49,7 @@ public:
      void getDirectionToGoalID(const int goalID);
      void drawBlockerLines();
      void crossOutOutsideNeighbors(const long int key);
-     virtual bool isInside(const long int key);
+     virtual int isInside(const long int key);
 protected:
      const Room* room;
 };
@@ -65,7 +65,7 @@ public:
      void parseRoom(const SubRoom* const subroomArg, const double hxArg, const double hyArg);
      void getDirectionToDestination (Pedestrian* ped, Point& direction);
      void getDirectionToGoalID(const int goalID);
-     virtual bool isInside(const long int key);
+     virtual int isInside(const long int key);
 protected:
      const SubRoom* subroom;
 };

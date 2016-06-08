@@ -287,6 +287,20 @@ bool FFRouter::Init(Building* building)
 
 int FFRouter::FindExit(Pedestrian* p)
 {
+     if (_mode == quickest) {
+          //if needed: quickest-mechanic part 1 of 2
+          if ((_locffviafm.at(p->GetRoomID())->getGrid()->includesPoint(p->GetPos())) &&
+              (p->GetSubRoomUID() != _locffviafm.at(p->GetRoomID())->getSubroomUIDAt(p->GetPos()))) {
+               //pedestrian is still in the room, but changed subroom
+               notifyDoor(p);
+          }
+
+          //if needed: quickest-mechanic part 2 of 2
+          if (!(_locffviafm.at(p->GetRoomID())->getGrid()->includesPoint(p->GetPos()))) {
+               //pedestrian left the room and therefore changed subroom
+               notifyDoor(p);
+          }
+     }
      double minDist = DBL_MAX;
      int bestDoor = -1;
      int bestGoal = -1;
@@ -440,4 +454,31 @@ void FFRouter::SetMode(std::string s)
 
      _mode = global_shortest;
      return;
+}
+
+void FFRouter::notifyDoor(Pedestrian *const p) {
+     //find correct door
+     auto lastSubRoom = _building->GetSubRoomByUID(p->GetSubRoomUID());
+     auto doorsOfSubRoom = lastSubRoom->GetAllGoalIDs();
+     double minDist = _CroTrByUID.at(doorsOfSubRoom[0])->DistTo(p->GetPos());
+     double tmp = minDist;
+     Crossing* minCross = _CroTrByUID.at(doorsOfSubRoom[0]);
+     for(auto UID : doorsOfSubRoom) {
+          tmp = _CroTrByUID.at(UID)->DistTo(p->GetPos());
+          if (tmp < minDist) {
+               minCross = _CroTrByUID.at(UID);
+               minDist = tmp;
+          }
+     }
+
+     //find correct direction, where direction means: subRoom1 uses TickTime1, subRoom2 uses TickTime2; order in the Crossing::HLine is defining
+     if(minCross->GetSubRoom1()->IsInSubRoom(p)) { //p is in subRoom1, so he entered that from subRoom2
+          minCross->_lastTickTime2 = p->_ticksInThisRoom;
+          minCross->_refresh2 = 0;
+     }
+     if(minCross->GetSubRoom2()->IsInSubRoom(p)) {
+          minCross->_lastTickTime1 = p->_ticksInThisRoom;
+          minCross->_refresh1 = 0;
+     }
+     p->_ticksInThisRoom = 0;
 }
