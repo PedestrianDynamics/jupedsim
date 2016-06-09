@@ -99,12 +99,6 @@ Building::Building(const Configuration* configuration, PedDistributor& pedDistri
           exit(EXIT_FAILURE);
      }
 
-     //triangulate the geometry
-//     if(!Triangulate())
-//     {
-//          Log->Write("ERROR:\t could not triangulate the geometry!");
-//          exit (EXIT_FAILURE);
-//     }
 
 
      //TODO: check whether traffic info can be loaded before InitGeometry if so call it in LoadBuilding instead and make

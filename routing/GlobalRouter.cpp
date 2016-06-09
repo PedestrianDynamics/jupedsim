@@ -1366,6 +1366,13 @@ string GlobalRouter::GetRoutingInfoFile()
                     TiXmlElement* para =e->FirstChild("parameters")->FirstChildElement("navigation_mesh");
                     if (para)
                     {
+                          //triangulate the geometry
+                          if(!_building->Triangulate())
+                          {
+                                Log->Write("ERROR:\t could not triangulate the geometry!");
+                                exit (EXIT_FAILURE);
+                          }
+
                          string local_planing=xmltoa(para->Attribute("use_for_local_planning"),"false");
                          if(local_planing=="true") {
                               _useMeshForLocalNavigation = 1;
