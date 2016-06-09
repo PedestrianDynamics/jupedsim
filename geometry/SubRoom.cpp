@@ -196,6 +196,10 @@ void SubRoom::AddObstacle(Obstacle* obs)
 
 void SubRoom::AddGoalID(int ID)
 {
+     if (std::find(_goalIDs.begin(), _goalIDs.end(), ID) != _goalIDs.end()) {
+          Log->Write("WARNING: \tAdded existing GoalID to Subroom %d", this->GetSubRoomID());
+          //if occurs, plz assert, that ID is a UID of any line of the goal and not a number given by the user (ar.graf)
+     }
      _goalIDs.push_back(ID);
 }
 

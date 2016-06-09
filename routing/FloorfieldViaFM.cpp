@@ -1641,6 +1641,7 @@ void FloorfieldViaFM::testoutput(const char* filename1, const char* filename2, c
 
 void FloorfieldViaFM::writeFF(const std::string& filename, std::vector<int> targetID) {
     Log->Write("INFO: \tWrite Floorfield to file");
+    Log->Write(filename);
     std::ofstream file;
 
     int numX = (int) ((grid->GetxMax()-grid->GetxMin())/grid->Gethx());
@@ -1685,13 +1686,13 @@ void FloorfieldViaFM::writeFF(const std::string& filename, std::vector<int> targ
             continue;
         }
 
-        file << "VECTORS GradientTarget" << targetID[iTarget] << " float" << std::endl;
+        file << "VECTORS GradientTarget" << building->GetTransOrCrossByUID(targetID[iTarget])->GetCaption() << "-" << targetID[iTarget] << " float" << std::endl;
         for (int i = 0; i < grid->GetnPoints(); ++i) {
             file << gradarray[i]._x << " " << gradarray[i]._y << " 0.0" << std::endl;
         }
 
         double *costarray = costmap[targetID[iTarget]];
-        file << "SCALARS CostTarget" << targetID[iTarget] <<" float 1" << std::endl;
+        file << "SCALARS CostTarget" << building->GetTransOrCrossByUID(targetID[iTarget])->GetCaption() << "-" << targetID[iTarget] << " float 1" << std::endl;
         file << "LOOKUP_TABLE default" << std::endl;
         for (long int i = 0; i < grid->GetnPoints(); ++i) {
             file << costarray[i] << std::endl;

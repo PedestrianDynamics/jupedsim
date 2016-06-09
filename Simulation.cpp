@@ -388,9 +388,12 @@ void Simulation::UpdateRoutesAndLocations()
             if (ped->FindRoute()==-1) {
                 //a destination could not be found for that pedestrian
                 Log->Write("ERROR: \tCould not find a route for pedestrian %d", ped->GetID());
+                ped->FindRoute(); //debug only; can be removed any time @cleanup @todo: ar.graf
                 //exit(EXIT_FAILURE);
 #pragma omp critical
-                pedsToRemove.push_back(ped);
+                if (std::find(pedsToRemove.begin(), pedsToRemove.end(), ped) == pedsToRemove.end()) {
+                    pedsToRemove.push_back(ped);
+                }
             }
         }
     } //omp parallel
@@ -407,6 +410,7 @@ void Simulation::UpdateRoutesAndLocations()
             UpdateFlowAtDoors(*pedsToRemove[p]);
             _building->DeletePedestrian(pedsToRemove[p]);
         }
+        pedsToRemove.clear();
     }
 
     //    temporary fix for the safest path router

@@ -321,9 +321,9 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
 Point VelocityModel::e0(Pedestrian* ped, Room* room) const
 {
-      const Point& target = _direction->GetTarget(room, ped);
+      const Point target = _direction->GetTarget(room, ped);
       Point e0;
-      const Point& pos = ped->GetPos();
+      const Point pos = ped->GetPos();
       double dist = ped->GetExitLine()->DistTo(pos);
       // check if the molified version works
       Point lastE0 = ped->GetLastE0();
