@@ -92,12 +92,6 @@ bool ToxicityAnalysis::LoadJPSfireInfo(const std::string projectFilename )
 }
 
 
-std::string ToxicityAnalysis::GetName() const
-{
-    return "ToxicityAnalysis";
-}
-
-
 double ToxicityAnalysis::GetFDSQuantity(const Pedestrian * pedestrian, std::string quantity)
 {
     //std::cout << "\n" << quantity << std::endl;

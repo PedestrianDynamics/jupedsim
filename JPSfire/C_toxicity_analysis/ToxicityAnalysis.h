@@ -47,9 +47,6 @@ public:
 
     virtual ~ToxicityAnalysis();
 
-    std::string GetName() const;
-    //void execute(const Pedestrian *) const;
-
     void HazardAnalysis(Pedestrian *);
     double GetFDSQuantity(const Pedestrian *, std::string);
     void StoreHazardAnalysis(const Pedestrian *, double, double, double, double, double, double,

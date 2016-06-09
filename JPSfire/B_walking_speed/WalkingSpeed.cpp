@@ -84,13 +84,6 @@ bool WalkingSpeed::LoadJPSfireInfo(const std::string projectFilename )
    return false;
 }
 
-
-std::string WalkingSpeed::GetName() const
-{
-    return "WalkingSpeed";
-}
-
-
 double WalkingSpeed::GetExtinction(const Pedestrian * pedestrian)
 {
     std::string quantity = "SOOT_EXTINCTION_COEFFICIENT";

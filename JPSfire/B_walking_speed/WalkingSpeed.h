@@ -46,9 +46,6 @@ public:
 
     virtual ~WalkingSpeed();
 
-    std::string GetName() const;
-    //void execute(const Pedestrian *) const;
-
     double WalkingInSmoke(const Pedestrian*, double);
     double GetExtinction(const Pedestrian *);
 
