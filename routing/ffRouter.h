@@ -136,6 +136,24 @@ public:
      virtual bool Init(Building* building);
 
      /*!
+      * \brief ReInit the router (must be called after each event (open/close change)
+      *
+      * ReInit() will reconstruct the graph (nodes = doors, edges = costs) and
+      * find shortest paths via Floyd-Warshall. It will reconstruct the floorfield to
+      * evaluate the best doors to certain goals as they could change. Further on it
+      * will take the information of former floorfields, if useful.
+      *
+      *
+      * \param[in] [name of input parameter] [its description]
+      * \param[out] [name of output parameter] [its description]
+      * \return [information about return value]
+      * \sa [see also section]
+      * \note [any note about the function you might have]
+      * \warning [any warning if necessary]
+      */
+     virtual bool ReInit();
+
+     /*!
       * \brief interface used by __Pedestrian__, sets (*p).exitline/.exitindex
       *
       * additional info: not available
