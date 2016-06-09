@@ -118,11 +118,11 @@ class RectGrid
             long int j = (long int)(((y-yMin)/hy)+.5);
             if ((i >= 0) && (i <= iMax) && (j >= 0) && (j <= jMax)) //@todo: ar.graf: check in #ifdef block
                 return (j*iMax+i); // 0-based; index of (closest gridpoint)
-             std::cerr << "ERROR in RectGrid::getKeyAtPoint with:" << std::endl;
-             std::cerr << "Point: " << x << ", " << y << std::endl;
-             std::cerr << "xMin, yMin: " << xMin << ", " << yMin << std::endl;
-             std::cerr << "xMax, yMax: " << xMax << ", " << yMax << std::endl;
-             std::cerr << "Point is out of Grid-Scope, Tip: check if correct Floorfield is called" << std::endl;
+             std::cerr << "ERROR 1 in RectGrid::getKeyAtPoint with:" << std::endl;
+             std::cerr << "   Point: " << x << ", " << y << std::endl;
+             std::cerr << "   xMin, yMin: " << xMin << ", " << yMin << std::endl;
+             std::cerr << "   xMax, yMax: " << xMax << ", " << yMax << std::endl;
+             std::cerr << "   Point is out of Grid-Scope, Tip: check if correct Floorfield is called" << std::endl;
             return -1; // invalid indices
         }
 
@@ -132,11 +132,18 @@ class RectGrid
             //if ((i >= 0) && (i <= iMax) && (j >= 0) && (j <= jMax)) //@todo: ar.graf: check in #ifdef block
              if (includesPoint(p))             //@todo: ar.graf: this if must be made work
                 return (j*iMax+i); // 0-based; index of (closest gridpoint)
-             std::cerr << "ERROR in RectGrid::getKeyAtPoint with:" << std::endl;
-             std::cerr << "Point: " << p._x << ", " << p._y << std::endl;
-             std::cerr << "xMin, yMin: " << xMin << ", " << yMin << std::endl;
-             std::cerr << "xMax, yMax: " << xMax << ", " << yMax << std::endl;
-             std::cerr << "Point is out of Grid-Scope, Tip: check if correct Floorfield is called" << std::endl;
+             else {
+                  if (p._x < xMin) { std::cerr << "Out of bound by: " << (xMin - p._x) << std::endl; i = 0; }
+                  if (p._x > xMax) { std::cerr << "Out of bound by: " << (p._x - xMax) << std::endl; i = iMax; }
+                  if (p._y < yMin) { std::cerr << "Out of bound by: " << (yMin - p._y) << std::endl; j = 0; }
+                  if (p._y > yMax) { std::cerr << "Out of bound by: " << (p._y - yMax) << std::endl; j = jMax; }
+                  return (j * iMax + i);
+             }
+             std::cerr << "ERROR 2 in RectGrid::getKeyAtPoint with:" << std::endl;
+             std::cerr << "   Point: " << p._x << ", " << p._y << std::endl;
+             std::cerr << "   xMin, yMin: " << xMin << ", " << yMin << std::endl;
+             std::cerr << "   xMax, yMax: " << xMax << ", " << yMax << std::endl;
+             std::cerr << "   Point is out of Grid-Scope, Tip: check if correct Floorfield is called" << std::endl;
              return -1; // invalid indices
         }
 
@@ -182,15 +189,15 @@ class RectGrid
             //if ((currPoint._x > xMax) || (currPoint._y > yMax) ||
             //    (currPoint._x < xMin) || (currPoint._y < yMin)) {
              if (!includesPoint(currPoint)) {
-                 std::cerr << "ERROR in RectGrid::getKeyAtPoint with:"
+                 std::cerr << "ERROR 3 in RectGrid::getKeyAtPoint with:"
                        << std::endl;
-                 std::cerr << "Point: " << currPoint._x << ", " << currPoint._y << std::endl;
-                 std::cerr << "xMin, yMin: " << xMin << ", " << yMin
+                 std::cerr << "   Point: " << currPoint._x << ", " << currPoint._y << std::endl;
+                 std::cerr << "   xMin, yMin: " << xMin << ", " << yMin
                        << std::endl;
-                 std::cerr << "xMax, yMax: " << xMax << ", " << yMax
+                 std::cerr << "   xMax, yMax: " << xMax << ", " << yMax
                        << std::endl;
                  std::cerr
-                       << "Point is out of Grid-Scope, Tip: check if correct Floorfield is called"
+                       << "   Point is out of Grid-Scope, Tip: check if correct Floorfield is called"
                        << std::endl;
                  return Point(-7, -7); // @todo: ar.graf : find good false indicator
             }
@@ -224,10 +231,10 @@ class RectGrid
         }
 
         bool includesPoint(const Point& point) const {
-             if ((point._x < xMin) ||
-                 (point._x > xMax) ||
-                 (point._y < yMin) ||
-                 (point._y > yMax)) {
+             if ((point._x < (xMin-hx/2)) ||
+                 (point._x > (xMax+hx/2)) ||
+                 (point._y < (yMin-hy/2)) ||
+                 (point._y > (yMax+hy/2))) {
                   return false;
              }
              return true;

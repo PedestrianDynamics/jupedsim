@@ -497,7 +497,7 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
      //for (auto& roomPair : building->GetAllRooms()) {
          auto roomPairIt = building->GetAllRooms().begin();
          std::advance(roomPairIt, i);
-         locffviafm[(*roomPairIt).first] = new LocalFloorfieldViaFM(&(*(*roomPairIt).second), building,
+         locffviafm[(*roomPairIt).first] = new LocalFloorfieldViaFM((*roomPairIt).second.get(), building,
                  hx, hy, wallAvoidDistance, useDistancefield, "FF_filename");
      }
      end = std::chrono::system_clock::now();
@@ -530,6 +530,23 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
         Point dummy;
         locffviafm[(*rAndtIT).first]->getDirectionToUID((*rAndtIT).second, 0, dummy);
     }
+     for(unsigned int i = 0; i < building->GetAllRooms().size(); ++i) {
+          std::vector<int> targets = {};
+          targets.clear();
+
+          auto roomIt = building->GetAllRooms().begin();
+          std::advance(roomIt, i);
+          roomNr = roomIt->second->GetID();
+
+          for (auto pair : roomAndTargetVector) {
+               if (pair.first == roomNr) {
+                    targets.emplace_back(pair.second);
+               }
+          }
+          std::string filename = "floorfield" + std::to_string(roomNr) + ".vtk";
+          locffviafm[roomNr]->writeFF(filename, targets);
+     }
+
 
 }
 
@@ -545,6 +562,7 @@ DirectionLocalFloorfield::~DirectionLocalFloorfield() {
      }
      //}
 }
+
 
 ///9
 Point DirectionSubLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
@@ -611,14 +629,42 @@ void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
           std::chrono::time_point<std::chrono::system_clock> start, end;
           start = std::chrono::system_clock::now();
           Log->Write("INFO: \tCalling Construtor of SubLocFloorfieldViaFM");
+          std::vector<std::pair<int, int>> subAndTarget;
+          subAndTarget.clear();
+          std::vector<int> subUIDs;
+          subUIDs.clear();
           for (auto& roomPair : building->GetAllRooms()) {
-               for (auto& subRoomPair : roomPair.second->GetAllSubRooms()) {
-                    std::cerr << "Creating SubLocFF at key: " << subRoomPair.second->GetUID() <<std::endl;
-                    locffviafm[subRoomPair.second->GetUID()] = new SubLocalFloorfieldViaFM(
-                          &(*subRoomPair.second), building,
-                          hx, hy, wallAvoidDistance, useDistancefield,
-                          "FF_filename");
+#pragma omp parallel for
+               for (unsigned int i = 0; i < roomPair.second->GetAllSubRooms().size(); ++i) {
+                    auto subroomIt = roomPair.second->GetAllSubRooms().begin();
+                    std::advance(subroomIt, i);
+                    int subUID = subroomIt->second->GetUID();
+#pragma omp critical
+                    subUIDs.emplace_back(subUID);
+                    Log->Write("Creating SubLocFF at key: %d", subUID);
+                    locffviafm[subUID] = new SubLocalFloorfieldViaFM(
+                              subroomIt->second.get(), building,
+                              hx, hy, wallAvoidDistance, useDistancefield,
+                              "FF_filename");
+                    auto targets = subroomIt->second->GetAllGoalIDs();
+                    for (auto targetUID : targets) {
+                         subAndTarget.emplace_back(std::make_pair(subUID, targetUID));
+                    }
                }
+//               for (auto& subRoomPair : roomPair.second->GetAllSubRooms()) {
+//                    std::cerr << "Creating SubLocFF at key: " << subRoomPair.second->GetUID() <<std::endl;
+//                    locffviafm[subRoomPair.second->GetUID()] = new SubLocalFloorfieldViaFM(
+//                          &(*subRoomPair.second), building,
+//                          hx, hy, wallAvoidDistance, useDistancefield,
+//                          "FF_filename");
+//               }
+          }
+#pragma omp parallel for
+          for (unsigned int i = 0; i < subAndTarget.size(); ++i) {
+               auto pairIT = subAndTarget.begin();
+               std::advance(pairIT, i);
+               Point dummy;
+               locffviafm[pairIT->first]->getDirectionToUID(pairIT->second, 0, dummy);
           }
           end = std::chrono::system_clock::now();
           std::chrono::duration<double> elapsed_seconds = end-start;
@@ -626,6 +672,21 @@ void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
 
 //     }
      initDone = true;
+
+     //write floorfields to file, one file per subroom
+     for(unsigned int i = 0; i < subUIDs.size(); ++i) {
+          std::vector<int> targets = {};
+          targets.clear();
+          int subroomUID = subUIDs[i];
+
+          for (auto pair : subAndTarget) {
+               if (pair.first == subroomUID) {
+                    targets.emplace_back(pair.second);
+               }
+          }
+          std::string filename = "floorfield" + std::to_string(subroomUID) + ".vtk";
+          locffviafm[subroomUID]->writeFF(filename, targets);
+     }
 }
 
 DirectionSubLocalFloorfield::DirectionSubLocalFloorfield() {
