@@ -262,7 +262,8 @@ sections: </p>
 <li><code>&lt;stepsize&gt;0.001&lt;/stepsize&gt;</code>: <ul>
 <li>The time step for the solver. This should be choosed with care. For force-based model it is recommended to take a value between <script type="math/tex">10^{-2}</script> and <script type="math/tex">10^{-3}</script> s.
    For first-order models, a value of 0.05 s should be OK.
-   A larger time step leads to faster simulations, however it is too risky and can lead to collisions and overlapping among pedestrians.</li>
+   A larger time step leads to faster simulations, however it is too risky and can lead to 
+numerical instability, collisions and overlapping among pedestrians.</li>
 <li>Unit: s </li>
 </ul>
 </li>
