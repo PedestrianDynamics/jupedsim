@@ -43,13 +43,7 @@ ToxicityAnalysis::ToxicityAnalysis(const Building * b)
     _building = b;
     _FMStorage = nullptr;
     LoadJPSfireInfo(_building->GetProjectFilename());
-    string fileNameWithoutExtension = _building->GetProjectFilename().substr(0, _building->GetProjectFilename().find_last_of(".")); 
-    std::string ToxAnalysisXML = "fire_" + fileNameWithoutExtension + ".xml";
-    _outputhandler = std::make_shared<ToxicityOutputHandler>(ToxAnalysisXML.c_str());
-    _outputhandler->WriteToFileHeader();
-    _frame=0;
     _dt = 1/20.; //time fraction for which doses are cumulated
-
 }
 
 ToxicityAnalysis::~ToxicityAnalysis()
@@ -197,6 +191,11 @@ void ToxicityAnalysis::HazardAnalysis(Pedestrian* p)
 
 void ToxicityAnalysis::StoreHazardAnalysis(const Pedestrian* p, double E, double FEC_Smoke, double CO2, double CO, double HCN, double HCL, double FED_In, double FIC_Im, double FIC_In, double T, double FED_Heat)
 {
+    string fileNameWithoutExtension = _building->GetProjectFilename().substr(0, _building->GetProjectFilename().find_last_of("."));
+    std::string ToxAnalysisXML = "fire_" + fileNameWithoutExtension + ".xml";
+    _outputhandler = std::make_shared<ToxicityOutputHandler>(ToxAnalysisXML.c_str());
+    _outputhandler->WriteToFileHeader();
+    _frame=0;
     string data;
     char tmp[CLENGTH] = "";
 
