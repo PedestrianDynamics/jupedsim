@@ -30,6 +30,7 @@
 
 #include "Simulation.h"
 
+#include "routing/ffRouter.h"
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
 #include "math/GradientModel.h"
@@ -311,7 +312,7 @@ void Simulation::UpdateRoutesAndLocations()
 
         for (int p = start; p<=end; ++p) {
             Pedestrian* ped = allPeds[p];
-            ped->_ticksInThisRoom += 1;
+
             Room* room0 = _building->GetRoom(ped->GetRoomID());
             SubRoom* sub0 = room0->GetSubRoom(ped->GetSubRoomID());
 
@@ -345,6 +346,10 @@ void Simulation::UpdateRoutesAndLocations()
                         auto& old_sub = sub0;
                         if (sub->IsDirectlyConnectedWith(old_sub)
                                 && sub->IsInSubRoom(ped->GetPos())) {
+                            if (ped->GetRoutingStrategy() == ROUTING_FF_QUICKEST) {
+                                dynamic_cast<FFRouter*>(ped->GetRouter())->notifyDoor(ped);
+                                ped->RerouteIn(0.);
+                            }
                             ped->SetRoomID(room->GetID(),
                                     room->GetCaption());
                             ped->SetSubRoomID(sub->GetSubRoomID());
@@ -563,16 +568,17 @@ void Simulation::ProcessAgentsQueue()
 }
 
 void Simulation::UpdateDoorticks() const {
-    //Softstate of _lastTickTime is valid for X seconds as in (X/_deltaT); here it is 5s
+    int softstateDecay = 1;
+    //Softstate of _lastTickTime is valid for X seconds as in (X/_deltaT); here it is 2s
     auto& allCross = _building->GetAllCrossings();
     for (auto& crossPair : allCross) {
         crossPair.second->_refresh1 += 1;
         crossPair.second->_refresh2 += 1;
-        if (crossPair.second->_refresh1 > (5/_deltaT)) {
+        if (crossPair.second->_refresh1 > (softstateDecay/_deltaT)) {
             crossPair.second->_lastTickTime1 = 0;
             crossPair.second->_refresh1 = 0;
         }
-        if (crossPair.second->_refresh2 > (5/_deltaT)) {
+        if (crossPair.second->_refresh2 > (softstateDecay/_deltaT)) {
             crossPair.second->_lastTickTime2 = 0;
             crossPair.second->_refresh2 = 0;
         }
@@ -582,11 +588,11 @@ void Simulation::UpdateDoorticks() const {
     for (auto& transPair : allTrans) {
         transPair.second->_refresh1 += 1;
         transPair.second->_refresh2 += 1;
-        if (transPair.second->_refresh1 > (5/_deltaT)) {
+        if (transPair.second->_refresh1 > (softstateDecay/_deltaT)) {
             transPair.second->_lastTickTime1 = 0;
             transPair.second->_refresh1 = 0;
         }
-        if (transPair.second->_refresh2 > (5/_deltaT)) {
+        if (transPair.second->_refresh2 > (softstateDecay/_deltaT)) {
             transPair.second->_lastTickTime2 = 0;
             transPair.second->_refresh2 = 0;
         }

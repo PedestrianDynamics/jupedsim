@@ -62,6 +62,15 @@ FFRouter::FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals):Router(id,s
      _hasSpecificGoals = hasSpecificGoals;
      _globalFF = nullptr;
      _targetWithinSubroom = true; //depending on exit_strat 8 => false, depending on exit_strat 9 => true;
+     if (s == ROUTING_FF_QUICKEST) {
+          _mode = quickest;
+     } else if (s == ROUTING_FF_LOCAL_SHORTEST) {
+          _mode = local_shortest;
+          _localShortestSafedPeds.clear();
+          _localShortestSafedPeds.reserve(500);
+     } else if (s == ROUTING_FF_GLOBAL_SHORTEST) {
+          _mode = global_shortest;
+     }
 }
 
 //FFRouter::FFRouter(const Building* const building)
@@ -508,18 +517,26 @@ bool FFRouter::ReInit()
 
 int FFRouter::FindExit(Pedestrian* p)
 {
-     if (_mode == quickest) {
-          //if needed: quickest-mechanic part 1 of 2
+     if (_mode == local_shortest) {
           if ((_locffviafm.at(p->GetRoomID())->getGrid()->includesPoint(p->GetPos())) &&
               (p->GetSubRoomUID() != _locffviafm.at(p->GetRoomID())->getSubroomUIDAt(p->GetPos()))) {
                //pedestrian is still in the room, but changed subroom
-               notifyDoor(p);
+               _localShortestSafedPeds.emplace_back(p->GetID());
           }
 
           //if needed: quickest-mechanic part 2 of 2
           if (!(_locffviafm.at(p->GetRoomID())->getGrid()->includesPoint(p->GetPos()))) {
                //pedestrian left the room and therefore changed subroom
-               notifyDoor(p);
+               _localShortestSafedPeds.emplace_back(p->GetID());
+          }
+     }
+     if (_mode == quickest) {
+          p->_ticksInThisRoom += 1;
+          if (p->GetReroutingTime() > 0.) {
+               p->UpdateReroutingTime();
+               return p->GetExitIndex();
+          } else {
+               p->RerouteIn(5.);
           }
      }
      double minDist = DBL_MAX;
@@ -589,11 +606,26 @@ int FFRouter::FindExit(Pedestrian* p)
                     continue;
                }
                std::pair<int, int> key = std::make_pair(doorUID, finalDoor);
-               if ((_distMatrix.count(key)!=0) && (_distMatrix.at(key) != DBL_MAX)
-                     && ( (_distMatrix.at(key) + locDistToDoor) < minDist)) {
-                    minDist = _distMatrix.at(key) + locDistToDoor;
-                    bestDoor = key.first; //doorUID
-                    bestGoal = key.second;//finalDoor
+               auto subroomDoors = _building->GetSubRoomByUID(p->GetSubRoomUID())->GetAllGoalIDs();
+               //only consider doors, that lead to goal via a new subroom
+               if (std::find(subroomDoors.begin(), subroomDoors.end(), _pathsMatrix.at(key)) != subroomDoors.end() &&
+                   (finalDoor != doorUID)){
+                    continue;
+               }
+               if (_mode == quickest) {
+                    int locDistToDoorAdd = (_CroTrByUID[doorUID]->_lastTickTime2 > _CroTrByUID[doorUID]->_lastTickTime1)?_CroTrByUID[doorUID]->_lastTickTime2:_CroTrByUID[doorUID]->_lastTickTime1;
+                    locDistToDoor = (locDistToDoor + locDistToDoorAdd * p->Getdt() * p->GetEllipse().GetV0())/2;
+               }
+               if ((_distMatrix.count(key)!=0) && (_distMatrix.at(key) != DBL_MAX)) {
+                    if ( (_mode == local_shortest) &&
+                         (std::find(_localShortestSafedPeds.begin(), _localShortestSafedPeds.end(), p->GetID()) == _localShortestSafedPeds.end()) ) {
+                         locDistToDoor -= _distMatrix.at(key); // -x +x == +0, therefore only locDist is considered
+                    }
+                    if ((_distMatrix.at(key) + locDistToDoor) < minDist) {
+                         minDist = _distMatrix.at(key) + locDistToDoor;
+                         bestDoor = key.first; //doorUID
+                         bestGoal = key.second;//finalDoor
+                    }
                }
           }
      }
@@ -607,14 +639,14 @@ int FFRouter::FindExit(Pedestrian* p)
 //     }
 
      //avoid entering oscillation at doors alongside (real) shortest path
-     while (
-               (std::find(DoorUIDsOfRoom.begin(), DoorUIDsOfRoom.end(), _pathsMatrix[std::make_pair(bestDoor, bestGoal)]) != DoorUIDsOfRoom.end())
-            && (bestDoor != _pathsMatrix[std::make_pair(bestDoor, bestGoal)])        //last door has itself as _pathsMatrix[lastDooronPath]
-            && (bestDoor != bestGoal)
-            )
-     {
-          bestDoor = _pathsMatrix[std::make_pair(bestDoor, bestGoal)];
-     }
+//     while (
+//               (std::find(DoorUIDsOfRoom.begin(), DoorUIDsOfRoom.end(), _pathsMatrix[std::make_pair(bestDoor, bestGoal)]) != DoorUIDsOfRoom.end())
+//            && (bestDoor != _pathsMatrix[std::make_pair(bestDoor, bestGoal)])        //last door has itself as _pathsMatrix[lastDooronPath]
+//            && (bestDoor != bestGoal)
+//            )
+//     {
+//          bestDoor = _pathsMatrix[std::make_pair(bestDoor, bestGoal)];
+//     }
      if (_CroTrByUID.count(bestDoor)) {
           p->SetExitIndex(bestDoor);
           p->SetExitLine(_CroTrByUID.at(bestDoor));
@@ -683,6 +715,9 @@ void FFRouter::SetMode(std::string s)
 }
 
 void FFRouter::notifyDoor(Pedestrian *const p) {
+     if (p->GetV().Norm() > 0.5) {
+          return;
+     }
      //find correct door
      auto lastSubRoom = _building->GetSubRoomByUID(p->GetSubRoomUID());
      auto doorsOfSubRoom = lastSubRoom->GetAllGoalIDs();
@@ -698,11 +733,15 @@ void FFRouter::notifyDoor(Pedestrian *const p) {
      }
 
      //find correct direction, where direction means: subRoom1 uses TickTime1, subRoom2 uses TickTime2; order in the Crossing::HLine is defining
-     if(minCross->GetSubRoom1()->IsInSubRoom(p)) { //p is in subRoom1, so he entered that from subRoom2
+     if (
+            (minCross->_lastTickTime2 == 0)
+         && (minCross->GetSubRoom1()) && (minCross->GetSubRoom1()->IsInSubRoom(p->GetPos()))) { //p is in subRoom1, so he entered that from subRoom2
           minCross->_lastTickTime2 = p->_ticksInThisRoom;
           minCross->_refresh2 = 0;
      }
-     if(minCross->GetSubRoom2()->IsInSubRoom(p)) {
+     if (
+             (minCross->_lastTickTime1 == 0)
+          && (minCross->GetSubRoom2()) && (minCross->GetSubRoom2()->IsInSubRoom(p->GetPos()))) {
           minCross->_lastTickTime1 = p->_ticksInThisRoom;
           minCross->_refresh1 = 0;
      }

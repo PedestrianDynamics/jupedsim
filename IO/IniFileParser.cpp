@@ -998,6 +998,30 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                     return false;
                }
           }
+          else if ((strategy == "ff_local_shortest") &&
+                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+               //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
+               Router *r = new FFRouter(id, ROUTING_FF_LOCAL_SHORTEST, hasSpecificGoals);
+               _config->GetRoutingEngine()->AddRouter(r);
+               Log->Write("\nINFO: \tUsing FF Local Shortest Router");
+
+               //check if the exit strat is [8]
+
+               ///Parsing additional options
+//               if (!ParseFfRouterOps(e)) {
+//                    return false;
+//               }
+          }
+          else if ((strategy == "ff_quickest") &&
+                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+               Router *r = new FFRouter(id, ROUTING_FF_QUICKEST, hasSpecificGoals);
+               _config->GetRoutingEngine()->AddRouter(r);
+               Log->Write("\nINFO: \tUsing FF Quickest Router");
+
+               //if (!ParseFfRouterOps(e)) {
+               //     return false;
+               //}
+          }
           else if (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) {
                Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",
                          strategy.c_str());

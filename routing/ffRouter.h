@@ -193,6 +193,7 @@ protected:
      std::map< std::pair<int, int> , double > _distMatrix;
      std::map< std::pair<int, int> , int >    _pathsMatrix;
      std::vector<int>                         _allDoorUIDs;
+     std::vector<int>                         _localShortestSafedPeds;
      const Building*                          _building;
      std::map<int, LocalFloorfieldViaFM*>     _locffviafm;
      FloorfieldViaFM*                         _globalFF;
