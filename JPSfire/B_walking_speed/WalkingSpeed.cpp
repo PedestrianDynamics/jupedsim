@@ -151,10 +151,6 @@ double WalkingSpeed::WalkingInSmoke(const Pedestrian* p, double walking_speed)
                 Log->Write("ERROR:\tNo study specified");
                 exit(EXIT_FAILURE);
             }
-    //Generally check if v0 < reduced walking_speed
-//    if(walking_speed > p->GetEllipse().GetV0()) {
-//       walking_speed = p->GetEllipse().GetV0();
-//    }
     }
    //fprintf(stderr, "%f \t%f \t%f \t%f \n", p->GetGlobalTime(), ExtinctionCoefficient, walking_speed, p->GetV().Norm() );
 
