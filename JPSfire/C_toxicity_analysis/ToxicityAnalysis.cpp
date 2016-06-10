@@ -79,6 +79,9 @@ bool ToxicityAnalysis::LoadJPSfireInfo(const std::string projectFilename )
                       filepath.c_str(), updateIntervall, finalTime);
            //TODO Is there a posibility to pass a variable number of arguments to a function?
            _FMStorage = std::make_shared<FDSMeshStorage>(filepath, finalTime, updateIntervall, study, irritant);
+
+           InitializeWriteOut();
+
            return true;
        }
    }
@@ -186,16 +189,20 @@ void ToxicityAnalysis::HazardAnalysis(Pedestrian* p)
     //FED Heat dose calculation according to SFPE2016 Chap. 63
     FED_Heat = CalculateFEDHeat(p, T, FED_Heat);
 
-    StoreHazardAnalysis(p, E, FEC_Smoke, CO2, CO, HCN, HCL, FED_In, FIC_Im, FIC_In, T, FED_Heat);
+    WriteOutHazardAnalysis(p, E, FEC_Smoke, CO2, CO, HCN, HCL, FED_In, FIC_Im, FIC_In, T, FED_Heat);
 }
 
-void ToxicityAnalysis::StoreHazardAnalysis(const Pedestrian* p, double E, double FEC_Smoke, double CO2, double CO, double HCN, double HCL, double FED_In, double FIC_Im, double FIC_In, double T, double FED_Heat)
+void ToxicityAnalysis::InitializeWriteOut()
 {
     string fileNameWithoutExtension = _building->GetProjectFilename().substr(0, _building->GetProjectFilename().find_last_of("."));
     std::string ToxAnalysisXML = "fire_" + fileNameWithoutExtension + ".xml";
     _outputhandler = std::make_shared<ToxicityOutputHandler>(ToxAnalysisXML.c_str());
     _outputhandler->WriteToFileHeader();
     _frame=0;
+}
+
+void ToxicityAnalysis::WriteOutHazardAnalysis(const Pedestrian* p, double E, double FEC_Smoke, double CO2, double CO, double HCN, double HCL, double FED_In, double FIC_Im, double FIC_In, double T, double FED_Heat)
+{
     string data;
     char tmp[CLENGTH] = "";
 

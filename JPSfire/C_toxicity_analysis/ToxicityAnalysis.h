@@ -49,7 +49,7 @@ public:
 
     void HazardAnalysis(Pedestrian *);
     double GetFDSQuantity(const Pedestrian *, std::string);
-    void StoreHazardAnalysis(const Pedestrian *, double, double, double, double, double, double,
+    void WriteOutHazardAnalysis(const Pedestrian *, double, double, double, double, double, double,
                              double, double, double, double, double);
 
     void set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage);
@@ -70,6 +70,7 @@ private:
     int _frame;
     double _dt;
 
+    void InitializeWriteOut();
 };
 
 #endif // ToxicityAnalysis_H
