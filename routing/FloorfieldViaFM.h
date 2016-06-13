@@ -84,6 +84,7 @@ public:
      void drawLinesOnGrid(std::vector<Line>& wallArg, double* const target, const double dbl2draw);
      void drawLinesOnGrid(std::vector<Line>& wallArg, int* const target, const int int2draw);
      void setSpeed(bool useDistance2WallArg);
+     void setSpeedFromLCGrid(double* newspeed);
      void clearAndPrepareForFloorfieldReCalc(double* costarray);
      void setNewGoalAfterTheClear(double* costarray, std::vector<Line>& GoalWallArg);
      void calculateFloorfield(std::vector<Line>& wallArg, double* costarray, Point* neggradarray);   //make private

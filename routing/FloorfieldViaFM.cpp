@@ -1187,11 +1187,10 @@ void FloorfieldViaFM::setSpeed(bool useDistance2WallArg) {
             }
         }
     }
+}
 
-    //@todo: ar.graf: below is a fix to prevent folks from taking a shortcut outside of rooms. trying to make passing a transition expensive
-    //std::vector<Line> exits(wall.begin(), wall.begin()+numOfExits);
-    //drawLinesOnGrid(exits, modifiedspeed, 0.00000000001);
-
+void FloorfieldViaFM::setSpeedFromLCGrid(double* newspeed) {
+//    building->GetGrid()->HALLOHIERBINICHAMMONTAG
 }
 
 void FloorfieldViaFM::calculateFloorfield(std::vector<Line>& targetlines, double* costarray, Point* neggradarray) {
