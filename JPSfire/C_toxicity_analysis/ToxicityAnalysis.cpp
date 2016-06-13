@@ -119,8 +119,8 @@ const std::shared_ptr<FDSMeshStorage> ToxicityAnalysis::get_FMStorage()
 
 double ToxicityAnalysis::CalculateFEDIn(Pedestrian* p, double CO2, double CO, double O2, double HCN, double FED_In)
 {
-    double VE = 20.; //breath rate (L/min)
-    double D = 30.; //Exposure dose (percent COHb) for incapacitation
+    double VE = 50.; //breath rate (L/min)
+    double D = 20.; //Exposure dose (percent COHb) for incapacitation
 
     double FED_In_CO = (3.317/(1E5 * D) * pow(CO, 1.036)) * _dt ;
     double FED_In_HCN = (pow(HCN, 2.36)/(2.43*1E7)) * _dt ;
@@ -137,14 +137,6 @@ double ToxicityAnalysis::CalculateFEDIn(Pedestrian* p, double CO2, double CO, do
 
 double ToxicityAnalysis::CalculateFEDHeat(Pedestrian* p, double T, double FED_Heat)
 {
-    //radiative + convective exposure
-    double T_Skin = 39.;
-    double emissivity = 0.5;
-    double Boltzmann = 5.67 * 1E-8;
-    double h_c = 6.5;
-    double incident_flux;
-    incident_flux = emissivity * Boltzmann * (pow( (T+273.15),4) - pow( (T_Skin+273.15),4)) + h_c*(T-T_Skin)/1000;
-
     double tolerance_time = 2 * pow(10,31) * pow(T,-16.963) + 4*1E8 * pow(T, -3.7561);
 
    // overall FED_Heat Fractional Effective Dose
@@ -189,7 +181,7 @@ void ToxicityAnalysis::HazardAnalysis(Pedestrian* p)
     //FED Heat dose calculation according to SFPE2016 Chap. 63
     FED_Heat = CalculateFEDHeat(p, T, FED_Heat);
 
-    WriteOutHazardAnalysis(p, E, FEC_Smoke, CO2, CO, HCN, HCL, FED_In, FIC_Im, FIC_In, T, FED_Heat);
+    WriteOutHazardAnalysis(p, E, FEC_Smoke, O2, CO2, CO, HCN, HCL, FED_In, FIC_Im, FIC_In, T, FED_Heat);
 }
 
 void ToxicityAnalysis::InitializeWriteOut()
@@ -201,13 +193,13 @@ void ToxicityAnalysis::InitializeWriteOut()
     _frame=0;
 }
 
-void ToxicityAnalysis::WriteOutHazardAnalysis(const Pedestrian* p, double E, double FEC_Smoke, double CO2, double CO, double HCN, double HCL, double FED_In, double FIC_Im, double FIC_In, double T, double FED_Heat)
+void ToxicityAnalysis::WriteOutHazardAnalysis(const Pedestrian* p, double E, double FEC_Smoke, double O2, double CO2, double CO, double HCN, double HCL, double FED_In, double FIC_Im, double FIC_In, double T, double FED_Heat)
 {
     string data;
     char tmp[CLENGTH] = "";
 
-    sprintf(tmp, "\t<agent ID=\"%i\"\tt=\"%.0f\"\tE=\"%.4f\"\tFEC_Smoke=\"%.4f\"\tc_CO2=\"%.0f\"\tc_CO=\"%.0f\"\tc_HCN=\"%.0f\"\tc_HCl=\"%.0f\"\tFED_In=\"%.4f\"\tFIC_Im=\"%.4f\"\tFIC_In=\"%.4f\"\tT=\"%.1f\"\tFED_Heat=\"%.4f\"/>",
-         p->GetID(), p->GetGlobalTime(), E, FEC_Smoke, CO2, CO, HCN, HCL, FED_In, FIC_Im, FIC_In, T, FED_Heat);
+    sprintf(tmp, "\t<agent ID=\"%i\"\tt=\"%.0f\"\tE=\"%.4f\"\tFEC_Smoke=\"%.4f\"\tc_O2=\"%.0f\"\tc_CO2=\"%.0f\"\tc_CO=\"%.0f\"\tc_HCN=\"%.0f\"\tc_HCl=\"%.0f\"\tFED_In=\"%.4f\"\tFIC_Im=\"%.4f\"\tFIC_In=\"%.4f\"\tT=\"%.1f\"\tFED_Heat=\"%.4f\"/>",
+         p->GetID(), p->GetGlobalTime(), E, FEC_Smoke, O2, CO2, CO, HCN, HCL, FED_In, FIC_Im, FIC_In, T, FED_Heat);
 
         data.append(tmp);
 
