@@ -204,6 +204,8 @@
     
         <li class="main active"><a href="#routing">Routing</a></li>
         
+            <li><a href="#floorfield-router">Floorfield Router</a></li>
+        
             <li><a href="#global-shortest-path">Global shortest path</a></li>
         
             <li><a href="#quickest-path">Quickest path</a></li>
@@ -217,7 +219,48 @@
 
 <h1 id="routing"><a class="toclink" href="#routing">Routing</a></h1>
 <p>Different router are implemented. However: </p>
-<pre><code>Actually the router-class is undergoing a a major refactoring...
+<pre><code>Actually the router-class is undergoing a a major refactoring ...
+</code></pre>
+
+<h2 id="floorfield-router"><a class="toclink" href="#floorfield-router">Floorfield Router</a></h2>
+<p>The floorfield-router is our latest router, which uses floorfields 
+to calculate the distances among the doors of the same <strong><em>sub</em></strong>room. 
+The major difference to any other router is, that it does <strong><em>not</em></strong> 
+need convex subrooms/rooms any longer. There is no need for adding 
+helplines.</p>
+<p>It fills an adjacency matrix and calculates global-shortest paths via the
+Floyd-Warshall algorithm.</p>
+<p>The floorfield-router will give intermediate targets within the <strong><em>sub</em></strong>room
+of each agent. It works in combination with exit strategies 8 and 9. (If you provide convex subrooms,
+any exit strategy will work. In these special cases, global router will be faster in
+computation time.)</p>
+<p>To use it successfully in multi-storage buildings, the user must provide 
+a geometry file, where stair-cases (or any other structur), which connects 
+two floors/levels <strong><em>must</em></strong> be a separate room. Further, that room 
+<strong><em>must</em></strong> only connect two levels. Rooms stretching over more than 
+2 levels are not valid.</p>
+<p>(If there are two points with the same (x,y)-coordinates, which differ 
+only in the (z)-coordinate, the router will face problems, thus we defined 
+the restriction above. That should avoid any such cases.)</p>
+<p>The floorfield router provides one mode: <code>ff_global_shortest</code></p>
+<p><code>ff_local_shortest</code> and <code>ff_quickest</code> will follow shortly.</p>
+<p><strong><em>Important</em></strong>:</p>
+<pre><code>If you use a router, which allows non-convex subrooms/rooms, you should use an exit-strategy, 
+which also allows non-convex subrooms/rooms. 
+Exit-strategies 8 and 9 will work best with the floorfield router.
+</code></pre>
+
+<p>Following snippet is a definition example of the routing information:</p>
+<pre><code class="xml">&lt;route_choice_models&gt;
+  &lt;router router_id=&quot;1&quot; description=&quot;ff_global_shortest&quot;&gt;
+  &lt;/router&gt;
+
+  &lt;!--router router_id=&quot;2&quot; description=&quot;ff_local_shortest&quot;&gt;
+  &lt;/router--&gt;
+
+  &lt;!--router router_id=&quot;3&quot; description=&quot;ff_quickest&quot;&gt;
+  &lt;/router--&gt;
+&lt;/route_choice_models&gt;
 </code></pre>
 
 <h2 id="global-shortest-path"><a class="toclink" href="#global-shortest-path">Global shortest path</a></h2>
