@@ -1127,8 +1127,11 @@ bool IniFileParser::ParseStepSize(TiXmlNode& stepNode)
                double stepsizeDBL = atof(stepsize);
                //find a stepsize, that can be multiplied by (int) to get framerate
                for (int i = 1; i < 2000; ++i) {
-                    if ((tmp / i) < stepsizeDBL) {
+                    if ((tmp / i) <= stepsizeDBL) {
                          _config->Setdt(tmp / i);
+                         if ((tmp/i) < stepsizeDBL) {
+                              Log->Write("WARNING: \tDecreased stepsize from <%f> to <%f> to match fps", stepsizeDBL, (tmp/i));
+                         }
                          Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
                          return true;
                     }
