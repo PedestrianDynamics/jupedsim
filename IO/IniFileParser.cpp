@@ -92,7 +92,7 @@ bool IniFileParser::Parse(std::string iniFile)
                     JPS_VERSION);
      }
      else if (std::stod(xMainNode->Attribute("version"))<std::stod(JPS_OLD_VERSION)) {
-          Log->Write("ERROR:\t Wrong header version. Only version %s is supported.", JPS_VERSION);
+          Log->Write("ERROR:\t Wrong header version. Only version greater than %s is supported.", JPS_OLD_VERSION);
           return false;
      }
 
