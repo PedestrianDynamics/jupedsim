@@ -1122,10 +1122,21 @@ bool IniFileParser::ParseStepSize(TiXmlNode& stepNode)
 {
      if (stepNode.FirstChild("stepsize")) {
           const char* stepsize = stepNode.FirstChild("stepsize")->FirstChild()->Value();
-          if (stepsize)
-               _config->Setdt(atof(stepsize));
-          Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
-          return true;
+          if (stepsize) {
+               double tmp = 1. / _config->GetFps();
+               double stepsizeDBL = atof(stepsize);
+               //find a stepsize, that can be multiplied by (int) to get framerate
+               for (int i = 1; i < 2000; ++i) {
+                    if ((tmp / i) < stepsizeDBL) {
+                         _config->Setdt(tmp / i);
+                         Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
+                         return true;
+                    }
+               }
+               _config->Setdt(stepsizeDBL);
+               Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
+               return true;
+          }
      }
      return false;
 }
