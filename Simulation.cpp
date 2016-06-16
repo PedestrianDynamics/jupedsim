@@ -314,6 +314,7 @@ void Simulation::UpdateRoutesAndLocations()
             Pedestrian* ped = allPeds[p];
 
             Room* room0 = _building->GetRoom(ped->GetRoomID());
+            assert(room0 != nullptr);
             SubRoom* sub0 = room0->GetSubRoom(ped->GetSubRoomID());
 
             //set the new room if needed
