@@ -54,6 +54,7 @@ public:
      {
           _log = 0;
           _port = -1.0;
+          _tMax = 20;
           _routingEngine = std::shared_ptr<RoutingEngine>(new RoutingEngine());
      }
 
