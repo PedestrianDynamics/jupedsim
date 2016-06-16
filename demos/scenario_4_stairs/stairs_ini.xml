@@ -43,7 +43,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 	<!--persons information and distribution -->
 	<agents operational_model_id="2">
 		<agents_distribution>
-		<group group_id="1" agent_parameter_id="1"  room_id="0" subroom_id="0" number="100" router_id="1"/>
+		<group group_id="1" agent_parameter_id="1"  room_id="0" subroom_id="0" number="100" router_id="2"/>
 		</agents_distribution>
 	</agents>
 
@@ -108,8 +108,13 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 	<route_choice_models>
 		<router router_id="1" description="global_shortest">
 			<parameters>
-				<navigation_lines file="stairs_routing.xml" />
+			  <navigation_lines file="stairs_routing.xml" />
 			</parameters>
 		</router>
+                <router router_id="2" description="ff_global_shortest">
+			<parameters>
+			</parameters>
+		</router>
+                
 	</route_choice_models>
 </JuPedSim>
