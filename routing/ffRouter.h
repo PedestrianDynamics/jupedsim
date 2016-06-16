@@ -187,6 +187,11 @@ public:
       */
      void notifyDoor(Pedestrian* const p);
 
+     /*!
+      * \brief mark pedestrian as not being in the first room anymore and return to normal routing
+      */
+     void save(Pedestrian* const p);
+
 private:
 
 protected:

@@ -238,9 +238,8 @@ bool IniFileParser::Parse(std::string iniFile)
      }
 
      bool parsingModelSuccessful = false;
-     for (TiXmlElement* xModel = xMainNode->FirstChild("operational_models")->FirstChildElement(
-               "model"); xModel;
-          xModel = xModel->NextSiblingElement("model")) {
+     for (TiXmlElement* xModel = xMainNode->FirstChild("operational_models")->FirstChildElement("model");
+                                        xModel; xModel = xModel->NextSiblingElement("model")) {
           if (!xModel->Attribute("description")) {
                Log->Write("ERROR: \t missing attribute description in models ?");
                return false;
@@ -1125,6 +1124,11 @@ bool IniFileParser::ParseStepSize(TiXmlNode& stepNode)
           if (stepsize) {
                double tmp = 1. / _config->GetFps();
                double stepsizeDBL = atof(stepsize);
+               if (std::string(stepNode.FirstChildElement("stepsize")->Attribute("fix")) == "yes") {
+                    _config->Setdt(atof(stepsize));
+                    Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
+                    return true;
+               }
                //find a stepsize, that can be multiplied by (int) to get framerate
                for (int i = 1; i < 2000; ++i) {
                     if ((tmp / i) <= stepsizeDBL) {

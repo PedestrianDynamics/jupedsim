@@ -517,19 +517,19 @@ bool FFRouter::ReInit()
 
 int FFRouter::FindExit(Pedestrian* p)
 {
-     if (_mode == local_shortest) {
-          if ((_locffviafm.at(p->GetRoomID())->getGrid()->includesPoint(p->GetPos())) &&
-              (p->GetSubRoomUID() != _locffviafm.at(p->GetRoomID())->getSubroomUIDAt(p->GetPos()))) {
-               //pedestrian is still in the room, but changed subroom
-               _localShortestSafedPeds.emplace_back(p->GetID());
-          }
-
-          //if needed: quickest-mechanic part 2 of 2
-          if (!(_locffviafm.at(p->GetRoomID())->getGrid()->includesPoint(p->GetPos()))) {
-               //pedestrian left the room and therefore changed subroom
-               _localShortestSafedPeds.emplace_back(p->GetID());
-          }
-     }
+//     if (_mode == local_shortest) {
+//          if ((_locffviafm.at(p->GetRoomID())->getGrid()->includesPoint(p->GetPos())) &&
+//              (p->GetSubRoomUID() != _locffviafm.at(p->GetRoomID())->getSubroomUIDAt(p->GetPos()))) {
+//               //pedestrian is still in the room, but changed subroom
+//               _localShortestSafedPeds.emplace_back(p->GetID());
+//          }
+//
+//          //if needed: quickest-mechanic part 2 of 2
+//          if (!(_locffviafm.at(p->GetRoomID())->getGrid()->includesPoint(p->GetPos()))) {
+//               //pedestrian left the room and therefore changed subroom
+//               _localShortestSafedPeds.emplace_back(p->GetID());
+//          }
+//     }
      if (_mode == quickest) {
           p->_ticksInThisRoom += 1;
           if (p->GetReroutingTime() > 0.) {
@@ -746,4 +746,8 @@ void FFRouter::notifyDoor(Pedestrian *const p) {
           minCross->_refresh1 = 0;
      }
      p->_ticksInThisRoom = 0;
+}
+
+void FFRouter::save(Pedestrian* const p) {
+     _localShortestSafedPeds.emplace_back(p->GetID());
 }

@@ -350,6 +350,9 @@ void Simulation::UpdateRoutesAndLocations()
                                 dynamic_cast<FFRouter*>(ped->GetRouter())->notifyDoor(ped);
                                 ped->RerouteIn(0.);
                             }
+                            if (ped->GetRoutingStrategy() == ROUTING_FF_LOCAL_SHORTEST) {
+                                dynamic_cast<FFRouter*>(ped->GetRouter())->save(ped);
+                            }
                             ped->SetRoomID(room->GetID(),
                                     room->GetCaption());
                             ped->SetSubRoomID(sub->GetSubRoomID());
