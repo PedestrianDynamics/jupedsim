@@ -124,7 +124,15 @@ double ToxicityAnalysis::CalculateFEDIn(Pedestrian* p, double CO2, double CO, do
 
     double FED_In_CO = (3.317/(1E5 * D) * pow(CO, 1.036)) * _dt ;
     double FED_In_HCN = (pow(HCN, 2.36)/(2.43*1E7)) * _dt ;
-    double FED_In_O2 = 1/exp(8.13-0.54*(20.9-O2/10000)) * _dt ; //Vol%
+    double FED_In_O2;
+    //this if statement is necessary since Pursers correlation is not considering
+    //normal O2 concentrations (20.9%). It would thus increase the FED_in slightly
+    if(O2==209000){
+        FED_In_O2 = 0.;
+    }
+    else if(O2<209000){
+        FED_In_O2 = 1/exp(8.13-0.54*(20.9-O2/10000)) * _dt ; //Vol%
+    }
     double VCO2 = exp(CO2/10000/5) ; //Vol%
 
     // overall FED_In Fractional Effective Dose until incapacitation
@@ -161,7 +169,7 @@ void ToxicityAnalysis::HazardAnalysis(Pedestrian* p)
     HCN = GetFDSQuantity(p, "HYDROGEN_CYANIDE_VOLUME_FRACTION")*1E6;
     HCL = GetFDSQuantity(p, "HYDROGEN_CHLORIDE_VOLUME_FRACTION")*1E6;
     //derive O2 concentration from balance calculation
-    O2 = 210000 - CO2 - CO - HCN - HCL;
+    O2 = 209000 - CO2 - CO - HCN - HCL;
 
     // gas temperature in C
     double T = 20.;
