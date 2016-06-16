@@ -76,15 +76,19 @@ public:
      void getDir2WallAt(const Point& position, Point& direction);
      double getDistance2WallAt(const Point& position);
 
+     int getSubroomUIDAt(const Point& position);
+
      void parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
      void parseBuildingForExits(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
      void prepareForDistanceFieldCalculation(const bool withExits);
      void drawLinesOnGrid(std::vector<Line>& wallArg, double* const target, const double dbl2draw);
      void drawLinesOnGrid(std::vector<Line>& wallArg, int* const target, const int int2draw);
      void setSpeed(bool useDistance2WallArg);
+     void setSpeedFromLCGrid(double* newspeed);
      void clearAndPrepareForFloorfieldReCalc(double* costarray);
      void setNewGoalAfterTheClear(double* costarray, std::vector<Line>& GoalWallArg);
      void calculateFloorfield(std::vector<Line>& wallArg, double* costarray, Point* neggradarray);   //make private
+     void calculateFloorfield(std::vector<Line>& wallArg, double* costarray, Point* neggradarray, double* speedarray);
      void calculateDistanceField(const double thresholdArg);             //make private
 
      void checkNeighborsAndAddToNarrowband(Trial* trialfield, Trial* &smallest, Trial* &biggest, int* flag, const long int key,
@@ -100,7 +104,7 @@ public:
      void testoutput(const char*, const char*, const double*);
      void writeFF(const std::string&, std::vector<int> targetID);
 
-     virtual bool isInside(const long int key);
+     virtual int isInside(const long int key);
 
      std::map<int, int> getGoalToLineUIDmap() const
      {
@@ -127,7 +131,7 @@ public:
 #endif //TESTING
 
 protected:
-     RectGrid* grid;
+     RectGrid* grid = nullptr;
      std::vector<Line> wall;
      std::vector<Line> exitsFromScope;
      int numOfExits;
@@ -140,14 +144,16 @@ protected:
 
      //GridPoint Data in independant arrays (shared primary key)
      // changed to threadsafe creation when needed: int* flag;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
-     int* gcode;                 //gridcode (see Macros.h)
-     double* dist2Wall;
-     double* speedInitial;
-     double* modifiedspeed;
-     double* cost;
+     int* gcode = nullptr;                 //gridcode (see Macros.h)
+     int* subroomUID = nullptr;
+     double* dist2Wall = nullptr;
+     double* speedInitial = nullptr;
+     double* modifiedspeed = nullptr;
+     double* densityspeed = nullptr;
+     double* cost = nullptr;
      //long int* secKey;  //secondary key to address ... not used yet
-     Point* neggrad; //gradients
-     Point* dirToWall;
+     Point* neggrad = nullptr; //gradients
+     Point* dirToWall = nullptr;
      // changed to threadsafe creation when needed: Trial* trialfield;
 
      std::map<int, double*> goalcostmap;

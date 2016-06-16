@@ -144,6 +144,7 @@ void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
      //create arrays
      //flag = new int[grid->GetnPoints()];                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, -7 = outside)
      gcode = new int[grid->GetnPoints()];
+     subroomUID = new int[grid->GetnPoints()];
      dist2Wall = new double[grid->GetnPoints()];
      speedInitial = new double[grid->GetnPoints()];
      modifiedspeed = new double[grid->GetnPoints()];
@@ -407,8 +408,8 @@ void LocalFloorfieldViaFM::crossOutOutsideNeighbors(const long int key){
 ////     }
 }
 
-bool LocalFloorfieldViaFM::isInside(const long int key) {
-     bool temp = false;
+int LocalFloorfieldViaFM::isInside(const long int key) {
+     int temp = 0;
      Point probe = grid->getPointFromKey(key);
 
      const std::map<int, std::shared_ptr<SubRoom>>& subRoomMap = room->GetAllSubRooms();
@@ -418,7 +419,7 @@ bool LocalFloorfieldViaFM::isInside(const long int key) {
           SubRoom* subRoomPtr = subRoomPair.second.get();
 
           if (subRoomPtr->IsInSubRoom(probe)) {
-               temp = true;
+               temp = subRoomPtr->GetUID();
           }
      }
 
@@ -575,6 +576,7 @@ void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
 
      //create arrays
      gcode = new int[grid->GetnPoints()];                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, -7 = outside)
+     subroomUID = new int[grid->GetnPoints()];
      dist2Wall = new double[grid->GetnPoints()];
      speedInitial = new double[grid->GetnPoints()];
      modifiedspeed = new double[grid->GetnPoints()];
@@ -600,7 +602,7 @@ void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
      drawLinesOnGrid(exitsFromScope, gcode, OPEN_TRANSITION);
 }
 
-bool SubLocalFloorfieldViaFM::isInside(const long int key) {
+int SubLocalFloorfieldViaFM::isInside(const long int key) {
      Point probe = grid->getPointFromKey(key);
-     return subroom->IsInSubRoom(probe);
+     return subroom->IsInSubRoom(probe)?subroom->GetUID():0;
 }

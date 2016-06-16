@@ -178,6 +178,13 @@ public:
      * @param ped
      */
     void UpdateFlowAtDoors(const Pedestrian& ped) const;
+
+     /**
+     * Update the refresh ticks for all doors. they count up and measure the age of the tickvalue (ffRouter, quickest)
+     *
+     */
+     void UpdateDoorticks() const;
+
 };
 
 #endif /*SIMULATION_H_*/

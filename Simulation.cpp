@@ -30,6 +30,7 @@
 
 #include "Simulation.h"
 
+#include "routing/ffRouter.h"
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
 #include "math/GradientModel.h"
@@ -87,11 +88,11 @@ bool Simulation::InitArgs()
     case 0: {
         // no log file. Use default log file
         //Log = new OutputHandler();
-          char default_name[CLENGTH] = "";
-          sprintf(default_name, "%s/log.dat", _config->GetProjectRootDir().c_str());
-          if (Log)
-                delete Log;
-          Log = new FileHandler(default_name);
+//          char default_name[CLENGTH] = "";
+//          sprintf(default_name, "%s/log.dat", _config->GetProjectRootDir().c_str());
+//          if (Log)
+//                delete Log;
+//          Log = new FileHandler(default_name);
 
         break;
     }
@@ -302,21 +303,23 @@ void Simulation::UpdateRoutesAndLocations()
     int partSize = nSize/nThreads;
 
 #pragma omp parallel  default(shared) num_threads(nThreads)
-     {
-          const int threadID = omp_get_thread_num();
-          int start = threadID * partSize;
-          int end = (threadID + 1) * partSize - 1;
-          if ((threadID == nThreads - 1))
-               end = nSize - 1;
+    {
+        const int threadID = omp_get_thread_num();
+        int start = threadID*partSize;
+        int end = (threadID+1)*partSize-1;
+        if ((threadID==nThreads-1))
+            end = nSize-1;
 
-          for (int p = start; p <= end; ++p) {
-               Pedestrian* ped = allPeds[p];
-               Room* Room = _building->GetRoom(ped->GetRoomID());
-               SubRoom* sub0 = Room->GetSubRoom(ped->GetSubRoomID());
+        for (int p = start; p<=end; ++p) {
+            Pedestrian* ped = allPeds[p];
 
-               //set the new room if needed
-               if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
-                         && (Room->GetCaption() == "outside")) {
+            Room* room0 = _building->GetRoom(ped->GetRoomID());
+            SubRoom* sub0 = room0->GetSubRoom(ped->GetSubRoomID());
+
+            //set the new room if needed
+            if ((ped->GetFinalDestination()==FINAL_DEST_OUT)
+                    && (room0->GetCaption()=="outside")) {
+
 #pragma omp critical
                 pedsToRemove.push_back(ped);
             }
@@ -330,19 +333,24 @@ void Simulation::UpdateRoutesAndLocations()
                 // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
                 // That may happen if the forces are too high for instance
                 // the ped is removed from the simulation, if it could not be reassigned
+                //@todo: ar.graf: condition could be ff::subroom[grid->getKeyAt(ped->GetPosition())] != ped->GetSubRoomUID()
             else if (!sub0->IsInSubRoom(ped)) {
                 bool assigned = false;
+
                 auto& allRooms = _building->GetAllRooms();
 
                 for (auto&& it_room : allRooms) {
-                    auto&& room = it_room.second;
+                    auto& room = it_room.second;
                     for (auto&& it_sub : room->GetAllSubRooms()) {
-                        auto&& sub = it_sub.second;
-                        auto&& old_room = allRooms.at(ped->GetRoomID());
-                        auto&& old_sub = old_room->GetSubRoom(
-                                ped->GetSubRoomID());
+                        auto& sub = it_sub.second;
+                        auto& old_room = room0;
+                        auto& old_sub = sub0;
                         if (sub->IsDirectlyConnectedWith(old_sub)
                                 && sub->IsInSubRoom(ped->GetPos())) {
+                            if (ped->GetRoutingStrategy() == ROUTING_FF_QUICKEST) {
+                                dynamic_cast<FFRouter*>(ped->GetRouter())->notifyDoor(ped);
+                                ped->RerouteIn(0.);
+                            }
                             ped->SetRoomID(room->GetID(),
                                     room->GetCaption());
                             ped->SetSubRoomID(sub->GetSubRoomID());
@@ -360,8 +368,7 @@ void Simulation::UpdateRoutesAndLocations()
                             //}
 
                             //also statistic for internal doors
-                            UpdateFlowAtDoors(
-                                    *ped); //@todo: ar.graf : this call should move into a critical region? check plz
+                            UpdateFlowAtDoors(*ped); //@todo: ar.graf : this call should move into a critical region? check plz
 
                             ped->ClearMentalMap(); // reset the destination
 //                                   ped->FindRoute();
@@ -511,6 +518,9 @@ int Simulation::RunBody(double maxSimTime)
             //update the events
             _em->ProcessEvent();
 
+            //update doorticks
+            UpdateDoorticks();
+
             //update the routes and locations
             UpdateRoutesAndLocations();
 
@@ -563,6 +573,38 @@ void Simulation::ProcessAgentsQueue()
         _building->AddPedestrian(ped);
     }
 }
+
+void Simulation::UpdateDoorticks() const {
+    int softstateDecay = 1;
+    //Softstate of _lastTickTime is valid for X seconds as in (X/_deltaT); here it is 2s
+    auto& allCross = _building->GetAllCrossings();
+    for (auto& crossPair : allCross) {
+        crossPair.second->_refresh1 += 1;
+        crossPair.second->_refresh2 += 1;
+        if (crossPair.second->_refresh1 > (softstateDecay/_deltaT)) {
+            crossPair.second->_lastTickTime1 = 0;
+            crossPair.second->_refresh1 = 0;
+        }
+        if (crossPair.second->_refresh2 > (softstateDecay/_deltaT)) {
+            crossPair.second->_lastTickTime2 = 0;
+            crossPair.second->_refresh2 = 0;
+        }
+    }
+
+    auto& allTrans = _building->GetAllTransitions();
+    for (auto& transPair : allTrans) {
+        transPair.second->_refresh1 += 1;
+        transPair.second->_refresh2 += 1;
+        if (transPair.second->_refresh1 > (softstateDecay/_deltaT)) {
+            transPair.second->_lastTickTime1 = 0;
+            transPair.second->_refresh1 = 0;
+        }
+        if (transPair.second->_refresh2 > (softstateDecay/_deltaT)) {
+            transPair.second->_lastTickTime2 = 0;
+            transPair.second->_refresh2 = 0;
+        }
+    }
+};
 
 void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
 {

@@ -92,7 +92,7 @@ bool IniFileParser::Parse(std::string iniFile)
                     JPS_VERSION);
      }
      else if (std::stod(xMainNode->Attribute("version"))<std::stod(JPS_OLD_VERSION)) {
-          Log->Write("ERROR:\t Wrong header version. Only version %s is supported.", JPS_VERSION);
+          Log->Write("ERROR:\t Wrong header version. Only version greater than %s is supported.", JPS_OLD_VERSION);
           return false;
      }
 
@@ -396,7 +396,7 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
      ParseAgentParameters(xGCFM, xAgentDistri);
 
      //TODO: models do not belong in a configuration container [gl march '16]
-     _config->SetModel(std::shared_ptr<OperationalModel>(new GCFMModel(_exit_strategy.get(), _config->GetNuPed(),
+     _config->SetModel(std::shared_ptr<OperationalModel>(new GCFMModel(_exit_strategy, _config->GetNuPed(),
                _config->GetNuWall(), _config->GetDistEffMaxPed(),
                _config->GetDistEffMaxWall(), _config->GetIntPWidthPed(),
                _config->GetIntPWidthWall(), _config->GetMaxFPed(),
@@ -647,7 +647,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
      ParseAgentParameters(xGradient, xAgentDistri);
 
      //TODO: models do not belong in a configuration container [gl march '16]
-     _config->SetModel(std::shared_ptr<OperationalModel>(new GradientModel(_exit_strategy.get(), _config->GetNuPed(),
+     _config->SetModel(std::shared_ptr<OperationalModel>(new GradientModel(_exit_strategy, _config->GetNuPed(),
                _config->GetaPed(), _config->GetbPed(), _config->GetcPed(),
                _config->GetNuWall(), _config->GetaWall(), _config->GetbWall(),
                _config->GetcWall(), pDeltaH, pWallAvoidDistance, pUseWallAvoidance,
@@ -738,7 +738,7 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement* xVelocity, TiXmlElement* xM
      //Parsing the agent parameters
      TiXmlNode* xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
      ParseAgentParameters(xVelocity, xAgentDistri);
-     _config->SetModel(std::shared_ptr<OperationalModel>(new VelocityModel(_exit_strategy.get(), _config->GetaPed(),
+     _config->SetModel(std::shared_ptr<OperationalModel>(new VelocityModel(_exit_strategy, _config->GetaPed(),
                _config->GetDPed(), _config->GetaWall(),
                _config->GetDWall())));
 
@@ -997,6 +997,30 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                if (!ParseFfRouterOps(e)) {
                     return false;
                }
+          }
+          else if ((strategy == "ff_local_shortest") &&
+                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+               //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
+               Router *r = new FFRouter(id, ROUTING_FF_LOCAL_SHORTEST, hasSpecificGoals);
+               _config->GetRoutingEngine()->AddRouter(r);
+               Log->Write("\nINFO: \tUsing FF Local Shortest Router");
+
+               //check if the exit strat is [8]
+
+               ///Parsing additional options
+//               if (!ParseFfRouterOps(e)) {
+//                    return false;
+//               }
+          }
+          else if ((strategy == "ff_quickest") &&
+                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+               Router *r = new FFRouter(id, ROUTING_FF_QUICKEST, hasSpecificGoals);
+               _config->GetRoutingEngine()->AddRouter(r);
+               Log->Write("\nINFO: \tUsing FF Quickest Router");
+
+               //if (!ParseFfRouterOps(e)) {
+               //     return false;
+               //}
           }
           else if (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) {
                Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",

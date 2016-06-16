@@ -48,10 +48,10 @@ private:
 
 public:
      // last ped that passed was in room {1,2} that many ticks
-     int _lastTickTime1;
-     int _lastTickTime2;
-     int _refresh1;
-     int _refresh2;
+     int _lastTickTime1 = 0;
+     int _lastTickTime2 = 0;
+     int _refresh1 = 0;
+     int _refresh2 = 0;
 
 
      /**

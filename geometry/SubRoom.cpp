@@ -47,7 +47,7 @@ using namespace std;
  SubRoom
  ************************************************************/
 
-int SubRoom::_static_uid=0;
+int SubRoom::_static_uid=1; //must be positive (sideeffect for FloorfieldViaFM::isInside())
 
 SubRoom::SubRoom()
 {
@@ -1361,8 +1361,8 @@ const std::string& SubRoom::GetType() const
 
 bool SubRoom::IsInSubRoom(Pedestrian* ped) const
 {
-     const Point& pos = ped->GetPos();
-     if (ped->GetExitLine()->DistTo(pos) <= J_EPS_GOAL)
+     Point pos = ped->GetPos();
+     if ((ped->GetExitLine()) && (ped->GetExitLine()->DistTo(pos) <= J_EPS_GOAL))
           return true;
      else
           return IsInSubRoom(pos);

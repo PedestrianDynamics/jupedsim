@@ -47,7 +47,7 @@
 using std::vector;
 using std::string;
 
-GCFMModel::GCFMModel(DirectionStrategy* dir, double nuped, double nuwall, double dist_effPed,
+GCFMModel::GCFMModel(std::shared_ptr<DirectionStrategy> dir, double nuped, double nuwall, double dist_effPed,
                      double dist_effWall, double intp_widthped, double intp_widthwall, double maxfped,
                      double maxfwall)
 {
@@ -71,33 +71,33 @@ GCFMModel::~GCFMModel(void)
 
 bool GCFMModel::Init (Building* building)
 {
-     if(dynamic_cast<DirectionFloorfield*>(_direction)){
+     if(dynamic_cast<DirectionFloorfield*>(_direction.get())){
           Log->Write("INFO:\t Init DirectionFloorfield starting ...");
           //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
           double _deltaH = 0.0625;
           double _wallAvoidDistance = 0.4;
           bool _useWallAvoidance = true;
-          dynamic_cast<DirectionFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          dynamic_cast<DirectionFloorfield*>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
           Log->Write("INFO:\t Init DirectionFloorfield done");
      }
 
-     if(dynamic_cast<DirectionLocalFloorfield*>(_direction)){
+     if(dynamic_cast<DirectionLocalFloorfield*>(_direction.get())){
           Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
           //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
           double _deltaH = 0.0625;
           double _wallAvoidDistance = 0.4;
           bool _useWallAvoidance = true;
-          dynamic_cast<DirectionLocalFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          dynamic_cast<DirectionLocalFloorfield*>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
           Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
      }
 
-     if(dynamic_cast<DirectionSubLocalFloorfield*>(_direction)){
+     if(dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())){
           Log->Write("INFO:\t Init DirectionSubLOCALFloorfield starting ...");
           //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
           double _deltaH = 0.0625;
           double _wallAvoidDistance = 0.4;
           bool _useWallAvoidance = true;
-          dynamic_cast<DirectionSubLocalFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
           Log->Write("INFO:\t Init DirectionSubLOCALFloorfield done");
      }
 
@@ -264,9 +264,9 @@ inline  Point GCFMModel::ForceDriv(Pedestrian* ped, Room* room) const
      Point lastE0 = ped->GetLastE0();
      ped->SetLastE0(target-pos);
 
-     if (  (dynamic_cast<DirectionFloorfield*>(_direction)) ||
-           (dynamic_cast<DirectionLocalFloorfield*>(_direction)) ||
-           (dynamic_cast<DirectionSubLocalFloorfield*>(_direction))  ) {
+     if (  (dynamic_cast<DirectionFloorfield*>(_direction.get())) ||
+           (dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) ||
+           (dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get()))  ) {
           if (dist > 10*J_EPS_GOAL) {
                const Point& v0 = ped->GetV0(target);
                F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
@@ -602,7 +602,7 @@ Point GCFMModel::ForceInterpolation(double v0, double K_ij, const Point& e, doub
 
 // Getter-Funktionen
 
-DirectionStrategy* GCFMModel::GetDirection() const
+std::shared_ptr<DirectionStrategy> GCFMModel::GetDirection() const
 {
      return _direction;
 }

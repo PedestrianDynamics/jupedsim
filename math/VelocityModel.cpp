@@ -51,7 +51,7 @@ double cutoff = 2.0;
 using std::vector;
 using std::string;
 
-VelocityModel::VelocityModel(DirectionStrategy* dir, double aped, double Dped,
+VelocityModel::VelocityModel(std::shared_ptr<DirectionStrategy> dir, double aped, double Dped,
                              double awall, double Dwall)
 {
      _direction = dir;
@@ -72,33 +72,33 @@ VelocityModel::~VelocityModel()
 bool VelocityModel::Init (Building* building)
 {
 
-    if(dynamic_cast<DirectionFloorfield*>(_direction)){
+    if(dynamic_cast<DirectionFloorfield*>(_direction.get())){
         Log->Write("INFO:\t Init DirectionFloorfield starting ...");
         //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
             double _deltaH = 0.0625;
             double _wallAvoidDistance = 0.4;
             bool _useWallAvoidance = true;
-        dynamic_cast<DirectionFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+        dynamic_cast<DirectionFloorfield*>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
         Log->Write("INFO:\t Init DirectionFloorfield done");
     }
 
-     if(dynamic_cast<DirectionLocalFloorfield*>(_direction)){
+     if(dynamic_cast<DirectionLocalFloorfield*>(_direction.get())){
           Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
           //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
           double _deltaH = 0.0625;
           double _wallAvoidDistance = 0.4;
           bool _useWallAvoidance = true;
-          dynamic_cast<DirectionLocalFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          dynamic_cast<DirectionLocalFloorfield*>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
           Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
      }
 
-     if(dynamic_cast<DirectionSubLocalFloorfield*>(_direction)){
+     if(dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())){
           Log->Write("INFO:\t Init DirectionSubLOCALFloorfield starting ...");
           //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
           double _deltaH = 0.0625;
           double _wallAvoidDistance = 0.4;
           bool _useWallAvoidance = true;
-          dynamic_cast<DirectionSubLocalFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
           Log->Write("INFO:\t Init DirectionSubLOCALFloorfield done");
      }
 
@@ -329,9 +329,9 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
       Point lastE0 = ped->GetLastE0();
       ped->SetLastE0(target-pos);
 
-      if ( (dynamic_cast<DirectionFloorfield*>(_direction)) ||
-           (dynamic_cast<DirectionLocalFloorfield*>(_direction)) ||
-           (dynamic_cast<DirectionSubLocalFloorfield*>(_direction))  ) {
+      if ( (dynamic_cast<DirectionFloorfield*>(_direction.get())) ||
+           (dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) ||
+           (dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get()))  ) {
           if (dist > 20*J_EPS_GOAL) {
                e0 = target - pos; //ped->GetV0(target);
           } else {
@@ -535,7 +535,7 @@ string VelocityModel::GetDescription()
      return rueck;
 }
 
-DirectionStrategy* VelocityModel::GetDirection() const
+std::shared_ptr<DirectionStrategy> VelocityModel::GetDirection() const
 {
      return _direction;
 }

@@ -1430,8 +1430,8 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
      }
 
      string  version = xRootNode->Attribute("version");
-     if (version != JPS_VERSION && version != JPS_OLD_VERSION) {
-          Log->Write("ERROR: \tOnly version  %d.%d supported",JPS_VERSION_MAJOR,JPS_VERSION_MINOR);
+     if (version < JPS_OLD_VERSION) {
+          Log->Write("ERROR: \tOnly version greater than %d supported",JPS_OLD_VERSION);
           Log->Write("ERROR: \tparsing routing file failed!");
           return false;
      }
