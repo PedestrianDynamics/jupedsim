@@ -176,7 +176,7 @@ void ToxicityAnalysis::HazardAnalysis(Pedestrian* p)
     T = GetFDSQuantity(p, "TEMPERATURE");
 
     // FEC Smoke
-    FEC_Smoke = E/0.1;
+    FEC_Smoke = E/0.23;
 
     // FED Incapacitation dose calculation according to SFPE2016 Chap. 63
     FED_In = CalculateFEDIn(p, CO2, CO, O2, HCN, FED_In);
