@@ -1124,7 +1124,8 @@ bool IniFileParser::ParseStepSize(TiXmlNode& stepNode)
           if (stepsize) {
                double tmp = 1. / _config->GetFps();
                double stepsizeDBL = atof(stepsize);
-               if (std::string(stepNode.FirstChildElement("stepsize")->Attribute("fix")) == "yes") {
+               if ( (stepNode.FirstChildElement("stepsize")->Attribute("fix")) &&
+                         (std::string(stepNode.FirstChildElement("stepsize")->Attribute("fix")) == "yes") ) {
                     _config->Setdt(atof(stepsize));
                     Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
                     return true;
