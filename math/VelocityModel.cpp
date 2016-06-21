@@ -175,6 +175,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
            for (int p = start; p <= end; ++p) {
 
                 Pedestrian* ped = allPeds[p];
+                std::cout << ped->GetRoomID() << std::endl;
                 Room* room = building->GetRoom(ped->GetRoomID());
                 SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
 
