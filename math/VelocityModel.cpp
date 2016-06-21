@@ -455,7 +455,7 @@ Point VelocityModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
           if(obst->Contains(ped->GetPos()))
           {
                Log->Write("ERROR:\t Agent [%d] is trapped in obstacle in room/subroom [%d/%d]",ped->GetID(),subroom->GetRoomID(), subroom->GetSubRoomID());
-               exit(EXIT_FAILURE);
+               //exit(EXIT_FAILURE);
           }
           else
           for(const auto & wall: obst->GetAllWalls())
