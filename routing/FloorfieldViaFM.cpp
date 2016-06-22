@@ -280,7 +280,11 @@ void FloorfieldViaFM::getDirectionToDestination(Pedestrian* ped, Point& directio
     getDirectionToUID(destID, key, direction);
 }
 
-void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& direction) {
+void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point &direction) {
+    getDirectionToUID(destID, key, direction, global_shortest);
+}
+
+void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& direction, int mode) {
     //what if goal == -1, meaning closest exit... is GetExitIndex then -1? NO... ExitIndex is UID, given by router
     //if (ped->GetFinalDestination() == -1) /*go to closest exit*/ destID != -1;
 
@@ -337,7 +341,11 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
 //                setNewGoalAfterTheClear(localcostptr, localline);
                 //Log->Write("Starting FF for UID %d", destID);
                 //std::cerr << "\rW\tO\tR\tK\tI\tN\tG";
-                calculateFloorfield(localline, localcostptr, localneggradptr);
+                if (mode == quickest) {
+                    calculateFloorfield(localline, localcostptr, localneggradptr, densityspeed);
+                } else {
+                    calculateFloorfield(localline, localcostptr, localneggradptr, modifiedspeed);
+                }
                 //Log->Write("Ending   FF for UID %d", destID);
                 //std::cerr << "\r W\t O\t R\t K\t I\t N\t G";
         }
@@ -345,6 +353,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
     direction._x = (localneggradptr[key]._x);
     direction._y = (localneggradptr[key]._y);
 }
+
 
 //void FloorfieldViaFM::getDirectionToFinalDestination(Pedestrian* ped, Point& direction){
 //    const Point& position = ped->GetPos();
@@ -494,9 +503,25 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
 }
 
 double FloorfieldViaFM::getCostToDestination(const int destID, const Point& position) {
+//    if ((costmap.count(destID) == 0) || (costmap.at(destID) == nullptr)) {
+//        Point dummy;
+//        getDirectionToUID(destID, 0, dummy);         //this call induces the floorfieldcalculation
+//    }
+//    if ((costmap.count(destID) == 0) || (costmap.at(destID) == nullptr)) {
+//        Log->Write("ERROR: \tDestinationUID %d is invalid / out of grid.", destID);
+//        return DBL_MAX;
+//    }
+//    if (grid->getKeyAtPoint(position) == -1) {  //position is out of grid
+//        return -7;
+//    }
+//    return (costmap.at(destID))[grid->getKeyAtPoint(position)];
+    return getCostToDestination(destID, position, global_shortest);
+}
+
+double FloorfieldViaFM::getCostToDestination(const int destID, const Point& position, int mode) {
     if ((costmap.count(destID) == 0) || (costmap.at(destID) == nullptr)) {
         Point dummy;
-        getDirectionToUID(destID, 0, dummy);         //this call induces the floorfieldcalculation
+        getDirectionToUID(destID, 0, dummy, mode);         //this call induces the floorfieldcalculation
     }
     if ((costmap.count(destID) == 0) || (costmap.at(destID) == nullptr)) {
         Log->Write("ERROR: \tDestinationUID %d is invalid / out of grid.", destID);
@@ -680,6 +705,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     dist2Wall = new double[grid->GetnPoints()];
     speedInitial = new double[grid->GetnPoints()];
     modifiedspeed = new double[grid->GetnPoints()];
+    densityspeed = new double[grid->GetnPoints()];
     cost = new double[grid->GetnPoints()];
     neggrad = new Point[grid->GetnPoints()];
     dirToWall = new Point[grid->GetnPoints()];
@@ -953,6 +979,21 @@ void FloorfieldViaFM::setNewGoalAfterTheClear(double* costarray, std::vector<Lin
     //std::cerr << LineArg[0].GetUniqueID() << " " << LineArg[0].GetPoint1()._x << " " << LineArg[0].GetPoint1()._y << " " << LineArg[0].GetPoint2()._x << " " << LineArg[0].GetPoint2()._y << std::endl;
 }
 
+void FloorfieldViaFM::deleteAllFFs() {
+    for (int i = 0; i < costmap.size(); ++i) {
+        auto costIter = costmap.rbegin();
+        auto negIter  = neggradmap.rbegin();
+        std::advance(costIter, i);
+        std::advance(negIter, i);
+
+        delete[] costIter->second;
+        delete[] negIter->second;
+
+        costIter->second = nullptr;
+        negIter->second = nullptr;
+    }
+}
+
 /*!
  * \brief [brief description]
  *
@@ -1187,10 +1228,59 @@ void FloorfieldViaFM::setSpeed(bool useDistance2WallArg) {
             }
         }
     }
+    std::copy(modifiedspeed, modifiedspeed+grid->GetnPoints(), densityspeed);
 }
 
-void FloorfieldViaFM::setSpeedFromLCGrid(double* newspeed) {
-//    building->GetGrid()->HALLOHIERBINICHAMMONTAG
+void FloorfieldViaFM::setSpeedThruPeds(Pedestrian* const * pedsArg, int nsize, int modechoice, double radius) {
+
+    long int delta = radius / grid->Gethx();
+    long int posIndex = 0;
+    long int pos_i = 0;
+    long int pos_j = 0;
+    long int i_start = 0;
+    long int j_start = 0;
+    long int i_end = 0;
+    long int j_end = 0;
+    double indexDistance = 0.0;
+
+    if ((modechoice == quickest) && (!densityspeed)) {
+        densityspeed = new double[grid->GetnPoints()];
+    }
+    std::copy(modifiedspeed, modifiedspeed+grid->GetnPoints(), densityspeed);
+
+    for (int i = 0; i < nsize; ++i) {
+        //the following check is not 3D proof, we require the caller of this function to provide a list with "valid"
+        //pedestrian-pointer
+        if (!grid->includesPoint(pedsArg[i]->GetPos())) {
+            continue;
+        }
+        if (pedsArg[i]->GetEllipse().GetV().Norm() > /*this value defines the jam-speed threshold*/ 0.3*pedsArg[i]->GetEllipse().GetV0()) {
+            continue;
+        }
+        posIndex = grid->getKeyAtPoint(pedsArg[i]->GetPos());
+        pos_i = grid->get_i_fromKey(posIndex);
+        pos_j = grid->get_j_fromKey(posIndex);
+
+        i_start = ((pos_i - delta) < 0)               ? 0               : (pos_i - delta);
+        i_end   = ((pos_i + delta) >= grid->GetiMax()) ? grid->GetiMax()-1 : (pos_i + delta);
+
+        j_start = ((pos_j - delta) < 0)               ? 0               : (pos_j - delta);
+        j_end   = ((pos_j + delta) >= grid->GetjMax()) ? grid->GetjMax()-1 : (pos_j + delta);
+
+        for     (long int curr_i = i_start; curr_i < i_end; ++curr_i) {
+            for (long int curr_j = j_start; curr_j < j_end; ++curr_i) {
+                //indexDistance holds the square
+                indexDistance = ( (curr_i - pos_i)*(curr_i - pos_i) + (curr_j - pos_j)*(curr_j - pos_j) );
+                //now using indexDistance to store the (speed) reduction value
+                indexDistance = (delta*delta) - (indexDistance);
+                if (indexDistance < 0) { indexDistance = 0.;}
+                //scale to [0 .. 1]
+                indexDistance = indexDistance/(delta*delta);
+                densityspeed[curr_j*grid->GetiMax() + curr_i] = (indexDistance > 0.0) ? modifiedspeed[curr_j*grid->GetiMax() + curr_i] : .001;
+            }
+        }
+    }
+
 }
 
 void FloorfieldViaFM::calculateFloorfield(std::vector<Line>& targetlines, double* costarray, Point* neggradarray) {

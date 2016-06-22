@@ -211,6 +211,7 @@ protected:
      std::map<int, int>     goalToLineUIDmap3;
 
      int _mode;
+     double timeToRecalc = 0;
      bool _hasSpecificGoals;
      bool _targetWithinSubroom;
 };

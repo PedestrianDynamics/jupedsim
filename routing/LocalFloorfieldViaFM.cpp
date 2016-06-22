@@ -148,6 +148,7 @@ void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
      dist2Wall = new double[grid->GetnPoints()];
      speedInitial = new double[grid->GetnPoints()];
      modifiedspeed = new double[grid->GetnPoints()];
+     densityspeed = new double[grid->GetnPoints()];
      cost = new double[grid->GetnPoints()];
      neggrad = new Point[grid->GetnPoints()];
      dirToWall = new Point[grid->GetnPoints()];
@@ -580,6 +581,7 @@ void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
      dist2Wall = new double[grid->GetnPoints()];
      speedInitial = new double[grid->GetnPoints()];
      modifiedspeed = new double[grid->GetnPoints()];
+     densityspeed = new double[grid->GetnPoints()];
      cost = new double[grid->GetnPoints()];
      neggrad = new Point[grid->GetnPoints()];
      dirToWall = new Point[grid->GetnPoints()];

@@ -232,8 +232,7 @@ bool FFRouter::Init(Building* building)
                     //question: if (a to c) > (a to b) + (b to c), then FloyedWarshall will favour intermediate goal b
                     //          as a precessor to c. This might be very important, if there are edges among lines, that
                     //          are not adjacent.
-                    tempDistance = ptrToNew->getCostToDestination(*outerPtr,
-                                                                  _CroTrByUID.at(*innerPtr)->GetCentre());
+                    tempDistance = ptrToNew->getCostToDestination(*outerPtr, _CroTrByUID.at(*innerPtr)->GetCentre(), _mode);
 //                    Point endA = _CroTrByUID.at(*innerPtr)->GetCentre() * .9 +
 //                                 _CroTrByUID.at(*innerPtr)->GetPoint1() * .1;
 //                    Point endB = _CroTrByUID.at(*innerPtr)->GetCentre() * .9 +
@@ -450,11 +449,11 @@ bool FFRouter::ReInit()
                     //          are not adjacent.
                     std::pair<int, int> key_ij = std::make_pair(*outerPtr, *innerPtr);
                     std::pair<int, int> key_ji = std::make_pair(*innerPtr, *outerPtr);
-                    if (tmpdistMatrix.count(key_ij) > 0) {
+                    if ((!(_mode == quickest)) && (tmpdistMatrix.count(key_ij) > 0)) { //only take old value if ffields do not change during sim (quickest do change)
                          tempDistance = tmpdistMatrix.at(key_ij);
                     } else {
                          tempDistance = ptrToNew->getCostToDestination(*outerPtr,
-                                                                       _CroTrByUID.at(*innerPtr)->GetCentre());
+                                                                       _CroTrByUID.at(*innerPtr)->GetCentre(), _mode);
                     }
 //                    Point endA = _CroTrByUID.at(*innerPtr)->GetCentre() * .9 +
 //                                 _CroTrByUID.at(*innerPtr)->GetPoint1() * .1;
@@ -531,12 +530,24 @@ int FFRouter::FindExit(Pedestrian* p)
 //          }
 //     }
      if (_mode == quickest) {
-          p->_ticksInThisRoom += 1;
-          if (p->GetReroutingTime() > 0.) {
-               p->UpdateReroutingTime();
-               return p->GetExitIndex();
-          } else {
-               p->RerouteIn(5.);
+//          p->_ticksInThisRoom += 1;
+//          if (p->GetReroutingTime() > 0.) {
+//               p->UpdateReroutingTime();
+//               return p->GetExitIndex();
+//          } else {
+//               p->RerouteIn(5.);
+//          }
+          //above version (stopwatch at doors) failed
+
+          //new version: recalc densityspeed every x seconds
+#pragma omp critical
+          if (p->GetGlobalTime() > timeToRecalc) {
+               timeToRecalc += 5;
+               for (auto localfield : _locffviafm) { //@todo: ar.graf: create a list of local ped-ptr instead of giving all peds-ptr
+                    localfield.second->setSpeedThruPeds(_building->GetAllPedestrians().data(), _building->GetAllPedestrians().size(), _mode, 0.5);
+                    localfield.second->deleteAllFFs();
+               }
+               ReInit();
           }
      }
      double minDist = DBL_MAX;
@@ -612,15 +623,16 @@ int FFRouter::FindExit(Pedestrian* p)
                    (finalDoor != doorUID)){
                     continue;
                }
-               if (_mode == quickest) {
-                    int locDistToDoorAdd = (_CroTrByUID[doorUID]->_lastTickTime2 > _CroTrByUID[doorUID]->_lastTickTime1)?_CroTrByUID[doorUID]->_lastTickTime2:_CroTrByUID[doorUID]->_lastTickTime1;
-                    locDistToDoor = (locDistToDoor + locDistToDoorAdd * p->Getdt() * p->GetEllipse().GetV0())/2;
-               }
+//               if (_mode == quickest) {
+//                    int locDistToDoorAdd = (_CroTrByUID[doorUID]->_lastTickTime2 > _CroTrByUID[doorUID]->_lastTickTime1)?_CroTrByUID[doorUID]->_lastTickTime2:_CroTrByUID[doorUID]->_lastTickTime1;
+//                    locDistToDoor = (locDistToDoor + locDistToDoorAdd * p->Getdt() * p->GetEllipse().GetV0())/2;
+//               }
                if ((_distMatrix.count(key)!=0) && (_distMatrix.at(key) != DBL_MAX)) {
-                    if ( (_mode == local_shortest) &&
-                         (std::find(_localShortestSafedPeds.begin(), _localShortestSafedPeds.end(), p->GetID()) == _localShortestSafedPeds.end()) ) {
-                         locDistToDoor -= _distMatrix.at(key); // -x +x == +0, therefore only locDist is considered
-                    }
+                                //local_shortest comment: this version does not work. it is NOT checked, if a route exists without entering the smoked room again
+//                    if ( (_mode == local_shortest) &&
+//                         (std::find(_localShortestSafedPeds.begin(), _localShortestSafedPeds.end(), p->GetID()) == _localShortestSafedPeds.end()) ) {
+//                         locDistToDoor -= _distMatrix.at(key); // -x +x == +0, therefore only locDist is considered
+//                    }
                     if ((_distMatrix.at(key) + locDistToDoor) < minDist) {
                          minDist = _distMatrix.at(key) + locDistToDoor;
                          bestDoor = key.first; //doorUID

@@ -347,10 +347,10 @@ void Simulation::UpdateRoutesAndLocations()
                         auto& old_sub = sub0;
                         if (sub->IsDirectlyConnectedWith(old_sub)
                                 && sub->IsInSubRoom(ped->GetPos())) {
-                            if (ped->GetRoutingStrategy() == ROUTING_FF_QUICKEST) {
-                                dynamic_cast<FFRouter*>(ped->GetRouter())->notifyDoor(ped);
-                                ped->RerouteIn(0.);
-                            }
+//                            if (ped->GetRoutingStrategy() == ROUTING_FF_QUICKEST) {
+//                                dynamic_cast<FFRouter*>(ped->GetRouter())->notifyDoor(ped);
+//                                ped->RerouteIn(-1.);
+//                            }
                             if (ped->GetRoutingStrategy() == ROUTING_FF_LOCAL_SHORTEST) {
                                 dynamic_cast<FFRouter*>(ped->GetRouter())->save(ped);
                             }
