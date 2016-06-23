@@ -175,6 +175,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
            for (int p = start; p <= end; ++p) {
 
                 Pedestrian* ped = allPeds[p];
+                std::cout << ped->GetRoomID() << std::endl;
                 Room* room = building->GetRoom(ped->GetRoomID());
                 SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
 
@@ -455,7 +456,7 @@ Point VelocityModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
           if(obst->Contains(ped->GetPos()))
           {
                Log->Write("ERROR:\t Agent [%d] is trapped in obstacle in room/subroom [%d/%d]",ped->GetID(),subroom->GetRoomID(), subroom->GetSubRoomID());
-               exit(EXIT_FAILURE);
+               //exit(EXIT_FAILURE);
           }
           else
           for(const auto & wall: obst->GetAllWalls())
