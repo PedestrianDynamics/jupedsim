@@ -214,6 +214,7 @@ protected:
      double timeToRecalc = 0;
      bool _hasSpecificGoals;
      bool _targetWithinSubroom;
+     static int cnt;
 };
 
 #endif /* FFROUTER_H_ */

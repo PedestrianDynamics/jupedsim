@@ -1128,6 +1128,9 @@ bool IniFileParser::ParseStepSize(TiXmlNode& stepNode)
                          (std::string(stepNode.FirstChildElement("stepsize")->Attribute("fix")) == "yes") ) {
                     _config->Setdt(atof(stepsize));
                     Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
+                    if (tmp < _config->Getdt()) {
+                         Log->Write("WARNING: \tStepsize dt = %f > %f = frameinterval.\nWARNING: \tYou should decrease stepsize or fps!", _config->Getdt(), tmp);
+                    }
                     return true;
                }
                //find a stepsize, that can be multiplied by (int) to get framerate
@@ -1141,8 +1144,12 @@ bool IniFileParser::ParseStepSize(TiXmlNode& stepNode)
                          return true;
                     }
                }
+               //below should never execute
                _config->Setdt(stepsizeDBL);
                Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
+               if (tmp < _config->Getdt()) {
+                    Log->Write("WARNING: \tStepsize dt = %f > %f = frameinterval. You should decrease stepsize or fps!", _config->Getdt(), tmp);
+               }
                return true;
           }
      }

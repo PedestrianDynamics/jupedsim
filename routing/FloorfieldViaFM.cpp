@@ -981,13 +981,13 @@ void FloorfieldViaFM::setNewGoalAfterTheClear(double* costarray, std::vector<Lin
 
 void FloorfieldViaFM::deleteAllFFs() {
     for (int i = 0; i < costmap.size(); ++i) {
-        auto costIter = costmap.rbegin();
-        auto negIter  = neggradmap.rbegin();
-        std::advance(costIter, i);
-        std::advance(negIter, i);
+        auto costIter = costmap.begin();
+        auto negIter  = neggradmap.begin();
+        std::advance(costIter, (costmap.size() - (i+1)));
+        std::advance(negIter,  (neggradmap.size() - (i+1)));
 
-        delete[] costIter->second;
-        delete[] negIter->second;
+        if (costIter->second) delete[] costIter->second;
+        if (negIter->second) delete[] negIter->second;
 
         costIter->second = nullptr;
         negIter->second = nullptr;
@@ -1243,10 +1243,19 @@ void FloorfieldViaFM::setSpeedThruPeds(Pedestrian* const * pedsArg, int nsize, i
     long int j_end = 0;
     double indexDistance = 0.0;
 
+    if (nsize == 0) {
+        Log->Write("WARNING: \tSetSpeedThruPeds is ZERO");
+    } else {
+        Log->Write("INFO: \t\tNumber of Peds: %d",nsize);
+    }
+
     if ((modechoice == quickest) && (!densityspeed)) {
         densityspeed = new double[grid->GetnPoints()];
     }
-    std::copy(modifiedspeed, modifiedspeed+grid->GetnPoints(), densityspeed);
+    //std::copy(modifiedspeed, modifiedspeed+(grid->GetnPoints()), densityspeed);
+    for (long int i = 0; i < grid->GetnPoints(); ++i) {
+        densityspeed[i] = speedInitial[i];
+    }
 
     for (int i = 0; i < nsize; ++i) {
         //the following check is not 3D proof, we require the caller of this function to provide a list with "valid"
@@ -1254,9 +1263,10 @@ void FloorfieldViaFM::setSpeedThruPeds(Pedestrian* const * pedsArg, int nsize, i
         if (!grid->includesPoint(pedsArg[i]->GetPos())) {
             continue;
         }
-        if (pedsArg[i]->GetEllipse().GetV().Norm() > /*this value defines the jam-speed threshold*/ 0.3*pedsArg[i]->GetEllipse().GetV0()) {
-            continue;
-        }
+                                                    /*this value defines the jam-speed threshold*/
+//        if (pedsArg[i]->GetEllipse().GetV().Norm() >  0.8*pedsArg[i]->GetEllipse().GetV0()) {
+//            continue;
+//        }
         posIndex = grid->getKeyAtPoint(pedsArg[i]->GetPos());
         pos_i = grid->get_i_fromKey(posIndex);
         pos_j = grid->get_j_fromKey(posIndex);
@@ -1268,15 +1278,20 @@ void FloorfieldViaFM::setSpeedThruPeds(Pedestrian* const * pedsArg, int nsize, i
         j_end   = ((pos_j + delta) >= grid->GetjMax()) ? grid->GetjMax()-1 : (pos_j + delta);
 
         for     (long int curr_i = i_start; curr_i < i_end; ++curr_i) {
-            for (long int curr_j = j_start; curr_j < j_end; ++curr_i) {
+            for (long int curr_j = j_start; curr_j < j_end; ++curr_j) {
                 //indexDistance holds the square
                 indexDistance = ( (curr_i - pos_i)*(curr_i - pos_i) + (curr_j - pos_j)*(curr_j - pos_j) );
                 //now using indexDistance to store the (speed) reduction value
-                indexDistance = (delta*delta) - (indexDistance);
-                if (indexDistance < 0) { indexDistance = 0.;}
+                //indexDistance = (delta*delta) - (indexDistance);
+                //if (indexDistance < 0) { indexDistance = 0.;}
                 //scale to [0 .. 1]
-                indexDistance = indexDistance/(delta*delta);
-                densityspeed[curr_j*grid->GetiMax() + curr_i] = (indexDistance > 0.0) ? modifiedspeed[curr_j*grid->GetiMax() + curr_i] : .001;
+                //indexDistance = indexDistance/(delta*delta);
+
+                //densityspeed[curr_j*grid->GetiMax() + curr_i] = (indexDistance > (delta*delta)) ? densityspeed[curr_j*grid->GetiMax() + curr_i] : .001;
+                if (indexDistance > (delta*delta)) {
+                    //std::cout << "c h a n g i n g   ";
+                    densityspeed[curr_j*grid->GetiMax() + curr_i] = 0.01;
+                }
             }
         }
     }

@@ -52,6 +52,8 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../IO/OutputHandler.h"
 
+int FFRouter::cnt = 0;
+
 FFRouter::FFRouter()
 {
 
@@ -381,6 +383,9 @@ bool FFRouter::ReInit()
 #pragma omp critical
           _locffviafm.insert(std::make_pair((*pairRoomIt).first, ptrToNew));
 
+          if (_mode == quickest) {
+               ptrToNew->setSpeedThruPeds(_building->GetAllPedestrians().data(), _building->GetAllPedestrians().size(), _mode, 0.5);
+          }
           //SetDistances
           vector<int> doorUIDs;
           doorUIDs.clear();
@@ -489,7 +494,8 @@ bool FFRouter::ReInit()
      FloydWarshall();
 
      //debug output in file
-//     _locffviafm[4]->writeFF("ffTreppe.vtk", _allDoorUIDs);
+     std::string ffname = "MasterFF" + std::to_string(++cnt) + ".vtk";
+     _locffviafm[0]->writeFF(ffname, _allDoorUIDs);
 
      //int roomTest = (*(_locffviafm.begin())).first;
      //int transTest = (building->GetRoom(roomTest)->GetAllTransitionsIDs())[0];
@@ -540,13 +546,12 @@ int FFRouter::FindExit(Pedestrian* p)
           //above version (stopwatch at doors) failed
 
           //new version: recalc densityspeed every x seconds
-#pragma omp critical
           if (p->GetGlobalTime() > timeToRecalc) {
                timeToRecalc += 5;
-               for (auto localfield : _locffviafm) { //@todo: ar.graf: create a list of local ped-ptr instead of giving all peds-ptr
-                    localfield.second->setSpeedThruPeds(_building->GetAllPedestrians().data(), _building->GetAllPedestrians().size(), _mode, 0.5);
-                    localfield.second->deleteAllFFs();
-               }
+//               for (auto localfield : _locffviafm) { //@todo: ar.graf: create a list of local ped-ptr instead of giving all peds-ptr
+//                    localfield.second->setSpeedThruPeds(_building->GetAllPedestrians().data(), _building->GetAllPedestrians().size(), _mode, 1.);
+//                    localfield.second->deleteAllFFs();
+//               }
                ReInit();
           }
      }
@@ -612,7 +617,7 @@ int FFRouter::FindExit(Pedestrian* p)
      for(int finalDoor : validFinalDoor) {
           //with UIDs, we can ask for shortest path
           for (int doorUID : DoorUIDsOfRoom) {
-               double locDistToDoor = _locffviafm[p->GetRoomID()]->getCostToDestination(doorUID, p->GetPos());
+               double locDistToDoor = _locffviafm[p->GetRoomID()]->getCostToDestination(doorUID, p->GetPos(), _mode);
                if (locDistToDoor < -J_EPS) {     //this can happen, if the point is not reachable and therefore has init val -7
                     continue;
                }
