@@ -280,11 +280,11 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 spacings.clear(); //clear for ped p
 
                 // stuck peds get removed. Warning is thrown. low speed due to jam is ommitted.
-                if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime()&& ped->GetMeanVelOverRecTime() < 0.1 && size <= 2 ) // size length of peds neighbour vector
-                {
-                      Log->Write("WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time %f s\n", ped->GetID(), ped->GetMeanVelOverRecTime(), ped->GetRoomID(), ped->GetSubRoomID(), ped->GetGlobalTime());
-                      building->DeletePedestrian(ped);
-                }
+//                if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime()&& ped->GetMeanVelOverRecTime() < 0.1 && size <= 2 ) // size length of peds neighbour vector
+//                {
+//                      Log->Write("WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time %f s\n", ped->GetID(), ped->GetMeanVelOverRecTime(), ped->GetRoomID(), ped->GetSubRoomID(), ped->GetGlobalTime());
+//                      building->DeletePedestrian(ped);
+//                }
 
            } // for p
 
