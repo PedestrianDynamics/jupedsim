@@ -70,7 +70,6 @@ private:
      double _xMax;
      double _yMin;
      double _yMax;
-
      //pre movement time distribution
      mutable std::normal_distribution<double> _premovementTime;
 
@@ -79,13 +78,14 @@ private:
      mutable std::normal_distribution<double> _riskTolerance;
      mutable boost::math::beta_distribution<> _risk_beta_dist;
 
+     static bool seeded;
      //random number generator engine
      mutable std::default_random_engine _generator;
 
 public:
      StartDistribution(int seed);
      virtual ~StartDistribution();
-
+     std::default_random_engine GetGenerator();
      int GetAgentsNumber() const;
      void SetRoomID(int id);
      void SetAgentsNumber(int N);
