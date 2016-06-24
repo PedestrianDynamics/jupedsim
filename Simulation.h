@@ -139,7 +139,7 @@ public:
     /**
      * Run the main part of the simulation
      */
-    int RunBody(double maxSimTime);
+    double RunBody(double maxSimTime);
 
     /**
      * Perform some finalization like writing the
@@ -151,7 +151,7 @@ public:
      * Run a standard simulation
      * @return the total simulated/evacuation time
      */
-    int RunStandardSimulation(double maxSimTime);
+    double RunStandardSimulation(double maxSimTime);
 
     /**
      * print some statistics about the simulation

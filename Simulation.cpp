@@ -278,12 +278,12 @@ bool Simulation::InitArgs()
     return true;
 }
 
-int Simulation::RunStandardSimulation(double maxSimTime)
+double Simulation::RunStandardSimulation(double maxSimTime)
 {
     RunHeader(_nPeds+_agentSrcManager.GetMaxAgentNumber());
     double t = RunBody(maxSimTime);
     RunFooter();
-    return (int) t;
+    return t;
 }
 
 void Simulation::UpdateRoutesAndLocations()
@@ -478,7 +478,7 @@ void Simulation::RunHeader(long nPed)
     ProcessAgentsQueue();
 }
 
-int Simulation::RunBody(double maxSimTime)
+double Simulation::RunBody(double maxSimTime)
 {
     //needed to control the execution time PART 1
     //in the case you want to run in no faster than realtime
@@ -548,7 +548,7 @@ int Simulation::RunBody(double maxSimTime)
         // while (goal > clock());
         ++frameNr;
     }
-    return (int) t;
+    return t;
 }
 
 void Simulation::RunFooter()
