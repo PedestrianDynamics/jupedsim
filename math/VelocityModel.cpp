@@ -156,7 +156,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
       int nThreads = omp_get_max_threads();
       //nThreads = 1; //debug only
       int partSize;
-      partSize = (int) (nSize / nThreads);
+      partSize = (nSize >= nThreads)? (int) (nSize / nThreads):1;
 
       #pragma omp parallel  default(shared) num_threads(nThreads)
       {
@@ -171,7 +171,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
            int end;
            end = (threadID + 1) * partSize - 1;
            if ((threadID == nThreads - 1)) end = (int) (nSize - 1);
-
+           if(threadID >= nSize) end = start - 1; //ignore this thread
            for (int p = start; p <= end; ++p) {
 
                 Pedestrian* ped = allPeds[p];
