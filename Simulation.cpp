@@ -299,7 +299,7 @@ void Simulation::UpdateRoutesAndLocations()
 
     unsigned long nSize = allPeds.size();
     int nThreads = omp_get_max_threads();
-//     int nThreads = 1;
+    nThreads = 1;
     int partSize = nSize/nThreads;
 
 #pragma omp parallel  default(shared) num_threads(nThreads)
