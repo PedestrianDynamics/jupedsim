@@ -154,11 +154,13 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
       nSize = allPeds.size();
 
       int nThreads = omp_get_max_threads();
+
       //nThreads = 1; //debug only
       int partSize;
-      partSize = (int) (nSize / nThreads);
-
-      #pragma omp parallel  default(shared) num_threads(nThreads)
+      partSize = ((int)nSize > nThreads)? (int) (nSize / nThreads):(int)nSize;
+      if(partSize == (int)nSize)
+            nThreads = 1; // not worthy to parallelize 
+      #pragma omp parallel default(shared) num_threads(nThreads)
       {
            vector< Point > result_acc = vector<Point > ();
            result_acc.reserve(nSize);
@@ -169,30 +171,12 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
            int start = threadID*partSize;
            int end;
-           end = (threadID + 1) * partSize - 1;
-           if ((threadID == nThreads - 1)) end = (int) (nSize - 1);
-
+           end = (threadID < nThreads - 1) ? (threadID + 1) * partSize - 1: (int) (nSize - 1);
            for (int p = start; p <= end; ++p) {
-
+                 // printf("\n------------------\nid=%d\t p=%d\n", threadID, p);
                 Pedestrian* ped = allPeds[p];
                 Room* room = building->GetRoom(ped->GetRoomID());
                 SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
-
-                double normVi = ped->GetV().ScalarProduct(ped->GetV()); //squared
-                double HighVel = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta); //(v0+delta)^2
-                if (normVi > HighVel && ped->GetV0Norm() > 0) {
-                     fprintf(stderr, "WARNING: VelocityModel::ComputeNextTimeStep() actual velocity (%f) of iped %d "
-                             "is bigger than desired velocity (%f) at time: %fs\n",
-                             sqrt(normVi), ped->GetID(), ped->GetV0Norm(), current);
-
-                     // remove the pedestrian and abort
-                     Log->Write("\tERROR: ped [%d] was removed due to high velocity",ped->GetID());
-                     building->DeletePedestrian(ped);
-                     exit(EXIT_FAILURE);
-
-                }
-
-
                 Point repPed = Point(0,0);
                 vector<Pedestrian*> neighbours;
                 building->GetGrid()->GetNeighbourhood(ped,neighbours);
@@ -203,6 +187,10 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      //if they are in the same subroom
                      Point p1 = ped->GetPos();
                      Point p2 = ped1->GetPos();
+                     // if(ped->GetID() == -1){
+                     // printf("---\nid: %d\t (%f), ped1 %d\t pos1 %f %f\n", threadID, ped->GetGlobalTime(), ped->GetID(), p1._x, p1._y);
+                     // printf("id: %d\t (%f), ped2 %d\t pos2 %f %f\n---\n", threadID, ped1->GetGlobalTime(), ped1->GetID(), p2._x, p2._y);
+                     // }
                      //subrooms to consider when looking for neighbour for the 3d visibility
                      vector<SubRoom*> emptyVector;
                      emptyVector.push_back(subroom);
@@ -250,36 +238,11 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 double spacing = spacings[0].first;
                 double winkel = spacings[0].second;
                 Point tmp;
-
-
-                // if(fmod(ped->GetGlobalTime(), ped->GetUpdateRate())<0.0001 || (spacing-ped->GetLastE0()._x)>0.01)
-                // {
-                   
-                      // if(ped->GetID()==-10)
-                            // std::cout << "Min Spacing "<< spacing << ", " << winkel << std::endl;
-                //       ped->SetLastE0(Point(spacing, winkel));
-                // }
-                // else
-                // {
-                //       tmp = ped->GetLastE0();
-                //       if(ped->GetID()==10)
-                //             std::cout << "keep direction "<<tmp._x << ", " << tmp._y << std::endl;
-                //       spacing = tmp._x;
-                //       winkel = tmp._y;
-                // }
-                // if(ped->GetID()==-10)
-                      // getc(stdin);
-
-                
-                // spacing = *std::min_element(std::begin(spacings), std::end(spacings));
-                // if(ped->GetID()==10){
-                      // fprintf(stderr, "%f %f %f\n", ped->GetGlobalTime(), (repPed+repWall).Norm(), spacing);
-                // }
                 Point speed = direction.Normalized() * OptimalSpeed(ped, spacing, winkel);
-                result_acc.push_back(speed);
+                result_acc.push_back(speed);                
                 spacings.clear(); //clear for ped p
-
-                // stuck peds get removed. Warning is thrown. low speed due to jam is ommitted.
+                
+                // stuck peds get removed. Warning is thrown. low speed due to jam is omitted.
                 if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime()&& ped->GetMeanVelOverRecTime() < 0.01 && size == 0 ) // size length of peds neighbour vector
                 {
                       Log->Write("WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time %f s\n", ped->GetID(), ped->GetMeanVelOverRecTime(), ped->GetRoomID(), ped->GetSubRoomID(), ped->GetGlobalTime());
@@ -288,7 +251,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
            } // for p
 
-           //#pragma omp barrier
+           #pragma omp barrier
            // update
            for (int p = start; p <= end; ++p) {
                 Pedestrian* ped = allPeds[p];
