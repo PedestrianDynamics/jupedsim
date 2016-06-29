@@ -211,7 +211,6 @@ const std::map<int, std::shared_ptr<Room> >& Building::GetAllRooms() const
 
 Room* Building::GetRoom(int index) const
 {
-    std::cout << index << std::endl;
      //todo: obsolete since the check is done by .at()
      if (_rooms.count(index)==0) {
           Log->Write("ERROR: Wrong 'index' in CBuiling::GetRoom() Room ID: %d size: %d", index, _rooms.size());

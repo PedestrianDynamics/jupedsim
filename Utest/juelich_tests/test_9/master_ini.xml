@@ -3,8 +3,8 @@
 <JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
 
   <!-- seed used for initialising random generator -->
-  <seed>linspace(1, 100000, 10)</seed>
-  <num_threads>range(1,9)</num_threads>
+  <seed>1234</seed>
+  <num_threads>[1, 2, 4, 8, 16, 24]</num_threads>
   <max_sim_time unit="sec">900</max_sim_time>
   <!-- geometry file -->
   <geometry>../geometry.xml</geometry>
@@ -45,7 +45,7 @@
   <!--persons information and distribution -->
   <agents operational_model_id="3">
     <agents_distribution>
-      <group group_id="2" agent_parameter_id="0" room_id="1" subroom_id="0" number="100" goal_id="0" router_id="1" route_id=""/>
+      <group group_id="2" agent_parameter_id="0" room_id="1" subroom_id="0" number="40" goal_id="0" router_id="1" route_id=""/>
     </agents_distribution>
 
     <!-- frequency in persons/minute -->

@@ -91,7 +91,7 @@ bool PedDistributor::Distribute(Building *building) const {
     Log->Write("INFO: \tInit Distribute");
     int nPeds_is = 0;
     int nPeds_expected = 0;
-    mt19937 g(static_cast<uint32_t>(_configuration->GetSeed()));
+
 
     // store the position in a map since we are not computing for all rooms/subrooms.
     std::map<int, std::map<int, vector<Point> > > allFreePos;
@@ -124,7 +124,7 @@ bool PedDistributor::Distribute(Building *building) const {
         return false;}
 
         auto possibleSubroomPositions = PedDistributor::PossiblePositions(*sr);
-        shuffle(possibleSubroomPositions.begin(), possibleSubroomPositions.end(), g);
+        shuffle(possibleSubroomPositions.begin(), possibleSubroomPositions.end(), dist->GetGenerator());
         allFreePosRoom[subroomID] = possibleSubroomPositions;
     }
 
@@ -144,7 +144,7 @@ bool PedDistributor::Distribute(Building *building) const {
                 continue;
             
             auto possibleSubroomPositions = PedDistributor::PossiblePositions(*it_sr.second);
-            shuffle(possibleSubroomPositions.begin(), possibleSubroomPositions.end(), g);
+            shuffle(possibleSubroomPositions.begin(), possibleSubroomPositions.end(), dist->GetGenerator());
             allFreePosRoom[subroomID] = possibleSubroomPositions;
         }
     }

@@ -44,6 +44,7 @@ StartDistribution::StartDistribution(int seed)
 {
      _roomID = -1;
      _subroomID=-1;
+     _subroomUID=-1;
      _nPeds = -1;
      _groupID = -1;
      _goalID = -1;
@@ -62,13 +63,22 @@ StartDistribution::StartDistribution(int seed)
      _yMin=-FLT_MAX;
      _yMax=FLT_MAX;
      _groupParameters=NULL;
-     _generator = std::default_random_engine(seed);
+     static bool _seeded = false; // seed only once, not every time
+     if(!_seeded) {
+           _generator = std::default_random_engine(seed);     // mt19937 g(static_cast<uint32_t>(_configuration->GetSeed()));
+           _seeded = true;
+     }
 }
 
 StartDistribution::~StartDistribution()
 {
 }
 
+
+std::default_random_engine StartDistribution::GetGenerator() 
+{
+     return _generator;
+}
 
 int StartDistribution::GetAgentsNumber() const
 {

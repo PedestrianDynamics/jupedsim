@@ -114,7 +114,19 @@ def PassedLineY(p, exit):
     x2 = exit[2]
     return any(p[:, 3] <= y) & any(p[:, 3] >= y) & any(p[:, 2] >= x1) & any(p[:, 2] <= x2)
 
-
+def get_num_threads(filename):
+    """
+    get num_threads
+    """
+    logging.info("parsing <%s>"%filename)
+    try:
+        xmldoc = minidom.parse(filename)
+    except:
+        logging.critical('could not parse file %s. exit'%filename)
+        exit(FAILURE)
+    num_threads = float(xmldoc.getElementsByTagName('num_threads')[0].firstChild.nodeValue)
+    return num_threads
+    
 def get_maxtime(filename):
     """
     get max sim time

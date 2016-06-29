@@ -107,7 +107,7 @@ bool IniFileParser::Parse(std::string iniFile)
                _config->SetSeed((unsigned int) time(NULL));
           }
      }
-     srand(_config->GetSeed());
+     // srand(_config->GetSeed());
      Log->Write("INFO:\trandom seed <%d>", _config->GetSeed());
 
      // max simulation time

@@ -183,7 +183,7 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
                             frequency));
             startDisSources.push_back(source);
 
-            Log->Write("INFO:\tSource with id %s will not be parsed !", e->Attribute("id"));
+            Log->Write("INFO:\tSource with id %s will be parsed !", e->Attribute("id"));
         }
     }
     Log->Write("INFO: \t...Done");
