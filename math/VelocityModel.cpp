@@ -157,8 +157,9 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
       //nThreads = 1; //debug only
       int partSize;
-      partSize = ((int)nSize >= nThreads)? (int) (nSize / nThreads):1;
-
+      partSize = ((int)nSize > nThreads)? (int) (nSize / nThreads):(int)nSize;
+      if(partSize == (int)nSize)
+            nThreads = 1; // not worthy to parallelize 
       #pragma omp parallel default(shared) num_threads(nThreads)
       {
            vector< Point > result_acc = vector<Point > ();
@@ -171,9 +172,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
            int start = threadID*partSize;
            int end;
            end = (threadID < nThreads - 1) ? (threadID + 1) * partSize - 1: (int) (nSize - 1);
-
-           // printf("\nstart %d, end %d Thread Id %d\n", start, end, threadID);
-           
            for (int p = start; p <= end; ++p) {
                  // printf("\n------------------\nid=%d\t p=%d\n", threadID, p);
                 Pedestrian* ped = allPeds[p];
@@ -253,7 +251,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
            } // for p
 
-           //#pragma omp barrier
+           #pragma omp barrier
            // update
            for (int p = start; p <= end; ++p) {
                 Pedestrian* ped = allPeds[p];

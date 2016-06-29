@@ -299,20 +299,23 @@ void Simulation::UpdateRoutesAndLocations()
 
     unsigned long nSize = allPeds.size();
     int nThreads = omp_get_max_threads();
-    nThreads = 1;
-    int partSize = nSize/nThreads;
+    int partSize;
+    partSize = ((int)nSize > nThreads)? (int) (nSize / nThreads):(int)nSize;
+    if(partSize == (int)nSize)
+            nThreads = 1; // not worthy to parallelize 
 
 #pragma omp parallel  default(shared) num_threads(nThreads)
     {
         const int threadID = omp_get_thread_num();
         int start = threadID*partSize;
-        int end = (threadID+1)*partSize-1;
-        if ((threadID==nThreads-1))
-            end = nSize-1;
+        int end ;//= (threadID+1)*partSize-1;
+        // if ((threadID==nThreads-1))
+            // end = nSize-1;
+        end = (threadID < nThreads - 1) ? (threadID + 1) * partSize - 1: (int) (nSize - 1);
 
         for (int p = start; p<=end; ++p) {
-            Pedestrian* ped = allPeds[p];
 
+            Pedestrian* ped = allPeds[p];
             Room* room0 = _building->GetRoom(ped->GetRoomID());
             SubRoom* sub0 = room0->GetSubRoom(ped->GetSubRoomID());
 
@@ -365,7 +368,6 @@ void Simulation::UpdateRoutesAndLocations()
                             //   Log->Write("WARNING:\t pedestrian [%d] left the room in an unusual way. Please check",ped->GetID());
                             //   Log->Write("        \t distance to previous target is %f",ped->GetDistanceToNextTarget());
                             //}
-
                             //also statistic for internal doors
                             UpdateFlowAtDoors(*ped); //@todo: ar.graf : this call should move into a critical region? check plz
 
