@@ -4,8 +4,7 @@
 # -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON (default OFF)
 # -DBUILD_TESTING=ON (default OFF) for python tests
 # -DBUILD_CPPUNIT_TEST=ON (default OFF) for unit tests
-# -DUSE_ABI=ON (default OFF) makes the compiler use the old version of ABI (helps if BOOST is compiled with a different version)
-# see also http://stackoverflow.com/questions/30668560/boost-unit-test-link-error-abi-mismatch
+# -DUSE_DUAL_ABI=ON (default OFF)  https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
@@ -15,7 +14,7 @@ project(JPScore)
 
 set(CMAKE_COLOR_MAKEFILE ON)
 set(JPSCORE_MAJOR_VERSION 0)
-set(JPSCORE_MINOR_VERSION 7)
+set(JPSCORE_MINOR_VERSION 8)
 set(JPSCORE_PATCH_VERSION 0)
 set(JPSCORE_VERSION
         ${JPSCORE_MAJOR_VERSION}.${JPSCORE_MINOR_VERSION}.${JPSCORE_PATCH_VERSION})
@@ -77,8 +76,8 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif (NOT CMAKE_BUILD_TYPE)
 message(STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE})
-if(NOT USE_ABI)
-  set (USE_ABI FALSE)
+if(NOT USE_DUAL_ABI)
+  set (USE_DUAL_ABI FALSE)
 endif()
 #------------------ set important directories --------------------
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
@@ -190,9 +189,9 @@ if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
     find_package(Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
     IF (CMAKE_COMPILER_IS_GNUCXX)
       set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
-      IF (USE_ABI)
+      IF (USE_DUAL_ABI)
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_USE_CXX11_ABI=0")
-      ENDIF(USE_ABI)
+      ENDIF(USE_DUAL_ABI)
         set(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
         set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules/")
         INCLUDE(CodeCoverage)
