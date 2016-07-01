@@ -68,8 +68,8 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
         double patience = xmltof(e->Attribute("patience"), 5);
         double premovement_mean = xmltof(e->Attribute("pre_movement_mean"), 0);
         double premovement_sigma = xmltof(e->Attribute("pre_movement_sigma"), 0);
-        double risk_tolerance_mean = xmltof(e->Attribute("risk_tolerance_mean"), 0);
-        double risk_tolerance_sigma = xmltof(e->Attribute("risk_tolerance_sigma"), 0);
+        //double risk_tolerance_mean = xmltof(e->Attribute("risk_tolerance_mean"), 0);
+        //double risk_tolerance_sigma = xmltof(e->Attribute("risk_tolerance_sigma"), 0);
 
         double x_min = xmltof(e->Attribute("x_min"), -FLT_MAX);
         double x_max = xmltof(e->Attribute("x_max"), FLT_MAX);

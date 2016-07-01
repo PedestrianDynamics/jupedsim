@@ -52,10 +52,50 @@ public:
 
      Configuration()
      {
-          _log = 0;
-          _port = -1.0;
-          _tMax = 20;
+          _solver = 1;
           _routingEngine = std::shared_ptr<RoutingEngine>(new RoutingEngine());
+          _maxOpenMPThreads = 1;
+          _log = 0;
+          _port = -1;
+          _seed = 0;
+          _fps = 8;
+          _linkedCellSize = 2.2; // meter
+          _model = nullptr;//std::shared_ptr<OperationalModel>(new OperationalModel());
+          _tMax = 500; // seconds
+          _dT = 0.01;
+          _isPeriodic = 0; // use only for Tordeux2015 with "trivial" geometries
+          // ----------- GCFM repulsive force ------
+          _nuPed = 0.4;
+          _nuWall = 0.2;
+          // ----------- Gompertz repulsive force ------
+          _aPed = 1;    // Tordeux2015
+          _bPed = 0.25; // Tordeux2015
+          _cPed = 3;
+          _aWall = 1;
+          _bWall = 0.7;
+          _cWall = 3;
+          // ----------- Tordeux2015 model ------
+          _dWall = 0.1;
+          _dPed = 0.1;
+          // ------- Interpolation GCFM - left side
+          _intPWidthPed = 0.1;
+          _intPWidthWall = 0.1;
+          // ------- GCFM repulsive force
+          _maxFPed = 3;
+          _maxFWall = 3;
+          // -------- Interpolation GCFM - right side
+          _distEffMaxPed = 2;
+          _distEffMaxWall = 2;
+          // ----------------
+          _hostname = "localhost";
+          _trajectoriesFile = "trajectories.xml";
+          _errorLogFile = "log.txt";
+          _projectFile = "";
+          _geometryFile = "";
+          _projectRootDir = ".";
+          _showStatistics = false;
+          _fileFormat = FORMAT_XML_PLAIN;
+          _agentsParameters = std::map<int, std::shared_ptr<AgentsParameters> >();
      }
 
      int GetSolver() const { return _solver; };
@@ -177,7 +217,7 @@ public:
 
      const std::string& GetTrajectoriesFile() const { return _trajectoriesFile; };
 
-     void SetTrjectoriesFile(std::string trajectoriesFile) { _trajectoriesFile = trajectoriesFile; };
+     void SetTrajectoriesFile(std::string trajectoriesFile) { _trajectoriesFile = trajectoriesFile; };
 
      const std::string& GetErrorLogFile() const { return _errorLogFile; };
 
