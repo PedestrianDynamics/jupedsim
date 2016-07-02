@@ -28,9 +28,9 @@ PedDistributionParser::PedDistributionParser(const Configuration* configuration)
 
 }
 
-bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDistribution>>& startDis,
-        vector<std::shared_ptr<StartDistribution>>& startDisSub,
-        std::vector<std::shared_ptr<AgentsSource>>& startDisSources)
+bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDistribution> >& startDis,
+        vector<std::shared_ptr<StartDistribution> >& startDisSub,
+        std::vector<std::shared_ptr<AgentsSource> >& startDisSources)
 {
 
     Log->Write("INFO: \tLoading and parsing the persons attributes");
