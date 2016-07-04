@@ -2708,8 +2708,7 @@ namespace VisiLibity
   }
 
 
-  void Guards::snap_to_boundary_of(const Environment& environment_temp,
-				   double epsilon)
+  void Guards::snap_to_boundary_of(const Environment& environment_temp)
   {
     for(unsigned i=0; i<positions_.size(); i++)
       positions_[i].snap_to_boundary_of(environment_temp);

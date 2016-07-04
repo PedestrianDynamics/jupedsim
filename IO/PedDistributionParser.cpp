@@ -28,6 +28,10 @@ PedDistributionParser::PedDistributionParser(const Configuration* configuration)
 
 }
 
+PedDistributionParser::~PedDistributionParser() {
+      // delete _configuration;
+}
+
 bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDistribution> >& startDis,
         vector<std::shared_ptr<StartDistribution> >& startDisSub,
         std::vector<std::shared_ptr<AgentsSource> >& startDisSources)
