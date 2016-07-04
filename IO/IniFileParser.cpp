@@ -131,7 +131,7 @@ bool IniFileParser::Parse(std::string iniFile)
           TiXmlNode* numthreads = xMainNode->FirstChild("num_threads")->FirstChild();
           if (numthreads) {
 #ifdef _OPENMP
-               omp_set_num_threads(xmltoi(numthreads->Value(), omp_get_max_threads()));
+                omp_set_num_threads(xmltoi(numthreads->Value()));
 #endif               
           }
      }
