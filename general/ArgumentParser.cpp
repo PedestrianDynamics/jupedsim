@@ -112,7 +112,9 @@ bool ArgumentParser::ParseArgs(int argc, char** argv)
                argument.erase(0, prefix1.size());
           }
           IniFileParser* p = new IniFileParser(_config);
-          return p->Parse(argument);
+          bool status = p->Parse(argument);
+          delete p;
+          return status;
      }
 
 #ifdef _JPS_AS_A_SERVICE //TODO try to avoid macros!
