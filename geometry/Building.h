@@ -61,12 +61,12 @@ class Configuration;
 
 class Building {
 private:
+     const Configuration* _configuration;
+     std::shared_ptr<RoutingEngine> _routingEngine;
      std::string _caption;
      std::string _geometryFilename;
-     std::shared_ptr<RoutingEngine> _routingEngine;
      LCGrid* _linkedCellGrid;
      std::vector<Pedestrian*> _allPedestians;
-
      std::map<int, std::shared_ptr<Room> > _rooms;
      std::map<int, Crossing*> _crossings;
      std::map<int, Transition*> _transitions;
@@ -228,7 +228,7 @@ public:
       * @param filename the relative location of the file
       * @return true if everything went fine.
       */
-     bool SaveGeometry(const std::string& filename);
+  //   bool SaveGeometry(const std::string& filename);
 
      void WriteToErrorLog() const;
 
@@ -247,7 +247,6 @@ public:
 private:
      void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);
 
-     const Configuration* _configuration;
 };
 
 #endif  /* _BUILDING_H */

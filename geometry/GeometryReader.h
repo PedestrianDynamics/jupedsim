@@ -12,7 +12,7 @@ public:
      virtual void LoadBuilding(Building* building) = 0;
 
      virtual bool LoadTrafficInfo(Building* building) = 0;
-
+     virtual ~GeometryReader(){};
 };
 
 #endif //JPSCORE_GEOMETRYREADER_H

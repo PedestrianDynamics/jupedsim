@@ -1123,9 +1123,9 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
           {
                int to_door = to_AP->GetID();
 
-               int room_id = to_AP->GetConnectingRoom1();
+               int lroom_id = to_AP->GetConnectingRoom1();
 
-               if (IsElementInVector(rooms_ids, room_id) == false)
+               if (IsElementInVector(rooms_ids, lroom_id) == false)
                     continue;
 
                graph_file << from_door << " -> " << to_door << " [ label="

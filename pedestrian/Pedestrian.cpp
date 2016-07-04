@@ -45,75 +45,85 @@ AgentColorMode Pedestrian::_colorMode=BY_VELOCITY;
 
 Pedestrian::Pedestrian()
 {
-     _roomID = -1;
-     _subRoomID = -1;
-     _subRoomUID = -1;
-     _oldRoomID = -1;
-     _oldSubRoomID = -1;
-     _ticksInThisRoom = 0;
-     _exitIndex = -1;
      _id = _agentsCreated;//default id
+     _exitIndex = -1;
+     _group = -1;
+     _desiredFinalDestination = FINAL_DEST_OUT;
+     _height = 170;
+     _age = 30;
+     _premovement = 0;
+     _riskTolerance = 0;
+     _gender = "female";
      _mass = 1;
      _tau = 0.5;
      _T = 1.0;
-     _newOrientationFlag = false;
-     _newOrientationDelay = 0; //0 seconds, in steps
-     _tmpFirstOrientation = true;
-     _turninAngle = 0.0;
-     _ellipse = JEllipse();
-     //_navLine = new NavLine(); //FIXME? argraf : rather nullptr and Setter includes correct uid (done below)
-     _navLine = nullptr;
-     _router = NULL;
-     _building = NULL;
-     _reroutingThreshold = 0.0; // new orientation after 10 seconds, value is incremented
-     _timeBeforeRerouting = 0.0;
-     _reroutingEnabled = false;
-     _timeInJam = 0.0;
-     _patienceTime = 5.0;// time after which the ped feels to be in jam
-     _desiredFinalDestination = FINAL_DEST_OUT;
-     _mentalMap = map<int, int>();
-     _destHistory = vector<int>();
      _deltaT = 0.01;
-     _updateRate = _deltaT;
+     _ellipse = JEllipse();
      _V0 = Point(0,0);
-     _lastPosition = Point(0,0);
-     _lastCellPosition = -1;
-     _recordingTime = 20; //seconds
-     //_knownDoors = map<int, NavLineState>();
-     _knownDoors.clear();
-     _height = 170;
-     _age = 30;
-     _gender = "male";
-     _trip = vector<int> ();
-     _group = -1;
-     _spotlight = false;
      _V0UpStairs=0.6;
      _V0DownStairs=0.6;
      _EscalatorUpStairs=0.8;
      _EscalatorDownStairs=0.8;
      _V0IdleEscalatorUpStairs=0.6;
      _V0IdleEscalatorDownStairs=0.6;
-     _distToBlockade=0.0;
-     _routingStrategy=ROUTING_GLOBAL_SHORTEST;
+     _roomCaption = "";
+     _roomID = -1;
+     _subRoomID = -1;
+     _subRoomUID = -1;
+     _oldRoomID = -1;
+     _oldSubRoomID = -1;
      _lastE0 = Point(0,0);
+     _navLine = nullptr;
+     _mentalMap = map<int, int>();
+     _destHistory = vector<int>();
+     _trip = vector<int> ();
+     _lastPosition = Point(0,0);
+     _lastCellPosition = -1;
+     _knownDoors.clear();
+     _distToBlockade=0.0;
+     _reroutingThreshold = 0.0; // new orientation after 10 seconds, value is incremented
+     _timeBeforeRerouting = 0.0;
+     _timeInJam = 0.0;
+     _patienceTime = 5.0;// time after which the ped feels to be in jam
+     _recordingTime = 20; //seconds
+     //_lastPosition;
+     //_lastVelocities
+     _routingStrategy=ROUTING_GLOBAL_SHORTEST;
+     _newOrientationDelay = 0; //0 seconds, in steps
+     _updateRate = _deltaT;
+     _turninAngle = 0.0;
+     _reroutingEnabled = false;
+     _tmpFirstOrientation = true;
+     _newOrientationFlag = false;
+     _router = NULL;
+     _building = NULL;
+
+     //_knownDoors = map<int, NavLineState>();
+
+     _spotlight = false;
+     _ticksInThisRoom = 0;
+
      _agentsCreated++;//increase the number of object created
 }
 Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& building)
-:    _age(agentsParameters.GetAge()),
-     _gender(agentsParameters.GetGender()),
-     _height(agentsParameters.GetHeight()),
-     _desiredFinalDestination(agentsParameters.GetGoalId()),
+:
      _group(agentsParameters.GetGroupId()),
-     _building(&building),
-     _router(building.GetRoutingEngine()->GetRouter(agentsParameters.GetRouterId())),
-     _lastPosition(),
-     _roomID(agentsParameters.GetRoomId()),
+     _desiredFinalDestination(agentsParameters.GetGoalId()),
+     _height(agentsParameters.GetHeight()),
+     _age(agentsParameters.GetAge()),
+     _premovement(agentsParameters.GetPremovementTime()),
+     _gender(agentsParameters.GetGender()),
      _roomCaption(""),
+     _roomID(agentsParameters.GetRoomId()),
      _subRoomID(agentsParameters.GetSubroomID()),
      _subRoomUID(building.GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetUID()),
+     _lastPosition(),
+
      _patienceTime(agentsParameters.GetPatience()),
-     _premovement(agentsParameters.GetPremovementTime()),
+     _router(building.GetRoutingEngine()->GetRouter(agentsParameters.GetRouterId())),
+     _building(&building),
      _ticksInThisRoom(0)
+
 {
 
 }
@@ -442,7 +452,7 @@ double Pedestrian::GetV0Norm() const
      //-----------------------------------------
 
 
-     const Point& pos = GetPos();
+     // const Point& pos = GetPos();
      // double distanceToTarget = (target-pos).Norm();
      // double iniDistanceToTarget = (target-_lastPositions.front()).Norm();
 
