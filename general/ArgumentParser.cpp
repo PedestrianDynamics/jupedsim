@@ -73,6 +73,8 @@ ArgumentParser::ArgumentParser(Configuration* config)
      _config = config;
 }
 
+ArgumentParser::~ArgumentParser(){}
+
 bool ArgumentParser::ParseArgs(int argc, char** argv)
 {
      //special case of the default configuration ini.xml
