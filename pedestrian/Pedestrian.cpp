@@ -528,7 +528,10 @@ double Pedestrian::GetV0Norm() const
                  // double stairHorinzontalLength =  stairHeight / sub->GetTanAngleWithHorizontal();
                  f = 2.0/(1+exp(-c*stairInclination*(minSubElevation - ped_elevation)*(minSubElevation - ped_elevation))) - 1;
                  g = 2.0/(1+exp(-c*stairInclination*(ped_elevation - minSubElevation - stairHeight)*(ped_elevation - minSubElevation - stairHeight))) - 1;
-                 double speed_up = _V0UpStairs;
+
+                 //FIXME std::normal_distribution generated V0's that are very small or even < 0
+                 double speed_up = std::max(0.3,_V0UpStairs);
+
                  if(sub->GetType() == "escalator"){
                        speed_up = _EscalatorUpStairs;
                  }
