@@ -1244,9 +1244,9 @@ void FloorfieldViaFM::setSpeedThruPeds(Pedestrian* const * pedsArg, int nsize, i
     double indexDistance = 0.0;
 
     if (nsize == 0) {
-        Log->Write("WARNING: \tSetSpeedThruPeds is ZERO");
+        Log->Write("WARNING: \tSetSpeedThruPeds: nsize is ZERO");
     } else {
-        Log->Write("INFO: \t\tNumber of Peds: %d",nsize);
+        Log->Write("INFO: \t\tNumber of Peds used in setSpeedThruPeds: %d",nsize);
     }
 
     if ((modechoice == quickest) && (!densityspeed)) {
@@ -1288,9 +1288,9 @@ void FloorfieldViaFM::setSpeedThruPeds(Pedestrian* const * pedsArg, int nsize, i
                 //indexDistance = indexDistance/(delta*delta);
 
                 //densityspeed[curr_j*grid->GetiMax() + curr_i] = (indexDistance > (delta*delta)) ? densityspeed[curr_j*grid->GetiMax() + curr_i] : .001;
-                if (indexDistance > (delta*delta)) {
+                if (indexDistance < (delta*delta)) {
                     //std::cout << "c h a n g i n g   ";
-                    densityspeed[curr_j*grid->GetiMax() + curr_i] = 0.01;
+                    densityspeed[curr_j*grid->GetiMax() + curr_i] = 0.07;
                 }
             }
         }
