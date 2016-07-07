@@ -1228,7 +1228,9 @@ void FloorfieldViaFM::setSpeed(bool useDistance2WallArg) {
             }
         }
     }
-    std::copy(modifiedspeed, modifiedspeed+grid->GetnPoints(), densityspeed);
+    if (densityspeed) {
+        std::copy(modifiedspeed, modifiedspeed + grid->GetnPoints(), densityspeed);
+    }
 }
 
 void FloorfieldViaFM::setSpeedThruPeds(Pedestrian* const * pedsArg, int nsize, int modechoice, double radius) {
