@@ -205,7 +205,72 @@ bool ArgumentParser::ParseArgs(int argc, char** argv)
                          return true;
                     }
                }
+          }
+          else {
+               Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",
+                         strategy.c_str());
+               return false;
+          }
+     }
+     return true;
+}
 
+//todo: parse this in Cognitive map router
+bool ArgumentParser::ParseCogMapOpts(TiXmlNode *routerNode)
+{
+     TiXmlNode* sensorNode=routerNode->FirstChild();
+
+     if (!sensorNode)
+     {
+          Log->Write("ERROR:\tNo sensors found.\n");
+          return false;
+     }
+
+     /// static_cast to get access to the method 'addOption' of the CognitiveMapRouter
+     CognitiveMapRouter* r = static_cast<CognitiveMapRouter*>(_routingengine->GetAvailableRouters().back());
+
+     std::vector<std::string> sensorVec;
+     for (TiXmlElement* e = sensorNode->FirstChildElement("sensor"); e;
+               e = e->NextSiblingElement("sensor"))
+     {
+          string sensor = e->Attribute("description");
+
+          sensorVec.push_back(sensor);
+
+          Log->Write("INFO: \tSensor "+ sensor + " added");
+     }
+
+
+     r->addOption("Sensors",sensorVec);
+
+     TiXmlElement* cogMap=routerNode->FirstChildElement("cognitive_map");
+
+     if (!cogMap)
+     {
+          Log->Write("ERROR:\tCognitive Map not specified.\n");
+          return false;
+     }
+
+     std::vector<std::string> cogMapStatus;
+     cogMapStatus.push_back(cogMap->Attribute("status"));
+     Log->Write("INFO: \tAll pedestrian starting with a(n) "+cogMapStatus[0]+" cognitive map\n");
+     r->addOption("CognitiveMap",cogMapStatus);
+
+
+     return true;
+
+}
+
+bool ArgumentParser::ParseFfRouterOps(TiXmlNode* routingNode) {
+     //set defaults
+     std::string mode = "global_shortest";
+     FFRouter* r = static_cast<FFRouter*>(_routingengine->GetAvailableRouters().back());
+
+     //parse ini-file-information
+     if (routingNode->FirstChild("parameters")) {
+          TiXmlNode* pParameters = routingNode->FirstChild("parameters");
+          if (pParameters->FirstChild("mode")) {
+               mode = pParameters->FirstChild("mode")->FirstChild()->Value();
           }
      }
 #endif

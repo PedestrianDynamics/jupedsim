@@ -144,7 +144,11 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
      int nThreads = omp_get_max_threads();
 
 
-     int partSize = nSize / nThreads;
+     int partSize;
+     partSize = ((int)nSize > nThreads)? (int) (nSize / nThreads):(int)nSize;
+      if(partSize == (int)nSize)
+            nThreads = 1; // not worthy to parallelize 
+
      int debugPed = -10;
      //building->GetGrid()->HighlightNeighborhood(debugPed, building);
 #pragma omp parallel  default(shared) num_threads(nThreads)
@@ -155,8 +159,8 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
           const int threadID = omp_get_thread_num();
           
           int start = threadID*partSize;
-          int end = (threadID + 1) * partSize - 1;
-          if ((threadID == nThreads - 1)) end = nSize - 1;
+          int end;
+          end = (threadID < nThreads - 1) ? (threadID + 1) * partSize - 1: (int) (nSize - 1);
 
           for (int p = start; p <= end; ++p) {
 
@@ -227,7 +231,7 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
                result_acc.push_back(acc);
           }
 
-          //#pragma omp barrier
+          #pragma omp barrier
           // update
           for (int p = start; p <= end; ++p) {
                Pedestrian* ped = allPeds[p];

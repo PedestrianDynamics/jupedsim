@@ -278,12 +278,12 @@ bool Simulation::InitArgs()
     return true;
 }
 
-int Simulation::RunStandardSimulation(double maxSimTime)
+double Simulation::RunStandardSimulation(double maxSimTime)
 {
     RunHeader(_nPeds+_agentSrcManager.GetMaxAgentNumber());
     double t = RunBody(maxSimTime);
     RunFooter();
-    return (int) t;
+    return t;
 }
 
 void Simulation::UpdateRoutesAndLocations()
@@ -299,20 +299,23 @@ void Simulation::UpdateRoutesAndLocations()
 
     unsigned long nSize = allPeds.size();
     int nThreads = omp_get_max_threads();
-//     int nThreads = 1;
-    int partSize = nSize/nThreads;
+    int partSize;
+    partSize = ((int)nSize > nThreads)? (int) (nSize / nThreads):(int)nSize;
+    if(partSize == (int)nSize)
+            nThreads = 1; // not worthy to parallelize 
 
 #pragma omp parallel  default(shared) num_threads(nThreads)
     {
         const int threadID = omp_get_thread_num();
         int start = threadID*partSize;
-        int end = (threadID+1)*partSize-1;
-        if ((threadID==nThreads-1))
-            end = nSize-1;
+        int end ;//= (threadID+1)*partSize-1;
+        // if ((threadID==nThreads-1))
+            // end = nSize-1;
+        end = (threadID < nThreads - 1) ? (threadID + 1) * partSize - 1: (int) (nSize - 1);
 
         for (int p = start; p<=end; ++p) {
-            Pedestrian* ped = allPeds[p];
 
+            Pedestrian* ped = allPeds[p];
             Room* room0 = _building->GetRoom(ped->GetRoomID());
             assert(room0 != nullptr);
             SubRoom* sub0 = room0->GetSubRoom(ped->GetSubRoomID());
@@ -320,6 +323,7 @@ void Simulation::UpdateRoutesAndLocations()
             //set the new room if needed
             if ((ped->GetFinalDestination()==FINAL_DEST_OUT)
                     && (room0->GetCaption()=="outside")) {
+
 #pragma omp critical
                 pedsToRemove.push_back(ped);
             }
@@ -369,7 +373,6 @@ void Simulation::UpdateRoutesAndLocations()
                             //   Log->Write("WARNING:\t pedestrian [%d] left the room in an unusual way. Please check",ped->GetID());
                             //   Log->Write("        \t distance to previous target is %f",ped->GetDistanceToNextTarget());
                             //}
-
                             //also statistic for internal doors
                             UpdateFlowAtDoors(*ped); //@todo: ar.graf : this call should move into a critical region? check plz
 
@@ -482,15 +485,10 @@ void Simulation::RunHeader(long nPed)
     ProcessAgentsQueue();
 }
 
-int Simulation::RunBody(double maxSimTime)
+double Simulation::RunBody(double maxSimTime)
 {
-    //needed to control the execution time PART 1
-    //in the case you want to run in no faster than realtime
-    //time_t starttime, endtime;
-    //time(&starttime);
-
-    //take the current time from the pedestrian
-    double t = Pedestrian::GetGlobalTime();
+     //take the current time from the pedestrian
+     double t=Pedestrian::GetGlobalTime();
 
     //frame number. This function can be called many times,
     static int frameNr = (int) (1+t/_deltaT); // Frame Number
@@ -501,7 +499,6 @@ int Simulation::RunBody(double maxSimTime)
     // NEEDS TO BE FIXED!
     int writeInterval = (int) ((1./_fps)/_deltaT+0.5);
     writeInterval = (writeInterval<=0) ? 1 : writeInterval; // mustn't be <= 0
-    // ##########
 
     //process the queue for incoming pedestrians
     //important since the number of peds is used
@@ -510,7 +507,9 @@ int Simulation::RunBody(double maxSimTime)
     _nPeds = _building->GetAllPedestrians().size();
     int initialnPeds = _nPeds;
     // main program loop
+
     while ((_nPeds || (!_agentSrcManager.IsCompleted()&& _gotSources) ) && t<maxSimTime) {
+
         t = 0+(frameNr-1)*_deltaT;
         //process the queue for incoming pedestriansg
         ProcessAgentsQueue();
@@ -551,8 +550,16 @@ int Simulation::RunBody(double maxSimTime)
         // clock_t goal = timeToWait*1000 + clock();
         // while (goal > clock());
         ++frameNr;
+
+        //Trigger JPSfire Toxicity Analysis
+        //only executed every 3 seconds _ToxicityAnalysis->ConductToxicityAnalysis() &&
+        if( fmod(Pedestrian::GetGlobalTime(), 3) == 0 ) {
+            for (auto&& ped: _building->GetAllPedestrians()) {
+                ped->ConductToxicityAnalysis();
+            }
+        }
     }
-    return (int) t;
+    return t;
 }
 
 void Simulation::RunFooter()

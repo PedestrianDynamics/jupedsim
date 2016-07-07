@@ -73,7 +73,7 @@ int main(int argc, char** argv)
 
     if (status && sim.InitArgs()) {
         //evacuation time
-        int evacTime = 0;
+        double evacTime = 0;
         Log->Write("INFO: \tStart runSimulation() with %d pedestrians", sim.GetPedsNumber());
 
 #ifdef _JPS_AS_A_SERVICE

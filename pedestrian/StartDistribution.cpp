@@ -44,6 +44,7 @@ StartDistribution::StartDistribution(int seed)
 {
      _roomID = -1;
      _subroomID=-1;
+     _subroomUID=-1;
      _nPeds = -1;
      _groupID = -1;
      _goalID = -1;
@@ -55,13 +56,18 @@ StartDistribution::StartDistribution(int seed)
      _startY = NAN;
      _startZ = NAN;
      _gender = "male";
+     _social_group = "false";
      _patience=5;
      _xMin=-FLT_MAX;
      _xMax=FLT_MAX;
      _yMin=-FLT_MAX;
      _yMax=FLT_MAX;
      _groupParameters=NULL;
-     _generator = std::default_random_engine(seed);
+     static bool _seeded = false; // seed only once, not every time
+     if(!_seeded) {
+           _generator = std::default_random_engine(seed);     // mt19937 g(static_cast<uint32_t>(_configuration->GetSeed()));
+           _seeded = true;
+     }
 }
 
 StartDistribution::~StartDistribution()
@@ -69,9 +75,19 @@ StartDistribution::~StartDistribution()
 }
 
 
+std::default_random_engine StartDistribution::GetGenerator() 
+{
+     return _generator;
+}
+
 int StartDistribution::GetAgentsNumber() const
 {
      return _nPeds;
+}
+
+double StartDistribution::GetAgentsDensity() const
+{
+     return _DPeds;
 }
 
 void StartDistribution::SetRoomID(int id)
@@ -97,6 +113,16 @@ const std::string& StartDistribution::GetGender() const
 void StartDistribution::SetGender(const std::string& gender)
 {
      _gender = gender;
+}
+
+const std::string& StartDistribution::GetSocialGroup() const
+{
+     return _social_group;
+}
+
+void StartDistribution::SetSocialGroup(const std::string& social_group)
+{
+     _social_group = social_group;
 }
 
 int StartDistribution::GetGoalId() const
@@ -178,6 +204,11 @@ int StartDistribution::GetRouterId() const
 void StartDistribution::SetRouterId(int routerId)
 {
      _routerID = routerId;
+}
+
+double StartDistribution::SetAgentsDensity(double D)
+{
+     _DPeds = D;
 }
 
 void StartDistribution::SetAgentsNumber(int N)
@@ -338,14 +369,28 @@ void StartDistribution::Setbounds(double bounds[4])
      _yMax=bounds[3];
 }
 
-void StartDistribution::InitPremovementTime(double mean, double stdv)
+void StartDistribution::InitPremovementTime(std::string distribution_type, double para1, double para2)
 {
-     _premovementTime = std::normal_distribution<double>(mean,stdv);
+
+    if(distribution_type=="normal"){
+        _preDist = distribution_type;
+        _premovementTimeNormal = std::normal_distribution<double>(para1,para2);
+    }
+    else if(distribution_type=="uniform"){
+        _preDist = distribution_type;
+        _premovementTimeUniform = std::uniform_real_distribution<double>(para1,para2);
+    }
+
 }
 
 double StartDistribution::GetPremovementTime() const
 {
-     return _premovementTime(_generator);
+    if (_preDist == "normal"){
+     return _premovementTimeNormal(_generator);
+    }
+    if (_preDist == "uniform"){
+     return _premovementTimeUniform(_generator);
+    }
 }
 
 void StartDistribution::InitRiskTolerance(std::string distribution_type, double para1, double para2)

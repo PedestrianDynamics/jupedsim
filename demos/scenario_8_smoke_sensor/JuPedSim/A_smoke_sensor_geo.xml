@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<geometry version="0.8" caption="corner" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/jps_geometry.xsd" unit="m">
+    <rooms>
+        <room id="0" caption="basement">
+            <subroom id="0" caption="basement" class="subroom" A_x="0" B_y="0" C_z="0">
+                <polygon caption="wall">
+                    <vertex px="0" py="30"/>
+                    <vertex px="8" py="30"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="0" py="0"/>
+                    <vertex px="10" py="0"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="10" py="10"/>
+                    <vertex px="10" py="0"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="10" py="12"/>
+                    <vertex px="10" py="30"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="0" py="15"/>
+                    <vertex px="0" py="6"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="0" py="17"/>
+                    <vertex px="0" py="30"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="0" py="6"/>
+                    <vertex px="2" py="6"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2" py="2"/>
+                    <vertex px="2" py="6"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="0" py="0"/>
+                    <vertex px="0" py="2"/>
+                </polygon>
+            </subroom>
+            <subroom id="1" caption="stair" class="stair" A_x="0" B_y="0.75" C_z="-1.5">
+                <polygon caption="wall">
+                    <vertex px="0" py="2"/>
+                    <vertex px="0" py="6"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2" py="6"/>
+                    <vertex px="2" py="2"/>
+                </polygon>
+                <up px="0" py="6" />
+				<down px="0" py="2" />
+            </subroom>
+            
+            <crossings>
+                <crossing id="0" subroom1_id="1" subroom2_id="0">
+		            <vertex px="0" py="2"/>
+		            <vertex px="2" py="2"/>
+        		</crossing>
+            </crossings>
+            
+        </room>
+        <room id="1" caption="1stfloor">
+            <subroom id="0" caption="1stfloor" class="subroom" A_x="0" B_y="0" C_z="3">
+                <polygon caption="wall">
+                    <vertex px="0" py="10"/>
+                    <vertex px="10" py="10"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="0" py="0"/>
+                    <vertex px="10" py="0"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="10" py="10"/>
+                    <vertex px="10" py="0"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="0" py="10"/>
+                    <vertex px="0" py="6"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2" py="2"/>
+                    <vertex px="2" py="6"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2" py="2"/>
+                    <vertex px="0" py="2"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="0" py="0"/>
+                    <vertex px="0" py="2"/>
+                </polygon>
+            </subroom>
+            
+            
+        </room>
+    </rooms>
+    
+    <transitions>
+        <transition id="0" caption="to_stair" type="emergency" room1_id="1" subroom1_id="0" room2_id="0" subroom2_id="1">
+            <vertex px="0" py="6"/>
+            <vertex px="2" py="6"/>
+        </transition>
+        
+        <transition id="1" caption="emergency" type="emergency" room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
+            <vertex px="8" py="30"/>
+            <vertex px="10" py="30"/>
+        </transition>
+        
+        <transition id="2" caption="emergency" type="emergency" room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
+            <vertex px="10" py="10"/>
+            <vertex px="10" py="12"/>
+        </transition>
+        
+        <transition id="3" caption="emergency" type="emergency" room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
+            <vertex px="0" py="15"/>
+            <vertex px="0" py="17"/>
+        </transition>
+        
+    </transitions>
+</geometry>

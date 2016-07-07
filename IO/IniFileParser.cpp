@@ -107,7 +107,7 @@ bool IniFileParser::Parse(std::string iniFile)
                _config->SetSeed((unsigned int) time(NULL));
           }
      }
-     srand(_config->GetSeed());
+     // srand(_config->GetSeed());
      Log->Write("INFO:\trandom seed <%d>", _config->GetSeed());
 
      // max simulation time
@@ -979,7 +979,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                _config->GetRoutingEngine()->AddRouter(r);
 
                Log->Write("\nINFO: \tUsing CognitiveMapRouter");
-               ///Parsing additional options
+               //Parsing additional options
                if (!ParseCogMapOpts(e))
                     return false;
           }
@@ -1048,30 +1048,30 @@ bool IniFileParser::ParseFfRouterOps(TiXmlNode* routingNode) {
 
 bool IniFileParser::ParseCogMapOpts(TiXmlNode* routingNode)
 {
-     TiXmlNode* sensorNode = routingNode->FirstChild();
 
+     TiXmlNode* sensorNode = routingNode->FirstChild();
      if (!sensorNode) {
           Log->Write("ERROR:\tNo sensors found.\n");
           return false;
      }
 
-     /// static_cast to get access to the method 'addOption' of the CognitiveMapRouter
+     // static_cast to get access to the method 'addOption' of the CognitiveMapRouter
      CognitiveMapRouter* r = static_cast<CognitiveMapRouter*>(_config->GetRoutingEngine()->GetAvailableRouters().back());
 
      std::vector<std::string> sensorVec;
      for (TiXmlElement* e = sensorNode->FirstChildElement("sensor"); e;
           e = e->NextSiblingElement("sensor")) {
           string sensor = e->Attribute("description");
-          ///adding Smoke Sensor specific parameters
-          if (sensor=="Smoke") {
-               std::vector<std::string> smokeOptVec;
+          //adding Smoke Sensor specific parameters
+//          if (sensor=="Smoke") {
+//               std::vector<std::string> smokeOptVec;
 
-               smokeOptVec.push_back(e->Attribute("smoke_factor_grids"));
-               smokeOptVec.push_back(e->Attribute("update_time"));
-               smokeOptVec.push_back(e->Attribute("final_time"));
-               r->addOption("smokeOptions", smokeOptVec);
+//               smokeOptVec.push_back(e->Attribute("smoke_factor_grids"));
+//               smokeOptVec.push_back(e->Attribute("update_time"));
+//               smokeOptVec.push_back(e->Attribute("final_time"));
+//               r->addOption("smokeOptions", smokeOptVec);
 
-          }
+          //}
           sensorVec.push_back(sensor);
 
           Log->Write("INFO: \tSensor "+sensor+" added");
