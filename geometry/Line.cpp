@@ -52,10 +52,15 @@ Line::Line()
      _uid = _static_UID++;
 }
 
-Line::Line(const Point& p1, const Point& p2)
+Line::Line(const Point& p1, const Point& p2, int count):
+      _point1(p1), _point2(p2), _centre((p1+p2)*0.5), _length((p1-p2).Norm())
 {
-     SetPoint1(p1);
-     SetPoint2(p2);
+     if(count) _uid = _static_UID++;
+}
+
+Line::Line(const Point& p1, const Point& p2):
+            _point1(p1), _point2(p2), _centre((p1+p2)*0.5), _length((p1-p2).Norm())
+{
      _uid = _static_UID++;
 }
 
@@ -69,6 +74,7 @@ Line::Line(const Line& orig)
      _point1 = orig.GetPoint1();
      _point2 = orig.GetPoint2();
      _centre = orig.GetCentre();
+     _length = orig.GetLength();
      _uid = orig.GetUniqueID();
 }
 
@@ -82,13 +88,11 @@ Line::~Line()
 void Line::SetPoint1(const Point& p)
 {
      _point1 = p;
-     _centre = (_point1+_point2)*0.5;
 }
 
 void Line::SetPoint2(const Point& p)
 {
      _point2 = p;
-     _centre = (_point1+_point2)*0.5;
 }
 
 /*************************************************************
@@ -265,6 +269,10 @@ bool Line::operator!=(const Line& l) const
 
 }
 
+double Line::GetLength() const
+{
+      return _length;
+}
 double Line::Length() const
 {
      return (_point1-_point2).Norm();
