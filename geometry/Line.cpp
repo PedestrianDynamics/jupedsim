@@ -49,6 +49,8 @@ Line::Line()
 {
      SetPoint1(Point()); //Default-Constructor  (0.0,0.0)
      SetPoint2(Point());
+     _centre = (_point1 + _point2)*0.5;
+     _length = (_point1 - _point2).Norm();
      _uid = _static_UID++;
 }
 
@@ -69,13 +71,9 @@ int Line::GetUniqueID() const
      return _uid;
 }
 
-Line::Line(const Line& orig)
+Line::Line(const Line& orig):
+      _point1(orig.GetPoint1()), _point2(orig.GetPoint2()), _centre(orig.GetCentre()), _length(orig.GetLength()), _uid(orig.GetUniqueID())
 {
-     _point1 = orig.GetPoint1();
-     _point2 = orig.GetPoint2();
-     _centre = orig.GetCentre();
-     _length = orig.GetLength();
-     _uid = orig.GetUniqueID();
 }
 
 Line::~Line()
@@ -141,7 +139,7 @@ string Line::Write() const
 
 Point Line::NormalVec() const
 {
-     double nx, ny, norm;
+     double nx, ny;
      Point r = GetPoint2()-GetPoint1();
 
      if (r._x==0.0) {
@@ -149,6 +147,7 @@ Point Line::NormalVec() const
           ny = 0;
      }
      else {
+          double norm; 
           nx = -r._y/r._x;
           ny = 1;
           /* Normieren */
