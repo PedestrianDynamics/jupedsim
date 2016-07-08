@@ -56,7 +56,7 @@ public:
 
      Line();
 
-     Line(const Point& p1, const Point& p2, int count);
+     Line(const Point& p1, const Point& p2, int count); // count = 0 --> don't count the line. Useful for temporary lines.
      
      Line(const Point& p1, const Point& p2);
 
