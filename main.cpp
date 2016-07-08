@@ -52,10 +52,10 @@ int main(int argc, char** argv)
     Configuration* configuration = new Configuration();
     // Parsing the arguments
     bool status = false;
-{
-    ArgumentParser* p = new ArgumentParser(configuration);
-    status = p->ParseArgs(argc, argv);
-}
+    {    
+          ArgumentParser* p = new ArgumentParser(configuration);
+          status = p->ParseArgs(argc, argv);
+    }
 #ifdef _JPS_AS_A_SERVICE
     if (configuration->GetRunAsService()) {
           std::shared_ptr<HybridSimulationManager> hybridSimulationManager = std::shared_ptr<HybridSimulationManager>(

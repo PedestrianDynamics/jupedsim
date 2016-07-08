@@ -303,14 +303,11 @@ void Simulation::UpdateRoutesAndLocations()
     partSize = ((int)nSize > nThreads)? (int) (nSize / nThreads):(int)nSize;
     if(partSize == (int)nSize)
             nThreads = 1; // not worthy to parallelize 
-
-#pragma omp parallel  default(shared) num_threads(nThreads)
+#pragma omp parallel  default(shared) num_threads(nThreads) 
     {
         const int threadID = omp_get_thread_num();
         int start = threadID*partSize;
         int end ;//= (threadID+1)*partSize-1;
-        // if ((threadID==nThreads-1))
-            // end = nSize-1;
         end = (threadID < nThreads - 1) ? (threadID + 1) * partSize - 1: (int) (nSize - 1);
 
         for (int p = start; p<=end; ++p) {
@@ -332,7 +329,7 @@ void Simulation::UpdateRoutesAndLocations()
                 pedsToRemove.push_back(ped);
             }
 
-                // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
+                // reposition in the case the pedestrians "accidentally left the room" not via the intended exit.
                 // That may happen if the forces are too high for instance
                 // the ped is removed from the simulation, if it could not be reassigned
                 //@todo: ar.graf: condition could be ff::subroom[grid->getKeyAt(ped->GetPosition())] != ped->GetSubRoomUID()
@@ -359,6 +356,7 @@ void Simulation::UpdateRoutesAndLocations()
                             ped->SetSubRoomUID(sub->GetUID());
                             //the agent left the old iroom
                             //actualize the egress time for that iroom
+                            # pragma omp critical
                             old_room->SetEgressTime(ped->GetGlobalTime());
 
                             //the pedestrian did not used the door to exit the room
@@ -384,11 +382,12 @@ void Simulation::UpdateRoutesAndLocations()
 
                 if (!assigned) {
 #pragma omp critical
+                  {
                     pedsToRemove.push_back(ped);
                     //the agent left the old room
                     //actualize the eggress time for that room
                     allRooms.at(ped->GetRoomID())->SetEgressTime(ped->GetGlobalTime());
-
+                  }
                 }
             }
 
