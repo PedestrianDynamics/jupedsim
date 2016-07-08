@@ -228,7 +228,7 @@ bool Simulation::InitArgs()
 
     // Initialize the agents sources that have been collected in the pedestrians distributor
     _agentSrcManager.SetBuilding(_building.get());
-    _gotSources = distributor->GetAgentsSources().size(); // did we have any sources? false if no sources
+    _gotSources = (bool) distributor->GetAgentsSources().size(); // did we have any sources? false if no sources
     for (const auto& src: distributor->GetAgentsSources()) {
         _agentSrcManager.AddSource(src);
         //src->Dump();
@@ -356,7 +356,7 @@ void Simulation::UpdateRoutesAndLocations()
                             ped->SetSubRoomUID(sub->GetUID());
                             //the agent left the old iroom
                             //actualize the egress time for that iroom
-                            # pragma omp critical
+                            #pragma omp critical
                             old_room->SetEgressTime(ped->GetGlobalTime());
 
                             //the pedestrian did not used the door to exit the room

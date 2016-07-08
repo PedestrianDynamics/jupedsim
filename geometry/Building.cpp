@@ -108,7 +108,7 @@ Building::Building(const Configuration* configuration, PedDistributor& pedDistri
           Log->Write("ERROR:\t could not load extra traffic information!");
           exit(EXIT_FAILURE);
      }
-     delete parser;
+     // delete parser;
 
      if (!pedDistributor.Distribute(this)) {
           Log->Write("ERROR:\t could not distribute the pedestrians");

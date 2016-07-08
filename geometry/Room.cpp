@@ -43,20 +43,20 @@ Room::Room()
 {
      _id = -1;
      _state=ROOM_CLEAN; //smoke-free
-     _egressTime=0;
      _caption = "no room caption";
      _zPos = -1.0;
      _outputFile=NULL;
+     _egressTime=0;
 }
 
 Room::Room(const Room& orig)
 {
      _id = orig.GetID();
+     _state=orig.GetState();
      _caption = orig.GetCaption();
      _zPos = orig.GetZPos();
-     _state=orig.GetState();
-     _egressTime=orig.GetEgressTime();
      _outputFile=orig.GetOutputHandler();
+     _egressTime=orig.GetEgressTime();
 }
 
 Room::~Room()

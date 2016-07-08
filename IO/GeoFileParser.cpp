@@ -468,6 +468,13 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
      return true;
 }
 
+GeoFileParser::~GeoFileParser()
+{
+
+}
+
+
+
 
 
 
