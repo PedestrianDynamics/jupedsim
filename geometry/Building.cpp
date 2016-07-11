@@ -778,13 +778,13 @@ void Building::DeletePedestrian(Pedestrian*& ped)
      it = find(_allPedestians.begin(), _allPedestians.end(), ped);
      if (it==_allPedestians.end()) {
           Log->Write("\tERROR: \tPed not found with ID %d ", ped->GetID());
-          exit(EXIT_FAILURE);
+          // exit(EXIT_FAILURE);
           return;
      }
      else {
           // save the path history for this pedestrian before removing from the simulation
           if (_savePathway) {
-               string results;
+               // string results;
                string path = (*it)->GetPath();
                vector<string> brokenpaths;
                StringExplode(path, ">", &brokenpaths);
@@ -814,7 +814,7 @@ void Building::DeletePedestrian(Pedestrian*& ped)
      delete ped;
 }
 
-const vector<Pedestrian*>& Building::GetAllPedestrians() const
+const vector<Pedudestrian*>& Building::GetAllPedestrians() const
 {
      return _allPedestians;
 }
