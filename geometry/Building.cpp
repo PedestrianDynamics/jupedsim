@@ -814,7 +814,7 @@ void Building::DeletePedestrian(Pedestrian*& ped)
      delete ped;
 }
 
-const vector<Pedudestrian*>& Building::GetAllPedestrians() const
+const vector<Pedestrian*>& Building::GetAllPedestrians() const
 {
      return _allPedestians;
 }
