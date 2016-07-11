@@ -302,7 +302,9 @@ void Simulation::UpdateRoutesAndLocations()
     int partSize;
     partSize = ((int)nSize > nThreads)? (int) (nSize / nThreads):(int)nSize;
     if(partSize == (int)nSize)
-            nThreads = 1; // not worthy to parallelize 
+            nThreads = 1; // not worthy to parallelize
+    
+    auto& allRooms = _building->GetAllRooms(); // @todo: m.c: outside the loop
 #pragma omp parallel  default(shared) num_threads(nThreads) 
     {
         const int threadID = omp_get_thread_num();
@@ -335,16 +337,11 @@ void Simulation::UpdateRoutesAndLocations()
                 //@todo: ar.graf: condition could be ff::subroom[grid->getKeyAt(ped->GetPosition())] != ped->GetSubRoomUID()
             else if (!sub0->IsInSubRoom(ped)) {
                 bool assigned = false;
-
-                auto& allRooms = _building->GetAllRooms();
-
                 for (auto&& it_room : allRooms) {
                     auto& room = it_room.second;
                     for (auto&& it_sub : room->GetAllSubRooms()) {
                         auto& sub = it_sub.second;
-                        auto& old_room = room0;
-                        auto& old_sub = sub0;
-                        if (sub->IsDirectlyConnectedWith(old_sub)
+                        if (sub->IsDirectlyConnectedWith(sub0)
                                 && sub->IsInSubRoom(ped->GetPos())) {
                             if (ped->GetRoutingStrategy() == ROUTING_FF_QUICKEST) {
                                 dynamic_cast<FFRouter*>(ped->GetRouter())->notifyDoor(ped);
@@ -354,18 +351,6 @@ void Simulation::UpdateRoutesAndLocations()
                                     room->GetCaption());
                             ped->SetSubRoomID(sub->GetSubRoomID());
                             ped->SetSubRoomUID(sub->GetUID());
-                            //the agent left the old iroom
-                            //actualize the egress time for that iroom
-                            #pragma omp critical
-                            old_room->SetEgressTime(ped->GetGlobalTime());
-
-                            //the pedestrian did not used the door to exit the room
-                            //todo: optimize with distance square
-                            //if(ped->GetDistanceToNextTarget()>0.5)
-                            //{
-                            //   Log->Write("WARNING:\t pedestrian [%d] left the room in an unusual way. Please check",ped->GetID());
-                            //   Log->Write("        \t distance to previous target is %f",ped->GetDistanceToNextTarget());
-                            //}
                             //also statistic for internal doors
                             UpdateFlowAtDoors(*ped); //@todo: ar.graf : this call should move into a critical region? check plz
 
@@ -375,21 +360,23 @@ void Simulation::UpdateRoutesAndLocations()
                             assigned = true;
                             break;
                         }
-                    }
+                    } // all subrooms
                     if (assigned)
                         break; // stop the loop
-                }
+                } // all rooms
 
+                if(room0->GetID() != ped->GetRoomID()){
+                      //the agent left the old room
+                      //actualize the egress time for that room
+#pragma omp critical
+                      allRooms.at(room0->GetID())->SetEgressTime(ped->GetGlobalTime());
+                }
+                
                 if (!assigned) {
 #pragma omp critical
-                  {
                     pedsToRemove.push_back(ped);
-                    //the agent left the old room
-                    //actualize the eggress time for that room
-                    allRooms.at(ped->GetRoomID())->SetEgressTime(ped->GetGlobalTime());
-                  }
                 }
-            }
+            } // else if (!sub0->IsInSubRoom(ped)) 
 
             //finally actualize the route
             if (ped->FindRoute()==-1) {
