@@ -2,8 +2,8 @@
 # -DCMAKE_CXX_COMPILER:STRING=clang++   -DCMAKE_C_COMPILER:STRING=clang .
 # -DCMAKE_BUILD_TYPE:STRING=Debug (default Release)
 # -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON (default OFF)
-# -DBUILD_TESTING=ON (default OFF)
-# -DBUILD_CPPUNIT_TEST=ON (default OFF)
+# -DBUILD_TESTING=ON (default OFF)  for python tests
+# -DBUILD_CPPUNIT_TEST=ON (default OFF) for unit tests
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
@@ -84,7 +84,7 @@ set(CMAKE_TEST_DIR ${CMAKE_SOURCE_DIR}/Utest)
 # Debug messages
 message(STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR})
 message(STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR})
-
+message(STATUS "CMAKE_TEST_DIR: " ${CMAKE_TEST_DIR})
 # ========================== build platform ==========================
 message(STATUS "")
 message(STATUS "Platform: ")
