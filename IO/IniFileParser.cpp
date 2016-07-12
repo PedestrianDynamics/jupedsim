@@ -136,7 +136,7 @@ bool IniFileParser::Parse(std::string iniFile)
           }
      }
      _config->SetMaxOpenMPThreads(omp_get_max_threads());
-     Log->Write("INFO:\tUsing num_threads <%d> threads", _config->GetMaxOpenMPThreads());
+     Log->Write("INFO:\tUsing num_threads <%d> threads (%d available)", _config->GetMaxOpenMPThreads(), omp_get_max_threads());
 
      //logfile
      if (xMainNode->FirstChild("logfile")) {
@@ -155,8 +155,10 @@ bool IniFileParser::Parse(std::string iniFile)
      //trajectories
      TiXmlNode* xTrajectories = xMainNode->FirstChild("trajectories");
      if (xTrajectories) {
-          double fps;
-          xMainNode->FirstChildElement("trajectories")->Attribute("fps", &fps);
+           double fps;
+           xMainNode->FirstChildElement("trajectories")->Attribute("fps", &fps);
+           std::cout << "\n\nFPS " << fps << std::endl;
+           getc(stdin);
           _config->SetFps(fps);
 
           string format =
@@ -211,7 +213,7 @@ bool IniFileParser::Parse(std::string iniFile)
                if (tmp.c_str())
                     _config->SetTrajectoriesFile(_config->GetProjectRootDir()+tmp);
                Log->Write("INFO: \toutput file  <%s>", _config->GetTrajectoriesFile().c_str());
-               Log->Write("INFO: \tin format <%s> at <%d> frames per seconds",format.c_str(), _config->GetFps());
+               Log->Write("INFO: \tin format <%s> at <%.0f> frames per seconds",format.c_str(), _config->GetFps());
           }
 
           if (xTrajectories->FirstChild("socket")) {
