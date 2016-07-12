@@ -30,6 +30,6 @@ void ToxicityOutputHandler::WriteToFile(std::string &string)
 
 void ToxicityOutputHandler::WriteToFileFooter()
 {
-    Write("</ToxicityAnalysis>\n");
+    Write("\t</frame>\n</ToxicityAnalysis>\n");
 }
 

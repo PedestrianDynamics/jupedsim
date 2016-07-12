@@ -37,6 +37,7 @@
 #include <algorithm>
 #include <math.h>
 #include "../../IO/OutputHandler.h"
+#include "../../general/Configuration.h"
 
 ToxicityAnalysis::ToxicityAnalysis(const Building * b)
 {
@@ -44,6 +45,7 @@ ToxicityAnalysis::ToxicityAnalysis(const Building * b)
     _FMStorage = nullptr;
     LoadJPSfireInfo(_building->GetProjectFilename());
     _dt = 1/20.; //time fraction for which doses are cumulated
+    _t_prev = -1;
 }
 
 ToxicityAnalysis::~ToxicityAnalysis()
@@ -198,7 +200,6 @@ void ToxicityAnalysis::InitializeWriteOut()
     std::string ToxAnalysisXML = "fire_" + fileNameWithoutExtension + ".xml";
     _outputhandler = std::make_shared<ToxicityOutputHandler>(ToxAnalysisXML.c_str());
     _outputhandler->WriteToFileHeader();
-    _frame=0;
 }
 
 void ToxicityAnalysis::WriteOutHazardAnalysis(const Pedestrian* p, double E, double FEC_Smoke, double O2, double CO2, double CO, double HCN, double HCL, double FED_In, double FIC_Im, double FIC_In, double T, double FED_Heat)
@@ -206,12 +207,30 @@ void ToxicityAnalysis::WriteOutHazardAnalysis(const Pedestrian* p, double E, dou
     string data;
     char tmp[CLENGTH] = "";
 
+    //FIXME _fps = _configuration->GetFps();
+    _fps = 1;
+    int frameNr = int(p->GetGlobalTime()/_fps);
+
+
+    if(_t_prev == -1){
+         sprintf(tmp, "\t<frame ID=\"%i\">\n", frameNr );
+         data.append(tmp);
+         _t_prev = p->GetGlobalTime();
+    }
+
+    else if(p->GetGlobalTime() > _t_prev){
+         sprintf(tmp, "\t</frame>\n \t<frame ID=\"%i\">\n", frameNr );
+         data.append(tmp);
+         _t_prev = p->GetGlobalTime();
+    }
+
     sprintf(tmp, "\t<agent ID=\"%i\"\tt=\"%.0f\"\tE=\"%.4f\"\tFEC_Smoke=\"%.4f\"\tc_O2=\"%.0f\"\tc_CO2=\"%.0f\"\tc_CO=\"%.0f\"\tc_HCN=\"%.0f\"\tc_HCl=\"%.0f\"\tFED_In=\"%.4f\"\tFIC_Im=\"%.4f\"\tFIC_In=\"%.4f\"\tT=\"%.1f\"\tFED_Heat=\"%.4f\"/>",
          p->GetID(), p->GetGlobalTime(), E, FEC_Smoke, O2, CO2, CO, HCN, HCL, FED_In, FIC_Im, FIC_In, T, FED_Heat);
-
         data.append(tmp);
 
-    _outputhandler->WriteToFile(data);
+
+   _outputhandler->WriteToFile(data);
+
 }
 
 bool ToxicityAnalysis::ConductToxicityAnalysis()

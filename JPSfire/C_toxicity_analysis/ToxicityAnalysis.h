@@ -37,6 +37,7 @@ class Pedestrian;
 class Building;
 class Point;
 class FDSMeshStorage;
+class Configuration;
 
 class ToxicityAnalysis
 {
@@ -65,10 +66,12 @@ public:
 private:
 
     const Building* _building;
+    const Configuration* _configuration;
     std::shared_ptr<FDSMeshStorage> _FMStorage;
     std::shared_ptr<ToxicityOutputHandler> _outputhandler;
-    int _frame;
     double _dt;
+    double _t_prev;
+    double _fps;
 
     void InitializeWriteOut();
 };
