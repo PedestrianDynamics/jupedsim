@@ -157,8 +157,6 @@ bool IniFileParser::Parse(std::string iniFile)
      if (xTrajectories) {
            double fps;
            xMainNode->FirstChildElement("trajectories")->Attribute("fps", &fps);
-           std::cout << "\n\nFPS " << fps << std::endl;
-           getc(stdin);
           _config->SetFps(fps);
 
           string format =
