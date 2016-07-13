@@ -53,6 +53,7 @@ FloorfieldViaFM::~FloorfieldViaFM()
     //dtor
     delete grid;
     if (gcode) delete[] gcode;
+    if (subroomUID) delete[] subroomUID;
     if (dist2Wall) delete[] dist2Wall;
     if (speedInitial) delete[] speedInitial;
     if (modifiedspeed) delete[] modifiedspeed;
@@ -397,9 +398,9 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
             localcostptr =    new double[grid->GetnPoints()];
             localneggradptr = new Point[grid->GetnPoints()];
             goalneggradmap.erase(goalID);
-            goalneggradmap.emplace(goalID, localneggradptr);
+            //goalneggradmap.emplace(goalID, localneggradptr);
             goalcostmap.erase(goalID);
-            goalcostmap.emplace(goalID, localcostptr);
+            //goalcostmap.emplace(goalID, localcostptr);
             //create ff (prepare Trial-mechanic, then calc)
 //            for (long int i = 0; i < grid->GetnPoints(); ++i) {
 //                //set Trialptr to fieldelements
@@ -501,6 +502,8 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
             goalToLineUIDmap2.emplace(goalID, UID_of_MIN2);
             goalToLineUIDmap3.erase(goalID);
             goalToLineUIDmap3.emplace(goalID, UID_of_MIN3);
+            delete[] localcostptr;
+            delete[] localneggradptr;
         }
     }
 }

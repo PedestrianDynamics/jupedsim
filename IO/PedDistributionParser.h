@@ -28,6 +28,7 @@ class PedDistributionParser : public PedDistributionLoader {
 
 public:
      PedDistributionParser(const Configuration* configuration);
+     virtual ~PedDistributionParser(){};
 
      virtual bool LoadPedDistribution(std::vector<std::shared_ptr<StartDistribution>>& startDis,
                std::vector<std::shared_ptr<StartDistribution>>& startDisSub,

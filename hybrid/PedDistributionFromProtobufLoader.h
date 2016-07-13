@@ -28,6 +28,7 @@ class PedDistributionFromProtobufLoader : public PedDistributionLoader {
 
 public:
      PedDistributionFromProtobufLoader(const Configuration* configuration);
+     virtual ~PedDistributionFromProtobufLoader(){};
 
      virtual bool LoadPedDistribution(std::vector<std::shared_ptr<StartDistribution>>& startDis,
                std::vector<std::shared_ptr<StartDistribution>>& startDisSub,
