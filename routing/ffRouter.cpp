@@ -577,7 +577,6 @@ int FFRouter::FindExit(Pedestrian* p)
                Log->Write("ERROR: \t ffRouter: unknown/unreachable goalID: %d in FindExit(Ped)",goalID);
           } else {
                validFinalDoor.emplace_back(goalToLineUIDmap.at(goalID));
-               Log->Write("aaaaaa %f / %f", _CroTrByUID[validFinalDoor[0]]->GetCentre()._x, _CroTrByUID[validFinalDoor[0]]->GetCentre()._y);
           }
      }
 
