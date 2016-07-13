@@ -53,7 +53,8 @@ int main(int argc, char** argv)
     // Parsing the arguments
     bool status = false;
     {    
-          ArgumentParser* p = new ArgumentParser(configuration);
+          //ArgumentParser* p = new ArgumentParser(configuration); //Memory Leak
+          std::unique_ptr<ArgumentParser> p(new ArgumentParser(configuration));
           status = p->ParseArgs(argc, argv);
     }
 #ifdef _JPS_AS_A_SERVICE

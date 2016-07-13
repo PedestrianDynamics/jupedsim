@@ -88,7 +88,7 @@ Building::Building(const Configuration* configuration, PedDistributor& pedDistri
      else
 #endif
      {
-          parser = new GeoFileParser(_configuration);
+           parser = new GeoFileParser(_configuration); // Memory Leak
 
      }
      parser->LoadBuilding(this);
