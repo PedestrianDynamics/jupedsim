@@ -71,28 +71,23 @@ Building::Building()
 Building::Building(const Configuration* configuration, PedDistributor& pedDistributor)
           :_configuration(configuration),
            _routingEngine(
-                     configuration->GetRoutingEngine())
+                 configuration->GetRoutingEngine()),
+           _caption("no_caption")
 {
-
-     _caption = "no_caption";
      _savePathway = false;
      _linkedCellGrid = nullptr;
 
-     GeometryReader* parser;//(_configuration);
-
 #ifdef _JPS_AS_A_SERVICE
-
      if (_configuration->GetRunAsService()) {
-          parser = new GeometryFromProtobufLoader(_configuration);
+           std::unique_ptr<GeometryFromProtobufLoader> parser(new GeometryFromProtobufLoader(_configuration));
+           parser->LoadBuilding(this);
      }
      else
 #endif
      {
-           parser = new GeoFileParser(_configuration); // Memory Leak
-
+           std::unique_ptr<GeoFileParser> parser(new GeoFileParser(_configuration));
+           parser->LoadBuilding(this);
      }
-     parser->LoadBuilding(this);
-//     this->AddSurroundingRoom();
 
      if (!InitGeometry()) {
           Log->Write("ERROR:\t could not initialize the geometry!");
@@ -104,11 +99,6 @@ Building::Building(const Configuration* configuration, PedDistributor& pedDistri
      //TODO: check whether traffic info can be loaded before InitGeometry if so call it in LoadBuilding instead and make
      //TODO: LoadTrafficInfo private [gl march '16]
 
-     if (!parser->LoadTrafficInfo(this)) {
-          Log->Write("ERROR:\t could not load extra traffic information!");
-          exit(EXIT_FAILURE);
-     }
-     // delete parser;
 
      if (!pedDistributor.Distribute(this)) {
           Log->Write("ERROR:\t could not distribute the pedestrians");
