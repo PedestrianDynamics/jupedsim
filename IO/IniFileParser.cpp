@@ -1003,6 +1003,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                Router *r = new FFRouter(id, ROUTING_FF_LOCAL_SHORTEST, hasSpecificGoals);
                _config->GetRoutingEngine()->AddRouter(r);
                Log->Write("\nINFO: \tUsing FF Local Shortest Router");
+               Log->Write("\nWARNING: \tFF Local Shortest is bugged!!!!");
 
                //check if the exit strat is [8]
 

@@ -106,6 +106,7 @@ public:
 
      void testoutput(const char*, const char*, const double*);
      void writeFF(const std::string&, std::vector<int> targetID);
+     void writeGoalFF(const std::string&, std::vector<int> targetID);
 
      virtual int isInside(const long int key);
 

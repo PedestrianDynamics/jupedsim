@@ -685,7 +685,7 @@ void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
                }
           }
           std::string filename = "floorfield" + std::to_string(subroomUID) + ".vtk";
-          locffviafm[subroomUID]->writeFF(filename, targets);
+          //locffviafm[subroomUID]->writeFF(filename, targets);
      }
 }
 

@@ -464,8 +464,12 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
             double cost_of_MIN3 = DBL_MAX;
             long int dummykey;
             for (const auto& loctrans : transitions) {
+                if (!loctrans.second->IsExit() || !loctrans.second->IsOpen()) {
+                    continue;
+                }
                 dummykey = grid->getKeyAtPoint(loctrans.second->GetCentre());
-                if (cost_of_MIN > localcostptr[dummykey]) {
+                double debugdouble = localcostptr[dummykey];
+                if ((cost_of_MIN > localcostptr[dummykey]) && (localcostptr[dummykey] >= 0.)) {
                     UID_of_MIN3 = UID_of_MIN2;
                     cost_of_MIN3 = cost_of_MIN2;
 
@@ -477,7 +481,7 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
                     //std::cerr << std::endl << "Closer Line found: " << UID_of_MIN ;
                     continue;
                 }
-                if (cost_of_MIN2 > localcostptr[dummykey]) {
+                if ((cost_of_MIN2 > localcostptr[dummykey]) && (localcostptr[dummykey] >= 0.)) {
                     UID_of_MIN3 = UID_of_MIN2;
                     cost_of_MIN3 = cost_of_MIN2;
 
@@ -485,7 +489,7 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
                     cost_of_MIN2 = localcostptr[dummykey];
                     continue;
                 }
-                if (cost_of_MIN3 > localcostptr[dummykey]) {
+                if ((cost_of_MIN3 > localcostptr[dummykey]) && (localcostptr[dummykey] >= 0.)) {
                     UID_of_MIN3 = loctrans.second->GetUniqueID();
                     cost_of_MIN3 = localcostptr[dummykey];
                     continue;
@@ -497,7 +501,6 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
             goalToLineUIDmap2.emplace(goalID, UID_of_MIN2);
             goalToLineUIDmap3.erase(goalID);
             goalToLineUIDmap3.emplace(goalID, UID_of_MIN3);
-
         }
     }
 }
@@ -866,8 +869,8 @@ void FloorfieldViaFM::parseBuildingForExits(const Building* const buildingArg, c
             if (eachwall.GetPoint1()._y > yMax) yMax = eachwall.GetPoint1()._y;
             if (eachwall.GetPoint2()._y > yMax) yMax = eachwall.GetPoint2()._y;
         }
-        goalcostmap.emplace(eachgoal.second->GetId(), nullptr);
-        goalneggradmap.emplace(eachgoal.second->GetId(), nullptr);
+        //goalcostmap.emplace(eachgoal.second->GetId(), nullptr);
+        //goalneggradmap.emplace(eachgoal.second->GetId(), nullptr);
     }
 
     //create Rect Grid
@@ -1815,6 +1818,73 @@ void FloorfieldViaFM::writeFF(const std::string& filename, std::vector<int> targ
 
         double *costarray = costmap[targetID[iTarget]];
         file << "SCALARS CostTarget" << building->GetTransOrCrossByUID(targetID[iTarget])->GetCaption() << "-" << targetID[iTarget] << " float 1" << std::endl;
+        file << "LOOKUP_TABLE default" << std::endl;
+        for (long int i = 0; i < grid->GetnPoints(); ++i) {
+            file << costarray[i] << std::endl;
+        }
+    }
+    file << "SCALARS GCode float 1" << std::endl;
+    file << "LOOKUP_TABLE default" << std::endl;
+    for (long int i = 0; i < grid->GetnPoints(); ++i) {
+        file << gcode[i] << std::endl;
+    }
+    file.close();
+}
+
+void FloorfieldViaFM::writeGoalFF(const std::string& filename, std::vector<int> targetID) {
+    Log->Write("INFO: \tWrite Floorfield to file");
+    Log->Write(filename);
+    std::ofstream file;
+
+    int numX = (int) ((grid->GetxMax()-grid->GetxMin())/grid->Gethx());
+    int numY = (int) ((grid->GetyMax()-grid->GetyMin())/grid->Gethy());
+    int numTotal = numX * numY;
+    //std::cerr << numTotal << " numTotal" << std::endl;
+    //std::cerr << grid->GetnPoints() << " grid" << std::endl;
+    file.open(filename);
+
+    file << "# vtk DataFile Version 3.0" << std::endl;
+    file << "Testdata: Fast Marching: Test: " << std::endl;
+    file << "ASCII" << std::endl;
+    file << "DATASET STRUCTURED_POINTS" << std::endl;
+    file << "DIMENSIONS " <<
+    std::to_string(grid->GetiMax()) <<
+    " " <<
+    std::to_string(grid->GetjMax()) <<
+    " 1" << std::endl;
+    file << "ORIGIN " << grid->GetxMin() << " " << grid->GetyMin() << " 0" << std::endl;
+    file << "SPACING " << std::to_string(grid->Gethx()) << " " << std::to_string(grid->Gethy()) << " 1" << std::endl;
+    file << "POINT_DATA " << std::to_string(numTotal) << std::endl;
+    //file << "SCALARS Dist2Wall float 1" << std::endl;
+    //file << "LOOKUP_TABLE default" << std::endl;
+    //for (long int i = 0; i < grid->GetnPoints(); ++i) {
+    //    file << dist2Wall[i] << std::endl; //@todo: change target to all dist2wall
+        //Point iPoint = grid->getPointFromKey(i);
+        //file2 << iPoint._x /*- grid->GetxMin()*/ << " " << iPoint._y /*- grid->GetyMin()*/ << " " << target[i] << std::endl;
+    //}
+
+    //file << "VECTORS Dir2Wall float" << std::endl;
+    //for (long int i = 0; i < grid->GetnPoints(); ++i) {
+    //    file << dirToWall[i]._x << " " << dirToWall[i]._y << " 0.0" << std::endl;
+    //}
+
+    for (unsigned int iTarget = 0; iTarget < targetID.size(); ++iTarget) {
+        if (goalneggradmap.count(targetID[iTarget]) == 0) {
+            continue;
+        }
+
+        Point *gradarray = goalneggradmap[targetID[iTarget]];
+        if (gradarray == nullptr) {
+            continue;
+        }
+
+        file << "VECTORS GradientTarget" << targetID[iTarget] << " float" << std::endl;
+        for (int i = 0; i < grid->GetnPoints(); ++i) {
+            file << gradarray[i]._x << " " << gradarray[i]._y << " 0.0" << std::endl;
+        }
+
+        double *costarray = goalcostmap[targetID[iTarget]];
+        file << "SCALARS CostTarget" << targetID[iTarget] << " float 1" << std::endl;
         file << "LOOKUP_TABLE default" << std::endl;
         for (long int i = 0; i < grid->GetnPoints(); ++i) {
             file << costarray[i] << std::endl;

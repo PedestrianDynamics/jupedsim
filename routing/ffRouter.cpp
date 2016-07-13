@@ -95,14 +95,18 @@ bool FFRouter::Init(Building* building)
 {
      _building = building;
      if (_hasSpecificGoals) {
+          std::vector<int> goalIDs;
+          goalIDs.clear();
           //get global field to manage goals (which are not in a subroom)
           _globalFF = new FloorfieldViaFM(building, 0.25, 0.25, 0.0, false, true);
           for (auto &itrGoal : building->GetAllGoals()) {
                _globalFF->createMapEntryInLineToGoalID(itrGoal.first);
+               goalIDs.emplace_back(itrGoal.first);
           }
           goalToLineUIDmap = _globalFF->getGoalToLineUIDmap();
           goalToLineUIDmap2 = _globalFF->getGoalToLineUIDmap2();
           goalToLineUIDmap3 = _globalFF->getGoalToLineUIDmap3();
+          _globalFF->writeGoalFF("goal.vtk", goalIDs);
      }
      //get all door UIDs
      _allDoorUIDs.clear();
@@ -495,7 +499,7 @@ bool FFRouter::ReInit()
 
      //debug output in file
      std::string ffname = "MasterFF" + std::to_string(++cnt) + ".vtk";
-     _locffviafm[0]->writeFF(ffname, _allDoorUIDs);
+     //_locffviafm[0]->writeFF(ffname, _allDoorUIDs);
 
      //int roomTest = (*(_locffviafm.begin())).first;
      //int transTest = (building->GetRoom(roomTest)->GetAllTransitionsIDs())[0];
@@ -573,6 +577,7 @@ int FFRouter::FindExit(Pedestrian* p)
                Log->Write("ERROR: \t ffRouter: unknown/unreachable goalID: %d in FindExit(Ped)",goalID);
           } else {
                validFinalDoor.emplace_back(goalToLineUIDmap.at(goalID));
+               Log->Write("aaaaaa %f / %f", _CroTrByUID[validFinalDoor[0]]->GetCentre()._x, _CroTrByUID[validFinalDoor[0]]->GetCentre()._y);
           }
      }
 
