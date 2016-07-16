@@ -544,7 +544,7 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
                }
           }
           std::string filename = "floorfield" + std::to_string(roomNr) + ".vtk";
-          locffviafm[roomNr]->writeFF(filename, targets);
+          //locffviafm[roomNr]->writeFF(filename, targets);
      }
 
 
@@ -595,14 +595,14 @@ Point DirectionSubLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 Point DirectionSubLocalFloorfield::GetDir2Wall(Pedestrian* ped) const
 {
      Point p;
-     int key = ped->GetSubRoomID();
+     int key = ped->GetSubRoomUID();
      locffviafm.at(key)->getDir2WallAt(ped->GetPos(), p);
      return p;
 }
 
 double DirectionSubLocalFloorfield::GetDistance2Wall(Pedestrian* ped) const
 {
-     return locffviafm.at(ped->GetSubRoomID())->getDistance2WallAt(ped->GetPos());
+     return locffviafm.at(ped->GetSubRoomUID())->getDistance2WallAt(ped->GetPos());
 }
 
 void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
@@ -685,7 +685,7 @@ void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
                }
           }
           std::string filename = "floorfield" + std::to_string(subroomUID) + ".vtk";
-          locffviafm[subroomUID]->writeFF(filename, targets);
+          //locffviafm[subroomUID]->writeFF(filename, targets);
      }
 }
 

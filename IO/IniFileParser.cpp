@@ -238,9 +238,8 @@ bool IniFileParser::Parse(std::string iniFile)
      }
 
      bool parsingModelSuccessful = false;
-     for (TiXmlElement* xModel = xMainNode->FirstChild("operational_models")->FirstChildElement(
-               "model"); xModel;
-          xModel = xModel->NextSiblingElement("model")) {
+     for (TiXmlElement* xModel = xMainNode->FirstChild("operational_models")->FirstChildElement("model");
+                                        xModel; xModel = xModel->NextSiblingElement("model")) {
           if (!xModel->Attribute("description")) {
                Log->Write("ERROR: \t missing attribute description in models ?");
                return false;
@@ -1004,6 +1003,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                Router *r = new FFRouter(id, ROUTING_FF_LOCAL_SHORTEST, hasSpecificGoals);
                _config->GetRoutingEngine()->AddRouter(r);
                Log->Write("\nINFO: \tUsing FF Local Shortest Router");
+               Log->Write("\nWARNING: \tFF Local Shortest is bugged!!!!");
 
                //check if the exit strat is [8]
 
@@ -1122,10 +1122,37 @@ bool IniFileParser::ParseStepSize(TiXmlNode& stepNode)
 {
      if (stepNode.FirstChild("stepsize")) {
           const char* stepsize = stepNode.FirstChild("stepsize")->FirstChild()->Value();
-          if (stepsize)
-               _config->Setdt(atof(stepsize));
-          Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
-          return true;
+          if (stepsize) {
+               double tmp = 1. / _config->GetFps();
+               double stepsizeDBL = atof(stepsize);
+               if ( (stepNode.FirstChildElement("stepsize")->Attribute("fix")) &&
+                         (std::string(stepNode.FirstChildElement("stepsize")->Attribute("fix")) == "yes") ) {
+                    _config->Setdt(atof(stepsize));
+                    Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
+                    if (tmp < _config->Getdt()) {
+                         Log->Write("WARNING: \tStepsize dt = %f > %f = frameinterval.\nWARNING: \tYou should decrease stepsize or fps!", _config->Getdt(), tmp);
+                    }
+                    return true;
+               }
+               //find a stepsize, that can be multiplied by (int) to get framerate
+               for (int i = 1; i < 2000; ++i) {
+                    if ((tmp / i) <= stepsizeDBL) {
+                         _config->Setdt(tmp / i);
+                         if ((tmp/i) < stepsizeDBL) {
+                              Log->Write("WARNING: \tDecreased stepsize from <%f> to <%f> to match fps", stepsizeDBL, (tmp/i));
+                         }
+                         Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
+                         return true;
+                    }
+               }
+               //below should never execute
+               _config->Setdt(stepsizeDBL);
+               Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
+               if (tmp < _config->Getdt()) {
+                    Log->Write("WARNING: \tStepsize dt = %f > %f = frameinterval. You should decrease stepsize or fps!", _config->Getdt(), tmp);
+               }
+               return true;
+          }
      }
      return false;
 }

@@ -39,6 +39,7 @@ class IniFileParser {
 
 public:
      IniFileParser(Configuration* config);
+     ~IniFileParser(){};
 
      bool Parse(std::string iniFile);
 

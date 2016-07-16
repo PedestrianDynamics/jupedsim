@@ -187,6 +187,11 @@ public:
       */
      void notifyDoor(Pedestrian* const p);
 
+     /*!
+      * \brief mark pedestrian as not being in the first room anymore and return to normal routing
+      */
+     void save(Pedestrian* const p);
+
 private:
 
 protected:
@@ -206,8 +211,10 @@ protected:
      std::map<int, int>     goalToLineUIDmap3;
 
      int _mode;
+     double timeToRecalc = 0;
      bool _hasSpecificGoals;
      bool _targetWithinSubroom;
+     static int cnt;
 };
 
 #endif /* FFROUTER_H_ */
