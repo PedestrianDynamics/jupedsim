@@ -249,6 +249,8 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 {
                       Log->Write("WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time %f s\n", ped->GetID(), ped->GetMeanVelOverRecTime(), ped->GetRoomID(), ped->GetSubRoomID(), ped->GetGlobalTime());
                       building->DeletePedestrian(ped);
+                      p--;
+                      nSize--;
                 }
 
            } // for p
