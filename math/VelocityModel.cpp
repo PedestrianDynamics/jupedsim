@@ -249,12 +249,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
            } // for p
 
            #pragma omp barrier
-           // remove the pedestrians that have left the building
-           for (unsigned int p = 0; p<pedsToRemove.size(); p++) {
-                 building->DeletePedestrian(pedsToRemove[p]);
-           }
-           pedsToRemove.clear();
-           #pragma omp barrier
            // update
            for (int p = start; p <= end; ++p) {
                 Pedestrian* ped = allPeds[p];
@@ -283,6 +277,13 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 ped->SetV(v_neu);
            }
       }//end parallel
+//#pragma omp barrier
+      // remove the pedestrians that have left the building
+      for (unsigned int p = 0; p<pedsToRemove.size(); p++) {
+            building->DeletePedestrian(pedsToRemove[p]);
+      }
+      pedsToRemove.clear();
+           
 }
 
 Point VelocityModel::e0(Pedestrian* ped, Room* room) const
