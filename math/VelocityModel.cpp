@@ -283,7 +283,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
             building->DeletePedestrian(pedsToRemove[p]);
       }
       pedsToRemove.clear();
-
 }
 
 Point VelocityModel::e0(Pedestrian* ped, Room* room) const
