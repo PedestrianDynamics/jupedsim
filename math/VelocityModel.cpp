@@ -148,7 +148,8 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
 {
       // collect all pedestrians in the simulation.
       const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
-
+      vector<Pedestrian*> pedsToRemove;
+      pedsToRemove.reserve(500);
       unsigned long nSize;
       nSize = allPeds.size();
 
@@ -241,11 +242,18 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime()&& ped->GetMeanVelOverRecTime() < 0.01 && size == 0 ) // size length of peds neighbour vector
                 {
                       Log->Write("WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time %f s (current=%f\n", ped->GetID(), ped->GetMeanVelOverRecTime(), ped->GetRoomID(), ped->GetSubRoomID(), ped->GetGlobalTime(), current);
-                      building->DeletePedestrian(ped);
+                      #pragma omp critical
+                      pedsToRemove.push_back(ped);
                 }
 
            } // for p
 
+           #pragma omp barrier
+           // remove the pedestrians that have left the building
+           for (unsigned int p = 0; p<pedsToRemove.size(); p++) {
+                 building->DeletePedestrian(pedsToRemove[p]);
+           }
+           pedsToRemove.clear();
            #pragma omp barrier
            // update
            for (int p = start; p <= end; ++p) {

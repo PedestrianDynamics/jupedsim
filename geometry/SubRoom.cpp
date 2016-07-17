@@ -536,7 +536,7 @@ bool SubRoom::CheckObstacles()
           {
                if(obst->IntersectWithLine(wall))
                {
-                    Log->Write("ERROR: \tthe obstacle id [%d] is intersection with subroom [%d]",obst->GetId(),_id);
+                     Log->Write("ERROR: \tthe obstacle [%d] intersects with subroom [%d] in room [%d]",obst->GetId(),_id,_roomID);
                     Log->Write("     : \tthe triangulation will not work.");
                     return false;
                }
