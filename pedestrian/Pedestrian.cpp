@@ -486,8 +486,11 @@ double Pedestrian::GetV0Norm() const
      // we are walking on an even plane
      //TODO: move _ellipse.GetV0() to _V0Plane
      if(fabs(delta)<J_EPS){
-           // fprintf(stderr, "%f  %f  %f  %f\n", pos._x, pos._y, ped_elevation, _ellipse.GetV0());
-          walking_speed =_ellipse.GetV0();
+         //FIXME std::normal_distribution generated V0's that are very small or even < 0
+         //assume absolute v_min according to Weidmann
+         walking_speed = std::max(0.5,_ellipse.GetV0());
+
+         //fprintf(stderr, "%f  %f  %f  %f\n", pos._x, pos._y, ped_elevation, walking_speed);
      }
       // we are walking downstairs
      else{
