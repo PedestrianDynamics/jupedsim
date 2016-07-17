@@ -1781,8 +1781,7 @@ namespace VisiLibity
      * \remarks O(N*n) time complexity, where N is the guard count and
      * n is the number of vertices in \a environment_temp
      */
-    void snap_to_boundary_of(const Environment& environment_temp,
-			     double epsilon=0.0);
+    void snap_to_boundary_of(const Environment& environment_temp);
     /** \brief  relocate each guard to closest Point on boundary if
      *	        within \a epsilon of the boundary (of \a polygon_temp)
      *

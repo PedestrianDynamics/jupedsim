@@ -69,7 +69,7 @@ Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) 
      if(d >= 0.5*length) return (p1 + p2)*0.5; // return the middle point, since line is anyway too short
      double u = d/length; // d is supposed to be smaller than length, then u is in [0, 1]
      //Point diff = (p1 - p2).Normalized() * d;
-     Line e_neu = Line(p1 + (p2-p1)*u, p1 + (p2-p1)*(1-u));
+     Line e_neu = Line(p1 + (p2-p1)*u, p1 + (p2-p1)*(1-u), 0);
      Point target = e_neu.ShortestPoint(ped->GetPos());
      // if(ped->GetID() == 81)
      // {
@@ -93,7 +93,7 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 
     const Point& p1 = ped->GetExitLine()->GetPoint1();
     const Point& p2 = ped->GetExitLine()->GetPoint2();
-    Line ExitLine = Line(p1, p2);
+    Line ExitLine = Line(p1, p2, 0);
     Point Lot = ExitLine.LotPoint( ped->GetPos() );
     Point ExitMiddle = (p1+p2)*0.5;
     double d = 0.2;
@@ -108,7 +108,7 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 
 
     Point diff = (p1 - p2).Normalized() * d;
-    Line e_neu = Line(p1 - diff, p2 + diff);
+    Line e_neu = Line(p1 - diff, p2 + diff, 0);
 
     // if(ped->GetID() == )
     // {
@@ -142,14 +142,14 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
       using namespace std;
       const Point& p1 = ped->GetExitLine()->GetPoint1();
       const Point& p2 = ped->GetExitLine()->GetPoint2();
-      Line ExitLine = Line(p1, p2);
+      Line ExitLine = Line(p1, p2, 0);
       //Point Lot = ExitLine.LotPoint( ped->GetPos() );
       double d = 0.2; //shorten the line by  20 cm
       Point diff = (p1 - p2).Normalized() * d;
-      Line e_neu = Line(p1 - diff, p2 + diff);
+      Line e_neu = Line(p1 - diff, p2 + diff, 0);
       Point NextPointOnLine =  e_neu.ShortestPoint(ped->GetPos());
 
-      Line tmpDirection = Line(ped->GetPos(), NextPointOnLine );//This direction will be rotated if
+      Line tmpDirection = Line(ped->GetPos(), NextPointOnLine, 0);//This direction will be rotated if
       // it intersects a wall || obstacle.
       // check for intersection with walls
       // @todo: make a FUNCTION of this
@@ -543,8 +543,8 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
                     targets.emplace_back(pair.second);
                }
           }
-          std::string filename = "floorfield" + std::to_string(roomNr) + ".vtk";
-          locffviafm[roomNr]->writeFF(filename, targets);
+          std::string lfilename = "floorfield" + std::to_string(roomNr) + ".vtk";
+          locffviafm[roomNr]->writeFF(lfilename, targets);
      }
 
 
@@ -684,8 +684,8 @@ void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
                     targets.emplace_back(pair.second);
                }
           }
-          std::string filename = "floorfield" + std::to_string(subroomUID) + ".vtk";
-          locffviafm[subroomUID]->writeFF(filename, targets);
+          std::string filename1 = "floorfield" + std::to_string(subroomUID) + ".vtk";
+          locffviafm[subroomUID]->writeFF(filename1, targets);
      }
 }
 

@@ -71,68 +71,16 @@ void ArgumentParser::Usage(const std::string file)
 ArgumentParser::ArgumentParser(Configuration* config)
 {
      _config = config;
-//     // Default parameter values
-//     //pNumberFilename = "inputfiles/persons.xml";
-//     pSolver = 1;
-//     _projectFile = "";
-//     pTmax = 900;
-//     pfps = 1.0;
-//     pdt = 0.01;
-//     pExitStrategy = 2;
-//     pLinkedCells = false;
-//     pLinkedCellSize = 2.2;
-//     pV0Mu = 1.24;
-//     pV0Sigma = 0.26;
-//     pBmaxMu = 0.25;
-//     pBmaxSigma = 0.001;
-//     pBminMu = 0.2;
-//     pBminSigma = 0.001;
-//     pAtauMu = 0.53;
-//     pAtauSigma = 0.001;
-//     pAminMu = 0.18;
-//     pAminSigma = 0.001;
-//     pNuPed = 0.4;
-//     pNuWall = 0.2;
-//     pIntPWidthPed = 0.1;
-//     pIntPWidthWall = 0.1;
-//     pMaxFPed = 3;
-//     pMaxFWall = 3;
-//     pDistEffMaxPed = 2; //0.8
-//     pDistEffMaxWall = 2;
-//     pTauMu = 0.5;
-//     pTauSigma = 0.001;
-//     paPed=1;
-//     pbPed=0.25;
-//     pcPed=3;
-//     paWall=1;
-//     pbWall=0.7;
-//     pDWall = 0.1;  //Tordeux2015
-//     pDPed = 0.1; //Tordeux2015
-//     pPeriodic = 0; // use only for Tordeux2015 with "trivial" geometries
-//     pcWall=3;
-//     pLog = 0;
-//     pModel=MODEL_GFCM;
-//     pErrorLogFile = "./Logfile.dat";
-//     pNavMeshFilename = "";
-//     pSeed = 0;
-//     pFormat = FORMAT_XML_PLAIN;
-//     pPort = -1;
-//     _hostname = "localhost";
-//     _embedMesh = 0;
-//     _maxOpenMPThreads = omp_get_thread_num();
-//     _profilingFlag = false;
-//     _hpcFlag = 0;
-//     _agentsParameters= std::map<int, std::shared_ptr<AgentsParameters> >();
-//     _routingengine = std::shared_ptr<RoutingEngine>(new RoutingEngine());
-//     _showStatistics=false;
 }
+
+ArgumentParser::~ArgumentParser(){}
 
 bool ArgumentParser::ParseArgs(int argc, char** argv)
 {
      //special case of the default configuration ini.xml
      if (argc==1) {
           Log->Write(
-                    "INFO: \tTrying to load the default configuration from the file <ini.xml>");
+                     "INFO: \tTrying to load the default configuration from the file <ini.xml>");
           IniFileParser* p = new IniFileParser(_config);
           if (!p->Parse("ini.xml")) {
                Usage(argv[0]);
@@ -141,12 +89,13 @@ bool ArgumentParser::ParseArgs(int argc, char** argv)
      }
 
      string argument = argv[1];
+
      if (argument=="-h" || argument=="--help") {
           Usage(argv[0]);
           return false;
      }
      else if (argument=="-v" || argument=="--version") {
-          fprintf(stderr, "You are actually using JuPedsim version %s  \n\n", JPS_VERSION);
+          fprintf(stderr, "You are actually using JuPedsim/jpscore version %s  \n\n", JPS_VERSION);
           return false;
      }
 
@@ -163,7 +112,9 @@ bool ArgumentParser::ParseArgs(int argc, char** argv)
                argument.erase(0, prefix1.size());
           }
           IniFileParser* p = new IniFileParser(_config);
-          return p->Parse(argument);
+          bool status = p->Parse(argument);
+          delete p;
+          return status;
      }
 
 #ifdef _JPS_AS_A_SERVICE //TODO try to avoid macros!
@@ -189,7 +140,7 @@ bool ArgumentParser::ParseArgs(int argc, char** argv)
                                    _config->SetProjectRootDir(argument5);
                                    _config->SetGeometryFile("geo.xml");
                                    _config->SetProjectFile("ini.xml");
-                                   _config->SetTrjectoriesFile(_config->GetProjectRootDir()+"tra.xml");
+                                   _config->SetTrajectoriesFile(_config->GetProjectRootDir()+"tra.xml");
                                    _config->SetFileFormat(FileFormat::FORMAT_XML_PLAIN);
                                    _config->SetFps(25);
                                    _config->SetDumpScenario(true);
@@ -214,245 +165,4 @@ bool ArgumentParser::ParseArgs(int argc, char** argv)
      Usage(argv[0]);
      return false;
 }
-
-
-//shared_ptr<OperationalModel> ArgumentParser::GetModel() const {
-//    return p_op_model;
-//}
-//
-//const FileFormat &ArgumentParser::GetFileFormat() const {
-//    return pFormat;
-//}
-//
-//const string &ArgumentParser::GetHostname() const {
-//    return _hostname;
-//}
-//
-//void ArgumentParser::SetHostname(const string &hostname) {
-//    _hostname = hostname;
-//}
-//
-//int ArgumentParser::GetPort() const {
-//    return pPort;
-//}
-//
-//void ArgumentParser::SetPort(int port) {
-//    pPort = port;
-//}
-//
-//int ArgumentParser::GetSolver() const {
-//    return pSolver;
-//}
-//
-//double ArgumentParser::GetTmax() const {
-//    return pTmax;
-//}
-//
-//double ArgumentParser::Getdt() const {
-//    return pdt;
-//}
-//
-//int ArgumentParser::IsPeriodic() const {
-//    return pPeriodic;
-//}
-//
-//double ArgumentParser::Getfps() const {
-//    return pfps;
-//}
-//
-//const string &ArgumentParser::GetProjectFile() const {
-//    return _projectFile;
-//}
-//
-///// @deprecated
-//const string &ArgumentParser::GetNavigationMesh() const {
-//    return pNavMeshFilename;
-//}
-//
-//std::shared_ptr<DirectionStrategy> ArgumentParser::GetExitStrategy() const {
-//    return p_exit_strategy;
-//}
-//
-//bool ArgumentParser::GetLinkedCells() const {
-//    return pLinkedCells;
-//}
-//
-//std::shared_ptr<RoutingEngine> ArgumentParser::GetRoutingEngine() const {
-//    return _routingengine;
-//}
-//
-//vector<pair<int, RoutingStrategy> > ArgumentParser::GetRoutingStrategy() const {
-//    return pRoutingStrategies;
-//}
-//
-//#ifdef _HYBRID_SIMULATION
-//
-//std::shared_ptr<HybridSimulationManager> ArgumentParser::GetHybridSimManager() const {
-//    return _hybridSimManager;
-//}
-//
-//#endif
-//
-//double ArgumentParser::GetV0Mu() const {
-//    return pV0Mu;
-//}
-//
-//double ArgumentParser::GetV0Sigma() const {
-//    return pV0Sigma;
-//}
-//
-//double ArgumentParser::GetBmaxMu() const {
-//    return pBmaxMu;
-//}
-//
-//double ArgumentParser::GetBmaxSigma() const {
-//    return pBmaxSigma;
-//}
-//
-//double ArgumentParser::GetBminMu() const {
-//    return pBminMu;
-//}
-//
-//double ArgumentParser::GetBminSigma() const {
-//    return pBminSigma;
-//}
-//
-//double ArgumentParser::GetAtauMu() const {
-//    return pAtauMu;
-//}
-//
-//double ArgumentParser::GetAtauSigma() const {
-//    return pAtauSigma;
-//}
-//
-//double ArgumentParser::GetAminMu() const {
-//    return pAminMu;
-//}
-//
-//double ArgumentParser::GetAminSigma() const {
-//    return pAminSigma;
-//}
-//
-//double ArgumentParser::GetNuPed() const {
-//    return pNuPed;
-//}
-//
-//double ArgumentParser::GetaPed() const {
-//    return paPed;
-//}
-//
-//double ArgumentParser::GetbPed() const {
-//    return pbPed;
-//}
-//
-//double ArgumentParser::GetcPed() const {
-//    return pcPed;
-//}
-//
-//double ArgumentParser::GetNuWall() const {
-//    return pNuWall;
-//}
-//
-//double ArgumentParser::GetaWall() const {
-//    return paWall;
-//}
-//
-//double ArgumentParser::GetbWall() const {
-//    return pbWall;
-//}
-//
-//double ArgumentParser::GetDWall() const {
-//    return pDWall;
-//}
-//
-//double ArgumentParser::GetDPed() const {
-//    return pDPed;
-//}
-//
-//
-//double ArgumentParser::GetcWall() const {
-//    return pcWall;
-//}
-//
-//double ArgumentParser::GetIntPWidthPed() const {
-//    return pIntPWidthPed;
-//}
-//
-//double ArgumentParser::GetIntPWidthWall() const {
-//    return pIntPWidthWall;
-//}
-//
-//double ArgumentParser::GetMaxFPed() const {
-//    return pMaxFPed;
-//}
-//
-//double ArgumentParser::GetMaxFWall() const {
-//    return pMaxFWall;
-//}
-//
-//double ArgumentParser::GetDistEffMaxPed() const {
-//    return pDistEffMaxPed;
-//}
-//
-//double ArgumentParser::GetDistEffMaxWall() const {
-//    return pDistEffMaxWall;
-//}
-//
-//double ArgumentParser::GetTauMu() const {
-//    return pTauMu;
-//}
-//
-//double ArgumentParser::GetTauSigma() const {
-//    return pTauSigma;
-//}
-//
-//int ArgumentParser::GetLog() const {
-//    return pLog;
-//}
-//
-//double ArgumentParser::GetLinkedCellSize() const {
-//    if (pLinkedCells)
-//        return pLinkedCellSize;
-//    return -1;
-//}
-//
-//unsigned int ArgumentParser::GetSeed() const {
-//    return pSeed;
-//}
-//
-//int ArgumentParser::GetEmbededMesh() const {
-//    return _embedMesh;
-//}
-//
-//const string &ArgumentParser::GetErrorLogFile() const {
-//    return pErrorLogFile;
-//}
-//
-//int ArgumentParser::GetMaxOpenMPThreads() const {
-//    return _maxOpenMPThreads;
-//}
-//
-//const string &ArgumentParser::GetTrajectoriesFile() const {
-//    return pTrajectoriesFile;
-//}
-//
-//void ArgumentParser::SetTrajectoriesFile(const string &trajectoriesFile) {
-//    pTrajectoriesFile = trajectoriesFile;
-//}
-//
-//const string &ArgumentParser::GetProjectRootDir() const {
-//    return _projectRootDir;
-//}
-//
-//bool ArgumentParser::GetProfileFlag() {
-//    return _profilingFlag;
-//}
-//
-//int ArgumentParser::GetHPCFlag() const {
-//    return _hpcFlag;
-//}
-//
-//bool ArgumentParser::ShowStatistics() const {
-//    return _showStatistics;
-//}
 

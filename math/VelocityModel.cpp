@@ -146,7 +146,6 @@ bool VelocityModel::Init (Building* building)
 
 void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic)
 {
-      double delta = 0.5;
       // collect all pedestrians in the simulation.
       const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
@@ -187,10 +186,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      //if they are in the same subroom
                      Point p1 = ped->GetPos();
                      Point p2 = ped1->GetPos();
-                     // if(ped->GetID() == -1){
-                     // printf("---\nid: %d\t (%f), ped1 %d\t pos1 %f %f\n", threadID, ped->GetGlobalTime(), ped->GetID(), p1._x, p1._y);
-                     // printf("id: %d\t (%f), ped2 %d\t pos2 %f %f\n---\n", threadID, ped1->GetGlobalTime(), ped1->GetID(), p2._x, p2._y);
-                     // }
                      //subrooms to consider when looking for neighbour for the 3d visibility
                      vector<SubRoom*> emptyVector;
                      emptyVector.push_back(subroom);
@@ -245,7 +240,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 // stuck peds get removed. Warning is thrown. low speed due to jam is omitted.
                 if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime()&& ped->GetMeanVelOverRecTime() < 0.01 && size == 0 ) // size length of peds neighbour vector
                 {
-                      Log->Write("WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time %f s\n", ped->GetID(), ped->GetMeanVelOverRecTime(), ped->GetRoomID(), ped->GetSubRoomID(), ped->GetGlobalTime());
+                      Log->Write("WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time %f s (current=%f\n", ped->GetID(), ped->GetMeanVelOverRecTime(), ped->GetRoomID(), ped->GetSubRoomID(), ped->GetGlobalTime(), current);
                       building->DeletePedestrian(ped);
                 }
 
@@ -321,6 +316,7 @@ double VelocityModel::OptimalSpeed(Pedestrian* ped, double spacing, double winke
       speed = (speed>0)?speed:0;
       speed = (speed<v0)?speed:v0;
 //      (1-winkel)*speed;
+     //todo use winkel
       return speed;
 }
 

@@ -42,6 +42,10 @@ void GeoFileParser::LoadBuilding(Building* building)
           Log->Write("ERROR:\t could not load extra routing information!");
           exit(EXIT_FAILURE);
      }
+     if (!LoadTrafficInfo(building)) {
+           Log->Write("ERROR:\t could not load extra traffic information!");
+           exit(EXIT_FAILURE);
+     }
 }
 
 bool GeoFileParser::LoadGeometry(Building* building)
@@ -467,6 +471,13 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
      Log->Write("INFO:\tDone with loading traffic info file");
      return true;
 }
+
+GeoFileParser::~GeoFileParser()
+{
+
+}
+
+
 
 
 

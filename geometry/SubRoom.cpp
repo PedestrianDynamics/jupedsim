@@ -852,12 +852,12 @@ string NormalSubRoom::WriteSubRoom() const
                s.append("\t\t</wall>\n");
           }
 
-          const Point& pos = obst->GetCentroid();
+          const Point& obst_pos = obst->GetCentroid();
 
           //add the obstacle caption
           char tmp1[CLENGTH];
           sprintf(tmp1, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" color=\"100\" />\n"
-                    , pos._x * FAKTOR, pos._y * FAKTOR,GetElevation(pos)*FAKTOR ,obst->GetId());
+                    , obst_pos._x * FAKTOR, obst_pos._y * FAKTOR,GetElevation(obst_pos)*FAKTOR ,obst->GetId());
           s.append(tmp1);
      }
 
@@ -1362,7 +1362,8 @@ const std::string& SubRoom::GetType() const
 bool SubRoom::IsInSubRoom(Pedestrian* ped) const
 {
      Point pos = ped->GetPos();
-     if ((ped->GetExitLine()) && (ped->GetExitLine()->DistTo(pos) <= J_EPS_GOAL))
+     Line * pedExitLine = ped->GetExitLine();
+     if ((pedExitLine) && (pedExitLine->DistTo(pos) <= J_EPS_GOAL))
           return true;
      else
           return IsInSubRoom(pos);
