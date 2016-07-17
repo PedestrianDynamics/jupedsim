@@ -277,7 +277,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 ped->SetV(v_neu);
            }
       }//end parallel
-//#pragma omp barrier
+
       // remove the pedestrians that have left the building
       for (unsigned int p = 0; p<pedsToRemove.size(); p++) {
             building->DeletePedestrian(pedsToRemove[p]);
