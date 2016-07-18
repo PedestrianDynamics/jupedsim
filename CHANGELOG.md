@@ -12,7 +12,7 @@ All notable changes to this project will be documented in this file.
 - Fix properly delete pedestrians in `Tordeux915` (#203).
 - Fix simulations are not thread-safe (#200). 
 - Fix memory lacks (#202).
--
+
 
 ### Bugs
 Please also check the [Issue tracker](https://cst.version.fz-juelich.de/jupedsim/jpscore/issues?assignee_id=&author_id=&label_name=&milestone_id=&scope=all&sort=created_desc&state=opened), if access is available.
