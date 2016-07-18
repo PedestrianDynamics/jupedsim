@@ -423,11 +423,6 @@ void Pedestrian::ClearMentalMap()
 {
      _mentalMap.clear();
      _exitIndex = -1;
-     if (_navLine) delete _navLine;
-     _navLine = nullptr;
-     // todo: ar.graf: check if we also need to delete/reset _navLine
-     //  ^^^^   is anywhere a check, only considering _navLine without checking
-     //  ^^^^   exitIndex?? (probably in my code?)
 }
 
 void Pedestrian::AddKnownClosedDoor(int door, double ttime, bool state, double quality, double latency)
@@ -957,7 +952,7 @@ int Pedestrian::FindRoute()
           Log->Write("ERROR:\t one or more routers does not exit! Check your router_ids");
           return -1;
      }
-     bool isinsub = (_building->GetAllRooms().at(this->GetRoomID())->GetSubRoom(this->GetSubRoomID())->IsInSubRoom(this));
+     //bool isinsub = (_building->GetAllRooms().at(this->GetRoomID())->GetSubRoom(this->GetSubRoomID())->IsInSubRoom(this));
      return _router->FindExit(this);
 }
 
@@ -1107,30 +1102,33 @@ int Pedestrian::GetColor() const
 bool Pedestrian::Relocate(std::function<void(const Pedestrian&)> flowupdater) {
 
      auto allRooms = _building->GetAllRooms();
-
+     bool status = false;
      for (auto&it_room : allRooms)
      {
-          auto& room=it_room.second;
+          auto& room = it_room.second;
           auto subrooms = room->GetAllSubRooms();
-          map<int, std::shared_ptr<SubRoom>>::iterator sub =
+          map<int, std::shared_ptr<SubRoom> >::iterator sub =
                   std::find_if(subrooms.begin(), subrooms.end(), [&] (std::pair<int, std::shared_ptr<SubRoom>> iterator) {
-                         //if(!(iterator.second->IsDirectlyConnectedWith(allRooms[_roomID]->GetSubRoom(_subRoomID))) && iterator.second->IsInSubRoom(this))
-                         //     Log->Write("WARNING Pedestrian [%d] got pressed into non neighbor-subroom! From [%d/%d] to [%d/%d]", _id, _roomID, _subRoomID, iterator.second->GetSubRoomID(), room->GetID());
                       return ((iterator.second->IsDirectlyConnectedWith(allRooms[_roomID]->GetSubRoom(_subRoomID))) && iterator.second->IsInSubRoom(this));
                   });
           if(sub != subrooms.end()) {
-               allRooms.at(GetRoomID())->SetEgressTime(GetGlobalTime()); //set Egresstime to old room
-
                flowupdater(*this); //@todo: ar.graf : this call should move into a critical region? check plz
                ClearMentalMap(); // reset the destination
-               //ped->FindRoute();
+               const int oldRoomID = _roomID;
                SetRoomID(room->GetID(), room->GetCaption());
                SetSubRoomID(sub->second->GetSubRoomID());
                SetSubRoomUID(sub->second->GetUID());
 #pragma omp critical
                _router->FindExit(this);
-               return true;
+               if(oldRoomID != room->GetID()){
+                      //the agent left the old room
+                      //actualize the egress time for that room
+#pragma omp critical
+                     allRooms.at(GetRoomID())->SetEgressTime(GetGlobalTime()); //set Egresstime to old room
+               }
+               status = true;
+               break;
           }
      }
-     return false;
+     return status;
 }
