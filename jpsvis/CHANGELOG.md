@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 - show name and id of rooms/subrooms in "geometry structure"
 - Rename directory to `JPSvis_Files`: 94ed0a55
 
-##v0.8.0 [2016-02-18]
+## v0.8.0 [2016-02-18]
 ### Added
 - option to load  vtk files. Need to add the line ``` <gradient_field filename="floorfield.vtk"> 
 ``` in the header of the trajectory file. Alternatively drag and drop a vtk file on JPSvis.
