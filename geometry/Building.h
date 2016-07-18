@@ -102,9 +102,7 @@ public:
      std::string GetCaption() const;
 
      RoutingEngine* GetRoutingEngine() const;
-
      const std::map<int, std::shared_ptr<Room> >& GetAllRooms() const;
-
      const std::vector<Pedestrian*>& GetAllPedestrians() const;
 
      Pedestrian* GetPedestrian(int pedID) const;

@@ -15,7 +15,7 @@
   </trajectories>
   <!-- where to store the logs -->
   <logfile>log</logfile>
-  <num_threads>1</num_threads>
+  <num_threads>10</num_threads>
   <!-- traffic information: e.g closed doors or smoked rooms -->
   <traffic_constraints>
     <!-- room states are: good or smoked  -->
@@ -47,7 +47,7 @@
   <!--persons information and distribution -->
   <agents operational_model_id="3">
     <agents_distribution>
-      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="2" number="2" goal_id="0" router_id="1" />
+      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="2" number="10" goal_id="0" router_id="1" />
     </agents_distribution>
 
     <!-- frequency in persons/minute -->

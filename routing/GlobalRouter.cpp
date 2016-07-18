@@ -986,6 +986,7 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
      {
           //fixme: this should also never happened. But hapen due to previvous bugs..
           const vector<int>& goals=sub->GetAllGoalIDs();
+          auto isinsub = sub->IsInSubRoom(ped);
           for(unsigned int g1=0; g1<goals.size(); g1++)
           {
                relevantAPS.push_back(_accessPoints[goals[g1]]);
