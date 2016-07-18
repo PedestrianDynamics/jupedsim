@@ -138,6 +138,9 @@ private:
      static int _agentsCreated;
 
 public:
+     // public member
+     int _ticksInThisRoom;
+
      // constructors
      Pedestrian();
      explicit Pedestrian(const StartDistribution& agentsParameters, Building& building);

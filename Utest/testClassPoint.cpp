@@ -464,6 +464,7 @@ int main()
      char cCurrentPath[FILENAME_MAX];
      f = fopen(fname, "w");
      if (!GetCurrentDir(cCurrentPath, sizeof(cCurrentPath))) {
+          fclose(f); 
           return EXIT_FAILURE;
      }
      cCurrentPath[sizeof(cCurrentPath) - 1] = '\0'; /* not really required */

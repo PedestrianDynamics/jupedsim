@@ -47,7 +47,7 @@ using namespace std;
  SubRoom
  ************************************************************/
 
-int SubRoom::_static_uid=0;
+int SubRoom::_static_uid=1; //must be positive (sideeffect for FloorfieldViaFM::isInside())
 
 SubRoom::SubRoom()
 {
@@ -196,6 +196,10 @@ void SubRoom::AddObstacle(Obstacle* obs)
 
 void SubRoom::AddGoalID(int ID)
 {
+     if (std::find(_goalIDs.begin(), _goalIDs.end(), ID) != _goalIDs.end()) {
+          Log->Write("WARNING: \tAdded existing GoalID to Subroom %d", this->GetSubRoomID());
+          //if occurs, plz assert, that ID is a UID of any line of the goal and not a number given by the user (ar.graf)
+     }
      _goalIDs.push_back(ID);
 }
 
@@ -406,6 +410,9 @@ bool SubRoom::IsVisible(const Line &wall, const Point &position)
      {
           for(const auto& w: obst->GetAllWalls())
           {
+//               if(w._height <= 1.5) {
+//                    continue;
+//               }
                if(wall_is_vis && ped_wall.IntersectionWith(w)){
                     // fprintf (stdout, "\t\t Wall_is_visible INTERSECTION OBS; L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", w.GetPoint1()._x, w.GetPoint1()._y, w.GetPoint2()._x, w.GetPoint2()._y, ped_wall.GetPoint1()._x, ped_wall.GetPoint1()._y, ped_wall.GetPoint2()._x, ped_wall.GetPoint2()._y);
                     wall_is_vis = false;
@@ -529,7 +536,7 @@ bool SubRoom::CheckObstacles()
           {
                if(obst->IntersectWithLine(wall))
                {
-                    Log->Write("ERROR: \tthe obstacle id [%d] is intersection with subroom [%d]",obst->GetId(),_id);
+                     Log->Write("ERROR: \tthe obstacle [%d] intersects with subroom [%d] in room [%d]",obst->GetId(),_id,_roomID);
                     Log->Write("     : \tthe triangulation will not work.");
                     return false;
                }
@@ -845,12 +852,12 @@ string NormalSubRoom::WriteSubRoom() const
                s.append("\t\t</wall>\n");
           }
 
-          const Point& pos = obst->GetCentroid();
+          const Point& obst_pos = obst->GetCentroid();
 
           //add the obstacle caption
           char tmp1[CLENGTH];
           sprintf(tmp1, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" color=\"100\" />\n"
-                    , pos._x * FAKTOR, pos._y * FAKTOR,GetElevation(pos)*FAKTOR ,obst->GetId());
+                    , obst_pos._x * FAKTOR, obst_pos._y * FAKTOR,GetElevation(obst_pos)*FAKTOR ,obst->GetId());
           s.append(tmp1);
      }
 
@@ -923,18 +930,17 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
     				 return false;
     			 }
     			 else
-    				 ++j;
+                               ++j;
     		 }
-    	 }
+         }
     	 if (j <= 2)
     		 j = 0;
     	 else {
     		 char tmp[CLENGTH];
-    		 sprintf(tmp, "ERROR: \tNormanSubRoom::ConvertLineToPoly(): SubRoom %d Room %d !!\n", GetSubRoomID(), GetRoomID());
+    		 sprintf(tmp, "WARNING: \tNormanSubRoom::ConvertLineToPoly(): SubRoom %d Room %d !!\n", GetSubRoomID(), GetRoomID());
     		 Log->Write(tmp);
-    		 sprintf(tmp, "ERROR: \tWall %s shares edge with multiple walls!!!\n", it.toString().c_str());
-    		 Log->Write(tmp);
-    		 return false;
+    		 sprintf(tmp, "WARNING: \tWall %s shares edge with multiple walls!!! j=%d\n", it.toString().c_str(), j);
+    		 Log->Write(tmp); // why should this return false?
     	 }
     	 ++itr;
      }
@@ -1355,8 +1361,10 @@ const std::string& SubRoom::GetType() const
 
 bool SubRoom::IsInSubRoom(Pedestrian* ped) const
 {
+
      const Point& pos = ped->GetPos();
-     if (ped->GetExitLine() && ped->GetExitLine()->DistTo(pos) <= J_EPS_GOAL)
+     std::unique_ptr<Line> pedExitLine(ped->GetExitLine());
+     if ((pedExitLine) && (pedExitLine->DistTo(pos) <= J_EPS_GOAL))
           return true;
      else
           return IsInSubRoom(pos);

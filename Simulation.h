@@ -33,7 +33,6 @@
 #ifndef SIMULATION_H_
 #define SIMULATION_H_
 
-
 #include "general/ArgumentParser.h"
 #include "geometry/Building.h"
 #include "geometry/SubRoom.h"
@@ -52,16 +51,15 @@
 #include "routing/CognitiveMapRouter.h"
 #include "events/EventManager.h"
 #include "pedestrian/AgentsSourcesManager.h"
+#include "general/Configuration.h"
 
 //Forward declarations
 //class AgentsSourcesManager;
 class EventManager;
-class HybridSimulationManager;
 
-class Simulation
-{
+class Simulation {
 private:
-     ///Number of pedestrians in the simulation
+    ///Number of pedestrians in the simulation
     long _nPeds;
     ///Maximum simulation time
     //double _tmax;
@@ -83,19 +81,19 @@ private:
     IODispatcher* _iod;
     /// EventManager
     EventManager* _em;
-    /// argument parser
-    ArgumentParser _argsParser;
+    /// config
+    const Configuration* _config;
     /// Agents sources manager
     AgentsSourcesManager _agentSrcManager;
     /// hybrid simulation manager
     //HybridSimulationManager
-    std::shared_ptr<HybridSimulationManager>_hybridSimManager=nullptr;
     int _periodic;
+    bool _gotSources; // is true if we got some sources. Otherwise, false.
 public:
     /**
      * Constructor
      */
-    Simulation(const ArgumentParser& args);
+    Simulation(const Configuration* args);
 
     /**
      * Destructor
@@ -108,9 +106,9 @@ public:
     long GetPedsNumber() const;
 
     /**
-     * Read parameters from the argument parser class.
+     * Read parameters from config.
      */
-    bool InitArgs(const ArgumentParser& args);
+    bool InitArgs();
 
     /**
      * Update the route of the pedestrians and reassign rooms, in the case a room change happens
@@ -131,18 +129,17 @@ public:
      */
     void UpdateLocations();
 
-
     /**
      * Perform some initialisation for the simulation.
      * such as writing the headers for the trajectories.
      * @param the maximal number of pedestrian
      */
-    void RunHeader(long nPed=-1);
+    void RunHeader(long nPed = -1);
 
     /**
      * Run the main part of the simulation
      */
-    int RunBody(double maxSimTime);
+    double RunBody(double maxSimTime);
 
     /**
      * Perform some finalization like writing the
@@ -154,7 +151,7 @@ public:
      * Run a standard simulation
      * @return the total simulated/evacuation time
      */
-    int RunStandardSimulation(double maxSimTime);
+    double RunStandardSimulation(double maxSimTime);
 
     /**
      * print some statistics about the simulation
@@ -176,12 +173,18 @@ public:
      */
     Building* GetBuilding();
 
-
     /**
      * Update the flow for the door that the pedestrian just crossed
      * @param ped
      */
-    void UpdateFlowAtDoors(const Pedestrian &ped) const;
+    void UpdateFlowAtDoors(const Pedestrian& ped) const;
+
+     /**
+     * Update the refresh ticks for all doors. they count up and measure the age of the tickvalue (ffRouter, quickest)
+     *
+     */
+     void UpdateDoorticks() const;
+
 };
 
 #endif /*SIMULATION_H_*/

@@ -45,7 +45,7 @@ class DirectionStrategy;
 class GradientModel : public OperationalModel {
 private:
      /// define the strategy for crossing a door (used for calculating the driving force)
-     DirectionStrategy* _direction;
+     std::shared_ptr<DirectionStrategy> _direction;
 
      /// Modellparameter
      double _nuPed;
@@ -112,13 +112,13 @@ private:
 
 public:
 
-     GradientModel(DirectionStrategy* dir, double nuped, double aped, double bped, double cped,
+     GradientModel(std::shared_ptr<DirectionStrategy> dir, double nuped, double aped, double bped, double cped,
                    double nuwall, double awall, double bwall, double cwall,
                    double deltaH, double wallAvoidDistance, bool useWallAvoidance,
                    double slowDownDistance);
      virtual ~GradientModel(void);
 
-     DirectionStrategy* GetDirection() const;
+     std::shared_ptr<DirectionStrategy> GetDirection() const;
      /**
       * Get the parameter for the strength of the ped-PED repulsive force
       *

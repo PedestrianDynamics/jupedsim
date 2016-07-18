@@ -381,8 +381,8 @@ bool GlobalRouter::Init(Building* building)
                _distMatrix[from_door][to_door] = _edgeCost*from_AP->GetNavLine()->DistTo(goal->GetCentroid());
 
                // add a penalty for goals outside due to the direct line assumption while computing the distances
-               //if (_distMatrix[from_door][to_door] > 10.0)
-               //      _distMatrix[from_door][to_door]*=10;
+               if (_distMatrix[from_door][to_door] > 10.0)
+                     _distMatrix[from_door][to_door]*=100;
           }
      }
 
@@ -1124,9 +1124,9 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
           {
                int to_door = to_AP->GetID();
 
-               int room_id = to_AP->GetConnectingRoom1();
+               int lroom_id = to_AP->GetConnectingRoom1();
 
-               if (IsElementInVector(rooms_ids, room_id) == false)
+               if (IsElementInVector(rooms_ids, lroom_id) == false)
                     continue;
 
                graph_file << from_door << " -> " << to_door << " [ label="
@@ -1367,6 +1367,13 @@ string GlobalRouter::GetRoutingInfoFile()
                     TiXmlElement* para =e->FirstChild("parameters")->FirstChildElement("navigation_mesh");
                     if (para)
                     {
+                          //triangulate the geometry
+                          if(!_building->Triangulate())
+                          {
+                                Log->Write("ERROR:\t could not triangulate the geometry!");
+                                exit (EXIT_FAILURE);
+                          }
+
                          string local_planing=xmltoa(para->Attribute("use_for_local_planning"),"false");
                          if(local_planing=="true") {
                               _useMeshForLocalNavigation = 1;
@@ -1424,8 +1431,8 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
      }
 
      string  version = xRootNode->Attribute("version");
-     if (version != JPS_VERSION && version != JPS_OLD_VERSION) {
-          Log->Write("ERROR: \tOnly version  %d.%d supported",JPS_VERSION_MAJOR,JPS_VERSION_MINOR);
+     if (version < JPS_OLD_VERSION) {
+          Log->Write("ERROR: \tOnly version greater than %d supported",JPS_OLD_VERSION);
           Log->Write("ERROR: \tparsing routing file failed!");
           return false;
      }

@@ -143,11 +143,6 @@ void AgentsSource::SetStartDistribution(std::shared_ptr<StartDistribution> start
      _startDistribution=startDistribution;
 }
 
-int AgentsSource::GetGroupID() const
-{
-     return _groupID;
-}
-
 const std::shared_ptr<StartDistribution> AgentsSource::GetStartDistribution() const
 {
      return _startDistribution;

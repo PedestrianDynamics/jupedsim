@@ -51,7 +51,7 @@ double cutoff = 2.0;
 using std::vector;
 using std::string;
 
-VelocityModel::VelocityModel(DirectionStrategy* dir, double aped, double Dped,
+VelocityModel::VelocityModel(std::shared_ptr<DirectionStrategy> dir, double aped, double Dped,
                              double awall, double Dwall)
 {
      _direction = dir;
@@ -72,33 +72,33 @@ VelocityModel::~VelocityModel()
 bool VelocityModel::Init (Building* building)
 {
 
-    if(dynamic_cast<DirectionFloorfield*>(_direction)){
+    if(dynamic_cast<DirectionFloorfield*>(_direction.get())){
         Log->Write("INFO:\t Init DirectionFloorfield starting ...");
         //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
             double _deltaH = 0.0625;
             double _wallAvoidDistance = 0.4;
             bool _useWallAvoidance = true;
-        dynamic_cast<DirectionFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+        dynamic_cast<DirectionFloorfield*>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
         Log->Write("INFO:\t Init DirectionFloorfield done");
     }
 
-     if(dynamic_cast<DirectionLocalFloorfield*>(_direction)){
+     if(dynamic_cast<DirectionLocalFloorfield*>(_direction.get())){
           Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
           //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
           double _deltaH = 0.0625;
           double _wallAvoidDistance = 0.4;
           bool _useWallAvoidance = true;
-          dynamic_cast<DirectionLocalFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          dynamic_cast<DirectionLocalFloorfield*>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
           Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
      }
 
-     if(dynamic_cast<DirectionSubLocalFloorfield*>(_direction)){
+     if(dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())){
           Log->Write("INFO:\t Init DirectionSubLOCALFloorfield starting ...");
           //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
           double _deltaH = 0.0625;
           double _wallAvoidDistance = 0.4;
           bool _useWallAvoidance = true;
-          dynamic_cast<DirectionSubLocalFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
           Log->Write("INFO:\t Init DirectionSubLOCALFloorfield done");
      }
 
@@ -111,12 +111,16 @@ bool VelocityModel::Init (Building* building)
          //a destination could not be found for that pedestrian
          if (ped->FindRoute() == -1) {
               Log->Write(
-                   "ERROR:\tVelocityModel::Init() cannot initialise route. ped %d is deleted.\n",ped->GetID());
+                   "ERROR:\tVelocityModel::Init() cannot initialise route. ped %d is deleted in Room %d %d.\n",ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID());
               building->DeletePedestrian(ped);
               p--;
               peds_size--;
               continue;
          }
+
+
+         
+         
          Point target = ped->GetExitLine()->ShortestPoint(ped->GetPos());
          Point d = target - ped->GetPos();
          double dist = d.Norm();
@@ -142,19 +146,21 @@ bool VelocityModel::Init (Building* building)
 
 void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic)
 {
-      double delta = 0.5;
       // collect all pedestrians in the simulation.
       const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
-
+      vector<Pedestrian*> pedsToRemove;
+      pedsToRemove.reserve(500);
       unsigned long nSize;
       nSize = allPeds.size();
 
       int nThreads = omp_get_max_threads();
+
       //nThreads = 1; //debug only
       int partSize;
-      partSize = (int) (nSize / nThreads);
-
-      #pragma omp parallel  default(shared) num_threads(nThreads)
+      partSize = ((int)nSize > nThreads)? (int) (nSize / nThreads):(int)nSize;
+      if(partSize == (int)nSize)
+            nThreads = 1; // not worthy to parallelize 
+      #pragma omp parallel default(shared) num_threads(nThreads)
       {
            vector< Point > result_acc = vector<Point > ();
            result_acc.reserve(nSize);
@@ -165,28 +171,12 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
            int start = threadID*partSize;
            int end;
-           end = (threadID + 1) * partSize - 1;
-           if ((threadID == nThreads - 1)) end = (int) (nSize - 1);
-
+           end = (threadID < nThreads - 1) ? (threadID + 1) * partSize - 1: (int) (nSize - 1);
            for (int p = start; p <= end; ++p) {
-
+                 // printf("\n------------------\nid=%d\t p=%d\n", threadID, p);
                 Pedestrian* ped = allPeds[p];
                 Room* room = building->GetRoom(ped->GetRoomID());
                 SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
-
-                double normVi = ped->GetV().ScalarProduct(ped->GetV()); //squared
-                double HighVel = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta); //(v0+delta)^2
-                if (normVi > HighVel && ped->GetV0Norm() > 0) {
-                     fprintf(stderr, "WARNING: VelocityModel::ComputeNextTimeStep() actual velocity (%f) of iped %d "
-                             "is bigger than desired velocity (%f) at time: %fs\n",
-                             sqrt(normVi), ped->GetID(), ped->GetV0Norm(), current);
-
-                     // remove the pedestrian and abort
-                     Log->Write("\tERROR: ped [%d] was removed due to high velocity",ped->GetID());
-                     building->DeletePedestrian(ped);
-                     exit(EXIT_FAILURE);
-                }
-
                 Point repPed = Point(0,0);
                 vector<Pedestrian*> neighbours;
                 building->GetGrid()->GetNeighbourhood(ped,neighbours);
@@ -244,37 +234,21 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 double spacing = spacings[0].first;
                 double winkel = spacings[0].second;
                 Point tmp;
-
-
-                // if(fmod(ped->GetGlobalTime(), ped->GetUpdateRate())<0.0001 || (spacing-ped->GetLastE0()._x)>0.01)
-                // {
-                   
-                      // if(ped->GetID()==-10)
-                            // std::cout << "Min Spacing "<< spacing << ", " << winkel << std::endl;
-                //       ped->SetLastE0(Point(spacing, winkel));
-                // }
-                // else
-                // {
-                //       tmp = ped->GetLastE0();
-                //       if(ped->GetID()==10)
-                //             std::cout << "keep direction "<<tmp._x << ", " << tmp._y << std::endl;
-                //       spacing = tmp._x;
-                //       winkel = tmp._y;
-                // }
-                // if(ped->GetID()==-10)
-                      // getc(stdin);
-
-                
-                // spacing = *std::min_element(std::begin(spacings), std::end(spacings));
-                // if(ped->GetID()==10){
-                      // fprintf(stderr, "%f %f %f\n", ped->GetGlobalTime(), (repPed+repWall).Norm(), spacing);
-                // }
                 Point speed = direction.Normalized() * OptimalSpeed(ped, spacing, winkel);
-                result_acc.push_back(speed);
+                result_acc.push_back(speed);                
                 spacings.clear(); //clear for ped p
+                
+                // stuck peds get removed. Warning is thrown. low speed due to jam is omitted.
+                if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime()&& ped->GetMeanVelOverRecTime() < 0.01 && size == 0 ) // size length of peds neighbour vector
+                {
+                      Log->Write("WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time %f s (current=%f\n", ped->GetID(), ped->GetMeanVelOverRecTime(), ped->GetRoomID(), ped->GetSubRoomID(), ped->GetGlobalTime(), current);
+                      #pragma omp critical
+                      pedsToRemove.push_back(ped);
+                }
+
            } // for p
 
-           //#pragma omp barrier
+           #pragma omp barrier
            // update
            for (int p = start; p <= end; ++p) {
                 Pedestrian* ped = allPeds[p];
@@ -303,16 +277,36 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 ped->SetV(v_neu);
            }
       }//end parallel
+
+      // remove the pedestrians that have left the building
+      for (unsigned int p = 0; p<pedsToRemove.size(); p++) {
+            building->DeletePedestrian(pedsToRemove[p]);
+      }
+      pedsToRemove.clear();
+           
 }
 
 Point VelocityModel::e0(Pedestrian* ped, Room* room) const
 {
-      const Point& target = _direction->GetTarget(room, ped);
+      const Point target = _direction->GetTarget(room, ped);
       Point e0;
-      const Point& pos = ped->GetPos();
+      const Point pos = ped->GetPos();
       double dist = ped->GetExitLine()->DistTo(pos);
       // check if the molified version works
-      if (dist > J_EPS_GOAL) {
+      Point lastE0 = ped->GetLastE0();
+      ped->SetLastE0(target-pos);
+
+      if ( (dynamic_cast<DirectionFloorfield*>(_direction.get())) ||
+           (dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) ||
+           (dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get()))  ) {
+          if (dist > 20*J_EPS_GOAL) {
+               e0 = target - pos; //ped->GetV0(target);
+          } else {
+               e0 = lastE0;
+               ped->SetLastE0(lastE0); //keep old vector (revert set operation done 9 lines above)
+          }
+      }
+      else if (dist > J_EPS_GOAL) {
             e0 = ped->GetV0(target);
       } else {
           ped->SetSmoothTurning();
@@ -331,6 +325,7 @@ double VelocityModel::OptimalSpeed(Pedestrian* ped, double spacing, double winke
       speed = (speed>0)?speed:0;
       speed = (speed<v0)?speed:v0;
 //      (1-winkel)*speed;
+     //todo use winkel
       return speed;
 }
 
@@ -508,7 +503,7 @@ string VelocityModel::GetDescription()
      return rueck;
 }
 
-DirectionStrategy* VelocityModel::GetDirection() const
+std::shared_ptr<DirectionStrategy> VelocityModel::GetDirection() const
 {
      return _direction;
 }

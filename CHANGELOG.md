@@ -7,7 +7,8 @@ Please also check the Issue tracker on GitLab, if access is available.
 - exit strategies using *local* - prefix can result in circular routing
 - triangulation creates error-prone help-lines in certain geometries
 - errors in unused parts of ini files lead to system-exit
-
+- fixed: simulations are now thread-safe. See #200 
+- fixes memory lacks (#202)
 
 ## v0.8.0 [2016-02-18]
 

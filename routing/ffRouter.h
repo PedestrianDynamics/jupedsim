@@ -111,7 +111,7 @@ public:
       *
       */
      FFRouter();
-     FFRouter(int id, RoutingStrategy s);
+     FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals);
      //FFRouter(const Building* const);
 
      /**
@@ -134,6 +134,24 @@ public:
       * \warning [any warning if necessary]
       */
      virtual bool Init(Building* building);
+
+     /*!
+      * \brief ReInit the router (must be called after each event (open/close change)
+      *
+      * ReInit() will reconstruct the graph (nodes = doors, edges = costs) and
+      * find shortest paths via Floyd-Warshall. It will reconstruct the floorfield to
+      * evaluate the best doors to certain goals as they could change. Further on it
+      * will take the information of former floorfields, if useful.
+      *
+      *
+      * \param[in] [name of input parameter] [its description]
+      * \param[out] [name of output parameter] [its description]
+      * \return [information about return value]
+      * \sa [see also section]
+      * \note [any note about the function you might have]
+      * \warning [any warning if necessary]
+      */
+     virtual bool ReInit();
 
      /*!
       * \brief interface used by __Pedestrian__, sets (*p).exitline/.exitindex
@@ -159,21 +177,37 @@ public:
       */
      //void SetDistances();
 
+     /*!
+      * \brief set mode (shortest, quickest, ...)
+      */
+      void SetMode(std::string s);
+
+     /*!
+      * \brief notify door about time spent in that room. needed for quickest mode
+      */
+     void notifyDoor(Pedestrian* const p);
+
 private:
 
 protected:
      std::map< std::pair<int, int> , double > _distMatrix;
      std::map< std::pair<int, int> , int >    _pathsMatrix;
      std::vector<int>                         _allDoorUIDs;
+     std::vector<int>                         _localShortestSafedPeds;
      const Building*                          _building;
      std::map<int, LocalFloorfieldViaFM*>     _locffviafm;
      FloorfieldViaFM*                         _globalFF;
      std::map<int, Transition*>               _TransByUID;
      std::map<int, Transition*>               _ExitsByUID;
+     std::map<int, Crossing*>                 _CroTrByUID;
 
      std::map<int, int>     goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
      std::map<int, int>     goalToLineUIDmap2;
      std::map<int, int>     goalToLineUIDmap3;
+
+     int _mode;
+     bool _hasSpecificGoals;
+     bool _targetWithinSubroom;
 };
 
 #endif /* FFROUTER_H_ */

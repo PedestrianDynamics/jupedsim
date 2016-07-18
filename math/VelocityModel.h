@@ -58,7 +58,7 @@ class DirectionStrategy;
 class VelocityModel : public OperationalModel {
 private:
      /// define the strategy for crossing a door (used for calculating the driving force)
-     DirectionStrategy* _direction;
+     std::shared_ptr<DirectionStrategy> _direction;
 
      /// Modellparameter
      double _aPed;
@@ -130,12 +130,12 @@ private:
 
 public:
 
-     VelocityModel(DirectionStrategy* dir, double aped, double Dped,
+     VelocityModel(std::shared_ptr<DirectionStrategy> dir, double aped, double Dped,
                    double awall, double Dwall);
      virtual ~VelocityModel(void);
 
      
-     DirectionStrategy* GetDirection() const;
+     std::shared_ptr<DirectionStrategy> GetDirection() const;
 
      /**
       * ToDO: What is this parameter doing?
