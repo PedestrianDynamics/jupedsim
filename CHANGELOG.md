@@ -1,30 +1,33 @@
-# JPSreport v0.9
+# Change Log
+All notable changes to this project will be documented in this file.
 
-## Added
+## JPSreport [unreleased]
 
-- Two options "startframe" and "stopframe" are added for each measurement area for method D to assign the time periods for analysis.
+### Added
+
+- Two options `startframe` and `stopframe` are added for each measurement area for method D to assign the time periods for analysis.
 
 - Individual density based on Voronoi method is added for one dimensional case in the output file (Individual headway is moved to the 5th column). 
 
 - z-position of each measurement area can be assigned in inifile so that the trajectories in geometries with several floors can be analyzed.
 
-- The option "plot_time_series" is available for each measurement area.
+- The option `plot_time_series` is available for each measurement area.
 
-- The option "frame_interval" for method A now can have different values for different measurement area.
+- The option `frame_interval` for method A now can have different values for different measurement area.
 
-## Changed
+### Changed
 
 - The swith for calculating Individual FD is arraged for each measurement area.
 
-## Fixed
+### Fixed
 
 - The script for plot Voronoi cells is modified so that it work when the trajectory files are not the in the same location as the inifile.
 
 
-# JPSreport v0.8
+## JPSreport v0.8
 
 
-## Added
+### Added
 
 - A switch is added in the infile for `method_D` to turn off plotting Voronoi diagrams. Now it is possible to only output data for the diagram but not plot figures.
 
@@ -39,7 +42,7 @@
 - A warning will will be given and the program stops if trajectory for a given pedestrian ID is not continuous. 
 
 
-## Changed
+### Changed
 
 - Scripts "_Plot_cell_rho.py" and "_Plot_cell_v.py" are modified. Now the geometry is also plotted when plotting voronoi cells.
 
@@ -47,7 +50,7 @@
 
 - Scripts "_Plot_FD.py" is modified!
 
-## Fixed
+### Fixed
 
 - Output data file "Folw\_NT\_xxxx.dat" is closed before calling script for plotting N-t diagram.
 
@@ -64,16 +67,17 @@
 - when path of trajectory is not given absolutely, the default location is the same folder with the inifile
 
 	
-# JPSreport v0.7
+## JPSreport v0.7
 
-## Added
+### Added
 
 - Added four demos as examples for using JPSreport
 - Added the option for specifying the location of scripts in configuration file.
 - Embedded python scripts (**\_Plot_N\_t.py**, **\_Plot_timeseries\_rho_v.py**) for plotting N-t diagram (Method A), time series of density/velocity diagram (Method C and D) and Voronoi diagrams (Method D).
 - Added python script (**SteadyState.py**) for automatically detecting steady state of pedestrian flow based on time series of density and velocity. When plotting fundamental diagrams normally only data under steady state are used due to its generality.
 - Added python script (**\_Plot_FD.py**) for plotting fundamenatl diagram based on the detected steady state.
-## Changed
+
+### Changed
 
 - Changed name of some variables in configuration file:
 
@@ -109,6 +113,6 @@ removing these pedestrians from the list.
 
 - More than one sub rooms in one geometry can be analysed independently.
 	
-## Fixed
+### Fixed
 	
 - Fixed bug for dealing with obstacles inside geometry.
