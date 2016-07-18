@@ -1,13 +1,24 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## Known Issues
-#### JPSCORE
-Please also check the Issue tracker on GitLab, if access is available.
+## Unreleased
+### Added
+- Floor field router. See [usage](http://jupedsim.github.io/jpscore/models/routing/#floorfield-router). 
+### Modified
+- If no seed is given, the simulation will be run with `seed=Time(NULL)` (random).
+- Major refactoring of the parsing machinery. :+1:  @laemmel. 
+
+### Fixed
+- Fix properly delete pedestrians in `Tordeux915` (#203).
+- Fix simulations are not thread-safe (#200). 
+- Fix memory lacks (#202).
+-
+
+### Bugs
+Please also check the [Issue tracker](https://cst.version.fz-juelich.de/jupedsim/jpscore/issues?assignee_id=&author_id=&label_name=&milestone_id=&scope=all&sort=created_desc&state=opened), if access is available.
 - exit strategies using *local* - prefix can result in circular routing
 - triangulation creates error-prone help-lines in certain geometries
 - errors in unused parts of ini files lead to system-exit
-- fixed: simulations are not thread-safe. See #200 
 
 
 ## v0.8.0 [2016-02-18]
