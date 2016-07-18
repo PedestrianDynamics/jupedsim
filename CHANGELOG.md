@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 ### Added
 - Floor field router. See [usage](http://jupedsim.github.io/jpscore/models/routing/#floorfield-router). 
+
 ### Modified
 - If no seed is given, the simulation will be run with `seed=Time(NULL)` (random).
 - Major refactoring of the parsing machinery. :+1:  @laemmel. 
