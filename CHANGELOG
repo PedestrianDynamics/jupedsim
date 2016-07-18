@@ -1,114 +1,14 @@
-# JPSreport v0.9
 
-## Added
-
-- Two options "startframe" and "stopframe" are added for each measurement area for method D to assign the time periods for analysis.
-
-- Individual density based on Voronoi method is added for one dimensional case in the output file (Individual headway is moved to the 5th column). 
-
-- z-position of each measurement area can be assigned in inifile so that the trajectories in geometries with several floors can be analyzed.
-
-- The option "plot_time_series" is available for each measurement area.
-
-- The option "frame_interval" for method A now can have different values for different measurement area.
-
-## Changed
-
-- The swith for calculating Individual FD is arraged for each measurement area.
-
-## Fixed
-
-- The script for plot Voronoi cells is modified so that it work when the trajectory files are not the in the same location as the inifile.
-
-
-# JPSreport v0.8
-
-
-## Added
-
-- A switch is added in the infile for `method_D` to turn off plotting Voronoi diagrams. Now it is possible to only output data for the diagram but not plot figures.
-
-- Switches for plotting time series of density and velocity are added for `method_C` and `method_D` in inifile.
-
-- A switch for plotting N-t diagram is added for `method_A` in inifile.
-
-- An option for analyzing one dimensional trajectory data is added in `method_D`.
-
-- Issue a warning when the voronoi cell cannot be calculated.
-
-- A warning will will be given and the program stops if trajectory for a given pedestrian ID is not continuous. 
-
-
-## Changed
-
-- Scripts "_Plot_cell_rho.py" and "_Plot_cell_v.py" are modified. Now the geometry is also plotted when plotting voronoi cells.
-
-- The indicator for velocity component can be specified in trajectory files now (.TXT and .XML)
-
-- Scripts "_Plot_FD.py" is modified!
-
-## Fixed
-
-- Output data file "Folw\_NT\_xxxx.dat" is closed before calling script for plotting N-t diagram.
-
-- A bug relating to transformation of units in `method_B` is fixed.
-
-- Fixed error where all trajectories were co-linear.
-
-- A bug for legend in the script "_Plot_timeseries_rho_v.py" is fixed.
-
-- The case that frame ID and Ped ID in trajectory file are not coutinuous can also be analyzed correctly.
-
-- Now when the given file paths in inifile include blank, it still works on windows system.
-
-- when path of trajectory is not given absolutely, the default location is the same folder with the inifile
-
-	
-# JPSreport v0.7
-
-## Added
-
-- Added four demos as examples for using JPSreport
-- Added the option for specifying the location of scripts in configuration file.
-- Embedded python scripts (**\_Plot_N\_t.py**, **\_Plot_timeseries\_rho_v.py**) for plotting N-t diagram (Method A), time series of density/velocity diagram (Method C and D) and Voronoi diagrams (Method D).
-- Added python script (**SteadyState.py**) for automatically detecting steady state of pedestrian flow based on time series of density and velocity. When plotting fundamental diagrams normally only data under steady state are used due to its generality.
-- Added python script (**\_Plot_FD.py**) for plotting fundamenatl diagram based on the detected steady state.
-## Changed
-
-- Changed name of some variables in configuration file:
-
-	**measurementAreas**                --->  **measurement_areas**
-    
-	**Length_in_movement_direction**	---> **length_in_movement_direction**
-	
-	**useXComponent**		            ---> **use_x_component**
-	
-	**useYComponent**		            ---> **use_y_component**
-	
-	**halfFrameNumberToUse**            ---> **frame_step**
-	
-	**timeInterval**	                ---> **frame_interval**
-	
-	**measurementArea**	                ---> **measurement_area**
-	
-	**outputGraph**	                    ---> **output_graph**
-	
-	**individualFDdata**	            ---> **individual_FD**
-	
-	**cutByCircle** 	                ---> **cut_by_circle**
-	
-	**getProfile** 		                ---> **profiles**
-	
-	**scale_x**			                ---> **grid_size_x**
-	
-	**scale_y**			                ---> **grid_size_y**
-- Changed the data type of frame rate (fps) from integer to float
-
-- Changed the way for dealing with pedestrian outside geometry. In old version JPSreport stops when some pedestrians are outside geometry but now it continue working by 
-removing these pedestrians from the list.
-
-- More than one sub rooms in one geometry can be analysed independently.
-	
-## Fixed
-	
-- Fixed bug for dealing with obstacles inside geometry.
+§âè€	e‹ZnWœ…©àzËh¶¬¦º#yËc¦ÊŞ¦ŠíÂ)emçhré×Š{aŠÇâ•å'­é^jÇ×^u<(¢›b¢{,µªí~¶¦y©İ²Ú)~¶¦yªŞi×^uú+y§!™æ¬º·¦z{Z­æŸ¢¹¶Ú²È Ø^¶)¥êâ¡Û¢¶§j\¬ŠÂ'v+âvæ¥uéìŠÜ›jÇ¢uh®‰èŠg­†‡b±§]y×è®‰Şv)È¨©\jÇ¢Ø^¢ëiº×â•â'v+âvæ¥…æÁ¬¢²j/yÛh¶¹¶(–é§Îš,ŠØ¨‡ŞiÈfy«.­éÖ«y§·š²È çb)â~)^²‹ajÛazÚÚç-¢¸²)àz‰¶¸³­†Ç¯z¶¥~Z(®Ç·š©rÍçS…ê)¶*'¦Z-¶)±êâzÈ¬jö¢•¦åyú+y§!™æ¬º·¦z{Z­æ“…ê)¶*'~¶¦z)íz»Ú•ú+™ëa¡Ğ'£¯yØŸ}êŞÛÚ–ç¬~Šİ‰÷Ş­éí™æ¬º·¦z{Z­æ‚…©àyÔázÌ"¶è­Æ¥réZ¶)à"wb¾'njQCŠÆ«­¨uú+y§!™æ¬º·¦z{Z­æ…‹N¬r¸©µú+¦Z-VŠèˆœzYlŠÉ¨v'âyÛ(¶­ŠÜ(®L!z{azÚÚç-¢¼ŸŠW¬j·§¢Ûaz)í…ë™éhq«b¢v¬¶¢'â•âOJ·©¢»oÓÀuç@³­r¬i×^v)í…è§~)^~ŠæzØht;h¶êç¡÷é–‹mŠx¢º'¢'bj
+ÚšÃhÂ+b²š,²&åzÚ(\¨ºÚnµÖ­iú+¶‰¨+jfî¶z-¦Z-~(.­ëÂ+\…ë¢ºe¢Ûbb™ë®'¬¡÷^È­É©İ½éhr+rj·šu×~ŠæzØht&§vg­†‡CŠx§‰ø¥x0Š×!~Šé–‹mŠxµØš‚¶¦ŠÆuç_¢¹¶)â'â•à'¢›b¢wè­©Ú—,â
+'yØ¦z{"¢v¥¶¶£yËh¯'Zµ¨¬i×^v)æzØht2,²çšÁªçŠx0…éí…ëè®‰è‰Ç¥•Æ§‹[yÆ¥réZµç@ÁªçŠx0ŠYpŠY[z¯zv§vØ^¦º ­©¬¶Šl‰ûkj7œ¶Šò~ŠÚ‚+Ş—zËk‰©È+'¢×(Ø§º‹¬
+§çRr¸©¶Ãå¢×–Zá¢œšÓå¢×–[éÉªŞš‡b~'6Œ-…è¢g­¯(¬j[(¦Z-µçp…éé–‹mŠx/¢º'¢'–[…è§v'¶Šß¢»Ş–‡"·'(šš'z{\jvŞ²—œ‰øv)í­¨ŞrÚ+Éø¥zÉèÁ5ÓjwW0´œ®*m°ùh´PéÊ+&¡ØŸ‰çE‹:ëiº×Zµ§â•áh—SÇqu«b±Éh±ç[yú+yÆ¥–)à±Êâ¦×è®™h¶Ø§€Û]‰¨+j`º
+Ş•«bh¶¶§±ú+™«b¢zºx­²)æzØht¬~,^tX±y×«®Šğ…êŞjYm­¨ŞrÚ+‰ë0z·œ¢X§yªÀnè¢¹^éİŠ{azÇ+Š›O–‹mŠg¬z¸²¸h¾œ¢±ø±yÔáyÆ¬zØZµúÚ™âjwOyÒŠ{kj7œ¶Šò~)^j·§¢×(ºØ§º‹¬q©Ú–Êy©Ú—,ŞuÊ+­ç-—#hÃ^Ø^‚+Şø¥z–­†È§ŠxŸŠW¢Énuæåjy"¶Ëb–\(®K(Ÿ§vŒ,³+-zl!zzZ¶¶¶£yËh¯(¬‹`Š÷§i»(–ë^—+ay×Ÿjém–‡¶*'ŠËazÆ¦yú%uêğŠØm…è§‰ø¥x“Ò­êh®Ûôì]yĞuç_¢êİzj,jÇ±jjezÇè®ë"OJ·©¢»@u×¶¨¦Ø¨ú+²—œ‰ü¢azZjØ¨‡ìr¸©¶È§r‰ßŠ«jØ¨ø¥xI›y×^vœ­†‰ìr¸©¶Ãå¢Óm§#å¢Ûb™ë®'¬®/§'è®™h¶Ø§€Û]‰¨+jc¶Ø¦zÇ«‰ë(}×§²+rş÷¥¡È­ÉØš‚¶¦1ëa¡ĞšĞÚÕh®‰è‰Øš‚¶¦°Ç­†‡C×^vœ­†‰ìr¸©µ+^iÜ’µ«^§'è­«­¢f­‰Æ¥—'^µç-Šx,µæÊËZµê¥ç^²Úâjwå£Ú±çhØ¦zÇ«‰ë(}×§²+rjwozZŠÜ–…éé–‹mŠxºwZ™éíjWbj
+ÚšÉè®f¥—*'—'Zµ«§uêìµæÊËZµæ«zëuÛ¶ˆ­²§z¶¥ŠÜ€u×§+a¢{®*m>Z-:r~Šé–‹mŠxºwZ™éÚ¶Wbj
+Ú™¶¬yÚ'¶z×œµçlµæÊËZµà¡jxt(Z©¡û(™ëÚ®&›•ë"Ê'~(.­«b¢wâ•éjË«zg§´
+ŞjÉjË«zg§µªŞjÂŞaŠy¨½é×b­ç-Š‰åzx-†)æ¢÷¦z{]Š·œ¶*'ºÇ—
+‰©¢w§¶ëÅÊ&¦‰ŞÛ¬y€¨šš'z{n±ìœ¢jhéí…©_¶¦xÛ¦mêÓ¡K~¶¦zË^¦Ø¦x‰íz»Ú•úÚ™è§µêïjYjË«zg§´
+Şjgš²êŞ™éíj·š¢ëiºÑ«j˜hºÚn¶
+Ú¦§v+âvæ¥7Zµ¨§v+âvæ¥7.´‚Š·%yË­o'"­É^ëO®‡â•êk¡ø¥zËjW±‚¸²,ŞÆÇ•ì ®'l‹7²
+§çm…çZµ«r¥ê~¶¦z¶­yúl~º&Š{^êí¡ùhjĞ¡jxvØ^Á¬Ÿ¢·^jX§ƒ­†—zËk‰©èºÛ"uè¢g­¯"'¢Woz»"¢rOJ·©¢»l¶ŠlÂ§²‰¥ç^²Úâj{­ê.¶Èz¨™ëkÉ»­Œ"µÊ'¶)î{
++’)ào*Şš‹âazÇ©y×¬¶¸šÇë¢kazX¬´Ê+zØZ‰Ş²æë¢‰¬Šz'z¨™ëkÉÆ§mæ§j\¬yØ§uê^×§¶\…‹,^u» ~Šİy©b"¶²Öœ•ë"Èz¨™ëk
