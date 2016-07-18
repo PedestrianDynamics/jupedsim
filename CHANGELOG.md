@@ -26,7 +26,6 @@ Please also check the [Issue tracker](https://cst.version.fz-juelich.de/jupedsim
 
 
 ### Added
-#### JPSCORE
 - CI with travis and Gitlab CI
 - Compilation checked on Visual Studio 12 2013 
 - Added more validation tests
@@ -46,20 +45,7 @@ Please also check the [Issue tracker](https://cst.version.fz-juelich.de/jupedsim
 - Added floor field to all exits, providing direction to target, direction to closest wall and cost estimates. Parameter to control wall-avoidance included.
 - Added new __Exit Strategies__ using floor fields on various subdomains (rooms, subrooms). Please refer to the online documentation on [jupedsim.org](www.jupedsim.org).
    
-#### JPSVIS
-- Added option to load  vtk files. Need to add the line ``` <gradient_field filename="floorfield.vtk"> 
-``` in the header of the trajectory file. Alternatively drag and drop a vtk file on JPSvis.
- 
-- Fixed error displaying the total number of frames when using the scroolbar
- 
-#### JPSREPORT
-- Added geometry information while plotting the voronoi cells
-- Added option to disable plotting
-- Issue a warning when the voronoi cell cannot be calculated 
-- Fixed error where all trajectories were colinear
 
-#### JPSEDITOR
- 
 
 ## v0.7.0 [2015-07-15]
 
@@ -78,13 +64,10 @@ Please also check the [Issue tracker](https://cst.version.fz-juelich.de/jupedsim
 - Changelog file
 - Rimea testcases
 - Unit tests are now based on the Boost testing engine
-#### JPSVIS
-- Display the geometry structure individual room/subroom.
-- Now build on OSX/Linux/Windows 
 
 ### Changed
 -  
--  
+
 
 ### Fixed
 - Visiblity in 3D
