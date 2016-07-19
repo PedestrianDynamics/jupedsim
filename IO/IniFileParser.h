@@ -45,6 +45,8 @@ public:
 private:
      bool ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMain);
 
+     bool ParseKrauszModel(TiXmlElement* xKrausz, TiXmlElement* xMain);
+
      bool ParseGompertzModel(TiXmlElement* xGompertz, TiXmlElement* xMain);
 
      bool ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xMain);

@@ -34,6 +34,7 @@
 #include "IniFileParser.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../math/GCFMModel.h"
+#include "../math/KrauszModel.h"
 #include "../math/GompertzModel.h"
 #include "../math/GradientModel.h"
 #include "../math/VelocityModel.h"
@@ -292,10 +293,21 @@ bool IniFileParser::Parse(std::string iniFile)
                parsingModelSuccessful = true;
                break;
           }
+          if ((_model==MODEL_KRAUSZ) && (model_id==MODEL_KRAUSZ)) {
+               if (modelName!="krausz") {
+                    Log->Write("ERROR: \t mismatch model ID and description. Did you mean krausz?");
+                    return false;
+               }
+               if (!ParseKrauszModel(xModel, xMainNode))
+                    return false;
+               parsingModelSuccessful = true;
+               //only parsing one model
+               break;
+          }
      }
 
      if (!parsingModelSuccessful) {
-          Log->Write("ERROR: \tWrong model id [%d]. Choose 1 (GCFM) or 2 (Gompertz) or 3 (Tordeux2015)", _model);
+          Log->Write("ERROR: \tWrong model id [%d]. Choose 1 (GCFM), 2 (Gompertz),  3 (Tordeux2015) or 4 (Krausz)", _model);
           Log->Write("ERROR: \tPlease make sure that all models are specified in the operational_models section");
           Log->Write("ERROR: \tand make sure to use the same ID in the agent section");
           return false;
@@ -398,6 +410,97 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
                _config->GetDistEffMaxWall(), _config->GetIntPWidthPed(),
                _config->GetIntPWidthWall(), _config->GetMaxFPed(),
                _config->GetMaxFWall())));
+
+     return true;
+}
+
+bool IniFileParser::ParseKrauszModel(TiXmlElement* xKrausz, TiXmlElement* xMainNode)
+{
+     Log->Write("\nINFO:\tUsing the Krausz model");
+     Log->Write("INFO:\tParsing the model parameters");
+
+     TiXmlNode* xModelPara = xKrausz->FirstChild("model_parameters");
+     if (!xModelPara) {
+          Log->Write("ERROR: \t !!!! Changes in the operational model section !!!");
+          Log->Write("ERROR: \t !!!! The new version is in inputfiles/ship_msw/ini_ship2.xml !!!");
+          return false;
+     }
+
+     // For convenience. This moved to the header as it is not model specific
+     if (xModelPara->FirstChild("tmax")) {
+          Log->Write(
+                  "ERROR: \tthe maximal simulation time section moved to the header!!!");
+          Log->Write("ERROR: \t\t <max_sim_time> </max_sim_time>\n");
+          return false;
+     }
+
+     //solver
+     if (!ParseNodeToSolver(*xModelPara))
+          return false;
+
+     //stepsize
+     if (!ParseStepSize(*xModelPara))
+          return false;
+
+     //exit crossing strategy
+     if (!ParseStrategyNodeToObject(*xModelPara))
+          return false;
+
+     //linked-cells
+     if (!ParseLinkedCells(*xModelPara))
+          return false;
+
+     //force_ped
+     if (xModelPara->FirstChild("force_ped")) {
+          string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
+          string dist_max = xModelPara->FirstChildElement("force_ped")->Attribute(
+                  "dist_max");
+          string disteff_max =
+                  xModelPara->FirstChildElement("force_ped")->Attribute(
+                          "disteff_max"); // @todo: rename disteff_max to force_max
+          string interpolation_width =
+                  xModelPara->FirstChildElement("force_ped")->Attribute(
+                          "interpolation_width");
+
+          _config->SetMaxFPed(atof(dist_max.c_str()));
+          _config->SetNuPed(atof(nu.c_str()));
+          _config->SetDistEffMaxPed(atof(disteff_max.c_str()));
+          _config->SetIntPWidthPed(atof(interpolation_width.c_str()));
+          Log->Write(
+                  "INFO: \tfrep_ped nu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
+                  interpolation_width.c_str(), nu.c_str(), dist_max.c_str(), disteff_max.c_str(), interpolation_width.c_str());
+     }
+
+     //force_wall
+     if (xModelPara->FirstChild("force_wall")) {
+          string nu = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
+          string dist_max = xModelPara->FirstChildElement("force_wall")->Attribute(
+                  "dist_max");
+          string disteff_max =
+                  xModelPara->FirstChildElement("force_wall")->Attribute(
+                          "disteff_max");
+          string interpolation_width =
+                  xModelPara->FirstChildElement("force_wall")->Attribute(
+                          "interpolation_width");
+          _config->SetMaxFWall(atof(dist_max.c_str()));
+          _config->SetNuWall(atof(nu.c_str()));
+          _config->SetDistEffMaxWall(atof(disteff_max.c_str()));
+          _config->SetIntPWidthWall(atof(interpolation_width.c_str()));
+          Log->Write(
+                  "INFO: \tfrep_wall mu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
+                  nu.c_str(), dist_max.c_str(), disteff_max.c_str(), interpolation_width.c_str());
+     }
+
+     //Parsing the agent parameters
+     TiXmlNode* xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
+     ParseAgentParameters(xKrausz, xAgentDistri);
+
+     //TODO: models do not belong in a configuration container [gl march '16]
+     _config->SetModel(std::shared_ptr<OperationalModel>(new KrauszModel(_exit_strategy, _config->GetNuPed(),
+                                                                         _config->GetNuWall(), _config->GetDistEffMaxPed(),
+                                                                         _config->GetDistEffMaxWall(), _config->GetIntPWidthPed(),
+                                                                         _config->GetIntPWidthWall(), _config->GetMaxFPed(),
+                                                                         _config->GetMaxFWall())));
 
      return true;
 }

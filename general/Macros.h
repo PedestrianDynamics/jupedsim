@@ -134,7 +134,8 @@ enum OperativModels {
     MODEL_GFCM=1,
     MODEL_GOMPERTZ,
     MODEL_VELOCITY,
-    MODEL_GRADIENT
+    MODEL_GRADIENT,
+    MODEL_KRAUSZ
 //    MODEL_ORCA,
 //    MODEL_CFM,
 //    MODEL_GNM
