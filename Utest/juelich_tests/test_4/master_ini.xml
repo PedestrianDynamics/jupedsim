@@ -41,7 +41,7 @@
   </routing>
 
   <!--persons information and distribution -->
-  <agents operational_model_id="[1,2,3,4]">
+  <agents operational_model_id="[1,2,3,5]">
     <agents_distribution>
       <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="0" number="1" start_x="2" start_y="2.2"  goal_id="0" router_id="1" />
       <group group_id="1"  agent_parameter_id="1"  room_id="0" subroom_id="0" number="1" start_x="4" start_y="2"  goal_id="0" router_id="1" />
@@ -119,7 +119,7 @@
       </agent_parameters>
     </model>
 
-    <model operational_model_id="1" description="Krausz">
+    <model operational_model_id="5" description="Krausz">
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.001</stepsize>
