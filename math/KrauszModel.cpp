@@ -130,6 +130,7 @@ bool KrauszModel::Init (Building* building)
           E.SetSinPhi(sinPhi);
           ped->SetEllipse(E);
      }
+     _simulatedTime = 0;
      return true;
 }
 
@@ -212,12 +213,14 @@ void KrauszModel::ComputeNextTimeStep(double current, double deltaT, Building* b
                     }
                }//for peds
 
+               //lateral swaying of pedestrians
+               Point oscil = AccelOscil(ped);
 
                //repulsive forces to the walls and transitions that are not my target
                Point repwall = ForceRepRoom(allPeds[p], subroom);
                Point fd = ForceDriv(ped, room);
                // Point acc = (ForceDriv(ped, room) + F_rep + repwall) / ped->GetMass();
-               Point acc = (fd + F_rep + repwall) / ped->GetMass();
+               Point acc = (fd + F_rep + repwall) / ped->GetMass() + oscil;
 
                // if(ped->GetID() ==  debugPed){
                //      printf("%f   %f    %f    %f   %f   %f\n", fd._x, fd._y, F_rep._x, F_rep._y, repwall._x, repwall._y);
@@ -255,6 +258,7 @@ void KrauszModel::ComputeNextTimeStep(double current, double deltaT, Building* b
           }
 
      }//end parallel
+     _simulatedTime += deltaT;
 
 }
 
@@ -463,6 +467,35 @@ inline Point KrauszModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
      }
 
      return f;
+}
+
+//TODO: inline?
+
+/* Oscillation acceleration for modelling lateral swaying
+ * Parameters:
+ *   - ped: Pedestrian whose AccelOscil is calculated
+ * returns:
+ *   - vector(x,y) of the acceleration
+ * */
+Point KrauszModel::AccelOscil(Pedestrian* ped) const
+{
+     double v = ped->GetV().Norm();
+     double omega = 2*M_PI*OscilFreq(v);
+     //omega^2 A sin(omega t)
+     double accel = omega*omega * OscilAmp(v) * sin(omega*_simulatedTime); //ommiting phase phi0 at the moment
+     return Point(-ped->GetV()._y, ped->GetV()._x) / v * accel;
+
+}
+
+
+inline double KrauszModel::OscilFreq(double v) const
+{
+     return 0.44*v + 0.35;
+}
+
+inline double KrauszModel::OscilAmp(double v) const
+{
+     return -0.14*v + 0.21;
 }
 
 
