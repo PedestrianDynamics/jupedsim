@@ -147,6 +147,8 @@ public:
      */
     void InitT(double mean, double stv);
 
+    void SetStretch(bool stretch);
+
 
     /**
      * @return a random number following the distribution
@@ -193,6 +195,7 @@ public:
      */
     double GetBmin();
 
+
     /**
      * @return a random number following the distribution
      */
@@ -214,6 +217,14 @@ public:
     double GetT();
 
     /**
+     * @return whether Ellipse stretching is enabled
+     */
+    bool StretchEnabled()
+    {
+        return _do_stretch;
+    }
+
+    /**
      * return a summary of the parameters
      */
     std::string writeParameter();
@@ -231,6 +242,8 @@ private:
     std::normal_distribution<double> _V0IdleEscalatorDownStairs;
     std::normal_distribution<double> _Bmax;
     std::normal_distribution<double> _Bmin;
+    bool _do_stretch = false;
+    double _last_B;
     std::normal_distribution<double> _Atau;
     std::normal_distribution<double> _Amin;
     std::normal_distribution<double> _Tau;

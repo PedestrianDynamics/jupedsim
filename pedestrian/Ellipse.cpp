@@ -124,6 +124,11 @@ void JEllipse::SetV0(double v0)
      _vel0 = v0;
 }
 
+void JEllipse::DoStretch(bool stretch)
+{
+     _do_stretch = stretch;
+}
+
 /*************************************************************
  Getter-Funktionen
  ************************************************************/
@@ -190,6 +195,11 @@ double JEllipse::GetArea() const
 double JEllipse::GetEA() const
 {
       return _Amin + _vel.Norm() * _Av;
+}
+
+bool JEllipse::DoesStretch()
+{
+     return _do_stretch;
 }
 
 // ellipse semi-axis in the orthogonal direction of the velocity

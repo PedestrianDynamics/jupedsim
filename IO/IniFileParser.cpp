@@ -501,7 +501,6 @@ bool IniFileParser::ParseKrauszModel(TiXmlElement* xKrausz, TiXmlElement* xMainN
                                                                          _config->GetDistEffMaxWall(), _config->GetIntPWidthPed(),
                                                                          _config->GetIntPWidthWall(), _config->GetMaxFPed(),
                                                                          _config->GetMaxFWall())));
-
      return true;
 }
 
@@ -993,6 +992,11 @@ void IniFileParser::ParseAgentParameters(TiXmlElement* operativModel, TiXmlNode*
                     double max_Eb = 2 * agentParameters->GetBmax();
                     _config->SetDistEffMaxPed(max_Eb+agentParameters->GetT()*agentParameters->GetV0());
                     _config->SetDistEffMaxWall(_config->GetDistEffMaxPed());
+               }
+
+               if (_model == 5) // Krausz
+               {
+                    _config->DoEllipseStretch(false);
                }
           }
      }

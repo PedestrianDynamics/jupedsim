@@ -45,6 +45,7 @@ private:
      double _Bmin; //  pBmax - V *[(pBmax - pBmin) / V0]
      double _Bmax;
      double _vel0; // desired speed
+     bool _do_stretch; //Kraus-Model
 
 
 
@@ -82,6 +83,7 @@ public:
      double GetMaxEA()const;
      double GetMaxEB()const;
      double GetArea()const;
+     bool DoesStretch
 
 
      // Effective distance between two ellipses
