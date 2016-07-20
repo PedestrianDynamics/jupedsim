@@ -130,7 +130,6 @@ bool KrauszModel::Init (Building* building)
           E.SetSinPhi(sinPhi);
           ped->SetEllipse(E);
      }
-     _simulatedTime = 0;
      return true;
 }
 
@@ -258,7 +257,6 @@ void KrauszModel::ComputeNextTimeStep(double current, double deltaT, Building* b
           }
 
      }//end parallel
-     _simulatedTime += deltaT;
 
 }
 
@@ -477,13 +475,13 @@ inline Point KrauszModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
  * returns:
  *   - vector(x,y) of the acceleration
  * */
-Point KrauszModel::AccelOscil(Pedestrian* ped) const
+inline Point KrauszModel::AccelOscil(Pedestrian* ped) const
 {
      double v = ped->GetV().Norm();
      double omega = 2*M_PI*OscilFreq(v);
      //omega^2 A sin(omega t)
-     double accel = omega*omega * OscilAmp(v) * sin(omega*_simulatedTime); //ommiting phase phi0 at the moment
-     return Point(-ped->GetV()._y, ped->GetV()._x) / v * accel;
+     double accel = omega*omega * OscilAmp(v) * sin(omega*ped->GetGlobalTime()); //TODO: inclue phase of oscillations
+     return v == 0 ? 0 : Point(-ped->GetV()._y, ped->GetV()._x) / v * accel;
 
 }
 

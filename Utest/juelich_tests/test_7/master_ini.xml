@@ -91,7 +91,7 @@
       </agent_parameters>
     </model>
 
-    <model operational_model_id="1" description="Krausz">
+    <model operational_model_id="1" description="krausz">
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.001</stepsize>
