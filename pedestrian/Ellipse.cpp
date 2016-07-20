@@ -52,6 +52,7 @@ JEllipse::JEllipse()
      _Av = 0.53;
      _Bmin = 0.20; // Semi-axis in direction of shoulders: pBmax - V *[(pBmax - pBmin) / V0]
      _Bmax = 0.25;
+     _do_stretch = true;
      _vel0 = 0; // desired speed
 }
 
@@ -549,8 +550,6 @@ bool JEllipse::IsOn(const Point& p) const
      return (-J_EPS_DIST < condition) && (condition < J_EPS_DIST);
      //return (-J_EPS_DIST < impliciteEllipse) && (impliciteEllipse < J_EPS_DIST);
 }
-
-
 
 /*bool Ellipse::IntersectionWithLine(const Line& line) {
         //int Mathematics::IntersectionWithLine(ELLIPSE * E, float xa, float xb, float ya, float yb){

@@ -157,9 +157,10 @@ double AgentsParameters::GetV0IdleEscalatorDownStairs()
      return _V0IdleEscalatorDownStairs(_generator);
 }
 
+
 double AgentsParameters::GetBmax()
 {
-     return _Bmax(_generator);
+    return _Bmax(_generator);
 }
 
 double AgentsParameters::GetBmin()
