@@ -114,9 +114,9 @@ void AgentsParameters::InitT(double mean, double stdv)
     _T = std::normal_distribution<double>(mean,stdv);
 }
 
-void AgentsParameters::DoStretch(bool stretch)
+void AgentsParameters::EnableStretch(bool stretch)
 {
-    _do_stretch = stretch;
+    _enable_stretch = stretch;
 }
 
 
@@ -189,7 +189,7 @@ double AgentsParameters::GetT()
 
 bool AgentsParameters::StretchEnabled()
 {
-     return _do_stretch;
+     return _enable_stretch;
 }
 std::string AgentsParameters::writeParameter()
 {

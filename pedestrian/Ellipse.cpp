@@ -198,7 +198,7 @@ double JEllipse::GetEA() const
       return _Amin + _vel.Norm() * _Av;
 }
 
-bool JEllipse::DoesStretch()
+bool JEllipse::DoesStretch() const
 {
      return _do_stretch;
 }
@@ -549,6 +549,8 @@ bool JEllipse::IsOn(const Point& p) const
      return (-J_EPS_DIST < condition) && (condition < J_EPS_DIST);
      //return (-J_EPS_DIST < impliciteEllipse) && (impliciteEllipse < J_EPS_DIST);
 }
+
+
 
 /*bool Ellipse::IntersectionWithLine(const Line& line) {
         //int Mathematics::IntersectionWithLine(ELLIPSE * E, float xa, float xb, float ya, float yb){

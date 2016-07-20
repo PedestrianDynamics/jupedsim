@@ -147,7 +147,7 @@ public:
      */
     void InitT(double mean, double stv);
 
-    void DoStretch(bool stretch);
+    void EnableStretch(bool stretch);
 
 
     /**
@@ -219,10 +219,7 @@ public:
     /**
      * @return whether Ellipse stretching is enabled
      */
-    bool StretchEnabled()
-    {
-        return _do_stretch;
-    }
+    bool StretchEnabled();
 
     /**
      * return a summary of the parameters
@@ -242,7 +239,7 @@ private:
     std::normal_distribution<double> _V0IdleEscalatorDownStairs;
     std::normal_distribution<double> _Bmax;
     std::normal_distribution<double> _Bmin;
-    bool _do_stretch = false;
+    bool _enable_stretch = false;
     double _last_B;
     std::normal_distribution<double> _Atau;
     std::normal_distribution<double> _Amin;
