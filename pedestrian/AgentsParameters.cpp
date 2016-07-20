@@ -114,7 +114,7 @@ void AgentsParameters::InitT(double mean, double stdv)
     _T = std::normal_distribution<double>(mean,stdv);
 }
 
-void AgentsParameters::SetStretch(bool stretch)
+void AgentsParameters::DoStretch(bool stretch)
 {
     _do_stretch = stretch;
 }
@@ -159,10 +159,7 @@ double AgentsParameters::GetV0IdleEscalatorDownStairs()
 
 double AgentsParameters::GetBmax()
 {
-    if (_do_stretch)
-         return _Bmax(_generator);
-    else
-         return _last_B;
+     return _Bmax(_generator);
 }
 
 double AgentsParameters::GetBmin()

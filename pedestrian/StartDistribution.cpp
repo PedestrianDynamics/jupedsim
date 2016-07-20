@@ -224,6 +224,7 @@ Pedestrian* StartDistribution::GenerateAgent(Building* building, int* pid, vecto
      E.SetAmin(_groupParameters->GetAmin());
      E.SetBmax(_groupParameters->GetBmax());
      E.SetBmin(_groupParameters->GetBmin());
+     E.DoStretch(_groupParameters->StretchEnabled());
      ped->SetEllipse(E);
      ped->SetTau(_groupParameters->GetTau());
      ped->SetV0Norm(_groupParameters->GetV0(),

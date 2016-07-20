@@ -147,7 +147,7 @@ public:
      */
     void InitT(double mean, double stv);
 
-    void SetStretch(bool stretch);
+    void DoStretch(bool stretch);
 
 
     /**

@@ -87,8 +87,6 @@ public:
           _distEffMaxPed = 2;
           _distEffMaxWall = 2;
           // ----------------
-          _do_stretch = true;
-          _use_circles = false;
 
           _hostname = "localhost";
           _trajectoriesFile = "trajectories.xml";
@@ -251,11 +249,6 @@ public:
      void AddAgentsParameters(std::shared_ptr<AgentsParameters> agentsParameters,
                int id) { _agentsParameters[id] = agentsParameters; };
 
-
-     void DoEllipseStretch(bool stretch) { _do_stretch = stretch; }
-
-     void UseCircles(bool circles) { _use_circles = circles; }
-
 #ifdef _JPS_AS_A_SERVICE
 
      const bool GetRunAsService() const { return _runAsService; };
@@ -311,8 +304,6 @@ private:
      double _maxFWall;
      double _distEffMaxPed;
      double _distEffMaxWall;
-     bool _do_stretch; //Krausz Model
-     bool _use_circles; //Velocity Model
      std::string _hostname;
      std::string _trajectoriesFile;
      std::string _errorLogFile;

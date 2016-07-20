@@ -996,7 +996,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement* operativModel, TiXmlNode*
 
                if (_model == 5) // Krausz
                {
-                    _config->DoEllipseStretch(false);
+                    agentParameters->DoStretch(false);
                }
           }
      }

@@ -65,6 +65,7 @@ public:
      void SetBmin(double b_min);
      void SetBmax(double b_max);
      void SetV0(double v0);
+     void DoStretch(bool stretch);
 
 
      const Point& GetV() const;
@@ -83,7 +84,7 @@ public:
      double GetMaxEA()const;
      double GetMaxEB()const;
      double GetArea()const;
-     bool DoesStretch
+     bool DoesStretch() const;
 
 
      // Effective distance between two ellipses

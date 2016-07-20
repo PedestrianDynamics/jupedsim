@@ -66,6 +66,7 @@ JEllipse::JEllipse(const JEllipse& orig)
      _Av = orig.GetAv();
      _Bmin = orig.GetBmin(); // Semi-axis in direction of shoulders: pBmax - V *[(pBmax - pBmin) / V0]
      _Bmax = orig.GetBmax();
+     _do_stretch = orig.DoesStretch();
      _vel0 = orig.GetV0(); // desired speed
 }
 
@@ -214,9 +215,13 @@ double JEllipse::GetEB() const
      // printf("v=%f, b=%f\n", v, t);
      // getc(stdin);
      //return (v<v_min)? 0.5*b_shoulder: 0.5*(b_shoulder + a * exp(b*v));
-
-     double x = (_vel0 <= 0.001) ? 0 : (_Bmax - _Bmin) / _vel0;
-
+     if (_do_stretch)
+     {
+          double x = (_vel0 <= 0.001) ? 0 : (_Bmax - _Bmin) / _vel0;
+          return _Bmax - _vel.Norm() * x;
+     } else {
+          return _Bmin;
+     }
      // double b_shoulder = _Bmin; /// width of shoulder. todo: find out empricial value
      // double v_min = 0.001;
      // double a = 0.49;
@@ -235,9 +240,7 @@ double JEllipse::GetEB() const
       //      x = (_Bmax - _Bmin) / _vel0;
       //else
       //      x = 0;
-      
 
-     return _Bmax - _vel.Norm() * x;
 }
 
 
