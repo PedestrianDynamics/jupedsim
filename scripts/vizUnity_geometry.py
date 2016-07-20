@@ -1,4 +1,4 @@
-from itertools import product, izip
+from itertools import product
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
@@ -16,10 +16,10 @@ logging.basicConfig(filename=logfile, level=logging.INFO, format='%(asctime)s - 
 g = open("geometry.txt", "w")
 
 def usage():
-    print "usage: python %s geometry_file trajectory_file"%sys.argv[0]
-    print "This will create two files:\
-               \n \t- Trajectories ---> b090_combined.txt \n \t- and geometry ---> geometry.txt"
-    print "mv geometry.txt b090_combined.txt to the location where SumoVizUnity leaves"
+    print("usage: python3 %s geometry_file trajectory_file"%sys.argv[0])
+    print("This will create two files:\
+               \n \t- Trajectories ---> b090_combined.txt \n \t- and geometry ---> geometry.txt")
+    print("mv geometry.txt b090_combined.txt to the location where SumoVizUnity leaves")
 
 
 def parse_trajectories(filename):
@@ -70,11 +70,11 @@ def get_polygon(poly):
     return X, Y
 
 def write_polygon(X, Y, Type, name, height):
-    print >>g, "Polygon",
+    print("Polygon", end=' ', file=g)
     for (x, y) in zip(X, Y):
-        print >>g, "%.1f %.1f"%(float(x), float(y)),
+        print("%.1f %.1f"%(float(x), float(y)), end=' ', file=g)
 
-    print >>g, "%s %s %.2f"%(name, Type, height)
+    print("%s %s %.2f"%(name, Type, height), file=g)
 
 def setMinMax(X, Y, minX, maxX, minY, maxY):
 
@@ -123,8 +123,8 @@ def parse_geometry(filename):
     # some trees
     dx = 5
     dy = 5
-    print >>g, "Polygon %.1f %.1f t1 tree 1.0"%(minX-dx, minY-dy)
-    print >>g, "Polygon %.1f %.1f t3 tree 1.0"%(maxX+dx, maxY+dy)
+    print("Polygon %.1f %.1f t1 tree 1.0"%(minX-dx, minY-dy), file=g)
+    print("Polygon %.1f %.1f t3 tree 1.0"%(maxX+dx, maxY+dy), file=g)
 
 if __name__ == "__main__":
     if len(sys.argv) <= 2:
