@@ -12,12 +12,20 @@ __author__ = 'Oliver Schmidts'
 
 def runtest2(inifile, trajfile):
     maxtime = get_maxtime(inifile)
-    must_time = 10
+    v = 1.0  # this is the desired speed. Check in the master inifile
     fps, n, traj = parse_file(trajfile)
     evac_time = (max(traj[:, 1]) - min(traj[:, 1])) / float(fps)
-    tolerance = 0.01
-    if (evac_time- must_time) > tolerance:
+    print fps
+    print max(traj[:, 1])
+    print min(traj[:, 1])
+    distance_x = (max(traj[:, 2]) - min(traj[:, 2]))
+    distance_y = (max(traj[:, 3]) - min(traj[:, 3]))
+    distance = np.sqrt(distance_x**2 + distance_y**2)
+    must_time = distance/v
+    tolerance = 0.1
+    if abs(evac_time- must_time) > tolerance:
         logging.info("%s exits with FAILURE evac_time = %f (!= %f)"%(argv[0], evac_time, must_time))
+        print("%s exits with FAILURE evac_time = %f (!= %f)"%(argv[0], evac_time, must_time))
         exit(FAILURE)
     else:
         logging.info("evac_time = %f (!= %f)"%(evac_time, must_time))
