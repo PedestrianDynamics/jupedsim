@@ -307,7 +307,7 @@ bool IniFileParser::Parse(std::string iniFile)
      }
 
      if (!parsingModelSuccessful) {
-          Log->Write("ERROR: \tWrong model id [%d]. Choose 1 (GCFM), 2 (Gompertz),  3 (Tordeux2015) or 4 (Krausz)", _model);
+          Log->Write("ERROR: \tWrong model id [%d]. Choose 1 (GCFM), 2 (Gompertz),  3 (Tordeux2015) or 5 (Krausz)", _model);
           Log->Write("ERROR: \tPlease make sure that all models are specified in the operational_models section");
           Log->Write("ERROR: \tand make sure to use the same ID in the agent section");
           return false;

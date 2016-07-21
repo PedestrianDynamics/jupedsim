@@ -477,7 +477,6 @@ inline Point KrauszModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
  * */
 inline Point KrauszModel::AccelOscil(Pedestrian* ped) const
 {
-     printf("calculating AccelOscil");
      double v = ped->GetV().Norm();
      double omega = 2*M_PI*OscilFreq(v);
      //omega^2 A sin(omega t)
