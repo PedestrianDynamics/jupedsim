@@ -147,6 +147,8 @@ public:
      */
     void InitT(double mean, double stv);
 
+    void SetSwayParams(double freqA, double freqB, double ampA, double ampB);
+
     void EnableStretch(bool stretch);
 
 
@@ -216,6 +218,14 @@ public:
      */
     double GetT();
 
+    double GetSwayFreqA() const;
+
+    double GetSwayFreqB() const;
+
+    double GetSwayAmpA() const;
+
+    double GetSwayAmpB() const;
+
     /**
      * @return whether Ellipse stretching is enabled
      */
@@ -239,12 +249,15 @@ private:
     std::normal_distribution<double> _V0IdleEscalatorDownStairs;
     std::normal_distribution<double> _Bmax;
     std::normal_distribution<double> _Bmin;
-    bool _enable_stretch = false;
-    double _last_B;
+    bool _enableStretch = false;
     std::normal_distribution<double> _Atau;
     std::normal_distribution<double> _Amin;
     std::normal_distribution<double> _Tau;
     std::normal_distribution<double> _T;
+    double _swayFreqA;
+    double _swayFreqB;
+    double _swayAmpA;
+    double _swayAmpB;
 
 };
 

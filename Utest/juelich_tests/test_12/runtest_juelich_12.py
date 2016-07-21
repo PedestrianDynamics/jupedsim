@@ -13,7 +13,6 @@ def runtest12(inifile, trajfile):
     maxtime = get_maxtime(inifile)
     fps, N, traj = parse_file(trajfile)
     y2 = traj[traj[:, 0] == 2][:, 3]
-    y4 = traj[traj[:, 0] == 4][:, 3]
     dy2 = np.sum(np.abs(np.diff(y2)))
     # evac_time = ( max( traj[:,1] ) - min( traj[:,1] ) ) / float(fps)
     tolerance = 0.005

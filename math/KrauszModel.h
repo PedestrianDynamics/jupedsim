@@ -120,8 +120,8 @@ private:
     Point ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const;
     Point ForceRepWall(Pedestrian* ped, const Line& l) const;
     Point AccelOscil(Pedestrian *ped) const;
-    double OscilFreq(double v) const;
-    double OscilAmp(double v) const;
+    double OscilFreq(double a, double b, double v) const;
+    double OscilAmp(double a, double b, double v) const;
     Point ForceRepStatPoint(Pedestrian* ped, const Point& p, double l, double vn) const;
     Point ForceInterpolation(double v0, double K_ij, const Point& e, double v, double d, double r, double l) const;
 

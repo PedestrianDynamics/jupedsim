@@ -467,8 +467,6 @@ inline Point KrauszModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
      return f;
 }
 
-//TODO: inline?
-
 /* Oscillation acceleration for modelling lateral swaying
  * Parameters:
  *   - ped: Pedestrian whose AccelOscil is calculated
@@ -478,21 +476,23 @@ inline Point KrauszModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 inline Point KrauszModel::AccelOscil(Pedestrian* ped) const
 {
      double v = ped->GetV().Norm();
-     double omega = 2*M_PI*OscilFreq(v);
+     double omega = 2*M_PI*OscilFreq(ped->GetSwayFreqA(), ped->GetSwayFreqB() v);
      //omega^2 A sin(omega t)
-     double accel = omega*omega * OscilAmp(v) * sin(omega*ped->GetGlobalTime()); //TODO: inclue phase of oscillations
+     double amplitude = OscilAmp(ped->GetSwayAmpA(), ped->GetSwayAmpB(), v);
+     double accel = omega*omega * amplitude * sin(omega*ped->GetGlobalTime()); //TODO: inclue phase of oscillations
      return v == 0 ? 0 : Point(-ped->GetV()._y, ped->GetV()._x) / v * accel;
 }
 
 
-inline double KrauszModel::OscilFreq(double v) const
+inline double KrauszModel::OscilFreq(double a, double b, double v) const
 {
-     return 0.44*v + 0.35;
+     return a*v +b;
 }
 
-inline double KrauszModel::OscilAmp(double v) const
+inline double KrauszModel::OscilAmp(double a, double b, double v) const
 {
-     return -0.14*v + 0.21;
+     double A_ = a*v + b;
+     return A_ > 0 ? A_ : 0;
 }
 
 

@@ -967,6 +967,14 @@ void IniFileParser::ParseAgentParameters(TiXmlElement* operativModel, TiXmlNode*
                     agentParameters->InitT(mu, sigma);
                     Log->Write("INFO: \tT mu=%f , sigma=%f", mu, sigma);
                }
+               // swaying parameters
+               if (xAgentPara->FirstChild("sway")) {
+                    double freqA = xmltof(xAgentPara->FirstChildElement("sway")->Attribute("freqA"));
+                    double freqB = xmltof(xAgentPara->FirstChildElement("sway")->Attribute("freqB"));
+                    double ampA = xmltof(xAgentPara->FirstChildElement("sway")->Attribute("ampA"));
+                    double ampB = xmltof(xAgentPara->FirstChildElement("sway")->Attribute("ampB"));
+                    agentParameters->SetSwayParams(freqA, freqB, ampA, ampB);
+               }
 
                if (_model == 2) { // Gompertz
                     double beta_c = 1; /// @todo quick and dirty

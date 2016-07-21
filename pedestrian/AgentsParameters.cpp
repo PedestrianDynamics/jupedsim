@@ -114,9 +114,17 @@ void AgentsParameters::InitT(double mean, double stdv)
     _T = std::normal_distribution<double>(mean,stdv);
 }
 
+
+void AgentsParameters::SetSwayParams(double freqA, double freqB, double ampA, double ampB) {
+     _swayFreqA = freqA;
+     _swayFreqB = freqB;
+     _swayAmpA = ampA;
+     _swayAmpB = ampB;
+}
+
 void AgentsParameters::EnableStretch(bool stretch)
 {
-    _enable_stretch = stretch;
+    _enableStretch = stretch;
 }
 
 
@@ -188,9 +196,25 @@ double AgentsParameters::GetT()
     return _T(_generator);
 }
 
+double AgentsParameters::GetSwayFreqA() const {
+     return _swayFreqA;
+}
+
+double AgentsParameters::GetSwayFreqB() const {
+     return _swayFreqB;
+}
+
+double AgentsParameters::GetSwayAmpA() const {
+     return _swayAmpA;
+}
+
+double AgentsParameters::GetSwayAmpB() const {
+     return _swayAmpB;
+}
+
 bool AgentsParameters::StretchEnabled()
 {
-     return _enable_stretch;
+     return _enableStretch;
 }
 std::string AgentsParameters::writeParameter()
 {
@@ -214,3 +238,6 @@ std::string AgentsParameters::writeParameter()
     s.append(tmp);
     return s;
 }
+
+
+
