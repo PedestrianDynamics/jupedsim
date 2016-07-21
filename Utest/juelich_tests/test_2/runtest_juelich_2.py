@@ -16,7 +16,7 @@ def runtest2(inifile, trajfile):
     fps, n, traj = parse_file(trajfile)
     evac_time = (max(traj[:, 1]) - min(traj[:, 1])) / float(fps)
     tolerance = 0.01
-    if (evac_time- must_time) > tolerance:
+    if abs(evac_time- must_time) > tolerance:
         logging.info("%s exits with FAILURE evac_time = %f (!= %f)"%(argv[0], evac_time, must_time))
         exit(FAILURE)
     else:
