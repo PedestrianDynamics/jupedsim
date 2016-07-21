@@ -127,16 +127,20 @@ bool IniFileParser::Parse(std::string iniFile)
 
 
      //max CPU
+     int max_threads =  1;
+#ifdef _OPENMP
+     max_threads = omp_get_max_threads();
+#endif
      if (xMainNode->FirstChild("num_threads")) {
           TiXmlNode* numthreads = xMainNode->FirstChild("num_threads")->FirstChild();
           if (numthreads) {
 #ifdef _OPENMP
                 omp_set_num_threads(xmltoi(numthreads->Value()));
 #endif               
-          }
+          }              
      }
      _config->SetMaxOpenMPThreads(omp_get_max_threads());
-     Log->Write("INFO:\tUsing num_threads <%d> threads (%d available)", _config->GetMaxOpenMPThreads(), omp_get_max_threads());
+     Log->Write("INFO:\tUsing num_threads <%d> threads (%d available)", _config->GetMaxOpenMPThreads(), max_threads);
 
      //logfile
      if (xMainNode->FirstChild("logfile")) {
