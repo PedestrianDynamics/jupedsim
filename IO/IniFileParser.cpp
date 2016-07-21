@@ -974,6 +974,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement* operativModel, TiXmlNode*
                     double ampA = xmltof(xAgentPara->FirstChildElement("sway")->Attribute("ampA"));
                     double ampB = xmltof(xAgentPara->FirstChildElement("sway")->Attribute("ampB"));
                     agentParameters->SetSwayParams(freqA, freqB, ampA, ampB);
+                    Log->Write("INFO: \tSwaying parameters freqA=%f , freqB=%f , ampA=%f, ampB=%f");
                }
 
                if (_model == 2) { // Gompertz

@@ -56,6 +56,10 @@ Pedestrian::Pedestrian()
      _gender = "female";
      _mass = 1;
      _tau = 0.5;
+     _swayFreqA = 0.44;
+     _swayFreqB = 0.35;
+     _swayAmpA = -0.14;
+     _swayAmpB = 0.21;
      _T = 1.0;
      _deltaT = 0.01;
      _ellipse = JEllipse();
@@ -134,7 +138,10 @@ Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& buil
      _mass = 1;
      _tau = 0.5;
      _T = 1.0;
-     _swayAmpA =
+     _swayFreqA = 0.44;
+     _swayFreqB = 0.35;
+     _swayAmpA = -0.14;
+     _swayAmpB = 0.21;
      _newOrientationFlag = false;
      _newOrientationDelay = 0; //0 seconds, in steps
      _tmpFirstOrientation = true;
