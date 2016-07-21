@@ -84,7 +84,7 @@ private:
      int _oldSubRoomID;
      Point _lastE0;
 
-     NavLine* _navLine; // current exit line
+     std::unique_ptr<NavLine> _navLine; // current exit line
      std::map<int, int>_mentalMap; // map the actual room to a destination
      std::vector<int> _destHistory;
      std::vector<int> _trip;
@@ -451,6 +451,7 @@ public:
       */
      void SetBuilding(Building* building);
 
+     bool Relocate(std::function<void(const Pedestrian&)> flowupdater);
 };
 
 #endif  /* _PEDESTRIAN_H */

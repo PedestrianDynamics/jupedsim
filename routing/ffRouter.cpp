@@ -148,6 +148,10 @@ bool FFRouter::Init(Building* building)
      _locffviafm.clear();
      //type of allRooms: const std::map<int, std::unique_ptr<Room> >&
      const std::map<int, std::shared_ptr<Room> >& allRooms = _building->GetAllRooms();
+// <<<<<<< HEAD
+
+//      for(auto& pairRoom : allRooms) {
+// =======
 #pragma omp parallel for
      //for (auto &pairRoom : allRooms) {
      for (unsigned int i = 0; i < allRooms.size(); ++i) {
