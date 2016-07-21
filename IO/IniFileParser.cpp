@@ -249,7 +249,7 @@ bool IniFileParser::Parse(std::string iniFile)
           string modelName = string(xModel->Attribute("description"));
           int model_id = xmltoi(xModel->Attribute("operational_model_id"), -1);
 
-          if ((_model==MODEL_GFCM) && (model_id==MODEL_GFCM)) {
+          if ((_model==MODEL_GCFM) && (model_id==MODEL_GCFM)) {
                if (modelName!="gcfm") {
                     Log->Write("ERROR: \t mismatch model ID and description. Did you mean gcfm?");
                     return false;

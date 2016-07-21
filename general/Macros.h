@@ -131,7 +131,7 @@ enum RoutingStrategy {
 };
 
 enum OperativModels {
-    MODEL_GFCM=1,
+    MODEL_GCFM=1,
     MODEL_GOMPERTZ,
     MODEL_VELOCITY,
     MODEL_GRADIENT,
