@@ -254,10 +254,10 @@ private:
     std::normal_distribution<double> _Amin;
     std::normal_distribution<double> _Tau;
     std::normal_distribution<double> _T;
-    double _swayFreqA;
-    double _swayFreqB;
-    double _swayAmpA;
-    double _swayAmpB;
+    double _swayFreqA = 0.44;
+    double _swayFreqB = 0.35;
+    double _swayAmpA = -0.14;
+    double _swayAmpB = 0.21;
 
 };
 
