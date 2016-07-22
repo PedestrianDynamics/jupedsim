@@ -76,6 +76,10 @@ void RoomToFloorSensor::execute(const Pedestrian * pedestrian, CognitiveMap * co
                 (*it_edges)->SetFactor(.3 , GetName());
             else if ((*it_edges)->GetDest()->GetSubRoom()->GetType() == "floor")
                 (*it_edges)->SetFactor(.3 , GetName());
+            else if ((*it_edges)->GetDest()->GetSubRoom()->GetType() == "Entrance")
+                (*it_edges)->SetFactor(.1 , GetName());
+            else if ((*it_edges)->GetDest()->GetSubRoom()->GetType() == "Lobby")
+                (*it_edges)->SetFactor(.2 , GetName());
             else
                 (*it_edges)->SetFactor(5.0 , GetName());
         }

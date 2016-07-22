@@ -12,8 +12,6 @@
 #include "youareherepointer.h"
 #include "cogmapoutputhandler.h"
 
-
-
 #include <queue>
 #include <memory>
 #include <vector>
@@ -82,17 +80,16 @@ public:
     //WriteXML
     void WriteToFile();
 
-    //Make it fuzzy
+    //Tools
     double MakeItFuzzy(const double& mean, const double& std);
+    //std::vector<Point> StartFromLLCorner(std::vector<Point>&  polygon);
 
     // Set new Landmarks
     //void SetNewLandmark();
 
-
     //Find region/landmarks/connections
     Landmarks GetLandmarksConnectedWith(const ptrLandmark& landmark) const;
     const ptrRegion GetRegionContaining(const ptrLandmark& landmark) const;
-
 
     //Locater
     void FindCurrentRegion();

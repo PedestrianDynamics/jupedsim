@@ -1036,7 +1036,7 @@ std::vector<Point> Building::GetBoundaryVertices() const
          }
 
     }
-    return std::vector<Point>{Point(xMin,xMin),Point(xMin,yMax),Point(xMax,yMin),Point(xMax,yMax)};
+    return std::vector<Point>{Point(xMin,yMin),Point(xMin,yMax),Point(xMax,yMax),Point(xMax,yMin)};
 }
 
 bool Building::SanityCheck()

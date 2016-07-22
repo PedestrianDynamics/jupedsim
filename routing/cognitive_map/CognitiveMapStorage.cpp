@@ -49,6 +49,9 @@ CognitiveMapStorage::CognitiveMapStorage(const Building * const b, std::string c
     creator = new EmptyCognitiveMapCreator(b);
     else
     creator = new CompleteCognitiveMapCreator(b);
+
+    //Complete Environment
+    _visibleEnv=VisibleEnvironment(b);
 }
 
 CognitiveMapStorage::~CognitiveMapStorage()
@@ -73,9 +76,11 @@ CMStorageValueType CognitiveMapStorage::operator[] (CMStorageKeyType key)
 
 void CognitiveMapStorage::ParseCogMap(CMStorageKeyType ped)
 {
+
     _regions.clear();
 
     //create filename
+
     int groupId = ped->GetGroup();
     if (_cogMapFiles=="")
         return;
@@ -142,8 +147,8 @@ void CognitiveMapStorage::ParseCogMap(CMStorageKeyType ped)
         std::string b = xmltoa(xRegion->Attribute("b"),"-1");
 
         ptrRegion region (new Region(Point(std::stod(pxinmap),std::stod(pyinmap))));
-
         region->SetId(std::stoi(id));
+
         region->SetCaption(caption);
         region->SetPosInMap(Point(std::stod(pxinmap),std::stod(pyinmap)));
         region->SetA(std::stod(a));
@@ -178,6 +183,11 @@ void CognitiveMapStorage::ParseCogMap(CMStorageKeyType ped)
 
             ptrLandmark landmark (new Landmark(Point(std::stod(pxreal),std::stod(pyreal))));
 
+            if (roomId=="NaN")
+            {
+                Log->Write("ERROR:\t Subroom Id is NaN!");
+                return;
+            }
             landmark->SetId(std::stoi(id));
             landmark->SetCaption(caption);
             landmark->SetType(type);
@@ -250,6 +260,7 @@ void CognitiveMapStorage::ParseCogMap(CMStorageKeyType ped)
                 ptrConnection connection = std::make_shared<Connection>(std::stoi(idC),captionC,typeC,
                                                                         region->GetLandmarkByID(std::stoi(landmark1)),
                                                                         region->GetLandmarkByID(std::stoi(landmark2)));
+
                 region->AddConnection(connection);
                 Log->Write("INFO:\tConnection added!");
             }

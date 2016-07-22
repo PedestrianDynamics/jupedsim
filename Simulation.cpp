@@ -492,6 +492,7 @@ int Simulation::RunBody(double maxSimTime)
      static int frameNr = 1 + t/_deltaT ; // Frame Number
 
      int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
+     Log->Write(std::to_string(writeInterval));
      writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
 
      //process the queue for incoming pedestrians
@@ -507,6 +508,7 @@ int Simulation::RunBody(double maxSimTime)
 
      {
           t = 0 + (frameNr - 1) * _deltaT;
+
 
           //process the queue for incoming pedestrians
           ProcessAgentsQueue();
@@ -536,6 +538,7 @@ int Simulation::RunBody(double maxSimTime)
           // write the trajectories
           if (0 == frameNr % writeInterval) {
                _iod->WriteFrame(frameNr / writeInterval, _building.get());
+
           }
           Log->ProgressBar(initialnPeds,   initialnPeds -  _nPeds , t);
 
@@ -544,6 +547,7 @@ int Simulation::RunBody(double maxSimTime)
           // double timeToWait=t-difftime(endtime, starttime);
           // clock_t goal = timeToWait*1000 + clock();
           // while (goal > clock());
+
           ++frameNr;
      }
      return (int) t;

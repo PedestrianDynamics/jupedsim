@@ -49,6 +49,8 @@ using namespace std;
 
 int SubRoom::_static_uid=0;
 
+
+
 SubRoom::SubRoom()
 {
      _id = -1;
@@ -970,7 +972,7 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
           Log->Write(tmp);
           return false;
      }
-     _poly = tmpPoly;
+     _poly = StartLLCorner(tmpPoly);
 
 
      //check if all walls and goals were used in the polygon
@@ -1359,6 +1361,40 @@ bool SubRoom::IsInSubRoom(Pedestrian* ped) const
           return true;
      else
           return IsInSubRoom(pos);
+}
+
+
+std::vector<Point> SubRoom::StartLLCorner(const std::vector<Point> &polygon)
+{
+
+    // detecting point which is in the lower left corner
+    Point startingpoint = polygon[0];
+    size_t id_start=0;
+
+    for (size_t i = 1; i<polygon.size(); ++i)
+    {
+        if (polygon[i]._x<=startingpoint._x)
+        {
+            if (polygon[i]._y<=startingpoint._y)
+            {
+                startingpoint=polygon[i];
+                id_start=i;
+            }
+        }
+    }
+
+    std::vector<Point> cwPolygon;
+    for (size_t i=id_start; i<polygon.size(); ++i)
+    {
+        cwPolygon.push_back(polygon[i]);
+    }
+    for (size_t i=0; i<id_start; ++i)
+    {
+        cwPolygon.push_back(polygon[i]);
+    }
+
+    return cwPolygon;
+
 }
 
 

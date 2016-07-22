@@ -33,6 +33,7 @@
 #include <unordered_map>
 #include <vector>
 #include "./cognitiveMap/cognitivemap.h"
+#include "./perception/visibleenvironment.h"
 
 class Building;
 class Pedestrian;
@@ -66,6 +67,13 @@ private:
      const Building * const _building;
      CMStorageType cognitive_maps;
      AbstractCognitiveMapCreator * creator;
+
+
+     //perception
+     //Complete environment
+     VisibleEnvironment _visibleEnv;
+
+     //cognitive map
      std::vector<ptrRegion> _regions;
      std::string _cogMapStatus;
      std::string _cogMapFiles;

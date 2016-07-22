@@ -316,6 +316,9 @@ set (   source_files
   routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
   routing/cognitive_map/cognitiveMap/landmarknetwork.cpp
 
+  routing/cognitive_map/perception/perception.cpp
+  routing/cognitive_map/perception/visibleenvironment.cpp
+
 
   visiLibity/source_code/visilibity.cpp
 
@@ -380,6 +383,9 @@ set (   header_files
   routing/cognitive_map/cognitiveMap/youareherepointer.h
   routing/cognitive_map/cognitiveMap/cogmapoutputhandler.h
   routing/cognitive_map/cognitiveMap/landmarknetwork.h
+
+  routing/cognitive_map/perception/perception.h
+  routing/cognitive_map/perception/visibleenvironment.h
 
   visiLibity/source_code/visilibity.hpp
 
