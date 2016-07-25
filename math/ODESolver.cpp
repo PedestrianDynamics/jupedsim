@@ -33,13 +33,13 @@
 
 using namespace std;
 
-ODESolver::ODESolver(ForceModel *model) : model(model)
+ODESolver::ODESolver(ForceModel *tmodel) : model(tmodel)
 {
 
 }
 
 
-EulerSolver::EulerSolver(ForceModel *model) : ODESolver(model)
+EulerSolver::EulerSolver(ForceModel *tmodel) : ODESolver(tmodel)
 {
 
 }

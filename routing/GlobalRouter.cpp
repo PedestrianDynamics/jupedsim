@@ -986,6 +986,7 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
      {
           //fixme: this should also never happened. But hapen due to previvous bugs..
           const vector<int>& goals=sub->GetAllGoalIDs();
+          auto isinsub = sub->IsInSubRoom(ped);
           for(unsigned int g1=0; g1<goals.size(); g1++)
           {
                relevantAPS.push_back(_accessPoints[goals[g1]]);
@@ -1123,9 +1124,9 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
           {
                int to_door = to_AP->GetID();
 
-               int room_id = to_AP->GetConnectingRoom1();
+               int lroom_id = to_AP->GetConnectingRoom1();
 
-               if (IsElementInVector(rooms_ids, room_id) == false)
+               if (IsElementInVector(rooms_ids, lroom_id) == false)
                     continue;
 
                graph_file << from_door << " -> " << to_door << " [ label="

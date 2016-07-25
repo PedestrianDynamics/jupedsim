@@ -149,7 +149,9 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building 
     int nThreads = omp_get_max_threads();
 
     int partSize;
-    partSize = (int) (nSize / nThreads);
+    partSize = ((int)nSize > nThreads)? (int) (nSize / nThreads):(int)nSize;
+    if(partSize == (int)nSize)
+          nThreads = 1; // not worthy to parallelize 
 
 #pragma omp parallel  default(shared) num_threads(nThreads)
     {
@@ -160,9 +162,7 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building 
 
         int start = threadID * partSize;
         int end;
-        end = (threadID + 1) * partSize - 1;
-        if ((threadID == nThreads - 1)) end = (int) (nSize - 1);
-
+        end = (threadID < nThreads - 1) ? (threadID + 1) * partSize - 1: (int) (nSize - 1);
         for (int p = start; p <= end; ++p) {
 
             Pedestrian *ped = allPeds[p];
@@ -173,8 +173,8 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building 
             double HighVel = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta); //(v0+delta)^2
             if (normVi > HighVel && ped->GetV0Norm() > 0) {
                 fprintf(stderr, "GompertzModel::calculateForce_LC() WARNING: actual velocity (%f) of iped %d "
-                                "is bigger than desired velocity (%f) at time: %fs\n",
-                        sqrt(normVi), ped->GetID(), ped->GetV0Norm(), current);
+                                "is bigger than desired velocity (%f) at time: %fs (periodic=%d)\n",
+                        sqrt(normVi), ped->GetID(), ped->GetV0Norm(), current, periodic);
 
                 // remove the pedestrian and abort
                 Log->Write("\tERROR: ped [%d] was removed due to high velocity", ped->GetID());
@@ -229,7 +229,7 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building 
             result_acc.push_back(acc);
         }
 
-        //#pragma omp barrier
+        #pragma omp barrier
         // update
         for (int p = start; p <= end; ++p) {
             Pedestrian *ped = allPeds[p];

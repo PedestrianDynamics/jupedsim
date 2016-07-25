@@ -144,7 +144,11 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
      int nThreads = omp_get_max_threads();
 
 
-     int partSize = nSize / nThreads;
+     int partSize;
+     partSize = ((int)nSize > nThreads)? (int) (nSize / nThreads):(int)nSize;
+      if(partSize == (int)nSize)
+            nThreads = 1; // not worthy to parallelize 
+
      int debugPed = -10;
      //building->GetGrid()->HighlightNeighborhood(debugPed, building);
 #pragma omp parallel  default(shared) num_threads(nThreads)
@@ -155,8 +159,8 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
           const int threadID = omp_get_thread_num();
           
           int start = threadID*partSize;
-          int end = (threadID + 1) * partSize - 1;
-          if ((threadID == nThreads - 1)) end = nSize - 1;
+          int end;
+          end = (threadID < nThreads - 1) ? (threadID + 1) * partSize - 1: (int) (nSize - 1);
 
           for (int p = start; p <= end; ++p) {
 
@@ -170,8 +174,8 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
                double tmp = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta);
                if (normVi > tmp && ped->GetV0Norm() > 0) {
                     fprintf(stderr, "GCFMModel::calculateForce() WARNING: actual velocity (%f) of iped %d "
-                              "is bigger than desired velocity (%f) at time: %fs\n",
-                              sqrt(normVi), ped->GetID(), ped->GetV0Norm(), current);
+                              "is bigger than desired velocity (%f) at time: %fs (periodic=%d)\n",
+                              sqrt(normVi), ped->GetID(), ped->GetV0Norm(), current, periodic);
                     // remove the pedestrian and abort
                     building->DeletePedestrian(ped);
                     Log->Write("\tERROR: one ped was removed due to high velocity");
@@ -184,8 +188,8 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
                //if(ped->GetID()==61) building->GetGrid()->HighlightNeighborhood(ped,building);
                vector<SubRoom*> emptyVector;
 
-               int nSize=neighbours.size();
-               for (int i = 0; i < nSize; i++) {
+               int neighborsSize = neighbours.size();
+               for (int i = 0; i < neighborsSize; i++) {
                     Pedestrian* ped1 = neighbours[i];
                     Point p1 = ped->GetPos();
                     Point p2 = ped1->GetPos();
@@ -227,7 +231,7 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
                result_acc.push_back(acc);
           }
 
-          //#pragma omp barrier
+          #pragma omp barrier
           // update
           for (int p = start; p <= end; ++p) {
                Pedestrian* ped = allPeds[p];
@@ -271,7 +275,6 @@ inline  Point GCFMModel::ForceDriv(Pedestrian* ped, Room* room) const
                const Point& v0 = ped->GetV0(target);
                F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
           } else {
-               const Point& v0 = ped->GetV0();
                F_driv = ((lastE0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
                ped->SetLastE0(lastE0);
           }
@@ -397,10 +400,10 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
           F_rep = ep12 * px;
      }
      if (F_rep._x != F_rep._x || F_rep._y != F_rep._y) {
-          char tmp[CLENGTH];
-          sprintf(tmp, "\nNAN return ----> p1=%d p2=%d Frepx=%f, Frepy=%f\n", ped1->GetID(),
+          char tmp1[CLENGTH];
+          sprintf(tmp1, "\nNAN return ----> p1=%d p2=%d Frepx=%f, Frepy=%f\n", ped1->GetID(),
                   ped2->GetID(), F_rep._x, F_rep._y);
-          Log->Write(tmp);
+          Log->Write(tmp1);
           Log->Write("ERROR:\t fix this as soon as possible");
           printf("K_ij=%f\n", K_ij);
           //return Point(0,0); // FIXME: should never happen

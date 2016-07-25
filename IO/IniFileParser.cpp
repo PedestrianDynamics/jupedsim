@@ -107,7 +107,7 @@ bool IniFileParser::Parse(std::string iniFile)
                _config->SetSeed((unsigned int) time(NULL));
           }
      }
-     srand(_config->GetSeed());
+     // srand(_config->GetSeed());
      Log->Write("INFO:\trandom seed <%d>", _config->GetSeed());
 
      // max simulation time
@@ -120,29 +120,34 @@ bool IniFileParser::Parse(std::string iniFile)
 
      // geometry file name
      if (xMainNode->FirstChild("geometry")) {
-          _config->SetGeometryFile(xMainNode->FirstChild("geometry")->FirstChild()->Value());
-          Log->Write("INFO: \tgeometry <"+_config->GetGeometryFile()+">");
+          std::string filename = xMainNode->FirstChild("geometry")->FirstChild()->Value();
+          _config->SetGeometryFile(filename);
+          Log->Write("INFO: \tgeometry <%s>", filename.c_str());
      }
 
 
      //max CPU
+     int max_threads =  1;
+#ifdef _OPENMP
+     max_threads = omp_get_max_threads();
+#endif
      if (xMainNode->FirstChild("num_threads")) {
           TiXmlNode* numthreads = xMainNode->FirstChild("num_threads")->FirstChild();
           if (numthreads) {
 #ifdef _OPENMP
-               omp_set_num_threads(xmltoi(numthreads->Value(), omp_get_max_threads()));
+                omp_set_num_threads(xmltoi(numthreads->Value()));
 #endif               
-          }
+          }              
      }
      _config->SetMaxOpenMPThreads(omp_get_max_threads());
-     Log->Write("INFO:\tUsing num_threads <%d> threads", _config->GetMaxOpenMPThreads());
+     Log->Write("INFO:\tUsing num_threads <%d> threads (%d available)", _config->GetMaxOpenMPThreads(), max_threads);
 
      //logfile
      if (xMainNode->FirstChild("logfile")) {
           _config->SetErrorLogFile(
                     _config->GetProjectRootDir()+xMainNode->FirstChild("logfile")->FirstChild()->Value());
           _config->SetLog(2);
-          Log->Write("INFO:\tlogfile <"+(_config->GetErrorLogFile())+">");
+          Log->Write("INFO:\tlogfile <%s>", _config->GetErrorLogFile().c_str());
      }
      //display statistics
      if (xMainNode->FirstChild("show_statistics")) {
@@ -154,8 +159,8 @@ bool IniFileParser::Parse(std::string iniFile)
      //trajectories
      TiXmlNode* xTrajectories = xMainNode->FirstChild("trajectories");
      if (xTrajectories) {
-          double fps;
-          xMainNode->FirstChildElement("trajectories")->Attribute("fps", &fps);
+           double fps;
+           xMainNode->FirstChildElement("trajectories")->Attribute("fps", &fps);
           _config->SetFps(fps);
 
           string format =
@@ -204,21 +209,19 @@ bool IniFileParser::Parse(std::string iniFile)
 
           //a file descriptor was given
           if (xTrajectories->FirstChild("file")) {
-               const char* tmp =
-                         xTrajectories->FirstChildElement("file")->Attribute(
-                                   "location");
-               if (tmp)
-                    _config->SetTrjectoriesFile(_config->GetProjectRootDir()+tmp);
-               Log->Write(
-                         "INFO: \toutput file  <"+string(_config->GetTrajectoriesFile())+">");
-               Log->Write("INFO: \tin format <%s> at <%f> frames per seconds",
-                         format.c_str(), _config->GetFps());
+               std::string tmp;
+               tmp = xTrajectories->FirstChildElement("file")->Attribute(
+                                                  "location");
+               if (tmp.c_str())
+                    _config->SetTrajectoriesFile(_config->GetProjectRootDir()+tmp);
+               Log->Write("INFO: \toutput file  <%s>", _config->GetTrajectoriesFile().c_str());
+               Log->Write("INFO: \tin format <%s> at <%.0f> frames per seconds",format.c_str(), _config->GetFps());
           }
 
           if (xTrajectories->FirstChild("socket")) {
-               const char* tmp =
+               std::string tmp =
                          xTrajectories->FirstChildElement("socket")->Attribute("hostname");
-               if (tmp)
+               if (tmp.c_str())
                     _config->SetHostname(tmp);
                int port;
                xTrajectories->FirstChildElement("socket")->Attribute("port", &port);
@@ -232,7 +235,7 @@ bool IniFileParser::Parse(std::string iniFile)
      //get the wanted ped model id
      _model = xmltoi(xMainNode->FirstChildElement("agents")->Attribute("operational_model_id"), -1);
      if (_model==-1) {
-          Log->Write("ERROR: \tmissing operational_model_id attribute in the agent section. ");
+          Log->Write("ERROR: \tmissing operational_model_id attribute in the agent section.");
           Log->Write("ERROR: \tplease specify the model id to use");
           return false;
      }
@@ -241,7 +244,7 @@ bool IniFileParser::Parse(std::string iniFile)
      for (TiXmlElement* xModel = xMainNode->FirstChild("operational_models")->FirstChildElement("model");
                                         xModel; xModel = xModel->NextSiblingElement("model")) {
           if (!xModel->Attribute("description")) {
-               Log->Write("ERROR: \t missing attribute description in models ?");
+               Log->Write("ERROR: \t missing attribute description in models?");
                return false;
           }
 
@@ -250,7 +253,7 @@ bool IniFileParser::Parse(std::string iniFile)
 
           if ((_model==MODEL_GFCM) && (model_id==MODEL_GFCM)) {
                if (modelName!="gcfm") {
-                    Log->Write("ERROR: \t mismatch model ID and description. Did you mean gcfm ?");
+                    Log->Write("ERROR: \t mismatch model ID and description. Did you mean gcfm?");
                     return false;
                }
                if (!ParseGCFMModel(xModel, xMainNode))
@@ -261,7 +264,7 @@ bool IniFileParser::Parse(std::string iniFile)
           }
           else if ((_model==MODEL_GOMPERTZ) && (model_id==MODEL_GOMPERTZ)) {
                if (modelName!="gompertz") {
-                    Log->Write("ERROR: \t mismatch model ID and description. Did you mean gompertz ?");
+                    Log->Write("ERROR: \t mismatch model ID and description. Did you mean gompertz?");
                     return false;
                }
                //only parsing one model
@@ -272,7 +275,7 @@ bool IniFileParser::Parse(std::string iniFile)
           }
           else if ((_model==MODEL_GRADIENT) && (model_id==MODEL_GRADIENT)) {
                if (modelName!="gradnav") {
-                    Log->Write("ERROR: \t mismatch model ID and description. Did you mean gradnav ?");
+                    Log->Write("ERROR: \t mismatch model ID and description. Did you mean gradnav?");
                     return false;
                }
                //only parsing one model
@@ -297,7 +300,7 @@ bool IniFileParser::Parse(std::string iniFile)
      if (!parsingModelSuccessful) {
           Log->Write("ERROR: \tWrong model id [%d]. Choose 1 (GCFM) or 2 (Gompertz) or 3 (Tordeux2015)", _model);
           Log->Write("ERROR: \tPlease make sure that all models are specified in the operational_models section");
-          Log->Write("ERROR: \tand make sure to use the same ID in th agent section");
+          Log->Write("ERROR: \tand make sure to use the same ID in the agent section");
           return false;
      }
 
@@ -364,9 +367,8 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
           _config->SetDistEffMaxPed(atof(disteff_max.c_str()));
           _config->SetIntPWidthPed(atof(interpolation_width.c_str()));
           Log->Write(
-                    "INFO: \tfrep_ped mu="+nu+", dist_max="+dist_max
-                              +", disteff_max="+disteff_max
-                              +", interpolation_width="+interpolation_width);
+                    "INFO: \tfrep_ped nu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
+                     interpolation_width.c_str(), nu.c_str(), dist_max.c_str(), disteff_max.c_str(), interpolation_width.c_str());
      }
 
      //force_wall
@@ -385,9 +387,8 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
           _config->SetDistEffMaxWall(atof(disteff_max.c_str()));
           _config->SetIntPWidthWall(atof(interpolation_width.c_str()));
           Log->Write(
-                    "INFO: \tfrep_wall mu="+nu+", dist_max="+dist_max
-                              +", disteff_max="+disteff_max
-                              +", interpolation_width="+interpolation_width);
+                    "INFO: \tfrep_wall mu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
+                     nu.c_str(), dist_max.c_str(), disteff_max.c_str(), interpolation_width.c_str());
      }
 
      //Parsing the agent parameters
@@ -1074,7 +1075,7 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode* routingNode)
           }
           sensorVec.push_back(sensor);
 
-          Log->Write("INFO: \tSensor "+sensor+" added");
+          Log->Write("INFO: \tSensor <%s> added.", sensor.c_str());
      }
 
      r->addOption("Sensors", sensorVec);
@@ -1088,7 +1089,7 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode* routingNode)
 
      std::vector<std::string> cogMapStatus;
      cogMapStatus.push_back(cogMap->Attribute("status"));
-     Log->Write("INFO: \tAll pedestrian starting with a(n) "+cogMapStatus[0]+" cognitive map\n");
+     Log->Write("INFO: \tAll pedestrian starting with a(n) %s cognitive maps", cogMapStatus[0].c_str());
      r->addOption("CognitiveMap", cogMapStatus);
 
      return true;
@@ -1105,7 +1106,7 @@ bool IniFileParser::ParseLinkedCells(const TiXmlNode& linkedCellNode)
           if (linkedcells=="true") {
                _config->SetLinkedCellSize(atof(cell_size.c_str()));
                Log->Write(
-                         "INFO: \tlinked cells enabled with size  <"+cell_size+">");
+                         "INFO: \tlinked cells enabled with size  <%.2f>", _config->GetLinkedCellSize());
                return true;
           }
           else {
@@ -1154,7 +1155,7 @@ bool IniFileParser::ParsePeriodic(TiXmlNode& Node)
      if (Node.FirstChild("periodic")) {
           const char* periodic = Node.FirstChild("periodic")->FirstChild()->Value();
           if (periodic)
-               _config->SetIsPeriodic(atof(periodic));
+               _config->SetIsPeriodic(atoi(periodic));
           Log->Write("INFO: \tperiodic <%d>", _config->IsPeriodic());
           return true;
      }
@@ -1179,7 +1180,7 @@ bool IniFileParser::ParseNodeToSolver(const TiXmlNode& solverNode)
                Log->Write("ERROR: \twrong value [%s] for solver type\n", solver.c_str());
                return false;
           }
-          Log->Write("INFO: \tpSolver <"+string(solver)+">");
+          Log->Write("INFO: \tpSolver <%d>", _config->GetSolver());
           return true;
      }
      return false;

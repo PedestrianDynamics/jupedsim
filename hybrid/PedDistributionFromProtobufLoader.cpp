@@ -27,9 +27,9 @@ PedDistributionFromProtobufLoader::PedDistributionFromProtobufLoader(const Confi
 
 }
 
-bool PedDistributionFromProtobufLoader::LoadPedDistribution(std::vector<std::shared_ptr<StartDistribution>>& startDis,
-          std::vector<std::shared_ptr<StartDistribution>>& startDisSub,
-          std::vector<std::shared_ptr<AgentsSource>>& startDisSources)
+bool PedDistributionFromProtobufLoader::LoadPedDistribution(std::vector<std::shared_ptr<StartDistribution> >& startDis,
+          std::vector<std::shared_ptr<StartDistribution> >& startDisSub,
+          std::vector<std::shared_ptr<AgentsSource> >& startDisSources)
 {
 
      for (hybridsim::Group pbGroup : _configuration->GetScenario()->group()) {
