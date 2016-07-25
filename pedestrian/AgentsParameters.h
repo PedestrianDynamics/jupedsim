@@ -249,7 +249,7 @@ private:
     std::normal_distribution<double> _V0IdleEscalatorDownStairs;
     std::normal_distribution<double> _Bmax;
     std::normal_distribution<double> _Bmin;
-    bool _enableStretch = false;
+    bool _enableStretch = true;
     std::normal_distribution<double> _Atau;
     std::normal_distribution<double> _Amin;
     std::normal_distribution<double> _Tau;

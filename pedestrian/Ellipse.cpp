@@ -178,7 +178,9 @@ double JEllipse::GetBmin() const
 double JEllipse::GetBmax() const
 {
      if (_do_stretch)
+     {
           return _Bmax;
+     }
      else
           return _Bmin;
 }
