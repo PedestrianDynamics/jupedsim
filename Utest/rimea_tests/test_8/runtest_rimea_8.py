@@ -28,7 +28,7 @@ from utils import *
 
 
 def run_rimea_test8(inifile, trajfile):
-    print inifile
+    print(inifile)
     files = glob.glob("trajectories/*_exit*")
     if len(files) == 0:
         logging.critical("%s exists with failure! Found no exit-files.", argv[0])

@@ -50,9 +50,9 @@ def eval_results(results):
     std_stair = np.std(results[:, 1])
     logging.info("mean corridor: %.2f (+- %.2f), mean stair: %.2f (+- %.2f)",
                  mean_cor, std_cor, mean_stair, std_stair)
-    plt.errorbar(range(len(results[:, 0])), results[:, 0],
+    plt.errorbar(list(range(len(results[:, 0]))), results[:, 0],
                  yerr=std_cor, fmt='-o', lw=2, label="Flow corridor")
-    plt.errorbar(range(len(results[:, 1])), results[:, 1],
+    plt.errorbar(list(range(len(results[:, 1]))), results[:, 1],
                  yerr=std_stair, fmt='-D', lw=2, label="Flow stair")
     plt.ylabel("$J$", size=18)
     plt.xlim([-0.5, len(results[:, 0])+0.5])
