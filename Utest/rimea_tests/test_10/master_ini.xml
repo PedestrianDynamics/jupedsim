@@ -50,7 +50,7 @@
   </routing>
 
   <!--persons information and distribution -->
-  <agents operational_model_id="1">
+  <agents operational_model_id="[1, 5]">
     <agents_distribution>
       <group group_id="0"  agent_parameter_id="1" room_id="0" subroom_id="0"  number="2" goal_id="0" router_id="1" />
       <group group_id="1"  agent_parameter_id="1" room_id="0" subroom_id="1"  number="2" goal_id="0" router_id="1" />
