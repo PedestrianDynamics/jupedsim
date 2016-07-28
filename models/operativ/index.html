@@ -218,6 +218,8 @@
         
             <li><a href="#wall-avoidance-model">Wall-avoidance model</a></li>
         
+            <li><a href="#generalized-centrifugal-force-model-with-lateral-swaying">Generalized Centrifugal Force Model with lateral swaying</a></li>
+        
     
     </ul>
 </div></div>
@@ -229,7 +231,7 @@ In the definition of agent&rsquo;s properties it is mandatory to precise the num
 <pre><code class="xml">&lt;agents operational_model_id=&quot;n&quot;&gt;
 </code></pre>
 
-<p>where <code>n</code> is a positive number in [1, 4].</p>
+<p>where <code>n</code> is 1, 2, 3, 4 or 5.</p>
 <h3 id="general-model-parameters-for-all-models"><a class="toclink" href="#general-model-parameters-for-all-models">General model parameters (for all models)</a></h3>
 <p>The definition of any model parameter is composed of two different 
 sections: </p>
@@ -245,7 +247,7 @@ sections: </p>
 </ul>
 </li>
 <li><code>&lt;stepsize&gt;0.001&lt;/stepsize&gt;</code>: <ul>
-<li>The time step for the solver. This should be choosed with care. For force-based model it is recommended to take a value between <script type="math/tex">10^{-2}</script> and <script type="math/tex">10^{-3}</script> s.
+<li>The time step for the solver. This should be choosed with care. For force-based model it is recommended to take a value between <script type="math/tex"> 10^{-2} </script> and <script type="math/tex">10^{-3}</script> s.
    For first-order models, a value of 0.05 s should be OK.
    A larger time step leads to faster simulations, however it is too risky and can lead to 
 numerical instability, collisions and overlapping among pedestrians.</li>
@@ -470,7 +472,17 @@ For example: </p>
 <li>range in which other pedestrians are considered neighbours and can influence the current agent. This value defines cell-size of the cell-grid.</li>
 </ul>
 </li>
-</ul></div>
+</ul>
+<h3 id="generalized-centrifugal-force-model-with-lateral-swaying"><a class="toclink" href="#generalized-centrifugal-force-model-with-lateral-swaying"><a href="https://link.springer.com/chapter/10.1007/978-3-319-02447-9_61">Generalized Centrifugal Force Model with lateral swaying</a></a></h3>
+<p>Mostly Identical to the GCFM Model, but instead of a variable semi-axis <script type="math/tex">b</script> of the ellipse simulating the pedestrian, pedestrians perform an oscillation perpendicular to their direction of motion.
+As a consequence the parameter <code>Bmax</code> is ignored. Four Parameters can be passed to control the lateral swaying, for example:</p>
+<p><code>&lt;sway ampA="-0.14" ampB="0.21" freqA="0.44" freqB="0.35" /&gt;</code>
+- <code>ampA</code> and <code>ampB</code> determine the amplitude of the oscillation according to the linear relation <script type="math/tex">A = \texttt{ampA} \cdot \| v_i \| + \texttt{ampB} </script>
+- <code>freqA</code> and <code>freqB</code> determine the frequency of the oscillation according to <script type="math/tex">f = \texttt{freqA} \cdot \| v_i \| + \texttt{freqB} </script>
+</p>
+<p>setting <code>ampA</code> and <code>ampB</code> to 0 disables lateral swaying. If not specified, the empirical values given in <a href="https://link.springer.com/chapter/10.1007/978-3-319-02447-9_61">Krausz, 2012</a> are used, that is:
+- <code>ampA</code> = -0.14, <code>ampB</code> = 0.21
+- <code>freqA</code> = 0.44, <code>freqB</code> = 0.25</p></div>
         </div>
 
 	<footer class="col-md-12">
