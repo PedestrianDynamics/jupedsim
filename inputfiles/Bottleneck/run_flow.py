@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 import numpy as np
 from xml.dom import minidom
 import os, argparse, logging, time
@@ -100,7 +100,7 @@ if __name__ == "__main__":
 	widths = [0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.5]
 	flows = []
 	if MAKE_INI:
-		sh("python makeBottleneckInifile.py")
+		sh("python3 makeBottleneckInifile.py")
 
 	for w in widths:
 	#------------------------------------------------------------------------------	

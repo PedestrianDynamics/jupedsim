@@ -19,13 +19,13 @@ def get_empirical_flow():
         flows = data[:, 1]
 
         for (width, flow) in zip(widths, flows):
-            if not width_flow.has_key(width):
+            if width not in width_flow:
                 width_flow[width] = [flow]
             else:
                 width_flow[width].append(flow)
 
     results = []
-    for w in width_flow.keys():
+    for w in list(width_flow.keys()):
         mean_J = np.mean(width_flow[w])
         std_J = np.std(width_flow[w])
         results.append([w, mean_J, std_J])
@@ -49,7 +49,7 @@ logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s -
 HOME = path.expanduser("~")
 DIR= os.path.dirname(os.path.realpath(argv[0]))
 CWD = os.getcwd()
-print DIR
+print(DIR)
 #--------------------------------------------------------
 if __name__ == "__main__":
     if CWD != DIR:
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     logging.info("change directory to ..")
     os.chdir("../..")
     lib_path = os.getcwd()
-    print lib_path
+    print(lib_path)
     logging.info("call makeini.py with -f %s/master_ini.xml"%DIR)
     subprocess.call(["python", "makeini.py", "-f", "%s/master_ini.xml"%DIR])
     os.chdir(DIR)
@@ -72,7 +72,7 @@ if __name__ == "__main__":
     from utils import *
     os.chdir("..")
     TRUNK = os.getcwd()
-    print "TRUNk", TRUNK
+    print("TRUNk", TRUNK)
     os.chdir(DIR)
     #----------------------------------------
     logging.info("change directory back to %s"%DIR)
@@ -99,7 +99,7 @@ if __name__ == "__main__":
         if not path.exists(inifile):
             logging.critical("inifile <%s> does not exist"%inifile)
             exit(FAILURE)
-        print inifile
+        print(inifile)
         width_size = float(inifile.split("geometry_")[1].split("_")[0])
         cmd = "%s --inifile=%s"%(executable, inifile)
         #--------------------- SIMULATION ------------------------  
@@ -120,7 +120,7 @@ if __name__ == "__main__":
         maxtime = get_maxtime(inifile)
         fps, N, traj = parse_file(trajfile)
         J = flow(fps, N, traj, 61)
-        if not flows.has_key(width_size):
+        if width_size not in flows:
             flows[width_size] = [J]
         else:
             flows[width_size].append(J)
@@ -135,25 +135,25 @@ if __name__ == "__main__":
     flow_file = "flow.txt"
     ff = open(flow_file, "w")
     logging.info('write flow values in \"%s\"'%flow_file)
-    for key, value in flows.items():
-        print >>ff, key, ":", value
+    for key, value in list(flows.items()):
+        print(key, ":", value, file=ff)
 
     ff.close
-    M = np.array([np.mean(i) for i in flows.values()]) # std pro width
-    S = np.array([np.std(i) for i in flows.values()])  # std pro width
-    print >>ff, "==========================="
-    print >>ff, "==========================="
-    print >>ff, "Means "
-    print >>ff, M
-    print >>ff, "==========================="
-    print >>ff, "Std "
-    print >>ff, S
-    print >>ff, "==========================="
+    M = np.array([np.mean(i) for i in list(flows.values())]) # std pro width
+    S = np.array([np.std(i) for i in list(flows.values())])  # std pro width
+    print("===========================", file=ff)
+    print("===========================", file=ff)
+    print("Means ", file=ff)
+    print(M, file=ff)
+    print("===========================", file=ff)
+    print("Std ", file=ff)
+    print(S, file=ff)
+    print("===========================", file=ff)
     #########################################################################
     ms = 8
     #plot(widths, flows, "o-b", lw = 2, ms = ms, label = "simulation")
-    indexsort = np.argsort( flows.keys() )
-    F = np.array( flows.keys() )[indexsort]
+    indexsort = np.argsort( list(flows.keys()) )
+    F = np.array( list(flows.keys()) )[indexsort]
     plot(F, np.array(M)[indexsort], "o-", lw=2, label='Simulation', color='blue')
     errorbar(F , np.array(M)[indexsort] , yerr=np.array(S)[indexsort], fmt='-o')
 
@@ -163,7 +163,7 @@ if __name__ == "__main__":
     columns = np.vstack((F, np.array(M)[indexsort]))
     gg = open("flow_col.txt", "w")
     for i in range(len(F)):
-        print >>gg, columns[0][i], columns[1][i]
+        print(columns[0][i], columns[1][i], file=gg)
     gg.close()
     legend(loc='best', numpoints=1)
     grid()
@@ -176,11 +176,11 @@ if __name__ == "__main__":
     err = 0
     num = 0
     for (w, j) in zip(jexp[:, 0], jexp[:, 1]):
-        for key, values in flows.items():
+        for key, values in list(flows.items()):
             if key == w:
                 num += 1
                 err +=  np.sqrt((np.mean(values)-j)**2)
-                print "%3.3f  %3.1f  %3.1f  -  %3.3f  %3.3f"%(err, key, w, j, np.mean(values))
+                print("%3.3f  %3.1f  %3.1f  -  %3.3f  %3.3f"%(err, key, w, j, np.mean(values)))
     err /= num
     title(r"$\frac{1}{N}\sqrt{{\sum_w {(\mu(w)-E(w)})^2 }}=%.2f\; (tol=%.2f)$"%(err, tolerance), y=1.02)
     

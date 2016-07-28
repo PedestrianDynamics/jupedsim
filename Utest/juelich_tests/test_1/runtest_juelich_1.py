@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import sys
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
@@ -16,7 +16,7 @@ def runtest1(inifile, trajfile):
     fps, n, traj = parse_file(trajfile)
     evac_time = (max(traj[:, 1]) - min(traj[:, 1])) / float(fps)
     tolerance = 0.5
-    if (abs(evac_time - must_time)) > tolerance:
+    if abs(evac_time - must_time) > tolerance:
         logging.info("%s exits with FAILURE evac_time = %f (!= %f)", argv[0], evac_time, must_time)
         exit(FAILURE)
     else:

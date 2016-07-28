@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Test description
 ================
@@ -28,7 +28,7 @@ from utils import *
 
 
 def run_rimea_test8(inifile, trajfile):
-    print inifile
+    print(inifile)
     files = glob.glob("trajectories/*_exit*")
     if len(files) == 0:
         logging.critical("%s exists with failure! Found no exit-files.", argv[0])

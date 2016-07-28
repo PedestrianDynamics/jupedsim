@@ -335,7 +335,7 @@ set(source_files
         poly2tri/sweep/cdt.cpp
         events/EventManager.cpp
         events/Event.cpp
-        )
+        math/KrauszModel.cpp)
 
 set(header_files
         routing/ffRouter.h
