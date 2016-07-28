@@ -77,37 +77,37 @@ VisibleEnvironment::VisibleEnvironment(const Building *b, const Pedestrian *ped)
 //    }
 
 
-//    std::vector<BoostPolygon> boostHolesCorrected;
-//    std::list<BoostPolygon> output;
-//    bool statusIdentical;
-//    Log->Write("INFO: PERCEPTION: Preparing visible environment ...");
-//    for (BoostPolygon hole:boostHoles)
-//    {
-//        statusIdentical=false;
+    std::vector<BoostPolygon> boostHolesCorrected;
+    std::list<BoostPolygon> output;
+    bool statusIdentical;
+    Log->Write("INFO: PERCEPTION: Preparing visible environment ...");
+    for (BoostPolygon hole:boostHoles)
+    {
+        statusIdentical=false;
 
-//        for (BoostPolygon correctedhole:boostHolesCorrected)
-//        {
+        for (BoostPolygon correctedhole:boostHolesCorrected)
+        {
 
-//            if (boost::geometry::equals(hole,correctedhole))
-//            {
-//                // if two walls are identical
-//                statusIdentical=true;
-//                break;
-//            }
+            if (boost::geometry::equals(hole,correctedhole))
+            {
+                // if two walls are identical
+                statusIdentical=true;
+                break;
+            }
 
-//            boost::geometry::difference(hole,correctedhole,output);  //what if output.size is greater than one?
-//            if (output.empty())
-//            {
-//                // if walls one lies in wall two
-//                statusIdentical=true;
-//                break;
-//            }
-//            hole=output.front();
-//            output.clear();
-//        }
-//        if (!statusIdentical)
-//            boostHolesCorrected.push_back(hole);
-//    }
+            boost::geometry::difference(hole,correctedhole,output);  //what if output.size is greater than one?
+            if (output.empty())
+            {
+                // if walls one lies in wall two
+                statusIdentical=true;
+                break;
+            }
+            hole=output.front();
+            output.clear();
+        }
+        if (!statusIdentical)
+            boostHolesCorrected.push_back(hole);
+    }
 
 
 
@@ -149,7 +149,7 @@ VisibleEnvironment::VisibleEnvironment(const Building *b, const Pedestrian *ped)
     //set up the environment
     VisiLibity::Environment environment(polygons);
     //environment.reverse_holes();
-    if (!environment.is_valid(0.01))
+    if (!environment.is_valid())
     {
         Log->Write("ERROR:\tEnvironment for Visibilitypolygon not valid. \n");
         exit(EXIT_FAILURE);
