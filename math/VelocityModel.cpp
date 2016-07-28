@@ -234,7 +234,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 double spacing = spacings[0].first;
                 double winkel = spacings[0].second;
                 Point tmp;
-                Point speed = direction.Normalized() * OptimalSpeed(ped, spacing, winkel);
+                Point speed = direction.Normalized() *OptimalSpeed(ped, spacing);
                 result_acc.push_back(speed);                
                 spacings.clear(); //clear for ped p
                 
@@ -316,7 +316,7 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
 }
 
 
-double VelocityModel::OptimalSpeed(Pedestrian* ped, double spacing, double winkel) const
+double VelocityModel::OptimalSpeed(Pedestrian* ped, double spacing) const
 {
       double v0 = ped->GetV0Norm();
       double T = ped->GetT();

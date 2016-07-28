@@ -76,7 +76,7 @@ private:
       *
       * @return double
       */
-     double OptimalSpeed(Pedestrian* ped, double spacing, double winkel) const;
+     double OptimalSpeed(Pedestrian* ped, double spacing) const;
 
      /**
       * The desired direction of pedestrian
