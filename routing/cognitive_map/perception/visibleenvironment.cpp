@@ -44,18 +44,18 @@ VisibleEnvironment::VisibleEnvironment(const Building *b, const Pedestrian *ped)
         BoostPolygon boostHole;
         if (wall.GetPoint1()._x <= wall.GetPoint2()._x)
         {
-            boost::geometry::append(boostHole,wall.GetPoint1()-normalVector*0.12);
-            boost::geometry::append(boostHole,wall.GetPoint1()+normalVector*0.12);
-            boost::geometry::append(boostHole,wall.GetPoint2()+normalVector*0.12);
-            boost::geometry::append(boostHole,wall.GetPoint2()-normalVector*0.12);
+            boost::geometry::append(boostHole,wall.GetPoint1()-normalVector*0.00012);
+            boost::geometry::append(boostHole,wall.GetPoint1()+normalVector*0.00012);
+            boost::geometry::append(boostHole,wall.GetPoint2()+normalVector*0.00012);
+            boost::geometry::append(boostHole,wall.GetPoint2()-normalVector*0.00012);
             boost::geometry::correct(boostHole);
         }
         else
         {
-            boost::geometry::append(boostHole,wall.GetPoint2()+normalVector*0.12);
-            boost::geometry::append(boostHole,wall.GetPoint2()-normalVector*0.12);
-            boost::geometry::append(boostHole,wall.GetPoint1()-normalVector*0.12);
-            boost::geometry::append(boostHole,wall.GetPoint1()+normalVector*0.12);
+            boost::geometry::append(boostHole,wall.GetPoint2()+normalVector*0.00012);
+            boost::geometry::append(boostHole,wall.GetPoint2()-normalVector*0.00012);
+            boost::geometry::append(boostHole,wall.GetPoint1()-normalVector*0.00012);
+            boost::geometry::append(boostHole,wall.GetPoint1()+normalVector*0.00012);
             boost::geometry::correct(boostHole);
         }
         boostHoles.push_back(boostHole);
@@ -95,15 +95,15 @@ VisibleEnvironment::VisibleEnvironment(const Building *b, const Pedestrian *ped)
                 break;
             }
 
-            boost::geometry::difference(hole,correctedhole,output);  //what if output.size is greater than one?
-            if (output.empty())
-            {
-                // if walls one lies in wall two
-                statusIdentical=true;
-                break;
-            }
-            hole=output.front();
-            output.clear();
+//            boost::geometry::difference(hole,correctedhole,output);  //what if output.size is greater than one?
+//            if (output.empty())
+//            {
+//                // if walls one lies in wall two
+//                statusIdentical=true;
+//                break;
+//            }
+            //hole=output.front();
+            //output.clear();
         }
         if (!statusIdentical)
             boostHolesCorrected.push_back(hole);
@@ -115,21 +115,29 @@ VisibleEnvironment::VisibleEnvironment(const Building *b, const Pedestrian *ped)
     std::vector<VisiLibity::Polygon> polygons;
     VisiLibity::Polygon boundary;
     //Boundary of environment
-    boundary.push_back(VisiLibity::Point(-999999,-999999));
-    boundary.push_back(VisiLibity::Point(999999,-999999));
-    boundary.push_back(VisiLibity::Point(999999,999999));
-    boundary.push_back(VisiLibity::Point(-999999,999999));
+    boundary.push_back(VisiLibity::Point(-20000,-20000));
+    boundary.push_back(VisiLibity::Point(20000,-20000));
+    boundary.push_back(VisiLibity::Point(20000,20000));
+    boundary.push_back(VisiLibity::Point(-20000,20000));
     polygons.push_back(boundary);
 
     //Holes
 
-    for (BoostPolygon correctedhole:boostHoles)
+    for (BoostPolygon correctedhole:boostHolesCorrected)
     {
         VisiLibity::Polygon VisiPolygon;
         std::vector<Point> const& points = correctedhole.outer();
+
+        Point dirVector2= (points[3]+points[2])/2-(points[1]+points[0])/2;
+        dirVector2=dirVector2/dirVector2.Norm();
+
         for (std::vector<Point>::size_type i = 0; i < points.size()-1; ++i)
         {
-            VisiPolygon.push_back((VisiLibity::Point(points[i]._x,points[i]._y)));
+            //VisiPolygon.push_back(VisiLibity::Point(points[i]._x,points[i]._y));
+            if (i<2)
+                VisiPolygon.push_back(VisiLibity::Point(points[i]._x+dirVector2._x*0.0012,points[i]._y+dirVector2._y*0.0012));
+            else
+                VisiPolygon.push_back(VisiLibity::Point(points[i]._x-dirVector2._x*0.0012,points[i]._y-dirVector2._y*0.0012));
         }
         polygons.push_back(VisiPolygon);
     }
@@ -154,6 +162,13 @@ VisibleEnvironment::VisibleEnvironment(const Building *b, const Pedestrian *ped)
         Log->Write("ERROR:\tEnvironment for Visibilitypolygon not valid. \n");
         exit(EXIT_FAILURE);
     }
+
+    //VisiLibity::Guards my_guards(std::vector(Point(2095.53,14423.4)));
+
+    VisiLibity::Visibility_Polygon
+      my_visibility_polygon(VisiLibity::Point(2095.53,14423.4), environment,0.1);
+    std::cout << "The visibility polygon is \n" << my_visibility_polygon << std::endl;
+
 
 
     Log->Write("INFO: PERCEPTION: Visible environment prepared.");
