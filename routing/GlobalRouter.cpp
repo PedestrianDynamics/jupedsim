@@ -819,7 +819,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 
      int bestAPsID = -1;
      double minDistGlobal = FLT_MAX;
-     double minDistLocal = FLT_MAX;
+     //double minDistLocal = FLT_MAX;
 
      // get the opened exits
      SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
@@ -829,7 +829,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      {
           AccessPoint* ap=relevantAPs[g];
 
-          if (ap->isInRange(sub->GetUID()) == false)
+          if (!ap->isInRange(sub->GetUID()))
                continue;
           //check if that exit is open.
           if (ap->IsClosed())
@@ -844,7 +844,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           //check if visible
           //only if the room is convex
           //otherwise check all rooms at that level
-          if(_building->IsVisible(posA, posC, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())],true)==false)
+          if(!_building->IsVisible(posA, posC, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())],true))
           {
                ped->RerouteIn(10);
                continue;
@@ -857,7 +857,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           {
                bestAPsID = ap->GetID();
                minDistGlobal = dist;
-               minDistLocal=dist2;
+               //minDistLocal=dist2;
           }
      }
 
@@ -888,7 +888,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
                ped->RerouteIn(5);
                return relevantAPs[0]->GetID();
           }
-          //return -1;
+          return -1;
      }
 }
 
@@ -959,13 +959,13 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
                          //the line from the current position to the centre of the nav line.
                          // at least the line in that direction minus EPS
                          AccessPoint* ap2=_accessPoints[goals[g2]];
-                         const Point& posA = ped->GetPos();
-                         const Point& posB = ap2->GetNavLine()->GetCentre();
-                         const Point& posC = (posB - posA).Normalized()* ((posA - posB).Norm() - J_EPS) + posA;
+                         const Point& posA_ = ped->GetPos();
+                         const Point& posB_ = ap2->GetNavLine()->GetCentre();
+                         const Point& posC_ = (posB_ - posA_).Normalized()* ((posA_ - posB_).Norm() - J_EPS) + posA_;
 
                          //it points to a destination that I can see anyway
-                         if (_building->IsVisible(posA, posC, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())],true))
-                              //if (sub->IsVisible(posA, posC, true) == true)
+                         if (_building->IsVisible(posA_, posC_, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())],true))
+                              //if (sub->IsVisible(posA_, posC_, true) == true)
                          {
                               relevant=false;
                          }
@@ -984,9 +984,8 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
      //fallback
      if(relevantAPS.size()==0)
      {
-          //fixme: this should also never happened. But hapen due to previvous bugs..
+          //fixme: this should also never happened. But happen due to previous bugs..
           const vector<int>& goals=sub->GetAllGoalIDs();
-          auto isinsub = sub->IsInSubRoom(ped);
           for(unsigned int g1=0; g1<goals.size(); g1++)
           {
                relevantAPS.push_back(_accessPoints[goals[g1]]);
@@ -1082,8 +1081,8 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
                bool isSink = true;
                for (unsigned int j = 0; j < from_aps.size(); j++)
                {
-                    int room_id = from_aps[j]->GetConnectingRoom1();
-                    if (IsElementInVector(rooms_ids, room_id) == true)
+                    int room_id_ = from_aps[j]->GetConnectingRoom1();
+                    if (IsElementInVector(rooms_ids, room_id_))
                     {
                          isSink = false;
                          break;

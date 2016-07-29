@@ -8,8 +8,8 @@ LocalFloorfieldViaFM::LocalFloorfieldViaFM(){};
 LocalFloorfieldViaFM::LocalFloorfieldViaFM(const Room* const roomArg,
                const Building* buildingArg,
                const double hxArg, const double hyArg,
-               const double wallAvoidDistance, const bool useDistancefield,
-               const std::string& filename) {
+               const double wallAvoidDistance, const bool useDistancefield
+               ) {
      //ctor
      threshold = -1; //negative value means: ignore threshold
      threshold = wallAvoidDistance;
@@ -44,9 +44,9 @@ void LocalFloorfieldViaFM::getDirectionToDestination(Pedestrian* ped,
      return;
 }
 
-void LocalFloorfieldViaFM::getDirectionToGoalID(const int goalID){
-     std::cerr << "invalid call to LocalFloorfieldViaFM::getDirectionToGoalID!" << std::endl;
-};
+//void LocalFloorfieldViaFM::getDirectionToGoalID(const int goalID){
+//     std::cerr << "invalid call to LocalFloorfieldViaFM::getDirectionToGoalID!" << std::endl;
+//};
 
 void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
       const double hxArg, const double hyArg)
@@ -177,7 +177,7 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
      //std::vector<Line> exits(wall.begin(), wall.begin()+numOfExits);
 
      //grid handeling local vars:
-     long int iMax  = grid->GetiMax();
+     //long int iMax  = grid->GetiMax();
 
      long int iStart, iEnd;
      long int jStart, jEnd;
@@ -212,7 +212,7 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
                     jDot = jEnd;
                     xe = iStart;
                }
-               crossOutOutsideNeighbors(jDot*iMax + iDot);
+               //crossOutOutsideNeighbors(jDot*iMax + iDot);
                for (i=0; iDot < xe; ++i) {
                     ++iDot;
                     if(px<0) {
@@ -225,7 +225,7 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
                          }
                          px+=2*(deltaY1-deltaX1);
                     }
-                    crossOutOutsideNeighbors(jDot*iMax + iDot);
+                    //crossOutOutsideNeighbors(jDot*iMax + iDot);
                }
           } else {
                if(deltaY>=0) {
@@ -237,7 +237,7 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
                     jDot = jEnd;
                     ye = jStart;
                }
-               crossOutOutsideNeighbors(jDot*iMax + iDot);
+               //crossOutOutsideNeighbors(jDot*iMax + iDot);
                for(i=0; jDot<ye; ++i) {
                     ++jDot;
                     if (py<=0) {
@@ -250,7 +250,7 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
                          }
                          py+=2*(deltaX1-deltaY1);
                     }
-                    crossOutOutsideNeighbors(jDot*iMax + iDot);
+                   // crossOutOutsideNeighbors(jDot*iMax + iDot);
                }
           }
      } //loop over all walls
@@ -282,7 +282,7 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
                     jDot = jEnd;
                     xe = iStart;
                }
-               crossOutOutsideNeighbors(jDot*iMax + iDot);
+               //crossOutOutsideNeighbors(jDot*iMax + iDot);
                for (i=0; iDot < xe; ++i) {
                     ++iDot;
                     if(px<0) {
@@ -295,7 +295,7 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
                          }
                          px+=2*(deltaY1-deltaX1);
                     }
-                    crossOutOutsideNeighbors(jDot*iMax + iDot);
+                    //crossOutOutsideNeighbors(jDot*iMax + iDot);
                }
           } else {
                if(deltaY>=0) {
@@ -307,7 +307,7 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
                     jDot = jEnd;
                     ye = jStart;
                }
-               crossOutOutsideNeighbors(jDot*iMax + iDot);
+               //crossOutOutsideNeighbors(jDot*iMax + iDot);
                for(i=0; jDot<ye; ++i) {
                     ++jDot;
                     if (py<=0) {
@@ -320,14 +320,14 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
                          }
                          py+=2*(deltaX1-deltaY1);
                     }
-                    crossOutOutsideNeighbors(jDot*iMax + iDot);
+                   // crossOutOutsideNeighbors(jDot*iMax + iDot);
                }
           }
      } //loop over all exits
 
 }
-
-void LocalFloorfieldViaFM::crossOutOutsideNeighbors(const long int key){
+//@todo Arne: Is this function needed? delete?
+//void LocalFloorfieldViaFM::crossOutOutsideNeighbors(const long int key){
 //     directNeighbor dNeigh = grid->getNeighbors(key);
 //     long int aux = -1;
 //
@@ -406,7 +406,7 @@ void LocalFloorfieldViaFM::crossOutOutsideNeighbors(const long int key){
 ////               cost[aux]         = -8.;
 ////          }
 ////     }
-}
+//}
 
 int LocalFloorfieldViaFM::isInside(const long int key) {
      int temp = 0;
@@ -431,8 +431,7 @@ SubLocalFloorfieldViaFM::SubLocalFloorfieldViaFM(){};
 SubLocalFloorfieldViaFM::SubLocalFloorfieldViaFM(const SubRoom* const roomArg,
       const Building* buildingArg,
       const double hxArg, const double hyArg,
-      const double wallAvoidDistance, const bool useDistancefield,
-      const std::string& filename) {
+      const double wallAvoidDistance, const bool useDistancefield) {
      //ctor
      threshold = -1; //negative value means: ignore threshold
      threshold = wallAvoidDistance;
@@ -466,7 +465,7 @@ void SubLocalFloorfieldViaFM::getDirectionToDestination(Pedestrian* ped,
 }
 
 void SubLocalFloorfieldViaFM::getDirectionToGoalID(const int goalID){
-     std::cerr << "invalid call to SubLocalFloorfieldViaFM::getDirectionToGoalID!" << std::endl;
+     std::cerr << "invalid call to SubLocalFloorfieldViaFM::getDirectionToGoalID with goalID: " << goalID << std::endl;
 };
 
 

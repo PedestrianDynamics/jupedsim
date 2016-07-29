@@ -1189,9 +1189,9 @@ void FloorfieldViaFM::setSpeed(bool useDistance2WallArg) {
     }
 }
 
-void FloorfieldViaFM::setSpeedFromLCGrid(double* newspeed) {
-//    building->GetGrid()->HALLOHIERBINICHAMMONTAG
-}
+//void FloorfieldViaFM::setSpeedFromLCGrid(double* newspeed) {
+////    building->GetGrid()->HALLOHIERBINICHAMMONTAG
+//}
 
 void FloorfieldViaFM::calculateFloorfield(std::vector<Line>& targetlines, double* costarray, Point* neggradarray) {
     calculateFloorfield(targetlines, costarray, neggradarray, modifiedspeed);

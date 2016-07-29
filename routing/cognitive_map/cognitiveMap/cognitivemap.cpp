@@ -1,7 +1,7 @@
 #include "cognitivemap.h"
-#include "../../../geometry/Point.h"
+//#include "../../../geometry/Point.h"
 #include "../../../geometry/SubRoom.h"
-#include "../../../geometry/Building.h"
+//#include "../../../geometry/Building.h"
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../visiLibity/source_code/visilibity.hpp"
 
@@ -36,23 +36,23 @@ CognitiveMap::~CognitiveMap()
 
 }
 
-void CognitiveMap::UpdateMap()
-{
-    AddWaypoints(TriggerAssoziations(LookForLandmarks()));
-    if (_waypContainerSorted.empty())
-        return;
-    if (_waypContainerSorted.top()->WaypointReached(_YAHPointer.GetPos()))
-    {
-        //ptrWaypoint cWaypoint = _waypContainerSorted.top();
-
-        //cWaypoint->SetPriority(_waypContainerSorted.size());
-        _waypContainerSorted.pop();
-
-        //_waypContainerSorted.push(cWaypoint);
-        //_waypContainer.pop();
-        //Log->Write("Prio:\t"+std::to_string(_waypContainerSorted.top()->GetPriority()));
-    }
-}
+//void CognitiveMap::UpdateMap()
+//{
+//    AddWaypoints(TriggerAssoziations(LookForLandmarks()));
+//    if (_waypContainerSorted.empty())
+//        return;
+//    if (_waypContainerSorted.top()->WaypointReached(_YAHPointer.GetPos()))
+//    {
+//        //ptrWaypoint cWaypoint = _waypContainerSorted.top();
+//
+//        //cWaypoint->SetPriority(_waypContainerSorted.size());
+//        _waypContainerSorted.pop();
+//
+//        //_waypContainerSorted.push(cWaypoint);
+//        //_waypContainer.pop();
+//        //Log->Write("Prio:\t"+std::to_string(_waypContainerSorted.top()->GetPriority()));
+//    }
+//}
 
 void CognitiveMap::UpdateDirection()
 {
@@ -195,8 +195,9 @@ std::vector<GraphEdge *> CognitiveMap::SortConShortestPath(ptrWaypoint waypoint,
     auto it = edges.begin();
     ++it;
     ///starting at the second element
-    for (it; it!=edges.end(); ++it)
+    for (auto end=edges.end(); it!=end; ++it)
     {
+        if (it == edges.begin()) continue;
         double pathLengthDoorWayP = ShortestPathDistance((*it),waypoint);
 
         //Point vectorPathPedDoor = (*it)->GetCrossing()->GetCentre()-_ped->GetPos();

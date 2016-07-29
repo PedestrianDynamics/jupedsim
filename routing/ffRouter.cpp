@@ -163,8 +163,7 @@ bool FFRouter::Init(Building* building)
           std::advance(pairRoomIt, i);
           LocalFloorfieldViaFM* ptrToNew = nullptr;
           double tempDistance = 0.;
-          ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), building, 0.125, 0.125, 0.0, false,
-                                              "nofile");
+          ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), building, 0.125, 0.125, 0.0, false);
           //for (long int i = 0; i < ptrToNew)
           Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
 #pragma omp critical
@@ -379,8 +378,7 @@ bool FFRouter::ReInit()
           std::advance(pairRoomIt, i);
           LocalFloorfieldViaFM* ptrToNew = nullptr;
           double tempDistance = 0.;
-          ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), _building, 0.125, 0.125, 0.0, false,
-                                              "nofile");
+          ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), _building, 0.125, 0.125, 0.0, false);
           //for (long int i = 0; i < ptrToNew)
           Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
 #pragma omp critical
@@ -545,7 +543,7 @@ int FFRouter::FindExit(Pedestrian* p)
      }
      double minDist = DBL_MAX;
      int bestDoor = -1;
-     int bestGoal = -1;
+     //int bestGoal = -1;
 
      int goalID = p->GetFinalDestination();
      std::vector<int> validFinalDoor; //UIDs of doors
@@ -628,7 +626,7 @@ int FFRouter::FindExit(Pedestrian* p)
                     if ((_distMatrix.at(key) + locDistToDoor) < minDist) {
                          minDist = _distMatrix.at(key) + locDistToDoor;
                          bestDoor = key.first; //doorUID
-                         bestGoal = key.second;//finalDoor
+                         //bestGoal = key.second;//finalDoor
                     }
                }
           }

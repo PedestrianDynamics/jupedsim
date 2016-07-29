@@ -441,7 +441,7 @@ struct Edge * VoronoiDiagramGenerator::bisect(struct Site *s1,struct Site *s2)
 }
 
 //create a new site where the HalfEdges el1 and el2 intersect - note that the PointVDG in the argument list is not used, don't know why it's there
-struct Site * VoronoiDiagramGenerator::intersect(struct Halfedge *el1, struct Halfedge *el2, struct PointVDG *p)
+struct Site* VoronoiDiagramGenerator::intersect(struct Halfedge* el1, struct Halfedge* el2)
 {
      struct	Edge *e1,*e2, *e;
      struct  Halfedge *el;
@@ -564,7 +564,7 @@ void VoronoiDiagramGenerator::makevertex(struct Site *v)
      v -> sitenbr = nvertices;
      insertVertexAddress(nvertices,v);
      nvertices += 1;
-     out_vertex(v);
+     //out_vertex(v);
 }
 
 
@@ -848,8 +848,8 @@ void VoronoiDiagramGenerator::line(float x1, float y1, float x2, float y2)
      pushGraphEdge(x1,y1,x2,y2);
 
 }
-void VoronoiDiagramGenerator::circle(float x, float y, float radius){}
-void VoronoiDiagramGenerator::range(float minX, float minY, float maxX, float maxY){}
+
+//void VoronoiDiagramGenerator::range(float minX, float minY, float maxX, float maxY){}
 
 
 
@@ -875,8 +875,8 @@ void VoronoiDiagramGenerator::out_bisector(struct Edge *e)
 }
 
 
-void VoronoiDiagramGenerator::out_ep(struct Edge *e)
-{
+//void VoronoiDiagramGenerator::out_ep(struct Edge *e)
+//{
      //if(!triangulate & plot)
      //clip_line(e);
      //if(!triangulate & !plot)
@@ -889,47 +889,47 @@ void VoronoiDiagramGenerator::out_ep(struct Edge *e)
      //printf("\n");
      //}
 
-}
+//}
 
-void VoronoiDiagramGenerator::out_vertex(struct Site *v)
-{
-     if(!triangulate & !plot &!debug)
-     {
-          //printf ("v %f %f\n", v->coord.x, v->coord.y);
-     }
-     if(debug)
-     {
-          //printf("vertex(%d) at %f %f\n", v->sitenbr, v->coord.x, v->coord.y);
-     }
-}
-
-
-void VoronoiDiagramGenerator::out_site(struct Site *s)
-{/*
-	if(!triangulate & plot & !debug)
-		circle (s->coord.x, s->coord.y, cradius);
-	if(!triangulate & !plot & !debug)
-	{
-		//printf("s %f %f\n", s->coord.x, s->coord.y);
-	}
-	if(debug)
-	{
-		//printf("site (%d) at %f %f\n", s->sitenbr, s->coord.x, s->coord.y);
-	}*/
-}
+//void VoronoiDiagramGenerator::out_vertex(struct Site *v)
+//{
+//     if(!triangulate & !plot &!debug)
+//     {
+//          //printf ("v %f %f\n", v->coord.x, v->coord.y);
+//     }
+//     if(debug)
+//     {
+//          //printf("vertex(%d) at %f %f\n", v->sitenbr, v->coord.x, v->coord.y);
+//     }
+//}
 
 
-void VoronoiDiagramGenerator::out_triple(struct Site *s1, struct Site *s2,struct Site * s3)
-{
-     //if(triangulate & !plot &!debug)
-     //{
-     //printf("%d %d %d\n", s1->sitenbr, s2->sitenbr, s3->sitenbr);
-     //	}
-     //if(debug)
-     //{
-     //printf("circle through left=%d right=%d bottom=%d\n", s1->sitenbr, s2->sitenbr, s3->sitenbr);
-     //}
-}
+//void VoronoiDiagramGenerator::out_site(struct Site *s)
+//{/*
+//	if(!triangulate & plot & !debug)
+//		circle (s->coord.x, s->coord.y, cradius);
+//	if(!triangulate & !plot & !debug)
+//	{
+//		//printf("s %f %f\n", s->coord.x, s->coord.y);
+//	}
+//	if(debug)
+//	{
+//		//printf("site (%d) at %f %f\n", s->sitenbr, s->coord.x, s->coord.y);
+//	}*/
+//}
+
+
+//void VoronoiDiagramGenerator::out_triple(struct Site *s1, struct Site *s2,struct Site * s3)
+//{
+//     //if(triangulate & !plot &!debug)
+//     //{
+//     //printf("%d %d %d\n", s1->sitenbr, s2->sitenbr, s3->sitenbr);
+//     //	}
+//     //if(debug)
+//     //{
+//     //printf("circle through left=%d right=%d bottom=%d\n", s1->sitenbr, s2->sitenbr, s3->sitenbr);
+//     //}
+//}
 
 
 
@@ -946,7 +946,7 @@ void VoronoiDiagramGenerator::plotinit()
      pymax = (float)(ymax + (d-dy)/2.0);
      cradius = (float)((pxmax - pxmin)/350.0);
      openpl();
-     range(pxmin, pymin, pxmax, pymax);
+     //range(pxmin, pymin, pxmax, pymax);
 
      //	printf("pxmin = %f, pxmax = %f, pymin = %f, pymax = %f\n",pxmin,pxmax,pymin,pymax);
 }
@@ -954,7 +954,7 @@ void VoronoiDiagramGenerator::plotinit()
 void VoronoiDiagramGenerator::clip_line(struct Edge *e)
 {
      struct Site *s1, *s2;
-     float x1=0,x2=0,y1=0,y2=0, temp = 0;
+     float x1=0,x2=0,y1=0,y2=0;
      Site *v1= 0, *v2 = 0;
      bool needNewVertex1 = false,needNewVertex2 = false;
 
@@ -1196,7 +1196,7 @@ bool VoronoiDiagramGenerator::voronoi(bool genVertexInfo)
                bot = leftreg(lbnd);						//get the Site to the left of the left HE which it bisects
                top = rightreg(rbnd);						//get the Site to the right of the right HE which it bisects
 
-               out_triple(bot, top, rightreg(lbnd));		//output the triple of sites, stating that a circle goes through them
+               //out_triple(bot, top, rightreg(lbnd));		//output the triple of sites, stating that a circle goes through them
 
                v = lbnd->vertex;						//get the vertex that caused this event
                makevertex(v);							//set the vertex number - couldn't do this earlier since we didn't know when it would be processed
@@ -1272,7 +1272,7 @@ bool VoronoiDiagramGenerator::voronoi(bool genVertexInfo)
           counter = 0;
           for(i = 0; i < sizeOfVertexLinks; i++)
           {
-               if(vertexLinks[i].count == 1 || vertexLinks[i].count == 3 && vertices[i] != 0)
+               if((vertexLinks[i].count == 1 || vertexLinks[i].count == 3) && vertices[i] != 0)
                {
                     finalVertices[counter] = vertices[i]->coord;
                     counter++;
@@ -1507,7 +1507,7 @@ void VoronoiDiagramGenerator::generateVertexLinks()
 
      //first, we go from all leaf nodes, those with just one edge, to either the next leaf or the
      //next node with 3 edges
-     long currentVertex = 0, prevVertex = 0;
+     long currentVertexLocal = 0, prevVertex = 0;
 
      for(i = 0; i< count1counter; i++)
      {
@@ -1515,28 +1515,28 @@ void VoronoiDiagramGenerator::generateVertexLinks()
                continue;
           //	LOG<<i;
 
-          currentVertex = (long)vertexLinks[count1vertices[i]].x;//use the x variable, since it should be the only one set
+          currentVertexLocal = (long)vertexLinks[count1vertices[i]].x;//use the x variable, since it should be the only one set
           prevVertex = count1vertices[i];
           vertexLinks[count1vertices[i]].count --;	//don't revisit this site
 
-          while(currentVertex != -1 && currentVertex <sizeOfVertexLinks &&
-                    vertexLinks[currentVertex].count != 1 && vertexLinks[currentVertex].count != 3 )
+          while(currentVertexLocal != -1 && currentVertexLocal <sizeOfVertexLinks &&
+                    vertexLinks[currentVertexLocal].count != 1 && vertexLinks[currentVertexLocal].count != 3 )
           {
-               if(vertexLinks[currentVertex].count == 2)
+               if(vertexLinks[currentVertexLocal].count == 2)
                {
-                    if(vertexLinks[currentVertex].x == prevVertex )
+                    if(vertexLinks[currentVertexLocal].x == prevVertex )
                     {
-                         vertexLinks[currentVertex].x = vertexLinks[currentVertex].y;
-                         vertexLinks[currentVertex].y = -1;
-                         vertexLinks[currentVertex].count--;
+                         vertexLinks[currentVertexLocal].x = vertexLinks[currentVertexLocal].y;
+                         vertexLinks[currentVertexLocal].y = -1;
+                         vertexLinks[currentVertexLocal].count--;
                     }
-                    else if(vertexLinks[currentVertex].y == prevVertex)
+                    else if(vertexLinks[currentVertexLocal].y == prevVertex)
                     {
-                         vertexLinks[currentVertex].y = -1;
-                         vertexLinks[currentVertex].count--;
+                         vertexLinks[currentVertexLocal].y = -1;
+                         vertexLinks[currentVertexLocal].count--;
                     }
-                    prevVertex = currentVertex;
-                    currentVertex = (long)vertexLinks[currentVertex].x;
+                    prevVertex = currentVertexLocal;
+                    currentVertexLocal = (long)vertexLinks[currentVertexLocal].x;
 
                }
                else
@@ -1545,32 +1545,32 @@ void VoronoiDiagramGenerator::generateVertexLinks()
                }
           }
 
-          if(currentVertex == -1 || currentVertex >= sizeOfVertexLinks)
+          if(currentVertexLocal == -1 || currentVertexLocal >= sizeOfVertexLinks)
                continue; //this is an error
 
-          finalVertexLinks[count1vertices[i]].v[finalVertexLinks[count1vertices[i]].count] = vertices[currentVertex]->coord;
+          finalVertexLinks[count1vertices[i]].v[finalVertexLinks[count1vertices[i]].count] = vertices[currentVertexLocal]->coord;
 
           finalVertexLinks[count1vertices[i]].count++;
 
 
-          if(vertexLinks[currentVertex].count == 1)
+          if(vertexLinks[currentVertexLocal].count == 1)
           {
-               vertexLinks[currentVertex].count = 0;
-               vertexLinks[currentVertex].x = -1;
+               vertexLinks[currentVertexLocal].count = 0;
+               vertexLinks[currentVertexLocal].x = -1;
           }
-          else if(vertexLinks[currentVertex].count == 3)
+          else if(vertexLinks[currentVertexLocal].count == 3)
           {
-               if(vertexLinks[currentVertex].x == prevVertex )
+               if(vertexLinks[currentVertexLocal].x == prevVertex )
                {
-                    vertexLinks[currentVertex].x = -1;
+                    vertexLinks[currentVertexLocal].x = -1;
                }
-               else if(vertexLinks[currentVertex].y == prevVertex)
+               else if(vertexLinks[currentVertexLocal].y == prevVertex)
                {
-                    vertexLinks[currentVertex].y = -1;
+                    vertexLinks[currentVertexLocal].y = -1;
                }
-               else if(vertexLinks[currentVertex].z == prevVertex)
+               else if(vertexLinks[currentVertexLocal].z == prevVertex)
                {
-                    vertexLinks[currentVertex].z = -1;
+                    vertexLinks[currentVertexLocal].z = -1;
                }
           }
      }
@@ -1598,7 +1598,7 @@ void VoronoiDiagramGenerator::generateVertexLinks()
 
           //mark one of the links in this finalVertexLink
           //finalVertexLinks[count3vertices[i]].v[finalVertexLinks[count3vertices[i]].count] =
-          //														vertices[currentVertex]->coord;
+          //														vertices[currentVertexLocal]->coord;
           //	LOG<<"after finalVertexLinks[count3vertices[i]]"<<endl;
 
           for(j = 0; j< 3; j++)//process each of the vertices that the current one is linked to
@@ -1606,23 +1606,23 @@ void VoronoiDiagramGenerator::generateVertexLinks()
                if(count3links[j] == -1) //all links to leaf nodes are marked with -1
                     continue;
 
-               currentVertex = count3links[j];
+               currentVertexLocal = count3links[j];
                prevVertex  = count3vertices[i];
-               while(currentVertex >=0 && currentVertex < sizeOfVertexLinks && vertexLinks[currentVertex].count != 3)
+               while(currentVertexLocal >=0 && currentVertexLocal < sizeOfVertexLinks && vertexLinks[currentVertexLocal].count != 3)
                {
-                    if(vertexLinks[currentVertex].count == 2)
+                    if(vertexLinks[currentVertexLocal].count == 2)
                     {
-                         if(vertexLinks[currentVertex].x == prevVertex )
+                         if(vertexLinks[currentVertexLocal].x == prevVertex )
                          {
-                              vertexLinks[currentVertex].x = -1;
-                              prevVertex = currentVertex;
-                              currentVertex = (long)vertexLinks[currentVertex].y;
+                              vertexLinks[currentVertexLocal].x = -1;
+                              prevVertex = currentVertexLocal;
+                              currentVertexLocal = (long)vertexLinks[currentVertexLocal].y;
                          }
-                         else if(vertexLinks[currentVertex].y == prevVertex)
+                         else if(vertexLinks[currentVertexLocal].y == prevVertex)
                          {
-                              vertexLinks[currentVertex].y = -1;
-                              prevVertex = currentVertex;
-                              currentVertex = (long)vertexLinks[currentVertex].x;
+                              vertexLinks[currentVertexLocal].y = -1;
+                              prevVertex = currentVertexLocal;
+                              currentVertexLocal = (long)vertexLinks[currentVertexLocal].x;
                          }
                          else
                          {
@@ -1631,30 +1631,30 @@ void VoronoiDiagramGenerator::generateVertexLinks()
 
                     }
                }
-               if(currentVertex < 0|| currentVertex >= sizeOfVertexLinks)
+               if(currentVertexLocal < 0|| currentVertexLocal >= sizeOfVertexLinks)
                {
-                    LOG<<"Error, currentVertex = "<<currentVertex<<" and sizeOfVertexLinks = "<<sizeOfVertexLinks;
+                    LOG<<"Error, currentVertexLocal = "<<currentVertexLocal<<" and sizeOfVertexLinks = "<<sizeOfVertexLinks;
                     LOG<<"On element "<<i+1<<" of "<<count3counter;
                     continue; //this is an error, and shouldn't happen
                }
 
                finalVertexLinks[count3vertices[i]].v[finalVertexLinks[count3vertices[i]].count] =
-                         vertices[currentVertex]->coord;
+                         vertices[currentVertexLocal]->coord;
                finalVertexLinks[count3vertices[i]].count++;
 
-               if(vertexLinks[currentVertex].count == 3)
+               if(vertexLinks[currentVertexLocal].count == 3)
                {
-                    if(vertexLinks[currentVertex].x == prevVertex )
+                    if(vertexLinks[currentVertexLocal].x == prevVertex )
                     {
-                         vertexLinks[currentVertex].x = -1;
+                         vertexLinks[currentVertexLocal].x = -1;
                     }
-                    else if(vertexLinks[currentVertex].y == prevVertex)
+                    else if(vertexLinks[currentVertexLocal].y == prevVertex)
                     {
-                         vertexLinks[currentVertex].y = -1;
+                         vertexLinks[currentVertexLocal].y = -1;
                     }
-                    else if(vertexLinks[currentVertex].z == prevVertex)
+                    else if(vertexLinks[currentVertexLocal].z == prevVertex)
                     {
-                         vertexLinks[currentVertex].z = -1;
+                         vertexLinks[currentVertexLocal].z = -1;
                     }
                }
                else

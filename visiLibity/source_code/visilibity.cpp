@@ -2695,6 +2695,7 @@ namespace VisiLibity
   void Guards::snap_to_vertices_of(const Environment& environment_temp,
 				   double epsilon)
   {
+    UNUSED(epsilon);
     for(unsigned i=0; i<positions_.size(); i++)
       positions_[i].snap_to_vertices_of(environment_temp);
   }
@@ -2703,6 +2704,7 @@ namespace VisiLibity
   void Guards::snap_to_vertices_of(const Polygon& polygon_temp,
 				   double epsilon)
   {
+    UNUSED(epsilon);
     for(unsigned i=0; i<positions_.size(); i++)
       positions_[i].snap_to_vertices_of(polygon_temp);
   }
@@ -2718,6 +2720,7 @@ namespace VisiLibity
   void Guards::snap_to_boundary_of(const Polygon& polygon_temp,
 				   double epsilon)
   {
+    UNUSED(epsilon);
     for(unsigned i=0; i<positions_.size(); i++)
       positions_[i].snap_to_boundary_of(polygon_temp);
   }
@@ -2801,7 +2804,8 @@ namespace VisiLibity
 
   void Visibility_Polygon::chop_spikes(const Point& observer,
 				       double epsilon)
-  {    
+  {
+    UNUSED(observer);
     std::set<Point> spike_tips;
     std::vector<Point> vertices_temp;
     //Middle point is potentially the tip of a spike

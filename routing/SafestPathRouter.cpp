@@ -365,9 +365,9 @@ int SafestPathRouter::ComputeSafestPath(Pedestrian* p)
                     if(path[j]->GetType()=="floor") {
                          int z=path[j]->GetSubRoomID();
 
-                         for(int j = 0; j <numberOfSubroom; j++) {
-                              if(flo[j]==z) {
-                                   phi_current=phi_current+rR[j];
+                         for(int k = 0; k <numberOfSubroom; k++) {
+                              if(flo[k]==z) {
+                                   phi_current=phi_current+rR[k];
                               }
                          }
 

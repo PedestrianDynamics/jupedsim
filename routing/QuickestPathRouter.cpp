@@ -121,7 +121,7 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped)
                if (distToExit > J_EPS_DIST)       //@todo: ar.graf: if anyone understands this, please write comment
                     continue;
 
-               nextDestination = GetQuickestRoute(ped,_accessPoints[apID]);
+               nextDestination = GetQuickestRoute(ped);
                //uncomment these lines to return to the gsp
                //nextDestination = ap->GetNearestTransitAPTO(ped->GetFinalDestination());
 
@@ -172,7 +172,7 @@ double QuickestPathRouter::CBA (double ref_g1, double comp_g2)
 }
 
 
-int QuickestPathRouter::GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP )
+int QuickestPathRouter::GetQuickestRoute(Pedestrian* ped)
 {
 
      //int preferredExit=nearestAP->GetNearestTransitAPTO(ped->GetFinalDestination());
@@ -417,7 +417,7 @@ bool QuickestPathRouter::IsDirectVisibilityBetween(Pedestrian* ped, Pedestrian* 
      //can happen, if the pedestrian is suddenly in a different room ( e.g went through a wall)
      if(!ignore_hline) return false;
 
-     int obstacles = GetObstaclesCountBetween(ped->GetPos(), ref->GetPos(),
+     unsigned int obstacles = GetObstaclesCountBetween(ped->GetPos(), ref->GetPos(),
                ignore_hline, ignore_ped1, ignore_ped2);
 
      if (obstacles > _visibilityObstruction)
@@ -431,7 +431,7 @@ bool QuickestPathRouter::IsDirectVisibilityBetween(Pedestrian* myself, Hline* hl
 {
      int ignore_ped1 = myself->GetID();
      int ignore_ped2 = -1;     //there is no second ped to ignore
-     int obstacles = GetObstaclesCountBetween(myself->GetPos(),
+     unsigned int obstacles = GetObstaclesCountBetween(myself->GetPos(),
                hline->GetCentre(), hline, ignore_ped1, ignore_ped2);
 
      if (obstacles > _visibilityObstruction)
@@ -441,8 +441,8 @@ bool QuickestPathRouter::IsDirectVisibilityBetween(Pedestrian* myself, Hline* hl
      return true;
 }
 
-int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p2, Hline* hline,
-          int ignore_ped1, int ignore_ped2)
+unsigned int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p2, Hline* hline,
+        int ignore_ped1, int ignore_ped2)
 {
 
      SubRoom* sbr1 = hline->GetSubRoom1();
@@ -457,7 +457,7 @@ int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p
      Line visibilityLine = Line(p1,p2);
 
      int exitID=hline->GetID();
-     int obstacles=0;
+     unsigned int obstacles=0;
 
      //if this is a hline
      if(sbr1==sbr2)
@@ -886,7 +886,7 @@ bool QuickestPathRouter::ParseAdditionalParameters()
                     _congestionRation=xmltof(para->Attribute("congestion_ratio"), _congestionRation);
                     _queueVelocityFromJam=xmltof(para->Attribute("queue_vel_escaping_jam"), _queueVelocityFromJam);
                     _queueVelocityNewRoom=xmltof(para->Attribute("queue_vel_new_room"), _queueVelocityNewRoom);
-                    _visibilityObstruction=xmltoi(para->Attribute("visibility_obstruction"), _visibilityObstruction);
+                    _visibilityObstruction=(unsigned int)xmltoi(para->Attribute("visibility_obstruction"), _visibilityObstruction);
 
                     string selection_mode=xmltoa(para->Attribute("reference_peds_selection"), "single");
                     if(selection_mode=="single") _refPedSelectionMode=RefSelectionMode::SINGLE;

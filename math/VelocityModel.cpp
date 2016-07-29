@@ -232,7 +232,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 // calculate min spacing
                 std::sort(spacings.begin(), spacings.end(), sort_pred());                
                 double spacing = spacings[0].first;
-                double winkel = spacings[0].second;
+                //double winkel = spacings[0].second;
                 Point tmp;
                 Point speed = direction.Normalized() *OptimalSpeed(ped, spacing);
                 result_acc.push_back(speed);                

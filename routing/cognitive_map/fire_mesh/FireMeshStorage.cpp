@@ -42,7 +42,7 @@ FireMeshStorage::FireMeshStorage(const Building * const b, const std::string &fi
     _updateIntervall=updateintervall;
     _finalTime=finalTime;
 
-    CreateTimeList(updateintervall,finalTime);
+    CreateTimeList(updateintervall, finalTime);
     IdentifyDoors();
     CreateFireMeshes();
 }
@@ -52,7 +52,7 @@ FireMeshStorage::~FireMeshStorage()
 
 }
 
-void FireMeshStorage::CreateTimeList(const double &updateIntervall, const double &finalTime, const double &startTime)
+void FireMeshStorage::CreateTimeList(const double& updateIntervall, const double& finalTime)
 {
     //fulfill list with times when new Mesh should be used
     double i=0;

@@ -1007,37 +1007,37 @@ void NavMesh::WriteToFile(std::string fileName)
      file<<ngroup_to_size[previousGroup]<<"";
 
      for (unsigned int n=0; n<_nodes.size(); n++) {
-          JNode* JNode=_nodes[n];
-          string actualGroup=JNode->pGroup;
+          JNode* JNode_=_nodes[n];
+          string actualGroup=JNode_->pGroup;
           if(actualGroup!=previousGroup) {
                previousGroup=actualGroup;
-               //file<<"# JNode group"<<endl;
+               //file<<"# JNode_ group"<<endl;
                file<<endl<<previousGroup<<endl;
                file<<ngroup_to_size[previousGroup]<<"";
           }
 
-          //assert(JNode->pObstacles.size()<20);
-          //assert(JNode->pPortals.size()<20);
-          //file<<"nodeid "<<JNode->id<<endl;
+          //assert(JNode_->pObstacles.size()<20);
+          //assert(JNode_->pPortals.size()<20);
+          //file<<"nodeid "<<JNode_->id<<endl;
           file<<endl;
-          file<<"\t"<<JNode->pCentroid._x<<" "<<JNode->pCentroid._y<<endl;
-          file<<"\t"<<JNode->pHull.size()<<" ";
-          for(unsigned int i=0; i<JNode->pHull.size(); i++) {
-               file<<JNode->pHull[i].id<<" ";
+          file<<"\t"<<JNode_->pCentroid._x<<" "<<JNode_->pCentroid._y<<endl;
+          file<<"\t"<<JNode_->pHull.size()<<" ";
+          for(unsigned int i=0; i<JNode_->pHull.size(); i++) {
+               file<<JNode_->pHull[i].id<<" ";
           }
           file<<endl;
-          file<<"\t"<<JNode->pNormalVec[0]<<" "<<JNode->pNormalVec[1]<<" "<<JNode->pNormalVec[2]<<endl;
+          file<<"\t"<<JNode_->pNormalVec[0]<<" "<<JNode_->pNormalVec[1]<<" "<<JNode_->pNormalVec[2]<<endl;
 
 
-          file<<"\t"<<JNode->pPortals.size()<<" ";
-          for(unsigned int i=0; i<JNode->pPortals.size(); i++) {
-               file<<JNode->pPortals[i]<<" ";
+          file<<"\t"<<JNode_->pPortals.size()<<" ";
+          for(unsigned int i=0; i<JNode_->pPortals.size(); i++) {
+               file<<JNode_->pPortals[i]<<" ";
           }
           file<<endl;
 
-          file<<"\t"<<JNode->pObstacles.size()<<" ";
-          for(unsigned int i=0; i<JNode->pObstacles.size(); i++) {
-               file<<JNode->pObstacles[i]<<" ";
+          file<<"\t"<<JNode_->pObstacles.size()<<" ";
+          for(unsigned int i=0; i<JNode_->pObstacles.size(); i++) {
+               file<<JNode_->pObstacles[i]<<" ";
           }
 
           file<<endl;
@@ -1415,10 +1415,10 @@ void NavMesh::FinalizeAlphaShape()
 
           for (int index=0; index<3; index++) {
 
-               Point P0  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
-               Point P1  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
+               Point P0_  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
+               Point P1_  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
 
-               int edge_id=IsPortal(P0,P1);
+               int edge_id=IsPortal(P0_,P1_);
                if(edge_id != -1) {
                     //if(IsElementInVector(new_node->pPortals,edge_id)==false)
                     new_node->pPortals.push_back(edge_id);
@@ -1430,7 +1430,7 @@ void NavMesh::FinalizeAlphaShape()
                     e->pNode1=-1;
                }
 
-               int obstacle_id=IsObstacle(P0,P1);
+               int obstacle_id=IsObstacle(P0_,P1_);
                if(obstacle_id != -1) {
                     //std::cerr<<"Error: the convexification has created an JObstacle"<<endl;
                     //if(IsElementInVector(new_node->pObstacles,obstacle_id)==false)
@@ -1442,8 +1442,8 @@ void NavMesh::FinalizeAlphaShape()
                if ((obstacle_id==-1) && (edge_id==-1)) {
 
                     JEdge* e= new JEdge();
-                    e->pEnd=*GetVertex(P1);
-                    e->pStart= *GetVertex(P0);
+                    e->pEnd=*GetVertex(P1_);
+                    e->pStart= *GetVertex(P0_);
                     AddEdge(e);
 
                     //invalidate any previous information
@@ -1509,10 +1509,10 @@ void NavMesh::Finalize()
                for (unsigned w = 0; w < walls.size(); w++) {
 
                     bool skip=false;
-                    for(unsigned int i=0; i<centroids.size(); i++) {
-                         if(walls[w].DistTo(centroids[i])<25) skip=true;
+                    for(unsigned int j=0; j<centroids.size(); j++) {
+                         if(walls[w].DistTo(centroids[j])<25) skip=true;
                     }
-                    if(skip==true) continue;
+                    if(skip) continue;
 
                     //first attempt
                     Point P0 = walls[w].GetPoint1();
@@ -1533,10 +1533,10 @@ void NavMesh::Finalize()
                     if(transitions[t]->GetSubRoom2() != NULL) continue;
 
                     bool skip=false;
-                    for(unsigned int i=0; i<centroids.size(); i++) {
-                         if(transitions[t]->DistTo(centroids[i])<25) skip=true;
+                    for(unsigned int c=0; c<centroids.size(); c++) {
+                         if(transitions[t]->DistTo(centroids[c])<25) skip=true;
                     }
-                    if(skip==true) continue;
+                    if(skip) continue;
 
                     //first attempt
                     Point P0 = transitions[t]->GetPoint1();
@@ -1677,10 +1677,10 @@ void NavMesh::Finalize()
 
           for (int index=0; index<3; index++) {
 
-               Point P0  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
-               Point P1  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
+               Point P0_  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
+               Point P1_  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
 
-               int edge_id=IsPortal(P0,P1);
+               int edge_id=IsPortal(P0_,P1_);
                if(edge_id != -1) {
                     //if(IsElementInVector(new_node->pPortals,edge_id)==false)
                     new_node->pPortals.push_back(edge_id);
@@ -1692,7 +1692,7 @@ void NavMesh::Finalize()
                     e->pNode1=-1;
                }
 
-               int obstacle_id=IsObstacle(P0,P1);
+               int obstacle_id=IsObstacle(P0_,P1_);
                if(obstacle_id != -1) {
                     //std::cerr<<"Error: the convexification has created an JObstacle"<<endl;
                     //if(IsElementInVector(new_node->pObstacles,obstacle_id)==false)
@@ -1704,8 +1704,8 @@ void NavMesh::Finalize()
                if ((obstacle_id==-1) && (edge_id==-1)) {
 
                     JEdge* e= new JEdge();
-                    e->pEnd=*GetVertex(P1);
-                    e->pStart= *GetVertex(P0);
+                    e->pEnd=*GetVertex(P1_);
+                    e->pStart= *GetVertex(P0_);
                     AddEdge(e);
 
                     //invalidate any previous information
@@ -1823,10 +1823,10 @@ void NavMesh::Triangulate(SubRoom* sub)
 
           for (int index=0; index<3; index++) {
 
-               Point P0  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
-               Point P1  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
+               Point P0_  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
+               Point P1_  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
 
-               int edge_id=IsPortal(P0,P1);
+               int edge_id=IsPortal(P0_,P1_);
                if(edge_id != -1) {
                     new_node->pPortals.push_back(edge_id);
                     JEdge* e = _edges[edge_id];
@@ -1837,7 +1837,7 @@ void NavMesh::Triangulate(SubRoom* sub)
 
                }
 
-               int obstacle_id=IsObstacle(P0,P1);
+               int obstacle_id=IsObstacle(P0_,P1_);
                if(obstacle_id != -1) {
                     //std::cerr<<"Error: the convexification has created an JObstacle"<<endl;
                     new_node->pObstacles.push_back(obstacle_id);
@@ -1848,8 +1848,8 @@ void NavMesh::Triangulate(SubRoom* sub)
                if ((obstacle_id==-1) && (edge_id==-1)) {
 
                     JEdge* e= new JEdge();
-                    e->pEnd=*GetVertex(P1);
-                    e->pStart= *GetVertex(P0);
+                    e->pEnd=*GetVertex(P1_);
+                    e->pStart= *GetVertex(P0_);
                     AddEdge(e);
 
                     // invalidate the node
@@ -1972,10 +1972,10 @@ void NavMesh::Triangulate(JNode* node)
 
           for (int index=0; index<3; index++) {
 
-               Point P0  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
-               Point P1  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
+               Point P0_  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
+               Point P1_  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
 
-               int edge_id=IsPortal(P0,P1);
+               int edge_id=IsPortal(P0_,P1_);
                if(edge_id != -1) {
                     new_node->pPortals.push_back(edge_id);
                     JEdge* e = _edges[edge_id];
@@ -1985,7 +1985,7 @@ void NavMesh::Triangulate(JNode* node)
                     e->pNode1=-1;
                }
 
-               int obstacle_id=IsObstacle(P0,P1);
+               int obstacle_id=IsObstacle(P0_,P1_);
                if(obstacle_id != -1) {
                     //std::cerr<<"Error: the convexification has created an JObstacle"<<endl;
                     new_node->pObstacles.push_back(obstacle_id);
@@ -1997,8 +1997,8 @@ void NavMesh::Triangulate(JNode* node)
                if ((obstacle_id==-1) && (edge_id==-1)) {
 
                     JEdge* e= new JEdge();
-                    e->pEnd=*GetVertex(P1);
-                    e->pStart= *GetVertex(P0);
+                    e->pEnd=*GetVertex(P1_);
+                    e->pStart= *GetVertex(P0_);
                     AddEdge(e);
 
                     //invalidate the node
@@ -2179,7 +2179,7 @@ void NavMesh::WriteStartPositions()
           Room* room = _building->GetRoom(r);
           if(room->GetCaption()=="outside") continue;
           for (int s = 0; s < room->GetNumberOfSubRooms(); s++) {
-               SubRoom* subr = room->GetSubRoom(s);
+               // SubRoom* subr = room->GetSubRoom(s);
                // TODO
                //vector<Point > pos = PedDistributor::PossiblePositions(*subr);
                //freePosRoom.insert(freePosRoom.end(),pos.begin(),pos.end());
@@ -2462,10 +2462,10 @@ void NavMesh::ComputePlanesEquation()
                     bool connection=false;
 
                     //check if the subroom is connected with a stair
-                    for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
-                         Room* r = _building->GetRoom(i);
-                         for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
-                              SubRoom* s = r->GetSubRoom(k);
+                    for (int numRoom = 0; numRoom < _building->GetNumberOfRooms(); numRoom++) {
+                         Room* localRoom = _building->GetRoom(numRoom);
+                         for (int numSubroom = 0; numSubroom < localRoom->GetNumberOfSubRooms(); numSubroom++) {
+                              SubRoom* s = localRoom->GetSubRoom(numSubroom);
                               if(s){
                                    Stair* st=dynamic_cast<Stair*>(s);
                               //if ((st!=NULL) && (s->GetSubRoomID()!=sub->GetSubRoomID()) ){
