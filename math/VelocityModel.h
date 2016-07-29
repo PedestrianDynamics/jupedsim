@@ -141,8 +141,8 @@ public:
       * ToDO: What is this parameter doing?
       *
       * @return double
+      *
       */
-     /**
      double GetaPed() const;
 
      /**

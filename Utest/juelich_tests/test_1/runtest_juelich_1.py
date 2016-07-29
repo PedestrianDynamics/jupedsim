@@ -18,6 +18,7 @@ def runtest1(inifile, trajfile):
     tolerance = 0.5
     if abs(evac_time - must_time) > tolerance:
         logging.info("%s exits with FAILURE evac_time = %f (!= %f)", argv[0], evac_time, must_time)
+        print("%s exits with FAILURE evac_time = %f (!= %f)"%( argv[0], evac_time, must_time))
         exit(FAILURE)
     else:
         logging.info("evac_time = %f (!= %f)", evac_time, must_time)
