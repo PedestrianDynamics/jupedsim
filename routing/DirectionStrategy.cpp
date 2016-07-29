@@ -29,16 +29,16 @@
 #include "../geometry/Line.h"
 #include "../geometry/NavLine.h"
 #include "../geometry/Building.h"
-#include "../geometry/Room.h"
+//#include "../geometry/Room.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/SubRoom.h"
-#include "../geometry/Wall.h"
+//#include "../geometry/Wall.h"
 #include "../routing/FloorfieldViaFM.h"
 #include "../routing/LocalFloorfieldViaFM.h"
-#include "DirectionStrategy.h"
-#include <fstream>
-#include <chrono>
-#include <ctime>
+//#include "DirectionStrategy.h"
+//#include <fstream>
+//#include <chrono>
+//#include <ctime>
 
 #define UNUSED(x) [&x]{}()  // c++11 silence warnings
 
@@ -454,8 +454,8 @@ Point DirectionLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 #endif // DEBUG
 
      //this should not execute:
-     std::cerr << "Failure in DirectionFloorfield::GetTarget!!" << std::endl;
-     exit(EXIT_FAILURE);
+     //std::cerr << "Failure in DirectionFloorfield::GetTarget!!" << std::endl;
+    // exit(EXIT_FAILURE);
 }
 
 Point DirectionLocalFloorfield::GetDir2Wall(Pedestrian* ped) const
@@ -592,8 +592,8 @@ Point DirectionSubLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 #endif // DEBUG
 
      //this should not execute:
-     std::cerr << "Failure in DirectionFloorfield::GetTarget!!" << std::endl;
-     exit(EXIT_FAILURE);
+     //std::cerr << "Failure in DirectionFloorfield::GetTarget!!" << std::endl;
+     //exit(EXIT_FAILURE);
 }
 
 Point DirectionSubLocalFloorfield::GetDir2Wall(Pedestrian* ped) const

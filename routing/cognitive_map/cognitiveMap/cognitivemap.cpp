@@ -157,31 +157,31 @@ void CognitiveMap::AddWaypoints(Waypoints waypoints)
 
 }
 
-void CognitiveMap::AssessDoors()
-{
-    SubRoom * sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
-    GraphVertex * vertex = (*_network->GetNavigationGraph())[sub_room];
-    const GraphVertex::EdgesContainer edges = *(vertex->GetAllEdges());
-
-    //const Point rpWaypoint=_waypContainer[0]->GetPos();
-
-    if (!_waypContainer.empty())
-    {
-        std::vector<GraphEdge* > sortedEdges = SortConShortestPath(_waypContainerSorted.top(),edges);
-        //Log->Write(std::to_string(nextDoor->GetCrossing()->GetID()));
-
-        for (unsigned int i=0; i<sortedEdges.size(); ++i)
-        {
-            sortedEdges[i]->SetFactor(0.5+0.1*i,"SpatialKnowledge");
-            //Log->Write("INFO:\t "+std::to_string(sortedEdges[i]->GetCrossing()->GetID()));
-            //Log->Write("INFO:\t "+std::to_string(sortedEdges[i]->GetFactor()));
-        }
-
-        //Log->Write(std::to_string(nextDoor->GetCrossing()->GetID()));
-        //Log->Write("INFO: Door assessed!");
-    }
-
-}
+//void CognitiveMap::AssessDoors()
+//{
+//    SubRoom * sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
+//    GraphVertex * vertex = (*_network->GetNavigationGraph())[sub_room];
+//    const GraphVertex::EdgesContainer edges = *(vertex->GetAllEdges());
+//
+//    //const Point rpWaypoint=_waypContainer[0]->GetPos();
+//
+//    if (!_waypContainer.empty())
+//    {
+//        std::vector<GraphEdge* > sortedEdges = SortConShortestPath(_waypContainerSorted.top(),edges);
+//        //Log->Write(std::to_string(nextDoor->GetCrossing()->GetID()));
+//
+//        for (unsigned int i=0; i<sortedEdges.size(); ++i)
+//        {
+//            sortedEdges[i]->SetFactor(0.5+0.1*i,"SpatialKnowledge");
+//            //Log->Write("INFO:\t "+std::to_string(sortedEdges[i]->GetCrossing()->GetID()));
+//            //Log->Write("INFO:\t "+std::to_string(sortedEdges[i]->GetFactor()));
+//        }
+//
+//        //Log->Write(std::to_string(nextDoor->GetCrossing()->GetID()));
+//        //Log->Write("INFO: Door assessed!");
+//    }
+//
+//}
 
 std::vector<GraphEdge *> CognitiveMap::SortConShortestPath(ptrWaypoint waypoint, const GraphVertex::EdgesContainer edges)
 {
@@ -299,10 +299,10 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrWaypoi
     return polyline.length();
 }
 
-const Point &CognitiveMap::GetOwnPos()
-{
-    return _YAHPointer.GetPos();
-}
+//const Point &CognitiveMap::GetOwnPos()
+//{
+//    return _YAHPointer.GetPos();
+//}
 
 void CognitiveMap::WriteToFile()
 {

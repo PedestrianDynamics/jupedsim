@@ -25,20 +25,20 @@ License along with VisiLibity.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #include "visilibity.hpp"  //VisiLibity header
-#include <cmath>         //math functions in std namespace
-#include <vector>
-#include <queue>         //queue and priority_queue
-#include <set>           //priority queues with iteration,
+//#include <cmath>         //math functions in std namespace
+//#include <vector>
+//#include <queue>         //queue and priority_queue
+//#include <set>           //priority queues with iteration,
                          //integrated keys
-#include <list>
-#include <algorithm>     //sorting, min, max, reverse
-#include <cstdlib>       //rand and srand
-#include <ctime>         //Unix time
-#include <fstream>       //file I/O
-#include <iostream>
-#include <cstring>       //gives C-string manipulation
-#include <string>        //string class
-#include <cassert>       //assertions
+//#include <list>
+//#include <algorithm>     //sorting, min, max, reverse
+//#include <cstdlib>       //rand and srand
+//#include <ctime>         //Unix time
+//#include <fstream>       //file I/O
+//#include <iostream>
+//#include <cstring>       //gives C-string manipulation
+//#include <string>        //string class
+//#include <cassert>       //assertions
 
 
 
@@ -283,7 +283,7 @@ namespace VisiLibity
     assert( *this == *this
 	    && polygon_temp.vertices_.size() > 0 );
 
-    int n = polygon_temp.vertices_.size();
+    int n = (int) polygon_temp.vertices_.size();
     if( on_boundary_of(polygon_temp, epsilon) )
       return true;
     // Then check the number of times a ray emanating from the Point
@@ -3526,7 +3526,7 @@ namespace VisiLibity
 				     const Environment& environment,
 				     double epsilon)
   {
-    n_ = points.size();
+    n_ = (unsigned int) points.size();
 
     //fill vertex_counts_
     vertex_counts_.push_back( n_ );

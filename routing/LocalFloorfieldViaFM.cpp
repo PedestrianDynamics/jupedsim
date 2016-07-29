@@ -75,7 +75,7 @@ void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
                }
           }
      }
-     numOfExits = exitsFromScope.size();
+     numOfExits = (unsigned int) exitsFromScope.size();
      //put closed doors next, they are considered as walls later (index >= numOfExits)
      for (auto& trans : allTransitions) {
           if (!trans.second->IsOpen()) {
@@ -187,12 +187,12 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
 
      for(auto& line : wall) {
           key = grid->getKeyAtPoint(line.GetPoint1());
-          iStart = grid->get_i_fromKey(key);
-          jStart = grid->get_j_fromKey(key);
+          iStart = (long) grid->get_i_fromKey(key);
+          jStart = (long) grid->get_j_fromKey(key);
 
           key = grid->getKeyAtPoint(line.GetPoint2());
-          iEnd = grid->get_i_fromKey(key);
-          jEnd = grid->get_j_fromKey(key);
+          iEnd = (long) grid->get_i_fromKey(key);
+          jEnd = (long) grid->get_j_fromKey(key);
 
           deltaX = (int) (iEnd - iStart);
           deltaY = (int) (jEnd - jStart);
@@ -257,12 +257,12 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
 
      for(auto& line : exitsFromScope) {
           key = grid->getKeyAtPoint(line.GetPoint1());
-          iStart = grid->get_i_fromKey(key);
-          jStart = grid->get_j_fromKey(key);
+          iStart = (long) grid->get_i_fromKey(key);
+          jStart = (long) grid->get_j_fromKey(key);
 
           key = grid->getKeyAtPoint(line.GetPoint2());
-          iEnd = grid->get_i_fromKey(key);
-          jEnd = grid->get_j_fromKey(key);
+          iEnd = (long) grid->get_i_fromKey(key);
+          jEnd = (long) grid->get_j_fromKey(key);
 
           deltaX = (int) (iEnd - iStart);
           deltaY = (int) (jEnd - jStart);

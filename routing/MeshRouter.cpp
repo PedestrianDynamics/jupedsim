@@ -582,7 +582,7 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p,int& status)const
 
           for(unsigned int i=0; i<act_cell->GetEdges().size(); i++) {
                int act_edge_id=act_cell->GetEdges().at(i);
-               MeshEdge* act_edge=_meshdata->GetEdges().at(act_edge_id);
+               MeshEdge* act_edge=_meshdata->GetEdges().at((unsigned long) act_edge_id);
                int nb_id=-1;
                // Find neighbouring cell
 
@@ -595,8 +595,8 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p,int& status)const
                }
                int n1_pos=act_edge->GetNode1();
                int n2_pos=act_edge->GetNode2();
-               Point p1_p=*_meshdata->GetNodes().at(n1_pos);
-               Point p2_p=*_meshdata->GetNodes().at(n2_pos);
+               Point p1_p=*_meshdata->GetNodes().at((unsigned long) n1_pos);
+               Point p2_p=*_meshdata->GetNodes().at((unsigned long) n2_pos);
                double length=(p1_p-p2_p).Norm();
                MeshCell* nb_cell=_meshdata->GetCellAtPos(nb_id);
                // Calculate

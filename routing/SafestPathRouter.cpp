@@ -33,13 +33,13 @@
 #include "../geometry/SubRoom.h"
 
 
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <map>
+//#include <iostream>
+//#include <sstream>
+//#include <fstream>
+//#include <map>
 
 
-#include "../pedestrian/Pedestrian.h"
+//#include "../pedestrian/Pedestrian.h"
 
 #define UPDATE_FREQUENCY 1 // in seconds
 

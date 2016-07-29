@@ -33,8 +33,8 @@
 #include "../../../geometry/Building.h"
 #include "../cognitiveMap/cognitivemap.h"
 #include "../../../pedestrian/Pedestrian.h"
-#include <vector>
-#include <set>
+//#include <vector>
+//#include <set>
 #define UNUSED(x) [&x]{}()  // c++11 silence warnings
 
 LastDestinationsSensor::~LastDestinationsSensor()

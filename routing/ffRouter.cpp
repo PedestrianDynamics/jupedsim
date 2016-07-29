@@ -48,9 +48,9 @@
 #include <cfloat>
 #include <algorithm>
 #include "ffRouter.h"
-#include "../geometry/Building.h"
-#include "../pedestrian/Pedestrian.h"
-#include "../IO/OutputHandler.h"
+//#include "../geometry/Building.h"
+//#include "../pedestrian/Pedestrian.h"
+//#include "../IO/OutputHandler.h"
 
 FFRouter::FFRouter()
 {

@@ -531,7 +531,8 @@ int VoronoiDiagramGenerator::right_of(struct Halfedge *el,struct PointVDG *p)
      t3 = yl - topsite->coord.y;
      above = t1*t1 > t2*t2 + t3*t3;
      };
-     return (el->ELpm==le ? above : !above);
+     //return el->ELpm==le ? above : !above;
+     return el->ELpm == le == above;
 }
 
 
@@ -588,7 +589,7 @@ void VoronoiDiagramGenerator::PQinsert(struct Halfedge *he,struct Site * v, floa
 
      he -> vertex = v;
      ref(v);
-     he -> ystar = (float)(v -> coord.y + offset);
+     he -> ystar = (v -> coord.y + offset);
      last = &PQhash[PQbucket(he)];
      while ((next = last -> PQnext) != (struct Halfedge *) NULL &&
                (he -> ystar  > next -> ystar  ||
@@ -690,7 +691,7 @@ char * VoronoiDiagramGenerator::getfree(struct Freelist *fl)
 
      if(fl->head == (struct Freenode *) NULL)
      {
-          t =  (struct Freenode *) myalloc(sqrt_nsites * fl->nodesize);
+          t =  (struct Freenode *) myalloc((unsigned int) (sqrt_nsites * fl->nodesize));
 
           if(t == 0)
                return 0;
@@ -1302,7 +1303,7 @@ void VoronoiDiagramGenerator::insertVertexAddress(long vertexNum, struct Site* a
      {
           vertices = (struct Site **) myalloc(4000*sizeof( *vertices));
           sizeOfVertices = 4000;
-          for(int i = sizeOfVertices - 4000; i < sizeOfVertices; i++)
+          for(int i = (int) (sizeOfVertices - 4000); i < sizeOfVertices; i++)
           {
                vertices[i] = 0;
           }
@@ -1324,7 +1325,7 @@ void VoronoiDiagramGenerator::insertVertexAddress(long vertexNum, struct Site* a
           }
           sizeOfVertices += 4000;
 
-          for(int i = sizeOfVertices - 4000; i < sizeOfVertices; i++)
+          for(int i = (int) (sizeOfVertices - 4000); i < sizeOfVertices; i++)
           {
                vertices[i] = 0;
           }
@@ -1368,7 +1369,7 @@ void VoronoiDiagramGenerator::insertVertexLink(long vertexNum, long vertexLinked
           //if(vertexLinks == 0)LOG<<"Error - realloc failed, vertexLinks == 0"<<endl;
           sizeOfVertexLinks += 4000;
 
-          for(int i = sizeOfVertexLinks - 4000; i < sizeOfVertexLinks; i++)
+          for(int i = (int) (sizeOfVertexLinks - 4000); i < sizeOfVertexLinks; i++)
           {
                vertexLinks[i].x = vertexLinks[i].y = vertexLinks[i].z = -1; //initialise all elements in the array to -1
                vertexLinks[i].count = 0;

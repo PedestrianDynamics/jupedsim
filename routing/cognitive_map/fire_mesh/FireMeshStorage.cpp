@@ -107,11 +107,12 @@ void FireMeshStorage::CreateFireMeshes()
 
 const FireMesh &FireMeshStorage::get_FireMesh(const Point &doorCentre, const double &simTime) const
 {
-    int simT=simTime/_updateIntervall;
+    int simT;
+    simT = (int) (simTime/_updateIntervall);
     simT*=_updateIntervall;
 
     if (simT>=_finalTime)
-        simT=_finalTime;
+        simT= (int) _finalTime;
 
     std::string str = "Door_X_"+ std::to_string(doorCentre._x)
             + "_Y_" + std::to_string(doorCentre._y) + "_t_"+std::to_string(simT)+".000000";

@@ -30,7 +30,7 @@
 #include "../tinyxml/tinyxml.h"
 #include "../mpi/LCGrid.h"
 #include "../geometry/SubRoom.h"
-#include "../IO/OutputHandler.h"
+//#include "../IO/OutputHandler.h"
 
 
 using namespace std;
@@ -45,10 +45,10 @@ bool QuickestPathRouter::Init(Building* building)
 
      // prefer path through corridors to path through rooms
      SetEdgeCost(2.0);
-     if (GlobalRouter::Init(building) == false)
+     if (!GlobalRouter::Init(building))
           return false;
 
-     if (ParseAdditionalParameters() == false)
+     if (!ParseAdditionalParameters())
           return false;
 
      // activate the spotlight for tracking some pedestrians
@@ -132,8 +132,8 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped)
                else
                {
                     //check that the next destination is in the actual room of the pedestrian
-                    if (_accessPoints[nextDestination]->isInRange(
-                              sub->GetUID())==false)
+                    if (!_accessPoints[nextDestination]->isInRange(
+                              sub->GetUID()))
                     {
                          //return the last destination if defined
                          int previousDestination = ped->GetNextDestination();
@@ -316,7 +316,7 @@ bool QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
                }
           }
 
-     } while (done==false);
+     } while (!done);
 
 
      //debug area
@@ -420,11 +420,7 @@ bool QuickestPathRouter::IsDirectVisibilityBetween(Pedestrian* ped, Pedestrian* 
      unsigned int obstacles = GetObstaclesCountBetween(ped->GetPos(), ref->GetPos(),
                ignore_hline, ignore_ped1, ignore_ped2);
 
-     if (obstacles > _visibilityObstruction)
-     {
-          return false;
-     }
-     return true;
+     return _visibilityObstruction<obstacles ? false : true;
 }
 
 bool QuickestPathRouter::IsDirectVisibilityBetween(Pedestrian* myself, Hline* hline)
@@ -434,11 +430,7 @@ bool QuickestPathRouter::IsDirectVisibilityBetween(Pedestrian* myself, Hline* hl
      unsigned int obstacles = GetObstaclesCountBetween(myself->GetPos(),
                hline->GetCentre(), hline, ignore_ped1, ignore_ped2);
 
-     if (obstacles > _visibilityObstruction)
-     {
-          return false;
-     }
-     return true;
+     return obstacles > _visibilityObstruction ? false : true;
 }
 
 unsigned int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p2, Hline* hline,
@@ -544,10 +536,8 @@ int QuickestPathRouter::isCongested(Pedestrian* ped)
      double ratio = inFrontofMe / (inFrontofMe + behindMe);
 
      // the threshold is defined by the middle of the queue
-     if (ratio > 0.5)
-          return true;
+     return ratio > 0.5 ? true : false;
 
-     return false;
 }
 
 double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid)
@@ -666,13 +656,13 @@ void QuickestPathRouter::Redirect(Pedestrian* ped)
 
           for(const auto& wall: sub->GetAllWalls())
           {
-               if(segment.IntersectionWith(wall)==true)
+               if(segment.IntersectionWith(wall))
                {
                     isVisible=false;
                     break;
                }
           }
-          if(isVisible==false) continue;
+          if(!isVisible) continue;
 
           double time=GetEstimatedTravelTimeVia(ped, exitid);
 
@@ -743,7 +733,7 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           AccessPoint* ap=relevantAPs[g];
 
 
-          if (ap->isInRange(sub->GetUID()) == false)
+          if (!ap->isInRange(sub->GetUID()))
                continue;
           //check if that exit is open.
           if (ap->IsClosed())
@@ -862,7 +852,7 @@ bool QuickestPathRouter::ParseAdditionalParameters()
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \t GlobalRouter: could not parse the project file");
-          return "";
+          return false;
      }
 
      // everything is fine. proceed with parsing

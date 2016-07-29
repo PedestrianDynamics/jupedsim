@@ -29,7 +29,7 @@
 
 
 #include "../pedestrian/Pedestrian.h"
-#include "../routing/DirectionStrategy.h"
+//#include "../routing/DirectionStrategy.h"
 #include "../mpi/LCGrid.h"
 #include "../geometry/Wall.h"
 #include "../geometry/SubRoom.h"
@@ -233,7 +233,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 std::sort(spacings.begin(), spacings.end(), sort_pred());                
                 double spacing = spacings[0].first;
                 //double winkel = spacings[0].second;
-                Point tmp;
+                //Point tmp;
                 Point speed = direction.Normalized() *OptimalSpeed(ped, spacing);
                 result_acc.push_back(speed);                
                 spacings.clear(); //clear for ped p
