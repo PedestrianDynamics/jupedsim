@@ -531,8 +531,7 @@ int VoronoiDiagramGenerator::right_of(struct Halfedge *el,struct PointVDG *p)
      t3 = yl - topsite->coord.y;
      above = t1*t1 > t2*t2 + t3*t3;
      };
-     //return el->ELpm==le ? above : !above;
-     return el->ELpm == le == above;
+     return el->ELpm==le ? above : !above;
 }
 
 
