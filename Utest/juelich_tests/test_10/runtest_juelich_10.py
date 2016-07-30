@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 
 # todo: spaghetti code. directory mess
 
@@ -114,11 +114,11 @@ if __name__ == "__main__":
     ff = open(flow_file, "w")
     tt = open(times_file, "w")
     logging.info('write flow values in \"%s\"'%flow_file)
-    for key, value in list(flows.items()):
-        print(key, ":", value, file=ff)
+    # for key, value in list(flows.items()):
+    #      print(key, ":", value, file=ff)
 
-    for key, value in list(timedic.items()):
-        print(key, ":", value, file=tt)
+    # for key, value in list(timedic.items()):
+    #     print(key, ":", value, file=tt)
 
     time2 = time.time()
     M = np.array([np.mean(i) for i in list(flows.values())]) # std pro CPU
@@ -128,18 +128,18 @@ if __name__ == "__main__":
 
     std_all = np.std(M)
 
-    print("===========================", file=ff)
-    print("===========================", file=ff)
-    print("Means ", file=ff)
-    print(M, file=ff)
-    print("===========================", file=ff)
-    print("Std ", file=ff)
-    print(S, file=ff)
-    print("===========================", file=ff)
-    print("Std all ", file=ff)
-    print(std_all, file=ff)
-    print("===========================", file=ff)
-    print("===========================", file=ff)
+    # print("===========================", file=ff)
+    # print("===========================", file=ff)
+    # print("Means ", file=ff)
+    # print(M, file=ff)
+    # print("===========================", file=ff)
+    # print("Std ", file=ff)
+    # print(S, file=ff)
+    # print("===========================", file=ff)
+    # print("Std all ", file=ff)
+    # print(std_all, file=ff)
+    # print("===========================", file=ff)
+    # print("===========================", file=ff)
 
     ff.close()
     #########################################################################

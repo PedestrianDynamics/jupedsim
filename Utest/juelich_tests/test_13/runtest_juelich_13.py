@@ -1,12 +1,10 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 import numpy as np
-import os, argparse, logging, time, sys
-from os import path, system
+import os, logging, time, sys
 from sys import argv, exit
 import subprocess, glob
-import multiprocessing
-from matplotlib.pyplot import *
-import re
+from os import path
+import matplotlib.pyplot as plt
 
 def get_empirical_flow():
     files = glob.glob("experiments/*.txt")
@@ -136,42 +134,43 @@ if __name__ == "__main__":
     ff = open(flow_file, "w")
     logging.info('write flow values in \"%s\"'%flow_file)
     for key, value in list(flows.items()):
-        print(key, ":", value, file=ff)
+        ff.write("%f:%f" % (key, value))
 
-    ff.close
+    ff.close()
     M = np.array([np.mean(i) for i in list(flows.values())]) # std pro width
     S = np.array([np.std(i) for i in list(flows.values())])  # std pro width
-    print("===========================", file=ff)
-    print("===========================", file=ff)
-    print("Means ", file=ff)
-    print(M, file=ff)
-    print("===========================", file=ff)
-    print("Std ", file=ff)
-    print(S, file=ff)
-    print("===========================", file=ff)
+    ff.write("===========================")
+    ff.write("===========================")
+    ff.write("Means ")
+    ff.write(M)
+    ff.write("===========================")
+    ff.write("Std ")
+    ff.write(S)
+    ff.write("===========================")
     #########################################################################
     ms = 8
     #plot(widths, flows, "o-b", lw = 2, ms = ms, label = "simulation")
     indexsort = np.argsort( list(flows.keys()) )
     F = np.array( list(flows.keys()) )[indexsort]
-    plot(F, np.array(M)[indexsort], "o-", lw=2, label='Simulation', color='blue')
-    errorbar(F , np.array(M)[indexsort] , yerr=np.array(S)[indexsort], fmt='-o')
+    plt.plot(F, np.array(M)[indexsort], "o-", lw=2, label='Simulation', color='blue')
+    plt.errorbar(F , np.array(M)[indexsort] , yerr=np.array(S)[indexsort], fmt='-o')
 
     jexp, names = get_empirical_flow()
-    errorbar(jexp[:, 0], jexp[:, 1], yerr=jexp[:, 2], fmt="D-", color='r', ecolor='r', linewidth=2, capthick=2, label = "%s"%", ".join(names))
-    axes().set_aspect(1./axes().get_data_ratio())
+    plt.errorbar(jexp[:, 0], jexp[:, 1], yerr=jexp[:, 2], fmt="D-", color='r', ecolor='r', linewidth=2, capthick=2, label = "%s"%", ".join(names))
+    plt.axes().set_aspect(1./axes().get_data_ratio())
     columns = np.vstack((F, np.array(M)[indexsort]))
     gg = open("flow_col.txt", "w")
     for i in range(len(F)):
-        print(columns[0][i], columns[1][i], file=gg)
+        gg.write("%f  %f" % (columns[0][i], columns[1][i]))
+        
     gg.close()
-    legend(loc='best', numpoints=1)
-    grid()
-    xlabel(r'$w\; [\, \rm{m}\, ]$',fontsize=18)
-    ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
+    plt.legend(loc='best', numpoints=1)
+    pl.tgrid()
+    plt.xlabel(r'$w\; [\, \rm{m}\, ]$',fontsize=18)
+    plt.ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
     # xticks(jexp[:, 0])
-    xlim([np.min(jexp[:, 0]) - 0.1,  np.max(jexp[:, 0]) + 0.1])
-    ylim([np.min(jexp[:, 1]) - 0.3,  np.max(jexp[:, 1]) + np.max(jexp[:, 2]) + 0.3])
+    plt.xlim([np.min(jexp[:, 0]) - 0.1,  np.max(jexp[:, 0]) + 0.1])
+    plt.ylim([np.min(jexp[:, 1]) - 0.3,  np.max(jexp[:, 1]) + np.max(jexp[:, 2]) + 0.3])
 
     err = 0
     num = 0
@@ -182,9 +181,9 @@ if __name__ == "__main__":
                 err +=  np.sqrt((np.mean(values)-j)**2)
                 print("%3.3f  %3.1f  %3.1f  -  %3.3f  %3.3f"%(err, key, w, j, np.mean(values)))
     err /= num
-    title(r"$\frac{1}{N}\sqrt{{\sum_w {(\mu(w)-E(w)})^2 }}=%.2f\; (tol=%.2f)$"%(err, tolerance), y=1.02)
+    plt.title(r"$\frac{1}{N}\sqrt{{\sum_w {(\mu(w)-E(w)})^2 }}=%.2f\; (tol=%.2f)$"%(err, tolerance), y=1.02)
     
-    savefig("flow.png")
+    plt.savefig("flow.png")
     #show()
     #########################################################################
     
