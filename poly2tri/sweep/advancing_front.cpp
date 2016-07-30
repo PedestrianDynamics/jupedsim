@@ -32,11 +32,11 @@
 
 namespace p2t {
 
-AdvancingFront::AdvancingFront(Node& head, Node& tail)
+AdvancingFront::AdvancingFront(Node& Head, Node& Tail)
 {
-  head_ = &head;
-  tail_ = &tail;
-  search_node_ = &head;
+  head_ = &Head;
+  tail_ = &Tail;
+  search_node_ = &Head;
 }
 
 Node* AdvancingFront::LocateNode(double x)
