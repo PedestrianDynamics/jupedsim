@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import numpy as np
 import os, logging, time, sys
 from sys import argv, exit
@@ -134,9 +134,11 @@ if __name__ == "__main__":
     ff = open(flow_file, "w")
     logging.info('write flow values in \"%s\"'%flow_file)
     for key, value in list(flows.items()):
-        ff.write("%f:%f" % (key, value))
+        print (key)
+        print (value)
+        ff.write("%f:%f" % (key, value[0]))
 
-    ff.close()
+
     M = np.array([np.mean(i) for i in list(flows.values())]) # std pro width
     S = np.array([np.std(i) for i in list(flows.values())])  # std pro width
     ff.write("===========================")
@@ -147,6 +149,7 @@ if __name__ == "__main__":
     ff.write("Std ")
     ff.write(S)
     ff.write("===========================")
+    ff.close()
     #########################################################################
     ms = 8
     #plot(widths, flows, "o-b", lw = 2, ms = ms, label = "simulation")
@@ -157,7 +160,7 @@ if __name__ == "__main__":
 
     jexp, names = get_empirical_flow()
     plt.errorbar(jexp[:, 0], jexp[:, 1], yerr=jexp[:, 2], fmt="D-", color='r', ecolor='r', linewidth=2, capthick=2, label = "%s"%", ".join(names))
-    plt.axes().set_aspect(1./axes().get_data_ratio())
+    plt.axes().set_aspect(1./plt.axes().get_data_ratio())
     columns = np.vstack((F, np.array(M)[indexsort]))
     gg = open("flow_col.txt", "w")
     for i in range(len(F)):
@@ -165,7 +168,7 @@ if __name__ == "__main__":
         
     gg.close()
     plt.legend(loc='best', numpoints=1)
-    pl.tgrid()
+    plt.grid()
     plt.xlabel(r'$w\; [\, \rm{m}\, ]$',fontsize=18)
     plt.ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
     # xticks(jexp[:, 0])
