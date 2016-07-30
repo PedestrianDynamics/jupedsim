@@ -37,7 +37,7 @@
 #include "../routing/LocalFloorfieldViaFM.h"
 //#include "DirectionStrategy.h"
 //#include <fstream>
-//#include <chrono>
+#include <chrono>
 //#include <ctime>
 
 #define UNUSED(x) [&x]{}()  // c++11 silence warnings
