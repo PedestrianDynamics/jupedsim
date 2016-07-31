@@ -72,6 +72,7 @@ License along with VisiLibity.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>     //string class
 #include <cassert>    //assertions
 
+#define UNUSED(x) [&x]{}()  // c++11 silence warnings
 
 /// VisiLibity's sole namespace
 namespace VisiLibity
@@ -1515,6 +1516,8 @@ namespace VisiLibity
 						  partition_inducing_segments,
 						  double epsilon=0.0 )
     {
+      UNUSED(partition_inducing_segments);
+      UNUSED(epsilon);
       std::vector<Polygon> cells;
       return cells;
     }
@@ -1846,7 +1849,7 @@ namespace VisiLibity
      * \remarks  O(n log(n)) average case time complexity, where n is the
      * number of vertices in the Evironment (resp. Polygon).
      */
-    Visibility_Polygon(const Point& observer,
+    Visibility_Polygon(const Point& Observer,
 		       const Environment& environment_temp,
 		       double epsilon=0.0); 
     /** \brief visibility set of a Point in a Polygon
@@ -1974,7 +1977,7 @@ namespace VisiLibity
       }
     };
     
-    bool is_spike( const Point& observer,
+    bool is_spike( const Point& Observer,
 		   const Point& point1,
 		   const Point& point2,
 		   const Point& point3, 
@@ -1985,9 +1988,9 @@ namespace VisiLibity
     //Point is added to vertices.
     void chop_spikes_at_back(const Point& observer,
 			     double epsilon);
-    void chop_spikes_at_wrap_around(const Point& observer,
+    void chop_spikes_at_wrap_around(const Point& Observer,
 				    double epsilon);
-    void chop_spikes(const Point& observer,
+    void chop_spikes(const Point& Observer,
 		     double epsilon);
     //For debugging Visibility_Polygon constructors.
     //Prints current_vertex and active_edge data to screen.

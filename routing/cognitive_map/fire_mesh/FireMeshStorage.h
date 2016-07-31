@@ -48,7 +48,7 @@ public:
     FireMeshStorage();
     FireMeshStorage(const Building * const b, const std::string &filepath, const double &updateintervall, const double &finalTime);
     ~FireMeshStorage();
-    void CreateTimeList(const double &updateIntervall, const double &finalTime, const double &startTime=0);
+    void CreateTimeList(const double& updateIntervall, const double& finalTime);
     void IdentifyDoors();
     void CreateFireMeshes();
     const FireMesh& get_FireMesh(const Point &doorCentre, const double &simTime) const;

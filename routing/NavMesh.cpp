@@ -28,16 +28,12 @@
 
 #include "NavMesh.h"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-//#include "../MCD/GeomPoly.h"
-//#include "../MCD/GeomVector.h"
-//#include "../MCD/AlgorithmMCD.h"
+
 #include "DTriangulation.h"
 #include "../pedestrian/PedDistributor.h"
-#include "../geometry/Obstacle.h"
+//#include "../geometry/Obstacle.h"
 #include "../geometry/SubRoom.h"
-#include "../IO/OutputHandler.h"
+//#include "../IO/OutputHandler.h"
 
 //#define _DEBUG 1
 
@@ -76,7 +72,7 @@ void NavMesh::BuildNavMesh()
      std::map<int,int> subroom_to_node;
      for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
           Room* r = _building->GetRoom(i);
-          string caption = r->GetCaption();
+         // string caption = r->GetCaption();
 
           //skip the virtual room containing the complete geometry
           //if(r->GetCaption()=="outside") continue;
@@ -149,7 +145,7 @@ void NavMesh::BuildNavMesh()
                     Point centroid0 = transitions[t]->GetSubRoom1()->GetCentroid();
 
 
-                    if(transitions[t]->IsOpen()==true ) { // we are having an egde
+                    if(transitions[t]->IsOpen()) { // we are having an egde
                          //                              if(node1!=-1){
 
                          JEdge* e= new JEdge();
@@ -344,31 +340,31 @@ void NavMesh::BuildNavMesh()
      //      exit(0);
 }
 
-void NavMesh::DumpNode(int id)
-{
-     JNode *nd=_nodes[id];
-
-
-     std::cerr<<endl<<"Node ID: "<<id<<endl;
-     std::cerr<<"Hull ID: [ "<<endl;
-     for(unsigned int i=0; i<nd->pHull.size(); i++) {
-          std::cerr<<nd->pHull[i].id<<" ";
-     }
-     std::cerr<<endl<<" ]"<<endl;
-
-     std::cerr<<"Obstacles ID: ["<<endl;
-     for( unsigned int i=0; i<nd->pObstacles.size(); i++) {
-          std::cerr<<nd->pObstacles[i]<<" ";
-     }
-     std::cerr<<endl<<" ]"<<endl;
-
-     std::cerr<<"Portals ID: ["<<endl;
-     for( unsigned int i=0; i<nd->pPortals.size(); i++) {
-          std::cerr<<nd->pPortals[i]<<" ";
-     }
-     std::cerr<<endl<<" ]"<<endl<<endl;
-
-}
+//void NavMesh::DumpNode(int id)
+//{
+//     JNode *nd=_nodes[id];
+//
+//
+//     std::cerr<<endl<<"Node ID: "<<id<<endl;
+//     std::cerr<<"Hull ID: [ "<<endl;
+//     for(unsigned int i=0; i<nd->pHull.size(); i++) {
+//          std::cerr<<nd->pHull[i].id<<" ";
+//     }
+//     std::cerr<<endl<<" ]"<<endl;
+//
+//     std::cerr<<"Obstacles ID: ["<<endl;
+//     for( unsigned int i=0; i<nd->pObstacles.size(); i++) {
+//          std::cerr<<nd->pObstacles[i]<<" ";
+//     }
+//     std::cerr<<endl<<" ]"<<endl;
+//
+//     std::cerr<<"Portals ID: ["<<endl;
+//     for( unsigned int i=0; i<nd->pPortals.size(); i++) {
+//          std::cerr<<nd->pPortals[i]<<" ";
+//     }
+//     std::cerr<<endl<<" ]"<<endl<<endl;
+//
+//}
 
 void NavMesh::DumpEdge(int id)
 {
@@ -379,14 +375,14 @@ void NavMesh::DumpEdge(int id)
      std::cerr<<"node 1: "<<e->pNode1<<endl<<endl;
 }
 
-void NavMesh::DumpObstacle(int id)
-{
-     JObstacle* o= _obst[id];
-     std::cerr<<endl<<"Obstacle: "<<endl;
-     std::cerr<<"id: "<<o->id<<endl;
-     std::cerr<<"node 0: "<<o->pNode0<<endl<<endl;
-
-}
+//void NavMesh::DumpObstacle(int id)
+//{
+//     JObstacle* o= _obst[id];
+//     std::cerr<<endl<<"Obstacle: "<<endl;
+//     std::cerr<<"id: "<<o->id<<endl;
+//     std::cerr<<"node 0: "<<o->pNode0<<endl<<endl;
+//
+//}
 
 void NavMesh::Convexify()
 {
@@ -399,9 +395,9 @@ void NavMesh::Convexify()
                reverse(old_node->pHull.begin(), old_node->pHull.end());
           }
 
-          if (old_node->IsConvex() == false) {
+          if (!old_node->IsConvex()) {
 
-               Triangulate(old_node);
+               Triangulate((SubRoom*) old_node);
           }
      }
      Log->Write("INFO:\t...Done!");
@@ -655,9 +651,9 @@ void NavMesh::WriteToString(std::string& output)
      //writing the nodes
      //      int mynodes[] = {47, 30 ,38};
      //      int mynodes[] = {41, 1521};
-     int mynodes[] = {0};
+//     int mynodes[] = {0};
      //int mynodes[] = { 28, 27, 40};
-     vector<int> nodes_to_plot (mynodes, mynodes + sizeof(mynodes) / sizeof(int) );
+    // vector<int> nodes_to_plot (mynodes, mynodes + sizeof(mynodes) / sizeof(int) );
 
 
      //for (unsigned int n=0;n<new_nodes.size();n++){
@@ -766,7 +762,7 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName)
      file<<fixed;
 
 
-     if(file.is_open()==false) {
+     if(!file.is_open()) {
           Log->Write("\tERROR:\tcould not open the file:  " + fileName +" for writing the mesh");
           return;
      }
@@ -801,7 +797,7 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName, const std::vector<Point>
      Point centre (0,0);
      double factor=100;
 
-     if(file.is_open()==false) {
+     if(!file.is_open()) {
           cout <<"could not open the file: "<<fileName<<endl;
           return;
      }
@@ -822,7 +818,7 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName, const std::vector<Point>
 
      for(unsigned int i=0; i<points.size(); i++) {
 
-          unsigned int size= points.size();
+          unsigned long size= points.size();
           double x1=points[ i%size]._x*factor -centre._x;
           double y1=points[ i%size]._y*factor -centre._y;
           double x2=points[ (i+1)%size]._x*factor -centre._x;
@@ -859,7 +855,7 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName, JNode* node)
      Point centre (0,0);
      double factor=100;
 
-     if(file.is_open()==false) {
+     if(!file.is_open()) {
           cout <<"could not open the file: "<<fileName<<endl;
           return;
      }
@@ -960,7 +956,7 @@ void NavMesh::WriteToFile(std::string fileName)
      file.precision(2);
      file<<fixed;
 
-     if(file.is_open()==false) {
+     if(!file.is_open()) {
           cout <<"could not open the file: "<<fileName<<endl;
           return;
      }
@@ -1007,37 +1003,37 @@ void NavMesh::WriteToFile(std::string fileName)
      file<<ngroup_to_size[previousGroup]<<"";
 
      for (unsigned int n=0; n<_nodes.size(); n++) {
-          JNode* JNode=_nodes[n];
-          string actualGroup=JNode->pGroup;
+          JNode* JNode_=_nodes[n];
+          string actualGroup=JNode_->pGroup;
           if(actualGroup!=previousGroup) {
                previousGroup=actualGroup;
-               //file<<"# JNode group"<<endl;
+               //file<<"# JNode_ group"<<endl;
                file<<endl<<previousGroup<<endl;
                file<<ngroup_to_size[previousGroup]<<"";
           }
 
-          //assert(JNode->pObstacles.size()<20);
-          //assert(JNode->pPortals.size()<20);
-          //file<<"nodeid "<<JNode->id<<endl;
+          //assert(JNode_->pObstacles.size()<20);
+          //assert(JNode_->pPortals.size()<20);
+          //file<<"nodeid "<<JNode_->id<<endl;
           file<<endl;
-          file<<"\t"<<JNode->pCentroid._x<<" "<<JNode->pCentroid._y<<endl;
-          file<<"\t"<<JNode->pHull.size()<<" ";
-          for(unsigned int i=0; i<JNode->pHull.size(); i++) {
-               file<<JNode->pHull[i].id<<" ";
+          file<<"\t"<<JNode_->pCentroid._x<<" "<<JNode_->pCentroid._y<<endl;
+          file<<"\t"<<JNode_->pHull.size()<<" ";
+          for(unsigned int i=0; i<JNode_->pHull.size(); i++) {
+               file<<JNode_->pHull[i].id<<" ";
           }
           file<<endl;
-          file<<"\t"<<JNode->pNormalVec[0]<<" "<<JNode->pNormalVec[1]<<" "<<JNode->pNormalVec[2]<<endl;
+          file<<"\t"<<JNode_->pNormalVec[0]<<" "<<JNode_->pNormalVec[1]<<" "<<JNode_->pNormalVec[2]<<endl;
 
 
-          file<<"\t"<<JNode->pPortals.size()<<" ";
-          for(unsigned int i=0; i<JNode->pPortals.size(); i++) {
-               file<<JNode->pPortals[i]<<" ";
+          file<<"\t"<<JNode_->pPortals.size()<<" ";
+          for(unsigned int i=0; i<JNode_->pPortals.size(); i++) {
+               file<<JNode_->pPortals[i]<<" ";
           }
           file<<endl;
 
-          file<<"\t"<<JNode->pObstacles.size()<<" ";
-          for(unsigned int i=0; i<JNode->pObstacles.size(); i++) {
-               file<<JNode->pObstacles[i]<<" ";
+          file<<"\t"<<JNode_->pObstacles.size()<<" ";
+          for(unsigned int i=0; i<JNode_->pObstacles.size(); i++) {
+               file<<JNode_->pObstacles[i]<<" ";
           }
 
           file<<endl;
@@ -1069,7 +1065,7 @@ int NavMesh::AddEdge(JEdge* e)
 {
      int id = IsPortal(e->pStart.pPos, e->pEnd.pPos);
 
-     if ((IsElementInVector(_edges, e) == false) && (id == -1)) {
+     if (!IsElementInVector(_edges, e) && (id == -1)) {
           if (_edges.size() == 0) {
                e->id = 0;
           } else {
@@ -1212,7 +1208,7 @@ void NavMesh::FinalizeAlphaShape()
 
      for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
           Room* r = _building->GetRoom(i);
-          string caption = r->GetCaption();
+          //string caption = r->GetCaption();
 
           //skip the virtual room containing the complete geometry
           if(r->GetCaption()=="outside") continue;
@@ -1297,7 +1293,7 @@ void NavMesh::FinalizeAlphaShape()
      Hull.push_back(envelope[envelope.size()-1].GetPoint2());
      envelope.pop_back();
 
-     while(envelope.empty()==false) {
+     while(!envelope.empty()) {
           for(unsigned int i=0; i<envelope.size(); i++) {
                if(envelope[i].GetPoint1()==Hull[Hull.size()-1]) {
                     Hull.push_back(envelope[i].GetPoint2());
@@ -1415,10 +1411,10 @@ void NavMesh::FinalizeAlphaShape()
 
           for (int index=0; index<3; index++) {
 
-               Point P0  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
-               Point P1  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
+               Point P0_  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
+               Point P1_  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
 
-               int edge_id=IsPortal(P0,P1);
+               int edge_id=IsPortal(P0_,P1_);
                if(edge_id != -1) {
                     //if(IsElementInVector(new_node->pPortals,edge_id)==false)
                     new_node->pPortals.push_back(edge_id);
@@ -1430,7 +1426,7 @@ void NavMesh::FinalizeAlphaShape()
                     e->pNode1=-1;
                }
 
-               int obstacle_id=IsObstacle(P0,P1);
+               int obstacle_id=IsObstacle(P0_,P1_);
                if(obstacle_id != -1) {
                     //std::cerr<<"Error: the convexification has created an JObstacle"<<endl;
                     //if(IsElementInVector(new_node->pObstacles,obstacle_id)==false)
@@ -1442,8 +1438,8 @@ void NavMesh::FinalizeAlphaShape()
                if ((obstacle_id==-1) && (edge_id==-1)) {
 
                     JEdge* e= new JEdge();
-                    e->pEnd=*GetVertex(P1);
-                    e->pStart= *GetVertex(P0);
+                    e->pEnd=*GetVertex(P1_);
+                    e->pStart= *GetVertex(P0_);
                     AddEdge(e);
 
                     //invalidate any previous information
@@ -1493,7 +1489,7 @@ void NavMesh::Finalize()
 
      for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
           Room* r = _building->GetRoom(i);
-          string caption = r->GetCaption();
+          //string caption = r->GetCaption();
 
           //skip the virtual room containing the complete geometry
           if(r->GetCaption()=="outside") continue;
@@ -1509,10 +1505,10 @@ void NavMesh::Finalize()
                for (unsigned w = 0; w < walls.size(); w++) {
 
                     bool skip=false;
-                    for(unsigned int i=0; i<centroids.size(); i++) {
-                         if(walls[w].DistTo(centroids[i])<25) skip=true;
+                    for(unsigned int j=0; j<centroids.size(); j++) {
+                         if(walls[w].DistTo(centroids[j])<25) skip=true;
                     }
-                    if(skip==true) continue;
+                    if(skip) continue;
 
                     //first attempt
                     Point P0 = walls[w].GetPoint1();
@@ -1533,10 +1529,10 @@ void NavMesh::Finalize()
                     if(transitions[t]->GetSubRoom2() != NULL) continue;
 
                     bool skip=false;
-                    for(unsigned int i=0; i<centroids.size(); i++) {
-                         if(transitions[t]->DistTo(centroids[i])<25) skip=true;
+                    for(unsigned int c=0; c<centroids.size(); c++) {
+                         if(transitions[t]->DistTo(centroids[c])<25) skip=true;
                     }
-                    if(skip==true) continue;
+                    if(skip) continue;
 
                     //first attempt
                     Point P0 = transitions[t]->GetPoint1();
@@ -1559,7 +1555,7 @@ void NavMesh::Finalize()
      Hull.push_back(envelope[envelope.size()-1].GetPoint2());
      envelope.pop_back();
 
-     while(envelope.empty()==false) {
+     while(!envelope.empty()) {
           for(unsigned int i=0; i<envelope.size(); i++) {
                if(envelope[i].GetPoint1()==Hull[Hull.size()-1]) {
                     Hull.push_back(envelope[i].GetPoint2());
@@ -1677,10 +1673,10 @@ void NavMesh::Finalize()
 
           for (int index=0; index<3; index++) {
 
-               Point P0  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
-               Point P1  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
+               Point P0_  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
+               Point P1_  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
 
-               int edge_id=IsPortal(P0,P1);
+               int edge_id=IsPortal(P0_,P1_);
                if(edge_id != -1) {
                     //if(IsElementInVector(new_node->pPortals,edge_id)==false)
                     new_node->pPortals.push_back(edge_id);
@@ -1692,7 +1688,7 @@ void NavMesh::Finalize()
                     e->pNode1=-1;
                }
 
-               int obstacle_id=IsObstacle(P0,P1);
+               int obstacle_id=IsObstacle(P0_,P1_);
                if(obstacle_id != -1) {
                     //std::cerr<<"Error: the convexification has created an JObstacle"<<endl;
                     //if(IsElementInVector(new_node->pObstacles,obstacle_id)==false)
@@ -1704,8 +1700,8 @@ void NavMesh::Finalize()
                if ((obstacle_id==-1) && (edge_id==-1)) {
 
                     JEdge* e= new JEdge();
-                    e->pEnd=*GetVertex(P1);
-                    e->pStart= *GetVertex(P0);
+                    e->pEnd=*GetVertex(P1_);
+                    e->pStart= *GetVertex(P0_);
                     AddEdge(e);
 
                     //invalidate any previous information
@@ -1823,10 +1819,10 @@ void NavMesh::Triangulate(SubRoom* sub)
 
           for (int index=0; index<3; index++) {
 
-               Point P0  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
-               Point P1  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
+               Point P0_  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
+               Point P1_  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
 
-               int edge_id=IsPortal(P0,P1);
+               int edge_id=IsPortal(P0_,P1_);
                if(edge_id != -1) {
                     new_node->pPortals.push_back(edge_id);
                     JEdge* e = _edges[edge_id];
@@ -1837,7 +1833,7 @@ void NavMesh::Triangulate(SubRoom* sub)
 
                }
 
-               int obstacle_id=IsObstacle(P0,P1);
+               int obstacle_id=IsObstacle(P0_,P1_);
                if(obstacle_id != -1) {
                     //std::cerr<<"Error: the convexification has created an JObstacle"<<endl;
                     new_node->pObstacles.push_back(obstacle_id);
@@ -1848,8 +1844,8 @@ void NavMesh::Triangulate(SubRoom* sub)
                if ((obstacle_id==-1) && (edge_id==-1)) {
 
                     JEdge* e= new JEdge();
-                    e->pEnd=*GetVertex(P1);
-                    e->pStart= *GetVertex(P0);
+                    e->pEnd=*GetVertex(P1_);
+                    e->pStart= *GetVertex(P0_);
                     AddEdge(e);
 
                     // invalidate the node
@@ -1972,10 +1968,10 @@ void NavMesh::Triangulate(JNode* node)
 
           for (int index=0; index<3; index++) {
 
-               Point P0  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
-               Point P1  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
+               Point P0_  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
+               Point P1_  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
 
-               int edge_id=IsPortal(P0,P1);
+               int edge_id=IsPortal(P0_,P1_);
                if(edge_id != -1) {
                     new_node->pPortals.push_back(edge_id);
                     JEdge* e = _edges[edge_id];
@@ -1985,7 +1981,7 @@ void NavMesh::Triangulate(JNode* node)
                     e->pNode1=-1;
                }
 
-               int obstacle_id=IsObstacle(P0,P1);
+               int obstacle_id=IsObstacle(P0_,P1_);
                if(obstacle_id != -1) {
                     //std::cerr<<"Error: the convexification has created an JObstacle"<<endl;
                     new_node->pObstacles.push_back(obstacle_id);
@@ -1997,8 +1993,8 @@ void NavMesh::Triangulate(JNode* node)
                if ((obstacle_id==-1) && (edge_id==-1)) {
 
                     JEdge* e= new JEdge();
-                    e->pEnd=*GetVertex(P1);
-                    e->pStart= *GetVertex(P0);
+                    e->pEnd=*GetVertex(P1_);
+                    e->pStart= *GetVertex(P0_);
                     AddEdge(e);
 
                     //invalidate the node
@@ -2064,194 +2060,194 @@ int NavMesh::IsObstacle(Point& p1, Point& p2)
      return -1;
 }
 
-void NavMesh::WriteScenario()
-{
-     WriteBehavior();
-     WriteViewer();
-     WriteStartPositions();
-}
+//void NavMesh::WriteScenario()
+//{
+//     WriteBehavior();
+//     WriteViewer();
+//     WriteStartPositions();
+//}
 
-void NavMesh::WriteBehavior()
-{
-     string filename="../pedunc/examples/stadium/arenaB.xml";
-     ofstream file(filename.c_str());
-     file.precision(2);
-     file<<fixed;
+//void NavMesh::WriteBehavior()
+//{
+//     string filename="../pedunc/examples/stadium/arenaB.xml";
+//     ofstream file(filename.c_str());
+//     file.precision(2);
+//     file<<fixed;
+//
+//     if(file.is_open()==false) {
+//          cout <<"could not open the file: "<<filename<<endl;
+//          return;
+//     }
+//
+//     file<< "<?xml version=\"1.0\"?>"<<endl;
+//     file<< "\t<Population>"<<endl;
+//
+//
+//     int goalsetid=0;
+//     //Write the goal set outside
+//     {
+//          file<< "\t\t<GoalSet id=\""<<goalsetid++<<"\" description=\"outside\">"<<endl;
+//
+//          vector<Point> goals=_building->GetRoom("outside")->GetSubRoom(0)->GetPolygon();
+//          for(unsigned int g=0; g<goals.size(); g++) {
+//               double factor=(10.0/(goals[g].Norm())-1);
+//               file<< "\t\t\t<Goal type=\"point\" id=\""<<g<<"\" x=\""<< factor*goals[g]._x<<"\" y=\""<<factor*goals[g]._y<<"\"/>"<<endl;
+//          }
+//          file<< "\t\t</GoalSet>"<<endl;
+//     }
+//
+//
+//     //write the goal set tunnel
+//     {
+//          file<< "\t\t<GoalSet id=\""<<goalsetid++<<"\" description=\"tunnel\">"<<endl;
+//
+//          for (map<int, Transition*>::const_iterator itr = _building->GetAllTransitions().begin();
+//                    itr != _building->GetAllTransitions().end(); ++itr) {
+//
+//               int door=itr->first;
+//               //int door = itr->second->GetUniqueID();
+//               Transition* cross = itr->second;
+//               const Point& centre = cross->GetCentre();
+//
+//               if((cross->Length()<2.6) && (cross->Length()>2.4))
+//
+//                    file<< "\t\t\t<Goal type=\"point\" id=\""<<door<<"\" x=\""<< centre._x<<"\" y=\""<<centre._y<<"\"/>"<<endl;
+//          }
+//          file<< "\t\t</GoalSet>"<<endl;
+//     }
+//
+//     //write the goal set promenade
+//
+//     file<< "\t\t<Behavior class=\"1\">"<<endl;
+//     file<< "\t\t\t<Property name=\"prefSpeed\" type=\"float\" dist=\"c\" value=\"1.3\" />"<<endl;
+//     file<< "\t\t\t<Property type=\"2D\" name=\"stride\" dist=\"c\" factor_value=\"100.57\" buffer_value=\"0.0\" />"<<endl;
+//     file<< ""<<endl;
+//     file<< "\t\t\t<State name=\"Walk1\" speedPolicy=\"min\" final=\"0\" >"<<endl;
+//     file<< "<!--"<<endl;
+//     file<< "<NavMeshGoal goalSet=\"0\" goal=\"farthest\" filename=\"../examples/stadium/arena.nav\"/>"<<endl;
+//     file<< "-->"<<endl;
+//     file<< "\t\t\t\t<AbsoluteGoal goalSet=\"0\" goal=\"nearest\" perAgent=\"1\" />"<<endl;
+//     file<< "\t\t\t\t<VelComponent type=\"navMesh\" weight=\"1.0\"  filename=\"../examples/stadium/arena.nav\" />"<<endl;
+//     file<< "\t\t\t</State>"<<endl;
+//     file<< "\t\t\t<State name=\"Stop1\" speedPolicy=\"min\" final=\"1\">"<<endl;
+//     file<< "\t\t\t\t<HoldPosGoal />"<<endl;
+//     file<< "\t\t\t\t<VelComponent type=\"goal\" weight=\"1.0\"/>"<<endl;
+//     file<< "\t\t\t</State>"<<endl;
+//     file<< ""<<endl;
+//     file<< "\t\t\t<Transition order=\"0\" type=\"goal_circle\" from=\"Walk1\" to=\"Stop1\" radius=\"0.25\" inside=\"1\" />"<<endl;
+//     file<< "\t\t</Behavior>"<<endl;
+//     file<< ""<<endl;
+//     file<< "</Population>"<<endl;
+//
+//
+//     file.close();
+//}
 
-     if(file.is_open()==false) {
-          cout <<"could not open the file: "<<filename<<endl;
-          return;
-     }
+//void NavMesh::WriteViewer()
+//{
+//     /*
+//     <?xml version="1.0"?>
+//
+//     <View width="640" height="480">
+//         <!-- Multiple cameras are mapped to a key from 1-9 in the order they are defined here -->
+//             <Camera xpos="6.53453" ypos="7.05969" zpos="-4.31638" xtgt="0.609475" ytgt="0.961173" ztgt="1.77459" far="200" near="0.01" fov="45" />
+//             <Camera xpos="-0.947526" ypos="17.2771" zpos="1.64757" xtgt="-0.947526" ytgt="2.61554" ztgt="1.64584" far="200" near="0.01" fov="0.0" />
+//
+//             <!-- Comment out lights for a constant-illuminated visualization -->
+//             <Light x="1" y="0" z="-1" type="directional" diffR="1.0" diffG="0.8" diffB="0.8" space="camera"/>
+//             <Light x="-1" y="0" z="-1" type="directional" diffR="0.8" diffG="0.8" diffB="1.0" space="camera"/>
+//             <Light x="0" y="1" z="0" type="directional" diffR="0.8" diffG="0.8" diffB="0.8" space="world"/>
+//     </View>
+//      */
+//
+//}
 
-     file<< "<?xml version=\"1.0\"?>"<<endl;
-     file<< "\t<Population>"<<endl;
-
-
-     int goalsetid=0;
-     //Write the goal set outside
-     {
-          file<< "\t\t<GoalSet id=\""<<goalsetid++<<"\" description=\"outside\">"<<endl;
-
-          vector<Point> goals=_building->GetRoom("outside")->GetSubRoom(0)->GetPolygon();
-          for(unsigned int g=0; g<goals.size(); g++) {
-               double factor=(10.0/(goals[g].Norm())-1);
-               file<< "\t\t\t<Goal type=\"point\" id=\""<<g<<"\" x=\""<< factor*goals[g]._x<<"\" y=\""<<factor*goals[g]._y<<"\"/>"<<endl;
-          }
-          file<< "\t\t</GoalSet>"<<endl;
-     }
-
-
-     //write the goal set tunnel
-     {
-          file<< "\t\t<GoalSet id=\""<<goalsetid++<<"\" description=\"tunnel\">"<<endl;
-
-          for (map<int, Transition*>::const_iterator itr = _building->GetAllTransitions().begin();
-                    itr != _building->GetAllTransitions().end(); ++itr) {
-
-               int door=itr->first;
-               //int door = itr->second->GetUniqueID();
-               Transition* cross = itr->second;
-               const Point& centre = cross->GetCentre();
-
-               if((cross->Length()<2.6) && (cross->Length()>2.4))
-
-                    file<< "\t\t\t<Goal type=\"point\" id=\""<<door<<"\" x=\""<< centre._x<<"\" y=\""<<centre._y<<"\"/>"<<endl;
-          }
-          file<< "\t\t</GoalSet>"<<endl;
-     }
-
-     //write the goal set promenade
-
-     file<< "\t\t<Behavior class=\"1\">"<<endl;
-     file<< "\t\t\t<Property name=\"prefSpeed\" type=\"float\" dist=\"c\" value=\"1.3\" />"<<endl;
-     file<< "\t\t\t<Property type=\"2D\" name=\"stride\" dist=\"c\" factor_value=\"100.57\" buffer_value=\"0.0\" />"<<endl;
-     file<< ""<<endl;
-     file<< "\t\t\t<State name=\"Walk1\" speedPolicy=\"min\" final=\"0\" >"<<endl;
-     file<< "<!--"<<endl;
-     file<< "<NavMeshGoal goalSet=\"0\" goal=\"farthest\" filename=\"../examples/stadium/arena.nav\"/>"<<endl;
-     file<< "-->"<<endl;
-     file<< "\t\t\t\t<AbsoluteGoal goalSet=\"0\" goal=\"nearest\" perAgent=\"1\" />"<<endl;
-     file<< "\t\t\t\t<VelComponent type=\"navMesh\" weight=\"1.0\"  filename=\"../examples/stadium/arena.nav\" />"<<endl;
-     file<< "\t\t\t</State>"<<endl;
-     file<< "\t\t\t<State name=\"Stop1\" speedPolicy=\"min\" final=\"1\">"<<endl;
-     file<< "\t\t\t\t<HoldPosGoal />"<<endl;
-     file<< "\t\t\t\t<VelComponent type=\"goal\" weight=\"1.0\"/>"<<endl;
-     file<< "\t\t\t</State>"<<endl;
-     file<< ""<<endl;
-     file<< "\t\t\t<Transition order=\"0\" type=\"goal_circle\" from=\"Walk1\" to=\"Stop1\" radius=\"0.25\" inside=\"1\" />"<<endl;
-     file<< "\t\t</Behavior>"<<endl;
-     file<< ""<<endl;
-     file<< "</Population>"<<endl;
-
-
-     file.close();
-}
-
-void NavMesh::WriteViewer()
-{
-     /*
-     <?xml version="1.0"?>
-
-     <View width="640" height="480">
-         <!-- Multiple cameras are mapped to a key from 1-9 in the order they are defined here -->
-             <Camera xpos="6.53453" ypos="7.05969" zpos="-4.31638" xtgt="0.609475" ytgt="0.961173" ztgt="1.77459" far="200" near="0.01" fov="45" />
-             <Camera xpos="-0.947526" ypos="17.2771" zpos="1.64757" xtgt="-0.947526" ytgt="2.61554" ztgt="1.64584" far="200" near="0.01" fov="0.0" />
-
-             <!-- Comment out lights for a constant-illuminated visualization -->
-             <Light x="1" y="0" z="-1" type="directional" diffR="1.0" diffG="0.8" diffB="0.8" space="camera"/>
-             <Light x="-1" y="0" z="-1" type="directional" diffR="0.8" diffG="0.8" diffB="1.0" space="camera"/>
-             <Light x="0" y="1" z="0" type="directional" diffR="0.8" diffG="0.8" diffB="0.8" space="world"/>
-     </View>
-      */
-
-}
-
-void NavMesh::WriteStartPositions()
-{
-
-     //get the available positions:
-
-
-     vector< vector<Point > >  availablePos = vector< vector<Point> >();
-
-     for (int r = 0; r < _building->GetNumberOfRooms(); r++) {
-          vector<Point >   freePosRoom =  vector<Point >  ();
-          Room* room = _building->GetRoom(r);
-          if(room->GetCaption()=="outside") continue;
-          for (int s = 0; s < room->GetNumberOfSubRooms(); s++) {
-               SubRoom* subr = room->GetSubRoom(s);
-               // TODO
-               //vector<Point > pos = PedDistributor::PossiblePositions(*subr);
-               //freePosRoom.insert(freePosRoom.end(),pos.begin(),pos.end());
-          }
-          availablePos.push_back(freePosRoom);
-     }
-
-
-     string filename="../pedunc/examples/stadium/arenaS.xml";
-     ofstream file(filename.c_str());
-     file.precision(2);
-     file<<fixed;
-
-     if(file.is_open()==false) {
-          cout <<"could not open the file: "<<filename<<endl;
-          return;
-     }
-
-     file<< "<?xml version=\"1.0\"?>"<<endl;
-     file<< "<Experiment version=\"2.0\">"<<endl;
-     file<< "\t<SpatialQuery>"<<endl;
-     file<< "\t\t<NavMesh filename=\"../examples/stadium/arena.nav\"/>"<<endl;
-     file<< "\t</SpatialQuery>"<<endl;
-     file<< "<!--"<<endl;
-     file<< "<Elevation>"<<endl;
-     file<< "<NavMeshElevation filename=\"../examples/stadium/arena.nav\" />"<<endl;
-     file<< "</Elevation>"<<endl;
-     file<< "-->"<<endl;
-     file<< "\t<Boids max_force=\"8\" leak_through=\"0.1\" reaction_time=\"0.5\" />"<<endl;
-     file<< "\t<Common time_step=\"0.1\" />"<<endl;
-     file<< "\t<GCF reaction_time=\"0.5\" max_agent_dist=\"2\" max_agent_force=\"3\" agent_interp_width=\"0.1\" nu_agent=\"0.35\" />"<<endl;
-     file<< "\t<Helbing agent_scale=\"2000\" obstacle_scale=\"4000\" reaction_time=\"0.5\" body_force=\"1200\" friction=\"2400\" force_distance=\"0.015\" />"<<endl;
-     file<< "\t<Johansson agent_scale=\"25\" obstacle_scale=\"35\" reaction_time=\"0.5\" force_distance=\"0.15\" stride_time=\"0.5\" />"<<endl;
-     file<< "\t<Karamouzas orient_weight=\"0.8\" fov=\"200\" reaction_time=\"0.4\" wall_steepness=\"2\" wall_distance=\"2\" colliding_count=\"5\" d_min=\"1\" d_mid=\"8\" d_max=\"10\" agent_force=\"4\" />"<<endl;
-     file<< "\t<Zanlungo agent_scale=\"2000\" obstacle_scale=\"4000\" reaction_time=\"0.5\" force_distance=\"0.005\" />"<<endl;
-     file<< ""<<endl;
-     file<< "\t<AgentSet>"<<endl;
-     file<< "\t\t<Boids tau=\"3\" tauObst=\"6\" />"<<endl;
-     file<< "\t\t<Common max_neighbors=\"10\" obstacleSet=\"1\" neighbor_dist=\"5\" r=\"0.19\" class=\"1\" pref_speed=\"1.04\" max_speed=\"2\" max_accel=\"5\" />"<<endl;
-     file<< "\t\t<GCF stand_depth=\"0.18\" move_scale=\"0.53\" slow_width=\"0.25\" sway_change=\"0.05\" orient_weight=\"0.75\" />"<<endl;
-     file<< "\t\t<Helbing mass=\"80\" />"<<endl;
-     file<< "\t\t<Johansson fov_weight=\"0.16\" />"<<endl;
-     file<< "\t\t<Karamouzas personal_space=\"0.69\" anticipation=\"8\" />"<<endl;
-     file<< "\t\t<RVO tau=\"3\" tauObst=\"0.75\" turningBias=\"1.0\" />"<<endl;
-     file<< "\t\t<Zanlungo mass=\"80\" orient_weight=\"0.75\" />"<<endl;
-     file<< ""<<endl;
-
-
-     for(int i=0; i<_building->GetNumberOfRooms(); i++) {
-          //int room_id=pBuilding->GetRoom("100")->GetRoomID();
-
-          Room* room = _building->GetRoom(i);
-          if(room->GetCaption()=="outside") continue;
-          if(room->GetCaption()=="150") continue;
-          int room_id=room->GetID();
-          vector<Point > freePosRoom = availablePos[room_id];
-
-          int nAgentsPerRoom=10; // the number of agents to distribute
-          for (int a=0; a<nAgentsPerRoom; a++) {
-               int index = rand() % freePosRoom.size();
-               file<< "\t\t<Agent p_x=\""<<freePosRoom[index]._x<<" \"p_y=\""<<freePosRoom[index]._y<<"\"/>"<<endl;
-               //cout<<"Position: "<<freePosRoom[index].toString()<<endl;
-               freePosRoom.erase(freePosRoom.begin() + index);
-          }
-
-          //              break;
-     }
-
-     file<< "\t</AgentSet>"<<endl;
-     file<< "</Experiment>"<<endl;
-
-}
+//void NavMesh::WriteStartPositions()
+//{
+//
+//     //get the available positions:
+//
+//
+//     vector< vector<Point > >  availablePos = vector< vector<Point> >();
+//
+//     for (int r = 0; r < _building->GetNumberOfRooms(); r++) {
+//          vector<Point >   freePosRoom =  vector<Point >  ();
+//          Room* room = _building->GetRoom(r);
+//          if(room->GetCaption()=="outside") continue;
+//          for (int s = 0; s < room->GetNumberOfSubRooms(); s++) {
+//               // SubRoom* subr = room->GetSubRoom(s);
+//               // TODO
+//               //vector<Point > pos = PedDistributor::PossiblePositions(*subr);
+//               //freePosRoom.insert(freePosRoom.end(),pos.begin(),pos.end());
+//          }
+//          availablePos.push_back(freePosRoom);
+//     }
+//
+//
+//     string filename="../pedunc/examples/stadium/arenaS.xml";
+//     ofstream file(filename.c_str());
+//     file.precision(2);
+//     file<<fixed;
+//
+//     if(file.is_open()==false) {
+//          cout <<"could not open the file: "<<filename<<endl;
+//          return;
+//     }
+//
+//     file<< "<?xml version=\"1.0\"?>"<<endl;
+//     file<< "<Experiment version=\"2.0\">"<<endl;
+//     file<< "\t<SpatialQuery>"<<endl;
+//     file<< "\t\t<NavMesh filename=\"../examples/stadium/arena.nav\"/>"<<endl;
+//     file<< "\t</SpatialQuery>"<<endl;
+//     file<< "<!--"<<endl;
+//     file<< "<Elevation>"<<endl;
+//     file<< "<NavMeshElevation filename=\"../examples/stadium/arena.nav\" />"<<endl;
+//     file<< "</Elevation>"<<endl;
+//     file<< "-->"<<endl;
+//     file<< "\t<Boids max_force=\"8\" leak_through=\"0.1\" reaction_time=\"0.5\" />"<<endl;
+//     file<< "\t<Common time_step=\"0.1\" />"<<endl;
+//     file<< "\t<GCF reaction_time=\"0.5\" max_agent_dist=\"2\" max_agent_force=\"3\" agent_interp_width=\"0.1\" nu_agent=\"0.35\" />"<<endl;
+//     file<< "\t<Helbing agent_scale=\"2000\" obstacle_scale=\"4000\" reaction_time=\"0.5\" body_force=\"1200\" friction=\"2400\" force_distance=\"0.015\" />"<<endl;
+//     file<< "\t<Johansson agent_scale=\"25\" obstacle_scale=\"35\" reaction_time=\"0.5\" force_distance=\"0.15\" stride_time=\"0.5\" />"<<endl;
+//     file<< "\t<Karamouzas orient_weight=\"0.8\" fov=\"200\" reaction_time=\"0.4\" wall_steepness=\"2\" wall_distance=\"2\" colliding_count=\"5\" d_min=\"1\" d_mid=\"8\" d_max=\"10\" agent_force=\"4\" />"<<endl;
+//     file<< "\t<Zanlungo agent_scale=\"2000\" obstacle_scale=\"4000\" reaction_time=\"0.5\" force_distance=\"0.005\" />"<<endl;
+//     file<< ""<<endl;
+//     file<< "\t<AgentSet>"<<endl;
+//     file<< "\t\t<Boids tau=\"3\" tauObst=\"6\" />"<<endl;
+//     file<< "\t\t<Common max_neighbors=\"10\" obstacleSet=\"1\" neighbor_dist=\"5\" r=\"0.19\" class=\"1\" pref_speed=\"1.04\" max_speed=\"2\" max_accel=\"5\" />"<<endl;
+//     file<< "\t\t<GCF stand_depth=\"0.18\" move_scale=\"0.53\" slow_width=\"0.25\" sway_change=\"0.05\" orient_weight=\"0.75\" />"<<endl;
+//     file<< "\t\t<Helbing mass=\"80\" />"<<endl;
+//     file<< "\t\t<Johansson fov_weight=\"0.16\" />"<<endl;
+//     file<< "\t\t<Karamouzas personal_space=\"0.69\" anticipation=\"8\" />"<<endl;
+//     file<< "\t\t<RVO tau=\"3\" tauObst=\"0.75\" turningBias=\"1.0\" />"<<endl;
+//     file<< "\t\t<Zanlungo mass=\"80\" orient_weight=\"0.75\" />"<<endl;
+//     file<< ""<<endl;
+//
+//
+//     for(int i=0; i<_building->GetNumberOfRooms(); i++) {
+//          //int room_id=pBuilding->GetRoom("100")->GetRoomID();
+//
+//          Room* room = _building->GetRoom(i);
+//          if(room->GetCaption()=="outside") continue;
+//          if(room->GetCaption()=="150") continue;
+//          int room_id=room->GetID();
+//          vector<Point > freePosRoom = availablePos[room_id];
+//
+//          int nAgentsPerRoom=10; // the number of agents to distribute
+//          for (int a=0; a<nAgentsPerRoom; a++) {
+//               int index = rand() % freePosRoom.size();
+//               file<< "\t\t<Agent p_x=\""<<freePosRoom[index]._x<<" \"p_y=\""<<freePosRoom[index]._y<<"\"/>"<<endl;
+//               //cout<<"Position: "<<freePosRoom[index].toString()<<endl;
+//               freePosRoom.erase(freePosRoom.begin() + index);
+//          }
+//
+//          //              break;
+//     }
+//
+//     file<< "\t</AgentSet>"<<endl;
+//     file<< "</Experiment>"<<endl;
+//
+//}
 
 void NavMesh::UpdateEdges()
 {
@@ -2462,10 +2458,10 @@ void NavMesh::ComputePlanesEquation()
                     bool connection=false;
 
                     //check if the subroom is connected with a stair
-                    for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
-                         Room* r = _building->GetRoom(i);
-                         for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
-                              SubRoom* s = r->GetSubRoom(k);
+                    for (int numRoom = 0; numRoom < _building->GetNumberOfRooms(); numRoom++) {
+                         Room* localRoom = _building->GetRoom(numRoom);
+                         for (int numSubroom = 0; numSubroom < localRoom->GetNumberOfSubRooms(); numSubroom++) {
+                              SubRoom* s = localRoom->GetSubRoom(numSubroom);
                               if(s){
                                    Stair* st=dynamic_cast<Stair*>(s);
                               //if ((st!=NULL) && (s->GetSubRoomID()!=sub->GetSubRoomID()) ){
@@ -2513,7 +2509,7 @@ void NavMesh::ComputePlanesEquation()
                     }
                     // do the projection
 DONE:
-                    if(connection==false) {
+                    if(!connection) {
                          sub->SetPlanEquation(0.0,0.0,r->GetZPos());
                          //cout<<"base: "<< sub->GetAllCrossings().size()<<endl;
                     }
@@ -2583,7 +2579,6 @@ void NavMesh::ComputeStairsEquation()
 
                     // looking for the normal vector
                     Point A;
-                    Point B;
                     Point C;
                     Point D;
                     bool finished=false;
@@ -2604,9 +2599,9 @@ void NavMesh::ComputeStairsEquation()
 
                          for (unsigned int i1=0; i1<4; i1++) {
 
-                              int i2 = (i1 + 1) % poly.size();
-                              int i3 = (i2 + 1) % poly.size();
-                              int i4 = (i3 + 1) % poly.size();
+                              int i2 = (int) ((i1 + 1) % poly.size());
+                              int i3 = (int) ((i2 + 1) % poly.size());
+                              int i4 = (int) ((i3 + 1) % poly.size());
                               Point p1 = poly[i1];
                               Point p2 = poly[i2];
                               Point p3 = poly[i3];
@@ -2622,12 +2617,10 @@ void NavMesh::ComputeStairsEquation()
                                         if (D0.Determinant(D1) > 0) {
                                              D=p1;
                                              A=p2;
-                                             B=p3;
                                              C=p4;
                                              //finished=true;
                                         } else {
                                              A=p1;
-                                             B=p4;
                                              C=p3;
                                              D=p2;
                                         }
@@ -2692,144 +2685,144 @@ void NavMesh::ComputeStairsEquation()
 }
 
 
-bool NavMesh::IsCircleVisibleFromLine(const Point& center, double radius, const Line& segment)
-{
-
-     int nLine=0;
-
-     for(double alpha=0.0; alpha<=2*M_PI; alpha+=0.01) {
-
-          bool isVisible=true;
-          bool done=false;
-
-          double x= radius*cos(alpha);
-          double y= radius*sin(alpha);
-          Point point_on_circle = Point(x,y) + center;
-          //test must be done for the two points separately
-          Line seg1=Line(segment.GetPoint1(),point_on_circle);
-          //Line seg2=Line(segment.GetPoint2(),point_on_circle);
-
-          for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
-               Room* r = _building->GetRoom(i);
-
-               //skip the virtual room containing the complete geometry
-               if(r->GetCaption()=="outside") continue;
-
-               for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
-                    SubRoom* s = r->GetSubRoom(k);
-                    const vector<Wall>& walls = s->GetAllWalls();
-                    //const vector<Transition*>& transitions = s->GetAllTransitions();
-
-                    for (unsigned w = 0; w < walls.size(); w++) {
-
-                         //if(walls[w]==segment) continue;
-                         // dont check if they share a common vertex
-                         //if(walls[w].ShareCommonPointWith(segment)) continue;
-                         if(walls[w].HasEndPoint(segment.GetPoint1())) continue;
-
-                         if(seg1.IntersectionWith(walls[w])) {
-                              //cout<<"X";
-                              done=true;
-                              isVisible=false;
-                              break;
-                         }
-                    }
-                    if(!done)
-                         for (map<int, Transition*>::const_iterator itr = _building->GetAllTransitions().begin();
-                                   itr != _building->GetAllTransitions().end(); ++itr) {
-                              Transition* cross = itr->second;
-                              //if(cross->operator ==(segment)) continue;
-                              if(cross->IntersectionWith(segment)) {
-                                   done=true;
-                                   isVisible=false;
-                                   break;
-                              }
-                         }
-
-                    if(done) break;
-               }
-               if(done) break;
-          }
-
-          //one visibility line was found
-          if(isVisible==true) {
-               nLine++;
-               break;
-          }
-     }
-
-     //the first point failed.
-     // check the second one
-     if(nLine==0)    return false;
-
-     //if (nLine==1) return true;
-
-     //restart the same procedure with the second point
-
-     for(double alpha=0.0; alpha<=2*M_PI; alpha+=0.01) {
-
-          bool isVisible=true;
-          bool done=false;
-
-          double x= radius*cos(alpha);
-          double y= radius*sin(alpha);
-          Point point_on_circle = Point(x,y) + center;
-          //test must be done for the two points separately
-          //Line seg1=Line(segment.GetPoint1(),point_on_circle);
-          Line seg2=Line(segment.GetPoint2(),point_on_circle);
-
-
-          for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
-               Room* r = _building->GetRoom(i);
-
-               //skip the virtual room containing the complete geometry
-               if(r->GetCaption()=="outside") continue;
-
-               for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
-                    SubRoom* s = r->GetSubRoom(k);
-                    const vector<Wall>& walls = s->GetAllWalls();
-
-                    for (unsigned w = 0; w < walls.size(); w++) {
-
-                         //if(walls[w]==segment) continue;
-                         //if(walls[w].ShareCommonPointWith(segment)) continue;
-                         if(walls[w].HasEndPoint(segment.GetPoint2())) continue;
-
-                         if(seg2.IntersectionWith(walls[w])) {
-                              //cout<<"X";
-                              done=true;
-                              isVisible=false;
-                              break;
-                         }
-                    }
-                    if(!done)
-                         for (map<int, Transition*>::const_iterator itr = _building->GetAllTransitions().begin();
-                                   itr != _building->GetAllTransitions().end(); ++itr) {
-                              Transition* cross = itr->second;
-                              //if(cross->operator ==(segment)) continue;
-                              if(cross->IntersectionWith(segment)) {
-                                   done=true;
-                                   isVisible=false;
-                                   break;
-                              }
-                         }
-                    if(done) break;
-               }
-               if(done) break;
-          }
-
-          //one visibility line was found
-          if(isVisible==true) {
-               nLine++;
-               break;
-          }
-     }
-
-     cout<<"nline: " <<nLine<<endl;
-     if(nLine==2) return true;
-     else return false;
-
-}
+//bool NavMesh::IsCircleVisibleFromLine(const Point& center, double radius, const Line& segment)
+//{
+//
+//     int nLine=0;
+//
+//     for(double alpha=0.0; alpha<=2*M_PI; alpha+=0.01) {
+//
+//          bool isVisible=true;
+//          bool done=false;
+//
+//          double x= radius*cos(alpha);
+//          double y= radius*sin(alpha);
+//          Point point_on_circle = Point(x,y) + center;
+//          //test must be done for the two points separately
+//          Line seg1=Line(segment.GetPoint1(),point_on_circle);
+//          //Line seg2=Line(segment.GetPoint2(),point_on_circle);
+//
+//          for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
+//               Room* r = _building->GetRoom(i);
+//
+//               //skip the virtual room containing the complete geometry
+//               if(r->GetCaption()=="outside") continue;
+//
+//               for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
+//                    SubRoom* s = r->GetSubRoom(k);
+//                    const vector<Wall>& walls = s->GetAllWalls();
+//                    //const vector<Transition*>& transitions = s->GetAllTransitions();
+//
+//                    for (unsigned w = 0; w < walls.size(); w++) {
+//
+//                         //if(walls[w]==segment) continue;
+//                         // dont check if they share a common vertex
+//                         //if(walls[w].ShareCommonPointWith(segment)) continue;
+//                         if(walls[w].HasEndPoint(segment.GetPoint1())) continue;
+//
+//                         if(seg1.IntersectionWith(walls[w])) {
+//                              //cout<<"X";
+//                              done=true;
+//                              isVisible=false;
+//                              break;
+//                         }
+//                    }
+//                    if(!done)
+//                         for (map<int, Transition*>::const_iterator itr = _building->GetAllTransitions().begin();
+//                                   itr != _building->GetAllTransitions().end(); ++itr) {
+//                              Transition* cross = itr->second;
+//                              //if(cross->operator ==(segment)) continue;
+//                              if(cross->IntersectionWith(segment)) {
+//                                   done=true;
+//                                   isVisible=false;
+//                                   break;
+//                              }
+//                         }
+//
+//                    if(done) break;
+//               }
+//               if(done) break;
+//          }
+//
+//          //one visibility line was found
+//          if(isVisible==true) {
+//               nLine++;
+//               break;
+//          }
+//     }
+//
+//     //the first point failed.
+//     // check the second one
+//     if(nLine==0)    return false;
+//
+//     //if (nLine==1) return true;
+//
+//     //restart the same procedure with the second point
+//
+//     for(double alpha=0.0; alpha<=2*M_PI; alpha+=0.01) {
+//
+//          bool isVisible=true;
+//          bool done=false;
+//
+//          double x= radius*cos(alpha);
+//          double y= radius*sin(alpha);
+//          Point point_on_circle = Point(x,y) + center;
+//          //test must be done for the two points separately
+//          //Line seg1=Line(segment.GetPoint1(),point_on_circle);
+//          Line seg2=Line(segment.GetPoint2(),point_on_circle);
+//
+//
+//          for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
+//               Room* r = _building->GetRoom(i);
+//
+//               //skip the virtual room containing the complete geometry
+//               if(r->GetCaption()=="outside") continue;
+//
+//               for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
+//                    SubRoom* s = r->GetSubRoom(k);
+//                    const vector<Wall>& walls = s->GetAllWalls();
+//
+//                    for (unsigned w = 0; w < walls.size(); w++) {
+//
+//                         //if(walls[w]==segment) continue;
+//                         //if(walls[w].ShareCommonPointWith(segment)) continue;
+//                         if(walls[w].HasEndPoint(segment.GetPoint2())) continue;
+//
+//                         if(seg2.IntersectionWith(walls[w])) {
+//                              //cout<<"X";
+//                              done=true;
+//                              isVisible=false;
+//                              break;
+//                         }
+//                    }
+//                    if(!done)
+//                         for (map<int, Transition*>::const_iterator itr = _building->GetAllTransitions().begin();
+//                                   itr != _building->GetAllTransitions().end(); ++itr) {
+//                              Transition* cross = itr->second;
+//                              //if(cross->operator ==(segment)) continue;
+//                              if(cross->IntersectionWith(segment)) {
+//                                   done=true;
+//                                   isVisible=false;
+//                                   break;
+//                              }
+//                         }
+//                    if(done) break;
+//               }
+//               if(done) break;
+//          }
+//
+//          //one visibility line was found
+//          if(isVisible==true) {
+//               nLine++;
+//               break;
+//          }
+//     }
+//
+//     cout<<"nline: " <<nLine<<endl;
+//     if(nLine==2) return true;
+//     else return false;
+//
+//}
 
 
 void NavMesh::Test()

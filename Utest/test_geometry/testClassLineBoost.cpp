@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(LINE_DIST_TO_TEST)
      for (int i = -10; i < 11; ++i)
      {
           BOOST_CHECK_MESSAGE(L1.DistTo(Point(i, i)) == abs(i-2), L1.DistTo(Point(i, i)));  
-          BOOST_CHECK_MESSAGE(L1.DistToSquare(Point(i, i)) == abs(i-2)^2, L1.DistToSquare(Point(i, i)));  
+          BOOST_CHECK_MESSAGE(L1.DistToSquare(Point(i, i)) == ((i-2)*(i-2)), L1.DistToSquare(Point(i, i)));  
      }
      BOOST_TEST_MESSAGE("Leaving dist to shortestPoint test");
 

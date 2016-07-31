@@ -25,20 +25,20 @@ License along with VisiLibity.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #include "visilibity.hpp"  //VisiLibity header
-#include <cmath>         //math functions in std namespace
-#include <vector>
-#include <queue>         //queue and priority_queue
-#include <set>           //priority queues with iteration,
+//#include <cmath>         //math functions in std namespace
+//#include <vector>
+//#include <queue>         //queue and priority_queue
+//#include <set>           //priority queues with iteration,
                          //integrated keys
-#include <list>
-#include <algorithm>     //sorting, min, max, reverse
-#include <cstdlib>       //rand and srand
-#include <ctime>         //Unix time
-#include <fstream>       //file I/O
-#include <iostream>
-#include <cstring>       //gives C-string manipulation
-#include <string>        //string class
-#include <cassert>       //assertions
+//#include <list>
+//#include <algorithm>     //sorting, min, max, reverse
+//#include <cstdlib>       //rand and srand
+//#include <ctime>         //Unix time
+//#include <fstream>       //file I/O
+//#include <iostream>
+//#include <cstring>       //gives C-string manipulation
+//#include <string>        //string class
+//#include <cassert>       //assertions
 
 
 
@@ -283,7 +283,7 @@ namespace VisiLibity
     assert( *this == *this
 	    && polygon_temp.vertices_.size() > 0 );
 
-    int n = polygon_temp.vertices_.size();
+    int n = (int) polygon_temp.vertices_.size();
     if( on_boundary_of(polygon_temp, epsilon) )
       return true;
     // Then check the number of times a ray emanating from the Point
@@ -2695,6 +2695,7 @@ namespace VisiLibity
   void Guards::snap_to_vertices_of(const Environment& environment_temp,
 				   double epsilon)
   {
+    UNUSED(epsilon);
     for(unsigned i=0; i<positions_.size(); i++)
       positions_[i].snap_to_vertices_of(environment_temp);
   }
@@ -2703,6 +2704,7 @@ namespace VisiLibity
   void Guards::snap_to_vertices_of(const Polygon& polygon_temp,
 				   double epsilon)
   {
+    UNUSED(epsilon);
     for(unsigned i=0; i<positions_.size(); i++)
       positions_[i].snap_to_vertices_of(polygon_temp);
   }
@@ -2718,6 +2720,7 @@ namespace VisiLibity
   void Guards::snap_to_boundary_of(const Polygon& polygon_temp,
 				   double epsilon)
   {
+    UNUSED(epsilon);
     for(unsigned i=0; i<positions_.size(); i++)
       positions_[i].snap_to_boundary_of(polygon_temp);
   }
@@ -2736,7 +2739,7 @@ namespace VisiLibity
   //Visibility_Polygon
 
 
-  bool Visibility_Polygon::is_spike( const Point& observer,
+  bool Visibility_Polygon::is_spike( const Point& Observer,
 				     const Point& point1,
 				     const Point& point2,
 				     const Point& point3, 
@@ -2744,22 +2747,22 @@ namespace VisiLibity
   {
 
     return(  
-         //Make sure observer not colocated with any of the points.
-	   distance( observer , point1 ) > epsilon
-	   && distance( observer , point2 ) > epsilon
-	   && distance( observer , point3 ) > epsilon
+         //Make sure Observer not colocated with any of the points.
+	   distance( Observer , point1 ) > epsilon
+	   && distance( Observer , point2 ) > epsilon
+	   && distance( Observer , point3 ) > epsilon
 	 //Test whether there is a spike with point2 as the tip
-	   && (  ( distance(observer,point2) 
-		    >= distance(observer,point1)
-		    && distance(observer,point2) 
-		    >= distance(observer,point3) ) 
-		  || ( distance(observer,point2) 
-		       <= distance(observer,point1)
-		       && distance(observer,point2) 
-		       <= distance(observer,point3) )  )
+	   && (  ( distance(Observer,point2)
+		    >= distance(Observer,point1)
+		    && distance(Observer,point2)
+		    >= distance(Observer,point3) )
+		  || ( distance(Observer,point2)
+		       <= distance(Observer,point1)
+		       && distance(Observer,point2)
+		       <= distance(Observer,point3) )  )
 	 //and the pike is sufficiently sharp,
-	   && std::max(  distance( Ray(observer, point1), point2 ), 
-			  distance( Ray(observer, point3), point2 )  )
+	   && std::max(  distance( Ray(Observer, point1), point2 ),
+			  distance( Ray(Observer, point3), point2 )  )
 	   <= epsilon  
 	     );
     //Formerly used
@@ -2783,13 +2786,13 @@ namespace VisiLibity
   }
 
 
-  void Visibility_Polygon::chop_spikes_at_wrap_around(const Point& observer,
+  void Visibility_Polygon::chop_spikes_at_wrap_around(const Point& Observer,
 						      double epsilon)
   {
     //Eliminate "special case" vertices of the visibility polygon at
     //wrap-around.  While the there's a spike at the wrap-around,
     while(  vertices_.size() >= 3 
-	    && is_spike( observer,
+	    && is_spike( Observer,
 			  vertices_[vertices_.size()-2],
 			  vertices_[vertices_.size()-1],
 			  vertices_[0], epsilon )  ){
@@ -2799,9 +2802,10 @@ namespace VisiLibity
   }
 
 
-  void Visibility_Polygon::chop_spikes(const Point& observer,
+  void Visibility_Polygon::chop_spikes(const Point& Observer,
 				       double epsilon)
-  {    
+  {
+    UNUSED(Observer);
     std::set<Point> spike_tips;
     std::vector<Point> vertices_temp;
     //Middle point is potentially the tip of a spike
@@ -2858,10 +2862,10 @@ namespace VisiLibity
   }
 
 
-  Visibility_Polygon::Visibility_Polygon(const Point& observer,
+  Visibility_Polygon::Visibility_Polygon(const Point& Observer,
 					 const Environment& environment_temp,
 					 double epsilon)
-    : observer_(observer)
+    : observer_(Observer)
   {
     //Visibility polygon algorithm for environments with holes 
     //Radial line (AKA angular plane) sweep technique.
@@ -2887,7 +2891,7 @@ namespace VisiLibity
     //
     //Preconditions:
     //(1)  the Environment is epsilon-valid,
-    //(2)  the Point observer is actually in the Environment
+    //(2)  the Point Observer is actually in the Environment
     //     environment_temp,
     //(3)  the guard has been epsilon-snapped to the boundary, followed
     //     by vertices of the environment (the order of the snapping
@@ -2899,7 +2903,7 @@ namespace VisiLibity
     //
     //assert( environment_temp.is_valid(epsilon) );
     //assert( environment_temp.is_in_standard_form() );
-    //assert( observer.in(environment_temp, epsilon) );
+    //assert( Observer.in(environment_temp, epsilon) );
 
     //true  => data printed to terminal
     //false => silent
@@ -2914,9 +2918,9 @@ namespace VisiLibity
      
     //Construct a POLAR EDGE LIST from environment_temp's outer
     //boundary and holes.  During this construction, those edges are
-    //split which either (1) cross the ray emanating from the observer
+    //split which either (1) cross the ray emanating from the Observer
     //parallel to the x-axis (of world coords), or (2) contain the
-    //observer in their relative interior (w/in epsilon).  Also, edges
+    //Observer in their relative interior (w/in epsilon).  Also, edges
     //having first vertex bearing >= second vertex bearing are
     //eliminated because they cannot possibly contribute to the
     //visibility polygon.
@@ -2924,23 +2928,23 @@ namespace VisiLibity
     Polar_Point ppoint1, ppoint2;
     Polar_Point split_bottom, split_top;
     double t;
-    //If the observer is standing on the Enviroment boundary with its
+    //If the Observer is standing on the Enviroment boundary with its
     //back to the wall, these will be the bearings of the next vertex
     //to the right and to the left, respectively.
     Angle right_wall_bearing;
     Angle left_wall_bearing;
     for(unsigned i=0; i<=environment_temp.h(); i++){
     for(unsigned j=0; j<environment_temp[i].n(); j++){      
-      ppoint1 = Polar_Point( observer, environment_temp[i][j] );
-      ppoint2 = Polar_Point( observer, environment_temp[i][j+1] );
+      ppoint1 = Polar_Point( Observer, environment_temp[i][j] );
+      ppoint2 = Polar_Point( Observer, environment_temp[i][j+1] );
 
-      //If the observer is in the relative interior of the edge.
-      if(  observer.in_relative_interior_of( Line_Segment(ppoint1, ppoint2),
+      //If the Observer is in the relative interior of the edge.
+      if(  Observer.in_relative_interior_of( Line_Segment(ppoint1, ppoint2),
 					     epsilon )  ){
-	//Split the edge at the observer and add the resulting two
+	//Split the edge at the Observer and add the resulting two
 	//edges to elp (the polar edge list).
-	split_bottom = Polar_Point(observer, observer);
-	split_top = Polar_Point(observer, observer);
+	split_bottom = Polar_Point(Observer, Observer);
+	split_top = Polar_Point(Observer, Observer);
 
 	if( ppoint2.bearing() == Angle(0.0) )
 	  ppoint2.set_bearing_to_2pi();
@@ -2953,46 +2957,46 @@ namespace VisiLibity
 	continue;
       }
 
-      //Else if the observer is on first vertex of edge.
-      else if( distance(observer, ppoint1) <= epsilon ){
+      //Else if the Observer is on first vertex of edge.
+      else if( distance(Observer, ppoint1) <= epsilon ){
 	if( ppoint2.bearing() == Angle(0.0) )
 	  ppoint2.set_bearing_to_2pi();
 	//Get right wall bearing.
 	right_wall_bearing = ppoint2.bearing();
-	elp.push_back(  Polar_Edge( Polar_Point(observer, observer),
+	elp.push_back(  Polar_Edge( Polar_Point(Observer, Observer),
 				    ppoint2 )  );
 	continue;
       }
-      //Else if the observer is on second vertex of edge.
-      else if( distance(observer, ppoint2) <= epsilon ){
+      //Else if the Observer is on second vertex of edge.
+      else if( distance(Observer, ppoint2) <= epsilon ){
 	//Get left wall bearing.
 	left_wall_bearing = ppoint1.bearing();
 	elp.push_back(  Polar_Edge( ppoint1,
-				    Polar_Point(observer, observer) )  );	
+				    Polar_Point(Observer, Observer) )  );
 	continue;
       }
 
-      //Otherwise the observer is not on the edge.
+      //Otherwise the Observer is not on the edge.
 
       //If edge not horizontal (w/in epsilon).
       else if(  std::fabs( ppoint1.y() - ppoint2.y() ) > epsilon  ){
 	//Possible source of numerical instability?
-	t = ( observer.y() - ppoint2.y() ) 
+	t = ( Observer.y() - ppoint2.y() )
 	  / ( ppoint1.y() - ppoint2.y() );
 	//If edge crosses the ray emanating horizontal and right of
-	//the observer.
+	//the Observer.
 	if( 0 < t && t < 1 && 
-	    observer.x() < t*ppoint1.x() + (1-t)*ppoint2.x() ){ 
+	    Observer.x() < t*ppoint1.x() + (1-t)*ppoint2.x() ){
 	  //If first point is above, omit edge because it runs
 	  //'against the grain'.
-	  if( ppoint1.y() > observer.y() )
+	  if( ppoint1.y() > Observer.y() )
 	    continue;
 	  //Otherwise split the edge, making sure angles are assigned
 	  //correctly on each side of the split point.
 	  split_bottom = split_top 
-	    = Polar_Point(  observer,
+	    = Polar_Point(  Observer,
 			    Point( t*ppoint1.x() + (1-t)*ppoint2.x(),
-				   observer.y() )  );
+				   Observer.y() )  );
 	  split_top.set_bearing( Angle(0.0) );
 	  split_bottom.set_bearing_to_2pi();
 	  elp.push_back(  Polar_Edge( ppoint1   , split_bottom )  );
@@ -3000,7 +3004,7 @@ namespace VisiLibity
 	  continue;
 	}
 	//If the edge is not horizontal and doesn't cross the ray
-	//emanating horizontal and right of the observer.
+	//emanating horizontal and right of the Observer.
 	else if( ppoint1.bearing() >= ppoint2.bearing()
 		 && ppoint2.bearing() == Angle(0.0) 
 		 && ppoint1.bearing() > Angle(M_PI) )
@@ -3047,9 +3051,9 @@ namespace VisiLibity
       ppoint_wei2.set_polar_point( elp_iterator->second );
       ppoint_wei2.incident_edge = elp_iterator;
       ppoint_wei2.is_first = false;
-      //If edge contains the observer, then adjust the bearing of
-      //the Polar_Point containing the observer.
-      if( distance(observer, ppoint_wei1) <= epsilon ){
+      //If edge contains the Observer, then adjust the bearing of
+      //the Polar_Point containing the Observer.
+      if( distance(Observer, ppoint_wei1) <= epsilon ){
 	if( right_wall_bearing > left_wall_bearing ){
 	  ppoint_wei1.set_bearing( right_wall_bearing );
 	  (elp_iterator->first).set_bearing( right_wall_bearing );
@@ -3059,7 +3063,7 @@ namespace VisiLibity
 	  (elp_iterator->first).set_bearing( Angle(0.0) );
 	}
       } 
-      else if( distance(observer, ppoint_wei2) <= epsilon ){
+      else if( distance(Observer, ppoint_wei2) <= epsilon ){
 	if( right_wall_bearing > left_wall_bearing ){
 	  ppoint_wei2.set_bearing(right_wall_bearing);
 	  (elp_iterator->second).set_bearing( right_wall_bearing );
@@ -3080,8 +3084,8 @@ namespace VisiLibity
       std::cout << std::endl 
 		<< "\E[1;37;40m" 
 		<< "COMPUTING VISIBILITY POLYGON " << std::endl
-		<<  "for an observer located at [x y] = [" 
-		<< observer << "]" 
+		<<  "for an Observer located at [x y] = ["
+		<< Observer << "]"
 		<< "\x1b[0m" 
 		<< std::endl << std::endl
 		<< "\E[1;37;40m" <<"PREPROCESSING" << "\x1b[0m" 
@@ -3117,8 +3121,8 @@ namespace VisiLibity
     Line_Segment xing;
 
     //Priority queue of edges, where higher priority indicates closer
-    //range to observer along current ray (of ray sweep).
-    Incident_Edge_Compare my_iec(observer, current_vertex, epsilon);
+    //range to Observer along current ray (of ray sweep).
+    Incident_Edge_Compare my_iec(Observer, current_vertex, epsilon);
     std::priority_queue<std::list<Polar_Edge>::iterator,
                         std::vector<std::list<Polar_Edge>::iterator>,
                         Incident_Edge_Compare> q2(my_iec);
@@ -3144,9 +3148,9 @@ namespace VisiLibity
     }
 
     //Insert e into q2 as long as it doesn't contain the
-    //observer.
-    if( distance(observer,active_edge->first) > epsilon
-	 && distance(observer,active_edge->second) > epsilon ){
+    //Observer.
+    if( distance(Observer,active_edge->first) > epsilon
+	 && distance(Observer,active_edge->second) > epsilon ){
      
       if(PRINTING_DEBUG_DATA){
 	std::cout << std::endl
@@ -3225,7 +3229,7 @@ namespace VisiLibity
 
 	//Push current_vertex onto visibility polygon 
 	vertices_.push_back( current_vertex );
-	chop_spikes_at_back(observer, epsilon);
+	chop_spikes_at_back(Observer, epsilon);
 
 	while( !q2.empty() ){
 	  e = q2.top();
@@ -3251,19 +3255,19 @@ namespace VisiLibity
 	  if(  ( current_vertex.bearing().get() 
 		 <= e->second.bearing().get() )
 	       //For robustness.
-	       && distance( Ray(observer, current_vertex.bearing()),
+	       && distance( Ray(Observer, current_vertex.bearing()),
 			     e->second ) >= epsilon
 	       /* was
-	       and std::min( distance(Ray(observer, current_vertex.bearing()),
+	       and std::min( distance(Ray(Observer, current_vertex.bearing()),
 				      e->second), 
-			     distance(Ray(observer, e->second.bearing()),
+			     distance(Ray(Observer, e->second.bearing()),
 				      current_vertex) 
 			     ) >= epsilon
 	       */
 	       ){
  	    //Find intersection point k of ray (through
 	    //current_vertex) with edge e.
-	    xing = intersection( Ray(observer, current_vertex.bearing()), 
+	    xing = intersection( Ray(Observer, current_vertex.bearing()),
 				 Line_Segment(e->first,
 					      e->second),
 				 epsilon );
@@ -3271,7 +3275,7 @@ namespace VisiLibity
 	    //assert( xing.size() > 0 );
 	    
 	    if( xing.size() > 0 ){
-	      k = Polar_Point( observer , xing.first() );
+	      k = Polar_Point( Observer , xing.first() );
 	    }
 	    else{ //Error contingency.
 	      k = current_vertex;
@@ -3290,7 +3294,7 @@ namespace VisiLibity
 
 	    //Push k onto the visibility polygon.
 	    vertices_.push_back(k);
-	    chop_spikes_at_back(observer, epsilon);
+	    chop_spikes_at_back(Observer, epsilon);
 	    active_edge = e;
 	    break;
 	  }
@@ -3308,19 +3312,19 @@ namespace VisiLibity
       if( current_vertex.is_first ){
 	//Find intersection point k of ray (through current_vertex)
 	//with active_edge.
-	xing = intersection( Ray(observer, current_vertex.bearing()), 
+	xing = intersection( Ray(Observer, current_vertex.bearing()),
 			     Line_Segment(active_edge->first,
 					  active_edge->second),
 			     epsilon );
 	if(  xing.size() == 0 
-	     || ( distance(active_edge->first, observer) <= epsilon 
+	     || ( distance(active_edge->first, Observer) <= epsilon
 		  && active_edge->second.bearing() 
 		  <= current_vertex.bearing() )
 	     || active_edge->second < current_vertex  ){
 	  k_range = INFINITY;
 	}
 	else{
-	  k = Polar_Point( observer , xing.first() );
+	  k = Polar_Point( Observer , xing.first() );
 	  k_range = k.range();
 	}
 
@@ -3338,9 +3342,9 @@ namespace VisiLibity
 	}
 	
 	//Insert e into q2 as long as it doesn't contain the
-	//observer.
-	if( distance(observer, e->first) > epsilon
-	    && distance(observer, e->second) > epsilon ){
+	//Observer.
+	if( distance(Observer, e->first) > epsilon
+	    && distance(Observer, e->second) > epsilon ){
 	 
 	  if(PRINTING_DEBUG_DATA){
 	    std::cout << std::endl
@@ -3395,7 +3399,7 @@ namespace VisiLibity
 	      //and k == k
 	      && k_range != INFINITY
 	      && distance(k, current_vertex) > epsilon 
-	      && distance(active_edge->first, observer) > epsilon 
+	      && distance(active_edge->first, Observer) > epsilon
 	      ){
 	   
 	    if(PRINTING_DEBUG_DATA){
@@ -3407,12 +3411,12 @@ namespace VisiLibity
 
 	    //Push k-point onto the visibility polygon.
 	    vertices_.push_back(k);
-	    chop_spikes_at_back(observer, epsilon);
+	    chop_spikes_at_back(Observer, epsilon);
 	  }
 
 	  //Push current_vertex onto the visibility polygon.
 	  vertices_.push_back(current_vertex);
-	  chop_spikes_at_back(observer, epsilon);
+	  chop_spikes_at_back(Observer, epsilon);
 	  //Set active_edge to edge of current_vertex.
 	  active_edge = e;
 
@@ -3439,9 +3443,9 @@ namespace VisiLibity
     //-------END MAIN LOOP-------//
   
     //The Visibility_Polygon should have a minimal representation
-    chop_spikes_at_wrap_around( observer , epsilon );
+    chop_spikes_at_wrap_around( Observer , epsilon );
     eliminate_redundant_vertices( epsilon );
-    chop_spikes( observer, epsilon );
+    chop_spikes( Observer, epsilon );
     enforce_standard_form();
     
     if(PRINTING_DEBUG_DATA){
@@ -3522,7 +3526,7 @@ namespace VisiLibity
 				     const Environment& environment,
 				     double epsilon)
   {
-    n_ = points.size();
+    n_ = (unsigned int) points.size();
 
     //fill vertex_counts_
     vertex_counts_.push_back( n_ );

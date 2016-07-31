@@ -1,7 +1,7 @@
 #include "cognitivemap.h"
-#include "../../../geometry/Point.h"
+//#include "../../../geometry/Point.h"
 #include "../../../geometry/SubRoom.h"
-#include "../../../geometry/Building.h"
+//#include "../../../geometry/Building.h"
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../visiLibity/source_code/visilibity.hpp"
 
@@ -36,23 +36,23 @@ CognitiveMap::~CognitiveMap()
 
 }
 
-void CognitiveMap::UpdateMap()
-{
-    AddWaypoints(TriggerAssoziations(LookForLandmarks()));
-    if (_waypContainerSorted.empty())
-        return;
-    if (_waypContainerSorted.top()->WaypointReached(_YAHPointer.GetPos()))
-    {
-        //ptrWaypoint cWaypoint = _waypContainerSorted.top();
-
-        //cWaypoint->SetPriority(_waypContainerSorted.size());
-        _waypContainerSorted.pop();
-
-        //_waypContainerSorted.push(cWaypoint);
-        //_waypContainer.pop();
-        //Log->Write("Prio:\t"+std::to_string(_waypContainerSorted.top()->GetPriority()));
-    }
-}
+//void CognitiveMap::UpdateMap()
+//{
+//    AddWaypoints(TriggerAssoziations(LookForLandmarks()));
+//    if (_waypContainerSorted.empty())
+//        return;
+//    if (_waypContainerSorted.top()->WaypointReached(_YAHPointer.GetPos()))
+//    {
+//        //ptrWaypoint cWaypoint = _waypContainerSorted.top();
+//
+//        //cWaypoint->SetPriority(_waypContainerSorted.size());
+//        _waypContainerSorted.pop();
+//
+//        //_waypContainerSorted.push(cWaypoint);
+//        //_waypContainer.pop();
+//        //Log->Write("Prio:\t"+std::to_string(_waypContainerSorted.top()->GetPriority()));
+//    }
+//}
 
 void CognitiveMap::UpdateDirection()
 {
@@ -157,31 +157,31 @@ void CognitiveMap::AddWaypoints(Waypoints waypoints)
 
 }
 
-void CognitiveMap::AssessDoors()
-{
-    SubRoom * sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
-    GraphVertex * vertex = (*_network->GetNavigationGraph())[sub_room];
-    const GraphVertex::EdgesContainer edges = *(vertex->GetAllEdges());
-
-    //const Point rpWaypoint=_waypContainer[0]->GetPos();
-
-    if (!_waypContainer.empty())
-    {
-        std::vector<GraphEdge* > sortedEdges = SortConShortestPath(_waypContainerSorted.top(),edges);
-        //Log->Write(std::to_string(nextDoor->GetCrossing()->GetID()));
-
-        for (unsigned int i=0; i<sortedEdges.size(); ++i)
-        {
-            sortedEdges[i]->SetFactor(0.5+0.1*i,"SpatialKnowledge");
-            //Log->Write("INFO:\t "+std::to_string(sortedEdges[i]->GetCrossing()->GetID()));
-            //Log->Write("INFO:\t "+std::to_string(sortedEdges[i]->GetFactor()));
-        }
-
-        //Log->Write(std::to_string(nextDoor->GetCrossing()->GetID()));
-        //Log->Write("INFO: Door assessed!");
-    }
-
-}
+//void CognitiveMap::AssessDoors()
+//{
+//    SubRoom * sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
+//    GraphVertex * vertex = (*_network->GetNavigationGraph())[sub_room];
+//    const GraphVertex::EdgesContainer edges = *(vertex->GetAllEdges());
+//
+//    //const Point rpWaypoint=_waypContainer[0]->GetPos();
+//
+//    if (!_waypContainer.empty())
+//    {
+//        std::vector<GraphEdge* > sortedEdges = SortConShortestPath(_waypContainerSorted.top(),edges);
+//        //Log->Write(std::to_string(nextDoor->GetCrossing()->GetID()));
+//
+//        for (unsigned int i=0; i<sortedEdges.size(); ++i)
+//        {
+//            sortedEdges[i]->SetFactor(0.5+0.1*i,"SpatialKnowledge");
+//            //Log->Write("INFO:\t "+std::to_string(sortedEdges[i]->GetCrossing()->GetID()));
+//            //Log->Write("INFO:\t "+std::to_string(sortedEdges[i]->GetFactor()));
+//        }
+//
+//        //Log->Write(std::to_string(nextDoor->GetCrossing()->GetID()));
+//        //Log->Write("INFO: Door assessed!");
+//    }
+//
+//}
 
 std::vector<GraphEdge *> CognitiveMap::SortConShortestPath(ptrWaypoint waypoint, const GraphVertex::EdgesContainer edges)
 {
@@ -195,8 +195,9 @@ std::vector<GraphEdge *> CognitiveMap::SortConShortestPath(ptrWaypoint waypoint,
     auto it = edges.begin();
     ++it;
     ///starting at the second element
-    for (it; it!=edges.end(); ++it)
+    for (auto end=edges.end(); it!=end; ++it)
     {
+        if (it == edges.begin()) continue;
         double pathLengthDoorWayP = ShortestPathDistance((*it),waypoint);
 
         //Point vectorPathPedDoor = (*it)->GetCrossing()->GetCentre()-_ped->GetPos();
@@ -298,10 +299,10 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrWaypoi
     return polyline.length();
 }
 
-const Point &CognitiveMap::GetOwnPos()
-{
-    return _YAHPointer.GetPos();
-}
+//const Point &CognitiveMap::GetOwnPos()
+//{
+//    return _YAHPointer.GetPos();
+//}
 
 void CognitiveMap::WriteToFile()
 {

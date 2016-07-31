@@ -40,7 +40,7 @@ class Pedestrian;
 //c++11 alias: Container to store options for the router (i. a. sensors)
 using optStorage = std::unordered_map<std::string,std::vector<std::string> >;
 
-#include <vector>
+//#include <vector>
 #include <set>
 #include <string>
 
@@ -73,7 +73,7 @@ public:
      const double& GetIntVPeriodicUpdate();
 
 private:
-     const Building * const building;
+     //const Building * const building; //@todo: unused.
      CognitiveMapStorage * cm_storage;
 
      SensorContainer registered_sensors;
