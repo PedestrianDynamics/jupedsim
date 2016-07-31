@@ -1,7 +1,7 @@
 /**
  * \file        VelocityModel.h
  * \date        Apr 15, 2014
- * \version     v0.7
+ * \version     v0.8
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -72,7 +72,7 @@ private:
       *
       * @param ped: Pointer to Pedestrians
       * @param spacing: minimum spacing to the neighbors
-      * @param winkel: angle between <ped> and the nearest neighbor 
+      * @param winkel: angle between <ped> and the nearest neighbor. Is not yet used!
       *
       * @return double
       */
@@ -141,6 +141,7 @@ public:
       * ToDO: What is this parameter doing?
       *
       * @return double
+      *
       */
      double GetaPed() const;
 
@@ -182,6 +183,7 @@ public:
       * @param current the actual time
       * @param deltaT the next timestep
       * @param building the geometry object
+      * @param periodic: used in some utests for periodic scenarios (very specific)
       */
      virtual void ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic);
 };

@@ -28,18 +28,19 @@
 
 #include "GraphVertex.h"
 
-#include <utility>
-#include <cmath>
+//#include <utility>
+//#include <cmath>
 #include <set>
 #include <map>
 #include <queue>
-#include <functional>
+//#include <functional>
 
 #include "GraphEdge.h"
 #include "../../../geometry/SubRoom.h"
 #include "../NavigationGraph.h"
 #include "../../../geometry/Transition.h"
-#include <algorithm>
+//#include <algorithm>
+#define UNUSED(x) [&x]{}()  // c++11 silence warnings
 
 using namespace std;
 
@@ -97,24 +98,26 @@ GraphEdge * GraphVertex::operator[](const Crossing * crossing)
 }
 
 
-int GraphVertex::RemoveOutEdge(GraphEdge * edge)
-{
-     EdgesContainer::iterator it = out_edges.find(edge);
-     if(it != out_edges.end()) {
-          delete (*it);
-          out_edges.erase(it);
-          return 1;
-     }
-     return 0;
-}
+//int GraphVertex::RemoveOutEdge(GraphEdge * edge)
+//{
+//     EdgesContainer::iterator it = out_edges.find(edge);
+//     if(it != out_edges.end()) {
+//          delete (*it);
+//          out_edges.erase(it);
+//          return 1;
+//     }
+//     return 0;
+//}
 
 
-int GraphVertex::RemoveOutEdge(const GraphVertex * dest)
-{
-     //return out_edges.erase(dest);
-     return 1;
-
-}
+//@todo: remove this  function with obvious return?
+//int GraphVertex::RemoveOutEdge(const GraphVertex * dest)
+//{
+//     UNUSED(dest);
+//     //return out_edges.erase(dest);
+//     return 1;
+//
+//}
 
 const std::string GraphVertex::GetCaption() const
 {
@@ -219,7 +222,7 @@ const GraphEdge * GraphVertex::GetCheapestDestinationByEdges(const Point & posit
             return act_edge;
         }
     } else {
-        return NULL;
+        return nullptr;
     }
 
 }
@@ -257,7 +260,8 @@ const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & positio
 
         return act_edge;
     }
-
+     else return nullptr;
+//@todo: need to return something else
 }
 
 //NextDoorKnowlegde GraphVertex::GetShortestPathFromHere(const Point &position) const

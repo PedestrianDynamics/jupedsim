@@ -52,8 +52,8 @@ def eval_results(results):
     std_r2 = np.std(results[:, 1])
     logging.info("mean left: %.2f (+- %.2f), mean right: %.2f (+- %.2f)",
                  mean_r1, std_r1, mean_r2, std_r2)
-    plt.plot(results[:, 0], "-", lw=2, label="Room left")
-    plt.plot(results[:, 1], "-", lw=2, label="Room right")
+    plt.plot(results[:, 0], "o-", lw=2, label="Room left")
+    plt.plot(results[:, 1], "o-", lw=2, label="Room right")
     plt.ylabel("evac time")
     plt.xlabel("# runs")
     plt.legend(loc="best")

@@ -8,7 +8,7 @@
   <!-- geometry file -->
   <geometry>../geometry.xml</geometry>
   <!-- traectories file and format -->
-  <trajectories format="xml-plain" embed_mesh="false" fps="8">
+  <trajectories format="xml-plain" embed_mesh="false" fps="20">
     <file location="Traj_test_1.xml" />
   </trajectories>
   <!-- where to store the logs -->
@@ -43,7 +43,7 @@
 
   
   <!--persons information and distribution -->
-  <agents operational_model_id="[1, 2, 3, 5]">
+  <agents operational_model_id="[1, 2, 3]">
     <agents_distribution>
       <group group_id="0"  agent_parameter_id="0" room_id="0" subroom_id="0" number="1" goal_id="-1" router_id="1" start_x="2" start_y="2"/>	
     </agents_distribution>
@@ -76,7 +76,7 @@
     <model operational_model_id="1" description="gcfm">
       <model_parameters>
         <solver>euler</solver>
-        <stepsize>0.001</stepsize>
+        <stepsize>0.05</stepsize>
         <exit_crossing_strategy>range(1,5)</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
@@ -115,7 +115,7 @@
     <model operational_model_id="2" description="gompertz">
       <model_parameters>
         <solver>euler</solver>
-        <stepsize>0.01</stepsize>
+        <stepsize>0.05</stepsize>
         <exit_crossing_strategy>3</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="3"  b="0.25" c="3.0"/>
@@ -126,7 +126,7 @@
         <bmax mu="0.25" sigma="0.001" />
         <bmin mu="0.40" sigma="0.001" />
         <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.8" sigma="0.001" />
+        <tau mu="0.05" sigma="0.001" />
         <atau mu="0.2" sigma="0.001" />
       </agent_parameters>
     </model>

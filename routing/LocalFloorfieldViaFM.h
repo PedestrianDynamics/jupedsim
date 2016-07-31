@@ -39,14 +39,12 @@
 class LocalFloorfieldViaFM : public FloorfieldViaFM{
 public:
      LocalFloorfieldViaFM();
-     LocalFloorfieldViaFM(const Room* const room, const Building* buildingArg,
-                          const double hxArg, const double hyArg,
-                          const double wallAvoidDistance,
-                          const bool useDistancefield, const std::string& filename);
+     LocalFloorfieldViaFM(const Room* const room, const Building* buildingArg, const double hxArg,
+                 const double hyArg, const double wallAvoidDistance, const bool useDistancefield);
 
      void parseRoom(const Room* const roomArg, const double hxArg, const double hyArg);
-     void getDirectionToDestination (Pedestrian* ped, Point& direction);
-     void getDirectionToGoalID(const int goalID);
+     void getDirectionToDestination (Pedestrian* ped, Point& direction);//@todo hides non-virtual function
+//     void getDirectionToGoalID(const int goalID);
      void drawBlockerLines();
      void crossOutOutsideNeighbors(const long int key);
      virtual int isInside(const long int key);
@@ -58,9 +56,7 @@ class SubLocalFloorfieldViaFM : public FloorfieldViaFM{
 public:
      SubLocalFloorfieldViaFM();
      SubLocalFloorfieldViaFM(const SubRoom* const subroom, const Building* buildingArg,
-           const double hxArg, const double hyArg,
-           const double wallAvoidDistance,
-           const bool useDistancefield, const std::string& filename);
+                 const double hxArg, const double hyArg, const double wallAvoidDistance, const bool useDistancefield);
 
      void parseRoom(const SubRoom* const subroomArg, const double hxArg, const double hyArg);
      void getDirectionToDestination (Pedestrian* ped, Point& direction);
