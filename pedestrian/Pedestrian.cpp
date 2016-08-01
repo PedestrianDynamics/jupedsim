@@ -56,6 +56,10 @@ Pedestrian::Pedestrian()
      _gender = "female";
      _mass = 1;
      _tau = 0.5;
+     _swayFreqA = 0.44;
+     _swayFreqB = 0.35;
+     _swayAmpA = -0.14;
+     _swayAmpB = 0.21;
      _T = 1.0;
      _deltaT = 0.01;
      _ellipse = JEllipse();
@@ -134,6 +138,10 @@ Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& buil
      _mass = 1;
      _tau = 0.5;
      _T = 1.0;
+     _swayFreqA = 0.44;
+     _swayFreqB = 0.35;
+     _swayAmpA = -0.14;
+     _swayAmpB = 0.21;
      _newOrientationFlag = false;
      _newOrientationDelay = 0; //0 seconds, in steps
      _tmpFirstOrientation = true;
@@ -221,6 +229,14 @@ void Pedestrian::SetTau(double tau)
 void Pedestrian::SetT(double T)
 {
      _tau = T;
+}
+
+
+void Pedestrian::SetSwayParameters(double freqA, double freqB, double ampA, double ampB) {
+     _swayFreqA = freqA;
+     _swayFreqB = freqB;
+     _swayAmpA = ampA;
+     _swayAmpB = ampB;
 }
 
 void Pedestrian::SetEllipse(const JEllipse& e)
@@ -340,6 +356,23 @@ double Pedestrian::GetMass() const
 double Pedestrian::GetTau() const
 {
      return _tau;
+}
+
+
+double Pedestrian::GetSwayFreqA() const {
+     return _swayFreqA;
+}
+
+double Pedestrian::GetSwayFreqB() const {
+     return _swayFreqB;
+}
+
+double Pedestrian::GetSwayAmpA() const {
+     return _swayAmpA;
+}
+
+double Pedestrian::GetSwayAmpB() const {
+     return _swayAmpB;
 }
 
 double Pedestrian::GetT() const
@@ -1132,3 +1165,6 @@ bool Pedestrian::Relocate(std::function<void(const Pedestrian&)> flowupdater) {
      }
      return status;
 }
+
+
+

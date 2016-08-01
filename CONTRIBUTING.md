@@ -291,7 +291,7 @@ To write additional tests, create a directory under *Utest/*.
 - run the script `makeini.py` with the obligatory option `-f`: Using the
     aforementioned example the call is:
 ```bash
-   python makeini.py -f test_case1/inifile.xml
+   python3 makeini.py -f test_case1/inifile.xml
 ```
 
 The Script is going to create two directories:
@@ -305,7 +305,7 @@ The Script is going to create two directories:
 Your script has to start with the following lines:
 
 ```python
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import sys
 from sys import *

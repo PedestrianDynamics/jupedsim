@@ -29,21 +29,21 @@
 #include "GlobalRouter.h"
 
 #include "AccessPoint.h"
-#include "Router.h"
-#include "NavMesh.h"
+//#include "Router.h"
+//#include "NavMesh.h"
 #include "DTriangulation.h"
 
-#include "../geometry/Building.h"
-#include "../pedestrian/Pedestrian.h"
+//#include "../geometry/Building.h"
+//#include "../pedestrian/Pedestrian.h"
 #include "../tinyxml/tinyxml.h"
 #include "../geometry/SubRoom.h"
-#include "../geometry/Wall.h"
-#include "../IO/OutputHandler.h"
+//#include "../geometry/Wall.h"
+//#include "../IO/OutputHandler.h"
 
-#include <sstream>
-#include <cfloat>
-#include <fstream>
-#include <iomanip>
+//#include <sstream>
+//#include <cfloat>
+//#include <fstream>
+//#include <iomanip>
 
 
 using namespace std;
@@ -81,7 +81,7 @@ GlobalRouter::GlobalRouter(int id, RoutingStrategy s) :  Router(id, s)
 GlobalRouter::~GlobalRouter()
 {
      if (_distMatrix && _pathsMatrix) {
-          const int exitsCnt = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
+          const int exitsCnt = (const int) (_building->GetNumberOfGoals() + _building->GetAllGoals().size());
           for (int p = 0; p < exitsCnt; ++p) {
                delete[] _distMatrix[p];
                delete[] _pathsMatrix[p];
@@ -118,7 +118,7 @@ bool GlobalRouter::Init(Building* building)
      }
 
      // initialize the distances matrix for the floydwahrshall
-     int exitsCnt = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
+     const int exitsCnt = (const int) (_building->GetNumberOfGoals() + _building->GetAllGoals().size());
 
      _distMatrix = new double*[exitsCnt];
      _pathsMatrix = new int*[exitsCnt];
@@ -257,10 +257,10 @@ bool GlobalRouter::Init(Building* building)
      // populate the subrooms at the elevation
      for(auto && itroom:_building->GetAllRooms())
      {
-          auto&& room=itroom.second;
+          auto&& room= (shared_ptr<Room>&&) itroom.second;
           for(const auto & it_sub:room->GetAllSubRooms())
           {
-               auto&& sub=it_sub.second;
+               auto&& sub= (shared_ptr<SubRoom>&&) it_sub.second;
                //maybe truncate the elevation.
                // because using a double as key to map is not exact
                //double elevation =  ceilf(sub->GetMaxElevation() * 100) / 100;
@@ -276,11 +276,11 @@ bool GlobalRouter::Init(Building* building)
 
      for(auto && itroom:_building->GetAllRooms())
      {
-          auto&& room=itroom.second;
+          auto&& room= (shared_ptr<Room>&&) itroom.second;
           for(const auto & it_sub:room->GetAllSubRooms())
           {
                // The penalty factor should discourage pedestrians to evacuation through rooms
-               auto&& sub=it_sub.second;
+               auto&& sub= (shared_ptr<SubRoom>&&) it_sub.second;
                double  penalty=1.0;
                if((sub->GetType()!="floor") && (sub->GetType()!="dA") ) {
                     penalty=_edgeCost;
@@ -371,7 +371,7 @@ bool GlobalRouter::Init(Building* building)
           for(const auto & itr1: _accessPoints)
           {
                AccessPoint* from_AP = itr1.second;
-               if(from_AP->GetFinalExitToOutside()==false) continue;
+               if(!from_AP->GetFinalExitToOutside()) continue;
                if(from_AP->GetID()==to_AP->GetID()) continue;
                from_AP->AddConnectingAP(to_AP);
                int from_door= _map_id_to_index[from_AP->GetID()];
@@ -657,7 +657,7 @@ bool GlobalRouter::GetPath(Pedestrian*ped, int goalID, std::vector<SubRoom*>& pa
           int subroom_uid=_accessPoints[ap_id]->GetConnectingRoom1();
           if(subroom_uid==-1) continue;
           SubRoom* sub = _building->GetSubRoomByUID(subroom_uid);
-          if (sub && IsElementInVector(path, sub)==false) path.push_back(sub);
+          if (sub && !IsElementInVector(path, sub)) path.push_back(sub);
      }
 
      for(unsigned int i=0; i<_tmpPedPath.size(); i++) {
@@ -665,7 +665,7 @@ bool GlobalRouter::GetPath(Pedestrian*ped, int goalID, std::vector<SubRoom*>& pa
           int subroom_uid=_accessPoints[ap_id]->GetConnectingRoom2();
           if(subroom_uid==-1) continue;
           SubRoom* sub = _building->GetSubRoomByUID(subroom_uid);
-          if (sub && IsElementInVector(path, sub)==false) path.push_back(sub);
+          if (sub && !IsElementInVector(path, sub)) path.push_back(sub);
      }
 
      //clear the global variable holding the paths
@@ -685,7 +685,7 @@ bool GlobalRouter::GetPath(Pedestrian*ped, int goalID, std::vector<SubRoom*>& pa
  */
 void GlobalRouter::FloydWarshall()
 {
-     const int n = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
+     const int n = (const int) (_building->GetNumberOfGoals() + _building->GetAllGoals().size());
      for (int k = 0; k < n; k++)
           for (int i = 0; i < n; i++)
                for (int j = 0; j < n; j++)
@@ -695,21 +695,21 @@ void GlobalRouter::FloydWarshall()
                     }
 }
 
-void GlobalRouter::DumpAccessPoints(int p)
-{
-     if (p != -1) {
-          _accessPoints.at(p)->Dump();
-     } else {
-          for (const auto & itr: _accessPoints)
-          {
-               itr.second->Dump();
-          }
-     }
-}
+//void GlobalRouter::DumpAccessPoints(int p)
+//{
+//     if (p != -1) {
+//          _accessPoints.at(p)->Dump();
+//     } else {
+//          for (const auto & itr: _accessPoints)
+//          {
+//               itr.second->Dump();
+//          }
+//     }
+//}
 
 int GlobalRouter::FindExit(Pedestrian* ped)
 {
-     if(_useMeshForLocalNavigation==false)
+     if(!_useMeshForLocalNavigation)
      {
           std::vector<NavLine*> path;
           GetPath(ped,path);
@@ -775,8 +775,8 @@ int GlobalRouter::FindExit(Pedestrian* ped)
                     return ped->GetNextDestination();
                } else {
                     //check that the next destination is in the actual room of the pedestrian
-                    if (_accessPoints[nextDestination]->isInRange(
-                              sub->GetUID())==false) {
+                    if (!_accessPoints[nextDestination]->isInRange(
+                                                  sub->GetUID())) {
                          //return the last destination if defined
                          int previousDestination = ped->GetNextDestination();
 
@@ -811,7 +811,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      //save some computation
      if(relevantAPs.size()==1)
      {
-          auto&& ap=relevantAPs[0];
+          auto&& ap= (AccessPoint*&&) relevantAPs[0];
           ped->SetExitIndex(ap->GetID());
           ped->SetExitLine(ap->GetNavLine());
           return ap->GetID();
@@ -819,7 +819,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 
      int bestAPsID = -1;
      double minDistGlobal = FLT_MAX;
-     double minDistLocal = FLT_MAX;
+     //double minDistLocal = FLT_MAX;
 
      // get the opened exits
      SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
@@ -829,7 +829,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      {
           AccessPoint* ap=relevantAPs[g];
 
-          if (ap->isInRange(sub->GetUID()) == false)
+          if (!ap->isInRange(sub->GetUID()))
                continue;
           //check if that exit is open.
           if (ap->IsClosed())
@@ -844,7 +844,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           //check if visible
           //only if the room is convex
           //otherwise check all rooms at that level
-          if(_building->IsVisible(posA, posC, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())],true)==false)
+          if(!_building->IsVisible(posA, posC, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())],true))
           {
                ped->RerouteIn(10);
                continue;
@@ -857,7 +857,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           {
                bestAPsID = ap->GetID();
                minDistGlobal = dist;
-               minDistLocal=dist2;
+               //minDistLocal=dist2;
           }
      }
 
@@ -888,7 +888,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
                ped->RerouteIn(5);
                return relevantAPs[0]->GetID();
           }
-          //return -1;
+          return -1;
      }
 }
 
@@ -918,9 +918,9 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
                          break;
                     }
                }
-               if(relevant==true) {
+               if(relevant) {
                     //only if not closed
-                    if(ap->IsClosed()==false)
+                    if(ap->IsClosed()==0)
                          relevantAPS.push_back(ap);
                }
           }
@@ -942,7 +942,7 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
                const Point& posC = (posB - posA).Normalized() * ((posA - posB).Norm() - J_EPS) + posA;
 
                //check if visible
-               if (_building->IsVisible(posA, posC, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())],true)==false)
+               if (!_building->IsVisible(posA, posC, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())],true))
                     //if (sub->IsVisible(posA, posC, true) == false)
                {
                     continue;
@@ -959,13 +959,13 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
                          //the line from the current position to the centre of the nav line.
                          // at least the line in that direction minus EPS
                          AccessPoint* ap2=_accessPoints[goals[g2]];
-                         const Point& posA = ped->GetPos();
-                         const Point& posB = ap2->GetNavLine()->GetCentre();
-                         const Point& posC = (posB - posA).Normalized()* ((posA - posB).Norm() - J_EPS) + posA;
+                         const Point& posA_ = ped->GetPos();
+                         const Point& posB_ = ap2->GetNavLine()->GetCentre();
+                         const Point& posC_ = (posB_ - posA_).Normalized()* ((posA_ - posB_).Norm() - J_EPS) + posA_;
 
                          //it points to a destination that I can see anyway
-                         if (_building->IsVisible(posA, posC, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())],true))
-                              //if (sub->IsVisible(posA, posC, true) == true)
+                         if (_building->IsVisible(posA_, posC_, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())],true))
+                              //if (sub->IsVisible(posA_, posC_, true) == true)
                          {
                               relevant=false;
                          }
@@ -973,9 +973,9 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
                          break;
                     }
                }
-               if(relevant==true)
+               if(relevant)
                {
-                    if(ap->IsClosed()==false)
+                    if(ap->IsClosed()==0)
                          relevantAPS.push_back(ap);
                }
           }
@@ -984,9 +984,8 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
      //fallback
      if(relevantAPS.size()==0)
      {
-          //fixme: this should also never happened. But hapen due to previvous bugs..
+          //fixme: this should also never happened. But happen due to previous bugs..
           const vector<int>& goals=sub->GetAllGoalIDs();
-          auto isinsub = sub->IsInSubRoom(ped);
           for(unsigned int g1=0; g1<goals.size(); g1++)
           {
                relevantAPS.push_back(_accessPoints[goals[g1]]);
@@ -996,156 +995,156 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
 
 }
 
-void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
-          const vector<string> rooms_captions)
-{
-     ofstream graph_file(filename.c_str());
-     if (graph_file.is_open() == false) {
-          Log->Write("Unable to open file" + filename);
-          return;
-     }
-
-     //header
-     graph_file << "## Produced by JuPedSim" << endl;
-     //graph_file << "##comand: \" sfdp -Goverlap=prism -Gcharset=latin1"<<filename <<"| gvmap -e | neato -Ecolor=\"#55555522\" -n2 -Tpng > "<< filename<<".png \""<<endl;
-     graph_file << "##Command to produce the output: \"neato -n -s -Tpng "
-               << filename << " > " << filename << ".png\"" << endl;
-     graph_file << "digraph JUPEDSIM_ROUTING {" << endl;
-     graph_file << "overlap=scale;" << endl;
-     graph_file << "splines=false;" << endl;
-     graph_file << "fontsize=20;" << endl;
-     graph_file
-     << "label=\"Graph generated by the routing engine for destination: "
-     << finalDestination << "\"" << endl;
-
-     vector<int> rooms_ids = vector<int>();
-
-     if (rooms_captions.empty())
-     {
-          // then all rooms should be printed
-          for(auto && itroom:_building->GetAllRooms())
-          {
-               for(const auto & it_sub:itroom.second->GetAllSubRooms())
-               {
-                    rooms_ids.push_back(it_sub.second->GetUID());
-               }
-          }
-
-
-     } else {
-          for (auto && caption: rooms_captions)
-          {
-               for(const auto & it_sub:_building->GetRoom(caption)->GetAllSubRooms())
-               {
-                    rooms_ids.push_back(it_sub.second->GetUID());
-               }
-          }
-     }
-
-     for (map<int, AccessPoint*>::const_iterator itr = _accessPoints.begin();
-               itr != _accessPoints.end(); ++itr) {
-
-          AccessPoint* from_AP = itr->second;
-
-          int from_door = from_AP->GetID();
-
-          // check for valid room
-          int room_id = from_AP->GetConnectingRoom1();
-          int room_id1=from_AP->GetConnectingRoom2();
-
-          if ( (IsElementInVector(rooms_ids, room_id) == false) && (IsElementInVector(rooms_ids, room_id1) == false) )
-               continue;
-          double px = from_AP->GetCentre()._x;
-          double py = from_AP->GetCentre()._y;
-          //graph_file << from_door <<" [shape=ellipse, pos=\""<<px<<", "<<py<<" \"] ;"<<endl;
-          //graph_file << from_door <<" [shape=ellipse, pos=\""<<px<<","<<py<<"\" ];"<<endl;
-
-          //const vector<AccessPoint*>& from_aps = from_AP->GetConnectingAPs();
-          const vector<AccessPoint*>& from_aps = from_AP->GetTransitAPsTo(
-                    finalDestination);
-
-          if (from_aps.size() == 0) {
-
-               if (from_AP->GetFinalExitToOutside()) {
-                    graph_file << from_door << " [pos=\"" << px << ", " << py
-                              << " \", style=filled, color=green,fontsize=5] ;"
-                              << endl;
-                    //                              graph_file << from_door <<" [width=\"0.41\", height=\"0.31\",fixedsize=false,pos=\""<<px<<", "<<py<<" \", style=filled, color=green,fontsize=4] ;"<<endl;
-               } else {
-                    graph_file << from_door << " [pos=\"" << px << ", " << py
-                              << " \", style=filled, color=red,fontsize=5] ;" << endl;
-                    //                              graph_file << from_door <<" [width=\"0.41\", height=\"0.31\",fixedsize=false,pos=\""<<px<<", "<<py<<" \", style=filled, color=red,fontsize=4] ;"<<endl;
-               }
-          } else {
-               // check that all connecting aps are contained in the room_ids list
-               // if not marked as sink.
-               bool isSink = true;
-               for (unsigned int j = 0; j < from_aps.size(); j++)
-               {
-                    int room_id = from_aps[j]->GetConnectingRoom1();
-                    if (IsElementInVector(rooms_ids, room_id) == true)
-                    {
-                         isSink = false;
-                         break;
-                    }
-               }
-
-               if (isSink) {
-                    //graph_file << from_door <<" [width=\"0.3\", height=\"0.21\",fixedsize=false,pos=\""<<px<<", "<<py<<" \" ,style=filled, color=green, fontsize=4] ;"<<endl;
-                    graph_file << from_door << " [pos=\"" << px << ", " << py
-                              << " \" ,style=filled, color=blue, fontsize=5] ;"
-                              << endl;
-               } else {
-                    //graph_file << from_door <<" [width=\"0.3\", height=\"0.231\",fixedsize=false, pos=\""<<px<<", "<<py<<" \", fontsize=4] ;"<<endl;
-                    graph_file << from_door << " [pos=\"" << px << ", " << py
-                              << " \", style=filled, color=yellow, fontsize=5] ;"
-                              << endl;
-               }
-          }
-
-     }
-
-     //connections
-     for (const auto & itr: _accessPoints)
-     {
-          AccessPoint* from_AP = itr.second;
-          int from_door = from_AP->GetID();
-
-          int room_id = from_AP->GetConnectingRoom1();
-
-          if (IsElementInVector(rooms_ids, room_id) == false)
-               continue;
-
-          //const vector<AccessPoint*>& aps = from_AP->GetConnectingAPs();
-          const vector<AccessPoint*>& aps = from_AP->GetTransitAPsTo(
-                    finalDestination);
-
-          for (const auto & to_AP:aps)
-          {
-               int to_door = to_AP->GetID();
-
-               int lroom_id = to_AP->GetConnectingRoom1();
-
-               if (IsElementInVector(rooms_ids, lroom_id) == false)
-                    continue;
-
-               graph_file << from_door << " -> " << to_door << " [ label="
-                         << from_AP->GetDistanceTo(to_AP)
-                         + to_AP->GetDistanceTo(finalDestination)
-                         << ", fontsize=10]; " << endl;
-          }
-     }
-
-     //graph_file << "node [shape=box];  gy2; yr2; rg2; gy1; yr1; rg1;"<<endl;
-     //graph_file << "node [shape=circle,fixedsize=true,width=0.9];  green2; yellow2; red2; safe2; safe1; green1; yellow1; red1;"<<endl;
-
-     //graph_file << "0 -> 1 ;"<<endl;
-
-     graph_file << "}" << endl;
-
-     //done
-     graph_file.close();
-}
+//void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
+//          const vector<string> rooms_captions)
+//{
+//     ofstream graph_file(filename.c_str());
+//     if (graph_file.is_open() == false) {
+//          Log->Write("Unable to open file" + filename);
+//          return;
+//     }
+//
+//     //header
+//     graph_file << "## Produced by JuPedSim" << endl;
+//     //graph_file << "##comand: \" sfdp -Goverlap=prism -Gcharset=latin1"<<filename <<"| gvmap -e | neato -Ecolor=\"#55555522\" -n2 -Tpng > "<< filename<<".png \""<<endl;
+//     graph_file << "##Command to produce the output: \"neato -n -s -Tpng "
+//               << filename << " > " << filename << ".png\"" << endl;
+//     graph_file << "digraph JUPEDSIM_ROUTING {" << endl;
+//     graph_file << "overlap=scale;" << endl;
+//     graph_file << "splines=false;" << endl;
+//     graph_file << "fontsize=20;" << endl;
+//     graph_file
+//     << "label=\"Graph generated by the routing engine for destination: "
+//     << finalDestination << "\"" << endl;
+//
+//     vector<int> rooms_ids = vector<int>();
+//
+//     if (rooms_captions.empty())
+//     {
+//          // then all rooms should be printed
+//          for(auto && itroom:_building->GetAllRooms())
+//          {
+//               for(const auto & it_sub:itroom.second->GetAllSubRooms())
+//               {
+//                    rooms_ids.push_back(it_sub.second->GetUID());
+//               }
+//          }
+//
+//
+//     } else {
+//          for (auto && caption: rooms_captions)
+//          {
+//               for(const auto & it_sub:_building->GetRoom(caption)->GetAllSubRooms())
+//               {
+//                    rooms_ids.push_back(it_sub.second->GetUID());
+//               }
+//          }
+//     }
+//
+//     for (map<int, AccessPoint*>::const_iterator itr = _accessPoints.begin();
+//               itr != _accessPoints.end(); ++itr) {
+//
+//          AccessPoint* from_AP = itr->second;
+//
+//          int from_door = from_AP->GetID();
+//
+//          // check for valid room
+//          int room_id = from_AP->GetConnectingRoom1();
+//          int room_id1=from_AP->GetConnectingRoom2();
+//
+//          if ( (IsElementInVector(rooms_ids, room_id) == false) && (IsElementInVector(rooms_ids, room_id1) == false) )
+//               continue;
+//          double px = from_AP->GetCentre()._x;
+//          double py = from_AP->GetCentre()._y;
+//          //graph_file << from_door <<" [shape=ellipse, pos=\""<<px<<", "<<py<<" \"] ;"<<endl;
+//          //graph_file << from_door <<" [shape=ellipse, pos=\""<<px<<","<<py<<"\" ];"<<endl;
+//
+//          //const vector<AccessPoint*>& from_aps = from_AP->GetConnectingAPs();
+//          const vector<AccessPoint*>& from_aps = from_AP->GetTransitAPsTo(
+//                    finalDestination);
+//
+//          if (from_aps.size() == 0) {
+//
+//               if (from_AP->GetFinalExitToOutside()) {
+//                    graph_file << from_door << " [pos=\"" << px << ", " << py
+//                              << " \", style=filled, color=green,fontsize=5] ;"
+//                              << endl;
+//                    //                              graph_file << from_door <<" [width=\"0.41\", height=\"0.31\",fixedsize=false,pos=\""<<px<<", "<<py<<" \", style=filled, color=green,fontsize=4] ;"<<endl;
+//               } else {
+//                    graph_file << from_door << " [pos=\"" << px << ", " << py
+//                              << " \", style=filled, color=red,fontsize=5] ;" << endl;
+//                    //                              graph_file << from_door <<" [width=\"0.41\", height=\"0.31\",fixedsize=false,pos=\""<<px<<", "<<py<<" \", style=filled, color=red,fontsize=4] ;"<<endl;
+//               }
+//          } else {
+//               // check that all connecting aps are contained in the room_ids list
+//               // if not marked as sink.
+//               bool isSink = true;
+//               for (unsigned int j = 0; j < from_aps.size(); j++)
+//               {
+//                    int room_id_ = from_aps[j]->GetConnectingRoom1();
+//                    if (IsElementInVector(rooms_ids, room_id_))
+//                    {
+//                         isSink = false;
+//                         break;
+//                    }
+//               }
+//
+//               if (isSink) {
+//                    //graph_file << from_door <<" [width=\"0.3\", height=\"0.21\",fixedsize=false,pos=\""<<px<<", "<<py<<" \" ,style=filled, color=green, fontsize=4] ;"<<endl;
+//                    graph_file << from_door << " [pos=\"" << px << ", " << py
+//                              << " \" ,style=filled, color=blue, fontsize=5] ;"
+//                              << endl;
+//               } else {
+//                    //graph_file << from_door <<" [width=\"0.3\", height=\"0.231\",fixedsize=false, pos=\""<<px<<", "<<py<<" \", fontsize=4] ;"<<endl;
+//                    graph_file << from_door << " [pos=\"" << px << ", " << py
+//                              << " \", style=filled, color=yellow, fontsize=5] ;"
+//                              << endl;
+//               }
+//          }
+//
+//     }
+//
+//     //connections
+//     for (const auto & itr: _accessPoints)
+//     {
+//          AccessPoint* from_AP = itr.second;
+//          int from_door = from_AP->GetID();
+//
+//          int room_id = from_AP->GetConnectingRoom1();
+//
+//          if (IsElementInVector(rooms_ids, room_id) == false)
+//               continue;
+//
+//          //const vector<AccessPoint*>& aps = from_AP->GetConnectingAPs();
+//          const vector<AccessPoint*>& aps = from_AP->GetTransitAPsTo(
+//                    finalDestination);
+//
+//          for (const auto & to_AP:aps)
+//          {
+//               int to_door = to_AP->GetID();
+//
+//               int lroom_id = to_AP->GetConnectingRoom1();
+//
+//               if (IsElementInVector(rooms_ids, lroom_id) == false)
+//                    continue;
+//
+//               graph_file << from_door << " -> " << to_door << " [ label="
+//                         << from_AP->GetDistanceTo(to_AP)
+//                         + to_AP->GetDistanceTo(finalDestination)
+//                         << ", fontsize=10]; " << endl;
+//          }
+//     }
+//
+//     //graph_file << "node [shape=box];  gy2; yr2; rg2; gy1; yr1; rg1;"<<endl;
+//     //graph_file << "node [shape=circle,fixedsize=true,width=0.9];  green2; yellow2; red2; safe2; safe1; green1; yellow1; red1;"<<endl;
+//
+//     //graph_file << "0 -> 1 ;"<<endl;
+//
+//     graph_file << "}" << endl;
+//
+//     //done
+//     graph_file.close();
+//}
 
 void GlobalRouter::TriangulateGeometry()
 {
@@ -1154,14 +1153,14 @@ void GlobalRouter::TriangulateGeometry()
      {
           for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
           {
-               auto&& subroom=itr_subroom.second;
-               auto&& room=itr_room.second;
-               auto&& obstacles=subroom->GetAllObstacles();
-               if(subroom->IsAccessible()==false) continue;
+               auto&& subroom= (shared_ptr<SubRoom>&&) itr_subroom.second;
+               auto&& room= (shared_ptr<Room>&&) itr_room.second;
+               auto&& obstacles= (const vector<Obstacle*>&&) subroom->GetAllObstacles();
+               if(!subroom->IsAccessible()) continue;
 
                //Triangulate if obstacle or concave and no hlines ?
                //if(subroom->GetAllHlines().size()==0)
-               if((obstacles.size()>0 ) || (subroom->IsConvex()==false ))
+               if((obstacles.size()>0 ) || !subroom->IsConvex())
                {
 
                     //                    DTriangulation* tri= new DTriangulation();

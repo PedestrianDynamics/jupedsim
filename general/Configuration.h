@@ -87,6 +87,7 @@ public:
           _distEffMaxPed = 2;
           _distEffMaxWall = 2;
           // ----------------
+
           _hostname = "localhost";
           _trajectoriesFile = "trajectories.xml";
           _errorLogFile = "log.txt";
@@ -322,5 +323,7 @@ private:
 
 
 };
+
+
 
 #endif //JPSCORE_CONFIGURATION_H

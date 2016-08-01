@@ -57,7 +57,7 @@ public:
      /****************************
       * Constructors & Destructors
       ****************************/
-     GraphNetwork(const Building * building, const Pedestrian * pedestrian);
+     GraphNetwork(const Building * buildg, const Pedestrian * ped);
      virtual ~GraphNetwork();
 
      void Add(const SubRoom * sub_room);

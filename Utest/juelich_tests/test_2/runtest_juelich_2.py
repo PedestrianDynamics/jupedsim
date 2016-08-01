@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import sys
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
@@ -15,9 +15,9 @@ def runtest2(inifile, trajfile):
     v = 1.0  # this is the desired speed. Check in the master inifile
     fps, n, traj = parse_file(trajfile)
     evac_time = (max(traj[:, 1]) - min(traj[:, 1])) / float(fps)
-    print fps
-    print max(traj[:, 1])
-    print min(traj[:, 1])
+    # print fps
+    # print max(traj[:, 1])
+    # print min(traj[:, 1])
     distance_x = (max(traj[:, 2]) - min(traj[:, 2]))
     distance_y = (max(traj[:, 3]) - min(traj[:, 3]))
     distance = np.sqrt(distance_x**2 + distance_y**2)

@@ -8,11 +8,11 @@ import os, time
 from pylab import Rectangle
 
 if len(argv)<=2:
-    print "usage: %s, filename geometryfile"%argv[0]
+    print("usage: %s, filename geometryfile"%argv[0])
     exit()
 
 
-from itertools import product, izip
+from itertools import product
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
@@ -138,7 +138,7 @@ def plotFrame(i, t, data, geometry):
     plt.title("t=%.3f"%t)
     fig.savefig("figs_bot/%.4d.png"%i)
     plt.clf()
-    print "---> figs_bot/%.4d.png"%i 
+    print("---> figs_bot/%.4d.png"%i) 
 
 
 if __name__ == "__main__":
@@ -157,7 +157,7 @@ if __name__ == "__main__":
             i += 1
     if Movie:
         cmd = "\"mf://figs_bot/*.png\" -mf w=800:h=600:fps=25:type=png -ovc lavc -lavcopts vcodec=mpeg4 -oac copy -o output.avi"
-        print "Mencoder ---- "
+        print("Mencoder ---- ")
         os.system("mencoder %s" %cmd)
         MPlayer= "mplayer output.avi"
         os.system("%s" %MPlayer)

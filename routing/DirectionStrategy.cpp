@@ -29,17 +29,18 @@
 #include "../geometry/Line.h"
 #include "../geometry/NavLine.h"
 #include "../geometry/Building.h"
-#include "../geometry/Room.h"
+//#include "../geometry/Room.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/SubRoom.h"
-#include "../geometry/Wall.h"
+//#include "../geometry/Wall.h"
 #include "../routing/FloorfieldViaFM.h"
 #include "../routing/LocalFloorfieldViaFM.h"
-#include "DirectionStrategy.h"
-#include <fstream>
+//#include "DirectionStrategy.h"
+//#include <fstream>
 #include <chrono>
-#include <ctime>
+//#include <ctime>
 
+#define UNUSED(x) [&x]{}()  // c++11 silence warnings
 
 DirectionStrategy::DirectionStrategy()
 {
@@ -52,13 +53,13 @@ DirectionStrategy::~DirectionStrategy()
 /// 1
 Point DirectionMiddlePoint::GetTarget(Room* room, Pedestrian* ped) const
 {
-    (void)room; // suppress the unused warning
+    UNUSED(room); // suppress the unused warning
     return (ped->GetExitLine()->GetPoint1() + ped->GetExitLine()->GetPoint2())*0.5;
 }
 /// 2
 Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) const
 {
-    (void)room; // suppress the unused warning
+    UNUSED(room); // suppress the unused warning
 
      double d = ped->GetEllipse().GetBmin() + 0.1 ; // shoulder//0.5;
      const Point& p1 = ped->GetExitLine()->GetPoint1();
@@ -89,7 +90,7 @@ Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) 
 /// 3
 Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 {
-   (void)room; // suppress the unused warning
+   UNUSED(room); // suppress the unused warning
 
     const Point& p1 = ped->GetExitLine()->GetPoint1();
     const Point& p2 = ped->GetExitLine()->GetPoint2();
@@ -279,6 +280,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
 /// 6
 Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 {
+     UNUSED(room);
 #if DEBUG
     if (initDone && (ffviafm != nullptr)) {
 #endif // DEBUG
@@ -374,8 +376,8 @@ Point DirectionLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 #endif // DEBUG
 
      //this should not execute:
-     std::cerr << "Failure in DirectionFloorfield::GetTarget!!" << std::endl;
-     exit(EXIT_FAILURE);
+     //std::cerr << "Failure in DirectionFloorfield::GetTarget!!" << std::endl;
+    // exit(EXIT_FAILURE);
 }
 
 Point DirectionLocalFloorfield::GetDir2Wall(Pedestrian* ped) const
@@ -420,8 +422,8 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
      //for (auto& roomPair : building->GetAllRooms()) {
          auto roomPairIt = building->GetAllRooms().begin();
          std::advance(roomPairIt, i);
-         locffviafm[(*roomPairIt).first] = new LocalFloorfieldViaFM((*roomPairIt).second.get(), building,
-                 hx, hy, wallAvoidDistance, useDistancefield, "FF_filename");
+         locffviafm[(*roomPairIt).first] = new LocalFloorfieldViaFM((*roomPairIt).second.get(), building, hx, hy,
+                 wallAvoidDistance, useDistancefield);
      }
      end = std::chrono::system_clock::now();
      std::chrono::duration<double> elapsed_seconds = end-start;
@@ -490,6 +492,7 @@ DirectionLocalFloorfield::~DirectionLocalFloorfield() {
 ///9
 Point DirectionSubLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 {
+     (void)room; // silence warning
 #if DEBUG
      if (initDone && (ffviafm != nullptr)) {
 #endif // DEBUG
@@ -511,8 +514,8 @@ Point DirectionSubLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 #endif // DEBUG
 
      //this should not execute:
-     std::cerr << "Failure in DirectionFloorfield::GetTarget!!" << std::endl;
-     exit(EXIT_FAILURE);
+     //std::cerr << "Failure in DirectionFloorfield::GetTarget!!" << std::endl;
+     //exit(EXIT_FAILURE);
 }
 
 Point DirectionSubLocalFloorfield::GetDir2Wall(Pedestrian* ped) const
@@ -565,10 +568,8 @@ void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
 #pragma omp critical
                     subUIDs.emplace_back(subUID);
                     Log->Write("Creating SubLocFF at key: %d", subUID);
-                    locffviafm[subUID] = new SubLocalFloorfieldViaFM(
-                              subroomIt->second.get(), building,
-                              hx, hy, wallAvoidDistance, useDistancefield,
-                              "FF_filename");
+                    locffviafm[subUID] = new SubLocalFloorfieldViaFM(subroomIt->second.get(), building, hx, hy,
+                            wallAvoidDistance, useDistancefield);
                     auto targets = subroomIt->second->GetAllGoalIDs();
                     for (auto targetUID : targets) {
                          subAndTarget.emplace_back(std::make_pair(subUID, targetUID));
