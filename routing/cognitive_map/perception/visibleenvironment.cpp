@@ -115,10 +115,10 @@ VisibleEnvironment::VisibleEnvironment(const Building *b, const Pedestrian *ped)
     std::vector<VisiLibity::Polygon> polygons;
     VisiLibity::Polygon boundary;
     //Boundary of environment
-    boundary.push_back(VisiLibity::Point(-20000,-20000));
-    boundary.push_back(VisiLibity::Point(20000,-20000));
-    boundary.push_back(VisiLibity::Point(20000,20000));
-    boundary.push_back(VisiLibity::Point(-20000,20000));
+    boundary.push_back(VisiLibity::Point(b->GetBoundaryVertices()[0]._x-5,b->GetBoundaryVertices()[0]._y-5));
+    boundary.push_back(VisiLibity::Point(b->GetBoundaryVertices()[3]._x+5,b->GetBoundaryVertices()[3]._y-5));
+    boundary.push_back(VisiLibity::Point(b->GetBoundaryVertices()[2]._x+5,b->GetBoundaryVertices()[2]._y+5));
+    boundary.push_back(VisiLibity::Point(b->GetBoundaryVertices()[1]._x-5,b->GetBoundaryVertices()[1]._y+5));
     polygons.push_back(boundary);
 
     //Holes
@@ -166,7 +166,7 @@ VisibleEnvironment::VisibleEnvironment(const Building *b, const Pedestrian *ped)
     //VisiLibity::Guards my_guards(std::vector(Point(2095.53,14423.4)));
 
     VisiLibity::Visibility_Polygon
-      my_visibility_polygon(VisiLibity::Point(2095.53,14423.4), environment,0.1);
+      my_visibility_polygon(VisiLibity::Point(2.5,2.5), environment,0.01);
     std::cout << "The visibility polygon is \n" << my_visibility_polygon << std::endl;
 
 

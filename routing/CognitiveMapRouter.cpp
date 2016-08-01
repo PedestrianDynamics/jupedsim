@@ -163,9 +163,9 @@ bool CognitiveMapRouter::Init(Building * b)
 
      //Init Cognitive Map Storage, second parameter: decides whether cognitive Map is empty or complete
      if (getOptions().find("CognitiveMapFiles")==getOptions().end())
-        cm_storage = new CognitiveMapStorage(building,getOptions().at("CognitiveMapStatus")[0]);
+        cm_storage = new CognitiveMapStorage(building,getOptions().at("CognitiveMap")[0]);
      else
-        cm_storage = new CognitiveMapStorage(building,getOptions().at("CognitiveMapStatus")[0],getOptions().at("CognitiveMapFiles")[0]);
+        cm_storage = new CognitiveMapStorage(building,getOptions().at("CognitiveMap")[0],getOptions().at("CognitiveMapFiles")[0]);
      Log->Write("INFO:\tCognitiveMapStorage initialized");
      //cm_storage->ParseCogMap();
 
