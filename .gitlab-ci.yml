@@ -1,6 +1,6 @@
 # compile jpscore and run light tests
 before_script:
-   - nproc=`grep '^processor' /proc/cpuinfo`
+   - nproc=`grep -c '^processor' /proc/cpuinfo`
    - echo "nproc = ${nproc}"
    - mkdir build && cd build/
 
