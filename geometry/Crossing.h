@@ -47,6 +47,13 @@ private:
      bool _isOpen;
 
 public:
+     // last ped that passed was in room {1,2} that many ticks
+     int _lastTickTime1 = 0;
+     int _lastTickTime2 = 0;
+     int _refresh1 = 0;
+     int _refresh2 = 0;
+
+
      /**
       * Constructor
       */

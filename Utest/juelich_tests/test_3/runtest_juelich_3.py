@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import sys
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
@@ -11,10 +11,14 @@ __author__ = 'Oliver Schmidts'
 
 
 def runtest3(inifile, trajfile):
+    #       x     y1   y2
+    #       |     |    |
+    #       v     v    v
+    door= [8.5, 2.0, 3.0] # value from geometry file. Door is at 9.0 m shifted bu 0.5 m
     maxtime = get_maxtime(inifile)
     fps, N, traj = parse_file(trajfile)
     evac_time = (max(traj[:, 1]) - min(traj[:, 1])) / float(fps)
-    if evac_time > maxtime*0.5:
+    if evac_time > maxtime*0.5 or not PassedLineX(traj, door):
         logging.info("%s exits with FAILURE evac_time = %f (maxtime =  %f)" % (argv[0], evac_time, maxtime))
         exit(FAILURE)
     else:

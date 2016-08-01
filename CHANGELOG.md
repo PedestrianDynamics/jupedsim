@@ -1,9 +1,24 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## Known Issues
-#### JPSCORE
-Please also check the Issue tracker on GitLab, if access is available.
+## Unreleased
+### Added
+- Floor field router. See [usage](http://jupedsim.github.io/jpscore/models/routing/#floorfield-router). 
+- New attribute for *step_size* `<step_size fix "no">0.01</step_size>`. Default is yes. See #193 for description and commit 78b634ff. 
+- Added new operational model `<model operational_model_id="5" description="Krausz">`. See [Wiki](https://cst.version.fz-juelich.de/jupedsim/jpscore/wikis/docs/models/operativ#generalized-centrifugal-force-model-with-lateral-swaying) 
+
+### Modified
+- If no seed is given, the simulation will be run with `seed=Time(NULL)` (random).
+- Major refactoring of the parsing machinery. :+1:  @laemmel. 
+
+### Fixed
+- Fix properly delete pedestrians in `Tordeux915` (#203).
+- Fix simulations are not thread-safe (#200). 
+- Fix memory lacks (#202).
+
+
+### Bugs
+Please also check the [Issue tracker](https://cst.version.fz-juelich.de/jupedsim/jpscore/issues?assignee_id=&author_id=&label_name=&milestone_id=&scope=all&sort=created_desc&state=opened), if access is available.
 - exit strategies using *local* - prefix can result in circular routing
 - triangulation creates error-prone help-lines in certain geometries
 - errors in unused parts of ini files lead to system-exit
@@ -13,7 +28,6 @@ Please also check the Issue tracker on GitLab, if access is available.
 
 
 ### Added
-#### JPSCORE
 - CI with travis and Gitlab CI
 - Compilation checked on Visual Studio 12 2013 
 - Added more validation tests
@@ -33,20 +47,7 @@ Please also check the Issue tracker on GitLab, if access is available.
 - Added floor field to all exits, providing direction to target, direction to closest wall and cost estimates. Parameter to control wall-avoidance included.
 - Added new __Exit Strategies__ using floor fields on various subdomains (rooms, subrooms). Please refer to the online documentation on [jupedsim.org](www.jupedsim.org).
    
-#### JPSVIS
-- Added option to load  vtk files. Need to add the line ``` <gradient_field filename="floorfield.vtk"> 
-``` in the header of the trajectory file. Alternatively drag and drop a vtk file on JPSvis.
- 
-- Fixed error displaying the total number of frames when using the scroolbar
- 
-#### JPSREPORT
-- Added geometry information while plotting the voronoi cells
-- Added option to disable plotting
-- Issue a warning when the voronoi cell cannot be calculated 
-- Fixed error where all trajectories were colinear
 
-#### JPSEDITOR
- 
 
 ## v0.7.0 [2015-07-15]
 
@@ -65,13 +66,10 @@ Please also check the Issue tracker on GitLab, if access is available.
 - Changelog file
 - Rimea testcases
 - Unit tests are now based on the Boost testing engine
-#### JPSVIS
-- Display the geometry structure individual room/subroom.
-- Now build on OSX/Linux/Windows 
 
 ### Changed
 -  
--  
+
 
 ### Fixed
 - Visiblity in 3D

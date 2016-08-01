@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.5" 
+<JuPedSim project="JPS-Project" version="0.8" 
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
           xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 
   <!-- seed used for initialising random generator -->
   <seed>12542</seed>
-  <max_sim_time >200</max_sim_time>
+  <max_sim_time >1000</max_sim_time>
   <!-- geometry file -->
   <geometry>1.2_bottleneck.xml</geometry>
   <!-- traectories file and format -->
@@ -15,7 +15,7 @@
   </trajectories>
   <!-- where to store the logs -->
   <logfile>log</logfile>
-
+  <num_threads>10</num_threads>
   <!-- traffic information: e.g closed doors or smoked rooms -->
   <traffic_constraints>
     <!-- room states are: good or smoked  -->
@@ -47,7 +47,7 @@
   <!--persons information and distribution -->
   <agents operational_model_id="3">
     <agents_distribution>
-      <group group_id="1" agent_parameter_id="1" room_id="1" subroom_id="0" number="60" goal_id="0" router_id="1" />
+      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="2" number="10" goal_id="0" router_id="1" />
     </agents_distribution>
 
     <!-- frequency in persons/minute -->
@@ -98,12 +98,13 @@
         <stepsize>0.01</stepsize>
         <exit_crossing_strategy>3</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
-        <force_ped  a="5" D="0.1"/>
-        <force_wall a="5" D="0.1"/>
+        <force_ped  a="6" D="0.15"/>
+        <force_wall a="7" D="0.14"/>
       </model_parameters>
       <agent_parameters agent_parameter_id="1">
         <v0 mu="1.34" sigma="0.001" />
         <bmax mu="0.15" sigma="0.00001" /> <!-- this is l/2, assuming peds are circles with constant radius-->
+        <bmin mu="0.15" sigma="0.001" />
         <amin mu="0.15" sigma="0.00001" />
         <tau mu="0.2" sigma="0.001" />
         <atau mu="0." sigma="0.000001" />

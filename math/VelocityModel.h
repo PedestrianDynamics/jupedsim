@@ -1,7 +1,7 @@
 /**
  * \file        VelocityModel.h
  * \date        Apr 15, 2014
- * \version     v0.7
+ * \version     v0.8
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -58,7 +58,7 @@ class DirectionStrategy;
 class VelocityModel : public OperationalModel {
 private:
      /// define the strategy for crossing a door (used for calculating the driving force)
-     DirectionStrategy* _direction;
+     std::shared_ptr<DirectionStrategy> _direction;
 
      /// Modellparameter
      double _aPed;
@@ -72,11 +72,11 @@ private:
       *
       * @param ped: Pointer to Pedestrians
       * @param spacing: minimum spacing to the neighbors
-      * @param winkel: angle between <ped> and the nearest neighbor 
+      * @param winkel: angle between <ped> and the nearest neighbor. Is not yet used!
       *
       * @return double
       */
-     double OptimalSpeed(Pedestrian* ped, double spacing, double winkel) const;
+     double OptimalSpeed(Pedestrian* ped, double spacing) const;
 
      /**
       * The desired direction of pedestrian
@@ -130,17 +130,18 @@ private:
 
 public:
 
-     VelocityModel(DirectionStrategy* dir, double aped, double Dped,
+     VelocityModel(std::shared_ptr<DirectionStrategy> dir, double aped, double Dped,
                    double awall, double Dwall);
      virtual ~VelocityModel(void);
 
      
-     DirectionStrategy* GetDirection() const;
+     std::shared_ptr<DirectionStrategy> GetDirection() const;
 
      /**
       * ToDO: What is this parameter doing?
       *
       * @return double
+      *
       */
      double GetaPed() const;
 
@@ -182,6 +183,7 @@ public:
       * @param current the actual time
       * @param deltaT the next timestep
       * @param building the geometry object
+      * @param periodic: used in some utests for periodic scenarios (very specific)
       */
      virtual void ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic);
 };

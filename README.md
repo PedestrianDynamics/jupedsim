@@ -61,19 +61,19 @@ The only requirement is a compiler supporting the new standard c++11.
 ### Windows (tested on Win7 with MinGW 4.8)
 
 
-    cmake -G "MinGW Makefiles" CMakeList.txt
-    make-mingw32.exe
+    cmake -G "MinGW Makefiles" CMakeLists.txt
+    mingw32-make.exe
 
 ### Linux (tested on Ubuntu 14.04 with gcc 4.8)
 
 
-    cmake CMakeList.txt
+    cmake CMakeLists.txt
     make
 
 ### OSX (tested on OSX Maverick with clang 5.1 and Yosemite with clang 6.1)
 
 
-    cmake   CMakeList.txt
+    cmake   CMakeLists.txt
     make
 
 Note that the OpenMP acceleration might be missing under OSX

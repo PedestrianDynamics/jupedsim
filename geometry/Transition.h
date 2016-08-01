@@ -46,7 +46,6 @@ private:
      std::string _flowAtExit;
 
 public:
-
      /**
       * Cosntructor
       */

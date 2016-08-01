@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(LINE_DIST_TO_TEST)
      for (int i = -10; i < 11; ++i)
      {
           BOOST_CHECK_MESSAGE(L1.DistTo(Point(i, i)) == abs(i-2), L1.DistTo(Point(i, i)));  
-          BOOST_CHECK_MESSAGE(L1.DistToSquare(Point(i, i)) == abs(i-2)^2, L1.DistToSquare(Point(i, i)));  
+          BOOST_CHECK_MESSAGE(L1.DistToSquare(Point(i, i)) == ((i-2)*(i-2)), L1.DistToSquare(Point(i, i)));  
      }
      BOOST_TEST_MESSAGE("Leaving dist to shortestPoint test");
 
@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(Line_Intersection_test)
     BOOST_CHECK(L1.IntersectionWith(Point(-1, 1), Point(-1, 0), P3) == true);
     BOOST_CHECK(P3 == Point(-1, 0));
     BOOST_CHECK(L1.IntersectionWith(Point(-1.04, 1), Point(-1.04, -1), P3) == false);
-    BOOST_CHECK(isnan(P3._x) && isnan(P3._y));
+    BOOST_CHECK(std::isnan(P3._x) && std::isnan(P3._y));
 
 	BOOST_TEST_MESSAGE("Leaving line intersection test");
 }

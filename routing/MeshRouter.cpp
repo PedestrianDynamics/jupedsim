@@ -465,7 +465,7 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
      }//END IF
 }
 
-MeshEdge* MeshRouter::Visibility(Point& start,Point& goal,vector<MeshEdge*> edge_path)const
+MeshEdge* MeshRouter::Visibility(Point& start, vector<MeshEdge*> edge_path) const
 {
 
      //return *(edge_path.begin());
@@ -582,7 +582,7 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p,int& status)const
 
           for(unsigned int i=0; i<act_cell->GetEdges().size(); i++) {
                int act_edge_id=act_cell->GetEdges().at(i);
-               MeshEdge* act_edge=_meshdata->GetEdges().at(act_edge_id);
+               MeshEdge* act_edge=_meshdata->GetEdges().at((unsigned long) act_edge_id);
                int nb_id=-1;
                // Find neighbouring cell
 
@@ -595,13 +595,13 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p,int& status)const
                }
                int n1_pos=act_edge->GetNode1();
                int n2_pos=act_edge->GetNode2();
-               Point p1_p=*_meshdata->GetNodes().at(n1_pos);
-               Point p2_p=*_meshdata->GetNodes().at(n2_pos);
+               Point p1_p=*_meshdata->GetNodes().at((unsigned long) n1_pos);
+               Point p2_p=*_meshdata->GetNodes().at((unsigned long) n2_pos);
                double length=(p1_p-p2_p).Norm();
                MeshCell* nb_cell=_meshdata->GetCellAtPos(nb_id);
                // Calculate
                if (nb_cell->GetEdges().size()==3) {
-
+                    //@todo: What happend in this cas?
                }
                if (!closedlist[nb_id] && length>0.2) { // neighbour-cell not fully evaluated
                     //MeshCell* nb_cell=_meshdata->GetCellAtPos(nb_id);
@@ -613,8 +613,8 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p,int& status)const
                          costlist[nb_id]=new_cost;
                          inopenlist[nb_id]=true;
 
-                         double f=new_cost+(nb_cell->GetMidpoint()-point_goal).Norm();
-                         openlist.push_back(make_pair(f,nb_cell));
+                         double fc=new_cost+(nb_cell->GetMidpoint()-point_goal).Norm();
+                         openlist.push_back(make_pair(fc,nb_cell));
                     } else {
                          if (new_cost<costlist[nb_id]) {
                               //cout<<"ERROR"<<endl;
@@ -624,9 +624,9 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p,int& status)const
                               // update nb in openlist
                               for(unsigned int j=0; j<openlist.size(); j++) {
                                    if(openlist.at(i).second->GetID()==nb_id) {
-                                        MeshCell* nb_cell=openlist.at(i).second;
-                                        double f=new_cost+(nb_cell->GetMidpoint()-point_goal).Norm();
-                                        openlist.at(i)=make_pair(f,nb_cell);
+                                        MeshCell* nb_cell_=openlist.at(i).second;
+                                        double fcost=new_cost+(nb_cell_->GetMidpoint()-point_goal).Norm();
+                                        openlist.at(i)=make_pair(fcost,nb_cell_);
                                         break;
                                    }
                               }
@@ -677,6 +677,8 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p,int& status)const
      // In the case the agent is in the destination cell
      if(predlist[c_goal_id]==-1) {
           status=-1;
+          delete[] predlist;
+          delete[] predEdgelist;
           return pathedge;
      }
 
@@ -832,8 +834,8 @@ void MeshRouter::FixMeshEdges()
           MeshEdge* edge=_meshdata->GetEdges().at(i);
           if(edge->GetRoom1()==NULL) {
 
-               for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
-                    Room* room = _building->GetRoom(i);
+               for (int numRooms = 0; numRooms < _building->GetNumberOfRooms(); numRooms++) {
+                    Room* room = _building->GetRoom(numRooms);
                     for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
                          SubRoom* sub = room->GetSubRoom(j);
                          if(sub->IsInSubRoom( edge->GetCentre())) {
@@ -924,10 +926,10 @@ bool MeshRouter::Init(Building* b)
                for(unsigned int i=0; i<countCells; i++) {
                     double midx,midy;
                     meshfile>>midx>>midy;
-                    unsigned int countNodes=0;
-                    meshfile>>countNodes;
+                    unsigned int countNodes_=0;
+                    meshfile>>countNodes_;
                     vector<int> node_id;
-                    for(unsigned int j=0; j<countNodes; j++) {
+                    for(unsigned int j=0; j<countNodes_; j++) {
                          int tmp;
                          meshfile>>tmp;
                          node_id.push_back(tmp);

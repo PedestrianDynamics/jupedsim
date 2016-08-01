@@ -59,8 +59,8 @@
 #define _SIMULATOR 1
 //#define _USE_PROTOCOL_BUFFER 1
 
-#define JPS_OLD_VERSION "0.8" // this version is still supported
-#define JPS_VERSION_MINOR "81"
+#define JPS_OLD_VERSION "0.5" // this version is still supported
+#define JPS_VERSION_MINOR "8"
 #define JPS_VERSION_MAJOR "0"
 
 #define JPS_VERSION JPS_VERSION_MAJOR "." JPS_VERSION_MINOR
@@ -125,14 +125,17 @@ enum RoutingStrategy {
      ROUTING_COGNITIVEMAP,
      ROUTING_FLOORFIELD,
      ROUTING_FF_GLOBAL_SHORTEST,
+     ROUTING_FF_LOCAL_SHORTEST,
+     ROUTING_FF_QUICKEST,
      ROUTING_UNDEFINED =-1
 };
 
 enum OperativModels {
-    MODEL_GFCM=1,
+    MODEL_GCFM=1,
     MODEL_GOMPERTZ,
     MODEL_VELOCITY,
-    MODEL_GRADIENT
+    MODEL_GRADIENT,
+    MODEL_KRAUSZ
 //    MODEL_ORCA,
 //    MODEL_CFM,
 //    MODEL_GNM
@@ -159,6 +162,16 @@ enum FFRouterMode {
      global_shortest = 0,
      local_shortest,
      quickest
+};
+
+enum GridCode { //used in floor fields
+    WALL = 0,
+    INSIDE,
+    OUTSIDE,
+    OPEN_CROSSING,
+    OPEN_TRANSITION,
+    CLOSED_CROSSING,     //closed crossings and transitions are marked as walls in "parseBuilding"
+    CLOSED_TRANSITION
 };
 
 //global functions for convenience

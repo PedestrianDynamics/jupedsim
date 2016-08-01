@@ -1,4 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
+"""
+- 100 peds distributed in a room with 2 exits:
+  - All  peds  with router "quickest"
+
+- Some peds should leave from the exit e2
+"""
+
 import os
 import sys
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))

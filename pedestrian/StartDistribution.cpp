@@ -44,6 +44,7 @@ StartDistribution::StartDistribution(int seed)
 {
      _roomID = -1;
      _subroomID=-1;
+     _subroomUID=-1;
      _nPeds = -1;
      _groupID = -1;
      _goalID = -1;
@@ -61,13 +62,22 @@ StartDistribution::StartDistribution(int seed)
      _yMin=-FLT_MAX;
      _yMax=FLT_MAX;
      _groupParameters=NULL;
-     _generator = std::default_random_engine(seed);
+     static bool _seeded = false; // seed only once, not every time
+     if(!_seeded) {
+           _generator = std::default_random_engine(seed);     // mt19937 g(static_cast<uint32_t>(_configuration->GetSeed()));
+           _seeded = true;
+     }
 }
 
 StartDistribution::~StartDistribution()
 {
 }
 
+
+std::default_random_engine StartDistribution::GetGenerator() 
+{
+     return _generator;
+}
 
 int StartDistribution::GetAgentsNumber() const
 {
@@ -214,6 +224,7 @@ Pedestrian* StartDistribution::GenerateAgent(Building* building, int* pid, vecto
      E.SetAmin(_groupParameters->GetAmin());
      E.SetBmax(_groupParameters->GetBmax());
      E.SetBmin(_groupParameters->GetBmin());
+     E.DoStretch(_groupParameters->StretchEnabled());
      ped->SetEllipse(E);
      ped->SetTau(_groupParameters->GetTau());
      ped->SetV0Norm(_groupParameters->GetV0(),
@@ -224,6 +235,8 @@ Pedestrian* StartDistribution::GenerateAgent(Building* building, int* pid, vecto
                     _groupParameters->GetV0IdleEscalatorUpStairs(),
                     _groupParameters->GetV0IdleEscalatorDownStairs()
           );
+     ped->SetSwayParameters(_groupParameters->GetSwayFreqA(), _groupParameters->GetSwayFreqB(),
+                            _groupParameters->GetSwayAmpA(), _groupParameters->GetSwayAmpB());
      // first default Position
      int index = -1;
 

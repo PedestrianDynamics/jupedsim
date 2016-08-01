@@ -95,7 +95,7 @@ class JPSRunTestDriver(object):
             jpsreport_exe = self.__find_executable(jpsreport)
             # if self.testno == 100: # fix for 1dfd, since jpsreport can not be used in 1D
             #     fd_script = os.path.join(self.DIR, "fd.py")
-            #     print fd_script
+            #     print(fd_script)
             #     subprocess.call(["python", "%s" % fd_script])
             # else:
             subprocess.call([jpsreport_exe, "%s" % self.jpsreport_ini])

@@ -235,7 +235,7 @@ private:
 	struct Halfedge *ELleftbnd(struct PointVDG *p);
 	struct Halfedge *ELright(struct Halfedge *he);
 	void makevertex(struct Site *v);
-	void out_triple(struct Site *s1, struct Site *s2,struct Site * s3);
+	//void out_triple(struct Site *s1, struct Site *s2,struct Site * s3);
 	
 	void		PQinsert(struct Halfedge *he,struct Site * v, float offset);
 	void		PQdelete(struct Halfedge *he);
@@ -245,7 +245,7 @@ private:
 	struct Halfedge * ELgethash(int b);
 	struct Halfedge *ELleft(struct Halfedge *he);
 	struct Site *leftreg(struct Halfedge *he);
-	void		out_site(struct Site *s);
+	//void		out_site(struct Site *s);
 	bool		PQinitialize();
 	int			PQbucket(struct Halfedge *he);
 	void		clip_line(struct Edge *e);
@@ -255,11 +255,11 @@ private:
 	struct Site *rightreg(struct Halfedge *he);
 	struct Edge *bisect(struct	Site *s1,struct	Site *s2);
 	float dist(struct Site *s,struct Site *t);
-	struct Site *intersect(struct Halfedge *el1, struct Halfedge *el2, struct PointVDG *p=0);
+	struct Site* intersect(struct Halfedge* el1, struct Halfedge* el2);
 
 	void		out_bisector(struct Edge *e);
-	void		out_ep(struct Edge *e);
-	void		out_vertex(struct Site *v);
+	//void		out_ep(struct Edge *e);
+	//void		out_vertex(struct Site *v);
 	struct Site *nextone();
 
 	void		pushGraphEdge(float x1, float y1, float x2, float y2);
@@ -268,8 +268,8 @@ private:
 
 	void		openpl();
 	void		line(float x1, float y1, float x2, float y2);
-	void		circle(float x, float y, float radius);
-	void		range(float minX, float minY, float maxX, float maxY);
+
+	//void		range(float minX, float minY, float maxX, float maxY);
 
 	void  		insertVertexAddress(long vertexNum, struct Site* address);
 	void		insertVertexLink(long vertexNum, long vertexLinkedTo);
