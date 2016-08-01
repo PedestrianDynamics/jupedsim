@@ -1,9 +1,10 @@
 # compile jpscore and run light tests
 before_script:
+   - apt-get update -qq && apt-get install -y libboost-system-dev libboost-filesystem-dev libboost-test-dev 
    - mkdir build && cd build/
 
 build:
   script:
     - cmake .. -DBUILD_TESTING=ON
-    - make -j$(nproc)     
+    - make -j4
     - ctest -R Boost                         
