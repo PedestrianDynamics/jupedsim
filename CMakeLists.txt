@@ -5,6 +5,7 @@
 # -DBUILD_TESTING=ON (default OFF) for python tests
 # -DBUILD_CPPUNIT_TEST=ON (default OFF) for unit tests
 # -DUSE_DUAL_ABI=ON (default OFF)  https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
+# -D Boost_NO_SYSTEM_PATHS=true (default false) -D BOOST_ROOT=PARH_where_to_find_boost 
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
@@ -160,13 +161,15 @@ if (APPLE)
 endif (APPLE)
 
 
-#set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /opt/local/lib)
-#set(Boost_INCLUDE_DIR /opt/local/include/boost)
-#set(Boost_LIBRARY_DIR /usr/local/src/boost_1_46_1/stage/lib)
+if (Boost_NO_SYSTEM_PATHS)
+  #set(BOOST_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../3p/boost")
+  set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
+  set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
+endif (Boost_NO_SYSTEM_PATHS)
 # in case boost is a non-default location
 # SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "C:/win32libs/boost")
 # SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "C:/win32libs/boost/lib")
-find_package(Boost REQUIRED)
+#find_package(Boost REQUIRED)
 
 
 # find the correct OpenMP flag
