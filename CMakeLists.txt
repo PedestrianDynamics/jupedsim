@@ -487,7 +487,7 @@ if (Boost_FOUND)
     message(STATUS "Boost_LIB_VERSION: " ${Boost_LIB_VERSION})
     message(STATUS "Boost_libraries: " ${Boost_LIBRARIES})
     link_directories(${Boost_LIBRARY_DIRS})
-    include_directories(${Boost_INCLUDE_DIR})
+    include_directories(SYSTEM ${Boost_INCLUDE_DIR})
     # todo: is this necessary?
     target_link_libraries(jpscore ${Boost_LIBRARIES})
 endif ()
