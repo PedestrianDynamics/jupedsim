@@ -6,7 +6,11 @@ All notable changes to this project will be documented in this file.
 - Floor field router. See [usage](http://jupedsim.github.io/jpscore/models/routing/#floorfield-router). 
 - New attribute for *step_size* `<step_size fix "no">0.01</step_size>`. Default is yes. See #193 for description and commit 78b634ff. 
 - Added new operational model `<model operational_model_id="5" description="Krausz">`. See [Wiki](https://cst.version.fz-juelich.de/jupedsim/jpscore/wikis/docs/models/operativ#generalized-centrifugal-force-model-with-lateral-swaying) 
-
+- Added new `cmake` compilation flags: 
+  - `-D DUSE_DUAL_ABI=ON` (default OFF): See [note in GCC 5.1 release](https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html). 
+  - `-D Boost_NO_SYSTEM_PATHS=true` (default false): In case a local version of boost have to be used.
+     Pass this option together with `-D BOOST_ROOT=PARH_where_to_find_boost`.
+  
 ### Modified
 - If no seed is given, the simulation will be run with `seed=Time(NULL)` (random).
 - Major refactoring of the parsing machinery. :+1:  @laemmel. 
