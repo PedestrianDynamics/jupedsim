@@ -91,7 +91,7 @@ There is no special hardware/software requirements for running JuPedSim. The dis
 
 
 Some verification tests are still failing. The actual cdash-board can be found [here](http://my.cdash.org/index.php?project=JuPedSim) 
-Occasionaly jpscore crashes if the input file is not valid. Make sure to validate your XML input files with the supplied XSD files.
+Occasionally jpscore crashes if the input file is not valid. Make sure to validate your XML input files with the supplied XSD files.
 
 ## Frequently Asked Questions
 
