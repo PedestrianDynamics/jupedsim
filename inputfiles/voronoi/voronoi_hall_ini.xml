@@ -84,10 +84,10 @@
     </agents_distribution>
 
     <agents_sources><!-- frequency in persons/seconds -->
-      <source id="1" frequency="5" agents_max="50" group_id="0" caption="source 1" />
-      <source_ id="2" frequency="10" agents_max="50" group_id="2" caption="source 2" />
-      <source_ id="3" frequency="10" agents_max="50" group_id="3" caption="source 3" />
-      <source_ id="4" frequency="10" agents_max="50" group_id="4" caption="source 4" />
+      <source id="1" frequency="2" agents_max="50" group_id="0" caption="source 1" />
+      <source_ id="2" frequency="2" agents_max="50" group_id="2" caption="source 2" />
+      <source_ id="3" frequency="2" agents_max="50" group_id="3" caption="source 3" />
+      <source_ id="4" frequency="2" agents_max="50" group_id="4" caption="source 4" />
     </agents_sources>
 
   </agents>
