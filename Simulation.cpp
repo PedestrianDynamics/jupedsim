@@ -453,7 +453,7 @@ double Simulation::RunBody(double maxSimTime)
     // main program loop
     while ((_nPeds || (!_agentSrcManager.IsCompleted()&& _gotSources) ) && t<maxSimTime) {
         t = 0+(frameNr-1)*_deltaT;
-        //process the queue for incoming pedestriansg
+        //process the queue for incoming pedestrians
         ProcessAgentsQueue();
 
         if (t>Pedestrian::GetMinPremovementTime()) {
@@ -484,7 +484,8 @@ double Simulation::RunBody(double maxSimTime)
         if (0==frameNr%writeInterval) {
             _iod->WriteFrame(frameNr/writeInterval, _building.get());
         }
-        Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
+        if(!_gotSources /*&& _printPB*/) // @todo: option for print progressbar
+              Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
 
         // needed to control the execution time PART 2
         // time(&endtime);
