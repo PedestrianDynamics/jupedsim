@@ -73,7 +73,8 @@ EventManager::EventManager(Building *_b, unsigned int seed)
 
      _file = fopen("../events/events.txt", "r");
      if (!_file) {
-          Log->Write("INFO:\tFiles 'events.txt' missing.");
+          Log->Write("INFO:\tFiles 'events.txt' missing. "
+                    "Realtime interaction with the simulation not possible.");
      } else {
           Log->Write("INFO:\tFile 'events.txt' will be monitored for new events.");
           _dynamic = true;
@@ -163,7 +164,9 @@ bool EventManager::ReadEventsXml()
      Log->Write("INFO: \tEvents were initialized");
 
      //create some events
-     CreateSomeEngines();
+     //FIXME: creating some engine before starting is not working.
+     // seom doors are still perceived as beeing closed.
+     //CreateSomeEngines();
      return true;
 }
 
@@ -708,10 +711,15 @@ void EventManager::CreateSomeEngines()
      Log->Write("INFO: \tpopulating routers");
      std::map<int, bool> doors_states;
 
+     for(auto&& t:_building->GetAllTransitions())
+     {
+          printf("ID: %d  IsOpen: %d\n",t.second->GetID(),t.second->IsOpen());
+     }
+
      //save the doors states
      for(auto&& t:_building->GetAllTransitions())
      {
-          doors_states[t.second->GetID()]=    t.second->IsOpen();
+          doors_states[t.second->GetID()]=t.second->IsOpen();
      }
 
      //open all doors
@@ -747,5 +755,12 @@ void EventManager::CreateSomeEngines()
           }
      }
      Log->Write("INFO: \tdone");
+
+     cout<<endl<<endl;
+     for(auto&& t:_building->GetAllTransitions())
+     {
+          printf("ID: %d  IsOpen: %d\n",t.second->GetID(),t.second->IsOpen());
+     }
+     exit(0);
 }
 

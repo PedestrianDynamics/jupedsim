@@ -523,6 +523,11 @@ double Pedestrian::GetV0Norm() const
      //detect the walking direction based on the elevation
      SubRoom* sub=_building->GetRoom(_roomID)->GetSubRoom(_subRoomID);
      double ped_elevation = sub->GetElevation(_ellipse.GetCenter());
+     if (_navLine ==nullptr)
+     {
+          printf("Error: ped %d has no navline\n", _id);
+          exit(EXIT_FAILURE);
+     }
      const Point& target = _navLine->GetCentre();
      double nav_elevation = sub->GetElevation(target);
      double delta = nav_elevation - ped_elevation;
