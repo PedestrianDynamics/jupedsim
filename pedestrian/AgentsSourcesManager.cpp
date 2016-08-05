@@ -2,7 +2,7 @@
  * \file        AgentsSourcesManager.cpp
  * \date        Apr 14, 2015
  * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -42,6 +42,7 @@
 #include "AgentsQueue.h"
 
 #include "../voronoi-boost/VoronoiPositionGenerator.h"
+#define UNUSED(x) [&x]{}()  // c++11 silence warnings
 
 using namespace std;
 
@@ -78,7 +79,7 @@ void AgentsSourcesManager::Run()
      //it might be better to use a timer
      _isCompleted = false;
      bool finished = false;
-     long updateFrequency = 2;     // @todo: get from inifile
+     long updateFrequency = 1;
      do
      {
           int current_time = (int)Pedestrian::GetGlobalTime();
@@ -123,6 +124,7 @@ bool AgentsSourcesManager::ProcessAllSources() const
 void AgentsSourcesManager::ComputeBestPositionDummy(AgentsSource* src,
           vector<Pedestrian*>& peds)const
 {
+     UNUSED(src); 
      peds[0]->SetPos( Point(10,5.5) );
      peds[1]->SetPos( Point(10,4.9) );
      peds[2]->SetPos( Point(10,4.3) );

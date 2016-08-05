@@ -64,7 +64,7 @@ void HybridSimulationManager::Start()
 bool HybridSimulationManager::Run(Simulation& sim)
 {
 
-     Log->Write("WARN:\tJuPedSim requires the maximum number of pedestrians to be known at startup. However,\n"
+     Log->Write("WARNING:\tJuPedSim requires the maximum number of pedestrians to be known at startup. However,\n"
                "\t\tin a hybrid approach it is not possible to know this number beforehand.\n"
                "\t\tThis needs to be fixed in future. For the time being the number is arbitrarily set to 10,000.\n"
                "\t\tThe simulation is likely to crash if the actual number of pedestrians exceeds 10,000.");
