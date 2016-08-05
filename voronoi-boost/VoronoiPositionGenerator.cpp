@@ -103,21 +103,21 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
     //fake_peds will be the positions of "fake" pedestrians, multiplied by factor and converted to int
     for (auto vert: subroom->GetPolygon() ) //room vertices
     {
-   	     const Point& center_pos = subroom->GetCentroid();
-   	     temp._x = ( center_pos._x-vert._x );
-		temp._y = ( center_pos._y-vert._y );
-		temp = temp/sqrt(temp.NormSquare());
-		temp = temp*(radius*1.4);  //now the norm of the vector is ~r*sqrt(2), pointing to the center
-		temp = temp + vert;
-		temp._x = (int)(temp._x*factor);
-		temp._y = (int)(temp._y*factor);
-		fake_peds.push_back( temp );
+          const Point& center_pos = subroom->GetCentroid();
+          temp._x = ( center_pos._x-vert._x );
+          temp._y = ( center_pos._y-vert._y );
+          temp = temp/sqrt(temp.NormSquare());
+          temp = temp*(radius*1.4);  //now the norm of the vector is ~r*sqrt(2), pointing to the center
+          temp = temp + vert;
+          temp._x = (int)(temp._x*factor);
+          temp._y = (int)(temp._y*factor);
+          fake_peds.push_back( temp );
     }
 
     std::vector<Pedestrian*>::iterator iter_ped;
     for (iter_ped = peds.begin(); iter_ped != peds.end(); )
     {
-         Pedestrian* ped = (*iter_ped);
+         Pedestrian* ped = *iter_ped;
          radius = ped->GetEllipse().GetBmax(); //max radius of the current pedestrian
 
          if(existing_peds.size() == 0 )
@@ -134,47 +134,24 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                    if( IsEnoughInSubroom(subroom, new_pos, radius ) )
                    {
                         ped->SetPos(center_pos + random_pos, true);
-                        Point v;
-                        if (ped->GetExitLine()) {
-                             v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
-                        } else {
-                             v = Point(0., 0.);
-                        }
-                        //double speed=ped->GetV0Norm();
-                        double speed = ped->GetEllipse().GetV0(); //@todo: some peds do not have a navline. This should not be accepted.
-                        v=v*speed;
-                        ped->SetV(v);
-                   }
-                   else
-                   {
-                        ped->SetPos(center_pos, true);
-                        Point v;
-                        if (ped->GetExitLine()) {
-                             v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
-                        } else {
-                             v = Point(0., 0.);
-                        }
-                        double speed=ped->GetV0Norm();
-                        v=v*speed;
-                        ped->SetV(v);
                    }
               }
               else
               {
-                   ped->SetPos(center_pos, true);
-                   Point v;
-                   if (ped->GetExitLine()) {
-                             v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
-                   } else {
-                             v = Point(0., 0.);
-                   }
-                   double speed=ped->GetV0Norm();
-                   v=v*speed;
-                   ped->SetV(v);
+                    ped->SetPos(center_pos, true);
               }
-
+              
+              Point v;
+              if (ped->GetExitLine()) {
+                    v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
+              } else {
+                    v = Point(0., 0.);
+              }
+              //double speed=ped->GetV0Norm();
+              double speed = ped->GetEllipse().GetV0(); //@todo: some peds do not have a navline. This should not be accepted.
+              v=v*speed;
+              ped->SetV(v);
               existing_peds.push_back(ped);
-
 
          }//0
 

@@ -111,7 +111,7 @@ bool AgentsSourcesManager::ProcessAllSources() const
                //ComputeBestPositionRandom(src.get(), peds);
                //todo: here every pedestrian needs an exitline
                if( !ComputeBestPositionVoronoiBoost(src.get(), peds, _building) )
-                    Log->Write("INFO:\t there was no place for some pedestrians");
+                    Log->Write("WARNING:\tThere was no place for some pedestrians");
                AgentsQueueIn::Add(peds);
                empty = false;
           }
