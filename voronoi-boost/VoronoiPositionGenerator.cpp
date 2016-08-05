@@ -27,7 +27,7 @@
 //#include <string>
 //#include <random>
 
-//#include "boost/polygon/voronoi.hpp"
+#include "boost/polygon/voronoi.hpp"
 using boost::polygon::voronoi_builder;
 using boost::polygon::voronoi_diagram;
 using boost::polygon::x;
@@ -37,24 +37,24 @@ using boost::polygon::high;
 
 
 //wrapping the boost objects (just the point object)
-//namespace boost {
-//namespace polygon {
-//template <>
-//struct geometry_concept<Point> {
-//     typedef point_concept type;
-//};
-//
-//template <>
-//struct point_traits<Point> {
-//     typedef int coordinate_type;
-//
-//     static inline coordinate_type get(
-//               const Point& point, orientation_2d orient) {
-//          return (orient == HORIZONTAL) ? point._x : point._y;
-//     }
-//};
-//}  // polygon
-//}  // boost
+namespace boost {
+namespace polygon {
+template <>
+struct geometry_concept<Point> {
+     typedef point_concept type;
+};
+
+template <>
+struct point_traits<Point> {
+     typedef int coordinate_type;
+
+     static inline coordinate_type get(
+               const Point& point, orientation_2d orient) {
+          return (orient == HORIZONTAL) ? point._x : point._y;
+     }
+};
+}  // polygon
+}  // boost
 
 
 using namespace std;
@@ -282,8 +282,14 @@ void VoronoiAdjustVelocityNeighbour(voronoi_diagram<double>::const_vertex_iterat
      double no1=0,no2=0;
      double backup_speed = 0;
      std::size_t index;
-
-     Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized(); //the direction
+     Point v(0,0);
+     if(ped->GetExitLine() != nullptr)
+          v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized(); //the direction
+     else
+     {
+          int gotRoute = ped->FindRoute();
+          if(gotRoute < 0) printf("\nWARNING: source agent %d can not get exit\n", ped->GetID());
+     }
      double speed = 0;
      do
      {

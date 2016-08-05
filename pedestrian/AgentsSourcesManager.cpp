@@ -81,7 +81,7 @@ void AgentsSourcesManager::Run()
      long updateFrequency = 2;     // 1 = second
      do
      {
-          int current_time = Pedestrian::GetGlobalTime();
+          int current_time = (int)Pedestrian::GetGlobalTime();
 
           if ((current_time != _lastUpdateTime)
                     && ((current_time % updateFrequency) == 0))
@@ -108,7 +108,7 @@ bool AgentsSourcesManager::ProcessAllSources() const
                Log->Write("INFO:\tSource %d generating %d agents (%d remaining)",src->GetId(),peds.size(),src->GetPoolSize());
 
                //ComputeBestPositionRandom(src.get(), peds);
-               //todo: compute the optimal position for insertion using voronoi
+               //todo: here every pedestrian needs an exitline
                if( !ComputeBestPositionVoronoiBoost(src.get(), peds, _building) )
                     Log->Write("INFO:\t there was no place for some pedestrians");
                AgentsQueueIn::Add(peds);
