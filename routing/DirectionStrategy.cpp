@@ -498,7 +498,7 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
          auto roomPairIt = building->GetAllRooms().begin();
          std::advance(roomPairIt, i);
          locffviafm[(*roomPairIt).first] = new LocalFloorfieldViaFM((*roomPairIt).second.get(), building,
-                 hx, hy, wallAvoidDistance, useDistancefield, "FF_filename");
+                 hx, hy, wallAvoidDistance, useDistancefield);
      }
      end = std::chrono::system_clock::now();
      std::chrono::duration<double> elapsed_seconds = end-start;
@@ -644,8 +644,7 @@ void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
                     Log->Write("Creating SubLocFF at key: %d", subUID);
                     locffviafm[subUID] = new SubLocalFloorfieldViaFM(
                               subroomIt->second.get(), building,
-                              hx, hy, wallAvoidDistance, useDistancefield,
-                              "FF_filename");
+                              hx, hy, wallAvoidDistance, useDistancefield);
                     auto targets = subroomIt->second->GetAllGoalIDs();
                     for (auto targetUID : targets) {
                          subAndTarget.emplace_back(std::make_pair(subUID, targetUID));

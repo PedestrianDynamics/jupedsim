@@ -8,8 +8,7 @@ LocalFloorfieldViaFM::LocalFloorfieldViaFM(){};
 LocalFloorfieldViaFM::LocalFloorfieldViaFM(const Room* const roomArg,
                const Building* buildingArg,
                const double hxArg, const double hyArg,
-               const double wallAvoidDistance, const bool useDistancefield,
-               const std::string& filename) {
+               const double wallAvoidDistance, const bool useDistancefield) {
      //ctor
      threshold = -1; //negative value means: ignore threshold
      threshold = wallAvoidDistance;
@@ -432,8 +431,7 @@ SubLocalFloorfieldViaFM::SubLocalFloorfieldViaFM(){};
 SubLocalFloorfieldViaFM::SubLocalFloorfieldViaFM(const SubRoom* const roomArg,
       const Building* buildingArg,
       const double hxArg, const double hyArg,
-      const double wallAvoidDistance, const bool useDistancefield,
-      const std::string& filename) {
+      const double wallAvoidDistance, const bool useDistancefield) {
      //ctor
      threshold = -1; //negative value means: ignore threshold
      threshold = wallAvoidDistance;
