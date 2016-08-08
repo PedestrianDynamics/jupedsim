@@ -5,7 +5,7 @@
   <!-- seed used for initialising random generator -->
   <seed>12542</seed>
   <!-- geometry file -->
-  <geometry>geometry.xml</geometry>
+  <geometry>bidirectional_geo.xml</geometry>
   <max_sim_time>130</max_sim_time>
 
   <!-- trajectories file and format -->
@@ -53,16 +53,19 @@
   </routing>
 
   <!--persons information and distribution -->
-  <agents operational_model_id="4">
+  <agents operational_model_id="2">
     <agents_distribution>
-      <group group_id="2" room_id="0" subroom_id="0" number="50" router_id="1" agent_parameter_id="1" goal_id="2" x_min="23" x_max="29" y_min="-3" y_max="3" />
-      <group group_id="1" room_id="0" subroom_id="0" number="50" router_id="1" agent_parameter_id="1" goal_id="1"  x_min="1" x_max="7" y_min="-3" y_max="3"/>
+      <group group_id="2" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="2"  />
+      <group group_id="1" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="1" x_min="7" x_max="9"  />
+      <group group_id="3" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="2" />
+      <group group_id="4" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="1"  />
+
       <!-- uncomment this line and comment out the line above. This creates a SegFault because GetRoom returns nullptr -->
       <!-- <group group_id="1" room_id="1" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="2"  x_min="1" x_max="5" y_min="-2" y_max="2"/>  -->
     </agents_distribution>
 
     <agents_sources><!-- frequency in persons/seconds -->
-      <source_ id="1" frequency="3" agents_max="30" group_id="1" caption="source 1" />
+      <source id="1" frequency="3" agents_max="30" group_id="1" caption="source 1" />
       <source_ id="2" frequency="3" agents_max="30" group_id="2" caption="source 2" />
     </agents_sources>
 

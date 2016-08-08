@@ -34,19 +34,15 @@
 
 #include <iostream>
 
-AgentsSource::AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency)
+AgentsSource::AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency):
+      _id(id), _frequency(frequency), _maxAgents(max_agents), _groupID(group_id), _caption(caption)
 {
-    _id=id;
-    _caption=caption;
-    _maxAgents=max_agents;
-    _groupID=group_id;
-    _frequency=frequency;
     _agentsGenerated=0;
+    _boundaries[0] = 0;
+    _boundaries[1] = 0;
+    _boundaries[2] = 0;
+    _boundaries[3] = 0;
     _agents.clear();
-	_boundaries[0] = 0;
-	_boundaries[1] = 0;
-	_boundaries[2] = 0;
-	_boundaries[3] = 0;
 }
 
 AgentsSource::~AgentsSource()
@@ -82,7 +78,7 @@ void AgentsSource::AddAgentsToPool(std::vector<Pedestrian*>& peds)
 
 int AgentsSource::GetPoolSize() const
 {
-     return _agents.size();
+     return (int)_agents.size();
 }
 
 void AgentsSource::AddToPool(Pedestrian* ped)

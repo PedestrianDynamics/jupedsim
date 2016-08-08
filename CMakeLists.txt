@@ -272,7 +272,7 @@ set(source_files
         pedestrian/StartDistribution.cpp
 
 
-        voronoi/VoronoiDiagramGenerator.cpp
+        # voronoi/VoronoiDiagramGenerator.cpp
         voronoi-boost/VoronoiPositionGenerator.cpp
 
         routing/ffRouter.cpp
@@ -399,7 +399,7 @@ set(header_files
         pedestrian/Pedestrian.h
         pedestrian/AgentsSourcesManager.h
         pedestrian/StartDistribution.h
-        voronoi/VoronoiDiagramGenerator.h
+        # voronoi/VoronoiDiagramGenerator.h
         voronoi-boost/VoronoiPositionGenerator.h
 
         mpi/LCGrid.h
