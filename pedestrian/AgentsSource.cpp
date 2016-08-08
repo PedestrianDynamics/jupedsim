@@ -78,7 +78,7 @@ void AgentsSource::AddAgentsToPool(std::vector<Pedestrian*>& peds)
 
 int AgentsSource::GetPoolSize() const
 {
-     return _agents.size();
+     return (int)_agents.size();
 }
 
 void AgentsSource::AddToPool(Pedestrian* ped)

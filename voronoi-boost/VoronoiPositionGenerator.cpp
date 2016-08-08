@@ -106,7 +106,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
           const Point& center_pos = subroom->GetCentroid();
           temp._x = ( center_pos._x-vert._x );
           temp._y = ( center_pos._y-vert._y );
-          temp = temp/sqrt(temp.NormSquare());
+          temp = temp/temp.Norm();
           temp = temp*(radius*1.4);  //now the norm of the vector is ~r*sqrt(2), pointing to the center
           temp = temp + vert;
           temp._x = (int)(temp._x*factor);
@@ -122,7 +122,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
 
          if(existing_peds.size() == 0 )
          {
-       	   const Point& center_pos = subroom->GetCentroid();
+              const Point& center_pos = subroom->GetCentroid();
 
               double x_coor = 3 * ( (double)rand() / (double)RAND_MAX ) - 1.5;
               double y_coor = 3 * ( (double)rand() / (double)RAND_MAX ) - 1.5;
@@ -159,7 +159,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
          {
        	   //it would be better to maybe have a mapping between discrete_positions and pointers to the pedestrians
        	   //then there would be no need to remember the velocities_vector and goal_vector
-     	       std::vector<Point> discrete_positions;
+              std::vector<Point> discrete_positions;
               std::vector<Point> velocities_vector;
               std::vector<int> goal_vector;
               Point tmp(0,0);
@@ -177,19 +177,17 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                    goal_vector.push_back( eped->GetFinalDestination() );
 
                    //calculating the mean, using it for the fake pedestrians
-                   v = v + eped->GetV();
+                   v += eped->GetV();
                    no++;
               }
-
-              //TODO: dividing by 0 when existing_peds is empty
-              // -------> existing_peds is not empty because of the if statement
               // sum up the weighted velocity in the loop
               v = v/no; //this is the mean of all velocities
 
               //adding fake people to the vector for constructing voronoi diagram
-              for (unsigned int i=0; i<subroom->GetPolygon().size(); i++ )
+              //for (unsigned int i=0; i<subroom->GetPolygon().size(); i++ )
+              for(auto fake_ped: fake_peds)
               {
-                   discrete_positions.push_back( fake_peds[i] );
+                   discrete_positions.push_back( fake_ped );
                    velocities_vector.push_back( v );
                    goal_vector.push_back( -10 );
               }
