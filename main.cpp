@@ -51,10 +51,12 @@ int main(int argc, char** argv)
 
     Configuration* configuration = new Configuration();
     // Parsing the arguments
-
-    ArgumentParser* p = new ArgumentParser(configuration);
-    bool status = p->ParseArgs(argc, argv);
-
+    bool status = false;
+    {    
+          //ArgumentParser* p = new ArgumentParser(configuration); //Memory Leak
+          std::unique_ptr<ArgumentParser> p(new ArgumentParser(configuration));
+          status = p->ParseArgs(argc, argv);
+    }
 #ifdef _JPS_AS_A_SERVICE
     if (configuration->GetRunAsService()) {
           std::shared_ptr<HybridSimulationManager> hybridSimulationManager = std::shared_ptr<HybridSimulationManager>(

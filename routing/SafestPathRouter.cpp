@@ -33,13 +33,13 @@
 #include "../geometry/SubRoom.h"
 
 
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <map>
+//#include <iostream>
+//#include <sstream>
+//#include <fstream>
+//#include <map>
 
 
-#include "../pedestrian/Pedestrian.h"
+//#include "../pedestrian/Pedestrian.h"
 
 #define UPDATE_FREQUENCY 1 // in seconds
 
@@ -365,9 +365,9 @@ int SafestPathRouter::ComputeSafestPath(Pedestrian* p)
                     if(path[j]->GetType()=="floor") {
                          int z=path[j]->GetSubRoomID();
 
-                         for(int j = 0; j <numberOfSubroom; j++) {
-                              if(flo[j]==z) {
-                                   phi_current=phi_current+rR[j];
+                         for(int k = 0; k <numberOfSubroom; k++) {
+                              if(flo[k]==z) {
+                                   phi_current=phi_current+rR[k];
                               }
                          }
 

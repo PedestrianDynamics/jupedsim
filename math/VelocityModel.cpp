@@ -29,7 +29,7 @@
 
 
 #include "../pedestrian/Pedestrian.h"
-#include "../routing/DirectionStrategy.h"
+//#include "../routing/DirectionStrategy.h"
 #include "../mpi/LCGrid.h"
 #include "../geometry/Wall.h"
 #include "../geometry/SubRoom.h"
@@ -146,10 +146,10 @@ bool VelocityModel::Init (Building* building)
 
 void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic)
 {
-      double delta = 0.5;
       // collect all pedestrians in the simulation.
       const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
-
+      vector<Pedestrian*> pedsToRemove;
+      pedsToRemove.reserve(500);
       unsigned long nSize;
       nSize = allPeds.size();
 
@@ -188,10 +188,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      //if they are in the same subroom
                      Point p1 = ped->GetPos();
                      Point p2 = ped1->GetPos();
-                     // if(ped->GetID() == -1){
-                     // printf("---\nid: %d\t (%f), ped1 %d\t pos1 %f %f\n", threadID, ped->GetGlobalTime(), ped->GetID(), p1._x, p1._y);
-                     // printf("id: %d\t (%f), ped2 %d\t pos2 %f %f\n---\n", threadID, ped1->GetGlobalTime(), ped1->GetID(), p2._x, p2._y);
-                     // }
                      //subrooms to consider when looking for neighbour for the 3d visibility
                      vector<SubRoom*> emptyVector;
                      emptyVector.push_back(subroom);
@@ -237,20 +233,20 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 // calculate min spacing
                 std::sort(spacings.begin(), spacings.end(), sort_pred());                
                 double spacing = spacings[0].first;
-                double winkel = spacings[0].second;
-                Point tmp;
-                Point speed = direction.Normalized() * OptimalSpeed(ped, spacing, winkel);
+                //double winkel = spacings[0].second;
+                //Point tmp;
+                Point speed = direction.Normalized() *OptimalSpeed(ped, spacing);
                 result_acc.push_back(speed);                
                 spacings.clear(); //clear for ped p
 
                 
                 // stuck peds get removed. Warning is thrown. low speed due to jam is omitted.
-//                if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime()&& ped->GetMeanVelOverRecTime() < 0.01 && size == 0 ) // size length of peds neighbour vector
-//                {
-//                      Log->Write("WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time %f s\n", ped->GetID(), ped->GetMeanVelOverRecTime(), ped->GetRoomID(), ped->GetSubRoomID(), ped->GetGlobalTime());
-//                      building->DeletePedestrian(ped);
-//                }
-
+                if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime()&& ped->GetMeanVelOverRecTime() < 0.01 && size == 0 ) // size length of peds neighbour vector
+                {
+                      Log->Write("WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time %f s (current=%f\n", ped->GetID(), ped->GetMeanVelOverRecTime(), ped->GetRoomID(), ped->GetSubRoomID(), ped->GetGlobalTime(), current);
+                      #pragma omp critical
+                      pedsToRemove.push_back(ped);
+                }
            } // for p
 
            #pragma omp barrier
@@ -282,12 +278,19 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 ped->SetV(v_neu);
            }
       }//end parallel
+
+      // remove the pedestrians that have left the building
+      for (unsigned int p = 0; p<pedsToRemove.size(); p++) {
+            building->DeletePedestrian(pedsToRemove[p]);
+      }
+      pedsToRemove.clear();
+           
 }
 
 Point VelocityModel::e0(Pedestrian* ped, Room* room) const
 {
       const Point target = _direction->GetTarget(room, ped);
-      Point e0;
+      Point desired_direction;
       const Point pos = ped->GetPos();
       double dist = ped->GetExitLine()->DistTo(pos);
       // check if the molified version works
@@ -298,23 +301,23 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
            (dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) ||
            (dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get()))  ) {
           if (dist > 20*J_EPS_GOAL) {
-               e0 = target - pos; //ped->GetV0(target);
+               desired_direction = target - pos; //ped->GetV0(target);
           } else {
-               e0 = lastE0;
+               desired_direction = lastE0;
                ped->SetLastE0(lastE0); //keep old vector (revert set operation done 9 lines above)
           }
       }
       else if (dist > J_EPS_GOAL) {
-            e0 = ped->GetV0(target);
+            desired_direction = ped->GetV0(target);
       } else {
           ped->SetSmoothTurning();
-          e0 = ped->GetV0();
+          desired_direction = ped->GetV0();
      }
-     return e0;
+     return desired_direction;
 }
 
 
-double VelocityModel::OptimalSpeed(Pedestrian* ped, double spacing, double winkel) const
+double VelocityModel::OptimalSpeed(Pedestrian* ped, double spacing) const
 {
       double v0 = ped->GetV0Norm();
       double T = ped->GetT();
@@ -323,6 +326,7 @@ double VelocityModel::OptimalSpeed(Pedestrian* ped, double spacing, double winke
       speed = (speed>0)?speed:0;
       speed = (speed<v0)?speed:v0;
 //      (1-winkel)*speed;
+     //todo use winkel
       return speed;
 }
 

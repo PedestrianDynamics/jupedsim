@@ -173,8 +173,8 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building 
             double HighVel = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta); //(v0+delta)^2
             if (normVi > HighVel && ped->GetV0Norm() > 0) {
                 fprintf(stderr, "GompertzModel::calculateForce_LC() WARNING: actual velocity (%f) of iped %d "
-                                "is bigger than desired velocity (%f) at time: %fs\n",
-                        sqrt(normVi), ped->GetID(), ped->GetV0Norm(), current);
+                                "is bigger than desired velocity (%f) at time: %fs (periodic=%d)\n",
+                        sqrt(normVi), ped->GetID(), ped->GetV0Norm(), current, periodic);
 
                 // remove the pedestrian and abort
                 Log->Write("\tERROR: ped [%d] was removed due to high velocity", ped->GetID());

@@ -41,10 +41,12 @@
 #include "../navigation_graph/GraphVertex.h"
 #include "../NavigationGraph.h"
 #include "../cognitiveMap/cognitivemap.h"
+#define UNUSED(x) [&x]{}()  // c++11 silence warnings
 
 SensorManager::SensorManager(const Building * b, CognitiveMapStorage * cms)
-     : building(b), cm_storage(cms)
+     : /*building(b), */cm_storage(cms)
 {
+     UNUSED(b);
     _periodicUpdateInterval=1/UPDATE_RATE;
 }
 

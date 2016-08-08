@@ -33,8 +33,9 @@
 #include "../../../geometry/Building.h"
 #include "../cognitiveMap/cognitivemap.h"
 #include "../../../pedestrian/Pedestrian.h"
-#include <vector>
-#include <set>
+//#include <vector>
+//#include <set>
+#define UNUSED(x) [&x]{}()  // c++11 silence warnings
 
 LastDestinationsSensor::~LastDestinationsSensor()
 {
@@ -47,6 +48,7 @@ std::string LastDestinationsSensor::GetName() const
 
 void LastDestinationsSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitive_map) const
 {
+    UNUSED(pedestrian);
     NavigationGraph & ng = (*cognitive_map->GetGraphNetwork()->GetNavigationGraph());
     std::vector<const GraphEdge *> & destinations = cognitive_map->GetGraphNetwork()->GetDestinations();
     int i = 1;

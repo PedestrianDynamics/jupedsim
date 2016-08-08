@@ -45,8 +45,8 @@ public:
                           const bool useDistancefield);
 
      void parseRoom(const Room* const roomArg, const double hxArg, const double hyArg);
-     void getDirectionToDestination (Pedestrian* ped, Point& direction);
-     void getDirectionToGoalID(const int goalID);
+     void getDirectionToDestination (Pedestrian* ped, Point& direction);//@todo hides non-virtual function
+//     void getDirectionToGoalID(const int goalID);
      void drawBlockerLines();
      void crossOutOutsideNeighbors(const long int key);
      virtual int isInside(const long int key);

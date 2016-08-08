@@ -41,7 +41,7 @@ private:
      std::vector<MeshEdge*> AStar(Pedestrian* p,int& status)const;
      NavLine Funnel(Point&,Point&,std::vector<MeshEdge*>)const;
      NavLine FunnelRad(Point&,Point&,std::vector<MeshEdge*>);
-     MeshEdge* Visibility(Point&,Point&,std::vector<MeshEdge*>)const;
+     MeshEdge* Visibility(Point&, std::vector<MeshEdge*>) const;
      std::string GetMeshFileName() const;
      void WriteMeshToFile(const std::string& filename);
      void FixMeshEdges();

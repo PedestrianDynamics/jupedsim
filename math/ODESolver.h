@@ -42,7 +42,7 @@ class ODESolver {
 protected:
      ForceModel *model;
 public:
-     ODESolver(ForceModel* model);
+     ODESolver(ForceModel* tmodel);
      virtual ~ODESolver() {};
      virtual void solveODE(double t, double tp, Building* building) const = 0;
 };
@@ -54,7 +54,7 @@ public:
 
 class EulerSolver : public ODESolver {
 public:
-     EulerSolver(ForceModel *model);
+     EulerSolver(ForceModel *tmodel);
      virtual void solveODE(double t, double tp, Building* building) const;
 };
 

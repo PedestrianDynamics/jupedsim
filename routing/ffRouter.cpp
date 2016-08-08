@@ -48,9 +48,9 @@
 #include <cfloat>
 #include <algorithm>
 #include "ffRouter.h"
-#include "../geometry/Building.h"
-#include "../pedestrian/Pedestrian.h"
-#include "../IO/OutputHandler.h"
+//#include "../geometry/Building.h"
+//#include "../pedestrian/Pedestrian.h"
+//#include "../IO/OutputHandler.h"
 
 int FFRouter::cnt = 0;
 
@@ -154,6 +154,10 @@ bool FFRouter::Init(Building* building)
      _locffviafm.clear();
      //type of allRooms: const std::map<int, std::unique_ptr<Room> >&
      const std::map<int, std::shared_ptr<Room> >& allRooms = _building->GetAllRooms();
+// <<<<<<< HEAD
+
+//      for(auto& pairRoom : allRooms) {
+// =======
 #pragma omp parallel for
      //for (auto &pairRoom : allRooms) {
      for (unsigned int i = 0; i < allRooms.size(); ++i) {
@@ -559,7 +563,7 @@ int FFRouter::FindExit(Pedestrian* p)
      }
      double minDist = DBL_MAX;
      int bestDoor = -1;
-     int bestGoal = -1;
+     //int bestGoal = -1;
 
      int goalID = p->GetFinalDestination();
      std::vector<int> validFinalDoor; //UIDs of doors
@@ -643,7 +647,7 @@ int FFRouter::FindExit(Pedestrian* p)
                     if ((_distMatrix.at(key) + locDistToDoor) < minDist) {
                          minDist = _distMatrix.at(key) + locDistToDoor;
                          bestDoor = key.first; //doorUID
-                         bestGoal = key.second;//finalDoor
+                         //bestGoal = key.second;//finalDoor
                     }
                }
           }

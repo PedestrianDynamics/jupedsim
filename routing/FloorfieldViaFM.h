@@ -138,7 +138,7 @@ protected:
      RectGrid* grid = nullptr;
      std::vector<Line> wall;
      std::vector<Line> exitsFromScope;
-     int numOfExits;
+     unsigned int numOfExits;
 
      const Building* building;
 
