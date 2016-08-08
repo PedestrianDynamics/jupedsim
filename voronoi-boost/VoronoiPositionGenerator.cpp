@@ -86,7 +86,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
     auto dist = src->GetStartDistribution();
     int roomID = dist->GetRoomId();
     int subroomID = dist->GetSubroomID();
-    std::string caption = (building->GetRoom( roomID ))->GetCaption();
+    // std::string caption = (building->GetRoom( roomID ))->GetCaption();
 
     std::vector<Pedestrian*> existing_peds;
     std::vector<Pedestrian*> peds_without_place;
@@ -258,7 +258,7 @@ void VoronoiAdjustVelocityNeighbour(voronoi_diagram<double>::const_vertex_iterat
      const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
      double no1=0,no2=0;
      double backup_speed = 0;
-     std::size_t index;
+     //std::size_t index;
      Point v(0,0);
      if(ped->GetExitLine() != nullptr)
           v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized(); //the direction
@@ -270,7 +270,7 @@ void VoronoiAdjustVelocityNeighbour(voronoi_diagram<double>::const_vertex_iterat
      double speed = 0;
      do
      {
-          index = ( edge->cell() )->source_index();
+          std::size_t index = ( edge->cell() )->source_index();
           if( ped->GetFinalDestination() == goal_vector[index]  )
           {
         	  no1++;
