@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 ### Added
+- Tag Sources: new attribute to choose between "greedy" approach and random approach: `gready="true"` (default: `false`)
 - Floor field router. See [usage](http://jupedsim.github.io/jpscore/models/routing/#floorfield-router). 
 - New attribute for *step_size* `<step_size fix "no">0.01</step_size>`. Default is yes. See #193 for description and commit 78b634ff. 
 - Added new operational model `<model operational_model_id="5" description="Krausz">`. See [Wiki](https://cst.version.fz-juelich.de/jupedsim/jpscore/wikis/docs/models/operativ#generalized-centrifugal-force-model-with-lateral-swaying) 
