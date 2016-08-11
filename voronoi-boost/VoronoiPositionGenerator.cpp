@@ -5,6 +5,14 @@
  *      Author: gsp1502
  */
 
+#define PLOT_VORONOI_DIAGRAM 0
+
+#if PLOT_VORONOI_DIAGRAM
+      static int global_count = 0;
+#endif
+
+
+
 #include "VoronoiPositionGenerator.h"
 //check if all includes are necessary
 #include "../pedestrian/AgentsSourcesManager.h"
@@ -81,7 +89,7 @@ bool IsEnoughInSubroom( SubRoom* subroom, Point& pt, double radius )
 
 bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>& peds,
          Building* building)
-{
+{   
     bool return_value = true;
     auto dist = src->GetStartDistribution();
     int roomID = dist->GetRoomId();
@@ -198,9 +206,13 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
 
               voronoi_diagram<double>::const_vertex_iterator chosen_it = vd.vertices().begin();
               double dis = 0;
-              VoronoiBestVertexRandMax(discrete_positions, vd, subroom, factor, chosen_it, dis, radius );
-
-              if( dis > 4*radius*factor*radius*factor)// be careful with the factor!! radius*factor, 2,3,4?
+              //std::default_random_engine gen = dist->GetGenerator();
+              if(!src->Greedy())
+                    VoronoiBestVertexRandMax(discrete_positions, vd, subroom, factor, chosen_it, dis, radius);
+              else
+                    VoronoiBestVertexGreedy(discrete_positions, vd, subroom, factor, chosen_it, dis, radius);
+              
+              if( dis > 4*radius*radius)// be careful with the factor!! radius*factor, 2,3,4?
               {
                    Point pos( chosen_it->x()/factor, chosen_it->y()/factor ); //check!
                    ped->SetPos(pos , true);
@@ -356,29 +368,70 @@ void VoronoiAdjustVelocityNeighbour(voronoi_diagram<double>::const_vertex_iterat
 //     //at the end, max_it is the choosen vertex, or the first vertex - max_dis=0 assures that this position will not be taken
 //}
 
-//gives random voronoi vertex but with weights proportional to distances^2
-//in case you want proportional to distance^4 just change two lines commented as HERE
+/**
+ * Returns a Voronoi vertex randomly with respect to weights proportional to distances^2
+ * For vertexes \f$v_i\f$  and distances \f$d_i\f$ to their surrounding seeds
+ * calculate the probabilities \f$p_i\f$ as
+ * \f[
+ *     p_i= \frac{d_i^2}{\sum_j^n d_j^2}
+ * \f]
+ *
+ * @param discrete_positions: agents and imaginary agents
+ * @param vd: Voronoi diagram
+ * @param subroom
+ * @param factor: used to convert the coordinates back from int (was necessary for Boost Voronoi calculations)
+ * @param chosen_it: return best_vertex
+ * @param dis: distance squared of  the best_vertex to its surrouding seeds.
+ * @param radius: radius of pedestrian
+ */
 void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
-          double factor, voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	, double radius)
+                               double factor, voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	, double radius)
 {
      std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
      vector<double> partial_sums;
      unsigned long size=0;
+     // double max_distance = std::numeric_limits<double>::epsilon();
+     // unsigned long imax=0;
 
-     for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
+#if PLOT_VORONOI_DIAGRAM
+     // =============== plot Voronoi Diagram =====================
+     char name [50];
+     sprintf(name,  "log_%.3d.py", global_count);    
+     FILE * f;
+     f = fopen(name, "w");
+     fprintf(f, "# ------------------------------\n");
+     fprintf(f, "import matplotlib.pyplot as plt\n");
+     for(auto pos : discrete_positions)
      {
+           fprintf(f, "plt.plot([%f], [%f], \"or\")\n", pos._x/factor, pos._y/factor);
+     }
+
+     for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it){
+           const voronoi_diagram<double>::vertex_type &vertex = *it;
+           const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
+           do {
+                 if(edge->vertex0() && edge->vertex1())
+                 {
+                       fprintf(f, "plt.plot([%f, %f], [%f, %f], \"bo-\") \n",  edge->vertex0()->x()/factor, edge->vertex1()->x()/factor, edge->vertex0()->y()/factor, edge->vertex1()->y()/factor);  
+                 }
+                            
+              edge = edge->next();
+        } while (edge != vertex.incident_edge()); 
+     }
+     // =============================================================
+#endif
+     for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it){
           Point vert_pos = Point( it->x()/factor, it->y()/factor );
           if( subroom->IsInSubRoom( vert_pos ) )
                if( IsEnoughInSubroom(subroom, vert_pos,radius) )
                {
                     const voronoi_diagram<double>::vertex_type &vertex = *it;
                     const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
-
                     std::size_t index = ( edge->cell() )->source_index();
                     Point p = discrete_positions[index];
 
-                    dis = ( p._x - it->x() )*( p._x - it->x() )   + ( p._y - it->y() )*( p._y - it->y() )  ;
-
+                    dis = ( p._x - it->x() )*( p._x - it->x() )   + ( p._y - it->y() )*( p._y - it->y() ) ;
+                    dis = dis / factor / factor;
                     possible_vertices.push_back( it );
                     partial_sums.push_back( dis ); // HERE
 
@@ -389,28 +442,139 @@ void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, con
                     }
                }
      }
+     // partial_sums: [d_0^2,  d_0^2 + d_1^2,  d_0^2 + d_1^2 + d_2^2, ..., \sum_i^{n-1} d_i^3]
      //now we have the vector of possible vertices and weights and we can choose one randomly
 
      double lower_bound = 0;
      double upper_bound = partial_sums[size-1];
-     std::uniform_real_distribution<double> unif(lower_bound,upper_bound);
-     std::default_random_engine re;
-     double a_random_double = unif(re);
+     std::random_device rd;
+     std::mt19937 gen(rd()); //@todo use seed instead of rd(). Generator should not be here
+     std::uniform_real_distribution<double> distribution(lower_bound, upper_bound); //std::nextafter(upper_bound, DBL_MAX));
+     vector<double> random_numbers;
+     for(unsigned int r=0; r<size;r++)
+           random_numbers.push_back(distribution(gen));
 
-     for (unsigned int i=0; i<size; i++)
-     {
-          if ( partial_sums[i] >= a_random_double )
-          {
-               //this is the chosen index
-               chosen_it = possible_vertices[i];
-               dis = partial_sums[i];
-               if( i > 1 )
-                    dis -= partial_sums[i-1];
-               break;
-          }
-     }
-     //dis = sqrt(dis); //HERE
+     shuffle(random_numbers.begin(), random_numbers.end(), gen);
+     double a_random_double = random_numbers[0];
+     
+     //the first element in the range [first, last) that is not less than a_random_double
+     auto lower = std::lower_bound(partial_sums.begin(), partial_sums.end(), a_random_double);
+     int iposition = lower - partial_sums.begin();
+     // if iposition == size then no element is found. Should not happen..
+     chosen_it = possible_vertices[iposition];
+     dis = partial_sums[iposition];
+     if (iposition>1)
+           dis -= partial_sums[iposition-1];
+
+     // printf("\n================================================\n");
+     // printf("random number from %f to %f is: %f. Chosen is at position %d with dis=%f\n", lower_bound, upper_bound, a_random_double, iposition, dis);
+     // for(auto d : partial_sums)
+     //       printf("d = %f\n", d);
+
+#if PLOT_VORONOI_DIAGRAM
+     fprintf(f, "# ================================================\n");
+     fprintf(f, "plt.plot([%f], [%f], \"go\", ms=10) \n",  possible_vertices[iposition]->x()/factor, possible_vertices[iposition]->y()/factor);
+     fprintf(f, "plt.xlim([50, 60])\n");
+     fprintf(f, "plt.ylim([98, 106])\n");
+     fprintf(f, "plt.title(\"d = %f\")\n", sqrt(dis));
+     // geometry
+     fprintf(f, "plt.plot([50, 50], [98, 106], \"k-\", lw=2)\n");
+     fprintf(f, "plt.plot([60, 60], [98, 106],\"k-\", lw=2)\n");
+     fprintf(f, "plt.plot([50, 60], [98, 98], \"k-\", lw=2)\n");
+     fprintf(f, "plt.plot([50, 60], [106, 106], \"k-\", lw=2)\n");
+     fprintf(f, "plt.savefig(\"%.3d.png\")\n", global_count++);
+     fprintf(f, "# ------------------------------\n");
+     fclose(f);
+#endif
 }
+
+
+/**
+ * Returns a Voronoi vertex with the largest distances^2
+ * For vertexes \f$v_i\f$  and distances \f$d_i\f$ to their surrounding seeds
+ * Use the "greedy" approach by choosing the best_vertex as the
+ * vertex with the biggest distance to the surrounding seeds
+ *
+ * @param discrete_positions: agents and imaginary agents
+ * @param vd: Voronoi diagram
+ * @param subroom
+ * @param factor: used to convert the coordinates back from int (was necessary for Boost Voronoi calculations)
+ * @param chosen_it: return best_vertex
+ * @param dis: distance squared of  the best_vertex to its surrouding seeds.
+ * @param radius: radius of pedestrian
+ */
+void VoronoiBestVertexGreedy (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
+                               double factor, voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	, double radius)
+{
+     std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
+     vector<double> distances;
+#if PLOT_VORONOI_DIAGRAM
+     // =============== plot Voronoi Diagram =====================
+     char name [50];
+     sprintf(name,  "log_%.3d.py", global_count);    
+     FILE * f;
+     f = fopen(name, "w");
+     fprintf(f, "# ------------------------------\n");
+     fprintf(f, "import matplotlib.pyplot as plt\n");
+     for(auto pos : discrete_positions)
+     {
+           fprintf(f, "plt.plot([%f], [%f], \"xr\")\n", pos._x/factor, pos._y/factor);
+     }
+
+     for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it){
+           const voronoi_diagram<double>::vertex_type &vertex = *it;
+           const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
+           do {
+                 if(edge->vertex0() && edge->vertex1())
+                 {
+                       fprintf(f, "plt.plot([%f, %f], [%f, %f], \"bo-\") \n",  edge->vertex0()->x()/factor, edge->vertex1()->x()/factor, edge->vertex0()->y()/factor, edge->vertex1()->y()/factor);  
+                 }
+                            
+              edge = edge->next();
+        } while (edge != vertex.incident_edge()); 
+     }
+     // =============================================================
+#endif
+     for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it){
+          Point vert_pos = Point( it->x()/factor, it->y()/factor );
+          if( subroom->IsInSubRoom( vert_pos ) )
+               if( IsEnoughInSubroom(subroom, vert_pos,radius) )
+               {
+                    const voronoi_diagram<double>::vertex_type &vertex = *it;
+                    const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
+                    std::size_t index = ( edge->cell() )->source_index();
+                    Point p = discrete_positions[index];
+
+                    dis = ( p._x - it->x() )*( p._x - it->x() )   + ( p._y - it->y() )*( p._y - it->y() ) ;
+                    dis = dis / factor / factor;
+                    possible_vertices.push_back( it );
+                    distances.push_back( dis );
+
+               }
+     }
+
+     auto biggest = std::max_element(distances.begin(), distances.end());
+     int iposition = biggest - distances.begin(); // first biggest distance
+     chosen_it = possible_vertices[iposition];
+     dis = distances[iposition];
+     
+#if PLOT_VORONOI_DIAGRAM
+     fprintf(f, "# ================================================\n");
+     fprintf(f, "plt.plot([%f], [%f], \"go\", ms=10) \n",  possible_vertices[iposition]->x()/factor, possible_vertices[iposition]->y()/factor);
+     fprintf(f, "plt.xlim([48, 62])\n");
+     fprintf(f, "plt.ylim([96, 108])\n");
+     fprintf(f, "plt.title(\"d = %f\")\n", sqrt(dis));
+     // geometry
+     fprintf(f, "plt.plot([50, 50], [98, 106], \"k-\", lw=2)\n");
+     fprintf(f, "plt.plot([60, 60], [98, 106],\"k-\", lw=2)\n");
+     fprintf(f, "plt.plot([50, 60], [98, 98], \"k-\", lw=2)\n");
+     fprintf(f, "plt.plot([50, 60], [106, 106], \"k-\", lw=2)\n");
+     fprintf(f, "plt.savefig(\"%.3d.png\")\n", global_count++);
+     fprintf(f, "# ------------------------------\n");
+     fclose(f);
+#endif
+}
+
 
 //gives a random voronoi vertex
 //void VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,

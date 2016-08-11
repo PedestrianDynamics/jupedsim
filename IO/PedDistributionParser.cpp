@@ -36,7 +36,6 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
         vector<std::shared_ptr<StartDistribution> >& startDisSub,
         std::vector<std::shared_ptr<AgentsSource> >& startDisSources)
 {
-
     Log->Write("INFO: \tLoading and parsing the persons attributes");
 
     TiXmlDocument doc(_configuration->GetProjectFile());
@@ -163,13 +162,14 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
             int agents_max = xmltoi(e->Attribute("agents_max"), -1);
             int group_id = xmltoi(e->Attribute("group_id"), -1);
             string caption = xmltoa(e->Attribute("caption"), "no caption");
-
+            string str_greedy = xmltoa(e->Attribute("greedy"), "false");
+            bool greedy = (str_greedy == "true")?true:false;
             auto source = std::shared_ptr<AgentsSource>(
                     new AgentsSource(id, caption, agents_max, group_id,
-                            frequency));
+                                     frequency, greedy));
             startDisSources.push_back(source);
 
-            Log->Write("INFO:\tSource with id %s will be parsed !", e->Attribute("id"));
+            Log->Write("INFO:\tSource with id %d will be parsed (greedy = %d)!", id, greedy);
         }
     }
     Log->Write("INFO: \t...Done");
