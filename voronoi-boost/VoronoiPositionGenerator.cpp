@@ -7,9 +7,11 @@
 
 #define PLOT_VORONOI_DIAGRAM 0
 
-#ifdef PLOT_VORONOI_DIAGRAM
-static int global_count = 0;
+#if PLOT_VORONOI_DIAGRAM
+      static int global_count = 0;
 #endif
+
+
 
 #include "VoronoiPositionGenerator.h"
 //check if all includes are necessary
@@ -391,7 +393,7 @@ void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, con
      // double max_distance = std::numeric_limits<double>::epsilon();
      // unsigned long imax=0;
 
-#ifdef PLOT_VORONOI_DIAGRAM
+#if PLOT_VORONOI_DIAGRAM
      // =============== plot Voronoi Diagram =====================
      char name [50];
      sprintf(name,  "log_%.3d.py", global_count);    
@@ -469,7 +471,7 @@ void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, con
      // for(auto d : partial_sums)
      //       printf("d = %f\n", d);
 
-#ifdef PLOT_VORONOI_DIAGRAM
+#if PLOT_VORONOI_DIAGRAM
      fprintf(f, "# ================================================\n");
      fprintf(f, "plt.plot([%f], [%f], \"go\", ms=10) \n",  possible_vertices[iposition]->x()/factor, possible_vertices[iposition]->y()/factor);
      fprintf(f, "plt.xlim([50, 60])\n");
@@ -506,7 +508,7 @@ void VoronoiBestVertexGreedy (const std::vector<Point>& discrete_positions, cons
 {
      std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
      vector<double> distances;
-#ifdef PLOT_VORONOI_DIAGRAM
+#if PLOT_VORONOI_DIAGRAM
      // =============== plot Voronoi Diagram =====================
      char name [50];
      sprintf(name,  "log_%.3d.py", global_count);    
@@ -556,7 +558,7 @@ void VoronoiBestVertexGreedy (const std::vector<Point>& discrete_positions, cons
      chosen_it = possible_vertices[iposition];
      dis = distances[iposition];
      
-#ifdef PLOT_VORONOI_DIAGRAM
+#if PLOT_VORONOI_DIAGRAM
      fprintf(f, "# ================================================\n");
      fprintf(f, "plt.plot([%f], [%f], \"go\", ms=10) \n",  possible_vertices[iposition]->x()/factor, possible_vertices[iposition]->y()/factor);
      fprintf(f, "plt.xlim([48, 62])\n");
