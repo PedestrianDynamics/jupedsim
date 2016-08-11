@@ -49,7 +49,7 @@ public:
      /**
       * Constructor
       */
-     AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency);
+      AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency, bool greedy);
 
      /**
       * Destructor
@@ -111,6 +111,7 @@ public:
      int GetGroupId() const;
      int GetId() const;
      int GetMaxAgents() const;
+     bool Greedy() const;
      void SetStartDistribution(std::shared_ptr<StartDistribution>);
      const std::shared_ptr<StartDistribution> GetStartDistribution() const;
 
@@ -119,10 +120,11 @@ private:
      int _id=-1;
      int _frequency=0;
      int _maxAgents=0;
-     int _agentsGenerated=0;
      int _groupID=-1;
-	 double _boundaries[4];// = { 0, 0, 0, 0 };
      std::string _caption="no caption";
+     bool _greedy = false;
+     int _agentsGenerated=0;
+     double _boundaries[4];// = { 0, 0, 0, 0 };
      std::vector<Pedestrian*> _agents;
      std::shared_ptr<StartDistribution> _startDistribution;
 
