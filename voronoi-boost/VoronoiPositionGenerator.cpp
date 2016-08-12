@@ -543,7 +543,7 @@ void plotVoronoi(const std::vector<Point>& discrete_positions, const voronoi_dia
                  max_y = gpoint._y;
            if(gpoint._x < min_x)
                  min_x = gpoint._x;
-           if(gpoint._y < max_y)
+           if(gpoint._y < min_y)
                  min_y = gpoint._y;
            
            // fprintf(f, "plt.plot([%f, %f], [%f, %f], \"k-\", lw=2)\n",  gpoint._x, gpointNext._x, gpoint._y, gpointNext._y);
