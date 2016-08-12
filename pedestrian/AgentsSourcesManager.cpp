@@ -81,12 +81,11 @@ void AgentsSourcesManager::Run()
      bool finished = false;
      long updateFrequency = 1;
      do
-     {
+     { //@todo: break if max simulation time is reached.
           int current_time = (int)Pedestrian::GetGlobalTime();
-
           if ((current_time != _lastUpdateTime)
                     && ((current_time % updateFrequency) == 0))
-          {
+          {   
                finished=ProcessAllSources();
                _lastUpdateTime = current_time;
           }

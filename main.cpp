@@ -88,9 +88,10 @@ int main(int argc, char** argv)
         if (sim.GetAgentSrcManager().GetMaxAgentNumber()) {
             //Start the thread for managing the sources of agents if any
             //std::thread t1(sim.GetAgentSrcManager());
-            std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());
+            double simMaxTime = configuration->GetTmax();
+            std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());//@todo pass simMaxTime to Run
             //main thread for the simulation
-            evacTime = sim.RunStandardSimulation(configuration->GetTmax());
+            evacTime = sim.RunStandardSimulation(simMaxTime);
             //Join the main thread
             t1.join();
         }
