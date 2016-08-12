@@ -71,6 +71,8 @@ void VoronoiBestVertexMax(const std::vector<Point>& discrete_positions, const vo
                                        voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius);
 	void VoronoiBestVertexGreedy (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, double factor,
                                        voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius);
+
+void plotVoronoi(const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, double factor);
 	/**
 	 * Position incoming pedestrian on a random vertex
 	 * @param discrete_positions

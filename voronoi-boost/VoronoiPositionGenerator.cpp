@@ -7,9 +7,7 @@
 
 #define PLOT_VORONOI_DIAGRAM 0
 
-#if PLOT_VORONOI_DIAGRAM
-      static int global_count = 0;
-#endif
+static int global_count = 0;
 
 
 
@@ -89,7 +87,7 @@ bool IsEnoughInSubroom( SubRoom* subroom, Point& pt, double radius )
 
 bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>& peds,
          Building* building)
-{   
+{
     bool return_value = true;
     auto dist = src->GetStartDistribution();
     int roomID = dist->GetRoomId();
@@ -203,7 +201,9 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
               //constructing the diagram
               voronoi_diagram<double> vd;
               construct_voronoi(discrete_positions.begin(), discrete_positions.end(), &vd);
-
+#if PLOT_VORONOI_DIAGRAM
+              plotVoronoi(discrete_positions, vd, subroom, factor);
+#endif
               voronoi_diagram<double>::const_vertex_iterator chosen_it = vd.vertices().begin();
               double dis = 0;
               //std::default_random_engine gen = dist->GetGenerator();
@@ -212,7 +212,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
               else
                     VoronoiBestVertexGreedy(discrete_positions, vd, subroom, factor, chosen_it, dis, radius);
               
-              if( dis > 4*radius*radius)// be careful with the factor!! radius*factor, 2,3,4?
+              if( dis > 4*radius*radius)
               {
                    Point pos( chosen_it->x()/factor, chosen_it->y()/factor ); //check!
                    ped->SetPos(pos , true);
@@ -231,21 +231,6 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                    iter_ped=peds.erase(iter_ped); // remove from the initial vector since it should only contain the pedestrians that could find a place
               }
 
-              /*else //try with the maximum distance, don't need this if already using the VoronoiBestVertexMax function
-				{
-					VoronoiBestVertexMax(discrete_positions, vd, subroom, factor, chosen_it, dis );
-					if( dis > radius*factor*radius*factor)// be careful with the factor!! radius*factor
-					{
-						Point pos( chosen_it->x()/factor, chosen_it->y()/factor ); //check!
-						ped->SetPos(pos , true);
-						VoronoiAdjustVelocityNeighbour( vd, chosen_it, ped, velocities_vector );
-					}
-					else
-					{
-						return_value = false;
-						//reject the pedestrian
-					}
-				}*/
          }// >0
 
 
@@ -255,7 +240,6 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
     //maybe not all pedestrians could find a place, requeue them in the source
     if(peds_without_place.size()>0)
          src->AddAgentsToPool(peds_without_place);
-
     return return_value;
 }
 
@@ -390,36 +374,6 @@ void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, con
      std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
      vector<double> partial_sums;
      unsigned long size=0;
-     // double max_distance = std::numeric_limits<double>::epsilon();
-     // unsigned long imax=0;
-
-#if PLOT_VORONOI_DIAGRAM
-     // =============== plot Voronoi Diagram =====================
-     char name [50];
-     sprintf(name,  "log_%.3d.py", global_count);    
-     FILE * f;
-     f = fopen(name, "w");
-     fprintf(f, "# ------------------------------\n");
-     fprintf(f, "import matplotlib.pyplot as plt\n");
-     for(auto pos : discrete_positions)
-     {
-           fprintf(f, "plt.plot([%f], [%f], \"or\")\n", pos._x/factor, pos._y/factor);
-     }
-
-     for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it){
-           const voronoi_diagram<double>::vertex_type &vertex = *it;
-           const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
-           do {
-                 if(edge->vertex0() && edge->vertex1())
-                 {
-                       fprintf(f, "plt.plot([%f, %f], [%f, %f], \"bo-\") \n",  edge->vertex0()->x()/factor, edge->vertex1()->x()/factor, edge->vertex0()->y()/factor, edge->vertex1()->y()/factor);  
-                 }
-                            
-              edge = edge->next();
-        } while (edge != vertex.incident_edge()); 
-     }
-     // =============================================================
-#endif
      for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it){
           Point vert_pos = Point( it->x()/factor, it->y()/factor );
           if( subroom->IsInSubRoom( vert_pos ) )
@@ -433,7 +387,7 @@ void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, con
                     dis = ( p._x - it->x() )*( p._x - it->x() )   + ( p._y - it->y() )*( p._y - it->y() ) ;
                     dis = dis / factor / factor;
                     possible_vertices.push_back( it );
-                    partial_sums.push_back( dis ); // HERE
+                    partial_sums.push_back( dis );
 
                     size = partial_sums.size();
                     if( size > 1 )
@@ -465,27 +419,6 @@ void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, con
      dis = partial_sums[iposition];
      if (iposition>1)
            dis -= partial_sums[iposition-1];
-
-     // printf("\n================================================\n");
-     // printf("random number from %f to %f is: %f. Chosen is at position %d with dis=%f\n", lower_bound, upper_bound, a_random_double, iposition, dis);
-     // for(auto d : partial_sums)
-     //       printf("d = %f\n", d);
-
-#if PLOT_VORONOI_DIAGRAM
-     fprintf(f, "# ================================================\n");
-     fprintf(f, "plt.plot([%f], [%f], \"go\", ms=10) \n",  possible_vertices[iposition]->x()/factor, possible_vertices[iposition]->y()/factor);
-     fprintf(f, "plt.xlim([50, 60])\n");
-     fprintf(f, "plt.ylim([98, 106])\n");
-     fprintf(f, "plt.title(\"d = %f\")\n", sqrt(dis));
-     // geometry
-     fprintf(f, "plt.plot([50, 50], [98, 106], \"k-\", lw=2)\n");
-     fprintf(f, "plt.plot([60, 60], [98, 106],\"k-\", lw=2)\n");
-     fprintf(f, "plt.plot([50, 60], [98, 98], \"k-\", lw=2)\n");
-     fprintf(f, "plt.plot([50, 60], [106, 106], \"k-\", lw=2)\n");
-     fprintf(f, "plt.savefig(\"%.3d.png\")\n", global_count++);
-     fprintf(f, "# ------------------------------\n");
-     fclose(f);
-#endif
 }
 
 
@@ -508,37 +441,10 @@ void VoronoiBestVertexGreedy (const std::vector<Point>& discrete_positions, cons
 {
      std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
      vector<double> distances;
-#if PLOT_VORONOI_DIAGRAM
-     // =============== plot Voronoi Diagram =====================
-     char name [50];
-     sprintf(name,  "log_%.3d.py", global_count);    
-     FILE * f;
-     f = fopen(name, "w");
-     fprintf(f, "# ------------------------------\n");
-     fprintf(f, "import matplotlib.pyplot as plt\n");
-     for(auto pos : discrete_positions)
-     {
-           fprintf(f, "plt.plot([%f], [%f], \"xr\")\n", pos._x/factor, pos._y/factor);
-     }
-
-     for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it){
-           const voronoi_diagram<double>::vertex_type &vertex = *it;
-           const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
-           do {
-                 if(edge->vertex0() && edge->vertex1())
-                 {
-                       fprintf(f, "plt.plot([%f, %f], [%f, %f], \"bo-\") \n",  edge->vertex0()->x()/factor, edge->vertex1()->x()/factor, edge->vertex0()->y()/factor, edge->vertex1()->y()/factor);  
-                 }
-                            
-              edge = edge->next();
-        } while (edge != vertex.incident_edge()); 
-     }
-     // =============================================================
-#endif
      for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it){
           Point vert_pos = Point( it->x()/factor, it->y()/factor );
           if( subroom->IsInSubRoom( vert_pos ) )
-               if( IsEnoughInSubroom(subroom, vert_pos,radius) )
+               if( IsEnoughInSubroom(subroom, vert_pos, radius) )
                {
                     const voronoi_diagram<double>::vertex_type &vertex = *it;
                     const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
@@ -557,22 +463,6 @@ void VoronoiBestVertexGreedy (const std::vector<Point>& discrete_positions, cons
      int iposition = biggest - distances.begin(); // first biggest distance
      chosen_it = possible_vertices[iposition];
      dis = distances[iposition];
-     
-#if PLOT_VORONOI_DIAGRAM
-     fprintf(f, "# ================================================\n");
-     fprintf(f, "plt.plot([%f], [%f], \"go\", ms=10) \n",  possible_vertices[iposition]->x()/factor, possible_vertices[iposition]->y()/factor);
-     fprintf(f, "plt.xlim([48, 62])\n");
-     fprintf(f, "plt.ylim([96, 108])\n");
-     fprintf(f, "plt.title(\"d = %f\")\n", sqrt(dis));
-     // geometry
-     fprintf(f, "plt.plot([50, 50], [98, 106], \"k-\", lw=2)\n");
-     fprintf(f, "plt.plot([60, 60], [98, 106],\"k-\", lw=2)\n");
-     fprintf(f, "plt.plot([50, 60], [98, 98], \"k-\", lw=2)\n");
-     fprintf(f, "plt.plot([50, 60], [106, 106], \"k-\", lw=2)\n");
-     fprintf(f, "plt.savefig(\"%.3d.png\")\n", global_count++);
-     fprintf(f, "# ------------------------------\n");
-     fclose(f);
-#endif
 }
 
 
@@ -611,3 +501,60 @@ void VoronoiBestVertexGreedy (const std::vector<Point>& discrete_positions, cons
 //}
 
 
+
+void plotVoronoi(const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, double factor)
+{
+     // =============== plot Voronoi Diagram =====================
+     char name [50];
+     sprintf(name,  "log_%.3d.py", global_count);    
+     FILE * f;
+     f = fopen(name, "w");
+    // plot cells 
+     fprintf(f, "# ------------------------------\n");
+     fprintf(f, "import matplotlib.pyplot as plt\n");
+     //  plot seeds 
+     for(auto pos : discrete_positions)
+     {
+           fprintf(f, "plt.plot([%f], [%f], \"or\")\n", pos._x/factor, pos._y/factor);
+     }
+// plot cells
+     for (auto it = vd.cells().begin(); it != vd.cells().end(); ++it){
+           const voronoi_diagram<double>::cell_type &cell = *it;
+           const voronoi_diagram<double>::edge_type *edge = cell.incident_edge();
+         do {
+                 if(edge->vertex0() && edge->vertex1())
+                 {
+                       fprintf(f, "plt.plot([%f, %f], [%f, %f], \"bo-\", lw=2)\n",  edge->vertex0()->x()/factor, edge->vertex1()->x()/factor, edge->vertex0()->y()/factor, edge->vertex1()->y()/factor);  
+                 }
+                            
+              edge = edge->next();
+        } while (edge != cell.incident_edge()); 
+     }
+// plot geometry
+     double max_x=std::numeric_limits<double>::min(), min_x=std::numeric_limits<double>::max();
+     double max_y=std::numeric_limits<double>::min(), min_y=std::numeric_limits<double>::max();
+     const vector<Point> polygon = subroom->GetPolygon();
+     for(auto it = polygon.begin(); it != polygon.end(); ) {
+           Point gpoint = *(it++); 
+           // Point gpointNext = *it;
+           if(gpoint._x > max_x)
+                 max_x = gpoint._x;
+           if(gpoint._y > max_y)
+                 max_y = gpoint._y;
+           if(gpoint._x < min_x)
+                 min_x = gpoint._x;
+           if(gpoint._y < max_y)
+                 min_y = gpoint._y;
+           
+           // fprintf(f, "plt.plot([%f, %f], [%f, %f], \"k-\", lw=2)\n",  gpoint._x, gpointNext._x, gpoint._y, gpointNext._y);
+           if(it == polygon.end()){
+                 // fprintf(f, "plt.plot([%f, %f], [%f, %f], \"k-\", lw=2)\n",  gpointNext._x, polygon.begin()->_x,  gpointNext._y, polygon.begin()->_y );
+                 break;
+           }
+     }
+     double eps=0.0;
+     fprintf(f, "plt.xlim([%f, %f])\n", min_x-eps, max_x+eps);
+     fprintf(f, "plt.ylim([%f, %f])\n", min_y-eps, max_y+eps);
+     fprintf(f, "plt.savefig(\"%.3d.png\")\n", global_count++);
+     fclose(f);
+}
