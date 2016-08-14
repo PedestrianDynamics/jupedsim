@@ -5,7 +5,7 @@
  *      Author: gsp1502
  */
 
-#define PLOT_VORONOI_DIAGRAM 0
+#define PLOT_VORONOI_DIAGRAM 1
 
 static int global_count = 0;
 
@@ -555,6 +555,7 @@ void plotVoronoi(const std::vector<Point>& discrete_positions, const voronoi_dia
      double eps=0.0;
      fprintf(f, "plt.xlim([%f, %f])\n", min_x-eps, max_x+eps);
      fprintf(f, "plt.ylim([%f, %f])\n", min_y-eps, max_y+eps);
-     fprintf(f, "plt.savefig(\"%.3d.png\")\n", global_count++);
+     fprintf(f, "plt.title(\"agents = %3d\")\n", (int)discrete_positions.size());
+     fprintf(f, "plt.savefig(\"%.4d.png\", dpi=600)\n", global_count++);
      fclose(f);
 }
