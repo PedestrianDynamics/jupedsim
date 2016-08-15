@@ -208,9 +208,9 @@
         
             <li><a href="#global-shortest-path">Global shortest path</a></li>
         
-            <li><a href="#quickest-path">Quickest path</a></li>
-        
             <li><a href="#the-cognitive-map">The cognitive map</a></li>
+        
+            <li><a href="#updates">Updates</a></li>
         
     
     </ul>
@@ -219,7 +219,7 @@
 
 <h1 id="routing"><a class="toclink" href="#routing">Routing</a></h1>
 <p>Different router are implemented. However: </p>
-<pre><code>Actually the router-class is undergoing a a major refactoring ...
+<pre><code>Actually the router-class is undergoing a major refactoring ...
 </code></pre>
 
 <h2 id="floorfield-router"><a class="toclink" href="#floorfield-router">Floorfield Router</a></h2>
@@ -267,21 +267,11 @@ Exit-strategies 8 and 9 will work best with the floorfield router.
 <p>At the beginning of the simulation, the Dijkstra algorithm is used to
 build a network which is then cached and used through the simulation
 life time.</p>
-<h2 id="quickest-path"><a class="toclink" href="#quickest-path">Quickest path</a></h2>
-<p>In the quickest path, the peds are rerouted based on actual traffic
-conditions. This defaults to the global shortest path when the patience
-time of the agents are very large.</p>
 <p>Detailed information about the aforementioned models
 are presented in: <a href="../dx.doi.org/10.1142%2FS0219525912500294" title="Kemloh et al &quot;Modeling the dynamic route choice of pedestrians to assess the criticality of building evacuation. Advances in Complex Systems. 2012">KemlohWagoum2012a</a></p>
 <p>Following snippet is a definition example of the routing information:</p>
 <pre><code class="xml">&lt;route_choice_models&gt;
-  &lt;router router_id=&quot;1&quot; description=&quot;quickest&quot;&gt;
-    &lt;parameters&gt;
-      &lt;navigation_mesh method=&quot;triangulation&quot; use_for_local_planning=&quot;true&quot; /&gt;
-    &lt;/parameters&gt;
-  &lt;/router&gt;
-
-  &lt;router router_id=&quot;2&quot; description=&quot;global_shortest&quot;&gt;
+  &lt;router router_id=&quot;1&quot; description=&quot;global_shortest&quot;&gt;
     &lt;parameters&gt;
       &lt;navigation_lines file=&quot;routing.xml&quot; /&gt;
     &lt;/parameters&gt;
@@ -299,7 +289,10 @@ are presented in: <a href="../dx.doi.org/10.1142%2FS0219525912500294" title="Kem
   &lt;/sensors&gt;
   &lt;cognitive_map status=&quot;complete&quot; /&gt;
 &lt;/router&gt;
-</code></pre></div>
+</code></pre>
+
+<h2 id="updates"><a class="toclink" href="#updates">Updates</a></h2>
+<p>For current development updates, please check this <a href="https://cst.version.fz-juelich.de/jupedsim/jpscore/issues/127">Issue</a> on our GitLab Repo.</p></div>
         </div>
 
 	<footer class="col-md-12">
