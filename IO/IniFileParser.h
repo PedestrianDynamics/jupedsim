@@ -58,7 +58,7 @@ private:
 
      bool ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* agentDistri);
 
-     bool ParseFfRouterOps(TiXmlNode* routingNode);
+     bool ParseFfRouterOps(TiXmlNode* routingNode, RoutingStrategy s);
 
      bool ParseCogMapOpts(TiXmlNode* routingNode);
 

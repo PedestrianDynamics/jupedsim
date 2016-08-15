@@ -59,13 +59,15 @@ FFRouter::FFRouter()
 
 }
 
-FFRouter::FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals):Router(id,s) {
+FFRouter::FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals, Configuration* config):Router(id,s) {
+     _config = config;
      _building = nullptr;
      _hasSpecificGoals = hasSpecificGoals;
      _globalFF = nullptr;
      _targetWithinSubroom = true; //depending on exit_strat 8 => false, depending on exit_strat 9 => true;
      if (s == ROUTING_FF_QUICKEST) {
           _mode = quickest;
+          _recalc_interval = _config->get_recalc_interval();
      } else if (s == ROUTING_FF_LOCAL_SHORTEST) {
           _mode = local_shortest;
           _localShortestSafedPeds.clear();
@@ -542,18 +544,9 @@ int FFRouter::FindExit(Pedestrian* p)
 //          }
 //     }
      if (_mode == quickest) {
-//          p->_ticksInThisRoom += 1;
-//          if (p->GetReroutingTime() > 0.) {
-//               p->UpdateReroutingTime();
-//               return p->GetExitIndex();
-//          } else {
-//               p->RerouteIn(5.);
-//          }
-          //above version (stopwatch at doors) failed
-
           //new version: recalc densityspeed every x seconds
           if (p->GetGlobalTime() > timeToRecalc) {
-               timeToRecalc += 5;
+               timeToRecalc += _recalc_interval;                      //@todo: ar.graf: change "5" to value of config file/classmember
 //               for (auto localfield : _locffviafm) { //@todo: ar.graf: create a list of local ped-ptr instead of giving all peds-ptr
 //                    localfield.second->setSpeedThruPeds(_building->GetAllPedestrians().data(), _building->GetAllPedestrians().size(), _mode, 1.);
 //                    localfield.second->deleteAllFFs();
