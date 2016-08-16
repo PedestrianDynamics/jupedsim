@@ -48,9 +48,9 @@
 #include <cfloat>
 #include <algorithm>
 #include "ffRouter.h"
-#include "../geometry/Building.h"
-#include "../pedestrian/Pedestrian.h"
-#include "../IO/OutputHandler.h"
+//#include "../geometry/Building.h"
+//#include "../pedestrian/Pedestrian.h"
+//#include "../IO/OutputHandler.h"
 
 int FFRouter::cnt = 0;
 
@@ -59,13 +59,15 @@ FFRouter::FFRouter()
 
 }
 
-FFRouter::FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals):Router(id,s) {
+FFRouter::FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals, Configuration* config):Router(id,s) {
+     _config = config;
      _building = nullptr;
      _hasSpecificGoals = hasSpecificGoals;
      _globalFF = nullptr;
      _targetWithinSubroom = true; //depending on exit_strat 8 => false, depending on exit_strat 9 => true;
      if (s == ROUTING_FF_QUICKEST) {
           _mode = quickest;
+          _recalc_interval = _config->get_recalc_interval();
      } else if (s == ROUTING_FF_LOCAL_SHORTEST) {
           _mode = local_shortest;
           _localShortestSafedPeds.clear();
@@ -154,6 +156,10 @@ bool FFRouter::Init(Building* building)
      _locffviafm.clear();
      //type of allRooms: const std::map<int, std::unique_ptr<Room> >&
      const std::map<int, std::shared_ptr<Room> >& allRooms = _building->GetAllRooms();
+// <<<<<<< HEAD
+
+//      for(auto& pairRoom : allRooms) {
+// =======
 #pragma omp parallel for
      //for (auto &pairRoom : allRooms) {
      for (unsigned int i = 0; i < allRooms.size(); ++i) {
@@ -165,8 +171,7 @@ bool FFRouter::Init(Building* building)
           std::advance(pairRoomIt, i);
           LocalFloorfieldViaFM* ptrToNew = nullptr;
           double tempDistance = 0.;
-          ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), building, 0.125, 0.125, 0.0, false,
-                                              "nofile");
+          ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), building, 0.125, 0.125, 0.0, false);
           //for (long int i = 0; i < ptrToNew)
           Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
 #pragma omp critical
@@ -380,8 +385,7 @@ bool FFRouter::ReInit()
           std::advance(pairRoomIt, i);
           LocalFloorfieldViaFM* ptrToNew = nullptr;
           double tempDistance = 0.;
-          ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), _building, 0.125, 0.125, 0.0, false,
-                                              "nofile");
+          ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), _building, 0.125, 0.125, 0.0, false);
           //for (long int i = 0; i < ptrToNew)
           Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
 #pragma omp critical
@@ -540,18 +544,9 @@ int FFRouter::FindExit(Pedestrian* p)
 //          }
 //     }
      if (_mode == quickest) {
-//          p->_ticksInThisRoom += 1;
-//          if (p->GetReroutingTime() > 0.) {
-//               p->UpdateReroutingTime();
-//               return p->GetExitIndex();
-//          } else {
-//               p->RerouteIn(5.);
-//          }
-          //above version (stopwatch at doors) failed
-
           //new version: recalc densityspeed every x seconds
           if (p->GetGlobalTime() > timeToRecalc) {
-               timeToRecalc += 5;
+               timeToRecalc += _recalc_interval;                      //@todo: ar.graf: change "5" to value of config file/classmember
 //               for (auto localfield : _locffviafm) { //@todo: ar.graf: create a list of local ped-ptr instead of giving all peds-ptr
 //                    localfield.second->setSpeedThruPeds(_building->GetAllPedestrians().data(), _building->GetAllPedestrians().size(), _mode, 1.);
 //                    localfield.second->deleteAllFFs();
@@ -561,7 +556,7 @@ int FFRouter::FindExit(Pedestrian* p)
      }
      double minDist = DBL_MAX;
      int bestDoor = -1;
-     int bestGoal = -1;
+     //int bestGoal = -1;
 
      int goalID = p->GetFinalDestination();
      std::vector<int> validFinalDoor; //UIDs of doors
@@ -645,7 +640,7 @@ int FFRouter::FindExit(Pedestrian* p)
                     if ((_distMatrix.at(key) + locDistToDoor) < minDist) {
                          minDist = _distMatrix.at(key) + locDistToDoor;
                          bestDoor = key.first; //doorUID
-                         bestGoal = key.second;//finalDoor
+                         //bestGoal = key.second;//finalDoor
                     }
                }
           }

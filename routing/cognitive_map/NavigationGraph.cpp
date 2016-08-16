@@ -43,8 +43,8 @@
  * Constructors & Destructors
  */
 
-NavigationGraph::NavigationGraph(const Building * building)
-     : building(building)
+NavigationGraph::NavigationGraph(const Building * Building)
+     : building(Building)
 {
 }
 

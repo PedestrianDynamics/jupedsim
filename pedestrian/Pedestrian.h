@@ -62,13 +62,20 @@ private:
      double _riskTolerance=0;
      std::string _gender;
 
-     //gcfm specific parameters
+     //gcfm (and Krausz) specific parameters
      double _mass; // Mass: 1
      double _tau; // Reaction time: 0.5
      double _T; // OV function
      double _deltaT; // step size
      JEllipse _ellipse;// the shape of this pedestrian
      Point _V0; //vector V0
+
+     //Krausz specific parameters
+     double _swayFreqA;
+     double _swayFreqB;
+     double _swayAmpA;
+     double _swayAmpB;
+
 
      //double _V0;
      double _V0UpStairs;
@@ -86,7 +93,7 @@ private:
      int _oldSubRoomID;
      Point _lastE0;
 
-     NavLine* _navLine; // current exit line
+     std::unique_ptr<NavLine> _navLine; // current exit line
      std::map<int, int>_mentalMap; // map the actual room to a destination
      std::vector<int> _destHistory;
      std::vector<int> _trip;
@@ -472,7 +479,20 @@ public:
 
 
      void SetTox(std::shared_ptr<ToxicityAnalysis> toxicityAnalysis);
+     
      void ConductToxicityAnalysis();
+
+     bool Relocate(std::function<void(const Pedestrian&)> flowupdater);
+
+     void SetSwayParameters(double d, double d1, double d2, double d3);
+
+     double GetSwayFreqA() const;
+
+     double GetSwayFreqB() const;
+
+     double GetSwayAmpA() const;
+
+     double GetSwayAmpB() const;
 };
 
 #endif  /* _PEDESTRIAN_H */

@@ -228,7 +228,7 @@ bool Simulation::InitArgs()
 
     // Initialize the agents sources that have been collected in the pedestrians distributor
     _agentSrcManager.SetBuilding(_building.get());
-    _gotSources = distributor->GetAgentsSources().size(); // did we have any sources? false if no sources
+    _gotSources = (bool) distributor->GetAgentsSources().size(); // did we have any sources? false if no sources
     for (const auto& src: distributor->GetAgentsSources()) {
         _agentSrcManager.AddSource(src);
         //src->Dump();
@@ -288,134 +288,127 @@ double Simulation::RunStandardSimulation(double maxSimTime)
 
 void Simulation::UpdateRoutesAndLocations()
 {
-    //pedestrians to be deleted
-    //you should better create this in the constructor and allocate it once.
-    vector<Pedestrian*> pedsToRemove;
-    pedsToRemove.reserve(500); //just reserve some space
+     //pedestrians to be deleted
+     //you should better create this in the constructor and allocate it once.
+     vector<Pedestrian*> pedsToRemove;
+     pedsToRemove.reserve(500); //just reserve some space
 
-    // collect all pedestrians in the simulation.
-    const vector<Pedestrian*>& allPeds = _building->GetAllPedestrians();
-    const map<int, Goal*>& goals = _building->GetAllGoals();
+     // collect all pedestrians in the simulation.
+     const vector<Pedestrian*>& allPeds = _building->GetAllPedestrians();
+     const map<int, Goal*>& goals = _building->GetAllGoals();
+     auto allRooms = _building->GetAllRooms();
 
-    unsigned long nSize = allPeds.size();
-    int nThreads = omp_get_max_threads();
-    int partSize;
-    partSize = ((int)nSize > nThreads)? (int) (nSize / nThreads):(int)nSize;
-    if(partSize == (int)nSize)
-            nThreads = 1; // not worthy to parallelize 
+#pragma omp parallel for shared(pedsToRemove, allRooms)
+     for (size_t p = 0; p < allPeds.size(); ++p) {
+          auto ped = allPeds[p];
+          Room* room = _building->GetRoom(ped->GetRoomID());
+          SubRoom* sub0 = room->GetSubRoom(ped->GetSubRoomID());
 
-#pragma omp parallel  default(shared) num_threads(nThreads)
-    {
-        const int threadID = omp_get_thread_num();
-        int start = threadID*partSize;
-        int end ;//= (threadID+1)*partSize-1;
-        // if ((threadID==nThreads-1))
-            // end = nSize-1;
-        end = (threadID < nThreads - 1) ? (threadID + 1) * partSize - 1: (int) (nSize - 1);
-
-        for (int p = start; p<=end; ++p) {
-
-            Pedestrian* ped = allPeds[p];
-            Room* room0 = _building->GetRoom(ped->GetRoomID());
-            assert(room0 != nullptr);
-            SubRoom* sub0 = room0->GetSubRoom(ped->GetSubRoomID());
-
-            //set the new room if needed
-            if ((ped->GetFinalDestination()==FINAL_DEST_OUT)
-                    && (room0->GetCaption()=="outside")) {
+          //set the new room if needed
+          if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
+                    && (room->GetCaption() == "outside")) {
 
 #pragma omp critical
-                pedsToRemove.push_back(ped);
-            }
-            else if ((ped->GetFinalDestination()!=FINAL_DEST_OUT)
+               pedsToRemove.push_back(ped);
+          } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
                     && (goals.at(ped->GetFinalDestination())->Contains(
-                            ped->GetPos()))) {
+                              ped->GetPos()))) {
 #pragma omp critical
-                pedsToRemove.push_back(ped);
-            }
+               pedsToRemove.push_back(ped);
+          }
 
-                // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
-                // That may happen if the forces are too high for instance
-                // the ped is removed from the simulation, if it could not be reassigned
-                //@todo: ar.graf: condition could be ff::subroom[grid->getKeyAt(ped->GetPosition())] != ped->GetSubRoomUID()
-            else if (!sub0->IsInSubRoom(ped)) {
-                bool assigned = false;
+// <<<<<<< HEAD
+//                 // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
+//                 // That may happen if the forces are too high for instance
+//                 // the ped is removed from the simulation, if it could not be reassigned
+//                 //@todo: ar.graf: condition could be ff::subroom[grid->getKeyAt(ped->GetPosition())] != ped->GetSubRoomUID()
+//             else if (!sub0->IsInSubRoom(ped)) {
+//                 bool assigned = false;
 
-                auto& allRooms = _building->GetAllRooms();
+//                 auto& allRooms = _building->GetAllRooms();
 
-                for (auto&& it_room : allRooms) {
-                    auto& room = it_room.second;
-                    for (auto&& it_sub : room->GetAllSubRooms()) {
-                        auto& sub = it_sub.second;
-                        auto& old_room = room0;
-                        auto& old_sub = sub0;
-                        if (sub->IsDirectlyConnectedWith(old_sub)
-                                && sub->IsInSubRoom(ped->GetPos())) {
-//                            if (ped->GetRoutingStrategy() == ROUTING_FF_QUICKEST) {
-//                                dynamic_cast<FFRouter*>(ped->GetRouter())->notifyDoor(ped);
-//                                ped->RerouteIn(-1.);
-//                            }
-                            if (ped->GetRoutingStrategy() == ROUTING_FF_LOCAL_SHORTEST) {
-                                dynamic_cast<FFRouter*>(ped->GetRouter())->save(ped);
-                            }
-                            ped->SetRoomID(room->GetID(),
-                                    room->GetCaption());
-                            ped->SetSubRoomID(sub->GetSubRoomID());
-                            ped->SetSubRoomUID(sub->GetUID());
-                            //the agent left the old iroom
-                            //actualize the egress time for that iroom
-                            old_room->SetEgressTime(ped->GetGlobalTime());
+//                 for (auto&& it_room : allRooms) {
+//                     auto& room = it_room.second;
+//                     for (auto&& it_sub : room->GetAllSubRooms()) {
+//                         auto& sub = it_sub.second;
+//                         auto& old_room = room0;
+//                         auto& old_sub = sub0;
+//                         if (sub->IsDirectlyConnectedWith(old_sub)
+//                                 && sub->IsInSubRoom(ped->GetPos())) {
+// //                            if (ped->GetRoutingStrategy() == ROUTING_FF_QUICKEST) {
+// //                                dynamic_cast<FFRouter*>(ped->GetRouter())->notifyDoor(ped);
+// //                                ped->RerouteIn(-1.);
+// //                            }
+//                             if (ped->GetRoutingStrategy() == ROUTING_FF_LOCAL_SHORTEST) {
+//                                 dynamic_cast<FFRouter*>(ped->GetRouter())->save(ped);
+//                             }
+//                             ped->SetRoomID(room->GetID(),
+//                                     room->GetCaption());
+//                             ped->SetSubRoomID(sub->GetSubRoomID());
+//                             ped->SetSubRoomUID(sub->GetUID());
+//                             //the agent left the old iroom
+//                             //actualize the egress time for that iroom
+//                             old_room->SetEgressTime(ped->GetGlobalTime());
 
-                            //the pedestrian did not used the door to exit the room
-                            //todo: optimize with distance square
-                            //if(ped->GetDistanceToNextTarget()>0.5)
-                            //{
-                            //   Log->Write("WARNING:\t pedestrian [%d] left the room in an unusual way. Please check",ped->GetID());
-                            //   Log->Write("        \t distance to previous target is %f",ped->GetDistanceToNextTarget());
-                            //}
-                            //also statistic for internal doors
-                            UpdateFlowAtDoors(*ped); //@todo: ar.graf : this call should move into a critical region? check plz
+//                             //the pedestrian did not used the door to exit the room
+//                             //todo: optimize with distance square
+//                             //if(ped->GetDistanceToNextTarget()>0.5)
+//                             //{
+//                             //   Log->Write("WARNING:\t pedestrian [%d] left the room in an unusual way. Please check",ped->GetID());
+//                             //   Log->Write("        \t distance to previous target is %f",ped->GetDistanceToNextTarget());
+//                             //}
+//                             //also statistic for internal doors
+//                             UpdateFlowAtDoors(*ped); //@todo: ar.graf : this call should move into a critical region? check plz
 
-                            ped->ClearMentalMap(); // reset the destination
-//                                   ped->FindRoute();
+//                             ped->ClearMentalMap(); // reset the destination
+// //                                   ped->FindRoute();
 
-                            assigned = true;
-                            break;
-                        }
-                    }
-                    if (assigned)
-                        break; // stop the loop
-                }
+//                             assigned = true;
+//                             break;
+//                         }
+//                     }
+//                     if (assigned)
+//                         break; // stop the loop
+//                 }
+// =======
+          // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
+          // That may happen if the forces are too high for instance
+          // the ped is removed from the simulation, if it could not be reassigned
+          else if (!sub0->IsInSubRoom(ped))
+          {
 
-                if (!assigned) {
+               bool assigned = false;
+               std::function<void(const Pedestrian&)> f = std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
+               assigned = ped->Relocate(f);
+               //this will delete agents, that are pushed outside (maybe even if inside obstacles??)
+// >>>>>>> develop
+
 #pragma omp critical
+               if (!assigned) {
                     pedsToRemove.push_back(ped);
                     //the agent left the old room
                     //actualize the eggress time for that room
                     allRooms.at(ped->GetRoomID())->SetEgressTime(ped->GetGlobalTime());
 
-                }
-            }
-
-            //finally actualize the route
-            if (ped->FindRoute()==-1) {
-                //a destination could not be found for that pedestrian
-                Log->Write("ERROR: \tCould not find a route for pedestrian %d", ped->GetID());
-                ped->FindRoute(); //debug only; can be removed any time @cleanup @todo: ar.graf
-                //exit(EXIT_FAILURE);
+               }
+          }
+          //finally actualize the route
+          if (ped->FindRoute() == -1) {
+               //a destination could not be found for that pedestrian
+               Log->Write("ERROR: \tCould not find a route for pedestrian %d",ped->GetID());
+               //exit(EXIT_FAILURE);
 #pragma omp critical
-                if (std::find(pedsToRemove.begin(), pedsToRemove.end(), ped) == pedsToRemove.end()) {
-                    pedsToRemove.push_back(ped);
-                }
-            }
-        }
-    } //omp parallel
+               pedsToRemove.push_back(ped);
+          }
+     }
 
-#ifdef _JPS_AS_A_SERVICE
-    if (_config->GetRunAsService()) {
-         AgentsQueueOut::Add(pedsToRemove);    //@todo: ar.graf: this should be critical region (and it is)
-    }
-    else
+
+#ifdef _USE_PROTOCOL_BUFFER
+     if (_hybridSimManager)
+     {
+          AgentsQueueOut::Add(pedsToRemove);    //@todo: ar.graf: this should be critical region (and it is)
+     }
+     else
 #endif
     {
         // remove the pedestrians that have left the building
@@ -511,7 +504,7 @@ double Simulation::RunBody(double maxSimTime)
     while ((_nPeds || (!_agentSrcManager.IsCompleted()&& _gotSources) ) && t<maxSimTime) {
 
         t = 0+(frameNr-1)*_deltaT;
-        //process the queue for incoming pedestriansg
+        //process the queue for incoming pedestrians
         ProcessAgentsQueue();
 
         if (t>Pedestrian::GetMinPremovementTime()) {
@@ -542,7 +535,8 @@ double Simulation::RunBody(double maxSimTime)
         if (0==frameNr%writeInterval) {
             _iod->WriteFrame(frameNr/writeInterval, _building.get());
         }
-        Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
+        if(!_gotSources /*&& _printPB*/) // @todo: option for print progressbar
+              Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
 
         // needed to control the execution time PART 2
         // time(&endtime);
@@ -645,7 +639,7 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
                     return; //todo we need to check if the ped is in a subroom neighboring the target. If so, no problems!
                 }
             }
-#pragma omp critical
+//#pragma omp critical
             trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
         }
     }

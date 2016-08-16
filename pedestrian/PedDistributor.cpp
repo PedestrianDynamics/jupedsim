@@ -65,7 +65,7 @@ PedDistributor::PedDistributor(const Configuration *configuration) : _configurat
     }
 
     parser->LoadPedDistribution(_start_dis,_start_dis_sub,_start_dis_sources);
-
+    delete parser;
 }
 
 
@@ -188,7 +188,7 @@ bool PedDistributor::Distribute(Building *building) const {
         // Distributing
         Log->Write("INFO: \tDistributing %d Agents in Room/Subrom [%d/%d]! Maximum allowed: %d", N, roomID, subroomID,
                    max_pos);
-        DistributeInSubRoom(sr, N, allpos, &pid, dist.get(), building);
+        DistributeInSubRoom(N, allpos, &pid, dist.get(), building);
         Log->Write("\t...Done");
         nPeds_is += N;
     }
@@ -264,7 +264,7 @@ bool PedDistributor::Distribute(Building *building) const {
             dist->SetSubroomID(sr->GetSubRoomID());
             //dist->SetSubroomUID(sr->GetSubRoomUID())
             if (akt_anz[is] > 0) {
-                DistributeInSubRoom(sr, akt_anz[is], allFreePosInRoom[is], &pid, dist.get(), building);
+                DistributeInSubRoom(akt_anz[is], allFreePosInRoom[is], &pid, dist.get(), building);
             }
         }
         nPeds_is += N;
@@ -507,7 +507,7 @@ vector<Point>  PedDistributor::PossiblePositions(const SubRoom &r) {
  *              nächsten Aufruf)
  *   - routing: wird benötigt um die Zielline der Fußgänger zu initialisieren
  * */
-void PedDistributor::DistributeInSubRoom(SubRoom *r, int nAgents, vector<Point> &positions, int *pid,
+void PedDistributor::DistributeInSubRoom(int nAgents, vector<Point> &positions, int *pid,
                                          StartDistribution *para, Building *building) const {
     // set the pedestrians
     for (int i = 0; i < nAgents; ++i) {

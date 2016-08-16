@@ -19,7 +19,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
   <!--<logfile>log.txt</logfile> -->
 
 
-  <!-- traffic information: e.g closed doors -->
+  traffic information: e.g closed doors
   <traffic_constraints>
     <doors>
       <door trans_id="4" caption="up right" state="close"/>
@@ -33,8 +33,8 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
   <!--persons information and distribution -->
   <agents operational_model_id="3">
     <agents_distribution>
-      <group group_id="0" agent_parameter_id="1" room_id="0" subroom_id="0" number="1000" goal_id="-1" router_id="1" />
-      <group group_id="1" agent_parameter_id="1" room_id="1" subroom_id="0" number="1000" goal_id="-1" router_id="1"/>
+      <group group_id="0" agent_parameter_id="1" room_id="1" subroom_id="0" number="100" goal_id="-1" router_id="1"/>
+      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="100" goal_id="-1" router_id="1" />
     </agents_distribution>
   </agents>
 

@@ -186,10 +186,10 @@ void AgentsSourcesManager::ComputeBestPositionVoronoi(AgentsSource* src,
 
           for (auto&& ped : peds)
           {
-               double dist = (pos - ped->GetPos()).NormSquare();
-               if (dist < min_dist)
+               double distance = (pos - ped->GetPos()).NormSquare();
+               if (distance < min_dist)
                {
-                    min_dist = dist;
+                    min_dist = distance;
                }
           }
           map_dist_to_position[min_dist] = pos;
