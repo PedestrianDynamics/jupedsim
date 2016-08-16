@@ -64,6 +64,8 @@ bool IniFileParser::Parse(std::string iniFile)
      size_t found = iniFile.find_last_of("/\\");
      if (found!=std::string::npos) {
           _config->SetProjectRootDir(iniFile.substr(0, found)+"/");
+     } else {
+          _config->SetProjectRootDir("./");
      }
 
      TiXmlDocument doc(iniFile);
