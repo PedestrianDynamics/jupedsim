@@ -245,6 +245,7 @@ Pedestrian* StartDistribution::GenerateAgent(Building* building, int* pid, vecto
      E.SetAmin(_groupParameters->GetAmin());
      E.SetBmax(_groupParameters->GetBmax());
      E.SetBmin(_groupParameters->GetBmin());
+     E.DoStretch(_groupParameters->StretchEnabled());
      ped->SetEllipse(E);
      ped->SetTau(_groupParameters->GetTau());
      ped->SetV0Norm(_groupParameters->GetV0(),
@@ -255,6 +256,8 @@ Pedestrian* StartDistribution::GenerateAgent(Building* building, int* pid, vecto
                     _groupParameters->GetV0IdleEscalatorUpStairs(),
                     _groupParameters->GetV0IdleEscalatorDownStairs()
           );
+     ped->SetSwayParameters(_groupParameters->GetSwayFreqA(), _groupParameters->GetSwayFreqB(),
+                            _groupParameters->GetSwayAmpA(), _groupParameters->GetSwayAmpB());
      // first default Position
      int index = -1;
 

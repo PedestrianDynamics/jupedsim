@@ -162,7 +162,7 @@ int testIsOutside()
      return (res==ntests)?EXIT_SUCCESS:EXIT_FAILURE;
 }
 
-int main(int argc, char * argv[])
+int main()
 {
      //   fprintf(stdout, "%s Version %d.%d\n", argv[0], JPSCORE_MINOR_VERSION, JPSCORE_MAJOR_VERSION);
      return testIsOutside();

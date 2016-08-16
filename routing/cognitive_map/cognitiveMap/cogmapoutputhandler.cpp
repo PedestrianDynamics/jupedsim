@@ -19,7 +19,7 @@ void CogMapOutputHandler::WriteToFileHeader(const int &id, const double& fps)
     char agents[CLENGTH] = "";
     sprintf(agents, "\t<header version = \"0.8\">\n");
     tmp.append(agents);
-    sprintf(agents, "\t\t<agent>%ld</agent>\n", id);
+    sprintf(agents, "\t\t<agent>%d</agent>\n", id);
     tmp.append(agents);
     sprintf(agents, "\t\t<frameRate>%0.2f</frameRate>\n",fps );
     tmp.append(agents);

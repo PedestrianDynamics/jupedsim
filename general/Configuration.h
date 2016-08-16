@@ -52,10 +52,60 @@ public:
 
      Configuration()
      {
-          _log = 0;
-          _port = -1.0;
-          _tMax = 20;
+          _solver = 1;
           _routingEngine = std::shared_ptr<RoutingEngine>(new RoutingEngine());
+          _maxOpenMPThreads = 1;
+          _log = 0;
+          _port = -1;
+          _seed = 0;
+          _fps = 8;
+          _linkedCellSize = 2.2; // meter
+          _model = nullptr;//std::shared_ptr<OperationalModel>(new OperationalModel());
+          _tMax = 500; // seconds
+          _dT = 0.01;
+          _isPeriodic = 0; // use only for Tordeux2015 with "trivial" geometries
+          // ----------- GCFM repulsive force ------
+          _nuPed = 0.4;
+          _nuWall = 0.2;
+          // ----------- Gompertz repulsive force ------
+          _aPed = 1;    // Tordeux2015
+          _bPed = 0.25; // Tordeux2015
+          _cPed = 3;
+          _aWall = 1;
+          _bWall = 0.7;
+          _cWall = 3;
+          // ----------- Tordeux2015 model ------
+          _dWall = 0.1;
+          _dPed = 0.1;
+          // ------- Interpolation GCFM - left side
+          _intPWidthPed = 0.1;
+          _intPWidthWall = 0.1;
+          // ------- GCFM repulsive force
+          _maxFPed = 3;
+          _maxFWall = 3;
+          // -------- Interpolation GCFM - right side
+          _distEffMaxPed = 2;
+          _distEffMaxWall = 2;
+          // ----------------
+
+          _hostname = "localhost";
+          _trajectoriesFile = "trajectories.xml";
+          _errorLogFile = "log.txt";
+          _projectFile = "";
+          _geometryFile = "";
+          _projectRootDir = ".";
+          _showStatistics = false;
+          _fileFormat = FORMAT_XML_PLAIN;
+          _agentsParameters = std::map<int, std::shared_ptr<AgentsParameters> >();
+          // ---------- floorfield
+          _deltaH = 0.0625;
+          _wall_avoid_distance = 0.4;
+          _use_wall_avoidance = true;
+          // ---------- gradientmodel
+          _slow_down_distance = 0.2;
+
+          //ff router quickest
+          _recalc_interval = 5;
      }
 
      int GetSolver() const { return _solver; };
@@ -171,13 +221,33 @@ public:
 
      void SetDistEffMaxWall(double distEffMaxWall) { _distEffMaxWall = distEffMaxWall; };
 
+     double get_deltaH() const { return _deltaH; }
+
+     void set_deltaH(double _deltaH) { Configuration::_deltaH = _deltaH; }
+
+     double get_wall_avoid_distance() const { return _wall_avoid_distance; }
+
+     void set_wall_avoid_distance(double _wall_avoid_distance) { Configuration::_wall_avoid_distance = _wall_avoid_distance; }
+
+     bool get_use_wall_avoidance() const { return _use_wall_avoidance; }
+
+     void set_use_wall_avoidance(bool _use_wall_avoidance) { Configuration::_use_wall_avoidance = _use_wall_avoidance; }
+
+     double get_slow_down_distance() const { return _slow_down_distance; }
+
+     void set_slow_down_distance(double _slow_down_distance) { Configuration::_slow_down_distance = _slow_down_distance; }
+
+     double get_recalc_interval() const { return _recalc_interval; }
+
+     void set_recalc_interval(double _recalc_interval) { Configuration::_recalc_interval = _recalc_interval; }
+
      const std::string& GetHostname() const { return _hostname; };
 
      void SetHostname(std::string hostname) { _hostname = hostname; };
 
      const std::string& GetTrajectoriesFile() const { return _trajectoriesFile; };
 
-     void SetTrjectoriesFile(std::string trajectoriesFile) { _trajectoriesFile = trajectoriesFile; };
+     void SetTrajectoriesFile(std::string trajectoriesFile) { _trajectoriesFile = trajectoriesFile; };
 
      const std::string& GetErrorLogFile() const { return _errorLogFile; };
 
@@ -263,6 +333,16 @@ private:
      double _maxFWall;
      double _distEffMaxPed;
      double _distEffMaxWall;
+     //floorfield
+     double _deltaH;
+     double _wall_avoid_distance;
+     bool _use_wall_avoidance;
+     //gradientmodel
+     double _slow_down_distance;
+
+     //ff router quickest
+     double _recalc_interval;
+
      std::string _hostname;
      std::string _trajectoriesFile;
      std::string _errorLogFile;
@@ -282,5 +362,7 @@ private:
 
 
 };
+
+
 
 #endif //JPSCORE_CONFIGURATION_H

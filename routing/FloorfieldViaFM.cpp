@@ -28,12 +28,12 @@
 #define TESTING
 #define GEO_UP_SCALE 1
 #include "FloorfieldViaFM.h"
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <fstream>
-#include <cfloat>
-#include <chrono>
+//#include <iostream>
+//#include <string>
+//#include <sstream>
+//#include <fstream>
+//#include <cfloat>
+//#include <chrono>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -561,10 +561,10 @@ double FloorfieldViaFM::getDistance2WallAt(const Point& position) {
     }
 }
 
-int  FloorfieldViaFM::getSubroomUIDAt(const Point &position) {
-    long int key = grid->getKeyAtPoint(position);
-    return subroomUID[key];
-}
+//int  FloorfieldViaFM::getSubroomUIDAt(const Point &position) {
+//    long int key = grid->getKeyAtPoint(position);
+//    return subroomUID[key];
+//}
 
 /*!
  * \brief Parsing geo-info but conflicts in multi-floor-buildings OBSOLETE
@@ -607,7 +607,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
         costmap.emplace(trans.second->GetUniqueID(), nullptr);
         neggradmap.emplace(trans.second->GetUniqueID(), nullptr);
     }
-    numOfExits = exitsFromScope.size();
+    numOfExits = (unsigned int) exitsFromScope.size();
     for (auto& trans : allTransitions) {
         if (!trans.second->IsOpen()) {
             wall.emplace_back(Line ( (Line) *(trans.second)));
@@ -791,7 +791,7 @@ void FloorfieldViaFM::parseBuildingForExits(const Building* const buildingArg, c
         costmap.emplace(trans.second->GetUniqueID(), nullptr);
         neggradmap.emplace(trans.second->GetUniqueID(), nullptr);
     }
-    numOfExits = exitsFromScope.size();
+    numOfExits = (unsigned int) exitsFromScope.size();
     for (auto& trans : allTransitions) {
         if (!trans.second->IsOpen()) {
             wall.emplace_back(Line ( (Line) *(trans.second)));
@@ -970,20 +970,20 @@ void FloorfieldViaFM::prepareForDistanceFieldCalculation(const bool onlyRoomsWit
 
 }
 
-void FloorfieldViaFM::clearAndPrepareForFloorfieldReCalc(double* costarray) {
-    for (long int i = 0; i < grid->GetnPoints(); ++i) {
-        if ((gcode[i] == WALL) || (gcode[i] == OUTSIDE) || (gcode[i] == CLOSED_TRANSITION) || (gcode[i] == CLOSED_CROSSING)){    //wall or blocker
-            costarray[i]    = -7.;                          //this is done in calculateFloorfield again
-        } else {                     //inside
-            costarray[i]    = -2.;
-        }
-    }
-}
+//void FloorfieldViaFM::clearAndPrepareForFloorfieldReCalc(double* costarray) {
+//    for (long int i = 0; i < grid->GetnPoints(); ++i) {
+//        if ((gcode[i] == WALL) || (gcode[i] == OUTSIDE) || (gcode[i] == CLOSED_TRANSITION) || (gcode[i] == CLOSED_CROSSING)){    //wall or blocker
+//            costarray[i]    = -7.;                          //this is done in calculateFloorfield again
+//        } else {                     //inside
+//            costarray[i]    = -2.;
+//        }
+//    }
+//}
 
-void FloorfieldViaFM::setNewGoalAfterTheClear(double* costarray, std::vector<Line>& LineArg) {
-    drawLinesOnGrid(LineArg, costarray, 0.);
-    //std::cerr << LineArg[0].GetUniqueID() << " " << LineArg[0].GetPoint1()._x << " " << LineArg[0].GetPoint1()._y << " " << LineArg[0].GetPoint2()._x << " " << LineArg[0].GetPoint2()._y << std::endl;
-}
+//void FloorfieldViaFM::setNewGoalAfterTheClear(double* costarray, std::vector<Line>& LineArg) {
+//    drawLinesOnGrid(LineArg, costarray, 0.);
+//    //std::cerr << LineArg[0].GetUniqueID() << " " << LineArg[0].GetPoint1()._x << " " << LineArg[0].GetPoint1()._y << " " << LineArg[0].GetPoint2()._x << " " << LineArg[0].GetPoint2()._y << std::endl;
+//}
 
 void FloorfieldViaFM::deleteAllFFs() {
     for (int i = 0; i < costmap.size(); ++i) {
@@ -1034,12 +1034,12 @@ void FloorfieldViaFM::drawLinesOnGrid(std::vector<Line>& wallArg, double* const 
 
     for (auto& line : wallArg) {
         key = grid->getKeyAtPoint(line.GetPoint1());
-        iStart = grid->get_i_fromKey(key);
-        jStart = grid->get_j_fromKey(key);
+        iStart = (long) grid->get_i_fromKey(key);
+        jStart = (long) grid->get_j_fromKey(key);
 
         key = grid->getKeyAtPoint(line.GetPoint2());
-        iEnd = grid->get_i_fromKey(key);
-        jEnd = grid->get_j_fromKey(key);
+        iEnd = (long) grid->get_i_fromKey(key);
+        jEnd = (long) grid->get_j_fromKey(key);
 
         deltaX = (int) (iEnd - iStart);
         deltaY = (int) (jEnd - jStart);
@@ -1134,12 +1134,12 @@ void FloorfieldViaFM::drawLinesOnGrid(std::vector<Line>& wallArg, int* const tar
 
     for (auto& line : wallArg) {
         key = grid->getKeyAtPoint(line.GetPoint1());
-        iStart = grid->get_i_fromKey(key);
-        jStart = grid->get_j_fromKey(key);
+        iStart = (long) grid->get_i_fromKey(key);
+        jStart = (long) grid->get_j_fromKey(key);
 
         key = grid->getKeyAtPoint(line.GetPoint2());
-        iEnd = grid->get_i_fromKey(key);
-        jEnd = grid->get_j_fromKey(key);
+        iEnd = (long) grid->get_i_fromKey(key);
+        jEnd = (long) grid->get_j_fromKey(key);
 
         deltaX = (int) (iEnd - iStart);
         deltaY = (int) (jEnd - jStart);
@@ -1489,7 +1489,7 @@ void FloorfieldViaFM::calcDist2Wall(Trial* trialfield, int* flag, const long int
 
     row = 100000.;
     col = 100000.;
-    aux = -1;
+    //aux = -1;
 
     directNeighbor dNeigh = grid->getNeighbors(key);
 
@@ -1604,7 +1604,7 @@ void FloorfieldViaFM::calcFloorfield(Trial* trialfield, int* flag, const long in
 
     row = DBL_MAX;
     col = DBL_MAX;
-    aux = -1;
+    //aux = -1;
 
     directNeighbor dNeigh = grid->getNeighbors(key);
 

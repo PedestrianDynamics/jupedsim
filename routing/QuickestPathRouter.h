@@ -91,7 +91,7 @@ private:
       * @return the best route found
       */
 
-     int GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP);
+     int GetQuickestRoute(Pedestrian* ped);
 
      /**
       * compute the cost benefit analysis obtained by changing from value g1 to value g2
@@ -186,7 +186,8 @@ private:
       * @param ignore_ped2
       * @return the number of obstacles
       */
-     int GetObstaclesCountBetween(const Point& p1, const Point& p2, Hline* hline, int ignore_ped1, int ignore_ped2);
+     unsigned int GetObstaclesCountBetween(const Point& p1, const Point& p2, Hline* hline, int ignore_ped1,
+             int ignore_ped2);
 
      /**
       *
@@ -217,7 +218,7 @@ private:
      // Threshold for the cost benefit analysis
      double _cbaThreshold=0.15;
      // obstructions
-     int _visibilityObstruction=4;
+     unsigned int _visibilityObstruction=4;
      //congestion factor before attempting a change
      double _congestionRation=0.8;
      // reference pedestrian selection mode

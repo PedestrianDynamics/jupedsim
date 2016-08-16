@@ -42,6 +42,10 @@ void GeoFileParser::LoadBuilding(Building* building)
           Log->Write("ERROR:\t could not load extra routing information!");
           exit(EXIT_FAILURE);
      }
+     if (!LoadTrafficInfo(building)) {
+           Log->Write("ERROR:\t could not load extra traffic information!");
+           exit(EXIT_FAILURE);
+     }
 }
 
 bool GeoFileParser::LoadGeometry(Building* building)
@@ -50,6 +54,9 @@ bool GeoFileParser::LoadGeometry(Building* building)
      std::string geoFilenameWithPath = _configuration->GetProjectRootDir()+_configuration->GetGeometryFile();
      TiXmlDocument docGeo(geoFilenameWithPath);
      if (!docGeo.LoadFile()) {
+          Log->Write(_configuration->GetProjectRootDir());
+          Log->Write(_configuration->GetGeometryFile());
+          Log->Write(geoFilenameWithPath);
           Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
           Log->Write("\t could not parse the geometry file");
           return false;
@@ -467,6 +474,13 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
      Log->Write("INFO:\tDone with loading traffic info file");
      return true;
 }
+
+GeoFileParser::~GeoFileParser()
+{
+
+}
+
+
 
 
 

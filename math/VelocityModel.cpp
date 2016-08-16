@@ -29,7 +29,7 @@
 
 
 #include "../pedestrian/Pedestrian.h"
-#include "../routing/DirectionStrategy.h"
+//#include "../routing/DirectionStrategy.h"
 #include "../mpi/LCGrid.h"
 #include "../geometry/Wall.h"
 #include "../geometry/SubRoom.h"
@@ -232,10 +232,12 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 // calculate min spacing
                 std::sort(spacings.begin(), spacings.end(), sort_pred());
                 double spacing = spacings[0].first;
-                double winkel = spacings[0].second;
-                Point tmp;
-                Point speed = direction.Normalized() * OptimalSpeed(ped, spacing, winkel);
-                result_acc.push_back(speed);
+
+                //double winkel = spacings[0].second;
+                //Point tmp;
+                Point speed = direction.Normalized() *OptimalSpeed(ped, spacing);
+                result_acc.push_back(speed);                
+
                 spacings.clear(); //clear for ped p
 
                 // stuck peds get removed. Warning is thrown. low speed due to jam is omitted.
@@ -288,7 +290,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
 Point VelocityModel::e0(Pedestrian* ped, Room* room) const
 {
       const Point target = _direction->GetTarget(room, ped);
-      Point e0;
+      Point desired_direction;
       const Point pos = ped->GetPos();
       double dist = ped->GetExitLine()->DistTo(pos);
       // check if the molified version works
@@ -299,23 +301,23 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
            (dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) ||
            (dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get()))  ) {
           if (dist > 20*J_EPS_GOAL) {
-               e0 = target - pos; //ped->GetV0(target);
+               desired_direction = target - pos; //ped->GetV0(target);
           } else {
-               e0 = lastE0;
+               desired_direction = lastE0;
                ped->SetLastE0(lastE0); //keep old vector (revert set operation done 9 lines above)
           }
       }
       else if (dist > J_EPS_GOAL) {
-            e0 = ped->GetV0(target);
+            desired_direction = ped->GetV0(target);
       } else {
           ped->SetSmoothTurning();
-          e0 = ped->GetV0();
+          desired_direction = ped->GetV0();
      }
-     return e0;
+     return desired_direction;
 }
 
 
-double VelocityModel::OptimalSpeed(Pedestrian* ped, double spacing, double winkel) const
+double VelocityModel::OptimalSpeed(Pedestrian* ped, double spacing) const
 {
       double v0 = ped->GetV0Norm();
       double T = ped->GetT();

@@ -89,6 +89,7 @@ private:
     //HybridSimulationManager
     int _periodic;
     bool _gotSources; // is true if we got some sources. Otherwise, false.
+    // bool _printPB; // print progressbar
 public:
     /**
      * Constructor

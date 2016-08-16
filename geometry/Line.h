@@ -47,7 +47,7 @@ private:
      Point _point1;
      Point _point2;
      Point _centre;
-
+     double _length;
      //unique identifier for all line elements
      static int _static_UID;
      int _uid;
@@ -56,6 +56,8 @@ public:
 
      Line();
 
+     Line(const Point& p1, const Point& p2, int count); // count = 0 --> don't count the line. Useful for temporary lines.
+     
      Line(const Point& p1, const Point& p2);
 
      Line(const Line& orig);
@@ -93,6 +95,12 @@ public:
       */
      const Point& GetCentre(void) const;
 
+     /**
+      * Return the length of the line
+      */
+     double GetLength(void) const;
+
+     
      /**
       * @return a normal vector to this line
       */

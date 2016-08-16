@@ -10,7 +10,7 @@ We are heavily working on this project which means that:
 
 - It’s not done. We will be releasing new enhancements, bug fixes etc.
 - We love your support. If you find any errors or have suggestions, please write an issue. We will try hard to fix it.
-- Be patient. We are scientists and PhD/master students. Therefore, we primarly care about our research and theses. 
+- Be patient. We are scientists and PhD/master students. Therefore, we primarily care about our research and theses. 
 
 Enjoy!
 
@@ -93,7 +93,7 @@ There is no special hardware/software requirements for running JuPedSim. The dis
 
 
 Some verification tests are still failing. The actual cdash-board can be found [here](http://my.cdash.org/index.php?project=JuPedSim) 
-Occasionaly jpscore crashes if the input file is not valid. Make sure to validate your XML input files with the supplied XSD files.
+Occasionally jpscore crashes if the input file is not valid. Make sure to validate your XML input files with the supplied XSD files.
 
 ## Frequently Asked Questions
 

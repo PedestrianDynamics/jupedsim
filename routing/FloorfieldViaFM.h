@@ -138,13 +138,9 @@ protected:
      RectGrid* grid = nullptr;
      std::vector<Line> wall;
      std::vector<Line> exitsFromScope;
-     int numOfExits;
+     unsigned int numOfExits;
 
      const Building* building;
-
-     //stuff to handle wrapper grid (unused, cause RectGrid handles offset)
-     //double offsetX;
-     //double offsetY;
 
      //GridPoint Data in independant arrays (shared primary key)
      // changed to threadsafe creation when needed: int* flag;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # make some new ini-files based on the file <ini-Bottleneck.xml>
 # so first make changes in <ini-Bottleneck.xml> and then spread them with this script to the  world         
 

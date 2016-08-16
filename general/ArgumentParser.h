@@ -142,7 +142,7 @@ private:
 public:
      // constructor
      ArgumentParser(Configuration* config);
-
+     ~ArgumentParser();
 
 
 //     // Getter-Funktionen
