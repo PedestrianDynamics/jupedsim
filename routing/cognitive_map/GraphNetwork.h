@@ -31,7 +31,7 @@
 #define GRAPHNETWORK_H_
 
 #include "NavigationGraph.h"
-//#include "./map_knowlegde/routeknowlegde.h"
+
 #include <vector>
 
 class SubRoom;
@@ -40,6 +40,7 @@ class Crossing;
 class Building;
 class NavLine;
 class Pedestrian;
+
 
 
 
@@ -84,6 +85,8 @@ private:
     const Pedestrian * const pedestrian;
     const SubRoom * current_subroom = NULL;
     std::vector<const GraphEdge *> destinations;
+
+
 
 
 };

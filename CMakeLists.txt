@@ -333,6 +333,9 @@ set(source_files
 
   routing/cognitive_map/perception/perception.cpp
   routing/cognitive_map/perception/visibleenvironment.cpp
+  routing/cognitive_map/brain.cpp
+
+  routing/cognitive_map/cognitiveMap/InternNavigationNetwork.cpp
 
 
   visiLibity/source_code/visilibity.cpp
@@ -401,6 +404,9 @@ set(header_files
 
   routing/cognitive_map/perception/perception.h
   routing/cognitive_map/perception/visibleenvironment.h
+  routing/cognitive_map/brain.h
+
+  routing/cognitive_map/cognitiveMap/InternNavigationNetwork.h
 
   visiLibity/source_code/visilibity.hpp
 

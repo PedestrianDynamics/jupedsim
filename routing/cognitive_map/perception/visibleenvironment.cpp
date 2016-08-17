@@ -5,7 +5,7 @@
 #include "../../../geometry/SubRoom.h"
 
 #include <boost/geometry/geometry.hpp>
-#include <boost/foreach.hpp>
+//#include <boost/foreach.hpp>
 
 VisibleEnvironment::VisibleEnvironment()
 {
@@ -166,10 +166,11 @@ VisibleEnvironment::VisibleEnvironment(const Building *b, const Pedestrian *ped)
     //VisiLibity::Guards my_guards(std::vector(Point(2095.53,14423.4)));
 
     VisiLibity::Visibility_Polygon
-      my_visibility_polygon(VisiLibity::Point(2.5,2.5), environment,0.01);
+      my_visibility_polygon(VisiLibity::Point(4.0,3.5), environment,0.01);
     std::cout << "The visibility polygon is \n" << my_visibility_polygon << std::endl;
 
 
+    //my_visibility_polygon.
 
     Log->Write("INFO: PERCEPTION: Visible environment prepared.");
 

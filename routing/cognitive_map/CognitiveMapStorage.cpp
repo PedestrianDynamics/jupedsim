@@ -31,6 +31,7 @@
 #include "AbstractCognitiveMapCreator.h"
 #include "EmptyCognitiveMapCreator.h"
 #include "CompleteCognitiveMapCreator.h"
+#include "cognitiveMap/internnavigationnetwork.h"
 
 #include "../../tinyxml/tinyxml.h"
 #include <memory>
@@ -40,7 +41,7 @@
 //#include "NavigationGraph.h"
 
 
-CognitiveMapStorage::CognitiveMapStorage(const Building * const b, std::string cogMapStatus, std::string cogMapFiles)
+BrainStorage::BrainStorage(const Building * const b, std::string cogMapStatus, std::string cogMapFiles)
      : _building(b)
 {
     _cogMapStatus=cogMapStatus;
@@ -52,9 +53,18 @@ CognitiveMapStorage::CognitiveMapStorage(const Building * const b, std::string c
 
     //Complete Environment
     _visibleEnv=VisibleEnvironment(b);
+
+    //internal graph networks in every subroom
+    for (auto it=_b->GetAllRooms().begin(); it!=_b->GetAllRooms().end(); ++it)
+    {
+        for (auto it2=it->second->GetAllSubRooms().begin(); it2!=it->second->GetAllSubRooms().end(); ++it2)
+        {
+            InitInternalNetwork(it2->second);
+        }
+    }
 }
 
-CognitiveMapStorage::~CognitiveMapStorage()
+BrainStorage::~BrainStorage()
 {
      delete creator;
      for (auto it=cognitive_maps.begin(); it!=cognitive_maps.end(); ++it)
@@ -64,17 +74,23 @@ CognitiveMapStorage::~CognitiveMapStorage()
      cognitive_maps.clear();
 }
 
-CMStorageValueType CognitiveMapStorage::operator[] (CMStorageKeyType key)
+BStorageValueType BrainStorage::operator[] (BStorageKeyType key)
 {
-     CMStorageType::iterator it = cognitive_maps.find(key);
-     if(it == cognitive_maps.end()) {
-          CreateCognitiveMap(key);
+     BStorageType::iterator it = _brains.find(key);
+     if(it == _brains.end()) {
+          CreateBrain(key);
      }
 
-     return cognitive_maps[key];
+//     PStorageType::iterator itP= perception_abilities.find(key);
+//     if (itP == perception_abilities.end())
+//     {
+//         CreatePerceptionAbility(key);
+//     }
+
+     return _brains[key];
 }
 
-void CognitiveMapStorage::ParseCogMap(CMStorageKeyType ped)
+void CognitiveMapStorage::ParseCogMap(BStorageKeyType ped)
 {
 
     _regions.clear();
@@ -271,15 +287,40 @@ void CognitiveMapStorage::ParseCogMap(CMStorageKeyType ped)
     }
 }
 
-void CognitiveMapStorage::CreateCognitiveMap(CMStorageKeyType ped)
+void BrainStorage::CreateBrain(BStorageKeyType ped)
 {
 
      //todo: the possibility to have more then one creator.
-     cognitive_maps.insert(std::make_pair(ped, creator->CreateCognitiveMap(ped)));
+
+     _brains.insert(std::make_pair(ped, std::make_shared<Brain>(ped,_visibleEnv,_roominternalNetworks)));//  creator->CreateCognitiveMap(ped)));
      ParseCogMap(ped);
      cognitive_maps[ped]->AddRegions(_regions);
      cognitive_maps[ped]->InitLandmarkNetworksInRegions();
      cognitive_maps[ped]->FindMainDestination();
      //debug
      //cognitive_maps[ped]->GetNavigationGraph()->WriteToDotFile(building->GetProjectRootDir());
+}
+
+void BrainStorage::InitInternalNetwork(const SubRoom *sub_room)
+{
+
+    _roominternalNetworks.emplace(sub_room,std::make_shared<InternNavigationNetwork>(sub_room));
+
+    for (Crossing* crossing:sub_room->GetAllCrossings())
+    {
+        _roominternalNetworks[sub_room]->AddVertex(std::shared_ptr<Crossing>(crossing));
+    }
+
+    for (Transition* transition:sub_room->GetAllTransitions())
+    {
+        _roominternalNetworks[sub_room]->AddVertex(std::shared_ptr<Transition>(transition));
+    }
+
+    for (Hline* hline:sub_room->GetAllHlines())
+    {
+        _roominternalNetworks[sub_room]->AddVertex(std::shared_ptr<Hline>(hline));
+    }
+
+    _roominternalNetworks[sub_room]->EstablishConnections();
+
 }

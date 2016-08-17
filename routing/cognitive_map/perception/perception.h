@@ -2,10 +2,28 @@
 #define PERCEPTION_H
 
 
+#include <memory>
+
+class Pedestrian;
+class Building;
+class VisibleEnvironment;
+
+using ptrBuilding = const Building*;
+using ptrPed = const Pedestrian*;
+using ptrEnv = std::shared_ptr<const VisibleEnvironment>;
+
+
 class Perception
 {
 public:
-    Perception();
+    Perception(ptrBuilding b, ptrPed ped, ptrEnv env);
+
+private:
+
+    ptrBuilding _building;
+    ptrPed _ped;
+    ptrEnv _env;
+
 };
 
 #endif // PERCEPTION_H

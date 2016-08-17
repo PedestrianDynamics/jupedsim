@@ -37,14 +37,15 @@
 
 class Building;
 class Pedestrian;
-class CognitiveMap;
+class Brain;
 class AbstractCognitiveMapCreator;
+class InternNavigationNetwork;
 
 
-
-typedef const Pedestrian * CMStorageKeyType;
-typedef CognitiveMap * CMStorageValueType;
-typedef std::unordered_map<CMStorageKeyType, CMStorageValueType> CMStorageType;
+using ptrIntNetwork = std::shared_ptr<InternNavigationNetwork>;
+typedef const Pedestrian * BStorageKeyType;
+typedef std::shared_ptr<Brain> BStorageValueType;
+typedef std::unordered_map<BStorageKeyType, BStorageValueType> BStorageType;
 
 
 
@@ -54,18 +55,18 @@ typedef std::unordered_map<CMStorageKeyType, CMStorageValueType> CMStorageType;
  * Cares about Cognitive map storage, creation and delivery
  *
  */
-class CognitiveMapStorage {
+class BrainStorage {
 public:
-     CognitiveMapStorage(const Building * const b, std::string cogMapStatus, std::string cogMapFiles="");
-     virtual ~CognitiveMapStorage();
+     BrainStorage(const Building * const b, std::string cogMapStatus, std::string cogMapFiles="");
+     virtual ~BrainStorage();
 
 
-     CMStorageValueType operator[] (CMStorageKeyType key);
+     BStorageValueType operator[] (BStorageKeyType key);
 
 
 private:
      const Building * const _building;
-     CMStorageType cognitive_maps;
+     BStorageType _brains;
      AbstractCognitiveMapCreator * creator;
 
 
@@ -78,9 +79,14 @@ private:
      std::string _cogMapStatus;
      std::string _cogMapFiles;
 
+     //brain
+     void CreateBrain(BStorageKeyType ped);
+     void ParseCogMap(BStorageKeyType ped);
 
-     void CreateCognitiveMap(CMStorageKeyType ped);
-     void ParseCogMap(CMStorageKeyType ped);
+
+     // internal graph network in every room (for locomotion purposes)
+     void InitInternalNetwork(const SubRoom* sub_room);
+     std::map<const SubRoom*,ptrIntNetwork> _roominternalNetworks;
 
 };
 
