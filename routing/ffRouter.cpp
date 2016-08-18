@@ -109,6 +109,8 @@ bool FFRouter::Init(Building* building)
      _CroTrByUID.clear();
      auto& allTrans = building->GetAllTransitions();
      auto& allCross = building->GetAllCrossings();
+     std::vector<std::pair<int, int>> subroomAndCroTrVector;
+     subroomAndCroTrVector.clear();
      for (auto& pair:allTrans) {
           if (pair.second->IsOpen()) {
                _allDoorUIDs.emplace_back(pair.second->GetUniqueID());
@@ -116,12 +118,14 @@ bool FFRouter::Init(Building* building)
                if (pair.second->IsExit()) {
                     _ExitsByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
                }
+               subroomAndCroTrVector.emplace_back(std::make_pair(pair.second->GetSubRoom1()->GetUID(), pair.second->GetUniqueID()));
           }
      }
      for (auto& pair:allCross) {
           if (pair.second->IsOpen()) {
                _allDoorUIDs.emplace_back(pair.second->GetUniqueID());
                _CroTrByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
+               subroomAndCroTrVector.emplace_back(std::make_pair(pair.second->GetSubRoom1()->GetUID(), pair.second->GetUniqueID()));
           }
      }
      //make unique
@@ -148,10 +152,9 @@ bool FFRouter::Init(Building* building)
      _locffviafm.clear();
      //type of allRooms: const std::map<int, std::unique_ptr<Room> >&
      const std::map<int, std::shared_ptr<Room> >& allRooms = _building->GetAllRooms();
-// <<<<<<< HEAD
 
-//      for(auto& pairRoom : allRooms) {
-// =======
+     // @todo f.mack Is it worth parallelizing this?
+     // @todo f.mack do we have to use subrooms?
 #pragma omp parallel for
      //for (auto &pairRoom : allRooms) {
      for (unsigned int i = 0; i < allRooms.size(); ++i) {
@@ -161,68 +164,90 @@ bool FFRouter::Init(Building* building)
 #endif
           auto pairRoomIt = allRooms.begin();
           std::advance(pairRoomIt, i);
-          LocalFloorfieldViaFM* ptrToNew = nullptr;
-          double tempDistance = 0.;
+          LocalFloorfieldViaFM *ptrToNew = nullptr;
           ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), building, 0.125, 0.125, 0.0, false);
+
+          printf("####### initializing room %d", pairRoomIt->first);
           //for (long int i = 0; i < ptrToNew)
           Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
 #pragma omp critical
           _locffviafm.insert(std::make_pair((*pairRoomIt).first, ptrToNew));
+     }
 
+#pragma omp parallel for
+     for (unsigned int i = 0; i < subroomAndCroTrVector.size(); ++i) {
+          auto rtIt = subroomAndCroTrVector.begin();
+          std::advance(rtIt, i);
           //SetDistances
-          vector<int> doorUIDs;
-          doorUIDs.clear();
-          for (int transI: (*pairRoomIt).second->GetAllTransitionsIDs()) {
-               if ( (_CroTrByUID.count(transI) != 0) && (_CroTrByUID[transI]->IsOpen()) ) {
-                    doorUIDs.emplace_back(transI);
-                    //Log->Write("Door UID: %d", transI);
-                    //Log->Write(_CroTrByUID[transI]->GetDescription());
-               }
-          }
+          //vector<int> doorUIDs;
+          //doorUIDs.clear();
+          //Room* room = _building->GetSubRoomByUID(rtIt->first);
+          //for (int transI: (*pairRoomIt).second->GetAllTransitionsIDs()) {
+          //for (int transI: room->GetAllTransitionsIDs())
+          //     if ( (_CroTrByUID.count(transI) != 0) && (_CroTrByUID[transI]->IsOpen()) ) {
+          //          doorUIDs.emplace_back(transI);
+          //          //Log->Write("Door UID: %d", transI);
+          //          //Log->Write(_CroTrByUID[transI]->GetDescription());
+          //     }
+          //}
 
-          for (auto &subI : (*pairRoomIt).second->GetAllSubRooms()) {
-               for (auto &crossI : subI.second->GetAllCrossings()) { //if clause checks so that only new doors get added
-                    if ((crossI->IsOpen()) &&
-                        (std::find(doorUIDs.begin(), doorUIDs.end(), crossI->GetUniqueID()) == doorUIDs.end())) {
-                         doorUIDs.emplace_back(crossI->GetUniqueID());
-                         //Log->Write("Crossing: %d", crossI->GetUniqueID());
-                         //Log->Write(crossI->GetDescription());
-                    }
-               }
-          }
-          //loop over upper triangular matrice (i,j) and write to (j,i) as well
-          std::vector<int>::const_iterator outerPtr;
-          std::vector<int>::const_iterator innerPtr;
-          Log->Write("INFO: \tFound %d Doors (Cross + Trans) in room %d", doorUIDs.size(), (*pairRoomIt).first);
-          for (outerPtr = doorUIDs.begin(); outerPtr != doorUIDs.end(); ++outerPtr) {
+          //for (auto &subI : (*pairRoomIt).second->GetAllSubRooms()) {
+          //     for (auto &crossI : subI.second->GetAllCrossings()) { //if clause checks so that only new doors get added
+          //          if ((crossI->IsOpen()) &&
+          //              (std::find(doorUIDs.begin(), doorUIDs.end(), crossI->GetUniqueID()) == doorUIDs.end())) {
+          //               doorUIDs.emplace_back(crossI->GetUniqueID());
+          //               //Log->Write("Crossing: %d", crossI->GetUniqueID());
+          //               //Log->Write(crossI->GetDescription());
+          //          }
+          //     }
+          //}
+
+          printf("#######INFO: \tCalculating floorfield in subroom %d for door %d", rtIt->first, rtIt->second);
+
+          ////loop over upper triangular matrice (i,j) and write to (j,i) as well
+          //std::vector<int>::const_iterator outerPtr;
+          //std::vector<int>::const_iterator innerPtr;
+          //Log->Write("INFO: \tFound %d Doors (Cross + Trans) in room %d", doorUIDs.size(), (*pairRoomIt).first);
+          //for (outerPtr = doorUIDs.begin(); outerPtr != doorUIDs.end(); ++outerPtr) {
+          for (auto outerPtr: _CroTrByUID) {
                //if the door is closed, then dont calc distances
-               if (!_CroTrByUID.at(*outerPtr)->IsOpen()) {
-                    continue;
-               }
-               // @todo: ar.graf: this following loop and the one directly wrapping this "for (outerPtr = ...)" could be
-               // moved out of the parallel for loop into a follow up part. There we could parallelize the most inner loop
-               // to achieve a better load balancing. You can have a look at DirectionStrategy.cpp at the DirectionLocalFloorfield::Init
-               // and take that scheme.
-               for (innerPtr = outerPtr; innerPtr != doorUIDs.end(); ++innerPtr) {
-                    //if outerdoor == innerdoor or the inner door is closed
-                    if ((*outerPtr == *innerPtr) || (!_CroTrByUID.at(*innerPtr)->IsOpen())) {
-                         continue;
-                    }
+               //if (!_CroTrByUID.at(*outerPtr)->IsOpen()) {
+               //     continue;
+               //}
+          //     // @todo: ar.graf: this following loop and the one directly wrapping this "for (outerPtr = ...)" could be
+          //     // moved out of the parallel for loop into a follow up part. There we could parallelize the most inner loop
+          //     // to achieve a better load balancing. You can have a look at DirectionStrategy.cpp at the DirectionLocalFloorfield::Init
+          //     // and take that scheme.
+          //     for (innerPtr = outerPtr; innerPtr != doorUIDs.end(); ++innerPtr) {
+          //          //if outerdoor == innerdoor or the inner door is closed
+          //          if ((*outerPtr == *innerPtr) || (!_CroTrByUID.at(*innerPtr)->IsOpen())) {
+          //               continue;
+          //          }
 
                     //if the two doors are not within the same subroom, do not consider (ar.graf)
                     //should fix problems of oscillation caused by doorgaps in the distancegraph
-                    int innerUID1 = (_CroTrByUID.at(*innerPtr)->GetSubRoom1()) ? _CroTrByUID.at(*innerPtr)->GetSubRoom1()->GetUID() : -1 ;
-                    int innerUID2 = (_CroTrByUID.at(*innerPtr)->GetSubRoom2()) ? _CroTrByUID.at(*innerPtr)->GetSubRoom2()->GetUID() : -2 ;
-                    int outerUID1 = (_CroTrByUID.at(*outerPtr)->GetSubRoom1()) ? _CroTrByUID.at(*outerPtr)->GetSubRoom1()->GetUID() : -3 ;
-                    int outerUID2 = (_CroTrByUID.at(*outerPtr)->GetSubRoom2()) ? _CroTrByUID.at(*outerPtr)->GetSubRoom2()->GetUID() : -4 ;
+               //     int innerUID1 = (_CroTrByUID.at(rtIt->second)->GetSubRoom1()) ? _CroTrByUID.at(rtIt->second)->GetSubRoom1()->GetUID() : -1 ;
+               //     int innerUID2 = (_CroTrByUID.at(rtIt->second)->GetSubRoom2()) ? _CroTrByUID.at(rtIt->second)->GetSubRoom2()->GetUID() : -2 ;
+               //     int outerUID1 = (_CroTrByUID.at(*outerPtr)->GetSubRoom1()) ? _CroTrByUID.at(*outerPtr)->GetSubRoom1()->GetUID() : -3 ;
+               //     int outerUID2 = (_CroTrByUID.at(*outerPtr)->GetSubRoom2()) ? _CroTrByUID.at(*outerPtr)->GetSubRoom2()->GetUID() : -4 ;
+
+               // @todo f.mack: check this
+               //int innerUID1 = _building->GetSubRoomByUID(rtIt->second) ? _CroTrByUID.at(rtIt->second)->GetSubRoom1()->GetUID() : -1 ;
+               //int innerUID2 = (_CroTrByUID.at(rtIt->second)->GetSubRoom2()) ? _CroTrByUID.at(rtIt->second)->GetSubRoom2()->GetUID() : -2 ;
+               int outerUID1 = (outerPtr.second->GetSubRoom1()) ? outerPtr.second->GetSubRoom1()->GetUID() : -3 ;
+               int outerUID2 = (outerPtr.second->GetSubRoom2()) ? outerPtr.second->GetSubRoom2()->GetUID() : -4 ;
+               int innerUID1 = rtIt->first;
+               int innerUID2 = rtIt->first;
 
                     if (
                          (innerUID1 != outerUID1) &&
                          (innerUID1 != outerUID2) &&
                          (innerUID2 != outerUID1) &&
                          (innerUID2 != outerUID2)      ) {
+                         printf("####### Ignoring way from %d to %d", rtIt->second, outerPtr.first);
                          continue;
                     }
+                    double tempDistance = 0.;
 
                     //The distance is checked by reading the timecost of a wave starting at the line(!) to reach a point(!)
                     //That will have the following implications:
@@ -235,8 +260,10 @@ bool FFRouter::Init(Building* building)
                     //question: if (a to c) > (a to b) + (b to c), then FloyedWarshall will favour intermediate goal b
                     //          as a precessor to c. This might be very important, if there are edges among lines, that
                     //          are not adjacent.
-                    tempDistance = ptrToNew->getCostToDestination(*outerPtr,
-                                                                  _CroTrByUID.at(*innerPtr)->GetCentre());
+          auto ptrToNew = _locffviafm[rtIt->first];
+                    //tempDistance = ptrToNew->getCostToDestination(*outerPtr,
+                    //                                              _CroTrByUID.at(*innerPtr)->GetCentre());
+          tempDistance = ptrToNew->getCostToDestination(rtIt->second, outerPtr.second->GetCentre());
 //                    Point endA = _CroTrByUID.at(*innerPtr)->GetCentre() * .9 +
 //                                 _CroTrByUID.at(*innerPtr)->GetPoint1() * .1;
 //                    Point endB = _CroTrByUID.at(*innerPtr)->GetCentre() * .9 +
@@ -261,13 +288,13 @@ bool FFRouter::Init(Building* building)
                          continue;
                     }
 //                    tempDistance = ptrToNew->getCostToDestination(*outerPtr, _CroTrByUID[*innerPtr]->GetCentre());
-                    std::pair<int, int> key_ij = std::make_pair(*outerPtr, *innerPtr);
-                    std::pair<int, int> key_ji = std::make_pair(*innerPtr, *outerPtr);
+                    std::pair<int, int> key_ij = std::make_pair(outerPtr.first, rtIt->second);
+                    std::pair<int, int> key_ji = std::make_pair(rtIt->second, outerPtr.first);
                     _distMatrix.erase(key_ij);
                     _distMatrix.erase(key_ji);
                     _distMatrix.insert(std::make_pair(key_ij, tempDistance));
                     _distMatrix.insert(std::make_pair(key_ji, tempDistance));
-               }
+               //}
           }
      }
      FloydWarshall();
