@@ -48,6 +48,8 @@
 #include <cfloat>
 #include <algorithm>
 #include "ffRouter.h"
+#include <omp.h>
+// @todo f.mack remove this include
 //#include "../geometry/Building.h"
 //#include "../pedestrian/Pedestrian.h"
 //#include "../IO/OutputHandler.h"
@@ -186,22 +188,22 @@ bool FFRouter::Init(Building* building)
          //Log->Write("####### added to _locffviafm");
      }
      Log->Write("####### initializing rooms done");
-     Log->Write("Contents of _sublocffviavm");
-     for (auto i:_sublocffviafm) {
-          Log->Write("%d\t%p", i.first, i.second);
-     }
-     Log->Write("Contents of subroomAndCroTrVector");
-     for (auto i: subroomAndCroTrVector) {
-          Log->Write("room: %d\t door: %d", i.first, i.second);
-     }
+     //Log->Write("Contents of _sublocffviavm");
+     //for (auto i:_sublocffviafm) {
+     //     Log->Write("%d\t%p", i.first, i.second);
+     //}
+     //Log->Write("Contents of subroomAndCroTrVector");
+     //for (auto i: subroomAndCroTrVector) {
+     //     Log->Write("room: %d\t door: %d", i.first, i.second);
+     //}
 
 #pragma omp parallel for
      for (unsigned int i = 0; i < subroomAndCroTrVector.size(); ++i) {
-          //Log->Write("##1");
+          if (i == 0) {
+               Log->Write("######in subroomAndCroTrVector loop: using %d threads", omp_get_num_threads());
+          }
           auto srctIt = subroomAndCroTrVector.begin();
-          //Log->Write("##2");
           std::advance(srctIt, i);
-          Log->Write("##3");
           //SetDistances
           //vector<int> doorUIDs;
           //doorUIDs.clear();
@@ -226,14 +228,18 @@ bool FFRouter::Init(Building* building)
           //     }
           //}
 
-          Log->Write("#######INFO: \tCalculating floorfield in subroom %d for door %d", srctIt->first, srctIt->second);
+          //Log->Write("#######INFO: \tCalculating floorfield in subroom %d for door %d", srctIt->first, srctIt->second);
 
           ////loop over upper triangular matrice (i,j) and write to (j,i) as well
           //std::vector<int>::const_iterator outerPtr;
           //std::vector<int>::const_iterator innerPtr;
           //Log->Write("INFO: \tFound %d Doors (Cross + Trans) in room %d", doorUIDs.size(), (*pairRoomIt).first);
           //for (outerPtr = doorUIDs.begin(); outerPtr != doorUIDs.end(); ++outerPtr) {
-          for (auto outerPtr: _CroTrByUID) {
+          //for (auto outerPtr: _CroTrByUID) {
+          for (auto outerPtr : subroomAndCroTrVector) {
+               if (outerPtr.first != srctIt->first) continue; // we only want doors with one subroom in common
+               if (outerPtr.second < srctIt->second) continue; // calculate every path only once
+               // @todo f.mack: if we exclude outerPtr.second == srctIt->second, the program loops forever
                //if the door is closed, then dont calc distances
                //if (!_CroTrByUID.at(*outerPtr)->IsOpen()) {
                //     continue;
@@ -254,7 +260,7 @@ bool FFRouter::Init(Building* building)
                //     int innerUID2 = (_CroTrByUID.at(srctIt->second)->GetSubRoom2()) ? _CroTrByUID.at(srctIt->second)->GetSubRoom2()->GetUID() : -2 ;
                //     int outerUID1 = (_CroTrByUID.at(*outerPtr)->GetSubRoom1()) ? _CroTrByUID.at(*outerPtr)->GetSubRoom1()->GetUID() : -3 ;
                //     int outerUID2 = (_CroTrByUID.at(*outerPtr)->GetSubRoom2()) ? _CroTrByUID.at(*outerPtr)->GetSubRoom2()->GetUID() : -4 ;
-
+/*
                // @todo f.mack: check this
                //int innerUID1 = _building->GetSubRoomByUID(srctIt->second) ? _CroTrByUID.at(srctIt->second)->GetSubRoom1()->GetUID() : -1 ;
                //int innerUID2 = (_CroTrByUID.at(srctIt->second)->GetSubRoom2()) ? _CroTrByUID.at(srctIt->second)->GetSubRoom2()->GetUID() : -2 ;
@@ -268,11 +274,10 @@ bool FFRouter::Init(Building* building)
                          (innerUID1 != outerUID2) &&
                          (innerUID2 != outerUID1) &&
                          (innerUID2 != outerUID2)      ) {
-                         printf("####### Ignoring way from %d to %d", srctIt->second, outerPtr.first);
+                         Log->Write("####### Ignoring way from %d to %d", srctIt->second, outerPtr.first);
                          continue;
                     }
-                    double tempDistance = 0.;
-
+*/
                     //The distance is checked by reading the timecost of a wave starting at the line(!) to reach a point(!)
                     //That will have the following implications:
                     //distance (a to b) can be different than distance (b ta a)
@@ -284,12 +289,15 @@ bool FFRouter::Init(Building* building)
                     //question: if (a to c) > (a to b) + (b to c), then FloyedWarshall will favour intermediate goal b
                     //          as a precessor to c. This might be very important, if there are edges among lines, that
                     //          are not adjacent.
-          auto ptrToNew = _sublocffviafm[srctIt->first];
-               Log->Write("for subroom %d is ptrToNew %p", srctIt->first, ptrToNew);
+               auto ptrToNew = _sublocffviafm[srctIt->first];
+               //Log->Write("for subroom %d is ptrToNew %p", srctIt->first, ptrToNew);
 
                     //tempDistance = ptrToNew->getCostToDestination(*outerPtr,
                     //                                              _CroTrByUID.at(*innerPtr)->GetCentre());
-          tempDistance = ptrToNew->getCostToDestination(srctIt->second, outerPtr.second->GetCentre());
+               Point dummy;
+               ptrToNew->getDirectionToUID(srctIt->second, 0, dummy); // initiates floorfield calculation // @todo f.mack necessary?
+               double tempDistance = ptrToNew->getCostToDestination(srctIt->second, _CroTrByUID.at(outerPtr.second)->GetCentre());
+               Log->Write("#######room %d: calculating distance from door %d to door %d", srctIt->first, srctIt->second, outerPtr.second);
 //                    Point endA = _CroTrByUID.at(*innerPtr)->GetCentre() * .9 +
 //                                 _CroTrByUID.at(*innerPtr)->GetPoint1() * .1;
 //                    Point endB = _CroTrByUID.at(*innerPtr)->GetCentre() * .9 +
@@ -314,8 +322,8 @@ bool FFRouter::Init(Building* building)
                          continue;
                     }
 //                    tempDistance = ptrToNew->getCostToDestination(*outerPtr, _CroTrByUID[*innerPtr]->GetCentre());
-                    std::pair<int, int> key_ij = std::make_pair(outerPtr.first, srctIt->second);
-                    std::pair<int, int> key_ji = std::make_pair(srctIt->second, outerPtr.first);
+                    std::pair<int, int> key_ij = std::make_pair(outerPtr.second, srctIt->second);
+                    std::pair<int, int> key_ji = std::make_pair(srctIt->second, outerPtr.second);
                     _distMatrix.erase(key_ij);
                     _distMatrix.erase(key_ji);
                     _distMatrix.insert(std::make_pair(key_ij, tempDistance));
