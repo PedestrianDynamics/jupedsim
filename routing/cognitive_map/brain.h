@@ -7,21 +7,28 @@
 class InternNavigationNetwork;
 
 using ptrIntNetwork = std::shared_ptr<InternNavigationNetwork>;
-using ptrEnvironment = std::shared_ptr<VisibleEnvironment>;
-using ptrPed = const Pedestrian*;
+using ptrEnv = std::shared_ptr<const VisibleEnvironment>;
+
+using ptrSubRoom = std::shared_ptr<const SubRoom>;
+using ptrIntNetworks = std::shared_ptr<const std::map<ptrSubRoom, ptrIntNetwork>>;
 
 class Brain
 {   
 
 public:
     Brain();
-    Brain(ptrPed ped, ptrEnvironment env, const std::map<const SubRoom*,ptrIntNetwork>& _roominternalNetworks);
+    Brain(ptrBuilding b,ptrPed ped, ptrEnv env, ptrIntNetworks roominternalNetworks);
+
+    CognitiveMap& GetCognitiveMap();
 
 private:
+    ptrBuilding _b;
     ptrPed _ped;
     CognitiveMap _cMap;
     //whole environment
-    ptrEnvironment _wholeEnvironment;
+    ptrEnv _wholeEnvironment;
+    // reference of roominternalNetwork
+    ptrIntNetworks _intNetworks;
 
 
 };

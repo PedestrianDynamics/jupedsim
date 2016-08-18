@@ -8,8 +8,8 @@ class Pedestrian;
 class Building;
 class VisibleEnvironment;
 
-using ptrBuilding = const Building*;
-using ptrPed = const Pedestrian*;
+using ptrBuilding = std::shared_ptr<const Building>;
+using ptrPed = std::shared_ptr<const Pedestrian>;
 using ptrEnv = std::shared_ptr<const VisibleEnvironment>;
 
 

@@ -40,8 +40,8 @@ class Building;
 //using SortedLandmarks = std::priority_queue<ptrLandmark,std::vector<ptrLandmark>,priorityCheck>;
 using Landmarks = std::vector<ptrLandmark>;
 using Regions = std::vector<ptrRegion>;
-using ptrBuilding = const Building*;
-using ptrPed = const Pedestrian*;
+using ptrBuilding = std::shared_ptr<const Building>;
+using ptrPed = std::shared_ptr<const Pedestrian>;
 using ptrGraphNetwork = std::shared_ptr<GraphNetwork>;
 using ptrOutputHandler = std::shared_ptr<CogMapOutputHandler>;
 

@@ -43,7 +43,7 @@ std::string RoomToFloorSensor::GetName() const
      return "RoomToFloorSensor";
 }
 
-void RoomToFloorSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitive_map) const
+void RoomToFloorSensor::execute(const Pedestrian * pedestrian, CognitiveMap &cognitive_map) const
 {
     // NavigationGraph::VerticesContainer * vertices = cognitive_map->GetAllVertices();
 
@@ -64,7 +64,7 @@ void RoomToFloorSensor::execute(const Pedestrian * pedestrian, CognitiveMap * co
     // }
 
     SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
-    GraphVertex * vertex = (*cognitive_map->GetGraphNetwork()->GetNavigationGraph())[sub_room];
+    GraphVertex * vertex = cognitive_map.GetGraphNetwork()->GetNavigationGraph()->operator [](sub_room);
     const GraphVertex::EdgesContainer * edges = vertex->GetAllOutEdges();
    for(GraphVertex::EdgesContainer::iterator it_edges = edges->begin(); it_edges != edges->end(); ++it_edges) {
         if((*it_edges)->GetDest() == nullptr || (*it_edges)->GetDest()->GetSubRoom()->GetType() == (*it_edges)->GetSrc()->GetSubRoom()->GetType()) {

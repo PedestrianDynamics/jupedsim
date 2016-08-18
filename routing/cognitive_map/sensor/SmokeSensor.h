@@ -44,7 +44,7 @@ public:
     virtual ~SmokeSensor();
 
     std::string GetName() const;
-    void execute(const Pedestrian *, CognitiveMap *) const;
+    void execute(const Pedestrian *, CognitiveMap&) const;
 
     void set_FMStorage(const std::shared_ptr<FireMeshStorage> fmStorage);
     const std::shared_ptr<FireMeshStorage> get_FMStorage();

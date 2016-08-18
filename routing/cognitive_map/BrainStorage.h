@@ -34,15 +34,14 @@
 #include <vector>
 #include "./cognitiveMap/cognitivemap.h"
 #include "./perception/visibleenvironment.h"
+#include "Brain.h"
 
 class Building;
 class Pedestrian;
-class Brain;
 class AbstractCognitiveMapCreator;
 class InternNavigationNetwork;
 
 
-using ptrIntNetwork = std::shared_ptr<InternNavigationNetwork>;
 typedef const Pedestrian * BStorageKeyType;
 typedef std::shared_ptr<Brain> BStorageValueType;
 typedef std::unordered_map<BStorageKeyType, BStorageValueType> BStorageType;
@@ -50,7 +49,7 @@ typedef std::unordered_map<BStorageKeyType, BStorageValueType> BStorageType;
 
 
 /**
- * @brief Cognitive Map Storage
+ * @brief Brain Storage
  *
  * Cares about Cognitive map storage, creation and delivery
  *
@@ -85,8 +84,8 @@ private:
 
 
      // internal graph network in every room (for locomotion purposes)
-     void InitInternalNetwork(const SubRoom* sub_room);
-     std::map<const SubRoom*,ptrIntNetwork> _roominternalNetworks;
+     void InitInternalNetwork(ptrSubRoom sub_room);
+     std::map<ptrSubRoom,ptrIntNetwork> _roominternalNetworks;
 
 };
 

@@ -27,7 +27,7 @@
  **/
 
 
-#include "CognitiveMapStorage.h"
+#include "BrainStorage.h"
 #include "AbstractCognitiveMapCreator.h"
 #include "EmptyCognitiveMapCreator.h"
 #include "CompleteCognitiveMapCreator.h"
@@ -55,7 +55,7 @@ BrainStorage::BrainStorage(const Building * const b, std::string cogMapStatus, s
     _visibleEnv=VisibleEnvironment(b);
 
     //internal graph networks in every subroom
-    for (auto it=_b->GetAllRooms().begin(); it!=_b->GetAllRooms().end(); ++it)
+    for (auto it=_building->GetAllRooms().begin(); it!=_building->GetAllRooms().end(); ++it)
     {
         for (auto it2=it->second->GetAllSubRooms().begin(); it2!=it->second->GetAllSubRooms().end(); ++it2)
         {
@@ -67,11 +67,8 @@ BrainStorage::BrainStorage(const Building * const b, std::string cogMapStatus, s
 BrainStorage::~BrainStorage()
 {
      delete creator;
-     for (auto it=cognitive_maps.begin(); it!=cognitive_maps.end(); ++it)
-     {
-        delete it->second;
-     }
-     cognitive_maps.clear();
+
+     _brains.clear();
 }
 
 BStorageValueType BrainStorage::operator[] (BStorageKeyType key)
@@ -90,7 +87,7 @@ BStorageValueType BrainStorage::operator[] (BStorageKeyType key)
      return _brains[key];
 }
 
-void CognitiveMapStorage::ParseCogMap(BStorageKeyType ped)
+void BrainStorage::ParseCogMap(BStorageKeyType ped)
 {
 
     _regions.clear();
@@ -292,16 +289,19 @@ void BrainStorage::CreateBrain(BStorageKeyType ped)
 
      //todo: the possibility to have more then one creator.
 
-     _brains.insert(std::make_pair(ped, std::make_shared<Brain>(ped,_visibleEnv,_roominternalNetworks)));//  creator->CreateCognitiveMap(ped)));
+     _brains.insert(std::make_pair(ped, std::make_shared<Brain>(std::shared_ptr<const Building>(_building),
+                                                                std::shared_ptr<const Pedestrian>(ped) ,
+                                                                std::shared_ptr<const VisibleEnvironment>(&_visibleEnv),
+                                                                std::shared_ptr<const std::map<std::shared_ptr<const SubRoom>,ptrIntNetwork>>(&_roominternalNetworks))));//  creator->CreateCognitiveMap(ped)));
      ParseCogMap(ped);
-     cognitive_maps[ped]->AddRegions(_regions);
-     cognitive_maps[ped]->InitLandmarkNetworksInRegions();
-     cognitive_maps[ped]->FindMainDestination();
+     _brains[ped]->GetCognitiveMap().AddRegions(_regions);
+     _brains[ped]->GetCognitiveMap().InitLandmarkNetworksInRegions();
+     _brains[ped]->GetCognitiveMap().FindMainDestination();
      //debug
      //cognitive_maps[ped]->GetNavigationGraph()->WriteToDotFile(building->GetProjectRootDir());
 }
 
-void BrainStorage::InitInternalNetwork(const SubRoom *sub_room)
+void BrainStorage::InitInternalNetwork(ptrSubRoom sub_room)
 {
 
     _roominternalNetworks.emplace(sub_room,std::make_shared<InternNavigationNetwork>(sub_room));

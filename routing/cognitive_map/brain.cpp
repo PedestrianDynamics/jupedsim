@@ -5,12 +5,18 @@ Brain::Brain()
 
 }
 
-Brain::Brain(ptrPed ped, ptrEnvironment env, const std::map<const SubRoom *, ptrIntNetwork>& _roominternalNetworks)
+Brain::Brain(ptrBuilding b, ptrPed ped, ptrEnv env, ptrIntNetworks roominternalNetworks)
 {
-
+    _b=b;
+    _ped=ped;
+    _wholeEnvironment=env;
+    _intNetworks=roominternalNetworks;
+    _cMap=CognitiveMap(_b,_ped);
 }
 
-Brain::Brain(ptrPed ped, ptrEnvironment env)
+CognitiveMap &Brain::GetCognitiveMap()
 {
-
+    return _cMap;
 }
+
+

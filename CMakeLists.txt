@@ -305,7 +305,7 @@ set(source_files
   routing/CognitiveMapRouter.cpp
   routing/cognitive_map/GraphNetwork.cpp
   routing/cognitive_map/NavigationGraph.cpp
-  routing/cognitive_map/CognitiveMapStorage.cpp
+  routing/cognitive_map/BrainStorage.cpp
   routing/cognitive_map/AbstractCognitiveMapCreator.cpp
   routing/cognitive_map/CompleteCognitiveMapCreator.cpp
   routing/cognitive_map/EmptyCognitiveMapCreator.cpp
@@ -333,7 +333,7 @@ set(source_files
 
   routing/cognitive_map/perception/perception.cpp
   routing/cognitive_map/perception/visibleenvironment.cpp
-  routing/cognitive_map/brain.cpp
+  routing/cognitive_map/Brain.cpp
 
   routing/cognitive_map/cognitiveMap/InternNavigationNetwork.cpp
 
@@ -376,7 +376,7 @@ set(header_files
   routing/CognitiveMapRouter.h
   routing/cognitive_map/GraphNetwork.h
   routing/cognitive_map/NavigationGraph.h
-  routing/cognitive_map/CognitiveMapStorage.h
+  routing/cognitive_map/BrainStorage.h
   routing/cognitive_map/AbstractCognitiveMapCreator.h
   routing/cognitive_map/CompleteCognitiveMapCreator.h
   routing/cognitive_map/EmptyCognitiveMapCreator.h
@@ -404,7 +404,7 @@ set(header_files
 
   routing/cognitive_map/perception/perception.h
   routing/cognitive_map/perception/visibleenvironment.h
-  routing/cognitive_map/brain.h
+  routing/cognitive_map/Brain.h
 
   routing/cognitive_map/cognitiveMap/InternNavigationNetwork.h
 

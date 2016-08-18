@@ -35,6 +35,7 @@
 #include "../../geometry/Building.h"
 #include "../../geometry/Crossing.h"
 #include "../../geometry/Transition.h"
+#include "../../pedestrian/Pedestrian.h"
 
 CompleteCognitiveMapCreator::~CompleteCognitiveMapCreator()
 {
@@ -42,7 +43,7 @@ CompleteCognitiveMapCreator::~CompleteCognitiveMapCreator()
 
 CognitiveMap * CompleteCognitiveMapCreator::CreateCognitiveMap(const Pedestrian * ped)
 {
-     CognitiveMap * cm = new CognitiveMap(_building, ped);
+     CognitiveMap * cm = new CognitiveMap(std::shared_ptr<const Building>(_building), std::shared_ptr<const Pedestrian>(ped));
 
      //adding all SubRooms as Vertex
      for(auto&& itr_room: _building->GetAllRooms())

@@ -40,7 +40,7 @@ public:
      virtual ~RoomToFloorSensor();
 
      std::string GetName() const;
-     void execute(const Pedestrian *, CognitiveMap *) const;
+     void execute(const Pedestrian *, CognitiveMap&) const;
 private:
 
 };

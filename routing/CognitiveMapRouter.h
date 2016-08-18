@@ -36,7 +36,7 @@
 
 class Building;
 class Router;
-class CognitiveMapStorage;
+class BrainStorage;
 class SensorManager;
 class NavLine;
 
@@ -78,7 +78,7 @@ protected:
 private:
 
      Building * building;
-     CognitiveMapStorage * cm_storage;
+     BrainStorage * brain_storage;
      SensorManager * sensor_manager;
 
      // Optional options which are supposed to be used

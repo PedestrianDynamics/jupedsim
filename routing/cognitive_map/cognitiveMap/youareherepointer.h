@@ -3,7 +3,7 @@
 
 #include "../../../geometry/Point.h"
 class Pedestrian;
-using ptrPed = const Pedestrian*;
+using ptrPed = std::shared_ptr<const Pedestrian>;
 
 
 // Ellipse representing the approximative position of a pedestrian in his cognitive map

@@ -1,4 +1,5 @@
 #include "internnavigationnetwork.h"
+
 #include <boost/geometry.hpp>
 
 InternNavigationNetwork::InternNavigationNetwork()
@@ -6,7 +7,7 @@ InternNavigationNetwork::InternNavigationNetwork()
     _graph=Graph();
 }
 
-InternNavigationNetwork::InternNavigationNetwork(const SubRoom *subRoom)
+InternNavigationNetwork::InternNavigationNetwork(ptrSubRoom subRoom)
 {
     _graph=Graph();
 
@@ -106,15 +107,15 @@ void InternNavigationNetwork::EstablishConnections()
         boost::geometry::append(currentRoom,point);
     }
     //building lines from center points of the navlines and check if those lines intersect the polygon representing the current room
-    for (size_t i=0; i<_navLines.size(); ++i)
+    for (auto &it:_navLines)
     {
-        for (size_t j=0; j<_navLines.size(); ++j)
+        for (auto &it2:_navLines)
         {
-            if (_navLines[i].first!=_navLines[j].first)
+            if (it.first!=it2.first)
             {
-                if (!LineIntersectsPolygon(std::make_pair<Point,Point>(_navLines[i].first->GetCentre(),_navLines[j].first->GetCentre()),currentRoom))
+                if (!LineIntersectsPolygon(std::make_pair<const Point&,const Point&>(it.first->GetCentre(),it2.first->GetCentre()),currentRoom))
                 {
-                   AddEdge(_navLines[i].first,_navLines[j].first);
+                   AddEdge(it.first,it2.first);
                 }
             }
         }
@@ -123,7 +124,7 @@ void InternNavigationNetwork::EstablishConnections()
 
 }
 
-bool InternNavigationNetwork::LineIntersectsPolygon(const std::pair<Point, Point> &line, const boost::geometry::model::polygon<Point> &polygon)
+bool InternNavigationNetwork::LineIntersectsPolygon(const std::pair<const Point&, const Point&> &line, const boost::geometry::model::polygon<Point> &polygon)
 {
     typedef boost::geometry::model::linestring<Point> Linestring;
 

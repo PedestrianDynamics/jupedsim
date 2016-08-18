@@ -44,10 +44,10 @@ using namespace std;
  * Constructors & Destructors
  */
 
-GraphNetwork::GraphNetwork(const Building * buildg, const Pedestrian * ped)
+GraphNetwork::GraphNetwork(ptrBuilding buildg, ptrPed ped)
      : building(buildg), pedestrian(ped)
 {
-     navigation_graph = new NavigationGraph(buildg);
+     navigation_graph = new NavigationGraph(buildg.get());
 
 }
 
