@@ -200,7 +200,7 @@ bool FFRouter::Init(Building* building)
 #pragma omp parallel for
      for (unsigned int i = 0; i < subroomAndCroTrVector.size(); ++i) {
           if (i == 0) {
-               Log->Write("######in subroomAndCroTrVector loop: using %d threads", omp_get_num_threads());
+               //Log->Write("###### in subroomAndCroTrVector loop: using %d threads", omp_get_num_threads());
           }
           auto srctIt = subroomAndCroTrVector.begin();
           std::advance(srctIt, i);

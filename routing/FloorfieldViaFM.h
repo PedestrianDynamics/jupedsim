@@ -36,6 +36,7 @@
 #define FLOORFIELDVIAFM_H
 
 #include <vector>
+#include <unordered_set>
 #include <cmath>
 #include <functional>
 #include "mesh/RectGrid.h"
@@ -163,6 +164,8 @@ protected:
      std::map<int, Point*>  goalneggradmap;
      std::map<int, double*> costmap;
      std::map<int, Point*>  neggradmap;
+     std::unordered_set<int>  floorfieldsBeingCalculated;
+     bool maps_deleted = false; // @todo f.mack remove
 
      double threshold;
      bool useDistanceToWall;
