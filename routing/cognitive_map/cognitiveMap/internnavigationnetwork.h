@@ -13,6 +13,9 @@
 typedef boost::adjacency_list<boost::listS, boost::vecS, boost::directedS,
                        boost::no_property, boost::property<boost::edge_weight_t, double> > Graph;
 typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
+typedef boost::geometry::model::polygon<Point> BoostPolygon;
+
+
 typedef std::pair<Vertex, Vertex> Edge;
 typedef double Weight;
 typedef std::vector<Edge> Edges;
@@ -32,7 +35,7 @@ public:
     // used if each of the navline is visible from the position of the other.
     //void RemoveEdge(ptrNavLine navLine1, ptrNavLine navLine2);
 
-    ptrNavLine GetNextNavLineOnShortestPathToTarget(ptrNavLine start, ptrNavLine target);
+    ptrNavLine GetNextNavLineOnShortestPathToTarget(const Point& pos, ptrNavLine target);
 
     //Create edges (connection (edge) will be established if two vertices are visible from each other
     void EstablishConnections();
@@ -44,6 +47,8 @@ private:
     std::list<std::pair<ptrNavLine,Vertex>> _navLines; //vertices
     std::list<std::pair<Edge,Weight>> _connections; //edges; Weight equals length
     ptrSubRoom _subRoom;
+    // current Subroom as boost polygon
+    BoostPolygon _currentRoom;
 
     bool LineIntersectsPolygon(const std::pair<const Point&, const Point&> &line, const boost::geometry::model::polygon<Point> &polygon);
 

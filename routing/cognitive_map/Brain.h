@@ -10,7 +10,7 @@ using ptrIntNetwork = std::shared_ptr<InternNavigationNetwork>;
 using ptrEnv = std::shared_ptr<const VisibleEnvironment>;
 
 using ptrSubRoom = std::shared_ptr<const SubRoom>;
-using ptrIntNetworks = std::shared_ptr<const std::map<ptrSubRoom, ptrIntNetwork>>;
+using ptrIntNetworks = std::shared_ptr<std::map<ptrSubRoom, ptrIntNetwork>>;
 
 class Brain
 {   
@@ -21,6 +21,8 @@ public:
 
     CognitiveMap& GetCognitiveMap();
 
+    const NavLine* GetNextNavLine(const NavLine *nextTarget);
+
 private:
     ptrBuilding _b;
     ptrPed _ped;
@@ -29,6 +31,7 @@ private:
     ptrEnv _wholeEnvironment;
     // reference of roominternalNetwork
     ptrIntNetworks _intNetworks;
+    ptrIntNetwork _currentIntNetwork;
 
 
 };

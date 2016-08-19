@@ -137,6 +137,7 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
             }
         }
 
+
         //if we still could not found any destination we are lost! Pedestrian will be deleted
         //no destination should just appear in bug case or closed rooms.
         if(destination == nullptr) {
@@ -147,9 +148,13 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
         (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->AddDestination(destination);
         sensor_manager->execute(p, SensorManager::NEW_DESTINATION);
 
+        const Crossing* nextTarget = destination->GetCrossing();
+
+        const NavLine* nextNavLine=(*brain_storage)[p]->GetNextNavLine(nextTarget);
+
         //setting crossing to ped
-        p->SetExitLine(destination->GetCrossing());
-        p->SetExitIndex(destination->GetCrossing()->GetUniqueID());
+        p->SetExitLine(nextNavLine);
+        p->SetExitIndex(nextNavLine->GetUniqueID());
 
         return 1;
 }
@@ -160,6 +165,8 @@ bool CognitiveMapRouter::Init(Building * b)
 {
      Log->Write("INFO:\tInit the Cognitive Map Router Engine");
      building = b;
+
+     LoadRoutingInfos(GetRoutingInfoFile());
 
      //Init Cognitive Map Storage, second parameter: decides whether cognitive Map is empty or complete
      if (getOptions().find("CognitiveMapFiles")==getOptions().end())
@@ -186,4 +193,123 @@ void CognitiveMapRouter::addOption(const std::string &key, const std::vector<std
 {
     options.insert(std::make_pair(key, value));
 }
+
+bool CognitiveMapRouter::LoadRoutingInfos(const std::string &filename)
+{
+    if(filename=="") return true;
+
+    Log->Write("INFO:\tLoading extra routing information for the global/quickest path router");
+    Log->Write("INFO:\t  from the file "+filename);
+
+    TiXmlDocument docRouting(filename);
+    if (!docRouting.LoadFile()) {
+         Log->Write("ERROR: \t%s", docRouting.ErrorDesc());
+         Log->Write("ERROR: \t could not parse the routing file [%s]",filename.c_str());
+         return false;
+    }
+
+    TiXmlElement* xRootNode = docRouting.RootElement();
+    if( ! xRootNode ) {
+         Log->Write("ERROR:\tRoot element does not exist");
+         return false;
+    }
+
+    if( xRootNode->ValueStr () != "routing" ) {
+         Log->Write("ERROR:\tRoot element value is not 'routing'.");
+         return false;
+    }
+
+    string  version = xRootNode->Attribute("version");
+    if (version < JPS_OLD_VERSION) {
+         Log->Write("ERROR: \tOnly version greater than %d supported",JPS_OLD_VERSION);
+         Log->Write("ERROR: \tparsing routing file failed!");
+         return false;
+    }
+    int HlineCount = 0;
+    for(TiXmlElement* xHlinesNode = xRootNode->FirstChildElement("Hlines"); xHlinesNode;
+              xHlinesNode = xHlinesNode->NextSiblingElement("Hlines")) {
+
+
+         for(TiXmlElement* hline = xHlinesNode->FirstChildElement("Hline"); hline;
+                   hline = hline->NextSiblingElement("Hline")) {
+
+              double id = xmltof(hline->Attribute("id"), -1);
+              int room_id = xmltoi(hline->Attribute("room_id"), -1);
+              int subroom_id = xmltoi(hline->Attribute("subroom_id"), -1);
+
+              double x1 = xmltof(     hline->FirstChildElement("vertex")->Attribute("px"));
+              double y1 = xmltof(     hline->FirstChildElement("vertex")->Attribute("py"));
+              double x2 = xmltof(     hline->LastChild("vertex")->ToElement()->Attribute("px"));
+              double y2 = xmltof(     hline->LastChild("vertex")->ToElement()->Attribute("py"));
+
+              Room* room = building->GetRoom(room_id);
+              SubRoom* subroom = room->GetSubRoom(subroom_id);
+
+              //new implementation
+              Hline* h = new Hline();
+              h->SetID(id);
+              h->SetPoint1(Point(x1, y1));
+              h->SetPoint2(Point(x2, y2));
+              h->SetRoom1(room);
+              h->SetSubRoom1(subroom);
+
+              if(building->AddHline(h))
+              {
+                   subroom->AddHline(h);
+                   HlineCount++;
+                   //h is freed in building
+              }
+              else
+              {
+                   delete h;
+              }
+         }
+    }
+    Log->Write("INFO:\tDone with loading extra routing information. Loaded <%d> Hlines", HlineCount);
+    return true;
+}
+
+std::string CognitiveMapRouter::GetRoutingInfoFile()
+{
+
+    TiXmlDocument doc(building->GetProjectFilename());
+    if (!doc.LoadFile()) {
+         Log->Write("ERROR: \t%s", doc.ErrorDesc());
+         Log->Write("ERROR: \t GlobalRouter: could not parse the project file");
+         return "";
+    }
+
+    // everything is fine. proceed with parsing
+    TiXmlElement* xMainNode = doc.RootElement();
+    TiXmlNode* xRouters=xMainNode->FirstChild("route_choice_models");
+    string nav_line_file="";
+
+    for(TiXmlElement* e = xRouters->FirstChildElement("router"); e;
+              e = e->NextSiblingElement("router"))
+    {
+
+         string strategy=e->Attribute("description");
+
+         if(strategy=="cognitive map")
+         {
+              if(e->FirstChild("parameters"))
+              {
+                   if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
+                        nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
+              }
+         }
+    }
+
+    if (nav_line_file == "")
+         return nav_line_file;
+    else
+         return building->GetProjectRootDir()+nav_line_file;
+}
+
+
+
+
+
+
+
 

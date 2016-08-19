@@ -71,6 +71,17 @@ public:
       */
      void addOption(const std::string &key, const std::vector<std::string> &value);
 
+     /**
+      * Load extra routing information e.g navigation lines
+      */
+     bool LoadRoutingInfos(const std::string &filename);
+
+     /**
+      * Each router is responsible of getting the correct filename
+      * and doing other initializations
+      */
+     virtual std::string GetRoutingInfoFile();
+
 protected:
 
     int FindDestination(Pedestrian * );

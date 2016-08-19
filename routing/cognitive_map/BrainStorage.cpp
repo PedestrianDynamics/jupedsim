@@ -292,7 +292,7 @@ void BrainStorage::CreateBrain(BStorageKeyType ped)
      _brains.insert(std::make_pair(ped, std::make_shared<Brain>(std::shared_ptr<const Building>(_building),
                                                                 std::shared_ptr<const Pedestrian>(ped) ,
                                                                 std::shared_ptr<const VisibleEnvironment>(&_visibleEnv),
-                                                                std::shared_ptr<const std::map<std::shared_ptr<const SubRoom>,ptrIntNetwork>>(&_roominternalNetworks))));//  creator->CreateCognitiveMap(ped)));
+                                                                std::shared_ptr<std::map<std::shared_ptr<const SubRoom>,ptrIntNetwork>>(&_roominternalNetworks))));//  creator->CreateCognitiveMap(ped)));
      ParseCogMap(ped);
      _brains[ped]->GetCognitiveMap().AddRegions(_regions);
      _brains[ped]->GetCognitiveMap().InitLandmarkNetworksInRegions();
