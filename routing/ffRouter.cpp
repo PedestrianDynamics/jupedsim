@@ -180,7 +180,7 @@ bool FFRouter::Init(Building* building)
           SubLocalFloorfieldViaFM *ptrToNew = nullptr;
           ptrToNew = new SubLocalFloorfieldViaFM((*pairSubroomIt).second.get(), building, 0.125, 0.125, 0.0, false);
 
-          Log->Write("####### initializing room %d", pairSubroomIt->first);
+          //Log->Write("####### initializing room %d", pairSubroomIt->first);
           //for (long int i = 0; i < ptrToNew)
           //Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairSubroomIt).first);
 #pragma omp critical
@@ -297,7 +297,7 @@ bool FFRouter::Init(Building* building)
                Point dummy;
                ptrToNew->getDirectionToUID(srctIt->second, 0, dummy); // initiates floorfield calculation // @todo f.mack necessary?
                double tempDistance = ptrToNew->getCostToDestination(srctIt->second, _CroTrByUID.at(outerPtr.second)->GetCentre());
-               Log->Write("#######room %d: calculating distance from door %d to door %d", srctIt->first, srctIt->second, outerPtr.second);
+               //Log->Write("#######room %d: calculating distance from door %d to door %d", srctIt->first, srctIt->second, outerPtr.second);
 //                    Point endA = _CroTrByUID.at(*innerPtr)->GetCentre() * .9 +
 //                                 _CroTrByUID.at(*innerPtr)->GetPoint1() * .1;
 //                    Point endB = _CroTrByUID.at(*innerPtr)->GetCentre() * .9 +
@@ -664,7 +664,11 @@ int FFRouter::FindExit(Pedestrian* p)
      for(int finalDoor : validFinalDoor) {
           //with UIDs, we can ask for shortest path
           for (int doorUID : DoorUIDsOfRoom) {
-               double locDistToDoor = _locffviafm[p->GetRoomID()]->getCostToDestination(doorUID, p->GetPos());
+               // @todo f.mack: This only works if _targetWithinSubroom. If this is not the case, we would have to initialize and calculate the _locffviafm for this room.
+               double locDistToDoor = _sublocffviafm[p->GetSubRoomUID()]->getCostToDestination(doorUID, p->GetPos());
+               if (p->GetSubRoomUID() != 14) {
+                    //Log->Write("####### ped %d, subroomID %d, distance to crossingID %d is %f", p->GetID(), p->GetSubRoomID(), _CroTrByUID[doorUID]->GetID(), locDistToDoor);
+               }
                if (locDistToDoor < -J_EPS) {     //this can happen, if the point is not reachable and therefore has init val -7
                     continue;
                }
