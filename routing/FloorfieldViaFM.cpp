@@ -324,16 +324,17 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 direction._x = direction._y = 0.;
                 //return;
             } else {
-#pragma omp critical
-                neggradmap.emplace(destID, nullptr);
-#pragma omp critical
-                costmap.emplace(destID, nullptr);
+//#pragma omp critical
+                //neggradmap.emplace(destID, nullptr);
+//#pragma omp critical
+                //costmap.emplace(destID, nullptr);
+                // @todo f.mack I removed the two lines above -- this shouldn't do any harm
             }
         }
         localneggradptr = (neggradmap.count(destID) == 0) ? nullptr : neggradmap.at(destID); //will fail if above if-clause was entered
         localcostptr = (costmap.count(destID) == 0) ? nullptr : costmap.at(destID);
         if (localneggradptr == nullptr) { //@todo: ar.graf : check here if other thread has started calc of same ff
-            Log->Write("###### Calculating new Floorfield");
+            Log->Write("###### key %d wants to calculate new Floorfield to destID %d", key, destID);
             bool isBeingCalculated;
 #pragma omp critical
             {
@@ -342,7 +343,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 }
             }
             if (isBeingCalculated) {
-                Log->Write("####### it's already being calculated");
+                Log->Write("####### ff to destID %d is already being calculated", destID);
                 // we do not want to wait until the other calculation has finished, so we return immediately
                 // the values are corrected in getDirectionToDestination(), and getCostToDestination doesn't care about the direction
                 direction._x = DBL_MAX;
@@ -350,7 +351,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 return;
             }
             // @todo f.mack: Sometimes, 2 peds in the same subroom with the same destID both calculate the Floorfield, but I have no idea why.
-            Log->Write("####### I start calculating it");
+            Log->Write("####### ped with key %d started calculating ff to destID %d", key, destID);
 
                 //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)
                 localcostptr =    new double[grid->GetnPoints()];
@@ -363,13 +364,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 costmap.erase(destID);
 #pragma omp critical
                 costmap.emplace(destID, localcostptr);
-#pragma omp critical
-            {
-                if (floorfieldsBeingCalculated.count(destID) != 1) {
-                    Log->Write("ERROR: FloorfieldViaFM::getDirectionToUID: I was calculating FF for destID %d, but it was removed from floorfieldsBeingCalculated meanwhile", destID);
-                }
-                floorfieldsBeingCalculated.erase(destID);
-            }
+
 
                 //create ff (prepare Trial-mechanic, then calc)
 //                for (long int i = 0; i < grid->GetnPoints(); ++i) {
@@ -385,6 +380,13 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 //Log->Write("Starting FF for UID %d", destID);
                 //std::cerr << "\rW\tO\tR\tK\tI\tN\tG";
                 calculateFloorfield(localline, localcostptr, localneggradptr);
+#pragma omp critical
+            {
+                if (floorfieldsBeingCalculated.count(destID) != 1) {
+                    Log->Write("ERROR: FloorfieldViaFM::getDirectionToUID: key %d was calculating FF for destID %d, but it was removed from floorfieldsBeingCalculated meanwhile", key, destID);
+                }
+                floorfieldsBeingCalculated.erase(destID);
+            }
                 //Log->Write("Ending   FF for UID %d", destID);
                 //std::cerr << "\r W\t O\t R\t K\t I\t N\t G";
         }
