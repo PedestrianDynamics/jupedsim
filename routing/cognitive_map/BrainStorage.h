@@ -84,8 +84,8 @@ private:
 
 
      // internal graph network in every room (for locomotion purposes)
-     void InitInternalNetwork(std::shared_ptr<const SubRoom> sub_room);
-     std::unordered_map<std::shared_ptr<const SubRoom>,ptrIntNetwork> _roominternalNetworks;
+     void InitInternalNetwork(const SubRoom *sub_room);
+     std::unordered_map<const SubRoom*,ptrIntNetwork> _roominternalNetworks;
 
 };
 

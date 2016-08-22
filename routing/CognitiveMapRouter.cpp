@@ -145,21 +145,21 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
             return -1;
         }
 
-//        (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->AddDestination(destination);
-//        sensor_manager->execute(p, SensorManager::NEW_DESTINATION);
+        (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->AddDestination(destination);
+        sensor_manager->execute(p, SensorManager::NEW_DESTINATION);
 
-//        const Crossing* nextTarget = destination->GetCrossing();
+        const Crossing* nextTarget = destination->GetCrossing();
 
-//        const NavLine* nextNavLine=(*brain_storage)[p]->GetNextNavLine(nextTarget);
+        const NavLine* nextNavLine=(*brain_storage)[p]->GetNextNavLine(nextTarget);
 
-//        if (nextNavLine==nullptr)
-//            Log->Write("ERROR: \t No visible next subtarget found");
+        if (nextNavLine==nullptr)
+            Log->Write("ERROR: \t No visible next subtarget found");
 
         //setting crossing to ped
-        //p->SetExitLine(nextNavLine);
-        //p->SetExitIndex(nextNavLine->GetUniqueID());
-        p->SetExitLine(destination->GetCrossing());
-        p->SetExitIndex(destination->GetCrossing()->GetUniqueID());
+        p->SetExitLine(nextNavLine);
+        p->SetExitIndex(nextNavLine->GetUniqueID());
+        //p->SetExitLine(destination->GetCrossing());
+        //p->SetExitIndex(destination->GetCrossing()->GetUniqueID());
 
 
         return 1;
@@ -296,7 +296,7 @@ std::string CognitiveMapRouter::GetRoutingInfoFile()
 
          string strategy=e->Attribute("description");
 
-         if(strategy=="cognitive map")
+         if(strategy=="cognitive_map")
          {
               if(e->FirstChild("parameters"))
               {

@@ -14,6 +14,7 @@ typedef boost::adjacency_list<boost::listS, boost::vecS, boost::directedS,
                        boost::no_property, boost::property<boost::edge_weight_t, double> > Graph;
 typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
 typedef boost::geometry::model::polygon<Point> BoostPolygon;
+typedef boost::geometry::model::linestring<Point> Linestring;
 
 
 typedef std::pair<Vertex, Vertex> Edge;
@@ -26,7 +27,7 @@ class InternNavigationNetwork
 {
 public:
     InternNavigationNetwork();
-    InternNavigationNetwork(std::shared_ptr<const SubRoom> subRoom);
+    InternNavigationNetwork(const SubRoom* subRoom);
 
     void AddVertex(const NavLine* navLine);  // add navline (crossing / transition or HLine)
     //void RemoveVertex(ptrNavLine navLine);
@@ -45,11 +46,11 @@ private:
     Graph _graph;
     std::list<std::pair<const NavLine*,Vertex>> _navLines; //vertices
     std::list<std::pair<Edge,Weight>> _connections; //edges; Weight equals length
-    std::shared_ptr<const SubRoom> _subRoom;
+    const SubRoom* _subRoom;
     // current Subroom as boost polygon
-    BoostPolygon _currentRoom;
+    std::vector<Linestring> _currentRoom;
 
-    bool LineIntersectsPolygon(const std::pair<const Point&, const Point&> &line, const boost::geometry::model::polygon<Point> &polygon);
+    bool LineIntersectsWalls(const std::pair<const Point&, const Point&> &line, const std::vector<Linestring> &walls);
 
 
 

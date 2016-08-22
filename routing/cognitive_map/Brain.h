@@ -15,7 +15,7 @@ class Brain
 
 public:
     Brain();
-    Brain(const Building* b,const Pedestrian* ped, const VisibleEnvironment* env, std::unordered_map<std::shared_ptr<const SubRoom>, ptrIntNetwork>* roominternalNetworks);
+    Brain(const Building* b,const Pedestrian* ped, const VisibleEnvironment* env, std::unordered_map<const SubRoom*, ptrIntNetwork>* roominternalNetworks);
 
     CognitiveMap& GetCognitiveMap();
 
@@ -28,7 +28,7 @@ private:
     //whole environment
     const VisibleEnvironment* _wholeEnvironment;
     // reference of roominternalNetwork
-    std::unordered_map<std::shared_ptr<const SubRoom>, ptrIntNetwork>* _intNetworks;
+    std::unordered_map<const SubRoom*, ptrIntNetwork>* _intNetworks;
     InternNavigationNetwork _currentIntNetwork;
 
 

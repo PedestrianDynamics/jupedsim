@@ -10,15 +10,19 @@ InternNavigationNetwork::InternNavigationNetwork()
     _graph=Graph();
 }
 
-InternNavigationNetwork::InternNavigationNetwork(std::shared_ptr<const SubRoom> subRoom)
+InternNavigationNetwork::InternNavigationNetwork(const SubRoom *subRoom)
 {
     _graph=Graph();
 
     _subRoom=subRoom;
 
-    for (Point point:_subRoom->GetPolygon())
+    for (Wall wall:_subRoom->GetAllWalls())
     {
-        boost::geometry::append(_currentRoom,point);
+        Linestring lineS;
+        boost::geometry::append(lineS,wall.GetPoint1());
+        boost::geometry::append(lineS,wall.GetPoint2());
+        _currentRoom.push_back(lineS);
+
     }
 }
 
@@ -74,7 +78,7 @@ const NavLine *InternNavigationNetwork::GetNextNavLineOnShortestPathToTarget(con
     //building lines from center points of the navlines and pos and check if those lines intersect the polygon representing the current room
     for (auto &it:_navLines)
     {
-        if (!LineIntersectsPolygon(std::make_pair<const Point&,const Point&>(it.first->GetCentre(),pos),_currentRoom))
+        if (!LineIntersectsWalls(std::make_pair<const Point&,const Point&>(it.first->GetCentre(),pos),_currentRoom))
         {
             //vector between navLines
             Point vector = pos-target->GetCentre();
@@ -94,6 +98,7 @@ const NavLine *InternNavigationNetwork::GetNextNavLineOnShortestPathToTarget(con
         if (it->first==target)
         {
             targetVertex=it->second;
+            break;
         }
     }
 
@@ -102,9 +107,9 @@ const NavLine *InternNavigationNetwork::GetNextNavLineOnShortestPathToTarget(con
 
     // determine shortest path to target
     std::vector<Vertex> pMap(boost::num_vertices(_graph));
-    boost::dijkstra_shortest_paths(_graph, v, boost::predecessor_map(&pMap[0]));
+    boost::dijkstra_shortest_paths(_graph, targetVertex, boost::predecessor_map(&pMap[0]));
     // next vertex on shortest path:
-    Vertex predecessor = pMap[targetVertex];
+    Vertex predecessor = pMap[v];
 
 
     //remove pos from graph network
@@ -130,29 +135,37 @@ void InternNavigationNetwork::EstablishConnections()
     // Check which navlines have (vice-versa) visible connectivity
 
     //building lines from center points of the navlines and check if those lines intersect the polygon representing the current room
-    for (auto &it:_navLines)
+    for (auto it=_navLines.begin(); it!=_navLines.end();++it)
     {
-        for (auto &it2:_navLines)
+        auto it2=it;
+        it2++;
+        for (; it2!=_navLines.end(); ++it2)
         {
-            if (it.first!=it2.first)
+            if (it->first!=it2->first)
             {
-                if (!LineIntersectsPolygon(std::make_pair<const Point&,const Point&>(it.first->GetCentre(),it2.first->GetCentre()),_currentRoom))
+                if (!LineIntersectsWalls(std::make_pair<const Point&,const Point&>(it->first->GetCentre(),it2->first->GetCentre()),_currentRoom))
                 {
-                   AddEdge(it.first,it2.first);
+                   AddEdge(it->first,it2->first);
                 }
             }
         }
     }
 }
 
-bool InternNavigationNetwork::LineIntersectsPolygon(const std::pair<const Point&, const Point&> &line, const boost::geometry::model::polygon<Point> &polygon)
+bool InternNavigationNetwork::LineIntersectsWalls(const std::pair<const Point&, const Point&> &line, const std::vector<Linestring> &walls)
 {
-    typedef boost::geometry::model::linestring<Point> Linestring;
+
 
     Linestring lineS;
     boost::geometry::append(lineS,line.first);
     boost::geometry::append(lineS,line.second);
 
-    return boost::geometry::intersects(lineS,polygon);
+    for (Linestring wall:walls)
+    {
+       if (boost::geometry::intersects(wall,lineS))
+           return true;
+    }
+
+    return false;
 
 }

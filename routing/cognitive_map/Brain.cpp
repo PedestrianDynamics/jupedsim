@@ -6,7 +6,7 @@ Brain::Brain()
 
 }
 
-Brain::Brain(const Building *b, const Pedestrian *ped, const VisibleEnvironment *env, std::unordered_map<std::shared_ptr<const SubRoom>, ptrIntNetwork>* roominternalNetworks)
+Brain::Brain(const Building *b, const Pedestrian *ped, const VisibleEnvironment *env, std::unordered_map<const SubRoom *, ptrIntNetwork> *roominternalNetworks)
 {
     _b=b;
     _ped=ped;
@@ -22,7 +22,7 @@ CognitiveMap &Brain::GetCognitiveMap()
 
 const NavLine* Brain::GetNextNavLine(const NavLine* nextTarget)
 {
-    std::shared_ptr<const SubRoom> currentSubRoom = std::shared_ptr<const SubRoom>(_b->GetSubRoomByUID(_ped->GetSubRoomUID()));
+    const SubRoom* currentSubRoom = _b->GetSubRoomByUID(_ped->GetSubRoomUID());
 
     _currentIntNetwork=*(_intNetworks->operator [](currentSubRoom));
 

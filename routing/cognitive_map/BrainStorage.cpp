@@ -59,7 +59,7 @@ BrainStorage::BrainStorage(const Building * const b, std::string cogMapStatus, s
     {
         for (auto it2=it->second->GetAllSubRooms().begin(); it2!=it->second->GetAllSubRooms().end(); ++it2)
         {
-            InitInternalNetwork(it2->second);
+            InitInternalNetwork(it2->second.get());
         }
     }
 }
@@ -301,7 +301,7 @@ void BrainStorage::CreateBrain(BStorageKeyType ped)
      //cognitive_maps[ped]->GetNavigationGraph()->WriteToDotFile(building->GetProjectRootDir());
 }
 
-void BrainStorage::InitInternalNetwork(std::shared_ptr<const SubRoom> sub_room)
+void BrainStorage::InitInternalNetwork(const SubRoom* sub_room)
 {
 
     _roominternalNetworks.emplace(sub_room,std::make_shared<InternNavigationNetwork>(sub_room));
