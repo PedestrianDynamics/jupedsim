@@ -175,7 +175,7 @@ bool FFRouter::Init(Building* building)
                ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), building, 0.125, 0.125, 0.0, false);
                //for (long int i = 0; i < ptrToNew)
                Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
-#pragma omp critical
+#pragma omp critical(_locffviafm)
                _locffviafm.insert(std::make_pair((*pairRoomIt).first, ptrToNew));
           }
 #pragma omp single nowait

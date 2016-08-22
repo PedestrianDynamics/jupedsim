@@ -291,7 +291,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
     //if (ped->GetFinalDestination() == -1) /*go to closest exit*/ destID != -1;
      // @todo f.mack: remove
 //*
-#pragma omp critical
+#pragma omp critical(delete_map)
      if (Pedestrian::GetGlobalTime() == 10 && !maps_deleted) {
 //#pragma omp critical
           neggradmap.clear();
@@ -332,7 +332,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
         if (localneggradptr == nullptr) { //@todo: ar.graf : check here if other thread has started calc of same ff
             //Log->Write("###### key %d wants to calculate new Floorfield to destID %d", key, destID);
             bool isBeingCalculated;
-#pragma omp critical
+#pragma omp critical(isBeingCalculated)
             {
                 if (!(isBeingCalculated = floorfieldsBeingCalculated.count(destID) > 0)) {
                     floorfieldsBeingCalculated.insert(destID);
@@ -351,13 +351,13 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)
                 localcostptr =    new double[grid->GetnPoints()];
                 localneggradptr = new Point[grid->GetnPoints()];
-#pragma omp critical
+#pragma omp critical(neggradmap)
                 neggradmap.erase(destID);
-#pragma omp critical
+#pragma omp critical(neggradmap)
                 neggradmap.emplace(destID, localneggradptr);
-#pragma omp critical
+#pragma omp critical(costmap)
                 costmap.erase(destID);
-#pragma omp critical
+#pragma omp critical(costmap)
                 costmap.emplace(destID, localcostptr);
 
 
@@ -375,7 +375,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 //Log->Write("Starting FF for UID %d", destID);
                 //std::cerr << "\rW\tO\tR\tK\tI\tN\tG";
                 calculateFloorfield(localline, localcostptr, localneggradptr);
-#pragma omp critical
+#pragma omp critical(isBeingCalculated)
             {
                 if (floorfieldsBeingCalculated.count(destID) != 1) {
                     Log->Write("ERROR: FloorfieldViaFM::getDirectionToUID: key %d was calculating FF for destID %d, but it was removed from floorfieldsBeingCalculated meanwhile", key, destID);
