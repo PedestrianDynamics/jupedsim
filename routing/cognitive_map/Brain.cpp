@@ -29,4 +29,20 @@ const NavLine* Brain::GetNextNavLine(const NavLine* nextTarget)
     return _currentIntNetwork.GetNextNavLineOnShortestPathToTarget(_ped->GetPos(),nextTarget);
 }
 
+bool Brain::HlineReached() const
+{
+    const SubRoom* currentSubRoom = _b->GetSubRoomByUID(_ped->GetSubRoomUID());
+
+    for (Hline* hline:currentSubRoom->GetAllHlines())
+    {
+        // if distance hline to ped lower than 1 m
+        if (hline->DistTo(_ped->GetPos())<1)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 

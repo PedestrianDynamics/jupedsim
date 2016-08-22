@@ -82,6 +82,16 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
         return status;
     }
 
+    // check if ped reached a hline
+    if((*brain_storage)[p]->HlineReached())
+    {
+        int status = FindDestination(p);
+
+        //(*cm_storage)[p]->UpdateSubRoom();
+
+        return status;
+    }
+
     //std::cout << p->GetGlobalTime() << std::endl;
     if (std::fmod(p->GetGlobalTime(),sensor_manager->GetIntVPeriodicUpdate())==0.0 && p->GetGlobalTime()>0)
     {

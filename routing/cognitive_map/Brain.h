@@ -20,6 +20,7 @@ public:
     CognitiveMap& GetCognitiveMap();
 
     const NavLine* GetNextNavLine(const NavLine *nextTarget);
+    bool HlineReached() const;
 
 private:
     const Building* _b;
