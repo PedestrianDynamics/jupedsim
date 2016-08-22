@@ -10,7 +10,7 @@ InternNavigationNetwork::InternNavigationNetwork()
     _graph=Graph();
 }
 
-InternNavigationNetwork::InternNavigationNetwork(ptrSubRoom subRoom)
+InternNavigationNetwork::InternNavigationNetwork(std::shared_ptr<const SubRoom> subRoom)
 {
     _graph=Graph();
 
@@ -22,14 +22,14 @@ InternNavigationNetwork::InternNavigationNetwork(ptrSubRoom subRoom)
     }
 }
 
-void InternNavigationNetwork::AddVertex(ptrNavLine navLine)
+void InternNavigationNetwork::AddVertex(const NavLine *navLine)
 {
     Vertex v = boost::add_vertex(_graph);
-    _navLines.push_back(std::pair<ptrNavLine,Vertex> (navLine,v));
+    _navLines.push_back(std::pair<const NavLine*,Vertex> (navLine,v));
 }
 
 
-void InternNavigationNetwork::AddEdge(ptrNavLine navLine1, ptrNavLine navLine2)
+void InternNavigationNetwork::AddEdge(const NavLine *navLine1, const NavLine *navLine2)
 {
     //find indeces of vertices(landmarks) in graph
     Vertex A;
@@ -64,7 +64,7 @@ void InternNavigationNetwork::AddEdge(ptrNavLine navLine1, ptrNavLine navLine2)
     boost::add_edge(B,A,distance,_graph);
 }
 
-ptrNavLine InternNavigationNetwork::GetNextNavLineOnShortestPathToTarget(const Point &pos, ptrNavLine target)
+const NavLine *InternNavigationNetwork::GetNextNavLineOnShortestPathToTarget(const Point &pos, const NavLine *target)
 {
     // new vertex for the actual position of the pedestrian
     Vertex v = boost::add_vertex(_graph);

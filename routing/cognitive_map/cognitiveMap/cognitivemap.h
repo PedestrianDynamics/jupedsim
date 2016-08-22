@@ -40,8 +40,6 @@ class Building;
 //using SortedLandmarks = std::priority_queue<ptrLandmark,std::vector<ptrLandmark>,priorityCheck>;
 using Landmarks = std::vector<ptrLandmark>;
 using Regions = std::vector<ptrRegion>;
-using ptrBuilding = std::shared_ptr<const Building>;
-using ptrPed = std::shared_ptr<const Pedestrian>;
 using ptrGraphNetwork = std::shared_ptr<GraphNetwork>;
 using ptrOutputHandler = std::shared_ptr<CogMapOutputHandler>;
 
@@ -50,7 +48,7 @@ class CognitiveMap
 {
 public:
     CognitiveMap();
-    CognitiveMap(ptrBuilding b, ptrPed ped);
+    CognitiveMap(const Building* b, const Pedestrian* ped);
     ~CognitiveMap();
     //Map Updates
     void UpdateMap();
@@ -110,8 +108,8 @@ public:
 
 
 private:
-    ptrBuilding _building;
-    ptrPed _ped;
+    const Building* _building;
+    const Pedestrian* _ped;
     ptrGraphNetwork _network;
     Associations _assoContainer;
     std::vector<ptrLandmark> _landmarksSubConcious;

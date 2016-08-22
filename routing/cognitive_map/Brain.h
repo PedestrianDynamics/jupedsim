@@ -3,35 +3,33 @@
 
 #include "cognitiveMap/cognitivemap.h"
 #include "./perception/visibleenvironment.h"
+#include "./cognitiveMap/internnavigationnetwork.h"
 
-class InternNavigationNetwork;
 
 using ptrIntNetwork = std::shared_ptr<InternNavigationNetwork>;
-using ptrEnv = std::shared_ptr<const VisibleEnvironment>;
 
-using ptrSubRoom = std::shared_ptr<const SubRoom>;
-using ptrIntNetworks = std::shared_ptr<std::map<ptrSubRoom, ptrIntNetwork>>;
+
 
 class Brain
 {   
 
 public:
     Brain();
-    Brain(ptrBuilding b,ptrPed ped, ptrEnv env, ptrIntNetworks roominternalNetworks);
+    Brain(const Building* b,const Pedestrian* ped, const VisibleEnvironment* env, std::unordered_map<std::shared_ptr<const SubRoom>, ptrIntNetwork>* roominternalNetworks);
 
     CognitiveMap& GetCognitiveMap();
 
     const NavLine* GetNextNavLine(const NavLine *nextTarget);
 
 private:
-    ptrBuilding _b;
-    ptrPed _ped;
+    const Building* _b;
+    const Pedestrian* _ped;
     CognitiveMap _cMap;
     //whole environment
-    ptrEnv _wholeEnvironment;
+    const VisibleEnvironment* _wholeEnvironment;
     // reference of roominternalNetwork
-    ptrIntNetworks _intNetworks;
-    ptrIntNetwork _currentIntNetwork;
+    std::unordered_map<std::shared_ptr<const SubRoom>, ptrIntNetwork>* _intNetworks;
+    InternNavigationNetwork _currentIntNetwork;
 
 
 };

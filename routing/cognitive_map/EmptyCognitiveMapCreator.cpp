@@ -44,7 +44,7 @@ EmptyCognitiveMapCreator::~EmptyCognitiveMapCreator()
 
 CognitiveMap * EmptyCognitiveMapCreator::CreateCognitiveMap(const Pedestrian * ped)
 {
-     CognitiveMap * cm = new CognitiveMap(std::shared_ptr<const Building>(_building), std::shared_ptr<const Pedestrian>(ped));
+     CognitiveMap * cm = new CognitiveMap(_building, ped);
 
      return cm;
 }

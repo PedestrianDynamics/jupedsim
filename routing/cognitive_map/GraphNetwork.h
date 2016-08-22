@@ -41,8 +41,6 @@ class Building;
 class NavLine;
 class Pedestrian;
 
-using ptrPed = std::shared_ptr<const Pedestrian>;
-using ptrBuilding = std::shared_ptr<const Building>;
 
 
 /**
@@ -59,7 +57,7 @@ public:
      /****************************
       * Constructors & Destructors
       ****************************/
-     GraphNetwork(ptrBuilding buildg, ptrPed ped);
+     GraphNetwork(const Building* buildg, const Pedestrian* ped);
      virtual ~GraphNetwork();
 
      void Add(const SubRoom * sub_room);
@@ -82,8 +80,8 @@ public:
 
 private:
     NavigationGraph * navigation_graph;
-    ptrBuilding building;
-    ptrPed pedestrian;
+    const Building* building;
+    const Pedestrian* pedestrian;
     const SubRoom * current_subroom = NULL;
     std::vector<const GraphEdge *> destinations;
 

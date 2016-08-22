@@ -33,6 +33,7 @@
 #include "Router.h"
 #include <string>
 #include <unordered_map>
+#include <memory>
 
 class Building;
 class Router;
@@ -89,7 +90,7 @@ protected:
 private:
 
      Building * building;
-     BrainStorage * brain_storage;
+     std::shared_ptr<BrainStorage>  brain_storage;
      SensorManager * sensor_manager;
 
      // Optional options which are supposed to be used

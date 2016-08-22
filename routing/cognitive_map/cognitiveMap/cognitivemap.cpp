@@ -24,7 +24,7 @@ CognitiveMap::CognitiveMap()
 }
 
 
-CognitiveMap::CognitiveMap(ptrBuilding b, ptrPed ped)
+CognitiveMap::CognitiveMap(const Building *b, const Pedestrian *ped)
 {
     _building=b;
     _ped=ped;

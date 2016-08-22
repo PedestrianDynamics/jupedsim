@@ -1,5 +1,4 @@
 #include "Brain.h"
-#include "./cognitiveMap/internnavigationnetwork.h"
 #include "../../pedestrian/Pedestrian.h"
 
 Brain::Brain()
@@ -7,7 +6,7 @@ Brain::Brain()
 
 }
 
-Brain::Brain(ptrBuilding b, ptrPed ped, ptrEnv env, ptrIntNetworks roominternalNetworks)
+Brain::Brain(const Building *b, const Pedestrian *ped, const VisibleEnvironment *env, std::unordered_map<std::shared_ptr<const SubRoom>, ptrIntNetwork>* roominternalNetworks)
 {
     _b=b;
     _ped=ped;
@@ -23,11 +22,11 @@ CognitiveMap &Brain::GetCognitiveMap()
 
 const NavLine* Brain::GetNextNavLine(const NavLine* nextTarget)
 {
-    ptrSubRoom currentSubRoom = std::shared_ptr<const SubRoom>(_b->GetSubRoomByUID(_ped->GetSubRoomID()));
+    std::shared_ptr<const SubRoom> currentSubRoom = std::shared_ptr<const SubRoom>(_b->GetSubRoomByUID(_ped->GetSubRoomUID()));
 
-    _currentIntNetwork=_intNetworks->operator [](currentSubRoom);
+    _currentIntNetwork=*(_intNetworks->operator [](currentSubRoom));
 
-    return (_currentIntNetwork->GetNextNavLineOnShortestPathToTarget(_ped->GetPos(),std::shared_ptr<const NavLine>(nextTarget))).get();
+    return _currentIntNetwork.GetNextNavLineOnShortestPathToTarget(_ped->GetPos(),nextTarget);
 }
 
 

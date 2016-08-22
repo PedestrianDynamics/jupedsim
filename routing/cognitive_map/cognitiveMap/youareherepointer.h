@@ -3,7 +3,7 @@
 
 #include "../../../geometry/Point.h"
 class Pedestrian;
-using ptrPed = std::shared_ptr<const Pedestrian>;
+
 
 
 // Ellipse representing the approximative position of a pedestrian in his cognitive map
@@ -16,12 +16,12 @@ public:
     //Getter
     const Point& GetPos() const;
     const double& GetDirection() const;
-    ptrPed GetPed() const;
+    const Pedestrian* GetPed() const;
 
     //Setter
     void SetPos(const Point& point);
     void SetDirection();
-    void SetPed(const ptrPed ped);
+    void SetPed(const Pedestrian* ped);
 
     //Update
     void UpdateYAH(const Point& move);
@@ -33,7 +33,7 @@ private:
     Point _pos;
     Point _oldpos;
 
-     ptrPed _ped;
+    const Pedestrian* _ped;
 
     //Direction
     double _angle;

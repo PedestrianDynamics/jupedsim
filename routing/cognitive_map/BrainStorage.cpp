@@ -68,7 +68,7 @@ BrainStorage::~BrainStorage()
 {
      delete creator;
 
-     _brains.clear();
+     //_brains.clear();
 }
 
 BStorageValueType BrainStorage::operator[] (BStorageKeyType key)
@@ -289,10 +289,10 @@ void BrainStorage::CreateBrain(BStorageKeyType ped)
 
      //todo: the possibility to have more then one creator.
 
-     _brains.insert(std::make_pair(ped, std::make_shared<Brain>(std::shared_ptr<const Building>(_building),
-                                                                std::shared_ptr<const Pedestrian>(ped) ,
-                                                                std::shared_ptr<const VisibleEnvironment>(&_visibleEnv),
-                                                                std::shared_ptr<std::map<std::shared_ptr<const SubRoom>,ptrIntNetwork>>(&_roominternalNetworks))));//  creator->CreateCognitiveMap(ped)));
+     _brains.insert(std::make_pair(ped, std::make_shared<Brain>(_building,
+                                                                ped,
+                                                                &_visibleEnv,
+                                                                &_roominternalNetworks)));//  creator->CreateCognitiveMap(ped)));
      ParseCogMap(ped);
      _brains[ped]->GetCognitiveMap().AddRegions(_regions);
      _brains[ped]->GetCognitiveMap().InitLandmarkNetworksInRegions();
@@ -301,24 +301,24 @@ void BrainStorage::CreateBrain(BStorageKeyType ped)
      //cognitive_maps[ped]->GetNavigationGraph()->WriteToDotFile(building->GetProjectRootDir());
 }
 
-void BrainStorage::InitInternalNetwork(ptrSubRoom sub_room)
+void BrainStorage::InitInternalNetwork(std::shared_ptr<const SubRoom> sub_room)
 {
 
     _roominternalNetworks.emplace(sub_room,std::make_shared<InternNavigationNetwork>(sub_room));
 
     for (Crossing* crossing:sub_room->GetAllCrossings())
     {
-        _roominternalNetworks[sub_room]->AddVertex(std::shared_ptr<Crossing>(crossing));
+        _roominternalNetworks[sub_room]->AddVertex(crossing);
     }
 
     for (Transition* transition:sub_room->GetAllTransitions())
     {
-        _roominternalNetworks[sub_room]->AddVertex(std::shared_ptr<Transition>(transition));
+        _roominternalNetworks[sub_room]->AddVertex(transition);
     }
 
     for (Hline* hline:sub_room->GetAllHlines())
     {
-        _roominternalNetworks[sub_room]->AddVertex(std::shared_ptr<Hline>(hline));
+        _roominternalNetworks[sub_room]->AddVertex(hline);
     }
 
     _roominternalNetworks[sub_room]->EstablishConnections();

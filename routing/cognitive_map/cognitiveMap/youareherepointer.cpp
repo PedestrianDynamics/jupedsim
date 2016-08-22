@@ -30,7 +30,7 @@ const double &YouAreHerePointer::GetDirection() const
     return _angle;
 }
 
-ptrPed YouAreHerePointer::GetPed() const
+const Pedestrian *YouAreHerePointer::GetPed() const
 {
     return _ped;
 }
@@ -60,7 +60,7 @@ void YouAreHerePointer::SetDirection()
     //std::cout << std::to_string(angle*180/3.14) << std::endl;
 }
 
-void YouAreHerePointer::SetPed(const ptrPed ped)
+void YouAreHerePointer::SetPed(const Pedestrian *ped)
 {
     _ped=ped;
 }

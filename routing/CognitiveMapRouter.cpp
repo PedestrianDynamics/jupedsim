@@ -58,7 +58,7 @@ CognitiveMapRouter::CognitiveMapRouter(int id, RoutingStrategy s) : Router(id, s
 
 CognitiveMapRouter::~CognitiveMapRouter()
 {
-     delete brain_storage;
+     //delete brain_storage;
      delete sensor_manager;
 
 }
@@ -145,16 +145,22 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
             return -1;
         }
 
-        (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->AddDestination(destination);
-        sensor_manager->execute(p, SensorManager::NEW_DESTINATION);
+//        (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->AddDestination(destination);
+//        sensor_manager->execute(p, SensorManager::NEW_DESTINATION);
 
-        const Crossing* nextTarget = destination->GetCrossing();
+//        const Crossing* nextTarget = destination->GetCrossing();
 
-        const NavLine* nextNavLine=(*brain_storage)[p]->GetNextNavLine(nextTarget);
+//        const NavLine* nextNavLine=(*brain_storage)[p]->GetNextNavLine(nextTarget);
+
+//        if (nextNavLine==nullptr)
+//            Log->Write("ERROR: \t No visible next subtarget found");
 
         //setting crossing to ped
-        p->SetExitLine(nextNavLine);
-        p->SetExitIndex(nextNavLine->GetUniqueID());
+        //p->SetExitLine(nextNavLine);
+        //p->SetExitIndex(nextNavLine->GetUniqueID());
+        p->SetExitLine(destination->GetCrossing());
+        p->SetExitIndex(destination->GetCrossing()->GetUniqueID());
+
 
         return 1;
 }
@@ -170,15 +176,15 @@ bool CognitiveMapRouter::Init(Building * b)
 
      //Init Cognitive Map Storage, second parameter: decides whether cognitive Map is empty or complete
      if (getOptions().find("CognitiveMapFiles")==getOptions().end())
-        brain_storage = new BrainStorage(building,getOptions().at("CognitiveMap")[0]);
+        brain_storage = std::shared_ptr<BrainStorage>(new BrainStorage(building,getOptions().at("CognitiveMap")[0]));
      else
-        brain_storage = new BrainStorage(building,getOptions().at("CognitiveMap")[0],getOptions().at("CognitiveMapFiles")[0]);
+        brain_storage = std::shared_ptr<BrainStorage>(new BrainStorage(building,getOptions().at("CognitiveMap")[0],getOptions().at("CognitiveMapFiles")[0]));
      Log->Write("INFO:\tCognitiveMapStorage initialized");
      //cm_storage->ParseCogMap();
 
      //Init Sensor Manager
      //sensor_manager = SensorManager::InitWithAllSensors(b, cm_storage);
-     sensor_manager = SensorManager::InitWithCertainSensors(b, brain_storage, getOptions());
+     sensor_manager = SensorManager::InitWithCertainSensors(b, brain_storage.get(), getOptions());
      Log->Write("INFO:\tSensorManager initialized");
      return true;
 }

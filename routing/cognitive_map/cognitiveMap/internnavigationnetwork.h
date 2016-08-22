@@ -20,22 +20,21 @@ typedef std::pair<Vertex, Vertex> Edge;
 typedef double Weight;
 typedef std::vector<Edge> Edges;
 
-using ptrNavLine = std::shared_ptr<const NavLine>;
-using ptrSubRoom = std::shared_ptr<const SubRoom>;
+
 
 class InternNavigationNetwork
 {
 public:
     InternNavigationNetwork();
-    InternNavigationNetwork(ptrSubRoom subRoom);
+    InternNavigationNetwork(std::shared_ptr<const SubRoom> subRoom);
 
-    void AddVertex(ptrNavLine navLine);  // add navline (crossing / transition or HLine)
+    void AddVertex(const NavLine* navLine);  // add navline (crossing / transition or HLine)
     //void RemoveVertex(ptrNavLine navLine);
-    void AddEdge(ptrNavLine navLine1, ptrNavLine navLine2); // add connection (edge) between two navlines. Function should only be
+    void AddEdge(const NavLine* navLine1, const NavLine* navLine2); // add connection (edge) between two navlines. Function should only be
     // used if each of the navline is visible from the position of the other.
     //void RemoveEdge(ptrNavLine navLine1, ptrNavLine navLine2);
 
-    ptrNavLine GetNextNavLineOnShortestPathToTarget(const Point& pos, ptrNavLine target);
+    const NavLine* GetNextNavLineOnShortestPathToTarget(const Point& pos, const NavLine* target);
 
     //Create edges (connection (edge) will be established if two vertices are visible from each other
     void EstablishConnections();
@@ -44,9 +43,9 @@ public:
 
 private:
     Graph _graph;
-    std::list<std::pair<ptrNavLine,Vertex>> _navLines; //vertices
+    std::list<std::pair<const NavLine*,Vertex>> _navLines; //vertices
     std::list<std::pair<Edge,Weight>> _connections; //edges; Weight equals length
-    ptrSubRoom _subRoom;
+    std::shared_ptr<const SubRoom> _subRoom;
     // current Subroom as boost polygon
     BoostPolygon _currentRoom;
 
