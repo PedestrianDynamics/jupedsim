@@ -201,7 +201,6 @@ protected:
      std::vector<int>                         _localShortestSafedPeds;
      const Building*                          _building;
      std::map<int, LocalFloorfieldViaFM*>     _locffviafm;
-     std::map<int, SubLocalFloorfieldViaFM*>  _sublocffviafm;
      FloorfieldViaFM*                         _globalFF;
      std::map<int, Transition*>               _TransByUID;
      std::map<int, Transition*>               _ExitsByUID;

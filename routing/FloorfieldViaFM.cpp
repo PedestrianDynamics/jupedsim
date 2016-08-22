@@ -70,10 +70,6 @@ FloorfieldViaFM::~FloorfieldViaFM()
         if (neggradmap.at(id.first)) delete[] neggradmap.at(id.first);
         //map will be deleted by itself
     }
-    // @todo f.mack remove when it works
-    if (!floorfieldsBeingCalculated.empty()) {
-        Log->Write("ERROR: floorfieldsBeingCalculated not empty when destructing FloorfieldViaFM");
-    }
 
 }
 
@@ -283,7 +279,7 @@ void FloorfieldViaFM::getDirectionToDestination(Pedestrian* ped, Point& directio
     long int key = grid->getKeyAtPoint(position);
     getDirectionToUID(destID, key, direction);
     if (direction._x == DBL_MAX && direction._y == DBL_MAX) {
-        Log->Write("Floorfield for ped %d in subroom %d not yet calculated", ped->GetID(), ped->GetSubRoomID());
+        //Log->Write("Floorfield for ped %d in subroom %d not yet calculated", ped->GetID(), ped->GetSubRoomID());
          direction._x = 0;
          direction._y = 0;
         // @todo f.mack I can do whatever I want in here, it seems to have no influence. Which Strategy is suitable for testing this?
@@ -294,6 +290,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
     //what if goal == -1, meaning closest exit... is GetExitIndex then -1? NO... ExitIndex is UID, given by router
     //if (ped->GetFinalDestination() == -1) /*go to closest exit*/ destID != -1;
      // @todo f.mack: remove
+//*
 #pragma omp critical
      if (Pedestrian::GetGlobalTime() == 10 && !maps_deleted) {
 //#pragma omp critical
@@ -303,7 +300,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
           Log->Write("maps cleared");
           maps_deleted = true;
      }
-
+//*/
     if ((key < 0) || (key >= grid->GetnPoints())) { // @todo: ar.graf: this check in a #ifdef-block?
         Log->Write("ERROR: \t Floorfield tried to access a key out of grid!");
         direction._x = 0.;
@@ -328,13 +325,12 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 //neggradmap.emplace(destID, nullptr);
 //#pragma omp critical
                 //costmap.emplace(destID, nullptr);
-                // @todo f.mack I removed the two lines above -- this shouldn't do any harm
             }
         }
         localneggradptr = (neggradmap.count(destID) == 0) ? nullptr : neggradmap.at(destID); //will fail if above if-clause was entered
         localcostptr = (costmap.count(destID) == 0) ? nullptr : costmap.at(destID);
         if (localneggradptr == nullptr) { //@todo: ar.graf : check here if other thread has started calc of same ff
-            Log->Write("###### key %d wants to calculate new Floorfield to destID %d", key, destID);
+            //Log->Write("###### key %d wants to calculate new Floorfield to destID %d", key, destID);
             bool isBeingCalculated;
 #pragma omp critical
             {
@@ -343,15 +339,14 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 }
             }
             if (isBeingCalculated) {
-                Log->Write("####### ff to destID %d is already being calculated", destID);
+                //Log->Write("####### ff to destID %d is already being calculated", destID);
                 // we do not want to wait until the other calculation has finished, so we return immediately
                 // the values are corrected in getDirectionToDestination(), and getCostToDestination doesn't care about the direction
                 direction._x = DBL_MAX;
                 direction._y = DBL_MAX;
                 return;
             }
-            // @todo f.mack: Sometimes, 2 peds in the same subroom with the same destID both calculate the Floorfield, but I have no idea why.
-            Log->Write("####### ped with key %d started calculating ff to destID %d", key, destID);
+            //Log->Write("####### ped with key %d started calculating ff to destID %d", key, destID);
 
                 //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)
                 localcostptr =    new double[grid->GetnPoints()];
