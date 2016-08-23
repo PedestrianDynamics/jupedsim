@@ -25,7 +25,7 @@
 <!-- agents -->
 <agents operational_model_id="3">
 	<agents_distribution>
-		<group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" x_min="2" y_min="0" y_max="5" number="10" router_id="7" pre_movement_mean="21" pre_movement_sigma="0" risk_tolerance_mean="0." risk_tolerance_sigma="0."/>
+		<group group_id="1" agent_parameter_id="1" room_id="1" subroom_id="0" x_min="2" y_min="0" y_max="5" number="10" router_id="7" pre_movement_mean="60" pre_movement_sigma="0" risk_tolerance_mean="0." risk_tolerance_sigma="0."/>
 		
 	</agents_distribution>
 </agents>
@@ -38,7 +38,7 @@
 			<solver>euler</solver>
 			<stepsize>0.1</stepsize>
 	<periodic>0</periodic>
-			<exit_crossing_strategy>3</exit_crossing_strategy>
+			<exit_crossing_strategy>1</exit_crossing_strategy>
 			<linkedcells enabled="true" cell_size="30"/>
 			<force_ped  a="5" D="0.1"/>
 			<force_wall a="5" D="0.02"/>
@@ -65,6 +65,9 @@
 	      <sensor sensor_id="3" description="LastDestination" status="activated"/>
       </sensors>
       <cognitive_map status="complete" />
+	  <parameters>
+        <navigation_lines file="A_smoke_sensor_ini_routing.xml" />
+        </parameters>
     </router>
 
   </route_choice_models>
