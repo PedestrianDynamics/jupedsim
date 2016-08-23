@@ -5,6 +5,7 @@
 # -DBUILD_TESTING=ON (default OFF) for python tests
 # -DBUILD_CPPUNIT_TEST=ON (default OFF) for unit tests
 # -DUSE_DUAL_ABI=ON (default OFF)  https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
+# -D Boost_NO_SYSTEM_PATHS=true (default false) -D BOOST_ROOT=PARH_where_to_find_boost 
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
@@ -70,10 +71,10 @@ if (NOT DEFINED PROCESSOR_COUNT)
 endif (NOT DEFINED PROCESSOR_COUNT)
 
 if (PROCESSOR_COUNT)
-    #  message( STATUS "PROCESSOR_COUNT: " ${PROCESSOR_COUNT})
+     message( STATUS "PROCESSOR_COUNT: " ${PROCESSOR_COUNT})
     #  set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
     message(STATUS "PROCESSOR_COUNT: 0")
-    set(CTEST_BUILD_FLAGS "-j0")
+    set(CTEST_BUILD_FLAGS "-j8")
 endif (PROCESSOR_COUNT)
 
 if (NOT CMAKE_BUILD_TYPE)
@@ -188,6 +189,10 @@ endif (OPENMP_FOUND)
 #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
+#boost
+#find_package(Boost REQUIRED )
+
+
 # test all cpp-files in Utest
 
 if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
@@ -299,30 +304,39 @@ set(source_files
         general/Configuration.h
         general/Macros.h
 
-        routing/CognitiveMapRouter.cpp
-        routing/cognitive_map/GraphNetwork.cpp
-        routing/cognitive_map/NavigationGraph.cpp
-        routing/cognitive_map/CognitiveMapStorage.cpp
-        routing/cognitive_map/AbstractCognitiveMapCreator.cpp
-        routing/cognitive_map/CompleteCognitiveMapCreator.cpp
-        routing/cognitive_map/EmptyCognitiveMapCreator.cpp
-        routing/cognitive_map/navigation_graph/GraphEdge.cpp
-        routing/cognitive_map/navigation_graph/GraphVertex.cpp
-        routing/cognitive_map/sensor/RoomToFloorSensor.cpp
-        routing/cognitive_map/sensor/SensorManager.cpp
-        routing/cognitive_map/sensor/AbstractSensor.cpp
-        routing/cognitive_map/sensor/DiscoverDoorsSensor.cpp
-        routing/cognitive_map/sensor/JamSensor.cpp
-        routing/cognitive_map/sensor/LastDestinationsSensor.cpp
-        routing/cognitive_map/sensor/locater.cpp
-        routing/cognitive_map/cognitiveMap/associations.cpp
-        routing/cognitive_map/cognitiveMap/cognitivemap.cpp
-        routing/cognitive_map/cognitiveMap/waypoints.cpp
-        routing/cognitive_map/cognitiveMap/landmark.cpp
-        routing/cognitive_map/cognitiveMap/youareherepointer.cpp
-        routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
+  routing/CognitiveMapRouter.cpp
+  routing/cognitive_map/GraphNetwork.cpp
+  routing/cognitive_map/NavigationGraph.cpp
+  routing/cognitive_map/BrainStorage.cpp
+  routing/cognitive_map/AbstractCognitiveMapCreator.cpp
+  routing/cognitive_map/CompleteCognitiveMapCreator.cpp
+  routing/cognitive_map/EmptyCognitiveMapCreator.cpp
+  routing/cognitive_map/navigation_graph/GraphEdge.cpp
+  routing/cognitive_map/navigation_graph/GraphVertex.cpp
+  routing/cognitive_map/sensor/RoomToFloorSensor.cpp
+  routing/cognitive_map/sensor/SensorManager.cpp
+  routing/cognitive_map/sensor/AbstractSensor.cpp
+  routing/cognitive_map/sensor/DiscoverDoorsSensor.cpp
+  routing/cognitive_map/sensor/JamSensor.cpp
+  routing/cognitive_map/sensor/LastDestinationsSensor.cpp
+  routing/cognitive_map/sensor/locater.cpp
+  routing/cognitive_map/cognitiveMap/associations.cpp
+  routing/cognitive_map/cognitiveMap/connection.cpp
+  routing/cognitive_map/cognitiveMap/cognitivemap.cpp
+  routing/cognitive_map/cognitiveMap/landmark.cpp
+  routing/cognitive_map/cognitiveMap/region.cpp
+  routing/cognitive_map/cognitiveMap/youareherepointer.cpp
+  routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
+  routing/cognitive_map/cognitiveMap/landmarknetwork.cpp
 
-        visiLibity/source_code/visilibity.cpp
+  routing/cognitive_map/perception/perception.cpp
+  routing/cognitive_map/perception/visibleenvironment.cpp
+  routing/cognitive_map/Brain.cpp
+
+  routing/cognitive_map/cognitiveMap/internnavigationnetwork.cpp
+
+
+  visiLibity/source_code/visilibity.cpp
 
 
         poly2tri/common/shapes.cpp
@@ -366,30 +380,38 @@ set(header_files
         routing/graph/NavLineState.h
 
 
-        routing/CognitiveMapRouter.h
-        routing/cognitive_map/GraphNetwork.h
-        routing/cognitive_map/NavigationGraph.h
-        routing/cognitive_map/CognitiveMapStorage.h
-        routing/cognitive_map/AbstractCognitiveMapCreator.h
-        routing/cognitive_map/CompleteCognitiveMapCreator.h
-        routing/cognitive_map/EmptyCognitiveMapCreator.h
-        routing/cognitive_map/navigation_graph/GraphEdge.h
-        routing/cognitive_map/navigation_graph/GraphVertex.h
-        routing/cognitive_map/sensor/AbstractSensor.h
-        routing/cognitive_map/sensor/RoomToFloorSensor.h
-        routing/cognitive_map/sensor/SensorManager.h
-        routing/cognitive_map/sensor/DiscoverDoorsSensor.h
-        routing/cognitive_map/sensor/JamSensor.h
-        routing/cognitive_map/sensor/LastDestinationsSensor.h
-        routing/cognitive_map/sensor/locater.h
-        routing/cognitive_map/cognitiveMap/associations.h
-        routing/cognitive_map/cognitiveMap/cognitivemap.h
-        routing/cognitive_map/cognitiveMap/waypoints.h
-        routing/cognitive_map/cognitiveMap/landmark.h
-        routing/cognitive_map/cognitiveMap/youareherepointer.h
-        routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
+  routing/CognitiveMapRouter.h
+  routing/cognitive_map/GraphNetwork.h
+  routing/cognitive_map/NavigationGraph.h
+  routing/cognitive_map/BrainStorage.h
+  routing/cognitive_map/AbstractCognitiveMapCreator.h
+  routing/cognitive_map/CompleteCognitiveMapCreator.h
+  routing/cognitive_map/EmptyCognitiveMapCreator.h
+  routing/cognitive_map/navigation_graph/GraphEdge.h
+  routing/cognitive_map/navigation_graph/GraphVertex.h
+  routing/cognitive_map/sensor/AbstractSensor.h
+  routing/cognitive_map/sensor/RoomToFloorSensor.h
+  routing/cognitive_map/sensor/SensorManager.h
+  routing/cognitive_map/sensor/DiscoverDoorsSensor.h
+  routing/cognitive_map/sensor/JamSensor.h
+  routing/cognitive_map/sensor/LastDestinationsSensor.h
+  routing/cognitive_map/sensor/locater.h
+  routing/cognitive_map/cognitiveMap/associations.h
+  routing/cognitive_map/cognitiveMap/connection.cpp
+  routing/cognitive_map/cognitiveMap/cognitivemap.h
+  routing/cognitive_map/cognitiveMap/landmark.h
+  routing/cognitive_map/cognitiveMap/region.h
+  routing/cognitive_map/cognitiveMap/youareherepointer.h
+  routing/cognitive_map/cognitiveMap/cogmapoutputhandler.h
+  routing/cognitive_map/cognitiveMap/landmarknetwork.h
 
-        visiLibity/source_code/visilibity.hpp
+  routing/cognitive_map/perception/perception.h
+  routing/cognitive_map/perception/visibleenvironment.h
+  routing/cognitive_map/Brain.h
+
+  routing/cognitive_map/cognitiveMap/internnavigationnetwork.h
+
+  visiLibity/source_code/visilibity.hpp
 
         pedestrian/Pedestrian.h
         pedestrian/PedDistributor.h
@@ -482,7 +504,7 @@ if (Boost_FOUND)
     message(STATUS "Boost_LIB_VERSION: " ${Boost_LIB_VERSION})
     message(STATUS "Boost_libraries: " ${Boost_LIBRARIES})
     link_directories(${Boost_LIBRARY_DIRS})
-    include_directories(${Boost_INCLUDE_DIR})
+    include_directories(SYSTEM ${Boost_INCLUDE_DIR})
     # todo: is this necessary?
     target_link_libraries(jpscore ${Boost_LIBRARIES})
 endif ()

@@ -37,15 +37,14 @@
 #include "../../geometry/NavLine.h"
 #include "../../pedestrian/Pedestrian.h"
 
+
 using namespace std;
-
-
 
 /**
  * Constructors & Destructors
  */
 
-GraphNetwork::GraphNetwork(const Building * buildg, const Pedestrian * ped)
+GraphNetwork::GraphNetwork(const Building *buildg, const Pedestrian *ped)
      : building(buildg), pedestrian(ped)
 {
      navigation_graph = new NavigationGraph(buildg);
@@ -60,6 +59,7 @@ GraphNetwork::~GraphNetwork()
 void GraphNetwork::Add(const SubRoom * sub_room)
 {
      navigation_graph->AddVertex(sub_room);
+
 }
 
 void GraphNetwork::Add(const Crossing * crossing)
@@ -121,3 +121,5 @@ void GraphNetwork::UpdateSubRoom()
 {
     current_subroom = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
 }
+
+

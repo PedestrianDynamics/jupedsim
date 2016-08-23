@@ -35,6 +35,7 @@
 #include "../../geometry/Building.h"
 #include "../../geometry/Crossing.h"
 #include "../../geometry/Transition.h"
+#include "../../pedestrian/Pedestrian.h"
 
 CompleteCognitiveMapCreator::~CompleteCognitiveMapCreator()
 {

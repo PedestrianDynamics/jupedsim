@@ -33,10 +33,11 @@
 #include "Router.h"
 #include <string>
 #include <unordered_map>
+#include <memory>
 
 class Building;
 class Router;
-class CognitiveMapStorage;
+class BrainStorage;
 class SensorManager;
 class NavLine;
 
@@ -71,6 +72,17 @@ public:
       */
      void addOption(const std::string &key, const std::vector<std::string> &value);
 
+     /**
+      * Load extra routing information e.g navigation lines
+      */
+     bool LoadRoutingInfos(const std::string &filename);
+
+     /**
+      * Each router is responsible of getting the correct filename
+      * and doing other initializations
+      */
+     virtual std::string GetRoutingInfoFile();
+
 protected:
 
     int FindDestination(Pedestrian * );
@@ -78,10 +90,10 @@ protected:
 private:
 
      Building * building;
-     CognitiveMapStorage * cm_storage;
+     std::shared_ptr<BrainStorage>  brain_storage;
      SensorManager * sensor_manager;
 
-     /// Optional options which are supposed to be used
+     // Optional options which are supposed to be used
      optStorage options;
 
 };

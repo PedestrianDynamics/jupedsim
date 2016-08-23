@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<geometry version="0.5" caption="corner" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/jps_geometry.xsd" unit="m">
+    <rooms>
+        <room id="0" caption="hall">
+            <subroom id="0" caption="Startoffice" class="Office">
+                <polygon caption="wall">
+                    <vertex px="2.62" py="3.34"/>
+                    <vertex px="-0.38" py="3.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2.62" py="1.34"/>
+                    <vertex px="0.62" py="1.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2.62" py="3.34"/>
+                    <vertex px="2.62" py="1.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="-0.38" py="3.34"/>
+                    <vertex px="-0.38" py="1.34"/>
+                </polygon>
+            </subroom>
+            <subroom id="1" caption="Office2" class="Office">
+                <polygon caption="wall">
+                    <vertex px="2.62" py="1.34"/>
+                    <vertex px="2.62" py="-0.66"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2.62" py="1.34"/>
+                    <vertex px="0.62" py="1.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2.62" py="-0.66"/>
+                    <vertex px="0.62" py="-0.66"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="-0.38" py="1.34"/>
+                    <vertex px="-0.38" py="-0.66"/>
+                </polygon>
+            </subroom>
+            <subroom id="2" caption="Office3" class="Office">
+                <polygon caption="wall">
+                    <vertex px="-0.38" py="-3.66"/>
+                    <vertex px="2.62" py="-3.66"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2.62" py="-0.66"/>
+                    <vertex px="0.62" py="-0.66"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2.62" py="-0.66"/>
+                    <vertex px="2.62" py="-2.66"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="-0.38" py="-0.66"/>
+                    <vertex px="-0.38" py="-3.66"/>
+                </polygon>
+            </subroom>
+            <subroom id="3" caption="Hallway1" class="Corridor">
+                <polygon caption="wall">
+                    <vertex px="5.62" py="-3.66"/>
+                    <vertex px="2.62" py="-3.66"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2.62" py="1.34"/>
+                    <vertex px="2.62" py="-0.66"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2.62" py="3.34"/>
+                    <vertex px="2.62" py="1.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2.62" py="-0.66"/>
+                    <vertex px="2.62" py="-2.66"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="5.62" py="3.34"/>
+                    <vertex px="5.62" py="0.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="5.62" py="-0.66"/>
+                    <vertex px="5.62" py="-2.66"/>
+                </polygon>
+            </subroom>
+            <subroom id="4" caption="Hallway2" class="Corridor">
+                <polygon caption="wall">
+                    <vertex px="2.62" py="4.34"/>
+                    <vertex px="2.62" py="6.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="5.62" py="6.34"/>
+                    <vertex px="5.62" py="11.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2.62" py="6.34"/>
+                    <vertex px="2.62" py="11.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2.62" py="11.34"/>
+                    <vertex px="2.62" py="13.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2.62" py="14.34"/>
+                    <vertex px="5.62" py="14.34"/>
+                </polygon>
+            </subroom>
+            <subroom id="5" caption="Office4" class="Office">
+                <polygon caption="wall">
+                    <vertex px="2.62" py="3.34"/>
+                    <vertex px="-0.38" py="3.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2.62" py="4.34"/>
+                    <vertex px="2.62" py="6.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2.62" py="6.34"/>
+                    <vertex px="-0.38" py="6.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="-0.38" py="6.34"/>
+                    <vertex px="-0.38" py="3.34"/>
+                </polygon>
+            </subroom>
+            <subroom id="6" caption="Office5" class="Office">
+                <polygon caption="wall">
+                    <vertex px="2.62" py="6.34"/>
+                    <vertex px="-0.38" py="6.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="-0.38" py="14.34"/>
+                    <vertex px="-0.38" py="6.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2.62" py="6.34"/>
+                    <vertex px="2.62" py="11.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="2.62" py="11.34"/>
+                    <vertex px="2.62" py="13.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="-0.38" py="14.34"/>
+                    <vertex px="2.62" py="14.34"/>
+                </polygon>
+            </subroom>
+            <subroom id="7" caption="Hallway3" class="Corridor">
+                <polygon caption="wall">
+                    <vertex px="15.62" py="11.34"/>
+                    <vertex px="15.62" py="14.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="15.62" py="14.34"/>
+                    <vertex px="5.62" py="14.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="5.62" py="11.34"/>
+                    <vertex px="6.62" py="11.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="12.62" py="11.34"/>
+                    <vertex px="7.62" py="11.34"/>
+                </polygon>
+            </subroom>
+            <subroom id="8" caption="Hallway4" class="Corridor">
+                <polygon caption="wall">
+                    <vertex px="5.62" py="6.34"/>
+                    <vertex px="12.62" py="6.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="5.62" py="3.34"/>
+                    <vertex px="9.12" py="3.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="9.12" py="3.34"/>
+                    <vertex px="12.62" py="3.34"/>
+                </polygon>
+            </subroom>
+            <subroom id="9" caption="ExitHallway" class="Corridor">
+                <polygon caption="wall">
+                    <vertex px="15.62" py="6.34"/>
+                    <vertex px="15.62" py="-3.66"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="15.62" py="11.34"/>
+                    <vertex px="15.62" py="6.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="12.62" py="6.34"/>
+                    <vertex px="12.62" py="11.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="12.62" py="3.34"/>
+                    <vertex px="12.62" py="0.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="12.62" py="-0.66"/>
+                    <vertex px="12.62" py="-2.66"/>
+                </polygon>
+            </subroom>
+            <subroom id="10" caption="Office 6" class="Office">
+                <polygon caption="wall">
+                    <vertex px="5.62" py="6.34"/>
+                    <vertex px="5.62" py="11.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="5.62" py="6.34"/>
+                    <vertex px="12.62" py="6.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="5.62" py="11.34"/>
+                    <vertex px="6.62" py="11.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="12.62" py="6.34"/>
+                    <vertex px="12.62" py="11.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="12.62" py="11.34"/>
+                    <vertex px="7.62" py="11.34"/>
+                </polygon>
+            </subroom>
+            <subroom id="11" caption="Entrance" class="Corridor">
+                <polygon caption="wall">
+                    <vertex px="12.62" py="-3.66"/>
+                    <vertex px="12.62" py="-6.66"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="12.62" py="-6.66"/>
+                    <vertex px="17.62" py="-6.66"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="15.62" py="-3.66"/>
+                    <vertex px="17.62" py="-3.66"/>
+                </polygon>
+            </subroom>
+            <subroom id="12" caption="Office 7" class="Office">
+                <polygon caption="wall">
+                    <vertex px="5.62" py="3.34"/>
+                    <vertex px="9.12" py="3.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="5.62" py="3.34"/>
+                    <vertex px="5.62" py="0.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="9.12" py="-0.66"/>
+                    <vertex px="9.12" py="3.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="5.62" py="-0.66"/>
+                    <vertex px="9.12" py="-0.66"/>
+                </polygon>
+            </subroom>
+            <subroom id="13" caption="Office 8" class="Office">
+                <polygon caption="wall">
+                    <vertex px="9.12" py="-3.66"/>
+                    <vertex px="5.62" py="-3.66"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="5.62" py="-0.66"/>
+                    <vertex px="5.62" py="-2.66"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="9.12" py="-3.66"/>
+                    <vertex px="9.12" py="-0.66"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="5.62" py="-0.66"/>
+                    <vertex px="9.12" py="-0.66"/>
+                </polygon>
+            </subroom>
+            <subroom id="14" caption="Office 9" class="Office">
+                <polygon caption="wall">
+                    <vertex px="9.12" py="3.34"/>
+                    <vertex px="12.62" py="3.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="9.12" py="-0.66"/>
+                    <vertex px="9.12" py="3.34"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="9.12" py="-0.66"/>
+                    <vertex px="12.62" py="-0.66"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="12.62" py="3.34"/>
+                    <vertex px="12.62" py="0.34"/>
+                </polygon>
+            </subroom>
+            <subroom id="15" caption="Office 10" class="Office">
+                <polygon caption="wall">
+                    <vertex px="9.12" py="-3.66"/>
+                    <vertex px="12.62" py="-3.66"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="9.12" py="-3.66"/>
+                    <vertex px="9.12" py="-0.66"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="9.12" py="-0.66"/>
+                    <vertex px="12.62" py="-0.66"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="12.62" py="-0.66"/>
+                    <vertex px="12.62" py="-2.66"/>
+                </polygon>
+            </subroom>
+            <crossings>
+                <crossing id="0" subroom1_id="0" subroom2_id="1">
+                    <vertex px="0.62" py="1.34"/>
+                    <vertex px="-0.38" py="1.34"/>
+                </crossing>
+                <crossing id="1" subroom1_id="1" subroom2_id="2">
+                    <vertex px="0.62" py="-0.66"/>
+                    <vertex px="-0.38" py="-0.66"/>
+                </crossing>
+                <crossing id="2" subroom1_id="2" subroom2_id="3">
+                    <vertex px="2.62" py="-2.66"/>
+                    <vertex px="2.62" py="-3.66"/>
+                </crossing>
+                <crossing id="3" subroom1_id="4" subroom2_id="8">
+                    <vertex px="5.62" py="3.34"/>
+                    <vertex px="5.62" py="6.34"/>
+                </crossing>
+                <crossing id="4" subroom1_id="3" subroom2_id="4">
+                    <vertex px="2.62" py="3.34"/>
+                    <vertex px="5.62" py="3.34"/>
+                </crossing>
+                <crossing id="5" subroom1_id="5" subroom2_id="4">
+                    <vertex px="2.62" py="4.34"/>
+                    <vertex px="2.62" py="3.34"/>
+                </crossing>
+                <crossing id="6" subroom1_id="4" subroom2_id="6">
+                    <vertex px="2.62" py="13.34"/>
+                    <vertex px="2.62" py="14.34"/>
+                </crossing>
+                <crossing id="7" subroom1_id="4" subroom2_id="7">
+                    <vertex px="5.62" py="11.34"/>
+                    <vertex px="5.62" py="14.34"/>
+                </crossing>
+                <crossing id="8" subroom1_id="10" subroom2_id="7">
+                    <vertex px="6.62" py="11.34"/>
+                    <vertex px="7.62" py="11.34"/>
+                </crossing>
+                <crossing id="9" subroom1_id="8" subroom2_id="9">
+                    <vertex px="12.62" py="3.34"/>
+                    <vertex px="12.62" py="6.34"/>
+                </crossing>
+                <crossing id="10" subroom1_id="7" subroom2_id="9">
+                    <vertex px="12.62" py="11.34"/>
+                    <vertex px="15.62" py="11.34"/>
+                </crossing>
+                <crossing id="11" subroom1_id="9" subroom2_id="11">
+                    <vertex px="15.62" py="-3.66"/>
+                    <vertex px="12.62" py="-3.66"/>
+                </crossing>
+                <crossing id="12" subroom1_id="13" subroom2_id="3">
+                    <vertex px="5.62" py="-2.66"/>
+                    <vertex px="5.62" py="-3.66"/>
+                </crossing>
+                <crossing id="13" subroom1_id="12" subroom2_id="3">
+                    <vertex px="5.62" py="0.34"/>
+                    <vertex px="5.62" py="-0.66"/>
+                </crossing>
+                <crossing id="14" subroom1_id="14" subroom2_id="9">
+                    <vertex px="12.62" py="0.34"/>
+                    <vertex px="12.62" py="-0.66"/>
+                </crossing>
+                <crossing id="15" subroom1_id="15" subroom2_id="9">
+                    <vertex px="12.62" py="-2.66"/>
+                    <vertex px="12.62" py="-3.66"/>
+                </crossing>
+            </crossings>
+        </room>
+    </rooms>
+    <transitions>
+        <transition id="0" caption="NaN" type="NaN" room1_id="0" subroom1_id="11" room2_id="-1" subroom2_id="-1">
+            <vertex px="17.62" py="-6.66"/>
+            <vertex px="17.62" py="-3.66"/>
+        </transition>
+    </transitions>
+    <landmarks>
+        <landmark id="0" caption="Statue" type="NaN" room1_id="0" subroom1_id="3" px="3.63667" py="-2.29333">
+            <associations>
+                <association id="1" caption="Turn left and walk through corridor!" type="NaN" px="3.02167" py="4.795" a="5.65833" b="1.855" connectedwith="0"/>
+                <association id="2" caption="Use corridor to your right!" type="NaN" px="14.7076" py="4.38375" a="3.63592" b="2.75042"/>
+            </associations>
+        </landmark>
+        <landmark id="3" caption="Strange Window" type="NaN" room1_id="0" subroom1_id="9" px="14.9067" py="8.88333">
+            <associations>
+                <association id="4" caption="Entrance is here!" type="NaN" px="16.8408" py="-6.16175" a="5.474" b="1.65025"/>
+            </associations>
+        </landmark>
+    </landmarks>
+</geometry>

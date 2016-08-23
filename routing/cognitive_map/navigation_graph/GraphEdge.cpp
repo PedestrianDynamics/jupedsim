@@ -84,9 +84,9 @@ void GraphEdge::CalcApproximateDistance()
 
 double GraphEdge::GetWeight(const Point & position) const
 {
-    //if(factors.empty()) {
-    //    return GetApproximateDistance(position);
-   // }
+//    if(factors.empty()) {
+//        return GetApproximateDistance(position);
+//    }
     //double weight = GetFactorWithDistance(GetApproximateDistance(position));
     double weight = GetApproximateDistance(position) * GetFactor();
     return weight;
@@ -101,6 +101,19 @@ double GraphEdge::GetFactor() const
     }
 
     return factor;
+}
+
+double GraphEdge::GetSpecificFactor(string name) const
+{
+    for(FactorContainer::const_iterator it = factors.begin(); it != factors.end(); ++it)
+    {
+        if (it->first==name)
+        {
+            return it->second.first;
+        }
+    }
+    //if no factor with the name was found return 1.0
+    return 1.0;
 }
 
 double GraphEdge::GetFactorWithDistance(double distance) const

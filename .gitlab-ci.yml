@@ -1,9 +1,12 @@
 # compile jpscore and run light tests
 before_script:
+   - nproc=`grep -c '^processor' /proc/cpuinfo`
+   - echo "nproc = ${nproc}"
    - mkdir build && cd build/
 
 build:
   script:
-    - cmake .. -DBUILD_TESTING=ON
-    - make -j$(nproc)     
+    - cmake -DBUILD_TESTING=ON -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=~/boost_1_61_0 .. 
+    - make -j${nproc}
+    - export LD_LIBRARY_PATH=$HOME/boost_1_61_0/stage/lib/:$LD_LIBRARY_PATH
     - ctest -R Boost                         

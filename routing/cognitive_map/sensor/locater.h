@@ -12,7 +12,7 @@ public:
     ~Locater();
 
     std::string GetName() const;
-    void execute(const Pedestrian *ped, CognitiveMap *cogMap) const;
+    void execute(const Pedestrian *ped, CognitiveMap &cogMap) const;
 private:
     double _updateInterval;
 };

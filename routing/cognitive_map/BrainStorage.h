@@ -33,43 +33,59 @@
 #include <unordered_map>
 #include <vector>
 #include "./cognitiveMap/cognitivemap.h"
+#include "./perception/visibleenvironment.h"
+#include "Brain.h"
 
 class Building;
 class Pedestrian;
-class CognitiveMap;
 class AbstractCognitiveMapCreator;
+class InternNavigationNetwork;
 
 
-
-typedef const Pedestrian * CMStorageKeyType;
-typedef CognitiveMap * CMStorageValueType;
-typedef std::unordered_map<CMStorageKeyType, CMStorageValueType> CMStorageType;
+typedef const Pedestrian * BStorageKeyType;
+typedef std::shared_ptr<Brain> BStorageValueType;
+typedef std::unordered_map<BStorageKeyType, BStorageValueType> BStorageType;
 
 
 
 /**
- * @brief Cognitive Map Storage
+ * @brief Brain Storage
  *
  * Cares about Cognitive map storage, creation and delivery
  *
  */
-class CognitiveMapStorage {
+class BrainStorage {
 public:
-     CognitiveMapStorage(const Building * const b, std::string cogMapStatus);
-     virtual ~CognitiveMapStorage();
-     void ParseLandmarks();
+     BrainStorage(const Building * const b, std::string cogMapStatus, std::string cogMapFiles="");
+     virtual ~BrainStorage();
 
-     CMStorageValueType operator[] (CMStorageKeyType key);
+
+     BStorageValueType operator[] (BStorageKeyType key);
 
 
 private:
      const Building * const _building;
-     CMStorageType cognitive_maps;
+     BStorageType _brains;
      AbstractCognitiveMapCreator * creator;
-     std::vector<ptrLandmark> _landmarks;
 
 
-     void CreateCognitiveMap(CMStorageKeyType ped);
+     //perception
+     //Complete environment
+     VisibleEnvironment _visibleEnv;
+
+     //cognitive map
+     std::vector<ptrRegion> _regions;
+     std::string _cogMapStatus;
+     std::string _cogMapFiles;
+
+     //brain
+     void CreateBrain(BStorageKeyType ped);
+     void ParseCogMap(BStorageKeyType ped);
+
+
+     // internal graph network in every room (for locomotion purposes)
+     void InitInternalNetwork(const SubRoom *sub_room);
+     std::unordered_map<const SubRoom*,ptrIntNetwork> _roominternalNetworks;
 
 };
 

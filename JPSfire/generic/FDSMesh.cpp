@@ -1,5 +1,6 @@
 #include "FDSMesh.h"
 #include <cmath>
+#include <string>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -171,12 +172,14 @@ void FDSMesh::ReadMatrix(std::string line, std::ifstream &pFile)
         for (auto &elem : strVec)
         {
             //std::cout << elem << " col " << n  << " line " << m << std::endl;
-//            if (elem=="nan")
-//            {
-//                Log->Write("ERROR: Mesh values consist of nan!");
-//                exit(EXIT_FAILURE);
-//            }
-            _matrix[m][n].SetValue(std::stod(elem));
+            if (elem=="nan")
+            {
+                _matrix[m][n].SetValue(std::nan(""));
+                //Log->Write("ERROR: Mesh values consist of nan!");
+                //exit(EXIT_FAILURE);
+            }
+            else
+                _matrix[m][n].SetValue(std::stod(elem));
             ++n;
         }
         strVec.clear();

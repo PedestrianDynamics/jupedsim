@@ -37,13 +37,13 @@
 #include "locater.h"
 
 #include "../../../geometry/Building.h"
-#include "../CognitiveMapStorage.h"
+#include "../BrainStorage.h"
 #include "../navigation_graph/GraphVertex.h"
 #include "../NavigationGraph.h"
 #include "../cognitiveMap/cognitivemap.h"
 #define UNUSED(x) [&x]{}()  // c++11 silence warnings
 
-SensorManager::SensorManager(const Building * b, CognitiveMapStorage * cms)
+SensorManager::SensorManager(const Building * b, BrainStorage * cms)
      : /*building(b), */cm_storage(cms)
 {
      UNUSED(b);
@@ -58,7 +58,7 @@ void SensorManager::execute(const Pedestrian * ped, EventType event_type)
 {
      for(SensorContainer::iterator it = registered_sensors.begin(); it != registered_sensors.end(); ++it) {
           if(event_type & it->second) {
-               it->first->execute(ped, (*cm_storage)[ped]);
+               it->first->execute(ped, (*cm_storage)[ped]->GetCognitiveMap());
           }
      }
 }
@@ -68,7 +68,7 @@ void SensorManager::Register(AbstractSensor * sensor, EventType events)
      registered_sensors.push_back(std::make_pair(sensor, events));
 }
 
-SensorManager * SensorManager::InitWithAllSensors(const Building * b, CognitiveMapStorage * cm_storage)
+SensorManager * SensorManager::InitWithAllSensors(const Building * b, BrainStorage *cm_storage)
 {
      SensorManager * sensor_manager = new SensorManager(b, cm_storage);
 
@@ -84,7 +84,7 @@ SensorManager * SensorManager::InitWithAllSensors(const Building * b, CognitiveM
     return sensor_manager;
 }
 
-SensorManager *SensorManager::InitWithCertainSensors(const Building * b, CognitiveMapStorage * cm_storage, const optStorage& optSto)
+SensorManager *SensorManager::InitWithCertainSensors(const Building * b, BrainStorage * cm_storage, const optStorage& optSto)
 {
     SensorManager * sensor_manager = new SensorManager(b, cm_storage);
 

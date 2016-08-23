@@ -31,7 +31,7 @@
 #define SENSORMANAGER_H_
 
 class Building;
-class CognitiveMapStorage;
+class BrainStorage;
 class AbstractSensor;
 class Pedestrian;
 
@@ -60,21 +60,21 @@ public:
      /****************************
       * Constructors & Destructors
       ****************************/
-     SensorManager(const Building * building, CognitiveMapStorage *);
+     SensorManager(const Building * building, BrainStorage *);
      virtual ~SensorManager();
 
      void Register(AbstractSensor *, EventType);
      void execute(const Pedestrian *, EventType);
 
-     static SensorManager * InitWithAllSensors(const Building *, CognitiveMapStorage *);
-     static SensorManager * InitWithCertainSensors(const Building*, CognitiveMapStorage*, const optStorage& optSto);
+     static SensorManager * InitWithAllSensors(const Building *, BrainStorage *);
+     static SensorManager * InitWithCertainSensors(const Building*, BrainStorage *, const optStorage& optSto);
 
      void SetIntVPeriodicUpdate(const double& interval);
      const double& GetIntVPeriodicUpdate();
 
 private:
      //const Building * const building; //@todo: unused.
-     CognitiveMapStorage * cm_storage;
+     BrainStorage * cm_storage;
 
      SensorContainer registered_sensors;
 

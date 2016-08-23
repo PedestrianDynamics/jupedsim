@@ -42,10 +42,10 @@ std::string JamSensor::GetName() const
     return "JamSensor";
 }
 
-void JamSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitive_map) const
+void JamSensor::execute(const Pedestrian * pedestrian, CognitiveMap &cognitive_map) const
 {
     SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
-    GraphVertex * vertex = (*cognitive_map->GetGraphNetwork()->GetNavigationGraph())[sub_room];
+    GraphVertex * vertex = cognitive_map.GetGraphNetwork()->GetNavigationGraph()->operator [](sub_room);
     const GraphVertex::EdgesContainer * edges = vertex->GetAllOutEdges();
 
     for(GraphVertex::EdgesContainer::const_iterator it = edges->begin(); it != edges->end(); ++it) {

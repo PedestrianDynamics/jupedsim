@@ -46,7 +46,7 @@ public:
     bool LoadJPSfireInfo(const std::string projectFilename);
 
     std::string GetName() const;
-    void execute(const Pedestrian *, CognitiveMap *) const;
+    void execute(const Pedestrian *, CognitiveMap&) const;
 
     void set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage);
     const std::shared_ptr<FDSMeshStorage> get_FMStorage();

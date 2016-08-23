@@ -67,6 +67,7 @@ public:
      void SetFactor(double factor, std::string name);
      double GetRoomToFloorFactor() const;
      double GetFactor() const;
+     double GetSpecificFactor(std::string name) const;
      double GetFactorWithDistance(double distance) const;
      double GetWeight(const Point &) const;
      bool IsExit() const;

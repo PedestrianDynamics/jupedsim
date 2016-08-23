@@ -31,7 +31,7 @@
 #define GRAPHNETWORK_H_
 
 #include "NavigationGraph.h"
-//#include "./map_knowlegde/routeknowlegde.h"
+
 #include <vector>
 
 class SubRoom;
@@ -57,7 +57,7 @@ public:
      /****************************
       * Constructors & Destructors
       ****************************/
-     GraphNetwork(const Building * buildg, const Pedestrian * ped);
+     GraphNetwork(const Building* buildg, const Pedestrian* ped);
      virtual ~GraphNetwork();
 
      void Add(const SubRoom * sub_room);
@@ -80,10 +80,12 @@ public:
 
 private:
     NavigationGraph * navigation_graph;
-    const Building * const building;
-    const Pedestrian * const pedestrian;
+    const Building* building;
+    const Pedestrian* pedestrian;
     const SubRoom * current_subroom = NULL;
     std::vector<const GraphEdge *> destinations;
+
+
 
 
 };

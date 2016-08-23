@@ -2,19 +2,25 @@
 #define ASSOCIATIONS_H
 
 #include<memory>
-class Waypoint;
-using ptrWaypoint = std::shared_ptr<Waypoint>;
+
+class Landmark;
+using ptrLandmark = std::shared_ptr<Landmark>;
+class Connection;
+using ptrConnection = std::shared_ptr<Connection>;
 
 class Association
 {
 public:
     Association();
-    Association(ptrWaypoint waypoint, ptrWaypoint associated_waypoint);
+    Association(ptrLandmark landmark, ptrLandmark associated_landmark, bool connected=false);
+    Association(ptrConnection connection);
     ~Association();
-    ptrWaypoint GetAssociation(ptrWaypoint waypoint);
+    ptrLandmark GetLandmarkAssociation(ptrLandmark landmark) const;
+    ptrConnection GetConnectionAssoziation() const;
 private:
-    ptrWaypoint _waypoint;
-    ptrWaypoint _associatedWaypoint;
+    ptrLandmark _landmark;
+    ptrLandmark _associatedLandmark;
+    ptrConnection _connection;
 };
 
 #endif // ASSOCIATIONS_H
