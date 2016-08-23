@@ -1193,16 +1193,7 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode* routingNode)
      for (TiXmlElement* e = sensorNode->FirstChildElement("sensor"); e;
           e = e->NextSiblingElement("sensor")) {
           string sensor = e->Attribute("description");
-          //adding Smoke Sensor specific parameters
-//          if (sensor=="Smoke") {
-//               std::vector<std::string> smokeOptVec;
-
-//               smokeOptVec.push_back(e->Attribute("smoke_factor_grids"));
-//               smokeOptVec.push_back(e->Attribute("update_time"));
-//               smokeOptVec.push_back(e->Attribute("final_time"));
-//               r->addOption("smokeOptions", smokeOptVec);
-
-          //}
+          //adding Smoke Sensor specific parameters is executed in the class FDSFIreMeshStorage
           sensorVec.push_back(sensor);
 
           Log->Write("INFO: \tSensor <%s> added.", sensor.c_str());
@@ -1221,6 +1212,15 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode* routingNode)
      cogMapStatus.push_back(cogMap->Attribute("status"));
      Log->Write("INFO: \tAll pedestrian starting with a(n) %s cognitive maps", cogMapStatus[0].c_str());
      r->addOption("CognitiveMap", cogMapStatus);
+
+     std::vector<std::string> cogMapFiles;
+     if (!cogMap->Attribute("files"))
+     {
+        Log->Write("WARNING:\tNo input files for the cognitive map specified!");
+        return true;
+     }
+     cogMapFiles.push_back(cogMap->Attribute("files"));
+     r->addOption("CognitiveMapFiles",cogMapFiles);
 
      return true;
 }
