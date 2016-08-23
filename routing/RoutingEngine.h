@@ -106,6 +106,12 @@ public:
       */
      bool Init(Building* building);
 
+     /**
+      * Allow the routers to do some preparation
+      * @param building
+      */
+     void PrepareForSimulation(Building* building);
+
 private:
      /// collections of all routers used
      std::vector<Router*> _routersCollection;

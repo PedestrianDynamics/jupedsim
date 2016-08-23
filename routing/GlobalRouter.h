@@ -65,6 +65,8 @@ public:
 
      virtual bool Init(Building* building);
 
+     virtual void PrepareForSimulation(Building* b);
+
      virtual int FindExit(Pedestrian* p);
 
      /**

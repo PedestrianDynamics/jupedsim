@@ -968,6 +968,8 @@ bool MeshRouter::Init(Building* b)
      return true;
 }
 
+virtual void MeshRouter::PrepareForSimulation(Building* b) {}
+
 void MeshRouter::WriteMeshToFile(const string& filename)
 {
     // in the case the navigation mesh should be written to a file

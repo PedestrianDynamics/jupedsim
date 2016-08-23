@@ -338,6 +338,7 @@ bool FFRouter::Init(Building* building)
           matrixfile << _CroTrByUID.at(_pathsMatrix[mapItem.first])->GetID() << std::endl;
      }
      matrixfile.close();
+
      Log->Write("INFO: \tFF Router Init done.");
      return true;
 }
@@ -561,6 +562,10 @@ bool FFRouter::ReInit()
      return true;
 }
 
+virtual void FFRouter::PrepareForSimulation(Building* building) {
+     // collect all <room, door> pairs needed
+     // calculate the ff in a parallelized way
+}
 
 int FFRouter::FindExit(Pedestrian* p)
 {

@@ -44,6 +44,7 @@ public:
 
      virtual int FindExit(Pedestrian* p);
      virtual bool Init(Building* b);
+     virtual void PrepareForSimulation(Building* b);
 
 };
 

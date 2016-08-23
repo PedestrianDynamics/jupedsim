@@ -154,6 +154,14 @@ public:
      virtual bool ReInit();
 
      /*!
+      * \brief Calculates some needed floorfields
+      *
+      * PrepareForSimulation() will look up the exit route of each pedestrian (which is not yet
+      * known in Init()) and calculate the floorfields needed for these routes.
+      */
+     virtual void PrepareForSimulation(Building* building);
+
+     /*!
       * \brief interface used by __Pedestrian__, sets (*p).exitline/.exitindex
       *
       * additional info: not available
