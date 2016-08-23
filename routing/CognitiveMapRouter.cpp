@@ -165,7 +165,9 @@ bool CognitiveMapRouter::Init(Building * b)
      return true;
 }
 
-virtual void CognitiveMapRouter::PrepareForSimulation(Building *b) {}
+void CognitiveMapRouter::PrepareForSimulation(Building *b) {
+    (void) b;
+}
 
 const optStorage &CognitiveMapRouter::getOptions() const
 {

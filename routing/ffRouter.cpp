@@ -562,9 +562,67 @@ bool FFRouter::ReInit()
      return true;
 }
 
-virtual void FFRouter::PrepareForSimulation(Building* building) {
-     // collect all <room, door> pairs needed
-     // calculate the ff in a parallelized way
+void FFRouter::PrepareForSimulation(Building* building) {
+     // @todo f.mack parallelize
+#pragma omp single
+     {
+          // collects all <subroom, door> pairs needed using _pathsMatrix
+          std::vector<pair<int, int>> subroomsDoorsVector;
+          subroomsDoorsVector.clear();
+          for (auto ped : building->GetAllPedestrians()) {
+               int finalDoor = _finalDoors.at(ped->GetID());
+               int finalDoorID = _CroTrByUID.at(finalDoor)->GetID();
+               Log->Write("ped %d: final door is UID %d, ID %d", ped->GetID(), finalDoor, finalDoorID);
+               /*
+               if (ped->GetFinalDestination() == -1) {
+                    for (auto lastdoor : validFinalDoorToOutside) {
+
+                    }
+               } else {
+                    finalDoor = goalToLineUIDmap.at(ped->GetFinalDestination());
+               }*/
+               int subroomUID = ped->GetSubRoomUID();
+               auto subroom = building->GetSubRoomByUID(subroomUID);
+               int doorUID = ped->GetNextDestination();
+               do {
+                    Log->Write("PrepareForSimulation: ped %d needs ff in subroomUID %d (ID %d) to doorUID %d (ID %d)",
+                          ped->GetID(), subroom->GetUID(), subroom->GetSubRoomID(), doorUID, _CroTrByUID[doorUID]->GetID());
+                    if (_CroTrByUID[doorUID]->GetSubRoom1() &&
+                        _CroTrByUID[doorUID]->GetSubRoom1()->GetUID() != subroom->GetUID() &&
+                        _CroTrByUID[doorUID]->GetSubRoom2() &&
+                        _CroTrByUID[doorUID]->GetSubRoom2()->GetUID() != subroom->GetUID()) {
+                         Log->Write(
+                                 "ERROR in PrepareForSimulation: ped %d want to leave subroomUID %d (ID %d) through doorUID %d (ID %d), but this subroom does not belong to this door.",
+                                 ped->GetID(), subroom->GetUID(), subroom->GetSubRoomID(), doorUID, _CroTrByUID[doorUID]->GetID());
+                    }
+                    subroomsDoorsVector.emplace_back(std::make_pair(subroom->GetUID(), doorUID));
+                    auto nextDoorUID = _pathsMatrix.at(std::make_pair(doorUID, finalDoor));
+                    // _pathsMatrix sometimes returns a door in the same subroom we are already in
+                    if (!_CroTrByUID[nextDoorUID]->IsInSubRoom(subroom->GetSubRoomID())) {
+                         auto oldSubroomID = subroom->GetSubRoomID();
+                         subroom = _CroTrByUID[doorUID]->GetOtherSubRoom(subroom->GetRoomID(), subroom->GetSubRoomID());
+                         if (!_CroTrByUID[nextDoorUID]->IsInSubRoom(subroom->GetSubRoomID())) {
+                              Log->Write("ERROR in PrepareForSimulation: ped %d wants to walk through doorUID %d (ID %d), but neither subroomID %d nor %d are adjacent.",
+                              ped->GetID(), nextDoorUID, _CroTrByUID[nextDoorUID]->GetID(), oldSubroomID, subroom->GetSubRoomID());
+                         }
+                    }
+                    doorUID = nextDoorUID;
+               } while (doorUID != finalDoor);
+               Log->Write("PrepareForSimulation: ped %d needs ff in subroomUID %d (ID %d) to doorUID %d (ID %d) (final exit)",
+                          ped->GetID(), subroom->GetUID(), subroom->GetSubRoomID(), doorUID, _CroTrByUID[doorUID]->GetID());
+               if (_CroTrByUID[doorUID]->GetSubRoom1() &&
+                   _CroTrByUID[doorUID]->GetSubRoom1()->GetUID() != subroom->GetUID() &&
+                   _CroTrByUID[doorUID]->GetSubRoom2() &&
+                   _CroTrByUID[doorUID]->GetSubRoom2()->GetUID() != subroom->GetUID()) {
+                    Log->Write(
+                            "ERROR in PrepareForSimulation: ped %d want to leave subroomUID %d (ID %d) through doorUID %d (ID %d), but this subroom does not belong to this door.",
+                            ped->GetID(), subroom->GetUID(), subroom->GetSubRoomID(), doorUID, _CroTrByUID[doorUID]->GetID());
+               }
+               subroomsDoorsVector.emplace_back(std::make_pair(subroom->GetUID(), doorUID));
+          }
+          // make entries unique
+          // calculate the ff in a parallelized way
+     }
 }
 
 int FFRouter::FindExit(Pedestrian* p)
@@ -650,6 +708,7 @@ int FFRouter::FindExit(Pedestrian* p)
           }
      }
 
+     int bestFinalDoor;
      for(int finalDoor : validFinalDoor) {
           //with UIDs, we can ask for shortest path
           for (int doorUID : DoorUIDsOfRoom) {
@@ -676,11 +735,14 @@ int FFRouter::FindExit(Pedestrian* p)
                     if ((_distMatrix.at(key) + locDistToDoor) < minDist) {
                          minDist = _distMatrix.at(key) + locDistToDoor;
                          bestDoor = key.first; //doorUID
+                         bestFinalDoor = key.second;
                          //bestGoal = key.second;//finalDoor
                     }
                }
           }
      }
+#pragma omp critical(finalDoors)
+     _finalDoors.emplace(std::make_pair(p->GetID(), bestFinalDoor));
 
      //at this point, bestDoor is either a crossing or a transition
 //     if ((!_targetWithinSubroom) && (_CroTrByUID.count(bestDoor) != 0)) {

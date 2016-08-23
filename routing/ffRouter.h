@@ -217,6 +217,7 @@ protected:
      std::map<int, int>     goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
      std::map<int, int>     goalToLineUIDmap2;
      std::map<int, int>     goalToLineUIDmap3;
+     std::map<int, int>     _finalDoors; // _finalDoors[i] the UID of the last door the pedestrian with ID i wants to walk through
 
      int _mode;
      bool _hasSpecificGoals;
