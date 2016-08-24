@@ -1208,6 +1208,15 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode* routingNode)
      Log->Write("INFO: \tAll pedestrian starting with a(n) %s cognitive maps", cogMapStatus[0].c_str());
      r->addOption("CognitiveMap", cogMapStatus);
 
+     std::vector<std::string> cogMapFiles;
+     if (!cogMap->Attribute("files"))
+     {
+        Log->Write("WARNING:\tNo input files for the cognitive map specified!");
+        return true;
+     }
+     cogMapFiles.push_back(cogMap->Attribute("files"));
+     r->addOption("CognitiveMapFiles",cogMapFiles);
+
      return true;
 }
 

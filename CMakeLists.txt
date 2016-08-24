@@ -311,9 +311,6 @@ set(source_files
   routing/cognitive_map/GraphNetwork.cpp
   routing/cognitive_map/NavigationGraph.cpp
   routing/cognitive_map/BrainStorage.cpp
-  routing/cognitive_map/AbstractCognitiveMapCreator.cpp
-  routing/cognitive_map/CompleteCognitiveMapCreator.cpp
-  routing/cognitive_map/EmptyCognitiveMapCreator.cpp
   routing/cognitive_map/navigation_graph/GraphEdge.cpp
   routing/cognitive_map/navigation_graph/GraphVertex.cpp
   routing/cognitive_map/sensor/RoomToFloorSensor.cpp
@@ -382,9 +379,6 @@ set(header_files
   routing/cognitive_map/GraphNetwork.h
   routing/cognitive_map/NavigationGraph.h
   routing/cognitive_map/BrainStorage.h
-  routing/cognitive_map/AbstractCognitiveMapCreator.h
-  routing/cognitive_map/CompleteCognitiveMapCreator.h
-  routing/cognitive_map/EmptyCognitiveMapCreator.h
   routing/cognitive_map/navigation_graph/GraphEdge.h
   routing/cognitive_map/navigation_graph/GraphVertex.h
   routing/cognitive_map/sensor/AbstractSensor.h

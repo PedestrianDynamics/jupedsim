@@ -238,29 +238,56 @@ const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & positio
         std::pair<double, const GraphEdge *>,
         vector<std::pair<double, const GraphEdge *> >,
         std::greater<std::pair<double, const GraphEdge *> >
+        > exitEdges;
+
+    std::priority_queue<
+        std::pair<double, const GraphEdge *>,
+        vector<std::pair<double, const GraphEdge *> >,
+        std::greater<std::pair<double, const GraphEdge *> >
         > sameFactorEdges;
 
     for(EdgesContainer::const_iterator it = this->GetAllOutEdges()->begin(); it != this->GetAllOutEdges()->end(); ++it) {
         if ((*it)->GetCrossing()->IsExit())
-            return (*it);
+            exitEdges.push(std::make_pair((*it)->GetFactor(), (*it)));
         edges.push(std::make_pair((*it)->GetFactor(), (*it)));
     }
 
-    // if two edges possess the same (lowest) weight
-    for(EdgesContainer::const_iterator itedge = this->GetAllOutEdges()->begin(); itedge != this->GetAllOutEdges()->end(); ++itedge)
+    // if exit(s) are available
+    if (exitEdges.size()==1)
+        return exitEdges.top().second;
+
+    else if (exitEdges.size()>1)
     {
-        if ((*itedge)==edges.top().second)
-            sameFactorEdges.push(std::make_pair((*itedge)->GetApproximateDistance(position),(*itedge)));
-        else if ((*itedge)->GetFactor()==edges.top().second->GetFactor())
-            sameFactorEdges.push(std::make_pair((*itedge)->GetApproximateDistance(position),(*itedge)));
+        // if two edges possess the same (lowest) weight
+        for(EdgesContainer::const_iterator itedge = this->GetAllOutEdges()->begin(); itedge != this->GetAllOutEdges()->end(); ++itedge)
+        {
+            if ((*itedge)->GetCrossing()->IsExit())
+            {
+                if ((*itedge)->GetFactor()==edges.top().second->GetFactor())
+                    sameFactorEdges.push(std::make_pair((*itedge)->GetApproximateDistance(position),(*itedge)));
+            }
+            //else if ((*itedge)->GetFactor()==edges.top().second->GetFactor())
+             //   sameFactorEdges.push(std::make_pair((*itedge)->GetApproximateDistance(position),(*itedge)));
+        }
+    }
+    else
+    {
+        // if two edges possess the same (lowest) weight
+        for(EdgesContainer::const_iterator itedge = this->GetAllOutEdges()->begin(); itedge != this->GetAllOutEdges()->end(); ++itedge)
+        {
+            if ((*itedge)->GetFactor()==edges.top().second->GetFactor())
+                sameFactorEdges.push(std::make_pair((*itedge)->GetApproximateDistance(position),(*itedge)));
+            //else if ((*itedge)->GetFactor()==edges.top().second->GetFactor())
+             //   sameFactorEdges.push(std::make_pair((*itedge)->GetApproximateDistance(position),(*itedge)));
+        }
     }
 
-//    Log->Write("Crossing:");
-//    Log->Write(std::to_string(sameFactorEdges.top().second->GetCrossing()->GetCentre().GetX()));
-//    Log->Write(std::to_string(sameFactorEdges.top().second->GetCrossing()->GetCentre().GetY()));
+    if(sameFactorEdges.size() >= 1)
+        return sameFactorEdges.top().second;
+    else
+        return edges.top().second;
 
-    if(sameFactorEdges.size() >= 1) return sameFactorEdges.top().second;
-    else return edges.top().second;
+
 //    if(edges.size() > 1) {
 //        double best_factor = edges.top().first;
 //        const GraphEdge * act_edge = nullptr;
