@@ -38,7 +38,6 @@
 
 class Building;
 class Pedestrian;
-class AbstractCognitiveMapCreator;
 class InternNavigationNetwork;
 
 
@@ -66,7 +65,6 @@ public:
 private:
      const Building * const _building;
      BStorageType _brains;
-     AbstractCognitiveMapCreator * creator;
 
 
      //perception

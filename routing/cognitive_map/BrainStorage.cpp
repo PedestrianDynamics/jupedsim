@@ -28,9 +28,6 @@
 
 
 #include "BrainStorage.h"
-#include "AbstractCognitiveMapCreator.h"
-#include "EmptyCognitiveMapCreator.h"
-#include "CompleteCognitiveMapCreator.h"
 #include "cognitiveMap/internnavigationnetwork.h"
 
 #include "../../tinyxml/tinyxml.h"
@@ -46,10 +43,6 @@ BrainStorage::BrainStorage(const Building * const b, std::string cogMapStatus, s
 {
     _cogMapStatus=cogMapStatus;
     _cogMapFiles=cogMapFiles;
-    if (cogMapStatus == "empty")
-    creator = new EmptyCognitiveMapCreator(b);
-    else
-    creator = new CompleteCognitiveMapCreator(b);
 
     //Complete Environment
     //_visibleEnv=VisibleEnvironment(b);
@@ -66,9 +59,7 @@ BrainStorage::BrainStorage(const Building * const b, std::string cogMapStatus, s
 
 BrainStorage::~BrainStorage()
 {
-     delete creator;
 
-     //_brains.clear();
 }
 
 BStorageValueType BrainStorage::operator[] (BStorageKeyType key)
@@ -293,12 +284,48 @@ void BrainStorage::CreateBrain(BStorageKeyType ped)
                                                                 ped,
                                                                 &_visibleEnv,
                                                                 &_roominternalNetworks)));//  creator->CreateCognitiveMap(ped)));
+
+
+     // if cognitive map is complete (complete graph network is known by every ped)
+     if (_cogMapStatus=="complete")
+     {
+         //adding all SubRooms as Vertex
+         for(auto&& itr_room: _building->GetAllRooms())
+         {
+              for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+              {
+                   _brains[ped]->GetCognitiveMap().GetGraphNetwork()->Add(itr_subroom.second.get());
+              }
+         }
+
+         //Add crossings as edges
+         for(auto&& itr_cross: _building->GetAllCrossings())
+         {
+              _brains[ped]->GetCognitiveMap().GetGraphNetwork()->Add(itr_cross.second);
+         }
+
+         //Add transitions as edges
+         for(auto&& itr_trans: _building->GetAllTransitions())
+         {
+              if(itr_trans.second->IsExit())
+              {
+                   _brains[ped]->GetCognitiveMap().GetGraphNetwork()->AddExit(itr_trans.second);
+              }
+              else
+              {
+                   _brains[ped]->GetCognitiveMap().GetGraphNetwork()->Add(itr_trans.second);
+              }
+         }
+     }
+
+     // load cogmap and do first cognitive step
      ParseCogMap(ped);
      _brains[ped]->GetCognitiveMap().AddRegions(_regions);
      _brains[ped]->GetCognitiveMap().InitLandmarkNetworksInRegions();
      _brains[ped]->GetCognitiveMap().FindMainDestination();
      //debug
      //cognitive_maps[ped]->GetNavigationGraph()->WriteToDotFile(building->GetProjectRootDir());
+
 }
 
 void BrainStorage::InitInternalNetwork(const SubRoom* sub_room)
