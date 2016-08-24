@@ -562,17 +562,20 @@ bool FFRouter::ReInit()
      return true;
 }
 
-void FFRouter::PrepareForSimulation(Building* building) {
-     std::vector<pair<int, int>> roomsDoorsVector;
+// @todo f.mack remove building from the argument list
+void FFRouter::PrepareForSimulation(Building* building) {}
+
+std::set<std::pair<int, int>> FFRouter::GetPresumableExitRoute(Pedestrian* p) {
+     std::set<std::pair<int, int>> roomsDoorsVector;
      roomsDoorsVector.clear();
      // @todo f.mack parallelize
 #pragma omp single
      {
           // collects all <room, door> pairs needed using _pathsMatrix
-          for (auto ped : building->GetAllPedestrians()) {
-               int finalDoor = _finalDoors.at(ped->GetID());
+//          for (auto ped : building->GetAllPedestrians()) {
+               int finalDoor = _finalDoors.at(p->GetID());
                int finalDoorID = _CroTrByUID.at(finalDoor)->GetID();
-               Log->Write("ped %d: final door is UID %d, ID %d", ped->GetID(), finalDoor, finalDoorID);
+               Log->Write("ped %d: final door is UID %d, ID %d", p->GetID(), finalDoor, finalDoorID);
                /*
                if (ped->GetFinalDestination() == -1) {
                     for (auto lastdoor : validFinalDoorToOutside) {
@@ -581,23 +584,23 @@ void FFRouter::PrepareForSimulation(Building* building) {
                } else {
                     finalDoor = goalToLineUIDmap.at(ped->GetFinalDestination());
                }*/
-               int roomID = ped->GetRoomID();
-               auto room = building->GetRoom(roomID);
-               int doorUID = ped->GetNextDestination();
+               int roomID = p->GetRoomID();
+               auto room = _building->GetRoom(roomID);
+               int doorUID = p->GetNextDestination();
                do {
                     Log->Write("PrepareForSimulation: ped %d needs ff in roomID %d to doorUID %d (ID %d)",
-                          ped->GetID(), room->GetID(), doorUID, _CroTrByUID[doorUID]->GetID());
+                          p->GetID(), room->GetID(), doorUID, _CroTrByUID[doorUID]->GetID());
                     if (_CroTrByUID[doorUID]->GetRoom1() &&
                         _CroTrByUID[doorUID]->GetRoom1()->GetID() != room->GetID()) {
                          if (auto tr = dynamic_cast<Transition*>(_CroTrByUID[doorUID])) {
                               if (tr->GetRoom2() && tr->GetRoom2()->GetID() != room->GetID()) {
                                    Log->Write(
                                            "ERROR in PrepareForSimulation: ped %d want to leave roomID %d through doorUID %d (ID %d), but this room does not belong to this door.",
-                                           ped->GetID(), room->GetID(), doorUID, _CroTrByUID[doorUID]->GetID());
+                                           p->GetID(), room->GetID(), doorUID, _CroTrByUID[doorUID]->GetID());
                               }
                          }
                     }
-                    roomsDoorsVector.emplace_back(std::make_pair(room->GetID(), doorUID));
+                    roomsDoorsVector.insert(std::make_pair(room->GetID(), doorUID));
                     auto nextDoorUID = _pathsMatrix.at(std::make_pair(doorUID, finalDoor));
                     // _pathsMatrix sometimes returns a door in the same room we are already in
                     if (!_CroTrByUID[nextDoorUID]->IsInRoom(room->GetID())) {
@@ -606,39 +609,47 @@ void FFRouter::PrepareForSimulation(Building* building) {
                               room = tr->GetOtherRoom(room->GetID());
                               if (!tr->IsInRoom(room->GetID())) {
                                    Log->Write("ERROR in PrepareForSimulation: ped %d wants to walk through doorUID %d (ID %d), but neither roomID %d nor %d are adjacent.",
-                                              ped->GetID(), nextDoorUID, _CroTrByUID[nextDoorUID]->GetID(), oldRoomID, room->GetID());
+                                              p->GetID(), nextDoorUID, _CroTrByUID[nextDoorUID]->GetID(), oldRoomID, room->GetID());
                               }
                          }
                     }
                     doorUID = nextDoorUID;
                } while (doorUID != finalDoor);
                Log->Write("PrepareForSimulation: ped %d needs ff in roomID %d to doorUID %d (ID %d) (final exit)",
-                          ped->GetID(), room->GetID(), doorUID, _CroTrByUID[doorUID]->GetID());
+                          p->GetID(), room->GetID(), doorUID, _CroTrByUID[doorUID]->GetID());
                if (_CroTrByUID[doorUID]->GetRoom1() &&
                    _CroTrByUID[doorUID]->GetRoom1()->GetID() != room->GetID()) {
                     if (auto tr = dynamic_cast<Transition*>(_CroTrByUID[doorUID])) {
                          if (tr->GetRoom2() && tr->GetRoom2()->GetID() != room->GetID()) {
                               Log->Write(
                                       "ERROR in PrepareForSimulation: ped %d want to leave roomID %d through doorUID %d (ID %d) (final exit), but this room does not belong to this door.",
-                                      ped->GetID(), room->GetID(), doorUID, _CroTrByUID[doorUID]->GetID());
+                                      p->GetID(), room->GetID(), doorUID, _CroTrByUID[doorUID]->GetID());
                          }
                     }
                }
-               roomsDoorsVector.emplace_back(std::make_pair(room->GetID(), doorUID));
-          }
-
-          // make entries unique // @todo f.mack maybe using a set is more efficient
-//#pragma omp single
-          std::sort(roomsDoorsVector.begin(), roomsDoorsVector.end());
-//#pragma omp single
-          roomsDoorsVector.erase(std::unique(roomsDoorsVector.begin(), roomsDoorsVector.end()), roomsDoorsVector.end());
-
-          for (auto sdIt : roomsDoorsVector) {
-               Log->Write("need ff in roomID %d for doorUID %d (ID %d)",
-                          sdIt.first, building->GetRoom(sdIt.first)->GetID(), sdIt.second, _CroTrByUID[sdIt.second]->GetID());
-          }
-          // calculate the ff in a parallelized way
-     }
+               roomsDoorsVector.insert(std::make_pair(room->GetID(), doorUID));
+//          }
+//
+//          // make entries unique // @todo f.mack maybe using a set is more efficient
+////#pragma omp single
+//          std::sort(roomsDoorsVector.begin(), roomsDoorsVector.end());
+////#pragma omp single
+//          roomsDoorsVector.erase(std::unique(roomsDoorsVector.begin(), roomsDoorsVector.end()), roomsDoorsVector.end());
+//
+//          for (auto sdIt : roomsDoorsVector) {
+//               Log->Write("need ff in roomID %d for doorUID %d (ID %d)",
+//                          sdIt.first, building->GetRoom(sdIt.first)->GetID(), sdIt.second, _CroTrByUID[sdIt.second]->GetID());
+//          }
+//
+//
+//          // calculate the ff in a parallelized way
+//          for (auto rdIt = roomsDoorsVector.begin(); rdIt < roomsDoorsVector.end(); ++rdIt) {
+//               auto newLocFloorfield = new LocalFloorfieldViaFM(building->GetRoom(rdIt->first), building, 0,0,0,true);
+//#pragma omp critical
+//               //_locffviafm.insert();
+//          }
+     } // omp single (is going to become omp parallel)
+     return roomsDoorsVector;
 }
 
 int FFRouter::FindExit(Pedestrian* p)

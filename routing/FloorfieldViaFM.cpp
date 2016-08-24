@@ -372,7 +372,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
 //                clearAndPrepareForFloorfieldReCalc(localcostptr);
                 std::vector<Line> localline = {Line((Line) *(building->GetTransOrCrossByUID(destID)))};
 //                setNewGoalAfterTheClear(localcostptr, localline);
-                //Log->Write("Starting FF for UID %d", destID);
+                Log->Write("Starting FF for UID %d (ID %d)", destID, dynamic_cast<Crossing*>(building->GetTransOrCrossByUID(destID))->GetID());
                 //std::cerr << "\rW\tO\tR\tK\tI\tN\tG";
                 calculateFloorfield(localline, localcostptr, localneggradptr);
 #pragma omp critical(isBeingCalculated)

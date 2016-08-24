@@ -31,6 +31,7 @@
 #include <math.h>
 #include "../pedestrian/Pedestrian.h"
 #include "../routing/DirectionStrategy.h"
+#include "../routing/ffRouter.h"
 #include "../mpi/LCGrid.h"
 #include "../geometry/Wall.h"
 #include "../geometry/SubRoom.h"
@@ -117,8 +118,9 @@ bool GradientModel::Init (Building* building)
 
      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
-    for(unsigned int p=0;p<allPeds.size();p++)
-    {
+     std::set<std::pair<int, int>> roomsDoorsSet;
+     roomsDoorsSet.clear();
+    for(unsigned int p=0;p<allPeds.size();p++) {
          Pedestrian* ped = allPeds[p];
          double cosPhi, sinPhi;
          //a destination could not be found for that pedestrian
@@ -151,7 +153,24 @@ bool GradientModel::Init (Building* building)
          E.SetCosPhi(cosPhi);
          E.SetSinPhi(sinPhi);
          ped->SetEllipse(E);
+
+         if (auto router = dynamic_cast<FFRouter*>(ped->GetRouter())) {
+              auto pedRoomsDoorSet = router->GetPresumableExitRoute(ped);
+              roomsDoorsSet.insert(pedRoomsDoorSet.begin(), pedRoomsDoorSet.end());
+         }
     }
+
+     // @todo f.mack if it works, also implement for the others
+     if (auto dirLocff = dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) {
+          Log->Write("####### The GradientModel is using DirectionLocalFloorfield");
+          // parallelize
+          for (size_t i = 0; i < roomsDoorsSet.size(); ++i) {
+               auto rdIt = roomsDoorsSet.begin();
+               // suboptimal, because a set doesn't provide random-access iterators
+               std::advance(rdIt, i);
+               dirLocff->CalcFloorfield(rdIt->first, rdIt->second);
+          }
+     }
     return true;
 }
 

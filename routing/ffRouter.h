@@ -200,6 +200,13 @@ public:
       */
      void save(Pedestrian* const p);
 
+     /*!
+      * \brief Get the route the pedestrian p wants to take (according to _pathsMatrix)
+      * @param p The pedestrian in question
+      * @return A set containing (roomID, doorUID) pairs. The floorfields needed are inside the room, originating from the door.
+      */
+     std::set<std::pair<int, int>> GetPresumableExitRoute(Pedestrian* p);
+
 private:
 
 protected:
