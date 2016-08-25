@@ -125,8 +125,3 @@ bool RoutingEngine::Init(Building* building)
      return status;
 }
 
-void RoutingEngine::PrepareForSimulation(Building *building) {
-     for (auto router: _routersCollection) {
-          router->PrepareForSimulation(building);
-     }
-}

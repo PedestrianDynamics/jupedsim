@@ -484,7 +484,12 @@ void DirectionLocalFloorfield::CalcFloorfield(int room, int destUID) {
 
 void DirectionLocalFloorfield::writeFF(int room, std::vector<int> targets) {
      std::string lfilename = "floorfield" + std::to_string(room) + ".vtk";
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
      locffviafm[room]->writeFF(lfilename, targets);
+    end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    Log->Write("INFO: \twriting %s took %f s ", lfilename.c_str(), elapsed_seconds.count());
 }
 
 DirectionLocalFloorfield::DirectionLocalFloorfield() {

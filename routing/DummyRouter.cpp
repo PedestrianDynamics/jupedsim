@@ -75,6 +75,3 @@ bool DummyRouter::Init(Building* b)
      return true;
 }
 
-void DummyRouter::PrepareForSimulation(Building* b) {
-     (void) b;
-}

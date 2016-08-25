@@ -120,6 +120,7 @@ bool GradientModel::Init (Building* building)
 
      std::set<std::pair<int, int>> roomsDoorsSet;
      roomsDoorsSet.clear();
+     // @todo f.mack parallelize? yes, using pedsToRemove should be fine
     for(unsigned int p=0;p<allPeds.size();p++) {
          Pedestrian* ped = allPeds[p];
          double cosPhi, sinPhi;
@@ -165,16 +166,23 @@ bool GradientModel::Init (Building* building)
           std::map<int, std::vector<int>> doorsInRoom;
           doorsInRoom.clear();
           Log->Write("####### The GradientModel is using DirectionLocalFloorfield");
-          // parallelize
-          for (size_t i = 0; i < roomsDoorsSet.size(); ++i) {
-               auto rdIt = roomsDoorsSet.begin();
-               // suboptimal, because a set doesn't provide random-access iterators
-               std::advance(rdIt, i);
-               dirLocff->CalcFloorfield(rdIt->first, rdIt->second);
-               doorsInRoom[rdIt->first].push_back(rdIt->second);
-          }
-          for (auto roomIt : doorsInRoom) {
-               dirLocff->writeFF(roomIt.first, roomIt.second);
+#pragma omp parallel
+          {
+#pragma omp for
+               for (size_t i = 0; i < roomsDoorsSet.size(); ++i) {
+                    auto rdIt = roomsDoorsSet.begin();
+                    // suboptimal, because a set doesn't provide random-access iterators
+                    std::advance(rdIt, i);
+                    dirLocff->CalcFloorfield(rdIt->first, rdIt->second);
+#pragma omp critical(doorsInRoom)
+                    doorsInRoom[rdIt->first].push_back(rdIt->second);
+               }
+#pragma omp for
+               for (size_t i = 0; i < doorsInRoom.size(); ++i) {
+                   auto roomIt = doorsInRoom.begin();
+                   std::advance(roomIt, i);
+                   dirLocff->writeFF(roomIt->first, roomIt->second);
+               }
           }
      }
     return true;

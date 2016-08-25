@@ -968,9 +968,6 @@ bool MeshRouter::Init(Building* b)
      return true;
 }
 
-void MeshRouter::PrepareForSimulation(Building* b) {
-     (void) b;
-}
 
 void MeshRouter::WriteMeshToFile(const string& filename)
 {

@@ -547,9 +547,6 @@ void GlobalRouter::Reset(){
      _mapIdToFinalDestination.clear();
 }
 
-void GlobalRouter::PrepareForSimulation(Building* b) {
-     (void) b;
-}
 
 void GlobalRouter::SetEdgeCost(double cost)
 {

@@ -420,7 +420,6 @@ void Simulation::RunHeader(long nPed)
 
     //first initialisation needed by the linked-cells
     UpdateRoutesAndLocations();
-    _routingEngine.get()->PrepareForSimulation(_building.get());
     ProcessAgentsQueue();
 }
 

@@ -133,13 +133,6 @@ public:
       */
      virtual bool ParseAdditionalParameters(){return true;};
 
-     /**
-      * Each implementation can do some pre-simulation calculation. When calling this
-      * function, the exit route for each pedestrian (present at the beginning of the
-      * simulation) is already known.
-      */
-     virtual void PrepareForSimulation(Building* b) = 0;
-
 };
 
 #endif  /* _ROUTING_H */
