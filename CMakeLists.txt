@@ -346,7 +346,7 @@ set(source_files
         events/Event.cpp
         math/KrauszModel.cpp)
 
-set(header_files)
+set(header_files
 
         #floorfield
         routing/ff_router/ffRouter.h
@@ -357,12 +357,8 @@ set(header_files)
 
         #general
         routing/DirectionStrategy.h
-
         routing/Router.h
         routing/RoutingEngine.h
-
-
-
 
         #global_shortest
         routing/global_shortest/GlobalRouter.h
