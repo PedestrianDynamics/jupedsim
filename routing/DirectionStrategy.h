@@ -30,6 +30,7 @@
 #define _DIRECTIONSTRATEGY_H
 
 #include <map>
+#include <vector>
 
 class Room;
 class Building;
@@ -99,6 +100,7 @@ public:
      virtual Point GetDir2Wall(Pedestrian* ped) const;
      virtual double GetDistance2Wall(Pedestrian* ped) const;
      virtual void CalcFloorfield(int room, int destUID);
+     virtual void writeFF(int room, std::vector<int> targets);
 
      //void WriteAll(std::string filename);
 

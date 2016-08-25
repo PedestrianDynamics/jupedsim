@@ -162,6 +162,8 @@ bool GradientModel::Init (Building* building)
 
      // @todo f.mack if it works, also implement for the others
      if (auto dirLocff = dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) {
+          std::map<int, std::vector<int>> doorsInRoom;
+          doorsInRoom.clear();
           Log->Write("####### The GradientModel is using DirectionLocalFloorfield");
           // parallelize
           for (size_t i = 0; i < roomsDoorsSet.size(); ++i) {
@@ -169,6 +171,10 @@ bool GradientModel::Init (Building* building)
                // suboptimal, because a set doesn't provide random-access iterators
                std::advance(rdIt, i);
                dirLocff->CalcFloorfield(rdIt->first, rdIt->second);
+               doorsInRoom[rdIt->first].push_back(rdIt->second);
+          }
+          for (auto roomIt : doorsInRoom) {
+               dirLocff->writeFF(roomIt.first, roomIt.second);
           }
      }
     return true;

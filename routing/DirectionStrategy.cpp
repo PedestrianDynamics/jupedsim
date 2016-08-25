@@ -432,6 +432,7 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
      initDone = true;
     //create all presumably used ff in parallel region: a) find targets and corresponding rooms, b) create ff s
      // @todo f.mack once CalcFloorfield() is complete, the following can go
+     /*
     std::vector<std::pair<int, int>> roomAndTargetVector;
     roomAndTargetVector.clear();
     //for now, just calc all ff for every transition in a room
@@ -472,13 +473,18 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
           std::string lfilename = "floorfield" + std::to_string(roomNr) + ".vtk";
           locffviafm[roomNr]->writeFF(lfilename, targets);
      }
-
+*/
 
 }
 
 void DirectionLocalFloorfield::CalcFloorfield(int room, int destUID) {
      Point dummy;
      locffviafm.at(room)->getDirectionToUID(destUID, 0, dummy);
+}
+
+void DirectionLocalFloorfield::writeFF(int room, std::vector<int> targets) {
+     std::string lfilename = "floorfield" + std::to_string(room) + ".vtk";
+     locffviafm[room]->writeFF(lfilename, targets);
 }
 
 DirectionLocalFloorfield::DirectionLocalFloorfield() {
