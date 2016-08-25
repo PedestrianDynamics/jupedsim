@@ -46,12 +46,9 @@
 #include "../IO/OutputHandler.h"
 #include "../IO/IODispatcher.h"
 #include "../routing/RoutingEngine.h"
-#include "../routing/GlobalRouter.h"
-#include "../routing/QuickestPathRouter.h"
-#include "../routing/MeshRouter.h"
-#include "../routing/DummyRouter.h"
-#include "../routing/SafestPathRouter.h"
-#include "../routing/CognitiveMapRouter.h"
+#include "../routing/global_shortest/GlobalRouter.h"
+#include "../routing/quickest/QuickestPathRouter.h"
+#include "../routing/ai_router/AIRouter.h"
 #include "EventManager.h"
 #include "Event.h"
 
@@ -681,20 +678,8 @@ Router * EventManager::CreateRouter(const RoutingStrategy& strategy)
           rout = new QuickestPathRouter(ROUTING_QUICKEST, ROUTING_QUICKEST);
           break;
 
-     case ROUTING_NAV_MESH:
-          rout = new MeshRouter(ROUTING_NAV_MESH, ROUTING_NAV_MESH);
-          break;
-
-     case ROUTING_DUMMY:
-          rout = new DummyRouter(ROUTING_DUMMY, ROUTING_DUMMY);
-          break;
-
-     case ROUTING_SAFEST:
-          rout = new SafestPathRouter(ROUTING_SAFEST, ROUTING_SAFEST);
-          break;
-
-     case ROUTING_COGNITIVEMAP:
-          rout = new CognitiveMapRouter(ROUTING_COGNITIVEMAP, ROUTING_COGNITIVEMAP);
+     case ROUTING_AI:
+          rout = new AIRouter(ROUTING_AI, ROUTING_AI);
           break;
 
      default:
