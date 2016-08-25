@@ -30,7 +30,7 @@
 #ifndef COGNITIVEMAPROUTER_H_
 #define COGNITIVEMAPROUTER_H_
 
-#include "Router.h"
+#include "../Router.h"
 #include <string>
 #include <unordered_map>
 #include <memory>

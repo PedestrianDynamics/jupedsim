@@ -29,7 +29,7 @@
 #ifndef RECTGRID_H
 #define RECTGRID_H
 
-#include "../../geometry/Point.h"
+#include "../../../geometry/Point.h"
 
 // geometric interpretation of index in "directNeighbor"
 //          x (1)              ^ y

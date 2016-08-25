@@ -30,11 +30,11 @@
 #define QUICKESTPATHROUTER_H_
 
 
-#include "GlobalRouter.h"
-#include "AccessPoint.h"
-#include "Router.h"
-#include "../geometry/Building.h"
-#include "../pedestrian/Pedestrian.h"
+#include "../global_shortest/GlobalRouter.h"
+#include "../global_shortest/AccessPoint.h"
+#include "../Router.h"
+#include "../../geometry/Building.h"
+#include "../../pedestrian/Pedestrian.h"
 
 #include <cfloat>
 

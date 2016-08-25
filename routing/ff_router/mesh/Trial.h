@@ -33,7 +33,7 @@
 #ifndef TRIAL_H
 #define TRIAL_H
 
-#include "../../geometry/Point.h"
+#include "../../../geometry/Point.h"
 
 class Trial // father := smaller; child := bigger (in terms of cost); cost/speed := ptr to its cost/speed
 {

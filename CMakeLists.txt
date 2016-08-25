@@ -284,16 +284,6 @@ set(source_files
         voronoi/VoronoiDiagramGenerator.cpp
         voronoi-boost/VoronoiPositionGenerator.cpp
 
-        routing/ffRouter.cpp
-        routing/LocalFloorfieldViaFM.cpp
-        routing/FloorfieldViaFM.cpp
-        routing/AccessPoint.cpp
-        routing/DirectionStrategy.cpp
-        routing/GlobalRouter.cpp
-        routing/QuickestPathRouter.cpp
-        routing/Router.cpp
-        routing/RoutingEngine.cpp
-        routing/DTriangulation.cpp
 
         #header files with scr code need to be added here, in order to be
         #included in generated project files (codeblocks)
@@ -301,40 +291,55 @@ set(source_files
         general/Configuration.h
         general/Macros.h
 
-  routing/CognitiveMapRouter.cpp
-  routing/cognitive_map/GraphNetwork.cpp
-  routing/cognitive_map/NavigationGraph.cpp
-  routing/cognitive_map/BrainStorage.cpp
-  routing/cognitive_map/navigation_graph/GraphEdge.cpp
-  routing/cognitive_map/navigation_graph/GraphVertex.cpp
-  routing/cognitive_map/sensor/RoomToFloorSensor.cpp
-  routing/cognitive_map/sensor/SensorManager.cpp
-  routing/cognitive_map/sensor/AbstractSensor.cpp
-  routing/cognitive_map/sensor/DiscoverDoorsSensor.cpp
-  routing/cognitive_map/sensor/JamSensor.cpp
-  routing/cognitive_map/sensor/LastDestinationsSensor.cpp
-  routing/cognitive_map/sensor/SmokeSensor.cpp
-  routing/cognitive_map/sensor/locater.cpp
-  routing/cognitive_map/fire_mesh/FireMesh.cpp
-  routing/cognitive_map/fire_mesh/Knot.cpp
-  routing/cognitive_map/fire_mesh/FireMeshStorage.cpp
-  routing/cognitive_map/cognitiveMap/associations.cpp
-  routing/cognitive_map/cognitiveMap/connection.cpp
-  routing/cognitive_map/cognitiveMap/cognitivemap.cpp
-  routing/cognitive_map/cognitiveMap/landmark.cpp
-  routing/cognitive_map/cognitiveMap/region.cpp
-  routing/cognitive_map/cognitiveMap/youareherepointer.cpp
-  routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
-  routing/cognitive_map/cognitiveMap/landmarknetwork.cpp
+        #floorfield
+        routing/ff_router/ffRouter.cpp
+        routing/ff_router/LocalFloorfieldViaFM.cpp
+        routing/ff_router/FloorfieldViaFM.cpp
 
-  routing/cognitive_map/perception/perception.cpp
-  routing/cognitive_map/perception/visibleenvironment.cpp
-  routing/cognitive_map/Brain.cpp
+        #global_shortest
+        routing/global_shortest/AccessPoint.cpp
+        routing/global_shortest/GlobalRouter.cpp
+        routing/global_shortest/DTriangulation.cpp
 
-  routing/cognitive_map/cognitiveMap/internnavigationnetwork.cpp
+        #general
+        routing/DirectionStrategy.cpp
+        routing/Router.cpp
+        routing/RoutingEngine.cpp
 
+        #quickest
+        routing/quickest/QuickestPathRouter.cpp
 
-  visiLibity/source_code/visilibity.cpp
+        #AI router
+        routing/AI_router/CognitiveMapRouter.cpp
+        routing/AI_router/GraphNetwork.cpp
+        routing/AI_router/NavigationGraph.cpp
+        routing/AI_router/BrainStorage.cpp
+        routing/AI_router/navigation_graph/GraphEdge.cpp
+        routing/AI_router/navigation_graph/GraphVertex.cpp
+        routing/AI_router/sensor/RoomToFloorSensor.cpp
+        routing/AI_router/sensor/SensorManager.cpp
+        routing/AI_router/sensor/AbstractSensor.cpp
+        routing/AI_router/sensor/DiscoverDoorsSensor.cpp
+        routing/AI_router/sensor/JamSensor.cpp
+        routing/AI_router/sensor/LastDestinationsSensor.cpp
+        routing/AI_router/sensor/SmokeSensor.cpp
+        routing/AI_router/sensor/locater.cpp
+        routing/AI_router/fire_mesh/FireMesh.cpp
+        routing/AI_router/fire_mesh/Knot.cpp
+        routing/AI_router/fire_mesh/FireMeshStorage.cpp
+        routing/AI_router/cognitiveMap/associations.cpp
+        routing/AI_router/cognitiveMap/connection.cpp
+        routing/AI_router/cognitiveMap/cognitivemap.cpp
+        routing/AI_router/cognitiveMap/landmark.cpp
+        routing/AI_router/cognitiveMap/region.cpp
+        routing/AI_router/cognitiveMap/youareherepointer.cpp
+        routing/AI_router/cognitiveMap/cogmapoutputhandler.cpp
+        routing/AI_router/cognitiveMap/landmarknetwork.cpp
+        routing/AI_router/perception/perception.cpp
+        routing/AI_router/perception/visibleenvironment.cpp
+        routing/AI_router/Brain.cpp
+        routing/AI_router/cognitiveMap/internnavigationnetwork.cpp
+        visiLibity/source_code/visilibity.cpp
 
 
         poly2tri/common/shapes.cpp
@@ -347,53 +352,59 @@ set(source_files
         math/KrauszModel.cpp)
 
 set(header_files
-        routing/ffRouter.h
-        routing/LocalFloorfieldViaFM.h
-        routing/FloorfieldViaFM.h
+
+        #floorfield
+        routing/ff_router/ffRouter.h
+        routing/ff_router/RectGrid.h
+        routing/ff_router/Trial.h
+        routing/ff_router/LocalFloorfieldViaFM.h
+        routing/ff_router/FloorfieldViaFM.h
+
+        #general
         routing/DirectionStrategy.h
-        routing/GlobalRouter.h
-        routing/QuickestPathRouter.h
         routing/Router.h
         routing/RoutingEngine.h
-        routing/AccessPoint.h
-        routing/DTriangulation.h
-        routing/mesh/RectGrid.h
-        routing/mesh/Trial.h
 
 
-  routing/CognitiveMapRouter.h
-  routing/cognitive_map/GraphNetwork.h
-  routing/cognitive_map/NavigationGraph.h
-  routing/cognitive_map/BrainStorage.h
-  routing/cognitive_map/navigation_graph/GraphEdge.h
-  routing/cognitive_map/navigation_graph/GraphVertex.h
-  routing/cognitive_map/sensor/AbstractSensor.h
-  routing/cognitive_map/sensor/RoomToFloorSensor.h
-  routing/cognitive_map/sensor/SensorManager.h
-  routing/cognitive_map/sensor/DiscoverDoorsSensor.h
-  routing/cognitive_map/sensor/JamSensor.h
-  routing/cognitive_map/sensor/LastDestinationsSensor.h
-  routing/cognitive_map/sensor/SmokeSensor.h
-  routing/cognitive_map/sensor/locater.h
-  routing/cognitive_map/fire_mesh/FireMesh.h
-  routing/cognitive_map/fire_mesh/Knot.h
-  routing/cognitive_map/fire_mesh/FireMeshStorage.h
-  routing/cognitive_map/cognitiveMap/associations.h
-  routing/cognitive_map/cognitiveMap/connection.cpp
-  routing/cognitive_map/cognitiveMap/cognitivemap.h
-  routing/cognitive_map/cognitiveMap/landmark.h
-  routing/cognitive_map/cognitiveMap/region.h
-  routing/cognitive_map/cognitiveMap/youareherepointer.h
-  routing/cognitive_map/cognitiveMap/cogmapoutputhandler.h
-  routing/cognitive_map/cognitiveMap/landmarknetwork.h
+        #global_shortest
+        routing/global_shortest/GlobalRouter.h
+        routing/global_shortest/AccessPoint.h
+        routing/global_shortest/DTriangulation.h
 
-  routing/cognitive_map/perception/perception.h
-  routing/cognitive_map/perception/visibleenvironment.h
-  routing/cognitive_map/Brain.h
+        #quickest
+        routing/quickest/QuickestPathRouter.h
 
-  routing/cognitive_map/cognitiveMap/internnavigationnetwork.h
-
-  visiLibity/source_code/visilibity.hpp
+        #AI router
+        routing/AI_router/CognitiveMapRouter.h
+        routing/AI_router/GraphNetwork.h
+        routing/AI_router/NavigationGraph.h
+        routing/AI_router/BrainStorage.h
+        routing/AI_router/navigation_graph/GraphEdge.h
+        routing/AI_router/navigation_graph/GraphVertex.h
+        routing/AI_router/sensor/AbstractSensor.h
+        routing/AI_router/sensor/RoomToFloorSensor.h
+        routing/AI_router/sensor/SensorManager.h
+        routing/AI_router/sensor/DiscoverDoorsSensor.h
+        routing/AI_router/sensor/JamSensor.h
+        routing/AI_router/sensor/LastDestinationsSensor.h
+        routing/AI_router/sensor/SmokeSensor.h
+        routing/AI_router/sensor/locater.h
+        routing/AI_router/fire_mesh/FireMesh.h
+        routing/AI_router/fire_mesh/Knot.h
+        routing/AI_router/fire_mesh/FireMeshStorage.h
+        routing/AI_router/cognitiveMap/associations.h
+        routing/AI_router/cognitiveMap/connection.cpp
+        routing/AI_router/cognitiveMap/cognitivemap.h
+        routing/AI_router/cognitiveMap/landmark.h
+        routing/AI_router/cognitiveMap/region.h
+        routing/AI_router/cognitiveMap/youareherepointer.h
+        routing/AI_router/cognitiveMap/cogmapoutputhandler.h
+        routing/AI_router/cognitiveMap/landmarknetwork.h
+        routing/AI_router/perception/perception.h
+        routing/AI_router/perception/visibleenvironment.h
+        routing/AI_router/Brain.h
+        routing/AI_router/cognitiveMap/internnavigationnetwork.h
+        visiLibity/source_code/visilibity.hpp
 
         pedestrian/Pedestrian.h
         pedestrian/PedDistributor.h

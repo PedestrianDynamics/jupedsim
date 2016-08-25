@@ -35,8 +35,8 @@
 
 //#include "../geometry/Building.h"
 //#include "../pedestrian/Pedestrian.h"
-#include "../tinyxml/tinyxml.h"
-#include "../geometry/SubRoom.h"
+#include "../../tinyxml/tinyxml.h"
+#include "../../geometry/SubRoom.h"
 //#include "../geometry/Wall.h"
 //#include "../IO/OutputHandler.h"
 

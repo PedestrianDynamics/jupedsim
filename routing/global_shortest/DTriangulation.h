@@ -40,8 +40,8 @@
 #include <iostream>
 #include <vector>
 
-#include "../geometry/Point.h"
-#include "../poly2tri/poly2tri.h"
+#include "../../geometry/Point.h"
+#include "../../poly2tri/poly2tri.h"
 
 
 class DTriangulation {

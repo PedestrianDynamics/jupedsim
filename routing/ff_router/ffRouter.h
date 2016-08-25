@@ -60,10 +60,10 @@
 #define FFROUTER_H_
 
 
-#include "Router.h"
-#include "../general/Macros.h"
-#include "../geometry/Building.h"
-#include "../routing/LocalFloorfieldViaFM.h"
+#include "../Router.h"
+#include "../../general/Macros.h"
+#include "../../geometry/Building.h"
+#include "LocalFloorfieldViaFM.h"
 
 class Building;
 class Pedestrian;

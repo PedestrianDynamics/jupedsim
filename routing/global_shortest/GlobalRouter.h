@@ -35,8 +35,8 @@
 #include <cfloat>
 #include <fstream>
 #include <vector>
-#include "Router.h"
-#include "../geometry/Building.h"
+#include "../Router.h"
+#include "../../geometry/Building.h"
 
 // forwarded classes
 class Pedestrian;

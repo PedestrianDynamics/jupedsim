@@ -31,7 +31,7 @@
 
 
 #include "Wall.h"
-#include "../routing/DTriangulation.h"
+#include "../routing/global_shortest/DTriangulation.h"
 
 #include <vector>
 #include <string>

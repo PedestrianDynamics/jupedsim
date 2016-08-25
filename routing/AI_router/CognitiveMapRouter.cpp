@@ -27,19 +27,19 @@
 
 
 #include "CognitiveMapRouter.h"
-#include "Router.h"
+#include "../Router.h"
 
-#include "cognitive_map/BrainStorage.h"
-#include "cognitive_map/cognitiveMap/cognitivemap.h"
-#include "cognitive_map/NavigationGraph.h"
-#include "cognitive_map/sensor/SensorManager.h"
+#include "BrainStorage.h"
+#include "./cognitiveMap/cognitivemap.h"
+#include "NavigationGraph.h"
+#include "./sensor/SensorManager.h"
 
-#include "../geometry/SubRoom.h"
-#include "../geometry/NavLine.h"
-#include "../geometry/Building.h"
+#include "../../geometry/SubRoom.h"
+#include "../../geometry/NavLine.h"
+#include "../../geometry/Building.h"
 
-#include "../pedestrian/Pedestrian.h"
-#include "../tinyxml/tinyxml.h"
+#include "../../pedestrian/Pedestrian.h"
+#include "../../tinyxml/tinyxml.h"
 
 CognitiveMapRouter::CognitiveMapRouter()
 {

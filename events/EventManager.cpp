@@ -46,9 +46,9 @@
 #include "../IO/OutputHandler.h"
 #include "../IO/IODispatcher.h"
 #include "../routing/RoutingEngine.h"
-#include "../routing/GlobalRouter.h"
-#include "../routing/QuickestPathRouter.h"
-#include "../routing/CognitiveMapRouter.h"
+#include "../routing/global_shortest/GlobalRouter.h"
+#include "../routing/quickest/QuickestPathRouter.h"
+#include "../routing/AI_router/CognitiveMapRouter.h"
 #include "EventManager.h"
 #include "Event.h"
 

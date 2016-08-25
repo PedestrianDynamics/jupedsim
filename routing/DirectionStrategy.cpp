@@ -33,8 +33,8 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/SubRoom.h"
 //#include "../geometry/Wall.h"
-#include "../routing/FloorfieldViaFM.h"
-#include "../routing/LocalFloorfieldViaFM.h"
+#include "../routing/ff_router/FloorfieldViaFM.h"
+#include "../routing/ff_router/LocalFloorfieldViaFM.h"
 //#include "DirectionStrategy.h"
 //#include <fstream>
 #include <chrono>

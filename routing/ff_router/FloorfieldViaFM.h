@@ -39,12 +39,12 @@
 #include <cmath>
 #include <functional>
 #include "mesh/RectGrid.h"
-#include "../geometry/Wall.h"
-#include "../geometry/Point.h"
-#include "../geometry/Building.h"
-#include "../geometry/SubRoom.h" //check: should Room.h include SubRoom.h??
-#include "../routing/mesh/Trial.h"
-#include "../pedestrian/Pedestrian.h"
+#include "../../geometry/Wall.h"
+#include "../../geometry/Point.h"
+#include "../../geometry/Building.h"
+#include "../../geometry/SubRoom.h" //check: should Room.h include SubRoom.h??
+#include "./mesh/Trial.h"
+#include "../../pedestrian/Pedestrian.h"
 
 //maybe put following in macros.h
 #define LOWSPEED 0.001

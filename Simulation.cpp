@@ -30,7 +30,7 @@
 
 #include "Simulation.h"
 
-#include "routing/ffRouter.h"
+#include "routing/ff_router/ffRouter.h"
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
 #include "math/GradientModel.h"

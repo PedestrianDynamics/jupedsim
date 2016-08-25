@@ -38,10 +38,10 @@
 #include "../math/GompertzModel.h"
 #include "../math/GradientModel.h"
 #include "../math/VelocityModel.h"
-#include "../routing/GlobalRouter.h"
-#include "../routing/QuickestPathRouter.h"
-#include "../routing/CognitiveMapRouter.h"
-#include "../routing/ffRouter.h"
+#include "../routing/global_shortest/GlobalRouter.h"
+#include "../routing/quickest/QuickestPathRouter.h"
+#include "../routing/AI_router/CognitiveMapRouter.h"
+#include "../routing/ff_router/ffRouter.h"
 
 IniFileParser::IniFileParser(Configuration* config)
 {
