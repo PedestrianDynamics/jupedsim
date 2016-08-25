@@ -289,21 +289,15 @@ set(source_files
         routing/FloorfieldViaFM.cpp
         routing/AccessPoint.cpp
         routing/DirectionStrategy.cpp
-        routing/DummyRouter.cpp
         routing/GlobalRouter.cpp
         routing/QuickestPathRouter.cpp
-        routing/SafestPathRouter.cpp
         routing/Router.cpp
         routing/RoutingEngine.cpp
-        routing/NavMesh.cpp
         routing/DTriangulation.cpp
-        routing/MeshRouter.cpp
-        routing/mesh/Mesh.cpp
+
         #header files with scr code need to be added here, in order to be
         #included in generated project files (codeblocks)
         #plz do not delete them here
-        routing/mesh/RectGrid.h
-        routing/mesh/Trial.h
         general/Configuration.h
         general/Macros.h
 
@@ -356,23 +350,15 @@ set(header_files
         routing/ffRouter.h
         routing/LocalFloorfieldViaFM.h
         routing/FloorfieldViaFM.h
-        routing/NavMesh.h
         routing/DirectionStrategy.h
-        routing/DummyRouter.h
         routing/GlobalRouter.h
         routing/QuickestPathRouter.h
-        routing/SafestPathRouter.h
         routing/Router.h
         routing/RoutingEngine.h
         routing/AccessPoint.h
         routing/DTriangulation.h
-        routing/MeshRouter.h
-        routing/mesh/Mesh.h
         routing/mesh/RectGrid.h
         routing/mesh/Trial.h
-        routing/graph/RoutingGraphStorage.h
-        routing/graph/RoutingGraph.h
-        routing/graph/NavLineState.h
 
 
   routing/CognitiveMapRouter.h

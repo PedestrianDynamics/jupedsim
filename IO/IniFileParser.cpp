@@ -40,9 +40,6 @@
 #include "../math/VelocityModel.h"
 #include "../routing/GlobalRouter.h"
 #include "../routing/QuickestPathRouter.h"
-#include "../routing/MeshRouter.h"
-#include "../routing/DummyRouter.h"
-#include "../routing/SafestPathRouter.h"
 #include "../routing/CognitiveMapRouter.h"
 #include "../routing/ffRouter.h"
 
@@ -1071,24 +1068,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                Router *r = new QuickestPathRouter(id, ROUTING_QUICKEST);
                _config->GetRoutingEngine()->AddRouter(r);
           }
-          else if ((strategy == "nav_mesh") &&
-                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
-               //pRoutingStrategies.push_back(make_pair(id, ROUTING_NAV_MESH));
-               Router *r = new MeshRouter(id, ROUTING_NAV_MESH);
-               _config->GetRoutingEngine()->AddRouter(r);
-          }
-          else if ((strategy == "dummy") &&
-                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
-               //pRoutingStrategies.push_back(make_pair(id, ROUTING_DUMMY));
-               Router *r = new DummyRouter(id, ROUTING_DUMMY);
-               _config->GetRoutingEngine()->AddRouter(r);
-          }
-          else if ((strategy == "global_safest") &&
-                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
-               //pRoutingStrategies.push_back(make_pair(id, ROUTING_SAFEST));
-               Router *r = new SafestPathRouter(id, ROUTING_SAFEST);
-               _config->GetRoutingEngine()->AddRouter(r);
-          }
           else if ((strategy == "cognitive_map") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                //pRoutingStrategies.push_back(make_pair(id, ROUTING_COGNITIVEMAP));
@@ -1179,16 +1158,16 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode* routingNode)
      for (TiXmlElement* e = sensorNode->FirstChildElement("sensor"); e;
           e = e->NextSiblingElement("sensor")) {
           string sensor = e->Attribute("description");
-          ///adding Smoke Sensor specific parameters
-          if (sensor=="Smoke") {
-               std::vector<std::string> smokeOptVec;
+          //adding Smoke Sensor specific parameter is now handled in FDSMeshStorage
+//          if (sensor=="Smoke") {
+//               std::vector<std::string> smokeOptVec;
 
-               smokeOptVec.push_back(e->Attribute("smoke_factor_grids"));
-               smokeOptVec.push_back(e->Attribute("update_time"));
-               smokeOptVec.push_back(e->Attribute("final_time"));
-               r->addOption("smokeOptions", smokeOptVec);
+//               smokeOptVec.push_back(e->Attribute("smoke_factor_grids"));
+//               smokeOptVec.push_back(e->Attribute("update_time"));
+//               smokeOptVec.push_back(e->Attribute("final_time"));
+//               r->addOption("smokeOptions", smokeOptVec);
 
-          }
+//          }
           sensorVec.push_back(sensor);
 
           Log->Write("INFO: \tSensor <%s> added.", sensor.c_str());

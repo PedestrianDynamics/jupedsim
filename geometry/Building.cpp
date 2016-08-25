@@ -36,7 +36,6 @@
 #include "GeometryReader.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../mpi/LCGrid.h"
-#include "../routing/SafestPathRouter.h"
 #include "../routing/RoutingEngine.h"
 #include "../pedestrian/PedDistributor.h"
 #include "../IO/GeoFileParser.h"

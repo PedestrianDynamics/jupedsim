@@ -45,7 +45,7 @@ BrainStorage::BrainStorage(const Building * const b, std::string cogMapStatus, s
     _cogMapFiles=cogMapFiles;
 
     //Complete Environment
-    _visibleEnv=VisibleEnvironment(b);
+    //_visibleEnv=VisibleEnvironment(b);
 
     //internal graph networks in every subroom
     for (auto it=_building->GetAllRooms().begin(); it!=_building->GetAllRooms().end(); ++it)
