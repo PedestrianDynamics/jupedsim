@@ -45,7 +45,7 @@
 #include "routing/DirectionStrategy.h"
 #include "routing/RoutingEngine.h"
 #include "pedestrian/PedDistributor.h"
-#include "routing/AI_router/CognitiveMapRouter.h"
+#include "routing/ai_router/AIRouter.h"
 #include "events/EventManager.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "general/Configuration.h"

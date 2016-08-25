@@ -48,7 +48,7 @@
 #include "../routing/RoutingEngine.h"
 #include "../routing/global_shortest/GlobalRouter.h"
 #include "../routing/quickest/QuickestPathRouter.h"
-#include "../routing/AI_router/CognitiveMapRouter.h"
+#include "../routing/ai_router/AIRouter.h"
 #include "EventManager.h"
 #include "Event.h"
 
@@ -675,8 +675,8 @@ Router * EventManager::CreateRouter(const RoutingStrategy& strategy)
           rout = new QuickestPathRouter(ROUTING_QUICKEST, ROUTING_QUICKEST);
           break;
 
-     case ROUTING_COGNITIVEMAP:
-          rout = new CognitiveMapRouter(ROUTING_COGNITIVEMAP, ROUTING_COGNITIVEMAP);
+     case ROUTING_AI:
+          rout = new AIRouter(ROUTING_AI, ROUTING_AI);
           break;
 
      default:

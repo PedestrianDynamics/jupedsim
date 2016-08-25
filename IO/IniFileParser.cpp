@@ -40,7 +40,7 @@
 #include "../math/VelocityModel.h"
 #include "../routing/global_shortest/GlobalRouter.h"
 #include "../routing/quickest/QuickestPathRouter.h"
-#include "../routing/AI_router/CognitiveMapRouter.h"
+#include "../routing/ai_router/AIRouter.h"
 #include "../routing/ff_router/ffRouter.h"
 
 IniFileParser::IniFileParser(Configuration* config)
@@ -1068,13 +1068,13 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                Router *r = new QuickestPathRouter(id, ROUTING_QUICKEST);
                _config->GetRoutingEngine()->AddRouter(r);
           }
-          else if ((strategy == "cognitive_map") &&
+          else if ((strategy == "AI") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                //pRoutingStrategies.push_back(make_pair(id, ROUTING_COGNITIVEMAP));
-               Router *r = new CognitiveMapRouter(id, ROUTING_COGNITIVEMAP);
+               Router *r = new AIRouter(id, ROUTING_AI);
                _config->GetRoutingEngine()->AddRouter(r);
 
-               Log->Write("\nINFO: \tUsing CognitiveMapRouter");
+               Log->Write("\nINFO: \tUsing AIRouter");
                ///Parsing additional options
                if (!ParseCogMapOpts(e))
                     return false;
@@ -1151,8 +1151,8 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode* routingNode)
           return false;
      }
 
-     /// static_cast to get access to the method 'addOption' of the CognitiveMapRouter
-     CognitiveMapRouter* r = static_cast<CognitiveMapRouter*>(_config->GetRoutingEngine()->GetAvailableRouters().back());
+     /// static_cast to get access to the method 'addOption' of the AIRouter
+     AIRouter* r = static_cast<AIRouter*>(_config->GetRoutingEngine()->GetAvailableRouters().back());
 
      std::vector<std::string> sensorVec;
      for (TiXmlElement* e = sensorNode->FirstChildElement("sensor"); e;

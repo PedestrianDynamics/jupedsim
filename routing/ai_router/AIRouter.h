@@ -27,8 +27,8 @@
  **/
 
 
-#ifndef COGNITIVEMAPROUTER_H_
-#define COGNITIVEMAPROUTER_H_
+#ifndef AIROUTER_H_
+#define AIROUTER_H_
 
 #include "../Router.h"
 #include <string>
@@ -43,7 +43,7 @@ class NavLine;
 
 
 /**
- * @brief Routing Engine for Cognitive Map
+ * @brief Routing Engine for Cognitive Map/ Smoke Sensor / Perception Abilities
  *
  *
  */
@@ -52,11 +52,11 @@ class NavLine;
 //c++11 alias: Container to store options for the router (i. a. sensors)
 using optStorage = std::unordered_map<std::string,std::vector<std::string> >;
 
-class CognitiveMapRouter: public Router {
+class AIRouter: public Router {
 public:
-     CognitiveMapRouter();
-     CognitiveMapRouter(int id, RoutingStrategy s);
-     virtual ~CognitiveMapRouter();
+     AIRouter();
+     AIRouter(int id, RoutingStrategy s);
+     virtual ~AIRouter();
 
 
      virtual int FindExit(Pedestrian* p);

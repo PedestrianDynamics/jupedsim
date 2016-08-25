@@ -1,5 +1,5 @@
 /**
- * \file        CognitiveMapRouter.cpp
+ * \file        AIRouter.cpp
  * \date        Feb 1, 2014
  * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
@@ -26,7 +26,7 @@
  **/
 
 
-#include "CognitiveMapRouter.h"
+#include "AIRouter.h"
 #include "../Router.h"
 
 #include "BrainStorage.h"
@@ -41,7 +41,7 @@
 #include "../../pedestrian/Pedestrian.h"
 #include "../../tinyxml/tinyxml.h"
 
-CognitiveMapRouter::CognitiveMapRouter()
+AIRouter::AIRouter()
 {
     building=nullptr;
 //    cm_storage=nullptr;
@@ -49,21 +49,21 @@ CognitiveMapRouter::CognitiveMapRouter()
 
 }
 
-CognitiveMapRouter::CognitiveMapRouter(int id, RoutingStrategy s) : Router(id, s)
+AIRouter::AIRouter(int id, RoutingStrategy s) : Router(id, s)
 {
     building=nullptr;
 //    cm_storage=nullptr;
 //    sensor_manager=nullptr;
 }
 
-CognitiveMapRouter::~CognitiveMapRouter()
+AIRouter::~AIRouter()
 {
      //delete brain_storage;
      delete sensor_manager;
 
 }
 
-int CognitiveMapRouter::FindExit(Pedestrian * p)
+int AIRouter::FindExit(Pedestrian * p)
 {
     //check for former goal.
     if((*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->HadNoDestination()) {
@@ -108,7 +108,7 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
     return 1;
 }
 
-int CognitiveMapRouter::FindDestination(Pedestrian * p)
+int AIRouter::FindDestination(Pedestrian * p)
 {
         // Discover doors
         sensor_manager->execute(p, SensorManager::NO_WAY);
@@ -177,7 +177,7 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
 
 
 
-bool CognitiveMapRouter::Init(Building * b)
+bool AIRouter::Init(Building * b)
 {
      Log->Write("INFO:\tInit the Cognitive Map Router Engine");
      building = b;
@@ -200,17 +200,17 @@ bool CognitiveMapRouter::Init(Building * b)
 }
 
 
-const optStorage &CognitiveMapRouter::getOptions() const
+const optStorage &AIRouter::getOptions() const
 {
     return options;
 }
 
-void CognitiveMapRouter::addOption(const std::string &key, const std::vector<std::string> &value)
+void AIRouter::addOption(const std::string &key, const std::vector<std::string> &value)
 {
     options.insert(std::make_pair(key, value));
 }
 
-bool CognitiveMapRouter::LoadRoutingInfos(const std::string &filename)
+bool AIRouter::LoadRoutingInfos(const std::string &filename)
 {
     if(filename=="") return true;
 
@@ -285,7 +285,7 @@ bool CognitiveMapRouter::LoadRoutingInfos(const std::string &filename)
     return true;
 }
 
-std::string CognitiveMapRouter::GetRoutingInfoFile()
+std::string AIRouter::GetRoutingInfoFile()
 {
 
     TiXmlDocument doc(building->GetProjectFilename());
