@@ -132,6 +132,7 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
 
         destination = (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->GetLocalDestination();
         if(destination == nullptr) {
+            Log->Write("Gruess dich");
             //no destination was found, now we could start the discovery!
             //1. run the no_way sensors for room discovery.
             sensor_manager->execute(p, SensorManager::NO_WAY);

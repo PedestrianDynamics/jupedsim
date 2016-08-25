@@ -248,7 +248,7 @@ const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & positio
 
     for(EdgesContainer::const_iterator it = this->GetAllOutEdges()->begin(); it != this->GetAllOutEdges()->end(); ++it) {
         if ((*it)->GetCrossing()->IsExit())
-            exitEdges.push(std::make_pair((*it)->GetFactor(), (*it)));
+            exitEdges.push(std::make_pair((*it)->GetWeight(position), (*it)));
         edges.push(std::make_pair((*it)->GetFactor(), (*it)));
     }
 
@@ -256,21 +256,22 @@ const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & positio
     if (exitEdges.size()==1)
         return exitEdges.top().second;
 
-    else if (exitEdges.size()>1)
-    {
-        // if two edges possess the same (lowest) weight
-        for(EdgesContainer::const_iterator itedge = this->GetAllOutEdges()->begin(); itedge != this->GetAllOutEdges()->end(); ++itedge)
-        {
-            if ((*itedge)->GetCrossing()->IsExit())
-            {
-                if ((*itedge)->GetFactor()==edges.top().second->GetFactor())
-                    sameFactorEdges.push(std::make_pair((*itedge)->GetApproximateDistance(position),(*itedge)));
-            }
-            //else if ((*itedge)->GetFactor()==edges.top().second->GetFactor())
-             //   sameFactorEdges.push(std::make_pair((*itedge)->GetApproximateDistance(position),(*itedge)));
-        }
-    }
-    else
+//    else if (exitEdges.size()>1)
+//    {
+//        /*
+//        // if two edges possess the same (lowest) weight
+//        for(EdgesContainer::const_iterator itedge = this->GetAllOutEdges()->begin(); itedge != this->GetAllOutEdges()->end(); ++itedge)
+//        {
+//            if ((*itedge)->GetCrossing()->IsExit())
+//            {
+
+//                sameFactorEdges.push(std::make_pair((*itedge)->GetWeight(position),(*itedge)));
+//            }
+//            //else if ((*itedge)->GetFactor()==edges.top().second->GetFactor())
+//             //   sameFactorEdges.push(std::make_pair((*itedge)->GetApproximateDistance(position),(*itedge)));
+//        }*/
+//    }
+    else if (exitEdges.empty())
     {
         // if two edges possess the same (lowest) weight
         for(EdgesContainer::const_iterator itedge = this->GetAllOutEdges()->begin(); itedge != this->GetAllOutEdges()->end(); ++itedge)
