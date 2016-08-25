@@ -46,6 +46,7 @@ Method_A::Method_A()
      _fps=16;
      _areaForMethod_A = NULL;
      _plotTimeSeries = false;
+     _minId=0;
 }
 
 Method_A::~Method_A()
@@ -63,6 +64,7 @@ bool Method_A::Process (const PedData& peddata,const string& scriptsLocation, co
      _yCor = peddata.GetYCor();
      _firstFrame = peddata.GetFirstFrame();
      _fps =peddata.GetFps();
+     _minId=peddata.GetMinID();
      _measureAreaId = boost::lexical_cast<string>(_areaForMethod_A->_id);
      _passLine = new bool[peddata.GetNumPeds()];
      string outputRhoV;
@@ -89,7 +91,7 @@ bool Method_A::Process (const PedData& peddata,const string& scriptsLocation, co
           const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
           if(IdInFrame.size()>0)
           {
-			  GetAccumFlowVelocity(frameNr, IdInFrame, VInFrame);
+        	  GetAccumFlowVelocity(frameNr, IdInFrame, VInFrame);
 			  char tmp[30];
 			  sprintf(tmp, "%.2f\t%d\n", frid/_fps, _classicFlow);
 			  outputRhoV.append(tmp);
@@ -134,21 +136,21 @@ void Method_A::WriteFile_N_t(string data)
 
 void Method_A::GetAccumFlowVelocity(int frame, const vector<int>& ids, const vector<double>& VInFrame)
 {
-     for(unsigned int i=0; i<ids.size();i++)
+	for(unsigned int i=0; i<ids.size();i++)
      {
-          int id = ids[i];
+		  int id = ids[i];
           bool IspassLine=false;
-          if(frame >_firstFrame[id]&&!_passLine[id])
+          if(frame >_firstFrame[id-_minId]&&!_passLine[id-_minId])
           {
-               IspassLine = IsPassLine(_areaForMethod_A->_lineStartX,
+        	  IspassLine = IsPassLine(_areaForMethod_A->_lineStartX,
                          _areaForMethod_A->_lineStartY,
                          _areaForMethod_A->_lineEndX,
-                         _areaForMethod_A->_lineEndY, _xCor[id][frame - 1],
-                         _yCor[id][frame - 1], _xCor[id][frame], _yCor[id][frame]);
+                         _areaForMethod_A->_lineEndY, _xCor[id-_minId][frame - 1],
+                         _yCor[id-_minId][frame - 1], _xCor[id-_minId][frame], _yCor[id-_minId][frame]);
           }
           if(IspassLine==true)
           {
-               _passLine[id] = true;
+        	   _passLine[id-_minId] = true;
                _classicFlow++;
                _vDeltaT+=VInFrame[i];
           }
