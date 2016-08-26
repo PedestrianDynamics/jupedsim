@@ -177,6 +177,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 Pedestrian* ped = allPeds[p];
                 Room* room = building->GetRoom(ped->GetRoomID());
                 SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
+
                 Point repPed = Point(0,0);
                 vector<Pedestrian*> neighbours;
                 building->GetGrid()->GetNeighbourhood(ped,neighbours);
@@ -237,6 +238,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 Point speed = direction.Normalized() *OptimalSpeed(ped, spacing);
                 result_acc.push_back(speed);                
                 spacings.clear(); //clear for ped p
+
                 
                 // stuck peds get removed. Warning is thrown. low speed due to jam is omitted.
                 if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime()&& ped->GetMeanVelOverRecTime() < 0.01 && size == 0 ) // size length of peds neighbour vector
@@ -245,7 +247,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                       #pragma omp critical
                       pedsToRemove.push_back(ped);
                 }
-
            } // for p
 
            #pragma omp barrier
@@ -423,7 +424,7 @@ Point VelocityModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
           if(obst->Contains(ped->GetPos()))
           {
                Log->Write("ERROR:\t Agent [%d] is trapped in obstacle in room/subroom [%d/%d]",ped->GetID(),subroom->GetRoomID(), subroom->GetSubRoomID());
-               exit(EXIT_FAILURE);
+               //exit(EXIT_FAILURE);
           }
           else
           for(const auto & wall: obst->GetAllWalls())

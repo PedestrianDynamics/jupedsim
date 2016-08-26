@@ -8,8 +8,7 @@ LocalFloorfieldViaFM::LocalFloorfieldViaFM(){};
 LocalFloorfieldViaFM::LocalFloorfieldViaFM(const Room* const roomArg,
                const Building* buildingArg,
                const double hxArg, const double hyArg,
-               const double wallAvoidDistance, const bool useDistancefield
-               ) {
+               const double wallAvoidDistance, const bool useDistancefield) {
      //ctor
      threshold = -1; //negative value means: ignore threshold
      threshold = wallAvoidDistance;
@@ -148,6 +147,7 @@ void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
      dist2Wall = new double[grid->GetnPoints()];
      speedInitial = new double[grid->GetnPoints()];
      modifiedspeed = new double[grid->GetnPoints()];
+     densityspeed = new double[grid->GetnPoints()];
      cost = new double[grid->GetnPoints()];
      neggrad = new Point[grid->GetnPoints()];
      dirToWall = new Point[grid->GetnPoints()];
@@ -579,6 +579,7 @@ void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
      dist2Wall = new double[grid->GetnPoints()];
      speedInitial = new double[grid->GetnPoints()];
      modifiedspeed = new double[grid->GetnPoints()];
+     densityspeed = new double[grid->GetnPoints()];
      cost = new double[grid->GetnPoints()];
      neggrad = new Point[grid->GetnPoints()];
      dirToWall = new Point[grid->GetnPoints()];

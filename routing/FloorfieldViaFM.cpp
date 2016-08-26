@@ -53,6 +53,7 @@ FloorfieldViaFM::~FloorfieldViaFM()
     //dtor
     delete grid;
     if (gcode) delete[] gcode;
+    if (subroomUID) delete[] subroomUID;
     if (dist2Wall) delete[] dist2Wall;
     if (speedInitial) delete[] speedInitial;
     if (modifiedspeed) delete[] modifiedspeed;
@@ -286,7 +287,11 @@ void FloorfieldViaFM::getDirectionToDestination(Pedestrian* ped, Point& directio
     }
 }
 
-void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& direction) {
+void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point &direction) {
+    getDirectionToUID(destID, key, direction, global_shortest);
+}
+
+void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& direction, int mode) {
     //what if goal == -1, meaning closest exit... is GetExitIndex then -1? NO... ExitIndex is UID, given by router
     //if (ped->GetFinalDestination() == -1) /*go to closest exit*/ destID != -1;
      // @todo f.mack: remove
@@ -374,14 +379,18 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
 //                setNewGoalAfterTheClear(localcostptr, localline);
                 Log->Write("Starting FF for UID %d (ID %d)", destID, dynamic_cast<Crossing*>(building->GetTransOrCrossByUID(destID))->GetID());
                 //std::cerr << "\rW\tO\tR\tK\tI\tN\tG";
-                calculateFloorfield(localline, localcostptr, localneggradptr);
-#pragma omp critical(isBeingCalculated)
-            {
-                if (floorfieldsBeingCalculated.count(destID) != 1) {
-                    Log->Write("ERROR: FloorfieldViaFM::getDirectionToUID: key %d was calculating FF for destID %d, but it was removed from floorfieldsBeingCalculated meanwhile", key, destID);
+                if (mode == quickest) {
+                    calculateFloorfield(localline, localcostptr, localneggradptr, densityspeed);
+                } else {
+                    calculateFloorfield(localline, localcostptr, localneggradptr, modifiedspeed);
                 }
-                floorfieldsBeingCalculated.erase(destID);
-            }
+#pragma omp critical(isBeingCalculated)
+               {
+                       if (floorfieldsBeingCalculated.count(destID) != 1) {
+                           Log->Write("ERROR: FloorfieldViaFM::getDirectionToUID: key %d was calculating FF for destID %d, but it was removed from floorfieldsBeingCalculated meanwhile", key, destID);
+                       }
+                       floorfieldsBeingCalculated.erase(destID);
+               }
                 //Log->Write("Ending   FF for UID %d", destID);
                 //std::cerr << "\r W\t O\t R\t K\t I\t N\t G";
         }
@@ -389,6 +398,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
     direction._x = (localneggradptr[key]._x);
     direction._y = (localneggradptr[key]._y);
 }
+
 
 //void FloorfieldViaFM::getDirectionToFinalDestination(Pedestrian* ped, Point& direction){
 //    const Point& position = ped->GetPos();
@@ -432,9 +442,9 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
             localcostptr =    new double[grid->GetnPoints()];
             localneggradptr = new Point[grid->GetnPoints()];
             goalneggradmap.erase(goalID);
-            goalneggradmap.emplace(goalID, localneggradptr);
+            //goalneggradmap.emplace(goalID, localneggradptr);
             goalcostmap.erase(goalID);
-            goalcostmap.emplace(goalID, localcostptr);
+            //goalcostmap.emplace(goalID, localcostptr);
             //create ff (prepare Trial-mechanic, then calc)
 //            for (long int i = 0; i < grid->GetnPoints(); ++i) {
 //                //set Trialptr to fieldelements
@@ -499,8 +509,12 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
             double cost_of_MIN3 = DBL_MAX;
             long int dummykey;
             for (const auto& loctrans : transitions) {
+                if (!loctrans.second->IsExit() || !loctrans.second->IsOpen()) {
+                    continue;
+                }
                 dummykey = grid->getKeyAtPoint(loctrans.second->GetCentre());
-                if (cost_of_MIN > localcostptr[dummykey]) {
+                double debugdouble = localcostptr[dummykey];
+                if ((cost_of_MIN > localcostptr[dummykey]) && (localcostptr[dummykey] >= 0.)) {
                     UID_of_MIN3 = UID_of_MIN2;
                     cost_of_MIN3 = cost_of_MIN2;
 
@@ -512,7 +526,7 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
                     //std::cerr << std::endl << "Closer Line found: " << UID_of_MIN ;
                     continue;
                 }
-                if (cost_of_MIN2 > localcostptr[dummykey]) {
+                if ((cost_of_MIN2 > localcostptr[dummykey]) && (localcostptr[dummykey] >= 0.)) {
                     UID_of_MIN3 = UID_of_MIN2;
                     cost_of_MIN3 = cost_of_MIN2;
 
@@ -520,7 +534,7 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
                     cost_of_MIN2 = localcostptr[dummykey];
                     continue;
                 }
-                if (cost_of_MIN3 > localcostptr[dummykey]) {
+                if ((cost_of_MIN3 > localcostptr[dummykey]) && (localcostptr[dummykey] >= 0.)) {
                     UID_of_MIN3 = loctrans.second->GetUniqueID();
                     cost_of_MIN3 = localcostptr[dummykey];
                     continue;
@@ -532,15 +546,32 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
             goalToLineUIDmap2.emplace(goalID, UID_of_MIN2);
             goalToLineUIDmap3.erase(goalID);
             goalToLineUIDmap3.emplace(goalID, UID_of_MIN3);
-
+            delete[] localcostptr;
+            delete[] localneggradptr;
         }
     }
 }
 
 double FloorfieldViaFM::getCostToDestination(const int destID, const Point& position) {
+//    if ((costmap.count(destID) == 0) || (costmap.at(destID) == nullptr)) {
+//        Point dummy;
+//        getDirectionToUID(destID, 0, dummy);         //this call induces the floorfieldcalculation
+//    }
+//    if ((costmap.count(destID) == 0) || (costmap.at(destID) == nullptr)) {
+//        Log->Write("ERROR: \tDestinationUID %d is invalid / out of grid.", destID);
+//        return DBL_MAX;
+//    }
+//    if (grid->getKeyAtPoint(position) == -1) {  //position is out of grid
+//        return -7;
+//    }
+//    return (costmap.at(destID))[grid->getKeyAtPoint(position)];
+    return getCostToDestination(destID, position, global_shortest);
+}
+
+double FloorfieldViaFM::getCostToDestination(const int destID, const Point& position, int mode) {
     if ((costmap.count(destID) == 0) || (costmap.at(destID) == nullptr)) {
         Point dummy;
-        getDirectionToUID(destID, 0, dummy);         //this call induces the floorfieldcalculation
+        getDirectionToUID(destID, 0, dummy, mode);         //this call induces the floorfieldcalculation
     }
     if ((costmap.count(destID) == 0) || (costmap.at(destID) == nullptr)) {
         Log->Write("ERROR: \tDestinationUID %d is invalid / out of grid.", destID);
@@ -724,6 +755,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     dist2Wall = new double[grid->GetnPoints()];
     speedInitial = new double[grid->GetnPoints()];
     modifiedspeed = new double[grid->GetnPoints()];
+    densityspeed = new double[grid->GetnPoints()];
     cost = new double[grid->GetnPoints()];
     neggrad = new Point[grid->GetnPoints()];
     dirToWall = new Point[grid->GetnPoints()];
@@ -884,8 +916,8 @@ void FloorfieldViaFM::parseBuildingForExits(const Building* const buildingArg, c
             if (eachwall.GetPoint1()._y > yMax) yMax = eachwall.GetPoint1()._y;
             if (eachwall.GetPoint2()._y > yMax) yMax = eachwall.GetPoint2()._y;
         }
-        goalcostmap.emplace(eachgoal.second->GetId(), nullptr);
-        goalneggradmap.emplace(eachgoal.second->GetId(), nullptr);
+        //goalcostmap.emplace(eachgoal.second->GetId(), nullptr);
+        //goalneggradmap.emplace(eachgoal.second->GetId(), nullptr);
     }
 
     //create Rect Grid
@@ -996,6 +1028,21 @@ void FloorfieldViaFM::prepareForDistanceFieldCalculation(const bool onlyRoomsWit
 //    drawLinesOnGrid(LineArg, costarray, 0.);
 //    //std::cerr << LineArg[0].GetUniqueID() << " " << LineArg[0].GetPoint1()._x << " " << LineArg[0].GetPoint1()._y << " " << LineArg[0].GetPoint2()._x << " " << LineArg[0].GetPoint2()._y << std::endl;
 //}
+
+void FloorfieldViaFM::deleteAllFFs() {
+    for (int i = 0; i < costmap.size(); ++i) {
+        auto costIter = costmap.begin();
+        auto negIter  = neggradmap.begin();
+        std::advance(costIter, (costmap.size() - (i+1)));
+        std::advance(negIter,  (neggradmap.size() - (i+1)));
+
+        if (costIter->second) delete[] costIter->second;
+        if (negIter->second) delete[] negIter->second;
+
+        costIter->second = nullptr;
+        negIter->second = nullptr;
+    }
+}
 
 /*!
  * \brief [brief description]
@@ -1231,11 +1278,77 @@ void FloorfieldViaFM::setSpeed(bool useDistance2WallArg) {
             }
         }
     }
+    if (densityspeed) {
+        std::copy(modifiedspeed, modifiedspeed + grid->GetnPoints(), densityspeed);
+    }
 }
 
-//void FloorfieldViaFM::setSpeedFromLCGrid(double* newspeed) {
-////    building->GetGrid()->HALLOHIERBINICHAMMONTAG
-//}
+void FloorfieldViaFM::setSpeedThruPeds(Pedestrian* const * pedsArg, int nsize, int modechoice, double radius) {
+
+    long int delta = radius / grid->Gethx();
+    long int posIndex = 0;
+    long int pos_i = 0;
+    long int pos_j = 0;
+    long int i_start = 0;
+    long int j_start = 0;
+    long int i_end = 0;
+    long int j_end = 0;
+    double indexDistance = 0.0;
+
+    if (nsize == 0) {
+        Log->Write("WARNING: \tSetSpeedThruPeds: nsize is ZERO");
+    } else {
+        Log->Write("INFO: \t\tNumber of Peds used in setSpeedThruPeds: %d",nsize);
+    }
+
+    if ((modechoice == quickest) && (!densityspeed)) {
+        densityspeed = new double[grid->GetnPoints()];
+    }
+    //std::copy(modifiedspeed, modifiedspeed+(grid->GetnPoints()), densityspeed);
+    for (long int i = 0; i < grid->GetnPoints(); ++i) {
+        densityspeed[i] = speedInitial[i];
+    }
+
+    for (int i = 0; i < nsize; ++i) {
+        //the following check is not 3D proof, we require the caller of this function to provide a list with "valid"
+        //pedestrian-pointer
+        if (!grid->includesPoint(pedsArg[i]->GetPos())) {
+            continue;
+        }
+                                                    /*this value defines the jam-speed threshold*/
+//        if (pedsArg[i]->GetEllipse().GetV().Norm() >  0.8*pedsArg[i]->GetEllipse().GetV0()) {
+//            continue;
+//        }
+        posIndex = grid->getKeyAtPoint(pedsArg[i]->GetPos());
+        pos_i = grid->get_i_fromKey(posIndex);
+        pos_j = grid->get_j_fromKey(posIndex);
+
+        i_start = ((pos_i - delta) < 0)               ? 0               : (pos_i - delta);
+        i_end   = ((pos_i + delta) >= grid->GetiMax()) ? grid->GetiMax()-1 : (pos_i + delta);
+
+        j_start = ((pos_j - delta) < 0)               ? 0               : (pos_j - delta);
+        j_end   = ((pos_j + delta) >= grid->GetjMax()) ? grid->GetjMax()-1 : (pos_j + delta);
+
+        for     (long int curr_i = i_start; curr_i < i_end; ++curr_i) {
+            for (long int curr_j = j_start; curr_j < j_end; ++curr_j) {
+                //indexDistance holds the square
+                indexDistance = ( (curr_i - pos_i)*(curr_i - pos_i) + (curr_j - pos_j)*(curr_j - pos_j) );
+                //now using indexDistance to store the (speed) reduction value
+                //indexDistance = (delta*delta) - (indexDistance);
+                //if (indexDistance < 0) { indexDistance = 0.;}
+                //scale to [0 .. 1]
+                //indexDistance = indexDistance/(delta*delta);
+
+                //densityspeed[curr_j*grid->GetiMax() + curr_i] = (indexDistance > (delta*delta)) ? densityspeed[curr_j*grid->GetiMax() + curr_i] : .001;
+                if (indexDistance < (delta*delta)) {
+                    //std::cout << "c h a n g i n g   ";
+                    densityspeed[curr_j*grid->GetiMax() + curr_i] = 0.07;
+                }
+            }
+        }
+    }
+
+}
 
 void FloorfieldViaFM::calculateFloorfield(std::vector<Line>& targetlines, double* costarray, Point* neggradarray) {
     calculateFloorfield(targetlines, costarray, neggradarray, modifiedspeed);
@@ -1752,6 +1865,73 @@ void FloorfieldViaFM::writeFF(const std::string& filename, std::vector<int> targ
 
         double *costarray = costmap[targetID[iTarget]];
         file << "SCALARS CostTarget" << building->GetTransOrCrossByUID(targetID[iTarget])->GetCaption() << "-" << targetID[iTarget] << " float 1" << std::endl;
+        file << "LOOKUP_TABLE default" << std::endl;
+        for (long int i = 0; i < grid->GetnPoints(); ++i) {
+            file << costarray[i] << std::endl;
+        }
+    }
+    file << "SCALARS GCode float 1" << std::endl;
+    file << "LOOKUP_TABLE default" << std::endl;
+    for (long int i = 0; i < grid->GetnPoints(); ++i) {
+        file << gcode[i] << std::endl;
+    }
+    file.close();
+}
+
+void FloorfieldViaFM::writeGoalFF(const std::string& filename, std::vector<int> targetID) {
+    Log->Write("INFO: \tWrite Floorfield to file");
+    Log->Write(filename);
+    std::ofstream file;
+
+    int numX = (int) ((grid->GetxMax()-grid->GetxMin())/grid->Gethx());
+    int numY = (int) ((grid->GetyMax()-grid->GetyMin())/grid->Gethy());
+    int numTotal = numX * numY;
+    //std::cerr << numTotal << " numTotal" << std::endl;
+    //std::cerr << grid->GetnPoints() << " grid" << std::endl;
+    file.open(filename);
+
+    file << "# vtk DataFile Version 3.0" << std::endl;
+    file << "Testdata: Fast Marching: Test: " << std::endl;
+    file << "ASCII" << std::endl;
+    file << "DATASET STRUCTURED_POINTS" << std::endl;
+    file << "DIMENSIONS " <<
+    std::to_string(grid->GetiMax()) <<
+    " " <<
+    std::to_string(grid->GetjMax()) <<
+    " 1" << std::endl;
+    file << "ORIGIN " << grid->GetxMin() << " " << grid->GetyMin() << " 0" << std::endl;
+    file << "SPACING " << std::to_string(grid->Gethx()) << " " << std::to_string(grid->Gethy()) << " 1" << std::endl;
+    file << "POINT_DATA " << std::to_string(numTotal) << std::endl;
+    //file << "SCALARS Dist2Wall float 1" << std::endl;
+    //file << "LOOKUP_TABLE default" << std::endl;
+    //for (long int i = 0; i < grid->GetnPoints(); ++i) {
+    //    file << dist2Wall[i] << std::endl; //@todo: change target to all dist2wall
+        //Point iPoint = grid->getPointFromKey(i);
+        //file2 << iPoint._x /*- grid->GetxMin()*/ << " " << iPoint._y /*- grid->GetyMin()*/ << " " << target[i] << std::endl;
+    //}
+
+    //file << "VECTORS Dir2Wall float" << std::endl;
+    //for (long int i = 0; i < grid->GetnPoints(); ++i) {
+    //    file << dirToWall[i]._x << " " << dirToWall[i]._y << " 0.0" << std::endl;
+    //}
+
+    for (unsigned int iTarget = 0; iTarget < targetID.size(); ++iTarget) {
+        if (goalneggradmap.count(targetID[iTarget]) == 0) {
+            continue;
+        }
+
+        Point *gradarray = goalneggradmap[targetID[iTarget]];
+        if (gradarray == nullptr) {
+            continue;
+        }
+
+        file << "VECTORS GradientTarget" << targetID[iTarget] << " float" << std::endl;
+        for (int i = 0; i < grid->GetnPoints(); ++i) {
+            file << gradarray[i]._x << " " << gradarray[i]._y << " 0.0" << std::endl;
+        }
+
+        double *costarray = goalcostmap[targetID[iTarget]];
+        file << "SCALARS CostTarget" << targetID[iTarget] << " float 1" << std::endl;
         file << "LOOKUP_TABLE default" << std::endl;
         for (long int i = 0; i < grid->GetnPoints(); ++i) {
             file << costarray[i] << std::endl;

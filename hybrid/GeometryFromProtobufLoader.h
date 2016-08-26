@@ -11,6 +11,7 @@
 class GeometryFromProtobufLoader : public GeometryReader {
 public:
      GeometryFromProtobufLoader(const Configuration* configuration);
+     virtual ~GeometryFromProtobufLoader(){};
 
      virtual void LoadBuilding(Building* building) override;
 

@@ -190,9 +190,10 @@ endif (OPENMP_FOUND)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 # test all cpp-files in Utest
+
 if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
-    find_package(Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
+    find_package(Boost COMPONENTS unit_test_framework REQUIRED)
     IF (CMAKE_COMPILER_IS_GNUCXX)
       set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
       IF (USE_DUAL_ABI)
@@ -314,11 +315,7 @@ set(source_files
         routing/cognitive_map/sensor/DiscoverDoorsSensor.cpp
         routing/cognitive_map/sensor/JamSensor.cpp
         routing/cognitive_map/sensor/LastDestinationsSensor.cpp
-        routing/cognitive_map/sensor/SmokeSensor.cpp
         routing/cognitive_map/sensor/locater.cpp
-        routing/cognitive_map/fire_mesh/FireMesh.cpp
-        routing/cognitive_map/fire_mesh/Knot.cpp
-        routing/cognitive_map/fire_mesh/FireMeshStorage.cpp
         routing/cognitive_map/cognitiveMap/associations.cpp
         routing/cognitive_map/cognitiveMap/cognitivemap.cpp
         routing/cognitive_map/cognitiveMap/waypoints.cpp
@@ -336,6 +333,15 @@ set(source_files
         poly2tri/sweep/cdt.cpp
         events/EventManager.cpp
         events/Event.cpp
+
+        JPSfire/generic/FDSMesh.cpp
+        JPSfire/generic/Knot.cpp
+        JPSfire/generic/FDSMeshStorage.cpp
+        JPSfire/A_smoke_sensor/SmokeSensor.cpp
+        JPSfire/B_walking_speed/WalkingSpeed.cpp
+        JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
+        JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
+
         math/KrauszModel.cpp)
 
 set(header_files
@@ -376,11 +382,7 @@ set(header_files
         routing/cognitive_map/sensor/DiscoverDoorsSensor.h
         routing/cognitive_map/sensor/JamSensor.h
         routing/cognitive_map/sensor/LastDestinationsSensor.h
-        routing/cognitive_map/sensor/SmokeSensor.h
         routing/cognitive_map/sensor/locater.h
-        routing/cognitive_map/fire_mesh/FireMesh.h
-        routing/cognitive_map/fire_mesh/Knot.h
-        routing/cognitive_map/fire_mesh/FireMeshStorage.h
         routing/cognitive_map/cognitiveMap/associations.h
         routing/cognitive_map/cognitiveMap/cognitivemap.h
         routing/cognitive_map/cognitiveMap/waypoints.h
@@ -450,10 +452,20 @@ set(header_files
         poly2tri/sweep/sweep.h
         events/EventManager.h
         events/Event.h
+
+        JPSfire/generic/FDSMesh.h
+        JPSfire/generic/Knot.h
+        JPSfire/generic/FDSMeshStorage.h
+        JPSfire/A_smoke_sensor/SmokeSensor.h
+        JPSfire/B_walking_speed/WalkingSpeed.h
+        JPSfire/C_toxicity_analysis/ToxicityAnalysis.h
+        JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
         )
 
-
-add_library(core STATIC ${source_files})
+      add_library(core STATIC ${source_files})
+      if(Boost_FOUND)
+        target_link_libraries(core ${Boost_LIBRARIES})
+      endif()
 
 #add_library ( core SHARED ${source_files} )
 
@@ -461,6 +473,7 @@ add_library(core STATIC ${source_files})
 #add_executable(
 #  jpscore Utest/Fastmarchtest.h
 #)
+
 add_executable(jpscore main.cpp)
 
 if (Boost_FOUND)
@@ -475,11 +488,12 @@ if (Boost_FOUND)
     target_link_libraries(jpscore ${Boost_LIBRARIES})
 endif ()
 
-target_link_libraries(jpscore core)
+target_link_libraries(jpscore core )
 
 if (WIN32)
     target_link_libraries(jpscore core wsock32)
 endif (WIN32)
+
 
 # if(CGAL_FOUND)
 #   target_link_libraries (jpscore ${CGAL_CORE_LIBRARY})
