@@ -195,7 +195,7 @@ const GraphEdge * GraphVertex::GetCheapestDestinationByEdges(const Point & posit
             //check if the destination edge was discovered before.
             if(destinations.find((*it)) == destinations.end()) {
                 //initialize the new discovered vertex with distance inifity and push it to the queue
-                destinations[(*it)] = std::make_pair<const GraphEdge*, double>(NULL, INFINITY);
+                destinations[(*it)] = std::make_pair<const GraphEdge*, double>(nullptr, INFINITY);
                 queue.push(std::make_pair(new_distance, (*it)));
             }
             //check if we found a shorter path to the dest vertex
@@ -206,7 +206,7 @@ const GraphEdge * GraphVertex::GetCheapestDestinationByEdges(const Point & posit
         }
         visited.insert(act_edge);
     }
-    //did we found an exits?
+    //did we found an exit?
     if(exit_edge != NULL) {
         const GraphEdge * act_edge = destinations[exit_edge].first;
 

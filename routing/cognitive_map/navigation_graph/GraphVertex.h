@@ -85,7 +85,6 @@ public:
     const GraphEdge * GetCheapestDestinationByEdges(const Point & position) const;
     const GraphEdge * GetLocalCheapestDestination(const Point & position) const;
 
-    //NextDoorKnowlegde GetShortestPathFromHere(const Point & position) const;
 
 
 

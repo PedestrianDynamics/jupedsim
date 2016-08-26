@@ -151,7 +151,8 @@ double FDSMesh::GetKnotValue(const double &x, const double &y) const
     if(row < _matrix.size() && col < _matrix[0].size())
           value = _matrix[row][col].GetValue();
     else
-          value = std::numeric_limits<double>::quiet_NaN();
+        // needs to be fixed!!!
+          value = 1.0;//std::numeric_limits<double>::quiet_NaN();
 
 //    if(_matrix[row][col].GetValue() == 0.) {
 //        std::cout << "(" << row << " , " << col <<  ")" << std::endl;
@@ -172,9 +173,9 @@ void FDSMesh::ReadMatrix(std::string line, std::ifstream &pFile)
         for (auto &elem : strVec)
         {
             //std::cout << elem << " col " << n  << " line " << m << std::endl;
-            if (elem=="nan")
+            if (elem=="nan" || elem=="NAN" || elem=="NaN")
             {
-                _matrix[m][n].SetValue(std::nan(""));
+                _matrix[m][n].SetValue(1);
                 //Log->Write("ERROR: Mesh values consist of nan!");
                 //exit(EXIT_FAILURE);
             }

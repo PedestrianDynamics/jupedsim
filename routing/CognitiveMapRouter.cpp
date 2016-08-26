@@ -130,7 +130,7 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
 
         //Log->Write(std::to_string((*cm_storage)[p]->GetOwnPos().GetX())+" "+std::to_string((*cm_storage)[p]->GetOwnPos().GetY()));
 
-        destination = (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->GetLocalDestination();
+        destination = (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->GetDestination();
         if(destination == nullptr) {
             Log->Write("Gruess dich");
             //no destination was found, now we could start the discovery!
