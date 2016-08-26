@@ -55,7 +55,7 @@ public:
     void CreateDoorList();
     void CreateFDSMeshes();
     const FDSMesh& GetFDSMesh(const double &simTime, const double &pedElev,const std::string &quantity) throw (int);
-    const FDSMesh& GetFDSMesh(const double &pedElev, const Point &doorCentre, const double &simTime);
+    const FDSMesh& GetFDSMesh(const double &pedElev, const Point &doorCentre, const double &simTime) throw (int);
     std::string GetStudy() const;
     std::string IrritantOrNot() const;
 

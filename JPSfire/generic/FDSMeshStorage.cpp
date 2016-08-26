@@ -89,7 +89,7 @@ bool FDSMeshStorage::CreateQuantityList()
       {
 		  std::string quant_dir = iter->path().string();
           quant_dir =  quant_dir.substr( quant_dir.find_last_of("/\\") + 1 );
-          //std::cout << quant_dir << std::endl;
+          std::cout << quant_dir << std::endl;
            _quantitylist.push_back(quant_dir);
       }
     }
@@ -113,7 +113,7 @@ bool FDSMeshStorage::CreateElevationList()
       {
           std::string elev_dir = iter->path().string();
           double elev =  std::stod(elev_dir.substr( elev_dir.rfind("_") + 1 ));
-          //std::cout << elev << std::endl;
+          std::cout << elev << std::endl;
           _elevationlist.push_back(elev);
       }
     }
@@ -259,7 +259,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &p
     //    }
 }
 
-const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &doorCentre, const double &simTime)
+const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &doorCentre, const double &simTime) throw (int)
 {
     //Smoke Sensor active
 
@@ -278,6 +278,11 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
     "/t_"+std::to_string(simT)+".000000";
 
     std::cout << str << std::endl;
+
+    if (_fMContainer.count(str) == 0) {
+        std::cout << "requested sfgrid not available: " << str << std::endl;
+        throw -1;
+    }
 
     return _fMContainer.at(str);
 }

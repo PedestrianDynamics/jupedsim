@@ -98,14 +98,27 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap& cognitive
         /// on the current position of the pedestrian
 
         double RiskTolerance = pedestrian->GetRiskTolerance();
+        double weight;
 
-        double smokeFactor = 1 + (1-RiskTolerance)*
-                _FMStorage->GetFDSMesh(pedestrian->GetElevation(),
-                                       item->GetCrossing()->GetCentre(),
-                                       pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x,
-                                                                                 pedestrian->GetPos()._y);
+        //try block when no sfgrid is available
+
+        try
+        {
+            double SmokeFactor = _FMStorage->GetFDSMesh(pedestrian->GetElevation(),
+                                                        item->GetCrossing()->GetCentre(),
+                                                        pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x,
+                                                                                                 pedestrian->GetPos()._y);
+            weight = 1 + (1-RiskTolerance) * SmokeFactor;
+        }
+
+        catch (int e)
+        {
+            weight = 1;
+        }
+
         /// Set Smoke factor
-        item->SetFactor(smokeFactor,GetName());
+        //std::cout << weight << std::endl;
+        item->SetFactor(weight,GetName());
 
     }
 
