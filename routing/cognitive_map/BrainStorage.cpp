@@ -301,19 +301,23 @@ void BrainStorage::CreateBrain(BStorageKeyType ped)
          //Add crossings as edges
          for(auto&& itr_cross: _building->GetAllCrossings())
          {
+             if (itr_cross->IsOpen())
               _brains[ped]->GetCognitiveMap().GetGraphNetwork()->Add(itr_cross.second);
          }
 
          //Add transitions as edges
          for(auto&& itr_trans: _building->GetAllTransitions())
          {
-              if(itr_trans.second->IsExit())
+              if (itr_trans->IsOpen())
               {
-                   _brains[ped]->GetCognitiveMap().GetGraphNetwork()->AddExit(itr_trans.second);
-              }
-              else
-              {
-                   _brains[ped]->GetCognitiveMap().GetGraphNetwork()->Add(itr_trans.second);
+                  if(itr_trans.second->IsExit())
+                  {
+                       _brains[ped]->GetCognitiveMap().GetGraphNetwork()->AddExit(itr_trans.second);
+                  }
+                  else
+                  {
+                       _brains[ped]->GetCognitiveMap().GetGraphNetwork()->Add(itr_trans.second);
+                  }
               }
          }
      }

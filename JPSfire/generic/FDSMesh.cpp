@@ -152,7 +152,7 @@ double FDSMesh::GetKnotValue(const double &x, const double &y) const
           value = _matrix[row][col].GetValue();
     else
         // needs to be fixed!!!
-          value = 1.0;//std::numeric_limits<double>::quiet_NaN();
+          value = 0.0;//std::numeric_limits<double>::quiet_NaN();
 
 //    if(_matrix[row][col].GetValue() == 0.) {
 //        std::cout << "(" << row << " , " << col <<  ")" << std::endl;
