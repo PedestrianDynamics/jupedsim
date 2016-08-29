@@ -64,6 +64,7 @@ ArgumentParser::ArgumentParser()
      _geometryFileName = "geo.xml";
 
      _vComponent = "B";
+     _IgnoreBackwardMovement=false;
      _isMethodA = false;
      _delatTVInst = 5;
      _isMethodB = false;
@@ -415,7 +416,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
      }
 
      //instantaneous velocity
-     TiXmlNode* xVelocity=xMainNode->FirstChild("velocity");
+ /*    TiXmlNode* xVelocity=xMainNode->FirstChild("velocity");
      if(xVelocity)
      {
 		  string FrameSteps = xVelocity->FirstChildElement("frame_step")->GetText();
@@ -482,6 +483,44 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <" + FrameSteps + " frames>");
           }
      }
+*/
+     //instantaneous velocity
+         TiXmlNode* xVelocity=xMainNode->FirstChild("velocity");
+         if(xVelocity)
+         {
+        	  string FrameSteps =xMainNode->FirstChildElement("velocity")->Attribute("frame_step");
+    		  _delatTVInst = atof(FrameSteps.c_str())/2.0;
+    		  string MovementDirection = xMainNode->FirstChildElement("velocity")->Attribute("set_movement_direction");
+    		  if(atof(MovementDirection.c_str())<0 && atof(MovementDirection.c_str())>360 && MovementDirection!="None" && MovementDirection!="SeeTraj")
+    		  {
+    			  Log->Write("WARNING: \tThe movement direction should be set between 0 to 360 or None!");
+    			  return false;
+    		  }
+    		  if	(string(xMainNode->FirstChildElement("velocity")->Attribute("ignore_backward_movement"))=="true")
+    		  {
+    			  _IgnoreBackwardMovement = true;
+    		  }
+    		  else
+    		  {
+    			  _IgnoreBackwardMovement = false;
+    		  }
+    		  if(MovementDirection=="None")
+    		  {
+    			  _vComponent = "B";  // both components
+    			  _IgnoreBackwardMovement = false;
+    			  Log->Write("INFO: \tBoth x and y-component of coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+    		  }
+    		  else if(MovementDirection=="SeeTraj")
+    		  {
+    			  _vComponent = "F";
+    			  Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <" + FrameSteps + " frames>");
+    		  }
+    		  else
+    		  {
+    			  _vComponent = MovementDirection;
+    			  Log->Write("INFO: \tThe instantaneous velocity in the direction of "+MovementDirection+"degree will be calculated over <"+FrameSteps+" frames>" );
+    		  }
+         }
 
      // method A
      TiXmlElement* xMethod_A=xMainNode->FirstChildElement("method_A");
@@ -762,6 +801,11 @@ const string& ArgumentParser::GetTrajectoriesFilename() const
 std::string	ArgumentParser::GetVComponent() const
 {
      return _vComponent;
+}
+
+bool ArgumentParser::GetIgnoreBackwardMovement() const
+{
+	return _IgnoreBackwardMovement;
 }
 
 int ArgumentParser::GetDelatT_Vins() const

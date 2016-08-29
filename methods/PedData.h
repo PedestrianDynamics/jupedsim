@@ -70,7 +70,7 @@ public:
      std::vector<double> GetYInFrame(int frame, const std::vector<int>& ids) const;
      std::vector<double> GetZInFrame(int frame, const std::vector<int>& ids) const;
      std::vector<double> GetVInFrame(int frame, const std::vector<int>& ids, double zPos) const;
-     bool ReadData(const std::string& projectRootDir, const std::string& path, const std::string& filename, const FileFormat& _trajformat, int deltaF, std::string vComponent);
+     bool ReadData(const std::string& projectRootDir, const std::string& path, const std::string& filename, const FileFormat& _trajformat, int deltaF, std::string vComponent, const bool IgnoreBackwardMovement);
 
 
 private:
@@ -78,7 +78,7 @@ private:
      bool InitializeVariables(TiXmlElement* xRootNode);
      void CreateGlobalVariables(int numPeds, int numFrames);
      double GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor) const;
-
+     double GetInstantaneousVelocity1(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor) const;
 
 private:
 
@@ -93,6 +93,7 @@ private:
 
      int _deltaF=5;
      std::string _vComponent="B";
+     bool _IgnoreBackwardMovement=false;
 
      int *_firstFrame=NULL;   // Record the first frame of each pedestrian
      int *_lastFrame=NULL;    // Record the last frame of each pedestrian

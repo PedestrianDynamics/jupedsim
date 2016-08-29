@@ -58,6 +58,7 @@ private:
      std::vector<std::string> _trajectoriesFiles;
 
      std::string _vComponent;
+     bool _IgnoreBackwardMovement;
      bool _isMethodA;
      bool _isMethodB;
      bool _isMethodC;
@@ -116,6 +117,7 @@ public:
      double GetLineEndY() const;
 
      std::string GetVComponent() const;
+     bool GetIgnoreBackwardMovement() const;
      int GetDelatT_Vins() const;
      std::vector<int> GetTimeIntervalA() const;
      bool GetIsMethodA() const;
