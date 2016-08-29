@@ -1310,7 +1310,7 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
     delete[] flag;
 } //calculateDistancField
 
-void FloorfieldViaFM::checkNeighborsAndAddToNarrowband(std::priority_queue<TrialP, std::vector<TrialP>, std::greater<TrialP>> trialqueue, TrialP keyP,
+void FloorfieldViaFM::checkNeighborsAndAddToNarrowband(std::priority_queue<TrialP, std::vector<TrialP>, std::greater<TrialP>>& trialqueue, TrialP keyP,
                                                        std::function<void (TrialP)> calc) {
     long int aux = -1;
     int* flag = keyP.flag;
