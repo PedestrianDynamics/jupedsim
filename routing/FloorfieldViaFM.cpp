@@ -295,7 +295,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
     //what if goal == -1, meaning closest exit... is GetExitIndex then -1? NO... ExitIndex is UID, given by router
     //if (ped->GetFinalDestination() == -1) /*go to closest exit*/ destID != -1;
      // @todo f.mack: remove
-/*
+//*
 #pragma omp critical(delete_map)
      if (Pedestrian::GetGlobalTime() == 10 && !maps_deleted) {
 //#pragma omp critical
@@ -317,7 +317,6 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
     //#pragma omp critical
     {
         if (neggradmap.count(destID) == 0) {
-            Log->Write("FF for destID %d does not exist (key is %d)", destID, key);
             //check, if distID is in this grid
             Hline* destLine = building->GetTransOrCrossByUID(destID);
             Point A = destLine->GetPoint1();
@@ -338,7 +337,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
         if (localneggradptr == nullptr) { //@todo: ar.graf : check here if other thread has started calc of same ff
             //Log->Write("###### key %d wants to calculate new Floorfield to destID %d", key, destID);
             bool isBeingCalculated;
-#pragma omp critical(floorfieldsBeingCalculated)
+#pragma omp critical(isBeingCalculated)
             {
                 if (!(isBeingCalculated = floorfieldsBeingCalculated.count(destID) > 0)) {
                     floorfieldsBeingCalculated.insert(destID);
@@ -385,8 +384,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 } else {
                     calculateFloorfield(localline, localcostptr, localneggradptr, modifiedspeed);
                 }
-            // @todo f.mack find the biggest value in localneggradptr
-#pragma omp critical(floorfieldsBeingCalculated)
+#pragma omp critical(isBeingCalculated)
                {
                        if (floorfieldsBeingCalculated.count(destID) != 1) {
                            Log->Write("ERROR: FloorfieldViaFM::getDirectionToUID: key %d was calculating FF for destID %d, but it was removed from floorfieldsBeingCalculated meanwhile", key, destID);
@@ -399,7 +397,6 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
     }
     direction._x = (localneggradptr[key]._x);
     direction._y = (localneggradptr[key]._y);
-    if (Pedestrian::GetGlobalTime() == 10) Log->Write("FloorfieldViaFM::getDirectionToUID(): return value is %f, %f", direction._x, direction._y);
 }
 
 
@@ -1819,8 +1816,6 @@ void FloorfieldViaFM::writeFF(const std::string& filename, std::vector<int> targ
     Log->Write(filename);
     std::ofstream file;
 
-    Log->Write("FloorfieldViaFM::writeFF(): writing to file %s: There are %d targets.", filename.c_str(), targetID.size());
-
     int numX = (int) ((grid->GetxMax()-grid->GetxMin())/grid->Gethx());
     int numY = (int) ((grid->GetyMax()-grid->GetyMin())/grid->Gethy());
     int numTotal = numX * numY;
@@ -1854,7 +1849,6 @@ void FloorfieldViaFM::writeFF(const std::string& filename, std::vector<int> targ
     }
 
     for (unsigned int iTarget = 0; iTarget < targetID.size(); ++iTarget) {
-        Log->Write("%s: target number %d: UID %d", filename.c_str(), iTarget, targetID[iTarget]);
         if (neggradmap.count(targetID[iTarget]) == 0) {
             continue;
         }

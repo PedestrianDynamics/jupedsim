@@ -338,12 +338,6 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 movDirection = oldMov - diff;
                 movDirection = (movDirection.Norm() > 1.) ? movDirection.Normalized() : movDirection;
 
-                if (Pedestrian::GetGlobalTime() == 10) {
-                     Log->Write("exit: %d", ped->GetExitIndex());
-                     Log->Write("toTarget: %f, %f", toTarget._x, toTarget._y);
-                     Log->Write("movDirection: %f, %f", movDirection._x, movDirection._y);
-                }
-
                 //redirect near wall mechanics:
                 Point dir2Wall = Point{0., 0.};
                 double distance2Wall = -1.;
@@ -362,29 +356,18 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 double dotProduct = 0;
                 double antiClippingFactor = 1;
                 if (distance2Wall < _slowDownDistance) {
-                    Log->Write("distance2Wall: %f, _slowDownDistance: %f", distance2Wall, _slowDownDistance);
                     dotProduct = movDirection.ScalarProduct(dir2Wall);
                     if ((dotProduct > 0) && (distance2Wall < .5 * _slowDownDistance)) { //acute angle && really close to wall
                         movDirection = movDirection - (dir2Wall*dotProduct); //remove walldirection from movDirection
                         ++(*redircnt);
                     }
                     antiClippingFactor = ( 1 - .5*(dotProduct + fabs(dotProduct)) );
-                     Log->Write("antiClippingFactor: %f", antiClippingFactor);
                     ++(*slowcnt);
                 }
 
                 movDirection = movDirection * (antiClippingFactor * ped->GetV0Norm() * deltaT);
 
                 Point pos_neu = ped->GetPos() + movDirection;
-                if (Pedestrian::GetGlobalTime() == 10 || Pedestrian::GetGlobalTime() == 3) {
-                     Log->Write("dir2Wall: %f, %f", dir2Wall._x, dir2Wall._y);
-                     Log->Write("dotProduct: %f", dotProduct);
-                     Log->Write("V0Norm: %f", ped->GetV0Norm());
-                     Log->Write("deltaT: %f", deltaT);
-                     Log->Write("final movDirection: %f, %f", movDirection._x, movDirection._y);
-                     Log->Write("oldPos: %f, %f", ped->GetPos()._x, ped->GetPos()._y);
-                     Log->Write("pos_neu: %f, %f", pos_neu._x, pos_neu._y);
-                }
 
                 ped->SetPos(pos_neu);
                 ped->SetV(movDirection/deltaT);
