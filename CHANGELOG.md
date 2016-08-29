@@ -19,6 +19,8 @@ All notable changes to this project will be documented in this file.
 
 - The swith for calculating Individual FD is arraged for each measurement area.
 
+- The setting for velocity calculation is changed. Now velocity can be calculated by projecting to any direction. The backward movement against the target direction can be considered or removed by setting the parameter `ignore_backward_movement`.
+
 ### Fixed
 
 - The script for plot Voronoi cells is modified so that it work when the trajectory files are not the in the same location as the inifile.
