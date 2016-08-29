@@ -52,14 +52,14 @@ void DiscoverDoorsSensor::execute(const Pedestrian * pedestrian, CognitiveMap& c
     const std::vector<Crossing *>& crossings = sub_room->GetAllCrossings();
     for(std::vector<Crossing*>::const_iterator it = crossings.begin(); it != crossings.end(); ++it)
     {
-        if (it->IsOpen())
+        if ((*it)->IsOpen())
             cognitive_map.GetGraphNetwork()->Add((*it));
     }
     //Add transitions as edges
     const std::vector<Transition *>& transitions = sub_room->GetAllTransitions();
     for(std::vector<Transition *>::const_iterator it = transitions.begin(); it != transitions.end(); ++it)
     {
-        if (it->IsOpen())
+        if ((*it)->IsOpen())
         {
             if((*it)->IsExit()) {
                 cognitive_map.GetGraphNetwork()->AddExit((*it));
