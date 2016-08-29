@@ -368,7 +368,10 @@ Point DirectionLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 //                                      filename));
 //          locffviafm[room->GetID()]->getDirectionToDestination(ped, p);
 //     }
+     if (Pedestrian::GetGlobalTime() == 10) Log->Write("DirectionLocalFloorfield::GetTarget(): p == %f, %f", p._x, p._y);
      p = p.Normalized();     // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
+     if (Pedestrian::GetGlobalTime() == 10) Log->Write("DirectionLocalFloorfield::GetTarget(): p.Normalized == %f, %f", p._x, p._y);
+     if (Pedestrian::GetGlobalTime() == 10) Log->Write("DirectionLocalFloorfield::GetTarget(): ped->GetPos() == %f, %f", ped->GetPos()._x, ped->GetPos()._y);
      return (p + ped->GetPos());
 
 #if DEBUG
@@ -385,6 +388,10 @@ Point DirectionLocalFloorfield::GetDir2Wall(Pedestrian* ped) const
      Point p;
      int roomID = ped->GetRoomID();
      locffviafm.at(roomID)->getDir2WallAt(ped->GetPos(), p);
+     if (Pedestrian::GetGlobalTime() == 10) {
+          Log->Write("DirectionLocalFloorfield::GetDir2Wall was called for roomID %d, subroomID %d", roomID, ped->GetSubRoomID());
+          Log->Write("at %f, %f, the result is %f, %f", ped->GetPos()._x, ped->GetPos()._y, p._x, p._y);
+     }
      return p;
 }
 
@@ -422,8 +429,8 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
      //for (auto& roomPair : building->GetAllRooms()) {
          auto roomPairIt = building->GetAllRooms().begin();
          std::advance(roomPairIt, i);
-         locffviafm[(*roomPairIt).first] = new LocalFloorfieldViaFM((*roomPairIt).second.get(), building, hx, hy,
-                 wallAvoidDistance, useDistancefield);
+         locffviafm[(*roomPairIt).first] = new LocalFloorfieldViaFM((*roomPairIt).second.get(), building,
+                 hx, hy, wallAvoidDistance, useDistancefield);
      }
      end = std::chrono::system_clock::now();
      std::chrono::duration<double> elapsed_seconds = end-start;
@@ -470,8 +477,9 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
                     targets.emplace_back(pair.second);
                }
           }
+          //@todo: ar.graf: plz make switch in ini file and dependand on ini write yes/no (issue 208)
           std::string lfilename = "floorfield" + std::to_string(roomNr) + ".vtk";
-          locffviafm[roomNr]->writeFF(lfilename, targets);
+          //locffviafm[roomNr]->writeFF(lfilename, targets);
      }
 */
 
@@ -538,14 +546,14 @@ Point DirectionSubLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 Point DirectionSubLocalFloorfield::GetDir2Wall(Pedestrian* ped) const
 {
      Point p;
-     int key = ped->GetSubRoomID();
+     int key = ped->GetSubRoomUID();
      locffviafm.at(key)->getDir2WallAt(ped->GetPos(), p);
      return p;
 }
 
 double DirectionSubLocalFloorfield::GetDistance2Wall(Pedestrian* ped) const
 {
-     return locffviafm.at(ped->GetSubRoomID())->getDistance2WallAt(ped->GetPos());
+     return locffviafm.at(ped->GetSubRoomUID())->getDistance2WallAt(ped->GetPos());
 }
 
 void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
@@ -585,8 +593,9 @@ void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
 #pragma omp critical
                     subUIDs.emplace_back(subUID);
                     Log->Write("Creating SubLocFF at key: %d", subUID);
-                    locffviafm[subUID] = new SubLocalFloorfieldViaFM(subroomIt->second.get(), building, hx, hy,
-                            wallAvoidDistance, useDistancefield);
+                    locffviafm[subUID] = new SubLocalFloorfieldViaFM(
+                              subroomIt->second.get(), building,
+                              hx, hy, wallAvoidDistance, useDistancefield);
                     auto targets = subroomIt->second->GetAllGoalIDs();
                     for (auto targetUID : targets) {
                          subAndTarget.emplace_back(std::make_pair(subUID, targetUID));
@@ -625,8 +634,9 @@ void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
                     targets.emplace_back(pair.second);
                }
           }
-          std::string filename1 = "floorfield" + std::to_string(subroomUID) + ".vtk";
-          locffviafm[subroomUID]->writeFF(filename1, targets);
+          //@todo: ar.graf: make ini file switch if files are written (yes/no) (Issue 208)
+          std::string filename = "floorfield" + std::to_string(subroomUID) + ".vtk";
+          //locffviafm[subroomUID]->writeFF(filename, targets);
      }
 }
 

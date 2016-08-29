@@ -65,6 +65,7 @@ public:
      //void getDirectionAt(const Point& position, Point& direction);                                   //obsolete
      //void getDirectionToDestination (const int destID, const Point& position, Point& direction);     //obsolete
      void getDirectionToUID(int destID, const long int key, Point& direction);
+     void getDirectionToUID(int destID, const long int key, Point& direction, int mode);
      //void getDirectionToUIDParallel(int destID, const long int key, Point& direction);
      void getDirectionToDestination (Pedestrian* ped, Point& direction);
      //void getDirectionToFinalDestination(Pedestrian* ped, Point& direction); //this is router buissness! problem in multi-storage buildings
@@ -72,6 +73,7 @@ public:
      void createMapEntryInLineToGoalID(const int goalID);
 
      double getCostToDestination(const int destID, const Point& position);
+     double getCostToDestination(const int destID, const Point& position, int mode);
      //double getCostToDestinationParallel(const int destID, const Point& position);
 
      void getDir2WallAt(const Point& position, Point& direction);
@@ -85,7 +87,8 @@ public:
      void drawLinesOnGrid(std::vector<Line>& wallArg, double* const target, const double dbl2draw);
      void drawLinesOnGrid(std::vector<Line>& wallArg, int* const target, const int int2draw);
      void setSpeed(bool useDistance2WallArg);
-     void setSpeedFromLCGrid(double* newspeed);
+     void setSpeedThruPeds(Pedestrian* const* pedsArg, int nPeds, int modechoice, double radius);
+     void deleteAllFFs();
      void clearAndPrepareForFloorfieldReCalc(double* costarray);
      void setNewGoalAfterTheClear(double* costarray, std::vector<Line>& GoalWallArg);
      void calculateFloorfield(std::vector<Line>& wallArg, double* costarray, Point* neggradarray);   //make private
@@ -104,6 +107,7 @@ public:
 
      void testoutput(const char*, const char*, const double*);
      void writeFF(const std::string&, std::vector<int> targetID);
+     void writeGoalFF(const std::string&, std::vector<int> targetID);
 
      virtual int isInside(const long int key);
 
@@ -138,10 +142,6 @@ protected:
      unsigned int numOfExits;
 
      const Building* building;
-
-     //stuff to handle wrapper grid (unused, cause RectGrid handles offset)
-     //double offsetX;
-     //double offsetY;
 
      //GridPoint Data in independant arrays (shared primary key)
      // changed to threadsafe creation when needed: int* flag;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
