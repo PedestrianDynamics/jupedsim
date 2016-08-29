@@ -25,7 +25,7 @@
 <!-- agents -->
 <agents operational_model_id="3">
 	<agents_distribution>
-		<group group_id="1" agent_parameter_id="1" room_id="1" subroom_id="0" x_min="2" y_min="0" y_max="5" number="10" router_id="7" pre_movement_mean="60" pre_movement_sigma="0" risk_tolerance_mean="0." risk_tolerance_sigma="0."/>
+		<group group_id="1" agent_parameter_id="1" room_id="1" subroom_id="0" x_min="2" y_min="0" y_max="5" number="20" router_id="7" pre_movement_mean="20" pre_movement_sigma="0" risk_tolerance_mean="1." risk_tolerance_sigma="0.3"/>
 		
 	</agents_distribution>
 </agents>

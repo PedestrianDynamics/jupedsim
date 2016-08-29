@@ -108,7 +108,7 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap& cognitive
                                                         item->GetCrossing()->GetCentre(),
                                                         pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x,
                                                                                                  pedestrian->GetPos()._y);
-            weight = 1 + (1-RiskTolerance) * SmokeFactor;
+            weight = 1 + (1-RiskTolerance) * SmokeFactor ;
         }
 
         catch (int e)
@@ -116,7 +116,7 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap& cognitive
             weight = 1;
         }
 
-        /// Set Smoke factor
+        /// Set Edge Weight
         //std::cout << weight << std::endl;
         item->SetFactor(weight,GetName());
 

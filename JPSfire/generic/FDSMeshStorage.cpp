@@ -113,7 +113,7 @@ bool FDSMeshStorage::CreateElevationList()
       {
           std::string elev_dir = iter->path().string();
           double elev =  std::stod(elev_dir.substr( elev_dir.rfind("_") + 1 ));
-          std::cout << elev << std::endl;
+          //std::cout << elev << std::endl;
           _elevationlist.push_back(elev);
       }
     }
@@ -131,15 +131,33 @@ void FDSMeshStorage::CreateDoorList()
     /// Create door list only neceassry if smoke sensor is active
     _doorlist.clear();
     fs::directory_iterator end ;
-    for( fs::directory_iterator iter(_filepath + _quantitylist[0] +
-       "/Z_" + std::to_string(_elevationlist[0]) ) ; iter != end ; ++iter ) {
-      if ( fs::is_directory( *iter ) )
-      {
-          std::string door_dir = iter->path().string();
-          door_dir =  door_dir.substr( door_dir.find_last_of("/\\") + 1 );
-          //std::cout << door_dir << std::endl;
-           _doorlist.push_back(door_dir);
-      }
+
+//        for( fs::directory_iterator iter(_filepath + _quantitylist[0] +
+//           "/Z_" + std::to_string(_elevationlist[0]) ) ; iter != end ; ++iter )
+//            {
+//              if ( fs::is_directory( *iter ) )
+//              {
+//                  std::string door_dir = iter->path().string();
+//                  door_dir =  door_dir.substr( door_dir.find_last_of("/\\") + 1 );
+//                  std::cout << door_dir << std::endl;
+//                   _doorlist.push_back(door_dir);
+//              }
+//            }
+
+    for( auto &elv:_elevationlist){
+
+        for( fs::directory_iterator iter(_filepath + _quantitylist[0] +
+           "/Z_" + std::to_string(elv) ) ; iter != end ; ++iter )
+            {
+              if ( fs::is_directory( *iter ) )
+              {
+                  std::string door_dir = iter->path().string();
+                  door_dir =  door_dir.substr( door_dir.find_last_of("/\\") + 1 );
+                  std::string elv_dir = "Z_" + ( "%.6f", std::to_string(elv)) ;
+                  std::cout << elv_dir + "/" + door_dir << std::endl;
+                   _doorlist.push_back(elv_dir + "/" + door_dir);
+              }
+            }
     }
 }
 
@@ -159,7 +177,7 @@ void FDSMeshStorage::CreateTimeList()
     std::string check_str;
     for(auto elem : _timelist) {
         if (_doorlist.size() > 0) {     // Smoke sensor active
-        check_str = _filepath + _quantitylist[0] + "/Z_" + std::to_string(_elevationlist[0]) + "/" +
+        check_str = _filepath + _quantitylist[0] + "/" +
                 _doorlist[0] + "/t_" + std::to_string(elem) + ".csv";
                 //std::cout << check_str << std::endl;
         }
@@ -184,23 +202,20 @@ void FDSMeshStorage::CreateFDSMeshes()
     if (_doorlist.size() > 0) {     // Smoke sensor active
         for (auto &h:_quantitylist)     //list of quantities
         {
-            for (auto &i:_elevationlist)    //list of elevations
-            {
                 for (auto &j:_doorlist)         //list of doors
                 {
-                    //std::cout << "i " << i << std::endl;
+                    //std::cout << "door " << j << std::endl;
                     for (auto &k:_timelist)         //list of times
                     {
                         //std::cout << "k " << j << std::endl;
-                        std::string str = h + "/Z_" + std::to_string(i) +
+                        std::string str = h +
                         "/" + j + "/t_"+std::to_string(k);
-                        std::cout << _filepath + str + ".csv" << std::endl;
+                        //std::cout << _filepath + str + ".csv" << std::endl;
                         FDSMesh mesh(_filepath + str + ".csv");
                         //std::string str = "t_"+std::to_string(i);
                         _fMContainer.insert(std::make_pair(str, mesh));
                     }
                 }
-            }
        }
    }
    else if (_doorlist.size() == 0) {     // Smoke sensor not active
@@ -277,11 +292,14 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
     "Door_X_"+ std::to_string(doorCentre._x) + "_Y_" + std::to_string(doorCentre._y) +
     "/t_"+std::to_string(simT)+".000000";
 
-    std::cout << str << std::endl;
 
     if (_fMContainer.count(str) == 0) {
-        std::cout << "requested sfgrid not available: " << str << std::endl;
+        //std::cout << "requested sfgrid not available: " << str << std::endl;
         throw -1;
+    }
+
+    if (_fMContainer.count(str) == 1) {
+        //std::cout << "requested sfgrid: " << str << std::endl;
     }
 
     return _fMContainer.at(str);
@@ -301,7 +319,7 @@ double FDSMeshStorage::GetNearestHeight(double _PedEyeHeight)
         }
     }
     _NearestHeight = _elevationlist[index];
-    //std::cout << "NEAREST" << std::endl << _NearestHeight << std::endl;
+    //std::cout << "NEAREST: " << _NearestHeight << std::endl;
     return _NearestHeight;
 }
 

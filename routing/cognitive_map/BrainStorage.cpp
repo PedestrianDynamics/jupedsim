@@ -224,7 +224,7 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
                 ptrLandmark assolandmark (new Landmark(Point(std::stod(asso_x),std::stod(asso_y)),
                                                     std::stod(asso_a),std::stod(asso_b)));
                 assolandmark->SetId(std::stod(asso_id));
-                std::cout << assolandmark->GetId() << std::endl;
+                //std::cout << assolandmark->GetId() << std::endl;
                 assolandmark->SetCaption(asso_caption);
                 //assolandmark->AddConnection(std::stoi(connection));
                 //assolandmark->SetPriority(std::stod(priority));
@@ -301,14 +301,14 @@ void BrainStorage::CreateBrain(BStorageKeyType ped)
          //Add crossings as edges
          for(auto&& itr_cross: _building->GetAllCrossings())
          {
-             if (itr_cross->IsOpen())
+             if (itr_cross.second->IsOpen())
               _brains[ped]->GetCognitiveMap().GetGraphNetwork()->Add(itr_cross.second);
          }
 
          //Add transitions as edges
          for(auto&& itr_trans: _building->GetAllTransitions())
          {
-              if (itr_trans->IsOpen())
+              if (itr_trans.second->IsOpen())
               {
                   if(itr_trans.second->IsExit())
                   {
