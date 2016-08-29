@@ -149,6 +149,8 @@ private:
      double _FED_In;
      double _FED_Heat;
 
+     WalkingSpeed * _WalkingSpeed;
+     std::shared_ptr<ToxicityAnalysis> _ToxicityAnalysis;
 
 public:
      // public member
@@ -470,10 +472,13 @@ public:
       */
      void SetBuilding(Building* building);
 
+     void SetWalkingSpeed(WalkingSpeed* walkingSpeed);
 
      void WalkingUpstairs(double c, SubRoom* sub, double ped_elevation, double &walking_speed) const;
      void WalkingDownstairs(double &walking_speed, double c, SubRoom* sub, double ped_elevation) const;
 
+
+     void SetTox(std::shared_ptr<ToxicityAnalysis> toxicityAnalysis);
      
      void ConductToxicityAnalysis();
 

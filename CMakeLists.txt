@@ -334,13 +334,13 @@ set(source_files
         events/EventManager.cpp
         events/Event.cpp
 
-        #JPSfire/generic/FDSMesh.cpp
-        #JPSfire/generic/Knot.cpp
-        #JPSfire/generic/FDSMeshStorage.cpp
-        #JPSfire/A_smoke_sensor/SmokeSensor.cpp
-        #JPSfire/B_walking_speed/WalkingSpeed.cpp
-        #JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
-        #JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
+        JPSfire/generic/FDSMesh.cpp
+        JPSfire/generic/Knot.cpp
+        JPSfire/generic/FDSMeshStorage.cpp
+        JPSfire/A_smoke_sensor/SmokeSensor.cpp
+        JPSfire/B_walking_speed/WalkingSpeed.cpp
+        JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
+        JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
 
         math/KrauszModel.cpp)
 
@@ -453,13 +453,13 @@ set(header_files
         events/EventManager.h
         events/Event.h
 
-        #JPSfire/generic/FDSMesh.h
-        #JPSfire/generic/Knot.h
-        #JPSfire/generic/FDSMeshStorage.h
-        #JPSfire/A_smoke_sensor/SmokeSensor.h
-        #JPSfire/B_walking_speed/WalkingSpeed.h
-        #JPSfire/C_toxicity_analysis/ToxicityAnalysis.h
-        #JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
+        JPSfire/generic/FDSMesh.h
+        JPSfire/generic/Knot.h
+        JPSfire/generic/FDSMeshStorage.h
+        JPSfire/A_smoke_sensor/SmokeSensor.h
+        JPSfire/B_walking_speed/WalkingSpeed.h
+        JPSfire/C_toxicity_analysis/ToxicityAnalysis.h
+        JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
         )
 
       add_library(core STATIC ${source_files})

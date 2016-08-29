@@ -643,7 +643,11 @@ double Pedestrian::GetV0Norm() const
            }
      }
 
-
+     //IF execution of WalkingInSmoke depending on JPSfire section in INI file
+     if(_WalkingSpeed->ReduceWalkingSpeed()) {
+         
+         walking_speed = _WalkingSpeed->WalkingInSmoke(this, walking_speed);
+     }
 
      //WHERE should the call to that routine be placed properly?
      //only executed every 3 seconds
@@ -655,7 +659,9 @@ double Pedestrian::GetV0Norm() const
 
 void Pedestrian::ConductToxicityAnalysis()
 {
-
+    if( _ToxicityAnalysis->ConductToxicityAnalysis() ) {
+       _ToxicityAnalysis->HazardAnalysis(this);
+    }
 }
 
 // get axis in the walking direction
@@ -1104,7 +1110,15 @@ void Pedestrian::SetBuilding(Building* building)
      _building = building;
 }
 
+void Pedestrian::SetWalkingSpeed(WalkingSpeed* walkingSpeed)
+{
+    _WalkingSpeed = walkingSpeed;
+}
 
+void Pedestrian::SetTox(std::shared_ptr<ToxicityAnalysis>toxicityAnalysis)
+{
+    _ToxicityAnalysis = toxicityAnalysis;
+}
 
 void Pedestrian::SetSpotlight(bool spotlight)
 {
