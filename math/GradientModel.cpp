@@ -120,20 +120,15 @@ bool GradientModel::Init (Building* building)
 
      std::set<std::pair<int, int>> roomsDoorsSet;
      roomsDoorsSet.clear();
-     std::vector<Pedestrian*> pedsToRemove;
-     pedsToRemove.clear();
-     bool error_occurred = false;
-#pragma omp parallel for
+     // @todo f.mack parallelize? yes, using pedsToRemove should be fine
     for(unsigned int p=0;p<allPeds.size();p++) {
          Pedestrian* ped = allPeds[p];
          double cosPhi, sinPhi;
          //a destination could not be found for that pedestrian
          if (ped->FindRoute() == -1) {
               Log->Write(
-                   "ERROR:\tGradientModel::Init() cannot initialise route. ped %d is scheduled for deletion.\n",ped->GetID());
-             //building->DeletePedestrian(ped);
-#pragma omp critical(GradientModel_Init_pedsToRemove)
-              pedsToRemove.emplace_back(ped);
+                   "ERROR:\tGradientModel::Init() cannot initialise route. ped %d is deleted.\n",ped->GetID());
+             building->DeletePedestrian(ped);
               continue;
          }
 
@@ -150,12 +145,8 @@ bool GradientModel::Init (Building* building)
               Log->Write(
                    "ERROR: \allPeds::Init() cannot initialise phi! "
                    "dist to target is 0\n");
-#pragma omp critical(error_occurred)
-              error_occurred = true;
-              //return false;
+              return false;
          }
-         // This skips the rest of the initialization if any pedestrian could not be initialized
-         if (error_occurred) continue;
 
          ped->InitV0(target);
 
@@ -169,11 +160,6 @@ bool GradientModel::Init (Building* building)
               roomsDoorsSet.insert(pedRoomsDoorSet.begin(), pedRoomsDoorSet.end());
          }
     }
-
-     for (auto ped : pedsToRemove) {
-          building->DeletePedestrian(ped);
-     }
-     if (error_occurred) return false;
 
      // @todo f.mack if it works, also implement for the others
      if (auto dirLocff = dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) {
