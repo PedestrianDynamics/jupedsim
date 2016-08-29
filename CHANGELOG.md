@@ -15,11 +15,15 @@ All notable changes to this project will be documented in this file.
 
 - The option `frame_interval` for method A now can have different values for different measurement area.
 
+- The option `ignore_backward_movement` and `set_movement_direction` are added to indicate the movement direction for velocity calculation.
+
 ### Changed
 
 - The swith for calculating Individual FD is arraged for each measurement area.
 
 - The setting for velocity calculation is changed. Now velocity can be calculated by projecting to any direction by setting the parameter `set_movement_direction`. The backward movement against the target direction can be considered or removed by setting the parameter `ignore_backward_movement`.
+
+- The way for reading .txt format trajectory file is changed. Now the order of each column in trajectory file is not so important. The trajectory file from JPScore can be analyzed directly.
 
 ### Fixed
 
