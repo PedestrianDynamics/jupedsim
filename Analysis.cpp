@@ -80,7 +80,7 @@ Analysis::Analysis()
      _outputGraph = false;   // Whether output the data for plot the fundamental diagram each frame
      _calcIndividualFD = false; //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
      _vComponent = "B"; // to mark whether x, y or x and y coordinate are used when calculating the velocity
-
+     _IgnoreBackwardMovement = false;
      _grid_size_X = 0.10;   // the size of the grid
      _grid_size_Y = 0.10;
      _lowVertexX = 0;// LOWest vertex of the geometry (x coordinate)
@@ -190,6 +190,7 @@ void Analysis::InitArgs(ArgumentParser* args)
      _plotGraph = args->GetIsPlotGraph();
      _isOneDimensional=args->GetIsOneDimensional();
      _vComponent = args->GetVComponent();
+     _IgnoreBackwardMovement =args->GetIgnoreBackwardMovement();
      _grid_size_X = int(args->GetGridSizeX());
      _grid_size_Y = int(args->GetGridSizeY());
      _geoPoly = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_D);
@@ -280,7 +281,7 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const std::string& geometryFile
 int Analysis::RunAnalysis(const string& filename, const string& path)
 {
      PedData data;
-     if(data.ReadData(_projectRootDir, path, filename, _trajFormat, _deltaF, _vComponent)==false)
+     if(data.ReadData(_projectRootDir, path, filename, _trajFormat, _deltaF, _vComponent, _IgnoreBackwardMovement)==false)
      {
           Log->Write("ERROR:\tCould not parse the file");
           return -1;

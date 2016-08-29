@@ -140,6 +140,7 @@ private:
      bool _isOneDimensional;
      bool _calcIndividualFD;  //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
      std::string _vComponent;        // to mark whether x, y or x and y coordinate are used when calculating the velocity
+     bool _IgnoreBackwardMovement;
      std::string _projectRootDir;
      std::string _scriptsLocation;
      std::string _geometryFileName;

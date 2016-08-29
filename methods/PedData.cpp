@@ -27,7 +27,8 @@
  **/
 
 #include "PedData.h"
-#include  <cmath>
+#include <cmath>
+#include <string>
 
 using std::string;
 using std::map;
@@ -44,12 +45,13 @@ PedData::~PedData()
 
 }
 
-bool PedData::ReadData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& trajformat, int deltaF, std::string vComponent)
+bool PedData::ReadData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& trajformat, int deltaF, std::string vComponent, const bool IgnoreBackwardMovement)
 {
      _minID = INT_MAX;
      _minFrame = INT_MAX;
      _deltaF = deltaF;
      _vComponent = vComponent;
+     _IgnoreBackwardMovement=IgnoreBackwardMovement;
      _projectRootDir = projectRootDir;
      _trajName = filename;
 
@@ -361,7 +363,7 @@ vector<double> PedData::GetVInFrame(int frame, const vector<int>& ids, double zP
           int id = ids[i];
           int Tpast = frame - _deltaF;
 		  int Tfuture = frame + _deltaF;
-		  double v = GetInstantaneousVelocity(frame, Tpast, Tfuture, id, _firstFrame, _lastFrame, _xCor, _yCor);
+		  double v = GetInstantaneousVelocity1(frame, Tpast, Tfuture, id, _firstFrame, _lastFrame, _xCor, _yCor);
           if(zPos<1000000.0)
           {
         	  if(fabs(_zCor[id][frame]-zPos*M2CM)<J_EPS_EVENT)
@@ -537,6 +539,67 @@ double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID
      }
 
      return fabs(v);
+}
+
+double PedData::GetInstantaneousVelocity1(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor) const
+{
+     std::string vcmp = _vComp[ID][Tnow];  // the vcmp is the angle from 0 to 360
+     if(vcmp=="X+")
+     {
+    	 vcmp="0";
+     }
+     else if(vcmp=="Y+")
+	 {
+		 vcmp="90";
+	 }
+     if(vcmp=="X-")
+	 {
+		 vcmp="180";
+	 }
+     if(vcmp=="Y-")
+	 {
+		 vcmp="270";
+	 }
+     double v=0.0;
+     if(vcmp != "B")  //check the component used in the calculation of velocity
+     {
+    	 float alpha=atof(vcmp.c_str())*2*M_PI/360.0;
+
+    	 if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
+		  {
+			 v=  _fps*CMtoM*((Xcor[ID][Tfuture] - Xcor[ID][Tpast])*cos(alpha)+(Ycor[ID][Tfuture] - Ycor[ID][Tpast])*sin(alpha))/(2.0 * _deltaF);
+		  }
+		  else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID]))
+		  {
+			   v = _fps*CMtoM*((Xcor[ID][Tfuture] - Xcor[ID][Tnow])*cos(alpha)+(Ycor[ID][Tfuture] - Ycor[ID][Tnow])*sin(alpha))/(_deltaF);  //one dimensional velocity
+		  }
+		  else if((Tpast >=Tfirst[ID])&&(Tfuture > Tlast[ID]))
+		  {
+			   v = _fps*CMtoM*((Xcor[ID][Tnow] - Xcor[ID][Tpast])*cos(alpha)+(Ycor[ID][Tnow] - Ycor[ID][Tpast])*sin(alpha))/( _deltaF);  //one dimensional velocity
+		  }
+		  if(_IgnoreBackwardMovement && v<0)           //if no move back and pedestrian moves back, his velocity is set as 0;
+		  {
+			   v=0;
+		  }
+
+     }
+     else if(vcmp == "B")
+     {
+          if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
+          {
+               v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tfuture] - Xcor[ID][Tpast]),2)+pow((Ycor[ID][Tfuture] - Ycor[ID][Tpast]),2))/(2.0 * _deltaF);  //two dimensional velocity
+          }
+          else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID]))
+          {
+               v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tfuture] - Xcor[ID][Tnow]),2)+pow((Ycor[ID][Tfuture] - Ycor[ID][Tnow]),2))/(_deltaF);
+          }
+          else if((Tpast >=Tfirst[ID])&&(Tfuture > Tlast[ID]))
+          {
+               v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tnow] - Xcor[ID][Tpast]),2)+pow((Ycor[ID][Tnow] - Ycor[ID][Tpast]),2))/(_deltaF);  //two dimensional velocity
+          }
+     }
+
+     return v;
 }
 
 void PedData::CreateGlobalVariables(int numPeds, int numFrames)
