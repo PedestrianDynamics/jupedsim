@@ -98,6 +98,12 @@ bool PedData::InitializeVariables(const string& filename)
      {
           string line;
           int lineNr=1;
+          int pos_id=0;
+          int pos_fr=0;
+          int pos_x=0;
+          int pos_y=0;
+          int pos_z=0;
+          int pos_vd=0; //velocity direction
           while ( getline(fdata,line) )
           {
                //looking for the framerate which is suppposed to be at the second position
@@ -112,6 +118,26 @@ bool PedData::InitializeVariables(const string& filename)
                          Log->Write("INFO:\tFrame rate fps: <%.2f>", _fps);
                     }
 
+                    if(line.find("ID") != std::string::npos && line.find("FR") != std::string::npos && line.find("X") != std::string::npos)
+                    {
+                    	std::vector<std::string> strs1;
+                    	line.erase(0,1);
+                    	boost::split(strs1, line , boost::is_any_of("\t"),boost::token_compress_on);
+                    	vector<string>::iterator it_id;
+                    	it_id=find(strs1.begin(),strs1.end(),"ID");
+                    	pos_id = std::distance(strs1.begin(), it_id);
+                    	it_id=find(strs1.begin(),strs1.end(),"FR");
+                    	pos_fr = std::distance(strs1.begin(), it_id);
+                    	it_id=find(strs1.begin(),strs1.end(),"X");
+                    	pos_x = std::distance(strs1.begin(), it_id);
+                    	it_id=find(strs1.begin(),strs1.end(),"Y");
+                    	pos_y = std::distance(strs1.begin(), it_id);
+                    	it_id=find(strs1.begin(),strs1.end(),"Z");
+						pos_z = std::distance(strs1.begin(), it_id);
+						it_id=find(strs1.begin(),strs1.end(),"VD");
+						pos_vd = std::distance(strs1.begin(), it_id);
+                    }
+
                }
                else if ( line[0] != '#' && !(line.empty()) )
                {
@@ -119,22 +145,22 @@ bool PedData::InitializeVariables(const string& filename)
                     std::vector<std::string> strs;
                     boost::split(strs, line , boost::is_any_of("\t "),boost::token_compress_on);
 
-                    if(strs.size() < 4)
+                    if(strs.size() < 5)
                     {
                          Log->Write("ERROR:\t There is an error in the file at line %d", lineNr);
                          return false;
                     }
 
-                    _IdsTXT.push_back(atoi(strs[0].c_str()));
-                    _FramesTXT.push_back(atoi(strs[1].c_str()));
-                    xs.push_back(atof(strs[2].c_str()));
-                    ys.push_back(atof(strs[3].c_str()));
-                    zs.push_back(atof(strs[4].c_str()));
+                    _IdsTXT.push_back(atoi(strs[pos_id].c_str()));
+                    _FramesTXT.push_back(atoi(strs[pos_fr].c_str()));
+                    xs.push_back(atof(strs[pos_x].c_str()));
+                    ys.push_back(atof(strs[pos_y].c_str()));
+                    zs.push_back(atof(strs[pos_z].c_str()));
                     if(_vComponent=="F")
                     {
-						if(strs.size() >= 6)
+						if(strs.size() >= 6 && pos_vd < (int)strs.size() )
 						{
-							vcmp.push_back(strs[5].c_str());
+							vcmp.push_back(strs[pos_vd].c_str());
 						}
 						else
 						{
@@ -313,9 +339,9 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
                _zCor[ID][frameNr] =  z*M2CM;
                if(_vComponent == "F")
                {
-            	   if(xAgent->Attribute("vc"))
+            	   if(xAgent->Attribute("vd"))
             	   {
-            	       _vComp[ID][frameNr] = *string(xAgent->Attribute("vc")).c_str();
+            	       _vComp[ID][frameNr] = *string(xAgent->Attribute("vd")).c_str();
             	   }
             	   else
             	   {

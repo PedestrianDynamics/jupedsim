@@ -23,14 +23,10 @@
             <end x="0.00" y="1.50" /> 
         </area_L> 
     </measurementAreas> 
-
-    <velocity> 
-        <useXComponent>true</useXComponent> 
-        <useYComponent>false</useYComponent> 
-        		<!-- The time interval that used to calculate instantaneous velocity 
-			of ped i [fr] here v_i = (X(t+frame_step/2) - X(t+frame_step/2))/frame_step. X is location. -->
-        <halfFrameNumberToUse>10</halfFrameNumberToUse> 
-    </velocity> 
+    
+    <velocity frame_step="10" set_movement_direction="None" ignore_backward_movement="false"/>
+    <!-- frame_step is the time interval that used to calculate instantaneous velocity 
+	of ped i [fr] here v_i = (X(t+frame_step/2) - X(t+frame_step/2))/frame_step. X is location. -->
 
     <!-- Method A (Zhang2011a) Flow and Vel --> 
     <method_A enabled="true"> 
