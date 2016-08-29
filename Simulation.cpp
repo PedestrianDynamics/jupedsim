@@ -317,60 +317,6 @@ void Simulation::UpdateRoutesAndLocations()
                pedsToRemove.push_back(ped);
           }
 
-// <<<<<<< HEAD
-//                 // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
-//                 // That may happen if the forces are too high for instance
-//                 // the ped is removed from the simulation, if it could not be reassigned
-//                 //@todo: ar.graf: condition could be ff::subroom[grid->getKeyAt(ped->GetPosition())] != ped->GetSubRoomUID()
-//             else if (!sub0->IsInSubRoom(ped)) {
-//                 bool assigned = false;
-
-//                 auto& allRooms = _building->GetAllRooms();
-
-//                 for (auto&& it_room : allRooms) {
-//                     auto& room = it_room.second;
-//                     for (auto&& it_sub : room->GetAllSubRooms()) {
-//                         auto& sub = it_sub.second;
-//                         auto& old_room = room0;
-//                         auto& old_sub = sub0;
-//                         if (sub->IsDirectlyConnectedWith(old_sub)
-//                                 && sub->IsInSubRoom(ped->GetPos())) {
-// //                            if (ped->GetRoutingStrategy() == ROUTING_FF_QUICKEST) {
-// //                                dynamic_cast<FFRouter*>(ped->GetRouter())->notifyDoor(ped);
-// //                                ped->RerouteIn(-1.);
-// //                            }
-//                             if (ped->GetRoutingStrategy() == ROUTING_FF_LOCAL_SHORTEST) {
-//                                 dynamic_cast<FFRouter*>(ped->GetRouter())->save(ped);
-//                             }
-//                             ped->SetRoomID(room->GetID(),
-//                                     room->GetCaption());
-//                             ped->SetSubRoomID(sub->GetSubRoomID());
-//                             ped->SetSubRoomUID(sub->GetUID());
-//                             //the agent left the old iroom
-//                             //actualize the egress time for that iroom
-//                             old_room->SetEgressTime(ped->GetGlobalTime());
-
-//                             //the pedestrian did not used the door to exit the room
-//                             //todo: optimize with distance square
-//                             //if(ped->GetDistanceToNextTarget()>0.5)
-//                             //{
-//                             //   Log->Write("WARNING:\t pedestrian [%d] left the room in an unusual way. Please check",ped->GetID());
-//                             //   Log->Write("        \t distance to previous target is %f",ped->GetDistanceToNextTarget());
-//                             //}
-//                             //also statistic for internal doors
-//                             UpdateFlowAtDoors(*ped); //@todo: ar.graf : this call should move into a critical region? check plz
-
-//                             ped->ClearMentalMap(); // reset the destination
-// //                                   ped->FindRoute();
-
-//                             assigned = true;
-//                             break;
-//                         }
-//                     }
-//                     if (assigned)
-//                         break; // stop the loop
-//                 }
-// =======
           // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
           // That may happen if the forces are too high for instance
           // the ped is removed from the simulation, if it could not be reassigned
@@ -381,7 +327,6 @@ void Simulation::UpdateRoutesAndLocations()
                std::function<void(const Pedestrian&)> f = std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
                assigned = ped->Relocate(f);
                //this will delete agents, that are pushed outside (maybe even if inside obstacles??)
-// >>>>>>> develop
 
 #pragma omp critical
                if (!assigned) {
@@ -480,8 +425,13 @@ void Simulation::RunHeader(long nPed)
 
 double Simulation::RunBody(double maxSimTime)
 {
-     //take the current time from the pedestrian
-     double t=Pedestrian::GetGlobalTime();
+    //needed to control the execution time PART 1
+    //in the case you want to run in no faster than realtime
+    //time_t starttime, endtime;
+    //time(&starttime);
+
+    //take the current time from the pedestrian
+    double t = Pedestrian::GetGlobalTime();
 
     //frame number. This function can be called many times,
     static int frameNr = (int) (1+t/_deltaT); // Frame Number
@@ -492,6 +442,7 @@ double Simulation::RunBody(double maxSimTime)
     // NEEDS TO BE FIXED!
     int writeInterval = (int) ((1./_fps)/_deltaT+0.5);
     writeInterval = (writeInterval<=0) ? 1 : writeInterval; // mustn't be <= 0
+    // ##########
 
     //process the queue for incoming pedestrians
     //important since the number of peds is used
@@ -500,9 +451,7 @@ double Simulation::RunBody(double maxSimTime)
     _nPeds = _building->GetAllPedestrians().size();
     int initialnPeds = _nPeds;
     // main program loop
-
     while ((_nPeds || (!_agentSrcManager.IsCompleted()&& _gotSources) ) && t<maxSimTime) {
-
         t = 0+(frameNr-1)*_deltaT;
         //process the queue for incoming pedestrians
         ProcessAgentsQueue();
@@ -544,14 +493,6 @@ double Simulation::RunBody(double maxSimTime)
         // clock_t goal = timeToWait*1000 + clock();
         // while (goal > clock());
         ++frameNr;
-
-        //Trigger JPSfire Toxicity Analysis
-        //only executed every 3 seconds _ToxicityAnalysis->ConductToxicityAnalysis() &&
-        if( fmod(Pedestrian::GetGlobalTime(), 3) == 0 ) {
-            for (auto&& ped: _building->GetAllPedestrians()) {
-                ped->ConductToxicityAnalysis();
-            }
-        }
     }
     return t;
 }

@@ -132,11 +132,7 @@ std::shared_ptr<DirectionStrategy> IniFromProtobufLoader::configureExitCrossingS
           exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionFloorfield());
           break;
      case 7:
-          // dead end -> not supported anymore (global ff needed, but not available in 3d)
-          Log->Write("ERROR: \tExit Strategy 7 is not supported any longer. Please refer to www.jupedsim.org");
-          Log->Write("WARNING: \tChanging Exit-Strategy to #9 (Floorfields with targets within subroom)");
-          pExitStrategy = 9;
-          _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
+          exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionGoalFloorfield());
           break;
      case 8:
           exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());

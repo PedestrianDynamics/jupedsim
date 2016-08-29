@@ -60,8 +60,6 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
         int group_id = xmltoi(e->Attribute("group_id"));
         int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
         int number = xmltoi(e->Attribute("number"), 0);
-        double density = xmltof(e->Attribute("density"), 0);
-        string social_group = xmltoa(e->Attribute("social_group"), "false");
         int agent_para_id = xmltoi(e->Attribute("agent_parameter_id"), -1);
 
         int goal_id = xmltoi(e->Attribute("goal_id"), FINAL_DEST_OUT);
@@ -73,10 +71,8 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
         double patience = xmltof(e->Attribute("patience"), 5);
         double premovement_mean = xmltof(e->Attribute("pre_movement_mean"), 0);
         double premovement_sigma = xmltof(e->Attribute("pre_movement_sigma"), 0);
-        double premovement_min = xmltof(e->Attribute("pre_movement_min"), 0);
-        double premovement_max = xmltof(e->Attribute("pre_movement_max"), 0);
-        double risk_tolerance_mean = xmltof(e->Attribute("risk_tolerance_mean"), 0);
-        double risk_tolerance_sigma = xmltof(e->Attribute("risk_tolerance_sigma"), 0);
+        //double risk_tolerance_mean = xmltof(e->Attribute("risk_tolerance_mean"), 0);
+        //double risk_tolerance_sigma = xmltof(e->Attribute("risk_tolerance_sigma"), 0);
 
         double x_min = xmltof(e->Attribute("x_min"), -FLT_MAX);
         double x_max = xmltof(e->Attribute("x_max"), FLT_MAX);
@@ -98,51 +94,37 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
         dis->SetGroupId(group_id);
         dis->Setbounds(bounds);
         dis->SetAgentsNumber(number);
-        dis->SetAgentsDensity(density);
         dis->SetAge(age);
         dis->SetGender(gender);
-        dis->SetSocialGroup(social_group);
         dis->SetGoalId(goal_id);
         dis->SetRouteId(route_id);
         dis->SetRouterId(router_id);
         dis->SetHeight(height);
         dis->SetPatience(patience);
-
-        if (e->Attribute("pre_movement_mean") && e->Attribute("pre_movement_sigma")) {
-            std::string distribution_type = "normal";
-            dis->InitPremovementTime(distribution_type, premovement_mean, premovement_sigma);
-        }
-        if (e->Attribute("pre_movement_min") && e->Attribute("pre_movement_max")) {
-            std::string distribution_type = "uniform";
-            if(premovement_min > premovement_max){
-                Log->Write("ERROR:\tpremovement_min > premovement_max!");
-                return false;
-            }
-            dis->InitPremovementTime(distribution_type, premovement_min, premovement_max);
-        }
+        dis->InitPremovementTime(premovement_mean, premovement_sigma);
 
         if (e->Attribute("risk_tolerance_mean") && e->Attribute("risk_tolerance_sigma")) {
             std::string distribution_type = "normal";
             double risk_tolerance_mean = xmltof(e->Attribute("risk_tolerance_mean"), NAN);
             double risk_tolerance_sigma = xmltof(e->Attribute("risk_tolerance_sigma"), NAN);
-            //Log->Write("INFO:\trisk tolerance mu = %f, risk tolerance sigma = %f\n", risk_tolerance_mean,
-                   // risk_tolerance_sigma);
+            Log->Write("INFO:\trisk tolerance mu = %f, risk tolerance sigma = %f\n", risk_tolerance_mean,
+                    risk_tolerance_sigma);
             dis->InitRiskTolerance(distribution_type, risk_tolerance_mean, risk_tolerance_sigma);
         }
         else if (e->Attribute("risk_tolerance_alpha") && e->Attribute("risk_tolerance_beta")) {
             std::string distribution_type = "beta";
             double risk_tolerance_alpha = xmltof(e->Attribute("risk_tolerance_alpha"), NAN);
             double risk_tolerance_beta = xmltof(e->Attribute("risk_tolerance_beta"), NAN);
-            //Log->Write("INFO:\trisk tolerance alpha = %f, risk tolerance beta = %f\n", risk_tolerance_alpha,
-                   // risk_tolerance_beta);
+            Log->Write("INFO:\trisk tolerance alpha = %f, risk tolerance beta = %f\n", risk_tolerance_alpha,
+                    risk_tolerance_beta);
             dis->InitRiskTolerance(distribution_type, risk_tolerance_alpha, risk_tolerance_beta);
         }
         else {
             std::string distribution_type = "normal";
             double risk_tolerance_mean = 0.;
             double risk_tolerance_sigma = 1.;
-            //Log->Write("INFO:\trisk tolerance mu = %f, risk tolerance sigma = %f\n", risk_tolerance_mean,
-            //        risk_tolerance_sigma);
+            Log->Write("INFO:\trisk tolerance mu = %f, risk tolerance sigma = %f\n", risk_tolerance_mean,
+                    risk_tolerance_sigma);
             dis->InitRiskTolerance(distribution_type, risk_tolerance_mean, risk_tolerance_sigma);
         }
 

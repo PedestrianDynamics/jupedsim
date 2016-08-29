@@ -111,7 +111,7 @@ public:
       *
       */
      FFRouter();
-     FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals, Configuration* config);
+     FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals);
      //FFRouter(const Building* const);
 
      /**
@@ -202,7 +202,6 @@ public:
 private:
 
 protected:
-     Configuration* _config;
      std::map< std::pair<int, int> , double > _distMatrix;
      std::map< std::pair<int, int> , int >    _pathsMatrix;
      std::vector<int>                         _allDoorUIDs;
@@ -220,12 +219,8 @@ protected:
      std::map<int, int>     _finalDoors; // _finalDoors[i] the UID of the last door the pedestrian with ID i wants to walk through
 
      int _mode;
-     double timeToRecalc = 0.;
-     double _recalc_interval;
      bool _hasSpecificGoals;
      bool _targetWithinSubroom;
-     //output filename counter: cnt
-     static int cnt;
 };
 
 #endif /* FFROUTER_H_ */

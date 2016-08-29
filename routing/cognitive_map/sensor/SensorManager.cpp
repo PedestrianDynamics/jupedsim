@@ -32,7 +32,7 @@
 #include "RoomToFloorSensor.h"
 #include "DiscoverDoorsSensor.h"
 #include "LastDestinationsSensor.h"
-#include "../../../JPSfire/A_smoke_sensor/SmokeSensor.h"
+#include "SmokeSensor.h"
 #include "JamSensor.h"
 #include "locater.h"
 
@@ -105,7 +105,10 @@ SensorManager *SensorManager::InitWithCertainSensors(const Building * b, Cogniti
         }
         else if (it == "Smoke")
         {
-            sensor_manager->Register(new SmokeSensor(b), INIT | PERIODIC | NO_WAY | CHANGED_ROOM );
+            std::string smokeFilepath = optSto.at("smokeOptions").at(0);
+            double updatet = std::stod(optSto.at("smokeOptions").at(1));
+            double finalt = std::stod(optSto.at("smokeOptions").at(2));
+            sensor_manager->Register(new SmokeSensor(b,smokeFilepath,updatet,finalt), INIT | PERIODIC | NO_WAY | CHANGED_ROOM );
         }
     }
 

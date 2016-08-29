@@ -31,7 +31,7 @@
 #define GRAPHEDGE_H_
 
 #include "../../../geometry/Line.h"
-#include "../../../JPSfire/generic/FDSMesh.h"
+#include "../fire_mesh/FireMesh.h"
 #include <map>
 
 class SubRoom;

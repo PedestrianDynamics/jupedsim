@@ -39,7 +39,6 @@ class IniFileParser {
 
 public:
      IniFileParser(Configuration* config);
-     ~IniFileParser(){};
 
      bool Parse(std::string iniFile);
 
@@ -58,7 +57,7 @@ private:
 
      bool ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* agentDistri);
 
-     bool ParseFfRouterOps(TiXmlNode* routingNode, RoutingStrategy s);
+     bool ParseFfRouterOps(TiXmlNode* routingNode);
 
      bool ParseCogMapOpts(TiXmlNode* routingNode);
 

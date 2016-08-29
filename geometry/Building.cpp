@@ -30,9 +30,6 @@
 
 #include "../geometry/SubRoom.h"
 #include "../tinyxml/tinyxml.h"
-#include "../JPSfire/B_walking_speed/WalkingSpeed.h"
-#include "../JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
-#include "../pedestrian/PedDistributor.h"
 
 #ifdef _SIMULATOR
 
@@ -79,8 +76,6 @@ Building::Building(const Configuration* configuration, PedDistributor& pedDistri
 {
      _savePathway = false;
      _linkedCellGrid = nullptr;
-     _WalkingSpeed = new WalkingSpeed(this);
-     _ToxicityAnalysis = std::make_shared<ToxicityAnalysis>(this);
 
 #ifdef _JPS_AS_A_SERVICE
      if (_configuration->GetRunAsService()) {
@@ -824,8 +819,6 @@ void Building::AddPedestrian(Pedestrian* ped)
           }
      }
      _allPedestians.push_back(ped);
-     ped->SetWalkingSpeed(_WalkingSpeed);
-     ped->SetTox(_ToxicityAnalysis);
 }
 
 void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds) const

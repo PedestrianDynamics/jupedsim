@@ -63,8 +63,6 @@ The only requirement is a compiler supporting the new standard c++11.
 
     cmake -G "MinGW Makefiles" CMakeLists.txt
     mingw32-make.exe
-    
-(Make sure that cmake and mingw32-make is in your system path)
 
 ### Linux (tested on Ubuntu 14.04 with gcc 4.8)
 

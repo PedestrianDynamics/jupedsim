@@ -56,8 +56,6 @@ class LCGrid;
 class ForceModel;
 
 class PedDistributor;
-class WalkingSpeed;
-class ToxicityAnalysis;
 
 class Configuration;
 
@@ -78,9 +76,6 @@ private:
      /// pedestrians pathway
      bool _savePathway;
      std::ofstream _pathWayStream;
-
-     WalkingSpeed * _WalkingSpeed;
-     std::shared_ptr<ToxicityAnalysis> _ToxicityAnalysis;
 
 public:
      /// constructor
