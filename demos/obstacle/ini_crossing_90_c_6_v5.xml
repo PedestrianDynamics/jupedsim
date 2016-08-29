@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?> 
-<JPSreport project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_report.xsd"> 
+<JPSreport project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_report.xsd"> 
     <!-- geometry file --> 
     <geometry file = "geo_crossing_90_c_6_v5.xml" /> 
     <!-- trajectories file and format --> 
