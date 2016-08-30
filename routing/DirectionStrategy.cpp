@@ -455,22 +455,22 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
         Point dummy;
         locffviafm[(*rAndtIT).first]->getDirectionToUID((*rAndtIT).second, 0, dummy);
     }
-     for(unsigned int i = 0; i < building->GetAllRooms().size(); ++i) {
-          std::vector<int> targets = {};
-          targets.clear();
-
-          auto roomIt = building->GetAllRooms().begin();
-          std::advance(roomIt, i);
-          roomNr = roomIt->second->GetID();
-
-          for (auto pair : roomAndTargetVector) {
-               if (pair.first == roomNr) {
-                    targets.emplace_back(pair.second);
-               }
-          }
-          std::string lfilename = "floorfield" + std::to_string(roomNr) + ".vtk";
-          locffviafm[roomNr]->writeFF(lfilename, targets);
-     }
+//     for(unsigned int i = 0; i < building->GetAllRooms().size(); ++i) {
+//          std::vector<int> targets = {};
+//          targets.clear();
+//
+//          auto roomIt = building->GetAllRooms().begin();
+//          std::advance(roomIt, i);
+//          roomNr = roomIt->second->GetID();
+//
+//          for (auto pair : roomAndTargetVector) {
+//               if (pair.first == roomNr) {
+//                    targets.emplace_back(pair.second);
+//               }
+//          }
+//          std::string lfilename = "floorfield" + std::to_string(roomNr) + ".vtk";
+//          locffviafm[roomNr]->writeFF(lfilename, targets);
+//     }
 
 
 }

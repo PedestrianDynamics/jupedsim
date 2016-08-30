@@ -876,6 +876,7 @@ void FloorfieldViaFM::parseBuildingForExits(const Building* const buildingArg, c
 
 //this function must only be used BEFORE calculateDistanceField(), because we set trialfield[].cost = dist2Wall AND we init dist2Wall with "-3"
 void FloorfieldViaFM::prepareForDistanceFieldCalculation(const bool onlyRoomsWithExits) { //onlyRoomsWithExits means, outside points must be considered
+    Log->Write("Anfang gcode");
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
 
         switch (gcode[i]) {
@@ -933,7 +934,7 @@ void FloorfieldViaFM::prepareForDistanceFieldCalculation(const bool onlyRoomsWit
 //        trialfield[i].child = nullptr;
     } //for loop (points)
     // drawLinesOnGrid(exits, cost, 0.); //already mark targets/exits in cost array (for floorfieldcalc and crossout (LocalFF))
-
+    Log->Write("Ende gcode");
 }
 
 //void FloorfieldViaFM::clearAndPrepareForFloorfieldReCalc(double* costarray) {

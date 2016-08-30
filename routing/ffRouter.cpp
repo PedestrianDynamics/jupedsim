@@ -609,6 +609,11 @@ int FFRouter::FindExit(Pedestrian* p)
                }
                std::pair<int, int> key = std::make_pair(doorUID, finalDoor);
                auto subroomDoors = _building->GetSubRoomByUID(p->GetSubRoomUID())->GetAllGoalIDs();
+               //only consider, if paths exists //@todo: ar.graf: this assert needs to be checked. why would _pathsMatrix have no entry?
+               if (_pathsMatrix.count(key)==0) {
+                    Log->Write("no key for %d %d", key.first, key.second);
+                    continue;
+               }
                //only consider doors, that lead to goal via a new subroom
                if (std::find(subroomDoors.begin(), subroomDoors.end(), _pathsMatrix.at(key)) != subroomDoors.end() &&
                    (finalDoor != doorUID)){
