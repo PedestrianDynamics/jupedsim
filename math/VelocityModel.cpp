@@ -208,7 +208,17 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 Point repWall = ForceRepRoom(allPeds[p], subroom);
 
                 // calculate new direction ei according to (6)
-                Point direction = e0(ped, room) + repPed + repWall;
+                auto E0 = e0(ped, room);
+                Point direction = E0/*e0(ped, room)*/ + repPed + repWall;
+                if (ped->GetID() == 8) {
+                     auto c = dynamic_cast<Crossing*>(building->GetTransOrCrossByUID(ped->GetNextDestination()));
+                     Log->Write("ped %d want to go to destUID %d (ID %d)", ped->GetID(), ped->GetNextDestination(), c ? c->GetUniqueID() : -42);
+                     auto line = ped->GetExitLine();
+                     Log->Write("the navline goes from %f, %f to %f, %f", line->GetPoint1()._x, line->GetPoint1()._y, line->GetPoint2()._x, line->GetPoint2()._y);
+                     //Log->Write("final dest is UID %d (ID %d)", ped->GetFinalDestination(), building->GetTransOrCrossByUID(ped->GetFinalDestination())->GetUniqueID());
+                     Log->Write("e0: %f, %f", E0._x, E0._y);
+                     Log->Write("direction: %f, %f", direction._x, direction._y);
+                }
                 for (int i = 0; i < size; i++) {
                       Pedestrian* ped1 = neighbours[i];
                      // calculate spacing
@@ -288,7 +298,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
 Point VelocityModel::e0(Pedestrian* ped, Room* room) const
 {
-      const Point target = _direction->GetTarget(room, ped);
+      const Point target = _direction->GetTarget(room, ped); // target is where the ped wants to be after the next timestep
       Point desired_direction;
       const Point pos = ped->GetPos();
       double dist = ped->GetExitLine()->DistTo(pos);
@@ -299,11 +309,25 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
       if ( (dynamic_cast<DirectionFloorfield*>(_direction.get())) ||
            (dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) ||
            (dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get()))  ) {
+           if (ped->GetID() == 8) {
+                Log->Write("dist: %f", dist);
+                auto ExLineDir = ped->GetExitLine()->GetPoint2() - ped->GetExitLine()->GetPoint1();
+                auto side = ExLineDir.CrossProduct(ped->GetPos() - ped->GetExitLine()->GetPoint1());
+                Log->Write("crossProduct is %f, i.e. the ped is in the %s subroom", side, side > 0 ? "new" : "old");
+                Log->Write("the ped thinks he is in subroomID %d", ped->GetSubRoomID());
+           }
           if (dist > 20*J_EPS_GOAL) {
                desired_direction = target - pos; //ped->GetV0(target);
           } else {
                desired_direction = lastE0;
                ped->SetLastE0(lastE0); //keep old vector (revert set operation done 9 lines above)
+               if (ped->GetID() == 8) {
+                    Log->Write("target: %f, %f", target._x, target._y);
+                    Log->Write("desired_direction: %f, %f", desired_direction._x, desired_direction._y);
+                    Log->Write("pos: %f, %f", pos._x, pos._y);
+                    Log->Write("lastE0: %f, %f", lastE0._x, lastE0._y);
+                    Log->Write("lastE0.norm: %f", lastE0.Norm());
+               }
           }
       }
       else if (dist > J_EPS_GOAL) {

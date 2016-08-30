@@ -279,6 +279,9 @@ void FloorfieldViaFM::getDirectionToDestination(Pedestrian* ped, Point& directio
     int destID = ped->GetExitIndex();
     long int key = grid->getKeyAtPoint(position);
     getDirectionToUID(destID, key, direction);
+     if (ped->GetID() == 8) {
+          Log->Write("getDirToDest: destID = %d, dir = %f, %f", destID, direction._x, direction._y);
+     }
     if (direction._x == DBL_MAX && direction._y == DBL_MAX) {
         //Log->Write("Floorfield for ped %d in subroom %d not yet calculated", ped->GetID(), ped->GetSubRoomID());
          direction._x = 0;
@@ -385,7 +388,6 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 } else {
                     calculateFloorfield(localline, localcostptr, localneggradptr, modifiedspeed);
                 }
-            // @todo f.mack find the biggest value in localneggradptr
 #pragma omp critical(floorfieldsBeingCalculated)
                {
                        if (floorfieldsBeingCalculated.count(destID) != 1) {
