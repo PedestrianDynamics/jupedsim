@@ -5,7 +5,7 @@
 # -DBUILD_TESTING=ON (default OFF) for python tests
 # -DBUILD_CPPUNIT_TEST=ON (default OFF) for unit tests
 # -DUSE_DUAL_ABI=ON (default OFF)  https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
-# -D Boost_NO_SYSTEM_PATHS=true (default false) -D BOOST_ROOT=PARH_where_to_find_boost 
+# -D Boost_NO_SYSTEM_PATHS=true (default false) -D BOOST_ROOT=PATH_where_to_find_boost 
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
@@ -71,9 +71,11 @@ if (NOT DEFINED PROCESSOR_COUNT)
 endif (NOT DEFINED PROCESSOR_COUNT)
 
 if (PROCESSOR_COUNT)
-    #  message( STATUS "PROCESSOR_COUNT: " ${PROCESSOR_COUNT})
+
+     message( STATUS "PROCESSOR_COUNT: " ${PROCESSOR_COUNT})
     #  set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
     message(STATUS "PROCESSOR_COUNT: 0")
+
     set(CTEST_BUILD_FLAGS "-j0")
 endif (PROCESSOR_COUNT)
 
@@ -160,14 +162,18 @@ if (APPLE)
 
 endif (APPLE)
 
+
 if (Boost_NO_SYSTEM_PATHS)
+  #set(BOOST_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../3p/boost")
   set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
   set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/stage/lib")
   set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${BOOST_ROOT})
   set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${BOOST_LIBRARY_DIRS})
 endif (Boost_NO_SYSTEM_PATHS)
-
-find_package(Boost REQUIRED)
+# in case boost is a non-default location
+# SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "C:/win32libs/boost")
+# SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "C:/win32libs/boost/lib")
+#find_package(Boost REQUIRED)
 
 
 # find the correct OpenMP flag
@@ -188,6 +194,10 @@ endif (OPENMP_FOUND)
 #statically link all gcc stuffs
 #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+
+#boost
+find_package(Boost REQUIRED )
+
 
 # test all cpp-files in Utest
 if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
@@ -273,59 +283,57 @@ set(source_files
         pedestrian/StartDistribution.cpp
 
 
-        # voronoi/VoronoiDiagramGenerator.cpp
+        #voronoi/VoronoiDiagramGenerator.cpp
         voronoi-boost/VoronoiPositionGenerator.cpp
 
-        routing/ffRouter.cpp
-        routing/LocalFloorfieldViaFM.cpp
-        routing/FloorfieldViaFM.cpp
-        routing/AccessPoint.cpp
+        #floorfield
+        routing/ff_router/ffRouter.cpp
+        routing/ff_router/LocalFloorfieldViaFM.cpp
+        routing/ff_router/FloorfieldViaFM.cpp
+
+        #global_shortest
+        routing/global_shortest/AccessPoint.cpp
+        routing/global_shortest/GlobalRouter.cpp
+        routing/global_shortest/DTriangulation.cpp
+
+        #general
         routing/DirectionStrategy.cpp
-        routing/DummyRouter.cpp
-        routing/GlobalRouter.cpp
-        routing/QuickestPathRouter.cpp
-        routing/SafestPathRouter.cpp
         routing/Router.cpp
         routing/RoutingEngine.cpp
-        routing/NavMesh.cpp
-        routing/DTriangulation.cpp
-        routing/MeshRouter.cpp
-        routing/mesh/Mesh.cpp
-        #header files with scr code need to be added here, in order to be
-        #included in generated project files (codeblocks)
-        #plz do not delete them here
-        routing/mesh/RectGrid.h
-        routing/mesh/Trial.h
-        general/Configuration.h
-        general/Macros.h
 
-        routing/CognitiveMapRouter.cpp
-        routing/cognitive_map/GraphNetwork.cpp
-        routing/cognitive_map/NavigationGraph.cpp
-        routing/cognitive_map/CognitiveMapStorage.cpp
-        routing/cognitive_map/AbstractCognitiveMapCreator.cpp
-        routing/cognitive_map/CompleteCognitiveMapCreator.cpp
-        routing/cognitive_map/EmptyCognitiveMapCreator.cpp
-        routing/cognitive_map/navigation_graph/GraphEdge.cpp
-        routing/cognitive_map/navigation_graph/GraphVertex.cpp
-        routing/cognitive_map/sensor/RoomToFloorSensor.cpp
-        routing/cognitive_map/sensor/SensorManager.cpp
-        routing/cognitive_map/sensor/AbstractSensor.cpp
-        routing/cognitive_map/sensor/DiscoverDoorsSensor.cpp
-        routing/cognitive_map/sensor/JamSensor.cpp
-        routing/cognitive_map/sensor/LastDestinationsSensor.cpp
-        routing/cognitive_map/sensor/SmokeSensor.cpp
-        routing/cognitive_map/sensor/locater.cpp
-        routing/cognitive_map/fire_mesh/FireMesh.cpp
-        routing/cognitive_map/fire_mesh/Knot.cpp
-        routing/cognitive_map/fire_mesh/FireMeshStorage.cpp
-        routing/cognitive_map/cognitiveMap/associations.cpp
-        routing/cognitive_map/cognitiveMap/cognitivemap.cpp
-        routing/cognitive_map/cognitiveMap/waypoints.cpp
-        routing/cognitive_map/cognitiveMap/landmark.cpp
-        routing/cognitive_map/cognitiveMap/youareherepointer.cpp
-        routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
+        #quickest
+        routing/quickest/QuickestPathRouter.cpp
 
+        #AI router
+        routing/ai_router/AIRouter.cpp
+        routing/ai_router/GraphNetwork.cpp
+        routing/ai_router/NavigationGraph.cpp
+        routing/ai_router/BrainStorage.cpp
+        routing/ai_router/navigation_graph/GraphEdge.cpp
+        routing/ai_router/navigation_graph/GraphVertex.cpp
+        routing/ai_router/sensor/RoomToFloorSensor.cpp
+        routing/ai_router/sensor/SensorManager.cpp
+        routing/ai_router/sensor/AbstractSensor.cpp
+        routing/ai_router/sensor/DiscoverDoorsSensor.cpp
+        routing/ai_router/sensor/JamSensor.cpp
+        routing/ai_router/sensor/LastDestinationsSensor.cpp
+        routing/ai_router/sensor/SmokeSensor.cpp
+        routing/ai_router/sensor/locater.cpp
+        routing/ai_router/fire_mesh/FireMesh.cpp
+        routing/ai_router/fire_mesh/Knot.cpp
+        routing/ai_router/fire_mesh/FireMeshStorage.cpp
+        routing/ai_router/cognitiveMap/associations.cpp
+        routing/ai_router/cognitiveMap/connection.cpp
+        routing/ai_router/cognitiveMap/cognitivemap.cpp
+        routing/ai_router/cognitiveMap/landmark.cpp
+        routing/ai_router/cognitiveMap/region.cpp
+        routing/ai_router/cognitiveMap/youareherepointer.cpp
+        routing/ai_router/cognitiveMap/cogmapoutputhandler.cpp
+        routing/ai_router/cognitiveMap/landmarknetwork.cpp
+        routing/ai_router/perception/perception.cpp
+        routing/ai_router/perception/visibleenvironment.cpp
+        routing/ai_router/Brain.cpp
+        routing/ai_router/cognitiveMap/internnavigationnetwork.cpp
         visiLibity/source_code/visilibity.cpp
 
 
@@ -339,55 +347,57 @@ set(source_files
         math/KrauszModel.cpp)
 
 set(header_files
-        routing/ffRouter.h
-        routing/LocalFloorfieldViaFM.h
-        routing/FloorfieldViaFM.h
-        routing/NavMesh.h
+
+        #floorfield
+        routing/ff_router/ffRouter.h
+        routing/ff_router/RectGrid.h
+        routing/ff_router/Trial.h
+        routing/ff_router/LocalFloorfieldViaFM.h
+        routing/ff_router/FloorfieldViaFM.h
+
+        #general
         routing/DirectionStrategy.h
-        routing/DummyRouter.h
-        routing/GlobalRouter.h
-        routing/QuickestPathRouter.h
-        routing/SafestPathRouter.h
         routing/Router.h
         routing/RoutingEngine.h
-        routing/AccessPoint.h
-        routing/DTriangulation.h
-        routing/MeshRouter.h
-        routing/mesh/Mesh.h
-        routing/mesh/RectGrid.h
-        routing/mesh/Trial.h
-        routing/graph/RoutingGraphStorage.h
-        routing/graph/RoutingGraph.h
-        routing/graph/NavLineState.h
 
+        #global_shortest
+        routing/global_shortest/GlobalRouter.h
+        routing/global_shortest/AccessPoint.h
+        routing/global_shortest/DTriangulation.h
 
-        routing/CognitiveMapRouter.h
-        routing/cognitive_map/GraphNetwork.h
-        routing/cognitive_map/NavigationGraph.h
-        routing/cognitive_map/CognitiveMapStorage.h
-        routing/cognitive_map/AbstractCognitiveMapCreator.h
-        routing/cognitive_map/CompleteCognitiveMapCreator.h
-        routing/cognitive_map/EmptyCognitiveMapCreator.h
-        routing/cognitive_map/navigation_graph/GraphEdge.h
-        routing/cognitive_map/navigation_graph/GraphVertex.h
-        routing/cognitive_map/sensor/AbstractSensor.h
-        routing/cognitive_map/sensor/RoomToFloorSensor.h
-        routing/cognitive_map/sensor/SensorManager.h
-        routing/cognitive_map/sensor/DiscoverDoorsSensor.h
-        routing/cognitive_map/sensor/JamSensor.h
-        routing/cognitive_map/sensor/LastDestinationsSensor.h
-        routing/cognitive_map/sensor/SmokeSensor.h
-        routing/cognitive_map/sensor/locater.h
-        routing/cognitive_map/fire_mesh/FireMesh.h
-        routing/cognitive_map/fire_mesh/Knot.h
-        routing/cognitive_map/fire_mesh/FireMeshStorage.h
-        routing/cognitive_map/cognitiveMap/associations.h
-        routing/cognitive_map/cognitiveMap/cognitivemap.h
-        routing/cognitive_map/cognitiveMap/waypoints.h
-        routing/cognitive_map/cognitiveMap/landmark.h
-        routing/cognitive_map/cognitiveMap/youareherepointer.h
-        routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
+        #quickest
+        routing/quickest/QuickestPathRouter.h
 
+        #AI router
+        routing/ai_router/AIRouter.h
+        routing/ai_router/GraphNetwork.h
+        routing/ai_router/NavigationGraph.h
+        routing/ai_router/BrainStorage.h
+        routing/ai_router/navigation_graph/GraphEdge.h
+        routing/ai_router/navigation_graph/GraphVertex.h
+        routing/ai_router/sensor/AbstractSensor.h
+        routing/ai_router/sensor/RoomToFloorSensor.h
+        routing/ai_router/sensor/SensorManager.h
+        routing/ai_router/sensor/DiscoverDoorsSensor.h
+        routing/ai_router/sensor/JamSensor.h
+        routing/ai_router/sensor/LastDestinationsSensor.h
+        routing/ai_router/sensor/SmokeSensor.h
+        routing/ai_router/sensor/locater.h
+        routing/ai_router/fire_mesh/FireMesh.h
+        routing/ai_router/fire_mesh/Knot.h
+        routing/ai_router/fire_mesh/FireMeshStorage.h
+        routing/ai_router/cognitiveMap/associations.h
+        routing/ai_router/cognitiveMap/connection.cpp
+        routing/ai_router/cognitiveMap/cognitivemap.h
+        routing/ai_router/cognitiveMap/landmark.h
+        routing/ai_router/cognitiveMap/region.h
+        routing/ai_router/cognitiveMap/youareherepointer.h
+        routing/ai_router/cognitiveMap/cogmapoutputhandler.h
+        routing/ai_router/cognitiveMap/landmarknetwork.h
+        routing/ai_router/perception/perception.h
+        routing/ai_router/perception/visibleenvironment.h
+        routing/ai_router/Brain.h
+        routing/ai_router/cognitiveMap/internnavigationnetwork.h
         visiLibity/source_code/visilibity.hpp
 
         pedestrian/Pedestrian.h
@@ -400,7 +410,8 @@ set(header_files
         pedestrian/Pedestrian.h
         pedestrian/AgentsSourcesManager.h
         pedestrian/StartDistribution.h
-        # voronoi/VoronoiDiagramGenerator.h
+        #voronoi/VoronoiDiagramGenerator.h
+
         voronoi-boost/VoronoiPositionGenerator.h
 
         mpi/LCGrid.h
@@ -470,7 +481,7 @@ if (Boost_FOUND)
     message(STATUS "Boost_LIB_VERSION: " ${Boost_LIB_VERSION})
     message(STATUS "Boost_libraries: " ${Boost_LIBRARIES})
     link_directories(${Boost_LIBRARY_DIRS})
-    include_directories(${Boost_INCLUDE_DIR})
+    include_directories(SYSTEM ${Boost_INCLUDE_DIR})
     # todo: is this necessary?
     target_link_libraries(jpscore ${Boost_LIBRARIES})
 endif ()
