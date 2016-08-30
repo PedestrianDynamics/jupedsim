@@ -279,9 +279,6 @@ void FloorfieldViaFM::getDirectionToDestination(Pedestrian* ped, Point& directio
     int destID = ped->GetExitIndex();
     long int key = grid->getKeyAtPoint(position);
     getDirectionToUID(destID, key, direction);
-     if (ped->GetID() == 8) {
-          Log->Write("getDirToDest: destID = %d, dir = %f, %f", destID, direction._x, direction._y);
-     }
     if (direction._x == DBL_MAX && direction._y == DBL_MAX) {
         //Log->Write("Floorfield for ped %d in subroom %d not yet calculated", ped->GetID(), ped->GetSubRoomID());
          direction._x = 0;
@@ -401,7 +398,6 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
     }
     direction._x = (localneggradptr[key]._x);
     direction._y = (localneggradptr[key]._y);
-    if (Pedestrian::GetGlobalTime() == 10) Log->Write("FloorfieldViaFM::getDirectionToUID(): return value is %f, %f", direction._x, direction._y);
 }
 
 

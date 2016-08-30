@@ -368,10 +368,7 @@ Point DirectionLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 //                                      filename));
 //          locffviafm[room->GetID()]->getDirectionToDestination(ped, p);
 //     }
-     if (Pedestrian::GetGlobalTime() == 10) Log->Write("DirectionLocalFloorfield::GetTarget(): p == %f, %f", p._x, p._y);
      p = p.Normalized();     // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
-     if (Pedestrian::GetGlobalTime() == 10) Log->Write("DirectionLocalFloorfield::GetTarget(): p.Normalized == %f, %f", p._x, p._y);
-     if (Pedestrian::GetGlobalTime() == 10) Log->Write("DirectionLocalFloorfield::GetTarget(): ped->GetPos() == %f, %f", ped->GetPos()._x, ped->GetPos()._y);
      return (p + ped->GetPos());
 
 #if DEBUG
@@ -388,10 +385,6 @@ Point DirectionLocalFloorfield::GetDir2Wall(Pedestrian* ped) const
      Point p;
      int roomID = ped->GetRoomID();
      locffviafm.at(roomID)->getDir2WallAt(ped->GetPos(), p);
-     if (Pedestrian::GetGlobalTime() == 10) {
-          Log->Write("DirectionLocalFloorfield::GetDir2Wall was called for roomID %d, subroomID %d", roomID, ped->GetSubRoomID());
-          Log->Write("at %f, %f, the result is %f, %f", ped->GetPos()._x, ped->GetPos()._y, p._x, p._y);
-     }
      return p;
 }
 
