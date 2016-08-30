@@ -1,7 +1,7 @@
 #include "associations.h"
 #include "connection.h"
 
-
+#define UNUSED(x) [&x]{}()  // c++11 silence warnings
 
 Association::Association()
 {
@@ -12,6 +12,7 @@ Association::Association()
 
 Association::Association(ptrLandmark landmark, ptrLandmark associated_landmark, bool connected)
 {
+    UNUSED(connected);
     _landmark=landmark;
     _associatedLandmark=associated_landmark;
 

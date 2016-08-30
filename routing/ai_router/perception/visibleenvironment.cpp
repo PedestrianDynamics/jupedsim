@@ -6,6 +6,7 @@
 
 #include <boost/geometry/geometry.hpp>
 //#include <boost/foreach.hpp>
+#define UNUSED(x) [&x]{}()  // c++11 silence warnings
 
 VisibleEnvironment::VisibleEnvironment()
 {
@@ -14,6 +15,7 @@ VisibleEnvironment::VisibleEnvironment()
 
 VisibleEnvironment::VisibleEnvironment(const Building *b, const Pedestrian *ped)
 {
+    _ped=ped;
     typedef boost::geometry::model::polygon<Point> BoostPolygon;
 
     std::vector<BoostPolygon> boostHoles;

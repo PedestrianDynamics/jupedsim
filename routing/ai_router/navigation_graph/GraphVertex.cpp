@@ -42,6 +42,7 @@
 #include <algorithm>
 
 using namespace std;
+#define UNUSED(x) [&x]{}()  // c++11 silence warnings
 
 /**
  * Constructors & Destructors
@@ -111,6 +112,7 @@ int GraphVertex::RemoveOutEdge(GraphEdge * edge)
 
 int GraphVertex::RemoveOutEdge(const GraphVertex * dest)
 {
+     UNUSED(dest);
      //return out_edges.erase(dest);
      return 1;
 

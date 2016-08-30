@@ -174,16 +174,16 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
                   xLandmark = xLandmark->NextSiblingElement("landmark"))
         {
 
-            std::string id = xmltoa(xLandmark->Attribute("id"), "-1");
-            std::string caption = xmltoa(xLandmark->Attribute("caption"));
+            std::string landmark_id = xmltoa(xLandmark->Attribute("id"), "-1");
+            std::string landmark_caption = xmltoa(xLandmark->Attribute("caption"));
             std::string type = xmltoa(xLandmark->Attribute("type"),"-1");
             std::string roomId = xmltoa(xLandmark->Attribute("subroom1_id"),"-1");
             std::string pxreal = xmltoa(xLandmark->Attribute("pxreal"),"-1");
             std::string pyreal = xmltoa(xLandmark->Attribute("pyreal"),"-1");
-            std::string pxinmap = xmltoa(xLandmark->Attribute("px"),"-1");
-            std::string pyinmap = xmltoa(xLandmark->Attribute("py"),"-1");
-            std::string a = xmltoa(xLandmark->Attribute("a"),"-1");
-            std::string b = xmltoa(xLandmark->Attribute("b"),"-1");
+            std::string landmark_pxinmap = xmltoa(xLandmark->Attribute("px"),"-1");
+            std::string landmark_pyinmap = xmltoa(xLandmark->Attribute("py"),"-1");
+            std::string landmark_a = xmltoa(xLandmark->Attribute("a"),"-1");
+            std::string landmark_b = xmltoa(xLandmark->Attribute("b"),"-1");
 
             ptrLandmark landmark (new Landmark(Point(std::stod(pxreal),std::stod(pyreal))));
 
@@ -192,13 +192,13 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
                 Log->Write("ERROR:\t Subroom Id is NaN!");
                 return;
             }
-            landmark->SetId(std::stoi(id));
-            landmark->SetCaption(caption);
+            landmark->SetId(std::stoi(landmark_id));
+            landmark->SetCaption(landmark_caption);
             landmark->SetType(type);
             landmark->SetRealPos(Point(std::stod(pxreal),std::stod(pyreal)));
-            landmark->SetPosInMap(Point(std::stod(pxinmap),std::stod(pyinmap)));
-            landmark->SetA(std::stod(a));
-            landmark->SetB(std::stod(b));
+            landmark->SetPosInMap(Point(std::stod(landmark_pxinmap),std::stod(landmark_pyinmap)));
+            landmark->SetA(std::stod(landmark_a));
+            landmark->SetB(std::stod(landmark_b));
             landmark->SetRoom(_building->GetSubRoomByUID(std::stoi(roomId)));
 
             //processing the rooms node
