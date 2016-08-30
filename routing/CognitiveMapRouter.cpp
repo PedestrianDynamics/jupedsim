@@ -93,18 +93,18 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
     }
 
     //std::cout << p->GetGlobalTime() << std::endl;
-    if (std::fmod(p->GetGlobalTime(),sensor_manager->GetIntVPeriodicUpdate())==0.0 && p->GetGlobalTime()>0)
-    {
-        //Log->Write(std::to_string(p->GetGlobalTime()));
-        sensor_manager->execute(p, SensorManager::PERIODIC);
+//    if (std::fmod(p->GetGlobalTime(),sensor_manager->GetIntVPeriodicUpdate())==0.0 && p->GetGlobalTime()>0)
+//    {
+//        //Log->Write(std::to_string(p->GetGlobalTime()));
+//        sensor_manager->execute(p, SensorManager::PERIODIC);
 
-        int status = FindDestination(p);
+//        int status = FindDestination(p);
 
-        //(*cm_storage)[p]->UpdateSubRoom();
+//        //(*cm_storage)[p]->UpdateSubRoom();
 
-        return status;
+//        return status;
 
-    }
+//    }
     return 1;
 }
 
@@ -164,7 +164,7 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
         const NavLine* nextNavLine=(*brain_storage)[p]->GetNextNavLine(nextTarget);
 
         if (nextNavLine==nullptr)
-            Log->Write("ERROR: \t No visible next subtarget found");
+            Log->Write("ERROR: \t No visible next subtarget found. PED " + std::to_string(p->GetID()) );
 
         //setting crossing to ped
         p->SetExitLine(nextNavLine);
