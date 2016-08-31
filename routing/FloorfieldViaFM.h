@@ -50,6 +50,49 @@
 //maybe put following in macros.h
 #define LOWSPEED 0.001
 
+class TrialP
+{
+public:
+     long int key;
+     int* flag;
+     double* cost;
+     double* speed;
+     Point* neggrad;
+
+     TrialP() {
+          key = 0;
+          flag = nullptr;
+          cost = nullptr;
+          speed = nullptr;
+          neggrad = nullptr;
+     }
+
+     TrialP(long int keyArg, double* t, double* f, int* flagArg, Point* neggradArg) {
+          key = keyArg;
+          cost = t;
+          speed = f;
+          flag = flagArg;
+          neggrad = neggradArg;
+     }
+
+     ~TrialP(){}
+
+     bool operator <(const TrialP& rhs) const
+     {
+          return this->cost[this->key] < rhs.cost[rhs.key];
+     }
+
+     bool operator >(const TrialP& rhs) const
+     {
+          return this->cost[this->key] > rhs.cost[rhs.key];
+     }
+
+     bool operator ==(const TrialP& rhs) const
+     {
+          return this->cost[this->key] == rhs.cost[rhs.key];
+     }
+};
+
 class FloorfieldViaFM
 {
 public:
@@ -95,11 +138,11 @@ public:
      void calculateFloorfield(std::vector<Line>& wallArg, double* costarray, Point* neggradarray, double* speedarray);
      void calculateDistanceField(const double thresholdArg);             //make private
 
-     void checkNeighborsAndAddToNarrowband(Trial* trialfield, Trial* &smallest, Trial* &biggest, int* flag, const long int key,
-                                           std::function<void (Trial*, int*, const long int)> calc);
+     void checkNeighborsAndAddToNarrowband(std::priority_queue<TrialP, std::vector<TrialP>, std::greater<TrialP>>& trialfield, TrialP key,
+                                           std::function<void (TrialP)> calc);
 
-     void calcDist2Wall(Trial*, int*, const long int key);
-     void calcFloorfield(Trial*, int*, const long int key);
+     void calcDist2Wall(TrialP);
+     void calcFloorfield(TrialP);
      //void (*checkNeighborsAndCalc)(const long int key);
 
      inline double onesidedCalc(double xy, double hDivF);
