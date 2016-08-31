@@ -173,6 +173,16 @@ public:
      void FloydWarshall();
 
      /*!
+      * \brief Sets the door that leaves the subroom in _pathsMatrix
+      *
+      * Due to the way we calculate door distances (entries in _pathsMatrix), pedestrians in a corridor
+      * tend to jump from door to door, i.e. they walk to the next door in the correct direction, but they
+      * do not traverse it. This algorithm searches for the door on the way that really leaves the subroom,
+      * and sets this door in _pathsMatrix, which in turn is used by GetPresumableExitRoute() and FindExit().
+      */
+     void AvoidDoorHopping();
+
+     /*!
       * \brief set all the distances using ff
       */
      //void SetDistances();
