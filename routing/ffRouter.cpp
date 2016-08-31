@@ -731,11 +731,12 @@ int FFRouter::FindExit(Pedestrian* p)
                     Log->Write("no key for %d %d", key.first, key.second);
                     continue;
                }
-               //only consider doors, that lead to goal via a new subroom
+               //only consider doors, that lead to goal via a new subroom // should be redundant with AvoidDoorHopping
+               /*
                if (std::find(subroomDoors.begin(), subroomDoors.end(), _pathsMatrix.at(key)) != subroomDoors.end() &&
                    (finalDoor != doorUID)){
                     continue;
-               }
+               }//*/
 //               if (_mode == quickest) {
 //                    int locDistToDoorAdd = (_CroTrByUID[doorUID]->_lastTickTime2 > _CroTrByUID[doorUID]->_lastTickTime1)?_CroTrByUID[doorUID]->_lastTickTime2:_CroTrByUID[doorUID]->_lastTickTime1;
 //                    locDistToDoor = (locDistToDoor + locDistToDoorAdd * p->Getdt() * p->GetEllipse().GetV0())/2;
@@ -850,52 +851,54 @@ void FFRouter::AvoidDoorHopping() {
           }
      }
 
-     // @todo f.mack parallelize
-     for (auto crTrIt : _CroTrByUID) {
+     // @todo f.mack move to a vector<CroTr, finalDoor> first?
+#pragma omp parallel for
+     for (size_t i = 0; i < _CroTrByUID.size(); ++i) {
+          auto crTrIt = _CroTrByUID.begin();
+          std::advance(crTrIt, i);
           for (auto finalDoor : validFinalDoors) {
-               if (_distMatrix[std::make_pair(crTrIt.first, finalDoor)] == DBL_MAX) {
+               auto key = std::make_pair(crTrIt->first, finalDoor);
+               if (_distMatrix[key] == DBL_MAX) {
                     continue;
                }
-               auto nextDoor = _pathsMatrix.at(std::make_pair(crTrIt.first, finalDoor));
-               if (nextDoor == -42) {
-                    Log->Write("nextDoor is -42");
-                    continue;
-               }
-               int doorLeavingSubroom = -42;
-               auto sub = crTrIt.second->GetSubRoom1();
-               if (sub && (_CroTrByUID.at(nextDoor)->GetSubRoom1() == sub || _CroTrByUID.at(nextDoor)->GetSubRoom2() == sub)) {
-                    doorLeavingSubroom = crTrIt.first;
+               auto nextDoor = _pathsMatrix.at(key);
+               int doorLeavingSubroom1 = -1, doorLeavingSubroom2 = -1; // initialization should not be necessary
+               int doorsHopped1 = 0, doorsHopped2 = 0;
+
+               // We need to check both subrooms to figure out the best doorLeavingSubroom. Imagine two long parallel corridors
+               // connected by multiple doors. We do not know in advance which is the better subroom
+               auto sub1 = crTrIt->second->GetSubRoom1();
+               if (sub1 && (_CroTrByUID.at(nextDoor)->GetSubRoom1() == sub1 || _CroTrByUID.at(nextDoor)->GetSubRoom2() == sub1)) {
+                    doorLeavingSubroom1 = crTrIt->first;
                     Crossing* doorAfterNext;
                     do {
-                         auto key = std::make_pair(doorLeavingSubroom, finalDoor);
-                         doorLeavingSubroom = _pathsMatrix.at(key);
-                         if (doorLeavingSubroom == finalDoor) break;
-                         doorAfterNext = _CroTrByUID.at(_pathsMatrix.at(std::make_pair(doorLeavingSubroom, finalDoor)));
-                    } while (doorAfterNext->GetSubRoom1() == sub || doorAfterNext->GetSubRoom2() == sub);
+                         doorLeavingSubroom1 = _pathsMatrix.at(std::make_pair(doorLeavingSubroom1, finalDoor));
+                         if (doorLeavingSubroom1 == finalDoor) break;
+                         ++doorsHopped1;
+                         doorAfterNext = _CroTrByUID.at(_pathsMatrix.at(std::make_pair(doorLeavingSubroom1, finalDoor)));
+                    } while (doorAfterNext->GetSubRoom1() == sub1 || doorAfterNext->GetSubRoom2() == sub1);
                     // @todo f.mack If two doors connect the same two subrooms, only one of the subrooms is checked. If the doorAfterNext is in the other subroom, no optimization is made.
                     // @todo f.mack Do both and store results, then compare doorsHopped1 with doorsHopped2 and take the bigger one.
-               } else if ((sub = crTrIt.second->GetSubRoom2()) && (_CroTrByUID.at(nextDoor)->GetSubRoom1() == sub || _CroTrByUID.at(nextDoor)->GetSubRoom2() == sub)) {
-                    doorLeavingSubroom = crTrIt.first;
+               }
+               auto sub2 = crTrIt->second->GetSubRoom2();
+               if (sub2 && (_CroTrByUID.at(nextDoor)->GetSubRoom1() == sub2 || _CroTrByUID.at(nextDoor)->GetSubRoom2() == sub2)) {
+                    doorLeavingSubroom2 = crTrIt->first;
                     Crossing* doorAfterNext;
                     do {
-                         auto key = std::make_pair(doorLeavingSubroom, finalDoor);
-                         doorLeavingSubroom = _pathsMatrix.at(key);
-                         if (doorLeavingSubroom == finalDoor) break;
-                         doorAfterNext = _CroTrByUID.at(_pathsMatrix.at(std::make_pair(doorLeavingSubroom, finalDoor)));
-                    } while (doorAfterNext->GetSubRoom1() == sub || doorAfterNext->GetSubRoom2() == sub);
-               } else {
-                    Log->Write("ERROR FFRouter::AvoidDoorHopping: doors %d and %d (IDs: %d and %d) do not share a subroom.",
-                               crTrIt.first, nextDoor, crTrIt.second->GetID(), _CroTrByUID[nextDoor]->GetID());
-                    if (crTrIt.second->GetRoom1() == _CroTrByUID[nextDoor]->GetRoom1()) {
-                         Log->Write("But they are in the same room.");
-                    }
-                    Log->Write("The dists are %e", _distMatrix[std::make_pair(crTrIt.first, nextDoor)]);
-                    Log->Write("DBL_MAX:      %e", DBL_MAX);
-                    /*if (auto tr = dynamic_cast<Transition*>(_CroTrByUID[nextDoor]))//*/ {
-
+                         doorLeavingSubroom2 = _pathsMatrix.at(std::make_pair(doorLeavingSubroom2, finalDoor));
+                         if (doorLeavingSubroom2 == finalDoor) break;
+                         ++doorsHopped2;
+                         doorAfterNext = _CroTrByUID.at(_pathsMatrix.at(std::make_pair(doorLeavingSubroom2, finalDoor)));
+                    } while (doorAfterNext->GetSubRoom1() == sub2 || doorAfterNext->GetSubRoom2() == sub2);
+               }
+               if (doorsHopped1 + doorsHopped2 > 0) {
+                    // @todo f.mack better test for the distance, the current version fails for U-shaped rooms (did it work before?)
+#pragma omp critical(_pathsMatrix)
+                    _pathsMatrix.at(key) = doorsHopped1 > doorsHopped2 ? doorLeavingSubroom1 : doorLeavingSubroom2;
+                    if (_pathsMatrix.at(key) == -1) {
+                         Log->Write("ERROR in FFRouter::AvoidDoorHopping(): _pathsMatrix got assigned a value of -1 for key %d, %d", key.first, key.second);
                     }
                }
-               _pathsMatrix.at(std::make_pair(crTrIt.first, finalDoor)) = doorLeavingSubroom;
           }
      }
 
