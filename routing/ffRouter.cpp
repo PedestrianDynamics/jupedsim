@@ -318,10 +318,45 @@ bool FFRouter::Init(Building* building)
 //                    tempDistance = ptrToNew->getCostToDestination(*outerPtr, _CroTrByUID[*innerPtr]->GetCentre());
                     std::pair<int, int> key_ij = std::make_pair(outerPtr.second, rctIt->second);
                     std::pair<int, int> key_ji = std::make_pair(rctIt->second, outerPtr.second);
-                    _distMatrix.erase(key_ij);
-                    _distMatrix.erase(key_ji);
-                    _distMatrix.insert(std::make_pair(key_ij, tempDistance));
-                    _distMatrix.insert(std::make_pair(key_ji, tempDistance));
+                    auto room = _building->GetRoom(rctIt->first); // the room is the same for both doors
+                    SubRoom *subroom1 = nullptr, *subroom2 = nullptr;
+                    if (auto tr = dynamic_cast<Transition*>(_CroTrByUID[rctIt->second])) {
+                         if (tr->GetRoom1() == room) {
+                              subroom1 = tr->GetSubRoom1();
+                         } else if (tr->GetRoom2() == room) {
+                              subroom1 = tr->GetSubRoom2();
+                         }
+                    }
+                    if (auto tr = dynamic_cast<Transition*>(_CroTrByUID[outerPtr.second])) {
+                         if (tr->GetRoom1() == room) {
+                              subroom2 = tr->GetSubRoom1();
+                         } else if (tr->GetRoom2() == room) {
+                              subroom2 = tr->GetSubRoom2();
+                         }
+                    }
+                    // if the door is a crossing, we cannot say for sure which subroom we take - just leave it a nullptr for now
+#pragma omp critical
+                    {
+                         Log->Write("key is %d, %d", key_ij.first, key_ij.second);
+                         Log->Write("room is %d", room->GetID());
+                         if (subroom1) Log->Write("subroom1 is [%d/%d]", subroom1->GetRoomID(), subroom1->GetSubRoomID()); else Log->Write("subroom1 is nullptr");
+                         if (subroom2) Log->Write("subroom2 is [%d/%d]", subroom2->GetRoomID(), subroom2->GetSubRoomID()); else Log->Write("subroom2 is nullptr");
+                    }
+#pragma omp critical(_distMatrix)
+                    if (_distMatrix.at(key_ij) > tempDistance) {
+                         _distMatrix.erase(key_ij);
+                         _distMatrix.erase(key_ji);
+                         _distMatrix.insert(std::make_pair(key_ij, tempDistance));
+                         _distMatrix.insert(std::make_pair(key_ji, tempDistance));
+#pragma omp critical(_subroomMatrix)
+                         {
+                              _subroomMatrix.erase(key_ij);
+                              _subroomMatrix.erase(key_ji);
+                              _subroomMatrix.insert(std::make_pair(key_ij, subroom1));
+                              _subroomMatrix.insert(std::make_pair(key_ji, subroom2));
+                         }
+
+                    }
                     //}
                }
           }
@@ -347,7 +382,13 @@ bool FFRouter::Init(Building* building)
      for (auto mapItem : _distMatrix) {
           matrixfile << mapItem.first.first << " to " << mapItem.first.second << " : " << mapItem.second << "\t via \t" << _pathsMatrix[mapItem.first];
           matrixfile << "\t" << _CroTrByUID.at(mapItem.first.first)->GetID() << " to " << _CroTrByUID.at(mapItem.first.second)->GetID() << "\t via \t";
-          matrixfile << _CroTrByUID.at(_pathsMatrix[mapItem.first])->GetID() << std::endl;
+          matrixfile << _CroTrByUID.at(_pathsMatrix[mapItem.first])->GetID();
+          auto sub = _subroomMatrix[mapItem.first];
+          if (sub) {
+               matrixfile << std::string("\tSubroom: UID ") << sub->GetUID() << " (room: " << sub->GetRoomID() << " subroom ID: " << sub->GetSubRoomID() << ")" << std::endl;
+          } else {
+               matrixfile << std::string("\tSubroom is nullptr") << std::endl;
+          }
      }
      matrixfile.close();
      Log->Write("INFO: \tFF Router Init done.");
