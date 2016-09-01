@@ -717,6 +717,9 @@ int FFRouter::FindExit(Pedestrian* p)
      }
 
      int bestFinalDoor;
+     if (p->GetID() == 2 && Pedestrian::GetGlobalTime() == 4.44) {
+          Log->Write("time to investigate");
+     }
      for(int finalDoor : validFinalDoor) {
           //with UIDs, we can ask for shortest path
           for (int doorUID : DoorUIDsOfRoom) {
@@ -732,11 +735,16 @@ int FFRouter::FindExit(Pedestrian* p)
                     continue;
                }
                //only consider doors, that lead to goal via a new subroom // should be redundant with AvoidDoorHopping
-               /*
-               if (std::find(subroomDoors.begin(), subroomDoors.end(), _pathsMatrix.at(key)) != subroomDoors.end() &&
-                   (finalDoor != doorUID)){
-                    continue;
-               }//*/
+               //*
+               if (std::find(subroomDoors.begin(), subroomDoors.end(), _pathsMatrix.at(key)) != subroomDoors.end())/**/ {
+                    if (finalDoor != doorUID//*/_pathsMatrix[key]
+                            ){
+                         Log->Write("####### FindExit(): next door is in subroom and doorUID is not final; key = %d, %d (ID %d, %d), next = %d (ID %d)",
+                                    key.first, key.second, _CroTrByUID[key.first]->GetID(), _CroTrByUID[key.second]->GetID(), _pathsMatrix[key], _CroTrByUID[_pathsMatrix[key]]->GetID());
+                         continue;
+                    }
+               }
+//*/
 //               if (_mode == quickest) {
 //                    int locDistToDoorAdd = (_CroTrByUID[doorUID]->_lastTickTime2 > _CroTrByUID[doorUID]->_lastTickTime1)?_CroTrByUID[doorUID]->_lastTickTime2:_CroTrByUID[doorUID]->_lastTickTime1;
 //                    locDistToDoor = (locDistToDoor + locDistToDoorAdd * p->Getdt() * p->GetEllipse().GetV0())/2;
@@ -791,6 +799,9 @@ int FFRouter::FindExit(Pedestrian* p)
 //               temp = _pathsMatrix[key];
 //          }
 //     }
+     if (p->GetID() == 2) {
+          //Log->Write("ped %d wants to go to doorUID %d (ID %d)", p->GetID(), bestDoor, _CroTrByUID[bestDoor]->GetID());
+     }
      return bestDoor; //-1 if no way was found, doorUID of best, if path found
 }
 
@@ -836,6 +847,7 @@ void FFRouter::AvoidDoorHopping() {
      std::vector<int> validFinalDoors; //UIDs of doors
      validFinalDoors.clear();
      for (auto goal : goals) {
+          Log->Write("AvoidDoorHopping(): a goal is %d", goal.first);
           if (goal.first == -1) {
                for (auto &pairDoor : _ExitsByUID) {
                     //we add the all exits,
@@ -849,6 +861,9 @@ void FFRouter::AvoidDoorHopping() {
                     validFinalDoors.emplace_back(goalToLineUIDmap.at(goal.first));
                }
           }
+     }
+     for (auto d : validFinalDoors) {
+          Log->Write("a final door is %d (ID %d)", d, _CroTrByUID[d]->GetID());
      }
 
      // @todo f.mack move to a vector<CroTr, finalDoor> first?
@@ -877,8 +892,6 @@ void FFRouter::AvoidDoorHopping() {
                          ++doorsHopped1;
                          doorAfterNext = _CroTrByUID.at(_pathsMatrix.at(std::make_pair(doorLeavingSubroom1, finalDoor)));
                     } while (doorAfterNext->GetSubRoom1() == sub1 || doorAfterNext->GetSubRoom2() == sub1);
-                    // @todo f.mack If two doors connect the same two subrooms, only one of the subrooms is checked. If the doorAfterNext is in the other subroom, no optimization is made.
-                    // @todo f.mack Do both and store results, then compare doorsHopped1 with doorsHopped2 and take the bigger one.
                }
                auto sub2 = crTrIt->second->GetSubRoom2();
                if (sub2 && (_CroTrByUID.at(nextDoor)->GetSubRoom1() == sub2 || _CroTrByUID.at(nextDoor)->GetSubRoom2() == sub2)) {
