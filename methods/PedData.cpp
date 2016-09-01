@@ -144,7 +144,6 @@ bool PedData::InitializeVariables(const string& filename)
 
                     std::vector<std::string> strs;
                     boost::split(strs, line , boost::is_any_of("\t "),boost::token_compress_on);
-
                     if(strs.size() < 5)
                     {
                          Log->Write("ERROR:\t There is an error in the file at line %d", lineNr);
@@ -183,37 +182,42 @@ bool PedData::InitializeVariables(const string& filename)
 
      //Total number of agents
      _numPeds = *max_element(_IdsTXT.begin(),_IdsTXT.end()) - _minID+1;
-
      CreateGlobalVariables(_numPeds, _numFrames);
 
-     std::vector<int> firstFrameIndex;  //The first frame index of each pedestrian
-     std::vector<int> lastFrameIndex;	 //The last frame index of each pedestrian
-     int prevValue = _IdsTXT[0] - 1;
-     for (size_t i = 0; i < _IdsTXT.size(); i++)
+     for(int i=_minID;i<_minID+_numPeds; i++)
      {
-          if (prevValue != _IdsTXT[i])
-          {
-               firstFrameIndex.push_back(i);
-               prevValue = _IdsTXT[i];
-          }
-     }
-     for (size_t  i = 1; i < firstFrameIndex.size(); i++)
-     {
-          lastFrameIndex.push_back(firstFrameIndex[i] - 1);
-     }
-     lastFrameIndex.push_back(_IdsTXT.size() - 1);
+    	 int firstFrameIndex=INT_MAX;   //The first frame index of a pedestrian
+    	 int lastFrameIndex=-1;    //The last frame index of a pedestrian
+    	 int actual_totalframe=0;  //The total data points of a pedestrian in the trajectory
+    	 for (auto j = _IdsTXT.begin(); j != _IdsTXT.end(); ++j)
+    	     {
+    	         if (*j ==i)
+    	         {
+    	             int pos = std::distance(_IdsTXT.begin(), j);
+    	             if(pos<firstFrameIndex)
+    	             {
+    	            	 firstFrameIndex=pos;
+    	             }
+    	             if(pos>lastFrameIndex)
+    	             {
+    	            	 lastFrameIndex=pos;
+    	             }
+    	             actual_totalframe++;
+    	         }
+    	     }
+    	 if(lastFrameIndex==0)
+    	 {
+    		 Log->Write("Warning:\tThere is no trajectory for ped with ID <%d>!",i);
+    	 }
+    	 _firstFrame[i-_minID] = _FramesTXT[firstFrameIndex] - _minFrame;
+    	 _lastFrame[i-_minID] = _FramesTXT[lastFrameIndex] - _minFrame;
 
-     for (unsigned int i = 0; i < firstFrameIndex.size(); i++)
-     {
-          _firstFrame[i] = _FramesTXT[firstFrameIndex[i]] - _minFrame;
-          _lastFrame[i] = _FramesTXT[lastFrameIndex[i]] - _minFrame;
-          int actual_totalframe=lastFrameIndex[i]-firstFrameIndex[i]+1;
-          int expect_totalframe=_lastFrame[i]-_firstFrame[i]+1;
-          if(actual_totalframe != expect_totalframe)
-          {
-              Log->Write("Error:\tThe trajectory of ped with ID <%d> is not continuous. Please modify the trajectory file!",_IdsTXT[firstFrameIndex[i]]);
-              return false;
-          }
+	     int expect_totalframe=_lastFrame[i-_minID]-_firstFrame[i-_minID]+1;
+	     if(actual_totalframe != expect_totalframe)
+	     {
+		    Log->Write("Error:\tThe trajectory of ped with ID <%d> is not continuous. Please modify the trajectory file!",i);
+		    return false;
+	     }
      }
 
      for(unsigned int i = 0; i < _IdsTXT.size(); i++)
