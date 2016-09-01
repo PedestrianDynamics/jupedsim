@@ -356,14 +356,14 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 double dotProduct = 0;
                 double antiClippingFactor = 1;
                 if (distance2Wall < _slowDownDistance) {
-                    //Log->Write("distance2Wall: %f, _slowDownDistance: %f", distance2Wall, _slowDownDistance);
+                    Log->Write("distance2Wall: %f, _slowDownDistance: %f", distance2Wall, _slowDownDistance);
                     dotProduct = movDirection.ScalarProduct(dir2Wall);
                     if ((dotProduct > 0) && (distance2Wall < .5 * _slowDownDistance)) { //acute angle && really close to wall
                         movDirection = movDirection - (dir2Wall*dotProduct); //remove walldirection from movDirection
                         ++(*redircnt);
                     }
                     antiClippingFactor = ( 1 - .5*(dotProduct + fabs(dotProduct)) );
-                     //Log->Write("antiClippingFactor: %f", antiClippingFactor);
+                     Log->Write("antiClippingFactor: %f", antiClippingFactor);
                     ++(*slowcnt);
                 }
 
