@@ -1,23 +1,16 @@
 -	Edited all master_ini.xml:
 	Deleted the lines which told that 8 kernels need to be used
-
--	Edited all runtest_rimea_x.py:
-	Added the remarks to run a new dedicated console if the code is used with spyder
-
-
--	Test_1:
-	-	No changes needed. Added some notes to clearify the pythoncode.
-		Made the geometrydata more readable.
+Test_1:
+	-	No changes.
 
 
-	Test_2:
+Test_2:
 	-	Changed the calculation of the tolerance of the traveltime.
+
 		Before:
 		tolerance = 1
 		Now:
-		tolerance = +/- 5% of the mean of the traveltime (Rimea)
-
-	-	Added some notes to clearify the pythoncode. Made the geometrydata more readable.
+		tolerance = +/- 5% of the mean of the traveltime (Check Rimea)
 
 	-	Changed the geometrydata.
 		Before:
@@ -28,17 +21,15 @@
 		Now:
 		Stairlenght along the x-axis:	8.0
 		Stairheight along the z-axis:	6.0
-		---> Real stairlenght:		sqrt(100) = 10
+		---> Real stairlenght:		sqrt(100) = 10 (Check Rimea)
 
 
-	Test_3:
+Test_3:
 	-	Changed the calculation of the tolerance of the traveltime.
 		Before:
 		tolerance = 1
 		Now:
-		tolerance = +/- 5% of the mean of the traveltime (Rimea)
-
-	-	Added some notes to clearify the pythoncode. Made the geometrydata more readable.
+		tolerance = +/- 5% of the mean of the traveltime (Check Rimea)
 
 	-	Changed the geometrydata.
 		Before:
@@ -49,8 +40,55 @@
 		Now:
 		Stairlenght along the x-axis:	8.0
 		Stairheight along the z-axis:	6.0
-		---> Real stairlenght:		sqrt(100) = 10
+		---> Real stairlenght:		sqrt(100) = 10 (Check Rimea)
 	
+Test_4:
+
+
+Test_5:
+	-	Changed the calculation of the frame when the pedestrians start moving.
+		Before:
+		Taking the frame when the pedestrian already moved for 1 fps.
+		---> Error of 1 fps is to be considered
+
+		Now:
+		Taking the frame when the pedestrian is going to move.
+		---> No Error to be considered.
+
+Test_6:
+	-	No changes.
 
 
 
+Test_7:
+	-	Changed the number of distributed pedestrians from 4*150=600 to 4*50=200
+
+	-	Changed geometrydata:
+
+		Before:
+		Geometry rectangle: width=40, lengt=100
+
+		Now:
+		Geometry rectangle: width=50, lengt=40
+
+
+Test_8:
+	-	Changed the number of seeds used from 10 to 1
+
+	-	Fixed a bug, which caused logging the same information over and over again.
+		Added a plot, which shows the correlation between the modified parameters.
+
+
+Test_9:
+	-	Changed the number of seeds used from 10 to 1
+
+	-	Rewrote the testfunction
+
+
+Test_10:
+	-	No changes.
+
+
+Test_11:
+	-	
+	

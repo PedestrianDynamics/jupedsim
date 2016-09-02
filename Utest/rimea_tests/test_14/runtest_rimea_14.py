@@ -8,6 +8,7 @@ Pedestrian evacuation to an exit. They have two possible routes:
 
 Remarks
 =======
+Use this code with python 2
 Use new dedicated python console if you run this code with spyder
 
 This test has no concrete condition to check for.
@@ -20,7 +21,7 @@ There are 4 stats that should be documented:
 
 Source
 ======
-http://www.rimea.de/fileadmin/files/dok/richtlinien/r2.2.1.pdf
+http://www.rimea.de/fileadmin/files/dok/richtlinien/RiMEA_Richtlinie_3.0.0_-_D-E.pdf
 """
 
 import os

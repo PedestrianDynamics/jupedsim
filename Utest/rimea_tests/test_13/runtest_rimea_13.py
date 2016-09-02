@@ -9,6 +9,7 @@ a jam should be observed at the beginning of the stair
 
 Remarks
 =======
+Use this code with python 2
 Use new dedicated python console if you run this code with spyder
 
 In case of jam, flow at the beginnning of the stair
@@ -30,7 +31,7 @@ See also Fig. DistributionSpeedStairUp.png
 
 Source
 ======
-http://www.rimea.de/fileadmin/files/dok/richtlinien/r2.2.1.pdf
+http://www.rimea.de/fileadmin/files/dok/richtlinien/RiMEA_Richtlinie_3.0.0_-_D-E.pdf
 """
 
 import os

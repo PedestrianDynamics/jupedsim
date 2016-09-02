@@ -7,6 +7,7 @@ At the last exit there should be no jam.
 
 Remarks
 =======
+Use this code with python 2
 Use new dedicated python console if you run this code with spyder
 
 condition of this test is not clear enough...
@@ -16,7 +17,7 @@ However, this condition is not enough to quantify a jam.
 
 Source
 ======
-http://www.rimea.de/fileadmin/files/dok/richtlinien/r2.2.1.pdf
+http://www.rimea.de/fileadmin/files/dok/richtlinien/RiMEA_Richtlinie_3.0.0_-_D-E.pdf
 """
 
 import os
