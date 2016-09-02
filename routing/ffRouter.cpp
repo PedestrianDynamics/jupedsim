@@ -321,6 +321,7 @@ bool FFRouter::Init(Building* building)
                     std::pair<int, int> key_ji = std::make_pair(rctIt->second, outerPtr.second);
                     auto room = _building->GetRoom(rctIt->first); // the room is the same for both doors
                     SubRoom *subroom1 = nullptr, *subroom2 = nullptr;
+                    // @todo f.mack When this code is tested enough, remove unnecessary checks.
                     if (auto tr = dynamic_cast<Transition*>(_CroTrByUID[rctIt->second])) {
                          if (tr->GetRoom1() == room) {
                               subroom1 = tr->GetSubRoom1();
@@ -335,19 +336,57 @@ bool FFRouter::Init(Building* building)
                               subroom2 = tr->GetSubRoom2();
                          }
                     }
+                    auto cr1 = _CroTrByUID[rctIt->second];
+                    auto cr2 = _CroTrByUID[outerPtr.second];
                     if (subroom1 && !subroom2) {
-                         auto cr = _CroTrByUID[outerPtr.second];
-                         if (cr->GetSubRoom1() == subroom1 || cr->GetSubRoom2() == subroom1) {
+                         if (cr2->GetSubRoom1() == subroom1 || cr2->GetSubRoom2() == subroom1) {
                               subroom2 = subroom1;
+                         } else {
+                              Log->Write("ERROR in ffRouter::Init(): sub2 is nil, but subroomUID %d is not adjacent to crossingUID %d", subroom1->GetUID(), outerPtr.second);
                          }
                     }
                     if (subroom2 && !subroom1) {
-                         auto cr = _CroTrByUID[rctIt->second];
-                         if (cr->GetSubRoom1() == subroom2 || cr->GetSubRoom2() == subroom2) {
+                         if (cr1->GetSubRoom1() == subroom2 || cr1->GetSubRoom2() == subroom2) {
                               subroom1 = subroom2;
+                         } else {
+                              Log->Write("ERROR in ffRouter::Init(): sub1 is nil, but subroomUID %d is not adjacent to crossingUID %d", subroom2->GetUID(), rctIt->second);
                          }
                     }
-                    // if both are crossing, we still could check for their common subroom (but not if they share both subrooms)
+                    if (!subroom1 && !subroom2) {
+                         switch (int nr_subrooms = cr1->CommonSubroomWith(cr2, subroom1)) {
+                              case 1: {
+                                   subroom2 = subroom1;
+                                   break;
+                              }
+                              case 2: {
+                                   subroom2 = cr2->GetOtherSubRoom(subroom1->GetRoomID(), subroom1->GetSubRoomID());
+                                   Point grad;
+                                   long int grid_key = _locffviafm.at(subroom1->GetRoomID())->getGrid()->getKeyAtPoint(cr2->GetCentre());
+                                   _locffviafm.at(subroom1->GetRoomID())->getDirectionToUID(cr1->GetUniqueID(), grid_key, grad);
+                                   Point point_in_subroom = cr2->GetCentre() + grad;
+                                   bool s1 = subroom1->IsInSubRoom(point_in_subroom);
+                                   bool s2 = subroom2->IsInSubRoom(point_in_subroom);
+                                   // @todo f.mack what if grad == (0,0) or parallel to cr2?
+                                   // @todo f.mack is "do {point_in_subroom += grad} while (point in both subrooms)" necessary?
+                                   if (!(s1 xor s2)) {
+                                        Log->Write("ERROR in ffRouter::Init(): %f, %f is in %s with UIDs %d and %d",
+                                                   point_in_subroom._x, point_in_subroom._y, s1 ? "both subrooms" : "neither subroom", subroom1->GetUID(), subroom2->GetUID());
+                                   }
+                                   if (s1) subroom2 = subroom1; else subroom1 = subroom2;
+                                   break;
+                              }
+                              default: {
+                                   Log->Write("ERROR in ffRouter::Init(): unexpected numbers of common subrooms: %d for doorUIDs %d and %d", nr_subrooms, cr1->GetUniqueID(), cr2->GetUniqueID());
+                                   subroom2 = subroom1;
+                              }
+                         }
+                    }
+
+                    // Validity check
+                    if (key_ij.first != key_ij.second) {
+                         if (!subroom1) Log->Write("ERROR in ffRouter::Init(): for key %d, %d, subroom1 is nil", key_ij.first, key_ij.second);
+                         if (!subroom2) Log->Write("ERROR in ffRouter::Init(): for key %d, %d, subroom2 is nil", key_ij.first, key_ij.second);
+                    }
 #pragma omp critical
                     {
                          Log->Write("key is %d, %d", key_ij.first, key_ij.second);
