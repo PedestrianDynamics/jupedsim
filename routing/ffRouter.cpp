@@ -925,86 +925,39 @@ void FFRouter::AvoidDoorHopping() {
      std::chrono::time_point<std::chrono::system_clock> start, end;
      start = std::chrono::system_clock::now();
 
+     // it's already very fast -- no need to parallelize
+//#pragma omp parallel for
+     for (auto pathsIt : _pathsMatrix) {
+          auto key = pathsIt.first;
+          if (key.first == key.second) continue;
+          if (_distMatrix[key] == DBL_MAX) {
+               continue;
+          }
+          auto nextDoorUID = pathsIt.second;
+          auto nextDoor = _CroTrByUID.at(nextDoorUID);
+          int doorLeavingSubroom = -1; // initialization oly needed in case of error
 
-     auto goals = _building->GetAllGoals();
-     std::vector<int> validFinalDoors; //UIDs of doors
-     validFinalDoors.clear();
-     for (auto goal : goals) {
-          if (goal.first == -1) {
-               for (auto &pairDoor : _ExitsByUID) {
-                    //we add the all exits,
-                    validFinalDoors.emplace_back(pairDoor.first); //UID
-               }
-          } else {  //only one specific goal, goalToLineUIDmap gets
-               //populated in Init()
-               if ((goalToLineUIDmap.count(goal.first) == 0) || (goalToLineUIDmap[goal.first] == -1)) {
-                    Log->Write("ERROR: \t ffRouter: unknown/unreachable goalID: %d in FindExit(Ped)", goal.first);
-               } else {
-                    validFinalDoors.emplace_back(goalToLineUIDmap.at(goal.first));
-               }
+          auto subroom = _subroomMatrix.at(key);
+          auto finalDoor = key.second;
+
+          if (subroom && (_CroTrByUID.at(nextDoorUID)->GetSubRoom1() == subroom || _CroTrByUID.at(nextDoorUID)->GetSubRoom2() == subroom)) {
+               doorLeavingSubroom = key.first;
+               Crossing* doorAfterNext;
+               do {
+                    doorLeavingSubroom = _pathsMatrix.at(std::make_pair(doorLeavingSubroom, finalDoor));
+                    if (doorLeavingSubroom == finalDoor) break;
+                    auto doorAfterNextUID = _pathsMatrix.at(std::make_pair(doorLeavingSubroom, finalDoor));
+                    doorAfterNext = _CroTrByUID.at(doorAfterNextUID);
+               } while (doorAfterNext->GetSubRoom1() == subroom || doorAfterNext->GetSubRoom2() == subroom);
+          } else {
+               Log->Write("ERROR in FFRouter::AvoidDoorHopping: sub is %p (UID %d), nextDoorUID/ID is %d/%d", subroom, subroom?subroom->GetUID():-1, nextDoorUID, nextDoor->GetID());
+          }
+#pragma omp critical(_pathsMatrix)
+          _pathsMatrix.at(key) = doorLeavingSubroom;
+          if (_pathsMatrix.at(key) == -1) {
+               Log->Write("ERROR in FFRouter::AvoidDoorHopping(): _pathsMatrix got assigned a value of -1 for key %d, %d", key.first, key.second);
           }
      }
-
-     // @todo f.mack move to a vector<CroTr, finalDoor> first?
-//#pragma omp parallel for
-     //for (size_t i = 0; i < _CroTrByUID.size(); ++i) {
-     //     auto crTrIt = _CroTrByUID.begin();
-     //     std::advance(crTrIt, i);
-     //     for (auto finalDoor : validFinalDoors) {
-     for (auto pathsIt : _pathsMatrix) {
-               auto key = pathsIt.first;
-               if (key.first == key.second) continue;
-               if (_distMatrix[key] == DBL_MAX) {
-                    continue;
-               }
-               auto nextDoorUID = pathsIt.second;
-               auto nextDoor = _CroTrByUID.at(nextDoorUID);
-               int doorLeavingSubroom1 = -1, doorLeavingSubroom2 = -1; // initialization should not be necessary
-               //int doorsHopped1 = 0, doorsHopped2 = 0;
-
-               auto sub1 = _subroomMatrix.at(key);
-               auto finalDoor = key.second;
-
-
-               // We need to check both subrooms to figure out the best doorLeavingSubroom. Imagine two long parallel corridors
-               // connected by multiple doors. We do not know in advance which is the better subroom
-
-               //auto sub1 = crTrIt->second->GetSubRoom1();
-               if (sub1 && (_CroTrByUID.at(nextDoorUID)->GetSubRoom1() == sub1 || _CroTrByUID.at(nextDoorUID)->GetSubRoom2() == sub1)) {
-                    doorLeavingSubroom1 = key.first;
-                    Crossing* doorAfterNext;
-                    do {
-                         doorLeavingSubroom1 = _pathsMatrix.at(std::make_pair(doorLeavingSubroom1, finalDoor));
-                         if (doorLeavingSubroom1 == finalDoor) break;
-                         //++doorsHopped1;
-                         auto doorAfterNextUID = _pathsMatrix.at(std::make_pair(doorLeavingSubroom1, finalDoor));
-                         doorAfterNext = _CroTrByUID.at(doorAfterNextUID);
-                    } while (doorAfterNext->GetSubRoom1() == sub1 || doorAfterNext->GetSubRoom2() == sub1);
-               } else {
-                    Log->Write("ERROR in FFRouter::AvoidDoorHopping: sub is %p (UID %d), nextDoorUID/ID is %d/%d", sub1, sub1?sub1->GetUID():-1, nextDoorUID, nextDoor->GetID());
-               }
-               /*auto sub2 = crTrIt->second->GetSubRoom2();
-               if (sub2 && (_CroTrByUID.at(nextDoorUID)->GetSubRoom1() == sub2 || _CroTrByUID.at(nextDoorUID)->GetSubRoom2() == sub2)) {
-                    doorLeavingSubroom2 = crTrIt->first;
-                    Crossing* doorAfterNext;
-                    do {
-                         doorLeavingSubroom2 = _pathsMatrix.at(std::make_pair(doorLeavingSubroom2, finalDoor));
-                         if (doorLeavingSubroom2 == finalDoor) break;
-                         ++doorsHopped2;
-                         doorAfterNext = _CroTrByUID.at(_pathsMatrix.at(std::make_pair(doorLeavingSubroom2, finalDoor)));
-                    } while (doorAfterNext->GetSubRoom1() == sub2 || doorAfterNext->GetSubRoom2() == sub2);
-               }
-               */
-               //if (doorsHopped1 + doorsHopped2 > 0) {
-                    // @todo f.mack better test for the distance, the current version fails for U-shaped rooms (did it work before?)
-#pragma omp critical(_pathsMatrix)
-                    _pathsMatrix.at(key) = /*doorsHopped1 > doorsHopped2 ?*/ doorLeavingSubroom1 ;//: doorLeavingSubroom2;
-                    if (_pathsMatrix.at(key) == -1) {
-                         Log->Write("ERROR in FFRouter::AvoidDoorHopping(): _pathsMatrix got assigned a value of -1 for key %d, %d", key.first, key.second);
-                    //}
-               }
-          }
-     //}
 
      end = std::chrono::system_clock::now();
      std::chrono::duration<double> elapsed_seconds = end-start;

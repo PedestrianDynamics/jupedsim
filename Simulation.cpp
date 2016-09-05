@@ -250,7 +250,7 @@ bool Simulation::InitArgs()
     // because then, invalid pedestrians have been deleted and FindExit()
     // has been called.
     Log->Write("INFO:\t PreSim of DirectionStrategy starting ...");
-    if (!_operationalModel->_direction->PreSim(_building.get()))
+    if (!_operationalModel->GetDirection()->PreSim(_building.get()))
         return false;
     Log->Write("INFO:\t PreSim of DirectionStrategy done");
 

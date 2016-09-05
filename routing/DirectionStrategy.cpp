@@ -506,8 +506,6 @@ bool DirectionLocalFloorfield::PreSim(Building* building) {
                }
           }
 
-          // @todo f.mack Create locff here and only for needed rooms. Does this cause problems when a non-existing floorfield is needed?
-
 #pragma omp for
           for (size_t i = 0; i < roomsDoorsSet.size(); ++i) {
                auto rdIt = roomsDoorsSet.begin();
@@ -522,7 +520,7 @@ bool DirectionLocalFloorfield::PreSim(Building* building) {
      for (size_t i = 0; i < doorsInRoom.size(); ++i) {
           auto roomIt = doorsInRoom.begin();
           std::advance(roomIt, i);
-          writeFF(roomIt->first, roomIt->second);
+          //writeFF(roomIt->first, roomIt->second);
      }
      return true;
 }
