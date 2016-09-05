@@ -32,11 +32,16 @@
 #define OPERATIONALMODEL_H_
 
 #include <string>
+#include <memory>
 
 class Building;
+class DirectionStrategy;
 
 class OperationalModel
 {
+public: // @todo f.mack make private or protected and add getter
+     // define the strategy for crossing a door (used for calculating the driving force)
+     std::shared_ptr<DirectionStrategy> _direction;
 public:
      /**
       * Constructor

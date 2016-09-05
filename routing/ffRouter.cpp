@@ -366,8 +366,8 @@ bool FFRouter::Init(Building* building)
                                    Point point_in_subroom = cr2->GetCentre() + grad;
                                    bool s1 = subroom1->IsInSubRoom(point_in_subroom);
                                    bool s2 = subroom2->IsInSubRoom(point_in_subroom);
-                                   // @todo f.mack what if grad == (0,0) or parallel to cr2?
-                                   // @todo f.mack is "do {point_in_subroom += grad} while (point in both subrooms)" necessary?
+                                   // there might be cases where grad == (0,0) or parallel to cr2, but I have found no way to produce
+                                   // this case (even for a symmetric geometry, grad points into one of the subrooms). --f.mack
                                    if (!(s1 xor s2)) {
                                         Log->Write("ERROR in ffRouter::Init(): %f, %f is in %s with UIDs %d and %d",
                                                    point_in_subroom._x, point_in_subroom._y, s1 ? "both subrooms" : "neither subroom", subroom1->GetUID(), subroom2->GetUID());
@@ -389,10 +389,10 @@ bool FFRouter::Init(Building* building)
                     }
 #pragma omp critical
                     {
-                         Log->Write("key is %d, %d", key_ij.first, key_ij.second);
-                         Log->Write("room is %d", room->GetID());
-                         if (subroom1) Log->Write("subroom1 is [%d/%d]", subroom1->GetRoomID(), subroom1->GetSubRoomID()); else Log->Write("subroom1 is nullptr");
-                         if (subroom2) Log->Write("subroom2 is [%d/%d]", subroom2->GetRoomID(), subroom2->GetSubRoomID()); else Log->Write("subroom2 is nullptr");
+                         //Log->Write("key is %d, %d", key_ij.first, key_ij.second);
+                         //Log->Write("room is %d", room->GetID());
+                         //if (subroom1) Log->Write("subroom1 is [%d/%d]", subroom1->GetRoomID(), subroom1->GetSubRoomID()); else Log->Write("subroom1 is nullptr");
+                         //if (subroom2) Log->Write("subroom2 is [%d/%d]", subroom2->GetRoomID(), subroom2->GetSubRoomID()); else Log->Write("subroom2 is nullptr");
                     }
 #pragma omp critical(_distMatrix)
                     if (_distMatrix.at(key_ij) > tempDistance) {
@@ -675,14 +675,14 @@ std::set<std::pair<int, int>> FFRouter::GetPresumableExitRoute(Pedestrian* p) {
     roomsDoorsVector.clear();
     int finalDoor = _finalDoors.at(p->GetID());
     int finalDoorID = _CroTrByUID.at(finalDoor)->GetID();
-    Log->Write("ped %d: final door is UID %d, ID %d", p->GetID(), finalDoor, finalDoorID);
+    //Log->Write("ped %d: final door is UID %d, ID %d", p->GetID(), finalDoor, finalDoorID);
 
     int roomID = p->GetRoomID();
     auto room = _building->GetRoom(roomID);
     int doorUID = p->GetNextDestination();
     do {
-        Log->Write("GetPresumableExitRoute: ped %d needs ff in roomID %d to doorUID %d (ID %d)",
-              p->GetID(), room->GetID(), doorUID, _CroTrByUID[doorUID]->GetID());
+        //Log->Write("GetPresumableExitRoute: ped %d needs ff in roomID %d to doorUID %d (ID %d)",
+        //      p->GetID(), room->GetID(), doorUID, _CroTrByUID[doorUID]->GetID());
         if (_CroTrByUID[doorUID]->GetRoom1() &&
             _CroTrByUID[doorUID]->GetRoom1()->GetID() != room->GetID()) {
              if (auto tr = dynamic_cast<Transition*>(_CroTrByUID[doorUID])) {

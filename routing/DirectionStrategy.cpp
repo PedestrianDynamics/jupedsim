@@ -33,6 +33,7 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/SubRoom.h"
 //#include "../geometry/Wall.h"
+#include "../routing/ffRouter.h"
 #include "../routing/FloorfieldViaFM.h"
 #include "../routing/LocalFloorfieldViaFM.h"
 //#include "DirectionStrategy.h"
@@ -476,6 +477,54 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
      }
 */
 
+}
+
+bool DirectionLocalFloorfield::PreSim(Building* building) {
+     for (auto ped: building->GetAllPedestrians()) {
+          //Log->Write("ped %d: ExitUID is %d", ped->GetID(), ped->GetNextDestination());
+     }
+
+     std::map<int, std::vector<int>> doorsInRoom;
+     doorsInRoom.clear();
+     Log->Write("####### DirectionLocalFloorfield::PreSim");
+
+     //return true;
+     std::set<std::pair<int, int>> roomsDoorsSet;
+     roomsDoorsSet.clear();
+     auto allPeds = building->GetAllPedestrians();
+//#pragma omp parallel
+     {
+#pragma omp for
+          //for (auto ped: building->GetAllPedestrians()) {
+          for (size_t i = 0; i < allPeds.size(); ++i) {
+               auto ped = allPeds.begin();
+               std::advance(ped, i);
+               if (auto router = dynamic_cast<FFRouter*>((*ped)->GetRouter())) {
+                    auto pedRoomsDoorSet = router->GetPresumableExitRoute(*ped);
+#pragma omp critical(roomsDoorsSet)
+                    roomsDoorsSet.insert(pedRoomsDoorSet.begin(), pedRoomsDoorSet.end());
+               }
+          }
+
+          // @todo f.mack Create locff here and only for needed rooms. Does this cause problems when a non-existing floorfield is needed?
+
+#pragma omp for
+          for (size_t i = 0; i < roomsDoorsSet.size(); ++i) {
+               auto rdIt = roomsDoorsSet.begin();
+               // suboptimal, because a set doesn't provide random-access iterators
+               std::advance(rdIt, i);
+               CalcFloorfield(rdIt->first, rdIt->second);
+#pragma omp critical(doorsInRoom)
+               doorsInRoom[rdIt->first].push_back(rdIt->second);
+          }
+     }
+
+     for (size_t i = 0; i < doorsInRoom.size(); ++i) {
+          auto roomIt = doorsInRoom.begin();
+          std::advance(roomIt, i);
+          writeFF(roomIt->first, roomIt->second);
+     }
+     return true;
 }
 
 void DirectionLocalFloorfield::CalcFloorfield(int room, int destUID) {

@@ -46,7 +46,7 @@ class DirectionStrategy;
 class GompertzModel : public OperationalModel {
 private:
      /// define the strategy for crossing a door (used for calculating the driving force)
-     std::shared_ptr<DirectionStrategy> _direction;
+     //std::shared_ptr<DirectionStrategy> _direction;
 
      /// Modellparameter
      double _nuPed;

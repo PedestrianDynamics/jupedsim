@@ -244,6 +244,16 @@ bool Simulation::InitArgs()
     if (!_operationalModel->Init(_building.get()))
         return false;
     Log->Write("INFO:\t Init Operational Model done");
+
+    // Give the DirectionStrategy the chance to perform some initialization.
+    // This should be done after the initialization of the operationalModel
+    // because then, invalid pedestrians have been deleted and FindExit()
+    // has been called.
+    Log->Write("INFO:\t PreSim of DirectionStrategy starting ...");
+    if (!_operationalModel->_direction->PreSim(_building.get()))
+        return false;
+    Log->Write("INFO:\t PreSim of DirectionStrategy done");
+
     //other initializations
     for (auto&& ped: _building->GetAllPedestrians()) {
         ped->Setdt(_deltaT);
