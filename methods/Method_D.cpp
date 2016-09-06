@@ -240,10 +240,10 @@ vector<polygon_2d> Method_D::GetPolygons(vector<double>& XInFrame, vector<double
      }
      polygons = vd.cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
 
-/*     for(auto && p:polygons)
+     for(auto && p:polygons)
      {
           ReducePrecision(p);
-     }*/
+     }
      return polygons;
 }
 /**
@@ -564,8 +564,8 @@ void Method_D::ReducePrecision(polygon_2d& polygon)
 {
 	for(auto&& point:polygon.outer())
      {
-          point.x(round(point.x() * 100.0) / 100.0);
-          point.y(round(point.y() * 100.0) / 100.0);
+          point.x(round(point.x() * 100000000000.0) / 100000000000.0);
+          point.y(round(point.y() * 100000000000.0) / 100000000000.0);
      }
 }
 
