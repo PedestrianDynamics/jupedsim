@@ -31,7 +31,6 @@
 #include <math.h>
 #include "../pedestrian/Pedestrian.h"
 #include "../routing/DirectionStrategy.h"
-#include "../routing/ffRouter.h"
 #include "../mpi/LCGrid.h"
 #include "../geometry/Wall.h"
 #include "../geometry/SubRoom.h"
@@ -118,8 +117,6 @@ bool GradientModel::Init (Building* building)
 
      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
-     std::set<std::pair<int, int>> roomsDoorsSet;
-     roomsDoorsSet.clear();
      std::vector<Pedestrian*> pedsToRemove;
      pedsToRemove.clear();
      bool error_occurred = false;
@@ -163,43 +160,12 @@ bool GradientModel::Init (Building* building)
          E.SetCosPhi(cosPhi);
          E.SetSinPhi(sinPhi);
          ped->SetEllipse(E);
-
-         if (auto router = dynamic_cast<FFRouter*>(ped->GetRouter())) {
-              auto pedRoomsDoorSet = router->GetPresumableExitRoute(ped);
-              roomsDoorsSet.insert(pedRoomsDoorSet.begin(), pedRoomsDoorSet.end());
-         }
     }
 
      for (auto ped : pedsToRemove) {
           building->DeletePedestrian(ped);
      }
-     if (error_occurred) return false;
-
-     // @todo f.mack if it works, also implement for the others
-     if (auto dirLocff = dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) {
-          std::map<int, std::vector<int>> doorsInRoom;
-          doorsInRoom.clear();
-          Log->Write("####### The GradientModel is using DirectionLocalFloorfield");
-#pragma omp parallel
-          {
-#pragma omp for
-               for (size_t i = 0; i < roomsDoorsSet.size(); ++i) {
-                    auto rdIt = roomsDoorsSet.begin();
-                    // suboptimal, because a set doesn't provide random-access iterators
-                    std::advance(rdIt, i);
-                    dirLocff->CalcFloorfield(rdIt->first, rdIt->second);
-#pragma omp critical(doorsInRoom)
-                    doorsInRoom[rdIt->first].push_back(rdIt->second);
-               }
-#pragma omp for
-               for (size_t i = 0; i < doorsInRoom.size(); ++i) {
-                   auto roomIt = doorsInRoom.begin();
-                   std::advance(roomIt, i);
-                   dirLocff->writeFF(roomIt->first, roomIt->second);
-               }
-          }
-     }
-    return true;
+     return !error_occurred;
 }
 
 void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic)
@@ -356,14 +322,12 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 double dotProduct = 0;
                 double antiClippingFactor = 1;
                 if (distance2Wall < _slowDownDistance) {
-                    Log->Write("distance2Wall: %f, _slowDownDistance: %f", distance2Wall, _slowDownDistance);
                     dotProduct = movDirection.ScalarProduct(dir2Wall);
                     if ((dotProduct > 0) && (distance2Wall < .5 * _slowDownDistance)) { //acute angle && really close to wall
                         movDirection = movDirection - (dir2Wall*dotProduct); //remove walldirection from movDirection
                         ++(*redircnt);
                     }
                     antiClippingFactor = ( 1 - .5*(dotProduct + fabs(dotProduct)) );
-                     Log->Write("antiClippingFactor: %f", antiClippingFactor);
                     ++(*slowcnt);
                 }
 
