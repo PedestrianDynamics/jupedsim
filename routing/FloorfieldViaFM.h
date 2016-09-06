@@ -107,10 +107,10 @@ public:
 
      //void getDirectionAt(const Point& position, Point& direction);                                   //obsolete
      //void getDirectionToDestination (const int destID, const Point& position, Point& direction);     //obsolete
-     void getDirectionToUID(int destID, const long int key, Point& direction);
-     void getDirectionToUID(int destID, const long int key, Point& direction, int mode);
+     virtual void getDirectionToUID(int destID, const long int key, Point& direction);
+     virtual void getDirectionToUID(int destID, const long int key, Point& direction, int mode);
      //void getDirectionToUIDParallel(int destID, const long int key, Point& direction);
-     void getDirectionToDestination (Pedestrian* ped, Point& direction);
+     virtual void getDirectionToDestination (Pedestrian* ped, Point& direction);
      //void getDirectionToFinalDestination(Pedestrian* ped, Point& direction); //this is router buissness! problem in multi-storage buildings
 
      void createMapEntryInLineToGoalID(const int goalID);
@@ -212,6 +212,14 @@ protected:
 
      double threshold;
      bool useDistanceToWall;
+};
+
+class CentrePointFFViaFM : public virtual FloorfieldViaFM {
+public:
+     // @todo f.mack It seems we only need getDirectionToUID(.., mode). Make sure and remove the others. Also clean up LocalFF and CPLocalFF
+     virtual void getDirectionToDestination (Pedestrian* ped, Point& direction);
+     virtual void getDirectionToUID(int destID, const long int key, Point& direction) {getDirectionToUID(destID, key, direction, global_shortest);};
+     virtual void getDirectionToUID(int destID, const long int key, Point& direction, int mode);
 };
 
 #endif // FLOORFIELDVIAFM_H

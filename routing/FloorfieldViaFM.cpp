@@ -1964,3 +1964,117 @@ int FloorfieldViaFM::isInside(const long int key) {
 
     return temp;
 }
+
+void CentrePointFFViaFM::getDirectionToDestination(Pedestrian* ped, Point& direction){
+    const Point& position = ped->GetPos();
+    int destID = ped->GetExitIndex();
+    long int key = grid->getKeyAtPoint(position);
+    getDirectionToUID(destID, key, direction, global_shortest);
+    if (direction._x == DBL_MAX && direction._y == DBL_MAX) {
+        //Log->Write("Floorfield for ped %d in subroom %d not yet calculated", ped->GetID(), ped->GetSubRoomID());
+        direction._x = 0;
+        direction._y = 0;
+        // @todo f.mack I can do whatever I want in here, it seems to have no influence. Which Strategy is suitable for testing this?
+    }
+}
+
+void CentrePointFFViaFM::getDirectionToUID(int destID, const long int key, Point& direction, int mode) {
+    //what if goal == -1, meaning closest exit... is GetExitIndex then -1? NO... ExitIndex is UID, given by router
+    //if (ped->GetFinalDestination() == -1) /*go to closest exit*/ destID != -1;
+
+    //Log->Write("###### CentrePointFFViaFM::getDirectionToUID");
+    if ((key < 0) || (key >= grid->GetnPoints())) { // @todo: ar.graf: this check in a #ifdef-block?
+        Log->Write("ERROR: \t Floorfield tried to access a key out of grid!");
+        direction._x = 0.;
+        direction._y = 0.;
+        return;
+    }
+    Point* localneggradptr = nullptr;
+    double* localcostptr = nullptr;
+    //#pragma omp critical
+    {
+        if (neggradmap.count(destID) == 0) {
+            Log->Write("FF for destID %d does not exist (key is %d)", destID, key);
+            //check, if distID is in this grid
+            Hline* destLine = building->GetTransOrCrossByUID(destID);
+            Point A = destLine->GetCentre();
+            //Point B = destLine->GetPoint2();
+            if (!(grid->includesPoint(A))) {
+                Log->Write("ERROR: \t Destination ID %d is not in grid!", destID);
+                direction._x = direction._y = 0.;
+                //return;
+            } else {
+//#pragma omp critical
+                //neggradmap.emplace(destID, nullptr);
+//#pragma omp critical
+                //costmap.emplace(destID, nullptr);
+            }
+        }
+        localneggradptr = (neggradmap.count(destID) == 0) ? nullptr : neggradmap.at(destID); //will fail if above if-clause was entered
+        localcostptr = (costmap.count(destID) == 0) ? nullptr : costmap.at(destID);
+        if (localneggradptr == nullptr) { //@todo: ar.graf : check here if other thread has started calc of same ff
+            //Log->Write("###### key %d wants to calculate new Floorfield to destID %d", key, destID);
+            bool isBeingCalculated;
+#pragma omp critical(floorfieldsBeingCalculated)
+            {
+                if (!(isBeingCalculated = floorfieldsBeingCalculated.count(destID) > 0)) {
+                    floorfieldsBeingCalculated.insert(destID);
+                }
+            }
+            if (isBeingCalculated) {
+                //Log->Write("####### ff to destID %d is already being calculated", destID);
+                // we do not want to wait until the other calculation has finished, so we return immediately
+                // the values are corrected in getDirectionToDestination(), and getCostToDestination doesn't care about the direction
+                direction._x = DBL_MAX;
+                direction._y = DBL_MAX;
+                return;
+            }
+            //Log->Write("####### ped with key %d started calculating ff to destID %d", key, destID);
+
+            //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)
+            localcostptr =    new double[grid->GetnPoints()];
+            localneggradptr = new Point[grid->GetnPoints()];
+#pragma omp critical(neggradmap)
+            neggradmap.erase(destID);
+#pragma omp critical(neggradmap)
+            neggradmap.emplace(destID, localneggradptr);
+#pragma omp critical(costmap)
+            costmap.erase(destID);
+#pragma omp critical(costmap)
+            costmap.emplace(destID, localcostptr);
+
+
+            //create ff (prepare Trial-mechanic, then calc)
+//                for (long int i = 0; i < grid->GetnPoints(); ++i) {
+//                    //set Trialptr to fieldelements
+//                    trialfield[i].cost = localcostptr + i;
+//                    trialfield[i].neggrad = localneggradptr + i;
+//                    trialfield[i].father = nullptr;
+//                    trialfield[i].child = nullptr;
+//                }
+//                clearAndPrepareForFloorfieldReCalc(localcostptr);
+            //std::vector<Line> localline = {Line((Line) *(building->GetTransOrCrossByUID(destID)))};
+            Point centre = building->GetTransOrCrossByUID(destID)->GetCentre();
+            std::vector<Line> localline = {Line(centre, centre, 0)}; // only one point
+//                setNewGoalAfterTheClear(localcostptr, localline);
+            Log->Write("Starting FF for UID %d (ID %d)", destID, dynamic_cast<Crossing*>(building->GetTransOrCrossByUID(destID))->GetID());
+            //std::cerr << "\rW\tO\tR\tK\tI\tN\tG";
+            if (mode == quickest) {
+                calculateFloorfield(localline, localcostptr, localneggradptr, densityspeed);
+            } else {
+                calculateFloorfield(localline, localcostptr, localneggradptr, modifiedspeed);
+            }
+#pragma omp critical(floorfieldsBeingCalculated)
+            {
+                if (floorfieldsBeingCalculated.count(destID) != 1) {
+                    Log->Write("ERROR: FloorfieldViaFM::getDirectionToUID: key %d was calculating FF for destID %d, but it was removed from floorfieldsBeingCalculated meanwhile", key, destID);
+                }
+                floorfieldsBeingCalculated.erase(destID);
+            }
+            //Log->Write("Ending   FF for UID %d", destID);
+            //std::cerr << "\r W\t O\t R\t K\t I\t N\t G";
+        }
+    }
+    direction._x = (localneggradptr[key]._x);
+    direction._y = (localneggradptr[key]._y);
+}

@@ -87,7 +87,7 @@ FFRouter::~FFRouter()
           delete _globalFF;
      }
      //delete localffs
-     std::map<int, LocalFloorfieldViaFM*>::reverse_iterator delIter;
+     std::map<int, CentrePointLocalFFViaFM*>::reverse_iterator delIter;
      for (delIter = _locffviafm.rbegin();
           delIter != _locffviafm.rend();
           ++delIter) {
@@ -182,8 +182,8 @@ bool FFRouter::Init(Building* building)
 #endif
                auto pairRoomIt = allRooms.begin();
                std::advance(pairRoomIt, i);
-               LocalFloorfieldViaFM *ptrToNew = nullptr;
-               ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), building, 0.125, 0.125, 0.0, false);
+               CentrePointLocalFFViaFM *ptrToNew = nullptr;
+               ptrToNew = new CentrePointLocalFFViaFM((*pairRoomIt).second.get(), building, 0.125, 0.125, 0.0, false);
                //for (long int i = 0; i < ptrToNew)
                Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
 #pragma omp critical(_locffviafm)
@@ -526,9 +526,9 @@ bool FFRouter::ReInit()
 #endif
           auto pairRoomIt = allRooms.begin();
           std::advance(pairRoomIt, i);
-          LocalFloorfieldViaFM* ptrToNew = nullptr;
+          CentrePointLocalFFViaFM* ptrToNew = nullptr;
           double tempDistance = 0.;
-          ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), _building, 0.125, 0.125, 0.0, false);
+          ptrToNew = new CentrePointLocalFFViaFM((*pairRoomIt).second.get(), _building, 0.125, 0.125, 0.0, false);
           //for (long int i = 0; i < ptrToNew)
           Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
 #pragma omp critical
@@ -824,7 +824,7 @@ int FFRouter::FindExit(Pedestrian* p)
                     Log->Write("no key for %d %d", key.first, key.second);
                     continue;
                }
-               //only consider doors, that lead to goal via a new subroom
+               //only consider doors that lead to goal via a new subroom resp. room considering _targetWithinSubroom
                if (std::find(subroomDoors.begin(), subroomDoors.end(), _pathsMatrix.at(key)) != subroomDoors.end() &&
                    (finalDoor != doorUID)){
                     continue;

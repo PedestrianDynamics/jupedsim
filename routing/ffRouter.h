@@ -219,7 +219,8 @@ protected:
      std::vector<int>                         _allDoorUIDs;
      std::vector<int>                         _localShortestSafedPeds;
      const Building*                          _building;
-     std::map<int, LocalFloorfieldViaFM*>     _locffviafm;
+     //std::map<int, LocalFloorfieldViaFM*>     _locffviafm; // @todo f.mack change back
+     std::map<int, CentrePointLocalFFViaFM*>  _locffviafm;
      FloorfieldViaFM*                         _globalFF;
      std::map<int, Transition*>               _TransByUID;
      std::map<int, Transition*>               _ExitsByUID;

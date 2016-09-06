@@ -492,7 +492,7 @@ bool DirectionLocalFloorfield::PreSim(Building* building) {
      std::set<std::pair<int, int>> roomsDoorsSet;
      roomsDoorsSet.clear();
      auto allPeds = building->GetAllPedestrians();
-//#pragma omp parallel
+#pragma omp parallel
      {
 #pragma omp for
           //for (auto ped: building->GetAllPedestrians()) {
