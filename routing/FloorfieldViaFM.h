@@ -214,6 +214,7 @@ protected:
      bool useDistanceToWall;
 };
 
+// very similar to FloorfieldViaFM, but the calculation of floorfields starts at the center of the door only, not on the whole line
 class CentrePointFFViaFM : public virtual FloorfieldViaFM {
 public:
      virtual void getDirectionToUID(int destID, const long int key, Point& direction, int mode);

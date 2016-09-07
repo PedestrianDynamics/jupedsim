@@ -235,6 +235,8 @@ protected:
      double _recalc_interval;
      bool _hasSpecificGoals;
      bool _targetWithinSubroom;
+     // If we use CentrePointDistance (i.e. CentrePointLocalFFViaFM), some algorithms can maybe be simplified
+     // (AvoidDoorHopping and _subroomMatrix might be unnecessary, and some code in FindExit could go). --f.mack
      bool _useCentrePointDistance = true;
      //output filename counter: cnt
      static int cnt;

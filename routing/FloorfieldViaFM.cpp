@@ -993,13 +993,16 @@ void FloorfieldViaFM::prepareForDistanceFieldCalculation(const bool onlyRoomsWit
                 break;
             //this is the main thing in this loop, we want to find and mark inside points (and it is costly!!)
             case OUTSIDE:
-                if (isInside(i) || onlyRoomsWithExits) {
+            {
+                int subroom = isInside(i);
+                if (subroom || onlyRoomsWithExits) {
                     speedInitial[i] = 1.;
                     cost[i] = -2.;
                     gcode[i] = INSIDE;
-                    subroomUID[i] = isInside(i);
+                    subroomUID[i] = subroom;
                 }
                 break;
+            }
         } //switch
         //set Trialptr to fieldelements
 //        trialfield[i].key = i;
@@ -1942,7 +1945,6 @@ void FloorfieldViaFM::writeGoalFF(const std::string& filename, std::vector<int> 
 }
 
 int FloorfieldViaFM::isInside(const long int key) {
-    int temp = 0;
     Point probe = grid->getPointFromKey(key);
 
     const std::map<int, std::shared_ptr<Room>>& roomMap = building->GetAllRooms();
@@ -1957,12 +1959,12 @@ int FloorfieldViaFM::isInside(const long int key) {
             SubRoom* subRoomPtr = subRoomPair.second.get();
 
             if (subRoomPtr->IsInSubRoom(probe)) {
-                temp = subRoomPtr->GetUID();
+                return subRoomPtr->GetUID();
             }
         }
     }
 
-    return temp;
+    return 0;
 }
 
 void CentrePointFFViaFM::getDirectionToUID(int destID, const long int key, Point& direction, int mode) {

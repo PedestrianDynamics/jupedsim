@@ -402,7 +402,6 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
 //}
 
 int LocalFloorfieldViaFM::isInside(const long int key) {
-     int temp = 0;
      Point probe = grid->getPointFromKey(key);
 
      const std::map<int, std::shared_ptr<SubRoom>>& subRoomMap = room->GetAllSubRooms();
@@ -412,12 +411,12 @@ int LocalFloorfieldViaFM::isInside(const long int key) {
           SubRoom* subRoomPtr = subRoomPair.second.get();
 
           if (subRoomPtr->IsInSubRoom(probe)) {
-               temp = subRoomPtr->GetUID();
+               return subRoomPtr->GetUID();
           }
      }
 
 
-     return temp;
+     return 0;
 }
 
 SubLocalFloorfieldViaFM::SubLocalFloorfieldViaFM(){};
