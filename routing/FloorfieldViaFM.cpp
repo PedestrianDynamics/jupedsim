@@ -1965,19 +1965,6 @@ int FloorfieldViaFM::isInside(const long int key) {
     return temp;
 }
 
-void CentrePointFFViaFM::getDirectionToDestination(Pedestrian* ped, Point& direction){
-    const Point& position = ped->GetPos();
-    int destID = ped->GetExitIndex();
-    long int key = grid->getKeyAtPoint(position);
-    getDirectionToUID(destID, key, direction, global_shortest);
-    if (direction._x == DBL_MAX && direction._y == DBL_MAX) {
-        //Log->Write("Floorfield for ped %d in subroom %d not yet calculated", ped->GetID(), ped->GetSubRoomID());
-        direction._x = 0;
-        direction._y = 0;
-        // @todo f.mack I can do whatever I want in here, it seems to have no influence. Which Strategy is suitable for testing this?
-    }
-}
-
 void CentrePointFFViaFM::getDirectionToUID(int destID, const long int key, Point& direction, int mode) {
     //what if goal == -1, meaning closest exit... is GetExitIndex then -1? NO... ExitIndex is UID, given by router
     //if (ped->GetFinalDestination() == -1) /*go to closest exit*/ destID != -1;

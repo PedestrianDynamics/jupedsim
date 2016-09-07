@@ -219,8 +219,7 @@ protected:
      std::vector<int>                         _allDoorUIDs;
      std::vector<int>                         _localShortestSafedPeds;
      const Building*                          _building;
-     //std::map<int, LocalFloorfieldViaFM*>     _locffviafm; // @todo f.mack change back
-     std::map<int, CentrePointLocalFFViaFM*>  _locffviafm;
+     std::map<int, LocalFloorfieldViaFM*>     _locffviafm; // the actual type might be CentrePointLocalFFViaFM
      FloorfieldViaFM*                         _globalFF;
      std::map<int, Transition*>               _TransByUID;
      std::map<int, Transition*>               _ExitsByUID;
@@ -236,6 +235,7 @@ protected:
      double _recalc_interval;
      bool _hasSpecificGoals;
      bool _targetWithinSubroom;
+     bool _useCentrePointDistance = true;
      //output filename counter: cnt
      static int cnt;
 };

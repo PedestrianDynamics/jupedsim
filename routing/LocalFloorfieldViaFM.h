@@ -36,7 +36,7 @@
 #include <string>
 #include "FloorfieldViaFM.h"
 
-class LocalFloorfieldViaFM : public virtual FloorfieldViaFM{
+class LocalFloorfieldViaFM : public virtual FloorfieldViaFM {
 public:
      LocalFloorfieldViaFM();
      LocalFloorfieldViaFM(const Room* const room, const Building* buildingArg,
@@ -45,7 +45,6 @@ public:
                           const bool useDistancefield);
 
      void parseRoom(const Room* const roomArg, const double hxArg, const double hyArg);
-     virtual void getDirectionToDestination (Pedestrian* ped, Point& direction);//@todo hides non-virtual function
 //     void getDirectionToGoalID(const int goalID);
      void drawBlockerLines();
      void crossOutOutsideNeighbors(const long int key);
@@ -60,7 +59,6 @@ public:
                              const double hxArg, const double hyArg,
                              const double wallAvoidDistance,
                              const bool useDistancefield) : LocalFloorfieldViaFM(room, buildingArg, hxArg, hyArg, wallAvoidDistance, useDistancefield) {};
-     void getDirectionToDestination (Pedestrian* ped, Point& direction);
 };
 
 class SubLocalFloorfieldViaFM : public FloorfieldViaFM{

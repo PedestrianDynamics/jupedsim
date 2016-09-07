@@ -36,13 +36,6 @@ LocalFloorfieldViaFM::LocalFloorfieldViaFM(const Room* const roomArg,
      Log->Write("INFO: \tFloor field for \"goal -1\" done in room %d", roomArg->GetID());
 };
 
-void LocalFloorfieldViaFM::getDirectionToDestination(Pedestrian* ped,
-      Point& direction) {
-
-     FloorfieldViaFM::getDirectionToDestination(ped, direction);
-     return;
-}
-
 //void LocalFloorfieldViaFM::getDirectionToGoalID(const int goalID){
 //     std::cerr << "invalid call to LocalFloorfieldViaFM::getDirectionToGoalID!" << std::endl;
 //};
@@ -425,12 +418,6 @@ int LocalFloorfieldViaFM::isInside(const long int key) {
 
 
      return temp;
-}
-
-void CentrePointLocalFFViaFM::getDirectionToDestination (Pedestrian* ped, Point& direction) {
-     // @todo f.mack this is never called. remove
-     Log->Write("Calling CentrePointLocalFFViaFM::getDirectionToDestination ()");
-     CentrePointFFViaFM::getDirectionToDestination(ped, direction);
 }
 
 SubLocalFloorfieldViaFM::SubLocalFloorfieldViaFM(){};

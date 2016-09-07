@@ -87,7 +87,7 @@ FFRouter::~FFRouter()
           delete _globalFF;
      }
      //delete localffs
-     std::map<int, CentrePointLocalFFViaFM*>::reverse_iterator delIter;
+     std::map<int, LocalFloorfieldViaFM*>::reverse_iterator delIter;
      for (delIter = _locffviafm.rbegin();
           delIter != _locffviafm.rend();
           ++delIter) {
@@ -182,8 +182,12 @@ bool FFRouter::Init(Building* building)
 #endif
                auto pairRoomIt = allRooms.begin();
                std::advance(pairRoomIt, i);
-               CentrePointLocalFFViaFM *ptrToNew = nullptr;
-               ptrToNew = new CentrePointLocalFFViaFM((*pairRoomIt).second.get(), building, 0.125, 0.125, 0.0, false);
+               LocalFloorfieldViaFM *ptrToNew = nullptr;
+               if (_useCentrePointDistance) {
+                    ptrToNew = new CentrePointLocalFFViaFM((*pairRoomIt).second.get(), building, 0.125, 0.125, 0.0, false);
+               } else {
+                    ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), building, 0.125, 0.125, 0.0, false);
+               }
                //for (long int i = 0; i < ptrToNew)
                Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
 #pragma omp critical(_locffviafm)
@@ -526,9 +530,13 @@ bool FFRouter::ReInit()
 #endif
           auto pairRoomIt = allRooms.begin();
           std::advance(pairRoomIt, i);
-          CentrePointLocalFFViaFM* ptrToNew = nullptr;
+          LocalFloorfieldViaFM* ptrToNew = nullptr;
           double tempDistance = 0.;
-          ptrToNew = new CentrePointLocalFFViaFM((*pairRoomIt).second.get(), _building, 0.125, 0.125, 0.0, false);
+          if (_useCentrePointDistance) {
+               ptrToNew = new CentrePointLocalFFViaFM((*pairRoomIt).second.get(), _building, 0.125, 0.125, 0.0, false);
+          } else {
+               ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), _building, 0.125, 0.125, 0.0, false);
+          }
           //for (long int i = 0; i < ptrToNew)
           Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
 #pragma omp critical

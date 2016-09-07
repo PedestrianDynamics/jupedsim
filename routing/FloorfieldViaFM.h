@@ -107,7 +107,7 @@ public:
 
      //void getDirectionAt(const Point& position, Point& direction);                                   //obsolete
      //void getDirectionToDestination (const int destID, const Point& position, Point& direction);     //obsolete
-     virtual void getDirectionToUID(int destID, const long int key, Point& direction);
+     void getDirectionToUID(int destID, const long int key, Point& direction); // shall not be used any more, therefore not virtual
      virtual void getDirectionToUID(int destID, const long int key, Point& direction, int mode);
      //void getDirectionToUIDParallel(int destID, const long int key, Point& direction);
      virtual void getDirectionToDestination (Pedestrian* ped, Point& direction);
@@ -216,9 +216,6 @@ protected:
 
 class CentrePointFFViaFM : public virtual FloorfieldViaFM {
 public:
-     // @todo f.mack It seems we only need getDirectionToUID(.., mode). Make sure and remove the others. Also clean up LocalFF and CPLocalFF
-     virtual void getDirectionToDestination (Pedestrian* ped, Point& direction);
-     virtual void getDirectionToUID(int destID, const long int key, Point& direction) {getDirectionToUID(destID, key, direction, global_shortest);};
      virtual void getDirectionToUID(int destID, const long int key, Point& direction, int mode);
 };
 

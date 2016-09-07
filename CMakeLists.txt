@@ -5,7 +5,7 @@
 # -DBUILD_TESTING=ON (default OFF) for python tests
 # -DBUILD_CPPUNIT_TEST=ON (default OFF) for unit tests
 # -DUSE_DUAL_ABI=ON (default OFF)  https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
-# -D Boost_NO_SYSTEM_PATHS=true (default false) -D BOOST_ROOT=PARH_where_to_find_boost 
+# -D Boost_NO_SYSTEM_PATHS=true (default false) -D BOOST_ROOT=PATH_where_to_find_boost 
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
@@ -470,7 +470,7 @@ if (Boost_FOUND)
     message(STATUS "Boost_LIB_VERSION: " ${Boost_LIB_VERSION})
     message(STATUS "Boost_libraries: " ${Boost_LIBRARIES})
     link_directories(${Boost_LIBRARY_DIRS})
-    include_directories(${Boost_INCLUDE_DIR})
+    include_directories(SYSTEM ${Boost_INCLUDE_DIR})
     # todo: is this necessary?
     target_link_libraries(jpscore ${Boost_LIBRARIES})
 endif ()
