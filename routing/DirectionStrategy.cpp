@@ -418,6 +418,7 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
     Log->Write("INFO: \tCalling Constructor of LocFloorfieldViaFM in DirectionLocalFloorfield::Init(...)");
+    // @todo f.mack different scheduling type? e.g. dynamic or guided or runtime
 #pragma omp parallel for
      for (unsigned int i = 0; i < building->GetAllRooms().size(); ++i) {
      //for (auto& roomPair : building->GetAllRooms()) {
@@ -500,9 +501,11 @@ bool DirectionLocalFloorfield::PreSim(Building* building) {
                auto ped = allPeds.begin();
                std::advance(ped, i);
                if (auto router = dynamic_cast<FFRouter*>((*ped)->GetRouter())) {
-                    auto pedRoomsDoorSet = router->GetPresumableExitRoute(*ped);
+                    auto pedSubroomsDoorSet = router->GetPresumableExitRoute(*ped);
 #pragma omp critical(roomsDoorsSet)
-                    roomsDoorsSet.insert(pedRoomsDoorSet.begin(), pedRoomsDoorSet.end());
+                    for (auto it : pedSubroomsDoorSet) {
+                         roomsDoorsSet.insert(std::make_pair(it.first->GetRoomID(), it.second));
+                    }
                }
           }
 

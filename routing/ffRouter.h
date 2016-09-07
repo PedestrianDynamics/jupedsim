@@ -178,7 +178,7 @@ public:
       * Due to the way we calculate door distances (entries in _pathsMatrix), pedestrians in a corridor
       * tend to jump from door to door, i.e. they walk to the next door in the correct direction, but they
       * do not traverse it. This algorithm searches for the door on the way that really leaves the subroom,
-      * and sets this door in _pathsMatrix, which in turn is used by GetPresumableExitRoute() and FindExit().
+      * and sets this door in _pathsMatrix, which in turn is needed by GetPresumableExitRoute().
       */
      void AvoidDoorHopping();
 
@@ -205,9 +205,9 @@ public:
      /*!
       * \brief Get the route the pedestrian p wants to take (according to _pathsMatrix)
       * @param p The pedestrian in question
-      * @return A set containing (roomID, doorUID) pairs. The floorfields needed are inside the room, originating from the door.
+      * @return A set containing (subroom*, doorUID) pairs. The floorfields needed are inside the subroom, originating from the door.
       */
-     std::set<std::pair<int, int>> GetPresumableExitRoute(Pedestrian* p);
+     std::set<std::pair<SubRoom*, int>> GetPresumableExitRoute(Pedestrian* p);
 
 private:
 
