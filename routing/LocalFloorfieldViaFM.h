@@ -53,6 +53,11 @@ protected:
      const Room* room;
 };
 
+/*
+ NOTE: both parents are derived from FloorfieldViaFM with "public virtual" (it is called "Virtual Inheritance"). This
+ means that there is only one instance of FloorfieldViaFM in CentrePointLocalFFViaFM, so calls to FlorfieldViaFM's member
+ variables and functions are not ambiguous. See http://www.programering.com/a/MDOxITMwATk.html for some nice diagrams.
+ */
 class CentrePointLocalFFViaFM : public CentrePointFFViaFM, public LocalFloorfieldViaFM {
 public:
      CentrePointLocalFFViaFM(const Room* const room, const Building* buildingArg,

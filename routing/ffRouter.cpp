@@ -183,6 +183,7 @@ bool FFRouter::Init(Building* building)
                auto pairRoomIt = allRooms.begin();
                std::advance(pairRoomIt, i);
                LocalFloorfieldViaFM *ptrToNew = nullptr;
+               Log->Write("INFO: \tusing %s in ffRouter::Init", _useCentrePointDistance ? "CentrePointLocalFFViaFm" : "LocalFloorfieldViaFM");
                if (_useCentrePointDistance) {
                     ptrToNew = new CentrePointLocalFFViaFM((*pairRoomIt).second.get(), building, 0.125, 0.125, 0.0, false);
                } else {
@@ -426,12 +427,13 @@ bool FFRouter::Init(Building* building)
 
      //int roomTest = (*(_locffviafm.begin())).first;
      //int transTest = (building->GetRoom(roomTest)->GetAllTransitionsIDs())[0];
-//     for (unsigned int i = 0; i < _locffviafm.size(); ++i) {
-//          auto iter = _locffviafm.begin();
-//          std::advance(iter, i);
-//          int roomNr = iter->first;
-//          iter->second->writeFF("testFF" + std::to_string(roomNr) + ".vtk", _allDoorUIDs);
-//     }
+     /*
+     for (unsigned int i = 0; i < _locffviafm.size(); ++i) {
+          auto iter = _locffviafm.begin();
+          std::advance(iter, i);
+          int roomNr = iter->first;
+          iter->second->writeFF("testFF" + std::to_string(roomNr) + ".vtk", _allDoorUIDs);
+     }//*/
 
      std::ofstream matrixfile;
      matrixfile.open("Matrix.txt");
@@ -686,11 +688,11 @@ std::set<std::pair<SubRoom*, int>> FFRouter::GetPresumableExitRoute(Pedestrian* 
     SubRoom* subroom = _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID());
     int doorUID = p->GetNextDestination();
 
-    do {
+     while (doorUID != finalDoor) {
         subroomsDoorsSet.insert(std::make_pair(subroom, doorUID));
         subroom = _CroTrByUID[doorUID]->GetOtherSubRoom(subroom->GetRoomID(), subroom->GetSubRoomID());
         doorUID = _pathsMatrix.at(std::make_pair(doorUID, finalDoor));
-    } while (doorUID != finalDoor);
+    }
     subroomsDoorsSet.insert(std::make_pair(subroom, doorUID));
     return subroomsDoorsSet;
 }

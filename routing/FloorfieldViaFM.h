@@ -207,6 +207,7 @@ protected:
      std::map<int, Point*>  goalneggradmap;
      std::map<int, double*> costmap;
      std::map<int, Point*>  neggradmap;
+     // use an unordered_set for faster access (it is accessed within a critical region)
      std::unordered_set<int>  floorfieldsBeingCalculated;
      bool maps_deleted = false; // @todo f.mack remove
 
@@ -215,6 +216,7 @@ protected:
 };
 
 // very similar to FloorfieldViaFM, but the calculation of floorfields starts at the center of the door only, not on the whole line
+// this happens in order to avoid "door hopping" (for a pedestrian, it is shorter to go to a nearby door and skip half the door width)
 class CentrePointFFViaFM : public virtual FloorfieldViaFM {
 public:
      virtual void getDirectionToUID(int destID, const long int key, Point& direction, int mode);

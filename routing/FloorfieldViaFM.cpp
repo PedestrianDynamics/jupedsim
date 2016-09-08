@@ -317,7 +317,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
     //#pragma omp critical
     {
         if (neggradmap.count(destID) == 0) {
-            Log->Write("FF for destID %d does not exist (key is %d)", destID, key);
+            //Log->Write("FF for destID %d does not exist (key is %d)", destID, key);
             //check, if distID is in this grid
             Hline* destLine = building->GetTransOrCrossByUID(destID);
             Point A = destLine->GetPoint1();
@@ -378,7 +378,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
 //                clearAndPrepareForFloorfieldReCalc(localcostptr);
                 std::vector<Line> localline = {Line((Line) *(building->GetTransOrCrossByUID(destID)))};
 //                setNewGoalAfterTheClear(localcostptr, localline);
-                Log->Write("Starting FF for UID %d (ID %d)", destID, dynamic_cast<Crossing*>(building->GetTransOrCrossByUID(destID))->GetID());
+                //Log->Write("Starting FF for UID %d (ID %d)", destID, dynamic_cast<Crossing*>(building->GetTransOrCrossByUID(destID))->GetID());
                 //std::cerr << "\rW\tO\tR\tK\tI\tN\tG";
                 if (mode == quickest) {
                     calculateFloorfield(localline, localcostptr, localneggradptr, densityspeed);
@@ -1857,13 +1857,15 @@ void FloorfieldViaFM::writeFF(const std::string& filename, std::vector<int> targ
             continue;
         }
 
-        file << "VECTORS GradientTarget" << building->GetTransOrCrossByUID(targetID[iTarget])->GetCaption() << "-" << targetID[iTarget] << " float" << std::endl;
+        std::string name = building->GetTransOrCrossByUID(targetID[iTarget])->GetCaption() + "-" + std::to_string(targetID[iTarget]);
+        std::replace(name.begin(), name.end(), ' ', '_');
+        file << "VECTORS GradientTarget" << name << " float" << std::endl;
         for (int i = 0; i < grid->GetnPoints(); ++i) {
             file << gradarray[i]._x << " " << gradarray[i]._y << " 0.0" << std::endl;
         }
 
         double *costarray = costmap[targetID[iTarget]];
-        file << "SCALARS CostTarget" << building->GetTransOrCrossByUID(targetID[iTarget])->GetCaption() << "-" << targetID[iTarget] << " float 1" << std::endl;
+        file << "SCALARS CostTarget" << name << " float 1" << std::endl;
         file << "LOOKUP_TABLE default" << std::endl;
         for (long int i = 0; i < grid->GetnPoints(); ++i) {
             file << costarray[i] << std::endl;
@@ -1983,7 +1985,7 @@ void CentrePointFFViaFM::getDirectionToUID(int destID, const long int key, Point
     //#pragma omp critical
     {
         if (neggradmap.count(destID) == 0) {
-            Log->Write("FF for destID %d does not exist (key is %d)", destID, key);
+            //Log->Write("FF for destID %d does not exist (key is %d)", destID, key);
             //check, if distID is in this grid
             Hline* destLine = building->GetTransOrCrossByUID(destID);
             Point A = destLine->GetCentre();
@@ -2046,7 +2048,7 @@ void CentrePointFFViaFM::getDirectionToUID(int destID, const long int key, Point
             Point centre = building->GetTransOrCrossByUID(destID)->GetCentre();
             std::vector<Line> localline = {Line(centre, centre, 0)}; // only one point
 //                setNewGoalAfterTheClear(localcostptr, localline);
-            Log->Write("Starting FF for UID %d (ID %d)", destID, dynamic_cast<Crossing*>(building->GetTransOrCrossByUID(destID))->GetID());
+            //Log->Write("Starting FF for UID %d (ID %d)", destID, dynamic_cast<Crossing*>(building->GetTransOrCrossByUID(destID))->GetID());
             //std::cerr << "\rW\tO\tR\tK\tI\tN\tG";
             if (mode == quickest) {
                 calculateFloorfield(localline, localcostptr, localneggradptr, densityspeed);
