@@ -121,11 +121,11 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
         //--------------------COGMAP----------------------------
         //See if Landmarks are visible
 
-        (*brain_storage)[p]->GetCognitiveMap().UpdateMap();
+        //(*brain_storage)[p]->GetCognitiveMap().UpdateMap();
         //Find next appropriate landmark
-        (*brain_storage)[p]->GetCognitiveMap().FindNextTarget();
+        //(*brain_storage)[p]->GetCognitiveMap().FindNextTarget();
         //Find appropriate door to reach next app. landmark
-        (*brain_storage)[p]->GetCognitiveMap().AssessDoors();
+        //(*brain_storage)[p]->GetCognitiveMap().AssessDoors();
         //------------------------------------------------------
 
         //Log->Write(std::to_string((*cm_storage)[p]->GetOwnPos().GetX())+" "+std::to_string((*cm_storage)[p]->GetOwnPos().GetY()));
