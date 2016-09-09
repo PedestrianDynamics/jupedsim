@@ -171,7 +171,8 @@ bool FFRouter::Init(Building* building)
      //type of allRooms: const std::map<int, std::unique_ptr<Room> >&
      const std::map<int, std::shared_ptr<Room> >& allRooms = _building->GetAllRooms();
 
-#pragma omp parallel
+     // @todo f.mack enable parallelization
+//#pragma omp parallel
      {
 #pragma omp for
           //for (auto &pairRoom : allRooms) {
@@ -185,7 +186,9 @@ bool FFRouter::Init(Building* building)
                LocalFloorfieldViaFM *ptrToNew = nullptr;
                Log->Write("INFO: \tusing %s in ffRouter::Init", _useCentrePointDistance ? "CentrePointLocalFFViaFm" : "LocalFloorfieldViaFM");
                if (_useCentrePointDistance) {
-                    ptrToNew = new CentrePointLocalFFViaFM((*pairRoomIt).second.get(), building, 0.125, 0.125, 0.0, false);
+                    // @todo f.mack put back in one
+                    Room* room = pairRoomIt->second.get();
+                    ptrToNew = new CentrePointLocalFFViaFM(room, building, 0.125, 0.125, 0.0, false);
                } else {
                     ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), building, 0.125, 0.125, 0.0, false);
                }

@@ -51,6 +51,10 @@ public:
      virtual int isInside(const long int key);
 protected:
      const Room* room;
+     RectGrid* _subroomGrid = nullptr;
+     std::map<long int, SubRoom*> _subroomMap; // maps from _subroomGrid key to the subroom
+     double _subroomGridSpacing = 1.;
+     virtual SubRoom* isInsideInit(const long int key);
 };
 
 /*
