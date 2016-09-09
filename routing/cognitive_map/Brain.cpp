@@ -12,7 +12,7 @@ Brain::Brain(const Building *b, const Pedestrian *ped, const VisibleEnvironment 
     _ped=ped;
     _wholeEnvironment=env;
     _intNetworks=roominternalNetworks;
-    _cMap=CognitiveMap(_b,_ped);
+    //_cMap=CognitiveMap(_b,_ped);
 }
 
 CognitiveMap &Brain::GetCognitiveMap()

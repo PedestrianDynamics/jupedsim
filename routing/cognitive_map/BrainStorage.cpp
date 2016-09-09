@@ -282,7 +282,7 @@ void BrainStorage::CreateBrain(BStorageKeyType ped)
 
      _brains.insert(std::make_pair(ped, std::make_shared<Brain>(_building,
                                                                 ped,
-                                                                &_visibleEnv,
+                                                                nullptr,
                                                                 &_roominternalNetworks)));//  creator->CreateCognitiveMap(ped)));
 
 
