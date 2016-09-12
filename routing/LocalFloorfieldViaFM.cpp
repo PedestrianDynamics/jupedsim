@@ -2,11 +2,7 @@
 // Created by ar.graf on 1/28/16.
 //
 
-// @todo f.mack move to macros.h
-#define OUTSIDE_SUBROOM_PTR (SubRoom*)0x0751DE
-
 #include "LocalFloorfieldViaFM.h"
-#include <chrono>
 
 LocalFloorfieldViaFM::LocalFloorfieldViaFM(){};
 LocalFloorfieldViaFM::LocalFloorfieldViaFM(const Room* const roomArg,
@@ -135,21 +131,15 @@ void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
      _subroomGrid->setBoundaries(xMin, yMin, xMax, yMax);
      _subroomGrid->setSpacing(_subroomGridSpacing, _subroomGridSpacing);
      _subroomGrid->createGrid();
-     //Log->Write("LocalFF for room %d: There are %ld points in _subroomGrid", room->GetID(), _subroomGrid->GetnPoints());
-     std::chrono::time_point<std::chrono::system_clock> start, end;
-     start = std::chrono::system_clock::now();
+
      // There was a case where _subroomGrid->GetKeyAtPoint(p) returns values >= nPoints (the check for includesPoints(p) was successful).
-     // So we insert some additional entries to _subroomMap ("<=" instead of "<") to avoid out_of_range errors. --f.mack
+     // So we insert some additional entries to _subroomMap to avoid out_of_range errors. --f.mack
      // @todo Investigate why this is happening.
      long int max_index = _subroomGrid->GetnPoints() + _subroomGrid->GetiMax() + _subroomGrid->GetjMax();
      for (long int i = 0; i < max_index; ++i) {
           SubRoom* subroom = isInsideInit(i);
           _subroomMap.insert(std::make_pair(i, subroom));
      }
-     end = std::chrono::system_clock::now();
-     std::chrono::duration<double> elapsed_seconds = end-start;
-     Log->Write("INFO: \tinitializing _subroomMap (room %d, %ld points):", room->GetID(), _subroomGrid->GetnPoints());
-     Log->Write("      \ttime: "+ std::to_string(elapsed_seconds.count()));
 
      //create Rect Grid
      grid = new RectGrid();
@@ -439,54 +429,31 @@ SubRoom* LocalFloorfieldViaFM::isInsideInit(const long int key) {
           }
      }
 
-
-     return OUTSIDE_SUBROOM_PTR;
+     return nullptr;
 }
 
 int LocalFloorfieldViaFM::isInside(const long int key) {
      Point probe = grid->getPointFromKey(key);
 
-     // rounds downwards to the next number that is a multiple of _subroomGridSpacing
-     // if have to correct this by the offset because the _subroomGrid messes around with the values
-     // @todo f.mack shouldn't it be probe._x - 1 + xOffset?
-     double xOffset = fmod(_subroomGrid->GetxMin(), 1.);
-     double yOffset = fmod(_subroomGrid->GetyMin(), 1.);
-     double lowerX = _subroomGridSpacing * floor((probe._x - 1 + xOffset) / _subroomGridSpacing);
-     double lowerY = _subroomGridSpacing * floor((probe._y - 1 + yOffset) / _subroomGridSpacing);
+     // rounds downwards to the next number that is a multiple of _subroomGridSpacing, considering an offset of xMin/yMin
+     double lowerX = _subroomGridSpacing * floor((probe._x - _subroomGrid->GetxMin()) / _subroomGridSpacing) + _subroomGrid->GetxMin();
+     double lowerY = _subroomGridSpacing * floor((probe._y - _subroomGrid->GetyMin()) / _subroomGridSpacing) + _subroomGrid->GetyMin();
 
      Point subroomPoint = Point(lowerX, lowerY);
-     Point p1 = subroomPoint;
      SubRoom* sub1 = _subroomGrid->includesPoint(subroomPoint) ? _subroomMap.at(_subroomGrid->getKeyAtPoint(subroomPoint)) : nullptr;
-     if (sub1 && sub1 != OUTSIDE_SUBROOM_PTR && sub1->IsInSubRoom(probe)) return sub1->GetUID();
+     if (sub1 && sub1->IsInSubRoom(probe)) return sub1->GetUID();
 
      subroomPoint._x += _subroomGridSpacing;
-     Point p2 = subroomPoint;
      SubRoom* sub2 = _subroomGrid->includesPoint(subroomPoint) ? _subroomMap.at(_subroomGrid->getKeyAtPoint(subroomPoint)) : nullptr;
-     if (sub2 && sub2 != OUTSIDE_SUBROOM_PTR && sub2 != sub1 && sub2->IsInSubRoom(probe)) return sub2->GetUID();
+     if (sub2 && sub2 != sub1 && sub2->IsInSubRoom(probe)) return sub2->GetUID();
 
      subroomPoint._y += _subroomGridSpacing;
-     Point p3 = subroomPoint;
-     SubRoom* sub3;
-     if (_subroomGrid->includesPoint(subroomPoint)) {
-          long int sr_key = _subroomGrid->getKeyAtPoint(subroomPoint);
-          sub3 = _subroomMap.at(sr_key);
-     } else {
-          sub3 = nullptr;
-     }
-     //SubRoom* sub3 = _subroomGrid->includesPoint(subroomPoint) ? _subroomMap.at(_subroomGrid->getKeyAtPoint(subroomPoint)) : nullptr;
-     if (sub3 && sub3 != OUTSIDE_SUBROOM_PTR && sub3 != sub1 && sub3 != sub2 && sub3->IsInSubRoom(probe)) return sub3->GetUID();
+     SubRoom* sub3 = _subroomGrid->includesPoint(subroomPoint) ? _subroomMap.at(_subroomGrid->getKeyAtPoint(subroomPoint)) : nullptr;
+     if (sub3 && sub3 != sub1 && sub3 != sub2 && sub3->IsInSubRoom(probe)) return sub3->GetUID();
 
      subroomPoint._x -= _subroomGridSpacing;
-     Point p4 = subroomPoint;
      SubRoom* sub4 = _subroomGrid->includesPoint(subroomPoint) ? _subroomMap.at(_subroomGrid->getKeyAtPoint(subroomPoint)) : nullptr;
-     if (sub4 && sub4 != OUTSIDE_SUBROOM_PTR && sub4 != sub1 && sub4 != sub2 && sub4 != sub3 && sub4->IsInSubRoom(probe)) return sub4->GetUID();
-
-     bool b = false;
-     if (sub1 == OUTSIDE_SUBROOM_PTR && sub2 == OUTSIDE_SUBROOM_PTR && sub3 == OUTSIDE_SUBROOM_PTR && sub4 == OUTSIDE_SUBROOM_PTR) {
-          //return 0;
-          b = true;
-     }//*/
-     //Log->Write("####### LocFF for room %d: for point %f, %f, trying all subrooms", room->GetID(), probe._x, probe._y);
+     if (sub4 && sub4 != sub1 && sub4 != sub2 && sub4 != sub3 && sub4->IsInSubRoom(probe)) return sub4->GetUID();
 
      const std::map<int, std::shared_ptr<SubRoom>>& subRoomMap = room->GetAllSubRooms();
 
@@ -496,16 +463,9 @@ int LocalFloorfieldViaFM::isInside(const long int key) {
           if (subRoomPtr == sub1 || subRoomPtr == sub2 || subRoomPtr == sub3 || subRoomPtr == sub4) continue;
 
           if (subRoomPtr->IsInSubRoom(probe)) {
-               if (b) {
-                    Log->Write("####### point %f, %f is surrounded by outside, but is in subroom [%d/%d]", probe._x, probe._y, subRoomPtr->GetRoomID(), subRoomPtr->GetSubRoomID());
-                    Log->Write("surrounding points: %f, %f     %f, %f     %f, %f     %f, %f", p1._x, p1._y, p2._x, p2._y, p3._x, p3._y, p4._x, p4._y);
-                    Log->Write("subrooms are: %p    %p    %p    %p", sub1, sub2, sub3, sub4);
-                    Log->Write("keys are: %ld   %ld   %ld   %ld", _subroomGrid->getKeyAtPoint(p1), _subroomGrid->getKeyAtPoint(p2), _subroomGrid->getKeyAtPoint(p3), _subroomGrid->getKeyAtPoint(p4));
-               }
                return subRoomPtr->GetUID();
           }
      }
-
 
      return 0;
 }

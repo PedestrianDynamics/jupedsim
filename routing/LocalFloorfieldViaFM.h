@@ -48,12 +48,14 @@ public:
 //     void getDirectionToGoalID(const int goalID);
      void drawBlockerLines();
      void crossOutOutsideNeighbors(const long int key);
+     // returns the UID of a subroom for a key of th grid, using the information from _subroomMap
      virtual int isInside(const long int key);
 protected:
      const Room* room;
      RectGrid* _subroomGrid = nullptr;
      std::map<long int, SubRoom*> _subroomMap; // maps from _subroomGrid key to the subroom
-     double _subroomGridSpacing = 1.;
+     double _subroomGridSpacing = 1.; // seems to be close to the optimum
+     // returns the subroom for a key of the _subroomGrid
      virtual SubRoom* isInsideInit(const long int key);
 };
 
