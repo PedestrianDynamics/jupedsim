@@ -96,8 +96,8 @@ public:
     virtual double GetDistance2Wall(Pedestrian* ped) const;
 
 private:
-     FloorfieldViaFM* ffviafm;
-     bool initDone;
+     FloorfieldViaFM* _ffviafm;
+     bool _initDone;
 };
 
 class DirectionLocalFloorfield : public DirectionStrategy {
@@ -117,14 +117,14 @@ public:
      //void WriteAll(std::string filename);
 
 protected:
-     std::map<int, LocalFloorfieldViaFM*> locffviafm;
-     bool initDone;
-     const Building* building;
-     double hx;
-     double hy;
-     double wallAvoidDistance;
-     bool useDistancefield;
-     std::string filename;
+     std::map<int, LocalFloorfieldViaFM*> _locffviafm;
+     bool _initDone;
+     const Building* _building;
+     double _hx;
+     double _hy;
+     double _wallAvoidDistance;
+     bool _useDistancefield;
+     std::string _filename;
 };
 
 class DirectionSubLocalFloorfield : public DirectionStrategy {
@@ -142,14 +142,14 @@ public:
      //void WriteAll(std::string filename);
 
 protected:
-     std::map<int, SubLocalFloorfieldViaFM*> locffviafm;
-     bool initDone;
-     const Building* building;
-     double hx;
-     double hy;
-     double wallAvoidDistance;
-     bool useDistancefield;
-     std::string filename;
+     std::map<int, SubLocalFloorfieldViaFM*> _locffviafm;
+     bool _initDone;
+     const Building* _building;
+     double _hx;
+     double _hy;
+     double _wallAvoidDistance;
+     bool _useDistancefield;
+     std::string _filename;
 };
 
 #endif  /* _DIRECTIONSTRATEGY_H */
