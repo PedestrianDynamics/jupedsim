@@ -156,63 +156,63 @@ public:
 
      std::map<int, int> getGoalToLineUIDmap() const
      {
-          return goalToLineUIDmap;
+          return _goalToLineUIDmap;
      }
 
      std::map<int, int> getGoalToLineUIDmap2() const
      {
-          return goalToLineUIDmap2;
+          return _goalToLineUIDmap2;
      }
 
      std::map<int, int> getGoalToLineUIDmap3() const
      {
-          return goalToLineUIDmap3;
+          return _goalToLineUIDmap3;
      }
 
      RectGrid* getGrid() const
      {
-          return grid;
+          return _grid;
      }
 
 #ifdef TESTING
-     void setGrid(RectGrid* gridArg) {grid = gridArg;}
+     void setGrid(RectGrid* gridArg) {_grid = gridArg;}
 #endif //TESTING
 
 protected:
-     RectGrid* grid = nullptr;
-     std::vector<Line> wall;
-     std::vector<Line> exitsFromScope;
-     unsigned int numOfExits;
+     RectGrid* _grid = nullptr;
+     std::vector<Line> _wall;
+     std::vector<Line> _exitsFromScope;
+     unsigned int _numOfExits;
 
-     const Building* building;
+     const Building* _building;
 
      //GridPoint Data in independant arrays (shared primary key)
      // changed to threadsafe creation when needed: int* flag;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
-     int* gcode = nullptr;                 //gridcode (see Macros.h)
-     int* subroomUID = nullptr;
-     double* dist2Wall = nullptr;
-     double* speedInitial = nullptr;
-     double* modifiedspeed = nullptr;
-     double* densityspeed = nullptr;
-     double* cost = nullptr;
+     int* _gcode = nullptr;                 //gridcode (see Macros.h)
+     int* _subroomUID = nullptr;
+     double* _dist2Wall = nullptr;
+     double* _speedInitial = nullptr;
+     double* _modifiedspeed = nullptr;
+     double* _densityspeed = nullptr;
+     double* _cost = nullptr;
      //long int* secKey;  //secondary key to address ... not used yet
-     Point* neggrad = nullptr; //gradients
-     Point* dirToWall = nullptr;
+     Point* _neggrad = nullptr; //gradients
+     Point* _dirToWall = nullptr;
      // changed to threadsafe creation when needed: Trial* trialfield;
 
-     std::map<int, double*> goalcostmap;
-     std::map<int, int>     goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
-     std::map<int, int>     goalToLineUIDmap2;
-     std::map<int, int>     goalToLineUIDmap3;
-     std::map<int, Point*>  goalneggradmap;
-     std::map<int, double*> costmap;
-     std::map<int, Point*>  neggradmap;
+     std::map<int, double*> _goalcostmap;
+     std::map<int, int>     _goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
+     std::map<int, int>     _goalToLineUIDmap2;
+     std::map<int, int>     _goalToLineUIDmap3;
+     std::map<int, Point*>  _goalneggradmap;
+     std::map<int, double*> _costmap;
+     std::map<int, Point*>  _neggradmap;
      // use an unordered_set for faster access (it is accessed within a critical region)
-     std::unordered_set<int>  floorfieldsBeingCalculated;
+     std::unordered_set<int>  _floorfieldsBeingCalculated;
      bool maps_deleted = false; // @todo f.mack remove
 
-     double threshold;
-     bool useDistanceToWall;
+     double _threshold;
+     bool _useDistanceToWall;
 };
 
 // very similar to FloorfieldViaFM, but the calculation of floorfields starts at the center of the door only, not on the whole line

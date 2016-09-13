@@ -10,10 +10,10 @@ LocalFloorfieldViaFM::LocalFloorfieldViaFM(const Room* const roomArg,
                const double hxArg, const double hyArg,
                const double wallAvoidDistance, const bool useDistancefield) {
      //ctor
-     threshold = -1; //negative value means: ignore threshold
-     threshold = wallAvoidDistance;
-     building = buildingArg;
-     room = roomArg;
+     _threshold = -1; //negative value means: ignore threshold
+     _threshold = wallAvoidDistance;
+     _building = buildingArg;
+     _room = roomArg;
 
      if (hxArg != hyArg) std::cerr << "ERROR: hx != hy <=========";
      //parse building and create list of walls/obstacles (find xmin xmax, ymin, ymax, and add border?)
@@ -32,7 +32,7 @@ LocalFloorfieldViaFM::LocalFloorfieldViaFM(const Room* const roomArg,
 
      setSpeed(useDistancefield); //use distance2Wall
      Log->Write("INFO: \tGrid initialized: Speed in room %d", roomArg->GetID());
-     calculateFloorfield(exitsFromScope, cost, neggrad);
+     calculateFloorfield(_exitsFromScope, _cost, _neggrad);
      Log->Write("INFO: \tFloor field for \"goal -1\" done in room %d", roomArg->GetID());
 };
 
@@ -43,45 +43,45 @@ LocalFloorfieldViaFM::LocalFloorfieldViaFM(const Room* const roomArg,
 void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
       const double hxArg, const double hyArg)
 {
-     room = roomArg;
+     _room = roomArg;
      //init min/max before parsing
      double xMin = DBL_MAX;
      double xMax = -DBL_MAX;
      double yMin = xMin;
      double yMax = xMax;
-     costmap.clear();
-     neggradmap.clear();
+     _costmap.clear();
+     _neggradmap.clear();
 
      //create a list of walls
      //add all transition and put open doors at the beginning of "wall"
      std::map<int, Transition*> allTransitions;
-     for (auto& itSubroom : room->GetAllSubRooms()) {
+     for (auto& itSubroom : _room->GetAllSubRooms()) {
           for (auto itTrans : itSubroom.second->GetAllTransitions()) {
                if (!allTransitions.count(itTrans->GetUniqueID())) {
                     allTransitions[itTrans->GetUniqueID()] = &(*itTrans);
                     if (itTrans->IsOpen()) {
-                         exitsFromScope.emplace_back(Line((Line) *itTrans));
-                         costmap.emplace(itTrans->GetUniqueID(), nullptr);
-                         neggradmap.emplace(itTrans->GetUniqueID(), nullptr);
+                         _exitsFromScope.emplace_back(Line((Line) *itTrans));
+                         _costmap.emplace(itTrans->GetUniqueID(), nullptr);
+                         _neggradmap.emplace(itTrans->GetUniqueID(), nullptr);
                     }
                }
           }
      }
-     numOfExits = (unsigned int) exitsFromScope.size();
+     _numOfExits = (unsigned int) _exitsFromScope.size();
      //put closed doors next, they are considered as walls later (index >= numOfExits)
      for (auto& trans : allTransitions) {
           if (!trans.second->IsOpen()) {
-               wall.emplace_back(Line ( (Line) *(trans.second)));
+               _wall.emplace_back(Line ( (Line) *(trans.second)));
           }
      }
 
-     for (const auto& itSubroom : room->GetAllSubRooms()) {
+     for (const auto& itSubroom : _room->GetAllSubRooms()) {
           std::vector<Obstacle*> allObstacles = itSubroom.second->GetAllObstacles();
           for (std::vector<Obstacle*>::iterator itObstacles = allObstacles.begin(); itObstacles != allObstacles.end(); ++itObstacles) {
 
                std::vector<Wall> allObsWalls = (*itObstacles)->GetAllWalls();
                for (std::vector<Wall>::iterator itObsWall = allObsWalls.begin(); itObsWall != allObsWalls.end(); ++itObsWall) {
-                    wall.emplace_back(Line( (Line) *itObsWall));
+                    _wall.emplace_back(Line( (Line) *itObsWall));
                     // xMin xMax
                     if ((*itObsWall).GetPoint1()._x < xMin) xMin = (*itObsWall).GetPoint1()._x;
                     if ((*itObsWall).GetPoint2()._x < xMin) xMin = (*itObsWall).GetPoint2()._x;
@@ -97,7 +97,7 @@ void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
 
           std::vector<Wall> allWalls = itSubroom.second->GetAllWalls();
           for (std::vector<Wall>::iterator itWall = allWalls.begin(); itWall != allWalls.end(); ++itWall) {
-               wall.emplace_back( Line( (Line) *itWall));
+               _wall.emplace_back( Line( (Line) *itWall));
                // xMin xMax
                if ((*itWall).GetPoint1()._x < xMin) xMin = (*itWall).GetPoint1()._x;
                if ((*itWall).GetPoint2()._x < xMin) xMin = (*itWall).GetPoint2()._x;
@@ -112,7 +112,7 @@ void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
           const vector<Crossing*>& allCrossings = itSubroom.second->GetAllCrossings();
           for (Crossing* crossPtr : allCrossings) {
                if (!crossPtr->IsOpen()) {
-                    wall.emplace_back( Line( (Line) *crossPtr));
+                    _wall.emplace_back( Line( (Line) *crossPtr));
 
                     if (crossPtr->GetPoint1()._x < xMin) xMin = crossPtr->GetPoint1()._x;
                     if (crossPtr->GetPoint2()._x < xMin) xMin = crossPtr->GetPoint2()._x;
@@ -142,42 +142,42 @@ void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
      }
 
      //create Rect Grid
-     grid = new RectGrid();
-     grid->setBoundaries(xMin, yMin, xMax, yMax);
-     grid->setSpacing(hxArg, hyArg);
-     grid->createGrid();
+     _grid = new RectGrid();
+     _grid->setBoundaries(xMin, yMin, xMax, yMax);
+     _grid->setSpacing(hxArg, hyArg);
+     _grid->createGrid();
 
      //create arrays
      //flag = new int[grid->GetnPoints()];                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, -7 = outside)
-     gcode = new int[grid->GetnPoints()];
-     subroomUID = new int[grid->GetnPoints()];
-     dist2Wall = new double[grid->GetnPoints()];
-     speedInitial = new double[grid->GetnPoints()];
-     modifiedspeed = new double[grid->GetnPoints()];
-     densityspeed = new double[grid->GetnPoints()];
-     cost = new double[grid->GetnPoints()];
-     neggrad = new Point[grid->GetnPoints()];
-     dirToWall = new Point[grid->GetnPoints()];
+     _gcode = new int[_grid->GetnPoints()];
+     _subroomUID = new int[_grid->GetnPoints()];
+     _dist2Wall = new double[_grid->GetnPoints()];
+     _speedInitial = new double[_grid->GetnPoints()];
+     _modifiedspeed = new double[_grid->GetnPoints()];
+     _densityspeed = new double[_grid->GetnPoints()];
+     _cost = new double[_grid->GetnPoints()];
+     _neggrad = new Point[_grid->GetnPoints()];
+     _dirToWall = new Point[_grid->GetnPoints()];
      //trialfield = new Trial[grid->GetnPoints()];                 //created with other arrays, but not initialized yet
 
-     costmap.emplace(-1 , cost);                         // enable default ff (closest exit)
-     neggradmap.emplace(-1, neggrad);
+     _costmap.emplace(-1 , _cost);                         // enable default ff (closest exit)
+     _neggradmap.emplace(-1, _neggrad);
 
      //init grid with -3 as unknown distance to any wall
-     for(long int i = 0; i < grid->GetnPoints(); ++i) {
-          dist2Wall[i] = -3.;
-          cost[i] = -2.;
-          gcode[i] = OUTSIDE;            //unknown
+     for(long int i = 0; i < _grid->GetnPoints(); ++i) {
+          _dist2Wall[i] = -3.;
+          _cost[i] = -2.;
+          _gcode[i] = OUTSIDE;            //unknown
      }
      //drawLinesOnGrid(wall, dist2Wall, 0.);
      //drawLinesOnGrid(wall, cost, -7.);
      //drawLinesOnGrid(wall, gcode, WALL);
      //drawLinesOnGrid(exitsFromScope, gcode, OPEN_TRANSITION);
 
-     drawLinesOnGrid(wall, dist2Wall, 0.);
-     drawLinesOnGrid(wall, cost, -7.);
-     drawLinesOnGrid(wall, gcode, WALL);
-     drawLinesOnGrid(exitsFromScope, gcode, OPEN_TRANSITION);
+     drawLinesOnGrid(_wall, _dist2Wall, 0.);
+     drawLinesOnGrid(_wall, _cost, -7.);
+     drawLinesOnGrid(_wall, _gcode, WALL);
+     drawLinesOnGrid(_exitsFromScope, _gcode, OPEN_TRANSITION);
 }
 
 void LocalFloorfieldViaFM::drawBlockerLines() {
@@ -192,14 +192,14 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
      long int key;
      long int deltaX, deltaY, deltaX1, deltaY1, px, py, xe, ye, i; //Bresenham Algorithm
 
-     for(auto& line : wall) {
-          key = grid->getKeyAtPoint(line.GetPoint1());
-          iStart = (long) grid->get_i_fromKey(key);
-          jStart = (long) grid->get_j_fromKey(key);
+     for(auto& line : _wall) {
+          key = _grid->getKeyAtPoint(line.GetPoint1());
+          iStart = (long) _grid->get_i_fromKey(key);
+          jStart = (long) _grid->get_j_fromKey(key);
 
-          key = grid->getKeyAtPoint(line.GetPoint2());
-          iEnd = (long) grid->get_i_fromKey(key);
-          jEnd = (long) grid->get_j_fromKey(key);
+          key = _grid->getKeyAtPoint(line.GetPoint2());
+          iEnd = (long) _grid->get_i_fromKey(key);
+          jEnd = (long) _grid->get_j_fromKey(key);
 
           deltaX = (int) (iEnd - iStart);
           deltaY = (int) (jEnd - jStart);
@@ -262,14 +262,14 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
           }
      } //loop over all walls
 
-     for(auto& line : exitsFromScope) {
-          key = grid->getKeyAtPoint(line.GetPoint1());
-          iStart = (long) grid->get_i_fromKey(key);
-          jStart = (long) grid->get_j_fromKey(key);
+     for(auto& line : _exitsFromScope) {
+          key = _grid->getKeyAtPoint(line.GetPoint1());
+          iStart = (long) _grid->get_i_fromKey(key);
+          jStart = (long) _grid->get_j_fromKey(key);
 
-          key = grid->getKeyAtPoint(line.GetPoint2());
-          iEnd = (long) grid->get_i_fromKey(key);
-          jEnd = (long) grid->get_j_fromKey(key);
+          key = _grid->getKeyAtPoint(line.GetPoint2());
+          iEnd = (long) _grid->get_i_fromKey(key);
+          jEnd = (long) _grid->get_j_fromKey(key);
 
           deltaX = (int) (iEnd - iStart);
           deltaY = (int) (jEnd - jStart);
@@ -418,7 +418,7 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
 SubRoom* LocalFloorfieldViaFM::isInsideInit(const long int key) {
      Point probe = _subroomGrid->getPointFromKey(key);
 
-     const std::map<int, std::shared_ptr<SubRoom>>& subRoomMap = room->GetAllSubRooms();
+     const std::map<int, std::shared_ptr<SubRoom>>& subRoomMap = _room->GetAllSubRooms();
 
      for (auto& subRoomPair : subRoomMap) {
 
@@ -433,7 +433,7 @@ SubRoom* LocalFloorfieldViaFM::isInsideInit(const long int key) {
 }
 
 int LocalFloorfieldViaFM::isInside(const long int key) {
-     Point probe = grid->getPointFromKey(key);
+     Point probe = _grid->getPointFromKey(key);
 
      // rounds downwards to the next number that is a multiple of _subroomGridSpacing, considering an offset of xMin/yMin
      double lowerX = _subroomGridSpacing * floor((probe._x - _subroomGrid->GetxMin()) / _subroomGridSpacing) + _subroomGrid->GetxMin();
@@ -455,7 +455,7 @@ int LocalFloorfieldViaFM::isInside(const long int key) {
      SubRoom* sub4 = _subroomGrid->includesPoint(subroomPoint) ? _subroomMap.at(_subroomGrid->getKeyAtPoint(subroomPoint)) : nullptr;
      if (sub4 && sub4 != sub1 && sub4 != sub2 && sub4 != sub3 && sub4->IsInSubRoom(probe)) return sub4->GetUID();
 
-     const std::map<int, std::shared_ptr<SubRoom>>& subRoomMap = room->GetAllSubRooms();
+     const std::map<int, std::shared_ptr<SubRoom>>& subRoomMap = _room->GetAllSubRooms();
 
      for (auto& subRoomPair : subRoomMap) {
 
@@ -476,10 +476,10 @@ SubLocalFloorfieldViaFM::SubLocalFloorfieldViaFM(const SubRoom* const roomArg,
       const double hxArg, const double hyArg,
       const double wallAvoidDistance, const bool useDistancefield) {
      //ctor
-     threshold = -1; //negative value means: ignore threshold
-     threshold = wallAvoidDistance;
-     building = buildingArg;
-     subroom = roomArg;
+     _threshold = -1; //negative value means: ignore threshold
+     _threshold = wallAvoidDistance;
+     _building = buildingArg;
+     _subroom = roomArg;
 
      if (hxArg != hyArg) std::cerr << "ERROR: hx != hy <=========";
      //parse building and create list of walls/obstacles (find xmin xmax, ymin, ymax, and add border?)
@@ -497,7 +497,7 @@ SubLocalFloorfieldViaFM::SubLocalFloorfieldViaFM(const SubRoom* const roomArg,
 
      setSpeed(useDistancefield); //use distance2Wall
      //Log->Write("INFO: \tGrid initialized: Speed");
-     calculateFloorfield(exitsFromScope, cost, neggrad);
+     calculateFloorfield(_exitsFromScope, _cost, _neggrad);
 };
 
 void SubLocalFloorfieldViaFM::getDirectionToDestination(Pedestrian* ped,
@@ -515,55 +515,55 @@ void SubLocalFloorfieldViaFM::getDirectionToGoalID(const int goalID){
 void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
       const double hxArg, const double hyArg)
 {
-     subroom = roomArg;
+     _subroom = roomArg;
      //init min/max before parsing
      double xMin = DBL_MAX;
      double xMax = -DBL_MAX;
      double yMin = xMin;
      double yMax = xMax;
-     costmap.clear();
-     neggradmap.clear();
+     _costmap.clear();
+     _neggradmap.clear();
 
      //create a list of walls
      //add all transition and put open doors at the beginning of "wall"
      std::map<int, Transition*> allTransitions;
 
-     for (auto itTrans : subroom->GetAllTransitions()) {
+     for (auto itTrans : _subroom->GetAllTransitions()) {
           if (!allTransitions.count(itTrans->GetUniqueID())) {
                allTransitions[itTrans->GetUniqueID()] = &(*itTrans);
                if (itTrans->IsOpen()) {
-                    exitsFromScope.emplace_back(Line((Line) *itTrans));
-                    costmap.emplace(itTrans->GetUniqueID(), nullptr);
-                    neggradmap.emplace(itTrans->GetUniqueID(), nullptr);
+                    _exitsFromScope.emplace_back(Line((Line) *itTrans));
+                    _costmap.emplace(itTrans->GetUniqueID(), nullptr);
+                    _neggradmap.emplace(itTrans->GetUniqueID(), nullptr);
                }
           }
      }
 
-     for (auto itCross : subroom->GetAllCrossings()) {
+     for (auto itCross : _subroom->GetAllCrossings()) {
           if (itCross->IsOpen()) {
-               exitsFromScope.emplace_back(Line((Line) *itCross));
-               costmap.emplace(itCross->GetUniqueID(), nullptr);
-               neggradmap.emplace(itCross->GetUniqueID(), nullptr);
+               _exitsFromScope.emplace_back(Line((Line) *itCross));
+               _costmap.emplace(itCross->GetUniqueID(), nullptr);
+               _neggradmap.emplace(itCross->GetUniqueID(), nullptr);
           } else {
-               wall.emplace_back(Line( (Line) *itCross));
+               _wall.emplace_back(Line( (Line) *itCross));
           }
      }
 
-     numOfExits = exitsFromScope.size();
+     _numOfExits = _exitsFromScope.size();
      //put closed doors next, they are considered as walls later (index >= numOfExits)
      for (auto& trans : allTransitions) {
           if (!trans.second->IsOpen()) {
-               wall.emplace_back(Line ( (Line) *(trans.second)));
+               _wall.emplace_back(Line ( (Line) *(trans.second)));
           }
      }
 
 
-     std::vector<Obstacle*> allObstacles = subroom->GetAllObstacles();
+     std::vector<Obstacle*> allObstacles = _subroom->GetAllObstacles();
      for (std::vector<Obstacle*>::iterator itObstacles = allObstacles.begin(); itObstacles != allObstacles.end(); ++itObstacles) {
 
           std::vector<Wall> allObsWalls = (*itObstacles)->GetAllWalls();
           for (std::vector<Wall>::iterator itObsWall = allObsWalls.begin(); itObsWall != allObsWalls.end(); ++itObsWall) {
-               wall.emplace_back(Line( (Line) *itObsWall));
+               _wall.emplace_back(Line( (Line) *itObsWall));
                // xMin xMax
                if ((*itObsWall).GetPoint1()._x < xMin) xMin = (*itObsWall).GetPoint1()._x;
                if ((*itObsWall).GetPoint2()._x < xMin) xMin = (*itObsWall).GetPoint2()._x;
@@ -577,9 +577,9 @@ void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
           }
      }
 
-     std::vector<Wall> allWalls = subroom->GetAllWalls();
+     std::vector<Wall> allWalls = _subroom->GetAllWalls();
      for (std::vector<Wall>::iterator itWall = allWalls.begin(); itWall != allWalls.end(); ++itWall) {
-          wall.emplace_back( Line( (Line) *itWall));
+          _wall.emplace_back( Line( (Line) *itWall));
           // xMin xMax
           if ((*itWall).GetPoint1()._x < xMin) xMin = (*itWall).GetPoint1()._x;
           if ((*itWall).GetPoint2()._x < xMin) xMin = (*itWall).GetPoint2()._x;
@@ -592,10 +592,10 @@ void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
           if ((*itWall).GetPoint2()._y > yMax) yMax = (*itWall).GetPoint2()._y;
      }
 
-     const vector<Crossing*>& allCrossings = subroom->GetAllCrossings();
+     const vector<Crossing*>& allCrossings = _subroom->GetAllCrossings();
      for (Crossing* crossPtr : allCrossings) {
           if (!crossPtr->IsOpen()) {
-               wall.emplace_back( Line( (Line) *crossPtr));
+               _wall.emplace_back( Line( (Line) *crossPtr));
 
                if (crossPtr->GetPoint1()._x < xMin) xMin = crossPtr->GetPoint1()._x;
                if (crossPtr->GetPoint2()._x < xMin) xMin = crossPtr->GetPoint2()._x;
@@ -611,41 +611,41 @@ void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
 
 
      //create Rect Grid
-     grid = new RectGrid();
-     grid->setBoundaries(xMin, yMin, xMax, yMax);
-     grid->setSpacing(hxArg, hyArg);
-     grid->createGrid();
+     _grid = new RectGrid();
+     _grid->setBoundaries(xMin, yMin, xMax, yMax);
+     _grid->setSpacing(hxArg, hyArg);
+     _grid->createGrid();
 
      //create arrays
-     gcode = new int[grid->GetnPoints()];                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, -7 = outside)
-     subroomUID = new int[grid->GetnPoints()];
-     dist2Wall = new double[grid->GetnPoints()];
-     speedInitial = new double[grid->GetnPoints()];
-     modifiedspeed = new double[grid->GetnPoints()];
-     densityspeed = new double[grid->GetnPoints()];
-     cost = new double[grid->GetnPoints()];
-     neggrad = new Point[grid->GetnPoints()];
-     dirToWall = new Point[grid->GetnPoints()];
+     _gcode = new int[_grid->GetnPoints()];                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, -7 = outside)
+     _subroomUID = new int[_grid->GetnPoints()];
+     _dist2Wall = new double[_grid->GetnPoints()];
+     _speedInitial = new double[_grid->GetnPoints()];
+     _modifiedspeed = new double[_grid->GetnPoints()];
+     _densityspeed = new double[_grid->GetnPoints()];
+     _cost = new double[_grid->GetnPoints()];
+     _neggrad = new Point[_grid->GetnPoints()];
+     _dirToWall = new Point[_grid->GetnPoints()];
      //trialfield = new Trial[grid->GetnPoints()];                 //created with other arrays, but not initialized yet
 
-     costmap.emplace(-1 , cost);                         // enable default ff (closest exit)
-     neggradmap.emplace(-1, neggrad);
+     _costmap.emplace(-1 , _cost);                         // enable default ff (closest exit)
+     _neggradmap.emplace(-1, _neggrad);
 
      //init grid with -3 as unknown distance to any wall
-     for(long int i = 0; i < grid->GetnPoints(); ++i) {
-          dist2Wall[i] = -3.;
-          cost[i] = -2.;
-          gcode[i] = OUTSIDE;
+     for(long int i = 0; i < _grid->GetnPoints(); ++i) {
+          _dist2Wall[i] = -3.;
+          _cost[i] = -2.;
+          _gcode[i] = OUTSIDE;
      }
      //drawLinesOnGrid(wall, gcode, WALL);
      //drawLinesOnGrid(exitsFromScope, gcode, OPEN_TRANSITION);
-     drawLinesOnGrid(wall, dist2Wall, 0.);
-     drawLinesOnGrid(wall, cost, -7.);
-     drawLinesOnGrid(wall, gcode, WALL);
-     drawLinesOnGrid(exitsFromScope, gcode, OPEN_TRANSITION);
+     drawLinesOnGrid(_wall, _dist2Wall, 0.);
+     drawLinesOnGrid(_wall, _cost, -7.);
+     drawLinesOnGrid(_wall, _gcode, WALL);
+     drawLinesOnGrid(_exitsFromScope, _gcode, OPEN_TRANSITION);
 }
 
 int SubLocalFloorfieldViaFM::isInside(const long int key) {
-     Point probe = grid->getPointFromKey(key);
-     return subroom->IsInSubRoom(probe)?subroom->GetUID():0;
+     Point probe = _grid->getPointFromKey(key);
+     return _subroom->IsInSubRoom(probe)?_subroom->GetUID():0;
 }

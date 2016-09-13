@@ -51,7 +51,7 @@ public:
      // returns the UID of a subroom for a key of th grid, using the information from _subroomMap
      virtual int isInside(const long int key);
 protected:
-     const Room* room;
+     const Room* _room;
      RectGrid* _subroomGrid = nullptr;
      std::map<long int, SubRoom*> _subroomMap; // maps from _subroomGrid key to the subroom
      double _subroomGridSpacing = 1.; // seems to be close to the optimum
@@ -72,7 +72,7 @@ public:
                              const bool useDistancefield) : LocalFloorfieldViaFM(room, buildingArg, hxArg, hyArg, wallAvoidDistance, useDistancefield) {};
 };
 
-class SubLocalFloorfieldViaFM : public FloorfieldViaFM{
+class SubLocalFloorfieldViaFM : public FloorfieldViaFM {
 public:
      SubLocalFloorfieldViaFM();
      SubLocalFloorfieldViaFM(const SubRoom* const subroom, const Building* buildingArg,
@@ -85,7 +85,7 @@ public:
      void getDirectionToGoalID(const int goalID);
      virtual int isInside(const long int key);
 protected:
-     const SubRoom* subroom;
+     const SubRoom* _subroom;
 };
 
 #endif //JPSCORE_LOCALFLOORFIELDVIAFM_H
