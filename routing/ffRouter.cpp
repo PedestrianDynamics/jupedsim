@@ -124,7 +124,7 @@ bool FFRouter::Init(Building* building)
      for (auto& pair:allTrans) {
           if (pair.second->IsOpen()) {
                _allDoorUIDs.emplace_back(pair.second->GetUniqueID());
-               _CroTrByUID.insert(std::make_pair(pair.second->GetUniqueID(), (Crossing *) pair.second));
+               _CroTrByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
                if (pair.second->IsExit()) {
                     _ExitsByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
                }
@@ -140,13 +140,10 @@ bool FFRouter::Init(Building* building)
                _CroTrByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
                Room* room1 = pair.second->GetRoom1();
                if (room1) roomAndCroTrVector.emplace_back(std::make_pair(room1->GetID(), pair.second->GetUniqueID()));
-
-               //roomAndCroTrVector.emplace_back(std::make_pair(pair.second->GetSubRoom1()->GetUID(), pair.second->GetUniqueID()));
-               //roomAndCroTrVector.emplace_back(std::make_pair(pair.second->GetSubRoom2()->GetUID(), pair.second->GetUniqueID()));
           }
      }
-     //make unique
-     _allDoorUIDs.erase( std::unique(_allDoorUIDs.begin(),_allDoorUIDs.end()), _allDoorUIDs.end());
+     //make unique // because of the way how this vector is constructed, the entries are already unique. Besides, std::unique would need a sorted vector.
+     //_allDoorUIDs.erase( std::unique(_allDoorUIDs.begin(),_allDoorUIDs.end()), _allDoorUIDs.end());
 
      //cleanse maps
      _distMatrix.clear();

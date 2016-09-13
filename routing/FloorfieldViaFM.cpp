@@ -77,7 +77,7 @@ FloorfieldViaFM::~FloorfieldViaFM()
 FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg,
                                  const double wallAvoidDistance, const bool useDistancefield, const bool onlyRoomsWithExits) {
     //ctor
-    _threshold = -1; //negative value means: ignore threshold
+    //_threshold = -1; //negative value means: ignore threshold
     _threshold = wallAvoidDistance;
     _building = buildingArg;
     _useDistanceToWall = useDistancefield;
@@ -514,7 +514,6 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
                     continue;
                 }
                 dummykey = _grid->getKeyAtPoint(loctrans.second->GetCentre());
-                double debugdouble = localcostptr[dummykey];
                 if ((cost_of_MIN > localcostptr[dummykey]) && (localcostptr[dummykey] >= 0.)) {
                     UID_of_MIN3 = UID_of_MIN2;
                     cost_of_MIN3 = cost_of_MIN2;
@@ -1031,7 +1030,7 @@ void FloorfieldViaFM::prepareForDistanceFieldCalculation(const bool onlyRoomsWit
 //}
 
 void FloorfieldViaFM::deleteAllFFs() {
-    for (int i = 0; i < _costmap.size(); ++i) {
+    for (size_t i = 0; i < _costmap.size(); ++i) {
         auto costIter = _costmap.begin();
         auto negIter  = _neggradmap.begin();
         std::advance(costIter, (_costmap.size() - (i+1)));
@@ -1472,13 +1471,12 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
 
 void FloorfieldViaFM::checkNeighborsAndAddToNarrowband(std::priority_queue<TrialP, std::vector<TrialP>, std::greater<TrialP>>& trialqueue, TrialP keyP,
                                                        std::function<void (TrialP)> calc) {
-    long int aux = -1;
     int* flag = keyP.flag;
 
     directNeighbor dNeigh = _grid->getNeighbors(keyP.key);
 
     //check for valid neigh
-    aux = dNeigh.key[0];
+    long int aux = dNeigh.key[0];
     //hint: trialfield[i].cost = dist2Wall + i; <<< set in prepareForDistanceFieldCalc
     //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside, -5 = blocker)
     if ((aux != -2) && (flag[aux] == 0)) {
