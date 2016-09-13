@@ -225,13 +225,13 @@ protected:
      std::map<int, Transition*>               _ExitsByUID;
      std::map<int, Crossing*>                 _CroTrByUID;
 
-     std::map<int, int>     goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
-     std::map<int, int>     goalToLineUIDmap2;
-     std::map<int, int>     goalToLineUIDmap3;
+     std::map<int, int>     _goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
+     std::map<int, int>     _goalToLineUIDmap2;
+     std::map<int, int>     _goalToLineUIDmap3;
      std::map<int, int>     _finalDoors; // _finalDoors[i] the UID of the last door the pedestrian with ID i wants to walk through
 
      int _mode;
-     double timeToRecalc = 0.;
+     double _timeToRecalc = 0.;
      double _recalc_interval;
      bool _hasSpecificGoals;
      bool _targetWithinSubroom;
@@ -239,7 +239,7 @@ protected:
      // (AvoidDoorHopping and _subroomMatrix might be unnecessary, and some code in FindExit could go). --f.mack
      bool _useCentrePointDistance = true;
      //output filename counter: cnt
-     static int cnt;
+     static int _cnt;
 };
 
 #endif /* FFROUTER_H_ */

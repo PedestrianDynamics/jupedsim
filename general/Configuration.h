@@ -223,23 +223,23 @@ public:
 
      double get_deltaH() const { return _deltaH; }
 
-     void set_deltaH(double _deltaH) { Configuration::_deltaH = _deltaH; }
+     void set_deltaH(double deltaH) { _deltaH = deltaH; }
 
      double get_wall_avoid_distance() const { return _wall_avoid_distance; }
 
-     void set_wall_avoid_distance(double _wall_avoid_distance) { Configuration::_wall_avoid_distance = _wall_avoid_distance; }
+     void set_wall_avoid_distance(double wall_avoid_distance) { _wall_avoid_distance = wall_avoid_distance; }
 
      bool get_use_wall_avoidance() const { return _use_wall_avoidance; }
 
-     void set_use_wall_avoidance(bool _use_wall_avoidance) { Configuration::_use_wall_avoidance = _use_wall_avoidance; }
+     void set_use_wall_avoidance(bool use_wall_avoidance) { _use_wall_avoidance = use_wall_avoidance; }
 
      double get_slow_down_distance() const { return _slow_down_distance; }
 
-     void set_slow_down_distance(double _slow_down_distance) { Configuration::_slow_down_distance = _slow_down_distance; }
+     void set_slow_down_distance(double slow_down_distance) { _slow_down_distance = slow_down_distance; }
 
      double get_recalc_interval() const { return _recalc_interval; }
 
-     void set_recalc_interval(double _recalc_interval) { Configuration::_recalc_interval = _recalc_interval; }
+     void set_recalc_interval(double recalc_interval) { _recalc_interval = recalc_interval; }
 
      const std::string& GetHostname() const { return _hostname; };
 

@@ -54,7 +54,7 @@
 
 #include <chrono>
 
-int FFRouter::cnt = 0;
+int FFRouter::_cnt = 0;
 
 FFRouter::FFRouter()
 {
@@ -107,9 +107,9 @@ bool FFRouter::Init(Building* building)
                _globalFF->createMapEntryInLineToGoalID(itrGoal.first);
                goalIDs.emplace_back(itrGoal.first);
           }
-          goalToLineUIDmap = _globalFF->getGoalToLineUIDmap();
-          goalToLineUIDmap2 = _globalFF->getGoalToLineUIDmap2();
-          goalToLineUIDmap3 = _globalFF->getGoalToLineUIDmap3();
+          _goalToLineUIDmap = _globalFF->getGoalToLineUIDmap();
+          _goalToLineUIDmap2 = _globalFF->getGoalToLineUIDmap2();
+          _goalToLineUIDmap3 = _globalFF->getGoalToLineUIDmap3();
           //_globalFF->writeGoalFF("goal.vtk", goalIDs);
      }
      //get all door UIDs
@@ -430,9 +430,9 @@ bool FFRouter::ReInit()
           for (auto &itrGoal : _building->GetAllGoals()) {
                _globalFF->createMapEntryInLineToGoalID(itrGoal.first);
           }
-          goalToLineUIDmap = _globalFF->getGoalToLineUIDmap(); //@todo: ar.graf: will this create mem-leak?
-          goalToLineUIDmap2 = _globalFF->getGoalToLineUIDmap2();
-          goalToLineUIDmap3 = _globalFF->getGoalToLineUIDmap3();
+          _goalToLineUIDmap = _globalFF->getGoalToLineUIDmap(); //@todo: ar.graf: will this create mem-leak?
+          _goalToLineUIDmap2 = _globalFF->getGoalToLineUIDmap2();
+          _goalToLineUIDmap3 = _globalFF->getGoalToLineUIDmap3();
      }
      //get all door UIDs
      _allDoorUIDs.clear();
@@ -623,7 +623,7 @@ bool FFRouter::ReInit()
      FloydWarshall();
 
      //debug output in file
-     std::string ffname = "MasterFF" + std::to_string(++cnt) + ".vtk";
+     std::string ffname = "MasterFF" + std::to_string(++_cnt) + ".vtk";
      //_locffviafm[0]->writeFF(ffname, _allDoorUIDs);
 
      //int roomTest = (*(_locffviafm.begin())).first;
@@ -681,8 +681,8 @@ int FFRouter::FindExit(Pedestrian* p)
 //     }
      if (_mode == quickest) {
           //new version: recalc densityspeed every x seconds
-          if (p->GetGlobalTime() > timeToRecalc) {
-               timeToRecalc += _recalc_interval;                      //@todo: ar.graf: change "5" to value of config file/classmember
+          if (p->GetGlobalTime() > _timeToRecalc) {
+               _timeToRecalc += _recalc_interval;                      //@todo: ar.graf: change "5" to value of config file/classmember
 //               for (auto localfield : _locffviafm) { //@todo: ar.graf: create a list of local ped-ptr instead of giving all peds-ptr
 //                    localfield.second->setSpeedThruPeds(_building->GetAllPedestrians().data(), _building->GetAllPedestrians().size(), _mode, 1.);
 //                    localfield.second->deleteAllFFs();
@@ -704,10 +704,10 @@ int FFRouter::FindExit(Pedestrian* p)
           }
      } else {  //only one specific goal, goalToLineUIDmap gets
                //populated in Init()
-          if ((goalToLineUIDmap.count(goalID) == 0) || (goalToLineUIDmap[goalID] == -1)) {
+          if ((_goalToLineUIDmap.count(goalID) == 0) || (_goalToLineUIDmap[goalID] == -1)) {
                Log->Write("ERROR: \t ffRouter: unknown/unreachable goalID: %d in FindExit(Ped)",goalID);
           } else {
-               validFinalDoor.emplace_back(goalToLineUIDmap.at(goalID));
+               validFinalDoor.emplace_back(_goalToLineUIDmap.at(goalID));
           }
      }
 
