@@ -655,7 +655,7 @@ std::set<std::pair<SubRoom*, int>> FFRouter::GetPresumableExitRoute(Pedestrian* 
     SubRoom* subroom = _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID());
     int doorUID = p->GetNextDestination();
 
-     while (doorUID != finalDoor) {
+    while (doorUID != finalDoor) {
         subroomsDoorsSet.insert(std::make_pair(subroom, doorUID));
         subroom = _CroTrByUID[doorUID]->GetOtherSubRoom(subroom->GetRoomID(), subroom->GetSubRoomID());
         doorUID = _pathsMatrix.at(std::make_pair(doorUID, finalDoor));
@@ -893,12 +893,12 @@ void FFRouter::AvoidDoorHopping() {
                          doorAfterNext = _CroTrByUID.at(doorAfterNextUID);
                     } while (doorAfterNext->GetSubRoom1() == subroom || doorAfterNext->GetSubRoom2() == subroom);
                } else {
-                    Log->Write("ERROR in FFRouter::AvoidDoorHopping: sub is %p (UID %d), nextDoorUID/ID is %d/%d", subroom, subroom?subroom->GetUID():-1, nextDoorUID, nextDoor->GetID());
+                    Log->Write("ERROR \tFFRouter::AvoidDoorHopping: sub is %p (UID %d), nextDoorUID/ID is %d/%d", subroom, subroom?subroom->GetUID():-1, nextDoorUID, nextDoor->GetID());
                }
 #pragma omp critical(_pathsMatrix)
                _pathsMatrix.at(key) = doorLeavingSubroom;
                if (_pathsMatrix.at(key) == -1) {
-                    Log->Write("ERROR in FFRouter::AvoidDoorHopping(): _pathsMatrix got assigned a value of -1 for key %d, %d", key.first, key.second);
+                    Log->Write("ERROR \tFFRouter::AvoidDoorHopping(): _pathsMatrix got assigned a value of -1 for key %d, %d", key.first, key.second);
                }
           } else {
                int doorLeavingRoom = -1; // initialization only needed in case of error
@@ -906,37 +906,31 @@ void FFRouter::AvoidDoorHopping() {
 
                auto tr = dynamic_cast<Transition*>(_CroTrByUID.at(nextDoorUID));
                if (room && (_CroTrByUID.at(nextDoorUID)->GetRoom1() == room || (tr && tr->GetRoom2() == room))) {
-                    //doorLeavingRoom = key.first;
                     Transition* doorAfterNext;
                     int doorAfterNextUID = key.first;
                     do {
                          doorLeavingRoom = doorAfterNextUID;
-                         /*
-                         do {
-                              doorLeavingRoom = _pathsMatrix.at(std::make_pair(doorLeavingRoom, finalDoor));
-                         } while (doorLeavingRoom != finalDoor && dynamic_cast<Transition*>(_CroTrByUID.at(doorLeavingRoom)));
-                          //*/
-                         //if (doorLeavingRoom == finalDoor) break;
+
                          do {
                               doorAfterNextUID = _pathsMatrix.at(std::make_pair(doorAfterNextUID, finalDoor));
                          } while (doorAfterNextUID != finalDoor && !(doorAfterNext = dynamic_cast<Transition*>(_CroTrByUID.at(doorAfterNextUID))));
+
                          if (doorAfterNextUID == finalDoor) {
                               if (doorLeavingRoom == key.first) {
-                                   // handles a special case // @todo f.mack which one?
+                                   // handles the case in which in the final door is in the room we are going to enter
                                    doorLeavingRoom = finalDoor;
                               }
                               break;
                          }
 
-                         //doorAfterNext = dynamic_cast<Transition*>(_CroTrByUID.at(doorAfterNextUID));
                     } while (doorAfterNext->GetRoom1() == room || doorAfterNext->GetRoom2() == room);
                } else {
-                    Log->Write("ERROR in FFRouter::AvoidDoorHopping: room is %p (ID %d), nextDoorUID/ID is %d/%d", room, room ? room->GetID() : -1, nextDoorUID, nextDoor->GetID());
+                    Log->Write("ERROR \tFFRouter::AvoidDoorHopping: room is %p (ID %d), nextDoorUID/ID is %d/%d", room, room ? room->GetID() : -1, nextDoorUID, nextDoor->GetID());
                }
 #pragma omp critical(_pathsMatrix)
                _pathsMatrix.at(key) = doorLeavingRoom;
                if (_pathsMatrix.at(key) == -1) {
-                    Log->Write("ERROR in FFRouter::AvoidDoorHopping(): _pathsMatrix got assigned a value of -1 for key %d, %d", key.first, key.second);
+                    Log->Write("ERROR \tFFRouter::AvoidDoorHopping(): _pathsMatrix got assigned a value of -1 for key %d, %d", key.first, key.second);
                }
           }
      }
