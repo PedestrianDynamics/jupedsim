@@ -147,7 +147,7 @@ bool GradientModel::Init (Building* building)
               Log->Write(
                    "ERROR: \allPeds::Init() cannot initialise phi! "
                    "dist to target is 0\n");
-#pragma omp critical(error_occurred)
+#pragma omp critical(GradientModel_Init_error_occurred)
               error_occurred = true;
               //return false;
          }
@@ -236,6 +236,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 Point repPed = Point(0,0);
                 vector<Pedestrian*> neighbours;
                 int size;
+                // @todo Why is this critical section needed?
                 #pragma omp critical
                 {
                      building->GetGrid()->GetNeighbourhood(ped,neighbours);

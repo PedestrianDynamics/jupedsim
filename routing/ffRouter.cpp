@@ -506,7 +506,7 @@ bool FFRouter::ReInit()
           }
           //for (long int i = 0; i < ptrToNew)
           Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
-#pragma omp critical
+#pragma omp critical(_locffviafm)
           _locffviafm.insert(std::make_pair((*pairRoomIt).first, ptrToNew));
 
           if (_mode == quickest) {

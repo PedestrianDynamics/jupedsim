@@ -318,12 +318,12 @@ void Simulation::UpdateRoutesAndLocations()
           if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
                     && (room->GetCaption() == "outside")) {
 
-#pragma omp critical
+#pragma omp critical(Simulation_Update_pedsToRemove)
                pedsToRemove.push_back(ped);
           } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
                     && (goals.at(ped->GetFinalDestination())->Contains(
                               ped->GetPos()))) {
-#pragma omp critical
+#pragma omp critical(Simulation_Update_pedsToRemove)
                pedsToRemove.push_back(ped);
           }
 
@@ -338,11 +338,12 @@ void Simulation::UpdateRoutesAndLocations()
                assigned = ped->Relocate(f);
                //this will delete agents, that are pushed outside (maybe even if inside obstacles??)
 
-#pragma omp critical
                if (!assigned) {
+#pragma omp critical(Simulation_Update_pedsToRemove)
                     pedsToRemove.push_back(ped);
                     //the agent left the old room
                     //actualize the eggress time for that room
+#pragma omp critical(SetEgressTime)
                     allRooms.at(ped->GetRoomID())->SetEgressTime(ped->GetGlobalTime());
 
                }
@@ -352,7 +353,7 @@ void Simulation::UpdateRoutesAndLocations()
                //a destination could not be found for that pedestrian
                Log->Write("ERROR: \tCould not find a route for pedestrian %d",ped->GetID());
                //exit(EXIT_FAILURE);
-#pragma omp critical
+#pragma omp critical(Simulation_Update_pedsToRemove)
                pedsToRemove.push_back(ped);
           }
      }

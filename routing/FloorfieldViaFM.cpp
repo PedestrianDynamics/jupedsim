@@ -427,7 +427,10 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
         Log->Write("WARNING: \t goalID was unknown in FloorfieldViaFM::createMapEntryInLineToGoalID");
         return;
     }
-#pragma omp critical
+    // @todo This is called in parallel via Simulation::UpdateRoutesAndLocations() -> Ped::FindRoute() -> ffRouter::FindExit() -> ReInit()
+    // Check if the call to Router::FindExit() has to be in a critical section, or if all Router::FindExit()s are thread-safe (issue 218)
+    // Furthermore, the scope of this critical section can probably be reduced (maybe use a GoalsBeingCalculated similar to FloorfieldViaFM::getDirectionToUID)
+#pragma omp critical(FloorfieldViaFM_maps)
     {
         if (_goalcostmap.count(goalID) == 0) { //no entry for goalcostmap, so we need to calc FF
             _goalcostmap.emplace(goalID, nullptr);

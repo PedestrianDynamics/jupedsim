@@ -519,7 +519,7 @@ Point DirectionSubLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 //     } else {
 //          std::cerr << "Mapentry found: " << ped->GetSubRoomUID() << " with ptr: " << locffviafm.at(ped->GetSubRoomUID()) << std::endl;
 //     }
-#pragma omp critical
+//#pragma omp critical
      _locffviafm.at(ped->GetSubRoomUID())->getDirectionToDestination(ped, p);
 
      p = p.Normalized();     // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
@@ -581,7 +581,7 @@ void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
                     auto subroomIt = roomPair.second->GetAllSubRooms().begin();
                     std::advance(subroomIt, i);
                     int subUID = subroomIt->second->GetUID();
-#pragma omp critical
+#pragma omp critical(subUIDs)
                     subUIDs.emplace_back(subUID);
                     Log->Write("Creating SubLocFF at key: %d", subUID);
                     _locffviafm[subUID] = new SubLocalFloorfieldViaFM(
