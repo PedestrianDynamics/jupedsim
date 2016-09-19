@@ -773,10 +773,10 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
         _gcode[i]        = OUTSIDE;
         //flag[i] = 0;            //unknown
     }
-    drawLinesOnGrid(_wall, _dist2Wall, 0.);
-    drawLinesOnGrid(_wall, _cost, -7.);
-    drawLinesOnGrid(_wall, _gcode, WALL);
-    drawLinesOnGrid(_exitsFromScope, _gcode, OPEN_TRANSITION);
+    drawLinesOnGrid<double>(_wall, _dist2Wall, 0.);
+    drawLinesOnGrid<double>(_wall, _cost, -7.);
+    drawLinesOnGrid<int>(_wall, _gcode, WALL);
+    drawLinesOnGrid<int>(_exitsFromScope, _gcode, OPEN_TRANSITION);
 }
 
 /*!
@@ -947,10 +947,10 @@ void FloorfieldViaFM::parseBuildingForExits(const Building* const buildingArg, c
         _cost[i] = -2.;
         _gcode[i] = OUTSIDE;            //unknown
     }
-    drawLinesOnGrid(_wall, _dist2Wall, 0.);
-    drawLinesOnGrid(_wall, _cost, -7.);
-    drawLinesOnGrid(_wall, _gcode, WALL);
-    drawLinesOnGrid(_exitsFromScope, _gcode, OPEN_TRANSITION);
+    drawLinesOnGrid<double>(_wall, _dist2Wall, 0.);
+    drawLinesOnGrid<double>(_wall, _cost, -7.);
+    drawLinesOnGrid<int>(_wall, _gcode, WALL);
+    drawLinesOnGrid<int>(_exitsFromScope, _gcode, OPEN_TRANSITION);
 }
 
 //this function must only be used BEFORE calculateDistanceField(), because we set trialfield[].cost = dist2Wall AND we init dist2Wall with "-3"
@@ -1047,19 +1047,8 @@ void FloorfieldViaFM::deleteAllFFs() {
     }
 }
 
-/*!
- * \brief [brief description]
- *
- * [detailed description]
- *
- * \param[in] [name of input parameter] [its description]
- * \param[out] [name of output parameter] [its description]
- * \return [information about return value]
- * \sa [see also section]
- * \note [any note about the function you might have]
- * \warning [any warning if necessary]
- */
-void FloorfieldViaFM::drawLinesOnGrid(std::vector<Line>& wallArg, double* const target, const double outside) { //no init, plz init elsewhere
+template <typename T>
+void FloorfieldViaFM::drawLinesOnGrid(std::vector<Line>& wallArg, T* const target, const T value) { //no init, plz init elsewhere
 // i~x; j~y;
 //http://stackoverflow.com/questions/10060046/drawing-lines-with-bresenhams-line-algorithm
 //src in answer of "Avi"; adapted to fit this application
@@ -1107,7 +1096,7 @@ void FloorfieldViaFM::drawLinesOnGrid(std::vector<Line>& wallArg, double* const 
                 xe = iStart;
             }
             if ((_gcode[jDot*iMax + iDot] != WALL) && (_gcode[jDot*iMax + iDot] != CLOSED_CROSSING) && (_gcode[jDot*iMax + iDot] != CLOSED_TRANSITION)) {
-                target[jDot * iMax + iDot] = outside;
+                target[jDot * iMax + iDot] = value;
             }
             for (i=0; iDot < xe; ++i) {
                 ++iDot;
@@ -1122,7 +1111,7 @@ void FloorfieldViaFM::drawLinesOnGrid(std::vector<Line>& wallArg, double* const 
                     px+=2*(deltaY1-deltaX1);
                 }
                 if ((_gcode[jDot*iMax + iDot] != WALL) && (_gcode[jDot*iMax + iDot] != CLOSED_CROSSING) && (_gcode[jDot*iMax + iDot] != CLOSED_TRANSITION)) {
-                    target[jDot * iMax + iDot] = outside;
+                    target[jDot * iMax + iDot] = value;
                 }
             }
         } else {
@@ -1136,7 +1125,7 @@ void FloorfieldViaFM::drawLinesOnGrid(std::vector<Line>& wallArg, double* const 
                 ye = jStart;
             }
             if ((_gcode[jDot*iMax + iDot] != WALL) && (_gcode[jDot*iMax + iDot] != CLOSED_CROSSING) && (_gcode[jDot*iMax + iDot] != CLOSED_TRANSITION)) {
-                target[jDot * iMax + iDot] = outside;
+                target[jDot * iMax + iDot] = value;
             }
             for(i=0; jDot<ye; ++i) {
                 ++jDot;
@@ -1151,107 +1140,7 @@ void FloorfieldViaFM::drawLinesOnGrid(std::vector<Line>& wallArg, double* const 
                     py+=2*(deltaX1-deltaY1);
                 }
                 if ((_gcode[jDot*iMax + iDot] != WALL) && (_gcode[jDot*iMax + iDot] != CLOSED_CROSSING) && (_gcode[jDot*iMax + iDot] != CLOSED_TRANSITION)) {
-                    target[jDot * iMax + iDot] = outside;
-                }
-            }
-        }
-    } //loop over all walls
-
-} //drawLinesOnGrid
-
-void FloorfieldViaFM::drawLinesOnGrid(std::vector<Line>& wallArg, int* const target, const int outside) { //no init, plz init elsewhere
-// i~x; j~y;
-//http://stackoverflow.com/questions/10060046/drawing-lines-with-bresenhams-line-algorithm
-//src in answer of "Avi"; adapted to fit this application
-
-//    //init with inside value:
-//    long int indexMax = grid->GetnPoints();
-//    for (long int i = 0; i < indexMax; ++i) {
-//        target[i] = inside;
-//    }
-
-    //grid handeling local vars:
-    long int iMax  = _grid->GetiMax();
-
-    long int iStart, iEnd;
-    long int jStart, jEnd;
-    long int iDot, jDot;
-    long int key;
-    long int deltaX, deltaY, deltaX1, deltaY1, px, py, xe, ye, i; //Bresenham Algorithm
-
-    for (auto& line : wallArg) {
-        key = _grid->getKeyAtPoint(line.GetPoint1());
-        iStart = (long) _grid->get_i_fromKey(key);
-        jStart = (long) _grid->get_j_fromKey(key);
-
-        key = _grid->getKeyAtPoint(line.GetPoint2());
-        iEnd = (long) _grid->get_i_fromKey(key);
-        jEnd = (long) _grid->get_j_fromKey(key);
-
-        deltaX = (int) (iEnd - iStart);
-        deltaY = (int) (jEnd - jStart);
-        deltaX1 = abs( (int) (iEnd - iStart));
-        deltaY1 = abs( (int) (jEnd - jStart));
-
-        px = 2*deltaY1 - deltaX1;
-        py = 2*deltaX1 - deltaY1;
-
-        if(deltaY1<=deltaX1) {
-            if(deltaX>=0) {
-                iDot = iStart;
-                jDot = jStart;
-                xe = iEnd;
-            } else {
-                iDot = iEnd;
-                jDot = jEnd;
-                xe = iStart;
-            }
-            if ((_gcode[jDot*iMax + iDot] != WALL) && (_gcode[jDot*iMax + iDot] != CLOSED_CROSSING) && (_gcode[jDot*iMax + iDot] != CLOSED_TRANSITION)) {
-                target[jDot * iMax + iDot] = outside;
-            }
-            for (i=0; iDot < xe; ++i) {
-                ++iDot;
-                if(px<0) {
-                    px+=2*deltaY1;
-                } else {
-                    if((deltaX<0 && deltaY<0) || (deltaX>0 && deltaY>0)) {
-                        ++jDot;
-                    } else {
-                        --jDot;
-                    }
-                    px+=2*(deltaY1-deltaX1);
-                }
-                if ((_gcode[jDot*iMax + iDot] != WALL) && (_gcode[jDot*iMax + iDot] != CLOSED_CROSSING) && (_gcode[jDot*iMax + iDot] != CLOSED_TRANSITION)) {
-                    target[jDot * iMax + iDot] = outside;
-                }
-            }
-        } else {
-            if(deltaY>=0) {
-                iDot = iStart;
-                jDot = jStart;
-                ye = jEnd;
-            } else {
-                iDot = iEnd;
-                jDot = jEnd;
-                ye = jStart;
-            }
-            if ((_gcode[jDot*iMax + iDot] != WALL) && (_gcode[jDot*iMax + iDot] != CLOSED_CROSSING) && (_gcode[jDot*iMax + iDot] != CLOSED_TRANSITION)) {
-                target[jDot * iMax + iDot] = outside;
-            }
-            for(i=0; jDot<ye; ++i) {
-                ++jDot;
-                if (py<=0) {
-                    py+=2*deltaX1;
-                } else {
-                    if((deltaX<0 && deltaY<0) || (deltaX>0 && deltaY>0)) {
-                        ++iDot;
-                    } else {
-                        --iDot;
-                    }
-                    py+=2*(deltaX1-deltaY1);
-                }
-                if ((_gcode[jDot*iMax + iDot] != WALL) && (_gcode[jDot*iMax + iDot] != CLOSED_CROSSING) && (_gcode[jDot*iMax + iDot] != CLOSED_TRANSITION)) {
-                    target[jDot * iMax + iDot] = outside;
+                    target[jDot * iMax + iDot] = value;
                 }
             }
         }
@@ -1372,8 +1261,8 @@ void FloorfieldViaFM::calculateFloorfield(std::vector<Line>& targetlines, double
 
         costarray[i] = -7.;
     }
-    drawLinesOnGrid(targetlines, costarray, 0.);
-    drawLinesOnGrid(targetlines, flag, 3);
+    drawLinesOnGrid<double>(targetlines, costarray, 0.);
+    drawLinesOnGrid<int>(targetlines, flag, 3);
 
     //init narrowband
     for (long int i = 0; i < _grid->GetnPoints(); ++i) {

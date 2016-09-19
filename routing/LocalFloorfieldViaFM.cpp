@@ -174,10 +174,10 @@ void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
      //drawLinesOnGrid(wall, gcode, WALL);
      //drawLinesOnGrid(exitsFromScope, gcode, OPEN_TRANSITION);
 
-     drawLinesOnGrid(_wall, _dist2Wall, 0.);
-     drawLinesOnGrid(_wall, _cost, -7.);
-     drawLinesOnGrid(_wall, _gcode, WALL);
-     drawLinesOnGrid(_exitsFromScope, _gcode, OPEN_TRANSITION);
+     drawLinesOnGrid<double>(_wall, _dist2Wall, 0.);
+     drawLinesOnGrid<double>(_wall, _cost, -7.);
+     drawLinesOnGrid<int>(_wall, _gcode, WALL);
+     drawLinesOnGrid<int>(_exitsFromScope, _gcode, OPEN_TRANSITION);
 }
 
 void LocalFloorfieldViaFM::drawBlockerLines() {
@@ -639,10 +639,10 @@ void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
      }
      //drawLinesOnGrid(wall, gcode, WALL);
      //drawLinesOnGrid(exitsFromScope, gcode, OPEN_TRANSITION);
-     drawLinesOnGrid(_wall, _dist2Wall, 0.);
-     drawLinesOnGrid(_wall, _cost, -7.);
-     drawLinesOnGrid(_wall, _gcode, WALL);
-     drawLinesOnGrid(_exitsFromScope, _gcode, OPEN_TRANSITION);
+     drawLinesOnGrid<double>(_wall, _dist2Wall, 0.);
+     drawLinesOnGrid<double>(_wall, _cost, -7.);
+     drawLinesOnGrid<int>(_wall, _gcode, WALL);
+     drawLinesOnGrid<int>(_exitsFromScope, _gcode, OPEN_TRANSITION);
 }
 
 int SubLocalFloorfieldViaFM::isInside(const long int key) {
