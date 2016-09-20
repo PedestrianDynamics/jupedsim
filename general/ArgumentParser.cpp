@@ -488,22 +488,33 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
          TiXmlNode* xVelocity=xMainNode->FirstChild("velocity");
          if(xVelocity)
          {
-        	  string FrameSteps =xMainNode->FirstChildElement("velocity")->Attribute("frame_step");
-    		  _delatTVInst = atof(FrameSteps.c_str())/2.0;
-    		  string MovementDirection = xMainNode->FirstChildElement("velocity")->Attribute("set_movement_direction");
-    		  if(atof(MovementDirection.c_str())<0 && atof(MovementDirection.c_str())>360 && MovementDirection!="None" && MovementDirection!="SeeTraj")
-    		  {
-    			  Log->Write("WARNING: \tThe movement direction should be set between 0 to 360 or None!");
-    			  return false;
-    		  }
-    		  if	(string(xMainNode->FirstChildElement("velocity")->Attribute("ignore_backward_movement"))=="true")
-    		  {
-    			  _IgnoreBackwardMovement = true;
-    		  }
-    		  else
-    		  {
-    			  _IgnoreBackwardMovement = false;
-    		  }
+        	 string FrameSteps = "10";
+        	  if(xMainNode->FirstChildElement("velocity")->Attribute("frame_step"))
+        	  {
+        		  FrameSteps =xMainNode->FirstChildElement("velocity")->Attribute("frame_step");
+        		  _delatTVInst = atof(FrameSteps.c_str())/2.0;
+        	  }
+        	  string MovementDirection = "None";
+        	  if(xMainNode->FirstChildElement("velocity")->Attribute("set_movement_direction"))
+        	  {
+				  MovementDirection = xMainNode->FirstChildElement("velocity")->Attribute("set_movement_direction");
+				  if(atof(MovementDirection.c_str())<0 && atof(MovementDirection.c_str())>360 && MovementDirection!="None" && MovementDirection!="SeeTraj")
+				  {
+					  Log->Write("WARNING: \tThe movement direction should be set between 0 to 360 or None!");
+					  return false;
+				  }
+        	  }
+        	  if	(xMainNode->FirstChildElement("velocity")->Attribute("ignore_backward_movement"))
+        	  {
+        		  if	(string(xMainNode->FirstChildElement("velocity")->Attribute("ignore_backward_movement"))=="true")
+				  {
+					  _IgnoreBackwardMovement = true;
+				  }
+				  else
+				  {
+					  _IgnoreBackwardMovement = false;
+				  }
+        	  }
     		  if(MovementDirection=="None")
     		  {
     			  _vComponent = "B";  // both components
