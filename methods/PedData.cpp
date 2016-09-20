@@ -343,9 +343,9 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
                _zCor[ID][frameNr] =  z*M2CM;
                if(_vComponent == "F")
                {
-            	   if(xAgent->Attribute("vd"))
+            	   if(xAgent->Attribute("VD"))
             	   {
-            	       _vComp[ID][frameNr] = *string(xAgent->Attribute("vd")).c_str();
+            	       _vComp[ID][frameNr] = *string(xAgent->Attribute("VD")).c_str();
             	   }
             	   else
             	   {
