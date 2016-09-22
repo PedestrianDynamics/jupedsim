@@ -76,7 +76,15 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
      int minFrame = peddata.GetMinFrame();
      if(_startFrame!=_stopFrame)
      {
-         	 for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
+         	 if(_startFrame==-1)
+         	 {
+         		_startFrame = minFrame;
+         	 }
+         	 if(_stopFrame==-1)
+         	 {
+         		_stopFrame = peddata.GetNumFrames()+minFrame;
+         	 }
+    	 	 for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
          	 {
          		 if((ite->first + minFrame)<_startFrame || (ite->first + minFrame) >_stopFrame)
          		 {
@@ -125,7 +133,7 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
           }
           int NumPeds = IdInFrame.size();
           //---------------------------------------------------------------------------------------------------------------
-          if(NumPeds>2)
+          if(NumPeds>3)
           {
         	  if(_isOneDimensional)
         	  {
