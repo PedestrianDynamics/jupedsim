@@ -185,8 +185,6 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building 
 
             Point repPed = Point(0, 0);
             vector<Pedestrian *> neighbours;
-            // @todo Why is this critical section needed?
-#pragma omp critical
             building->GetGrid()->GetNeighbourhood(ped, neighbours);
 
             int size = (int) neighbours.size();

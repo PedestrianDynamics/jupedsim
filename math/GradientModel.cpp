@@ -235,13 +235,8 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
                 Point repPed = Point(0,0);
                 vector<Pedestrian*> neighbours;
-                int size;
-                // @todo Why is this critical section needed?
-                #pragma omp critical
-                {
-                     building->GetGrid()->GetNeighbourhood(ped,neighbours);
-                     size = (int) neighbours.size();
-                }
+                building->GetGrid()->GetNeighbourhood(ped,neighbours);
+                int size = (int) neighbours.size();
                 for (int i = 0; i < size; i++) {
                      Pedestrian* ped1 = neighbours[i];
                      if ((minAddress > neighbours[i]) || (maxAddress < neighbours[i])) {
