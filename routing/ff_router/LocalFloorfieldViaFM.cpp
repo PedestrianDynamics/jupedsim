@@ -18,23 +18,23 @@ LocalFloorfieldViaFM::LocalFloorfieldViaFM(const Room* const roomArg,
 
      if (hxArg != hyArg) std::cerr << "ERROR: hx != hy <=========";
      //parse building and create list of walls/obstacles (find xmin xmax, ymin, ymax, and add border?)
-     Log->Write("INFO: \tStart Parsing: Room %d", roomArg->GetID());
+     //Log->Write("INFO: \tStart Parsing: Room %d", roomArg->GetID());
      parseRoom(roomArg, hxArg, hyArg);
-     Log->Write("INFO: \tFinished Parsing: Room %d", roomArg->GetID());
+     //Log->Write("INFO: \tFinished Parsing: Room %d", roomArg->GetID());
      //testoutput("AALineScan.vtk", "AALineScan.txt", dist2Wall);
 
      prepareForDistanceFieldCalculation(false);
      //here we need to draw blocker lines @todo: ar.graf
      //drawBlockerLines();
-     Log->Write("INFO: \tGrid initialized: Walls in room %d", roomArg->GetID());
+     //Log->Write("INFO: \tGrid initialized: Walls in room %d", roomArg->GetID());
 
      calculateDistanceField(-1.); //negative threshold is ignored, so all distances get calculated. this is important since distances is used for slowdown/redirect
-     Log->Write("INFO: \tGrid initialized: Walldistances in room %d", roomArg->GetID());
+     //Log->Write("INFO: \tGrid initialized: Walldistances in room %d", roomArg->GetID());
 
      setSpeed(useDistancefield); //use distance2Wall
-     Log->Write("INFO: \tGrid initialized: Speed in room %d", roomArg->GetID());
+     //Log->Write("INFO: \tGrid initialized: Speed in room %d", roomArg->GetID());
      calculateFloorfield(exitsFromScope, cost, neggrad);
-     Log->Write("INFO: \tFloor field for \"goal -1\" done in room %d", roomArg->GetID());
+     //Log->Write("INFO: \tFloor field for \"goal -1\" done in room %d", roomArg->GetID());
 };
 
 void LocalFloorfieldViaFM::getDirectionToDestination(Pedestrian* ped,

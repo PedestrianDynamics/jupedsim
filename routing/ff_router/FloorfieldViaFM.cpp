@@ -86,23 +86,23 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
         Log->Write("WARNING: \tFloor field: stepsize hx differs from hy! Taking hx = %d for both.", hxArg);
     }
     //parse building and create list of walls/obstacles (find xmin xmax, ymin, ymax, and add border?)
-    Log->Write("INFO: \tStart Parsing: Building");
+    //Log->Write("INFO: \tStart Parsing: Building");
     if (onlyRoomsWithExits) {
         parseBuildingForExits(buildingArg, hxArg, hyArg);
     } else {
         parseBuilding(buildingArg, hxArg, hyArg);
     }
-    Log->Write("INFO: \tFinished Parsing: Building");
+    //Log->Write("INFO: \tFinished Parsing: Building");
     //testoutput("AALineScan.vtk", "AALineScan.txt", dist2Wall);
 
     prepareForDistanceFieldCalculation(onlyRoomsWithExits);
-    Log->Write("INFO: \tGrid initialized: Walls");
+    //Log->Write("INFO: \tGrid initialized: Walls");
 
     calculateDistanceField(-1.); //negative threshold is ignored, so all distances get calculated. this is important since distances is used for slowdown/redirect
-    Log->Write("INFO: \tGrid initialized: Walldistances");
+    //Log->Write("INFO: \tGrid initialized: Walldistances");
 
     setSpeed(useDistancefield); //use distance2Wall
-    Log->Write("INFO: \tGrid initialized: Speed");
+    //Log->Write("INFO: \tGrid initialized: Speed");
 
     calculateFloorfield(exitsFromScope, cost, neggrad);
     //writing FF-file disabled, we will not revive it ( @todo: argraf )
@@ -304,9 +304,9 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 direction._x = direction._y = 0.;
                 //return;
             } else {
-#pragma omp critical
+//#pragma omp critical
                 neggradmap.emplace(destID, nullptr);
-#pragma omp critical
+//#pragma omp critical
                 costmap.emplace(destID, nullptr);
             }
         }
@@ -316,13 +316,13 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)
                 localcostptr =    new double[grid->GetnPoints()];
                 localneggradptr = new Point[grid->GetnPoints()];
-#pragma omp critical
+//#pragma omp critical
                 neggradmap.erase(destID);
-#pragma omp critical
+//#pragma omp critical
                 neggradmap.emplace(destID, localneggradptr);
-#pragma omp critical
+//#pragma omp critical
                 costmap.erase(destID);
-#pragma omp critical
+//#pragma omp critical
                 costmap.emplace(destID, localcostptr);
                 //create ff (prepare Trial-mechanic, then calc)
 //                for (long int i = 0; i < grid->GetnPoints(); ++i) {
