@@ -2,18 +2,21 @@
 """
 Test description
 ================
-Distribute 23 pedestrians in 12 different rooms.
-The building  has two exits.
-The Pedestrians have exactly assigned exits and should evacuate through these.
+Distribute 23 pedestrians in 12 different rooms. The building has two exits.
+
+The pedestrians have exactly assigned exits.
+
+The test shows that the pedestrians use their assigned exits.
 
 Remarks
 =======
 Use this code with python 2
 Use new dedicated python console if you run this code with spyder
 
-We assign pedestrian to two different groups.
-In the simulation pedestrians disapear once they are outside therefore we check
-if peds go through line  <exit> - <displacement>
+We assign pedestrian to two different groups:
+
+1. group1 -> exit1
+2. group2 -> exit2
 
 Source
 ======

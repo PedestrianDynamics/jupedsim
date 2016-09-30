@@ -12,7 +12,7 @@
 	
 	<!-- trajectories file and format -->
 	<trajectories format="xml-plain" fps="8">
-		<file location="RiMEATest8_traj.xml.xml" />
+		<file location="RiMEATest8_traj.xml" />
 		<!--<socket hostname="127.0.0.1" port="8989"/> -->
 	</trajectories>
 	

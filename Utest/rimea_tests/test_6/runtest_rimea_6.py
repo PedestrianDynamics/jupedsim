@@ -2,7 +2,7 @@
 """
 Test description
 ================
-Distribute 20 pedestrians in a room with the exit behind a corner.
+Distribute 20 pedestrians in a room with an exit behind a corner.
 
 The test shows whether the pedestrians are going around the corner or walking
 through walls.

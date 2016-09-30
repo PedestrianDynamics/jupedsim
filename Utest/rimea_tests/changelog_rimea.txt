@@ -4,6 +4,7 @@ Test_1:
 	-	No changes.
 
 
+
 Test_2:
 	-	Changed the calculation of the tolerance of the traveltime.
 
@@ -24,6 +25,7 @@ Test_2:
 		---> Real stairlenght:		sqrt(100) = 10 (Check Rimea)
 
 
+
 Test_3:
 	-	Changed the calculation of the tolerance of the traveltime.
 		Before:
@@ -41,22 +43,31 @@ Test_3:
 		Stairlenght along the x-axis:	8.0
 		Stairheight along the z-axis:	6.0
 		---> Real stairlenght:		sqrt(100) = 10 (Check Rimea)
-	
+
+
+
 Test_4:
+	-	Wrong geometry
+
+	-	---> Still needs to be runned for the great amount of peds, but test is fine <---
+
 
 
 Test_5:
 	-	Changed the calculation of the frame when the pedestrians start moving.
 		Before:
-		Taking the frame when the pedestrian already moved for 1 fps.
-		---> Error of 1 fps is to be considered
+		Taking the frame when the pedestrian already moved for 1 frame.
+		---> Error of 1 frame is to be considered
 
 		Now:
 		Taking the frame when the pedestrian is going to move.
 		---> No Error to be considered.
 
+
+
 Test_6:
 	-	No changes.
+
 
 
 
@@ -72,11 +83,16 @@ Test_7:
 		Geometry rectangle: width=50, lengt=40
 
 
+
 Test_8:
 	-	Changed the number of seeds used from 10 to 1
 
 	-	Fixed a bug, which caused logging the same information over and over again.
-		Added a plot, which shows the correlation between the modified parameters.
+
+	-	Added a plot, which shows the correlation between the modified parameters.
+
+	-	---> Still needs to be runned for the great amount of peds, but test is fine <---
+
 
 
 Test_9:
@@ -84,11 +100,52 @@ Test_9:
 
 	-	Rewrote the testfunction
 
+	-	---> Still needs to be runned for the great amount of peds, but test is fine <---
+
+
 
 Test_10:
 	-	No changes.
 
 
+
 Test_11:
-	-	
-	
+	-	Deleted the goal from master_ini and changed routing method from "global shortest" to "quickest" + "triangulation":
+		
+		Before:
+		All pedestrians use the second exit
+		
+		Now:
+		The pedestrians prefer the first exit, but some use the second one
+
+	-	---> Still needs to be runned for the great amount of peds, but test is fine <---
+
+
+
+Test_12:
+	-	Test working, no changes.
+
+
+
+Test_13:
+	-	Test working, no changes.
+
+
+
+Test_14:
+	-	Changed routing method from "global shortest" to "quickest" + "triangulation":
+		
+		Before:
+		No ped uses the longer way, altough its crowded
+
+		Now:
+		Peds also use the longer way
+
+	-	Rewrote the testfunction
+
+
+
+Test_15:
+	-	Wrote the testfunction
+
+	-	---> Still needs to be runned for the great amount of peds, but test is fine <---

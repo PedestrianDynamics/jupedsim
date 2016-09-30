@@ -2,51 +2,48 @@
 """
 Test description
 ================
-Pedestrian evacuation to an exit. They have two possible routes: 
-1. short
-2. and long
+The pedestrians can choose between to options leaving the building. First there
+is a short way out by using two sets of stairs. Then there is a longer way out
+leading around two corners.
+
+The test shows wether the pedestrians prefer the longer way out while the shorter
+way is crowded.
 
 Remarks
 =======
 Use this code with python 2
 Use new dedicated python console if you run this code with spyder
 
-This test has no concrete condition to check for.
-It should be documented whether pedestrians take a long detour or not
-There are 4 stats that should be documented:
-1. "kurz" (short)
-2. "lang"  (long)
-3. "gemischt" (mixed)
-4. "konfigurierbar" (configurable)
-
 Source
 ======
 http://www.rimea.de/fileadmin/files/dok/richtlinien/RiMEA_Richtlinie_3.0.0_-_D-E.pdf
 """
 
+
+import numpy as np
 import os
 import sys
+import glob
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
 from sys import *
 sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
 
-states = ["short", "long", "mixed", "configurable"]
-stair_up_left = [5, 4, 6] # x, y1, y2 |--> exit to the stair left. 
-# todo: read  stair_up_left from geometry
+states = ["short", "long", "mixed"]
 
 def run_rimea_test14(inifile, trajfile):
-    fps, N, traj = parse_file(trajfile)
-    num_short = 0
-    num_long = 0
-    peds = np.unique(traj[:, 0])
-    for ped in peds:
-        traj1 = traj[traj[:, 0] == ped]
-        if PassedLineX(traj1, stair_up_left):
-            num_short += 1
-        else:
-            num_long += 1
+    # Read data
+    data_short = np.loadtxt('trajectories/traj.xml_flow_exit_id_3.dat')
+    data_main = np.loadtxt('trajectories/traj.xml_flow_exit_id_1.dat')
+    
+    # Cummulative number of peds using the right stair --> short way
+    num_short = data_short[-1,-1]
+    
+    # Cummulative number of peds using the exit
+    # Minus
+    # Cummulative number of peds using the right stair --> long way
+    num_long = data_main[-1,-1] - data_short[-1,-1]
 
     if num_long == 0 and num_short != 0:
         state = states[0]
@@ -55,8 +52,7 @@ def run_rimea_test14(inifile, trajfile):
     else:
         state = states[2]
 
-    logging.info("num_peds: %d, num_long: %d, num_short %d",
-                 len(peds), num_long, num_short)
+    logging.info("num_peds: %d, num_long: %d, num_short %d", data_main[-1,-1], num_long, num_short)
     logging.info("Return state ---> %s", state)
 
 if __name__ == "__main__":
@@ -64,12 +60,3 @@ if __name__ == "__main__":
     test.run_test(testfunction=run_rimea_test14)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
-
-
-
-
-
-
-
-
-

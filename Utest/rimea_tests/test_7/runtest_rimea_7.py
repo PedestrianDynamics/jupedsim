@@ -2,7 +2,7 @@
 """
 Test description
 ================
-Distribute 200 pedestrian with velocities (Rimea, page 15, picture 2)
+Distribute 200 pedestrian with velocities according to Rimea, page 15, picture 2
 
 Four different groups are distributed:
 1. 20 < age < 30
@@ -12,7 +12,7 @@ Four different groups are distributed:
 
 Distribute 50 pedestrian for each group within a rectangle of 50m lenght and 200m width.
 
-Check whether the speed values are within the specified fange (Rimea, page 15, picture 2)
+Check whether the speed values are within the specified fange like Rimea, page 15, picture 2
 
 Remarks
 =======
@@ -24,14 +24,12 @@ Use new dedicated python console if you run this code with spyder
    test we are only interested in the desired velocies.
    ---> Overlapping-error to be considered
    
-3. Script Gauss.py checks that the sigmas, means are in accordance with the min-max values.
+3. Script Gauss.py checks that the means and sigmas are in accordance with the min-max values.
 
 This test produces two files
 
 1. a png-file showing the distribution of the velocities
 2. a csv-file with two comma separated columns: ids, velocities
-
-@todo: write csv-file to excel as in the rimea reports
 
 Source
 ======

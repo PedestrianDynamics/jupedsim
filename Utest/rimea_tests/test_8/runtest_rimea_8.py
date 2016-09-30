@@ -12,9 +12,6 @@ Use new dedicated python console if you run this code with spyder
 
 There is no fail criterion in this test. Just documentation.
 
-Theres a bug which causes the script to log the same information over and over again.
-This bug is fixed but in a dirty style.
-
 Source
 ======
 http://www.rimea.de/fileadmin/files/dok/richtlinien/RiMEA_Richtlinie_3.0.0_-_D-E.pdf
@@ -45,7 +42,7 @@ def run_rimea_test8(inifile, trajfile):
     tau_list = []
     evac_time_list = []
     
-    if len(files) == len(v0_mean)*len(tau_mean): # Avoiding logging bug, check remarks
+    if len(files) == len(v0_mean)*len(tau_mean): # Avoiding logging bug
         for f in files:
             d = np.loadtxt(f)
         

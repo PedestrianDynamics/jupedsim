@@ -4,6 +4,7 @@ Test Description
 ================
 One pedestrian is moving along a 10m long stairway upstairs (x-lenght 8m and
 z-height 6m).
+
 The test shows wether the pedestrian can maintain its speed constant or not.
 
 Remarks:

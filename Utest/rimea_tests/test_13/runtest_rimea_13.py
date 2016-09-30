@@ -2,18 +2,18 @@
 """
 Test description
 ================
-Pedestrian coming out from a bottleneck along a corridor.
-At the end of the corridor is a stair.
-Since peds have to resduce their speed on the stair,
-a jam should be observed at the beginning of the stair
+The pedestrians are entering a corridor from a bottleneck. At the end of the
+corridor is a stair. The exist lays behind the stair.
+
+The test shows that there is a jam in front of the stair.
 
 Remarks
 =======
 Use this code with python 2
 Use new dedicated python console if you run this code with spyder
 
-In case of jam, flow at the beginnning of the stair
-should be smaller than the flow in the corridor.
+In case of jam, flow at the beginnning of the stair should be smaller than the
+flow in the corridor.
 
 The reduced speed on stairs (up) is according to  Tab 1 Burghardt2014:
 |----------+----------------|
@@ -27,6 +27,7 @@ The reduced speed on stairs (up) is according to  Tab 1 Burghardt2014:
 
 Therefore, we choose for v0_upstairs a Gauss-distribution with
 mean = 0.675 and sigma = 0.04
+
 See also Fig. DistributionSpeedStairUp.png
 
 Source

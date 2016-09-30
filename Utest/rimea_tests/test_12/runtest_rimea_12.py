@@ -2,8 +2,10 @@
 """
 Test description
 ================
-Two bottlenecks are connected with a long corridor.
-At the last exit there should be no jam.
+150 pedestrians are distributed in a room which is connected to another room
+via a thin corridor. In the second room there is an exit.
+
+The test shows that there is a jam at the entry of the corridor.
 
 Remarks
 =======

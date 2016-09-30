@@ -3,6 +3,7 @@
 Test description
 ================
 One pedestrian is moving along a 40m long corridor.
+
 The test shows wether the pedestrian can maintain its speed constant or not.
 
 Remarks

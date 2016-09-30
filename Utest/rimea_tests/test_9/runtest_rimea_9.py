@@ -8,7 +8,7 @@ has two exits of 1m width. There are two scenarios calculated:
 Scenario 1: All four exits are open
 Scenario 2: The exits of one of the longer walls are closed. The remaining two exits remain open.
 
-The evacuation time of scenario 1 should be half the evacuation time in scenario 2.
+The test shows, that the evacuation time of scenario 1 is about the half the evacuation time in scenario 2.
 
 Remarks
 =======
@@ -18,8 +18,6 @@ Use new dedicated python console if you run this code with spyder
 For simplicity we simulate two identical rooms:
 Room left with 4 exits. All of them are open.
 Room right with 4 exits. Two of them are closed.
-
-We write the trajectory in plain txt-format, to avoid a long lasting xml-parsing
 
 Source
 ======

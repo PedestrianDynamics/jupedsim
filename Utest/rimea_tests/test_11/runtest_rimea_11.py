@@ -3,15 +3,13 @@
 Test description
 ================
 1000 pedestrians are distributed in a room with two exits.
-The pedestrians should prefer the nearest exit,
-but some should (spontaneously) choose the second exit
+The pedestrians should prefer the nearest exit, but some should choose the
+second exit, when there is jam in front of the nearest exit.
 
 Remarks
 =======
 Use this code with python 2
 Use new dedicated python console if you run this code with spyder
-
-
 
 Source
 ======
