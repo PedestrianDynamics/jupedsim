@@ -418,7 +418,7 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
     Log->Write("INFO: \tCalling Constructor of LocFloorfieldViaFM in DirectionLocalFloorfield::Init(...)");
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
      for (unsigned int i = 0; i < _building->GetAllRooms().size(); ++i) {
      //for (auto& roomPair : building->GetAllRooms()) {
          auto roomPairIt = _building->GetAllRooms().begin();
