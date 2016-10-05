@@ -746,7 +746,7 @@ int FFRouter::FindExit(Pedestrian* p)
           }
      }
 
-     int bestFinalDoor;
+     int bestFinalDoor = -1; // to silence the compiler
      for(int finalDoor : validFinalDoor) {
           //with UIDs, we can ask for shortest path
           for (int doorUID : DoorUIDsOfRoom) {

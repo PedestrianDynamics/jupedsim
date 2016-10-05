@@ -378,7 +378,7 @@ class NormalSubRoom : public SubRoom {
 private:
 
      ///@see IsInSubRoom
-     int WhichQuad(const Point& vertex, const Point& hitPos) const;
+     short WhichQuad(const Point& vertex, const Point& hitPos) const;
      double Xintercept(const Point& point1, const Point& point2, double hitY) const;
 
 public:
