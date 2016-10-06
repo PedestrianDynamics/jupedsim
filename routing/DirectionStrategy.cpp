@@ -428,7 +428,7 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
      }
      end = std::chrono::system_clock::now();
      std::chrono::duration<double> elapsed_seconds = end-start;
-     Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
+     Log->Write("INFO: \tTime to construct FF in DirectionLocalFloorfield: " + std::to_string(elapsed_seconds.count()));
 //     }
      _initDone = true;
 }

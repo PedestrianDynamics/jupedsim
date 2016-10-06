@@ -170,8 +170,7 @@ bool FFRouter::Init(Building* building)
 
 #pragma omp parallel
      {
-#pragma omp for nowait
-          //for (auto &pairRoom : allRooms) {
+#pragma omp for
           for (unsigned int i = 0; i < allRooms.size(); ++i) {
 
 #ifdef DEBUG
@@ -179,36 +178,22 @@ bool FFRouter::Init(Building* building)
 #endif
                auto pairRoomIt = allRooms.begin();
                std::advance(pairRoomIt, i);
-               LocalFloorfieldViaFM *ptrToNew = nullptr;
+               LocalFloorfieldViaFM *locffptr = nullptr;
                Log->Write("INFO: \tusing %s in ffRouter::Init", _useCentrePointDistance ? "CentrePointLocalFFViaFm" : "LocalFloorfieldViaFM");
                if (_useCentrePointDistance) {
-                    ptrToNew = new CentrePointLocalFFViaFM(pairRoomIt->second.get(), building, 0.125, 0.125, 0.0, false);
+                    locffptr = new CentrePointLocalFFViaFM(pairRoomIt->second.get(), building, 0.125, 0.125, 0.0, false);
                } else {
-                    ptrToNew = new LocalFloorfieldViaFM(pairRoomIt->second.get(), building, 0.125, 0.125, 0.0, false);
+                    locffptr = new LocalFloorfieldViaFM(pairRoomIt->second.get(), building, 0.125, 0.125, 0.0, false);
                }
 
-               //for (long int i = 0; i < ptrToNew)
                Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
 #pragma omp critical(_locffviafm)
-               _locffviafm.insert(std::make_pair((*pairRoomIt).first, ptrToNew));
+               _locffviafm.insert(std::make_pair((*pairRoomIt).first, locffptr));
           }
-#pragma omp single
-          Log->Write("####### initializing rooms done");
-          //Log->Write("Contents of _sublocffviavm");
-          //for (auto i:_sublocffviafm) {
-          //     Log->Write("%d\t%p", i.first, i.second);
-          //}
-          //Log->Write("Contents of roomAndCroTrVector");
-          //for (auto i: roomAndCroTrVector) {
-          //     Log->Write("room: %d\t door: %d", i.first, i.second);
-          //}
 
           // nowait, because the parallel region ends directly afterwards
 #pragma omp for nowait
           for (unsigned int i = 0; i < roomAndCroTrVector.size(); ++i) {
-               if (i == 0) {
-                    //Log->Write("###### in roomAndCroTrVector loop: using %d threads", omp_get_num_threads());
-               }
                auto rctIt = roomAndCroTrVector.begin();
                std::advance(rctIt, i);
                //SetDistances
@@ -235,48 +220,32 @@ bool FFRouter::Init(Building* building)
                //     }
                //}
 
-               //Log->Write("#######INFO: \tCalculating floorfield in subroom %d for door %d", rctIt->first, rctIt->second);
-
                ////loop over upper triangular matrice (i,j) and write to (j,i) as well
-               //std::vector<int>::const_iterator outerPtr;
-               //std::vector<int>::const_iterator innerPtr;
-               //Log->Write("INFO: \tFound %d Doors (Cross + Trans) in room %d", doorUIDs.size(), (*pairRoomIt).first);
-               //for (outerPtr = doorUIDs.begin(); outerPtr != doorUIDs.end(); ++outerPtr) {
-               //for (auto outerPtr: _CroTrByUID) {
-               for (auto outerPtr : roomAndCroTrVector) {
-                    if (outerPtr.first != rctIt->first) continue; // we only want doors with one room in common
-                    if (outerPtr.second < rctIt->second) continue; // calculate every path only once
-                    // @todo f.mack: if we exclude outerPtr.second == rctIt->second, the program loops forever
-                    //if the door is closed, then dont calc distances
-                    //if (!_CroTrByUID.at(*outerPtr)->IsOpen()) {
+               for (auto otherDoor : roomAndCroTrVector) {
+                    if (otherDoor.first != rctIt->first) continue; // we only want doors with one room in common
+                    if (otherDoor.second < rctIt->second) continue; // calculate every path only once
+                    // if we exclude otherDoor.second == rctIt->second, the program loops forever
+
+                    //if the door is closed, then don't calc distances
+                    //if (!_CroTrByUID.at(*otherDoor)->IsOpen()) {
                     //     continue;
                     //}
-                    //     // @todo: ar.graf: this following loop and the one directly wrapping this "for (outerPtr = ...)" could be
-                    //     // moved out of the parallel for loop into a follow up part. There we could parallelize the most inner loop
-                    //     // to achieve a better load balancing. You can have a look at DirectionStrategy.cpp at the DirectionLocalFloorfield::Init
-                    //     // and take that scheme.
-                    //     for (innerPtr = outerPtr; innerPtr != doorUIDs.end(); ++innerPtr) {
-                    //          //if outerdoor == innerdoor or the inner door is closed
-                    //          if ((*outerPtr == *innerPtr) || (!_CroTrByUID.at(*innerPtr)->IsOpen())) {
-                    //               continue;
-                    //          }
 
-                    //if the two doors are not within the same subroom, do not consider (ar.graf)
-                    //should fix problems of oscillation caused by doorgaps in the distancegraph
-                         int innerUID1 = (_CroTrByUID.at(rctIt->second)->GetSubRoom1()) ? _CroTrByUID.at(rctIt->second)->GetSubRoom1()->GetUID() : -1 ;
-                         int innerUID2 = (_CroTrByUID.at(rctIt->second)->GetSubRoom2()) ? _CroTrByUID.at(rctIt->second)->GetSubRoom2()->GetUID() : -2 ;
-                         int outerUID1 = (_CroTrByUID.at(outerPtr.second)->GetSubRoom1()) ? _CroTrByUID.at(outerPtr.second)->GetSubRoom1()->GetUID() : -3 ;
-                         int outerUID2 = (_CroTrByUID.at(outerPtr.second)->GetSubRoom2()) ? _CroTrByUID.at(outerPtr.second)->GetSubRoom2()->GetUID() : -4 ;
+                    // if the two doors are not within the same subroom, do not consider (ar.graf)
+                    // should fix problems of oscillation caused by doorgaps in the distancegraph
+                    int thisUID1 = (_CroTrByUID.at(rctIt->second)->GetSubRoom1()) ? _CroTrByUID.at(rctIt->second)->GetSubRoom1()->GetUID() : -1 ;
+                    int thisUID2 = (_CroTrByUID.at(rctIt->second)->GetSubRoom2()) ? _CroTrByUID.at(rctIt->second)->GetSubRoom2()->GetUID() : -2 ;
+                    int otherUID1 = (_CroTrByUID.at(otherDoor.second)->GetSubRoom1()) ? _CroTrByUID.at(otherDoor.second)->GetSubRoom1()->GetUID() : -3 ;
+                    int otherUID2 = (_CroTrByUID.at(otherDoor.second)->GetSubRoom2()) ? _CroTrByUID.at(otherDoor.second)->GetSubRoom2()->GetUID() : -4 ;
 
                     if (
-                         (innerUID1 != outerUID1) &&
-                         (innerUID1 != outerUID2) &&
-                         (innerUID2 != outerUID1) &&
-                         (innerUID2 != outerUID2)      ) {
-                         //Log->Write("####### Ignoring way from %d to %d", rctIt->second, outerPtr.first);
+                         (thisUID1 != otherUID1) &&
+                         (thisUID1 != otherUID2) &&
+                         (thisUID2 != otherUID1) &&
+                         (thisUID2 != otherUID2)      ) {
                          continue;
                     }
-//*/
+
                     //The distance is checked by reading the timecost of a wave starting at the line(!) to reach a point(!)
                     //That will have the following implications:
                     //distance (a to b) can be different than distance (b ta a)
@@ -288,24 +257,19 @@ bool FFRouter::Init(Building* building)
                     //question: if (a to c) > (a to b) + (b to c), then FloyedWarshall will favour intermediate goal b
                     //          as a precessor to c. This might be very important, if there are edges among lines, that
                     //          are not adjacent.
-                    auto ptrToNew = _locffviafm[rctIt->first];
-                    //Log->Write("for subroom %d is ptrToNew %p", rctIt->first, ptrToNew);
-
-                    //tempDistance = ptrToNew->getCostToDestination(*outerPtr,
-                    //                                              _CroTrByUID.at(*innerPtr)->GetCentre());
-                    double tempDistance = ptrToNew->getCostToDestination(rctIt->second,
-                                                                         _CroTrByUID.at(outerPtr.second)->GetCentre());
-                    //Log->Write("#######room %d: calculating distance from door %d to door %d", rctIt->first, rctIt->second, outerPtr.second);
+                    LocalFloorfieldViaFM* locffptr = _locffviafm[rctIt->first];
+                    double tempDistance = locffptr->getCostToDestination(rctIt->second,
+                                                                         _CroTrByUID.at(otherDoor.second)->GetCentre());
 
 //                    Point endA = _CroTrByUID.at(*innerPtr)->GetCentre() * .9 +
 //                                 _CroTrByUID.at(*innerPtr)->GetPoint1() * .1;
 //                    Point endB = _CroTrByUID.at(*innerPtr)->GetCentre() * .9 +
 //                                 _CroTrByUID.at(*innerPtr)->GetPoint2() * .1;
-//                    if (ptrToNew->getCostToDestination(*outerPtr, endA) < tempDistance) {
-//                         tempDistance = ptrToNew->getCostToDestination(*outerPtr, endA);
+//                    if (locffptr->getCostToDestination(*otherDoor, endA) < tempDistance) {
+//                         tempDistance = locffptr->getCostToDestination(*otherDoor, endA);
 //                    }
-//                    if (ptrToNew->getCostToDestination(*outerPtr, endB) < tempDistance) {
-//                         tempDistance = ptrToNew->getCostToDestination(*outerPtr, endB);
+//                    if (locffptr->getCostToDestination(*otherDoor, endB) < tempDistance) {
+//                         tempDistance = locffptr->getCostToDestination(*otherDoor, endB);
 //                    }
 //                    if (tempDistance < 0) {
 //                         Crossing *crossTest = _CroTrByUID.at(*innerPtr);
@@ -315,18 +279,18 @@ bool FFRouter::Init(Building* building)
 //                         Log->Write(a.toString());
 //                         Log->Write(b.toString());
 //                    }
-                    if (tempDistance < ptrToNew->getGrid()->Gethx()) {
-                         //Log->Write("WARNING:\tDistance of doors %d and %d is too small: %f",*outerPtr, *innerPtr, tempDistance);
+                    if (tempDistance < locffptr->getGrid()->Gethx()) {
+                         //Log->Write("WARNING:\tDistance of doors %d and %d is too small: %f",*otherDoor, *innerPtr, tempDistance);
                          //Log->Write("^^^^^^^^\tIf there are scattered subrooms, which are not connected, this is ok.");
                          continue;
                     }
-//                    tempDistance = ptrToNew->getCostToDestination(*outerPtr, _CroTrByUID[*innerPtr]->GetCentre());
-                    std::pair<int, int> key_ij = std::make_pair(outerPtr.second, rctIt->second);
-                    std::pair<int, int> key_ji = std::make_pair(rctIt->second, outerPtr.second);
+//                    tempDistance = locffptr->getCostToDestination(*otherDoor, _CroTrByUID[*innerPtr]->GetCentre());
+                    std::pair<int, int> key_ij = std::make_pair(otherDoor.second, rctIt->second);
+                    std::pair<int, int> key_ji = std::make_pair(rctIt->second, otherDoor.second);
                     SubRoom *subroom = nullptr;
 
                     auto cr1 = _CroTrByUID[rctIt->second];
-                    auto cr2 = _CroTrByUID[outerPtr.second];
+                    auto cr2 = _CroTrByUID[otherDoor.second];
 
                     // If the crossings are the same, we write nullptr to _subroomMatrix. This entry is never accessed.
                     if (cr1 != cr2) {
@@ -353,7 +317,7 @@ bool FFRouter::Init(Building* building)
                                                    subroom->GetRoomID(), subroom->GetSubRoomID(),
                                                    subroom2->GetRoomID(), subroom2->GetSubRoomID());
                                    }
-                                   if (s2) subroom = subroom2;
+                                   if (s2) subroom = subroom2; // we have to take the other one
                                    break;
                               }
                               default: {
@@ -380,9 +344,10 @@ bool FFRouter::Init(Building* building)
 
                     }
                     //}
-               }
-          }
+               } // otherDoor
+          } // roomAndCroTrVector
      } // omp parallel
+
      FloydWarshall();
      AvoidDoorHopping();
 
@@ -689,7 +654,6 @@ int FFRouter::FindExit(Pedestrian* p)
      }
      double minDist = DBL_MAX;
      int bestDoor = -1;
-     //int bestGoal = -1;
 
      int goalID = p->GetFinalDestination();
      std::vector<int> validFinalDoor; //UIDs of doors
@@ -780,7 +744,6 @@ int FFRouter::FindExit(Pedestrian* p)
                          minDist = _distMatrix.at(key) + locDistToDoor;
                          bestDoor = key.first; //doorUID
                          bestFinalDoor = key.second;
-                         //bestGoal = key.second;//finalDoor
                     }
                }
           }
@@ -862,7 +825,7 @@ void FFRouter::AvoidDoorHopping() {
      std::chrono::time_point<std::chrono::system_clock> start, end;
      start = std::chrono::system_clock::now();
 
-     // it's already very fast -- no need to parallelize
+     // it's already very fast (< 0.1s) -- no need to parallelize
 //#pragma omp parallel for
      for (auto pathsIt : _pathsMatrix) {
           auto key = pathsIt.first;
@@ -892,7 +855,7 @@ void FFRouter::AvoidDoorHopping() {
                } else {
                     Log->Write("ERROR \tFFRouter::AvoidDoorHopping: sub is %p (UID %d), nextDoorUID/ID is %d/%d", subroom, subroom?subroom->GetUID():-1, nextDoorUID, nextDoor->GetID());
                }
-#pragma omp critical(_pathsMatrix)
+//#pragma omp critical(_pathsMatrix)
                _pathsMatrix.at(key) = doorLeavingSubroom;
                if (_pathsMatrix.at(key) == -1) {
                     Log->Write("ERROR \tFFRouter::AvoidDoorHopping(): _pathsMatrix got assigned a value of -1 for key %d, %d", key.first, key.second);
@@ -924,7 +887,7 @@ void FFRouter::AvoidDoorHopping() {
                } else {
                     Log->Write("ERROR \tFFRouter::AvoidDoorHopping: room is %p (ID %d), nextDoorUID/ID is %d/%d", room, room ? room->GetID() : -1, nextDoorUID, nextDoor->GetID());
                }
-#pragma omp critical(_pathsMatrix)
+//#pragma omp critical(_pathsMatrix)
                _pathsMatrix.at(key) = doorLeavingRoom;
                if (_pathsMatrix.at(key) == -1) {
                     Log->Write("ERROR \tFFRouter::AvoidDoorHopping(): _pathsMatrix got assigned a value of -1 for key %d, %d", key.first, key.second);

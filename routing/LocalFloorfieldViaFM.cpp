@@ -406,11 +406,12 @@ SubRoom* LocalFloorfieldViaFM::isInside(const long int key) {
      auto neighbors = _grid->getNeighbors(key);
 
      for (auto& neighbor : neighbors.key) {
-          if (neighbor == -2) continue; // -2 is returned y getNeighbors() for invalid points
+          if (neighbor == -2) continue; // -2 is returned by getNeighbors() for invalid points
           SubRoom* subroom = _subrooms[neighbor];
           if (subroom && subroom->IsInSubRoom(probe)) return subroom;
      }
 
+     // If we weren't successful so far, we have to search the whole list.
      const std::map<int, std::shared_ptr<SubRoom>>& subRoomMap = _room->GetAllSubRooms();
 
      for (auto& subRoomPair : subRoomMap) {
