@@ -187,7 +187,7 @@ protected:
      const Building* _building;
 
      //GridPoint Data in independant arrays (shared primary key)
-     // changed to threadsafe creation when needed: int* flag;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
+     // changed to threadsafe creation when needed: int* flag;
      int* _gcode = nullptr;                 //gridcode (see Macros.h)
      SubRoom* * _subrooms = nullptr; // this is an array (first asterisk) of pointers (second asterisk)
      double* _dist2Wall = nullptr;

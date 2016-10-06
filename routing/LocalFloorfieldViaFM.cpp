@@ -134,7 +134,7 @@ void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
      _grid->createGrid();
 
      //create arrays
-     //flag = new int[grid->GetnPoints()];                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, -7 = outside)
+     //flag = new int[grid->GetnPoints()];
      _gcode = new int[_grid->GetnPoints()];
      _subrooms = new SubRoom*[_grid->GetnPoints()](); // initializes with nullptr
      _dist2Wall = new double[_grid->GetnPoints()];
@@ -328,7 +328,7 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
 //
 //
 //     aux = dNeigh.key[0];
-////     if ((aux != -2) && (cost[aux] < -0.1) && (flag[aux] != -7) && (flag[aux] != -5)) { //aux is key of vaild girdpoint && gridpoint is not on exitline (exits have cost = 0 in prepareForDistance..())
+////     if ((aux != -2) && (cost[aux] < -0.1) && (flag[aux] != FM_OUTSIDE) && (flag[aux] != FM_BLOCKER)) { //aux is key of vaild girdpoint && gridpoint is not on exitline (exits have cost = 0 in prepareForDistance..())
 ////          Point trialP = grid->getPointFromKey(aux);               //^^ and gridpoint is not wall nor blockpoint
 ////          bool isInside = false;
 ////          for (int i = 0; i < subRoomMap.size(); ++i) {
@@ -339,14 +339,14 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
 ////               }
 ////          }
 //          if (!isInside(aux)) {
-//               flag[aux] = -5;
+//               flag[aux] = FM_BLOCKER;
 //               dist2Wall[aux] = 0.; //set dist2Wall == 0 to save this points from updates in FloorfieldViaFM::clearAndPrepareForFloorfieldReCalc
 //               speedInitial[aux] = .001;
 //               cost[aux]         = -8.;
 //          }
 ////     }
 //     aux = dNeigh.key[1];
-////     if ((aux != -2) && (cost[aux] < 0.) && (flag[aux] != -7) && (flag[aux] != -5)) {
+////     if ((aux != -2) && (cost[aux] < 0.) && (flag[aux] != FM_OUTSIDE) && (flag[aux] != FM_BLOCKER)) {
 ////          Point trialP = grid->getPointFromKey(aux);
 ////          bool isInside = false;
 ////          for (int i = 0; i < subRoomMap.size(); ++i) {
@@ -357,14 +357,14 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
 ////               }
 ////          }
 ////          if (!isInside) {
-////               flag[aux] = -5;
+////               flag[aux] = FM_BLOCKER;
 ////               dist2Wall[aux] = 0.;
 ////               speedInitial[aux] = .001;
 ////               cost[aux]         = -8.;
 ////          }
 ////     }
 //     aux = dNeigh.key[2];
-////     if ((aux != -2) && (cost[aux] < 0.) && (flag[aux] != -7) && (flag[aux] != -5)) {
+////     if ((aux != -2) && (cost[aux] < 0.) && (flag[aux] != FM_OUTSIDE) && (flag[aux] != FM_BLOCKER)) {
 ////          Point trialP = grid->getPointFromKey(aux);
 ////          bool isInside = false;
 ////          for (int i = 0; i < subRoomMap.size(); ++i) {
@@ -375,14 +375,14 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
 ////               }
 ////          }
 ////          if (!isInside) {
-////               flag[aux] = -5;
+////               flag[aux] = FM_BLOCKER;
 ////               dist2Wall[aux] = 0.;
 ////               speedInitial[aux] = .001;
 ////               cost[aux]         = -8.;
 ////          }
 ////     }
 //     aux = dNeigh.key[3];
-////     if ((aux != -2) && (cost[aux] < 0.) && (flag[aux] != -7) && (flag[aux] != -5)) {
+////     if ((aux != -2) && (cost[aux] < 0.) && (flag[aux] != FM_OUTSIDE) && (flag[aux] != FM_BLOCKER)) {
 ////          Point trialP = grid->getPointFromKey(aux);
 ////          bool isInside = false;
 ////          for (int i = 0; i < subRoomMap.size(); ++i) {
@@ -393,7 +393,7 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
 ////               }
 ////          }
 ////          if (!isInside) {
-////               flag[aux] = -5;
+////               flag[aux] = FM_BLOCKER;
 ////               dist2Wall[aux] = 0.;
 ////               speedInitial[aux] = .001;
 ////               cost[aux]         = -8.;
@@ -570,7 +570,7 @@ void SubLocalFloorfieldViaFM::parseRoom(SubRoom* const roomArg,
      _grid->createGrid();
 
      //create arrays
-     _gcode = new int[_grid->GetnPoints()];                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, -7 = outside)
+     _gcode = new int[_grid->GetnPoints()];
      _subrooms = new SubRoom*[_grid->GetnPoints()](); // initializes with nullptr
      _dist2Wall = new double[_grid->GetnPoints()];
      _speedInitial = new double[_grid->GetnPoints()];

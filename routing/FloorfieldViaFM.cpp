@@ -226,7 +226,7 @@ FloorfieldViaFM::FloorfieldViaFM(const std::string& filename) {
 //    grid = new RectGrid(nPoints, xMin, yMin, xMax, yMax, hx, hy, iMax, jMax, true);
 //
 //    //create arrays
-//    flag = new int[nPoints];                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, -7 = outside)
+//    flag = new int[nPoints];
 //    dist2Wall = new double[nPoints];
 //    speedInitial = new double[nPoints];
 //    cost = new double[nPoints];
@@ -771,7 +771,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
         _dist2Wall[i]    = -3.;
         _cost[i]         = -2.;
         _gcode[i]        = OUTSIDE;
-        //flag[i] = 0;            //unknown
+        //flag[i] = FM_UNKNOWN;            //unknown
     }
     drawLinesOnGrid<double>(_wall, _dist2Wall, 0.);
     drawLinesOnGrid<double>(_wall, _cost, -7.);
@@ -1254,19 +1254,19 @@ void FloorfieldViaFM::calculateFloorfield(std::vector<Line>& targetlines, double
     //re-init memory
     for (long int i = 0; i < _grid->GetnPoints(); ++i) {
         if ((_gcode[i] == INSIDE) || (_gcode[i] == OPEN_TRANSITION) || (_gcode[i] == OPEN_CROSSING)) {
-            flag[i]         = 0;   //inside
+            flag[i]         = FM_UNKNOWN;   //inside
         } else {
-            flag[i]         = -7;  //wall, outside or closed
+            flag[i]         = FM_OUTSIDE;  //wall, outside or closed
         }
 
         costarray[i] = -7.;
     }
     drawLinesOnGrid<double>(targetlines, costarray, 0.);
-    drawLinesOnGrid<int>(targetlines, flag, 3);
+    drawLinesOnGrid<int>(targetlines, flag, FM_FINAL);
 
     //init narrowband
     for (long int i = 0; i < _grid->GetnPoints(); ++i) {
-        if (flag[i] == 3) {
+        if (flag[i] == FM_FINAL) {
             TrialP newTrialP = TrialP(i, costarray, speedarray, flag, neggradarray);
             checkNeighborsAndAddToNarrowband(trialqueue, newTrialP,
                                              [&] (TrialP trialPArg) {this->calcFloorfield(trialPArg);});
@@ -1276,7 +1276,7 @@ void FloorfieldViaFM::calculateFloorfield(std::vector<Line>& targetlines, double
     //inital narrowband done, now loop (while not empty: remove smallest, add neighbors of removed)
     while (!trialqueue.empty()) {
         long int keyOfSmallest = trialqueue.top().key;
-        flag[keyOfSmallest] = 3;
+        flag[keyOfSmallest] = FM_FINAL;
         trialqueue.pop();
         TrialP newTrialP = TrialP(keyOfSmallest, costarray, speedarray, flag, neggradarray);
         checkNeighborsAndAddToNarrowband(trialqueue,  newTrialP,
@@ -1291,7 +1291,7 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
     int* flag = new int[_grid->GetnPoints()];
 #ifdef TESTING
     //sanity check (fields <> 0)
-    if (flag == 0) return;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside, -5 = blocker)
+    if (flag == nullptr) return;
     if (_dist2Wall == 0) return;
     if (_speedInitial == 0) return;
     if (_cost == 0) return;
@@ -1301,11 +1301,11 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
     //re-init memory
     for (long int i = 0; i < _grid->GetnPoints(); ++i) {
         if ((_gcode[i] == INSIDE) || (_gcode[i] == OPEN_TRANSITION) || (_gcode[i] == OPEN_CROSSING)) {
-            flag[i]         = 0;   //inside
+            flag[i]         = FM_UNKNOWN;   //inside
         } else if (_gcode[i] == OUTSIDE) {
-            flag[i]         = -7;  //outside
+            flag[i]         = FM_OUTSIDE;  //outside
         } else {
-            flag[i]         = 3;   //wall or closed
+            flag[i]         = FM_FINAL;   //wall or closed
         }
     }
 
@@ -1328,7 +1328,7 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
     //long int debugcounter = 0;
     while (!trialqueue.empty()) {
         long int keyOfSmallest = trialqueue.top().key;
-        flag[keyOfSmallest] = 3;
+        flag[keyOfSmallest] = FM_FINAL;
         trialqueue.pop();
         if ((thresholdArg > 0) && (_dist2Wall[keyOfSmallest] > thresholdArg)) {    //set rest of nearfield and rest of unknown to this max value:
 
@@ -1336,7 +1336,7 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
             while (!trialqueue.empty()) {
                 long int currKey = trialqueue.top().key;
                 _dist2Wall[currKey] = _dist2Wall[keyOfSmallest];
-                flag[currKey] = 3;
+                flag[currKey] = FM_FINAL;
                 _dirToWall[currKey]._x = (0.);
                 _dirToWall[currKey]._y = (0.);
                 trialqueue.pop();
@@ -1344,8 +1344,8 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
 
             //rest of unknown
             for (long int i = 0; i < _grid->GetnPoints(); ++i) {
-                if (flag[i] == 0) {
-                    flag[i] = 3;
+                if (flag[i] == FM_UNKNOWN) {
+                    flag[i] = FM_FINAL;
                     _dist2Wall[i] = _dist2Wall[keyOfSmallest];
                     _dirToWall[i]._x = (0.);
                     _dirToWall[i]._y = (0.);
@@ -1370,30 +1370,29 @@ void FloorfieldViaFM::checkNeighborsAndAddToNarrowband(std::priority_queue<Trial
     //check for valid neigh
     long int aux = dNeigh.key[0];
     //hint: trialfield[i].cost = dist2Wall + i; <<< set in prepareForDistanceFieldCalc
-    //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside, -5 = blocker)
-    if ((aux != -2) && (flag[aux] == 0)) {
-        flag[aux] = 4;      //4 = added to trial but not calculated
+    if ((aux != -2) && (flag[aux] == FM_UNKNOWN)) {
+        flag[aux] = FM_ADDED;      // added to trial but not calculated
         TrialP currNeighP = TrialP(aux, keyP.cost, keyP.speed, flag, keyP.neggrad);
         calc(currNeighP);
         trialqueue.emplace(currNeighP);
     }
     aux = dNeigh.key[1];
-    if ((aux != -2) && (flag[aux] == 0)) {
-        flag[aux] = 4;      //4 = added to trial but not calculated
+    if ((aux != -2) && (flag[aux] == FM_UNKNOWN)) {
+        flag[aux] = FM_ADDED;      // added to trial but not calculated
         TrialP currNeighP = TrialP(aux, keyP.cost, keyP.speed, flag, keyP.neggrad);
         calc(currNeighP);
         trialqueue.emplace(currNeighP);
     }
     aux = dNeigh.key[2];
-    if ((aux != -2) && (flag[aux] == 0)) {
-        flag[aux] = 4;      //4 = added to trial but not calculated
+    if ((aux != -2) && (flag[aux] == FM_UNKNOWN)) {
+        flag[aux] = FM_ADDED;      // added to trial but not calculated
         TrialP currNeighP = TrialP(aux, keyP.cost, keyP.speed, flag, keyP.neggrad);
         calc(currNeighP);
         trialqueue.emplace(currNeighP);
     }
     aux = dNeigh.key[3];
-    if ((aux != -2) && (flag[aux] == 0)) {
-        flag[aux] = 4;      //4 = added to trial but not calculated
+    if ((aux != -2) && (flag[aux] == FM_UNKNOWN)) {
+        flag[aux] = FM_ADDED;      // added to trial but not calculated
         TrialP currNeighP = TrialP(aux, keyP.cost, keyP.speed, flag, keyP.neggrad);
         calc(currNeighP);
         trialqueue.emplace(currNeighP);
@@ -1419,9 +1418,8 @@ void FloorfieldViaFM::calcDist2Wall(TrialP newPoint) {
 
     aux = dNeigh.key[0];
     //hint: trialfield[i].cost = dist2Wall + i; <<< set in resetGoalAndCosts
-    //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside, -5 = blocker)
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
-         (flag[aux] != 0) &&                                                    //gridpoint holds a calculated value
+         (flag[aux] != FM_UNKNOWN) &&                                                    //gridpoint holds a calculated value
          (_gcode[aux] != OUTSIDE))                                                     //gridpoint holds a calculated value
     {
         row = cost[aux];
@@ -1433,7 +1431,7 @@ void FloorfieldViaFM::calcDist2Wall(TrialP newPoint) {
     }
     aux = dNeigh.key[2];
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
-         (flag[aux] != 0) &&                                                    //gridpoint holds a calculated value
+         (flag[aux] != FM_UNKNOWN) &&                                                    //gridpoint holds a calculated value
          (_gcode[aux] != OUTSIDE) &&
          (cost[aux] < row))                                       //calculated value promises smaller cost
     {
@@ -1443,9 +1441,8 @@ void FloorfieldViaFM::calcDist2Wall(TrialP newPoint) {
 
     aux = dNeigh.key[1];
     //hint: trialfield[i].cost = dist2Wall + i; <<< set in parseBuilding after linescan call
-    //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
-         (flag[aux] != 0) &&                                                    //gridpoint holds a calculated value
+         (flag[aux] != FM_UNKNOWN) &&                                                    //gridpoint holds a calculated value
          (_gcode[aux] != OUTSIDE))
     {
         col = cost[aux];
@@ -1457,7 +1454,7 @@ void FloorfieldViaFM::calcDist2Wall(TrialP newPoint) {
     }
     aux = dNeigh.key[3];
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
-         (flag[aux] != 0) &&                                                    //gridpoint holds a calculated value
+         (flag[aux] != FM_UNKNOWN) &&                                                    //gridpoint holds a calculated value
          (_gcode[aux] != OUTSIDE) &&
          (cost[aux] < col))                                       //calculated value promises smaller cost
     {
@@ -1466,7 +1463,7 @@ void FloorfieldViaFM::calcDist2Wall(TrialP newPoint) {
     }
     if (col == 100000.) { //one sided update with row
         cost[key] = onesidedCalc(row, _grid->Gethx());
-        flag[key] = 1;
+        flag[key] = FM_SINGLE;
         if (pointsRight) {
             _dirToWall[key]._x = (-(cost[key+1]-cost[key])/_grid->Gethx());
             _dirToWall[key]._y = (0.);
@@ -1480,7 +1477,7 @@ void FloorfieldViaFM::calcDist2Wall(TrialP newPoint) {
 
     if (row == 100000.) { //one sided update with col
         cost[key] = onesidedCalc(col, _grid->Gethy());
-        flag[key] = 1;
+        flag[key] = FM_SINGLE;
         if (pointsUp) {
             _dirToWall[key]._x = (0.);
             _dirToWall[key]._y = (-(cost[key+(_grid->GetiMax())]-cost[key])/_grid->Gethy());
@@ -1496,7 +1493,7 @@ void FloorfieldViaFM::calcDist2Wall(TrialP newPoint) {
     double precheck = twosidedCalc(row, col, _grid->Gethx());
     if (precheck >= 0) {
         cost[key] = precheck;
-        flag[key] = 2;
+        flag[key] = FM_DOUBLE;
         if (pointsUp && pointsRight) {
             _dirToWall[key]._x = (-(cost[key+1]-cost[key])/_grid->Gethx());
             _dirToWall[key]._y = (-(cost[key+(_grid->GetiMax())]-cost[key])/_grid->Gethy());
@@ -1540,19 +1537,18 @@ void FloorfieldViaFM::calcFloorfield(TrialP newPoint) {
 
     aux = dNeigh.key[0];
     //hint: trialfield[i].cost = costarray + i; <<< set in calculateFloorfield
-    //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside, -5 = blocker)
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
-         (flag[aux] != 0) &&
+         (flag[aux] != FM_UNKNOWN) &&
          //((gcode[aux] == INSIDE) || (gcode[aux] == OPEN_CROSSING) || (gcode[aux] == OPEN_TRANSITION)) )                                                      //gridpoint holds a calculated value
-         (flag[aux] != -7))
+         (flag[aux] != FM_OUTSIDE))
     {
         row = cost[aux];
         pointsRight = true;
     }
     aux = dNeigh.key[2];
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
-         (flag[aux] != 0) &&
-         (flag[aux] != -7) &&                                                 //gridpoint holds a calculated value
+         (flag[aux] != FM_UNKNOWN) &&
+         (flag[aux] != FM_OUTSIDE) &&                                                 //gridpoint holds a calculated value
          (cost[aux] < row))                                       //calculated value promises smaller cost
     {
         row = cost[aux];
@@ -1561,18 +1557,17 @@ void FloorfieldViaFM::calcFloorfield(TrialP newPoint) {
 
     aux = dNeigh.key[1];
     //hint: trialfield[i].cost = cost + i; <<< set in calculateFloorfield
-    //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
-         (flag[aux] != 0) &&
-         (flag[aux] != -7))                                                      //gridpoint holds a calculated value
+         (flag[aux] != FM_UNKNOWN) &&
+         (flag[aux] != FM_OUTSIDE))                                                      //gridpoint holds a calculated value
     {
         col = cost[aux];
         pointsUp = true;
     }
     aux = dNeigh.key[3];
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
-         (flag[aux] != 0) &&
-         (flag[aux] != -7) &&                                                  //gridpoint holds a calculated value
+         (flag[aux] != FM_UNKNOWN) &&
+         (flag[aux] != FM_OUTSIDE) &&                                                  //gridpoint holds a calculated value
          (cost[aux] < col))                                       //calculated value promises smaller cost
     {
         col = cost[aux];
@@ -1584,7 +1579,7 @@ void FloorfieldViaFM::calcFloorfield(TrialP newPoint) {
     }
     if (col == DBL_MAX) { //one sided update with row
         cost[key] = onesidedCalc(row, _grid->Gethx()/speed[key]);
-        flag[key] = 1;
+        flag[key] = FM_SINGLE;
         if (pointsRight && (dNeigh.key[0] != -2)) {
             neggrad[key]._x = (-(cost[key+1]-cost[key])/_grid->Gethx());
             neggrad[key]._y = (0.);
@@ -1597,7 +1592,7 @@ void FloorfieldViaFM::calcFloorfield(TrialP newPoint) {
 
     if (row == DBL_MAX) { //one sided update with col
         cost[key] = onesidedCalc(col, _grid->Gethy()/speed[key]);
-        flag[key] = 1;
+        flag[key] = FM_SINGLE;
         if ((pointsUp) && (dNeigh.key[1] != -2)) {
             neggrad[key]._x = (0.);
             neggrad[key]._y = (-(cost[key+(_grid->GetiMax())]-cost[key])/_grid->Gethy());
@@ -1615,7 +1610,7 @@ void FloorfieldViaFM::calcFloorfield(TrialP newPoint) {
 //    }
     if (precheck >= 0) {
         cost[key] = precheck;
-        flag[key] = 2;
+        flag[key] = FM_DOUBLE;
         if (pointsUp && pointsRight) {
             neggrad[key]._x = (-(cost[key+1]-cost[key])/_grid->Gethx());
             neggrad[key]._y = (-(cost[key+(_grid->GetiMax())]-cost[key])/_grid->Gethy());
