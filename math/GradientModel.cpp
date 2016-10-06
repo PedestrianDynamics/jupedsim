@@ -96,21 +96,21 @@ GradientModel::~GradientModel()
 bool GradientModel::Init (Building* building)
 {
 
-    if(dynamic_cast<DirectionFloorfield*>(_direction.get())){
+    if(auto dirff = dynamic_cast<DirectionFloorfield*>(_direction.get())){
          Log->Write("INFO:\t Init DirectionFloorfield starting ...");
-         dynamic_cast<DirectionFloorfield*>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+         dirff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
          Log->Write("INFO:\t Init DirectionFloorfield done");
     }
 
-     if(dynamic_cast<DirectionLocalFloorfield*>(_direction.get())){
+     if(auto dirlocff = dynamic_cast<DirectionLocalFloorfield*>(_direction.get())){
           Log->Write("INFO:\t Init Direction LOCAL Floorfield starting ...");
-          dynamic_cast<DirectionLocalFloorfield*>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          dirlocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
           Log->Write("INFO:\t Init Direction LOCAL Floorfield done");
      }
 
-     if(dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())){
+     if(auto dirsublocff = dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())){
           Log->Write("INFO:\t Init Direction SubLOCAL Floorfield starting ...");
-          dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          dirsublocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
           Log->Write("INFO:\t Init Direction SubLOCAL Floorfield done");
      }
 
@@ -303,15 +303,15 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 //redirect near wall mechanics:
                 Point dir2Wall = Point{0., 0.};
                 double distance2Wall = -1.;
-                if (dynamic_cast<DirectionFloorfield*>(_direction.get())) {
-                     dir2Wall = dynamic_cast<DirectionFloorfield*>(_direction.get())->GetDir2Wall(ped);
-                     distance2Wall = dynamic_cast<DirectionFloorfield*>(_direction.get())->GetDistance2Wall(ped);
-                } else if (dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) {
-                     dir2Wall = dynamic_cast<DirectionLocalFloorfield*>(_direction.get())->GetDir2Wall(ped);
-                     distance2Wall = dynamic_cast<DirectionLocalFloorfield*>(_direction.get())->GetDistance2Wall(ped);
-                } else if (dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())) {
-                     dir2Wall = dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())->GetDir2Wall(ped);
-                     distance2Wall = dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())->GetDistance2Wall(ped);
+                if (auto dirff = dynamic_cast<DirectionFloorfield*>(_direction.get())) {
+                     dir2Wall = dirff->GetDir2Wall(ped);
+                     distance2Wall = dirff->GetDistance2Wall(ped);
+                } else if (auto dirlocff = dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) {
+                     dir2Wall = dirlocff->GetDir2Wall(ped);
+                     distance2Wall = dirlocff->GetDistance2Wall(ped);
+                } else if (auto dirsublocff = dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())) {
+                     dir2Wall = dirsublocff->GetDir2Wall(ped);
+                     distance2Wall = dirsublocff->GetDistance2Wall(ped);
                 } else {
                      Log->Write("ERROR: \t GradNav Model (4) requires any floor field (exit-strat {6,8,9}). None found!");
                 }
