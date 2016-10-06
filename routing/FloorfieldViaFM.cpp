@@ -53,7 +53,7 @@ FloorfieldViaFM::~FloorfieldViaFM()
     //dtor
     delete _grid;
     if (_gcode) delete[] _gcode;
-    if (_subroomUID) delete[] _subroomUID;
+    if (_subrooms) delete[] _subrooms;
     if (_dist2Wall) delete[] _dist2Wall;
     if (_speedInitial) delete[] _speedInitial;
     if (_modifiedspeed) delete[] _modifiedspeed;
@@ -744,7 +744,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     _grid->createGrid();
 
     //create arrays
-    _subroomUID = new int[_grid->GetnPoints()];
+    _subrooms = new SubRoom*[_grid->GetnPoints()]();
     _gcode = new int[_grid->GetnPoints()];                  //gcode:
                                                             //    enum GridCode { //used in floor fields
                                                             //         WALL = 0,
@@ -930,7 +930,7 @@ void FloorfieldViaFM::parseBuildingForExits(const Building* const buildingArg, c
 
     //create arrays
     _gcode = new int[_grid->GetnPoints()];                  //see Macros.h: enum GridCode {...}
-    _subroomUID = new int[_grid->GetnPoints()];
+    _subrooms = new SubRoom*[_grid->GetnPoints()]();
     _dist2Wall = new double[_grid->GetnPoints()];
     _speedInitial = new double[_grid->GetnPoints()];
     _modifiedspeed = new double[_grid->GetnPoints()];
@@ -996,12 +996,12 @@ void FloorfieldViaFM::prepareForDistanceFieldCalculation(const bool onlyRoomsWit
             //this is the main thing in this loop, we want to find and mark inside points (and it is costly!!)
             case OUTSIDE:
             {
-                int subroom = isInside(i);
+                SubRoom* subroom = isInside(i);
                 if (subroom || onlyRoomsWithExits) {
                     _speedInitial[i] = 1.;
                     _cost[i] = -2.;
                     _gcode[i] = INSIDE;
-                    _subroomUID[i] = subroom;
+                    _subrooms[i] = subroom;
                 }
                 break;
             }
@@ -1836,7 +1836,7 @@ void FloorfieldViaFM::writeGoalFF(const std::string& filename, std::vector<int> 
     file.close();
 }
 
-int FloorfieldViaFM::isInside(const long int key) {
+SubRoom* FloorfieldViaFM::isInside(const long int key) {
     Point probe = _grid->getPointFromKey(key);
 
     const std::map<int, std::shared_ptr<Room>>& roomMap = _building->GetAllRooms();
@@ -1851,12 +1851,12 @@ int FloorfieldViaFM::isInside(const long int key) {
             SubRoom* subRoomPtr = subRoomPair.second.get();
 
             if (subRoomPtr->IsInSubRoom(probe)) {
-                return subRoomPtr->GetUID();
+                return subRoomPtr;
             }
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 void CentrePointFFViaFM::getDirectionToUID(int destID, const long int key, Point& direction, int mode) {

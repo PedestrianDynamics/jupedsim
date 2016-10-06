@@ -49,14 +49,9 @@ public:
      void drawBlockerLines();
      void crossOutOutsideNeighbors(const long int key);
      // returns the UID of a subroom for a key of th grid, using the information from _subroomMap
-     virtual int isInside(const long int key);
+     virtual SubRoom* isInside(const long int key);
 protected:
      const Room* _room;
-     RectGrid* _subroomGrid = nullptr;
-     std::map<long int, SubRoom*> _subroomMap; // maps from _subroomGrid key to the subroom
-     double _subroomGridSpacing = 1.; // seems to be close to the optimum
-     // returns the subroom for a key of the _subroomGrid
-     virtual SubRoom* isInsideInit(const long int key);
 };
 
 /*
@@ -75,17 +70,17 @@ public:
 class SubLocalFloorfieldViaFM : public FloorfieldViaFM {
 public:
      SubLocalFloorfieldViaFM();
-     SubLocalFloorfieldViaFM(const SubRoom* const subroom, const Building* buildingArg,
+     SubLocalFloorfieldViaFM(SubRoom* const subroom, const Building* buildingArg,
            const double hxArg, const double hyArg,
            const double wallAvoidDistance,
            const bool useDistancefield);
 
-     void parseRoom(const SubRoom* const subroomArg, const double hxArg, const double hyArg);
+     void parseRoom(SubRoom* const subroomArg, const double hxArg, const double hyArg);
      void getDirectionToDestination (Pedestrian* ped, Point& direction);
      void getDirectionToGoalID(const int goalID);
-     virtual int isInside(const long int key);
+     virtual SubRoom* isInside(const long int key);
 protected:
-     const SubRoom* _subroom;
+     SubRoom* _subroom;
 };
 
 #endif //JPSCORE_LOCALFLOORFIELDVIAFM_H

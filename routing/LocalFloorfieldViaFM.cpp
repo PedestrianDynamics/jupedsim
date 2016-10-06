@@ -127,20 +127,6 @@ void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
           }
      }
 
-     _subroomGrid = new RectGrid();
-     _subroomGrid->setBoundaries(xMin, yMin, xMax, yMax);
-     _subroomGrid->setSpacing(_subroomGridSpacing, _subroomGridSpacing);
-     _subroomGrid->createGrid();
-
-     // There was a case where _subroomGrid->GetKeyAtPoint(p) returns values >= nPoints (the check for includesPoints(p) was successful).
-     // So we insert some additional entries to _subroomMap to avoid out_of_range errors. --f.mack
-     // @todo Investigate why this is happening.
-     long int max_index = _subroomGrid->GetnPoints() + _subroomGrid->GetiMax() + _subroomGrid->GetjMax();
-     for (long int i = 0; i < max_index; ++i) {
-          SubRoom* subroom = isInsideInit(i);
-          _subroomMap.insert(std::make_pair(i, subroom));
-     }
-
      //create Rect Grid
      _grid = new RectGrid();
      _grid->setBoundaries(xMin, yMin, xMax, yMax);
@@ -150,7 +136,7 @@ void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
      //create arrays
      //flag = new int[grid->GetnPoints()];                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, -7 = outside)
      _gcode = new int[_grid->GetnPoints()];
-     _subroomUID = new int[_grid->GetnPoints()];
+     _subrooms = new SubRoom*[_grid->GetnPoints()](); // initializes with nullptr
      _dist2Wall = new double[_grid->GetnPoints()];
      _speedInitial = new double[_grid->GetnPoints()];
      _modifiedspeed = new double[_grid->GetnPoints()];
@@ -415,15 +401,20 @@ void LocalFloorfieldViaFM::drawBlockerLines() {
 ////     }
 //}
 
-SubRoom* LocalFloorfieldViaFM::isInsideInit(const long int key) {
-     Point probe = _subroomGrid->getPointFromKey(key);
+SubRoom* LocalFloorfieldViaFM::isInside(const long int key) {
+     Point probe = _grid->getPointFromKey(key);
+     auto neighbors = _grid->getNeighbors(key);
+
+     for (auto& neighbor : neighbors.key) {
+          if (neighbor == -2) continue; // -2 is returned y getNeighbors() for invalid points
+          SubRoom* subroom = _subrooms[neighbor];
+          if (subroom && subroom->IsInSubRoom(probe)) return subroom;
+     }
 
      const std::map<int, std::shared_ptr<SubRoom>>& subRoomMap = _room->GetAllSubRooms();
 
      for (auto& subRoomPair : subRoomMap) {
-
           SubRoom* subRoomPtr = subRoomPair.second.get();
-
           if (subRoomPtr->IsInSubRoom(probe)) {
                return subRoomPtr;
           }
@@ -432,46 +423,8 @@ SubRoom* LocalFloorfieldViaFM::isInsideInit(const long int key) {
      return nullptr;
 }
 
-int LocalFloorfieldViaFM::isInside(const long int key) {
-     Point probe = _grid->getPointFromKey(key);
-
-     // rounds downwards to the next number that is a multiple of _subroomGridSpacing, considering an offset of xMin/yMin
-     double lowerX = _subroomGridSpacing * floor((probe._x - _subroomGrid->GetxMin()) / _subroomGridSpacing) + _subroomGrid->GetxMin();
-     double lowerY = _subroomGridSpacing * floor((probe._y - _subroomGrid->GetyMin()) / _subroomGridSpacing) + _subroomGrid->GetyMin();
-
-     Point subroomPoint = Point(lowerX, lowerY);
-     SubRoom* sub1 = _subroomGrid->includesPoint(subroomPoint) ? _subroomMap.at(_subroomGrid->getKeyAtPoint(subroomPoint)) : nullptr;
-     if (sub1 && sub1->IsInSubRoom(probe)) return sub1->GetUID();
-
-     subroomPoint._x += _subroomGridSpacing;
-     SubRoom* sub2 = _subroomGrid->includesPoint(subroomPoint) ? _subroomMap.at(_subroomGrid->getKeyAtPoint(subroomPoint)) : nullptr;
-     if (sub2 && sub2 != sub1 && sub2->IsInSubRoom(probe)) return sub2->GetUID();
-
-     subroomPoint._y += _subroomGridSpacing;
-     SubRoom* sub3 = _subroomGrid->includesPoint(subroomPoint) ? _subroomMap.at(_subroomGrid->getKeyAtPoint(subroomPoint)) : nullptr;
-     if (sub3 && sub3 != sub1 && sub3 != sub2 && sub3->IsInSubRoom(probe)) return sub3->GetUID();
-
-     subroomPoint._x -= _subroomGridSpacing;
-     SubRoom* sub4 = _subroomGrid->includesPoint(subroomPoint) ? _subroomMap.at(_subroomGrid->getKeyAtPoint(subroomPoint)) : nullptr;
-     if (sub4 && sub4 != sub1 && sub4 != sub2 && sub4 != sub3 && sub4->IsInSubRoom(probe)) return sub4->GetUID();
-
-     const std::map<int, std::shared_ptr<SubRoom>>& subRoomMap = _room->GetAllSubRooms();
-
-     for (auto& subRoomPair : subRoomMap) {
-
-          SubRoom* subRoomPtr = subRoomPair.second.get();
-          if (subRoomPtr == sub1 || subRoomPtr == sub2 || subRoomPtr == sub3 || subRoomPtr == sub4) continue;
-
-          if (subRoomPtr->IsInSubRoom(probe)) {
-               return subRoomPtr->GetUID();
-          }
-     }
-
-     return 0;
-}
-
 SubLocalFloorfieldViaFM::SubLocalFloorfieldViaFM(){};
-SubLocalFloorfieldViaFM::SubLocalFloorfieldViaFM(const SubRoom* const roomArg,
+SubLocalFloorfieldViaFM::SubLocalFloorfieldViaFM(SubRoom* const roomArg,
       const Building* buildingArg,
       const double hxArg, const double hyArg,
       const double wallAvoidDistance, const bool useDistancefield) {
@@ -512,7 +465,7 @@ void SubLocalFloorfieldViaFM::getDirectionToGoalID(const int goalID){
 };
 
 
-void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
+void SubLocalFloorfieldViaFM::parseRoom(SubRoom* const roomArg,
       const double hxArg, const double hyArg)
 {
      _subroom = roomArg;
@@ -618,7 +571,7 @@ void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
 
      //create arrays
      _gcode = new int[_grid->GetnPoints()];                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, -7 = outside)
-     _subroomUID = new int[_grid->GetnPoints()];
+     _subrooms = new SubRoom*[_grid->GetnPoints()](); // initializes with nullptr
      _dist2Wall = new double[_grid->GetnPoints()];
      _speedInitial = new double[_grid->GetnPoints()];
      _modifiedspeed = new double[_grid->GetnPoints()];
@@ -645,7 +598,7 @@ void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
      drawLinesOnGrid<int>(_exitsFromScope, _gcode, OPEN_TRANSITION);
 }
 
-int SubLocalFloorfieldViaFM::isInside(const long int key) {
+SubRoom* SubLocalFloorfieldViaFM::isInside(const long int key) {
      Point probe = _grid->getPointFromKey(key);
-     return _subroom->IsInSubRoom(probe)?_subroom->GetUID():0;
+     return _subroom->IsInSubRoom(probe) ? _subroom : nullptr;
 }

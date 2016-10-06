@@ -152,7 +152,7 @@ public:
      void writeFF(const std::string&, std::vector<int> targetID);
      void writeGoalFF(const std::string&, std::vector<int> targetID);
 
-     virtual int isInside(const long int key);
+     virtual SubRoom* isInside(const long int key);
 
      std::map<int, int> getGoalToLineUIDmap() const
      {
@@ -189,7 +189,7 @@ protected:
      //GridPoint Data in independant arrays (shared primary key)
      // changed to threadsafe creation when needed: int* flag;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
      int* _gcode = nullptr;                 //gridcode (see Macros.h)
-     int* _subroomUID = nullptr;
+     SubRoom* * _subrooms = nullptr; // this is an array (first asterisk) of pointers (second asterisk)
      double* _dist2Wall = nullptr;
      double* _speedInitial = nullptr;
      double* _modifiedspeed = nullptr;
