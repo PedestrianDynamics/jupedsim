@@ -232,6 +232,18 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 // calculate min spacing
                 std::sort(spacings.begin(), spacings.end(), sort_pred());                
                 double spacing = spacings[0].first;
+                //============================================================
+                // TODO: Hack for Head on situations: ped1 x ------> | <------- x ped2
+//              printf("\ndirection %f, %f, norm = %f\n", direction._x, direction._y, direction.NormSquare());
+                if(0 && direction.NormSquare() < 0.5)
+                {
+                      double pi_half = 1.57079663;
+                      double alpha =  pi_half*exp(-spacing);
+                      direction = e0(ped, room).Rotate(cos(alpha), sin(alpha));
+                      printf("\nRotate %f, %f, norm = %f alpha = %f, spacing = %f\n", direction._x, direction._y, direction.NormSquare(), alpha, spacing);
+                      getc(stdin);
+                }
+                //============================================================                
                 //double winkel = spacings[0].second;
                 //Point tmp;
                 Point speed = direction.Normalized() *OptimalSpeed(ped, spacing);
