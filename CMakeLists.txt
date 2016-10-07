@@ -164,7 +164,6 @@ endif (APPLE)
 
 
 if (Boost_NO_SYSTEM_PATHS)
-  #set(BOOST_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../3p/boost")
   set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
   set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/stage/lib")
   set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${BOOST_ROOT})
@@ -196,13 +195,13 @@ endif (OPENMP_FOUND)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 #boost
-find_package(Boost REQUIRED )
+find_package(Boost COMPONENTS timer chrono system filesystem unit_test_framework REQUIRED)
 
 
 # test all cpp-files in Utest
 if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
-    find_package(Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
+    find_package(Boost COMPONENTS timer chrono system filesystem unit_test_framework REQUIRED)
     IF (CMAKE_COMPILER_IS_GNUCXX)
       set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
       IF (USE_DUAL_ABI)

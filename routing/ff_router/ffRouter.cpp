@@ -165,7 +165,7 @@ bool FFRouter::Init(Building* building)
           double tempDistance = 0.;
           ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), building, 0.125, 0.125, 0.0, false);
           //for (long int i = 0; i < ptrToNew)
-          Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
+          //Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
 #pragma omp critical
           _locffviafm.insert(std::make_pair((*pairRoomIt).first, ptrToNew));
 
@@ -193,7 +193,7 @@ bool FFRouter::Init(Building* building)
           //loop over upper triangular matrice (i,j) and write to (j,i) as well
           std::vector<int>::const_iterator outerPtr;
           std::vector<int>::const_iterator innerPtr;
-          Log->Write("INFO: \tFound %d Doors (Cross + Trans) in room %d", doorUIDs.size(), (*pairRoomIt).first);
+          //Log->Write("INFO: \tFound %d Doors (Cross + Trans) in room %d", doorUIDs.size(), (*pairRoomIt).first);
           for (outerPtr = doorUIDs.begin(); outerPtr != doorUIDs.end(); ++outerPtr) {
                //if the door is closed, then dont calc distances
                if (!_CroTrByUID.at(*outerPtr)->IsOpen()) {
@@ -380,7 +380,7 @@ bool FFRouter::ReInit()
           double tempDistance = 0.;
           ptrToNew = new LocalFloorfieldViaFM((*pairRoomIt).second.get(), _building, 0.125, 0.125, 0.0, false);
           //for (long int i = 0; i < ptrToNew)
-          Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
+          //Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
 #pragma omp critical
           _locffviafm.insert(std::make_pair((*pairRoomIt).first, ptrToNew));
 
@@ -408,7 +408,7 @@ bool FFRouter::ReInit()
           //loop over upper triangular matrice (i,j) and write to (j,i) as well
           std::vector<int>::const_iterator outerPtr;
           std::vector<int>::const_iterator innerPtr;
-          Log->Write("INFO: \tFound %d Doors (Cross + Trans) in room %d", doorUIDs.size(), (*pairRoomIt).first);
+          //Log->Write("INFO: \tFound %d Doors (Cross + Trans) in room %d", doorUIDs.size(), (*pairRoomIt).first);
           for (outerPtr = doorUIDs.begin(); outerPtr != doorUIDs.end(); ++outerPtr) {
                //if the door is closed, then dont calc distances
                if (!_CroTrByUID.at(*outerPtr)->IsOpen()) {
