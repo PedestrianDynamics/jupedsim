@@ -9,8 +9,8 @@ All notable changes to this project will be documented in this file.
 - Added new operational model `<model operational_model_id="5" description="Krausz">`. See [Wiki](https://cst.version.fz-juelich.de/jupedsim/jpscore/wikis/docs/models/operativ#generalized-centrifugal-force-model-with-lateral-swaying) 
 - Added new `cmake` compilation flags: 
   - `-D DUSE_DUAL_ABI=ON` (default OFF): See [note in GCC 5.1 release](https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html). 
-  - `-D Boost_NO_SYSTEM_PATHS=true` (default false): In case a local version of boost have to be used.
-     Pass this option together with `-D BOOST_ROOT=PARH_where_to_find_boost`.
+  - `-D Boost_NO_SYSTEM_PATHS=true` (default false): In case a local version of boost has to be used.
+     Pass this option together with `-D BOOST_ROOT=PATH_where_to_find_boost`.
   
 ### Modified
 - If no seed is given, the simulation will be run with `seed=Time(NULL)` (random).
@@ -27,6 +27,7 @@ Please also check the [Issue tracker](https://cst.version.fz-juelich.de/jupedsim
 - exit strategies using *local* - prefix can result in circular routing
 - triangulation creates error-prone help-lines in certain geometries
 - errors in unused parts of ini files lead to system-exit
+- router: ff_global_shortest might not find paths in some geometries. please use exit_strategy 8
 
 
 ## v0.8.0 [2016-02-18]
