@@ -27,8 +27,10 @@ Please also check the [Issue tracker](https://cst.version.fz-juelich.de/jupedsim
 - exit strategies using *local* - prefix can result in circular routing
 - triangulation creates error-prone help-lines in certain geometries
 - errors in unused parts of ini files lead to system-exit
+- exit_strategy: exit strat 9 currently bugged
 - router: ff_global_shortest might not find paths in some geometries. please use exit_strategy 8
-
+- console output: messages of only one line will be overwritten by progress bar
+- agents that leave the building might produce an error-msg (although they correctly left the simulation)
 
 ## v0.8.0 [2016-02-18]
 
