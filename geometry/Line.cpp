@@ -231,7 +231,10 @@ Point Line::ShortestPoint(const Point& p) const
  * */
 bool Line::IsInLineSegment(const Point& p) const
 {
-     return fabs((_point1-p).Norm()+(_point2-p).Norm()-(_point2-_point1).Norm())<J_EPS;
+     //return fabs((_point1-p).Norm()+(_point2-p).Norm()-(_point2-_point1).Norm())<J_EPS; // old version
+
+     // because calculating the square root takes too long, we used the sqared distances
+     return std::abs((_point1-p).NormSquare() + (_point2-p).NormSquare() - _length*_length) < J_EPS*J_EPS;
 }
 
 /* Berechnet direkt den Abstand von p zum Segment l

@@ -171,6 +171,16 @@ enum GridCode { //used in floor fields
     CLOSED_TRANSITION
 };
 
+enum FastMarchingFlags {
+     FM_UNKNOWN = 0,
+     FM_SINGLE = 1, // single and double indicate whether a grid point was reached from one or two
+     FM_DOUBLE = 2, // directions (rows and columns) when performing the fast marching algorithm
+     FM_FINAL = 3,
+     FM_ADDED = 4, // added to trial but not calculated
+     //FM_BLOCKER = -5, // currently not used
+     FM_OUTSIDE = -7
+};
+
 //global functions for convenience
 
 inline char xmltob(const char * t, char v = 0)

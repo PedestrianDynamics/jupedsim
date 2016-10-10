@@ -1015,7 +1015,7 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
 
 // gibt zurück in welchen Quadranten vertex liegt, wobei hitPos der Koordinatenursprung ist
 
-int NormalSubRoom::WhichQuad(const Point& vertex, const Point& hitPos) const
+short NormalSubRoom::WhichQuad(const Point& vertex, const Point& hitPos) const
 {
      return (vertex._x > hitPos._x) ? ((vertex._y > hitPos._y) ? 1 : 4) :
                ((vertex._y > hitPos._y) ? 2 : 3);
@@ -1031,64 +1031,54 @@ double NormalSubRoom::Xintercept(const Point& point1, const Point& point2, doubl
 }
 
 
-// neue Version auch für konkave Polygone
+// This method is called very often in DirectionFloorField, so it should be fast.
 
 bool NormalSubRoom::IsInSubRoom(const Point& ped) const
 {
 
      //case when the point is on an edge
      // todo: this affect the runtime, and do we really need that
-     // If we do not d othis check, then for a square for instance, half the points located on the edge will be inside and
+     // If we do not do this check, then for a square for instance, half the points located on the edge will be inside and
      // the other half will be outside the polygon.
      for(auto& w: _walls)
      {
           if(w.IsInLineSegment(ped)) return true;
      }
 
-
-     short edge, first, next;
-     short quad, next_quad, delta, total;
-
-     /////////////////////////////////////////////////////////////
-     edge = first = 0;
-     quad = (short) WhichQuad(_poly[edge], ped);
-     total = 0; // COUNT OF ABSOLUTE SECTORS CROSSED
-     /* LOOP THROUGH THE VERTICES IN A SECTOR */
-     do {
-          next = (edge + 1) % _poly.size();
-          next_quad = WhichQuad(_poly[next], ped);
-          delta = next_quad - quad; // HOW MANY QUADS HAVE I MOVED
-
-          // SPECIAL CASES TO HANDLE CROSSINGS OF MORE THEN ONE
-          //QUAD
+     auto next_corner = _poly.begin();
+     short quad = WhichQuad(*next_corner, ped);
+     short next_quad;
+     short total = 0; // count of absolute sectors crossed
+     for (auto& corner : _poly) { // _poly contains all corner points of the walls
+          ++next_corner;
+          if (next_corner == _poly.end()) next_corner = _poly.begin();
+          next_quad = WhichQuad(*next_corner, ped);
+          short delta = next_quad - quad;
 
           switch (delta) {
-          case 2: // IF WE CROSSED THE MIDDLE, FIGURE OUT IF IT
-               //WAS CLOCKWISE OR COUNTER
-          case -2: // US THE X POSITION AT THE HIT POINT TO
-               // DETERMINE WHICH WAY AROUND
-               if (Xintercept(_poly[edge], _poly[next], ped._y) > ped._x)
-                    delta = -(delta);
-               break;
-          case 3: // MOVING 3 QUADS IS LIKE MOVING BACK 1
-               delta = -1;
-               break;
-          case -3: // MOVING BACK 3 IS LIKE MOVING FORWARD 1
-               delta = 1;
-               break;
-          default:break;
+               case 2:
+               case -2:
+                    // If we crossed the middle, figure out if it
+                    // was clockwise or counter-clockwise by using
+                    // the x position of the ped
+                    if (Xintercept(corner, *next_corner, ped._y) > ped._x)
+                         delta = -delta;
+                    break;
+               case 3: // moving 3 quads is like moving back 1
+                    delta = -1;
+                    break;
+               case -3: // moving back 3 is like moving forward 1
+                    delta = 1;
+                    break;
+               default:
+                    break;
           }
-          /* ADD IN THE DELTA */
-          total += delta;
-          quad = next_quad; // RESET FOR NEXT STEP
-          edge = next;
-     } while (edge != first);
 
-     /* AFTER ALL IS DONE IF THE TOTAL IS 4 THEN WE ARE INSIDE */
-     if (abs(total) == 4)
-          return true;
-     else
-          return false;
+          total += delta;
+          quad = next_quad;
+     }
+
+     return abs(total) == 4;
 }
 
 /************************************************************

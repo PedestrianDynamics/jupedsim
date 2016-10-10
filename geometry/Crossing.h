@@ -132,6 +132,13 @@ public:
       * @return a nicely formatted string representation of the object
       */
      virtual std::string GetDescription() const;
+
+     /**
+      * @return the number of subrooms this has in common with other (0, 1, 2)
+      * @param other the other crossing
+      * @param subroom returns one of the common subrooms
+      */
+     virtual int CommonSubroomWith(Crossing* other, SubRoom* &subroom);
 };
 
 #endif  /* _CROSSING_H */

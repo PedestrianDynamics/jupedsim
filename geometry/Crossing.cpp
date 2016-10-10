@@ -160,3 +160,16 @@ string Crossing::GetDescription() const
      geometry.append("\t\t</crossing>\n");
      return geometry;
 }
+
+int Crossing::CommonSubroomWith(Crossing* other, SubRoom* &subroom) {
+     int result = 0;
+     if (_subRoom1 && (_subRoom1 == other->_subRoom1 || _subRoom1 == other->_subRoom2)) {
+          ++result;
+          subroom = _subRoom1;
+     }
+     if (_subRoom2 && (_subRoom2 == other->_subRoom1 || _subRoom2 == other->_subRoom2)) {
+          ++result;
+          subroom = _subRoom2;
+     }
+     return result;
+}

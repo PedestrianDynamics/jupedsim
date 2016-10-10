@@ -653,6 +653,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
                string delta_h = xModelPara->FirstChildElement("floorfield")->Attribute("delta_h");
                pDeltaH = atof(delta_h.c_str());
           }
+          _config->set_deltaH(pDeltaH);
 
           if (!xModelPara->FirstChildElement("floorfield")->Attribute("wall_avoid_distance"))
                pWallAvoidDistance = .8; // default value
@@ -661,6 +662,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
                          "wall_avoid_distance");
                pWallAvoidDistance = atof(wall_avoid_distance.c_str());
           }
+          _config->set_wall_avoid_distance(pWallAvoidDistance);
 
           if (!xModelPara->FirstChildElement("floorfield")->Attribute("use_wall_avoidance"))
                pUseWallAvoidance = true; // default value
@@ -668,6 +670,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
                string use_wall_avoidance = xModelPara->FirstChildElement("floorfield")->Attribute("use_wall_avoidance");
                pUseWallAvoidance = !(use_wall_avoidance=="false");
           }
+          _config->set_use_wall_avoidance(pUseWallAvoidance);
           Log->Write("INFO: \tfloorfield <delta h=%0.4f, wall avoid distance=%0.2f>", pDeltaH, pWallAvoidDistance);
           Log->Write("INFO: \tfloorfield <use wall avoidance=%s>", pUseWallAvoidance ? "true" : "false");
      }
@@ -740,6 +743,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
                          "slow_down_distance");
                pSlowDownDistance = atof(slow_down_distance.c_str());
           }
+          _config->set_slow_down_distance(pSlowDownDistance);
           Log->Write("INFO: \tAnti Clipping: SlowDown Distance=%0.2f", pSlowDownDistance);
      }
 
@@ -751,8 +755,8 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
      _config->SetModel(std::shared_ptr<OperationalModel>(new GradientModel(_exit_strategy, _config->GetNuPed(),
                _config->GetaPed(), _config->GetbPed(), _config->GetcPed(),
                _config->GetNuWall(), _config->GetaWall(), _config->GetbWall(),
-               _config->GetcWall(), pDeltaH, pWallAvoidDistance, pUseWallAvoidance,
-               pSlowDownDistance)));
+               _config->GetcWall(), _config->get_deltaH(), _config->get_wall_avoid_distance(), _config->get_use_wall_avoidance(),
+               _config->get_slow_down_distance())));
 
      return true;
 }
@@ -1084,25 +1088,26 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
           else if ((strategy == "ff_global_shortest") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
-               Router *r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals);
+               Router *r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals, _config);
                _config->GetRoutingEngine()->AddRouter(r);
                Log->Write("\nINFO: \tUsing FF Global Shortest Router");
 
-               //check if the exit strat is [8]
+               //check if the exit strat is [8 | 9] //@todo: ar.graf: implement check and check which are valid exitstrats
 
                ///Parsing additional options
-               if (!ParseFfRouterOps(e)) {
+               if (!ParseFfRouterOps(e, ROUTING_FF_GLOBAL_SHORTEST)) {
                     return false;
                }
           }
           else if ((strategy == "ff_local_shortest") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
-               Router *r = new FFRouter(id, ROUTING_FF_LOCAL_SHORTEST, hasSpecificGoals);
+               Router *r = new FFRouter(id, ROUTING_FF_LOCAL_SHORTEST, hasSpecificGoals, _config);
                _config->GetRoutingEngine()->AddRouter(r);
                Log->Write("\nINFO: \tUsing FF Local Shortest Router");
+               Log->Write("\nWARNING: \tFF Local Shortest is bugged!!!!");
 
-               //check if the exit strat is [8]
+               //check if the exit strat is [8 | 9]
 
                ///Parsing additional options
 //               if (!ParseFfRouterOps(e)) {
@@ -1111,13 +1116,13 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
           }
           else if ((strategy == "ff_quickest") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
-               Router *r = new FFRouter(id, ROUTING_FF_QUICKEST, hasSpecificGoals);
+               Router *r = new FFRouter(id, ROUTING_FF_QUICKEST, hasSpecificGoals, _config);
                _config->GetRoutingEngine()->AddRouter(r);
                Log->Write("\nINFO: \tUsing FF Quickest Router");
 
-               //if (!ParseFfRouterOps(e)) {
-               //     return false;
-               //}
+               if (!ParseFfRouterOps(e, ROUTING_FF_QUICKEST)) {
+                    return false;
+               }
           }
           else if (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) {
                Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",
@@ -1128,26 +1133,33 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
      return true;
 }
 
-bool IniFileParser::ParseFfRouterOps(TiXmlNode* routingNode) {
+bool IniFileParser::ParseFfRouterOps(TiXmlNode* routingNode, RoutingStrategy s) {
      //set defaults
-     std::string mode = "global_shortest";
-     FFRouter* r = static_cast<FFRouter*>(_config->GetRoutingEngine()->GetAvailableRouters().back());
-
-     //parse ini-file-information
-     if (routingNode->FirstChild("parameters")) {
-          TiXmlNode* pParameters = routingNode->FirstChild("parameters");
-          if (pParameters->FirstChild("mode")) {
-               mode = pParameters->FirstChild("mode")->FirstChild()->Value();
+     std::string mode;
+     if (s == ROUTING_FF_GLOBAL_SHORTEST) {
+          mode = "global_shortest";
+     }
+     if (s == ROUTING_FF_QUICKEST) {
+          mode = "quickest";
+          //parse ini-file-information
+          if (routingNode->FirstChild("parameters")) {
+               TiXmlNode* pParameters = routingNode->FirstChild("parameters");
+               if (pParameters->FirstChild("recalc interval")) { //@todo: ar.graf: test ini file with recalc value
+                    _config->set_recalc_interval(atof(pParameters->FirstChild("recalc interval")->FirstChild()->Value()));
+               }
           }
      }
+     FFRouter* r = static_cast<FFRouter*>(_config->GetRoutingEngine()->GetAvailableRouters().back());
+
+
      r->SetMode(mode);
      return true;
 }
 
 bool IniFileParser::ParseCogMapOpts(TiXmlNode* routingNode)
 {
-     TiXmlNode* sensorNode = routingNode->FirstChild();
 
+     TiXmlNode* sensorNode = routingNode->FirstChild();
      if (!sensorNode) {
           Log->Write("ERROR:\tNo sensors found.\n");
           return false;
@@ -1235,6 +1247,9 @@ bool IniFileParser::ParseStepSize(TiXmlNode& stepNode)
                          (std::string(stepNode.FirstChildElement("stepsize")->Attribute("fix")) == "yes") ) {
                     _config->Setdt(atof(stepsize));
                     Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
+                    if (tmp < _config->Getdt()) {
+                         Log->Write("WARNING: \tStepsize dt = %f > %f = frameinterval.\nWARNING: \tYou should decrease stepsize or fps!", _config->Getdt(), tmp);
+                    }
                     return true;
                }
                //find a stepsize, that can be multiplied by (int) to get framerate
@@ -1248,8 +1263,12 @@ bool IniFileParser::ParseStepSize(TiXmlNode& stepNode)
                          return true;
                     }
                }
+               //below should never execute
                _config->Setdt(stepsizeDBL);
                Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
+               if (tmp < _config->Getdt()) {
+                    Log->Write("WARNING: \tStepsize dt = %f > %f = frameinterval. You should decrease stepsize or fps!", _config->Getdt(), tmp);
+               }
                return true;
           }
      }

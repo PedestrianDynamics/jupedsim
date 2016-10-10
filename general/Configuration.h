@@ -97,6 +97,15 @@ public:
           _showStatistics = false;
           _fileFormat = FORMAT_XML_PLAIN;
           _agentsParameters = std::map<int, std::shared_ptr<AgentsParameters> >();
+          // ---------- floorfield
+          _deltaH = 0.0625;
+          _wall_avoid_distance = 0.4;
+          _use_wall_avoidance = true;
+          // ---------- gradientmodel
+          _slow_down_distance = 0.2;
+
+          //ff router quickest
+          _recalc_interval = 5;
      }
 
      int GetSolver() const { return _solver; };
@@ -212,6 +221,26 @@ public:
 
      void SetDistEffMaxWall(double distEffMaxWall) { _distEffMaxWall = distEffMaxWall; };
 
+     double get_deltaH() const { return _deltaH; }
+
+     void set_deltaH(double deltaH) { _deltaH = deltaH; }
+
+     double get_wall_avoid_distance() const { return _wall_avoid_distance; }
+
+     void set_wall_avoid_distance(double wall_avoid_distance) { _wall_avoid_distance = wall_avoid_distance; }
+
+     bool get_use_wall_avoidance() const { return _use_wall_avoidance; }
+
+     void set_use_wall_avoidance(bool use_wall_avoidance) { _use_wall_avoidance = use_wall_avoidance; }
+
+     double get_slow_down_distance() const { return _slow_down_distance; }
+
+     void set_slow_down_distance(double slow_down_distance) { _slow_down_distance = slow_down_distance; }
+
+     double get_recalc_interval() const { return _recalc_interval; }
+
+     void set_recalc_interval(double recalc_interval) { _recalc_interval = recalc_interval; }
+
      const std::string& GetHostname() const { return _hostname; };
 
      void SetHostname(std::string hostname) { _hostname = hostname; };
@@ -304,6 +333,16 @@ private:
      double _maxFWall;
      double _distEffMaxPed;
      double _distEffMaxWall;
+     //floorfield
+     double _deltaH;
+     double _wall_avoid_distance;
+     bool _use_wall_avoidance;
+     //gradientmodel
+     double _slow_down_distance;
+
+     //ff router quickest
+     double _recalc_interval;
+
      std::string _hostname;
      std::string _trajectoriesFile;
      std::string _errorLogFile;

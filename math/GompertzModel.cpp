@@ -71,35 +71,33 @@ GompertzModel::~GompertzModel() {
 
 bool GompertzModel::Init(Building *building) {
 
-    if (dynamic_cast<DirectionFloorfield *>(_direction.get())) {
+    if (auto dirff = dynamic_cast<DirectionFloorfield *>(_direction.get())) {
         Log->Write("INFO:\t Init DirectionFloorfield starting ...");
         //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
         double _deltaH = 0.0625;
         double _wallAvoidDistance = 0.4;
         bool _useWallAvoidance = true;
-        dynamic_cast<DirectionFloorfield *>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+        dirff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
         Log->Write("INFO:\t Init DirectionFloorfield done");
     }
 
-    if (dynamic_cast<DirectionLocalFloorfield *>(_direction.get())) {
+    if (auto dirlocff = dynamic_cast<DirectionLocalFloorfield *>(_direction.get())) {
         Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
         //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
         double _deltaH = 0.0625;
         double _wallAvoidDistance = 0.4;
         bool _useWallAvoidance = true;
-        dynamic_cast<DirectionLocalFloorfield *>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance,
-                                                                   _useWallAvoidance);
+        dirlocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
         Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
     }
 
-    if (dynamic_cast<DirectionSubLocalFloorfield *>(_direction.get())) {
+    if (auto dirsublocff = dynamic_cast<DirectionSubLocalFloorfield *>(_direction.get())) {
         Log->Write("INFO:\t Init DirectionSubLOCALFloorfield starting ...");
         //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
         double _deltaH = 0.0625;
         double _wallAvoidDistance = 0.4;
         bool _useWallAvoidance = true;
-        dynamic_cast<DirectionSubLocalFloorfield *>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance,
-                                                                      _useWallAvoidance);
+        dirsublocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
         Log->Write("INFO:\t Init DirectionSubLOCALFloorfield done");
     }
 
@@ -185,7 +183,6 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building 
 
             Point repPed = Point(0, 0);
             vector<Pedestrian *> neighbours;
-#pragma omp critical
             building->GetGrid()->GetNeighbourhood(ped, neighbours);
 
             int size = (int) neighbours.size();

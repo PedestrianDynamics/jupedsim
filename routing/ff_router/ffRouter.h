@@ -111,7 +111,7 @@ public:
       *
       */
      FFRouter();
-     FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals);
+     FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals, Configuration* config);
      //FFRouter(const Building* const);
 
      /**
@@ -173,6 +173,16 @@ public:
      void FloydWarshall();
 
      /*!
+      * \brief Sets the door that leaves the subroom in _pathsMatrix
+      *
+      * Due to the way we calculate door distances (entries in _pathsMatrix), pedestrians in a corridor
+      * tend to jump from door to door, i.e. they walk to the next door in the correct direction, but they
+      * do not traverse it. This algorithm searches for the door on the way that really leaves the subroom,
+      * and sets this door in _pathsMatrix, which in turn is needed by GetPresumableExitRoute().
+      */
+     void AvoidDoorHopping();
+
+     /*!
       * \brief set all the distances using ff
       */
      //void SetDistances();
@@ -192,27 +202,44 @@ public:
       */
      void save(Pedestrian* const p);
 
+     /*!
+      * \brief Get the route the pedestrian p wants to take (according to _pathsMatrix)
+      * @param p The pedestrian in question
+      * @return A set containing (subroom*, doorUID) pairs. The floorfields needed are inside the subroom, originating from the door.
+      */
+     std::set<std::pair<SubRoom*, int>> GetPresumableExitRoute(Pedestrian* p);
+
 private:
 
 protected:
+     Configuration* _config;
      std::map< std::pair<int, int> , double > _distMatrix;
      std::map< std::pair<int, int> , int >    _pathsMatrix;
+     std::map< std::pair<int, int> , SubRoom* > _subroomMatrix;
      std::vector<int>                         _allDoorUIDs;
      std::vector<int>                         _localShortestSafedPeds;
      const Building*                          _building;
-     std::map<int, LocalFloorfieldViaFM*>     _locffviafm;
+     std::map<int, LocalFloorfieldViaFM*>     _locffviafm; // the actual type might be CentrePointLocalFFViaFM
      FloorfieldViaFM*                         _globalFF;
      std::map<int, Transition*>               _TransByUID;
      std::map<int, Transition*>               _ExitsByUID;
      std::map<int, Crossing*>                 _CroTrByUID;
 
-     std::map<int, int>     goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
-     std::map<int, int>     goalToLineUIDmap2;
-     std::map<int, int>     goalToLineUIDmap3;
+     std::map<int, int>     _goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
+     std::map<int, int>     _goalToLineUIDmap2;
+     std::map<int, int>     _goalToLineUIDmap3;
+     std::map<int, int>     _finalDoors; // _finalDoors[i] the UID of the last door the pedestrian with ID i wants to walk through
 
      int _mode;
+     double _timeToRecalc = 0.;
+     double _recalc_interval;
      bool _hasSpecificGoals;
      bool _targetWithinSubroom;
+     // If we use CentrePointDistance (i.e. CentrePointLocalFFViaFM), some algorithms can maybe be simplified
+     // (AvoidDoorHopping and _subroomMatrix might be unnecessary, and some code in FindExit could go). --f.mack
+     bool _useCentrePointDistance = true;
+     //output filename counter: cnt
+     static int _cnt;
 };
 
 #endif /* FFROUTER_H_ */
