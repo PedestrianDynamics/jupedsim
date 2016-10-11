@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## v0.8.1 [2016-10-11]
 ### Added
 - Tag Sources: new attribute to choose between "greedy" approach and random approach: `gready="true"` (default: `false`)
 - Floor field router. See [usage](http://jupedsim.github.io/jpscore/models/routing/#floorfield-router). 
