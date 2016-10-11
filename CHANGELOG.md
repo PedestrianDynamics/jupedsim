@@ -1,7 +1,7 @@
 # Change Log
-All notable changes to this project will be documented in this file.
+All notable changes to `jpsreport` will be documented in this file.
 
-## JPSreport [unreleased]
+## v0.8.1 [11.10.2016]
 
 ### Added
 
@@ -19,23 +19,23 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- The swith for calculating Individual FD is arraged for each measurement area.
+- The switch for calculating Individual FD is arraged for each measurement area.
 
 - The setting for velocity calculation is changed in inifile. Now velocity can be calculated by projecting to any direction by setting the parameter `set_movement_direction`. The backward movement against the target direction can be considered or removed by setting the parameter `ignore_backward_movement`.
 
 - The way for reading .txt format trajectory file is changed. Now the order of each column in trajectory file is not so important. The trajectory file from JPScore can be analyzed directly.
 
-- The algorithm for loading the '.txt' format trajectory file is modified. Now the order of each column in the file is not so important. JPSreport will search for meaning of each column from the comments (for example"#ID FR X Y Z VD").
+- The algorithm for loading the '.txt' format trajectory file is modified. Now the order of each column in the file is not so important. JPSreport will search for meaning of each column from the comments (for example `#ID FR X Y Z VD`).
 
 ### Fixed
 
 - The script for plot Voronoi cells is modified so that it work when the trajectory files are not the in the same location as the inifile.
 
-- The bug related the issue #54 is fixed.
+- The bug related to #54 is fixed.
 
-- The bug regarding to the issue #43 is fixed.
+- The bug regarding to #43 is fixed.
 
-## JPSreport v0.8
+## v0.8
 
 
 ### Added
@@ -78,7 +78,7 @@ All notable changes to this project will be documented in this file.
 - when path of trajectory is not given absolutely, the default location is the same folder with the inifile
 
 	
-## JPSreport v0.7
+## v0.7
 
 ### Added
 
