@@ -45,7 +45,7 @@ Method_C::~Method_C()
 
 }
 
-bool Method_C::Process (const PedData& peddata)
+bool Method_C::Process (const PedData& peddata, const double& zPos_measureArea)
 {
      _peds_t = peddata.GetPedsFrame();
      _minFrame = peddata.GetMinFrame();
@@ -65,10 +65,11 @@ bool Method_C::Process (const PedData& peddata)
                Log->Write("frame ID = %d",frid);
           }
           vector<int> ids=_peds_t[frameNr];
-          const vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids);
-          const vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids);
-          const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids);
-          OutputClassicalResults(frameNr, ids.size(),XInFrame,YInFrame,VInFrame);
+          vector<int> IdInFrame = peddata.GetIdInFrame(frameNr, ids, zPos_measureArea);
+          const vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids, zPos_measureArea);
+          const vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids, zPos_measureArea);
+          const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
+          OutputClassicalResults(frameNr, IdInFrame.size(),XInFrame,YInFrame,VInFrame);
      }
      fclose(_fClassicRhoV);
      return true;

@@ -25,6 +25,43 @@ im = 3.2
 d = 2 * im / KK
 xi = arange(-im, im + 0.0001, d)
 
+def overlap(start1, end1, start2, end2):
+    """
+    Does the range (start1, end1) overlap with (start2, end2)?
+    not (end1 < start2 or end2 < start1)
+    De Morgan's laws mean that we can change this condition to:
+    """
+    return end1 >= start2 and end2 >= start1
+
+def get_start_end(startframes, endframes):
+    is_overlap = 1
+    at_least_one_overlap = 0
+    while is_overlap:
+        is_overlap = 0
+        startframes0 = []
+        endframes0 = []
+        for (s, e) in zip(startframes, endframes):
+            for (s0, e0) in zip(startframes, endframes):
+                if s != s0 and e != e0 and overlap(s, e, s0, e0):
+                    overlap_s = max(s, s0)
+                    overlap_e = min(e, e0)
+                    is_overlap = 1
+                    # add start of overlap segment
+                    if not overlap_s in startframes0:
+                        startframes0.append(overlap_s)
+                    # add end of overlap segment
+                    if not overlap_e in endframes0:
+                        endframes0.append(overlap_e)
+
+        if is_overlap:
+            startframes = startframes0
+            endframes = endframes0
+            at_least_one_overlap = 1
+
+    if at_least_one_overlap: # this is for the case that we never had overlaps
+        return startframes, endframes
+    else:
+        return startframes0, endframes0
 
 def F(x):
     """
@@ -46,11 +83,6 @@ def func_b(i, k, acf):
     return d * exp(-(xi[i] - xi[k] * acf) * (xi[i] - xi[k] * acf) / (2 * (1 - acf * acf))) / sqrt(
         2 * math.pi * (1 - acf * acf))
 
-
-# - Flow
-# - plot frame x axis
-# - Unities /
-
 def getParserArgs():
     """
 
@@ -66,8 +98,8 @@ def getParserArgs():
                         help="columns to read from file (default 0, 1, 2)")
     parser.add_argument("-xl", "--xlabel", type=str, default="t /s",
                         help="xlabel")
-    parser.add_argument("-yl", "--ylabel", nargs='+', type=str, default=["\rho /m/s", "v m/s"],
-                        help="ylabel")
+    parser.add_argument("-yl", "--ylabels", nargs='+', type=str, default=["\\rho\; /m^{-2}", "v\; /m/s"],
+                        help="ylabels. separate units with \"\;\"")
     parser.add_argument("-rs", "--reference_start", nargs='+', type=int, default=[240, 240],
                         help='Start frame of the reference process in density (default 240)')
     parser.add_argument("-re", "--reference_end", nargs='+', type=int, default=[640, 640],
@@ -244,17 +276,18 @@ def choose_steady_state(column, theta):
         ss.write('%.0f %.0f %.2f %.4f %.4f \n' % (
             steady_start, steady_end, data_ratio, data_mean, data_std))
     ss.close()
-    info_serie = loadtxt('%s/SteadyState_%d_%s.txt' % (filepath, column, filename))
-    if info_serie.shape == (5,):
-        temp = [info_serie]
-        info = array(temp)
-
-    return info, statistics
+    info_serie = atleast_2d(loadtxt('%s/SteadyState_%d_%s.txt' % (filepath, column, filename)))
+    return info_serie, statistics
 
 def plot_series(statistics, theta, column):
     fig = plt.figure(figsize=(11, 10), dpi=100)
-    limit = (int((statistics[-1, 0] / frame) / 10) + 1) * 10
-    plt.plot(statistics[:, 0] / frame, statistics[:, 1], 'b--', lw=2, label=r'S$_{k}$')
+    if xlabel == "frame":
+        fps = 1.0  # hack
+    else:
+        fps = frame
+
+    limit = (int((statistics[-1, 0] / fps) / 10) + 1) * 10
+    plt.plot(statistics[:, 0] / fps, statistics[:, 1], 'b--', lw=2, label=r'S$_{k}$')
     plt.plot([0, limit], [theta, theta], 'r-', lw=2, label=r'$\theta$')
     plt.xlabel(xlabel, fontsize=25)
     plt.ylabel('Statistics %d'%column, fontsize=25)
@@ -263,11 +296,12 @@ def plot_series(statistics, theta, column):
     plt.xlim(0, limit)
     plt.ylim(-10, 120)
     plt.legend(numpoints=2, ncol=1, loc=1, fontsize=20)
+    print('--> %s/cusum_%d_%s.png' % (filepath, column, filename))
     plt.savefig('%s/cusum_%d_%s.png' % (filepath, column, filename))
     plt.close()
 
 
-def plot_steady_state(statistics, data, ref_start, ref_end, info, column):
+def plot_steady_state(statistics, data, ref_start, ref_end, info, start, end, column):
     fig = plt.figure(figsize=(11, 10), dpi=100)
     ax = fig.add_subplot(111)
     if xlabel == "frame":
@@ -276,7 +310,7 @@ def plot_steady_state(statistics, data, ref_start, ref_end, info, column):
         fps = frame
 
     limit = (int((statistics[-1, 0] / fps) / 10) + 1) * 10
-    plt.plot((data[:, 0] + minframe) / fps, data[:, 1], 'b-', lw=2)
+    plt.plot((data[:, 0] + minframe) / fps, data[:, column], 'b-', lw=2)
     plt.plot([ref_start / fps, ref_start / fps], [0, 50], 'g--', lw=2, label='reference')
     plt.plot([ref_end / fps, ref_end / fps], [0, 50], 'g--', lw=2)
     for i in range(len(info[:, 0])):
@@ -285,23 +319,24 @@ def plot_steady_state(statistics, data, ref_start, ref_end, info, column):
                                        [info[i, 1] / fps, 50],
                                        [info[i, 0] / fps, 50]],
                                       closed=True, fill=False,
-                                      color='r', hatch='/', label='steady (%d)'%column))
+                                      color='r', hatch='/', label='steady ($%s$)'%ylabels[column-1].split("\;")[0]))
 
-    for i in range(len(info[:, 0])):
-        ax.add_patch(mpatches.Polygon([[info[i, 0] / fps, 0],
-                                       [info[i, 1] / fps, 0],
-                                       [info[i, 1] / fps, 50],
-                                       [info[i, 0] / fps, 50]],
+    if start != end:
+        ax.add_patch(mpatches.Polygon([[start / fps, 0],
+                                       [end / fps, 0],
+                                       [end / fps, 50],
+                                       [start / fps, 50]],
                                       closed=True, fill=True,
                                       color='y', alpha=0.2, label='steady (final)'))
 
     plt.xlabel(xlabel, fontsize=25)
-    plt.ylabel(r'$%s$'%ylabel[column-1], fontsize=25)
+    plt.ylabel(r'$%s$'%ylabels[column-1], fontsize=25)
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
     plt.xlim(0, limit)
     plt.ylim(0, int(max(data[:, 1])) + 2)
     plt.legend(numpoints=1, ncol=1, loc=1, fontsize=20)
+    print('--> %s/SteadyState_%d_%s.png' % (filepath, column, filename))
     plt.savefig('%s/SteadyState_%d_%s.png' % (filepath, column, filename))
     plt.close()
 
@@ -315,13 +350,13 @@ if __name__ == '__main__':
     frame = args.fps
     columns = args.columns
     xlabel = args.xlabel
-    ylabel = args.ylabel
+    ylabels = args.ylabels
     # sanity check
 
     if not args.automatic: # in case references are manually given, lengths should be correct
-        assert (len(columns)-1) == len(ref_start) == len(ref_end) == len(ylabel),\
-            "mismatch lengths.\n\t columns: %s (first is frame)\n\t ref_start: %s\n\t ref_end: %s\n ylabel: %s"%\
-            (", ".join(map(str, columns)), ", ".join(map(str, ref_start)), ", ".join(map(str, ref_end)), ", ".join(map(str, ylabel)))
+        assert (len(columns)-1) == len(ref_start) == len(ref_end) == len(ylabels),\
+            "mismatch lengths.\n\t columns: %s (first is frame)\n\t ref_start: %s\n\t ref_end: %s\n\t ylabels: %s"%\
+            (", ".join(map(str, columns)), ", ".join(map(str, ref_start)), ", ".join(map(str, ref_end)), ", ".join(map(str, ylabels)))
 
     # read input data
     try:
@@ -330,18 +365,37 @@ if __name__ == '__main__':
         exit("Can not open file <%s>" % input_file)
 
     data = data[data[:, 1] != 0] # todo: why?
+    if args.automatic:
+        ref_start = []
+        ref_end = []
+        for c in range(1, len(columns)):
+            start_frame = data[0, 0]
+            end_frame = data[-1, 0]
+            ref_start.append(int(1./3*(end_frame-start_frame)))
+            ref_end.append(int(2./3*(end_frame-start_frame)))
+
+        print("Automatic mode:")
+        print("\t ref_start: %s"%", ".join(map(str, ref_start)))
+        print("\t ref_end  : %s"%", ".join(map(str, ref_end)))
+
     minframe = data[0, 0]
     data[:, 0] = data[:, 0] - minframe
 
     # get filepath and filename
     filename = os.path.basename(input_file).split(".")[0]
     filepath = os.path.dirname(input_file)
+    filepath = os.path.join(filepath, "results_%s"%filename)
+    if not os.path.exists(filepath):
+        os.makedirs(filepath)
+
     print('file path = %s' % filepath)
     print('file name = %s' % filename)
 
     ia, ib, dnorm = init_parameters()
     starts = []  # collect start of steady state for all series
     ends = [] # collect end of steady state for all series
+    infos = []
+    all_statistics = []
     for i in range(len(columns)-1):
         ref_acf, ref_mean, ref_std = set_ref_series(data, i+1, ref_start[i], ref_end[i])
         # calculate theta rho
@@ -351,6 +405,8 @@ if __name__ == '__main__':
         calculate_statistics(data, i+1, ref_mean, ref_std)
         # choose steady state
         info, statistics = choose_steady_state(i+1, theta)
+        infos.append(info)
+        all_statistics.append(statistics)
         print('+------------------------------------------------------------------------------+')
         for j in range(info.shape[0]):
             print('steady state of series %d (%d): from %d (%.1f s) to %d (%.1f s) [ratio=%.2f, mean=%.2f, std=%.2f]' % (
@@ -362,11 +418,8 @@ if __name__ == '__main__':
             starts.append(info[j][0])
 
         if plotfigs == 'yes':
-            print('Plotting figures...')
             # plot cusum
             plot_series(statistics, theta, i+1)
-            # plot steady
-            plot_steady_state(statistics, data, ref_start[i], ref_end[i], info, i+1)
 
         print('+------------------------------------------------------------------------------+')
         os.remove('%s/cusum_%d_%s.txt' % (filepath, i+1, filename))
@@ -374,53 +427,38 @@ if __name__ == '__main__':
     # choose steady state
     ss = open('%s/SteadyState_%s.txt' % (filepath, filename), 'w')
     ss.write('# start end ratio \n')
-    print "start frames: ", starts
-    print "end frames: ", ends
-    mix_start = max(starts)
-    mix_end = min(ends)
-    if mix_start < mix_end:
-        ss_data_ratio = (mix_end - mix_start) / len(data[:, 0]) * 100
-        ss.write('%.0f %.0f %.2f \n' % (mix_start, mix_end, ss_data_ratio))
+    print ("start frames: %s" % ", ".join(map(str, starts)))
+    print ("end frames: %s" % ", ".join(map(str, ends)))
+    mix_starts, mix_ends = get_start_end(starts, ends)
+    if mix_starts and mix_ends: #lists are not empty --> there is overlap(s)
+        for (mix_start, mix_end) in zip(mix_starts, mix_ends):
+            ss_data_ratio = (mix_end - mix_start) / len(data[:, 0]) * 100
+            ss.write('%.0f %.0f %.2f \n' % (mix_start, mix_end, ss_data_ratio))
+            print('+ final steady state is from %d (%.1f s) to %d (%.1f s)  [ratio=%.2f]' %
+                  (mix_start, mix_start / frame, mix_end, mix_end / frame, ss_data_ratio))
+
+        print('Steady state detected successfully!')
+        print('+------------------------------------------------------------------------------+')
+    else:
+        print('Steady state detected with problems: ')
+        print('mix_starts: %f'%mix_starts)
+        print('mix_ends: %f'%mix_ends)
+        print('+------------------------------------------------------------------------------+')
+
+    if plotfigs == 'yes':
+        # plot steady
+        for (mix_start, mix_end) in zip(mix_starts, mix_ends):
+            info = [mix_start, mix_end]
+            for i in range(len(columns)-1):
+                plot_steady_state(
+                    all_statistics[i],
+                    data,
+                    ref_start[i],
+                    ref_end[i],
+                    infos[i],
+                    mix_start,
+                    mix_end,
+                    i+1
+                )
 
     ss.close()
-    info = loadtxt('%s/SteadyState_%s.txt' % (filepath, filename))
-    print('final steady state is  from %d (%.1f s) to %d (%.1f s)  [ratio=%.2f]' %
-          (mix_start, mix_start / frame, mix_end, mix_end / frame, ss_data_ratio))
-
-
-    print('Steady state detected successfully!')
-
-
-
-
-        # choose steady state v
-    # info_v, statistics_v = choose_steady_state(2, v_theta)
-
-    # print('+--------------------------------------------------------------------------------------------+')
-    # for i in range(info_v.shape[0]):
-        # print('steady state of v (%d): from %d (%.1f s) to %d (%.1f s) [ratio=%.2f, mean=%.2f, std=%.2f]' % (
-            # i,
-            # info_v[i][0], info_v[i][0] / frame, info_v[i][1], info_v[i][1] / frame,
-            # info_v[i][2], info_v[i][3], info_v[i][4]))
-        # print('+--------------------------------------------------------------------------------------------+')
-
-    # calculate steady state
-
-        
-    # for i in range(len(info_rho[:, 0])):
-    #     for j in range(len(info_v[:, 0])):
-    #         mix_start = max(info_rho[i, 0], info_v[j, 0])
-    #         mix_end = min(info_rho[i, 1], info_v[j, 1])
-    #         if mix_start < mix_end:
-    #             ss_data_ratio = (mix_end - mix_start) / len(data[:, 0]) * 100
-    #             ss.write('%.0f %.0f %.2f \n' % (mix_start, mix_end, ss_data_ratio))
-    # ss.close()
-    # info = loadtxt('%s/SteadyState_%s.txt' % (filepath, filename))
-    # if info.shape == (3,):
-        # temp = [info]
-        # info = array(temp)
-
-    # print('final steady state is  from %d (%.1f s) to %d (%.1f s)  [ratio=%.2f]' %
-          # (info[0][0], info[0][0] / frame, info[0][1], info[0][1] / frame, info[0][2]))
-    # print('+--------------------------------------------------------------------------------------------+')
-

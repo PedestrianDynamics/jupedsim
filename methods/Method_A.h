@@ -46,8 +46,8 @@ public:
      Method_A();
      virtual ~Method_A();
      void SetMeasurementArea (MeasurementArea_L* area);
-     void SetTimeInterval(const int& deltaT);
-     bool Process (const PedData& peddata,const std::string& scriptsLocation);
+     void SetTimeInterval(int deltaT);
+     bool Process (const PedData& peddata,const std::string& scriptsLocation, const double& zPos_measureArea);
      void SetPlotTimeSeries(bool plotTimeseries);
 
 private:
@@ -72,6 +72,7 @@ private:
      int _deltaT;
 
      bool _plotTimeSeries;
+     int _minId;
      /**
       * Calculate the Flow rate during a certain time interval DeltaT and the mean velocity passing a line.
       * Note: here the time interval in calculating the flow rate is modified.

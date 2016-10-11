@@ -56,6 +56,8 @@ Method_D::Method_D()
      _areaForMethod_D = NULL;
      _plotVoronoiCellData=false;
      _isOneDimensional=false;
+     _startFrame =-1;
+     _stopFrame = -1;
 }
 
 Method_D::~Method_D()
@@ -63,7 +65,7 @@ Method_D::~Method_D()
 
 }
 
-bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocation)
+bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocation, const double& zPos_measureArea)
 {
 	 _scriptsLocation = scriptsLocation;
      _peds_t = peddata.GetPedsFrame();
@@ -72,6 +74,24 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
      _measureAreaId = boost::lexical_cast<string>(_areaForMethod_D->_id);
      _fps =peddata.GetFps();
      int minFrame = peddata.GetMinFrame();
+     if(_startFrame!=_stopFrame)
+     {
+         	 if(_startFrame==-1)
+         	 {
+         		_startFrame = minFrame;
+         	 }
+         	 if(_stopFrame==-1)
+         	 {
+         		_stopFrame = peddata.GetNumFrames()+minFrame;
+         	 }
+    	 	 for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
+         	 {
+         		 if((ite->first + minFrame)<_startFrame || (ite->first + minFrame) >_stopFrame)
+         		 {
+         			_peds_t.erase(ite);
+         		 }
+         	 }
+     }
      OpenFileMethodD();
      if(_calcIndividualFD)
      {
@@ -93,11 +113,10 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
                Log->Write("frame ID = %d",frid);
           }
           vector<int> ids=_peds_t[frameNr];
-          vector<int> IdInFrame = peddata.GetIdInFrame(ids);
-          vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids);
-          vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids);
-          vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids);
-
+          vector<int> IdInFrame = peddata.GetIdInFrame(frameNr, ids, zPos_measureArea);
+          vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids, zPos_measureArea);
+          vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids, zPos_measureArea);
+          vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
           //vector int to_remove
           //------------------------------Remove peds outside geometry------------------------------------------
           for( int i=0;i<(int)IdInFrame.size();i++)
@@ -114,7 +133,7 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
           }
           int NumPeds = IdInFrame.size();
           //---------------------------------------------------------------------------------------------------------------
-          if(NumPeds>2)
+          if(NumPeds>3)
           {
         	  if(_isOneDimensional)
         	  {
@@ -141,7 +160,7 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
 					   {
 							if(false==_isOneDimensional)
 							{
-								 GetIndividualFD(polygons,VInFrame, IdInFrame, _areaIndividualFD, str_frid);
+								 GetIndividualFD(polygons,VInFrame, IdInFrame, _areaForMethod_D->_poly, str_frid);
 							}
 					   }
 					   if(_getProfile)
@@ -207,11 +226,11 @@ bool Method_D::OpenFileIndividualFD()
      {
     	 if(_isOneDimensional)
     	 {
-    		 fprintf(_fIndividualFD,"#framerate:\t%.2f\n\n#Frame	\t	PedId	\t	headway(m)\t	Individual velocity(m/s)\n",_fps);
+    		 fprintf(_fIndividualFD,"#framerate (fps):\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-1)) \t 	Individual velocity(m/s)	\t	Headway(m)\n",_fps);
     	 }
     	 else
     	 {
-    		 fprintf(_fIndividualFD,"#framerate:\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-2))\t	Individual velocity(m/s)\n",_fps);
+    		 fprintf(_fIndividualFD,"#framerate (fps):\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-2)) \t 	Individual velocity(m/s)\n",_fps);
     	 }
           return true;
      }
@@ -229,10 +248,10 @@ vector<polygon_2d> Method_D::GetPolygons(vector<double>& XInFrame, vector<double
      }
      polygons = vd.cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
 
-/*     for(auto && p:polygons)
+     for(auto && p:polygons)
      {
           ReducePrecision(p);
-     }*/
+     }
      return polygons;
 }
 /**
@@ -438,10 +457,10 @@ void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polyg
 
      if(_plotVoronoiCellData)
      {
-		 string parameters_rho="python "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
-				 " -g "+_geometryFileName;
+    	 string parameters_rho="python "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+				 " -g "+_geometryFileName+" -p "+_trajectoryPath;
 		 string parameters_v="python "+_scriptsLocation+"/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
-					 " -g "+_geometryFileName;
+					 " -g "+_geometryFileName+" -p "+_trajectoryPath;
 		 //Log->Write("INFO:\t%s",parameters_rho.c_str());
 		 Log->Write("INFO:\tPlotting Voronoi Cell at the frame <%s>",frameId.c_str());
 		 system(parameters_rho.c_str());
@@ -478,9 +497,14 @@ void Method_D::SetCalculateIndividualFD(bool individualFD)
      _calcIndividualFD = individualFD;
 }
 
-void Method_D::SetAreaIndividualFD(polygon_2d areaindividualFD)
+void Method_D::SetStartFrame(int startFrame)
 {
-	_areaIndividualFD = areaindividualFD;
+	_startFrame=startFrame;
+}
+
+void Method_D::SetStopFrame(int stopFrame)
+{
+	_stopFrame=stopFrame;
 }
 
 void Method_D::Setcutbycircle(double radius,int edges)
@@ -506,6 +530,11 @@ void Method_D::SetGeometryBoundaries(double minX, double minY, double maxX, doub
 void Method_D::SetGeometryFileName(const std::string& geometryFile)
 {
 	_geometryFileName=geometryFile;
+}
+
+void Method_D::SetTrajectoriesLocation(const std::string& trajectoryPath)
+{
+     _trajectoryPath=trajectoryPath;
 }
 
 void Method_D::SetGridSize(double x, double y)
@@ -543,8 +572,8 @@ void Method_D::ReducePrecision(polygon_2d& polygon)
 {
 	for(auto&& point:polygon.outer())
      {
-          point.x(round(point.x() * 100.0) / 100.0);
-          point.y(round(point.y() * 100.0) / 100.0);
+          point.x(round(point.x() * 100000000000.0) / 100000000000.0);
+          point.y(round(point.y() * 100000000000.0) / 100000000000.0);
      }
 }
 
@@ -616,7 +645,8 @@ void Method_D::CalcVoronoiResults1D(vector<double>& XInFrame, vector<double>& VI
 		if(_calcIndividualFD)
 		{
 			double headway=(XRightNeighbor[i] - XInFrame[i])*CMtoM;
-			fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\n",frid.c_str(), IdInFrame[i], headway,VInFrame[i]);
+			double individualDensity = 2.0/((XRightNeighbor[i] - XLeftNeighbor[i])*CMtoM);
+			fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\t%.3f\n",frid.c_str(), IdInFrame[i], individualDensity,VInFrame[i], headway);
 		}
 	}
 	VoronoiDensity/=((right_boundary-left_boundary)*CMtoM);

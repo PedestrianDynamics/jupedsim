@@ -53,9 +53,8 @@ class Method_D
 public:
      Method_D();
      virtual ~Method_D();
-     bool Process (const PedData& peddata,const std::string& scriptsLocation);
+     bool Process (const PedData& peddata,const std::string& scriptsLocation, const double& zPos_measureArea);
      void SetCalculateIndividualFD(bool individualFD);
-     void SetAreaIndividualFD(polygon_2d areaindividualFD);
      void Setcutbycircle(double radius,int edges);
      void SetGeometryPolygon(polygon_2d geometryPolygon);
      void SetGeometryFileName(const std::string& geometryFile);
@@ -66,6 +65,9 @@ public:
      void SetPlotVoronoiGraph(bool plotVoronoiGraph);
      void SetMeasurementArea (MeasurementArea_B* area);
      void SetDimensional (bool dimension);
+     void SetTrajectoriesLocation(const std::string& trajectoryPath);
+     void SetStartFrame(int startFrame);
+     void SetStopFrame(int stopFrame);
 
 private:
      std::map<int , std::vector<int> > _peds_t;
@@ -96,6 +98,10 @@ private:
      bool OpenFileMethodD();
      bool OpenFileIndividualFD();
      std::string _geometryFileName;
+     std::string _trajectoryPath;
+     int _startFrame;
+     int _stopFrame;
+
 
      std::vector<polygon_2d> GetPolygons(std::vector<double>& XInFrame, std::vector<double>& YInFrame,
                std::vector<double>& VInFrame, std::vector<int>& IdInFrame);

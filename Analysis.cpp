@@ -71,7 +71,6 @@ Analysis::Analysis()
      _building = NULL;
      _projectRootDir="";
      _deltaF=5;   // half of the time interval that used to calculate instantaneous velocity of ped i. Here v_i = (X(t+deltaF) - X(t+deltaF))/(2*deltaF).   X is location.
-     _deltaT =160;   // the time interval to calculate the classic flow
      _DoesUseMethodA = false; 						// Method A (Zhang2011a)
      _DoesUseMethodB = false; 			// Method B (Zhang2011a)
      _DoesUseMethodC = false; 					// Method C //calculate and save results of classic in separate file
@@ -81,7 +80,7 @@ Analysis::Analysis()
      _outputGraph = false;   // Whether output the data for plot the fundamental diagram each frame
      _calcIndividualFD = false; //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
      _vComponent = "B"; // to mark whether x, y or x and y coordinate are used when calculating the velocity
-
+     _IgnoreBackwardMovement = false;
      _grid_size_X = 0.10;   // the size of the grid
      _grid_size_Y = 0.10;
      _lowVertexX = 0;// LOWest vertex of the geometry (x coordinate)
@@ -94,10 +93,6 @@ Analysis::Analysis()
      _trajFormat=FileFormat::FORMAT_PLAIN;
      _isOneDimensional=false;
      _plotGraph=false;
-     _plotTimeseriesA=false;
-     _plotTimeseriesC=false;
-     _plotTimeseriesD=false;
-
 }
 
 Analysis::~Analysis()
@@ -152,6 +147,8 @@ void Analysis::InitArgs(ArgumentParser* args)
           {
                _areaForMethod_A.push_back(dynamic_cast<MeasurementArea_L*>( args->GetMeasurementArea(Measurement_Area_IDs[i])));
           }
+          _deltaT = args->GetTimeIntervalA();
+          _plotTimeseriesA=args->GetIsPlotTimeSeriesA();
      }
 
      if(args->GetIsMethodB()) {
@@ -170,6 +167,7 @@ void Analysis::InitArgs(ArgumentParser* args)
           {
                _areaForMethod_C.push_back(dynamic_cast<MeasurementArea_B*>( args->GetMeasurementArea(Measurement_Area_IDs[i])));
           }
+          _plotTimeseriesC=args->GetIsPlotTimeSeriesC();
      }
 
      if(args ->GetIsMethodD()) {
@@ -179,21 +177,20 @@ void Analysis::InitArgs(ArgumentParser* args)
           {
                _areaForMethod_D.push_back(dynamic_cast<MeasurementArea_B*>( args->GetMeasurementArea(Measurement_Area_IDs[i])));
           }
+          _StartFramesMethodD = args->GetStartFramesMethodD();
+          _StopFramesMethodD = args->GetStopFramesMethodD();
+          _IndividualFDFlags = args->GetIndividualFDFlags();
+          _plotTimeseriesD=args->GetIsPlotTimeSeriesD();
      }
 
      _deltaF = args->GetDelatT_Vins();
-     _deltaT = args->GetTimeIntervalA();
      _cutByCircle = args->GetIsCutByCircle();
      _getProfile = args->GetIsGetProfile();
      _outputGraph = args->GetIsOutputGraph();
      _plotGraph = args->GetIsPlotGraph();
-     _plotTimeseriesA=args->GetIsPlotTimeSeriesA();
-     _plotTimeseriesC=args->GetIsPlotTimeSeriesC();
-     _plotTimeseriesD=args->GetIsPlotTimeSeriesD();
      _isOneDimensional=args->GetIsOneDimensional();
-     _calcIndividualFD = args->GetIsIndividualFD();
-     _areaIndividualFD= args->GetAreaIndividualFD();
      _vComponent = args->GetVComponent();
+     _IgnoreBackwardMovement =args->GetIgnoreBackwardMovement();
      _grid_size_X = int(args->GetGridSizeX());
      _grid_size_Y = int(args->GetGridSizeY());
      _geoPoly = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_D);
@@ -224,7 +221,7 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const std::string& geometryFile
      //loop over all areas
      for(auto&& area: areas)
      {
-          //search for the subroom that containst that area
+          //search for the subroom that contains that area
           for (auto&& it_room : _building->GetAllRooms())
           {
                for (auto&& it_sub : it_room.second->GetAllSubRooms())
@@ -284,7 +281,7 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const std::string& geometryFile
 int Analysis::RunAnalysis(const string& filename, const string& path)
 {
      PedData data;
-     if(data.ReadData(_projectRootDir, path, filename, _trajFormat, _deltaF, _vComponent)==false)
+     if(data.ReadData(_projectRootDir, path, filename, _trajFormat, _deltaF, _vComponent, _IgnoreBackwardMovement)==false)
      {
           Log->Write("ERROR:\tCould not parse the file");
           return -1;
@@ -332,9 +329,9 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
           {
                Method_A method_A ;
                method_A.SetMeasurementArea(_areaForMethod_A[i]);
-               method_A.SetTimeInterval(_deltaT);
-               method_A.SetPlotTimeSeries(_plotTimeseriesA);
-               bool result_A=method_A.Process(data,_scriptsLocation);
+               method_A.SetTimeInterval(_deltaT[i]);
+               method_A.SetPlotTimeSeries(_plotTimeseriesA[i]);
+               bool result_A=method_A.Process(data,_scriptsLocation, _areaForMethod_A[i]->_zPos);
                if(result_A)
                {
                     Log->Write("INFO:\tSuccess with Method A using measurement area id %d!\n",_areaForMethod_A[i]->_id);
@@ -372,11 +369,11 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
           {
                Method_C method_C;
                method_C.SetMeasurementArea(_areaForMethod_C[i]);
-               bool result_C =method_C.Process(data);
+               bool result_C =method_C.Process(data,_areaForMethod_C[i]->_zPos);
                if(result_C)
                {
                     Log->Write("INFO:\tSuccess with Method C using measurement area id %d!\n",_areaForMethod_C[i]->_id);
-             	   if(_plotTimeseriesC)
+             	   if(_plotTimeseriesC[i])
  					 {
  					 string parameters_Timeseries="python \""+_scriptsLocation+"/_Plot_timeseries_rho_v.py\" -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
  								" -f "+boost::lexical_cast<std::string>(data.GetFps());
@@ -397,6 +394,9 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
           for(signed int i=0; i<_areaForMethod_D.size(); i++)
           {
                Method_D method_D;
+               method_D.SetStartFrame(_StartFramesMethodD[i]);
+               method_D.SetStopFrame(_StopFramesMethodD[i]);
+               method_D.SetCalculateIndividualFD(_IndividualFDFlags[i]);
                method_D.SetGeometryPolygon(_geoPoly[_areaForMethod_D[i]->_id]);
                method_D.SetGeometryFileName(_geometryFileName);
                method_D.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
@@ -404,19 +404,18 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                method_D.SetOutputVoronoiCellData(_outputGraph);
                method_D.SetPlotVoronoiGraph(_plotGraph);
                method_D.SetDimensional(_isOneDimensional);
-               method_D.SetCalculateIndividualFD(_calcIndividualFD);
-               method_D.SetAreaIndividualFD(_areaIndividualFD);
                method_D.SetCalculateProfiles(_getProfile);
+               method_D.SetTrajectoriesLocation(path);
                if(_cutByCircle)
                {
                     method_D.Setcutbycircle(_cutRadius, _circleEdges);
                }
                method_D.SetMeasurementArea(_areaForMethod_D[i]);
-               bool result_D = method_D.Process(data,_scriptsLocation);
+               bool result_D = method_D.Process(data,_scriptsLocation, _areaForMethod_D[i]->_zPos);
                if(result_D)
                {
             	   Log->Write("INFO:\tSuccess with Method D using measurement area id %d!\n",_areaForMethod_D[i]->_id);
-            	   if(_plotTimeseriesD)
+            	   if(_plotTimeseriesD[i])
 					 {
 					 string parameters_Timeseries="python \""+_scriptsLocation+"/_Plot_timeseries_rho_v.py\" -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
 								" -f "+boost::lexical_cast<std::string>(data.GetFps());

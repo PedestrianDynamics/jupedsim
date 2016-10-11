@@ -16,6 +16,7 @@ def getParserArgs():
 	parser.add_argument("-f", "--filepath", default="./", help='give the path of source file')
 	parser.add_argument("-n", "--namefile", help='give the name of the source file')
 	parser.add_argument("-g", "--geoname", help='give the name of the geometry file')
+	parser.add_argument("-p", "--trajpath", help='give the path of the trajectory file')
 	args = parser.parse_args()
 	return args
 
@@ -26,10 +27,11 @@ if __name__ == '__main__':
    sys.path.append(filepath)
    namefile = args.namefile
    geoFile=args.geoname
+   trajpath=args.trajpath
    geoLocation = filepath.split("Output")[0]
    trajName = namefile.split(".")[0]
    trajType = namefile.split(".")[1].split("_")[0]
-   trajFile = geoLocation+trajName+"."+trajType
+   trajFile = trajpath+trajName+"."+trajType
    frameNr=int(namefile.split("_")[-1])
    geominX, geomaxX, geominY, geomaxY = get_geometry_boundary(geoFile)
 

@@ -27,7 +27,8 @@
  **/
 
 #include "PedData.h"
-#include  <cmath>
+#include <cmath>
+#include <string>
 
 using std::string;
 using std::map;
@@ -44,12 +45,13 @@ PedData::~PedData()
 
 }
 
-bool PedData::ReadData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& trajformat, int deltaF, std::string vComponent)
+bool PedData::ReadData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& trajformat, int deltaF, std::string vComponent, const bool IgnoreBackwardMovement)
 {
      _minID = INT_MAX;
      _minFrame = INT_MAX;
      _deltaF = deltaF;
      _vComponent = vComponent;
+     _IgnoreBackwardMovement=IgnoreBackwardMovement;
      _projectRootDir = projectRootDir;
      _trajName = filename;
 
@@ -80,6 +82,7 @@ bool PedData::InitializeVariables(const string& filename)
 {
      vector<double> xs;
      vector<double> ys;
+     vector<double> zs;
      vector<string> vcmp; // the direction identification for velocity calculation
      vector<int> _IdsTXT;   // the Id data from txt format trajectory data
      vector<int> _FramesTXT;  // the Frame data from txt format trajectory data
@@ -95,6 +98,12 @@ bool PedData::InitializeVariables(const string& filename)
      {
           string line;
           int lineNr=1;
+          int pos_id=0;
+          int pos_fr=0;
+          int pos_x=0;
+          int pos_y=0;
+          int pos_z=0;
+          int pos_vd=0; //velocity direction
           while ( getline(fdata,line) )
           {
                //looking for the framerate which is suppposed to be at the second position
@@ -109,28 +118,48 @@ bool PedData::InitializeVariables(const string& filename)
                          Log->Write("INFO:\tFrame rate fps: <%.2f>", _fps);
                     }
 
+                    if(line.find("ID") != std::string::npos && line.find("FR") != std::string::npos && line.find("X") != std::string::npos)
+                    {
+                    	std::vector<std::string> strs1;
+                    	line.erase(0,1);
+                    	boost::split(strs1, line , boost::is_any_of("\t"),boost::token_compress_on);
+                    	vector<string>::iterator it_id;
+                    	it_id=find(strs1.begin(),strs1.end(),"ID");
+                    	pos_id = std::distance(strs1.begin(), it_id);
+                    	it_id=find(strs1.begin(),strs1.end(),"FR");
+                    	pos_fr = std::distance(strs1.begin(), it_id);
+                    	it_id=find(strs1.begin(),strs1.end(),"X");
+                    	pos_x = std::distance(strs1.begin(), it_id);
+                    	it_id=find(strs1.begin(),strs1.end(),"Y");
+                    	pos_y = std::distance(strs1.begin(), it_id);
+                    	it_id=find(strs1.begin(),strs1.end(),"Z");
+						pos_z = std::distance(strs1.begin(), it_id);
+						it_id=find(strs1.begin(),strs1.end(),"VD");
+						pos_vd = std::distance(strs1.begin(), it_id);
+                    }
+
                }
                else if ( line[0] != '#' && !(line.empty()) )
                {
 
                     std::vector<std::string> strs;
                     boost::split(strs, line , boost::is_any_of("\t "),boost::token_compress_on);
-
-                    if(strs.size() < 4)
+                    if(strs.size() < 5)
                     {
                          Log->Write("ERROR:\t There is an error in the file at line %d", lineNr);
                          return false;
                     }
 
-                    _IdsTXT.push_back(atoi(strs[0].c_str()));
-                    _FramesTXT.push_back(atoi(strs[1].c_str()));
-                    xs.push_back(atof(strs[2].c_str()));
-                    ys.push_back(atof(strs[3].c_str()));
+                    _IdsTXT.push_back(atoi(strs[pos_id].c_str()));
+                    _FramesTXT.push_back(atoi(strs[pos_fr].c_str()));
+                    xs.push_back(atof(strs[pos_x].c_str()));
+                    ys.push_back(atof(strs[pos_y].c_str()));
+                    zs.push_back(atof(strs[pos_z].c_str()));
                     if(_vComponent=="F")
                     {
-						if(strs.size() >= 6)
+						if(strs.size() >= 6 && pos_vd < (int)strs.size() )
 						{
-							vcmp.push_back(strs[5].c_str());
+							vcmp.push_back(strs[pos_vd].c_str());
 						}
 						else
 						{
@@ -153,37 +182,42 @@ bool PedData::InitializeVariables(const string& filename)
 
      //Total number of agents
      _numPeds = *max_element(_IdsTXT.begin(),_IdsTXT.end()) - _minID+1;
-
      CreateGlobalVariables(_numPeds, _numFrames);
 
-     std::vector<int> firstFrameIndex;  //The first frame index of each pedestrian
-     std::vector<int> lastFrameIndex;	 //The last frame index of each pedestrian
-     int prevValue = _IdsTXT[0] - 1;
-     for (size_t i = 0; i < _IdsTXT.size(); i++)
+     for(int i=_minID;i<_minID+_numPeds; i++)
      {
-          if (prevValue != _IdsTXT[i])
-          {
-               firstFrameIndex.push_back(i);
-               prevValue = _IdsTXT[i];
-          }
-     }
-     for (size_t  i = 1; i < firstFrameIndex.size(); i++)
-     {
-          lastFrameIndex.push_back(firstFrameIndex[i] - 1);
-     }
-     lastFrameIndex.push_back(_IdsTXT.size() - 1);
+    	 int firstFrameIndex=INT_MAX;   //The first frame index of a pedestrian
+    	 int lastFrameIndex=-1;    //The last frame index of a pedestrian
+    	 int actual_totalframe=0;  //The total data points of a pedestrian in the trajectory
+    	 for (auto j = _IdsTXT.begin(); j != _IdsTXT.end(); ++j)
+    	     {
+    	         if (*j ==i)
+    	         {
+    	             int pos = std::distance(_IdsTXT.begin(), j);
+    	             if(pos<firstFrameIndex)
+    	             {
+    	            	 firstFrameIndex=pos;
+    	             }
+    	             if(pos>lastFrameIndex)
+    	             {
+    	            	 lastFrameIndex=pos;
+    	             }
+    	             actual_totalframe++;
+    	         }
+    	     }
+    	 if(lastFrameIndex==0)
+    	 {
+    		 Log->Write("Warning:\tThere is no trajectory for ped with ID <%d>!",i);
+    	 }
+    	 _firstFrame[i-_minID] = _FramesTXT[firstFrameIndex] - _minFrame;
+    	 _lastFrame[i-_minID] = _FramesTXT[lastFrameIndex] - _minFrame;
 
-     for (unsigned int i = 0; i < firstFrameIndex.size(); i++)
-     {
-          _firstFrame[i] = _FramesTXT[firstFrameIndex[i]] - _minFrame;
-          _lastFrame[i] = _FramesTXT[lastFrameIndex[i]] - _minFrame;
-          int actual_totalframe=lastFrameIndex[i]-firstFrameIndex[i]+1;
-          int expect_totalframe=_lastFrame[i]-_firstFrame[i]+1;
-          if(actual_totalframe != expect_totalframe)
-          {
-              Log->Write("Error:\tThe trajectory of ped with ID <%d> is not continuous. Please modify the trajectory file!",_IdsTXT[firstFrameIndex[i]]);
-              return false;
-          }
+	     int expect_totalframe=_lastFrame[i-_minID]-_firstFrame[i-_minID]+1;
+	     if(actual_totalframe != expect_totalframe)
+	     {
+		    Log->Write("Error:\tThe trajectory of ped with ID <%d> is not continuous. Please modify the trajectory file!",i);
+		    return false;
+	     }
      }
 
      for(unsigned int i = 0; i < _IdsTXT.size(); i++)
@@ -192,8 +226,10 @@ bool PedData::InitializeVariables(const string& filename)
           int frm = _FramesTXT[i] - _minFrame;
           double x = xs[i]*M2CM;
           double y = ys[i]*M2CM;
+          double z = zs[i]*M2CM;
           _xCor[ID][frm] = x;
           _yCor[ID][frm] = y;
+          _zCor[ID][frm] = z;
           if(_vComponent == "F")
           {
         	  _vComp[ID][frm] = vcmp[i];
@@ -297,17 +333,19 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
                //get agent id, x, y
                double x= atof(xAgent->Attribute("x"));
                double y= atof(xAgent->Attribute("y"));
+               double z= atof(xAgent->Attribute("z"));
                int ID= atoi(xAgent->Attribute("ID"))-_minID;
 
 
                _peds_t[frameNr].push_back(ID);
                _xCor[ID][frameNr] =  x*M2CM;
                _yCor[ID][frameNr] =  y*M2CM;
+               _zCor[ID][frameNr] =  z*M2CM;
                if(_vComponent == "F")
                {
-            	   if(xAgent->Attribute("vc"))
+            	   if(xAgent->Attribute("VD"))
             	   {
-            	       _vComp[ID][frameNr] = *string(xAgent->Attribute("vc")).c_str();
+            	       _vComp[ID][frameNr] = *string(xAgent->Attribute("VD")).c_str();
             	   }
             	   else
             	   {
@@ -347,18 +385,48 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
      return true;
 }
 
-vector<double> PedData::GetVInFrame(int frame, const vector<int>& ids) const
+vector<double> PedData::GetVInFrame(int frame, const vector<int>& ids, double zPos) const
 {
      vector<double> VInFrame;
      for(unsigned int i=0; i<ids.size();i++)
      {
           int id = ids[i];
           int Tpast = frame - _deltaF;
-          int Tfuture = frame + _deltaF;
-          double v = GetInstantaneousVelocity(frame, Tpast, Tfuture, id, _firstFrame, _lastFrame, _xCor, _yCor);
-          VInFrame.push_back(v);
+		  int Tfuture = frame + _deltaF;
+		  double v = GetInstantaneousVelocity1(frame, Tpast, Tfuture, id, _firstFrame, _lastFrame, _xCor, _yCor);
+          if(zPos<1000000.0)
+          {
+        	  if(fabs(_zCor[id][frame]-zPos*M2CM)<J_EPS_EVENT)
+        	  {
+        		  VInFrame.push_back(v);
+        	  }
+          }
+          else
+          {
+        	  VInFrame.push_back(v);
+          }
      }
      return VInFrame;
+}
+
+vector<double> PedData::GetXInFrame(int frame, const vector<int>& ids, double zPos) const
+{
+     vector<double> XInFrame;
+     for(int id:ids)
+     {
+    	 if(zPos<1000000.0)
+		  {
+    		 if(fabs(_zCor[id][frame]-zPos*M2CM)<J_EPS_EVENT)
+			  {
+				  XInFrame.push_back(_xCor[id][frame]);
+			  }
+		  }
+		  else
+		  {
+			  XInFrame.push_back(_xCor[id][frame]);
+		  }
+     }
+     return XInFrame;
 }
 
 vector<double> PedData::GetXInFrame(int frame, const vector<int>& ids) const
@@ -366,9 +434,30 @@ vector<double> PedData::GetXInFrame(int frame, const vector<int>& ids) const
      vector<double> XInFrame;
      for(int id:ids)
      {
-          XInFrame.push_back(_xCor[id][frame]);
+			  XInFrame.push_back(_xCor[id][frame]);
      }
      return XInFrame;
+}
+
+vector<double> PedData::GetYInFrame(int frame, const vector<int>& ids, double zPos) const
+{
+     vector<double> YInFrame;
+     for(unsigned int i=0; i<ids.size();i++)
+     {
+          int id = ids[i];
+          if(zPos<1000000.0)
+          {
+        	  if(fabs(_zCor[id][frame]-zPos*M2CM)<J_EPS_EVENT)
+			  {
+				  YInFrame.push_back(_yCor[id][frame]);
+			  }
+          }
+          else
+          {
+        	  YInFrame.push_back(_yCor[id][frame]);
+          }
+     }
+     return YInFrame;
 }
 
 vector<double> PedData::GetYInFrame(int frame, const vector<int>& ids) const
@@ -382,6 +471,17 @@ vector<double> PedData::GetYInFrame(int frame, const vector<int>& ids) const
      return YInFrame;
 }
 
+vector<double> PedData::GetZInFrame(int frame, const vector<int>& ids) const
+{
+     vector<double> ZInFrame;
+     for(unsigned int i=0; i<ids.size();i++)
+     {
+          int id = ids[i];
+          ZInFrame.push_back(_zCor[id][frame]);
+     }
+     return ZInFrame;
+}
+
 vector<int> PedData::GetIdInFrame(const vector<int>& ids) const
 {
      vector<int> IdInFrame;
@@ -389,6 +489,26 @@ vector<int> PedData::GetIdInFrame(const vector<int>& ids) const
      {
           id = id +_minID;
           IdInFrame.push_back(id);
+     }
+     return IdInFrame;
+}
+
+vector<int> PedData::GetIdInFrame(int frame, const vector<int>& ids, double zPos) const
+{
+     vector<int> IdInFrame;
+     for(int id:ids)
+     {
+          if(zPos<1000000.0)
+          {
+			  if(fabs(_zCor[id][frame]-zPos*M2CM)<J_EPS_EVENT)
+			  {
+				  IdInFrame.push_back(id +_minID);
+			  }
+          }
+          else
+          {
+        	  IdInFrame.push_back(id +_minID);
+          }
      }
      return IdInFrame;
 }
@@ -451,14 +571,77 @@ double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID
      return fabs(v);
 }
 
+double PedData::GetInstantaneousVelocity1(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor) const
+{
+     std::string vcmp = _vComp[ID][Tnow];  // the vcmp is the angle from 0 to 360
+     if(vcmp=="X+")
+     {
+    	 vcmp="0";
+     }
+     else if(vcmp=="Y+")
+	 {
+		 vcmp="90";
+	 }
+     if(vcmp=="X-")
+	 {
+		 vcmp="180";
+	 }
+     if(vcmp=="Y-")
+	 {
+		 vcmp="270";
+	 }
+     double v=0.0;
+     if(vcmp != "B")  //check the component used in the calculation of velocity
+     {
+    	 float alpha=atof(vcmp.c_str())*2*M_PI/360.0;
+
+    	 if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
+		  {
+			 v=  _fps*CMtoM*((Xcor[ID][Tfuture] - Xcor[ID][Tpast])*cos(alpha)+(Ycor[ID][Tfuture] - Ycor[ID][Tpast])*sin(alpha))/(2.0 * _deltaF);
+		  }
+		  else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID]))
+		  {
+			   v = _fps*CMtoM*((Xcor[ID][Tfuture] - Xcor[ID][Tnow])*cos(alpha)+(Ycor[ID][Tfuture] - Ycor[ID][Tnow])*sin(alpha))/(_deltaF);  //one dimensional velocity
+		  }
+		  else if((Tpast >=Tfirst[ID])&&(Tfuture > Tlast[ID]))
+		  {
+			   v = _fps*CMtoM*((Xcor[ID][Tnow] - Xcor[ID][Tpast])*cos(alpha)+(Ycor[ID][Tnow] - Ycor[ID][Tpast])*sin(alpha))/( _deltaF);  //one dimensional velocity
+		  }
+		  if(_IgnoreBackwardMovement && v<0)           //if no move back and pedestrian moves back, his velocity is set as 0;
+		  {
+			   v=0;
+		  }
+
+     }
+     else if(vcmp == "B")
+     {
+          if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
+          {
+               v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tfuture] - Xcor[ID][Tpast]),2)+pow((Ycor[ID][Tfuture] - Ycor[ID][Tpast]),2))/(2.0 * _deltaF);  //two dimensional velocity
+          }
+          else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID]))
+          {
+               v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tfuture] - Xcor[ID][Tnow]),2)+pow((Ycor[ID][Tfuture] - Ycor[ID][Tnow]),2))/(_deltaF);
+          }
+          else if((Tpast >=Tfirst[ID])&&(Tfuture > Tlast[ID]))
+          {
+               v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tnow] - Xcor[ID][Tpast]),2)+pow((Ycor[ID][Tnow] - Ycor[ID][Tpast]),2))/(_deltaF);  //two dimensional velocity
+          }
+     }
+
+     return v;
+}
+
 void PedData::CreateGlobalVariables(int numPeds, int numFrames)
 {
      _xCor = new double* [numPeds];
      _yCor = new double* [numPeds];
+     _zCor = new double* [numPeds];
      _vComp = new string* [numPeds];
      for (int i=0; i<numPeds; i++) {
           _xCor[i] = new double [numFrames];
           _yCor[i] = new double [numFrames];
+          _zCor[i] = new double [numFrames];
           _vComp[i] =new string [numFrames];
      }
      _firstFrame = new int[numPeds];  // Record the first frame of each pedestrian
@@ -468,6 +651,7 @@ void PedData::CreateGlobalVariables(int numPeds, int numFrames)
           for (int j = 0; j < numFrames; j++) {
                _xCor[i][j] = 0;
                _yCor[i][j] = 0;
+               _zCor[i][j] = 0;
                _vComp[i][j] ="B";
           }
           _firstFrame[i] = INT_MAX;
@@ -519,6 +703,11 @@ double** PedData::GetXCor() const
 double** PedData::GetYCor() const
 {
      return _yCor;
+}
+
+double** PedData::GetZCor() const
+{
+     return _zCor;
 }
 
 int* PedData::GetFirstFrame() const

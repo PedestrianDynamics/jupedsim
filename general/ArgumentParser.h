@@ -58,6 +58,7 @@ private:
      std::vector<std::string> _trajectoriesFiles;
 
      std::string _vComponent;
+     bool _IgnoreBackwardMovement;
      bool _isMethodA;
      bool _isMethodB;
      bool _isMethodC;
@@ -67,17 +68,15 @@ private:
      int _circleEdges;
      bool _isOutputGraph;
      bool _isPlotGraph;
-     bool _isPlotTimeSeriesA;
+     /*bool _isPlotTimeSeriesA;
      bool _isPlotTimeSeriesC;
-     bool _isPlotTimeSeriesD;
+     bool _isPlotTimeSeriesD;*/
      bool _isOneDimensional;
-     bool _isIndividualFD;
-     polygon_2d _areaIndividualFD;
      bool _isGetProfile;
      double _steadyStart;
      double _steadyEnd;
      int _delatTVInst;
-     int _timeIntervalA;
+
      std::vector<int> _areaIDforMethodA;
      std::vector<int> _areaIDforMethodB;
      std::vector<int> _areaIDforMethodC;
@@ -85,6 +84,14 @@ private:
      float _grid_size_X;
      float _grid_size_Y;
      int _log;
+     std::vector<int> _start_frames_MethodD;
+     std::vector<int> _stop_frames_MethodD;
+     std::vector<bool> _individual_FD_flags;
+     std::vector<bool> _isPlotTimeSeriesA;
+     std::vector<bool> _isPlotTimeSeriesC;
+     std::vector<bool> _isPlotTimeSeriesD;
+     std::vector<int> _timeIntervalA;
+
 
      std::map <int, MeasurementArea*> _measurementAreas;
      void Usage(const std::string file);
@@ -110,8 +117,9 @@ public:
      double GetLineEndY() const;
 
      std::string GetVComponent() const;
+     bool GetIgnoreBackwardMovement() const;
      int GetDelatT_Vins() const;
-     int GetTimeIntervalA() const;
+     std::vector<int> GetTimeIntervalA() const;
      bool GetIsMethodA() const;
      bool GetIsMethodB() const;
      bool GetIsMethodC() const;
@@ -120,14 +128,17 @@ public:
      std::vector<int> GetAreaIDforMethodB() const;
      std::vector<int> GetAreaIDforMethodC() const;
      std::vector<int> GetAreaIDforMethodD() const;
+     std::vector<int> GetStartFramesMethodD() const;
+     std::vector<int> GetStopFramesMethodD() const;
+     std::vector<bool> GetIndividualFDFlags() const;
      bool GetIsCutByCircle() const;
      double GetCutRadius() const;
      int GetCircleEdges() const;
      bool GetIsOutputGraph() const;
      bool GetIsPlotGraph() const;
-     bool GetIsPlotTimeSeriesA() const;
-     bool GetIsPlotTimeSeriesC() const;
-     bool GetIsPlotTimeSeriesD() const;
+     std::vector<bool> GetIsPlotTimeSeriesA() const;
+     std::vector<bool> GetIsPlotTimeSeriesC() const;
+     std::vector<bool> GetIsPlotTimeSeriesD() const;
      bool GetIsOneDimensional() const;
      bool GetIsIndividualFD() const;
      polygon_2d GetAreaIndividualFD() const;
