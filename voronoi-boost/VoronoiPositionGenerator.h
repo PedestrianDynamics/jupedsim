@@ -54,8 +54,9 @@ class Point;
 	 * @param max_dis, after calling the function this will be the (distance*factor)^2 where distance is the distance to the chosen vertex
 	 * @param radius, radius of a person
 	 */
-	void VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, double factor,
-		voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius, const std::vector<int>& goal_vector, Pedestrian* ped 	);
+void VoronoiBestVertexMax(const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd,
+        SubRoom* subroom, double factor, voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis,
+        double radius);
 
 	/**
 	 * Position incoming pedestrian on the vertex with greater probability for greater distances
@@ -67,8 +68,11 @@ class Point;
 	 * @param radius, radius of a person
 	 */
 	void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, double factor,
-				voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius);
+                                       voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius);
+	void VoronoiBestVertexGreedy (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, double factor,
+                                       voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius);
 
+void plotVoronoi(const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, double factor);
 	/**
 	 * Position incoming pedestrian on a random vertex
 	 * @param discrete_positions
@@ -87,8 +91,8 @@ class Point;
 	 * @param chosen_it
 	 * @param velocities_vector
 	 */
-	void VoronoiAdjustVelocityNeighbour( const voronoi_diagram<double>& vd, voronoi_diagram<double>::const_vertex_iterator& chosen_it,
-			Pedestrian* ped, const std::vector<Point>& velocities_vector, const std::vector<int>& goal_vector ) ;
+void VoronoiAdjustVelocityNeighbour(voronoi_diagram<double>::const_vertex_iterator& chosen_it, Pedestrian* ped,
+        const std::vector<Point>& velocities_vector, const std::vector<int>& goal_vector);
 
 
 

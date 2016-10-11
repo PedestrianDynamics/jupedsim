@@ -33,7 +33,6 @@
 #include <string>
 
 class Room;
-class Subroom;
 
 class Transition : public Crossing {
 private:
@@ -46,7 +45,6 @@ private:
      std::string _flowAtExit;
 
 public:
-
      /**
       * Cosntructor
       */

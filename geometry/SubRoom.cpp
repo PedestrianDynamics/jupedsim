@@ -47,7 +47,9 @@ using namespace std;
  SubRoom
  ************************************************************/
 
-int SubRoom::_static_uid=0;
+int SubRoom::_static_uid=1; //must be positive (sideeffect for FloorfieldViaFM::isInside())
+
+
 
 SubRoom::SubRoom()
 {
@@ -196,6 +198,10 @@ void SubRoom::AddObstacle(Obstacle* obs)
 
 void SubRoom::AddGoalID(int ID)
 {
+     if (std::find(_goalIDs.begin(), _goalIDs.end(), ID) != _goalIDs.end()) {
+          Log->Write("WARNING: \tAdded existing GoalID to Subroom %d", this->GetSubRoomID());
+          //if occurs, plz assert, that ID is a UID of any line of the goal and not a number given by the user (ar.graf)
+     }
      _goalIDs.push_back(ID);
 }
 
@@ -406,6 +412,9 @@ bool SubRoom::IsVisible(const Line &wall, const Point &position)
      {
           for(const auto& w: obst->GetAllWalls())
           {
+//               if(w._height <= 1.5) {
+//                    continue;
+//               }
                if(wall_is_vis && ped_wall.IntersectionWith(w)){
                     // fprintf (stdout, "\t\t Wall_is_visible INTERSECTION OBS; L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", w.GetPoint1()._x, w.GetPoint1()._y, w.GetPoint2()._x, w.GetPoint2()._y, ped_wall.GetPoint1()._x, ped_wall.GetPoint1()._y, ped_wall.GetPoint2()._x, ped_wall.GetPoint2()._y);
                     wall_is_vis = false;
@@ -529,7 +538,7 @@ bool SubRoom::CheckObstacles()
           {
                if(obst->IntersectWithLine(wall))
                {
-                    Log->Write("ERROR: \tthe obstacle id [%d] is intersection with subroom [%d]",obst->GetId(),_id);
+                     Log->Write("ERROR: \tthe obstacle [%d] intersects with subroom [%d] in room [%d]",obst->GetId(),_id,_roomID);
                     Log->Write("     : \tthe triangulation will not work.");
                     return false;
                }
@@ -845,12 +854,12 @@ string NormalSubRoom::WriteSubRoom() const
                s.append("\t\t</wall>\n");
           }
 
-          const Point& pos = obst->GetCentroid();
+          const Point& obst_pos = obst->GetCentroid();
 
           //add the obstacle caption
           char tmp1[CLENGTH];
           sprintf(tmp1, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" color=\"100\" />\n"
-                    , pos._x * FAKTOR, pos._y * FAKTOR,GetElevation(pos)*FAKTOR ,obst->GetId());
+                    , obst_pos._x * FAKTOR, obst_pos._y * FAKTOR,GetElevation(obst_pos)*FAKTOR ,obst->GetId());
           s.append(tmp1);
      }
 
@@ -923,18 +932,17 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
     				 return false;
     			 }
     			 else
-    				 ++j;
+                               ++j;
     		 }
-    	 }
+         }
     	 if (j <= 2)
     		 j = 0;
     	 else {
     		 char tmp[CLENGTH];
-    		 sprintf(tmp, "ERROR: \tNormanSubRoom::ConvertLineToPoly(): SubRoom %d Room %d !!\n", GetSubRoomID(), GetRoomID());
+    		 sprintf(tmp, "WARNING: \tNormanSubRoom::ConvertLineToPoly(): SubRoom %d Room %d !!\n", GetSubRoomID(), GetRoomID());
     		 Log->Write(tmp);
-    		 sprintf(tmp, "ERROR: \tWall %s shares edge with multiple walls!!!\n", it.toString().c_str());
-    		 Log->Write(tmp);
-    		 return false;
+    		 sprintf(tmp, "WARNING: \tWall %s shares edge with multiple walls!!! j=%d\n", it.toString().c_str(), j);
+    		 Log->Write(tmp); // why should this return false?
     	 }
     	 ++itr;
      }
@@ -971,7 +979,7 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
           Log->Write(tmp);
           return false;
      }
-     _poly = tmpPoly;
+     _poly = StartLLCorner(tmpPoly);
 
 
      //check if all walls and goals were used in the polygon
@@ -1007,7 +1015,7 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
 
 // gibt zurück in welchen Quadranten vertex liegt, wobei hitPos der Koordinatenursprung ist
 
-int NormalSubRoom::WhichQuad(const Point& vertex, const Point& hitPos) const
+short NormalSubRoom::WhichQuad(const Point& vertex, const Point& hitPos) const
 {
      return (vertex._x > hitPos._x) ? ((vertex._y > hitPos._y) ? 1 : 4) :
                ((vertex._y > hitPos._y) ? 2 : 3);
@@ -1023,64 +1031,54 @@ double NormalSubRoom::Xintercept(const Point& point1, const Point& point2, doubl
 }
 
 
-// neue Version auch für konkave Polygone
+// This method is called very often in DirectionFloorField, so it should be fast.
 
 bool NormalSubRoom::IsInSubRoom(const Point& ped) const
 {
 
      //case when the point is on an edge
      // todo: this affect the runtime, and do we really need that
-     // If we do not d othis check, then for a square for instance, half the points located on the edge will be inside and
+     // If we do not do this check, then for a square for instance, half the points located on the edge will be inside and
      // the other half will be outside the polygon.
      for(auto& w: _walls)
      {
           if(w.IsInLineSegment(ped)) return true;
      }
 
-
-     short edge, first, next;
-     short quad, next_quad, delta, total;
-
-     /////////////////////////////////////////////////////////////
-     edge = first = 0;
-     quad = (short) WhichQuad(_poly[edge], ped);
-     total = 0; // COUNT OF ABSOLUTE SECTORS CROSSED
-     /* LOOP THROUGH THE VERTICES IN A SECTOR */
-     do {
-          next = (edge + 1) % _poly.size();
-          next_quad = WhichQuad(_poly[next], ped);
-          delta = next_quad - quad; // HOW MANY QUADS HAVE I MOVED
-
-          // SPECIAL CASES TO HANDLE CROSSINGS OF MORE THEN ONE
-          //QUAD
+     auto next_corner = _poly.begin();
+     short quad = WhichQuad(*next_corner, ped);
+     short next_quad;
+     short total = 0; // count of absolute sectors crossed
+     for (auto& corner : _poly) { // _poly contains all corner points of the walls
+          ++next_corner;
+          if (next_corner == _poly.end()) next_corner = _poly.begin();
+          next_quad = WhichQuad(*next_corner, ped);
+          short delta = next_quad - quad;
 
           switch (delta) {
-          case 2: // IF WE CROSSED THE MIDDLE, FIGURE OUT IF IT
-               //WAS CLOCKWISE OR COUNTER
-          case -2: // US THE X POSITION AT THE HIT POINT TO
-               // DETERMINE WHICH WAY AROUND
-               if (Xintercept(_poly[edge], _poly[next], ped._y) > ped._x)
-                    delta = -(delta);
-               break;
-          case 3: // MOVING 3 QUADS IS LIKE MOVING BACK 1
-               delta = -1;
-               break;
-          case -3: // MOVING BACK 3 IS LIKE MOVING FORWARD 1
-               delta = 1;
-               break;
-          default:break;
+               case 2:
+               case -2:
+                    // If we crossed the middle, figure out if it
+                    // was clockwise or counter-clockwise by using
+                    // the x position of the ped
+                    if (Xintercept(corner, *next_corner, ped._y) > ped._x)
+                         delta = -delta;
+                    break;
+               case 3: // moving 3 quads is like moving back 1
+                    delta = -1;
+                    break;
+               case -3: // moving back 3 is like moving forward 1
+                    delta = 1;
+                    break;
+               default:
+                    break;
           }
-          /* ADD IN THE DELTA */
-          total += delta;
-          quad = next_quad; // RESET FOR NEXT STEP
-          edge = next;
-     } while (edge != first);
 
-     /* AFTER ALL IS DONE IF THE TOTAL IS 4 THEN WE ARE INSIDE */
-     if (abs(total) == 4)
-          return true;
-     else
-          return false;
+          total += delta;
+          quad = next_quad;
+     }
+
+     return abs(total) == 4;
 }
 
 /************************************************************
@@ -1355,11 +1353,46 @@ const std::string& SubRoom::GetType() const
 
 bool SubRoom::IsInSubRoom(Pedestrian* ped) const
 {
+
      const Point& pos = ped->GetPos();
-     if (ped->GetExitLine()->DistTo(pos) <= J_EPS_GOAL)
+     if ((ped->GetExitLine()) && (ped->GetExitLine()->DistTo(pos) <= J_EPS_GOAL))
           return true;
      else
           return IsInSubRoom(pos);
+}
+
+
+std::vector<Point> SubRoom::StartLLCorner(const std::vector<Point> &polygon)
+{
+
+    // detecting point which is in the lower left corner
+    Point startingpoint = polygon[0];
+    size_t id_start=0;
+
+    for (size_t i = 1; i<polygon.size(); ++i)
+    {
+        if (polygon[i]._x<=startingpoint._x)
+        {
+            if (polygon[i]._y<=startingpoint._y)
+            {
+                startingpoint=polygon[i];
+                id_start=i;
+            }
+        }
+    }
+
+    std::vector<Point> cwPolygon;
+    for (size_t i=id_start; i<polygon.size(); ++i)
+    {
+        cwPolygon.push_back(polygon[i]);
+    }
+    for (size_t i=0; i<id_start; ++i)
+    {
+        cwPolygon.push_back(polygon[i]);
+    }
+
+    return cwPolygon;
+
 }
 
 

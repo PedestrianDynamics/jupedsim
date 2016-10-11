@@ -32,11 +32,16 @@
 #define OPERATIONALMODEL_H_
 
 #include <string>
+#include <memory>
 
 class Building;
+class DirectionStrategy;
 
 class OperationalModel
 {
+protected:
+     // define the strategy for crossing a door (used for calculating the driving force)
+     std::shared_ptr<DirectionStrategy> _direction;
 public:
      /**
       * Constructor
@@ -70,6 +75,8 @@ public:
       * @param building, the representation of the building
       */
      virtual void ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic) = 0 ;
+
+     std::shared_ptr<DirectionStrategy> GetDirection() {return _direction;};
 };
 
 #endif /* OPERATIONALMODEL_H_ */

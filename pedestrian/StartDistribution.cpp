@@ -35,6 +35,7 @@
 #include "../geometry/Point.h"
 #include "../routing/RoutingEngine.h"
 #include "../geometry/SubRoom.h"
+#include "boost/math/distributions.hpp"
 
 using namespace std;
 
@@ -43,6 +44,7 @@ StartDistribution::StartDistribution(int seed)
 {
      _roomID = -1;
      _subroomID=-1;
+     _subroomUID=-1;
      _nPeds = -1;
      _groupID = -1;
      _goalID = -1;
@@ -60,13 +62,22 @@ StartDistribution::StartDistribution(int seed)
      _yMin=-FLT_MAX;
      _yMax=FLT_MAX;
      _groupParameters=NULL;
-     _generator = std::default_random_engine(seed);
+     static bool _seeded = false; // seed only once, not every time
+     if(!_seeded) {
+           _generator = std::default_random_engine(seed);     // mt19937 g(static_cast<uint32_t>(_configuration->GetSeed()));
+           _seeded = true;
+     }
 }
 
 StartDistribution::~StartDistribution()
 {
 }
 
+
+std::default_random_engine StartDistribution::GetGenerator() 
+{
+     return _generator;
+}
 
 int StartDistribution::GetAgentsNumber() const
 {
@@ -213,6 +224,7 @@ Pedestrian* StartDistribution::GenerateAgent(Building* building, int* pid, vecto
      E.SetAmin(_groupParameters->GetAmin());
      E.SetBmax(_groupParameters->GetBmax());
      E.SetBmin(_groupParameters->GetBmin());
+     E.DoStretch(_groupParameters->StretchEnabled());
      ped->SetEllipse(E);
      ped->SetTau(_groupParameters->GetTau());
      ped->SetV0Norm(_groupParameters->GetV0(),
@@ -223,6 +235,8 @@ Pedestrian* StartDistribution::GenerateAgent(Building* building, int* pid, vecto
                     _groupParameters->GetV0IdleEscalatorUpStairs(),
                     _groupParameters->GetV0IdleEscalatorDownStairs()
           );
+     ped->SetSwayParameters(_groupParameters->GetSwayFreqA(), _groupParameters->GetSwayFreqB(),
+                            _groupParameters->GetSwayAmpA(), _groupParameters->GetSwayAmpB());
      // first default Position
      int index = -1;
 
@@ -347,14 +361,32 @@ double StartDistribution::GetPremovementTime() const
      return _premovementTime(_generator);
 }
 
-void StartDistribution::InitRiskTolerance(double mean, double stdv)
+void StartDistribution::InitRiskTolerance(std::string distribution_type, double para1, double para2)
 {
-     _riskTolerance = std::normal_distribution<double>(mean,stdv);
+    _distribution_type = distribution_type;
+    if(distribution_type=="normal"){
+    _riskTolerance = std::normal_distribution<double>(para1, para2);
+    }
+    if(distribution_type=="beta"){
+    _risk_beta_dist = boost::math::beta_distribution<>(para1,  para2);
+    }
 }
 
 double StartDistribution::GetRiskTolerance()
 {
-     return _riskTolerance(_generator);
+    if(_distribution_type=="normal"){
+        //fprintf(stderr, "%f \t %f \n", _generator, _riskTolerance(_generator));
+        return _riskTolerance(_generator);
+    }
+    else {
+        std::uniform_real_distribution<float> normalize(0.0, 1.0);
+        float rand_norm = normalize(_generator);
+        //fprintf(stderr, "%f \n", quantile(_risk_beta_dist, rand_norm));
+        if(_distribution_type=="beta") {
+             return quantile(_risk_beta_dist, rand_norm);
+        }
+        Log->Write("Warning:\tDistribution Type invalid or not set. Fallback to uniform distribution");
+        return (double) rand_norm; // todo: ar.graf: check if this quick fix executes and why
+    }
 }
-
 

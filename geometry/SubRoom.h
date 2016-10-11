@@ -31,7 +31,7 @@
 
 
 #include "Wall.h"
-#include "../routing/DTriangulation.h"
+#include "../routing/global_shortest/DTriangulation.h"
 
 #include <vector>
 #include <string>
@@ -54,7 +54,7 @@ class Pedestrian;
  SubRoom
 ************************************************************/
 
-class SubRoom {
+class   SubRoom {
 private:
      /// the id set using the SetID method
      int _id;
@@ -80,6 +80,8 @@ private:
 
      /// storing and incrementing the total number of subrooms
      static int _static_uid;
+
+
 
 protected:
      std::vector<Wall> _walls;
@@ -138,6 +140,11 @@ public:
       *  counterclockwise
       */
      const std::vector<Point>& GetPolygon() const;
+
+     /**
+      * @return vertices of a polygon starting with left lower corner
+      */
+     std::vector<Point> StartLLCorner(const std::vector<Point>& polygon);
 
      /**
       * @return a reference to all obstacles contained
@@ -378,7 +385,7 @@ class NormalSubRoom : public SubRoom {
 private:
 
      ///@see IsInSubRoom
-     int WhichQuad(const Point& vertex, const Point& hitPos) const;
+     short WhichQuad(const Point& vertex, const Point& hitPos) const;
      double Xintercept(const Point& point1, const Point& point2, double hitY) const;
 
 public:

@@ -42,4 +42,3 @@ notifications:
        - mohcine@chraibi.de
      on_success: change
      on_failure: always
-

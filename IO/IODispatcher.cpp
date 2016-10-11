@@ -28,7 +28,6 @@
 
 #include "IODispatcher.h"
 #include "../pedestrian/Pedestrian.h"
-#include "../routing/NavMesh.h"
 #include "../tinyxml/tinyxml.h"
 #include "../geometry/SubRoom.h"
 #include "../mpi/LCGrid.h"
@@ -116,7 +115,7 @@ string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
 
 void TrajectoriesJPSV04::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
-     //nPeds=building->GetAllPedestrians().size();
+     building->GetCaption();
      string tmp;
      tmp =
                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
@@ -389,49 +388,51 @@ void TrajectoriesVTK::WriteHeader(long nPeds, double fps, Building* building, in
 
 void TrajectoriesVTK::WriteGeometry(Building* building)
 {
-     stringstream tmp;
+    (void)building; // avoid warning
+    Log->Write("WARNING:\t Creating NavMesh is deprecated. Please have a look at old files on git lab if you want to use this!");
+//     stringstream tmp;
 
-     NavMesh* nv= new NavMesh(building);
-     nv->BuildNavMesh();
-     //nv->WriteToFile("../pedunc/examples/stadium/arena.nav");
-     Write("DATASET UNSTRUCTURED_GRID");
+//     NavMesh* nv= new NavMesh(building);
+//     nv->BuildNavMesh();
+//     //nv->WriteToFile("../pedunc/examples/stadium/arena.nav");
+//     Write("DATASET UNSTRUCTURED_GRID");
 
-     //writing the vertices
-     const vector<NavMesh::JVertex*>& vertices= nv->GetVertices() ;
-     tmp<<"POINTS "<<vertices.size()<<" FLOAT"<<endl;
-     for (unsigned int v=0; v<vertices.size(); v++) {
-          tmp<<vertices[v]->pPos._x<<" " <<vertices[v]->pPos._y <<" 0.0"<<endl;
-     }
-     Write(tmp.str());
-     tmp.str(std::string());
+//     //writing the vertices
+//     const vector<NavMesh::JVertex*>& vertices= nv->GetVertices() ;
+//     tmp<<"POINTS "<<vertices.size()<<" FLOAT"<<endl;
+//     for (unsigned int v=0; v<vertices.size(); v++) {
+//          tmp<<vertices[v]->pPos._x<<" " <<vertices[v]->pPos._y <<" 0.0"<<endl;
+//     }
+//     Write(tmp.str());
+//     tmp.str(std::string());
 
-     //writing the cells data
-     const vector<NavMesh::JNode*>& cells= nv->GetNodes();
-     int nComponents= (int) cells.size();
-     stringstream tmp1;
-     for (unsigned int n=0; n<cells.size(); n++) {
-          int hSize= (int) cells[n]->pHull.size();
+//     //writing the cells data
+//     const vector<NavMesh::JNode*>& cells= nv->GetNodes();
+//     int nComponents= (int) cells.size();
+//     stringstream tmp1;
+//     for (unsigned int n=0; n<cells.size(); n++) {
+//          int hSize= (int) cells[n]->pHull.size();
 
-          tmp1<<hSize<<"";
-          for(unsigned int i=0; i<cells[n]->pHull.size(); i++) {
-               tmp1<<" "<<cells[n]->pHull[i].id;
-          }
-          tmp1<<endl;
-          nComponents+= hSize;
-     }
-     tmp<<"CELLS "<<cells.size()<<" "<<nComponents<<endl;
-     tmp<<tmp1.str();
-     Write(tmp.str());
-     tmp.str(std::string());
+//          tmp1<<hSize<<"";
+//          for(unsigned int i=0; i<cells[n]->pHull.size(); i++) {
+//               tmp1<<" "<<cells[n]->pHull[i].id;
+//          }
+//          tmp1<<endl;
+//          nComponents+= hSize;
+//     }
+//     tmp<<"CELLS "<<cells.size()<<" "<<nComponents<<endl;
+//     tmp<<tmp1.str();
+//     Write(tmp.str());
+//     tmp.str(std::string());
 
-     // writing the cell type
-     tmp<<"CELL_TYPES "<<cells.size()<<endl;
-     for (unsigned int n=0; n<cells.size(); n++) {
-          tmp<<"9"<<endl;
-     }
+//     // writing the cell type
+//     tmp<<"CELL_TYPES "<<cells.size()<<endl;
+//     for (unsigned int n=0; n<cells.size(); n++) {
+//          tmp<<"9"<<endl;
+//     }
 
-     Write(tmp.str());
-     delete nv;
+//     Write(tmp.str());
+//     delete nv;
 }
 
 void TrajectoriesVTK::WriteFrame(int frameNr, Building* building)
@@ -446,7 +447,7 @@ void TrajectoriesVTK::WriteFooter()
 
 void TrajectoriesJPSV06::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
-     //nPeds=building->GetAllPedestrians().size();
+     building->GetCaption();
      string tmp;
      tmp =
                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
@@ -585,22 +586,24 @@ void TrajectoriesJPSV06::WriteFooter()
 
 void TrajectoriesXML_MESH::WriteGeometry(Building* building)
 {
-     //Navigation mesh implementation
-     NavMesh* nv= new NavMesh(building);
-     nv->BuildNavMesh();
-     string geometry;
-     nv->WriteToString(geometry);
-     Write("<geometry>");
-     Write(geometry);
-     Write("</geometry>");
-     nv->WriteToFile(building->GetProjectFilename()+".full.nav");
-     delete nv;
+    (void)building; // avoid warning
+    Log->Write("WARNING:\t Creating NavMesh is deprecated. Please have a look at old files on git lab if you want to use this!");
+//     //Navigation mesh implementation
+//     NavMesh* nv= new NavMesh(building);
+//     nv->BuildNavMesh();
+//     string geometry;
+//     nv->WriteToString(geometry);
+//     Write("<geometry>");
+//     Write(geometry);
+//     Write("</geometry>");
+//     nv->WriteToFile(building->GetProjectFilename()+".full.nav");
+//     delete nv;
 }
 
 
 void TrajectoriesJPSV05::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
-     //nPeds=building->GetAllPedestrians().size();
+     building->GetCaption();
      string tmp;
      tmp = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
      char agents[CLENGTH] = "";

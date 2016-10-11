@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<geometry version="0.5" caption="FD1d" unit="m">
+<geometry version="0.8" caption="FD1d" unit="m">
   <rooms>
     <room id="0" caption="Tjunction">
       <subroom id="0" closed="0" class="subroom">

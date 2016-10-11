@@ -106,6 +106,7 @@ public:
       */
      bool Init(Building* building);
 
+
 private:
      /// collections of all routers used
      std::vector<Router*> _routersCollection;

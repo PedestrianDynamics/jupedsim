@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
+<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
 
   <!-- seed used for initialising random generator -->
   <seed>12542</seed>
   <!-- geometry file -->
-  <geometry>bidirectional_traj.xml</geometry>
-  <max_sim_time>5000</max_sim_time>
+  <geometry>bidirectional_geo.xml</geometry>
+  <max_sim_time>130</max_sim_time>
 
   <!-- trajectories file and format -->
-  <trajectories format="xml-plain" fps="16" color_mode="final_goal">
-	    <file location="hybrid_hall_traj_bi.xml" />
+  <trajectories format="xml-plain" fps="16" color_mode="group"> 
+	    <file location="trajectories.xml"/>
     <socket_ hostname="127.0.0.1" port="8989" />
   </trajectories>
 
   <!-- Parameters for the hybrid (matsim) server mode -->
-  <hybrid_simulation_ server="zam763" port="9999" />
-  <!--<hybrid_simulation server="zam597" port="9999" />-->
+  <!-- <hybrid_simulation_ server="zam763" port="9999" /> -->
+
 
   <!-- where to store the logs -->
-  <!--<logfile>outputfiles/log.txt</logfile> -->
+  <logfile>log.txt</logfile>
 
   <!-- traffic information: e.g closed doors or smoked rooms -->
   <traffic_constraints>
@@ -31,69 +31,68 @@
 
   <routing>
     <goals>
-      <goal id="3" final="true" caption="goal3">
-        <polygon>
-          <vertex px="3.2" py="12.0" />
-          <vertex px="3.2" py="13.0" />
-          <vertex px="5.6" py="13.0" />
-          <vertex px="5.6" py="12.0" />
-          <vertex px="3.2" py="12.0" />
-        </polygon>
-      </goal>
       <goal id="1" final="true" caption="goal1">
         <polygon>
-          <vertex px="3.6" py="-3.0" />
-          <vertex px="3.6" py="-4.0" />
-          <vertex px="5.2" py="-4.0" />
-          <vertex px="5.2" py="-3.0" />
-          <vertex px="3.6" py="-3.0" />
+          <vertex px="32" py="2.0" />
+          <vertex px="32" py="-2.0" />
+          <vertex px="33" py="-2.0" />
+          <vertex px="33" py="2.0" />
+          <vertex px="32" py="2.0" />
         </polygon>
       </goal>
       <goal id="2" final="true" caption="goal2">
         <polygon>
-          <vertex px="18" py="2.8" />
-          <vertex px="19" py="2.8" />
-          <vertex px="19" py="6.4" />
-          <vertex px="18" py="6.4" />
-          <vertex px="18" py="2.8" />
-        </polygon>
-      </goal>
-      <goal id="4" final="true" caption="goal4">
-        <polygon>
-          <vertex px="-3.0" py="2.8" />
-          <vertex px="-4.0" py="2.8" />
-          <vertex px="-4.0" py="6.4" />
-          <vertex px="-3.0" py="6.4" />
-          <vertex px="-3.0" py="2.8" />
+          <vertex px="-3.0" py="2.0" />
+          <vertex px="-3.0" py="-2.0" />
+          <vertex px="-2.0" py="-2.0" />
+          <vertex px="-2.0" py="2.0" />
+          <vertex px="-3.0" py="2.0" />
         </polygon>
       </goal>
     </goals>
   </routing>
 
   <!--persons information and distribution -->
-  <agents operational_model_id="3">
+  <agents operational_model_id="2">
     <agents_distribution>
-      <group group_id="0" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" x_min="3" x_max="5" y_min="3" y_max="5" />
-      <group group_id="1" room_id="1" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="2" />
-      <group group_id="2" room_id="2" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" />
-      <group group_id="3" room_id="3" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="2" />
-      <group group_id="4" room_id="4" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="2" />
-      <!-- real start group -->
-      <group group_id="5" room_id="0" subroom_id="0" number="60" router_id="1" agent_parameter_id="1" goal_id="2" y_min="5.2"/>
-      <group group_id="6" room_id="2" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="4" />
-      <group group_id="7" room_id="1" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" start_x="4.5" start_y="-1.63" goal_id="4" />
+      <group group_id="2" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="2"  />
+      <group group_id="1" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="1" x_min="7" x_max="9"  />
+      <group group_id="3" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="2" />
+      <group group_id="4" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="1"  />
+
+      <!-- uncomment this line and comment out the line above. This creates a SegFault because GetRoom returns nullptr -->
+      <!-- <group group_id="1" room_id="1" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="2"  x_min="1" x_max="5" y_min="-2" y_max="2"/>  -->
     </agents_distribution>
 
     <agents_sources><!-- frequency in persons/seconds -->
-      <source id="1" frequency="2" agents_max="80" group_id="6" caption="source 1" />
-      <source_ id="2" frequency="5" agents_max="80" group_id="5" caption="source 2" />
-      <source_ id="3" frequency="10" agents_max="50" group_id="3" caption="source 3" />
-      <source_ id="4" frequency="10" agents_max="50" group_id="4" caption="source 4" />
+      <source id="1" frequency="3" agents_max="30" group_id="1" caption="source 1" />
+      <source_ id="2" frequency="3" agents_max="30" group_id="2" caption="source 2" />
     </agents_sources>
 
   </agents>
 
   <operational_models>
+    <model operational_model_id="4" description="gradnav">
+      <model_parameters>
+	<solver>euler</solver>
+	<stepsize>0.01</stepsize>
+	<exit_crossing_strategy>8</exit_crossing_strategy>
+	<floorfield delta_h="0.0625" wall_avoid_distance="0.5" use_wall_avoidance="true" />
+	<linkedcells enabled="true" cell_size="4.2" />
+        <force_ped nu="3" b="1.0" c="3.0" />
+        <force_wall nu="1" b="0.70" c="3.0" />
+	<anti_clipping slow_down_distance=".6" />
+      </model_parameters>
+      <agent_parameters agent_parameter_id="1">
+        <v0 mu="1.5" sigma="0.0" />
+        <bmax mu="0.20" sigma="0.02" />
+        <bmin mu="0.15" sigma="0.02" />
+        <amin mu="0.1" sigma="0.02" />
+        <tau mu="0.5" sigma="0.02" />
+        <atau mu="0.2" sigma="0.02" />
+      </agent_parameters>
+    </model>
+
     <model operational_model_id="1" description="gcfm">
       <model_parameters>
         <solver>euler</solver>
@@ -173,6 +172,9 @@
       <parameters></parameters>
     </router>
     <router router_id="2" description="quickest">
+      <parameters></parameters>
+    </router>
+    <router router_id="3" description="ff_global_shortest">
       <parameters></parameters>
     </router>
 

@@ -52,6 +52,7 @@ JEllipse::JEllipse()
      _Av = 0.53;
      _Bmin = 0.20; // Semi-axis in direction of shoulders: pBmax - V *[(pBmax - pBmin) / V0]
      _Bmax = 0.25;
+     _do_stretch = true;
      _vel0 = 0; // desired speed
 }
 
@@ -66,6 +67,7 @@ JEllipse::JEllipse(const JEllipse& orig)
      _Av = orig.GetAv();
      _Bmin = orig.GetBmin(); // Semi-axis in direction of shoulders: pBmax - V *[(pBmax - pBmin) / V0]
      _Bmax = orig.GetBmax();
+     _do_stretch = orig.DoesStretch();
      _vel0 = orig.GetV0(); // desired speed
 }
 
@@ -124,6 +126,11 @@ void JEllipse::SetV0(double v0)
      _vel0 = v0;
 }
 
+void JEllipse::DoStretch(bool stretch)
+{
+     _do_stretch = stretch;
+}
+
 /*************************************************************
  Getter-Funktionen
  ************************************************************/
@@ -170,7 +177,12 @@ double JEllipse::GetBmin() const
 
 double JEllipse::GetBmax() const
 {
-     return _Bmax;
+     if (_do_stretch)
+     {
+          return _Bmax;
+     }
+     else
+          return _Bmin;
 }
 
 double JEllipse::GetV0() const
@@ -192,6 +204,11 @@ double JEllipse::GetEA() const
       return _Amin + _vel.Norm() * _Av;
 }
 
+bool JEllipse::DoesStretch() const
+{
+     return _do_stretch;
+}
+
 // ellipse semi-axis in the orthogonal direction of the velocity
 double JEllipse::GetEB() const
 {
@@ -204,9 +221,13 @@ double JEllipse::GetEB() const
      // printf("v=%f, b=%f\n", v, t);
      // getc(stdin);
      //return (v<v_min)? 0.5*b_shoulder: 0.5*(b_shoulder + a * exp(b*v));
-
-     double x = (_vel0 <= 0.001) ? 0 : (_Bmax - _Bmin) / _vel0;
-
+     if (_do_stretch)
+     {
+          double x = (_vel0 <= 0.001) ? 0 : (_Bmax - _Bmin) / _vel0;
+          return _Bmax - _vel.Norm() * x;
+     } else {
+          return _Bmin;
+     }
      // double b_shoulder = _Bmin; /// width of shoulder. todo: find out empricial value
      // double v_min = 0.001;
      // double a = 0.49;
@@ -225,9 +246,7 @@ double JEllipse::GetEB() const
       //      x = (_Bmax - _Bmin) / _vel0;
       //else
       //      x = 0;
-      
 
-     return _Bmax - _vel.Norm() * x;
 }
 
 

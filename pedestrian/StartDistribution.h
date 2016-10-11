@@ -31,7 +31,7 @@
 #include <vector>
 #include <string>
 #include <random>
-
+#include "boost/math/distributions.hpp"
 
 //Forward declarations
 class AgentsParameters;
@@ -70,20 +70,22 @@ private:
      double _xMax;
      double _yMin;
      double _yMax;
-
      //pre movement time distribution
      mutable std::normal_distribution<double> _premovementTime;
 
      //risk tolerance distribution
+     std::string _distribution_type;
      mutable std::normal_distribution<double> _riskTolerance;
+     mutable boost::math::beta_distribution<> _risk_beta_dist;
 
+     static bool seeded;
      //random number generator engine
      mutable std::default_random_engine _generator;
 
 public:
      StartDistribution(int seed);
      virtual ~StartDistribution();
-
+     std::default_random_engine GetGenerator();
      int GetAgentsNumber() const;
      void SetRoomID(int id);
      void SetAgentsNumber(int N);
@@ -118,7 +120,7 @@ public:
      void SetGroupParameters(AgentsParameters* groupParameters);
      void InitPremovementTime(double mean, double stdv);
      double GetPremovementTime() const;
-     void InitRiskTolerance(double mean, double stdv);
+     void InitRiskTolerance(std::string distribution_type, double para1, double para2);
      double GetRiskTolerance();
 
      Pedestrian* GenerateAgent(Building* building, int* pid, std::vector<Point>& positions);

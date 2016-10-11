@@ -62,7 +62,7 @@ struct Node {
 class AdvancingFront {
 public:
 
-AdvancingFront(Node& head, Node& tail);
+AdvancingFront(Node& Head, Node& Tail);
 // Destructor
 ~AdvancingFront();
 

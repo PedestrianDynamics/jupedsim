@@ -48,12 +48,12 @@ class GCFMModel : public OperationalModel
 {
 public:
 
-    GCFMModel(DirectionStrategy* dir, double nuped, double nuwall, double dist_effPed, double dist_effWall,
+    GCFMModel(std::shared_ptr<DirectionStrategy> dir, double nuped, double nuwall, double dist_effPed, double dist_effWall,
             double intp_widthped, double intp_widthwall, double maxfped, double maxfwall);
     virtual ~GCFMModel(void);
 
     // Getter
-    DirectionStrategy* GetDirection() const;
+    std::shared_ptr<DirectionStrategy> GetDirection() const;
     double GetNuPed() const;
     double GetNuWall() const;
     double GetDistEffMax() const;
@@ -76,8 +76,6 @@ public:
     virtual bool Init (Building* building);
 
 private:
-    /// define the strategy for crossing a door (used for calculating the driving force)
-    DirectionStrategy* _direction;
     // Modellparameter
     double _nuPed;                /**< strength of the pedestrian repulsive force */
     double _nuWall;               /**< strength of the wall repulsive force */

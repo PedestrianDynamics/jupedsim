@@ -1,11 +1,11 @@
 
-# help: python makeini.py -h
+# help: python3 makeini.py -h
 import os, sys, glob
 from shutil import copy2, rmtree, move
 import logging, types, argparse
 import errno, time
 from numpy import *
-from itertools import product, izip
+from itertools import product
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
@@ -112,7 +112,7 @@ def get_attribute(node):
     text = ''
     values = []
 
-    for node_attrib in node.attrib.keys():
+    for node_attrib in list(node.attrib.keys()):
         if node_attrib in attributes:
             text = node.attrib[node_attrib]
             if text:
@@ -146,7 +146,7 @@ def get_product(root):
             d = get_tag(node)
             if isinstance(d, list) or isinstance(d, ndarray):
                 # in case some tags have multiple values
-                if not input_tags.has_key(tag) and len(d) > 1:
+                if tag not in input_tags and len(d) > 1:
             # ignore lists with one element (equiv to scalars)
             # if tag in tags:
                     input_tags[tag] = d
@@ -160,7 +160,7 @@ def get_product(root):
         else:
             continue
 
-    result_prod = [dict(izip(input_tags, x)) for x in product(*input_tags.itervalues())]
+    result_prod = [dict(zip(input_tags, x)) for x in product(*iter(input_tags.values()))]
     # print "result", result_prod
     # raw_input()
     return result_prod
@@ -168,7 +168,7 @@ def get_product(root):
 def make_filename(directory, d):
     name = "%s/inifiles/ini"%directory
     traj = "../trajectories/traj" #%directory
-    for key, value in d.iteritems():
+    for key, value in d.items():
         if key == "geometry":
             value = os.path.basename(value)
         # if key == "num_threads":
@@ -193,7 +193,7 @@ def update_attrib_value(root, attr_tag, value):
     # raw_input()
     if attr_tag == "location":  # e.g. location
         for r in root.iter():
-            if r.attrib.has_key(attr_tag):
+            if attr_tag in r.attrib:
                 r.attrib[attr_tag] = str(value)
         return
 
@@ -201,7 +201,7 @@ def update_attrib_value(root, attr_tag, value):
     cor_tag = attr_tag.split("-")[0]
 
     for r in root.iter(cor_tag):
-        if r.attrib.has_key(attr):
+        if attr in r.attrib:
             r.attrib[attr] = str(value)
 # =======================================================
 def make_file(masterfile, tree, result):
@@ -219,7 +219,7 @@ def make_file(masterfile, tree, result):
         if not os.path.isfile(newfile):
             logging.error("make_file: could not create file %s"%newfile)
             sys.exit(FAILURE)
-        for tag, value in item.iteritems():
+        for tag, value in item.items():
             # print "tag: ", tag, "value:", value
             # raw_input()
             if tag in attributes_tags:

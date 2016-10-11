@@ -32,7 +32,7 @@ def copyanything(src, dst):
         shutil.copytree(src, dst)
     except OSError as exc: # python >2.5
         if exc.errno == errno.ENOTDIR:
-            print dst
+            print(dst)
             shutil.copy(src, dst)
         else: raise
 

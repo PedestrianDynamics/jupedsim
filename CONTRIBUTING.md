@@ -20,9 +20,10 @@ There are only a few rules and advices we want to give to you:
     - [Coding style](#coding-style)
     - [Unit tests](#unit-tests)
 
-- [Writing documentation](#wrinting-documentation)
+- [Writing documentation](#writing-documentation)
     - [Comments](#comments)
     - [Documenting new features](#documenting-new-features)
+    - [Sample Templates](#sample-templates)
 
 - [Committing code](#commiting-code)
     - [Committing guidelines](#commiting-guidelines)
@@ -290,7 +291,7 @@ To write additional tests, create a directory under *Utest/*.
 - run the script `makeini.py` with the obligatory option `-f`: Using the
     aforementioned example the call is:
 ```bash
-   python makeini.py -f test_case1/inifile.xml
+   python3 makeini.py -f test_case1/inifile.xml
 ```
 
 The Script is going to create two directories:
@@ -304,7 +305,7 @@ The Script is going to create two directories:
 Your script has to start with the following lines:
 
 ```python
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import sys
 from sys import *
@@ -351,6 +352,66 @@ Comments have to be written in **English** everywhere. Please use markdown where
 
 ### Documenting new features
 Please update the changelog with every feature/fix you provide so we can keep track of changes for new versions of JuPedSim.
+
+### Sample Templates
+```
+/*!
+ * \file [filename]
+ *
+ * \author [your name]
+ * \date
+ * \version     v[x.y]
+ * \copyright   <2016-2022> Forschungszentrum Jülich GmbH. All rights reserved.
+ *
+ * \section License
+ * This file is part of JuPedSim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * JuPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * \section Description
+ *
+ * [your comment here]
+ */
+```
+
+```
+/*!
+ * \class [class name]
+ *
+ * \brief [brief description]
+ *
+ * [detailed description]
+ *
+ * \author [your name]
+ * \date
+ */
+```
+
+```
+/*!
+ * \brief [brief description]
+ *
+ * [detailed description]
+ *
+ * \param[in] [name of input parameter] [its description]
+ * \param[out] [name of output parameter] [its description]
+ * \return [information about return value]
+ * \sa [see also section]
+ * \note [any note about the function you might have]
+ * \warning [any warning if necessary]
+ */
+```
 
 ## Commiting Code
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<geometry version="0.5" caption="Projectname" gridSizeX="20.000000"
+<geometry version="0.8" caption="Projectname" gridSizeX="20.000000"
           gridSizeY="20.000000" unit="m">
   <rooms>
     <room id="0" caption="bottleneck" zpos="0.000000">

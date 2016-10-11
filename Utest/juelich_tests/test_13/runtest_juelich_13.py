@@ -1,12 +1,10 @@
-#! /usr/bin/env python
+#!/usr/bin/env python3
 import numpy as np
-import os, argparse, logging, time, sys
-from os import path, system
+import os, logging, time, sys
 from sys import argv, exit
 import subprocess, glob
-import multiprocessing
-from matplotlib.pyplot import *
-import re
+from os import path
+import matplotlib.pyplot as plt
 
 def get_empirical_flow():
     files = glob.glob("experiments/*.txt")
@@ -19,13 +17,13 @@ def get_empirical_flow():
         flows = data[:, 1]
 
         for (width, flow) in zip(widths, flows):
-            if not width_flow.has_key(width):
+            if width not in width_flow:
                 width_flow[width] = [flow]
             else:
                 width_flow[width].append(flow)
 
     results = []
-    for w in width_flow.keys():
+    for w in list(width_flow.keys()):
         mean_J = np.mean(width_flow[w])
         std_J = np.std(width_flow[w])
         results.append([w, mean_J, std_J])
@@ -49,7 +47,7 @@ logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s -
 HOME = path.expanduser("~")
 DIR= os.path.dirname(os.path.realpath(argv[0]))
 CWD = os.getcwd()
-print DIR
+print(DIR)
 #--------------------------------------------------------
 if __name__ == "__main__":
     if CWD != DIR:
@@ -59,7 +57,7 @@ if __name__ == "__main__":
     logging.info("change directory to ..")
     os.chdir("../..")
     lib_path = os.getcwd()
-    print lib_path
+    print(lib_path)
     logging.info("call makeini.py with -f %s/master_ini.xml"%DIR)
     subprocess.call(["python", "makeini.py", "-f", "%s/master_ini.xml"%DIR])
     os.chdir(DIR)
@@ -72,7 +70,7 @@ if __name__ == "__main__":
     from utils import *
     os.chdir("..")
     TRUNK = os.getcwd()
-    print "TRUNk", TRUNK
+    print("TRUNk", TRUNK)
     os.chdir(DIR)
     #----------------------------------------
     logging.info("change directory back to %s"%DIR)
@@ -99,7 +97,7 @@ if __name__ == "__main__":
         if not path.exists(inifile):
             logging.critical("inifile <%s> does not exist"%inifile)
             exit(FAILURE)
-        print inifile
+        print(inifile)
         width_size = float(inifile.split("geometry_")[1].split("_")[0])
         cmd = "%s --inifile=%s"%(executable, inifile)
         #--------------------- SIMULATION ------------------------  
@@ -120,7 +118,7 @@ if __name__ == "__main__":
         maxtime = get_maxtime(inifile)
         fps, N, traj = parse_file(trajfile)
         J = flow(fps, N, traj, 61)
-        if not flows.has_key(width_size):
+        if width_size not in flows:
             flows[width_size] = [J]
         else:
             flows[width_size].append(J)
@@ -135,56 +133,60 @@ if __name__ == "__main__":
     flow_file = "flow.txt"
     ff = open(flow_file, "w")
     logging.info('write flow values in \"%s\"'%flow_file)
-    for key, value in flows.items():
-        print >>ff, key, ":", value
+    for key, value in list(flows.items()):
+        print (key)
+        print (value)
+        ff.write("%f:%f" % (key, value[0]))
 
-    ff.close
-    M = np.array([np.mean(i) for i in flows.values()]) # std pro width
-    S = np.array([np.std(i) for i in flows.values()])  # std pro width
-    print >>ff, "==========================="
-    print >>ff, "==========================="
-    print >>ff, "Means "
-    print >>ff, M
-    print >>ff, "==========================="
-    print >>ff, "Std "
-    print >>ff, S
-    print >>ff, "==========================="
+
+    M = np.array([np.mean(i) for i in list(flows.values())]) # std pro width
+    S = np.array([np.std(i) for i in list(flows.values())])  # std pro width
+    ff.write("===========================")
+    ff.write("===========================")
+    ff.write("Means ")
+    ff.write(M)
+    ff.write("===========================")
+    ff.write("Std ")
+    ff.write(S)
+    ff.write("===========================")
+    ff.close()
     #########################################################################
     ms = 8
     #plot(widths, flows, "o-b", lw = 2, ms = ms, label = "simulation")
-    indexsort = np.argsort( flows.keys() )
-    F = np.array( flows.keys() )[indexsort]
-    plot(F, np.array(M)[indexsort], "o-", lw=2, label='Simulation', color='blue')
-    errorbar(F , np.array(M)[indexsort] , yerr=np.array(S)[indexsort], fmt='-o')
+    indexsort = np.argsort( list(flows.keys()) )
+    F = np.array( list(flows.keys()) )[indexsort]
+    plt.plot(F, np.array(M)[indexsort], "o-", lw=2, label='Simulation', color='blue')
+    plt.errorbar(F , np.array(M)[indexsort] , yerr=np.array(S)[indexsort], fmt='-o')
 
     jexp, names = get_empirical_flow()
-    errorbar(jexp[:, 0], jexp[:, 1], yerr=jexp[:, 2], fmt="D-", color='r', ecolor='r', linewidth=2, capthick=2, label = "%s"%", ".join(names))
-    axes().set_aspect(1./axes().get_data_ratio())
+    plt.errorbar(jexp[:, 0], jexp[:, 1], yerr=jexp[:, 2], fmt="D-", color='r', ecolor='r', linewidth=2, capthick=2, label = "%s"%", ".join(names))
+    plt.axes().set_aspect(1./plt.axes().get_data_ratio())
     columns = np.vstack((F, np.array(M)[indexsort]))
     gg = open("flow_col.txt", "w")
     for i in range(len(F)):
-        print >>gg, columns[0][i], columns[1][i]
+        gg.write("%f  %f" % (columns[0][i], columns[1][i]))
+        
     gg.close()
-    legend(loc='best', numpoints=1)
-    grid()
-    xlabel(r'$w\; [\, \rm{m}\, ]$',fontsize=18)
-    ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
+    plt.legend(loc='best', numpoints=1)
+    plt.grid()
+    plt.xlabel(r'$w\; [\, \rm{m}\, ]$',fontsize=18)
+    plt.ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
     # xticks(jexp[:, 0])
-    xlim([np.min(jexp[:, 0]) - 0.1,  np.max(jexp[:, 0]) + 0.1])
-    ylim([np.min(jexp[:, 1]) - 0.3,  np.max(jexp[:, 1]) + np.max(jexp[:, 2]) + 0.3])
+    plt.xlim([np.min(jexp[:, 0]) - 0.1,  np.max(jexp[:, 0]) + 0.1])
+    plt.ylim([np.min(jexp[:, 1]) - 0.3,  np.max(jexp[:, 1]) + np.max(jexp[:, 2]) + 0.3])
 
     err = 0
     num = 0
     for (w, j) in zip(jexp[:, 0], jexp[:, 1]):
-        for key, values in flows.items():
+        for key, values in list(flows.items()):
             if key == w:
                 num += 1
                 err +=  np.sqrt((np.mean(values)-j)**2)
-                print "%3.3f  %3.1f  %3.1f  -  %3.3f  %3.3f"%(err, key, w, j, np.mean(values))
+                print("%3.3f  %3.1f  %3.1f  -  %3.3f  %3.3f"%(err, key, w, j, np.mean(values)))
     err /= num
-    title(r"$\frac{1}{N}\sqrt{{\sum_w {(\mu(w)-E(w)})^2 }}=%.2f\; (tol=%.2f)$"%(err, tolerance), y=1.02)
+    plt.title(r"$\frac{1}{N}\sqrt{{\sum_w {(\mu(w)-E(w)})^2 }}=%.2f\; (tol=%.2f)$"%(err, tolerance), y=1.02)
     
-    savefig("flow.png")
+    plt.savefig("flow.png")
     #show()
     #########################################################################
     

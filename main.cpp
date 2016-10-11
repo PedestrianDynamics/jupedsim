@@ -1,7 +1,7 @@
 /**
  * \file        main.cpp
  * \date        Jan 15, 2013
- * \version     v0.7
+ * \version     v0.8
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -31,105 +31,111 @@
 #include "./Simulation.h"
 #include "pedestrian/AgentsSourcesManager.h"
 
-#ifdef _USE_PROTOCOL_BUFFER
-#include "matsim/HybridSimulationManager.h"
+#ifdef _JPS_AS_A_SERVICE
+
+#include "hybrid/HybridSimulationManager.h"
+
 #endif
 
 #include <thread>
 #include <functional>
 #include <iomanip>
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-     //gathering some statistics about the runtime
-     time_t starttime, endtime;
+    //gathering some statistics about the runtime
+    time_t starttime, endtime;
 
-     // default logger
-     Log = new STDIOHandler();
+    // default logger
+    Log = new STDIOHandler();
 
-     // Parsing the arguments
-     ArgumentParser* args = new ArgumentParser();
-     bool status=args->ParseArgs(argc, argv);
-
-     // create and initialize the simulation engine
-     // Simulation
-     time(&starttime);
-
-     Simulation sim(*args);
-
-     if(status&&sim.InitArgs(*args))
-     {
-          //evacuation time
-          int evacTime = 0;
-          Log->Write("INFO: \tStart runSimulation() with %d pedestrians", sim.GetPedsNumber());
-
-#ifdef _USE_PROTOCOL_BUFFER
-          //Start the thread for managing incoming messages from MatSim
-          auto hybrid=args->GetHybridSimManager();
-          //process the hybrid simulation
-          if(hybrid)
-          {
-               evacTime=hybrid->Run(sim);
-          }
-          //process the normal simulation
-          else
+    Configuration* configuration = new Configuration();
+    // Parsing the arguments
+    bool status = false;
+    {    
+          //ArgumentParser* p = new ArgumentParser(configuration); //Memory Leak
+          std::unique_ptr<ArgumentParser> p(new ArgumentParser(configuration));
+          status = p->ParseArgs(argc, argv);
+    }
+#ifdef _JPS_AS_A_SERVICE
+    if (configuration->GetRunAsService()) {
+          std::shared_ptr<HybridSimulationManager> hybridSimulationManager = std::shared_ptr<HybridSimulationManager>(
+                    new HybridSimulationManager(configuration));
+          configuration->SetHybridSimulationManager(hybridSimulationManager);
+          std::thread t = std::thread(&HybridSimulationManager::Start, hybridSimulationManager);
+          hybridSimulationManager->WaitForScenarioLoaded();
+          t.detach();
+     }
 #endif
-          if(sim.GetAgentSrcManager().GetMaxAgentNumber())
-          {
-               //Start the thread for managing the sources of agents if any
-               //std::thread t1(sim.GetAgentSrcManager());
-               std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());
-               //main thread for the simulation
-               evacTime = sim.RunStandardSimulation(args->GetTmax());
-               //Join the main thread
-               t1.join();
-          }
-          else
-          {
-               //main thread for the simulation
-               evacTime = sim.RunStandardSimulation(args->GetTmax());
-          }
+    // create and initialize the simulation engine
+    // Simulation
+    time(&starttime);
 
-          Log->Write("\nINFO: \tEnd runSimulation()");
-          time(&endtime);
+    Simulation sim(configuration);
 
-          // some statistics output
-          if(args->ShowStatistics())
-          {
-               sim.PrintStatistics();
-          }
+    if (status && sim.InitArgs()) {
+        //evacuation time
+        double evacTime = 0;
+        Log->Write("INFO: \tStart runSimulation() with %d pedestrians", sim.GetPedsNumber());
 
-          if (sim.GetPedsNumber())
-          {
-               Log->Write("WARNING: Pedestrians not evacuated [%d] using [%d] threads",
-                         sim.GetPedsNumber(), args->GetMaxOpenMPThreads());
-          }
+#ifdef _JPS_AS_A_SERVICE
 
-          double execTime = difftime(endtime, starttime);
+        if (configuration->GetRunAsService()) {
+              configuration->GetHybridSimulationManager()->Run(sim);
+         }
+         else
+#endif
+        if (sim.GetAgentSrcManager().GetMaxAgentNumber()) {
+            //Start the thread for managing the sources of agents if any
+            //std::thread t1(sim.GetAgentSrcManager());
+            double simMaxTime = configuration->GetTmax();
+            std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());//@todo pass simMaxTime to Run
+            //main thread for the simulation
+            evacTime = sim.RunStandardSimulation(simMaxTime);
+            //Join the main thread
+            t1.join();
+        }
+        else {
+            //main thread for the simulation
+            evacTime = sim.RunStandardSimulation(configuration->GetTmax());
+        }
 
-          std::stringstream summary;
-          summary << std::setprecision(2)<<std::fixed;
-          summary<<"\nExec Time [s]     : "<< execTime<<std::endl;
-          summary<<"Evac Time [s]     : "<< evacTime<<std::endl;
-          summary<<"Realtime Factor   : "<< evacTime / execTime<<" X " <<std::endl;
-          summary<<"Number of Threads : "<< args->GetMaxOpenMPThreads()<<std::endl;
-          summary<<"Warnings          : "<< Log->GetWarnings()<<std::endl;
-          summary<<"Errors            : "<< Log->GetErrors()<<std::endl;
-          Log->Write(summary.str().c_str());
+        Log->Write("\nINFO: \tEnd runSimulation()");
+        time(&endtime);
 
-          //force an output to the screen if the log is not the standard output
-          if (nullptr == dynamic_cast<STDIOHandler*>(Log))
-          {
-               printf("%s\n", summary.str().c_str());
-          }
-     }
-     else
-     {
-          Log->Write("INFO:\tFinishing...");
-     }
-     // do the last cleaning
-     delete args;
-     delete Log;
+        // some statistics output
+        if (configuration->ShowStatistics()) {
+            sim.PrintStatistics();
+        }
 
-     return (EXIT_SUCCESS);
+        if (sim.GetPedsNumber()) {
+            Log->Write("WARNING: Pedestrians not evacuated [%d] using [%d] threads",
+                    sim.GetPedsNumber(), configuration->GetMaxOpenMPThreads());
+        }
+
+        double execTime = difftime(endtime, starttime);
+
+        std::stringstream summary;
+        summary << std::setprecision(2) << std::fixed;
+        summary << "\nExec Time [s]     : " << execTime << std::endl;
+        summary << "Evac Time [s]     : " << evacTime << std::endl;
+        summary << "Realtime Factor   : " << evacTime/execTime << " X " << std::endl;
+        summary << "Number of Threads : " << configuration->GetMaxOpenMPThreads() << std::endl;
+        summary << "Warnings          : " << Log->GetWarnings() << std::endl;
+        summary << "Errors            : " << Log->GetErrors() << std::endl;
+        Log->Write(summary.str().c_str());
+
+        //force an output to the screen if the log is not the standard output
+        if (nullptr==dynamic_cast<STDIOHandler*>(Log)) {
+            printf("%s\n", summary.str().c_str());
+        }
+    }
+    else {
+        Log->Write("INFO:\tFinishing...");
+    }
+    // do the last cleaning
+    delete configuration;
+    delete Log;
+
+    return (EXIT_SUCCESS);
 }
