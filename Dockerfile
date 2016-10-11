@@ -18,6 +18,8 @@ RUN apt-get update && apt-get install -y \
     lcov \
     doxygen \
     libboost-system-dev \
+    libboost-timer-dev\
+    libboost-chrono-dev\
     libboost-filesystem-dev \
     libboost-test-dev \
     python \
