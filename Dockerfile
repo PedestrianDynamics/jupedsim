@@ -41,8 +41,8 @@ RUN wget http://downloads.sourceforge.net/project/boost/boost/${boost_version}/$
 
 # add user
 RUN groupadd -r -g 1000 jupedsim && useradd -r -g jupedsim -u 1000 -m jupedsim
-# Change passwort for user jupedsim to "jupedsim".
 USER jupedsim
+# sudo usermod -p `perl -e "print crypt("password","Q4")"` root
 
 # install jpscore
 RUN mkdir -p /home/jupedsim/workspace
@@ -51,7 +51,7 @@ RUN cd /home/jupedsim/workspace \
     && cd jpscore \
     && mkdir -p build \
     && cd build \
-    && cmake -DBUILD_TESTING=ON .. \
+    && cmake -DBUILD_TESTING=ON ..\
     && make
 
 
