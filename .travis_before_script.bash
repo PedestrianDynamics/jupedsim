@@ -13,8 +13,8 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
         && rm boost_1_61_0.tar.gz \
         && cd boost_1_61_0 \
         && ./bootstrap.sh --with-libraries=filesystem,test,system\
-        && ./b2 --without-python --prefix=/usr -j 4 link=shared runtime-link=shared install \
-        && cd .. && rm -rf boost_1_61_0 && ldconfig
+        && sudo ./b2 --without-python --prefix=/usr -j 4 link=shared runtime-link=shared install \
+        && cd .. && rm -rf boost_1_61_0 && sudo ldconfig
 
 elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
     brew update;   
