@@ -122,6 +122,7 @@ bool PedData::InitializeVariables(const string& filename)
                     {
                     	std::vector<std::string> strs1;
                     	line.erase(0,1);
+                        boost::algorithm::trim_right(line);
                     	boost::split(strs1, line , boost::is_any_of("\t"),boost::token_compress_on);
                     	vector<string>::iterator it_id;
                     	it_id=find(strs1.begin(),strs1.end(),"ID");
@@ -143,6 +144,7 @@ bool PedData::InitializeVariables(const string& filename)
                {
 
                     std::vector<std::string> strs;
+                    boost::algorithm::trim_right(line);
                     boost::split(strs, line , boost::is_any_of("\t "),boost::token_compress_on);
                     if(strs.size() < 5)
                     {
