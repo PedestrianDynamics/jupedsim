@@ -143,6 +143,7 @@ bool PedData::InitializeVariables(const string& filename)
                {
 
                     std::vector<std::string> strs;
+                    boost::algorithm::trim_right(line);
                     boost::split(strs, line , boost::is_any_of("\t "),boost::token_compress_on);
                     if(strs.size() < 5)
                     {
