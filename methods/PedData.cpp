@@ -122,7 +122,7 @@ bool PedData::InitializeVariables(const string& filename)
                     {
                     	std::vector<std::string> strs1;
                     	line.erase(0,1);
-                    	boost::split(strs1, line , boost::is_any_of("\t"),boost::token_compress_on);
+                    	boost::split(strs1, line , boost::is_any_of("\t "),boost::token_compress_on);
                     	vector<string>::iterator it_id;
                     	it_id=find(strs1.begin(),strs1.end(),"ID");
                     	pos_id = std::distance(strs1.begin(), it_id);
