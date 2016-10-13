@@ -1,5 +1,14 @@
 # Change Log
 All notable changes to `jpsreport` will be documented in this file.
+## v0.8.2 [unreleased]
+
+### Added
+
+### Changed
+
+### Fixed 
+- Fixed SegFault due to reading files from different OS. (9a42c9dd)
+
 
 ## v0.8.1 [11.10.2016]
 
