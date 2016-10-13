@@ -228,7 +228,7 @@ bool GeometryFactory::RefreshView()
             //_model.setItem(room.first, 1, roomcaption);
             QString roomCaption;
             if (room.first>=0)
-                roomCaption = QString::fromStdString(_geometryFactory[room.first][0]->GetRoomCaption());
+                roomCaption = QString::fromStdString((_geometryFactory[room.first].begin())->second->GetRoomCaption());
             else
                 roomCaption = "empty";
 
