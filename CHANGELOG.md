@@ -67,11 +67,8 @@ Please also check the [Issue tracker](https://cst.version.fz-juelich.de/jupedsim
 
 ## v0.7.0 [2015-07-15]
 
-### New Module
-- JuPedSim: Editor for the geometry
-
 ### Added
-
+- New module `JuPeditor`: Editor for the geometry
 - Risk tolerance factor (value in [0 1]) for pedestrian. Pedestrians with high values are likely to take more risks.
 - Added pre-movement time of the agents. Only after this time, the concerned agents will start moving.
 - Sources for generating agents at runtime. Parameter are frequency (agents per seconds) and maximum number
