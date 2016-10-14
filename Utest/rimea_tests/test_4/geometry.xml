@@ -5,8 +5,8 @@
 		<room id="0" caption="corridor">
 			<subroom id="0" closed="0" class="subroom">
 				<polygon>	
-					<vertex px="0" py="4" />
-					<vertex px="26" py="4" />
+					<vertex px="0" py="2" />
+					<vertex px="26" py="2" />
 				</polygon>
 				<polygon>	
 					<vertex px="0" py="0" />
@@ -20,11 +20,11 @@
 	<!-- exits like crossings but between rooms or to outside (room with index = -1) -->
 		<transition id="0" caption="left" type="emergency" room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
 			<vertex px="0" py="0" />
-			<vertex px="0" py="4" />
+			<vertex px="0" py="2" />
 		</transition>
 		<transition id="1" caption="recht" type="emergency" room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
 			<vertex px="26" py="0" />
-			<vertex px="26" py="4" />
+			<vertex px="26" py="2" />
 		</transition>
 	</transitions>
 </geometry>

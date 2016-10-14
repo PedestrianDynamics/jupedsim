@@ -2,27 +2,28 @@
 
 <JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 
-  <!-- seed used for initialising random generator -->
-  <seed>1254</seed>
-  <max_sim_time>200</max_sim_time>
-  <!-- geometry file -->
-  <geometry>../geometry.xml</geometry>
-  <!-- trajectories file and format -->
-  <trajectories format="xml-plain" fps="8">
-    <file location="RiMEATest14_traj.xml" />
-    <!--<socket hostname="127.0.0.1" port="8989"/> -->
-  </trajectories>
-  <!-- where to store the logs -->
-  <!--<logfile>log.txt</logfile> -->
+	<!-- seed used for initialising random generator -->
+	<seed>1254</seed>
+	<max_sim_time>1000</max_sim_time>
+	
+	<!-- geometry file -->
+	<geometry>../geometry.xml</geometry>
+	
+	<!-- trajectories file and format -->
+	<trajectories format="xml-plain" fps="8">
+		<file location="RiMEATest14_traj.xml" />
+		<!--<socket hostname="127.0.0.1" port="8989"/> -->
+	</trajectories>
+	
+	<!-- where to store the logs -->
+	<!--<logfile>log.txt</logfile> -->
 
+	<!-- traffic information: e.g closed doors -->
+	<traffic_constraints>
+	</traffic_constraints>
 
-  <!-- traffic information: e.g closed doors -->
-  <traffic_constraints>
-    <doors>
-      <!-- <door trans_id="2" caption="main_exit" state="open" />
-	   <door trans_id="3" caption="door" state="open"	/> -->
-    </doors>
-  </traffic_constraints>
+	<routing>
+	</routing>
 
 	<!--persons information and distribution -->
 	<agents operational_model_id="1">

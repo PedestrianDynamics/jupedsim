@@ -174,7 +174,7 @@
 				<bmax mu="0.25" sigma="0.001" />
 				<bmin mu="0.20" sigma="0.001" />
 				<amin mu="0.18" sigma="0.001" />
-				<tau mu="[0.3, 0.4, 0.5, 0.6, 0.7]" sigma="0.001" />
+				<tau mu="[0.3, 0.5, 0.7]" sigma="0.001" />
 				<atau mu="0.5" sigma="0.001" />
 			</agent_parameters>
 			<agent_parameters agent_parameter_id="2">
@@ -218,7 +218,6 @@
 	<route_choice_models>
 		<router router_id="1" description="global_shortest">
 			<parameters>
-				<navigation_mesh method="triangulation" use_for_local_planning="true" />
 			</parameters>
 		</router>
 	</route_choice_models>

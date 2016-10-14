@@ -1,11 +1,21 @@
+##################################################################################################################
+
+General:
+
 -	Edited all master_ini.xml:
 	Deleted the lines which told that 8 kernels need to be used
-Test_1:
+
+##################################################################################################################
+
+Test 1:
 	-	No changes.
 
 
+Exits with SUCCESS
 
-Test_2:
+##################################################################################################################
+
+Test 2:
 	-	Changed the calculation of the tolerance of the traveltime.
 
 		Before:
@@ -25,8 +35,11 @@ Test_2:
 		---> Real stairlenght:		sqrt(100) = 10 (Check Rimea)
 
 
+Exits with SUCCESS
 
-Test_3:
+##################################################################################################################
+
+Test 3:
 	-	Changed the calculation of the tolerance of the traveltime.
 		Before:
 		tolerance = 1
@@ -45,15 +58,19 @@ Test_3:
 		---> Real stairlenght:		sqrt(100) = 10 (Check Rimea)
 
 
+Exits with SUCCESS
 
-Test_4:
-	-	Wrong geometry
+##################################################################################################################
 
-	-	---> Still needs to be runned for the great amount of peds, but test is fine <---
+Test 4:
+	-	We use a different geometry than stated in Rimea, because we use periodic boundary conditions.
 
 
+Exits with SUCCESS
 
-Test_5:
+##################################################################################################################
+
+Test 5:
 	-	Changed the calculation of the frame when the pedestrians start moving.
 		Before:
 		Taking the frame when the pedestrian already moved for 1 frame.
@@ -64,16 +81,20 @@ Test_5:
 		---> No Error to be considered.
 
 
+Exits with SUCCESS
 
-Test_6:
-	-	No changes.
+##################################################################################################################
+
+Test 6:
+	-	Test working, no changes.
 
 
+Exits with SUCCESS
 
+##################################################################################################################
 
-
-Test_7:
-	-	Changed the number of distributed pedestrians from 4*150=600 to 4*50=200
+Test 7:
+	-	Changed the number of distributed pedestrians from 4*150=600 to 4*50=200 (Check Rimea)
 
 	-	Changed geometrydata:
 
@@ -84,57 +105,71 @@ Test_7:
 		Geometry rectangle: width=50, lengt=40
 
 
+Exits with SUCCESS
 
-Test_8:
-	-	Changed the number of seeds used from 10 to 1
+##################################################################################################################
 
+Test 8:
 	-	Fixed a bug, which caused logging the same information over and over again.
 
 	-	Added a plot, which shows the correlation between the modified parameters.
 
-	-	---> Still needs to be runned for the great amount of peds, but test is fine <---
+	-	A LOT OF PEDESTRIAN (~20%) ARE NOT EVACUATED / ARE DELETED
 
 
+Exits with SUCCESS/FAILURE
 
-Test_9:
-	-	Changed the number of seeds used from 10 to 1
+##################################################################################################################
 
+Test 9:
 	-	Rewrote the testfunction
 
-	-	---> Still needs to be runned for the great amount of peds, but test is fine <---
+
+Exits with SUCCES
+
+##################################################################################################################
 
 
-
-Test_10:
-	-	No changes.
-
+Test 10:
+	-	Test working, no changes.
 
 
+Exits with SUCCESS
 
-Test_11:
-	-	Deleted the goal from master_ini and changed routing method from "global shortest" to "quickest" + "triangulation":
+##################################################################################################################
+
+Test 11:
+	-	Deleted the goal from master_ini and changed routing method from "global shortest"
+		to "quickest" + "triangulation":
 		
 		Before:
-		All pedestrians use the second exit
+		All pedestrians use the first exit
 		
 		Now:
 		The pedestrians prefer the first exit, but some use the second one
 
-	-	---> Still needs to be runned for the great amount of peds, but test is fine <---
 
+Exits with SUCCESS
 
+##################################################################################################################
 
-Test_12:
+Test 12:
 	-	Test working, no changes.
 
 
+Exits with SUCCESS
 
-Test_13:
+##################################################################################################################
+
+Test 13:
 	-	Test working, no changes.
 
 
+Exits with SUCCESS
 
-Test_14:
+##################################################################################################################
+
+Test 14:
 	-	Changed routing method from "global shortest" to "quickest" + "triangulation":
 		
 		Before:
@@ -146,8 +181,12 @@ Test_14:
 	-	Rewrote the testfunction
 
 
+Exits with SUCCESS
 
-Test_15:
+##################################################################################################################
+
+Test 15:
 	-	Wrote the testfunction
 
-	-	---> Still needs to be runned for the great amount of peds, but test is fine <---
+
+Exits with FAILURE

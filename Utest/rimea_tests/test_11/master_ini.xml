@@ -5,7 +5,7 @@
 	<!-- seed used for initialising random generator -->
 	<seed>1254</seed>
 	<show_statistics>true</show_statistics>
-	<max_sim_time>500</max_sim_time>
+	<max_sim_time>1000</max_sim_time>
 	
 	<!-- geometry file -->
 	<geometry>../geometry.xml</geometry>

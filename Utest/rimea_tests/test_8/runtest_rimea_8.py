@@ -2,7 +2,7 @@
 """
 Test description
 ================
-A 3D building is simulated and the influence of parameter e.g. speed and tau is investigated.
+A 3D building is simulated and the influence of the parameters speed and tau is investigated.
 It should be shown how the evacuation time behaves with respect to the investigated parameter.
 
 Remarks
@@ -22,38 +22,35 @@ import sys
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
 from sys import *
 import glob
+import matplotlib.pyplot as plt
 sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
-import matplotlib.pyplot as plt
+
 
 def run_rimea_test8(inifile, trajfile):
     v0_mean = [1.0,1.25,0.75] # Used in master_ini
-    tau_mean = [0.3,0.4,0.5,0.6,0.7] # Used in master_ini
+    tau_mean = [0.3,0.5,0.7] # Used in master_ini
     
     # Catch all Traj-files
-    files = glob.glob("trajectories/*_exit*")
-    
-    if len(files) == 0:
-        logging.critical("%s exists with failure! Found no exit-files.", argv[0])
-        exit(FAILURE)
+    files = glob.glob("trajectories/*_exit_id_0*")
     
     v0_list = []
     tau_list = []
     evac_time_list = []
     
-    if len(files) == len(v0_mean)*len(tau_mean): # Avoiding logging bug
+    if len(files) == len(v0_mean)*len(tau_mean): # Avoiding bug
         for f in files:
-            d = np.loadtxt(f)
+            data = np.loadtxt(f)
         
-            if len(d) == 0:
+            if len(data) == 0:
                 logging.critical("File %s is empty", f)
                 logging.critical("%s exists with failure!", argv[0])
                 exit(FAILURE)
         
-            num_evacuated = max(d[:,1])
+            evac_num = data[-1,1]
             
-            evac_time = max(d[:,0])
+            evac_time = data[-1,0]
             evac_time_list.append(evac_time)
             
             v0 = float(f.split("_v0-mu_")[1].split("_tau-mu_")[0])
@@ -62,7 +59,7 @@ def run_rimea_test8(inifile, trajfile):
             tau = float(f.split("_tau-mu_")[1].split(".xml_")[0])
             tau_list.append(tau)
             
-            logging.info("%d peds evacuated from exit <%s>. Evac_time: %f, v0: %s tau: %s", num_evacuated, f.split(".dat")[0].split("_id_")[-1], evac_time, v0, tau)
+            logging.info("%d peds evacuated from exit <%s>. Evac_time: %f, v0: %s tau: %s", evac_num, f.split(".dat")[0].split("_id_")[-1], evac_time, v0, tau)
         
         # Plotting
         logging.info("Ploting graph...")
@@ -77,7 +74,7 @@ def run_rimea_test8(inifile, trajfile):
             plt.title('v0 = %f'%v0)
             plt.ylabel('Evac time [s]')
             plt.xlim([0,1])
-            plt.ylim([0,100])
+            plt.ylim([0,np.max(evac_time_list)+100])
             plt.grid()
             i = i + 1
         plt.xlabel('tau')

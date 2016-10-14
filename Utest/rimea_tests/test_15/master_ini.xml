@@ -4,7 +4,7 @@
 
 	<!-- seed used for initialising random generator -->
 	<seed>1254</seed>
-	<max_sim_time>400</max_sim_time>
+	<max_sim_time>1000</max_sim_time>
 	
 	<!-- geometry file -->
 	<geometry>../geometry.xml</geometry>
@@ -28,9 +28,9 @@
 	<!--persons information and distribution -->
 	<agents operational_model_id="1">
 		<agents_distribution>
-			<group group_id="0" agent_parameter_id="1" room_id="0" subroom_id="0" goal_id="-1" number="100" router_id="1" x_min="0"  x_max="20" y_min="75.4" y_max="81.4" />
-			<group group_id="1" agent_parameter_id="1" room_id="1" subroom_id="0" goal_id="-1" number="100" router_id="1" x_min="21"  x_max="41" y_min="44" y_max="50" />
-			<group group_id="2" agent_parameter_id="1" room_id="2" subroom_id="0" goal_id="-1" number="100" router_id="1" x_min="42"  x_max="62" y_min="54" y_max="60" />
+			<group group_id="0" agent_parameter_id="1" room_id="0" subroom_id="0" goal_id="-1" number="500" router_id="1" x_min="0"  x_max="20" y_min="75.4" y_max="81.4" />
+			<group group_id="1" agent_parameter_id="1" room_id="1" subroom_id="0" goal_id="-1" number="500" router_id="1" x_min="21"  x_max="41" y_min="44" y_max="50" />
+			<group group_id="2" agent_parameter_id="1" room_id="2" subroom_id="0" goal_id="-1" number="500" router_id="1" x_min="42"  x_max="62" y_min="54" y_max="60" />
 		</agents_distribution>
 	</agents>
 

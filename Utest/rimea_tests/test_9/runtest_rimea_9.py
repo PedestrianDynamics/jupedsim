@@ -19,6 +19,9 @@ For simplicity we simulate two identical rooms:
 Room left with 4 exits. All of them are open.
 Room right with 4 exits. Two of them are closed.
 
+The exits of the left room have the ids 0 to 3.
+The exits of the right room have the ids 6 and 7.
+
 Source
 ======
 http://www.rimea.de/fileadmin/files/dok/richtlinien/RiMEA_Richtlinie_3.0.0_-_D-E.pdf
@@ -27,48 +30,37 @@ http://www.rimea.de/fileadmin/files/dok/richtlinien/RiMEA_Richtlinie_3.0.0_-_D-E
 import os
 import sys
 from sys import *
+import glob
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
 sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
 
 def run_rimea_test9(inifile, trajfile):
-    fps, numpeds, traj = parse_file(trajfile)
-    
-    logging.info("Npeds_4door: %d, Npeds_2door: %d fps: %d", numpeds/2, numpeds/2 , fps)
-    peds = np.unique(traj[:, 0])
-    
-    peds_4door = peds[peds <= numpeds/2] # Pedestrians in room with 4 doors open
-    peds_2door = peds[peds > numpeds/2] # Pedestrians in room with 2 doors open
-    
-    evac_times4door = []
-    evac_times2door = []
-    
-    for ped in peds_4door:
-        # Data of each ped
-        ptraj = traj[traj[:, 0] == ped]
-        # Get evac time of each ped
-        evac_times4door.append(ptraj[-1,1]/8)
 
-    for ped in peds_2door:
-        # Data of each ped
-        ptraj = traj[traj[:, 0] == ped]
-        # Get evac time of each ped
-        evac_times2door.append(ptraj[-1,1]/8)
+    # Read data:
+    left_room_0 = np.loadtxt('trajectories/traj.xml_flow_exit_id_0.dat')
+    left_room_1 = np.loadtxt('trajectories/traj.xml_flow_exit_id_1.dat')
+    left_room_2 = np.loadtxt('trajectories/traj.xml_flow_exit_id_2.dat')
+    left_room_3 = np.loadtxt('trajectories/traj.xml_flow_exit_id_3.dat')
     
-    evac_time_4door = np.max(evac_times4door)
-    evac_time_2door = np.max(evac_times2door)
+    right_room_0 = np.loadtxt('trajectories/traj.xml_flow_exit_id_6.dat')
+    right_room_1 = np.loadtxt('trajectories/traj.xml_flow_exit_id_7.dat')
     
-    logging.info("Evac_time_4door: %f, Evac_time_2door: %f", evac_time_4door, evac_time_2door)
+    # Evac times for each scenario:
+    evac_time_left = np.max([left_room_0[-1,0], left_room_1[-1,0], left_room_2[-1,0], left_room_3[-1,0]])
+    evac_time_right = np.max([right_room_0[-1,0], right_room_1[-1,0]])
     
-    factor = evac_time_2door/evac_time_4door
+    logging.info("Evac_time_4_door: %f, Evac_time_2_door: %f", evac_time_left, evac_time_right)
+    
+    factor = evac_time_right/evac_time_left
     
     if 1.6 <= factor <= 2.4:
-        logging.info("Evac_time_2door diveded by Evac_time_4door is in between:")
-        logging.info("2 - 0.2 <= %f <= 2 + 0.2", factor)
+        logging.info("Evac_time_2door divided by Evac_time_4door is in between:")
+        logging.info("1.6 <= %f <= 2.4", factor)
     else:
-        logging.info("Evac_time_2door diveded by Evac_time_4door is not in between:")
-        logging.info("2 - 0.2 <= %f <= 2 + 0.2", factor)
+        logging.info("Evac_time_2door divided by Evac_time_4door is not in between:")
+        logging.info("1.6 <= %f <= 2.4", factor)
         logging.critical("%s exists with FAILURE.", argv[0])
         exit(FAILURE)
 

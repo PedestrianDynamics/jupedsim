@@ -31,8 +31,8 @@
 			<goal id="0" final="true" caption="goal 1">
 				<polygon>
 					<vertex px="27" py="0" />
-					<vertex px="27" py="4" />
-					<vertex px="28" py="4" />
+					<vertex px="27" py="2" />
+					<vertex px="28" py="2" />
 					<vertex px="28" py="0" />
 					<vertex px="27" py="0" />
 				</polygon>
@@ -40,10 +40,10 @@
 		</goals>
 	</routing>
 
-	<!--persons information and distribution -->
+	<!--persons information and distribution-->
 	<agents operational_model_id="3">
 		<agents_distribution>
-			<group group_id="0" agent_parameter_id="1" room_id="0" subroom_id="0" number="[52,104,208,312,416,520,624]" goal_id="0" router_id="1"/>
+			<group group_id="0" agent_parameter_id="1" room_id="0" subroom_id="0" number="[26,52,78,104,156,208,260,312]" goal_id="0" router_id="1"/>
 		</agents_distribution>
 	</agents>
 
