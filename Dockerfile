@@ -17,21 +17,32 @@ RUN apt-get update && apt-get install -y \
     git \
     lcov \
     doxygen \
-    libboost-system-dev \
-    libboost-filesystem-dev \
-    libboost-test-dev \
+    wget \
+    libbz2-dev \ 
     python \
     python-dev \
     python-pip \
     && apt-get clean
 
 # set environment
-ENV BOOST_ROOT /usr
 ENV HOME /home/jupedsim
+
+ARG boost_version=1.61.0
+ARG boost_dir=boost_1_61_0
+ENV boost_version ${boost_version}
+ENV BOOST_ROOT /usr
+RUN wget http://downloads.sourceforge.net/project/boost/boost/${boost_version}/${boost_dir}.tar.gz \
+    && tar xfz ${boost_dir}.tar.gz \
+    && rm ${boost_dir}.tar.gz \
+    && cd ${boost_dir} \
+    && ./bootstrap.sh --with-libraries=filesystem,test,system\
+    && ./b2 --without-python --prefix=/usr -j 4 link=shared runtime-link=shared install \
+    && cd .. && rm -rf ${boost_dir} && ldconfig
 
 # add user
 RUN groupadd -r -g 1000 jupedsim && useradd -r -g jupedsim -u 1000 -m jupedsim
 USER jupedsim
+# sudo usermod -p `perl -e "print crypt("password","Q4")"` root
 
 # install jpscore
 RUN mkdir -p /home/jupedsim/workspace
@@ -50,4 +61,4 @@ RUN cd /home/jupedsim/workspace \
 
 
 # by default /bin/bash is executed
-CMD /bin/bash && echo "JuPedSim/jpscore: Enjoy simulating!"
+CMD /bin/bash && echo "Thank you for using JuPedSim/jpscore!"
