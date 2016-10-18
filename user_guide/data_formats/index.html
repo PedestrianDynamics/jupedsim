@@ -208,6 +208,8 @@
         
             <li><a href="#inifile">Inifile</a></li>
         
+            <li><a href="#sources">Sources</a></li>
+        
             <li><a href="#trajectory">Trajectory</a></li>
         
     
@@ -216,25 +218,29 @@
             <div class="col-md-9" role="main">
 
 <h1 id="file-formats"><a class="toclink" href="#file-formats">File formats</a></h1>
-<p>JuPedSim uses three two input files and produces an output file with trajectories</p>
+<p>JuPedSim uses two input files and produces an output file with trajectories</p>
 <p><img alt="jpscore_input" src="../img/jpscore_inout.png" /></p>
-<ol>
-<li>Inifile: This is the project file that controls the simulation parameter, the population properties, etc. </li>
-<li>Geometry file: Defines the geometry that should be used in the simulation</li>
-<li>Output of the simulation is a trajectory file.</li>
-</ol>
+<p>The <a href="#geometry">geometry file</a> defines the geometry that should be used in the simulation, 
+while the <a href="#inifile">inifile</a>  defines the different settings and parameter values, population properties etc. </p>
+<p>The result of a successful simulation is saved in a <a href="#trajectory">trajectory file</a> in a certain format.</p>
 <h2 id="geometry"><a class="toclink" href="#geometry">Geometry</a></h2>
-<p>The main structure of the geometry file is as follows 
-<img alt="jpsgeometry" src="../img/geometry_classes.png" /></p>
-<p>Sample geometry with one room, two subrooms and one obstacle.
-An obstacle should not overlap with any wall of the geometry.
-<img alt="corner" src="../img/corner_geo.png" /></p>
-<p>The main components of a geometry an: 
-- Rooms
-- Subrooms
-- Obstacles
-- Crossings
-- Transitions</p>
+<p>The main structure of the geometry file is as follows </p>
+<p><img alt="jpsgeometry" src="../img/geometry_classes.png" /></p>
+<hr />
+<p>Following picture shows a sample geometry with one room, two subrooms and one obstacle.</p>
+<p><img alt="corner" src="../img/Subrooms.png" /></p>
+<p><code>subrooms</code> and <code>rooms</code> are two different concepts two organize a geometry. 
+Basically, it is up to the user to organize its geometry with more than one <code>subroom</code> or not. </p>
+<p>The above mentioned geometry could also be organized using two rooms as follows:
+<img alt="rooms" src="../img/Rooms.png" /></p>
+<p>The main components of a geometry are: </p>
+<ul>
+<li><a href="#rooms">Rooms</a></li>
+<li><a href="#subrooms">Subrooms</a></li>
+<li><a href="#obstacles">Obstacles</a></li>
+<li><a href="#transitions">Transitions</a></li>
+<li><a href="#crossings">Crossings</a></li>
+</ul>
 <h3 id="rooms"><a class="toclink" href="#rooms">Rooms</a></h3>
 <p>The geometry contains at least one room and one transition. 
 Each room has a unique <code>id</code> and optional caption. 
@@ -246,9 +252,9 @@ Two rooms are separated by either walls or transitions.</p>
 
 <h3 id="subrooms"><a class="toclink" href="#subrooms">Subrooms</a></h3>
 <p>Subrooms define the navigation mesh, i.e the walkable areas in the geometry. 
-Each <code>subroom</code> is bounded by at least 1 <code>crossing</code>. 
+Each <code>subroom</code> is bounded by at least one <code>crossing</code>. 
 A sample is described in the following listing: </p>
-<pre><code class="xml">&lt;subroom id=&quot;1&quot; class=&quot;stair&quot; A x=&quot;−1.2&quot; B y=&quot;0&quot; C=&quot;0&quot;&gt; 
+<pre><code class="xml">&lt;subroom id=&quot;1&quot; class=&quot;stair&quot; A_x=&quot;−1.2&quot; B_y=&quot;0&quot; C=&quot;0&quot;&gt; 
     &lt;polygon caption=&quot;wall&quot;&gt;
         &lt;vertex px=&quot;0.0&quot; py=&quot;1.0&quot;/&gt;
         &lt;vertex px=&quot;−5.0&quot; py=&quot;1.0&quot;/&gt; 
@@ -271,17 +277,15 @@ A sample is described in the following listing: </p>
 </li>
 <li><code>floor</code></li>
 <li><code>stairs</code> takes additionally
-    <code>xml
-    &lt;up px="-5.0" py="2" /&gt;
-    &lt;down px="0.0" py="2" /&gt;</code>
+    <code>&lt;up px="-5.0" py="2" /&gt;</code> and   <code>&lt;down px="0.0" py="2" /&gt;</code>, which are 
     used in the visualisation, for marking the highest and the lowest point.</li>
 <li>
 <p>
-<script type="math/tex">\_x,\; B\_y,\; C</script> optional parameter for the explicit plane equation of the subroom.
-It allows the construction of a 3D environment and should be used to describe stairs. 
-The plane equation is given by:  <script type="math/tex">Z = Ax +By + C</script>. 
-For instance, if the stair goes through the following points: <script type="math/tex">P1(1,0,0),\; P2 (0,1,0)\; \rm{and}\; P3(0,0,1)</script> 
-then the equation is given by: <script type="math/tex">Z= -x -y +1</script>.</p>
+<script type="math/tex">A\_x,\; B\_y,\rm{and}\; C</script> are optional parameter for the explicit plane equation of the subroom,
+   for the construction of a 3D environment and should be used to describe stairs. <br />
+   The plane equation is given by:  <script type="math/tex">Z = Ax +By + C</script>. 
+   For instance, if the stair goes through the following points: <script type="math/tex">P_1(1,0,0),\; P_2 (0,1,0)\; \rm{and}\; P_3(0,0,1)</script> 
+   then the equation is given by: <script type="math/tex">Z= -x -y +1</script>.</p>
 </li>
 <li>
 <p><code>polygon</code> describes the walls as a sequence of vertexes.</p>
@@ -290,6 +294,32 @@ then the equation is given by: <script type="math/tex">Z= -x -y +1</script>.</p>
 <p>To ease navigation, it is recommended to always use convex subrooms. 
 In the case the subroom is not convex, additional navigation lines might be required
 or the floor field router should be used. </p>
+<hr />
+<p><strong>Note</strong>: Every <code>room</code> has at least one <code>subroom</code>.</p>
+<hr />
+<h3 id="obstacles"><a class="toclink" href="#obstacles">Obstacles</a></h3>
+<p>One or more obstacles can also be defined within a <code>subroom</code>. </p>
+<hr />
+<p><strong>Note</strong>: Obstacles should not intersect with other geometry elements e.g. walls, crossings or transitions.</p>
+<hr />
+<p>Sample obstacle in a subroom</p>
+<pre><code class="xml">&lt;obstacle id=&quot;0&quot; caption=&quot;table&quot; height=&quot;1.0&quot; &gt;
+    &lt;polygon&gt;
+        &lt;vertex px=&quot;12.0&quot; py=&quot;6.0&quot;/&gt;
+        &lt;vertex px=&quot;13.0&quot; py=&quot;6.0&quot;/&gt;
+        &lt;vertex px=&quot;13.0&quot; py=&quot;5.5&quot;/&gt;
+        &lt;vertex px=&quot;12.0&quot; py=&quot;5.5&quot;/&gt;
+        &lt;vertex px=&quot;12.0&quot; py=&quot;6.0&quot;/&gt;
+    &lt;/polygon&gt;
+&lt;/obstacle&gt;
+</code></pre>
+
+<ul>
+<li><code>id</code>, mandatory unique identifier for this obstacle.</li>
+<li><code>caption</code>, used in the visualisation.</li>
+<li><code>height</code>, optional parameter, not used at the moment</li>
+<li><code>polygon</code>, describing the obstacle as a sequence of vertex.</li>
+</ul>
 <h3 id="transitions"><a class="toclink" href="#transitions">Transitions</a></h3>
 <p>A <code>transition</code> defines the connection between two rooms and is basically a door.
 It can be close or open (section &ldquo;traffic constraints&rdquo; in the inifile). </p>
@@ -335,31 +365,199 @@ Unlike <code>transition</code>, they are always open.</p>
   then use <code>-1</code>.</li>
 <li><code>vertex, define two ending points of the</code>crossing`.</li>
 </ul>
-<h3 id="obstacles"><a class="toclink" href="#obstacles">Obstacles</a></h3>
-<p>One or more obstacles can also be defined within a <code>subroom</code>. </p>
-<hr />
-<p><strong>Note</strong>: Obstacles should not any intersect with other geometry elements (walls, crossings or transitions).</p>
-<hr />
-<p>Sample obstacle in a subroom</p>
-<pre><code class="xml">&lt;obstacle id=&quot;0&quot; caption=&quot;table&quot; height=&quot;1.0&quot; &gt;
-    &lt;polygon&gt;
-        &lt;vertex px=&quot;12.0&quot; py=&quot;6.0&quot;/&gt;
-        &lt;vertex px=&quot;13.0&quot; py=&quot;6.0&quot;/&gt;
-        &lt;vertex px=&quot;13.0&quot; py=&quot;5.5&quot;/&gt;
-        &lt;vertex px=&quot;12.0&quot; py=&quot;5.5&quot;/&gt;
-        &lt;vertex px=&quot;12.0&quot; py=&quot;6.0&quot;/&gt;
-    &lt;/polygon&gt;
-&lt;/obstacle&gt;
+<h2 id="inifile"><a class="toclink" href="#inifile">Inifile</a></h2>
+<p>With the content of the <code>inifile</code>, the simulation with <code>jpscore</code> can be controlled. </p>
+<p>The typical structure of an <code>inifile</code> is as follows:</p>
+<pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+&lt;JuPedSim project=&quot;JPS-Project&quot; version=&quot;0.8&quot;&gt;
+
+    &lt;header&gt; 
+         &lt;!-- seed , geometry, output format --&gt;
+    &lt;/header&gt;        
+
+    &lt;traffic_constraints&gt; 
+        &lt;!-- traffic information: e.g closed doors or smoked rooms --&gt;
+    &lt;/traffic_constraints&gt;
+
+
+    &lt;goals&gt;
+    &lt;!-- goals (closed polygons) outside the geometry--&gt;
+    &lt;goals/&gt;
+
+
+    &lt;agents&gt;
+        &lt;agents_distribution&gt;
+            &lt;!--persons information and distribution --&gt; 
+        &lt;/agents_distribution&gt;
+    &lt;/agents&gt;
+
+
+    &lt;operational_models&gt;
+        &lt;model id=&quot;n&quot; description=&quot;name&quot;&gt;
+            &lt;!-- parameters of model (&lt;n&gt;, &quot;name&quot;)  --&gt;
+        &lt;/model&gt;
+        &lt;!-- other models can be defined --&gt;
+    &lt;/operational_models&gt;
+
+    &lt;route_choice_models&gt;
+        &lt;router router_id=&quot;n&quot; description=&quot;name&quot;&gt;
+            &lt;!-- parameters of router (&lt;n&gt;, &quot;name&quot;)  --&gt;
+        &lt;/router&gt;
+        &lt;!-- other routers can be defined --&gt;
+    &lt;/route_choice_models&gt;
+
+&lt;/JuPedSim&gt;
+</code></pre>
+
+<h3 id="header"><a class="toclink" href="#header">Header</a></h3>
+<p>The header comprises the following elements:</p>
+<ul>
+<li>
+<p><code>&lt;seed&gt;s&lt;/seed&gt;</code> </p>
+<p>Set the  <code>seed</code> value to <code>s</code>.  This is used for the random number generator. If missing the
+current time (<code>time(NULL)</code>), is used i.e. random initial conditions</p>
+</li>
+<li>
+<p><code>&lt;max_sim_time&gt;200&lt;/max_sim_time&gt;</code>
+    the maximal simulation time in seconds. </p>
+</li>
+<li>
+<p>The trajectory file 
+   <code>&lt;trajectories format="xml-plain"  fps="8"&gt;  &lt;file location="trajectories.xml" /&gt;  &lt;/trajectories&gt;</code></p>
+<p>The options for the format are</p>
+<ul>
+<li>
+<p><code>xml-plain</code>: the default xml format. It can lead to large files. See section <a href="#xml-plain">xml-plain</a>.</p>
+</li>
+<li>
+<p><code>plain</code>: simple text format. See section <a href="#plain-text">plain-text</a>.</p>
+</li>
+<li>
+<p>The value <code>fps</code> defines the frame rate per second for the trajectories. </p>
+</li>
+<li>
+<p><code>file location</code> defines the location of the trajectories. 
+   All paths are relative to
+   the location of the project file.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>&lt;geometry&gt;geometry.xml&lt;/geometry&gt;</code>
+    The name and location of the geometry file. All file locations are relative
+    to the actual location of the project file.</p>
+</li>
+</ul>
+<h3 id="traffic-constraints"><a class="toclink" href="#traffic-constraints">Traffic constraints</a></h3>
+<p>This section defines constraints related to the traffic. At the moment the state of the doors can be changed (<code>open</code> or <code>close</code>)</p>
+<pre><code class="xml">&lt;traffic_constraints&gt; 
+    &lt;!-- doors states are: close or open --&gt;
+    &lt;doors&gt;
+        &lt;door trans_id=&quot;4&quot; caption=&quot;Main-gate&quot; state=&quot;open&quot; /&gt;
+        &lt;door trans_id=&quot;6&quot; caption=&quot;Rear-gate&quot; state=&quot;close&quot; /&gt;
+    &lt;/doors&gt;
+&lt;/traffic_constraints&gt;
 </code></pre>
 
 <ul>
-<li><code>id</code>, mandatory unique identifier for this obstacle.</li>
-<li><code>caption</code>, used in the visualisation.</li>
-<li><code>height</code>, optional parameter, not used at the moment</li>
-<li><code>polygon</code>, describing the obstacle as a sequence of vertex.</li>
+<li>
+<p><code>trans_id</code>: the unique ID of that door as defined in the geometry file. See <a href="#geometry">geometry</a>.</p>
+</li>
+<li>
+<p><code>caption</code>: optional parameter defining the caption of the door.</p>
+</li>
+<li>
+<p><code>state</code> defines the state of the door. Options are <code>close</code> or <code>open</code>.</p>
+</li>
 </ul>
-<h2 id="inifile"><a class="toclink" href="#inifile">Inifile</a></h2>
-<p>todo</p>
+<h3 id="goals"><a class="toclink" href="#goals">Goals</a></h3>
+<p>Additional goals might be defined <strong>outside</strong> the geometry. 
+They should <em>NOT</em> overlap with any walls or be in a rooms. 
+It is recommended to position them near the exits. </p>
+<p>Goals are defined with close polygons, i.e. the last vertex is equal to the first one.</p>
+<pre><code class="xml">&lt;routing&gt;
+    &lt;goals&gt;
+        &lt;goal id=&quot;0&quot; final=&quot;false&quot; caption=&quot;goal 1&quot;&gt;
+            &lt;polygon&gt;
+                &lt;vertex px=&quot;-5.0&quot; py=&quot;-5.0&quot; /&gt;
+                &lt;vertex px=&quot;-5.0&quot; py=&quot;-2.0&quot; /&gt;
+                &lt;vertex px=&quot;-3.0&quot; py=&quot;-2.0&quot; /&gt;
+                &lt;vertex px=&quot;-3.0&quot; py=&quot;-5.0&quot; /&gt;
+                &lt;vertex px=&quot;-5.0&quot; py=&quot;-5.0&quot; /&gt;
+                &lt;/polygon&gt;
+        &lt;/goal&gt;
+        &lt;goal id=&quot;1&quot; final=&quot;false&quot; caption=&quot;goal 2&quot;&gt;
+            &lt;polygon&gt;
+                &lt;vertex px=&quot;15.0&quot; py=&quot;-5.0&quot; /&gt;
+                &lt;vertex px=&quot;17.0&quot; py=&quot;-5.0&quot; /&gt;
+                &lt;vertex px=&quot;17.0&quot; py=&quot;-7.0&quot; /&gt;
+                &lt;vertex px=&quot;15.0&quot; py=&quot;-7.0&quot; /&gt;
+                &lt;vertex px=&quot;15.0&quot; py=&quot;-5.0&quot; /&gt;
+            &lt;/polygon&gt;
+        &lt;/goal&gt;
+    &lt;/goals&gt;
+&lt;/routing&gt;
+</code></pre>
+
+<h3 id="agents"><a class="toclink" href="#agents">Agents</a></h3>
+<p>An example how to define agent&rsquo;s characteristics with different number of
+attributes is as follows</p>
+<pre><code class="xml">    &lt;agents&gt;
+        &lt;agents_distribution&gt;
+            &lt;group group_id=&quot;1&quot; room_id=&quot;0&quot; number=&quot;10&quot; /&gt;
+
+            &lt;group group_id=&quot;2&quot; room_id=&quot;0&quot; subroom_id=&quot;0&quot; number=&quot;10&quot; 
+                goal_id=&quot;&quot; router_id=&quot;1&quot; /&gt;
+
+            &lt;group group_id=&quot;3&quot; room_id=&quot;0&quot; subroom_id=&quot;1&quot; number=&quot;20&quot; 
+                goal_id=&quot;1&quot; router_id=&quot;2&quot; patience=&quot;5&quot;/&gt;
+
+            &lt;group group_id=&quot;4&quot; room_id=&quot;0&quot; number=&quot;200&quot; goal_id=&quot;-1&quot; 
+                router_id=&quot;2&quot; patience=&quot;50&quot;/&gt;
+
+            &lt;group group_id=&quot;5&quot; room_id=&quot;0&quot; number=&quot;1&quot; startX=&quot;25.3&quot; startY=&quot;365.90&quot;/&gt;
+
+    &lt;/agents_distribution&gt;
+&lt;/agents&gt;
+</code></pre>
+
+<ul>
+<li>
+<p><code>group_id</code>: mandatory parameter defining the unique id of that group.</p>
+</li>
+<li>
+<p><code>room_id</code>: mandatory parameter defining the room where the agents should be
+randomly distributed.</p>
+</li>
+<li>
+<p><code>number</code>: mandatory parameter defining the number of agents to distribute.</p>
+</li>
+<li>
+<p><code>subroom_id</code>: defines the id of the subroom where the agents should be distributed. 
+  If omitted then the agents are homogeneously distributed in the room. </p>
+</li>
+<li>
+<p><code>goal_id</code>: one of the <code>id</code>s defined in the section  <a href="#goals">goals</a>. 
+   If omitted or &ldquo;-1&rdquo; then the shortest exit to the outside is chosen by the agent.</p>
+</li>
+<li>
+<p><code>router_id</code>: defines the route choice model to used. 
+  <!-- Those models are defined in the section  <a href="#routers">routers</a> --></p>
+</li>
+<li>
+<p><code>patience</code>:  this parameter influences the route choice behavior when using the quickest path router. 
+  It basically defines how long a pedestrian stays in jams before attempting a rerouting.</p>
+</li>
+<li>
+<p><code>startX</code>, <code>startY</code>: define the initial coordinate of the agents. This might be useful for testing/debugging. 
+  Note that this coordinate is ignored if <code>number</code> is different from 1.</p>
+</li>
+<li>
+<p>other parameter: TODO</p>
+</li>
+</ul>
+<h2 id="sources"><a class="toclink" href="#sources">Sources</a></h2>
+<p>TODO</p>
 <h2 id="trajectory"><a class="toclink" href="#trajectory">Trajectory</a></h2>
 <p>The results of the simulation are written to files or streamed to a network socket.</p>
 <p>Possible formats are:</p>
@@ -367,7 +565,9 @@ Unlike <code>transition</code>, they are always open.</p>
 <li><code>xml-plain</code> which is the default xml format</li>
 <li><code>plain</code> a flat format (just numbers)</li>
 </ul>
-<p>Note that if you are using the streaming mode, the format is forced to xml-plain.</p>
+<p>Note that if you are using the streaming mode or want to visualize the trajectories with <code>jpsvis</code>, 
+the format should be <code>xml-plain</code>.</p>
+<h3 id="xml-plain"><a class="toclink" href="#xml-plain">xml-plain</a></h3>
 <p>The file has three main sections: <code>header</code>, <code>geometry</code> and <code>frames</code>.</p>
 <pre><code class="xml">&lt;header version = &quot;0.8&quot;&gt;
     &lt;agents&gt;1&lt;/agents&gt;
@@ -439,6 +639,7 @@ rA=&quot;31.29&quot;  rB=&quot;23.87&quot;  eO=&quot;-175.41&quot; eC=&quot;54&q
 &lt;/trajectories&gt;
 </code></pre>
 
+<h3 id="plain-text"><a class="toclink" href="#plain-text">plain-text</a></h3>
 <p>The other format of the trajectory file is <code>plain-text</code></p>
 <p>A sample trajectory in the plain format is as follows:</p>
 <pre><code class="xml">                #description: simulation
