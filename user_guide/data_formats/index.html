@@ -208,8 +208,6 @@
         
             <li><a href="#inifile">Inifile</a></li>
         
-            <li><a href="#sources">Sources</a></li>
-        
             <li><a href="#trajectory">Trajectory</a></li>
         
     
@@ -369,7 +367,9 @@ Unlike <code>transition</code>, they are always open.</p>
 <p>With the content of the <code>inifile</code>, the simulation with <code>jpscore</code> can be controlled. </p>
 <p>The typical structure of an <code>inifile</code> is as follows:</p>
 <pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
-&lt;JuPedSim project=&quot;JPS-Project&quot; version=&quot;0.8&quot;&gt;
+&lt;JuPedSim project=&quot;JPS-Project&quot; version=&quot;0.8&quot;
+         xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; 
+          xsi:noNamespaceSchemaLocation=&quot;https://github.com/JuPedSim/jpscore/blob/master/xsd/jps_ini_core.xsd&quot;&gt;
 
     &lt;header&gt; 
          &lt;!-- seed , geometry, output format --&gt;
@@ -414,16 +414,27 @@ Unlike <code>transition</code>, they are always open.</p>
 <ul>
 <li>
 <p><code>&lt;seed&gt;s&lt;/seed&gt;</code> </p>
-<p>Set the  <code>seed</code> value to <code>s</code>.  This is used for the random number generator. If missing the
-current time (<code>time(NULL)</code>), is used i.e. random initial conditions</p>
+<p>Set the  <code>seed</code> value of the random number generator to <code>s</code>. If missing the
+current time (<code>time(NULL)</code>), is used i.e. random initial conditions.</p>
 </li>
 <li>
-<p><code>&lt;max_sim_time&gt;200&lt;/max_sim_time&gt;</code>
+<p><code>&lt;max_sim_time&gt;t&lt;/max_sim_time&gt;</code>
     the maximal simulation time in seconds. </p>
 </li>
 <li>
+<p><code>&lt;num_threads&gt;n&lt;/num_threads&gt;</code> the number of used cores.</p>
+</li>
+<li>
+<p><code>&lt;show_statistics&gt;true&lt;/show_statistics</code> Show different aggregate statistics e.g. the usage of the doors. </p>
+</li>
+<li></li>
+<li>
+<p><code>&lt;logfile&gt;log.txt&lt;/logfile&gt;</code> save relevant information about the simulation to a log file. 
+  Useful to keep track of warnings or errors that may rise during a simulation.</p>
+</li>
+<li>
 <p>The trajectory file 
-   <code>&lt;trajectories format="xml-plain"  fps="8"&gt;  &lt;file location="trajectories.xml" /&gt;  &lt;/trajectories&gt;</code></p>
+   <code>&lt;trajectories format="xml-plain" fps="8" color_mode="velocity"&gt;  &lt;file location="trajectories.xml" /&gt;  &lt;/trajectories&gt;</code></p>
 <p>The options for the format are</p>
 <ul>
 <li>
@@ -434,6 +445,18 @@ current time (<code>time(NULL)</code>), is used i.e. random initial conditions</
 </li>
 <li>
 <p>The value <code>fps</code> defines the frame rate per second for the trajectories. </p>
+</li>
+<li>
+<p><code>color_mode</code>: coloring agents in the trajectories. Options are:   </p>
+</li>
+<li><code>velocity</code> (default): Color is proportional to speed (slow &ndash;&gt; red). </li>
+<li><code>spotlight</code></li>
+<li><code>group</code></li>
+<li><code>knowledge</code> </li>
+<li><code>router</code></li>
+<li><code>final_goal</code></li>
+<li>
+<p><code>intermediate_goal</code></p>
 </li>
 <li>
 <p><code>file location</code> defines the location of the trajectories. 
@@ -500,6 +523,7 @@ It is recommended to position them near the exits. </p>
 </code></pre>
 
 <h3 id="agents"><a class="toclink" href="#agents">Agents</a></h3>
+<h4 id="agents_distribution"><a class="toclink" href="#agents_distribution">Agents_distribution</a></h4>
 <p>An example how to define agent&rsquo;s characteristics with different number of
 attributes is as follows</p>
 <pre><code class="xml">    &lt;agents&gt;
@@ -526,11 +550,11 @@ attributes is as follows</p>
 <p><code>group_id</code>: mandatory parameter defining the unique id of that group.</p>
 </li>
 <li>
-<p><code>room_id</code>: mandatory parameter defining the room where the agents should be
-randomly distributed.</p>
+<p><code>number</code>: mandatory parameter defining the number of agents to distribute.</p>
 </li>
 <li>
-<p><code>number</code>: mandatory parameter defining the number of agents to distribute.</p>
+<p><code>room_id</code>: mandatory parameter defining the room where the agents should be
+randomly distributed.</p>
 </li>
 <li>
 <p><code>subroom_id</code>: defines the id of the subroom where the agents should be distributed. 
@@ -544,20 +568,71 @@ randomly distributed.</p>
 <p><code>router_id</code>: defines the route choice model to used. 
   <!-- Those models are defined in the section  <a href="#routers">routers</a> --></p>
 </li>
+</ul>
+<!-- `- route_id` -->
+
+<ul>
+<li>
+<p><code>age</code>:</p>
+</li>
+<li>
+<p><code>gender</code>: </p>
+</li>
+<li>
+<p><code>height</code>:</p>
+</li>
 <li>
 <p><code>patience</code>:  this parameter influences the route choice behavior when using the quickest path router. 
   It basically defines how long a pedestrian stays in jams before attempting a rerouting.</p>
+</li>
+<li>
+<p><code>premovement_mean</code> and <code>premovement_sigma</code>: </p>
+</li>
+<li>
+<p>Risk tolerance can be Gauss-distributed, or beta-distributed. 
+  If not specified then it is defined as <script type="math/tex">\mathcal{N}(1, 0)</script>.</p>
+</li>
+<li>
+<p><code>risk_tolerance_mean</code> and <code>risk_tolerance_sigma</code>: <script type="math/tex">\mathcal{N}(\mu, \sigma^2)</script>
+</p>
+</li>
+<li>
+<p><code>risk_tolerance_alpha</code> and <code>risk_tolerance_beta</code>:  <script type="math/tex">Beta(\alpha, \beta)</script>.</p>
+</li>
+<li>
+<p><code>x_min</code>, <code>x_max</code>, <code>y_min</code> and <code>y_max</code>: define a bound where agents should be distributed.</p>
 </li>
 <li>
 <p><code>startX</code>, <code>startY</code>: define the initial coordinate of the agents. This might be useful for testing/debugging. 
   Note that this coordinate is ignored if <code>number</code> is different from 1.</p>
 </li>
 <li>
-<p>other parameter: TODO</p>
+<p><code>agent_parameter_id</code>: choose a set of parameters. See <a href="http://jupedsim.github.io/jpscore/models/operativ/">operational models</a>.</p>
 </li>
 </ul>
-<h2 id="sources"><a class="toclink" href="#sources">Sources</a></h2>
-<p>TODO</p>
+<h4 id="sources"><a class="toclink" href="#sources">Sources</a></h4>
+<p>Besides distributing agents randomly before the simulation starts, it is
+possible to define sources in order to &ldquo;inject&rdquo; 
+new agents in the system during the simulation.</p>
+<pre><code class="xml">&lt;agents_sources&gt;
+&lt;source id=&quot;1&quot; frequency=&quot;2&quot;, agents_max=&quot;10&quot; group_id=&quot;1&quot;, caption=&quot;caption&quot; greedy=&quot;true&quot;/&gt;
+&lt;/agents_sources&gt;
+</code></pre>
+
+<ul>
+<li><code>id</code>: id of the source</li>
+<li><code>frequency</code>: Number of pedestrians per second.</li>
+<li><code>agents_max</code>: maximal number of agents produced by that source.</li>
+<li><code>group_id</code>: group id of the agents already defined in the section <a href="#agents_distribution">Agents_distribution</a>.</li>
+<li><code>caption</code>: Caption</li>
+<li><code>greedy</code>: (default <code>false</code>) Returns a Voronoi vertex randomly with respect to weights proportional to squared distances.</li>
+</ul>
+<p>For vertexes <script type="math/tex">v_i</script> and distances <script type="math/tex">d_i</script> to their surrounding seeds
+   calculate the probabilities <script type="math/tex">p_i</script> as<br />
+<script type="math/tex; mode=display">p_i= \frac{d_i^2}{\sum_j^n d_j^2}.</script>
+</p>
+<p>If this attribute is set to <code>true</code>, the greedy approach is used. 
+  That means new agents will be placed on the vertex with the biggest distance to the surrounding seeds.</p>
 <h2 id="trajectory"><a class="toclink" href="#trajectory">Trajectory</a></h2>
 <p>The results of the simulation are written to files or streamed to a network socket.</p>
 <p>Possible formats are:</p>
