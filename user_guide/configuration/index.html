@@ -68,20 +68,16 @@
                             <a href="../requirements/">Requirements</a>
                         </li>
                     
+                        <li >
+                            <a href="../quickstart/">Quickstart</a>
+                        </li>
+                    
                         <li class="active">
                             <a href="./">Configuration</a>
                         </li>
                     
                         <li >
-                            <a href="../vagrant/">Vagrant</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../quickstart/">Quickstart</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../data_formats/">File formats</a>
+                            <a href="../contributing/">Contributing</a>
                         </li>
                     
                     </ul>
@@ -90,7 +86,7 @@
             
             
                 <li >
-                    <a href="../../contributing/">Contributing</a>
+                    <a href="../data_formats/">File formats</a>
                 </li>
             
             
@@ -174,12 +170,12 @@
             <!-- Search, Navigation and Repo links -->
             <ul class="nav navbar-nav navbar-right">
                 <li >
-                    <a rel="next" href="../requirements/">
+                    <a rel="next" href="../quickstart/">
                         <i class="fa fa-arrow-left"></i> Previous
                     </a>
                 </li>
                 <li >
-                    <a rel="prev" href="../vagrant/">
+                    <a rel="prev" href="../contributing/">
                         Next <i class="fa fa-arrow-right"></i>
                     </a>
                 </li>
@@ -212,7 +208,7 @@
             <div class="col-md-9" role="main">
 
 <h1 id="installation"><a class="toclink" href="#installation">Installation</a></h1>
-<p>JuPedSim-modules can not be installed but compiled.</p>
+<p><code>JuPedSim</code>-modules can not be installed but compiled.</p>
 <p>For all  modules the compilation is fairly straightforward: </p>
 <ul>
 <li>Create a new directory and change to it</li>
@@ -221,25 +217,24 @@
 </code></pre>
 
 <ul>
-<li>Run <code>CMake</code> to build the project</li>
+<li>Run <code>CMake</code> to build the project. <code>CMake</code> will check if all required  libraries are installed. </li>
 </ul>
 <pre><code class="javascript">cmake .. 
 </code></pre>
 
-<p><em>cmake</em> will check if all required  libraries are installed. 
-- Compile the project
-If the previous step terminated successfully run </p>
+<ul>
+<li>If the previous step terminates successfully, run </li>
+</ul>
 <pre><code class="javascript">make -jN
 </code></pre>
 
 <p>(<em>N</em> is the number of your CPUs)</p>
 <ul>
-<li>Run a simulation
-If the compilation succeeded a binary will be produced in
-the direction <em>bin</em>. Run a simulation using one of
-the ini files in the directory <em>initfiles</em></li>
+<li>Run a simulation:  If the compilation succeeded a binary will be produced in
+  the direction <em>bin</em>. Run a simulation using one of
+  the demo scenarios. <br />
+  For example:</li>
 </ul>
-<p>For example:</p>
 <pre><code class="javascript">./bin/jpscore inputfiles/Bottleneck/1.1_ini-Bottleneck.xml
 </code></pre>
 
@@ -247,7 +242,8 @@ the ini files in the directory <em>initfiles</em></li>
 <ul>
 <li>
 <p><a href="https://www.jetbrains.com/clion/">CLion</a> (Windows, Linux, Mac)</p>
-<p><em>CLion</em> has build in <em>CMake</em>-support so you only have to start a new project an set the project root to your <code>jpscore</code> directory.</p>
+<p><em>CLion</em> has build in <em>CMake</em>-support so you only have to start a new project an set the project root to your <code>jpscore</code> directory.
+See also this <a href="https://www.youtube.com/watch?v=Achsd2EpJbI">tutorial</a>.</p>
 </li>
 <li>
 <p><a href="https://eclipse.org/">Eclipse</a> (Windows, Linux, Mac)</p>

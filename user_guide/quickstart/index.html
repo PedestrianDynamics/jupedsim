@@ -68,20 +68,16 @@
                             <a href="../requirements/">Requirements</a>
                         </li>
                     
-                        <li >
-                            <a href="../configuration/">Configuration</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../vagrant/">Vagrant</a>
-                        </li>
-                    
                         <li class="active">
                             <a href="./">Quickstart</a>
                         </li>
                     
                         <li >
-                            <a href="../data_formats/">File formats</a>
+                            <a href="../configuration/">Configuration</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../contributing/">Contributing</a>
                         </li>
                     
                     </ul>
@@ -90,7 +86,7 @@
             
             
                 <li >
-                    <a href="../../contributing/">Contributing</a>
+                    <a href="../data_formats/">File formats</a>
                 </li>
             
             
@@ -174,12 +170,12 @@
             <!-- Search, Navigation and Repo links -->
             <ul class="nav navbar-nav navbar-right">
                 <li >
-                    <a rel="next" href="../vagrant/">
+                    <a rel="next" href="../requirements/">
                         <i class="fa fa-arrow-left"></i> Previous
                     </a>
                 </li>
                 <li >
-                    <a rel="prev" href="../data_formats/">
+                    <a rel="prev" href="../configuration/">
                         Next <i class="fa fa-arrow-right"></i>
                     </a>
                 </li>
@@ -211,18 +207,16 @@
 
 <h1 id="get-started"><a class="toclink" href="#get-started">Get started</a></h1>
 <p>After succesfully <a href="../configuration">compiling</a> the code you can just run
-<code>jpscore</code> in a Terminal as follows:</p>
+<code>jpscore</code> in a terminal as follows:</p>
 <pre><code class="bash">./bin/jpscore inifile.xml
 </code></pre>
 
 <p><em>inifile.xml</em> defines all the needed information to start a simulation with
-<code>jpscore</code>. See  the specifications of the <a href="../data_formats">file format</a>.</p>
-<p>After a successful simulation an additional xml-file will be created in
-the same directory as the used inifile. It contains discrete values
-for the trajectories of the agents.</p>
-<p>You can visualize the produced trajectory file with <code>jpscore</code> as follows</p>
-<pre><code class="bash">/path/to/jpsvis  trajectory.xml
-</code></pre></div>
+<code>jpscore</code>. See the specifications of the <a href="../data_formats">file format</a>.</p>
+<p>After a successful simulation an additional xml-file will be created. 
+It contains discrete values for the trajectories of the agents.</p>
+<p>You can visualize the produced trajectory file with <a href="https://cst.version.fz-juelich.de/jupedsim/jpsvis"><code>jpsvis</code></a>.</p>
+<p><img alt="simulation" src="../img/simulation.png" /></p></div>
         </div>
 
 	<footer class="col-md-12">

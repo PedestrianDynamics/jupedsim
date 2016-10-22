@@ -69,19 +69,15 @@
                         </li>
                     
                         <li >
-                            <a href="../../user_guide/configuration/">Configuration</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../../user_guide/vagrant/">Vagrant</a>
-                        </li>
-                    
-                        <li >
                             <a href="../../user_guide/quickstart/">Quickstart</a>
                         </li>
                     
                         <li >
-                            <a href="../../user_guide/data_formats/">File formats</a>
+                            <a href="../../user_guide/configuration/">Configuration</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../../user_guide/contributing/">Contributing</a>
                         </li>
                     
                     </ul>
@@ -90,7 +86,7 @@
             
             
                 <li >
-                    <a href="../../contributing/">Contributing</a>
+                    <a href="../../user_guide/data_formats/">File formats</a>
                 </li>
             
             
@@ -214,13 +210,15 @@
 <h1 id="introduction"><a class="toclink" href="#introduction">Introduction</a></h1>
 <p>In order to develop, use and reuse mathematical models for pedestrian dynamics with high fidelity level,
 the verification and validation process should be considered as key part in the development cycle of every model.</p>
-<p>Since JuPedSim is being developed intensively and is constantly extended with new models, it is important to test its functionality continuously.
+<p>Since <code>JuPedSim</code> is being developed intensively and is constantly extended with new models, 
+it is important to test its functionality continuously.
 For this purpose, we developed a bunch of quality tests that are triggered after each change in the code.
-Besides, we use known tests e.g. RiMEA tests and NIST tests.</p>
-<p>The <a href="http://rimea.de/">RiMEA</a> project aims to develop and define a set of tests to ensure the quality of pedestrian dynamics software.</p>
+Besides, we use known tests e.g. RiMEA tests.</p>
+<p>The <a href="http://rimea.de/">RiMEA</a> project aims to develop and define a set of tests to ensure 
+the quality of pedestrian dynamics software.</p>
 <!-- The [NIST](http://www.nist.gov/customcf/get_pdf.cfm?pub_id=913642) test suite is an enhancement of the RiMEA tests especially by including specific tests that consider evacuation of pedestrian under smoke conditions. -->
 
-<p>All tests are run in an automatic way. See also <a href="../../contributing/utest">Contributing/Unit testing</a>.</p>
+<p>All tests are run in an automatic way. See also <a href="../../user_guide/contributing/#writing-a-unit-test">Contributing/Unit testing</a>.</p>
 <h2 id="list-of-used-tests"><a class="toclink" href="#list-of-used-tests">List of used tests</a></h2>
 <p>We give a  list of the tests we use in JuPedSim along with a brief description as well as specific remarks related to implementation:</p>
 <ul>
@@ -229,6 +227,9 @@ Besides, we use known tests e.g. RiMEA tests and NIST tests.</p>
 </li>
 <li>
 <p><a href="../juelich">Juelich tests</a></p>
+</li>
+<li>
+<p>Validation: TODO</p>
 </li>
 </ul></div>
         </div>
