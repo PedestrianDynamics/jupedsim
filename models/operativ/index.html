@@ -1,473 +1,221 @@
 <!DOCTYPE html>
-<!--[if lt IE 7 ]><html class="no-js ie6"><![endif]-->
-<!--[if IE 7 ]><html class="no-js ie7"><![endif]-->
-<!--[if IE 8 ]><html class="no-js ie8"><![endif]-->
-<!--[if IE 9 ]><html class="no-js ie9"><![endif]-->
-<!--[if (gt IE 9)|!(IE)]><!--> <html class="no-js"> <!--<![endif]-->
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,maximum-scale=1">
-    
-      
-        <title>Operational models - JuPedSim/jpscore</title>
-      
-      
-      
-        <link rel="canonical" href="http://www.jupedsim.org/models/operativ/">
-      
-      
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
         <meta name="author" content="Mohcine Chraibi">
-      
-    
-    <meta property="og:url" content="http://www.jupedsim.org/models/operativ/">
-    <meta property="og:title" content="JuPedSim/jpscore">
-    <meta property="og:image" content="http://www.jupedsim.org/models/operativ//../../img/sim.png">
-    <meta name="apple-mobile-web-app-title" content="JuPedSim/jpscore">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-      <link rel="apple-touch-icon" href="../../img/sim.png">
-    
-    
-    <link rel="shortcut icon" type="image/x-icon" href="../../../../favicon.icon">
-    <link rel="icon" type="image/x-icon" href="../../../../favicon.icon">
-    <style>
-      @font-face {
-      	font-family: 'Icon';
-      	src: url('../../assets/fonts/icon.eot?52m981');
-      	src: url('../../assets/fonts/icon.eot?#iefix52m981')
-               format('embedded-opentype'),
-      		   url('../../assets/fonts/icon.woff?52m981')
-               format('woff'),
-      		   url('../../assets/fonts/icon.ttf?52m981')
-               format('truetype'),
-      		   url('../../assets/fonts/icon.svg?52m981#icon')
-               format('svg');
-      	font-weight: normal;
-      	font-style: normal;
-      }
-    </style>
-    <link rel="stylesheet" href="../../assets/stylesheets/application-a422ff04cc.css">
-    
-      <link rel="stylesheet" href="../../assets/stylesheets/palettes-05ab2406df.css">
-    
-    
-      
-      
-      
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700|Roboto+Mono">
-      <style>
-        body, input {
-          font-family: 'Roboto', Helvetica, Arial, sans-serif;
-        }
-        pre, code {
-          font-family: 'Roboto Mono', 'Courier New', 'Courier', monospace;
-        }
-      </style>
-    
-    
-      <link rel="stylesheet" href="../../html/customdoxygen.css">
-    
-      <link rel="stylesheet" href="../../html/doxygen.css">
-    
-      <link rel="stylesheet" href="../../html/tabs.css">
-    
-    <script src="../../assets/javascripts/modernizr-4ab42b99fd.js"></script>
-    
-  </head>
-  
-  
-  
-  <body class="palette-primary-orange palette-accent-light-blue">
-    
-      
-      
-    
-    <div class="backdrop">
-      <div class="backdrop-paper"></div>
-    </div>
-    <input class="toggle" type="checkbox" id="toggle-drawer">
-    <input class="toggle" type="checkbox" id="toggle-search">
-    <label class="toggle-button overlay" for="toggle-drawer"></label>
-    <header class="header">
-      <nav aria-label="Header">
-  <div class="bar default">
-    <div class="button button-menu" role="button" aria-label="Menu">
-      <label class="toggle-button icon icon-menu" for="toggle-drawer">
-        <span></span>
-      </label>
-    </div>
-    <div class="stretch">
-      <div class="title">
+        <link rel="canonical" href="http://www.jupedsim.org/models/operativ/">
+        <link rel="shortcut icon" href="../../favicon.icon">
         
-          <span class="path">
-            
-              
-                Models <i class="icon icon-link"></i>
-              
-            
-          </span>
+
+	<title>Operational models - JuPedSim/jpscore</title>
+
+        <link href="../../css/bootstrap-3.0.3.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link rel="stylesheet" href="../../css/highlight.css">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link href="../../html/customdoxygen.css" rel="stylesheet">
+        <link href="../../html/doxygen.css" rel="stylesheet">
+        <link href="../../html/tabs.css" rel="stylesheet">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
         
-        Operational models
-      </div>
-    </div>
-    
-      
-      <div class="button button-twitter" role="button" aria-label="Twitter">
-        <a href="https://twitter.com/JuPedSim" title="@JuPedSim on Twitter" target="_blank" class="toggle-button icon icon-twitter"></a>
-      </div>
-    
-    
-      
-      <div class="button button-github" role="button" aria-label="GitHub">
-        <a href="https://github.com/JuPedSim" title="@JuPedSim on GitHub" target="_blank" class="toggle-button icon icon-github"></a>
-      </div>
-    
-    <div class="button button-search" role="button" aria-label="Search">
-      <label class="toggle-button icon icon-search" title="Search" for="toggle-search"></label>
-    </div>
-  </div>
-  <div class="bar search">
-    <div class="button button-close" role="button" aria-label="Close">
-      <label class="toggle-button icon icon-back" for="toggle-search"></label>
-    </div>
-    <div class="stretch">
-      <div class="field">
-        <input class="query" type="text" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck>
-      </div>
-    </div>
-    <div class="button button-reset" role="button" aria-label="Search">
-      <button class="toggle-button icon icon-close" id="reset-search"></button>
-    </div>
-  </div>
-</nav>
-    </header>
-    <main class="main">
-      
-      <div class="drawer">
-        <nav aria-label="Navigation">
-  
-  <a href="https://github.com/JuPedSim/jpscore" class="project">
-    <div class="banner">
-      
-        <div class="logo">
-          <img src="../../img/sim.png">
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <!-- Main title -->
+            <a class="navbar-brand" href="../..">JuPedSim/jpscore</a>
         </div>
-      
-      <div class="name">
-        <strong>
-          JuPedSim/jpscore
-          <span class="version">
-            v0.8.1
-          </span>
-        </strong>
-        
-          <br>
-          JuPedSim/jpscore
-        
-      </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+            <!-- Main navigation -->
+            <ul class="nav navbar-nav">
+            
+            
+                <li >
+                    <a href="../..">Home</a>
+                </li>
+            
+            
+            
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">User guide <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    
+                        <li >
+                            <a href="../../user_guide/requirements/">Requirements</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../../user_guide/quickstart/">Quickstart</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../../user_guide/configuration/">Configuration</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../../user_guide/contributing/">Contributing</a>
+                        </li>
+                    
+                    </ul>
+                </li>
+            
+            
+            
+                <li >
+                    <a href="../../user_guide/data_formats/">File formats</a>
+                </li>
+            
+            
+            
+                <li class="dropdown active">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Models <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    
+                        <li class="active">
+                            <a href="./">Operational models</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../direction/">Direction strategies</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../routing/">Routing</a>
+                        </li>
+                    
+                    </ul>
+                </li>
+            
+            
+            
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tests <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    
+                        <li >
+                            <a href="../../tests/introduction/">Introduction</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../../tests/rimea/">RiMEA</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../../tests/juelich/">Juelich</a>
+                        </li>
+                    
+                    </ul>
+                </li>
+            
+            
+            
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    
+                        <li >
+                            <a href="../../about/disclaimer/">Disclaimer</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../../about/LICENSE/">License</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../../about/contributors/">Contributors</a>
+                        </li>
+                    
+                    </ul>
+                </li>
+            
+            
+            
+                <li >
+                    <a href="../../publications/">Publications</a>
+                </li>
+            
+            
+            </ul>
+
+            <!-- Search, Navigation and Repo links -->
+            <ul class="nav navbar-nav navbar-right">
+                <li >
+                    <a rel="next" href="../../user_guide/data_formats/">
+                        <i class="fa fa-arrow-left"></i> Previous
+                    </a>
+                </li>
+                <li >
+                    <a rel="prev" href="../direction/">
+                        Next <i class="fa fa-arrow-right"></i>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="https://github.com/JuPedSim/jpscore">
+                        
+                            <i class="fa fa-github"></i>
+                        
+                        GitHub
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
     </div>
-  </a>
-  <div class="scrollable">
-    <div class="wrapper">
-      
-        <ul class="repo">
-          <li class="repo-download">
-            
-            <a href="https://github.com/JuPedSim/jpscore/archive/v0.8.1.zip" target="_blank" title="Download" data-action="download">
-              <i class="icon icon-download"></i> Download
-            </a>
-          </li>
-          <li class="repo-stars">
-            <a href="https://github.com/JuPedSim/jpscore/stargazers" target="_blank" title="Stargazers" data-action="star">
-              <i class="icon icon-star"></i> Stars
-              <span class="count">&ndash;</span>
-            </a>
-          </li>
-        </ul>
-        <hr>
-      
-      <div class="toc">
-        <ul>
-          
-            
-  <li>
-    <a class="" title="Home" href="../..">
-      Home
-    </a>
-    
-  </li>
+</div>
 
-          
-            
-  <li>
-    <span class="section">User guide</span>
-    <ul>
-      
+        <div class="container">
+            <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main active"><a href="#operational-models">Operational models</a></li>
         
-  <li>
-    <a class="" title="Requirements" href="../../user_guide/requirements/">
-      Requirements
-    </a>
-    
-  </li>
-
-      
+            <li><a href="#general-model-parameters-for-all-models">General model parameters (for all models)</a></li>
         
-  <li>
-    <a class="" title="Quickstart" href="../../user_guide/quickstart/">
-      Quickstart
-    </a>
-    
-  </li>
-
-      
+            <li><a href="#model_parameters">Model_parameters</a></li>
         
-  <li>
-    <a class="" title="Configuration" href="../../user_guide/configuration/">
-      Configuration
-    </a>
-    
-  </li>
-
-      
+            <li><a href="#agent_parameters">Agent_parameters</a></li>
         
-  <li>
-    <a class="" title="Contributing" href="../../user_guide/contributing/">
-      Contributing
-    </a>
+            <li><a href="#generalized-centrifugal-force-model">Generalized Centrifugal Force Model</a></li>
+        
+            <li><a href="#gompertz-model">Gompertz model</a></li>
+        
+            <li><a href="#collision-free-speed-model">Collision-free speed model</a></li>
+        
+            <li><a href="#wall-avoidance-model">Wall-avoidance model</a></li>
+        
+            <li><a href="#generalized-centrifugal-force-model-with-lateral-swaying">Generalized Centrifugal Force Model with lateral swaying</a></li>
+        
     
-  </li>
-
-      
     </ul>
-  </li>
+</div></div>
+            <div class="col-md-9" role="main">
 
-          
-            
-  <li>
-    <a class="" title="File formats" href="../../user_guide/data_formats/">
-      File formats
-    </a>
-    
-  </li>
-
-          
-            
-  <li>
-    <span class="section">Models</span>
-    <ul>
-      
-        
-  <li>
-    <a class="current" title="Operational models" href="./">
-      Operational models
-    </a>
-    
-      
-        
-      
-      
-        <ul>
-          
-            <li class="anchor">
-              <a title="General model parameters (for all models)" href="#general-model-parameters-for-all-models">
-                General model parameters (for all models)
-              </a>
-            </li>
-          
-            <li class="anchor">
-              <a title="Model_parameters" href="#model_parameters">
-                Model_parameters
-              </a>
-            </li>
-          
-            <li class="anchor">
-              <a title="Agent_parameters" href="#agent_parameters">
-                Agent_parameters
-              </a>
-            </li>
-          
-            <li class="anchor">
-              <a title="Generalized Centrifugal Force Model" href="#generalized-centrifugal-force-model">
-                Generalized Centrifugal Force Model
-              </a>
-            </li>
-          
-            <li class="anchor">
-              <a title="Gompertz model" href="#gompertz-model">
-                Gompertz model
-              </a>
-            </li>
-          
-            <li class="anchor">
-              <a title="Collision-free speed model" href="#collision-free-speed-model">
-                Collision-free speed model
-              </a>
-            </li>
-          
-            <li class="anchor">
-              <a title="Wall-avoidance model" href="#wall-avoidance-model">
-                Wall-avoidance model
-              </a>
-            </li>
-          
-            <li class="anchor">
-              <a title="Generalized Centrifugal Force Model with lateral swaying" href="#generalized-centrifugal-force-model-with-lateral-swaying">
-                Generalized Centrifugal Force Model with lateral swaying
-              </a>
-            </li>
-          
-        </ul>
-      
-    
-  </li>
-
-      
-        
-  <li>
-    <a class="" title="Direction strategies" href="../direction/">
-      Direction strategies
-    </a>
-    
-  </li>
-
-      
-        
-  <li>
-    <a class="" title="Routing" href="../routing/">
-      Routing
-    </a>
-    
-  </li>
-
-      
-    </ul>
-  </li>
-
-          
-            
-  <li>
-    <span class="section">Tests</span>
-    <ul>
-      
-        
-  <li>
-    <a class="" title="Introduction" href="../../tests/introduction/">
-      Introduction
-    </a>
-    
-  </li>
-
-      
-        
-  <li>
-    <a class="" title="RiMEA" href="../../tests/rimea/">
-      RiMEA
-    </a>
-    
-  </li>
-
-      
-        
-  <li>
-    <a class="" title="Juelich" href="../../tests/juelich/">
-      Juelich
-    </a>
-    
-  </li>
-
-      
-    </ul>
-  </li>
-
-          
-            
-  <li>
-    <span class="section">About</span>
-    <ul>
-      
-        
-  <li>
-    <a class="" title="Disclaimer" href="../../about/disclaimer/">
-      Disclaimer
-    </a>
-    
-  </li>
-
-      
-        
-  <li>
-    <a class="" title="License" href="../../about/LICENSE/">
-      License
-    </a>
-    
-  </li>
-
-      
-        
-  <li>
-    <a class="" title="Contributors" href="../../about/contributors/">
-      Contributors
-    </a>
-    
-  </li>
-
-      
-    </ul>
-  </li>
-
-          
-            
-  <li>
-    <a class="" title="Publications" href="../../publications/">
-      Publications
-    </a>
-    
-  </li>
-
-          
-            
-  <li>
-    <a class="" title="API" href="../../doxygen/">
-      API
-    </a>
-    
-  </li>
-
-          
-        </ul>
-        
-          <hr>
-          <span class="section">The author</span>
-          <ul>
-            
-              
-              <li>
-                <a href="https://twitter.com/JuPedSim" target="_blank" title="@JuPedSim on Twitter">
-                  @JuPedSim on Twitter
-                </a>
-              </li>
-            
-            
-              
-              <li>
-                <a href="https://github.com/JuPedSim" target="_blank" title="@JuPedSim on GitHub">
-                  @JuPedSim on GitHub
-                </a>
-              </li>
-            
-          </ul>
-        
-      </div>
-    </div>
-  </div>
-</nav>
-      </div>
-      <article class="article">
-        <div class="wrapper">
-          
-          <h1 id="operational-models"><a class="toclink" href="#operational-models">Operational models</a></h1>
+<h1 id="operational-models"><a class="toclink" href="#operational-models">Operational models</a></h1>
 <p>Several operational models are implemented in <code>jpscore</code>. An operational model defines how pedestrians moves from one time step to the next.
 In the definition of agent&rsquo;s properties it is mandatory to precise the number of the model to be used e.g.:</p>
 <pre><code class="xml">&lt;agents operational_model_id=&quot;n&quot;&gt;
@@ -738,84 +486,22 @@ As a consequence the parameter <code>Bmax</code> is ignored. </p>
 <ul>
 <li><code>ampA</code> = -0.14, <code>ampB</code> = 0.21 and</li>
 <li><code>freqA</code> = 0.44, <code>freqB</code> = 0.25.</li>
-</ul>
-          <aside class="copyright" role="note">
-            
-              Copyright &copy; 2016 <a href="http://www.fz-juelich.de">Forschungszentrum Jülich GmbH</a>. Maintenance by <a href="http://www.fz-juelich.de/SharedDocs/Personen/IAS/JSC/EN/staff/chraibi_m.html/">Mohcine Chraibi</a>. &ndash;
-            
-            Documentation built with
-            <a href="http://www.mkdocs.org" target="_blank">MkDocs</a>
-            using the
-            <a href="http://squidfunk.github.io/mkdocs-material/" target="_blank">
-              Material
-            </a>
-            theme.
-          </aside>
-          
-            <footer class="footer">
-              
-  <nav class="pagination" aria-label="Footer">
-    <div class="previous">
-      
-        <a href="../../user_guide/data_formats/" title="File formats">
-          <span class="direction">
-            Previous
-          </span>
-          <div class="page">
-            <div class="button button-previous" role="button" aria-label="Previous">
-              <i class="icon icon-back"></i>
-            </div>
-            <div class="stretch">
-              <div class="title">
-                File formats
-              </div>
-            </div>
-          </div>
-        </a>
-      
-    </div>
-    <div class="next">
-      
-        <a href="../direction/" title="Direction strategies">
-          <span class="direction">
-            Next
-          </span>
-          <div class="page">
-            <div class="stretch">
-              <div class="title">
-                Direction strategies
-              </div>
-            </div>
-            <div class="button button-next" role="button" aria-label="Next">
-              <i class="icon icon-forward"></i>
-            </div>
-          </div>
-        </a>
-      
-    </div>
-  </nav>
+</ul></div>
+        </div>
 
-            </footer>
-          
-        </div>
-      </article>
-      <div class="results" role="status" aria-live="polite">
-        <div class="scrollable">
-          <div class="wrapper">
-            <div class="meta"></div>
-            <div class="list"></div>
-          </div>
-        </div>
-      </div>
-    </main>
-    <script>
-      var base_url = '../..';
-      var repo_id  = 'JuPedSim/jpscore';
-    </script>
-    <script src="../../assets/javascripts/application-997097ee0c.js"></script>
-    
-      <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    
-  </body>
+	<footer class="col-md-12">
+		<hr>
+		
+		<p>Copyright &copy; 2016 <a href="http://www.fz-juelich.de">Forschungszentrum Jülich GmbH</a>. Maintenance by <a href="http://www.fz-juelich.de/SharedDocs/Personen/IAS/JSC/EN/staff/chraibi_m.html/">Mohcine Chraibi</a>.</p>
+		
+		<p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+	</footer>
+
+
+        <script src="../../js/jquery-1.10.2.min.js"></script>
+        <script src="../../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../../js/highlight.pack.js"></script>
+        <script src="../../js/base.js"></script>
+        <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </body>
 </html>
