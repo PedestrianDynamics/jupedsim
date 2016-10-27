@@ -549,7 +549,7 @@ endif()
       PATTERN "*_debug.*" EXCLUDE)
     ADD_CUSTOM_COMMAND(
       TARGET ${PROJECT_NAME} POST_BUILD
-      COMMAND ruby ${CMAKE_SOURCE_DIR}/ruby/fixup/fixup.rb ${EXECUTABLE}
+      COMMAND ruby ${PROJECT_SOURCE_DIR}/ruby/fixup/fixup.rb ${EXECUTABLE}
       COMMENT "Fixing up the app bundle")
   ENDIF(APPLE)
 
