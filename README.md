@@ -11,6 +11,10 @@ The core module for performing the simulation (i.e. computing the trajectories).
 
 So, get the code from Gitlab and the releases from GitHub. :-)
 
+## Configuration 
+
+See [installation and configuration](http://jupedsim.github.io/jpscore/user_guide/configuration/)
+
 ## Showcase and tutorials
 
 
