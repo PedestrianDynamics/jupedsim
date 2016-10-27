@@ -26,13 +26,19 @@ For the visualization module (`jpsvis`) at least
 - and VTK version 4.8 are required.
 
 ### Install requirements for Mac OS X (with Homebrew)
+
+```
 brew update
 brew install vtk --with-qt --without-python --without-boost  --build-from-source
+```
 
 ### Install packages for Debian 7.7 (Ubuntu)
+
+```
 sudo apt-get install libmgl-qt5
 sudo apt-get install libvtk5-dev
 sudo apt-get install libvtk5.8-qt4
+```
 
 Alternatively, you can download the latest version of QT [here](https://www.qt.io/download/) and the latest version of VTK [here](http://www.vtk.org/download/).
 
