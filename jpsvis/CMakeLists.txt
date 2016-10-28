@@ -31,7 +31,7 @@ cmake_minimum_required(VERSION 2.8)
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/" ${CMAKE_MODULE_PATH})
 
 # set project's name
-project( JPSvis )
+project( jpsvis )
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -289,7 +289,7 @@ if(${QT4_INSTALLED})
   ${UI_HDRS} 
   ${RCS}
   )
-  TARGET_LINK_LIBRARIES( JPSvis ${QT_LIBRARIES})
+  TARGET_LINK_LIBRARIES( jpsvis ${QT_LIBRARIES})
 elseif( ${QT5_INSTALLED})
   message(STATUS "Working with Qt5")
   # http://www.kdab.com/using-cmake-with-qt-5/
@@ -358,12 +358,12 @@ set(VTK_USE_QT  ON)
 # QVTK is for VTK 5.x. For VTK 6, use ${VTK_LIBRARIES} instead
 if(VTK_LIBRARIES)
   if(${VTK_VERSION} VERSION_LESS "6")
-    TARGET_LINK_LIBRARIES( JPSvis ${QT_LIBRARIES} QVTK)
+    TARGET_LINK_LIBRARIES( jpsvis ${QT_LIBRARIES} QVTK)
   else()        
-    TARGET_LINK_LIBRARIES( JPSvis  ${VTK_LIBRARIES} ${QT_LIBRARIES})
+    TARGET_LINK_LIBRARIES( jpsvis  ${VTK_LIBRARIES} ${QT_LIBRARIES})
   endif()
 else() # this else is not yet tested
-  target_link_libraries(JPSvis vtkHybrid QVTK vtkViews ${QT_LIBRARIES})
+  target_link_libraries(jpsvis vtkHybrid QVTK vtkViews ${QT_LIBRARIES})
 endif() 
 
 
@@ -422,15 +422,15 @@ endif()
 #--------------------------------------------------------------------------------
 SET(plugin_dest_dir bin)
 SET(qtconf_dest_dir bin)
-SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/JPSvis")
+SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/jpsvis")
 IF(APPLE)
   SET(plugin_dest_dir JPSvis.app/Contents/MacOS)
   SET(qtconf_dest_dir JPSvis.app/Contents/Resources)
-  SET(APPS "\${CMAKE_INSTALL_PREFIX}/JPSvis.app")  
+  SET(APPS "\${CMAKE_INSTALL_PREFIX}/jpsvis.app")  
 ENDIF(APPLE)
 
 IF(WIN32)
-  SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/JPSvis.exe")
+  SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/jpsvis.exe")
 ENDIF(WIN32)
 
 
@@ -438,7 +438,7 @@ ENDIF(WIN32)
 # Install the QtTest application, on Apple, the bundle is at the root of the
 # install tree, and on other platforms it'll go into the bin directory.
 MESSAGE(STATUS "${PROJECT_NAME} will be installed to ${CMAKE_INSTALL_PREFIX}")
-INSTALL(TARGETS JPSvis
+INSTALL(TARGETS jpsvis
   BUNDLE DESTINATION . COMPONENT Runtime
   RUNTIME DESTINATION bin COMPONENT Runtime
   
@@ -484,9 +484,9 @@ IF(APPLE)
   # SET(MACOSX_BUNDLE_ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.png)
   SET(MACOSX_BUNDLE_ICON_FILE JPSvis.icns)
   SET(MACOSX_GUI_ICON JPSvis.icns)
-  set_target_properties(JPSvis PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Resources/Info.plist.in)
+  set_target_properties(jpsvis PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Resources/Info.plist.in)
   SET(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2015 Forschungszentrum Juelich. All rights reserved.")
-  SET(MACOSX_BUNDLE_BUNDLE_NAME "JPSvis")
+  SET(MACOSX_BUNDLE_BUNDLE_NAME "jpsvis")
   SET(MACOSX_BUNDLE_BUNDLE_VERSION "${JPSVIS_VERSION}")
   SET(MACOSX_BUNDLE_LONG_VERSION_STRING "version ${JPSVIS_VERSION}")
   SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "${JPSVIS_VERSION}")
@@ -503,7 +503,7 @@ SET(CPACK_RESOURCE_FILE_README "${README_FILE}")
 set(CPACK_BINARY_DRAGNDROP ON)
 set(CPACK_PACKAGE_NAME "jpsvis")
 set(CPACK_PACKAGE_VENDOR "www.jupedsim.org")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "JPSvis - CPack Component Installation Example")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "jpsvis - CPack Component Installation Example")
 set(CPACK_PACKAGE_VERSION "1.0.0")
 set(CPACK_PACKAGE_VERSION_MAJOR "1")
 set(CPACK_PACKAGE_VERSION_MINOR "0")
