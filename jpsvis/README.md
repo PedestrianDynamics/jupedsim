@@ -29,7 +29,7 @@ For the visualization module (`jpsvis`) at least
 
 ```
 brew update
-brew install vtk --with-qt --without-python --without-boost  --build-from-source
+brew install vtk --with-qt --without-python --with-python3 --without-boost  --build-from-source
 ```
 
 ### Install packages for Debian 7.7 (Ubuntu)
@@ -68,4 +68,3 @@ The only requirement is a compiler supporting the new standard c++11.
     make
 
 Note that the OpenMP acceleration might be missing under OSX
-
