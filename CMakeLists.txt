@@ -36,7 +36,7 @@ message( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
 message( STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE} )
 
 if(NOT BUILD_TESTING)
-  set(BUILD_TESTING ON) # test units are generated.
+  set(BUILD_TESTING OFF) # test units are generated.
 endif(NOT BUILD_TESTING)
 message( STATUS "BUILD_TESTING: " ${BUILD_TESTING} )
 
