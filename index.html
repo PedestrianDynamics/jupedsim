@@ -1,239 +1,85 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="The Jülich Pedestrian Simulator">
-        <meta name="author" content="Mohcine Chraibi">
-        <link rel="canonical" href="http://www.jupedsim.org/">
-        <link rel="shortcut icon" href="favicon.icon">
-        
+---
+layout: page 
+title: jpscore
+subtitle: The core module for performing the simulation
+---
 
-	<title>JuPedSim/jpscore</title>
-
-        <link href="./css/bootstrap-3.0.3.min.css" rel="stylesheet">
-        <link href="./css/font-awesome-4.0.3.css" rel="stylesheet">
-        <link rel="stylesheet" href="./css/highlight.css">
-        <link href="./css/base.css" rel="stylesheet">
-        <link href="./html/customdoxygen.css" rel="stylesheet">
-        <link href="./html/doxygen.css" rel="stylesheet">
-        <link href="./html/tabs.css" rel="stylesheet">
-
-        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!--[if lt IE 9]>
-            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
-        <![endif]-->
-
-        
-    </head>
-
-    <body>
-
-        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-    <div class="container">
-
-        <!-- Collapsed navigation -->
-        <div class="navbar-header">
-            <!-- Expander button -->
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-
-            <!-- Main title -->
-            <a class="navbar-brand" href=".">JuPedSim/jpscore</a>
-        </div>
-
-        <!-- Expanded navigation -->
-        <div class="navbar-collapse collapse">
-            <!-- Main navigation -->
-            <ul class="nav navbar-nav">
-            
-            
-                <li class="active">
-                    <a href=".">Home</a>
-                </li>
-            
-            
-            
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">User guide <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                    
-                        <li >
-                            <a href="user_guide/requirements/">Requirements</a>
-                        </li>
-                    
-                        <li >
-                            <a href="user_guide/quickstart/">Quickstart</a>
-                        </li>
-                    
-                        <li >
-                            <a href="user_guide/configuration/">Configuration</a>
-                        </li>
-                    
-                        <li >
-                            <a href="user_guide/contributing/">Contributing</a>
-                        </li>
-                    
-                    </ul>
-                </li>
-            
-            
-            
-                <li >
-                    <a href="user_guide/data_formats/">File formats</a>
-                </li>
-            
-            
-            
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Models <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                    
-                        <li >
-                            <a href="models/operativ/">Operational models</a>
-                        </li>
-                    
-                        <li >
-                            <a href="models/direction/">Direction strategies</a>
-                        </li>
-                    
-                        <li >
-                            <a href="models/routing/">Routing</a>
-                        </li>
-                    
-                    </ul>
-                </li>
-            
-            
-            
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tests <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                    
-                        <li >
-                            <a href="tests/introduction/">Introduction</a>
-                        </li>
-                    
-                        <li >
-                            <a href="tests/rimea/">RiMEA</a>
-                        </li>
-                    
-                        <li >
-                            <a href="tests/juelich/">Juelich</a>
-                        </li>
-                    
-                    </ul>
-                </li>
-            
-            
-            
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                    
-                        <li >
-                            <a href="about/disclaimer/">Disclaimer</a>
-                        </li>
-                    
-                        <li >
-                            <a href="about/LICENSE/">License</a>
-                        </li>
-                    
-                        <li >
-                            <a href="about/contributors/">Contributors</a>
-                        </li>
-                    
-                    </ul>
-                </li>
-            
-            
-            
-                <li >
-                    <a href="publications/">Publications</a>
-                </li>
-            
-            
-            </ul>
-
-            <!-- Search, Navigation and Repo links -->
-            <ul class="nav navbar-nav navbar-right">
-                <li class="disabled">
-                    <a rel="next" >
-                        <i class="fa fa-arrow-left"></i> Previous
-                    </a>
-                </li>
-                <li >
-                    <a rel="prev" href="user_guide/requirements/">
-                        Next <i class="fa fa-arrow-right"></i>
-                    </a>
-                </li>
-                
-                <li>
-                    <a href="https://github.com/JuPedSim/jpscore">
-                        
-                            <i class="fa fa-github"></i>
-                        
-                        GitHub
-                    </a>
-                </li>
-                
-            </ul>
-        </div>
-    </div>
+<div class="jumbotron">
+  <p><code>JPScore</code> implements models on the operational as well as on the tactical level.
+  <p>This software is platform independent, released under the <a href="https://raw.githubusercontent.com/JuPedSim/jpscore/master/LICENSE">LGPL</a> license and is written in C++ and Python.</p>
+  <center>
+    <!-- <div class="btn-group"> -->
+    <a class="btn btn-primary btn-lg"  href="https://cst.version.fz-juelich.de/jupedsim/jpscore">
+      &nbsp;&nbsp;&nbsp;&nbsp;Code &nbsp;&nbsp;&nbsp;&nbsp;
+    </a>
+    <a class="btn btn-success btn-lg"  href="2016-11-04-contributing.html">
+      Contribute
+    </a>
+    <a class="btn btn-danger btn-lg"  href="2016-11-02-quickstart.html">
+      &nbsp;&nbsp;&nbsp;&nbsp;Start&nbsp;&nbsp;&nbsp;&nbsp;
+    </a>
+  <!-- </div> -->
+  </center>
 </div>
 
-        <div class="container">
-            <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
-    
-        <li class="main active"><a href="#jpscore">JPScore</a></li>
-        
-    
-    </ul>
-</div></div>
-            <div class="col-md-9" role="main">
-
-<h1 id="jpscore"><a class="toclink" href="#jpscore">JPScore</a></h1>
-<p>Core module for simulation and computing of trajectories.
-<img alt="JuPedSim" title="Logo by Nadine" src="img/logo.png" width="100px"  align="right"></p>
-<!-- [![build status](https://travis-ci.org/JuPedSim/jpscore.svg?branch=develop)](https://travis-ci.org/JuPedSim/jpscore) -->
-
-<!-- [![codecov.io](https://codecov.io/github/JuPedSim/jpscore/coverage.svg?branch=develop)](https://codecov.io/github/JuPedSim/jpscore?branch=develop) -->
-
-<hr />
-<p><strong>Note</strong>: When reporting bugs, please make sure to use the development branch <em>develop</em>.  </p>
-<hr />
-<p>Jülich Pedestrian Simulator (<code>JuPedSim</code>) is an open source framework for simulating pedestrian dynamics. </p>
-<p>The primary goal of <code>JuPedSim</code> is to provide a framework to ease  the development, calibration, and validation of new models or models for pedestrian dynamics.</p>
-<p><code>JuPedSim</code> is currently focusing on evacuation, but is easily extendable to cover other areas e.g. passengers exchange, commuter traffic in railway stations etc.</p>
-<p>JuPedSim comes with four loosely coupled modules: </p>
-<ol>
-<li><a href="https://cst.version.fz-juelich.de/jupedsim/core">JPScore</a>: The simulation core</li>
-<li><a href="https://cst.version.fz-juelich.de/jupedsim/jpsrevis">JPSvis</a>: Geometry and trajectories visualization tool</li>
-<li><a href="http://jupedsim.github.io/jpsreport/">JPSreport</a>: Implementation of different measurement methods to evaluate out of trajectories the density, the velocity and the flow.</li>
-<li><a href="https://cst.version.fz-juelich.de/jupedsim/jpseditor">JPSreditor</a>: Geometry editor.</li>
-</ol></div>
-        </div>
-
-	<footer class="col-md-12">
-		<hr>
-		
-		<p>Copyright &copy; 2016 <a href="http://www.fz-juelich.de">Forschungszentrum Jülich GmbH</a>. Maintenance by <a href="http://www.fz-juelich.de/SharedDocs/Personen/IAS/JSC/EN/staff/chraibi_m.html/">Mohcine Chraibi</a>.</p>
-		
-		<p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
-	</footer>
 
 
-        <script src="./js/jquery-1.10.2.min.js"></script>
-        <script src="./js/bootstrap-3.0.3.min.js"></script>
-        <script src="./js/highlight.pack.js"></script>
-        <script src="./js/base.js"></script>
-        <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    </body>
-</html>
+
+
+
+<!-- <div class="list-group" > -->
+<!--   {% assign sorted_posts = paginator.posts | sort: 'pub_date' | reversed %} -->
+<!--   {% for post in sorted_posts  reversed %} -->
+<!--   <article class="post-preview"> -->
+<!--     <a href="{{ post.url | prepend: site.baseurl }}" class="list-group-item"> -->
+<!-- 	  <h2 class="post-title">• {{ post.title }}</h2> -->
+<!-- 	  {% if post.subtitle %} -->
+<!-- 	  <h3 class="post-subtitle"> -->
+<!-- 	    {{ post.subtitle }} -->
+<!-- 	  </h3> -->
+<!-- 	  {% endif %} -->
+<!--     </a> -->
+
+<!--     <\!-- <p class="post-meta"> -\-> -->
+<!--     <\!--   Posted on {{ post.date | date: "%B %-d, %Y" }} -\-> -->
+<!--     <\!-- </p> -\-> -->
+
+<!--     <\!-- <div class="post-entry"> -\-> -->
+<!--     <\!--   {{ post.excerpt | strip_html | xml_escape | truncatewords: site.excerpt_length }} -\-> -->
+<!--     <\!--   {% assign excerpt_word_count = post.excerpt | number_of_words %} -\-> -->
+<!--     <\!--   {% if post.content != post.excerpt or excerpt_word_count > site.excerpt_length %} -\-> -->
+<!--     <\!--     <a href="{{ post.url | prepend: site.baseurl }}" class="post-read-more">[Read&nbsp;More]</a> -\-> -->
+<!--     <\!--   {% endif %} -\-> -->
+<!--     <\!-- </div> -\-> -->
+
+<!--     {% if post.tags.size > 0 %} -->
+<!--     <div class="blog-tags"> -->
+<!--       Tags: -->
+<!--       {% if site.link-tags %} -->
+<!--       {% for tag in post.tags %} -->
+<!--       <a href="{{ site.baseurl }}/tag/{{ tag }}">{{ tag }}</a> -->
+<!--       {% endfor %} -->
+<!--       {% else %} -->
+<!--         {{ post.tags | join: ", " }} -->
+<!--       {% endif %} -->
+<!--     </div> -->
+<!--     {% endif %} -->
+
+<!--    </article> -->
+<!--   {% endfor %} -->
+<!-- </div> -->
+
+<!-- {% if paginator.total_pages > 1 %} -->
+<!-- <ul class="pager main-pager"> -->
+<!--   {% if paginator.previous_page %} -->
+<!--   <li class="previous"> -->
+<!--     <a href="{{ paginator.previous_page_path | prepend: site.baseurl | replace: '//', '/' }}">&larr; Newer Posts</a> -->
+<!--   </li> -->
+<!--   {% endif %} -->
+<!--   {% if paginator.next_page %} -->
+<!--   <li class="next"> -->
+<!--     <a href="{{ paginator.next_page_path | prepend: site.baseurl | replace: '//', '/' }}">Older Posts &rarr;</a> -->
+<!--   </li> -->
+<!--   {% endif %} -->
+<!-- </ul> -->
+<!-- {% endif %} -->
