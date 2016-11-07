@@ -1,13 +1,13 @@
 ---
 layout: post
 title: Contributing
-subtitle: 
+subtitle: to JuPedSim
 #bigimg: /img/jupedsim_small.png
 permalink: 2016-11-04-contributing.html
 ---
 
 
-# Contributing to JuPedSim
+
 
 
 This project is mainly developed by a small group of researchers and students from [Jülich Research Center](http://www.fz-juelich.de/en) and [BUW](http://www.uni-wuppertal.de/).
@@ -19,26 +19,26 @@ It does not matter if you are a researcher, student or just interested in pedest
 
 ### First steps
 * Clone/fork our `gitlab` repository
-~~~
-git clone https://cst.version.fz-juelich.de/jupedsim/jpscore.git
-~~~
+
+  ~~~
+  git clone https://cst.version.fz-juelich.de/jupedsim/jpscore.git
+  ~~~
 
 * Change to the developement branch and create a branch with your feature.
-~~~
-git checkout developement 
-git checkout -b feature_name
-~~~
+
+  ~~~
+  git checkout developement 
+  git checkout -b feature_name
+  ~~~
 
 * Assuming you are in the `jpscore` folder type 
-```
-mkdir build && cd build 
-cmake .. 
-```
 
-* Download all dependencies and check if `CMake` tells you something is missing e.g.  
-    * Boost >= 1.56
-    * Qt
-    * Vtk
+  ```
+  mkdir build && cd build 
+  cmake .. 
+  ```
+
+* Download all [dependencies](2016-11-03-requirements.html and check the output of `CMake`
     
 * If everything compiles fine, you are free to start. :-)
 
@@ -51,7 +51,7 @@ After doing that open a merge request.
 
 If your fix/feature is accepted it will be merged into the develop-branch.
 
-### FAQ
+
 
 ## Reporting bugs and requesting features
 If you have a question or a problem and need support from our team feel free to contact us.
@@ -191,20 +191,22 @@ This can be a long and religious discussion, to make it short *DO NOT* use tabs,
 Here are some hints to configure your editor in order to use the *stroustrup* style
 
 - **Emacs**:
-    Add this to your ```.emacs```
-```lisp
-(setq c-default-style "stroustrup" c-basic-offset 5)
-(setq indent-tabs-mode nil)
-```
+
+  Add this to your ```.emacs```
+  ```shell
+  (setq c-default-style "stroustrup" c-basic-offset 5)
+  (setq indent-tabs-mode nil)
+  ```
 - **Vim**:
-    Set in your config file these variables
-```javascript
-:set autoindent
-:set cindent
-:set expandtab
-:set shiftwidth=5
-:set softtabstop=5
-```
+
+  Set in your config file these variables
+  ```javascript
+  :set autoindent
+  :set cindent
+  :set expandtab
+  :set shiftwidth=5
+  :set softtabstop=5
+  ```
 
 - **Eclipse**:
     Here is a [plugin](http://astyleclipse.sourceforge.net/) for astyle in eclipse.
@@ -212,7 +214,7 @@ Here are some hints to configure your editor in order to use the *stroustrup* st
     [How to change indentation width in eclipse?](https://superuser.com/questions/462221/how-do-i-reliably-change-the-indentation-width-in-eclipse)
 
 - **Clion**: preferences -> Editor -> Code Style --> C++ --> predefined style --> Stroustrup.  See also following screen-shot. 
- ![clion](img/screenshot.png)
+ ![clion-screenshot]({{ site.baseurl }}/img/screenshot.png)
 
 ### Unit tests
 
@@ -413,14 +415,14 @@ change.
 - Reference issues and pull requests liberally if your commit is connected to one.
 - When only changing documentation start with `:memo:`
 - Consider starting the commit message with an applicable emoji:  
-    - ![:new:]({{ baseurl }}/img/new.png) `:new:` when adding a new feature  
-    - ![:art:]({{ baseurl }}/img/art.png) `:art:` when improving the format/structure of the code  
-    - ![:racehorse:]({{ baseurl }}/img/racehorse.png) `:racehorse:` when improving performance  
-    - ![:memo:]({{ baseurl }}/img/memo.png) `:memo:` when writing docs  
-    - ![:penguin:]({{ baseurl }}/img/penguin.png) `:penguin:` when fixing something on Linux  
-    - ![:apple:]({{ baseurl }}/img/apple.png) `:apple:` when fixing something on Mac OS  
-    - ![:checkered_flag:]({{ baseurl }}/img/checkered_flag.png) `:checkered_flag:` when fixing something on Windows  
-    - ![:bug:]({{ baseurl }}/img/bug.png) `:bug:` when fixing a bug  
-    - ![:fire:]({{ baseurl }}/img/fire.png) `:fire:` when removing code or files  
-    - ![:green_heart:]({{ baseurl }}/img/green_heart.png) `:green_heart:` when fixing the CI build  
-    - ![:white_check_mark:]({{ baseurl }}/img/white_check_mark.png) `:white_check_mark:` when adding tests  
+    - ![:new:]({{ site.baseurl }}/img/new.png) `:new:` when adding a new feature  
+    - ![:art:]({{ site.baseurl }}/img/art.png) `:art:` when improving the format/structure of the code  
+    - ![:racehorse:]({{ site.baseurl }}/img/racehorse.png) `:racehorse:` when improving performance  
+    - ![:memo:]({{ site.baseurl }}/img/memo.png) `:memo:` when writing docs  
+    - ![:penguin:]({{ site.baseurl }}/img/penguin.png) `:penguin:` when fixing something on Linux  
+    - ![:apple:]({{ site.baseurl }}/img/apple.png) `:apple:` when fixing something on Mac OS  
+    - ![:checkered_flag:]({{ site.baseurl }}/img/checkered_flag.png) `:checkered_flag:` when fixing something on Windows  
+    - ![:bug:]({{ site.baseurl }}/img/bug.png) `:bug:` when fixing a bug  
+    - ![:fire:]({{ site.baseurl }}/img/fire.png) `:fire:` when removing code or files  
+    - ![:green_heart:]({{ site.baseurl }}/img/green_heart.png) `:green_heart:` when fixing the CI build  
+    - ![:white_check_mark:]({{ site.baseurl }}/img/white_check_mark.png) `:white_check_mark:` when adding tests  
