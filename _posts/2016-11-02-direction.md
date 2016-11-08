@@ -7,8 +7,6 @@ permalink: 2016-11-02-direction.html
 ---
 
 
-# Direction strategies
-
 The desired direction of a pedestrian is defined following different algorithms:
 In the section of the chosen model the direction strategy should be specified as follows:
 

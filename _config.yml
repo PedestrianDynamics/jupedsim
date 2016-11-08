@@ -42,7 +42,7 @@ navbar-links:
      - Juelich: "2016-11-02-juelich"
 
 
-  Publication: "2016-11-04-publications"
+  Publications: "2016-11-04-publications"
 
 
 # Image to show in the navigation bar - image must be a square (width = height)
@@ -66,7 +66,7 @@ author:
   #stackoverflow: yourlink  # eg. "3943160/daattali"
   #snapchat: yourname  # eg. daattali
   #instagram: yourname # eg. daattali
-  youtube: channel/UCKS8w8CUClHEeN4K1SUSMBA   # eg. user/daattali or channel/daattali
+  youtube: channel/UCKS8w8CUClHEeN4K1SUSMB A  # eg. user/daattali or channel/daattali
   #spotify: yourname   # eg. daattali
 
 # Select which links to show in the footer

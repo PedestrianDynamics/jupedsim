@@ -1,14 +1,14 @@
 ---
 layout: post
 title: Publications
-subtitle: 
+subtitle: using JuPedSim
 #bigimg: /img/jupedsim_small.png
 permalink: 2016-11-04-publications.html
 ---
 
 
-# Publications
-JuPedSim is a software build for academic use only.
+
+`JuPedSim` is a software build for academic use only.
 The models implemented within this framework were developed in different
 theses and articles that were published in journals or presented in conferences.
 
@@ -16,7 +16,7 @@ This is a list of some works that contributed to JuPedSim or used it to
 produce results.
 
 ## Theses
-1. Rüping, Fabian  
+- Rüping, Fabian  
    "Computersimulation einer Schulevakuierung - Reproduzierbarkeit von Evakuierungszeiten und Fundamentaldiagrammen auf Treppen"  
    Bachlor thesis, Wuppertal University, 2016  
    [Talk](https://fz-juelich.sciebo.de/index.php/s/XuaUZU1CsbpQ4d9)  
@@ -92,7 +92,12 @@ produce results.
 
 
 ## Conferences
-1. Lämmel, Gregor, Chraibi, Mohcine, Kemloh Wagoum, Armel Ulrich and Steffen, Bernhard  
+- Chraibi, Mohcine and Zhang, Jun  
+    Tutorials about basic methods and tools on pedestrian dynamics, PED12, Hefei 2012
+    - [JuPedSim](https://fz-juelich.sciebo.de/index.php/s/X61OxgkjjUBqp9v)  
+    - [JPSreport](https://fz-juelich.sciebo.de/index.php/s/0Q5drRRzPSkJR8j)
+    
+- Lämmel, Gregor, Chraibi, Mohcine, Kemloh Wagoum, Armel Ulrich and Steffen, Bernhard  
     Hybrid multi- and inter-modal transport simulation: A case study on large-scale evacuation planning  
     In *Transport and Research Board (TRB)* 2015.
 
