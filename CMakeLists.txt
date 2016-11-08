@@ -661,7 +661,7 @@ endif (BUILD_TESTING)
 
 install(TARGETS jpscore DESTINATION bin)
 
-------------- CPACK ------------------------------
+# ------------- CPACK ------------------------------
 IF(CMAKE_SYSTEM_NAME STREQUAL Linux)
   SET(CPACK_GENERATOR "DEB")
 
