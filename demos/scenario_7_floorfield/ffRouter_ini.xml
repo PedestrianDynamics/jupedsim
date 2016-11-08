@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <JuPedSim project="JPS-Project" version="0.8"
@@ -10,7 +11,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
   <!-- geometry file -->
   <geometry>Kobes_geo.xml</geometry>
   <!-- trajectories file and format -->
-  <trajectories format="xml-plain" fps="8">
+  <trajectories format="xml-plain" fps="16">
     <file location="Kobes_traj.xml" />
     <!-- <socket hostname="127.0.0.1" port="8989"/> -->
   </trajectories>
