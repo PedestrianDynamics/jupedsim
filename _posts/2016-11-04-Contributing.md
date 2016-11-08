@@ -164,7 +164,7 @@ In JuPedSim we try to code according to the *Stroustrup* style of formatting/ind
 If you want (or have) to write code in JuPedSim you really **need** to respect that style.
 This is important not just aesthetically but also practically. Diff commits are much more clearer and cleaner.
 
-The code is formated using the automatic formatter [astyle](http://astyle.sourceforge.net/astyle.html)  with the option `--style=stroustrup`:
+The code is formatted using the automatic formatter [astyle](http://astyle.sourceforge.net/astyle.html)  with the option `--style=stroustrup`:
 
 > Stroustrup style formatting/indenting uses stroustrup brackets.
 > Brackets are broken from function definitions only.
