@@ -325,18 +325,23 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
      }
      //int frameNr=0;
      for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
-               xFrame = xFrame->NextSiblingElement("frame")) {
+               xFrame = xFrame->NextSiblingElement("frame"))
+     {
     	  int frameNr = atoi(xFrame->Attribute("ID")) - _minFrame;
           //todo: can be parallelized with OpenMP
           for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
-                    xAgent = xAgent->NextSiblingElement("agent")) {
-
+                    xAgent = xAgent->NextSiblingElement("agent"))
+          {
                //get agent id, x, y
                double x= atof(xAgent->Attribute("x"));
                double y= atof(xAgent->Attribute("y"));
                double z= atof(xAgent->Attribute("z"));
                int ID= atoi(xAgent->Attribute("ID"))-_minID;
-
+               if(ID>=_numPeds)
+               {
+            	   Log->Write("ERROR:\t The number of agents are not corresponding to IDs. Maybe Ped IDs are not continuous in the first frame, please check!!");
+            	   return false;
+               }
 
                _peds_t[frameNr].push_back(ID);
                _xCor[ID][frameNr] =  x*M2CM;
@@ -371,7 +376,6 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
           }
           //frameNr++;
      }
-
      for(int id = 0; id<_numPeds; id++)
      {
          int actual_totalframe= totalframes[id];
