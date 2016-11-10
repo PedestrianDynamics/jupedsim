@@ -1,7 +1,7 @@
 /**
  * \file        OutputHandler.cpp
  * \date        Nov 20, 2010
- * \version     v0.5
+ * \version     v0.8
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License

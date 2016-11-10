@@ -1,8 +1,8 @@
 /**
  * \file        main.cpp
  * \date        Oct 10, 2014
- * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \version     v0.8.1
+ * \copyright   <2009-2015> Forschungszentrum Juelich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
