@@ -4,6 +4,8 @@ All notable changes to `jpsreport` will be documented in this file.
 
 ### Added
 
+- Added an error warning when the number of agents in the trajectory is not corresponding to total ids or the ped ids are not continuous in the first frame.
+
 ### Changed
 
 ### Fixed 
