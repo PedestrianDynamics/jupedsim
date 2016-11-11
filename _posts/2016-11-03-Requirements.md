@@ -47,6 +47,8 @@ cd .. && rm -rf ${boost_dir}
 sudo ldconfig
 ```
 
+(download this snippet as a [script](https://cst.version.fz-juelich.de/jupedsim/jpscore/snippets/4))
+
 or if you are a `brew` user:
 
 ````
