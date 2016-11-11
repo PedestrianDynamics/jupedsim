@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Requirements
-subtitle: Dependencies of JuPedSim
+subtitle: Dependencies of JPScore
 #bigimg: /img/jupedsim_small.png
 permalink: 2016-11-03-requirements.html
 ---
