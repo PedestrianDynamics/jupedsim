@@ -51,7 +51,7 @@ message (STATUS "MODULE_PATH: " ${CMAKE_MODULE_PATH})
 set(CMAKE_COLOR_MAKEFILE ON)
 set(JPSVIS_MAJOR_VERSION 0)
 set(JPSVIS_MINOR_VERSION 8)
-set(JPSVIS_PATCH_VERSION 0)
+set(JPSVIS_PATCH_VERSION 1)
 set(JPSVIS_VERSION
   ${JPSVIS_MAJOR_VERSION}.${JPSVIS_MINOR_VERSION}.${JPSVIS_PATCH_VERSION})
 message( STATUS "JPSVIS_VERSION: " ${JPSVIS_VERSION} )
@@ -63,7 +63,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(README_FILE "${CMAKE_SOURCE_DIR}/README.md")
 if(APPLE AND CMAKE_INSTALL_PREFIX MATCHES "/usr/local")
-	set(CMAKE_INSTALL_PREFIX "/Applications")
+	set(CMAKE_INSTALL_PREFIX ${EXECUTABLE_OUTPUT_PATH}) #"/Applications")
 endif()
 message(STATUS "${PROJECT_NAME} will be installed to ${CMAKE_INSTALL_PREFIX}")
 
@@ -304,35 +304,15 @@ elseif( ${QT5_INSTALLED})
   ${UI_HDRS} 
   ${RCS}
   )
- qt5_use_modules(JPSvis Widgets)
- target_link_libraries(JPSvis Qt5::Xml)
-  target_link_libraries(JPSvis Qt5::Network)
- target_link_libraries(JPSvis ${Qt5Widgets_LIBRARIES})
+ qt5_use_modules(jpsvis Widgets)
+ target_link_libraries(jpsvis Qt5::Xml)
+ target_link_libraries(jpsvis Qt5::Network)
+ target_link_libraries(jpsvis ${Qt5Widgets_LIBRARIES})
 else()
   message(FATAL_ERROR "QT NOT FOUND - ABORT")
 endif()
 
 
-#======================================================================
-# debug where is python?
-# foreach(REQUIRED_PYTHON_VERSION 2.7)  # 2.6 2.5)
-#   message(STATUS "======== LOOKING FOR ${REQUIRED_PYTHON_VERSION} ========================")
-#   # find_package ( PythonInterp ${REQUIRED_PYTHON_VERSION} REQUIRED)
-#   # find_package ( PythonLibs ${PYTHON_VERSION_STRING} EXACT)
-#   # find_package ( PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED )
-
-
-#   message(STATUS "PYTHON_EXECUTABLE:FILEPATH=${PYTHON_EXECUTABLE}")
-#   message(STATUS "PYTHON_LIBRARY:FILEPATH=${PYTHON_LIBRARY}")
-#   message(STATUS "PYTHON_INCLUDE_DIR:FILEPATH=${PYTHON_INCLUDE_DIR}")
-#   message(STATUS "PYTHON_FRAMEWORK_INCLUDES=${PYTHON_FRAMEWORK_INCLUDES}")
-#   message(STATUS "PYTHONLIBS_VERSION_STRING=${PYTHONLIBS_VERSION_STRING}")
-#   message(STATUS "Python_FRAMEWORKS=${Python_FRAMEWORKS}")
-
-#   # unset(PYTHON_EXECUTABLE CACHE)
-#   # unset(PYTHON_LIBRARY CACHE)
-#   # unset(PYTHON_INCLUDE_DIR CACHE)
-# endforeach()
 
 
 # For Apple set the icns file containing icons
@@ -424,8 +404,8 @@ SET(plugin_dest_dir bin)
 SET(qtconf_dest_dir bin)
 SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/jpsvis")
 IF(APPLE)
-  SET(plugin_dest_dir JPSvis.app/Contents/MacOS)
-  SET(qtconf_dest_dir JPSvis.app/Contents/Resources)
+  SET(plugin_dest_dir ${CMAKE_INSTALL_PREFIX}/jpsvis.app/Contents/MacOS)
+  SET(qtconf_dest_dir ${CMAKE_INSTALL_PREFIX}/jpsvis.app/Contents/Resources)
   SET(APPS "\${CMAKE_INSTALL_PREFIX}/jpsvis.app")  
 ENDIF(APPLE)
 
@@ -471,12 +451,13 @@ SET(DIRS ${QT_LIBRARY_DIRS})
 # An alternative is the do a configure_file() on a script and use install(SCRIPT  ...).
 # Note that the image plugins depend on QtSvg and QtXml, and it got those copied
 # over.
-INSTALL(CODE "
-    file(GLOB_RECURSE QTPLUGINS
-      \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-    include(BundleUtilities)
-    fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
-    " COMPONENT Runtime)
+# needed?
+# INSTALL(CODE "
+#     file(GLOB_RECURSE QTPLUGINS
+#       \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+#     include(BundleUtilities)
+#     fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
+#     " COMPONENT Runtime)
 
 
 IF(APPLE)
@@ -504,10 +485,10 @@ set(CPACK_BINARY_DRAGNDROP ON)
 set(CPACK_PACKAGE_NAME "jpsvis")
 set(CPACK_PACKAGE_VENDOR "www.jupedsim.org")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "jpsvis - CPack Component Installation Example")
-set(CPACK_PACKAGE_VERSION "1.0.0")
-set(CPACK_PACKAGE_VERSION_MAJOR "1")
-set(CPACK_PACKAGE_VERSION_MINOR "0")
-set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_PACKAGE_VERSION ${JPSVIS_VERSION})
+set(CPACK_PACKAGE_VERSION_MAJOR ${JPSVIS_MAJOR_VERSION})
+set(CPACK_PACKAGE_VERSION_MINOR ${JPSVIS_MINOR_VERSION})
+set(CPACK_PACKAGE_VERSION_PATCH ${JPSVIS_PATCH_VERSION})
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "JPSvis_dir")
 
 if(APPLE)
@@ -539,19 +520,21 @@ else()
 endif()
 
 # https://github.com/artm/vision-ui-skeleton/blob/master/cmake/QArtmRelease.cmake
-  IF(APPLE)
-    SET(EXE_CONTENTS "${CMAKE_CURRENT_BINARY_DIR}/${EXECUTABLE}/Contents")
-    FILE(WRITE
-      ${EXE_CONTENTS}/Resources/qt.conf
-      "[Paths]\nPlugins=PlugIns\n")
-    FILE(COPY ${QT_PLUGINS_DIR}/imageformats
-      DESTINATION ${EXE_CONTENTS}/PlugIns/
-      PATTERN "*_debug.*" EXCLUDE)
-    ADD_CUSTOM_COMMAND(
-      TARGET ${PROJECT_NAME} POST_BUILD
-      COMMAND ruby ${PROJECT_SOURCE_DIR}/ruby/fixup/fixup.rb ${EXECUTABLE}
-      COMMENT "Fixing up the app bundle")
-  ENDIF(APPLE)
+IF(APPLE)
+  SET(EXE_CONTENTS "${CMAKE_INSTALL_PREFIX}/${EXECUTABLE}/Contents")
+  message(STATUS "EXE_CONTENTS: " ${EXE_CONTENTS})
+  message(STATUS "EXECUTABLE: " ${EXECUTABLE})
+  FILE(WRITE
+    ${EXE_CONTENTS}/Resources/qt.conf
+    "[Paths]\nPlugins=PlugIns\n")
+  FILE(COPY ${QT_PLUGINS_DIR}/imageformats
+    DESTINATION ${EXE_CONTENTS}/PlugIns/
+    PATTERN "*_debug.*" EXCLUDE)
+  ADD_CUSTOM_COMMAND(
+    TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ruby ${PROJECT_SOURCE_DIR}/ruby/fixup/fixup.rb ${CMAKE_INSTALL_PREFIX}/${EXECUTABLE}
+    COMMENT "Fixing up the app bundle")
+ENDIF(APPLE)
 
 
 # if(APPLE OR WIN32)
