@@ -5,56 +5,25 @@
 # -DBUILD_TESTING=ON (default OFF)
 # MARK_AS_ADVANCED (BUILD_TESTING CMAKE_BUILD_TYPE=Debug)
 #windows flags: -DDESIRED_QT_VERSION=5 -DCMAKE_PREFIX_PATH=D:\Qt32bit\Qt5.4.1\5.4\msvc2013 -DCMAKE_PREFIX_PATH=VTK.0.0\VTK-7.0.0\build -G "Visual Studio 12 2013"
-
 #--------------------------------------------------------------------------
-
-
-# ------------------------- Begin Generic CMake Variable Logging ------------------
-
-# the short system name, e.g. "Linux", "FreeBSD" or "Windows"
-MESSAGE( STATUS "CMAKE_SYSTEM_NAME: " ${CMAKE_SYSTEM_NAME} )
-
-# only the version part of CMAKE_SYSTEM 
-MESSAGE( STATUS "CMAKE_SYSTEM_VERSION: " ${CMAKE_SYSTEM_VERSION} )
-
-# the processor name (e.g. "Intel(R) Pentium(R) M processor 2.00GHz") 
-MESSAGE( STATUS "CMAKE_SYSTEM_PROCESSOR: " ${CMAKE_SYSTEM_PROCESSOR} )
-
-# the compiler used for C files 
-MESSAGE( STATUS "CMAKE_C_COMPILER: " ${CMAKE_C_COMPILER} )
-
-# the compiler used for C++ files 
-MESSAGE( STATUS "CMAKE_CXX_COMPILER: " ${CMAKE_CXX_COMPILER} )
-# ------------------------- End of Generic CMake Variable Logging ------------------
 cmake_minimum_required(VERSION 2.8)
-
-#set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/" ${CMAKE_MODULE_PATH})
-
-# set project's name
 project( jpsvis )
 
+MESSAGE( STATUS "System ........................................ ${CMAKE_SYSTEM_NAME} (${CMAKE_SYSTEM_VERSION}, ${CMAKE_SYSTEM_PROCESSOR})" )
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
-
-
-#------------------ set important directories --------------------
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
-set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
-# Debug messages
-message( STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR} )
-message( STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR} )
-message( STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR} )
-message( STATUS "CMAKE_RUNTIME_OUTPUT_DIRECTORY: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} )
-message( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
-message( STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE} )
-message( STATUS "PROJECT_SOURCE_DIR points to " ${PROJECT_SOURCE_DIR})
-message (STATUS "MODULE_PATH: " ${CMAKE_MODULE_PATH})
 set(CMAKE_COLOR_MAKEFILE ON)
 set(JPSVIS_MAJOR_VERSION 0)
 set(JPSVIS_MINOR_VERSION 8)
 set(JPSVIS_PATCH_VERSION 1)
 set(JPSVIS_VERSION
   ${JPSVIS_MAJOR_VERSION}.${JPSVIS_MINOR_VERSION}.${JPSVIS_PATCH_VERSION})
-message( STATUS "JPSVIS_VERSION: " ${JPSVIS_VERSION} )
+
+
+#------------------ set important directories --------------------
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
+message( STATUS "Generating  ................................... ${PROJECT_NAME} (${JPSVIS_VERSION})")
 
 # we need this to be able to include headers produced by uic in our code
 # (CMAKE_BINARY_DIR holds a path to the build directory, while INCLUDE_DIRECTORIES() works just like INCLUDEPATH from qmake)
@@ -65,13 +34,11 @@ set(README_FILE "${CMAKE_SOURCE_DIR}/README.md")
 if(APPLE AND CMAKE_INSTALL_PREFIX MATCHES "/usr/local")
 	set(CMAKE_INSTALL_PREFIX ${EXECUTABLE_OUTPUT_PATH}) #"/Applications")
 endif()
-message(STATUS "${PROJECT_NAME} will be installed to ${CMAKE_INSTALL_PREFIX}")
 
 # these files compile need Cocoa (evtl. Mac specific)
 SET(MAC_FIX_SRC src/fix/osx_thread_fix.mm) #.mm
 SET(MAC_FIX_HDR src/fix/osx_thread_fix.h) #.h
 set( SRCS
-  # src/fix/osx_thread_fix.mm
   src/geometry/Building.cpp 
   src/geometry/Crossing.cpp 
   src/geometry/Goal.cpp
@@ -118,7 +85,6 @@ set( SRCS
   )  
 # all header files that should be treated with moc
 set( HDR
-  # src/fix/osx_thread_fix.h
   src/geometry/Building.h
   src/geometry/Crossing.h
   src/geometry/Goal.h
@@ -185,20 +151,14 @@ set( RCS
 find_package(VTK REQUIRED)
 
 if(VTK_FOUND)
-  message(STATUS "found VTK. Version: " ${VTK_VERSION} " |  VTK_DIR: " ${VTK_DIR})
-  message(STATUS "VTK_QT_Version: " ${VTK_QT_VERSION})
-  message(STATUS "VTK_LIBraries: " ${VTK_LIBRARIES})
+  message(STATUS "Check VTK ..................................... yes (${VTK_VERSION})")
 else(VTK_FOUND)
-  message(FATAL_ERROR
-    "Cannot build the executable without VTK. Please set the
-VTK_DIR")
+  message(FATAL_ERROR "Check VTK ..................................... no")
 endif(VTK_FOUND)
 
 include(${VTK_USE_FILE})
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
-
-
 
 # This sets the windows build that will need the special winmain@16 call. Qt provides
 #  this for us in the qtmain.lib file. Using this cmake code will ensure we have it
@@ -210,11 +170,11 @@ ENDIF (WIN32)
 
 #--------------- here comes QT. Version problem (4 or 5?)
 # cmake does not provide findqt5-modules
-message(STATUS "QT_Qmake_executable " ${QT_QMAKE_EXECUTABLE})
+#message(STATUS "QT_Qmake_executable " ${QT_QMAKE_EXECUTABLE})
 if($QT_QMAKE_EXECUTABLE STREQUAL "")
   FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake)
   if (NOT QT_QMAKE_EXECUTABL)
-    message(WARNING "QT not found - abort.")
+    message(WARNING "Check Qt          ...  no")
   endif()
 endif()
 # default qt version is 4
@@ -224,7 +184,8 @@ endif()
 
 # qt version > 5 or qt version < 3 are not supported
 if( ${DESIRED_QT_VERSION} VERSION_GREATER 5 OR ${DESIRED_QT_VERSION} VERSION_LESS 3)
-  message(FATAL_ERROR "QT version " ${DESIRED_QT_VERSION} " not supported. Try 4 or 5")
+  message(WARNING "Desired QT version " ${DESIRED_QT_VERSION} " not supported. Taking 4")
+  set(DESIRED_QT_VERSION "4")
 endif()
 
 # find packages according to qt version
@@ -241,29 +202,21 @@ if("${DESIRED_QT_VERSION}" STREQUAL "5")
   # # other modules must be enabled like this:
   set(QT_USE_QTXML TRUE)  # needed!
   set(QT_USE_QTNETWORK TRUE)
-  MESSAGE(STATUS "Found Qt version: ${Qt5Core_VERSION_STRING}")
+  MESSAGE(STATUS "Check Qt 5 .................................... yes (${Qt5Core_VERSION_STRING})")
 elseif("${DESIRED_QT_VERSION}" STREQUAL "4")
- 
-  #   QT4_INSTALLED is set to TRUE if qt4 is found and
-  #   QT3_INSTALLED is set to TRUE if qt3 is found.
-  FIND_PACKAGE(Qt COMPONENTS QtXml QT_USE_QTNETWORK QtXmlPatterns REQUIRED)
-  set(QT_USE_QTXML TRUE)  # needed!
-  set(QT_USE_QTNETWORK TRUE)
-  
+   FIND_PACKAGE(Qt COMPONENTS QtXml QT_USE_QTNETWORK QtXmlPatterns REQUIRED)
+   set(QT_USE_QTXML TRUE)  # needed!
+   set(QT_USE_QTNETWORK TRUE)
 endif()
 
-
-
-
-message(STATUS "DESIRED_QT_VERSION " ${DESIRED_QT_VERSION})
 if(QT5_INSTALLED)
   message(STATUS "QT5_INSTALLED: " ${QT5_INSTALLED})
 elseif(QT4_INSTALLED )
-  message(STATUS "QT4_INSTALLED: " ${QT4_INSTALLED})
+    MESSAGE(STATUS "Check Qt 4 .................................... yes")
 elseif(QT3_INSTALLED)
-  message(STATUS "QT3_INSTALLED: " ${QT3_INSTALLED})
+    MESSAGE(STATUS "Check Qt 3 .................................... yes")
 else()
-  message(SEND_ERROR "No supported Qt found.")
+    MESSAGE(STATUS "Check Qt 4          ...  no")
 endif()
 # Disable automatic conversion from QString to ASCII 8-bit strings (char *)
 # (Keeps code compatible with Qt/Mac/64bit)
@@ -276,7 +229,6 @@ endif()
 # this command will generate rules that will run rcc on all files from RCS
 # in result RC_SRCS variable will contain paths to files produced by rcc
 if(${QT4_INSTALLED})
-  message(STATUS "Working with Qt4")
   # and finally this will run moc:
   QT4_WRAP_CPP( MOC_HDRS ${MOC_HDRS} )
   # this will run uic on .ui files:
@@ -291,10 +243,8 @@ if(${QT4_INSTALLED})
   )
   TARGET_LINK_LIBRARIES( jpsvis ${QT_LIBRARIES})
 elseif( ${QT5_INSTALLED})
-  message(STATUS "Working with Qt5")
   # http://www.kdab.com/using-cmake-with-qt-5/
-  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}" ) 
-  
+  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}" )
   qt5_wrap_ui( UI_HDRS ${UIS} )
   qt5_add_resources( RCS ${RCS} )
 
@@ -305,15 +255,10 @@ elseif( ${QT5_INSTALLED})
   ${RCS}
   )
  qt5_use_modules(jpsvis Widgets)
- target_link_libraries(jpsvis Qt5::Xml)
- target_link_libraries(jpsvis Qt5::Network)
- target_link_libraries(jpsvis ${Qt5Widgets_LIBRARIES})
+ target_link_libraries(jpsvis ${Qt5Widgets_LIBRARIES} Qt5::Network Qt5::Xml)
 else()
-  message(FATAL_ERROR "QT NOT FOUND - ABORT")
+    MESSAGE(STATUS "Check Qt           ...  no")
 endif()
-
-
-
 
 # For Apple set the icns file containing icons
 
@@ -326,29 +271,22 @@ IF(APPLE)
   SET(SRCS ${SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.icns)
 ENDIF(APPLE)
 
-# SET_TARGET_PROPERTIES(JPSvis PROPERTIES LINKER_LANGUAGE CXX)
-# set_property(TARGET JPSvis PROPERTY CXX_STANDARD 11)
-
 # last thing we have to do is to tell CMake what libraries our executable needs,
 # luckily FIND_PACKAGE prepared QT_LIBRARIES variable for us:
 set(VTK_USE_GUISUPPORT  ON) 
 set(VTK_USE_QT  ON)
-#set(VTK_USE_QVTK_QTOPENGL ON )
-
 # QVTK is for VTK 5.x. For VTK 6, use ${VTK_LIBRARIES} instead
 if(VTK_LIBRARIES)
   if(${VTK_VERSION} VERSION_LESS "6")
     TARGET_LINK_LIBRARIES( jpsvis ${QT_LIBRARIES} QVTK)
+    
   else()        
     TARGET_LINK_LIBRARIES( jpsvis  ${VTK_LIBRARIES} ${QT_LIBRARIES})
   endif()
 else() # this else is not yet tested
   target_link_libraries(jpsvis vtkHybrid QVTK vtkViews ${QT_LIBRARIES})
 endif() 
-
-
-#=================================================== Compiler flags =================================================
-#----------------------------------------------------------------------
+# ================================ Compiler flags
 # enable as many warnings as possible
 set(warning_flags "-Wall -Wextra")
 # issue all the warnings demanded by strict iso c and iso c++
@@ -373,28 +311,22 @@ elseif(COMPILER_SUPPORTS_CXX0X)
 else()
   message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
-message(STATUS "Checking for C++11 compiler - available")
+message(STATUS "Checking for C++11 compiler ................... yes")
 endif(NOT MSVC)
 #---------------------
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  message(STATUS "Using Clang " ${CMAKE_CXX_COMPILER_VERSION})
+  message(STATUS "Using compiler ................................ Clang (${CMAKE_CXX_COMPILER_VERSION})")
 endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 if(CMAKE_COMPILER_IS_GNUCXX)
-  message( STATUS "Using g++ " ${CMAKE_CXX_COMPILER_VERSION})
+  message( STATUS "Using compiler ................................ g++ (${CMAKE_CXX_COMPILER_VERSION}")
 endif(CMAKE_COMPILER_IS_GNUCXX)
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   set(CMAKE_CXX_LDFLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
   message(STATUS "Debug flags: "  ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_DEBUG} )
-else(CMAKE_BUILD_TYPE MATCHES Debug)
-  message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS} " ,  " ${CMAKE_CXX_FLAGS_RELEASE} )
+#else(CMAKE_BUILD_TYPE MATCHES Debug)
+  # message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS} " ,  " ${CMAKE_CXX_FLAGS_RELEASE} )
 endif(CMAKE_BUILD_TYPE MATCHES Debug)
-
-
-# PGI ++ Flags
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")     
-endif()
 #======================================================================================================================================
 
 #--------------------------------------------------------------------------------
@@ -417,11 +349,9 @@ ENDIF(WIN32)
 #--------------------------------------------------------------------------------
 # Install the QtTest application, on Apple, the bundle is at the root of the
 # install tree, and on other platforms it'll go into the bin directory.
-MESSAGE(STATUS "${PROJECT_NAME} will be installed to ${CMAKE_INSTALL_PREFIX}")
 INSTALL(TARGETS jpsvis
   BUNDLE DESTINATION . COMPONENT Runtime
   RUNTIME DESTINATION bin COMPONENT Runtime
-  
   )
 
 
@@ -451,13 +381,12 @@ SET(DIRS ${QT_LIBRARY_DIRS})
 # An alternative is the do a configure_file() on a script and use install(SCRIPT  ...).
 # Note that the image plugins depend on QtSvg and QtXml, and it got those copied
 # over.
-# needed?
-# INSTALL(CODE "
-#     file(GLOB_RECURSE QTPLUGINS
-#       \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-#     include(BundleUtilities)
-#     fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
-#     " COMPONENT Runtime)
+INSTALL(CODE "
+    file(GLOB_RECURSE QTPLUGINS
+      \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+    include(BundleUtilities)
+    fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
+    " COMPONENT Runtime)
 
 
 IF(APPLE)
@@ -522,8 +451,6 @@ endif()
 # https://github.com/artm/vision-ui-skeleton/blob/master/cmake/QArtmRelease.cmake
 IF(APPLE)
   SET(EXE_CONTENTS "${CMAKE_INSTALL_PREFIX}/${EXECUTABLE}/Contents")
-  message(STATUS "EXE_CONTENTS: " ${EXE_CONTENTS})
-  message(STATUS "EXECUTABLE: " ${EXECUTABLE})
   FILE(WRITE
     ${EXE_CONTENTS}/Resources/qt.conf
     "[Paths]\nPlugins=PlugIns\n")
@@ -537,15 +464,3 @@ IF(APPLE)
 ENDIF(APPLE)
 
 
-# if(APPLE OR WIN32)
-#   if(${QT4_INSTALLED})
-#     include(DeployQt4)
-#     install_qt4_executable("${EXECUTABLE}" "qsqlite")
-#   elseif(${QT4_INSTALLED})
-#     include(DeployQt5)
-#     install_qt5_executable("${EXECUTABLE}" "qsqlite")
-#   endif()
-# endif()
-
-#   message(STATUS "verify app")
-#   verify_app(${EXECUTABLE})
