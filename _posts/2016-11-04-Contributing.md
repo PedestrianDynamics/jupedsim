@@ -38,7 +38,7 @@ It does not matter if you are a researcher, student or just interested in pedest
   cmake .. 
   ```
 
-* Download all [dependencies](2016-11-03-requirements.html and check the output of `CMake`
+* Download all [dependencies](2016-11-03-requirements.html) and check the output of `CMake`
     
 * If everything compiles fine, you are free to start. :-)
 
@@ -219,6 +219,7 @@ Here are some hints to configure your editor in order to use the *stroustrup* st
 ### Unit tests
 
 Testing should be enabled by `CMake` as follows:
+
 ```javascript
 cmake -DBUILD_TESTING=ON ..
 ```
@@ -230,6 +231,7 @@ ctest
 ```
 
 This will take some hours time (depending on your machine). Threfore, a quick testing could be used:
+
 ```javascript
 ctest -R Boost
 ```
@@ -249,6 +251,7 @@ BOOST_AUTO_TEST_SUITE(MyTestClass)
 ```
 
 Then you can start implementing your test cases by using
+
 ```c++
 BOOST_AUTO_TEST_CASE(MyTestCase) 
 {
@@ -274,17 +277,21 @@ To write additional tests, create a directory under *Utest/*.
    and all the relevant files for a simulation, e.g. geometry file, etc. In the master-inifile you can use python syntax
    
    Example:
-```xml
-   <max_sim_time>[3,4]</max_sim_time> 
+
+  ```xml
+    <max_sim_time>[3,4]</max_sim_time> 
    <seed>range(1, 10)</seed>
-```
+  ```
+  
 - run the script `makeini.py` with the obligatory option `-f`: Using the
     aforementioned example the call is:
-```bash
-   python makeini.py -f test_case1/inifile.xml
-```
+    
+  ```bash
+     python makeini.py -f test_case1/inifile.xml
+  ```
 
 The Script is going to create two directories:
+
 - test\_case/trajectories: Here live the simulation trajectories.
 - test\_case/inifiles: and here the inifiles, that will be produced  based on the master inifile (in this case test\_case1/inifile.xml).
     Note, that the geometry file and the trajectory files are all relative to the project files in the directory *inifiles*.
@@ -292,17 +299,17 @@ The Script is going to create two directories:
 
 - Write a runtest-script. Here you have to define the logic of your test. What should be tested? When does the file succeed or file? etc.
 
-Your script has to start with the following lines:
+  Your script has to start with the following lines:
 
-```python
-#!/usr/bin/env python
-import os
-import sys
-from sys import *
-sys.path.append(os.path.abspath(os.path.dirname(sys.path[0])))
-from JPSRunTest import JPSRunTestDriver
-from utils import *
-```
+  ```python
+  #!/usr/bin/env python
+  import os
+  import sys
+  from sys import *
+  sys.path.append(os.path.abspath(os.path.dirname(sys.path[0])))
+  from JPSRunTest import JPSRunTestDriver
+  from utils import *
+  ```
 
 After including these lines you can write the test you want to perform for every ini-file generated from the makeini.py script.
 The method signature must contain at least two arguments to receive the inifile and the trajectory file from the simulation.
@@ -344,6 +351,7 @@ Comments have to be written in **English** everywhere. Please use markdown where
 Please update the changelog with every feature/fix you provide so we can keep track of changes for new versions of JuPedSim.
 
 ### Sample Templates
+
 ```
 /*!
  * \file [filename]
