@@ -27,7 +27,9 @@ description: Simulating pedestrians with state of the art models
 
 # List of links in the navigation bar
 navbar-links:
-  Files: 
+  Ressources:
+    - Quick start: "2016-11-02-quickstart.html"
+    - JuPedSim: "http://jupedsim.org"
     - Inifile: "2016-11-01-inifile"
     - Geometry: "2016-11-02-geometry"
     - Trajectory: "2016-11-03-trajectory"
