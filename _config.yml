@@ -134,7 +134,7 @@ defaults:
     values:
       layout: "post"
       comments: false  # add comments to all blog posts
-      social-share: true # add social media sharing buttons to all blog posts
+      social-share: false # add social media sharing buttons to all blog posts
   -
     scope:
       path: "" # all files
