@@ -16,18 +16,18 @@ In the section of the chosen model the direction strategy should be specified as
 
 with *num* a positive integer.
 
-The majority of the strategies define how a pedestrian crosses a line $L = [P_1, P_2]$. Possible values are:  
+The majority of the strategies define how a pedestrian crosses a line \\(L = [P_1, P_2]\\). Possible values are:  
 
-1. The direction of the pedestrian is towards the middle of $L$ ($\frac{P_1+P2}{2}$)  
+1. The direction of the pedestrian is towards the middle of \\(L\\) (\\(\frac{P_1+P2}{2}\\))  
 
-2. The direction is given by the nearest point on $L$ to the position of the pedestrian.  
-   $L$ is shorten by 20 cm.  
+2. The direction is given by the nearest point on \\(L\\) to the position of the pedestrian.  
+   \\(L\\) is shorten by 20 cm.  
 
-3. If the nearest point of the pedestrian on the segment line $L$ is outside the segment, then chose the middle point as target.  
+3. If the nearest point of the pedestrian on the segment line \\(L\\) is outside the segment, then chose the middle point as target.  
    Otherwise the nearest point is chosen.
 
 4. This strategy is still beta. It assumes that the simulation scenario has no loops or U-shaped corridors.
-   Pedestrians, are targets towards the exit, even if it is outside their visibility range. In case of intersection with walls or bstacles, the temporary direction is rotaions away from the wall.  
+   Pedestrians,  target he exit, even if it is outside their visibility range. In case of intersection with walls or obstacles, the temporary direction is rotated away from the wall.  
 
 5. Does not exist.
 
@@ -38,7 +38,9 @@ https://cst.version.fz-juelich.de/jupedsim/jpscore/uploads/785cda284f5f44d2b0193
 
   * 6: This strategy does use a floor field rather than heading towards a point on a line segment.
 
-    For more details see [Graf2015][#Graf2015]. (__do not use in multi-storage buildings__)
+    For more details see [Graf2015][#Graf2015]. 
+     
+    (__do not use in multi-storage buildings__)
     
   * 7: (__experimental__)
   
@@ -48,19 +50,17 @@ https://cst.version.fz-juelich.de/jupedsim/jpscore/uploads/785cda284f5f44d2b0193
 
     The router __must__ provide intermediate targets for every agent, the target being in the same room.
     
-    The projection of the room onto the x,y-plane must be non-overlapping!
+    The projection of the room onto the \\(x,y\\)-plane must be non-overlapping!
 
-  * 9: This strategy uses a floor field collection for each __sub__room. (__broken__)
+  * 9: This strategy uses a floor field collection for each subroom. (__broken__)
 
-    Thus the floor fields are again smaller but cannot steer to targets in a different __sub__room. 
+    Thus the floor fields are again smaller but cannot steer to targets in a different subroom. 
 
-    The router __must__ provide intermediate targets for every agent, that target being in the same __sub__room.
+    The router __must__ provide intermediate targets for every agent, that target being in the same subroom.
     
     The projection of the room onto the x,y-plane must be non-overlapping!
 
 ---   
-Most of the aforementioned strategies were discussed in [Chraibi2011][#Chraibi2011].
-
 
 
 [#Graf2015]: https://owncloud.zam.kfa-juelich.de/index.php/s/MomKWVu6mFvnrSf "Automated Routing in Pedestrian Dynamics Master thesis, Fachhochschule Aachen, 2015"
