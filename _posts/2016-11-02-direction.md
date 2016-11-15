@@ -38,7 +38,7 @@ https://cst.version.fz-juelich.de/jupedsim/jpscore/uploads/785cda284f5f44d2b0193
 
   * 6: This strategy does use a floor field rather than heading towards a point on a line segment.
 
-    For more details see [Graf2015][#Graf2015]. 
+    For more details see this talk [^1] and the corresponding thesis [^2].
      
     (__do not use in multi-storage buildings__)
     
@@ -63,9 +63,10 @@ https://cst.version.fz-juelich.de/jupedsim/jpscore/uploads/785cda284f5f44d2b0193
 ---   
 
 
-[#Graf2015]: https://owncloud.zam.kfa-juelich.de/index.php/s/MomKWVu6mFvnrSf "Automated Routing in Pedestrian Dynamics Master thesis, Fachhochschule Aachen, 2015"
-    
+[^1]: (https://fz-juelich.sciebo.de/index.php/s/s1ORGTUssCsHDHC)  
+[^2]: (https://fz-juelich.sciebo.de/index.php/s/VFnUCH2gtz1mSoL)  
 
+    
 [#Chraibi2011]: http://aimsciences.org/journals/displayPaper.jsp?paperID=6440 "Chraibi el al. Force-based models of pedestrian dynamics.  Pages: 425 - 442, Volume 6, Issue 3, September 2011"
 
 
