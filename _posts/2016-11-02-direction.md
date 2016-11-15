@@ -47,12 +47,16 @@ https://cst.version.fz-juelich.de/jupedsim/jpscore/uploads/785cda284f5f44d2b0193
     Thus the floor fields are smaller but cannot steer to targets in a different room. 
 
     The router __must__ provide intermediate targets for every agent, the target being in the same room.
+    
+    The projection of the room onto the x,y-plane must be non-overlapping!
 
   * 9: This strategy uses a floor field collection for each __sub__room. (__broken__)
 
     Thus the floor fields are again smaller but cannot steer to targets in a different __sub__room. 
 
     The router __must__ provide intermediate targets for every agent, that target being in the same __sub__room.
+    
+    The projection of the room onto the x,y-plane must be non-overlapping!
 
 ---   
 Most of the aforementioned strategies were discussed in [Chraibi2011][#Chraibi2011].
