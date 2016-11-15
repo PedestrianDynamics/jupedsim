@@ -232,7 +232,7 @@ endif (BUILD_TESTING)
 set(source_files
         Simulation.cpp
         general/ArgumentParser.cpp
-
+        IO/progress_bar.cpp
         tinyxml/tinystr.cpp
         tinyxml/tinyxml.cpp
         tinyxml/tinyxmlerror.cpp
@@ -675,7 +675,7 @@ IF(CMAKE_SYSTEM_NAME STREQUAL Linux)
   SET(CPACK_GENERATOR "DEB")
 
   SET(CPACK_PACKAGE_DESCRIPTION "simulation core of JuPedSim")
-  SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The simulation core of JuPedSIm, a framework for simulation and analysis of pedestrian dynamics")
+  SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The simulation core of JuPedSim, a framework for simulation and analysis of pedestrian dynamics")
   #SET(CPACK_PACKAGE_VENDOR "nowardev")
   SET(CPACK_PACKAGE_CONTACT "m.chraibi@fz-juelich.de")
   SET(CPACK_PACKAGE_VERSION_MAJOR "${JPSCORE_MAJOR_VERSION}")

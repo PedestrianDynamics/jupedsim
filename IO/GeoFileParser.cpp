@@ -445,7 +445,7 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
                          building->GetTransition(id)->Close();
                     }
                     else {
-                         Log->Write("WARNING:\t Unknown door state: %s", state.c_str());
+                         Log->Write("WARNING:\t Unknown door state: <%s>", state.c_str());
                     }
                }
                else {

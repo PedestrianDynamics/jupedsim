@@ -29,7 +29,7 @@
  **/
 
 #include "Simulation.h"
-
+#include "IO/progress_bar.hpp"
 #include "routing/ff_router/ffRouter.h"
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
@@ -460,6 +460,15 @@ double Simulation::RunBody(double maxSimTime)
     //to break the main simulation loop
     ProcessAgentsQueue();
     _nPeds = _building->GetAllPedestrians().size();
+    std::cout << "\n";
+    std::string description = "Evacuation of " + std::to_string(_nPeds) + " agents.";
+    ProgressBar *bar = new ProgressBar(_nPeds, description);
+    // bar->SetFrequencyUpdate(10);
+#ifdef _WINDOWS
+    bar->SetStyle("|","-");
+#else
+    bar->SetStyle("\u2588", "-"); //for linux
+#endif
     int initialnPeds = _nPeds;
     // main program loop
     while ((_nPeds || (!_agentSrcManager.IsCompleted()&& _gotSources) ) && t<maxSimTime) {
@@ -496,8 +505,8 @@ double Simulation::RunBody(double maxSimTime)
             _iod->WriteFrame(frameNr/writeInterval, _building.get());
         }
         if(!_gotSources /*&& _printPB*/) // @todo: option for print progressbar
-              Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
-
+              // Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
+              bar->Progressed(initialnPeds-_nPeds);
         // needed to control the execution time PART 2
         // time(&endtime);
         // double timeToWait=t-difftime(endtime, starttime);
