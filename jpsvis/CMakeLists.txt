@@ -381,13 +381,14 @@ SET(DIRS ${QT_LIBRARY_DIRS})
 # An alternative is the do a configure_file() on a script and use install(SCRIPT  ...).
 # Note that the image plugins depend on QtSvg and QtXml, and it got those copied
 # over.
+if(APPLE)
 INSTALL(CODE "
     file(GLOB_RECURSE QTPLUGINS
       \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
     include(BundleUtilities)
     fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
     " COMPONENT Runtime)
-
+endif()
 
 IF(APPLE)
   # set how it shows up in the Info.plist file
@@ -426,6 +427,30 @@ if(APPLE)
   set(CPACK_DMG_VOLUME_NAME "${PROJECT_NAME}")
   set(CPACK_SYSTEM_NAME "OSX")
   set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${JPSVIS_VERSION}")
+   elseif(UNIX)
+     # tested with success in 
+     # Linux dhcppc5 3.2.0-4-686-pae #1 SMP Debian 3.2.68-1+deb7u2 i686 GNU/Linux
+     set(CPACK_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}")
+       SET(CPACK_GENERATOR "DEB")
+
+       SET(CPACK_PACKAGE_DESCRIPTION "Visualisation module for JuPedSim")
+       SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Visualisation module for  JuPedSim, a framework for simulation and analysis of pedestrian dynamics")
+       #SET(CPACK_PACKAGE_VENDOR "nowardev")
+       SET(CPACK_PACKAGE_CONTACT "m.chraibi@fz-juelich.de")
+       SET(CPACK_PACKAGE_VERSION_MAJOR "${JPSVIS_MAJOR_VERSION}")
+       SET(CPACK_PACKAGE_VERSION_MINOR "${JPSVIS_MINOR_VERSION}")
+       SET(CPACK_PACKAGE_VERSION_PATCH "${JPSVIS_PATCH_VERSION}")
+       SET(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${JPSVIS_VERSION}")
+       SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${JPSVIS_VERSION}")
+       #SET(CPACK_DEBIAN_PACKAGE_DEPENDS " Boost (>= 1.59) ")
+       SET(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+       SET( CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://jupedsim.org")
+       SET(CPACK_DEBIAN_PACKAGE_SUGGESTS, "jpseditor, jpsreport, jpscore")
+       SET(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+       SET(CPACK_DEBIAN_PACKAGE_SECTION "science")
+       SET(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+
+  
 endif()
 
 include(CPack)
