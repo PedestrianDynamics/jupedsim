@@ -33,7 +33,7 @@ It does not matter if you are a researcher, student or just interested in pedest
 
 * Assuming you are in the `jpscore` folder type 
 
-  ```
+  ```bash
   mkdir build && cd build 
   cmake .. 
   ```
@@ -74,7 +74,7 @@ If you use the issue tracker we have a list of labels you should use.
 If you find a bug in the source code or a mistake in the documentation, you can help us by submitting an issue to our repository.
 Even better you can submit a pull or merge request with a fix. Please use the following template and make sure you provide us as much information as possible:
 
-~~~.md
+~~~bash
 [Short description of problem here]
 
 **Reproduction Steps:**
@@ -128,7 +128,7 @@ If you want to support us by writing the enhancement yourself consider what kind
 
 Nevertheless open an issue for documentation purposes with the following template:
 
-~~~.md
+~~~bash
 [Short description of suggestion]
 
 **Steps which explain the enhancement**
@@ -164,7 +164,10 @@ In JuPedSim we try to code according to the *Stroustrup* style of formatting/ind
 If you want (or have) to write code in JuPedSim you really **need** to respect that style.
 This is important not just aesthetically but also practically. Diff commits are much more clearer and cleaner.
 
-The code is formatted using the automatic formatter [astyle](http://astyle.sourceforge.net/astyle.html)  with the option `--style=stroustrup`:
+The code is formatted using the automatic formatter [astyle](http://astyle.sourceforge.net/astyle.html)
+with the option
+
+`--style=stroustrup`:
 
 > Stroustrup style formatting/indenting uses stroustrup brackets.
 > Brackets are broken from function definitions only.
@@ -186,21 +189,22 @@ int Foo(bool isBar)
 ```
 
 #### Tabs vs Spaces
-This can be a long and religious discussion, to make it short *DO NOT* use tabs, just spaces.
 
-Here are some hints to configure your editor in order to use the *stroustrup* style
+This can be a long and religious discussion, to make it short *DO NOT* use tabs, just spaces.
+Here are some hints how to configure your editor in order to use the *stroustrup* style
 
 - **Emacs**:
+  Add this to your `.emacs`
 
-  Add this to your ```.emacs```
-  ```shell
+  ```bash
   (setq c-default-style "stroustrup" c-basic-offset 5)
   (setq indent-tabs-mode nil)
   ```
+  
 - **Vim**:
-
   Set in your config file these variables
-  ```javascript
+  
+  ```bash
   :set autoindent
   :set cindent
   :set expandtab
@@ -214,25 +218,25 @@ Here are some hints to configure your editor in order to use the *stroustrup* st
     [How to change indentation width in eclipse?](https://superuser.com/questions/462221/how-do-i-reliably-change-the-indentation-width-in-eclipse)
 
 - **Clion**: preferences -> Editor -> Code Style --> C++ --> predefined style --> Stroustrup.  See also following screen-shot. 
- ![clion-screenshot]({{ site.baseurl }}/img/screenshot.png)
+  ![clion-screenshot]({{ site.baseurl }}/img/screenshot.png)
 
-### Unit tests
+### Running the unit tests
 
 Testing should be enabled by `CMake` as follows:
 
-```javascript
+```bash
 cmake -DBUILD_TESTING=ON ..
 ```
 
 After compiling (`make`) the tests can be called as follows:
 
-```javascript
+```bash
 ctest
 ```
 
 This will take some hours time (depending on your machine). Threfore, a quick testing could be used:
 
-```javascript
+```bash
 ctest -R Boost
 ```
 
@@ -352,7 +356,7 @@ Please update the changelog with every feature/fix you provide so we can keep tr
 
 ### Sample Templates
 
-```
+```C
 /*!
  * \file [filename]
  *
@@ -383,7 +387,7 @@ Please update the changelog with every feature/fix you provide so we can keep tr
  */
 ```
 
-```
+```C 
 /*!
  * \class [class name]
  *
@@ -396,7 +400,7 @@ Please update the changelog with every feature/fix you provide so we can keep tr
  */
 ```
 
-```
+```C
 /*!
  * \brief [brief description]
  *
@@ -413,7 +417,6 @@ Please update the changelog with every feature/fix you provide so we can keep tr
 
 ## Commiting Code
 
-### Commiting guidelines
 Please write clear and concise commit messages so that
 your co-developers can directly grasp what changes on the code are you committing/pushing. Please do this with respect
 to the following points:

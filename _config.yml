@@ -117,13 +117,28 @@ excerpt_length: 50
 
 # Output options (more information on Jekyll's site)
 timezone: "Berlin"
-markdown: Kramdown
+markdown: Kramdown # Pandoc # 
 highlighter: rouge
 permalink: /:year-:month-:day-:title/
 paginate: 5
 
 kramdown:
   input: GFM
+
+# pandoc:
+#   extensions:
+#     - normalize
+#     - smart
+#     - mathjax
+#   skip: false
+#   impose: false
+#   output: ./tmp
+#   csl: _includes/apa.csl
+#   flags: '--smart --bibliography=ref.bib'
+#   site_flags: '--toc --toc-depth=2'
+#   outputs:
+#     pdf: '--latex-engine=xelatex -S --smart --reference-links  -N  --highlight-style zenburn --variable mainfont="Palatino" --variable sansfont="Century Gothic" --variable monofont="Consolas" --variable fontsize=12pt  --variable version=0.8.1'
+
 
 # Default YAML values (more information on Jekyll's site)
 defaults:
@@ -201,6 +216,8 @@ prose:
 
 gems:
   - jekyll-paginate
-
+  # - jekyll-pandoc-multiple-formats
+  
+  # - jekyll-pdf
 # Beautiful Jekyll / Dean Attali
 # 2fc73a3a967e97599c9763d05e564189

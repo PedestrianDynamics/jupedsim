@@ -5,15 +5,17 @@ subtitle: Compiling the code
 permalink: 2016-11-02-quickstart.html
 ---
 
-To install `JPScore` there are three steps to follow: 
 
-# 1. Get the code
+To install `JPScore` there  are three steps to follow: 
+
+
+## 1. Get the code
 
 ```bash
 git clone https://cst.version.fz-juelich.de/jupedsim/jpscore
 ```
 
-# 2. Check the requirements
+## 2. Check the requirements
 
 ```bash
 cd jpscore
@@ -27,7 +29,7 @@ See also [requirements](2016-11-03-requirements.html).
 
 In case something is missing, `CMake` will report an error and point to the missing package.
 
-# 3. Compile the code
+## 3. Compile the code
 
 If the two first steps succeed then you can proceed with the compilation 
 
@@ -37,11 +39,28 @@ make -j2
 
 In case of a successful compilation, the executables will be located in the directory `bin/`.
 
-# Run an example 
+## Run an example 
 
 In the directory `demos` there are some examples to start with:  
 
-```
+<!-- \dirtree{ -->
+<!-- .1 \myfolder{red}{demos}. -->
+<!-- .2 \myfolder{blue}{scenario\_1\_corridor}. -->
+<!-- .3 \myfolder{green}{corridor\_geo.xml}. -->
+<!-- .3 \myfolder{green}{corridor\_ini.xml}. -->
+<!-- .2 \myfolder{blue}{scenario\_2\_bottleneck}. -->
+<!-- .3 \myfolder{green}{bottleneck\_geo.xml}. -->
+<!-- .3 \myfolder{green}{bottleneck\_ini.xml}. -->
+<!-- .2 .. -->
+<!-- .2 .. -->
+<!-- .2 \myfolder{blue}{scenario\_7\_floorfield}. -->
+<!-- .3 \myfolder{green}{Kobes\_geo.xml}. -->
+<!-- .3 \myfolder{green}{ffRouter\_ini.xml}. -->
+<!-- .2 .. -->
+<!-- .2 .. -->
+<!-- } -->
+
+```bash
 ├── demos
 │   ├── scenario_1_corridor
 │   │   ├── corridor_geo.xml
@@ -79,6 +98,6 @@ which produces a trajectory file in the same directory. This can be visualized w
 jpsvis demos/scenario_7_floorfield/Kobes_traj.xml
 ```
 
-![simulation]({{ site.baseurl  }}/img/kobe.gif)
+![Simulation using demo 7 of `jpscore` ]({{ site.baseurl  }}/img/kobe.gif)
 
 

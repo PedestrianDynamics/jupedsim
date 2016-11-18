@@ -31,7 +31,7 @@ The file has three main sections: `header`, `geometry` and `frames`.
 where
 
 - `agents`: The total number of agents at the beginning of the simulation.
-- frameRate`: Divide the total number of frames by the framerate to obtain the overall evacuation time.
+- `frameRate`: Divide the total number of frames by the framerate to obtain the overall evacuation time.
 
 The geometry can be completely embedded within the trajectories or a reference to a file can be supplied.
 
@@ -68,7 +68,7 @@ rA="31.29"	rB="23.87"	eO="-175.41" eC="54"/>
   "ellipseOrientation" is the angle between the  major axis and the X-axis (zero for circle). 
    A color can also be provided, for example for displaying change in velocity. 
    The colours are in the range `[0=red, 255=green]` and define the proportion between 
-   the desired speed ($v_0$) and the instantaneous velocity.
+   the desired speed ($$v_0$$) and the instantaneous velocity.
 
 
 

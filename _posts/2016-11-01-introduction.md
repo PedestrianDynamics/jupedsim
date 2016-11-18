@@ -5,9 +5,11 @@ subtitle: Jülich pedestrian simulator
 permalink: 2016-11-01-introduction.html
 ---
 
-Open source framework for simulating, analyzing and visualizing  pedestrian dynamics. [![DOI](https://zenodo.org/badge/13744388.svg)](https://zenodo.org/badge/latestdoi/13744388)
+<!-- todo DOI as local image -->
+Open source framework for simulating, analyzing and visualizing  pedestrian dynamics. 
+<!-- [![DOI](https://zenodo.org/badge/13744388.svg)](https://zenodo.org/badge/latestdoi/13744388) -->
 
-![logo](https://github.com/JuPedSim/JuPedSim/blob/master/doc/jupedsim_small.png?raw=true)
+<!-- ![logo]({{ site.baseurl }}/img/jupedsim_small.png) -->
 
 
 ## Goal
@@ -18,7 +20,7 @@ and  focus on research, i.e. development and validation of new models or model f
 For any scientist and especially for  bachelor/master/PhD students it is important to not loose time in   developing "help tools" 
 e.g. scripts to visualize their results or editing geometries. 
 
-![timewasting]({{ site.baseurl }}/img/timewasting.png)
+![Classical process throughout a thesis. First (technical) preparation then productivity starts]({{ site.baseurl }}/img/timewasting.png)
 
 
 `JuPedSim` is currently focusing on evacuation, but easily extendable to cover other areas 
@@ -41,9 +43,9 @@ which was established over the last years. See for example
 2. `jpsreport`: a tool for analyzing the trajectories and validating the model. 
    It implements a couple of measurement methods including the [Voronoi-method](http://dx.doi.org/10.1016/j.physa.2009.12.015) for calculating the density.
 3. `jpsvis`: a tool for visualizing the input (geometry) and output (trajectories) data.
-4.  `jpseditor`: a tool for creating and editing geometry files with dxf import/export capabilities.
+4. `jpseditor`: a tool for creating and editing geometry files with dxf import/export capabilities.
 
-![structure]({{ site.baseurl }}/img/structure.png)
+![Structure of JuPedSim: interacting modules]({{ site.baseurl }}/img/structure.png)
 
 
 ## Showcase and tutorials
@@ -55,7 +57,7 @@ our [YouTube channel](https://www.youtube.com/channel/UCKS8w8CUClHEeN4K1SUSMBA).
 
 ## Quick Install
 
-```shell
+```bash
 git clone https://github.com/JuPedSim/JuPedSim.git
 cd JuPedSim
 git submodule update --init --recursive
@@ -67,7 +69,7 @@ Note: it is very important to update the submodule, otherwise the they will be e
 
 `CMake` will eventually report any missing packages. Please fix these errors/warnings first **before** proceeding with the compilation of `JuPedSim` with 
 
-```shell
+```bash
 make -f Makefile.cmake check release
 ```
 
@@ -79,10 +81,12 @@ make -f Makefile.cmake check release
 
 We are heavily working on this project which means that:
 
-- It’s not done. We will be releasing new enhancements, bug fixes etc.
-- We love your support. If you find any errors or have suggestions, please write an issue in our [issue-tracker](https://cst.version.fz-juelich.de/jupedsim/jpsvis/issues). We will try hard to fix it.
+- It's not done. We will be releasing new enhancements, bug fixes etc.
+- We love your support. If you find any errors or have suggestions, please write an issue in our [issue-tracker](https://cst.version.fz-juelich.de/jupedsim/jpsvis/issues). 
+  We will try hard to fix it.
 - Be patient. We are scientists and PhD/master students. Therefore, we primarily care about our research and theses. 
 
-## Contact
+## Contact/Feedback
 
-info at jupedsim dot org
+You have found a bug in the code? Please help us with your feedback. You can contact us per mail at 
+`info at jupedsim dot org`.

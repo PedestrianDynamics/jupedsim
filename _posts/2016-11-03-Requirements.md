@@ -31,7 +31,7 @@ Tested with
 
 ## Install Boost (at least v1.57)
 
-You can compile boost as follows: 
+You can compile boost using the following snippet:
 
 ```bash
 boost_version=1.61.0
@@ -43,19 +43,18 @@ rm ${boost_dir}.tar.gz
 cd ${boost_dir}
 ./bootstrap.sh --with-libraries=filesystem,test,system
 sudo ./b2 --without-python --prefix=/usr -j 4 link=shared runtime-link=shared install
-cd .. && rm -rf ${boost_dir}
+cd ..
+rm -rf ${boost_dir}
 sudo ldconfig
 ```
 
-(download this snippet as a [script](https://cst.version.fz-juelich.de/jupedsim/jpscore/snippets/4))
+(download this snippet as a [script](https://cst.version.fz-juelich.de/jupedsim/jpscore/snippets/4)).
 
 or if you are a `brew` user:
 
-````
+```bash
 brew install boost
 ```
-
-***
 
 Note: Debian's and Ubuntu's install manager offer an old version of Boost, which is not supported by `JuPedSim`.
 
