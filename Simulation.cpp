@@ -1,7 +1,7 @@
 /**
  * \file        Simulation.cpp
  * \date        Dec 15, 2010
- * \version     v0.7
+ * \version     v0.8.1
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
