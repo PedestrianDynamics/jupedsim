@@ -6,7 +6,7 @@ The core module for performing the simulation (i.e. computing the trajectories).
 
 ## Get the source code 
 
-- The project is being developed in a [Gitlab repository](https://cst.version.fz-juelich.de/jupedsim/jpscore). 
+- The project is being developed in a [Gitlab repository](https://gitlab.version.fz-juelich.de/jupedsim/jpscore). 
 - Our [GitHub repository](https://github.com/JuPedSim/jpscore) is used to host selected tags and releases.
 
 So, get the code from Gitlab and the releases from GitHub. :-)
