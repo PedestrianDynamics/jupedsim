@@ -22,8 +22,8 @@ compile:
     - echo "compile in $PWD"
 
   cache:
-    paths:
-    - .
+    untracked: true
+    
 
 test:
  stage: unit_test 
