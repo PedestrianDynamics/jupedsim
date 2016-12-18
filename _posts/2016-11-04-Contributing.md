@@ -21,7 +21,7 @@ It does not matter if you are a researcher, student or just interested in pedest
 * Clone/fork our `gitlab` repository
 
   ~~~
-  git clone https://cst.version.fz-juelich.de/jupedsim/jpscore.git
+  git clone https://gitlab.version.fz-juelich.de/jupedsim/jpscore.git
   ~~~
 
 * Change to the developement branch and create a branch with your feature.

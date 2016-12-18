@@ -12,7 +12,7 @@ To install `JPScore` there  are three steps to follow:
 ## 1. Get the code
 
 ```bash
-git clone https://cst.version.fz-juelich.de/jupedsim/jpscore
+git clone https://gitlab.version.fz-juelich.de/jupedsim/jpscore
 ```
 
 ## 2. Check the requirements
