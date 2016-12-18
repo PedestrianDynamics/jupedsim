@@ -1,12 +1,28 @@
-# compile jpscore and run light tests
+variables:
+  nproc: 1
+  
 before_script:
    - nproc=`grep -c '^processor' /proc/cpuinfo`
-   - echo "nproc = ${nproc}"
+   - echo "nproc = $nproc"
+   - export LD_LIBRARY_PATH=$HOME/boost_1_61_0/stage/lib/:$LD_LIBRARY_PATH
    - mkdir build && cd build/
+
+stages:
+  - build
+  - test
+  - rimea
 
 build:
   script:
-    - cmake -DBUILD_TESTING=ON -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=~/boost_1_61_0 .. 
-    - make -j${nproc}
-    - export LD_LIBRARY_PATH=$HOME/boost_1_61_0/stage/lib/:$LD_LIBRARY_PATH
-    - ctest -R Boost                         
+    - cmake -DBUILD_TESTING=ON -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=~/boost_1_61_0 ..
+    - make -j$nproc
+
+test:
+  script:
+    - ctest -R Boost
+
+rimea:
+  script:
+    - "curl -X POST -F token=$TOKEN -F ref=develop https://gitlab.version.fz-juelich.de/api/v3/projects/262/trigger/builds"| at 22:00
+    - ctest -R rimea
+  only: develop
