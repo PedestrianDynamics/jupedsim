@@ -19,7 +19,7 @@ compile:
   script:
     - cmake -DBUILD_TESTING=ON -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=~/boost_1_61_0 ..
     - make -j$nproc
-     - echo "compile in $PWD"
+    - echo "compile in $PWD"
 
   cache:
     paths:
