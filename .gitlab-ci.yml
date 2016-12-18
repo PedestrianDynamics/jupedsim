@@ -13,7 +13,7 @@ stages:
   - unit_test
   - rimea
 
-build:
+compile:
   stage: build
   script:
     - cmake -DBUILD_TESTING=ON -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=~/boost_1_61_0 ..
@@ -21,10 +21,10 @@ build:
 
 test:
  stage: unit_test 
-  script:
+ script:
     - ctest -R Boost
 
-verification:
+verify:
   stage: rimea
   script:
     - echo "curl -X POST -F token=$TOKEN -F ref=develop https://gitlab.version.fz-juelich.de/api/v3/projects/262/trigger/builds"| at 22:00
