@@ -7,6 +7,7 @@ before_script:
    - echo "nproc = $nproc"
    - export LD_LIBRARY_PATH=$HOME/boost_1_61_0/stage/lib/:$LD_LIBRARY_PATH
    - mkdir build && cd build/
+   
 
 stages:
   - compile
@@ -18,15 +19,16 @@ compile:
   script:
     - cmake -DBUILD_TESTING=ON -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=~/boost_1_61_0 ..
     - make -j$nproc
-    - echo "compile: $PWD"
-  artifacts:
+     - echo "compile in $PWD"
+
+  cache:
     paths:
-      - .
-    expire_in: 2 hours
+    - .
+
 test:
  stage: unit_test 
  script:
-    - echo "unit_test: $PWD"
+    - echo "unit_test in $PWD"
     - ctest -R Boost
 
 verify:
@@ -36,3 +38,6 @@ verify:
     - ctest -R rimea
   only: 
     - develop
+
+after_script:
+  - echo "End CI"
