@@ -3,44 +3,73 @@ variables:
 
 
 before_script:
-   - nproc=`grep -c '^processor' /proc/cpuinfo`
-   - echo "nproc = $nproc"
-   - export LD_LIBRARY_PATH=$HOME/boost_1_61_0/stage/lib/:$LD_LIBRARY_PATH
-   - mkdir build && cd build/
+  - nproc=`grep -c '^processor' /proc/cpuinfo`
+  - echo "nproc = $nproc"
+  - export LD_LIBRARY_PATH=$HOME/boost_1_61_0/stage/lib/:$LD_LIBRARY_PATH
+   
    
 
 stages:
+  - configure
   - compile
   - unit_test
   - rimea
 
-compile:
+
+configure-linux:
+  artifacts:
+    name: "${CI_BUILD_NAME}"
+    expire_in: 1 hour
+    paths:
+      - build 
+  script:
+    - echo $CI_PROJET_DIR
+    - mkdir -p build
+    - cd build
+    - cmake -DBUILD_TESTING=ON -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=~/boost_1_61_0 ..
+  stage: configure
+  tags:
+    - linux
+
+
+make-linux:
+  dependencies:
+    - configure-linux
+  artifacts:
+    name: "${CI_BUILD_NAME}" # can add any other variables neeed
+    expire_in: 1 hour # optional expiry
+    paths:
+      - build 
+
   stage: compile
   script:
     - cmake -DBUILD_TESTING=ON -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=~/boost_1_61_0 ..
     - make -j$nproc
     - echo "compile in $PWD"
-
-  artifacts:
-    untracked: true
-    paths:
-      - build
-      
-    
+   
 
 test:
- stage: unit_test 
- script:
-    - echo "unit_test in $PWD"
-    - ctest -R Boost
+  dependencies:
+    - make-linux
 
+  stage: unit_test 
+  script:
+    - ctest -R Boost
+  tags:
+    - linux
+   
 verify:
+  dependencies:
+    - make-linux
+
   stage: rimea
   script:
     - echo "curl -X POST -F token=$TOKEN -F ref=develop https://gitlab.version.fz-juelich.de/api/v3/projects/262/trigger/builds"| at 22:00
     - ctest -R rimea
   only: 
     - develop
+  tags:
+    - linux
 
 after_script:
   - echo "End CI"
