@@ -9,19 +9,23 @@ before_script:
    - mkdir build && cd build/
 
 stages:
-  - build
+  - compile
   - unit_test
   - rimea
 
 compile:
-  stage: build
+  stage: compile
   script:
     - cmake -DBUILD_TESTING=ON -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=~/boost_1_61_0 ..
     - make -j$nproc
-
+    artifacts:
+      paths:
+        - build/
+      expire_in: 5 minutes
 test:
  stage: unit_test 
  script:
+    - echo "$PWD"
     - ctest -R Boost
 
 verify:
