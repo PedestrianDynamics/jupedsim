@@ -10,19 +10,22 @@ before_script:
 
 stages:
   - build
-  - test
+  - unit_test
   - rimea
 
 build:
+  stage: build
   script:
     - cmake -DBUILD_TESTING=ON -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=~/boost_1_61_0 ..
     - make -j$nproc
 
 test:
+ stage: unit_test 
   script:
     - ctest -R Boost
 
-rimea:
+verification:
+  stage: rimea
   script:
     - echo "curl -X POST -F token=$TOKEN -F ref=develop https://gitlab.version.fz-juelich.de/api/v3/projects/262/trigger/builds"| at 22:00
     - ctest -R rimea
