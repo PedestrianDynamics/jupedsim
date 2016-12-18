@@ -1,6 +1,7 @@
 variables:
-  nproc: 1
-  
+  nproc: "1"
+
+
 before_script:
    - nproc=`grep -c '^processor' /proc/cpuinfo`
    - echo "nproc = $nproc"
@@ -23,6 +24,7 @@ test:
 
 rimea:
   script:
-    - "curl -X POST -F token=$TOKEN -F ref=develop https://gitlab.version.fz-juelich.de/api/v3/projects/262/trigger/builds"| at 22:00
+    - echo "curl -X POST -F token=$TOKEN -F ref=develop https://gitlab.version.fz-juelich.de/api/v3/projects/262/trigger/builds"| at 22:00
     - ctest -R rimea
-  only: develop
+  only: 
+    - develop
