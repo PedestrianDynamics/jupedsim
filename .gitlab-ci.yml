@@ -18,14 +18,15 @@ compile:
   script:
     - cmake -DBUILD_TESTING=ON -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=~/boost_1_61_0 ..
     - make -j$nproc
+    - echo "compile: $PWD"
   artifacts:
     paths:
-      - build/
+      - .
     expire_in: 2 hours
 test:
  stage: unit_test 
  script:
-    - echo "$PWD"
+    - echo "unit_test: $PWD"
     - ctest -R Boost
 
 verify:
