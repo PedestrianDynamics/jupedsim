@@ -21,8 +21,11 @@ compile:
     - make -j$nproc
     - echo "compile in $PWD"
 
-  cache:
+  artifacts:
     untracked: true
+    paths:
+      - build
+      
     
 
 test:
