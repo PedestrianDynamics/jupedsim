@@ -43,6 +43,7 @@ make-linux:
 
   stage: compile
   script:
+    - cd build
     - make -j$nproc
     - echo $CI_PROJET_DIR
    
