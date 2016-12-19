@@ -22,7 +22,8 @@ configure-linux:
     name: "${CI_BUILD_NAME}"
     expire_in: 1 hour
     paths:
-      - build 
+      - build
+      - ${CI_PROJET_DIR}/lib
   script:
     - mkdir -p build
     - cd build
@@ -39,8 +40,10 @@ make-linux:
     name: "${CI_BUILD_NAME}"
     expire_in: 1 hour # optional expiry
     paths:
-      - build 
-
+      - build
+      - ${CI_PROJET_DIR}/lib
+      - ${CI_PROJET_DIR}/bin
+      
   stage: compile
   script:
     - cd build
