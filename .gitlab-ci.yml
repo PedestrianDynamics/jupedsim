@@ -24,6 +24,7 @@ configure-linux:
     paths:
       - build
       - ${CI_PROJET_DIR}/lib
+      - ${CI_PROJET_DIR}/lib/Debug
   script:
     - mkdir -p build
     - cd build
@@ -42,6 +43,7 @@ make-linux:
     paths:
       - build
       - ${CI_PROJET_DIR}/lib
+      - ${CI_PROJET_DIR}/lib/Debug
       - ${CI_PROJET_DIR}/bin
       
   stage: compile
