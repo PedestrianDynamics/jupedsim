@@ -25,11 +25,12 @@ configure-linux:
       - build
       - lib
       - lib/Debug
+      - bin
   script:
     - mkdir -p build
     - cd build
     - cmake -DBUILD_TESTING=ON -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=~/boost_1_61_0 ..
-    - echo "${CI_PROJET_DIR}"
+    - echo "configure | ${CI_PROJET_DIR}"
   stage: configure
   tags:
     - linux
@@ -50,7 +51,7 @@ make-linux:
   script:
     - cd build
     - make -j$nproc
-    - echo "${CI_PROJET_DIR}"
+    - echo "compile | ${CI_PROJET_DIR}"
    
 #============== unit_test ============
 test:
