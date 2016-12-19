@@ -23,13 +23,13 @@ configure-linux:
     expire_in: 1 hour
     paths:
       - build
-      - ${CI_PROJET_DIR}/lib
-      - ${CI_PROJET_DIR}/lib/Debug
+      - lib
+      - lib/Debug
   script:
     - mkdir -p build
     - cd build
     - cmake -DBUILD_TESTING=ON -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=~/boost_1_61_0 ..
-    - echo $CI_PROJET_DIR
+    - echo "${CI_PROJET_DIR}"
   stage: configure
   tags:
     - linux
@@ -42,15 +42,15 @@ make-linux:
     expire_in: 1 hour # optional expiry
     paths:
       - build
-      - ${CI_PROJET_DIR}/lib
-      - ${CI_PROJET_DIR}/lib/Debug
-      - ${CI_PROJET_DIR}/bin
+      - lib
+      - lib/Debug
+      - bin
       
   stage: compile
   script:
     - cd build
     - make -j$nproc
-    - echo $CI_PROJET_DIR
+    - echo "${CI_PROJET_DIR}"
    
 #============== unit_test ============
 test:
