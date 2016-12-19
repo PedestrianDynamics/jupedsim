@@ -19,7 +19,7 @@ stages:
 #============== configure ============
 configure-linux:
   artifacts:
-    name: "${CI_BUILD_NAME}"
+    name: "${CI_BUILD_NAME}_${CI_BUILD_ID}"
     expire_in: 1 hour
     paths:
       - build
@@ -38,7 +38,7 @@ make-linux:
   dependencies:
     - configure-linux
   artifacts:
-    name: "${CI_BUILD_NAME}"
+    name: "${CI_BUILD_NAME}_${CI_BUILD_ID}"
     expire_in: 1 hour # optional expiry
     paths:
       - build
