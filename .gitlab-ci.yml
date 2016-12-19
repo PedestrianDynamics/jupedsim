@@ -30,7 +30,7 @@ configure-linux:
     - mkdir -p build
     - cd build
     - cmake -DBUILD_TESTING=ON -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=~/boost_1_61_0 ..
-    - echo "configure | ${CI_PROJET_DIR}"
+    - echo "configure | ${CI_PROJECT_DIR}"
   stage: configure
   tags:
     - linux
@@ -51,7 +51,7 @@ make-linux:
   script:
     - cd build
     - make -j$nproc
-    - echo "compile | ${CI_PROJET_DIR}"
+    - echo "compile | ${CI_PROJECT_DIR}"
    
 #============== unit_test ============
 test:
@@ -72,8 +72,8 @@ verify:
   stage: rimea
   script:
     - echo "curl -X POST -F token=$TOKEN -F ref=develop https://gitlab.version.fz-juelich.de/api/v3/projects/262/trigger/builds"| at 22:00
-    - cd build
-    - ctest -R rimea
+    #- cd build
+    #- ctest -R rimea
   only: 
     - develop
   tags:
