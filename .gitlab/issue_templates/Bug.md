@@ -1,18 +1,25 @@
-## Description
+## Summary
+
+
+
+## Steps to reproduce
+
+
+## Expected behavior
+
+
+
+## Actual behavior
+
 
 
 ## Inifile + Geometry file to reproduce bug
 
 
-## Screenshots (optional)
+## Relevant logs, files (inifile and geometry) and/or screenshots
 
 
-## Branch
 
 
-## OS
-
-
-## Compiler and version
 
 
