@@ -2,10 +2,11 @@
 All notable changes to this project will be documented in this file.
 
 ## v0.8.2 [unreleased]
-
+Repository moved to [new server](https://gitlab.version.fz-juelich.de/jupedsim/jpscore)
 ### Added
 
 ### Changed
+- New Progressbar (ec7c9b0c)
 
 ### Fixed 
 
