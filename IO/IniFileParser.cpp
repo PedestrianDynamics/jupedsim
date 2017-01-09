@@ -1342,6 +1342,9 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                     break;
                case 6:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionFloorfield());
+                    if(!ParseFfOpts(strategyNode)) {
+                         return false;
+                    };
                     break;
                case 7:
                     // dead end -> not supported anymore (global ff needed, but not available in 3d)
@@ -1352,9 +1355,15 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                     break;
                case 8:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
+                    if(!ParseFfOpts(strategyNode)) {
+                         return false;
+                    };
                     break;
                case 9:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
+                    if(!ParseFfOpts(strategyNode)) {
+                         return false;
+                    };
                     break;
                default:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
@@ -1368,6 +1377,36 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                return false;
           }
           Log->Write("INFO: \texit_crossing_strategy < %d >", pExitStrategy);
+     }
+     return true;
+}
+
+bool IniFileParser::ParseFfOpts(const TiXmlNode &strategyNode) {
+
+     string query = "delta_h";
+     if (strategyNode.FirstChild(query.c_str())) {
+          const char *tmp =
+                    strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
+          double pDeltaH = atof(tmp);
+          _config->set_deltaH(pDeltaH);
+     }
+
+
+     query = "wall_avoid_distance";
+     if (strategyNode.FirstChild(query.c_str())) {
+          const char *tmp =
+                    strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
+          double pWallAvoidance = atof(tmp);
+          _config->set_wall_avoid_distance(pWallAvoidance);
+     }
+
+
+     query = "use_wall_avoidance";
+     if (strategyNode.FirstChild(query.c_str())) {
+          string tmp =
+                    strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
+          bool pUseWallAvoidance = !(tmp=="false");
+          _config->set_use_wall_avoidance(pUseWallAvoidance);
      }
      return true;
 }

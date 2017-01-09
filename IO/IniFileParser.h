@@ -72,6 +72,8 @@ private:
 
      bool ParseStrategyNodeToObject(const TiXmlNode& strategyNode);
 
+     bool ParseFfOpts(const TiXmlNode& strategyNode);
+
      Configuration* _config;
      int _model;
      std::shared_ptr<DirectionStrategy> _exit_strategy;
