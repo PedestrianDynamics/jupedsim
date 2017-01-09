@@ -74,7 +74,7 @@ bool GCFMModel::Init (Building* building)
      if(auto dirff = dynamic_cast<DirectionFloorfield*>(_direction.get())){
           Log->Write("INFO:\t Init DirectionFloorfield starting ...");
           //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
-          double _deltaH = 0.0625;
+          double _deltaH = building->GetConfig()->get_deltaH();
           double _wallAvoidDistance = 0.4;
           bool _useWallAvoidance = true;
           dirff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);

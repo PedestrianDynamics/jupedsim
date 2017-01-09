@@ -156,6 +156,10 @@ Building::~Building()
      }
 }
 
+const Configuration* Building::GetConfig() const {
+     return _configuration;
+}
+
 ///************************************************************
 // setters
 // ************************************************************/
