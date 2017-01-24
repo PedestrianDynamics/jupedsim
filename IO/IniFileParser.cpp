@@ -655,6 +655,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
           }
           _config->set_deltaH(pDeltaH);
 
+
           if (!xModelPara->FirstChildElement("floorfield")->Attribute("wall_avoid_distance"))
                pWallAvoidDistance = .8; // default value
           else {
@@ -1389,6 +1390,7 @@ bool IniFileParser::ParseFfOpts(const TiXmlNode &strategyNode) {
                     strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
           double pDeltaH = atof(tmp);
           _config->set_deltaH(pDeltaH);
+          Log->Write("INFO: \tdeltaH:\t %f", pDeltaH);
      }
 
 
@@ -1398,6 +1400,7 @@ bool IniFileParser::ParseFfOpts(const TiXmlNode &strategyNode) {
                     strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
           double pWallAvoidance = atof(tmp);
           _config->set_wall_avoid_distance(pWallAvoidance);
+          Log->Write("INFO: \tWAD:\t %f", pWallAvoidance);
      }
 
 
@@ -1407,6 +1410,10 @@ bool IniFileParser::ParseFfOpts(const TiXmlNode &strategyNode) {
                     strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
           bool pUseWallAvoidance = !(tmp=="false");
           _config->set_use_wall_avoidance(pUseWallAvoidance);
+         if(pUseWallAvoidance)
+             Log->Write("INFO: \tUseWAD:\t yes");
+         else
+             Log->Write("INFO: \tUseWAD:\t no");
      }
      return true;
 }
