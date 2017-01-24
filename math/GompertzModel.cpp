@@ -85,7 +85,7 @@ bool GompertzModel::Init(Building *building) {
         Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
         //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
         double _deltaH = building->GetConfig()->get_deltaH();
-        double _wallAvoidDistance = building->GetConfig()->get_use_wall_avoidance();
+        double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
         bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
         dirlocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
         Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
