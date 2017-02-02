@@ -575,8 +575,8 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
                 Log->Write("WARNING:\t pedestrian [%d] left room/subroom [%d/%d] in an unusual way. Please check",
                         ped.GetID(), ped.GetRoomID(), ped.GetSubRoomID());
                 Log->Write("       :\t distance to last door (%d | %d) is %f. That should be smaller.",
-                        ped.GetExitLine()->GetUniqueID(), ped.GetExitIndex(),
-                        ped.GetExitLine()->DistTo(ped.GetPos()));
+                        trans->GetUniqueID(), ped.GetExitIndex(),
+                        trans->DistTo(ped.GetPos()));
                 Log->Write("       :\t correcting the door statistics");
                 //ped.Dump(ped.GetID());
 
