@@ -1090,7 +1090,15 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
                Router *r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals, _config);
                _config->GetRoutingEngine()->AddRouter(r);
-               Log->Write("\nINFO: \tUsing FF Global Shortest Router");
+
+
+               if (_exit_strat_number == 8 || 9){
+                   Log->Write("\nINFO: \tUsing FF Global Shortest Router");
+               }
+               else {
+                   Log->Write("\nWARNING: \tExit Strategy Number is not 8 or 9!!!");
+               }
+
 
                //check if the exit strat is [8 | 9] //@todo: ar.graf: implement check and check which are valid exitstrats
 
@@ -1106,6 +1114,14 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                _config->GetRoutingEngine()->AddRouter(r);
                Log->Write("\nINFO: \tUsing FF Local Shortest Router");
                Log->Write("\nWARNING: \tFF Local Shortest is bugged!!!!");
+
+               
+               if (_exit_strat_number == 8 || 9){
+                   Log->Write("\nINFO: \tUsing FF Global Shortest Router");
+               }
+               else {
+                   Log->Write("\nWARNING: \tExit Strategy Number is not 8 or 9!!!");
+               }
 
                //check if the exit strat is [8 | 9]
 
@@ -1327,6 +1343,7 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
           int pExitStrategy;
           if (tmp) {
                pExitStrategy = atoi(tmp);
+              _exit_strat_number = pExitStrategy;
                switch (pExitStrategy) {
                case 1:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMiddlePoint());
