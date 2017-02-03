@@ -77,6 +77,7 @@ private:
      Configuration* _config;
      int _model;
      std::shared_ptr<DirectionStrategy> _exit_strategy;
+     int _exit_strat_number;
 
 };
 
