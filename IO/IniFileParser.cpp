@@ -1092,7 +1092,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                _config->GetRoutingEngine()->AddRouter(r);
 
 
-               if (_exit_strat_number == 8 || 9){
+               if ((_exit_strat_number == 8) || (_exit_strat_number == 9)){
                    Log->Write("\nINFO: \tUsing FF Global Shortest Router");
                }
                else {
@@ -1116,7 +1116,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                Log->Write("\nWARNING: \tFF Local Shortest is bugged!!!!");
 
                
-               if (_exit_strat_number == 8 || 9){
+               if ((_exit_strat_number == 8) || (_exit_strat_number == 9)){
                    Log->Write("\nINFO: \tUsing FF Global Shortest Router");
                }
                else {
