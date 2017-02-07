@@ -87,6 +87,8 @@ public:
      /// destructor
      virtual ~Building();
 
+     const Configuration* GetConfig() const;
+
      void SetCaption(const std::string& s);
 
 //    void SetRoutingEngine(RoutingEngine *r);
