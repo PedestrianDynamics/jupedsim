@@ -1098,6 +1098,9 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                }
                else {
                    Log->Write("\nWARNING: \tExit Strategy Number is not 8 or 9!!!");
+                   Log->Write("\nWARNING: \tSetting Number to 8");
+                   _exit_strategy =  std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
+                   // config object holds default values, so we omit any set operations
                }
 
 
@@ -1122,6 +1125,9 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                }
                else {
                    Log->Write("\nWARNING: \tExit Strategy Number is not 8 or 9!!!");
+                   Log->Write("\nWARNING: \tSetting Number to 8");
+                   _exit_strategy =  std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
+                   // config object holds default values, so we omit any set operations
                }
 
                //check if the exit strat is [8 | 9]
