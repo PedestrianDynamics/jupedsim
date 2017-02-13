@@ -1042,6 +1042,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                     usedRouter.emplace_back(router);
                }
           }
+         //
           int goal = -1;
           if (e->Attribute("goal_id")) {
                goal = atoi(e->Attribute("goal_id"));
@@ -1115,7 +1116,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                Log->Write("\nINFO: \tUsing FF Local Shortest Router");
                Log->Write("\nWARNING: \tFF Local Shortest is bugged!!!!");
 
-               
                if ((_exit_strat_number == 8) || (_exit_strat_number == 9)){
                    Log->Write("\nINFO: \tUsing FF Global Shortest Router");
                }
@@ -1343,6 +1343,21 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
           int pExitStrategy;
           if (tmp) {
                pExitStrategy = atoi(tmp);
+
+              //check for ff router to avoid exit strat <> router mismatch
+              const TiXmlNode* agentsDistri = strategyNode.GetDocument()->RootElement()->FirstChild("agents")->FirstChild("agents_distribution");
+              std::vector<int> usedRouter;
+              for (const TiXmlElement* e = agentsDistri->FirstChildElement("group"); e;
+                   e = e->NextSiblingElement("group")) {
+                  int router = -1;
+                  if (e->Attribute("router_id")) {
+                      router = atoi(e->Attribute("router_id"));
+                      if(std::find(usedRouter.begin(), usedRouter.end(), router) == usedRouter.end()) {
+                          usedRouter.emplace_back(router);
+                      }
+                  }
+              }
+
               _exit_strat_number = pExitStrategy;
                switch (pExitStrategy) {
                case 1:
