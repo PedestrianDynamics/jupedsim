@@ -1043,6 +1043,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                     usedRouter.emplace_back(router);
                }
           }
+         //
           int goal = -1;
           if (e->Attribute("goal_id")) {
                goal = atoi(e->Attribute("goal_id"));
@@ -1098,8 +1099,8 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                }
                else {
                    Log->Write("\nWARNING: \tExit Strategy Number is not 8 or 9!!!");
-                   Log->Write("\nWARNING: \tSetting Number to 8");
-                   _exit_strategy =  std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
+
+
                    // config object holds default values, so we omit any set operations
                }
 
@@ -1119,14 +1120,11 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                Log->Write("\nINFO: \tUsing FF Local Shortest Router");
                Log->Write("\nWARNING: \tFF Local Shortest is bugged!!!!");
 
-               
                if ((_exit_strat_number == 8) || (_exit_strat_number == 9)){
                    Log->Write("\nINFO: \tUsing FF Global Shortest Router");
                }
                else {
                    Log->Write("\nWARNING: \tExit Strategy Number is not 8 or 9!!!");
-                   Log->Write("\nWARNING: \tSetting Number to 8");
-                   _exit_strategy =  std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
                    // config object holds default values, so we omit any set operations
                }
 
@@ -1350,6 +1348,38 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
           int pExitStrategy;
           if (tmp) {
                pExitStrategy = atoi(tmp);
+
+              //check for ff router to avoid exit strat <> router mismatch
+              const TiXmlNode* agentsDistri = strategyNode.GetDocument()->RootElement()->FirstChild("agents")->FirstChild("agents_distribution");
+              std::vector<int> usedRouter;
+              for (const TiXmlElement* e = agentsDistri->FirstChildElement("group"); e;
+                   e = e->NextSiblingElement("group")) {
+                  int router = -1;
+                  if (e->Attribute("router_id")) {
+                      router = atoi(e->Attribute("router_id"));
+                      if(std::find(usedRouter.begin(), usedRouter.end(), router) == usedRouter.end()) {
+                          usedRouter.emplace_back(router);
+                      }
+                  }
+              }
+               //continue: check for ff router to avoid exit strat <> router mismatch
+               const TiXmlNode* routeChoice = strategyNode.GetDocument()->RootElement()->FirstChild("route_choice_models");
+               for (const TiXmlElement* e = routeChoice->FirstChildElement("router"); e;
+                    e = e->NextSiblingElement("router")) {
+                    int router_id = atoi(e->Attribute("router_id"));
+                    if (!(std::find(usedRouter.begin(), usedRouter.end(), router_id) == usedRouter.end())) {
+                         std::string router_descr = e->Attribute("description");
+                         if (  (pExitStrategy != 9)
+                               && (pExitStrategy != 8)
+                               && ((router_descr == "ff_global_shortest") || (router_descr == "ff_local_shortest")
+                                                                          || (router_descr == "ff_quickest") ) ) {
+                             pExitStrategy = 8;
+                              Log->Write("WARNING: \tChanging Exit Strategie to work with floorfield!");
+                         }
+
+                    }
+
+               }
               _exit_strat_number = pExitStrategy;
                switch (pExitStrategy) {
                case 1:
