@@ -743,9 +743,19 @@ int FFRouter::FindExit(Pedestrian* p)
           }
           std::pair<int, int> pedTupel = std::make_pair(p->GetRoomID(), p->GetSubRoomID());
 
-          std::pair<int, int> roomNsub1 = std::make_pair(_building->GetTransOrCrossByUID(UIDofLinePedStandsOn)->GetSubRoom1()->GetRoomID(), _building->GetTransOrCrossByUID(UIDofLinePedStandsOn)->GetSubRoom1()->GetSubRoomID());
-          std::pair<int, int> roomNsub2 = std::make_pair(_building->GetTransOrCrossByUID(UIDofLinePedStandsOn)->GetSubRoom2()->GetRoomID(), _building->GetTransOrCrossByUID(UIDofLinePedStandsOn)->GetSubRoom2()->GetSubRoomID());
-
+          std::pair<int, int> roomNsub1 = std::make_pair(
+                         _building->GetTransOrCrossByUID(UIDofLinePedStandsOn)->GetSubRoom1()->GetRoomID(),
+                         _building->GetTransOrCrossByUID(UIDofLinePedStandsOn)->GetSubRoom1()->GetSubRoomID());
+          std::pair<int, int> roomNsub2;
+          if (_building->GetTransOrCrossByUID(UIDofLinePedStandsOn)->GetSubRoom2()) {
+               roomNsub2 = std::make_pair(
+                         _building->GetTransOrCrossByUID(UIDofLinePedStandsOn)->GetSubRoom2()->GetRoomID(),
+                         _building->GetTransOrCrossByUID(UIDofLinePedStandsOn)->GetSubRoom2()->GetSubRoomID());
+          } else { // if no second exists, then door leads to outside and nothing should change, which we do by roomNsub1 == roomNsub2
+               roomNsub2 = std::make_pair(
+                         _building->GetTransOrCrossByUID(UIDofLinePedStandsOn)->GetSubRoom1()->GetRoomID(),
+                         _building->GetTransOrCrossByUID(UIDofLinePedStandsOn)->GetSubRoom1()->GetSubRoomID());
+          }
           if (pedTupel == roomNsub1) {
                p->SetRoomID(roomNsub2.first, _building->GetRoom(roomNsub2.first)->GetCaption());
                p->SetSubRoomID(roomNsub2.second);
