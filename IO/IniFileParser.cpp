@@ -1357,7 +1357,23 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                       }
                   }
               }
+               const TiXmlNode* routeChoice = strategyNode.GetDocument()->RootElement()->FirstChild("route_choice_models");
+               for (const TiXmlElement* e = routeChoice->FirstChildElement("router"); e;
+                    e = e->NextSiblingElement("router")) {
+                    int router_id = atoi(e->Attribute("router_id"));
+                    if (!(std::find(usedRouter.begin(), usedRouter.end(), router_id) == usedRouter.end())) {
+                         std::string router_descr = e->Attribute("description");
+                         if (  (pExitStrategy != 9)
+                               && (pExitStrategy != 8)
+                               && ((router_descr == "ff_global_shortest") || (router_descr == "ff_local_shortest")
+                                                                          || (router_descr == "ff_quickest") ) ) {
+                             pExitStrategy = 8;
+                              Log->Write("WARNING: \tChanging Exit Strategie to work with floorfield!");
+                         }
 
+                    }
+
+               }
               _exit_strat_number = pExitStrategy;
                switch (pExitStrategy) {
                case 1:
