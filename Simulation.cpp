@@ -506,7 +506,7 @@ double Simulation::RunBody(double maxSimTime)
         }
         if(!_gotSources /*&& _printPB*/) // @todo: option for print progressbar
               // Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
-              bar->Progressed(initialnPeds-_nPeds);
+              //bar->Progressed(initialnPeds-_nPeds);
         // needed to control the execution time PART 2
         // time(&endtime);
         // double timeToWait=t-difftime(endtime, starttime);

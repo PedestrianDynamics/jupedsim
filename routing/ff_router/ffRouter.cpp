@@ -719,8 +719,46 @@ int FFRouter::FindExit(Pedestrian* p)
      if (_building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->IsInSubRoom(p->GetPos())) {
           //ped is in the subroom, according to its member attribs
      } else {
+          // find next crossing / transition and set new room to the OTHER
+          //candidates of current room (ID) (provided by Room)
+          for (auto transUID : _building->GetRoom(p->GetRoomID())->GetAllTransitionsIDs()) {
+               if ((_CroTrByUID.count(transUID) != 0) && (_CroTrByUID[transUID]->IsOpen())) {
+                    DoorUIDsOfRoom.emplace_back(transUID);
+               }
+          }
+          for (auto &subIPair : _building->GetRoom(p->GetRoomID())->GetAllSubRooms()) {
+               for (auto &crossI : subIPair.second->GetAllCrossings()) {
+                    if (crossI->IsOpen()) {
+                         DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
+                    }
+               }
+          }
+          int UIDofLinePedStandsOn;
+          double UIDsDistance = DBL_MAX;
+          for (auto dooruid : DoorUIDsOfRoom) {
+               if (UIDsDistance > _locffviafm[p->GetRoomID()]->getCostToDestination(dooruid, p->GetPos(), _mode)) {
+                    UIDofLinePedStandsOn = dooruid;
+                    UIDsDistance = _locffviafm[p->GetRoomID()]->getCostToDestination(dooruid, p->GetPos(), _mode);
+               }
+          }
+          std::pair<int, int> pedTupel = std::make_pair(p->GetRoomID(), p->GetSubRoomID());
+
+          std::pair<int, int> roomNsub1 = std::make_pair(_building->GetTransOrCrossByUID(UIDofLinePedStandsOn)->GetSubRoom1()->GetRoomID(), _building->GetTransOrCrossByUID(UIDofLinePedStandsOn)->GetSubRoom1()->GetSubRoomID());
+          std::pair<int, int> roomNsub2 = std::make_pair(_building->GetTransOrCrossByUID(UIDofLinePedStandsOn)->GetSubRoom2()->GetRoomID(), _building->GetTransOrCrossByUID(UIDofLinePedStandsOn)->GetSubRoom2()->GetSubRoomID());
+
+          if (pedTupel == roomNsub1) {
+               p->SetRoomID(roomNsub2.first, _building->GetRoom(roomNsub2.first)->GetCaption());
+               p->SetSubRoomID(roomNsub2.second);
+               p->SetSubRoomUID(_building->GetRoom(roomNsub2.first)->GetSubRoom(roomNsub2.second)->GetUID());
+          } else {
+               p->SetRoomID(roomNsub1.first, _building->GetRoom(roomNsub1.first)->GetCaption());
+               p->SetSubRoomID(roomNsub1.second);
+               p->SetSubRoomUID(_building->GetRoom(roomNsub1.first)->GetSubRoom(roomNsub1.second)->GetUID());
+          }
+
           //Log->Write("ERROR: \tffRouter cannot handle incorrect room/subroom attribs of pedestrian %d!!", p->GetID());
      }
+     DoorUIDsOfRoom.clear();
      if (!_targetWithinSubroom) {
           //candidates of current room (ID) (provided by Room)
           for (auto transUID : _building->GetRoom(p->GetRoomID())->GetAllTransitionsIDs()) {
