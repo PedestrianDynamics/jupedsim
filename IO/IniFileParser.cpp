@@ -1357,6 +1357,7 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                       }
                   }
               }
+               //continue: check for ff router to avoid exit strat <> router mismatch
                const TiXmlNode* routeChoice = strategyNode.GetDocument()->RootElement()->FirstChild("route_choice_models");
                for (const TiXmlElement* e = routeChoice->FirstChildElement("router"); e;
                     e = e->NextSiblingElement("router")) {
