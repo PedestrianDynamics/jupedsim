@@ -66,7 +66,7 @@ FFRouter::FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals, Configurati
      _building = nullptr;
      _hasSpecificGoals = hasSpecificGoals;
      _globalFF = nullptr;
-     _targetWithinSubroom = false; //depending on exit_strat 8 => false, depending on exit_strat 9 => true;
+     _targetWithinSubroom = true; //depending on exit_strat 8 => false, depending on exit_strat 9 => true;
      if (s == ROUTING_FF_QUICKEST) {
           _mode = quickest;
           _recalc_interval = _config->get_recalc_interval();
