@@ -38,6 +38,8 @@ mt = 18 # size of ticks
 def eval_results(results):
     fd_exp = results[0]
     fd_sim = results[1]
+    print "exp: ", len(fd_exp)
+    print "sim: ", len(fd_sim)
     dexp = results[0]
     dsim = results[1]
     fig = plt.figure()

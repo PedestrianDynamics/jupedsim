@@ -487,7 +487,7 @@ Point VelocityModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
            Log->Write("WARNING:\t Velocity: forceRepWall() ped %d is too near to the wall (dist=%f)", ped->GetID(), Distance);
           Point new_dist = centroid - ped->GetPos();
           new_dist = new_dist/new_dist.Norm();
-          printf("new distance = (%f, %f) inside=%d\n", new_dist._x, new_dist._y, inside);
+          //printf("new distance = (%f, %f) inside=%d\n", new_dist._x, new_dist._y, inside);
           e_iw = (inside ? new_dist:new_dist*-1);
      }
      //-------------------------
