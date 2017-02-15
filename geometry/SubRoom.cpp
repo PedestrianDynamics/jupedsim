@@ -1356,7 +1356,8 @@ bool SubRoom::IsInSubRoom(Pedestrian* ped) const
 
      const Point& pos = ped->GetPos();
      if ((ped->GetExitLine()) && (ped->GetExitLine()->DistTo(pos) <= J_EPS_GOAL))
-          return true;
+          return IsInSubRoom(pos);
+          //return true;
      else
           return IsInSubRoom(pos);
 }

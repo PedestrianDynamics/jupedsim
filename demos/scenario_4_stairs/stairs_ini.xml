@@ -10,6 +10,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 	<max_sim_time>300</max_sim_time>
 	<!-- geometry file -->
 	<geometry>stairs_geo.xml</geometry>
+    <num_threads>6</num_threads>
 	<!-- traectories file and format -->
 	<trajectories format="xml-plain" fps="8">
 		<file location="stairs_traj.xml" />

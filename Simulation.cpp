@@ -352,6 +352,9 @@ void Simulation::UpdateRoutesAndLocations()
           if (ped->FindRoute() == -1) {
                //a destination could not be found for that pedestrian
                Log->Write("ERROR: \tCould not find a route for pedestrian %d",ped->GetID());
+               ped->FindRoute(); //debug only, plz remove
+               std::function<void(const Pedestrian&)> f = std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
+               ped->Relocate(f);
                //exit(EXIT_FAILURE);
 #pragma omp critical(Simulation_Update_pedsToRemove)
                pedsToRemove.push_back(ped);
