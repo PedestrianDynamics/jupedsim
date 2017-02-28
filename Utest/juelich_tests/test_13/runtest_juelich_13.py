@@ -34,9 +34,6 @@ def get_empirical_flow():
 testnr = 13
 #========================
 
-# SUCCESS = 0
-# FAILURE = 1
-
 #--------------------------------------------------------
 logfile="log_test_%d.txt"%testnr
 f=open(logfile, "w")
@@ -67,7 +64,8 @@ if __name__ == "__main__":
     # os.chdir(DIR)
     #    lib_path = os.path.abspath(lib_path)
     sys.path.append(lib_path)
-    from utils import *
+    from utils import SUCCESS, FAILURE
+    from utils import get_maxtime, parse_file, flow 
     os.chdir("..")
     TRUNK = os.getcwd()
     print("TRUNk", TRUNK)
@@ -133,22 +131,20 @@ if __name__ == "__main__":
     flow_file = "flow.txt"
     ff = open(flow_file, "w")
     logging.info('write flow values in \"%s\"'%flow_file)
+    ff.write("# width: flow values (for different seeds)\n")
     for key, value in list(flows.items()):
-        print (key)
-        print (value)
-        ff.write("%f:%f" % (key, value[0]))
+        ff.write("%f : %s\n" % (key, ", ".join([str(j) for j in value])))
 
 
     M = np.array([np.mean(i) for i in list(flows.values())]) # std pro width
     S = np.array([np.std(i) for i in list(flows.values())])  # std pro width
-    ff.write("===========================")
-    ff.write("===========================")
-    ff.write("Means ")
-    ff.write(M)
-    ff.write("===========================")
-    ff.write("Std ")
-    ff.write(S)
-    ff.write("===========================")
+
+    ff.write("Means \n")
+    ff.write(", ".join([str(m) for m in M]))
+
+    ff.write("\n\nStd \n")
+    ff.write(", ".join([str(s) for s in S]))
+    ff.write("\n")
     ff.close()
     #########################################################################
     ms = 8
@@ -164,7 +160,7 @@ if __name__ == "__main__":
     columns = np.vstack((F, np.array(M)[indexsort]))
     gg = open("flow_col.txt", "w")
     for i in range(len(F)):
-        gg.write("%f  %f" % (columns[0][i], columns[1][i]))
+        gg.write("%f  %f\n" % (columns[0][i], columns[1][i]))
         
     gg.close()
     plt.legend(loc='best', numpoints=1)
