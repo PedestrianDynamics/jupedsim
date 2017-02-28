@@ -140,8 +140,58 @@ def get_maxtime(filename):
     maxtime = float(xmldoc.getElementsByTagName('max_sim_time')[0].firstChild.nodeValue)
     return maxtime
 
-
 def parse_file(filename):
+    """
+    parse trajectories in Travisto-format and output results
+    in the following  format: id    frame    x    y
+    (no sorting of the data is performed)
+    returns:
+    fps: frames per second
+    N: number of pedestrians
+    data: trajectories (numpy.array) [id fr x y]
+    """
+    logging.info("parsing <%s>"%filename)
+
+    tree = ET.parse(filename)
+    root = tree.getroot()
+
+    for header in root.iter('header'):
+        fps = header.find('frameRate').text
+
+    try:
+        fps = float(fps)
+    except:
+        print ("ERROR: could not read <fps>")
+        exit()
+
+    for header in root.iter('header'):
+        N = header.find('agents').text
+
+    try:
+        N = int(N)
+    except:
+        print ("ERROR: could not read <agents>")
+        exit()
+
+    data = np.empty(shape=[0, 5])
+    for node in root.iter():
+        tag = node.tag
+        if tag == "frame":
+            frame = node.attrib['ID']
+            for agent in node.getchildren():
+                x = agent.attrib['x']
+                y = agent.attrib['y']
+                z = agent.attrib['z']
+                ID = agent.attrib['ID']
+                data = np.vstack((data, list(map(float, [ID, frame, x, y, z]) ) ) )
+
+
+                # data += [ID, frame, x, y, z] 
+    print(data)
+    # data = np.array(data, dtype=float).reshape((-1, 5))
+    return fps, N, data
+
+def parse_file_deprecated(filename):
     """
     parse trajectories in Travisto-format and output results
     in the following  format: id    frame    x    y
