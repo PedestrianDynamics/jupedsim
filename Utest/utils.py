@@ -187,7 +187,7 @@ def parse_file(filename):
 
 
                 # data += [ID, frame, x, y, z] 
-    print(data)
+
     # data = np.array(data, dtype=float).reshape((-1, 5))
     return fps, N, data
 
