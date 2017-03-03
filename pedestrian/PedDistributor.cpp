@@ -132,35 +132,25 @@ bool PedDistributor::Distribute(Building *building) const {
                           {
                                std::string basename = fs::basename(p);
                                std::string extention = fs::extension(p);
-                               // check filename. regx "bla_N.ext"
-                               // number is after "_" and before "."
-                               std::size_t first = basename.find_last_of("_");
-                               if(first != std::string::npos){
-                                    std::string tmp;
-                                    tmp.assign(basename.begin() + first + 1, basename.end());
-                                    int n = stoi(tmp);
-                                    if(n == dist->GetAgentsNumber()){                                         
-                                         auto tmpPositions = GetPositionsFromFile(p.string(), n);
-                                         //check if positions are
-                                         //empty. May happen if file
-                                         //is misformed.
-                                         if(tmpPositions.empty()){
+                               auto tmpPositions = GetPositionsFromFile(p.string(), dist->GetAgentsNumber());
+                               //check if positions are
+                               //empty. May happen if file
+                               //is misformed.                                         
+                               if(tmpPositions.empty()){
                                               Log->Write("ERROR: \tproblems with file <%s%s>.", basename.c_str(), extention.c_str());
                                               return false; //maybe just ignore?
-                                         }
-                                         else
-                                              allFreePosRoom[subroomID] = tmpPositions;
-                                         fromDirectory = true;
-                                         Log->Write("INFO: \tDistributing %d pedestrians using file <%s%s>", n, basename.c_str(), extention.c_str());
-                                         break; //leave BOOST_FOREEACH                                         
-                                    }
                                }
-                               else{
-                                    Log->Write("ERROR: \twrong file name <%s>.\n \tshould be something like <blabla_number.ext>", basename.c_str());
-                                    return false; //maybe just ignore?                                    
-                               }
+                               else
+                                    allFreePosRoom[subroomID] = tmpPositions;
+                               fromDirectory = true;
+                               Log->Write("INFO: \tDistributing %d pedestrians using file <%s%s>", dist->GetAgentsNumber(), basename.c_str(), extention.c_str());
+                               break; //leave BOOST_FOREEACH
                           }//regular file
                     } // for files
+                    if (fromDirectory == false){                         
+                         Log->Write("ERROR: \tDistributing pedestrians using file is not successful.");
+                         return false;                         
+                    }
               }// check if directory
         }//if we have a directoy
         //------------------------------------- pack in function ------------
@@ -480,13 +470,8 @@ const vector<Point>  PedDistributor::GetPositionsFromFile(std::string filename, 
                       n, first_ids.size());
            positions.clear();
       }
-      //debuging
-      // for (auto tup : boost::combine(first_ids, positions)) {
-      //       Point pos;
-      //       int id;
-      //       boost::tie(id, pos) = tup;
-      //       printf("id = %d,  x = %f, y = %f \n", id, pos._x, pos._y);
-      // }
+      else
+           Log->Write("ERROR: \tGetPositionsFromFile: number of peds <%d> in file. To simulate <%d>", first_ids.size(), n);      
       return positions;
 }
 
