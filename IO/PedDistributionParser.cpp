@@ -73,7 +73,7 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
         double premovement_sigma = xmltof(e->Attribute("pre_movement_sigma"), 0);
         //double risk_tolerance_mean = xmltof(e->Attribute("risk_tolerance_mean"), 0);
         //double risk_tolerance_sigma = xmltof(e->Attribute("risk_tolerance_sigma"), 0);
-
+        string positions_dir = xmltoa(e->Attribute("positions_dir"), "");
         double x_min = xmltof(e->Attribute("x_min"), -FLT_MAX);
         double x_max = xmltof(e->Attribute("x_max"), FLT_MAX);
         double y_min = xmltof(e->Attribute("y_min"), -FLT_MAX);
@@ -102,7 +102,12 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
         dis->SetHeight(height);
         dis->SetPatience(patience);
         dis->InitPremovementTime(premovement_mean, premovement_sigma);
+        dis->SetPositionsDir(positions_dir);
 
+        if (dis->GetPositionsDir().length())
+        {
+              Log->Write("INFO:\tPositions_dir = <%s>\n", dis->GetPositionsDir().c_str());
+        }
         if (e->Attribute("risk_tolerance_mean") && e->Attribute("risk_tolerance_sigma")) {
             std::string distribution_type = "normal";
             double risk_tolerance_mean = xmltof(e->Attribute("risk_tolerance_mean"), NAN);
