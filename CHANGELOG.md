@@ -4,7 +4,9 @@ All notable changes to this project will be documented in this file.
 ## v0.8.2 [unreleased]
 Repository moved to [new server](https://gitlab.version.fz-juelich.de/jupedsim/jpscore)
 ### Added
-
+- New opstion for `groups`. It is now possible to load the first positions of peedestrians from a file. 
+  Needed for better comparison with experiments. Use attribute: `positions_dir="/path/to/directory/"` `unit="cm"`.
+  The unit of the trajectories can be specified. Default is meter.
 ### Changed
 - New Progressbar (ec7c9b0c)
 

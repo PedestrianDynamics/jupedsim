@@ -63,6 +63,7 @@ StartDistribution::StartDistribution(int seed)
      _yMax=FLT_MAX;
      _groupParameters=NULL;
      _positions_dir = "";
+     _unit_traj = "m";
      static bool _seeded = false; // seed only once, not every time
      if(!_seeded) {
            _generator = std::default_random_engine(seed);     // mt19937 g(static_cast<uint32_t>(_configuration->GetSeed()));
@@ -398,4 +399,13 @@ void StartDistribution::SetPositionsDir(const std::string& dir)
 const std::string& StartDistribution::GetPositionsDir() const
 {
       return _positions_dir;
+}
+
+void StartDistribution::SetUnitTraj(const std::string& unit)
+{
+      _unit_traj = unit;
+}
+const std::string& StartDistribution::GetUnitTraj() const
+{
+      return _unit_traj;
 }

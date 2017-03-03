@@ -123,6 +123,7 @@ bool PedDistributor::Distribute(Building *building) const {
         bool fromDirectory = false;
         if(dist->GetPositionsDir().length()){
               string directory = dist->GetPositionsDir();
+              string unit = dist->GetUnitTraj();
               fs::path the_path(directory);
               if(fs::exists(directory) && fs::is_directory(directory)){
                     fs::directory_iterator it(the_path), eod;
@@ -132,7 +133,7 @@ bool PedDistributor::Distribute(Building *building) const {
                           {
                                std::string basename = fs::basename(p);
                                std::string extention = fs::extension(p);
-                               auto tmpPositions = GetPositionsFromFile(p.string(), dist->GetAgentsNumber());
+                               auto tmpPositions = GetPositionsFromFile(p.string(), dist->GetAgentsNumber(), unit);
                                //check if positions are
                                //empty. May happen if file
                                //is misformed.                                         
@@ -413,7 +414,11 @@ vector<Point>PedDistributor::PositionsOnFixY(double min_x, double max_x, double 
 }
 
 // format: id fr x y
-const vector<Point>  PedDistributor::GetPositionsFromFile(std::string filename, int n) const{
+const vector<Point>  PedDistributor::GetPositionsFromFile(std::string filename, int n, std::string unit) const{
+      float m2cm = 1.0;
+      if(unit == "cm")
+            m2cm = 100.0;
+      
       std::ifstream infile(filename);
       // read all data from file in xpos, ypos, ids and frames
       // @todo: need to read z too
@@ -422,8 +427,6 @@ const vector<Point>  PedDistributor::GetPositionsFromFile(std::string filename, 
       std::vector<int> ids;
       std::vector<int> frames;
       // here we push_back only the first (x,y) of every id.
-      // std::vector<double> first_xpos;
-      // std::vector<double> first_ypos;
       std::vector<Point> positions;
       std::vector<int> first_ids;
       if (infile.good()){
@@ -438,8 +441,8 @@ const vector<Point>  PedDistributor::GetPositionsFromFile(std::string filename, 
                         boost::split(strs, sLine, boost::is_any_of("\t "));
                         id = atoi(strs[0].c_str());
                         fr = atoi(strs[1].c_str());
-                        x =  atof(strs[2].c_str());
-                        y = atof(strs[3].c_str());
+                        x =  atof(strs[2].c_str())/m2cm;
+                        y = atof(strs[3].c_str())/m2cm;
                         // @todo: check for z component. Some data don't have. Some do.
                         xpos.push_back(x);
                         ypos.push_back(y);
