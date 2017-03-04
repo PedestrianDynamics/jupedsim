@@ -53,6 +53,8 @@ private:
      //demographic parameters
      //TODO: should also follow a distribution, see _premovement
      std::string _gender;
+     std::string _positions_dir; // directory containing >=1 file(s) used to setup starting positions
+     std::string _unit_traj; //unit of traj from file
      int _age;
      int _height;
      double _patience;
@@ -122,7 +124,11 @@ public:
      double GetPremovementTime() const;
      void InitRiskTolerance(std::string distribution_type, double para1, double para2);
      double GetRiskTolerance();
-
+     void SetPositionsDir(const std::string& dir);
+     const std::string& GetPositionsDir()  const;
+     void SetUnitTraj(const std::string& unit);
+     const std::string& GetUnitTraj()  const;
+     
      Pedestrian* GenerateAgent(Building* building, int* pid, std::vector<Point>& positions);
 };
 
