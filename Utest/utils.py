@@ -1,7 +1,7 @@
 from xml.dom import minidom
 import logging
 import numpy as np
-
+import pandas as pd
 SUCCESS = 0
 FAILURE = -1
 
@@ -227,6 +227,51 @@ def parse_file_deprecated(filename):
     return fps, N, data
 
 
+def rolling_flow(fps, N, data, x0, name):
+    """
+    measure the flow at a vertical line given by <x0>
+    trajectories are given by <data> in the following format: id    frame    x    y
+    input:
+    - fps: frame per second
+    - N: number of peds
+    - data: trajectories
+    - x0: x-coordinate of the vertical measurement line
+    output:
+    - flow
+    """
+    logging.info('Measure flow at %f'%x0)
+    if not isinstance(data, np.ndarray):
+        logging.critical("flow() accepts data of type <ndarray>. exit")
+        exit(FAILURE)
+    peds = np.unique(data[:, 0]).astype(int)
+    times = []
+    for ped in peds:
+        d = data[data[:, 0] == ped]
+        passed = d[d[:, 2] >= x0]
+        if passed.size == 0:  # pedestrian did not pass the line
+            logging.critical("Pedestrian <%d> did not pass the line at <%.2f>"%(ped, x0))
+            exit(FAILURE)
+        first = min(passed[:, 1])
+        #print "ped= ", ped, "first=",first
+        times.append(first)
+    if len(times) < 2:
+        logging.warning("Number of pedestrians passing the line is small. return 0")
+        return 0
+
+    times = np.sort(times)
+    serie = pd.Series(times)
+    minp = 100; windows = int(len(times)/10);
+    minp = min(minp, windows)
+    flow = fps*(windows-1)/(serie.rolling(windows, min_periods=minp).max()  - serie.rolling(windows, min_periods=minp).min() )
+    flow = flow[~np.isnan(flow)] # remove NaN
+    wmean = flow.rolling(windows, min_periods=minp).mean()
+ 
+    np.savetxt(name, np.array(times))
+    
+    logging.info("min(times)=%f max(times)=%f"%(min(times), max(times)))
+    return np.mean(wmean) #fps * float(N-1) / (max(times) - min(times))
+
+
 def flow(fps, N, data, x0):
     """
     measure the flow at a vertical line given by <x0>
@@ -257,6 +302,7 @@ def flow(fps, N, data, x0):
     if len(times) < 2:
         logging.warning("Number of pedestrians passing the line is small. return 0")
         return 0
+    
     logging.info("min(times)=%f max(times)=%f"%(min(times), max(times)))
     return fps * float(N-1) / (max(times) - min(times))
 
