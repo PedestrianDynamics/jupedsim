@@ -40,7 +40,8 @@ def process_inifile(inifile):
         exit(FAILURE)
 
     fps, N, traj = parse_file(trajfile)
-    J = flow(fps, N, traj, 61)
+    name = "times" + inifile.split("ini")[2]
+    J = rolling_flow(fps, N, traj, 61, name)
     return [N, width_size, J]
 
 #=========================
@@ -78,7 +79,7 @@ if __name__ == "__main__":
     #    lib_path = os.path.abspath(lib_path)
     sys.path.append(lib_path)
     from utils import SUCCESS, FAILURE
-    from utils import parse_file, flow
+    from utils import parse_file, flow, rolling_flow
     # from utils import get_maxtime
     os.chdir("..")
     TRUNK = os.getcwd()
@@ -125,6 +126,8 @@ if __name__ == "__main__":
     # #--------------------- PARSING & FLOW-MEASUREMENT --------        
     pool = multiprocessing.Pool()
     flows = pool.map(process_inifile, inifiles)
+    pool.close()
+    pool.join()
     flows = np.array(flows)
     # ----------------------- PLOT RESULTS ----------------------
     flow_file = "flow.txt"
