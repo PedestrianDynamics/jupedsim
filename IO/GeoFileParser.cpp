@@ -211,6 +211,7 @@ bool GeoFileParser::LoadGeometry(Building* building)
                     subroom->AddObstacle(obstacle);
                }
                room->AddSubRoom(subroom);
+
           }
           //parsing the crossings
           TiXmlNode* xCrossingsNode = xRoom->FirstChild("crossings");

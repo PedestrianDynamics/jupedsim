@@ -319,6 +319,9 @@ bool Building::InitGeometry()
                          return false;
                }
 
+               //here we can create a boost::geometry::model::polygon out of the vector<Point> objects created above
+               itr_subroom.second->CreateBoostPoly();
+
                double minElevation = FLT_MAX;
                double maxElevation = -FLT_MAX;
                for (auto&& wall:itr_subroom.second->GetAllWalls()) {

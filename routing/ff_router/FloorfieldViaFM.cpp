@@ -1709,6 +1709,16 @@ void FloorfieldViaFM::writeFF(const std::string& filename, std::vector<int> targ
         file << _dirToWall[i]._x << " " << _dirToWall[i]._y << " 0.0" << std::endl;
     }
 
+    file << "SCALARS SubroomPtr float 1" << std::endl;
+    file << "LOOKUP_TABLE default" << std::endl;
+    for (long int i = 0; i < _grid->GetnPoints(); ++i) {
+        if (_subrooms[i]) {
+            file << _subrooms[i]->GetUID() << std::endl;
+        } else {
+            file << 0.0 << std::endl;
+        }
+    }
+
     for (unsigned int iTarget = 0; iTarget < targetID.size(); ++iTarget) {
         Log->Write("%s: target number %d: UID %d", filename.c_str(), iTarget, targetID[iTarget]);
         if (_neggradmap.count(targetID[iTarget]) == 0) {
@@ -1921,4 +1931,10 @@ void CentrePointFFViaFM::getDirectionToUID(int destID, const long int key, Point
     }
     direction._x = (localneggradptr[key]._x);
     direction._y = (localneggradptr[key]._y);
+}
+
+SubRoom* FloorfieldViaFM::GetSubroom(Pedestrian* ped) {
+    long int key = _grid->getKeyAtPoint(ped->GetPos());
+    assert(key >= 0 && key <= _grid->GetnPoints());
+    return _subrooms[key];
 }

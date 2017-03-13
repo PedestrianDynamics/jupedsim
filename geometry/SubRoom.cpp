@@ -76,6 +76,7 @@ SubRoom::SubRoom()
      _goalIDs = vector<int> ();
      _area = 0.0;
      _uid = _static_uid++;
+     _boostPoly = polygon_type();
 }
 
 SubRoom::~SubRoom()
@@ -185,6 +186,11 @@ bool SubRoom::AddWall(const Wall& w)
           return false;
      }
      _walls.push_back(w);
+
+     //not a good idea to add points, as we need points in clockwise rotation and each point only once. we need to process all walls
+     //boost::geometry::append(_boostPoly, w.GetPoint1());
+     //boost::geometry::append(_boostPoly, w.GetPoint2());
+
      return true;
 }
 
@@ -784,11 +790,37 @@ bool SubRoom::IsPartOfPolygon(const Point& ptw)
 bool SubRoom::IsInObstacle(const Point& pt)
 {
      //write the obstacles
-     for (auto&& obst : _obstacles)
-     {
-          if(obst->Contains(pt)) return true;
+//     for (auto&& obst : _obstacles)
+//     {
+//          if(obst->Contains(pt)) return true;
+//     }
+//     return false;
+     for (polygon_type obs:_boostPolyObstacles) {
+          if (boost::geometry::within(pt, obs)) {
+               return true;
+          }
      }
      return false;
+}
+
+bool SubRoom::CreateBoostPoly() {
+     std::vector<Point> copyPts;
+     copyPts.insert(copyPts.begin(), _poly.begin(), _poly.end());
+     if(IsClockwise())
+          std::reverse(copyPts.begin(), copyPts.end());
+
+     boost::geometry::assign_points(_boostPoly, _poly);
+
+     for (auto obsPtr:_obstacles) {
+          std::vector<Point> obsPoints;
+          obsPoints.insert(obsPoints.begin(), obsPtr->GetPolygon().begin(), obsPtr->GetPolygon().end());
+          if (obsPtr->IsClockwise()) {
+               std::reverse(obsPoints.begin(), obsPoints.end());
+          }
+          polygon_type newObstacle;
+          boost::geometry::assign_points(newObstacle, obsPoints);
+          _boostPolyObstacles.emplace_back(newObstacle);
+     }
 }
 
 /************************************************************
@@ -932,11 +964,11 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
     				 return false;
     			 }
     			 else
-                               ++j;
+                               ++j; //number of lines, that share endpoints with wall "it"
     		 }
          }
     	 if (j <= 2)
-    		 j = 0;
+    		 j = 0; //all good, set j back to 0 for next iteration
     	 else {
     		 char tmp[CLENGTH];
     		 sprintf(tmp, "WARNING: \tNormanSubRoom::ConvertLineToPoly(): SubRoom %d Room %d !!\n", GetSubRoomID(), GetRoomID());
@@ -944,7 +976,7 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
     		 sprintf(tmp, "WARNING: \tWall %s shares edge with multiple walls!!! j=%d\n", it.toString().c_str(), j);
     		 Log->Write(tmp); // why should this return false?
     	 }
-    	 ++itr;
+    	 ++itr; // only check lines that have greater index than current "it" (inner loop goes from itr to size)
      }
 
 
@@ -1035,50 +1067,61 @@ double NormalSubRoom::Xintercept(const Point& point1, const Point& point2, doubl
 
 bool NormalSubRoom::IsInSubRoom(const Point& ped) const
 {
-
-     //case when the point is on an edge
-     // todo: this affect the runtime, and do we really need that
-     // If we do not do this check, then for a square for instance, half the points located on the edge will be inside and
-     // the other half will be outside the polygon.
-     for(auto& w: _walls)
-     {
-          if(w.IsInLineSegment(ped)) return true;
-     }
-
-     auto next_corner = _poly.begin();
-     short quad = WhichQuad(*next_corner, ped);
-     short next_quad;
-     short total = 0; // count of absolute sectors crossed
-     for (auto& corner : _poly) { // _poly contains all corner points of the walls
-          ++next_corner;
-          if (next_corner == _poly.end()) next_corner = _poly.begin();
-          next_quad = WhichQuad(*next_corner, ped);
-          short delta = next_quad - quad;
-
-          switch (delta) {
-               case 2:
-               case -2:
-                    // If we crossed the middle, figure out if it
-                    // was clockwise or counter-clockwise by using
-                    // the x position of the ped
-                    if (Xintercept(corner, *next_corner, ped._y) > ped._x)
-                         delta = -delta;
-                    break;
-               case 3: // moving 3 quads is like moving back 1
-                    delta = -1;
-                    break;
-               case -3: // moving back 3 is like moving forward 1
-                    delta = 1;
-                    break;
-               default:
-                    break;
+     for (polygon_type obs:_boostPolyObstacles) {
+          // if pedestrian is stuck in obstacle, please return false
+          if (boost::geometry::within(ped, obs)) {
+               return false;
           }
-
-          total += delta;
-          quad = next_quad;
      }
+     // pedestrian is not in obstacle, so we can use within(...) on _boostPoly
+     return boost::geometry::within(ped, _boostPoly);
 
-     return abs(total) == 4;
+     // the code below is old and only works in manhatten-polygons (horizontal and vertical lines only)
+
+//     //case when the point is on an edge
+//     // todo: this affect the runtime, and do we really need that
+//     // If we do not do this check, then for a square for instance, half the points located on the edge will be inside and
+//     // the other half will be outside the polygon.
+//     // We should also consider crossings and transitions - not only walls
+//     for(auto& w: _walls)
+//     {
+//          if(w.IsInLineSegment(ped)) return true;
+//     }
+//
+//     auto next_corner = _poly.begin();
+//     short quad = WhichQuad(*next_corner, ped);
+//     short next_quad;
+//     short total = 0; // count of absolute sectors crossed
+//     for (auto& corner : _poly) { // _poly contains all corner points of the walls
+//          ++next_corner;
+//          if (next_corner == _poly.end()) next_corner = _poly.begin();
+//          next_quad = WhichQuad(*next_corner, ped);
+//          short delta = next_quad - quad;
+//
+//          switch (delta) {
+//               case 2:
+//               case -2:
+//                    // If we crossed the middle, figure out if it
+//                    // was clockwise or counter-clockwise by using
+//                    // the x position of the ped
+//                    if (Xintercept(corner, *next_corner, ped._y) > ped._x)
+//                         delta = -delta;
+//                    break;
+//               case 3: // moving 3 quads is like moving back 1
+//                    delta = -1;
+//                    break;
+//               case -3: // moving back 3 is like moving forward 1
+//                    delta = 1;
+//                    break;
+//               default:
+//                    break;
+//          }
+//
+//          total += delta;
+//          quad = next_quad;
+//     }
+//
+//     return abs(total) == 4;
 }
 
 /************************************************************

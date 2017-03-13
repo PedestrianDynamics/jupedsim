@@ -398,13 +398,13 @@ bool FFRouter::Init(Building* building)
 
      //int roomTest = (*(_locffviafm.begin())).first;
      //int transTest = (building->GetRoom(roomTest)->GetAllTransitionsIDs())[0];
-     /*
-     for (unsigned int i = 0; i < _locffviafm.size(); ++i) {
-          auto iter = _locffviafm.begin();
-          std::advance(iter, i);
-          int roomNr = iter->first;
-          iter->second->writeFF("testFF" + std::to_string(roomNr) + ".vtk", _allDoorUIDs);
-     }//*/
+
+//     for (unsigned int i = 0; i < _locffviafm.size(); ++i) {
+//          auto iter = _locffviafm.begin();
+//          std::advance(iter, i);
+//          int roomNr = iter->first;
+//          iter->second->writeFF("testFF" + std::to_string(roomNr) + ".vtk", _allDoorUIDs);
+//     }
 
      std::ofstream matrixfile;
      matrixfile.open("Matrix.txt");
@@ -717,6 +717,10 @@ int FFRouter::FindExit(Pedestrian* p)
      std::vector<int> DoorUIDsOfRoom;
      DoorUIDsOfRoom.clear();
      if (_building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->IsInSubRoom(p->GetPos())) {
+     //SubRoom* exp1 = _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID());
+     //SubRoom* exp2 = _locffviafm[p->GetRoomID()]->GetSubroom(p);
+     //if (exp1 == exp2) {
+     //if (_building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID()) == _locffviafm[p->GetRoomID()]->GetSubroom(p)) {
           //ped is in the subroom, according to its member attribs
      } else {
           // find next crossing / transition and set new room to the OTHER
