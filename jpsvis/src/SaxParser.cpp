@@ -463,9 +463,9 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
         }
 
         //coordinates of the ellipse, default to the head of the agent
-        if(std::isnan(el_x)) el_x=xPos;
-        if(std::isnan(el_y)) el_y=yPos;
-        if(std::isnan(el_z)) el_z=zPos;
+        //if(std::isnan(el_x)) el_x=xPos;
+        //if(std::isnan(el_y)) el_y=yPos;
+        //if(std::isnan(el_z)) el_z=zPos;
 
         //double pos[3]={xPos,yPos,zPos};
         //double vel[3]={xVel,yPos,zPos};

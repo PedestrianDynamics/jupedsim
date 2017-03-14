@@ -722,7 +722,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     }
 
     //no other geometry format was detected
-    double frameRate=15; //default frame rate
+    double frameRate=16; //default frame rate
     statusBar()->showMessage(tr("parsing the file"));
 
 

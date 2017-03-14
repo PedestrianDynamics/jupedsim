@@ -179,13 +179,13 @@ if($QT_QMAKE_EXECUTABLE STREQUAL "")
 endif()
 # default qt version is 4
 if("${DESIRED_QT_VERSION}" STREQUAL "")
-  set(DESIRED_QT_VERSION "4")
+  set(DESIRED_QT_VERSION "5")
 endif()
 
 # qt version > 5 or qt version < 3 are not supported
 if( ${DESIRED_QT_VERSION} VERSION_GREATER 5 OR ${DESIRED_QT_VERSION} VERSION_LESS 3)
-  message(WARNING "Desired QT version " ${DESIRED_QT_VERSION} " not supported. Taking 4")
-  set(DESIRED_QT_VERSION "4")
+  message(WARNING "Desired QT version " ${DESIRED_QT_VERSION} " not supported. Taking 5")
+  set(DESIRED_QT_VERSION "5")
 endif()
 
 # find packages according to qt version
@@ -209,15 +209,6 @@ elseif("${DESIRED_QT_VERSION}" STREQUAL "4")
    set(QT_USE_QTNETWORK TRUE)
 endif()
 
-if(QT5_INSTALLED)
-  message(STATUS "QT5_INSTALLED: " ${QT5_INSTALLED})
-elseif(QT4_INSTALLED )
-    MESSAGE(STATUS "Check Qt 4 .................................... yes")
-elseif(QT3_INSTALLED)
-    MESSAGE(STATUS "Check Qt 3 .................................... yes")
-else()
-    MESSAGE(STATUS "Check Qt 4          ...  no")
-endif()
 # Disable automatic conversion from QString to ASCII 8-bit strings (char *)
 # (Keeps code compatible with Qt/Mac/64bit)
 if(APPLE)
@@ -243,6 +234,7 @@ if(${QT4_INSTALLED})
   )
   TARGET_LINK_LIBRARIES( jpsvis ${QT_LIBRARIES})
 elseif( ${QT5_INSTALLED})
+  message(MESSAGE "libs: ${Qt5Widgets_LIBRARIES}  ${QT_LIBRARIES}")
   # http://www.kdab.com/using-cmake-with-qt-5/
   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}" )
   qt5_wrap_ui( UI_HDRS ${UIS} )
@@ -276,15 +268,22 @@ ENDIF(APPLE)
 set(VTK_USE_GUISUPPORT  ON) 
 set(VTK_USE_QT  ON)
 # QVTK is for VTK 5.x. For VTK 6, use ${VTK_LIBRARIES} instead
+
+if( ${QT_INSTALLED})
+  SET(QTLIBS ${QT_LIBRARIES})
+elseif( ${QT5_INSTALLED})
+  SET(QTLIBS ${Qt5Widgets_LIBRARIES})
+endif()
+
 if(VTK_LIBRARIES)
   if(${VTK_VERSION} VERSION_LESS "6")
-    TARGET_LINK_LIBRARIES( jpsvis ${QT_LIBRARIES} QVTK)
-    
+   TARGET_LINK_LIBRARIES( jpsvis ${QTLIBS} QVTK) #qt5
   else()        
-    TARGET_LINK_LIBRARIES( jpsvis  ${VTK_LIBRARIES} ${QT_LIBRARIES})
+    #    TARGET_LINK_LIBRARIES( jpsvis  ${VTK_LIBRARIES} ${QT_LIBRARIES})
+    TARGET_LINK_LIBRARIES( jpsvis  ${VTK_LIBRARIES} ${QTLIBS}) #qt5   
   endif()
 else() # this else is not yet tested
-  target_link_libraries(jpsvis vtkHybrid QVTK vtkViews ${QT_LIBRARIES})
+  target_link_libraries(jpsvis vtkHybrid QVTK vtkViews ${QTLIBS})
 endif() 
 # ================================ Compiler flags
 # enable as many warnings as possible
@@ -374,8 +373,13 @@ INSTALL(CODE "
 # for dependencies.  If they are not system dependencies, they are copied.
 
 # directories to look for dependencies
-SET(DIRS ${QT_LIBRARY_DIRS})
-
+#SET(DIRS ${QT_LIBRARY_DIRS} ${QTPLUGINS})
+if( ${QT4_INSTALLED})
+  SET(DIRS ${QT_LIBRARIES})
+elseif( ${QT5_INSTALLED})
+  SET(DIRS ${QT_LIBRARY_DIRS})
+endif()
+message(STATUS "qt_lib_dirs  ${QT_LIBRARY_DIRS}")
 # Now the work of copying dependencies into the bundle/package
 # The quotes are escaped and variables to use at install time have their $ escaped
 # An alternative is the do a configure_file() on a script and use install(SCRIPT  ...).
@@ -449,18 +453,18 @@ else()
 endif()
 
 # https://github.com/artm/vision-ui-skeleton/blob/master/cmake/QArtmRelease.cmake
-IF(APPLE)
-  SET(EXE_CONTENTS "${CMAKE_INSTALL_PREFIX}/${EXECUTABLE}/Contents")
-  FILE(WRITE
-    ${EXE_CONTENTS}/Resources/qt.conf
-    "[Paths]\nPlugins=PlugIns\n")
-  FILE(COPY ${QT_PLUGINS_DIR}/imageformats
-    DESTINATION ${EXE_CONTENTS}/PlugIns/
-    PATTERN "*_debug.*" EXCLUDE)
-  ADD_CUSTOM_COMMAND(
-    TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ruby ${PROJECT_SOURCE_DIR}/ruby/fixup/fixup.rb ${CMAKE_INSTALL_PREFIX}/${EXECUTABLE}
-    COMMENT "Fixing up the app bundle")
-ENDIF(APPLE)
+ # IF(APPLE)
+#   SET(EXE_CONTENTS "${CMAKE_INSTALL_PREFIX}/${EXECUTABLE}/Contents")
+#   FILE(WRITE
+#     ${EXE_CONTENTS}/Resources/qt.conf
+#     "[Paths]\nPlugins=PlugIns\n")
+#   FILE(COPY ${QT_PLUGINS_DIR}/imageformats
+#     DESTINATION ${EXE_CONTENTS}/PlugIns/
+#     PATTERN "*_debug.*" EXCLUDE)
+#   ADD_CUSTOM_COMMAND(
+#     TARGET ${PROJECT_NAME} POST_BUILD
+#     COMMAND ruby ${PROJECT_SOURCE_DIR}/ruby/fixup/fixup.rb ${CMAKE_INSTALL_PREFIX}/${EXECUTABLE}
+#     COMMENT "Fixing up the app bundle")
+# ENDIF(APPLE)
 
 

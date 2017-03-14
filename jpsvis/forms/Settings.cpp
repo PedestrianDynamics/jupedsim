@@ -104,7 +104,11 @@ void Settings::slotPickPedestrianColor()
     QColor col=colorDialog->getColor("choose the new pedestrian color");
 
     // the user may have cancelled the process
-    if(col.isValid()==false) return;
+    if(col.isValid()==false) {
+        delete colorDialog;
+        return;
+    }
+    
     slotChangePedestrianColor(col);
 
     delete colorDialog;
@@ -210,7 +214,10 @@ void Settings::slotPickCaptionColor()
     tmpCaptionColor=colorDialog->getColor();
 
     // the user may have cancelled the process
-    if(tmpCaptionColor.isValid()==false) return;
+    if(tmpCaptionColor.isValid()==false) {
+        delete colorDialog;
+     return;
+    }
 
     int size =ui.CbCaptionSize->currentText().toInt();
     int orientation= ui.ComboCaptionOrientation->currentText().toInt();

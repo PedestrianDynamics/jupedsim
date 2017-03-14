@@ -123,7 +123,7 @@ void SimpleVisualisationWindow::start()
 
     // Create an interactor
     vtkRenderWindowInteractor *renderWinInteractor = vtkRenderWindowInteractor::New();
-    renderWinInteractor = vtkRenderWindowInteractor::New();
+    // renderWinInteractor = vtkRenderWindowInteractor::New();
     renderWindow->SetInteractor( renderWinInteractor );
     //set full screen and catch esc to restore defaults one
     //renderWindow->SetFullScreen(1);
