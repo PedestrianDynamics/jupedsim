@@ -187,10 +187,6 @@ bool SubRoom::AddWall(const Wall& w)
      }
      _walls.push_back(w);
 
-     //not a good idea to add points, as we need points in clockwise rotation and each point only once. we need to process all walls
-     //boost::geometry::append(_boostPoly, w.GetPoint1());
-     //boost::geometry::append(_boostPoly, w.GetPoint2());
-
      return true;
 }
 
@@ -1064,7 +1060,7 @@ double NormalSubRoom::Xintercept(const Point& point1, const Point& point2, doubl
 
 
 // This method is called very often in DirectionFloorField, so it should be fast.
-
+// we ignore
 bool NormalSubRoom::IsInSubRoom(const Point& ped) const
 {
      for (polygon_type obs:_boostPolyObstacles) {

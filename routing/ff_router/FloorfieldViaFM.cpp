@@ -159,113 +159,7 @@ FloorfieldViaFM::FloorfieldViaFM(const std::string& filename) {
 
     Log->Write("ERROR: \tReading  FF from file not supported!!");
     Log->Write(filename);
-//                    FileHeaderExample: (GEO_UP_SCALE is assumed to be 1.0)
-//                    # vtk DataFile Version 3.0
-//                    Testdata: Fast Marching: Test:
-//                    ASCII
-//                    DATASET STRUCTURED_POINTS
-//                    DIMENSIONS 322 226 1
-//                    ORIGIN 50 90 0
-//                    SPACING 0.062500 0.062500 1
-//                    POINT_DATA 72772
-//                    SCALARS Cost float 1
-//                    LOOKUP_TABLE default
-//                    0.505725
-//                    0.505725
-//                    0.505725
-//                    ...
 
-// comments show lineformat in .vtk file (below)
-//    std::ifstream file(filename);
-//    std::string line;
-//
-//    std::getline(file, line); //# vtk DataFile Version 3.0
-//    std::getline(file, line); //Testdata: Fast Marching: Test:
-//    std::getline(file, line); //ASCII
-//    std::getline(file, line); //DATASET STRUCTURED_POINTS
-//    std::getline(file, line); //DIMENSIONS {x} {y} {z}
-//
-//    std::stringstream inputline(line);
-//
-//    long int iMax, jMax, c;
-//    std::string dummy;
-//    double fdummy;
-//    long int nPoints;
-//    double xMin;
-//    double yMin;
-//    double xMax;
-//    double yMax;
-//    double hx;
-//    double hy;
-//
-//
-//    inputline >> dummy >> iMax >> jMax >> c ;
-//
-//    std::getline(file, line); //ORIGIN x y z
-//    inputline.str("");
-//    inputline.clear();
-//    inputline << line;
-//    inputline >> dummy >> xMin >> yMin >> c;
-//
-//    std::getline(file, line); //SPACING 0.062500 0.062500 1
-//    inputline.str("");
-//    inputline.clear();
-//    inputline << line;
-//    inputline >> dummy >> hx >> hy >> c;
-//    xMax = xMin + hx*iMax;
-//    yMax = yMin + hy*jMax;
-//
-//    std::getline(file, line); //POINT_DATA 72772
-//    inputline.str("");
-//    inputline.clear();
-//    inputline.flush();
-//    inputline << line;
-//    inputline >> dummy >> nPoints;
-//
-//    //create Rect Grid
-//    grid = new RectGrid(nPoints, xMin, yMin, xMax, yMax, hx, hy, iMax, jMax, true);
-//
-//    //create arrays
-//    flag = new int[nPoints];
-//    dist2Wall = new double[nPoints];
-//    speedInitial = new double[nPoints];
-//    cost = new double[nPoints];
-//    neggrad = new Point[nPoints];
-//    dirToWall = new Point[nPoints];
-//    trialfield = new Trial[nPoints];                 //created with other arrays, but not initialized yet
-//
-//    std::getline(file, line);   //SCALARS Cost float 1
-//    std::getline(file, line);   //LOOKUP_TABLE default
-//
-//    for (long int i = 0; i < nPoints; ++i) {
-//        std::getline(file, line);
-//        inputline.str("");
-//        inputline << line;
-//        inputline >> dist2Wall[i];  //0.505725
-//        //std::cerr << dist2Wall[i] << std::endl;
-//        inputline.clear();
-//    }
-//
-//    std::getline(file, line);       //VECTORS Gradient float
-//
-//    for (long int i = 0; i < nPoints; ++i) {
-//        std::getline(file, line);
-//        inputline.str("");
-//        inputline << line;
-//        inputline >> neggrad[i]._x >> neggrad[i]._y >> fdummy;  //0.989337 7.88255 0.0
-//        inputline.clear();
-//    }
-//
-//    std::getline(file, line);       //VECTORS Gradient float
-//
-//    for (long int i = 0; i < nPoints; ++i) {
-//        std::getline(file, line);
-//        inputline.str("");
-//        inputline << line;
-//        inputline >> dirToWall[i]._x >> dirToWall[i]._y >> fdummy;  //0.989337 7.88255 0.0
-//        inputline.clear();
-//    }
-//    file.close();
 }
 
 //void FloorfieldViaFM::getDirectionAt(const Point& position, Point& direction){
@@ -378,21 +272,6 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
     direction._x = (localneggradptr[key]._x);
     direction._y = (localneggradptr[key]._y);
 }
-
-
-//void FloorfieldViaFM::getDirectionToFinalDestination(Pedestrian* ped, Point& direction){
-//    const Point& position = ped->GetPos();
-//    const int goalID = ped->GetFinalDestination();
-//    long int key = grid->getKeyAtPoint(position);
-//    //we assume, only ground level (planeEquation[2] == 0), which is C == 0, allows to exit to goal
-//    if ((goalID == -1) && (building->GetSubRoomByUID(ped->GetSubRoomUID())->GetPlaneEquation()[2] == 0.)) {
-//        direction._x = neggrad[key]._x;
-//        direction._y = neggrad[key]._y;
-//    }
-//    createMapEntryInLineToGoalID(goalID);
-//
-//    getDirectionToUID(goalToLineUIDmap.at(goalID), key, direction);
-//}
 
 void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
 {
@@ -534,18 +413,6 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
 }
 
 double FloorfieldViaFM::getCostToDestination(const int destID, const Point& position) {
-//    if ((costmap.count(destID) == 0) || (costmap.at(destID) == nullptr)) {
-//        Point dummy;
-//        getDirectionToUID(destID, 0, dummy);         //this call induces the floorfieldcalculation
-//    }
-//    if ((costmap.count(destID) == 0) || (costmap.at(destID) == nullptr)) {
-//        Log->Write("ERROR: \tDestinationUID %d is invalid / out of grid.", destID);
-//        return DBL_MAX;
-//    }
-//    if (grid->getKeyAtPoint(position) == -1) {  //position is out of grid
-//        return -7;
-//    }
-//    return (costmap.at(destID))[grid->getKeyAtPoint(position)];
     return getCostToDestination(destID, position, global_shortest);
 }
 
@@ -984,31 +851,9 @@ void FloorfieldViaFM::prepareForDistanceFieldCalculation(const bool onlyRoomsWit
                 break;
             }
         } //switch
-        //set Trialptr to fieldelements
-//        trialfield[i].key = i;
-//        trialfield[i].flag = flag + i;              //ptr!
-//        trialfield[i].cost = dist2Wall + i;         //ptr!  //this line imposes, that we calc DistancesField next
-//        trialfield[i].speed = speedInitial + i;     //ptr!
-//        trialfield[i].father = nullptr;
-//        trialfield[i].child = nullptr;
     } //for loop (points)
     // drawLinesOnGrid(exits, cost, 0.); //already mark targets/exits in cost array (for floorfieldcalc and crossout (LocalFF))
 }
-
-//void FloorfieldViaFM::clearAndPrepareForFloorfieldReCalc(double* costarray) {
-//    for (long int i = 0; i < grid->GetnPoints(); ++i) {
-//        if ((gcode[i] == WALL) || (gcode[i] == OUTSIDE) || (gcode[i] == CLOSED_TRANSITION) || (gcode[i] == CLOSED_CROSSING)){    //wall or blocker
-//            costarray[i]    = -7.;                          //this is done in calculateFloorfield again
-//        } else {                     //inside
-//            costarray[i]    = -2.;
-//        }
-//    }
-//}
-
-//void FloorfieldViaFM::setNewGoalAfterTheClear(double* costarray, std::vector<Line>& LineArg) {
-//    drawLinesOnGrid(LineArg, costarray, 0.);
-//    //std::cerr << LineArg[0].GetUniqueID() << " " << LineArg[0].GetPoint1()._x << " " << LineArg[0].GetPoint1()._y << " " << LineArg[0].GetPoint2()._x << " " << LineArg[0].GetPoint2()._y << std::endl;
-//}
 
 void FloorfieldViaFM::deleteAllFFs() {
     for (size_t i = 0; i < _costmap.size(); ++i) {
@@ -1295,15 +1140,7 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
                                              [&] (TrialP trialPArg) { this->calcDist2Wall(trialPArg);} );
         }
     }
-    //Log->Write(std::to_string(grid->GetxMax()));
-    //Log->Write(std::to_string(grid->GetyMax()));
-    //Log->Write(std::to_string(grid->GetxMin()));
-    //Log->Write(std::to_string(grid->GetyMin()));
-    //Log->Write(std::to_string(grid->GetiMax()));
-    //Log->Write(std::to_string(grid->GetjMax()));
-    //Log->Write("INFO: \t" + std::to_string(grid->GetnPoints()));
-    //inital narrowband done, now loop (while not empty: remove smallest, add neighbors of removed)
-    //long int debugcounter = 0;
+
     while (!trialqueue.empty()) {
         long int keyOfSmallest = trialqueue.top().key;
         flag[keyOfSmallest] = FM_FINAL;
