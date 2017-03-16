@@ -155,10 +155,6 @@ void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
           _cost[i] = -2.;
           _gcode[i] = OUTSIDE;            //unknown
      }
-     //drawLinesOnGrid(wall, dist2Wall, 0.);
-     //drawLinesOnGrid(wall, cost, -7.);
-     //drawLinesOnGrid(wall, gcode, WALL);
-     //drawLinesOnGrid(exitsFromScope, gcode, OPEN_TRANSITION);
 
      drawLinesOnGrid<double>(_wall, _dist2Wall, 0.);
      drawLinesOnGrid<double>(_wall, _cost, -7.);
@@ -510,8 +506,7 @@ void SubLocalFloorfieldViaFM::parseRoom(SubRoom* const roomArg,
           _cost[i] = -2.;
           _gcode[i] = OUTSIDE;
      }
-     //drawLinesOnGrid(wall, gcode, WALL);
-     //drawLinesOnGrid(exitsFromScope, gcode, OPEN_TRANSITION);
+
      drawLinesOnGrid<double>(_wall, _dist2Wall, 0.);
      drawLinesOnGrid<double>(_wall, _cost, -7.);
      drawLinesOnGrid<int>(_wall, _gcode, WALL);
