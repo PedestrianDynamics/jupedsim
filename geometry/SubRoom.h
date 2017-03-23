@@ -36,10 +36,17 @@
 #include <vector>
 #include <string>
 #include <boost/polygon/polygon.hpp>
+#include <boost/geometry.hpp>
 
 //typedef boost::geometry::model::d2::point_xy<double> point_type;
 //typedef boost::geometry::model::polygon<point_type> polygon_type;
-typedef boost::geometry::model::polygon<Point> polygon_type;
+//typedef boost::geometry::model::polygon<Point> polygon_type;
+
+namespace bg = boost::geometry;
+//typedef bg::model::point<double, 2, bg::cs::cartesian> point;
+//typedef bg::model::box<point> box;
+//typedef bg::model::polygon<Point, false, true> closed_polygon;
+typedef bg::model::polygon<Point, false, false> polygon_type;
 
 //forward declarations
 class Transition;

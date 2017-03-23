@@ -746,17 +746,34 @@ bool SubRoom::IsConvex()
 ///http://stackoverflow.com/questions/9473570/polygon-vertices-clockwise-or-counterclockwise/
 bool SubRoom::IsClockwise()
 {
+     //http://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order
      if(_poly.size()<3) {
-          Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Subroom ID [%d]",_id);
+          Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Obstacle ID [%d]",_id);
           return false;
           //exit(EXIT_FAILURE);
      }
+     double sum = 0;
+     for (int i = 0; i < _poly.size() - 1; ++i) {
+          Point a = _poly[i];
+          Point b = _poly[i+1];
+          sum += (b._x - a._x) * (b._y + a._y);
+     }
+     Point first = _poly[0];
+     Point last = _poly[_poly.size()-1];
+     sum += (first._x - last._x) * (first._y + last._y);
 
-     Point vecAB= _poly[1]-_poly[0];
-     Point vecBC= _poly[2]-_poly[1];
-
-     double det= vecAB.Determinant(vecBC);
-     return (fabs(det)<J_EPS);
+     return (sum > 0.);
+//     if(_poly.size()<3) {
+//          Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Subroom ID [%d]",_id);
+//          return false;
+//          //exit(EXIT_FAILURE);
+//     }
+//
+//     Point vecAB= _poly[1]-_poly[0];
+//     Point vecBC= _poly[2]-_poly[1];
+//
+//     double det= vecAB.Determinant(vecBC);
+//     return (fabs(det)<J_EPS);
 }
 
 bool SubRoom::IsPartOfPolygon(const Point& ptw)
@@ -802,7 +819,7 @@ bool SubRoom::IsInObstacle(const Point& pt)
 bool SubRoom::CreateBoostPoly() {
      std::vector<Point> copyPts;
      copyPts.insert(copyPts.begin(), _poly.begin(), _poly.end());
-     if(IsClockwise())
+     if(!IsClockwise())
           std::reverse(copyPts.begin(), copyPts.end());
 
      boost::geometry::assign_points(_boostPoly, _poly);
