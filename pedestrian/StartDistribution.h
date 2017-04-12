@@ -56,7 +56,7 @@ private:
      std::string _positions_dir; // directory containing >=1 file(s) used to setup starting positions
      std::string _unit_traj; //unit of traj from file
      int _age;
-     int _height;
+     double _height;
      double _patience;
 
      //force model parameters
@@ -99,8 +99,8 @@ public:
      void SetGoalId(int goalId);
      int GetGroupId() const;
      void SetGroupId(int groupId);
-     int GetHeight() const;
-     void SetHeight(int height);
+     double GetHeight() const;
+     void SetHeight(double height);
      int GetRoomId() const;
      void SetRoomId(int roomId);
      int GetSubroomID() const;
