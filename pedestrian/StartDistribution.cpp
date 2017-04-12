@@ -131,12 +131,12 @@ void StartDistribution::SetGroupId(int groupId)
      _groupID = groupId;
 }
 
-int StartDistribution::GetHeight() const
+double StartDistribution::GetHeight() const
 {
      return _height;
 }
 
-void StartDistribution::SetHeight(int height)
+void StartDistribution::SetHeight(double height)
 {
      _height = height;
 }
