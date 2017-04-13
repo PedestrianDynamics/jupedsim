@@ -791,6 +791,7 @@ void FloorfieldViaFM::parseBuildingForExits(const Building* const buildingArg, c
         _dist2Wall[i] = -3.;
         _cost[i] = -2.;
         _gcode[i] = OUTSIDE;            //unknown
+        _subrooms[i] = nullptr;
     }
     drawLinesOnGrid<double>(_wall, _dist2Wall, 0.);
     drawLinesOnGrid<double>(_wall, _cost, -7.);
@@ -1657,24 +1658,26 @@ void FloorfieldViaFM::writeGoalFF(const std::string& filename, std::vector<int> 
 }
 
 SubRoom* FloorfieldViaFM::isInside(const long int key) {
-    Point probe = _grid->getPointFromKey(key);
+//    Point probe = _grid->getPointFromKey(key);
 
-    const std::map<int, std::shared_ptr<Room>>& roomMap = _building->GetAllRooms();
+//    const std::map<int, std::shared_ptr<Room>>& roomMap = _building->GetAllRooms();
+//
+//    for (auto& roomPair : roomMap) {
+//
+//        Room* roomPtr = roomPair.second.get();
+//        const std::map<int, std::shared_ptr<SubRoom>>& subRoomMap = roomPtr->GetAllSubRooms();
+//
+//        for (auto& subRoomPair : subRoomMap) {
+//
+//            SubRoom* subRoomPtr = subRoomPair.second.get();
+//
+//            if (subRoomPtr->IsInSubRoom(probe)) {
+//                return subRoomPtr;
+//            }
+//        }
 
-    for (auto& roomPair : roomMap) {
-
-        Room* roomPtr = roomPair.second.get();
-        const std::map<int, std::shared_ptr<SubRoom>>& subRoomMap = roomPtr->GetAllSubRooms();
-
-        for (auto& subRoomPair : subRoomMap) {
-
-            SubRoom* subRoomPtr = subRoomPair.second.get();
-
-            if (subRoomPtr->IsInSubRoom(probe)) {
-                return subRoomPtr;
-            }
-        }
-    }
+    //FloorfieldViaFM does not support isInside because of unresolved problem of ambiguous projection of xy plane in multi-
+    //storage buildings
 
     return nullptr;
 }
@@ -1755,6 +1758,12 @@ void CentrePointFFViaFM::getDirectionToUID(int destID, const long int key, Point
             } else {
                 calculateFloorfield(localline, localcostptr, localneggradptr, _modifiedspeed);
             }
+             //when using CentralPoint, the rest of destID Line would not be calculated. We set that line to zero in the lines below.
+             //this way, the ffrouter understands, if a pedestrian reached the line, but is next to central point.
+             Point a = _building->GetTransOrCrossByUID(destID)->GetPoint1();
+             Point b = _building->GetTransOrCrossByUID(destID)->GetPoint2();
+             localline.emplace_back(Line(a, b, 0));
+             drawLinesOnGrid<double>(localline, localcostptr, 0.);
 #pragma omp critical(floorfieldsBeingCalculated)
             {
                 if (_floorfieldsBeingCalculated.count(destID) != 1) {

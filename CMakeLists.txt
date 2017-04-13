@@ -289,6 +289,7 @@ set(source_files
         routing/ff_router/ffRouter.cpp
         routing/ff_router/LocalFloorfieldViaFM.cpp
         routing/ff_router/FloorfieldViaFM.cpp
+        #routing/ff_router/FFKit.cpp
 
         #global_shortest
         routing/global_shortest/AccessPoint.cpp
@@ -353,6 +354,7 @@ set(header_files
         routing/ff_router/Trial.h
         routing/ff_router/LocalFloorfieldViaFM.h
         routing/ff_router/FloorfieldViaFM.h
+        #routing/ff_router/FFKit.h
 
         #general
         routing/DirectionStrategy.h

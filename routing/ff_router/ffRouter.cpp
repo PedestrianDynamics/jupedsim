@@ -722,10 +722,10 @@ int FFRouter::FindExit(Pedestrian* p)
                     continue;
                }
                //only consider doors that lead to goal via a new subroom resp. room considering _targetWithinSubroom
-               if (std::find(subroomDoors.begin(), subroomDoors.end(), _pathsMatrix.at(key)) != subroomDoors.end() &&
-                   (finalDoor != doorUID)){
-                    continue;
-               }
+//               if (std::find(subroomDoors.begin(), subroomDoors.end(), _pathsMatrix.at(key)) != subroomDoors.end() &&
+//                   (finalDoor != doorUID)){
+//                    continue;
+//               }
 //               if (_mode == quickest) {
 //                    int locDistToDoorAdd = (_CroTrByUID[doorUID]->_lastTickTime2 > _CroTrByUID[doorUID]->_lastTickTime1)?_CroTrByUID[doorUID]->_lastTickTime2:_CroTrByUID[doorUID]->_lastTickTime1;
 //                    locDistToDoor = (locDistToDoor + locDistToDoorAdd * p->Getdt() * p->GetEllipse().GetV0())/2;
