@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Mar  7 15:40:15 2017
+
+@author: valentina
+"""
 """
 Test description
 ================
-- UO
-- Fundamental Diagram in 2D, test number 103
-- Width = 2.0 m
-- Length = 8.0 m
-- Measurement area: X = [9, 11],  Y = [1.3, 3.7]
 
 Remarks
 =======
-TODO: Compare two "clouds" of points and return a number.
 
 Source
 ======
@@ -35,18 +35,19 @@ def plot_results(results):
     dsim = results[1]
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
-    p1 = plt.plot(dsim[:, 2], dsim[:, 3], ".b", ms=0.1 , alpha=0.5, label="simulation")
-    p2 = plt.plot(dexp[:, 0], dexp[:, 1], "xr", label="experiment")
+    plt.plot(dsim[:, 1], dsim[:, 2], ".b", alpha=0.5, label="simulation")
+    plt.plot(dexp[:, 0], dexp[:, 1], "xr", label="experiment")
     plt.ylabel(r"$v\; [m/s]$", size=ms)
-    plt.xlabel(r"$\rho \; [1/m^2]$", size=ms)
+    plt.xlabel(r"$\rho \; [1/m]$", size=ms)
+    plt.ylim([0, 1.5])
+    plt.xlim([0, 3.0])
     plt.xticks(fontsize=mt)
     plt.yticks(fontsize=mt)
-    leg = plt.legend(loc="best", numpoints=1)
-
+    plt.legend(loc="best", numpoints=1)
     fig.set_tight_layout(True)
-    plt.savefig("fd2d_uo.png", dpi=300)
+    plt.savefig("ToChange.png", dpi=300)
 
-def run_validation_3(inifile, trajfile):
+def run_validation_4(inifile, trajfile):
     return 0
 
 def eval_results(results):
@@ -56,11 +57,11 @@ def eval_results(results):
     return res
 
 if __name__ == "__main__":
-    test = JPSRunTestDriver(103, argv0=argv[0],
+    test = JPSRunTestDriver(104, argv0=argv[0],
                             testdir=sys.path[0],
                             utestdir=utestdir)
 
-    results = test.run_test(testfunction=run_validation_3, fd=1)
+    results = test.run_test(testfunction=run_validation_4, fd=1)
     res = eval_results(results) 
     if res < critical_value:
         plot_results(results)
