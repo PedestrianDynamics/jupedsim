@@ -2,99 +2,71 @@
 """
 Test description
 ================
-1000 pedestrians are distributed in a room with 4 exits.
-scenario 1: All 4 exits are open
-scenario 2: 2 exits are closed. The remaining 2 are still open
+1000 pedestrians are distributed in a room of 30m lenght and 20m width. Each of the longer walls of the room
+has two exits of 1m width. There are two scenarios calculated:
 
-The flow should nearly be doubled in scenario 1.
+Scenario 1: All four exits are open
+Scenario 2: The exits of one of the longer walls are closed. The remaining two exits remain open.
+
+The test shows, that the evacuation time of scenario 1 is about the half the evacuation time in scenario 2.
 
 Remarks
 =======
+Use this code with python 2
+Use new dedicated python console if you run this code with spyder
+
 For simplicity we simulate two identical rooms:
-1. room left: with 4 exits. All of them are open
-2. room right with 4 exits. two of them are closed
-3. We write the trajectory in plain txt-format, to avoid a long lasting xml-parsing
+Room left with 4 exits. All of them are open.
+Room right with 4 exits. Two of them are closed.
+
+The exits of the left room have the ids 0 to 3.
+The exits of the right room have the ids 6 and 7.
+
 Source
 ======
-http://www.rimea.de/fileadmin/files/dok/richtlinien/r2.2.1.pdf
+http://www.rimea.de/fileadmin/files/dok/richtlinien/RiMEA_Richtlinie_3.0.0_-_D-E.pdf
 """
 
 import os
 import sys
-import matplotlib.pyplot as plt
 from sys import *
-
+import glob
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
-
 sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
 
-#  ==================== todo: read these variables from the geometry.xml
-r1_left = 0
-r1_right = 30
+def run_rimea_test9(inifile, trajfile):
 
-r2_left = r1_left + 31
-r2_right = r1_right + 31
-
-down = 0
-up = 20
-
-tolerance = 0.5
-# =========================================================================
-
-
-def eval_results(results):
-    results = np.array(results)
-    mean_r1 = np.mean(results[:, 0])
-    mean_r2 = np.mean(results[:, 1])
-    std_r1 = np.std(results[:, 0])
-    std_r2 = np.std(results[:, 1])
-    logging.info("mean left: %.2f (+- %.2f), mean right: %.2f (+- %.2f)",
-                 mean_r1, std_r1, mean_r2, std_r2)
-    plt.plot(results[:, 0], "o-", lw=2, label="Room left")
-    plt.plot(results[:, 1], "o-", lw=2, label="Room right")
-    plt.ylabel("evac time")
-    plt.xlabel("# runs")
-    plt.legend(loc="best")
-    plt.savefig("evac_times.png")
-    rel_error = np.abs(mean_r2 - 2*mean_r1)/(2*mean_r1)
-    if rel_error > tolerance:
-        logging.critical("%s exists with FAILURE. rel_error = %.2f, tolerance = %.2f",
-                         argv[0], rel_error, tolerance)
+    # Read data:
+    left_room_0 = np.loadtxt('trajectories/traj.xml_flow_exit_id_0.dat')
+    left_room_1 = np.loadtxt('trajectories/traj.xml_flow_exit_id_1.dat')
+    left_room_2 = np.loadtxt('trajectories/traj.xml_flow_exit_id_2.dat')
+    left_room_3 = np.loadtxt('trajectories/traj.xml_flow_exit_id_3.dat')
+    
+    right_room_0 = np.loadtxt('trajectories/traj.xml_flow_exit_id_6.dat')
+    right_room_1 = np.loadtxt('trajectories/traj.xml_flow_exit_id_7.dat')
+    
+    # Evac times for each scenario:
+    evac_time_left = np.max([left_room_0[-1,0], left_room_1[-1,0], left_room_2[-1,0], left_room_3[-1,0]])
+    evac_time_right = np.max([right_room_0[-1,0], right_room_1[-1,0]])
+    
+    logging.info("Evac_time_4_door: %f, Evac_time_2_door: %f", evac_time_left, evac_time_right)
+    
+    factor = evac_time_right/evac_time_left
+    
+    if 1.6 <= factor <= 2.4:
+        logging.info("Evac_time_2door divided by Evac_time_4door is in between:")
+        logging.info("1.6 <= %f <= 2.4", factor)
+    else:
+        logging.info("Evac_time_2door divided by Evac_time_4door is not in between:")
+        logging.info("1.6 <= %f <= 2.4", factor)
+        logging.critical("%s exists with FAILURE.", argv[0])
         exit(FAILURE)
 
-def run_rimea_test9(inifile, trajfile):
-    max_frame_r1 = []
-    max_frame_r2 = []
-    #fps, numpeds, traj = parse_file(trajfile)
-    fps = 8
-    traj = np.loadtxt(trajfile)
-    numpeds = np.max(traj[:, 0])
-    max_frame = np.max(traj[:, 1])
-    peds = np.unique(traj[:, 0])
-    logging.info("=== npeds: %d, max_frame: %d, fps: %d", numpeds, max_frame, fps)
-    for ped in peds:
-        ptraj = traj[traj[:, 0] == ped]
-        if is_inside(ptraj, r1_left, r1_right, down, up):
-            max_frame_r1.append(np.max(ptraj[:, 1]))
-        elif is_inside(ptraj, r2_left, r2_right, down, up):
-            max_frame_r2.append(np.max(ptraj[:, 1]))
-        else:
-            logging.warning("*** ped: %d is nowhere! ***", ped)
-
-    time_r1 = np.max(max_frame_r1)/fps
-    time_r2 = np.max(max_frame_r2)/fps
-
-    logging.info("max time room left: %.2f, max time room right: %.2f", time_r1, time_r2)
-    return (time_r1, time_r2)
-
-if __name__ == "__main__":
-
+if __name__ == "__main__": 
     test = JPSRunTestDriver(9, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
-    results = test.run_test(testfunction=run_rimea_test9)
-    eval_results(results)
-
+    test.run_test(testfunction=run_rimea_test9)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
 

@@ -1,208 +1,142 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.8" 
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-          xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
+<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 
-  <!-- seed used for initialising random generator -->
-  <seed>1254</seed>
-  <max_sim_time>1000</max_sim_time>
-  <num_threads>8</num_threads>
-  <!-- geometry file -->
-  <geometry>../geometry.xml</geometry>
-  <!-- trajectories file and format -->
-  <trajectories format="xml-plain" fps="8" color_mode="group">
-    <file location="RiMEATest7_traj.xml" />
-    <!--<socket hostname="127.0.0.1" port="8989"/> -->
-  </trajectories>
-  <!-- where to store the logs -->
-  <!--<logfile>log.txt</logfile> -->
+	<!-- seed used for initialising random generator -->
+	<seed>1254</seed>
+	<max_sim_time>1000</max_sim_time>
+	
+	<!-- geometry file -->
+	<geometry>../geometry.xml</geometry>
+	
+	<!-- trajectories file and format -->
+	<trajectories format="xml-plain" fps="8" color_mode="group">
+		<file location="RiMEATest7_traj.xml" />
+		<!--<socket hostname="127.0.0.1" port="8989"/> -->
+	</trajectories>
+	
+	<!-- where to store the logs -->
+	<!-- <logfile>log.txt</logfile> -->
 
+	<!-- traffic information: e.g closed doors -->
+	<traffic_constraints>
+	</traffic_constraints>
 
-  <!-- traffic information: e.g closed doors -->
-  <traffic_constraints>
-    <doors>
-      <!-- <door trans_id="2" caption="main_exit" state="open" />
-	   <door trans_id="3" caption="door" state="open"	/> -->
-    </doors>
-  </traffic_constraints>
+	<routing>
+	</routing>
 
-  <routing>
-    <!-- <goals>
-	 <goal id="0" final="true" caption="goal 0">
-	 <polygon>
-	 <vertex px="12.5" py="2.0" />
-	 <vertex px="12.5" py="0.0" />
-	 <vertex px="13.0" py="0.0" />
-	 <vertex px="13.0" py="2.0" />
-	 <vertex px="12.5" py="2.0" />
-	 </polygon>
-	 </goal>
-	 </goals> -->
-  </routing>
+	<!--persons information and distribution -->
+	<agents operational_model_id="1">
+		<agents_distribution>
+			<!-- 20 < age < 30 -->
+			<group group_id="0" agent_parameter_id="1"  subroom_id="0" goal_id="-1" number="50" router_id="1" pre_movement_mean="0" pre_movement_sigma="0" x_min="19.5" x_max="20.5"/>
+			<!-- 30 < age < 50 -->
+			<group group_id="1" agent_parameter_id="2"  subroom_id="0" goal_id="-1" number="50" router_id="1" pre_movement_mean="30" pre_movement_sigma="0" x_min="14.5" x_max="15.5"/>
+			<!-- 50 < age < 80 -->
+			<group group_id="2" agent_parameter_id="3"  subroom_id="0" goal_id="-1" number="50" router_id="1" pre_movement_mean="60" pre_movement_sigma="0" x_min="9.5" x_max="10.5"/>
+			<!-- handicapped -->
+			<group group_id="3"  agent_parameter_id="4"  subroom_id="0" goal_id="-1" number="50"  router_id="1"  pre_movement_mean="90" pre_movement_sigma="0" x_min="4.5" x_max="5.5"/>
+		</agents_distribution>
+	</agents>
 
-  <!--persons information and distribution -->
-  <agents operational_model_id="[1, 5]">
-    <agents_distribution>
-       <!-- <30 -->
-       <group group_id="0" agent_parameter_id="1"  subroom_id="0" goal_id="-1" number="1
+	<!-- These parameters may be overwritten -->
+	<operational_models>
+		<model operational_model_id="1" description="gcfm">
+			<model_parameters>
+				<solver>euler</solver>
+				<stepsize>0.01</stepsize>
+				<exit_crossing_strategy>4</exit_crossing_strategy>
+				<linkedcells enabled="true" cell_size="2.2" />
+				<force_ped nu="0.0" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+				<force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+			</model_parameters>
+			<agent_parameters agent_parameter_id="1">
+				<v0 mu="1.095" sigma="0.2" />
+				<v0_upstairs mu="0.5" sigma="0.0" />
+				<v0_downstairs mu="0.65" sigma="0.0" />
+				<bmax mu="0.25" sigma="0.001" />
+				<bmin mu="0.20" sigma="0.001" />
+				<amin mu="0.18" sigma="0.001" />
+				<tau mu="0.5" sigma="0.001" />
+				<atau mu="0.5" sigma="0.001" />
+			</agent_parameters>
+			<agent_parameters agent_parameter_id="2">
+				<v0 mu="1.475" sigma="0.02" />
+				<bmax mu="0.25" sigma="0.001" />
+				<bmin mu="0.20" sigma="0.001" />
+				<amin mu="0.18" sigma="0.001" />
+				<tau mu="0.5" sigma="0.001" />
+				<atau mu="0.5" sigma="0.001" />
+			</agent_parameters>
+			<agent_parameters agent_parameter_id="3">
+				<v0 mu="1.045" sigma="0.13" />
+				<bmax mu="0.25" sigma="0.001" />
+				<bmin mu="0.20" sigma="0.001" />
+				<amin mu="0.18" sigma="0.001" />
+				<tau mu="0.5" sigma="0.001" />
+				<atau mu="0.5" sigma="0.001" />
+			</agent_parameters>
+			<agent_parameters agent_parameter_id="4">
+				<v0 mu="0.61" sigma="0.05" />
+				<bmax mu="0.25" sigma="0.001" />
+				<bmin mu="0.20" sigma="0.001" />
+				<amin mu="0.18" sigma="0.001" />
+				<tau mu="0.5" sigma="0.001" />
+				<atau mu="0.5" sigma="0.001" />
+			</agent_parameters>
+		</model>
 
-50" router_id="1" pre_movement_mean="0" pre_movement_sigma="0" x_min="60" x_max="80"/>
-       <!-- 30-50 -->
-       <group group_id="1" agent_parameter_id="2"  subroom_id="0" goal_id="-1" number="150" router_id="1" pre_movement_mean="30" pre_movement_sigma="0" x_min="40" x_max="60"/>
-       <!-- >50 -->
-       <group group_id="2" agent_parameter_id="3"  subroom_id="0" goal_id="-1" number="150" router_id="1" pre_movement_mean="60" pre_movement_sigma="0" x_min="20" x_max="40"/>
-       <!-- mobility -->
-      <group group_id="3"  agent_parameter_id="4"  subroom_id="0" goal_id="-1" number="150"  router_id="1"  pre_movement_mean="90" pre_movement_sigma="0" x_min="0" x_max="20"/>
-    </agents_distribution>
-  </agents>
-
-  <!-- These parameters may be overwritten -->
-  <operational_models>
-    <model operational_model_id="1" description="gcfm">
-      <model_parameters>
-        <solver>euler</solver>
-        <stepsize>0.01</stepsize>
-        <exit_crossing_strategy>4</exit_crossing_strategy>
-        <linkedcells enabled="true" cell_size="2.2" />
-        <force_ped nu="0.0" dist_max="3" disteff_max="2" interpolation_width="0.1" />
-        <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
-      </model_parameters>
-      <agent_parameters agent_parameter_id="1">
-        <v0 mu="1.095" sigma="0.2" />
-        <v0_upstairs mu="0.5" sigma="0.0" />
-        <v0_downstairs mu="0.65" sigma="0.0" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-      <agent_parameters agent_parameter_id="2">
-        <v0 mu="1.475" sigma="0.02" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-      <agent_parameters agent_parameter_id="3">
-        <v0 mu="1.045" sigma="0.13" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-      <agent_parameters agent_parameter_id="4">
-        <v0 mu="0.61" sigma="0.05" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-    </model>
-
-  <operational_models>
-    <model operational_model_id="5" description="krausz">
-      <model_parameters>
-        <solver>euler</solver>
-        <stepsize>0.01</stepsize>
-        <exit_crossing_strategy>4</exit_crossing_strategy>
-        <linkedcells enabled="true" cell_size="2.2" />
-        <force_ped nu="0.0" dist_max="3" disteff_max="2" interpolation_width="0.1" />
-        <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
-      </model_parameters>
-      <agent_parameters agent_parameter_id="1">
-        <v0 mu="1.095" sigma="0.2" />
-        <v0_upstairs mu="0.5" sigma="0.0" />
-        <v0_downstairs mu="0.65" sigma="0.0" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-      <agent_parameters agent_parameter_id="2">
-        <v0 mu="1.475" sigma="0.02" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-      <agent_parameters agent_parameter_id="3">
-        <v0 mu="1.045" sigma="0.13" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-      <agent_parameters agent_parameter_id="4">
-        <v0 mu="0.61" sigma="0.05" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-    </model>
-
-    <model operational_model_id="2" description="gompertz">
-      <model_parameters>
-        <solver>euler</solver>
-        <stepsize>0.01</stepsize>
-        <exit_crossing_strategy>3</exit_crossing_strategy>
-        <linkedcells enabled="true" cell_size="2.2" />
-        <force_ped nu="3"  b="0.25" c="3.0"/>
-        <force_wall nu="10" b="0.70" c="3.0"/>
-      </model_parameters>
+		<model operational_model_id="2" description="gompertz">
+			<model_parameters>
+				<solver>euler</solver>
+				<stepsize>0.01</stepsize>
+				<exit_crossing_strategy>3</exit_crossing_strategy>
+				<linkedcells enabled="true" cell_size="2.2" />
+				<force_ped nu="3"  b="0.25" c="3.0"/>
+				<force_wall nu="10" b="0.70" c="3.0"/>
+			</model_parameters>
             <agent_parameters agent_parameter_id="1">
-        <v0 mu="1.095" sigma="0.2" />
-        <v0_upstairs mu="0.5" sigma="0.0" />
-        <v0_downstairs mu="0.65" sigma="0.0" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-      <agent_parameters agent_parameter_id="2">
-        <v0 mu="1.475" sigma="0.02" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-      <agent_parameters agent_parameter_id="3">
-        <v0 mu="1.045" sigma="0.13" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-      <agent_parameters agent_parameter_id="4">
-        <v0 mu="0.61" sigma="0.05" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-    </model>
-  </operational_models>
+				<v0 mu="1.095" sigma="0.2" />
+				<v0_upstairs mu="0.5" sigma="0.0" />
+				<v0_downstairs mu="0.65" sigma="0.0" />
+				<bmax mu="0.25" sigma="0.001" />
+				<bmin mu="0.20" sigma="0.001" />
+				<amin mu="0.18" sigma="0.001" />
+				<tau mu="0.5" sigma="0.001" />
+				<atau mu="0.5" sigma="0.001" />
+			</agent_parameters>
+			<agent_parameters agent_parameter_id="2">
+				<v0 mu="1.475" sigma="0.02" />
+				<bmax mu="0.25" sigma="0.001" />
+				<bmin mu="0.20" sigma="0.001" />
+				<amin mu="0.18" sigma="0.001" />
+				<tau mu="0.5" sigma="0.001" />
+				<atau mu="0.5" sigma="0.001" />
+			</agent_parameters>
+			<agent_parameters agent_parameter_id="3">
+				<v0 mu="1.045" sigma="0.13" />
+				<bmax mu="0.25" sigma="0.001" />
+				<bmin mu="0.20" sigma="0.001" />
+				<amin mu="0.18" sigma="0.001" />
+				<tau mu="0.5" sigma="0.001" />
+				<atau mu="0.5" sigma="0.001" />
+			</agent_parameters>
+			<agent_parameters agent_parameter_id="4">
+				<v0 mu="0.61" sigma="0.05" />
+				<bmax mu="0.25" sigma="0.001" />
+				<bmin mu="0.20" sigma="0.001" />
+				<amin mu="0.18" sigma="0.001" />
+				<tau mu="0.5" sigma="0.001" />
+				<atau mu="0.5" sigma="0.001" />
+			</agent_parameters>
+		</model>
+	</operational_models>
 
-  <route_choice_models>
-    <router router_id="1" description="global_shortest">
-      <parameters>
-	<!-- <navigation_lines file="routing.xml" /> -->
-      </parameters>
-    </router>
-
-  </route_choice_models>
+	<route_choice_models>
+		<router router_id="1" description="global_shortest">
+			<parameters>
+			</parameters>
+		</router>
+	</route_choice_models>
 
 </JuPedSim>
