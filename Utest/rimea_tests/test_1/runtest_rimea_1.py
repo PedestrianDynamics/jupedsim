@@ -33,10 +33,13 @@ def run_rimea_test1(inifile, trajfile):
     must_max_time = 34.0
     # Read data
     fps, n, traj = parse_file(trajfile)
-    # Pedestrian starting at x = -1, only get traveltime between x = 0 and x = 40
+
+    # Pedestrian starting at x = -1,
+    # only get traveltime between x = 0 and x = 40
     in_way = (traj[:, 2] >= start_way) & (traj[:, 2] <= end_way)
     traj_way = traj[in_way]
     evac_time = (max(traj_way[:, 1]) - min(traj_way[:, 1])) / float(fps)
+
     # Check wether the simulation fits into the wanted range of time 
     if must_min_time <= evac_time <= must_max_time:
         logging.info("evac_time: %f <= %f <= %f", must_min_time, evac_time, must_max_time)
