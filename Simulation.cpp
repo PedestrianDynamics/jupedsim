@@ -480,7 +480,7 @@ double Simulation::RunBody(double maxSimTime)
         ProcessAgentsQueue();
 
         if (t>Pedestrian::GetMinPremovementTime()) {
-            //@todo: @ar.graf: here we could place router-tasks (calc new maps) that can use multiple cores
+            //@todo: @ar.graf: here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
 
             //update the linked cells
             _building->UpdateGrid();
