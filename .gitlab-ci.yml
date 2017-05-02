@@ -36,8 +36,8 @@ configure-linux:
     - linux
 #============== compile ============
 make-linux:
-  except:
-    - newIsInSubroom 
+  #except:
+  #  - newIsInSubroom 
   dependencies:
     - configure-linux
   artifacts:
