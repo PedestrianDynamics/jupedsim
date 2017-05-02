@@ -36,6 +36,8 @@ configure-linux:
     - linux
 #============== compile ============
 make-linux:
+  except:
+    - newIsInSubroom 
   dependencies:
     - configure-linux
   artifacts:
@@ -52,8 +54,7 @@ make-linux:
     - cd build
     - make -j$nproc
     - echo "compile | ${CI_PROJECT_DIR}"
-  except:    
-    - newIsInSubroom 
+
 #============== unit_test ============
 test:
   dependencies:
