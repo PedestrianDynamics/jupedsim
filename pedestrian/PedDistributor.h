@@ -93,6 +93,14 @@ public:
 
     const std::vector<std::shared_ptr<AgentsSource> > &GetAgentsSources() const;
 
+    /**
+     * Get positions from filename
+     * Only for frame's position for every id is given
+     * WARNING: It is assumed that positions should be in the corresponding room/subroom. 
+     * checks with n if the file delivers the right number of peds
+     */
+    const vector<Point>  GetPositionsFromFile(std::string filename, int n, std::string unit) const;
+
 };
 
 #endif  /* _PEDDISTRIBUTOR_H */

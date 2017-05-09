@@ -100,7 +100,7 @@ Building::Building(const Configuration* configuration, PedDistributor& pedDistri
 
 
      if (!pedDistributor.Distribute(this)) {
-          Log->Write("ERROR:\t could not distribute the pedestrians");
+          Log->Write("ERROR:\tcould not distribute the pedestrians\n");
           exit(EXIT_FAILURE);
      }
 

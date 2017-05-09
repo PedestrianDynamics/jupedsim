@@ -509,9 +509,12 @@ double Simulation::RunBody(double maxSimTime)
         if (0==frameNr%writeInterval) {
             _iod->WriteFrame(frameNr/writeInterval, _building.get());
         }
-        if(!_gotSources /*&& _printPB*/) // @todo: option for print progressbar
+        if(!_gotSources && !_periodic /*&& _printPB*/) // @todo: option for print progressbar
               // Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
-              //bar->Progressed(initialnPeds-_nPeds);
+              bar->Progressed(initialnPeds-_nPeds);
+        else
+             printf("time: %.2f | %.2f\n",  t , maxSimTime);
+
         // needed to control the execution time PART 2
         // time(&endtime);
         // double timeToWait=t-difftime(endtime, starttime);
