@@ -511,7 +511,7 @@ double Simulation::RunBody(double maxSimTime)
         }
         if(!_gotSources && !_periodic /*&& _printPB*/) // @todo: option for print progressbar
               // Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
-              bar->Progressed(initialnPeds-_nPeds);
+              //bar->Progressed(initialnPeds-_nPeds);
         else
              printf("time: %.2f | %.2f\n",  t , maxSimTime);
 
