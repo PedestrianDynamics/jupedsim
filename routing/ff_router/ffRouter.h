@@ -162,45 +162,24 @@ public:
      virtual int FindExit(Pedestrian* p);
 
      /*!
-      * \brief
-      *
-      */
-     void Reset();
-
-     /*!
       * \brief Perform the FloydWarshall algorithm
       */
      void FloydWarshall();
 
-     /*!
-      * \brief Sets the door that leaves the subroom in _pathsMatrix
-      *
-      * Due to the way we calculate door distances (entries in _pathsMatrix), pedestrians in a corridor
-      * tend to jump from door to door, i.e. they walk to the next door in the correct direction, but they
-      * do not traverse it. This algorithm searches for the door on the way that really leaves the subroom,
-      * and sets this door in _pathsMatrix, which in turn is needed by GetPresumableExitRoute().
-      */
-     void AvoidDoorHopping();
-
-     /*!
-      * \brief set all the distances using ff
-      */
-     //void SetDistances();
+//     /*!
+//      * \brief Sets the door that leaves the subroom in _pathsMatrix
+//      *
+//      * Due to the way we calculate door distances (entries in _pathsMatrix), pedestrians in a corridor
+//      * tend to jump from door to door, i.e. they walk to the next door in the correct direction, but they
+//      * do not traverse it. This algorithm searches for the door on the way that really leaves the subroom,
+//      * and sets this door in _pathsMatrix, which in turn is needed by GetPresumableExitRoute().
+//      */
+//     void AvoidDoorHopping();
 
      /*!
       * \brief set mode (shortest, quickest, ...)
       */
       void SetMode(std::string s);
-
-     /*!
-      * \brief notify door about time spent in that room. needed for quickest mode
-      */
-     void notifyDoor(Pedestrian* const p);
-
-     /*!
-      * \brief mark pedestrian as not being in the first room anymore and return to normal routing
-      */
-     void save(Pedestrian* const p);
 
      /*!
       * \brief Get the route the pedestrian p wants to take (according to _pathsMatrix)

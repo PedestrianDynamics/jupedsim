@@ -817,84 +817,84 @@ void FFRouter::FloydWarshall()
      }
 }
 
-void FFRouter::AvoidDoorHopping() {
-     std::chrono::time_point<std::chrono::system_clock> start, end;
-     start = std::chrono::system_clock::now();
-
-     // it's already very fast (< 0.1s) -- no need to parallelize
-//#pragma omp parallel for
-     for (auto pathsIt : _pathsMatrix) {
-          auto key = pathsIt.first;
-          if (key.first == key.second) continue;
-          if (_distMatrix[key] == DBL_MAX) {
-               continue;
-          }
-          auto subroom = _subroomMatrix.at(key);
-          if (!subroom) continue;
-
-          auto nextDoorUID = pathsIt.second;
-          auto nextDoor = _CroTrByUID.at(nextDoorUID);
-          auto finalDoor = key.second;
-
-          if (_targetWithinSubroom) {
-               int doorLeavingSubroom = -1; // initialization only needed in case of error
-
-               if (_CroTrByUID.at(nextDoorUID)->GetSubRoom1() == subroom || _CroTrByUID.at(nextDoorUID)->GetSubRoom2() == subroom) {
-                    doorLeavingSubroom = key.first;
-                    Crossing* doorAfterNext;
-                    do {
-                         doorLeavingSubroom = _pathsMatrix.at(std::make_pair(doorLeavingSubroom, finalDoor));
-                         if (doorLeavingSubroom == finalDoor) break;
-                         auto doorAfterNextUID = _pathsMatrix.at(std::make_pair(doorLeavingSubroom, finalDoor));
-                         doorAfterNext = _CroTrByUID.at(doorAfterNextUID);
-                    } while (doorAfterNext->GetSubRoom1() == subroom || doorAfterNext->GetSubRoom2() == subroom);
-               } else {
-                    Log->Write("ERROR \tFFRouter::AvoidDoorHopping: sub is %p (UID %d), nextDoorUID/ID is %d/%d", subroom, subroom?subroom->GetUID():-1, nextDoorUID, nextDoor->GetID());
-               }
-//#pragma omp critical(_pathsMatrix)
-               _pathsMatrix.at(key) = doorLeavingSubroom;
-               if (_pathsMatrix.at(key) == -1) {
-                    Log->Write("ERROR \tFFRouter::AvoidDoorHopping(): _pathsMatrix got assigned a value of -1 for key %d, %d", key.first, key.second);
-               }
-          } else {
-               int doorLeavingRoom = -1; // initialization only needed in case of error
-               auto room = _building->GetRoom(subroom->GetRoomID());
-
-               auto tr = dynamic_cast<Transition*>(_CroTrByUID.at(nextDoorUID));
-               if (room && (_CroTrByUID.at(nextDoorUID)->GetRoom1() == room || (tr && tr->GetRoom2() == room))) {
-                    Transition* doorAfterNext;
-                    int doorAfterNextUID = key.first;
-                    do {
-                         doorLeavingRoom = doorAfterNextUID;
-
-                         do {
-                              doorAfterNextUID = _pathsMatrix.at(std::make_pair(doorAfterNextUID, finalDoor));
-                         } while (doorAfterNextUID != finalDoor && !(doorAfterNext = dynamic_cast<Transition*>(_CroTrByUID.at(doorAfterNextUID))));
-
-                         if (doorAfterNextUID == finalDoor) {
-                              if (doorLeavingRoom == key.first) {
-                                   // handles the case in which in the final door is in the room we are going to enter
-                                   doorLeavingRoom = finalDoor;
-                              }
-                              break;
-                         }
-
-                    } while (doorAfterNext->GetRoom1() == room || doorAfterNext->GetRoom2() == room);
-               } else {
-                    Log->Write("ERROR \tFFRouter::AvoidDoorHopping: room is %p (ID %d), nextDoorUID/ID is %d/%d", room, room ? room->GetID() : -1, nextDoorUID, nextDoor->GetID());
-               }
-//#pragma omp critical(_pathsMatrix)
-               _pathsMatrix.at(key) = doorLeavingRoom;
-               if (_pathsMatrix.at(key) == -1) {
-                    Log->Write("ERROR \tFFRouter::AvoidDoorHopping(): _pathsMatrix got assigned a value of -1 for key %d, %d", key.first, key.second);
-               }
-          }
-     }
-
-     end = std::chrono::system_clock::now();
-     std::chrono::duration<double> elapsed_seconds = end-start;
-     Log->Write("INFO: \tTime in AvoidDoorHopping: " + std::to_string(elapsed_seconds.count()));
-}
+//void FFRouter::AvoidDoorHopping() {
+//     std::chrono::time_point<std::chrono::system_clock> start, end;
+//     start = std::chrono::system_clock::now();
+//
+//     // it's already very fast (< 0.1s) -- no need to parallelize
+////#pragma omp parallel for
+//     for (auto pathsIt : _pathsMatrix) {
+//          auto key = pathsIt.first;
+//          if (key.first == key.second) continue;
+//          if (_distMatrix[key] == DBL_MAX) {
+//               continue;
+//          }
+//          auto subroom = _subroomMatrix.at(key);
+//          if (!subroom) continue;
+//
+//          auto nextDoorUID = pathsIt.second;
+//          auto nextDoor = _CroTrByUID.at(nextDoorUID);
+//          auto finalDoor = key.second;
+//
+//          if (_targetWithinSubroom) {
+//               int doorLeavingSubroom = -1; // initialization only needed in case of error
+//
+//               if (_CroTrByUID.at(nextDoorUID)->GetSubRoom1() == subroom || _CroTrByUID.at(nextDoorUID)->GetSubRoom2() == subroom) {
+//                    doorLeavingSubroom = key.first;
+//                    Crossing* doorAfterNext;
+//                    do {
+//                         doorLeavingSubroom = _pathsMatrix.at(std::make_pair(doorLeavingSubroom, finalDoor));
+//                         if (doorLeavingSubroom == finalDoor) break;
+//                         auto doorAfterNextUID = _pathsMatrix.at(std::make_pair(doorLeavingSubroom, finalDoor));
+//                         doorAfterNext = _CroTrByUID.at(doorAfterNextUID);
+//                    } while (doorAfterNext->GetSubRoom1() == subroom || doorAfterNext->GetSubRoom2() == subroom);
+//               } else {
+//                    Log->Write("ERROR \tFFRouter::AvoidDoorHopping: sub is %p (UID %d), nextDoorUID/ID is %d/%d", subroom, subroom?subroom->GetUID():-1, nextDoorUID, nextDoor->GetID());
+//               }
+////#pragma omp critical(_pathsMatrix)
+//               _pathsMatrix.at(key) = doorLeavingSubroom;
+//               if (_pathsMatrix.at(key) == -1) {
+//                    Log->Write("ERROR \tFFRouter::AvoidDoorHopping(): _pathsMatrix got assigned a value of -1 for key %d, %d", key.first, key.second);
+//               }
+//          } else {
+//               int doorLeavingRoom = -1; // initialization only needed in case of error
+//               auto room = _building->GetRoom(subroom->GetRoomID());
+//
+//               auto tr = dynamic_cast<Transition*>(_CroTrByUID.at(nextDoorUID));
+//               if (room && (_CroTrByUID.at(nextDoorUID)->GetRoom1() == room || (tr && tr->GetRoom2() == room))) {
+//                    Transition* doorAfterNext;
+//                    int doorAfterNextUID = key.first;
+//                    do {
+//                         doorLeavingRoom = doorAfterNextUID;
+//
+//                         do {
+//                              doorAfterNextUID = _pathsMatrix.at(std::make_pair(doorAfterNextUID, finalDoor));
+//                         } while (doorAfterNextUID != finalDoor && !(doorAfterNext = dynamic_cast<Transition*>(_CroTrByUID.at(doorAfterNextUID))));
+//
+//                         if (doorAfterNextUID == finalDoor) {
+//                              if (doorLeavingRoom == key.first) {
+//                                   // handles the case in which in the final door is in the room we are going to enter
+//                                   doorLeavingRoom = finalDoor;
+//                              }
+//                              break;
+//                         }
+//
+//                    } while (doorAfterNext->GetRoom1() == room || doorAfterNext->GetRoom2() == room);
+//               } else {
+//                    Log->Write("ERROR \tFFRouter::AvoidDoorHopping: room is %p (ID %d), nextDoorUID/ID is %d/%d", room, room ? room->GetID() : -1, nextDoorUID, nextDoor->GetID());
+//               }
+////#pragma omp critical(_pathsMatrix)
+//               _pathsMatrix.at(key) = doorLeavingRoom;
+//               if (_pathsMatrix.at(key) == -1) {
+//                    Log->Write("ERROR \tFFRouter::AvoidDoorHopping(): _pathsMatrix got assigned a value of -1 for key %d, %d", key.first, key.second);
+//               }
+//          }
+//     }
+//
+//     end = std::chrono::system_clock::now();
+//     std::chrono::duration<double> elapsed_seconds = end-start;
+//     Log->Write("INFO: \tTime in AvoidDoorHopping: " + std::to_string(elapsed_seconds.count()));
+//}
 
 void FFRouter::SetMode(std::string s)
 {
@@ -910,42 +910,4 @@ void FFRouter::SetMode(std::string s)
 
      _mode = global_shortest;
      return;
-}
-
-void FFRouter::notifyDoor(Pedestrian *const p) {
-     if (p->GetV().Norm() > 0.5) {
-          return;
-     }
-     //find correct door
-     auto lastSubRoom = _building->GetSubRoomByUID(p->GetSubRoomUID());
-     auto doorsOfSubRoom = lastSubRoom->GetAllGoalIDs();
-     double minDist = _CroTrByUID.at(doorsOfSubRoom[0])->DistTo(p->GetPos());
-     double tmp = minDist;
-     Crossing* minCross = _CroTrByUID.at(doorsOfSubRoom[0]);
-     for(auto UID : doorsOfSubRoom) {
-          tmp = _CroTrByUID.at(UID)->DistTo(p->GetPos());
-          if (tmp < minDist) {
-               minCross = _CroTrByUID.at(UID);
-               minDist = tmp;
-          }
-     }
-
-     //find correct direction, where direction means: subRoom1 uses TickTime1, subRoom2 uses TickTime2; order in the Crossing::HLine is defining
-     if (
-            (minCross->_lastTickTime2 == 0)
-         && (minCross->GetSubRoom1()) && (minCross->GetSubRoom1()->IsInSubRoom(p->GetPos()))) { //p is in subRoom1, so he entered that from subRoom2
-          minCross->_lastTickTime2 = p->_ticksInThisRoom;
-          minCross->_refresh2 = 0;
-     }
-     if (
-             (minCross->_lastTickTime1 == 0)
-          && (minCross->GetSubRoom2()) && (minCross->GetSubRoom2()->IsInSubRoom(p->GetPos()))) {
-          minCross->_lastTickTime1 = p->_ticksInThisRoom;
-          minCross->_refresh1 = 0;
-     }
-     p->_ticksInThisRoom = 0;
-}
-
-void FFRouter::save(Pedestrian* const p) {
-     _localShortestSafedPeds.emplace_back(p->GetID());
 }
