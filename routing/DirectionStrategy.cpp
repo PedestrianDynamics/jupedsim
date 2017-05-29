@@ -410,48 +410,7 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
      _initDone = true;
 }
 
-bool DirectionLocalFloorfield::PreSim(Building* building) {
-     std::map<int, std::vector<int>> doorsInRoom;
-     doorsInRoom.clear();
-     Log->Write("INFO: \tDirectionLocalFloorfield::PreSim");
 
-     std::set<std::pair<int, int>> roomsDoorsSet;
-     roomsDoorsSet.clear();
-     auto allPeds = building->GetAllPedestrians();
-#pragma omp parallel
-     {
-#pragma omp for
-          for (size_t i = 0; i < allPeds.size(); ++i) {
-               auto ped = allPeds.begin();
-               std::advance(ped, i);
-               if (auto router = dynamic_cast<FFRouter*>((*ped)->GetRouter())) {
-                    auto pedSubroomsDoorSet = router->GetPresumableExitRoute(*ped);
-#pragma omp critical(roomsDoorsSet)
-                    for (auto it : pedSubroomsDoorSet) {
-                         roomsDoorsSet.insert(std::make_pair(it.first->GetRoomID(), it.second));
-                    }
-               }
-          }
-
-#pragma omp for
-          for (size_t i = 0; i < roomsDoorsSet.size(); ++i) {
-               auto rdIt = roomsDoorsSet.begin();
-               // suboptimal, because a set doesn't provide random-access iterators
-               std::advance(rdIt, i);
-               CalcFloorfield(rdIt->first, rdIt->second);
-#pragma omp critical(doorsInRoom)
-               doorsInRoom[rdIt->first].push_back(rdIt->second);
-          }
-     }
-
-     for (size_t i = 0; i < doorsInRoom.size(); ++i) {
-          auto roomIt = doorsInRoom.begin();
-          std::advance(roomIt, i);
-          //@todo: ar.graf: plz make switch in ini file and dependand on ini write yes/no (issue 208)
-          //writeFF(roomIt->first, roomIt->second);
-     }
-     return true;
-}
 
 void DirectionLocalFloorfield::CalcFloorfield(int room, int destUID) {
      Point dummy;

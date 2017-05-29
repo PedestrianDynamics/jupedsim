@@ -249,10 +249,6 @@ bool Simulation::InitArgs()
     // This should be done after the initialization of the operationalModel
     // because then, invalid pedestrians have been deleted and FindExit()
     // has been called.
-    Log->Write("INFO:\t PreSim of DirectionStrategy starting ...");
-    if (!_operationalModel->GetDirection()->PreSim(_building.get()))
-        return false;
-    Log->Write("INFO:\t PreSim of DirectionStrategy done");
 
     //other initializations
     for (auto&& ped: _building->GetAllPedestrians()) {
@@ -509,11 +505,11 @@ double Simulation::RunBody(double maxSimTime)
         if (0==frameNr%writeInterval) {
             _iod->WriteFrame(frameNr/writeInterval, _building.get());
         }
-        if(!_gotSources && !_periodic /*&& _printPB*/) // @todo: option for print progressbar
-              // Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
-              //bar->Progressed(initialnPeds-_nPeds);
-        else
-             printf("time: %.2f | %.2f\n",  t , maxSimTime);
+//        if(!_gotSources && !_periodic /*&& _printPB*/) // @todo: option for print progressbar
+//              // Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
+//              bar->Progressed(initialnPeds-_nPeds);
+//        else
+//             printf("time: %.2f | %.2f\n",  t , maxSimTime);
 
         // needed to control the execution time PART 2
         // time(&endtime);

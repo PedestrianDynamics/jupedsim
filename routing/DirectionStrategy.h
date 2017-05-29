@@ -46,41 +46,33 @@ public:
      DirectionStrategy();
      virtual ~DirectionStrategy();
 
-     // Allow the DirectionStrategy to perform some pre-simulation calculation, with all pedestrians
-     // already set and a valid _exitIndex. Returns true if the initialization was successful.
-     virtual bool PreSim(Building* building) = 0;
 
      virtual Point GetTarget(Room* room, Pedestrian* ped) const = 0;
 };
 
 class DirectionMiddlePoint : public DirectionStrategy {
 public:
-     virtual bool PreSim(Building* building) {(void) building; return true;};
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
 };
 
 class DirectionMinSeperation : public DirectionStrategy {
 public:
-     virtual bool PreSim(Building* building) {(void) building; return true;};
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
 };
 
 class DirectionMinSeperationShorterLine : public DirectionStrategy {
 public:
-     virtual bool PreSim(Building* building) {(void) building; return true;};
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
 };
 
 class DirectionInRangeBottleneck : public DirectionStrategy {
 public:
-     virtual bool PreSim(Building* building) {(void) building; return true;};
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
 };
 
 
 class DirectionGeneral : public DirectionStrategy {
 public:
-     virtual bool PreSim(Building* building) {(void) building; return true;};
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
 };
 
@@ -88,7 +80,6 @@ class DirectionFloorfield : public DirectionStrategy {
 public:
     DirectionFloorfield();
     void Init(Building* building, double stepsize, double threshold, bool useDistancMap);
-    virtual bool PreSim(Building* building) {(void) building; return true;};
     ~DirectionFloorfield();
     //void Init();
     virtual Point GetTarget(Room* room, Pedestrian* ped) const;
@@ -105,7 +96,6 @@ public:
      DirectionLocalFloorfield();
      void Init(Building* building, double stepsize, double threshold,
                bool useDistancMap);
-     virtual bool PreSim(Building* building);
      ~DirectionLocalFloorfield();
      //void Init();
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
@@ -132,7 +122,6 @@ public:
      DirectionSubLocalFloorfield();
      void Init(Building* building, double stepsize, double threshold,
            bool useDistancMap);
-     virtual bool PreSim(Building* building) {(void) building; return true;};
      ~DirectionSubLocalFloorfield();
      //void Init();
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;

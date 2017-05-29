@@ -64,6 +64,7 @@
 #include "../../general/Macros.h"
 #include "../../geometry/Building.h"
 #include "LocalFloorfieldViaFM.h"
+#include "UnivFFviaFM.h"
 
 class Building;
 class Pedestrian;
@@ -181,13 +182,6 @@ public:
       */
       void SetMode(std::string s);
 
-     /*!
-      * \brief Get the route the pedestrian p wants to take (according to _pathsMatrix)
-      * @param p The pedestrian in question
-      * @return A set containing (subroom*, doorUID) pairs. The floorfields needed are inside the subroom, originating from the door.
-      */
-     std::set<std::pair<SubRoom*, int>> GetPresumableExitRoute(Pedestrian* p);
-
 private:
 
 protected:
@@ -198,7 +192,7 @@ protected:
      std::vector<int>                         _allDoorUIDs;
      std::vector<int>                         _localShortestSafedPeds;
      const Building*                          _building;
-     std::map<int, LocalFloorfieldViaFM*>     _locffviafm; // the actual type might be CentrePointLocalFFViaFM
+     std::map<int, UnivFFviaFM*>     _locffviafm; // the actual type might be CentrePointLocalFFViaFM
      FloorfieldViaFM*                         _globalFF;
      std::map<int, Transition*>               _TransByUID;
      std::map<int, Transition*>               _ExitsByUID;
