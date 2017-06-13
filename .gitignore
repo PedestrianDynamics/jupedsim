@@ -10,7 +10,8 @@
 /figs
 /figs_bot
 /inputfiles
-/Utest
+/Utest/*.txt
+/Utest/rimea_tests/*/*.txt
 /Utest/*/inifiles*/
 /Utest/*/trajectories
 /Utest/rimea_tests/*/inifiles*/
