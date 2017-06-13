@@ -129,3 +129,8 @@ inputfiles/U8/
 inputfiles/VerteilerEbene/
 .idea*
 idea/codeStyleSettings.xml
+*.fls
+*.fdb_latexmk
+*.tex
+*.aux
+*.log
