@@ -1,9 +1,9 @@
 import os
-import re
-from pylatex import Document, PageStyle, Head, Foot, MiniPage, \
-    StandAloneGraphic, MultiColumn, Tabu, LongTabu, LargeText, MediumText, \
-    LineBreak, NewPage, Tabularx, TextColor, simple_page_number
-from pylatex.utils import bold, NoEscape
+import re, sys, subprocess
+from pylatex import Document, Command, PageStyle, Head, MiniPage, LargeText, LineBreak, \
+	LineBreak, MediumText, LongTabu, NewPage
+from pylatex.utils import NoEscape, bold
+
 
 
 ## Import a number of test(int), return all evac time in the log of this test
@@ -22,10 +22,11 @@ def get_evac_time(testnumber):
 			else:
 				continue
 
-	return evac_time
+	return evac_time ## eventuelle nur last result
 
 
-def generate_report():
+## for the report within evacution time
+def generate_eva_report():
 	geometry_options = {
 		"head": "40pt",
 		"margin": "0.5in",
@@ -34,30 +35,69 @@ def generate_report():
 	}
 	doc = Document(geometry_options=geometry_options)
 
-	first_page = PageStyle("firstpage")
+	## Define style of report
+	reportStyle = PageStyle("reportStyle")
 
-	with first_page.create(Head("L")) as left_header:
+	with reportStyle.create(Head("R")) as left_header:
 		with left_header.create(MiniPage(width=NoEscape(r"0.49\textwidth"),
 		                                  pos='c', align='l')) as title_wrapper:
 			title_wrapper.append(LargeText(bold("RiMEA-Projekt")))
 			title_wrapper.append(LineBreak())
 			title_wrapper.append(MediumText(bold("Anlyse")))
 
-	doc.preamble.append(first_page)
-	doc.change_document_style("firstpage")
-	## Add table
+	doc.preamble.append(reportStyle)
+
+	## Apply Pagestyle
+	doc.change_document_style("reportStyle")
+
+	## Create table
 	with doc.create(LongTabu("X[c] X[c]",
 	                         row_height=1.5)) as report_table:
 		report_table.add_row(["Test",
 		                    "evacuation time(s)"],
 		                   mapper=bold)
 		report_table.add_hline()
-		for i in range(1,4):  # TODO: Automatize filling the content
-			report_table.add_row(i, get_evac_time(i)[0])  # TODO: Calculate mean
+
+		for i in range(1,4):  
+			report_table.add_row(i, get_evac_time(i)[0])  
 
 	doc.append(NewPage())
 
 	doc.generate_pdf("RiMEA-Projekt Analyse", clean_tex=False)
 
-if __name__ == '__main__':
-	generate_report()
+
+def generate_info_report():
+	geometry_options = {
+			"head": "40pt",
+			"margin": "0.5in",
+			"bottom": "0.6in",
+			"includeheadfoot": True
+		}
+	
+	doc = Document(documentclass='report', geometry_options=geometry_options)
+
+	## add preamble part
+	generate_cover(doc)
+
+	doc.generate_pdf("RiMEA-Projekt Analyse", clean_tex=False)
+
+def generate_cover(doc):
+	doc.preamble.append(Command('title', 'RiMEA-Projekt Analyse'))
+	doc.preamble.append(Command('author', get_git_status()[1]))
+	doc.preamble.append(Command('date', get_git_status()[2]))
+	doc.append(NoEscape(r'\maketitle')) #TODO: add branch in title with titling package
+
+def get_git_status():
+	branch = subprocess.check_output(["git", "status"]).splitlines()[0].split(' ')[-1]
+
+	git_status = subprocess.check_output(["git", "show", "--pretty=medium"])
+	author = git_status.split('\n')[1]
+	date = git_status.split('\n')[2]
+
+	return branch, author, date
+
+
+if __name__ == "__main__":
+	generate_info_report()
+
+
