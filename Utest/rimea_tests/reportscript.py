@@ -6,12 +6,18 @@ from pylatex.utils import NoEscape, bold, verbatim
 from pylatex.base_classes import Environment
 
 
-## Import a number of test(int), return all evac time in the log of this test
+ 
 def get_evac_time(testnumber):
-	log_name = "./test_" + str(testnumber) + "/log_test_" + str(testnumber) + ".txt"
+    """
+    Import a number of test
+    return all evac time in the log of this test
+    :param testnumber: int, the number of test
+    :return: list, contains all evacution times in a log txt
+    """
+    log_name = "./test_" + str(testnumber) + "/log_test_" + str(testnumber) + ".txt"
 
 	with open(log_name) as log:
-		evac_time = []
+	    evac_time = []
 		for line in log:
 			## Use Regular Expression to filter, fetch lines which contain the evac time.
 			if re.match(
@@ -22,11 +28,13 @@ def get_evac_time(testnumber):
 			else:
 				continue
 
-	return evac_time ## eventuelle nur last result
+	return evac_time ## even only last result
 
 
-## for the report within evacution time
 def generate_eva_report():
+    """
+    generate a report which contains the evacution time for every test
+    """
 	geometry_options = {
 		"head": "40pt",
 		"margin": "0.5in",
@@ -68,10 +76,7 @@ def generate_eva_report():
 
 def generate_info_report():
 	"""
-	generate a report with funcs generate_cover for cover,
-	generate_status for tests status
-	generate_infos for last 2 lines of every log text
-	:return: null
+	generate a report with cover, status und last 2 lines infos for every test
 	"""
 	geometry_options = {
 			"head": "40pt",
