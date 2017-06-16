@@ -1,9 +1,9 @@
 import os
 import re, sys, subprocess
 from pylatex import Document, Command, PageStyle, Head, MiniPage, LargeText, LineBreak, \
-	LineBreak, MediumText, LongTabu, NewPage
+	LineBreak, MediumText, LongTabu, NewPage, Package
 from pylatex.utils import NoEscape, bold
-
+from pylatex.base_classes import Environment
 
 
 ## Import a number of test(int), return all evac time in the log of this test
@@ -65,7 +65,14 @@ def generate_eva_report():
 
 	doc.generate_pdf("RiMEA-Projekt Evacution Analyse", clean_tex=False)
 
+
 def generate_info_report():
+	"""
+	generate a report with funcs generate_cover for cover,
+	generate_status for tests status
+	generate_infos for last 2 lines of every log text
+	:return: null
+	"""
 	geometry_options = {
 			"head": "40pt",
 			"margin": "0.5in",
@@ -82,10 +89,20 @@ def generate_info_report():
 
 
 def generate_cover(doc):
+	"""
+	generate a cover for generate_info_report func
+	cover contains name, date and branch info
+	:param doc: a Document Calss instance
+	:return: null
+	"""
+
 	doc.preamble.append(Command('title', 'RiMEA-Projekt Analyse'))
 	doc.preamble.append(Command('author', get_git_status()[1]))
 	doc.preamble.append(Command('date', get_git_status()[2]))
-	doc.append(NoEscape(r'\maketitle')) #TODO: add branch in title with titling package
+
+	doc.packages.append(Package('titling'))
+
+	doc.append(NoEscape(r'\maketitle'))
 
 def get_git_status():
 	branch = subprocess.check_output(["git", "status"]).splitlines()[0].split(' ')[-1]
@@ -96,8 +113,7 @@ def get_git_status():
 
 	return branch, author, date
 
-
 if __name__ == "__main__":
-	# generate_info_report()
-	generate_eva_report()
+	generate_info_report()
+	# generate_eva_report()
 
