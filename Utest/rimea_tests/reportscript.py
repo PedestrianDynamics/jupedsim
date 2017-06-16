@@ -63,8 +63,7 @@ def generate_eva_report():
 
 	doc.append(NewPage())
 
-	doc.generate_pdf("RiMEA-Projekt Analyse", clean_tex=False)
-
+	doc.generate_pdf("RiMEA-Projekt Evacution Analyse", clean_tex=False)
 
 def generate_info_report():
 	geometry_options = {
@@ -80,6 +79,7 @@ def generate_info_report():
 	generate_cover(doc)
 
 	doc.generate_pdf("RiMEA-Projekt Analyse", clean_tex=False)
+
 
 def generate_cover(doc):
 	doc.preamble.append(Command('title', 'RiMEA-Projekt Analyse'))
@@ -98,6 +98,6 @@ def get_git_status():
 
 
 if __name__ == "__main__":
-	generate_info_report()
-
+	# generate_info_report()
+	generate_eva_report()
 
