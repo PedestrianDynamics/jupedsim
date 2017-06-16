@@ -2,7 +2,7 @@ import os
 import re, sys, subprocess
 from pylatex import Document, Command, PageStyle, Head, MiniPage, LargeText, LineBreak, \
 	LineBreak, MediumText, LongTabu, NewPage, Package
-from pylatex.utils import NoEscape, bold
+from pylatex.utils import NoEscape, bold, verbatim
 from pylatex.base_classes import Environment
 
 
@@ -101,6 +101,10 @@ def generate_cover(doc):
 	doc.preamble.append(Command('date', get_git_status()[2]))
 
 	doc.packages.append(Package('titling'))
+
+	branch = r"\begin{center}Branch: "+ get_git_status()[0] + "\end{center}"
+
+	doc.preamble.append(Command('postdate', NoEscape(branch)))
 
 	doc.append(NoEscape(r'\maketitle'))
 
