@@ -151,10 +151,10 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
         }
         dis->SetGroupParameters(_configuration->GetAgentsParameters().at(agent_para_id).get());
 
-        if (e->Attribute("start_x") && e->Attribute("start_y")) {
-            double startX = xmltof(e->Attribute("start_x"), NAN);
-            double startY = xmltof(e->Attribute("start_y"), NAN);
-            Log->Write("INFO:\tstart_x = %f, start_y = %f\n", startX, startY);
+        if (e->Attribute("startX") && e->Attribute("startY")) {
+            double startX = xmltof(e->Attribute("startX"), NAN);
+            double startY = xmltof(e->Attribute("startY"), NAN);
+            Log->Write("INFO:\tstartX = %f, startY = %f\n", startX, startY);
             dis->SetStartPosition(startX, startY, 0.0);
         }
     }
