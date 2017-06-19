@@ -6,7 +6,7 @@ from pylatex.utils import NoEscape, bold, verbatim
 from pylatex.base_classes import Environment
 
 
-
+ 
 def get_evac_time(testnumber):
 		"""
 		Import a number of test
@@ -16,24 +16,26 @@ def get_evac_time(testnumber):
 		"""
 		log_name = "./test_" + str(testnumber) + "/log_test_" + str(testnumber) + ".txt"
 
-		evac_time = []
-		for line in log_name:
-			## Use Regular Expression to filter, fetch lines which contain the evac time.
-			if re.match(
-					r'^2017-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} - INFO - evac_time: \d{2}.\d{6} <= \d{2}.\d{6} <= \d{2}.\d{6}$',
-					line):
-				evac_time.append(float(re.split('<=', line)[-2])) ## The second to last number is the evac time
+		with open(log_name) as log:
+			evac_time = []
+			for line in log:
+				## Use Regular Expression to filter, fetch lines which contain the evac time.
+				if re.match(
+						r'^2017-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} - INFO - evac_time: \d{2}.\d{6} <= \d{2}.\d{6} <= \d{2}.\d{6}$',
+						line):
+					evac_time.append(float(re.split('<=', line)[-2])) ## The second to last number is the evac time
 
-			else:
-				continue
+				else:
+					continue
 
 		return evac_time ## even only last result
 
 
+
 def generate_eva_report():
 		"""
-	  generate a report which contains the evacution time for every test
-	  """
+		generate a report which contains the evacution time for every test
+		"""
 		geometry_options = {
 			"head": "40pt",
 			"margin": "0.5in",
