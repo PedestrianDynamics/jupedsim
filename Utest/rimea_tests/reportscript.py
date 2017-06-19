@@ -87,7 +87,6 @@ def generate_info_report():
 
 			doc = Document(documentclass='report', geometry_options=geometry_options)
 
-			## add preamble part
 			generate_cover(doc)
 			generate_status_tabel(doc)
 
@@ -155,9 +154,13 @@ def get_tests_status(testnumber):
  
 		return status
 
+def get_log(testnumber):
+		log_name = "./test_" + str(testnumber) + "/log_test_" + str(testnumber) + ".txt"
+		with open(log_name) as log:
+				return log.read().split("\n")[-3:-1]
+
 if __name__ == "__main__":
 		generate_info_report()
 		# generate_eva_report()
-
 
 
