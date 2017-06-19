@@ -89,6 +89,7 @@ def generate_info_report():
 
 			## add preamble part
 			generate_cover(doc)
+			generate_status_tabel(doc)
 
 
 			doc.generate_pdf("RiMEA-Projekt Analyse", clean_tex=False)
@@ -112,6 +113,21 @@ def generate_cover(doc):
 		doc.preamble.append(Command('postdate', NoEscape(branch)))
 
 		doc.append(NoEscape(r'\maketitle'))
+
+def generate_status_tabel(doc):
+		with doc.create(LongTabu("X[c] X[c]")) as status_table:
+				header_row1 = ["Test Number", "Status"]
+
+				status_table.add_row(header_row1, mapper=[bold])
+				status_table.add_hline()
+				status_table.add_empty_row()
+				status_table.end_table_header()
+
+
+				for i in range(3):
+						row = [str(i+1), get_tests_status(i+1)]
+						status_table.add_row(row)
+
 
 def get_git_status():
 		branch = subprocess.check_output(["git", "status"]).splitlines()[0].split(' ')[-1]
