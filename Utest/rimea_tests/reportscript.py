@@ -6,7 +6,7 @@ from pylatex.utils import NoEscape, bold, verbatim
 from pylatex.base_classes import Environment
 
 
- 
+
 def get_evac_time(testnumber):
 		"""
 		Import a number of test
@@ -17,30 +17,29 @@ def get_evac_time(testnumber):
 		log_name = "./test_" + str(testnumber) + "/log_test_" + str(testnumber) + ".txt"
 
 		with open(log_name) as log:
-			evac_time = []
-			for line in log:
-				## Use Regular Expression to filter, fetch lines which contain the evac time.
-				if re.match(
-						r'^2017-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} - INFO - evac_time: \d{2}.\d{6} <= \d{2}.\d{6} <= \d{2}.\d{6}$',
-						line):
-					evac_time.append(float(re.split('<=', line)[-2])) ## The second to last number is the evac time
+				evac_time = []
+				for line in log:
+					## Use Regular Expression to filter, fetch lines which contain the evac time.
+					if re.match(
+							r'^2017-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} - INFO - evac_time: \d{2}.\d{6} <= \d{2}.\d{6} <= \d{2}.\d{6}$',
+							line):
+						evac_time.append(float(re.split('<=', line)[-2])) ## The second to last number is the evac time
 
-				else:
-					continue
+					else:
+						continue
 
 		return evac_time ## even only last result
 
 
-
 def generate_eva_report():
 		"""
-		generate a report which contains the evacution time for every test
-		"""
+    generate a report which contains the evacution time for every test
+    """
 		geometry_options = {
-			"head": "40pt",
-			"margin": "0.5in",
-			"bottom": "0.6in",
-			"includeheadfoot": True
+		"head": "40pt",
+		"margin": "0.5in",
+		"bottom": "0.6in",
+		"includeheadfoot": True
 		}
 		doc = Document(geometry_options=geometry_options)
 
@@ -48,11 +47,11 @@ def generate_eva_report():
 		reportStyle = PageStyle("reportStyle")
 
 		with reportStyle.create(Head("R")) as left_header:
-			with left_header.create(MiniPage(width=NoEscape(r"0.49\textwidth"),
-			                                  pos='c', align='l')) as title_wrapper:
-				title_wrapper.append(LargeText(bold("RiMEA-Projekt")))
-				title_wrapper.append(LineBreak())
-				title_wrapper.append(MediumText(bold("Anlyse")))
+				with left_header.create(MiniPage(width=NoEscape(r"0.49\textwidth"),
+				                                  pos='c', align='l')) as title_wrapper:
+					title_wrapper.append(LargeText(bold("RiMEA-Projekt")))
+					title_wrapper.append(LineBreak())
+					title_wrapper.append(MediumText(bold("Anlyse")))
 
 		doc.preamble.append(reportStyle)
 
@@ -61,14 +60,14 @@ def generate_eva_report():
 
 		## Create table
 		with doc.create(LongTabu("X[c] X[c]",
-		                         row_height=1.5)) as report_table:
-			report_table.add_row(["Test",
-			                    "evacuation time(s)"],
-			                   mapper=bold)
-			report_table.add_hline()
+		                       row_height=1.5)) as report_table:
+				report_table.add_row(["Test",
+				                    "evacuation time(s)"],
+				                   mapper=bold)
+				report_table.add_hline()
 
-			for i in range(1,4):
-				report_table.add_row(i, get_evac_time(i)[0])
+		for i in range(1,4):
+			report_table.add_row(i, get_evac_time(i)[0])
 
 		doc.append(NewPage())
 
@@ -76,56 +75,73 @@ def generate_eva_report():
 
 
 def generate_info_report():
-	"""
-	generate a report with cover, status und last 2 lines info for every test
-	"""
-	geometry_options = {
-			"head": "40pt",
-			"margin": "0.5in",
-			"bottom": "0.6in",
-			"includeheadfoot": True
-		}
+			"""
+			generate a report with cover, status und last 2 lines info for every test
+			"""
+			geometry_options = {
+					"head": "40pt",
+					"margin": "0.5in",
+					"bottom": "0.6in",
+					"includeheadfoot": True
+				}
 
-	doc = Document(documentclass='report', geometry_options=geometry_options)
+			doc = Document(documentclass='report', geometry_options=geometry_options)
 
-	## add preamble part
-	generate_cover(doc)
+			## add preamble part
+			generate_cover(doc)
 
 
-	doc.generate_pdf("RiMEA-Projekt Analyse", clean_tex=False)
+			doc.generate_pdf("RiMEA-Projekt Analyse", clean_tex=False)
 
 
 
 def generate_cover(doc):
-	"""
-	generate a cover for generate_info_report func
-	cover contains name, date and branch info
-	:param doc: a Document Class instance
-	:return: null
-	"""
+		"""
+		generate a cover for generate_info_report func
+		cover contains name, date and branch info
+		:param doc: a Document Class instance
+		:return: null
+		"""
 
-	doc.preamble.append(Command('title', 'RiMEA-Projekt Analyse'))
-	doc.preamble.append(Command('author', get_git_status()[1]))
-	doc.preamble.append(Command('date', get_git_status()[2]))
+		doc.preamble.append(Command('title', 'RiMEA-Projekt Analyse'))
+		doc.preamble.append(Command('author', get_git_status()[1]))
+		doc.preamble.append(Command('date', get_git_status()[2]))
 
-	doc.packages.append(Package('titling'))
-	branch = r"\begin{center}Branch: "+ get_git_status()[0] + "\end{center}"
-	doc.preamble.append(Command('postdate', NoEscape(branch)))
+		doc.packages.append(Package('titling'))
+		branch = r"\begin{center}Branch: "+ get_git_status()[0] + "\end{center}"
+		doc.preamble.append(Command('postdate', NoEscape(branch)))
 
-	doc.append(NoEscape(r'\maketitle'))
+		doc.append(NoEscape(r'\maketitle'))
 
 def get_git_status():
-	branch = subprocess.check_output(["git", "status"]).splitlines()[0].split(' ')[-1]
+		branch = subprocess.check_output(["git", "status"]).splitlines()[0].split(' ')[-1]
 
-	git_status = subprocess.check_output(["git", "show", "--pretty=medium"])
-	author = git_status.split('\n')[1]
-	date = git_status.split('\n')[2]
+		git_status = subprocess.check_output(["git", "show", "--pretty=medium"])
+		author = git_status.split('\n')[1]
+		date = git_status.split('\n')[2]
 
-	return branch, author, date
+		return branch, author, date
+
+def get_tests_status(testnumber):
+		log_name = "./test_" + str(testnumber) + "/log_test_" + str(testnumber) + ".txt"
+
+		with open(log_name) as log:
+				for line in log:
+								## Use Regular Expression to filter.
+								if re.match(
+										r'^2017-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} - INFO - runtest_rimea_\d{1}.py exits with SUCCESS$',
+										line):
+										status = "Succeed"
+										break
+
+								else:
+										status = "Failed"
+ 
+		return status
 
 if __name__ == "__main__":
 		generate_info_report()
-	# generate_eva_report()
+		# generate_eva_report()
 
 
 
