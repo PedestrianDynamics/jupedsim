@@ -1,7 +1,6 @@
-import os
-import re, sys, subprocess
+import re, subprocess
 from pylatex import Document, Command, PageStyle, Head, MiniPage, LargeText, LineBreak, \
-	LineBreak, MediumText, LongTabu, NewPage, Package, Center, Section
+	LineBreak, MediumText, LongTabu, NewPage, Package, Section
 from pylatex.utils import NoEscape, bold, verbatim
 from pylatex.base_classes import Environment
 
@@ -76,7 +75,7 @@ def generate_eva_report():
 
 def generate_info_report():
 			"""
-			generate a report with cover, status und last 2 lines info for every test
+			generate a report with cover, status und last 2 lines in log for every test
 			"""
 			geometry_options = {
 					"head": "40pt",
@@ -89,6 +88,8 @@ def generate_info_report():
 
 			generate_cover(doc)
 			generate_status_tabel(doc)
+			doc.append(NewPage())
+			generate_info_table(doc)
 
 
 			doc.generate_pdf("RiMEA-Projekt Analyse", clean_tex=False)
@@ -127,6 +128,23 @@ def generate_status_tabel(doc):
 						row = [str(i+1), get_tests_status(i+1)]
 						status_table.add_row(row)
 
+def generate_info_table(doc):
+		with doc.create(LongTabu("X[l] X[r]")) as info_table:
+				header_row1 = ["Test Number", "Info"]
+
+				info_table.add_row(header_row1, mapper=[bold])
+				info_table.add_hline()
+				info_table.add_empty_row()
+				info_table.end_table_header()
+
+				for i in range(3):
+						row_1 = [str(i + 1), get_log(i + 1)[0]]
+						row_2 = [" ", get_log(i + 1)[1]]
+						info_table.add_row(row_1)
+						info_table.add_empty_row()
+						info_table.add_row(row_2)
+						info_table.add_hline()
+						info_table.add_empty_row()
 
 def get_git_status():
 		branch = subprocess.check_output(["git", "status"]).splitlines()[0].split(' ')[-1]
@@ -158,6 +176,7 @@ def get_log(testnumber):
 		log_name = "./test_" + str(testnumber) + "/log_test_" + str(testnumber) + ".txt"
 		with open(log_name) as log:
 				return log.read().split("\n")[-3:-1]
+
 
 if __name__ == "__main__":
 		generate_info_report()
