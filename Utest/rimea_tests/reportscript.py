@@ -1,6 +1,6 @@
 import re, subprocess
 from pylatex import Document, Command, PageStyle, Head, MiniPage, LargeText, LineBreak, \
-	LineBreak, MediumText, LongTabu, NewPage, Package, Section
+		MediumText, LongTabu, NewPage, Package, Section,  Description, NoEscape, Subsection
 from pylatex.utils import NoEscape, bold, verbatim
 from pylatex.base_classes import Environment
 
@@ -84,12 +84,16 @@ def generate_info_report():
 					"includeheadfoot": True
 				}
 
-			doc = Document(documentclass='report', geometry_options=geometry_options)
+			doc = Document(documentclass='article', geometry_options=geometry_options)
 
 			generate_cover(doc)
+			doc.append(NewPage())
 			generate_status_tabel(doc)
 			doc.append(NewPage())
-			generate_info_table(doc)
+
+
+			for i in range(1, 4):
+					generate_info_list(doc, i)
 
 
 			doc.generate_pdf("RiMEA-Projekt Analyse", clean_tex=False)
@@ -145,6 +149,15 @@ def generate_info_table(doc):
 						info_table.add_row(row_2)
 						info_table.add_hline()
 						info_table.add_empty_row()
+
+def generate_info_list(doc, testnumber):
+		section_name = 'Test' + str(testnumber) + ': Last 2 lines in log_test_' + str(testnumber ) + '.txt'
+		with doc.create(Section(section_name)):
+				with doc.create(Description()) as desc:
+						desc.add_item("Second last line: ", get_log(testnumber)[0])
+						desc.add_item("Last line: ", get_log(testnumber)[1])
+
+		doc.append(NewPage())
 
 def get_git_status():
 		branch = subprocess.check_output(["git", "status"]).splitlines()[0].split(' ')[-1]
