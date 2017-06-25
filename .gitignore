@@ -135,3 +135,4 @@ idea/codeStyleSettings.xml
 *.aux
 *.log
 *.pdf
+/Utest/rimea_tests/figures

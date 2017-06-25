@@ -1,6 +1,6 @@
 import re, subprocess
 from pylatex import Document, Command, PageStyle, Head, MiniPage, LargeText, LineBreak, \
-		MediumText, LongTabu, NewPage, Package, Section,  Description, NoEscape, Subsection
+		MediumText, LongTabu, NewPage, Package, Section,  Description, NoEscape, Subsection, Figure, Center
 from pylatex.utils import NoEscape, bold, verbatim
 from pylatex.base_classes import Environment
 
@@ -86,7 +86,7 @@ def generate_info_report():
 
 			doc = Document(documentclass='article', geometry_options=geometry_options)
 
-			generate_cover(doc)
+			generate_cover2(doc)
 			doc.append(NewPage())
 			generate_status_tabel(doc)
 			doc.append(NewPage())
@@ -125,6 +125,39 @@ def generate_cover(doc):
 
 
 		doc.append(NoEscape(r'\maketitle'))
+
+
+def generate_cover2(doc):
+		doc.append(NoEscape(r"\begin{titlepage}"))
+		doc.append(NoEscape(r"\begin{center}"))
+
+		with doc.create(Figure(position='t', width=NoEscape(r'0.4\textwidth'))) as logo:
+				logo.add_image("./figures/logo.png")
+
+		doc.append(NoEscape(r"\textsc{\LARGE J\"ulich Pedestrian Simulator}\\[1.5cm]"))
+		doc.append(NoEscape(r"\textsc{\small Forschungszentrum J\"ulich GmbH}\\[0.5cm]"))
+
+		doc.append(NoEscape(r"\HRule \\[0.4cm]"))
+		doc.append(NoEscape(r"{ \huge \bfseries RiMEA-Projekt Analyse Report}\\[0.4cm]"))
+		doc.append(NoEscape(r"\HRule \\[1.5cm]"))
+
+		author = get_git_status()[1] + "\par"
+		date = get_git_status()[2] + "\par"
+		branch = "Branch: " + get_git_status()[0] + "\par"
+		commit = "Commit: " + get_git_status()[3] + "\par"
+
+		InfoBlock = MiniPage(width=NoEscape(r"0.8\textwidth"),
+                align='c')
+		InfoBlock.append(NoEscape(author))
+		InfoBlock.append(NoEscape(date))
+		InfoBlock.append(NoEscape(branch))
+		InfoBlock.append(NoEscape(commit))
+
+		doc.append(InfoBlock)
+
+		doc.append(NoEscape(r"\end{center}"))
+		doc.append(NoEscape(r"\end{titlepage}"))
+
 
 def generate_status_tabel(doc):
 		with doc.create(LongTabu("X[c] X[c]")) as status_table:
