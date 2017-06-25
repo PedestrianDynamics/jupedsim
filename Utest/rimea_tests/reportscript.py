@@ -113,8 +113,16 @@ def generate_cover(doc):
 		doc.preamble.append(Command('date', get_git_status()[2]))
 
 		doc.packages.append(Package('titling'))
-		branch = r"\begin{center}Branch: "+ get_git_status()[0] + "\end{center}"
-		doc.preamble.append(Command('postdate', NoEscape(branch)))
+
+		branch = r"\begin{center}Branch: "+ get_git_status()[0] + "\par"
+		doc.preamble.append(Command('predate', NoEscape(branch)))
+
+
+
+		commit = r"\par commit: " + get_git_status()[3] + "\par\end{center}"
+		doc.preamble.append(Command('postdate', NoEscape(commit)))
+
+
 
 		doc.append(NoEscape(r'\maketitle'))
 
@@ -163,10 +171,12 @@ def get_git_status():
 		branch = subprocess.check_output(["git", "status"]).splitlines()[0].split(' ')[-1]
 
 		git_status = subprocess.check_output(["git", "show", "--pretty=medium"])
+		commit = git_status.split("\n")[0].split(' ')[1]
 		author = git_status.split('\n')[1]
 		date = git_status.split('\n')[2]
 
-		return branch, author, date
+
+		return branch, author, date, commit
 
 def get_tests_status(testnumber):
 		log_name = "./test_" + str(testnumber) + "/log_test_" + str(testnumber) + ".txt"
