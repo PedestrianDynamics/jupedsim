@@ -8,10 +8,9 @@ from pylatex.base_classes import Environment
 
 def get_evac_time(testnumber):
 		"""
-		Import a number of test
-		return all evac time in the log of this test
-		:param testnumber: int, the number of test
-		:return: list, contains all evacution times in a log txt
+		Fetch the evacuation time from log.txt of tests
+		:param testnumber: the number of test(int)
+		:return: All evacuation times(list)
 		"""
 		log_name = "./test_" + str(testnumber) + "/log_test_" + str(testnumber) + ".txt"
 
@@ -32,7 +31,7 @@ def get_evac_time(testnumber):
 
 def generate_eva_report():
 		"""
-    generate a report which contains the evacution time for every test
+    Generate a report which contains the evacution time for every test
     """
 		geometry_options = {
 		"head": "40pt",
@@ -65,6 +64,7 @@ def generate_eva_report():
 				                   mapper=bold)
 				report_table.add_hline()
 
+		## Write the results of 3 tests in table
 		for i in range(1,4):
 			report_table.add_row(i, get_evac_time(i)[0])
 
@@ -75,8 +75,10 @@ def generate_eva_report():
 
 def generate_info_report():
 			"""
-			generate a report with cover, status und last 2 lines in log for every test
+			Generate a report with cover, status und last 2 lines in log for every test
 			"""
+
+			## Define the geometry for LaTeX files
 			geometry_options = {
 					"head": "40pt",
 					"margin": "0.5in",
@@ -84,14 +86,19 @@ def generate_info_report():
 					"includeheadfoot": True
 				}
 
+
+			## Create the LaTeX object, a instance of Document Class
 			doc = Document(documentclass='article', geometry_options=geometry_options)
 
+			## Add cover
 			generate_cover2(doc)
 			doc.append(NewPage())
+
+			## Add status table
 			generate_status_tabel(doc)
 			doc.append(NewPage())
 
-
+			## Add last 2 lines in log.txt
 			for i in range(1, 4):
 					generate_info_list(doc, i)
 
@@ -99,35 +106,43 @@ def generate_info_report():
 			doc.generate_pdf("RiMEA-Projekt Analyse", clean_tex=False)
 
 
-
 def generate_cover(doc):
 		"""
-		generate a cover for generate_info_report func
-		cover contains name, date and branch info
+		Generate a cover for generate_info_report func
+		Cover contains name, date and branch info
 		:param doc: a Document Class instance
 		:return: null
 		"""
 
+		## Convert in default command of LaTeX to make title
+		## \title{}
+		## \author{}
+		## \date{}
 		doc.preamble.append(Command('title', 'RiMEA-Projekt Analyse'))
 		doc.preamble.append(Command('author', get_git_status()[1]))
 		doc.preamble.append(Command('date', get_git_status()[2]))
 
+		## Use titling package to add line on title
 		doc.packages.append(Package('titling'))
 
 		branch = r"\begin{center}Branch: "+ get_git_status()[0] + "\par"
 		doc.preamble.append(Command('predate', NoEscape(branch)))
 
-
-
 		commit = r"\par commit: " + get_git_status()[3] + "\par\end{center}"
 		doc.preamble.append(Command('postdate', NoEscape(commit)))
-
-
 
 		doc.append(NoEscape(r'\maketitle'))
 
 
 def generate_cover2(doc):
+		"""
+		Generate a cover for generate_info_report func
+		Without \maketitle in LaTeX, but using titlepage environment
+		:param doc: LaTeX object, a instance of Document Class
+		:return: null
+		"""
+
+		## Define titlepage in title environment
 		doc.append(NoEscape(r"\begin{titlepage}"))
 		doc.append(NoEscape(r"\begin{center}"))
 
@@ -141,6 +156,7 @@ def generate_cover2(doc):
 		doc.append(NoEscape(r"{ \huge \bfseries RiMEA-Projekt Analyse Report}\\[0.4cm]"))
 		doc.append(NoEscape(r"\HRule \\[1.5cm]"))
 
+		## Add author date branch commit in a miniPage on title
 		author = get_git_status()[1] + "\par"
 		date = get_git_status()[2] + "\par"
 		branch = "Branch: " + get_git_status()[0] + "\par"
@@ -160,6 +176,12 @@ def generate_cover2(doc):
 
 
 def generate_status_tabel(doc):
+		"""
+		Generate a table which contains status of tests
+		:param doc: LaTeX object, a instance of Document Class
+		:return: null
+		"""
+		## Create a long table object in LaTeX object
 		with doc.create(LongTabu("X[c] X[c]")) as status_table:
 				header_row1 = ["Test Number", "Status"]
 
@@ -173,7 +195,15 @@ def generate_status_tabel(doc):
 						row = [str(i+1), get_tests_status(i+1)]
 						status_table.add_row(row)
 
+
 def generate_info_table(doc):
+		"""
+		Generate a table which contains last 2 line of tests from log.txt
+		:param doc: LaTeX object, a instance of Document Class
+		:return: null
+		"""
+
+		## Create a long table object in LaTeX object
 		with doc.create(LongTabu("X[l] X[r]")) as info_table:
 				header_row1 = ["Test Number", "Info"]
 
@@ -182,6 +212,7 @@ def generate_info_table(doc):
 				info_table.add_empty_row()
 				info_table.end_table_header()
 
+				## Add last 2 lines
 				for i in range(3):
 						row_1 = [str(i + 1), get_log(i + 1)[0]]
 						row_2 = [" ", get_log(i + 1)[1]]
@@ -191,8 +222,16 @@ def generate_info_table(doc):
 						info_table.add_hline()
 						info_table.add_empty_row()
 
+
 def generate_info_list(doc, testnumber):
+		"""
+		Generate a list which contains last 2 line of tests from log.txt
+		:param doc: LaTeX object, a instance of Document Class
+		:return: null
+		"""
 		section_name = 'Test' + str(testnumber) + ': Last 2 lines in log_test_' + str(testnumber ) + '.txt'
+
+		## Create a long table object in LaTeX object
 		with doc.create(Section(section_name)):
 				with doc.create(Description()) as desc:
 						desc.add_item("Second last line: ", get_log(testnumber)[0])
@@ -200,18 +239,30 @@ def generate_info_list(doc, testnumber):
 
 		doc.append(NewPage())
 
+
 def get_git_status():
+		"""
+		Fetch information of the last git commit.
+		:return: branch, author, date, commit of the newst commit(tuple)
+		"""
+		## Get the branch name by `git status` command
 		branch = subprocess.check_output(["git", "status"]).splitlines()[0].split(' ')[-1]
 
+		## Get the commit, author und date name by `git show` command
 		git_status = subprocess.check_output(["git", "show", "--pretty=medium"])
 		commit = git_status.split("\n")[0].split(' ')[1]
 		author = git_status.split('\n')[1]
 		date = git_status.split('\n')[2]
 
-
 		return branch, author, date, commit
 
+
 def get_tests_status(testnumber):
+		"""
+		Judge the status(succeed or failed) of a test by log.txt
+		:param testnumber: the number of test(int)
+		:return: status(Succeed or failed)(int)
+		"""
 		log_name = "./test_" + str(testnumber) + "/log_test_" + str(testnumber) + ".txt"
 
 		with open(log_name) as log:
@@ -228,7 +279,14 @@ def get_tests_status(testnumber):
  
 		return status
 
+
 def get_log(testnumber):
+		"""
+		Generate a path of a log.txt file
+		Just for debugging
+		:param testnumber: the number of test(int)
+		:return: a path(str)
+		"""
 		log_name = "./test_" + str(testnumber) + "/log_test_" + str(testnumber) + ".txt"
 		with open(log_name) as log:
 				return log.read().split("\n")[-3:-1]
