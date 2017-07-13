@@ -168,9 +168,9 @@ bool FFRouter::Init(Building* building)
      //type of allRooms: const std::map<int, std::unique_ptr<Room> >&
      const std::map<int, std::shared_ptr<Room> >& allRooms = _building->GetAllRooms();
 
-#pragma omp parallel
+//#pragma omp parallel
      {
-#pragma omp for
+//#pragma omp for
           for (unsigned int i = 0; i < allRooms.size(); ++i) {
 
 #ifdef DEBUG
@@ -180,22 +180,23 @@ bool FFRouter::Init(Building* building)
                auto pairRoomIt = allRooms.begin();
                std::advance(pairRoomIt, i);
                UnivFFviaFM *locffptr = nullptr;
-               locffptr = new UnivFFviaFM(pairRoomIt->second.get(), building, 0.125, 0.125, 0.0, false);
+               locffptr = new UnivFFviaFM(pairRoomIt->second.get(), building, 0.125, 0.0, false);
 //               Log->Write("INFO: \tusing %s in ffRouter::Init", _useCentrePointDistance ? "CentrePointLocalFFViaFm" : "LocalFloorfieldViaFM");
 //               if (_useCentrePointDistance) {
 //                    locffptr = new CentrePointLocalFFViaFM(pairRoomIt->second.get(), building, 0.125, 0.125, 0.0, false);
 //               } else {
 //                    locffptr = new LocalFloorfieldViaFM(pairRoomIt->second.get(), building, 0.125, 0.125, 0.0, false);
 //               }
-
+               locffptr->addAllTargets();
+               locffptr->writeFF("UnivFF.vtk", locffptr->getKnownDoorUIDs());
                Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
-#pragma omp critical(_locffviafm)
+//#pragma omp critical(_locffviafm)
                _locffviafm.insert(std::make_pair((*pairRoomIt).first, locffptr));
           }
-
+      return true;  //@todo: ar.graf: remove this!!
 
           // nowait, because the parallel region ends directly afterwards
-#pragma omp for nowait
+//#pragma omp for nowait
           for (unsigned int i = 0; i < roomAndCroTrVector.size(); ++i) {
                auto rctIt = roomAndCroTrVector.begin();
                std::advance(rctIt, i);
@@ -290,13 +291,13 @@ bool FFRouter::Init(Building* building)
                          }
                     }
 
-#pragma omp critical(_distMatrix)
+//#pragma omp critical(_distMatrix)
                     if (_distMatrix.at(key_ij) > tempDistance) {
                          _distMatrix.erase(key_ij);
                          _distMatrix.erase(key_ji);
                          _distMatrix.insert(std::make_pair(key_ij, tempDistance));
                          _distMatrix.insert(std::make_pair(key_ji, tempDistance));
-#pragma omp critical(_subroomMatrix)
+//#pragma omp critical(_subroomMatrix)
                          {
                               _subroomMatrix.erase(key_ij);
                               _subroomMatrix.erase(key_ji);

@@ -40,6 +40,7 @@
 #include <vector>
 #include <map>
 #include <float.h>
+#include "../../general/Macros.h"
 
 class Room;
 class SubRoom;
@@ -78,16 +79,21 @@ private:
 
 class UnivFFviaFM {
 public:
-     UnivFFviaFM(Room* a, Building* b, double c, double d, double e, bool f);
-     UnivFFviaFM(SubRoom* a, Building* b, double c, double d, double e, bool f);
-     UnivFFviaFM(Room *a, const Configuration *b, double c, double d, double e, bool f);
-     UnivFFviaFM(SubRoom *a, const Configuration *b, double c, double d, double e, bool f);
-     UnivFFviaFM(std::vector<Line>& walls, std::map<int, Line>& doors, std::vector<int> targetUIDs, int mode, double spacing);
+     UnivFFviaFM(Room* a, Building* b, double c, double e, bool f);
+     UnivFFviaFM(SubRoom* a, Building* b, double c, double e, bool f);
+     UnivFFviaFM(Room *a, const Configuration *b, double hx, double wallAvoid, bool useWallAvoid);
+     UnivFFviaFM(Room *a, const Configuration *b, double hx, double wallAvoid, bool useWallAvoid, std::vector<int> wantedDoors);
+     UnivFFviaFM(SubRoom *sr, const Configuration *conf, double hx, double wallAvoid, bool useWallAvoid);
+     UnivFFviaFM(SubRoom *subRoomArg, const Configuration *confArg, double hx, double wallAvoid, bool useWallAvoid, std::vector<int> wantedDoors);
+     void create(std::vector<Line>& walls, std::map<int, Line>& doors, std::vector<int> targetUIDs, int mode,
+                 double spacing, double wallAvoidDist, bool useWallAvoid);
      UnivFFviaFM() {};
      UnivFFviaFM(UnivFFviaFM&){};
      ~UnivFFviaFM(){};
 
      void addTarget(const int uid, Line* door);
+     void addTarget(const int uid);
+     void addAllTargets();
      std::vector<int> getKnownDoorUIDs();
 
      double getCostToDestination(const int destID, const Point& position, int mode) {return 0.;};
@@ -116,6 +122,7 @@ private:
      Configuration* _configuration = nullptr;
      int _mode = LINESEGMENT;                     //default
      int _user = DISTANCE_AND_DIRECTIONS_USED;    //default
+     int _speedmode = FF_HOMO_SPEED;              //default
      RectGrid* _grid = nullptr;
      long int _nPoints = 0;
      std::vector<double*> _speedFieldSelector;

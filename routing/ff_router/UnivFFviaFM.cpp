@@ -10,28 +10,28 @@
 #include "mesh/RectGrid.h"
 
 
-UnivFFviaFM::UnivFFviaFM(Room* a, Building* b, double hx, double hy, double wallAvoid, bool useWallAvoid) {
+UnivFFviaFM::UnivFFviaFM(Room* r, Building* b, double hx, double wallAvoid, bool useWallAvoid)
+          : UnivFFviaFM(r, b->GetConfig(), hx, wallAvoid, useWallAvoid) {
      _building = b;
-     const Configuration* conf = b->GetConfig();
-     UnivFFviaFM(a, conf, hx, hy, wallAvoid, useWallAvoid);
 }
 
-UnivFFviaFM::UnivFFviaFM(SubRoom* a, Building* b, double hx, double hy, double wallAvoid, bool useWallAvoid) {
+UnivFFviaFM::UnivFFviaFM(SubRoom* sr, Building* b, double hx, double wallAvoid, bool useWallAvoid)
+          : UnivFFviaFM(sr, b->GetConfig(), hx, wallAvoid, useWallAvoid) {
      _building = b;
-     const Configuration* conf = b->GetConfig();
-     UnivFFviaFM(a, conf, hx, hy, wallAvoid, useWallAvoid);
 }
 
-UnivFFviaFM::UnivFFviaFM(Room *a, const Configuration *b, double hx, double hy, double wallAvoid, bool useWallAvoid) {
+UnivFFviaFM::UnivFFviaFM(Room *r, const Configuration *conf, double hx, double wallAvoid, bool useWallAvoid)
+          : UnivFFviaFM(r, conf, hx, wallAvoid, useWallAvoid, std::vector<int>()){
+}
+
+UnivFFviaFM::UnivFFviaFM(Room *roomArg, const Configuration *confArg, double hx, double wallAvoid, bool useWallAvoid, std::vector<int> wantedDoors) {
      //build the vector with walls(wall or obstacle), the map with <UID, Door(Cross or Trans)>, the vector with targets(UIDs)
      //then call other constructor including the mode
-     _wallAvoidDistance = wallAvoid;
-     _useWallAvoidance = useWallAvoid;
 
      std::vector<Line> lines;
      std::map<int, Line> tmpDoors;
 
-     for (auto& subroomMap : a->GetAllSubRooms()) {
+     for (auto& subroomMap : roomArg->GetAllSubRooms()) {
           SubRoom* subRoomPtr = subroomMap.second.get();
           std::vector<Wall> walls = std::vector<Wall>(subRoomPtr->GetAllWalls());
           for (auto& wall : walls) {
@@ -49,31 +49,42 @@ UnivFFviaFM::UnivFFviaFM(Room *a, const Configuration *b, double hx, double hy, 
           const std::vector<Crossing*> tmpCross = subRoomPtr->GetAllCrossings();
           const std::vector<Transition*> tmpTrans = subRoomPtr->GetAllTransitions();
 
+          int uidNotConst = 0;
           for (auto& cross : tmpCross) {
-               tmpDoors.emplace(std::make_pair(cross->GetUniqueID(), (Line) *cross));
+               uidNotConst = cross->GetUniqueID();
+               if (tmpDoors.count(uidNotConst) == 0) {
+                    tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *cross));
+               }
           }
           for (auto& trans : tmpTrans) {
-               tmpDoors.emplace(std::make_pair(trans->GetUniqueID(), (Line) *trans));
+               uidNotConst = trans->GetUniqueID();
+               if (tmpDoors.count(uidNotConst) == 0) {
+                    tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *trans));
+               }
           }
      }
 
-     std::vector<int> noDoors;
-     UnivFFviaFM(lines, tmpDoors, noDoors, FF_HOMO_SPEED, hx);
+     create(lines, tmpDoors, wantedDoors, FF_HOMO_SPEED, hx, wallAvoid, useWallAvoid);
+     writeFF("UnivFFRoom.vtk", this->getKnownDoorUIDs());
 }
 
-UnivFFviaFM::UnivFFviaFM(SubRoom* a, const Configuration* b, double hx, double hy, double wallAvoid, bool useWallAvoid) {
+UnivFFviaFM::UnivFFviaFM(SubRoom* sr, const Configuration* conf, double hx, double wallAvoid, bool useWallAvoid)
+          : UnivFFviaFM(sr, conf, hx, wallAvoid, useWallAvoid, std::vector<int>()){
+}
+
+UnivFFviaFM::UnivFFviaFM(SubRoom* subRoomArg, const Configuration* confArg, double hx, double wallAvoid, bool useWallAvoid, std::vector<int> wantedDoors) {
      //build the vector with walls(wall or obstacle), the map with <UID, Door(Cross or Trans)>, the vector with targets(UIDs)
      //then call other constructor including the mode
-     _wallAvoidDistance = wallAvoid;
-     _useWallAvoidance = useWallAvoid;
 
-     std::vector<Wall> walls = std::vector<Wall> (a->GetAllWalls());
      std::vector<Line> lines;
+     std::map<int, Line> tmpDoors;
+
+     std::vector<Wall> walls = std::vector<Wall> (subRoomArg->GetAllWalls());
      for (auto& wall : walls) {
           lines.emplace_back((Line)wall);
      }
 
-     std::vector<Obstacle*> tmpObsPtrVec = a->GetAllObstacles();
+     std::vector<Obstacle*> tmpObsPtrVec = subRoomArg->GetAllObstacles();
      for (Obstacle* ptrObs : tmpObsPtrVec) {
           const std::vector<Wall> obsWalls = ptrObs->GetAllWalls();
           for (auto& owall : obsWalls) {
@@ -81,22 +92,30 @@ UnivFFviaFM::UnivFFviaFM(SubRoom* a, const Configuration* b, double hx, double h
           }
      }
 
-     std::map<int, Line> tmpDoors;
-     const std::vector<Crossing*> tmpCross = a->GetAllCrossings();
-     const std::vector<Transition*> tmpTrans = a->GetAllTransitions();
+     const std::vector<Crossing*> tmpCross = subRoomArg->GetAllCrossings();
+     const std::vector<Transition*> tmpTrans = subRoomArg->GetAllTransitions();
 
+     int uidNotConst = 0;
      for (auto& cross : tmpCross) {
-          tmpDoors.emplace(std::make_pair(cross->GetUniqueID(), (Line) *cross));
+          uidNotConst = cross->GetUniqueID();
+          tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *cross));
      }
      for (auto& trans : tmpTrans) {
-          tmpDoors.emplace(std::make_pair(trans->GetUniqueID(), (Line) *trans));
+          uidNotConst = trans->GetUniqueID();
+          tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *trans));
      }
 
-     std::vector<int> noDoors;
-     UnivFFviaFM(lines, tmpDoors, noDoors, FF_HOMO_SPEED, hx);
+     create(lines, tmpDoors, wantedDoors, FF_HOMO_SPEED, hx, wallAvoid, useWallAvoid);
+     writeFF("UnivFFSubroom.vtk", this->getKnownDoorUIDs());
 }
 
-UnivFFviaFM::UnivFFviaFM(std::vector<Line>& walls, std::map<int, Line>& doors, std::vector<int> targetUIDs, int mode, double spacing) {
+void UnivFFviaFM::create(std::vector<Line>& walls, std::map<int, Line>& doors, std::vector<int> targetUIDs, int mode,
+                         double spacing, double wallAvoid, bool useWallAvoid) {
+
+     _wallAvoidDistance = wallAvoid;
+     _useWallAvoidance = useWallAvoid;
+     _speedmode = mode;
+
      //find circumscribing rectangle (x_min/max, y_min/max) //create RectGrid
      createRectGrid(walls, doors, spacing);
      _nPoints = _grid->GetnPoints();
@@ -104,8 +123,7 @@ UnivFFviaFM::UnivFFviaFM(std::vector<Line>& walls, std::map<int, Line>& doors, s
      //allocate _gridCode and  _speedFieldSelector and initialize them ("draw" walls and doors)
      _gridCode = new int[_nPoints];
      processGeometry(walls, doors);
-
-     _speedFieldSelector[INITIAL_SPEED] = new double[_nPoints];
+     _speedFieldSelector.emplace(_speedFieldSelector.begin()+INITIAL_SPEED, new double[_nPoints]);
      std::fill(_speedFieldSelector[INITIAL_SPEED], _speedFieldSelector[INITIAL_SPEED]+_nPoints, 1.0);
 
      //allocate _initalSpeed and maybe _modifiedSpeed
@@ -154,7 +172,8 @@ UnivFFviaFM::UnivFFviaFM(std::vector<Line>& walls, std::map<int, Line>& doors, s
 
           if (_directionFieldWithKey[targetUID])
                delete[] _directionFieldWithKey[targetUID];
-          _directionFieldWithKey[targetUID] = newArrayPt;
+          if (newArrayPt)
+               _directionFieldWithKey[targetUID] = newArrayPt;
 
           //initialize start area
           if (_mode == LINESEGMENT) {
@@ -217,7 +236,10 @@ void UnivFFviaFM::processGeometry(std::vector<Line>&walls, std::map<int, Line>& 
           _gridCode[i] = OUTSIDE;
      }
 
-     _doors = doors;
+     for (auto mapentry : doors) {
+          _doors.insert(mapentry);
+     }
+     //_doors = doors;
 
      drawLinesOnGrid<int>(walls, _gridCode, WALL);
      drawLinesOnGrid(doors, _gridCode); //UIDs of doors will be drawn on _gridCode
@@ -532,10 +554,57 @@ inline double UnivFFviaFM::twosidedCalc(double x, double y, double hDivF) { //on
      return -2.; //this line should never execute
 } //twosidedCalc
 
-void UnivFFviaFM::addTarget(const int uid, Line* door) {
+void UnivFFviaFM::addTarget(const int uid) {
+     Line tempTargetLine = Line(_doors[uid]);
+     Point tempCenterPoint = Point(tempTargetLine.GetCentre());
 
+     //this allocation must be on shared heap! to be accessable by any thread later (head should be shared in openmp)
+     double* newArrayDBL = new double[_nPoints];
+     Point* newArrayPt = nullptr;
+     if (_user == DISTANCE_AND_DIRECTIONS_USED) {
+          newArrayPt = new Point[_nPoints];
+     }
 
+     if (_costFieldWithKey[uid])
+          delete[] _costFieldWithKey[uid];
+     _costFieldWithKey[uid] = newArrayDBL;
+
+     //init costarray
+     for (int i = 0; i < _nPoints; ++i) {
+          if (_gridCode[i] == WALL) {
+               newArrayDBL[i] = magicnum(WALL_ON_COSTARRAY);
+          } else {
+               newArrayDBL[i] = magicnum(UNKNOWN_COST);
+          }
+     }
+
+     if (_directionFieldWithKey[uid])
+          delete[] _directionFieldWithKey[uid];
+     if (newArrayPt)
+          _directionFieldWithKey[uid] = newArrayPt;
+
+     //initialize start area
+     if (_mode == LINESEGMENT) {
+          drawLinesOnGrid(tempTargetLine, newArrayDBL, magicnum(TARGET_REGION));
+     }
+     if (_mode == CENTERPOINT) {
+          newArrayDBL[_grid->getKeyAtPoint(tempCenterPoint)] = magicnum(TARGET_REGION);
+     }
+
+     if (_speedmode == FF_WALL_AVOID) {
+          calcFF(newArrayDBL, newArrayPt, _speedFieldSelector[REDU_WALL_SPEED]);
+     } else if (_speedmode == FF_HOMO_SPEED) {
+          calcFF(newArrayDBL, newArrayPt, _speedFieldSelector[INITIAL_SPEED]);
+     }
+     _uids.emplace_back(uid);
 }
+
+void UnivFFviaFM::addAllTargets() {
+     for (auto uidmap : _doors) {
+          addTarget(uidmap.first);
+     }
+}
+
 std::vector<int> UnivFFviaFM::getKnownDoorUIDs(){
      return _uids;
 }
@@ -568,6 +637,9 @@ void UnivFFviaFM::writeFF(const std::string& filename, std::vector<int> targetID
     file << "POINT_DATA " << std::to_string(numTotal) << std::endl;
     file << "SCALARS GCode float 1" << std::endl;
     file << "LOOKUP_TABLE default" << std::endl;
+    if (!_gridCode) {
+         return;
+    }
     for (long int i = 0; i < _grid->GetnPoints(); ++i) {
          file << _gridCode[i] << std::endl;
     }
@@ -594,31 +666,33 @@ void UnivFFviaFM::writeFF(const std::string& filename, std::vector<int> targetID
 //            file << 0.0 << std::endl;
 //        }
 //    }
+    if (!targetID.empty()) {
+         for (unsigned int iTarget = 0; iTarget < targetID.size(); ++iTarget) {
+              Log->Write("%s: target number %d: UID %d", filename.c_str(), iTarget, targetID[iTarget]);
+              if (_directionFieldWithKey.count(targetID[iTarget]) == 0) {
+                   continue;
+              }
 
-    for (unsigned int iTarget = 0; iTarget < targetID.size(); ++iTarget) {
-        Log->Write("%s: target number %d: UID %d", filename.c_str(), iTarget, targetID[iTarget]);
-        if (_directionFieldWithKey.count(targetID[iTarget]) == 0) {
-            continue;
-        }
+              Point *gradarray = _directionFieldWithKey[targetID[iTarget]];
+              if (gradarray == nullptr) {
+                   continue;
+              }
 
-        Point *gradarray = _directionFieldWithKey[targetID[iTarget]];
-        if (gradarray == nullptr) {
-            continue;
-        }
+              std::string name = _building->GetTransOrCrossByUID(targetID[iTarget])->GetCaption() + "-" +
+                                 std::to_string(targetID[iTarget]);
+              std::replace(name.begin(), name.end(), ' ', '_');
+              file << "VECTORS GradientTarget" << name << " float" << std::endl;
+              for (int i = 0; i < _grid->GetnPoints(); ++i) {
+                   file << gradarray[i]._x << " " << gradarray[i]._y << " 0.0" << std::endl;
+              }
 
-        std::string name = _building->GetTransOrCrossByUID(targetID[iTarget])->GetCaption() + "-" + std::to_string(targetID[iTarget]);
-        std::replace(name.begin(), name.end(), ' ', '_');
-        file << "VECTORS GradientTarget" << name << " float" << std::endl;
-        for (int i = 0; i < _grid->GetnPoints(); ++i) {
-            file << gradarray[i]._x << " " << gradarray[i]._y << " 0.0" << std::endl;
-        }
-
-        double *costarray = _costFieldWithKey[targetID[iTarget]];
-        file << "SCALARS CostTarget" << name << " float 1" << std::endl;
-        file << "LOOKUP_TABLE default" << std::endl;
-        for (long int i = 0; i < _grid->GetnPoints(); ++i) {
-            file << costarray[i] << std::endl;
-        }
+              double *costarray = _costFieldWithKey[targetID[iTarget]];
+              file << "SCALARS CostTarget" << name << " float 1" << std::endl;
+              file << "LOOKUP_TABLE default" << std::endl;
+              for (long int i = 0; i < _grid->GetnPoints(); ++i) {
+                   file << costarray[i] << std::endl;
+              }
+         }
     }
     file.close();
 }
