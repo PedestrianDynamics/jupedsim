@@ -24,7 +24,7 @@
 #include "../geometry/Goal.h"
 #include "../geometry/SubRoom.h"
 
-GeoFileParser::GeoFileParser(const Configuration* configuration)
+GeoFileParser::GeoFileParser(Configuration* configuration)
           :_configuration(configuration)
 {
 

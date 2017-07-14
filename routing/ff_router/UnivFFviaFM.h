@@ -81,10 +81,10 @@ class UnivFFviaFM {
 public:
      UnivFFviaFM(Room* a, Building* b, double c, double e, bool f);
      UnivFFviaFM(SubRoom* a, Building* b, double c, double e, bool f);
-     UnivFFviaFM(Room *a, const Configuration *b, double hx, double wallAvoid, bool useWallAvoid);
-     UnivFFviaFM(Room *a, const Configuration *b, double hx, double wallAvoid, bool useWallAvoid, std::vector<int> wantedDoors);
-     UnivFFviaFM(SubRoom *sr, const Configuration *conf, double hx, double wallAvoid, bool useWallAvoid);
-     UnivFFviaFM(SubRoom *subRoomArg, const Configuration *confArg, double hx, double wallAvoid, bool useWallAvoid, std::vector<int> wantedDoors);
+     UnivFFviaFM(Room* a, Configuration* const b, double hx, double wallAvoid, bool useWallAvoid);
+     UnivFFviaFM(Room* a, Configuration* const b, double hx, double wallAvoid, bool useWallAvoid, std::vector<int> wantedDoors);
+     UnivFFviaFM(SubRoom* sr, Configuration* const conf, double hx, double wallAvoid, bool useWallAvoid);
+     UnivFFviaFM(SubRoom* subRoomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallAvoid, std::vector<int> wantedDoors);
      void create(std::vector<Line>& walls, std::map<int, Line>& doors, std::vector<int> targetUIDs, int mode,
                  double spacing, double wallAvoidDist, bool useWallAvoid);
      UnivFFviaFM() {};
@@ -105,6 +105,7 @@ public:
 
      void createRectGrid(std::vector<Line>& walls, std::map<int, Line>& doors, double spacing);
      void processGeometry(std::vector<Line>&walls, std::map<int, Line>& doors);
+     void createReduWallSpeed(double* reduWallSpeed);
 
      void drawLinesOnGrid(std::map<int, Line>& doors, int *const grid);
      template <typename T>
@@ -112,8 +113,15 @@ public:
      template <typename T>
      void drawLinesOnGrid(Line& line, T* const target, const T value);
 
+     template <typename T>
+     void drawLinesOnWall(std::vector<Line>& wallArg, T* const target, const T value);
+     template <typename T>
+     void drawLinesOnWall(Line& line, T* const target, const T value);
+
      void calcFF(double*, Point*, const double* const);
      void calcCost(const long int key, double* cost, Point* dir, const double* const speed);
+     void calcDF(double*, Point*, const double* const);
+     void calcDist(const long int key, double* cost, Point* dir, const double* const speed);
      inline double onesidedCalc(double xy, double hDivF);
      inline double twosidedCalc(double x, double y, double hDivF);
 
@@ -123,6 +131,7 @@ private:
      int _mode = LINESEGMENT;                     //default
      int _user = DISTANCE_AND_DIRECTIONS_USED;    //default
      int _speedmode = FF_HOMO_SPEED;              //default
+     int _scope = 0;                              //not set / unknown
      RectGrid* _grid = nullptr;
      long int _nPoints = 0;
      std::vector<double*> _speedFieldSelector;

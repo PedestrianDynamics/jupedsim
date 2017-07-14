@@ -50,7 +50,7 @@ using namespace std;
 
 OutputHandler* Log;
 
-Simulation::Simulation(const Configuration* args)
+Simulation::Simulation(Configuration* args)
         :_config(args)
 {
     _nPeds = 0;

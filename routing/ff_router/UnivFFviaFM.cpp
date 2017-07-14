@@ -20,14 +20,16 @@ UnivFFviaFM::UnivFFviaFM(SubRoom* sr, Building* b, double hx, double wallAvoid, 
      _building = b;
 }
 
-UnivFFviaFM::UnivFFviaFM(Room *r, const Configuration *conf, double hx, double wallAvoid, bool useWallAvoid)
+UnivFFviaFM::UnivFFviaFM(Room* r, Configuration* const conf, double hx, double wallAvoid, bool useWallAvoid)
           : UnivFFviaFM(r, conf, hx, wallAvoid, useWallAvoid, std::vector<int>()){
 }
 
-UnivFFviaFM::UnivFFviaFM(Room *roomArg, const Configuration *confArg, double hx, double wallAvoid, bool useWallAvoid, std::vector<int> wantedDoors) {
+UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallAvoid, std::vector<int> wantedDoors) {
      //build the vector with walls(wall or obstacle), the map with <UID, Door(Cross or Trans)>, the vector with targets(UIDs)
      //then call other constructor including the mode
 
+     _configuration = confArg;
+     _scope = FF_ROOM_SCALE;
      std::vector<Line> lines;
      std::map<int, Line> tmpDoors;
 
@@ -64,18 +66,20 @@ UnivFFviaFM::UnivFFviaFM(Room *roomArg, const Configuration *confArg, double hx,
           }
      }
 
-     create(lines, tmpDoors, wantedDoors, FF_HOMO_SPEED, hx, wallAvoid, useWallAvoid);
-     writeFF("UnivFFRoom.vtk", this->getKnownDoorUIDs());
+     //create(lines, tmpDoors, wantedDoors, FF_HOMO_SPEED, hx, wallAvoid, useWallAvoid);
+     create(lines, tmpDoors, wantedDoors, FF_WALL_AVOID, hx, wallAvoid, useWallAvoid);
+     //writeFF("UnivFFRoom.vtk", this->getKnownDoorUIDs());
 }
 
-UnivFFviaFM::UnivFFviaFM(SubRoom* sr, const Configuration* conf, double hx, double wallAvoid, bool useWallAvoid)
+UnivFFviaFM::UnivFFviaFM(SubRoom* sr, Configuration* const conf, double hx, double wallAvoid, bool useWallAvoid)
           : UnivFFviaFM(sr, conf, hx, wallAvoid, useWallAvoid, std::vector<int>()){
 }
 
-UnivFFviaFM::UnivFFviaFM(SubRoom* subRoomArg, const Configuration* confArg, double hx, double wallAvoid, bool useWallAvoid, std::vector<int> wantedDoors) {
+UnivFFviaFM::UnivFFviaFM(SubRoom* subRoomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallAvoid, std::vector<int> wantedDoors) {
      //build the vector with walls(wall or obstacle), the map with <UID, Door(Cross or Trans)>, the vector with targets(UIDs)
      //then call other constructor including the mode
-
+     _configuration = confArg;
+     _scope = FF_SUBROOM_SCALE;
      std::vector<Line> lines;
      std::map<int, Line> tmpDoors;
 
@@ -134,61 +138,32 @@ void UnivFFviaFM::create(std::vector<Line>& walls, std::map<int, Line>& doors, s
           _directionFieldWithKey[0] = gradient_alias_walldirection;
 
           //create wall distance field
-          drawLinesOnGrid(walls, cost_alias_walldistance, magicnum(TARGET_REGION));
-          calcFF(cost_alias_walldistance, gradient_alias_walldirection, _speedFieldSelector[INITIAL_SPEED]);
+          //init costarray
+          for (int i = 0; i < _nPoints; ++i) {
+               if (_gridCode[i] == WALL) {
+                    cost_alias_walldistance[i] = magicnum(WALL_ON_COSTARRAY);
+               } else {
+                    cost_alias_walldistance[i] = magicnum(UNKNOWN_COST);
+               }
+          }
+          drawLinesOnWall(walls, cost_alias_walldistance, magicnum(TARGET_REGION));
+          calcDF(cost_alias_walldistance, gradient_alias_walldirection, _speedFieldSelector[INITIAL_SPEED]);
+          //_uids.emplace_back(0);
 
           double* temp_reduWallSpeed = new double[_nPoints];
-          if (_speedFieldSelector[REDU_WALL_SPEED]) { //free memory before overwriting
+          if (_speedFieldSelector.size() > 1) { //free memory before overwriting
                delete[] _speedFieldSelector[REDU_WALL_SPEED];
           }
           _speedFieldSelector[REDU_WALL_SPEED] = temp_reduWallSpeed;
           //init _reducedWallSpeed by using distance field
           //@todo: @ar.graf @newFF
+          createReduWallSpeed(temp_reduWallSpeed);
      }
 
+     //the memory will be allocated in "addTarget". for parallel processing, we might change it to allocate before the
+     //parallel region and call a fct "addTarget(int, [ptr_to_preallocated mem])"
      for (auto targetUID : targetUIDs ) {
-          Line tempTargetLine = Line(doors[targetUID]);
-          Point tempCenterPoint = Point(tempTargetLine.GetCentre());
-
-          //this allocation must be on shared heap! to be accessable by any thread later (head should be shared in openmp)
-          double* newArrayDBL = new double[_nPoints];
-          Point* newArrayPt = nullptr;
-          if (_user == DISTANCE_AND_DIRECTIONS_USED) {
-               newArrayPt = new Point[_nPoints];
-          }
-
-          if (_costFieldWithKey[targetUID])
-               delete[] _costFieldWithKey[targetUID];
-          _costFieldWithKey[targetUID] = newArrayDBL;
-
-          //init costarray
-          for (int i = 0; i < _nPoints; ++i) {
-               if (_gridCode[i] == WALL) {
-                    newArrayDBL[i] = magicnum(WALL_ON_COSTARRAY);
-               } else {
-                    newArrayDBL[i] = magicnum(UNKNOWN_COST);
-               }
-          }
-
-          if (_directionFieldWithKey[targetUID])
-               delete[] _directionFieldWithKey[targetUID];
-          if (newArrayPt)
-               _directionFieldWithKey[targetUID] = newArrayPt;
-
-          //initialize start area
-          if (_mode == LINESEGMENT) {
-               drawLinesOnGrid(tempTargetLine, newArrayDBL, magicnum(TARGET_REGION));
-          }
-          if (_mode == CENTERPOINT) {
-               newArrayDBL[_grid->getKeyAtPoint(tempCenterPoint)] = magicnum(TARGET_REGION);
-          }
-
-          if (mode == FF_WALL_AVOID) {
-               calcFF(newArrayDBL, newArrayPt, _speedFieldSelector[REDU_WALL_SPEED]);
-          } else if (mode == FF_HOMO_SPEED) {
-               calcFF(newArrayDBL, newArrayPt, _speedFieldSelector[INITIAL_SPEED]);
-          }
-          _uids.emplace_back(targetUID);
+          addTarget(targetUID);
      }    //loop over targets
 
 
@@ -245,6 +220,16 @@ void UnivFFviaFM::processGeometry(std::vector<Line>&walls, std::map<int, Line>& 
      drawLinesOnGrid(doors, _gridCode); //UIDs of doors will be drawn on _gridCode
 }
 
+void UnivFFviaFM::createReduWallSpeed(double* reduWallSpeed){
+     double factor = 1/_wallAvoidDistance;
+     double* wallDstAlias = _costFieldWithKey[0];
+
+     for (long int i = 0; i < _nPoints; ++i) {
+          if (wallDstAlias[i] > 0.) {
+               reduWallSpeed[i] = (wallDstAlias[i] > _wallAvoidDistance) ? 1.0 : (factor * wallDstAlias[i]);
+          }
+     }
+}
 void UnivFFviaFM::drawLinesOnGrid(std::map<int, Line>& doors, int *const grid) {
      for (auto&& doorPair : doors) {
           int tempUID = doorPair.first;
@@ -354,6 +339,108 @@ void UnivFFviaFM::drawLinesOnGrid(Line& line, T* const target, const T value) { 
           }
      }
 } //drawLinesOnGrid
+
+template <typename T>
+void UnivFFviaFM::drawLinesOnWall(std::vector<Line>& wallArg, T* const target, const T value) { //no init, plz init elsewhere
+
+     for (auto& line : wallArg) {
+          drawLinesOnWall(line, target, value);
+     } //loop over all walls
+
+} //drawLinesOnWall
+
+template <typename T>
+void UnivFFviaFM::drawLinesOnWall(Line& line, T* const target, const T value) { //no init, plz init elsewhere
+// i~x; j~y;
+//http://stackoverflow.com/questions/10060046/drawing-lines-with-bresenhams-line-algorithm
+//src in answer of "Avi"; adapted to fit this application
+
+     //grid handeling local vars:
+     long int iMax  = _grid->GetiMax();
+
+     long int iStart, iEnd;
+     long int jStart, jEnd;
+     long int iDot, jDot;
+     long int key;
+     long int deltaX, deltaY, deltaX1, deltaY1, px, py, xe, ye, i; //Bresenham Algorithm
+
+
+     key = _grid->getKeyAtPoint(line.GetPoint1());
+     iStart = (long) _grid->get_i_fromKey(key);
+     jStart = (long) _grid->get_j_fromKey(key);
+
+     key = _grid->getKeyAtPoint(line.GetPoint2());
+     iEnd = (long) _grid->get_i_fromKey(key);
+     jEnd = (long) _grid->get_j_fromKey(key);
+
+     deltaX = (int) (iEnd - iStart);
+     deltaY = (int) (jEnd - jStart);
+     deltaX1 = abs( (int) (iEnd - iStart));
+     deltaY1 = abs( (int) (jEnd - jStart));
+
+     px = 2*deltaY1 - deltaX1;
+     py = 2*deltaX1 - deltaY1;
+
+     if(deltaY1<=deltaX1) {
+          if(deltaX>=0) {
+               iDot = iStart;
+               jDot = jStart;
+               xe = iEnd;
+          } else {
+               iDot = iEnd;
+               jDot = jEnd;
+               xe = iStart;
+          }
+          if ((_gridCode[jDot*iMax + iDot] != CLOSED_CROSSING) && (_gridCode[jDot*iMax + iDot] != CLOSED_TRANSITION)) {
+               target[jDot * iMax + iDot] = value;
+          }
+          for (i=0; iDot < xe; ++i) {
+               ++iDot;
+               if(px<0) {
+                    px+=2*deltaY1;
+               } else {
+                    if((deltaX<0 && deltaY<0) || (deltaX>0 && deltaY>0)) {
+                         ++jDot;
+                    } else {
+                         --jDot;
+                    }
+                    px+=2*(deltaY1-deltaX1);
+               }
+               if ((_gridCode[jDot*iMax + iDot] != CLOSED_CROSSING) && (_gridCode[jDot*iMax + iDot] != CLOSED_TRANSITION)) {
+                    target[jDot * iMax + iDot] = value;
+               }
+          }
+     } else {
+          if(deltaY>=0) {
+               iDot = iStart;
+               jDot = jStart;
+               ye = jEnd;
+          } else {
+               iDot = iEnd;
+               jDot = jEnd;
+               ye = jStart;
+          }
+          if ((_gridCode[jDot*iMax + iDot] != CLOSED_CROSSING) && (_gridCode[jDot*iMax + iDot] != CLOSED_TRANSITION)) {
+               target[jDot * iMax + iDot] = value;
+          }
+          for(i=0; jDot<ye; ++i) {
+               ++jDot;
+               if (py<=0) {
+                    py+=2*deltaX1;
+               } else {
+                    if((deltaX<0 && deltaY<0) || (deltaX>0 && deltaY>0)) {
+                         ++iDot;
+                    } else {
+                         --iDot;
+                    }
+                    py+=2*(deltaX1-deltaY1);
+               }
+               if ((_gridCode[jDot*iMax + iDot] != CLOSED_CROSSING) && (_gridCode[jDot*iMax + iDot] != CLOSED_TRANSITION)) {
+                    target[jDot * iMax + iDot] = value;
+               }
+          }
+     }
+} //drawLinesOnWall
 
 void UnivFFviaFM::calcFF(double* costOutput, Point* directionOutput, const double *const speed) {
      CompareCost comp = CompareCost(costOutput);
@@ -538,6 +625,189 @@ void UnivFFviaFM::calcCost(const long int key, double* cost, Point* dir, const d
      dir[key] = dir[key].Normalized();
 }
 
+void UnivFFviaFM::calcDF(double* costOutput, Point* directionOutput, const double *const speed) {
+     CompareCost comp = CompareCost(costOutput);
+     std::priority_queue<long int, std::vector<long int>, CompareCost> trialfield(costOutput); //pass the argument for the constr of CompareCost
+     std::priority_queue<long int, std::vector<long int>, CompareCost> trialfield2(comp);      //pass the CompareCost object directly
+
+     directNeighbor local_neighbor = _grid->getNeighbors(0);
+     long int aux = 0;
+     //init trial field
+     for (long int i = 0; i < _nPoints; ++i) {
+          if (costOutput[i] == 0.0) {
+               //check for negative neighbours, calc that ones and add to queue trialfield
+               local_neighbor = _grid->getNeighbors(i);
+
+               //check for valid neigh
+               aux = local_neighbor.key[0];
+               if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+                    calcDist(aux, costOutput, directionOutput, speed);
+                    trialfield.emplace(aux);
+                    trialfield2.emplace(aux);
+               }
+               aux = local_neighbor.key[1];
+               if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+                    calcDist(aux, costOutput, directionOutput, speed);
+                    trialfield.emplace(aux);
+                    trialfield2.emplace(aux);
+               }
+               aux = local_neighbor.key[2];
+               if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+                    calcDist(aux, costOutput, directionOutput, speed);
+                    trialfield.emplace(aux);
+                    trialfield2.emplace(aux);
+               }
+               aux = local_neighbor.key[3];
+               if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+                    calcDist(aux, costOutput, directionOutput, speed);
+                    trialfield.emplace(aux);
+                    trialfield2.emplace(aux);
+               }
+          }
+     }
+
+     while(!trialfield.empty()) {
+          local_neighbor = _grid->getNeighbors(trialfield.top());
+          trialfield.pop();
+
+          //check for valid neigh
+          aux = local_neighbor.key[0];
+          if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+               calcDist(aux, costOutput, directionOutput, speed);
+               trialfield.emplace(aux);
+               trialfield2.emplace(aux);
+          }
+          aux = local_neighbor.key[1];
+          if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+               calcDist(aux, costOutput, directionOutput, speed);
+               trialfield.emplace(aux);
+               trialfield2.emplace(aux);
+          }
+          aux = local_neighbor.key[2];
+          if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+               calcDist(aux, costOutput, directionOutput, speed);
+               trialfield.emplace(aux);
+               trialfield2.emplace(aux);
+          }
+          aux = local_neighbor.key[3];
+          if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+               calcDist(aux, costOutput, directionOutput, speed);
+               trialfield.emplace(aux);
+               trialfield2.emplace(aux);
+          }
+     }
+}
+
+void UnivFFviaFM::calcDist(const long int key, double* cost, Point* dir, const double* const speed) {
+     //adapt from calcFloorfield
+     double row = DBL_MAX;
+     double col = DBL_MAX;
+     long int aux = -1; //will be set below
+     bool pointsUp = false;
+     bool pointsRight = false;
+
+     directNeighbor dNeigh = _grid->getNeighbors(key);
+
+     aux = dNeigh.key[0];
+     //hint: trialfield[i].cost = dist2Wall + i; <<< set in resetGoalAndCosts
+     if  ((aux != -2) &&                                                                         //neighbor is a gridpoint
+          (cost[aux] != magicnum(UNKNOWN_COST)) && (cost[aux] != magicnum(UNKNOWN_DISTANCE))     //gridpoint holds a calculated value
+          )                                                              //gridpoint holds a calculated value
+     {
+          row = cost[aux];
+          pointsRight = true;
+          if (row < 0) {
+               std::cerr << "hier ist was schief " << row << " " << aux << " " <<  std::endl;
+               row = DBL_MAX;
+          }
+     }
+     aux = dNeigh.key[2];
+     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
+          (cost[aux] != magicnum(UNKNOWN_COST)) && (cost[aux] != magicnum(UNKNOWN_DISTANCE))   //gridpoint holds a calculated value
+           &&
+          (cost[aux] < row))                                       //calculated value promises smaller cost
+     {
+          row = cost[aux];
+          pointsRight = false;
+     }
+
+     aux = dNeigh.key[1];
+     //hint: trialfield[i].cost = dist2Wall + i; <<< set in parseBuilding after linescan call
+     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
+          (cost[aux] != magicnum(UNKNOWN_COST)) && (cost[aux] != magicnum(UNKNOWN_DISTANCE))   //gridpoint holds a calculated value
+          )
+     {
+          col = cost[aux];
+          pointsUp = true;
+          if (col < 0) {
+               std::cerr << "hier ist was schief " << col << " " << aux << " "  << std::endl;
+               col = DBL_MAX;
+          }
+     }
+     aux = dNeigh.key[3];
+     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
+          (cost[aux] != magicnum(UNKNOWN_COST)) && (cost[aux] != magicnum(UNKNOWN_DISTANCE)) &&  //gridpoint holds a calculated value
+
+          (cost[aux] < col))                                       //calculated value promises smaller cost
+     {
+          col = cost[aux];
+          pointsUp = false;
+     }
+     if (col == DBL_MAX) { //one sided update with row
+          cost[key] = onesidedCalc(row, _grid->Gethx()/speed[key]);
+          //flag[key] = FM_SINGLE;
+          if (pointsRight) {
+               dir[key]._x = (-(cost[key+1]-cost[key])/_grid->Gethx());
+               dir[key]._y = (0.);
+          } else {
+               dir[key]._x = (-(cost[key]-cost[key-1])/_grid->Gethx());
+               dir[key]._y = (0.);
+          }
+          dir[key] = dir[key].Normalized(); //@todo: ar.graf: what yields better performance? scale every point here or scale each read value? more points or more calls to any element of dir2Wall
+          return;
+     }
+
+     if (row == DBL_MAX) { //one sided update with col
+          cost[key] = onesidedCalc(col, _grid->Gethy()/speed[key]);
+          //flag[key] = FM_SINGLE;
+          if (pointsUp) {
+               dir[key]._x = (0.);
+               dir[key]._y = (-(cost[key+(_grid->GetiMax())]-cost[key])/_grid->Gethy());
+          } else {
+               dir[key]._x = (0.);
+               dir[key]._y = (-(cost[key]-cost[key-(_grid->GetiMax())])/_grid->Gethy());
+          }
+          dir[key] = dir[key].Normalized();
+          return;
+     }
+
+     //two sided update
+     double precheck = twosidedCalc(row, col, _grid->Gethx()/speed[key]);
+     if (precheck >= 0) {
+          cost[key] = precheck;
+          //flag[key] = FM_DOUBLE;
+          if (pointsUp && pointsRight) {
+               dir[key]._x = (-(cost[key+1]-cost[key])/_grid->Gethx());
+               dir[key]._y = (-(cost[key+(_grid->GetiMax())]-cost[key])/_grid->Gethy());
+          }
+          if (pointsUp && !pointsRight) {
+               dir[key]._x = (-(cost[key]-cost[key-1])/_grid->Gethx());
+               dir[key]._y = (-(cost[key+(_grid->GetiMax())]-cost[key])/_grid->Gethy());
+          }
+          if (!pointsUp && pointsRight) {
+               dir[key]._x = (-(cost[key+1]-cost[key])/_grid->Gethx());
+               dir[key]._y = (-(cost[key]-cost[key-(_grid->GetiMax())])/_grid->Gethy());
+          }
+          if (!pointsUp && !pointsRight) {
+               dir[key]._x = (-(cost[key]-cost[key-1])/_grid->Gethx());
+               dir[key]._y = (-(cost[key]-cost[key-(_grid->GetiMax())])/_grid->Gethy());
+          }
+     } else {
+          std::cerr << "else in twosided Dist " << std::endl;
+     }
+     dir[key] = dir[key].Normalized();
+}
+
 inline double UnivFFviaFM::onesidedCalc(double xy, double hDivF) {
      //if ( (xy+hDivF) > 10000) std::cerr << "error in onesided " << xy << std::endl;
      return xy + hDivF;
@@ -558,7 +828,7 @@ void UnivFFviaFM::addTarget(const int uid) {
      Line tempTargetLine = Line(_doors[uid]);
      Point tempCenterPoint = Point(tempTargetLine.GetCentre());
 
-     //this allocation must be on shared heap! to be accessable by any thread later (head should be shared in openmp)
+     //this allocation must be on shared heap! to be accessible by any thread later (should be shared in openmp)
      double* newArrayDBL = new double[_nPoints];
      Point* newArrayPt = nullptr;
      if (_user == DISTANCE_AND_DIRECTIONS_USED) {

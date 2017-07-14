@@ -67,7 +67,7 @@ Building::Building()
 
 #ifdef _SIMULATOR
 
-Building::Building(const Configuration* configuration, PedDistributor& pedDistributor)
+Building::Building(Configuration* configuration, PedDistributor& pedDistributor)
           :_configuration(configuration),
            _routingEngine(
                  configuration->GetRoutingEngine()),
@@ -156,7 +156,7 @@ Building::~Building()
      }
 }
 
-const Configuration* Building::GetConfig() const {
+Configuration* Building::GetConfig() const {
      return _configuration;
 }
 

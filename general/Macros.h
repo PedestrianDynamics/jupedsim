@@ -186,7 +186,9 @@ enum FloorfieldMode {
      FF_CENTRALPOINT,
      FF_FULL_LINE,
      FF_WALL_AVOID,
-     FF_HOMO_SPEED
+     FF_HOMO_SPEED,
+     FF_ROOM_SCALE,
+     FF_SUBROOM_SCALE
 };
 
 enum MagicNumbers{
