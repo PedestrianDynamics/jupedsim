@@ -91,16 +91,19 @@ public:
      UnivFFviaFM(UnivFFviaFM&){};
      ~UnivFFviaFM(){};
 
-     void addTarget(const int uid, Line* door);
-     void addTarget(const int uid);
+     void addTarget(const int uid, Line* door, double* costarray = nullptr, Point* gradarray = nullptr);
+     void addTarget(const int uid, double* costarray = nullptr, Point* gradarray = nullptr);
      void addAllTargets();
+     void addAllTargetsParallel();
      std::vector<int> getKnownDoorUIDs();
+     void setUser(int userArg);
+     void setMode(int modeArg);
 
-     double getCostToDestination(const int destID, const Point& position, int mode) {return 0.;};
-     double getCostToDestination(const int destID, const Point& position) {return 0.;};
-     RectGrid* getGrid(){return nullptr;};
-     virtual void getDirectionToUID(int destID, const long int key, Point& direction, int mode){};
-     void getDirectionToUID(int destID, const long int key, Point& direction){};
+     double getCostToDestination(const int destID, const Point& position, int mode);
+     double getCostToDestination(const int destID, const Point& position);
+     RectGrid* getGrid();
+     virtual void getDirectionToUID(int destID, const long int key, Point& direction, int mode);
+     void getDirectionToUID(int destID, const long int key, Point& direction);
      void writeFF(const std::string&, std::vector<int> targetID);
 
      void createRectGrid(std::vector<Line>& walls, std::map<int, Line>& doors, double spacing);
@@ -128,10 +131,12 @@ public:
 private:
      Building* _building = nullptr;
      Configuration* _configuration = nullptr;
+     int _room = -1;                              //not set
      int _mode = LINESEGMENT;                     //default
      int _user = DISTANCE_AND_DIRECTIONS_USED;    //default
      int _speedmode = FF_HOMO_SPEED;              //default
      int _scope = 0;                              //not set / unknown
+     bool _directCalculation = true;
      RectGrid* _grid = nullptr;
      long int _nPoints = 0;
      std::vector<double*> _speedFieldSelector;

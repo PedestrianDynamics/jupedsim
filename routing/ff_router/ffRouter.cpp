@@ -187,13 +187,15 @@ bool FFRouter::Init(Building* building)
 //               } else {
 //                    locffptr = new LocalFloorfieldViaFM(pairRoomIt->second.get(), building, 0.125, 0.125, 0.0, false);
 //               }
-               locffptr->addAllTargets();
+               locffptr->setUser(DISTANCE_MEASUREMENTS_ONLY);
+               locffptr->setMode(CENTERPOINT);
+               locffptr->addAllTargetsParallel();
                locffptr->writeFF("UnivFF.vtk", locffptr->getKnownDoorUIDs());
                Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
 //#pragma omp critical(_locffviafm)
                _locffviafm.insert(std::make_pair((*pairRoomIt).first, locffptr));
           }
-      return true;  //@todo: ar.graf: remove this!!
+
 
           // nowait, because the parallel region ends directly afterwards
 //#pragma omp for nowait

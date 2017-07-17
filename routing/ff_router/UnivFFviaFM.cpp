@@ -30,6 +30,7 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
 
      _configuration = confArg;
      _scope = FF_ROOM_SCALE;
+     _room = roomArg->GetID();
      std::vector<Line> lines;
      std::map<int, Line> tmpDoors;
 
@@ -68,7 +69,6 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
 
      //create(lines, tmpDoors, wantedDoors, FF_HOMO_SPEED, hx, wallAvoid, useWallAvoid);
      create(lines, tmpDoors, wantedDoors, FF_WALL_AVOID, hx, wallAvoid, useWallAvoid);
-     //writeFF("UnivFFRoom.vtk", this->getKnownDoorUIDs());
 }
 
 UnivFFviaFM::UnivFFviaFM(SubRoom* sr, Configuration* const conf, double hx, double wallAvoid, bool useWallAvoid)
@@ -80,6 +80,7 @@ UnivFFviaFM::UnivFFviaFM(SubRoom* subRoomArg, Configuration* const confArg, doub
      //then call other constructor including the mode
      _configuration = confArg;
      _scope = FF_SUBROOM_SCALE;
+     _room = subRoomArg->GetRoomID();
      std::vector<Line> lines;
      std::map<int, Line> tmpDoors;
 
@@ -110,7 +111,6 @@ UnivFFviaFM::UnivFFviaFM(SubRoom* subRoomArg, Configuration* const confArg, doub
      }
 
      create(lines, tmpDoors, wantedDoors, FF_HOMO_SPEED, hx, wallAvoid, useWallAvoid);
-     writeFF("UnivFFSubroom.vtk", this->getKnownDoorUIDs());
 }
 
 void UnivFFviaFM::create(std::vector<Line>& walls, std::map<int, Line>& doors, std::vector<int> targetUIDs, int mode,
@@ -573,6 +573,9 @@ void UnivFFviaFM::calcCost(const long int key, double* cost, Point* dir, const d
      if (col == DBL_MAX) { //one sided update with row
           cost[key] = onesidedCalc(row, _grid->Gethx()/speed[key]);
           //flag[key] = FM_SINGLE;
+          if (!dir) {
+               return;
+          }
           if (pointsRight) {
                dir[key]._x = (-(cost[key+1]-cost[key])/_grid->Gethx());
                dir[key]._y = (0.);
@@ -587,6 +590,9 @@ void UnivFFviaFM::calcCost(const long int key, double* cost, Point* dir, const d
      if (row == DBL_MAX) { //one sided update with col
           cost[key] = onesidedCalc(col, _grid->Gethy()/speed[key]);
           //flag[key] = FM_SINGLE;
+          if (!dir) {
+               return;
+          }
           if (pointsUp) {
                dir[key]._x = (0.);
                dir[key]._y = (-(cost[key+(_grid->GetiMax())]-cost[key])/_grid->Gethy());
@@ -603,6 +609,9 @@ void UnivFFviaFM::calcCost(const long int key, double* cost, Point* dir, const d
      if (precheck >= 0) {
           cost[key] = precheck;
           //flag[key] = FM_DOUBLE;
+          if (!dir) {
+               return;
+          }
           if (pointsUp && pointsRight) {
                dir[key]._x = (-(cost[key+1]-cost[key])/_grid->Gethx());
                dir[key]._y = (-(cost[key+(_grid->GetiMax())]-cost[key])/_grid->Gethy());
@@ -756,6 +765,9 @@ void UnivFFviaFM::calcDist(const long int key, double* cost, Point* dir, const d
      if (col == DBL_MAX) { //one sided update with row
           cost[key] = onesidedCalc(row, _grid->Gethx()/speed[key]);
           //flag[key] = FM_SINGLE;
+          if (!dir) {
+               return;
+          }
           if (pointsRight) {
                dir[key]._x = (-(cost[key+1]-cost[key])/_grid->Gethx());
                dir[key]._y = (0.);
@@ -770,6 +782,9 @@ void UnivFFviaFM::calcDist(const long int key, double* cost, Point* dir, const d
      if (row == DBL_MAX) { //one sided update with col
           cost[key] = onesidedCalc(col, _grid->Gethy()/speed[key]);
           //flag[key] = FM_SINGLE;
+          if (!dir) {
+               return;
+          }
           if (pointsUp) {
                dir[key]._x = (0.);
                dir[key]._y = (-(cost[key+(_grid->GetiMax())]-cost[key])/_grid->Gethy());
@@ -786,6 +801,9 @@ void UnivFFviaFM::calcDist(const long int key, double* cost, Point* dir, const d
      if (precheck >= 0) {
           cost[key] = precheck;
           //flag[key] = FM_DOUBLE;
+          if (!dir) {
+               return;
+          }
           if (pointsUp && pointsRight) {
                dir[key]._x = (-(cost[key+1]-cost[key])/_grid->Gethx());
                dir[key]._y = (-(cost[key+(_grid->GetiMax())]-cost[key])/_grid->Gethy());
@@ -824,18 +842,22 @@ inline double UnivFFviaFM::twosidedCalc(double x, double y, double hDivF) { //on
      return -2.; //this line should never execute
 } //twosidedCalc
 
-void UnivFFviaFM::addTarget(const int uid) {
+void UnivFFviaFM::addTarget(const int uid, double* costarrayDBL, Point* gradarrayPt) {
+     if (_doors.count(uid) == 0) {
+          Log->Write("ERROR: \tCould not find door with uid %d in Room %d", uid, _room);
+          return;
+     }
      Line tempTargetLine = Line(_doors[uid]);
      Point tempCenterPoint = Point(tempTargetLine.GetCentre());
 
      //this allocation must be on shared heap! to be accessible by any thread later (should be shared in openmp)
-     double* newArrayDBL = new double[_nPoints];
+     double* newArrayDBL = (costarrayDBL)? costarrayDBL : new double[_nPoints];
      Point* newArrayPt = nullptr;
      if (_user == DISTANCE_AND_DIRECTIONS_USED) {
-          newArrayPt = new Point[_nPoints];
+          newArrayPt = (gradarrayPt)? gradarrayPt : new Point[_nPoints];
      }
 
-     if (_costFieldWithKey[uid])
+     if (_costFieldWithKey[uid] && !costarrayDBL)
           delete[] _costFieldWithKey[uid];
      _costFieldWithKey[uid] = newArrayDBL;
 
@@ -848,7 +870,7 @@ void UnivFFviaFM::addTarget(const int uid) {
           }
      }
 
-     if (_directionFieldWithKey[uid])
+     if (_directionFieldWithKey[uid] && !gradarrayPt)
           delete[] _directionFieldWithKey[uid];
      if (newArrayPt)
           _directionFieldWithKey[uid] = newArrayPt;
@@ -869,15 +891,64 @@ void UnivFFviaFM::addTarget(const int uid) {
      _uids.emplace_back(uid);
 }
 
+void UnivFFviaFM::addTarget(const int uid, Line* door, double* costarray, Point* gradarray){
+     if (_doors.count(uid) == 0) {
+          _doors.emplace(std::make_pair(uid, *door));
+     }
+     addTarget(uid, costarray, gradarray);
+}
+
 void UnivFFviaFM::addAllTargets() {
      for (auto uidmap : _doors) {
           addTarget(uidmap.first);
      }
 }
 
+void UnivFFviaFM::addAllTargetsParallel() {
+     //free old memory
+     for (auto memoryDBL : _costFieldWithKey) {
+          if (memoryDBL.first == 0) continue;          //do not free distancemap
+          if (memoryDBL.second) delete[](memoryDBL.second);
+     }
+     for (auto memoryPt : _directionFieldWithKey) {
+          if (memoryPt.first == 0) continue;           //do not free walldirectionmap
+          if (memoryPt.second) delete[](memoryPt.second);
+     }
+     //allocate new memory
+     for (auto uidmap : _doors) {
+          _costFieldWithKey[uidmap.first] = new double[_nPoints];
+          if (_user == DISTANCE_MEASUREMENTS_ONLY) {
+               _directionFieldWithKey[uidmap.first] = nullptr;
+          }
+          if (_user == DISTANCE_AND_DIRECTIONS_USED) {
+               _directionFieldWithKey[uidmap.first] = new Point[_nPoints];
+          }
+     }
+
+     //parallel region
+#pragma omp parallel
+     {
+#pragma omp for
+          for (unsigned int i = 0; i < _doors.size(); ++i) {
+               auto doorPair = _doors.begin();
+               std::advance(doorPair, i);
+               addTarget(doorPair->first, _costFieldWithKey[doorPair->first], _directionFieldWithKey[doorPair->first]);
+          }
+     };
+}
+
 std::vector<int> UnivFFviaFM::getKnownDoorUIDs(){
      return _uids;
 }
+
+void UnivFFviaFM::setUser(int userArg) {
+     _user=userArg;
+}
+
+void UnivFFviaFM::setMode(int modeArg) {
+     _mode=modeArg;
+}
+
 
 void UnivFFviaFM::writeFF(const std::string& filename, std::vector<int> targetID) {
     Log->Write("INFO: \tWrite Floorfield to file");
@@ -939,6 +1010,26 @@ void UnivFFviaFM::writeFF(const std::string& filename, std::vector<int> targetID
     if (!targetID.empty()) {
          for (unsigned int iTarget = 0; iTarget < targetID.size(); ++iTarget) {
               Log->Write("%s: target number %d: UID %d", filename.c_str(), iTarget, targetID[iTarget]);
+
+              if (_costFieldWithKey.count(targetID[iTarget]) == 0) {
+                   continue;
+              }
+              double *costarray = _costFieldWithKey[targetID[iTarget]];
+
+              std::string name = _building->GetTransOrCrossByUID(targetID[iTarget])->GetCaption() + "-" +
+                                                                                          std::to_string(targetID[iTarget]);
+              std::replace(name.begin(), name.end(), ' ', '_');
+
+              if (!costarray) {
+                   continue;
+              }
+
+              file << "SCALARS CostTarget" << name << " float 1" << std::endl;
+              file << "LOOKUP_TABLE default" << std::endl;
+              for (long int i = 0; i < _grid->GetnPoints(); ++i) {
+                   file << costarray[i] << std::endl;
+              }
+
               if (_directionFieldWithKey.count(targetID[iTarget]) == 0) {
                    continue;
               }
@@ -948,21 +1039,111 @@ void UnivFFviaFM::writeFF(const std::string& filename, std::vector<int> targetID
                    continue;
               }
 
-              std::string name = _building->GetTransOrCrossByUID(targetID[iTarget])->GetCaption() + "-" +
-                                 std::to_string(targetID[iTarget]);
-              std::replace(name.begin(), name.end(), ' ', '_');
+
               file << "VECTORS GradientTarget" << name << " float" << std::endl;
               for (int i = 0; i < _grid->GetnPoints(); ++i) {
                    file << gradarray[i]._x << " " << gradarray[i]._y << " 0.0" << std::endl;
               }
 
-              double *costarray = _costFieldWithKey[targetID[iTarget]];
-              file << "SCALARS CostTarget" << name << " float 1" << std::endl;
-              file << "LOOKUP_TABLE default" << std::endl;
-              for (long int i = 0; i < _grid->GetnPoints(); ++i) {
-                   file << costarray[i] << std::endl;
-              }
+
          }
     }
     file.close();
 }
+
+//@todo: @ar.graf: mode is argument, which should not be needed, the info is stored in members like speedmode, ...
+double UnivFFviaFM::getCostToDestination(const int destID, const Point& position, int mode) {
+     assert(_grid->includesPoint(position));
+     if (_costFieldWithKey.count(destID)==1 && _costFieldWithKey[destID]) {
+          return _costFieldWithKey[destID][_grid->getKeyAtPoint(position)];
+     } else if (_directCalculation && _doors.count(destID) > 0) {
+          _costFieldWithKey[destID] = new double[_nPoints];
+          if (_user == DISTANCE_AND_DIRECTIONS_USED) {
+               _directionFieldWithKey[destID] = new Point[_nPoints];
+          } else {
+               _directionFieldWithKey[destID] = nullptr;
+          }
+
+          addTarget(destID, _costFieldWithKey[destID], _directionFieldWithKey[destID]);
+          getCostToDestination(destID, position, mode);
+     }
+     return 0.;
+}
+
+double UnivFFviaFM::getCostToDestination(const int destID, const Point& position) {
+     assert(_grid->includesPoint(position));
+     if (_costFieldWithKey.count(destID)==1 && _costFieldWithKey[destID]) {
+          return _costFieldWithKey[destID][_grid->getKeyAtPoint(position)];
+     } else if (_directCalculation && _doors.count(destID) > 0) {
+          _costFieldWithKey[destID] = new double[_nPoints];
+          if (_user == DISTANCE_AND_DIRECTIONS_USED) {
+               _directionFieldWithKey[destID] = new Point[_nPoints];
+          } else {
+               _directionFieldWithKey[destID] = nullptr;
+          }
+
+          addTarget(destID, _costFieldWithKey[destID], _directionFieldWithKey[destID]);
+          getCostToDestination(destID, position);
+     }
+     return 0.;
+}
+
+RectGrid* UnivFFviaFM::getGrid(){
+     return _grid;
+}
+
+void UnivFFviaFM::getDirectionToUID(int destID, const long int key, Point& direction, int mode){
+     assert(key > 0 && key < _nPoints);
+     if (_directionFieldWithKey.count(destID)==1 && _directionFieldWithKey[destID]) {
+          direction = _directionFieldWithKey[destID][key];
+     } else if (_directCalculation && _doors.count(destID) > 0) {
+          //free memory if needed
+          if (_costFieldWithKey.count(destID) == 1 && _costFieldWithKey[destID]) {
+               delete[] _costFieldWithKey[destID];
+          }
+          //allocate memory
+          _costFieldWithKey[destID] = new double[_nPoints];
+          if (_user == DISTANCE_AND_DIRECTIONS_USED) {
+               _directionFieldWithKey[destID] = new Point[_nPoints];
+          } else {
+               _directionFieldWithKey[destID] = nullptr;
+          }
+
+          //calculate destID's fields and call function
+          addTarget(destID, _costFieldWithKey[destID], _directionFieldWithKey[destID]);
+          getDirectionToUID(destID, key, direction, mode);
+     }
+     return;
+}
+
+void UnivFFviaFM::getDirectionToUID(int destID, const long int key, Point& direction){
+     assert(key > 0 && key < _nPoints);
+     if (_directionFieldWithKey.count(destID)==1 && _directionFieldWithKey[destID]) {
+          direction = _directionFieldWithKey[destID][key];
+     } else if (_directCalculation && _doors.count(destID) > 0) {
+          //free memory if needed
+          if (_costFieldWithKey.count(destID) == 1 && _costFieldWithKey[destID]) {
+               delete[] _costFieldWithKey[destID];
+          }
+          //allocate memory
+          _costFieldWithKey[destID] = new double[_nPoints];
+          if (_user == DISTANCE_AND_DIRECTIONS_USED) {
+               _directionFieldWithKey[destID] = new Point[_nPoints];
+          } else {
+               _directionFieldWithKey[destID] = nullptr;
+          }
+
+          //calculate destID's fields and call function
+          addTarget(destID, _costFieldWithKey[destID], _directionFieldWithKey[destID]);
+          getDirectionToUID(destID, key, direction);
+     }
+     return;
+}
+
+/* Log:
+ * todo:
+ *   - implement error treatment: extend fctns to throw errors and handle them
+ *   - error treatment will be advantageous, if calculation of FFs can be postponed
+ *                                           to be done in Simulation::RunBody, where
+ *                                           all cores are available
+ *   - (WIP) fill subroom* array with correct values
