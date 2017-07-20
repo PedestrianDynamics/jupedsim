@@ -251,7 +251,7 @@ void Pedestrian::SetExitIndex(int i)
      //_destHistory.push_back(i);
 }
 
-void Pedestrian::SetExitLine(const NavLine* l) //FIXME? argraf : _navLine = new NavLine(*l); this would have a navLine with consistent uid (done below)
+void Pedestrian::SetExitLine(const NavLine* l)
 {
      if(_navLine)
           delete _navLine;

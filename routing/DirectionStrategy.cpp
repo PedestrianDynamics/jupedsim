@@ -525,19 +525,21 @@ void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
      _initDone = true;
 
      //write floorfields to file, one file per subroom //ar.graf: [SWITCH writevtk ON/OFF]
-//     for(unsigned int i = 0; i < subUIDs.size(); ++i) {
-//          std::vector<int> targets = {};
-//          targets.clear();
-//          int subroomUID = subUIDs[i];
-//
-//          for (auto pair : subAndTarget) {
-//               if (pair.first == subroomUID) {
-//                    targets.emplace_back(pair.second);
-//               }
-//          }
-//          std::string filename1 = "floorfield" + std::to_string(subroomUID) + ".vtk";
-//          locffviafm[subroomUID]->writeFF(filename1, targets);
-//     }
+     for(unsigned int i = 0; i < subUIDs.size(); ++i) {
+          std::vector<int> targets = {};
+          targets.clear();
+          int subroomUID = subUIDs[i];
+          if (subroomUID != 26) continue;
+
+          for (auto pair : subAndTarget) {
+               if (pair.first == subroomUID) {
+                    targets.emplace_back(pair.second);
+               }
+          }
+          std::string filename1 = "floorfield" + std::to_string(subroomUID) + ".vtk";
+          if (targets.size() > 0)
+          _locffviafm[subroomUID]->writeFF(filename1, targets);
+     }
 }
 
 DirectionSubLocalFloorfield::DirectionSubLocalFloorfield() {

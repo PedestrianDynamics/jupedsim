@@ -102,8 +102,8 @@ bool GompertzModel::Init(Building *building) {
     }
 
     const vector<Pedestrian *> &allPeds = building->GetAllPedestrians();
-
-    for (unsigned int p = 0; p < allPeds.size(); p++) {
+    size_t peds_size = allPeds.size();
+    for (unsigned int p = 0; p < peds_size; p++) {
         Pedestrian *ped = allPeds[p];
         double cosPhi, sinPhi;
         //a destination could not be found for that pedestrian
@@ -111,6 +111,8 @@ bool GompertzModel::Init(Building *building) {
             Log->Write(
                     "ERROR:\tGompertzModel::Init() cannot initialise route. ped %d is deleted.\n", ped->GetID());
             building->DeletePedestrian(ped);
+            --p;
+            --peds_size;
             continue;
         }
         Point target = ped->GetExitLine()->LotPoint(ped->GetPos());

@@ -102,13 +102,16 @@ bool GCFMModel::Init (Building* building)
      }
 
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
-    for(unsigned int p=0;p<allPeds.size();p++)
+    size_t peds_size = allPeds.size();
+    for(unsigned int p=0;p<peds_size;p++)
     {
          Pedestrian* ped = allPeds[p];
          double cosPhi, sinPhi;
          //a destination could not be found for that pedestrian
          if (ped->FindRoute() == -1) {
              building->DeletePedestrian(ped);
+              p--;
+              peds_size--;
               continue;
          }
 

@@ -187,10 +187,10 @@ bool FFRouter::Init(Building* building)
 //               } else {
 //                    locffptr = new LocalFloorfieldViaFM(pairRoomIt->second.get(), building, 0.125, 0.125, 0.0, false);
 //               }
-               locffptr->setUser(DISTANCE_MEASUREMENTS_ONLY);
+               locffptr->setUser(DISTANCE_AND_DIRECTIONS_USED);
                locffptr->setMode(CENTERPOINT);
                locffptr->addAllTargetsParallel();
-               locffptr->writeFF("UnivFF.vtk", locffptr->getKnownDoorUIDs());
+               locffptr->writeFF("UnivFF"+std::to_string(pairRoomIt->first)+".vtk", locffptr->getKnownDoorUIDs());
                Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
 //#pragma omp critical(_locffviafm)
                _locffviafm.insert(std::make_pair((*pairRoomIt).first, locffptr));
@@ -320,13 +320,14 @@ bool FFRouter::Init(Building* building)
 
      //int roomTest = (*(_locffviafm.begin())).first;
      //int transTest = (building->GetRoom(roomTest)->GetAllTransitionsIDs())[0];
+     //auto test = _CroTrByUID.at(1253);
 
-     for (unsigned int i = 0; i < _locffviafm.size(); ++i) {
-          auto iter = _locffviafm.begin();
-          std::advance(iter, i);
-          int roomNr = iter->first;
-          iter->second->writeFF("testFF" + std::to_string(roomNr) + ".vtk", _allDoorUIDs);
-     }
+//     for (unsigned int i = 0; i < _locffviafm.size(); ++i) {
+//          auto iter = _locffviafm.begin();
+//          std::advance(iter, i);
+//          int roomNr = iter->first;
+//          iter->second->writeFF("testFF" + std::to_string(roomNr) + ".vtk", _allDoorUIDs);
+//     }
 
      std::ofstream matrixfile;
      matrixfile.open("Matrix.txt");

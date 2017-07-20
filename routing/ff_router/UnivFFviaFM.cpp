@@ -2,6 +2,7 @@
 // Created by arne on 5/9/17.
 //
 
+#include <unordered_set>
 #include "UnivFFviaFM.h"
 #include "../../geometry/Line.h"
 #include "../../geometry/Building.h"
@@ -67,8 +68,8 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
           }
      }
 
-     //create(lines, tmpDoors, wantedDoors, FF_HOMO_SPEED, hx, wallAvoid, useWallAvoid);
-     create(lines, tmpDoors, wantedDoors, FF_WALL_AVOID, hx, wallAvoid, useWallAvoid);
+     create(lines, tmpDoors, wantedDoors, FF_HOMO_SPEED, hx, wallAvoid, useWallAvoid);
+     //create(lines, tmpDoors, wantedDoors, FF_WALL_AVOID, hx, wallAvoid, useWallAvoid);
 }
 
 UnivFFviaFM::UnivFFviaFM(SubRoom* sr, Configuration* const conf, double hx, double wallAvoid, bool useWallAvoid)
@@ -218,6 +219,81 @@ void UnivFFviaFM::processGeometry(std::vector<Line>&walls, std::map<int, Line>& 
 
      drawLinesOnGrid<int>(walls, _gridCode, WALL);
      drawLinesOnGrid(doors, _gridCode); //UIDs of doors will be drawn on _gridCode
+}
+
+void UnivFFviaFM::markSubroom(const Point& insidePoint, SubRoom* const value) {
+     //value must not be nullptr. it would lead to infinite loop
+     if (!value) return;
+     //alloc mem if needed
+     if (!_subrooms) {
+          _subrooms = new SubRoom*[_nPoints];
+          for (long i = 0; i < _nPoints; ++i) {
+               _subrooms[i] = nullptr;
+          }
+     }
+
+     //init start
+     _subrooms[_grid->getKeyAtPoint(insidePoint)] = value;
+     _gridCode[_grid->getKeyAtPoint(insidePoint)] = INSIDE;
+
+     std::unordered_set<long> wavefront;
+     wavefront.reserve(_nPoints);
+
+     directNeighbor _neigh = _grid->getNeighbors(_grid->getKeyAtPoint(insidePoint));
+     long aux = _neigh.key[0];
+     if ((aux != -2) && (_gridCode[aux] == INSIDE || _gridCode[aux] == OUTSIDE)) {
+          wavefront.insert(aux);
+          _subrooms[aux] = value;
+     }
+
+     aux = _neigh.key[1];
+     if ((aux != -2) && (_gridCode[aux] == INSIDE || _gridCode[aux] == OUTSIDE)) {
+          wavefront.insert(aux);
+          _subrooms[aux] = value;
+     }
+
+     aux = _neigh.key[2];
+     if ((aux != -2) && (_gridCode[aux] == INSIDE || _gridCode[aux] == OUTSIDE)) {
+          wavefront.insert(aux);
+          _subrooms[aux] = value;
+     }
+
+     aux = _neigh.key[3];
+     if ((aux != -2) && (_gridCode[aux] == INSIDE || _gridCode[aux] == OUTSIDE)) {
+          wavefront.insert(aux);
+          _subrooms[aux] = value;
+     }
+
+     while(!wavefront.empty()) {
+          long current = *(wavefront.begin());
+          wavefront.erase(current);
+          _gridCode[current] = INSIDE;
+
+          directNeighbor _neigh = _grid->getNeighbors(current);
+          long aux = _neigh.key[0];
+          if ((aux != -2) && (_gridCode[aux] == INSIDE || _gridCode[aux] == OUTSIDE) && _subrooms[aux] == nullptr) {
+               wavefront.insert(aux);
+               _subrooms[aux] = value;
+          }
+
+          aux = _neigh.key[1];
+          if ((aux != -2) && (_gridCode[aux] == INSIDE || _gridCode[aux] == OUTSIDE) && _subrooms[aux] == nullptr) {
+               wavefront.insert(aux);
+               _subrooms[aux] = value;
+          }
+
+          aux = _neigh.key[2];
+          if ((aux != -2) && (_gridCode[aux] == INSIDE || _gridCode[aux] == OUTSIDE) && _subrooms[aux] == nullptr) {
+               wavefront.insert(aux);
+               _subrooms[aux] = value;
+          }
+
+          aux = _neigh.key[3];
+          if ((aux != -2) && (_gridCode[aux] == INSIDE || _gridCode[aux] == OUTSIDE) && _subrooms[aux] == nullptr) {
+               wavefront.insert(aux);
+               _subrooms[aux] = value;
+          }
+     }
 }
 
 void UnivFFviaFM::createReduWallSpeed(double* reduWallSpeed){
@@ -443,9 +519,9 @@ void UnivFFviaFM::drawLinesOnWall(Line& line, T* const target, const T value) { 
 } //drawLinesOnWall
 
 void UnivFFviaFM::calcFF(double* costOutput, Point* directionOutput, const double *const speed) {
-     CompareCost comp = CompareCost(costOutput);
+     //CompareCost comp = CompareCost(costOutput);
      std::priority_queue<long int, std::vector<long int>, CompareCost> trialfield(costOutput); //pass the argument for the constr of CompareCost
-     std::priority_queue<long int, std::vector<long int>, CompareCost> trialfield2(comp);      //pass the CompareCost object directly
+     //std::priority_queue<long int, std::vector<long int>, CompareCost> trialfield2(comp);      //pass the CompareCost object directly
 
      directNeighbor local_neighbor = _grid->getNeighbors(0);
      long int aux = 0;
@@ -460,25 +536,25 @@ void UnivFFviaFM::calcFF(double* costOutput, Point* directionOutput, const doubl
                if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
                     calcCost(aux, costOutput, directionOutput, speed);
                     trialfield.emplace(aux);
-                    trialfield2.emplace(aux);
+                    //trialfield2.emplace(aux);
                }
                aux = local_neighbor.key[1];
                if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
                     calcCost(aux, costOutput, directionOutput, speed);
                     trialfield.emplace(aux);
-                    trialfield2.emplace(aux);
+                    //trialfield2.emplace(aux);
                }
                aux = local_neighbor.key[2];
                if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
                     calcCost(aux, costOutput, directionOutput, speed);
                     trialfield.emplace(aux);
-                    trialfield2.emplace(aux);
+                    //trialfield2.emplace(aux);
                }
                aux = local_neighbor.key[3];
                if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
                     calcCost(aux, costOutput, directionOutput, speed);
                     trialfield.emplace(aux);
-                    trialfield2.emplace(aux);
+                    //trialfield2.emplace(aux);
                }
           }
      }
@@ -492,25 +568,25 @@ void UnivFFviaFM::calcFF(double* costOutput, Point* directionOutput, const doubl
           if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
                calcCost(aux, costOutput, directionOutput, speed);
                trialfield.emplace(aux);
-               trialfield2.emplace(aux);
+               //trialfield2.emplace(aux);
           }
           aux = local_neighbor.key[1];
           if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
                calcCost(aux, costOutput, directionOutput, speed);
                trialfield.emplace(aux);
-               trialfield2.emplace(aux);
+               //trialfield2.emplace(aux);
           }
           aux = local_neighbor.key[2];
           if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
                calcCost(aux, costOutput, directionOutput, speed);
                trialfield.emplace(aux);
-               trialfield2.emplace(aux);
+               //trialfield2.emplace(aux);
           }
           aux = local_neighbor.key[3];
           if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
                calcCost(aux, costOutput, directionOutput, speed);
                trialfield.emplace(aux);
-               trialfield2.emplace(aux);
+               //trialfield2.emplace(aux);
           }
      }
 }
@@ -635,9 +711,9 @@ void UnivFFviaFM::calcCost(const long int key, double* cost, Point* dir, const d
 }
 
 void UnivFFviaFM::calcDF(double* costOutput, Point* directionOutput, const double *const speed) {
-     CompareCost comp = CompareCost(costOutput);
+     //CompareCost comp = CompareCost(costOutput);
      std::priority_queue<long int, std::vector<long int>, CompareCost> trialfield(costOutput); //pass the argument for the constr of CompareCost
-     std::priority_queue<long int, std::vector<long int>, CompareCost> trialfield2(comp);      //pass the CompareCost object directly
+     //std::priority_queue<long int, std::vector<long int>, CompareCost> trialfield2(comp);      //pass the CompareCost object directly
 
      directNeighbor local_neighbor = _grid->getNeighbors(0);
      long int aux = 0;
@@ -652,25 +728,25 @@ void UnivFFviaFM::calcDF(double* costOutput, Point* directionOutput, const doubl
                if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
                     calcDist(aux, costOutput, directionOutput, speed);
                     trialfield.emplace(aux);
-                    trialfield2.emplace(aux);
+                    //trialfield2.emplace(aux);
                }
                aux = local_neighbor.key[1];
                if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
                     calcDist(aux, costOutput, directionOutput, speed);
                     trialfield.emplace(aux);
-                    trialfield2.emplace(aux);
+                    //trialfield2.emplace(aux);
                }
                aux = local_neighbor.key[2];
                if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
                     calcDist(aux, costOutput, directionOutput, speed);
                     trialfield.emplace(aux);
-                    trialfield2.emplace(aux);
+                    //trialfield2.emplace(aux);
                }
                aux = local_neighbor.key[3];
                if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
                     calcDist(aux, costOutput, directionOutput, speed);
                     trialfield.emplace(aux);
-                    trialfield2.emplace(aux);
+                    //trialfield2.emplace(aux);
                }
           }
      }
@@ -684,25 +760,25 @@ void UnivFFviaFM::calcDF(double* costOutput, Point* directionOutput, const doubl
           if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
                calcDist(aux, costOutput, directionOutput, speed);
                trialfield.emplace(aux);
-               trialfield2.emplace(aux);
+               //trialfield2.emplace(aux);
           }
           aux = local_neighbor.key[1];
           if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
                calcDist(aux, costOutput, directionOutput, speed);
                trialfield.emplace(aux);
-               trialfield2.emplace(aux);
+               //trialfield2.emplace(aux);
           }
           aux = local_neighbor.key[2];
           if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
                calcDist(aux, costOutput, directionOutput, speed);
                trialfield.emplace(aux);
-               trialfield2.emplace(aux);
+               //trialfield2.emplace(aux);
           }
           aux = local_neighbor.key[3];
           if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
                calcDist(aux, costOutput, directionOutput, speed);
                trialfield.emplace(aux);
-               trialfield2.emplace(aux);
+               //trialfield2.emplace(aux);
           }
      }
 }
@@ -857,7 +933,7 @@ void UnivFFviaFM::addTarget(const int uid, double* costarrayDBL, Point* gradarra
           newArrayPt = (gradarrayPt)? gradarrayPt : new Point[_nPoints];
      }
 
-     if (_costFieldWithKey[uid] && !costarrayDBL)
+     if ((_costFieldWithKey[uid]) && (_costFieldWithKey[uid] != costarrayDBL))
           delete[] _costFieldWithKey[uid];
      _costFieldWithKey[uid] = newArrayDBL;
 
@@ -870,7 +946,7 @@ void UnivFFviaFM::addTarget(const int uid, double* costarrayDBL, Point* gradarra
           }
      }
 
-     if (_directionFieldWithKey[uid] && !gradarrayPt)
+     if ((_directionFieldWithKey[uid]) && (_directionFieldWithKey[uid] != gradarrayPt))
           delete[] _directionFieldWithKey[uid];
      if (newArrayPt)
           _directionFieldWithKey[uid] = newArrayPt;
@@ -882,7 +958,7 @@ void UnivFFviaFM::addTarget(const int uid, double* costarrayDBL, Point* gradarra
      if (_mode == CENTERPOINT) {
           newArrayDBL[_grid->getKeyAtPoint(tempCenterPoint)] = magicnum(TARGET_REGION);
      }
-
+     //the following condition is not clean: we have _speedmode and _useWallAvoidance which are redundant
      if (_speedmode == FF_WALL_AVOID) {
           calcFF(newArrayDBL, newArrayPt, _speedFieldSelector[REDU_WALL_SPEED]);
      } else if (_speedmode == FF_HOMO_SPEED) {
@@ -935,6 +1011,18 @@ void UnivFFviaFM::addAllTargetsParallel() {
                addTarget(doorPair->first, _costFieldWithKey[doorPair->first], _directionFieldWithKey[doorPair->first]);
           }
      };
+}
+
+SubRoom** UnivFFviaFM::getSubRoomFF(){
+     return _subrooms;
+}
+
+SubRoom* UnivFFviaFM::getSubRoom(const Point& pos){
+     if (!_subrooms) return nullptr;
+     if (!_grid->includesPoint(pos)) return nullptr;
+
+     long key = _grid->getKeyAtPoint(pos);
+     return _subrooms[key];
 }
 
 std::vector<int> UnivFFviaFM::getKnownDoorUIDs(){
@@ -998,15 +1086,18 @@ void UnivFFviaFM::writeFF(const std::string& filename, std::vector<int> targetID
          }
     }
 
-//    file << "SCALARS SubroomPtr float 1" << std::endl;
-//    file << "LOOKUP_TABLE default" << std::endl;
-//    for (long int i = 0; i < _grid->GetnPoints(); ++i) {
-//        if (_subrooms[i]) {
-//            file << _subrooms[i]->GetUID() << std::endl;
-//        } else {
-//            file << 0.0 << std::endl;
-//        }
-//    }
+    if (_subrooms) {
+         file << "SCALARS SubroomPtr float 1" << std::endl;
+         file << "LOOKUP_TABLE default" << std::endl;
+         for (long int i = 0; i < _grid->GetnPoints(); ++i) {
+              if (_subrooms[i]) {
+                   file << _subrooms[i]->GetUID() << std::endl;
+              } else {
+                   file << 0.0 << std::endl;
+              }
+         }
+    }
+
     if (!targetID.empty()) {
          for (unsigned int iTarget = 0; iTarget < targetID.size(); ++iTarget) {
               Log->Write("%s: target number %d: UID %d", filename.c_str(), iTarget, targetID[iTarget]);
@@ -1147,3 +1238,4 @@ void UnivFFviaFM::getDirectionToUID(int destID, const long int key, Point& direc
  *                                           to be done in Simulation::RunBody, where
  *                                           all cores are available
  *   - (WIP) fill subroom* array with correct values
+ *   */

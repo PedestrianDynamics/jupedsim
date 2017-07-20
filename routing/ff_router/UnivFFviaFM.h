@@ -89,7 +89,7 @@ public:
                  double spacing, double wallAvoidDist, bool useWallAvoid);
      UnivFFviaFM() {};
      UnivFFviaFM(UnivFFviaFM&){};
-     ~UnivFFviaFM(){};
+     virtual ~UnivFFviaFM(){};
 
      void addTarget(const int uid, Line* door, double* costarray = nullptr, Point* gradarray = nullptr);
      void addTarget(const int uid, double* costarray = nullptr, Point* gradarray = nullptr);
@@ -98,6 +98,8 @@ public:
      std::vector<int> getKnownDoorUIDs();
      void setUser(int userArg);
      void setMode(int modeArg);
+     SubRoom** getSubRoomFF();
+     SubRoom* getSubRoom(const Point& pos);
 
      double getCostToDestination(const int destID, const Point& position, int mode);
      double getCostToDestination(const int destID, const Point& position);
@@ -108,6 +110,7 @@ public:
 
      void createRectGrid(std::vector<Line>& walls, std::map<int, Line>& doors, double spacing);
      void processGeometry(std::vector<Line>&walls, std::map<int, Line>& doors);
+     void markSubroom(const Point& insidePoint, SubRoom* const value);
      void createReduWallSpeed(double* reduWallSpeed);
 
      void drawLinesOnGrid(std::map<int, Line>& doors, int *const grid);
@@ -141,6 +144,7 @@ private:
      long int _nPoints = 0;
      std::vector<double*> _speedFieldSelector;
      int* _gridCode = nullptr;
+     SubRoom* * _subrooms = nullptr; // this is an array (first asterisk) of pointers (second asterisk)
 
      double _wallAvoidDistance = 0.;
      bool _useWallAvoidance = false;
