@@ -517,7 +517,7 @@ int FFRouter::FindExit(Pedestrian* p)
 
 #pragma omp critical(finalDoors)
      _finalDoors.emplace(std::make_pair(p->GetID(), bestFinalDoor));
-
+     
      if (_CroTrByUID.count(bestDoor)) {
           p->SetExitIndex(bestDoor);
           p->SetExitLine(_CroTrByUID.at(bestDoor));

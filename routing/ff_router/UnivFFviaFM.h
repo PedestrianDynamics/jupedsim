@@ -81,12 +81,12 @@ class UnivFFviaFM {
 public:
      UnivFFviaFM(Room* a, Building* b, double c, double e, bool f);
      UnivFFviaFM(SubRoom* a, Building* b, double c, double e, bool f);
-     UnivFFviaFM(Room* a, Configuration* const b, double hx, double wallAvoid, bool useWallAvoid);
-     UnivFFviaFM(Room* a, Configuration* const b, double hx, double wallAvoid, bool useWallAvoid, std::vector<int> wantedDoors);
-     UnivFFviaFM(SubRoom* sr, Configuration* const conf, double hx, double wallAvoid, bool useWallAvoid);
-     UnivFFviaFM(SubRoom* subRoomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallAvoid, std::vector<int> wantedDoors);
+     UnivFFviaFM(Room* a, Configuration* const b, double hx, double wallAvoid, bool useWallDistances);
+     UnivFFviaFM(Room* a, Configuration* const b, double hx, double wallAvoid, bool useWallDistances, std::vector<int> wantedDoors);
+     UnivFFviaFM(SubRoom* sr, Configuration* const conf, double hx, double wallAvoid, bool useWallDistances);
+     UnivFFviaFM(SubRoom* subRoomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallDistances, std::vector<int> wantedDoors);
      void create(std::vector<Line>& walls, std::map<int, Line>& doors, std::vector<int> targetUIDs, int mode,
-                 double spacing, double wallAvoidDist, bool useWallAvoid);
+                 double spacing, double wallAvoidDist, bool useWallDistances);
      UnivFFviaFM() {};
      UnivFFviaFM(UnivFFviaFM&){};
      virtual ~UnivFFviaFM();
@@ -106,6 +106,9 @@ public:
      RectGrid* getGrid();
      virtual void getDirectionToUID(int destID, const long int key, Point& direction, int mode);
      void getDirectionToUID(int destID, const long int key, Point& direction);
+     double getDistance2WallAt(const Point& pos);
+     void getDir2WallAt(const Point& pos, Point& p);
+
      void writeFF(const std::string&, std::vector<int> targetID);
 
      void createRectGrid(std::vector<Line>& walls, std::map<int, Line>& doors, double spacing);
@@ -147,7 +150,7 @@ private:
      SubRoom* * _subrooms = nullptr; // this is an array (first asterisk) of pointers (second asterisk)
 
      double _wallAvoidDistance = 0.;
-     bool _useWallAvoidance = false;
+     bool _useWallDistances = false;
 
      //the following maps are responsible for dealloc the arrays
      std::map<int, double*> _costFieldWithKey;

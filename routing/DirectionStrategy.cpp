@@ -314,28 +314,16 @@ double DirectionFloorfield::GetDistance2Wall(Pedestrian* ped) const
 
 void DirectionFloorfield::Init(Building* building, double stepsize,
                                double threshold, bool useDistancMap) {
-    //implement mechanic, that can read-in an existing floorfield (from a previous run)
-    string s = building->GetGeometryFilename();
-    Log->Write("INFO: \tGeometryFilename <" + s + ">");
-    s.erase(s.find_last_of(".", string::npos)); // delete ending
-    if (s.find_last_of("/") != string::npos) {
-        s.erase(0, s.find_last_of("/")+1);      // delete directories before filename (espacially "..")
-    }
-    string FF_filename = (building->GetProjectRootDir() + "FF_" + s +  "_" + std::to_string(threshold) + ".vtk").c_str();
-    std::ifstream test(FF_filename);
-    if (test.good()) {
-          Log->Write("INFO: \tRead Floorfield from file <" + FF_filename + ">");
-        _ffviafm = new FloorfieldViaFM(FF_filename);
-    } else {
-          std::chrono::time_point<std::chrono::system_clock> start, end;
-          start = std::chrono::system_clock::now();
-          Log->Write("INFO: \tCalling Construtor of FloorfieldViaFM");
-          _ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold,
-                                        useDistancMap, false);
-          end = std::chrono::system_clock::now();
-          std::chrono::duration<double> elapsed_seconds = end-start;
-          Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
-    }
+
+     std::chrono::time_point<std::chrono::system_clock> start, end;
+     start = std::chrono::system_clock::now();
+     Log->Write("INFO: \tCalling Construtor of FloorfieldViaFM");
+     _ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold,
+                                   useDistancMap, false);
+     end = std::chrono::system_clock::now();
+     std::chrono::duration<double> elapsed_seconds = end-start;
+     Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
+
     _initDone = true;
 }
 

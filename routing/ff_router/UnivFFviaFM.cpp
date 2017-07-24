@@ -35,21 +35,21 @@ UnivFFviaFM::~UnivFFviaFM() {
      }
 }
 
-UnivFFviaFM::UnivFFviaFM(Room* r, Building* b, double hx, double wallAvoid, bool useWallAvoid)
-          : UnivFFviaFM(r, b->GetConfig(), hx, wallAvoid, useWallAvoid) {
+UnivFFviaFM::UnivFFviaFM(Room* r, Building* b, double hx, double wallAvoid, bool useWallDistances)
+          : UnivFFviaFM(r, b->GetConfig(), hx, wallAvoid, useWallDistances) {
      _building = b;
 }
 
-UnivFFviaFM::UnivFFviaFM(SubRoom* sr, Building* b, double hx, double wallAvoid, bool useWallAvoid)
-          : UnivFFviaFM(sr, b->GetConfig(), hx, wallAvoid, useWallAvoid) {
+UnivFFviaFM::UnivFFviaFM(SubRoom* sr, Building* b, double hx, double wallAvoid, bool useWallDistances)
+          : UnivFFviaFM(sr, b->GetConfig(), hx, wallAvoid, useWallDistances) {
      _building = b;
 }
 
-UnivFFviaFM::UnivFFviaFM(Room* r, Configuration* const conf, double hx, double wallAvoid, bool useWallAvoid)
-          : UnivFFviaFM(r, conf, hx, wallAvoid, useWallAvoid, std::vector<int>()){
+UnivFFviaFM::UnivFFviaFM(Room* r, Configuration* const conf, double hx, double wallAvoid, bool useWallDistances)
+          : UnivFFviaFM(r, conf, hx, wallAvoid, useWallDistances, std::vector<int>()){
 }
 
-UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallAvoid, std::vector<int> wantedDoors) {
+UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallDistances, std::vector<int> wantedDoors) {
      //build the vector with walls(wall or obstacle), the map with <UID, Door(Cross or Trans)>, the vector with targets(UIDs)
      //then call other constructor including the mode
 
@@ -92,15 +92,15 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
           }
      }
 
-     create(lines, tmpDoors, wantedDoors, FF_HOMO_SPEED, hx, wallAvoid, useWallAvoid);
-     //create(lines, tmpDoors, wantedDoors, FF_WALL_AVOID, hx, wallAvoid, useWallAvoid);
+     create(lines, tmpDoors, wantedDoors, FF_HOMO_SPEED, hx, wallAvoid, useWallDistances);
+     //create(lines, tmpDoors, wantedDoors, FF_WALL_AVOID, hx, wallAvoid, useWallDistances);
 }
 
-UnivFFviaFM::UnivFFviaFM(SubRoom* sr, Configuration* const conf, double hx, double wallAvoid, bool useWallAvoid)
-          : UnivFFviaFM(sr, conf, hx, wallAvoid, useWallAvoid, std::vector<int>()){
+UnivFFviaFM::UnivFFviaFM(SubRoom* sr, Configuration* const conf, double hx, double wallAvoid, bool useWallDistances)
+          : UnivFFviaFM(sr, conf, hx, wallAvoid, useWallDistances, std::vector<int>()){
 }
 
-UnivFFviaFM::UnivFFviaFM(SubRoom* subRoomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallAvoid, std::vector<int> wantedDoors) {
+UnivFFviaFM::UnivFFviaFM(SubRoom* subRoomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallDistances, std::vector<int> wantedDoors) {
      //build the vector with walls(wall or obstacle), the map with <UID, Door(Cross or Trans)>, the vector with targets(UIDs)
      //then call other constructor including the mode
      _configuration = confArg;
@@ -135,14 +135,14 @@ UnivFFviaFM::UnivFFviaFM(SubRoom* subRoomArg, Configuration* const confArg, doub
           tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *trans));
      }
 
-     create(lines, tmpDoors, wantedDoors, FF_HOMO_SPEED, hx, wallAvoid, useWallAvoid);
+     create(lines, tmpDoors, wantedDoors, FF_HOMO_SPEED, hx, wallAvoid, useWallDistances);
 }
 
 void UnivFFviaFM::create(std::vector<Line>& walls, std::map<int, Line>& doors, std::vector<int> targetUIDs, int mode,
-                         double spacing, double wallAvoid, bool useWallAvoid) {
+                         double spacing, double wallAvoid, bool useWallDistances) {
 
      _wallAvoidDistance = wallAvoid;
-     _useWallAvoidance = useWallAvoid;
+     _useWallDistances = useWallDistances;
      _speedmode = mode;
 
      //find circumscribing rectangle (x_min/max, y_min/max) //create RectGrid
@@ -156,7 +156,7 @@ void UnivFFviaFM::create(std::vector<Line>& walls, std::map<int, Line>& doors, s
      std::fill(_speedFieldSelector[INITIAL_SPEED], _speedFieldSelector[INITIAL_SPEED]+_nPoints, 1.0);
 
      //allocate _initalSpeed and maybe _modifiedSpeed
-     if (mode == FF_WALL_AVOID) {
+     if ((mode == FF_WALL_AVOID) || (useWallDistances)) {
           double* cost_alias_walldistance = new double[_nPoints];
           _costFieldWithKey[0] = cost_alias_walldistance;
           Point* gradient_alias_walldirection = new Point[_nPoints];
@@ -995,7 +995,7 @@ void UnivFFviaFM::addTarget(const int uid, double* costarrayDBL, Point* gradarra
      if (_mode == CENTERPOINT) {
           newArrayDBL[_grid->getKeyAtPoint(tempCenterPoint)] = magicnum(TARGET_REGION);
      }
-     //the following condition is not clean: we have _speedmode and _useWallAvoidance which are redundant
+     //the following condition is not clean: we have _speedmode and _useWallDistances which are redundant
      if (_speedmode == FF_WALL_AVOID) {
           calcFF(newArrayDBL, newArrayPt, _speedFieldSelector[REDU_WALL_SPEED]);
      } else if (_speedmode == FF_HOMO_SPEED) {
@@ -1286,6 +1286,21 @@ void UnivFFviaFM::getDirectionToUID(int destID, const long int key, Point& direc
           direction._y = 0.;
      }
      return;
+}
+
+double UnivFFviaFM::getDistance2WallAt(const Point &pos) {
+     if (_useWallDistances || (_speedmode == FF_WALL_AVOID)) {
+          return _costFieldWithKey[0][_grid->getKeyAtPoint(pos)];
+     }
+     return DBL_MAX;
+}
+
+void UnivFFviaFM::getDir2WallAt(const Point &pos, Point &p) {
+     if (_useWallDistances || (_speedmode == FF_WALL_AVOID)) {
+          p = _directionFieldWithKey[0][_grid->getKeyAtPoint(pos)];
+     } else {
+          p = Point(0.0, 0.0);
+     }
 }
 
 /* Log:
