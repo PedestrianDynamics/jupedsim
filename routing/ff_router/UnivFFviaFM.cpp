@@ -11,6 +11,30 @@
 #include "mesh/RectGrid.h"
 
 
+UnivFFviaFM::~UnivFFviaFM() {
+     if (_grid) delete _grid;
+     size_t speedsize = _speedFieldSelector.size();
+     for (auto speedPtr : _speedFieldSelector) {
+          if (speedPtr) delete[] speedPtr;
+     }
+     if (_gridCode) delete[] _gridCode;
+     if (_subrooms) delete[] _subrooms;
+
+     std::map<int, double*>::reverse_iterator delIterCost;
+
+     for (delIterCost = _costFieldWithKey.rbegin();
+          delIterCost != _costFieldWithKey.rend();
+          ++delIterCost) {
+          delete[] delIterCost->second;
+     }
+     std::map<int, Point*>::reverse_iterator delIterDir;
+     for (delIterDir = _directionFieldWithKey.rbegin();
+          delIterDir != _directionFieldWithKey.rend();
+          ++delIterDir) {
+          delete[] delIterDir->second;
+     }
+}
+
 UnivFFviaFM::UnivFFviaFM(Room* r, Building* b, double hx, double wallAvoid, bool useWallAvoid)
           : UnivFFviaFM(r, b->GetConfig(), hx, wallAvoid, useWallAvoid) {
      _building = b;

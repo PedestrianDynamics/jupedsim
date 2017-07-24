@@ -89,7 +89,7 @@ public:
                  double spacing, double wallAvoidDist, bool useWallAvoid);
      UnivFFviaFM() {};
      UnivFFviaFM(UnivFFviaFM&){};
-     virtual ~UnivFFviaFM(){};
+     virtual ~UnivFFviaFM();
 
      void addTarget(const int uid, Line* door, double* costarray = nullptr, Point* gradarray = nullptr);
      void addTarget(const int uid, double* costarray = nullptr, Point* gradarray = nullptr);
@@ -152,6 +152,7 @@ private:
      //the following maps are responsible for dealloc the arrays
      std::map<int, double*> _costFieldWithKey;
      std::map<int, Point*> _directionFieldWithKey;
+
      std::vector<int> _uids;
      std::map<int, Line> _doors;
      std::vector<int> _toDo;
