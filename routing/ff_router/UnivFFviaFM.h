@@ -98,6 +98,7 @@ public:
      std::vector<int> getKnownDoorUIDs();
      void setUser(int userArg);
      void setMode(int modeArg);
+     void setSpeedMode(int speedModeArg);
      SubRoom** getSubRoomFF();
      SubRoom* getSubRoom(const Point& pos);
 
@@ -150,7 +151,7 @@ private:
      SubRoom* * _subrooms = nullptr; // this is an array (first asterisk) of pointers (second asterisk)
 
      double _wallAvoidDistance = 0.;
-     bool _useWallDistances = false;
+     bool _useWallDistances = false;    //could be used in DirectionStrategy even if mode _speedmode is FF_HOMO_SPEED
 
      //the following maps are responsible for dealloc the arrays
      std::map<int, double*> _costFieldWithKey;

@@ -189,6 +189,7 @@ bool FFRouter::Init(Building* building)
 //               }
                locffptr->setUser(DISTANCE_AND_DIRECTIONS_USED);
                locffptr->setMode(CENTERPOINT);
+               locffptr->setSpeedMode(FF_HOMO_SPEED);
                locffptr->addAllTargetsParallel();
                locffptr->writeFF("UnivFF"+std::to_string(pairRoomIt->first)+".vtk", locffptr->getKnownDoorUIDs());
                Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
@@ -517,7 +518,7 @@ int FFRouter::FindExit(Pedestrian* p)
 
 #pragma omp critical(finalDoors)
      _finalDoors.emplace(std::make_pair(p->GetID(), bestFinalDoor));
-     
+
      if (_CroTrByUID.count(bestDoor)) {
           p->SetExitIndex(bestDoor);
           p->SetExitLine(_CroTrByUID.at(bestDoor));

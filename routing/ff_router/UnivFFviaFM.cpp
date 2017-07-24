@@ -91,9 +91,12 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
                }
           }
      }
-
-     create(lines, tmpDoors, wantedDoors, FF_HOMO_SPEED, hx, wallAvoid, useWallDistances);
-     //create(lines, tmpDoors, wantedDoors, FF_WALL_AVOID, hx, wallAvoid, useWallDistances);
+     //this will interpret "useWallDistances" as best as possible. Users should clearify with "setSpeedMode" before calling "AddTarget"
+     if (useWallDistances) {
+          create(lines, tmpDoors, wantedDoors, FF_WALL_AVOID, hx, wallAvoid, useWallDistances);
+     } else {
+          create(lines, tmpDoors, wantedDoors, FF_HOMO_SPEED, hx, wallAvoid, useWallDistances);
+     }
 }
 
 UnivFFviaFM::UnivFFviaFM(SubRoom* sr, Configuration* const conf, double hx, double wallAvoid, bool useWallDistances)
@@ -135,7 +138,12 @@ UnivFFviaFM::UnivFFviaFM(SubRoom* subRoomArg, Configuration* const confArg, doub
           tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *trans));
      }
 
-     create(lines, tmpDoors, wantedDoors, FF_HOMO_SPEED, hx, wallAvoid, useWallDistances);
+     //this will interpret "useWallDistances" as best as possible. Users should clearify with "setSpeedMode" before calling "AddTarget"
+     if (useWallDistances) {
+          create(lines, tmpDoors, wantedDoors, FF_WALL_AVOID, hx, wallAvoid, useWallDistances);
+     } else {
+          create(lines, tmpDoors, wantedDoors, FF_HOMO_SPEED, hx, wallAvoid, useWallDistances);
+     }
 }
 
 void UnivFFviaFM::create(std::vector<Line>& walls, std::map<int, Line>& doors, std::vector<int> targetUIDs, int mode,
@@ -995,7 +1003,7 @@ void UnivFFviaFM::addTarget(const int uid, double* costarrayDBL, Point* gradarra
      if (_mode == CENTERPOINT) {
           newArrayDBL[_grid->getKeyAtPoint(tempCenterPoint)] = magicnum(TARGET_REGION);
      }
-     //the following condition is not clean: we have _speedmode and _useWallDistances which are redundant
+
      if (_speedmode == FF_WALL_AVOID) {
           calcFF(newArrayDBL, newArrayPt, _speedFieldSelector[REDU_WALL_SPEED]);
      } else if (_speedmode == FF_HOMO_SPEED) {
@@ -1072,6 +1080,10 @@ void UnivFFviaFM::setUser(int userArg) {
 
 void UnivFFviaFM::setMode(int modeArg) {
      _mode=modeArg;
+}
+
+void UnivFFviaFM::setSpeedMode(int speedModeArg) {
+     _speedmode = speedModeArg;
 }
 
 
@@ -1290,14 +1302,18 @@ void UnivFFviaFM::getDirectionToUID(int destID, const long int key, Point& direc
 
 double UnivFFviaFM::getDistance2WallAt(const Point &pos) {
      if (_useWallDistances || (_speedmode == FF_WALL_AVOID)) {
-          return _costFieldWithKey[0][_grid->getKeyAtPoint(pos)];
+          if (_costFieldWithKey[0]) {
+               return _costFieldWithKey[0][_grid->getKeyAtPoint(pos)];
+          }
      }
      return DBL_MAX;
 }
 
 void UnivFFviaFM::getDir2WallAt(const Point &pos, Point &p) {
      if (_useWallDistances || (_speedmode == FF_WALL_AVOID)) {
-          p = _directionFieldWithKey[0][_grid->getKeyAtPoint(pos)];
+          if (_directionFieldWithKey[0]) {
+               p = _directionFieldWithKey[0][_grid->getKeyAtPoint(pos)];
+          }
      } else {
           p = Point(0.0, 0.0);
      }
