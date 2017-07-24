@@ -1199,7 +1199,7 @@ double UnivFFviaFM::getCostToDestination(const int destID, const Point& position
 #pragma omp critical(UnivFFviaFM_toDo)
           _toDo.emplace_back(destID);
      }
-     return 0.;
+     return DBL_MAX;
 }
 
 double UnivFFviaFM::getCostToDestination(const int destID, const Point& position) {
@@ -1221,7 +1221,7 @@ double UnivFFviaFM::getCostToDestination(const int destID, const Point& position
 #pragma omp critical(UnivFFviaFM_toDo)
           _toDo.emplace_back(destID);
      }
-     return 0.;
+     return DBL_MAX;
 }
 
 RectGrid* UnivFFviaFM::getGrid(){
