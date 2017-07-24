@@ -154,6 +154,7 @@ private:
      std::map<int, Point*> _directionFieldWithKey;
      std::vector<int> _uids;
      std::map<int, Line> _doors;
+     std::vector<int> _toDo;
 
 };
 

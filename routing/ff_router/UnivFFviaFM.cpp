@@ -1157,6 +1157,10 @@ double UnivFFviaFM::getCostToDestination(const int destID, const Point& position
 
           addTarget(destID, _costFieldWithKey[destID], _directionFieldWithKey[destID]);
           getCostToDestination(destID, position, mode);
+     } else if (!_directCalculation && _doors.count(destID) > 0) {
+          //omp critical
+#pragma omp critical(UnivFFviaFM_toDo)
+          _toDo.emplace_back(destID);
      }
      return 0.;
 }
@@ -1175,6 +1179,10 @@ double UnivFFviaFM::getCostToDestination(const int destID, const Point& position
 
           addTarget(destID, _costFieldWithKey[destID], _directionFieldWithKey[destID]);
           getCostToDestination(destID, position);
+     } else if (!_directCalculation && _doors.count(destID) > 0) {
+//omp critical
+#pragma omp critical(UnivFFviaFM_toDo)
+          _toDo.emplace_back(destID);
      }
      return 0.;
 }
@@ -1203,6 +1211,12 @@ void UnivFFviaFM::getDirectionToUID(int destID, const long int key, Point& direc
           //calculate destID's fields and call function
           addTarget(destID, _costFieldWithKey[destID], _directionFieldWithKey[destID]);
           getDirectionToUID(destID, key, direction, mode);
+     } else if (!_directCalculation && _doors.count(destID) > 0) {
+//omp critical
+#pragma omp critical(UnivFFviaFM_toDo)
+          _toDo.emplace_back(destID);
+          direction._x = 0.;
+          direction._y = 0.;
      }
      return;
 }
@@ -1227,6 +1241,12 @@ void UnivFFviaFM::getDirectionToUID(int destID, const long int key, Point& direc
           //calculate destID's fields and call function
           addTarget(destID, _costFieldWithKey[destID], _directionFieldWithKey[destID]);
           getDirectionToUID(destID, key, direction);
+     } else if (!_directCalculation && _doors.count(destID) > 0) {
+//omp critical
+#pragma omp critical(UnivFFviaFM_toDo)
+          _toDo.emplace_back(destID);
+          direction._x = 0.;
+          direction._y = 0.;
      }
      return;
 }
