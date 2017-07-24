@@ -949,6 +949,19 @@ void UnivFFviaFM::addTarget(const int uid, double* costarrayDBL, Point* gradarra
      }
      Line tempTargetLine = Line(_doors[uid]);
      Point tempCenterPoint = Point(tempTargetLine.GetCentre());
+     if (tempTargetLine.GetLength() > 0.6) { //shorten line from both Points to avoid targeting edges of real door
+          const Point& p1 = tempTargetLine.GetPoint1();
+          const Point& p2 = tempTargetLine.GetPoint2();
+          double length = tempTargetLine.GetLength();
+          double u = 0.2/length;
+          tempTargetLine = Line(p1 + (p2-p1)*u, p1 + (p2-p1)*(1-u), 0);
+     } else if (tempTargetLine.GetLength() > 0.2) {
+          const Point& p1 = tempTargetLine.GetPoint1();
+          const Point& p2 = tempTargetLine.GetPoint2();
+          double length = tempTargetLine.GetLength();
+          double u = 0.05/length;
+          tempTargetLine = Line(p1 + (p2-p1)*u, p1 + (p2-p1)*(1-u), 0);
+     }
 
      //this allocation must be on shared heap! to be accessible by any thread later (should be shared in openmp)
      double* newArrayDBL = (costarrayDBL)? costarrayDBL : new double[_nPoints];
