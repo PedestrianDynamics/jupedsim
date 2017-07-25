@@ -36,6 +36,7 @@ class Room;
 class Building;
 class Pedestrian;
 class Point;
+class UnivFFviaFM;
 class FloorfieldViaFM;
 class LocalFloorfieldViaFM;
 class SubLocalFloorfieldViaFM;
@@ -46,41 +47,33 @@ public:
      DirectionStrategy();
      virtual ~DirectionStrategy();
 
-     // Allow the DirectionStrategy to perform some pre-simulation calculation, with all pedestrians
-     // already set and a valid _exitIndex. Returns true if the initialization was successful.
-     virtual bool PreSim(Building* building) = 0;
 
      virtual Point GetTarget(Room* room, Pedestrian* ped) const = 0;
 };
 
 class DirectionMiddlePoint : public DirectionStrategy {
 public:
-     virtual bool PreSim(Building* building) {(void) building; return true;};
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
 };
 
 class DirectionMinSeperation : public DirectionStrategy {
 public:
-     virtual bool PreSim(Building* building) {(void) building; return true;};
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
 };
 
 class DirectionMinSeperationShorterLine : public DirectionStrategy {
 public:
-     virtual bool PreSim(Building* building) {(void) building; return true;};
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
 };
 
 class DirectionInRangeBottleneck : public DirectionStrategy {
 public:
-     virtual bool PreSim(Building* building) {(void) building; return true;};
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
 };
 
 
 class DirectionGeneral : public DirectionStrategy {
 public:
-     virtual bool PreSim(Building* building) {(void) building; return true;};
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
 };
 
@@ -88,7 +81,6 @@ class DirectionFloorfield : public DirectionStrategy {
 public:
     DirectionFloorfield();
     void Init(Building* building, double stepsize, double threshold, bool useDistancMap);
-    virtual bool PreSim(Building* building) {(void) building; return true;};
     ~DirectionFloorfield();
     //void Init();
     virtual Point GetTarget(Room* room, Pedestrian* ped) const;
@@ -104,24 +96,17 @@ class DirectionLocalFloorfield : public DirectionStrategy {
 public:
      DirectionLocalFloorfield();
      void Init(Building* building, double stepsize, double threshold,
-               bool useDistancMap);
-     virtual bool PreSim(Building* building);
+               bool useDistanceMap);
      ~DirectionLocalFloorfield();
-     //void Init();
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
      virtual Point GetDir2Wall(Pedestrian* ped) const;
      virtual double GetDistance2Wall(Pedestrian* ped) const;
-     virtual void CalcFloorfield(int room, int destUID);
-     virtual void writeFF(int room, std::vector<int> targets);
-
-     //void WriteAll(std::string filename);
 
 protected:
-     std::map<int, LocalFloorfieldViaFM*> _locffviafm;
+     std::map<int, UnivFFviaFM*> _locffviafm;
      bool _initDone;
-     const Building* _building;
-     double _hx;
-     double _hy;
+     Building* _building;
+     double _stepsize;
      double _wallAvoidDistance;
      bool _useDistancefield;
      std::string _filename;
@@ -131,22 +116,17 @@ class DirectionSubLocalFloorfield : public DirectionStrategy {
 public:
      DirectionSubLocalFloorfield();
      void Init(Building* building, double stepsize, double threshold,
-           bool useDistancMap);
-     virtual bool PreSim(Building* building) {(void) building; return true;};
+           bool useDistanceMap);
      ~DirectionSubLocalFloorfield();
-     //void Init();
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
      virtual Point GetDir2Wall(Pedestrian* ped) const;
      virtual double GetDistance2Wall(Pedestrian* ped) const;
 
-     //void WriteAll(std::string filename);
-
 protected:
-     std::map<int, SubLocalFloorfieldViaFM*> _locffviafm;
+     std::map<int, UnivFFviaFM*> _locffviafm;
      bool _initDone;
-     const Building* _building;
-     double _hx;
-     double _hy;
+     Building* _building;
+     double _stepsize;
      double _wallAvoidDistance;
      bool _useDistancefield;
      std::string _filename;

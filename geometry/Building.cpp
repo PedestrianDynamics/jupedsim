@@ -67,7 +67,7 @@ Building::Building()
 
 #ifdef _SIMULATOR
 
-Building::Building(const Configuration* configuration, PedDistributor& pedDistributor)
+Building::Building(Configuration* configuration, PedDistributor& pedDistributor)
           :_configuration(configuration),
            _routingEngine(
                  configuration->GetRoutingEngine()),
@@ -156,7 +156,7 @@ Building::~Building()
      }
 }
 
-const Configuration* Building::GetConfig() const {
+Configuration* Building::GetConfig() const {
      return _configuration;
 }
 
@@ -318,6 +318,9 @@ bool Building::InitGeometry()
                     if (!obst->ConvertLineToPoly())
                          return false;
                }
+
+               //here we can create a boost::geometry::model::polygon out of the vector<Point> objects created above
+               itr_subroom.second->CreateBoostPoly();
 
                double minElevation = FLT_MAX;
                double maxElevation = -FLT_MAX;

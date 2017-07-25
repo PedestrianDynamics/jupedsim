@@ -61,7 +61,7 @@ class Configuration;
 
 class Building {
 private:
-     const Configuration* _configuration;
+     Configuration* _configuration;
      std::shared_ptr<RoutingEngine> _routingEngine;
      std::string _caption;
      std::string _geometryFilename;
@@ -82,12 +82,12 @@ public:
      Building();
 
 //    Building(const std::string &, const std::string &, RoutingEngine &, PedDistributor &, double);
-     Building(const Configuration* config, PedDistributor& pedDistributor);
+     Building(Configuration* config, PedDistributor& pedDistributor);
 
      /// destructor
      virtual ~Building();
 
-     const Configuration* GetConfig() const;
+     Configuration* GetConfig() const;
 
      void SetCaption(const std::string& s);
 

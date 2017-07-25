@@ -162,13 +162,14 @@ enum FFRouterMode {
 };
 
 enum GridCode { //used in floor fields
-    WALL = 0,
-    INSIDE,
-    OUTSIDE,
-    OPEN_CROSSING,
-    OPEN_TRANSITION,
-    CLOSED_CROSSING,     //closed crossings and transitions are marked as walls in "parseBuilding"
-    CLOSED_TRANSITION
+    WALL = -10,
+    INSIDE = -11,
+    OUTSIDE = -12,
+    //instead of constants, GridCode stores UID of doors
+    OPEN_CROSSING = -13,
+    OPEN_TRANSITION = -14,
+    CLOSED_CROSSING = -15,     //closed crossings and transitions are marked as walls in "parseBuilding"
+    CLOSED_TRANSITION = -16
 };
 
 enum FastMarchingFlags {
@@ -180,6 +181,39 @@ enum FastMarchingFlags {
      //FM_BLOCKER = -5, // currently not used
      FM_OUTSIDE = -7
 };
+
+enum FloorfieldMode {
+     FF_CENTRALPOINT,
+     FF_FULL_LINE,
+     FF_WALL_AVOID,
+     FF_HOMO_SPEED,
+     FF_ROOM_SCALE,
+     FF_SUBROOM_SCALE
+};
+
+enum MagicNumbers{
+     UNKNOWN_DISTANCE,
+     UNKNOWN_COST,
+     WALL_ON_COSTARRAY,
+     TARGET_REGION
+};
+
+constexpr double magicnum(int i) {
+     return (i == UNKNOWN_DISTANCE) ? -3.0 : (i == UNKNOWN_COST) ? -2.0 : (i == WALL_ON_COSTARRAY) ? -7.0 : (i == TARGET_REGION) ? 0.0 : NAN;
+//     switch (i) {
+//          case UNKNOWN_DISTANCE:
+//               return -3.0;
+//          case UNKNOWN_COST:
+//               return -2.0;
+//          case WALL_ON_COSTARRAY:
+//               return -7.0;
+//          case TARGET_REGION:
+//               return 0.0;
+//          default:
+//               std::cerr << "ERROR: \tunknown magic number " << i << std::endl;
+//               return NAN;
+//     }
+}
 
 //global functions for convenience
 

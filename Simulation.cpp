@@ -50,7 +50,7 @@ using namespace std;
 
 OutputHandler* Log;
 
-Simulation::Simulation(const Configuration* args)
+Simulation::Simulation(Configuration* args)
         :_config(args)
 {
     _nPeds = 0;
@@ -249,10 +249,6 @@ bool Simulation::InitArgs()
     // This should be done after the initialization of the operationalModel
     // because then, invalid pedestrians have been deleted and FindExit()
     // has been called.
-    Log->Write("INFO:\t PreSim of DirectionStrategy starting ...");
-    if (!_operationalModel->GetDirection()->PreSim(_building.get()))
-        return false;
-    Log->Write("INFO:\t PreSim of DirectionStrategy done");
 
     //other initializations
     for (auto&& ped: _building->GetAllPedestrians()) {
@@ -352,6 +348,9 @@ void Simulation::UpdateRoutesAndLocations()
           if (ped->FindRoute() == -1) {
                //a destination could not be found for that pedestrian
                Log->Write("ERROR: \tCould not find a route for pedestrian %d",ped->GetID());
+               ped->FindRoute(); //debug only, plz remove
+               std::function<void(const Pedestrian&)> f = std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
+               ped->Relocate(f);
                //exit(EXIT_FAILURE);
 #pragma omp critical(Simulation_Update_pedsToRemove)
                pedsToRemove.push_back(ped);
@@ -477,6 +476,8 @@ double Simulation::RunBody(double maxSimTime)
         ProcessAgentsQueue();
 
         if (t>Pedestrian::GetMinPremovementTime()) {
+            //@todo: @ar.graf: here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
+
             //update the linked cells
             _building->UpdateGrid();
 
@@ -504,11 +505,12 @@ double Simulation::RunBody(double maxSimTime)
         if (0==frameNr%writeInterval) {
             _iod->WriteFrame(frameNr/writeInterval, _building.get());
         }
-        if(!_gotSources && !_periodic /*&& _printPB*/) // @todo: option for print progressbar
-              // Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
-              bar->Progressed(initialnPeds-_nPeds);
-        else
-             printf("time: %.2f | %.2f\n",  t , maxSimTime);
+//        if(!_gotSources && !_periodic /*&& _printPB*/) // @todo: option for print progressbar
+//              // Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
+//              bar->Progressed(initialnPeds-_nPeds);
+//        else
+//             printf("time: %.2f | %.2f\n",  t , maxSimTime);
+
         // needed to control the execution time PART 2
         // time(&endtime);
         // double timeToWait=t-difftime(endtime, starttime);

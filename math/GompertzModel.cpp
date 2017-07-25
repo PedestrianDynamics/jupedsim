@@ -102,8 +102,8 @@ bool GompertzModel::Init(Building *building) {
     }
 
     const vector<Pedestrian *> &allPeds = building->GetAllPedestrians();
-
-    for (unsigned int p = 0; p < allPeds.size(); p++) {
+    size_t peds_size = allPeds.size();
+    for (unsigned int p = 0; p < peds_size; p++) {
         Pedestrian *ped = allPeds[p];
         double cosPhi, sinPhi;
         //a destination could not be found for that pedestrian
@@ -111,6 +111,8 @@ bool GompertzModel::Init(Building *building) {
             Log->Write(
                     "ERROR:\tGompertzModel::Init() cannot initialise route. ped %d is deleted.\n", ped->GetID());
             building->DeletePedestrian(ped);
+            --p;
+            --peds_size;
             continue;
         }
         Point target = ped->GetExitLine()->LotPoint(ped->GetPos());
@@ -279,7 +281,8 @@ Point GompertzModel::ForceDriv(Pedestrian *ped, Room *room) const {
             printf("1 e0 %f %f, target %f %f\n", e0._x, e0._y, target._x, target._y);
     } else {
         ped->SetSmoothTurning();
-        e0 = ped->GetV0();
+        //e0 = ped->GetV0();
+        e0 = ped->GetLastE0(); //@todo: ar.graf: this was supposed to fix standing on lines, and should be tested or removed
         if (ped->GetID() == -4)
             printf("2 e0 %f %f\n", e0._x, e0._y);
     }

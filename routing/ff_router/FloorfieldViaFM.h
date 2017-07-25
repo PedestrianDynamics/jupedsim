@@ -153,6 +153,7 @@ public:
      void writeGoalFF(const std::string&, std::vector<int> targetID);
 
      virtual SubRoom* isInside(const long int key);
+     SubRoom* GetSubroom(Pedestrian* p);
 
      std::map<int, int> getGoalToLineUIDmap() const
      {

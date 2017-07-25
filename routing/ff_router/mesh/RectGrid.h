@@ -133,10 +133,10 @@ class RectGrid
              if (includesPoint(p))             //@todo: ar.graf: this if must be made work
                 return (j*iMax+i); // 0-based; index of (closest gridpoint)
              else {
-                  if (p._x < xMin) { std::cerr << "Out of bound by: " << (xMin - p._x) << std::endl; i = 0; }
-                  if (p._x > xMax) { std::cerr << "Out of bound by: " << (p._x - xMax) << std::endl; i = iMax; }
-                  if (p._y < yMin) { std::cerr << "Out of bound by: " << (yMin - p._y) << std::endl; j = 0; }
-                  if (p._y > yMax) { std::cerr << "Out of bound by: " << (p._y - yMax) << std::endl; j = jMax; }
+                  if (p._x < xMin) { std::cerr << "Out of left bound by: " << (xMin - p._x) << std::endl; i = 0; }
+                  if (p._x > xMax) { std::cerr << "Out of right bound by: " << (p._x - xMax) << std::endl; i = iMax; }
+                  if (p._y < yMin) { std::cerr << "Out of lower bound by: " << (yMin - p._y) << std::endl; j = 0; }
+                  if (p._y > yMax) { std::cerr << "Out of upper bound by: " << (p._y - yMax) << std::endl; j = jMax; }
                   return (j * iMax + i);
              }
              std::cerr << "ERROR 2 in RectGrid::getKeyAtPoint with:" << std::endl;

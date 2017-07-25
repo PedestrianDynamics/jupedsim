@@ -147,7 +147,6 @@ Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& buil
      _tmpFirstOrientation = true;
      _turninAngle = 0.0;
      _ellipse = JEllipse();
-     //_navLine = new NavLine(); //FIXME? argraf : rather nullptr and Setter includes correct uid (done below)
      _navLine = nullptr;
      _router = NULL;
      _building = NULL;
@@ -252,18 +251,13 @@ void Pedestrian::SetExitIndex(int i)
      //_destHistory.push_back(i);
 }
 
-void Pedestrian::SetExitLine(const NavLine* l) //FIXME? argraf : _navLine = new NavLine(*l); this would have a navLine with consistent uid (done below)
+void Pedestrian::SetExitLine(const NavLine* l)
 {
-     //_navLine = l;
-     //_navLine->SetPoint1(l->GetPoint1());
-     //_navLine->SetPoint2(l->GetPoint2());
-     if(l) {
-          _navLine = std::unique_ptr<NavLine>(new NavLine(*l));
-     }
-     /*else if(l && _navLine && *l != *_navLine && l->GetUniqueID() != _navLine->GetUniqueID()){
+     if(_navLine)
           delete _navLine;
+     if(l) {
           _navLine = new NavLine(*l);
-     }*/
+     }
 }
 
 void Pedestrian::SetPos(const Point& pos, bool initial)
@@ -392,7 +386,7 @@ int Pedestrian::GetExitIndex() const
 
 NavLine* Pedestrian::GetExitLine() const
 {
-     return _navLine.get();
+     return _navLine;
 }
 
 const vector<int>& Pedestrian::GetTrip() const
@@ -1161,7 +1155,7 @@ bool Pedestrian::Relocate(std::function<void(const Pedestrian&)> flowupdater) {
                       //the agent left the old room
                       //actualize the egress time for that room
 #pragma omp critical(SetEgressTime)
-                     allRooms.at(GetRoomID())->SetEgressTime(GetGlobalTime()); //set Egresstime to old room
+                     allRooms.at(GetRoomID())->SetEgressTime(GetGlobalTime()); //set Egresstime to old room //@todo: ar.graf : GetRoomID() yields NEW room
                }
                status = true;
                break;
