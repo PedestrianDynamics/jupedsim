@@ -1009,6 +1009,7 @@ void UnivFFviaFM::addTarget(const int uid, double* costarrayDBL, Point* gradarra
      } else if (_speedmode == FF_HOMO_SPEED) {
           calcFF(newArrayDBL, newArrayPt, _speedFieldSelector[INITIAL_SPEED]);
      }
+#pragma omp critical(_uids)
      _uids.emplace_back(uid);
 }
 
