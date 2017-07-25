@@ -107,6 +107,8 @@ public:
      RectGrid* getGrid();
      virtual void getDirectionToUID(int destID, const long int key, Point& direction, int mode);
      void getDirectionToUID(int destID, const long int key, Point& direction);
+     virtual void getDirectionToUID(int destID, const Point& pos, Point& direction, int mode);
+     void getDirectionToUID(int destID, const Point& pos, Point& direction);
      double getDistance2WallAt(const Point& pos);
      void getDir2WallAt(const Point& pos, Point& p);
 

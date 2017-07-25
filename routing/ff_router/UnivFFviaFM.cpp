@@ -1300,6 +1300,14 @@ void UnivFFviaFM::getDirectionToUID(int destID, const long int key, Point& direc
      return;
 }
 
+void UnivFFviaFM::getDirectionToUID(int destID, const Point& pos, Point& direction, int mode) {
+     getDirectionToUID(destID, _grid->getKeyAtPoint(pos), direction, mode);
+}
+
+void UnivFFviaFM::getDirectionToUID(int destID, const Point& pos,Point& direction) {
+     getDirectionToUID(destID, _grid->getKeyAtPoint(pos), direction);
+}
+
 double UnivFFviaFM::getDistance2WallAt(const Point &pos) {
      if (_useWallDistances || (_speedmode == FF_WALL_AVOID)) {
           if (_costFieldWithKey[0]) {

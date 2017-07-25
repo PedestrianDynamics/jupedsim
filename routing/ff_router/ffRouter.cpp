@@ -168,80 +168,78 @@ bool FFRouter::Init(Building* building)
      //type of allRooms: const std::map<int, std::unique_ptr<Room> >&
      const std::map<int, std::shared_ptr<Room> >& allRooms = _building->GetAllRooms();
 
-//#pragma omp parallel
-     {
-//#pragma omp for
-          for (unsigned int i = 0; i < allRooms.size(); ++i) {
+
+     for (unsigned int i = 0; i < allRooms.size(); ++i) {
 
 #ifdef DEBUG
-               std::cerr << "Creating Floorfield for Room: " << pair.first << std::endl;
+          std::cerr << "Creating Floorfield for Room: " << pair.first << std::endl;
 #endif
 
-               auto pairRoomIt = allRooms.begin();
-               std::advance(pairRoomIt, i);
-               UnivFFviaFM *locffptr = nullptr;
-               locffptr = new UnivFFviaFM(pairRoomIt->second.get(), building, 0.125, 0.0, false);
+          auto pairRoomIt = allRooms.begin();
+          std::advance(pairRoomIt, i);
+          UnivFFviaFM *locffptr = nullptr;
+          locffptr = new UnivFFviaFM(pairRoomIt->second.get(), building, 0.125, 0.0, false);
 //               Log->Write("INFO: \tusing %s in ffRouter::Init", _useCentrePointDistance ? "CentrePointLocalFFViaFm" : "LocalFloorfieldViaFM");
 //               if (_useCentrePointDistance) {
 //                    locffptr = new CentrePointLocalFFViaFM(pairRoomIt->second.get(), building, 0.125, 0.125, 0.0, false);
 //               } else {
 //                    locffptr = new LocalFloorfieldViaFM(pairRoomIt->second.get(), building, 0.125, 0.125, 0.0, false);
 //               }
-               locffptr->setUser(DISTANCE_AND_DIRECTIONS_USED);
-               locffptr->setMode(CENTERPOINT);
-               locffptr->setSpeedMode(FF_HOMO_SPEED);
-               locffptr->addAllTargetsParallel();
-               locffptr->writeFF("UnivFF"+std::to_string(pairRoomIt->first)+".vtk", locffptr->getKnownDoorUIDs());
-               Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
+          locffptr->setUser(DISTANCE_AND_DIRECTIONS_USED);
+          locffptr->setMode(CENTERPOINT);
+          locffptr->setSpeedMode(FF_HOMO_SPEED);
+          locffptr->addAllTargetsParallel();
+          //locffptr->writeFF("UnivFF"+std::to_string(pairRoomIt->first)+".vtk", locffptr->getKnownDoorUIDs());
+          Log->Write("INFO: \tAdding distances in Room %d to matrix", (*pairRoomIt).first);
 //#pragma omp critical(_locffviafm)
-               _locffviafm.insert(std::make_pair((*pairRoomIt).first, locffptr));
-          }
+          _locffviafm.insert(std::make_pair((*pairRoomIt).first, locffptr));
+     }
 
 
-          // nowait, because the parallel region ends directly afterwards
+     // nowait, because the parallel region ends directly afterwards
 //#pragma omp for nowait
-          for (unsigned int i = 0; i < roomAndCroTrVector.size(); ++i) {
-               auto rctIt = roomAndCroTrVector.begin();
-               std::advance(rctIt, i);
+     for (unsigned int i = 0; i < roomAndCroTrVector.size(); ++i) {
+          auto rctIt = roomAndCroTrVector.begin();
+          std::advance(rctIt, i);
 
-               ////loop over upper triangular matrice (i,j) and write to (j,i) as well
-               for (auto otherDoor : roomAndCroTrVector) {
-                    if (otherDoor.first != rctIt->first) continue; // we only want doors with one room in common
-                    if (otherDoor.second <= rctIt->second) continue; // calculate every path only once
-                    // if we exclude otherDoor.second == rctIt->second, the program loops forever
+          ////loop over upper triangular matrice (i,j) and write to (j,i) as well
+          for (auto otherDoor : roomAndCroTrVector) {
+               if (otherDoor.first != rctIt->first) continue; // we only want doors with one room in common
+               if (otherDoor.second <= rctIt->second) continue; // calculate every path only once
+               // if we exclude otherDoor.second == rctIt->second, the program loops forever
 
-                    //if the door is closed, then don't calc distances
-                    //if (!_CroTrByUID.at(*otherDoor)->IsOpen()) {
-                    //     continue;
-                    //}
+               //if the door is closed, then don't calc distances
+               //if (!_CroTrByUID.at(*otherDoor)->IsOpen()) {
+               //     continue;
+               //}
 
-                    // if the two doors are not within the same subroom, do not consider (ar.graf)
-                    // should fix problems of oscillation caused by doorgaps in the distancegraph
-                    int thisUID1 = (_CroTrByUID.at(rctIt->second)->GetSubRoom1()) ? _CroTrByUID.at(rctIt->second)->GetSubRoom1()->GetUID() : -1 ;
-                    int thisUID2 = (_CroTrByUID.at(rctIt->second)->GetSubRoom2()) ? _CroTrByUID.at(rctIt->second)->GetSubRoom2()->GetUID() : -2 ;
-                    int otherUID1 = (_CroTrByUID.at(otherDoor.second)->GetSubRoom1()) ? _CroTrByUID.at(otherDoor.second)->GetSubRoom1()->GetUID() : -3 ;
-                    int otherUID2 = (_CroTrByUID.at(otherDoor.second)->GetSubRoom2()) ? _CroTrByUID.at(otherDoor.second)->GetSubRoom2()->GetUID() : -4 ;
+               // if the two doors are not within the same subroom, do not consider (ar.graf)
+               // should fix problems of oscillation caused by doorgaps in the distancegraph
+               int thisUID1 = (_CroTrByUID.at(rctIt->second)->GetSubRoom1()) ? _CroTrByUID.at(rctIt->second)->GetSubRoom1()->GetUID() : -1 ;
+               int thisUID2 = (_CroTrByUID.at(rctIt->second)->GetSubRoom2()) ? _CroTrByUID.at(rctIt->second)->GetSubRoom2()->GetUID() : -2 ;
+               int otherUID1 = (_CroTrByUID.at(otherDoor.second)->GetSubRoom1()) ? _CroTrByUID.at(otherDoor.second)->GetSubRoom1()->GetUID() : -3 ;
+               int otherUID2 = (_CroTrByUID.at(otherDoor.second)->GetSubRoom2()) ? _CroTrByUID.at(otherDoor.second)->GetSubRoom2()->GetUID() : -4 ;
 
-                    if (
+               if (
                          (thisUID1 != otherUID1) &&
                          (thisUID1 != otherUID2) &&
                          (thisUID2 != otherUID1) &&
                          (thisUID2 != otherUID2)      ) {
-                         continue;
-                    }
+                    continue;
+               }
 
-                    UnivFFviaFM* locffptr = _locffviafm[rctIt->first];
-                    double tempDistance = locffptr->getCostToDestination(rctIt->second,
-                                                                         _CroTrByUID.at(otherDoor.second)->GetCentre());
+               UnivFFviaFM* locffptr = _locffviafm[rctIt->first];
+               double tempDistance = locffptr->getCostToDestination(rctIt->second,
+                                                                    _CroTrByUID.at(otherDoor.second)->GetCentre());
 
-                    if (tempDistance < locffptr->getGrid()->Gethx()) {
-                         //Log->Write("WARNING:\tDistance of doors %d and %d is too small: %f",*otherDoor, *innerPtr, tempDistance);
-                         //Log->Write("^^^^^^^^\tIf there are scattered subrooms, which are not connected, this is ok.");
-                         continue;
-                    }
+               if (tempDistance < locffptr->getGrid()->Gethx()) {
+                    //Log->Write("WARNING:\tDistance of doors %d and %d is too small: %f",*otherDoor, *innerPtr, tempDistance);
+                    //Log->Write("^^^^^^^^\tIf there are scattered subrooms, which are not connected, this is ok.");
+                    continue;
+               }
 //
-                    std::pair<int, int> key_ij = std::make_pair(otherDoor.second, rctIt->second);
-                    std::pair<int, int> key_ji = std::make_pair(rctIt->second, otherDoor.second);
+               std::pair<int, int> key_ij = std::make_pair(otherDoor.second, rctIt->second);
+               std::pair<int, int> key_ji = std::make_pair(rctIt->second, otherDoor.second);
 //                    SubRoom *subroom = nullptr;
 //
 //                    auto cr1 = _CroTrByUID[rctIt->second];
@@ -284,11 +282,11 @@ bool FFRouter::Init(Building* building)
 //                    }
 
 //#pragma omp critical(_distMatrix)
-                    if (_distMatrix.at(key_ij) > tempDistance) {
-                         _distMatrix.erase(key_ij);
-                         _distMatrix.erase(key_ji);
-                         _distMatrix.insert(std::make_pair(key_ij, tempDistance));
-                         _distMatrix.insert(std::make_pair(key_ji, tempDistance));
+               if (_distMatrix.at(key_ij) > tempDistance) {
+                    _distMatrix.erase(key_ij);
+                    _distMatrix.erase(key_ji);
+                    _distMatrix.insert(std::make_pair(key_ij, tempDistance));
+                    _distMatrix.insert(std::make_pair(key_ji, tempDistance));
 //#pragma omp critical(_subroomMatrix)
 //                         {
 //                              _subroomMatrix.erase(key_ij);
@@ -297,11 +295,10 @@ bool FFRouter::Init(Building* building)
 //                              _subroomMatrix.insert(std::make_pair(key_ji, subroom));
 //                         }
 
-                    }
-                    //}
-               } // otherDoor
-          } // roomAndCroTrVector
-     } // omp parallel
+               }
+               //}
+          } // otherDoor
+     } // roomAndCroTrVector
 
      FloydWarshall();
 
@@ -319,21 +316,21 @@ bool FFRouter::Init(Building* building)
 //          iter->second->writeFF("testFF" + std::to_string(roomNr) + ".vtk", _allDoorUIDs);
 //     }
 
-     std::ofstream matrixfile;
-     matrixfile.open("Matrix.txt");
-
-     for (auto mapItem : _distMatrix) {
-          matrixfile << mapItem.first.first << " to " << mapItem.first.second << " : " << mapItem.second << "\t via \t" << _pathsMatrix[mapItem.first];
-          matrixfile << "\t" << _CroTrByUID.at(mapItem.first.first)->GetID() << " to " << _CroTrByUID.at(mapItem.first.second)->GetID() << "\t via \t";
-          matrixfile << _CroTrByUID.at(_pathsMatrix[mapItem.first])->GetID();
-//          auto sub = _subroomMatrix.at(mapItem.first);
-//          if (sub) {
-//               matrixfile << std::string("\tSubroom: UID ") << sub->GetUID() << " (room: " << sub->GetRoomID() << " subroom ID: " << sub->GetSubRoomID() << ")" << std::endl;
-//          } else {
-//               matrixfile << std::string("\tSubroom is nullptr") << std::endl;
-//          }
-     }
-     matrixfile.close();
+//     std::ofstream matrixfile;
+//     matrixfile.open("Matrix.txt");
+//
+//     for (auto mapItem : _distMatrix) {
+//          matrixfile << mapItem.first.first << " to " << mapItem.first.second << " : " << mapItem.second << "\t via \t" << _pathsMatrix[mapItem.first];
+//          matrixfile << "\t" << _CroTrByUID.at(mapItem.first.first)->GetID() << " to " << _CroTrByUID.at(mapItem.first.second)->GetID() << "\t via \t";
+//          matrixfile << _CroTrByUID.at(_pathsMatrix[mapItem.first])->GetID();
+////          auto sub = _subroomMatrix.at(mapItem.first);
+////          if (sub) {
+////               matrixfile << std::string("\tSubroom: UID ") << sub->GetUID() << " (room: " << sub->GetRoomID() << " subroom ID: " << sub->GetSubRoomID() << ")" << std::endl;
+////          } else {
+////               matrixfile << std::string("\tSubroom is nullptr") << std::endl;
+////          }
+//     }
+//     matrixfile.close();
      Log->Write("INFO: \tFF Router Init done.");
      return true;
 }

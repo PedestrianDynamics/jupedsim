@@ -36,6 +36,7 @@ class Room;
 class Building;
 class Pedestrian;
 class Point;
+class UnivFFviaFM;
 class FloorfieldViaFM;
 class LocalFloorfieldViaFM;
 class SubLocalFloorfieldViaFM;
@@ -95,23 +96,17 @@ class DirectionLocalFloorfield : public DirectionStrategy {
 public:
      DirectionLocalFloorfield();
      void Init(Building* building, double stepsize, double threshold,
-               bool useDistancMap);
+               bool useDistanceMap);
      ~DirectionLocalFloorfield();
-     //void Init();
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
      virtual Point GetDir2Wall(Pedestrian* ped) const;
      virtual double GetDistance2Wall(Pedestrian* ped) const;
-     virtual void CalcFloorfield(int room, int destUID);
-     virtual void writeFF(int room, std::vector<int> targets);
-
-     //void WriteAll(std::string filename);
 
 protected:
-     std::map<int, LocalFloorfieldViaFM*> _locffviafm;
+     std::map<int, UnivFFviaFM*> _locffviafm;
      bool _initDone;
-     const Building* _building;
-     double _hx;
-     double _hy;
+     Building* _building;
+     double _stepsize;
      double _wallAvoidDistance;
      bool _useDistancefield;
      std::string _filename;
@@ -121,21 +116,17 @@ class DirectionSubLocalFloorfield : public DirectionStrategy {
 public:
      DirectionSubLocalFloorfield();
      void Init(Building* building, double stepsize, double threshold,
-           bool useDistancMap);
+           bool useDistanceMap);
      ~DirectionSubLocalFloorfield();
-     //void Init();
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
      virtual Point GetDir2Wall(Pedestrian* ped) const;
      virtual double GetDistance2Wall(Pedestrian* ped) const;
 
-     //void WriteAll(std::string filename);
-
 protected:
-     std::map<int, SubLocalFloorfieldViaFM*> _locffviafm;
+     std::map<int, UnivFFviaFM*> _locffviafm;
      bool _initDone;
-     const Building* _building;
-     double _hx;
-     double _hy;
+     Building* _building;
+     double _stepsize;
      double _wallAvoidDistance;
      bool _useDistancefield;
      std::string _filename;
