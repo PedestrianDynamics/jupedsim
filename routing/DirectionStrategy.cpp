@@ -348,6 +348,13 @@ Point DirectionLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 
      Point p;
      UnivFFviaFM* floorfield = _locffviafm.at(room->GetID());
+#if DEBUG
+     if (!floorfield->getGrid()->includesPoint(ped->GetPos())) {
+          Log->Write("ERROR: \tDirectionLocalFloorfield::GetTarget is accessing wrong floorfield. Pedestrian is not inside!");
+          p = Point(0.0,0.0);
+          return p;
+     }
+#endif
      floorfield->getDirectionToUID(ped->GetExitIndex(), ped->GetPos(), p);
      if (floorfield->getCostToDestination(ped->GetExitIndex(), ped->GetPos()) < 1.0) {
           p = p * floorfield->getCostToDestination(ped->GetExitIndex(), ped->GetPos());
@@ -429,6 +436,13 @@ Point DirectionSubLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 
      Point p;
      UnivFFviaFM* floorfield = _locffviafm.at(ped->GetSubRoomUID());
+#if DEBUG
+     if (!floorfield->getGrid()->includesPoint(ped->GetPos())) {
+          Log->Write("ERROR: \tDirectionSubLocalFloorfield::GetTarget is accessing wrong floorfield. Pedestrian is not inside!");
+          p = Point(0.0,0.0);
+          return p;
+     }
+#endif
      floorfield->getDirectionToUID(ped->GetExitIndex(), ped->GetPos(),p);
      if (floorfield->getCostToDestination(ped->GetExitIndex(), ped->GetPos()) < 1.0){
           p = p * floorfield->getCostToDestination(ped->GetExitIndex(), ped->GetPos());
