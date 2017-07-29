@@ -488,7 +488,7 @@ double Simulation::RunBody(double maxSimTime)
             _em->ProcessEvent();
 
             //update doorticks
-            UpdateDoorticks();
+            //UpdateDoorticks();
 
             //update the routes and locations
             UpdateRoutesAndLocations();
@@ -538,35 +538,35 @@ void Simulation::ProcessAgentsQueue()
 }
 
 void Simulation::UpdateDoorticks() const {
-    int softstateDecay = 1;
-    //Softstate of _lastTickTime is valid for X seconds as in (X/_deltaT); here it is 2s
-    auto& allCross = _building->GetAllCrossings();
-    for (auto& crossPair : allCross) {
-        crossPair.second->_refresh1 += 1;
-        crossPair.second->_refresh2 += 1;
-        if (crossPair.second->_refresh1 > (softstateDecay/_deltaT)) {
-            crossPair.second->_lastTickTime1 = 0;
-            crossPair.second->_refresh1 = 0;
-        }
-        if (crossPair.second->_refresh2 > (softstateDecay/_deltaT)) {
-            crossPair.second->_lastTickTime2 = 0;
-            crossPair.second->_refresh2 = 0;
-        }
-    }
-
-    auto& allTrans = _building->GetAllTransitions();
-    for (auto& transPair : allTrans) {
-        transPair.second->_refresh1 += 1;
-        transPair.second->_refresh2 += 1;
-        if (transPair.second->_refresh1 > (softstateDecay/_deltaT)) {
-            transPair.second->_lastTickTime1 = 0;
-            transPair.second->_refresh1 = 0;
-        }
-        if (transPair.second->_refresh2 > (softstateDecay/_deltaT)) {
-            transPair.second->_lastTickTime2 = 0;
-            transPair.second->_refresh2 = 0;
-        }
-    }
+//    int softstateDecay = 1;
+//    //Softstate of _lastTickTime is valid for X seconds as in (X/_deltaT); here it is 2s
+//    auto& allCross = _building->GetAllCrossings();
+//    for (auto& crossPair : allCross) {
+//        crossPair.second->_refresh1 += 1;
+//        crossPair.second->_refresh2 += 1;
+//        if (crossPair.second->_refresh1 > (softstateDecay/_deltaT)) {
+//            crossPair.second->_lastTickTime1 = 0;
+//            crossPair.second->_refresh1 = 0;
+//        }
+//        if (crossPair.second->_refresh2 > (softstateDecay/_deltaT)) {
+//            crossPair.second->_lastTickTime2 = 0;
+//            crossPair.second->_refresh2 = 0;
+//        }
+//    }
+//
+//    auto& allTrans = _building->GetAllTransitions();
+//    for (auto& transPair : allTrans) {
+//        transPair.second->_refresh1 += 1;
+//        transPair.second->_refresh2 += 1;
+//        if (transPair.second->_refresh1 > (softstateDecay/_deltaT)) {
+//            transPair.second->_lastTickTime1 = 0;
+//            transPair.second->_refresh1 = 0;
+//        }
+//        if (transPair.second->_refresh2 > (softstateDecay/_deltaT)) {
+//            transPair.second->_lastTickTime2 = 0;
+//            transPair.second->_refresh2 = 0;
+//        }
+//    }
 };
 
 void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const

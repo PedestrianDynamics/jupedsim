@@ -43,10 +43,10 @@ Transition::Transition() : Crossing()
      _doorUsage=0;
      _lastPassingTime=0;
      _room2 = nullptr;
-     _lastTickTime1 = 0;
-     _lastTickTime2 = 0;
-     _refresh1 = 0;
-     _refresh2 = 0;
+//     _lastTickTime1 = 0;
+//     _lastTickTime2 = 0;
+//     _refresh1 = 0;
+//     _refresh2 = 0;
 }
 
 Transition::~Transition()
