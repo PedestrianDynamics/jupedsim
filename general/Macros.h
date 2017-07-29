@@ -199,7 +199,7 @@ enum MagicNumbers{
 };
 
 constexpr double magicnum(int i) {
-     return (i == UNKNOWN_DISTANCE) ? -3.0 : (i == UNKNOWN_COST) ? -2.0 : (i == WALL_ON_COSTARRAY) ? -7.0 : (i == TARGET_REGION) ? 0.0 : NAN;
+     return (i == UNKNOWN_DISTANCE) ? -3.0 : (i == UNKNOWN_COST) ? -2.0 : (i == WALL_ON_COSTARRAY) ? -7.0 : (i == TARGET_REGION) ? 0.0 : J_NAN;
 //     switch (i) {
 //          case UNKNOWN_DISTANCE:
 //               return -3.0;
