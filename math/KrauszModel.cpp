@@ -276,7 +276,7 @@ inline  Point KrauszModel::ForceDriv(Pedestrian* ped, Room* room) const
      if (  (dynamic_cast<DirectionFloorfield*>(_direction.get())) ||
            (dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) ||
            (dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get()))  ) {
-          if (dist > 10*J_EPS_GOAL) {
+          if (dist > 50*J_EPS_GOAL) {
                const Point& v0 = ped->GetV0(target);
                F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
           } else {

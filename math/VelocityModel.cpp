@@ -152,6 +152,10 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
       pedsToRemove.reserve(500);
       unsigned long nSize;
       nSize = allPeds.size();
+     //debug
+     //if (allPeds[0]->GetID() == 21 && allPeds[0]->GetPos()._y < -1.129) {
+     //     Log->Write("now");
+     //}
 
       int nThreads = omp_get_max_threads();
 
@@ -311,7 +315,7 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
       if ( (dynamic_cast<DirectionFloorfield*>(_direction.get())) ||
            (dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) ||
            (dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get()))  ) {
-          if (dist > 20*J_EPS_GOAL) {
+          if (dist > 50*J_EPS_GOAL) {
                desired_direction = target - pos; //ped->GetV0(target);
           } else {
                desired_direction = lastE0;

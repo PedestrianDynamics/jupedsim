@@ -275,7 +275,7 @@ Point GompertzModel::ForceDriv(Pedestrian *ped, Room *room) const {
     double dist = ped->GetExitLine()->DistTo(pos);
 
     // check if the molified version works
-    if (dist > J_EPS_GOAL) {
+    if (dist > 50 * J_EPS_GOAL) {
         e0 = ped->GetV0(target);
         if (ped->GetID() == -4)
             printf("1 e0 %f %f, target %f %f\n", e0._x, e0._y, target._x, target._y);
