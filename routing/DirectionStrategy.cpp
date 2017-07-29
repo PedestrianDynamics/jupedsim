@@ -386,7 +386,7 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
 
      std::chrono::time_point<std::chrono::system_clock> start, end;
      start = std::chrono::system_clock::now();
-     Log->Write("INFO: \tCalling Constructor of LocFloorfieldViaFM in DirectionLocalFloorfield::Init(...)");
+     Log->Write("INFO: \tCalling Constructor of UnivFFviaFM(Room-scale) in DirectionLocalFloorfield::Init(...)");
 
      for (auto& roomPair : _building->GetAllRooms()) {
          UnivFFviaFM* newfield =  new UnivFFviaFM(roomPair.second.get(), _building, stepsize, _wallAvoidDistance, _useDistancefield);
@@ -462,7 +462,7 @@ void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
 
      std::chrono::time_point<std::chrono::system_clock> start, end;
      start = std::chrono::system_clock::now();
-     Log->Write("INFO: \tCalling Construtor of SubLocFloorfieldViaFM");
+     Log->Write("INFO: \tCalling Construtor of UnivFFviaFM(Subroom-scale)");
 
      for (auto& roomPair : _building->GetAllRooms()) {
           for (auto& subPair : roomPair.second->GetAllSubRooms()) {
