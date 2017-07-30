@@ -706,11 +706,8 @@ std::vector<Point> Building::GetBoundaryVertices() const
 
 bool Building::SanityCheck()
 {
-     Log->Write("INFO: \tChecking the geometry for artifacts");
+     Log->Write("INFO: \tChecking the geometry for artifacts: (Ignore Warnings, if ff_[...] router is used!)");
      bool status = true;
-
-     //only for ffRouter
-     return status;
 
      for(auto&& itr_room: _rooms)
      {

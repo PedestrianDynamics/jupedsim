@@ -981,7 +981,7 @@ Router* Pedestrian::GetRouter() const
 int Pedestrian::FindRoute()
 {
      if( ! _router) {
-          Log->Write("ERROR:\t one or more routers does not exit! Check your router_ids");
+          Log->Write("ERROR:\t one or more routers does not exist! Check your router_ids");
           return -1;
      }
      //bool isinsub = (_building->GetAllRooms().at(this->GetRoomID())->GetSubRoom(this->GetSubRoomID())->IsInSubRoom(this));

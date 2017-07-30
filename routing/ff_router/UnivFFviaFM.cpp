@@ -8,12 +8,13 @@
 #include "../../geometry/Building.h"
 #include "../../geometry/Room.h"
 #include "../../geometry/SubRoom.h"
+#include "../../pedestrian/Pedestrian.h"
 #include "mesh/RectGrid.h"
 
 
 UnivFFviaFM::~UnivFFviaFM() {
      if (_grid) delete _grid;
-     size_t speedsize = _speedFieldSelector.size();
+     //size_t speedsize = _speedFieldSelector.size();
      for (auto speedPtr : _speedFieldSelector) {
           if (speedPtr) delete[] speedPtr;
      }
@@ -78,15 +79,24 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
           const std::vector<Transition*> tmpTrans = subRoomPtr->GetAllTransitions();
 
           int uidNotConst = 0;
+          bool isOpen = false;
           for (auto& cross : tmpCross) {
                uidNotConst = cross->GetUniqueID();
-               if (tmpDoors.count(uidNotConst) == 0) {
+               isOpen = cross->IsOpen();
+               if (!isOpen) {
+                    //will be added twice! is it a problem?
+                    lines.emplace_back((Line)*cross);
+               } else if ((tmpDoors.count(uidNotConst) == 0)) {
                     tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *cross));
                }
           }
           for (auto& trans : tmpTrans) {
                uidNotConst = trans->GetUniqueID();
-               if (tmpDoors.count(uidNotConst) == 0) {
+               isOpen = trans->IsOpen();
+               if (!isOpen) {
+                    //will be added twice! is it a problem?
+                    lines.emplace_back((Line)*trans);
+               } else if (tmpDoors.count(uidNotConst) == 0) {
                     tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *trans));
                }
           }
@@ -129,13 +139,24 @@ UnivFFviaFM::UnivFFviaFM(SubRoom* subRoomArg, Configuration* const confArg, doub
      const std::vector<Transition*> tmpTrans = subRoomArg->GetAllTransitions();
 
      int uidNotConst = 0;
+     bool isOpen = false;
      for (auto& cross : tmpCross) {
           uidNotConst = cross->GetUniqueID();
-          tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *cross));
+          isOpen = cross->IsOpen();
+          if (!isOpen) {
+               lines.emplace_back((Line)*cross);
+          } else {
+               tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *cross));
+          }
      }
      for (auto& trans : tmpTrans) {
           uidNotConst = trans->GetUniqueID();
-          tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *trans));
+          isOpen = trans->IsOpen();
+          if (!isOpen) {
+               lines.emplace_back((Line)*trans);
+          } else {
+               tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *trans));
+          }
      }
 
      //this will interpret "useWallDistances" as best as possible. Users should clearify with "setSpeedMode" before calling "AddTarget"
@@ -163,8 +184,11 @@ void UnivFFviaFM::create(std::vector<Line>& walls, std::map<int, Line>& doors, s
      _speedFieldSelector.emplace(_speedFieldSelector.begin()+INITIAL_SPEED, new double[_nPoints]);
      std::fill(_speedFieldSelector[INITIAL_SPEED], _speedFieldSelector[INITIAL_SPEED]+_nPoints, 1.0);
 
-     //allocate _initalSpeed and maybe _modifiedSpeed
-     if ((mode == FF_WALL_AVOID) || (useWallDistances)) {
+     _speedFieldSelector.emplace(_speedFieldSelector.begin()+REDU_WALL_SPEED, nullptr);
+     _speedFieldSelector.emplace(_speedFieldSelector.begin()+PED_SPEED, nullptr);
+
+     //allocate _modifiedSpeed
+     if ((_speedmode == FF_WALL_AVOID) || (useWallDistances)) {
           double* cost_alias_walldistance = new double[_nPoints];
           _costFieldWithKey[0] = cost_alias_walldistance;
           Point* gradient_alias_walldirection = new Point[_nPoints];
@@ -184,7 +208,7 @@ void UnivFFviaFM::create(std::vector<Line>& walls, std::map<int, Line>& doors, s
           //_uids.emplace_back(0);
 
           double* temp_reduWallSpeed = new double[_nPoints];
-          if (_speedFieldSelector.size() > 1) { //free memory before overwriting
+          if (_speedFieldSelector[REDU_WALL_SPEED]) { //free memory before overwriting
                delete[] _speedFieldSelector[REDU_WALL_SPEED];
           }
           _speedFieldSelector[REDU_WALL_SPEED] = temp_reduWallSpeed;
@@ -193,14 +217,10 @@ void UnivFFviaFM::create(std::vector<Line>& walls, std::map<int, Line>& doors, s
           createReduWallSpeed(temp_reduWallSpeed);
      }
 
-     //the memory will be allocated in "addTarget". for parallel processing, we might change it to allocate before the
-     //parallel region and call a fct "addTarget(int, [ptr_to_preallocated mem])"
-     for (auto targetUID : targetUIDs ) {
-          addTarget(targetUID);
-     }    //loop over targets
-
-
-
+     // parallel call
+     if (!targetUIDs.empty()) {
+          addTargetsParallel(targetUIDs);
+     }
 }
 
 void UnivFFviaFM::createRectGrid(std::vector<Line>& walls, std::map<int, Line>& doors, double spacing) {
@@ -301,8 +321,8 @@ void UnivFFviaFM::markSubroom(const Point& insidePoint, SubRoom* const value) {
           wavefront.erase(current);
           _gridCode[current] = INSIDE;
 
-          directNeighbor _neigh = _grid->getNeighbors(current);
-          long aux = _neigh.key[0];
+          _neigh = _grid->getNeighbors(current);
+          aux = _neigh.key[0];
           if ((aux != -2) && (_gridCode[aux] == INSIDE || _gridCode[aux] == OUTSIDE) && _subrooms[aux] == nullptr) {
                wavefront.insert(aux);
                _subrooms[aux] = value;
@@ -338,6 +358,106 @@ void UnivFFviaFM::createReduWallSpeed(double* reduWallSpeed){
           }
      }
 }
+
+void UnivFFviaFM::recreateAllForQuickest() {
+     //allocate if neccessary (should not be!)
+     for (int doorUID : _uids) {
+          if (!_costFieldWithKey[doorUID]) {
+               _costFieldWithKey[doorUID] = new double[_nPoints];
+          }
+          if (_user == DISTANCE_MEASUREMENTS_ONLY) {
+               if (_directionFieldWithKey.count(doorUID) != 0 && _directionFieldWithKey[doorUID]){
+                    delete[] _directionFieldWithKey[doorUID];
+               }
+               _directionFieldWithKey[doorUID] = nullptr;
+          }
+          if (_user == DISTANCE_AND_DIRECTIONS_USED) {
+               //check if not in map OR (in map but) nullptr)
+               if ((_directionFieldWithKey.count(doorUID) == 0) || (!_directionFieldWithKey[doorUID])) {
+                    _directionFieldWithKey[doorUID] = new Point[_nPoints];
+               }
+          }
+     }
+
+     //parallel region
+#pragma omp parallel
+     {
+#pragma omp for
+          for (unsigned int i = 0; i < _doors.size(); ++i) {
+               auto doorPair = _doors.begin();
+               std::advance(doorPair, i);
+               addTarget(doorPair->first, _costFieldWithKey[doorPair->first], _directionFieldWithKey[doorPair->first]);
+          }
+     };
+}
+
+void UnivFFviaFM::createPedSpeed(Pedestrian *const *pedsArg, int nsize, int modechoice, double radius) {
+     long int delta = radius / _grid->Gethx();
+     long int posIndex = 0;
+     long int pos_i = 0;
+     long int pos_j = 0;
+     long int i_start = 0;
+     long int j_start = 0;
+     long int i_end = 0;
+     long int j_end = 0;
+     long int iStride = _grid->GetiMax();
+     double indexDistance = 0.0;
+
+//     if (nsize == 0) {
+//          Log->Write("WARNING: \tcreatePedSpeed: nsize is ZERO");
+//     } else {
+//          Log->Write("INFO: \t\tNumber of Peds used in createPedSpeed: %d",nsize);
+//     }
+
+     if ((modechoice == quickest) && (!_speedFieldSelector[PED_SPEED])) {
+          _speedFieldSelector[PED_SPEED] = new double[_grid->GetnPoints()];
+     }
+
+     //we assume, that this function is only used by router and is not using REDU_WALL_SPEED
+     for (long int i = 0; i < _grid->GetnPoints(); ++i) {
+          _speedFieldSelector[PED_SPEED][i] = _speedFieldSelector[INITIAL_SPEED][i];
+     }
+
+     for (int i = 0; i < nsize; ++i) {
+          //the following check is not 3D proof, we require the caller of this function to provide a list with "valid"
+          //pedestrian-pointer
+          if (!_grid->includesPoint(pedsArg[i]->GetPos())) {
+               continue;
+          }
+          /*this value defines the jam-speed threshold*/
+//        if (pedsArg[i]->GetEllipse().GetV().Norm() >  0.8*pedsArg[i]->GetEllipse().GetV0()) {
+//            continue;
+//        }
+          posIndex = _grid->getKeyAtPoint(pedsArg[i]->GetPos());
+          pos_i = _grid->get_i_fromKey(posIndex);
+          pos_j = _grid->get_j_fromKey(posIndex);
+
+          i_start = ((pos_i - delta) < 0)               ? 0               : (pos_i - delta);
+          i_end   = ((pos_i + delta) >= iStride) ? iStride-1 : (pos_i + delta);
+
+          j_start = ((pos_j - delta) < 0)               ? 0               : (pos_j - delta);
+          j_end   = ((pos_j + delta) >= _grid->GetjMax()) ? _grid->GetjMax()-1 : (pos_j + delta);
+
+          for     (long int curr_i = i_start; curr_i < i_end; ++curr_i) {
+               for (long int curr_j = j_start; curr_j < j_end; ++curr_j) {
+                    //indexDistance holds the square
+                    indexDistance = ( (curr_i - pos_i)*(curr_i - pos_i) + (curr_j - pos_j)*(curr_j - pos_j) );
+                    //now using indexDistance to store the (speed) reduction value
+                    //indexDistance = (delta*delta) - (indexDistance);
+                    //if (indexDistance < 0) { indexDistance = 0.;}
+                    //scale to [0 .. 1]
+                    //indexDistance = indexDistance/(delta*delta);
+
+                    //densityspeed[curr_j*grid->GetiMax() + curr_i] = (indexDistance > (delta*delta)) ? densityspeed[curr_j*grid->GetiMax() + curr_i] : .001;
+                    if (indexDistance < (delta*delta)) {
+                         //std::cout << "c h a n g i n g   ";
+                         _speedFieldSelector[PED_SPEED][curr_j*iStride + curr_i] = 0.2;
+                    }
+               }
+          }
+     }
+}
+
 void UnivFFviaFM::drawLinesOnGrid(std::map<int, Line>& doors, int *const grid) {
      for (auto&& doorPair : doors) {
           int tempUID = doorPair.first;
@@ -957,18 +1077,20 @@ void UnivFFviaFM::addTarget(const int uid, double* costarrayDBL, Point* gradarra
      }
      Line tempTargetLine = Line(_doors[uid]);
      Point tempCenterPoint = Point(tempTargetLine.GetCentre());
-     if (tempTargetLine.GetLength() > 0.6) { //shorten line from both Points to avoid targeting edges of real door
-          const Point& p1 = tempTargetLine.GetPoint1();
-          const Point& p2 = tempTargetLine.GetPoint2();
-          double length = tempTargetLine.GetLength();
-          double u = 0.2/length;
-          tempTargetLine = Line(p1 + (p2-p1)*u, p1 + (p2-p1)*(1-u), 0);
-     } else if (tempTargetLine.GetLength() > 0.2) {
-          const Point& p1 = tempTargetLine.GetPoint1();
-          const Point& p2 = tempTargetLine.GetPoint2();
-          double length = tempTargetLine.GetLength();
-          double u = 0.05/length;
-          tempTargetLine = Line(p1 + (p2-p1)*u, p1 + (p2-p1)*(1-u), 0);
+     if (_mode == LINESEGMENT) {
+          if (tempTargetLine.GetLength() > 0.6) { //shorten line from both Points to avoid targeting edges of real door
+               const Point &p1 = tempTargetLine.GetPoint1();
+               const Point &p2 = tempTargetLine.GetPoint2();
+               double length = tempTargetLine.GetLength();
+               double u = 0.2 / length;
+               tempTargetLine = Line(p1 + (p2 - p1) * u, p1 + (p2 - p1) * (1 - u), 0);
+          } else if (tempTargetLine.GetLength() > 0.2) {
+               const Point &p1 = tempTargetLine.GetPoint1();
+               const Point &p2 = tempTargetLine.GetPoint2();
+               double length = tempTargetLine.GetLength();
+               double u = 0.05 / length;
+               tempTargetLine = Line(p1 + (p2 - p1) * u, p1 + (p2 - p1) * (1 - u), 0);
+          }
      }
 
      //this allocation must be on shared heap! to be accessible by any thread later (should be shared in openmp)
@@ -1008,6 +1130,8 @@ void UnivFFviaFM::addTarget(const int uid, double* costarrayDBL, Point* gradarra
           calcFF(newArrayDBL, newArrayPt, _speedFieldSelector[REDU_WALL_SPEED]);
      } else if (_speedmode == FF_HOMO_SPEED) {
           calcFF(newArrayDBL, newArrayPt, _speedFieldSelector[INITIAL_SPEED]);
+     } else if (_speedmode == FF_PED_SPEED) {
+          calcFF(newArrayDBL, newArrayPt, _speedFieldSelector[PED_SPEED]);
      }
 #pragma omp critical(_uids)
      _uids.emplace_back(uid);
@@ -1027,6 +1151,9 @@ void UnivFFviaFM::addAllTargets() {
 }
 
 void UnivFFviaFM::addAllTargetsParallel() {
+     //Reason: freeing and reallocating takes time. We do not use already allocated memory, because we do not know if it
+     //        is shared memory. Maybe this is not neccessary - maybe reconsider. This way, it is safe. If this function
+     //        is called from a parallel region, we all go to hell.
      //free old memory
      for (auto memoryDBL : _costFieldWithKey) {
           if (memoryDBL.first == 0) continue;          //do not free distancemap
@@ -1059,6 +1186,39 @@ void UnivFFviaFM::addAllTargetsParallel() {
      };
 }
 
+void UnivFFviaFM::addTargetsParallel(std::vector<int> wantedDoors) {
+     //free old memory (but not the distancemap with key == 0)
+     for (int targetUID : wantedDoors) {
+          if ((targetUID != 0) && _costFieldWithKey.count(targetUID) && _costFieldWithKey[targetUID]) {
+               delete[] _costFieldWithKey[targetUID];
+          }
+          if ((targetUID != 0) && _directionFieldWithKey.count(targetUID) && _directionFieldWithKey[targetUID]) {
+               delete[] _directionFieldWithKey[targetUID];
+          }
+     }
+     //allocate new memory
+     for (int targetUID : wantedDoors) {
+          _costFieldWithKey[targetUID] = new double[_nPoints];
+          if (_user == DISTANCE_MEASUREMENTS_ONLY) {
+               _directionFieldWithKey[targetUID] = nullptr;
+          }
+          if (_user == DISTANCE_AND_DIRECTIONS_USED) {
+               _directionFieldWithKey[targetUID] = new Point[_nPoints];
+          }
+     }
+
+     //parallel region
+#pragma omp parallel
+     {
+#pragma omp for
+          for (unsigned int i = 0; i < wantedDoors.size(); ++i) {
+               auto doorUID = wantedDoors.begin();
+               std::advance(doorUID, i);
+               addTarget(*doorUID, _costFieldWithKey[*doorUID], _directionFieldWithKey[*doorUID]);
+          }
+     };
+}
+
 SubRoom** UnivFFviaFM::getSubRoomFF(){
      return _subrooms;
 }
@@ -1085,6 +1245,9 @@ void UnivFFviaFM::setMode(int modeArg) {
 
 void UnivFFviaFM::setSpeedMode(int speedModeArg) {
      _speedmode = speedModeArg;
+     if (_speedmode == FF_PED_SPEED && !_speedFieldSelector[PED_SPEED]) {
+          _speedFieldSelector[PED_SPEED] = new double[_nPoints];
+     }
 }
 
 

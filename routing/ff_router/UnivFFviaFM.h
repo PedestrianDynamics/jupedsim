@@ -42,6 +42,7 @@
 #include <float.h>
 #include "../../general/Macros.h"
 
+class Pedestrian;
 class Room;
 class SubRoom;
 class Building;
@@ -87,6 +88,7 @@ public:
      UnivFFviaFM(SubRoom* subRoomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallDistances, std::vector<int> wantedDoors);
      void create(std::vector<Line>& walls, std::map<int, Line>& doors, std::vector<int> targetUIDs, int mode,
                  double spacing, double wallAvoidDist, bool useWallDistances);
+     void recreateAllForQuickest();
      UnivFFviaFM() {};
      UnivFFviaFM(UnivFFviaFM&){};
      virtual ~UnivFFviaFM();
@@ -95,6 +97,7 @@ public:
      void addTarget(const int uid, double* costarray = nullptr, Point* gradarray = nullptr);
      void addAllTargets();
      void addAllTargetsParallel();
+     void addTargetsParallel(std::vector<int> wantedDoors);
      std::vector<int> getKnownDoorUIDs();
      void setUser(int userArg);
      void setMode(int modeArg);
@@ -118,6 +121,7 @@ public:
      void processGeometry(std::vector<Line>&walls, std::map<int, Line>& doors);
      void markSubroom(const Point& insidePoint, SubRoom* const value);
      void createReduWallSpeed(double* reduWallSpeed);
+     void createPedSpeed(Pedestrian* const * pedsArg, int nsize, int modechoice, double radius);
 
      void drawLinesOnGrid(std::map<int, Line>& doors, int *const grid);
      template <typename T>

@@ -137,12 +137,11 @@ public:
      virtual bool Init(Building* building);
 
      /*!
-      * \brief ReInit the router (must be called after each event (open/close change)
+      * \brief ReInit the router if quickest router is used. Current position of agents is considered.
       *
       * ReInit() will reconstruct the graph (nodes = doors, edges = costs) and
       * find shortest paths via Floyd-Warshall. It will reconstruct the floorfield to
-      * evaluate the best doors to certain goals as they could change. Further on it
-      * will take the information of former floorfields, if useful.
+      * evaluate the best doors to certain goals as they could change.
       *
       *
       * \param[in] [name of input parameter] [its description]
@@ -181,6 +180,8 @@ public:
       * \brief set mode (shortest, quickest, ...)
       */
       void SetMode(std::string s);
+      bool MustReInit();
+      void SetRecalc(double t);
 
 private:
 
@@ -206,6 +207,7 @@ protected:
      int _mode;
      double _timeToRecalc = 0.;
      double _recalc_interval;
+     bool _plzReInit = false;
      bool _hasSpecificGoals;
      bool _targetWithinSubroom;
      // If we use CentrePointDistance (i.e. CentrePointLocalFFViaFM), some algorithms can maybe be simplified

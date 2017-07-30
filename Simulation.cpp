@@ -476,8 +476,6 @@ double Simulation::RunBody(double maxSimTime)
         ProcessAgentsQueue();
 
         if (t>Pedestrian::GetMinPremovementTime()) {
-            //@todo: @ar.graf: here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
-
             //update the linked cells
             _building->UpdateGrid();
 
@@ -487,8 +485,15 @@ double Simulation::RunBody(double maxSimTime)
             //update the events
             _em->ProcessEvent();
 
-            //update doorticks
-            //UpdateDoorticks();
+            //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
+            //update quickestRouter
+            if (_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST)) {
+                FFRouter* ffrouter = dynamic_cast<FFRouter*>(_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST));
+                if (ffrouter->MustReInit()) {
+                    ffrouter->ReInit();
+                    ffrouter->SetRecalc(t);
+                }
+            }
 
             //update the routes and locations
             UpdateRoutesAndLocations();

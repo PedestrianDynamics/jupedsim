@@ -187,6 +187,7 @@ enum FloorfieldMode {
      FF_FULL_LINE,
      FF_WALL_AVOID,
      FF_HOMO_SPEED,
+     FF_PED_SPEED,
      FF_ROOM_SCALE,
      FF_SUBROOM_SCALE
 };

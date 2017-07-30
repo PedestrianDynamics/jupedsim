@@ -185,7 +185,7 @@ bool FFRouter::Init(Building* building)
 //               } else {
 //                    locffptr = new LocalFloorfieldViaFM(pairRoomIt->second.get(), building, 0.125, 0.125, 0.0, false);
 //               }
-          locffptr->setUser(DISTANCE_AND_DIRECTIONS_USED);
+          locffptr->setUser(DISTANCE_MEASUREMENTS_ONLY);
           locffptr->setMode(CENTERPOINT);
           locffptr->setSpeedMode(FF_HOMO_SPEED);
           locffptr->addAllTargetsParallel();
@@ -198,6 +198,10 @@ bool FFRouter::Init(Building* building)
 
      // nowait, because the parallel region ends directly afterwards
 //#pragma omp for nowait
+     //@todo: @ar.graf: it would be easier to browse thru doors of each field directly after "addAllTargetsParallel" as
+     //                 we do only want doors of same subroom anyway. BUT the router would have to switch from room-scope
+     //                 to subroom-scope. Nevertheless, we could omit the room info (used to acces correct field), if we
+     //                 do it like in "ReInit()".
      for (unsigned int i = 0; i < roomAndCroTrVector.size(); ++i) {
           auto rctIt = roomAndCroTrVector.begin();
           std::advance(rctIt, i);
@@ -337,7 +341,68 @@ bool FFRouter::Init(Building* building)
 
 bool FFRouter::ReInit()
 {
-     return false;
+     //cleanse maps
+     _distMatrix.clear();
+     _pathsMatrix.clear();
+
+     //init, yet no distances, only create map entries
+     for(auto& id1 : _allDoorUIDs) {
+          for(auto& id2 : _allDoorUIDs){
+               std::pair<int, int> key   = std::make_pair(id1, id2);
+               double              value = (id1 == id2)? 0.0 : DBL_MAX;
+               //distMatrix[i][j] = 0,   if i==j
+               //distMatrix[i][j] = max, else
+               _distMatrix.insert(std::make_pair( key , value));
+               //pathsMatrix[i][j] = i or j ? (follow wiki:path_reconstruction, it should be j)
+               _pathsMatrix.insert(std::make_pair( key , id2 ));
+               _subroomMatrix.insert(std::make_pair(key, nullptr));
+          }
+     }
+
+     for (auto floorfield : _locffviafm) {
+          floorfield.second->setSpeedMode(FF_PED_SPEED);
+          //@todo: ar.graf: create a list of local ped-ptr instead of giving all peds-ptr
+          floorfield.second->createPedSpeed(_building->GetAllPedestrians().data(), _building->GetAllPedestrians().size(), _mode, 1.);
+          floorfield.second->recreateAllForQuickest();
+          std::vector<int> allDoors(floorfield.second->getKnownDoorUIDs());
+          for (auto firstDoor : allDoors) {
+               for (auto secondDoor : allDoors) {
+                    if (secondDoor <= firstDoor) continue; // calculate every path only once
+                    // if the two doors are not within the same subroom, do not consider (ar.graf)
+                    // should fix problems of oscillation caused by doorgaps in the distancegraph
+                    int thisUID1 = (_CroTrByUID.at(firstDoor)->GetSubRoom1()) ? _CroTrByUID.at(firstDoor)->GetSubRoom1()->GetUID() : -1 ;
+                    int thisUID2 = (_CroTrByUID.at(firstDoor)->GetSubRoom2()) ? _CroTrByUID.at(firstDoor)->GetSubRoom2()->GetUID() : -2 ;
+                    int otherUID1 = (_CroTrByUID.at(secondDoor)->GetSubRoom1()) ? _CroTrByUID.at(secondDoor)->GetSubRoom1()->GetUID() : -3 ;
+                    int otherUID2 = (_CroTrByUID.at(secondDoor)->GetSubRoom2()) ? _CroTrByUID.at(secondDoor)->GetSubRoom2()->GetUID() : -4 ;
+
+                    if (
+                              (thisUID1 != otherUID1) &&
+                              (thisUID1 != otherUID2) &&
+                              (thisUID2 != otherUID1) &&
+                              (thisUID2 != otherUID2)      ) {
+                         continue;
+                    }
+
+                    double tempDistance = floorfield.second->getCostToDestination(firstDoor, _CroTrByUID.at(secondDoor)->GetCentre());
+                    if (tempDistance < floorfield.second->getGrid()->Gethx()) {
+                         //Log->Write("WARNING:\tDistance of doors %d and %d is too small: %f",*otherDoor, *innerPtr, tempDistance);
+                         //Log->Write("^^^^^^^^\tIf there are scattered subrooms, which are not connected, this is ok.");
+                         continue;
+                    }
+                    std::pair<int, int> key_ij = std::make_pair(secondDoor, firstDoor);
+                    std::pair<int, int> key_ji = std::make_pair(firstDoor, secondDoor);
+                    if (_distMatrix.at(key_ij) > tempDistance) {
+                         _distMatrix.erase(key_ij);
+                         _distMatrix.erase(key_ji);
+                         _distMatrix.insert(std::make_pair(key_ij, tempDistance));
+                         _distMatrix.insert(std::make_pair(key_ji, tempDistance));
+                    }
+               } //secondDoor(s)
+          } //firstDoor(s)
+     } //allRooms
+     FloydWarshall();
+     _plzReInit = false;
+     return true;
 }
 
 
@@ -359,13 +424,8 @@ int FFRouter::FindExit(Pedestrian* p)
 //     }
      if (_mode == quickest) {
           //new version: recalc densityspeed every x seconds
-          if (p->GetGlobalTime() > _timeToRecalc) {
-               _timeToRecalc += _recalc_interval;                      //@todo: ar.graf: change "5" to value of config file/classmember
-//               for (auto localfield : _locffviafm) { //@todo: ar.graf: create a list of local ped-ptr instead of giving all peds-ptr
-//                    localfield.second->setSpeedThruPeds(_building->GetAllPedestrians().data(), _building->GetAllPedestrians().size(), _mode, 1.);
-//                    localfield.second->deleteAllFFs();
-//               }
-               ReInit();
+          if ((p->GetGlobalTime() > _timeToRecalc) && (p->GetGlobalTime() > Pedestrian::GetMinPremovementTime() + _recalc_interval)) {
+               _plzReInit = true;
           }
      }
      double minDist = DBL_MAX;
@@ -649,4 +709,12 @@ void FFRouter::SetMode(std::string s)
 
      _mode = global_shortest;
      return;
+}
+
+bool FFRouter::MustReInit() {
+     return _plzReInit;
+}
+
+void FFRouter::SetRecalc(double t) {
+     _timeToRecalc = t + _recalc_interval;
 }
