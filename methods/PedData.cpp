@@ -67,7 +67,7 @@ bool PedData::ReadData(const string& projectRootDir, const string& path, const s
                Log->Write("ERROR: \t could not parse the trajectories file <%s>",fullTrajectoriesPathName.c_str());
                return false;
           }
-          TiXmlElement* xRootNode = docGeo.RootElement();
+           TiXmlElement* xRootNode = docGeo.RootElement();
           result=InitializeVariables(xRootNode);	//initialize some global variables
      }
 
@@ -99,11 +99,11 @@ bool PedData::InitializeVariables(const string& filename)
           string line;
           int lineNr=1;
           int pos_id=0;
-          int pos_fr=0;
-          int pos_x=0;
-          int pos_y=0;
-          int pos_z=0;
-          int pos_vd=0; //velocity direction
+          int pos_fr=1;
+          int pos_x=2;
+          int pos_y=3;
+          int pos_z=4;
+          int pos_vd=5; //velocity direction
           while ( getline(fdata,line) )
           {
                //looking for the framerate which is suppposed to be at the second position
@@ -120,6 +120,7 @@ bool PedData::InitializeVariables(const string& filename)
 
                     if(line.find("ID") != std::string::npos && line.find("FR") != std::string::npos && line.find("X") != std::string::npos)
                     {
+                         std::cout << "in if" << std::endl;
                     	std::vector<std::string> strs1;
                     	line.erase(0,1);
                     	boost::split(strs1, line , boost::is_any_of("\t "),boost::token_compress_on);
@@ -133,20 +134,29 @@ bool PedData::InitializeVariables(const string& filename)
                     	it_id=find(strs1.begin(),strs1.end(),"Y");
                     	pos_y = std::distance(strs1.begin(), it_id);
                     	it_id=find(strs1.begin(),strs1.end(),"Z");
-						pos_z = std::distance(strs1.begin(), it_id);
-						it_id=find(strs1.begin(),strs1.end(),"VD");
-						pos_vd = std::distance(strs1.begin(), it_id);
+                        pos_z = std::distance(strs1.begin(), it_id);
+                        it_id=find(strs1.begin(),strs1.end(),"VD");
+                        pos_vd = std::distance(strs1.begin(), it_id);
                     }
 
                }
                else if ( line[0] != '#' && !(line.empty()) )
                {
-
+                    if (lineNr % 100000 == 0)
+                         std::cout << "lineNr " << lineNr<< std::endl;
                     std::vector<std::string> strs;
                     boost::algorithm::trim_right(line);
                     boost::split(strs, line , boost::is_any_of("\t "),boost::token_compress_on);
                     if(strs.size() < 5)
                     {
+                         for (int i=0;i<strs.size();i++)
+                              std::cout << "str[%d " <<i << "]: " << strs[i]  << std::endl;
+
+                         std::cout << "pos_fr: " << pos_fr << std::endl;
+                         std::cout << "pos_id: " << pos_id << std::endl;
+                         std::cout << "pos_x: " << pos_x << std::endl;
+                         std::cout << "pos_y: " << pos_y << std::endl;
+                         std::cout << "pos_z: " << pos_z << std::endl;
                          Log->Write("ERROR:\t There is an error in the file at line %d", lineNr);
                          return false;
                     }
@@ -158,33 +168,38 @@ bool PedData::InitializeVariables(const string& filename)
                     zs.push_back(atof(strs[pos_z].c_str()));
                     if(_vComponent=="F")
                     {
-						if(strs.size() >= 6 && pos_vd < (int)strs.size() )
-						{
-							vcmp.push_back(strs[pos_vd].c_str());
-						}
-						else
-						{
-							Log->Write("ERROR:\t There is no indicator for velocity component in trajectory file or ini file!!");
-							return false;
-						}
+                         if(strs.size() >= 6 && pos_vd < (int)strs.size() )
+                         {
+                              vcmp.push_back(strs[pos_vd].c_str());
+                         }
+                         else
+                         {
+                              Log->Write("ERROR:\t There is no indicator for velocity component in trajectory file or ini file!!");
+                              return false;
+                         }
                     }
                }
                lineNr++;
           }
+          Log->Write("INFO:\t Finished reading the data");
+          
      }
      fdata.close();
-
+     Log->Write("INFO: Call min_element with  %d elements ", _IdsTXT.size());
      _minID = *min_element(_IdsTXT.begin(),_IdsTXT.end());
+     Log->Write("INFO: minID: %d", _minID);
      _minFrame = *min_element(_FramesTXT.begin(),_FramesTXT.end());
-
+     Log->Write("INFO: minFrame: %d", _minFrame);
      //Total number of frames
      _numFrames = *max_element(_FramesTXT.begin(),_FramesTXT.end()) - _minFrame+1;
-
+     Log->Write("INFO: numFrames: %d", _numFrames);
 
      //Total number of agents
      _numPeds = *max_element(_IdsTXT.begin(),_IdsTXT.end()) - _minID+1;
+     Log->Write("INFO: Total number of Agents: %d", _numPeds);
      CreateGlobalVariables(_numPeds, _numFrames);
-
+     Log->Write("INFO: Create Global Variables done");
+     
      for(int i=_minID;i<_minID+_numPeds; i++)
      {
     	 int firstFrameIndex=INT_MAX;   //The first frame index of a pedestrian
@@ -220,7 +235,7 @@ bool PedData::InitializeVariables(const string& filename)
 		    return false;
 	     }
      }
-
+     Log->Write("convert x and y");
      for(unsigned int i = 0; i < _IdsTXT.size(); i++)
      {
           int ID = _IdsTXT[i] - _minID;
@@ -240,7 +255,8 @@ bool PedData::InitializeVariables(const string& filename)
         	  _vComp[ID][frm] = _vComponent;
           }
      }
-
+     Log->Write("Save the data for each frame");
+     
      //save the data for each frame
      for (unsigned int i = 0; i < _FramesTXT.size(); i++ )
      {
