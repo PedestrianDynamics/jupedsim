@@ -426,7 +426,7 @@ void UnivFFviaFM::createPedSpeed(Pedestrian *const *pedsArg, int nsize, int mode
                continue;
           }
 
-          newWaveSpeed = pedsArg[i]->GetEllipse().GetV().Norm()/pedsArg[i]->GetEllipse().GetV0();
+          newWaveSpeed = pedsArg[i]->GetEllipse().GetV().Norm()/pedsArg[i]->GetEllipse().GetV0(); //   (current speed)/(desired speed)
           newWaveSpeed *= 0.8;
           if (newWaveSpeed < 0.1) {
                newWaveSpeed = 0.1;
