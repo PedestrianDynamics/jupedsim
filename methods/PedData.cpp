@@ -118,8 +118,14 @@ bool PedData::InitializeVariables(const string& filename)
                          Log->Write("INFO:\tFrame rate fps: <%.2f>", _fps);
                     }
 
-                    if(line.find("ID") != std::string::npos && line.find("FR") != std::string::npos && line.find("X") != std::string::npos)
+                    if(line.find("ID") != std::string::npos &&
+                       line.find("FR") != std::string::npos &&
+                       line.find("X") != std::string::npos &&
+                       line.find("Y") != std::string::npos &&
+                       line.find("Z") != std::string::npos)
                     {
+                         // looking for this line
+                         // #ID	 FR  X Y Z
                          std::cout << "in if" << std::endl;
                     	std::vector<std::string> strs1;
                     	line.erase(0,1);
@@ -142,30 +148,31 @@ bool PedData::InitializeVariables(const string& filename)
                }
                else if ( line[0] != '#' && !(line.empty()) )
                {
+                    static int once = 1;
                     if (lineNr % 100000 == 0)
                          std::cout << "lineNr " << lineNr<< std::endl;
                     std::vector<std::string> strs;
                     boost::algorithm::trim_right(line);
                     boost::split(strs, line , boost::is_any_of("\t "),boost::token_compress_on);
-                    if(strs.size() < 5)
+                    if(once && strs.size() < 5)
                     {
-                         for (int i=0;i<strs.size();i++)
-                              std::cout << "str[%d " <<i << "]: " << strs[i]  << std::endl;
-
-                         std::cout << "pos_fr: " << pos_fr << std::endl;
-                         std::cout << "pos_id: " << pos_id << std::endl;
-                         std::cout << "pos_x: " << pos_x << std::endl;
-                         std::cout << "pos_y: " << pos_y << std::endl;
-                         std::cout << "pos_z: " << pos_z << std::endl;
-                         Log->Write("ERROR:\t There is an error in the file at line %d", lineNr);
-                         return false;
+                         once = 0;
+                         Log->Write("INFO: pos_id: %d", pos_id);
+                         Log->Write("INFO: pos_fr: %d", pos_fr);
+                         Log->Write("INFO: pos_x: %d", pos_x);
+                         Log->Write("INFO: pos_y: %d", pos_y);
+                         Log->Write("INFO: pos_z: %d", pos_z);
+                         Log->Write("WARNING:\t assuming z=0 for all data");
                     }
-
                     _IdsTXT.push_back(atoi(strs[pos_id].c_str()));
                     _FramesTXT.push_back(atoi(strs[pos_fr].c_str()));
                     xs.push_back(atof(strs[pos_x].c_str()));
                     ys.push_back(atof(strs[pos_y].c_str()));
-                    zs.push_back(atof(strs[pos_z].c_str()));
+                    if(strs.size() >= 5)
+                         zs.push_back(atof(strs[pos_z].c_str()));
+                    else
+                         zs.push_back(0);
+
                     if(_vComponent=="F")
                     {
                          if(strs.size() >= 6 && pos_vd < (int)strs.size() )
@@ -185,7 +192,7 @@ bool PedData::InitializeVariables(const string& filename)
           
      }
      fdata.close();
-     Log->Write("INFO: Call min_element with  %d elements ", _IdsTXT.size());
+     Log->Write("INFO: Got %d lines", _IdsTXT.size());
      _minID = *min_element(_IdsTXT.begin(),_IdsTXT.end());
      Log->Write("INFO: minID: %d", _minID);
      _minFrame = *min_element(_FramesTXT.begin(),_FramesTXT.end());
