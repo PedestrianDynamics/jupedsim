@@ -402,6 +402,7 @@ void UnivFFviaFM::createPedSpeed(Pedestrian *const *pedsArg, int nsize, int mode
      long int j_end = 0;
      long int iStride = _grid->GetiMax();
      double indexDistance = 0.0;
+     double newWaveSpeed = 0.0;
 
 //     if (nsize == 0) {
 //          Log->Write("WARNING: \tcreatePedSpeed: nsize is ZERO");
@@ -424,10 +425,12 @@ void UnivFFviaFM::createPedSpeed(Pedestrian *const *pedsArg, int nsize, int mode
           if (!_grid->includesPoint(pedsArg[i]->GetPos())) {
                continue;
           }
-          /*this value defines the jam-speed threshold*/
-//        if (pedsArg[i]->GetEllipse().GetV().Norm() >  0.8*pedsArg[i]->GetEllipse().GetV0()) {
-//            continue;
-//        }
+
+          newWaveSpeed = pedsArg[i]->GetEllipse().GetV().Norm()/pedsArg[i]->GetEllipse().GetV0();
+          newWaveSpeed *= 0.8;
+          if (newWaveSpeed < 0.1) {
+               newWaveSpeed = 0.1;
+          }
           posIndex = _grid->getKeyAtPoint(pedsArg[i]->GetPos());
           pos_i = _grid->get_i_fromKey(posIndex);
           pos_j = _grid->get_j_fromKey(posIndex);
@@ -442,16 +445,10 @@ void UnivFFviaFM::createPedSpeed(Pedestrian *const *pedsArg, int nsize, int mode
                for (long int curr_j = j_start; curr_j < j_end; ++curr_j) {
                     //indexDistance holds the square
                     indexDistance = ( (curr_i - pos_i)*(curr_i - pos_i) + (curr_j - pos_j)*(curr_j - pos_j) );
-                    //now using indexDistance to store the (speed) reduction value
-                    //indexDistance = (delta*delta) - (indexDistance);
-                    //if (indexDistance < 0) { indexDistance = 0.;}
-                    //scale to [0 .. 1]
-                    //indexDistance = indexDistance/(delta*delta);
 
-                    //densityspeed[curr_j*grid->GetiMax() + curr_i] = (indexDistance > (delta*delta)) ? densityspeed[curr_j*grid->GetiMax() + curr_i] : .001;
                     if (indexDistance < (delta*delta)) {
-                         //std::cout << "c h a n g i n g   ";
-                         _speedFieldSelector[PED_SPEED][curr_j*iStride + curr_i] = 0.2;
+                         //_speedFieldSelector[PED_SPEED][curr_j*iStride + curr_i] = 0.2;
+                         _speedFieldSelector[PED_SPEED][curr_j*iStride + curr_i] = std::min(newWaveSpeed, _speedFieldSelector[PED_SPEED][curr_j*iStride + curr_i]);
                     }
                }
           }
