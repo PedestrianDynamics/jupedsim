@@ -255,7 +255,9 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 spacings.clear(); //clear for ped p
                 
                 // stuck peds get removed. Warning is thrown. low speed due to jam is omitted.
-                if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime()&& ped->GetMeanVelOverRecTime() < 0.01 && size == 0 ) // size length of peds neighbour vector
+                if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime() &&
+                          std::max(ped->GetMeanVelOverRecTime(), ped->GetV().Norm()) < 0.01 &&
+                          size == 0 ) // size length of peds neighbour vector
                 {
                       Log->Write("WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time %f s (current=%f\n", ped->GetID(), ped->GetMeanVelOverRecTime(), ped->GetRoomID(), ped->GetSubRoomID(), ped->GetGlobalTime(), current);
                       #pragma omp critical(VelocityModel_ComputeNextTimeStep_pedsToRemove)
