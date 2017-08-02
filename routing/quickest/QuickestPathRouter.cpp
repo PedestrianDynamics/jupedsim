@@ -118,7 +118,7 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped)
                const Point& pt3 = ped->GetPos();
                double distToExit = ap->GetNavLine()->DistTo(pt3);
 
-               if (distToExit > J_EPS_DIST)       //@todo: ar.graf: if anyone understands this, please write comment
+               if (distToExit > J_EPS_DIST)       //if anyone understands this, please write comment
                     continue;
 
                nextDestination = GetQuickestRoute(ped);

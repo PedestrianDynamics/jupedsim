@@ -173,7 +173,7 @@ class RectGrid
             }
         }
 
-        void createGrid(){ // @todo ar.graf : what if cast chops off float, if any changes: get_x_fromKey still correct?
+        void createGrid(){ //what if cast chops off float, if any changes: get_x_fromKey still correct?
             if (!isInitialized) {
                 iMax = (long int)((xMax-xMin)/hx) + 2;  //check plus 2 (one for ceil, one for starting point)
                 jMax = (long int)((yMax-yMin)/hy) + 2;
@@ -199,7 +199,7 @@ class RectGrid
                  std::cerr
                        << "   Point is out of Grid-Scope, Tip: check if correct Floorfield is called"
                        << std::endl;
-                 return Point(-7, -7); // @todo: ar.graf : find good false indicator
+                 return Point(-7, -7);
             }
             long int i = (long int)(((currPoint._x-xMin)/hx)+.5);
             long int j = (long int)(((currPoint._y-yMin)/hy)+.5);

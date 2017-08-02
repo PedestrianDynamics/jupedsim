@@ -73,7 +73,6 @@ bool GompertzModel::Init(Building *building) {
 
     if (auto dirff = dynamic_cast<DirectionFloorfield *>(_direction.get())) {
         Log->Write("INFO:\t Init DirectionFloorfield starting ...");
-        //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
         double _deltaH = building->GetConfig()->get_deltaH();
         double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
         bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
@@ -83,7 +82,6 @@ bool GompertzModel::Init(Building *building) {
 
     if (auto dirlocff = dynamic_cast<DirectionLocalFloorfield *>(_direction.get())) {
         Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
-        //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
         double _deltaH = building->GetConfig()->get_deltaH();
         double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
         bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
@@ -93,7 +91,6 @@ bool GompertzModel::Init(Building *building) {
 
     if (auto dirsublocff = dynamic_cast<DirectionSubLocalFloorfield *>(_direction.get())) {
         Log->Write("INFO:\t Init DirectionSubLOCALFloorfield starting ...");
-        //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
         double _deltaH = building->GetConfig()->get_deltaH();
         double _wallAvoidDistance = building->GetConfig()->get_use_wall_avoidance();
         bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();

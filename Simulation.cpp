@@ -361,7 +361,7 @@ void Simulation::UpdateRoutesAndLocations()
 #ifdef _USE_PROTOCOL_BUFFER
      if (_hybridSimManager)
      {
-          AgentsQueueOut::Add(pedsToRemove);    //@todo: ar.graf: this should be critical region (and it is)
+          AgentsQueueOut::Add(pedsToRemove);    //this should be critical region (and it is)
      }
      else
 #endif

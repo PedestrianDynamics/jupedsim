@@ -994,7 +994,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement* operativModel, TiXmlNode*
                     _config->SetDistEffMaxWall(_config->GetDistEffMaxPed());
                }
 
-               if (_model == 4) { //  Gompertz @todo: ar.graf
+               if (_model == 4) { //  Gradient
                     double beta_c = 2; /// @todo quick and dirty
                     double max_Ea = agentParameters->GetAmin() + agentParameters->GetAtau() * agentParameters->GetV0();
                     double max_Eb = 0.5 * (agentParameters->GetBmin() +
@@ -1093,19 +1093,13 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                Router *r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals, _config);
                _config->GetRoutingEngine()->AddRouter(r);
 
-
                if ((_exit_strat_number == 8) || (_exit_strat_number == 9)){
                    Log->Write("\nINFO: \tUsing FF Global Shortest Router");
                }
                else {
                    Log->Write("\nWARNING: \tExit Strategy Number is not 8 or 9!!!");
-
-
                    // config object holds default values, so we omit any set operations
                }
-
-
-               //check if the exit strat is [8 | 9] //@todo: ar.graf: implement check and check which are valid exitstrats
 
                ///Parsing additional options
                if (!ParseFfRouterOps(e, ROUTING_FF_GLOBAL_SHORTEST)) {
@@ -1165,8 +1159,8 @@ bool IniFileParser::ParseFfRouterOps(TiXmlNode* routingNode, RoutingStrategy s) 
           //parse ini-file-information
           if (routingNode->FirstChild("parameters")) {
                TiXmlNode* pParameters = routingNode->FirstChild("parameters");
-               if (pParameters->FirstChild("recalc interval")) { //@todo: ar.graf: test ini file with recalc value
-                    _config->set_recalc_interval(atof(pParameters->FirstChild("recalc interval")->FirstChild()->Value()));
+               if (pParameters->FirstChild("recalc_interval")) { //@todo: ar.graf: test ini file with recalc value
+                    _config->set_recalc_interval(atof(pParameters->FirstChild("recalc_interval")->FirstChild()->Value()));
                }
           }
      }

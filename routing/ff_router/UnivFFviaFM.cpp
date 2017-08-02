@@ -213,7 +213,6 @@ void UnivFFviaFM::create(std::vector<Line>& walls, std::map<int, Line>& doors, s
           }
           _speedFieldSelector[REDU_WALL_SPEED] = temp_reduWallSpeed;
           //init _reducedWallSpeed by using distance field
-          //@todo: @ar.graf @newFF
           createReduWallSpeed(temp_reduWallSpeed);
      }
 
@@ -813,7 +812,7 @@ void UnivFFviaFM::calcCost(const long int key, double* cost, Point* dir, const d
                dir[key]._x = (-(cost[key]-cost[key-1])/_grid->Gethx());
                dir[key]._y = (0.);
           }
-          dir[key] = dir[key].Normalized(); //@todo: ar.graf: what yields better performance? scale every point here or scale each read value? more points or more calls to any element of dir2Wall
+          dir[key] = dir[key].Normalized();
           return;
      }
 
@@ -1005,7 +1004,7 @@ void UnivFFviaFM::calcDist(const long int key, double* cost, Point* dir, const d
                dir[key]._x = (-(cost[key]-cost[key-1])/_grid->Gethx());
                dir[key]._y = (0.);
           }
-          dir[key] = dir[key].Normalized(); //@todo: ar.graf: what yields better performance? scale every point here or scale each read value? more points or more calls to any element of dir2Wall
+          dir[key] = dir[key].Normalized();
           return;
      }
 
@@ -1357,7 +1356,7 @@ void UnivFFviaFM::writeFF(const std::string& filename, std::vector<int> targetID
     file.close();
 }
 
-//@todo: @ar.graf: mode is argument, which should not be needed, the info is stored in members like speedmode, ...
+//mode is argument, which should not be needed, the info is stored in members like speedmode, ...
 double UnivFFviaFM::getCostToDestination(const int destID, const Point& position, int mode) {
      assert(_grid->includesPoint(position));
      if (_costFieldWithKey.count(destID)==1 && _costFieldWithKey[destID]) {
