@@ -263,11 +263,11 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building 
 }
 
 Point GompertzModel::ForceDriv(Pedestrian *ped, Room *room) const {
-#define DEBUG 0
+//#define DEBUG 0
 
-# if DEBUG
-    printf("=====\n Enter GompertzModel::ForceDriv\n");
-# endif
+//# if DEBUG
+//    printf("=====\n Enter GompertzModel::ForceDriv\n");
+//# endif
     const Point &target = _direction->GetTarget(room, ped);
     Point F_driv;
     Point e0;
@@ -277,27 +277,22 @@ Point GompertzModel::ForceDriv(Pedestrian *ped, Room *room) const {
     // check if the molified version works
     if (dist > 50 * J_EPS_GOAL) {
         e0 = ped->GetV0(target);
-        if (ped->GetID() == -4)
-            printf("1 e0 %f %f, target %f %f\n", e0._x, e0._y, target._x, target._y);
     } else {
         ped->SetSmoothTurning();
-        //e0 = ped->GetV0();
-        e0 = ped->GetLastE0(); //@todo: ar.graf: this was supposed to fix standing on lines, and should be tested or removed
-        if (ped->GetID() == -4)
-            printf("2 e0 %f %f\n", e0._x, e0._y);
+        e0 = ped->GetV0();
+        //e0 = ped->GetLastE0(); //this was supposed to fix standing on lines, but other solution found
     }
     F_driv = ((e0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
 
 // #if DEBUG
-    if (ped->GetID() == -4) {
-        double e0norm = sqrt(e0._x * e0._x + e0._y * e0._y);
-        printf("pos %f %f target %f %f\n", pos._x, pos._y, target._x, target._y);
-        printf("mass=%f, v0norm=%f, e0Norm=%f, tau=%f\n", ped->GetMass(), ped->GetV0Norm(), e0norm, ped->GetTau());
-        printf("Fdriv=  [%f, %f]\n", F_driv._x, F_driv._y);
-        fprintf(stdout, "%d   %f    %f    %f    %f    %f    %f\n", ped->GetID(), ped->GetPos()._x, ped->GetPos()._y,
-                ped->GetV()._x, ped->GetV()._y, target._x, target._y);
-
-    }
+//    if (ped->GetID() == -4) {
+//        double e0norm = sqrt(e0._x * e0._x + e0._y * e0._y);
+//        printf("pos %f %f target %f %f\n", pos._x, pos._y, target._x, target._y);
+//        printf("mass=%f, v0norm=%f, e0Norm=%f, tau=%f\n", ped->GetMass(), ped->GetV0Norm(), e0norm, ped->GetTau());
+//        printf("Fdriv=  [%f, %f]\n", F_driv._x, F_driv._y);
+//        fprintf(stdout, "%d   %f    %f    %f    %f    %f    %f\n", ped->GetID(), ped->GetPos()._x, ped->GetPos()._y,
+//                ped->GetV()._x, ped->GetV()._y, target._x, target._y);
+//    }
 // #endif
 
     return F_driv;
