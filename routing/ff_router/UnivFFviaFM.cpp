@@ -418,6 +418,11 @@ void UnivFFviaFM::createPedSpeed(Pedestrian *const *pedsArg, int nsize, int mode
      for (long int i = 0; i < _grid->GetnPoints(); ++i) {
           _speedFieldSelector[PED_SPEED][i] = _speedFieldSelector[INITIAL_SPEED][i];
      }
+     if (_speedFieldSelector[REDU_WALL_SPEED] && _mode == LINESEGMENT) { //indicates, that the direction strat is using it
+          for (long int i = 0; i < _grid->GetnPoints(); ++i) {
+               _speedFieldSelector[PED_SPEED][i] = _speedFieldSelector[PED_SPEED][i];
+          }
+     }
 
      for (int i = 0; i < nsize; ++i) {
           //the following check is not 3D proof, we require the caller of this function to provide a list with "valid"
