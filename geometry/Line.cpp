@@ -231,7 +231,7 @@ Point Line::ShortestPoint(const Point& p) const
  * */
 bool Line::IsInLineSegment(const Point& p) const
 {
-     return fabs((_point1-p).Norm()+(_point2-p).Norm()-(_point2-_point1).Norm())<J_EPS;
+     return fabs((_point1-p).Norm()+(_point2-p).Norm()-(_point2-_point1).Norm())<J_EPS; // old version
 }
 
 /* Berechnet direkt den Abstand von p zum Segment l

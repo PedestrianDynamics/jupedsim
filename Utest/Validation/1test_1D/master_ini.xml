@@ -4,13 +4,13 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
           xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org//jps_ini_core.xsd">
 
-  <!-- seed used for initialising random generator -->
-  <seed>12542</seed>
+  <!-- seed used for initialising random generator 12542 -->
+  <seed>linspace(1,10000, 10)</seed>
   <max_sim_time>100</max_sim_time>
   <!-- geometry file -->
   <geometry>../geometry.xml</geometry>
   <!-- traectories file and format -->
-  <trajectories format="xml-plain" fps="8">
+  <trajectories format="xml-plain" fps="25">
     <file location="trajects.xml" />
   </trajectories>
   <!-- where to store the logs -->
@@ -48,8 +48,8 @@
   <!--persons information and distribution -->
   <agents operational_model_id="3">
     <agents_distribution>
-      <!-- [14, 17, 20, 22, 25, 28, 34, 39, 45, 56, 62, 70] range(5, 75, 2)-->
-      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="range(5, 75, 2)" goal_id="0" router_id="1"/>
+      <!-- [14, 17, 20, 22, 25, 28, 34, 39, 45, 56, 62, 70] range(5, 75, 2) range(5, 10, 2)-->
+      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="[14, 17, 20, 22, 25, 28, 34, 39, 45, 56, 62, 70]" goal_id="0" router_id="1"/>
     </agents_distribution>
   </agents>
 

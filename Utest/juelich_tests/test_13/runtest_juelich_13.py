@@ -4,6 +4,7 @@ import os, logging, time, sys
 from sys import argv, exit
 import subprocess, glob
 from os import path
+import multiprocessing 
 import matplotlib.pyplot as plt
 
 def get_empirical_flow():
@@ -30,12 +31,22 @@ def get_empirical_flow():
 
     return np.sort(np.array(results), axis=0), names
 
+
+def process_inifile(inifile):
+    width_size = float(inifile.split("geometry_")[1].split("_")[0])
+    trajfile = "trajectories/traj" + inifile.split("ini")[2]
+    if not path.exists(trajfile):
+        logging.critical("trajfile <%s> does not exist"%trajfile)
+        exit(FAILURE)
+
+    fps, N, traj = parse_file(trajfile)
+    name = "times" + inifile.split("ini")[2]
+    J = rolling_flow(fps, N, traj, 61, name)
+    return [N, width_size, J]
+
 #=========================
 testnr = 13
 #========================
-
-# SUCCESS = 0
-# FAILURE = 1
 
 #--------------------------------------------------------
 logfile="log_test_%d.txt"%testnr
@@ -67,7 +78,9 @@ if __name__ == "__main__":
     # os.chdir(DIR)
     #    lib_path = os.path.abspath(lib_path)
     sys.path.append(lib_path)
-    from utils import *
+    from utils import SUCCESS, FAILURE
+    from utils import parse_file, flow, rolling_flow
+    # from utils import get_maxtime
     os.chdir("..")
     TRUNK = os.getcwd()
     print("TRUNk", TRUNK)
@@ -75,7 +88,7 @@ if __name__ == "__main__":
     #----------------------------------------
     logging.info("change directory back to %s"%DIR)
     
-    flows = {}
+    
     tolerance = 0.5# todo: maybe too large
     time1 = time.clock()
     for e in ["png", "txt"]:
@@ -98,91 +111,72 @@ if __name__ == "__main__":
             logging.critical("inifile <%s> does not exist"%inifile)
             exit(FAILURE)
         print(inifile)
-        width_size = float(inifile.split("geometry_")[1].split("_")[0])
         cmd = "%s --inifile=%s"%(executable, inifile)
         #--------------------- SIMULATION ------------------------  
         #os.chdir(TRUNK) #cd to the simulation directory      
         cmd = "%s --inifile=%s"%(executable, inifile)
         logging.info('\n--------------\n start simulating with exe=<%s>'%(cmd))
-        logging.info('width_size = <%.2f>'%width_size)
+        # logging.info('width_size = <%.2f>'%width_size)
         #------------------------------------------------------
         subprocess.call([executable, "--inifile=%s"%inifile])
         #------------------------------------------------------
         logging.info('end simulation ...\n--------------\n')
-        trajfile = "trajectories/traj" + inifile.split("ini")[2]
-        logging.info('trajfile = <%s>'%trajfile)
-        #--------------------- PARSING & FLOW-MEASUREMENT --------
-        if not path.exists(trajfile):
-            logging.critical("trajfile <%s> does not exist"%trajfile)
-            exit(FAILURE)
-        maxtime = get_maxtime(inifile)
-        fps, N, traj = parse_file(trajfile)
-        J = flow(fps, N, traj, 61)
-        if width_size not in flows:
-            flows[width_size] = [J]
-        else:
-            flows[width_size].append(J)
-       
-        logging.info("W = %f;  Flow = %f"%(width_size, J))
-                     
-    #logging.debug("flows: (%s)"%', '.join(map(str, flows)))
-        #------------------------------------------------------------------------------ 
-    logging.debug("flows: (%s)"%', '.join(map(str, flows)))
-    
+
+
+    # #--------------------- PARSING & FLOW-MEASUREMENT --------        
+    pool = multiprocessing.Pool()
+    flows = pool.map(process_inifile, inifiles)
+    pool.close()
+    pool.join()
+    flows = np.array(flows)
     # ----------------------- PLOT RESULTS ----------------------
     flow_file = "flow.txt"
     ff = open(flow_file, "w")
     logging.info('write flow values in \"%s\"'%flow_file)
-    for key, value in list(flows.items()):
-        print (key)
-        print (value)
-        ff.write("%f:%f" % (key, value[0]))
+    # 0   1  2
+    # N   W  J
+    widths = np.unique(flows[:, 1])
+    W = []
+    M = []
+    S = []
+    ff.write("# width  mean  std\n")
+    for (i, w) in enumerate(widths):
+        X = flows[ flows[:, 1] == w]
+        m = np.mean(X[:, 2])
+        s = np.std(X[:, 2])
+
+        W.append(w)
+        M.append(m)
+        S.append(s)
+        ff.write("%.2f   %.2f   %.2f\n" %(w, m, s))
 
 
-    M = np.array([np.mean(i) for i in list(flows.values())]) # std pro width
-    S = np.array([np.std(i) for i in list(flows.values())])  # std pro width
-    ff.write("===========================")
-    ff.write("===========================")
-    ff.write("Means ")
-    ff.write(M)
-    ff.write("===========================")
-    ff.write("Std ")
-    ff.write(S)
-    ff.write("===========================")
+    ff.write("\n")
     ff.close()
     #########################################################################
     ms = 8
-    #plot(widths, flows, "o-b", lw = 2, ms = ms, label = "simulation")
-    indexsort = np.argsort( list(flows.keys()) )
-    F = np.array( list(flows.keys()) )[indexsort]
-    plt.plot(F, np.array(M)[indexsort], "o-", lw=2, label='Simulation', color='blue')
-    plt.errorbar(F , np.array(M)[indexsort] , yerr=np.array(S)[indexsort], fmt='-o')
+    plt.errorbar(W, M, yerr=S, fmt="o-", linewidth=1.2, capthick=2, capsize=4)
+    plt.plot(W, M, "o", label='Simulation', color='blue')
 
-    jexp, names = get_empirical_flow()
-    plt.errorbar(jexp[:, 0], jexp[:, 1], yerr=jexp[:, 2], fmt="D-", color='r', ecolor='r', linewidth=2, capthick=2, label = "%s"%", ".join(names))
-    plt.axes().set_aspect(1./plt.axes().get_data_ratio())
-    columns = np.vstack((F, np.array(M)[indexsort]))
-    gg = open("flow_col.txt", "w")
-    for i in range(len(F)):
-        gg.write("%f  %f" % (columns[0][i], columns[1][i]))
-        
-    gg.close()
     plt.legend(loc='best', numpoints=1)
     plt.grid()
     plt.xlabel(r'$w\; [\, \rm{m}\, ]$',fontsize=18)
     plt.ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
     # xticks(jexp[:, 0])
+    jexp, names = get_empirical_flow()
+    plt.errorbar(jexp[:, 0], jexp[:, 1], yerr=jexp[:, 2], fmt="D-", color='r', ecolor='r', linewidth=2, capthick=2, label = "%s"%", ".join(names))
+    plt.axes().set_aspect(1./plt.axes().get_data_ratio()) 
     plt.xlim([np.min(jexp[:, 0]) - 0.1,  np.max(jexp[:, 0]) + 0.1])
     plt.ylim([np.min(jexp[:, 1]) - 0.3,  np.max(jexp[:, 1]) + np.max(jexp[:, 2]) + 0.3])
 
     err = 0
     num = 0
     for (w, j) in zip(jexp[:, 0], jexp[:, 1]):
-        for key, values in list(flows.items()):
-            if key == w:
-                num += 1
-                err +=  np.sqrt((np.mean(values)-j)**2)
-                print("%3.3f  %3.1f  %3.1f  -  %3.3f  %3.3f"%(err, key, w, j, np.mean(values)))
+            for (m, w0) in zip(M, W):
+                if w == w0:
+                    num += 1
+                    err +=  np.sqrt((m-j)**2)
+
     err /= num
     plt.title(r"$\frac{1}{N}\sqrt{{\sum_w {(\mu(w)-E(w)})^2 }}=%.2f\; (tol=%.2f)$"%(err, tolerance), y=1.02)
     

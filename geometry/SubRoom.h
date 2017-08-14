@@ -35,6 +35,18 @@
 
 #include <vector>
 #include <string>
+#include <boost/polygon/polygon.hpp>
+#include <boost/geometry.hpp>
+
+//typedef boost::geometry::model::d2::point_xy<double> point_type;
+//typedef boost::geometry::model::polygon<point_type> polygon_type;
+//typedef boost::geometry::model::polygon<Point> polygon_type;
+
+namespace bg = boost::geometry;
+//typedef bg::model::point<double, 2, bg::cs::cartesian> point;
+//typedef bg::model::box<point> box;
+//typedef bg::model::polygon<Point, false, true> closed_polygon;
+typedef bg::model::polygon<Point, false, false> polygon_type;
 
 //forward declarations
 class Transition;
@@ -86,6 +98,9 @@ private:
 protected:
      std::vector<Wall> _walls;
      std::vector<Point> _poly; // Polygonal representation of the subroom
+
+     polygon_type _boostPoly;
+     std::vector<polygon_type> _boostPolyObstacles;
      std::vector<double> _poly_help_constatnt; //for the function IsInsidePolygon, a.brkic
      std::vector<double> _poly_help_multiple; //for the function IsInsidePolygon, a.brkic
      std::vector<Obstacle*> _obstacles;
@@ -365,6 +380,7 @@ public:
 
      /// convert all walls and transitions(doors) into a polygon representing the subroom
      virtual bool ConvertLineToPoly(const std::vector<Line*>& goals) = 0;
+     bool CreateBoostPoly();
 
      ///check whether the pedestrians is still in the subroom
      virtual bool IsInSubRoom(const Point& ped) const = 0;
@@ -385,7 +401,7 @@ class NormalSubRoom : public SubRoom {
 private:
 
      ///@see IsInSubRoom
-     int WhichQuad(const Point& vertex, const Point& hitPos) const;
+     short WhichQuad(const Point& vertex, const Point& hitPos) const;
      double Xintercept(const Point& point1, const Point& point2, double hitY) const;
 
 public:

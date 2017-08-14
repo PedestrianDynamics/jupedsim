@@ -547,6 +547,7 @@ void GlobalRouter::Reset(){
      _mapIdToFinalDestination.clear();
 }
 
+
 void GlobalRouter::SetEdgeCost(double cost)
 {
      _edgeCost=cost;

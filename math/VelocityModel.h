@@ -57,8 +57,6 @@ class DirectionStrategy;
 
 class VelocityModel : public OperationalModel {
 private:
-     /// define the strategy for crossing a door (used for calculating the driving force)
-     std::shared_ptr<DirectionStrategy> _direction;
 
      /// Modellparameter
      double _aPed;

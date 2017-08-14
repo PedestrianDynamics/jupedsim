@@ -653,6 +653,8 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
                string delta_h = xModelPara->FirstChildElement("floorfield")->Attribute("delta_h");
                pDeltaH = atof(delta_h.c_str());
           }
+          _config->set_deltaH(pDeltaH);
+
 
           if (!xModelPara->FirstChildElement("floorfield")->Attribute("wall_avoid_distance"))
                pWallAvoidDistance = .8; // default value
@@ -661,6 +663,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
                          "wall_avoid_distance");
                pWallAvoidDistance = atof(wall_avoid_distance.c_str());
           }
+          _config->set_wall_avoid_distance(pWallAvoidDistance);
 
           if (!xModelPara->FirstChildElement("floorfield")->Attribute("use_wall_avoidance"))
                pUseWallAvoidance = true; // default value
@@ -668,6 +671,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
                string use_wall_avoidance = xModelPara->FirstChildElement("floorfield")->Attribute("use_wall_avoidance");
                pUseWallAvoidance = !(use_wall_avoidance=="false");
           }
+          _config->set_use_wall_avoidance(pUseWallAvoidance);
           Log->Write("INFO: \tfloorfield <delta h=%0.4f, wall avoid distance=%0.2f>", pDeltaH, pWallAvoidDistance);
           Log->Write("INFO: \tfloorfield <use wall avoidance=%s>", pUseWallAvoidance ? "true" : "false");
      }
@@ -740,6 +744,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
                          "slow_down_distance");
                pSlowDownDistance = atof(slow_down_distance.c_str());
           }
+          _config->set_slow_down_distance(pSlowDownDistance);
           Log->Write("INFO: \tAnti Clipping: SlowDown Distance=%0.2f", pSlowDownDistance);
      }
 
@@ -751,8 +756,8 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
      _config->SetModel(std::shared_ptr<OperationalModel>(new GradientModel(_exit_strategy, _config->GetNuPed(),
                _config->GetaPed(), _config->GetbPed(), _config->GetcPed(),
                _config->GetNuWall(), _config->GetaWall(), _config->GetbWall(),
-               _config->GetcWall(), pDeltaH, pWallAvoidDistance, pUseWallAvoidance,
-               pSlowDownDistance)));
+               _config->GetcWall(), _config->get_deltaH(), _config->get_wall_avoid_distance(), _config->get_use_wall_avoidance(),
+               _config->get_slow_down_distance())));
 
      return true;
 }
@@ -989,7 +994,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement* operativModel, TiXmlNode*
                     _config->SetDistEffMaxWall(_config->GetDistEffMaxPed());
                }
 
-               if (_model == 4) { //  Gompertz @todo: ar.graf
+               if (_model == 4) { //  Gradient
                     double beta_c = 2; /// @todo quick and dirty
                     double max_Ea = agentParameters->GetAmin() + agentParameters->GetAtau() * agentParameters->GetV0();
                     double max_Eb = 0.5 * (agentParameters->GetBmin() +
@@ -1038,6 +1043,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                     usedRouter.emplace_back(router);
                }
           }
+         //
           int goal = -1;
           if (e->Attribute("goal_id")) {
                goal = atoi(e->Attribute("goal_id"));
@@ -1084,25 +1090,39 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
           else if ((strategy == "ff_global_shortest") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
-               Router *r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals);
+               Router *r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals, _config);
                _config->GetRoutingEngine()->AddRouter(r);
-               Log->Write("\nINFO: \tUsing FF Global Shortest Router");
 
-               //check if the exit strat is [8]
+               if ((_exit_strat_number == 8) || (_exit_strat_number == 9)){
+                   Log->Write("\nINFO: \tUsing FF Global Shortest Router");
+               }
+               else {
+                   Log->Write("\nWARNING: \tExit Strategy Number is not 8 or 9!!!");
+                   // config object holds default values, so we omit any set operations
+               }
 
                ///Parsing additional options
-               if (!ParseFfRouterOps(e)) {
+               if (!ParseFfRouterOps(e, ROUTING_FF_GLOBAL_SHORTEST)) {
                     return false;
                }
           }
           else if ((strategy == "ff_local_shortest") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
-               Router *r = new FFRouter(id, ROUTING_FF_LOCAL_SHORTEST, hasSpecificGoals);
+               Router *r = new FFRouter(id, ROUTING_FF_LOCAL_SHORTEST, hasSpecificGoals, _config);
                _config->GetRoutingEngine()->AddRouter(r);
                Log->Write("\nINFO: \tUsing FF Local Shortest Router");
+               Log->Write("\nWARNING: \tFF Local Shortest is bugged!!!!");
 
-               //check if the exit strat is [8]
+               if ((_exit_strat_number == 8) || (_exit_strat_number == 9)){
+                   Log->Write("\nINFO: \tUsing FF Global Shortest Router");
+               }
+               else {
+                   Log->Write("\nWARNING: \tExit Strategy Number is not 8 or 9!!!");
+                   // config object holds default values, so we omit any set operations
+               }
+
+               //check if the exit strat is [8 | 9]
 
                ///Parsing additional options
 //               if (!ParseFfRouterOps(e)) {
@@ -1111,13 +1131,13 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
           }
           else if ((strategy == "ff_quickest") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
-               Router *r = new FFRouter(id, ROUTING_FF_QUICKEST, hasSpecificGoals);
+               Router *r = new FFRouter(id, ROUTING_FF_QUICKEST, hasSpecificGoals, _config);
                _config->GetRoutingEngine()->AddRouter(r);
                Log->Write("\nINFO: \tUsing FF Quickest Router");
 
-               //if (!ParseFfRouterOps(e)) {
-               //     return false;
-               //}
+               if (!ParseFfRouterOps(e, ROUTING_FF_QUICKEST)) {
+                    return false;
+               }
           }
           else if (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) {
                Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",
@@ -1128,26 +1148,33 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
      return true;
 }
 
-bool IniFileParser::ParseFfRouterOps(TiXmlNode* routingNode) {
+bool IniFileParser::ParseFfRouterOps(TiXmlNode* routingNode, RoutingStrategy s) {
      //set defaults
-     std::string mode = "global_shortest";
-     FFRouter* r = static_cast<FFRouter*>(_config->GetRoutingEngine()->GetAvailableRouters().back());
-
-     //parse ini-file-information
-     if (routingNode->FirstChild("parameters")) {
-          TiXmlNode* pParameters = routingNode->FirstChild("parameters");
-          if (pParameters->FirstChild("mode")) {
-               mode = pParameters->FirstChild("mode")->FirstChild()->Value();
+     std::string mode;
+     if (s == ROUTING_FF_GLOBAL_SHORTEST) {
+          mode = "global_shortest";
+     }
+     if (s == ROUTING_FF_QUICKEST) {
+          mode = "quickest";
+          //parse ini-file-information
+          if (routingNode->FirstChild("parameters")) {
+               TiXmlNode* pParameters = routingNode->FirstChild("parameters");
+               if (pParameters->FirstChild("recalc_interval")) { //@todo: ar.graf: test ini file with recalc value
+                    _config->set_recalc_interval(atof(pParameters->FirstChild("recalc_interval")->FirstChild()->Value()));
+               }
           }
      }
+     FFRouter* r = static_cast<FFRouter*>(_config->GetRoutingEngine()->GetAvailableRouters().back());
+
+
      r->SetMode(mode);
      return true;
 }
 
 bool IniFileParser::ParseCogMapOpts(TiXmlNode* routingNode)
 {
-     TiXmlNode* sensorNode = routingNode->FirstChild();
 
+     TiXmlNode* sensorNode = routingNode->FirstChild();
      if (!sensorNode) {
           Log->Write("ERROR:\tNo sensors found.\n");
           return false;
@@ -1235,6 +1262,9 @@ bool IniFileParser::ParseStepSize(TiXmlNode& stepNode)
                          (std::string(stepNode.FirstChildElement("stepsize")->Attribute("fix")) == "yes") ) {
                     _config->Setdt(atof(stepsize));
                     Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
+                    if (tmp < _config->Getdt()) {
+                         Log->Write("WARNING: \tStepsize dt = %f > %f = frameinterval.\nWARNING: \tYou should decrease stepsize or fps!", _config->Getdt(), tmp);
+                    }
                     return true;
                }
                //find a stepsize, that can be multiplied by (int) to get framerate
@@ -1248,8 +1278,12 @@ bool IniFileParser::ParseStepSize(TiXmlNode& stepNode)
                          return true;
                     }
                }
+               //below should never execute
                _config->Setdt(stepsizeDBL);
                Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
+               if (tmp < _config->Getdt()) {
+                    Log->Write("WARNING: \tStepsize dt = %f > %f = frameinterval. You should decrease stepsize or fps!", _config->Getdt(), tmp);
+               }
                return true;
           }
      }
@@ -1308,6 +1342,39 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
           int pExitStrategy;
           if (tmp) {
                pExitStrategy = atoi(tmp);
+
+              //check for ff router to avoid exit strat <> router mismatch
+              const TiXmlNode* agentsDistri = strategyNode.GetDocument()->RootElement()->FirstChild("agents")->FirstChild("agents_distribution");
+              std::vector<int> usedRouter;
+              for (const TiXmlElement* e = agentsDistri->FirstChildElement("group"); e;
+                   e = e->NextSiblingElement("group")) {
+                  int router = -1;
+                  if (e->Attribute("router_id")) {
+                      router = atoi(e->Attribute("router_id"));
+                      if(std::find(usedRouter.begin(), usedRouter.end(), router) == usedRouter.end()) {
+                          usedRouter.emplace_back(router);
+                      }
+                  }
+              }
+               //continue: check for ff router to avoid exit strat <> router mismatch
+               const TiXmlNode* routeChoice = strategyNode.GetDocument()->RootElement()->FirstChild("route_choice_models");
+               for (const TiXmlElement* e = routeChoice->FirstChildElement("router"); e;
+                    e = e->NextSiblingElement("router")) {
+                    int router_id = atoi(e->Attribute("router_id"));
+                    if (!(std::find(usedRouter.begin(), usedRouter.end(), router_id) == usedRouter.end())) {
+                         std::string router_descr = e->Attribute("description");
+                         if (  (pExitStrategy != 9)
+                               && (pExitStrategy != 8)
+                               && ((router_descr == "ff_global_shortest") || (router_descr == "ff_local_shortest")
+                                                                          || (router_descr == "ff_quickest") ) ) {
+                             pExitStrategy = 8;
+                              Log->Write("WARNING: \tChanging Exit Strategie to work with floorfield!");
+                         }
+
+                    }
+
+               }
+              _exit_strat_number = pExitStrategy;
                switch (pExitStrategy) {
                case 1:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMiddlePoint());
@@ -1323,6 +1390,9 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                     break;
                case 6:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionFloorfield());
+                    if(!ParseFfOpts(strategyNode)) {
+                         return false;
+                    };
                     break;
                case 7:
                     // dead end -> not supported anymore (global ff needed, but not available in 3d)
@@ -1333,9 +1403,15 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                     break;
                case 8:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
+                    if(!ParseFfOpts(strategyNode)) {
+                         return false;
+                    };
                     break;
                case 9:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
+                    if(!ParseFfOpts(strategyNode)) {
+                         return false;
+                    };
                     break;
                default:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
@@ -1349,6 +1425,42 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                return false;
           }
           Log->Write("INFO: \texit_crossing_strategy < %d >", pExitStrategy);
+     }
+     return true;
+}
+
+bool IniFileParser::ParseFfOpts(const TiXmlNode &strategyNode) {
+
+     string query = "delta_h";
+     if (strategyNode.FirstChild(query.c_str())) {
+          const char *tmp =
+                    strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
+          double pDeltaH = atof(tmp);
+          _config->set_deltaH(pDeltaH);
+          Log->Write("INFO: \tdeltaH:\t %f", pDeltaH);
+     }
+
+
+     query = "wall_avoid_distance";
+     if (strategyNode.FirstChild(query.c_str())) {
+          const char *tmp =
+                    strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
+          double pWallAvoidance = atof(tmp);
+          _config->set_wall_avoid_distance(pWallAvoidance);
+          Log->Write("INFO: \tWAD:\t %f", pWallAvoidance);
+     }
+
+
+     query = "use_wall_avoidance";
+     if (strategyNode.FirstChild(query.c_str())) {
+          string tmp =
+                    strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
+          bool pUseWallAvoidance = !(tmp=="false");
+          _config->set_use_wall_avoidance(pUseWallAvoidance);
+         if(pUseWallAvoidance)
+             Log->Write("INFO: \tUseWAD:\t yes");
+         else
+             Log->Write("INFO: \tUseWAD:\t no");
      }
      return true;
 }

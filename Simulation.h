@@ -79,7 +79,7 @@ private:
     /// EventManager
     EventManager* _em;
     /// config
-    const Configuration* _config;
+    Configuration* _config;
     /// Agents sources manager
     AgentsSourcesManager _agentSrcManager;
     /// hybrid simulation manager
@@ -91,7 +91,7 @@ public:
     /**
      * Constructor
      */
-    Simulation(const Configuration* args);
+    Simulation(Configuration* args);
 
     /**
      * Destructor

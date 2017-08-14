@@ -76,8 +76,6 @@ public:
     virtual bool Init (Building* building);
 
 private:
-    /// define the strategy for crossing a door (used for calculating the driving force)
-    std::shared_ptr<DirectionStrategy> _direction;
     // Modellparameter
     double _nuPed;                /**< strength of the pedestrian repulsive force */
     double _nuWall;               /**< strength of the wall repulsive force */

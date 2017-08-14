@@ -1,9 +1,10 @@
 from xml.dom import minidom
 import logging
 import numpy as np
-
+import pandas as pd
 SUCCESS = 0
 FAILURE = -1
+critical_value = 0.9
 
 
 try:
@@ -140,8 +141,58 @@ def get_maxtime(filename):
     maxtime = float(xmldoc.getElementsByTagName('max_sim_time')[0].firstChild.nodeValue)
     return maxtime
 
-
 def parse_file(filename):
+    """
+    parse trajectories in Travisto-format and output results
+    in the following  format: id    frame    x    y
+    (no sorting of the data is performed)
+    returns:
+    fps: frames per second
+    N: number of pedestrians
+    data: trajectories (numpy.array) [id fr x y]
+    """
+    logging.info("parsing <%s>"%filename)
+
+    tree = ET.parse(filename)
+    root = tree.getroot()
+
+    for header in root.iter('header'):
+        fps = header.find('frameRate').text
+
+    try:
+        fps = float(fps)
+    except:
+        print ("ERROR: could not read <fps>")
+        exit()
+
+    for header in root.iter('header'):
+        N = header.find('agents').text
+
+    try:
+        N = int(N)
+    except:
+        print ("ERROR: could not read <agents>")
+        exit()
+
+    data = np.empty(shape=[0, 5])
+    for node in root.iter():
+        tag = node.tag
+        if tag == "frame":
+            frame = node.attrib['ID']
+            for agent in node.getchildren():
+                x = agent.attrib['x']
+                y = agent.attrib['y']
+                z = agent.attrib['z']
+                ID = agent.attrib['ID']
+                data = np.vstack((data, list(map(float, [ID, frame, x, y, z]) ) ) )
+
+
+                # data += [ID, frame, x, y, z] 
+
+    # data = np.array(data, dtype=float).reshape((-1, 5))
+    return fps, N, data
+
+def parse_file_deprecated(filename):
     """
     parse trajectories in Travisto-format and output results
     in the following  format: id    frame    x    y
@@ -177,6 +228,51 @@ def parse_file(filename):
     return fps, N, data
 
 
+def rolling_flow(fps, N, data, x0, name):
+    """
+    measure the flow at a vertical line given by <x0>
+    trajectories are given by <data> in the following format: id    frame    x    y
+    input:
+    - fps: frame per second
+    - N: number of peds
+    - data: trajectories
+    - x0: x-coordinate of the vertical measurement line
+    output:
+    - flow
+    """
+    logging.info('Measure flow at %f'%x0)
+    if not isinstance(data, np.ndarray):
+        logging.critical("flow() accepts data of type <ndarray>. exit")
+        exit(FAILURE)
+    peds = np.unique(data[:, 0]).astype(int)
+    times = []
+    for ped in peds:
+        d = data[data[:, 0] == ped]
+        passed = d[d[:, 2] >= x0]
+        if passed.size == 0:  # pedestrian did not pass the line
+            logging.critical("Pedestrian <%d> did not pass the line at <%.2f>"%(ped, x0))
+            exit(FAILURE)
+        first = min(passed[:, 1])
+        #print "ped= ", ped, "first=",first
+        times.append(first)
+    if len(times) < 2:
+        logging.warning("Number of pedestrians passing the line is small. return 0")
+        return 0
+
+    times = np.sort(times)
+    serie = pd.Series(times)
+    minp = 100; windows = int(len(times)/10);
+    minp = min(minp, windows)
+    flow = fps*(windows-1)/(serie.rolling(windows, min_periods=minp).max()  - serie.rolling(windows, min_periods=minp).min() )
+    flow = flow[~np.isnan(flow)] # remove NaN
+    wmean = flow.rolling(windows, min_periods=minp).mean()
+ 
+    np.savetxt(name, np.array(times))
+    
+    logging.info("min(times)=%f max(times)=%f"%(min(times), max(times)))
+    return np.mean(wmean) #fps * float(N-1) / (max(times) - min(times))
+
+
 def flow(fps, N, data, x0):
     """
     measure the flow at a vertical line given by <x0>
@@ -207,8 +303,57 @@ def flow(fps, N, data, x0):
     if len(times) < 2:
         logging.warning("Number of pedestrians passing the line is small. return 0")
         return 0
+    
     logging.info("min(times)=%f max(times)=%f"%(min(times), max(times)))
     return fps * float(N-1) / (max(times) - min(times))
+
+def CalcBiVarCDF(x,y,xGrid,yGrid):
+    """
+    Calculate the bivariate CDF of two given input signals on predefined grids. 
+    input: 
+      - x: array of size n1
+      - y: array of size n2
+      - xGrid: array of size m1
+      - yGrid: array of size m2
+    output: 
+      - CDF2D: matrix
+    """
+    nPoints = np.size(x);
+    xGridLen = np.size(xGrid);
+    yGridLen = np.size(yGrid);
+    CDF2D = np.zeros([xGridLen,yGridLen]);
+    for i in range(xGridLen):
+        for j in range(yGridLen):
+            for k in range(nPoints):
+                if ((x[k] <= xGrid[i]) and (y[k] <= yGrid[j])):
+                     CDF2D[i,j] += 1;
+
+    CDF2D = CDF2D / nPoints;
+    return CDF2D
+
+
+def CDFDistance(x1, y1, x2, y2):
+    """
+    For two input 2D signals calculate the distance between their CDFs. 
+    input: 
+      - x1: array of size n
+      - y2: array of size n
+      - x2: array of size m
+      - y2: array of size m
+    output: 
+      - KSD: not negative number
+    """
+    xPoints = 100;
+    yPoints = 100;
+    x = np.hstack((x1, x2))
+    xCommonGrid = np.linspace(np.min(x), np.max(x), xPoints);
+    y = np.hstack((y1, y2))
+    yCommonGrid = np.linspace(np.min(y), np.max(y), yPoints);
+    CDF1 = CalcBiVarCDF(x1,y1,xCommonGrid,yCommonGrid);
+    CDF2 = CalcBiVarCDF(x2,y2,xCommonGrid,yCommonGrid);
+#    KSD = np.linalg.norm(CDF1-CDF2)/(np.linalg.norm(CDF1)+np.linalg.norm(CDF1); # Frobenius norm (p=2)
+    KSD = np.max(np.abs(CDF1-CDF2)); # Kolmogorov-Smirnov distance (p=inf)
+    return KSD
 
 
 

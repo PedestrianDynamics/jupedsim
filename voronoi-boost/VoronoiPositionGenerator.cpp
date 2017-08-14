@@ -5,7 +5,7 @@
  *      Author: gsp1502
  */
 
-#define PLOT_VORONOI_DIAGRAM 1
+#define PLOT_VORONOI_DIAGRAM 0
 
 static int global_count = 0;
 

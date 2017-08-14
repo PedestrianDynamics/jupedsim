@@ -33,8 +33,10 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/SubRoom.h"
 //#include "../geometry/Wall.h"
+#include "../routing/ff_router/UnivFFviaFM.h"
 #include "../routing/ff_router/FloorfieldViaFM.h"
 #include "../routing/ff_router/LocalFloorfieldViaFM.h"
+#include "../routing/ff_router/ffRouter.h"
 //#include "DirectionStrategy.h"
 //#include <fstream>
 #include <chrono>
@@ -286,7 +288,7 @@ Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 #endif // DEBUG
 
         Point p;
-        ffviafm->getDirectionToDestination(ped, p);
+        _ffviafm->getDirectionToDestination(ped, p);
         p = p.Normalized();     // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
         return (p + ped->GetPos());
 
@@ -302,50 +304,38 @@ Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 Point DirectionFloorfield::GetDir2Wall(Pedestrian* ped) const
 {
     Point p;
-    ffviafm->getDir2WallAt(ped->GetPos(), p);
+    _ffviafm->getDir2WallAt(ped->GetPos(), p);
     return p;
 }
 
 double DirectionFloorfield::GetDistance2Wall(Pedestrian* ped) const
 {
-    return ffviafm->getDistance2WallAt(ped->GetPos());
+    return _ffviafm->getDistance2WallAt(ped->GetPos());
 }
 
 void DirectionFloorfield::Init(Building* building, double stepsize,
                                double threshold, bool useDistancMap) {
-    //implement mechanic, that can read-in an existing floorfield (from a previous run)
-    string s = building->GetGeometryFilename();
-    Log->Write("INFO: \tGeometryFilename <" + s + ">");
-    s.erase(s.find_last_of(".", string::npos)); // delete ending
-    if (s.find_last_of("/") != string::npos) {
-        s.erase(0, s.find_last_of("/")+1);      // delete directories before filename (espacially "..")
-    }
-    string FF_filename = (building->GetProjectRootDir() + "FF_" + s +  "_" + std::to_string(threshold) + ".vtk").c_str();
-    std::ifstream test(FF_filename);
-    if (test.good()) {
-          Log->Write("INFO: \tRead Floorfield from file <" + FF_filename + ">");
-        ffviafm = new FloorfieldViaFM(FF_filename);
-    } else {
-          std::chrono::time_point<std::chrono::system_clock> start, end;
-          start = std::chrono::system_clock::now();
-          Log->Write("INFO: \tCalling Construtor of FloorfieldViaFM");
-          ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold,
-                                        useDistancMap, false);
-          end = std::chrono::system_clock::now();
-          std::chrono::duration<double> elapsed_seconds = end-start;
-          Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
-    }
-    initDone = true;
+
+     std::chrono::time_point<std::chrono::system_clock> start, end;
+     start = std::chrono::system_clock::now();
+     Log->Write("INFO: \tCalling Construtor of FloorfieldViaFM");
+     _ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold,
+                                   useDistancMap, false);
+     end = std::chrono::system_clock::now();
+     std::chrono::duration<double> elapsed_seconds = end-start;
+     Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
+
+    _initDone = true;
 }
 
 DirectionFloorfield::DirectionFloorfield() {
-    ffviafm = nullptr;
-    initDone = false;
+    _ffviafm = nullptr;
+    _initDone = false;
 };
 
 DirectionFloorfield::~DirectionFloorfield() {
-    if (ffviafm) {
-        delete ffviafm;
+    if (_ffviafm) {
+        delete _ffviafm;
     }
 }
 
@@ -357,18 +347,18 @@ Point DirectionLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 #endif // DEBUG
 
      Point p;
-//     if (locffviafm.count(room->GetID())) {
-//#pragma omp critical
-     locffviafm.at(room->GetID())->getDirectionToDestination(ped, p);
-//     } else {
-          //create locffviafm[room->GetID()] - therefore use all members needed for ctor
-          // members will be added to this class
-//          locffviafm.emplace(room->GetID(), new LocalFloorfieldViaFM(room, building,
-//                                      hx, hy, wallAvoidDistance, useDistancefield,
-//                                      filename));
-//          locffviafm[room->GetID()]->getDirectionToDestination(ped, p);
-//     }
-     p = p.Normalized();     // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
+     UnivFFviaFM* floorfield = _locffviafm.at(room->GetID());
+#if DEBUG
+     if (!floorfield->getGrid()->includesPoint(ped->GetPos())) {
+          Log->Write("ERROR: \tDirectionLocalFloorfield::GetTarget is accessing wrong floorfield. Pedestrian is not inside!");
+          p = Point(0.0,0.0);
+          return p;
+     }
+#endif
+     floorfield->getDirectionToUID(ped->GetExitIndex(), ped->GetPos(), p);
+     if (floorfield->getCostToDestination(ped->GetExitIndex(), ped->GetPos()) < 1.0) {
+          p = p * floorfield->getCostToDestination(ped->GetExitIndex(), ped->GetPos());
+     }
      return (p + ped->GetPos());
 
 #if DEBUG
@@ -384,108 +374,55 @@ Point DirectionLocalFloorfield::GetDir2Wall(Pedestrian* ped) const
 {
      Point p;
      int roomID = ped->GetRoomID();
-     locffviafm.at(roomID)->getDir2WallAt(ped->GetPos(), p);
+     _locffviafm.at(roomID)->getDir2WallAt(ped->GetPos(), p);
      return p;
 }
 
 double DirectionLocalFloorfield::GetDistance2Wall(Pedestrian* ped) const
 {
-     return locffviafm.at(ped->GetRoomID())->getDistance2WallAt(ped->GetPos());
+     return _locffviafm.at(ped->GetRoomID())->getDistance2WallAt(ped->GetPos());
 }
 
 void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
-                                    double threshold, bool useDistancMap) {
-     hx = stepsize;
-     hy = stepsize;
-     building = buildingArg;
-     wallAvoidDistance = threshold;
-     useDistancefield = useDistancMap;
+                                    double threshold, bool useDistanceMap) {
+     _stepsize = stepsize;
+     _building = buildingArg;
+     _wallAvoidDistance = threshold;
+     _useDistancefield = useDistanceMap;
 
-     //implement mechanic, that can read-in an existing floorfield (from a previous run)
-//     string s = building->GetGeometryFilename();
-//     Log->Write("INFO: \tGeometryFilename <" + s + ">");
-//     s.erase(s.find_last_of(".", string::npos)); // delete ending
-//     if (s.find_last_of("/") != string::npos) {
-//          s.erase(0, s.find_last_of("/")+1);      // delete directories before filename (espacially "..")
-//     }
-//     string FF_filename = (building->GetProjectRootDir() + "FF_" + s +  "_" + std::to_string(threshold) + ".vtk").c_str();
-//     std::ifstream test(FF_filename);
-//     if (test.good() && false) {
-//          //Log->Write("INFO: \tRead Floorfield from file <" + FF_filename + ">");
-//          //ffviafm = new FloorfieldViaFM(FF_filename);
-//     } else {
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
-    Log->Write("INFO: \tCalling Constructor of LocFloorfieldViaFM in DirectionLocalFloorfield::Init(...)");
-#pragma omp parallel for
-     for (unsigned int i = 0; i < building->GetAllRooms().size(); ++i) {
-     //for (auto& roomPair : building->GetAllRooms()) {
-         auto roomPairIt = building->GetAllRooms().begin();
-         std::advance(roomPairIt, i);
-         locffviafm[(*roomPairIt).first] = new LocalFloorfieldViaFM((*roomPairIt).second.get(), building, hx, hy,
-                 wallAvoidDistance, useDistancefield);
+
+     std::chrono::time_point<std::chrono::system_clock> start, end;
+     start = std::chrono::system_clock::now();
+     Log->Write("INFO: \tCalling Constructor of UnivFFviaFM(Room-scale) in DirectionLocalFloorfield::Init(...)");
+
+     for (auto& roomPair : _building->GetAllRooms()) {
+         UnivFFviaFM* newfield =  new UnivFFviaFM(roomPair.second.get(), _building, stepsize, _wallAvoidDistance, _useDistancefield);
+         _locffviafm[roomPair.first] = newfield;
+          newfield->setUser(DISTANCE_AND_DIRECTIONS_USED);
+          newfield->setMode(LINESEGMENT);
+          if (useDistanceMap) {
+               newfield->setSpeedMode(FF_WALL_AVOID);
+          } else {
+               newfield->setSpeedMode(FF_HOMO_SPEED);
+          }
+         newfield->addAllTargetsParallel();
      }
      end = std::chrono::system_clock::now();
      std::chrono::duration<double> elapsed_seconds = end-start;
-     Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
-//     }
-     initDone = true;
-    //create all presumably used ff in parallel region: a) find targets and corresponding rooms, b) create ff s
-    std::vector<std::pair<int, int>> roomAndTargetVector;
-    roomAndTargetVector.clear();
-    //for now, just calc all ff for every transition in a room
-    int roomNr = 0;
-    int transUID = 0;
-    for (unsigned int i = 0; i < building->GetAllRooms().size(); ++i) {
-        auto roomIt = building->GetAllRooms().begin();
-        std::advance(roomIt, i);
-        roomNr = roomIt->second->GetID();
-        for (unsigned int j = 0; j < roomIt->second->GetAllTransitionsIDs().size(); ++j) {
-            transUID = roomIt->second->GetAllTransitionsIDs()[j];
-            if (building->GetTransitionByUID(transUID)->IsOpen()) {
-                std::pair<int, int> key = std::make_pair(roomNr, transUID);
-                roomAndTargetVector.emplace_back(key);
-            }
-        }
-    }
-#pragma omp parallel for
-    for(unsigned int i = 0; i < roomAndTargetVector.size(); ++i){
-        auto rAndtIT = roomAndTargetVector.begin();
-        std::advance(rAndtIT, i);
-        Point dummy;
-        locffviafm[(*rAndtIT).first]->getDirectionToUID((*rAndtIT).second, 0, dummy);
-    }
-     for(unsigned int i = 0; i < building->GetAllRooms().size(); ++i) {
-          std::vector<int> targets = {};
-          targets.clear();
-
-          auto roomIt = building->GetAllRooms().begin();
-          std::advance(roomIt, i);
-          roomNr = roomIt->second->GetID();
-
-          for (auto pair : roomAndTargetVector) {
-               if (pair.first == roomNr) {
-                    targets.emplace_back(pair.second);
-               }
-          }
-          std::string lfilename = "floorfield" + std::to_string(roomNr) + ".vtk";
-          locffviafm[roomNr]->writeFF(lfilename, targets);
-     }
-
-
+     Log->Write("INFO: \tTime to construct FF in DirectionLocalFloorfield: " + std::to_string(elapsed_seconds.count()));
+     _initDone = true;
 }
 
 DirectionLocalFloorfield::DirectionLocalFloorfield() {
-     //locffviafm = nullptr;
-     initDone = false;
+     _initDone = false;
 }
 
 DirectionLocalFloorfield::~DirectionLocalFloorfield() {
-     //if (locffviafm) {
-     for (auto pair : locffviafm) {
-          delete pair.second;
+     for (auto pair : _locffviafm) {
+          if (pair.second) {
+               delete pair.second;
+          }
      }
-     //}
 }
 
 
@@ -498,130 +435,95 @@ Point DirectionSubLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 #endif // DEBUG
 
      Point p;
-//     if (!locffviafm.count(ped->GetSubRoomUID())) {
-//          std::cerr << "Error: no mapentry for key :" << ped->GetSubRoomUID() << std::endl;
-//     } else {
-//          std::cerr << "Mapentry found: " << ped->GetSubRoomUID() << " with ptr: " << locffviafm.at(ped->GetSubRoomUID()) << std::endl;
-//     }
-#pragma omp critical
-     locffviafm.at(ped->GetSubRoomUID())->getDirectionToDestination(ped, p);
-
-     p = p.Normalized();     // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
+     UnivFFviaFM* floorfield = _locffviafm.at(ped->GetSubRoomUID());
+#if DEBUG
+     if (!floorfield->getGrid()->includesPoint(ped->GetPos())) {
+          Log->Write("ERROR: \tDirectionSubLocalFloorfield::GetTarget is accessing wrong floorfield. Pedestrian is not inside!");
+          p = Point(0.0,0.0);
+          return p;
+     }
+#endif
+     floorfield->getDirectionToUID(ped->GetExitIndex(), ped->GetPos(),p);
+     if (floorfield->getCostToDestination(ped->GetExitIndex(), ped->GetPos()) < 1.0){
+          p = p * floorfield->getCostToDestination(ped->GetExitIndex(), ped->GetPos());
+     }
      return (p + ped->GetPos());
 
 #if DEBUG
      }
 #endif // DEBUG
-
-     //this should not execute:
-     //std::cerr << "Failure in DirectionFloorfield::GetTarget!!" << std::endl;
-     //exit(EXIT_FAILURE);
 }
 
 Point DirectionSubLocalFloorfield::GetDir2Wall(Pedestrian* ped) const
 {
      Point p;
-     int key = ped->GetSubRoomID();
-     locffviafm.at(key)->getDir2WallAt(ped->GetPos(), p);
+     int key = ped->GetSubRoomUID();
+     _locffviafm.at(key)->getDir2WallAt(ped->GetPos(), p);
      return p;
 }
 
 double DirectionSubLocalFloorfield::GetDistance2Wall(Pedestrian* ped) const
 {
-     return locffviafm.at(ped->GetSubRoomID())->getDistance2WallAt(ped->GetPos());
+     return _locffviafm.at(ped->GetSubRoomUID())->getDistance2WallAt(ped->GetPos());
 }
 
 void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
-      double threshold, bool useDistancMap) {
-     hx = stepsize;
-     hy = stepsize;
-     building = buildingArg;
-     wallAvoidDistance = threshold;
-     useDistancefield = useDistancMap;
+                                       double threshold, bool useDistanceMap) {
+     _stepsize = stepsize;
+     _building = buildingArg;
+     _wallAvoidDistance = threshold;
+     _useDistancefield = useDistanceMap;
 
-     //implement mechanic, that can read-in an existing floorfield (from a previous run)
-//     string s = building->GetGeometryFilename();
-//     Log->Write("INFO: \tGeometryFilename <" + s + ">");
-//     s.erase(s.find_last_of(".", string::npos)); // delete ending
-//     if (s.find_last_of("/") != string::npos) {
-//          s.erase(0, s.find_last_of("/")+1);      // delete directories before filename (espacially "..")
-//     }
-//     string FF_filename = (building->GetProjectRootDir() + "FF_" + s +  "_" + std::to_string(threshold) + ".vtk").c_str();
-//     std::ifstream test(FF_filename);
-//     if (test.good()) {
-//          //Log->Write("INFO: \tRead Floorfield from file <" + FF_filename + ">");
-//          //ffviafm = new FloorfieldViaFM(FF_filename);
-//     } else {
-          std::chrono::time_point<std::chrono::system_clock> start, end;
-          start = std::chrono::system_clock::now();
-          Log->Write("INFO: \tCalling Construtor of SubLocFloorfieldViaFM");
-          std::vector<std::pair<int, int>> subAndTarget;
-          subAndTarget.clear();
-          std::vector<int> subUIDs;
-          subUIDs.clear();
-          for (auto& roomPair : building->GetAllRooms()) {
-#pragma omp parallel for
-               for (unsigned int i = 0; i < roomPair.second->GetAllSubRooms().size(); ++i) {
-                    auto subroomIt = roomPair.second->GetAllSubRooms().begin();
-                    std::advance(subroomIt, i);
-                    int subUID = subroomIt->second->GetUID();
-#pragma omp critical
-                    subUIDs.emplace_back(subUID);
-                    Log->Write("Creating SubLocFF at key: %d", subUID);
-                    locffviafm[subUID] = new SubLocalFloorfieldViaFM(subroomIt->second.get(), building, hx, hy,
-                            wallAvoidDistance, useDistancefield);
-                    auto targets = subroomIt->second->GetAllGoalIDs();
-                    for (auto targetUID : targets) {
-                         subAndTarget.emplace_back(std::make_pair(subUID, targetUID));
-                    }
+     std::chrono::time_point<std::chrono::system_clock> start, end;
+     start = std::chrono::system_clock::now();
+     Log->Write("INFO: \tCalling Construtor of UnivFFviaFM(Subroom-scale)");
+
+     for (auto& roomPair : _building->GetAllRooms()) {
+          for (auto& subPair : roomPair.second->GetAllSubRooms()) {
+               int subUID = subPair.second->GetUID();
+               UnivFFviaFM* floorfield = new UnivFFviaFM(subPair.second.get(), _building, stepsize, _wallAvoidDistance, _useDistancefield);
+               _locffviafm[subUID] = floorfield;
+               floorfield->setUser(DISTANCE_AND_DIRECTIONS_USED);
+               floorfield->setMode(LINESEGMENT);
+               if (useDistanceMap) {
+                    floorfield->setSpeedMode(FF_WALL_AVOID);
+               } else {
+                    floorfield->setSpeedMode(FF_HOMO_SPEED);
                }
-//               for (auto& subRoomPair : roomPair.second->GetAllSubRooms()) {
-//                    std::cerr << "Creating SubLocFF at key: " << subRoomPair.second->GetUID() <<std::endl;
-//                    locffviafm[subRoomPair.second->GetUID()] = new SubLocalFloorfieldViaFM(
-//                          &(*subRoomPair.second), building,
-//                          hx, hy, wallAvoidDistance, useDistancefield,
-//                          "FF_filename");
-//               }
+               floorfield->addAllTargetsParallel();
           }
-#pragma omp parallel for
-          for (unsigned int i = 0; i < subAndTarget.size(); ++i) {
-               auto pairIT = subAndTarget.begin();
-               std::advance(pairIT, i);
-               Point dummy;
-               locffviafm[pairIT->first]->getDirectionToUID(pairIT->second, 0, dummy);
-          }
-          end = std::chrono::system_clock::now();
-          std::chrono::duration<double> elapsed_seconds = end-start;
-          Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
-
-//     }
-     initDone = true;
-
-     //write floorfields to file, one file per subroom
-     for(unsigned int i = 0; i < subUIDs.size(); ++i) {
-          std::vector<int> targets = {};
-          targets.clear();
-          int subroomUID = subUIDs[i];
-
-          for (auto pair : subAndTarget) {
-               if (pair.first == subroomUID) {
-                    targets.emplace_back(pair.second);
-               }
-          }
-          std::string filename1 = "floorfield" + std::to_string(subroomUID) + ".vtk";
-          locffviafm[subroomUID]->writeFF(filename1, targets);
      }
+
+     end = std::chrono::system_clock::now();
+     std::chrono::duration<double> elapsed_seconds = end-start;
+     Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
+
+     _initDone = true;
+
+     //write floorfields to file, one file per subroom //ar.graf: [SWITCH writevtk ON/OFF]
+//     for(unsigned int i = 0; i < subUIDs.size(); ++i) {
+//          std::vector<int> targets = {};
+//          targets.clear();
+//          int subroomUID = subUIDs[i];
+//          //if (subroomUID != 26) continue;
+//
+//          for (auto pair : subAndTarget) {
+//               if (pair.first == subroomUID) {
+//                    targets.emplace_back(pair.second);
+//               }
+//          }
+//          std::string filename1 = "floorfield" + std::to_string(subroomUID) + ".vtk";
+//          if (targets.size() > 0)
+//               _locffviafm[subroomUID]->writeFF(filename1, targets);
+//     }
 }
 
 DirectionSubLocalFloorfield::DirectionSubLocalFloorfield() {
-     //locffviafm = nullptr;
-     initDone = false;
+     _initDone = false;
 }
 
 DirectionSubLocalFloorfield::~DirectionSubLocalFloorfield() {
-     //if (locffviafm) {
-     for (auto pair : locffviafm) {
+     for (auto pair : _locffviafm) {
           delete pair.second;
      }
-     //}
 }

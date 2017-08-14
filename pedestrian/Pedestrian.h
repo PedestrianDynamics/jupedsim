@@ -91,7 +91,7 @@ private:
      int _oldSubRoomID;
      Point _lastE0;
 
-     std::unique_ptr<NavLine> _navLine; // current exit line
+     NavLine* _navLine; // current exit line
      std::map<int, int>_mentalMap; // map the actual room to a destination
      std::vector<int> _destHistory;
      std::vector<int> _trip;

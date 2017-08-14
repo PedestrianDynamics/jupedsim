@@ -33,7 +33,6 @@
 #include <string>
 
 class Room;
-class Subroom;
 
 class Transition : public Crossing {
 private:

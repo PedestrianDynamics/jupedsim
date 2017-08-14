@@ -95,7 +95,7 @@ Router* RoutingEngine::GetRouter(RoutingStrategy strategy) const
           if(router->GetStrategy()==strategy)
                return router;
      }
-     Log->Write("ERROR: \t Could not Find any router with Strategy:  [%d].",strategy);
+     //Log->Write("ERROR: \t Could not Find any router with Strategy:  [%d].",strategy);
      return /*(Router*)*/ nullptr;
 }
 
@@ -124,3 +124,4 @@ bool RoutingEngine::Init(Building* building)
      }
      return status;
 }
+

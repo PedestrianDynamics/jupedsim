@@ -6,15 +6,15 @@
 
   <!-- seed used for initialising random generator -->
   <seed>12542</seed>
-  <max_sim_time >10</max_sim_time>
+  <max_sim_time >40</max_sim_time>
   <!-- geometry file -->
   <geometry>1.2_bottleneck.xml</geometry>
   <!-- traectories file and format -->
   <trajectories format="xml-plain" fps="8">
-    <file location="trajectorien_bottleneck.xml" />
+    <file location="trajectories.xml" />
   </trajectories>
   <!-- where to store the logs -->
-  <logfile>log</logfile>
+  <!-- <logfile>log</logfile> -->
   <num_threads>10</num_threads>
   <!-- traffic information: e.g closed doors or smoked rooms -->
   <traffic_constraints>
@@ -47,12 +47,12 @@
   <!--persons information and distribution -->
   <agents operational_model_id="3">
     <agents_distribution>
-      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="2" number="0" goal_id="0" router_id="1" />
+      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="2" number="1" goal_id="0" router_id="1" positions_dir="/Users/chraibi/test_directories"/>
     </agents_distribution>
 
     <!-- frequency in persons/minute -->
     <agents_sources>
-      <source id="1" frequency="3" agents_max="30" group_id="1" caption="source 1" />
+      <source_ id="1" frequency="10" agents_max="50" group_id="1" caption="source 1" />
     </agents_sources>
     <!--                 <agents_sources/> -->
   </agents>
@@ -105,7 +105,7 @@
         <force_wall a="7" D="0.14"/>
       </model_parameters>
       <agent_parameters agent_parameter_id="1">
-        <v0 mu="0" sigma="0.001" />
+        <v0 mu="1.2" sigma="0.001" />
         <bmax mu="0.15" sigma="0.00001" /> <!-- this is l/2, assuming peds are circles with constant radius-->
         <bmin mu="0.15" sigma="0.001" />
         <amin mu="0.15" sigma="0.00001" />

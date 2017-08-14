@@ -16,7 +16,7 @@ project(JPScore)
 set(CMAKE_COLOR_MAKEFILE ON)
 set(JPSCORE_MAJOR_VERSION 0)
 set(JPSCORE_MINOR_VERSION 8)
-set(JPSCORE_PATCH_VERSION 0)
+set(JPSCORE_PATCH_VERSION 1)
 set(JPSCORE_VERSION
         ${JPSCORE_MAJOR_VERSION}.${JPSCORE_MINOR_VERSION}.${JPSCORE_PATCH_VERSION})
 message(STATUS "JPSCORE_VERSION: " ${JPSCORE_VERSION})
@@ -74,7 +74,7 @@ if (PROCESSOR_COUNT)
 
      message( STATUS "PROCESSOR_COUNT: " ${PROCESSOR_COUNT})
     #  set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
-    message(STATUS "PROCESSOR_COUNT: 0")
+    message(STATUS "PROCESSOR_COUNT: 1")
 
     set(CTEST_BUILD_FLAGS "-j0")
 endif (PROCESSOR_COUNT)
@@ -164,7 +164,6 @@ endif (APPLE)
 
 
 if (Boost_NO_SYSTEM_PATHS)
-  #set(BOOST_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../3p/boost")
   set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
   set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/stage/lib")
   set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${BOOST_ROOT})
@@ -196,20 +195,20 @@ endif (OPENMP_FOUND)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 #boost
-find_package(Boost REQUIRED )
+find_package(Boost COMPONENTS timer chrono system filesystem unit_test_framework REQUIRED)
 
 
 # test all cpp-files in Utest
 if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
-    find_package(Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
+    find_package(Boost COMPONENTS timer chrono system filesystem unit_test_framework REQUIRED)
     IF (CMAKE_COMPILER_IS_GNUCXX)
       set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
       IF (USE_DUAL_ABI)
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_USE_CXX11_ABI=0")
       ENDIF(USE_DUAL_ABI)
         set(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
-        set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules/")
+        set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake_modules/")
         INCLUDE(CodeCoverage)
         set(ENABLE_COVERAGE ON)
         SETUP_TARGET_FOR_COVERAGE(
@@ -233,7 +232,7 @@ endif (BUILD_TESTING)
 set(source_files
         Simulation.cpp
         general/ArgumentParser.cpp
-
+        IO/progress_bar.cpp
         tinyxml/tinystr.cpp
         tinyxml/tinyxml.cpp
         tinyxml/tinyxmlerror.cpp
@@ -290,6 +289,8 @@ set(source_files
         routing/ff_router/ffRouter.cpp
         routing/ff_router/LocalFloorfieldViaFM.cpp
         routing/ff_router/FloorfieldViaFM.cpp
+        #routing/ff_router/FFKit.cpp
+        routing/ff_router/UnivFFviaFM.cpp
 
         #global_shortest
         routing/global_shortest/AccessPoint.cpp
@@ -354,6 +355,8 @@ set(header_files
         routing/ff_router/Trial.h
         routing/ff_router/LocalFloorfieldViaFM.h
         routing/ff_router/FloorfieldViaFM.h
+        #routing/ff_router/FFKit.h
+        routing/ff_router/UnivFFviaFM.h
 
         #general
         routing/DirectionStrategy.h
@@ -475,12 +478,14 @@ add_library(core STATIC ${source_files})
 add_executable(jpscore main.cpp)
 
 if (Boost_FOUND)
-    message(STATUS "BOOST FOUND: " ${Boost_LIBRARIES})
-    message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
-    message(STATUS "Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIR})
-    message(STATUS "Boost_LIB_VERSION: " ${Boost_LIB_VERSION})
-    message(STATUS "Boost_libraries: " ${Boost_LIBRARIES})
+    message(STATUS "BOOST FOUND: " ${Boost_LIB_VERSION})
+#    message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
+#    message(STATUS "Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIR})
+#    message(STATUS "Boost_LIB_VERSION: " ${Boost_LIB_VERSION})
+#    message(STATUS "Boost_libraries: " ${Boost_LIBRARIES})
     link_directories(${Boost_LIBRARY_DIRS})
+
+    # suppress warnings in boost libraries with attribute SYSTEM
     include_directories(SYSTEM ${Boost_INCLUDE_DIR})
     # todo: is this necessary?
     target_link_libraries(jpscore ${Boost_LIBRARIES})
@@ -578,16 +583,25 @@ if (NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
     endif ()
 endif ()
 
-message(STATUS "MSVC: " ${MSVC})
-message(STATUS "MSVC_IDE: " ${MSVC_IDE})
-message(STATUS "MSVC60: " ${MSVC60})
-message(STATUS "MSVC71: " ${MSVC71})
-message(STATUS "MSVC80: " ${MSVC80})
-message(STATUS "MSVC90: " ${MSVC90})
-message(STATUS "MSVC10: " ${MSVC10})
-message(STATUS "MSVC12: " ${MSVC12})
-message(STATUS "MSVC13: " ${MSVC13})
-
+if (MSVC)
+  message(STATUS "MSVC: " ${MSVC})
+elseif (MSVC_IDE)
+  message(STATUS "MSVC_IDE: " ${MSVC_IDE})
+elseif(MSVC60)  
+  message(STATUS "MSVC60: " ${MSVC60})
+elseif(MSVC71)
+  message(STATUS "MSVC71: " ${MSVC71})
+elseif(MSVC80)
+  message(STATUS "MSVC80: " ${MSVC80})
+elseif(MSVC90)
+  message(STATUS "MSVC90: " ${MSVC90})
+elseif(MSVC10)
+  message(STATUS "MSVC10: " ${MSVC10})
+elseif(MSVC12)
+  message(STATUS "MSVC12: " ${MSVC12})
+elseif(MSVC13)
+  message(STATUS "MSVC13: " ${MSVC13})
+endif()
 #---------------------
 message(STATUS "C++ Compiler: " ${CMAKE_CXX_COMPILER})
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -644,6 +658,7 @@ if (BUILD_TESTING)
     #  )
     find_package(PythonInterp)
     if (PYTHONINTERP_FOUND)
+        message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
         foreach (test_src ${test_py_files})
             MATH(EXPR counter "${counter}+1")
             GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
@@ -651,7 +666,6 @@ if (BUILD_TESTING)
             # message (STATUS "Add python test: " ${test} " | test_src: " ${PYTHON_EXECUTABLE} " " ${test_src})
             add_test(NAME ${test} COMMAND ${PYTHON_EXECUTABLE} ${test_src})
         endforeach (test_src ${test_py_files})
-        message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
         # set (test_parameters "${CMAKE_SOURCE_DIR}")
         # add_test(NAME flow  COMMAND "${CMAKE_TEST_DIR}/testflow.py" "${test_parameters}")
     endif (PYTHONINTERP_FOUND)
@@ -659,3 +673,28 @@ endif (BUILD_TESTING)
 
 
 install(TARGETS jpscore DESTINATION bin)
+
+# ------------- CPACK ------------------------------
+IF(CMAKE_SYSTEM_NAME STREQUAL Linux)
+  SET(CPACK_GENERATOR "DEB")
+
+  SET(CPACK_PACKAGE_DESCRIPTION "simulation core of JuPedSim")
+  SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The simulation core of JuPedSim, a framework for simulation and analysis of pedestrian dynamics")
+  #SET(CPACK_PACKAGE_VENDOR "nowardev")
+  SET(CPACK_PACKAGE_CONTACT "m.chraibi@fz-juelich.de")
+  SET(CPACK_PACKAGE_VERSION_MAJOR "${JPSCORE_MAJOR_VERSION}")
+  SET(CPACK_PACKAGE_VERSION_MINOR "${JPSCORE_MINOR_VERSION}")
+  SET(CPACK_PACKAGE_VERSION_PATCH "${JPSCORE_PATCH_VERSION}")
+  SET(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${JPSCORE_VERSION}")
+  SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${JPSCORE_VERSION}")
+  #SET(CPACK_DEBIAN_PACKAGE_DEPENDS " Boost (>= 1.59) ")
+  SET(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+  SET( CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://jupedsim.org")
+  SET(CPACK_DEBIAN_PACKAGE_SUGGESTS, "jpsvis, jpsreport, jpseditor")
+  SET(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+  SET(CPACK_DEBIAN_PACKAGE_SECTION "science")
+  SET(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+
+
+  INCLUDE(CPack)
+ENDIF(CMAKE_SYSTEM_NAME STREQUAL Linux)

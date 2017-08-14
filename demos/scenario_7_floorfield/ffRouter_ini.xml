@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.8"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
+<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 
   <!-- seed used for initialising random generator -->
   <seed>6943</seed>
@@ -10,12 +8,12 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
   <!-- geometry file -->
   <geometry>Kobes_geo.xml</geometry>
   <!-- trajectories file and format -->
-  <trajectories format="xml-plain" fps="8">
+  <trajectories format="xml-plain" fps="16">
     <file location="Kobes_traj.xml" />
-    <!--<socket hostname="127.0.0.1" port="8989"/> -->
+    <!-- <socket hostname="127.0.0.1" port="8989"/> -->
   </trajectories>
   <!-- where to store the logs -->
-  <!--<logfile>log.txt</logfile> -->
+  <logfile>log.txt</logfile>
 
 
   <!-- traffic information: e.g closed doors -->
@@ -48,17 +46,17 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
   <!--persons information and distribution -->
   <agents operational_model_id="3">
     <agents_distribution>
-      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="2" number="1" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
-      <group group_id="2" agent_parameter_id="1" room_id="0" subroom_id="3" number="1" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
-      <group group_id="3" agent_parameter_id="1" room_id="0" subroom_id="4" number="1" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
-      <group group_id="4" agent_parameter_id="1" room_id="0" subroom_id="5" number="1" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
-      <group group_id="5" agent_parameter_id="1" room_id="0" subroom_id="6" number="1" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
-      <group group_id="6" agent_parameter_id="1" room_id="0" subroom_id="7" number="1" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
-      <group group_id="7" agent_parameter_id="1" room_id="0" subroom_id="8" number="1" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
-      <group group_id="8" agent_parameter_id="1" room_id="0" subroom_id="9" number="1" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
-      <group group_id="9" agent_parameter_id="1" room_id="0" subroom_id="10" number="1" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
-      <group group_id="10" agent_parameter_id="1" room_id="0" subroom_id="11" number="1" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
-      <group group_id="11" agent_parameter_id="1" room_id="0" subroom_id="12" number="1" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
+      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="2" number="5" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
+      <group group_id="2" agent_parameter_id="1" room_id="0" subroom_id="3" number="5" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
+      <group group_id="3" agent_parameter_id="1" room_id="0" subroom_id="4" number="5" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
+      <group group_id="4" agent_parameter_id="1" room_id="0" subroom_id="5" number="5" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
+      <group group_id="5" agent_parameter_id="1" room_id="0" subroom_id="6" number="5" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
+      <group group_id="6" agent_parameter_id="1" room_id="0" subroom_id="7" number="5" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
+      <group group_id="7" agent_parameter_id="1" room_id="0" subroom_id="8" number="5" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
+      <group group_id="8" agent_parameter_id="1" room_id="0" subroom_id="9" number="5" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
+      <group group_id="9" agent_parameter_id="1" room_id="0" subroom_id="10" number="5" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
+      <group group_id="10" agent_parameter_id="1" room_id="0" subroom_id="11" number="5" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
+      <group group_id="11" agent_parameter_id="1" room_id="0" subroom_id="12" number="5" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
     </agents_distribution>
   </agents>
 

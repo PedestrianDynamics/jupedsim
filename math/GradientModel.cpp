@@ -96,36 +96,41 @@ GradientModel::~GradientModel()
 bool GradientModel::Init (Building* building)
 {
 
-    if(dynamic_cast<DirectionFloorfield*>(_direction.get())){
+    if(auto dirff = dynamic_cast<DirectionFloorfield*>(_direction.get())){
          Log->Write("INFO:\t Init DirectionFloorfield starting ...");
-         dynamic_cast<DirectionFloorfield*>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+         dirff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
          Log->Write("INFO:\t Init DirectionFloorfield done");
     }
 
-     if(dynamic_cast<DirectionLocalFloorfield*>(_direction.get())){
+     if(auto dirlocff = dynamic_cast<DirectionLocalFloorfield*>(_direction.get())){
           Log->Write("INFO:\t Init Direction LOCAL Floorfield starting ...");
-          dynamic_cast<DirectionLocalFloorfield*>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          dirlocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
           Log->Write("INFO:\t Init Direction LOCAL Floorfield done");
      }
 
-     if(dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())){
+     if(auto dirsublocff = dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())){
           Log->Write("INFO:\t Init Direction SubLOCAL Floorfield starting ...");
-          dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          dirsublocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
           Log->Write("INFO:\t Init Direction SubLOCAL Floorfield done");
      }
 
 
      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
-    for(unsigned int p=0;p<allPeds.size();p++)
-    {
+     std::vector<Pedestrian*> pedsToRemove;
+     pedsToRemove.clear();
+     bool error_occurred = false;
+#pragma omp parallel for
+    for(unsigned int p=0;p<allPeds.size();p++) {
          Pedestrian* ped = allPeds[p];
          double cosPhi, sinPhi;
          //a destination could not be found for that pedestrian
          if (ped->FindRoute() == -1) {
               Log->Write(
-                   "ERROR:\tGradientModel::Init() cannot initialise route. ped %d is deleted.\n",ped->GetID());
-             building->DeletePedestrian(ped);
+                   "ERROR:\tGradientModel::Init() cannot initialise route. ped %d is scheduled for deletion.\n",ped->GetID());
+             //building->DeletePedestrian(ped);
+#pragma omp critical(GradientModel_Init_pedsToRemove)
+              pedsToRemove.emplace_back(ped);
               continue;
          }
 
@@ -142,8 +147,12 @@ bool GradientModel::Init (Building* building)
               Log->Write(
                    "ERROR: \allPeds::Init() cannot initialise phi! "
                    "dist to target is 0\n");
-              return false;
+#pragma omp critical(GradientModel_Init_error_occurred)
+              error_occurred = true;
+              //return false;
          }
+         // This skips the rest of the initialization if any pedestrian could not be initialized
+         if (error_occurred) continue;
 
          ped->InitV0(target);
 
@@ -152,7 +161,11 @@ bool GradientModel::Init (Building* building)
          E.SetSinPhi(sinPhi);
          ped->SetEllipse(E);
     }
-    return true;
+
+     for (auto ped : pedsToRemove) {
+          building->DeletePedestrian(ped);
+     }
+     return !error_occurred;
 }
 
 void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic)
@@ -208,7 +221,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
                 double normVi = ped->GetV().ScalarProduct(ped->GetV()); //squared
                 double HighVel = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta); //(v0+delta)^2
-                if (normVi > HighVel && ped->GetV0Norm() > 0) {            //@todo: ar.graf disabled check
+                if (normVi > HighVel && true) {
                      fprintf(stderr, "GradientModel::calculateForce_LC() WARNING: actual velocity (%f) of iped %d "
                              "is bigger than desired velocity (%f) at time: %fs (periodic=%d)\n",
                              sqrt(normVi), ped->GetID(), ped->GetV0Norm(), current, periodic);
@@ -222,12 +235,8 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
                 Point repPed = Point(0,0);
                 vector<Pedestrian*> neighbours;
-                int size;
-                #pragma omp critical
-                {
-                     building->GetGrid()->GetNeighbourhood(ped,neighbours);
-                     size = (int) neighbours.size();
-                }
+                building->GetGrid()->GetNeighbourhood(ped,neighbours);
+                int size = (int) neighbours.size();
                 for (int i = 0; i < size; i++) {
                      Pedestrian* ped1 = neighbours[i];
                      if ((minAddress > neighbours[i]) || (maxAddress < neighbours[i])) {
@@ -294,15 +303,15 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 //redirect near wall mechanics:
                 Point dir2Wall = Point{0., 0.};
                 double distance2Wall = -1.;
-                if (dynamic_cast<DirectionFloorfield*>(_direction.get())) {
-                     dir2Wall = dynamic_cast<DirectionFloorfield*>(_direction.get())->GetDir2Wall(ped);
-                     distance2Wall = dynamic_cast<DirectionFloorfield*>(_direction.get())->GetDistance2Wall(ped);
-                } else if (dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) {
-                     dir2Wall = dynamic_cast<DirectionLocalFloorfield*>(_direction.get())->GetDir2Wall(ped);
-                     distance2Wall = dynamic_cast<DirectionLocalFloorfield*>(_direction.get())->GetDistance2Wall(ped);
-                } else if (dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())) {
-                     dir2Wall = dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())->GetDir2Wall(ped);
-                     distance2Wall = dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())->GetDistance2Wall(ped);
+                if (auto dirff = dynamic_cast<DirectionFloorfield*>(_direction.get())) {
+                     dir2Wall = dirff->GetDir2Wall(ped);
+                     distance2Wall = dirff->GetDistance2Wall(ped);
+                } else if (auto dirlocff = dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) {
+                     dir2Wall = dirlocff->GetDir2Wall(ped);
+                     distance2Wall = dirlocff->GetDistance2Wall(ped);
+                } else if (auto dirsublocff = dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())) {
+                     dir2Wall = dirsublocff->GetDir2Wall(ped);
+                     distance2Wall = dirsublocff->GetDistance2Wall(ped);
                 } else {
                      Log->Write("ERROR: \t GradNav Model (4) requires any floor field (exit-strat {6,8,9}). None found!");
                 }

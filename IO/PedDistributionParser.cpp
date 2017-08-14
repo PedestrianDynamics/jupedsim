@@ -73,7 +73,8 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
         double premovement_sigma = xmltof(e->Attribute("pre_movement_sigma"), 0);
         //double risk_tolerance_mean = xmltof(e->Attribute("risk_tolerance_mean"), 0);
         //double risk_tolerance_sigma = xmltof(e->Attribute("risk_tolerance_sigma"), 0);
-
+        string positions_dir = xmltoa(e->Attribute("positions_dir"), "");
+        string unit_traj = xmltoa(e->Attribute("unit"), "m");
         double x_min = xmltof(e->Attribute("x_min"), -FLT_MAX);
         double x_max = xmltof(e->Attribute("x_max"), FLT_MAX);
         double y_min = xmltof(e->Attribute("y_min"), -FLT_MAX);
@@ -102,7 +103,13 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
         dis->SetHeight(height);
         dis->SetPatience(patience);
         dis->InitPremovementTime(premovement_mean, premovement_sigma);
+        dis->SetPositionsDir(positions_dir);
+        dis->SetUnitTraj(unit_traj);
 
+        if (dis->GetPositionsDir().length())
+        {
+              Log->Write("INFO:\tPositions_dir = <%s>\n", dis->GetPositionsDir().c_str());
+        }
         if (e->Attribute("risk_tolerance_mean") && e->Attribute("risk_tolerance_sigma")) {
             std::string distribution_type = "normal";
             double risk_tolerance_mean = xmltof(e->Attribute("risk_tolerance_mean"), NAN);
@@ -144,10 +151,10 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
         }
         dis->SetGroupParameters(_configuration->GetAgentsParameters().at(agent_para_id).get());
 
-        if (e->Attribute("start_x") && e->Attribute("start_y")) {
-            double startX = xmltof(e->Attribute("start_x"), NAN);
-            double startY = xmltof(e->Attribute("start_y"), NAN);
-            Log->Write("INFO:\tstart_x = %f, start_y = %f\n", startX, startY);
+        if (e->Attribute("startX") && e->Attribute("startY")) {
+            double startX = xmltof(e->Attribute("startX"), NAN);
+            double startY = xmltof(e->Attribute("startY"), NAN);
+            Log->Write("INFO:\tstartX = %f, startY = %f\n", startX, startY);
             dis->SetStartPosition(startX, startY, 0.0);
         }
     }

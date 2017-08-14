@@ -30,9 +30,7 @@ tolerance = 0.05
 ms = 20 # size of labels
 mt = 18 # size of ticks
 
-def eval_results(results):
-    fd_exp = results[0]
-    fd_sim = results[1]
+def plot_results(results):
     dexp = results[0]
     dsim = results[1]
     fig = plt.figure()
@@ -51,12 +49,23 @@ def eval_results(results):
 def run_validation_3(inifile, trajfile):
     return 0
 
+def eval_results(results):
+    dexp = results[0]
+    dsim = results[1]
+    res = CDFDistance(dsim[:, 1], dsim[:, 2], dexp[:, 0], dexp[:, 1])
+    return res
+
 if __name__ == "__main__":
     test = JPSRunTestDriver(103, argv0=argv[0],
                             testdir=sys.path[0],
                             utestdir=utestdir)
 
     results = test.run_test(testfunction=run_validation_3, fd=1)
-    eval_results(results)
-    logging.info("%s exits with SUCCESS" % (argv[0]))
-    exit(SUCCESS)
+    res = eval_results(results) 
+    if res < critical_value:
+        plot_results(results)
+        logging.info("%s exits with SUCCESS. res= %f" % (argv[0], res))
+        exit(SUCCESS)
+    else:
+        logging.info("%s exits with FAILURE. res= %f" % (argv[0], res))
+        exit(FAILURE)

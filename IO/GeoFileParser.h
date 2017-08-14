@@ -33,7 +33,7 @@
 class GeoFileParser : public GeometryReader {
 
 public:
-     GeoFileParser(const Configuration* configuration);
+     GeoFileParser(Configuration* configuration);
      ~GeoFileParser();
      virtual void LoadBuilding(Building* building) override;
 

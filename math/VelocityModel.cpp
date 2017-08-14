@@ -72,33 +72,30 @@ VelocityModel::~VelocityModel()
 bool VelocityModel::Init (Building* building)
 {
 
-    if(dynamic_cast<DirectionFloorfield*>(_direction.get())){
+    if(auto dirff = dynamic_cast<DirectionFloorfield*>(_direction.get())){
         Log->Write("INFO:\t Init DirectionFloorfield starting ...");
-        //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
-            double _deltaH = 0.0625;
-            double _wallAvoidDistance = 0.4;
-            bool _useWallAvoidance = true;
-        dynamic_cast<DirectionFloorfield*>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+        double _deltaH = building->GetConfig()->get_deltaH();
+        double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
+        bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
+        dirff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
         Log->Write("INFO:\t Init DirectionFloorfield done");
     }
 
-     if(dynamic_cast<DirectionLocalFloorfield*>(_direction.get())){
+     if(auto dirlocff = dynamic_cast<DirectionLocalFloorfield*>(_direction.get())){
           Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
-          //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
-          double _deltaH = 0.0625;
-          double _wallAvoidDistance = 0.4;
-          bool _useWallAvoidance = true;
-          dynamic_cast<DirectionLocalFloorfield*>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          double _deltaH = building->GetConfig()->get_deltaH();
+          double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
+          bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
+          dirlocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
           Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
      }
 
-     if(dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())){
+     if(auto dirsublocff = dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())){
           Log->Write("INFO:\t Init DirectionSubLOCALFloorfield starting ...");
-          //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
-          double _deltaH = 0.0625;
-          double _wallAvoidDistance = 0.4;
-          bool _useWallAvoidance = true;
-          dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          double _deltaH = building->GetConfig()->get_deltaH();
+          double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
+          bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
+          dirsublocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
           Log->Write("INFO:\t Init DirectionSubLOCALFloorfield done");
      }
 
@@ -152,6 +149,10 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
       pedsToRemove.reserve(500);
       unsigned long nSize;
       nSize = allPeds.size();
+     //debug
+     //if (allPeds[0]->GetID() == 21 && allPeds[0]->GetPos()._y < -1.129) {
+     //     Log->Write("now");
+     //}
 
       int nThreads = omp_get_max_threads();
 
@@ -232,6 +233,18 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 // calculate min spacing
                 std::sort(spacings.begin(), spacings.end(), sort_pred());                
                 double spacing = spacings[0].first;
+                //============================================================
+                // TODO: Hack for Head on situations: ped1 x ------> | <------- x ped2
+//              printf("\ndirection %f, %f, norm = %f\n", direction._x, direction._y, direction.NormSquare());
+                if(0 && direction.NormSquare() < 0.5)
+                {
+                      double pi_half = 1.57079663;
+                      double alpha =  pi_half*exp(-spacing);
+                      direction = e0(ped, room).Rotate(cos(alpha), sin(alpha));
+                      printf("\nRotate %f, %f, norm = %f alpha = %f, spacing = %f\n", direction._x, direction._y, direction.NormSquare(), alpha, spacing);
+                      getc(stdin);
+                }
+                //============================================================                
                 //double winkel = spacings[0].second;
                 //Point tmp;
                 Point speed = direction.Normalized() *OptimalSpeed(ped, spacing);
@@ -239,10 +252,12 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 spacings.clear(); //clear for ped p
                 
                 // stuck peds get removed. Warning is thrown. low speed due to jam is omitted.
-                if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime()&& ped->GetMeanVelOverRecTime() < 0.01 && size == 0 ) // size length of peds neighbour vector
+                if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime() &&
+                          std::max(ped->GetMeanVelOverRecTime(), ped->GetV().Norm()) < 0.01 &&
+                          size == 0 ) // size length of peds neighbour vector
                 {
                       Log->Write("WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time %f s (current=%f\n", ped->GetID(), ped->GetMeanVelOverRecTime(), ped->GetRoomID(), ped->GetSubRoomID(), ped->GetGlobalTime(), current);
-                      #pragma omp critical
+                      #pragma omp critical(VelocityModel_ComputeNextTimeStep_pedsToRemove)
                       pedsToRemove.push_back(ped);
                 }
 
@@ -288,7 +303,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
 Point VelocityModel::e0(Pedestrian* ped, Room* room) const
 {
-      const Point target = _direction->GetTarget(room, ped);
+      const Point target = _direction->GetTarget(room, ped); // target is where the ped wants to be after the next timestep
       Point desired_direction;
       const Point pos = ped->GetPos();
       double dist = ped->GetExitLine()->DistTo(pos);
@@ -299,7 +314,7 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
       if ( (dynamic_cast<DirectionFloorfield*>(_direction.get())) ||
            (dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) ||
            (dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get()))  ) {
-          if (dist > 20*J_EPS_GOAL) {
+          if (dist > 50*J_EPS_GOAL) {
                desired_direction = target - pos; //ped->GetV0(target);
           } else {
                desired_direction = lastE0;
@@ -439,15 +454,15 @@ Point VelocityModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
           {
                 f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)), centroid, inside);
           }
-//           int uid1= goal->GetUniqueID();
-//           int uid2=ped->GetExitIndex();
-//           // ignore my transition consider closed doors
-//           //closed doors are considered as wall
-//
-//           if((uid1 != uid2) || (goal->IsOpen()==false ))
-//           {
-//                 f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)), centroid, inside);
-//           }
+          int uid1= goal->GetUniqueID();
+          int uid2=ped->GetExitIndex();
+          // ignore my transition consider closed doors
+          //closed doors are considered as wall
+
+          if((uid1 != uid2) || (goal->IsOpen()==false ))
+          {
+                f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)), centroid, inside);
+          }
      }
 
      return f;
@@ -475,7 +490,7 @@ Point VelocityModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
            Log->Write("WARNING:\t Velocity: forceRepWall() ped %d is too near to the wall (dist=%f)", ped->GetID(), Distance);
           Point new_dist = centroid - ped->GetPos();
           new_dist = new_dist/new_dist.Norm();
-          printf("new distance = (%f, %f) inside=%d\n", new_dist._x, new_dist._y, inside);
+          //printf("new distance = (%f, %f) inside=%d\n", new_dist._x, new_dist._y, inside);
           e_iw = (inside ? new_dist:new_dist*-1);
      }
      //-------------------------

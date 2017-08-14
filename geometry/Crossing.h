@@ -48,10 +48,10 @@ private:
 
 public:
      // last ped that passed was in room {1,2} that many ticks
-     int _lastTickTime1 = 0;
-     int _lastTickTime2 = 0;
-     int _refresh1 = 0;
-     int _refresh2 = 0;
+//     int _lastTickTime1 = 0;
+//     int _lastTickTime2 = 0;
+//     int _refresh1 = 0;
+//     int _refresh2 = 0;
 
 
      /**
@@ -132,6 +132,13 @@ public:
       * @return a nicely formatted string representation of the object
       */
      virtual std::string GetDescription() const;
+
+     /**
+      * @return the number of subrooms this has in common with other (0, 1, 2)
+      * @param other the other crossing
+      * @param subroom returns one of the common subrooms
+      */
+     virtual int CommonSubroomWith(Crossing* other, SubRoom* &subroom);
 };
 
 #endif  /* _CROSSING_H */

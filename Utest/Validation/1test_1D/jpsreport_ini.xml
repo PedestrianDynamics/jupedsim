@@ -26,7 +26,7 @@
 	</area_L> -->
   </measurement_areas>
 
-  <velocity>
+  <velocity set_movement_direction="None" ignore_backward_movement="false">
     <use_x_component>true</use_x_component>
     <use_y_component>true</use_y_component>
     <!-- half of the time interval that used to calculate instantaneous velocity of ped i [fr] here v_i = (X(t+deltaF) - X(t+deltaF))/(2*deltaF). X is location. -->

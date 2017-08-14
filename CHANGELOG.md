@@ -1,7 +1,32 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## v0.8.2 [unreleased]
+Repository moved to [new server](https://gitlab.version.fz-juelich.de/jupedsim/jpscore)
+### Added
+- New option for `groups`. It is now possible to load the first positions of pedestrians from a file. 
+  Needed for better comparison with experiments. Use attribute: `positions_dir="/path/to/directory/"` `unit="cm"`.
+  The unit of the trajectories can be specified. Default is meter.
+- New router: prototype of the floorfield based, quickest router `ff_quickest`. This router will re-asses all routes
+  including agents into its routing-calculations. Jams will be avoided, if a clear route is available.
+
+### Changed
+- New Progressbar (ec7c9b0c)
+- UnivFFviaFM class replaces the old (Local)FloorfieldViaFM classes
+- FFRouter (`ff_global_shortest`, `ff_quickest`) will delay calculations to a point between timesteps to use all available cores.
+- removed writing of VTK-files (this feature will be controllable via inifiles in the future)
+- DirectionStrategy using floorfields (exit strat `8`,`9`) will respect shoulderwidth for doors.
+- Boost::Geometry is used for geometric checks (isWithin)
+- Direction Strategy will be matched, if FFRouter is used (auto-set to exit strat `8`)
+
+### Fixed 
+- isClockwise() fixed
+- isInSubroom() fixed
+- agents getting stuck and oscillating fixed (#247)
+- router problems with `ff_global_shortest` fixed (#245)
+- parameters for direction strategy `8`,`9` will be used (`wall_avoid_distance`,`delta_h`, `use_wall_avoidance`)
+
+## v0.8.1 [2016-10-11]
 ### Added
 - Tag Sources: new attribute to choose between "greedy" approach and random approach: `gready="true"` (default: `false`)
 - Floor field router. See [usage](http://jupedsim.github.io/jpscore/models/routing/#floorfield-router). 
@@ -9,8 +34,8 @@ All notable changes to this project will be documented in this file.
 - Added new operational model `<model operational_model_id="5" description="Krausz">`. See [Wiki](https://cst.version.fz-juelich.de/jupedsim/jpscore/wikis/docs/models/operativ#generalized-centrifugal-force-model-with-lateral-swaying) 
 - Added new `cmake` compilation flags: 
   - `-D DUSE_DUAL_ABI=ON` (default OFF): See [note in GCC 5.1 release](https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html). 
-  - `-D Boost_NO_SYSTEM_PATHS=true` (default false): In case a local version of boost have to be used.
-     Pass this option together with `-D BOOST_ROOT=PARH_where_to_find_boost`.
+  - `-D Boost_NO_SYSTEM_PATHS=true` (default false): In case a local version of boost has to be used.
+     Pass this option together with `-D BOOST_ROOT=PATH_where_to_find_boost`.
   
 ### Modified
 - If no seed is given, the simulation will be run with `seed=Time(NULL)` (random).
@@ -27,7 +52,10 @@ Please also check the [Issue tracker](https://cst.version.fz-juelich.de/jupedsim
 - exit strategies using *local* - prefix can result in circular routing
 - triangulation creates error-prone help-lines in certain geometries
 - errors in unused parts of ini files lead to system-exit
-
+- exit_strategy: exit strat 9 currently bugged
+- router: ff_global_shortest might not find paths in some geometries. please use exit_strategy 8
+- console output: messages of only one line will be overwritten by progress bar
+- agents that leave the building might produce an error-msg (although they correctly left the simulation)
 
 ## v0.8.0 [2016-02-18]
 
@@ -56,11 +84,8 @@ Please also check the [Issue tracker](https://cst.version.fz-juelich.de/jupedsim
 
 ## v0.7.0 [2015-07-15]
 
-### New Module
-- JuPedSim: Editor for the geometry
-
 ### Added
-
+- New module `JuPeditor`: Editor for the geometry
 - Risk tolerance factor (value in [0 1]) for pedestrian. Pedestrians with high values are likely to take more risks.
 - Added pre-movement time of the agents. Only after this time, the concerned agents will start moving.
 - Sources for generating agents at runtime. Parameter are frequency (agents per seconds) and maximum number

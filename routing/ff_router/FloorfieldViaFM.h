@@ -36,6 +36,7 @@
 #define FLOORFIELDVIAFM_H
 
 #include <vector>
+#include <unordered_set>
 #include <cmath>
 #include <functional>
 #include "mesh/RectGrid.h"
@@ -48,6 +49,49 @@
 
 //maybe put following in macros.h
 #define LOWSPEED 0.001
+
+class TrialP
+{
+public:
+     long int key;
+     int* flag;
+     double* cost;
+     double* speed;
+     Point* neggrad;
+
+     TrialP() {
+          key = 0;
+          flag = nullptr;
+          cost = nullptr;
+          speed = nullptr;
+          neggrad = nullptr;
+     }
+
+     TrialP(long int keyArg, double* t, double* f, int* flagArg, Point* neggradArg) {
+          key = keyArg;
+          cost = t;
+          speed = f;
+          flag = flagArg;
+          neggrad = neggradArg;
+     }
+
+     ~TrialP(){}
+
+     bool operator <(const TrialP& rhs) const
+     {
+          return this->cost[this->key] < rhs.cost[rhs.key];
+     }
+
+     bool operator >(const TrialP& rhs) const
+     {
+          return this->cost[this->key] > rhs.cost[rhs.key];
+     }
+
+     bool operator ==(const TrialP& rhs) const
+     {
+          return this->cost[this->key] == rhs.cost[rhs.key];
+     }
+};
 
 class FloorfieldViaFM
 {
@@ -63,14 +107,16 @@ public:
 
      //void getDirectionAt(const Point& position, Point& direction);                                   //obsolete
      //void getDirectionToDestination (const int destID, const Point& position, Point& direction);     //obsolete
-     void getDirectionToUID(int destID, const long int key, Point& direction);
+     void getDirectionToUID(int destID, const long int key, Point& direction); // shall not be used any more, therefore not virtual
+     virtual void getDirectionToUID(int destID, const long int key, Point& direction, int mode);
      //void getDirectionToUIDParallel(int destID, const long int key, Point& direction);
-     void getDirectionToDestination (Pedestrian* ped, Point& direction);
+     virtual void getDirectionToDestination (Pedestrian* ped, Point& direction);
      //void getDirectionToFinalDestination(Pedestrian* ped, Point& direction); //this is router buissness! problem in multi-storage buildings
 
      void createMapEntryInLineToGoalID(const int goalID);
 
      double getCostToDestination(const int destID, const Point& position);
+     double getCostToDestination(const int destID, const Point& position, int mode);
      //double getCostToDestinationParallel(const int destID, const Point& position);
 
      void getDir2WallAt(const Point& position, Point& direction);
@@ -81,21 +127,22 @@ public:
      void parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
      void parseBuildingForExits(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
      void prepareForDistanceFieldCalculation(const bool withExits);
-     void drawLinesOnGrid(std::vector<Line>& wallArg, double* const target, const double dbl2draw);
-     void drawLinesOnGrid(std::vector<Line>& wallArg, int* const target, const int int2draw);
+     template <typename T>
+     void drawLinesOnGrid(std::vector<Line>& wallArg, T* const target, const T value);
      void setSpeed(bool useDistance2WallArg);
-     void setSpeedFromLCGrid(double* newspeed);
+     void setSpeedThruPeds(Pedestrian* const* pedsArg, int nPeds, int modechoice, double radius);
+     void deleteAllFFs();
      void clearAndPrepareForFloorfieldReCalc(double* costarray);
      void setNewGoalAfterTheClear(double* costarray, std::vector<Line>& GoalWallArg);
      void calculateFloorfield(std::vector<Line>& wallArg, double* costarray, Point* neggradarray);   //make private
      void calculateFloorfield(std::vector<Line>& wallArg, double* costarray, Point* neggradarray, double* speedarray);
      void calculateDistanceField(const double thresholdArg);             //make private
 
-     void checkNeighborsAndAddToNarrowband(Trial* trialfield, Trial* &smallest, Trial* &biggest, int* flag, const long int key,
-                                           std::function<void (Trial*, int*, const long int)> calc);
+     void checkNeighborsAndAddToNarrowband(std::priority_queue<TrialP, std::vector<TrialP>, std::greater<TrialP>>& trialfield, TrialP key,
+                                           std::function<void (TrialP)> calc);
 
-     void calcDist2Wall(Trial*, int*, const long int key);
-     void calcFloorfield(Trial*, int*, const long int key);
+     void calcDist2Wall(TrialP);
+     void calcFloorfield(TrialP);
      //void (*checkNeighborsAndCalc)(const long int key);
 
      inline double onesidedCalc(double xy, double hDivF);
@@ -103,69 +150,77 @@ public:
 
      void testoutput(const char*, const char*, const double*);
      void writeFF(const std::string&, std::vector<int> targetID);
+     void writeGoalFF(const std::string&, std::vector<int> targetID);
 
-     virtual int isInside(const long int key);
+     virtual SubRoom* isInside(const long int key);
+     SubRoom* GetSubroom(Pedestrian* p);
 
      std::map<int, int> getGoalToLineUIDmap() const
      {
-          return goalToLineUIDmap;
+          return _goalToLineUIDmap;
      }
 
      std::map<int, int> getGoalToLineUIDmap2() const
      {
-          return goalToLineUIDmap2;
+          return _goalToLineUIDmap2;
      }
 
      std::map<int, int> getGoalToLineUIDmap3() const
      {
-          return goalToLineUIDmap3;
+          return _goalToLineUIDmap3;
      }
 
      RectGrid* getGrid() const
      {
-          return grid;
+          return _grid;
      }
 
 #ifdef TESTING
-     void setGrid(RectGrid* gridArg) {grid = gridArg;}
+     void setGrid(RectGrid* gridArg) {_grid = gridArg;}
 #endif //TESTING
 
 protected:
-     RectGrid* grid = nullptr;
-     std::vector<Line> wall;
-     std::vector<Line> exitsFromScope;
-     unsigned int numOfExits;
+     RectGrid* _grid = nullptr;
+     std::vector<Line> _wall;
+     std::vector<Line> _exitsFromScope;
+     unsigned int _numOfExits;
 
-     const Building* building;
-
-     //stuff to handle wrapper grid (unused, cause RectGrid handles offset)
-     //double offsetX;
-     //double offsetY;
+     const Building* _building;
 
      //GridPoint Data in independant arrays (shared primary key)
-     // changed to threadsafe creation when needed: int* flag;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
-     int* gcode = nullptr;                 //gridcode (see Macros.h)
-     int* subroomUID = nullptr;
-     double* dist2Wall = nullptr;
-     double* speedInitial = nullptr;
-     double* modifiedspeed = nullptr;
-     double* densityspeed = nullptr;
-     double* cost = nullptr;
+     // changed to threadsafe creation when needed: int* flag;
+     int* _gcode = nullptr;                 //gridcode (see Macros.h)
+     SubRoom* * _subrooms = nullptr; // this is an array (first asterisk) of pointers (second asterisk)
+     double* _dist2Wall = nullptr;
+     double* _speedInitial = nullptr;
+     double* _modifiedspeed = nullptr;
+     double* _densityspeed = nullptr;
+     double* _cost = nullptr;
      //long int* secKey;  //secondary key to address ... not used yet
-     Point* neggrad = nullptr; //gradients
-     Point* dirToWall = nullptr;
+     Point* _neggrad = nullptr; //gradients
+     Point* _dirToWall = nullptr;
      // changed to threadsafe creation when needed: Trial* trialfield;
 
-     std::map<int, double*> goalcostmap;
-     std::map<int, int>     goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
-     std::map<int, int>     goalToLineUIDmap2;
-     std::map<int, int>     goalToLineUIDmap3;
-     std::map<int, Point*>  goalneggradmap;
-     std::map<int, double*> costmap;
-     std::map<int, Point*>  neggradmap;
+     std::map<int, double*> _goalcostmap;
+     std::map<int, int>     _goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
+     std::map<int, int>     _goalToLineUIDmap2;
+     std::map<int, int>     _goalToLineUIDmap3;
+     std::map<int, Point*>  _goalneggradmap;
+     std::map<int, double*> _costmap;
+     std::map<int, Point*>  _neggradmap;
+     // use an unordered_set for faster access (it is accessed within a critical region)
+     std::unordered_set<int>  _floorfieldsBeingCalculated;
+     bool maps_deleted = false; // @todo f.mack remove
 
-     double threshold;
-     bool useDistanceToWall;
+     double _threshold;
+     bool _useDistanceToWall;
+};
+
+// very similar to FloorfieldViaFM, but the calculation of floorfields starts at the center of the door only, not on the whole line
+// this happens in order to avoid "door hopping" (for a pedestrian, it is shorter to go to a nearby door and skip half the door width)
+class CentrePointFFViaFM : public virtual FloorfieldViaFM {
+public:
+     virtual void getDirectionToUID(int destID, const long int key, Point& direction, int mode);
 };
 
 #endif // FLOORFIELDVIAFM_H

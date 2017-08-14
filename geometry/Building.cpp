@@ -67,7 +67,7 @@ Building::Building()
 
 #ifdef _SIMULATOR
 
-Building::Building(const Configuration* configuration, PedDistributor& pedDistributor)
+Building::Building(Configuration* configuration, PedDistributor& pedDistributor)
           :_configuration(configuration),
            _routingEngine(
                  configuration->GetRoutingEngine()),
@@ -100,7 +100,7 @@ Building::Building(const Configuration* configuration, PedDistributor& pedDistri
 
 
      if (!pedDistributor.Distribute(this)) {
-          Log->Write("ERROR:\t could not distribute the pedestrians");
+          Log->Write("ERROR:\tcould not distribute the pedestrians\n");
           exit(EXIT_FAILURE);
      }
 
@@ -154,6 +154,10 @@ Building::~Building()
           iter!=_goals.end(); ++iter) {
           delete iter->second;
      }
+}
+
+Configuration* Building::GetConfig() const {
+     return _configuration;
 }
 
 ///************************************************************
@@ -314,6 +318,9 @@ bool Building::InitGeometry()
                     if (!obst->ConvertLineToPoly())
                          return false;
                }
+
+               //here we can create a boost::geometry::model::polygon out of the vector<Point> objects created above
+               itr_subroom.second->CreateBoostPoly();
 
                double minElevation = FLT_MAX;
                double maxElevation = -FLT_MAX;
@@ -699,11 +706,8 @@ std::vector<Point> Building::GetBoundaryVertices() const
 
 bool Building::SanityCheck()
 {
-     Log->Write("INFO: \tChecking the geometry for artifacts");
+     Log->Write("INFO: \tChecking the geometry for artifacts: (Ignore Warnings, if ff_[...] router is used!)");
      bool status = true;
-
-     //only for ffRouter
-     return status;
 
      for(auto&& itr_room: _rooms)
      {

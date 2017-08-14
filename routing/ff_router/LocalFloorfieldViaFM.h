@@ -36,34 +36,51 @@
 #include <string>
 #include "FloorfieldViaFM.h"
 
-class LocalFloorfieldViaFM : public FloorfieldViaFM{
+class LocalFloorfieldViaFM : public virtual FloorfieldViaFM {
 public:
      LocalFloorfieldViaFM();
-     LocalFloorfieldViaFM(const Room* const room, const Building* buildingArg, const double hxArg,
-                 const double hyArg, const double wallAvoidDistance, const bool useDistancefield);
+     LocalFloorfieldViaFM(const Room* const room, const Building* buildingArg,
+                          const double hxArg, const double hyArg,
+                          const double wallAvoidDistance,
+                          const bool useDistancefield);
 
      void parseRoom(const Room* const roomArg, const double hxArg, const double hyArg);
-     void getDirectionToDestination (Pedestrian* ped, Point& direction);//@todo hides non-virtual function
 //     void getDirectionToGoalID(const int goalID);
      void drawBlockerLines();
      void crossOutOutsideNeighbors(const long int key);
-     virtual int isInside(const long int key);
+     // returns the UID of a subroom for a key of th grid, using the information from _subroomMap
+     virtual SubRoom* isInside(const long int key);
 protected:
-     const Room* room;
+     const Room* _room;
 };
 
-class SubLocalFloorfieldViaFM : public FloorfieldViaFM{
+/*
+ NOTE: both parents are derived from FloorfieldViaFM with "public virtual" (it is called "Virtual Inheritance"). This
+ means that there is only one instance of FloorfieldViaFM in CentrePointLocalFFViaFM, so calls to FlorfieldViaFM's member
+ variables and functions are not ambiguous. See http://www.programering.com/a/MDOxITMwATk.html for some nice diagrams.
+ */
+class CentrePointLocalFFViaFM : public CentrePointFFViaFM, public LocalFloorfieldViaFM {
+public:
+     CentrePointLocalFFViaFM(const Room* const room, const Building* buildingArg,
+                             const double hxArg, const double hyArg,
+                             const double wallAvoidDistance,
+                             const bool useDistancefield) : LocalFloorfieldViaFM(room, buildingArg, hxArg, hyArg, wallAvoidDistance, useDistancefield) {};
+};
+
+class SubLocalFloorfieldViaFM : public FloorfieldViaFM {
 public:
      SubLocalFloorfieldViaFM();
-     SubLocalFloorfieldViaFM(const SubRoom* const subroom, const Building* buildingArg,
-                 const double hxArg, const double hyArg, const double wallAvoidDistance, const bool useDistancefield);
+     SubLocalFloorfieldViaFM(SubRoom* const subroom, const Building* buildingArg,
+           const double hxArg, const double hyArg,
+           const double wallAvoidDistance,
+           const bool useDistancefield);
 
-     void parseRoom(const SubRoom* const subroomArg, const double hxArg, const double hyArg);
+     void parseRoom(SubRoom* const subroomArg, const double hxArg, const double hyArg);
      void getDirectionToDestination (Pedestrian* ped, Point& direction);
      void getDirectionToGoalID(const int goalID);
-     virtual int isInside(const long int key);
+     virtual SubRoom* isInside(const long int key);
 protected:
-     const SubRoom* subroom;
+     SubRoom* _subroom;
 };
 
 #endif //JPSCORE_LOCALFLOORFIELDVIAFM_H
