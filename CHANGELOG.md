@@ -7,10 +7,24 @@ Repository moved to [new server](https://gitlab.version.fz-juelich.de/jupedsim/j
 - New option for `groups`. It is now possible to load the first positions of pedestrians from a file. 
   Needed for better comparison with experiments. Use attribute: `positions_dir="/path/to/directory/"` `unit="cm"`.
   The unit of the trajectories can be specified. Default is meter.
+- New router: prototype of the floorfield based, quickest router `ff_quickest`. This router will re-asses all routes
+  including agents into its routing-calculations. Jams will be avoided, if a clear route is available.
+
 ### Changed
 - New Progressbar (ec7c9b0c)
+- UnivFFviaFM class replaces the old (Local)FloorfieldViaFM classes
+- FFRouter (`ff_global_shortest`, `ff_quickest`) will delay calculations to a point between timesteps to use all available cores.
+- removed writing of VTK-files (this feature will be controllable via inifiles in the future)
+- DirectionStrategy using floorfields (exit strat `8`,`9`) will respect shoulderwidth for doors.
+- Boost::Geometry is used for geometric checks (isWithin)
+- Direction Strategy will be matched, if FFRouter is used (auto-set to exit strat `8`)
 
 ### Fixed 
+- isClockwise() fixed
+- isInSubroom() fixed
+- agents getting stuck and oscillating fixed (#247)
+- router problems with `ff_global_shortest` fixed (#245)
+- parameters for direction strategy `8`,`9` will be used (`wall_avoid_distance`,`delta_h`, `use_wall_avoidance`)
 
 ## v0.8.1 [2016-10-11]
 ### Added
