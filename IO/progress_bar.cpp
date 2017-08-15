@@ -35,7 +35,7 @@ int ProgressBar::GetConsoleWidth(){
 
       int width;
 
-#ifdef _WINDOWS
+#ifdef _WIN32
       CONSOLE_SCREEN_BUFFER_INFO csbi;
       GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
       width = csbi.srWindow.Right - csbi.srWindow.Left;

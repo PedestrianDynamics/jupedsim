@@ -24,7 +24,7 @@
 #ifndef _PROGRESS_BAR_
 #define _PROGRESS_BAR_
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <sys/ioctl.h>
