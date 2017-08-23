@@ -40,6 +40,8 @@
 #include "../geometry/NavLine.h"
 #include "AgentsParameters.h"
 #include "PedDistributor.h"
+#include "../JPSfire/B_walking_speed/WalkingSpeed.h"
+#include "../JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
 
 class Building;
 class NavLine;
@@ -144,6 +146,13 @@ private:
 
      static int _agentsCreated;
 
+     double _FED_In;
+     double _FED_Heat;
+
+     WalkingSpeed * _WalkingSpeed = nullptr;
+     std::shared_ptr<ToxicityAnalysis> _ToxicityAnalysis = nullptr;
+
+
 public:
      // public member
      int _ticksInThisRoom;
@@ -167,6 +176,12 @@ public:
      //TODO: merge this two functions
      void SetExitIndex(int i);
      void SetExitLine(const NavLine* l);
+
+     void SetFEDIn(double FED_In);
+     double GetFEDIn();
+
+     void SetFEDHeat(double FED_Heat);
+     double GetFEDHeat();
 
      void Setdt(double dt);
      double Getdt();
@@ -457,6 +472,16 @@ public:
       * Set/Get the Building object
       */
      void SetBuilding(Building* building);
+
+     void SetWalkingSpeed(WalkingSpeed* walkingSpeed);
+
+     void WalkingUpstairs(double c, SubRoom* sub, double ped_elevation, double &walking_speed) const;
+     void WalkingDownstairs(double &walking_speed, double c, SubRoom* sub, double ped_elevation) const;
+
+
+     void SetTox(std::shared_ptr<ToxicityAnalysis> toxicityAnalysis);
+
+     void ConductToxicityAnalysis();
 
      bool Relocate(std::function<void(const Pedestrian&)> flowupdater);
 

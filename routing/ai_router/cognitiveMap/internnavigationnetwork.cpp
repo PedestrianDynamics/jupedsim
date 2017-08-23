@@ -4,6 +4,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/geometry.hpp>
+#include "../../../geometry/Obstacle.h"
 
 InternNavigationNetwork::InternNavigationNetwork()
 {
@@ -23,6 +24,19 @@ InternNavigationNetwork::InternNavigationNetwork(const SubRoom *subRoom)
         boost::geometry::append(lineS,wall.GetPoint2());
         _currentRoom.push_back(lineS);
 
+    }
+
+    const std::vector<Obstacle* > obstacles = _subRoom->GetAllObstacles();
+
+    for (Obstacle* obstacle:obstacles)
+    {
+        for (Wall wall: obstacle->GetAllWalls())
+        {
+            Linestring lineS;
+            boost::geometry::append(lineS,wall.GetPoint1());
+            boost::geometry::append(lineS,wall.GetPoint2());
+            _currentRoom.push_back(lineS);
+        }
     }
 }
 

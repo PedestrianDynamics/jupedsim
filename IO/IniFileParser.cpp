@@ -655,7 +655,6 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
           }
           _config->set_deltaH(pDeltaH);
 
-
           if (!xModelPara->FirstChildElement("floorfield")->Attribute("wall_avoid_distance"))
                pWallAvoidDistance = .8; // default value
           else {
@@ -1043,7 +1042,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                     usedRouter.emplace_back(router);
                }
           }
-         //
           int goal = -1;
           if (e->Attribute("goal_id")) {
                goal = atoi(e->Attribute("goal_id"));
@@ -1187,16 +1185,7 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode* routingNode)
      for (TiXmlElement* e = sensorNode->FirstChildElement("sensor"); e;
           e = e->NextSiblingElement("sensor")) {
           string sensor = e->Attribute("description");
-          //adding Smoke Sensor specific parameter is now handled in FDSMeshStorage
-//          if (sensor=="Smoke") {
-//               std::vector<std::string> smokeOptVec;
-
-//               smokeOptVec.push_back(e->Attribute("smoke_factor_grids"));
-//               smokeOptVec.push_back(e->Attribute("update_time"));
-//               smokeOptVec.push_back(e->Attribute("final_time"));
-//               r->addOption("smokeOptions", smokeOptVec);
-
-//          }
+          //adding Smoke Sensor specific parameters is executed in the class FDSFIreMeshStorage
           sensorVec.push_back(sensor);
 
           Log->Write("INFO: \tSensor <%s> added.", sensor.c_str());

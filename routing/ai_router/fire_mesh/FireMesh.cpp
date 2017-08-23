@@ -1,39 +1,11 @@
-/**
- * \file        firemesh.cpp
- * \date        Jan 1, 2015
- * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
- *
- * \section License
- * This file is part of JuPedSim.
- *
- * JuPedSim is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * JuPedSim is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
- *
- * \section Description
- * 2D-Mesh. Division of the geometry into a cartesian equidistant mesh
- *
- *
- **/
-
-#include "FireMesh.h"
+#include "FDSMesh.h"
 #include <cmath>
+#include <string>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
-
-std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
+std::vector<std::string> &split2(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss(s);
     std::string item;
     while (std::getline(ss, item, delim)) {
@@ -44,33 +16,31 @@ std::vector<std::string> &split(const std::string &s, char delim, std::vector<st
 
 
 
-FireMesh::FireMesh()
+FDSMesh::FDSMesh() : _statMesh(false)
 {
     //statHeaderRead=false;
-    _statMesh=false;
 }
 
-FireMesh::FireMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const double &cellsize)
+FDSMesh::FDSMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const double &cellsize) : _statMesh(false)
 {
     SetUpMesh(xmin,ymin,xmax,ymax,cellsize);
+    std::cout << "FDSMesh set up!" << std::endl;
     //statHeaderRead=false;
-    _statMesh=false;
 }
 
-FireMesh::FireMesh(const std::string &filename)
+FDSMesh::FDSMesh(const std::string &filename) : _statMesh(false)
 {
+    //std::cout << filename << std::endl;
     SetKnotValuesFromFile(filename);
     //statHeaderRead=false;
-    _statMesh=false;
-
 }
 
-FireMesh::~FireMesh()
+FDSMesh::~FDSMesh()
 {
 
 }
 
-void FireMesh::SetUpMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const double &cellsize)
+void FDSMesh::SetUpMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const double &cellsize)
 {
     _cellsize=cellsize;
 
@@ -99,26 +69,17 @@ void FireMesh::SetUpMesh(const double &xmin, const double &ymin, const double &x
              _matrix[i][j]=k;
         }
     }
-
-
-
 }
 
-const Matrix &FireMesh::GetMesh() const
+const Matrix &FDSMesh::GetMesh() const
 {
     return _matrix;
-
 }
 
-double FireMesh::GetKnotValue(const double &x, const double &y) const
+int FDSMesh::GetColumn(const double &x, int &col) const
 {
     double restx;
-    double resty;
-    int col;
-    int row;
 
-    /// Which knot is the nearest one to (x,y)?
-    ///
     if (x>_xmin && x<_xmax)
     {
         restx = fmod((x-_xmin),_cellsize);
@@ -141,6 +102,12 @@ double FireMesh::GetKnotValue(const double &x, const double &y) const
         restx=0;
         col=0;
     }
+    return col;
+}
+
+int FDSMesh::GetRow(int &row, const double &y) const
+{
+    double resty;
 
     if (y>_ymin && y<_ymax)
     {
@@ -162,16 +129,71 @@ double FireMesh::GetKnotValue(const double &x, const double &y) const
         resty=0;
         row=0;
     }
+    return row;
+}
 
-    return _matrix[row][col].GetValue();
+double FDSMesh::GetKnotValue(const double &x, const double &y) const
+{
+    /// To Do: exception / warning when no knot is available for the pedestrian position
+    int col=0;
+    int row=0;
+
+    /// Which knot is the nearest one to (x,y)?
+
+    GetColumn(x, col);
+    GetRow(row, y);
+
+    //std::cout << _matrix[row][col].GetValue() << std::endl;
+    double value;
+
+    // Exception if a mesh can not provide an appropriately located value
+    if(row < _matrix.size() && col < _matrix[0].size())
+          value = _matrix[row][col].GetValue();
+    else
+        // needs to be fixed!!!
+          value = 0.0;//std::numeric_limits<double>::quiet_NaN();
+
+//    if(_matrix[row][col].GetValue() == 0.) {
+//        std::cout << "(" << row << " , " << col <<  ")" << std::endl;
+//    }
+
+    return value;
 
 }
 
-void FireMesh::SetKnotValuesFromFile(const std::string &filename)
+void FDSMesh::ReadMatrix(std::string line, std::ifstream &pFile)
+{
+    int m = 0;
+    int n;
+    std::vector<std::string> strVec;
+    while (std::getline(pFile, line)) {
+        n = 0;
+        strVec = split2(line, ',', strVec);
+        for (auto &elem : strVec)
+        {
+            //std::cout << elem << " col " << n  << " line " << m << std::endl;
+            if (elem=="nan" || elem=="NAN" || elem=="NaN" || elem=="-inf" || elem=="inf")
+            {
+                _matrix[m][n].SetValue(1.0);
+                //Log->Write("ERROR: Mesh values consist of nan!");
+                //exit(EXIT_FAILURE);
+            }
+            else
+                _matrix[m][n].SetValue(std::stod(elem));
+            ++n;
+        }
+        strVec.clear();
+        ++m;
+    }
+
+    pFile.close();
+    _statMesh=true;
+}
+
+void FDSMesh::SetKnotValuesFromFile(const std::string &filename)
 {
     ///open File (reading)
     std::ifstream pFile(filename);
-
     if (pFile)
     {
         std::vector<std::string> strVec;
@@ -186,7 +208,7 @@ void FireMesh::SetKnotValuesFromFile(const std::string &filename)
         //if (statHeaderRead==false)
         //{
         /// read header
-        strVec = split(line,',', strVec);
+        strVec = split2(line,',', strVec);
         double cellsize = std::stod(strVec[0]);
         double xmin = std::stod(strVec[2]);
         double xmax = std::stod(strVec[3]);
@@ -194,44 +216,27 @@ void FireMesh::SetKnotValuesFromFile(const std::string &filename)
         double ymax = std::stod(strVec[5]);
 
         strVec.clear();
-        //std::cout << ymin << xmax << ymax << cellsize << std::endl;
+        //std::cout << "xmin=" << xmin << " , xmax=" << xmax << " , ymin=" << ymin << ", ymax=" << ymax << " , dx=" << cellsize << std::endl;
+
         SetUpMesh(xmin,ymin,xmax,ymax,cellsize);
 
             //statHeaderRead=true;
         //}
-        ///Read matrix
-        ///
-        int m = 0;
-        int n;
-        while (std::getline(pFile, line)) {
-            n = 0;
-            strVec = split(line, ',', strVec);
-            for (auto &elem : strVec)
-            {
-                //std::cout << elem << std::endl;
-                _matrix[m][n].SetValue(std::stod(elem));
-                ++n;
-            }
-            strVec.clear();
-            ++m;
-        }
+        //Read matrix
 
-        pFile.close();
-        _statMesh=true;
+        ReadMatrix(line, pFile);
+
     }
     else
     {
-       Log->Write("ERROR:\tCould not open potential file: %s",filename.c_str());
+       Log->Write("ERROR:\tCould not open FDS slicefile: %s",filename.c_str());
        //return false;
        exit(EXIT_FAILURE);
     }
 
 }
 
-bool FireMesh::statusMesh() const
+bool FDSMesh::statusMesh() const
 {
     return _statMesh;
 }
-
-
-
