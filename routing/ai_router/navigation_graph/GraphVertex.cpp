@@ -164,14 +164,14 @@ const GraphEdge * GraphVertex::GetCheapestDestinationByEdges(const Point & posit
         vector<std::pair<double, const GraphEdge *> >,
         std::greater<std::pair<double, const GraphEdge *> >
         > queue;
-    const GraphEdge * exit_edge = NULL;
+    const GraphEdge * exit_edge = nullptr;
 
 
     // add all out edges from this vertex to priority queue and destinations.
     for(EdgesContainer::const_iterator it = this->GetAllOutEdges()->begin(); it != this->GetAllOutEdges()->end(); ++it) {
         double new_distance = (*it)->GetWeight(position);
 
-        destinations[(*it)] = std::make_pair((const GraphEdge*) NULL, new_distance);
+        destinations[(*it)] = std::make_pair((const GraphEdge*) nullptr, new_distance);
         queue.push(std::make_pair(new_distance, (*it)));
     }
 
@@ -209,10 +209,10 @@ const GraphEdge * GraphVertex::GetCheapestDestinationByEdges(const Point & posit
         visited.insert(act_edge);
     }
     //did we found an exit?
-    if(exit_edge != NULL) {
+    if(exit_edge != nullptr) {
         const GraphEdge * act_edge = destinations[exit_edge].first;
 
-        if(act_edge == NULL) {
+        if(act_edge == nullptr) {
             return exit_edge;
         } else {
             while(this != act_edge->GetSrc()) {
@@ -221,7 +221,7 @@ const GraphEdge * GraphVertex::GetCheapestDestinationByEdges(const Point & posit
             return act_edge;
         }
     } else {
-        return NULL;
+        return nullptr;
     }
 
 }
@@ -251,7 +251,8 @@ const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & positio
     for(EdgesContainer::const_iterator it = this->GetAllOutEdges()->begin(); it != this->GetAllOutEdges()->end(); ++it) {
         if ((*it)->GetCrossing()->IsExit())
             exitEdges.push(std::make_pair((*it)->GetWeight(position), (*it)));
-        edges.push(std::make_pair((*it)->GetFactor(), (*it)));
+        //edges.push(std::make_pair((*it)->GetFactor(), (*it)));
+         edges.push(std::make_pair((*it)->GetFactor(), (*it)));
     }
 
     // if exit(s) are available

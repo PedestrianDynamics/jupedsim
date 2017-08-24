@@ -82,7 +82,7 @@ private:
     NavigationGraph * navigation_graph;
     const Building* building;
     const Pedestrian* pedestrian;
-    const SubRoom * current_subroom = NULL;
+    const SubRoom * current_subroom = nullptr;
     std::vector<const GraphEdge *> destinations;
 
 

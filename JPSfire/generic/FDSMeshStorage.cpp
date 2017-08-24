@@ -146,9 +146,9 @@ void FDSMeshStorage::CreateDoorList()
 
     for( auto &elv:_elevationlist){
         std::string elvAsStringTwoDecimals = std::to_string(elv);
-        elvAsStringTwoDecimals = elvAsStringTwoDecimals.substr(0, elvAsStringTwoDecimals.find_last_of(".")+3);
+        elvAsStringTwoDecimals = elvAsStringTwoDecimals.substr(0, elvAsStringTwoDecimals.find_last_of(".")+7);
         for( fs::directory_iterator iter(_filepath + _quantitylist[0] +
-           "/dx_" + elvAsStringTwoDecimals ) ; iter != end ; ++iter ) {
+           "/Z_" + elvAsStringTwoDecimals ) ; iter != end ; ++iter ) {
 
            if ( fs::is_directory( *iter ) ) {
                   std::string tempString = iter->path().string();

@@ -262,12 +262,12 @@ bool QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
                //check if I can see/reach the exit without much effort
                if(IsDirectVisibilityBetween(myself,crossing))
                {
-                    *myref=NULL;
+                    *myref=nullptr;
                     *flag=FREE_EXIT;
                }
                else
                {
-                    *myref=NULL;
+                    *myref=nullptr;
                     *flag=UNREACHEABLE_EXIT;
                }
                // we should return here as there is no queue
@@ -300,14 +300,14 @@ bool QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
           {
                if(queue.size()>0)
                { // there were some ref pedes only not visible
-                    *myref=NULL;
+                    *myref=nullptr;
                     *flag=UNREACHEABLE_EXIT;
                     done=true;
 
                }
                else
                {
-                    *myref=NULL;
+                    *myref=nullptr;
                     *flag=UNREACHEABLE_EXIT;
                     //done=true; //this line has no effect, cause of return statement below
                     Log->Write("ERROR: reference ped cannot be found for ped %d within [%f] "
@@ -341,7 +341,7 @@ void QuickestPathRouter::GetQueueAtExit(Hline* hline, double minVel,
      SubRoom* sbr1 = hline->GetSubRoom1();
 
      //tentative upgrade to Crossing for getting the second subroom
-     SubRoom* sbr2 = NULL;
+     SubRoom* sbr2 = nullptr;
      if(Crossing* cros=dynamic_cast<Crossing*>(hline))
      {
           sbr2=cros->GetSubRoom2();
@@ -354,7 +354,7 @@ void QuickestPathRouter::GetQueueAtExit(Hline* hline, double minVel,
      //if this is a hline
      if(sbr1==sbr2)
      {
-          sbr2=NULL;
+          sbr2=nullptr;
      }
 
      if (sbr1 && (sbr1->GetSubRoomID()==subroomToConsider))
@@ -440,7 +440,7 @@ unsigned int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const
      SubRoom* sbr1 = hline->GetSubRoom1();
 
      //tentative upgrade to Crossing for getting the second subroom
-     SubRoom* sbr2 = NULL;
+     SubRoom* sbr2 = nullptr;
      if(Crossing* cros=dynamic_cast<Crossing*>(hline))
      {
           sbr2=cros->GetSubRoom2();
@@ -454,7 +454,7 @@ unsigned int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const
      //if this is a hline
      if(sbr1==sbr2)
      {
-          sbr2=NULL;
+          sbr2=nullptr;
      }
 
      if (sbr1)
@@ -543,7 +543,7 @@ int QuickestPathRouter::isCongested(Pedestrian* ped)
 double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid)
 {
      //select a reference pedestrian
-     Pedestrian* myref=NULL;
+     Pedestrian* myref=nullptr;
      int flag=FREE_EXIT; //assume free exit
      SelectReferencePedestrian(ped,&myref,_queueVelocityFromJam,exitid,&flag);
 
@@ -553,7 +553,7 @@ double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid
      double time=FLT_MAX;
 
      // case of free exit
-     if((myref==NULL)&& (flag==FREE_EXIT))
+     if((myref==nullptr)&& (flag==FREE_EXIT))
      {
           double t1 = (ped->GetPos()- ap->GetCentre()).Norm()/ped->GetV0Norm();
           // time to reach the AP
@@ -566,13 +566,13 @@ double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid
      }
 
      // case of unreachable exit
-     if((myref==NULL)&& (flag==UNREACHEABLE_EXIT))
+     if((myref==nullptr)&& (flag==UNREACHEABLE_EXIT))
      {
           time= FLT_MAX;
      }
 
      // case of ref ped
-     if((myref!=NULL) && (flag==REF_PED_FOUND))
+     if((myref!=nullptr) && (flag==REF_PED_FOUND))
      {
 
           //time to reach the reference
@@ -596,10 +596,10 @@ double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid
           time=t1+t2+t3;
      }
 
-     if((myref==NULL) && (flag==REF_PED_FOUND))
+     if((myref==nullptr) && (flag==REF_PED_FOUND))
      {
           Log->Write("ERROR:\t Fatal Error in Quickest Path Router");
-          Log->Write("      \t reference pedestrians is NULL");
+          Log->Write("      \t reference pedestrians is nullptr");
           time= FLT_MAX;
      }
 

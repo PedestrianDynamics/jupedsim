@@ -61,7 +61,7 @@ StartDistribution::StartDistribution(int seed)
      _xMax=FLT_MAX;
      _yMin=-FLT_MAX;
      _yMax=FLT_MAX;
-     _groupParameters=NULL;
+     _groupParameters=nullptr;
      _positions_dir = "";
      _unit_traj = "m";
      static bool _seeded = false; // seed only once, not every time

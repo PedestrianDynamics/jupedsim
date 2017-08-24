@@ -86,9 +86,9 @@ string Transition::GetType() const
 // gibt den ANDEREN room != roomID zurück
 Room* Transition::GetOtherRoom(int roomID) const
 {
-     if (GetRoom1()!=NULL && GetRoom1()->GetID() == roomID) {
+     if (GetRoom1()!=nullptr && GetRoom1()->GetID() == roomID) {
           return GetRoom2();
-     } else if (GetRoom2()!=NULL && GetRoom2()->GetID() == roomID) {
+     } else if (GetRoom2()!=nullptr && GetRoom2()->GetID() == roomID) {
           return GetRoom1();
      } else {
           char msg[CLENGTH];
@@ -103,7 +103,7 @@ Room* Transition::GetOtherRoom(int roomID) const
 // prüft ob Ausgang nach draußen
 bool Transition::IsExit() const
 {
-     if(GetRoom1()!=NULL && _room2!=NULL)
+     if(GetRoom1()!=nullptr && _room2!=nullptr)
           return false;
      else
           return true;
@@ -113,9 +113,9 @@ bool Transition::IsInRoom(int roomID) const
 {
      bool c1 = false;
      bool c2 = false;
-     if (GetRoom1() != NULL && GetRoom1()->GetID() == roomID)
+     if (GetRoom1() != nullptr && GetRoom1()->GetID() == roomID)
           c1 = true;
-     if (GetRoom2() != NULL && GetRoom2()->GetID() == roomID)
+     if (GetRoom2() != nullptr && GetRoom2()->GetID() == roomID)
           c2 = true;
      return c1 || c2;
 }
@@ -131,9 +131,9 @@ bool Transition::IsTransition() const
  * (virtuelle Funktion) */
 SubRoom* Transition::GetOtherSubRoom(int roomID, int subroomID) const
 {
-     if ((GetRoom1() != NULL) && (GetRoom1()->GetID() == roomID))
+     if ((GetRoom1() != nullptr) && (GetRoom1()->GetID() == roomID))
           return GetSubRoom2();
-     else if ((GetRoom2() != NULL) && (GetRoom2()->GetID() == roomID))
+     else if ((GetRoom2() != nullptr) && (GetRoom2()->GetID() == roomID))
           return GetSubRoom1();
      else {
           Log->Write("ERROR: \tTransition::GetOtherSubRoom No exit found "
@@ -152,7 +152,7 @@ void Transition::WriteToErrorLog() const
              GetPoint1()._x, GetPoint1()._y, GetPoint2()._x, GetPoint2()._y);
      s.append(tmp);
      // erster Raum
-     if (GetRoom1() != NULL) {
+     if (GetRoom1() != nullptr) {
           sprintf(tmp, "\t\t\t\tRoom: %d [%s] SubRoom: %d", GetRoom1()->GetID(),
                   GetRoom1()->GetCaption().c_str(), GetSubRoom1()->GetSubRoomID());
      } else {
@@ -160,7 +160,7 @@ void Transition::WriteToErrorLog() const
      }
      s.append(tmp);
      // zweiter Raum
-     if (GetRoom2() != NULL) {
+     if (GetRoom2() != nullptr) {
           sprintf(tmp, " <->\tRoom: %d [%s] SubRoom: %d\n", GetRoom2()->GetID(),
                   GetRoom2()->GetCaption().c_str(), GetSubRoom2()->GetSubRoomID());
      } else {

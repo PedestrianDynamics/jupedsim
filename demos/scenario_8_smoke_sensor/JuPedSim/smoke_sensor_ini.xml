@@ -91,7 +91,7 @@
 <!-- route choice models -->
   <route_choice_models>
 
-    <router router_id="7" description="cognitive_map">
+    <router router_id="7" description="AI">
       <sensors>
 
 	      <sensor sensor_id="2" description="Smoke" smoke_factor_grids="demos/scenario_8_smoke_sensor/FDS/3_sfgrids/Z_2.25/dx_1.00/" update_time="20" final_time="120" status="activated"/>

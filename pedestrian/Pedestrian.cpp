@@ -106,8 +106,8 @@ Pedestrian::Pedestrian()
      _reroutingEnabled = false;
      _tmpFirstOrientation = true;
      _newOrientationFlag = false;
-     _router = NULL;
-     _building = NULL;
+     _router = nullptr;
+     _building = nullptr;
 
      //_knownDoors = map<int, NavLineState>();
 
@@ -157,8 +157,8 @@ Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& buil
      _turninAngle = 0.0;
      _ellipse = JEllipse();
      _navLine = nullptr;
-     _router = NULL;
-     _building = NULL;
+     _router = nullptr;
+     _building = nullptr;
      _reroutingThreshold = 0.0; // new orientation after 10 seconds, value is incremented
      _timeBeforeRerouting = 0.0;
      _reroutingEnabled = false;

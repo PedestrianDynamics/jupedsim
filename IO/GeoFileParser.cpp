@@ -130,7 +130,7 @@ bool GeoFileParser::LoadGeometry(Building* building)
                double C_z = xmltof(xSubRoom->Attribute("C_z"), 0.0);
                C_z = xmltof(xSubRoom->Attribute("C"), C_z);
 
-               SubRoom* subroom = NULL;
+               SubRoom* subroom = nullptr;
 
                if (type=="stair" || type=="escalator" || type=="idle_escalator") {
                     if (xSubRoom->FirstChildElement("up")==NULL) {

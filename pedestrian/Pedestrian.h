@@ -300,7 +300,7 @@ public:
      int FindRoute();
 
      ///write the pedestrian path (room and exit taken ) to file
-     void WritePath(std::ofstream& file, Building* building=NULL);
+     void WritePath(std::ofstream& file, Building* building=nullptr);
 
      ///write the pedestrian path (room and exit taken ) to file
      /// in the format room1:exit1>room2:exit2
