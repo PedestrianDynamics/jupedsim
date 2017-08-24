@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from numpy import *
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon as pgon
