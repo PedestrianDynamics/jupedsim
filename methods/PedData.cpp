@@ -104,6 +104,7 @@ bool PedData::InitializeVariables(const string& filename)
           int pos_y=3;
           int pos_z=4;
           int pos_vd=5; //velocity direction
+          int indx=1, index = 0 , lastindex = 0;
           while ( getline(fdata,line) )
           {
                //looking for the framerate which is suppposed to be at the second position
@@ -164,7 +165,12 @@ bool PedData::InitializeVariables(const string& filename)
                          Log->Write("INFO: pos_z: %d", pos_z);
                          Log->Write("WARNING:\t assuming z=0 for all data");
                     }
-                    _IdsTXT.push_back(atoi(strs[pos_id].c_str()));
+                    lastindex = index;
+                    index = atoi(strs[pos_id].c_str());
+                    if (index != lastindex){
+                         indx += 1;
+                    }
+                    _IdsTXT.push_back(indx);
                     _FramesTXT.push_back(atoi(strs[pos_fr].c_str()));
                     xs.push_back(atof(strs[pos_x].c_str()));
                     ys.push_back(atof(strs[pos_y].c_str()));
@@ -674,7 +680,6 @@ void PedData::CreateGlobalVariables(int numPeds, int numFrames)
      }
      _firstFrame = new int[numPeds];  // Record the first frame of each pedestrian
      _lastFrame = new int[numPeds];  // Record the last frame of each pedestrian
-
      for(int i = 0; i <numPeds; i++) {
           for (int j = 0; j < numFrames; j++) {
                _xCor[i][j] = 0;
