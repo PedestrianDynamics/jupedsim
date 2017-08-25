@@ -2,7 +2,7 @@
  * \file        Method_B.cpp
  * \date        Oct 10, 2014
  * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \copyright   <2009-2017> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -34,14 +34,14 @@ using std::vector;
 
 Method_B::Method_B()
 {
-     _xCor = NULL;
-     _yCor = NULL;
-     _tIn = NULL;
-     _tOut = NULL;
-     _DensityPerFrame = NULL;
+     ub::matrix<double> _xCor(0,0);
+     ub::matrix<double> _yCor(0,0);
+     _tIn = nullptr;
+     _tOut = nullptr;
+     _DensityPerFrame = nullptr;
      _fps = 10;
      _NumPeds =0;
-     _areaForMethod_B = NULL;
+     _areaForMethod_B = nullptr;
 }
 
 Method_B::~Method_B()
@@ -98,8 +98,8 @@ void Method_B::GetTinTout(int numFrames)
           for(unsigned int i=0; i< ids.size(); i++)
           {
                int ID = ids[i];
-               int x = _xCor[ID][frameNr];
-               int y = _yCor[ID][frameNr];
+               int x = _xCor(ID,frameNr);
+               int y = _yCor(ID,frameNr);
                if(within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly))
                {
                     pedsinMeasureArea++;

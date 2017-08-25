@@ -256,9 +256,10 @@ bool PedData::InitializeVariables(const string& filename)
           double x = xs[i]*M2CM;
           double y = ys[i]*M2CM;
           double z = zs[i]*M2CM;
-          _xCor[ID][frm] = x;
-          _yCor[ID][frm] = y;
-          _zCor[ID][frm] = z;
+          //_xCor[ID][frm] = x;
+          _xCor(ID,frm) = x;
+          _yCor(ID,frm) = y;
+          _zCor(ID,frm) = z;
           if(_vComponent == "F")
           {
         	  _vComp[ID][frm] = vcmp[i];
@@ -344,9 +345,7 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
      //counting the number of frames
      _numFrames = maxFrame-_minFrame+1;
      Log->Write("INFO:\tnum Frames = %d",_numFrames);
-
      CreateGlobalVariables(_numPeds, _numFrames);
-
      vector<int> totalframes;
      for (int i = 0; i <_numPeds; i++)
      {
@@ -373,9 +372,12 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
                }
 
                _peds_t[frameNr].push_back(ID);
-               _xCor[ID][frameNr] =  x*M2CM;
-               _yCor[ID][frameNr] =  y*M2CM;
-               _zCor[ID][frameNr] =  z*M2CM;
+               //_xCor[ID][frameNr] =  x*M2CM;
+               std::cout << "11: ID=" << ID << " frameNr="<<frameNr<< std::endl;
+               _xCor(ID,frameNr) =  x*M2CM;
+               std::cout << "22" << std::endl;
+               _yCor(ID,frameNr) =  y*M2CM;
+               _zCor(ID,frameNr) =  z*M2CM;
                if(_vComponent == "F")
                {
             	   if(xAgent->Attribute("VD"))
@@ -389,9 +391,9 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
             	   }
                }
                else
-			  {
-				  _vComp[ID][frameNr] = _vComponent;
-			  }
+               {
+                    _vComp[ID][frameNr] = _vComponent;
+               }
 
                if(frameNr < _firstFrame[ID])
                {
@@ -405,6 +407,7 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
           }
           //frameNr++;
      }
+     std::cout << "check trajectories" << std::endl;
      for(int id = 0; id<_numPeds; id++)
      {
          int actual_totalframe= totalframes[id];
@@ -430,14 +433,14 @@ vector<double> PedData::GetVInFrame(int frame, const vector<int>& ids, double zP
 		  double v = GetInstantaneousVelocity1(frame, Tpast, Tfuture, id, _firstFrame, _lastFrame, _xCor, _yCor);
           if(zPos<1000000.0)
           {
-        	  if(fabs(_zCor[id][frame]-zPos*M2CM)<J_EPS_EVENT)
-        	  {
-        		  VInFrame.push_back(v);
-        	  }
+               if(fabs(_zCor(id,frame)-zPos*M2CM)<J_EPS_EVENT)
+               {
+                    VInFrame.push_back(v);
+               }
           }
           else
           {
-        	  VInFrame.push_back(v);
+               VInFrame.push_back(v);
           }
      }
      return VInFrame;
@@ -450,14 +453,14 @@ vector<double> PedData::GetXInFrame(int frame, const vector<int>& ids, double zP
      {
     	 if(zPos<1000000.0)
 		  {
-    		 if(fabs(_zCor[id][frame]-zPos*M2CM)<J_EPS_EVENT)
+                       if(fabs(_zCor(id,frame)-zPos*M2CM)<J_EPS_EVENT)
 			  {
-				  XInFrame.push_back(_xCor[id][frame]);
+                               XInFrame.push_back(_xCor(id,frame));
 			  }
 		  }
 		  else
 		  {
-			  XInFrame.push_back(_xCor[id][frame]);
+                       XInFrame.push_back(_xCor(id,frame));
 		  }
      }
      return XInFrame;
@@ -468,7 +471,7 @@ vector<double> PedData::GetXInFrame(int frame, const vector<int>& ids) const
      vector<double> XInFrame;
      for(int id:ids)
      {
-			  XInFrame.push_back(_xCor[id][frame]);
+          XInFrame.push_back(_xCor(id,frame));
      }
      return XInFrame;
 }
@@ -481,14 +484,14 @@ vector<double> PedData::GetYInFrame(int frame, const vector<int>& ids, double zP
           int id = ids[i];
           if(zPos<1000000.0)
           {
-        	  if(fabs(_zCor[id][frame]-zPos*M2CM)<J_EPS_EVENT)
-			  {
-				  YInFrame.push_back(_yCor[id][frame]);
-			  }
+               if(fabs(_zCor(id,frame)-zPos*M2CM)<J_EPS_EVENT)
+               {
+                    YInFrame.push_back(_yCor(id,frame));
+               }
           }
           else
           {
-        	  YInFrame.push_back(_yCor[id][frame]);
+               YInFrame.push_back(_yCor(id,frame));
           }
      }
      return YInFrame;
@@ -500,7 +503,7 @@ vector<double> PedData::GetYInFrame(int frame, const vector<int>& ids) const
      for(unsigned int i=0; i<ids.size();i++)
      {
           int id = ids[i];
-          YInFrame.push_back(_yCor[id][frame]);
+          YInFrame.push_back(_yCor(id,frame));
      }
      return YInFrame;
 }
@@ -511,7 +514,7 @@ vector<double> PedData::GetZInFrame(int frame, const vector<int>& ids) const
      for(unsigned int i=0; i<ids.size();i++)
      {
           int id = ids[i];
-          ZInFrame.push_back(_zCor[id][frame]);
+          ZInFrame.push_back(_zCor(id,frame));
      }
      return ZInFrame;
 }
@@ -534,20 +537,20 @@ vector<int> PedData::GetIdInFrame(int frame, const vector<int>& ids, double zPos
      {
           if(zPos<1000000.0)
           {
-			  if(fabs(_zCor[id][frame]-zPos*M2CM)<J_EPS_EVENT)
-			  {
-				  IdInFrame.push_back(id +_minID);
-			  }
+               if(fabs(_zCor(id,frame)-zPos*M2CM)<J_EPS_EVENT)
+               {
+                    IdInFrame.push_back(id +_minID);
+               }
           }
           else
           {
-        	  IdInFrame.push_back(id +_minID);
+               IdInFrame.push_back(id +_minID);
           }
      }
      return IdInFrame;
 }
 
-double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor) const
+double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, ub::matrix<double> Xcor, ub::matrix<double> Ycor) const
 {
      std::string vcmp = _vComp[ID][Tnow];
      double v=0.0;
@@ -556,15 +559,15 @@ double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID
      {
           if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
           {
-               v = _fps*CMtoM*(Xcor[ID][Tfuture] - Xcor[ID][Tpast])/(2.0 * _deltaF);  //one dimensional velocity
+               v = _fps*CMtoM*(Xcor(ID,Tfuture) - Xcor(ID,Tpast))/(2.0 * _deltaF);  //one dimensional velocity
           }
           else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID]))
           {
-               v = _fps*CMtoM*(Xcor[ID][Tfuture] - Xcor[ID][Tnow])/(_deltaF);  //one dimensional velocity
+               v = _fps*CMtoM*(Xcor(ID,Tfuture) - Xcor(ID,Tnow))/(_deltaF);  //one dimensional velocity
           }
           else if((Tpast >=Tfirst[ID])&&(Tfuture > Tlast[ID]))
           {
-               v = _fps*CMtoM*(Xcor[ID][Tnow] - Xcor[ID][Tpast])/( _deltaF);  //one dimensional velocity
+               v = _fps*CMtoM*(Xcor(ID,Tnow) - Xcor(ID,Tpast))/( _deltaF);  //one dimensional velocity
           }
           if((vcmp=="X+"&& v<0)||(vcmp=="X-"&& v>0))            //no moveback
                v=0;
@@ -573,15 +576,15 @@ double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID
      {
           if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
           {
-               v = _fps*CMtoM*(Ycor[ID][Tfuture] - Ycor[ID][Tpast])/(2.0 * _deltaF);  //one dimensional velocity
+               v = _fps*CMtoM*(Ycor(ID,Tfuture) - Ycor(ID,Tpast))/(2.0 * _deltaF);  //one dimensional velocity
           }
           else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID]))
           {
-               v = _fps*CMtoM*(Ycor[ID][Tfuture] - Ycor[ID][Tnow])/(_deltaF);  //one dimensional velocity
+               v = _fps*CMtoM*(Ycor(ID,Tfuture) - Ycor(ID,Tnow))/(_deltaF);  //one dimensional velocity
           }
           else if((Tpast >=Tfirst[ID])&&(Tfuture > Tlast[ID]))
           {
-               v = _fps*CMtoM*(Ycor[ID][Tnow] - Ycor[ID][Tpast])/( _deltaF);  //one dimensional velocity
+               v = _fps*CMtoM*(Ycor(ID,Tnow) - Ycor(ID,Tpast))/( _deltaF);  //one dimensional velocity
           }
           if((vcmp=="Y+"&& v<0)||(vcmp=="Y-"&& v>0))        //no moveback
                v=0;
@@ -590,22 +593,25 @@ double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID
      {
           if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
           {
-               v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tfuture] - Xcor[ID][Tpast]),2)+pow((Ycor[ID][Tfuture] - Ycor[ID][Tpast]),2))/(2.0 * _deltaF);  //two dimensional velocity
+               v = _fps*CMtoM*sqrt(pow((Xcor(ID,Tfuture) - Xcor(ID,Tpast)),2)+
+                                   pow((Ycor(ID,Tfuture) - Ycor(ID,Tpast)),2))/(2.0 * _deltaF);  //two dimensional velocity
           }
           else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID]))
           {
-               v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tfuture] - Xcor[ID][Tnow]),2)+pow((Ycor[ID][Tfuture] - Ycor[ID][Tnow]),2))/(_deltaF);
+               v = _fps*CMtoM*sqrt(pow((Xcor(ID,Tfuture) - Xcor(ID,Tnow)),2)+
+                                   pow((Ycor(ID,Tfuture) - Ycor(ID,Tnow)),2))/(_deltaF);
           }
           else if((Tpast >=Tfirst[ID])&&(Tfuture > Tlast[ID]))
           {
-               v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tnow] - Xcor[ID][Tpast]),2)+pow((Ycor[ID][Tnow] - Ycor[ID][Tpast]),2))/(_deltaF);  //two dimensional velocity
+               v = _fps*CMtoM*sqrt(pow((Xcor(ID,Tnow) - Xcor(ID,Tpast)),2)+
+                                   pow((Ycor(ID,Tnow) - Ycor(ID,Tpast)),2))/(_deltaF);  //two dimensional velocity
           }
      }
 
      return fabs(v);
 }
 
-double PedData::GetInstantaneousVelocity1(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor) const
+double PedData::GetInstantaneousVelocity1(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, ub::matrix<double> Xcor, ub::matrix<double> Ycor) const
 {
      std::string vcmp = _vComp[ID][Tnow];  // the vcmp is the angle from 0 to 360
      if(vcmp=="X+")
@@ -631,15 +637,15 @@ double PedData::GetInstantaneousVelocity1(int Tnow,int Tpast, int Tfuture, int I
 
     	 if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
 		  {
-			 v=  _fps*CMtoM*((Xcor[ID][Tfuture] - Xcor[ID][Tpast])*cos(alpha)+(Ycor[ID][Tfuture] - Ycor[ID][Tpast])*sin(alpha))/(2.0 * _deltaF);
+                       v=  _fps*CMtoM*((Xcor(ID,Tfuture) - Xcor(ID,Tpast))*cos(alpha)+(Ycor(ID,Tfuture) - Ycor(ID,Tpast))*sin(alpha))/(2.0 * _deltaF);
 		  }
 		  else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID]))
 		  {
-			   v = _fps*CMtoM*((Xcor[ID][Tfuture] - Xcor[ID][Tnow])*cos(alpha)+(Ycor[ID][Tfuture] - Ycor[ID][Tnow])*sin(alpha))/(_deltaF);  //one dimensional velocity
+                       v = _fps*CMtoM*((Xcor(ID,Tfuture) - Xcor(ID,Tnow))*cos(alpha)+(Ycor(ID,Tfuture) - Ycor(ID,Tnow))*sin(alpha))/(_deltaF);  //one dimensional velocity
 		  }
 		  else if((Tpast >=Tfirst[ID])&&(Tfuture > Tlast[ID]))
 		  {
-			   v = _fps*CMtoM*((Xcor[ID][Tnow] - Xcor[ID][Tpast])*cos(alpha)+(Ycor[ID][Tnow] - Ycor[ID][Tpast])*sin(alpha))/( _deltaF);  //one dimensional velocity
+                       v = _fps*CMtoM*((Xcor(ID,Tnow) - Xcor(ID,Tpast))*cos(alpha)+(Ycor(ID,Tnow) - Ycor(ID,Tpast))*sin(alpha))/( _deltaF);  //one dimensional velocity
 		  }
 		  if(_IgnoreBackwardMovement && v<0)           //if no move back and pedestrian moves back, his velocity is set as 0;
 		  {
@@ -651,15 +657,15 @@ double PedData::GetInstantaneousVelocity1(int Tnow,int Tpast, int Tfuture, int I
      {
           if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
           {
-               v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tfuture] - Xcor[ID][Tpast]),2)+pow((Ycor[ID][Tfuture] - Ycor[ID][Tpast]),2))/(2.0 * _deltaF);  //two dimensional velocity
+               v = _fps*CMtoM*sqrt(pow((Xcor(ID,Tfuture) - Xcor(ID,Tpast)),2)+pow((Ycor(ID,Tfuture) - Ycor(ID,Tpast)),2))/(2.0 * _deltaF);  //two dimensional velocity
           }
           else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID]))
           {
-               v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tfuture] - Xcor[ID][Tnow]),2)+pow((Ycor[ID][Tfuture] - Ycor[ID][Tnow]),2))/(_deltaF);
+               v = _fps*CMtoM*sqrt(pow((Xcor(ID,Tfuture) - Xcor(ID,Tnow)),2)+pow((Ycor(ID,Tfuture) - Ycor(ID,Tnow)),2))/(_deltaF);
           }
           else if((Tpast >=Tfirst[ID])&&(Tfuture > Tlast[ID]))
           {
-               v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tnow] - Xcor[ID][Tpast]),2)+pow((Ycor[ID][Tnow] - Ycor[ID][Tpast]),2))/(_deltaF);  //two dimensional velocity
+               v = _fps*CMtoM*sqrt(pow((Xcor(ID,Tnow) - Xcor(ID,Tpast)),2)+pow((Ycor(ID,Tnow) - Ycor(ID,Tpast)),2))/(_deltaF);  //two dimensional velocity
           }
      }
 
@@ -668,29 +674,33 @@ double PedData::GetInstantaneousVelocity1(int Tnow,int Tpast, int Tfuture, int I
 
 void PedData::CreateGlobalVariables(int numPeds, int numFrames)
 {
-     _xCor = new double* [numPeds];
-     _yCor = new double* [numPeds];
-     _zCor = new double* [numPeds];
+     std::cout << "\n\nEnter CreateGlobalVariables with numPeds="<< numPeds << " and numFrames=" <<numFrames<< std::endl;
+     _xCor = ub::matrix<double>(numPeds, numFrames);
+     _yCor = ub::matrix<double>(numPeds, numFrames);
+     _zCor = ub::matrix<double>(numPeds, numFrames);
      _vComp = new string* [numPeds];
+     std::cout << "Allocate memory" << std::endl;
      for (int i=0; i<numPeds; i++) {
-          _xCor[i] = new double [numFrames];
-          _yCor[i] = new double [numFrames];
-          _zCor[i] = new double [numFrames];
+          //_xCor[i] = new double [numFrames];
+          //_yCor[i] = new double [numFrames];
+          //_zCor[i] = new double [numFrames];
           _vComp[i] =new string [numFrames];
      }
+     std::cout << "Finished Allocate memory" << std::endl;
      _firstFrame = new int[numPeds];  // Record the first frame of each pedestrian
      _lastFrame = new int[numPeds];  // Record the last frame of each pedestrian
+     std::cout << "Init variables" << std::endl;
      for(int i = 0; i <numPeds; i++) {
           for (int j = 0; j < numFrames; j++) {
-               _xCor[i][j] = 0;
-               _yCor[i][j] = 0;
-               _zCor[i][j] = 0;
+               _xCor(i,j) = 0;
+               _yCor(i,j) = 0;
+               _zCor(i,j) = 0;
                _vComp[i][j] ="B";
           }
           _firstFrame[i] = INT_MAX;
           _lastFrame[i] = INT_MIN;
      }
-
+     std::cout << "Leave CreateGlobalVariables" << std::endl;
 }
 
 
@@ -729,16 +739,16 @@ map<int , vector<int> > PedData::GetPedsFrame() const
      return _peds_t;
 }
 
-double** PedData::GetXCor() const
+ub::matrix<double> PedData::GetXCor() const
 {
      return _xCor;
 }
-double** PedData::GetYCor() const
+ub::matrix<double> PedData::GetYCor() const
 {
      return _yCor;
 }
 
-double** PedData::GetZCor() const
+ub::matrix<double> PedData::GetZCor() const
 {
      return _zCor;
 }

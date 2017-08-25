@@ -33,6 +33,11 @@
 #include "Method_C.h"
 #include "../Analysis.h"
 
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/io.hpp>
+namespace ub=boost::numeric::ublas;
+
+
 class Method_B
 {
 public:
@@ -49,8 +54,8 @@ private:
      MeasurementArea_B* _areaForMethod_B;
      int _NumPeds;
      float _fps;
-     double** _xCor;
-     double** _yCor;
+     ub::matrix<double> _xCor;
+     ub::matrix<double> _yCor;
      int *_tIn;           //the time for each pedestrian enter the measurement area
      int *_tOut;          //the time for each pedestrian exit the measurement area
      double *_DensityPerFrame; // the measured density in each frame

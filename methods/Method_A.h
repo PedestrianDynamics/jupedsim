@@ -2,7 +2,7 @@
  * \file        Method_A.h
  * \date        Oct 10, 2014
  * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \copyright   <2009-2017> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -39,6 +39,9 @@
 using namespace boost::geometry;
 typedef boost::geometry::model::segment<boost::geometry::model::d2::point_xy<double> > segment;
 
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/io.hpp>
+namespace ub=boost::numeric::ublas;
 
 class Method_A
 {
@@ -61,8 +64,8 @@ private:
      std::vector<double> _accumVPassLine; // the accumulative instantaneous velocity of the pedestrians pass a line
      std::map<int , std::vector<int> > _peds_t;
 
-     double** _xCor;
-     double** _yCor;
+     ub::matrix<double> _xCor;
+     ub::matrix<double> _yCor;
      int* _firstFrame;
      float _fps;
 
