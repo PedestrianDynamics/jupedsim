@@ -307,7 +307,7 @@ std::string AIRouter::GetRoutingInfoFile()
 
          string strategy=e->Attribute("description");
 
-         if(strategy=="cognitive_map")
+         if(strategy=="AI")
          {
               if(e->FirstChild("parameters"))
               {
