@@ -104,8 +104,8 @@ private:
      ub::matrix<double> _xCor;
      ub::matrix<double> _yCor;
      ub::matrix<double> _zCor;
-     std::string **_vComp= nullptr;
-
+     ub::matrix<std::string> _vComp;
+     
 };
 
 #endif /* PEDDATA_H_ */

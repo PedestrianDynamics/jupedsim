@@ -127,7 +127,6 @@ bool PedData::InitializeVariables(const string& filename)
                     {
                          // looking for this line
                          // #ID	 FR  X Y Z
-                         std::cout << "in if" << std::endl;
                     	std::vector<std::string> strs1;
                     	line.erase(0,1);
                     	boost::split(strs1, line , boost::is_any_of("\t "),boost::token_compress_on);
@@ -256,17 +255,16 @@ bool PedData::InitializeVariables(const string& filename)
           double x = xs[i]*M2CM;
           double y = ys[i]*M2CM;
           double z = zs[i]*M2CM;
-          //_xCor[ID][frm] = x;
           _xCor(ID,frm) = x;
           _yCor(ID,frm) = y;
           _zCor(ID,frm) = z;
           if(_vComponent == "F")
           {
-        	  _vComp[ID][frm] = vcmp[i];
+               _vComp(ID,frm) = vcmp[i];
           }
           else
           {
-        	  _vComp[ID][frm] = _vComponent;
+               _vComp(ID,frm) = _vComponent;
           }
      }
      Log->Write("Save the data for each frame");
@@ -373,26 +371,24 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
 
                _peds_t[frameNr].push_back(ID);
                //_xCor[ID][frameNr] =  x*M2CM;
-               std::cout << "11: ID=" << ID << " frameNr="<<frameNr<< std::endl;
                _xCor(ID,frameNr) =  x*M2CM;
-               std::cout << "22" << std::endl;
                _yCor(ID,frameNr) =  y*M2CM;
                _zCor(ID,frameNr) =  z*M2CM;
                if(_vComponent == "F")
                {
             	   if(xAgent->Attribute("VD"))
             	   {
-            	       _vComp[ID][frameNr] = *string(xAgent->Attribute("VD")).c_str();
+                        _vComp(ID,frameNr) = *string(xAgent->Attribute("VD")).c_str();
             	   }
             	   else
             	   {
-            		   Log->Write("ERROR:\t There is no indicator for velocity component in trajectory file or ini file!!");
-            		   return false;
+                        Log->Write("ERROR:\t There is no indicator for velocity component in trajectory file or ini file!!");
+                        return false;
             	   }
                }
                else
                {
-                    _vComp[ID][frameNr] = _vComponent;
+                    _vComp(ID,frameNr) = _vComponent;
                }
 
                if(frameNr < _firstFrame[ID])
@@ -407,7 +403,6 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
           }
           //frameNr++;
      }
-     std::cout << "check trajectories" << std::endl;
      for(int id = 0; id<_numPeds; id++)
      {
          int actual_totalframe= totalframes[id];
@@ -552,7 +547,7 @@ vector<int> PedData::GetIdInFrame(int frame, const vector<int>& ids, double zPos
 
 double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, ub::matrix<double> Xcor, ub::matrix<double> Ycor) const
 {
-     std::string vcmp = _vComp[ID][Tnow];
+     std::string vcmp = _vComp(ID,Tnow);
      double v=0.0;
     //check the component used in the calculation of velocity
      if(vcmp == "X" || vcmp == "X+"|| vcmp == "X-")
@@ -613,7 +608,7 @@ double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID
 
 double PedData::GetInstantaneousVelocity1(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, ub::matrix<double> Xcor, ub::matrix<double> Ycor) const
 {
-     std::string vcmp = _vComp[ID][Tnow];  // the vcmp is the angle from 0 to 360
+     std::string vcmp = _vComp(ID,Tnow);  // the vcmp is the angle from 0 to 360
      if(vcmp=="X+")
      {
     	 vcmp="0";
@@ -674,33 +669,29 @@ double PedData::GetInstantaneousVelocity1(int Tnow,int Tpast, int Tfuture, int I
 
 void PedData::CreateGlobalVariables(int numPeds, int numFrames)
 {
-     std::cout << "\n\nEnter CreateGlobalVariables with numPeds="<< numPeds << " and numFrames=" <<numFrames<< std::endl;
+     Log->Write("INFO: Enter CreateGlobalVariables with numPeds=%d and numFrames=%d", numPeds, numFrames);
+     Log->Write("INFO: allocate memory for xCor");
      _xCor = ub::matrix<double>(numPeds, numFrames);
+     Log->Write("INFO: allocate memory for yCor");
      _yCor = ub::matrix<double>(numPeds, numFrames);
+     Log->Write("INFO: allocate memory for zCor");
      _zCor = ub::matrix<double>(numPeds, numFrames);
-     _vComp = new string* [numPeds];
-     std::cout << "Allocate memory" << std::endl;
-     for (int i=0; i<numPeds; i++) {
-          //_xCor[i] = new double [numFrames];
-          //_yCor[i] = new double [numFrames];
-          //_zCor[i] = new double [numFrames];
-          _vComp[i] =new string [numFrames];
-     }
-     std::cout << "Finished Allocate memory" << std::endl;
+     Log->Write("INFO: allocate memory for vComp");
+     _vComp = ub::matrix<std::string>(numPeds, numFrames);
+     Log->Write(" Finished memory allocation");   
      _firstFrame = new int[numPeds];  // Record the first frame of each pedestrian
      _lastFrame = new int[numPeds];  // Record the last frame of each pedestrian
-     std::cout << "Init variables" << std::endl;
      for(int i = 0; i <numPeds; i++) {
           for (int j = 0; j < numFrames; j++) {
                _xCor(i,j) = 0;
                _yCor(i,j) = 0;
                _zCor(i,j) = 0;
-               _vComp[i][j] ="B";
+               _vComp(i,j) ="B";
           }
           _firstFrame[i] = INT_MAX;
           _lastFrame[i] = INT_MIN;
      }
-     std::cout << "Leave CreateGlobalVariables" << std::endl;
+     Log->Write("INFO: Leave CreateGlobalVariables()");
 }
 
 
