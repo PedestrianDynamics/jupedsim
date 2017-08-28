@@ -10,7 +10,8 @@
 /figs
 /figs_bot
 /inputfiles
-/Utest
+/Utest/*.txt
+/Utest/rimea_tests/*/*.txt
 /Utest/*/inifiles*/
 /Utest/*/trajectories
 /Utest/rimea_tests/*/inifiles*/
@@ -128,3 +129,10 @@ inputfiles/U8/
 inputfiles/VerteilerEbene/
 .idea*
 idea/codeStyleSettings.xml
+*.fls
+*.fdb_latexmk
+*.tex
+*.aux
+*.log
+*.pdf
+/Utest/rimea_tests/figures
