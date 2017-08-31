@@ -251,7 +251,6 @@ const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & positio
     for(EdgesContainer::const_iterator it = this->GetAllOutEdges()->begin(); it != this->GetAllOutEdges()->end(); ++it) {
         if ((*it)->GetCrossing()->IsExit())
             exitEdges.push(std::make_pair((*it)->GetWeight(position), (*it)));
-        //edges.push(std::make_pair((*it)->GetFactor(), (*it)));
          edges.push(std::make_pair((*it)->GetFactor(), (*it)));
     }
 

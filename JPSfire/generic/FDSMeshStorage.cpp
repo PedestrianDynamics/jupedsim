@@ -164,9 +164,20 @@ void FDSMeshStorage::CreateDoorList()
                   _doorlist.push_back(tempString);
            }
         }
-    }
-}
 
+//         for( fs::directory_iterator iter(_filepath + _quantitylist[0] +
+//            "/Z_" + std::to_string(elv) ) ; iter != end ; ++iter )
+//             {
+//               if ( fs::is_directory( *iter ) )
+//               {
+//                   std::string door_dir = iter->path().string();
+//                   door_dir =  door_dir.substr( door_dir.find_last_of("/\\") + 1 );
+//                   std::string elv_dir = "Z_" + ( "%.6f", std::to_string(elv)) ;
+//                   std::cout << elv_dir + "/" + door_dir << std::endl;
+//                    _doorlist.push_back(elv_dir + "/" + door_dir);
+//               }
+//             }
+// >>>>>>> jpsfire_toxicity_analysis
 
 void FDSMeshStorage::CreateTimeList()
 {

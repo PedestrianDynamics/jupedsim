@@ -116,8 +116,8 @@ bool VelocityModel::Init (Building* building)
          }
 
 
-         
-         
+
+
          Point target = ped->GetExitLine()->ShortestPoint(ped->GetPos());
          Point d = target - ped->GetPos();
          double dist = d.Norm();
@@ -231,7 +231,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 double spacing = spacings[0].first;
                 //============================================================
                 // TODO: Hack for Head on situations: ped1 x ------> | <------- x ped2
-//              printf("\ndirection %f, %f, norm = %f\n", direction._x, direction._y, direction.NormSquare());
                 if(0 && direction.NormSquare() < 0.5)
                 {
                       double pi_half = 1.57079663;
@@ -245,6 +244,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 //Point tmp;
                 Point speed = direction.Normalized() *OptimalSpeed(ped, spacing);
                 result_acc.push_back(speed);                
+
                 spacings.clear(); //clear for ped p
 
                 // stuck peds get removed. Warning is thrown. low speed due to jam is omitted.
@@ -256,6 +256,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                       #pragma omp critical(VelocityModel_ComputeNextTimeStep_pedsToRemove)
                       pedsToRemove.push_back(ped);
                 }
+
            } // for p
 
            #pragma omp barrier
