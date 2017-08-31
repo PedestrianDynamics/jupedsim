@@ -14,12 +14,12 @@ def runtest3(inifile, trajfile):
     #       x     y1   y2
     #       |     |    |
     #       v     v    v
-    door= [8.5, 2.0, 3.0] # value from geometry file. Door is at 9.0 m shifted bu 0.5 m
+    door= [8.5, 2.0, 3.0] # value from geometry file. Door is at 9.0 m shifted by 0.5 m
     maxtime = get_maxtime(inifile)
     fps, N, traj = parse_file(trajfile)
     evac_time = (max(traj[:, 1]) - min(traj[:, 1])) / float(fps)
     if evac_time > maxtime*0.5 or not PassedLineX(traj, door):
-        logging.info("%s exits with FAILURE evac_time = %f (maxtime =  %f)" % (argv[0], evac_time, maxtime))
+        logging.info("%s exits with FAILURE. evac_time = %f (maxtime =  %f) or not passed exit" % (argv[0], evac_time, maxtime))
         exit(FAILURE)
     else:
         logging.info("evac_time = %f (maxtime =  %f)" % (evac_time, maxtime))
