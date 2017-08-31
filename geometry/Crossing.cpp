@@ -96,11 +96,11 @@ void Crossing::Open()
 bool Crossing::IsInSubRoom(int subroomID) const
 {
      bool r1, r2;
-     if (_subRoom1 != NULL)
+     if (_subRoom1 != nullptr)
           r1 = _subRoom1->GetSubRoomID() == subroomID;
      else
           r1 = false;
-     if (_subRoom2 != NULL)
+     if (_subRoom2 != nullptr)
           r2 = _subRoom2->GetSubRoomID() == subroomID;
      else
           r2 = false;
@@ -119,7 +119,7 @@ SubRoom* Crossing::GetOtherSubRoom(int roomID, int subroomID) const
      else {
           Log->Write("WARMING: \tCrossing::GetOtherSubRoom No exit found "
                      "on the other side\n ID=%hd, roomID=%hd, subroomID=%hd\n",GetID(),roomID,subroomID);
-          return NULL;
+          return nullptr;
      }
 }
 

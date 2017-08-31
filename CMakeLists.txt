@@ -5,7 +5,7 @@
 # -DBUILD_TESTING=ON (default OFF) for python tests
 # -DBUILD_CPPUNIT_TEST=ON (default OFF) for unit tests
 # -DUSE_DUAL_ABI=ON (default OFF)  https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
-# -D Boost_NO_SYSTEM_PATHS=true (default false) -D BOOST_ROOT=PATH_where_to_find_boost 
+# -D Boost_NO_SYSTEM_PATHS=true (default false) -D BOOST_ROOT=PATH_where_to_find_boost
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
@@ -71,7 +71,6 @@ if (NOT DEFINED PROCESSOR_COUNT)
 endif (NOT DEFINED PROCESSOR_COUNT)
 
 if (PROCESSOR_COUNT)
-
      message( STATUS "PROCESSOR_COUNT: " ${PROCESSOR_COUNT})
     #  set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
     message(STATUS "PROCESSOR_COUNT: 1")
@@ -165,7 +164,7 @@ endif (APPLE)
 
 if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
-  set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/stage/lib")
+  set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
   set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${BOOST_ROOT})
   set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${BOOST_LIBRARY_DIRS})
 endif (Boost_NO_SYSTEM_PATHS)
@@ -287,7 +286,7 @@ set(source_files
 
         #floorfield
         routing/ff_router/ffRouter.cpp
-        routing/ff_router/LocalFloorfieldViaFM.cpp
+        #routing/ff_router/LocalFloorfieldViaFM.cpp
         routing/ff_router/FloorfieldViaFM.cpp
         #routing/ff_router/FFKit.cpp
         routing/ff_router/UnivFFviaFM.cpp
@@ -318,11 +317,11 @@ set(source_files
         routing/ai_router/sensor/DiscoverDoorsSensor.cpp
         routing/ai_router/sensor/JamSensor.cpp
         routing/ai_router/sensor/LastDestinationsSensor.cpp
-        routing/ai_router/sensor/SmokeSensor.cpp
+        #routing/ai_router/sensor/SmokeSensor.cpp
         routing/ai_router/sensor/locater.cpp
-        routing/ai_router/fire_mesh/FireMesh.cpp
-        routing/ai_router/fire_mesh/Knot.cpp
-        routing/ai_router/fire_mesh/FireMeshStorage.cpp
+        #routing/ai_router/fire_mesh/FireMesh.cpp
+        #routing/ai_router/fire_mesh/Knot.cpp
+        #routing/ai_router/fire_mesh/FireMeshStorage.cpp
         routing/ai_router/cognitiveMap/associations.cpp
         routing/ai_router/cognitiveMap/connection.cpp
         routing/ai_router/cognitiveMap/cognitivemap.cpp
@@ -345,6 +344,15 @@ set(source_files
         poly2tri/sweep/cdt.cpp
         events/EventManager.cpp
         events/Event.cpp
+
+        JPSfire/generic/FDSMesh.cpp
+        JPSfire/generic/Knot.cpp
+        JPSfire/generic/FDSMeshStorage.cpp
+        JPSfire/A_smoke_sensor/SmokeSensor.cpp
+        JPSfire/B_walking_speed/WalkingSpeed.cpp
+        JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
+        JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
+
         math/KrauszModel.cpp)
 
 set(header_files
@@ -353,13 +361,17 @@ set(header_files
         routing/ff_router/ffRouter.h
         routing/ff_router/RectGrid.h
         routing/ff_router/Trial.h
-        routing/ff_router/LocalFloorfieldViaFM.h
+        #routing/ff_router/LocalFloorfieldViaFM.h
         routing/ff_router/FloorfieldViaFM.h
         #routing/ff_router/FFKit.h
         routing/ff_router/UnivFFviaFM.h
 
         #general
         routing/DirectionStrategy.h
+        routing/DummyRouter.h
+        routing/GlobalRouter.h
+        routing/QuickestPathRouter.h
+        routing/SafestPathRouter.h
         routing/Router.h
         routing/RoutingEngine.h
 
@@ -384,11 +396,11 @@ set(header_files
         routing/ai_router/sensor/DiscoverDoorsSensor.h
         routing/ai_router/sensor/JamSensor.h
         routing/ai_router/sensor/LastDestinationsSensor.h
-        routing/ai_router/sensor/SmokeSensor.h
+        #routing/ai_router/sensor/SmokeSensor.h
         routing/ai_router/sensor/locater.h
-        routing/ai_router/fire_mesh/FireMesh.h
-        routing/ai_router/fire_mesh/Knot.h
-        routing/ai_router/fire_mesh/FireMeshStorage.h
+        #routing/ai_router/fire_mesh/FireMesh.h
+        #routing/ai_router/fire_mesh/Knot.h
+        #routing/ai_router/fire_mesh/FireMeshStorage.h
         routing/ai_router/cognitiveMap/associations.h
         routing/ai_router/cognitiveMap/connection.cpp
         routing/ai_router/cognitiveMap/cognitivemap.h
@@ -464,8 +476,15 @@ set(header_files
         poly2tri/sweep/sweep.h
         events/EventManager.h
         events/Event.h
-        )
 
+        JPSfire/generic/FDSMesh.h
+        JPSfire/generic/Knot.h
+        JPSfire/generic/FDSMeshStorage.h
+        JPSfire/A_smoke_sensor/SmokeSensor.h
+        JPSfire/B_walking_speed/WalkingSpeed.h
+        JPSfire/C_toxicity_analysis/ToxicityAnalysis.h
+        JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
+        )
 
 add_library(core STATIC ${source_files})
 
@@ -479,10 +498,10 @@ add_executable(jpscore main.cpp)
 
 if (Boost_FOUND)
     message(STATUS "BOOST FOUND: " ${Boost_LIB_VERSION})
-#    message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
-#    message(STATUS "Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIR})
-#    message(STATUS "Boost_LIB_VERSION: " ${Boost_LIB_VERSION})
-#    message(STATUS "Boost_libraries: " ${Boost_LIBRARIES})
+    message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
+    message(STATUS "Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIR})
+    message(STATUS "Boost_LIB_VERSION: " ${Boost_LIB_VERSION})
+    message(STATUS "Boost_libraries: " ${Boost_LIBRARIES})
     link_directories(${Boost_LIBRARY_DIRS})
 
     # suppress warnings in boost libraries with attribute SYSTEM
@@ -587,7 +606,7 @@ if (MSVC)
   message(STATUS "MSVC: " ${MSVC})
 elseif (MSVC_IDE)
   message(STATUS "MSVC_IDE: " ${MSVC_IDE})
-elseif(MSVC60)  
+elseif(MSVC60)
   message(STATUS "MSVC60: " ${MSVC60})
 elseif(MSVC71)
   message(STATUS "MSVC71: " ${MSVC71})

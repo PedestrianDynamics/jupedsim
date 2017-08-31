@@ -32,7 +32,7 @@ using namespace std;
 
 DTriangulation::DTriangulation()
 {
-     _cdt=NULL;
+     _cdt=nullptr;
 }
 
 DTriangulation::~DTriangulation()

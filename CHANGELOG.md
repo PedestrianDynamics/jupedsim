@@ -4,13 +4,20 @@ All notable changes to this project will be documented in this file.
 ## v0.8.2 [unreleased]
 Repository moved to [new server](https://gitlab.version.fz-juelich.de/jupedsim/jpscore)
 ### Added
+- 
+- Adding rolling flow for validation tests (a74f9ba465efc9706b7e0bbe4e51c1cae66b356f)
+- New smoke sensor. Adapt speed of agents walking in smoke. See branch [jpsfire_toxicity_analysis](https://gitlab.version.fz-juelich.de/jupedsim/jpscore/commits/jpsfire_toxicity_analysis)
 - New option for `groups`. It is now possible to load the first positions of pedestrians from a file. 
   Needed for better comparison with experiments. Use attribute: `positions_dir="/path/to/directory/"` `unit="cm"`.
-  The unit of the trajectories can be specified. Default is meter.
+  The unit of the trajectories can be specified. Default is meter. (!3)
 - New router: prototype of the floorfield based, quickest router `ff_quickest`. This router will re-asses all routes
   including agents into its routing-calculations. Jams will be avoided, if a clear route is available.
 
 ### Changed
+- Using only Gitlab CI
+- update to RiMEA test 3.0 [changelog_rimea.txt](https://gitlab.version.fz-juelich.de/jupedsim/jpscore/blob/mergePrototype/Utest/rimea_tests/changelog_rimea.txt). Thanks @schumacher3
+- automatically make a report with RiMEA tests (!7). Thanks @zhong1
+- renamed options `start_x` and `start_y` to `startX` and `startY` resp. (bf28854f)
 - New Progressbar (ec7c9b0c)
 - UnivFFviaFM class replaces the old (Local)FloorfieldViaFM classes
 - FFRouter (`ff_global_shortest`, `ff_quickest`) will delay calculations to a point between timesteps to use all available cores.
@@ -20,8 +27,10 @@ Repository moved to [new server](https://gitlab.version.fz-juelich.de/jupedsim/j
 - Direction Strategy will be matched, if FFRouter is used (auto-set to exit strat `8`)
 
 ### Fixed 
+- Wrong Z-component in trajectories (!4)
+- Several bug fixes
 - isClockwise() fixed
-- isInSubroom() fixed
+- isInSubroom() fixed (#238)
 - agents getting stuck and oscillating fixed (#247)
 - router problems with `ff_global_shortest` fixed (#245)
 - parameters for direction strategy `8`,`9` will be used (`wall_avoid_distance`,`delta_h`, `use_wall_avoidance`)

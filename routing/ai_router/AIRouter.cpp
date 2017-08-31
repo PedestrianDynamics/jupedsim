@@ -93,18 +93,18 @@ int AIRouter::FindExit(Pedestrian * p)
     }
 
     //std::cout << p->GetGlobalTime() << std::endl;
-    if (std::fmod(p->GetGlobalTime(),sensor_manager->GetIntVPeriodicUpdate())==0.0 && p->GetGlobalTime()>0)
-    {
-        //Log->Write(std::to_string(p->GetGlobalTime()));
-        sensor_manager->execute(p, SensorManager::PERIODIC);
+//    if (std::fmod(p->GetGlobalTime(),sensor_manager->GetIntVPeriodicUpdate())==0.0 && p->GetGlobalTime()>0)
+//    {
+//        //Log->Write(std::to_string(p->GetGlobalTime()));
+//        sensor_manager->execute(p, SensorManager::PERIODIC);
 
-        int status = FindDestination(p);
+//        int status = FindDestination(p);
 
-        //(*cm_storage)[p]->UpdateSubRoom();
+//        //(*cm_storage)[p]->UpdateSubRoom();
 
-        return status;
+//        return status;
 
-    }
+//    }
     return 1;
 }
 
@@ -121,17 +121,18 @@ int AIRouter::FindDestination(Pedestrian * p)
         //--------------------COGMAP----------------------------
         //See if Landmarks are visible
 
-        (*brain_storage)[p]->GetCognitiveMap().UpdateMap();
+        //(*brain_storage)[p]->GetCognitiveMap().UpdateMap();
         //Find next appropriate landmark
-        (*brain_storage)[p]->GetCognitiveMap().FindNextTarget();
+        //(*brain_storage)[p]->GetCognitiveMap().FindNextTarget();
         //Find appropriate door to reach next app. landmark
-        (*brain_storage)[p]->GetCognitiveMap().AssessDoors();
+        //(*brain_storage)[p]->GetCognitiveMap().AssessDoors();
         //------------------------------------------------------
 
         //Log->Write(std::to_string((*cm_storage)[p]->GetOwnPos().GetX())+" "+std::to_string((*cm_storage)[p]->GetOwnPos().GetY()));
 
-        destination = (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->GetLocalDestination();
+        destination = (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->GetDestination();
         if(destination == nullptr) {
+            Log->Write("Gruess dich");
             //no destination was found, now we could start the discovery!
             //1. run the no_way sensors for room discovery.
             sensor_manager->execute(p, SensorManager::NO_WAY);
@@ -163,7 +164,7 @@ int AIRouter::FindDestination(Pedestrian * p)
         const NavLine* nextNavLine=(*brain_storage)[p]->GetNextNavLine(nextTarget);
 
         if (nextNavLine==nullptr)
-            Log->Write("ERROR: \t No visible next subtarget found");
+            Log->Write("ERROR: \t No visible next subtarget found. PED " + std::to_string(p->GetID()) );
 
         //setting crossing to ped
         p->SetExitLine(nextNavLine);
@@ -306,7 +307,7 @@ std::string AIRouter::GetRoutingInfoFile()
 
          string strategy=e->Attribute("description");
 
-         if(strategy=="cognitive_map")
+         if(strategy=="AI")
          {
               if(e->FirstChild("parameters"))
               {

@@ -1251,7 +1251,7 @@ const Point* Stair::CheckCorner(const Point** otherPoint, const Point** aktPoint
 {
      Point l1 = **otherPoint - **aktPoint;
      Point l2 = *nextPoint - **aktPoint;
-     const Point* rueck = NULL;
+     const Point* rueck = nullptr;
      // Punkte bilden eine Linie
      if (fabs(fabs(l1.ScalarProduct(l2) / (l1.Norm() * l2.Norm())) - 1) < 0.1) {
           *aktPoint = nextPoint;
@@ -1299,15 +1299,15 @@ bool Stair::ConvertLineToPoly(const vector<Line*>& goals)
      // Polygon aus allen Linen erzeugen
      for (int i = 0; i < (int) copy.size(); i++) {
           nextLine = copy[i];
-          nextPoint = NULL;
+          nextPoint = nullptr;
           if ((*aktPoint - nextLine->GetPoint1()).Norm() < J_TOLERANZ) {
                nextPoint = &nextLine->GetPoint2();
           } else if ((*aktPoint - nextLine->GetPoint2()).Norm() < J_TOLERANZ) {
                nextPoint = &nextLine->GetPoint1();
           }
-          if (nextPoint != NULL) {
+          if (nextPoint != nullptr) {
                const Point* rueck = CheckCorner(&otherPoint, &aktPoint, nextPoint);
-               if (rueck != NULL)
+               if (rueck != nullptr)
                     orgPoly.push_back(*rueck);
                copy.erase(copy.begin() + i);
                i = -1; // von vorne suchen
@@ -1315,7 +1315,7 @@ bool Stair::ConvertLineToPoly(const vector<Line*>& goals)
      }
      if ((*aktPoint - *firstOtherPoint).Norm() < J_TOLERANZ) {
           const Point* rueck = CheckCorner(&otherPoint, &aktPoint, firstAktPoint);
-          if (rueck != NULL)
+          if (rueck != nullptr)
                orgPoly.push_back(*rueck);
      } else {
           char tmp[CLENGTH];

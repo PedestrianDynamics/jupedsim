@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<routing version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/jps_routing.xsd" unit="m">
+    <Hlines>
+        <Hline id="1000" room_id="0" subroom_id="0">
+            <vertex px="2" py="2"/>
+            <vertex px="3.03333" py="0.2"/>
+        </Hline>
+        <Hline id="1001" room_id="0" subroom_id="0">
+            <vertex px="3.06667" py="6.46667"/>
+            <vertex px="7.96667" py="6.06667"/>
+        </Hline>
+        <Hline id="1002" room_id="1" subroom_id="0">
+            <vertex px="2.06667" py="6.66667"/>
+            <vertex px="2.06667" py="8.9"/>
+        </Hline>
+    </Hlines>
+</routing>

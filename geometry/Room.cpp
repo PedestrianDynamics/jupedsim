@@ -45,7 +45,7 @@ Room::Room()
      _state=ROOM_CLEAN; //smoke-free
      _caption = "no room caption";
      _zPos = -1.0;
-     _outputFile=NULL;
+     _outputFile=nullptr;
      _egressTime=0;
 }
 

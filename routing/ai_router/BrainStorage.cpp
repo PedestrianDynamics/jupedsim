@@ -282,8 +282,9 @@ void BrainStorage::CreateBrain(BStorageKeyType ped)
 
      _brains.insert(std::make_pair(ped, std::make_shared<Brain>(_building,
                                                                 ped,
-                                                                &_visibleEnv,
+                                                                nullptr,
                                                                 &_roominternalNetworks)));//  creator->CreateCognitiveMap(ped)));
+
 
      // if cognitive map is complete (complete graph network is known by every ped)
      if (_cogMapStatus=="complete")
@@ -300,19 +301,23 @@ void BrainStorage::CreateBrain(BStorageKeyType ped)
          //Add crossings as edges
          for(auto&& itr_cross: _building->GetAllCrossings())
          {
+             if (itr_cross.second->IsOpen())
               _brains[ped]->GetCognitiveMap().GetGraphNetwork()->Add(itr_cross.second);
          }
 
          //Add transitions as edges
          for(auto&& itr_trans: _building->GetAllTransitions())
          {
-              if(itr_trans.second->IsExit())
+              if (itr_trans.second->IsOpen())
               {
-                   _brains[ped]->GetCognitiveMap().GetGraphNetwork()->AddExit(itr_trans.second);
-              }
-              else
-              {
-                   _brains[ped]->GetCognitiveMap().GetGraphNetwork()->Add(itr_trans.second);
+                  if(itr_trans.second->IsExit())
+                  {
+                       _brains[ped]->GetCognitiveMap().GetGraphNetwork()->AddExit(itr_trans.second);
+                  }
+                  else
+                  {
+                       _brains[ped]->GetCognitiveMap().GetGraphNetwork()->Add(itr_trans.second);
+                  }
               }
          }
      }

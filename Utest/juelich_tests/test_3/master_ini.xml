@@ -134,7 +134,7 @@
   </operational_models>
 
   <route_choice_models>
-    <router router_id="1" description="local_shortest">
+    <router router_id="1" description="ff_global_shortest">
       <parameters>
         <!--<navigation_lines file="routing.xml" />-->
       </parameters>

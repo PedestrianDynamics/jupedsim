@@ -66,14 +66,14 @@ void GraphEdge::CalcApproximateDistance()
      int count = 0;
      for(std::vector<Crossing*>::const_iterator it = _src->GetSubRoom()->GetAllCrossings().begin(); it != _src->GetSubRoom()->GetAllCrossings().end(); ++it) {
           if(_crossing->GetUniqueID() == (*it)->GetUniqueID()) continue;
-          if(GetDest() != NULL && ((*it)->GetSubRoom1() == GetDest()->GetSubRoom() || (*it)->GetSubRoom2() == GetDest()->GetSubRoom())) continue;
+          if(GetDest() != nullptr && ((*it)->GetSubRoom1() == GetDest()->GetSubRoom() || (*it)->GetSubRoom2() == GetDest()->GetSubRoom())) continue;
           count++;
           distance = distance + (((*it)->GetCentre() - _crossing->GetCentre()).Norm());
      }
 
      for(std::vector<Transition*>::const_iterator it = _src->GetSubRoom()->GetAllTransitions().begin(); it != _src->GetSubRoom()->GetAllTransitions().end(); ++it) {
           if(_crossing->GetUniqueID() == (*it)->GetUniqueID()) continue;
-          if(GetDest() != NULL && ((*it)->GetSubRoom1() == GetDest()->GetSubRoom() || (*it)->GetSubRoom2() == GetDest()->GetSubRoom())) continue;
+          if(GetDest() != nullptr && ((*it)->GetSubRoom1() == GetDest()->GetSubRoom() || (*it)->GetSubRoom2() == GetDest()->GetSubRoom())) continue;
           count++;
           distance = distance + (((*it)->GetCentre() - _crossing->GetCentre()).Norm());
      }
@@ -140,7 +140,7 @@ void GraphEdge::SetFactor(double factor, std::string name)
 
 double GraphEdge::GetRoomToFloorFactor() const
 {
-     if(GetDest() == NULL || GetDest()->GetSubRoom()->GetType() == GetSrc()->GetSubRoom()->GetType()) return 1.0;
+     if(GetDest() == nullptr || GetDest()->GetSubRoom()->GetType() == GetSrc()->GetSubRoom()->GetType()) return 1.0;
      if(GetDest()->GetSubRoom()->GetType() == "floor") return 1.0;
      else return 5.0;
 }

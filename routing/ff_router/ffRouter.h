@@ -63,7 +63,7 @@
 #include "../Router.h"
 #include "../../general/Macros.h"
 #include "../../geometry/Building.h"
-#include "LocalFloorfieldViaFM.h"
+#include "FloorfieldViaFM.h"
 #include "UnivFFviaFM.h"
 
 class Building;

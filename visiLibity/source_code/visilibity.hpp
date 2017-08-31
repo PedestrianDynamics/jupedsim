@@ -2016,7 +2016,7 @@ namespace VisiLibity
   public:
     //Constructors
     /// default to empty 
-    Visibility_Graph() { n_=0; adjacency_matrix_ = NULL; }
+    Visibility_Graph() { n_=0; adjacency_matrix_ = nullptr; }
     /// copy 
     Visibility_Graph( const Visibility_Graph& vg2 );
     /** \brief  construct the visibility graph of Environment vertices

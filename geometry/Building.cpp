@@ -521,7 +521,7 @@ Transition* Building::GetTransition(int ID) const //ar.graf: added const 2015-12
      }
      else {
           if (ID==-1)
-               return NULL;
+               return nullptr;
           else {
                Log->Write(
                          "ERROR: I could not find any transition with the 'ID' [%d]. You have defined [%d] transitions",
@@ -538,7 +538,7 @@ Crossing* Building::GetCrossing(int ID)
      }
      else {
           if (ID==-1)
-               return NULL;
+               return nullptr;
           else {
                Log->Write(
                          "ERROR: I could not find any crossing with the 'ID' [%d]. You have defined [%d] transitions",
@@ -555,7 +555,7 @@ Goal* Building::GetFinalGoal(int ID) const
      }
      else {
           if (ID==-1)
-               return NULL;
+               return nullptr;
           else {
                Log->Write(
                          "ERROR: I could not find any goal with the 'ID' [%d]. You have defined [%d] goals",
@@ -585,7 +585,7 @@ Crossing* Building::GetTransOrCrossByName(string caption) const
      }
 
      Log->Write("WARNING: No Transition or Crossing with Caption: "+caption);
-     return NULL;
+     return nullptr;
 }
 
 Hline* Building::GetTransOrCrossByUID(int id) const
@@ -614,7 +614,7 @@ Hline* Building::GetTransOrCrossByUID(int id) const
           }
      }
      Log->Write("ERROR: No Transition or Crossing or hline with ID %d: ", id);
-     return NULL;
+     return nullptr;
 }
 
 SubRoom* Building::GetSubRoomByUID(int uid) const
@@ -626,7 +626,7 @@ SubRoom* Building::GetSubRoomByUID(int uid) const
           }
      }
      Log->Write("ERROR:\t No subroom exits with the unique id %d", uid);
-     return NULL;
+     return nullptr;
 }
 
 //bool Building::IsVisible(Line* l1, Line* l2, bool considerHlines)
@@ -921,7 +921,7 @@ Pedestrian* Building::GetPedestrian(int pedID) const
           }
      }
 
-     return NULL;
+     return nullptr;
 }
 
 Transition* Building::GetTransitionByUID(int uid) const

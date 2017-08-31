@@ -60,7 +60,7 @@ class Trajectories
 public:
      Trajectories()
      {
-          _outputHandler = NULL;
+          _outputHandler = nullptr;
      };
      virtual ~Trajectories(){delete _outputHandler;};
      virtual void WriteHeader(long nPeds, double fps, Building* building, int seed)=0;

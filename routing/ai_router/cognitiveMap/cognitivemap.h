@@ -2,7 +2,7 @@
 #define COGNITIVEMAP_H
 
 #ifndef UPDATE_RATE
-#define UPDATE_RATE 0.1
+#define UPDATE_RATE 1.0
 #endif
 
 

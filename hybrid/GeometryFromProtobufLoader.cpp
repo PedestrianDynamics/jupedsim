@@ -58,7 +58,7 @@ bool GeometryFromProtobufLoader::LoadGeometry(Building* building)
                double B_y = 0.0; //TODO: not yet implemented in proto file [gl march '16]
                double C_z = 0.0; //TODO: not yet implemented in proto file [gl march '16]
 
-               SubRoom* subroom = NULL;
+               SubRoom* subroom = nullptr;
 
                //TODO: not yet implemented in proto file [gl march '16]
                Log->Write(

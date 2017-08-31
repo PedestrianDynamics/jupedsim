@@ -131,7 +131,7 @@ bool VelocityModel::Init (Building* building)
               return false;
          }
 
-         ped->InitV0(target); 
+         ped->InitV0(target);
 
          JEllipse E = ped->GetEllipse();
          E.SetCosPhi(cosPhi);
@@ -149,10 +149,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
       pedsToRemove.reserve(500);
       unsigned long nSize;
       nSize = allPeds.size();
-     //debug
-     //if (allPeds[0]->GetID() == 21 && allPeds[0]->GetPos()._y < -1.129) {
-     //     Log->Write("now");
-     //}
 
       int nThreads = omp_get_max_threads();
 
@@ -160,7 +156,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
       int partSize;
       partSize = ((int)nSize > nThreads)? (int) (nSize / nThreads):(int)nSize;
       if(partSize == (int)nSize)
-            nThreads = 1; // not worthy to parallelize 
+            nThreads = 1; // not worthy to parallelize
       #pragma omp parallel default(shared) num_threads(nThreads)
       {
            vector< Point > result_acc = vector<Point > ();
@@ -226,12 +222,12 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 }
                 // @todo: get spacing to walls
                 // @todo: update direction every DT?
-                
+
                 // if(ped->GetID()==-10)
-                //       std::cout << "time: " << ped->GetGlobalTime() << "  |  updateRate  " <<ped->GetUpdateRate() << "   modulo " <<fmod(ped->GetGlobalTime(), ped->GetUpdateRate())<<std::endl; 
+                //       std::cout << "time: " << ped->GetGlobalTime() << "  |  updateRate  " <<ped->GetUpdateRate() << "   modulo " <<fmod(ped->GetGlobalTime(), ped->GetUpdateRate())<<std::endl;
 
                 // calculate min spacing
-                std::sort(spacings.begin(), spacings.end(), sort_pred());                
+                std::sort(spacings.begin(), spacings.end(), sort_pred());
                 double spacing = spacings[0].first;
                 //============================================================
                 // TODO: Hack for Head on situations: ped1 x ------> | <------- x ped2
@@ -244,13 +240,13 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                       printf("\nRotate %f, %f, norm = %f alpha = %f, spacing = %f\n", direction._x, direction._y, direction.NormSquare(), alpha, spacing);
                       getc(stdin);
                 }
-                //============================================================                
+                //============================================================
                 //double winkel = spacings[0].second;
                 //Point tmp;
                 Point speed = direction.Normalized() *OptimalSpeed(ped, spacing);
                 result_acc.push_back(speed);                
                 spacings.clear(); //clear for ped p
-                
+
                 // stuck peds get removed. Warning is thrown. low speed due to jam is omitted.
                 if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime() &&
                           std::max(ped->GetMeanVelOverRecTime(), ped->GetV().Norm()) < 0.01 &&
@@ -260,7 +256,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                       #pragma omp critical(VelocityModel_ComputeNextTimeStep_pedsToRemove)
                       pedsToRemove.push_back(ped);
                 }
-
            } // for p
 
            #pragma omp barrier
@@ -298,7 +293,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
             building->DeletePedestrian(pedsToRemove[p]);
       }
       pedsToRemove.clear();
-           
 }
 
 Point VelocityModel::e0(Pedestrian* ped, Room* room) const
@@ -347,11 +341,11 @@ double VelocityModel::OptimalSpeed(Pedestrian* ped, double spacing) const
 // return spacing and id of the nearest pedestrian
 my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei, int periodic) const
 {
-      Point distp12 = ped2->GetPos() - ped1->GetPos(); // inversed sign 
+      Point distp12 = ped2->GetPos() - ped1->GetPos(); // inversed sign
       if(periodic){
             double x = ped1->GetPos()._x;
             double x_j = ped2->GetPos()._x;
-            
+
             if((xRight-x) + (x_j-xLeft) <= cutoff){
                  distp12._x = distp12._x + xRight - xLeft;
             }
@@ -377,13 +371,13 @@ my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei, 
             return  my_pair(distp12.Norm(), ped2->GetID());
       else
             return  my_pair(FLT_MAX, ped2->GetID());
-}      
+}
 Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2, int periodic) const
-{      
+{
      Point F_rep(0.0, 0.0);
      // x- and y-coordinate of the distance between p1 and p2
      Point distp12 = ped2->GetPos() - ped1->GetPos();
-     
+
      if(periodic){
             double x = ped1->GetPos()._x;
             double x_j = ped2->GetPos()._x;
@@ -391,12 +385,12 @@ Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2, int periodi
                  distp12._x = distp12._x + xRight - xLeft;
             }
       }
-     
+
      double Distance = distp12.Norm();
      Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
      double R_ij;
      double l = 2*ped1->GetEllipse().GetBmax();
-     
+
      if (Distance >= J_EPS) {
           ep12 = distp12.Normalized();
      } else {
@@ -470,7 +464,7 @@ Point VelocityModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 
 Point VelocityModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& centroid, bool inside) const
 {
-     Point F_wrep = Point(0.0, 0.0);    
+     Point F_wrep = Point(0.0, 0.0);
      Point pt = w.ShortestPoint(ped->GetPos());
 
      Point dist = pt - ped->GetPos(); // x- and y-coordinate of the distance between ped and p
@@ -482,7 +476,7 @@ Point VelocityModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
      double l = ped->GetEllipse().GetBmax();
      double R_iw;
      double min_distance_to_wall = 0.001; // 10 cm
-     
+
      if (Distance > min_distance_to_wall) {
            e_iw = dist / Distance;
      }
@@ -510,7 +504,7 @@ string VelocityModel::GetDescription()
 {
      string rueck;
      char tmp[CLENGTH];
-     
+
      sprintf(tmp, "\t\ta: \t\tPed: %f \tWall: %f\n", _aPed, _aWall);
      rueck.append(tmp);
      sprintf(tmp, "\t\tD: \t\tPed: %f \tWall: %f\n", _DPed, _DWall);

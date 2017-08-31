@@ -40,10 +40,10 @@
   </routing>
 
   <!--persons information and distribution -->
-  <agents operational_model_id="[1,2,3,5]">
+  <agents operational_model_id="3">
     <agents_distribution>
-      <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="0" number="1" start_x="2" start_y="0.5"  goal_id="0" router_id="1" />
-      <group group_id="1"  agent_parameter_id="1"  room_id="0" subroom_id="0" number="1" start_x="4" start_y="0.4"  goal_id="0" router_id="1" />
+      <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="0" number="1" startX="2" startY="0.5"  goal_id="0" router_id="1" />
+      <group group_id="1"  agent_parameter_id="1"  room_id="0" subroom_id="0" number="1" startX="4" startY="0.4"  goal_id="0" router_id="1" />
     </agents_distribution>
     <!-- frequency in persons/minute -->
     <agents_sources/>
