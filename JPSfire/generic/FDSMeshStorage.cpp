@@ -49,7 +49,7 @@ FDSMeshStorage::FDSMeshStorage(const std::string &filepath, const double &finalT
 {
     ///Check if _filepath is existent
 
-    if (true || fs::exists(_filepath ) )
+    if (fs::exists(_filepath ) )
     {
         std::cout << "\nCreating QuantityList..." << std::endl;
         CreateQuantityList();
