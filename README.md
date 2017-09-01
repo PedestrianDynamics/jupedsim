@@ -1,6 +1,6 @@
 # JPScore
 
-[![Build Status](https://travis-ci.org/JuPedSim/jpscore.svg?branch=develop)](https://travis-ci.org/JuPedSim/jpscore)[![codecov.io](https://codecov.io/github/JuPedSim/jpscore/coverage.svg?branch=develop)](https://codecov.io/github/JuPedSim/jpscore?branch=develop)[![GitHub license](https://img.shields.io/badge/license-GPL-blue.svg)](https://raw.githubusercontent.com/JuPedSim/jpscore/master/LICENSE)
+[![Build Status](https://travis-ci.org/JuPedSim/jpscore.svg?branch=develop)](https://travis-ci.org/JuPedSim/jpscore/pipelines)[![codecov.io](https://codecov.io/github/JuPedSim/jpscore/coverage.svg?branch=develop)](https://codecov.io/github/JuPedSim/jpscore?branch=develop)[![GitHub license](https://img.shields.io/badge/license-GPL-blue.svg)](https://raw.githubusercontent.com/JuPedSim/jpscore/master/LICENSE)
 
 The core module for performing the simulation (i.e. computing the trajectories). See the [online documentation](http://jupedsim.org/jpscore/)
 
