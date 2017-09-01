@@ -753,7 +753,7 @@ bool SubRoom::IsClockwise()
           //exit(EXIT_FAILURE);
      }
      double sum = 0;
-     for (int i = 0; i < _poly.size() - 1; ++i) {
+     for (unsigned int i = 0; i < _poly.size() - 1; ++i) {
           Point a = _poly[i];
           Point b = _poly[i+1];
           sum += (b._x - a._x) * (b._y + a._y);
@@ -763,17 +763,6 @@ bool SubRoom::IsClockwise()
      sum += (first._x - last._x) * (first._y + last._y);
 
      return (sum > 0.);
-//     if(_poly.size()<3) {
-//          Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Subroom ID [%d]",_id);
-//          return false;
-//          //exit(EXIT_FAILURE);
-//     }
-//
-//     Point vecAB= _poly[1]-_poly[0];
-//     Point vecBC= _poly[2]-_poly[1];
-//
-//     double det= vecAB.Determinant(vecBC);
-//     return (fabs(det)<J_EPS);
 }
 
 bool SubRoom::IsPartOfPolygon(const Point& ptw)

@@ -49,7 +49,7 @@ FDSMeshStorage::FDSMeshStorage(const std::string &filepath, const double &finalT
 {
     ///Check if _filepath exists
 
-    if (true || fs::exists(_filepath ) )
+    if (fs::exists(_filepath ) )
     {
         std::cout << "\nCreating QuantityList..." << std::endl;
         CreateQuantityList();
@@ -293,14 +293,14 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
     return _fMContainer.at(str);
 }
 
-double FDSMeshStorage::GetNearestHeight(double _PedEyeHeight)
+double FDSMeshStorage::GetNearestHeight(double PedEyeHeight)
 {
     ///find the nearest height in the JPSfire data related to the ped elevation
-	double min_val = FLT_MAX;// std::numeric_limits<double>::max();
-    int index = 0;
+     double min_val = FLT_MAX;// std::numeric_limits<double>::max();
+     int index = 0;
 
-    for(int i=0;i < _elevationlist.size() ;++i) {
-        double diff = std::abs(_elevationlist[i] - _PedEyeHeight);
+    for(unsigned int i=0;i < _elevationlist.size() ;++i) {
+        double diff = std::abs(_elevationlist[i] - PedEyeHeight);
         if(diff < min_val) {
             min_val = diff;
             index = i;

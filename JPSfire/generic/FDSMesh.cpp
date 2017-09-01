@@ -138,25 +138,18 @@ double FDSMesh::GetKnotValue(const double &x, const double &y) const
     /// To Do: exception / warning when no knot is available for the pedestrian position
     int col=0;
     int row=0;
-
+    double value;
     /// Which knot is the nearest one to (x,y)?
 
     GetColumn(x, col);
     GetRow(row, y);
 
-    //std::cout << _matrix[row][col].GetValue() << std::endl;
-    double value;
-
     // Exception if a mesh can not provide an appropriately located value
-    if(row < _matrix.size() && col < _matrix[0].size())
+    if((unsigned int)row < _matrix.size() && (unsigned int)col < _matrix[0].size())
           value = _matrix[row][col].GetValue();
     else
         // needs to be fixed!!!
           value = 0.0;//std::numeric_limits<double>::quiet_NaN();
-
-//    if(_matrix[row][col].GetValue() == 0.) {
-//        std::cout << "(" << row << " , " << col <<  ")" << std::endl;
-//    }
 
     return value;
 
