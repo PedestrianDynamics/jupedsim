@@ -164,6 +164,8 @@ void FDSMeshStorage::CreateDoorList()
                   _doorlist.push_back(tempString);
            }
         }
+    }
+}
 
 //         for( fs::directory_iterator iter(_filepath + _quantitylist[0] +
 //            "/Z_" + std::to_string(elv) ) ; iter != end ; ++iter )
@@ -210,6 +212,7 @@ void FDSMeshStorage::CreateTimeList()
             exit(EXIT_FAILURE);
         }
     }
+
 }
 
 void FDSMeshStorage::CreateFDSMeshes()

@@ -4,7 +4,7 @@ variables:
 
 before_script:
   - nproc=`grep -c '^processor' /proc/cpuinfo`
-  - echo "nproc = $nproc"
+  - echo "Hostname: `hostname`, nproc = $nproc"
   - export LD_LIBRARY_PATH=$HOME/boost_1_61_0/stage/lib/:$LD_LIBRARY_PATH
    
    
@@ -13,7 +13,7 @@ stages:
   - configure
   - compile
   - unit_test
-  - rimea
+  - juelich_tests
 #=====================================
 
 #============== configure ============
@@ -60,26 +60,54 @@ test:
 
   stage: unit_test 
   script:
-    - which ctest
     - cd build
     - ctest -R Boost
   tags:
     - linux
-#============== rimea ============
-verify:
+#============== juelich ============
+verification:
   dependencies:
     - make-linux
 
-  stage: rimea
+  stage: juelich_tests
   script:
-    - echo "curl -X POST -F token=$TOKEN -F ref=develop https://gitlab.version.fz-juelich.de/api/v3/projects/262/trigger/builds"| at 22:00
-    #- cd build
-    #- ctest -R rimea
+    - cd build
+    - ctest -R juelich
   only: 
     - develop
   tags:
     - linux
 #=================================
 
+#============== rimea ============
+# verification:
+#   dependencies:
+#     - make-linux
+
+#   stage: rimea
+#   script:
+#     - cd build
+#     - ctest -R rimea
+#   only: 
+#     - develop
+#   tags:
+#     - linux
+#=================================
+
+#============== validation =======
+# validation:
+#   dependencies:
+#     - make-linux
+
+#   stage: validation
+#   script:
+#     - cd build
+#     - ctest -R validation
+#   only: 
+#     - develop
+#   tags:
+#     - linux
+#=================================
+
 after_script:
-  - echo "End CI"
+  - echo "End CI" # todo: run report script
