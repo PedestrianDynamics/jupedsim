@@ -4,7 +4,8 @@ variables:
 
 before_script:
   - nproc=`grep -c '^processor' /proc/cpuinfo`
-  - echo "Hostname: `hostname`, nproc = $nproc"
+  - host=`hostname`
+  - echo "Hostname: $host, nproc = $nproc"
   - export LD_LIBRARY_PATH=$HOME/boost_1_61_0/stage/lib/:$LD_LIBRARY_PATH
    
    
