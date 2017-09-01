@@ -47,7 +47,7 @@ FDSMeshStorage::FDSMeshStorage(const std::string &filepath, const double &finalT
     _updateIntervall(updateIntervall), _study(study),
     _elevationlist(), _timelist(), _irritant(irritant)
 {
-    ///Check if _filepath is existent
+    ///Check if _filepath exists
 
     if (true || fs::exists(_filepath ) )
     {
@@ -132,19 +132,7 @@ void FDSMeshStorage::CreateDoorList()
     _doorlist.clear();
     fs::directory_iterator end ;
 
-//        for( fs::directory_iterator iter(_filepath + _quantitylist[0] +
-//           "/Z_" + std::to_string(_elevationlist[0]) ) ; iter != end ; ++iter )
-//            {
-//              if ( fs::is_directory( *iter ) )
-//              {
-//                  std::string door_dir = iter->path().string();
-//                  door_dir =  door_dir.substr( door_dir.find_last_of("/\\") + 1 );
-//                  std::cout << door_dir << std::endl;
-//                   _doorlist.push_back(door_dir);
-//              }
-//            }
-
-    for( auto &elv:_elevationlist){
+   for( auto &elv:_elevationlist){
         std::string elvAsStringTwoDecimals = std::to_string(elv);
         elvAsStringTwoDecimals = elvAsStringTwoDecimals.substr(0, elvAsStringTwoDecimals.find_last_of(".")+7);
         for( fs::directory_iterator iter(_filepath + _quantitylist[0] +
@@ -156,31 +144,11 @@ void FDSMeshStorage::CreateDoorList()
                   unsigned long startChar = tempString.find_last_of("/\\") + 1;
                   tempString = iter->path().string();
                   tempString = tempString.substr(startChar);
-                  //std::string door_dir = iter->path().string();
-                  //door_dir =  door_dir.substr( door_dir.find_last_of("/\\") + 1 );
-                  //std::string elv_dir = "dx_" + elvAsStringTwoDecimals ;
-                  //std::cout << elv_dir + "/" + door_dir << std::endl;
-                   //_doorlist.push_back(elv_dir + "/" + door_dir);
                   _doorlist.push_back(tempString);
            }
         }
     }
 }
-
-//         for( fs::directory_iterator iter(_filepath + _quantitylist[0] +
-//            "/Z_" + std::to_string(elv) ) ; iter != end ; ++iter )
-//             {
-//               if ( fs::is_directory( *iter ) )
-//               {
-//                   std::string door_dir = iter->path().string();
-//                   door_dir =  door_dir.substr( door_dir.find_last_of("/\\") + 1 );
-//                   std::string elv_dir = "Z_" + ( "%.6f", std::to_string(elv)) ;
-//                   std::cout << elv_dir + "/" + door_dir << std::endl;
-//                    _doorlist.push_back(elv_dir + "/" + door_dir);
-//               }
-//             }
-// >>>>>>> jpsfire_toxicity_analysis
-
 void FDSMeshStorage::CreateTimeList()
 {
     /// Create time list for mesh refreshment

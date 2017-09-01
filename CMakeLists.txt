@@ -337,51 +337,6 @@ set(source_files
         routing/ai_router/Brain.cpp
         routing/ai_router/cognitiveMap/internnavigationnetwork.cpp
         visiLibity/source_code/visilibity.cpp
-# =======
-#         routing/NavMesh.cpp
-#         routing/DTriangulation.cpp
-#         routing/MeshRouter.cpp
-#         routing/mesh/Mesh.cpp
-#         #header files with scr code need to be added here, in order to be
-#         #included in generated project files (codeblocks)
-#         #plz do not delete them here
-#         routing/mesh/RectGrid.h
-#         routing/mesh/Trial.h
-#         general/Configuration.h
-#         general/Macros.h
-
-#   routing/CognitiveMapRouter.cpp
-#   routing/cognitive_map/GraphNetwork.cpp
-#   routing/cognitive_map/NavigationGraph.cpp
-#   routing/cognitive_map/BrainStorage.cpp
-#   routing/cognitive_map/navigation_graph/GraphEdge.cpp
-#   routing/cognitive_map/navigation_graph/GraphVertex.cpp
-#   routing/cognitive_map/sensor/RoomToFloorSensor.cpp
-#   routing/cognitive_map/sensor/SensorManager.cpp
-#   routing/cognitive_map/sensor/AbstractSensor.cpp
-#   routing/cognitive_map/sensor/DiscoverDoorsSensor.cpp
-#   routing/cognitive_map/sensor/JamSensor.cpp
-#   routing/cognitive_map/sensor/LastDestinationsSensor.cpp
-#   routing/cognitive_map/sensor/locater.cpp
-#   routing/cognitive_map/cognitiveMap/associations.cpp
-#   routing/cognitive_map/cognitiveMap/connection.cpp
-#   routing/cognitive_map/cognitiveMap/cognitivemap.cpp
-#   routing/cognitive_map/cognitiveMap/landmark.cpp
-#   routing/cognitive_map/cognitiveMap/region.cpp
-#   routing/cognitive_map/cognitiveMap/youareherepointer.cpp
-#   routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
-#   routing/cognitive_map/cognitiveMap/landmarknetwork.cpp
-
-#   routing/cognitive_map/perception/perception.cpp
-#   routing/cognitive_map/perception/visibleenvironment.cpp
-#   routing/cognitive_map/Brain.cpp
-
-#   routing/cognitive_map/cognitiveMap/internnavigationnetwork.cpp
-
-
-#   visiLibity/source_code/visilibity.cpp
-# >>>>>>> jpsfire_toxicity_analysis
-
 
         poly2tri/common/shapes.cpp
         poly2tri/sweep/sweep_context.cpp
@@ -460,48 +415,6 @@ set(header_files
         routing/ai_router/Brain.h
         routing/ai_router/cognitiveMap/internnavigationnetwork.h
         visiLibity/source_code/visilibity.hpp
-
-#         routing/AccessPoint.h
-#         routing/DTriangulation.h
-#         routing/MeshRouter.h
-#         routing/mesh/Mesh.h
-#         routing/mesh/RectGrid.h
-#         routing/mesh/Trial.h
-#         routing/graph/RoutingGraphStorage.h
-#         routing/graph/RoutingGraph.h
-#         routing/graph/NavLineState.h
-
-
-#   routing/CognitiveMapRouter.h
-#   routing/cognitive_map/GraphNetwork.h
-#   routing/cognitive_map/NavigationGraph.h
-#   routing/cognitive_map/BrainStorage.h
-#   routing/cognitive_map/navigation_graph/GraphEdge.h
-#   routing/cognitive_map/navigation_graph/GraphVertex.h
-#   routing/cognitive_map/sensor/AbstractSensor.h
-#   routing/cognitive_map/sensor/RoomToFloorSensor.h
-#   routing/cognitive_map/sensor/SensorManager.h
-#   routing/cognitive_map/sensor/DiscoverDoorsSensor.h
-#   routing/cognitive_map/sensor/JamSensor.h
-#   routing/cognitive_map/sensor/LastDestinationsSensor.h
-#   routing/cognitive_map/sensor/locater.h
-#   routing/cognitive_map/cognitiveMap/associations.h
-#   routing/cognitive_map/cognitiveMap/connection.cpp
-#   routing/cognitive_map/cognitiveMap/cognitivemap.h
-#   routing/cognitive_map/cognitiveMap/landmark.h
-#   routing/cognitive_map/cognitiveMap/region.h
-#   routing/cognitive_map/cognitiveMap/youareherepointer.h
-#   routing/cognitive_map/cognitiveMap/cogmapoutputhandler.h
-#   routing/cognitive_map/cognitiveMap/landmarknetwork.h
-
-#   routing/cognitive_map/perception/perception.h
-#   routing/cognitive_map/perception/visibleenvironment.h
-#   routing/cognitive_map/Brain.h
-
-#   routing/cognitive_map/cognitiveMap/internnavigationnetwork.h
-
-#   visiLibity/source_code/visilibity.hpp
-# >>>>>>> jpsfire_toxicity_analysis
 
         pedestrian/Pedestrian.h
         pedestrian/PedDistributor.h
