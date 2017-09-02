@@ -165,7 +165,7 @@ endif (APPLE)
 
 if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
-  set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
+  set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/stage/lib")
   set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${BOOST_ROOT})
   set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${BOOST_LIBRARY_DIRS})
 endif (Boost_NO_SYSTEM_PATHS)
@@ -508,7 +508,7 @@ if (Boost_FOUND)
     # suppress warnings in boost libraries with attribute SYSTEM
     include_directories(SYSTEM ${Boost_INCLUDE_DIR})
     # todo: is this necessary?
-    target_link_libraries(jpscore ${Boost_LIBRARIES})
+    target_link_libraries(core ${Boost_LIBRARIES})
 endif ()
 
 target_link_libraries(jpscore core)
