@@ -117,7 +117,7 @@
   </operational_models>
 
   <route_choice_models>
-    <router router_id="1" description="quickest">
+    <router router_id="1" description="ff_quickest">
       <parameters>
         <!-- <navigation_lines file="routing.xml" /> -->
       </parameters>
