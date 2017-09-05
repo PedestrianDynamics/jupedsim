@@ -1,7 +1,7 @@
 /**
  * \file        FDSMeshStorage.h
- * \date        Jan 1, 2014
- * \version     v0.7
+ * \date        Jan 1, 2017
+ * \version     v0.8.2
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -63,18 +63,18 @@ public:
 private:
     FDSMeshContainer _fMContainer;
     std::string _filepath;
-    std::string _study;
-    std::string _irritant;
-    double _updateIntervall;
     double _finalTime;
-    std::vector<std::string> _quantitylist;
-    std::vector<std::string> _doorlist;
+    double _updateIntervall;
+    std::string _study;
     std::vector<double> _elevationlist;
     std::vector<double> _timelist;
+    std::string _irritant;
+    std::vector<std::string> _quantitylist;
+    std::vector<std::string> _doorlist;
     double _PedEyeHeight;
     double _NearestHeight;
     double GetNearestHeight(double);
-    const char * glob_str;
+    // const char * glob_str;
 
 };
 

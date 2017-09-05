@@ -1,6 +1,6 @@
 # JPScore
 
-[![Build Status](https://travis-ci.org/JuPedSim/jpscore.svg?branch=develop)](https://travis-ci.org/JuPedSim/jpscore)[![codecov.io](https://codecov.io/github/JuPedSim/jpscore/coverage.svg?branch=develop)](https://codecov.io/github/JuPedSim/jpscore?branch=develop)[![GitHub license](https://img.shields.io/badge/license-GPL-blue.svg)](https://raw.githubusercontent.com/JuPedSim/jpscore/master/LICENSE)
+[![Build Status](https://gitlab.version.fz-juelich.de/jupedsim/jpscore/badges/develop/build.svg)](https://gitlab.version.fz-juelich.de/JuPedSim/jpscore/pipelines)[![codecov.io](https://codecov.io/github/JuPedSim/jpscore/coverage.svg?branch=develop)](https://codecov.io/github/JuPedSim/jpscore?branch=develop)[![GitHub license](https://img.shields.io/badge/license-GPL-blue.svg)](https://raw.githubusercontent.com/JuPedSim/jpscore/master/LICENSE)
 
 The core module for performing the simulation (i.e. computing the trajectories). See the [online documentation](http://jupedsim.org/jpscore/)
 
@@ -16,7 +16,6 @@ So, get the code from Gitlab and the releases from GitHub. :-)
 See [installation and configuration](http://jupedsim.github.io/jpscore/user_guide/configuration/)
 
 ## Showcase and tutorials
-
 
 To highlight some features of JuPedSim we have uploaded some videos on our [YouTube channel](https://www.youtube.com/channel/UCKS8w8CUClHEeN4K1SUSMBA).
 

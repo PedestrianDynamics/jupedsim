@@ -126,7 +126,7 @@ double ToxicityAnalysis::CalculateFEDIn(Pedestrian* p, double CO2, double CO, do
 
     double FED_In_CO = (3.317/(1E5 * D) * pow(CO, 1.036)) * _dt ;
     double FED_In_HCN = (pow(HCN, 2.36)/(2.43*1E7)) * _dt ;
-    double FED_In_O2;
+    double FED_In_O2 = 0.0; // MC: hope this initialisation is ok
     //this if statement is necessary since Pursers correlation is not considering
     //normal O2 concentrations (20.9%). It would thus increase the FED_in slightly
     if(O2==209000){
@@ -159,7 +159,7 @@ double ToxicityAnalysis::CalculateFEDHeat(Pedestrian* p, double T, double FED_He
 
 void ToxicityAnalysis::HazardAnalysis(Pedestrian* p)
 {
-    double FEC_Smoke, FED_In, FED_Heat, FIC_Im, FIC_In;
+    double FEC_Smoke, FED_In = 0.0, FED_Heat = 0.0, FIC_Im, FIC_In;
 
     // Smoke extinction in 1/m
     double E = GetFDSQuantity(p, "SOOT_EXTINCTION_COEFFICIENT");
@@ -181,7 +181,9 @@ void ToxicityAnalysis::HazardAnalysis(Pedestrian* p)
     FEC_Smoke = E/0.23;
 
     // FED Incapacitation dose calculation according to SFPE2016 Chap. 63
-    FED_In = CalculateFEDIn(p, CO2, CO, O2, HCN, FED_In);
+    FED_In = CalculateFEDIn(p, CO2, CO, O2, HCN, FED_In); // FED_In as
+                                                          // argument
+                                                          // is not used!
 
     // FIC Fractional Irritant Concentration for impairment and incapacitation
     // according to SFPE/BS7899-2
@@ -207,8 +209,8 @@ void ToxicityAnalysis::WriteOutHazardAnalysis(const Pedestrian* p, double E, dou
     string data;
     char tmp[CLENGTH] = "";
 
-    //FIXME _fps = _configuration->GetFps();
-    _fps = 1;
+    _fps = _configuration->GetFps();
+    _fps = 1; // fixme: why 1?
     int frameNr = int(p->GetGlobalTime()/_fps);
 
 

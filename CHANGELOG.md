@@ -4,7 +4,6 @@ All notable changes to this project will be documented in this file.
 ## v0.8.2 [unreleased]
 Repository moved to [new server](https://gitlab.version.fz-juelich.de/jupedsim/jpscore)
 ### Added
-- 
 - Adding rolling flow for validation tests (a74f9ba465efc9706b7e0bbe4e51c1cae66b356f)
 - New smoke sensor. Adapt speed of agents walking in smoke. See branch [jpsfire_toxicity_analysis](https://gitlab.version.fz-juelich.de/jupedsim/jpscore/commits/jpsfire_toxicity_analysis)
 - New option for `groups`. It is now possible to load the first positions of pedestrians from a file. 

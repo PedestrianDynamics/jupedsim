@@ -354,7 +354,7 @@ bool Obstacle::IsClockwise() const
           //exit(EXIT_FAILURE);
      }
      double sum = 0;
-     for (int i = 0; i < _poly.size() - 1; ++i) {
+     for (unsigned int i = 0; i < _poly.size() - 1; ++i) {
           Point a = _poly[i];
           Point b = _poly[i+1];
           sum += (b._x - a._x) * (b._y + a._y);
@@ -364,19 +364,6 @@ bool Obstacle::IsClockwise() const
      sum += (first._x - last._x) * (first._y + last._y);
 
      return (sum > 0.);
-//     if(_poly.size()<3) {
-//          Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Obstacle ID [%d]",_id);
-//          return false;
-//          //exit(EXIT_FAILURE);
-//     }
-//
-//     Point vecAB= _poly[1]-_poly[0];
-//     Point vecBC= _poly[2]-_poly[1];
-//
-//     double det= vecAB.Determinant(vecBC);
-//     if(fabs(det)<J_EPS) det=0.0;
-//
-//     return ( det<=0.0 );
 }
 
 bool Obstacle::IntersectWithLine(const Line& line) const
