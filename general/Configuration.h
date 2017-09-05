@@ -106,6 +106,9 @@ public:
 
           //ff router quickest
           _recalc_interval = 5;
+
+          //ff router
+          _has_specific_goals = false;
      }
 
      int GetSolver() const { return _solver; };
@@ -241,6 +244,10 @@ public:
 
      void set_recalc_interval(double recalc_interval) { _recalc_interval = recalc_interval; }
 
+     bool get_has_specific_goals() const {return _has_specific_goals;}
+
+     void set_has_specific_goals(bool has_specific_goals) { _has_specific_goals = has_specific_goals;}
+
      const std::string& GetHostname() const { return _hostname; };
 
      void SetHostname(std::string hostname) { _hostname = hostname; };
@@ -342,6 +349,9 @@ private:
 
      //ff router quickest
      double _recalc_interval;
+
+     //ff router
+     bool _has_specific_goals;
 
      std::string _hostname;
      std::string _trajectoriesFile;

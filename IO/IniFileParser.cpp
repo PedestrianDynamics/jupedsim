@@ -1050,6 +1050,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                }
           }
      }
+     _config->set_has_specific_goals(hasSpecificGoals);
      for (TiXmlElement* e = routingNode->FirstChildElement("router"); e;
           e = e->NextSiblingElement("router")) {
 

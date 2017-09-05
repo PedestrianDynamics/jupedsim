@@ -49,6 +49,7 @@
 #include "../routing/global_shortest/GlobalRouter.h"
 #include "../routing/quickest/QuickestPathRouter.h"
 #include "../routing/ai_router/AIRouter.h"
+#include "../routing/ff_router/ffRouter.h"
 #include "EventManager.h"
 #include "Event.h"
 
@@ -666,26 +667,33 @@ Router * EventManager::CreateRouter(const RoutingStrategy& strategy)
 
      switch(strategy)
      {
-     case ROUTING_LOCAL_SHORTEST:
-          rout = new GlobalRouter(ROUTING_LOCAL_SHORTEST, ROUTING_LOCAL_SHORTEST);
-          break;
+          case ROUTING_LOCAL_SHORTEST:
+               rout = new GlobalRouter(ROUTING_LOCAL_SHORTEST, ROUTING_LOCAL_SHORTEST);
+               break;
 
-     case ROUTING_GLOBAL_SHORTEST:
-          rout = new GlobalRouter(ROUTING_GLOBAL_SHORTEST, ROUTING_GLOBAL_SHORTEST);
-          break;
+          case ROUTING_GLOBAL_SHORTEST:
+               rout = new GlobalRouter(ROUTING_GLOBAL_SHORTEST, ROUTING_GLOBAL_SHORTEST);
+               break;
 
-     case ROUTING_QUICKEST:
-          rout = new QuickestPathRouter(ROUTING_QUICKEST, ROUTING_QUICKEST);
-          break;
+          case ROUTING_QUICKEST:
+               rout = new QuickestPathRouter(ROUTING_QUICKEST, ROUTING_QUICKEST);
+               break;
 
-     case ROUTING_AI:
-          rout = new AIRouter(ROUTING_AI, ROUTING_AI);
-          break;
+          case ROUTING_AI:
+               rout = new AIRouter(ROUTING_AI, ROUTING_AI);
+               break;
 
-     default:
-          Log->Write("ERROR: \twrong value for routing strategy [%d]!!!\n", strategy );
-          exit(EXIT_FAILURE);
-          break;
+          case ROUTING_FF_GLOBAL_SHORTEST:
+               rout = new FFRouter(ROUTING_FF_GLOBAL_SHORTEST, ROUTING_FF_GLOBAL_SHORTEST, _building->GetConfig()->get_has_specific_goals(), _building->GetConfig());
+               break;
+
+          case ROUTING_FF_QUICKEST:
+               rout = new FFRouter(ROUTING_FF_QUICKEST, ROUTING_FF_QUICKEST, _building->GetConfig()->get_has_specific_goals(), _building->GetConfig());
+
+          default:
+               Log->Write("ERROR: \twrong value for routing strategy [%d]!!!\n", strategy );
+               exit(EXIT_FAILURE);
+               break;
 
      }
      return rout;
