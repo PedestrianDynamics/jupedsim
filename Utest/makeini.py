@@ -39,6 +39,7 @@ tags = ['tmax',
 # format tag-attribute
 attributes_tags = ['group-pre_movement_mean',
                    'group-number',
+                   'group-router_id',
                    'group-agent_parameter_id',
                    'group-premovement_sigma',
                    'agents-operational_model_id',
