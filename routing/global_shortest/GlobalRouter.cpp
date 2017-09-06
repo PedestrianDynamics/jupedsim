@@ -1402,8 +1402,6 @@ string GlobalRouter::GetRoutingInfoFile()
                }
           }
      }
-
-     std::cout << "\n\n >>>> " << nav_line_file.c_str()<< std::endl;
      if (nav_line_file == "")
           return nav_line_file;
      else

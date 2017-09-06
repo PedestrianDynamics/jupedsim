@@ -1,76 +1,44 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-
-<geometry version="0.8" caption="Projectname" unit="m"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_geometry.xsd">
-  <rooms>
-    <room id="0" caption="test7">
-      <subroom id="0" closed="0" class="subroom" A_x="0" B_y="0" C_z="0">
-        <polygon caption="wall">
-          <vertex px="0.0" py="0.0" />
-          <vertex px="0.0" py="26.0" />
-          <vertex px="1.0" py="26.0" />
-        </polygon>
-        <polygon caption="wall">
-          <vertex px="2.0" py="26.0" />
-          <vertex px="18.0" py="26.0" />
-          <vertex px="18.0" py="2.0" />
-        </polygon>
-        <polygon caption="wall">
-          <vertex px="18.0" py="1.0" />
-          <vertex px="18.0" py="0.0" />
-          <vertex px="0.0" py="0.0" />
-        </polygon>
-      </subroom>
-      <subroom id="1" closed="0" class="floor" A_x="0" B_y="0" C_z="0">
-        <polygon caption="wall">
-          <vertex px="1.0" py="26.0" />
-          <vertex px="0.0" py="26.0" />
-          <vertex px="0.0" py="28.0" />
-          <vertex px="3.0" py="28.0" />
-        </polygon>
-        <polygon caption="wall">
-          <vertex px="5.0" py="28.0" />
-          <vertex px="20.0" py="28.0" />
-        </polygon>
-        <polygon caption="wall">
-          <vertex px="2.0" py="26.0" />
-          <vertex px="18.0" py="26.0" />
-        </polygon>
-      </subroom>
-       <subroom id="2" closed="0" class="floor" A_x="0" B_y="0" C_z="0">
-        <polygon caption="wall">
-          <vertex px="20.0" py="28.0" />
-          <vertex px="20.0" py="0.0" />
-          <vertex px="18.0" py="0.0" />
-          <vertex px="18.0" py="1.0" />
-        </polygon>
-        <polygon caption="wall">
-          <vertex px="18.0" py="26.0" />
-          <vertex px="18.0" py="2.0" />
-        </polygon>
-      </subroom>
-      <crossings>
-        <crossing id="0" subroom1_id="0" subroom2_id="2">
-          <vertex px="18.0" py="1.0" />
-          <vertex px="18.0" py="2.0" />
-        </crossing>
-        <crossing id="1" subroom1_id="0" subroom2_id="1">
-          <vertex px="1.0" py="26.0" />
-          <vertex px="2.0" py="26.0" />
-        </crossing>
-        <crossing id="2" subroom1_id="1" subroom2_id="2">
-          <vertex px="18.0" py="26.0" />
-          <vertex px="20.0" py="28.0" />
-        </crossing>
-      </crossings>
-    </room>
-  </rooms>
-  <transitions>
-    <transition id="0" caption="No_Name" type="emergency" room1_id="0" subroom1_id="1" room2_id="-1" subroom2_id="-1">
-      <vertex px="3.0" py="28.0" />
-      <vertex px="5.0" py="28.0" />
-    </transition>
-  </transitions>
+<geometry version="0.8" caption="corner" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/jps_geometry.xsd" unit="m">
+    <rooms>
+        <room id="0" caption="floor">
+            <subroom id="1" caption="Room 1" class="Not specified" A_x="0" B_y="0" C_z="0">
+                <polygon caption="wall">
+                    <vertex px="8" py="16"/>
+                    <vertex px="58" py="16"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="8" py="16"/>
+                    <vertex px="8" py="-24"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="8" py="-24"/>
+                    <vertex px="108" py="-24"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="108" py="-24"/>
+                    <vertex px="108" py="58"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="108" py="58"/>
+                    <vertex px="8" py="58"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="58" py="16"/>
+                    <vertex px="58" py="16.5"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="58" py="16.5"/>
+                    <vertex px="8" py="16.5"/>
+                </polygon>
+            </subroom>
+            <crossings/>
+        </room>
+    </rooms>
+    <transitions>
+        <transition id="0" caption="NaN" type="NaN" room1_id="0" subroom1_id="1" room2_id="-1" subroom2_id="-1">
+            <vertex px="8" py="58"/>
+            <vertex px="8" py="16.5"/>
+        </transition>
+    </transitions>
 </geometry>
-
