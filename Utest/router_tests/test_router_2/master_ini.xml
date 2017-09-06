@@ -3,17 +3,17 @@
 <JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
  
   <seed>1</seed>
-  <max_sim_time>200</max_sim_time>
+  <max_sim_time>90</max_sim_time>
   <num_threads>8</num_threads>
 
   <!-- geometry file -->
   <geometry>../geometry.xml</geometry>
   <!-- traectories file and format -->
   <trajectories format="xml-plain" embed_mesh="false" fps="33">
-    <file location="Traj_test_7.xml"/>
+    <file location="Traj_test_2.xml"/>
   </trajectories>
   <!-- where to store the logs -->
-  <logfile>log</logfile>
+  <logfile>log.txt</logfile>
 
   <!-- traffic information: e.g closed doors or smoked rooms -->
   <traffic_constraints>
@@ -26,29 +26,13 @@
       <door trans_id="0" caption="" state="open" />
     </doors>
   </traffic_constraints>
-  <!-- <routing> -->
-  <!--   <goals> -->
-  <!--     <goal id="0" final="true" caption="goal"> -->
-  <!--       <polygon> -->
-  <!--         <vertex px="14" py="4" /> -->
-  <!--         <vertex px="14" py="0" /> -->
-  <!--         <vertex px="13" py="0" /> -->
-  <!--         <vertex px="13" py="4" /> -->
-  <!--         <vertex px="14" py="4" /> -->
-  <!--       </polygon> -->
-  <!--     </goal> -->
-  <!--   </goals> -->
-  <!-- </routing> -->
 
   <!--persons information and distribution -->
   <agents operational_model_id="3">
     <agents_distribution>
-      <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="0" number="100" goal_id="-1" router_id="2"/>	
+      <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="0" number="10" goal_id="-1" router_id="range(1,8)" x_min="0.65" x_max="9.2" y_min="4.6" y_max="9.16"/>	
     </agents_distribution>
-    <!-- frequency in persons/minute -->
-    <agents_sources/>
   </agents>
-
 
   <operational_models >
     <model operational_model_id="3" description="Tordeux2015">
@@ -70,75 +54,49 @@
         <T mu="1" sigma="0.001"/>
       </agent_parameters>
     </model>
-
-    <model operational_model_id="1" description="gcfm">
-      <model_parameters>
-        <solver>euler</solver>
-        <stepsize>0.01</stepsize>
-        <exit_crossing_strategy>3</exit_crossing_strategy>
-        <linkedcells enabled="true" cell_size="2.8" />
-        <force_ped nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
-        <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
-      </model_parameters>
-      <agent_parameters agent_parameter_id="0">
-        <v0 mu="1" sigma="0.0" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-    </model>
-
-    <model operational_model_id="5" description="krausz">
-      <model_parameters>
-        <solver>euler</solver>
-        <stepsize>0.01</stepsize>
-        <exit_crossing_strategy>3</exit_crossing_strategy>
-        <linkedcells enabled="true" cell_size="2.8" />
-        <force_ped nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
-        <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
-      </model_parameters>
-      <agent_parameters agent_parameter_id="0">
-        <v0 mu="1" sigma="0.0" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-    </model>
-
-    <model operational_model_id="2" description="gompertz">
-      <model_parameters>
-        <solver>euler</solver>
-        <stepsize>0.01</stepsize>
-        <exit_crossing_strategy>3</exit_crossing_strategy>
-        <linkedcells enabled="true" cell_size="2.8" />
-        <force_ped nu="2"  b="0.25" c="3.0"/>
-        <force_wall nu="2" b="0.70" c="3.0"/>
-      </model_parameters>
-      <agent_parameters agent_parameter_id="0">
-        <v0 mu="1" sigma="0.0" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-    </model>
-  </operational_models>
+  </operational_models >
 
   <route_choice_models>
-    <!-- <router router_id="1" description="quickest"> -->
-    <!--   <parameters> -->
-    <!--   </parameters> -->
-    <!-- </router> -->
+
+    <router router_id="1" description="local_shortest">
+      <parameters>
+        <navigation_lines file="../routing.xml" />
+      </parameters>
+    </router>
+    
     <router router_id="2" description="global_shortest">
       <parameters>
+        <navigation_lines file="../routing.xml" />
+      </parameters>
+    </router>
+    
+    <router router_id="3" description="quickest"> <!-- global quickest -->
+      <parameters>
+        <navigation_lines file="../routing.xml" />
       </parameters>
     </router>
 
+        
+    <router router_id="4" description="ff_global_shortest"/> <!-- like global_shortest, without HLines -->
+    <router router_id="5" description="ff_local_shortest"/> <!-- like local_shortest, without HLines -->
+    <router router_id="6" description="ff_quickest"/> <!-- like global quickest -->
+
+    <router router_id="7" description="AI">
+      <cognitive_map status="empty" />
+      <parameters>
+        <navigation_lines file="../routing.xml" />
+      </parameters>
+    </router>
+
+    <!-- not implemented -->
+    <router router_id="8" description="local_quickest">
+      <parameters>
+        <!-- <navigation_lines file="../routing.xml" /> -->
+      </parameters>
+    </router>
+
+
+    
   </route_choice_models>
 
 </JuPedSim>

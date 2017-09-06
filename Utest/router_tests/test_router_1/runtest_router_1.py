@@ -31,7 +31,7 @@ __author__ = 'Oliver Schmidts'
 def runtest1(inifile, trajfile):
     fps, N, traj = parse_file(trajfile)
     failure = False
-    ids = traj[:, 0]
+    ids = np.unique(traj[:,0]).astype(int)
     group_2 = [4, 6, 5]
     e1 = [26, 1, 2] # y, x1, x2
     e2 = [18, 1, 2] # x, y1, y2
@@ -40,15 +40,12 @@ def runtest1(inifile, trajfile):
         x = traj1[:, 2]
         y = traj1[:, 3]
         if not PassedLineY(traj1, e1) and not PassedLineX(traj1, e2):
-            logging.critical("ped %d did not exit" % ped)
+            logging.critical("ped %d did not pass exit" % ped)
             failure = True
-
 
     if failure:
         logging.critical("%s exists with failure!"%argv[0])
         exit(FAILURE)
-
-
 
 
 if __name__ == "__main__":

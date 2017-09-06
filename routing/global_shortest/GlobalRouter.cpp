@@ -1361,9 +1361,14 @@ string GlobalRouter::GetRoutingInfoFile()
                if(e->FirstChild("parameters"))
                {
 
-                    if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
+                    if (e->FirstChild("parameters")->FirstChildElement("navigation_lines")) //fixme:
+                                                                                            //this
+                                                                                            //reads
+                                                                                            //the
+                                                                                            //wronf
+                                                                                            //router section
                          nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
-
+                    
                     TiXmlElement* para =e->FirstChild("parameters")->FirstChildElement("navigation_mesh");
                     if (para)
                     {
@@ -1398,6 +1403,7 @@ string GlobalRouter::GetRoutingInfoFile()
           }
      }
 
+     std::cout << "\n\n >>>> " << nav_line_file.c_str()<< std::endl;
      if (nav_line_file == "")
           return nav_line_file;
      else
