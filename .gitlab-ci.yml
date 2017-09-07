@@ -19,6 +19,8 @@ configure-linux:
     expire_in: 1 hour
     paths:
       - build
+      - lib
+      - lib/Debug
       - bin
   script:
     - mkdir -p build
@@ -38,6 +40,8 @@ make-linux:
     paths:
       - build
       - bin
+      - lib
+      - lib/Debug
       
   stage: compile
   script:
