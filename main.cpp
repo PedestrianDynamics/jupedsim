@@ -25,11 +25,7 @@
  *
  * Some useful links:
  *
- * 	1: <a href="http://www.openpedsim.org">www.openpedsim.org</a> <br>
- * 	2: <a href="http://www.vtk.org">www.vtk.org</a> <br>
- * 	3: <a href="http://www.trolltech.com">www.trolltech.com</a> <br>
- * 	4: <a href="http://www.fz-juelich.de">www.fz-juelich.de</a> <br>
- * 	4: <a href="http://www.jupedsim.org">www.fz-juelich.de</a> <br>
+ * 	1: <a href="http://jupedsim.org">jupedsim.org</a> <br>
  *
  **/
 

@@ -4,9 +4,9 @@
 	<geometry file = "geo_Aufgabe2.xml" />
 	<!-- trajectories file and format -->
 	<!-- either a file name or a path location. In the latter case all files in the directory will be used-->
-	<trajectories format="xml" unit="m">
-		<file name="traj_Aufgabe2.xml" />
-		<path location="./" />  
+	<trajectories format="txt" unit="m">
+		<!-- <file name="traj_Aufgabe2.xml" /> -->
+		<path location="traj" /> 
 	</trajectories>
 	<!-- give relative path based on the location inifile or give the absolute path- -->
 	<scripts location="../../scripts/"/> 

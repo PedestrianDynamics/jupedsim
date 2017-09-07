@@ -150,7 +150,10 @@ if __name__ == '__main__':
    geoLocation = filepath.split("Output")[0]
    trajName = namefile.split(".")[0]
    trajType = namefile.split(".")[1].split("_")[0]
-   trajFile = trajpath+trajName+"."+trajType
+   trajFile = os.path.join(trajpath, trajName+"."+trajType) #trajpath+trajName+"."+trajType
+   print(">> plot_cell_rho trajpath %s" %trajpath)
+   print(">> plot_cell_rho  trajName %s"%trajName+"."+trajType)
+   print(">> plot_cell_rho trajFile %s" % trajFile)
    frameNr=int(namefile.split("_")[-1])
    geominX, geomaxX, geominY, geomaxY = get_geometry_boundary(geoFile)
    

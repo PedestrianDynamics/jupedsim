@@ -105,7 +105,7 @@ bool Method_A::Process (const PedData& peddata,const string& scriptsLocation, co
      }
      else
      {
-    	 Log->Write("Warning: No any pedestrian exists on the plane of the selected Measurement area!!");
+    	 Log->Write("Warning: No pedestrian exists on the plane of the selected Measurement area!!");
      }
      delete []_passLine;
      return true;

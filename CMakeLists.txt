@@ -94,6 +94,7 @@ if(BUILD_TESTING)
 endif(BUILD_TESTING)
 
 set(source_files
+  getRSS.c
   Analysis.cpp
   IO/OutputHandler.cpp
   general/ArgumentParser.cpp

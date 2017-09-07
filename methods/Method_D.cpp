@@ -457,14 +457,14 @@ void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polyg
 
      if(_plotVoronoiCellData)
      {
-    	 string parameters_rho="python "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
-				 " -g "+_geometryFileName+" -p "+_trajectoryPath;
-		 string parameters_v="python "+_scriptsLocation+"/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
-					 " -g "+_geometryFileName+" -p "+_trajectoryPath;
-		 //Log->Write("INFO:\t%s",parameters_rho.c_str());
-		 Log->Write("INFO:\tPlotting Voronoi Cell at the frame <%s>",frameId.c_str());
-		 system(parameters_rho.c_str());
-		 system(parameters_v.c_str());
+          string parameters_rho="python "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+               " -g "+_geometryFileName+" -p "+_trajectoryPath;
+          string parameters_v="python "+_scriptsLocation+"/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+               " -g "+_geometryFileName+" -p "+_trajectoryPath;
+          Log->Write("INFO:\t%s",parameters_rho.c_str());
+          Log->Write("INFO:\tPlotting Voronoi Cell at the frame <%s>",frameId.c_str());
+          system(parameters_rho.c_str());
+          system(parameters_v.c_str());
      }
      //points.close();
      polys.close();

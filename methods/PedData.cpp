@@ -35,6 +35,7 @@ using std::map;
 using std::vector;
 using std::ifstream;
 
+#include "getRSS.c"
 
 PedData::PedData()
 {
@@ -55,9 +56,9 @@ bool PedData::ReadData(const string& projectRootDir, const string& path, const s
      _projectRootDir = projectRootDir;
      _trajName = filename;
 
-     string fullTrajectoriesPathName= path+"./"+_trajName;
+     string fullTrajectoriesPathName= path+ "/" +_trajName;
      Log->Write("INFO:\tthe name of the trajectory is: <%s>",_trajName.c_str());
-
+     Log->Write("INFO:\tfull name of the trajectory is: <%s>",fullTrajectoriesPathName.c_str());
      bool result=true;
      if(trajformat == FORMAT_XML_PLAIN)
      {
@@ -78,6 +79,7 @@ bool PedData::ReadData(const string& projectRootDir, const string& path, const s
      return result;
 }
 
+// init _xCor, _yCor and _zCor
 bool PedData::InitializeVariables(const string& filename)
 {
      vector<double> xs;
@@ -672,12 +674,22 @@ void PedData::CreateGlobalVariables(int numPeds, int numFrames)
      Log->Write("INFO: Enter CreateGlobalVariables with numPeds=%d and numFrames=%d", numPeds, numFrames);
      Log->Write("INFO: allocate memory for xCor");
      _xCor = ub::matrix<double>(numPeds, numFrames);
+     size_t currentSize = getCurrentRSS( )/1000000;
+     size_t peakSize    = getPeakRSS( )/1000000;
+     std::cout << "currentSize: " << currentSize  <<" (MB)" << std::endl;
+     std::cout << "peakSize: " << peakSize << " (MB)" << std::endl;
      Log->Write("INFO: allocate memory for yCor");
      _yCor = ub::matrix<double>(numPeds, numFrames);
+     std::cout << "currentSize: " << currentSize  <<" (MB)" << std::endl;
+     std::cout << "peakSize: " << peakSize << " (MB)" << std::endl;
      Log->Write("INFO: allocate memory for zCor");
      _zCor = ub::matrix<double>(numPeds, numFrames);
+     std::cout << "currentSize: " << currentSize  <<" (MB)" << std::endl;
+     std::cout << "peakSize: " << peakSize << " (MB)" << std::endl;
      Log->Write("INFO: allocate memory for vComp");
      _vComp = ub::matrix<std::string>(numPeds, numFrames);
+     std::cout << "currentSize: " << currentSize  <<" (MB)" << std::endl;
+     std::cout << "peakSize: " << peakSize << " (MB)" << std::endl;
      Log->Write(" Finished memory allocation");   
      _firstFrame = new int[numPeds];  // Record the first frame of each pedestrian
      _lastFrame = new int[numPeds];  // Record the last frame of each pedestrian
