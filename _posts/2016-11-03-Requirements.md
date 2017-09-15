@@ -74,15 +74,12 @@ b2  variant=release --build-type=complete
 
 See also [Getting started on Windows](http://www.boost.org/doc/libs/1_65_1/more/getting_started/windows.html).
 
-[Here](https://github.com/Studiofreya/boost-build-scripts) you can find useful build scripts.
+[This](https://gitlab.version.fz-juelich.de/jupedsim/jpscore/snippets/18) https://github.com/Studiofreya/boost-build-scripts) can be useful, in case you are using
+Visual Studio.
+
+Download it and put it in the same directory as Boost. Depending on your Boost version and VS, 
+you may want to adapt in the script the variables `boost_dir` and `msvcver`.
 
 ## Test Boost installation 
 
 You can test your Boost installation by using this [minimal example](2016-11-04-boost.html).
-
-```
-- mkdir test
-- cd test 
-- mkdir build
-- cmake -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=/path/to/boost  ..
-```
