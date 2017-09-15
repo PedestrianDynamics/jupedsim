@@ -65,7 +65,7 @@ For `brew` users:
 brew install boost
 ```
 
-And For `port` users
+And for `port` users
 
 ```bash
 sudo port install boost 
