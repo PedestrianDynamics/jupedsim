@@ -59,10 +59,16 @@ Note: Debian's and Ubuntu's install manager offer an old version of Boost, which
 
 ### Mac
 
-or if you are a `brew` user:
+For `brew` users:
 
 ```bash
 brew install boost
+```
+
+And For `port` users
+
+```bash
+sudo port install boost 
 ```
 
 ### Windows 
@@ -74,7 +80,7 @@ b2  variant=release --build-type=complete
 
 See also [Getting started on Windows](http://www.boost.org/doc/libs/1_65_1/more/getting_started/windows.html).
 
-[This](https://gitlab.version.fz-juelich.de/jupedsim/jpscore/snippets/18) https://github.com/Studiofreya/boost-build-scripts) can be useful, in case you are using
+This [script](https://gitlab.version.fz-juelich.de/jupedsim/jpscore/snippets/18) can be useful, in case you are using
 Visual Studio.
 
 Download it and put it in the same directory as Boost. Depending on your Boost version and VS, 
