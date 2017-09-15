@@ -31,6 +31,9 @@ Tested with
 
 ## Install Boost (at least v1.57)
 
+
+### Linux 
+
 You can compile boost using the following snippet:
 
 ```bash
@@ -50,13 +53,36 @@ sudo ldconfig
 
 (download this snippet as a [script](https://gitlab.version.fz-juelich.de/jupedsim/jpscore/snippets/7)).
 
+
+Note: Debian's and Ubuntu's install manager offer an old version of Boost, which is not supported by `JuPedSim`.
+
+
+### Mac
+
 or if you are a `brew` user:
 
 ```bash
 brew install boost
 ```
 
-Note: Debian's and Ubuntu's install manager offer an old version of Boost, which is not supported by `JuPedSim`.
+### Windows 
 
+```
+bootstrap
+b2  variant=release --build-type=complete 
+```
+
+See also [Getting started on Windows](http://www.boost.org/doc/libs/1_65_1/more/getting_started/windows.html).
+
+[Here](https://github.com/Studiofreya/boost-build-scripts) you can find useful build scripts.
+
+## Test Boost installation 
 
 You can test your Boost installation by using this [minimal example](2016-11-04-boost.html).
+
+```
+- mkdir test
+- cd test 
+- mkdir build
+- cmake -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=/path/to/boost  ..
+```
