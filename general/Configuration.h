@@ -109,6 +109,7 @@ public:
 
           //ff router
           _has_specific_goals = false;
+          _write_VTK_files = false;
      }
 
      int GetSolver() const { return _solver; };
@@ -248,6 +249,10 @@ public:
 
      void set_has_specific_goals(bool has_specific_goals) { _has_specific_goals = has_specific_goals;}
 
+     void set_write_VTK_files(bool write_VTK_files) {_write_VTK_files = write_VTK_files;}
+
+     bool get_write_VTK_files() const {return _write_VTK_files;}
+
      const std::string& GetHostname() const { return _hostname; };
 
      void SetHostname(std::string hostname) { _hostname = hostname; };
@@ -352,6 +357,7 @@ private:
 
      //ff router
      bool _has_specific_goals;
+     bool _write_VTK_files;
 
      std::string _hostname;
      std::string _trajectoriesFile;
