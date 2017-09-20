@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<JuPedSim project="JPS-Project" version="0.8"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
+
+    
+    <seed>12541</seed>
+    <max_sim_time>100</max_sim_time>
+    <geometry>../geometry.xml</geometry>
+
+    <num_threads>10</num_threads>
+    <show_statistics>true</show_statistics>
+    <logfile>Test5_log.txt</logfile>
+
+    <trajectories format="xml-plain" fps="16" color_mode="verlocity">
+        <file location = "Test5_trajectory.xml"/>
+    </trajectories>
+    
+    <traffic_constraints>
+        <doors>
+            <door trans_id="1" caption="exit west 1" state="open"/>
+            <door trans_id="2" caption="exit west 2" state="open"/>
+        </doors>
+    </traffic_constraints>
+
+    <routing>
+        <goals>
+        </goals>
+    </routing>
+
+    <!--For First run-->
+    <agents operational_model_id = "3">
+        <agents_distribution>
+            <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="67" router_id = "range(1,8)"/>
+        </agents_distribution>
+    </agents>
+
+    <!--For second run-->
+    <!--agents operational_model_id = "3">
+        <agents_distribution>
+            <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="71" router_id = "1"/>
+        </agents_distribution>
+    </agents-->
+
+    <!--For third run-->
+    <!--agents operational_model_id = "3">
+        <agents_distribution>
+            <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="90" router_id = "1">
+            <group group_id="2" agent_parameter_id="1" room_id="0" subroom_id="2" number="48" router_id = "1" x_min="0.0" x_max="3.0" y_min ="0.0" y_max="6.0"/>
+        </agents_distribution>
+    </agents-->
+
+
+    <operational_models>
+        <model operational_model_id = "3" description = "Tordeux2015">
+            <model_parameters>
+                <solver>euler</solver>
+                <stepsize>0.01</stepsize>
+                <exit_crossing_strategy>3</exit_crossing_strategy>
+                <linkedcells enabled = "true" cell_size = "2.2" />
+                <force_ped a = "5" D = "0.2" />
+                <force_wall a = "5" D = "0.02" />
+            </model_parameters>
+
+            <agent_parameters agent_parameter_id = "1">
+                <v0 mu = "1.2" sigma = "0.001"  />
+                <bmax mu = "0.15" sigma = "0.00001" />
+                <bmin mu = "0.15" sigma = "0.001" />
+                <amin mu = "0.15" sigma = "0.00001" />
+                <tau mu = "0.2" sigma = "0.001" />
+                <atau mu = "0." sigma = "0.000001" />
+                <T mu = "1" sigma = "0.001" />
+            </agent_parameters>
+        </model>
+    </operational_models>
+
+    <route_choice_models>
+       <router router_id="1" description="local_shortest">
+         <parameters>
+           <!-- <navigation_lines file="../routing.xml" /> -->
+         </parameters>
+       </router>
+       
+       <router router_id="2" description="global_shortest">
+         <parameters>
+           <!-- <navigation_lines file="../routing.xml" /> -->
+         </parameters>
+       </router>
+       
+       <router router_id="3" description="quickest"> <!-- global quickest -->
+         <parameters>
+           <!-- <navigation_lines file="../routing.xml" /> -->
+         </parameters>
+       </router>
+
+       
+       <router router_id="4" description="ff_global_shortest"/> <!-- like global_shortest, without HLines -->
+       <router router_id="5" description="ff_local_shortest"/> <!-- like local_shortest, without HLines -->
+       <router router_id="6" description="ff_quickest"/> <!-- like global quickest -->
+
+       <router router_id="7" description="AI">
+         <cognitive_map status="empty" />
+         <parameters>
+           <!-- <navigation_lines file="../routing.xml" /> -->
+         </parameters>
+       </router>
+
+       <!-- not implemented -->
+       <router router_id="8" description="local_quickest">
+         <parameters>
+           <!-- <navigation_lines file="../routing.xml" /> -->
+         </parameters>
+       </router>
+    </route_choice_models>
+
+</JuPedSim>
