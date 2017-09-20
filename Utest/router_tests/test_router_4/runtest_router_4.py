@@ -24,6 +24,7 @@ def runtest4(inifile, trajfile):
     e2 = [2.9, 6.5, 7.6] # y, x1, x2
     count1 = 0
     count2 = 0
+    N = len(ids)
     for ped in ids:
         traj1 = traj[traj[:, 0] == ped]
         x = traj1[:, 2]
@@ -36,7 +37,7 @@ def runtest4(inifile, trajfile):
             logging.critical("ped %d did not pass one of the exists" % ped)
             failure = True
 
-    logging.info("\t >> STATISTICS: Exit Left: %d. Exit Right: %d" % (argv[0], count1, count2))
+    logging.info(">> STATISTICS: Exit Left: %d. Exit Right: %d, Total %d <<" % (count1, count2, N))
     
     if failure:
         logging.critical("%s exists with failure!"%argv[0])
