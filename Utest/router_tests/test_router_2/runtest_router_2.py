@@ -1,10 +1,20 @@
 #!/usr/bin/env python3
 
 """
-- 100 peds distributed in a room with 2 exits:
-  - All  peds  with router "global_shortest"
+The Winding Channel. 
 
-- All peds should leave from the exit e1
+- "Optimized Automatic Wayfinding for Pedestrian Simulations"
+
+Actually the following routers are tested: 
+- local_shortest
+- global_shortest
+- quickest
+- ff_global_shortest
+- ff_local_shortest
+- ff_quickest
+- AI
+
+See also this issue: https://gitlab.version.fz-juelich.de/jupedsim/jpscore/issues/127
 """
 
 import os

@@ -1,20 +1,7 @@
 #!/usr/bin/env python3
 
 """
-- 6 peds distributed in a room with 2 exits:
-- Test if all implemented router run. 
-- This test does NOT check the behavior of the specific routers.
-
-Actually the following routers are tested: 
-- local_shortest
-- global_shortest
-- quickest
-- ff_global_shortest
-- ff_local_shortest
-- ff_quickest
-- AI
-
-See also this issue: https://gitlab.version.fz-juelich.de/jupedsim/jpscore/issues/127
+Room with two exists
 """
 
 import os

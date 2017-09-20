@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 """
-- 100 peds distributed in a room with 2 exits:
-  - All  peds  with router "global_shortest"
+180 degree turn around a wall
 
-- All peds should leave from the exit e1
+- Paper: Optimized Automatic Wayfinding for Pedestrian Simulations
+- Length of the wall: 50 m
 """
 
 import os
