@@ -100,20 +100,30 @@ def PassedLineX(p, exit):
     """
     check if pedestrian (given by matrix p) passed the vertical line x, [y1, y2] y1<y2
     """
+    eps = 0.1 # fps should be big enough, otherwise eps maybe too bis for a guess.
     x = exit[0]
     y1 = exit[1]
     y2 = exit[2]
-    return any(p[:, 2] <= x) & any(p[:, 2] >= x) & any(p[:, 3] >= y1) & any(p[:, 3] <= y2)
+    
+    X = p[:, 2]
+    Y = p[:, 3]
+
+    return (np.logical_and(np.logical_and(X >= x-eps, X <= x+eps), np.logical_and(Y >= y1, Y <= y2) ) ).any() 
 
 
 def PassedLineY(p, exit):
     """
     check if pedestrian (given by matrix p) passed the horizontal line y, [x1, x2] x1<x2
     """
+    eps = 0.1 # fps should be big enough, otherwise eps maybe too bis for a guess.
     y = exit[0]
     x1 = exit[1]
     x2 = exit[2]
-    return any(p[:, 3] <= y) & any(p[:, 3] >= y) & any(p[:, 2] >= x1) & any(p[:, 2] <= x2)
+
+    X = p[:, 2]
+    Y = p[:, 3]
+
+    return (np.logical_and(np.logical_and(Y >= y-eps, Y <= y+eps), np.logical_and(X >= x1, X <= x2) ) ).any() 
 
 def get_num_threads(filename):
     """
