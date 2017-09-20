@@ -1163,6 +1163,15 @@ bool IniFileParser::ParseFfRouterOps(TiXmlNode* routingNode, RoutingStrategy s) 
                }
           }
      }
+     _config->set_write_VTK_files(false);
+     if (routingNode->FirstChild("parameters")) {
+          TiXmlNode* pParametersForAllFF = routingNode->FirstChild("parameters");
+          if (pParametersForAllFF->FirstChild("write_VTK_files"))  {
+               //remark: std::strcmp returns 0 if the strings are equal
+               bool tmp_write_VTK = !std::strcmp(pParametersForAllFF->FirstChild("write_VTK_files")->FirstChild()->Value(), "true");
+               _config->set_write_VTK_files(tmp_write_VTK);
+          }
+     }
      FFRouter* r = static_cast<FFRouter*>(_config->GetRoutingEngine()->GetAvailableRouters().back());
 
 

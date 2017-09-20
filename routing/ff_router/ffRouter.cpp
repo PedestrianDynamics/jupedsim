@@ -314,12 +314,14 @@ bool FFRouter::Init(Building* building)
      //int transTest = (building->GetRoom(roomTest)->GetAllTransitionsIDs())[0];
      //auto test = _CroTrByUID.at(1253);
 
-//     for (unsigned int i = 0; i < _locffviafm.size(); ++i) {
-//          auto iter = _locffviafm.begin();
-//          std::advance(iter, i);
-//          int roomNr = iter->first;
-//          iter->second->writeFF("testFF" + std::to_string(roomNr) + ".vtk", _allDoorUIDs);
-//     }
+     if (_config->get_write_VTK_files()) {
+          for (unsigned int i = 0; i < _locffviafm.size(); ++i) {
+               auto iter = _locffviafm.begin();
+               std::advance(iter, i);
+               int roomNr = iter->first;
+               iter->second->writeFF("ffrouterOfRoom" + std::to_string(roomNr) + ".vtk", _allDoorUIDs);
+          }
+     }
 
 //     std::ofstream matrixfile;
 //     matrixfile.open("Matrix.txt");
