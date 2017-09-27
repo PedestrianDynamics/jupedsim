@@ -33,12 +33,12 @@ def runtest7(inifile, trajfile):
         y = traj1[:, 3]
         if PassedLineX(traj1, e1) != 0:
             count1 += 1
-            print("ped %d" % ped)
-            print(min(x), max(x))
-            print(min(y), max(y))
-            np.savetxt('x.txt', x)
-            np.savetxt('y.txt', y) 
-            input()
+            # print("ped %d" % ped)
+            # print(min(x), max(x))
+            # print(min(y), max(y))
+            # np.savetxt('x.txt', x)
+            # np.savetxt('y.txt', y) 
+            # input()
         elif PassedLineX(traj1, e2) != 0:
             count2 += 1
         elif PassedLineX(traj1, e3) != 0:
