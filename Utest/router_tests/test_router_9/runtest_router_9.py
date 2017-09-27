@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 """
-- Paper: Avoid or Follow? modelling Route Choice Based on Experimental Empirical Evidences 
-        by Luca Crociani et al. PED16 in Hefei
-- Name: Cruciani2016
+- Paper: Microscopic Pedestrian Wayfinfing and Dynamics Modelling
+        by Hoogendoorn et al
+- Name: Hoogendoorn2002
 - Unit: Meter
 - TODO: compare with the results form the paper
 """
