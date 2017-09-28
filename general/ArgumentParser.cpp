@@ -98,7 +98,7 @@ bool ArgumentParser::ParseArgs(int argc, char **argv)
      if (argc == 1)
      {
           Log->Write(
-                    "INFO: \tTrying to load the default configuration from the file <ini.xml>");
+               "INFO: \tTrying to load the default configuration from the file <ini.xml>");
           if(ParseIniFile("ini.xml")==false)
           {
                Usage(argv[0]);
@@ -216,11 +216,11 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           }
           //a file descriptor was given
           for (TiXmlElement* xFile = xTrajectories->FirstChildElement("file");
-                    xFile; xFile = xFile->NextSiblingElement("file"))
+               xFile; xFile = xFile->NextSiblingElement("file"))
           {
                //collect all the files given
                _trajectoriesFilename =
-                         + xFile->Attribute("name");
+                    + xFile->Attribute("name");
                _trajectoriesFiles.push_back(_trajectoriesFilename);
 
                //check if the given file match the format
@@ -239,22 +239,22 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           {
                if(xTrajectories->FirstChildElement("path")->Attribute("location"))
                {
-            	   _trajectoriesLocation = xTrajectories->FirstChildElement("path")->Attribute("location");
+                    _trajectoriesLocation = xTrajectories->FirstChildElement("path")->Attribute("location");
 
                }
                //hack to find if it is an absolute path
                // ignore the project root in this case
                if ( (boost::algorithm::contains(_trajectoriesLocation,":")==false) && //windows
-                         (boost::algorithm::starts_with(_trajectoriesLocation,"/") ==false)) //linux
+                    (boost::algorithm::starts_with(_trajectoriesLocation,"/") ==false)) //linux
                     // &&() osx
                {
-            	   Log->Write(_trajectoriesLocation);
-            	   _trajectoriesLocation=_projectRootDir+_trajectoriesLocation;
+                    Log->Write(_trajectoriesLocation);
+                    _trajectoriesLocation=_projectRootDir+_trajectoriesLocation;
                }
           }
           else
           {
-        	  _trajectoriesLocation=_projectRootDir;
+               _trajectoriesLocation=_projectRootDir;
           }
 
           Log->Write("INFO: \tInput directory for loading trajectory is:\t<"+ (_trajectoriesLocation)+">");
@@ -314,7 +314,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                _scriptsLocation="./";
           }
           if ( (boost::algorithm::contains(_scriptsLocation,":")==false) && //windows
-                    (boost::algorithm::starts_with(_scriptsLocation,"/") ==false)) //linux
+               (boost::algorithm::starts_with(_scriptsLocation,"/") ==false)) //linux
                // &&() osx
           {
                _scriptsLocation=_projectRootDir+_scriptsLocation;
@@ -342,26 +342,26 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           }
 
           for(TiXmlNode* xMeasurementArea_B=xMainNode->FirstChild("measurement_areas")->FirstChild("area_B");
-                    xMeasurementArea_B; xMeasurementArea_B=xMeasurementArea_B->NextSibling("area_B"))
+              xMeasurementArea_B; xMeasurementArea_B=xMeasurementArea_B->NextSibling("area_B"))
           {
                MeasurementArea_B* areaB = new MeasurementArea_B();
                areaB->_id=xmltoi(xMeasurementArea_B->ToElement()->Attribute("id"));
                areaB->_type=xMeasurementArea_B->ToElement()->Attribute("type");
                if(xMeasurementArea_B->ToElement()->Attribute("zPos"))
-				{
-				   if(string(xMeasurementArea_B->ToElement()->Attribute("zPos"))!="None")
-				   {
-					   areaB->_zPos=xmltof(xMeasurementArea_B->ToElement()->Attribute("zPos"));
-				   }
-				   else
-				   {
-					   areaB->_zPos=10000001.0;
-				   }
-				}
-				else
-				{
-					areaB->_zPos=10000001.0;
-				}
+               {
+                    if(string(xMeasurementArea_B->ToElement()->Attribute("zPos"))!="None")
+                    {
+                         areaB->_zPos=xmltof(xMeasurementArea_B->ToElement()->Attribute("zPos"));
+                    }
+                    else
+                    {
+                         areaB->_zPos=10000001.0;
+                    }
+               }
+               else
+               {
+                    areaB->_zPos=10000001.0;
+               }
                polygon_2d poly;
                Log->Write("INFO: \tMeasure area id  <%d> with type <%s>",areaB->_id, areaB->_type.c_str());
                for(TiXmlElement* xVertex=xMeasurementArea_B->FirstChildElement("vertex"); xVertex; xVertex=xVertex->NextSiblingElement("vertex") )
@@ -383,26 +383,26 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                _measurementAreas[areaB->_id]=areaB;
           }
           for(TiXmlNode* xMeasurementArea_L=xMainNode->FirstChild("measurement_areas")->FirstChild("area_L");
-                    xMeasurementArea_L; xMeasurementArea_L=xMeasurementArea_L->NextSibling("area_L"))
+              xMeasurementArea_L; xMeasurementArea_L=xMeasurementArea_L->NextSibling("area_L"))
           {
                MeasurementArea_L* areaL = new MeasurementArea_L();
                areaL->_id=xmltoi(xMeasurementArea_L->ToElement()->Attribute("id"));
                areaL->_type=xMeasurementArea_L->ToElement()->Attribute("type");
                if(xMeasurementArea_L->ToElement()->Attribute("zPos"))
-				{
-				   if(string(xMeasurementArea_L->ToElement()->Attribute("zPos"))!="None")
-				   {
-					   areaL->_zPos=xmltof(xMeasurementArea_L->ToElement()->Attribute("zPos"));
-				   }
-				   else
-				   {
-					   areaL->_zPos=10000001.0;
-				   }
-				}
-			    else
-			    {
-			    	areaL->_zPos=10000001.0;
-			    }
+               {
+                    if(string(xMeasurementArea_L->ToElement()->Attribute("zPos"))!="None")
+                    {
+                         areaL->_zPos=xmltof(xMeasurementArea_L->ToElement()->Attribute("zPos"));
+                    }
+                    else
+                    {
+                         areaL->_zPos=10000001.0;
+                    }
+               }
+               else
+               {
+                    areaL->_zPos=10000001.0;
+               }
                Log->Write("INFO: \tMeasure area id  <%d> with type <%s>",areaL->_id,areaL->_type.c_str());
                areaL->_lineStartX = xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("x"))*M2CM;
                areaL->_lineStartY =xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("y"))*M2CM;
@@ -415,122 +415,122 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
      }
      
      //instantaneous velocity
- /*    TiXmlNode* xVelocity=xMainNode->FirstChild("velocity");
+     /*    TiXmlNode* xVelocity=xMainNode->FirstChild("velocity");
+           if(xVelocity)
+           {
+           string FrameSteps = xVelocity->FirstChildElement("frame_step")->GetText();
+           _delatTVInst = atof(FrameSteps.c_str())/2.0;
+           TiXmlNode* xVx=xVelocity->FirstChildElement("use_x_component");
+           TiXmlNode* xVy=xVelocity->FirstChildElement("use_y_component");
+           //decide which component used in velocity calculation
+           if(xVx && xVy)
+           {
+           string UseXComponent = xVelocity->FirstChildElement("use_x_component")->GetText();
+           string UseYComponent = xVelocity->FirstChildElement("use_y_component")->GetText();
+           if(UseXComponent == "true"&&UseYComponent == "false")
+           {
+           _vComponent = "X";
+           Log->Write("INFO: \tOnly x-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+           }
+           else if(UseXComponent == "false"&&UseYComponent == "true")
+           {
+           _vComponent = "Y";
+           Log->Write("INFO: \tOnly y-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+           }
+           else if(UseXComponent == "true"&&UseYComponent == "true")
+           {
+           _vComponent = "B";  // both components
+           Log->Write("INFO: \tBoth x and y-component of coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+           }
+           else if(UseXComponent == "false"&&UseYComponent == "false")
+           {
+           _vComponent = "F";
+           Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+           }
+           }
+           else if(xVx && !xVy)
+           {
+           string UseXComponent = xVelocity->FirstChildElement("use_x_component")->GetText();
+           if(UseXComponent == "true")
+           {
+           _vComponent = "X";
+           Log->Write("INFO: \tOnly x-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+           }
+           else if(UseXComponent == "false")
+           {
+           _vComponent = "F";
+           Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+           }
+           }
+           else if(!xVx && xVy)
+           {
+           string UseYComponent = xVelocity->FirstChildElement("use_y_component")->GetText();
+           if(UseYComponent == "true")
+           {
+           _vComponent = "Y";
+           Log->Write("INFO: \tOnly y-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+           }
+           else if(UseYComponent == "false")
+           {
+           _vComponent = "F";
+           Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+           }
+           }
+           else
+           {
+           _vComponent = "F";
+           Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <" + FrameSteps + " frames>");
+           }
+           }
+     */
+     //instantaneous velocity
+     TiXmlNode* xVelocity=xMainNode->FirstChild("velocity");
      if(xVelocity)
      {
-		  string FrameSteps = xVelocity->FirstChildElement("frame_step")->GetText();
-		  _delatTVInst = atof(FrameSteps.c_str())/2.0;
-		  TiXmlNode* xVx=xVelocity->FirstChildElement("use_x_component");
-		  TiXmlNode* xVy=xVelocity->FirstChildElement("use_y_component");
-          //decide which component used in velocity calculation
-          if(xVx && xVy)
+          string FrameSteps = "10";
+          if(xMainNode->FirstChildElement("velocity")->Attribute("frame_step"))
           {
-               string UseXComponent = xVelocity->FirstChildElement("use_x_component")->GetText();
-               string UseYComponent = xVelocity->FirstChildElement("use_y_component")->GetText();
-               if(UseXComponent == "true"&&UseYComponent == "false")
+               FrameSteps =xMainNode->FirstChildElement("velocity")->Attribute("frame_step");
+               _delatTVInst = atof(FrameSteps.c_str())/2.0;
+          }
+          string MovementDirection = "None";
+          if(xMainNode->FirstChildElement("velocity")->Attribute("set_movement_direction"))
+          {
+               MovementDirection = xMainNode->FirstChildElement("velocity")->Attribute("set_movement_direction");
+               if(atof(MovementDirection.c_str())<0 && atof(MovementDirection.c_str())>360 && MovementDirection!="None" && MovementDirection!="SeeTraj")
                {
-                    _vComponent = "X";
-                    Log->Write("INFO: \tOnly x-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
-               }
-               else if(UseXComponent == "false"&&UseYComponent == "true")
-               {
-                    _vComponent = "Y";
-                    Log->Write("INFO: \tOnly y-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
-               }
-               else if(UseXComponent == "true"&&UseYComponent == "true")
-               {
-                    _vComponent = "B";  // both components
-                    Log->Write("INFO: \tBoth x and y-component of coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
-               }
-               else if(UseXComponent == "false"&&UseYComponent == "false")
-               {
-                    _vComponent = "F";
-                    Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+                    Log->Write("WARNING: \tThe movement direction should be set between 0 to 360 or None!");
+                    return false;
                }
           }
-          else if(xVx && !xVy)
+          if	(xMainNode->FirstChildElement("velocity")->Attribute("ignore_backward_movement"))
           {
-               string UseXComponent = xVelocity->FirstChildElement("use_x_component")->GetText();
-               if(UseXComponent == "true")
+               if	(string(xMainNode->FirstChildElement("velocity")->Attribute("ignore_backward_movement"))=="true")
                {
-                    _vComponent = "X";
-                    Log->Write("INFO: \tOnly x-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+                    _IgnoreBackwardMovement = true;
                }
-               else if(UseXComponent == "false")
+               else
                {
-                    _vComponent = "F";
-                    Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+                    _IgnoreBackwardMovement = false;
                }
           }
-          else if(!xVx && xVy)
+          if(MovementDirection=="None")
           {
-               string UseYComponent = xVelocity->FirstChildElement("use_y_component")->GetText();
-               if(UseYComponent == "true")
-               {
-                    _vComponent = "Y";
-                    Log->Write("INFO: \tOnly y-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
-               }
-               else if(UseYComponent == "false")
-               {
-                    _vComponent = "F";
-                    Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
-               }
+               _vComponent = "B";  // both components
+               _IgnoreBackwardMovement = false;
+               Log->Write("INFO: \tBoth x and y-component of coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
           }
-          else
+          else if(MovementDirection=="SeeTraj")
           {
                _vComponent = "F";
                Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <" + FrameSteps + " frames>");
           }
+          else
+          {
+               _vComponent = MovementDirection;
+               Log->Write("INFO: \tThe instantaneous velocity in the direction of "+MovementDirection+"degree will be calculated over <"+FrameSteps+" frames>" );
+          }
      }
-*/
-     //instantaneous velocity
-         TiXmlNode* xVelocity=xMainNode->FirstChild("velocity");
-         if(xVelocity)
-         {
-        	 string FrameSteps = "10";
-        	  if(xMainNode->FirstChildElement("velocity")->Attribute("frame_step"))
-        	  {
-        		  FrameSteps =xMainNode->FirstChildElement("velocity")->Attribute("frame_step");
-        		  _delatTVInst = atof(FrameSteps.c_str())/2.0;
-        	  }
-        	  string MovementDirection = "None";
-        	  if(xMainNode->FirstChildElement("velocity")->Attribute("set_movement_direction"))
-        	  {
-				  MovementDirection = xMainNode->FirstChildElement("velocity")->Attribute("set_movement_direction");
-				  if(atof(MovementDirection.c_str())<0 && atof(MovementDirection.c_str())>360 && MovementDirection!="None" && MovementDirection!="SeeTraj")
-				  {
-					  Log->Write("WARNING: \tThe movement direction should be set between 0 to 360 or None!");
-					  return false;
-				  }
-        	  }
-        	  if	(xMainNode->FirstChildElement("velocity")->Attribute("ignore_backward_movement"))
-        	  {
-        		  if	(string(xMainNode->FirstChildElement("velocity")->Attribute("ignore_backward_movement"))=="true")
-				  {
-					  _IgnoreBackwardMovement = true;
-				  }
-				  else
-				  {
-					  _IgnoreBackwardMovement = false;
-				  }
-        	  }
-    		  if(MovementDirection=="None")
-    		  {
-    			  _vComponent = "B";  // both components
-    			  _IgnoreBackwardMovement = false;
-    			  Log->Write("INFO: \tBoth x and y-component of coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
-    		  }
-    		  else if(MovementDirection=="SeeTraj")
-    		  {
-    			  _vComponent = "F";
-    			  Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <" + FrameSteps + " frames>");
-    		  }
-    		  else
-    		  {
-    			  _vComponent = MovementDirection;
-    			  Log->Write("INFO: \tThe instantaneous velocity in the direction of "+MovementDirection+"degree will be calculated over <"+FrameSteps+" frames>" );
-    		  }
-         }
 
      // method A
      TiXmlElement* xMethod_A=xMainNode->FirstChildElement("method_A");
@@ -541,45 +541,45 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                _isMethodA = true;
                Log->Write("INFO: \tMethod A is selected" );
 /*               _timeIntervalA = xmltoi(xMethod_A->FirstChildElement("frame_interval")->GetText());
-               Log->Write("INFO: \tFrame interval used for calculating flow in Method A is <%d> frame",_timeIntervalA);*/
+                 Log->Write("INFO: \tFrame interval used for calculating flow in Method A is <%d> frame",_timeIntervalA);*/
                for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_A")->FirstChildElement("measurement_area");
-                         xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
+                   xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
                {
                     _areaIDforMethodA.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
 
                     if(xMeasurementArea->Attribute("frame_interval"))
-					{
-						if(string(xMeasurementArea->Attribute("frame_interval"))!="None")
-						{
-							_timeIntervalA.push_back(xmltoi(xMeasurementArea->Attribute("frame_interval")));
-							Log->Write("\tFrame interval used for calculating flow is <%d> frame",xmltoi(xMeasurementArea->Attribute("frame_interval")));
-						}
-						else
-						{
-							_timeIntervalA.push_back(100);
-						}
-					}
-					else
-					{
-						_timeIntervalA.push_back(100);
-					}
+                    {
+                         if(string(xMeasurementArea->Attribute("frame_interval"))!="None")
+                         {
+                              _timeIntervalA.push_back(xmltoi(xMeasurementArea->Attribute("frame_interval")));
+                              Log->Write("\tFrame interval used for calculating flow is <%d> frame",xmltoi(xMeasurementArea->Attribute("frame_interval")));
+                         }
+                         else
+                         {
+                              _timeIntervalA.push_back(100);
+                         }
+                    }
+                    else
+                    {
+                         _timeIntervalA.push_back(100);
+                    }
                     if(xMeasurementArea->Attribute("plot_time_series"))
-					{
-						if(string(xMeasurementArea->Attribute("plot_time_series"))=="true")
-						{
-							_isPlotTimeSeriesA.push_back(true);
-							Log->Write("\tThe Time series N-t measured will be plotted!! ");
-						}
-						else
-						{
-							_isPlotTimeSeriesA.push_back(false);
-						}
-					}
-					else
-					{
-						_isPlotTimeSeriesA.push_back(false);
-					}
+                    {
+                         if(string(xMeasurementArea->Attribute("plot_time_series"))=="true")
+                         {
+                              _isPlotTimeSeriesA.push_back(true);
+                              Log->Write("\tThe Time series N-t measured will be plotted!! ");
+                         }
+                         else
+                         {
+                              _isPlotTimeSeriesA.push_back(false);
+                         }
+                    }
+                    else
+                    {
+                         _isPlotTimeSeriesA.push_back(false);
+                    }
 
                }
           }
@@ -593,7 +593,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                _isMethodB = true;
                Log->Write("INFO: \tMethod B is selected" );
                for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_B")->FirstChildElement("measurement_area");
-                         xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
+                   xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
                {
                     _areaIDforMethodB.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
@@ -607,27 +607,27 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                _isMethodC = true;
                Log->Write("INFO: \tMethod C is selected" );
                for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_C")->FirstChildElement("measurement_area");
-                         xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
+                   xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
                {
                     _areaIDforMethodC.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
 
                     if(xMeasurementArea->Attribute("plot_time_series"))
-					{
-						if(string(xMeasurementArea->Attribute("plot_time_series"))=="true")
-						{
-							_isPlotTimeSeriesC.push_back(true);
-							Log->Write("\tThe Time series measured will be plotted!! ");
-						}
-						else
-						{
-							_isPlotTimeSeriesC.push_back(false);
-						}
-					}
-					else
-					{
-						_isPlotTimeSeriesC.push_back(false);
-					}
+                    {
+                         if(string(xMeasurementArea->Attribute("plot_time_series"))=="true")
+                         {
+                              _isPlotTimeSeriesC.push_back(true);
+                              Log->Write("\tThe Time series measured will be plotted!! ");
+                         }
+                         else
+                         {
+                              _isPlotTimeSeriesC.push_back(false);
+                         }
+                    }
+                    else
+                    {
+                         _isPlotTimeSeriesC.push_back(false);
+                    }
                }
           }
      // method D
@@ -639,84 +639,84 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                Log->Write("INFO: \tMethod D is selected" );
 
                for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_D")->FirstChildElement("measurement_area");
-                         xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
+                   xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
                {
                     _areaIDforMethodD.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
                     if(xMeasurementArea->Attribute("start_frame"))
-				    {
-					   if(string(xMeasurementArea->Attribute("start_frame"))!="None")
-					   {
-						   _start_frames_MethodD.push_back(xmltoi(xMeasurementArea->Attribute("start_frame")));
-						   Log->Write("\tthe analysis starts from frame <%d>",xmltoi(xMeasurementArea->Attribute("start_frame")));
-					   }
-					   else
-					   {
-						   _start_frames_MethodD.push_back(-1);
-					   }
-				    }
+                    {
+                         if(string(xMeasurementArea->Attribute("start_frame"))!="None")
+                         {
+                              _start_frames_MethodD.push_back(xmltoi(xMeasurementArea->Attribute("start_frame")));
+                              Log->Write("\tthe analysis starts from frame <%d>",xmltoi(xMeasurementArea->Attribute("start_frame")));
+                         }
+                         else
+                         {
+                              _start_frames_MethodD.push_back(-1);
+                         }
+                    }
                     else
                     {
-                    	_start_frames_MethodD.push_back(-1);
+                         _start_frames_MethodD.push_back(-1);
                     }
                     if(xMeasurementArea->Attribute("stop_frame"))
-					{
-					   if(string(xMeasurementArea->Attribute("stop_frame"))!="None")
-					   {
-						   _stop_frames_MethodD.push_back(xmltoi(xMeasurementArea->Attribute("stop_frame")));
-						   Log->Write("\tthe analysis stops from frame <%d>", xmltoi(xMeasurementArea->Attribute("stop_frame")));
-					   }
-					   else
-					   {
-						   _stop_frames_MethodD.push_back(-1);
-					   }
-					}
-				    else
-				    {
-				    	_stop_frames_MethodD.push_back(-1);
-				    }
-
-                    if(xMeasurementArea->Attribute("get_individual_FD"))
-					{
-						if(string(xMeasurementArea->Attribute("get_individual_FD"))=="true")
-						{
-							_individual_FD_flags.push_back(true);
-							Log->Write("INFO: \tIndividual FD will be output");
-						}
-						else
-						{
-							_individual_FD_flags.push_back(false);
-						}
-					}
+                    {
+                         if(string(xMeasurementArea->Attribute("stop_frame"))!="None")
+                         {
+                              _stop_frames_MethodD.push_back(xmltoi(xMeasurementArea->Attribute("stop_frame")));
+                              Log->Write("\tthe analysis stops from frame <%d>", xmltoi(xMeasurementArea->Attribute("stop_frame")));
+                         }
+                         else
+                         {
+                              _stop_frames_MethodD.push_back(-1);
+                         }
+                    }
                     else
                     {
-                    	_individual_FD_flags.push_back(false);
+                         _stop_frames_MethodD.push_back(-1);
+                    }
+
+                    if(xMeasurementArea->Attribute("get_individual_FD"))
+                    {
+                         if(string(xMeasurementArea->Attribute("get_individual_FD"))=="true")
+                         {
+                              _individual_FD_flags.push_back(true);
+                              Log->Write("INFO: \tIndividual FD will be output");
+                         }
+                         else
+                         {
+                              _individual_FD_flags.push_back(false);
+                         }
+                    }
+                    else
+                    {
+                         _individual_FD_flags.push_back(false);
                     }
                     if(xMeasurementArea->Attribute("plot_time_series"))
-					{
-						if(string(xMeasurementArea->Attribute("plot_time_series"))=="true")
-						{
-							_isPlotTimeSeriesD.push_back(true);
-							Log->Write("\tThe Time series will be plotted!! ");
-						}
-						else
-						{
-							_isPlotTimeSeriesD.push_back(false);
-						}
-					}
-					else
-					{
-						_isPlotTimeSeriesD.push_back(false);
-					}
+                    {
+                         if(string(xMeasurementArea->Attribute("plot_time_series"))=="true")
+                         {
+                              _isPlotTimeSeriesD.push_back(true);
+                              Log->Write("\tThe Time series will be plotted!! ");
+                         }
+                         else
+                         {
+                              _isPlotTimeSeriesD.push_back(false);
+                         }
+                    }
+                    else
+                    {
+                         _isPlotTimeSeriesD.push_back(false);
+                    }
 
                }
                if (xMethod_D->FirstChildElement("one_dimensional"))
                {
-				   if ( string(xMethod_D->FirstChildElement("one_dimensional")->Attribute("enabled"))=="true")
-				   {
-					   _isOneDimensional=true;
-					   Log->Write("INFO: \tThe data will be analyzed with one dimensional way!!");
-				   }
+                    if ( string(xMethod_D->FirstChildElement("one_dimensional")->Attribute("enabled"))=="true")
+                    {
+                         _isOneDimensional=true;
+                         Log->Write("INFO: \tThe data will be analyzed with one dimensional way!!");
+                    }
                }
 
                if ( xMethod_D->FirstChildElement("cut_by_circle"))
@@ -735,15 +735,15 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                {
                     if ( string(xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("enabled"))=="true")
                     {
-                    	_isOutputGraph=true;
+                         _isOutputGraph=true;
                     	 Log->Write("INFO: \tData of voronoi diagram is asked to output" );
                     	 if(string(xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("plot_graphs"))=="true")
                     	 {
-							_isPlotGraph=true;
-							if(_isPlotGraph)
-							{
-								Log->Write("INFO: \tGraph of voronoi diagram will be plotted" );
-							}
+                              _isPlotGraph=true;
+                              if(_isPlotGraph)
+                              {
+                                   Log->Write("INFO: \tGraph of voronoi diagram will be plotted" );
+                              }
                     	 }
                     }
                }
@@ -815,7 +815,7 @@ std::string	ArgumentParser::GetVComponent() const
 
 bool ArgumentParser::GetIgnoreBackwardMovement() const
 {
-	return _IgnoreBackwardMovement;
+     return _IgnoreBackwardMovement;
 }
 
 int ArgumentParser::GetDelatT_Vins() const
@@ -875,22 +875,22 @@ bool ArgumentParser::GetIsPlotGraph() const
 
 vector<bool> ArgumentParser::GetIsPlotTimeSeriesA() const
 {
-	return _isPlotTimeSeriesA;
+     return _isPlotTimeSeriesA;
 }
 
 vector<bool> ArgumentParser::GetIsPlotTimeSeriesC() const
 {
-	return _isPlotTimeSeriesC;
+     return _isPlotTimeSeriesC;
 }
 
 vector<bool> ArgumentParser::GetIsPlotTimeSeriesD() const
 {
-	return _isPlotTimeSeriesD;
+     return _isPlotTimeSeriesD;
 }
 
 bool ArgumentParser::GetIsOneDimensional() const
 {
-	return _isOneDimensional;
+     return _isOneDimensional;
 }
 
 bool ArgumentParser::GetIsGetProfile() const
@@ -941,17 +941,17 @@ vector<int> ArgumentParser::GetAreaIDforMethodD() const
 
 vector<int> ArgumentParser::GetStartFramesMethodD() const
 {
-	 return _start_frames_MethodD;
+     return _start_frames_MethodD;
 }
 
 vector<int> ArgumentParser::GetStopFramesMethodD() const
 {
-	 return _stop_frames_MethodD;
+     return _stop_frames_MethodD;
 }
 
 vector<bool> ArgumentParser::GetIndividualFDFlags() const
 {
-	 return _individual_FD_flags;
+     return _individual_FD_flags;
 }
 
 MeasurementArea* ArgumentParser::GetMeasurementArea(int id)
