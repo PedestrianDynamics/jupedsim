@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from numpy import *
 import matplotlib
 import matplotlib.pyplot as plt

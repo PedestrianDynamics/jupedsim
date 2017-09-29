@@ -528,7 +528,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           else
           {
                _vComponent = MovementDirection;
-               Log->Write("INFO: \tThe instantaneous velocity in the direction of "+MovementDirection+"degree will be calculated over <"+FrameSteps+" frames>" );
+               Log->Write("INFO: \tThe instantaneous velocity in the direction of <"+MovementDirection+">  will be calculated over <"+FrameSteps+" frames>" );
           }
      }
 
