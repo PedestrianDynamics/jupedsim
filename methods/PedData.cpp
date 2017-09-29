@@ -35,7 +35,7 @@ using std::map;
 using std::vector;
 using std::ifstream;
 
-#include "getRSS.c"
+#include "../getRSS.c"
 
 PedData::PedData()
 {
