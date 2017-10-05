@@ -1358,6 +1358,9 @@ void UnivFFviaFM::writeFF(const std::string& filename, std::vector<int> targetID
 
 //mode is argument, which should not be needed, the info is stored in members like speedmode, ...
 double UnivFFviaFM::getCostToDestination(const int destID, const Point& position, int mode) {
+//     if (!_grid->includesPoint(position)) {
+//          Log->Write("Was ist denn hier los?");
+//     }
      assert(_grid->includesPoint(position));
      if (_costFieldWithKey.count(destID)==1 && _costFieldWithKey[destID]) {
           return _costFieldWithKey[destID][_grid->getKeyAtPoint(position)];
@@ -1370,7 +1373,7 @@ double UnivFFviaFM::getCostToDestination(const int destID, const Point& position
           }
 
           addTarget(destID, _costFieldWithKey[destID], _directionFieldWithKey[destID]);
-          getCostToDestination(destID, position, mode);
+          return getCostToDestination(destID, position, mode);
      } else if (!_directCalculation && _doors.count(destID) > 0) {
           //omp critical
 #pragma omp critical(UnivFFviaFM_toDo)
