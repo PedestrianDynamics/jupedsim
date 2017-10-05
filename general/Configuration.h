@@ -105,7 +105,7 @@ public:
           _slow_down_distance = 0.2;
 
           //ff router quickest
-          _recalc_interval = 5;
+          _recalc_interval = 3;
 
           //ff router
           _has_specific_goals = false;

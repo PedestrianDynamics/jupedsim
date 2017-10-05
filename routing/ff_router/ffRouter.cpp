@@ -426,6 +426,14 @@ int FFRouter::FindExit(Pedestrian* p)
 //          }
 //     }
      if (_mode == quickest) {
+          if (p->GetGlobalTime() > _recalc_interval && _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->IsInSubRoom(p)
+              && _locffviafm[p->GetRoomID()]->getCostToDestination(p->GetExitIndex(), p->GetPos()) > 3.0
+                    && p->GetExitIndex() != -1) {
+               //delay possible
+               if ((int) p->GetGlobalTime() % 10 != p->GetID() % 10) {
+                    return p->GetExitIndex();     //stay with old target
+               }
+          }
           //new version: recalc densityspeed every x seconds
           if ((p->GetGlobalTime() > _timeToRecalc) && (p->GetGlobalTime() > Pedestrian::GetMinPremovementTime() + _recalc_interval)) {
                _plzReInit = true;
