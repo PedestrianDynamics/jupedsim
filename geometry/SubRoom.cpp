@@ -823,6 +823,7 @@ bool SubRoom::CreateBoostPoly() {
           boost::geometry::assign_points(newObstacle, obsPoints);
           _boostPolyObstacles.emplace_back(newObstacle);
      }
+     return true;
 }
 
 /************************************************************
