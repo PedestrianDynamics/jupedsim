@@ -41,7 +41,7 @@ def runtest5(inifile, trajfile):
             count2 += 1
         elif PassedLineY(traj1, e3):
             count3 += 1
-        elif PassedLineX(traj1, e4):
+        elif PassedLineY(traj1, e4):
             count4 += 1            
         else:
             logging.critical("ped %d did not pass one of the exists" % ped)

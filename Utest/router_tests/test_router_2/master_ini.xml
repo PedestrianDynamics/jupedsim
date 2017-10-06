@@ -30,7 +30,7 @@
   <!--persons information and distribution -->
   <agents operational_model_id="3">
     <agents_distribution>
-      <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="0" number="10" goal_id="-1" router_id="range(1,8)" x_min="0.65" x_max="9.2" y_min="4.6" y_max="9.16"/>	
+      <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="0" number="10" goal_id="-1" router_id="arange(1,8)" x_min="0.65" x_max="9.2" y_min="4.6" y_max="9.16"/>
     </agents_distribution>
   </agents>
 

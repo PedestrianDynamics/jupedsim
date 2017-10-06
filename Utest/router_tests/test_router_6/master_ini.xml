@@ -32,7 +32,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
     <!--For First run-->
     <agents operational_model_id = "3">
         <agents_distribution>
-            <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="67" router_id = "range(1,8)"/>
+            <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="67" router_id = "arange(1,8)"/>
         </agents_distribution>
     </agents>
 
