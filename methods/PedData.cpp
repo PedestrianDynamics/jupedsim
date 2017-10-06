@@ -156,7 +156,7 @@ bool PedData::InitializeVariables(const string& filename)
                     std::vector<std::string> strs;
                     boost::algorithm::trim_right(line);
                     boost::split(strs, line , boost::is_any_of("\t "),boost::token_compress_on);
-                    if(once && strs.size() < 5)
+                    if(once) // && strs.size() < 5
                     {
                          once = 0;
                          Log->Write("INFO: pos_id: %d", pos_id);
@@ -168,13 +168,25 @@ bool PedData::InitializeVariables(const string& filename)
                     }
                     lastindex = index;
                     index = atoi(strs[pos_id].c_str());
+                    if(_IdsTXT.size() == 0){ // first line
+                         lastindex = index;
+                         indx = index;
+                    }
+
                     if (index != lastindex){
                          indx += 1;
                     }
+                    // std::cout << "lastindex " << lastindex << " index " << index << " indx = " << indx << std::endl;
                     _IdsTXT.push_back(indx);
                     _FramesTXT.push_back(atoi(strs[pos_fr].c_str()));
                     xs.push_back(atof(strs[pos_x].c_str()));
                     ys.push_back(atof(strs[pos_y].c_str()));
+                    // std::cout << " fr = " << atoi(strs[pos_fr].c_str())
+                    //           << " x  = " << atof(strs[pos_x].c_str())  
+                    //           << " y  = " << atof(strs[pos_x].c_str())
+                    //           << std::endl;
+                    // getc(stdin);
+                    
                     if(strs.size() >= 5)
                          zs.push_back(atof(strs[pos_z].c_str()));
                     else
@@ -235,6 +247,12 @@ bool PedData::InitializeVariables(const string& filename)
     	             actual_totalframe++;
     	         }
     	     }
+         std::cout << "i: " << i<< std::endl;
+         std::cout << "firstFrameIndex: " << firstFrameIndex<< std::endl;
+         std::cout << "lastFrameIndex: " << lastFrameIndex<< std::endl;
+         std::cout << "minID: " << _minID<< std::endl;
+         std::cout << "minFrame: " << _minFrame<< std::endl;
+         std::cout << "actual frame: " << actual_totalframe<< std::endl;
     	 if(lastFrameIndex==0)
     	 {
     		 Log->Write("Warning:\tThere is no trajectory for ped with ID <%d>!",i);
@@ -245,8 +263,9 @@ bool PedData::InitializeVariables(const string& filename)
 	     int expect_totalframe=_lastFrame[i-_minID]-_firstFrame[i-_minID]+1;
 	     if(actual_totalframe != expect_totalframe)
 	     {
-		    Log->Write("Error:\tThe trajectory of ped with ID <%d> is not continuous. Please modify the trajectory file!",i);
-		    return false;
+                  Log->Write("Error:\tThe trajectory of ped with ID <%d> is not continuous. Please modify the trajectory file!",i);
+                  Log->Write("Error:\t actual_totalfame = <%d>, expected_totalframe = <%d> ", actual_totalframe, expect_totalframe);
+                  return false;
 	     }
      }
      Log->Write("convert x and y");
@@ -412,6 +431,7 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
          if(actual_totalframe != expect_totalframe)
          {
              Log->Write("Error:\tThe trajectory of ped with ID <%d> is not continuous. Please modify the trajectory file!",id+_minID);
+             Log->Write("Error:\t actual_totalfame = <%d>, expected_totalframe = <%d> ", actual_totalframe, expect_totalframe);
              return false;
          }
      }
