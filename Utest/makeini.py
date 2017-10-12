@@ -190,7 +190,7 @@ def update_tag_value(root, tag, value):
 # =======================================================
 def update_attrib_value(root, attr_tag, value):
     # location
-    # print "update_attrib_value: ", attr_tag, value
+    print ("update_attrib_value: ", attr_tag, value)
     # raw_input()
     if attr_tag == "location":  # e.g. location
         for r in root.iter():
