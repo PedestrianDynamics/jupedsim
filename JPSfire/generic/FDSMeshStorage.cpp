@@ -68,7 +68,7 @@ FDSMeshStorage::FDSMeshStorage(const std::string &filepath, const double &finalT
         std::cout << "Success!" << std::endl;
     }
     else {        
-        Log->Write("ERROR:\tCould not find directory <%s>", _filepath.c_str());
+        Log->Write("ERROR:\tCould not find directory <%s>\n", _filepath.c_str());
         exit(EXIT_FAILURE);
     }
 }

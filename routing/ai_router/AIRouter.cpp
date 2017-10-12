@@ -162,9 +162,10 @@ int AIRouter::FindDestination(Pedestrian * p)
 
         const NavLine* nextNavLine=(*brain_storage)[p]->GetNextNavLine(nextTarget);
 
-        if (nextNavLine==nullptr)
-            Log->Write("ERROR: \t No visible next subtarget found. PED " + std::to_string(p->GetID()) );
-
+        if (nextNavLine==nullptr) {
+             Log->Write("ERROR: \t No visible next subtarget found. PED "+std::to_string(p->GetID()));
+             return -1;
+        }
         //setting crossing to ped
         p->SetExitLine(nextNavLine);
         p->SetExitIndex(nextNavLine->GetUniqueID());
