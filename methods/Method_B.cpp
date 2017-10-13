@@ -38,6 +38,8 @@ Method_B::Method_B()
      ub::matrix<double> _yCor(0,0);
      _tIn = nullptr;
      _tOut = nullptr;
+     _entrancePoint = {};
+     _exitPoint = {};
      _DensityPerFrame = nullptr;
      _fps = 10;
      _NumPeds =0;
@@ -52,6 +54,7 @@ Method_B::~Method_B()
 
 bool Method_B::Process (const PedData& peddata)
 {
+     Log->Write("------------------------Analyzing with Method B-----------------------------");
      _trajName = peddata.GetTrajName();
      _projectRootDir = peddata.GetProjectRootDir();
      _fps =peddata.GetFps();
@@ -62,22 +65,29 @@ bool Method_B::Process (const PedData& peddata)
      _measureAreaId = boost::lexical_cast<string>(_areaForMethod_B->_id);
      _tIn = new int[_NumPeds];				// Record the time of each pedestrian entering measurement area
      _tOut = new int[_NumPeds];
+     std::vector<Point> entp(_NumPeds);
+     std::vector<Point> extp(_NumPeds);
+     _entrancePoint = entp;
+     _exitPoint = extp;
      for (int i=0; i<_NumPeds; i++)
      {
           _tIn[i] = 0;
           _tOut[i] = 0;
+          _entrancePoint[i] = Point(0,0);
+          _exitPoint[i] = Point(0,0);
      }
      GetTinTout(peddata.GetNumFrames());
-     Log->Write("------------------------Analyzing with Method B-----------------------------");
+
      if(_areaForMethod_B->_length<0)
      {
-          Log->Write("Error:\tThe measurement area length for method B is not assigned!");
-          exit(0);
+          Log->Write("INFO:\tThe measurement area length for method B is not assigned!");
      }
      else
      {
-          GetFundamentalTinTout(_DensityPerFrame,_areaForMethod_B->_length);
+          Log->Write("INFO:\tThe measurement area length for method B is %.3f", _areaForMethod_B->_length);
      }
+     GetFundamentalTinTout(_DensityPerFrame,_areaForMethod_B->_length);
+     
      delete []_tIn;
      delete []_tOut;
      return true;
@@ -91,7 +101,7 @@ void Method_B::GetTinTout(int numFrames)
           IsinMeasurezone[i] = false;
      }
      _DensityPerFrame = new double[numFrames];
-     Method_C method_C;
+     //Method_C method_C;
      for(int frameNr = 0; frameNr < numFrames; frameNr++ )
      {
           vector<int> ids=_peds_t[frameNr];
@@ -108,10 +118,14 @@ void Method_B::GetTinTout(int numFrames)
                if(within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly)&&!(IsinMeasurezone[ID])) {
                     _tIn[ID]=frameNr;
                     IsinMeasurezone[ID] = true;
+                    _entrancePoint[ID]._x = x*CMtoM;
+                    _entrancePoint[ID]._y = y*CMtoM;
                     std::cout << "ID: "<< ID  << " x: " << x*CMtoM << " y: " << y*CMtoM<< std::endl;
                }
                if((!within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly))&&IsinMeasurezone[ID]) {
                     _tOut[ID]=frameNr;
+                    _exitPoint[ID]._x = x*CMtoM;
+                    _exitPoint[ID]._y = y*CMtoM;
                     IsinMeasurezone[ID] = false;
                     std::cout <<  "ID: "<< ID  << " OUT x: " << x*CMtoM << " y: " << y*CMtoM << std::endl;
                }
@@ -135,7 +149,15 @@ void Method_B::GetFundamentalTinTout(double *DensityPerFrame,double LengthMeasur
      fprintf(fFD_TinTout,"#person Index\t	density_i(m^(-2))\t	velocity_i(m/s)\n");
      for(int i=0; i<_NumPeds; i++)
      {
-          std::cout << "i: "<< i << ", Tin: " << _tIn[i] << ", Tout: " << _tOut[i]  << ", fps: " << _fps << ", L: "<< LengthMeasurementarea<< std::endl;
+          if(LengthMeasurementarea < 0) {
+               double dxq = (_entrancePoint[i]._x - _exitPoint[i]._x)*(_entrancePoint[i]._x - _exitPoint[i]._x);
+               double dyq = (_entrancePoint[i]._y - _exitPoint[i]._y)*(_entrancePoint[i]._y - _exitPoint[i]._y);
+               LengthMeasurementarea = std::sqrt(dxq + dyq);
+          }
+          std::cout << "i: "<< i << ", Tin: " << _tIn[i] << ", Tout: " << _tOut[i]
+                    << ", PointIn (" << _entrancePoint[i]._x << ", " << _entrancePoint[i]._y
+                    << "), PointOut (" << _exitPoint[i]._x << ", " << _exitPoint[i]._y
+                    << "), L: "<< LengthMeasurementarea<< std::endl;
 
           double velocity_temp=_fps*LengthMeasurementarea/(_tOut[i]-_tIn[i]);
           std::cout << ">> i: " << i << " vel = " << velocity_temp << std::endl;

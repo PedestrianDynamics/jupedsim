@@ -2,7 +2,7 @@
  * \file        Method_B.h
  * \date        Oct 10, 2014
  * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \copyright   <2009-2017> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -59,6 +59,8 @@ private:
      ub::matrix<double> _yCor;
      int *_tIn;           //the time for each pedestrian enter the measurement area
      int *_tOut;          //the time for each pedestrian exit the measurement area
+     std::vector<Point> _entrancePoint ; // where pedestrian enters the measurement area
+     std::vector<Point> _exitPoint; // where pedestrian leaves the measurement area
      double *_DensityPerFrame; // the measured density in each frame
      void GetTinTout(int numFrames);
      void GetFundamentalTinTout(double *DensityPerFrame,double LengthMeasurementarea);
