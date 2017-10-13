@@ -12,6 +12,7 @@ All notable changes to `jpsreport` will be documented in this file.
 - use boost matrix instead of double pointers (9ff5c978)
 - Use own index numbers (9a0d8ec8)
 - Use Python3 in scripts.
+
 ### Fixed 
 - Fixed SegFault due to reading files from different OS. (9a42c9dd)
 
