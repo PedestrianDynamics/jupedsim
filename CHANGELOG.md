@@ -4,10 +4,14 @@ All notable changes to `jpsreport` will be documented in this file.
 
 ### Added
 
+- Use the effective distance in method B in case `length_in_movement_direction` is not defined.  (2c321cef) 
 - Added an error warning when the number of agents in the trajectory is not corresponding to total ids or the ped ids are not continuous in the first frame.
 
 ### Changed
-
+- Code does not come with Boost anymore. User should install Boost before using jpsreport. (2c0c69f3) 
+- use boost matrix instead of double pointers (9ff5c978)
+- Use own index numbers (9a0d8ec8)
+- Use Python3 in scripts.
 ### Fixed 
 - Fixed SegFault due to reading files from different OS. (9a42c9dd)
 
