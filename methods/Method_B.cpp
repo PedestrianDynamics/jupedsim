@@ -42,6 +42,7 @@ Method_B::Method_B()
      _fps = 10;
      _NumPeds =0;
      _areaForMethod_B = nullptr;
+     _plotFundamentalDiagram = false;
 }
 
 Method_B::~Method_B()
@@ -107,12 +108,12 @@ void Method_B::GetTinTout(int numFrames)
                if(within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly)&&!(IsinMeasurezone[ID])) {
                     _tIn[ID]=frameNr;
                     IsinMeasurezone[ID] = true;
-                    std::cout << "IN x: " << x*CMtoM << " y: " << y*CMtoM<< std::endl;
+                    std::cout << "ID: "<< ID  << " x: " << x*CMtoM << " y: " << y*CMtoM<< std::endl;
                }
                if((!within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly))&&IsinMeasurezone[ID]) {
                     _tOut[ID]=frameNr;
                     IsinMeasurezone[ID] = false;
-                    std::cout << "OUT x: " << x*CMtoM << " y: " << y*CMtoM << std::endl;
+                    std::cout <<  "ID: "<< ID  << " OUT x: " << x*CMtoM << " y: " << y*CMtoM << std::endl;
                }
           }
           _DensityPerFrame[frameNr] = pedsinMeasureArea/(area(_areaForMethod_B->_poly)*CMtoM*CMtoM);
@@ -133,8 +134,11 @@ void Method_B::GetFundamentalTinTout(double *DensityPerFrame,double LengthMeasur
      }
      fprintf(fFD_TinTout,"#person Index\t	density_i(m^(-2))\t	velocity_i(m/s)\n");
      for(int i=0; i<_NumPeds; i++)
-     {std::cout << "i: "<< i << ", Tin: " << _tIn[i] << ", Tout: " << _tOut[i]  << ", fps: " << _fps << ", L: "<< LengthMeasurementarea<< std::endl;
+     {
+          std::cout << "i: "<< i << ", Tin: " << _tIn[i] << ", Tout: " << _tOut[i]  << ", fps: " << _fps << ", L: "<< LengthMeasurementarea<< std::endl;
+
           double velocity_temp=_fps*LengthMeasurementarea/(_tOut[i]-_tIn[i]);
+          std::cout << ">> i: " << i << " vel = " << velocity_temp << std::endl;
           double density_temp=0;
           for(int j=_tIn[i]; j<_tOut[i]; j++)
           {
@@ -144,6 +148,15 @@ void Method_B::GetFundamentalTinTout(double *DensityPerFrame,double LengthMeasur
           fprintf(fFD_TinTout,"%d\t%f\t%f\n",i+1,density_temp,velocity_temp);
      }
      fclose(fFD_TinTout);
+// plot FD
+// @todo: write new script to plot rho-v and j-rho diagrams
+     // if(_plotFundamentalDiagram)
+     // {
+     //      string parameters_N_t="python \""+_scriptsLocation+"/_Plot_N_t.py\" -p \""+ METHOD_A_LOCATION + "\" -n "+ fFD_TinTout;
+     //      int res = system(parameters_N_t.c_str());
+     //      Log->Write("INFO:\tPlotting N-t diagram! Status: %d", res);
+     // }
+     
 }
 
 void Method_B::SetMeasurementArea (MeasurementArea_B* area)
