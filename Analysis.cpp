@@ -2,7 +2,7 @@
  * \file        Analysis.cpp
  * \date        Oct 10, 2014
  * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \copyright   <2009-2016> Forschungszentrum Juelich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -134,7 +134,7 @@ void Analysis::InitArgs(ArgumentParser* args)
           if(Log) delete Log;
           Log = new FileHandler(name);
      }
-     break;
+          break;
      default:
           Log->Write("Wrong option for Log file!");
           exit(0);
@@ -373,13 +373,13 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                if(result_C)
                {
                     Log->Write("INFO:\tSuccess with Method C using measurement area id %d!\n",_areaForMethod_C[i]->_id);
-             	   if(_plotTimeseriesC[i])
- 					 {
- 					 string parameters_Timeseries="python \""+_scriptsLocation+"/_Plot_timeseries_rho_v.py\" -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
- 								" -f "+boost::lexical_cast<std::string>(data.GetFps());
- 					  int res=system(parameters_Timeseries.c_str());
- 					  Log->Write("INFO:\t time series result: %d ",res);
- 					 }
+                    if(_plotTimeseriesC[i])
+                    {
+                         string parameters_Timeseries="python3 \""+_scriptsLocation+"/_Plot_timeseries_rho_v.py\" -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
+                              " -f "+boost::lexical_cast<std::string>(data.GetFps());
+                         int res=system(parameters_Timeseries.c_str());
+                         Log->Write("INFO:\t time series result: %d ",res);
+                    }
                }
                else
                {
@@ -414,14 +414,14 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                bool result_D = method_D.Process(data,_scriptsLocation, _areaForMethod_D[i]->_zPos);
                if(result_D)
                {
-            	   Log->Write("INFO:\tSuccess with Method D using measurement area id %d!\n",_areaForMethod_D[i]->_id);
-            	   if(_plotTimeseriesD[i])
-					 {
-					 string parameters_Timeseries="python \""+_scriptsLocation+"/_Plot_timeseries_rho_v.py\" -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
-								" -f "+boost::lexical_cast<std::string>(data.GetFps());
-					  int res=system(parameters_Timeseries.c_str());
-					  Log->Write("INFO:\t time series result: %d ",res);
-					 }
+                    Log->Write("INFO:\tSuccess with Method D using measurement area id %d!\n",_areaForMethod_D[i]->_id);
+                    if(_plotTimeseriesD[i])
+                    {
+                         string parameters_Timeseries="python3 \""+_scriptsLocation+"/_Plot_timeseries_rho_v.py\" -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
+                              " -f "+boost::lexical_cast<std::string>(data.GetFps());
+                         int res=system(parameters_Timeseries.c_str());
+                         Log->Write("INFO:\t time series result: %d ",res);
+                    }
                }
                else
                {
@@ -452,7 +452,7 @@ FILE* Analysis::CreateFile(const string& filename)
 }
 
 #if defined(_WIN32)
-
+// @todo: rewrite using boost
 int Analysis::mkpath(char* file_path)
 {
      assert(file_path && *file_path);
@@ -474,6 +474,7 @@ int Analysis::mkpath(char* file_path)
 
 #else
 
+// @todo: rewrite using boost
 int Analysis::mkpath(char* file_path, mode_t mode)
 {
      assert(file_path && *file_path);

@@ -8,7 +8,7 @@
 		<file name="traj_KO_240_050_240_x.txt" />
 		<path location="./" />  
 	</trajectories>
-	<!----give relative path based on the location inifile or give the absolute path--->
+	<!-- give relative path based on the location inifile or give the absolute path- -->
 	<scripts location="../../scripts/"/> 
 
 	

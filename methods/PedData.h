@@ -38,6 +38,10 @@
 #include <algorithm>    // std::min_element, std::max_element
 #include <boost/algorithm/string.hpp>
 
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/io.hpp>
+namespace ub=boost::numeric::ublas;
+
 
 extern OutputHandler* Log;
 
@@ -57,9 +61,9 @@ public:
      std::string GetTrajName() const;
      std::string GetProjectRootDir() const;
      std::map<int , std::vector<int>> GetPedsFrame() const;
-     double** GetXCor() const;
-     double** GetYCor() const;
-     double** GetZCor() const;
+     ub::matrix<double> GetXCor() const;
+     ub::matrix<double> GetYCor() const;
+     ub::matrix<double> GetZCor() const;
      int* GetFirstFrame() const;
      int* GetLastFrame() const;
      std::vector<int> GetIdInFrame(const std::vector<int>& ids) const;
@@ -77,8 +81,8 @@ private:
      bool InitializeVariables(const std::string& filename);
      bool InitializeVariables(TiXmlElement* xRootNode);
      void CreateGlobalVariables(int numPeds, int numFrames);
-     double GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor) const;
-     double GetInstantaneousVelocity1(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor) const;
+     double GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, ub::matrix<double> Xcor, ub::matrix<double> Ycor) const;
+     double GetInstantaneousVelocity1(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, ub::matrix<double> Xcor, ub::matrix<double> Ycor) const;
 
 private:
 
@@ -95,13 +99,13 @@ private:
      std::string _vComponent="B";
      bool _IgnoreBackwardMovement=false;
 
-     int *_firstFrame=NULL;   // Record the first frame of each pedestrian
-     int *_lastFrame=NULL;    // Record the last frame of each pedestrian
-     double **_xCor=NULL;
-     double **_yCor=NULL;
-     double **_zCor=NULL;
-     std::string **_vComp=NULL;
-
+     int *_firstFrame= nullptr;   // Record the first frame of each pedestrian
+     int *_lastFrame= nullptr;    // Record the last frame of each pedestrian
+     ub::matrix<double> _xCor;
+     ub::matrix<double> _yCor;
+     ub::matrix<double> _zCor;
+     ub::matrix<std::string> _vComp;
+     
 };
 
 #endif /* PEDDATA_H_ */

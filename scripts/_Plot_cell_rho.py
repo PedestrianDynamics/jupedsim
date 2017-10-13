@@ -1,10 +1,12 @@
-from numpy import *
+import numpy as np
 import matplotlib
+#matplotlib.use('Agg') 
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon as pgon
-from Polygon import *         
+import Polygon as pol
 import matplotlib.cm as cm
 import pylab
+import pandas as pd
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import argparse
 import sys
@@ -55,7 +57,6 @@ def get_geometry_boundary(geometry):
     geomaxY = []
     for node in root.iter():
         tag = node.tag
-        # print "subroom tag", tag
         if tag == "polygon":
             X, Y = get_polygon(node)
             geominX.append(min(X))
@@ -63,7 +64,6 @@ def get_geometry_boundary(geometry):
             geominY.append(min(Y))
             geomaxY.append(max(Y))
         elif tag == "obstacle":
-            # print "obstacle tag",tag
             for n in node.getchildren():
                 X, Y = get_polygon(n)
                 geominX.append(min(X))
@@ -81,16 +81,12 @@ def plot_geometry(geometry):
     root = tree.getroot()
     for node in root.iter():
         tag = node.tag
-        # print "subroom tag", tag
         if tag == "polygon":
             X, Y = get_polygon(node)
             plt.plot(X, Y, "k", lw=4)
         elif tag == "obstacle":
-            # print "obstacle tag",tag
             for n in node.getchildren():
-                # print "N: ", n
                 X, Y = get_polygon(n)
-                # print "obstacle", X, Y
                 plt.plot(X, Y, "g", lw=4)
         elif tag == "crossing":
             X, Y = get_polygon(node)
@@ -121,7 +117,6 @@ def parse_xml_traj_file(filename):
         exit(FAILURE)
     N = int(xmldoc.getElementsByTagName('agents')[0].childNodes[0].data)
     fps = xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data #type unicode
-    fps = float(fps)
     fps = int(fps)
     #print ("fps=", fps)
     #fps = int(xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data)
@@ -135,78 +130,99 @@ def parse_xml_traj_file(filename):
             x = float(agent.attributes["x"].value)
             y = float(agent.attributes["y"].value)
             data += [agent_id, frame_number, x, y]
-    data = array(data).reshape((-1, 4))
+    data = np.array(data).reshape((-1, 4))
     return fps, N, data
+
+#@profile
+def main():
+    rho_max = 8.0
+    args = getParserArgs()
+    filepath = args.filepath
+    sys.path.append(filepath)
+    namefile = args.namefile
+    geoFile=args.geoname
+    trajpath=args.trajpath
+    #geoLocation = filepath.split("Output")[0]
+    trajName = namefile.split(".")[0]
+    trajType = namefile.split(".")[1].split("_")[0]
+    trajFile = os.path.join(trajpath, trajName+"."+trajType) #trajpath+trajName+"."+trajType
+    print(">> plot_cell_rho trajpath %s" %trajpath)
+    print(">> plot_cell_rho  trajName %s"%trajName+"."+trajType)
+    print(">> plot_cell_rho trajFile %s" % trajFile)
+    try:
+        frameNr=int(namefile.split("_")[-1])
+    except ValueError:
+        exit("Could not parse fps")
+        
+    geominX, geomaxX, geominY, geomaxY = get_geometry_boundary(geoFile)
     
+    fig = plt.figure(figsize=(16*(geomaxX-geominX)/(geomaxY-geominY)+2, 16), dpi=100)
+    ax1 = fig.add_subplot(111,aspect='equal')
+    plt.rc("font", size=30)
+    plt.rc('pdf',fonttype = 42)
+    ax1.set_yticks([int(1*j) for j in range(-2,5)])
+    for label in ax1.get_xticklabels() + ax1.get_yticklabels():
+        label.set_fontsize(30)
+        
+    for tick in ax1.get_xticklines() + ax1.get_yticklines():
+        tick.set_markeredgewidth(2)
+        tick.set_markersize(6)
+        ax1.set_aspect("equal")
+
+    plot_geometry(geoFile)
+        
+    density = np.array([])
+    density_orig = np.array([])
+    polygons = [] # polygons converted from string 
+    # TODO use os.path.join
+    polys = open("%s/polygon%s.dat"%(filepath,namefile)).readlines()
+    for poly in polys:
+        exec("p = %s"%poly)
+        pp = locals()['p']
+        polygons.append(pp)
+        xx=1.0/pol.Polygon(pp).area()
+        if xx>rho_max:
+            xx=rho_max
+            
+        density=np.append(density,xx)
+        
+    density_orig = np.copy(density)
+    Maxd=density.max()
+    Mind=density.min()
+    erro=np.ones(np.shape(density))*Mind
+    density=rho_max*(density-erro)/(Maxd-Mind)
+    sm = cm.ScalarMappable(cmap=cm.jet)
+    sm.set_array(density)
+    sm.autoscale_None()
+    sm.set_clim(vmin=0,vmax=5)
+    for j, poly in enumerate(polys):
+        ax1.add_patch(pgon(polygons[j],facecolor=sm.to_rgba(density_orig[j]), edgecolor='white',linewidth=2))
+
+    if(trajType=="xml"):
+       fps, N, Trajdata = parse_xml_traj_file(trajFile)
+    elif(trajType=="txt"):
+        try:            
+            Trajdata = np.array(pd.read_csv(trajFile, comment="#", delimiter="\s+"))
+        except :
+            Trajdata = np.loadtxt(trajFile)   
+
+
+    Trajdata = Trajdata[ Trajdata[:, 1] == frameNr ]
+    ax1.plot(Trajdata[:,2], Trajdata[:,3], "bo", markersize = 20, markeredgewidth=2)
+    
+    ax1.set_xlim(geominX-0.2,geomaxX+0.2)
+    ax1.set_ylim(geominY-0.2,geomaxY+0.2)
+    plt.xlabel("x [m]")
+    plt.ylabel("y [m]")
+    plt.title("%s"%namefile)
+    divider = make_axes_locatable(ax1)
+    cax = divider.append_axes("right", size="2.5%", pad=0.2)
+    cb=fig.colorbar(sm,ax=ax1,cax=cax,format='%.1f')
+    cb.set_label('Density [$m^{-2}$]') 
+    plt.savefig("%s/rho_%s.png"%(filepath,namefile))
+    plt.close()
+
 
 if __name__ == '__main__':
-   rho_max = 8.0
-   args = getParserArgs()
-   filepath = args.filepath
-   sys.path.append(filepath)
-   namefile = args.namefile
-   geoFile=args.geoname
-   trajpath=args.trajpath
-   geoLocation = filepath.split("Output")[0]
-   trajName = namefile.split(".")[0]
-   trajType = namefile.split(".")[1].split("_")[0]
-   trajFile = trajpath+trajName+"."+trajType
-   frameNr=int(namefile.split("_")[-1])
-   geominX, geomaxX, geominY, geomaxY = get_geometry_boundary(geoFile)
-   
-   fig = plt.figure(figsize=(16*(geomaxX-geominX)/(geomaxY-geominY)+2, 16), dpi=100)
-   ax1 = fig.add_subplot(111,aspect='equal')
-   plt.rc("font", size=30)
-   plt.rc('pdf',fonttype = 42)
-   ax1.set_yticks([int(1*j) for j in range(-2,5)])
-   for label in ax1.get_xticklabels() + ax1.get_yticklabels():
-      label.set_fontsize(30)
-   for tick in ax1.get_xticklines() + ax1.get_yticklines():
-      tick.set_markeredgewidth(2)
-      tick.set_markersize(6)
-   ax1.set_aspect("equal")
-   plot_geometry(geoFile)
-   
-   density=array([])
-   polys = open("%s/polygon%s.dat"%(filepath,namefile)).readlines()
-   for poly in polys:
-      exec("p = %s"%poly)
-      xx=1.0/Polygon(p).area()
-      if xx>rho_max:
-         xx=rho_max
-      density=append(density,xx)
-   Maxd=density.max()
-   Mind=density.min()
-   erro=ones(shape(density))*Mind
-   density=rho_max*(density-erro)/(Maxd-Mind)
-   sm = cm.ScalarMappable(cmap=cm.jet)
-   sm.set_array(density)
-   sm.autoscale_None()
-   sm.set_clim(vmin=0,vmax=5)
-   for poly in polys:
-      exec("p = %s"%poly)
-      xx=1.0/Polygon(p).area()
-      if xx>rho_max:
-         xx=rho_max
-      ax1.add_patch(pgon(p,facecolor=sm.to_rgba(xx), edgecolor='white',linewidth=2))
-
-   if(trajType=="xml"):
-       fps, N, Trajdata = parse_xml_traj_file(trajFile)
-   elif(trajType=="txt"):
-        Trajdata = loadtxt(trajFile)   
-   Trajdata = Trajdata[ Trajdata[:, 1] == frameNr ]
-   ax1.plot(Trajdata[:,2], Trajdata[:,3], "bo", markersize = 20, markeredgewidth=2)
-   
-   ax1.set_xlim(geominX-0.2,geomaxX+0.2)
-   ax1.set_ylim(geominY-0.2,geomaxY+0.2)
-   plt.xlabel("x [m]")
-   plt.ylabel("y [m]")
-   plt.title("%s"%namefile)
-   divider = make_axes_locatable(ax1)
-   cax = divider.append_axes("right", size="2.5%", pad=0.2)
-   cb=fig.colorbar(sm,ax=ax1,cax=cax,format='%.1f')
-   cb.set_label('Density [$m^{-2}$]') 
-   plt.savefig("%s/rho_%s.png"%(filepath,namefile))
-   plt.close()
-
+    main()
 

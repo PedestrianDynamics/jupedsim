@@ -1,7 +1,7 @@
 /**
  * \file        Building.cpp
  * \date        Oct 1, 2014
- * \version     v0.7
+ * \version     v0.8
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License

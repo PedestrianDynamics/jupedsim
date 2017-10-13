@@ -1,8 +1,8 @@
 /**
  * \file        main.cpp
  * \date        Oct 10, 2014
- * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \version     v0.8.1
+ * \copyright   <2009-2015> Forschungszentrum Juelich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -25,11 +25,7 @@
  *
  * Some useful links:
  *
- * 	1: <a href="http://www.openpedsim.org">www.openpedsim.org</a> <br>
- * 	2: <a href="http://www.vtk.org">www.vtk.org</a> <br>
- * 	3: <a href="http://www.trolltech.com">www.trolltech.com</a> <br>
- * 	4: <a href="http://www.fz-juelich.de">www.fz-juelich.de</a> <br>
- * 	4: <a href="http://www.jupedsim.org">www.fz-juelich.de</a> <br>
+ * 	1: <a href="http://jupedsim.org">jupedsim.org</a> <br>
  *
  **/
 

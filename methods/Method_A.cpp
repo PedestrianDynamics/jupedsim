@@ -38,13 +38,13 @@ Method_A::Method_A()
 {
      _classicFlow = 0;
      _vDeltaT = 0;
-     _xCor = NULL;
-     _yCor = NULL;
-     _firstFrame = NULL;
-     _passLine = NULL;
+     ub::matrix<double> _xCor(0,0);
+     ub::matrix<double> _yCor(0,0);
+     _firstFrame = nullptr;
+     _passLine = nullptr;
      _deltaT = 100;
      _fps=16;
-     _areaForMethod_A = NULL;
+     _areaForMethod_A = nullptr;
      _plotTimeSeries = false;
      _minId=0;
 }
@@ -105,7 +105,7 @@ bool Method_A::Process (const PedData& peddata,const string& scriptsLocation, co
      }
      else
      {
-    	 Log->Write("Warning: No any pedestrian exists on the plane of the selected Measurement area!!");
+    	 Log->Write("Warning: No pedestrian exists on the plane of the selected Measurement area!!");
      }
      delete []_passLine;
      return true;
@@ -143,14 +143,15 @@ void Method_A::GetAccumFlowVelocity(int frame, const vector<int>& ids, const vec
           if(frame >_firstFrame[id-_minId]&&!_passLine[id-_minId])
           {
         	  IspassLine = IsPassLine(_areaForMethod_A->_lineStartX,
-                         _areaForMethod_A->_lineStartY,
-                         _areaForMethod_A->_lineEndX,
-                         _areaForMethod_A->_lineEndY, _xCor[id-_minId][frame - 1],
-                         _yCor[id-_minId][frame - 1], _xCor[id-_minId][frame], _yCor[id-_minId][frame]);
+                                          _areaForMethod_A->_lineStartY,
+                                          _areaForMethod_A->_lineEndX,
+                                          _areaForMethod_A->_lineEndY, _xCor(id-_minId,frame - 1),
+                                          _yCor(id-_minId,frame - 1), _xCor(id-_minId,frame), 
+                                          _yCor(id-_minId,frame));
           }
           if(IspassLine==true)
           {
-        	   _passLine[id-_minId] = true;
+               _passLine[id-_minId] = true;
                _classicFlow++;
                _vDeltaT+=VInFrame[i];
           }
