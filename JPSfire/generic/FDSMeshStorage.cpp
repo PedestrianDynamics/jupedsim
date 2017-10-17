@@ -34,7 +34,6 @@
 #include <string>
 #include <boost/filesystem.hpp>
 
-
 namespace fs=boost::filesystem;
 
 FDSMeshStorage::FDSMeshStorage()
@@ -132,19 +131,28 @@ void FDSMeshStorage::CreateDoorList()
     _doorlist.clear();
     fs::directory_iterator end ;
 
-   for( auto &elv:_elevationlist){
-        std::string elvAsStringTwoDecimals = std::to_string(elv);
-        elvAsStringTwoDecimals = elvAsStringTwoDecimals.substr(0, elvAsStringTwoDecimals.find_last_of(".")+7);
-        for( fs::directory_iterator iter(_filepath + _quantitylist[0] +
-           "/Z_" + elvAsStringTwoDecimals ) ; iter != end ; ++iter ) {
+    for( auto &elv:_elevationlist){
+        std::string elvAsString = std::to_string(elv);
+        for( fs::directory_iterator iter(_filepath + _quantitylist[0] ) ; iter != end ; ++iter ) {
 
-           if ( fs::is_directory( *iter ) ) {
-                  std::string tempString = iter->path().string();
-                  tempString = tempString.substr(0, tempString.find_last_of("/\\"));
-                  unsigned long startChar = tempString.find_last_of("/\\") + 1;
-                  tempString = iter->path().string();
-                  tempString = tempString.substr(startChar);
-                  _doorlist.push_back(tempString);
+           if ( !fs::is_directory( *iter ) )
+                continue;
+
+           // skip directories not starting with Z_
+           if (iter->path().string().find("Z_") == std::string::npos)
+                continue;
+           // Skip if different elevation
+           double this_elev =  std::stod(elvAsString.substr( elvAsString.rfind("_") + 1 ));
+           if(this_elev != elv) continue;
+           // iterate over "Z_/" directories
+           for( fs::directory_iterator i(iter->path() ) ; i != end ; ++i ) {
+                if ( ! fs::is_directory( *i ) ) continue;
+                std::string tempString = i->path().string();
+                tempString = tempString.substr(0, tempString.find_last_of("/\\"));
+                unsigned long startChar = tempString.find_last_of("/\\") + 1;
+                tempString = i->path().string();
+                tempString = tempString.substr(startChar);
+                _doorlist.push_back(tempString);
            }
         }
     }
