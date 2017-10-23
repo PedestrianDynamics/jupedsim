@@ -11,7 +11,7 @@
 <geometry>A_smoke_sensor_geo.xml</geometry>
 
 <!-- traectories file and format -->
-<trajectories format="xml-plain" fps="12">
+<trajectories format="xml-plain" fps="20">
 <file location="A_smoke_sensor_traj.xml" />
 </trajectories>
 
@@ -25,7 +25,7 @@
 <!-- agents -->
 <agents operational_model_id="3">
 	<agents_distribution>
-		<group group_id="1" agent_parameter_id="1" room_id="1" subroom_id="0" x_min="2" y_min="0" y_max="5" number="20" router_id="7" pre_movement_mean="20" pre_movement_sigma="0" risk_tolerance_mean="1." risk_tolerance_sigma="0.3"/>
+		<group group_id="1" agent_parameter_id="1" room_id="1" subroom_id="0" x_min="2" y_min="0" y_max="5" number="30" router_id="7" pre_movement_mean="20" pre_movement_sigma="0" risk_tolerance_mean="1." risk_tolerance_sigma="0.3"/>
 		
 	</agents_distribution>
 </agents>
@@ -65,9 +65,9 @@
 	      <sensor sensor_id="3" description="LastDestination" status="activated"/>
       </sensors>
       <cognitive_map status="complete" />
-	  <parameters>
+      <parameters>
         <navigation_lines file="A_smoke_sensor_ini_routing.xml" />
-        </parameters>
+      </parameters>
     </router>
 
   </route_choice_models>
