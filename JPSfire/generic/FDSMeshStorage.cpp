@@ -174,12 +174,12 @@ void FDSMeshStorage::CreateTimeList()
         if (_doorlist.size() > 0) {     // Smoke sensor active
         check_str = _filepath + _quantitylist[0] + "/" +
                 _doorlist[0] + "/t_" + std::to_string(elem) + ".csv";
-                //std::cout << check_str << std::endl;
+//        std::cout << "1: " << check_str << std::endl;
         }
         else if (_doorlist.size() == 0) {   // Smoke sensor not active
             check_str = _filepath + _quantitylist[0] + "/Z_" +
                     std::to_string(_elevationlist[0]) + "/t_" + std::to_string(elem) + ".csv";
-                    //std::cout << check_str << std::endl;
+//                    std::cout << "2: "  << check_str << std::endl;
         }
 
         if (fs::exists(check_str) == false )
@@ -283,19 +283,19 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
 
     if (simT>=_finalTime)
         simT=_finalTime;
-
+    // @todo: what if the files have the format Z_%.2f ?
     std::string str = quantity + "/Z_" +  std::to_string(_NearestHeight) + "/" +
     "Door_X_"+ std::to_string(doorCentre._x) + "_Y_" + std::to_string(doorCentre._y) +
     "/t_"+std::to_string(simT)+".000000";
 
 
     if (_fMContainer.count(str) == 0) {
-        //std::cout << "requested sfgrid not available: " << str << std::endl;
+        std::cout << "ERROR: requested sfgrid not available: " << str << std::endl;
         throw -1;
     }
 
     if (_fMContainer.count(str) == 1) {
-        //std::cout << "requested sfgrid: " << str << std::endl;
+        std::cout << "INFO: requested sfgrid: " << str << std::endl;
     }
 
     return _fMContainer.at(str);

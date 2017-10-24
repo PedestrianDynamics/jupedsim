@@ -575,7 +575,7 @@ double Pedestrian::GetV0Norm() const
      if(fabs(delta)<J_EPS){
          //FIXME std::normal_distribution generated V0's that are very small or even < 0
          //assume absolute v_min according to Weidmann
-         walking_speed = std::max(0.5,_ellipse.GetV0());
+         walking_speed = std::max(0.,_ellipse.GetV0());
 
          //fprintf(stderr, "%f  %f  %f  %f\n", pos._x, pos._y, ped_elevation, walking_speed);
      }
@@ -620,7 +620,7 @@ double Pedestrian::GetV0Norm() const
                  g = 2.0/(1+exp(-c*stairInclination*(ped_elevation - minSubElevation - stairHeight)*(ped_elevation - minSubElevation - stairHeight))) - 1;
 
                  //FIXME std::normal_distribution generated V0's that are very small or even < 0
-                 double speed_up = std::max(0.3,_V0UpStairs);
+                 double speed_up = std::max(0.0, _V0UpStairs);
 
                  if(sub->GetType() == "escalator"){
                        speed_up = _EscalatorUpStairs;

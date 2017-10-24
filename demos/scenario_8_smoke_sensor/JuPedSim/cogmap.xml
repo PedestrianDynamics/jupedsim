@@ -2,7 +2,7 @@
 
 <cognitiveMap>
 	<header version = "0.8">
-		<agent>20</agent>
+		<agent>30</agent>
 		<frameRate>1.00</frameRate>
 	</header>
 </cognitiveMap>
