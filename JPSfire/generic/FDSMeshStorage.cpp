@@ -283,19 +283,19 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
 
     if (simT>=_finalTime)
         simT=_finalTime;
-
+    // @todo: what if the files have the format Z_%.2f ?
     std::string str = quantity + "/Z_" +  std::to_string(_NearestHeight) + "/" +
     "Door_X_"+ std::to_string(doorCentre._x) + "_Y_" + std::to_string(doorCentre._y) +
     "/t_"+std::to_string(simT)+".000000";
 
 
     if (_fMContainer.count(str) == 0) {
-        //std::cout << "requested sfgrid not available: " << str << std::endl;
+        std::cout << "ERROR: requested sfgrid not available: " << str << std::endl;
         throw -1;
     }
 
     if (_fMContainer.count(str) == 1) {
-        //std::cout << "requested sfgrid: " << str << std::endl;
+        std::cout << "INFO: requested sfgrid: " << str << std::endl;
     }
 
     return _fMContainer.at(str);
