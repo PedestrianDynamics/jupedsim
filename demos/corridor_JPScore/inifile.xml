@@ -48,11 +48,11 @@
 	
 	<!-- Method D (Zhang2011a) Voronoi density and Vel -->
 	<method_D enabled="true"> 
-        <measurement_area id="1" start_frame="10" stop_frame="None" plot_time_series="false" get_individual_FD="false"/> 
-		<one_dimensional enabled="false"/>
+        <measurement_area id="1" start_frame="10" stop_frame="None" plot_time_series="false" get_individual_FD="true"/> 
+	<one_dimensional enabled="false"/>
         <cut_by_circle enabled="false" radius="1.0" edges="10"/>
-        <output_voronoi_cells enabled="false" plot_graphs="false"/>
-        <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/> 
+        <output_voronoi_cells enabled="true" plot_graphs="false"/>
+        <profiles enabled="true" grid_size_x="0.20" grid_size_y="0.20"/> 
     </method_D> 
 </JPSreport>
 
