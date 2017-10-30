@@ -29,8 +29,21 @@ Tested with
 
 
 
-## Install Boost (at least v1.57)
+## Install Boost (at least v1.59)
 
+### Mac
+
+For `brew` users:
+
+```bash
+brew install boost
+```
+
+And for `port` users
+
+```bash
+sudo port install boost 
+```
 
 ### Linux 
 
@@ -57,19 +70,6 @@ sudo ldconfig
 Note: Debian's and Ubuntu's install manager offer an old version of Boost, which is not supported by `JuPedSim`.
 
 
-### Mac
-
-For `brew` users:
-
-```bash
-brew install boost
-```
-
-And for `port` users
-
-```bash
-sudo port install boost 
-```
 
 ### Windows 
 
@@ -80,12 +80,11 @@ b2  variant=release --build-type=complete
 
 See also [Getting started on Windows](http://www.boost.org/doc/libs/1_65_1/more/getting_started/windows.html).
 
-This [script](https://gitlab.version.fz-juelich.de/jupedsim/jpscore/snippets/18) can be useful, in case you are using
-Visual Studio.
+This [script](https://gitlab.version.fz-juelich.de/jupedsim/jpscore/snippets/18) can be useful, in case you are using Visual Studio.
 
 Download it and put it in the same directory as Boost. Depending on your Boost version and VS, 
 you may want to adapt in the script the variables `boost_dir` and `msvcver`.
 
 ## Test Boost installation 
 
-You can test your Boost installation by using this [minimal example](2016-11-04-boost.html).
+You can test your Boost installation by using this [minimal example](http://www.jupedsim.org/jpscore/2016-11-04-boost.html).
