@@ -107,7 +107,7 @@ string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
                "radiusA=\"%.2f\"\tradiusB=\"%.2f\"\t"
                "ellipseOrientation=\"%.2f\" ellipseColor=\"%d\"/>\n",
                ped->GetID(), (ped->GetPos()._x) * FAKTOR,
-               (ped->GetPos()._y) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
+               (ped->GetPos()._y) * FAKTOR,(ped->GetElevation()) * FAKTOR ,a * FAKTOR, b * FAKTOR,
                phi * RAD2DEG, color);
 
      return string(tmp);
@@ -568,7 +568,7 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
                     "rA=\"%.2f\"\trB=\"%.2f\"\t"
                     "eO=\"%.2f\" eC=\"%d\"/>\n",
                     ped->GetID(), (ped->GetPos()._x) * FAKTOR,
-                    (ped->GetPos()._y) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
+                    (ped->GetPos()._y) * FAKTOR,(ped->GetElevation()) * FAKTOR ,a * FAKTOR, b * FAKTOR,
                     phi * RAD2DEG, color);
           data.append(tmp1);
 
@@ -685,7 +685,7 @@ void TrajectoriesJPSV05::WriteFrame(int frameNr, Building* building)
                     "rA=\"%.2f\"\trB=\"%.2f\"\t"
                     "eO=\"%.2f\" eC=\"%d\"/>\n",
                     ped->GetID(), (ped->GetPos()._x) * FAKTOR,
-                    (ped->GetPos()._y) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
+                    (ped->GetPos()._y) * FAKTOR,(ped->GetElevation()) * FAKTOR ,a * FAKTOR, b * FAKTOR,
                     phi * RAD2DEG, color);
           data.append(s);
      }

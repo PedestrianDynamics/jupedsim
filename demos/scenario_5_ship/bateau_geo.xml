@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<geometry version ="0.5" caption="Projectname"  unit="m"
+<geometry version ="0.8" caption="Projectname"  unit="m"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/jps_geometry.xsd">
 	<rooms>

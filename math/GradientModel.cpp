@@ -221,7 +221,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
                 double normVi = ped->GetV().ScalarProduct(ped->GetV()); //squared
                 double HighVel = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta); //(v0+delta)^2
-                if (normVi > HighVel && ped->GetV0Norm() > 0) {            //@todo: ar.graf disabled check
+                if (normVi > HighVel && true) {
                      fprintf(stderr, "GradientModel::calculateForce_LC() WARNING: actual velocity (%f) of iped %d "
                              "is bigger than desired velocity (%f) at time: %fs (periodic=%d)\n",
                              sqrt(normVi), ped->GetID(), ped->GetV0Norm(), current, periodic);

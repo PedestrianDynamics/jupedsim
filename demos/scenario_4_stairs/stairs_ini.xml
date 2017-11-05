@@ -7,9 +7,10 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
 	<!-- max simulation time in seconds-->
-	<max_sim_time>500</max_sim_time>
+	<max_sim_time>300</max_sim_time>
 	<!-- geometry file -->
 	<geometry>stairs_geo.xml</geometry>
+  <num_threads>1</num_threads>
 	<!-- traectories file and format -->
 	<trajectories format="xml-plain" fps="8">
 		<file location="stairs_traj.xml" />
@@ -43,7 +44,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 	<!--persons information and distribution -->
 	<agents operational_model_id="2">
 		<agents_distribution>
-		<group group_id="1" agent_parameter_id="1"  room_id="0" subroom_id="0" number="100" router_id="2"/>
+		<group group_id="1" agent_parameter_id="1"  room_id="0" subroom_id="0" number="7" router_id="2" x_min="1.0" x_max="5.0"/>
 		</agents_distribution>
 	</agents>
 
@@ -54,7 +55,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.01</stepsize>
-        <exit_crossing_strategy>4</exit_crossing_strategy>
+        <exit_crossing_strategy>8</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
         <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />

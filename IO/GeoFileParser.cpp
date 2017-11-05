@@ -24,7 +24,7 @@
 #include "../geometry/Goal.h"
 #include "../geometry/SubRoom.h"
 
-GeoFileParser::GeoFileParser(const Configuration* configuration)
+GeoFileParser::GeoFileParser(Configuration* configuration)
           :_configuration(configuration)
 {
 
@@ -130,7 +130,7 @@ bool GeoFileParser::LoadGeometry(Building* building)
                double C_z = xmltof(xSubRoom->Attribute("C_z"), 0.0);
                C_z = xmltof(xSubRoom->Attribute("C"), C_z);
 
-               SubRoom* subroom = NULL;
+               SubRoom* subroom = nullptr;
 
                if (type=="stair" || type=="escalator" || type=="idle_escalator") {
                     if (xSubRoom->FirstChildElement("up")==NULL) {
@@ -211,6 +211,7 @@ bool GeoFileParser::LoadGeometry(Building* building)
                     subroom->AddObstacle(obstacle);
                }
                room->AddSubRoom(subroom);
+
           }
           //parsing the crossings
           TiXmlNode* xCrossingsNode = xRoom->FirstChild("crossings");
@@ -445,7 +446,7 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
                          building->GetTransition(id)->Close();
                     }
                     else {
-                         Log->Write("WARNING:\t Unknown door state: %s", state.c_str());
+                         Log->Write("WARNING:\t Unknown door state: <%s>", state.c_str());
                     }
                }
                else {

@@ -67,7 +67,7 @@ Building::Building()
 
 #ifdef _SIMULATOR
 
-Building::Building(const Configuration* configuration, PedDistributor& pedDistributor)
+Building::Building(Configuration* configuration, PedDistributor& pedDistributor)
           :_configuration(configuration),
            _routingEngine(
                  configuration->GetRoutingEngine()),
@@ -100,7 +100,7 @@ Building::Building(const Configuration* configuration, PedDistributor& pedDistri
 
 
      if (!pedDistributor.Distribute(this)) {
-          Log->Write("ERROR:\t could not distribute the pedestrians");
+          Log->Write("ERROR:\tcould not distribute the pedestrians\n");
           exit(EXIT_FAILURE);
      }
 
@@ -154,6 +154,10 @@ Building::~Building()
           iter!=_goals.end(); ++iter) {
           delete iter->second;
      }
+}
+
+Configuration* Building::GetConfig() const {
+     return _configuration;
 }
 
 ///************************************************************
@@ -314,6 +318,9 @@ bool Building::InitGeometry()
                     if (!obst->ConvertLineToPoly())
                          return false;
                }
+
+               //here we can create a boost::geometry::model::polygon out of the vector<Point> objects created above
+               itr_subroom.second->CreateBoostPoly();
 
                double minElevation = FLT_MAX;
                double maxElevation = -FLT_MAX;
@@ -514,7 +521,7 @@ Transition* Building::GetTransition(int ID) const //ar.graf: added const 2015-12
      }
      else {
           if (ID==-1)
-               return NULL;
+               return nullptr;
           else {
                Log->Write(
                          "ERROR: I could not find any transition with the 'ID' [%d]. You have defined [%d] transitions",
@@ -531,7 +538,7 @@ Crossing* Building::GetCrossing(int ID)
      }
      else {
           if (ID==-1)
-               return NULL;
+               return nullptr;
           else {
                Log->Write(
                          "ERROR: I could not find any crossing with the 'ID' [%d]. You have defined [%d] transitions",
@@ -548,7 +555,7 @@ Goal* Building::GetFinalGoal(int ID) const
      }
      else {
           if (ID==-1)
-               return NULL;
+               return nullptr;
           else {
                Log->Write(
                          "ERROR: I could not find any goal with the 'ID' [%d]. You have defined [%d] goals",
@@ -578,7 +585,7 @@ Crossing* Building::GetTransOrCrossByName(string caption) const
      }
 
      Log->Write("WARNING: No Transition or Crossing with Caption: "+caption);
-     return NULL;
+     return nullptr;
 }
 
 Hline* Building::GetTransOrCrossByUID(int id) const
@@ -607,7 +614,7 @@ Hline* Building::GetTransOrCrossByUID(int id) const
           }
      }
      Log->Write("ERROR: No Transition or Crossing or hline with ID %d: ", id);
-     return NULL;
+     return nullptr;
 }
 
 SubRoom* Building::GetSubRoomByUID(int uid) const
@@ -619,7 +626,7 @@ SubRoom* Building::GetSubRoomByUID(int uid) const
           }
      }
      Log->Write("ERROR:\t No subroom exits with the unique id %d", uid);
-     return NULL;
+     return nullptr;
 }
 
 //bool Building::IsVisible(Line* l1, Line* l2, bool considerHlines)
@@ -699,11 +706,8 @@ std::vector<Point> Building::GetBoundaryVertices() const
 
 bool Building::SanityCheck()
 {
-     Log->Write("INFO: \tChecking the geometry for artifacts");
+     Log->Write("INFO: \tChecking the geometry for artifacts: (Ignore Warnings, if ff_[...] router is used!)");
      bool status = true;
-
-     //only for ffRouter
-     return status;
 
      for(auto&& itr_room: _rooms)
      {
@@ -917,7 +921,7 @@ Pedestrian* Building::GetPedestrian(int pedID) const
           }
      }
 
-     return NULL;
+     return nullptr;
 }
 
 Transition* Building::GetTransitionByUID(int uid) const

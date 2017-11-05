@@ -2,11 +2,16 @@
 """
 Test description
 ================
-Two bottlenecks are connected with a long corridor.
-At the last exit there should be no jam.
+150 pedestrians are distributed in a room which is connected to another room
+via a thin corridor. In the second room there is an exit.
+
+The test shows that there is a jam at the entry of the corridor.
 
 Remarks
 =======
+Use this code with python 2
+Use new dedicated python console if you run this code with spyder
+
 condition of this test is not clear enough...
 In the last exit there should be no jam. Means:
 J_botl >= J_last
@@ -14,7 +19,7 @@ However, this condition is not enough to quantify a jam.
 
 Source
 ======
-http://www.rimea.de/fileadmin/files/dok/richtlinien/r2.2.1.pdf
+http://www.rimea.de/fileadmin/files/dok/richtlinien/RiMEA_Richtlinie_3.0.0_-_D-E.pdf
 """
 
 import os

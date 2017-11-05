@@ -73,42 +73,42 @@ bool GCFMModel::Init (Building* building)
 {
      if(auto dirff = dynamic_cast<DirectionFloorfield*>(_direction.get())){
           Log->Write("INFO:\t Init DirectionFloorfield starting ...");
-          //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
-          double _deltaH = 0.0625;
-          double _wallAvoidDistance = 0.4;
-          bool _useWallAvoidance = true;
+          double _deltaH = building->GetConfig()->get_deltaH();
+          double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
+          bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
           dirff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
           Log->Write("INFO:\t Init DirectionFloorfield done");
      }
 
      if(auto dirlocff = dynamic_cast<DirectionLocalFloorfield*>(_direction.get())){
           Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
-          //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
-          double _deltaH = 0.0625;
-          double _wallAvoidDistance = 0.4;
-          bool _useWallAvoidance = true;
+          double _deltaH = building->GetConfig()->get_deltaH();
+          double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
+          bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
           dirlocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
           Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
      }
 
      if(auto dirsublocff = dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())){
           Log->Write("INFO:\t Init DirectionSubLOCALFloorfield starting ...");
-          //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
-          double _deltaH = 0.0625;
-          double _wallAvoidDistance = 0.4;
-          bool _useWallAvoidance = true;
+          double _deltaH = building->GetConfig()->get_deltaH();;
+          double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
+          bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
           dirsublocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
           Log->Write("INFO:\t Init DirectionSubLOCALFloorfield done");
      }
 
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
-    for(unsigned int p=0;p<allPeds.size();p++)
+    size_t peds_size = allPeds.size();
+    for(unsigned int p=0;p<peds_size;p++)
     {
          Pedestrian* ped = allPeds[p];
          double cosPhi, sinPhi;
          //a destination could not be found for that pedestrian
          if (ped->FindRoute() == -1) {
              building->DeletePedestrian(ped);
+              p--;
+              peds_size--;
               continue;
          }
 
@@ -271,7 +271,7 @@ inline  Point GCFMModel::ForceDriv(Pedestrian* ped, Room* room) const
      if (  (dynamic_cast<DirectionFloorfield*>(_direction.get())) ||
            (dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) ||
            (dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get()))  ) {
-          if (dist > 10*J_EPS_GOAL) {
+          if (dist > 50*J_EPS_GOAL) {
                const Point& v0 = ped->GetV0(target);
                F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
           } else {

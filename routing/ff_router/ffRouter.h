@@ -63,7 +63,8 @@
 #include "../Router.h"
 #include "../../general/Macros.h"
 #include "../../geometry/Building.h"
-#include "LocalFloorfieldViaFM.h"
+#include "FloorfieldViaFM.h"
+#include "UnivFFviaFM.h"
 
 class Building;
 class Pedestrian;
@@ -136,12 +137,11 @@ public:
      virtual bool Init(Building* building);
 
      /*!
-      * \brief ReInit the router (must be called after each event (open/close change)
+      * \brief ReInit the router if quickest router is used. Current position of agents is considered.
       *
       * ReInit() will reconstruct the graph (nodes = doors, edges = costs) and
       * find shortest paths via Floyd-Warshall. It will reconstruct the floorfield to
-      * evaluate the best doors to certain goals as they could change. Further on it
-      * will take the information of former floorfields, if useful.
+      * evaluate the best doors to certain goals as they could change.
       *
       *
       * \param[in] [name of input parameter] [its description]
@@ -162,52 +162,26 @@ public:
      virtual int FindExit(Pedestrian* p);
 
      /*!
-      * \brief
-      *
-      */
-     void Reset();
-
-     /*!
       * \brief Perform the FloydWarshall algorithm
       */
      void FloydWarshall();
 
-     /*!
-      * \brief Sets the door that leaves the subroom in _pathsMatrix
-      *
-      * Due to the way we calculate door distances (entries in _pathsMatrix), pedestrians in a corridor
-      * tend to jump from door to door, i.e. they walk to the next door in the correct direction, but they
-      * do not traverse it. This algorithm searches for the door on the way that really leaves the subroom,
-      * and sets this door in _pathsMatrix, which in turn is needed by GetPresumableExitRoute().
-      */
-     void AvoidDoorHopping();
-
-     /*!
-      * \brief set all the distances using ff
-      */
-     //void SetDistances();
+//     /*!
+//      * \brief Sets the door that leaves the subroom in _pathsMatrix
+//      *
+//      * Due to the way we calculate door distances (entries in _pathsMatrix), pedestrians in a corridor
+//      * tend to jump from door to door, i.e. they walk to the next door in the correct direction, but they
+//      * do not traverse it. This algorithm searches for the door on the way that really leaves the subroom,
+//      * and sets this door in _pathsMatrix, which in turn is needed by GetPresumableExitRoute().
+//      */
+//     void AvoidDoorHopping();
 
      /*!
       * \brief set mode (shortest, quickest, ...)
       */
       void SetMode(std::string s);
-
-     /*!
-      * \brief notify door about time spent in that room. needed for quickest mode
-      */
-     void notifyDoor(Pedestrian* const p);
-
-     /*!
-      * \brief mark pedestrian as not being in the first room anymore and return to normal routing
-      */
-     void save(Pedestrian* const p);
-
-     /*!
-      * \brief Get the route the pedestrian p wants to take (according to _pathsMatrix)
-      * @param p The pedestrian in question
-      * @return A set containing (subroom*, doorUID) pairs. The floorfields needed are inside the subroom, originating from the door.
-      */
-     std::set<std::pair<SubRoom*, int>> GetPresumableExitRoute(Pedestrian* p);
+      bool MustReInit();
+      void SetRecalc(double t);
 
 private:
 
@@ -219,7 +193,7 @@ protected:
      std::vector<int>                         _allDoorUIDs;
      std::vector<int>                         _localShortestSafedPeds;
      const Building*                          _building;
-     std::map<int, LocalFloorfieldViaFM*>     _locffviafm; // the actual type might be CentrePointLocalFFViaFM
+     std::map<int, UnivFFviaFM*>     _locffviafm; // the actual type might be CentrePointLocalFFViaFM
      FloorfieldViaFM*                         _globalFF;
      std::map<int, Transition*>               _TransByUID;
      std::map<int, Transition*>               _ExitsByUID;
@@ -233,6 +207,7 @@ protected:
      int _mode;
      double _timeToRecalc = 0.;
      double _recalc_interval;
+     bool _plzReInit = false;
      bool _hasSpecificGoals;
      bool _targetWithinSubroom;
      // If we use CentrePointDistance (i.e. CentrePointLocalFFViaFM), some algorithms can maybe be simplified

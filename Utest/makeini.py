@@ -39,6 +39,7 @@ tags = ['tmax',
 # format tag-attribute
 attributes_tags = ['group-pre_movement_mean',
                    'group-number',
+                   'group-router_id',
                    'group-agent_parameter_id',
                    'group-premovement_sigma',
                    'agents-operational_model_id',
@@ -189,7 +190,7 @@ def update_tag_value(root, tag, value):
 # =======================================================
 def update_attrib_value(root, attr_tag, value):
     # location
-    # print "update_attrib_value: ", attr_tag, value
+    print ("update_attrib_value: ", attr_tag, value)
     # raw_input()
     if attr_tag == "location":  # e.g. location
         for r in root.iter():

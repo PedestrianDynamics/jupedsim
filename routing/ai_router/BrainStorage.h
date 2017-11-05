@@ -69,7 +69,7 @@ private:
 
      //perception
      //Complete environment
-     VisibleEnvironment _visibleEnv;
+     //VisibleEnvironment _visibleEnv;
 
      //cognitive map
      std::vector<ptrRegion> _regions;

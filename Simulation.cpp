@@ -1,7 +1,7 @@
 /**
  * \file        Simulation.cpp
  * \date        Dec 15, 2010
- * \version     v0.7
+ * \version     v0.8.1
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -29,7 +29,7 @@
  **/
 
 #include "Simulation.h"
-
+#include "IO/progress_bar.hpp"
 #include "routing/ff_router/ffRouter.h"
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
@@ -50,7 +50,7 @@ using namespace std;
 
 OutputHandler* Log;
 
-Simulation::Simulation(const Configuration* args)
+Simulation::Simulation(Configuration* args)
         :_config(args)
 {
     _nPeds = 0;
@@ -249,10 +249,6 @@ bool Simulation::InitArgs()
     // This should be done after the initialization of the operationalModel
     // because then, invalid pedestrians have been deleted and FindExit()
     // has been called.
-    Log->Write("INFO:\t PreSim of DirectionStrategy starting ...");
-    if (!_operationalModel->GetDirection()->PreSim(_building.get()))
-        return false;
-    Log->Write("INFO:\t PreSim of DirectionStrategy done");
 
     //other initializations
     for (auto&& ped: _building->GetAllPedestrians()) {
@@ -352,6 +348,9 @@ void Simulation::UpdateRoutesAndLocations()
           if (ped->FindRoute() == -1) {
                //a destination could not be found for that pedestrian
                Log->Write("ERROR: \tCould not find a route for pedestrian %d",ped->GetID());
+               ped->FindRoute(); //debug only, plz remove
+               std::function<void(const Pedestrian&)> f = std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
+               ped->Relocate(f);
                //exit(EXIT_FAILURE);
 #pragma omp critical(Simulation_Update_pedsToRemove)
                pedsToRemove.push_back(ped);
@@ -362,7 +361,7 @@ void Simulation::UpdateRoutesAndLocations()
 #ifdef _USE_PROTOCOL_BUFFER
      if (_hybridSimManager)
      {
-          AgentsQueueOut::Add(pedsToRemove);    //@todo: ar.graf: this should be critical region (and it is)
+          AgentsQueueOut::Add(pedsToRemove);    //this should be critical region (and it is)
      }
      else
 #endif
@@ -460,6 +459,15 @@ double Simulation::RunBody(double maxSimTime)
     //to break the main simulation loop
     ProcessAgentsQueue();
     _nPeds = _building->GetAllPedestrians().size();
+    std::cout << "\n";
+    std::string description = "Evacuation of " + std::to_string(_nPeds) + " agents.";
+    ProgressBar *bar = new ProgressBar(_nPeds, description);
+    // bar->SetFrequencyUpdate(10);
+#ifdef _WINDOWS
+    bar->SetStyle("|","-");
+#else
+    bar->SetStyle("\u2588", "-"); //for linux
+#endif
     int initialnPeds = _nPeds;
     // main program loop
     while ((_nPeds || (!_agentSrcManager.IsCompleted()&& _gotSources) ) && t<maxSimTime) {
@@ -477,8 +485,15 @@ double Simulation::RunBody(double maxSimTime)
             //update the events
             _em->ProcessEvent();
 
-            //update doorticks
-            UpdateDoorticks();
+            //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
+            //update quickestRouter
+            if (_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST)) {
+                FFRouter* ffrouter = dynamic_cast<FFRouter*>(_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST));
+                if (ffrouter->MustReInit()) {
+                    ffrouter->ReInit();
+                    ffrouter->SetRecalc(t);
+                }
+            }
 
             //update the routes and locations
             UpdateRoutesAndLocations();
@@ -495,8 +510,11 @@ double Simulation::RunBody(double maxSimTime)
         if (0==frameNr%writeInterval) {
             _iod->WriteFrame(frameNr/writeInterval, _building.get());
         }
-        if(!_gotSources /*&& _printPB*/) // @todo: option for print progressbar
-              Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
+        if(0 && !_gotSources && !_periodic /*&& _printPB*/) // @todo: option for print progressbar
+              // Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
+              bar->Progressed(initialnPeds-_nPeds);
+        else
+            printf("time: %.2f | %.2f  | Agents: %ld / %d\n",  t , maxSimTime, _nPeds, initialnPeds);
 
         // needed to control the execution time PART 2
         // time(&endtime);
@@ -525,35 +543,35 @@ void Simulation::ProcessAgentsQueue()
 }
 
 void Simulation::UpdateDoorticks() const {
-    int softstateDecay = 1;
-    //Softstate of _lastTickTime is valid for X seconds as in (X/_deltaT); here it is 2s
-    auto& allCross = _building->GetAllCrossings();
-    for (auto& crossPair : allCross) {
-        crossPair.second->_refresh1 += 1;
-        crossPair.second->_refresh2 += 1;
-        if (crossPair.second->_refresh1 > (softstateDecay/_deltaT)) {
-            crossPair.second->_lastTickTime1 = 0;
-            crossPair.second->_refresh1 = 0;
-        }
-        if (crossPair.second->_refresh2 > (softstateDecay/_deltaT)) {
-            crossPair.second->_lastTickTime2 = 0;
-            crossPair.second->_refresh2 = 0;
-        }
-    }
-
-    auto& allTrans = _building->GetAllTransitions();
-    for (auto& transPair : allTrans) {
-        transPair.second->_refresh1 += 1;
-        transPair.second->_refresh2 += 1;
-        if (transPair.second->_refresh1 > (softstateDecay/_deltaT)) {
-            transPair.second->_lastTickTime1 = 0;
-            transPair.second->_refresh1 = 0;
-        }
-        if (transPair.second->_refresh2 > (softstateDecay/_deltaT)) {
-            transPair.second->_lastTickTime2 = 0;
-            transPair.second->_refresh2 = 0;
-        }
-    }
+//    int softstateDecay = 1;
+//    //Softstate of _lastTickTime is valid for X seconds as in (X/_deltaT); here it is 2s
+//    auto& allCross = _building->GetAllCrossings();
+//    for (auto& crossPair : allCross) {
+//        crossPair.second->_refresh1 += 1;
+//        crossPair.second->_refresh2 += 1;
+//        if (crossPair.second->_refresh1 > (softstateDecay/_deltaT)) {
+//            crossPair.second->_lastTickTime1 = 0;
+//            crossPair.second->_refresh1 = 0;
+//        }
+//        if (crossPair.second->_refresh2 > (softstateDecay/_deltaT)) {
+//            crossPair.second->_lastTickTime2 = 0;
+//            crossPair.second->_refresh2 = 0;
+//        }
+//    }
+//
+//    auto& allTrans = _building->GetAllTransitions();
+//    for (auto& transPair : allTrans) {
+//        transPair.second->_refresh1 += 1;
+//        transPair.second->_refresh2 += 1;
+//        if (transPair.second->_refresh1 > (softstateDecay/_deltaT)) {
+//            transPair.second->_lastTickTime1 = 0;
+//            transPair.second->_refresh1 = 0;
+//        }
+//        if (transPair.second->_refresh2 > (softstateDecay/_deltaT)) {
+//            transPair.second->_lastTickTime2 = 0;
+//            transPair.second->_refresh2 = 0;
+//        }
+//    }
 };
 
 void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
@@ -562,12 +580,12 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
         Transition* trans = _building->GetTransitionByUID(ped.GetExitIndex());
         if (trans) {
             //check if the pedestrian left the door correctly
-            if (ped.GetExitLine()->DistTo(ped.GetPos())>0.5) {
+            if (trans->DistTo(ped.GetPos())>0.5) {
                 Log->Write("WARNING:\t pedestrian [%d] left room/subroom [%d/%d] in an unusual way. Please check",
                         ped.GetID(), ped.GetRoomID(), ped.GetSubRoomID());
                 Log->Write("       :\t distance to last door (%d | %d) is %f. That should be smaller.",
-                        ped.GetExitLine()->GetUniqueID(), ped.GetExitIndex(),
-                        ped.GetExitLine()->DistTo(ped.GetPos()));
+                        trans->GetUniqueID(), ped.GetExitIndex(),
+                        trans->DistTo(ped.GetPos()));
                 Log->Write("       :\t correcting the door statistics");
                 //ped.Dump(ped.GetID());
 

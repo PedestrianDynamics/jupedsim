@@ -47,7 +47,7 @@ AccessPoint::AccessPoint(int id, double center[2],double radius)
      _transitPedestrians = vector<Pedestrian*>();
      _connectingAPs = vector<AccessPoint*>();
      _isClosed=0;
-     _navLine=NULL;
+     _navLine=nullptr;
 }
 
 AccessPoint::~AccessPoint()

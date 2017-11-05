@@ -5,7 +5,7 @@
 # -DBUILD_TESTING=ON (default OFF) for python tests
 # -DBUILD_CPPUNIT_TEST=ON (default OFF) for unit tests
 # -DUSE_DUAL_ABI=ON (default OFF)  https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
-# -D Boost_NO_SYSTEM_PATHS=true (default false) -D BOOST_ROOT=PATH_where_to_find_boost 
+# -D Boost_NO_SYSTEM_PATHS=true (default false) -D BOOST_ROOT=PATH_where_to_find_boost
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
@@ -16,7 +16,7 @@ project(JPScore)
 set(CMAKE_COLOR_MAKEFILE ON)
 set(JPSCORE_MAJOR_VERSION 0)
 set(JPSCORE_MINOR_VERSION 8)
-set(JPSCORE_PATCH_VERSION 0)
+set(JPSCORE_PATCH_VERSION 2)
 set(JPSCORE_VERSION
         ${JPSCORE_MAJOR_VERSION}.${JPSCORE_MINOR_VERSION}.${JPSCORE_PATCH_VERSION})
 message(STATUS "JPSCORE_VERSION: " ${JPSCORE_VERSION})
@@ -71,10 +71,9 @@ if (NOT DEFINED PROCESSOR_COUNT)
 endif (NOT DEFINED PROCESSOR_COUNT)
 
 if (PROCESSOR_COUNT)
-
      message( STATUS "PROCESSOR_COUNT: " ${PROCESSOR_COUNT})
     #  set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
-    message(STATUS "PROCESSOR_COUNT: 0")
+    message(STATUS "PROCESSOR_COUNT: 1")
 
     set(CTEST_BUILD_FLAGS "-j0")
 endif (PROCESSOR_COUNT)
@@ -163,7 +162,9 @@ if (APPLE)
 endif (APPLE)
 
 
+
 if (Boost_NO_SYSTEM_PATHS)
+  set(Boost_NO_SYSTEM_PATHS ON)
   set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
   set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/stage/lib")
   set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${BOOST_ROOT})
@@ -232,7 +233,7 @@ endif (BUILD_TESTING)
 set(source_files
         Simulation.cpp
         general/ArgumentParser.cpp
-
+        IO/progress_bar.cpp
         tinyxml/tinystr.cpp
         tinyxml/tinyxml.cpp
         tinyxml/tinyxmlerror.cpp
@@ -287,8 +288,10 @@ set(source_files
 
         #floorfield
         routing/ff_router/ffRouter.cpp
-        routing/ff_router/LocalFloorfieldViaFM.cpp
+        #routing/ff_router/LocalFloorfieldViaFM.cpp
         routing/ff_router/FloorfieldViaFM.cpp
+        #routing/ff_router/FFKit.cpp
+        routing/ff_router/UnivFFviaFM.cpp
 
         #global_shortest
         routing/global_shortest/AccessPoint.cpp
@@ -299,6 +302,7 @@ set(source_files
         routing/DirectionStrategy.cpp
         routing/Router.cpp
         routing/RoutingEngine.cpp
+
 
         #quickest
         routing/quickest/QuickestPathRouter.cpp
@@ -316,11 +320,11 @@ set(source_files
         routing/ai_router/sensor/DiscoverDoorsSensor.cpp
         routing/ai_router/sensor/JamSensor.cpp
         routing/ai_router/sensor/LastDestinationsSensor.cpp
-        routing/ai_router/sensor/SmokeSensor.cpp
+        #routing/ai_router/sensor/SmokeSensor.cpp
         routing/ai_router/sensor/locater.cpp
-        routing/ai_router/fire_mesh/FireMesh.cpp
-        routing/ai_router/fire_mesh/Knot.cpp
-        routing/ai_router/fire_mesh/FireMeshStorage.cpp
+        #routing/ai_router/fire_mesh/FireMesh.cpp
+        #routing/ai_router/fire_mesh/Knot.cpp
+        #routing/ai_router/fire_mesh/FireMeshStorage.cpp
         routing/ai_router/cognitiveMap/associations.cpp
         routing/ai_router/cognitiveMap/connection.cpp
         routing/ai_router/cognitiveMap/cognitivemap.cpp
@@ -335,7 +339,6 @@ set(source_files
         routing/ai_router/cognitiveMap/internnavigationnetwork.cpp
         visiLibity/source_code/visilibity.cpp
 
-
         poly2tri/common/shapes.cpp
         poly2tri/sweep/sweep_context.cpp
         poly2tri/sweep/advancing_front.cpp
@@ -343,6 +346,15 @@ set(source_files
         poly2tri/sweep/cdt.cpp
         events/EventManager.cpp
         events/Event.cpp
+
+        JPSfire/generic/FDSMesh.cpp
+        JPSfire/generic/Knot.cpp
+        JPSfire/generic/FDSMeshStorage.cpp
+        JPSfire/A_smoke_sensor/SmokeSensor.cpp
+        JPSfire/B_walking_speed/WalkingSpeed.cpp
+        JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
+        JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
+
         math/KrauszModel.cpp)
 
 set(header_files
@@ -351,11 +363,17 @@ set(header_files
         routing/ff_router/ffRouter.h
         routing/ff_router/RectGrid.h
         routing/ff_router/Trial.h
-        routing/ff_router/LocalFloorfieldViaFM.h
+        #routing/ff_router/LocalFloorfieldViaFM.h
         routing/ff_router/FloorfieldViaFM.h
+        #routing/ff_router/FFKit.h
+        routing/ff_router/UnivFFviaFM.h
 
         #general
         routing/DirectionStrategy.h
+        routing/DummyRouter.h
+        routing/GlobalRouter.h
+        routing/QuickestPathRouter.h
+        routing/SafestPathRouter.h
         routing/Router.h
         routing/RoutingEngine.h
 
@@ -380,11 +398,11 @@ set(header_files
         routing/ai_router/sensor/DiscoverDoorsSensor.h
         routing/ai_router/sensor/JamSensor.h
         routing/ai_router/sensor/LastDestinationsSensor.h
-        routing/ai_router/sensor/SmokeSensor.h
+        #routing/ai_router/sensor/SmokeSensor.h
         routing/ai_router/sensor/locater.h
-        routing/ai_router/fire_mesh/FireMesh.h
-        routing/ai_router/fire_mesh/Knot.h
-        routing/ai_router/fire_mesh/FireMeshStorage.h
+        #routing/ai_router/fire_mesh/FireMesh.h
+        #routing/ai_router/fire_mesh/Knot.h
+        #routing/ai_router/fire_mesh/FireMeshStorage.h
         routing/ai_router/cognitiveMap/associations.h
         routing/ai_router/cognitiveMap/connection.cpp
         routing/ai_router/cognitiveMap/cognitivemap.h
@@ -460,8 +478,15 @@ set(header_files
         poly2tri/sweep/sweep.h
         events/EventManager.h
         events/Event.h
-        )
 
+        JPSfire/generic/FDSMesh.h
+        JPSfire/generic/Knot.h
+        JPSfire/generic/FDSMeshStorage.h
+        JPSfire/A_smoke_sensor/SmokeSensor.h
+        JPSfire/B_walking_speed/WalkingSpeed.h
+        JPSfire/C_toxicity_analysis/ToxicityAnalysis.h
+        JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
+        )
 
 add_library(core STATIC ${source_files})
 
@@ -474,7 +499,7 @@ add_library(core STATIC ${source_files})
 add_executable(jpscore main.cpp)
 
 if (Boost_FOUND)
-    message(STATUS "BOOST FOUND: " ${Boost_LIBRARIES})
+    message(STATUS "BOOST FOUND: " ${Boost_LIB_VERSION})
     message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
     message(STATUS "Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIR})
     message(STATUS "Boost_LIB_VERSION: " ${Boost_LIB_VERSION})
@@ -484,7 +509,7 @@ if (Boost_FOUND)
     # suppress warnings in boost libraries with attribute SYSTEM
     include_directories(SYSTEM ${Boost_INCLUDE_DIR})
     # todo: is this necessary?
-    target_link_libraries(jpscore ${Boost_LIBRARIES})
+    target_link_libraries(core ${Boost_LIBRARIES})
 endif ()
 
 target_link_libraries(jpscore core)
@@ -579,16 +604,25 @@ if (NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
     endif ()
 endif ()
 
-message(STATUS "MSVC: " ${MSVC})
-message(STATUS "MSVC_IDE: " ${MSVC_IDE})
-message(STATUS "MSVC60: " ${MSVC60})
-message(STATUS "MSVC71: " ${MSVC71})
-message(STATUS "MSVC80: " ${MSVC80})
-message(STATUS "MSVC90: " ${MSVC90})
-message(STATUS "MSVC10: " ${MSVC10})
-message(STATUS "MSVC12: " ${MSVC12})
-message(STATUS "MSVC13: " ${MSVC13})
-
+if (MSVC)
+  message(STATUS "MSVC: " ${MSVC})
+elseif (MSVC_IDE)
+  message(STATUS "MSVC_IDE: " ${MSVC_IDE})
+elseif(MSVC60)
+  message(STATUS "MSVC60: " ${MSVC60})
+elseif(MSVC71)
+  message(STATUS "MSVC71: " ${MSVC71})
+elseif(MSVC80)
+  message(STATUS "MSVC80: " ${MSVC80})
+elseif(MSVC90)
+  message(STATUS "MSVC90: " ${MSVC90})
+elseif(MSVC10)
+  message(STATUS "MSVC10: " ${MSVC10})
+elseif(MSVC12)
+  message(STATUS "MSVC12: " ${MSVC12})
+elseif(MSVC13)
+  message(STATUS "MSVC13: " ${MSVC13})
+endif()
 #---------------------
 message(STATUS "C++ Compiler: " ${CMAKE_CXX_COMPILER})
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -649,7 +683,7 @@ if (BUILD_TESTING)
         foreach (test_src ${test_py_files})
             MATH(EXPR counter "${counter}+1")
             GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
-            message(STATUS "Add test " ${counter} "  : " ${test})
+            message(STATUS "Add py test " ${counter} "  : " ${test})
             # message (STATUS "Add python test: " ${test} " | test_src: " ${PYTHON_EXECUTABLE} " " ${test_src})
             add_test(NAME ${test} COMMAND ${PYTHON_EXECUTABLE} ${test_src})
         endforeach (test_src ${test_py_files})
@@ -660,3 +694,28 @@ endif (BUILD_TESTING)
 
 
 install(TARGETS jpscore DESTINATION bin)
+
+# ------------- CPACK ------------------------------
+IF(CMAKE_SYSTEM_NAME STREQUAL Linux)
+  SET(CPACK_GENERATOR "DEB")
+
+  SET(CPACK_PACKAGE_DESCRIPTION "simulation core of JuPedSim")
+  SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The simulation core of JuPedSim, a framework for simulation and analysis of pedestrian dynamics")
+  #SET(CPACK_PACKAGE_VENDOR "nowardev")
+  SET(CPACK_PACKAGE_CONTACT "m.chraibi@fz-juelich.de")
+  SET(CPACK_PACKAGE_VERSION_MAJOR "${JPSCORE_MAJOR_VERSION}")
+  SET(CPACK_PACKAGE_VERSION_MINOR "${JPSCORE_MINOR_VERSION}")
+  SET(CPACK_PACKAGE_VERSION_PATCH "${JPSCORE_PATCH_VERSION}")
+  SET(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${JPSCORE_VERSION}")
+  SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${JPSCORE_VERSION}")
+  #SET(CPACK_DEBIAN_PACKAGE_DEPENDS " Boost (>= 1.59) ")
+  SET(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+  SET( CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://jupedsim.org")
+  SET(CPACK_DEBIAN_PACKAGE_SUGGESTS, "jpsvis, jpsreport, jpseditor")
+  SET(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+  SET(CPACK_DEBIAN_PACKAGE_SECTION "science")
+  SET(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+
+
+  INCLUDE(CPack)
+ENDIF(CMAKE_SYSTEM_NAME STREQUAL Linux)

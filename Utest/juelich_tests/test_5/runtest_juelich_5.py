@@ -12,21 +12,26 @@ __author__ = 'Oliver Schmidts'
 
 def runtest5(inifile, trajfile):
     fps, N, traj = parse_file(trajfile)
-    traj_1 = traj[traj[:, 0] == 1]
+    traj_1 = traj[traj[:, 0] == 1] # behind
     x_1 = traj_1[:, 2]
     y_1 = traj_1[:, 3]
 
-    x_2 = traj[traj[:, 0] == 2][:, 2]
-    y_2 = traj[traj[:, 0] == 2][:, 3]
+    traj_2 = traj[traj[:, 0] == 2] # vorne
+    x_2 = traj_2[:, 2]
+    y_2 = traj_2[:, 3]
 
-    eps = 0.3 # 10 cm
+    eps = 0.15 # see master_ini.xml
     x_min = x_2[0] - eps
     x_max = x_2[0] + eps
     y_min = y_2[0] - eps
     y_max = y_2[0] + eps
 
-    lx = np.logical_and(x_1 > x_min, x_1 < x_max)
-    ly = np.logical_and(y_1 > y_min, y_1 < y_max)
+    n = x_2.shape[0]
+
+    print(n)
+
+    lx = np.logical_and(x_1[:n] > x_2 - eps, x_1[:n] < x_2 + eps)
+    ly = np.logical_and(y_1[:n] > y_2 - eps, y_1[:n] < y_2 + eps)
 
     overlap = (lx*ly).any()
     if overlap:

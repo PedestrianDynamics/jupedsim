@@ -97,7 +97,7 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.7/jps_ini_core.xsd">
         <navigation_lines file="cognitive_map_routing.xml" />
       </parameters>
     </router>
-    <router router_id="7" description="cognitive_map">
+    <router router_id="7" description="AI">
       <sensors>
         <sensor sensor_id="1" description="Room2Corridor" status="activated" />
         <sensor sensor_id="2" description="Jam" status="activated" />

@@ -81,8 +81,8 @@ void NavigationGraph::AddExit(const Transition * transition)
 //     if(src_it != vertices.end()) {
 //          src_it->second->AddExit(transition);
 //     }
+    this->operator[](transition->GetSubRoom1())->AddExit(transition);
 
-     this->operator[](transition->GetSubRoom1())->AddExit(transition);
 }
 
 GraphVertex * NavigationGraph::operator[](const SubRoom * const sub_room)

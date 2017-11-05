@@ -993,7 +993,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement* operativModel, TiXmlNode*
                     _config->SetDistEffMaxWall(_config->GetDistEffMaxPed());
                }
 
-               if (_model == 4) { //  Gompertz @todo: ar.graf
+               if (_model == 4) { //  Gradient
                     double beta_c = 2; /// @todo quick and dirty
                     double max_Ea = agentParameters->GetAmin() + agentParameters->GetAtau() * agentParameters->GetV0();
                     double max_Eb = 0.5 * (agentParameters->GetBmin() +
@@ -1050,6 +1050,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                }
           }
      }
+     _config->set_has_specific_goals(hasSpecificGoals);
      for (TiXmlElement* e = routingNode->FirstChildElement("router"); e;
           e = e->NextSiblingElement("router")) {
 
@@ -1090,9 +1091,14 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
                Router *r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals, _config);
                _config->GetRoutingEngine()->AddRouter(r);
-               Log->Write("\nINFO: \tUsing FF Global Shortest Router");
 
-               //check if the exit strat is [8 | 9] //@todo: ar.graf: implement check and check which are valid exitstrats
+               if ((_exit_strat_number == 8) || (_exit_strat_number == 9)){
+                   Log->Write("\nINFO: \tUsing FF Global Shortest Router");
+               }
+               else {
+                   Log->Write("\nWARNING: \tExit Strategy Number is not 8 or 9!!!");
+                   // config object holds default values, so we omit any set operations
+               }
 
                ///Parsing additional options
                if (!ParseFfRouterOps(e, ROUTING_FF_GLOBAL_SHORTEST)) {
@@ -1106,6 +1112,14 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                _config->GetRoutingEngine()->AddRouter(r);
                Log->Write("\nINFO: \tUsing FF Local Shortest Router");
                Log->Write("\nWARNING: \tFF Local Shortest is bugged!!!!");
+
+               if ((_exit_strat_number == 8) || (_exit_strat_number == 9)){
+                   Log->Write("\nINFO: \tUsing FF Global Shortest Router");
+               }
+               else {
+                   Log->Write("\nWARNING: \tExit Strategy Number is not 8 or 9!!!");
+                   // config object holds default values, so we omit any set operations
+               }
 
                //check if the exit strat is [8 | 9]
 
@@ -1144,9 +1158,18 @@ bool IniFileParser::ParseFfRouterOps(TiXmlNode* routingNode, RoutingStrategy s) 
           //parse ini-file-information
           if (routingNode->FirstChild("parameters")) {
                TiXmlNode* pParameters = routingNode->FirstChild("parameters");
-               if (pParameters->FirstChild("recalc interval")) { //@todo: ar.graf: test ini file with recalc value
-                    _config->set_recalc_interval(atof(pParameters->FirstChild("recalc interval")->FirstChild()->Value()));
+               if (pParameters->FirstChild("recalc_interval")) { //@todo: ar.graf: test ini file with recalc value
+                    _config->set_recalc_interval(atof(pParameters->FirstChild("recalc_interval")->FirstChild()->Value()));
                }
+          }
+     }
+     _config->set_write_VTK_files(false);
+     if (routingNode->FirstChild("parameters")) {
+          TiXmlNode* pParametersForAllFF = routingNode->FirstChild("parameters");
+          if (pParametersForAllFF->FirstChild("write_VTK_files"))  {
+               //remark: std::strcmp returns 0 if the strings are equal
+               bool tmp_write_VTK = !std::strcmp(pParametersForAllFF->FirstChild("write_VTK_files")->FirstChild()->Value(), "true");
+               _config->set_write_VTK_files(tmp_write_VTK);
           }
      }
      FFRouter* r = static_cast<FFRouter*>(_config->GetRoutingEngine()->GetAvailableRouters().back());
@@ -1172,16 +1195,7 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode* routingNode)
      for (TiXmlElement* e = sensorNode->FirstChildElement("sensor"); e;
           e = e->NextSiblingElement("sensor")) {
           string sensor = e->Attribute("description");
-          //adding Smoke Sensor specific parameter is now handled in FDSMeshStorage
-//          if (sensor=="Smoke") {
-//               std::vector<std::string> smokeOptVec;
-
-//               smokeOptVec.push_back(e->Attribute("smoke_factor_grids"));
-//               smokeOptVec.push_back(e->Attribute("update_time"));
-//               smokeOptVec.push_back(e->Attribute("final_time"));
-//               r->addOption("smokeOptions", smokeOptVec);
-
-//          }
+          //adding Smoke Sensor specific parameters is executed in the class FDSFIreMeshStorage
           sensorVec.push_back(sensor);
 
           Log->Write("INFO: \tSensor <%s> added.", sensor.c_str());
@@ -1327,6 +1341,39 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
           int pExitStrategy;
           if (tmp) {
                pExitStrategy = atoi(tmp);
+
+              //check for ff router to avoid exit strat <> router mismatch
+              const TiXmlNode* agentsDistri = strategyNode.GetDocument()->RootElement()->FirstChild("agents")->FirstChild("agents_distribution");
+              std::vector<int> usedRouter;
+              for (const TiXmlElement* e = agentsDistri->FirstChildElement("group"); e;
+                   e = e->NextSiblingElement("group")) {
+                  int router = -1;
+                  if (e->Attribute("router_id")) {
+                      router = atoi(e->Attribute("router_id"));
+                      if(std::find(usedRouter.begin(), usedRouter.end(), router) == usedRouter.end()) {
+                          usedRouter.emplace_back(router);
+                      }
+                  }
+              }
+               //continue: check for ff router to avoid exit strat <> router mismatch
+               const TiXmlNode* routeChoice = strategyNode.GetDocument()->RootElement()->FirstChild("route_choice_models");
+               for (const TiXmlElement* e = routeChoice->FirstChildElement("router"); e;
+                    e = e->NextSiblingElement("router")) {
+                    int router_id = atoi(e->Attribute("router_id"));
+                    if (!(std::find(usedRouter.begin(), usedRouter.end(), router_id) == usedRouter.end())) {
+                         std::string router_descr = e->Attribute("description");
+                         if (  (pExitStrategy != 9)
+                               && (pExitStrategy != 8)
+                               && ((router_descr == "ff_global_shortest") || (router_descr == "ff_local_shortest")
+                                                                          || (router_descr == "ff_quickest") ) ) {
+                             pExitStrategy = 8;
+                              Log->Write("WARNING: \tChanging Exit Strategie to work with floorfield!");
+                         }
+
+                    }
+
+               }
+              _exit_strat_number = pExitStrategy;
                switch (pExitStrategy) {
                case 1:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMiddlePoint());
@@ -1342,6 +1389,9 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                     break;
                case 6:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionFloorfield());
+                    if(!ParseFfOpts(strategyNode)) {
+                         return false;
+                    };
                     break;
                case 7:
                     // dead end -> not supported anymore (global ff needed, but not available in 3d)
@@ -1352,9 +1402,15 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                     break;
                case 8:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
+                    if(!ParseFfOpts(strategyNode)) {
+                         return false;
+                    };
                     break;
                case 9:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
+                    if(!ParseFfOpts(strategyNode)) {
+                         return false;
+                    };
                     break;
                default:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
@@ -1368,6 +1424,42 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                return false;
           }
           Log->Write("INFO: \texit_crossing_strategy < %d >", pExitStrategy);
+     }
+     return true;
+}
+
+bool IniFileParser::ParseFfOpts(const TiXmlNode &strategyNode) {
+
+     string query = "delta_h";
+     if (strategyNode.FirstChild(query.c_str())) {
+          const char *tmp =
+                    strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
+          double pDeltaH = atof(tmp);
+          _config->set_deltaH(pDeltaH);
+          Log->Write("INFO: \tdeltaH:\t %f", pDeltaH);
+     }
+
+
+     query = "wall_avoid_distance";
+     if (strategyNode.FirstChild(query.c_str())) {
+          const char *tmp =
+                    strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
+          double pWallAvoidance = atof(tmp);
+          _config->set_wall_avoid_distance(pWallAvoidance);
+          Log->Write("INFO: \tWAD:\t %f", pWallAvoidance);
+     }
+
+
+     query = "use_wall_avoidance";
+     if (strategyNode.FirstChild(query.c_str())) {
+          string tmp =
+                    strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
+          bool pUseWallAvoidance = !(tmp=="false");
+          _config->set_use_wall_avoidance(pUseWallAvoidance);
+         if(pUseWallAvoidance)
+             Log->Write("INFO: \tUseWAD:\t yes");
+         else
+             Log->Write("INFO: \tUseWAD:\t no");
      }
      return true;
 }

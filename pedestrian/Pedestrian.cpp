@@ -34,6 +34,13 @@
 #include "../IO/OutputHandler.h"
 #include "Knowledge.h"
 #include "Pedestrian.h"
+#include "PedDistributor.h"
+
+#include "../JPSfire/generic/FDSMesh.h"
+#include "../JPSfire/generic/Knot.h"
+#include "../JPSfire/generic/FDSMeshStorage.h"
+#include "../JPSfire/B_walking_speed/WalkingSpeed.h"
+#include "../JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
 
 using namespace std;
 
@@ -99,8 +106,8 @@ Pedestrian::Pedestrian()
      _reroutingEnabled = false;
      _tmpFirstOrientation = true;
      _newOrientationFlag = false;
-     _router = NULL;
-     _building = NULL;
+     _router = nullptr;
+     _building = nullptr;
 
      //_knownDoors = map<int, NavLineState>();
 
@@ -108,6 +115,8 @@ Pedestrian::Pedestrian()
      _ticksInThisRoom = 0;
 
      _agentsCreated++;//increase the number of object created
+     _FED_In = 0.0;
+     _FED_Heat = 0.0;
 }
 Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& building)
 :
@@ -147,10 +156,9 @@ Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& buil
      _tmpFirstOrientation = true;
      _turninAngle = 0.0;
      _ellipse = JEllipse();
-     //_navLine = new NavLine(); //FIXME? argraf : rather nullptr and Setter includes correct uid (done below)
      _navLine = nullptr;
-     _router = NULL;
-     _building = NULL;
+     _router = nullptr;
+     _building = nullptr;
      _reroutingThreshold = 0.0; // new orientation after 10 seconds, value is incremented
      _timeBeforeRerouting = 0.0;
      _reroutingEnabled = false;
@@ -183,6 +191,8 @@ Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& buil
      _routingStrategy=ROUTING_GLOBAL_SHORTEST;
      _lastE0 = Point(0,0);
      _agentsCreated++;//increase the number of object created
+     _FED_In = 0.0;
+     _FED_Heat = 0.0;
 }
 
 
@@ -252,18 +262,13 @@ void Pedestrian::SetExitIndex(int i)
      //_destHistory.push_back(i);
 }
 
-void Pedestrian::SetExitLine(const NavLine* l) //FIXME? argraf : _navLine = new NavLine(*l); this would have a navLine with consistent uid (done below)
+void Pedestrian::SetExitLine(const NavLine* l)
 {
-     //_navLine = l;
-     //_navLine->SetPoint1(l->GetPoint1());
-     //_navLine->SetPoint2(l->GetPoint2());
-     if(l) {
-          _navLine = std::unique_ptr<NavLine>(new NavLine(*l));
-     }
-     /*else if(l && _navLine && *l != *_navLine && l->GetUniqueID() != _navLine->GetUniqueID()){
+     if(_navLine)
           delete _navLine;
+     if(l) {
           _navLine = new NavLine(*l);
-     }*/
+     }
 }
 
 void Pedestrian::SetPos(const Point& pos, bool initial)
@@ -308,6 +313,26 @@ void Pedestrian::SetV0Norm(double v0, double v0UpStairs, double v0DownStairs, do
      _V0IdleEscalatorUpStairs=v0IdleEscalatorUp;
      _V0IdleEscalatorDownStairs=v0IdleEscalatorDown;
 }
+
+
+void Pedestrian::SetFEDIn(double FED_In)
+{
+     _FED_In = FED_In;
+}
+double Pedestrian::GetFEDIn()
+{
+     return _FED_In;
+}
+
+void Pedestrian::SetFEDHeat(double FED_Heat)
+{
+     _FED_Heat = FED_Heat;
+}
+double Pedestrian::GetFEDHeat()
+{
+     return _FED_Heat;
+}
+
 
 void Pedestrian::Setdt(double dt)
 {
@@ -392,7 +417,7 @@ int Pedestrian::GetExitIndex() const
 
 NavLine* Pedestrian::GetExitLine() const
 {
-     return _navLine.get();
+     return _navLine;
 }
 
 const vector<int>& Pedestrian::GetTrip() const
@@ -531,6 +556,7 @@ double Pedestrian::GetV0Norm() const
      const Point& target = _navLine->GetCentre();
      double nav_elevation = sub->GetElevation(target);
      double delta = nav_elevation - ped_elevation;
+     double walking_speed = 0;
 //---------------------------------------------------
      //-----------------------------------------
 
@@ -547,8 +573,11 @@ double Pedestrian::GetV0Norm() const
      // we are walking on an even plane
      //TODO: move _ellipse.GetV0() to _V0Plane
      if(fabs(delta)<J_EPS){
-           // fprintf(stderr, "%f  %f  %f  %f\n", pos._x, pos._y, ped_elevation, _ellipse.GetV0());
-          return _ellipse.GetV0();
+         //FIXME std::normal_distribution generated V0's that are very small or even < 0
+         //assume absolute v_min according to Weidmann
+         walking_speed = std::max(0.,_ellipse.GetV0());
+
+         //fprintf(stderr, "%f  %f  %f  %f\n", pos._x, pos._y, ped_elevation, walking_speed);
      }
       // we are walking downstairs
      else{
@@ -576,7 +605,9 @@ double Pedestrian::GetV0Norm() const
                  // fprintf(stderr, "%f  %f  %f  %f\n", pos._x, pos._y, ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_down);
                  // fprintf(stderr, "%f  %f   %f  %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_down, GetV().Norm(), ped_elevation);
                  //                  // getc(stdin);
-                 return (1-f*g)*_ellipse.GetV0() + f*g*speed_down;
+
+                 walking_speed =(1-f*g)*_ellipse.GetV0() + f*g*speed_down;
+
            }
            //we are walking upstairs
            else
@@ -587,7 +618,10 @@ double Pedestrian::GetV0Norm() const
                  // double stairHorinzontalLength =  stairHeight / sub->GetTanAngleWithHorizontal();
                  f = 2.0/(1+exp(-c*stairInclination*(minSubElevation - ped_elevation)*(minSubElevation - ped_elevation))) - 1;
                  g = 2.0/(1+exp(-c*stairInclination*(ped_elevation - minSubElevation - stairHeight)*(ped_elevation - minSubElevation - stairHeight))) - 1;
-                 double speed_up = _V0UpStairs;
+
+                 //FIXME std::normal_distribution generated V0's that are very small or even < 0
+                 double speed_up = std::max(0.0, _V0UpStairs);
+
                  if(sub->GetType() == "escalator"){
                        speed_up = _EscalatorUpStairs;
                  }
@@ -601,13 +635,32 @@ double Pedestrian::GetV0Norm() const
                  // fprintf(stderr, "%f  %f   %f  %f %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_up, GetV().Norm(), ped_elevation,  stairInclination*180./3.14159265);
                  // }
                  // getc(stdin);
-                 return (1-f*g)*_ellipse.GetV0() + f*g*speed_up;
+
+                 walking_speed = (1-f*g)*_ellipse.GetV0() + f*g*speed_up;
            }
      }
+
+     //IF execution of WalkingInSmoke depending on JPSfire section in INI file
+     if(_WalkingSpeed && _WalkingSpeed->ReduceWalkingSpeed()) {
+         
+         walking_speed = _WalkingSpeed->WalkingInSmoke(this, walking_speed);
+     }
+
+     //WHERE should the call to that routine be placed properly?
+     //only executed every 3 seconds
+
+     return walking_speed;
      // orthogonal projection on the stair
      //return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
-
 }
+
+void Pedestrian::ConductToxicityAnalysis()
+{
+    if( _ToxicityAnalysis->ConductToxicityAnalysis() ) {
+       _ToxicityAnalysis->HazardAnalysis(this);
+    }
+}
+
 // get axis in the walking direction
 double Pedestrian::GetLargerAxis() const
 {
@@ -987,7 +1040,7 @@ Router* Pedestrian::GetRouter() const
 int Pedestrian::FindRoute()
 {
      if( ! _router) {
-          Log->Write("ERROR:\t one or more routers does not exit! Check your router_ids");
+          Log->Write("ERROR:\t one or more routers does not exist! Check your router_ids");
           return -1;
      }
      //bool isinsub = (_building->GetAllRooms().at(this->GetRoomID())->GetSubRoom(this->GetSubRoomID())->IsInSubRoom(this));
@@ -1052,6 +1105,16 @@ const Building* Pedestrian::GetBuilding()
 void Pedestrian::SetBuilding(Building* building)
 {
      _building = building;
+}
+
+void Pedestrian::SetWalkingSpeed(WalkingSpeed* walkingSpeed)
+{
+    _WalkingSpeed = walkingSpeed;
+}
+
+void Pedestrian::SetTox(std::shared_ptr<ToxicityAnalysis>toxicityAnalysis)
+{
+    _ToxicityAnalysis = toxicityAnalysis;
 }
 
 void Pedestrian::SetSpotlight(bool spotlight)
@@ -1161,7 +1224,7 @@ bool Pedestrian::Relocate(std::function<void(const Pedestrian&)> flowupdater) {
                       //the agent left the old room
                       //actualize the egress time for that room
 #pragma omp critical(SetEgressTime)
-                     allRooms.at(GetRoomID())->SetEgressTime(GetGlobalTime()); //set Egresstime to old room
+                     allRooms.at(GetRoomID())->SetEgressTime(GetGlobalTime()); //set Egresstime to old room //@todo: ar.graf : GetRoomID() yields NEW room
                }
                status = true;
                break;
