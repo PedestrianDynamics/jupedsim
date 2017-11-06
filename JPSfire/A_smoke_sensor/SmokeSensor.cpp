@@ -108,12 +108,13 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap& cognitive
                                                         item->GetCrossing()->GetCentre(),
                                                         pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x,
                                                                                                  pedestrian->GetPos()._y);
-            std::cout << "\n =================================== \n";
-            std::cout << "Ped: " << pedestrian->GetID() << ", at (" << pedestrian->GetPos()._x << ", " << pedestrian->GetPos()._y << ")" << std::endl;
-            std::cout << "\tElevation: " << pedestrian->GetElevation() << std::endl;
-            std::cout << "\titem->GetCrossing()->GetCentre(): " << item->GetCrossing()->GetCentre()._x << ", " << item->GetCrossing()->GetCentre()._y << std::endl;
-            std::cout << "\t Time" << pedestrian->GetGlobalTime() << std::endl;
-            std::cout << "\tKnotValue: " << _FMStorage->GetFDSMesh(pedestrian->GetElevation(), item->GetCrossing()->GetCentre(), pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x, pedestrian->GetPos()._y) << std::endl;
+            // std::cout << "\n =================================== \n";
+            // std::cout << "Ped: " << pedestrian->GetID() << ", at (" << pedestrian->GetPos()._x << ", " << pedestrian->GetPos()._y << ")" << std::endl;
+            // std::cout << "\tElevation: " << pedestrian->GetElevation() << std::endl;
+            // std::cout << "\titem->GetCrossing()->GetCentre(): " << item->GetCrossing()->GetCentre()._x << ", " << item->GetCrossing()->GetCentre()._y << std::endl;
+            // std::cout << "\t Time" << pedestrian->GetGlobalTime() << std::endl;
+            // std::cout << "\tKnotValue: " << _FMStorage->GetFDSMesh(pedestrian->GetElevation(), item->GetCrossing()->GetCentre(), pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x, pedestrian->GetPos()._y) << std::endl;
+
             weight = 1 + (1-RiskTolerance) * SmokeFactor ;
         }
 

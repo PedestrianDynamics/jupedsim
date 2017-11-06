@@ -274,7 +274,8 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
 {
     //Smoke Sensor active
 
-    std::string quantity = "SOOT_EXTINCTION_COEFFICIENT";
+     std::string quantity = "dx_1.00";
+     
     _PedEyeHeight = pedElev + 1.8;
     GetNearestHeight(_PedEyeHeight);
 
@@ -285,6 +286,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
         simT=_finalTime;
     // @todo: what if the files have the format Z_%.2f ?
     std::string str = quantity + "/Z_" +  std::to_string(_NearestHeight) + "/" +
+         //using namespace std;::string str = "Z_" +  std::to_string(_NearestHeight) + "/" +
     "Door_X_"+ std::to_string(doorCentre._x) + "_Y_" + std::to_string(doorCentre._y) +
     "/t_"+std::to_string(simT)+".000000";
 
