@@ -567,7 +567,7 @@ vector<int> PedData::GetIdInFrame(int frame, const vector<int>& ids, double zPos
      return IdInFrame;
 }
 
-double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, ub::matrix<double> Xcor, ub::matrix<double> Ycor) const
+double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, const ub::matrix<double> & Xcor, const ub::matrix<double> & Ycor) const
 {
      std::string vcmp = _vComp(ID,Tnow);
      double v=0.0;
@@ -628,7 +628,7 @@ double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID
      return fabs(v);
 }
 
-double PedData::GetInstantaneousVelocity1(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, ub::matrix<double> Xcor, ub::matrix<double> Ycor) const
+double PedData::GetInstantaneousVelocity1(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, const ub::matrix<double> & Xcor, const ub::matrix<double> & Ycor) const
 {
      std::string vcmp = _vComp(ID,Tnow);  // the vcmp is the angle from 0 to 360
      if(vcmp=="X+")
