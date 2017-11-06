@@ -205,18 +205,26 @@ message( STATUS "Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIR} )
 message( STATUS "Boost_LIBRARY_DIR: " ${Boost_LIBRARY_DIR} )
 
 include_directories(${Boost_INCLUDE_DIR})
-link_directories(${Boost_LIBRARY_DIR})
+#link_directories(${Boost_LIBRARY_DIR})
+
+if (WIN32)
+find_library (PSAPI Psapi PATH_SUFFIXES "x64")
+message (STATUS "PSAPI: ${PSAPI}")
+endif()
 
 add_library ( geometrycore STATIC ${source_files} )
 add_executable(
 	jpsreport main.cpp
 )
-target_link_libraries( jpsreport ${Boost_LIBRARIES} )
-target_link_libraries( jpsreport geometrycore )
+
 
 if(WIN32)
 target_link_libraries (jpsreport wsock32)
+target_link_libraries( jpsreport ${PSAPI} )
 endif()
+
+target_link_libraries( jpsreport geometrycore )
+
 
 
 # ----------------------------- cTest ------------------------------------------
