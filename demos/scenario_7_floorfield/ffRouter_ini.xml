@@ -46,7 +46,7 @@
   <!--persons information and distribution -->
   <agents operational_model_id="3">
     <agents_distribution>
-      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="2" number="5" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
+      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="2" number="50" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
       <group group_id="2" agent_parameter_id="1" room_id="0" subroom_id="3" number="5" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
       <group group_id="3" agent_parameter_id="1" room_id="0" subroom_id="4" number="5" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />
       <group group_id="4" agent_parameter_id="1" room_id="0" subroom_id="5" number="5" goal_id="-1" router_id="7" pre_movement_mean="1" pre_movement_sigma="0" risk_tolerance_mean="1" risk_tolerance_sigma="0.1" />

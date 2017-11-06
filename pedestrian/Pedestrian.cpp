@@ -600,13 +600,13 @@ double Pedestrian::GetV0Norm() const
                  else if(sub->GetType() == "idle_escalator"){
                        speed_down = _V0IdleEscalatorDownStairs;
                  }
-                 // if(_id==209)
-                       // printf("%f  DOWN max_e=%f,  z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", _globalTime, maxSubElevation, ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f)*_ellipse.GetV0() + f*speed_down);
                  // fprintf(stderr, "%f  %f  %f  %f\n", pos._x, pos._y, ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_down);
                  // fprintf(stderr, "%f  %f   %f  %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_down, GetV().Norm(), ped_elevation);
                  //                  // getc(stdin);
 
                  walking_speed =(1-f*g)*_ellipse.GetV0() + f*g*speed_down;
+              
+                     // printf("%f  DOWN max_e=%f,  z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", _globalTime, maxSubElevation, ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f*g)*_ellipse.GetV0() + f*g*speed_down);
 
            }
            //we are walking upstairs
@@ -638,17 +638,18 @@ double Pedestrian::GetV0Norm() const
 
                  walking_speed = (1-f*g)*_ellipse.GetV0() + f*g*speed_up;
            }
-     }
+     }    
 
      //IF execution of WalkingInSmoke depending on JPSfire section in INI file
      if(_WalkingSpeed && _WalkingSpeed->ReduceWalkingSpeed()) {
-         
+          std::cout << "JPSfire?" << std::endl;
          walking_speed = _WalkingSpeed->WalkingInSmoke(this, walking_speed);
      }
 
      //WHERE should the call to that routine be placed properly?
      //only executed every 3 seconds
-
+     // fprintf(stderr, "%f\n", walking_speed);
+     
      return walking_speed;
      // orthogonal projection on the stair
      //return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
