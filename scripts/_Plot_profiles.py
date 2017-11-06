@@ -67,7 +67,8 @@ if __name__ == '__main__':
     plt.rc("font", size=40)
     for j in range(beginsteady, endsteady):
         density_file = os.path.join(
-            pathfile, "density", "Prf_d_%s_id_1_%.5d.dat" % (nametraj, j))
+            pathfile, "density", "Prf_d_%s
+_id_1_%.5d.dat" % (nametraj, j))
         print("loading: %s" % density_file)
         density += np.loadtxt(density_file)
 

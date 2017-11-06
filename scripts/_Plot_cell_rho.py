@@ -117,7 +117,8 @@ def parse_xml_traj_file(filename):
         exit(FAILURE)
     N = int(xmldoc.getElementsByTagName('agents')[0].childNodes[0].data)
     fps = xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data #type unicode
-    fps = int(fps)
+    fps = round(float(fps))
+    
     #print ("fps=", fps)
     #fps = int(xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data)
     logging.info("Npeds = %d, fps = %d"%(N, fps))
