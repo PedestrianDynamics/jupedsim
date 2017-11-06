@@ -8,16 +8,16 @@
 <!--maxCPU>1</maxCPU-->
 
 
-<geometry>A_smoke_sensor_geo.xml</geometry>
+<geometry>smoke_sensor_geometry.xml</geometry>
 
 <!-- traectories file and format -->
 <trajectories format="xml-plain" fps="20">
-<file location="A_smoke_sensor_traj.xml" />
+<file location="smoke_sensor_traj.xml" />
 </trajectories>
-
+<logfile>log.txt</logfile>
 <!-- configuration of fire simulation input -->
 <JPSfire>
-	<A_smoke_sensor smoke_factor_grids="../FDS/3_sfgrids/" update_time="20" final_time="120" />
+	<A_smoke_sensor smoke_factor_grids="../FDS/3_sfgrids/" update_time="20" final_time="20" />
  	<B_walking_speed/>
  	<C_toxicity_analysis/>
 </JPSfire>
@@ -25,7 +25,7 @@
 <!-- agents -->
 <agents operational_model_id="3">
 	<agents_distribution>
-		<group group_id="1" agent_parameter_id="1" room_id="1" subroom_id="0" x_min="2" y_min="0" y_max="5" number="30" router_id="7" pre_movement_mean="20" pre_movement_sigma="0" risk_tolerance_mean="1." risk_tolerance_sigma="0.3"/>
+		<group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" x_min="2" y_min="0" y_max="5" number="30" router_id="7" pre_movement_mean="20" pre_movement_sigma="0" risk_tolerance_mean="0." risk_tolerance_sigma="0.3"/>
 		
 	</agents_distribution>
 </agents>
@@ -66,7 +66,7 @@
       </sensors>
       <cognitive_map status="complete" />
       <parameters>
-        <navigation_lines file="A_smoke_sensor_ini_routing.xml" />
+        <!-- <navigation_lines file="A_smoke_sensor_ini_routing.xml" /> -->
       </parameters>
     </router>
 
