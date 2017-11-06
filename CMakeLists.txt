@@ -159,7 +159,7 @@ set (  header_files
 
 
 #--------------------
-if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
+if(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
   include(CheckCXXCompilerFlag)
   CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
   CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
