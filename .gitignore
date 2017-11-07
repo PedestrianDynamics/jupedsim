@@ -85,3 +85,4 @@ scripts/stefan copy/
 scripts/stefan/
 test.py
 /Release/
+build*
