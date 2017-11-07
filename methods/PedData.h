@@ -81,8 +81,8 @@ private:
      bool InitializeVariables(const std::string& filename);
      bool InitializeVariables(TiXmlElement* xRootNode);
      void CreateGlobalVariables(int numPeds, int numFrames);
-     double GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, ub::matrix<double> Xcor, ub::matrix<double> Ycor) const;
-     double GetInstantaneousVelocity1(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, ub::matrix<double> Xcor, ub::matrix<double> Ycor) const;
+     double GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, const ub::matrix<double> & Xcor, const ub::matrix<double> & Ycor) const;
+     double GetInstantaneousVelocity1(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast,  const ub::matrix<double> & Xcor, const ub::matrix<double> & Ycor) const;
 
 private:
 
