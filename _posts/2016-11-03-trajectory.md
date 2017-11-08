@@ -98,8 +98,8 @@ A sample trajectory in the xml format is
 </trajectories>
 ```
 
-## plain-text
-The other format of the trajectory file is `plain-text`
+## plain
+The other format of the trajectory file is `plain`
 
 A sample trajectory in the plain format is as follows:
 
@@ -119,15 +119,5 @@ A sample trajectory in the plain format is as follows:
 				1	2	28.24	131.57	0.00
 				2	2	38.44	133.42	0.00
 				1	3	28.29	131.57	0.00
-				2	3	38.49	133.42	0.00
-				1	4	28.36	131.57	0.00
-				2	4	38.56	133.42	0.00
-				1	5	28.44	131.57	0.00
-				2	5	38.64	133.42	0.00
-				1	6	28.54	131.57	0.00
-				2	6	38.74	133.42	0.00
-				1	7	28.65	131.57	0.00
-				2	7	38.85	133.42	0.00
-				1	8	28.77	131.57	0.00
 ```				
 
