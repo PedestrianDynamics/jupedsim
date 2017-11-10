@@ -164,20 +164,10 @@ bool PedData::InitializeVariables(const string& filename)
                          Log->Write("INFO: pos_x: %d", pos_x);
                          Log->Write("INFO: pos_y: %d", pos_y);
                          Log->Write("INFO: pos_z: %d", pos_z);
-                         Log->Write("WARNING:\t assuming z=0 for all data");
-                    }
-                    lastindex = index;
-                    index = atoi(strs[pos_id].c_str());
-                    if(_IdsTXT.size() == 0){ // first line
-                         lastindex = index;
-                         indx = index;
+                         // Log->Write("WARNING:\t assuming z=0 for all data");
                     }
 
-                    if (index != lastindex){
-                         indx += 1;
-                    }
-                    // std::cout << "lastindex " << lastindex << " index " << index << " indx = " << indx << std::endl;
-                    _IdsTXT.push_back(indx);
+                    _IdsTXT.push_back(atoi(strs[pos_id].c_str()));
                     _FramesTXT.push_back(atoi(strs[pos_fr].c_str()));
                     xs.push_back(atof(strs[pos_x].c_str()));
                     ys.push_back(atof(strs[pos_y].c_str()));
@@ -221,10 +211,16 @@ bool PedData::InitializeVariables(const string& filename)
      Log->Write("INFO: numFrames: %d", _numFrames);
 
      //Total number of agents
-     _numPeds = *max_element(_IdsTXT.begin(),_IdsTXT.end()) - _minID+1;
+     sort(_IdsTXT.begin(), _IdsTXT.end());
+     std::vector<int>::iterator it;
+     it = unique(_IdsTXT.begin(), _IdsTXT.end());
+     _IdsTXT.resize(distance(_IdsTXT.begin(),it));
+
+     _numPeds = _IdsTXT.size();
      Log->Write("INFO: Total number of Agents: %d", _numPeds);
      CreateGlobalVariables(_numPeds, _numFrames);
      Log->Write("INFO: Create Global Variables done");
+     getc(stdin);
      
      for(int i=_minID;i<_minID+_numPeds; i++)
      {
@@ -247,12 +243,12 @@ bool PedData::InitializeVariables(const string& filename)
     	             actual_totalframe++;
     	         }
     	     }
-         std::cout << "i: " << i<< std::endl;
-         std::cout << "firstFrameIndex: " << firstFrameIndex<< std::endl;
-         std::cout << "lastFrameIndex: " << lastFrameIndex<< std::endl;
-         std::cout << "minID: " << _minID<< std::endl;
-         std::cout << "minFrame: " << _minFrame<< std::endl;
-         std::cout << "actual frame: " << actual_totalframe<< std::endl;
+         // std::cout << "i: " << i<< std::endl;
+         // std::cout << "firstFrameIndex: " << firstFrameIndex<< std::endl;
+         // std::cout << "lastFrameIndex: " << lastFrameIndex<< std::endl;
+         // std::cout << "minID: " << _minID<< std::endl;
+         // std::cout << "minFrame: " << _minFrame<< std::endl;
+         // std::cout << "actual frame: " << actual_totalframe<< std::endl;
     	 if(lastFrameIndex==0)
     	 {
     		 Log->Write("Warning:\tThere is no trajectory for ped with ID <%d>!",i);
@@ -696,20 +692,20 @@ void PedData::CreateGlobalVariables(int numPeds, int numFrames)
      _xCor = ub::matrix<double>(numPeds, numFrames);
      size_t currentSize = getCurrentRSS( )/1000000;
      size_t peakSize    = getPeakRSS( )/1000000;
-     std::cout << "currentSize: " << currentSize  <<" (MB)" << std::endl;
-     std::cout << "peakSize: " << peakSize << " (MB)" << std::endl;
+     std::cout << "\tcurrentSize: " << currentSize  <<" (MB)" << std::endl;
+     std::cout << "\tpeakSize: " << peakSize << " (MB)" << std::endl;
      Log->Write("INFO: allocate memory for yCor");
      _yCor = ub::matrix<double>(numPeds, numFrames);
-     std::cout << "currentSize: " << currentSize  <<" (MB)" << std::endl;
-     std::cout << "peakSize: " << peakSize << " (MB)" << std::endl;
+     std::cout << "\tcurrentSize: " << currentSize  <<" (MB)" << std::endl;
+     std::cout << "\tpeakSize: " << peakSize << " (MB)" << std::endl;
      Log->Write("INFO: allocate memory for zCor");
      _zCor = ub::matrix<double>(numPeds, numFrames);
-     std::cout << "currentSize: " << currentSize  <<" (MB)" << std::endl;
-     std::cout << "peakSize: " << peakSize << " (MB)" << std::endl;
+     std::cout << "\tcurrentSize: " << currentSize  <<" (MB)" << std::endl;
+     std::cout << "\tpeakSize: " << peakSize << " (MB)" << std::endl;
      Log->Write("INFO: allocate memory for vComp");
      _vComp = ub::matrix<std::string>(numPeds, numFrames);
-     std::cout << "currentSize: " << currentSize  <<" (MB)" << std::endl;
-     std::cout << "peakSize: " << peakSize << " (MB)" << std::endl;
+     std::cout << "\tcurrentSize: " << currentSize  <<" (MB)" << std::endl;
+     std::cout << "\tpeakSize: " << peakSize << " (MB)" << std::endl;
      Log->Write(" Finished memory allocation");   
      _firstFrame = new int[numPeds];  // Record the first frame of each pedestrian
      _lastFrame = new int[numPeds];  // Record the last frame of each pedestrian
