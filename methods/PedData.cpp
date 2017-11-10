@@ -208,10 +208,11 @@ bool PedData::InitializeVariables(const string& filename)
      std::vector<int> unique_ids = _IdsTXT;
      // no need to
      //sort. Assume that ids are ascendant 
+     sort(unique_ids.begin(), unique_ids.end());
      std::vector<int>::iterator it;
      it = unique(unique_ids.begin(), unique_ids.end());
      unique_ids.resize(distance(unique_ids.begin(),it));
-
+     
      _numPeds = unique_ids.size();
      Log->Write("INFO: Total number of Agents: %d", _numPeds);
      CreateGlobalVariables(_numPeds, _numFrames);
@@ -239,13 +240,6 @@ bool PedData::InitializeVariables(const string& filename)
     	             actual_totalframe++;
     	         }
     	     }
-         // std::cout << "i: " << i<< std::endl;
-         // std::cout << "firstFrameIndex: " << firstFrameIndex<< std::endl;
-         // std::cout << "lastFrameIndex: " << lastFrameIndex<< std::endl;
-         // std::cout << "minID: " << _minID<< std::endl;
-         // std::cout << "minFrame: " << _minFrame<< std::endl;
-         // std::cout << "actual frame: " << actual_totalframe<< std::endl;
-         // getc(stdin);
          
     	 if(lastFrameIndex==0)
     	 {
@@ -306,7 +300,7 @@ bool PedData::InitializeVariables(const string& filename)
           int id = _IdsTXT[i]-_minID; // this make the assumption that
                                       // indexes in the trajectories
                                       // are consecutive
-          std::cout << "fr " << _FramesTXT[i] << " id "  << id << std::endl;
+
           auto it = std::find(unique_ids.begin(), unique_ids.end(), _IdsTXT[i]);
           if (it == unique_ids.end())
           {
