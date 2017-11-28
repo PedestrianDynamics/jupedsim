@@ -111,12 +111,15 @@ bool PedData::InitializeVariables(const string& filename)
                //looking for the framerate which is suppposed to be at the second position
                if(line[0] == '#')
                {
-                    std::vector<std::string> strs;
-                    boost::split(strs, line , boost::is_any_of(":"),boost::token_compress_on);
 
-                    if(strs[0]=="#framerate" && strs.size()==2)
+                    if(line.find("framerate") != std::string::npos)
                     {
-                         _fps= atof(strs[1].c_str());
+                         std::vector<std::string> strs;
+                         line.erase(0,1); // remove #
+                         boost::split(strs, line , boost::is_any_of(":"),boost::token_compress_on);
+                         if(strs.size()>1)
+                              _fps= atof(strs[1].c_str());
+
                          Log->Write("INFO:\tFrame rate fps: <%.2f>", _fps);
                     }
 
@@ -212,7 +215,6 @@ bool PedData::InitializeVariables(const string& filename)
      std::vector<int>::iterator it;
      it = unique(unique_ids.begin(), unique_ids.end());
      unique_ids.resize(distance(unique_ids.begin(),it));
-     
      _numPeds = unique_ids.size();
      Log->Write("INFO: Total number of Agents: %d", _numPeds);
      CreateGlobalVariables(_numPeds, _numFrames);

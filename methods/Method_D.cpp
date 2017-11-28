@@ -73,6 +73,8 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
      _projectRootDir = peddata.GetProjectRootDir();
      _measureAreaId = boost::lexical_cast<string>(_areaForMethod_D->_id);
      _fps =peddata.GetFps();
+     Log->Write("INFO:\tFrame rate fps: <%.2f>", _fps);
+
      int minFrame = peddata.GetMinFrame();
      if(_startFrame!=_stopFrame)
      {
