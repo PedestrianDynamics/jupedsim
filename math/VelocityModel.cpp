@@ -27,7 +27,7 @@
  *
  **/
 
-
+# define NOMINMAX
 #include "../pedestrian/Pedestrian.h"
 //#include "../routing/DirectionStrategy.h"
 #include "../mpi/LCGrid.h"
@@ -36,7 +36,6 @@
 
 
 #include "VelocityModel.h"
-
 #ifdef _OPENMP
 #include <omp.h>
 #else

@@ -1,5 +1,5 @@
 #include "progress_bar.hpp"
-
+#include "string"
 ProgressBar::ProgressBar() {}
 
 ProgressBar::ProgressBar(unsigned long n_, std::string description_, std::ostream& out_){

@@ -121,7 +121,7 @@ bool GradientModel::Init (Building* building)
      pedsToRemove.clear();
      bool error_occurred = false;
 #pragma omp parallel for
-    for(unsigned int p=0;p<allPeds.size();p++) {
+    for(signed int p=0;p<allPeds.size();p++) {
          Pedestrian* ped = allPeds[p];
          double cosPhi, sinPhi;
          //a destination could not be found for that pedestrian
