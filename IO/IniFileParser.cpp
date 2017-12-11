@@ -23,6 +23,7 @@
 
 #include <omp.h>
 
+
 #else
 #define omp_get_thread_num() 0
 #define omp_get_max_threads()  1
@@ -362,25 +363,25 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
           return false;
 
      //force_ped
-     if (xModelPara->FirstChild("force_ped")) {
-          string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
-          string dist_max = xModelPara->FirstChildElement("force_ped")->Attribute(
-                    "dist_max");
-          string disteff_max =
-                    xModelPara->FirstChildElement("force_ped")->Attribute(
-                              "disteff_max"); // @todo: rename disteff_max to force_max
-          string interpolation_width =
-                    xModelPara->FirstChildElement("force_ped")->Attribute(
-                              "interpolation_width");
+	 if (xModelPara->FirstChild("force_ped")) {
+		 string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
+		 string dist_max = xModelPara->FirstChildElement("force_ped")->Attribute(
+			 "dist_max");
+		 string disteff_max =
+			 xModelPara->FirstChildElement("force_ped")->Attribute(
+				 "disteff_max"); // @todo: rename disteff_max to force_max
+		 string interpolation_width =
+			 xModelPara->FirstChildElement("force_ped")->Attribute(
+				 "interpolation_width");
 
-          _config->SetMaxFPed(atof(dist_max.c_str()));
-          _config->SetNuPed(atof(nu.c_str()));
-          _config->SetDistEffMaxPed(atof(disteff_max.c_str()));
-          _config->SetIntPWidthPed(atof(interpolation_width.c_str()));
-          Log->Write(
-                    "INFO: \tfrep_ped nu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
-                     interpolation_width.c_str(), nu.c_str(), dist_max.c_str(), disteff_max.c_str(), interpolation_width.c_str());
-     }
+		 _config->SetMaxFPed(atof(dist_max.c_str()));
+		 _config->SetNuPed(atof(nu.c_str()));
+		 _config->SetDistEffMaxPed(atof(disteff_max.c_str()));
+		 _config->SetIntPWidthPed(atof(interpolation_width.c_str()));
+		 Log->Write(
+			 "INFO: \tfrep_ped nu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
+			 atof(nu.c_str()), atof(dist_max.c_str()), atof(disteff_max.c_str()), atof(interpolation_width.c_str()));
+	 }
 
      //force_wall
      if (xModelPara->FirstChild("force_wall")) {
@@ -399,7 +400,7 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
           _config->SetIntPWidthWall(atof(interpolation_width.c_str()));
           Log->Write(
                     "INFO: \tfrep_wall mu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
-                     nu.c_str(), dist_max.c_str(), disteff_max.c_str(), interpolation_width.c_str());
+			  atof(nu.c_str()), atof(dist_max.c_str()), atof(disteff_max.c_str()), atof(interpolation_width.c_str()));
      }
 
      //Parsing the agent parameters
