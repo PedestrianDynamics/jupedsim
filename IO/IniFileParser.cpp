@@ -471,7 +471,7 @@ bool IniFileParser::ParseKrauszModel(TiXmlElement* xKrausz, TiXmlElement* xMainN
           _config->SetIntPWidthPed(atof(interpolation_width.c_str()));
           Log->Write(
                   "INFO: \tfrep_ped nu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
-                  interpolation_width.c_str(), nu.c_str(), dist_max.c_str(), disteff_max.c_str(), interpolation_width.c_str());
+			  atof(nu.c_str()), atof(dist_max.c_str()), atof(disteff_max.c_str()), atof(interpolation_width.c_str()));
      }
 
      //force_wall
@@ -491,7 +491,7 @@ bool IniFileParser::ParseKrauszModel(TiXmlElement* xKrausz, TiXmlElement* xMainN
           _config->SetIntPWidthWall(atof(interpolation_width.c_str()));
           Log->Write(
                   "INFO: \tfrep_wall mu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
-                  nu.c_str(), dist_max.c_str(), disteff_max.c_str(), interpolation_width.c_str());
+			  atof(nu.c_str()), atof(dist_max.c_str()), atof(disteff_max.c_str()), atof(interpolation_width.c_str()));
      }
 
      //Parsing the agent parameters
