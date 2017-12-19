@@ -355,18 +355,33 @@ void StartDistribution::Setbounds(double bounds[4])
 
 void StartDistribution::InitPremovementTime(double mean, double stdv)
 {
+	if (stdv<=0)
+	{
+		stdv = judge;
+	}
      _premovementTime = std::normal_distribution<double>(mean,stdv);
 }
 
 double StartDistribution::GetPremovementTime() const
 {
-     return _premovementTime(_generator);
+	if (_premovementTime.stddev() == judge)
+	{
+		return _premovementTime.mean();
+	}
+	else
+	{
+		return _premovementTime(_generator);
+	}
 }
 
 void StartDistribution::InitRiskTolerance(std::string distribution_type, double para1, double para2)
 {
     _distribution_type = distribution_type;
     if(distribution_type=="normal"){
+		if (para2 <= 0)
+		{
+			para2 = judge;
+		}
     _riskTolerance = std::normal_distribution<double>(para1, para2);
     }
     if(distribution_type=="beta"){
@@ -378,7 +393,14 @@ double StartDistribution::GetRiskTolerance()
 {
     if(_distribution_type=="normal"){
         //fprintf(stderr, "%f \t %f \n", _generator, _riskTolerance(_generator));
-        return _riskTolerance(_generator);
+		if (_riskTolerance.stddev() == judge)
+		{
+			return _riskTolerance.mean();
+		}
+		else
+		{
+			return _riskTolerance(_generator);
+		}
     }
     else {
         std::uniform_real_distribution<float> normalize(0.0, 1.0);
