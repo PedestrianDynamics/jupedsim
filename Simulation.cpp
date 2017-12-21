@@ -514,7 +514,9 @@ double Simulation::RunBody(double maxSimTime)
               // Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
               bar->Progressed(initialnPeds-_nPeds);
         else
-            printf("time: %.2f | %.2f  | Agents: %ld / %d\n",  t , maxSimTime, _nPeds, initialnPeds);
+             if ((frameNr < 100 &&  frameNr % 10 == 0) ||
+                  (frameNr > 100 &&  frameNr % 100 == 0))
+                  printf("time: %6.2f (%4.0f)  | Agents: %6ld / %d [%4.1f%%]\n",  t , maxSimTime, _nPeds, initialnPeds, (double)(initialnPeds-_nPeds)/initialnPeds*100);
 
         // needed to control the execution time PART 2
         // time(&endtime);
