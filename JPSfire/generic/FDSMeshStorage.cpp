@@ -66,7 +66,7 @@ FDSMeshStorage::FDSMeshStorage(const std::string &filepath, const double &finalT
         CreateFDSMeshes();
         std::cout << "Success!" << std::endl;
     }
-    else {        
+    else {
         Log->Write("ERROR:\tCould not find directory <%s>\n", _filepath.c_str());
         exit(EXIT_FAILURE);
     }
@@ -88,7 +88,7 @@ bool FDSMeshStorage::CreateQuantityList()
       {
 		  std::string quant_dir = iter->path().string();
           quant_dir =  quant_dir.substr( quant_dir.find_last_of("/\\") + 1 );
-          std::cout << quant_dir << std::endl;
+          //std::cout << quant_dir << std::endl;
            _quantitylist.push_back(quant_dir);
       }
     }
@@ -203,9 +203,7 @@ void FDSMeshStorage::CreateFDSMeshes()
                     //std::cout << "door " << j << std::endl;
                     for (auto &k:_timelist)         //list of times
                     {
-                        //std::cout << "k " << j << std::endl;
-                        std::string str = h +
-                        "/" + j + "/t_"+std::to_string(k);
+                        std::string str = h + "/" + j + "/t_"+std::to_string(k);
                         //std::cout << _filepath + str + ".csv" << std::endl;
                         FDSMesh mesh(_filepath + str + ".csv");
                         //std::string str = "t_"+std::to_string(i);
@@ -256,6 +254,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &p
 
     if (_fMContainer.count(str) == 0) {
         //std::cout << str << std::endl;
+        std::cout << "ERROR: requested grid not available: " << str << std::endl;
         throw -1;
     }
     return _fMContainer.at(str);
@@ -275,7 +274,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
     //Smoke Sensor active
 
      std::string quantity = "dx_1.00";
-     
+
     _PedEyeHeight = pedElev + 1.8;
     GetNearestHeight(_PedEyeHeight);
 
@@ -330,4 +329,3 @@ std::string FDSMeshStorage::IrritantOrNot() const
 {
     return _irritant;
 }
-

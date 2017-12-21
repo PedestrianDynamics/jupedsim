@@ -142,7 +142,3 @@ const std::shared_ptr<FDSMeshStorage> SmokeSensor::get_FMStorage()
     return _FMStorage;
 
 }
-
-
-
-
