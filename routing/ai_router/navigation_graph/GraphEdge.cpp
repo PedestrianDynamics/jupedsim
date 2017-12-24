@@ -88,7 +88,10 @@ double GraphEdge::GetWeight(const Point & position) const
 //        return GetApproximateDistance(position);
 //    }
     //double weight = GetFactorWithDistance(GetApproximateDistance(position));
+    //double weight = GetApproximateDistance(position) * GetSpecificFactor("SmokeSensor");
     double weight = GetApproximateDistance(position) * GetFactor();
+    //std::cout << " End Weight from Graph Edge: " << weight << " approx distance: " << GetApproximateDistance(position) << std::endl;
+    //getc(stdin);
     return weight;
 }
 
@@ -99,7 +102,7 @@ double GraphEdge::GetFactor() const
     for(FactorContainer::const_iterator it = factors.begin(); it != factors.end(); ++it) {
         factor = factor * it->second.first;
     }
-
+    //std::cout << "Total Factor from Graph Edge: " << factor << std::endl;
     return factor;
 }
 
