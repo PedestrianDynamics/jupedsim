@@ -62,8 +62,9 @@
 #define JPS_OLD_VERSION "0.5" // this version is still supported
 #define JPS_VERSION_MINOR "8"
 #define JPS_VERSION_MAJOR "0"
+#define JPS_PATCH_VERSION "2"
 
-#define JPS_VERSION JPS_VERSION_MAJOR "." JPS_VERSION_MINOR
+#define JPS_VERSION JPS_VERSION_MAJOR "." JPS_VERSION_MINOR "." JPS_PATCH_VERSION
 
 // disable openmp in debug mode
 #ifdef _NDEBUG

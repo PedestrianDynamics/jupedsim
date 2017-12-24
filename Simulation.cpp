@@ -460,7 +460,7 @@ double Simulation::RunBody(double maxSimTime)
     ProcessAgentsQueue();
     _nPeds = _building->GetAllPedestrians().size();
     std::cout << "\n";
-    std::string description = "Evacuation of " + std::to_string(_nPeds) + " agents.";
+    std::string description = "Evacutation ";
     ProgressBar *bar = new ProgressBar(_nPeds, description);
     // bar->SetFrequencyUpdate(10);
 #ifdef _WINDOWS
@@ -510,13 +510,15 @@ double Simulation::RunBody(double maxSimTime)
         if (0==frameNr%writeInterval) {
             _iod->WriteFrame(frameNr/writeInterval, _building.get());
         }
-        if(0 && !_gotSources && !_periodic /*&& _printPB*/) // @todo: option for print progressbar
+
+        if(!_gotSources && !_periodic && _config->print_prog_bar())
               // Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
               bar->Progressed(initialnPeds-_nPeds);
         else
              if ((frameNr < 100 &&  frameNr % 10 == 0) ||
                   (frameNr > 100 &&  frameNr % 100 == 0))
                   printf("time: %6.2f (%4.0f)  | Agents: %6ld / %d [%4.1f%%]\n",  t , maxSimTime, _nPeds, initialnPeds, (double)(initialnPeds-_nPeds)/initialnPeds*100);
+
 
         // needed to control the execution time PART 2
         // time(&endtime);

@@ -1,8 +1,8 @@
 /**
  * \file        ArgumentParser.cpp
  * \date        Apr 20, 2009
- * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.8
+ * \copyright   <2009-2018> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.

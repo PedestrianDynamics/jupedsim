@@ -62,6 +62,7 @@ public:
           _linkedCellSize = 2.2; // meter
           _model = nullptr;//std::shared_ptr<OperationalModel>(new OperationalModel());
           _tMax = 500; // seconds
+          _PRB = false;
           _dT = 0.01;
           _isPeriodic = 0; // use only for Tordeux2015 with "trivial" geometries
           // ----------- GCFM repulsive force ------
@@ -132,6 +133,9 @@ public:
      int GetPort() const { return _port; };
 
      void SetPort(int port) { _port = port; };
+
+     void SetPRB(bool prb) {_PRB = prb; };
+     bool print_prog_bar() const {return _PRB; };
 
      unsigned int GetSeed() const { return _seed; };
 
@@ -327,6 +331,7 @@ private:
      double _linkedCellSize;
      std::shared_ptr<OperationalModel> _model;
      double _tMax;
+     bool _PRB;
      double _dT;
      int _isPeriodic;
      double _nuPed;

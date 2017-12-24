@@ -118,6 +118,12 @@ bool IniFileParser::Parse(std::string iniFile)
           Log->Write("INFO: \tMaximal simulation time <%.2f> seconds", _config->GetTmax());
      }
 
+     // Progressbar
+     if (xMainNode->FirstChild("progressbar")) {
+          _config->SetPRB(true);
+          Log->Write("INFO: \tUse Progressbar");          
+     }
+
      // geometry file name
      if (xMainNode->FirstChild("geometry")) {
           std::string filename = xMainNode->FirstChild("geometry")->FirstChild()->Value();

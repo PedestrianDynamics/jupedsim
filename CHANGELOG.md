@@ -2,7 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## v0.8.3 [unreleased]
-
+### Added
+- Router tests
+- Option for printing progressbar:  `<progressbar/>`
 ## v0.8.2 [2016-10-11]
 
 Repository moved to [new server](https://gitlab.version.fz-juelich.de/jupedsim/jpscore)
