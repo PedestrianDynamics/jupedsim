@@ -203,6 +203,7 @@ Pedestrian* StartDistribution::GenerateAgent(Building* building, int* pid, vecto
 
      Pedestrian* ped = new Pedestrian();
      // PedIndex
+     ped->SetWalkingSpeed(building->GetConfig()->GetWalkingSpeed());
      ped->SetID(*pid);
      ped->SetAge(GetAge());
      ped->SetGender(GetGender());

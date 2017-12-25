@@ -1108,7 +1108,7 @@ void Pedestrian::SetBuilding(Building* building)
      _building = building;
 }
 
-void Pedestrian::SetWalkingSpeed(WalkingSpeed* walkingSpeed)
+void Pedestrian::SetWalkingSpeed(std::shared_ptr<WalkingSpeed> walkingSpeed)
 {
     _WalkingSpeed = walkingSpeed;
 }

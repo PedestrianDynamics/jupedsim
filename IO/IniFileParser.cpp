@@ -95,13 +95,17 @@ bool IniFileParser::Parse(std::string iniFile)
           Log->Write("ERROR:\t Wrong header version. Only version greater than %s is supported.", JPS_OLD_VERSION);
           return false;
      }
-
+     // JPSfire
+     // read walkingspeed
+     std::shared_ptr<WalkingSpeed> W( new WalkingSpeed(iniFile) );
+     //auto w = std::make_shared<WalkingSpeed>();
+     _config->SetWalkingSpeed(W);
      //seed
      if (xMainNode->FirstChild("seed")) {
           TiXmlNode* seedNode = xMainNode->FirstChild("seed")->FirstChild();
           if (seedNode) {
                const char* seedValue = seedNode->Value();
-               _config->SetSeed((unsigned int) atoi(seedValue));
+               _config->SetSeed((unsigned int) atoi(seedValue));//strtol
           }
           else {
                _config->SetSeed((unsigned int) time(NULL));

@@ -35,7 +35,7 @@
 
 #include "../routing/RoutingEngine.h"
 #include "../math/OperationalModel.h"
-
+#include "../JPSfire/B_walking_speed/WalkingSpeed.h"
 //This class provides a data container for all configuration parameters.
 
 class AgentsParameters;
@@ -52,6 +52,7 @@ public:
 
      Configuration()
      {
+          _walkingSpeed = nullptr;
           _solver = 1;
           _routingEngine = std::shared_ptr<RoutingEngine>(new RoutingEngine());
           _maxOpenMPThreads = 1;
@@ -112,7 +113,8 @@ public:
           _has_specific_goals = false;
           _write_VTK_files = false;
      }
-
+    std::shared_ptr<WalkingSpeed> GetWalkingSpeed () {return _walkingSpeed; };
+     void SetWalkingSpeed(std::shared_ptr<WalkingSpeed> & w) {_walkingSpeed = w; };
      int GetSolver() const { return _solver; };
 
      void SetSolver(int solver) { _solver = solver; };
@@ -321,6 +323,7 @@ public:
 #endif
 
 private:
+     std::shared_ptr<WalkingSpeed> _walkingSpeed;
      int _solver;
      std::shared_ptr<RoutingEngine> _routingEngine;
      int _maxOpenMPThreads;
@@ -371,6 +374,7 @@ private:
      std::string _geometryFile;
      std::string _projectRootDir;
      bool _showStatistics;
+
      FileFormat _fileFormat;
      std::map<int, std::shared_ptr<AgentsParameters> > _agentsParameters;
 #ifdef _JPS_AS_A_SERVICE
