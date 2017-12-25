@@ -95,11 +95,6 @@ bool IniFileParser::Parse(std::string iniFile)
           Log->Write("ERROR:\t Wrong header version. Only version greater than %s is supported.", JPS_OLD_VERSION);
           return false;
      }
-     // JPSfire
-     // read walkingspeed
-     std::shared_ptr<WalkingSpeed> W( new WalkingSpeed(iniFile) );
-     //auto w = std::make_shared<WalkingSpeed>();
-     _config->SetWalkingSpeed(W);
      //seed
      if (xMainNode->FirstChild("seed")) {
           TiXmlNode* seedNode = xMainNode->FirstChild("seed")->FirstChild();
@@ -240,6 +235,16 @@ bool IniFileParser::Parse(std::string iniFile)
                          _config->GetHostname().c_str(), _config->GetPort());
           }
      }
+
+     // JPSfire
+     // -------------------------------------
+     // read walkingspeed
+     std::shared_ptr<WalkingSpeed> W( new WalkingSpeed(iniFile) );
+     _config->SetWalkingSpeed(W);
+     // read  ToxicityAnalysis
+     std::shared_ptr<ToxicityAnalysis> T( new ToxicityAnalysis(iniFile, _config->GetFps()));
+     _config->SetToxicityAnalysis(T);
+     // -------------------------------------
 
      //pick up which model to use
      //get the wanted ped model id

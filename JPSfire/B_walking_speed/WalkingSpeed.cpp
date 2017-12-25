@@ -27,7 +27,6 @@
  **/
 
 #include "WalkingSpeed.h"
-#include "../../geometry/Building.h"
 #include "../../pedestrian/Pedestrian.h"
 #include "../generic/FDSMesh.h"
 #include "../generic/FDSMeshStorage.h"

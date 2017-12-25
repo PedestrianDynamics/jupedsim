@@ -36,6 +36,7 @@
 #include "../routing/RoutingEngine.h"
 #include "../math/OperationalModel.h"
 #include "../JPSfire/B_walking_speed/WalkingSpeed.h"
+#include "../JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
 //This class provides a data container for all configuration parameters.
 
 class AgentsParameters;
@@ -53,6 +54,7 @@ public:
      Configuration()
      {
           _walkingSpeed = nullptr;
+          _ToxicityAnalysis = nullptr;
           _solver = 1;
           _routingEngine = std::shared_ptr<RoutingEngine>(new RoutingEngine());
           _maxOpenMPThreads = 1;
@@ -113,8 +115,12 @@ public:
           _has_specific_goals = false;
           _write_VTK_files = false;
      }
-    std::shared_ptr<WalkingSpeed> GetWalkingSpeed () {return _walkingSpeed; };
+     std::shared_ptr<WalkingSpeed> GetWalkingSpeed () {return _walkingSpeed; };
      void SetWalkingSpeed(std::shared_ptr<WalkingSpeed> & w) {_walkingSpeed = w; };
+
+     std::shared_ptr<ToxicityAnalysis> GetToxicityAnalysis () {return _ToxicityAnalysis; };
+     void SetToxicityAnalysis(std::shared_ptr<ToxicityAnalysis> & t) {_ToxicityAnalysis = t; };
+
      int GetSolver() const { return _solver; };
 
      void SetSolver(int solver) { _solver = solver; };
@@ -324,6 +330,7 @@ public:
 
 private:
      std::shared_ptr<WalkingSpeed> _walkingSpeed;
+     std::shared_ptr<ToxicityAnalysis> _ToxicityAnalysis;
      int _solver;
      std::shared_ptr<RoutingEngine> _routingEngine;
      int _maxOpenMPThreads;
