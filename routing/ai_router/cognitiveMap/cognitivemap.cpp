@@ -28,27 +28,15 @@ CognitiveMap::CognitiveMap(const Building *b, const Pedestrian *ped)
 {
     _building=b;
     _ped=ped;
-
     _network = std::make_shared<GraphNetwork>(b,ped);
-
-    std::string str(b->GetProjectRootDir()+"cogmap.xml");
-    _outputhandler = std::make_shared<CogMapOutputHandler>(str.c_str());
-
-    const double fps = UPDATE_RATE;
-    _outputhandler->WriteToFileHeader(ped->GetID(),fps);
     _frame=0;
-
     _YAHPointer.SetPed(ped);
     _YAHPointer.SetPos(_ped->GetPos());
-
     _createdWayP=-1;
-
     //Destination and regions
     _currentRegion=nullptr;
     //Find maindestination in cogmapstorage
-
     _nextTarget=nullptr;
-
 }
 
 CognitiveMap::~CognitiveMap()
