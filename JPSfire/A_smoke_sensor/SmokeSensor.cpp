@@ -34,7 +34,7 @@
 #include "../../geometry/SubRoom.h"
 #include "../generic/FDSMesh.h"
 #include "../generic/FDSMeshStorage.h"
-#include <set>
+//#include <set>
 #include "../../tinyxml/tinyxml.h"
 
 SmokeSensor::SmokeSensor(const Building *b) : AbstractSensor(b)
@@ -44,9 +44,7 @@ SmokeSensor::SmokeSensor(const Building *b) : AbstractSensor(b)
 
 }
 
-SmokeSensor::~SmokeSensor()
-{
-}
+SmokeSensor::~SmokeSensor() = default;
 
 bool SmokeSensor::LoadJPSfireInfo(const std::string projectFilename)
 {
@@ -98,12 +96,10 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap& cognitive
         /// on the current position of the pedestrian
 
         double RiskTolerance = pedestrian->GetRiskTolerance();
-        double weight;
+        double weight = 1;
 
-        //try block when no sfgrid is available
-
-        try
-        {
+        //FMStorage is nullptr if the section JPSfire is not parsed
+        if (_FMStorage){
             double SmokeFactor = _FMStorage->GetFDSMesh(pedestrian->GetElevation(),
                                                         item->GetCrossing()->GetCentre(),
                                                         pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x,
@@ -117,12 +113,6 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap& cognitive
 
             weight = 1 + (1-RiskTolerance) * SmokeFactor ;
         }
-
-        catch (int e)
-        {
-            weight = 1;
-        }
-
         /// Set Edge Weight
         // std::cout << weight << std::endl;
         item->SetFactor(weight,GetName());
@@ -131,14 +121,14 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap& cognitive
 
 }
 
-void SmokeSensor::set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage)
-{
-    _FMStorage=fmStorage;
+//void SmokeSensor::set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage)
+//{
+//    _FMStorage=fmStorage;
+//
+//}
 
-}
-
-const std::shared_ptr<FDSMeshStorage> SmokeSensor::get_FMStorage()
-{
-    return _FMStorage;
-
-}
+//const std::shared_ptr<FDSMeshStorage> SmokeSensor::get_FMStorage()
+//{
+//    return _FMStorage;
+//
+//}

@@ -30,12 +30,12 @@
 #include "../../pedestrian/Pedestrian.h"
 #include "../generic/FDSMesh.h"
 #include "../generic/FDSMeshStorage.h"
-#include "../../pedestrian/PedDistributor.h"
+//#include "../../pedestrian/PedDistributor.h"
 #include "../../tinyxml/tinyxml.h"
-#include <set>
-#include <algorithm>
-#include <math.h>
-#include <string>
+//#include <set>
+//#include <algorithm>
+//#include <math.h>
+//#include <string>
 #include <boost/filesystem.hpp>
 using namespace boost::filesystem;
 
@@ -46,11 +46,7 @@ WalkingSpeed::WalkingSpeed(const std::string & projectFileName)
      LoadJPSfireInfo(projectFileName);
 }
 
-WalkingSpeed::~WalkingSpeed()
-{
-}
-
-
+WalkingSpeed::~WalkingSpeed() = default;
 
 bool WalkingSpeed::LoadJPSfireInfo(const std::string & projectFilename )
 {
@@ -75,9 +71,9 @@ bool WalkingSpeed::LoadJPSfireInfo(const std::string & projectFilename )
        if(JPSfireCompElem->FirstAttribute()){
            std::string study = xmltoa(JPSfireCompElem->Attribute("study"), "");
            std::string irritant = xmltoa(JPSfireCompElem->Attribute("irritant"), "");
-           std::string extinction_grids = xmltoa(JPSfireCompElem->Attribute("extinction_grids"), "");           
+           std::string extinction_grids = xmltoa(JPSfireCompElem->Attribute("extinction_grids"), "");
            std::string filepath = projectRootDir + "/" + extinction_grids; //TODO: check compatibility
-           if (projectRootDir.size() == 0 ) // directory is "."
+           if (projectRootDir.empty()  ) // directory is "."
                 filepath =  extinction_grids;
 
            double updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
@@ -98,15 +94,15 @@ double WalkingSpeed::GetExtinction(const Pedestrian * pedestrian)
  return ExtinctionCoefficient;
 }
 
-void WalkingSpeed::set_FMStorage(const std::shared_ptr<FDSMeshStorage> & fmStorage)
-{
-    _FMStorage=fmStorage;
-}
+//void WalkingSpeed::set_FMStorage(const std::shared_ptr<FDSMeshStorage> & fmStorage)
+//{
+//    _FMStorage=fmStorage;
+//}
 
-const std::shared_ptr<FDSMeshStorage> WalkingSpeed::get_FMStorage()
-{
-    return _FMStorage;
-}
+//const std::shared_ptr<FDSMeshStorage> WalkingSpeed::get_FMStorage()
+//{
+//    return _FMStorage;
+//}
 
 double WalkingSpeed::FrantzichNilsson2003(double &walking_speed, double ExtinctionCoefficient)
 {
