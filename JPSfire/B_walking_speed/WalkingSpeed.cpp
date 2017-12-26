@@ -75,9 +75,11 @@ bool WalkingSpeed::LoadJPSfireInfo(const std::string & projectFilename )
        if(JPSfireCompElem->FirstAttribute()){
            std::string study = xmltoa(JPSfireCompElem->Attribute("study"), "");
            std::string irritant = xmltoa(JPSfireCompElem->Attribute("irritant"), "");
-           std::string extinction_grids = xmltoa(JPSfireCompElem->Attribute("extinction_grids"), "");
-           std::string projectRoot = projectRootDir;
-           std::string filepath = projectRoot + "/" + extinction_grids; //TODO: check compatibility
+           std::string extinction_grids = xmltoa(JPSfireCompElem->Attribute("extinction_grids"), "");           
+           std::string filepath = projectRootDir + "/" + extinction_grids; //TODO: check compatibility
+           if (projectRootDir.size() == 0 ) // directory is "."
+                filepath =  extinction_grids;
+
            double updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
            double finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
            Log->Write("INFO:\tJPSfire Module B_walking_speed: \n \tstudy: %s \n\tdata: %s \n\tupdate time: %.1f s | final time: %.1f s | irritant: %s",

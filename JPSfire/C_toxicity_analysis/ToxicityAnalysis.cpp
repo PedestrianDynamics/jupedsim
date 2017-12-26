@@ -77,6 +77,8 @@ bool ToxicityAnalysis::LoadJPSfireInfo(const std::string projectFilename )
        if(JPSfireCompElem->FirstAttribute()){
            std::string toxicity_grids = xmltoa(JPSfireCompElem->Attribute("toxicity_grids"), "");
            std::string filepath = projectRootDir + "/" +  toxicity_grids;
+           if (projectRootDir.size() == 0 ) // directory is "."
+                filepath = toxicity_grids;
            double updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
            double finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
            std::string study = "";
