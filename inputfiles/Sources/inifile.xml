@@ -73,7 +73,7 @@
   <!--persons information and distribution -->
   <agents operational_model_id="3">
     <agents_distribution>
-      <group group_id="0" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" x_min="3" x_max="5" y_min="3" y_max="5" />
+      <group group_id="0" room_id="0" subroom_id="0" number="20" router_id="1" agent_parameter_id="1" x_min="3" x_max="5" y_min="3" y_max="5" />
       <group group_id="1" room_id="1" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="2" />
       <group group_id="2" room_id="2" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" />
       <group group_id="3" room_id="3" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="2" />
@@ -85,9 +85,10 @@
     </agents_distribution>
 
     <agents_sources><!-- frequency in persons/seconds -->
-      <source id="1" frequency="2" agents_max="2" group_id="6" caption="source 1" />
-      <source id="2" agent_id="26" time="5" group_id="5" caption="source 2" />
-      <source_ id="3" agent_id="27" time="3" group_id="5" caption="source 3" />
+      <source id="1" frequency="2" agents_max="5" group_id="6" caption="source 1" />
+      <source id="2" agent_id="3" time="5" group_id="5" caption="source 2" />
+      <source id="3" agent_id="2" time="3" group_id="5" caption="source 3" />
+      <source id="4" agent_id="8" time="7" group_id="5" caption="source 4" />
     </agents_sources>
 
   </agents>
