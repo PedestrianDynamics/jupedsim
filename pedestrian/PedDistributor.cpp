@@ -209,6 +209,7 @@ bool PedDistributor::Distribute(Building *building) const {
                        N, roomID, allpos.size());
             return false;
         }
+        if (N==0) continue;
 
         // Distributing
         Log->Write("INFO: \tDistributing %d Agents in Room/Subrom [%d/%d]! Maximum allowed: %d", N, roomID, subroomID,
