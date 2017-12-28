@@ -162,7 +162,23 @@ const std::shared_ptr<StartDistribution> AgentsSource::GetStartDistribution() co
 void AgentsSource::GenerateAgents(std::vector<Pedestrian*>& peds, int count, Building* building)
 {
      std::vector<Point> emptyPositions;
-     int pid=Pedestrian::GetAgentsCreated(); // will be discarded
+     int pid;
+
+          // if(this->GetAgentId() < 0)
+     // {
+     //      // TODO: get the reserved ids by other sources
+     //      std::vector<int> reserved_ids;
+     //      for (const auto &source: _start_dis_sources)
+     //           if(source->GetAgentId() >= 0)
+     //                reserved_ids.push_back(source->GetAgentId());
+     
+     //      while( std::find(reserved_ids.begin(), reserved_ids.end(), pid) != reserved_ids.end() ){
+     //           std::cout << "\n\nSOURCE  SORRY " << pid << " is reserved!\n";              
+     //           pid += 1;              
+     //      }
+     // }
+
+     pid = (this->GetAgentId() >=0 )?this->GetAgentId() : Pedestrian::GetAgentsCreated() + building->GetAllPedestrians().size();
      for(int i=0;i<count;i++)
      {
           peds.push_back(_startDistribution->GenerateAgent(building, &pid,emptyPositions));

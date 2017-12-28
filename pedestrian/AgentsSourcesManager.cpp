@@ -100,7 +100,7 @@ bool AgentsSourcesManager::ProcessAllSources() const
 {
      bool empty=true;
      double current_time = Pedestrian::GetGlobalTime();
-     std::cout << "\n -- current time: " << current_time << std::endl;
+//     std::cout << "\n -- current time: " << current_time << " number " << _building->GetAllPedestrians().size() << std::endl;
      for (const auto& src : _sources)
      {
           if (src->GetPoolSize() && (src->GetPlanTime() <= current_time) )// maybe diff<eps
@@ -116,7 +116,7 @@ bool AgentsSourcesManager::ProcessAllSources() const
 
                AgentsQueueIn::Add(peds);
                empty = false;
-               src->Dump();
+               //src->Dump();
           }
           if (src->GetPlanTime() > current_time) // for the case we still expect
                                                  // agents coming

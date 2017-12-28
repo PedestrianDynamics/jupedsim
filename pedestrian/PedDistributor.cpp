@@ -598,8 +598,21 @@ vector<Point>  PedDistributor::PossiblePositions(const SubRoom &r) {
  * */
 void PedDistributor::DistributeInSubRoom(int nAgents, vector<Point> &positions, int *pid,
                                          StartDistribution *para, Building *building) const {
+
+
+     std::vector<int> reserved_ids;
+    for (const auto &source: _start_dis_sources) {
+         if(source->GetAgentId() >=0)
+              reserved_ids.push_back(source->GetAgentId());
+    }
+
     // set the pedestrians
     for (int i = 0; i < nAgents; ++i) {
+         // look for a not reserved id.
+         while( std::find(reserved_ids.begin(), reserved_ids.end(), *pid) != reserved_ids.end() ){
+              *pid += 1;
+         }
+
         Pedestrian *ped = para->GenerateAgent(building, pid, positions);
         building->AddPedestrian(ped);
     }
