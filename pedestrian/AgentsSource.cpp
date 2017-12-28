@@ -34,8 +34,8 @@
 
 #include <iostream>
 
-AgentsSource::AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency, bool greedy):
-      _id(id), _frequency(frequency), _maxAgents(max_agents), _groupID(group_id), _caption(caption), _greedy(greedy)
+AgentsSource::AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency, bool greedy, double time, int agent_id):
+     _id(id), _frequency(frequency), _maxAgents(max_agents), _groupID(group_id), _caption(caption), _greedy(greedy), _agent_id(agent_id), _time(time)
 {
     _agentsGenerated=0;
     _boundaries[0] = 0;
@@ -133,6 +133,17 @@ int AgentsSource::GetId() const
      return _id;
 }
 
+int AgentsSource::GetAgentId() const
+{
+     return _agent_id;
+}
+
+double AgentsSource::GetPlanTime() const
+{
+     return _time;
+}
+
+
 int AgentsSource::GetMaxAgents() const
 {
      return _maxAgents;
@@ -163,11 +174,15 @@ void AgentsSource::Dump() const
 {
      Log->Write("\n--------------------------");
      Log->Write("Dumping Source");
+     Log->Write("Caption: %s", this->GetCaption().c_str());
      Log->Write("ID: %d", _id);
      Log->Write("Group ID: %d", _groupID);
      Log->Write("Frequency: %d", _frequency);
      Log->Write("Agents Max: %d", _maxAgents);
      Log->Write("Agents Pool: %d", _agents.size());
+     Log->Write("Agent id: %d", this->GetAgentId());
+     Log->Write("Time: %f", this->GetPlanTime());
+     Log->Write("\n--------------------------\n");
      //getc(stdin);
 
 }
