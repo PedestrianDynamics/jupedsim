@@ -273,7 +273,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
 {
     //Smoke Sensor active
 
-     std::string quantity = "dx_1.00";
+     std::string quantity = "EXTINCTION_COEFFICIENT";
 
     _PedEyeHeight = pedElev + 1.8;
     GetNearestHeight(_PedEyeHeight);
