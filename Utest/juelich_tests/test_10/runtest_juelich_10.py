@@ -2,14 +2,16 @@
 
 # todo: spaghetti code. directory mess
 
-import numpy as np
-from xml.dom import minidom
-import os, argparse, logging, time
-from os import path, system
-from sys import argv ,exit
-import subprocess, glob, sys
-import multiprocessing
+import glob
+import logging
 import matplotlib.pyplot as plt
+import numpy as np
+import os
+import subprocess
+import sys
+import time
+from os import path
+from sys import argv, exit
 
 #=========================
 testnr = 10

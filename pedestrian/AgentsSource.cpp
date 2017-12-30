@@ -29,10 +29,6 @@
 
 #include "AgentsSource.h"
 #include "Pedestrian.h"
-#include "StartDistribution.h"
-#include "../IO/OutputHandler.h"
-
-#include <iostream>
 
 AgentsSource::AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency, bool greedy):
       _id(id), _frequency(frequency), _maxAgents(max_agents), _groupID(group_id), _caption(caption), _greedy(greedy)

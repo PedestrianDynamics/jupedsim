@@ -50,10 +50,6 @@
 #include "ffRouter.h"
 //#include "FloorfieldViaFM.h"
 //#include "../../geometry/Building.h"
-#include "../../pedestrian/Pedestrian.h"
-#include "../../IO/OutputHandler.h"
-
-#include <chrono>
 
 int FFRouter::_cnt = 0;
 

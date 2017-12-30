@@ -27,11 +27,8 @@
  *
  **/
 #include "FDSMeshStorage.h"
-#include "../../IO/OutputHandler.h"
 //#include <unistd.h>
-#include <stdio.h>
 //#include <glob.h>
-#include <string>
 #include <boost/filesystem.hpp>
 
 namespace fs=boost::filesystem;
@@ -161,7 +158,7 @@ void FDSMeshStorage::CreateTimeList()
 {
     /// Create time list for mesh refreshment
     _timelist.clear();
-    double i=0;
+    double i=0;    
     while (i<=_finalTime)
     {
         _timelist.push_back(i);
@@ -174,12 +171,12 @@ void FDSMeshStorage::CreateTimeList()
         if (_doorlist.size() > 0) {     // Smoke sensor active
         check_str = _filepath + _quantitylist[0] + "/" +
                 _doorlist[0] + "/t_" + std::to_string(elem) + ".csv";
-//        std::cout << "1: " << check_str << std::endl;
+        std::cout << "1: " << check_str << std::endl;
         }
         else if (_doorlist.size() == 0) {   // Smoke sensor not active
             check_str = _filepath + _quantitylist[0] + "/Z_" +
                     std::to_string(_elevationlist[0]) + "/t_" + std::to_string(elem) + ".csv";
-//                    std::cout << "2: "  << check_str << std::endl;
+                    std::cout << "2: "  << check_str << std::endl;
         }
 
         if (fs::exists(check_str) == false )

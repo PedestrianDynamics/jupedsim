@@ -5,8 +5,9 @@ input: xml file
 output: xml file
 """
 
-from sys import argv, exit
 import os
+from sys import argv, exit
+
 try:
     import xml.etree.cElementTree as ET
 except ImportError:

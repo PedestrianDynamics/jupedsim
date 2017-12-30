@@ -36,6 +36,12 @@ endif ()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${warnings}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${warnings}")
 
+# TODO clean up. no flags.
+#set(CMAKE_CXX_STANDARD 11)
+#set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#set(CMAKE_CXX_EXTENSIONS OFF)
+
+
 if (NOT BUILD_TESTING)
     set(BUILD_TESTING OFF) # test units & python tests are not generated.
 endif (NOT BUILD_TESTING)

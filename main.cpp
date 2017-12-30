@@ -29,7 +29,6 @@
 #include "geometry/Building.h"
 #include "general/ArgumentParser.h"
 #include "./Simulation.h"
-#include "pedestrian/AgentsSourcesManager.h"
 
 #ifdef _JPS_AS_A_SERVICE
 
@@ -38,8 +37,6 @@
 #endif
 
 #include <thread>
-#include <functional>
-#include <iomanip>
 
 int main(int argc, char** argv)
 {

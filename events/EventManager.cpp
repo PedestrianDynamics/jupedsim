@@ -27,25 +27,16 @@
 
 
 #include <string>
-#include <cstdio>
 #include <cstdlib>
 #include <iostream>
-#include <algorithm>
 #include <fstream>
 #include <vector>
 #include <math.h>
-#include <stdio.h>
 #include "../pedestrian/Pedestrian.h"
 #include "../pedestrian/Knowledge.h"
 #include "../mpi/LCGrid.h"
-#include "../geometry/Building.h"
 #include "../geometry/SubRoom.h"
-#include "../geometry/Transition.h"
-#include "../geometry/Point.h"
 #include "../tinyxml/tinyxml.h"
-#include "../IO/OutputHandler.h"
-#include "../IO/IODispatcher.h"
-#include "../routing/RoutingEngine.h"
 #include "../routing/global_shortest/GlobalRouter.h"
 #include "../routing/quickest/QuickestPathRouter.h"
 #include "../routing/ai_router/AIRouter.h"

@@ -28,9 +28,6 @@
 
 #include "OutputHandler.h"
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <cstdlib>
 #include <cmath>
 
 using namespace std;

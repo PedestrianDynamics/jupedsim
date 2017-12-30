@@ -1,13 +1,10 @@
 #! /usr/bin/env python
+import logging
 import numpy as np
-from xml.dom import minidom
-import os, argparse, logging, time
-from os import path, system
-from sys import argv ,exit
-import subprocess, glob
-import multiprocessing
-import matplotlib.pyplot as plt
-import re
+import os
+import subprocess
+from os import path
+from sys import argv, exit
 
 #=========================
 testnr = 11

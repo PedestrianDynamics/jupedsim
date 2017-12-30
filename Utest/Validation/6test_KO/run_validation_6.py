@@ -18,9 +18,10 @@ Source
 Table 4.4 Jun Zhang Diss.
 """
 
+import matplotlib.pyplot as plt
 import os
 import sys
-import matplotlib.pyplot as plt
+
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
 from sys import *
 sys.path.append(utestdir)

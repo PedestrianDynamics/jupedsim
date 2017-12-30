@@ -31,10 +31,6 @@
 #include "../general/Macros.h"
 #include "Line.h"
 #include "Wall.h"
-#include "../IO/OutputHandler.h"
-
-#include  <cmath>
-#include  <sstream>
 
 int Line::_static_UID = 0;
 

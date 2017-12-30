@@ -4,7 +4,6 @@
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../geometry/SubRoom.h"
 
-#include <boost/geometry/geometry.hpp>
 //#include <boost/foreach.hpp>
 #define UNUSED(x) [&x]{}()  // c++11 silence warnings
 

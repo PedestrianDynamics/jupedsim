@@ -1,7 +1,8 @@
-from xml.dom import minidom
 import logging
 import numpy as np
 import pandas as pd
+from xml.dom import minidom
+
 SUCCESS = 0
 FAILURE = -1
 critical_value = 0.9

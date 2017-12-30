@@ -29,14 +29,6 @@
 #include "Point.h"
 #include "../general/Macros.h"
 
-#include  <iostream>
-#include  <cmath>
-#include  <sstream>
-
-
-
-
-
 /************************************************************
   Konstruktoren
  ************************************************************/

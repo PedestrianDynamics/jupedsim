@@ -31,8 +31,7 @@
 #include "../cognitiveMap/cognitivemap.h"
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../geometry/SubRoom.h"
-#include <set>
-#include <vector>
+
 JamSensor::~JamSensor()
 {
 }

@@ -1,12 +1,7 @@
 #include "cognitivemap.h"
-#include "../../../geometry/Point.h"
 #include "../../../geometry/SubRoom.h"
-#include "../../../geometry/Building.h"
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../visiLibity/source_code/visilibity.hpp"
-#include <chrono>
-#include <random>
-#include <algorithm>
 
 //for shortest path calculations
 //#include <boost/graph/graph_traits.hpp>

@@ -28,12 +28,9 @@
 
 
 #include "BrainStorage.h"
-#include "cognitiveMap/internnavigationnetwork.h"
 
 #include "../../tinyxml/tinyxml.h"
-#include <memory>
 
-#include "../../geometry/Building.h"
 #include "../../pedestrian/Pedestrian.h"
 //#include "NavigationGraph.h"
 

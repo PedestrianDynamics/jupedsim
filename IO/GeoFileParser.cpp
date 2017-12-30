@@ -21,7 +21,6 @@
 
 #include "GeoFileParser.h"
 #include "../tinyxml/tinyxml.h"
-#include "../geometry/Goal.h"
 #include "../geometry/SubRoom.h"
 
 GeoFileParser::GeoFileParser(Configuration* configuration)

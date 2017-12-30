@@ -1,7 +1,5 @@
 #include "landmark.h"
 #include "associations.h"
-#include <stdlib.h>
-#include <math.h>
 
 Landmark::Landmark(Point pos, ptrRoom room)
 {

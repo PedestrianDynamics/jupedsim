@@ -33,7 +33,6 @@ static int global_count = 0;
 //#include <string>
 //#include <random>
 
-#include "boost/polygon/voronoi.hpp"
 using boost::polygon::voronoi_builder;
 using boost::polygon::voronoi_diagram;
 using boost::polygon::x;

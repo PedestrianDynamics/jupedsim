@@ -28,13 +28,9 @@
 
 
 #include "GraphNetwork.h"
-#include "NavigationGraph.h"
 
-#include "navigation_graph/GraphVertex.h"
-#include "navigation_graph/GraphEdge.h"
 #include "../../geometry/Crossing.h"
 #include "../../geometry/Building.h"
-#include "../../geometry/NavLine.h"
 #include "../../pedestrian/Pedestrian.h"
 
 

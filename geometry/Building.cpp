@@ -36,18 +36,13 @@
 #include "GeometryReader.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../mpi/LCGrid.h"
-#include "../routing/RoutingEngine.h"
-#include "../pedestrian/PedDistributor.h"
 #include "../IO/GeoFileParser.h"
-#include "../hybrid/GeometryFromProtobufLoader.h"
 
 #endif
 
 //#undef _OPENMP
 
 #ifdef _OPENMP
-
-#include <omp.h>
 
 #else
 #define omp_get_thread_num()    0

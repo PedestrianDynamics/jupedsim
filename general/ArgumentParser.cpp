@@ -34,8 +34,6 @@
 
 #ifdef _OPENMP
 
-#include <omp.h>
-
 #else
 #define omp_get_thread_num() 0
 #define omp_get_max_threads()  1
@@ -43,13 +41,11 @@
 
 #include "../IO/OutputHandler.h"
 #include "ArgumentParser.h"
-#include "Macros.h"
 #include "../pedestrian/AgentsParameters.h"
 #include "../routing/global_shortest/GlobalRouter.h"
 #include "../routing/quickest/QuickestPathRouter.h"
 #include "../routing/ai_router/AIRouter.h"
 #include "../IO/IniFileParser.h"
-#include <sys/stat.h>
 
 using namespace std;
 

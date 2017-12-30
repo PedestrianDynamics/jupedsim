@@ -1,9 +1,5 @@
 #include "FDSMesh.h"
 #include <cmath>
-#include <string>
-#include <fstream>
-#include <iostream>
-#include <sstream>
 
 std::vector<std::string> &split2(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss(s);
@@ -163,17 +159,23 @@ void FDSMesh::ReadMatrix(std::string line, std::ifstream &pFile)
     while (std::getline(pFile, line)) {
         n = 0;
         strVec = split2(line, ',', strVec);
-        for (auto &elem : strVec)
-        {
+        for (auto &elem : strVec) {
             //std::cout << elem << " col " << n  << " line " << m << std::endl;
-            if (elem=="nan" || elem=="NAN" || elem=="NaN" || elem=="-inf" || elem=="inf")
-            {
+            if (elem=="nan" || elem=="NAN" || elem=="NaN" || elem=="-inf" || elem=="inf") {
                 _matrix[m][n].SetValue(1.0);
                 //Log->Write("ERROR: Mesh values consist of nan!");
                 //exit(EXIT_FAILURE);
             }
-            else
-                _matrix[m][n].SetValue(std::stod(elem));
+            else {
+                double temp = 0;
+                try {
+                    temp = std::stod(elem);
+                }
+                catch (...) {
+                    std::cout << "can not convert " << elem << std::endl;
+                }
+            _matrix[m][n].SetValue(temp);
+            }
             ++n;
         }
         strVec.clear();

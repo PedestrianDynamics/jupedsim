@@ -30,7 +30,6 @@
 
 #include <math.h>
 #include "../pedestrian/Pedestrian.h"
-#include "../routing/DirectionStrategy.h"
 #include "../mpi/LCGrid.h"
 #include "../geometry/Wall.h"
 #include "../geometry/SubRoom.h"
