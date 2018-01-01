@@ -33,12 +33,11 @@ The majority of the strategies define how a pedestrian crosses a line $$L = [P_1
 
 6. -9. Strategies using floor fields (ff) (vector fields); one ff per target (door, line, ...)
 
-<img src="
-https://cst.version.fz-juelich.de/jupedsim/jpscore/uploads/785cda284f5f44d2b019332d29b8075e/transformFF.png" width="300" height="300" />
+    <img src="{{ site.baseurl }}/img/transformFF.png" width="500" height="500" />
 
   * 6: This strategy does use a floor field rather than heading towards a point on a line segment.
 
-    For more details see this talk [^talk_arne] and the corresponding thesis [^thesis_arne].
+    For more details see this [talk](https://fz-juelich.sciebo.de/index.php/s/s1ORGTUssCsHDHC) and the corresponding [thesis](https://fz-juelich.sciebo.de/index.php/s/VFnUCH2gtz1mSoL).
      
     (__do not use in multi-storage buildings__)
     
@@ -62,9 +61,6 @@ https://cst.version.fz-juelich.de/jupedsim/jpscore/uploads/785cda284f5f44d2b0193
 
 ---   
 
-
-[^talk_arne]: (https://fz-juelich.sciebo.de/index.php/s/s1ORGTUssCsHDHC)  
-[^thesis_arne]: (https://fz-juelich.sciebo.de/index.php/s/VFnUCH2gtz1mSoL)  
 
     
 [#Chraibi2011]: http://aimsciences.org/journals/displayPaper.jsp?paperID=6440 "Chraibi el al. Force-based models of pedestrian dynamics.  Pages: 425 - 442, Volume 6, Issue 3, September 2011"

@@ -5,11 +5,15 @@ subtitle: Compiling the code
 permalink: 2016-11-02-quickstart.html
 nav:
 - page: Get the code
-  permalink: #Get-the-code
-- page: Check the requirements
-  permalink: 2016-11-02-quickstart.html#check-the-requirements
+  permalink: #1-Get-the-code
+  - page: Check the requirements
+  permalink: 2016-11-02-quickstart.html#2-check-the-requirements
+- page: Compile the code
+  permalink: 2016-11-02-quickstart.html#3-compile-the-code
 - page: Run an example
-  permalink: 2016-11-02-quickstart.html#run-an-example
+  permalink: 2016-11-02-quickstart.html#4-run-an-example
+- page: Back to top
+  permalink: 2016-11-02-quickstart.html#top
 ---
 
 
@@ -46,7 +50,7 @@ make -j2
 
 In case of a successful compilation, the executables will be located in the directory `bin/`.
 
-## Run an example 
+## 4. Run an example 
 
 In the directory `demos` there are some examples to start with:  
 

@@ -1,9 +1,22 @@
 ---
-layout: post
+layout: post2
 title: Publications
 subtitle: using JuPedSim
 #bigimg: /img/jupedsim_small.png
 permalink: 2016-11-04-publications.html
+nav:
+- page: Theses
+  permalink: 2016-11-04-publications.html#
+  
+- page: Peer-reviewed articles
+  permalink: 2016-11-04-publications.html#peer-reviewed-journal-articles
+
+- page: Conferences
+  permalink: 2016-11-04-publications.html#conferences
+
+- page: Back to top
+  permalink: 2016-11-04-publications.html#top
+
 ---
 
 
@@ -16,6 +29,10 @@ This is a list of some works that contributed to JuPedSim or used it to
 produce results.
 
 ## Theses
+- Benjamin Schröder  
+  [Multivariate Methods for Life Safety Analysis in Case of Fire](http://juser.fz-juelich.de/record/838011)  
+  PhD Wuppertal University, 2017
+  
 - Rüping, Fabian  
    "Computersimulation einer Schulevakuierung - Reproduzierbarkeit von Evakuierungszeiten und Fundamentaldiagrammen auf Treppen"  
    Bachlor thesis, Wuppertal University, 2016  
