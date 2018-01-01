@@ -1,8 +1,15 @@
 ---
-layout: post
+layout: post2
 title: Quick start
 subtitle: Compiling the code
 permalink: 2016-11-02-quickstart.html
+nav:
+- page: Get the code
+  permalink: #Get-the-code
+- page: Check the requirements
+  permalink: 2016-11-02-quickstart.html#check-the-requirements
+- page: Run an example
+  permalink: 2016-11-02-quickstart.html#run-an-example
 ---
 
 

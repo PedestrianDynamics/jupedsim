@@ -114,5 +114,29 @@
   {% elsif site.avatar %}
   <meta name="twitter:image" content="{{ site.url }}{{ site.avatar }}" />
   {% endif %}
+  <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js?ver=1.3.2'></script>
+  <script type="text/javascript">
+$(document).ready(function () {
+
+    var $sidebar = $("aside"),
+        $window = $(window),
+        offset = $sidebar.offset();
+
+    var bodyRight = $("#wrapper").offset().left + $("#wrapper").width();
+
+    $window.scroll(function () {
+        if ($window.scrollTop() > offset.top) {
+            $("aside").addClass("fixed");
+            $("aside").css("left", bodyRight - $("aside").width());
+            $(".miniHeader").slideDown("fast");
+        } else {
+            $("aside").removeClass("fixed");
+            $(".miniHeader").slideUp("fast");
+        }
+    });
+
+});
+
+    </script>
 
 </head>

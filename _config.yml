@@ -169,6 +169,7 @@ exclude:
   - CNAME
   - Vagrantfile
 
+
 # prose.io config
 prose:
   rooturl: '_posts'
@@ -221,3 +222,4 @@ gems:
   # - jekyll-pdf
 # Beautiful Jekyll / Dean Attali
 # 2fc73a3a967e97599c9763d05e564189
+
