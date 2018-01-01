@@ -626,3 +626,89 @@ td.gutter {
 #social-share-section {
   margin-bottom: 30px;
 }
+
+/* ============= SIDE NAV BAR ====================*/
+/* sidebar */
+.bs-docs-sidebar {
+    padding-left: 0px;
+    margin-top: -100px;
+    margin-bottom: 0px;
+}
+
+.bs-docs-sidebar > ul{
+    width: 180px;
+    overflow-y: auto;
+    height: 100%;
+}
+
+/* all links */
+.bs-docs-sidebar .nav>li>a {
+    color: #999;
+    border-left: 2px solid transparent;
+    padding: 4px 0px;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+/* nested links */
+.bs-docs-sidebar .nav .nav>li>a {
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 30px;
+    font-size: 12px;
+}
+
+/* active & hover links */
+.bs-docs-sidebar .nav>.active>a, 
+.bs-docs-sidebar .nav>li>a:hover, 
+.bs-docs-sidebar .nav>li>a:focus {
+    color: #563d7c;                 
+    text-decoration: none;          
+    background-color: transparent;  
+    border-left-color: #563d7c; 
+}
+/* all active links */
+.bs-docs-sidebar .nav>.active>a, 
+.bs-docs-sidebar .nav>.active:hover>a,
+.bs-docs-sidebar .nav>.active:focus>a {
+    font-weight: 700;
+}
+/* nested active links */
+.bs-docs-sidebar .nav .nav>.active>a, 
+.bs-docs-sidebar .nav .nav>.active:hover>a,
+.bs-docs-sidebar .nav .nav>.active:focus>a {
+    font-weight: 500;
+}
+
+/* hide inactive nested list */
+.bs-docs-sidebar .nav ul.nav {
+    display: none;           
+}
+/* show active nested list */
+.bs-docs-sidebar .nav>.active>ul.nav {
+    display: block;           
+}
+
+
+/* Negative top margin on sidebar pulls up header under title-area */
+#sidebar { 
+  width: 150px; 
+  position: fixed; 
+ offset: {
+      top: 60
+    }
+}
+
+/* /\* Title area kept above all with z-index *\/ */
+/* #title-area {  */
+/*   background: white;  */
+/*   position: relative;  */
+/*   z-index: 3000;  */
+/* } */
+
+/* white-fade image */
+#reveal { 
+  position: absolute; 
+  right: 0; 
+  bottom: -20px; 
+}
