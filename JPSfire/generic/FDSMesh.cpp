@@ -224,10 +224,15 @@ void FDSMesh::SetKnotValuesFromFile(const std::string &filename)
     int ncol = smoke_factor_grid_norm.shape[1];
     int nrow = smoke_factor_grid_norm.shape[0];
     for (unsigned int i=0; i< ncol; i++)
-        for (unsigned int j=0; j< nrow; j++)
-            _matrix[i][j].SetValue(c_matrix[i*ncol + j]); //TODO: implement =operator
-
-
+        for (unsigned int j=0; j< nrow; j++) {
+             double tmp_value = c_matrix[i*ncol+j];
+             if(std::isnan(tmp_value) || std::isinf(tmp_value))
+                  tmp_value = 1.0;
+            std::cout << "i =  " << i  << "  j = " << j << ": " << tmp_value << std::endl;
+            _matrix[i][j].SetValue(tmp_value); //TODO: implement =operator
+        }
+    pFile.close();
+    _statMesh=true;
 }
 
 bool FDSMesh::statusMesh() const
