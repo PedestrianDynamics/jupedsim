@@ -170,20 +170,22 @@ void FDSMeshStorage::CreateTimeList()
     for(auto elem : _timelist) {
         if (_doorlist.size() > 0) {     // Smoke sensor active
         check_str = _filepath + _quantitylist[0] + "/" +
-                _doorlist[0] + "/t_" + std::to_string(elem) + ".csv";
+                _doorlist[0] + "/t_" + std::to_string(elem) + ".npz";
         std::cout << "1: " << check_str << std::endl;
         }
         else if (_doorlist.size() == 0) {   // Smoke sensor not active
             check_str = _filepath + _quantitylist[0] + "/Z_" +
-                    std::to_string(_elevationlist[0]) + "/t_" + std::to_string(elem) + ".csv";
+                    std::to_string(_elevationlist[0]) + "/t_" + std::to_string(elem) + ".npz";
                     std::cout << "2: "  << check_str << std::endl;
         }
 
         if (fs::exists(check_str) == false )
         {
             Log->Write("ERROR:\tSpecified times are not compliant with JPSfire data " + check_str);
+             std::cout << "Not found: " << check_str << std::endl;
             exit(EXIT_FAILURE);
         }
+         std::cout << "LEAVING \n" ;
     }
 
 }
@@ -207,8 +209,8 @@ void FDSMeshStorage::CreateFDSMeshes()
                          std::cout << "time: " << k << std::endl;
                          
                         std::string str = h + "/" + j + "/t_"+std::to_string(k);
-                        std::cout << _filepath + str + ".csv" << std::endl;
-                        FDSMesh mesh(_filepath + str + ".csv");
+                        std::cout << _filepath + str + ".npz" << std::endl;
+                        FDSMesh mesh(_filepath + str + ".npz");
                         //std::string str = "t_"+std::to_string(i);
                         _fMContainer.insert(std::make_pair(str, mesh));
                     }
@@ -226,11 +228,11 @@ void FDSMeshStorage::CreateFDSMeshes()
                     //std::cout << "k " << j << std::endl;
                     std::string str = h + "/Z_" + std::to_string(i) +
                     "/t_"+std::to_string(k);
-                    //std::cout << _filepath + str + ".csv" << std::endl;
+                    //std::cout << _filepath + str + ".npz" << std::endl;
 
-                    FDSMesh mesh(_filepath + str + ".csv");
+                    FDSMesh mesh(_filepath + str + ".npz");
 
-                    //std::cout << _filepath + str + ".csv" << std::endl;
+                    //std::cout << _filepath + str + ".npz" << std::endl;
                     //std::string str = "t_"+std::to_string(i);
                     _fMContainer.insert(std::make_pair(str, mesh));
                 }

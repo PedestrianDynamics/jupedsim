@@ -495,9 +495,11 @@ set(header_files
         )
 
 add_library(core STATIC ${source_files})
+find_package(ZLIB REQUIRED)
+include_directories(${ZLIB_INCLUDE_DIRS})
 
 add_library(cnpy SHARED "cnpy/cnpy.cpp")
-target_link_libraries(cnpy z)
+target_link_libraries(cnpy ${ZLIB_LIBRARIES})
 
 #add_library ( core SHARED ${source_files} )
 

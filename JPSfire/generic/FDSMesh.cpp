@@ -1,6 +1,6 @@
 #include "FDSMesh.h"
 #include <cmath>
-
+#include "../../cnpy/cnpy.h"
 std::vector<std::string> &split2(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss(s);
     std::string item;
@@ -189,49 +189,44 @@ void FDSMesh::ReadMatrix(std::string line, std::ifstream &pFile)
 void FDSMesh::SetKnotValuesFromFile(const std::string &filename)
 {
     ///open File (reading)
-     
-     
     std::ifstream pFile(filename);
-    
-    if (pFile)
+    if(!pFile)
     {
-        std::vector<std::string> strVec;
-        std::string line;
-        ///skip two lines
-        std::getline(pFile, line);
-        std::getline(pFile, line);
-
-        std::getline(pFile, line);
-        //std::cout << line << std::endl;
-        /// to avoid multiple reading of the header and mesh setting
-        //if (statHeaderRead==false)
-        //{
-        /// read header
-        strVec = split2(line,',', strVec);
-        double cellsize = std::stod(strVec[0]);
-        double xmin = std::stod(strVec[2]);
-        double xmax = std::stod(strVec[3]);
-        double ymin = std::stod(strVec[4]);
-        double ymax = std::stod(strVec[5]);
-
-        strVec.clear();
-        //std::cout << "xmin=" << xmin << " , xmax=" << xmax << " , ymin=" << ymin << ", ymax=" << ymax << " , dx=" << cellsize << std::endl;
-
-        SetUpMesh(xmin,ymin,xmax,ymax,cellsize);
-
-            //statHeaderRead=true;
-        //}
-        //Read matrix
-
-        ReadMatrix(line, pFile);
-
+        Log->Write("ERROR:\tCould not open FDS slicefile: %s",filename.c_str());
+        //return false;
+        exit(EXIT_FAILURE);
     }
-    else
-    {
-       Log->Write("ERROR:\tCould not open FDS slicefile: %s",filename.c_str());
-       //return false;
-       exit(EXIT_FAILURE);
-    }
+
+    cnpy::NpyArray Header = cnpy::npz_load(filename,"header");
+    cnpy::NpyArray smoke_factor_grid_norm = cnpy::npz_load(filename,"smoke_factor_grid_norm");
+    auto c_header = Header.data<double>();
+    auto c_matrix = smoke_factor_grid_norm.data<double>();
+
+    for (int i=0; i< Header.num_vals ; i++)
+        std::cout << "Header i: " << i << ": " << c_header[i] << std::endl;
+
+
+    for (int j=0; j< smoke_factor_grid_norm.num_vals; j++)
+        std::cout << "Matrix j: "<< c_matrix[j] << std::endl;
+
+    /// read header
+    double cellsize = c_header[0];
+    double xmin = c_header[1];
+    double xmax = c_header[2];
+    double ymin = c_header[3];
+    double ymax = c_header[4];
+
+    std::cout << "xmin=" << xmin << " , xmax=" << xmax << " , ymin=" << ymin << ", ymax=" << ymax << " , dx=" << cellsize << std::endl;
+
+    SetUpMesh(xmin,ymin,xmax,ymax,cellsize);
+
+    //Read matrix
+    int ncol = smoke_factor_grid_norm.shape[1];
+    int nrow = smoke_factor_grid_norm.shape[0];
+    for (unsigned int i=0; i< ncol; i++)
+        for (unsigned int j=0; j< nrow; j++)
+            _matrix[i][j].SetValue(c_matrix[i*ncol + j]); //TODO: implement =operator
+
 
 }
 
