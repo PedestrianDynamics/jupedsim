@@ -195,13 +195,19 @@ void FDSMeshStorage::CreateFDSMeshes()
     if (_doorlist.size() > 0) {     // Smoke sensor active
         for (auto &h:_quantitylist)     //list of quantities
         {
+             std::cout << "H: " << h << std::endl;
+             
                 for (auto &j:_doorlist)         //list of doors
                 {
+                     std::cout << "door: " << j << std::endl;
+                     
                     //std::cout << "door " << j << std::endl;
                     for (auto &k:_timelist)         //list of times
                     {
+                         std::cout << "time: " << k << std::endl;
+                         
                         std::string str = h + "/" + j + "/t_"+std::to_string(k);
-                        //std::cout << _filepath + str + ".csv" << std::endl;
+                        std::cout << _filepath + str + ".csv" << std::endl;
                         FDSMesh mesh(_filepath + str + ".csv");
                         //std::string str = "t_"+std::to_string(i);
                         _fMContainer.insert(std::make_pair(str, mesh));
@@ -292,9 +298,9 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
         throw -1;
     }
 
-    if (_fMContainer.count(str) == 1) {
-        std::cout << "INFO: requested sfgrid: " << str << std::endl;
-    }
+    // if (_fMContainer.count(str) == 1) {
+    //      std::cout << "INFO: requested sfgrid: " << str << std::endl;
+    // }
 
     return _fMContainer.at(str);
 }

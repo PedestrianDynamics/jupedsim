@@ -189,7 +189,10 @@ void FDSMesh::ReadMatrix(std::string line, std::ifstream &pFile)
 void FDSMesh::SetKnotValuesFromFile(const std::string &filename)
 {
     ///open File (reading)
+     
+     
     std::ifstream pFile(filename);
+    
     if (pFile)
     {
         std::vector<std::string> strVec;

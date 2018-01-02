@@ -496,6 +496,9 @@ set(header_files
 
 add_library(core STATIC ${source_files})
 
+add_library(cnpy SHARED "cnpy/cnpy.cpp")
+target_link_libraries(cnpy z)
+
 #add_library ( core SHARED ${source_files} )
 
 #Target
@@ -515,7 +518,7 @@ if (Boost_FOUND)
     # suppress warnings in boost libraries with attribute SYSTEM
     include_directories(SYSTEM ${Boost_INCLUDE_DIR})
     # todo: is this necessary?
-    target_link_libraries(core ${Boost_LIBRARIES})
+    target_link_libraries(core ${Boost_LIBRARIES} cnpy)
 endif ()
 
 target_link_libraries(jpscore core)
