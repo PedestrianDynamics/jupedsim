@@ -22,10 +22,10 @@ def get_parser_args():
                                                                              'steady state')
     parser.add_argument("-e", "--endsteady", type=int, required=True, help='the frame for the ending of '
                                                                            'steady state')
-    parser.add_argument("-x1", "--geominx", type=float, required=True, help='the minmum x of the geometry')
-    parser.add_argument("-x2", "--geomaxx", type=float, required=True, help='the maxmum x of the geometry')
-    parser.add_argument("-y1", "--geominy", type=float, required=True, help='the minmum y of the geometry')
-    parser.add_argument("-y2", "--geomaxy", type=float, required=True, help='the maxmum y of the geometry')
+    parser.add_argument("-x1", "--geominx", type=float, required=True, help='the minimum x of the geometry')
+    parser.add_argument("-x2", "--geomaxx", type=float, required=True, help='the maximum x of the geometry')
+    parser.add_argument("-y1", "--geominy", type=float, required=True, help='the minimum y of the geometry')
+    parser.add_argument("-y2", "--geomaxy", type=float, required=True, help='the maximum y of the geometry')
     arguments = parser.parse_args()
     return arguments
 
@@ -66,11 +66,14 @@ if __name__ == '__main__':
     ax1 = fig.add_subplot(111, aspect='1')
     plt.rc("font", size=40)
     for j in range(beginsteady, endsteady):
-        density_file = os.path.join(
-            pathfile, "density", "Prf_d_%s
-_id_1_%.5d.dat" % (nametraj, j))
-        print("loading: %s" % density_file)
-        density += np.loadtxt(density_file)
+        density_file = os.path.join(pathfile, "density", "Prf_d_%s_id_1_%.5d.dat" %(nametraj, j))
+        if os.path.exists(density_file):
+            print("loading: %s" % density_file)
+            density += np.loadtxt(density_file)
+            
+        else:
+            print("WARNING: file not found %s"%density_file)
+        
 
     density = density / (endsteady - beginsteady)
 
@@ -97,9 +100,11 @@ _id_1_%.5d.dat" % (nametraj, j))
     for j in range(beginsteady, endsteady):
         velocity_file = os.path.join(
             pathfile, "velocity", "Prf_v_%s_id_1_%.5d.dat" % (nametraj, j))
-        print("loading: %s" % velocity_file)
-        velocity += np.loadtxt(velocity_file)
-
+        if os.path.exists(velocity_file):
+                print("loading: %s" % velocity_file)
+                velocity += np.loadtxt(velocity_file)
+        else:
+            print("WARNING: file not found %s"%velocity_file)
     velocity = velocity / (endsteady - beginsteady)
     im = plt.imshow(velocity,
                     cmap=cm.jet,
