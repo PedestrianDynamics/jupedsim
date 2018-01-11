@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from numpy import *
+import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from Polygon import *         
@@ -24,13 +24,16 @@ def plotRhoT(pathfile,figname,fps,title,data_Classic=None, data_Voronoi=None):
         plt.rc('pdf',fonttype = 42)
         if data_Classic is not None:
                 plt.plot(data_Classic[:,0]/fps,data_Classic[:,1], 'b--', label="Classic method")
+                y_max = np.max(data_Classic[:,1])
         if data_Voronoi is not None:
                 plt.plot(data_Voronoi[:,0]/fps,data_Voronoi[:,1], 'r-', lw=3, label="Voronoi method")
-        plt.xlabel("t [$s$]")
-        plt.ylabel("density [$m^{-2}$]")
+                y_max = np.max(data_Voronoi[:,1])
+
+        plt.xlabel("$t\;\; [s$]", size=18)
+        plt.ylabel(r"$\rho\;\; [m^{-2}$]", size=18)
         plt.gca().set_xlim(left=0)
         #plt.gca().set_ylim(bottom=0)
-        plt.ylim(0,8)
+        plt.ylim(0, y_max + 0.5)
         plt.title("%s"%title)
         plt.legend()
         plt.savefig("%s/%s.png"%(pathfile,figname))
@@ -45,8 +48,8 @@ def plotVT(pathfile,figname,fps,title,data_Classic=None, data_Voronoi=None):
                 plt.plot(data_Classic[:,0]/fps,data_Classic[:,2], 'b--', label="Classic method")
         if data_Voronoi is not None:
                 plt.plot(data_Voronoi[:,0]/fps,data_Voronoi[:,2], 'r-', lw=3, label="Voronoi method")
-        plt.xlabel("t [$s$]")
-        plt.ylabel("velocity [$m/s$]")
+        plt.xlabel("$t\;\; [s]$", size=18)
+        plt.ylabel("$v\;\; [m/s]$", size=18)
         plt.gca().set_xlim(left=0)
         #plt.gca().set_ylim(bottom=0)
         plt.ylim(0,2)
@@ -70,7 +73,7 @@ if __name__ == '__main__':
                    figname_rho="rho_t_%s_id_%s"%(nametraj,ID)
                    figname_v="v_t_%s_id_%s"%(nametraj,ID)
                    title = "%s_id_%s"%(nametraj,ID)
-                   data_Classic = loadtxt(fC)
+                   data_Classic = np.loadtxt(fC)
                    plotRhoT(pathfile,figname_rho,fps,title,data_Classic)
                    plotVT(pathfile,figname_v,fps,title,data_Classic)
            
@@ -80,10 +83,10 @@ if __name__ == '__main__':
                    figname_rho="rho_t_%s_id_%s"%(nametraj,ID)
                    figname_v="v_t_%s_id_%s"%(nametraj,ID)
                    title = "%s_id_%s"%(nametraj,ID)
-                   data_Voronoi = loadtxt(fV)
+                   data_Voronoi = np.loadtxt(fV)
                    fC = "%s/rho_v_Classic_%s_id_%s.dat"%(pathfile,nametraj,ID)
                    if (os.path.isfile(fC)):
-                           data_Classic = loadtxt(fC)
+                           data_Classic = np.loadtxt(fC)
                            plotRhoT(pathfile,figname_rho,fps,title,data_Classic,data_Voronoi)
                            plotVT(pathfile,figname_v,fps,title,data_Classic,data_Voronoi)
                    else:
