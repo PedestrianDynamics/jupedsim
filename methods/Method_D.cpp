@@ -281,7 +281,7 @@ double Method_D::GetVoronoiDensity(const vector<polygon_2d>& polygon, const poly
                     std::cout<<"measure area: \t"<<std::setprecision(16)<<dsv(measureArea)<<"\n";
                     std::cout<<"Original polygon:\t"<<std::setprecision(16)<<dsv(polygon_iterator)<<"\n";
                     std::cout<<"intersected polygon: \t"<<std::setprecision(16)<<dsv(v[0])<<"\n";
-                    std::cout<<"this is a wrong result in density calculation\t "<<area(v[0])<<'\t'<<area(polygon_iterator)<<"\n";
+                    std::cout<<"this is a wrong result in density calculation\t "<<area(v[0])<<'\t'<<area(polygon_iterator)<<  "  (diff=" << (area(v[0]) - area(polygon_iterator)) << ")" << "\n";
                     //exit(EXIT_FAILURE);
                }
           }
@@ -331,7 +331,7 @@ double Method_D::GetVoronoiVelocity(const vector<polygon_2d>& polygon, const vec
                meanV+=(Velocity[temp]*area(v[0])/area(measureArea));
                if((area(v[0]) - area(polygon_iterator))>J_EPS)
                {
-                    std::cout<<"this is a wrong result in calculating velocity\t"<<area(v[0])<<'\t'<<area(polygon_iterator)<<std::endl;
+                    std::cout<<"this is a wrong result in calculating velocity\t"<<area(v[0])<<'\t'<<area(polygon_iterator)<< "  (diff=" << area(v[0]) - area(polygon_iterator) << ")"<< std::endl;
                }
           }
           temp++;
