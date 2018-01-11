@@ -2,7 +2,7 @@
  * \file        PedData.cpp
  * \date        Feb 10, 2016
  * \version     v0.8
- * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -106,18 +106,20 @@ bool PedData::InitializeVariables(const string& filename)
           int pos_y=3;
           int pos_z=4;
           int pos_vd=5; //velocity direction
-          int indx=1, index = 0 , lastindex = 0;
           while ( getline(fdata,line) )
           {
                //looking for the framerate which is suppposed to be at the second position
                if(line[0] == '#')
                {
-                    std::vector<std::string> strs;
-                    boost::split(strs, line , boost::is_any_of(":"),boost::token_compress_on);
 
-                    if(strs[0]=="#framerate" && strs.size()==2)
+                    if(line.find("framerate") != std::string::npos)
                     {
-                         _fps= atof(strs[1].c_str());
+                         std::vector<std::string> strs;
+                         line.erase(0,1); // remove #
+                         boost::split(strs, line , boost::is_any_of(":"),boost::token_compress_on);
+                         if(strs.size()>1)
+                              _fps= atof(strs[1].c_str());
+
                          Log->Write("INFO:\tFrame rate fps: <%.2f>", _fps);
                     }
 
@@ -164,28 +166,13 @@ bool PedData::InitializeVariables(const string& filename)
                          Log->Write("INFO: pos_x: %d", pos_x);
                          Log->Write("INFO: pos_y: %d", pos_y);
                          Log->Write("INFO: pos_z: %d", pos_z);
-                         Log->Write("WARNING:\t assuming z=0 for all data");
-                    }
-                    lastindex = index;
-                    index = atoi(strs[pos_id].c_str());
-                    if(_IdsTXT.size() == 0){ // first line
-                         lastindex = index;
-                         indx = index;
+                         // Log->Write("WARNING:\t assuming z=0 for all data");
                     }
 
-                    if (index != lastindex){
-                         indx += 1;
-                    }
-                    // std::cout << "lastindex " << lastindex << " index " << index << " indx = " << indx << std::endl;
-                    _IdsTXT.push_back(indx);
+                    _IdsTXT.push_back(atoi(strs[pos_id].c_str()));
                     _FramesTXT.push_back(atoi(strs[pos_fr].c_str()));
                     xs.push_back(atof(strs[pos_x].c_str()));
                     ys.push_back(atof(strs[pos_y].c_str()));
-                    // std::cout << " fr = " << atoi(strs[pos_fr].c_str())
-                    //           << " x  = " << atof(strs[pos_x].c_str())  
-                    //           << " y  = " << atof(strs[pos_x].c_str())
-                    //           << std::endl;
-                    // getc(stdin);
                     
                     if(strs.size() >= 5)
                          zs.push_back(atof(strs[pos_z].c_str()));
@@ -221,10 +208,18 @@ bool PedData::InitializeVariables(const string& filename)
      Log->Write("INFO: numFrames: %d", _numFrames);
 
      //Total number of agents
-     _numPeds = *max_element(_IdsTXT.begin(),_IdsTXT.end()) - _minID+1;
+     std::vector<int> unique_ids = _IdsTXT;
+     // no need to
+     //sort. Assume that ids are ascendant 
+     sort(unique_ids.begin(), unique_ids.end());
+     std::vector<int>::iterator it;
+     it = unique(unique_ids.begin(), unique_ids.end());
+     unique_ids.resize(distance(unique_ids.begin(),it));
+     _numPeds = unique_ids.size();
      Log->Write("INFO: Total number of Agents: %d", _numPeds);
      CreateGlobalVariables(_numPeds, _numFrames);
      Log->Write("INFO: Create Global Variables done");
+
      
      for(int i=_minID;i<_minID+_numPeds; i++)
      {
@@ -247,12 +242,7 @@ bool PedData::InitializeVariables(const string& filename)
     	             actual_totalframe++;
     	         }
     	     }
-         std::cout << "i: " << i<< std::endl;
-         std::cout << "firstFrameIndex: " << firstFrameIndex<< std::endl;
-         std::cout << "lastFrameIndex: " << lastFrameIndex<< std::endl;
-         std::cout << "minID: " << _minID<< std::endl;
-         std::cout << "minFrame: " << _minFrame<< std::endl;
-         std::cout << "actual frame: " << actual_totalframe<< std::endl;
+         
     	 if(lastFrameIndex==0)
     	 {
     		 Log->Write("Warning:\tThere is no trajectory for ped with ID <%d>!",i);
@@ -260,22 +250,38 @@ bool PedData::InitializeVariables(const string& filename)
     	 _firstFrame[i-_minID] = _FramesTXT[firstFrameIndex] - _minFrame;
     	 _lastFrame[i-_minID] = _FramesTXT[lastFrameIndex] - _minFrame;
 
-	     int expect_totalframe=_lastFrame[i-_minID]-_firstFrame[i-_minID]+1;
-	     if(actual_totalframe != expect_totalframe)
-	     {
-                  Log->Write("Error:\tThe trajectory of ped with ID <%d> is not continuous. Please modify the trajectory file!",i);
-                  Log->Write("Error:\t actual_totalfame = <%d>, expected_totalframe = <%d> ", actual_totalframe, expect_totalframe);
-                  return false;
-	     }
+         int expect_totalframe=_lastFrame[i-_minID]-_firstFrame[i-_minID]+1;
+         if(actual_totalframe != expect_totalframe)
+         {
+              Log->Write("Error:\tThe trajectory of ped with ID <%d> is not continuous. Please modify the trajectory file!",i);
+              Log->Write("Error:\t actual_totalfame = <%d>, expected_totalframe = <%d> ", actual_totalframe, expect_totalframe);
+              return false;
+         }
      }
      Log->Write("convert x and y");
      for(unsigned int i = 0; i < _IdsTXT.size(); i++)
+          //for(unsigned int i = 0; i < unique_ids .size(); i++)
      {
-          int ID = _IdsTXT[i] - _minID;
+          int ID = _IdsTXT[i] - _minID;  // this asumes that idstxt
+                                         // are consecutive. 1, 2, 10,
+                                         // 11 does not work
+          //---------- get position of index in unique index vector ---------------
+          auto it = std::find(unique_ids.begin(), unique_ids.end(), _IdsTXT[i]);
+          if (it == unique_ids.end())
+          {
+               Log->Write("Error:\t Id %d does not exist in file", _IdsTXT[i]);
+               return false;
+          } 
+          else
+          {
+               ID  = std::distance(unique_ids.begin(), it);
+          }
+          //--------------------
           int frm = _FramesTXT[i] - _minFrame;
           double x = xs[i]*M2CM;
           double y = ys[i]*M2CM;
           double z = zs[i]*M2CM;
+          
           _xCor(ID,frm) = x;
           _yCor(ID,frm) = y;
           _zCor(ID,frm) = z;
@@ -293,7 +299,21 @@ bool PedData::InitializeVariables(const string& filename)
      //save the data for each frame
      for (unsigned int i = 0; i < _FramesTXT.size(); i++ )
      {
-          int id = _IdsTXT[i]-_minID;
+          int id = _IdsTXT[i]-_minID; // this make the assumption that
+                                      // indexes in the trajectories
+                                      // are consecutive
+
+          auto it = std::find(unique_ids.begin(), unique_ids.end(), _IdsTXT[i]);
+          if (it == unique_ids.end())
+          {
+               Log->Write("Error2:\t Id %d does not exist in file", _IdsTXT[i]);
+               return false;
+          } 
+          else
+          {
+               id  = std::distance(unique_ids.begin(), it);
+          }
+          
           int t =_FramesTXT[i]- _minFrame;
           _peds_t[t].push_back(id);
 
@@ -696,20 +716,20 @@ void PedData::CreateGlobalVariables(int numPeds, int numFrames)
      _xCor = ub::matrix<double>(numPeds, numFrames);
      size_t currentSize = getCurrentRSS( )/1000000;
      size_t peakSize    = getPeakRSS( )/1000000;
-     std::cout << "currentSize: " << currentSize  <<" (MB)" << std::endl;
-     std::cout << "peakSize: " << peakSize << " (MB)" << std::endl;
+     std::cout << "\tcurrentSize: " << currentSize  <<" (MB)" << std::endl;
+     std::cout << "\tpeakSize: " << peakSize << " (MB)" << std::endl;
      Log->Write("INFO: allocate memory for yCor");
      _yCor = ub::matrix<double>(numPeds, numFrames);
-     std::cout << "currentSize: " << currentSize  <<" (MB)" << std::endl;
-     std::cout << "peakSize: " << peakSize << " (MB)" << std::endl;
+     std::cout << "\tcurrentSize: " << currentSize  <<" (MB)" << std::endl;
+     std::cout << "\tpeakSize: " << peakSize << " (MB)" << std::endl;
      Log->Write("INFO: allocate memory for zCor");
      _zCor = ub::matrix<double>(numPeds, numFrames);
-     std::cout << "currentSize: " << currentSize  <<" (MB)" << std::endl;
-     std::cout << "peakSize: " << peakSize << " (MB)" << std::endl;
+     std::cout << "\tcurrentSize: " << currentSize  <<" (MB)" << std::endl;
+     std::cout << "\tpeakSize: " << peakSize << " (MB)" << std::endl;
      Log->Write("INFO: allocate memory for vComp");
      _vComp = ub::matrix<std::string>(numPeds, numFrames);
-     std::cout << "currentSize: " << currentSize  <<" (MB)" << std::endl;
-     std::cout << "peakSize: " << peakSize << " (MB)" << std::endl;
+     std::cout << "\tcurrentSize: " << currentSize  <<" (MB)" << std::endl;
+     std::cout << "\tpeakSize: " << peakSize << " (MB)" << std::endl;
      Log->Write(" Finished memory allocation");   
      _firstFrame = new int[numPeds];  // Record the first frame of each pedestrian
      _lastFrame = new int[numPeds];  // Record the last frame of each pedestrian
