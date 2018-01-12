@@ -108,6 +108,7 @@ bool PedData::InitializeVariables(const string& filename)
           int pos_vd=5; //velocity direction
           while ( getline(fdata,line) )
           {
+               boost::algorithm::trim(line);
                //looking for the framerate which is suppposed to be at the second position
                if(line[0] == '#')
                {
@@ -153,10 +154,7 @@ bool PedData::InitializeVariables(const string& filename)
                else if ( line[0] != '#' && !(line.empty()) )
                {
                     static int once = 1;
-                    if (lineNr % 100000 == 0)
-                         std::cout << "lineNr " << lineNr<< std::endl;
                     std::vector<std::string> strs;
-                    boost::algorithm::trim_right(line);
                     boost::split(strs, line , boost::is_any_of("\t "),boost::token_compress_on);
                     if(once) // && strs.size() < 5
                     {
@@ -166,13 +164,14 @@ bool PedData::InitializeVariables(const string& filename)
                          Log->Write("INFO: pos_x: %d", pos_x);
                          Log->Write("INFO: pos_y: %d", pos_y);
                          Log->Write("INFO: pos_z: %d", pos_z);
+                         Log->Write("INFO: pos_vd: %d", pos_vd);
+                         std::cout << "size= " << strs.size() <<  "  V: "<< _vComponent<< std::endl;
                          // Log->Write("WARNING:\t assuming z=0 for all data");
                     }
-
                     _IdsTXT.push_back(atoi(strs[pos_id].c_str()));
                     _FramesTXT.push_back(atoi(strs[pos_fr].c_str()));
                     xs.push_back(atof(strs[pos_x].c_str()));
-                    ys.push_back(atof(strs[pos_y].c_str()));
+                    ys.push_back(atof(strs[pos_y].c_str()));                    
                     
                     if(strs.size() >= 5)
                          zs.push_back(atof(strs[pos_z].c_str()));
