@@ -633,7 +633,7 @@ void SaxParser::clearPoints()
 
 /// provided for convenience and will be removed in the next version
 bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
-{
+{    
     double captionsColor=0;//red
     if(!fileName.endsWith(".xml",Qt::CaseInsensitive)) return false;
     QString wd;
@@ -649,15 +649,20 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
     if(!building->InitGeometry())
         return false; // create the polygons
 
+    int room_id = -1;
+    int subroom_id = -1;
     for(auto&& itr_room: building->GetAllRooms())
     {
+         room_id++;         
         for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
         {
+             subroom_id++;
+             string room_caption = itr_room.second->GetCaption() + "_RId_" + QString::number(itr_room.first).toStdString();
+             string subroom_caption = itr_subroom.second->GetCaption()+ "_RId_" + QString::number(itr_room.first).toStdString();
               auto geometry= shared_ptr<FacilityGeometry>(
-                    new FacilityGeometry(itr_subroom.second->GetType(), itr_room.second->GetCaption(),itr_subroom.second->GetCaption()
+                    new FacilityGeometry(itr_subroom.second->GetType(), room_caption, subroom_caption
               )
         );
-
             int currentFloorPolyID=0;
             int currentObstPolyID=0;
 
@@ -783,9 +788,9 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
                 double pos[3]= {p._x*FAKTOR,p._y*FAKTOR,z1*FAKTOR};
                 geometry->addObjectLabel(pos,pos,"door_"+QString::number(tr->GetID()).toStdString()+
                                          +"_"+ QString::number(tr->GetUniqueID()).toStdString(),captionsColor);
-            }
+            }            
 
-            geoFac.AddElement(itr_subroom.second->GetRoomID(),itr_subroom.second->GetSubRoomID(),geometry);
+            geoFac.AddElement(room_id,subroom_id,geometry);
         }
     }
 
