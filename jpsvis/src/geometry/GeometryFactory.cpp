@@ -213,25 +213,24 @@ void GeometryFactory::ShowGeometryLabels(int status)
 
 bool GeometryFactory::RefreshView()
 {
+     int count = -2;
     if(_model.objectName()!="initialized")
     {
         _model.setObjectName("initialized");
         _model.setHorizontalHeaderItem( 0, new QStandardItem( "Entity" ) );
         //_model.setHorizontalHeaderItem( 1, new QStandardItem( "Description" ) );
-
         for (auto&& room: _geometryFactory)
         {
-
+             count++;
             //room caption
             //QStandardItem *roomcaption = new QStandardItem( QString("R %0").arg(room.first));
             //roomcaption->setEditable( false );
             //_model.setItem(room.first, 1, roomcaption);
             QString roomCaption;
             if (room.first>=0)
-                roomCaption = QString::fromStdString((_geometryFactory[room.first].begin())->second->GetRoomCaption());
+                roomCaption= QString::fromStdString((_geometryFactory[room.first].begin())->second->GetRoomCaption());
             else
                 roomCaption = "empty";
-
             QStandardItem *item = new QStandardItem( QString("Room: %0 (%1)")
                                                      .arg(room.first)
                                                      .arg(roomCaption)
@@ -251,15 +250,13 @@ bool GeometryFactory::RefreshView()
                                     .arg(QString::fromStdString(subroom.second->GetSubRoomCaption()))
                                     .arg(QString::fromStdString(subroom.second->GetDescription()))
                             );
-
                 child->setEditable(false);
                 child->setCheckable(true);
                 child->setCheckState(Qt::Checked);
                 item->appendRow( child );
-                _model.setItem(room.first, 0, item);
+                _model.setItem(count, 0, item);
                 QString data = QString("%0:%1").arg(room.first).arg(subroom.first);
                 child->setData(data);
-
                 //Subroom caption
                 //QStandardItem *childcaption = new QStandardItem( QString("S %0").arg(subroom.first));
                 //childcaption->setEditable( false );
