@@ -26,7 +26,7 @@
  **/
 
 
-#include "AIRouter.h"
+#include "SmokeRouter.h"
 #include "../Router.h"
 
 #include "BrainStorage.h"
@@ -41,7 +41,7 @@
 #include "../../pedestrian/Pedestrian.h"
 #include "../../tinyxml/tinyxml.h"
 
-AIRouter::AIRouter()
+SmokeRouter::SmokeRouter()
 {
     building=nullptr;
 //    cm_storage=nullptr;
@@ -49,21 +49,21 @@ AIRouter::AIRouter()
 
 }
 
-AIRouter::AIRouter(int id, RoutingStrategy s) : Router(id, s)
+SmokeRouter::SmokeRouter(int id, RoutingStrategy s) : Router(id, s)
 {
     building=nullptr;
 //    cm_storage=nullptr;
 //    sensor_manager=nullptr;
 }
 
-AIRouter::~AIRouter()
+SmokeRouter::~SmokeRouter()
 {
      //delete brain_storage;
      delete sensor_manager;
 
 }
 
-int AIRouter::FindExit(Pedestrian * p)
+int SmokeRouter::FindExit(Pedestrian * p)
 {
     //check for former goal.
     if((*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->HadNoDestination()) {
@@ -108,7 +108,7 @@ int AIRouter::FindExit(Pedestrian * p)
     return 1;
 }
 
-int AIRouter::FindDestination(Pedestrian * p)
+int SmokeRouter::FindDestination(Pedestrian * p)
 {
         // Discover doors
         sensor_manager->execute(p, SensorManager::NO_WAY);
@@ -178,7 +178,7 @@ int AIRouter::FindDestination(Pedestrian * p)
 
 
 
-bool AIRouter::Init(Building * b)
+bool SmokeRouter::Init(Building * b)
 {
      Log->Write("INFO:\tInit the Cognitive Map Router Engine");
      building = b;
@@ -201,17 +201,17 @@ bool AIRouter::Init(Building * b)
 }
 
 
-const optStorage &AIRouter::getOptions() const
+const optStorage &SmokeRouter::getOptions() const
 {
     return options;
 }
 
-void AIRouter::addOption(const std::string &key, const std::vector<std::string> &value)
+void SmokeRouter::addOption(const std::string &key, const std::vector<std::string> &value)
 {
     options.insert(std::make_pair(key, value));
 }
 
-bool AIRouter::LoadRoutingInfos(const std::string &filename)
+bool SmokeRouter::LoadRoutingInfos(const std::string &filename)
 {
     if(filename=="") return true;
 
@@ -286,7 +286,7 @@ bool AIRouter::LoadRoutingInfos(const std::string &filename)
     return true;
 }
 
-std::string AIRouter::GetRoutingInfoFile()
+std::string SmokeRouter::GetRoutingInfoFile()
 {
 
     TiXmlDocument doc(building->GetProjectFilename());

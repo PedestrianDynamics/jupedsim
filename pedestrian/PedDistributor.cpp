@@ -156,6 +156,7 @@ bool PedDistributor::Distribute(Building *building) const {
         }//if we have a directoy
         //------------------------------------- pack in function ------------
         else{
+
              auto possibleSubroomPositions = PedDistributor::PossiblePositions(*sr);
              shuffle(possibleSubroomPositions.begin(), possibleSubroomPositions.end(), dist->GetGenerator());
              allFreePosRoom[subroomID] = possibleSubroomPositions;
@@ -414,6 +415,7 @@ vector<Point>PedDistributor::PositionsOnFixY(double min_x, double max_x, double 
 }
 
 // format: id fr x y
+
 const vector<Point>  PedDistributor::GetPositionsFromFile(std::string filename, int n, std::string unit) const{
       float m2cm = 1.0;
       if(unit == "cm")
@@ -477,6 +479,7 @@ const vector<Point>  PedDistributor::GetPositionsFromFile(std::string filename, 
            Log->Write("ERROR: \tGetPositionsFromFile: number of peds <%d> in file. To simulate <%d>", first_ids.size(), n);      
       return positions;
 }
+
 
 vector<Point>  PedDistributor::PossiblePositions(const SubRoom &r) {
     double uni = 0.7; // wenn ein Raum in x oder y -Richtung schmaler ist als 0.7 wird in der Mitte verteilt

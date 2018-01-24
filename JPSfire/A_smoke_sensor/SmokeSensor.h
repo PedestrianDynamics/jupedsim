@@ -29,7 +29,7 @@
 #ifndef SMOKESENSOR_H
 #define SMOKESENSOR_H 1
 
-#include "../../routing/ai_router/sensor/AbstractSensor.h"
+#include "../../routing/smoke_router/sensor/AbstractSensor.h"
 #include <memory>
 
 class Point;

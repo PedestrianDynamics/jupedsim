@@ -33,7 +33,6 @@
 #include <unordered_map>
 #include <vector>
 #include "./cognitiveMap/cognitivemap.h"
-#include "./perception/visibleenvironment.h"
 #include "Brain.h"
 
 class Building;
@@ -66,10 +65,6 @@ private:
      const Building * const _building;
      BStorageType _brains;
 
-
-     //perception
-     //Complete environment
-     //VisibleEnvironment _visibleEnv;
 
      //cognitive map
      std::vector<ptrRegion> _regions;

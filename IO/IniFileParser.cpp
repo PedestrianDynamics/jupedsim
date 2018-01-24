@@ -40,7 +40,7 @@
 #include "../math/VelocityModel.h"
 #include "../routing/global_shortest/GlobalRouter.h"
 #include "../routing/quickest/QuickestPathRouter.h"
-#include "../routing/ai_router/AIRouter.h"
+#include "../routing/smoke_router/SmokeRouter.h"
 #include "../routing/ff_router/ffRouter.h"
 
 IniFileParser::IniFileParser(Configuration* config)
@@ -1090,13 +1090,12 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                Router *r = new QuickestPathRouter(id, ROUTING_QUICKEST);
                _config->GetRoutingEngine()->AddRouter(r);
           }
-          else if ((strategy == "AI") &&
+          else if ((strategy == "smoke") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
-               //pRoutingStrategies.push_back(make_pair(id, ROUTING_COGNITIVEMAP));
-               Router *r = new AIRouter(id, ROUTING_AI);
+               Router *r = new SmokeRouter(id, ROUTING_SMOKE);
                _config->GetRoutingEngine()->AddRouter(r);
 
-               Log->Write("\nINFO: \tUsing AIRouter");
+               Log->Write("\nINFO: \tUsing SmokeRouter");
                ///Parsing additional options
                if (!ParseCogMapOpts(e))
                     return false;
@@ -1203,8 +1202,8 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode* routingNode)
           return false;
      }
 
-     /// static_cast to get access to the method 'addOption' of the AIRouter
-     AIRouter* r = static_cast<AIRouter*>(_config->GetRoutingEngine()->GetAvailableRouters().back());
+     /// static_cast to get access to the method 'addOption' of the SmokeRouter
+     SmokeRouter* r = static_cast<SmokeRouter*>(_config->GetRoutingEngine()->GetAvailableRouters().back());
 
      std::vector<std::string> sensorVec;
      for (TiXmlElement* e = sensorNode->FirstChildElement("sensor"); e;

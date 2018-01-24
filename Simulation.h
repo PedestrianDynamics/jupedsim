@@ -45,7 +45,7 @@
 #include "routing/DirectionStrategy.h"
 #include "routing/RoutingEngine.h"
 #include "pedestrian/PedDistributor.h"
-#include "routing/ai_router/AIRouter.h"
+#include "routing/smoke_router/SmokeRouter.h"
 #include "events/EventManager.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "general/Configuration.h"

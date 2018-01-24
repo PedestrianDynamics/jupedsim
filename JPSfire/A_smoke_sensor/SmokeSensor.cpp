@@ -27,9 +27,9 @@
  **/
 
 #include "SmokeSensor.h"
-#include "../../routing/ai_router/NavigationGraph.h"
+#include "../../routing/smoke_router/NavigationGraph.h"
 #include "../../geometry/Building.h"
-#include "../../routing/ai_router/cognitiveMap/cognitivemap.h"
+#include "../../routing/smoke_router/cognitiveMap/cognitivemap.h"
 #include "../../pedestrian/Pedestrian.h"
 #include "../../geometry/SubRoom.h"
 #include "../generic/FDSMesh.h"

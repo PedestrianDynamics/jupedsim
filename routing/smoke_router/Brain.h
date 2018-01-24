@@ -2,7 +2,6 @@
 #define BRAIN_H
 
 #include "cognitiveMap/cognitivemap.h"
-#include "./perception/visibleenvironment.h"
 #include "./cognitiveMap/internnavigationnetwork.h"
 
 
@@ -15,7 +14,7 @@ class Brain
 
 public:
     Brain();
-    Brain(const Building* b,const Pedestrian* ped, const VisibleEnvironment* env, std::unordered_map<const SubRoom*, ptrIntNetwork>* roominternalNetworks);
+    Brain(const Building* b, const Pedestrian* ped, std::unordered_map<const SubRoom*, ptrIntNetwork>* roominternalNetworks);
 
     CognitiveMap& GetCognitiveMap();
 
@@ -27,7 +26,6 @@ private:
     const Pedestrian* _ped;
     CognitiveMap _cMap;
     //whole environment
-    const VisibleEnvironment* _wholeEnvironment;
     // reference of roominternalNetwork
     std::unordered_map<const SubRoom*, ptrIntNetwork>* _intNetworks;
     InternNavigationNetwork _currentIntNetwork;

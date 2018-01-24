@@ -47,7 +47,7 @@
 #include "../pedestrian/AgentsParameters.h"
 #include "../routing/global_shortest/GlobalRouter.h"
 #include "../routing/quickest/QuickestPathRouter.h"
-#include "../routing/ai_router/AIRouter.h"
+#include "../routing/smoke_router/SmokeRouter.h"
 #include "../IO/IniFileParser.h"
 #include <sys/stat.h>
 

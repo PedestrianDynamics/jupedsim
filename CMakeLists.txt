@@ -308,35 +308,29 @@ set(source_files
         routing/quickest/QuickestPathRouter.cpp
 
         #AI router
-        routing/ai_router/AIRouter.cpp
-        routing/ai_router/GraphNetwork.cpp
-        routing/ai_router/NavigationGraph.cpp
-        routing/ai_router/BrainStorage.cpp
-        routing/ai_router/navigation_graph/GraphEdge.cpp
-        routing/ai_router/navigation_graph/GraphVertex.cpp
-        routing/ai_router/sensor/RoomToFloorSensor.cpp
-        routing/ai_router/sensor/SensorManager.cpp
-        routing/ai_router/sensor/AbstractSensor.cpp
-        routing/ai_router/sensor/DiscoverDoorsSensor.cpp
-        routing/ai_router/sensor/JamSensor.cpp
-        routing/ai_router/sensor/LastDestinationsSensor.cpp
-        #routing/ai_router/sensor/SmokeSensor.cpp
-        routing/ai_router/sensor/locater.cpp
-        #routing/ai_router/fire_mesh/FireMesh.cpp
-        #routing/ai_router/fire_mesh/Knot.cpp
-        #routing/ai_router/fire_mesh/FireMeshStorage.cpp
-        routing/ai_router/cognitiveMap/associations.cpp
-        routing/ai_router/cognitiveMap/connection.cpp
-        routing/ai_router/cognitiveMap/cognitivemap.cpp
-        routing/ai_router/cognitiveMap/landmark.cpp
-        routing/ai_router/cognitiveMap/region.cpp
-        routing/ai_router/cognitiveMap/youareherepointer.cpp
-        routing/ai_router/cognitiveMap/cogmapoutputhandler.cpp
-        routing/ai_router/cognitiveMap/landmarknetwork.cpp
-        routing/ai_router/perception/perception.cpp
-        routing/ai_router/perception/visibleenvironment.cpp
-        routing/ai_router/Brain.cpp
-        routing/ai_router/cognitiveMap/internnavigationnetwork.cpp
+        routing/smoke_router/SmokeRouter.cpp
+        routing/smoke_router/GraphNetwork.cpp
+        routing/smoke_router/NavigationGraph.cpp
+        routing/smoke_router/BrainStorage.cpp
+        routing/smoke_router/navigation_graph/GraphEdge.cpp
+        routing/smoke_router/navigation_graph/GraphVertex.cpp
+        routing/smoke_router/sensor/RoomToFloorSensor.cpp
+        routing/smoke_router/sensor/SensorManager.cpp
+        routing/smoke_router/sensor/AbstractSensor.cpp
+        routing/smoke_router/sensor/DiscoverDoorsSensor.cpp
+        routing/smoke_router/sensor/JamSensor.cpp
+        routing/smoke_router/sensor/LastDestinationsSensor.cpp
+        routing/smoke_router/sensor/locater.cpp
+        routing/smoke_router/cognitiveMap/associations.cpp
+        routing/smoke_router/cognitiveMap/connection.cpp
+        routing/smoke_router/cognitiveMap/cognitivemap.cpp
+        routing/smoke_router/cognitiveMap/landmark.cpp
+        routing/smoke_router/cognitiveMap/region.cpp
+        routing/smoke_router/cognitiveMap/youareherepointer.cpp
+        routing/smoke_router/cognitiveMap/cogmapoutputhandler.cpp
+        routing/smoke_router/cognitiveMap/landmarknetwork.cpp
+        routing/smoke_router/Brain.cpp
+        routing/smoke_router/cognitiveMap/internnavigationnetwork.cpp
         visiLibity/source_code/visilibity.cpp
 
         poly2tri/common/shapes.cpp
@@ -386,35 +380,29 @@ set(header_files
         routing/quickest/QuickestPathRouter.h
 
         #AI router
-        routing/ai_router/AIRouter.h
-        routing/ai_router/GraphNetwork.h
-        routing/ai_router/NavigationGraph.h
-        routing/ai_router/BrainStorage.h
-        routing/ai_router/navigation_graph/GraphEdge.h
-        routing/ai_router/navigation_graph/GraphVertex.h
-        routing/ai_router/sensor/AbstractSensor.h
-        routing/ai_router/sensor/RoomToFloorSensor.h
-        routing/ai_router/sensor/SensorManager.h
-        routing/ai_router/sensor/DiscoverDoorsSensor.h
-        routing/ai_router/sensor/JamSensor.h
-        routing/ai_router/sensor/LastDestinationsSensor.h
-        #routing/ai_router/sensor/SmokeSensor.h
-        routing/ai_router/sensor/locater.h
-        #routing/ai_router/fire_mesh/FireMesh.h
-        #routing/ai_router/fire_mesh/Knot.h
-        #routing/ai_router/fire_mesh/FireMeshStorage.h
-        routing/ai_router/cognitiveMap/associations.h
-        routing/ai_router/cognitiveMap/connection.cpp
-        routing/ai_router/cognitiveMap/cognitivemap.h
-        routing/ai_router/cognitiveMap/landmark.h
-        routing/ai_router/cognitiveMap/region.h
-        routing/ai_router/cognitiveMap/youareherepointer.h
-        routing/ai_router/cognitiveMap/cogmapoutputhandler.h
-        routing/ai_router/cognitiveMap/landmarknetwork.h
-        routing/ai_router/perception/perception.h
-        routing/ai_router/perception/visibleenvironment.h
-        routing/ai_router/Brain.h
-        routing/ai_router/cognitiveMap/internnavigationnetwork.h
+        routing/smoke_router/SmokeRouter.h
+        routing/smoke_router/GraphNetwork.h
+        routing/smoke_router/NavigationGraph.h
+        routing/smoke_router/BrainStorage.h
+        routing/smoke_router/navigation_graph/GraphEdge.h
+        routing/smoke_router/navigation_graph/GraphVertex.h
+        routing/smoke_router/sensor/AbstractSensor.h
+        routing/smoke_router/sensor/RoomToFloorSensor.h
+        routing/smoke_router/sensor/SensorManager.h
+        routing/smoke_router/sensor/DiscoverDoorsSensor.h
+        routing/smoke_router/sensor/JamSensor.h
+        routing/smoke_router/sensor/LastDestinationsSensor.h
+        routing/smoke_router/sensor/locater.h
+        routing/smoke_router/cognitiveMap/associations.h
+        routing/smoke_router/cognitiveMap/connection.cpp
+        routing/smoke_router/cognitiveMap/cognitivemap.h
+        routing/smoke_router/cognitiveMap/landmark.h
+        routing/smoke_router/cognitiveMap/region.h
+        routing/smoke_router/cognitiveMap/youareherepointer.h
+        routing/smoke_router/cognitiveMap/cogmapoutputhandler.h
+        routing/smoke_router/cognitiveMap/landmarknetwork.h
+        routing/smoke_router/Brain.h
+        routing/smoke_router/cognitiveMap/internnavigationnetwork.h
         visiLibity/source_code/visilibity.hpp
 
         pedestrian/Pedestrian.h

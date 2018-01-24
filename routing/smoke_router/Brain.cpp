@@ -6,11 +6,10 @@ Brain::Brain()
 
 }
 
-Brain::Brain(const Building *b, const Pedestrian *ped, const VisibleEnvironment *env, std::unordered_map<const SubRoom *, ptrIntNetwork> *roominternalNetworks)
+Brain::Brain(const Building *b, const Pedestrian *ped, std::unordered_map<const SubRoom *, ptrIntNetwork> *roominternalNetworks)
 {
     _b=b;
     _ped=ped;
-    _wholeEnvironment=env;
     _intNetworks=roominternalNetworks;
     _cMap=CognitiveMap(_b,_ped);
 }

@@ -44,8 +44,6 @@ BrainStorage::BrainStorage(const Building * const b, std::string cogMapStatus, s
     _cogMapStatus=cogMapStatus;
     _cogMapFiles=cogMapFiles;
 
-    //Complete Environment
-    //_visibleEnv=VisibleEnvironment(b);
 
     //internal graph networks in every subroom
     for (auto it=_building->GetAllRooms().begin(); it!=_building->GetAllRooms().end(); ++it)
@@ -282,7 +280,6 @@ void BrainStorage::CreateBrain(BStorageKeyType ped)
 
      _brains.insert(std::make_pair(ped, std::make_shared<Brain>(_building,
                                                                 ped,
-                                                                nullptr,
                                                                 &_roominternalNetworks)));//  creator->CreateCognitiveMap(ped)));
 
 

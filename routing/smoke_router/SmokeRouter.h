@@ -1,5 +1,5 @@
 /**
- * \file        CognitiveMapRouter.h
+ * \file        SmokeRouter.h
  * \date        Feb 1, 2014
  * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
@@ -27,8 +27,8 @@
  **/
 
 
-#ifndef AIROUTER_H_
-#define AIROUTER_H_
+#ifndef SMOKEROUTER_H_
+#define SMOKEROUTER_H_
 
 #include "../Router.h"
 #include <string>
@@ -52,11 +52,11 @@ class NavLine;
 //c++11 alias: Container to store options for the router (i. a. sensors)
 using optStorage = std::unordered_map<std::string,std::vector<std::string> >;
 
-class AIRouter: public Router {
+class SmokeRouter: public Router {
 public:
-     AIRouter();
-     AIRouter(int id, RoutingStrategy s);
-     virtual ~AIRouter();
+     SmokeRouter();
+     SmokeRouter(int id, RoutingStrategy s);
+     virtual ~SmokeRouter();
 
 
      virtual int FindExit(Pedestrian* p);
@@ -98,4 +98,4 @@ private:
 
 };
 
-#endif /* COGNITIVEMAPROUTER_H_ */
+#endif /* SMOKEROUTER_H_ */
