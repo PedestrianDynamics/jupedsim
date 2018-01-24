@@ -32,14 +32,10 @@
 #include "Obstacle.h"
 #include "SubRoom.h"
 #include "Transition.h"
-#include "Hline.h"
-
 
 #ifdef _SIMULATOR
 #include "../pedestrian/Pedestrian.h"
 #endif //_SIMULATOR
-
-#include <cmath>
 
 using namespace std;
 

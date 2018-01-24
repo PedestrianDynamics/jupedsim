@@ -1,10 +1,8 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.optimize import curve_fit
-import matplotlib.pyplot as plt
 import sys
 from sys import exit
-
 
 fps = 8
 x0 = 61

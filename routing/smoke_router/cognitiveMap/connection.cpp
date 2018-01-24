@@ -1,5 +1,4 @@
 #include "connection.h"
-#include <utility>
 
 Connection::Connection(const int &id, const std::string &caption, const std::string &type, const ptrLandmark &landmark1, const ptrLandmark &landmark2)
 {

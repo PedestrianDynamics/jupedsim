@@ -1,9 +1,5 @@
 #include "internnavigationnetwork.h"
 
-#include <boost/graph/graph_traits.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/dijkstra_shortest_paths.hpp>
-#include <boost/geometry.hpp>
 #include "../../../geometry/Obstacle.h"
 
 InternNavigationNetwork::InternNavigationNetwork()

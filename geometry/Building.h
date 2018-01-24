@@ -29,13 +29,13 @@
 #ifndef _BUILDING_H
 #define _BUILDING_H
 
-#include <cstdlib>
-#include <string>
-#include <vector>
-#include <fstream>
-#include <cfloat>
-#include <map>
-#include <memory>
+// nclude <cstdlib>
+// #include <string>
+// #include <vector>
+// #include <fstream>
+// #include <cfloat>
+// #include <map>
+// #include <memory>
 
 #include "Room.h"
 #include "NavLine.h"

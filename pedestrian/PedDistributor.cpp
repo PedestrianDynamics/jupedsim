@@ -28,26 +28,14 @@
 
 #include <cmath>
 #include "PedDistributor.h"
-#include "../tinyxml/tinyxml.h"
-#include "../geometry/Obstacle.h"
-#include "../routing/RoutingEngine.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/SubRoom.h"
-#include "../IO/OutputHandler.h"
 #include "../IO/PedDistributionParser.h"
-#include "PedDistributionLoader.h"
-#include "../hybrid/PedDistributionFromProtobufLoader.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/lambda/bind.hpp>
 #include <boost/foreach.hpp>
-#include <boost/algorithm/string.hpp> //split
 #include <boost/range/combine.hpp>
-
-#include<fstream>
-#include <string>
-#include <vector>
-
 
 using namespace std;
 namespace fs = boost::filesystem;

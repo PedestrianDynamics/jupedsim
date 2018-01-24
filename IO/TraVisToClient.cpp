@@ -29,9 +29,6 @@
 /********* include files ******************************************************/
 
 #include <iostream>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
 #include "TraVisToClient.h"
 #include "../general/Macros.h"
 

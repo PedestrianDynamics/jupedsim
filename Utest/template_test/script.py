@@ -1,12 +1,11 @@
 #! /usr/bin/env python
-import numpy as np
-import os, argparse, logging, time, sys
-from os import path, system
-from sys import argv ,exit
-import subprocess, glob
-import multiprocessing
-import matplotlib.pyplot as plt
-import re
+import glob
+import logging
+import os
+import subprocess
+import sys
+from os import path
+from sys import argv, exit
 
 #=========================
 testnr = 1

@@ -21,7 +21,7 @@
 
 #include "PedDistributionParser.h"
 #include "../tinyxml/tinyxml.h"
-
+#include <cstdarg> // va_start and va_end
 PedDistributionParser::PedDistributionParser(const Configuration* configuration)
         :_configuration(configuration)
 {

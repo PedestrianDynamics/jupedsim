@@ -30,12 +30,7 @@
 #include "../../pedestrian/Pedestrian.h"
 #include "../generic/FDSMesh.h"
 #include "../generic/FDSMeshStorage.h"
-#include "../../pedestrian/PedDistributor.h"
 #include "../../tinyxml/tinyxml.h"
-#include <set>
-#include <algorithm>
-#include <math.h>
-#include "../../IO/OutputHandler.h"
 #include <boost/filesystem.hpp>
 using namespace boost::filesystem;
 

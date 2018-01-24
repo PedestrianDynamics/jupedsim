@@ -27,15 +27,9 @@
 
 
 #include "StartDistribution.h"
-#include <cmath>
-#include <cfloat>
 #include "AgentsParameters.h"
 #include "Pedestrian.h"
-#include "../geometry/Building.h"
-#include "../geometry/Point.h"
-#include "../routing/RoutingEngine.h"
 #include "../geometry/SubRoom.h"
-#include "boost/math/distributions.hpp"
 
 using namespace std;
 

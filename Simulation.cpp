@@ -35,11 +35,8 @@
 #include "math/GompertzModel.h"
 #include "math/GradientModel.h"
 #include "pedestrian/AgentsQueue.h"
-#include "pedestrian/AgentsSourcesManager.h"
 
 #ifdef _OPENMP
-
-#include <omp.h>
 
 #else
 #define omp_get_thread_num() 0

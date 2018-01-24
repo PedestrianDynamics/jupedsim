@@ -1,8 +1,6 @@
-from multiprocessing import Pool, current_process
 import numpy as np
 import matplotlib.pyplot as plt
 from sys import argv, exit
-import pandas as pd
 import os, time
 
 from pylab import Rectangle
@@ -11,8 +9,6 @@ if len(argv)<=2:
     print("usage: %s, filename geometryfile"%argv[0])
     exit()
 
-
-from itertools import product
 try:
     import xml.etree.cElementTree as ET
 except ImportError:

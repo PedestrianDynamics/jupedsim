@@ -36,10 +36,11 @@ Source
 http://www.rimea.de/fileadmin/files/dok/richtlinien/RiMEA_Richtlinie_3.0.0_-_D-E.pdf
 """
 
-import os
-import sys
 import numpy as np
+import os
 import pylab as P
+import sys
+
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
 from sys import *
 sys.path.append(utestdir)

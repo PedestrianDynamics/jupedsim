@@ -28,11 +28,8 @@
 
 #include "OutputHandler.h"
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <cstdlib>
 #include <cmath>
-
+#include <cstdarg> // va_start and va_end
 using namespace std;
 
 void OutputHandler::incrementWarnings()

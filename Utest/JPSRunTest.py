@@ -7,12 +7,12 @@ See template_test/How_to_make_new_test.txt
 import fnmatch
 import glob
 import logging
-from os import path
+import numpy as np
 import os
-from stat import S_ISREG, ST_MODE, ST_MTIME
 import subprocess
 import sys
-import numpy as np
+from os import path
+from stat import S_ISREG, ST_MODE, ST_MTIME
 
 __author__ = 'Oliver Schmidts'
 __email__ = 'dev@jupedsim.org'

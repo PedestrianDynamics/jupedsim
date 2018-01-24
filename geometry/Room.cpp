@@ -28,10 +28,6 @@
 
 #include "Room.h"
 #include "SubRoom.h"
-#include "../IO/OutputHandler.h"
-
-#include <sstream>
-#include <memory>
 
 using namespace std;
 

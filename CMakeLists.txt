@@ -36,6 +36,12 @@ endif ()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${warnings}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${warnings}")
 
+# TODO clean up. no flags.
+#set(CMAKE_CXX_STANDARD 11)
+#set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#set(CMAKE_CXX_EXTENSIONS OFF)
+
+
 if (NOT BUILD_TESTING)
     set(BUILD_TESTING OFF) # test units & python tests are not generated.
 endif (NOT BUILD_TESTING)
@@ -477,6 +483,11 @@ set(header_files
         )
 
 add_library(core STATIC ${source_files})
+find_package(ZLIB REQUIRED)
+include_directories(${ZLIB_INCLUDE_DIRS})
+
+add_library(cnpy SHARED "cnpy/cnpy.cpp")
+target_link_libraries(cnpy ${ZLIB_LIBRARIES})
 
 #add_library ( core SHARED ${source_files} )
 
@@ -497,7 +508,7 @@ if (Boost_FOUND)
     # suppress warnings in boost libraries with attribute SYSTEM
     include_directories(SYSTEM ${Boost_INCLUDE_DIR})
     # todo: is this necessary?
-    target_link_libraries(core ${Boost_LIBRARIES})
+    target_link_libraries(core ${Boost_LIBRARIES} cnpy)
 endif ()
 
 target_link_libraries(jpscore core)

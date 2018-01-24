@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-import numpy as np
-import os, logging, time, sys
-from sys import argv, exit
-import subprocess, glob
-from os import path
-import multiprocessing 
+import glob
+import logging
 import matplotlib.pyplot as plt
+import multiprocessing
+import numpy as np
+import os
+import subprocess
+import sys
+import time
+from os import path
+from sys import argv, exit
+
 
 def get_empirical_flow():
     files = glob.glob("experiments/*.txt")
@@ -79,7 +84,7 @@ if __name__ == "__main__":
     #    lib_path = os.path.abspath(lib_path)
     sys.path.append(lib_path)
     from utils import SUCCESS, FAILURE
-    from utils import parse_file, flow, rolling_flow
+    from utils import parse_file, rolling_flow
     # from utils import get_maxtime
     os.chdir("..")
     TRUNK = os.getcwd()

@@ -28,8 +28,6 @@
 
 #include "GraphEdge.h"
 
-#include<vector>
-
 #include "GraphVertex.h"
 #include "../../../geometry/SubRoom.h"
 #include "../../../geometry/Crossing.h"

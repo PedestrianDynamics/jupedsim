@@ -31,10 +31,8 @@
 
 #include "KrauszModel.h"
 #include "../pedestrian/Pedestrian.h"
-#include "../routing/DirectionStrategy.h"
 #include "../mpi/LCGrid.h"
 #include "../geometry/SubRoom.h"
-#include "../geometry/Wall.h"
 
 #ifdef _OPENMP
 #include <omp.h>

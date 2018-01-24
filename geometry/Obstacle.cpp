@@ -28,16 +28,10 @@
 
 #include "Obstacle.h"
 
-#include <cmath>
-#include <cstdio>
 #include <cstdlib>
-#include <iterator>
-#include <string>
-#include <vector>
 
 #include "../IO/OutputHandler.h"
 #include "Line.h"
-#include "Point.h"
 #include "Wall.h"
 
 

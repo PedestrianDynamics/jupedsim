@@ -1,14 +1,13 @@
-from itertools import product
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
     import xml.etree.ElementTree as ET
 
 
-from xml.dom import minidom    
 import logging
-import numpy as np    
+import numpy as np
 import sys
+from xml.dom import minidom
 
 logfile='log.dat'
 logging.basicConfig(filename=logfile, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

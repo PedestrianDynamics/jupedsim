@@ -6,7 +6,6 @@
 #include "UnivFFviaFM.h"
 #include "../../geometry/Line.h"
 #include "../../geometry/Building.h"
-#include "../../geometry/Room.h"
 #include "../../geometry/SubRoom.h"
 #include "../../pedestrian/Pedestrian.h"
 #include "mesh/RectGrid.h"

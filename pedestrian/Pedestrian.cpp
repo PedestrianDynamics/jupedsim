@@ -28,19 +28,11 @@
 
 #include <cassert>
 #include "../geometry/Building.h"
-#include "../geometry/NavLine.h"
-#include "../routing/Router.h"
 #include "../geometry/SubRoom.h"
-#include "../IO/OutputHandler.h"
 #include "Knowledge.h"
 #include "Pedestrian.h"
-#include "PedDistributor.h"
 
-#include "../JPSfire/generic/FDSMesh.h"
-#include "../JPSfire/generic/Knot.h"
 #include "../JPSfire/generic/FDSMeshStorage.h"
-#include "../JPSfire/B_walking_speed/WalkingSpeed.h"
-#include "../JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
 
 using namespace std;
 

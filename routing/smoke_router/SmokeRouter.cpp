@@ -25,18 +25,11 @@
  *
  **/
 
-
 #include "SmokeRouter.h"
 #include "../Router.h"
 
 #include "BrainStorage.h"
-#include "./cognitiveMap/cognitivemap.h"
-#include "NavigationGraph.h"
 #include "./sensor/SensorManager.h"
-
-#include "../../geometry/SubRoom.h"
-#include "../../geometry/NavLine.h"
-#include "../../geometry/Building.h"
 
 #include "../../pedestrian/Pedestrian.h"
 #include "../../tinyxml/tinyxml.h"

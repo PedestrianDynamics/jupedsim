@@ -38,9 +38,7 @@
 
 #include "../../../geometry/Building.h"
 #include "../BrainStorage.h"
-#include "../navigation_graph/GraphVertex.h"
-#include "../NavigationGraph.h"
-#include "../cognitiveMap/cognitivemap.h"
+
 #define UNUSED(x) [&x]{}()  // c++11 silence warnings
 
 SensorManager::SensorManager(const Building * b, BrainStorage * cms)

@@ -1,11 +1,16 @@
 
 # help: python3 makeini.py -h
-import os, sys, glob
-from shutil import copy2, rmtree, move
-import logging, types, argparse
-import errno, time
-from numpy import *
+import argparse
+import errno
+import glob
+import logging
+import os
+import sys
+import time
 from itertools import product
+from numpy import *
+from shutil import copy2, rmtree, move
+
 try:
     import xml.etree.cElementTree as ET
 except ImportError:

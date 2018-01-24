@@ -2,9 +2,9 @@
 plot fundamental diagram produced by runtest
 just to check the results without reruning the test 
 """
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 
 simfiles = glob.glob("Output/Fundamental_Diagram/Individual_FD/*.dat")
 expfiles = glob.glob("data/*.txt")

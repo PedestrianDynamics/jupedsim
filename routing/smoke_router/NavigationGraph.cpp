@@ -29,11 +29,6 @@
 
 #include "NavigationGraph.h"
 
-#include <iostream>
-#include <utility>
-#include <fstream>
-
-#include "navigation_graph/GraphEdge.h"
 #include "../../geometry/Building.h"
 #include "../../geometry/SubRoom.h"
 

@@ -2,11 +2,12 @@
 measure the fundamental diagram in a 1d scenario.
 return density, velocity
 """
+import glob
 import numpy as np
 import os
-import glob
-from sys import *
 import sys
+from sys import *
+
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
 path.append(utestdir)
 from utils import *

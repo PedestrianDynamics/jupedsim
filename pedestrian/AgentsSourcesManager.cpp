@@ -29,16 +29,9 @@
 
 #include "AgentsSourcesManager.h"
 #include "Pedestrian.h"
-#include "StartDistribution.h"
-#include "PedDistributor.h"
-#include "AgentsSource.h"
-#include "../geometry/Building.h"
-#include "../geometry/Point.h"
 
 #include "../mpi/LCGrid.h"
-#include <iostream>
 #include <thread>
-#include <chrono>
 #include "AgentsQueue.h"
 
 #include "../voronoi-boost/VoronoiPositionGenerator.h"

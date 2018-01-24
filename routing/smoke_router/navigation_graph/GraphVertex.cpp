@@ -28,18 +28,10 @@
 
 #include "GraphVertex.h"
 
-#include <utility>
-#include <cmath>
-#include <set>
-#include <map>
-#include <queue>
-#include <functional>
-
 #include "GraphEdge.h"
 #include "../../../geometry/SubRoom.h"
 #include "../NavigationGraph.h"
 #include "../../../geometry/Transition.h"
-#include <algorithm>
 
 using namespace std;
 #define UNUSED(x) [&x]{}()  // c++11 silence warnings
