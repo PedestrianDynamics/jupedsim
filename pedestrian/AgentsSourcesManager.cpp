@@ -72,7 +72,7 @@ void AgentsSourcesManager::Run()
      //it might be better to use a timer
      _isCompleted = false;
      bool finished = false;
-     long updateFrequency = 1;
+     long updateFrequency = 1; //TODO parse this from inifile
      do
      { //@todo: break if max simulation time is reached.
           int current_time = (int)Pedestrian::GetGlobalTime();
@@ -92,9 +92,11 @@ void AgentsSourcesManager::Run()
 bool AgentsSourcesManager::ProcessAllSources() const
 {
      bool empty=true;
+     double current_time = Pedestrian::GetGlobalTime();
+//     std::cout << "\n -- current time: " << current_time << " number " << _building->GetAllPedestrians().size() << std::endl;
      for (const auto& src : _sources)
      {
-          if (src->GetPoolSize())
+          if (src->GetPoolSize() && (src->GetPlanTime() <= current_time) )// maybe diff<eps
           {
                vector<Pedestrian*> peds;
                src->RemoveAgentsFromPool(peds,src->GetFrequency());
@@ -104,9 +106,14 @@ bool AgentsSourcesManager::ProcessAllSources() const
                //todo: here every pedestrian needs an exitline
                if( !ComputeBestPositionVoronoiBoost(src.get(), peds, _building) )
                     Log->Write("WARNING:\tThere was no place for some pedestrians");
+
                AgentsQueueIn::Add(peds);
                empty = false;
+               //src->Dump();
           }
+          if (src->GetPlanTime() > current_time) // for the case we still expect
+                                                 // agents coming
+               empty = false;
           //src->Dump();//exit(0);
      }
      return empty;

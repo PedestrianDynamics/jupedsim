@@ -449,15 +449,15 @@ Point VelocityModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
           {
                 f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)), centroid, inside);
           }
-          int uid1= goal->GetUniqueID();
-          int uid2=ped->GetExitIndex();
-          // ignore my transition consider closed doors
-          //closed doors are considered as wall
+          // int uid1= goal->GetUniqueID();
+          // int uid2=ped->GetExitIndex();
+          // // ignore my transition consider closed doors
+          // //closed doors are considered as wall
 
-          if((uid1 != uid2) || (goal->IsOpen()==false ))
-          {
-                f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)), centroid, inside);
-          }
+          // if((uid1 != uid2) || (goal->IsOpen()==false ))
+          // {
+          //      f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)), centroid, inside);
+          // }
      }
 
      return f;
@@ -482,7 +482,7 @@ Point VelocityModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
            e_iw = dist / Distance;
      }
      else {
-           Log->Write("WARNING:\t Velocity: forceRepWall() ped %d is too near to the wall (dist=%f)", ped->GetID(), Distance);
+          Log->Write("WARNING:\t Velocity: forceRepWall() ped %d [%f, %f] is too near to the wall [%f, %f]-[%f, %f] (dist=%f)", ped->GetID(), ped->GetPos()._y, ped->GetPos()._y, w.GetPoint1()._x, w.GetPoint1()._y,  w.GetPoint2()._x, w.GetPoint2()._y,Distance);
           Point new_dist = centroid - ped->GetPos();
           new_dist = new_dist/new_dist.Norm();
           //printf("new distance = (%f, %f) inside=%d\n", new_dist._x, new_dist._y, inside);

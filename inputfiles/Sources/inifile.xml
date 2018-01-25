@@ -5,7 +5,7 @@
   <!-- seed used for initialising random generator -->
   <seed>12542</seed>
   <!-- geometry file -->
-  <geometry>bidirectional_geo.xml</geometry>
+  <geometry>geometry.xml</geometry>
   <max_sim_time>5000</max_sim_time>
 
   <!-- trajectories file and format -->
@@ -19,13 +19,13 @@
   <!--<hybrid_simulation server="zam597" port="9999" />-->
 
   <!-- where to store the logs -->
-  <!--<logfile>outputfiles/log.txt</logfile> -->
+  <!-- <logfile>log.txt</logfile> -->
 
   <!-- traffic information: e.g closed doors or smoked rooms -->
   <traffic_constraints>
     <!-- doors states are: close or open -->
     <doors>
-	<!-- <door trans_id="5" caption="exit" state="close" /> -->
+	<!-- <door trans_id="1" caption="exit" state="open" /> -->
     </doors>
   </traffic_constraints>
 
@@ -73,22 +73,22 @@
   <!--persons information and distribution -->
   <agents operational_model_id="3">
     <agents_distribution>
-      <group group_id="0" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" x_min="3" x_max="5" y_min="3" y_max="5" />
+      <group group_id="0" room_id="0" subroom_id="0" number="20" router_id="1" agent_parameter_id="1" x_min="3" x_max="5" y_min="3" y_max="5" />
       <group group_id="1" room_id="1" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="2" />
       <group group_id="2" room_id="2" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" />
       <group group_id="3" room_id="3" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="2" />
       <group group_id="4" room_id="4" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="2" />
       <!-- real start group -->
-      <group group_id="5" room_id="0" subroom_id="0" number="60" router_id="1" agent_parameter_id="1" goal_id="2" y_min="5.2"/>
+      <group group_id="5" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="2" y_min="5.2"/>
       <group group_id="6" room_id="2" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="4" />
       <group group_id="7" room_id="1" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" start_x="4.5" start_y="-1.63" goal_id="4" />
     </agents_distribution>
 
     <agents_sources><!-- frequency in persons/seconds -->
-      <source id="1" frequency="2" agents_max="80" group_id="6" caption="source 1" />
-      <source_ id="2" frequency="5" agents_max="80" group_id="5" caption="source 2" />
-      <source_ id="3" frequency="10" agents_max="50" group_id="3" caption="source 3" />
-      <source_ id="4" frequency="10" agents_max="50" group_id="4" caption="source 4" />
+      <source id="1" frequency="2" agents_max="5" group_id="6" caption="source 1" />
+      <source id="2" agent_id="3" time="5" group_id="5" caption="source 2" />
+      <source id="3" agent_id="2" time="3" group_id="5" caption="source 3" />
+      <source id="4" agent_id="8" time="7" group_id="5" caption="source 4" />
     </agents_sources>
 
   </agents>

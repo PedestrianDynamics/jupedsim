@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## v0.8.3 [unreleased]
 ### Added
+- New attributes for sources `agent_id` and `time` for scheduling agent's appearance. See #258 for discussion.
 - Router tests
 - Option for printing progressbar:  `<progressbar/>` cfc65f22
 
