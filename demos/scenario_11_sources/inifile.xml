@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
+
+  <!-- seed used for initialising random generator -->
+  <seed>12542</seed>
+  <!-- geometry file -->
+  <geometry>geometry.xml</geometry>
+  <max_sim_time>5000</max_sim_time>
+
+  <!-- trajectories file and format -->
+  <trajectories format="xml-plain" fps="16" color_mode="final_goal">
+	    <file location="trajectories.xml" />
+    <!-- <socket_ hostname="127.0.0.1" port="8989" /> -->
+  </trajectories>
+
+  <!-- where to store the logs -->
+  <logfile>log.txt</logfile>
+
+  <!-- traffic information: e.g closed doors or smoked rooms -->
+  <traffic_constraints>
+    <!-- doors states are: close or open -->
+    <doors>
+	<!-- <door trans_id="1" caption="exit" state="open" /> -->
+    </doors>
+  </traffic_constraints>
+
+  <routing>
+    <goals>
+      <goal id="3" final="true" caption="goal3">
+        <polygon>
+          <vertex px="3.2" py="12.0" />
+          <vertex px="3.2" py="13.0" />
+          <vertex px="5.6" py="13.0" />
+          <vertex px="5.6" py="12.0" />
+          <vertex px="3.2" py="12.0" />
+        </polygon>
+      </goal>
+      <goal id="1" final="true" caption="goal1">
+        <polygon>
+          <vertex px="3.6" py="-3.0" />
+          <vertex px="3.6" py="-4.0" />
+          <vertex px="5.2" py="-4.0" />
+          <vertex px="5.2" py="-3.0" />
+          <vertex px="3.6" py="-3.0" />
+        </polygon>
+      </goal>
+      <goal id="2" final="true" caption="goal2">
+        <polygon>
+          <vertex px="18" py="2.8" />
+          <vertex px="19" py="2.8" />
+          <vertex px="19" py="6.4" />
+          <vertex px="18" py="6.4" />
+          <vertex px="18" py="2.8" />
+        </polygon>
+      </goal>
+      <goal id="4" final="true" caption="goal4">
+        <polygon>
+          <vertex px="-3.0" py="2.8" />
+          <vertex px="-4.0" py="2.8" />
+          <vertex px="-4.0" py="6.4" />
+          <vertex px="-3.0" py="6.4" />
+          <vertex px="-3.0" py="2.8" />
+        </polygon>
+      </goal>
+    </goals>
+  </routing>
+
+  <!--persons information and distribution -->
+  <agents operational_model_id="3">
+    <agents_distribution>
+      <group group_id="0" room_id="0" subroom_id="0" number="20" router_id="1" agent_parameter_id="1" x_min="3" x_max="5" y_min="3" y_max="5" />
+    </agents_distribution>
+
+    <agents_sources><!-- frequency in persons/seconds -->
+      <source id="1" frequency="2" agents_max="5" group_id="6" caption="source 1" />
+      <source id="2" agent_id="3" time="5" group_id="5" caption="source 2" />
+      <source id="3" agent_id="2" time="3" group_id="5" caption="source 3" />
+      <source id="4" agent_id="8" time="7" group_id="5" caption="source 4" />
+    </agents_sources>
+
+  </agents>
+
+  <operational_models>
+     <model operational_model_id="3" description="Tordeux2015">
+      <model_parameters>
+        <solver>euler</solver>
+        <stepsize>0.01</stepsize>
+        <exit_crossing_strategy>2</exit_crossing_strategy>
+        <linkedcells enabled="true" cell_size="2.2" />
+        <force_ped a="5" D="0.1" />
+        <force_wall a="5" D="0.02" />
+      </model_parameters>
+      <agent_parameters agent_parameter_id="1">
+        <v0 mu="1.0" sigma="0.001" />
+        <bmax mu="0.15" sigma="0.00000" /> <!-- this is l, assuming peds are circles with constant radius -->
+        <bmin mu="0.15" sigma="0.00000" />
+        <amin mu="0.15" sigma="0.00000" />
+        <tau mu="0.5" sigma="0.001" />
+        <atau mu="0.0" sigma="0.00000" />
+        <T mu="1" sigma="0.001" />
+      </agent_parameters>
+    </model>
+  </operational_models>
+
+  <route_choice_models>
+    <router router_id="1" description="global_shortest">
+      <parameters></parameters>
+    </router>
+    <router router_id="2" description="quickest">
+      <parameters></parameters>
+    </router>
+
+  </route_choice_models>
+
+</JuPedSim>
