@@ -32,6 +32,7 @@
 #include "../../../geometry/SubRoom.h"
 #include "../NavigationGraph.h"
 #include "../../../geometry/Transition.h"
+#include <queue>
 
 using namespace std;
 #define UNUSED(x) [&x]{}()  // c++11 silence warnings
