@@ -106,6 +106,7 @@ bool PedData::InitializeVariables(const string& filename)
           int pos_y=3;
           int pos_z=4;
           int pos_vd=5; //velocity direction
+          int fps_found = 0;
           while ( getline(fdata,line) )
           {
                boost::algorithm::trim(line);
@@ -119,11 +120,21 @@ bool PedData::InitializeVariables(const string& filename)
                          line.erase(0,1); // remove #
                          boost::split(strs, line , boost::is_any_of(":"),boost::token_compress_on);
                          if(strs.size()>1)
-                              _fps= atof(strs[1].c_str());
-
+                         {     
+                              _fps= atof(strs[1].c_str());                              
+                              if(_fps == 0.0) // in case not valid fps found
+                              {
+                                   Log->Write("ERROR:\t Could not convert fps <%s>", strs[1].c_str());
+                                   exit(1);                                              
+                              }
+                         }
+                         else{
+                              Log->Write("ERROR:\tFrame rate fps not defined");
+                              exit(1);                              
+                         }                         
                          Log->Write("INFO:\tFrame rate fps: <%.2f>", _fps);
+                         fps_found = 1;
                     }
-
                     if(line.find("ID") != std::string::npos &&
                        line.find("FR") != std::string::npos &&
                        line.find("X") != std::string::npos &&
@@ -193,6 +204,11 @@ bool PedData::InitializeVariables(const string& filename)
                     }
                }
                lineNr++;
+          }// while
+          if(fps_found == 0)
+          {
+               Log->Write("ERROR:\tFrame rate fps not define");
+               exit(1);
           }
           Log->Write("INFO:\t Finished reading the data");
           
