@@ -62,6 +62,8 @@ private:
 
      bool ParseCogMapOpts(TiXmlNode* routingNode);
 
+     bool ParseAIOpts(TiXmlNode* routingNode);
+
      bool ParseLinkedCells(const TiXmlNode& linkedCellNode);
 
      bool ParseStepSize(TiXmlNode& stepNode);
