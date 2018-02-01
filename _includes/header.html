@@ -62,7 +62,7 @@
 
 		  {% if include.type == "post" %}
                         {% if page.update %}            
-		        <span class="post-meta">Created: {{ page.date | date: "%B %-d, %Y" }} <br>(last updated:  {{ page.update | date: "%B %-d, %Y" }})</span>
+		        <span class="post-meta">Created: {{ page.date | date: "%B %-d, %Y" }} </br>(last updated:  {{ page.update | date: "%B %-d, %Y" }})</span>
                         {% else %}
 		        <span class="post-meta">Created: {{ page.date | date: "%B %-d, %Y" }}</span>
 		        {% endif %}
