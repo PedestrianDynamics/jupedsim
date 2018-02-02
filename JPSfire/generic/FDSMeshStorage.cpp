@@ -171,12 +171,12 @@ void FDSMeshStorage::CreateTimeList()
         if (_doorlist.size() > 0) {     // Smoke sensor active
         check_str = _filepath + _quantitylist[0] + "/" +
                 _doorlist[0] + "/t_" + std::to_string(elem) + ".npz";
-        std::cout << "1: " << check_str << std::endl;
+        //std::cout << "1: " << check_str << std::endl;
         }
         else if (_doorlist.size() == 0) {   // Smoke sensor not active
             check_str = _filepath + _quantitylist[0] + "/Z_" +
                     std::to_string(_elevationlist[0]) + "/t_" + std::to_string(elem) + ".npz";
-                    std::cout << "2: "  << check_str << std::endl;
+            //std::cout << "2: "  << check_str << std::endl;
         }
 
         if (fs::exists(check_str) == false )
@@ -185,7 +185,7 @@ void FDSMeshStorage::CreateTimeList()
              std::cout << "Not found: " << check_str << std::endl;
             exit(EXIT_FAILURE);
         }
-         std::cout << "LEAVING \n" ;
+        //std::cout << "LEAVING \n" ;
     }
 
 }
@@ -197,19 +197,15 @@ void FDSMeshStorage::CreateFDSMeshes()
     if (_doorlist.size() > 0) {     // Smoke sensor active
         for (auto &h:_quantitylist)     //list of quantities
         {
-             std::cout << "H: " << h << std::endl;
              
                 for (auto &j:_doorlist)         //list of doors
-                {
-                     std::cout << "door: " << j << std::endl;
-                     
+                {    
                     //std::cout << "door " << j << std::endl;
                     for (auto &k:_timelist)         //list of times
                     {
-                         std::cout << "time: " << k << std::endl;
                          
                         std::string str = h + "/" + j + "/t_"+std::to_string(k);
-                        std::cout << _filepath + str + ".npz" << std::endl;
+                        //std::cout << _filepath + str + ".npz" << std::endl;
                         FDSMesh mesh(_filepath + str + ".npz");
                         //std::string str = "t_"+std::to_string(i);
                         _fMContainer.insert(std::make_pair(str, mesh));

@@ -202,12 +202,12 @@ void FDSMesh::SetKnotValuesFromFile(const std::string &filename)
     auto c_header = Header.data<double>();
     auto c_matrix = smoke_factor_grid_norm.data<double>();
 
-    for (int i=0; i< Header.num_vals ; i++)
-        std::cout << "Header i: " << i << ": " << c_header[i] << std::endl;
+    // for (int i=0; i< Header.num_vals ; i++)
+    //     std::cout << "Header i: " << i << ": " << c_header[i] << std::endl;
+    // keep these for loops for debugging purpose
 
-
-    for (int j=0; j< smoke_factor_grid_norm.num_vals; j++)
-        std::cout << "Matrix j: "<< c_matrix[j] << std::endl;
+    // for (int j=0; j< smoke_factor_grid_norm.num_vals; j++)
+    //     std::cout << "Matrix j: "<< c_matrix[j] << std::endl;
 
     /// read header
     double cellsize = c_header[0];
@@ -216,19 +216,19 @@ void FDSMesh::SetKnotValuesFromFile(const std::string &filename)
     double ymin = c_header[3];
     double ymax = c_header[4];
 
-    std::cout << "xmin=" << xmin << " , xmax=" << xmax << " , ymin=" << ymin << ", ymax=" << ymax << " , dx=" << cellsize << std::endl;
+    //std::cout << "xmin=" << xmin << " , xmax=" << xmax << " , ymin=" << ymin << ", ymax=" << ymax << " , dx=" << cellsize << std::endl;
 
     SetUpMesh(xmin,ymin,xmax,ymax,cellsize);
 
     //Read matrix
-    int ncol = smoke_factor_grid_norm.shape[1];
-    int nrow = smoke_factor_grid_norm.shape[0];
+    unsigned int ncol = smoke_factor_grid_norm.shape[1];
+    unsigned int nrow = smoke_factor_grid_norm.shape[0];
     for (unsigned int i=0; i< nrow; i++)
         for (unsigned int j=0; j< ncol; j++) {
              double tmp_value = c_matrix[i*ncol+j];
              if(std::isnan(tmp_value) || std::isinf(tmp_value))
                   tmp_value = 1.0;
-            std::cout << "i =  " << i  << "  j = " << j << ": " << tmp_value << std::endl;
+             //std::cout << "i =  " << i  << "  j = " << j << ": " << tmp_value << std::endl;
             _matrix[i][j].SetValue(tmp_value); //TODO: implement =operator
         }
     pFile.close();
