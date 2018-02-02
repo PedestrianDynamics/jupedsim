@@ -148,4 +148,5 @@ idea/codeStyleSettings.xml
 *.log
 *.pdf
 /Utest/rimea_tests/figures
+
 cmake-build-debug

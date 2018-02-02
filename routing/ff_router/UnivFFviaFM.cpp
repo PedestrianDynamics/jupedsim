@@ -1,7 +1,7 @@
 //
 // Created by arne on 5/9/17.
 //
-
+#define NOMINMAX
 #include <unordered_set>
 #include "UnivFFviaFM.h"
 #include "../../geometry/Line.h"
@@ -381,7 +381,7 @@ void UnivFFviaFM::recreateAllForQuickest() {
 #pragma omp parallel
      {
 #pragma omp for
-          for (unsigned int i = 0; i < _doors.size(); ++i) {
+          for (signed int i = 0; i < _doors.size(); ++i) {
                auto doorPair = _doors.begin();
                std::advance(doorPair, i);
                addTarget(doorPair->first, _costFieldWithKey[doorPair->first], _directionFieldWithKey[doorPair->first]);
@@ -1178,7 +1178,7 @@ void UnivFFviaFM::addAllTargetsParallel() {
 #pragma omp parallel
      {
 #pragma omp for
-          for (unsigned int i = 0; i < _doors.size(); ++i) {
+          for (signed int i = 0; i < _doors.size(); ++i) {
                auto doorPair = _doors.begin();
                std::advance(doorPair, i);
                addTarget(doorPair->first, _costFieldWithKey[doorPair->first], _directionFieldWithKey[doorPair->first]);
@@ -1211,7 +1211,7 @@ void UnivFFviaFM::addTargetsParallel(std::vector<int> wantedDoors) {
 #pragma omp parallel
      {
 #pragma omp for
-          for (unsigned int i = 0; i < wantedDoors.size(); ++i) {
+          for (signed int i = 0; i < wantedDoors.size(); ++i) {
                auto doorUID = wantedDoors.begin();
                std::advance(doorUID, i);
                addTarget(*doorUID, _costFieldWithKey[*doorUID], _directionFieldWithKey[*doorUID]);

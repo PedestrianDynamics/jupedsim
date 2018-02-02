@@ -84,6 +84,9 @@ private:
      //random number generator engine
      mutable std::default_random_engine _generator;
 
+	 //judge whether sigma>0
+	 const double judge = 10000;
+
 public:
      StartDistribution(int seed);
      virtual ~StartDistribution();
