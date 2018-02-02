@@ -29,7 +29,7 @@ configure-linux:
   script:
     - mkdir -p build
     - cd build
-    - cmake -DBUILD_TESTING=ON -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=~/boost_1_61_0 ..
+    - cmake -DBUILD_TESTING=ON -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=~/boost_1_61_0 -DCGAL_DIR=~/cgal/build ..
     - echo "configure | ${CI_PROJECT_DIR}"
   stage: configure
   tags:
