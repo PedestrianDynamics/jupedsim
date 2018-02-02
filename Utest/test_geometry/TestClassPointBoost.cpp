@@ -57,9 +57,9 @@ BOOST_AUTO_TEST_CASE(Point_Norm_Tests)
 {
     BOOST_TEST_MESSAGE("Starting norm test");
     Point p1(0,0);
-    BOOST_CHECK(p1.Norm() == 1);
-    p1._x = (1);
     BOOST_CHECK(p1.Norm() == 0);
+    p1._x = (1);
+    BOOST_CHECK(p1.Norm() == 1);
     p1._x = (-1);
     BOOST_CHECK(p1.Norm() == 1);
     p1._x = (3);
