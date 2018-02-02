@@ -7,7 +7,7 @@ import logging
 import os
 import sys
 import time
-from itertools import product
+import itertools
 from numpy import *
 from shutil import copy2, rmtree, move
 
@@ -147,10 +147,9 @@ def get_product(root):
     """
     for node in root.iter():
         tag = node.tag
-        # print "node", node, "tag", tag
         if tag in tags:   # ignore tags that are not of interest
             d = get_tag(node)
-            if isinstance(d, list) or isinstance(d, ndarray):
+            if isinstance(d, list) or isinstance(d, ndarray) or isinstance(d, range):
                 # in case some tags have multiple values
                 if tag not in input_tags and len(d) > 1:
             # ignore lists with one element (equiv to scalars)
@@ -166,9 +165,7 @@ def get_product(root):
         else:
             continue
 
-    result_prod = [dict(zip(input_tags, x)) for x in product(*iter(input_tags.values()))]
-    # print "result", result_prod
-    # raw_input()
+    result_prod = [dict(zip(input_tags, x)) for x in itertools.product(*iter(input_tags.values()))]
     return result_prod
 # =======================================================
 def make_filename(directory, d):
