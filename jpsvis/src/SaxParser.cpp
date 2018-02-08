@@ -780,8 +780,23 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
             {
                 Point p1 = tr->GetPoint1();
                 Point p2 = tr->GetPoint2();
-                double z1= tr->GetSubRoom1()->GetElevation(p1);
-                double z2= tr->GetSubRoom1()->GetElevation(p2);
+                double z1 = 0;
+                double z2 = 0;
+                if(! tr->GetSubRoom1())
+                {
+                    std::cout << "Warning: transition " << tr->GetID() << ", " << tr->GetCaption() << " has no subroom1\n";
+                    std::cout << "\t Assume z1=0\n";
+                }
+                else
+                    z1 = tr->GetSubRoom1()->GetElevation(p2);
+                if(! tr->GetSubRoom2())
+                {
+                    std::cout << "Warning: transition " << tr->GetID() << ", " << tr->GetCaption() << " has no subroom2. \n";
+                    std::cout << "\t Assume z2=0\n";
+                }
+                else
+                    z2 = tr->GetSubRoom2()->GetElevation(p1);
+
                 geometry->addDoor(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
 
                 const Point& p =tr->GetCentre();
