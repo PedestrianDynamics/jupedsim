@@ -8,7 +8,9 @@
 #--------------------------------------------------------------------------
 cmake_minimum_required(VERSION 2.8)
 project( jpsvis )
-cmake_policy(SET CMP0025 NEW) #fixes error No known features for CXX compiler (on mac)
+IF(APPLE)
+  cmake_policy(SET CMP0025 NEW) #fixes error No known features for CXX compiler (on mac)
+ENDIF(APPLE)
 
 MESSAGE( STATUS "System ........................................ ${CMAKE_SYSTEM_NAME} (${CMAKE_SYSTEM_VERSION}, ${CMAKE_SYSTEM_PROCESSOR})" )
 
