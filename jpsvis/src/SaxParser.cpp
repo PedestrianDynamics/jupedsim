@@ -782,21 +782,20 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
                 Point p2 = tr->GetPoint2();
                 double z1 = 0;
                 double z2 = 0;
-                if(! tr->GetSubRoom1())
+                
+                if(tr->GetSubRoom1()) // get elevation for both points
                 {
-                    std::cout << "Warning: transition " << tr->GetID() << ", " << tr->GetCaption() << " has no subroom1\n";
-                    std::cout << "\t Assume z1=0\n";
+                     z2 = tr->GetSubRoom1()->GetElevation(p2);
+                     z1 = tr->GetSubRoom1()->GetElevation(p1);
+                }
+                else if(! tr->GetSubRoom2())
+                {
+                     z2 = tr->GetSubRoom2()->GetElevation(p2);
+                     z1 = tr->GetSubRoom2()->GetElevation(p1);
                 }
                 else
-                    z1 = tr->GetSubRoom1()->GetElevation(p2);
-                if(! tr->GetSubRoom2())
-                {
-                    std::cout << "Warning: transition " << tr->GetID() << ", " << tr->GetCaption() << " has no subroom2. \n";
-                    std::cout << "\t Assume z2=0\n";
-                }
-                else
-                    z2 = tr->GetSubRoom2()->GetElevation(p1);
-
+                     std::cout << "ERROR: Can not calculate elevations for transition " << tr->GetID() << ", " << tr->GetCaption() << ". Both subrooms are not defined \n";
+                
                 geometry->addDoor(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
 
                 const Point& p =tr->GetCentre();
