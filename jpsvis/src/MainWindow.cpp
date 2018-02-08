@@ -308,14 +308,13 @@ void MainWindow::slotHelpAbout()
     QMessageBox::about(
                 this,
                 "About JPSVis",
-                "Version 0.6 built with  QT 4.8 and VTK 5.10\n\n"
+                "Version 0.8.2 built with  QT 4.8 and VTK 5.10\n\n"
                 "JPSvis is part of the Juelich Pedestrian Simulator (JuPedsim)"
                 "It is a tool for visualizing pedestrians motion\n"
                 "developped at the Forschungszentrum Juelich GmbH, Germany\n\n"
-                "Copyright 2009-2014.\n"
+                "Copyright 2009-2018.\n"
                 "Authors: Ulrich Kemloh\n\n"
-                "For questions, contact +49-40-246161-4193 \nor mail at \n"
-                "u.kemloh@fz-juelich.de\n");
+                "Issue tracker: https://gitlab.version.fz-juelich.de/jupedsim/jpsvis/issues \n");
 }
 
 
