@@ -20,7 +20,7 @@ set(JPSVIS_PATCH_VERSION 1)
 set(JPSVIS_VERSION
   ${JPSVIS_MAJOR_VERSION}.${JPSVIS_MINOR_VERSION}.${JPSVIS_PATCH_VERSION})
 
-
+# set(CMAKE_PREFIX_PATH "/usr/local/opt/qt5")  # if qt is in a non-standard location, uncomment this
 #------------------ set important directories --------------------
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
