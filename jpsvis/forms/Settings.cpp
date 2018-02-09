@@ -34,7 +34,7 @@
 #include <QMessageBox>
 #include <QCloseEvent>
 #include <QColorDialog>
-
+#include "../src/Debug.h"
 #include "Settings.h"
 #include "./src/geometry/LinePlotter.h"
 
@@ -99,7 +99,7 @@ void Settings::slotUpdateTrailSettings()
 
 void Settings::slotPickPedestrianColor()
 {
-
+     Debug::Messages("Enter Settings::slotPickPedestrianColor()");
     QColorDialog* colorDialog = new QColorDialog(this);
     QColor col=colorDialog->getColor("choose the new pedestrian color");
 
@@ -116,6 +116,7 @@ void Settings::slotPickPedestrianColor()
 }
 void Settings::slotChangePedestrianColor(const QColor & color)
 {
+     Debug::Messages("Enter Settings::slotChangePedestrianColor()");
     int r=0.0,g=0.0,b=0.0;
     color.getRgb(&r,&g,&b);
     int  bkcolor[3]= {r ,g,b};
@@ -126,6 +127,7 @@ void Settings::slotChangePedestrianColor(const QColor & color)
 
 void Settings::slotChangeVerticesWidth()
 {
+     Debug::Messages("Enter Settings::sloChangeVerticesWidth()");
     bool ok=false;
 
     double width=ui.CbTrailPolygoneWidth->currentText().toDouble(&ok);
@@ -175,7 +177,7 @@ void Settings::slotErrorOutput(QString err)
 
 void Settings::slotChangePedestrianColorProfile()
 {
-
+     Debug::Messages("Enter Settings::slotChangePedestrianColorProfile()");
     if(!ui.chBpedestrianDefaultColor->isChecked()) {
         ui.CbPedestrianGroup->setEnabled(true);
         ui.pushButtonChangePedestrianColor->setEnabled(true);
@@ -208,7 +210,7 @@ void Settings::slotChangeCaptionSize()
 
 void Settings::slotPickCaptionColor()
 {
-
+     Debug::Messages("Enter Settings::slotPickCaptionColor()");
     QColorDialog* colorDialog = new QColorDialog(this);
 
     tmpCaptionColor=colorDialog->getColor();
@@ -258,7 +260,7 @@ void Settings::slotChangeCaptionAutoRotation()
 
 void Settings::slotChangeCaptionColorMode()
 {
-
+     Debug::Messages("Enter slotChangeCaptionColorMode()");
     if(ui.comboCaptionColorMode->currentText().compare("Auto")==0) {
         int size =ui.CbCaptionSize->currentText().toInt();
         int orientation= ui.ComboCaptionOrientation->currentText().toInt();
@@ -275,6 +277,7 @@ void Settings::slotChangeCaptionColorMode()
 //ugly, I had no choice :)
 void Settings::closeEvent(QCloseEvent* event)
 {
+     Debug::Messages("Enter Settings::closeEvent()");
     hide();
     ///@FIXME
     event->ignore();
