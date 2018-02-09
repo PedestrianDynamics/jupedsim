@@ -53,8 +53,9 @@
 #undef VTK_USE_FFMPEG
 
 #include "MainWindow.h"
+#ifdef __APPLE__
 #include "fix/osx_thread_fix.h"
-
+#endif
 #include <QApplication>
 #include <QDir>
 #include <locale.h>
@@ -74,7 +75,7 @@ int main(int argc, char *argv[])
 {
 
 #ifdef __APPLE__
-    InitMultiThreading();
+     InitMultiThreading();
 #endif
 
     QApplication a(argc, argv);
