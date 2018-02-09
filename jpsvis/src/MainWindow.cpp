@@ -59,7 +59,6 @@
 #include <QInputDialog>
 #include <QString>
 #include <QColorDialog>
-#include <QDebug>
 #include <QtXml>
 #include <QTemporaryFile>
 #include <QListView>
@@ -210,7 +209,8 @@ MainWindow::MainWindow(QWidget *parent) :
             QString argument=arguments[argCount];
 
             if(argument.compare("help")==0) {
-                Debug::Error("Usage: ./TraVisTo [file1] [-2D] [-caption] [-online [port]]");
+                Debug::Messages("Usage: ./TraVisTo [file1] [-2D] [-caption] [-online [port]]");
+                exit(0);
             } else if(argument.compare("-2D")==0) {
                 ui.action2_D->setChecked(true);
                 slotToogle2D();
@@ -238,9 +238,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
             } else if(argument.startsWith("-")) {
                 const char* std=argument.toStdString().c_str();
-                Debug::Error(" unknown options: %s",std);
+                Debug::Error("unknown options: %s",std);
                 Debug::Error("Usage: ./TraVisTo [file1] [-2D] [-caption] [-online [port] ]");
-
             } else if(addPedestrianGroup(group,argument)) {
                 //slotHelpAbout();
                 group++;
@@ -270,7 +269,7 @@ MainWindow::~MainWindow()
     if(ui.actionRemember_Settings->isChecked())
     {
         saveAllSettings();
-        qDebug()<<"saving all settings";
+        Debug::Messages("saving all settings");
     }
     else
     {
@@ -279,7 +278,7 @@ MainWindow::~MainWindow()
         settings.clear();
         //then remember that we do not want any settings saved
         settings.setValue("options/rememberSettings", false);
-        qDebug()<<"clearing all settings";
+        Debug::Messages("clearing all settings");
     }
 
 
@@ -305,6 +304,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::slotHelpAbout()
 {
+     Debug::Messages("About jpsvis");
     QMessageBox::about(
                 this,
                 "About JPSVis",
@@ -466,7 +466,8 @@ bool MainWindow::slotLoadFile()
 // This function is only used in online Mode
 void MainWindow::parseGeometry(const QDomNode &geoNode)
 {
-    cout<<"parsing the geo"<<endl;
+
+     Debug::Messages("parsing the geo");
     if(geoNode.isNull()) return ;
 
     //check if there is a tag 'file' there in
@@ -490,7 +491,7 @@ void MainWindow::parseGeometry(const QDomNode &geoNode)
         QDomDocument doc("");
         QDomNode geoNode;
         if(!geoNode.isNull()) {
-            cout<<"online geo: "<<geoNode.toElement().toDocument().toString().toStdString()<<endl;
+             std::cout << "online geo: "<<geoNode.toElement().toDocument().toString().toStdString();
             exit(0);
         }
 
@@ -919,9 +920,9 @@ void MainWindow::slotRenderingTime(int fps)
     QString msg =labelFrameNumber->text().replace(QRegExp("[0-9]+/"),QString::number(fps)+"/");
     labelFrameNumber->setText(msg);
 }
-
 void MainWindow::slotExit()
 {
+     Debug::Messages("Exit jpsvis");
     cleanUp();
     qApp->exit();
 }
@@ -1554,10 +1555,10 @@ void MainWindow::slotSetCameraPerspectiveToVirtualAgent()
 }
 
 /// @todo does it work? mem check?
-//void MainWindow::slotClearGeometry()
-//{
-//    _visualisationThread->setGeometry(NULL);
-//}
+void MainWindow::slotClearGeometry()
+{
+   _visualisationThread->setGeometry(NULL);
+}
 
 void MainWindow::slotErrorOutput(QString err)
 {
@@ -1578,7 +1579,7 @@ void MainWindow::slotTakeScreenShot()
 /// load settings, parsed from the project file
 void MainWindow::loadAllSettings()
 {
-    qDebug()<<"restoring previous settings";
+     Debug::Messages("restoring previous settings");
     QSettings settings;
 
     //visualisation
@@ -1594,11 +1595,11 @@ void MainWindow::loadAllSettings()
                 port = settings.value("options/listeningPort").toInt();
                 SystemSettings::setListeningPort(port);
             }
-            qDebug()<<"online listening on port: "<<port;
+            Debug::Messages("online listening on port: %d",port);
         }
         else
         {
-            qDebug()<<"offline: "<<offline;
+             Debug::Messages("offline: %s", offline?"Yes":"No");
         }
     }
 
@@ -1609,139 +1610,139 @@ void MainWindow::loadAllSettings()
         ui.action2_D->setChecked(checked);
         ui.action3_D->setChecked(!checked);
         SystemSettings::set2D(checked);
-        qDebug()<<"2D: "<<checked;
+        Debug::Messages("2D: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showAgents"))
     {
         bool checked = settings.value("view/showAgents").toBool();
         ui.actionShow_Agents->setChecked(checked);
         SystemSettings::setShowAgents(checked);
-        qDebug()<<"show Agents: "<<checked;
+        Debug::Messages("show Agents: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showCaptions"))
     {
         bool checked = settings.value("view/showCaptions").toBool();
         ui.actionShow_Captions->setChecked(checked);
         SystemSettings::setShowAgentsCaptions(checked);
-        qDebug()<<"show Captions: "<<checked;
+        Debug::Messages("show Captions: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showTrajectories"))
     {
         bool checked = settings.value("view/showTrajectories").toBool();
         ui.actionShow_Trajectories->setChecked(checked);
         SystemSettings::setShowTrajectories(checked);
-        qDebug()<<"show Trajectories: "<<checked;
+        Debug::Messages("show Trajectories: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showGeometry"))
     {
         bool checked = settings.value("view/showGeometry").toBool();
         ui.actionShow_Geometry->setChecked(checked);
         slotShowGeometry();//will take care of the others things like enabling options
-        qDebug()<<"show Geometry: "<<checked;
+        Debug::Messages("show Geometry: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showFloor"))
     {
         bool checked = settings.value("view/showFloor").toBool();
         ui.actionShow_Floor->setChecked(checked);
         slotShowHideFloor();
-        qDebug()<<"show Floor: "<<checked;
+        Debug::Messages("show Floor: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showExits"))
     {
         bool checked = settings.value("view/showExits").toBool();
         ui.actionShow_Exits->setChecked(checked);
         slotShowHideExits();
-        qDebug()<<"show Exits: "<<checked;
+        Debug::Messages("show Exits: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showWalls"))
     {
         bool checked = settings.value("view/showWalls").toBool();
         ui.actionShow_Walls->setChecked(checked);
         slotShowHideWalls();
-        qDebug()<<"show Walls: "<<checked;
+        Debug::Messages("show Walls: ", checked?"Yes":"No");
     }
     if (settings.contains("view/showGeoCaptions"))
     {
         bool checked = settings.value("view/showGeoCaptions").toBool();
         ui.actionShow_Geometry_Captions->setChecked(checked);
         slotShowHideGeometryCaptions();
-        qDebug()<<"show geometry Captions: "<<checked;
+        Debug::Messages("show geometry Captions: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showNavLines"))
     {
         bool checked = settings.value("view/showNavLines").toBool();
         ui.actionShow_Navigation_Lines->setChecked(checked);
         slotShowHideNavLines();
-        qDebug()<<"show Navlines: "<<checked;
+        Debug::Messages("show Navlines: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showObstacles"))
     {
         bool checked = settings.value("view/showObstacles").toBool();
         ui.actionShow_Obstacles->setChecked(checked);
         slotShowHideObstacles();
-        qDebug()<<"show showObstacles: "<<checked;
+        Debug::Messages("show showObstacles: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showOnScreensInfos"))
     {
         bool checked = settings.value("view/showOnScreensInfos").toBool();
         ui.actionShow_Onscreen_Infos->setChecked(checked);
         slotShowOnScreenInfos();
-        qDebug()<<"show OnScreensInfos: "<<checked;
+        Debug::Messages("show OnScreensInfos: %s", checked?"Yes":"No");
     }
     if (settings.contains("view/showGradientField"))
     {
         bool checked = settings.value("view/showGradientField").toBool();
         ui.actionShow_Gradient_Field->setChecked(checked);
         slotShowHideGradientField();
-        qDebug()<<"show GradientField: "<<checked;
+        Debug::Messages("show GradientField: %s", checked?"Yes":"No");
     }
     //options
     if (settings.contains("options/rememberSettings"))
     {
         bool checked = settings.value("options/rememberSettings").toBool();
         ui.actionRemember_Settings->setChecked(checked);
-        qDebug()<<"remember settings: "<<checked;
+        Debug::Messages("remember settings: %s", checked?"Yes":"No");
     }
 
     if (settings.contains("options/bgColor"))
     {
         QColor color = settings.value("options/bgColor").value<QColor>();
         SystemSettings::setBackgroundColor(color);
-        qDebug()<<"background color: "<<color;
+        Debug::Messages("background color: %s",color.name().toStdString().c_str());
     }
 
     if (settings.contains("options/exitsColor"))
     {
         QColor color = settings.value("options/exitsColor").value<QColor>();
         SystemSettings::setExitsColor(color);
-        qDebug()<<"Exits color: "<<color;
+        Debug::Messages("Exit color: %s",color.name().toStdString().c_str());
     }
 
     if (settings.contains("options/floorColor"))
     {
         QColor color = settings.value("options/floorColor").value<QColor>();
         SystemSettings::setFloorColor(color);
-        qDebug()<<"Floor color: "<<color;
+        Debug::Messages("Floor color: %s",color.name().toStdString().c_str());
     }
 
     if (settings.contains("options/wallsColor"))
     {
         QColor color = settings.value("options/wallsColor").value<QColor>();
         SystemSettings::setWallsColor(color);
-        qDebug()<<"Walls color: "<<color;
+        Debug::Messages("Walls color: %s",color.name().toStdString().c_str());
     }
 
     if (settings.contains("options/navLinesColor"))
     {
         QColor color = settings.value("options/navLinesColor").value<QColor>();
         SystemSettings::setNavLinesColor(color);
-        qDebug()<<"Navlines color: "<<color;
+        Debug::Messages("NavLines color: %s",color.name().toStdString().c_str());
     }
     if (settings.contains("options/obstaclesColor"))
     {
         QColor color = settings.value("options/obstaclesColor").value<QColor>();
         SystemSettings::setObstacleColor(color);
-        qDebug()<<"Obstacles color: "<<color;
+        Debug::Messages("Obstacles color: %s",color.name().toStdString().c_str());
     }
 
     extern_force_system_update=true;
@@ -1851,6 +1852,7 @@ void MainWindow::slotShowOnScreenInfos()
     bool value=ui.actionShow_Onscreen_Infos->isChecked();
     _visualisationThread->setOnscreenInformationVisibility(value);
     SystemSettings::setOnScreenInfos(value);
+    Debug::Messages("Show On Screen Infos: %s", value?"On":"Off");
 }
 
 /// show/hide the geometry captions
@@ -1887,6 +1889,7 @@ void MainWindow::slotShowGeometryStructure()
         _geoStructure.setWindowTitle("Geometry structure");
         _geoStructure.setModel(&_visualisationThread->getGeometry().GetModel());
     }
+    Debug::Messages("Show Geometry Structure: %s", ui.actionShowGeometry_Structure->isChecked()?"On":"Off");
 }
 
 void MainWindow::slotOnGeometryItemChanged( QStandardItem *item)
