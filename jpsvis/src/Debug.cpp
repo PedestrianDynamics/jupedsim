@@ -35,14 +35,14 @@
 
 #include <fstream>
 #include <iostream>
-
+#include <iomanip>
 #include <stdio.h>
 #include <stdarg.h>
 
 using namespace std;
 
 std::ostream& Debug::os=std::cerr;
-Debug::LEVEL Debug::debugLevel=Debug::ERROR;
+Debug::LEVEL Debug::debugLevel=Debug::ALL;
 int Debug::MSG_Count=0;
 int Debug::ERR_Count=0;
 int Debug::WAR_Count=0;
@@ -69,8 +69,7 @@ void Debug::setDebugLevel(Debug::LEVEL level)
 }
 
 void Debug::Messages(const char *format, ...)
-{
-
+{    
     switch (debugLevel) {
 
     case ALL:
@@ -82,7 +81,7 @@ void Debug::Messages(const char *format, ...)
         vsprintf (msg,format ,ap);
         va_end (ap);
 
-        os<<"Info["<<MSG_Count<<"]"<<msg<<endl;
+        os<<"Info ["<< std::setw(2) <<MSG_Count<<"]: "<<msg<<endl;
     }
     break;
 
