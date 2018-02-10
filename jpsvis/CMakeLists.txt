@@ -292,12 +292,12 @@ endif()
 # enable as many warnings as possible
 set(warning_flags "-Wall -Wextra")
 # issue all the warnings demanded by strict iso c and iso c++
-set(warning_flags "${warning_flags} -pedantic")
+#set(warning_flags "${warning_flags} -pedantic")
 #---------------------------- compiler -------------------------------
 # Initialize CXXFLAGS.
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} ${warning_flags}")
-  set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} ${warning_flags} -O0 -g -Wunused-variable -Wunused-parameter -Wunused-function -Wshadow -Wunused")
+  set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} ${warning_flags} -O0 -g ")#-Wunused-variable -Wunused-parameter -Wunused-function -Wshadow -Wunused"
   #    set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
 endif()
 
