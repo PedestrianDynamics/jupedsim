@@ -560,46 +560,46 @@ void MainWindow::parseGeometry(const QString& geometryString)
 }
 
 // TODO: still used?
-bool MainWindow::parsePedestrianShapes(QDomNode shapeNode, int groupID)
-{
+// bool MainWindow::parsePedestrianShapes(QDomNode shapeNode, int groupID)
+// {
 
-    if(shapeNode.isNull()) return false;
-    QStringList heights;
-    QStringList colors;
+//     if(shapeNode.isNull()) return false;
+//     QStringList heights;
+//     QStringList colors;
 
-    QDomNodeList agents = shapeNode.toElement().elementsByTagName("agentInfo");
+//     QDomNodeList agents = shapeNode.toElement().elementsByTagName("agentInfo");
 
-    for (int i = 0; i < agents.length(); i++) {
+//     for (int i = 0; i < agents.length(); i++) {
 
-        bool ok=false;
-        int id=agents.item(i).toElement().attribute("ID").toInt(&ok);
-        if(!ok) continue; // invalid ID
-        double height=agents.item(i).toElement().attribute("height").toDouble(&ok);
-        if(!ok)height=std::numeric_limits<double>::quiet_NaN();
+//         bool ok=false;
+//         int id=agents.item(i).toElement().attribute("ID").toInt(&ok);
+//         if(!ok) continue; // invalid ID
+//         double height=agents.item(i).toElement().attribute("height").toDouble(&ok);
+//         if(!ok)height=std::numeric_limits<double>::quiet_NaN();
 
-        int color=agents.item(i).toElement().attribute("color").toDouble(&ok);
-        if(!ok)color=std::numeric_limits<int>::quiet_NaN();
-        Debug::Messages("id= %d height= %lf color =%d",id,height,color);
+//         int color=agents.item(i).toElement().attribute("color").toDouble(&ok);
+//         if(!ok)color=std::numeric_limits<int>::quiet_NaN();
+//         Debug::Messages("id= %d height= %lf color =%d",id,height,color);
 
-        if(height!=height) {
-            heights.append(QString::number(id));
-            heights.append(QString::number(height));
-        }
-        if(color!=color) {
-            colors.append(QString::number(id));
-            colors.append(QString::number(color));
-        }
+//         if(height!=height) {
+//             heights.append(QString::number(id));
+//             heights.append(QString::number(height));
+//         }
+//         if(color!=color) {
+//             colors.append(QString::number(id));
+//             colors.append(QString::number(color));
+//         }
 
-    }
-    switch (groupID) {
+//     }
+//     switch (groupID) {
 
-    case 1:
-        extern_trajectories_firstSet.setInitialHeights(heights);
-        extern_trajectories_firstSet.setInitialColors(colors);
-        break;
-    }
-    return true;
-}
+//     case 1:
+//         extern_trajectories_firstSet.setInitialHeights(heights);
+//         extern_trajectories_firstSet.setInitialColors(colors);
+//         break;
+//     }
+//     return true;
+// }
 
 /// add a new dataset
 bool MainWindow::slotAddDataSet()
@@ -1454,7 +1454,7 @@ void MainWindow::slotChangeExitsColor()
 
     QSettings settings;
     settings.setValue("options/exitsColor", col);
-
+    Debug::Messages("Change Exits Color to %s", col.name().toStdString().c_str());
     delete colorDialog;
 }
 

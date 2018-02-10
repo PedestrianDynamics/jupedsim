@@ -289,7 +289,7 @@ private:
      * @param groupID 1, 2 or 3
      * @return true if success
      */
-    bool parsePedestrianShapes(QDomNode shapeNode, int groupID);
+     //  bool parsePedestrianShapes(QDomNode shapeNode, int groupID);
 
     /// reset all graphic element to their initial(default) state
     void resetGraphicalElements();
