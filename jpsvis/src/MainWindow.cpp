@@ -194,6 +194,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //TODO: Maybe this is not longer needed
     ui.framePerSecondSliderLabel->setVisible(false);
     ui.contrastSettingSlider->setVisible(false);
+    //restore the settings
+    loadAllSettings();
 
     QStringList arguments =QApplication::arguments();
     int group=1; // there are max 3 groups of pedestrians
@@ -220,13 +222,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
             } else if(argument.compare("-online")==0) {
                 slotSetOnlineMode(true);
-
+                Debug::Messages("Online option parsed");
                 // checking for other possible options [ port...]
                 if(argCount!=arguments.size()-1) {
                     bool ok=false;
                     int port = arguments[++argCount].toInt(&ok);
-//                    Debug::
-//                            Debug::Messages(" listening port: %d",port);
+                    Debug::Messages(" listening port: %d",port);
 
                     if (ok) {
                         SystemSettings::setListeningPort(port);
@@ -234,7 +235,7 @@ MainWindow::MainWindow(QWidget *parent) :
                         argCount--; // to ensure that the "option" will be checked
                     }
                 }
-                mayPlay=true;
+                //mayPlay=true;
 
             } else if(argument.startsWith("-")) {
                 const char* std=argument.toStdString().c_str();
@@ -242,15 +243,13 @@ MainWindow::MainWindow(QWidget *parent) :
                 Debug::Error("Usage: ./TraVisTo [file1] [-2D] [-caption] [-online [port] ]");
             } else if(addPedestrianGroup(group,argument)) {
                 //slotHelpAbout();
+                 Debug::Messages("group: %d, arg: %s", group, argument.toStdString().c_str());
                 group++;
                 mayPlay=true;
             }
 
         }
-
-    //restore the settings
-    loadAllSettings();
-
+    Debug::Messages("MayPlay: %s", mayPlay?"True":"False");
     // was call from the command line with a file.
     // disable the online mode if it was enabled
     if(mayPlay)
@@ -812,7 +811,6 @@ void MainWindow::slotFullScreen(bool status)
 
 void MainWindow::slotSetOfflineMode(bool status)
 {
-
     if (status) {
         ui.actionOnline->setChecked(false);
         extern_offline_mode = true;

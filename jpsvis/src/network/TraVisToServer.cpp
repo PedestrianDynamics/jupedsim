@@ -116,7 +116,7 @@ void TraVisToServer::createConnection()
     tcpServer->setMaxPendingConnections(2);
 
     if (!tcpServer->listen(QHostAddress::Any,port)) {
-        cerr<<"I cant listen to ALL interfaces, sorry"<<endl;
+        cerr<<"I cant listen to ALL interfaces"<<endl;
         cerr<<"I will try to listen only the LocalHost (127.0.0.1)"<<endl;
 
         if (!tcpServer->listen(QHostAddress::LocalHost,port)) {
@@ -134,7 +134,7 @@ void TraVisToServer::createConnection()
 
     if(tcpServer->isListening ()) {
         listening=true;
-        cerr<<"\nTraVisTo is listening on port "<< tcpServer->serverPort()<<endl;
+        cerr<<"\nJPSvis is listening on port "<< tcpServer->serverPort()<<endl;
     }
     //slotHandleConnection();
 }
