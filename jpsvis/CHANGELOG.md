@@ -7,6 +7,11 @@ All notable changes to this project will be documented in this file.
 - show name and id of rooms/subrooms in "geometry structure"
 - Rename directory to `JPSvis_Files`: 94ed0a55
 
+### Fixed
+- SegFault issue #55
+- Dealing with big room id numbers. #54
+- Ctrl-Q functionality #51
+
 ## v0.8.0 [2016-02-18]
 ### Added
 - option to load  vtk files. Need to add the line ``` <gradient_field filename="floorfield.vtk"> 
