@@ -28,6 +28,10 @@
 
 #include "Room.h"
 #include "SubRoom.h"
+#include "../IO/OutputHandler.h"
+
+#include <sstream>
+#include <memory>
 
 using namespace std;
 
@@ -189,6 +193,36 @@ void Room::SetOutputHandler(OutputHandler* oh)
 {
      _outputFile=oh;
 }
+
+std::vector<Point> Room::GetBoundaryVertices() const
+{
+
+    double xMin=FLT_MAX;
+    double yMin=FLT_MAX;
+    double xMax=-FLT_MAX;
+    double yMax=-FLT_MAX;
+
+     for(auto&& itr_subroom: this->GetAllSubRooms())
+     {
+         const std::vector<Point> vertices = itr_subroom.second->GetPolygon();
+
+         for (Point point:vertices)
+         {
+             if (point._x>xMax)
+                 xMax=point._x;
+             if (point._x<xMin)
+                 xMin=point._x;
+             if (point._y>yMax)
+                 yMax=point._y;
+             if (point._y<yMin)
+                 yMin=point._y;
+         }
+     }
+
+    return std::vector<Point>{Point(xMin,yMin),Point(xMin,yMax),Point(xMax,yMax),Point(xMax,yMin)};
+
+}
+
 
 OutputHandler* Room::GetOutputHandler() const
 {

@@ -36,12 +36,6 @@ endif ()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${warnings}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${warnings}")
 
-# TODO clean up. no flags.
-#set(CMAKE_CXX_STANDARD 11)
-#set(CMAKE_CXX_STANDARD_REQUIRED ON)
-#set(CMAKE_CXX_EXTENSIONS OFF)
-
-
 if (NOT BUILD_TESTING)
     set(BUILD_TESTING OFF) # test units & python tests are not generated.
 endif (NOT BUILD_TESTING)
@@ -204,6 +198,9 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 #boost
 find_package(Boost COMPONENTS timer chrono system filesystem unit_test_framework REQUIRED)
 
+#CGAL
+find_package(CGAL REQUIRED)
+
 
 # test all cpp-files in Utest
 if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
@@ -313,7 +310,7 @@ set(source_files
         #quickest
         routing/quickest/QuickestPathRouter.cpp
 
-        #AI router
+        #Smoke router
         routing/smoke_router/SmokeRouter.cpp
         routing/smoke_router/GraphNetwork.cpp
         routing/smoke_router/NavigationGraph.cpp
@@ -338,6 +335,24 @@ set(source_files
         routing/smoke_router/Brain.cpp
         routing/smoke_router/cognitiveMap/internnavigationnetwork.cpp
         visiLibity/source_code/visilibity.cpp
+
+
+        #AI router
+        routing/ai_router/AIRouter.cpp
+        routing/ai_router/BrainStorage.cpp
+        routing/ai_router/cognitiveMap/associations.cpp
+        routing/ai_router/cognitiveMap/connection.cpp
+        routing/ai_router/cognitiveMap/cognitivemap.cpp
+        routing/ai_router/cognitiveMap/landmark.cpp
+        routing/ai_router/cognitiveMap/region.cpp
+        routing/ai_router/cognitiveMap/landmarknetwork.cpp
+        routing/ai_router/cognitiveMap/internnavigationnetwork.cpp
+        routing/ai_router/perception/visualsystem.cpp
+        routing/ai_router/perception/visibleenvironment.cpp
+        routing/ai_router/perception/cgalgeometry.cpp
+        routing/ai_router/perception/sign.cpp
+        routing/ai_router/Cortex.cpp
+
 
         poly2tri/common/shapes.cpp
         poly2tri/sweep/sweep_context.cpp
@@ -385,7 +400,7 @@ set(header_files
         #quickest
         routing/quickest/QuickestPathRouter.h
 
-        #AI router
+        #Smoke router
         routing/smoke_router/SmokeRouter.h
         routing/smoke_router/GraphNetwork.h
         routing/smoke_router/NavigationGraph.h
@@ -411,6 +426,23 @@ set(header_files
         routing/smoke_router/cognitiveMap/internnavigationnetwork.h
         visiLibity/source_code/visilibity.hpp
 
+	#AI router
+        routing/ai_router/AIRouter.h
+        routing/ai_router/BrainStorage.h
+        routing/ai_router/cognitiveMap/associations.h
+        routing/ai_router/cognitiveMap/connection.cpp
+        routing/ai_router/cognitiveMap/cognitivemap.h
+        routing/ai_router/cognitiveMap/landmark.h
+        routing/ai_router/cognitiveMap/region.h
+        routing/ai_router/cognitiveMap/landmarknetwork.h
+        routing/ai_router/cognitiveMap/internnavigationnetwork.h
+        routing/ai_router/perception/visualsystem.h
+        routing/ai_router/perception/visibleenvironment.h
+        routing/ai_router/perception/cgalgeometry.h
+        routing/ai_router/perception/sign.h
+        routing/ai_router/Cortex.h
+
+
         pedestrian/Pedestrian.h
         pedestrian/PedDistributor.h
         pedestrian/Ellipse.h
@@ -432,6 +464,7 @@ set(header_files
 
         general/ArgumentParser.h
         general/Macros.h
+	general/randomnumbergenerator.h
 
         geometry/Crossing.h
         geometry/NavLine.h
@@ -483,11 +516,13 @@ set(header_files
         )
 
 add_library(core STATIC ${source_files})
+
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
 
 add_library(cnpy SHARED "cnpy/cnpy.cpp")
 target_link_libraries(cnpy ${ZLIB_LIBRARIES})
+
 
 #add_library ( core SHARED ${source_files} )
 
@@ -507,9 +542,42 @@ if (Boost_FOUND)
 
     # suppress warnings in boost libraries with attribute SYSTEM
     include_directories(SYSTEM ${Boost_INCLUDE_DIR})
-    # todo: is this necessary?
     target_link_libraries(core ${Boost_LIBRARIES} cnpy)
 endif ()
+
+
+
+if (GMP_FOUND)
+    message(STATUS "GMP FOUND: " ${GMP_FOUND})
+    message(STATUS "GMP_LIBRARY: " ${GMP_LIBRARIES})
+    message(STATUS "GMP_INCLUDE_DIR: " ${GMP_INCLUDE_DIR})
+    include_directories(SYSTEM ${GMP_INCLUDE_DIR})
+
+endif()
+
+if (MPFR_FOUND)
+    message(STATUS "MPFR FOUND: " ${MPFR_FOUND})
+    message(STATUS "MPFR_LIBRARY: " ${MPFR_LIBRARIES})
+    message(STATUS "MPFR_INCLUDE_DIR: " ${MPFR_INCLUDE_DIR})
+    include_directories(SYSTEM ${MPFR_INCLUDE_DIR})
+    #target_link_libraries(jpscore ${MPFR_LIBRARIES})
+endif()
+
+
+if (CGAL_FOUND)
+    message(STATUS "CGAL FOUND: " ${CGAL_FOUND})
+    message(STATUS "CGAL_LIBRARY_DIRS: " ${CGAL_LIBRARIES_DIR})
+    message(STATUS "CGAL_INCLUDE_DIRS: " ${CGAL_INCLUDE_DIRS})
+    #message(STATUS "CGAL_LIB_VERSION: " ${CGAL_LIB_VERSION})
+    message(STATUS "CGAL_libraries: " ${CGAL_LIBRARY})
+    #link_directories(${CGAL_LIBRARIES_DIR})
+    #link_directories(${)
+    include_directories(SYSTEM ${CGAL_INCLUDE_DIRS})
+    #message(STATUS "CGAL_3rdparty" ${CGAL_3RD_PARTY_LIBRARIES})
+    #target_link_libraries(jpscore ${CGAL_LIBRARIES})
+
+endif()
+
 
 target_link_libraries(jpscore core)
 
@@ -517,9 +585,8 @@ if (WIN32)
     target_link_libraries(jpscore core wsock32)
 endif (WIN32)
 
-# if(CGAL_FOUND)
-#   target_link_libraries (jpscore ${CGAL_CORE_LIBRARY})
-# endif(CGAL_FOUND)
+target_link_libraries(jpscore ${GMP_LIBRARIES} ${MPFR_LIBRARIES} ${CGAL_LIBRARY} ${CGAL_3RD_PARTY_LIBRARIES})
+
 
 ##if (JPS_AS_A_SERVICE)
 #find_package(Protobuf REQUIRED)

@@ -37,6 +37,10 @@
 #include "../math/OperationalModel.h"
 #include "../JPSfire/B_walking_speed/WalkingSpeed.h"
 #include "../JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
+
+//for random numbers
+#include "randomnumbergenerator.h"
+
 //This class provides a data container for all configuration parameters.
 
 class AgentsParameters;
@@ -114,6 +118,9 @@ public:
           //ff router
           _has_specific_goals = false;
           _write_VTK_files = false;
+
+	  //for random numbers
+          _rdGenerator=RandomNumberGenerator();
      }
      std::shared_ptr<WalkingSpeed> GetWalkingSpeed () {return _walkingSpeed; };
      void SetWalkingSpeed(std::shared_ptr<WalkingSpeed> & w) {_walkingSpeed = w; };
@@ -302,6 +309,8 @@ public:
      void AddAgentsParameters(std::shared_ptr<AgentsParameters> agentsParameters,
                int id) { _agentsParameters[id] = agentsParameters; };
 
+    RandomNumberGenerator* GetRandomNumberGenerator() const {return &_rdGenerator;};
+
 #ifdef _JPS_AS_A_SERVICE
 
      const bool GetRunAsService() const { return _runAsService; };
@@ -381,6 +390,8 @@ private:
      std::string _geometryFile;
      std::string _projectRootDir;
      bool _showStatistics;
+
+     mutable RandomNumberGenerator _rdGenerator;
 
      FileFormat _fileFormat;
      std::map<int, std::shared_ptr<AgentsParameters> > _agentsParameters;
