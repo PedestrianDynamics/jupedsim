@@ -2,6 +2,18 @@
 All notable changes to `jpsreport` will be documented in this file.
 
 ## v0.8.3 [unreleased]
+### Added
+- Exit if `framerate` is not found. c1308ef8
+
+### Changed
+- Pass Matrix by reference bff89e48 
+- Better fonts in plot scripts. 56d6a8f7 
+
+
+### Fixed 
+- Ignore empty line in traj file. 3a3ae04e 
+- Fixes for profile plots. a8a1414c 
+- Fix parsing of framerate. 2ad0b01d
 
 ## v0.8.2 [06.11.2017]
 
@@ -17,8 +29,7 @@ All notable changes to `jpsreport` will be documented in this file.
 - Use Python3 in scripts.
 
 ### Fixed 
-- Fixed SegFault due to reading files from different OS. (9a42c9dd)
-
+- Fix SegFault due to reading files from different OS. (9a42c9dd)
 
 ## v0.8.1 [11.10.2016]
 
