@@ -3,7 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ## v0.8.3 [unreleased]
 ### Added
-- New attributes for sources `agent_id` and `time` for scheduling agent's appearance. See #258 for discussion.
+- Renaming of CogMap-router and new router (Erik). !16
+- Use npy files for smokesensor. !13 
+- New attributes for sources `agent_id` and `time` for scheduling agent's appearance. See #258 for discussion. !14
 - Router tests
 - Option for printing progressbar:  `<progressbar/>` cfc65f22
 
