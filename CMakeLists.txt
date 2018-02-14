@@ -34,7 +34,7 @@ set(JPSREPORT_VERSION
   ${JPSREPORT_MAJOR_VERSION}.${JPSREPORT_MINOR_VERSION}.${JPSREPORT_PATCH_VERSION})
 message( STATUS "JPSREPORT_VERSION: " ${JPSREPORT_VERSION} )
 if(NOT CMAKE_BUILD_TYPE)
-  set (CMAKE_BUILD_TYPE Release) 
+  set (CMAKE_BUILD_TYPE Release)
 endif(NOT CMAKE_BUILD_TYPE)
 message( STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE} )
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
@@ -74,7 +74,7 @@ endif(NOT DEFINED PROCESSOR_COUNT)
 
 if(PROCESSOR_COUNT)
   # add 1 should be magic! http://www.kitware.com/blog/home/post/63
-  #math(EXPR PROCESSOR_COUNT "${PROCESSOR_COUNT} + 1") 
+  #math(EXPR PROCESSOR_COUNT "${PROCESSOR_COUNT} + 1")
   message( STATUS "PROCESSOR_COUNT " ${PROCESSOR_COUNT})
   set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
 endif(PROCESSOR_COUNT)
@@ -102,7 +102,6 @@ if(BUILD_TESTING)
 endif(BUILD_TESTING)
 
 set(source_files
-  getRSS.c
   Analysis.cpp
   IO/OutputHandler.cpp
   general/ArgumentParser.cpp
@@ -116,45 +115,45 @@ set(source_files
   methods/Method_B.cpp
   methods/Method_C.cpp
   methods/Method_D.cpp
-  geometry/Building.cpp  
-  geometry/Line.cpp      
-  geometry/Point.cpp    
+  geometry/Building.cpp
+  geometry/Line.cpp
+  geometry/Point.cpp
   geometry/Transition.cpp
-  geometry/Crossing.cpp  
-  geometry/NavLine.cpp   
-  geometry/Room.cpp     
+  geometry/Crossing.cpp
+  geometry/NavLine.cpp
+  geometry/Room.cpp
   geometry/Wall.cpp
-  geometry/Hline.cpp     
-  geometry/Obstacle.cpp  
+  geometry/Hline.cpp
+  geometry/Obstacle.cpp
   geometry/SubRoom.cpp
   geometry/Goal.cpp
-)  
+)
 set (  header_files
   Analysis.h
-  methods/MeasurementArea.h   
+  methods/MeasurementArea.h
   methods/VoronoiDiagram.h
   methods/PedData.h
   methods/Method_A.h
   methods/Method_B.h
   methods/Method_C.h
-  methods/Method_D.h  
+  methods/Method_D.h
   IO/OutputHandler.h
   general/ArgumentParser.h
   general/Macros.h
   tinyxml/tinyxml.h
   tinyxml/tinystr.h
-  geometry/Building.h  
-  geometry/Line.h      
-  geometry/Point.h    
+  geometry/Building.h
+  geometry/Line.h
+  geometry/Point.h
   geometry/Transition.h
-  geometry/Crossing.h  
-  geometry/NavLine.h   
-  geometry/Room.h     
+  geometry/Crossing.h
+  geometry/NavLine.h
+  geometry/Room.h
   geometry/Wall.h
-  geometry/Hline.h     
-  geometry/Obstacle.h  
+  geometry/Hline.h
+  geometry/Obstacle.h
   geometry/SubRoom.h
-  geometry/Goal.h  
+  geometry/Goal.h
   )
 
 
@@ -214,7 +213,7 @@ endif()
 
 add_library ( geometrycore STATIC ${source_files} )
 add_executable(
-	jpsreport main.cpp
+        jpsreport main.cpp
 )
 
 
@@ -236,11 +235,11 @@ if(BUILD_TESTING)
   include(CTest) #adding Dart support
 
   #test if code compiles and runs default setting. Takes about 30 seconds
-  add_test (jpsreport_compile ${CMAKE_CTEST_COMMAND} 
+  add_test (jpsreport_compile ${CMAKE_CTEST_COMMAND}
   --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
   --build-generator ${CMAKE_GENERATOR}
   --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
-  --build-two-config  
+  --build-two-config
   --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   --build-project JPSreport
   --test-command jpsreport --ini=${CMAKE_TEST_DIR}/files/input_UO_180.xml

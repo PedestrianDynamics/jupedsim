@@ -25,7 +25,7 @@
  *
  * Some useful links:
  *
- * 	1: <a href="http://jupedsim.org">jupedsim.org</a> <br>
+ *      1: <a href="http://jupedsim.org">jupedsim.org</a> <br>
  *
  **/
 
