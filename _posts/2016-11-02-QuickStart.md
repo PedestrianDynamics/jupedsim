@@ -17,42 +17,42 @@ nav:
 ---
 
 
-To install `JPScore` there  are three steps to follow: 
+To install `JPScore` there  are three steps to follow:
 
 
 ## 1. Get the code
 
 ```bash
-git clone https://gitlab.version.fz-juelich.de/jupedsim/jpscore
+ git clone https://gitlab.version.fz-juelich.de/jupedsim/jpscore
 ```
 
 ## 2. Check the requirements
 
 ```bash
-cd jpscore
-mkdir build && cd build
-cmake ..
+ cd jpscore
+ mkdir build && cd build
+ cmake ..
 ```
 
 
-Some packages and libraries are required to get `jpscore` compiled. 
+Some packages and libraries are required to get `jpscore` compiled.
 See also [requirements](2016-11-03-requirements.html).
 
 In case something is missing, `CMake` will report an error and point to the missing package.
 
 ## 3. Compile the code
 
-If the two first steps succeed then you can proceed with the compilation 
+If the two first steps succeed then you can proceed with the compilation
 
-```bash 
-make -j2
+```bash
+ make -j2
 ```
 
 In case of a successful compilation, the executables will be located in the directory `bin/`.
 
-## 4. Run an example 
+## 4. Run an example
 
-In the directory `demos` there are some examples to start with:  
+In the directory `demos` there are some examples to start with:
 
 <!-- \dirtree{ -->
 <!-- .1 \myfolder{red}{demos}. -->
@@ -93,22 +93,20 @@ In the directory `demos` there are some examples to start with:
 |
 |
 |.....
-│   
+│
 
 ```
 
-Taking the 7th demo as input, we run a simulation as follows: 
+Taking the 7th demo as input, we run a simulation as follows:
 
 ```bash
-./bin/jpscore  demos/corner_ini.xml
+ ./bin/jpscore  demos/corner_ini.xml
 ```
 
 which produces a trajectory file in the same directory. This can be visualized with `jpsvis`
 
-```bash 
-jpsvis demos/scenario_7_floorfield/Kobes_traj.xml
+```bash
+ jpsvis demos/scenario_7_floorfield/Kobes_traj.xml
 ```
 
 ![Simulation using demo 7 of `jpscore` ]({{ site.baseurl  }}/img/kobe.gif)
-
-
