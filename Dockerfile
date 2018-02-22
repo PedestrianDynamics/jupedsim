@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y \
     python \
     python-dev \
     python-pip \
+    libcgal-dev \
     && apt-get clean
 
 # set environment
