@@ -13,7 +13,7 @@ So, get the code from Gitlab and the releases from GitHub. :-)
 
 ## Configuration 
 
-See [installation and configuration](http://jupedsim.github.io/jpscore/user_guide/configuration/)
+See [installation and configuration](http://jupedsim.org/jpscore/2016-11-02-quickstart.html)
 
 ## Showcase and tutorials
 
