@@ -4,9 +4,9 @@
 # - run:
 #    docker -it jupedsim/jpscore
 # -----------------------------------------
-    
+
 FROM ubuntu:14.04
- 
+
 MAINTAINER Mohcine Chraibi <m.chraibi@gmail.com>
 
 # install required packages
@@ -18,11 +18,11 @@ RUN apt-get update && apt-get install -y \
     lcov \
     doxygen \
     wget \
-    libbz2-dev \ 
+    libbz2-dev \
     python \
     python-dev \
     python-pip \
-    libcgal-dev \
+    libgmp* \
     && apt-get clean
 
 # set environment
@@ -40,21 +40,32 @@ RUN wget http://downloads.sourceforge.net/project/boost/boost/${boost_version}/$
     && ./b2 --without-python --prefix=/usr -j 4 link=shared runtime-link=shared install \
     && cd .. && rm -rf ${boost_dir} && ldconfig
 
+
 # add user
 RUN groupadd -r -g 1000 jupedsim && useradd -r -g jupedsim -u 1000 -m jupedsim
 USER jupedsim
-# sudo usermod -p `perl -e "print crypt("password","Q4")"` root
 
 # install jpscore
-RUN mkdir -p /home/jupedsim/workspace
+RUN mkdir -p /home/jupedsim/workspace \
+    && cd /home/jupedsim/workspace \
+    && pwd
+
+# compile cgal
+RUN cd ~ \
+     && wget https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-4.10.2/CGAL-4.10.2.tar.xz \
+     && tar -xJvf CGAL-4.10.2.tar.xz \
+     && cd CGAL-4.10.2 \
+     && cmake . \
+     && make
+
+
 RUN cd /home/jupedsim/workspace \
     && git clone --depth=5 https://gitlab.version.fz-juelich.de/jupedsim/jpscore.git \
     && cd jpscore \
     && mkdir -p build \
     && cd build \
-    && cmake -DBUILD_TESTING=ON ..\
+    && cmake -DBUILD_TESTING=ON -DCGAL_DIR=~/CGAL-4.10.2  ..\
     && make
-
 
 # install python variant filtering dependencies
 #RUN pip install numpy
