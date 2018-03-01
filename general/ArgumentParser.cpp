@@ -373,7 +373,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                }
                correct(poly); // in the case the Polygone is not closed
                areaB->_poly=poly;
-               
+
                TiXmlElement* xLength=xMeasurementArea_B->FirstChildElement("length_in_movement_direction");
                if(xLength)
                {
@@ -413,7 +413,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                Log->Write("\t\tMeasurement line starts from  <%.3f, %.3f> to <%.3f, %.3f>",areaL->_lineStartX*CMtoM,areaL->_lineStartY*CMtoM,areaL->_lineEndX*CMtoM,areaL->_lineEndY*CMtoM);
           }
      }
-     
+
      //instantaneous velocity
      /*    TiXmlNode* xVelocity=xMainNode->FirstChild("velocity");
            if(xVelocity)
@@ -736,15 +736,15 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                     if ( string(xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("enabled"))=="true")
                     {
                          _isOutputGraph=true;
-                    	 Log->Write("INFO: \tData of voronoi diagram is asked to output" );
-                    	 if(string(xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("plot_graphs"))=="true")
-                    	 {
+                         Log->Write("INFO: \tData of voronoi diagram is asked to output" );
+                         if(string(xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("plot_graphs"))=="true")
+                         {
                               _isPlotGraph=true;
                               if(_isPlotGraph)
                               {
                                    Log->Write("INFO: \tGraph of voronoi diagram will be plotted" );
                               }
-                    	 }
+                         }
                     }
                }
 
