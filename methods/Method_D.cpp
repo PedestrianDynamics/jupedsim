@@ -64,7 +64,10 @@ Method_D::~Method_D()
 {
 
 }
-
+// auto outOfRange = [&](int number, int start, int end) -> bool
+// {
+//      return (number < start || number > end);
+// };
 bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocation, const double& zPos_measureArea)
 {
      _scriptsLocation = scriptsLocation;
@@ -73,9 +76,9 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
      _projectRootDir = peddata.GetProjectRootDir();
      _measureAreaId = boost::lexical_cast<string>(_areaForMethod_D->_id);
      _fps =peddata.GetFps();
-     Log->Write("INFO:\tMethod D: frame rate fps: <%.2f>, start: <%d>, stop: <%d>", _fps, _startFrame, _stopFrame);
-
+     int mycounter = 0;
      int minFrame = peddata.GetMinFrame();
+     Log->Write("INFO:\tMethod D: frame rate fps: <%.2f>, start: <%d>, stop: <%d> (minFrame = %d)", _fps, _startFrame, _stopFrame, minFrame);
      if(_startFrame!=_stopFrame)
      {
           if(_startFrame==-1)
@@ -86,12 +89,19 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
           {
                _stopFrame = peddata.GetNumFrames()+minFrame;
           }
-          for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
+          for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();)
           {
                if((ite->first + minFrame)<_startFrame || (ite->first + minFrame) >_stopFrame)
                {
-                    _peds_t.erase(ite);
+                    mycounter++;
+                    ite = _peds_t.erase(ite);
                }
+               else
+               {
+                    ++ite;
+               }
+
+
           }
      }
      OpenFileMethodD();
@@ -101,15 +111,15 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
      }
      Log->Write("------------------------Analyzing with Method D-----------------------------");
      //for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
-     for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
+     //for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
+     for(auto ite: _peds_t)
      {
-          int frameNr = ite->first;
+          int frameNr = ite.first;
           int frid =  frameNr + minFrame;
           //padd the frameid with 0
           std::ostringstream ss;
           ss << std::setw(5) << std::setfill('0') << frid;
           const std::string str_frid = ss.str();
-
           if(!(frid%100))
           {
                Log->Write("frame ID = %d",frid);
