@@ -205,7 +205,7 @@ bool PedData::InitializeVariables(const string& filename)
           }// while
           if(fps_found == 0)
           {
-               Log->Write("ERROR:\tFrame rate fps not define");
+               Log->Write("ERROR:\tFrame rate fps not defined");
                exit(1);
           }
           Log->Write("INFO:\t Finished reading the data");
@@ -235,32 +235,29 @@ bool PedData::InitializeVariables(const string& filename)
      Log->Write("INFO: Create Global Variables done");
 
 
-     for(int i=_minID;i<_minID+_numPeds; i++)
-     {
+     for(int i=_minID;i<_minID+_numPeds; i++){
          int firstFrameIndex=INT_MAX;   //The first frame index of a pedestrian
          int lastFrameIndex=-1;    //The last frame index of a pedestrian
          int actual_totalframe=0;  //The total data points of a pedestrian in the trajectory
-         for (auto j = _IdsTXT.begin(); j != _IdsTXT.end(); ++j)
-             {
-                 if (*j ==i)
-                 {
-                     int pos = std::distance(_IdsTXT.begin(), j);
-                     if(pos<firstFrameIndex)
-                     {
-                         firstFrameIndex=pos;
-                     }
-                     if(pos>lastFrameIndex)
-                     {
-                         lastFrameIndex=pos;
-                     }
-                     actual_totalframe++;
-                 }
-             }
-
-         if(lastFrameIndex==0)
-         {
-                 Log->Write("Warning:\tThere is no trajectory for ped with ID <%d>!",i);
+         for (auto j = _IdsTXT.begin(); j != _IdsTXT.end(); ++j){
+              if (*j ==i){
+                   int pos = std::distance(_IdsTXT.begin(), j);
+                   if(pos<firstFrameIndex)
+                   {
+                        firstFrameIndex=pos;
+                   }
+                   if(pos>lastFrameIndex)
+                   {
+                        lastFrameIndex=pos;
+                   }
+                   actual_totalframe++;
+              }
          }
+          if(lastFrameIndex <=0 || lastFrameIndex == INT_MAX)
+          {
+               Log->Write("Warning:\tThere is no trajectory for ped with ID <%d>!",i);
+               continue;
+          }
          _firstFrame[i-_minID] = _FramesTXT[firstFrameIndex] - _minFrame;
          _lastFrame[i-_minID] = _FramesTXT[lastFrameIndex] - _minFrame;
 
