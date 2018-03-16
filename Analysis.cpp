@@ -71,10 +71,10 @@ Analysis::Analysis()
      _building = NULL;
      _projectRootDir="";
      _deltaF=5;   // half of the time interval that used to calculate instantaneous velocity of ped i. Here v_i = (X(t+deltaF) - X(t+deltaF))/(2*deltaF).   X is location.
-     _DoesUseMethodA = false; 						// Method A (Zhang2011a)
-     _DoesUseMethodB = false; 			// Method B (Zhang2011a)
-     _DoesUseMethodC = false; 					// Method C //calculate and save results of classic in separate file
-     _DoesUseMethodD = false;  					// Method D--Voronoi method
+     _DoesUseMethodA = false;                                           // Method A (Zhang2011a)
+     _DoesUseMethodB = false;                   // Method B (Zhang2011a)
+     _DoesUseMethodC = false;                                   // Method C //calculate and save results of classic in separate file
+     _DoesUseMethodD = false;                                   // Method D--Voronoi method
      _cutByCircle = false;  //Adjust whether cut each original voronoi cell by a circle
      _getProfile = false;   // Whether make field analysis or not
      _outputGraph = false;   // Whether output the data for plot the fundamental diagram each frame
@@ -273,7 +273,9 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const std::string& geometryFile
      _highVertexY = geo_maxY;
      _lowVertexX = geo_minX;
      _lowVertexY = geo_minY;
-     //cout<<"INFO: \tGeometry polygon is:\t"<<dsv(geoPoly)<<endl;
+     // using boost::geometry::dsv;
+     // cout<<"INFO: \tGeometry polygon is:\t" << dsv(geoPoly[1])<<endl;
+
      return geoPoly;
 }
 
@@ -495,7 +497,3 @@ int Analysis::mkpath(char* file_path, mode_t mode)
 }
 
 #endif
-
-
-
-

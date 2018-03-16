@@ -1,6 +1,16 @@
+import os
+import sys
+import logging
+import argparse
+#from xml.dom import minidom
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
+
 import numpy as np
 import matplotlib
-#matplotlib.use('Agg') 
+#matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon as pgon
 import Polygon as pol
@@ -8,25 +18,18 @@ import matplotlib.cm as cm
 import pylab
 import pandas as pd
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-import argparse
-import sys
-import logging
-from xml.dom import minidom
-import os
-try:
-    import xml.etree.cElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
-    
+
+
+
 
 def getParserArgs():
-	parser = argparse.ArgumentParser(description='Combine French data to one file')
-	parser.add_argument("-f", "--filepath", default="./", help='give the path of source file')
-	parser.add_argument("-n", "--namefile", help='give the name of the source file')
-	parser.add_argument("-g", "--geoname", help='give the name of the geometry file')
-	parser.add_argument("-p", "--trajpath", help='give the path of the trajectory file')
-	args = parser.parse_args()
-	return args
+    parser = argparse.ArgumentParser(description='Combine French data to one file')
+    parser.add_argument("-f", "--filepath", default="./", help='give the path of source file')
+    parser.add_argument("-n", "--namefile", help='give the name of the source file')
+    parser.add_argument("-g", "--geoname", help='give the name of the geometry file')
+    parser.add_argument("-p", "--trajpath", help='give the path of the trajectory file')
+    args = parser.parse_args()
+    return args
 
 def get_polygon(poly):
     X = []
@@ -52,7 +55,7 @@ def get_geometry_boundary(geometry):
     tree = ET.parse(geometry)
     root = tree.getroot()
     geominX = []
-    geomaxX = [] 
+    geomaxX = []
     geominY = []
     geomaxY = []
     for node in root.iter():
@@ -118,7 +121,7 @@ def parse_xml_traj_file(filename):
     N = int(xmldoc.getElementsByTagName('agents')[0].childNodes[0].data)
     fps = xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data #type unicode
     fps = round(float(fps))
-    
+
     #print ("fps=", fps)
     #fps = int(xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data)
     logging.info("Npeds = %d, fps = %d"%(N, fps))
@@ -154,9 +157,9 @@ def main():
         frameNr=int(namefile.split("_")[-1])
     except ValueError:
         exit("Could not parse fps")
-        
+
     geominX, geomaxX, geominY, geomaxY = get_geometry_boundary(geoFile)
-    
+
     fig = plt.figure(figsize=(16*(geomaxX-geominX)/(geomaxY-geominY)+2, 16), dpi=100)
     ax1 = fig.add_subplot(111,aspect='equal')
     plt.rc("font", size=30)
@@ -164,17 +167,17 @@ def main():
     ax1.set_yticks([int(1*j) for j in range(-2,5)])
     for label in ax1.get_xticklabels() + ax1.get_yticklabels():
         label.set_fontsize(30)
-        
+
     for tick in ax1.get_xticklines() + ax1.get_yticklines():
         tick.set_markeredgewidth(2)
         tick.set_markersize(6)
         ax1.set_aspect("equal")
 
     plot_geometry(geoFile)
-        
+
     density = np.array([])
     density_orig = np.array([])
-    polygons = [] # polygons converted from string 
+    polygons = [] # polygons converted from string
     # TODO use os.path.join
     polys = open("%s/polygon%s.dat"%(filepath,namefile)).readlines()
     for poly in polys:
@@ -184,9 +187,9 @@ def main():
         xx=1.0/pol.Polygon(pp).area()
         if xx>rho_max:
             xx=rho_max
-            
+
         density=np.append(density,xx)
-        
+
     density_orig = np.copy(density)
     Maxd=density.max()
     Mind=density.min()
@@ -202,15 +205,15 @@ def main():
     if(trajType=="xml"):
        fps, N, Trajdata = parse_xml_traj_file(trajFile)
     elif(trajType=="txt"):
-        try:            
+        try:
             Trajdata = np.array(pd.read_csv(trajFile, comment="#", delimiter="\s+"))
         except :
-            Trajdata = np.loadtxt(trajFile)   
+            Trajdata = np.loadtxt(trajFile)
 
 
     Trajdata = Trajdata[ Trajdata[:, 1] == frameNr ]
     ax1.plot(Trajdata[:,2], Trajdata[:,3], "bo", markersize = 20, markeredgewidth=2)
-    
+
     ax1.set_xlim(geominX-0.2,geomaxX+0.2)
     ax1.set_ylim(geominY-0.2,geomaxY+0.2)
     plt.xlabel("x [m]")
@@ -219,11 +222,10 @@ def main():
     divider = make_axes_locatable(ax1)
     cax = divider.append_axes("right", size="2.5%", pad=0.2)
     cb=fig.colorbar(sm,ax=ax1,cax=cax,format='%.1f')
-    cb.set_label('Density [$m^{-2}$]') 
+    cb.set_label('Density [$m^{-2}$]')
     plt.savefig("%s/rho_%s.png"%(filepath,namefile))
     plt.close()
 
 
 if __name__ == '__main__':
     main()
-
