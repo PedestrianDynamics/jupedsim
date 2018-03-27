@@ -70,7 +70,7 @@ TODO:
 - How to work with branches
 - Board usage
 - Gitlab in general: features
-- 
+- Wiki vs Web
 #######################
 
 ### FAQ
