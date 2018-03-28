@@ -167,6 +167,10 @@ private:
      std::map<int, Line> _doors;
      std::vector<int> _toDo;
 
+     std::map<int, Point> _subroomUIDtoInsidePoint;
+     std::map<int, SubRoom*> _subroomUIDtoSubRoomPtr;
+     std::map<SubRoom*, Point> _subRoomPtrTOinsidePoint;
+
 };
 
 

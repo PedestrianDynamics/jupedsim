@@ -1068,6 +1068,7 @@ double NormalSubRoom::Xintercept(const Point& point1, const Point& point2, doubl
 
 // This method is called very often in DirectionFloorField, so it should be fast.
 // we ignore
+//@todo: ar.graf: UnivFF have subroomPtr Info for every gridpoint. Info should be used in DirectionFF instead of this
 bool NormalSubRoom::IsInSubRoom(const Point& ped) const
 {
      for (polygon_type obs:_boostPolyObstacles) {

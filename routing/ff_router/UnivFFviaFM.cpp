@@ -99,6 +99,24 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
                     tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *trans));
                }
           }
+          //find insidePoint and save it, together with UID
+          Line anyDoor = Line{tmpDoors.begin()->second};
+          Point normalVec = anyDoor.NormalVec();
+          Point midPoint = anyDoor.GetCentre();
+          Point candidate = midPoint + normalVec * 0.5;
+          if (subRoomPtr->IsInSubRoom(candidate)) {
+               //_subroomUIDtoInsidePoint.emplace(std::make_pair(subRoomPtr->GetUID(), candidate));
+               _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomPtr, candidate));
+          } else {
+               candidate = candidate - normalVec;
+               if (subRoomPtr->IsInSubRoom(candidate)) {
+                    //_subroomUIDtoInsidePoint.emplace(std::make_pair(subRoomPtr->GetUID(), candidate));
+                    _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomPtr, candidate));
+               } else {
+                    Log->Write("ERROR:\t In UnivFF InsidePoint Analysis");
+               }
+          }
+          //_subroomUIDtoSubRoomPtr.emplace(std::make_pair(subRoomPtr->GetUID(), subRoomPtr));
      }
      //this will interpret "useWallDistances" as best as possible. Users should clearify with "setSpeedMode" before calling "AddTarget"
      if (useWallDistances) {
@@ -158,6 +176,25 @@ UnivFFviaFM::UnivFFviaFM(SubRoom* subRoomArg, Configuration* const confArg, doub
           }
      }
 
+     //find insidePoint and save it, together with UID
+     Line anyDoor = Line{tmpDoors.begin()->second};
+     Point normalVec = anyDoor.NormalVec();
+     Point midPoint = anyDoor.GetCentre();
+     Point candidate = midPoint + normalVec * 0.5;
+     if (subRoomArg->IsInSubRoom(candidate)) {
+          //_subroomUIDtoInsidePoint.emplace(std::make_pair(subRoomArg->GetUID(), candidate));
+          _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomArg, candidate));
+     } else {
+          candidate = candidate - normalVec;
+          if (subRoomArg->IsInSubRoom(candidate)) {
+               //_subroomUIDtoInsidePoint.emplace(std::make_pair(subRoomArg->GetUID(), candidate));
+               _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomArg, candidate));
+          } else {
+               Log->Write("ERROR:\t In UnivFF InsidePoint Analysis");
+          }
+     }
+     //_subroomUIDtoSubRoomPtr.emplace(std::make_pair(subRoomArg->GetUID(), subRoomArg));
+
      //this will interpret "useWallDistances" as best as possible. Users should clearify with "setSpeedMode" before calling "AddTarget"
      if (useWallDistances) {
           create(lines, tmpDoors, wantedDoors, FF_WALL_AVOID, hx, wallAvoid, useWallDistances);
@@ -185,6 +222,11 @@ void UnivFFviaFM::create(std::vector<Line>& walls, std::map<int, Line>& doors, s
 
      _speedFieldSelector.emplace(_speedFieldSelector.begin()+REDU_WALL_SPEED, nullptr);
      _speedFieldSelector.emplace(_speedFieldSelector.begin()+PED_SPEED, nullptr);
+
+     //mark Inside areas (dont write outside areas)
+     for (auto subRoomPointPair : _subRoomPtrTOinsidePoint) {
+          markSubroom(subRoomPointPair.second, subRoomPointPair.first);
+     }
 
      //allocate _modifiedSpeed
      if ((_speedmode == FF_WALL_AVOID) || (useWallDistances)) {
@@ -274,6 +316,9 @@ void UnivFFviaFM::processGeometry(std::vector<Line>&walls, std::map<int, Line>& 
 void UnivFFviaFM::markSubroom(const Point& insidePoint, SubRoom* const value) {
      //value must not be nullptr. it would lead to infinite loop
      if (!value) return;
+
+     if(!_grid->includesPoint(insidePoint)) return;
+
      //alloc mem if needed
      if (!_subrooms) {
           _subrooms = new SubRoom*[_nPoints];
@@ -685,25 +730,25 @@ void UnivFFviaFM::calcFF(double* costOutput, Point* directionOutput, const doubl
 
                //check for valid neigh
                aux = local_neighbor.key[0];
-               if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+               if ((aux != -2) && (_gridCode[aux] != WALL) && (_gridCode[aux] != OUTSIDE) && (costOutput[aux] < 0.0)) {
                     calcCost(aux, costOutput, directionOutput, speed);
                     trialfield.emplace(aux);
                     //trialfield2.emplace(aux);
                }
                aux = local_neighbor.key[1];
-               if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+               if ((aux != -2) && (_gridCode[aux] != WALL) && (_gridCode[aux] != OUTSIDE) && (costOutput[aux] < 0.0)) {
                     calcCost(aux, costOutput, directionOutput, speed);
                     trialfield.emplace(aux);
                     //trialfield2.emplace(aux);
                }
                aux = local_neighbor.key[2];
-               if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+               if ((aux != -2) && (_gridCode[aux] != WALL) && (_gridCode[aux] != OUTSIDE) && (costOutput[aux] < 0.0)) {
                     calcCost(aux, costOutput, directionOutput, speed);
                     trialfield.emplace(aux);
                     //trialfield2.emplace(aux);
                }
                aux = local_neighbor.key[3];
-               if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+               if ((aux != -2) && (_gridCode[aux] != WALL) && (_gridCode[aux] != OUTSIDE) && (costOutput[aux] < 0.0)) {
                     calcCost(aux, costOutput, directionOutput, speed);
                     trialfield.emplace(aux);
                     //trialfield2.emplace(aux);
@@ -717,25 +762,25 @@ void UnivFFviaFM::calcFF(double* costOutput, Point* directionOutput, const doubl
 
           //check for valid neigh
           aux = local_neighbor.key[0];
-          if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+          if ((aux != -2) && (_gridCode[aux] != WALL) && (_gridCode[aux] != OUTSIDE) && (costOutput[aux] < 0.0)) {
                calcCost(aux, costOutput, directionOutput, speed);
                trialfield.emplace(aux);
                //trialfield2.emplace(aux);
           }
           aux = local_neighbor.key[1];
-          if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+          if ((aux != -2) && (_gridCode[aux] != WALL) && (_gridCode[aux] != OUTSIDE) && (costOutput[aux] < 0.0)) {
                calcCost(aux, costOutput, directionOutput, speed);
                trialfield.emplace(aux);
                //trialfield2.emplace(aux);
           }
           aux = local_neighbor.key[2];
-          if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+          if ((aux != -2) && (_gridCode[aux] != WALL) && (_gridCode[aux] != OUTSIDE) && (costOutput[aux] < 0.0)) {
                calcCost(aux, costOutput, directionOutput, speed);
                trialfield.emplace(aux);
                //trialfield2.emplace(aux);
           }
           aux = local_neighbor.key[3];
-          if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+          if ((aux != -2) && (_gridCode[aux] != WALL) && (_gridCode[aux] != OUTSIDE) && (costOutput[aux] < 0.0)) {
                calcCost(aux, costOutput, directionOutput, speed);
                trialfield.emplace(aux);
                //trialfield2.emplace(aux);
@@ -877,25 +922,25 @@ void UnivFFviaFM::calcDF(double* costOutput, Point* directionOutput, const doubl
 
                //check for valid neigh
                aux = local_neighbor.key[0];
-               if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+               if ((aux != -2) && (_gridCode[aux] != WALL) && (_gridCode[aux] != OUTSIDE) && (costOutput[aux] < 0.0)) {
                     calcDist(aux, costOutput, directionOutput, speed);
                     trialfield.emplace(aux);
                     //trialfield2.emplace(aux);
                }
                aux = local_neighbor.key[1];
-               if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+               if ((aux != -2) && (_gridCode[aux] != WALL) && (_gridCode[aux] != OUTSIDE) && (costOutput[aux] < 0.0)) {
                     calcDist(aux, costOutput, directionOutput, speed);
                     trialfield.emplace(aux);
                     //trialfield2.emplace(aux);
                }
                aux = local_neighbor.key[2];
-               if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+               if ((aux != -2) && (_gridCode[aux] != WALL) && (_gridCode[aux] != OUTSIDE) && (costOutput[aux] < 0.0)) {
                     calcDist(aux, costOutput, directionOutput, speed);
                     trialfield.emplace(aux);
                     //trialfield2.emplace(aux);
                }
                aux = local_neighbor.key[3];
-               if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+               if ((aux != -2) && (_gridCode[aux] != WALL) && (_gridCode[aux] != OUTSIDE) && (costOutput[aux] < 0.0)) {
                     calcDist(aux, costOutput, directionOutput, speed);
                     trialfield.emplace(aux);
                     //trialfield2.emplace(aux);
@@ -909,25 +954,25 @@ void UnivFFviaFM::calcDF(double* costOutput, Point* directionOutput, const doubl
 
           //check for valid neigh
           aux = local_neighbor.key[0];
-          if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+          if ((aux != -2) && (_gridCode[aux] != WALL) && (_gridCode[aux] != OUTSIDE) && (costOutput[aux] < 0.0)) {
                calcDist(aux, costOutput, directionOutput, speed);
                trialfield.emplace(aux);
                //trialfield2.emplace(aux);
           }
           aux = local_neighbor.key[1];
-          if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+          if ((aux != -2) && (_gridCode[aux] != WALL) && (_gridCode[aux] != OUTSIDE) && (costOutput[aux] < 0.0)) {
                calcDist(aux, costOutput, directionOutput, speed);
                trialfield.emplace(aux);
                //trialfield2.emplace(aux);
           }
           aux = local_neighbor.key[2];
-          if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+          if ((aux != -2) && (_gridCode[aux] != WALL) && (_gridCode[aux] != OUTSIDE) && (costOutput[aux] < 0.0)) {
                calcDist(aux, costOutput, directionOutput, speed);
                trialfield.emplace(aux);
                //trialfield2.emplace(aux);
           }
           aux = local_neighbor.key[3];
-          if ((aux != -2) && (_gridCode[aux] != WALL) && (costOutput[aux] < 0.0)) {
+          if ((aux != -2) && (_gridCode[aux] != WALL) && (_gridCode[aux] != OUTSIDE) && (costOutput[aux] < 0.0)) {
                calcDist(aux, costOutput, directionOutput, speed);
                trialfield.emplace(aux);
                //trialfield2.emplace(aux);
@@ -1313,12 +1358,12 @@ void UnivFFviaFM::writeFF(const std::string& filename, std::vector<int> targetID
 
     if (!targetID.empty()) {
          for (unsigned int iTarget = 0; iTarget < targetID.size(); ++iTarget) {
-              Log->Write("%s: target number %d: UID %d", filename.c_str(), iTarget, targetID[iTarget]);
-
               if (_costFieldWithKey.count(targetID[iTarget]) == 0) {
                    continue;
               }
               double *costarray = _costFieldWithKey[targetID[iTarget]];
+
+              Log->Write("%s: target number %d: UID %d", filename.c_str(), iTarget, targetID[iTarget]);
 
               std::string name = _building->GetTransOrCrossByUID(targetID[iTarget])->GetCaption() + "-" +
                                                                                           std::to_string(targetID[iTarget]);

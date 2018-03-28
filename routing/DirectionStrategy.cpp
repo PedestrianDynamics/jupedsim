@@ -404,7 +404,7 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
                newfield->setSpeedMode(FF_HOMO_SPEED);
           }
          newfield->addAllTargetsParallel();
-         //newfield->writeFF("ffrouterOfRoom" + std::to_string(roomPair.first) + ".vtk", newfield->getKnownDoorUIDs());
+         //newfield->writeFF("directionsOfRoom" + std::to_string(roomPair.first) + ".vtk", newfield->getKnownDoorUIDs());
      }
      end = std::chrono::system_clock::now();
      std::chrono::duration<double> elapsed_seconds = end-start;
