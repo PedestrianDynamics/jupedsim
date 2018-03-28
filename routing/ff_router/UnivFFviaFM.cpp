@@ -1276,7 +1276,7 @@ void UnivFFviaFM::writeFF(const std::string& filename, std::vector<int> targetID
                                 " 1" << std::endl;
     file << "ORIGIN " << _grid->GetxMin() << " " << _grid->GetyMin() << " 0" << std::endl;
     file << "SPACING " << std::to_string(_grid->Gethx()) << " " << std::to_string(_grid->Gethy()) << " 1" << std::endl;
-    file << "POINT_DATA " << std::to_string(numTotal) << std::endl;
+    file << "POINT_DATA " << std::to_string(_grid->GetnPoints()) << std::endl;
     file << "SCALARS GCode float 1" << std::endl;
     file << "LOOKUP_TABLE default" << std::endl;
     if (!_gridCode) {
