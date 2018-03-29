@@ -1439,13 +1439,47 @@ double UnivFFviaFM::getCostToDestination(const int destID, const Point& position
           }
 
           addTarget(destID, _costFieldWithKey[destID], _directionFieldWithKey[destID]);
-          getCostToDestination(destID, position);
+          return getCostToDestination(destID, position);
      } else if (!_directCalculation && _doors.count(destID) > 0) {
 //omp critical
 #pragma omp critical(UnivFFviaFM_toDo)
           _toDo.emplace_back(destID);
      }
      return DBL_MAX;
+}
+
+double UnivFFviaFM::getDistanceBetweenDoors(const int door1_ID, const int door2_ID) {
+    assert(_doors.count(door1_ID) != 0);
+    assert(_doors.count(door2_ID) != 0);
+
+    if (_costFieldWithKey.count(door1_ID)==1 && _costFieldWithKey[door1_ID]) {
+        long int key = _grid->getKeyAtPoint(_doors.at(door2_ID).GetCentre());
+        if (_gridCode[key] != door2_ID) {
+            //bresenham line (treppenstruktur) at middle and calculated centre of line are on different keys
+            //find a key that belongs to door (must be one left or right and second one below or above)
+            if (_gridCode[key+1] == door2_ID) {
+                key = key+1;
+            } else {
+                key = key-1;
+            }
+        }
+        return _costFieldWithKey[door1_ID][key];
+    } else if (_directCalculation && _doors.count(door1_ID) > 0) {
+        _costFieldWithKey[door1_ID] = new double[_nPoints];
+        if (_user == DISTANCE_AND_DIRECTIONS_USED) {
+            _directionFieldWithKey[door1_ID] = new Point[_nPoints];
+        } else {
+            _directionFieldWithKey[door1_ID] = nullptr;
+        }
+
+        addTarget(door1_ID, _costFieldWithKey[door1_ID], _directionFieldWithKey[door1_ID]);
+        return getDistanceBetweenDoors(door1_ID, door2_ID);
+    } else if (!_directCalculation && _doors.count(door1_ID) > 0) {
+//omp critical
+#pragma omp critical(UnivFFviaFM_toDo)
+        _toDo.emplace_back(door1_ID);
+    }
+    return DBL_MAX;
 }
 
 RectGrid* UnivFFviaFM::getGrid(){

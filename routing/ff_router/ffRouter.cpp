@@ -230,8 +230,11 @@ bool FFRouter::Init(Building* building)
                }
 
                UnivFFviaFM* locffptr = _locffviafm[rctIt->first];
-               double tempDistance = locffptr->getCostToDestination(rctIt->second,
-                                                                    _CroTrByUID.at(otherDoor.second)->GetCentre());
+              Point test = _CroTrByUID.at(otherDoor.second)->GetCentre();
+              Point test2 = test + Point(0.0 , 0.1);
+               //double tempDistance = locffptr->getCostToDestination(rctIt->second,
+               //                                                     _CroTrByUID.at(otherDoor.second)->GetCentre());
+               double tempDistance = locffptr->getDistanceBetweenDoors(rctIt->second, otherDoor.second);
 
                if (tempDistance < locffptr->getGrid()->Gethx()) {
                     //Log->Write("WARNING:\tDistance of doors %d and %d is too small: %f",*otherDoor, *innerPtr, tempDistance);
@@ -319,21 +322,21 @@ bool FFRouter::Init(Building* building)
           }
      }
 
-//     std::ofstream matrixfile;
-//     matrixfile.open("Matrix.txt");
-//
-//     for (auto mapItem : _distMatrix) {
-//          matrixfile << mapItem.first.first << " to " << mapItem.first.second << " : " << mapItem.second << "\t via \t" << _pathsMatrix[mapItem.first];
-//          matrixfile << "\t" << _CroTrByUID.at(mapItem.first.first)->GetID() << " to " << _CroTrByUID.at(mapItem.first.second)->GetID() << "\t via \t";
-//          matrixfile << _CroTrByUID.at(_pathsMatrix[mapItem.first])->GetID() << std::endl;
-////          auto sub = _subroomMatrix.at(mapItem.first);
-////          if (sub) {
-////               matrixfile << std::string("\tSubroom: UID ") << sub->GetUID() << " (room: " << sub->GetRoomID() << " subroom ID: " << sub->GetSubRoomID() << ")" << std::endl;
-////          } else {
-////               matrixfile << std::string("\tSubroom is nullptr") << std::endl;
-////          }
-//     }
-//     matrixfile.close();
+     std::ofstream matrixfile;
+     matrixfile.open("Matrix.txt");
+
+     for (auto mapItem : _distMatrix) {
+          matrixfile << mapItem.first.first << " to " << mapItem.first.second << " : " << mapItem.second << "\t via \t" << _pathsMatrix[mapItem.first];
+          matrixfile << "\t" << _CroTrByUID.at(mapItem.first.first)->GetID() << " to " << _CroTrByUID.at(mapItem.first.second)->GetID() << "\t via \t";
+          matrixfile << _CroTrByUID.at(_pathsMatrix[mapItem.first])->GetID() << std::endl;
+//          auto sub = _subroomMatrix.at(mapItem.first);
+//          if (sub) {
+//               matrixfile << std::string("\tSubroom: UID ") << sub->GetUID() << " (room: " << sub->GetRoomID() << " subroom ID: " << sub->GetSubRoomID() << ")" << std::endl;
+//          } else {
+//               matrixfile << std::string("\tSubroom is nullptr") << std::endl;
+//          }
+     }
+     matrixfile.close();
      Log->Write("INFO: \tFF Router Init done.");
      return true;
 }
