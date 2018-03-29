@@ -52,6 +52,18 @@ int OutputHandler::GetErrors()
      return _nErrors;
 }
 
+
+void OutputHandler::incrementDeletedAgents()
+{
+     _nDeletedAgents += 1;
+}
+
+int OutputHandler::GetDeletedAgents()
+{
+     return _nDeletedAgents;
+}
+
+
 void OutputHandler::Write(const string& str)
 {
           cout << endl << str;

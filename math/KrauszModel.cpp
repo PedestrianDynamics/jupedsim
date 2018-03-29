@@ -105,6 +105,7 @@ bool KrauszModel::Init (Building* building)
           //a destination could not be found for that pedestrian
           if (ped->FindRoute() == -1) {
                building->DeletePedestrian(ped);
+               Log->incrementDeletedAgents();
                --p;
                --peds_size;
                continue;
@@ -176,6 +177,7 @@ void KrauszModel::ComputeNextTimeStep(double current, double deltaT, Building* b
                             sqrt(normVi), ped->GetID(), ped->GetV0Norm(), current, periodic);
                     // remove the pedestrian and abort
                     building->DeletePedestrian(ped);
+                    Log->incrementDeletedAgents();
                     Log->Write("\tERROR: one ped was removed due to high velocity");
                     //exit(EXIT_FAILURE);
                }

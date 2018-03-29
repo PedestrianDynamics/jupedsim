@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     Configuration* configuration = new Configuration();
     // Parsing the arguments
     bool status = false;
-    {    
+    {
           //ArgumentParser* p = new ArgumentParser(configuration); //Memory Leak
           std::unique_ptr<ArgumentParser> p(new ArgumentParser(configuration));
           status = p->ParseArgs(argc, argv);
@@ -120,6 +120,7 @@ int main(int argc, char** argv)
         summary << "Number of Threads : " << configuration->GetMaxOpenMPThreads() << std::endl;
         summary << "Warnings          : " << Log->GetWarnings() << std::endl;
         summary << "Errors            : " << Log->GetErrors() << std::endl;
+        summary << "Deleted Agents    : " << Log->GetDeletedAgents() << std::endl;
         Log->Write(summary.str().c_str());
 
         //force an output to the screen if the log is not the standard output
