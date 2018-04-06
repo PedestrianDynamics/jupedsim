@@ -58,7 +58,7 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
      _room = roomArg->GetID();
      std::vector<Line> lines;
      std::map<int, Line> tmpDoors;
-
+     Line anyDoor = Line{};
      for (auto& subroomMap : roomArg->GetAllSubRooms()) {
           SubRoom* subRoomPtr = subroomMap.second.get();
           std::vector<Wall> walls = std::vector<Wall>(subRoomPtr->GetAllWalls());
@@ -87,6 +87,7 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
                     lines.emplace_back((Line)*cross);
                } else if ((tmpDoors.count(uidNotConst) == 0)) {
                     tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *cross));
+                    anyDoor = Line{*cross};
                }
           }
           for (auto& trans : tmpTrans) {
@@ -97,10 +98,10 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
                     lines.emplace_back((Line)*trans);
                } else if (tmpDoors.count(uidNotConst) == 0) {
                     tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *trans));
+                    anyDoor = Line{*trans};
                }
           }
           //find insidePoint and save it, together with UID
-          Line anyDoor = Line{tmpDoors.begin()->second};
           Point normalVec = anyDoor.NormalVec();
           double length = normalVec.Norm();
           Point midPoint = anyDoor.GetCentre();
@@ -180,22 +181,26 @@ UnivFFviaFM::UnivFFviaFM(SubRoom* subRoomArg, Configuration* const confArg, doub
      }
 
      //find insidePoint and save it, together with UID
-     Line anyDoor = Line{tmpDoors.begin()->second};
-     Point normalVec = anyDoor.NormalVec();
-     Point midPoint = anyDoor.GetCentre();
-     Point candidate = midPoint + (normalVec * 0.125);
-     if (subRoomArg->IsInSubRoom(candidate)) {
-          //_subroomUIDtoInsidePoint.emplace(std::make_pair(subRoomArg->GetUID(), candidate));
-          _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomArg, candidate));
-     } else {
-          candidate = candidate - (normalVec * 0.25);
-          if (subRoomArg->IsInSubRoom(candidate)) {
-               //_subroomUIDtoInsidePoint.emplace(std::make_pair(subRoomArg->GetUID(), candidate));
-               _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomArg, candidate));
-          } else {
-               Log->Write("ERROR:\t In UnivFF InsidePoint Analysis");
-          }
-     }
+    Line anyDoor = Line{(--tmpDoors.end())->second};
+    Point normalVec = anyDoor.NormalVec();
+    double length = normalVec.Norm();
+    Point midPoint = anyDoor.GetCentre();
+    Point candidate01 = midPoint + (normalVec * 0.25);
+    Point candidate02 = midPoint - (normalVec * 0.25);
+    if (subRoomArg->IsInSubRoom(candidate01)) {
+        _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomArg, candidate01));
+    } else {
+        //candidate = candidate - (normalVec * 0.25);
+        if (subRoomArg->IsInSubRoom(candidate02)) {
+            _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomArg, candidate02));
+        } else {
+            Log->Write("ERROR:\t In UnivFF InsidePoint Analysis");
+            bool a = subRoomArg->IsInSubRoom(candidate01);
+            bool b = subRoomArg->IsInSubRoom(candidate02);
+            a = b && a;
+        }
+    }
+
      //_subroomUIDtoSubRoomPtr.emplace(std::make_pair(subRoomArg->GetUID(), subRoomArg));
 
      //this will interpret "useWallDistances" as best as possible. Users should clearify with "setSpeedMode" before calling "AddTarget"
