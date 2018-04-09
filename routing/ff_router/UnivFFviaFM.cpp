@@ -58,7 +58,7 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
      _room = roomArg->GetID();
      std::vector<Line> lines;
      std::map<int, Line> tmpDoors;
-
+     Line anyDoor = Line{};
      for (auto& subroomMap : roomArg->GetAllSubRooms()) {
           SubRoom* subRoomPtr = subroomMap.second.get();
           std::vector<Wall> walls = std::vector<Wall>(subRoomPtr->GetAllWalls());
@@ -85,8 +85,11 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
                if (!isOpen) {
                     //will be added twice! is it a problem?
                     lines.emplace_back((Line)*cross);
-               } else if ((tmpDoors.count(uidNotConst) == 0)) {
-                    tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *cross));
+               } else {
+                   anyDoor = Line{*cross};
+                   if (tmpDoors.count(uidNotConst) == 0) {
+                       tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *cross));
+                   }
                }
           }
           for (auto& trans : tmpTrans) {
@@ -95,25 +98,30 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
                if (!isOpen) {
                     //will be added twice! is it a problem?
                     lines.emplace_back((Line)*trans);
-               } else if (tmpDoors.count(uidNotConst) == 0) {
-                    tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *trans));
+               } else {
+                   anyDoor = Line{*trans};
+                   if (tmpDoors.count(uidNotConst) == 0) {
+                       tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *trans));
+                   }
                }
           }
           //find insidePoint and save it, together with UID
-          Line anyDoor = Line{tmpDoors.begin()->second};
           Point normalVec = anyDoor.NormalVec();
+          double length = normalVec.Norm();
           Point midPoint = anyDoor.GetCentre();
-          Point candidate = midPoint + normalVec * 0.5;
-          if (subRoomPtr->IsInSubRoom(candidate)) {
-               //_subroomUIDtoInsidePoint.emplace(std::make_pair(subRoomPtr->GetUID(), candidate));
-               _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomPtr, candidate));
+          Point candidate01 = midPoint + (normalVec * 0.25);
+          Point candidate02 = midPoint - (normalVec * 0.25);
+          if (subRoomPtr->IsInSubRoom(candidate01)) {
+               _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomPtr, candidate01));
           } else {
-               candidate = candidate - normalVec;
-               if (subRoomPtr->IsInSubRoom(candidate)) {
-                    //_subroomUIDtoInsidePoint.emplace(std::make_pair(subRoomPtr->GetUID(), candidate));
-                    _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomPtr, candidate));
+               //candidate = candidate - (normalVec * 0.25);
+               if (subRoomPtr->IsInSubRoom(candidate02)) {
+                    _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomPtr, candidate02));
                } else {
                     Log->Write("ERROR:\t In UnivFF InsidePoint Analysis");
+                    bool a = subRoomPtr->IsInSubRoom(candidate01);
+                    bool b = subRoomPtr->IsInSubRoom(candidate02);
+                    a = b && a; //ignore this line. only to have a codeline after initialization of bools (to place a breakpoint)
                }
           }
           //_subroomUIDtoSubRoomPtr.emplace(std::make_pair(subRoomPtr->GetUID(), subRoomPtr));
@@ -177,22 +185,26 @@ UnivFFviaFM::UnivFFviaFM(SubRoom* subRoomArg, Configuration* const confArg, doub
      }
 
      //find insidePoint and save it, together with UID
-     Line anyDoor = Line{tmpDoors.begin()->second};
-     Point normalVec = anyDoor.NormalVec();
-     Point midPoint = anyDoor.GetCentre();
-     Point candidate = midPoint + normalVec * 0.5;
-     if (subRoomArg->IsInSubRoom(candidate)) {
-          //_subroomUIDtoInsidePoint.emplace(std::make_pair(subRoomArg->GetUID(), candidate));
-          _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomArg, candidate));
-     } else {
-          candidate = candidate - normalVec;
-          if (subRoomArg->IsInSubRoom(candidate)) {
-               //_subroomUIDtoInsidePoint.emplace(std::make_pair(subRoomArg->GetUID(), candidate));
-               _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomArg, candidate));
-          } else {
-               Log->Write("ERROR:\t In UnivFF InsidePoint Analysis");
-          }
-     }
+    Line anyDoor = Line{(--tmpDoors.end())->second};
+    Point normalVec = anyDoor.NormalVec();
+    double length = normalVec.Norm();
+    Point midPoint = anyDoor.GetCentre();
+    Point candidate01 = midPoint + (normalVec * 0.25);
+    Point candidate02 = midPoint - (normalVec * 0.25);
+    if (subRoomArg->IsInSubRoom(candidate01)) {
+        _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomArg, candidate01));
+    } else {
+        //candidate = candidate - (normalVec * 0.25);
+        if (subRoomArg->IsInSubRoom(candidate02)) {
+            _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomArg, candidate02));
+        } else {
+            Log->Write("ERROR:\t In UnivFF InsidePoint Analysis");
+            bool a = subRoomArg->IsInSubRoom(candidate01);
+            bool b = subRoomArg->IsInSubRoom(candidate02);
+            a = b && a;
+        }
+    }
+
      //_subroomUIDtoSubRoomPtr.emplace(std::make_pair(subRoomArg->GetUID(), subRoomArg));
 
      //this will interpret "useWallDistances" as best as possible. Users should clearify with "setSpeedMode" before calling "AddTarget"
@@ -463,7 +475,7 @@ void UnivFFviaFM::createPedSpeed(Pedestrian *const *pedsArg, int nsize, int mode
      }
      if (_speedFieldSelector[REDU_WALL_SPEED] && _mode == LINESEGMENT) { //indicates, that the direction strat is using it
           for (long int i = 0; i < _grid->GetnPoints(); ++i) {
-               _speedFieldSelector[PED_SPEED][i] = _speedFieldSelector[PED_SPEED][i];
+               _speedFieldSelector[PED_SPEED][i] = _speedFieldSelector[REDU_WALL_SPEED][i];
           }
      }
 
@@ -1439,13 +1451,49 @@ double UnivFFviaFM::getCostToDestination(const int destID, const Point& position
           }
 
           addTarget(destID, _costFieldWithKey[destID], _directionFieldWithKey[destID]);
-          getCostToDestination(destID, position);
+          return getCostToDestination(destID, position);
      } else if (!_directCalculation && _doors.count(destID) > 0) {
 //omp critical
 #pragma omp critical(UnivFFviaFM_toDo)
           _toDo.emplace_back(destID);
      }
      return DBL_MAX;
+}
+
+double UnivFFviaFM::getDistanceBetweenDoors(const int door1_ID, const int door2_ID) {
+    assert(_doors.count(door1_ID) != 0);
+    assert(_doors.count(door2_ID) != 0);
+
+    if (_costFieldWithKey.count(door1_ID)==1 && _costFieldWithKey[door1_ID]) {
+        long int key = _grid->getKeyAtPoint(_doors.at(door2_ID).GetCentre());
+        if (_gridCode[key] != door2_ID) {
+            //bresenham line (treppenstruktur) at middle and calculated centre of line are on different keys
+            //find a key that belongs to door (must be one left or right and second one below or above)
+            if (_gridCode[key+1] == door2_ID) {
+                key = key+1;
+            } else if (_gridCode[key-1] == door2_ID){
+                key = key-1;
+            } else {
+                Log->Write("ERROR:\t In DistanceBetweenDoors");
+            }
+        }
+        return _costFieldWithKey[door1_ID][key];
+    } else if (_directCalculation && _doors.count(door1_ID) > 0) {
+        _costFieldWithKey[door1_ID] = new double[_nPoints];
+        if (_user == DISTANCE_AND_DIRECTIONS_USED) {
+            _directionFieldWithKey[door1_ID] = new Point[_nPoints];
+        } else {
+            _directionFieldWithKey[door1_ID] = nullptr;
+        }
+
+        addTarget(door1_ID, _costFieldWithKey[door1_ID], _directionFieldWithKey[door1_ID]);
+        return getDistanceBetweenDoors(door1_ID, door2_ID);
+    } else if (!_directCalculation && _doors.count(door1_ID) > 0) {
+//omp critical
+#pragma omp critical(UnivFFviaFM_toDo)
+        _toDo.emplace_back(door1_ID);
+    }
+    return DBL_MAX;
 }
 
 RectGrid* UnivFFviaFM::getGrid(){

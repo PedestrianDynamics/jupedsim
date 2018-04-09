@@ -189,7 +189,7 @@ protected:
      Configuration* _config;
      std::map< std::pair<int, int> , double > _distMatrix;
      std::map< std::pair<int, int> , int >    _pathsMatrix;
-     std::map< std::pair<int, int> , SubRoom* > _subroomMatrix;
+     //std::map< std::pair<int, int> , SubRoom* > _subroomMatrix;
      std::vector<int>                         _allDoorUIDs;
      std::vector<int>                         _localShortestSafedPeds;
      const Building*                          _building;

@@ -107,6 +107,7 @@ public:
 
      double getCostToDestination(const int destID, const Point& position, int mode);
      double getCostToDestination(const int destID, const Point& position);
+     double getDistanceBetweenDoors(const int door1_ID, const int door2_ID);
      RectGrid* getGrid();
      virtual void getDirectionToUID(int destID, const long int key, Point& direction, int mode);
      void getDirectionToUID(int destID, const long int key, Point& direction);
