@@ -9,7 +9,8 @@ All notable changes to this project will be documented in this file.
 - Router tests
 - Option for printing progressbar:  `<progressbar/>` cfc65f22
 - Universal Floorfield: recognition of inside and outside of rooms, gridpoints know corresponding Subroom
-- Floorfield Router: fixes of "Cannot find route for pedestrian ..." bugs
+- Floorfield Router: fixes of "Cannot find route for pedestrian ..." bugs; vtk-files can be written with `<write_VTK_files>true</write_VTK_files>` (see wiki)
+- Exit_Strategie / Direction_Strategie: fixed bug 269, where agents get stuck at doors.
 
 ## v0.8.2 [2016-10-11]
 
