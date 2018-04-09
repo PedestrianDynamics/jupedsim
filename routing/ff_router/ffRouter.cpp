@@ -228,7 +228,7 @@ bool FFRouter::Init(Building* building)
                double tempDistance = locffptr->getDistanceBetweenDoors(rctIt->second, otherDoor.second);
 
                if (tempDistance < locffptr->getGrid()->Gethx()) {
-                    Log->Write("WARNING:\tDistance of doors %d and %d is too small: %f",rctIt->second, otherDoor.second, tempDistance);
+                    Log->Write("WARNING:\tIgnoring distance of doors %d and %d because it is too small: %f",rctIt->second, otherDoor.second, tempDistance);
                     //Log->Write("^^^^^^^^\tIf there are scattered subrooms, which are not connected, this is ok.");
                     continue;
                }
@@ -498,6 +498,7 @@ int FFRouter::FindExit(Pedestrian* p)
 void FFRouter::FloydWarshall()
 {
      bool change = false;
+     double savedDistance = 0.;
      int totalnum = _allDoorUIDs.size();
      for(int k = 0; k<totalnum; ++k) {
           for(int i = 0; i<totalnum; ++i) {
@@ -508,6 +509,7 @@ void FFRouter::FloydWarshall()
                     if ((_distMatrix[key_ik] < DBL_MAX) && (_distMatrix[key_kj] < DBL_MAX) &&
                        (_distMatrix[key_ik] + _distMatrix[key_kj] < _distMatrix[key_ij]))
                     {
+                         savedDistance = _distMatrix[key_ij] - _distMatrix[key_ik] - _distMatrix[key_kj];
                          _distMatrix.erase(key_ij);
                          _distMatrix.insert(std::make_pair(key_ij, _distMatrix[key_ik] + _distMatrix[key_kj]));
                          _pathsMatrix.erase(key_ij);
@@ -518,7 +520,7 @@ void FFRouter::FloydWarshall()
           }
      }
      if (change) {
-          Log->Write("Floyd nochmal!!!");
+          Log->Write("Floyd nochmal!!! %f", savedDistance);
           FloydWarshall();
      } else {
           Log->Write("Floyd fertig");

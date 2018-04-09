@@ -85,9 +85,11 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
                if (!isOpen) {
                     //will be added twice! is it a problem?
                     lines.emplace_back((Line)*cross);
-               } else if ((tmpDoors.count(uidNotConst) == 0)) {
-                    tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *cross));
-                    anyDoor = Line{*cross};
+               } else {
+                   anyDoor = Line{*cross};
+                   if (tmpDoors.count(uidNotConst) == 0) {
+                       tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *cross));
+                   }
                }
           }
           for (auto& trans : tmpTrans) {
@@ -96,9 +98,11 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
                if (!isOpen) {
                     //will be added twice! is it a problem?
                     lines.emplace_back((Line)*trans);
-               } else if (tmpDoors.count(uidNotConst) == 0) {
-                    tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *trans));
-                    anyDoor = Line{*trans};
+               } else {
+                   anyDoor = Line{*trans};
+                   if (tmpDoors.count(uidNotConst) == 0) {
+                       tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *trans));
+                   }
                }
           }
           //find insidePoint and save it, together with UID
