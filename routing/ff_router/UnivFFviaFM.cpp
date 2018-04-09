@@ -121,7 +121,7 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
                     Log->Write("ERROR:\t In UnivFF InsidePoint Analysis");
                     bool a = subRoomPtr->IsInSubRoom(candidate01);
                     bool b = subRoomPtr->IsInSubRoom(candidate02);
-                    a = b && a;
+                    a = b && a; //ignore this line. only to have a codeline after initialization of bools (to place a breakpoint)
                }
           }
           //_subroomUIDtoSubRoomPtr.emplace(std::make_pair(subRoomPtr->GetUID(), subRoomPtr));

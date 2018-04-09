@@ -265,15 +265,15 @@ bool FFRouter::Init(Building* building)
           }
      }
 
-     std::ofstream matrixfile;
-     matrixfile.open("Matrix.txt");
-
-     for (auto mapItem : _distMatrix) {
-          matrixfile << mapItem.first.first << " to " << mapItem.first.second << " : " << mapItem.second << "\t via \t" << _pathsMatrix[mapItem.first];
-          matrixfile << "\t" << _CroTrByUID.at(mapItem.first.first)->GetID() << " to " << _CroTrByUID.at(mapItem.first.second)->GetID() << "\t via \t";
-          matrixfile << _CroTrByUID.at(_pathsMatrix[mapItem.first])->GetID() << std::endl;
-     }
-     matrixfile.close();
+//     std::ofstream matrixfile;
+//     matrixfile.open("Matrix.txt");
+//
+//     for (auto mapItem : _distMatrix) {
+//          matrixfile << mapItem.first.first << " to " << mapItem.first.second << " : " << mapItem.second << "\t via \t" << _pathsMatrix[mapItem.first];
+//          matrixfile << "\t" << _CroTrByUID.at(mapItem.first.first)->GetID() << " to " << _CroTrByUID.at(mapItem.first.second)->GetID() << "\t via \t";
+//          matrixfile << _CroTrByUID.at(_pathsMatrix[mapItem.first])->GetID() << std::endl;
+//     }
+//     matrixfile.close();
      Log->Write("INFO: \tFF Router Init done.");
      return true;
 }
@@ -520,10 +520,10 @@ void FFRouter::FloydWarshall()
           }
      }
      if (change) {
-          Log->Write("Floyd nochmal!!! %f", savedDistance);
+          //Log->Write("Floyd nochmal!!! %f", savedDistance);
           FloydWarshall();
      } else {
-          Log->Write("Floyd fertig");
+          Log->Write("INFO:\t FloydWarshall done!");
      }
 }
 
