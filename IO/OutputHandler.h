@@ -46,7 +46,7 @@ protected:
      int _nErrors;
      int _nDeletedAgents;
 public:
-     OutputHandler() { _nWarnings = 0; _nErrors = 0; };
+     OutputHandler() { _nWarnings = 0; _nErrors = 0; _nDeletedAgents = 0;};
      virtual ~OutputHandler() {};
 
      int GetWarnings();
