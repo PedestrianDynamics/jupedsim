@@ -1190,6 +1190,11 @@ void UnivFFviaFM::addTarget(const int uid, double* costarrayDBL, Point* gradarra
      } else if (_speedmode == FF_PED_SPEED) {
           calcFF(newArrayDBL, newArrayPt, _speedFieldSelector[PED_SPEED]);
      }
+
+     //the rest of the door must be initialized if centerpoint was used. else ff_router will have probs getting localDist
+     if (_mode == CENTERPOINT) {
+         drawLinesOnGrid(tempTargetLine, newArrayDBL, magicnum(TARGET_REGION));
+     }
 #pragma omp critical(_uids)
      _uids.emplace_back(uid);
 }
@@ -1418,8 +1423,20 @@ double UnivFFviaFM::getCostToDestination(const int destID, const Point& position
 //          Log->Write("Was ist denn hier los?");
 //     }
      assert(_grid->includesPoint(position));
+    long int key = _grid->getKeyAtPoint(position);
+    if (_gridCode[key] == OUTSIDE) {
+        //bresenham line (treppenstruktur) at middle and calculated centre of line are on different gridpoints
+        //find a key that belongs domain (must be one left or right and second one below or above)
+        if (_gridCode[key+1] != OUTSIDE) {
+            key = key+1;
+        } else if (_gridCode[key-1] != OUTSIDE){
+            key = key-1;
+        } else {
+            Log->Write("ERROR:\t In getCostToDestination(3 args)");
+        }
+    }
      if (_costFieldWithKey.count(destID)==1 && _costFieldWithKey[destID]) {
-          return _costFieldWithKey[destID][_grid->getKeyAtPoint(position)];
+          return _costFieldWithKey[destID][key];
      } else if (_directCalculation && _doors.count(destID) > 0) {
           _costFieldWithKey[destID] = new double[_nPoints];
           if (_user == DISTANCE_AND_DIRECTIONS_USED) {
@@ -1440,8 +1457,20 @@ double UnivFFviaFM::getCostToDestination(const int destID, const Point& position
 
 double UnivFFviaFM::getCostToDestination(const int destID, const Point& position) {
      assert(_grid->includesPoint(position));
+    long int key = _grid->getKeyAtPoint(position);
+    if (_gridCode[key] == OUTSIDE) {
+        //bresenham line (treppenstruktur) getKeyAtPoint yields gridpoint next to edge, although position is on edge
+        //find a key that belongs domain (must be one left or right and second one below or above)
+        if (_gridCode[key+1] != OUTSIDE) {
+            key = key+1;
+        } else if (_gridCode[key-1] != OUTSIDE){
+            key = key-1;
+        } else {
+            Log->Write("ERROR:\t In getCostToDestination(2 args)");
+        }
+    }
      if (_costFieldWithKey.count(destID)==1 && _costFieldWithKey[destID]) {
-          return _costFieldWithKey[destID][_grid->getKeyAtPoint(position)];
+          return _costFieldWithKey[destID][key];
      } else if (_directCalculation && _doors.count(destID) > 0) {
           _costFieldWithKey[destID] = new double[_nPoints];
           if (_user == DISTANCE_AND_DIRECTIONS_USED) {
@@ -1467,7 +1496,7 @@ double UnivFFviaFM::getDistanceBetweenDoors(const int door1_ID, const int door2_
     if (_costFieldWithKey.count(door1_ID)==1 && _costFieldWithKey[door1_ID]) {
         long int key = _grid->getKeyAtPoint(_doors.at(door2_ID).GetCentre());
         if (_gridCode[key] != door2_ID) {
-            //bresenham line (treppenstruktur) at middle and calculated centre of line are on different keys
+            //bresenham line (treppenstruktur) getKeyAtPoint yields gridpoint next to edge, although position is on edge
             //find a key that belongs to door (must be one left or right and second one below or above)
             if (_gridCode[key+1] == door2_ID) {
                 key = key+1;
