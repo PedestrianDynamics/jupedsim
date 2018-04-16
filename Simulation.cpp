@@ -343,8 +343,10 @@ void Simulation::UpdateRoutesAndLocations()
                ped->Relocate(f);
                //exit(EXIT_FAILURE);
 #pragma omp critical(Simulation_Update_pedsToRemove)
-               pedsToRemove.push_back(ped);
-               Log->incrementDeletedAgents();
+               {
+                    pedsToRemove.push_back(ped);
+                    Log->incrementDeletedAgents();
+               }
           }
      }
 
