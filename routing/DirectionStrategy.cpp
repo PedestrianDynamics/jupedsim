@@ -404,9 +404,20 @@ void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
                newfield->setSpeedMode(FF_HOMO_SPEED);
           }
          newfield->addAllTargetsParallel();
+
          //newfield->writeFF("directionsOfRoom" + std::to_string(roomPair.first) + ".vtk", newfield->getKnownDoorUIDs());
      }
-     end = std::chrono::system_clock::now();
+
+    if (_building->GetConfig()->get_write_VTK_files_direction()) {
+        for (unsigned int i = 0; i < _locffviafm.size(); ++i) {
+            auto iter = _locffviafm.begin();
+            std::advance(iter, i);
+            int roomNr = iter->first;
+            iter->second->writeFF("direction" + std::to_string(roomNr) + ".vtk", iter->second->getKnownDoorUIDs());
+        }
+    }
+
+    end = std::chrono::system_clock::now();
      std::chrono::duration<double> elapsed_seconds = end-start;
      Log->Write("INFO: \tTime to construct FF in DirectionLocalFloorfield: " + std::to_string(elapsed_seconds.count()));
      _initDone = true;
@@ -491,9 +502,21 @@ void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
                }
                floorfield->addAllTargetsParallel();
           }
+
+
      }
 
-     end = std::chrono::system_clock::now();
+    if (_building->GetConfig()->get_write_VTK_files_direction()) {
+        for (unsigned int i = 0; i < _locffviafm.size(); ++i) {
+            auto iter = _locffviafm.begin();
+            std::advance(iter, i);
+            int roomNr = iter->first;
+            iter->second->writeFF("direction" + std::to_string(roomNr) + ".vtk", iter->second->getKnownDoorUIDs());
+        }
+    }
+
+
+    end = std::chrono::system_clock::now();
      std::chrono::duration<double> elapsed_seconds = end-start;
      Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
 

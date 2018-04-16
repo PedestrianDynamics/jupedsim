@@ -1414,7 +1414,8 @@ bool IniFileParser::ParseNodeToSolver(const TiXmlNode& solverNode)
 
 bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
 {
-     string query = "exit_crossing_strategy";
+
+    string query = "exit_crossing_strategy";
      if (!strategyNode.FirstChild(query.c_str())) {
           query = "exitCrossingStrategy";
           Log->Write(
@@ -1461,6 +1462,18 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
 
                }
               _exit_strat_number = pExitStrategy;
+
+               if (pExitStrategy == 8 || pExitStrategy ==9){
+                    _config->set_write_VTK_files_direction(false);
+                   if (strategyNode.FirstChild("write_VTK_files"))  {
+                       const char* tmp =
+                               strategyNode.FirstChild("write_VTK_files")->FirstChild()->Value();
+                       //remark: std::strcmp returns 0 if the strings are equal
+                       bool tmp_write_VTK = !std::strcmp(tmp, "true");
+                        _config->set_write_VTK_files_direction(tmp_write_VTK);
+                   }
+
+               }
                switch (pExitStrategy) {
                case 1:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMiddlePoint());
