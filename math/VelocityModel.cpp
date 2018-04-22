@@ -242,7 +242,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 //double winkel = spacings[0].second;
                 //Point tmp;
                 Point speed = direction.Normalized() *OptimalSpeed(ped, spacing);
-                result_acc.push_back(speed);                
+                result_acc.push_back(speed);
 
                 spacings.clear(); //clear for ped p
 
@@ -400,7 +400,9 @@ Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2, int periodi
           Log->Write("\t\t Maybe the value of <a> in force_ped should be increased. Going to exit.\n");
           printf("ped1 %d  ped2 %d\n", ped1->GetID(), ped2->GetID());
           printf("ped1 at (%f, %f), ped2 at (%f, %f)\n", ped1->GetPos()._x, ped1->GetPos()._y, ped2->GetPos()._x, ped2->GetPos()._y);
-          exit(EXIT_FAILURE);
+          // exit(EXIT_FAILURE); //TODO: quick and dirty fix for issue #158
+          // (sometimes sources create peds on the same location)
+          return F_rep; //no forces, in the hope these two get away soon
      }
       Point ei = ped1->GetV().Normalized();
       if(ped1->GetV().NormSquare()<0.01){
