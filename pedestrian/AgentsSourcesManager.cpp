@@ -78,7 +78,7 @@ void AgentsSourcesManager::Run()
           int current_time = (int)Pedestrian::GetGlobalTime();
           if ((current_time != _lastUpdateTime)
                     && ((current_time % updateFrequency) == 0))
-          {   
+          {
                finished=ProcessAllSources();
                _lastUpdateTime = current_time;
           }
@@ -93,14 +93,15 @@ bool AgentsSourcesManager::ProcessAllSources() const
 {
      bool empty=true;
      double current_time = Pedestrian::GetGlobalTime();
-//     std::cout << "\n -- current time: " << current_time << " number " << _building->GetAllPedestrians().size() << std::endl;
+
      for (const auto& src : _sources)
      {
+          std::cout << "src: " <<  src->GetId() << " -- current time: " << current_time << " number of peds " << _building->GetAllPedestrians().size() << std::endl;
           if (src->GetPoolSize() && (src->GetPlanTime() <= current_time) )// maybe diff<eps
           {
                vector<Pedestrian*> peds;
                src->RemoveAgentsFromPool(peds,src->GetFrequency());
-               Log->Write("INFO:\tSource %d generating %d agents (%d remaining)",src->GetId(),peds.size(),src->GetPoolSize());
+               Log->Write("> INFO:\tSource %d generating %d agents (%d remaining)\n",src->GetId(),peds.size(),src->GetPoolSize());
 
                //ComputeBestPositionRandom(src.get(), peds);
                //todo: here every pedestrian needs an exitline
@@ -109,7 +110,7 @@ bool AgentsSourcesManager::ProcessAllSources() const
 
                AgentsQueueIn::Add(peds);
                empty = false;
-               //src->Dump();
+               src->Dump();
           }
           if (src->GetPlanTime() > current_time) // for the case we still expect
                                                  // agents coming
@@ -123,15 +124,15 @@ bool AgentsSourcesManager::ProcessAllSources() const
 void AgentsSourcesManager::ComputeBestPositionDummy(AgentsSource* src,
           vector<Pedestrian*>& peds)const
 {
-     UNUSED(src); 
+     UNUSED(src);
      peds[0]->SetPos( Point(10,5.5) );
      peds[1]->SetPos( Point(10,4.9) );
      peds[2]->SetPos( Point(10,4.3) );
      peds[3]->SetPos( Point(10,3.7) );
 
      /*peds[0]->SetPos( Point(10,5.4) );
-	peds[1]->SetPos( Point(10,4.6) );
-	peds[2]->SetPos( Point(10,3.8) );*/
+        peds[1]->SetPos( Point(10,4.6) );
+        peds[2]->SetPos( Point(10,3.8) );*/
 
      for(auto&& ped : peds)
      {
@@ -148,9 +149,11 @@ void AgentsSourcesManager::ComputeBestPositionCompleteRandom(AgentsSource* src,
      auto dist = src->GetStartDistribution();
      auto subroom = _building->GetRoom(dist->GetRoomId())->GetSubRoom(dist->GetSubroomID());
      vector<Point> positions = PedDistributor::PossiblePositions(*subroom);
-
+     double seed = time(NULL);
      //TODO: get the seed from the simulation
-     srand (time(NULL));
+     std:: cout << "seed: "<< seed << std::endl;
+
+     srand (seed);
 
      for (auto& ped : peds)
      {
@@ -160,6 +163,8 @@ void AgentsSourcesManager::ComputeBestPositionCompleteRandom(AgentsSource* src,
                Point new_pos = positions[index];
                positions.erase(positions.begin() + index);
                ped->SetPos(new_pos, true);
+               std:: cout << "pos: " << new_pos._x << new_pos._y << std::endl;
+
                AdjustVelocityByNeighbour(ped);
           }
           else
@@ -328,25 +333,25 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
                          && (bounds[2] <= pos._y) && (pos._y < bounds[3]))
                {
 
-            	   bool enough_space = true;
+                   bool enough_space = true;
 
-            	   //checking enough space!!
-            	   vector<Pedestrian*> neighbours;
-            	   _building->GetGrid()->GetNeighbourhood(pos,neighbours);
+                   //checking enough space!!
+                   vector<Pedestrian*> neighbours;
+                   _building->GetGrid()->GetNeighbourhood(pos,neighbours);
 
-				   for (const auto& ngh: neighbours)
-					   if(  (ngh->GetPos() - pos).NormSquare() < 4*radius*radius )
-					   {
-							enough_space = false;
-							break;
-					   }
+                                   for (const auto& ngh: neighbours)
+                                           if(  (ngh->GetPos() - pos).NormSquare() < 4*radius*radius )
+                                           {
+                                                        enough_space = false;
+                                                        break;
+                                           }
 
 
-				   if( enough_space )
-				   {
-					   index = a;
-					   break;
-				   }
+                                   if( enough_space )
+                                   {
+                                           index = a;
+                                           break;
+                                   }
 
                }
           }
@@ -369,16 +374,16 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
           {
                const Point& pos = positions[index];
 
-			   extra_positions.push_back(pos);
-			   (*iter_ped)->SetPos(pos, true); //true for the initial position
-			   positions.erase(positions.begin() + index);
+                           extra_positions.push_back(pos);
+                           (*iter_ped)->SetPos(pos, true); //true for the initial position
+                           positions.erase(positions.begin() + index);
 
-			   //at this point we have a position
-			   //so we can adjust the velocity
-			   //AdjustVelocityUsingWeidmann(ped);
-			   AdjustVelocityByNeighbour( (*iter_ped) );
-			   //move iterator
-			   iter_ped++;
+                           //at this point we have a position
+                           //so we can adjust the velocity
+                           //AdjustVelocityUsingWeidmann(ped);
+                           AdjustVelocityByNeighbour( (*iter_ped) );
+                           //move iterator
+                           iter_ped++;
 
           }
 
@@ -421,7 +426,7 @@ void AgentsSourcesManager::AdjustVelocityByNeighbour(Pedestrian* ped) const
      //mean speed
      if(count==0)
      {
-          speed=ped->GetEllipse().GetV0(); // FIXME:  bad fix for: peds without navline (ar.graf) 
+          speed=ped->GetEllipse().GetV0(); // FIXME:  bad fix for: peds without navline (ar.graf)
           //speed=ped->GetV0Norm();
      }
      else
@@ -438,7 +443,7 @@ void AgentsSourcesManager::AdjustVelocityByNeighbour(Pedestrian* ped) const
      }
      else
      {
-          Log->Write("ERROR:\t no route could be found for agent [%d] going to [%d]",ped->GetID(),ped->GetFinalDestination());
+          Log->Write(">> ERROR:\t no route could be found for agent [%d] going to [%d]",ped->GetID(),ped->GetFinalDestination());
           //that will be most probably be fixed in the next computation step.
           // so do not abort
      }
@@ -485,7 +490,7 @@ void AgentsSourcesManager::AdjustVelocityUsingWeidmann(Pedestrian* ped) const
      }
      else
      {
-          Log->Write("ERROR:\t no route could be found for agent [%d] going to [%d]",ped->GetID(),ped->GetFinalDestination());
+          Log->Write(">>> ERROR:\t no route could be found for agent [%d] going to [%d]",ped->GetID(),ped->GetFinalDestination());
           //that will be most probably be fixed in the next computation step.
           // so do not abort
      }
@@ -508,7 +513,7 @@ void AgentsSourcesManager::SortPositionByDensity(std::vector<Point>& positions, 
           for(const auto& p: neighbours)
           {
               //FIXME: p  can be null, if deleted in the main simulation thread.
-        	  if( p && (pt-p->GetPos()).NormSquare()<=radius_square)
+                  if( p && (pt-p->GetPos()).NormSquare()<=radius_square)
                     density+=1.0;
           }
 

@@ -74,12 +74,12 @@ bool IsEnoughInSubroom( SubRoom* subroom, Point& pt, double radius )
                return false;
 
      for(const auto& trans: subroom->GetAllTransitions() )
-    	 if ( trans->DistTo(pt) < radius + 0.1 )
-    		 return false;
+         if ( trans->DistTo(pt) < radius + 0.1 )
+                 return false;
 
      for( const auto& cross: subroom->GetAllCrossings() )
-    	 if( cross->DistTo(pt) < radius + 0.1 )
-    		 return false;
+         if( cross->DistTo(pt) < radius + 0.1 )
+                 return false;
 
      return true;
 }
@@ -96,6 +96,8 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
     std::vector<Pedestrian*> existing_peds;
     std::vector<Pedestrian*> peds_without_place;
     building->GetPedestrians(roomID, subroomID, existing_peds);
+    for (auto  pp : existing_peds)
+         std::cout << "existing peds: " << pp->GetID() << " in " << pp->GetPos()._x << ", " << pp->GetPos()._y << std::endl;
 
     double radius = 0.3; //radius of a person, 0.3 is just some number(needed for the fake_peds bellow), will be changed afterwards
 
@@ -145,7 +147,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
               {
                     ped->SetPos(center_pos, true);
               }
-              
+
               Point v;
               if (ped->GetExitLine()) {
                     v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
@@ -162,8 +164,8 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
 
          else //more than one pedestrian
          {
-       	   //it would be better to maybe have a mapping between discrete_positions and pointers to the pedestrians
-       	   //then there would be no need to remember the velocities_vector and goal_vector
+           //it would be better to maybe have a mapping between discrete_positions and pointers to the pedestrians
+           //then there would be no need to remember the velocities_vector and goal_vector
               std::vector<Point> discrete_positions;
               std::vector<Point> velocities_vector;
               std::vector<int> goal_vector;
@@ -210,7 +212,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                     VoronoiBestVertexRandMax(discrete_positions, vd, subroom, factor, chosen_it, dis, radius);
               else
                     VoronoiBestVertexGreedy(discrete_positions, vd, subroom, factor, chosen_it, dis, radius);
-              
+
               if( dis > 4*radius*radius)
               {
                    Point pos( chosen_it->x()/factor, chosen_it->y()/factor ); //check!
@@ -266,21 +268,21 @@ void VoronoiAdjustVelocityNeighbour(voronoi_diagram<double>::const_vertex_iterat
           std::size_t index = ( edge->cell() )->source_index();
           if( ped->GetFinalDestination() == goal_vector[index]  )
           {
-        	  no1++;
-        	  speed += velocities_vector[index].Norm();
+                  no1++;
+                  speed += velocities_vector[index].Norm();
           }
           else
           {
-        	  no2++;
-        	  backup_speed += velocities_vector[index].Norm();
+                  no2++;
+                  backup_speed += velocities_vector[index].Norm();
           }
           edge = edge->rot_next();
      } while (edge != vertex.incident_edge());
 
      if(no1)
-    	 speed = speed/no1;
+         speed = speed/no1;
      else
-    	 speed = backup_speed/(no2*3.0); //just some small speed
+         speed = backup_speed/(no2*3.0); //just some small speed
 
      v = v*speed;
      ped->SetV(v);
@@ -324,26 +326,26 @@ void VoronoiAdjustVelocityNeighbour(voronoi_diagram<double>::const_vertex_iterat
 //
 //                    do
 //                    {
-//                    	//do something
-//                    	if( goal_vector[index]!=-3 &&  goal_vector[index]!=ped->GetFinalDestination() ) //
-//                    		if( check_line.IntersectionWithCircle(p,1.0) )    //0.7 because the radius is around 0.3
-//                    		{
-//                    			score -= 100;
-//                    			break;
-//                    		}
+//                      //do something
+//                      if( goal_vector[index]!=-3 &&  goal_vector[index]!=ped->GetFinalDestination() ) //
+//                              if( check_line.IntersectionWithCircle(p,1.0) )    //0.7 because the radius is around 0.3
+//                              {
+//                                      score -= 100;
+//                                      break;
+//                              }
 //
 //
-//                    	//change edge
-//                    	edge = edge->rot_next();
-//                    	index = ( edge->cell() )->source_index();
-//                    	p = discrete_positions[index]/factor;
+//                      //change edge
+//                      edge = edge->rot_next();
+//                      index = ( edge->cell() )->source_index();
+//                      p = discrete_positions[index]/factor;
 //
 //                    } while( edge != vertex.incident_edge() );
 //*/
 //                    if(score > max_score)
 //                    {
 //                         max_score =score;
-//                    	 max_dis = dis;
+//                       max_dis = dis;
 //                         max_it = it;
 //                    }
 //               }
@@ -409,7 +411,7 @@ void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, con
 
      shuffle(random_numbers.begin(), random_numbers.end(), gen);
      double a_random_double = random_numbers[0];
-     
+
      //the first element in the range [first, last) that is not less than a_random_double
      auto lower = std::lower_bound(partial_sums.begin(), partial_sums.end(), a_random_double);
      int iposition = lower - partial_sums.begin();
@@ -505,13 +507,13 @@ void plotVoronoi(const std::vector<Point>& discrete_positions, const voronoi_dia
 {
      // =============== plot Voronoi Diagram =====================
      char name [50];
-     sprintf(name,  "log_%.3d.py", global_count);    
+     sprintf(name,  "log_%.3d.py", global_count);
      FILE * f;
      f = fopen(name, "w");
-    // plot cells 
+    // plot cells
      fprintf(f, "# ------------------------------\n");
      fprintf(f, "import matplotlib.pyplot as plt\n");
-     //  plot seeds 
+     //  plot seeds
      for(auto pos : discrete_positions)
      {
            fprintf(f, "plt.plot([%f], [%f], \"or\")\n", pos._x/factor, pos._y/factor);
@@ -523,18 +525,18 @@ void plotVoronoi(const std::vector<Point>& discrete_positions, const voronoi_dia
          do {
                  if(edge->vertex0() && edge->vertex1())
                  {
-                       fprintf(f, "plt.plot([%f, %f], [%f, %f], \"bo-\", lw=2)\n",  edge->vertex0()->x()/factor, edge->vertex1()->x()/factor, edge->vertex0()->y()/factor, edge->vertex1()->y()/factor);  
+                       fprintf(f, "plt.plot([%f, %f], [%f, %f], \"bo-\", lw=2)\n",  edge->vertex0()->x()/factor, edge->vertex1()->x()/factor, edge->vertex0()->y()/factor, edge->vertex1()->y()/factor);
                  }
-                            
+
               edge = edge->next();
-        } while (edge != cell.incident_edge()); 
+        } while (edge != cell.incident_edge());
      }
 // plot geometry
      double max_x=std::numeric_limits<double>::min(), min_x=std::numeric_limits<double>::max();
      double max_y=std::numeric_limits<double>::min(), min_y=std::numeric_limits<double>::max();
      const vector<Point> polygon = subroom->GetPolygon();
      for(auto it = polygon.begin(); it != polygon.end(); ) {
-           Point gpoint = *(it++); 
+           Point gpoint = *(it++);
            // Point gpointNext = *it;
            if(gpoint._x > max_x)
                  max_x = gpoint._x;
@@ -544,7 +546,7 @@ void plotVoronoi(const std::vector<Point>& discrete_positions, const voronoi_dia
                  min_x = gpoint._x;
            if(gpoint._y < min_y)
                  min_y = gpoint._y;
-           
+
            // fprintf(f, "plt.plot([%f, %f], [%f, %f], \"k-\", lw=2)\n",  gpoint._x, gpointNext._x, gpoint._y, gpointNext._y);
            if(it == polygon.end()){
                  // fprintf(f, "plt.plot([%f, %f], [%f, %f], \"k-\", lw=2)\n",  gpointNext._x, polygon.begin()->_x,  gpointNext._y, polygon.begin()->_y );
