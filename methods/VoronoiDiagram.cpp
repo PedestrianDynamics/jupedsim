@@ -44,9 +44,9 @@ VoronoiDiagram::VoronoiDiagram()
 VoronoiDiagram::~VoronoiDiagram()
 {
 }
-
+//typedef std::vector<std::pair<polygon_2d>, int> >  poly_id;
 // Traversing Voronoi edges using cell iterator.
-vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(vector<double>& XInFrame, vector<double>& YInFrame,
+std::vector<std::pair<polygon_2d, int> > VoronoiDiagram::getVoronoiPolygons(vector<double>& XInFrame, vector<double>& YInFrame,
           vector<double>& VInFrame, vector<int>& IdInFrame, const double Bound_Max)
 {
      const int numPedsInFrame = IdInFrame.size();
@@ -59,16 +59,16 @@ vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(vector<double>& XInFrame, 
      {
           points.push_back(point_type2(round(XInFrame[i]), round(YInFrame[i])));
           XInFrame_temp.push_back(round(XInFrame[i]));
-		  YInFrame_temp.push_back(round(YInFrame[i]));
-		  VInFrame_temp.push_back(VInFrame[i]);
-		  IdInFrame_temp.push_back(IdInFrame[i]);
+          YInFrame_temp.push_back(round(YInFrame[i]));
+          VInFrame_temp.push_back(VInFrame[i]);
+          IdInFrame_temp.push_back(IdInFrame[i]);
      }
 
      VD voronoidiagram;
      construct_voronoi(points.begin(), points.end(), &voronoidiagram);
      int Ncell = 0;
-     std::vector<polygon_2d> polygons;
-
+     //std::vector<polygon_2d> polygons;
+     std::vector<std::pair<polygon_2d, int> >    polygons_id;
      double Bd_Box_minX = -Bound_Max;
      double Bd_Box_minY = -Bound_Max;
      double Bd_Box_maxX = Bound_Max;
@@ -83,7 +83,7 @@ vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(vector<double>& XInFrame, 
      for (voronoi_diagram<double>::const_cell_iterator it = voronoidiagram.cells().begin();
                it != voronoidiagram.cells().end(); ++it)
      {
-    	  polygon_2d poly;
+          polygon_2d poly;
           vector<point_type2> polypts;
           point_type2 pt_s;
           point_type2 pt_e;
@@ -170,7 +170,6 @@ vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(vector<double>& XInFrame, 
                }
                edge = edge->next();
           } while (edge != cell.incident_edge());
-          Ncell++;
 
           if (infinite_s && infinite_e)
           {
@@ -190,9 +189,14 @@ vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(vector<double>& XInFrame, 
           }
 
           boost::geometry::correct(poly);
-          polygons.push_back(poly);
+          //polygons.push_back(poly);
+          //cout << "poly is: " << typeid(poly).name() << '\n'
+          int id_ped = IdInFrame[Ncell];
+          std::pair<polygon_2d, int>  poly_id = std::make_pair(poly, id_ped);
+          polygons_id.push_back(poly_id);
+          Ncell++;
      }
-     return polygons;
+     return polygons_id;
 }
 
 point_type2 VoronoiDiagram::retrieve_point(const cell_type& cell)
@@ -359,7 +363,7 @@ vector<point_type2> VoronoiDiagram::add_bounding_points(const point_type2& pt1, 
                else
                {
                     double tempx = pt1.x()
-                            		                      + (pt2.x() - pt1.x()) * (pt.y() - pt1.y()) / (pt2.y() - pt1.y());
+                                                              + (pt2.x() - pt1.x()) * (pt.y() - pt1.y()) / (pt2.y() - pt1.y());
                     if (tempx < pt.x())
                     {
                          bounding_vertex.push_back(point_type2(minX, maxY));
@@ -391,7 +395,7 @@ vector<point_type2> VoronoiDiagram::add_bounding_points(const point_type2& pt1, 
                else
                {
                     double tempy = pt1.y()
-                            		                      + (pt2.y() - pt1.y()) * (pt.x() - pt1.x()) / (pt2.x() - pt1.x());
+                                                              + (pt2.y() - pt1.y()) * (pt.x() - pt1.x()) / (pt2.x() - pt1.x());
                     if (tempy < pt.y())
                     {
                          bounding_vertex.push_back(point_type2(minX, minY));
@@ -433,15 +437,18 @@ point_type2 VoronoiDiagram::getIntersectionPoint(const point_2d& pt0, const poin
      return interpts;
 }
 
-std::vector<polygon_2d> VoronoiDiagram::cutPolygonsWithGeometry(const std::vector<polygon_2d>& polygon,
+std::vector<std::pair<polygon_2d, int> > VoronoiDiagram::cutPolygonsWithGeometry(const std::vector<std::pair<polygon_2d, int> > & polygon,
           const polygon_2d& Geometry, const vector<double>& xs, const vector<double>& ys)
 {
-     vector<polygon_2d> intersetionpolygons;
+     // vector<polygon_2d> intersetionpolygons;
+     std::vector<std::pair<polygon_2d, int> > intersetionpolygons;
      int temp = 0;
      for (const auto & polygon_iterator:polygon)
      {
           polygon_list v;
-          intersection(Geometry, polygon_iterator, v);
+          polygon_2d p = polygon_iterator.first;
+
+          intersection(Geometry, p, v);
           BOOST_FOREACH(auto & it, v)
           {
                if (within(point_2d(xs[temp], ys[temp]), it))
@@ -452,7 +459,7 @@ std::vector<polygon_2d> VoronoiDiagram::cutPolygonsWithGeometry(const std::vecto
                     simplify(it,simplified,J_EPS);
 
                     correct(simplified);
-                    intersetionpolygons.push_back(simplified);
+                    intersetionpolygons.push_back(std::make_pair(simplified, polygon_iterator.second));
                }
           }
           temp++;
@@ -461,14 +468,15 @@ std::vector<polygon_2d> VoronoiDiagram::cutPolygonsWithGeometry(const std::vecto
 }
 
 
-std::vector<polygon_2d> VoronoiDiagram::cutPolygonsWithCircle(const std::vector<polygon_2d>& polygon,
+std::vector<std::pair<polygon_2d, int> >  VoronoiDiagram::cutPolygonsWithCircle(const std::vector<std::pair<polygon_2d, int> > & polygon,
           const vector<double>& xs, const vector<double>& ys, double radius, int edges)
 {
-     std::vector<polygon_2d> intersetionpolygons;
+     std::vector<std::pair<polygon_2d, int> >  intersetionpolygons;
      int temp = 0;
      for (const auto & polygon_iterator:polygon)
      {
           polygon_2d circle;
+          polygon_2d p = polygon_iterator.first;
           {
                for (int angle = 0; angle <=edges; angle++)
                {
@@ -479,7 +487,7 @@ std::vector<polygon_2d> VoronoiDiagram::cutPolygonsWithCircle(const std::vector<
           }
           correct(circle);
           polygon_list v;
-          intersection(circle, polygon_iterator, v);
+          intersection(circle, p, v);
           BOOST_FOREACH(auto & it, v)
           {
                if (within(point_2d(xs[temp], ys[temp]), it))
@@ -489,7 +497,7 @@ std::vector<polygon_2d> VoronoiDiagram::cutPolygonsWithCircle(const std::vector<
                     polygon_2d simplified;
                     simplify(it,simplified,J_EPS);
                     correct(simplified);
-                    intersetionpolygons.push_back(simplified);
+                    intersetionpolygons.push_back(std::make_pair(simplified, polygon_iterator.second));
                }
           }
           temp++;

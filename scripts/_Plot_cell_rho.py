@@ -2,7 +2,7 @@ import os
 import sys
 import logging
 import argparse
-#from xml.dom import minidom
+from xml.dom import minidom
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
@@ -117,7 +117,7 @@ def parse_xml_traj_file(filename):
         xmldoc = minidom.parse(filename)
     except:
         logging.critical('could not parse file. exit')
-        exit(FAILURE)
+        exit(0)
     N = int(xmldoc.getElementsByTagName('agents')[0].childNodes[0].data)
     fps = xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data #type unicode
     fps = round(float(fps))
