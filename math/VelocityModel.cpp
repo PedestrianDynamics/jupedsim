@@ -359,7 +359,8 @@ my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei, 
             //printf("ERROR: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!\n");
             Log->Write("WARNING: \tin VelocityModel::GetSPacing() ep12 can not be calculated!!!\n");
             Log->Write("\t\t Pedestrians are too near to each other (%f).", Distance);
-            exit(EXIT_FAILURE);
+            my_pair(FLT_MAX, ped2->GetID());
+            //exit(EXIT_FAILURE); TODO
      }
 
       double condition1 = ei.ScalarProduct(ep12); // < e_i , e_ij > should be positive
