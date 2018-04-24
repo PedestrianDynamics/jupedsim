@@ -1424,12 +1424,12 @@ double UnivFFviaFM::getCostToDestination(const int destID, const Point& position
 //     }
      assert(_grid->includesPoint(position));
     long int key = _grid->getKeyAtPoint(position);
-    if (_gridCode[key] == OUTSIDE) {
+    if ((_gridCode[key] == OUTSIDE) || (_gridCode[key] == WALL)) {
         //bresenham line (treppenstruktur) at middle and calculated centre of line are on different gridpoints
         //find a key that belongs domain (must be one left or right and second one below or above)
-        if (_gridCode[key+1] != OUTSIDE) {
+        if ((_gridCode[key+1] != OUTSIDE) && (_gridCode[key+1] != WALL)) {
             key = key+1;
-        } else if (_gridCode[key-1] != OUTSIDE){
+        } else if ((_gridCode[key-1] != OUTSIDE) && (_gridCode[key-1] != WALL)){
             key = key-1;
         } else {
             Log->Write("ERROR:\t In getCostToDestination(3 args)");
@@ -1458,12 +1458,12 @@ double UnivFFviaFM::getCostToDestination(const int destID, const Point& position
 double UnivFFviaFM::getCostToDestination(const int destID, const Point& position) {
      assert(_grid->includesPoint(position));
     long int key = _grid->getKeyAtPoint(position);
-    if (_gridCode[key] == OUTSIDE) {
+    if ((_gridCode[key] == OUTSIDE) || (_gridCode[key] == WALL)) {
         //bresenham line (treppenstruktur) getKeyAtPoint yields gridpoint next to edge, although position is on edge
         //find a key that belongs domain (must be one left or right and second one below or above)
-        if (_gridCode[key+1] != OUTSIDE) {
+        if ((_gridCode[key+1] != OUTSIDE) && (_gridCode[key+1] != WALL)) {
             key = key+1;
-        } else if (_gridCode[key-1] != OUTSIDE){
+        } else if ((_gridCode[key-1] != OUTSIDE) && (_gridCode[key-1] != WALL)){
             key = key-1;
         } else {
             Log->Write("ERROR:\t In getCostToDestination(2 args)");

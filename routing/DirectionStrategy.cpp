@@ -499,6 +499,7 @@ void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
 
      _initDone = true;
 
+    //_locffviafm[0]->writeFF()
      //write floorfields to file, one file per subroom //ar.graf: [SWITCH writevtk ON/OFF]
 //     for(unsigned int i = 0; i < subUIDs.size(); ++i) {
 //          std::vector<int> targets = {};
