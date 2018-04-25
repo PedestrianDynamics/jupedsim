@@ -286,8 +286,8 @@ void Simulation::UpdateRoutesAndLocations()
 {
      //pedestrians to be deleted
      //you should better create this in the constructor and allocate it once.
-     vector<Pedestrian*> pedsToRemove;
-     pedsToRemove.reserve(500); //just reserve some space
+     set<Pedestrian*> pedsToRemove;
+//     pedsToRemove.reserve(500); //just reserve some space
 
      // collect all pedestrians in the simulation.
      const vector<Pedestrian*>& allPeds = _building->GetAllPedestrians();
@@ -305,12 +305,12 @@ void Simulation::UpdateRoutesAndLocations()
                     && (room->GetCaption() == "outside")) {
 
 #pragma omp critical(Simulation_Update_pedsToRemove)
-               pedsToRemove.push_back(ped);
+               pedsToRemove.insert(ped);
           } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
                     && (goals.at(ped->GetFinalDestination())->Contains(
                               ped->GetPos()))) {
 #pragma omp critical(Simulation_Update_pedsToRemove)
-               pedsToRemove.push_back(ped);
+               pedsToRemove.insert(ped);
           }
 
           // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
@@ -326,8 +326,7 @@ void Simulation::UpdateRoutesAndLocations()
 
                if (!assigned) {
 #pragma omp critical(Simulation_Update_pedsToRemove)
-                    pedsToRemove.push_back(ped);
-                    //the agent left the old room
+                       pedsToRemove.insert(ped); //the agent left the old room
                     //actualize the eggress time for that room
 #pragma omp critical(SetEgressTime)
                     allRooms.at(ped->GetRoomID())->SetEgressTime(ped->GetGlobalTime());
@@ -343,7 +342,7 @@ void Simulation::UpdateRoutesAndLocations()
                ped->Relocate(f);
                //exit(EXIT_FAILURE);
 #pragma omp critical(Simulation_Update_pedsToRemove)
-               pedsToRemove.push_back(ped);
+                   pedsToRemove.insert(ped);
           }
      }
 
@@ -356,10 +355,11 @@ void Simulation::UpdateRoutesAndLocations()
      else
 #endif
     {
+
         // remove the pedestrians that have left the building
-        for (unsigned int p = 0; p<pedsToRemove.size(); p++) {
-            UpdateFlowAtDoors(*pedsToRemove[p]);
-            _building->DeletePedestrian(pedsToRemove[p]);
+        for (auto p : pedsToRemove){
+            UpdateFlowAtDoors(*p);
+            _building->DeletePedestrian(p);
         }
         pedsToRemove.clear();
     }
@@ -605,7 +605,7 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
                 }
             }
 //#pragma omp critical
-            trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
+            trans->IncreaseDoorUsage(1, ped.GetGlobalTime(), ped.GetID());
         }
     }
 }
