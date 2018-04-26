@@ -48,6 +48,8 @@ make-linux:
       - bin
       
   stage: compile
+  tags:
+    - linux
   script:
     - cd build
     - make -j$nproc
