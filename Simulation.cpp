@@ -605,7 +605,7 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
                 }
             }
 //#pragma omp critical
-            trans->IncreaseDoorUsage(1, ped.GetGlobalTime(), ped.GetID());
+            trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
         }
     }
 }
