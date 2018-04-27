@@ -1736,7 +1736,7 @@ RectGrid* UnivFFviaFM::getGrid(){
      return _grid;
 }
 
-void UnivFFviaFM::getDirectionToUID(int destID, const long int key, Point& direction, int mode){
+void UnivFFviaFM::getDirectionToUID(int destID, long int key, Point& direction, int mode){
      assert(key > 0 && key < _nPoints);
     if ((_gridCode[key] == OUTSIDE) || (_gridCode[key] == WALL)) {
         //bresenham line (treppenstruktur) getKeyAtPoint yields gridpoint next to edge, although position is on edge
@@ -1781,7 +1781,7 @@ void UnivFFviaFM::getDirectionToUID(int destID, const long int key, Point& direc
      return;
 }
 
-void UnivFFviaFM::getDirectionToUID(int destID, const long int key, Point& direction){
+void UnivFFviaFM::getDirectionToUID(int destID, long int key, Point& direction){
      assert(key > 0 && key < _nPoints);
     if ((_gridCode[key] == OUTSIDE) || (_gridCode[key] == WALL)) {
         //bresenham line (treppenstruktur) getKeyAtPoint yields gridpoint next to edge, although position is on edge
