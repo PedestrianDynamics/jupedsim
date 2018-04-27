@@ -30,7 +30,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
   elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
       message(STATUS "Compiling with Intel settings")
    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -w")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -w -tcheck")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -Og -w -tcheck")
 elseif ()
 endif ()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${warnings}")
@@ -463,6 +463,7 @@ set(header_files
         tinyxml/tinystr.h
 
         general/ArgumentParser.h
+        general/Configuration.h
         general/Macros.h
 	general/randomnumbergenerator.h
 

@@ -1485,6 +1485,7 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                     Log->Write("ERROR: \tExit Strategy 7 is not supported any longer. Please refer to www.jupedsim.org");
                     Log->Write("WARNING: \tChanging Exit-Strategy to #9 (Floorfields with targets within subroom)");
                     pExitStrategy = 9;
+                    _exit_strat_number = 9;
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
                     break;
                case 8:
@@ -1511,6 +1512,7 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                return false;
           }
           Log->Write("INFO: \texit_crossing_strategy < %d >", pExitStrategy);
+          _config->set_exit_strat(_exit_strat_number);
      }
      return true;
 }

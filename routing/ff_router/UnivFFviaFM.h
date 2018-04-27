@@ -123,6 +123,7 @@ public:
      void markSubroom(const Point& insidePoint, SubRoom* const value);
      void createReduWallSpeed(double* reduWallSpeed);
      void createPedSpeed(Pedestrian* const * pedsArg, int nsize, int modechoice, double radius);
+     void finalizeTargetLine(const int uid, const Line& tempTargetLine, Point* newArrayPt, Point& passvector);
 
      void drawLinesOnGrid(std::map<int, Line>& doors, int *const grid);
      template <typename T>

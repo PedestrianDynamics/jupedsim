@@ -515,6 +515,193 @@ void UnivFFviaFM::createPedSpeed(Pedestrian *const *pedsArg, int nsize, int mode
      }
 }
 
+void UnivFFviaFM::finalizeTargetLine(const int uid, const Line& line, Point* target, Point& value) {
+    // i~x; j~y;
+//http://stackoverflow.com/questions/10060046/drawing-lines-with-bresenhams-line-algorithm
+//src in answer of "Avi"; adapted to fit this application
+
+    //grid handeling local vars:
+    long int iMax  = _grid->GetiMax();
+
+    long int iStart, iEnd;
+    long int jStart, jEnd;
+    long int iDot, jDot;
+    long int key;
+    long int deltaX, deltaY, deltaX1, deltaY1, px, py, xe, ye, i; //Bresenham Algorithm
+
+    long int goodneighbor;
+    directNeighbor neigh;
+
+
+    key = _grid->getKeyAtPoint(line.GetPoint1());
+    iStart = (long) _grid->get_i_fromKey(key);
+    jStart = (long) _grid->get_j_fromKey(key);
+
+    key = _grid->getKeyAtPoint(line.GetPoint2());
+    iEnd = (long) _grid->get_i_fromKey(key);
+    jEnd = (long) _grid->get_j_fromKey(key);
+
+    deltaX = (int) (iEnd - iStart);
+    deltaY = (int) (jEnd - jStart);
+    deltaX1 = abs( (int) (iEnd - iStart));
+    deltaY1 = abs( (int) (jEnd - jStart));
+
+    px = 2*deltaY1 - deltaX1;
+    py = 2*deltaX1 - deltaY1;
+
+    if(deltaY1<=deltaX1) {
+        if(deltaX>=0) {
+            iDot = iStart;
+            jDot = jStart;
+            xe = iEnd;
+        } else {
+            iDot = iEnd;
+            jDot = jEnd;
+            xe = iStart;
+        }
+        if (_gridCode[jDot*iMax + iDot] == uid) {
+            /* //find a good neighborvalue
+             neigh = _grid->getNeighbors(jDot*iMax + iDot);
+             if ((neigh.key[0] >= 0) && (_gridCode[neigh.key[0]] == INSIDE)) {
+                 goodneighbor = neigh.key[0];
+             } else if ((neigh.key[1] >= 0) && (_gridCode[neigh.key[1]] == INSIDE)) {
+                 goodneighbor = neigh.key[1];
+             } else if ((neigh.key[2] >= 0) && (_gridCode[neigh.key[2]] == INSIDE)) {
+                 goodneighbor = neigh.key[2];
+             } else if ((neigh.key[3] >= 0) && (_gridCode[neigh.key[3]] == INSIDE)) {
+                 goodneighbor = neigh.key[3];
+             } else {
+                 //ERROR - should have an inside neighbor
+                 Log->Write("ERROR:\t In finalizeTargetLine");
+             }
+             //write the value on targetline
+             if ((target[goodneighbor]._x == 0.) && (target[goodneighbor]._y == 0.)) {
+                 //ERROR - should have a true vector
+                 Log->Write("ERROR:\t (0;0) In finalizeTargetLine");
+             }*/
+            target[jDot * iMax + iDot] = value;
+        } else if (_gridCode[jDot*iMax + iDot] == WALL) {
+            //do nothing
+        } else {
+            Log->Write("ERROR:\t in finalizingTargetLine");
+        }
+        for (i=0; iDot < xe; ++i) {
+            ++iDot;
+            if (px < 0) {
+                px += 2 * deltaY1;
+            } else {
+                if ((deltaX < 0 && deltaY < 0) || (deltaX > 0 && deltaY > 0)) {
+                    ++jDot;
+                } else {
+                    --jDot;
+                }
+                px += 2 * (deltaY1 - deltaX1);
+            }
+            if (_gridCode[jDot * iMax + iDot] == uid) {
+                /*//find a good neighborvalue
+                neigh = _grid->getNeighbors(jDot*iMax + iDot);
+                if ((neigh.key[0] >= 0) && (_gridCode[neigh.key[0]] == INSIDE)) {
+                    goodneighbor = neigh.key[0];
+                } else if ((neigh.key[1] >= 0) && (_gridCode[neigh.key[1]] == INSIDE)) {
+                    goodneighbor = neigh.key[1];
+                } else if ((neigh.key[2] >= 0) && (_gridCode[neigh.key[2]] == INSIDE)) {
+                    goodneighbor = neigh.key[2];
+                } else if ((neigh.key[3] >= 0) && (_gridCode[neigh.key[3]] == INSIDE)) {
+                    goodneighbor = neigh.key[3];
+                } else {
+                    //ERROR - should have an inside neighbor
+                    Log->Write("ERROR:\t In finalizeTargetLine");
+                }
+                //write the value on targetline
+                if ((target[goodneighbor]._x == 0.) && (target[goodneighbor]._y == 0.)) {
+                    //ERROR - should have a true vector
+                    Log->Write("ERROR:\t (0;0) In finalizeTargetLine");
+                }*/
+                target[jDot * iMax + iDot] = value;
+            } else if (_gridCode[jDot*iMax + iDot] == WALL) {
+                //do nothing
+            } else {
+                Log->Write("ERROR:\t in finalizingTargetLine");
+            }
+        }
+    } else {
+        if(deltaY>=0) {
+            iDot = iStart;
+            jDot = jStart;
+            ye = jEnd;
+        } else {
+            iDot = iEnd;
+            jDot = jEnd;
+            ye = jStart;
+        }
+        if (_gridCode[jDot*iMax + iDot] == uid) {
+            /*//find a good neighborvalue
+            neigh = _grid->getNeighbors(jDot*iMax + iDot);
+            if ((neigh.key[0] >= 0) && (_gridCode[neigh.key[0]] == INSIDE)) {
+                goodneighbor = neigh.key[0];
+            } else if ((neigh.key[1] >= 0) && (_gridCode[neigh.key[1]] == INSIDE)) {
+                goodneighbor = neigh.key[1];
+            } else if ((neigh.key[2] >= 0) && (_gridCode[neigh.key[2]] == INSIDE)) {
+                goodneighbor = neigh.key[2];
+            } else if ((neigh.key[3] >= 0) && (_gridCode[neigh.key[3]] == INSIDE)) {
+                goodneighbor = neigh.key[3];
+            } else {
+                //ERROR - should have an inside neighbor
+                Log->Write("ERROR:\t In finalizeTargetLine");
+            }
+            //write the value on targetline
+            if ((target[goodneighbor]._x == 0.) && (target[goodneighbor]._y == 0.)) {
+                //ERROR - should have a true vector
+                Log->Write("ERROR:\t (0;0) In finalizeTargetLine");
+            }*/
+            target[jDot * iMax + iDot] = value;
+        } else if (_gridCode[jDot*iMax + iDot] == WALL) {
+            //do nothing
+        }  else {
+            Log->Write("ERROR:\t in finalizingTargetLine");
+        }
+        for(i=0; jDot<ye; ++i) {
+            ++jDot;
+            if (py<=0) {
+                py+=2*deltaX1;
+            } else {
+                if((deltaX<0 && deltaY<0) || (deltaX>0 && deltaY>0)) {
+                    ++iDot;
+                } else {
+                    --iDot;
+                }
+                py+=2*(deltaX1-deltaY1);
+            }
+            if (_gridCode[jDot*iMax + iDot] == uid) {
+                /*//find a good neighborvalue
+                neigh = _grid->getNeighbors(jDot*iMax + iDot);
+                if ((neigh.key[0] >= 0) && (_gridCode[neigh.key[0]] == INSIDE)) {
+                    goodneighbor = neigh.key[0];
+                } else if ((neigh.key[1] >= 0) && (_gridCode[neigh.key[1]] == INSIDE)) {
+                    goodneighbor = neigh.key[1];
+                } else if ((neigh.key[2] >= 0) && (_gridCode[neigh.key[2]] == INSIDE)) {
+                    goodneighbor = neigh.key[2];
+                } else if ((neigh.key[3] >= 0) && (_gridCode[neigh.key[3]] == INSIDE)) {
+                    goodneighbor = neigh.key[3];
+                } else {
+                    //ERROR - should have an inside neighbor
+                    Log->Write("ERROR:\t In finalizeTargetLine");
+                }
+                //write the value on targetline
+                if ((target[goodneighbor]._x == 0.) && (target[goodneighbor]._y == 0.)) {
+                    //ERROR - should have a true vector
+                    Log->Write("ERROR:\t (0;0) In finalizeTargetLine");
+                }*/
+                target[jDot * iMax + iDot] = value;
+            } else if (_gridCode[jDot*iMax + iDot] == WALL) {
+                //do nothing
+            } else {
+                Log->Write("ERROR:\t in finalizingTargetLine");
+            }
+        }
+    }
+}
+
 void UnivFFviaFM::drawLinesOnGrid(std::map<int, Line>& doors, int *const grid) {
      for (auto&& doorPair : doors) {
           int tempUID = doorPair.first;
@@ -1195,6 +1382,21 @@ void UnivFFviaFM::addTarget(const int uid, double* costarrayDBL, Point* gradarra
      if (_mode == CENTERPOINT) {
          drawLinesOnGrid(tempTargetLine, newArrayDBL, magicnum(TARGET_REGION));
      }
+     //the directional field is yet undefined on the target line itself. we will use neighboring vector to help agents
+     //to cross the line
+     if (newArrayPt) {
+         Point passvector = tempTargetLine.NormalVec();
+         Point trial = tempTargetLine.GetCentre() - passvector * 0.25;
+         Point trial2 = tempTargetLine.GetCentre() + passvector * 0.25;
+         if ((_grid->getKeyAtPoint(trial) >= 0) && (_gridCode[_grid->getKeyAtPoint(trial)] == INSIDE)) {
+             finalizeTargetLine(uid, _doors[uid], newArrayPt, passvector);
+         } else if ((_grid->getKeyAtPoint(trial2) >= 0) && (_gridCode[_grid->getKeyAtPoint(trial2)] == INSIDE)) {
+             passvector = passvector * -1.0;
+             finalizeTargetLine(uid, _doors[uid], newArrayPt, passvector);
+         } else {
+             Log->Write("ERROR:\t in addTarget: calling finalizeTargetLine");
+         }
+     }
 #pragma omp critical(_uids)
      _uids.emplace_back(uid);
 }
@@ -1419,18 +1621,19 @@ void UnivFFviaFM::writeFF(const std::string& filename, std::vector<int> targetID
 
 //mode is argument, which should not be needed, the info is stored in members like speedmode, ...
 double UnivFFviaFM::getCostToDestination(const int destID, const Point& position, int mode) {
-//     if (!_grid->includesPoint(position)) {
-//          Log->Write("Was ist denn hier los?");
-//     }
-     assert(_grid->includesPoint(position));
+    assert(_grid->includesPoint(position));
     long int key = _grid->getKeyAtPoint(position);
     if ((_gridCode[key] == OUTSIDE) || (_gridCode[key] == WALL)) {
         //bresenham line (treppenstruktur) at middle and calculated centre of line are on different gridpoints
         //find a key that belongs domain (must be one left or right and second one below or above)
-        if ((_gridCode[key+1] != OUTSIDE) && (_gridCode[key+1] != WALL)) {
+        if ((key+1 <= _grid->GetnPoints()) && (_gridCode[key+1] != OUTSIDE) && (_gridCode[key+1] != WALL)) {
             key = key+1;
-        } else if ((_gridCode[key-1] != OUTSIDE) && (_gridCode[key-1] != WALL)){
-            key = key-1;
+        } else if ((key-1 >= 0) && (_gridCode[key-1] != OUTSIDE) && (_gridCode[key-1] != WALL)) {
+            key = key - 1;
+        } else if ((key >= _grid->GetiMax()) && (_gridCode[key-_grid->GetiMax()] != OUTSIDE) && (_gridCode[key-_grid->GetiMax()] != WALL)) {
+            key = key - _grid->GetiMax();
+        } else if ((key < _grid->GetnPoints()-_grid->GetiMax()) && (_gridCode[key+_grid->GetiMax()] != OUTSIDE) && (_gridCode[key+_grid->GetiMax()] != WALL)) {
+            key = key + _grid->GetiMax();
         } else {
             Log->Write("ERROR:\t In getCostToDestination(3 args)");
         }
@@ -1461,10 +1664,14 @@ double UnivFFviaFM::getCostToDestination(const int destID, const Point& position
     if ((_gridCode[key] == OUTSIDE) || (_gridCode[key] == WALL)) {
         //bresenham line (treppenstruktur) getKeyAtPoint yields gridpoint next to edge, although position is on edge
         //find a key that belongs domain (must be one left or right and second one below or above)
-        if ((_gridCode[key+1] != OUTSIDE) && (_gridCode[key+1] != WALL)) {
+        if ((key+1 <= _grid->GetnPoints()) && (_gridCode[key+1] != OUTSIDE) && (_gridCode[key+1] != WALL)) {
             key = key+1;
-        } else if ((_gridCode[key-1] != OUTSIDE) && (_gridCode[key-1] != WALL)){
-            key = key-1;
+        } else if ((key-1 >= 0) && (_gridCode[key-1] != OUTSIDE) && (_gridCode[key-1] != WALL)) {
+            key = key - 1;
+        } else if ((key >= _grid->GetiMax()) && (_gridCode[key-_grid->GetiMax()] != OUTSIDE) && (_gridCode[key-_grid->GetiMax()] != WALL)) {
+            key = key - _grid->GetiMax();
+        } else if ((key < _grid->GetnPoints()-_grid->GetiMax()) && (_gridCode[key+_grid->GetiMax()] != OUTSIDE) && (_gridCode[key+_grid->GetiMax()] != WALL)) {
+            key = key + _grid->GetiMax();
         } else {
             Log->Write("ERROR:\t In getCostToDestination(2 args)");
         }
@@ -1531,6 +1738,21 @@ RectGrid* UnivFFviaFM::getGrid(){
 
 void UnivFFviaFM::getDirectionToUID(int destID, const long int key, Point& direction, int mode){
      assert(key > 0 && key < _nPoints);
+    if ((_gridCode[key] == OUTSIDE) || (_gridCode[key] == WALL)) {
+        //bresenham line (treppenstruktur) getKeyAtPoint yields gridpoint next to edge, although position is on edge
+        //find a key that belongs domain (must be one left or right and second one below or above)
+        if ((key+1 <= _grid->GetnPoints()) && (_gridCode[key+1] != OUTSIDE) && (_gridCode[key+1] != WALL)) {
+            key = key+1;
+        } else if ((key-1 >= 0) && (_gridCode[key-1] != OUTSIDE) && (_gridCode[key-1] != WALL)) {
+            key = key - 1;
+        } else if ((key >= _grid->GetiMax()) && (_gridCode[key-_grid->GetiMax()] != OUTSIDE) && (_gridCode[key-_grid->GetiMax()] != WALL)) {
+            key = key - _grid->GetiMax();
+        } else if ((key < _grid->GetnPoints()-_grid->GetiMax()) && (_gridCode[key+_grid->GetiMax()] != OUTSIDE) && (_gridCode[key+_grid->GetiMax()] != WALL)) {
+            key = key + _grid->GetiMax();
+        } else {
+            Log->Write("ERROR:\t In getDirectionToUID (4 args)");
+        }
+    }
      if (_directionFieldWithKey.count(destID)==1 && _directionFieldWithKey[destID]) {
           direction = _directionFieldWithKey[destID][key];
      } else if (_directCalculation && _doors.count(destID) > 0) {
@@ -1561,6 +1783,21 @@ void UnivFFviaFM::getDirectionToUID(int destID, const long int key, Point& direc
 
 void UnivFFviaFM::getDirectionToUID(int destID, const long int key, Point& direction){
      assert(key > 0 && key < _nPoints);
+    if ((_gridCode[key] == OUTSIDE) || (_gridCode[key] == WALL)) {
+        //bresenham line (treppenstruktur) getKeyAtPoint yields gridpoint next to edge, although position is on edge
+        //find a key that belongs domain (must be one left or right and second one below or above)
+        if ((key+1 <= _grid->GetnPoints()) && (_gridCode[key+1] != OUTSIDE) && (_gridCode[key+1] != WALL)) {
+            key = key+1;
+        } else if ((key-1 >= 0) && (_gridCode[key-1] != OUTSIDE) && (_gridCode[key-1] != WALL)) {
+            key = key - 1;
+        } else if ((key >= _grid->GetiMax()) && (_gridCode[key-_grid->GetiMax()] != OUTSIDE) && (_gridCode[key-_grid->GetiMax()] != WALL)) {
+            key = key - _grid->GetiMax();
+        } else if ((key < _grid->GetnPoints()-_grid->GetiMax()) && (_gridCode[key+_grid->GetiMax()] != OUTSIDE) && (_gridCode[key+_grid->GetiMax()] != WALL)) {
+            key = key + _grid->GetiMax();
+        } else {
+            Log->Write("ERROR:\t In getDirectionToUID (3 args)");
+        }
+    }
      if (_directionFieldWithKey.count(destID)==1 && _directionFieldWithKey[destID]) {
           direction = _directionFieldWithKey[destID][key];
      } else if (_directCalculation && _doors.count(destID) > 0) {

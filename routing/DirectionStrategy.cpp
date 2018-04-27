@@ -354,9 +354,9 @@ Point DirectionLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
      }
 #endif
      floorfield->getDirectionToUID(ped->GetExitIndex(), ped->GetPos(), p);
-     if (floorfield->getCostToDestination(ped->GetExitIndex(), ped->GetPos()) < 1.0) {
-          p = p * floorfield->getCostToDestination(ped->GetExitIndex(), ped->GetPos());
-     }
+//     if (floorfield->getCostToDestination(ped->GetExitIndex(), ped->GetPos()) < 1.0) {
+//          p = p * floorfield->getCostToDestination(ped->GetExitIndex(), ped->GetPos());
+//     }
      return (p + ped->GetPos());
 
 #if DEBUG
@@ -443,9 +443,9 @@ Point DirectionSubLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
      }
 #endif
      floorfield->getDirectionToUID(ped->GetExitIndex(), ped->GetPos(),p);
-     if (floorfield->getCostToDestination(ped->GetExitIndex(), ped->GetPos()) < 1.0){
-          p = p * floorfield->getCostToDestination(ped->GetExitIndex(), ped->GetPos());
-     }
+//     if (floorfield->getCostToDestination(ped->GetExitIndex(), ped->GetPos()) < 1.0){
+//          p = p * floorfield->getCostToDestination(ped->GetExitIndex(), ped->GetPos());
+//     }
      return (p + ped->GetPos());
 
 #if DEBUG
