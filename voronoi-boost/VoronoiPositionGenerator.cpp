@@ -96,9 +96,6 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
     std::vector<Pedestrian*> existing_peds;
     std::vector<Pedestrian*> peds_without_place;
     building->GetPedestrians(roomID, subroomID, existing_peds);
-    for (auto  pp : existing_peds)
-         std::cout << "existing peds: " << pp->GetID() << " in " << pp->GetPos()._x << ", " << pp->GetPos()._y << std::endl;
-
     double radius = 0.3; //radius of a person, 0.3 is just some number(needed for the fake_peds bellow), will be changed afterwards
 
     SubRoom* subroom = building->GetRoom( roomID )->GetSubRoom(subroomID);
@@ -122,11 +119,11 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
     }
 
     std::vector<Pedestrian*>::iterator iter_ped;
+    std::srand(0);
     for (iter_ped = peds.begin(); iter_ped != peds.end(); )
     {
          Pedestrian* ped = *iter_ped;
          radius = ped->GetEllipse().GetBmax(); //max radius of the current pedestrian
-
          if(existing_peds.size() == 0 )
          {
               const Point& center_pos = subroom->GetCentroid();
@@ -158,10 +155,10 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
               double speed = ped->GetEllipse().GetV0(); //@todo: some peds do not have a navline. This should not be accepted.
               v=v*speed;
               ped->SetV(v);
+
               existing_peds.push_back(ped);
 
          }//0
-
          else //more than one pedestrian
          {
            //it would be better to maybe have a mapping between discrete_positions and pointers to the pedestrians
@@ -218,11 +215,11 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                    Point pos( chosen_it->x()/factor, chosen_it->y()/factor ); //check!
                    ped->SetPos(pos , true);
                    VoronoiAdjustVelocityNeighbour(chosen_it, ped, velocities_vector, goal_vector);
+                   std::cout << ">> Chosen Pos: " << pos._x << ", " << pos._y << std::endl;
 
                    // proceed to the next pedestrian
                    existing_peds.push_back(ped);
                    ++iter_ped;
-
               }
               else
               {
@@ -241,6 +238,8 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
     //maybe not all pedestrians could find a place, requeue them in the source
     if(peds_without_place.size()>0)
          src->AddAgentsToPool(peds_without_place);
+
+
     return return_value;
 }
 
@@ -372,6 +371,8 @@ void VoronoiAdjustVelocityNeighbour(voronoi_diagram<double>::const_vertex_iterat
 void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
                                double factor, voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	, double radius)
 {
+     std::cout << "Enter VoronoiBestVertexRandMax\n";
+
      std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
      vector<double> partial_sums;
      unsigned long size=0;
@@ -403,7 +404,8 @@ void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, con
      double lower_bound = 0;
      double upper_bound = partial_sums[size-1];
      std::random_device rd;
-     std::mt19937 gen(rd()); //@todo use seed instead of rd(). Generator should not be here
+     //std::mt19937 gen(rd()); //@todo use seed instead of rd(). Generator should not be here
+     std::mt19937 gen(1); //@todo use seed instead of rd(). Generator should not be here
      std::uniform_real_distribution<double> distribution(lower_bound, upper_bound); //std::nextafter(upper_bound, DBL_MAX));
      vector<double> random_numbers;
      for(unsigned int r=0; r<size;r++)
@@ -420,6 +422,9 @@ void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, con
      dis = partial_sums[iposition];
      if (iposition>1)
            dis -= partial_sums[iposition-1];
+
+
+     std::cout << "Leave VoronoiBestVertexRandMax\n";
 }
 
 
