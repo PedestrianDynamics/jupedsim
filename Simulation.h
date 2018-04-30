@@ -67,7 +67,7 @@ private:
     ///seed using for the random number generator
     unsigned int _seed;
     /// building object
-    std::unique_ptr<Building> _building;
+    std::shared_ptr<Building> _building;
     /// Force model to use
     std::shared_ptr<OperationalModel> _operationalModel;
     /// Manage all route choices algorithms
