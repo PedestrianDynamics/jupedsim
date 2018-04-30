@@ -85,6 +85,8 @@ private:
     /// hybrid simulation manager
     //HybridSimulationManager
     int _periodic;
+     int _maxSimTime;
+
     bool _gotSources; // is true if we got some sources. Otherwise, false.
     // bool _printPB; // print progressbar
 public:
@@ -182,6 +184,8 @@ public:
      *
      */
      void UpdateDoorticks() const;
+     int GetMaxSimTime() const;
+
 
 };
 

@@ -61,6 +61,7 @@ Simulation::Simulation(Configuration* args)
     _fps = 1;
     _em = nullptr;
     _gotSources = false;
+    _maxSimTime = 100;
 //     _config = args;
 }
 
@@ -201,6 +202,7 @@ bool Simulation::InitArgs()
     sprintf(tmp, "\tt_max: %f\n", _config->GetTmax());
     s.append(tmp);
     _deltaT = _config->Getdt();
+    _maxSimTime = _config->GetTmax();
     sprintf(tmp, "\tdt: %f\n", _deltaT);
     _periodic = _config->IsPeriodic();
     sprintf(tmp, "\t periodic: %d\n", _periodic);
@@ -218,6 +220,7 @@ bool Simulation::InitArgs()
 
     // Initialize the agents sources that have been collected in the pedestrians distributor
     _agentSrcManager.SetBuilding(_building.get());
+    _agentSrcManager.SetMaxSimTime(GetMaxSimTime());
     _gotSources = (bool) distributor->GetAgentsSources().size(); // did we have any sources? false if no sources
     for (const auto& src: distributor->GetAgentsSources()) {
         _agentSrcManager.AddSource(src);
@@ -530,28 +533,30 @@ void Simulation::RunFooter()
 void Simulation::ProcessAgentsQueue()
 {
 
-//     std::cout << "Call Simulation::ProcessAgentsQueue() at: " << Pedestrian::GetGlobalTime() << std::endl;
-//     std::cout << KRED << " simu building " << _building << " size "  << _building->GetAllPedestrians().size() << std::endl;
-//     for(auto pp: _building->GetAllPedestrians())
-//               std::cout<< KBLU << "BUL: Simulation: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl;
+     /* std::cout << "Call Simulation::ProcessAgentsQueue() at: " << Pedestrian::GetGlobalTime() << std::endl; */
+     /* std::cout << KRED << " SIMULATION building " << _building << " size "  << _building->GetAllPedestrians().size() << "\n" << RESET; */
+           /* for(auto pp: _building->GetAllPedestrians()) */
+     /*           std::cout<< KBLU << "BUL: Simulation: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl; */
 
     //incoming pedestrians
     vector<Pedestrian*> peds;
     //  std::cout << ">>> peds " << peds.size() << RESET<< std::endl;
 
     AgentsQueueIn::GetandClear(peds);
-     _agentSrcManager.SetBuildingUpdated(true);
+    //std::cout << "SIMULATION BEFORE BOOL = " <<  _agentSrcManager.IsBuildingUpdated() << " peds size " << peds.size() << "\n" ;
 
+    //_agentSrcManager.SetBuildingUpdated(true);
+    /* std::cout << "SIMULATION AFTER BOOL = " <<  _agentSrcManager.IsBuildingUpdated() << "\n" ; */
 
     for (auto&& ped: peds) {
-          //   std::cout << "Add to building : " << ped->GetPos()._x << ", " << ped->GetPos()._y << " t: "<< Pedestrian::GetGlobalTime() << std::endl;
+            /* std::cout << "Add to building : " << ped->GetPos()._x << ", " << ped->GetPos()._y << " t: "<< Pedestrian::GetGlobalTime() << std::endl; */
         _building->AddPedestrian(ped);
     }
     //  for(auto pp: _building->GetAllPedestrians())
     //         std::cout<< KBLU << "BUL: Simulation: " << pp->GetPos()._x << ", " << pp->GetPos()._y  << " t: "<< Pedestrian::GetGlobalTime() <<RESET << std::endl;
 
 
-    // std::cout << "LEAVE Simulation::ProcessAgentsQueue()\n";
+    /* std::cout << "LEAVE Simulation::ProcessAgentsQueue() with " << " size "  << _building->GetAllPedestrians().size() << "\n" << RESET; */
 }
 
 void Simulation::UpdateDoorticks() const {
@@ -635,4 +640,8 @@ AgentsSourcesManager& Simulation::GetAgentSrcManager()
 Building* Simulation::GetBuilding()
 {
     return _building.get();
+}
+
+int Simulation::GetMaxSimTime() const{
+      return _maxSimTime;
 }
