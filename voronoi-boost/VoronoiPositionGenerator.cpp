@@ -85,7 +85,7 @@ bool IsEnoughInSubroom( SubRoom* subroom, Point& pt, double radius )
 }
 
 bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>& peds,
-         Building* building)
+                                     Building* building, std::vector<Pedestrian*>& peds_queue)
 {
     bool return_value = true;
     auto dist = src->GetStartDistribution();
@@ -96,6 +96,8 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
     std::vector<Pedestrian*> existing_peds;
     std::vector<Pedestrian*> peds_without_place;
     building->GetPedestrians(roomID, subroomID, existing_peds);
+    existing_peds.insert(existing_peds.end(), peds_queue.begin(), peds_queue.end());
+
     double radius = 0.3; //radius of a person, 0.3 is just some number(needed for the fake_peds bellow), will be changed afterwards
 
     SubRoom* subroom = building->GetRoom( roomID )->GetSubRoom(subroomID);

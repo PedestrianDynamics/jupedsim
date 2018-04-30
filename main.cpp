@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     Configuration* configuration = new Configuration();
     // Parsing the arguments
     bool status = false;
-    {    
+    {
           //ArgumentParser* p = new ArgumentParser(configuration); //Memory Leak
           std::unique_ptr<ArgumentParser> p(new ArgumentParser(configuration));
           status = p->ParseArgs(argc, argv);
