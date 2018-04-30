@@ -29,7 +29,6 @@
 
 #include "AgentsSourcesManager.h"
 #include "Pedestrian.h"
-
 #include "../mpi/LCGrid.h"
 #include <thread>
 #include "AgentsQueue.h"
@@ -73,119 +72,101 @@ void AgentsSourcesManager::Run()
      //it might be better to use a timer
      _isCompleted = false;
      bool finished = false;
-
      SetBuildingUpdated(false);
      long updateFrequency = 1; //TODO parse this from inifile
-     //std::cout << KMAG << "RUN Starting thread manager with _lastUpdateTime " << _lastUpdateTime<< std::endl;
+     std::cout << KMAG << "RUN Starting thread manager with _lastUpdateTime " << _lastUpdateTime<< std::endl;
      do
-     { //@todo: break if max simulation time is reached.
+     {
           int current_time = (int)Pedestrian::GetGlobalTime();
           if ((current_time != _lastUpdateTime)
               && ((current_time % updateFrequency) == 0))
           {
-               //        std::cout << ">> RUN: current_time " << current_time << " last update  " << _lastUpdateTime << std::endl;
-               finished=ProcessAllSources();
-               _lastUpdateTime = current_time;
+                std::cout << ">> RUN: current_time " << current_time << " last update  " << _lastUpdateTime << std::endl;
+                if(AgentsQueueIn::IsEmpty())
+                //if queue is empty. Otherwise, wait for main thread to empty it and update _building
+                {
+                      finished=ProcessAllSources();
+                      _lastUpdateTime = current_time;
+                      SetBuildingUpdated(false);
+                }
           }
           // wait for main thread to update building
-
-          while(! IsBuildingUpdated())
-          {
-               std::cout << " sourceManager waiting ... \n";
-               std::this_thread::sleep_for(std::chrono::milliseconds(1));
-          }
-          SetBuildingUpdated(false);
-
-          std::cout << " NOT waiting ... \n";
-
-
+          if(current_time >= GetMaxSimTime())
+                break; // break if max simulation time is reached.
      } while (!finished);
-     // std::cout << "Terminating agent manager thread" << RESET << std::endl;
-      Log->Write("INFO:\tTerminating agent manager thread");
-      _isCompleted = true;
+     std::cout << "Terminating agent manager thread" << RESET << std::endl;
+     Log->Write("INFO:\tTerminating agent manager thread");
+     _isCompleted = true;
 }
 
-     bool AgentsSourcesManager::ProcessAllSources() const
-     {
-          std::cout << "\nSTART   AgentsSourcesManager::ProcessAllSources()\n";
-
-          bool empty=true;
-          double current_time = Pedestrian::GetGlobalTime();
-          for(auto pp: _building->GetAllPedestrians())
-               std::cout<< KMAG << "BUL: agentssourcesManager: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl;
-
-
-          for (const auto& src : _sources)
-          {
-
-               std::cout << KRED << "\nprocessing src: " <<  src->GetId() << " -- current time: " << current_time << " number of peds in building " << _building->GetAllPedestrians().size() << RESET << std::endl;
-// for(auto pp: _building->GetAllPedestrians())                                                                                                                  std::cout<< KYEL << "BUL: agentssourcesManager: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl;
-
-               if (src->GetPoolSize() && (src->GetPlanTime() <= current_time) )// maybe diff<eps
-               {
-                    vector<Pedestrian*> peds;
-                    src->RemoveAgentsFromPool(peds, src->GetFrequency());
-                    Log->Write("> INFO:\tSource %d generating %d agents (%d remaining)\n",src->GetId(),peds.size(),src->GetPoolSize());
-                    //ComputeBestPositionRandom(src.get(), peds);
-                    //todo: here every pedestrian needs an exitline
-                    std::cout << "\tCalling ComputeBestPositionVoronoiBoost\n";
-
-                    if( !ComputeBestPositionVoronoiBoost(src.get(), peds, _building) )
-                         Log->Write("WARNING:\tThere was no place for some pedestrians");
-
-                    for (auto p: peds)
-                         std::cout<< KGRN << "PED: agentssourcesManager: " << p->GetPos()._x << ", " << p->GetPos()._y << RESET << std::endl;
-
-                                                                                                                                   for(auto pp: _building->GetAllPedestrians())                                                                                                                  std::cout<< KBLU << "In source BUL: agentssourcesManager: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl;
-
-                                                                                                                                                                                                                                                                                                                                                                                                                       std::cout << "ADD TO QUEUE " << peds.size() << std::endl;
-
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                      AgentsQueueIn::Add(peds);
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                      empty = false;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                      src->Dump();
-               }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                       if (src->GetPlanTime() > current_time) // for the case we still expect
-                                                                                                                                                                                                                                                                                                                                                                                                                                                            // agents coming
-                                                                                                                                                                                                                                                                                                                                                                                                                                                            empty = false;
-                                                                                                                                                                                                                                                                                                                                                                                                                                    //src->Dump();//exit(0);
-          }
-                              std::cout << "LEAVE   AgentsSourcesManager::ProcessAllSources()\n";
-                    std::cout << " Source building: "<<  _building << " size "  << _building->GetAllPedestrians().size()<< std::endl;
-
-                                                                                                                           for(auto pp: _building->GetAllPedestrians())
-                                                                                                                                std::cout<< KBLU << "BUL: agentssourcesManager: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl;
-                                                                                                                                                                                                                                            std::cout << "========================\n";
-
-
-
-                                                                                                                                                                                                                                                         //
-
-                                                                                                                                                                                                                                                         return empty;
-     }
-
-//4 agents frequency, just for an example
-void AgentsSourcesManager::ComputeBestPositionDummy(AgentsSource* src,
-                                                    vector<Pedestrian*>& peds)const
+bool AgentsSourcesManager::ProcessAllSources() const
 {
-     UNUSED(src);
-     peds[0]->SetPos( Point(10,5.5) );
-     peds[1]->SetPos( Point(10,4.9) );
-     peds[2]->SetPos( Point(10,4.3) );
-     peds[3]->SetPos( Point(10,3.7) );
+     std::cout << "\nSTART   AgentsSourcesManager::ProcessAllSources()\n";
 
-     /*peds[0]->SetPos( Point(10,5.4) );
-       peds[1]->SetPos( Point(10,4.6) );
-       peds[2]->SetPos( Point(10,3.8) );*/
+     bool empty=true;
+     double current_time = Pedestrian::GetGlobalTime();
+     for(auto pp: _building->GetAllPedestrians())
+           std::cout<< KMAG << "BUL: SOURCE: " << pp->GetPos()._x << ", " << pp->GetPos()._y << "\n"<< RESET;
 
-     for(auto&& ped : peds)
+
+     for (const auto& src : _sources)
      {
-          Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
-          double speed=ped->GetV0Norm();
-          v=v*speed;
-          ped->SetV(v);
+          std::cout << KRED << "\nprocessing src: " <<  src->GetId() << " -- current time: " << current_time << " number of peds in building " << _building->GetAllPedestrians().size() << "\n" << RESET;
+
+          if (src->GetPoolSize() && (src->GetPlanTime() <= current_time) )// maybe diff<eps
+          {
+               vector<Pedestrian*> peds;
+               src->RemoveAgentsFromPool(peds, src->GetFrequency());
+               Log->Write("> INFO:\tSource %d generating %d agents (%d remaining)\n",src->GetId(),peds.size(),src->GetPoolSize());
+               //ComputeBestPositionRandom(src.get(), peds);
+               //todo: here every pedestrian needs an exitline
+               if( !ComputeBestPositionVoronoiBoost(src.get(), peds, _building) )
+                    Log->Write("WARNING:\tThere was no place for some pedestrians");
+
+               std::cout << KRED << ">>  Add to queue " << peds.size() << "\n" << RESET;
+                for( auto pp: peds)
+                      std::cout << "pos " << pp->GetPos()._x << ", " << pp->GetPos()._y << "\n";
+               AgentsQueueIn::Add(peds);
+               empty = false;
+               //src->Dump();
+          }
+          if (src->GetPlanTime() > current_time) // for the case we still expect
+               // agents coming
+               empty = false;
+          //src->Dump();//exit(0);
      }
+     std::cout << "LEAVE   AgentsSourcesManager::ProcessAllSources()\n";
+     // std::cout << " Source building: "<<  _building << " size "  << _building->GetAllPedestrians().size()<< std::endl;
+
+     //                                                                                                        for(auto pp: _building->GetAllPedestrians())
+     //                                                                                                             std::cout<< KBLU << "BUL: agentssourcesManager: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl;
+     //
+std::cout << "========================\n";
+                                                                                                                                                                                                                                          return empty;
 }
+
+                                                                                                                                                                                                                             //4 agents frequency, just for an example
+     void AgentsSourcesManager::ComputeBestPositionDummy(AgentsSource* src,
+                                                         vector<Pedestrian*>& peds)const
+     {
+          UNUSED(src);
+          peds[0]->SetPos( Point(10,5.5) );
+          peds[1]->SetPos( Point(10,4.9) );
+          peds[2]->SetPos( Point(10,4.3) );
+          peds[3]->SetPos( Point(10,3.7) );
+
+          /*peds[0]->SetPos( Point(10,5.4) );
+            peds[1]->SetPos( Point(10,4.6) );
+            peds[2]->SetPos( Point(10,3.8) );*/
+
+          for(auto&& ped : peds)
+          {
+               Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
+               double speed=ped->GetV0Norm();
+               v=v*speed;
+               ped->SetV(v);
+          }
+     }
 
 void AgentsSourcesManager::ComputeBestPositionCompleteRandom(AgentsSource* src,
                                                              vector<Pedestrian*>& peds)const
@@ -638,4 +619,12 @@ long AgentsSourcesManager::GetMaxAgentNumber() const
           pop+=src->GetMaxAgents();
      }
      return pop;
+}
+
+
+ int AgentsSourcesManager::GetMaxSimTime() const{
+      return maxSimTime;
+}
+void AgentsSourcesManager::SetMaxSimTime(int t){
+      maxSimTime = t;
 }

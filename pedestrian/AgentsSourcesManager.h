@@ -119,9 +119,12 @@ public:
      /**
       * Return the total number of agents that will be generated.
       * used by visualisation to allocate space
+      *
       */
      long GetMaxAgentNumber() const;
 
+     int GetMaxSimTime() const;
+     void SetMaxSimTime(int t);
 
 private:
 
@@ -173,6 +176,7 @@ private:
      std::vector<std::shared_ptr<AgentsSource> > _sources;
      ///to control the trigger of the events
      long int _lastUpdateTime = 0;
+     int maxSimTime = 0;
      /// building object
      Building* _building=nullptr;
      /// whether all agents have been dispatched
