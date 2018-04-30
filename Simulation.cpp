@@ -35,7 +35,7 @@
 #include "math/GompertzModel.h"
 #include "math/GradientModel.h"
 #include "pedestrian/AgentsQueue.h"
-
+#include "pedestrian/AgentsSourcesManager.h"
 #ifdef _OPENMP
 
 #else
@@ -214,7 +214,7 @@ bool Simulation::InitArgs()
     _routingEngine = _config->GetRoutingEngine();
     auto distributor = std::unique_ptr<PedDistributor>(new PedDistributor(_config));
     // IMPORTANT: do not change the order in the following..
-    _building = std::unique_ptr<Building>(new Building(_config, *distributor));
+    _building = std::shared_ptr<Building>(new Building(_config, *distributor));
 
     // Initialize the agents sources that have been collected in the pedestrians distributor
     _agentSrcManager.SetBuilding(_building.get());
@@ -529,12 +529,29 @@ void Simulation::RunFooter()
 
 void Simulation::ProcessAgentsQueue()
 {
+
+//     std::cout << "Call Simulation::ProcessAgentsQueue() at: " << Pedestrian::GetGlobalTime() << std::endl;
+//     std::cout << KRED << " simu building " << _building << " size "  << _building->GetAllPedestrians().size() << std::endl;
+//     for(auto pp: _building->GetAllPedestrians())
+//               std::cout<< KBLU << "BUL: Simulation: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl;
+
     //incoming pedestrians
     vector<Pedestrian*> peds;
+    //  std::cout << ">>> peds " << peds.size() << RESET<< std::endl;
+
     AgentsQueueIn::GetandClear(peds);
+     _agentSrcManager.SetBuildingUpdated(true);
+
+
     for (auto&& ped: peds) {
+          //   std::cout << "Add to building : " << ped->GetPos()._x << ", " << ped->GetPos()._y << " t: "<< Pedestrian::GetGlobalTime() << std::endl;
         _building->AddPedestrian(ped);
     }
+    //  for(auto pp: _building->GetAllPedestrians())
+    //         std::cout<< KBLU << "BUL: Simulation: " << pp->GetPos()._x << ", " << pp->GetPos()._y  << " t: "<< Pedestrian::GetGlobalTime() <<RESET << std::endl;
+
+
+    // std::cout << "LEAVE Simulation::ProcessAgentsQueue()\n";
 }
 
 void Simulation::UpdateDoorticks() const {
