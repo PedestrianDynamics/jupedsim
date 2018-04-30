@@ -92,6 +92,14 @@ public:
      bool IsCompleted() const;
 
      /**
+      * @return true if the building is updated
+      *
+      */
+     bool IsBuildingUpdated() const;
+
+     void SetBuildingUpdated(bool update);
+
+     /**
       * Return a pointer to the building object
       */
      Building* GetBuilding() const;
@@ -170,6 +178,8 @@ private:
      /// whether all agents have been dispatched
      static bool _isCompleted;
      //std::atomic<bool>_isCompleted=false;
+//     std::atomic<bool>_buildingUpdated=false;
+     bool _buildingUpdated;
 };
 
 #endif /* AGENTSSOURCESMANAGER_H_ */
