@@ -215,8 +215,6 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                    Point pos( chosen_it->x()/factor, chosen_it->y()/factor ); //check!
                    ped->SetPos(pos , true);
                    VoronoiAdjustVelocityNeighbour(chosen_it, ped, velocities_vector, goal_vector);
-                   std::cout << ">> Chosen Pos: " << pos._x << ", " << pos._y << std::endl;
-
                    // proceed to the next pedestrian
                    existing_peds.push_back(ped);
                    ++iter_ped;
@@ -371,8 +369,6 @@ void VoronoiAdjustVelocityNeighbour(voronoi_diagram<double>::const_vertex_iterat
 void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
                                double factor, voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	, double radius)
 {
-     std::cout << "Enter VoronoiBestVertexRandMax\n";
-
      std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
      vector<double> partial_sums;
      unsigned long size=0;
@@ -422,9 +418,6 @@ void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, con
      dis = partial_sums[iposition];
      if (iposition>1)
            dis -= partial_sums[iposition-1];
-
-
-     std::cout << "Leave VoronoiBestVertexRandMax\n";
 }
 
 
