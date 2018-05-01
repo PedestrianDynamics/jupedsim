@@ -86,8 +86,9 @@ int main(int argc, char** argv)
             //Start the thread for managing the sources of agents if any
             //std::thread t1(sim.GetAgentSrcManager());
             double simMaxTime = configuration->GetTmax();
-            std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());//@todo pass simMaxTime to Run
-            //main thread for the simulation
+            std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+//main thread for the simulation
             evacTime = sim.RunStandardSimulation(simMaxTime);
             //Join the main thread
             t1.join();
