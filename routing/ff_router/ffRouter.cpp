@@ -176,7 +176,7 @@ bool FFRouter::Init(Building* building)
           auto pairRoomIt = allRooms.begin();
           std::advance(pairRoomIt, i);
           UnivFFviaFM *locffptr = nullptr;
-          locffptr = new UnivFFviaFM(pairRoomIt->second.get(), building, 0.0625, 0.0, false);
+          locffptr = new UnivFFviaFM(pairRoomIt->second.get(), building, 0.125, 0.0, false);
 
           locffptr->setUser(DISTANCE_MEASUREMENTS_ONLY);
           locffptr->setMode(CENTERPOINT);
