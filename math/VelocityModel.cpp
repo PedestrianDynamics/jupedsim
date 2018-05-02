@@ -308,12 +308,17 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
       if ( (dynamic_cast<DirectionFloorfield*>(_direction.get())) ||
            (dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) ||
            (dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get()))  ) {
-          if (dist > 50*J_EPS_GOAL) {
-               desired_direction = target - pos; //ped->GetV0(target);
-          } else {
-               desired_direction = lastE0;
-               ped->SetLastE0(lastE0); //keep old vector (revert set operation done 9 lines above)
+          desired_direction = target-pos;
+          if (desired_direction.NormSquare() < 0.25) {
+              desired_direction = lastE0;
+              ped->SetLastE0(lastE0);
           }
+//          if (dist > 1*J_EPS_GOAL) {
+//               desired_direction = target - pos; //ped->GetV0(target);
+//          } else {
+//               desired_direction = lastE0;
+//               ped->SetLastE0(lastE0); //keep old vector (revert set operation done 9 lines above)
+//          }
       } else if (dist > J_EPS_GOAL) {
           desired_direction = ped->GetV0(target);
       } else {

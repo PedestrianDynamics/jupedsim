@@ -283,7 +283,7 @@ public:
     void set_write_VTK_files_direction(bool write_VTK_files_direction) {_write_VTK_files_direction = write_VTK_files_direction;}
 
     bool get_write_VTK_files_direction() const {return _write_VTK_files_direction;}
-    
+
      void SetHostname(std::string hostname) { _hostname = hostname; };
 
      const std::string& GetTrajectoriesFile() const { return _trajectoriesFile; };
