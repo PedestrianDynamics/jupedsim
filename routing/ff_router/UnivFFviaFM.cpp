@@ -1320,7 +1320,7 @@ void UnivFFviaFM::writeFF(const std::string& filename, std::vector<int> targetID
     int numTotal = numX * numY;
     //std::cerr << numTotal << " numTotal" << std::endl;
     //std::cerr << grid->GetnPoints() << " grid" << std::endl;
-    file.open(filename);
+    file.open(_configuration->GetProjectRootDir()+filename);
 
     file << "# vtk DataFile Version 3.0" << std::endl;
     file << "Testdata: Fast Marching: Test: " << std::endl;
