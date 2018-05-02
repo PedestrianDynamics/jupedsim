@@ -118,6 +118,7 @@ public:
           //ff router
           _has_specific_goals = false;
           _write_VTK_files = false;
+          _exit_strat = 9;
 
 	  //for random numbers
           _rdGenerator=RandomNumberGenerator();
@@ -272,6 +273,10 @@ public:
 
      bool get_write_VTK_files() const {return _write_VTK_files;}
 
+     void set_exit_strat(int e_strat) {_exit_strat = e_strat;}
+
+     int get_exit_strat() const {return _exit_strat;}
+
      const std::string& GetHostname() const { return _hostname; };
 
      void SetHostname(std::string hostname) { _hostname = hostname; };
@@ -382,6 +387,8 @@ private:
      //ff router
      bool _has_specific_goals;
      bool _write_VTK_files;
+
+     int _exit_strat;
 
      std::string _hostname;
      std::string _trajectoriesFile;

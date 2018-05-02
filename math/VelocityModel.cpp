@@ -314,14 +314,13 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
                desired_direction = lastE0;
                ped->SetLastE0(lastE0); //keep old vector (revert set operation done 9 lines above)
           }
-      }
-      else if (dist > J_EPS_GOAL) {
-            desired_direction = ped->GetV0(target);
+      } else if (dist > J_EPS_GOAL) {
+          desired_direction = ped->GetV0(target);
       } else {
           ped->SetSmoothTurning();
           desired_direction = ped->GetV0();
-     }
-     return desired_direction;
+      }
+      return desired_direction;
 }
 
 

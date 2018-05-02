@@ -463,6 +463,7 @@ set(header_files
         tinyxml/tinystr.h
 
         general/ArgumentParser.h
+        general/Configuration.h
         general/Macros.h
 	general/randomnumbergenerator.h
 
