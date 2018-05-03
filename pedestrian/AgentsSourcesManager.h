@@ -84,12 +84,21 @@ public:
       * Set the building object
       */
      void SetBuilding(Building* building);
+     void SetRunning(bool running);
 
      /**
       * @return true if all agents have been generated
       * and the class is ready to leave
       */
      bool IsCompleted() const;
+
+     /**
+      * @return true if the building is updated
+      *
+      */
+     bool IsBuildingUpdated() const;
+
+     void SetBuildingUpdated(bool update);
 
      /**
       * Return a pointer to the building object
@@ -111,10 +120,13 @@ public:
      /**
       * Return the total number of agents that will be generated.
       * used by visualisation to allocate space
+      *
       */
      long GetMaxAgentNumber() const;
 
-
+     int GetMaxSimTime() const;
+     void SetMaxSimTime(int t);
+     bool IsRunning() const;
 private:
 
      /**
@@ -165,11 +177,16 @@ private:
      std::vector<std::shared_ptr<AgentsSource> > _sources;
      ///to control the trigger of the events
      long int _lastUpdateTime = 0;
+     int maxSimTime = 0;
      /// building object
      Building* _building=nullptr;
      /// whether all agents have been dispatched
      static bool _isCompleted;
      //std::atomic<bool>_isCompleted=false;
+//     std::atomic<bool>_buildingUpdated=false;
+     bool _buildingUpdated;
+     bool _isRunning = false;
+
 };
 
 #endif /* AGENTSSOURCESMANAGER_H_ */
