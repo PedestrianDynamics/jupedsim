@@ -2,7 +2,7 @@
 from numpy import *
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon as pgon
-from Polygon import *         
+from Polygon import *
 import matplotlib.cm as cm
 import pylab
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -13,13 +13,13 @@ from _Plot_cell_rho import *
 
 
 def getParserArgs():
-	parser = argparse.ArgumentParser(description='Combine French data to one file')
-	parser.add_argument("-f", "--filepath", default="./", help='give the path of source file')
-	parser.add_argument("-n", "--namefile", help='give the name of the source file')
-	parser.add_argument("-g", "--geoname", help='give the name of the geometry file')
-	parser.add_argument("-p", "--trajpath", help='give the path of the trajectory file')
-	args = parser.parse_args()
-	return args
+        parser = argparse.ArgumentParser(description='Combine French data to one file')
+        parser.add_argument("-f", "--filepath", default="./", help='give the path of source file')
+        parser.add_argument("-n", "--namefile", help='give the name of the source file')
+        parser.add_argument("-g", "--geoname", help='give the name of the geometry file')
+        parser.add_argument("-p", "--trajpath", help='give the path of the trajectory file')
+        args = parser.parse_args()
+        return args
 
 
 if __name__ == '__main__':
@@ -51,7 +51,7 @@ if __name__ == '__main__':
       tick.set_markersize(6)
    ax1.set_aspect("equal")
    plot_geometry(geoFile)
-   
+
    velocity=array([])
    polys = open("%s/polygon%s.dat"%(filepath,namefile)).readlines()
    velocity=loadtxt("%s/speed%s.dat"%(filepath,namefile))
@@ -61,18 +61,21 @@ if __name__ == '__main__':
    sm.set_clim(vmin=0,vmax=1.5)
    index=0
    for poly in polys:
-      exec("p = %s"%poly)
-      xx = velocity[index]
-      index += 1
-      ax1.add_patch(pgon(p,facecolor=sm.to_rgba(xx), edgecolor='white',linewidth=2))
+       poly = poly.split("|")
+       poly_index = poly[0].strip()
+       Poly = poly[1].strip()
+       exec("p = %s"%Poly)
+       xx = velocity[index]
+       index += 1
+       ax1.add_patch(pgon(p,facecolor=sm.to_rgba(xx), edgecolor='white',linewidth=2))
 
    if(trajType=="xml"):
        fps, N, Trajdata = parse_xml_traj_file(trajFile)
    elif(trajType=="txt"):
-        Trajdata = loadtxt(trajFile)   
+        Trajdata = loadtxt(trajFile)
    Trajdata = Trajdata[ Trajdata[:, 1] == frameNr ]
    ax1.plot(Trajdata[:,2], Trajdata[:,3], "bo", markersize = 20, markeredgewidth=2)
-   
+
    ax1.set_xlim(geominX-0.2,geomaxX+0.2)
    ax1.set_ylim(geominY-0.2,geomaxY+0.2)
    plt.xlabel("x [m]")
@@ -81,10 +84,6 @@ if __name__ == '__main__':
    divider = make_axes_locatable(ax1)
    cax = divider.append_axes("right", size="2.5%", pad=0.2)
    cb=fig.colorbar(sm,ax=ax1,cax=cax,format='%.1f')
-   cb.set_label('Velocity [$m/s$]') 
+   cb.set_label('Velocity [$m/s$]')
    plt.savefig("%s/v_%s.png"%(filepath,namefile))
    plt.close()
-
-
-
-

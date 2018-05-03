@@ -181,7 +181,10 @@ def main():
     # TODO use os.path.join
     polys = open("%s/polygon%s.dat"%(filepath,namefile)).readlines()
     for poly in polys:
-        exec("p = %s"%poly)
+        poly = poly.split("|")
+        poly_index = poly[0].strip()
+        Poly = poly[1].strip()
+        exec("p = %s"%Poly)
         pp = locals()['p']
         polygons.append(pp)
         xx=1.0/pol.Polygon(pp).area()
@@ -201,6 +204,11 @@ def main():
     sm.set_clim(vmin=0,vmax=5)
     for j, poly in enumerate(polys):
         ax1.add_patch(pgon(polygons[j],facecolor=sm.to_rgba(density_orig[j]), edgecolor='white',linewidth=2))
+        ax1.text(polygons[j].center()[0], polygons[j].center()[1], poly_index,
+        horizontalalignment='center',
+        verticalalignment='center',
+        fontsize=20, color='red',
+        transform=ax1.transAxes)
 
     if(trajType=="xml"):
        fps, N, Trajdata = parse_xml_traj_file(trajFile)
