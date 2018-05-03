@@ -439,7 +439,7 @@ void Method_D::OutputVoroGraph(const string & frameId,  std::vector<std::pair<po
                          point.y(point.y()*CMtoM);
                     }
                }
-               polys << "["<< p.second << ", " <<dsv(poly) << "]" << endl;
+               polys << p.second << " | " << dsv(poly) << endl;
                //polys  <<dsv(poly)<< endl;
           }
      }
