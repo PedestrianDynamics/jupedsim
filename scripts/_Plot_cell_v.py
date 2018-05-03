@@ -68,6 +68,11 @@ if __name__ == '__main__':
        xx = velocity[index]
        index += 1
        ax1.add_patch(pgon(p,facecolor=sm.to_rgba(xx), edgecolor='white',linewidth=2))
+       ax1.text(pol.Polygon(polygons[j]).center()[0], pol.Polygon(polygons[j]).center()[1], poly_index,
+                horizontalalignment='center',
+                verticalalignment='center',
+                fontsize=20, color='red',
+                transform=ax1.transAxes)
 
    if(trajType=="xml"):
        fps, N, Trajdata = parse_xml_traj_file(trajFile)

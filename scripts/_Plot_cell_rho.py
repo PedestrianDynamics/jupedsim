@@ -204,11 +204,12 @@ def main():
     sm.set_clim(vmin=0,vmax=5)
     for j, poly in enumerate(polys):
         ax1.add_patch(pgon(polygons[j],facecolor=sm.to_rgba(density_orig[j]), edgecolor='white',linewidth=2))
-        ax1.text(polygons[j].center()[0], polygons[j].center()[1], poly_index,
-        horizontalalignment='center',
-        verticalalignment='center',
-        fontsize=20, color='red',
-        transform=ax1.transAxes)
+        ax1.text(pol.Polygon(polygons[j]).center()[0]+0.5, pol.Polygon(polygons[j]).center()[1]+0.5, poly_index,
+                 horizontalalignment='center',
+                 verticalalignment='center',
+                 fontsize=20, color='white',
+                 transform=ax1.transAxes)
+        # todo https://stackoverflow.com/questions/12881848/draw-polygons-more-efficiently-with-matplotlib
 
     if(trajType=="xml"):
        fps, N, Trajdata = parse_xml_traj_file(trajFile)

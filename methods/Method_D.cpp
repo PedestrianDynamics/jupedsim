@@ -428,7 +428,7 @@ void Method_D::OutputVoroGraph(const string & frameId,  std::vector<std::pair<po
                poly = p.first;
                for(auto&& point:poly.outer())
                {
-                    point.x(point.x()*CMtoM);
+z                    point.x(point.x()*CMtoM);
                     point.y(point.y()*CMtoM);
                }
                for(auto&& innerpoly:poly.inners())
