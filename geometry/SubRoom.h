@@ -111,6 +111,7 @@ public:
       * Constructor
       */
      SubRoom();
+     SubRoom(const SubRoom& orig);
 
      /**
       * Destructor
@@ -449,6 +450,29 @@ public:
      std::string WritePolyLine() const;
      virtual void WriteToErrorLog() const;
      virtual bool ConvertLineToPoly(const std::vector<Line*>& goals);
+};
+
+/************************************************************
+ Escalator
+************************************************************/
+
+class Escalator : public Stair {
+private:
+    bool isEscalator_Up;
+
+public:
+    Escalator();
+    Escalator(const Escalator& orig);
+    virtual ~Escalator();
+
+    // Setter-Funktionen
+    void SetEscalatorUp();
+    void SetEscalatorDown();
+
+    // Getter-Funktionen
+    bool IsEscalatorUp() const;
+    bool IsEscalatorDown() const;
+
 };
 
 #endif  /* _SUBROOM_H */

@@ -1500,18 +1500,24 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                     pExitStrategy = 9;
                     _exit_strat_number = 9;
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
+                    if(!ParseFfOpts(strategyNode)) {
+                        return false;
+                    };
+                    _config->set_dirSubLocal(dynamic_cast<DirectionSubLocalFloorfield*>(_exit_strategy.get()));
                     break;
                case 8:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
                     if(!ParseFfOpts(strategyNode)) {
                          return false;
                     };
+                    _config->set_dirLocal(dynamic_cast<DirectionLocalFloorfield*>(_exit_strategy.get()));
                     break;
                case 9:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
                     if(!ParseFfOpts(strategyNode)) {
                          return false;
                     };
+                    _config->set_dirSubLocal(dynamic_cast<DirectionSubLocalFloorfield*>(_exit_strategy.get()));
                     break;
                default:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());

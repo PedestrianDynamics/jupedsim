@@ -192,6 +192,8 @@ protected:
      //std::map< std::pair<int, int> , SubRoom* > _subroomMatrix;
      std::vector<int>                         _allDoorUIDs;
      std::vector<int>                         _localShortestSafedPeds;
+     std::vector<int>                         _directionalEscalatorsUID;
+     std::vector<std::pair<int, int>>         _penaltyList;
      const Building*                          _building;
      std::map<int, UnivFFviaFM*>     _locffviafm; // the actual type might be CentrePointLocalFFViaFM
      FloorfieldViaFM*                         _globalFF;

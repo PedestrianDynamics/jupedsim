@@ -40,7 +40,7 @@ public:
      virtual bool LoadTrafficInfo(Building* building) override;
 
 private:
-     const Configuration* _configuration;
+     Configuration* _configuration;
 
      bool LoadGeometry(Building* building);
 
