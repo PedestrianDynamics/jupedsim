@@ -55,13 +55,15 @@ void AgentsSourcesManager::operator()()
 
 void AgentsSourcesManager::Run()
 {
+      SetRunning(true);
      Log->Write("INFO:\tStarting agent manager thread");
-
+     /* std::cout<< KGRN << "\n Starting agent manager thread\n" << "\n>> time: " << Pedestrian::GetGlobalTime() << RESET << "\n"; */
      //Generate all agents required for the complete simulation
      //It might be more efficient to generate at each frequency step
      //TODO  this loop is exactly GenerateAgents( --> REFACTOR)
      for (const auto& src : _sources)
      {
+           /* std::cout << "Generate AgentsAndAddToPool src: " << src->GetId() << "\n" ; */
           src->GenerateAgentsAndAddToPool(src->GetMaxAgents(), _building);
      }
 
@@ -78,13 +80,16 @@ void AgentsSourcesManager::Run()
      do
      {
           int current_time = (int)Pedestrian::GetGlobalTime();
+          /* std::cout << KBLU << ">> RUN: current_time " << current_time << " last update  " << _lastUpdateTime << "\n" << RESET; */
+
           if ((current_time != _lastUpdateTime)
               && ((current_time % updateFrequency) == 0))
           {
-                /* std::cout << ">> RUN: current_time " << current_time << " last update  " << _lastUpdateTime << std::endl; */
+                /* std::cout << "   ---  Enter IF  --- \n" << KRED << "QUEUE isempty: " << AgentsQueueIn::IsEmpty() << "\n" << RESET; */
                 if(AgentsQueueIn::IsEmpty())
                 //if queue is empty. Otherwise, wait for main thread to empty it and update _building
                 {
+                      /* std::cout << "   ---  Enter QUEUE EMPTY --- \n"; */
                       finished=ProcessAllSources();
                       _lastUpdateTime = current_time;
                       //SetBuildingUpdated(false);
@@ -95,22 +100,20 @@ void AgentsSourcesManager::Run()
                 break; // break if max simulation time is reached.
 
      } while (!finished);
-     std::cout << ">> Terminating agent manager thread" << RESET << std::endl;
      Log->Write("INFO:\tTerminating agent manager thread");
      _isCompleted = true;
-
 }
 
 bool AgentsSourcesManager::ProcessAllSources() const
 {
-     std::cout << "\nSTART   AgentsSourcesManager::ProcessAllSources()\n";
+     /* std::cout << "\nSTART   AgentsSourcesManager::ProcessAllSources()\n"; */
 
      bool empty=true;
      double current_time = Pedestrian::GetGlobalTime();
      vector<Pedestrian*> source_peds; // we have to collect peds from all sources, so that we can consider them  while computing new positions
      for (const auto& src : _sources)
      {
-          /* std::cout << KRED << "\nprocessing src: " <<  src->GetId() << " -- current time: " << current_time << " schedule: " << src->GetPlanTime() <<". number of peds in building " << _building->GetAllPedestrians().size() << "\n" << RESET; */
+          /* std::cout << KRED << "\nprocessing src: " <<  src->GetId() << " -- current time: " << current_time << " schedule time: " << src->GetPlanTime() <<". number of peds in building " << _building->GetAllPedestrians().size() << "\n" << RESET; */
 
           if (src->GetPoolSize() && (src->GetPlanTime() <= current_time) )// maybe diff<eps
           {
@@ -602,6 +605,11 @@ bool AgentsSourcesManager::IsCompleted() const
      return _isCompleted;
 }
 
+bool AgentsSourcesManager::IsRunning() const
+{
+     return _isRunning;
+}
+
 
 bool AgentsSourcesManager::IsBuildingUpdated() const
 {
@@ -611,6 +619,12 @@ bool AgentsSourcesManager::IsBuildingUpdated() const
 void AgentsSourcesManager::SetBuildingUpdated(bool update)
 {
      _buildingUpdated = update;
+}
+
+
+void AgentsSourcesManager::SetRunning(bool running)
+{
+     _isRunning = running;
 }
 
 Building* AgentsSourcesManager::GetBuilding() const

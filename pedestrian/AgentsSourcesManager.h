@@ -84,6 +84,7 @@ public:
       * Set the building object
       */
      void SetBuilding(Building* building);
+     void SetRunning(bool running);
 
      /**
       * @return true if all agents have been generated
@@ -125,7 +126,7 @@ public:
 
      int GetMaxSimTime() const;
      void SetMaxSimTime(int t);
-
+     bool IsRunning() const;
 private:
 
      /**
@@ -184,6 +185,8 @@ private:
      //std::atomic<bool>_isCompleted=false;
 //     std::atomic<bool>_buildingUpdated=false;
      bool _buildingUpdated;
+     bool _isRunning = false;
+
 };
 
 #endif /* AGENTSSOURCESMANAGER_H_ */
