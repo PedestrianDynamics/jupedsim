@@ -549,8 +549,12 @@ int FFRouter::FindExit(Pedestrian* p)
                     if ((_distMatrix.at(key) + locDistToDoor) < minDist) {
                          minDist = _distMatrix.at(key) + locDistToDoor;
                          bestDoor = key.first; //doorUID
-                         if (locDistToDoor == 0.) {
-                             bestDoor = _pathsMatrix[key]; //@todo: @ar.graf: check this hack
+                         //if (locDistToDoor == 0.) {
+                         if (true) {
+                             auto subroomDoors = _building->GetSubRoomByUID(p->GetSubRoomUID())->GetAllGoalIDs();
+                             if (std::find(subroomDoors.begin(), subroomDoors.end(), _pathsMatrix[key]) != subroomDoors.end()) {
+                                 bestDoor = _pathsMatrix[key]; //@todo: @ar.graf: check this hack
+                             }
                          }
                          bestFinalDoor = key.second;
                     }

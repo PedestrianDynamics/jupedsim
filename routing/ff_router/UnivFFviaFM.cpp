@@ -583,7 +583,8 @@ void UnivFFviaFM::finalizeTargetLine(const int uid, const Line& line, Point* tar
         } else if (_gridCode[jDot*iMax + iDot] == WALL) {
             //do nothing
         } else {
-            Log->Write("ERROR:\t in finalizingTargetLine");
+            target[jDot * iMax + iDot] = value;
+            //Log->Write("ERROR:\t in finalizingTargetLine");
         }
         for (i=0; iDot < xe; ++i) {
             ++iDot;
@@ -621,7 +622,8 @@ void UnivFFviaFM::finalizeTargetLine(const int uid, const Line& line, Point* tar
             } else if (_gridCode[jDot*iMax + iDot] == WALL) {
                 //do nothing
             } else {
-                Log->Write("ERROR:\t in finalizingTargetLine");
+                target[jDot * iMax + iDot] = value;
+                //Log->Write("ERROR:\t in finalizingTargetLine");
             }
         }
     } else {
@@ -658,7 +660,8 @@ void UnivFFviaFM::finalizeTargetLine(const int uid, const Line& line, Point* tar
         } else if (_gridCode[jDot*iMax + iDot] == WALL) {
             //do nothing
         }  else {
-            Log->Write("ERROR:\t in finalizingTargetLine");
+            target[jDot * iMax + iDot] = value;
+            //Log->Write("ERROR:\t in finalizingTargetLine");
         }
         for(i=0; jDot<ye; ++i) {
             ++jDot;
@@ -696,7 +699,8 @@ void UnivFFviaFM::finalizeTargetLine(const int uid, const Line& line, Point* tar
             } else if (_gridCode[jDot*iMax + iDot] == WALL) {
                 //do nothing
             } else {
-                Log->Write("ERROR:\t in finalizingTargetLine");
+                target[jDot * iMax + iDot] = value;
+                //Log->Write("ERROR:\t in finalizingTargetLine");
             }
         }
     }
@@ -1388,14 +1392,22 @@ void UnivFFviaFM::addTarget(const int uid, double* costarrayDBL, Point* gradarra
          Point passvector = tempTargetLine.NormalVec();
          Point trial = tempTargetLine.GetCentre() - passvector * 0.25;
          Point trial2 = tempTargetLine.GetCentre() + passvector * 0.25;
-         if ((_grid->getKeyAtPoint(trial) >= 0) && (_gridCode[_grid->getKeyAtPoint(trial)] == INSIDE)) {
+         if ((_grid->includesPoint(trial)) && (_gridCode[_grid->getKeyAtPoint(trial)] == INSIDE)) {
              finalizeTargetLine(uid, _doors[uid], newArrayPt, passvector);
-         } else if ((_grid->getKeyAtPoint(trial2) >= 0) && (_gridCode[_grid->getKeyAtPoint(trial2)] == INSIDE)) {
+             finalizeTargetLine(uid, tempTargetLine, newArrayPt, passvector);
+         } else if ((_grid->includesPoint(trial2)) && (_gridCode[_grid->getKeyAtPoint(trial2)] == INSIDE)) {
              passvector = passvector * -1.0;
              finalizeTargetLine(uid, _doors[uid], newArrayPt, passvector);
+             finalizeTargetLine(uid, tempTargetLine, newArrayPt, passvector);
+
          } else {
              Log->Write("ERROR:\t in addTarget: calling finalizeTargetLine");
          }
+//         for (long int i = 0; i < _grid->GetnPoints(); ++i) {
+//             if ((_gridCode[i] != OUTSIDE) && (_gridCode[i] != WALL) && (newArrayPt[i] == Point(0.0, 0.0) )) {
+//                 Log->Write("Mist");
+//             }
+//         }
      }
 #pragma omp critical(_uids)
      _uids.emplace_back(uid);
