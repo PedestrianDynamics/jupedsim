@@ -198,7 +198,9 @@ void Pedestrian::SetID(int i)
      _id = i;
      if(i<=0)
      {
-          cout<<"invalid ID"<<i<<endl;exit(0);
+          cerr<<">> Invalid pedestrians ID " << i<< endl;
+          cerr<<">> Pedestrian ID should be > 0. Exit." << endl;
+          exit(0);
      }
 }
 
@@ -597,7 +599,7 @@ double Pedestrian::GetV0Norm() const
                  //                  // getc(stdin);
 
                  walking_speed =(1-f*g)*_ellipse.GetV0() + f*g*speed_down;
-              
+
                      // printf("%f  DOWN max_e=%f,  z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", _globalTime, maxSubElevation, ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f*g)*_ellipse.GetV0() + f*g*speed_down);
 
            }
@@ -630,7 +632,7 @@ double Pedestrian::GetV0Norm() const
 
                  walking_speed = (1-f*g)*_ellipse.GetV0() + f*g*speed_up;
            }
-     }    
+     }
 
      //IF execution of WalkingInSmoke depending on JPSfire section in INI file
      if(_WalkingSpeed && _WalkingSpeed->ReduceWalkingSpeed()) {
@@ -641,7 +643,7 @@ double Pedestrian::GetV0Norm() const
      //WHERE should the call to that routine be placed properly?
      //only executed every 3 seconds
      // fprintf(stderr, "%f\n", walking_speed);
-     
+
      return walking_speed;
      // orthogonal projection on the stair
      //return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
@@ -1225,6 +1227,3 @@ bool Pedestrian::Relocate(std::function<void(const Pedestrian&)> flowupdater) {
      }
      return status;
 }
-
-
-

@@ -841,7 +841,7 @@ void Building::AddPedestrian(Pedestrian* ped)
      for (unsigned int p = 0; p<_allPedestians.size(); p++) {
           Pedestrian* ped1 = _allPedestians[p];
           if (ped->GetID()==ped1->GetID()) {
-               cout << "Pedestrian already in the room ??? " << ped->GetID() << endl;
+               cout << "Pedestrian " << ped->GetID() << " already in the room." << endl;
                return;
           }
      }
@@ -1047,5 +1047,3 @@ Transition* Building::GetTransitionByUID(int uid) const
 //}
 
 #endif // _SIMULATOR
-
-

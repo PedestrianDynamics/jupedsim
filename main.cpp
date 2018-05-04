@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     Configuration* configuration = new Configuration();
     // Parsing the arguments
     bool status = false;
-    {    
+    {
           //ArgumentParser* p = new ArgumentParser(configuration); //Memory Leak
           std::unique_ptr<ArgumentParser> p(new ArgumentParser(configuration));
           status = p->ParseArgs(argc, argv);
@@ -86,8 +86,12 @@ int main(int argc, char** argv)
             //Start the thread for managing the sources of agents if any
             //std::thread t1(sim.GetAgentSrcManager());
             double simMaxTime = configuration->GetTmax();
-            std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());//@todo pass simMaxTime to Run
-            //main thread for the simulation
+            std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());
+            while(!sim.GetAgentSrcManager().IsRunning())
+            {
+                 // std::cout << "waiting...\n";
+            }
+           //main thread for the simulation
             evacTime = sim.RunStandardSimulation(simMaxTime);
             //Join the main thread
             t1.join();
@@ -111,7 +115,6 @@ int main(int argc, char** argv)
         }
 
         double execTime = difftime(endtime, starttime);
-
         std::stringstream summary;
         summary << std::setprecision(2) << std::fixed;
         summary << "\nExec Time [s]     : " << execTime << std::endl;
