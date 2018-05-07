@@ -188,16 +188,17 @@ def main():
     File.close()
     # plot the blue dots (head) first, to avoid intervening with "text"
     # ---------------------------------------------------
-    if(trajType == "xml"):
-        fps, N, Trajdata = parse_xml_traj_file(trajFile)
-    elif(trajType == "txt"):
-        try:
-            Trajdata = np.array(pd.read_csv(trajFile, comment="#", delimiter=r"\s+"))
-        except:
-            Trajdata = np.loadtxt(trajFile)
+    if  not plotIndex:
+        if(trajType == "xml"):
+            fps, N, Trajdata = parse_xml_traj_file(trajFile)
+        elif(trajType == "txt"):
+            try:
+                Trajdata = np.array(pd.read_csv(trajFile, comment="#", delimiter=r"\s+"))
+            except:
+                Trajdata = np.loadtxt(trajFile)
 
-    Trajdata = Trajdata[Trajdata[:, 1] == frameNr]
-    ax1.plot(Trajdata[:, 2], Trajdata[:, 3], "bo", markersize=20, markeredgewidth=2)
+        Trajdata = Trajdata[Trajdata[:, 1] == frameNr]
+        ax1.plot(Trajdata[:, 2], Trajdata[:, 3], "bo", markersize=20, markeredgewidth=2)
     # ---------------------------------------------------
 
     #polys = open("%s/polygon%s.dat"%(filepath,namefile)).readlines()
