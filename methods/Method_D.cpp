@@ -123,7 +123,7 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
           ss << std::setw(5) << std::setfill('0') << frid;
           const std::string str_frid = ss.str();
 
-          if(!(frid%100))
+          if(!(frid%10))
           {
                Log->Write("frame ID = %d",frid);
           }
@@ -496,9 +496,9 @@ void Method_D::OutputVoroGraph(const string & frameId,  std::vector<std::pair<po
 
      if(_plotVoronoiCellData)
      {
-          string parameters_rho="python3 "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
-               " -g "+_geometryFileName+" -p "+_trajectoryPath;
-          string parameters_v="python3 "+_scriptsLocation+"/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+          string parameters_rho="python "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+               " -g "+_geometryFileName+" -p "+_trajectoryPath + " -i";
+          string parameters_v="python "+_scriptsLocation+"/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
                " -g "+_geometryFileName+" -p "+_trajectoryPath;
           Log->Write("INFO:\t%s",parameters_rho.c_str());
           Log->Write("INFO:\tPlotting Voronoi Cell at the frame <%s>",frameId.c_str());
