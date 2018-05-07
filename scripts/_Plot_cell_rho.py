@@ -1,3 +1,4 @@
+# todo https://stackoverflow.com/questions/12881848/draw-polygons-more-efficiently-with-matplotlib
 import os
 import sys
 import logging
@@ -9,13 +10,13 @@ except ImportError:
     import xml.etree.ElementTree as ET
 
 import numpy as np
-import matplotlib
 #matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon as pgon
-import Polygon as pol
 import matplotlib.cm as cm
-import pylab
+
+import Polygon as pol
+#import pylab
 import pandas as pd
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
@@ -28,6 +29,7 @@ def getParserArgs():
     parser.add_argument("-n", "--namefile", help='give the name of the source file')
     parser.add_argument("-g", "--geoname", help='give the name of the geometry file')
     parser.add_argument("-p", "--trajpath", help='give the path of the trajectory file')
+    parser.add_argument("-i", "--index", action='store_const', const=True, default=False, help='plot index of pedestrians along with the Voronoi polygons')
     args = parser.parse_args()
     return args
 
@@ -104,7 +106,7 @@ def plot_geometry(geometry):
 
 def parse_xml_traj_file(filename):
     """
-    parse trajectories in Travisto-format and output results
+    parse trajectories in jpsvis-format and output results
     in the following  format: id    frame    x    y
     (no sorting of the data is performed)
     returns:
@@ -112,7 +114,7 @@ def parse_xml_traj_file(filename):
     N: number of pedestrians
     data: trajectories (numpy.array) [id fr x y]
     """
-    logging.info("parsing <%s>"%filename)
+    logging.info("parsing <%s>", filename)
     try:
         xmldoc = minidom.parse(filename)
     except:
@@ -144,27 +146,27 @@ def main():
     filepath = args.filepath
     sys.path.append(filepath)
     namefile = args.namefile
-    geoFile=args.geoname
-    trajpath=args.trajpath
+    geoFile = args.geoname
+    trajpath = args.trajpath
     #geoLocation = filepath.split("Output")[0]
     trajName = namefile.split(".")[0]
     trajType = namefile.split(".")[1].split("_")[0]
     trajFile = os.path.join(trajpath, trajName+"."+trajType) #trajpath+trajName+"."+trajType
-    print(">> plot_cell_rho trajpath %s" %trajpath)
-    print(">> plot_cell_rho  trajName %s"%trajName+"."+trajType)
-    print(">> plot_cell_rho trajFile %s" % trajFile)
+    plotIndex = args.index
+    logging.info("INFO plot_cell_rho trajpath %s", trajpath)
+    logging.info("INFO plot_cell_rho  trajName %s", trajName+"."+trajType)
+    logging.info("INFO plot_cell_rho trajFile %s", trajFile)
     try:
-        frameNr=int(namefile.split("_")[-1])
+        frameNr = int(namefile.split("_")[-1])
     except ValueError:
-        exit("Could not parse fps")
+        exit("ERROR: Could not parse fps")
 
     geominX, geomaxX, geominY, geomaxY = get_geometry_boundary(geoFile)
-
     fig = plt.figure(figsize=(16*(geomaxX-geominX)/(geomaxY-geominY)+2, 16), dpi=100)
-    ax1 = fig.add_subplot(111,aspect='equal')
+    ax1 = fig.add_subplot(111, aspect='equal')
     plt.rc("font", size=30)
-    plt.rc('pdf',fonttype = 42)
-    ax1.set_yticks([int(1*j) for j in range(-2,5)])
+    plt.rc('pdf', fonttype=42)
+    ax1.set_yticks([int(1*j) for j in range(-2, 5)])
     for label in ax1.get_xticklabels() + ax1.get_yticklabels():
         label.set_fontsize(30)
 
@@ -178,63 +180,70 @@ def main():
     density = np.array([])
     density_orig = np.array([])
     polygons = [] # polygons converted from string
-    # TODO use os.path.join
-    polys = open("%s/polygon%s.dat"%(filepath,namefile)).readlines()
+    polygon_filename = os.path.join(filepath, "polygon"+namefile+".dat")
+    File = open(polygon_filename)
+    polys = File.readlines()
+    File.close()
+    # plot the blue dots (head) first, to avoid intervening with "text"
+    # ---------------------------------------------------
+    if(trajType == "xml"):
+        fps, N, Trajdata = parse_xml_traj_file(trajFile)
+    elif(trajType == "txt"):
+        try:
+            Trajdata = np.array(pd.read_csv(trajFile, comment="#", delimiter=r"\s+"))
+        except:
+            Trajdata = np.loadtxt(trajFile)
+
+    Trajdata = Trajdata[Trajdata[:, 1] == frameNr]
+    ax1.plot(Trajdata[:, 2], Trajdata[:, 3], "bo", markersize=20, markeredgewidth=2)
+    # ---------------------------------------------------
+
+    #polys = open("%s/polygon%s.dat"%(filepath,namefile)).readlines()
+    poly_index = []
     for poly in polys:
         poly = poly.split("|")
-        poly_index = poly[0].strip()
+        poly_index.append(poly[0].strip())
         Poly = poly[1].strip()
         exec("p = %s"%Poly)
         pp = locals()['p']
         polygons.append(pp)
-        xx=1.0/pol.Polygon(pp).area()
-        if xx>rho_max:
-            xx=rho_max
+        xx = 1.0/pol.Polygon(pp).area()
+        if xx > rho_max:
+            xx = rho_max
 
-        density=np.append(density,xx)
+        density = np.append(density, xx)
 
     density_orig = np.copy(density)
-    Maxd=density.max()
-    Mind=density.min()
-    erro=np.ones(np.shape(density))*Mind
-    density=rho_max*(density-erro)/(Maxd-Mind)
+    Maxd = density.max()
+    Mind = density.min()
+    erro = np.ones(np.shape(density))*Mind
+    density = rho_max*(density-erro)/(Maxd-Mind)
     sm = cm.ScalarMappable(cmap=cm.jet)
     sm.set_array(density)
     sm.autoscale_None()
-    sm.set_clim(vmin=0,vmax=5)
+    sm.set_clim(vmin=0, vmax=5)
     for j, poly in enumerate(polys):
-        ax1.add_patch(pgon(polygons[j],facecolor=sm.to_rgba(density_orig[j]), edgecolor='white',linewidth=2))
-        ax1.text(pol.Polygon(polygons[j]).center()[0]+0.5, pol.Polygon(polygons[j]).center()[1]+0.5, poly_index,
-                 horizontalalignment='center',
-                 verticalalignment='center',
-                 fontsize=20, color='white',
-                 transform=ax1.transAxes)
-        # todo https://stackoverflow.com/questions/12881848/draw-polygons-more-efficiently-with-matplotlib
+        ax1.add_patch(pgon(polygons[j], fc=sm.to_rgba(density_orig[j]), ec='white', lw=2))
+        if plotIndex:
+            ax1.text(pol.Polygon(polygons[j]).center()[0],
+                     pol.Polygon(polygons[j]).center()[1],
+                     poly_index[j],
+                     fontsize=20, color='white')
 
-    if(trajType=="xml"):
-       fps, N, Trajdata = parse_xml_traj_file(trajFile)
-    elif(trajType=="txt"):
-        try:
-            Trajdata = np.array(pd.read_csv(trajFile, comment="#", delimiter="\s+"))
-        except :
-            Trajdata = np.loadtxt(trajFile)
-
-
-    Trajdata = Trajdata[ Trajdata[:, 1] == frameNr ]
-    ax1.plot(Trajdata[:,2], Trajdata[:,3], "bo", markersize = 20, markeredgewidth=2)
-
-    ax1.set_xlim(geominX-0.2,geomaxX+0.2)
-    ax1.set_ylim(geominY-0.2,geomaxY+0.2)
+    ax1.set_xlim(geominX-0.2, geomaxX+0.2)
+    ax1.set_ylim(geominY-0.2, geomaxY+0.2)
     plt.xlabel("x [m]")
     plt.ylabel("y [m]")
     plt.title("%s"%namefile)
     divider = make_axes_locatable(ax1)
     cax = divider.append_axes("right", size="2.5%", pad=0.2)
-    cb=fig.colorbar(sm,ax=ax1,cax=cax,format='%.1f')
+    cb = fig.colorbar(sm, ax=ax1, cax=cax, format='%.1f')
     cb.set_label('Density [$m^{-2}$]')
-    plt.savefig("%s/rho_%s.png"%(filepath,namefile))
+    print("SAVE: %s/rho_%s.png"%(filepath, namefile))
+    plt.savefig("%s/rho_%s.png"%(filepath, namefile))
     plt.close()
 
 
 if __name__ == '__main__':
-    main()
+    plot_index = 1
+    main(plot_index)
