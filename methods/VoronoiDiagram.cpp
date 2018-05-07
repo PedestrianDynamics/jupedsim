@@ -443,16 +443,20 @@ std::vector<std::pair<polygon_2d, int> > VoronoiDiagram::cutPolygonsWithGeometry
      // vector<polygon_2d> intersetionpolygons;
      std::vector<std::pair<polygon_2d, int> > intersetionpolygons;
      int temp = 0;
-     for (const auto & polygon_iterator:polygon)
+     // std::cout << "geometry = " << dsv(Geometry) << "\n";
+     for (const auto & polygon_iterator : polygon)
      {
           polygon_list v;
           polygon_2d p = polygon_iterator.first;
 
           intersection(Geometry, p, v);
+          // std::cout << "p" << polygon_iterator.second << " = " << dsv(p) << "\n";
           BOOST_FOREACH(auto & it, v)
           {
+               // std::cout << "v" << temp << " = " << dsv(it) << "\n";
                if (within(point_2d(xs[temp], ys[temp]), it))
                {
+                    // std::cout << "within " << temp << ": " << xs[temp] << ", " << ys[temp] << "\n";
                     //check and remove duplicates
                     //dispatch::unique (it);
                     polygon_2d simplified;
@@ -471,6 +475,7 @@ std::vector<std::pair<polygon_2d, int> > VoronoiDiagram::cutPolygonsWithGeometry
 std::vector<std::pair<polygon_2d, int> >  VoronoiDiagram::cutPolygonsWithCircle(const std::vector<std::pair<polygon_2d, int> > & polygon,
           const vector<double>& xs, const vector<double>& ys, double radius, int edges)
 {
+     // std::cout << "ENTER CIRCLE\n";
      std::vector<std::pair<polygon_2d, int> >  intersetionpolygons;
      int temp = 0;
      for (const auto & polygon_iterator:polygon)
@@ -488,10 +493,16 @@ std::vector<std::pair<polygon_2d, int> >  VoronoiDiagram::cutPolygonsWithCircle(
           correct(circle);
           polygon_list v;
           intersection(circle, p, v);
+          // std::cout << "p" << polygon_iterator.second << " = " << dsv(p) << "\n";
+          // std::cout << "circle" << polygon_iterator.second << " = " << dsv(circle) << "\n";
+
           BOOST_FOREACH(auto & it, v)
           {
+               // std::cout << "v" << temp << " = " << dsv(it) << "\n";
+               // std::cout << "check " << temp << ": " << xs[temp] << ", " << ys[temp] << "\n";
                if (within(point_2d(xs[temp], ys[temp]), it))
                {
+                    // std::cout << "within " << temp << ": " << xs[temp] << ", " << ys[temp] << "\n";
                     //check and remove duplicates
                     //dispatch::unique (it);
                     polygon_2d simplified;
@@ -502,5 +513,6 @@ std::vector<std::pair<polygon_2d, int> >  VoronoiDiagram::cutPolygonsWithCircle(
           }
           temp++;
      }
+     // std::cout << "LEAVE CIRCLE\n";
      return intersetionpolygons;
 }
