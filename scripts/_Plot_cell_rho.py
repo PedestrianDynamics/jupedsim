@@ -225,7 +225,6 @@ def main():
     sm.autoscale_None()
     sm.set_clim(vmin=0, vmax=5)
     for j, poly in enumerate(polys):
-        print(sm.to_rgba(density_orig[j]))
         ax1.add_patch(pgon(polygons[j], fc=sm.to_rgba(density_orig[j]), ec='white', lw=2))
         if plotIndex:
             bcolor = sm.to_rgba(density_orig[j]) #inverse background color
