@@ -20,8 +20,9 @@ import Polygon as pol
 import pandas as pd
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-
-
+logfile = "rho_log.txt"
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 def getParserArgs():
     parser = argparse.ArgumentParser(description='Combine French data to one file')
@@ -29,7 +30,8 @@ def getParserArgs():
     parser.add_argument("-n", "--namefile", help='give the name of the source file')
     parser.add_argument("-g", "--geoname", help='give the name of the geometry file')
     parser.add_argument("-p", "--trajpath", help='give the path of the trajectory file')
-    parser.add_argument("-i", "--index", action='store_const', const=True, default=False, help='plot index of pedestrians along with the Voronoi polygons')
+    parser.add_argument("-i", "--index", action='store_const', const=True,
+                        default=False, help='plot index of pedestrians along with the Voronoi polygons')
     args = parser.parse_args()
     return args
 
@@ -153,9 +155,9 @@ def main():
     trajType = namefile.split(".")[1].split("_")[0]
     trajFile = os.path.join(trajpath, trajName+"."+trajType) #trajpath+trajName+"."+trajType
     plotIndex = args.index
-    logging.info("INFO plot_cell_rho trajpath %s", trajpath)
-    logging.info("INFO plot_cell_rho  trajName %s", trajName+"."+trajType)
-    logging.info("INFO plot_cell_rho trajFile %s", trajFile)
+    logging.info("plot_cell_rho trajpath %s", trajpath)
+    logging.info("plot_cell_rho  trajName %s", trajName+"."+trajType)
+    logging.info("plot_cell_rho trajFile %s", trajFile)
     try:
         frameNr = int(namefile.split("_")[-1])
     except ValueError:
@@ -223,12 +225,17 @@ def main():
     sm.autoscale_None()
     sm.set_clim(vmin=0, vmax=5)
     for j, poly in enumerate(polys):
+        print(sm.to_rgba(density_orig[j]))
         ax1.add_patch(pgon(polygons[j], fc=sm.to_rgba(density_orig[j]), ec='white', lw=2))
         if plotIndex:
+            bcolor  = sm.to_rgba(density_orig[j]) #inverse background color
+            icolor = [1 - c for c in bcolor]
+            icolor[-1] = bcolor[-1] # alpha
+            print("icolo", icolor)
             ax1.text(pol.Polygon(polygons[j]).center()[0],
                      pol.Polygon(polygons[j]).center()[1],
                      poly_index[j],
-                     fontsize=20, color='white')
+                     fontsize=20, color=icolor)
 
     ax1.set_xlim(geominX-0.2, geomaxX+0.2)
     ax1.set_ylim(geominY-0.2, geomaxY+0.2)
@@ -239,8 +246,9 @@ def main():
     cax = divider.append_axes("right", size="2.5%", pad=0.2)
     cb = fig.colorbar(sm, ax=ax1, cax=cax, format='%.1f')
     cb.set_label('Density [$m^{-2}$]')
-    print("SAVE: %s/rho_%s.png"%(filepath, namefile))
-    plt.savefig("%s/rho_%s.png"%(filepath, namefile))
+    figname = os.path.join(filepath, "rho_"+namefile+".png")
+    logging.info("SAVE: %s", figname)
+    plt.savefig(figname)
     plt.close()
 
 
