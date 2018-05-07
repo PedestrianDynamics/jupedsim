@@ -245,5 +245,4 @@ def main():
 
 
 if __name__ == '__main__':
-    plot_index = 1
-    main(plot_index)
+    main()
