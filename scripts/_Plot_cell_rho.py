@@ -228,10 +228,9 @@ def main():
         print(sm.to_rgba(density_orig[j]))
         ax1.add_patch(pgon(polygons[j], fc=sm.to_rgba(density_orig[j]), ec='white', lw=2))
         if plotIndex:
-            bcolor  = sm.to_rgba(density_orig[j]) #inverse background color
+            bcolor = sm.to_rgba(density_orig[j]) #inverse background color
             icolor = [1 - c for c in bcolor]
             icolor[-1] = bcolor[-1] # alpha
-            print("icolo", icolor)
             ax1.text(pol.Polygon(polygons[j]).center()[0],
                      pol.Polygon(polygons[j]).center()[1],
                      poly_index[j],
