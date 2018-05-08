@@ -247,7 +247,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 spacings.clear(); //clear for ped p
 
                 // stuck peds get removed. Warning is thrown. low speed due to jam is omitted.
-                if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime() &&
+                if(ped->GetTimeInJam() > ped->GetPatienceTime() && ped->GetGlobalTime() > 30 + ped->GetPremovementTime() &&
                           std::max(ped->GetMeanVelOverRecTime(), ped->GetV().Norm()) < 0.01 &&
                           size == 0 ) // size length of peds neighbour vector
                 {
