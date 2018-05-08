@@ -188,21 +188,22 @@ def main():
     File.close()
     # plot the blue dots (head) first, to avoid intervening with "text"
     # ---------------------------------------------------
-    if  not plotIndex:
-        if(trajType == "xml"):
-            fps, N, Trajdata = parse_xml_traj_file(trajFile)
-        elif(trajType == "txt"):
-            try:
-                Trajdata = np.array(pd.read_csv(trajFile, comment="#", delimiter=r"\s+"))
-            except:
-                Trajdata = np.loadtxt(trajFile)
+    # if  not plotIndex:
+    #     if(trajType == "xml"):
+    #         fps, N, Trajdata = parse_xml_traj_file(trajFile)
+    #     elif(trajType == "txt"):
+    #         try:
+    #             Trajdata = np.array(pd.read_csv(trajFile, comment="#", delimiter=r"\s+"))
+    #         except:
+    #             Trajdata = np.loadtxt(trajFile)
 
-        Trajdata = Trajdata[Trajdata[:, 1] == frameNr]
-        ax1.plot(Trajdata[:, 2], Trajdata[:, 3], "bo", markersize=20, markeredgewidth=2)
+    #     Trajdata = Trajdata[Trajdata[:, 1] == frameNr]
+    #     ax1.plot(Trajdata[:, 2], Trajdata[:, 3], "bo", markersize=20, markeredgewidth=2)
     # ---------------------------------------------------
 
     #polys = open("%s/polygon%s.dat"%(filepath,namefile)).readlines()
     poly_index = []
+    areas = []
     for poly in polys:
         poly = poly.split("|")
         poly_index.append(poly[0].strip())
@@ -210,11 +211,13 @@ def main():
         exec("p = %s"%Poly)
         pp = locals()['p']
         polygons.append(pp)
-        xx = 1.0/pol.Polygon(pp).area()
+        area = pol.Polygon(pp).area()
+        xx = 1.0/area
         if xx > rho_max:
             xx = rho_max
 
         density = np.append(density, xx)
+        areas.append(area)
 
     density_orig = np.copy(density)
     Maxd = density.max()
@@ -225,16 +228,18 @@ def main():
     sm.set_array(density)
     sm.autoscale_None()
     sm.set_clim(vmin=0, vmax=5)
+    maxArea = np.max(areas)
+    meanArea = np.mean(areas)
     for j, poly in enumerate(polys):
         ax1.add_patch(pgon(polygons[j], fc=sm.to_rgba(density_orig[j]), ec='white', lw=2))
+        bcolor = sm.to_rgba(density_orig[j]) #inverse background color
+        icolor = [1 - c for c in bcolor]
+        icolor[-1] = bcolor[-1] # alpha
         if plotIndex:
-            bcolor = sm.to_rgba(density_orig[j]) #inverse background color
-            icolor = [1 - c for c in bcolor]
-            icolor[-1] = bcolor[-1] # alpha
             ax1.text(pol.Polygon(polygons[j]).center()[0],
                      pol.Polygon(polygons[j]).center()[1],
                      poly_index[j],
-                     fontsize=20, color=icolor)
+                     fontsize=25*areas[j]/maxArea, color=icolor)
 
     ax1.set_xlim(geominX-0.2, geomaxX+0.2)
     ax1.set_ylim(geominY-0.2, geomaxY+0.2)
