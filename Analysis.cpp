@@ -188,6 +188,7 @@ void Analysis::InitArgs(ArgumentParser* args)
      _getProfile = args->GetIsGetProfile();
      _outputGraph = args->GetIsOutputGraph();
      _plotGraph = args->GetIsPlotGraph();
+     _plotIndex = args->GetIsPlotIndex();
      _isOneDimensional=args->GetIsOneDimensional();
      _vComponent = args->GetVComponent();
      _IgnoreBackwardMovement =args->GetIgnoreBackwardMovement();
@@ -405,6 +406,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                method_D.SetGridSize(_grid_size_X, _grid_size_Y);
                method_D.SetOutputVoronoiCellData(_outputGraph);
                method_D.SetPlotVoronoiGraph(_plotGraph);
+               method_D.SetPlotVoronoiIndex(_plotIndex);
                method_D.SetDimensional(_isOneDimensional);
                method_D.SetCalculateProfiles(_getProfile);
                method_D.SetTrajectoriesLocation(path);

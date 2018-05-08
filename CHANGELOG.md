@@ -3,32 +3,37 @@ All notable changes to `jpsreport` will be documented in this file.
 
 ## v0.8.3 [unreleased]
 ### Added
+- Option to plot Voronoi diagrams with index instead of little blue circles `plot_index`. Use as:
+  ```xml
+  <output_voronoi_cells enabled="true" plot_graphs="true" plot_index="true"/>
+  ```
+- new format of returned polygons `"index | polygon"` 6fa459ad9ffe5a07699c05b655bcf90f114ed635
 - Exit if `framerate` is not found. c1308ef8
 
 ### Changed
-- Pass Matrix by reference bff89e48 
-- Better fonts in plot scripts. 56d6a8f7 
+- Pass Matrix by reference bff89e48
+- Better fonts in plot scripts. 56d6a8f7
 
 
-### Fixed 
-- Ignore empty line in traj file. 3a3ae04e 
-- Fixes for profile plots. a8a1414c 
+### Fixed
+- Ignore empty line in traj file. 3a3ae04e
+- Fixes for profile plots. a8a1414c
 - Fix parsing of framerate. 2ad0b01d
 
 ## v0.8.2 [06.11.2017]
 
 ### Added
 
-- Use the effective distance in method B in case `length_in_movement_direction` is not defined.  (2c321cef) 
+- Use the effective distance in method B in case `length_in_movement_direction` is not defined.  (2c321cef)
 - Added an error warning when the number of agents in the trajectory is not corresponding to total ids or the ped ids are not continuous in the first frame.
 
 ### Changed
-- Code does not come with Boost anymore. User should install Boost before using jpsreport. (2c0c69f3) 
+- Code does not come with Boost anymore. User should install Boost before using jpsreport. (2c0c69f3)
 - use boost matrix instead of double pointers (9ff5c978)
 - Use own index numbers (9a0d8ec8)
 - Use Python3 in scripts.
 
-### Fixed 
+### Fixed
 - Fix SegFault due to reading files from different OS. (9a42c9dd)
 
 ## v0.8.1 [11.10.2016]
@@ -37,7 +42,7 @@ All notable changes to `jpsreport` will be documented in this file.
 
 - Two options `startframe` and `stopframe` are added for each measurement area for method D to assign the time periods for analysis.
 
-- Individual density based on Voronoi method is added for one dimensional case in the output file (Individual headway is moved to the 5th column). 
+- Individual density based on Voronoi method is added for one dimensional case in the output file (Individual headway is moved to the 5th column).
 
 - z-position of each measurement area can be assigned in inifile so that the trajectories in geometries with several floors can be analyzed.
 
@@ -80,7 +85,7 @@ All notable changes to `jpsreport` will be documented in this file.
 
 - Issue a warning when the voronoi cell cannot be calculated.
 
-- A warning will will be given and the program stops if trajectory for a given pedestrian ID is not continuous. 
+- A warning will will be given and the program stops if trajectory for a given pedestrian ID is not continuous.
 
 
 ### Changed
@@ -107,7 +112,7 @@ All notable changes to `jpsreport` will be documented in this file.
 
 - when path of trajectory is not given absolutely, the default location is the same folder with the inifile
 
-	
+
 ## v0.7
 
 ### Added
@@ -122,38 +127,38 @@ All notable changes to `jpsreport` will be documented in this file.
 
 - Changed name of some variables in configuration file:
 
-	**measurementAreas**                --->  **measurement_areas**
-    
-	**Length_in_movement_direction**	---> **length_in_movement_direction**
-	
-	**useXComponent**		            ---> **use_x_component**
-	
-	**useYComponent**		            ---> **use_y_component**
-	
-	**halfFrameNumberToUse**            ---> **frame_step**
-	
-	**timeInterval**	                ---> **frame_interval**
-	
-	**measurementArea**	                ---> **measurement_area**
-	
-	**outputGraph**	                    ---> **output_graph**
-	
-	**individualFDdata**	            ---> **individual_FD**
-	
-	**cutByCircle** 	                ---> **cut_by_circle**
-	
-	**getProfile** 		                ---> **profiles**
-	
-	**scale_x**			                ---> **grid_size_x**
-	
-	**scale_y**			                ---> **grid_size_y**
+    **measurementAreas**                --->  **measurement_areas**
+
+    **Length_in_movement_direction**	---> **length_in_movement_direction**
+
+    **useXComponent**                   ---> **use_x_component**
+
+    **useYComponent**                   ---> **use_y_component**
+
+    **halfFrameNumberToUse**            ---> **frame_step**
+
+    **timeInterval**                    ---> **frame_interval**
+
+    **measurementArea**                 ---> **measurement_area**
+
+    **outputGraph**                     ---> **output_graph**
+
+    **individualFDdata**                ---> **individual_FD**
+
+    **cutByCircle**                     ---> **cut_by_circle**
+
+    **getProfile**                      ---> **profiles**
+
+    **scale_x**                         ---> **grid_size_x**
+
+    **scale_y**                         ---> **grid_size_y**
 - Changed the data type of frame rate (fps) from integer to float
 
-- Changed the way for dealing with pedestrian outside geometry. In old version JPSreport stops when some pedestrians are outside geometry but now it continue working by 
+- Changed the way for dealing with pedestrian outside geometry. In old version JPSreport stops when some pedestrians are outside geometry but now it continue working by
 removing these pedestrians from the list.
 
 - More than one sub rooms in one geometry can be analysed independently.
-	
+
 ### Fixed
-	
+
 - Fixed bug for dealing with obstacles inside geometry.

@@ -63,6 +63,7 @@ public:
      void SetCalculateProfiles(bool calcProfile);
      void SetOutputVoronoiCellData(bool outputCellData);
      void SetPlotVoronoiGraph(bool plotVoronoiGraph);
+     void SetPlotVoronoiIndex(bool plotVoronoiIndex);
      void SetMeasurementArea (MeasurementArea_B* area);
      void SetDimensional (bool dimension);
      void SetTrajectoriesLocation(const std::string& trajectoryPath);
@@ -81,6 +82,7 @@ private:
      bool _getProfile;
      bool _outputVoronoiCellData;
      bool _plotVoronoiCellData;
+     bool _plotVoronoiIndex;
      bool _isOneDimensional;
      bool _cutByCircle;       //Adjust whether cut each original voronoi cell by a circle
      double _cutRadius;
@@ -104,7 +106,7 @@ private:
 
 
      std::vector<std::pair<polygon_2d, int> >  GetPolygons(std::vector<double>& XInFrame, std::vector<double>& YInFrame,
-               std::vector<double>& VInFrame, std::vector<int>& IdInFrame);
+                                                           std::vector<double>& VInFrame, std::vector<int>& IdInFrame);
      void OutputVoronoiResults(const std::vector<polygon_2d>&  polygons, const std::string& frid, const std::vector<double>& VInFrame);
      double GetVoronoiDensity(const std::vector<polygon_2d>& polygon, const polygon_2d & measureArea);
      double GetVoronoiDensity2(const std::vector<polygon_2d>& polygon, double* XInFrame, double* YInFrame, const polygon_2d& measureArea);

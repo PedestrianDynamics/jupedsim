@@ -2,7 +2,7 @@
  * \file        ArgumentParser.cpp
  * \date        Oct 10, 2014
  * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -68,6 +68,7 @@ private:
      int _circleEdges;
      bool _isOutputGraph;
      bool _isPlotGraph;
+     bool _isPlotIndex;
      /*bool _isPlotTimeSeriesA;
      bool _isPlotTimeSeriesC;
      bool _isPlotTimeSeriesD;*/
@@ -136,6 +137,7 @@ public:
      int GetCircleEdges() const;
      bool GetIsOutputGraph() const;
      bool GetIsPlotGraph() const;
+     bool GetIsPlotIndex() const;
      std::vector<bool> GetIsPlotTimeSeriesA() const;
      std::vector<bool> GetIsPlotTimeSeriesC() const;
      std::vector<bool> GetIsPlotTimeSeriesD() const;

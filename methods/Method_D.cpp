@@ -596,6 +596,10 @@ void Method_D::SetPlotVoronoiGraph(bool plotVoronoiGraph)
 {
      _plotVoronoiCellData = plotVoronoiGraph;
 }
+void Method_D::SetPlotVoronoiIndex(bool plotVoronoiIndex)
+{
+     _plotVoronoiIndex = plotVoronoiIndex;
+}
 
 void Method_D::SetMeasurementArea (MeasurementArea_B* area)
 {
