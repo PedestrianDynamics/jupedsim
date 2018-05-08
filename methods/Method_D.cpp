@@ -497,9 +497,13 @@ void Method_D::OutputVoroGraph(const string & frameId,  std::vector<std::pair<po
      if(_plotVoronoiCellData)
      {
           string parameters_rho="python "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
-               " -g "+_geometryFileName+" -p "+_trajectoryPath + " -i";
+               " -g "+_geometryFileName+" -p "+_trajectoryPath;
           string parameters_v="python "+_scriptsLocation+"/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
                " -g "+_geometryFileName+" -p "+_trajectoryPath;
+
+          if(_plotVoronoiIndex)
+               parameters_rho += " -i";
+
           Log->Write("INFO:\t%s",parameters_rho.c_str());
           Log->Write("INFO:\tPlotting Voronoi Cell at the frame <%s>",frameId.c_str());
           system(parameters_rho.c_str());
