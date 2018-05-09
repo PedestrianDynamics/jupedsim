@@ -2,7 +2,7 @@
  * \file        ArgumentParser.cpp
  * \date        Oct 10, 2014
  * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum Jï¿½ï¿½lich GmbH. All rights reserved.
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -73,6 +73,7 @@ ArgumentParser::ArgumentParser()
      _isCutByCircle = false;
      _isOutputGraph= false;
      _isPlotGraph= false;
+     _isPlotIndex = false;
      _isOneDimensional=false;
      _isGetProfile =false;
      _steadyStart =100;
@@ -745,6 +746,11 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                                    Log->Write("INFO: \tGraph of voronoi diagram will be plotted" );
                               }
                          }
+                         if(string(xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("plot_index"))=="true")
+                         {
+                              _isPlotIndex=true;
+                              Log->Write("INFO: \tVoronoi diagram will be plotted with index of pedestrians" );
+                         }
                     }
                }
 
@@ -871,6 +877,11 @@ bool ArgumentParser::GetIsOutputGraph() const
 bool ArgumentParser::GetIsPlotGraph() const
 {
      return _isPlotGraph;
+}
+
+bool ArgumentParser::GetIsPlotIndex() const
+{
+     return _isPlotIndex;
 }
 
 vector<bool> ArgumentParser::GetIsPlotTimeSeriesA() const

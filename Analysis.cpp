@@ -188,6 +188,7 @@ void Analysis::InitArgs(ArgumentParser* args)
      _getProfile = args->GetIsGetProfile();
      _outputGraph = args->GetIsOutputGraph();
      _plotGraph = args->GetIsPlotGraph();
+     _plotIndex = args->GetIsPlotIndex();
      _isOneDimensional=args->GetIsOneDimensional();
      _vComponent = args->GetVComponent();
      _IgnoreBackwardMovement =args->GetIgnoreBackwardMovement();
@@ -377,7 +378,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                     Log->Write("INFO:\tSuccess with Method C using measurement area id %d!\n",_areaForMethod_C[i]->_id);
                     if(_plotTimeseriesC[i])
                     {
-                         string parameters_Timeseries="python3 \""+_scriptsLocation+"/_Plot_timeseries_rho_v.py\" -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
+                         string parameters_Timeseries="python \""+_scriptsLocation+"/_Plot_timeseries_rho_v.py\" -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
                               " -f "+boost::lexical_cast<std::string>(data.GetFps());
                          int res=system(parameters_Timeseries.c_str());
                          Log->Write("INFO:\t time series result: %d ",res);
@@ -405,6 +406,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                method_D.SetGridSize(_grid_size_X, _grid_size_Y);
                method_D.SetOutputVoronoiCellData(_outputGraph);
                method_D.SetPlotVoronoiGraph(_plotGraph);
+               method_D.SetPlotVoronoiIndex(_plotIndex);
                method_D.SetDimensional(_isOneDimensional);
                method_D.SetCalculateProfiles(_getProfile);
                method_D.SetTrajectoriesLocation(path);
@@ -419,7 +421,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                     Log->Write("INFO:\tSuccess with Method D using measurement area id %d!\n",_areaForMethod_D[i]->_id);
                     if(_plotTimeseriesD[i])
                     {
-                         string parameters_Timeseries="python3 \""+_scriptsLocation+"/_Plot_timeseries_rho_v.py\" -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
+                         string parameters_Timeseries="python \""+_scriptsLocation+"/_Plot_timeseries_rho_v.py\" -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
                               " -f "+boost::lexical_cast<std::string>(data.GetFps());
                          int res=system(parameters_Timeseries.c_str());
                          Log->Write("INFO:\t time series result: %d ",res);
