@@ -122,7 +122,7 @@ bool IniFileParser::Parse(std::string iniFile)
      // Progressbar
      if (xMainNode->FirstChild("progressbar")) {
           _config->SetPRB(true);
-          Log->Write("INFO: \tUse Progressbar");          
+          Log->Write("INFO: \tUse Progressbar");
      }
 
      // geometry file name
@@ -143,8 +143,8 @@ bool IniFileParser::Parse(std::string iniFile)
           if (numthreads) {
 #ifdef _OPENMP
                 omp_set_num_threads(xmltoi(numthreads->Value()));
-#endif               
-          }              
+#endif
+          }
      }
      _config->SetMaxOpenMPThreads(omp_get_max_threads());
      Log->Write("INFO:\tUsing num_threads <%d> threads (%d available)", _config->GetMaxOpenMPThreads(), max_threads);
@@ -379,25 +379,25 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
           return false;
 
      //force_ped
-	 if (xModelPara->FirstChild("force_ped")) {
-		 string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
-		 string dist_max = xModelPara->FirstChildElement("force_ped")->Attribute(
-			 "dist_max");
-		 string disteff_max =
-			 xModelPara->FirstChildElement("force_ped")->Attribute(
-				 "disteff_max"); // @todo: rename disteff_max to force_max
-		 string interpolation_width =
-			 xModelPara->FirstChildElement("force_ped")->Attribute(
-				 "interpolation_width");
+         if (xModelPara->FirstChild("force_ped")) {
+                 string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
+                 string dist_max = xModelPara->FirstChildElement("force_ped")->Attribute(
+                         "dist_max");
+                 string disteff_max =
+                         xModelPara->FirstChildElement("force_ped")->Attribute(
+                                 "disteff_max"); // @todo: rename disteff_max to force_max
+                 string interpolation_width =
+                         xModelPara->FirstChildElement("force_ped")->Attribute(
+                                 "interpolation_width");
 
-		 _config->SetMaxFPed(atof(dist_max.c_str()));
-		 _config->SetNuPed(atof(nu.c_str()));
-		 _config->SetDistEffMaxPed(atof(disteff_max.c_str()));
-		 _config->SetIntPWidthPed(atof(interpolation_width.c_str()));
-		 Log->Write(
-			 "INFO: \tfrep_ped nu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
-			 atof(nu.c_str()), atof(dist_max.c_str()), atof(disteff_max.c_str()), atof(interpolation_width.c_str()));
-	 }
+                 _config->SetMaxFPed(atof(dist_max.c_str()));
+                 _config->SetNuPed(atof(nu.c_str()));
+                 _config->SetDistEffMaxPed(atof(disteff_max.c_str()));
+                 _config->SetIntPWidthPed(atof(interpolation_width.c_str()));
+                 Log->Write(
+                         "INFO: \tfrep_ped nu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
+                         atof(nu.c_str()), atof(dist_max.c_str()), atof(disteff_max.c_str()), atof(interpolation_width.c_str()));
+         }
 
      //force_wall
      if (xModelPara->FirstChild("force_wall")) {
@@ -416,7 +416,7 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
           _config->SetIntPWidthWall(atof(interpolation_width.c_str()));
           Log->Write(
                     "INFO: \tfrep_wall mu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
-			  atof(nu.c_str()), atof(dist_max.c_str()), atof(disteff_max.c_str()), atof(interpolation_width.c_str()));
+                          atof(nu.c_str()), atof(dist_max.c_str()), atof(disteff_max.c_str()), atof(interpolation_width.c_str()));
      }
 
      //Parsing the agent parameters
@@ -487,7 +487,7 @@ bool IniFileParser::ParseKrauszModel(TiXmlElement* xKrausz, TiXmlElement* xMainN
           _config->SetIntPWidthPed(atof(interpolation_width.c_str()));
           Log->Write(
                   "INFO: \tfrep_ped nu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
-			  atof(nu.c_str()), atof(dist_max.c_str()), atof(disteff_max.c_str()), atof(interpolation_width.c_str()));
+                          atof(nu.c_str()), atof(dist_max.c_str()), atof(disteff_max.c_str()), atof(interpolation_width.c_str()));
      }
 
      //force_wall
@@ -507,7 +507,7 @@ bool IniFileParser::ParseKrauszModel(TiXmlElement* xKrausz, TiXmlElement* xMainN
           _config->SetIntPWidthWall(atof(interpolation_width.c_str()));
           Log->Write(
                   "INFO: \tfrep_wall mu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
-			  atof(nu.c_str()), atof(dist_max.c_str()), atof(disteff_max.c_str()), atof(interpolation_width.c_str()));
+                          atof(nu.c_str()), atof(dist_max.c_str()), atof(disteff_max.c_str()), atof(interpolation_width.c_str()));
      }
 
      //Parsing the agent parameters
@@ -1045,7 +1045,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
           Log->Write("ERROR: \t Agent Distribution section is missing");
           return false;
      }
-
      //first get list of actually used router
      std::vector<int> usedRouter;
      usedRouter.clear();
@@ -1104,6 +1103,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
           }
           else if ((strategy == "AI") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+     #ifdef AIROUTER
                Router *r = new AIRouter(id, ROUTING_AI);
                _config->GetRoutingEngine()->AddRouter(r);
 
@@ -1111,6 +1111,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                ///Parsing additional options
                if (!ParseAIOpts(e))
                     return false;
+     #endif
           }
           else if ((strategy == "ff_global_shortest") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
@@ -1252,7 +1253,7 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode* routingNode)
 
      return true;
 }
-
+#ifdef AIROUTER
 bool IniFileParser::ParseAIOpts(TiXmlNode* routingNode) {
      TiXmlNode *sensorNode = routingNode->FirstChild();
 
@@ -1311,7 +1312,7 @@ bool IniFileParser::ParseAIOpts(TiXmlNode* routingNode) {
 
      return true;
 }
-
+#endif
 
 
 bool IniFileParser::ParseLinkedCells(const TiXmlNode& linkedCellNode)
