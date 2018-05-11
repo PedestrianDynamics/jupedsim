@@ -204,9 +204,10 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 #boost
 find_package(Boost COMPONENTS timer chrono system filesystem unit_test_framework REQUIRED)
 
+if(AIROUTER)
 #CGAL
-find_package(CGAL QUIET) # for AI router
-
+find_package(CGAL REQUIRED) # for AI router
+endif()
 
 # test all cpp-files in Utest
 if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
