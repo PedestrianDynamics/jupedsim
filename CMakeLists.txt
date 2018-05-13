@@ -20,6 +20,60 @@ if (Boost_NO_SYSTEM_PATHS)
   set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${BOOST_LIBRARY_DIRS})
 endif (Boost_NO_SYSTEM_PATHS)
 
+
+find_package(git)
+if (GIT_FOUND)
+  message("git found: ${GIT_EXECUTABLE} in version     ${GIT_VERSION_STRING}")
+endif (GIT_FOUND)
+
+
+find_program(GIT_SCM git DOC "Git version control")
+mark_as_advanced(GIT_SCM)
+find_file(GITDIR NAMES .git PATHS ${CMAKE_SOURCE_DIR} NO_DEFAULT_PATH)
+if (GIT_SCM AND GITDIR)
+
+# the commit's SHA1, and whether the building workspace was dirty or not
+# describe --match=NeVeRmAtCh --always --tags --abbrev=40 --dirty
+execute_process(COMMAND
+  "${GIT_EXECUTABLE}" --no-pager describe --tags --always --dirty
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  OUTPUT_VARIABLE GIT_SHA1
+  ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+# branch
+execute_process(
+  COMMAND "${GIT_EXECUTABLE}" rev-parse --abbrev-ref HEAD
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  OUTPUT_VARIABLE GIT_BRANCH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# the date of the commit
+execute_process(COMMAND
+  "${GIT_EXECUTABLE}" log -1 --format=%ad --date=local
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  OUTPUT_VARIABLE GIT_DATE
+  ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+# the subject of the commit
+execute_process(COMMAND
+  "${GIT_EXECUTABLE}" log -1 --format=%s
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  OUTPUT_VARIABLE GIT_COMMIT_SUBJECT
+  ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+
+
+add_definitions("-DGIT_COMMIT_HASH=\"${GIT_SHA1}\"")
+add_definitions("-DGIT_COMMIT_DATE=\"${GIT_DATE}\"")
+add_definitions("-DGIT_COMMIT_SUBJECT=\"${GIT_COMMIT_SUBJECT}\"")
+add_definitions("-DGIT_BRANCH=\"${GIT_BRANCH}\"")
+
+else()
+    message(STATUS "Not in a git repo")
+endif()
+
+
 #set(EXECUTABLE_OUTPUT_PATH "../")
 #INCLUDE_DIRECTORIES("./")
 # message( STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR} )
@@ -223,8 +277,6 @@ target_link_libraries( jpsreport ${PSAPI} )
 endif()
 
 target_link_libraries( jpsreport geometrycore )
-
-
 
 # ----------------------------- cTest ------------------------------------------
 if(BUILD_TESTING)

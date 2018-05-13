@@ -38,6 +38,10 @@ using namespace std;
 int main(int argc, char **argv)
 {
      Log = new STDIOHandler();
+     Log->Write("INFO:\tCOMMIT   : %s", GIT_COMMIT_HASH);
+     Log->Write("INFO:\tDATE     : %s", GIT_COMMIT_DATE);
+     Log->Write("INFO:\tSUBJECT  : %s", GIT_COMMIT_SUBJECT);
+     Log->Write("INFO:\tBRANCH   : %s", GIT_BRANCH);
 
      // Parsing the arguments
      ArgumentParser* args = new ArgumentParser();
