@@ -34,8 +34,11 @@
 #include <string>
 #include <sstream>
 #include <math.h>
+#ifdef _MSC_VER
 #include "../.vs/dirent.h"
-
+#else
+#include <dirent.h>
+#endif
 #ifdef _OPENMP
 #include <omp.h>
 #else
