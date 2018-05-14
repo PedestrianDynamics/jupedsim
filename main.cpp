@@ -63,12 +63,15 @@ std::string ver_string(int a, int b, int c) {
 
 int main(int argc, char **argv)
 {
-     Log->Write("INFO:\tCOMPILER : %s %s\n----", true_cxx.c_str(), true_cxx_ver.c_str());
-     Log = new STDIOHandler();
-     Log->Write("INFO:\tCOMMIT   : %s", GIT_COMMIT_HASH);
-     Log->Write("INFO:\tDATE     : %s", GIT_COMMIT_DATE);
-     Log->Write("INFO:\tSUBJECT  : %s", GIT_COMMIT_SUBJECT);
-     Log->Write("INFO:\tBRANCH   : %s\n----", GIT_BRANCH);
+      Log->Write("JuPedSim - JPSreport\n");
+      Log->Write("Current date   : %s %s", __DATE__, __TIME__);
+      Log->Write("Version        : %s", JPSREPORT_VERSION);
+      Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
+      Log = new STDIOHandler();
+      Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
+      Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
+      Log->Write("Commit subject : %s", GIT_COMMIT_SUBJECT);
+      Log->Write("Branch         : %s\n", GIT_BRANCH);
      // Parsing the arguments
      ArgumentParser* args = new ArgumentParser();
 
