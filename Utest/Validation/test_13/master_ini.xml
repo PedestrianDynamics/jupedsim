@@ -2,12 +2,12 @@
 
 <!-- <JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd"> -->
 <JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://xsd.jupedsim.org/jps_ini_core.xsd" xsi:noNamespaceSchemaLocation="ini.xsd">
-  <seed>linspace(1,10000,4)</seed>
+  <seed>linspace(1,10000,2)</seed>
   <!-- <seed>1</seed> -->
   <num_threads>8</num_threads>
   <max_sim_time unit="sec">200</max_sim_time>
   <!-- geometry file -->
-  <geometry>juelich_tests/test_13/geometries/</geometry>
+  <geometry>Validation/test_13/geometries/</geometry>
   <!-- traectories file and format -->
   <trajectories format="xml-plain" embed_mesh="false" fps="8">
     <file location="Traj_test_13.xml" />
@@ -21,13 +21,13 @@
     <rooms>
       <room room_id="0" state="good" />
     </rooms>
-    
+
     <!-- doors states are: close or open -->
     <doors>
     </doors>
 
   </traffic_constraints>
-  
+
   <routing>
     <goals>
       <!-- <goal id="0" final="true" caption="goal 0"> -->
@@ -42,11 +42,11 @@
     </goals>
   </routing>
 
-  
+
   <!--persons information and distribution -->
   <agents operational_model_id="3">
     <agents_distribution>
-      <group group_id="0"  agent_parameter_id="0" room_id="0" subroom_id="2" number="200" goal_id="-1" router_id="1"/>	
+      <group group_id="0"  agent_parameter_id="0" room_id="0" subroom_id="2" number="200" goal_id="-1" router_id="1"/>
     </agents_distribution>
 
     <!-- frequency in persons/minute -->

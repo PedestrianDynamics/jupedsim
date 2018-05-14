@@ -23,7 +23,7 @@ endif()
 set(CMAKE_COLOR_MAKEFILE ON)
 set(JPSCORE_MAJOR_VERSION 0)
 set(JPSCORE_MINOR_VERSION 8)
-set(JPSCORE_PATCH_VERSION 2)
+set(JPSCORE_PATCH_VERSION 3)
 set(JPSCORE_VERSION
         ${JPSCORE_MAJOR_VERSION}.${JPSCORE_MINOR_VERSION}.${JPSCORE_PATCH_VERSION})
 message(STATUS "JPSCORE_VERSION: " ${JPSCORE_VERSION})
@@ -536,7 +536,7 @@ add_library(core STATIC ${source_files})
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
 
-add_library(cnpy SHARED "cnpy/cnpy.cpp")
+add_library(cnpy STATIC "cnpy/cnpy.cpp")
 target_link_libraries(cnpy ${ZLIB_LIBRARIES})
 
 
