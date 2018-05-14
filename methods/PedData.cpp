@@ -141,9 +141,15 @@ bool PedData::InitializeVariables(const string& filename)
                     {
                          // looking for this line
                          // #ID  FR  X Y Z
+                         //std::cout << "0. line <" << line << ">\n";
                          std::vector<std::string> strs1;
                          line.erase(0,1);
+                         //std::cout << "1. line <" << line << ">\n";
                          boost::split(strs1, line , boost::is_any_of("\t\r "),boost::token_compress_on);
+                         // std::cout << "str size = " << strs1.size() << "\n";
+                         // for(auto s: strs1)
+                         //      std::cout << "s <" << s  << ">\n";
+
                          vector<string>::iterator it_id;
                          it_id=find(strs1.begin(),strs1.end(),"ID");
                          pos_id = std::distance(strs1.begin(), it_id);

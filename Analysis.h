@@ -2,7 +2,7 @@
  * \file        Analysis.h
  * \date        Oct 10, 2014
  * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum J�lich GmbH. All rights reserved.
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -133,7 +133,11 @@ private:
      int _circleEdges;
      bool _getProfile;        // Whether make field analysis or not
      bool _outputGraph;       // Whether output the data for plot the voronoi diagram each frame
-     bool _plotGraph;       // Whether plot the voronoi diagram each frame
+     bool _plotGraph;       // Whether plot the voronoi diagram each
+                            // frame. if (outputGraph==true)
+     bool _plotIndex;       // Whether plot the voronoi diagram each
+                            // frame with index of pedesrians
+                            // if (outputGraph==true and _polotGraph==true)
      std::vector<bool> _plotTimeseriesA;
      std::vector<bool> _plotTimeseriesC;
      std::vector<bool> _plotTimeseriesD;
