@@ -21,7 +21,7 @@ if (Boost_NO_SYSTEM_PATHS)
 endif (Boost_NO_SYSTEM_PATHS)
 
 
-find_package(git)
+find_package(Git)
 if (GIT_FOUND)
   message("git found: ${GIT_EXECUTABLE} in version     ${GIT_VERSION_STRING}")
 endif (GIT_FOUND)
