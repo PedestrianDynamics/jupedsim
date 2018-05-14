@@ -34,7 +34,7 @@
 #include <string>
 #include <sstream>
 #include <math.h>
-#include <dirent.h>
+#include "../.vs/dirent.h"
 
 #ifdef _OPENMP
 #include <omp.h>
