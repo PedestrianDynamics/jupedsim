@@ -21,11 +21,7 @@ if (Boost_NO_SYSTEM_PATHS)
 endif (Boost_NO_SYSTEM_PATHS)
 
 
-find_package(Git REQUIRED)
-if (GIT_FOUND)
-  message("git found: ${GIT_EXECUTABLE} in version     ${GIT_VERSION_STRING}")
-endif (GIT_FOUND)
-
+find_package(Git REQUIRED) # no need for this msg. It comes from cmake.findgit()
 
 find_program(GIT_SCM git DOC "Git version control")
 mark_as_advanced(GIT_SCM)
