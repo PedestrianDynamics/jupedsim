@@ -34,15 +34,41 @@
 #include "Analysis.h"
 
 using namespace std;
+/* https://stackoverflow.com/questions/38530981/output-compiler-version-in-a-c-program#38531037 */
+std::string ver_string(int a, int b, int c) {
+      std::ostringstream ss;
+      ss << a << '.' << b << '.' << c;
+      return ss.str();
+}
+
+  std::string true_cxx =
+#ifdef __clang__
+   "clang++";
+#else
+   "g++";
+#endif
+
+  std::string true_cxx_ver =
+#ifdef __clang__
+    ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__);
+#else
+    ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+#endif
+
+// todo: handle Visual Studio
+/* #ifdef _MSC_VER */
+/*     std::to_string(_MSC_VER) */
+/* #endif */
+
 
 int main(int argc, char **argv)
 {
+     Log->Write("INFO:\tCOMPILER : %s %s\n----", true_cxx.c_str(), true_cxx_ver.c_str());
      Log = new STDIOHandler();
      Log->Write("INFO:\tCOMMIT   : %s", GIT_COMMIT_HASH);
      Log->Write("INFO:\tDATE     : %s", GIT_COMMIT_DATE);
      Log->Write("INFO:\tSUBJECT  : %s", GIT_COMMIT_SUBJECT);
-     Log->Write("INFO:\tBRANCH   : %s", GIT_BRANCH);
-
+     Log->Write("INFO:\tBRANCH   : %s\n----", GIT_BRANCH);
      // Parsing the arguments
      ArgumentParser* args = new ArgumentParser();
 
