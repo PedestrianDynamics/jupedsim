@@ -806,24 +806,31 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
 
                if ( xMethod_D->FirstChildElement("output_voronoi_cells"))
                {
-                    if ( string(xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("enabled"))=="true")
-                    {
-                         _isOutputGraph=true;
-                         Log->Write("INFO: \tData of voronoi diagram is asked to output" );
-                         if(string(xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("plot_graphs"))=="true")
+                    auto enabled = xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("enabled");
+                    if(enabled)
+                         if ( string(enabled)=="true")
                          {
-                              _isPlotGraph=true;
-                              if(_isPlotGraph)
+                              _isOutputGraph=true;
+                              Log->Write("INFO: \tData of voronoi diagram is asked to output" );
+                              auto plot_graphs = xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("plot_graphs");
+                              if(plot_graphs)
                               {
-                                   Log->Write("INFO: \tGraph of voronoi diagram will be plotted" );
-                              }
-                         }
-                         if(string(xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("plot_index"))=="true")
-                         {
-                              _isPlotIndex=true;
-                              Log->Write("INFO: \tVoronoi diagram will be plotted with index of pedestrians" );
-                         }
-                    }
+                                   if (string(plot_graphs)=="true")
+                                   {
+                                        _isPlotGraph = true;
+                                        Log->Write("INFO: \tGraph of voronoi diagram will be plotted");
+                                   }
+                                   auto plot_index = xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute(
+                                           "plot_index");
+                                   if (plot_index)
+                                        if (string(plot_index)=="true")
+                                        {
+                                             _isPlotIndex = true;
+                                             Log->Write(
+                                                     "INFO: \tVoronoi diagram will be plotted with index of pedestrians");
+                                        } // plot_index
+                              } // plot_graphs
+                         }// enabled
                }
 
                if ( xMethod_D->FirstChildElement("steadyState"))
