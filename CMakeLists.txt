@@ -20,6 +20,56 @@ if (Boost_NO_SYSTEM_PATHS)
   set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${BOOST_LIBRARY_DIRS})
 endif (Boost_NO_SYSTEM_PATHS)
 
+
+find_package(Git REQUIRED) # no need for this msg. It comes from cmake.findgit()
+
+find_program(GIT_SCM git DOC "Git version control")
+mark_as_advanced(GIT_SCM)
+find_file(GITDIR NAMES .git PATHS ${CMAKE_SOURCE_DIR} NO_DEFAULT_PATH)
+if (GIT_SCM AND GITDIR)
+
+# the commit's SHA1, and whether the building workspace was dirty or not
+# describe --match=NeVeRmAtCh --always --tags --abbrev=40 --dirty
+execute_process(COMMAND
+  "${GIT_EXECUTABLE}" --no-pager describe --tags --always --dirty
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  OUTPUT_VARIABLE GIT_SHA1
+  ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+# branch
+execute_process(
+  COMMAND "${GIT_EXECUTABLE}" rev-parse --abbrev-ref HEAD
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  OUTPUT_VARIABLE GIT_BRANCH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# the date of the commit
+execute_process(COMMAND
+  "${GIT_EXECUTABLE}" log -1 --format=%ad --date=local
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  OUTPUT_VARIABLE GIT_DATE
+  ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+# the subject of the commit
+execute_process(COMMAND
+  "${GIT_EXECUTABLE}" log -1 --format=%s
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  OUTPUT_VARIABLE GIT_COMMIT_SUBJECT
+  ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+
+
+add_definitions("-DGIT_COMMIT_HASH=\"${GIT_SHA1}\"")
+add_definitions("-DGIT_COMMIT_DATE=\"${GIT_DATE}\"")
+add_definitions("-DGIT_COMMIT_SUBJECT=\"${GIT_COMMIT_SUBJECT}\"")
+add_definitions("-DGIT_BRANCH=\"${GIT_BRANCH}\"")
+
+else()
+    message(STATUS "Not in a git repo")
+endif()
+
+
 #set(EXECUTABLE_OUTPUT_PATH "../")
 #INCLUDE_DIRECTORIES("./")
 # message( STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR} )
@@ -29,12 +79,13 @@ set(CMAKE_TEST_DIR ${CMAKE_SOURCE_DIR}/Utest)
 
 set(JPSREPORT_MAJOR_VERSION 0)
 set(JPSREPORT_MINOR_VERSION 8)
-set(JPSREPORT_PATCH_VERSION 2)
+set(JPSREPORT_PATCH_VERSION 3)
 set(JPSREPORT_VERSION
   ${JPSREPORT_MAJOR_VERSION}.${JPSREPORT_MINOR_VERSION}.${JPSREPORT_PATCH_VERSION})
 message( STATUS "JPSREPORT_VERSION: " ${JPSREPORT_VERSION} )
+add_definitions("-DJPSREPORT_VERSION=\"${JPSREPORT_VERSION}\"")
 if(NOT CMAKE_BUILD_TYPE)
-  set (CMAKE_BUILD_TYPE Release) 
+  set (CMAKE_BUILD_TYPE Release)
 endif(NOT CMAKE_BUILD_TYPE)
 message( STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE} )
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
@@ -74,7 +125,7 @@ endif(NOT DEFINED PROCESSOR_COUNT)
 
 if(PROCESSOR_COUNT)
   # add 1 should be magic! http://www.kitware.com/blog/home/post/63
-  #math(EXPR PROCESSOR_COUNT "${PROCESSOR_COUNT} + 1") 
+  #math(EXPR PROCESSOR_COUNT "${PROCESSOR_COUNT} + 1")
   message( STATUS "PROCESSOR_COUNT " ${PROCESSOR_COUNT})
   set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
 endif(PROCESSOR_COUNT)
@@ -102,7 +153,6 @@ if(BUILD_TESTING)
 endif(BUILD_TESTING)
 
 set(source_files
-  getRSS.c
   Analysis.cpp
   IO/OutputHandler.cpp
   general/ArgumentParser.cpp
@@ -116,45 +166,45 @@ set(source_files
   methods/Method_B.cpp
   methods/Method_C.cpp
   methods/Method_D.cpp
-  geometry/Building.cpp  
-  geometry/Line.cpp      
-  geometry/Point.cpp    
+  geometry/Building.cpp
+  geometry/Line.cpp
+  geometry/Point.cpp
   geometry/Transition.cpp
-  geometry/Crossing.cpp  
-  geometry/NavLine.cpp   
-  geometry/Room.cpp     
+  geometry/Crossing.cpp
+  geometry/NavLine.cpp
+  geometry/Room.cpp
   geometry/Wall.cpp
-  geometry/Hline.cpp     
-  geometry/Obstacle.cpp  
+  geometry/Hline.cpp
+  geometry/Obstacle.cpp
   geometry/SubRoom.cpp
   geometry/Goal.cpp
-)  
+)
 set (  header_files
   Analysis.h
-  methods/MeasurementArea.h   
+  methods/MeasurementArea.h
   methods/VoronoiDiagram.h
   methods/PedData.h
   methods/Method_A.h
   methods/Method_B.h
   methods/Method_C.h
-  methods/Method_D.h  
+  methods/Method_D.h
   IO/OutputHandler.h
   general/ArgumentParser.h
   general/Macros.h
   tinyxml/tinyxml.h
   tinyxml/tinystr.h
-  geometry/Building.h  
-  geometry/Line.h      
-  geometry/Point.h    
+  geometry/Building.h
+  geometry/Line.h
+  geometry/Point.h
   geometry/Transition.h
-  geometry/Crossing.h  
-  geometry/NavLine.h   
-  geometry/Room.h     
+  geometry/Crossing.h
+  geometry/NavLine.h
+  geometry/Room.h
   geometry/Wall.h
-  geometry/Hline.h     
-  geometry/Obstacle.h  
+  geometry/Hline.h
+  geometry/Obstacle.h
   geometry/SubRoom.h
-  geometry/Goal.h  
+  geometry/Goal.h
   )
 
 
@@ -205,19 +255,25 @@ message( STATUS "Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIR} )
 message( STATUS "Boost_LIBRARY_DIR: " ${Boost_LIBRARY_DIR} )
 
 include_directories(${Boost_INCLUDE_DIR})
-link_directories(${Boost_LIBRARY_DIR})
+#link_directories(${Boost_LIBRARY_DIR})
+
+if (WIN32)
+find_library (PSAPI Psapi PATH_SUFFIXES "x64")
+message (STATUS "PSAPI: ${PSAPI}")
+endif()
 
 add_library ( geometrycore STATIC ${source_files} )
 add_executable(
-	jpsreport main.cpp
+        jpsreport main.cpp
 )
-target_link_libraries( jpsreport ${Boost_LIBRARIES} )
-target_link_libraries( jpsreport geometrycore )
+
 
 if(WIN32)
 target_link_libraries (jpsreport wsock32)
+target_link_libraries( jpsreport ${PSAPI} )
 endif()
 
+target_link_libraries( jpsreport geometrycore )
 
 # ----------------------------- cTest ------------------------------------------
 if(BUILD_TESTING)
@@ -228,11 +284,11 @@ if(BUILD_TESTING)
   include(CTest) #adding Dart support
 
   #test if code compiles and runs default setting. Takes about 30 seconds
-  add_test (jpsreport_compile ${CMAKE_CTEST_COMMAND} 
+  add_test (jpsreport_compile ${CMAKE_CTEST_COMMAND}
   --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
   --build-generator ${CMAKE_GENERATOR}
   --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
-  --build-two-config  
+  --build-two-config
   --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   --build-project JPSreport
   --test-command jpsreport --ini=${CMAKE_TEST_DIR}/files/input_UO_180.xml

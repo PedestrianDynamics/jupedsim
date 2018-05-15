@@ -78,8 +78,8 @@ bool Method_A::Process (const PedData& peddata,const string& scriptsLocation, co
      bool PedInGeometry =false;
      for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
      {
-    	  int frameNr = ite->first;
-    	  int frid =  frameNr + peddata.GetMinFrame();
+          int frameNr = ite->first;
+          int frid =  frameNr + peddata.GetMinFrame();
           if(!(frid%100))
           {
                Log->Write("frame ID = %d",frid);
@@ -91,21 +91,21 @@ bool Method_A::Process (const PedData& peddata,const string& scriptsLocation, co
           const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
           if(IdInFrame.size()>0)
           {
-        	  GetAccumFlowVelocity(frameNr, IdInFrame, VInFrame);
-			  char tmp[30];
-			  sprintf(tmp, "%.2f\t%d\n", frid/_fps, _classicFlow);
-			  outputRhoV.append(tmp);
-			  PedInGeometry=true;
+               GetAccumFlowVelocity(frameNr, IdInFrame, VInFrame);
+               char tmp[30];
+               sprintf(tmp, "%.2f\t%d\n", frid/_fps, _classicFlow);
+               outputRhoV.append(tmp);
+               PedInGeometry=true;
           }
      }
      if(PedInGeometry)
      {
-		 FlowRate_Velocity(peddata.GetFps(), _accumPedsPassLine,_accumVPassLine);
-		 WriteFile_N_t(outputRhoV);
+          FlowRate_Velocity(peddata.GetFps(), _accumPedsPassLine,_accumVPassLine);
+          WriteFile_N_t(outputRhoV);
      }
      else
      {
-    	 Log->Write("Warning: No pedestrian exists on the plane of the selected Measurement area!!");
+          Log->Write("Warning: No pedestrian exists on the plane of the selected Measurement area!!");
      }
      delete []_passLine;
      return true;
@@ -123,9 +123,9 @@ void Method_A::WriteFile_N_t(string data)
           string file_N_t ="Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
           if(_plotTimeSeries)
           {
-			  string parameters_N_t="python3 \""+_scriptsLocation+"/_Plot_N_t.py\" -p \""+ METHOD_A_LOCATION + "\" -n "+file_N_t;
-			  int res = system(parameters_N_t.c_str());
-			  Log->Write("INFO:\tPlotting N-t diagram! Status: %d", res);
+               string parameters_N_t="python \""+_scriptsLocation+"/_Plot_N_t.py\" -p \""+ METHOD_A_LOCATION + "\" -n "+file_N_t;
+               int res = system(parameters_N_t.c_str());
+               Log->Write("INFO:\tPlotting N-t diagram! Status: %d", res);
           }
      }
      else
@@ -136,18 +136,18 @@ void Method_A::WriteFile_N_t(string data)
 
 void Method_A::GetAccumFlowVelocity(int frame, const vector<int>& ids, const vector<double>& VInFrame)
 {
-	for(unsigned int i=0; i<ids.size();i++)
+     for(unsigned int i=0; i<ids.size();i++)
      {
-		  int id = ids[i];
+          int id = ids[i];
           bool IspassLine=false;
           if(frame >_firstFrame[id-_minId]&&!_passLine[id-_minId])
           {
-        	  IspassLine = IsPassLine(_areaForMethod_A->_lineStartX,
-                                          _areaForMethod_A->_lineStartY,
-                                          _areaForMethod_A->_lineEndX,
-                                          _areaForMethod_A->_lineEndY, _xCor(id-_minId,frame - 1),
-                                          _yCor(id-_minId,frame - 1), _xCor(id-_minId,frame), 
-                                          _yCor(id-_minId,frame));
+               IspassLine = IsPassLine(_areaForMethod_A->_lineStartX,
+                                       _areaForMethod_A->_lineStartY,
+                                       _areaForMethod_A->_lineEndX,
+                                       _areaForMethod_A->_lineEndY, _xCor(id-_minId,frame - 1),
+                                       _yCor(id-_minId,frame - 1), _xCor(id-_minId,frame),
+                                       _yCor(id-_minId,frame));
           }
           if(IspassLine==true)
           {

@@ -79,10 +79,10 @@ public:
      VoronoiDiagram();
      virtual ~VoronoiDiagram();
 
-     std::vector<polygon_2d> getVoronoiPolygons(std::vector<double>& XInFrame, std::vector<double>& YInFrame, std::vector<double>& VInFrame,
+    std::vector<std::pair<polygon_2d, int> > getVoronoiPolygons(std::vector<double>& XInFrame, std::vector<double>& YInFrame, std::vector<double>& VInFrame,
                std::vector<int>& IdInFrame, const double Bound_Max);
-     std::vector<polygon_2d> cutPolygonsWithGeometry(const std::vector<polygon_2d>& polygon, const polygon_2d& Geometry, const std::vector<double>& xs, const std::vector<double>& ys);
-     std::vector<polygon_2d> cutPolygonsWithCircle(const std::vector<polygon_2d>& polygon, const std::vector<double>& xs, const std::vector<double>& ys, double radius, int edges);
+     std::vector<std::pair<polygon_2d, int> >  cutPolygonsWithGeometry(const std::vector<std::pair<polygon_2d, int> > & polygon, const polygon_2d& Geometry, const std::vector<double>& xs, const std::vector<double>& ys);
+     std::vector<std::pair<polygon_2d, int> >  cutPolygonsWithCircle(const std::vector<std::pair<polygon_2d, int> > & polygon, const std::vector<double>& xs, const std::vector<double>& ys, double radius, int edges);
 };
 
 #endif /* VORONOIDIAGRAM_H_ */

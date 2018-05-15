@@ -25,7 +25,7 @@
  *
  * Some useful links:
  *
- * 	1: <a href="http://jupedsim.org">jupedsim.org</a> <br>
+ *      1: <a href="http://jupedsim.org">jupedsim.org</a> <br>
  *
  **/
 
@@ -37,10 +37,9 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-     Log = new STDIOHandler();
-
+      Log = new STDIOHandler();
      // Parsing the arguments
-     ArgumentParser* args = new ArgumentParser();
+      ArgumentParser* args = new ArgumentParser();
 
 
      if(args->ParseArgs(argc, argv))
@@ -48,8 +47,6 @@ int main(int argc, char **argv)
           // get the number of file to analyse
           const vector<string>& files = args->GetTrajectoriesFiles();
           const string& path = args->GetTrajectoriesLocation();
-          //path="";
-
           // create and initialize the analysis engine
           for (unsigned int i = 0; i < files.size(); i++)
           {

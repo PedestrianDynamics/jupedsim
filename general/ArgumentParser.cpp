@@ -2,7 +2,7 @@
  * \file        ArgumentParser.cpp
  * \date        Oct 10, 2014
  * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum Jï¿½ï¿½lich GmbH. All rights reserved.
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -34,8 +34,11 @@
 #include <string>
 #include <sstream>
 #include <math.h>
+#ifdef _MSC_VER
+#include "../.vs/dirent.h"
+#else
 #include <dirent.h>
-
+#endif
 #ifdef _OPENMP
 #include <omp.h>
 #else
@@ -50,11 +53,39 @@
 
 using namespace std;
 
+/* https://stackoverflow.com/questions/38530981/output-compiler-version-in-a-c-program#38531037 */
+std::string ver_string(int a, int b, int c) {
+      std::ostringstream ss;
+      ss << a << '.' << b << '.' << c;
+      return ss.str();
+}
+
+  std::string true_cxx =
+#ifdef __clang__
+   "clang++";
+#else
+   "g++";
+#endif
+
+  std::string true_cxx_ver =
+#ifdef __clang__
+    ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__);
+#else
+    ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+#endif
+
+// todo: handle Visual Studio
+/* #ifdef _MSC_VER */
+/*     std::to_string(_MSC_VER) */
+/* #endif */
+
+
+
 void ArgumentParser::Usage(const std::string file)
 {
 
      Log->Write("Usage: \n");
-     Log->Write("\t%s input.xml\n",file.c_str());
+     Log->Write("%s inifile.xml\n",file.c_str());
      exit(EXIT_SUCCESS);
 }
 
@@ -73,14 +104,15 @@ ArgumentParser::ArgumentParser()
      _isCutByCircle = false;
      _isOutputGraph= false;
      _isPlotGraph= false;
+     _isPlotIndex = false;
      _isOneDimensional=false;
      _isGetProfile =false;
      _steadyStart =100;
      _steadyEnd = 1000;
      _grid_size_X = 10;
      _grid_size_Y = 10;
-     _errorLogFile="./Logfile.dat";
-     _log=1; //no output wanted
+     _errorLogFile="log.txt";
+     _log=2; //no output wanted
      _trajectoriesLocation="./";
      _trajectoriesFilename="";
      _projectRootDir="./";
@@ -110,11 +142,6 @@ bool ArgumentParser::ParseArgs(int argc, char **argv)
      if (argument == "-h" || argument == "--help")
      {
           Usage(argv[0]);
-          return false;
-     }
-     else if(argument == "-v" || argument == "--version")
-     {
-          fprintf(stderr,"You are actually using JuPedsim (jpsreport) version %s  \n\n",JPS_VERSION);
           return false;
      }
 
@@ -151,7 +178,14 @@ const string& ArgumentParser::GetProjectRootDir() const
 
 bool ArgumentParser::ParseIniFile(const string& inifile)
 {
-
+     // first logs will go to stdout
+     Log->Write("----\nJuPedSim - JPSreport\n");
+     Log->Write("Current date   : %s %s", __DATE__, __TIME__);
+     Log->Write("Version        : %s", JPSREPORT_VERSION);
+     Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
+     Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
+     Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
+     Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
      Log->Write("INFO: \tParsing the ini file <%s>",inifile.c_str());
 
      //extract and set the project root dir
@@ -179,6 +213,45 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           Log->Write("ERROR:\tRoot element value is not 'JPSreport'.");
           return false;
      }
+
+     if (xMainNode->FirstChild("logfile")) {
+          this->SetErrorLogFile(
+               this->GetProjectRootDir()+xMainNode->FirstChild("logfile")->FirstChild()->Value());
+          this->SetLog(2);
+          Log->Write("INFO:\tlogfile <%s>", this->GetErrorLogFile().c_str());
+     }
+     switch (this->GetLog()) {
+     case 0:
+          // no log file
+          //Log = new OutputHandler();
+          break;
+     case 1:
+          if(Log) delete Log;
+          Log = new STDIOHandler();
+          break;
+     case 2: {
+          char name[CLENGTH]="";
+          sprintf(name,"%s", this->GetErrorLogFile().c_str());
+          if(Log) delete Log;
+          Log = new FileHandler(name);
+     }
+          break;
+     default:
+          Log->Write("ERROR: \tWrong option for Log file!");
+          exit(0);
+     }
+     // from this point if case 2, the logs will go to a logfile
+     if(this->GetLog() == 2)
+     {
+          Log->Write("----\nJuPedSim - JPSreport\n");
+          Log->Write("Current date   : %s %s", __DATE__, __TIME__);
+          Log->Write("Version        : %s", JPSREPORT_VERSION);
+          Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
+          Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
+          Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
+          Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
+     }
+
 
      //geometry
      if(xMainNode->FirstChild("geometry"))
@@ -373,7 +446,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                }
                correct(poly); // in the case the Polygone is not closed
                areaB->_poly=poly;
-               
+
                TiXmlElement* xLength=xMeasurementArea_B->FirstChildElement("length_in_movement_direction");
                if(xLength)
                {
@@ -413,7 +486,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                Log->Write("\t\tMeasurement line starts from  <%.3f, %.3f> to <%.3f, %.3f>",areaL->_lineStartX*CMtoM,areaL->_lineStartY*CMtoM,areaL->_lineEndX*CMtoM,areaL->_lineEndY*CMtoM);
           }
      }
-     
+
      //instantaneous velocity
      /*    TiXmlNode* xVelocity=xMainNode->FirstChild("velocity");
            if(xVelocity)
@@ -733,19 +806,31 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
 
                if ( xMethod_D->FirstChildElement("output_voronoi_cells"))
                {
-                    if ( string(xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("enabled"))=="true")
-                    {
-                         _isOutputGraph=true;
-                    	 Log->Write("INFO: \tData of voronoi diagram is asked to output" );
-                    	 if(string(xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("plot_graphs"))=="true")
-                    	 {
-                              _isPlotGraph=true;
-                              if(_isPlotGraph)
+                    auto enabled = xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("enabled");
+                    if(enabled)
+                         if ( string(enabled)=="true")
+                         {
+                              _isOutputGraph=true;
+                              Log->Write("INFO: \tData of voronoi diagram is asked to output" );
+                              auto plot_graphs = xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("plot_graphs");
+                              if(plot_graphs)
                               {
-                                   Log->Write("INFO: \tGraph of voronoi diagram will be plotted" );
-                              }
-                    	 }
-                    }
+                                   if (string(plot_graphs)=="true")
+                                   {
+                                        _isPlotGraph = true;
+                                        Log->Write("INFO: \tGraph of voronoi diagram will be plotted");
+                                   }
+                                   auto plot_index = xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute(
+                                           "plot_index");
+                                   if (plot_index)
+                                        if (string(plot_index)=="true")
+                                        {
+                                             _isPlotIndex = true;
+                                             Log->Write(
+                                                     "INFO: \tVoronoi diagram will be plotted with index of pedestrians");
+                                        } // plot_index
+                              } // plot_graphs
+                         }// enabled
                }
 
                if ( xMethod_D->FirstChildElement("steadyState"))
@@ -873,6 +958,11 @@ bool ArgumentParser::GetIsPlotGraph() const
      return _isPlotGraph;
 }
 
+bool ArgumentParser::GetIsPlotIndex() const
+{
+     return _isPlotIndex;
+}
+
 vector<bool> ArgumentParser::GetIsPlotTimeSeriesA() const
 {
      return _isPlotTimeSeriesA;
@@ -966,3 +1056,12 @@ MeasurementArea* ArgumentParser::GetMeasurementArea(int id)
      return _measurementAreas[id];
 
 }
+
+void ArgumentParser::SetErrorLogFile(std::string errorLogFile)
+{
+     _errorLogFile = errorLogFile;
+};
+
+void ArgumentParser::SetLog(int log) {
+     _log = log;
+};
