@@ -3,6 +3,11 @@ All notable changes to `jpsreport` will be documented in this file.
 
 ## v0.8.3 [unreleased]
 ### Added
+- Option to output log in a file instead of the screen fe66fa49
+  ```
+  <logfile>log.txt</logfile>
+  ```
+- Output useful debug information like date, git and compiler versions. !6 and discussion in #79 
 - Option to plot Voronoi diagrams with index instead of little blue circles `plot_index`. Use as:
   ```xml
   <output_voronoi_cells enabled="true" plot_graphs="true" plot_index="true"/>
