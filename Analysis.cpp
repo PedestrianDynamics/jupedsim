@@ -119,27 +119,6 @@ void Analysis::InitArgs(ArgumentParser* args)
 {
      string s = "Parameter:\n";
 
-     switch (args->GetLog()) {
-     case 0:
-          // no log file
-          //Log = new OutputHandler();
-          break;
-     case 1:
-          if(Log) delete Log;
-          Log = new STDIOHandler();
-          break;
-     case 2: {
-          char name[CLENGTH]="";
-          sprintf(name,"%s.P0.dat",args->GetErrorLogFile().c_str());
-          if(Log) delete Log;
-          Log = new FileHandler(name);
-     }
-          break;
-     default:
-          Log->Write("Wrong option for Log file!");
-          exit(0);
-     }
-
      if(args->GetIsMethodA()) {
           _DoesUseMethodA = true;
           vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodA();

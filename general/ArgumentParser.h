@@ -151,7 +151,8 @@ public:
      float GetGridSizeY() const;
      int GetLog() const;
      bool ParseArgs(int argc, char **argv);
-
+     void SetErrorLogFile(std::string errorLogFile);
+     void SetLog(int log);
      MeasurementArea* GetMeasurementArea(int id);
 
      /**

@@ -53,6 +53,34 @@
 
 using namespace std;
 
+/* https://stackoverflow.com/questions/38530981/output-compiler-version-in-a-c-program#38531037 */
+std::string ver_string(int a, int b, int c) {
+      std::ostringstream ss;
+      ss << a << '.' << b << '.' << c;
+      return ss.str();
+}
+
+  std::string true_cxx =
+#ifdef __clang__
+   "clang++";
+#else
+   "g++";
+#endif
+
+  std::string true_cxx_ver =
+#ifdef __clang__
+    ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__);
+#else
+    ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+#endif
+
+// todo: handle Visual Studio
+/* #ifdef _MSC_VER */
+/*     std::to_string(_MSC_VER) */
+/* #endif */
+
+
+
 void ArgumentParser::Usage(const std::string file)
 {
 
@@ -83,8 +111,8 @@ ArgumentParser::ArgumentParser()
      _steadyEnd = 1000;
      _grid_size_X = 10;
      _grid_size_Y = 10;
-     _errorLogFile="./Logfile.dat";
-     _log=1; //no output wanted
+     _errorLogFile="log.txt";
+     _log=2; //no output wanted
      _trajectoriesLocation="./";
      _trajectoriesFilename="";
      _projectRootDir="./";
@@ -150,7 +178,14 @@ const string& ArgumentParser::GetProjectRootDir() const
 
 bool ArgumentParser::ParseIniFile(const string& inifile)
 {
-
+     // first logs will go to stdout
+     Log->Write("----\nJuPedSim - JPSreport\n");
+     Log->Write("Current date   : %s %s", __DATE__, __TIME__);
+     Log->Write("Version        : %s", JPSREPORT_VERSION);
+     Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
+     Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
+     Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
+     Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
      Log->Write("INFO: \tParsing the ini file <%s>",inifile.c_str());
 
      //extract and set the project root dir
@@ -178,6 +213,45 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           Log->Write("ERROR:\tRoot element value is not 'JPSreport'.");
           return false;
      }
+
+     if (xMainNode->FirstChild("logfile")) {
+          this->SetErrorLogFile(
+               this->GetProjectRootDir()+xMainNode->FirstChild("logfile")->FirstChild()->Value());
+          this->SetLog(2);
+          Log->Write("INFO:\tlogfile <%s>", this->GetErrorLogFile().c_str());
+     }
+     switch (this->GetLog()) {
+     case 0:
+          // no log file
+          //Log = new OutputHandler();
+          break;
+     case 1:
+          if(Log) delete Log;
+          Log = new STDIOHandler();
+          break;
+     case 2: {
+          char name[CLENGTH]="";
+          sprintf(name,"%s", this->GetErrorLogFile().c_str());
+          if(Log) delete Log;
+          Log = new FileHandler(name);
+     }
+          break;
+     default:
+          Log->Write("ERROR: \tWrong option for Log file!");
+          exit(0);
+     }
+     // from this point if case 2, the logs will go to a logfile
+     if(this->GetLog() == 2)
+     {
+          Log->Write("----\nJuPedSim - JPSreport\n");
+          Log->Write("Current date   : %s %s", __DATE__, __TIME__);
+          Log->Write("Version        : %s", JPSREPORT_VERSION);
+          Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
+          Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
+          Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
+          Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
+     }
+
 
      //geometry
      if(xMainNode->FirstChild("geometry"))
@@ -975,3 +1049,12 @@ MeasurementArea* ArgumentParser::GetMeasurementArea(int id)
      return _measurementAreas[id];
 
 }
+
+void ArgumentParser::SetErrorLogFile(std::string errorLogFile)
+{
+     _errorLogFile = errorLogFile;
+};
+
+void ArgumentParser::SetLog(int log) {
+     _log = log;
+};
