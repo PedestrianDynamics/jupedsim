@@ -34,13 +34,46 @@
 #include "Analysis.h"
 
 using namespace std;
+/* https://stackoverflow.com/questions/38530981/output-compiler-version-in-a-c-program#38531037 */
+std::string ver_string(int a, int b, int c) {
+      std::ostringstream ss;
+      ss << a << '.' << b << '.' << c;
+      return ss.str();
+}
+
+  std::string true_cxx =
+#ifdef __clang__
+   "clang++";
+#else
+   "g++";
+#endif
+
+  std::string true_cxx_ver =
+#ifdef __clang__
+    ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__);
+#else
+    ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+#endif
+
+// todo: handle Visual Studio
+/* #ifdef _MSC_VER */
+/*     std::to_string(_MSC_VER) */
+/* #endif */
+
 
 int main(int argc, char **argv)
 {
-     Log = new STDIOHandler();
-
+      Log = new STDIOHandler();
+      Log->Write("----\nJuPedSim - JPSreport\n");
+      Log->Write("Current date   : %s %s", __DATE__, __TIME__);
+      Log->Write("Version        : %s", JPSREPORT_VERSION);
+      Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
+      Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
+      Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
+ //     Log->Write("Commit subject : %s", GIT_COMMIT_SUBJECT);
+      Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
      // Parsing the arguments
-     ArgumentParser* args = new ArgumentParser();
+      ArgumentParser* args = new ArgumentParser();
 
 
      if(args->ParseArgs(argc, argv))

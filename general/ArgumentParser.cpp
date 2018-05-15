@@ -34,8 +34,11 @@
 #include <string>
 #include <sstream>
 #include <math.h>
+#ifdef _MSC_VER
 #include "../.vs/dirent.h"
-
+#else
+#include <dirent.h>
+#endif
 #ifdef _OPENMP
 #include <omp.h>
 #else
@@ -54,7 +57,7 @@ void ArgumentParser::Usage(const std::string file)
 {
 
      Log->Write("Usage: \n");
-     Log->Write("\t%s input.xml\n",file.c_str());
+     Log->Write("%s inifile.xml\n",file.c_str());
      exit(EXIT_SUCCESS);
 }
 
@@ -111,11 +114,6 @@ bool ArgumentParser::ParseArgs(int argc, char **argv)
      if (argument == "-h" || argument == "--help")
      {
           Usage(argv[0]);
-          return false;
-     }
-     else if(argument == "-v" || argument == "--version")
-     {
-          fprintf(stderr,"You are actually using JuPedsim (jpsreport) version %s  \n\n",JPS_VERSION);
           return false;
      }
 
