@@ -95,7 +95,7 @@ bool Simulation::InitArgs()
     }
     case 2: {
         char name[CLENGTH] = "";
-        sprintf(name, "%s.P0.dat", _config->GetErrorLogFile().c_str());
+        sprintf(name, "%s.txt", _config->GetErrorLogFile().c_str());
         if (Log)
             delete Log;
         Log = new FileHandler(name);
@@ -346,7 +346,7 @@ void Simulation::UpdateRoutesAndLocations()
                //exit(EXIT_FAILURE);
 #pragma omp critical(Simulation_Update_pedsToRemove)
                {
-                    pedsToRemove.push_back(ped);
+                    pedsToRemove.insert(ped);
                     Log->incrementDeletedAgents();
                }
           }

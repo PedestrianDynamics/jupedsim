@@ -49,14 +49,15 @@
 
 using namespace std;
 
+
+
+
 void ArgumentParser::Usage(const std::string file)
 {
-     fprintf(stderr, "\n\nYou are actually using JuPedsim version %s  \n\n", JPS_VERSION);
      fprintf(stderr, "Usages: \n");
      fprintf(stderr, "     %s  <path to file>  start the simulation with the specified file.\n", file.c_str());
      fprintf(stderr, "     %s                  search and use the file ini.xml in the current directory.\n",
                file.c_str());
-     fprintf(stderr, "     %s  -v/--version    display the current version.\n", file.c_str());
      fprintf(stderr, "     %s  -h/--help       display this text.\n", file.c_str());
 #ifdef _JPS_AS_A_SERVICE
      fprintf(stderr, "     %s  --as-a-service -p <port nr> runs jps as a service at port <port nr>.\n", file.c_str());
@@ -77,6 +78,15 @@ bool ArgumentParser::ParseArgs(int argc, char** argv)
      if (argc==1) {
           Log->Write(
                      "INFO: \tTrying to load the default configuration from the file <ini.xml>");
+     // first logs will go to stdout
+          Log->Write("----\nJuPedSim - JPScore\n");
+          Log->Write("Current date   : %s %s", __DATE__, __TIME__);
+          Log->Write("Version        : %s", JPSCORE_VERSION);
+          // Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
+          Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
+          Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
+          Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
+
           IniFileParser* p = new IniFileParser(_config);
           if (!p->Parse("ini.xml")) {
                Usage(argv[0]);
@@ -88,10 +98,6 @@ bool ArgumentParser::ParseArgs(int argc, char** argv)
 
      if (argument=="-h" || argument=="--help") {
           Usage(argv[0]);
-          return false;
-     }
-     else if (argument=="-v" || argument=="--version") {
-          fprintf(stderr, "You are actually using JuPedsim/jpscore version %s  \n\n", JPS_VERSION);
           return false;
      }
 
@@ -161,4 +167,3 @@ bool ArgumentParser::ParseArgs(int argc, char** argv)
      Usage(argv[0]);
      return false;
 }
-

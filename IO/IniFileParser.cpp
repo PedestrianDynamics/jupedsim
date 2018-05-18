@@ -45,6 +45,41 @@
 #include "../routing/ai_router/AIRouter.h"
 #include "../routing/ff_router/ffRouter.h"
 
+/* https://stackoverflow.com/questions/38530981/output-compiler-version-in-a-c-program#38531037 */
+std::string ver_string(int a, int b, int c) {
+      std::ostringstream ss;
+      ss << a << '.' << b << '.' << c;
+      return ss.str();
+}
+//https://sourceforge.net/p/predef/wiki/Compilers/
+std::string true_cxx =
+#ifdef __clang__
+      "clang++";
+#elif defined(__GNU__)
+"g++";
+#elif defined(__MINGW32__)
+   "MinGW";
+#elif defined(_MSC_VER)
+  "Visual Studio";
+#else
+"Compiler not identified";
+#endif
+
+
+std::string true_cxx_ver =
+#ifdef __clang__
+    ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__);
+#elif defined(__GNU__)
+    ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+#elif defined(__MINGW32__)
+ver_string(__MINGW32__, __MINGW32_MAJOR_VERSION, __MINGW32_MINOR_VERSION);
+#elif defined( _MSC_VER)
+    ver_string(_MSC_VER, _MSC_FULL_VER,_MSC_BUILD);
+#else
+"";
+#endif
+
+
 IniFileParser::IniFileParser(Configuration* config)
 {
      _config = config;
@@ -97,6 +132,25 @@ bool IniFileParser::Parse(std::string iniFile)
           Log->Write("ERROR:\t Wrong header version. Only version greater than %s is supported.", JPS_OLD_VERSION);
           return false;
      }
+
+     //logfile
+     if (xMainNode->FirstChild("logfile")) {
+          _config->SetErrorLogFile(
+                    _config->GetProjectRootDir()+xMainNode->FirstChild("logfile")->FirstChild()->Value());
+          _config->SetLog(2);
+          Log->Write("INFO:\tlogfile <%s>", _config->GetErrorLogFile().c_str());
+     }
+
+
+     Log->Write("----\nJuPedSim - JPScore\n");
+     Log->Write("Current date   : %s %s", __DATE__, __TIME__);
+     Log->Write("Version        : %s", JPSCORE_VERSION);
+     Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
+     Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
+     Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
+     Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
+
+
      //seed
      if (xMainNode->FirstChild("seed")) {
           TiXmlNode* seedNode = xMainNode->FirstChild("seed")->FirstChild();
@@ -149,13 +203,6 @@ bool IniFileParser::Parse(std::string iniFile)
      _config->SetMaxOpenMPThreads(omp_get_max_threads());
      Log->Write("INFO:\tUsing num_threads <%d> threads (%d available)", _config->GetMaxOpenMPThreads(), max_threads);
 
-     //logfile
-     if (xMainNode->FirstChild("logfile")) {
-          _config->SetErrorLogFile(
-                    _config->GetProjectRootDir()+xMainNode->FirstChild("logfile")->FirstChild()->Value());
-          _config->SetLog(2);
-          Log->Write("INFO:\tlogfile <%s>", _config->GetErrorLogFile().c_str());
-     }
      //display statistics
      if (xMainNode->FirstChild("show_statistics")) {
           std::string value = xMainNode->FirstChild("show_statistics")->FirstChild()->Value();
