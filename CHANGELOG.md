@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file.
 - New attributes for sources `agent_id` and `time` for scheduling agent's appearance. See #258 for discussion. !14
 - Router tests
 - Option for printing progressbar:  `<progressbar/>` cfc65f22
+- Universal Floorfield: recognition of inside and outside of rooms, gridpoints know corresponding Subroom
+- Floorfield Router: fixes of "Cannot find route for pedestrian ..." bugs; b1345915
+- vtk-files (ff_router) can be written with `<write_VTK_files>true</write_VTK_files>` (see wiki)
+- Exit_Strategie / Direction_Strategie: fixed bug 269, where agents get stuck at doors. b1345915
 
 ## v0.8.2 [2016-10-11]
 

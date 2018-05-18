@@ -44,6 +44,8 @@
 //This class provides a data container for all configuration parameters.
 
 class AgentsParameters;
+class DirectionSubLocalFloorfield;
+class DirectionLocalFloorfield;
 
 #ifdef _JPS_AS_A_SERVICE
 
@@ -117,7 +119,12 @@ public:
 
           //ff router
           _has_specific_goals = false;
+          _has_directional_escalators = false;
           _write_VTK_files = false;
+          _exit_strat = 9;
+          _write_VTK_files_direction = false;
+          _dirSubLocal = nullptr;
+          _dirLocal = nullptr;
 
 	  //for random numbers
           _rdGenerator=RandomNumberGenerator();
@@ -268,11 +275,28 @@ public:
 
      void set_has_specific_goals(bool has_specific_goals) { _has_specific_goals = has_specific_goals;}
 
+     bool get_has_directional_escalators() const { return _has_directional_escalators;}
+     void set_has_directional_escalators(bool has_directional_esc) {_has_directional_escalators = has_directional_esc;}
+
      void set_write_VTK_files(bool write_VTK_files) {_write_VTK_files = write_VTK_files;}
 
      bool get_write_VTK_files() const {return _write_VTK_files;}
 
+     void set_exit_strat(int e_strat) {_exit_strat = e_strat;}
+
+     int get_exit_strat() const {return _exit_strat;}
+
+     void set_dirSubLocal(DirectionSubLocalFloorfield* dir) {_dirSubLocal = dir;}
+     void set_dirLocal(DirectionLocalFloorfield* dir) {_dirLocal = dir;}
+
+     DirectionSubLocalFloorfield* get_dirSubLocal() const {return _dirSubLocal;}
+     DirectionLocalFloorfield* get_dirLocal() const {return _dirLocal;}
+
      const std::string& GetHostname() const { return _hostname; };
+
+    void set_write_VTK_files_direction(bool write_VTK_files_direction) {_write_VTK_files_direction = write_VTK_files_direction;}
+
+    bool get_write_VTK_files_direction() const {return _write_VTK_files_direction;}
 
      void SetHostname(std::string hostname) { _hostname = hostname; };
 
@@ -381,7 +405,13 @@ private:
 
      //ff router
      bool _has_specific_goals;
+     bool _has_directional_escalators;
      bool _write_VTK_files;
+     bool _write_VTK_files_direction;
+
+     int _exit_strat;
+     DirectionSubLocalFloorfield* _dirSubLocal;
+     DirectionLocalFloorfield* _dirLocal;
 
      std::string _hostname;
      std::string _trajectoriesFile;

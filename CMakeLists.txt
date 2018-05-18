@@ -6,6 +6,7 @@
 # -DBUILD_CPPUNIT_TEST=ON (default OFF) for unit tests
 # -DUSE_DUAL_ABI=ON (default OFF)  https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
 # -D Boost_NO_SYSTEM_PATHS=true (default false) -D BOOST_ROOT=PATH_where_to_find_boost
+# -D AIROUTER (default true)
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
@@ -13,10 +14,16 @@ set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 
 project(JPScore)
 
+if(NOT AIROUTER)
+set(AIROUTER false)
+else()
+set(AIROUTER true)
+endif()
+
 set(CMAKE_COLOR_MAKEFILE ON)
 set(JPSCORE_MAJOR_VERSION 0)
 set(JPSCORE_MINOR_VERSION 8)
-set(JPSCORE_PATCH_VERSION 2)
+set(JPSCORE_PATCH_VERSION 3)
 set(JPSCORE_VERSION
         ${JPSCORE_MAJOR_VERSION}.${JPSCORE_MINOR_VERSION}.${JPSCORE_PATCH_VERSION})
 message(STATUS "JPSCORE_VERSION: " ${JPSCORE_VERSION})
@@ -62,7 +69,6 @@ if (NOT DEFINED PROCESSOR_COUNT)
         file(STRINGS "${cpuinfo_file}" procs REGEX "^processor.: [0-9]+$")
         list(LENGTH procs PROCESSOR_COUNT)
     endif (EXISTS "${cpuinfo_file}")
-
 
     # Windows:
     if (WIN32)
@@ -198,9 +204,10 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 #boost
 find_package(Boost COMPONENTS timer chrono system filesystem unit_test_framework REQUIRED)
 
+if(AIROUTER)
 #CGAL
-find_package(CGAL REQUIRED)
-
+find_package(CGAL REQUIRED) # for AI router
+endif()
 
 # test all cpp-files in Utest
 if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
@@ -336,24 +343,6 @@ set(source_files
         routing/smoke_router/cognitiveMap/internnavigationnetwork.cpp
         visiLibity/source_code/visilibity.cpp
 
-
-        #AI router
-        routing/ai_router/AIRouter.cpp
-        routing/ai_router/BrainStorage.cpp
-        routing/ai_router/cognitiveMap/associations.cpp
-        routing/ai_router/cognitiveMap/connection.cpp
-        routing/ai_router/cognitiveMap/cognitivemap.cpp
-        routing/ai_router/cognitiveMap/landmark.cpp
-        routing/ai_router/cognitiveMap/region.cpp
-        routing/ai_router/cognitiveMap/landmarknetwork.cpp
-        routing/ai_router/cognitiveMap/internnavigationnetwork.cpp
-        routing/ai_router/perception/visualsystem.cpp
-        routing/ai_router/perception/visibleenvironment.cpp
-        routing/ai_router/perception/cgalgeometry.cpp
-        routing/ai_router/perception/sign.cpp
-        routing/ai_router/Cortex.cpp
-
-
         poly2tri/common/shapes.cpp
         poly2tri/sweep/sweep_context.cpp
         poly2tri/sweep/advancing_front.cpp
@@ -426,23 +415,6 @@ set(header_files
         routing/smoke_router/cognitiveMap/internnavigationnetwork.h
         visiLibity/source_code/visilibity.hpp
 
-	#AI router
-        routing/ai_router/AIRouter.h
-        routing/ai_router/BrainStorage.h
-        routing/ai_router/cognitiveMap/associations.h
-        routing/ai_router/cognitiveMap/connection.cpp
-        routing/ai_router/cognitiveMap/cognitivemap.h
-        routing/ai_router/cognitiveMap/landmark.h
-        routing/ai_router/cognitiveMap/region.h
-        routing/ai_router/cognitiveMap/landmarknetwork.h
-        routing/ai_router/cognitiveMap/internnavigationnetwork.h
-        routing/ai_router/perception/visualsystem.h
-        routing/ai_router/perception/visibleenvironment.h
-        routing/ai_router/perception/cgalgeometry.h
-        routing/ai_router/perception/sign.h
-        routing/ai_router/Cortex.h
-
-
         pedestrian/Pedestrian.h
         pedestrian/PedDistributor.h
         pedestrian/Ellipse.h
@@ -463,8 +435,9 @@ set(header_files
         tinyxml/tinystr.h
 
         general/ArgumentParser.h
+        general/Configuration.h
         general/Macros.h
-	general/randomnumbergenerator.h
+        general/randomnumbergenerator.h
 
         geometry/Crossing.h
         geometry/NavLine.h
@@ -515,12 +488,55 @@ set(header_files
         JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
         )
 
+SET(AIROUTER_SRC
+        #AI router
+        routing/ai_router/AIRouter.cpp
+        routing/ai_router/BrainStorage.cpp
+        routing/ai_router/cognitiveMap/associations.cpp
+        routing/ai_router/cognitiveMap/connection.cpp
+        routing/ai_router/cognitiveMap/cognitivemap.cpp
+        routing/ai_router/cognitiveMap/landmark.cpp
+        routing/ai_router/cognitiveMap/region.cpp
+        routing/ai_router/cognitiveMap/landmarknetwork.cpp
+        routing/ai_router/cognitiveMap/internnavigationnetwork.cpp
+        routing/ai_router/perception/visualsystem.cpp
+        routing/ai_router/perception/visibleenvironment.cpp
+        routing/ai_router/perception/cgalgeometry.cpp
+        routing/ai_router/perception/sign.cpp
+        routing/ai_router/Cortex.cpp
+)
+SET(AIROUTER_HDR
+        #AI router
+        routing/ai_router/AIRouter.h
+        routing/ai_router/BrainStorage.h
+        routing/ai_router/cognitiveMap/associations.h
+        routing/ai_router/cognitiveMap/connection.cpp
+        routing/ai_router/cognitiveMap/cognitivemap.h
+        routing/ai_router/cognitiveMap/landmark.h
+        routing/ai_router/cognitiveMap/region.h
+        routing/ai_router/cognitiveMap/landmarknetwork.h
+        routing/ai_router/cognitiveMap/internnavigationnetwork.h
+        routing/ai_router/perception/visualsystem.h
+        routing/ai_router/perception/visibleenvironment.h
+        routing/ai_router/perception/cgalgeometry.h
+        routing/ai_router/perception/sign.h
+        routing/ai_router/Cortex.h
+)
+
+message(STATUS "AIROUTER: ${AIROUTER}")
+if(CGAL_FOUND AND AIROUTER)
+  SET(source_files ${source_files} ${AIROUTER_SRC})
+  SET(header_files ${header_files} ${AIROUTER_HDR})
+  message(STATUS "USE AI ROUTER")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DAIROUTER")
+endif()
+
 add_library(core STATIC ${source_files})
 
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
 
-add_library(cnpy SHARED "cnpy/cnpy.cpp")
+add_library(cnpy STATIC "cnpy/cnpy.cpp")
 target_link_libraries(cnpy ${ZLIB_LIBRARIES})
 
 
@@ -669,6 +685,7 @@ if (NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
         message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
     endif ()
 endif ()
+
 
 if (MSVC)
   message(STATUS "MSVC: " ${MSVC})

@@ -248,7 +248,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 spacings.clear(); //clear for ped p
 
                 // stuck peds get removed. Warning is thrown. low speed due to jam is omitted.
-                if(ped->GetGlobalTime() > 30 + ped->GetPremovementTime() &&
+                if(ped->GetTimeInJam() > ped->GetPatienceTime() && ped->GetGlobalTime() > 30 + ped->GetPremovementTime() &&
                           std::max(ped->GetMeanVelOverRecTime(), ped->GetV().Norm()) < 0.01 &&
                           size == 0 ) // size length of peds neighbour vector
                 {
@@ -310,20 +310,30 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
       if ( (dynamic_cast<DirectionFloorfield*>(_direction.get())) ||
            (dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) ||
            (dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get()))  ) {
-          if (dist > 50*J_EPS_GOAL) {
-               desired_direction = target - pos; //ped->GetV0(target);
-          } else {
-               desired_direction = lastE0;
-               ped->SetLastE0(lastE0); //keep old vector (revert set operation done 9 lines above)
+          desired_direction = target-pos;
+          if (desired_direction.NormSquare() < 0.25) {
+              desired_direction = lastE0;
+              ped->SetLastE0(lastE0);
+              Log->Write("%f    %f", desired_direction._x, desired_direction._y);
+              //_direction->GetTarget(room, ped);
           }
-      }
-      else if (dist > J_EPS_GOAL) {
-            desired_direction = ped->GetV0(target);
+//          if (dist > 1*J_EPS_GOAL) {
+//               desired_direction = target - pos; //ped->GetV0(target);
+//          } else {
+//               desired_direction = lastE0;
+//               ped->SetLastE0(lastE0); //keep old vector (revert set operation done 9 lines above)
+//          }
+      } else if (dist > J_EPS_GOAL) {
+          desired_direction = ped->GetV0(target);
       } else {
           ped->SetSmoothTurning();
           desired_direction = ped->GetV0();
-     }
-     return desired_direction;
+      }
+      //Log->Write("%f    %f", desired_direction._x, desired_direction._y);
+      if (desired_direction.NormSquare() < 0.1) {
+          Log->Write("ERROR:\t desired_direction in VelocityModel::e0 is too small.");
+      }
+      return desired_direction;
 }
 
 
@@ -361,7 +371,8 @@ my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei, 
             //printf("ERROR: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!\n");
             Log->Write("WARNING: \tin VelocityModel::GetSPacing() ep12 can not be calculated!!!\n");
             Log->Write("\t\t Pedestrians are too near to each other (%f).", Distance);
-            exit(EXIT_FAILURE);
+            my_pair(FLT_MAX, ped2->GetID());
+            exit(EXIT_FAILURE); //TODO
      }
 
       double condition1 = ei.ScalarProduct(ep12); // < e_i , e_ij > should be positive
@@ -402,7 +413,9 @@ Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2, int periodi
           Log->Write("\t\t Maybe the value of <a> in force_ped should be increased. Going to exit.\n");
           printf("ped1 %d  ped2 %d\n", ped1->GetID(), ped2->GetID());
           printf("ped1 at (%f, %f), ped2 at (%f, %f)\n", ped1->GetPos()._x, ped1->GetPos()._y, ped2->GetPos()._x, ped2->GetPos()._y);
-          exit(EXIT_FAILURE);
+          exit(EXIT_FAILURE); //TODO: quick and dirty fix for issue #158
+          // (sometimes sources create peds on the same location)
+
      }
       Point ei = ped1->GetV().Normalized();
       if(ped1->GetV().NormSquare()<0.01){

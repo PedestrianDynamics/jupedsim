@@ -35,7 +35,7 @@
 #include "math/GompertzModel.h"
 #include "math/GradientModel.h"
 #include "pedestrian/AgentsQueue.h"
-
+#include "pedestrian/AgentsSourcesManager.h"
 #ifdef _OPENMP
 
 #else
@@ -61,6 +61,7 @@ Simulation::Simulation(Configuration* args)
     _fps = 1;
     _em = nullptr;
     _gotSources = false;
+    _maxSimTime = 100;
 //     _config = args;
 }
 
@@ -201,6 +202,7 @@ bool Simulation::InitArgs()
     sprintf(tmp, "\tt_max: %f\n", _config->GetTmax());
     s.append(tmp);
     _deltaT = _config->Getdt();
+    _maxSimTime = _config->GetTmax();
     sprintf(tmp, "\tdt: %f\n", _deltaT);
     _periodic = _config->IsPeriodic();
     sprintf(tmp, "\t periodic: %d\n", _periodic);
@@ -214,10 +216,11 @@ bool Simulation::InitArgs()
     _routingEngine = _config->GetRoutingEngine();
     auto distributor = std::unique_ptr<PedDistributor>(new PedDistributor(_config));
     // IMPORTANT: do not change the order in the following..
-    _building = std::unique_ptr<Building>(new Building(_config, *distributor));
+    _building = std::shared_ptr<Building>(new Building(_config, *distributor));
 
     // Initialize the agents sources that have been collected in the pedestrians distributor
     _agentSrcManager.SetBuilding(_building.get());
+    _agentSrcManager.SetMaxSimTime(GetMaxSimTime());
     _gotSources = (bool) distributor->GetAgentsSources().size(); // did we have any sources? false if no sources
     for (const auto& src: distributor->GetAgentsSources()) {
         _agentSrcManager.AddSource(src);
@@ -286,8 +289,8 @@ void Simulation::UpdateRoutesAndLocations()
 {
      //pedestrians to be deleted
      //you should better create this in the constructor and allocate it once.
-     vector<Pedestrian*> pedsToRemove;
-     pedsToRemove.reserve(500); //just reserve some space
+     set<Pedestrian*> pedsToRemove;
+//     pedsToRemove.reserve(500); //just reserve some space
 
      // collect all pedestrians in the simulation.
      const vector<Pedestrian*>& allPeds = _building->GetAllPedestrians();
@@ -305,12 +308,12 @@ void Simulation::UpdateRoutesAndLocations()
                     && (room->GetCaption() == "outside")) {
 
 #pragma omp critical(Simulation_Update_pedsToRemove)
-               pedsToRemove.push_back(ped);
+               pedsToRemove.insert(ped);
           } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
                     && (goals.at(ped->GetFinalDestination())->Contains(
                               ped->GetPos()))) {
 #pragma omp critical(Simulation_Update_pedsToRemove)
-               pedsToRemove.push_back(ped);
+               pedsToRemove.insert(ped);
           }
 
           // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
@@ -326,8 +329,7 @@ void Simulation::UpdateRoutesAndLocations()
 
                if (!assigned) {
 #pragma omp critical(Simulation_Update_pedsToRemove)
-                    pedsToRemove.push_back(ped);
-                    //the agent left the old room
+                       pedsToRemove.insert(ped); //the agent left the old room
                     //actualize the eggress time for that room
 #pragma omp critical(SetEgressTime)
                     allRooms.at(ped->GetRoomID())->SetEgressTime(ped->GetGlobalTime());
@@ -359,10 +361,11 @@ void Simulation::UpdateRoutesAndLocations()
      else
 #endif
     {
+
         // remove the pedestrians that have left the building
-        for (unsigned int p = 0; p<pedsToRemove.size(); p++) {
-            UpdateFlowAtDoors(*pedsToRemove[p]);
-            _building->DeletePedestrian(pedsToRemove[p]);
+        for (auto p : pedsToRemove){
+            UpdateFlowAtDoors(*p);
+            _building->DeletePedestrian(p);
         }
         pedsToRemove.clear();
     }
@@ -532,12 +535,31 @@ void Simulation::RunFooter()
 
 void Simulation::ProcessAgentsQueue()
 {
+
+     /* std::cout << "Call Simulation::ProcessAgentsQueue() at: " << Pedestrian::GetGlobalTime() << std::endl; */
+     /* std::cout << KRED << " SIMULATION building " << _building << " size "  << _building->GetAllPedestrians().size() << "\n" << RESET; */
+           /* for(auto pp: _building->GetAllPedestrians()) */
+     /*           std::cout<< KBLU << "BUL: Simulation: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl; */
+
     //incoming pedestrians
     vector<Pedestrian*> peds;
+    //  std::cout << ">>> peds " << peds.size() << RESET<< std::endl;
+
     AgentsQueueIn::GetandClear(peds);
+    //std::cout << "SIMULATION BEFORE BOOL = " <<  _agentSrcManager.IsBuildingUpdated() << " peds size " << peds.size() << "\n" ;
+
+    //_agentSrcManager.SetBuildingUpdated(true);
+    /* std::cout << "SIMULATION AFTER BOOL = " <<  _agentSrcManager.IsBuildingUpdated() << "\n" ; */
+
     for (auto&& ped: peds) {
+            /* std::cout << "Add to building : " << ped->GetPos()._x << ", " << ped->GetPos()._y << " t: "<< Pedestrian::GetGlobalTime() << std::endl; */
         _building->AddPedestrian(ped);
     }
+    //  for(auto pp: _building->GetAllPedestrians())
+    //         std::cout<< KBLU << "BUL: Simulation: " << pp->GetPos()._x << ", " << pp->GetPos()._y  << " t: "<< Pedestrian::GetGlobalTime() <<RESET << std::endl;
+
+
+    /* std::cout << "LEAVE Simulation::ProcessAgentsQueue() with " << " size "  << _building->GetAllPedestrians().size() << "\n" << RESET; */
 }
 
 void Simulation::UpdateDoorticks() const {
@@ -621,4 +643,8 @@ AgentsSourcesManager& Simulation::GetAgentSrcManager()
 Building* Simulation::GetBuilding()
 {
     return _building.get();
+}
+
+int Simulation::GetMaxSimTime() const{
+      return _maxSimTime;
 }
