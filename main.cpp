@@ -123,6 +123,7 @@ int main(int argc, char** argv)
         summary << "Number of Threads : " << configuration->GetMaxOpenMPThreads() << std::endl;
         summary << "Warnings          : " << Log->GetWarnings() << std::endl;
         summary << "Errors            : " << Log->GetErrors() << std::endl;
+        summary << "Deleted Agents    : " << Log->GetDeletedAgents() << std::endl;
         Log->Write(summary.str().c_str());
 
         //force an output to the screen if the log is not the standard output

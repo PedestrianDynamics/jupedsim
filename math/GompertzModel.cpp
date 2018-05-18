@@ -107,6 +107,7 @@ bool GompertzModel::Init(Building *building) {
             Log->Write(
                     "ERROR:\tGompertzModel::Init() cannot initialise route. ped %d is deleted.\n", ped->GetID());
             building->DeletePedestrian(ped);
+            Log->incrementDeletedAgents();
             --p;
             --peds_size;
             continue;
@@ -147,7 +148,7 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building 
     int partSize;
     partSize = ((int)nSize > nThreads)? (int) (nSize / nThreads):(int)nSize;
     if(partSize == (int)nSize)
-          nThreads = 1; // not worthy to parallelize 
+          nThreads = 1; // not worthy to parallelize
 
 #pragma omp parallel  default(shared) num_threads(nThreads)
     {
@@ -175,6 +176,7 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building 
                 // remove the pedestrian and abort
                 Log->Write("\tERROR: ped [%d] was removed due to high velocity", ped->GetID());
                 building->DeletePedestrian(ped);
+                Log->incrementDeletedAgents();
                 //continue;  //FIXME tolerate first
                 exit(EXIT_FAILURE);
             }
@@ -565,4 +567,3 @@ double GompertzModel::GetbWall() const {
 double GompertzModel::GetcWall() const {
     return _cWall;
 }
-

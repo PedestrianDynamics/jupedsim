@@ -228,6 +228,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      // remove the pedestrian and abort
                      Log->Write("\tERROR: ped [%d] was removed due to high velocity",ped->GetID());
                      building->DeletePedestrian(ped);
+                     Log->incrementDeletedAgents();
                      //continue;  //FIXME tolerate first
                      exit(EXIT_FAILURE);
                 }
@@ -641,4 +642,3 @@ double GradientModel::GetcWall() const
 {
      return _cWall;
 }
-

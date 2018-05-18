@@ -109,6 +109,7 @@ bool VelocityModel::Init (Building* building)
               Log->Write(
                    "ERROR:\tVelocityModel::Init() cannot initialise route. ped %d is deleted in Room %d %d.\n",ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID());
               building->DeletePedestrian(ped);
+              Log->incrementDeletedAgents();
               p--;
               peds_size--;
               continue;
@@ -252,6 +253,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                           size == 0 ) // size length of peds neighbour vector
                 {
                       Log->Write("WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time %f s (current=%f\n", ped->GetID(), ped->GetMeanVelOverRecTime(), ped->GetRoomID(), ped->GetSubRoomID(), ped->GetGlobalTime(), current);
+                      Log->incrementDeletedAgents();
                       #pragma omp critical(VelocityModel_ComputeNextTimeStep_pedsToRemove)
                       pedsToRemove.push_back(ped);
                 }
