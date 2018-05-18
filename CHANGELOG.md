@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to `jpsreport` will be documented in this file.
 
-## v0.8.3 [unreleased]
+## v0.8.3 [16.05.2018]
 ### Added
 - Option to output log in a file instead of the screen fe66fa49
   ```
