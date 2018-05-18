@@ -1,6 +1,6 @@
-#SCRIPT IN EARLY DEVELOPMENT
-
 #!/usr/bin/env python3
+
+#SCRIPT IN EARLY DEVELOPMENT
 import numpy as np
 import numpy.linalg as npl
 import matplotlib
@@ -85,20 +85,61 @@ def computeDirection(wall_list):
     else:
         print("WARNING: unusual angle,",total_angle)
         return total_angle
-        
+
+#return a*a+b*b
+def distanceSquared(x1,y1,x2,y2):
+    return (x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)
+
 #calculate distance between point and closest point on wall
 def distanceFromWall(x,y,p1x,p1y,p2x,p2y):
-    """TODO"""
-    return 1.0
+    a = distanceSquared(p1x,p1y,p2x,p2y)
+    b = distanceSquared(p1x,p1y,x,y)
+    c = distanceSquared(x,y,p2x,p2y)
+    xSq = ((a+b-c)*(a+b-c))/(4*a)
+    return math.sqrt(math.fabs(c - xSq))
 
-#return 1 if close from wall, else 0
+#return 1 if close from wall (in a circle shape), else 0
 def closeFromWall(x,y,p1x,p1y,p2x,p2y):
-    """TODO"""
-    return 1
+    a = distanceSquared(p1x,p1y,p2x,p2y)
+    b = distanceSquared(p1x,p1y,x,y)
+    c = distanceSquared(x,y,p2x,p2y)
+    if (a > b + c):
+        return 1
+    else:
+        return 0
         
 #return coordinates of a point moved away from a wall
-def moveFromWall(x,y,p1x,p1y,p2x,p2y,distance):   
-    """TODO"""
+def moveFromWall(x,y,p1x,p1y,p2x,p2y,new_distance):   
+    aSq = distanceSquared(p1x,p1y,p2x,p2y)
+    bSq = distanceSquared(p1x,p1y,x,y)
+    cSq = distanceSquared(x,y,p2x,p2y)
+    xSq = ((aSq+bSq-cSq)*(aSq+bSq-cSq))/(4*aSq)
+    h = math.sqrt(cSq - xSq)
+    print(aSq,bSq,cSq,xSq)
+    print("height is",h)
+    dist_x = math.sqrt(xSq)
+    dist_a = math.sqrt(aSq)
+    intersect_point_x = p1x + (dist_x/dist_a)*(p2x-p1x)
+    intersect_point_y = p1y + (dist_x/dist_a)*(p2y-p1y)
+    print("DEBUG: the point at the base is",intersect_point_x,intersect_point_y)
+    if(h==0):
+        #the Point is exactly on the edge, to move it away, we rotate the point p1 around x 90 degrees
+        print("DEBUG: point on edge")
+        x = intersect_point_x + (p1y - intersect_point_y)
+        y = intersect_point_y + (p1x - intersect_point_x)
+        aSq = distanceSquared(p1x,p1y,p2x,p2y)
+        bSq = distanceSquared(p1x,p1y,x,y)
+        cSq = distanceSquared(x,y,p2x,p2y)
+        xSq = ((aSq+bSq-cSq)*(aSq+bSq-cSq))/(4*aSq)
+        h = math.sqrt(math.fabs(cSq - xSq))
+        dist_x = math.sqrt(math.fabs(xSq))
+    if(h < 0):
+        ratio = -(new_distance)/h
+    else:
+        ratio = (new_distance)/h
+    print("ratio is",ratio)
+    x = intersect_point_x + ratio*(x-intersect_point_x)
+    y = intersect_point_y + ratio*(y-intersect_point_y)
     return x,y
     
 #treat one point according to policy
@@ -126,6 +167,11 @@ if __name__ == '__main__':
    geoData = readGeoData(pathfile,namegeo,fps)
    direction = computeDirection(geoData)
    
+   #unitary test of moving away one point:
+   print("we have a point at 1,1, we move it to be two units away from (0,0)(3,0)")
+   print("we expect (1,2)")
+   x,y = moveFromWall(1,1,0,0,3,0,2)
+   print("we have (%d,%d)"%(x,y))
    """
   TODO:
       call handleAllPoint
