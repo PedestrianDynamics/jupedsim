@@ -10,6 +10,7 @@
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include "connection.h"
 #include "landmark.h"
+#include <unordered_map>
 
 
 
@@ -20,27 +21,27 @@ typedef std::pair<Vertex, Vertex> Edge;
 typedef double Weight;
 typedef std::vector<Edge> Edges;
 
-using ptrConnection = std::shared_ptr<Connection>;
 
-class LandmarkNetwork
+class AILandmarkNetwork
 {
 public:
-    LandmarkNetwork();
-    LandmarkNetwork(const Landmarks& landmarks, const std::vector<ptrConnection>& connections);
-    ~LandmarkNetwork();
-    void AddLandmark(const ptrLandmark& landmark);
-    void RemoveLandmark(const ptrLandmark& landmark);
-    void AddConnection(const ptrConnection& connection);
+    AILandmarkNetwork();
+    AILandmarkNetwork(const AIRegion *region, const AILandmarks& landmarks, const std::vector<AIConnection> &connections);
+    ~AILandmarkNetwork();
+    void AddLandmark(const AILandmark* landmark);
+    void RemoveLandmark(const AILandmark* landmark);
+    void AddConnection(const AIConnection* connection);
 
     //Calculations
-    double LengthofShortestPathToTarget(const ptrLandmark& landmark, const ptrLandmark &target) const;
+    std::pair<std::vector<const AILandmark *>, double> LengthofShortestPathToTarget(const AILandmark *landmark, const AILandmark *target) const;
 
 
 private:
     Graph _graph;
-    std::list<std::pair<ptrLandmark,Vertex>> _landmarks; //vertices
+    std::unordered_map<const AILandmark*,Vertex> _landmarks; //vertices
     std::list<std::pair<Edge,Weight>> _connections; //edges; Weight equals length
                                                     //between two random point in the connected landmarks
+    const AIRegion* _region;
 
     void RemoveAdjacentEdges(const Vertex& vertex);
 

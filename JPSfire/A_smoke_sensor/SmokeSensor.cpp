@@ -27,14 +27,14 @@
  **/
 
 #include "SmokeSensor.h"
-#include "../../routing/ai_router/NavigationGraph.h"
+#include "../../routing/smoke_router/NavigationGraph.h"
 #include "../../geometry/Building.h"
-#include "../../routing/ai_router/cognitiveMap/cognitivemap.h"
+#include "../../routing/smoke_router/cognitiveMap/cognitivemap.h"
 #include "../../pedestrian/Pedestrian.h"
 #include "../../geometry/SubRoom.h"
 #include "../generic/FDSMesh.h"
 #include "../generic/FDSMeshStorage.h"
-#include <set>
+//#include <set>
 #include "../../tinyxml/tinyxml.h"
 
 SmokeSensor::SmokeSensor(const Building *b) : AbstractSensor(b)
@@ -44,9 +44,7 @@ SmokeSensor::SmokeSensor(const Building *b) : AbstractSensor(b)
 
 }
 
-SmokeSensor::~SmokeSensor()
-{
-}
+SmokeSensor::~SmokeSensor() = default;
 
 bool SmokeSensor::LoadJPSfireInfo(const std::string projectFilename)
 {
@@ -98,51 +96,43 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap& cognitive
         /// on the current position of the pedestrian
 
         double RiskTolerance = pedestrian->GetRiskTolerance();
-        double weight;
+        double weight = 1;
 
-        //try block when no sfgrid is available
-
-        try
-        {
+        //FMStorage is nullptr if the section JPSfire is not parsed
+        if (_FMStorage){
             double SmokeFactor = _FMStorage->GetFDSMesh(pedestrian->GetElevation(),
                                                         item->GetCrossing()->GetCentre(),
                                                         pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x,
                                                                                                  pedestrian->GetPos()._y);
-            // std::cout << "\n =================================== \n";
-            // std::cout << "Ped: " << pedestrian->GetID() << ", at (" << pedestrian->GetPos()._x << ", " << pedestrian->GetPos()._y << ")" << std::endl;
-            // std::cout << "\tElevation: " << pedestrian->GetElevation() << std::endl;
-            // std::cout << "\titem->GetCrossing()->GetCentre(): " << item->GetCrossing()->GetCentre()._x << ", " << item->GetCrossing()->GetCentre()._y << std::endl;
-            // std::cout << "\t Time" << pedestrian->GetGlobalTime() << std::endl;
-            // std::cout << "\tKnotValue: " << _FMStorage->GetFDSMesh(pedestrian->GetElevation(), item->GetCrossing()->GetCentre(), pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x, pedestrian->GetPos()._y) << std::endl;
-
+            // if(SmokeFactor > 2){
+                 
+            //      std::cout << "\n =================================== \n";
+            //      std::cout << "Ped: " << pedestrian->GetID() << ", at (" << pedestrian->GetPos()._x << ", " << pedestrian->GetPos()._y << ")" << std::endl;
+            //      std::cout << "\tElevation: " << pedestrian->GetElevation() << std::endl;
+            //      std::cout << "\titem->GetCrossing()->GetCentre(): " << item->GetCrossing()->GetCentre()._x << ", " << item->GetCrossing()->GetCentre()._y << std::endl;
+            //      std::cout << "\t Time: " << pedestrian->GetGlobalTime() << std::endl;
+            //      std::cout << "\tKnotValue: " << _FMStorage->GetFDSMesh(pedestrian->GetElevation(), item->GetCrossing()->GetCentre(), pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x, pedestrian->GetPos()._y) << std::endl;
+            //      std::cout << "SmokeFactor: " << SmokeFactor << std::endl;
+            //      std::cout << "Risktolerance: " << RiskTolerance << std::endl;
+            // }
             weight = 1 + (1-RiskTolerance) * SmokeFactor ;
         }
-
-        catch (int e)
-        {
-            weight = 1;
-        }
-
         /// Set Edge Weight
-        // std::cout << weight << std::endl;
+        //std::cout << "weight: "<< weight << std::endl;
         item->SetFactor(weight,GetName());
 
     }
 
 }
 
-void SmokeSensor::set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage)
-{
-    _FMStorage=fmStorage;
+//void SmokeSensor::set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage)
+//{
+//    _FMStorage=fmStorage;
+//
+//}
 
-}
-
-const std::shared_ptr<FDSMeshStorage> SmokeSensor::get_FMStorage()
-{
-    return _FMStorage;
-
-}
-
-
-
-
+//const std::shared_ptr<FDSMeshStorage> SmokeSensor::get_FMStorage()
+//{
+//    return _FMStorage;
+//
+//}

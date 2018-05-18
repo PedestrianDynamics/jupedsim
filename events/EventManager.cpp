@@ -27,28 +27,19 @@
 
 
 #include <string>
-#include <cstdio>
 #include <cstdlib>
 #include <iostream>
-#include <algorithm>
 #include <fstream>
 #include <vector>
 #include <math.h>
-#include <stdio.h>
 #include "../pedestrian/Pedestrian.h"
 #include "../pedestrian/Knowledge.h"
 #include "../mpi/LCGrid.h"
-#include "../geometry/Building.h"
 #include "../geometry/SubRoom.h"
-#include "../geometry/Transition.h"
-#include "../geometry/Point.h"
 #include "../tinyxml/tinyxml.h"
-#include "../IO/OutputHandler.h"
-#include "../IO/IODispatcher.h"
-#include "../routing/RoutingEngine.h"
 #include "../routing/global_shortest/GlobalRouter.h"
 #include "../routing/quickest/QuickestPathRouter.h"
-#include "../routing/ai_router/AIRouter.h"
+#include "../routing/smoke_router/SmokeRouter.h"
 #include "../routing/ff_router/ffRouter.h"
 #include "EventManager.h"
 #include "Event.h"
@@ -679,8 +670,8 @@ Router * EventManager::CreateRouter(const RoutingStrategy& strategy)
                rout = new QuickestPathRouter(ROUTING_QUICKEST, ROUTING_QUICKEST);
                break;
 
-          case ROUTING_AI:
-               rout = new AIRouter(ROUTING_AI, ROUTING_AI);
+          case ROUTING_SMOKE:
+               rout = new SmokeRouter(ROUTING_SMOKE, ROUTING_SMOKE);
                break;
 
           case ROUTING_FF_GLOBAL_SHORTEST:

@@ -1,9 +1,8 @@
-import re, subprocess
+import re
+import subprocess
 from pylatex import Document, Command, PageStyle, Head, MiniPage, LargeText, LineBreak, \
-		MediumText, LongTabu, NewPage, Package, Section,  Description, NoEscape, Subsection, Figure, Center
-from pylatex.utils import NoEscape, bold, verbatim
-from pylatex.base_classes import Environment
-
+    MediumText, LongTabu, NewPage, Package, Section, Description, Figure
+from pylatex.utils import NoEscape, bold
 
 
 def get_evac_time(testnumber):

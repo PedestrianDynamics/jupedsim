@@ -28,26 +28,14 @@
 
 #include <cmath>
 #include "PedDistributor.h"
-#include "../tinyxml/tinyxml.h"
-#include "../geometry/Obstacle.h"
-#include "../routing/RoutingEngine.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/SubRoom.h"
-#include "../IO/OutputHandler.h"
 #include "../IO/PedDistributionParser.h"
-#include "PedDistributionLoader.h"
-#include "../hybrid/PedDistributionFromProtobufLoader.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/lambda/bind.hpp>
 #include <boost/foreach.hpp>
-#include <boost/algorithm/string.hpp> //split
 #include <boost/range/combine.hpp>
-
-#include<fstream>
-#include <string>
-#include <vector>
-
 
 using namespace std;
 namespace fs = boost::filesystem;
@@ -156,6 +144,7 @@ bool PedDistributor::Distribute(Building *building) const {
         }//if we have a directoy
         //------------------------------------- pack in function ------------
         else{
+
              auto possibleSubroomPositions = PedDistributor::PossiblePositions(*sr);
              shuffle(possibleSubroomPositions.begin(), possibleSubroomPositions.end(), dist->GetGenerator());
              allFreePosRoom[subroomID] = possibleSubroomPositions;
@@ -209,6 +198,7 @@ bool PedDistributor::Distribute(Building *building) const {
                        N, roomID, allpos.size());
             return false;
         }
+        if (N==0) continue;
 
         // Distributing
         Log->Write("INFO: \tDistributing %d Agents in Room/Subrom [%d/%d]! Maximum allowed: %d", N, roomID, subroomID,
@@ -414,6 +404,7 @@ vector<Point>PedDistributor::PositionsOnFixY(double min_x, double max_x, double 
 }
 
 // format: id fr x y
+
 const vector<Point>  PedDistributor::GetPositionsFromFile(std::string filename, int n, std::string unit) const{
       float m2cm = 1.0;
       if(unit == "cm")
@@ -477,6 +468,7 @@ const vector<Point>  PedDistributor::GetPositionsFromFile(std::string filename, 
            Log->Write("ERROR: \tGetPositionsFromFile: number of peds <%d> in file. To simulate <%d>", first_ids.size(), n);      
       return positions;
 }
+
 
 vector<Point>  PedDistributor::PossiblePositions(const SubRoom &r) {
     double uni = 0.7; // wenn ein Raum in x oder y -Richtung schmaler ist als 0.7 wird in der Mitte verteilt
@@ -597,8 +589,21 @@ vector<Point>  PedDistributor::PossiblePositions(const SubRoom &r) {
  * */
 void PedDistributor::DistributeInSubRoom(int nAgents, vector<Point> &positions, int *pid,
                                          StartDistribution *para, Building *building) const {
+
+
+     std::vector<int> reserved_ids;
+    for (const auto &source: _start_dis_sources) {
+         if(source->GetAgentId() >=0)
+              reserved_ids.push_back(source->GetAgentId());
+    }
+
     // set the pedestrians
     for (int i = 0; i < nAgents; ++i) {
+         // look for a not reserved id.
+         while( std::find(reserved_ids.begin(), reserved_ids.end(), *pid) != reserved_ids.end() ){
+              *pid += 1;
+         }
+
         Pedestrian *ped = para->GenerateAgent(building, pid, positions);
         building->AddPedestrian(ped);
     }

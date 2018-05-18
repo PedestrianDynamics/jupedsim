@@ -27,13 +27,10 @@
 
 
 #include "ForceModel.h"
-#include "../routing/DirectionStrategy.h"
-#include "../mpi/LCGrid.h"
 #include "../pedestrian/Pedestrian.h"
 
 
 #ifdef _OPENMP
-#include <omp.h>
 #else
 #define omp_get_thread_num() 0
 #define omp_get_max_threads()  1

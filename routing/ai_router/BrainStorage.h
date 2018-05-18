@@ -27,14 +27,14 @@
  **/
 
 
-#ifndef COGNITIVEMAPSTORAGE_H_
-#define COGNITIVEMAPSTORAGE_H_
+#ifndef BRAINSTORAGE_H_
+#define BRAINSTORAGE_H_
 
 #include <unordered_map>
 #include <vector>
 #include "./cognitiveMap/cognitivemap.h"
 #include "./perception/visibleenvironment.h"
-#include "Brain.h"
+#include "Cortex.h"
 
 class Building;
 class Pedestrian;
@@ -42,7 +42,7 @@ class InternNavigationNetwork;
 
 
 typedef const Pedestrian * BStorageKeyType;
-typedef std::shared_ptr<Brain> BStorageValueType;
+typedef std::unique_ptr<Cortex> BStorageValueType;
 typedef std::unordered_map<BStorageKeyType, BStorageValueType> BStorageType;
 
 
@@ -50,35 +50,37 @@ typedef std::unordered_map<BStorageKeyType, BStorageValueType> BStorageType;
 /**
  * @brief Brain Storage
  *
- * Cares about Cognitive map storage, creation and delivery
+ * Cares about corteces, creation and delivery
  *
  */
-class BrainStorage {
+class AIBrainStorage {
 public:
-     BrainStorage(const Building * const b, std::string cogMapStatus, std::string cogMapFiles="");
-     virtual ~BrainStorage();
+     AIBrainStorage(const Building * const b, const std::string& cogMapFiles="", const std::string& signFiles="");
 
 
-     BStorageValueType operator[] (BStorageKeyType key);
+     Cortex* operator[] (BStorageKeyType key);
+
+     void DeleteCortex(BStorageKeyType ped);
 
 
 private:
      const Building * const _building;
-     BStorageType _brains;
+     BStorageType _corteces;
 
 
      //perception
      //Complete environment
-     //VisibleEnvironment _visibleEnv;
+     VisibleEnvironment _visibleEnv;
 
      //cognitive map
-     std::vector<ptrRegion> _regions;
-     std::string _cogMapStatus;
+     std::vector<AIRegion> _regions;
      std::string _cogMapFiles;
+     std::string _signFiles;
 
-     //brain
-     void CreateBrain(BStorageKeyType ped);
+     //Cortex
+     void CreateCortex(BStorageKeyType ped);
      void ParseCogMap(BStorageKeyType ped);
+     void ParseSigns();
 
 
      // internal graph network in every room (for locomotion purposes)
@@ -87,4 +89,4 @@ private:
 
 };
 
-#endif /* COGNITIVEMAPSTORAGE_H_ */
+#endif /* BRAINSTORAGE_H_ */

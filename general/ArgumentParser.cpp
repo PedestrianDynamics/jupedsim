@@ -1,8 +1,8 @@
 /**
  * \file        ArgumentParser.cpp
  * \date        Apr 20, 2009
- * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.8
+ * \copyright   <2009-2018> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -34,8 +34,6 @@
 
 #ifdef _OPENMP
 
-#include <omp.h>
-
 #else
 #define omp_get_thread_num() 0
 #define omp_get_max_threads()  1
@@ -43,24 +41,23 @@
 
 #include "../IO/OutputHandler.h"
 #include "ArgumentParser.h"
-#include "Macros.h"
 #include "../pedestrian/AgentsParameters.h"
 #include "../routing/global_shortest/GlobalRouter.h"
 #include "../routing/quickest/QuickestPathRouter.h"
-#include "../routing/ai_router/AIRouter.h"
+#include "../routing/smoke_router/SmokeRouter.h"
 #include "../IO/IniFileParser.h"
-#include <sys/stat.h>
 
 using namespace std;
 
+
+
+
 void ArgumentParser::Usage(const std::string file)
 {
-     fprintf(stderr, "\n\nYou are actually using JuPedsim version %s  \n\n", JPS_VERSION);
      fprintf(stderr, "Usages: \n");
      fprintf(stderr, "     %s  <path to file>  start the simulation with the specified file.\n", file.c_str());
      fprintf(stderr, "     %s                  search and use the file ini.xml in the current directory.\n",
                file.c_str());
-     fprintf(stderr, "     %s  -v/--version    display the current version.\n", file.c_str());
      fprintf(stderr, "     %s  -h/--help       display this text.\n", file.c_str());
 #ifdef _JPS_AS_A_SERVICE
      fprintf(stderr, "     %s  --as-a-service -p <port nr> runs jps as a service at port <port nr>.\n", file.c_str());
@@ -81,6 +78,15 @@ bool ArgumentParser::ParseArgs(int argc, char** argv)
      if (argc==1) {
           Log->Write(
                      "INFO: \tTrying to load the default configuration from the file <ini.xml>");
+     // first logs will go to stdout
+          Log->Write("----\nJuPedSim - JPScore\n");
+          Log->Write("Current date   : %s %s", __DATE__, __TIME__);
+          Log->Write("Version        : %s", JPSCORE_VERSION);
+          // Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
+          Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
+          Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
+          Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
+
           IniFileParser* p = new IniFileParser(_config);
           if (!p->Parse("ini.xml")) {
                Usage(argv[0]);
@@ -92,10 +98,6 @@ bool ArgumentParser::ParseArgs(int argc, char** argv)
 
      if (argument=="-h" || argument=="--help") {
           Usage(argv[0]);
-          return false;
-     }
-     else if (argument=="-v" || argument=="--version") {
-          fprintf(stderr, "You are actually using JuPedsim/jpscore version %s  \n\n", JPS_VERSION);
           return false;
      }
 
@@ -165,4 +167,3 @@ bool ArgumentParser::ParseArgs(int argc, char** argv)
      Usage(argv[0]);
      return false;
 }
-

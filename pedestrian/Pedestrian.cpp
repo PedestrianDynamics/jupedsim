@@ -25,22 +25,14 @@
  *
  **/
 
-
+#define NOMINMAX
 #include <cassert>
 #include "../geometry/Building.h"
-#include "../geometry/NavLine.h"
-#include "../routing/Router.h"
 #include "../geometry/SubRoom.h"
-#include "../IO/OutputHandler.h"
 #include "Knowledge.h"
 #include "Pedestrian.h"
-#include "PedDistributor.h"
 
-#include "../JPSfire/generic/FDSMesh.h"
-#include "../JPSfire/generic/Knot.h"
 #include "../JPSfire/generic/FDSMeshStorage.h"
-#include "../JPSfire/B_walking_speed/WalkingSpeed.h"
-#include "../JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
 
 using namespace std;
 
@@ -206,7 +198,9 @@ void Pedestrian::SetID(int i)
      _id = i;
      if(i<=0)
      {
-          cout<<"invalid ID"<<i<<endl;exit(0);
+          cerr<<">> Invalid pedestrians ID " << i<< endl;
+          cerr<<">> Pedestrian ID should be > 0. Exit." << endl;
+          exit(0);
      }
 }
 
@@ -238,7 +232,7 @@ void Pedestrian::SetTau(double tau)
 
 void Pedestrian::SetT(double T)
 {
-     _tau = T;
+     _T = T;
 }
 
 
@@ -605,7 +599,7 @@ double Pedestrian::GetV0Norm() const
                  //                  // getc(stdin);
 
                  walking_speed =(1-f*g)*_ellipse.GetV0() + f*g*speed_down;
-              
+
                      // printf("%f  DOWN max_e=%f,  z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", _globalTime, maxSubElevation, ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f*g)*_ellipse.GetV0() + f*g*speed_down);
 
            }
@@ -638,18 +632,18 @@ double Pedestrian::GetV0Norm() const
 
                  walking_speed = (1-f*g)*_ellipse.GetV0() + f*g*speed_up;
            }
-     }    
+     }
 
      //IF execution of WalkingInSmoke depending on JPSfire section in INI file
      if(_WalkingSpeed && _WalkingSpeed->ReduceWalkingSpeed()) {
-          std::cout << "JPSfire?" << std::endl;
+         std::cout << "JPSfire?" << std::endl;
          walking_speed = _WalkingSpeed->WalkingInSmoke(this, walking_speed);
      }
 
      //WHERE should the call to that routine be placed properly?
      //only executed every 3 seconds
      // fprintf(stderr, "%f\n", walking_speed);
-     
+
      return walking_speed;
      // orthogonal projection on the stair
      //return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
@@ -1108,7 +1102,7 @@ void Pedestrian::SetBuilding(Building* building)
      _building = building;
 }
 
-void Pedestrian::SetWalkingSpeed(WalkingSpeed* walkingSpeed)
+void Pedestrian::SetWalkingSpeed(std::shared_ptr<WalkingSpeed> walkingSpeed)
 {
     _WalkingSpeed = walkingSpeed;
 }
@@ -1233,6 +1227,3 @@ bool Pedestrian::Relocate(std::function<void(const Pedestrian&)> flowupdater) {
      }
      return status;
 }
-
-
-

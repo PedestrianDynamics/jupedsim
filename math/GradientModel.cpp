@@ -30,7 +30,6 @@
 
 #include <math.h>
 #include "../pedestrian/Pedestrian.h"
-#include "../routing/DirectionStrategy.h"
 #include "../mpi/LCGrid.h"
 #include "../geometry/Wall.h"
 #include "../geometry/SubRoom.h"
@@ -121,7 +120,7 @@ bool GradientModel::Init (Building* building)
      pedsToRemove.clear();
      bool error_occurred = false;
 #pragma omp parallel for
-    for(unsigned int p=0;p<allPeds.size();p++) {
+    for(signed int p=0;p<allPeds.size();p++) {
          Pedestrian* ped = allPeds[p];
          double cosPhi, sinPhi;
          //a destination could not be found for that pedestrian
@@ -229,6 +228,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      // remove the pedestrian and abort
                      Log->Write("\tERROR: ped [%d] was removed due to high velocity",ped->GetID());
                      building->DeletePedestrian(ped);
+                     Log->incrementDeletedAgents();
                      //continue;  //FIXME tolerate first
                      exit(EXIT_FAILURE);
                 }
@@ -642,4 +642,3 @@ double GradientModel::GetcWall() const
 {
      return _cWall;
 }
-

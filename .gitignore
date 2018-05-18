@@ -24,7 +24,19 @@ Utest/Validation/*/inifiles*/
 /Utest/juelich_tests/*/*.txt
 /Utest/juelich_tests/*/*.png
 *~
-
+/Utest/validation/test_13
+/Utest/validation/1test_1D
+/build*
+/Utest/router_tests/test_router_9/inifiles/
+/Utest/router_tests/test_router_1/inifiles/
+/Utest/router_tests/test_router_2/inifiles/
+/Utest/router_tests/test_router_3/inifiles/
+/Utest/router_tests/test_router_4/inifiles/
+/Utest/router_tests/test_router_5/inifiles/
+/Utest/router_tests/test_router_6/inifiles/
+/Utest/router_tests/test_router_7/inifiles/
+/Utest/router_tests/test_router_8/inifiles/
+Matrix.txt
 # Compiled Object files
 *.slo
 *.lo
@@ -89,16 +101,16 @@ vgcore.*
 /Utest/test_8/routing.xml
 /Utest/test_9/cpu.png
 /Utest/utils.pyc
-/auto/veloModel2.el
+/auto/veloModel9.el
 /cpu.png
 /cscope.file
 /gompertz.pdf
-/veloModel2.org
-/veloModel2.pdf
-/veloModel2.tex
+/veloModel10.org
+/veloModel11.pdf
+/veloModel12.tex
 /.project
-/#%2Aediff-merge%2A#14545CrI#
-/#%2Aediff-merge%3C2%3E%2A#145452Th#
+/#%13Aediff-merge%14A#14545CrI#
+/#%15Aediff-merge%3C16%3E%17A#1454518Th#
 /.idea/dictionaries/chraibi.xml
 /Dumping
 /Martella/corridor_8x3.xml
@@ -115,7 +127,7 @@ vgcore.*
 /Max/
 */old/*
 README.html
-Utest/r2.txt
+Utest/r19.txt
 Utest/r3.txt
 Utest/rimea_tests/test_13/gauss.py
 Utest/test_10/cell.png
@@ -123,7 +135,7 @@ Utest/test_10/result.txt
 Utest/test_10/times.txt
 Utest/todo.org
 html-dir/
-inputfiles/Bottleneck/rimea_test_12_geo.xml
+inputfiles/Bottleneck/rimea_test_120_geo.xml
 inputfiles/Karthik/
 inputfiles/U8/
 inputfiles/VerteilerEbene/
@@ -136,3 +148,5 @@ idea/codeStyleSettings.xml
 *.log
 *.pdf
 /Utest/rimea_tests/figures
+
+cmake-build-debug

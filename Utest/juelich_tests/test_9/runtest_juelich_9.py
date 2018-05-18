@@ -16,10 +16,11 @@ Source
 
 """
 
-import os
-import sys
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+import sys
+
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
 from sys import *
 sys.path.append(utestdir)

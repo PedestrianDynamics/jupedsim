@@ -34,18 +34,15 @@
 #include <string>
 
 class Pedestrian;
-class Building;
 class Point;
 class FDSMeshStorage;
-class Configuration;
 
 class ToxicityAnalysis
 {
 
 public:
 
-    ToxicityAnalysis(const Building * b);
-
+     ToxicityAnalysis(const std::string & projectFilename, double _fps);
     virtual ~ToxicityAnalysis();
 
     void HazardAnalysis(Pedestrian *);
@@ -62,17 +59,14 @@ public:
 
     double CalculateFEDIn(Pedestrian *, double CO2, double CO, double O2, double HCN, double FED_In);
     double CalculateFEDHeat(Pedestrian *, double T, double FED_Heat);
-
+     const std::string getProjectFileName(void);
 private:
-
-    const Building* _building;
-    const Configuration* _configuration;
     std::shared_ptr<FDSMeshStorage> _FMStorage;
     std::shared_ptr<ToxicityOutputHandler> _outputhandler;
+    const std::string _projectFileName;
     double _dt;
-    double _t_prev;
     double _fps;
-
+    double _t_prev;
     void InitializeWriteOut();
 };
 

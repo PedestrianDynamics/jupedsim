@@ -36,7 +36,6 @@
 
 #include"LCGrid.h"
 #include "../pedestrian/Pedestrian.h"
-#include "../geometry/Building.h"
 
 using namespace std;
 

@@ -79,6 +79,33 @@ SubRoom::SubRoom()
      _boostPoly = polygon_type();
 }
 
+SubRoom::SubRoom(const SubRoom& orig) {
+    _id = orig._id;
+    _roomID=orig._roomID;
+    _walls = orig._walls;
+    _poly = orig._poly;
+    _poly_help_constatnt = orig._poly_help_constatnt;
+    _poly_help_multiple = orig._poly_help_multiple;
+    _obstacles=orig._obstacles;
+
+    _crossings = orig._crossings;
+    _transitions = orig._transitions;
+    _hlines = orig._hlines;
+
+    _planeEquation[0]=orig._planeEquation[0];
+    _planeEquation[1]=orig._planeEquation[1];
+    _planeEquation[2]=orig._planeEquation[2];
+    _cosAngleWithHorizontalPlane=orig._cosAngleWithHorizontalPlane;
+    _tanAngleWithHorizontalPlane=orig._tanAngleWithHorizontalPlane;
+    _minElevation=orig._minElevation;
+    _maxElevation=orig._maxElevation;
+
+    _goalIDs = orig._goalIDs;
+    _area = orig._area;
+    _uid = orig._uid;
+    _boostPoly = orig._boostPoly;
+}
+
 SubRoom::~SubRoom()
 {
      for (unsigned int i = 0; i < _obstacles.size(); i++)
@@ -200,6 +227,7 @@ void SubRoom::AddObstacle(Obstacle* obs)
 
 void SubRoom::AddGoalID(int ID)
 {
+     Log->Write("ERROR:\t Adding a Goal directly to a subroom is not allowed. Plz add Crossing/Transition instead!");
      if (std::find(_goalIDs.begin(), _goalIDs.end(), ID) != _goalIDs.end()) {
           Log->Write("WARNING: \tAdded existing GoalID to Subroom %d", this->GetSubRoomID());
           //if occurs, plz assert, that ID is a UID of any line of the goal and not a number given by the user (ar.graf)
@@ -833,6 +861,7 @@ NormalSubRoom::NormalSubRoom() : SubRoom()
 {
 }
 
+NormalSubRoom::NormalSubRoom(const NormalSubRoom& orig) : SubRoom(orig) {}
 
 NormalSubRoom::~NormalSubRoom()
 {
@@ -1068,6 +1097,7 @@ double NormalSubRoom::Xintercept(const Point& point1, const Point& point2, doubl
 
 // This method is called very often in DirectionFloorField, so it should be fast.
 // we ignore
+//@todo: ar.graf: UnivFF have subroomPtr Info for every gridpoint. Info should be used in DirectionFF instead of this
 bool NormalSubRoom::IsInSubRoom(const Point& ped) const
 {
      for (polygon_type obs:_boostPolyObstacles) {
@@ -1135,6 +1165,12 @@ Stair::Stair() : NormalSubRoom()
 {
      pUp = Point();
      pDown = Point();
+}
+
+Stair::Stair(const Stair &orig) : NormalSubRoom(orig),
+pUp (orig.pUp),
+pDown (orig.pDown)
+{
 }
 
 
@@ -1441,6 +1477,34 @@ std::vector<Point> SubRoom::StartLLCorner(const std::vector<Point> &polygon)
     return cwPolygon;
 
 }
+
+/// Escalator
+
+Escalator::Escalator(): Stair() {
+
+}
+
+Escalator::Escalator(const Escalator& orig) : Stair(orig), isEscalator_Up(orig.isEscalator_Up)
+{}
+
+Escalator::~Escalator() {}
+
+// Setter-Funktionen
+void Escalator::SetEscalatorUp() {
+     isEscalator_Up = true;
+}
+void Escalator::SetEscalatorDown(){
+     isEscalator_Up = false;
+}
+
+// Getter-Funktionen
+bool Escalator::IsEscalatorUp() const {
+     return isEscalator_Up;
+}
+bool Escalator::IsEscalatorDown() const{
+     return !isEscalator_Up;
+}
+
 
 
 #endif // _SIMULATOR

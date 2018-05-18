@@ -21,7 +21,7 @@
 
 #include "PedDistributionParser.h"
 #include "../tinyxml/tinyxml.h"
-
+#include <cstdarg> // va_start and va_end
 PedDistributionParser::PedDistributionParser(const Configuration* configuration)
         :_configuration(configuration)
 {
@@ -170,10 +170,16 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
             int group_id = xmltoi(e->Attribute("group_id"), -1);
             string caption = xmltoa(e->Attribute("caption"), "no caption");
             string str_greedy = xmltoa(e->Attribute("greedy"), "false");
+            double time = xmltof(e->Attribute("time"), 0);
+            int agent_id = xmltoi(e->Attribute("agent_id"), -1);
             bool greedy = (str_greedy == "true")?true:false;
+            if (agent_id >= 0){
+              agents_max = 1;
+              frequency = 1;
+            }
             auto source = std::shared_ptr<AgentsSource>(
                     new AgentsSource(id, caption, agents_max, group_id,
-                                     frequency, greedy));
+                                     frequency, greedy, time, agent_id));
             startDisSources.push_back(source);
 
             Log->Write("INFO:\tSource with id %d will be parsed (greedy = %d)!", id, greedy);

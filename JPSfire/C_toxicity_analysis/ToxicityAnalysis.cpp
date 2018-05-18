@@ -27,25 +27,21 @@
  **/
 
 #include "ToxicityAnalysis.h"
-#include "../../geometry/Building.h"
 #include "../../pedestrian/Pedestrian.h"
 #include "../generic/FDSMesh.h"
 #include "../generic/FDSMeshStorage.h"
-#include "../../pedestrian/PedDistributor.h"
 #include "../../tinyxml/tinyxml.h"
-#include <set>
-#include <algorithm>
-#include <math.h>
-#include "../../IO/OutputHandler.h"
-#include "../../general/Configuration.h"
+#include <boost/filesystem.hpp>
+using namespace boost::filesystem;
 
-ToxicityAnalysis::ToxicityAnalysis(const Building * b)
+
+ToxicityAnalysis::ToxicityAnalysis(const std::string & projectFileName, double fps):  _projectFileName(projectFileName), _fps(fps)
 {
-    _building = b;
     _FMStorage = nullptr;
-    LoadJPSfireInfo(_building->GetProjectFilename());
-    _dt = 1/20.; //time fraction for which doses are cumulated
+    _dt = 1/20.; //time fraction for which doses are cumulated. TODO:
+                 //parse in inifile?
     _t_prev = -1;
+    LoadJPSfireInfo(projectFileName);
 }
 
 ToxicityAnalysis::~ToxicityAnalysis()
@@ -55,6 +51,9 @@ ToxicityAnalysis::~ToxicityAnalysis()
 
 bool ToxicityAnalysis::LoadJPSfireInfo(const std::string projectFilename )
 {
+     boost::filesystem::path p(projectFilename);
+     std::string projectRootDir = p.parent_path().string();
+
    TiXmlDocument doc(projectFilename);
    if (!doc.LoadFile()) {
         Log->Write("ERROR: \t%s", doc.ErrorDesc());
@@ -71,8 +70,10 @@ bool ToxicityAnalysis::LoadJPSfireInfo(const std::string projectFilename )
    TiXmlElement* JPSfireCompElem = JPSfireNode->FirstChildElement("C_toxicity_analysis");
    if(JPSfireCompElem) {
        if(JPSfireCompElem->FirstAttribute()){
-           //std::string filepath = xmltoa(JPSfireCompElem->Attribute("toxicity_grids"), "");
-           std::string filepath = _building->GetProjectRootDir() + xmltoa(JPSfireCompElem->Attribute("toxicity_grids"), "");
+           std::string toxicity_grids = xmltoa(JPSfireCompElem->Attribute("toxicity_grids"), "");
+           std::string filepath = projectRootDir + "/" +  toxicity_grids;
+           if (projectRootDir.size() == 0 ) // directory is "."
+                filepath = toxicity_grids;
            double updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
            double finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
            std::string study = "";
@@ -198,7 +199,7 @@ void ToxicityAnalysis::HazardAnalysis(Pedestrian* p)
 
 void ToxicityAnalysis::InitializeWriteOut()
 {
-    string fileNameWithoutExtension = _building->GetProjectFilename().substr(0, _building->GetProjectFilename().find_last_of("."));
+    string fileNameWithoutExtension = _projectFileName.substr(0, _projectFileName.find_last_of("."));
     std::string ToxAnalysisXML = "fire_" + fileNameWithoutExtension + ".xml";
     _outputhandler = std::make_shared<ToxicityOutputHandler>(ToxAnalysisXML.c_str());
     _outputhandler->WriteToFileHeader();
@@ -208,9 +209,7 @@ void ToxicityAnalysis::WriteOutHazardAnalysis(const Pedestrian* p, double E, dou
 {
     string data;
     char tmp[CLENGTH] = "";
-
-    _fps = _configuration->GetFps();
-    _fps = 1; // fixme: why 1?
+    //_fps = 1; // fixme: why 1?
     int frameNr = int(p->GetGlobalTime()/_fps);
 
 
@@ -238,4 +237,9 @@ void ToxicityAnalysis::WriteOutHazardAnalysis(const Pedestrian* p, double E, dou
 bool ToxicityAnalysis::ConductToxicityAnalysis()
 {
    return _FMStorage!=nullptr;
+}
+
+const std::string ToxicityAnalysis::getProjectFileName(void)
+{
+     return _projectFileName;
 }

@@ -1,18 +1,17 @@
 #include "associations.h"
 #include "connection.h"
 
-#define UNUSED(x) [&x]{}()  // c++11 silence warnings
 
-Association::Association()
+
+AIAssociation::AIAssociation()
 {
     _landmark=nullptr;
     _associatedLandmark=nullptr;
 
 }
 
-Association::Association(ptrLandmark landmark, ptrLandmark associated_landmark, bool connected)
+AIAssociation::AIAssociation(const AILandmark *landmark, const AILandmark *associated_landmark, bool connected)
 {
-    UNUSED(connected);
     _landmark=landmark;
     _associatedLandmark=associated_landmark;
 
@@ -25,19 +24,19 @@ Association::Association(ptrLandmark landmark, ptrLandmark associated_landmark, 
 
 }
 
-Association::Association(ptrConnection connection)
+AIAssociation::AIAssociation(const AIConnection *connection)
 {
     _connection=connection;
     _landmark=nullptr;
     _associatedLandmark=nullptr;
 }
 
-Association::~Association()
+AIAssociation::~AIAssociation()
 {
 
 }
 
-ptrLandmark Association::GetLandmarkAssociation(ptrLandmark landmark) const
+const AILandmark *AIAssociation::GetLandmarkAssociation(const AILandmark *landmark) const
 {
     if (landmark==nullptr)
         return nullptr;
@@ -50,8 +49,13 @@ ptrLandmark Association::GetLandmarkAssociation(ptrLandmark landmark) const
 
 }
 
-ptrConnection Association::GetConnectionAssoziation() const
+const AIConnection *AIAssociation::GetConnectionAssoziation() const
 {
     return _connection;
+}
+
+bool AIAssociation::operator==(const AIAssociation &asso2) const
+{
+    return this==&asso2;
 }
 

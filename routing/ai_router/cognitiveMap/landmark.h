@@ -4,28 +4,22 @@
 #include <vector>
 #include <list>
 #include "../../../geometry/Point.h"
-#include "../../../pedestrian/Ellipse.h"
-#include "../../../geometry/Building.h"
-
-
-using ptrRoom = SubRoom*;
-
-class Association;
-using ptrAssociation = std::shared_ptr<Association>;
-using Associations = std::vector<ptrAssociation>;
-
-class Region;
-using ptrRegion = std::shared_ptr<Region>;
+#include "associations.h"
 
 
 
-class Landmark
+using AIAssociations = std::vector<AIAssociation>;
+
+class AIRegion;
+
+
+class AILandmark
 {
 
 public:
-    Landmark(Point pos, ptrRoom room=nullptr);
-    Landmark(Point pos, double a, double b, int id=-1, ptrRoom room=nullptr);
-    ~Landmark();
+    AILandmark(const Point& pos);
+    AILandmark(const Point &pos, double a, double b, int id=-1);
+    ~AILandmark();
 
 
 
@@ -35,20 +29,18 @@ public:
     void SetB(double b);
     void SetRealPos(const Point& point);
     void SetPosInMap(const Point& point);
-    void SetRoom(ptrRoom room);
     void SetCaption(const std::string& string);
-    void SetPriority(double priority);
+//    void SetPriority(double priority);
     void SetType(const std::string &type);
     //Getter
-    const int& GetId() const;
+    int GetId() const;
     const Point& GetRealPos() const;
     const Point& GetPosInMap() const;
-    const double& GetA() const;
-    const double& GetB() const;
+    double GetA() const;
+    double GetB() const;
     const std::string& GetType() const;
-    ptrRoom GetRoom() const;
     const std::string& GetCaption() const;
-    const double &GetPriority() const;
+    //double GetPriority() const;
     //Random point somewhere within the waypoint
     Point GetRandomPoint() const;
     // Shortest Distance from waypoint egde (ellipse) to specific point
@@ -60,15 +52,15 @@ public:
     void SetVisited(bool stat);
 
     //check if landmark ellipse in cogmap contains certain point
-    bool Contains(const Point &point);
+    bool Contains(const Point &point) const;
 
     // Associations
-    Associations GetAssociations() const;
-    void AddAssociation(ptrAssociation asso);
+    const AIAssociations& GetAssociations() const;
+    void AddAssociation(const AIAssociation& asso);
 
     //Region
-    const ptrRegion IsInRegion() const;
-    void SetRegion(ptrRegion region);
+    const AIRegion* IsInRegion() const;
+    void SetRegion(const AIRegion* region);
 
 
 
@@ -79,14 +71,12 @@ private:
     Point _posInMap;
     double _a;
     double _b;
-    ptrRoom _room;
-    double _priority;
+    //double _priority;
     bool _visited;
     std::string _type;
     std::list<int> _connectedWith;
-    Associations _assoContainer;
-    ptrRegion _region;
-    JEllipse _ellipse;
+    AIAssociations _assoContainer;
+    const AIRegion* _region;
 };
 
 #endif // LANDMARK_H

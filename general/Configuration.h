@@ -35,10 +35,17 @@
 
 #include "../routing/RoutingEngine.h"
 #include "../math/OperationalModel.h"
+#include "../JPSfire/B_walking_speed/WalkingSpeed.h"
+#include "../JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
+
+//for random numbers
+#include "randomnumbergenerator.h"
 
 //This class provides a data container for all configuration parameters.
 
 class AgentsParameters;
+class DirectionSubLocalFloorfield;
+class DirectionLocalFloorfield;
 
 #ifdef _JPS_AS_A_SERVICE
 
@@ -52,6 +59,8 @@ public:
 
      Configuration()
      {
+          _walkingSpeed = nullptr;
+          _ToxicityAnalysis = nullptr;
           _solver = 1;
           _routingEngine = std::shared_ptr<RoutingEngine>(new RoutingEngine());
           _maxOpenMPThreads = 1;
@@ -62,6 +71,7 @@ public:
           _linkedCellSize = 2.2; // meter
           _model = nullptr;//std::shared_ptr<OperationalModel>(new OperationalModel());
           _tMax = 500; // seconds
+          _PRB = false;
           _dT = 0.01;
           _isPeriodic = 0; // use only for Tordeux2015 with "trivial" geometries
           // ----------- GCFM repulsive force ------
@@ -109,8 +119,21 @@ public:
 
           //ff router
           _has_specific_goals = false;
+          _has_directional_escalators = false;
           _write_VTK_files = false;
+          _exit_strat = 9;
+          _write_VTK_files_direction = false;
+          _dirSubLocal = nullptr;
+          _dirLocal = nullptr;
+
+	  //for random numbers
+          _rdGenerator=RandomNumberGenerator();
      }
+     std::shared_ptr<WalkingSpeed> GetWalkingSpeed () {return _walkingSpeed; };
+     void SetWalkingSpeed(std::shared_ptr<WalkingSpeed> & w) {_walkingSpeed = w; };
+
+     std::shared_ptr<ToxicityAnalysis> GetToxicityAnalysis () {return _ToxicityAnalysis; };
+     void SetToxicityAnalysis(std::shared_ptr<ToxicityAnalysis> & t) {_ToxicityAnalysis = t; };
 
      int GetSolver() const { return _solver; };
 
@@ -132,6 +155,9 @@ public:
      int GetPort() const { return _port; };
 
      void SetPort(int port) { _port = port; };
+
+     void SetPRB(bool prb) {_PRB = prb; };
+     bool print_prog_bar() const {return _PRB; };
 
      unsigned int GetSeed() const { return _seed; };
 
@@ -249,11 +275,28 @@ public:
 
      void set_has_specific_goals(bool has_specific_goals) { _has_specific_goals = has_specific_goals;}
 
+     bool get_has_directional_escalators() const { return _has_directional_escalators;}
+     void set_has_directional_escalators(bool has_directional_esc) {_has_directional_escalators = has_directional_esc;}
+
      void set_write_VTK_files(bool write_VTK_files) {_write_VTK_files = write_VTK_files;}
 
      bool get_write_VTK_files() const {return _write_VTK_files;}
 
+     void set_exit_strat(int e_strat) {_exit_strat = e_strat;}
+
+     int get_exit_strat() const {return _exit_strat;}
+
+     void set_dirSubLocal(DirectionSubLocalFloorfield* dir) {_dirSubLocal = dir;}
+     void set_dirLocal(DirectionLocalFloorfield* dir) {_dirLocal = dir;}
+
+     DirectionSubLocalFloorfield* get_dirSubLocal() const {return _dirSubLocal;}
+     DirectionLocalFloorfield* get_dirLocal() const {return _dirLocal;}
+
      const std::string& GetHostname() const { return _hostname; };
+
+    void set_write_VTK_files_direction(bool write_VTK_files_direction) {_write_VTK_files_direction = write_VTK_files_direction;}
+
+    bool get_write_VTK_files_direction() const {return _write_VTK_files_direction;}
 
      void SetHostname(std::string hostname) { _hostname = hostname; };
 
@@ -290,6 +333,8 @@ public:
      void AddAgentsParameters(std::shared_ptr<AgentsParameters> agentsParameters,
                int id) { _agentsParameters[id] = agentsParameters; };
 
+    RandomNumberGenerator* GetRandomNumberGenerator() const {return &_rdGenerator;};
+
 #ifdef _JPS_AS_A_SERVICE
 
      const bool GetRunAsService() const { return _runAsService; };
@@ -317,6 +362,8 @@ public:
 #endif
 
 private:
+     std::shared_ptr<WalkingSpeed> _walkingSpeed;
+     std::shared_ptr<ToxicityAnalysis> _ToxicityAnalysis;
      int _solver;
      std::shared_ptr<RoutingEngine> _routingEngine;
      int _maxOpenMPThreads;
@@ -327,6 +374,7 @@ private:
      double _linkedCellSize;
      std::shared_ptr<OperationalModel> _model;
      double _tMax;
+     bool _PRB;
      double _dT;
      int _isPeriodic;
      double _nuPed;
@@ -357,7 +405,13 @@ private:
 
      //ff router
      bool _has_specific_goals;
+     bool _has_directional_escalators;
      bool _write_VTK_files;
+     bool _write_VTK_files_direction;
+
+     int _exit_strat;
+     DirectionSubLocalFloorfield* _dirSubLocal;
+     DirectionLocalFloorfield* _dirLocal;
 
      std::string _hostname;
      std::string _trajectoriesFile;
@@ -366,6 +420,9 @@ private:
      std::string _geometryFile;
      std::string _projectRootDir;
      bool _showStatistics;
+
+     mutable RandomNumberGenerator _rdGenerator;
+
      FileFormat _fileFormat;
      std::map<int, std::shared_ptr<AgentsParameters> > _agentsParameters;
 #ifdef _JPS_AS_A_SERVICE

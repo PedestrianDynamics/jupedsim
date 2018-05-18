@@ -1,7 +1,30 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## v0.8.2 [unreleased]
+## v0.8.3 [2018-05-18]
+### Added
+- Consider direction of escalators in ff-router !22
+- Statistics about deleted agents !12
+- `cmake  -DAIROUTER=true` to ignore the `AIrouter` 6fd4a1a0
+- Use npy files for smokesensor. !13 
+- New attributes for sources `agent_id` and `time` for scheduling agent's appearance. See #258 for discussion. !14
+- Router tests
+- Option for printing progressbar:  `<progressbar/>` cfc65f22
+- Universal Floorfield: recognition of inside and outside of rooms, gridpoints know corresponding Subroom
+- Floorfield Router: fixes of "Cannot find route for pedestrian ..." bugs; b1345915
+- vtk-files (ff_router) can be written with `<write_VTK_files>true</write_VTK_files>` (see wiki)
+- Exit_Strategie / Direction_Strategie: fixed bug 269, where agents get stuck at doors. b1345915
+
+### Changed
+- Renaming of CogMap-router and new router (Erik). !16
+
+### Fixed
+-  source thread and main thread are not synchrone. 2d1fb525
+- Bug in sources leads to duplicate sgents. #158 5c81985b
+
+
+## v0.8.2 [2016-10-11]
+
 Repository moved to [new server](https://gitlab.version.fz-juelich.de/jupedsim/jpscore)
 ### Added
 - Adding rolling flow for validation tests (a74f9ba465efc9706b7e0bbe4e51c1cae66b356f)

@@ -38,47 +38,26 @@
 //#include "NavigationGraph.h"
 
 
-BrainStorage::BrainStorage(const Building * const b, std::string cogMapStatus, std::string cogMapFiles)
-     : _building(b)
+AIBrainStorage::AIBrainStorage(const Building * const b, const std::string &cogMapFiles, const std::string &signFiles)
+     : _building(b),_visibleEnv(VisibleEnvironment(b)),_cogMapFiles(cogMapFiles),_signFiles(signFiles)
 {
-    _cogMapStatus=cogMapStatus;
-    _cogMapFiles=cogMapFiles;
 
-    //Complete Environment
-    //_visibleEnv=VisibleEnvironment(b);
-
-    //internal graph networks in every subroom
-    for (auto it=_building->GetAllRooms().begin(); it!=_building->GetAllRooms().end(); ++it)
-    {
-        for (auto it2=it->second->GetAllSubRooms().begin(); it2!=it->second->GetAllSubRooms().end(); ++it2)
-        {
-            InitInternalNetwork(it2->second.get());
-        }
-    }
-}
-
-BrainStorage::~BrainStorage()
-{
+    //Set signs
+    ParseSigns();
 
 }
 
-BStorageValueType BrainStorage::operator[] (BStorageKeyType key)
+Cortex* AIBrainStorage::operator[] (BStorageKeyType key)
 {
-     BStorageType::iterator it = _brains.find(key);
-     if(it == _brains.end()) {
-          CreateBrain(key);
+     BStorageType::iterator it = _corteces.find(key);
+     if(it == _corteces.end()) {
+          CreateCortex(key);
      }
 
-//     PStorageType::iterator itP= perception_abilities.find(key);
-//     if (itP == perception_abilities.end())
-//     {
-//         CreatePerceptionAbility(key);
-//     }
-
-     return _brains[key];
+     return _corteces[key].get();
 }
 
-void BrainStorage::ParseCogMap(BStorageKeyType ped)
+void AIBrainStorage::ParseCogMap(BStorageKeyType ped)
 {
 
     _regions.clear();
@@ -123,7 +102,7 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
 
     double version = xmltof(xRootNode->Attribute("version"), -1);
 
-    if (version != std::stod(JPS_VERSION) && version != std::stod(JPS_OLD_VERSION)) {
+    if (version < std::stod(JPS_OLD_VERSION) ) {
          Log->Write(" \tWrong geometry version!");
          Log->Write(" \tOnly version >= %s supported",JPS_VERSION);
          Log->Write(" \tPlease update the version of your geometry file to %s",JPS_VERSION);
@@ -143,20 +122,20 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
               xRegion = xRegion->NextSiblingElement("region"))
     {
 
-        std::string id = xmltoa(xRegion->Attribute("id"), "-1");
-        std::string caption = xmltoa(xRegion->Attribute("caption"));
-        std::string pxinmap = xmltoa(xRegion->Attribute("px"),"-1");
-        std::string pyinmap = xmltoa(xRegion->Attribute("py"),"-1");
-        std::string a = xmltoa(xRegion->Attribute("a"),"-1");
-        std::string b = xmltoa(xRegion->Attribute("b"),"-1");
+        std::string idR = xmltoa(xRegion->Attribute("id"), "-1");
+        std::string captionR = xmltoa(xRegion->Attribute("caption"));
+        std::string pxinmapR = xmltoa(xRegion->Attribute("px"),"-1");
+        std::string pyinmapR = xmltoa(xRegion->Attribute("py"),"-1");
+        std::string aR = xmltoa(xRegion->Attribute("a"),"-1");
+        std::string bR = xmltoa(xRegion->Attribute("b"),"-1");
 
-        ptrRegion region (new Region(Point(std::stod(pxinmap),std::stod(pyinmap))));
-        region->SetId(std::stoi(id));
+        AIRegion region (Point(std::stod(pxinmapR),std::stod(pyinmapR)));
+        region.SetId(std::stoi(idR));
 
-        region->SetCaption(caption);
-        region->SetPosInMap(Point(std::stod(pxinmap),std::stod(pyinmap)));
-        region->SetA(std::stod(a));
-        region->SetB(std::stod(b));
+        region.SetCaption(captionR);
+        region.SetPosInMap(Point(std::stod(pxinmapR),std::stod(pyinmapR)));
+        region.SetA(std::stod(aR));
+        region.SetB(std::stod(bR));
 
 
 
@@ -174,32 +153,32 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
                   xLandmark = xLandmark->NextSiblingElement("landmark"))
         {
 
-            std::string landmark_id = xmltoa(xLandmark->Attribute("id"), "-1");
-            std::string landmark_caption = xmltoa(xLandmark->Attribute("caption"));
+            std::string id = xmltoa(xLandmark->Attribute("id"), "-1");
+            std::string caption = xmltoa(xLandmark->Attribute("caption"));
             std::string type = xmltoa(xLandmark->Attribute("type"),"-1");
             std::string roomId = xmltoa(xLandmark->Attribute("subroom1_id"),"-1");
             std::string pxreal = xmltoa(xLandmark->Attribute("pxreal"),"-1");
             std::string pyreal = xmltoa(xLandmark->Attribute("pyreal"),"-1");
-            std::string landmark_pxinmap = xmltoa(xLandmark->Attribute("px"),"-1");
-            std::string landmark_pyinmap = xmltoa(xLandmark->Attribute("py"),"-1");
-            std::string landmark_a = xmltoa(xLandmark->Attribute("a"),"-1");
-            std::string landmark_b = xmltoa(xLandmark->Attribute("b"),"-1");
+            std::string pxinmap = xmltoa(xLandmark->Attribute("px"),"-1");
+            std::string pyinmap = xmltoa(xLandmark->Attribute("py"),"-1");
+            std::string a = xmltoa(xLandmark->Attribute("a"),"-1");
+            std::string b = xmltoa(xLandmark->Attribute("b"),"-1");
 
-            ptrLandmark landmark (new Landmark(Point(std::stod(pxreal),std::stod(pyreal))));
+            AILandmark landmark(Point(std::stod(pxreal),std::stod(pyreal)));
 
             if (roomId=="NaN")
             {
                 Log->Write("ERROR:\t Subroom Id is NaN!");
                 return;
             }
-            landmark->SetId(std::stoi(landmark_id));
-            landmark->SetCaption(landmark_caption);
-            landmark->SetType(type);
-            landmark->SetRealPos(Point(std::stod(pxreal),std::stod(pyreal)));
-            landmark->SetPosInMap(Point(std::stod(landmark_pxinmap),std::stod(landmark_pyinmap)));
-            landmark->SetA(std::stod(landmark_a));
-            landmark->SetB(std::stod(landmark_b));
-            landmark->SetRoom(_building->GetSubRoomByUID(std::stoi(roomId)));
+            landmark.SetId(std::stoi(id));
+            landmark.SetCaption(caption);
+            landmark.SetType(type);
+            landmark.SetRealPos(Point(std::stod(pxreal),std::stod(pyreal)));
+            landmark.SetPosInMap(Point(std::stod(pxinmap),std::stod(pyinmap)));
+            landmark.SetA(std::stod(a));
+            landmark.SetB(std::stod(b));
+            //landmark->SetRoom(_building->GetSubRoomByUID(std::stoi(roomId)));
 
             //processing the rooms node
             TiXmlNode*  xAssociationsNode = xLandmark->FirstChild("associations");
@@ -221,22 +200,24 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
                 int connection = std::stoi(xmltoa(xAsso->Attribute("connectedwith"),"-1"));
                 //std::string priority = xmltoa(xAsso->Attribute("priority"),"-1");
 
-                ptrLandmark assolandmark (new Landmark(Point(std::stod(asso_x),std::stod(asso_y)),
-                                                    std::stod(asso_a),std::stod(asso_b)));
-                assolandmark->SetId(std::stod(asso_id));
-                //std::cout << assolandmark->GetId() << std::endl;
-                assolandmark->SetCaption(asso_caption);
+                AILandmark assolandmark(Point(std::stod(asso_x),std::stod(asso_y)),
+                                                    std::stod(asso_a),std::stod(asso_b));
+                assolandmark.SetId(std::stod(asso_id));
+                //std::cout << assolandmark.GetId() << std::endl;
+                assolandmark.SetCaption(asso_caption);
                 //assolandmark->AddConnection(std::stoi(connection));
                 //assolandmark->SetPriority(std::stod(priority));
                 bool connected=false;
-                if (connection==landmark->GetId())
+                if (connection==landmark.GetId())
                     connected=true;
-                landmark->AddAssociation(std::make_shared<Association>(landmark,assolandmark,connected));
+                landmark.AddAssociation(AIAssociation(&landmark,&assolandmark,connected));
+
+                region.AddLandmarkSubCs(assolandmark);
 
 
             }
 
-            region->AddLandmark(landmark);
+            region.AddLandmark(landmark);
             Log->Write("INFO:\tLandmark added!");
 
         }
@@ -261,11 +242,9 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
                 std::string landmark2 = xmltoa(xConnection->Attribute("landmark2_id"),"-1");
 
 
-                ptrConnection connection = std::make_shared<Connection>(std::stoi(idC),captionC,typeC,
-                                                                        region->GetLandmarkByID(std::stoi(landmark1)),
-                                                                        region->GetLandmarkByID(std::stoi(landmark2)));
+                AIConnection connection = AIConnection(std::stoi(idC),captionC,typeC,std::stoi(landmark1),std::stoi(landmark2));
 
-                region->AddConnection(connection);
+                region.AddConnection(connection);
                 Log->Write("INFO:\tConnection added!");
             }
         }
@@ -275,67 +254,32 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
     }
 }
 
-void BrainStorage::CreateBrain(BStorageKeyType ped)
+void AIBrainStorage::CreateCortex(BStorageKeyType ped)
 {
 
      //todo: the possibility to have more then one creator.
 
-     _brains.insert(std::make_pair(ped, std::make_shared<Brain>(_building,
+     _corteces.insert(std::make_pair(ped, std::unique_ptr<Cortex>(new Cortex(_building,
                                                                 ped,
-                                                                nullptr,
-                                                                &_roominternalNetworks)));//  creator->CreateCognitiveMap(ped)));
+                                                                &_visibleEnv,
+                                                                &_roominternalNetworks))));//  creator->CreateCognitiveMap(ped)));
 
 
-     // if cognitive map is complete (complete graph network is known by every ped)
-     if (_cogMapStatus=="complete")
-     {
-         //adding all SubRooms as Vertex
-         for(auto&& itr_room: _building->GetAllRooms())
-         {
-              for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
-              {
-                   _brains[ped]->GetCognitiveMap().GetGraphNetwork()->Add(itr_subroom.second.get());
-              }
-         }
 
-         //Add crossings as edges
-         for(auto&& itr_cross: _building->GetAllCrossings())
-         {
-             if (itr_cross.second->IsOpen())
-              _brains[ped]->GetCognitiveMap().GetGraphNetwork()->Add(itr_cross.second);
-         }
-
-         //Add transitions as edges
-         for(auto&& itr_trans: _building->GetAllTransitions())
-         {
-              if (itr_trans.second->IsOpen())
-              {
-                  if(itr_trans.second->IsExit())
-                  {
-                       _brains[ped]->GetCognitiveMap().GetGraphNetwork()->AddExit(itr_trans.second);
-                  }
-                  else
-                  {
-                       _brains[ped]->GetCognitiveMap().GetGraphNetwork()->Add(itr_trans.second);
-                  }
-              }
-         }
-     }
 
      // load cogmap and do first cognitive step
      ParseCogMap(ped);
-     _brains[ped]->GetCognitiveMap().AddRegions(_regions);
-     _brains[ped]->GetCognitiveMap().InitLandmarkNetworksInRegions();
-     _brains[ped]->GetCognitiveMap().FindMainDestination();
+     _corteces[ped]->GetCognitiveMap().AddRegions(_regions);
+     _corteces[ped]->GetCognitiveMap().InitLandmarkNetworksInRegions();
+     _corteces[ped]->GetCognitiveMap().FindMainDestination();
      //debug
      //cognitive_maps[ped]->GetNavigationGraph()->WriteToDotFile(building->GetProjectRootDir());
-
 }
 
-void BrainStorage::InitInternalNetwork(const SubRoom* sub_room)
+void AIBrainStorage::InitInternalNetwork(const SubRoom* sub_room)
 {
 
-    _roominternalNetworks.emplace(sub_room,std::make_shared<InternNavigationNetwork>(sub_room));
+    _roominternalNetworks.emplace(sub_room,ptrIntNetwork(new InternNavigationNetwork(sub_room)));
 
     for (Crossing* crossing:sub_room->GetAllCrossings())
     {
@@ -353,5 +297,87 @@ void BrainStorage::InitInternalNetwork(const SubRoom* sub_room)
     }
 
     _roominternalNetworks[sub_room]->EstablishConnections();
+
+}
+
+void AIBrainStorage::ParseSigns() {
+
+    if (_signFiles=="")
+    {
+        Log->Write("INFO: \tNo signs specified \n");
+        return;
+    }
+    std::string signFilenameWithPath = _building->GetProjectRootDir() + _signFiles;
+
+    Log->Write("INFO: \tRead Signs from " + signFilenameWithPath);
+    TiXmlDocument docSigns(signFilenameWithPath);
+    if (!docSigns.LoadFile()) {
+        Log->Write("WARNING: \t%s", docSigns.ErrorDesc());
+        Log->Write("\t could not parse the sign file");
+        Log->Write("No signs specified");
+        return;
+    }
+
+    TiXmlElement *xRootNode = docSigns.RootElement();
+    if (!xRootNode) {
+        Log->Write("WARNING:\tRoot element does not exist");
+        Log->Write("No signs specified");
+        return;
+    }
+
+    if (xRootNode->ValueStr() != "signage") {
+        Log->Write("WARNING:\tRoot element value is not 'signage'.");
+        Log->Write("No signs specified");
+        return;
+    }
+    if (xRootNode->Attribute("unit"))
+        if (std::string(xRootNode->Attribute("unit")) != "m") {
+            Log->Write("WARNING:\tOnly the unit m (meters) is supported. \n\tYou supplied [%s]",
+                       xRootNode->Attribute("unit"));
+            Log->Write("No signs specified");
+            return;
+        }
+
+    double version = xmltof(xRootNode->Attribute("version"), -1);
+
+    if (version < std::stod(JPS_OLD_VERSION)) {
+        Log->Write("WARNING: \tWrong file version!");
+        Log->Write(" \tOnly version >= %s supported", JPS_VERSION);
+        Log->Write(" \tPlease update the version of your file to %s", JPS_VERSION);
+        Log->Write("No signs specified");
+        return;
+    }
+
+    //processing the regions node
+    TiXmlNode *xSignsNode = xRootNode->FirstChild("signs");
+    if (!xSignsNode) {
+        Log->Write("WARNING: \tSignage file without signs!");
+        Log->Write("No signs specified");
+        return;
+    }
+
+
+    for (TiXmlElement *xSign = xSignsNode->FirstChildElement("sign"); xSign;
+         xSign = xSign->NextSiblingElement("sign")) {
+
+        std::string id = xmltoa(xSign->Attribute("id"), "-1");
+        std::string room_id = xmltoa(xSign->Attribute("room_id"), "-1");
+        std::string px = xmltoa(xSign->Attribute("px"), "-1");
+        std::string py = xmltoa(xSign->Attribute("py"), "-1");
+        std::string alpha = xmltoa(xSign->Attribute("alpha"), "-1");
+        std::string alphaPointing = xmltoa(xSign->Attribute("alphaPointing"), "-1"); 
+
+        Log->Write("Sign read!");
+
+        _visibleEnv.AddSign(_building->GetAllRooms().at(std::stod(room_id)).get(),Sign(std::stod(id), std::stod(room_id), Point(std::stod(px), std::stod(py)),
+                             std::stod(alpha), std::stod(alphaPointing)));
+
+    }
+
+}
+
+void AIBrainStorage::DeleteCortex(BStorageKeyType ped)
+{
+    _corteces.erase(ped);
 
 }

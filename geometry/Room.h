@@ -32,6 +32,7 @@
 #include <algorithm>
 #include <memory>
 #include "../general/Macros.h"
+#include "../geometry/Point.h"
 
 //forward declarations
 class OutputHandler;
@@ -146,6 +147,14 @@ public:
       * Add a new transition id
       */
      void AddTransitionID(int ID);
+
+
+     /**
+      * @return Vector with the vertices of the geometry's outer boundary rect
+      */
+
+     std::vector<Point> GetBoundaryVertices() const;
+
 
      /**
       * Debug output for this class

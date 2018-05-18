@@ -1,10 +1,6 @@
 #include "FDSMesh.h"
 #include <cmath>
-#include <string>
-#include <fstream>
-#include <iostream>
-#include <sstream>
-
+#include "../../cnpy/cnpy.h"
 std::vector<std::string> &split2(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss(s);
     std::string item;
@@ -163,17 +159,23 @@ void FDSMesh::ReadMatrix(std::string line, std::ifstream &pFile)
     while (std::getline(pFile, line)) {
         n = 0;
         strVec = split2(line, ',', strVec);
-        for (auto &elem : strVec)
-        {
+        for (auto &elem : strVec) {
             //std::cout << elem << " col " << n  << " line " << m << std::endl;
-            if (elem=="nan" || elem=="NAN" || elem=="NaN" || elem=="-inf" || elem=="inf")
-            {
+            if (elem=="nan" || elem=="NAN" || elem=="NaN" || elem=="-inf" || elem=="inf") {
                 _matrix[m][n].SetValue(1.0);
                 //Log->Write("ERROR: Mesh values consist of nan!");
                 //exit(EXIT_FAILURE);
             }
-            else
-                _matrix[m][n].SetValue(std::stod(elem));
+            else {
+                double temp = 0;
+                try {
+                    temp = std::stod(elem);
+                }
+                catch (...) {
+                    std::cout << "can not convert " << elem << std::endl;
+                }
+            _matrix[m][n].SetValue(temp);
+            }
             ++n;
         }
         strVec.clear();
@@ -188,46 +190,49 @@ void FDSMesh::SetKnotValuesFromFile(const std::string &filename)
 {
     ///open File (reading)
     std::ifstream pFile(filename);
-    if (pFile)
+    if(!pFile)
     {
-        std::vector<std::string> strVec;
-        std::string line;
-        ///skip two lines
-        std::getline(pFile, line);
-        std::getline(pFile, line);
-
-        std::getline(pFile, line);
-        //std::cout << line << std::endl;
-        /// to avoid multiple reading of the header and mesh setting
-        //if (statHeaderRead==false)
-        //{
-        /// read header
-        strVec = split2(line,',', strVec);
-        double cellsize = std::stod(strVec[0]);
-        double xmin = std::stod(strVec[2]);
-        double xmax = std::stod(strVec[3]);
-        double ymin = std::stod(strVec[4]);
-        double ymax = std::stod(strVec[5]);
-
-        strVec.clear();
-        //std::cout << "xmin=" << xmin << " , xmax=" << xmax << " , ymin=" << ymin << ", ymax=" << ymax << " , dx=" << cellsize << std::endl;
-
-        SetUpMesh(xmin,ymin,xmax,ymax,cellsize);
-
-            //statHeaderRead=true;
-        //}
-        //Read matrix
-
-        ReadMatrix(line, pFile);
-
-    }
-    else
-    {
-       Log->Write("ERROR:\tCould not open FDS slicefile: %s",filename.c_str());
-       //return false;
-       exit(EXIT_FAILURE);
+        Log->Write("ERROR:\tCould not open FDS slicefile: %s",filename.c_str());
+        //return false;
+        exit(EXIT_FAILURE);
     }
 
+    cnpy::NpyArray Header = cnpy::npz_load(filename,"header");
+    cnpy::NpyArray smoke_factor_grid_norm = cnpy::npz_load(filename,"smoke_factor_grid_norm");
+    auto c_header = Header.data<double>();
+    auto c_matrix = smoke_factor_grid_norm.data<double>();
+
+    // for (int i=0; i< Header.num_vals ; i++)
+    //     std::cout << "Header i: " << i << ": " << c_header[i] << std::endl;
+    // keep these for loops for debugging purpose
+
+    // for (int j=0; j< smoke_factor_grid_norm.num_vals; j++)
+    //     std::cout << "Matrix j: "<< c_matrix[j] << std::endl;
+
+    /// read header
+    double cellsize = c_header[0];
+    double xmin = c_header[1];
+    double xmax = c_header[2];
+    double ymin = c_header[3];
+    double ymax = c_header[4];
+
+    //std::cout << "xmin=" << xmin << " , xmax=" << xmax << " , ymin=" << ymin << ", ymax=" << ymax << " , dx=" << cellsize << std::endl;
+
+    SetUpMesh(xmin,ymin,xmax,ymax,cellsize);
+
+    //Read matrix
+    unsigned int ncol = smoke_factor_grid_norm.shape[1];
+    unsigned int nrow = smoke_factor_grid_norm.shape[0];
+    for (unsigned int i=0; i< nrow; i++)
+        for (unsigned int j=0; j< ncol; j++) {
+             double tmp_value = c_matrix[i*ncol+j];
+             if(std::isnan(tmp_value) || std::isinf(tmp_value))
+                  tmp_value = 1.0;
+             //std::cout << "i =  " << i  << "  j = " << j << ": " << tmp_value << std::endl;
+            _matrix[i][j].SetValue(tmp_value); //TODO: implement =operator
+        }
+    pFile.close();
+    _statMesh=true;
 }
 
 bool FDSMesh::statusMesh() const

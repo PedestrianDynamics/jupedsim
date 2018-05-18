@@ -31,10 +31,8 @@
 
 #include "GCFMModel.h"
 #include "../pedestrian/Pedestrian.h"
-#include "../routing/DirectionStrategy.h"
 #include "../mpi/LCGrid.h"
 #include "../geometry/SubRoom.h"
-#include "../geometry/Wall.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -107,6 +105,7 @@ bool GCFMModel::Init (Building* building)
          //a destination could not be found for that pedestrian
          if (ped->FindRoute() == -1) {
              building->DeletePedestrian(ped);
+             Log->incrementDeletedAgents();
               p--;
               peds_size--;
               continue;
@@ -124,7 +123,7 @@ bool GCFMModel::Init (Building* building)
                    "dist to target is 0\n");
               return false;
          }
-         ped->InitV0(target); 
+         ped->InitV0(target);
          JEllipse E = ped->GetEllipse();
          E.SetCosPhi(cosPhi);
          E.SetSinPhi(sinPhi);
@@ -147,7 +146,7 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
      int partSize;
      partSize = ((int)nSize > nThreads)? (int) (nSize / nThreads):(int)nSize;
       if(partSize == (int)nSize)
-            nThreads = 1; // not worthy to parallelize 
+            nThreads = 1; // not worthy to parallelize
 
      int debugPed = -10;
      //building->GetGrid()->HighlightNeighborhood(debugPed, building);
@@ -157,7 +156,7 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
           result_acc.reserve(2200);
 
           const int threadID = omp_get_thread_num();
-          
+
           int start = threadID*partSize;
           int end;
           end = (threadID < nThreads - 1) ? (threadID + 1) * partSize - 1: (int) (nSize - 1);
@@ -178,6 +177,7 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
                               sqrt(normVi), ped->GetID(), ped->GetV0Norm(), current, periodic);
                     // remove the pedestrian and abort
                     building->DeletePedestrian(ped);
+                    Log->incrementDeletedAgents();
                     Log->Write("\tERROR: one ped was removed due to high velocity");
                     //exit(EXIT_FAILURE);
                }
@@ -491,7 +491,7 @@ inline Point GCFMModel::ForceRepWall(Pedestrian* ped, const Line& w) const
      }
 
      return  F; //line --> l != 0
-     
+
 }
 
 /* abstoßende Punktkraft zwischen ped und Punkt p
@@ -511,7 +511,7 @@ Point GCFMModel::ForceRepStatPoint(Pedestrian* ped, const Point& p, double l, do
      Point dist = p - ped->GetPos(); // x- and y-coordinate of the distance between ped and p
      double d = dist.Norm(); // distance between the centre of ped and point p
      Point e_ij; // x- and y-coordinate of the normalized vector between ped and p
-     
+
      double tmp;
      double bla;
      Point r;
@@ -536,7 +536,7 @@ Point GCFMModel::ForceRepStatPoint(Pedestrian* ped, const Point& p, double l, do
      //interpolierte Kraft
 
      // double a = 6., b= 25.;
-     // double dist_eff = d - (r - E.GetCenter()).Norm();     
+     // double dist_eff = d - (r - E.GetCenter()).Norm();
 
      // if(ped->GetID() == -9 )
      //      printf("dist=%f\n", dist_eff);

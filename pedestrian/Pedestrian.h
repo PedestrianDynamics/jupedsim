@@ -47,7 +47,7 @@ class Building;
 class NavLine;
 class Router;
 class Knowledge;
-
+class WalkingSpeed;
 class Pedestrian
 {
 private:
@@ -149,7 +149,7 @@ private:
      double _FED_In;
      double _FED_Heat;
 
-     WalkingSpeed * _WalkingSpeed = nullptr;
+     std::shared_ptr<WalkingSpeed> _WalkingSpeed = nullptr;
      std::shared_ptr<ToxicityAnalysis> _ToxicityAnalysis = nullptr;
 
 
@@ -473,7 +473,7 @@ public:
       */
      void SetBuilding(Building* building);
 
-     void SetWalkingSpeed(WalkingSpeed* walkingSpeed);
+     void SetWalkingSpeed(std::shared_ptr<WalkingSpeed> walkingSpeed);
 
      void WalkingUpstairs(double c, SubRoom* sub, double ped_elevation, double &walking_speed) const;
      void WalkingDownstairs(double &walking_speed, double c, SubRoom* sub, double ped_elevation) const;

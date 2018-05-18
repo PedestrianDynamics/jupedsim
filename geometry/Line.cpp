@@ -31,10 +31,6 @@
 #include "../general/Macros.h"
 #include "Line.h"
 #include "Wall.h"
-#include "../IO/OutputHandler.h"
-
-#include  <cmath>
-#include  <sstream>
 
 int Line::_static_UID = 0;
 
@@ -85,6 +81,7 @@ Line::~Line()
  ************************************************************/
 void Line::SetPoint1(const Point& p)
 {
+     //if we call this setter and change line, it should get a new UID (ar.graf) @todo:
      _point1 = p;
      _centre = (_point1+_point2)*0.5;
      _length = (_point1 - _point2).Norm();
@@ -92,6 +89,7 @@ void Line::SetPoint1(const Point& p)
 
 void Line::SetPoint2(const Point& p)
 {
+     //if we call this setter and change line, it should get a new UID (ar.graf) @todo:
      _point2 = p;
      _centre = (_point1+_point2)*0.5;
      _length = (_point1 - _point2).Norm();

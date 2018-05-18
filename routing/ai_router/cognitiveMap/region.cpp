@@ -1,105 +1,112 @@
 #include "region.h"
 
-Region::Region(Point pos, ptrRoom room) : Landmark(pos,room)
+AIRegion::AIRegion(const Point &pos) : AILandmark(pos)
 {
 
 }
 
-Region::~Region()
+AIRegion::~AIRegion()
 {
 
 }
 
-void Region::AddLandmark(ptrLandmark landmark)
+void AIRegion::AddLandmark(const AILandmark &landmark)
 {
     _landmarks.push_back(landmark);
 
 }
 
-ptrLandmark Region::GetRegionAsLandmark()
+void AIRegion::AddLandmarkSubCs(const AILandmark &landmark)
 {
-    return static_cast<ptrLandmark>(this);
+   _landmarksSubConcious.push_back(landmark);
 }
 
-Landmarks Region::GetLandmarks() const
+const AILandmark *AIRegion::GetRegionAsLandmark() const
+{
+    return static_cast<const AILandmark*>(this);
+}
+
+const AILandmarks &AIRegion::GetLandmarks() const
 {
     return _landmarks;
 }
 
-ptrLandmark Region::GetLandmarkByID(const int &ID) const
+const AILandmark *AIRegion::GetLandmarkByID(int ID) const
 {
-    for (ptrLandmark landmark:_landmarks)
+    for (const AILandmark& landmark:_landmarks)
     {
-        if (landmark->GetId()==ID)
-            return landmark;
+        if (landmark.GetId()==ID)
+            return &landmark;
     }
     return nullptr;
 }
 
-bool Region::ContainsLandmark(const ptrLandmark &landmark) const
+bool AIRegion::ContainsLandmark(const AILandmark* landmark) const
 {
-    for (ptrLandmark clandmark:_landmarks)
+    for (const AILandmark& clandmark:_landmarks)
     {
-        if (clandmark==landmark)
+        if (&clandmark==landmark)
             return true;
     }
     return false;
 }
 
-void Region::InitLandmarkNetwork()
+void AIRegion::InitLandmarkNetwork()
 {
-    _landmarkNetwork = LandmarkNetwork(GetLandmarks(),GetAllConnections());
+    _landmarkNetwork = AILandmarkNetwork(this,GetLandmarks(),GetAllConnections());
 }
 
-double Region::PathLengthFromLandmarkToTarget(const ptrLandmark &landmark, const ptrLandmark &target)
+std::pair<std::vector<const AILandmark*>,double> AIRegion::PathLengthFromLandmarkToTarget(const AILandmark* landmark, const AILandmark* target) const
 {
     return _landmarkNetwork.LengthofShortestPathToTarget(landmark,target);
 }
 
 
-std::vector<ptrConnection> Region::GetAllConnections() const
+const std::vector<AIConnection>& AIRegion::GetAllConnections() const
 {
-    std::vector<ptrConnection> con{ std::begin(_connections), std::end(_connections) };
-    return con;
+    return _connections;
 }
 
-void Region::AddConnection(const ptrConnection& connection)
+void AIRegion::AddConnection(const AIConnection& connection)
 {
     _connections.push_back(connection);
 }
 
-void Region::AddConnection(const int& id, const std::string& caption, const std::string& type, const ptrLandmark& landmark1,const ptrLandmark& landmark2)
+void AIRegion::AddConnection(int id, const std::string& caption, const std::string& type, int landmarkId1, int landmarkId2)
 {
-    _connections.push_back(std::make_shared<Connection>(id,caption,type,landmark1,landmark2));
+    _connections.push_back(AIConnection(id,caption,type,landmarkId1,landmarkId2));
 }
 
-void Region::RemoveConnections(const ptrLandmark &landmark)
+void AIRegion::RemoveConnections(const AILandmark* landmark)
 {
-    for (ptrConnection connection:_connections)
+    for (auto it=_connections.begin(); it!=_connections.end(); ++it)
     {
-        if (connection->GetLandmarks().first==landmark || connection->GetLandmarks().second==landmark)
+        if (it->GetLandmarkIds().first==landmark->GetId() || it->GetLandmarkIds().second==landmark->GetId())
         {
-            _connections.remove(connection);
+            it=_connections.erase(it);
+            --it;
         }
     }
 }
 
-Landmarks Region::ConnectedWith(const ptrLandmark &landmark) const
+std::vector<const AILandmark*> AIRegion::ConnectedWith(const AILandmark *landmark) const
 {
-    Landmarks cLandmarks;
-    for (ptrConnection connection:_connections)
+    std::vector<const AILandmark*> cLandmarks;
+    for (const AIConnection& connection:_connections)
     {
-        if (connection->GetLandmarks().first==landmark )
+        if (connection.GetLandmarkIds().first==landmark->GetId())
         {
-            cLandmarks.push_back(connection->GetLandmarks().second);
+            cLandmarks.push_back(this->GetLandmarkByID(connection.GetLandmarkIds().second));
         }
-        else if (connection->GetLandmarks().second==landmark )
+        else if (connection.GetLandmarkIds().second==landmark->GetId())
         {
-            cLandmarks.push_back(connection->GetLandmarks().first);
+            cLandmarks.push_back(this->GetLandmarkByID(connection.GetLandmarkIds().first));
         }
     }
-
 
     return cLandmarks;
 
 }
+
+
+

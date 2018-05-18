@@ -138,7 +138,7 @@ public:
      void calculateFloorfield(std::vector<Line>& wallArg, double* costarray, Point* neggradarray, double* speedarray);
      void calculateDistanceField(const double thresholdArg);             //make private
 
-     void checkNeighborsAndAddToNarrowband(std::priority_queue<TrialP, std::vector<TrialP>, std::greater<TrialP>>& trialfield, TrialP key,
+     void checkNeighborsAndAddToNarrowband(std::priority_queue<TrialP, std::vector<TrialP>, std::greater<TrialP> >& trialfield, TrialP key,
                                            std::function<void (TrialP)> calc);
 
      void calcDist2Wall(TrialP);

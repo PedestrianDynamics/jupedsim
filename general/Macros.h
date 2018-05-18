@@ -62,8 +62,9 @@
 #define JPS_OLD_VERSION "0.5" // this version is still supported
 #define JPS_VERSION_MINOR "8"
 #define JPS_VERSION_MAJOR "0"
+#define JPS_PATCH_VERSION "2"
 
-#define JPS_VERSION JPS_VERSION_MAJOR "." JPS_VERSION_MINOR
+#define JPS_VERSION JPS_VERSION_MAJOR "." JPS_VERSION_MINOR "." JPS_PATCH_VERSION
 
 // disable openmp in debug mode
 #ifdef _NDEBUG
@@ -94,6 +95,12 @@
 // Not-a-Number (NaN)
 #define J_NAN std::numeric_limits<double>::quiet_NaN()
 
+//update rate for AI router
+#ifndef AI_UPDATE_RATE
+#define AI_UPDATE_RATE 5.0  //fps
+#endif
+
+
 enum RoomState {
      ROOM_CLEAN=0,
      ROOM_SMOKED=1
@@ -119,6 +126,7 @@ enum RoutingStrategy {
      ROUTING_GLOBAL_SHORTEST,
      ROUTING_QUICKEST,
      ROUTING_FROM_FILE,
+     ROUTING_SMOKE,
      ROUTING_AI,
      ROUTING_FLOORFIELD,
      ROUTING_FF_GLOBAL_SHORTEST,
@@ -296,31 +304,31 @@ inline void ReplaceStringInPlace(std::string& subject, const std::string& search
 //**************************************************************
 
 //Text attributes
-#define OFF       0     //All attributes off
-#define BRIGHT      1    //Bold on
+#define OFF 0     //All attributes off
+#define BRIGHT 1    //Bold on
 //       4    Underscore (on monochrome display adapter only)
-#define BLINK       5    //Blink on
+#define BLINK 5    //Blink on
 //       7    Reverse video on
 //      8    Concealed on
 
 //   Foreground colors
-#define BLACK     30
-#define CYAN      36
-#define WHITE     37
-#define RED       31
-#define GREEN     32
-#define YELLOW    33
-#define BLUE      34
-#define MAGENTA   35
+#define JPS_BLACK 30
+#define JPS_CYAN 36
+#define JPS_WHITE 37
+#define JPS_RED 31
+#define JPS_GREEN 32
+#define JPS_YELLOW 33
+#define JPS_BLUE 34
+#define JPS_MAGENTA 35
 
 //    Background colors
-#define BG_BLACK  40
-#define BG_RED    41
-#define BG_GREEN  42
-#define BG_YELLOW 43
-#define BG_BLUE   44
-#define BG_CYAN   47
-#define BG_WHITE  47
+#define JPS_BG_BLACK 40
+#define JPS_BG_RED 41
+#define JPS_BG_GREEN 42
+#define JPS_BG_YELLOW 43
+#define JPS_BG_BLUE 44
+#define JPS_BG_CYAN 47
+#define JPS_BG_WHITE 47
 
 // Special caracters
 #define HOME  printf("\033[1;1H");  // cursor up left

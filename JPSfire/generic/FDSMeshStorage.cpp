@@ -27,11 +27,8 @@
  *
  **/
 #include "FDSMeshStorage.h"
-#include "../../IO/OutputHandler.h"
 //#include <unistd.h>
-#include <stdio.h>
 //#include <glob.h>
-#include <string>
 #include <boost/filesystem.hpp>
 
 namespace fs=boost::filesystem;
@@ -66,7 +63,7 @@ FDSMeshStorage::FDSMeshStorage(const std::string &filepath, const double &finalT
         CreateFDSMeshes();
         std::cout << "Success!" << std::endl;
     }
-    else {        
+    else {
         Log->Write("ERROR:\tCould not find directory <%s>\n", _filepath.c_str());
         exit(EXIT_FAILURE);
     }
@@ -88,7 +85,7 @@ bool FDSMeshStorage::CreateQuantityList()
       {
 		  std::string quant_dir = iter->path().string();
           quant_dir =  quant_dir.substr( quant_dir.find_last_of("/\\") + 1 );
-          std::cout << quant_dir << std::endl;
+          //std::cout << quant_dir << std::endl;
            _quantitylist.push_back(quant_dir);
       }
     }
@@ -161,7 +158,7 @@ void FDSMeshStorage::CreateTimeList()
 {
     /// Create time list for mesh refreshment
     _timelist.clear();
-    double i=0;
+    double i=0;    
     while (i<=_finalTime)
     {
         _timelist.push_back(i);
@@ -173,20 +170,22 @@ void FDSMeshStorage::CreateTimeList()
     for(auto elem : _timelist) {
         if (_doorlist.size() > 0) {     // Smoke sensor active
         check_str = _filepath + _quantitylist[0] + "/" +
-                _doorlist[0] + "/t_" + std::to_string(elem) + ".csv";
-//        std::cout << "1: " << check_str << std::endl;
+                _doorlist[0] + "/t_" + std::to_string(elem) + ".npz";
+        //std::cout << "1: " << check_str << std::endl;
         }
         else if (_doorlist.size() == 0) {   // Smoke sensor not active
             check_str = _filepath + _quantitylist[0] + "/Z_" +
-                    std::to_string(_elevationlist[0]) + "/t_" + std::to_string(elem) + ".csv";
-//                    std::cout << "2: "  << check_str << std::endl;
+                    std::to_string(_elevationlist[0]) + "/t_" + std::to_string(elem) + ".npz";
+            //std::cout << "2: "  << check_str << std::endl;
         }
 
         if (fs::exists(check_str) == false )
         {
             Log->Write("ERROR:\tSpecified times are not compliant with JPSfire data " + check_str);
+             std::cout << "Not found: " << check_str << std::endl;
             exit(EXIT_FAILURE);
         }
+        //std::cout << "LEAVING \n" ;
     }
 
 }
@@ -198,16 +197,16 @@ void FDSMeshStorage::CreateFDSMeshes()
     if (_doorlist.size() > 0) {     // Smoke sensor active
         for (auto &h:_quantitylist)     //list of quantities
         {
+             
                 for (auto &j:_doorlist)         //list of doors
-                {
+                {    
                     //std::cout << "door " << j << std::endl;
                     for (auto &k:_timelist)         //list of times
                     {
-                        //std::cout << "k " << j << std::endl;
-                        std::string str = h +
-                        "/" + j + "/t_"+std::to_string(k);
-                        //std::cout << _filepath + str + ".csv" << std::endl;
-                        FDSMesh mesh(_filepath + str + ".csv");
+                         
+                        std::string str = h + "/" + j + "/t_"+std::to_string(k);
+                        //std::cout << _filepath + str + ".npz" << std::endl;
+                        FDSMesh mesh(_filepath + str + ".npz");
                         //std::string str = "t_"+std::to_string(i);
                         _fMContainer.insert(std::make_pair(str, mesh));
                     }
@@ -225,11 +224,11 @@ void FDSMeshStorage::CreateFDSMeshes()
                     //std::cout << "k " << j << std::endl;
                     std::string str = h + "/Z_" + std::to_string(i) +
                     "/t_"+std::to_string(k);
-                    //std::cout << _filepath + str + ".csv" << std::endl;
+                    //std::cout << _filepath + str + ".npz" << std::endl;
 
-                    FDSMesh mesh(_filepath + str + ".csv");
+                    FDSMesh mesh(_filepath + str + ".npz");
 
-                    //std::cout << _filepath + str + ".csv" << std::endl;
+                    //std::cout << _filepath + str + ".npz" << std::endl;
                     //std::string str = "t_"+std::to_string(i);
                     _fMContainer.insert(std::make_pair(str, mesh));
                 }
@@ -256,6 +255,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &p
 
     if (_fMContainer.count(str) == 0) {
         //std::cout << str << std::endl;
+        std::cout << "ERROR: requested grid not available: " << str << std::endl;
         throw -1;
     }
     return _fMContainer.at(str);
@@ -274,8 +274,8 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
 {
     //Smoke Sensor active
 
-     std::string quantity = "dx_1.00";
-     
+     std::string quantity = "EXTINCTION_COEFFICIENT";
+
     _PedEyeHeight = pedElev + 1.8;
     GetNearestHeight(_PedEyeHeight);
 
@@ -296,9 +296,9 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
         throw -1;
     }
 
-    if (_fMContainer.count(str) == 1) {
-        std::cout << "INFO: requested sfgrid: " << str << std::endl;
-    }
+    // if (_fMContainer.count(str) == 1) {
+    //      std::cout << "INFO: requested sfgrid: " << str << std::endl;
+    // }
 
     return _fMContainer.at(str);
 }
@@ -330,4 +330,3 @@ std::string FDSMeshStorage::IrritantOrNot() const
 {
     return _irritant;
 }
-

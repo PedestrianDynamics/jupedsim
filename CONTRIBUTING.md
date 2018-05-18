@@ -64,6 +64,15 @@ After doing that open a merge/pull request.
 
 If your fix/feature is accepted it will be merged into the develop-branch.
 
+#################
+TODO: 
+- How to make branches out of issues
+- How to work with branches
+- Board usage
+- Gitlab in general: features
+- Wiki vs Web
+#######################
+
 ### FAQ
 
 ## Reporting bugs and requesting features

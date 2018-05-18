@@ -1,4 +1,5 @@
 #include "landmarknetwork.h"
+#include "region.h"
 
 //    In the following example, we construct a graph and apply dijkstra_shortest_paths().
 //            The complete source code for the example is in examples/dijkstra-example.cpp.
@@ -57,44 +58,45 @@
 //    std::cout << std::endl;
 
 
-LandmarkNetwork::LandmarkNetwork()
+AILandmarkNetwork::AILandmarkNetwork()
 {
     _graph=Graph();
 }
 
-LandmarkNetwork::LandmarkNetwork(const Landmarks &landmarks, const std::vector<ptrConnection> &connections)
+AILandmarkNetwork::AILandmarkNetwork(const AIRegion* region, const AILandmarks &landmarks, const std::vector<AIConnection> &connections)
 {
+    _region=region;
     _graph=Graph();
 
-    for (ptrLandmark landmark:landmarks)
+    for (const AILandmark& landmark:landmarks)
     {
-        AddLandmark(landmark);
+        AddLandmark(&landmark);
     }
 
 
-    for (ptrConnection connection:connections)
+    for (const AIConnection& connection:connections)
     {
-        AddConnection(connection);
+        AddConnection(&connection);
 
     }
 }
 
 
-LandmarkNetwork::~LandmarkNetwork()
+AILandmarkNetwork::~AILandmarkNetwork()
 {
 
 }
 
-void LandmarkNetwork::AddLandmark(const ptrLandmark& landmark)
+void AILandmarkNetwork::AddLandmark(const AILandmark *landmark)
 {
 
     Vertex v = boost::add_vertex(_graph);
     //std::make_pair<int,int>(1,1);
-    _landmarks.push_back(std::pair<ptrLandmark,Vertex> (landmark,v));
+    _landmarks.emplace(landmark,v);
 
 }
 
-void LandmarkNetwork::RemoveLandmark(const ptrLandmark &landmark)
+void AILandmarkNetwork::RemoveLandmark(const AILandmark *landmark)
 {
 
 
@@ -105,42 +107,46 @@ void LandmarkNetwork::RemoveLandmark(const ptrLandmark &landmark)
             boost::clear_vertex(it->second,_graph);
             RemoveAdjacentEdges(it->second);
             boost::remove_vertex(it->second,_graph);
-            _landmarks.remove(*it);
+            _landmarks.erase(it);
             break;
         }
     }
 
 
+
 }
 
-void LandmarkNetwork::AddConnection(const ptrConnection &connection)
+void AILandmarkNetwork::AddConnection(const AIConnection *connection)
 {
     //find indeces of vertices(landmarks) in graph
-    ptrLandmark landmarkA = connection->GetLandmarks().first;
-    ptrLandmark landmarkB = connection->GetLandmarks().second;
+    const AILandmark* landmarkA = _region->GetLandmarkByID(connection->GetLandmarkIds().first);
+    const AILandmark* landmarkB = _region->GetLandmarkByID(connection->GetLandmarkIds().second);
     Vertex A;
     Vertex B;
 
-    for (auto it=_landmarks.begin(); it!=_landmarks.end(); ++it)
-    {
-        int counter=0;
-        if (it->first==landmarkA)
-        {
-            A = it->second;
-            counter++;
-            if (counter==2)
-                break;
-        }
-        else if (it->first==landmarkB)
-        {
-            B = it->second;
-            counter++;
-            if (counter==2)
-                break;
-        }
-    }
+//    for (auto it=_landmarks.begin(); it!=_landmarks.end(); ++it)
+//    {
+//        int counter=0;
+//        if (it->first==landmarkA)
+//        {
+//            A = it->second;
+//            counter++;
+//            if (counter==2)
+//                break;
+//        }
+//        else if (it->first==landmarkB)
+//        {
+//            B = it->second;
+//            counter++;
+//            if (counter==2)
+//                break;
+//        }
+//    }
 
-    Point vector = landmarkA->GetPosInMap()-landmarkB->GetPosInMap();//->GetRandomPoint()-landmarkB->GetRandomPoint();
+    A=_landmarks[landmarkA];
+    B=_landmarks[landmarkB];
+
+    Point vector = landmarkA->GetRandomPoint()-landmarkB->GetRandomPoint();//->GetRandomPoint()-landmarkB->GetRandomPoint();
     double distance = vector.Norm();
     _connections.push_back(std::pair<Edge,Weight>(Edge(A,B),distance));
 
@@ -148,8 +154,11 @@ void LandmarkNetwork::AddConnection(const ptrConnection &connection)
     boost::add_edge(B,A,distance,_graph);
 }
 
-double LandmarkNetwork::LengthofShortestPathToTarget(const ptrLandmark &landmark, const ptrLandmark &target) const
+std::pair<std::vector<const AILandmark*>,double> AILandmarkNetwork::LengthofShortestPathToTarget(const AILandmark *landmark, const AILandmark *target) const
 {
+
+    if (landmark==target)
+        return std::make_pair<std::vector<const AILandmark*>,double>(std::vector<const AILandmark*>{landmark},0.0);
 
     int startVertex=-1;
     int targetVertex=-1;
@@ -157,34 +166,38 @@ double LandmarkNetwork::LengthofShortestPathToTarget(const ptrLandmark &landmark
     // get the start vertex
 
 
-    for (auto it=_landmarks.begin(); it!=_landmarks.end(); ++it)
-    {
+//    for (auto it=_landmarks.begin(); it!=_landmarks.end(); ++it)
+//    {
 
-        int counter=0;
-        if (it->first==landmark)
-        {
-            startVertex=it->second;
-            counter++;
-            if (counter==2)
-                break;
-        }
-        else if (it->first==target)
-        {
-            targetVertex=it->second;
-            counter++;
-            if (counter==2)
-                break;
-        }
+//        int counter=0;
+//        if (it->first==landmark)
+//        {
+//            startVertex=it->second;
+//            counter++;
+//            if (counter==2)
+//                break;
+//        }
+//        else if (it->first==target)
+//        {
+//            targetVertex=it->second;
+//            counter++;
+//            if (counter==2)
+//                break;
+//        }
 
-    }
+//    }
+
+    startVertex=_landmarks.at(landmark);
+    targetVertex=_landmarks.at(target);
 
 
     if (targetVertex==-1 || startVertex==-1)
-        return -1;
+        throw std::invalid_argument("Wrong target or landmark!");
 
     //std::vector<double> edgeWeights;
 
     // vector for storing distance property
+    std::vector<Vertex> p(boost::num_vertices(_graph));
     std::vector<double> d(boost::num_vertices(_graph));
 
 //    for (auto it =_connections.begin(); it!=_connections.end(); ++it)
@@ -193,16 +206,46 @@ double LandmarkNetwork::LengthofShortestPathToTarget(const ptrLandmark &landmark
 //    }
 
     // invoke variant 2 of Dijkstra's algorithm
-    boost::dijkstra_shortest_paths(_graph, startVertex, boost::distance_map(&d[0]));
+    //boost::dijkstra_shortest_paths(_graph, startVertex, boost::distance_map(&d[0]));
+    boost::dijkstra_shortest_paths(_graph, startVertex,
+                              boost::predecessor_map(boost::make_iterator_property_map(p.begin(), get(boost::vertex_index, _graph))).
+                              distance_map(boost::make_iterator_property_map(d.begin(), get(boost::vertex_index, _graph))));
+
+   //std::cout << "distances and parents:" << std::endl;
+   Vertex vi=targetVertex;
+
+
+   std::vector<const AILandmark*> landmarksOnShortestPath;
+
+   while (vi!=startVertex)
+   {
+        for (auto it=_landmarks.begin(); it!=_landmarks.end(); ++it)
+        {
+            if (it->second==vi)
+            {
+                landmarksOnShortestPath.push_back(it->first);
+
+                break;
+            }
+            //Log->Write(std::to_string(vi));
+
+        }
+        vi=p[vi];
+
+      //std::cout << d[targetVertex] << std::endl;
+      //std::cout << "parent(" << name[*vi] << ") = " << name[p[*vi]] << std::endl;
+    }
+    landmarksOnShortestPath.push_back(landmark);
     //std::cout << "distance from start vertex to target:" << std::endl;
 //    boost::graph_traits<Graph>::vertex_iterator vi;
 //    for(vi = boost::vertices(_graph).first; vi != boost::vertices(_graph).second; ++vi)
 //        std::cout << "distance = "  << d[*vi] << std::endl;
 
-    return d[targetVertex];
+    //Log->Write(std::to_string(landmarksOnShortestPath.size()));
+    return std::make_pair(landmarksOnShortestPath,d[targetVertex]);
 }
 
-void LandmarkNetwork::RemoveAdjacentEdges(const Vertex &vertex)
+void AILandmarkNetwork::RemoveAdjacentEdges(const Vertex &vertex)
 {
     for (auto it=_connections.begin(); it!=_connections.end(); ++it)
     {

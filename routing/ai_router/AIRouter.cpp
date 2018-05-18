@@ -31,8 +31,8 @@
 
 #include "BrainStorage.h"
 #include "./cognitiveMap/cognitivemap.h"
-#include "NavigationGraph.h"
-#include "./sensor/SensorManager.h"
+//#include "NavigationGraph.h"
+//#include "./sensor/SensorManager.h"
 
 #include "../../geometry/SubRoom.h"
 #include "../../geometry/NavLine.h"
@@ -45,7 +45,7 @@ AIRouter::AIRouter()
 {
     building=nullptr;
 //    cm_storage=nullptr;
-//    sensor_manager=nullptr;
+    //sensor_manager=nullptr;
 
 }
 
@@ -53,125 +53,78 @@ AIRouter::AIRouter(int id, RoutingStrategy s) : Router(id, s)
 {
     building=nullptr;
 //    cm_storage=nullptr;
-//    sensor_manager=nullptr;
+    //sensor_manager=nullptr;
 }
 
 AIRouter::~AIRouter()
 {
      //delete brain_storage;
-     delete sensor_manager;
+     //delete sensor_manager;
 
 }
 
 int AIRouter::FindExit(Pedestrian * p)
 {
-    //check for former goal.
-    if((*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->HadNoDestination()) {
-        sensor_manager->execute(p, SensorManager::INIT);
-    }
 
-    //Check if the Pedestrian already has a Dest. or changed subroom and needs a new one.
-    if((*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->ChangedSubRoom()) {
-        //execute periodical sensors
-        sensor_manager->execute(p, SensorManager::CHANGED_ROOM);
-
-        int status = FindDestination(p);
-
-        (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->UpdateSubRoom();
-
-        return status;
-    }
-
-    // check if ped reached a hline
-    if((*brain_storage)[p]->HlineReached())
+    if (std::fmod(std::roundf(p->GetGlobalTime()*100),std::roundf(1.0/AI_UPDATE_RATE*100))==0.0)// && p->GetGlobalTime()>0)
     {
+
+        //Log->Write(std::to_string(p->GetGlobalTime()));
+        //sensor_manager->execute(p, SensorManager::PERIODIC);
+
         int status = FindDestination(p);
 
         //(*cm_storage)[p]->UpdateSubRoom();
 
         return status;
+
     }
-
-    //std::cout << p->GetGlobalTime() << std::endl;
-//    if (std::fmod(p->GetGlobalTime(),sensor_manager->GetIntVPeriodicUpdate())==0.0 && p->GetGlobalTime()>0)
-//    {
-//        //Log->Write(std::to_string(p->GetGlobalTime()));
-//        sensor_manager->execute(p, SensorManager::PERIODIC);
-
-//        int status = FindDestination(p);
-
-//        //(*cm_storage)[p]->UpdateSubRoom();
-
-//        return status;
-
-//    }
     return 1;
 }
 
 int AIRouter::FindDestination(Pedestrian * p)
 {
         // Discover doors
-        sensor_manager->execute(p, SensorManager::NO_WAY);
+        //sensor_manager->execute(p, SensorManager::NO_WAY);
         //check if there is a way to the outside the pedestrian knows (in the cognitive map)
-        const GraphEdge * destination = nullptr;
-        //Cognitive Map /Associations/ Waypoints/ landmarks
-
-//        (*cm_storage)[p]->UpdateMap();
 
         //--------------------COGMAP----------------------------
-        //See if Landmarks are visible
+        //Update isovists
+        (*brain_storage)[p]->GetPerceptionAbilities().UpdateCurrentEnvironment();
+        (*brain_storage)[p]->GetPerceptionAbilities().UpdateSeenEnv();
+        // update cogmap
+        (*brain_storage)[p]->GetCognitiveMap().UpdateMap();
 
-        //(*brain_storage)[p]->GetCognitiveMap().UpdateMap();
         //Find next appropriate landmark
-        //(*brain_storage)[p]->GetCognitiveMap().FindNextTarget();
-        //Find appropriate door to reach next app. landmark
-        //(*brain_storage)[p]->GetCognitiveMap().AssessDoors();
-        //------------------------------------------------------
+        (*brain_storage)[p]->GetCognitiveMap().FindNextTarget();
+        // find possible crossings in seenEnvironment e.g. to proceed to landmark
+        std::vector<NavLine> navLines = (*brain_storage)[p]->GetPerceptionAbilities().GetPossibleNavLines(
+                    (*brain_storage)[p]->GetPerceptionAbilities().GetSeenEnvironmentAsPointVec(building->GetRoom(p->GetRoomID())));
 
-        //Log->Write(std::to_string((*cm_storage)[p]->GetOwnPos().GetX())+" "+std::to_string((*cm_storage)[p]->GetOwnPos().GetY()));
+        NavLine nextNvLine=(*brain_storage)[p]->FindApprCrossing(navLines);
 
-        destination = (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->GetDestination();
-        if(destination == nullptr) {
-            //no destination was found, now we could start the discovery!
-            //1. run the no_way sensors for room discovery.
-            sensor_manager->execute(p, SensorManager::NO_WAY);
-
-            //check if this was enough for finding a global path to the exit
-
-            destination = (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->GetDestination();
-
-            if(destination == nullptr) {
-                //we still do not have a way. lets take the "best" local edge
-                //for this we don't calculate the cost to exit but calculate the cost for the edges at the actual vertex.
-                destination = (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->GetLocalDestination();
-            }
-        }
+//        std::ofstream myfile2;
+//        std::string str2 = "./isovists/navLinesBefore_pos"+std::to_string(p->GetID())+"_"+std::to_string((int)(std::round(p->GetGlobalTime()*100)))+".txt";
+//        myfile2.open (str2);
+//        myfile2 << std::to_string(nextNvLine.GetCentre()._x) << " " << std::to_string(nextNvLine.GetCentre()._y) << std::endl;
+//        myfile2.close();
 
 
-        //if we still could not found any destination we are lost! Pedestrian will be deleted
-        //no destination should just appear in bug case or closed rooms.
-        if(destination == nullptr) {
-            Log->Write("ERROR: \t One Pedestrian (ID: %i) was not able to find any destination", p->GetID());
-            return -1;
-        }
+        // find possible crossings in currentEnv to proceed to nextNvLine
+        navLines = (*brain_storage)[p]->GetPerceptionAbilities().GetPossibleNavLines(
+                    (*brain_storage)[p]->GetPerceptionAbilities().GetCurrentEnvironmentAsPointVec());
+        //Find appropriate visible crossing to reach next app. landmark
+        nextNvLine=(*brain_storage)[p]->FindApprVisibleCrossing(nextNvLine,navLines);
 
-        (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->AddDestination(destination);
-        sensor_manager->execute(p, SensorManager::NEW_DESTINATION);
 
-        const Crossing* nextTarget = destination->GetCrossing();
 
-        const NavLine* nextNavLine=(*brain_storage)[p]->GetNextNavLine(nextTarget);
+//        std::ofstream myfile;
+//        std::string str = "./isovists/navLines_pos"+std::to_string(p->GetID())+"_"+std::to_string((int)(std::round(p->GetGlobalTime()*100)))+".txt";
+//        myfile.open (str);
+//        myfile << std::to_string(nextNvLine.GetCentre()._x) << " " << std::to_string(nextNvLine.GetCentre()._y) << std::endl;
+//        myfile.close();
 
-        if (nextNavLine==nullptr) {
-             Log->Write("ERROR: \t No visible next subtarget found. PED "+std::to_string(p->GetID()));
-             return -1;
-        }
-        //setting crossing to ped
-        p->SetExitLine(nextNavLine);
-        p->SetExitIndex(nextNavLine->GetUniqueID());
-        //p->SetExitLine(destination->GetCrossing());
-        //p->SetExitIndex(destination->GetCrossing()->GetUniqueID());
-
+        p->SetExitLine(&nextNvLine);
 
         return 1;
 }
@@ -186,17 +139,24 @@ bool AIRouter::Init(Building * b)
      LoadRoutingInfos(GetRoutingInfoFile());
 
      //Init Cognitive Map Storage, second parameter: decides whether cognitive Map is empty or complete
-     if (getOptions().find("CognitiveMapFiles")==getOptions().end())
-        brain_storage = std::shared_ptr<BrainStorage>(new BrainStorage(building,getOptions().at("CognitiveMap")[0]));
+     if (getOptions().find("CognitiveMapFiles")==getOptions().end() && getOptions().find("SignFiles")==getOptions().end())
+        brain_storage = std::unique_ptr<AIBrainStorage>(new AIBrainStorage(building));
+     else if (getOptions().find("CognitiveMapFiles")==getOptions().end())
+         brain_storage = std::unique_ptr<AIBrainStorage>(new AIBrainStorage(building,"",getOptions().at("SignFiles")[0]));
+     else if (getOptions().find("SignFiles")==getOptions().end())
+        brain_storage = std::unique_ptr<AIBrainStorage>(new AIBrainStorage(building,getOptions().at("CognitiveMapFiles")[0]));
      else
-        brain_storage = std::shared_ptr<BrainStorage>(new BrainStorage(building,getOptions().at("CognitiveMap")[0],getOptions().at("CognitiveMapFiles")[0]));
+         brain_storage = std::unique_ptr<AIBrainStorage>(
+                 new AIBrainStorage(building,getOptions().at("CognitiveMapFiles")[0],
+                                  getOptions().at("SignFiles")[0]));
+
      Log->Write("INFO:\tCognitiveMapStorage initialized");
      //cm_storage->ParseCogMap();
 
      //Init Sensor Manager
      //sensor_manager = SensorManager::InitWithAllSensors(b, cm_storage);
-     sensor_manager = SensorManager::InitWithCertainSensors(b, brain_storage.get(), getOptions());
-     Log->Write("INFO:\tSensorManager initialized");
+     //sensor_manager = SensorManager::InitWithCertainSensors(b, brain_storage.get(), getOptions());
+     //Log->Write("INFO:\tSensorManager initialized");
      return true;
 }
 
@@ -307,7 +267,7 @@ std::string AIRouter::GetRoutingInfoFile()
 
          string strategy=e->Attribute("description");
 
-         if(strategy=="AI")
+         if(strategy=="cognitive_map")
          {
               if(e->FirstChild("parameters"))
               {
@@ -320,7 +280,13 @@ std::string AIRouter::GetRoutingInfoFile()
     if (nav_line_file == "")
          return nav_line_file;
     else
-         return building->GetProjectRootDir()+nav_line_file;
+        return building->GetProjectRootDir()+nav_line_file;
+}
+
+void AIRouter::DeleteCortex(const Pedestrian *ped)
+{
+    brain_storage->DeleteCortex(ped);
+
 }
 
 

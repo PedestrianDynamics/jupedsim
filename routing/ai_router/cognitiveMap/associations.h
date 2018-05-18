@@ -3,24 +3,24 @@
 
 #include<memory>
 
-class Landmark;
-using ptrLandmark = std::shared_ptr<Landmark>;
-class Connection;
-using ptrConnection = std::shared_ptr<Connection>;
+class AILandmark;
+class AIConnection;
 
-class Association
+
+class AIAssociation
 {
 public:
-    Association();
-    Association(ptrLandmark landmark, ptrLandmark associated_landmark, bool connected=false);
-    Association(ptrConnection connection);
-    ~Association();
-    ptrLandmark GetLandmarkAssociation(ptrLandmark landmark) const;
-    ptrConnection GetConnectionAssoziation() const;
+    AIAssociation();
+    AIAssociation(const AILandmark* landmark, const AILandmark* associated_landmark, bool connected=false);
+    AIAssociation(const AIConnection* connection);
+    ~AIAssociation();
+    const AILandmark* GetLandmarkAssociation(const AILandmark* landmark) const;
+    const AIConnection* GetConnectionAssoziation() const;
+    bool operator==(const AIAssociation& asso2) const;
 private:
-    ptrLandmark _landmark;
-    ptrLandmark _associatedLandmark;
-    ptrConnection _connection;
+    const AILandmark* _landmark;
+    const AILandmark* _associatedLandmark;
+    const AIConnection* _connection;
 };
 
 #endif // ASSOCIATIONS_H

@@ -87,6 +87,7 @@ public:
     virtual Point GetDir2Wall(Pedestrian* ped) const;
     virtual double GetDistance2Wall(Pedestrian* ped) const;
 
+
 private:
      FloorfieldViaFM* _ffviafm;
      bool _initDone;
@@ -101,6 +102,7 @@ public:
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
      virtual Point GetDir2Wall(Pedestrian* ped) const;
      virtual double GetDistance2Wall(Pedestrian* ped) const;
+     virtual double GetDistance2Target(Pedestrian* ped, int UID);
 
 protected:
      std::map<int, UnivFFviaFM*> _locffviafm;
@@ -121,6 +123,7 @@ public:
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
      virtual Point GetDir2Wall(Pedestrian* ped) const;
      virtual double GetDistance2Wall(Pedestrian* ped) const;
+     virtual double GetDistance2Target(Pedestrian* ped, int UID);
 
 protected:
      std::map<int, UnivFFviaFM*> _locffviafm;

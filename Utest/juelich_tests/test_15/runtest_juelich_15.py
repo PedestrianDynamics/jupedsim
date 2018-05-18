@@ -22,9 +22,6 @@ import os
 import sys
 from sys import *
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
-import scipy
-import scipy.stats
-import matplotlib.pyplot as plt
 sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *

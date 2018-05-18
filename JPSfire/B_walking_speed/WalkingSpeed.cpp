@@ -27,33 +27,33 @@
  **/
 
 #include "WalkingSpeed.h"
-#include "../../geometry/Building.h"
 #include "../../pedestrian/Pedestrian.h"
 #include "../generic/FDSMesh.h"
 #include "../generic/FDSMeshStorage.h"
-#include "../../pedestrian/PedDistributor.h"
+//#include "../../pedestrian/PedDistributor.h"
 #include "../../tinyxml/tinyxml.h"
-#include <set>
-#include <algorithm>
-#include <math.h>
-#include <string>
+//#include <set>
+//#include <algorithm>
+//#include <math.h>
+//#include <string>
+#include <boost/filesystem.hpp>
+using namespace boost::filesystem;
 
-WalkingSpeed::WalkingSpeed(const Building * b)
+
+WalkingSpeed::WalkingSpeed(const std::string & projectFileName)
 {
-    _FMStorage = nullptr;
-    _building = b;
-    LoadJPSfireInfo(_building->GetProjectFilename());
+     _FMStorage = nullptr;
+     LoadJPSfireInfo(projectFileName);
 }
 
-WalkingSpeed::~WalkingSpeed()
+WalkingSpeed::~WalkingSpeed() = default;
+
+bool WalkingSpeed::LoadJPSfireInfo(const std::string & projectFilename )
 {
-}
+   boost::filesystem::path p(projectFilename);
+   std::string projectRootDir = p.parent_path().string();
 
-
-
-bool WalkingSpeed::LoadJPSfireInfo(const std::string projectFilename )
-{
-   TiXmlDocument doc(projectFilename);
+     TiXmlDocument doc(projectFilename);
    if (!doc.LoadFile()) {
         Log->Write("ERROR: \t%s", doc.ErrorDesc());
         Log->Write("ERROR: \t could not parse the project file");
@@ -71,8 +71,11 @@ bool WalkingSpeed::LoadJPSfireInfo(const std::string projectFilename )
        if(JPSfireCompElem->FirstAttribute()){
            std::string study = xmltoa(JPSfireCompElem->Attribute("study"), "");
            std::string irritant = xmltoa(JPSfireCompElem->Attribute("irritant"), "");
-           //std::string filepath = xmltoa(JPSfireCompElem->Attribute("extinction_grids"), "");
-           std::string filepath = _building->GetProjectRootDir() + xmltoa(JPSfireCompElem->Attribute("extinction_grids"), "");
+           std::string extinction_grids = xmltoa(JPSfireCompElem->Attribute("extinction_grids"), "");
+           std::string filepath = projectRootDir + "/" + extinction_grids; //TODO: check compatibility
+           if (projectRootDir.empty()  ) // directory is "."
+                filepath =  extinction_grids;
+
            double updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
            double finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
            Log->Write("INFO:\tJPSfire Module B_walking_speed: \n \tstudy: %s \n\tdata: %s \n\tupdate time: %.1f s | final time: %.1f s | irritant: %s",
@@ -91,15 +94,15 @@ double WalkingSpeed::GetExtinction(const Pedestrian * pedestrian)
  return ExtinctionCoefficient;
 }
 
-void WalkingSpeed::set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage)
-{
-    _FMStorage=fmStorage;
-}
+//void WalkingSpeed::set_FMStorage(const std::shared_ptr<FDSMeshStorage> & fmStorage)
+//{
+//    _FMStorage=fmStorage;
+//}
 
-const std::shared_ptr<FDSMeshStorage> WalkingSpeed::get_FMStorage()
-{
-    return _FMStorage;
-}
+//const std::shared_ptr<FDSMeshStorage> WalkingSpeed::get_FMStorage()
+//{
+//    return _FMStorage;
+//}
 
 double WalkingSpeed::FrantzichNilsson2003(double &walking_speed, double ExtinctionCoefficient)
 {

@@ -1,124 +1,105 @@
 #include "landmark.h"
 #include "associations.h"
-#include <stdlib.h>
 #include <math.h>
+#include "../../../general/Macros.h"
 
-Landmark::Landmark(Point pos, ptrRoom room)
+AILandmark::AILandmark(const Point &pos)
 {
     _realPos=pos;
-    _room=room;
     _visited=false;
+    _posInMap=Point(0.0,0.0);
 }
 
-Landmark::Landmark(Point pos, double a, double b, int id, ptrRoom room)
+AILandmark::AILandmark(const Point& pos, double a, double b, int id)
 {
     _realPos=pos;
     _a=a;
     _b=b;
-    _room=room;
-    _priority=1.0;
     _visited=false;
     _id=id;
+    _posInMap=Point(0.0,0.0);
 }
 
-Landmark::~Landmark()
+AILandmark::~AILandmark()
 {
 
 }
 
-void Landmark::SetId(int id)
+void AILandmark::SetId(int id)
 {
     _id=id;
 }
 
-void Landmark::SetA(double a)
+void AILandmark::SetA(double a)
 {
     _a=a;
 }
 
-void Landmark::SetB(double b)
+void AILandmark::SetB(double b)
 {
     _b=b;
 }
 
-void Landmark::SetRealPos(const Point &point)
+void AILandmark::SetRealPos(const Point &point)
 {
     _realPos=point;
 }
 
-void Landmark::SetPosInMap(const Point &point)
+void AILandmark::SetPosInMap(const Point &point)
 {
     _posInMap=point;
 }
 
 
-void Landmark::SetRoom(ptrRoom room)
-{
-    _room=room;
-}
 
-void Landmark::SetCaption(const std::string &string)
+void AILandmark::SetCaption(const std::string &string)
 {
     _caption=string;
 }
 
-void Landmark::SetPriority(double priority)
-{
-    _priority=priority;
-}
-
-void Landmark::SetType(const std::string& type)
+void AILandmark::SetType(const std::string& type)
 {
     _type=type;
 }
 
-const int &Landmark::GetId() const
+int AILandmark::GetId() const
 {
     return _id;
 }
 
-const Point &Landmark::GetRealPos() const
+const Point &AILandmark::GetRealPos() const
 {
     return _realPos;
 }
 
-const Point &Landmark::GetPosInMap() const
+const Point &AILandmark::GetPosInMap() const
 {
     return _posInMap;
 }
 
-const double &Landmark::GetA() const
+double AILandmark::GetA() const
 {
     return _a;
 }
 
-const double &Landmark::GetB() const
+double AILandmark::GetB() const
 {
     return _b;
 }
 
-const std::string& Landmark::GetType() const
+const std::string& AILandmark::GetType() const
 {
     return _type;
 }
 
 
-ptrRoom Landmark::GetRoom() const
-{
-    return _room;
-}
-
-const std::string &Landmark::GetCaption() const
+const std::string &AILandmark::GetCaption() const
 {
     return _caption;
 }
 
-const double &Landmark::GetPriority() const
-{
-    return _priority;
-}
 
-Point Landmark::GetRandomPoint() const
+Point AILandmark::GetRandomPoint() const
 {
     const double pi = M_PI;//std::acos(-1);
     int alpha1 = std::rand() % 360;
@@ -131,7 +112,7 @@ Point Landmark::GetRandomPoint() const
     return Point(x,y);
 }
 
-Point Landmark::PointOnShortestRoute(const Point& point) const
+Point AILandmark::PointOnShortestRoute(const Point& point) const
 {
     const double pi = std::acos(-1);
     double distance;
@@ -168,17 +149,17 @@ Point Landmark::PointOnShortestRoute(const Point& point) const
 //    return false;
 //}
 
-bool Landmark::Visited() const
+bool AILandmark::Visited() const
 {
     return _visited;
 }
 
-void Landmark::SetVisited(bool stat)
+void AILandmark::SetVisited(bool stat)
 {
     _visited=stat;
 }
 
-bool Landmark::Contains(const Point &point)
+bool AILandmark::Contains(const Point &point) const
 {
     double x = _a-(std::fabs(this->GetPosInMap()._x-point._x));
     double y = _b-(std::fabs(this->GetPosInMap()._y-point._y));
@@ -190,12 +171,12 @@ bool Landmark::Contains(const Point &point)
     return false;
 }
 
-Associations Landmark::GetAssociations() const
+const AIAssociations &AILandmark::GetAssociations() const
 {
     return _assoContainer;
 }
 
-void Landmark::AddAssociation(ptrAssociation asso)
+void AILandmark::AddAssociation(const AIAssociation &asso)
 {
     if (std::find(_assoContainer.begin(), _assoContainer.end(), asso)!=_assoContainer.end())
         return;
@@ -203,12 +184,12 @@ void Landmark::AddAssociation(ptrAssociation asso)
         _assoContainer.push_back(asso);
 }
 
-const ptrRegion Landmark::IsInRegion() const
+const AIRegion *AILandmark::IsInRegion() const
 {
     return _region;
 }
 
-void Landmark::SetRegion(ptrRegion region)
+void AILandmark::SetRegion(const AIRegion *region)
 {
     _region=region;
 }

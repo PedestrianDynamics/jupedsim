@@ -30,7 +30,7 @@ http://www.rimea.de/fileadmin/files/dok/richtlinien/RiMEA_Richtlinie_3.0.0_-_D-E
 import os
 import sys
 from sys import *
-import glob
+
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
 sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver

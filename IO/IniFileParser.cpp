@@ -23,6 +23,7 @@
 
 #include <omp.h>
 
+
 #else
 #define omp_get_thread_num() 0
 #define omp_get_max_threads()  1
@@ -40,8 +41,44 @@
 #include "../math/VelocityModel.h"
 #include "../routing/global_shortest/GlobalRouter.h"
 #include "../routing/quickest/QuickestPathRouter.h"
+#include "../routing/smoke_router/SmokeRouter.h"
 #include "../routing/ai_router/AIRouter.h"
 #include "../routing/ff_router/ffRouter.h"
+
+/* https://stackoverflow.com/questions/38530981/output-compiler-version-in-a-c-program#38531037 */
+std::string ver_string(int a, int b, int c) {
+      std::ostringstream ss;
+      ss << a << '.' << b << '.' << c;
+      return ss.str();
+}
+//https://sourceforge.net/p/predef/wiki/Compilers/
+std::string true_cxx =
+#ifdef __clang__
+      "clang++";
+#elif defined(__GNU__)
+"g++";
+#elif defined(__MINGW32__)
+   "MinGW";
+#elif defined(_MSC_VER)
+  "Visual Studio";
+#else
+"Compiler not identified";
+#endif
+
+
+std::string true_cxx_ver =
+#ifdef __clang__
+    ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__);
+#elif defined(__GNU__)
+    ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+#elif defined(__MINGW32__)
+ver_string(__MINGW32__, __MINGW32_MAJOR_VERSION, __MINGW32_MINOR_VERSION);
+#elif defined( _MSC_VER)
+    ver_string(_MSC_VER, _MSC_FULL_VER,_MSC_BUILD);
+#else
+"";
+#endif
+
 
 IniFileParser::IniFileParser(Configuration* config)
 {
@@ -96,12 +133,30 @@ bool IniFileParser::Parse(std::string iniFile)
           return false;
      }
 
+     //logfile
+     if (xMainNode->FirstChild("logfile")) {
+          _config->SetErrorLogFile(
+                    _config->GetProjectRootDir()+xMainNode->FirstChild("logfile")->FirstChild()->Value());
+          _config->SetLog(2);
+          Log->Write("INFO:\tlogfile <%s>", _config->GetErrorLogFile().c_str());
+     }
+
+
+     Log->Write("----\nJuPedSim - JPScore\n");
+     Log->Write("Current date   : %s %s", __DATE__, __TIME__);
+     Log->Write("Version        : %s", JPSCORE_VERSION);
+     Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
+     Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
+     Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
+     Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
+
+
      //seed
      if (xMainNode->FirstChild("seed")) {
           TiXmlNode* seedNode = xMainNode->FirstChild("seed")->FirstChild();
           if (seedNode) {
                const char* seedValue = seedNode->Value();
-               _config->SetSeed((unsigned int) atoi(seedValue));
+               _config->SetSeed((unsigned int) atoi(seedValue));//strtol
           }
           else {
                _config->SetSeed((unsigned int) time(NULL));
@@ -116,6 +171,12 @@ bool IniFileParser::Parse(std::string iniFile)
                     xMainNode->FirstChildElement("max_sim_time")->FirstChild()->Value();
           _config->SetTmax(atof(tmax));
           Log->Write("INFO: \tMaximal simulation time <%.2f> seconds", _config->GetTmax());
+     }
+
+     // Progressbar
+     if (xMainNode->FirstChild("progressbar")) {
+          _config->SetPRB(true);
+          Log->Write("INFO: \tUse Progressbar");
      }
 
      // geometry file name
@@ -136,19 +197,12 @@ bool IniFileParser::Parse(std::string iniFile)
           if (numthreads) {
 #ifdef _OPENMP
                 omp_set_num_threads(xmltoi(numthreads->Value()));
-#endif               
-          }              
+#endif
+          }
      }
      _config->SetMaxOpenMPThreads(omp_get_max_threads());
      Log->Write("INFO:\tUsing num_threads <%d> threads (%d available)", _config->GetMaxOpenMPThreads(), max_threads);
 
-     //logfile
-     if (xMainNode->FirstChild("logfile")) {
-          _config->SetErrorLogFile(
-                    _config->GetProjectRootDir()+xMainNode->FirstChild("logfile")->FirstChild()->Value());
-          _config->SetLog(2);
-          Log->Write("INFO:\tlogfile <%s>", _config->GetErrorLogFile().c_str());
-     }
      //display statistics
      if (xMainNode->FirstChild("show_statistics")) {
           std::string value = xMainNode->FirstChild("show_statistics")->FirstChild()->Value();
@@ -230,6 +284,16 @@ bool IniFileParser::Parse(std::string iniFile)
                          _config->GetHostname().c_str(), _config->GetPort());
           }
      }
+
+     // JPSfire
+     // -------------------------------------
+     // read walkingspeed
+     std::shared_ptr<WalkingSpeed> W( new WalkingSpeed(iniFile) );
+     _config->SetWalkingSpeed(W);
+     // read  ToxicityAnalysis
+     std::shared_ptr<ToxicityAnalysis> T( new ToxicityAnalysis(iniFile, _config->GetFps()));
+     _config->SetToxicityAnalysis(T);
+     // -------------------------------------
 
      //pick up which model to use
      //get the wanted ped model id
@@ -362,25 +426,25 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
           return false;
 
      //force_ped
-     if (xModelPara->FirstChild("force_ped")) {
-          string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
-          string dist_max = xModelPara->FirstChildElement("force_ped")->Attribute(
-                    "dist_max");
-          string disteff_max =
-                    xModelPara->FirstChildElement("force_ped")->Attribute(
-                              "disteff_max"); // @todo: rename disteff_max to force_max
-          string interpolation_width =
-                    xModelPara->FirstChildElement("force_ped")->Attribute(
-                              "interpolation_width");
+         if (xModelPara->FirstChild("force_ped")) {
+                 string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
+                 string dist_max = xModelPara->FirstChildElement("force_ped")->Attribute(
+                         "dist_max");
+                 string disteff_max =
+                         xModelPara->FirstChildElement("force_ped")->Attribute(
+                                 "disteff_max"); // @todo: rename disteff_max to force_max
+                 string interpolation_width =
+                         xModelPara->FirstChildElement("force_ped")->Attribute(
+                                 "interpolation_width");
 
-          _config->SetMaxFPed(atof(dist_max.c_str()));
-          _config->SetNuPed(atof(nu.c_str()));
-          _config->SetDistEffMaxPed(atof(disteff_max.c_str()));
-          _config->SetIntPWidthPed(atof(interpolation_width.c_str()));
-          Log->Write(
-                    "INFO: \tfrep_ped nu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
-                     interpolation_width.c_str(), nu.c_str(), dist_max.c_str(), disteff_max.c_str(), interpolation_width.c_str());
-     }
+                 _config->SetMaxFPed(atof(dist_max.c_str()));
+                 _config->SetNuPed(atof(nu.c_str()));
+                 _config->SetDistEffMaxPed(atof(disteff_max.c_str()));
+                 _config->SetIntPWidthPed(atof(interpolation_width.c_str()));
+                 Log->Write(
+                         "INFO: \tfrep_ped nu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
+                         atof(nu.c_str()), atof(dist_max.c_str()), atof(disteff_max.c_str()), atof(interpolation_width.c_str()));
+         }
 
      //force_wall
      if (xModelPara->FirstChild("force_wall")) {
@@ -399,7 +463,7 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
           _config->SetIntPWidthWall(atof(interpolation_width.c_str()));
           Log->Write(
                     "INFO: \tfrep_wall mu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
-                     nu.c_str(), dist_max.c_str(), disteff_max.c_str(), interpolation_width.c_str());
+                          atof(nu.c_str()), atof(dist_max.c_str()), atof(disteff_max.c_str()), atof(interpolation_width.c_str()));
      }
 
      //Parsing the agent parameters
@@ -470,7 +534,7 @@ bool IniFileParser::ParseKrauszModel(TiXmlElement* xKrausz, TiXmlElement* xMainN
           _config->SetIntPWidthPed(atof(interpolation_width.c_str()));
           Log->Write(
                   "INFO: \tfrep_ped nu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
-                  interpolation_width.c_str(), nu.c_str(), dist_max.c_str(), disteff_max.c_str(), interpolation_width.c_str());
+                          atof(nu.c_str()), atof(dist_max.c_str()), atof(disteff_max.c_str()), atof(interpolation_width.c_str()));
      }
 
      //force_wall
@@ -490,7 +554,7 @@ bool IniFileParser::ParseKrauszModel(TiXmlElement* xKrausz, TiXmlElement* xMainN
           _config->SetIntPWidthWall(atof(interpolation_width.c_str()));
           Log->Write(
                   "INFO: \tfrep_wall mu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
-                  nu.c_str(), dist_max.c_str(), disteff_max.c_str(), interpolation_width.c_str());
+                          atof(nu.c_str()), atof(dist_max.c_str()), atof(disteff_max.c_str()), atof(interpolation_width.c_str()));
      }
 
      //Parsing the agent parameters
@@ -1028,7 +1092,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
           Log->Write("ERROR: \t Agent Distribution section is missing");
           return false;
      }
-
      //first get list of actually used router
      std::vector<int> usedRouter;
      usedRouter.clear();
@@ -1075,16 +1138,27 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                Router *r = new QuickestPathRouter(id, ROUTING_QUICKEST);
                _config->GetRoutingEngine()->AddRouter(r);
           }
+          else if ((strategy == "smoke") &&
+                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+               Router *r = new SmokeRouter(id, ROUTING_SMOKE);
+               _config->GetRoutingEngine()->AddRouter(r);
+
+               Log->Write("\nINFO: \tUsing SmokeRouter");
+               ///Parsing additional options
+               if (!ParseCogMapOpts(e))
+                    return false;
+          }
           else if ((strategy == "AI") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
-               //pRoutingStrategies.push_back(make_pair(id, ROUTING_COGNITIVEMAP));
+     #ifdef AIROUTER
                Router *r = new AIRouter(id, ROUTING_AI);
                _config->GetRoutingEngine()->AddRouter(r);
 
                Log->Write("\nINFO: \tUsing AIRouter");
                ///Parsing additional options
-               if (!ParseCogMapOpts(e))
+               if (!ParseAIOpts(e))
                     return false;
+     #endif
           }
           else if ((strategy == "ff_global_shortest") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
@@ -1188,8 +1262,8 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode* routingNode)
           return false;
      }
 
-     /// static_cast to get access to the method 'addOption' of the AIRouter
-     AIRouter* r = static_cast<AIRouter*>(_config->GetRoutingEngine()->GetAvailableRouters().back());
+     /// static_cast to get access to the method 'addOption' of the SmokeRouter
+     SmokeRouter* r = static_cast<SmokeRouter*>(_config->GetRoutingEngine()->GetAvailableRouters().back());
 
      std::vector<std::string> sensorVec;
      for (TiXmlElement* e = sensorNode->FirstChildElement("sensor"); e;
@@ -1226,6 +1300,67 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode* routingNode)
 
      return true;
 }
+#ifdef AIROUTER
+bool IniFileParser::ParseAIOpts(TiXmlNode* routingNode) {
+     TiXmlNode *sensorNode = routingNode->FirstChild();
+
+     if (!sensorNode) {
+          Log->Write("ERROR:\tNo sensors found.\n");
+          return false;
+     }
+
+     /// static_cast to get access to the method 'addOption' of the AIRouter
+     AIRouter *r = static_cast<AIRouter *>(_config->GetRoutingEngine()->GetAvailableRouters().back());
+
+     std::vector<std::string> sensorVec;
+     for (TiXmlElement *e = sensorNode->FirstChildElement("sensor"); e;
+          e = e->NextSiblingElement("sensor")) {
+          string sensor = e->Attribute("description");
+          sensorVec.push_back(sensor);
+
+          Log->Write("INFO: \tSensor <%s> added.", sensor.c_str());
+     }
+
+     r->addOption("Sensors", sensorVec);
+
+     TiXmlElement *cogMap = routingNode->FirstChildElement("cognitive_map");
+
+     if (!cogMap) {
+          Log->Write("ERROR:\tCognitive Map not specified.\n");
+          return false;
+     }
+
+     //std::vector<std::string> cogMapStatus;
+     //cogMapStatus.push_back(cogMap->Attribute("status"));
+     //Log->Write("INFO: \tAll pedestrian starting with a(n) %s cognitive maps", cogMapStatus[0].c_str());
+     //r->addOption("CognitiveMap", cogMapStatus);
+
+     std::vector<std::string> cogMapFiles;
+     if (!cogMap->Attribute("files")) {
+          Log->Write("WARNING:\tNo input files for the cognitive map specified!");
+     }
+     else
+     {
+          cogMapFiles.push_back(cogMap->Attribute("files"));
+          r->addOption("CognitiveMapFiles", cogMapFiles);
+     }
+
+     //Signs
+     TiXmlElement *signs = routingNode->FirstChildElement("signage");
+
+     if (!signs)
+     {
+          Log->Write("INFO: \tNo signage specified");
+     }
+     else
+     {
+          r->addOption("SignFiles",std::vector<std::string>{signs->Attribute("file")});
+     }
+
+     return true;
+}
+#endif
+
 
 bool IniFileParser::ParseLinkedCells(const TiXmlNode& linkedCellNode)
 {
@@ -1327,7 +1462,8 @@ bool IniFileParser::ParseNodeToSolver(const TiXmlNode& solverNode)
 
 bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
 {
-     string query = "exit_crossing_strategy";
+
+    string query = "exit_crossing_strategy";
      if (!strategyNode.FirstChild(query.c_str())) {
           query = "exitCrossingStrategy";
           Log->Write(
@@ -1374,6 +1510,18 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
 
                }
               _exit_strat_number = pExitStrategy;
+
+               if (pExitStrategy == 8 || pExitStrategy ==9){
+                    _config->set_write_VTK_files_direction(false);
+                   if (strategyNode.FirstChild("write_VTK_files"))  {
+                       const char* tmp =
+                               strategyNode.FirstChild("write_VTK_files")->FirstChild()->Value();
+                       //remark: std::strcmp returns 0 if the strings are equal
+                       bool tmp_write_VTK = !std::strcmp(tmp, "true");
+                        _config->set_write_VTK_files_direction(tmp_write_VTK);
+                   }
+
+               }
                switch (pExitStrategy) {
                case 1:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMiddlePoint());
@@ -1398,19 +1546,26 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                     Log->Write("ERROR: \tExit Strategy 7 is not supported any longer. Please refer to www.jupedsim.org");
                     Log->Write("WARNING: \tChanging Exit-Strategy to #9 (Floorfields with targets within subroom)");
                     pExitStrategy = 9;
+                    _exit_strat_number = 9;
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
+                    if(!ParseFfOpts(strategyNode)) {
+                        return false;
+                    };
+                    _config->set_dirSubLocal(dynamic_cast<DirectionSubLocalFloorfield*>(_exit_strategy.get()));
                     break;
                case 8:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
                     if(!ParseFfOpts(strategyNode)) {
                          return false;
                     };
+                    _config->set_dirLocal(dynamic_cast<DirectionLocalFloorfield*>(_exit_strategy.get()));
                     break;
                case 9:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
                     if(!ParseFfOpts(strategyNode)) {
                          return false;
                     };
+                    _config->set_dirSubLocal(dynamic_cast<DirectionSubLocalFloorfield*>(_exit_strategy.get()));
                     break;
                default:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
@@ -1424,6 +1579,7 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                return false;
           }
           Log->Write("INFO: \texit_crossing_strategy < %d >", pExitStrategy);
+          _config->set_exit_strat(_exit_strat_number);
      }
      return true;
 }

@@ -37,8 +37,8 @@
 
 class Building;
 class Router;
-class BrainStorage;
-class SensorManager;
+class AIBrainStorage;
+//class SensorManager;
 class NavLine;
 
 
@@ -83,19 +83,31 @@ public:
       */
      virtual std::string GetRoutingInfoFile();
 
+     /**
+     *Deletes everything that is related to a deleted pedestrian
+     *
+     *
+     **/
+     void DeleteCortex(const Pedestrian* ped);
+
 protected:
 
+     /**
+     * @brief FindDestination
+     * @return NavLine: best crossing to get closer to target/landmark
+     */
     int FindDestination(Pedestrian * );
+
 
 private:
 
      Building * building;
-     std::shared_ptr<BrainStorage>  brain_storage;
-     SensorManager * sensor_manager;
+     std::unique_ptr<AIBrainStorage>  brain_storage;
+     //SensorManager * sensor_manager;
 
      // Optional options which are supposed to be used
      optStorage options;
 
 };
 
-#endif /* COGNITIVEMAPROUTER_H_ */
+#endif /* AIROUTER_H_ */

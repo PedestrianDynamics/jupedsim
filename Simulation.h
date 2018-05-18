@@ -45,7 +45,7 @@
 #include "routing/DirectionStrategy.h"
 #include "routing/RoutingEngine.h"
 #include "pedestrian/PedDistributor.h"
-#include "routing/ai_router/AIRouter.h"
+#include "routing/smoke_router/SmokeRouter.h"
 #include "events/EventManager.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "general/Configuration.h"
@@ -67,7 +67,7 @@ private:
     ///seed using for the random number generator
     unsigned int _seed;
     /// building object
-    std::unique_ptr<Building> _building;
+    std::shared_ptr<Building> _building;
     /// Force model to use
     std::shared_ptr<OperationalModel> _operationalModel;
     /// Manage all route choices algorithms
@@ -85,6 +85,8 @@ private:
     /// hybrid simulation manager
     //HybridSimulationManager
     int _periodic;
+     int _maxSimTime;
+
     bool _gotSources; // is true if we got some sources. Otherwise, false.
     // bool _printPB; // print progressbar
 public:
@@ -182,6 +184,8 @@ public:
      *
      */
      void UpdateDoorticks() const;
+     int GetMaxSimTime() const;
+
 
 };
 

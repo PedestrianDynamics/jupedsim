@@ -107,9 +107,10 @@ public:
 
      double getCostToDestination(const int destID, const Point& position, int mode);
      double getCostToDestination(const int destID, const Point& position);
+     double getDistanceBetweenDoors(const int door1_ID, const int door2_ID);
      RectGrid* getGrid();
-     virtual void getDirectionToUID(int destID, const long int key, Point& direction, int mode);
-     void getDirectionToUID(int destID, const long int key, Point& direction);
+     virtual void getDirectionToUID(int destID, long int key, Point& direction, int mode);
+     void getDirectionToUID(int destID, long int key, Point& direction);
      virtual void getDirectionToUID(int destID, const Point& pos, Point& direction, int mode);
      void getDirectionToUID(int destID, const Point& pos, Point& direction);
      double getDistance2WallAt(const Point& pos);
@@ -122,6 +123,7 @@ public:
      void markSubroom(const Point& insidePoint, SubRoom* const value);
      void createReduWallSpeed(double* reduWallSpeed);
      void createPedSpeed(Pedestrian* const * pedsArg, int nsize, int modechoice, double radius);
+     void finalizeTargetLine(const int uid, const Line& tempTargetLine, Point* newArrayPt, Point& passvector);
 
      void drawLinesOnGrid(std::map<int, Line>& doors, int *const grid);
      template <typename T>
@@ -166,6 +168,10 @@ private:
      std::vector<int> _uids;
      std::map<int, Line> _doors;
      std::vector<int> _toDo;
+
+     std::map<int, Point> _subroomUIDtoInsidePoint;
+     std::map<int, SubRoom*> _subroomUIDtoSubRoomPtr;
+     std::map<SubRoom*, Point> _subRoomPtrTOinsidePoint;
 
 };
 

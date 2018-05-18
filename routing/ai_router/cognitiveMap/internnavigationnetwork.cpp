@@ -1,10 +1,10 @@
 #include "internnavigationnetwork.h"
+#include "../../../geometry/Obstacle.h"
 
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/geometry.hpp>
-#include "../../../geometry/Obstacle.h"
 
 InternNavigationNetwork::InternNavigationNetwork()
 {
@@ -168,7 +168,6 @@ void InternNavigationNetwork::EstablishConnections()
 
 bool InternNavigationNetwork::LineIntersectsWalls(const std::pair<const Point&, const Point&> &line, const std::vector<Linestring> &walls)
 {
-
 
     Linestring lineS;
     boost::geometry::append(lineS,line.first);

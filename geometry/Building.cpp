@@ -36,18 +36,13 @@
 #include "GeometryReader.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../mpi/LCGrid.h"
-#include "../routing/RoutingEngine.h"
-#include "../pedestrian/PedDistributor.h"
 #include "../IO/GeoFileParser.h"
-#include "../hybrid/GeometryFromProtobufLoader.h"
 
 #endif
 
 //#undef _OPENMP
 
 #ifdef _OPENMP
-
-#include <omp.h>
 
 #else
 #define omp_get_thread_num()    0
@@ -846,7 +841,7 @@ void Building::AddPedestrian(Pedestrian* ped)
      for (unsigned int p = 0; p<_allPedestians.size(); p++) {
           Pedestrian* ped1 = _allPedestians[p];
           if (ped->GetID()==ped1->GetID()) {
-               cout << "Pedestrian already in the room ??? " << ped->GetID() << endl;
+               cout << "Pedestrian " << ped->GetID() << " already in the room." << endl;
                return;
           }
      }
@@ -1052,5 +1047,3 @@ Transition* Building::GetTransitionByUID(int uid) const
 //}
 
 #endif // _SIMULATOR
-
-

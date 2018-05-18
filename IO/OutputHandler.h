@@ -24,7 +24,7 @@
  *
  *
  **/
- 
+
 
 #ifndef OUTPUT_HANDLER_H_
 #define OUTPUT_HANDLER_H_
@@ -44,14 +44,17 @@ class OutputHandler {
 protected:
      int _nWarnings;
      int _nErrors;
+     int _nDeletedAgents;
 public:
-     OutputHandler() { _nWarnings = 0; _nErrors = 0; };
+     OutputHandler() { _nWarnings = 0; _nErrors = 0; _nDeletedAgents = 0;};
      virtual ~OutputHandler() {};
 
      int GetWarnings();
      void incrementWarnings();
      int GetErrors();
      void incrementErrors();
+     int GetDeletedAgents();
+     void incrementDeletedAgents();
      void ProgressBar(double TotalPeds, double NowPeds, double simTime);
 
      virtual void Write(const std::string& str);

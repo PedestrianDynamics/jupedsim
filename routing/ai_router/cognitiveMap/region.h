@@ -5,41 +5,42 @@
 #include "connection.h"
 #include "landmarknetwork.h"
 
-using ptrLandmark = std::shared_ptr<Landmark>;
-using Landmarks = std::vector<ptrLandmark>;
 
-using ptrConnection = std::shared_ptr<Connection>;
-using Connections = std::list<ptrConnection>;
+using AILandmarks = std::vector<AILandmark>;
+using AIConnections = std::vector<AIConnection>;
 
-class Region : public Landmark
+class AIRegion : public AILandmark
 {
 public:
-    Region(Point pos, ptrRoom room=nullptr);
-    ~Region();
+    AIRegion(const Point& pos);
+    ~AIRegion();
 
-    void AddLandmark(ptrLandmark landmark);
-    ptrLandmark GetRegionAsLandmark();
+    void AddLandmark(const AILandmark& landmark);
+    void AddLandmarkSubCs(const AILandmark &landmark);
+    const AILandmark* GetRegionAsLandmark() const;
 
     //Getter
-    Landmarks GetLandmarks() const;
-    ptrLandmark GetLandmarkByID(const int& ID) const;
-    bool ContainsLandmark(const ptrLandmark& landmark) const;
+    const AILandmarks& GetLandmarks() const;
+    const AILandmark* GetLandmarkByID(int ID) const;
+    bool ContainsLandmark(const AILandmark* landmark) const;
 
     //LandmarkNetwork
     void InitLandmarkNetwork();
-    double PathLengthFromLandmarkToTarget(const ptrLandmark& landmark, const ptrLandmark& target);
+    std::pair<std::vector<const AILandmark*>, double> PathLengthFromLandmarkToTarget(const AILandmark* landmark, const AILandmark* target) const;
 
     //Connections
-    std::vector<ptrConnection> GetAllConnections() const;
-    void AddConnection(const ptrConnection &connection);
-    void AddConnection(const int &id, const std::string &caption, const std::string &type, const ptrLandmark& landmark1, const ptrLandmark& landmark2);
-    void RemoveConnections(const ptrLandmark& landmark);
-    Landmarks ConnectedWith(const ptrLandmark& landmark) const;
+    const std::vector<AIConnection> &GetAllConnections() const;
+    void AddConnection(const AIConnection &connection);
+    void AddConnection(int id, const std::string &caption, const std::string &type, int landmarkId1, int landmarkId2);
+    void RemoveConnections(const AILandmark *landmark);
+    std::vector<const AILandmark *> ConnectedWith(const AILandmark *landmark) const;
 
 private:
-    Landmarks _landmarks;
-    Connections _connections;
-    LandmarkNetwork _landmarkNetwork;
+    AILandmarks _landmarks;
+    AIConnections _connections;
+    AILandmarkNetwork _landmarkNetwork;
+    AIAssociations _assoContainer;
+    AILandmarks _landmarksSubConcious;
 };
 
 #endif // REGION_H

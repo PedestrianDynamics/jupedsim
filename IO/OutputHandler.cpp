@@ -28,11 +28,8 @@
 
 #include "OutputHandler.h"
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <cstdlib>
 #include <cmath>
-
+#include <cstdarg> // va_start and va_end
 using namespace std;
 
 void OutputHandler::incrementWarnings()
@@ -54,6 +51,18 @@ int OutputHandler::GetErrors()
 {
      return _nErrors;
 }
+
+
+void OutputHandler::incrementDeletedAgents()
+{
+     _nDeletedAgents += 1;
+}
+
+int OutputHandler::GetDeletedAgents()
+{
+     return _nDeletedAgents;
+}
+
 
 void OutputHandler::Write(const string& str)
 {

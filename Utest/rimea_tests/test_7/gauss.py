@@ -1,6 +1,6 @@
+import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib.mlab as mlab
 
 weidman_max_vel = np.array([1.61, 1.54, 1.41, 0.76])
 weidman_min_vel = np.array([0.58, 1.41, 0.68, 0.46])

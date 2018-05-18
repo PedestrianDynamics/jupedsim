@@ -21,7 +21,6 @@
 
 #include "GeoFileParser.h"
 #include "../tinyxml/tinyxml.h"
-#include "../geometry/Goal.h"
 #include "../geometry/SubRoom.h"
 
 GeoFileParser::GeoFileParser(Configuration* configuration)
@@ -133,8 +132,8 @@ bool GeoFileParser::LoadGeometry(Building* building)
                SubRoom* subroom = nullptr;
 
                if (type=="stair" || type=="escalator" || type=="idle_escalator") {
-                    if (xSubRoom->FirstChildElement("up")==NULL) {
-                         Log->Write("ERROR:\t the attribute <up> and <down> are missing for the "+type);
+                    if (xSubRoom->FirstChildElement("up") == NULL) {
+                         Log->Write("ERROR:\t the attribute <up> and <down> are missing for the " + type);
                          Log->Write("ERROR:\t check your geometry file");
                          return false;
                     }
@@ -143,10 +142,39 @@ bool GeoFileParser::LoadGeometry(Building* building)
                     double down_x = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
                     double down_y = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
                     subroom = new Stair();
-                    ((Stair*) subroom)->SetUp(Point(up_x, up_y));
-                    ((Stair*) subroom)->SetDown(Point(down_x, down_y));
-               }
-               else {
+                    ((Stair *) subroom)->SetUp(Point(up_x, up_y));
+                    ((Stair *) subroom)->SetDown(Point(down_x, down_y));
+               } else if (type =="escalator_up") {
+                    if (xSubRoom->FirstChildElement("up") == NULL) {
+                         Log->Write("ERROR:\t the attribute <up> and <down> are missing for the " + type);
+                         Log->Write("ERROR:\t check your geometry file");
+                         return false;
+                    }
+                    double up_x = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
+                    double up_y = xmltof(xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
+                    double down_x = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
+                    double down_y = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
+                    subroom = new Escalator();
+                    ((Escalator *) subroom)->SetUp(Point(up_x, up_y));
+                    ((Escalator *) subroom)->SetDown(Point(down_x, down_y));
+                    ((Escalator*) subroom)->SetEscalatorUp();
+                    _configuration->set_has_directional_escalators(true);
+               } else if (type == "escalator_down") {
+                    if (xSubRoom->FirstChildElement("up") == NULL) {
+                         Log->Write("ERROR:\t the attribute <up> and <down> are missing for the " + type);
+                         Log->Write("ERROR:\t check your geometry file");
+                         return false;
+                    }
+                    double up_x = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
+                    double up_y = xmltof(xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
+                    double down_x = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
+                    double down_y = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
+                    subroom = new Escalator();
+                    ((Escalator *) subroom)->SetUp(Point(up_x, up_y));
+                    ((Escalator *) subroom)->SetDown(Point(down_x, down_y));
+                    ((Escalator*) subroom)->SetEscalatorDown();
+                    _configuration->set_has_directional_escalators(true);
+               } else {
                     //normal subroom or corridor
                     subroom = new NormalSubRoom();
                }

@@ -1,52 +1,52 @@
 #include "connection.h"
 #include <utility>
 
-Connection::Connection(const int &id, const std::string &caption, const std::string &type, const ptrLandmark &landmark1, const ptrLandmark &landmark2)
+AIConnection::AIConnection(int id, const std::string &caption, const std::string &type, int landmarkId1, int landmarkId2)
 {
-    _landmark1=landmark1;
-    _landmark2=landmark2;
+    _landmarkId1=landmarkId1;
+    _landmarkId2=landmarkId2;
     _id=id;
     _caption=caption;
     _type=type;
 }
 
-Connection::~Connection()
+AIConnection::~AIConnection()
 {
 
 }
 
-std::pair<ptrLandmark, ptrLandmark> Connection::GetLandmarks() const
+std::pair<int, int> AIConnection::GetLandmarkIds() const
 {
-    return std::make_pair(_landmark1, _landmark2);
+    return std::make_pair(_landmarkId1, _landmarkId2);
 
 }
 
-const int &Connection::GetId() const
+int AIConnection::GetId() const
 {
     return _id;
 }
 
-const std::string &Connection::GetCaption() const
+const std::string &AIConnection::GetCaption() const
 {
     return _caption;
 }
 
-const std::string &Connection::GetType() const
+const std::string &AIConnection::GetType() const
 {
     return _type;
 }
 
-void Connection::SetId(const int &id)
+void AIConnection::SetId(int id)
 {
     _id=id;
 }
 
-void Connection::SetCaption(const std::string &caption)
+void AIConnection::SetCaption(const std::string &caption)
 {
     _caption=caption;
 }
 
-void Connection::SetType(const std::string &type)
+void AIConnection::SetType(const std::string &type)
 {
     _type=type;
 }

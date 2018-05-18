@@ -1,572 +1,323 @@
 #include "cognitivemap.h"
-#include "../../../geometry/Point.h"
-#include "../../../geometry/SubRoom.h"
-#include "../../../geometry/Building.h"
-#include "../../../pedestrian/Pedestrian.h"
-#include "../../../visiLibity/source_code/visilibity.hpp"
 #include <chrono>
 #include <random>
 #include <algorithm>
-
-//for shortest path calculations
-//#include <boost/graph/graph_traits.hpp>
-//#include <boost/graph/adjacency_list.hpp>
-//#include <boost/graph/dijkstra_shortest_paths.hpp>
-//#include <boost/geometry/geometry.hpp>
-//#include <boost/geometry/algorithms/intersection.hpp>
-//#include <boost/foreach.hpp>
+#include <cmath>
+#include <fstream>
+#include "../../../pedestrian/Pedestrian.h"
+#include "../perception/visualsystem.h"
 
 
 
-CognitiveMap::CognitiveMap()
+AICognitiveMap::AICognitiveMap()
 {
 
 }
 
 
-CognitiveMap::CognitiveMap(const Building *b, const Pedestrian *ped)
+AICognitiveMap::AICognitiveMap(const Pedestrian *ped, const VisualSystem* perceptionalAbilities)
 {
-    _building=b;
     _ped=ped;
 
-    _network = std::make_shared<GraphNetwork>(b,ped);
-
-    std::string str(b->GetProjectRootDir()+"cogmap.xml");
-    _outputhandler = std::make_shared<CogMapOutputHandler>(str.c_str());
-
-    const double fps = UPDATE_RATE;
-    _outputhandler->WriteToFileHeader(ped->GetID(),fps);
-    _frame=0;
-
-    _YAHPointer.SetPed(ped);
-    _YAHPointer.SetPos(_ped->GetPos());
-
-    _createdWayP=-1;
-
+    _perceptAbis=perceptionalAbilities;
     //Destination and regions
     _currentRegion=nullptr;
     //Find maindestination in cogmapstorage
 
     _nextTarget=nullptr;
+    _lastBestChoice=NavLine(Line(Point(0,0),Point(0,0)));
+    _lastMinAngleDiff=FLT_MAX;
+
+
+//    Region newRegion(Point(0.0));
+//    newRegion.SetA(20.0);
+//    newRegion.SetB(20.0);
+//    newRegion.SetId(1);
+    
+//    Landmark finalDest(Point(5.0,5.0),0.1,0.1,1);
+//    finalDest.SetPosInMap(Point(15.0,8.0));
+//    finalDest.SetType("main");
+	
+//    newRegion.AddLandmark(finalDest);
+//    AddRegion(newRegion);
+
+//    InitLandmarkNetworksInRegions();
+//    FindMainDestination();
 
 }
 
-CognitiveMap::~CognitiveMap()
-{
 
-}
-
-void CognitiveMap::UpdateMap()
+void AICognitiveMap::UpdateMap()
 {
     FindCurrentRegion();
-    //AddAssociatedLandmarks(TriggerAssociations(LookForLandmarks()));
-    SubRoom * sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
-    GraphVertex * vertex = (*_network->GetNavigationGraph())[sub_room];
-    const GraphVertex::EdgesContainer edges = *(vertex->GetAllEdges());
 
-    for (GraphEdge* edge:edges)
+    CheckIfLandmarksReached();		
+
+}
+
+
+
+void AICognitiveMap::AddRegions(const AIRegions &regions)
+{
+    for (const AIRegion& region:regions)
     {
-        edge->SetFactor(1,"SpatialKnowledge");
+       _regions.push_back(region);
     }
 
-    // Has landmark been reached?
-    CheckIfLandmarksReached();
-
 }
 
-
-void CognitiveMap::UpdateYAHPointer(const Point& move)
-{
-    double x =  std::fabs(MakeItFuzzy(move._x,0.2*move._x));
-    double y =  std::fabs(MakeItFuzzy(move._y,0.2*move._y));
-    _YAHPointer.UpdateYAH(Point(x,y));
-}
-
-void CognitiveMap::AddRegions(Regions regions)
-{
-    _regions.swap(regions);
-}
-
-void CognitiveMap::AddRegion(ptrRegion region)
+void AICognitiveMap::AddRegion(const AIRegion& region)
 {
     _regions.push_back(region);
 }
 
-ptrRegion CognitiveMap::GetRegionByID(const int &regionID) const
+const AIRegion *AICognitiveMap::GetRegionByID(int regionID) const
 {
-    for (ptrRegion region:_regions)
+    for (const AIRegion& region:_regions)
     {
-        if (region->GetId()==regionID)
+        if (region.GetId()==regionID)
         {
-            return region;
+            return &region;
         }
     }
     return nullptr;
 }
 
-void CognitiveMap::AddLandmarksSC(std::vector<ptrLandmark> landmarks)
+
+std::vector<const AILandmark *> AICognitiveMap::TriggerAssociations(const std::vector<const AILandmark *> &landmarks)
 {
-    for (ptrLandmark landmark:landmarks)
+    std::vector<const AILandmark *> associatedlandmarks;
+    for (const AILandmark* landmark:landmarks)
     {
-        if (std::find(_landmarksSubConcious.begin(), _landmarksSubConcious.end(), landmark)!=_landmarksSubConcious.end())
+        AIAssociations associations = landmark->GetAssociations();
+        for (const AIAssociation& association:associations)
         {
-            continue;
-        }
-        else
-        {
-            _landmarksSubConcious.push_back(landmark);
-
-        }
-    }
-}
-
-//void CognitiveMap::AddLandmarks(std::vector<ptrLandmark> landmarks)
-//{
-////    for (ptrLandmark landmark:landmarks)
-////    {
-////        if (std::find(_landmarks.begin(), _landmarks.end(), landmark)!=_landmarks.end())
-////        {
-////            continue;
-////        }
-////        else
-////        {
-////            _landmarks.push_back(landmark);
-////            _landmarks.back()->SetPosInMap(_landmarks.back()->GetPosInMap()-_YAHPointer.GetPosDiff());
-
-
-////        }
-////    }
-//}
-
-void CognitiveMap::AddLandmarkInRegion(ptrLandmark landmark, ptrRegion region)
-{
-    region->AddLandmark(landmark);
-}
-
-//std::vector<ptrLandmark> CognitiveMap::LookForLandmarks()
-//{
-////    SubRoom * sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
-
-////    std::vector<ptrLandmark> landmarks_found;
-
-////    for (ptrLandmark landmark:_landmarksSubConcious)
-////    {
-////        if (landmark->GetRoom()==sub_room && std::find(_landmarks.begin(), _landmarks.end(), landmark)==_landmarks.end())
-////        {
-////           landmarks_found.push_back(landmark);
-////           LandmarkReached(landmark);
-////        }
-////    }
-
-////    AddLandmarks(landmarks_found);
-
-////    return landmarks_found;
-//}
-
-Landmarks CognitiveMap::TriggerAssociations(const std::vector<ptrLandmark> &landmarks)
-{
-    Landmarks associatedlandmarks;
-    for (ptrLandmark landmark:landmarks)
-    {
-        Associations associations = landmark->GetAssociations();
-        for (ptrAssociation association:associations)
-        {
-            if (association->GetLandmarkAssociation(landmark)!=nullptr)
+            if (association.GetLandmarkAssociation(landmark)!=nullptr)
             {
-                associatedlandmarks.push_back(association->GetLandmarkAssociation(landmark));
-                //pos-yahpointer diff
-                associatedlandmarks.back()->SetPosInMap(landmarks.back()->GetPosInMap()-_YAHPointer.GetPosDiff());
+                associatedlandmarks.push_back(association.GetLandmarkAssociation(landmark));
+
             }
-            if (association->GetConnectionAssoziation()!=nullptr)
-            {
-                //AddConnection(association->GetConnectionAssoziation());
-            }
+
         }
     }
     return associatedlandmarks;
 }
 
-//void CognitiveMap::AddAssociatedLandmarks(Landmarks landmarks)
-//{
-////    for (ptrLandmark landmark:_waypContainer)
-////    {
-////        landmark->SetPriority(landmark->GetPriority()+landmarks.size());
-////    }
-////    int n=0;
-////    for (ptrLandmark landmark:landmarks)
-////    {
-////        if (std::find(_waypContainer.begin(), _waypContainer.end(), landmark)!=_waypContainer.end())
-////        {
-////            continue;
-////        }
-////        landmark->SetPriority(n);
-////        _waypContainer.push_back(landmark);
-////        //Add as new target
-////        if (!landmark->Visited())
-////            _waypContainerTargetsSorted.push(landmark);
-////        //Add as already visited
-////        else
-////        {
-////            LandmarkReached(landmark);
-////        }
 
-////        n++;
-
-////    }
-
-//}
-
-void CognitiveMap::AssessDoors()
+std::vector<const NavLine*> AICognitiveMap::SortConLeastAngle(const AILandmark* landmark, const std::vector<NavLine> &navLines, const NavLine &focus)
 {
-    SubRoom * sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
-    GraphVertex * vertex = (*_network->GetNavigationGraph())[sub_room];
-    const GraphVertex::EdgesContainer edges = *(vertex->GetAllEdges());
-
-    //const Point rpLandmark=_waypContainer[0]->GetPos();
-
-    if (_nextTarget!=nullptr)
+    std::vector<const NavLine*> sortedNavLines;
+    std::vector<const NavLine*> cNavLines;
+    NavLine focusTo = focus;
+    for (const NavLine& navline:navLines)
     {
-        std::vector<GraphEdge* > sortedEdges = SortConShortestPath(_nextTarget,edges);
-        //Log->Write(std::to_string(nextDoor->GetCrossing()->GetID()));
-
-        for (unsigned int i=0; i<sortedEdges.size(); ++i)
-        {
-            sortedEdges[i]->SetFactor(0.6+0.1*i,"SpatialKnowledge");
-//            Log->Write("INFO:\t "+std::to_string(sortedEdges[i]->GetCrossing()->GetID()));
-//            Log->Write("INFO:\t "+std::to_string(sortedEdges[i]->GetFactor()));
-        }
-
-        //Log->Write(std::to_string(nextDoor->GetCrossing()->GetID()));
-        //Log->Write("INFO: Door assessed!");
+        cNavLines.push_back(&navline);
     }
 
-}
 
-std::vector<GraphEdge *> CognitiveMap::SortConShortestPath(ptrLandmark landmark, const GraphVertex::EdgesContainer edges)
-{
-    std::list<double> sortedPathLengths;
-    sortedPathLengths.push_back(ShortestPathDistance((*edges.begin()),landmark));
-    std::list<GraphEdge* > sortedEdges;
-    sortedEdges.push_back((*edges.begin()));
 
-    auto itsortedEdges = sortedEdges.begin();
-    auto it = edges.begin();
-    ++it;
-    //starting at the second element
-    for (; it!=edges.end(); ++it)
+    //check if lastChoice still exists
+    bool statusLastChoice=false;
+    if (_lastBestChoice.GetPoint1()==Point(0,0) && _lastBestChoice.GetPoint2()==Point(0,0))
     {
-        double pathLengthDoorWayP = ShortestPathDistance((*it),landmark);
-//        Log->Write(std::to_string((*it)->GetCrossing()->GetID()));
-//        Log->Write(std::to_string(pathLengthDoorWayP));
+        _lastBestChoice=*(cNavLines.front());
+        statusLastChoice=true;
+        focusTo=_lastBestChoice;
+        //return cNavLines;
+    }
+    else
+    {
 
-        //Point vectorPathPedDoor = (*it)->GetCrossing()->GetCentre()-_ped->GetPos();
-        itsortedEdges = sortedEdges.begin();
-        //double pathLength = pathLengthDoorWayP+std::sqrt(std::pow(vectorPathPedDoor.GetX(),2)+std::pow(vectorPathPedDoor.GetY(),2));
-        bool inserted=false;
-        for (auto itLengths=sortedPathLengths.begin(); itLengths!=sortedPathLengths.end(); ++itLengths)
+        for (const NavLine* navline:cNavLines)
         {
-            if (pathLengthDoorWayP >= *itLengths)
+
+            Point pCloser = GetCloserPoint(_ped->GetPos(),navline->GetPoint1(),navline->GetPoint2());
+            Point pCloserBestChoice = GetCloserPoint(_ped->GetPos(),_lastBestChoice.GetPoint1(),_lastBestChoice.GetPoint2());
+
+            if ((pCloserBestChoice-pCloser).Norm()<0.125)
             {
-                ++itsortedEdges;
-                continue;
+                statusLastChoice=true;
+                _lastBestChoice=*navline;
+                break;
+            }
+        }
+    }
+
+    // check if ped already in landmark (ellipse); if so, random choice *******************
+    if (landmark)
+    {
+    Point vecPedLCenter = _ped->GetPos()-landmark->GetPosInMap();
+        double angleVecPedLCenter = std::atan2(vecPedLCenter._y,vecPedLCenter._x);
+
+        Point onEllipse = Point(landmark->GetPosInMap()._x+landmark->GetA()*std::cos(angleVecPedLCenter),landmark->GetPosInMap()._y+landmark->GetB()*std::sin(angleVecPedLCenter));
+
+        if ((onEllipse-landmark->GetPosInMap()).Norm()>vecPedLCenter.Norm())
+        {
+            landmark=nullptr;
+            //std::cout << "Hier" << std::endl;
+        }
+    }
+    //****************************************
+
+    if (!landmark)
+    {
+        if (statusLastChoice)
+        {
+            sortedNavLines.push_back(&_lastBestChoice);
+            for (const NavLine* navLine:cNavLines)
+            {
+                if (navLine!=&_lastBestChoice)
+                    sortedNavLines.push_back(navLine);
+            }
+            return sortedNavLines;
+        }
+        else
+        {
+
+
+            //prefer navLines that are in the agent's current heading direction
+            double cMinAngle=M_PI/4.0;
+            std::vector<const NavLine*> navLinesBehindMe;
+            //const NavLine* navLineInHeadDir=nullptr;
+            Point vec1 = focusTo.GetCentre()-_ped->GetPos();
+            double heading = std::atan2(vec1._y,vec1._x);
+            for (auto it=cNavLines.begin(); it!=cNavLines.end(); ++it)
+            {
+               Point vec2 = (*it)->GetCentre()-_ped->GetPos();
+               double angle = std::fabs(std::atan2(vec2._y,vec2._x)-heading);
+               if (angle>M_PI)
+                   angle=2*M_PI-angle;
+               // if crossing is behind agent put it to the bottom of the list
+               if (angle > cMinAngle)
+               {
+                   //cNavLines.erase(std::find(cNavLines.begin(), cNavLines.end(), navLine));
+                   cNavLines.erase(it);
+                   navLinesBehindMe.push_back(*it);
+                   --it;
+               }
             }
 
-            sortedPathLengths.insert(itLengths,pathLengthDoorWayP);
-            sortedEdges.insert(itsortedEdges,(*it));
-            inserted=true;
-            break;
-        }
-        if (!inserted)
-        {
-            sortedPathLengths.push_back(pathLengthDoorWayP);
-            sortedEdges.push_back((*it));
+            cNavLines.insert(cNavLines.end(),navLinesBehindMe.begin(),navLinesBehindMe.end());
+            _lastBestChoice=*(cNavLines.front());
+
+            return cNavLines;
+
         }
     }
 
-//    Log->Write("subroom:\t");
-//    Log->Write(std::to_string(_ped->GetSubRoomID()));
-//    Log->Write("edgeOnShortest:");
-//    Log->Write(std::to_string(sortedEdges.front()->GetCrossing()->GetID()));
-    std::vector<GraphEdge* > vectorSortedEdges;
-    for (GraphEdge* edge:sortedEdges)
+
+
+
+
+    Point beelineToLandmark = ShortestBeeLine(_ped->GetPos(),landmark);
+    double alpha1=std::atan2(beelineToLandmark._y,beelineToLandmark._x);
+
+    double anglediff;
+    std::vector<double> vecMinAngleDiff;
+    double currentMinAngleDiff;
+    const NavLine* bestChoice=nullptr;
+
+    while (cNavLines.size()>0)
     {
-        vectorSortedEdges.push_back(edge);
-        //Log->Write("INFO:\t "+std::to_string(edge->GetCrossing()->GetID()));
-
-    }
-    //Log->Write("INFO:\t Next");
-    return vectorSortedEdges;
-
-}
-
-//bool CognitiveMap::IsAroundLandmark(const Landmark& landmark, GraphEdge *edge) const
-//{
-//    Triangle triangle(_ped->GetPos(),landmark);
-//    Point point(edge->GetCrossing()->GetCentre());
-//    return triangle.Contains(point);
-//}
-
-ptrGraphNetwork CognitiveMap::GetGraphNetwork() const
-{
-    return _network;
-}
-
-double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrLandmark landmark)
-{
-        SubRoom* sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
-        std::vector<Point> points =sub_room->GetPolygon();
-
-        VisiLibity::Polygon boundary=VisiLibity::Polygon();
-        VisiLibity::Polygon room=VisiLibity::Polygon();
-
-        //points=StartFromLLCorner(points);
-
-
-        for (Point point:points)
+        bestChoice=nullptr;
+        currentMinAngleDiff=FLT_MAX;
+        for (auto it=cNavLines.begin(); it!=cNavLines.end(); ++it)
         {
-           room.push_back(VisiLibity::Point(point._x,point._y));
+
+            double alpha2=std::atan2(((*it)->GetCentre()-_ped->GetPos())._y,((*it)->GetCentre()-_ped->GetPos())._x);
+
+            anglediff=std::fabs(alpha1-alpha2);
+
+
+            if (anglediff>M_PI)
+                anglediff=2*M_PI-anglediff;
+
+
+            if (anglediff<currentMinAngleDiff)
+            {
+                currentMinAngleDiff=anglediff;
+                bestChoice=*it;
+
+            }
+
         }
 
-        //MakeItClockwise
-        if (room.area()>=0)
-            room.reverse();
-
-
-        // Boundary polygon counter clockwise
-        boundary.push_back(VisiLibity::Point(-999999,-999999));
-        boundary.push_back(VisiLibity::Point(999999,-999999));
-        boundary.push_back(VisiLibity::Point(999999,999999));
-        boundary.push_back(VisiLibity::Point(-999999,999999));
-        std::vector<VisiLibity::Polygon> polygons;
-        polygons.push_back(boundary);
-        polygons.push_back(room);
-
-        VisiLibity::Environment environment(polygons);
-        //environment.reverse_holes();
-        if (!environment.is_valid())
+        if (*bestChoice==_lastBestChoice)
         {
-            Log->Write("Error:\tEnvironment for Visibilitypolygon not valid");
-            exit(EXIT_FAILURE);
+            _lastMinAngleDiff=currentMinAngleDiff;
         }
 
-        VisiLibity::Point edgeP(edge->GetCrossing()->GetCentre()._x,edge->GetCrossing()->GetCentre()._y);
-        Point pointOnShortestRoute = landmark->PointOnShortestRoute(edge->GetCrossing()->GetCentre());
-        //Log->Write(std::to_string(pointOnShortestRoute.GetX())+" "+std::to_string(pointOnShortestRoute.GetY()));
-        VisiLibity::Point wayP(pointOnShortestRoute._x,pointOnShortestRoute._y);//,landmark->GetPos().GetY());
-
-        VisiLibity::Polyline polyline=environment.shortest_path(edgeP,wayP,0.1);
-    //    for (int i=0; i<polyline.size();++i)
-    //    {
-    //        Log->Write("Polyline:");
-    //        std::cout << std::to_string(polyline[i].x()) << "\t" << std::to_string(polyline[i].y()) << std::endl;
-    //    }
-    //    Log->Write("ShortestPathLength");
-    //    Log->Write(std::to_string(polyline.length()));
-
-        return polyline.length();
+        vecMinAngleDiff.push_back(currentMinAngleDiff);
+        sortedNavLines.push_back(bestChoice);
+        cNavLines.erase(std::find(cNavLines.begin(), cNavLines.end(), bestChoice));
     }
 
 
+//    //prefer navLines that are in the agent's current heading direction******************
 
-
-
-
-//    SubRoom* sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
-//    std::vector<Point> roomPolygon = sub_room->GetPolygon();
-
-//    typedef boost::geometry::model::polygon<Point> Polygon;
-
-//    Polygon boost_room;
-
-//    for (Point point:roomPolygon)
+//    double cMinAngle=M_PI/3.0;
+//    std::vector<const NavLine*> navLinesBehindMe;
+//    //const NavLine* navLineInHeadDir=nullptr;
+//    Point vec1 = focusTo.GetCentre()-_ped->GetPos();
+//    double heading = std::atan2(vec1._y,vec1._x);
+//    for (auto it=sortedNavLines.begin(); it!=sortedNavLines.end(); ++it)
 //    {
-//        boost::geometry::append(boost_room,point);
+//       Point vec2 = (*it)->GetCentre()-_ped->GetPos();
+//       double angle = std::fabs(std::atan2(vec2._y,vec2._x)-heading);
+//       if (angle>M_PI)
+//           angle=2*M_PI-angle;
+//       // if crossing is behind agent put it to the bottom of the list
+//       if (angle > cMinAngle)
+//       {
+//           //cNavLines.erase(std::find(cNavLines.begin(), cNavLines.end(), navLine));
+//           sortedNavLines.erase(it);
+//           navLinesBehindMe.push_back(*it);
+//           --it;
+//       }
 //    }
 
-//    boost::geometry::correct(boost_room);
+//    sortedNavLines.insert(sortedNavLines.end(),navLinesBehindMe.begin(),navLinesBehindMe.end());
+//    _lastBestChoice=*(cNavLines.front());
 
-//    std::vector<Point> graphPoints={};
-//    std::vector<Point> helpPoints={};
-//    for (Point p:roomPolygon)
-//    {
-//        helpPoints.clear();
-//        helpPoints.push_back(Point(p._x+0.2,p._y+0.2));
-//        helpPoints.push_back(Point(p._x-0.2,p._y+0.2));
-//        helpPoints.push_back(Point(p._x-0.2,p._y-0.2));
-//        helpPoints.push_back(Point(p._x+0.2,p._y-0.2));
-//        for (Point helpP:helpPoints)
-//        {
-//            if (!boost::geometry::intersects(helpP,boost_room))
-//            {
-//                graphPoints.push_back(helpP);
-//            }
-//        }
-//    }
+    //*********************************
 
-//    //Graph
-//    Graph graph=Graph();
+    if (_lastMinAngleDiff<vecMinAngleDiff.front()+M_PI/3.0 && statusLastChoice)
+    {
+        //erase the best choice navline from the vector and put it on the front
+        for (auto it=sortedNavLines.begin(); it!=sortedNavLines.end(); ++it)
+        {
+            if (*(*it)==_lastBestChoice)
+            {
+                sortedNavLines.erase(it);
+                break;
+            }
+        }
+        sortedNavLines.insert(sortedNavLines.begin(),&_lastBestChoice);
+    }
+    else
+    {
 
-//    //vertices of room
-//    for (size_t i=0; i<graphPoints.size(); ++i)
-//    {
-//        boost::add_vertex(graph);
-//    }
+        _lastBestChoice=*(sortedNavLines.front());
+        _lastMinAngleDiff=vecMinAngleDiff.front();
 
-//    // center of crossing
-//    helpPoints.clear();
-//    helpPoints.push_back(Point(edge->GetCrossing()->GetCentre()._x+0.2,edge->GetCrossing()->GetCentre()._y));
-//    helpPoints.push_back(Point(edge->GetCrossing()->GetCentre()._x,edge->GetCrossing()->GetCentre()._y+0.2));
-//    helpPoints.push_back(Point(edge->GetCrossing()->GetCentre()._x-0.2,edge->GetCrossing()->GetCentre()._y));
-//    helpPoints.push_back(Point(edge->GetCrossing()->GetCentre()._x,edge->GetCrossing()->GetCentre()._y-0.2));
-
-//    Vertex startV;
-
-//    for (Point helpP:helpPoints)
-//    {
-//        if (!boost::geometry::intersects(helpP,boost_room))
-//        {
-//            graphPoints.push_back(helpP);
-//            startV = boost::add_vertex(graph);
-//        }
-//    }
-//    //target (landmark)
-//    if (boost::geometry::intersects(landmark->GetPosInMap(),boost_room))
-//    {
-//        //Log->Write("INFO: Landmark muesste in meinem Raum sein!");
-//        // return always 1.0 so no crossing will be preferred based on information
-//        // from the cognitive map
-//        return 1.0;
-//    }
-//    graphPoints.push_back(landmark->GetPosInMap());
-
-//    //target (landmark)
-//    Vertex targetV = boost::add_vertex(graph);
-
-//    size_t m=0;
-//    for (auto it = boost::vertices(graph); it.first != it.second; ++it.first)
-//    {
-//        size_t n=0;
-//        for (auto it2 = boost::vertices(graph); it2.first != it2.second; ++it2.first)
-//        {
-//            if (*it.first!=*it2.first)
-//            {
-//                if (!LineIntersectsPolygon(std::pair<Point,Point>(graphPoints[m],graphPoints[n]),boost_room))
-//                {
-//                    Point vector = graphPoints[m]-graphPoints[n];
-//                    double distance=vector.Norm();
-//                    //Log->Write((it.first));
-//                    boost::add_edge((*it.first),(*it2.first),distance,graph);
-//                    //boost::add_edge(*it.second,*it.first,distance,graph);
-//                }
-//            }
-
-//            ++n;
-//        }
-//        ++m;
-//    }
-
-//    std::vector<double> d(boost::num_vertices(graph));
-
-//    boost::dijkstra_shortest_paths(graph, startV, boost::distance_map(&d[0]));
-
-//    //Log->Write(std::to_string(d[targetV]));
-//    return d[targetV];
-//}
-
-bool CognitiveMap::LineIntersectsPolygon(const std::pair<Point, Point> &line, const boost::geometry::model::polygon<Point> &polygon)
-{
-
-    typedef boost::geometry::model::linestring<Point> Linestring;
+    }
 
 
-    Linestring lineS;
-    boost::geometry::append(lineS,line.first);
-    boost::geometry::append(lineS,line.second);
-
-    return boost::geometry::intersects(lineS,polygon);
+    return sortedNavLines;
 
 }
 
-const Point &CognitiveMap::GetOwnPos()
+
+
+Point AICognitiveMap::ShortestBeeLine(const Point &pos, const AILandmark *landmark)
 {
-    return _YAHPointer.GetPos();
+    Point pointOnShortestRoute = landmark->PointOnShortestRoute(pos);
+    Point beeLineVec = pointOnShortestRoute-pos;
+    return beeLineVec;
 }
 
-void CognitiveMap::WriteToFile()
-{
-//    ++_frame;
-//    string data;
-//    char tmp[CLENGTH] = "";
 
-//    sprintf(tmp, "<frame ID=\"%d\">\n", _frame);
-//    data.append(tmp);
-
-
-//    for (ptrLandmark landmark:_landmarks)
-//    {
-//        char tmp1[CLENGTH] = "";
-//        sprintf(tmp1, "<landmark ID=\"%d\"\t"
-//               "caption=\"%s\"\t"
-//               "x=\"%.6f\"\ty=\"%.6f\"\t"
-//               "z=\"%.6f\"\t"
-//               "rA=\"%.2f\"\trB=\"%.2f\"/>\n",
-//               landmark->GetId(), landmark->GetCaption().c_str(), landmark->GetPosInMap().GetX(),
-//               landmark->GetPosInMap().GetY(),0.0 ,landmark->GetA(), landmark->GetB());
-
-//        data.append(tmp1);
-//    }
-//    bool current;
-
-//    for (ptrLandmark landmark:_waypContainer)
-//    {
-//        current=false;
-//        if (!_waypContainerTargetsSorted.empty())
-//        {
-//            if (landmark==_waypContainerTargetsSorted.top())
-//              f  current=true;
-//        }
-
-
-//        char tmp2[CLENGTH] = "";
-//        sprintf(tmp2, "<Landmark ID=\"%d\"\t"
-//               "caption=\"%s\"\t"
-//               "x=\"%.6f\"\ty=\"%.6f\"\t"
-//               "z=\"%.6f\"\t"
-//               "rA=\"%.2f\"\trB=\"%.2f\"\tcurrent=\"%i\"/>\n",
-//               landmark->GetId(),landmark->GetCaption().c_str(), landmark->GetPosInMap().GetX(),
-//               landmark->GetPosInMap().GetY(),0.0 ,landmark->GetA(), landmark->GetB(),
-//               current);
-//        data.append(tmp2);
-//    }
-
-//    char tmp3[CLENGTH]="";
-//    sprintf(tmp3, "<YAHPointer "
-//           "x=\"%.6f\"\ty=\"%.6f\"\t"
-//           "z=\"%.6f\"\t"
-//           "dir=\"%.2f\"/>\n",
-//           _YAHPointer.GetPos().GetX(),
-//           _YAHPointer.GetPos().GetY(),0.0 ,_YAHPointer.GetDirection());
-
-//    data.append(tmp3);
-
-
-//    for (ptrConnection connection:_connections)
-//    {
-//        char tmp4[CLENGTH]="";
-//        sprintf(tmp4, "<connection "
-//               "Landmark_landmarkID1=\"%d\"\tLandmark_landmarkID2=\"%d\"/>\n",
-//               connection->GetLandmarks().first->GetId(),
-//               connection->GetLandmarks().second->GetId());
-
-//        data.append(tmp4);
-//    }
-
-
-//    data.append("</frame>\n");
-    //    _outputhandler->WriteToFile(data);
-}
-
-double CognitiveMap::MakeItFuzzy(const double &mean, const double &std)
+double AICognitiveMap::MakeItFuzzy(double mean, double std)
 {
     using myClock = std::chrono::high_resolution_clock;
     myClock::duration d = myClock::now().time_since_epoch();
@@ -583,21 +334,9 @@ double CognitiveMap::MakeItFuzzy(const double &mean, const double &std)
 
 
 
-//void CognitiveMap::SetNewLandmark()
-//{
-//    double a= 2.0;
-//    double b=2.0;
-//    ptrLandmark wayP = std::make_shared<Landmark>(_YAHPointer.GetPos(),a,b,_createdWayP);
-//    _createdWayP--;
-//    wayP->SetVisited(true);
-//    std::vector<ptrLandmark> vec;
-//    vec.push_back(wayP);
-//    AddLandmarks(vec);
-//}
-
-Landmarks CognitiveMap::GetLandmarksConnectedWith(const ptrLandmark &landmark) const
+std::vector<const AILandmark*> AICognitiveMap::GetLandmarksConnectedWith(const AILandmark* landmark) const
 {
-    ptrRegion cRegion = GetRegionContaining(landmark);
+    const AIRegion* cRegion = GetRegionContaining(landmark);
 
     if (cRegion!=nullptr)
     {
@@ -605,36 +344,36 @@ Landmarks CognitiveMap::GetLandmarksConnectedWith(const ptrLandmark &landmark) c
     }
     else
     {
-        return Landmarks();
+        return std::vector<const AILandmark*>();
     }
 }
 
-const ptrRegion CognitiveMap::GetRegionContaining(const ptrLandmark &landmark) const
+const AIRegion* AICognitiveMap::GetRegionContaining(const AILandmark *landmark) const
 {
-    for (ptrRegion region:_regions)
+    for (const AIRegion& region:_regions)
     {
-        if (region->ContainsLandmark(landmark))
-            return region;
+        if (region.ContainsLandmark(landmark))
+            return &region;
     }
     return nullptr;
 }
 
-void CognitiveMap::FindCurrentRegion()
+void AICognitiveMap::FindCurrentRegion()
 {
 
     //for test purposes. has to be changed
     if (_regions.empty())
         return;
-
+     
     //needs to be fixed
-    _currentRegion=_regions.back();
+    _currentRegion=&(_regions.back());
     return;
 
-    for (ptrRegion region:_regions)
+    for (const AIRegion& region:_regions)
     {
-        if (region->Contains(this->_YAHPointer.GetPos()))
+        if (region.Contains(_ped->GetPos()))
         {
-            _currentRegion=region;
+            _currentRegion=&region;
             return;
         }
     }
@@ -642,35 +381,43 @@ void CognitiveMap::FindCurrentRegion()
     _currentRegion=nullptr;
 }
 
-void CognitiveMap::CheckIfLandmarksReached()
+void AICognitiveMap::CheckIfLandmarksReached()
 {
-    SubRoom * sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
+
+    BoostPolygon boostPolygon=_perceptAbis->GetCurrentEnvironment();
 
     if (_currentRegion!=nullptr)
     {
-        for (ptrLandmark landmark:_currentRegion->GetLandmarks())
+        for (const AILandmark& landmark:_currentRegion->GetLandmarks())
         {
-            if (landmark->GetRoom()==sub_room)
-            {
-//                std::string str1 = landmark->GetCaption()+" has been reached.";
-//                Log->Write(str1);
-                _landmarksRecentlyVisited.push_back(landmark);
-            }
+		if (boost::geometry::intersects(landmark.GetRealPos(),boostPolygon))
+		{
+		    if (std::find(_landmarksRecentlyVisited.begin(), _landmarksRecentlyVisited.end(), &landmark) == _landmarksRecentlyVisited.end() )
+		    {
+			_landmarksRecentlyVisited.push_back(&landmark);
+
+			_mainDestination=nullptr;
+			_nextTarget=nullptr;
+		    }
+		}
+            
         }
     }
+
+
 }
 
-const ptrLandmark CognitiveMap::FindConnectionPoint(const ptrRegion &currentRegion, const ptrRegion &targetRegion) const
+const AILandmark *AICognitiveMap::FindConnectionPoint(const AIRegion *currentRegion, const AIRegion *targetRegion) const
 {
     if (currentRegion!=nullptr && targetRegion!=nullptr)
     {
-        for (ptrLandmark landmarka:currentRegion->GetLandmarks())
+        for (const AILandmark& landmarka:currentRegion->GetLandmarks())
         {
-            for (ptrLandmark landmarkb:targetRegion->GetLandmarks())
+            for (const AILandmark& landmarkb:targetRegion->GetLandmarks())
             {
-                if (landmarka==landmarkb)
+                if (&landmarka==&landmarkb)
                 {
-                    return landmarka;
+                    return &landmarka;
                 }
             }
         }
@@ -680,35 +427,43 @@ const ptrLandmark CognitiveMap::FindConnectionPoint(const ptrRegion &currentRegi
 
 }
 
-void CognitiveMap::FindMainDestination()
+void AICognitiveMap::FindMainDestination()
 {
-    for (ptrRegion region:_regions)
+    std::vector<const AILandmark*> possibleMainTargets;
+    for (const AIRegion& region:_regions)
     {
-        for (ptrLandmark landmark:region->GetLandmarks())
+        for (const AILandmark& landmark:region.GetLandmarks())
         {
-            if (landmark->GetType()=="main")
+            if (landmark.GetType()=="main" && std::find(_landmarksRecentlyVisited.begin(),_landmarksRecentlyVisited.end(),&landmark)==_landmarksRecentlyVisited.end())
             {
-                _mainDestination=landmark;
-                _targetRegion=region;
-                return;
+                possibleMainTargets.push_back(&landmark);
+                _targetRegion=&region;
+
             }
         }
     }
-    // if no destination was found
-    _mainDestination=nullptr;
-    _targetRegion=nullptr;
-    return;
+    if (possibleMainTargets.empty())
+    {
+        _mainDestination=nullptr;
+        _targetRegion=nullptr;
+        return;
+    }
+    else
+        _mainDestination=GetNearestMainTarget(possibleMainTargets);
+
 }
 
-void CognitiveMap::FindNextTarget()
+void AICognitiveMap::FindNextTarget()
 {
 
     _nextTarget=nullptr;
+
     // if not already in the region of the maindestination
     if (_currentRegion==nullptr || _targetRegion==nullptr)
     {
         return;
     }
+	
     if (_targetRegion!=_currentRegion)
     {
         _nextTarget=FindConnectionPoint(_currentRegion,_targetRegion);
@@ -725,37 +480,29 @@ void CognitiveMap::FindNextTarget()
     {
        _nextTarget=_mainDestination;
     }
-
+	
     // Function considers that nearLandmark can be the target itself if no nearer was found.
-    ptrLandmark nearLandmark = FindNearLandmarkConnectedToTarget(_nextTarget);
+    const AILandmark* nearLandmark = FindNearLandmarkConnectedToTarget(_nextTarget);
 
     _nextTarget=nearLandmark;
-
     //Direct way to target much shorter than via near Landmark?
 
-
-
-
-
-//    if (_nextTarget!=nullptr)
-//        Log->Write(_nextTarget->GetCaption());
 }
 
-void CognitiveMap::FindShortCut()
+void AICognitiveMap::FindShortCut()
 {
 
 }
 
-const ptrLandmark CognitiveMap::FindNearLandmarkConnectedToTarget(const ptrLandmark &target)
+const AILandmark* AICognitiveMap::FindNearLandmarkConnectedToTarget(const AILandmark* target)
 {
 
-    Landmarks landmarksConnectedToTarget = FindLandmarksConnectedToTarget(target);
+    std::vector<const AILandmark*> landmarksConnectedToTarget = FindLandmarksConnectedToTarget(target);
 
     //if target has no connections return nullptr
     if (landmarksConnectedToTarget.empty())
         return target;
 
-    //ptrLandmark nearest = nullptr;
     //look for nearest located landmark
 
     //look for landmarks within a circle with the radius searchlimit
@@ -768,24 +515,19 @@ const ptrLandmark CognitiveMap::FindNearLandmarkConnectedToTarget(const ptrLandm
     double distanceToTarget=vector.Norm();
     int divisor = 24;
     double searchlimit=distanceToTarget/divisor;
-    Landmarks nearLandmarks;
-    double shortcutFactor = 2.0;
+    std::vector<const AILandmark*> nearLandmarks;
 
-    while (searchlimit<shortcutFactor*distanceToTarget && nearLandmarks.empty())
+    while (searchlimit<distanceToTarget && nearLandmarks.empty())
     {
-        for (ptrLandmark landmark:landmarksConnectedToTarget)
+        for (const AILandmark* landmark:landmarksConnectedToTarget)
         {
 
-            Point vectorLandmarkTarget=landmark->GetPosInMap()-target->GetPosInMap();
-            double distanceLandmarkTarget = vectorLandmarkTarget.Norm();
-
-            vector=landmark->GetPosInMap()-_ped->GetPos();//_YAHPointer.GetPos();
+            vector=landmark->GetPosInMap()-_ped->GetPos();
 
             double distance = vector.Norm();
 
 
-
-            if (distance<=searchlimit && distanceLandmarkTarget<distanceToTarget*shortcutFactor)
+            if (distance<=searchlimit)
             {
                 nearLandmarks.push_back(landmark);
             }
@@ -804,36 +546,33 @@ const ptrLandmark CognitiveMap::FindNearLandmarkConnectedToTarget(const ptrLandm
 
 }
 
-Landmarks CognitiveMap::FindLandmarksConnectedToTarget(const ptrLandmark &target)
+std::vector<const AILandmark*> AICognitiveMap::FindLandmarksConnectedToTarget(const AILandmark* target)
 {
 
-    Landmarks connectedLandmarks;
+    std::vector<const AILandmark*> connectedLandmarks;
 
     // landmarks directly connected to target
-    Landmarks firstCandidates = GetLandmarksConnectedWith(target);
+    std::vector<const AILandmark*> firstCandidates = GetLandmarksConnectedWith(target);
 
-    for (ptrLandmark candidate:firstCandidates)
+    for (const AILandmark* candidate:firstCandidates)
     {
         if(std::find(_landmarksRecentlyVisited.begin(), _landmarksRecentlyVisited.end(), candidate) == _landmarksRecentlyVisited.end())
         {
             connectedLandmarks.push_back(candidate);
-        }
+	}
     }
 
-
-
     //Landmarks connected to landmarks connected to target
-    Landmarks furtherCandidates;
+    std::vector<const AILandmark*> furtherCandidates;
 
     for (size_t i=0; i<connectedLandmarks.size(); ++i)
     {
         furtherCandidates=GetLandmarksConnectedWith(connectedLandmarks[i]);
 
-        for (ptrLandmark candidate : furtherCandidates)
+        for (const AILandmark* candidate : furtherCandidates)
         {
             // if candidate not already taken into account, not visited before or target itself
             if(std::find(connectedLandmarks.begin(), connectedLandmarks.end(), candidate) == connectedLandmarks.end()
-                    && std::find(_landmarksRecentlyVisited.begin(), _landmarksRecentlyVisited.end(), candidate) == _landmarksRecentlyVisited.end()
                     && candidate!=target)
             {
                 connectedLandmarks.push_back(candidate);
@@ -844,16 +583,15 @@ Landmarks CognitiveMap::FindLandmarksConnectedToTarget(const ptrLandmark &target
     return connectedLandmarks;
 }
 
-const ptrLandmark CognitiveMap::FindBestRouteFromOneOf(const Landmarks &nearLandmarks)
+const AILandmark* AICognitiveMap::FindBestRouteFromOneOf(const std::vector<const AILandmark*> &nearLandmarks)
 {
-    ptrLandmark bestChoice = nullptr;
+    const AILandmark* bestChoice = nullptr;
     double minDistance = FLT_MAX;
     double cDistance;
-    for (ptrLandmark landmark:nearLandmarks)
+    for (const AILandmark* landmark:nearLandmarks)
     {
-        cDistance=_currentRegion->PathLengthFromLandmarkToTarget(landmark, _nextTarget);
-        //Log->Write(landmark->GetCaption());
-        //Log->Write(std::to_string(cDistance));
+        cDistance=(_ped->GetPos()-landmark->GetRandomPoint()).Norm()+_currentRegion->PathLengthFromLandmarkToTarget(landmark, _nextTarget).second;
+
         if (cDistance<minDistance)
         {
             minDistance=cDistance;
@@ -861,37 +599,81 @@ const ptrLandmark CognitiveMap::FindBestRouteFromOneOf(const Landmarks &nearLand
             bestChoice=landmark;
         }
     }
-    return bestChoice;
+    std::vector<const AILandmark*> landmarksOnShortestPath = _currentRegion->PathLengthFromLandmarkToTarget(bestChoice, _nextTarget).first;
 
+    for (int i=landmarksOnShortestPath.size()-1; i>=0; --i)
+    {
+        if (std::find(_landmarksRecentlyVisited.begin(),_landmarksRecentlyVisited.end(),landmarksOnShortestPath[i])==_landmarksRecentlyVisited.end())
+        {
+            return landmarksOnShortestPath[i];
+        }
+
+    }
+    return nullptr;
 }
 
-const ptrLandmark CognitiveMap::GetNearestMainTarget(const Landmarks &mainTargets)
+const AILandmark* AICognitiveMap::GetNearestMainTarget(const std::vector<const AILandmark*> &mainTargets)
 {
-    ptrLandmark nearest = mainTargets[0];
-    double dNearest = (mainTargets[0]->GetRandomPoint()-GetOwnPos()).Norm();
-    for (ptrLandmark landmark:mainTargets)
-    {
-        if (landmark==nearest)
-            continue;
+    const AILandmark* nearest = nullptr;
+    double dNearest = FLT_MAX;
 
-        Point vec = landmark->GetRandomPoint()-GetOwnPos();
-        if (vec.Norm()<dNearest)
+    if (mainTargets.size()==1)
+        return mainTargets[0];
+
+    for (const AILandmark* mainDest:mainTargets)
+    {
+        _nextTarget=mainDest;
+        const AILandmark* cLandmark = FindNearLandmarkConnectedToTarget(mainDest);
+        double cDistance=(_ped->GetPos()-cLandmark->GetRandomPoint()).Norm()+_currentRegion->PathLengthFromLandmarkToTarget(cLandmark,mainDest).second;
+
+        if (cDistance<dNearest)
         {
-            dNearest=vec.Norm();
-            nearest=landmark;
+            dNearest=cDistance;
+            nearest=mainDest;
         }
     }
+
     return nearest;
 }
 
-void CognitiveMap::InitLandmarkNetworksInRegions()
+void AICognitiveMap::SetBestChoice(const NavLine &navLine)
 {
-    for (ptrRegion region:_regions)
+    _lastBestChoice=navLine;
+}
+
+const NavLine* AICognitiveMap::GetBestChoice() const
+{
+    if (_lastBestChoice.GetPoint1()==Point(0,0) && _lastBestChoice.GetPoint2()==Point(0,0))
+        return nullptr;
+    else
+        return &_lastBestChoice;
+}
+
+void AICognitiveMap::InitLandmarkNetworksInRegions()
+{
+    for (AIRegion& region:_regions)
     {
-        region->InitLandmarkNetwork();
+        region.InitLandmarkNetwork();
     }
 }
 
+const AILandmark* AICognitiveMap::GetNextTarget() const
+{
+    return _nextTarget;
+}
+
+
+Point GetCloserPoint(const Point &origin, const Point &target1, const Point& target2)
+{
+
+    Point vec1 = target1-origin;
+    Point vec2 = target2-origin;
+
+    if (vec1.Norm()<vec2.Norm())
+        return target1;
+    else
+        return target2;
+}
 
 
 

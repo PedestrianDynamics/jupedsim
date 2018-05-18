@@ -258,7 +258,7 @@ private:
     double _swayFreqB = 0.35;
     double _swayAmpA = -0.14;
     double _swayAmpB = 0.21;
-
+	const double judge = 10000;
 };
 
 #endif /* AGENTSPARAMETERS_H_ */
