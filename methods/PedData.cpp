@@ -63,7 +63,7 @@ bool PedData::ReadData(const string& projectRootDir, const string& path, const s
           TiXmlDocument docGeo(fullTrajectoriesPathName);
           if (!docGeo.LoadFile()) {
                Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
-               Log->Write("ERROR: \t could not parse the trajectories file <%s>",fullTrajectoriesPathName.c_str());
+               Log->Write("ERROR: \tcould not parse the trajectories file <%s>",fullTrajectoriesPathName.c_str());
                return false;
           }
           TiXmlElement* xRootNode = docGeo.RootElement();

@@ -72,6 +72,7 @@ Method_D::~Method_D()
 // };
 bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocation, const double& zPos_measureArea)
 {
+     bool return_value = true;
      _scriptsLocation = scriptsLocation;
      _peds_t = peddata.GetPedsFrame();
      _trajName = peddata.GetTrajName();
@@ -81,7 +82,7 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
      int mycounter = 0;
      int minFrame = peddata.GetMinFrame();
      Log->Write("INFO:\tMethod D: frame rate fps: <%.2f>, start: <%d>, stop: <%d> (minFrame = %d)", _fps, _startFrame, _stopFrame, minFrame);
-     if(_startFrame!=_stopFrame)
+     if(_startFrame != _stopFrame)
      {
           if(_startFrame==-1)
           {
@@ -106,10 +107,17 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
 
           }
      }
-     OpenFileMethodD();
+
+     if(!OpenFileMethodD())
+     {
+          return_value = false;
+     }
      if(_calcIndividualFD)
      {
-          OpenFileIndividualFD();
+          if (!OpenFileIndividualFD())
+          {
+               return_value = false;
+          }
      }
      Log->Write("------------------------Analyzing with Method D-----------------------------");
      //for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
@@ -122,7 +130,6 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
           std::ostringstream ss;
           ss << std::setw(5) << std::setfill('0') << frid;
           const std::string str_frid = ss.str();
-
           if(!(frid%10))
           {
                Log->Write("frame ID = %d",frid);
@@ -148,7 +155,6 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
           }
           int NumPeds = IdInFrame.size();
           //---------------------------------------------------------------------------------------------------------------
-          // std::cout << "NumPeds: " << NumPeds << "  Frame: "<< frid << "\n";
           if(NumPeds>3)
           {
                if(_isOneDimensional)
@@ -179,7 +185,7 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
                          OutputVoronoiResults(polygons, str_frid, VInFrame); // TODO polygons_id
                          if(_calcIndividualFD)
                          {
-                              if(false==_isOneDimensional)
+                              if(!_isOneDimensional)
                               {
                                    GetIndividualFD(polygons,VInFrame, IdInFrame, _areaForMethod_D->_poly, str_frid); // TODO polygons_id
                               }
@@ -195,22 +201,17 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
                     }
                     else
                     {
-
                          for(int i=0;i<(int)IdInFrame.size();i++)
                          {
                               std::cout << XInFrame[i]*CMtoM << "   " << YInFrame[i]*CMtoM <<  "   "  << IdInFrame[i] << "\n";
                          }
-                         Log->Write("WARNING: \tVoronoi Diagrams are not obtained!. Frame: %d\n", frid);
-                              return true; // todo: return false and
-                                           // check when does
-                                           // intersetion with circle fail
+                         Log->Write("WARNING: \tVoronoi Diagrams are not obtained!. Frame: %d (minFrame = %d)\n", frid, minFrame);
                     }
                }
-          }
+          } // if N >3
           else
           {
-               Log->Write("DEBUG: \tThe number of the pedestrians is less than 2. Frame = %d\n", frid);
-               return true;
+               Log->Write("INFO: \tThe number of the pedestrians is less than 2. Frame = %d (minFrame = %d)\n", frid, minFrame);
           }
      }
      fclose(_fVoronoiRhoV);
@@ -218,7 +219,7 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
      {
           fclose(_fIndividualFD);
      }
-     return true;
+     return return_value;
 }
 
 bool Method_D::OpenFileMethodD()
@@ -246,7 +247,7 @@ bool Method_D::OpenFileMethodD()
 bool Method_D::OpenFileIndividualFD()
 {
      string Individualfundment=_projectRootDir+"./Output/Fundamental_Diagram/Individual_FD/IndividualFD"+_trajName+"_id_"+_measureAreaId+".dat";
-     if((_fIndividualFD=Analysis::CreateFile(Individualfundment))==NULL)
+     if((_fIndividualFD=Analysis::CreateFile(Individualfundment))==nullptr)
      {
           Log->Write("ERROR:\tcannot open the file individual\n");
           return false;
