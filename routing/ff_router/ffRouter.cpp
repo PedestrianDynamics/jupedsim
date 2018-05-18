@@ -141,6 +141,7 @@ bool FFRouter::Init(Building* building)
           }
      }
      //make unique
+     std::sort(_allDoorUIDs.begin(), _allDoorUIDs.end());
      _allDoorUIDs.erase( std::unique(_allDoorUIDs.begin(),_allDoorUIDs.end()), _allDoorUIDs.end());
 
      //cleanse maps
@@ -248,6 +249,40 @@ bool FFRouter::Init(Building* building)
           } // otherDoor
      } // roomAndCroTrVector
 
+     if (_config->get_has_directional_escalators()) {
+         _directionalEscalatorsUID.clear();
+         _penaltyList.clear();
+         for (auto room : building->GetAllRooms()) {
+             for (auto subroom : room.second->GetAllSubRooms()) {
+                 if ((subroom.second->GetType() == "escalator_up") || (subroom.second->GetType() == "escalator_down")) {
+                     _directionalEscalatorsUID.emplace_back(subroom.second->GetUID());
+                 }
+             }
+         }
+         for (int subUID : _directionalEscalatorsUID) {
+             Escalator* escalator = (Escalator*) building->GetSubRoomByUID(subUID);
+             std::vector<int> lineUIDs = escalator->GetAllGoalIDs();
+             assert(lineUIDs.size() == 2);
+             if (escalator->IsEscalatorUp()) {
+                 if (_CroTrByUID[lineUIDs[0]]->IsInLineSegment(escalator->GetUp())) {
+                     _penaltyList.emplace_back(std::make_pair(lineUIDs[0], lineUIDs[1]));
+                 } else {
+                     _penaltyList.emplace_back(std::make_pair(lineUIDs[1], lineUIDs[0]));
+                 }
+             } else { //IsEscalatorDown
+                 if (_CroTrByUID[lineUIDs[0]]->IsInLineSegment(escalator->GetUp())) {
+                     _penaltyList.emplace_back(std::make_pair(lineUIDs[1], lineUIDs[0]));
+                 } else {
+                     _penaltyList.emplace_back(std::make_pair(lineUIDs[0], lineUIDs[1]));
+                 }
+             }
+         }
+         for (auto key : _penaltyList) {
+             _distMatrix.erase(key);
+             _distMatrix.insert(std::make_pair(key, DBL_MAX));
+         }
+     }
+
      FloydWarshall();
 
      //debug output in file
@@ -340,6 +375,41 @@ bool FFRouter::ReInit()
                } //secondDoor(s)
           } //firstDoor(s)
      } //allRooms
+
+    if (_config->get_has_directional_escalators()) {
+        _directionalEscalatorsUID.clear();
+        _penaltyList.clear();
+        for (auto room : _building->GetAllRooms()) {
+            for (auto subroom : room.second->GetAllSubRooms()) {
+                if ((subroom.second->GetType() == "escalator_up") || (subroom.second->GetType() == "escalator_down")) {
+                    _directionalEscalatorsUID.emplace_back(subroom.second->GetUID());
+                }
+            }
+        }
+        for (int subUID : _directionalEscalatorsUID) {
+            Escalator* escalator = (Escalator*) _building->GetSubRoomByUID(subUID);
+            std::vector<int> lineUIDs = escalator->GetAllGoalIDs();
+            assert(lineUIDs.size() == 2);
+            if (escalator->IsEscalatorUp()) {
+                if (_CroTrByUID[lineUIDs[0]]->IsInLineSegment(escalator->GetUp())) {
+                    _penaltyList.emplace_back(std::make_pair(lineUIDs[0], lineUIDs[1]));
+                } else {
+                    _penaltyList.emplace_back(std::make_pair(lineUIDs[1], lineUIDs[0]));
+                }
+            } else { //IsEscalatorDown
+                if (_CroTrByUID[lineUIDs[0]]->IsInLineSegment(escalator->GetUp())) {
+                    _penaltyList.emplace_back(std::make_pair(lineUIDs[1], lineUIDs[0]));
+                } else {
+                    _penaltyList.emplace_back(std::make_pair(lineUIDs[0], lineUIDs[1]));
+                }
+            }
+        }
+        for (auto key : _penaltyList) {
+            _distMatrix.erase(key);
+            _distMatrix.insert(std::make_pair(key, DBL_MAX));
+        }
+    }
+
      FloydWarshall();
      _plzReInit = false;
      return true;
@@ -456,7 +526,14 @@ int FFRouter::FindExit(Pedestrian* p)
      for(int finalDoor : validFinalDoor) {
           //with UIDs, we can ask for shortest path
           for (int doorUID : DoorUIDsOfRoom) {
-               double locDistToDoor = _locffviafm[p->GetRoomID()]->getCostToDestination(doorUID, p->GetPos(), _mode);
+               //double locDistToDoor = _locffviafm[p->GetRoomID()]->getCostToDestination(doorUID, p->GetPos(), _mode);
+               double locDistToDoor = 0.;
+               if (_targetWithinSubroom) {
+                   locDistToDoor = _config->get_dirSubLocal()->GetDistance2Target(p, doorUID);
+               } else {
+                   locDistToDoor = _config->get_dirLocal()->GetDistance2Target(p, doorUID);
+               }
+
                if (locDistToDoor < -J_EPS) {     //for old ff: //this can happen, if the point is not reachable and therefore has init val -7
                     continue;
                }
@@ -472,6 +549,13 @@ int FFRouter::FindExit(Pedestrian* p)
                     if ((_distMatrix.at(key) + locDistToDoor) < minDist) {
                          minDist = _distMatrix.at(key) + locDistToDoor;
                          bestDoor = key.first; //doorUID
+                         //if (locDistToDoor == 0.) {
+                         if (true) {
+                             auto subroomDoors = _building->GetSubRoomByUID(p->GetSubRoomUID())->GetAllGoalIDs();
+                             if (std::find(subroomDoors.begin(), subroomDoors.end(), _pathsMatrix[key]) != subroomDoors.end()) {
+                                 bestDoor = _pathsMatrix[key]; //@todo: @ar.graf: check this hack
+                             }
+                         }
                          bestFinalDoor = key.second;
                     }
                }

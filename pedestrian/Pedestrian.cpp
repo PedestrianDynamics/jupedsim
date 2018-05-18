@@ -232,7 +232,7 @@ void Pedestrian::SetTau(double tau)
 
 void Pedestrian::SetT(double T)
 {
-     _tau = T;
+     _T = T;
 }
 
 

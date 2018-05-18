@@ -381,6 +381,11 @@ double DirectionLocalFloorfield::GetDistance2Wall(Pedestrian* ped) const
      return _locffviafm.at(ped->GetRoomID())->getDistance2WallAt(ped->GetPos());
 }
 
+double DirectionLocalFloorfield::GetDistance2Target(Pedestrian* ped, int UID) {
+    int roomID = ped->GetRoomID();
+    return _locffviafm.at(roomID)->getCostToDestination(UID, ped->GetPos());
+}
+
 void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
                                     double threshold, bool useDistanceMap) {
      _stepsize = stepsize;
@@ -475,6 +480,11 @@ Point DirectionSubLocalFloorfield::GetDir2Wall(Pedestrian* ped) const
 double DirectionSubLocalFloorfield::GetDistance2Wall(Pedestrian* ped) const
 {
      return _locffviafm.at(ped->GetSubRoomUID())->getDistance2WallAt(ped->GetPos());
+}
+
+double DirectionSubLocalFloorfield::GetDistance2Target(Pedestrian* ped, int UID) {
+    int subroomUID = ped->GetSubRoomUID();
+    return _locffviafm.at(subroomUID)->getCostToDestination(UID, ped->GetPos());
 }
 
 void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
