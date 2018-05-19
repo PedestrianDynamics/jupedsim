@@ -130,9 +130,9 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
           std::ostringstream ss;
           ss << std::setw(5) << std::setfill('0') << frid;
           const std::string str_frid = ss.str();
-          if(!(frid%10))
+          if(!(frid%50))
           {
-               Log->Write("frame ID = %d",frid);
+               Log->Write("INFO:\tframe ID = %d",frid);
           }
           vector<int> ids=_peds_t[frameNr];
           vector<int> IdInFrame = peddata.GetIdInFrame(frameNr, ids, zPos_measureArea);
@@ -211,7 +211,7 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
           } // if N >3
           else
           {
-               Log->Write("INFO: \tThe number of the pedestrians is less than 2. Frame = %d (minFrame = %d)\n", frid, minFrame);
+               Log->Write("INFO: \tThe number of the pedestrians is small (%d). Frame = %d (minFrame = %d)\n", NumPeds, frid, minFrame);
           }
      }
      fclose(_fVoronoiRhoV);

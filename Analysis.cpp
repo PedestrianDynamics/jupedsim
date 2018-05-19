@@ -398,6 +398,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                if(result_D)
                {
                     Log->Write("INFO:\tSuccess with Method D using measurement area id %d!\n",_areaForMethod_D[i]->_id);
+                    std::cout << "INFO:\tSuccess with Method D using measurement area id "<< _areaForMethod_D[i]->_id << "\n";
                     if(_plotTimeseriesD[i])
                     {
                          string parameters_Timeseries="python \""+_scriptsLocation+"/_Plot_timeseries_rho_v.py\" -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
