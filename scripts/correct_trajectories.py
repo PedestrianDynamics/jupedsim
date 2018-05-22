@@ -29,12 +29,17 @@ def readTrajData(pathfile,nameTraj,fps):
     print("reading from:%s/%s"%(pathfile,nameTraj))
     f_traj = open("%s/%s"%(pathfile,nametraj),"r")
     lines = f_traj.readlines()
-    lines = lines[8:]
     data = []
     for line in lines:
         line = line[:-1]
         numbers = line.split('\t')
-        data.append(numbers)
+        numbers = line.split(' ')
+        if(line.startswith("#") != 1 and len(line) > 3):
+            data.append(numbers)
+    print(data[0])
+    print(data[1])
+    print(data[2])
+    print(data[3])
     return data
 
 #convert the xml file of geography into
@@ -61,11 +66,14 @@ def writeNewFile(trajData,filepath,nameTraj):
     print("getting copy info from:%s/%s"%(pathfile,nameTraj))
     f_traj = open("%s/%s"%(pathfile,nametraj),"r")
     lines = f_traj.readlines()
-    lines = lines[:8]
     f_traj.close()
     print("writing in:%s/%s_copy.txt"%(pathfile,nameTraj[:-4]))
     newFile = open("%s/%s_copy.txt"%(pathfile,nameTraj[:-4]),"w")
-    newFile.writelines(lines)
+    i=0
+    newFile.write("#This is an automatically generated trajectory file\r\n# that is supposed to correct the points into walls problem\r\n")
+    while(lines[i].startswith("#")):    
+        newFile.writelines(lines[i])
+        i=i+1
     for line in trajData:
         newLine = "\t".join(line)
         newLine = newLine + "\r\n"
