@@ -231,10 +231,22 @@ def handleSinglePoint(x,y,geoData):
                         x,y = moveFromWall(x,y,edge[0],edge[1],edge[2],edge[3],newDistance,direction)            
             
         else: #obstacle
-            backDistance = -1    #distance from behind the wall where correcting must start
-            startDistance = 0.05  #minimal final distance from the wall
-            endDistance = 0.15  #distance from front where correcting must start   
+            backDistance = -0.5    #distance from behind the wall where correcting must start
+            startDistance = 0.01  #minimal final distance from the wall
+            endDistance = 0.10  #distance from front where correcting must start   
             
+            #gently pushing the points to avoid jumps around corners
+            for edge in geometry[2]:
+                
+                if (closeFromWall(x,y,edge[0],edge[1],edge[2],edge[3],endDistance) 
+                    and wallFacingPoint(0,0,edge[0],edge[1],edge[2],edge[3],direction)):
+                    #print("close")
+                    distance = distanceFromWall(x,y,edge[0],edge[1],edge[2],edge[3],direction)
+                    if (backDistance <= distance and distance <= startDistance):
+                        #print("deserve treatment")
+                        newDistance = backDistance + ((endDistance - backDistance)/(startDistance - backDistance)) * (distance - backDistance)
+                        x,y = moveFromWall(x,y,edge[0],edge[1],edge[2],edge[3],newDistance,direction)  
+                
             #moving points away from inside the walls
             for edge in geometry[2]:
                 
@@ -244,19 +256,7 @@ def handleSinglePoint(x,y,geoData):
                     if (backDistance <= distance and distance <= endDistance):
                         #print("deserve treatment")
                         newDistance = (distance - backDistance) * ((endDistance - startDistance)/(endDistance - backDistance)) + startDistance
-                        x,y = moveFromWall(x,y,edge[0],edge[1],edge[2],edge[3],newDistance,direction)  
-                        
-            #gently pushing the points to avoid jumps around corners
-            for edge in geometry[2]:
-                
-                if (closeFromWall(x,y,edge[0],edge[1],edge[2],edge[3],endDistance-backDistance) and wallFacingPoint(0,0,edge[0],edge[1],edge[2],edge[3],direction)):
-                    #print("close")
-                    distance = distanceFromWall(x,y,edge[0],edge[1],edge[2],edge[3],direction)
-                    if (backDistance <= distance and distance <= startDistance):
-                        #print("deserve treatment")
-                        newDistance = backDistance + ((endDistance - backDistance)/(startDistance - backDistance)) * (distance - backDistance)
-                        x,y = moveFromWall(x,y,edge[0],edge[1],edge[2],edge[3],newDistance,direction)  
-        
+                        x,y = moveFromWall(x,y,edge[0],edge[1],edge[2],edge[3],newDistance,direction) 
             
     return x,y
 
@@ -329,12 +329,11 @@ def plotTrajectories(geoData,old_traj,new_traj):
             #print("DEBUG: curve #",i)
             i = i+1
 
-    #the ids of the trajectory we want to see, uncomment next line for all trajectories
-    #scope = range(len(oldCurveX)) 
-    scope = [4]
+    scope = range(len(oldCurveX)) 
     
     plt.figure(1)
-    plt.subplot(221)
+    
+    plt.subplot(121)
     plt.axis([-4,4,-4,4])
     plt.title('old trajectories')
     for i in range(len(geometryCurvesX)):
@@ -342,9 +341,28 @@ def plotTrajectories(geoData,old_traj,new_traj):
     for i in scope:     
         plt.plot(oldCurveX[i],oldCurveY[i], 'bo', ms= 1)
     
-    plt.subplot(222)
+    plt.subplot(122)
     plt.axis([-4,4,-4,4])
     plt.title('new trajectories')
+    for i in range(len(geometryCurvesX)):
+        plt.plot(geometryCurvesX[i],geometryCurvesY[i], 'r-')
+    for i in scope:     
+        plt.plot(newCurveX[i],newCurveY[i], 'bo', ms= 1)
+
+    scope = [4]
+    plt.figure(2)    
+    
+    plt.subplot(221)
+    plt.axis([-4,4,-4,4])
+    plt.title('old trajectory')
+    for i in range(len(geometryCurvesX)):
+        plt.plot(geometryCurvesX[i],geometryCurvesY[i], 'r-')
+    for i in scope:     
+        plt.plot(oldCurveX[i],oldCurveY[i], 'bo', ms= 1)
+    
+    plt.subplot(222)
+    plt.axis([-4,4,-4,4])
+    plt.title('new trajectory')
     for i in range(len(geometryCurvesX)):
         plt.plot(geometryCurvesX[i],geometryCurvesY[i], 'r-')
     for i in scope:     
@@ -352,19 +370,21 @@ def plotTrajectories(geoData,old_traj,new_traj):
         
     plt.subplot(223)
     plt.axis([-1,1,-1,1])
-    plt.title('old trajectories (closeup)')
+    plt.title('old trajectory (closeup)')
     for i in range(len(geometryCurvesX)):
         plt.plot(geometryCurvesX[i],geometryCurvesY[i], 'r-')
     for i in scope:     
-        plt.plot(oldCurveX[i],oldCurveY[i], 'bo', ms= 1)
+        plt.plot(oldCurveX[i],oldCurveY[i], 'bo', ms= 2)
+        plt.plot(oldCurveX[i],oldCurveY[i], 'k', lw=0.5)
     
     plt.subplot(224)
     plt.axis([-1,1,-1,1])
-    plt.title('new trajectories (closeup)')
+    plt.title('new trajectory (closeup)')
     for i in range(len(geometryCurvesX)):
         plt.plot(geometryCurvesX[i],geometryCurvesY[i], 'r-')
     for i in scope:     
-        plt.plot(newCurveX[i],newCurveY[i], 'bo', ms= 1)
+        plt.plot(newCurveX[i],newCurveY[i], 'bo', ms= 2)
+        plt.plot(newCurveX[i],newCurveY[i], 'k', lw=0.5)
     
     plt.show()
 
