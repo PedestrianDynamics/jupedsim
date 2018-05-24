@@ -1,5 +1,19 @@
 #!/usr/bin/env python3
 
+"""
+=== TRAJECTORY CORRECTOR FOR JPSreport ===
+author: Arno Gay-Bauer 2018-05-24
+
+This programm takes a trajectory file and a geometry file and move
+the points outside of obstacles and away from walls.
+
+In order to do that every point close to an obstacle is first slightly
+moved away to avoid jumps of trajectories around corner.
+Then, every point close from walls and obstacles get pushed away from walls 
+so that there is no point inside obstacles.
+
+"""
+
 import numpy as np
 import numpy.linalg as npl
 import matplotlib
