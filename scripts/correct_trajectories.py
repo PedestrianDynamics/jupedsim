@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-#SCRIPT IN EARLY DEVELOPMENT
 import numpy as np
 import numpy.linalg as npl
 import matplotlib
@@ -18,13 +17,12 @@ def getParserArgs():
 	parser.add_argument("-p", "--pathfile", default="./", help='give the path of source file')
 	parser.add_argument("-n", "--nametraj", help='give the name of the trajectory file (txt)')
 	parser.add_argument("-g", "--namegeo", help='give the name of the geometry file (xml)')
-	parser.add_argument("-f", "--fps", default="16", type=int, help='give the frame rate of data')
 	args = parser.parse_args()
 	return args
  
-#convert the txt file of trajectories into
+#convert the txt file into point list
 #list of [ID,frame,x,y,z]
-def readTrajData(pathfile,nameTraj,fps):
+def readTrajData(pathfile,nameTraj):
     
     print("reading from:%s/%s"%(pathfile,nameTraj))
     f_traj = open("%s/%s"%(pathfile,nametraj),"r")
@@ -40,13 +38,12 @@ def readTrajData(pathfile,nameTraj,fps):
 
 #convert the xml file of geography into
 #list of ["type=obstacle|walls",direction,list of [p1x, p1y, p2x, p2y]]
-def readGeoData(pathfile,namegeo,fps):
+def readGeoData(pathfile,namegeo):
     f_geo = etree.parse("%s/%s"%(pathfile,namegeo))
     wall_list = f_geo.findall("rooms/room/subroom/polygon")
     obstacle_list = f_geo.findall("rooms/room/subroom/obstacle/polygon")
     geometry_list = []
     i = 0
-    
     
     for obstacle in obstacle_list:
         vertices = []
@@ -83,7 +80,7 @@ def writeNewFile(trajData,filepath,nameTraj):
     print("writing in:%s/%s_copy.txt"%(pathfile,nameTraj[:-4]))
     newFile = open("%s/%s_copy.txt"%(pathfile,nameTraj[:-4]),"w")
     i=0
-    newFile.write("#This is an automatically generated trajectory file\r\n# that is supposed to correct the points into walls problem\r\n")
+    newFile.write("#This is an automatically generated trajectory file\r\n#that is supposed to move points away from walls \r\n")
     while(lines[i].startswith("#")):    
         newFile.writelines(lines[i])
         i=i+1
@@ -142,7 +139,6 @@ def distanceFromWall(x,y,p1x,p1y,p2x,p2y,direction):
     vect_B = [x - p1x, y - p1y]
     sinP = (np.linalg.det([vect_A,vect_B]))
     sinP = sinP * direction    
-    
     a = distanceSquared(p1x,p1y,p2x,p2y)
     b = distanceSquared(p1x,p1y,x,y)
     c = distanceSquared(x,y,p2x,p2y)
@@ -152,7 +148,7 @@ def distanceFromWall(x,y,p1x,p1y,p2x,p2y,direction):
     return np.sign(sinP)*math.sqrt(math.fabs(b - xSq))
 
 #return 1 if close from wall (in a circle shape), else 0
-def closeFromWall(x,y,p1x,p1y,p2x,p2y,bias = 0):
+def closeFromWall(x,y,p1x,p1y,p2x,p2y,bias=0):
     a = distanceSquared(p1x,p1y,p2x,p2y)
     b = distanceSquared(p1x,p1y,x,y)
     c = distanceSquared(x,y,p2x,p2y)
@@ -173,29 +169,30 @@ def wallFacingPoint(x,y,p1x,p1y,p2x,p2y,direction):
 #return coordinates of a point moved away from a wall
 def moveFromWall(x,y,p1x,p1y,p2x,p2y,new_distance,direction):
     #print("DEBUG: ",x,y,p1x,p1y,p2x,p2y,new_distance,direction)
+    #if the points are exactly on the corners of the edges, we move them slightly
     if (x == p1x and y == p1y):
         x = x - 0.001
     if (x == p2x and y == p2y):
         x = x - 0.001
+    #the triangle is p1 p2 (x,y) where dist_a is the wall segment length 
+    #and dist_x  the length between p1 and the projection of (x,y) on the wall
     aSq = distanceSquared(p1x,p1y,p2x,p2y)
     bSq = distanceSquared(p1x,p1y,x,y)
     cSq = distanceSquared(x,y,p2x,p2y)
     xSq = ((aSq+bSq-cSq)*(aSq+bSq-cSq))/(4*aSq)
     h = distanceFromWall(x,y,p1x,p1y,p2x,p2y,direction)
-    
-    #the cosine is needed to tell if x is negative
+    #the cosine is needed to tell if the projection is outside the segment
     vect_A = [p2x - p1x, p2y - p1y]
     vect_B = [x - p1x, y - p1y]
     cosP = np.dot(vect_A,vect_B)/(npl.norm(vect_A)*npl.norm(vect_B))    
     dist_x = math.sqrt(xSq) * np.sign(cosP)
-    
     dist_a = math.sqrt(aSq)
     #print("DEBUG:",aSq,bSq,cSq,xSq,h,dist_x,dist_a)
     intersect_point_x = p1x + (dist_x/dist_a)*(p2x-p1x)
     intersect_point_y = p1y + (dist_x/dist_a)*(p2y-p1y)
     #print("DEBUG: the point at the base is",intersect_point_x,intersect_point_y)
     if(h==0):
-        #the Point is exactly on the edge, to move it away, we rotate the point p1 around x 90 degrees
+        #if the Point is exactly on the edge, to move it away, we rotate the point p1 around x by 90 degrees
         x = intersect_point_x - (p2y - intersect_point_y)
         y = intersect_point_y + (p2x - intersect_point_x)
         #print("DEBUG: the new point far away is",x,y )
@@ -216,50 +213,54 @@ def handleSinglePoint(x,y,geoData):
     
     for geometry in geoData:
         direction = geometry[1]
+        
         if(geometry[0] == "walls"):
-            backDistance = -1    #distance from behind the wall where correcting must start
-            startDistance = 0.1  #minimal final distance from the wall
-            endDistance = 0.5  #distance from front where correcting must start     
-            
+            backDistance = -1       #distance from behind the wall where correcting must start
+            startDistance = 0.1     #minimal final distance from the wall
+            endDistance = 0.5       #distance from front where correcting must start     
             for edge in geometry[2]:
                 if (closeFromWall(x,y,edge[0],edge[1],edge[2],edge[3])):
-                    #print("close")
                     distance = distanceFromWall(x,y,edge[0],edge[1],edge[2],edge[3],direction)
                     if (backDistance <= distance and distance <= endDistance):
-                        #print("deserve treatment")
+                        #x' = (x-a)*((c-b)/(c-a))+b  
                         newDistance = (distance - backDistance) * ((endDistance - startDistance)/(endDistance - backDistance)) + startDistance
                         x,y = moveFromWall(x,y,edge[0],edge[1],edge[2],edge[3],newDistance,direction)            
             
         else: #obstacle
-            backDistance = -0.5    #distance from behind the wall where correcting must start
-            startDistance = 0.01  #minimal final distance from the wall
-            endDistance = 0.10  #distance from front where correcting must start   
+            backDistance = -0.5     #distance from behind the wall where correcting must start
+            startDistance = 0.01    #minimal final distance from the wall
+            endDistance = 0.10      #distance from front where correcting must start  
             
             #gently pushing the points to avoid jumps around corners
             for edge in geometry[2]:
-                
                 if (closeFromWall(x,y,edge[0],edge[1],edge[2],edge[3],endDistance) 
                     and wallFacingPoint(0,0,edge[0],edge[1],edge[2],edge[3],direction)):
-                    #print("close")
                     distance = distanceFromWall(x,y,edge[0],edge[1],edge[2],edge[3],direction)
                     if (backDistance <= distance and distance <= startDistance):
-                        #print("deserve treatment")
-                        newDistance = backDistance + ((endDistance - backDistance)/(startDistance - backDistance)) * (distance - backDistance)
+                        #x' =((c-a)/(b-a))*(x-a)+a
+                        newDistance = ((endDistance - backDistance)/(startDistance - backDistance)) * (distance - backDistance) + backDistance 
                         x,y = moveFromWall(x,y,edge[0],edge[1],edge[2],edge[3],newDistance,direction)  
-                
+                        
             #moving points away from inside the walls
             for edge in geometry[2]:
-                
                 if (closeFromWall(x,y,edge[0],edge[1],edge[2],edge[3]) and wallFacingPoint(0,0,edge[0],edge[1],edge[2],edge[3],direction)):
-                    #print("close")
                     distance = distanceFromWall(x,y,edge[0],edge[1],edge[2],edge[3],direction)
                     if (backDistance <= distance and distance <= endDistance):
-                        #print("deserve treatment")
+                        #x' = (x-a)*((c-b)/(c-a))+b 
                         newDistance = (distance - backDistance) * ((endDistance - startDistance)/(endDistance - backDistance)) + startDistance
                         x,y = moveFromWall(x,y,edge[0],edge[1],edge[2],edge[3],newDistance,direction) 
             
     return x,y
-
+    
+def smoothPoint(points):
+    new_x = 0
+    new_y = 0
+    length = len(points)
+    for point in points:
+        new_x = new_x + float(point[2])/length
+        new_y = new_y + float(point[3])/length
+    return new_x,new_y
+    
 #apply process to every point of the file
 def handleAllPoint(trajData,geoData):
     
@@ -271,7 +272,15 @@ def handleAllPoint(trajData,geoData):
         new_trajectories.append([inputs[0],inputs[1],floatToString(new_x),floatToString(new_y),inputs[4]])
         if (math.fmod(index,10000) == 0):
             print("Processing: [",index,"/",len(trajData),"]")
-
+    
+    smooth_order = 3
+    for index,inputs in enumerate(new_trajectories):
+        if (smooth_order < int(inputs[1]) and index < len(new_trajectories)-smooth_order and new_trajectories[index + smooth_order][0] == new_trajectories[index][0]):
+            new_x,new_y = smoothPoint(new_trajectories[index - smooth_order : index + smooth_order])
+            new_trajectories[index] = [inputs[0],inputs[1],floatToString(new_x),floatToString(new_y),inputs[4]]
+        if (math.fmod(index,10000) == 0):
+            print("Smoothing: [",index,"/",len(trajData),"]")
+            
     return new_trajectories
     
 
@@ -349,42 +358,41 @@ def plotTrajectories(geoData,old_traj,new_traj):
     for i in scope:     
         plt.plot(newCurveX[i],newCurveY[i], 'bo', ms= 1)
 
+    #scope = range(len(oldCurveX))
     scope = [4]
-    plt.figure(2)    
     
-    plt.subplot(221)
-    plt.axis([-4,4,-4,4])
-    plt.title('old trajectory')
-    for i in range(len(geometryCurvesX)):
-        plt.plot(geometryCurvesX[i],geometryCurvesY[i], 'r-')
-    for i in scope:     
-        plt.plot(oldCurveX[i],oldCurveY[i], 'bo', ms= 1)
-    
-    plt.subplot(222)
-    plt.axis([-4,4,-4,4])
-    plt.title('new trajectory')
-    for i in range(len(geometryCurvesX)):
-        plt.plot(geometryCurvesX[i],geometryCurvesY[i], 'r-')
-    for i in scope:     
-        plt.plot(newCurveX[i],newCurveY[i], 'bo', ms= 1)
+    for index,j in enumerate(scope):
+        plt.figure(index+2)    
         
-    plt.subplot(223)
-    plt.axis([-1,1,-1,1])
-    plt.title('old trajectory (closeup)')
-    for i in range(len(geometryCurvesX)):
-        plt.plot(geometryCurvesX[i],geometryCurvesY[i], 'r-')
-    for i in scope:     
-        plt.plot(oldCurveX[i],oldCurveY[i], 'bo', ms= 2)
-        plt.plot(oldCurveX[i],oldCurveY[i], 'k', lw=0.5)
-    
-    plt.subplot(224)
-    plt.axis([-1,1,-1,1])
-    plt.title('new trajectory (closeup)')
-    for i in range(len(geometryCurvesX)):
-        plt.plot(geometryCurvesX[i],geometryCurvesY[i], 'r-')
-    for i in scope:     
-        plt.plot(newCurveX[i],newCurveY[i], 'bo', ms= 2)
-        plt.plot(newCurveX[i],newCurveY[i], 'k', lw=0.5)
+        plt.subplot(221)
+        plt.axis([-4,4,-4,4])
+        plt.title('old trajectory')
+        for i in range(len(geometryCurvesX)):
+            plt.plot(geometryCurvesX[i],geometryCurvesY[i], 'r-')  
+        plt.plot(oldCurveX[j],oldCurveY[j], 'bo', ms= 1)
+        
+        plt.subplot(222)
+        plt.axis([-4,4,-4,4])
+        plt.title('new trajectory')
+        for i in range(len(geometryCurvesX)):
+            plt.plot(geometryCurvesX[i],geometryCurvesY[i], 'r-')
+        plt.plot(newCurveX[j],newCurveY[j], 'bo', ms= 1)
+            
+        plt.subplot(223)
+        plt.axis([-1,1,-1,1])
+        plt.title('old trajectory (closeup)')
+        for i in range(len(geometryCurvesX)):
+            plt.plot(geometryCurvesX[i],geometryCurvesY[i], 'r-')
+        plt.plot(oldCurveX[j],oldCurveY[j], 'bo', ms= 1)
+        plt.plot(oldCurveX[j],oldCurveY[j], 'k', lw=0.5)
+        
+        plt.subplot(224)
+        plt.axis([-1,1,-1,1])
+        plt.title('new trajectory (closeup)')
+        for i in range(len(geometryCurvesX)):
+            plt.plot(geometryCurvesX[i],geometryCurvesY[i], 'r-')     
+        plt.plot(newCurveX[j],newCurveY[j], 'bo', ms= 2)
+        plt.plot(newCurveX[j],newCurveY[j], 'k', lw=0.5)
     
     plt.show()
 
@@ -520,9 +528,8 @@ if __name__ == '__main__':
    nametraj = args.nametraj
    namegeo = args.namegeo
    print("INFO:\tEditing the trajectory from: <%s>"%(nametraj)) 
-   fps = args.fps
-   trajData = readTrajData(pathfile,nametraj,fps)
-   geoData = readGeoData(pathfile,namegeo,fps)
+   trajData = readTrajData(pathfile,nametraj)
+   geoData = readGeoData(pathfile,namegeo)
    
    
    
