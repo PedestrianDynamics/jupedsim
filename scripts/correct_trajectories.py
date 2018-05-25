@@ -170,6 +170,19 @@ def closeFromWall(x,y,p1x,p1y,p2x,p2y,bias=0):
         return 1
     else:
         return 0
+        
+#return 1 if close from wall (in a triangle shape), else 0
+def closeFromWallTriangle(x,y,p1x,p1y,p2x,p2y):
+    a = [p2x - p1x, p2y - p1y]
+    b = [x - p1x, y - p1y]
+    c = [x - p2x, y - p2y]
+    a = np.abs(a)
+    b = np.abs(b)
+    c = np.abs(c)
+    if (a[0]+a[1] >= b[0]+b[1] and a[0]+a[1] >= c[0]+c[1] ):
+        return 1
+    else:
+        return 0
 
 #return true if the outside of the wall is in sight of the point
 def wallFacingPoint(x,y,p1x,p1y,p2x,p2y,direction):
@@ -247,23 +260,23 @@ def handleSinglePoint(x,y,geoData):
             
             #gently pushing the points to avoid jumps around corners
             for edge in geometry[2]:
-                if (closeFromWall(x,y,edge[0],edge[1],edge[2],edge[3],endDistance) 
+                if (closeFromWall(x,y,edge[0],edge[1],edge[2],edge[3],4*endDistance) 
                     and wallFacingPoint(0,0,edge[0],edge[1],edge[2],edge[3],direction)):
                     distance = distanceFromWall(x,y,edge[0],edge[1],edge[2],edge[3],direction)
                     if (backDistance <= distance and distance <= startDistance):
                         #x' =((c-a)/(b-a))*(x-a)+a
                         newDistance = ((endDistance - backDistance)/(startDistance - backDistance)) * (distance - backDistance) + backDistance 
                         x,y = moveFromWall(x,y,edge[0],edge[1],edge[2],edge[3],newDistance,direction)  
-                        
+            
             #moving points away from inside the walls
             for edge in geometry[2]:
-                if (closeFromWall(x,y,edge[0],edge[1],edge[2],edge[3]) and wallFacingPoint(0,0,edge[0],edge[1],edge[2],edge[3],direction)):
+                if (closeFromWallTriangle(x,y,edge[0],edge[1],edge[2],edge[3]) and wallFacingPoint(0,0,edge[0],edge[1],edge[2],edge[3],direction)):
                     distance = distanceFromWall(x,y,edge[0],edge[1],edge[2],edge[3],direction)
                     if (backDistance <= distance and distance <= endDistance):
                         #x' = (x-a)*((c-b)/(c-a))+b 
                         newDistance = (distance - backDistance) * ((endDistance - startDistance)/(endDistance - backDistance)) + startDistance
                         x,y = moveFromWall(x,y,edge[0],edge[1],edge[2],edge[3],newDistance,direction) 
-            
+               
     return x,y
     
 def smoothPoint(points):
@@ -293,13 +306,14 @@ def handleAllPoint(trajData,geoData):
             new_x,new_y = smoothPoint(new_trajectories[index - smooth_order : index + smooth_order])
             new_trajectories[index] = [inputs[0],inputs[1],floatToString(new_x),floatToString(new_y),inputs[4]]
         if (math.fmod(index,10000) == 0):
-            print("Smoothing: [",index,"/",len(trajData),"]")
-            
+            print("Smoothing: [",index,"/",len(trajData),"]")   
+           
     return new_trajectories
     
-
+#display the graphs for trajectories
 def plotTrajectories(geoData,old_traj,new_traj): 
     
+    #put the data into displayable arrays
     geometryCurvesX = []
     geometryCurvesY = []
     for geometry in geoData:
@@ -352,10 +366,11 @@ def plotTrajectories(geoData,old_traj,new_traj):
             #print("DEBUG: curve #",i)
             i = i+1
 
+    #display all the trajectories at once on the same graph
     scope = range(len(oldCurveX)) 
     
     plt.figure(1)
-    
+    #all the trajectories before calculation
     plt.subplot(121)
     plt.axis([-4,4,-4,4])
     plt.title('old trajectories')
@@ -363,7 +378,7 @@ def plotTrajectories(geoData,old_traj,new_traj):
         plt.plot(geometryCurvesX[i],geometryCurvesY[i], 'r-')
     for i in scope:     
         plt.plot(oldCurveX[i],oldCurveY[i], 'bo', ms= 1)
-    
+    #all the trajectories after calculation
     plt.subplot(122)
     plt.axis([-4,4,-4,4])
     plt.title('new trajectories')
@@ -372,26 +387,27 @@ def plotTrajectories(geoData,old_traj,new_traj):
     for i in scope:     
         plt.plot(newCurveX[i],newCurveY[i], 'bo', ms= 1)
 
+    #uncomment next line to get all the curves
     #scope = range(len(oldCurveX))
     scope = [4]
-    
+    #open one new window for each trajectory in the scope (scope correspond to the id of the trajectory)
     for index,j in enumerate(scope):
         plt.figure(index+2)    
-        
+        #old trajectory on global scale
         plt.subplot(221)
         plt.axis([-4,4,-4,4])
         plt.title('old trajectory')
         for i in range(len(geometryCurvesX)):
             plt.plot(geometryCurvesX[i],geometryCurvesY[i], 'r-')  
         plt.plot(oldCurveX[j],oldCurveY[j], 'bo', ms= 1)
-        
+        #new trajectory on global scale
         plt.subplot(222)
         plt.axis([-4,4,-4,4])
         plt.title('new trajectory')
         for i in range(len(geometryCurvesX)):
             plt.plot(geometryCurvesX[i],geometryCurvesY[i], 'r-')
         plt.plot(newCurveX[j],newCurveY[j], 'bo', ms= 1)
-            
+        #old trajectory seen from close
         plt.subplot(223)
         plt.axis([-1,1,-1,1])
         plt.title('old trajectory (closeup)')
@@ -399,15 +415,16 @@ def plotTrajectories(geoData,old_traj,new_traj):
             plt.plot(geometryCurvesX[i],geometryCurvesY[i], 'r-')
         plt.plot(oldCurveX[j],oldCurveY[j], 'bo', ms= 1)
         plt.plot(oldCurveX[j],oldCurveY[j], 'k', lw=0.5)
-        
+        #new trajectory seen from close
         plt.subplot(224)
         plt.axis([-1,1,-1,1])
         plt.title('new trajectory (closeup)')
         for i in range(len(geometryCurvesX)):
             plt.plot(geometryCurvesX[i],geometryCurvesY[i], 'r-')     
-        plt.plot(newCurveX[j],newCurveY[j], 'bo', ms= 2)
+        plt.plot(newCurveX[j],newCurveY[j], 'bo', ms= 1)
         plt.plot(newCurveX[j],newCurveY[j], 'k', lw=0.5)
-    
+        
+        
     plt.show()
 
 #sequences of unitary tests for debugging
@@ -527,6 +544,20 @@ def debugTest():
    print("=3.9= (4.75,0.25), expected to become (4.5666,0.4333) == (%s,%s)"%(floatToString(x),floatToString(y)))
    x,y = handleSinglePoint(5.5,-0.5,geoData)
    print("=3.10= (5.5,-0.5), expected to become (4.7666,0.2333) == (%s,%s)"%(floatToString(x),floatToString(y)))
+   
+   print("DEBUG: debugging closeFromWallTriangle")
+   d = closeFromWallTriangle(1,0.5,0,0,2,0)
+   print("=4.1= is (1,0.5) close from (0,0),(2,0), expected 1 :",d)
+   d = closeFromWallTriangle(1,1,0,0,2,0)
+   print("=4.2= is (1,1) close from (0,0),(2,0), expected 1 :",d) 
+   d = closeFromWallTriangle(1,2,0,0,2,0)
+   print("=4.3= is (1,2) close from (0,0),(2,0), expected 0 :",d) 
+   d = closeFromWallTriangle(0,1,0,0,2,0)
+   print("=4.4= is (0,1) close from (0,0),(2,0), expected 0 :",d) 
+   d = closeFromWallTriangle(0.3,0.2,0,0,2,0)
+   print("=4.5= is (0.3,0.2) close from (0,0),(2,0), expected 1 :",d)
+   d = closeFromWallTriangle(0.3,-0.2,0,0,2,0)
+   print("=4.5= is (0.3,-0.2) close from (0,0),(2,0), expected 1 :",d) 
    
    return
    
