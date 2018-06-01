@@ -30,6 +30,7 @@
 #include "../geometry/SubRoom.h"
 #include "../geometry/Room.h"
 #include "../tinyxml/tinyxml.h"
+#include "../Debug.h"
 
 #ifdef _SIMULATOR
 #include "../pedestrian/Pedestrian.h"
@@ -351,57 +352,63 @@ bool Building::LoadGeometry(const std::string &geometryfile)
 {
      //get the geometry filename from the project file
      string geoFilenameWithPath= _projectRootDir + geometryfile;
-
+     Debug::Messages("LoadGeometry: Root Dir: <%s>", _projectRootDir.c_str());
+     Debug::Messages("LoadGeometry: geometryfile: <%s>", geometryfile.c_str());
+     Debug::Messages("LoadGeometry: geoFilenameWithPath: <%s>", geoFilenameWithPath.c_str());
      if(geometryfile=="")
      {
           TiXmlDocument doc(_projectFilename);
           if (!doc.LoadFile()) {
-               Log->Write("ERROR: \t%s", doc.ErrorDesc());
-               Log->Write("\t could not parse the project file");
+                Debug::Error("%s", doc.ErrorDesc());
+                Debug::Error("LoadGeometry: could not parse the project file");
                return false;
           }
 
-          Log->Write("INFO: \tParsing the geometry file");
+          Debug::Messages("Parsing the geometry file");
           TiXmlElement* xMainNode = doc.RootElement();
 
           if(xMainNode->FirstChild("geometry")) {
-               _geometryFilename=xMainNode->FirstChild("geometry")->FirstChild()->Value();
-               geoFilenameWithPath=_projectRootDir+_geometryFilename;
-               Log->Write("INFO: \tgeometry <"+_geometryFilename+">");
+                std::cout <<"geometry file found.\n";
+                _geometryFilename=xMainNode->FirstChild("geometry")->FirstChild()->Value();
+                geoFilenameWithPath=_projectRootDir+_geometryFilename;
+                Debug::Messages("LoadGeometry: Root Dir: <%s>", _projectRootDir.c_str());
+                Debug::Messages("LoadGeometry: geometryfile: <%s>", geometryfile.c_str());
+                Debug::Messages("LoadGeometry: geoFilenameWithPath: <%s>", geoFilenameWithPath.c_str());
+                Debug::Messages("INFO: \tgeometry <%s>", _geometryFilename.c_str());
           }
      }
 
      TiXmlDocument docGeo(geoFilenameWithPath);
      if (!docGeo.LoadFile()) {
-          Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
-          Log->Write("\t could not parse the geometry file");
+           Debug::Messages("%s", docGeo.ErrorDesc());
+           Debug::Error("LoadGeometry: could not parse the geometry file");
           return false;
      }
 
      TiXmlElement* xRootNode = docGeo.RootElement();
      if( ! xRootNode ) {
-          Log->Write("ERROR:\tRoot element does not exist");
+           Debug::Error("Root element does not exist");
           return false;
      }
 
      if( xRootNode->ValueStr () != "geometry" ) {
-          Log->Write("ERROR:\tRoot element value is not 'geometry'.");
+          Debug::Error("Root element value is not 'geometry'.");
           return false;
      }
      if(xRootNode->Attribute("unit"))
           if(string(xRootNode->Attribute("unit")) != "m") {
-               Log->Write("ERROR:\tOnly the unit m (meters) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
+                Debug::Error("Only the unit m (meters) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
                return false;
           }
 
-     double version = xmltof(xRootNode->Attribute("version"), -1);
+     /* double version = xmltof(xRootNode->Attribute("version"), -1); */
 
-     if ( (version - std::stod(JPS_VERSION))*(version - std::stod(JPS_VERSION)) > 0.01*0.01){  //|| version != std::stod(JPS_OLD_VERSION)) {
-           Log->Write(" \tWrong geometry version %.2f!", version);
-           Log->Write(" \tOnly versions = %s or %s are supported",JPS_VERSION, JPS_OLD_VERSION);
-          Log->Write(" \tPlease update the version of your geometry file to %s",JPS_VERSION);
-          return false;
-     }
+     /* if ( (version - std::stod(JPS_VERSION))*(version - std::stod(JPS_VERSION)) > 0.01*0.01){  //|| version != std::stod(JPS_OLD_VERSION)) { */
+     /*       Log->Write(" \tWrong geometry version %.2f!", version); */
+     /*       Log->Write(" \tOnly versions = %s or %s are supported",JPS_VERSION, JPS_OLD_VERSION); */
+     /*      Log->Write(" \tPlease update the version of your geometry file to %s",JPS_VERSION); */
+     /*      return false; */
+     /* } */
 
      _caption = xmltoa(xRootNode->Attribute("caption"), "virtual building");
      //The file has two main nodes
@@ -410,7 +417,7 @@ bool Building::LoadGeometry(const std::string &geometryfile)
      //processing the rooms node
      TiXmlNode*  xRoomsNode = xRootNode->FirstChild("rooms");
      if (!xRoomsNode) {
-          Log->Write("ERROR: \tThe geometry should have at least one room and one subroom");
+           Debug::Error("The geometry should have at least one room and one subroom");
           return false;
      }
 
@@ -456,9 +463,9 @@ bool Building::LoadGeometry(const std::string &geometryfile)
 
                if (type == "stair") {
                     if(xSubRoom->FirstChildElement("up")==NULL) {
-                         Log->Write("ERROR:\t the attribute <up> and <down> are missing for the stair");
-                         Log->Write("ERROR:\t check your geometry file");
-                         return false;
+                          Debug::Error("the attribute <up> and <down> are missing for the stair");
+                          Debug::Error("check your geometry file");
+                          return false;
                     }
                     double up_x = xmltof( xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
                     double up_y = xmltof( xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
@@ -544,10 +551,10 @@ bool Building::LoadGeometry(const std::string &geometryfile)
                     int sub1_id = xmltoi(xCrossing->Attribute("subroom1_id"), -1);
                     int sub2_id = xmltoi(xCrossing->Attribute("subroom2_id"), -1);
 
-                    double x1 = xmltof(     xCrossing->FirstChildElement("vertex")->Attribute("px"));
-                    double y1 = xmltof(     xCrossing->FirstChildElement("vertex")->Attribute("py"));
-                    double x2 = xmltof(     xCrossing->LastChild("vertex")->ToElement()->Attribute("px"));
-                    double y2 = xmltof(     xCrossing->LastChild("vertex")->ToElement()->Attribute("py"));
+                    double x1 = xmltof(xCrossing->FirstChildElement("vertex")->Attribute("px"));
+                    double y1 = xmltof(xCrossing->FirstChildElement("vertex")->Attribute("py"));
+                    double x2 = xmltof(xCrossing->LastChild("vertex")->ToElement()->Attribute("px"));
+                    double y2 = xmltof(xCrossing->LastChild("vertex")->ToElement()->Attribute("py"));
 
                     Crossing* c = new Crossing();
                     c->SetID(id);
@@ -628,7 +635,7 @@ bool Building::LoadGeometry(const std::string &geometryfile)
                AddTransition(t);
           }
 
-     Log->Write("INFO: \tLoading building file successful!!!\n");
+     Debug::Messages("Loading building file successful!!!\n");
 
      //everything went fine
      return true;
@@ -703,7 +710,7 @@ void Building::AddHline(Hline* line)
           // check if the lines are identical
           Hline* ori= _hLines[line->GetID()];
           if(ori->operator ==(*line)) {
-               Log->Write("INFO: \tSkipping identical hlines with ID [%d]",line->GetID());
+                Debug::Messages("Skipping identical hlines with ID [%d]",line->GetID());
                return;
           } else {
                Log->Write(
@@ -1411,5 +1418,3 @@ bool Building::SaveGeometry(const std::string &filename)
 }
 
 #endif // _SIMULATOR
-
-

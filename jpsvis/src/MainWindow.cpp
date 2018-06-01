@@ -5,7 +5,7 @@
  * Copyright (C) <2009-2010>
  *
  * @section LICENSE
- * This file is part of OpenPedSim.
+ * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,7 +87,9 @@ dispatch_queue_t main_q = dispatch_get_main_queue();
 void is_main_thread() {
 
     if ( main_thread_id == std::this_thread::get_id() )
-        std::cout << "This is the main thread.\n";
+    {
+         std::cout << "This is the main thread.\n";
+    }
     else
         std::cout << "This is not the main thread.\n";
 }
@@ -211,7 +213,7 @@ MainWindow::MainWindow(QWidget *parent) :
             QString argument=arguments[argCount];
 
             if(argument.compare("help")==0) {
-                Debug::Messages("Usage: ./TraVisTo [file1] [-2D] [-caption] [-online [port]]");
+                Debug::Messages("Usage: jpsvis [file1] [-2D] [-caption] [-online [port]]");
                 exit(0);
             } else if(argument.compare("-2D")==0) {
                 ui.action2_D->setChecked(true);
@@ -240,7 +242,7 @@ MainWindow::MainWindow(QWidget *parent) :
             } else if(argument.startsWith("-")) {
                 const char* std=argument.toStdString().c_str();
                 Debug::Error("unknown options: %s",std);
-                Debug::Error("Usage: ./TraVisTo [file1] [-2D] [-caption] [-online [port] ]");
+                Debug::Error("Usage: jpsvis [file1] [-2D] [-caption] [-online [port] ]");
             } else if(addPedestrianGroup(group,argument)) {
                 //slotHelpAbout();
                  Debug::Messages("group: %d, arg: %s", group, argument.toStdString().c_str());
@@ -630,12 +632,14 @@ void MainWindow::slotClearAllDataset()
 
 bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
 {
+     Debug::Messages("Enter MainWindow::addPedestrianGroup with filename <%s>", fileName.toStdString().c_str());
+
     statusBar()->showMessage(tr("Select a file"));
     if(fileName.isEmpty())
         fileName = QFileDialog::getOpenFileName(this,
                                                 "Select the file containing the data to visualize",
-                                                "F:\\workspace\\JPSvis\\data",
-                                                "Visualisation Files (*.dat *.trav *.xml);;All Files (*.*)");
+                                                QDir::currentPath(),
+                                                "Geometry or trajectory files (*.xml);;All Files (*.*)");
 
     //the action was cancelled
     if (fileName.isNull()) {
@@ -645,6 +649,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     //get and set the working dir
     QFileInfo fileInfo(fileName);
     QString wd=fileInfo.absoluteDir().absolutePath();
+    Debug::Messages("MainWindow::addPedestrianGroup: wd:  <%s>", wd.toStdString().c_str());
     SystemSettings::setWorkingDirectory(wd);
     SystemSettings::setFilenamePrefix(QFileInfo ( fileName ).baseName()+"_");
 
@@ -653,15 +658,14 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
 
     //try to get a geometry filename
     QString geometry_file=SaxParser::extractGeometryFilename(fileName);
-    //cout<<"geometry name: "<<geometry_file.toStdString()<<endl;
-
+    Debug::Messages("MainWindow::addPedestrianGroup: geometry name: <%s>", geometry_file.toStdString().c_str());
     // if xml is detected, just load and show the geometry then exit
     if(geometry_file.endsWith(".xml",Qt::CaseInsensitive)) {
 
         //try to parse the correct way
         // fall back to this if it fails
         SystemSettings::CreateLogfile();
-
+        Debug::Messages("Calling parseGeometryJPS with <%s>", geometry_file.toStdString().c_str());
         if(! SaxParser::parseGeometryJPS(geometry_file,geometry)) {
             int res = QMessageBox::warning(this, "Errors in Geometry. Continue Parsing?",
                                            "JuPedSim has detected an error in the supplied geometry.\n"
@@ -678,7 +682,8 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
             SaxParser::parseGeometryXMLV04(wd+"/"+geometry_file,geometry);
         } else {
             //everything was fine. Delete the log file
-            SystemSettings::DeleteLogfile();
+             std::cout << "won't delete logfile\n";
+            //SystemSettings::DeleteLogfile();
         }
 
         //SaxParser::parseGeometryXMLV04(fileName,geometry);
@@ -696,8 +701,9 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
 
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly)) {
-        Debug::Error("could not open the File: ",fileName.toStdString().c_str());
+        Debug::Error("parseGeometryJPS:  could not open the File: ",fileName.toStdString().c_str());
         return false;
+
     }
 
     SyncData* dataset=NULL;
@@ -1153,7 +1159,7 @@ void MainWindow::slotUpdateFrameSlider(int newValue)
 void MainWindow::slotUpdateContrastSlider(int newValue)
 {
 
-    //	 extern_screen_contrast=ui.contrastSettingSlider->value();
+    //   extern_screen_contrast=ui.contrastSettingSlider->value();
     //extern_screen_contrast=newValue;
     QString msg;
     msg.setNum(newValue);

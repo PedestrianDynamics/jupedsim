@@ -5,7 +5,7 @@
 * Copyright (C) <2009-2010>
 *
 * @section LICENSE
-* This file is part of OpenPedSim.
+* This file is part of JuPedSim.
 *
 * JuPedSim is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -42,11 +42,10 @@
 *
 * Some useful links:
 *
-* 	1: <a href="http://www.openpedsim.org">www.openpedsim.org</a> <br>
-* 	2: <a href="http://www.vtk.org">www.vtk.org</a> <br>
-* 	3: <a href="http://www.trolltech.com">www.trolltech.com</a> <br>
-* 	4: <a href="http://www.fz-juelich.de">www.fz-juelich.de</a> <br>
-* 	4: <a href="http://www.jupedsim.org">www.fz-juelich.de</a> <br>
+*       1: <a href="http://www.jupedsim.org">www.jupedsim.org</a> <br>
+*       2: <a href="http://www.vtk.org">www.vtk.org</a> <br>
+*       3: <a href="http://www.trolltech.com">www.trolltech.com</a> <br>
+*       4: <a href="http://www.fz-juelich.de">www.fz-juelich.de</a> <br>
 *
 */
 
@@ -59,7 +58,7 @@
 #include <QApplication>
 #include <QDir>
 #include <locale.h>
-
+#include "Debug.h"
 // for compiling a standalone windows exe with VS
 #ifdef _MSC_VER
 #    ifdef NDEBUG
@@ -73,6 +72,14 @@
 
 int main(int argc, char *argv[])
 {
+         Debug::Info("----\nJuPedSim - JPSvis\n");
+         Debug::Info("Current date   : %s %s", __DATE__, __TIME__);
+         Debug::Info("Version        : %s", JPSVIS_VERSION);
+         Debug::Info("Compiler       : %s", USED_COMPILER);
+         Debug::Info("Commit hash    : %s", GIT_COMMIT_HASH);
+         Debug::Info("Commit date    : %s", GIT_COMMIT_DATE);
+         Debug::Info("Branch         : %s\n----\n", GIT_BRANCH);
+
 
 #ifdef __APPLE__
      InitMultiThreading();

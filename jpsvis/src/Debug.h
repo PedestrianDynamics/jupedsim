@@ -78,6 +78,7 @@ public:
      */
     static void setDebugLevel(Debug::LEVEL level);
 
+    static void Info(const char *string, ...);
     /**
      * send a message (information) to the output stream
      *

@@ -399,7 +399,7 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
         for(int i=0; i<at.length(); i++) {
             if(at.localName(i)=="ID") {
                 _currentFrameID=at.value(i).toInt();
-                //cout<<"frame id: " <<_currentFrameID<<endl;
+                //cout<<"frame: " <<_currentFrameID<<endl;
             }
         }
 
@@ -461,6 +461,8 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
             }
 
         }
+//        xml2txt
+//        cout << _currentFrameID << " " << id << " " << xPos << " " << yPos << " " << zPos << "\n";
 
         //coordinates of the ellipse, default to the head of the agent
         //if(std::isnan(el_x)) el_x=xPos;
@@ -633,16 +635,20 @@ void SaxParser::clearPoints()
 
 /// provided for convenience and will be removed in the next version
 bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
-{    
+{
+     Debug::Messages( "Enter SaxParser::parseGeometryJPS with filename <%s>",fileName.toStdString().c_str());
+
     double captionsColor=0;//red
     if(!fileName.endsWith(".xml",Qt::CaseInsensitive)) return false;
     QString wd;
     SystemSettings::getWorkingDirectory(wd);
-    fileName=wd+"/"+fileName;
-
+    fileName=wd + "/" + fileName; //TODO: is this windows compatible?
+ // QString = QDir::cleanPath(wd + QDir::separator() + fileName);
+    Debug::Messages("filename: <%s)", fileName.toStdString().c_str());
+    Debug::Messages("wd: <%s>",wd.toStdString().c_str());
+    Debug::Messages("filename2: <%s>",fileName.toStdString().c_str());
     Building* building = new Building();
     string geometrypath = fileName.toStdString();
-
     // read the geometry
     if(!building->LoadGeometry(geometrypath))
         return false;
@@ -653,7 +659,7 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
     int subroom_id = -1;
     for(auto&& itr_room: building->GetAllRooms())
     {
-         room_id++;         
+         room_id++;
         for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
         {
              subroom_id++;
@@ -782,7 +788,7 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
                 Point p2 = tr->GetPoint2();
                 double z1 = 0;
                 double z2 = 0;
-                
+
                 if(tr->GetSubRoom1()) // get elevation for both points
                 {
                      z2 = tr->GetSubRoom1()->GetElevation(p2);
@@ -795,14 +801,14 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
                 }
                 else
                      std::cout << "ERROR: Can not calculate elevations for transition " << tr->GetID() << ", " << tr->GetCaption() << ". Both subrooms are not defined \n";
-                
+
                 geometry->addDoor(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
 
                 const Point& p =tr->GetCentre();
                 double pos[3]= {p._x*FAKTOR,p._y*FAKTOR,z1*FAKTOR};
                 geometry->addObjectLabel(pos,pos,"door_"+QString::number(tr->GetID()).toStdString()+
                                          +"_"+ QString::number(tr->GetUniqueID()).toStdString(),captionsColor);
-            }            
+            }
 
             geoFac.AddElement(room_id,subroom_id,geometry);
         }
@@ -1071,7 +1077,7 @@ void SaxParser::parseGeometryXMLV04(QString filename, GeometryFactory& geoFac)
         //cout<<"The file is too large: "<<filename.toStdString()<<endl;
         return;
     }
-            
+
     auto geo= shared_ptr<FacilityGeometry>(new FacilityGeometry("no name", "no name", "no name"));
     //cout<<"filename: "<<filename.toStdString()<<endl;
 

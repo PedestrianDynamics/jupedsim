@@ -18,9 +18,58 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 set(CMAKE_COLOR_MAKEFILE ON)
 set(JPSVIS_MAJOR_VERSION 0)
 set(JPSVIS_MINOR_VERSION 8)
-set(JPSVIS_PATCH_VERSION 1)
+set(JPSVIS_PATCH_VERSION 3)
 set(JPSVIS_VERSION
   ${JPSVIS_MAJOR_VERSION}.${JPSVIS_MINOR_VERSION}.${JPSVIS_PATCH_VERSION})
+
+find_package(Git REQUIRED) # no need for this msg. It comes from cmake.findgit()
+
+find_program(GIT_SCM git DOC "Git version control")
+mark_as_advanced(GIT_SCM)
+find_file(GITDIR NAMES .git PATHS ${CMAKE_SOURCE_DIR} NO_DEFAULT_PATH)
+if (GIT_SCM AND GITDIR)
+
+# the commit's SHA1, and whether the building workspace was dirty or not
+# describe --match=NeVeRmAtCh --always --tags --abbrev=40 --dirty
+execute_process(COMMAND
+  "${GIT_EXECUTABLE}" --no-pager describe --tags --always --dirty
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  OUTPUT_VARIABLE GIT_SHA1
+  ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+# branch
+execute_process(
+  COMMAND "${GIT_EXECUTABLE}" rev-parse --abbrev-ref HEAD
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  OUTPUT_VARIABLE GIT_BRANCH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# the date of the commit
+execute_process(COMMAND
+  "${GIT_EXECUTABLE}" log -1 --format=%ad --date=local
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  OUTPUT_VARIABLE GIT_DATE
+  ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+# the subject of the commit
+execute_process(COMMAND
+  "${GIT_EXECUTABLE}" log -1 --format=%s
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  OUTPUT_VARIABLE GIT_COMMIT_SUBJECT
+  ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+
+
+add_definitions("-DGIT_COMMIT_HASH=\"${GIT_SHA1}\"")
+add_definitions("-DGIT_COMMIT_DATE=\"${GIT_DATE}\"")
+add_definitions("-DGIT_COMMIT_SUBJECT=\"${GIT_COMMIT_SUBJECT}\"")
+add_definitions("-DGIT_BRANCH=\"${GIT_BRANCH}\"")
+add_definitions("-DJPSVIS_VERSION=\"${JPSVIS_VERSION}\"")
+else()
+    message(STATUS "Not in a git repo")
+endif()
+
 
 # set(CMAKE_PREFIX_PATH "/usr/local/opt/qt5")  # if qt is in a non-standard location, uncomment this
 #------------------ set important directories --------------------
@@ -35,15 +84,15 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(README_FILE "${CMAKE_SOURCE_DIR}/README.md")
 if(APPLE AND CMAKE_INSTALL_PREFIX MATCHES "/usr/local")
-	set(CMAKE_INSTALL_PREFIX ${EXECUTABLE_OUTPUT_PATH}) #"/Applications")
+        set(CMAKE_INSTALL_PREFIX ${EXECUTABLE_OUTPUT_PATH}) #"/Applications")
 endif()
 
 # these files compile need Cocoa (evtl. Mac specific)
 SET(MAC_FIX_SRC src/fix/osx_thread_fix.mm) #.mm
 SET(MAC_FIX_HDR src/fix/osx_thread_fix.h) #.h
 set( SRCS
-  src/geometry/Building.cpp 
-  src/geometry/Crossing.cpp 
+  src/geometry/Building.cpp
+  src/geometry/Crossing.cpp
   src/geometry/Goal.cpp
   src/geometry/Hline.cpp
   src/geometry/Line.cpp
@@ -85,7 +134,7 @@ set( SRCS
   src/MainWindow.cpp
   src/TrailPlotter.cpp
   forms/jpsvis.rc
-  )  
+  )
 # all header files that should be treated with moc
 set( HDR
   src/geometry/Building.h
@@ -130,7 +179,7 @@ set( HDR
   src/network/TraVisToServer.h
   src/MainWindow.h
   src/TrailPlotter.h
-  ) 
+  )
 IF(APPLE)
   SET(SRCS ${SRCS} ${MAC_FIX_SRC})
   SET(HDR ${HDR} ${MAC_FIX_HDR})
@@ -141,7 +190,7 @@ ENDIF(APPLE)
 # *.ui files
 set( UIS
   forms/settings.ui
-  forms/mainwindow.ui  
+  forms/mainwindow.ui
   )
 
 # and finally a resource file
@@ -165,7 +214,7 @@ set(CMAKE_AUTOMOC ON)
 
 # This sets the windows build that will need the special winmain@16 call. Qt provides
 #  this for us in the qtmain.lib file. Using this cmake code will ensure we have it
-#  linked into our build. Not needed on Unix/OS X/Linux which is why we have the 
+#  linked into our build. Not needed on Unix/OS X/Linux which is why we have the
 #  IF(WIN32) conditional.
 IF (WIN32)
   SET (QT_USE_QTMAIN TRUE)
@@ -232,12 +281,12 @@ if(${QT4_INSTALLED})
   ADD_EXECUTABLE( jpsvis MACOSX_BUNDLE WIN32
   ${SRCS}
   ${MOC_HDRS}
-  ${UI_HDRS} 
+  ${UI_HDRS}
   ${RCS}
   )
   TARGET_LINK_LIBRARIES( jpsvis ${QT_LIBRARIES})
 elseif( ${QT5_INSTALLED})
-  message(MESSAGE "libs: ${Qt5Widgets_LIBRARIES}  ${QT_LIBRARIES}")
+  message(STATUS "qt libs: ${Qt5Widgets_LIBRARIES}  ${QT_LIBRARIES}")
   # http://www.kdab.com/using-cmake-with-qt-5/
   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}" )
   qt5_wrap_ui( UI_HDRS ${UIS} )
@@ -246,7 +295,7 @@ elseif( ${QT5_INSTALLED})
   ADD_EXECUTABLE( jpsvis MACOSX_BUNDLE WIN32
   ${SRCS}
   ${MOC_HDRS}
-  ${UI_HDRS} 
+  ${UI_HDRS}
   ${RCS}
   )
  qt5_use_modules(jpsvis Widgets)
@@ -259,7 +308,7 @@ endif()
 
 IF(APPLE)
   # set how it shows up in the Info.plist file
-  SET(MACOSX_BUNDLE_ICON_FILE JPSvis.icns) 
+  SET(MACOSX_BUNDLE_ICON_FILE JPSvis.icns)
   # set where in the bundle to put the icns file
   SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   # include the icns file in the target
@@ -268,7 +317,7 @@ ENDIF(APPLE)
 
 # last thing we have to do is to tell CMake what libraries our executable needs,
 # luckily FIND_PACKAGE prepared QT_LIBRARIES variable for us:
-set(VTK_USE_GUISUPPORT  ON) 
+set(VTK_USE_GUISUPPORT  ON)
 set(VTK_USE_QT  ON)
 # QVTK is for VTK 5.x. For VTK 6, use ${VTK_LIBRARIES} instead
 
@@ -281,13 +330,13 @@ endif()
 if(VTK_LIBRARIES)
   if(${VTK_VERSION} VERSION_LESS "6")
    TARGET_LINK_LIBRARIES( jpsvis ${QTLIBS} QVTK) #qt5
-  else()        
+  else()
     #    TARGET_LINK_LIBRARIES( jpsvis  ${VTK_LIBRARIES} ${QT_LIBRARIES})
-    TARGET_LINK_LIBRARIES( jpsvis  ${VTK_LIBRARIES} ${QTLIBS}) #qt5   
+    TARGET_LINK_LIBRARIES( jpsvis  ${VTK_LIBRARIES} ${QTLIBS}) #qt5
   endif()
 else() # this else is not yet tested
   target_link_libraries(jpsvis vtkHybrid QVTK vtkViews ${QTLIBS})
-endif() 
+endif()
 # ================================ Compiler flags
 # enable as many warnings as possible
 set(warning_flags "-Wall -Wextra")
@@ -317,12 +366,12 @@ message(STATUS "Checking for C++11 compiler ................... yes")
 endif(NOT MSVC)
 #---------------------
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  message(STATUS "Using compiler ................................ Clang (${CMAKE_CXX_COMPILER_VERSION})")
+  set(USED_COMPILER "Clang (${CMAKE_CXX_COMPILER_VERSION})")
 endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 if(CMAKE_COMPILER_IS_GNUCXX)
-  message( STATUS "Using compiler ................................ g++ (${CMAKE_CXX_COMPILER_VERSION}")
+  set(USED_COMPILER "g++ (${CMAKE_CXX_COMPILER_VERSION})")
 endif(CMAKE_COMPILER_IS_GNUCXX)
-
+  message( STATUS "Using compiler ................................ ${USED_COMPILER}")
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   set(CMAKE_CXX_LDFLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
   message(STATUS "Debug flags: "  ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_DEBUG} )
@@ -340,14 +389,14 @@ SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/jpsvis")
 IF(APPLE)
   SET(plugin_dest_dir ${CMAKE_INSTALL_PREFIX}/jpsvis.app/Contents/MacOS)
   SET(qtconf_dest_dir ${CMAKE_INSTALL_PREFIX}/jpsvis.app/Contents/Resources)
-  SET(APPS "\${CMAKE_INSTALL_PREFIX}/jpsvis.app")  
+  SET(APPS "\${CMAKE_INSTALL_PREFIX}/jpsvis.app")
 ENDIF(APPLE)
 
 IF(WIN32)
   SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/jpsvis.exe")
 ENDIF(WIN32)
 
-
+add_definitions("-DUSED_COMPILER=\"${USED_COMPILER}\"")
 #--------------------------------------------------------------------------------
 # Install the QtTest application, on Apple, the bundle is at the root of the
 # install tree, and on other platforms it'll go into the bin directory.
@@ -435,7 +484,7 @@ if(APPLE)
   set(CPACK_SYSTEM_NAME "OSX")
   set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${JPSVIS_VERSION}")
    elseif(UNIX)
-     # tested with success in 
+     # tested with success in
      # Linux dhcppc5 3.2.0-4-686-pae #1 SMP Debian 3.2.68-1+deb7u2 i686 GNU/Linux
      set(CPACK_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}")
        SET(CPACK_GENERATOR "DEB")
@@ -457,7 +506,7 @@ if(APPLE)
        SET(CPACK_DEBIAN_PACKAGE_SECTION "science")
        SET(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 
-  
+
 endif()
 
 include(CPack)
@@ -494,5 +543,3 @@ endif()
 #     COMMAND ruby ${PROJECT_SOURCE_DIR}/ruby/fixup/fixup.rb ${CMAKE_INSTALL_PREFIX}/${EXECUTABLE}
 #     COMMENT "Fixing up the app bundle")
 # ENDIF(APPLE)
-
-

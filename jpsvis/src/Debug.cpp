@@ -68,8 +68,8 @@ void Debug::setDebugLevel(Debug::LEVEL level)
     debugLevel=level;
 }
 
-void Debug::Messages(const char *format, ...)
-{    
+void Debug::Info(const char *format, ...)
+{
     switch (debugLevel) {
 
     case ALL:
@@ -81,7 +81,32 @@ void Debug::Messages(const char *format, ...)
         vsprintf (msg,format ,ap);
         va_end (ap);
 
-        os<<"Info ["<< std::setw(2) <<MSG_Count<<"]: "<<msg<<endl;
+        os <<msg<<endl;
+    }
+    break;
+
+    case ERROR:
+    case WARNING:
+    case NONE:
+        break;
+    }
+
+}
+
+void Debug::Messages(const char *format, ...)
+{
+    switch (debugLevel) {
+
+    case ALL:
+    case INFO: {
+        MSG_Count++;
+        char msg[256];
+        va_list ap;
+        va_start (ap, format);
+        vsprintf (msg,format ,ap);
+        va_end (ap);
+
+        os<<"Info ["<< std::setw(3) <<MSG_Count<<"]: "<<msg<<endl;
     }
     break;
 
@@ -106,7 +131,7 @@ void Debug::Warning(const char *format, ...)
         va_start (ap, format);
         vsprintf (msg,format ,ap);
         va_end (ap);
-        os<<"Warning["<<WAR_Count<<"]"<<msg<<endl;
+        os<<"Warning["<< std::setw(3)<<WAR_Count<<"]"<<msg<<endl;
     }
     break;
 
@@ -132,7 +157,7 @@ void Debug::Error(const char *format, ...)
         va_start (ap, format);
         vsprintf (msg,format ,ap);
         va_end (ap);
-        os<<"Error["<<ERR_Count<<"]"<<msg<<endl;
+        os<<"Error["<< std::setw(3)<<ERR_Count<<"]"<<msg<<endl;
     }
     break;
 
