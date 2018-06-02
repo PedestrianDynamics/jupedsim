@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## v0.8.3 [2018-05-15]
 
 ### Added
 - show name and id of rooms/subrooms in "geometry structure"
