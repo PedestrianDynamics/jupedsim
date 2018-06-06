@@ -4,10 +4,14 @@
 # -DCMAKE_VERBOSE_MAKEFILE=ON (default OFF)
 # -DBUILD_TESTING=ON (default OFF)
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
+set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 
 project(JPSreport)
 
+IF (POLICY CMP0054)
+cmake_policy(SET CMP0054 NEW)
+ENDIF (POLICY CMP0054)
 set(CMAKE_COLOR_MAKEFILE ON)
 
 set(LIBRARY_OUTPUT_PATH  ${CMAKE_SOURCE_DIR}/lib/${CMAKE_BUILD_TYPE})
@@ -247,34 +251,70 @@ if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES Debug)
   message(STATUS "Debug flags for coverage: " ${CMAKE_CXX_FLAGS_DEBUG} )
 endif(CMAKE_COMPILER_IS_GNUCXX  AND CMAKE_BUILD_TYPE MATCHES Debug)
 
-
+if (Boost_NO_SYSTEM_PATHS)
+	set(Boost_NO_SYSTEM_PATHS ON)
+	set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
+	set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/stage/lib")
+	set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${BOOST_ROOT})
+	set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${BOOST_LIBRARY_DIRS})
+endif (Boost_NO_SYSTEM_PATHS)
 
 #find_package(Boost COMPONENTS system filesystem REQUIRED)
-find_package(Boost  REQUIRED)
-message( STATUS "Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIR} )
-message( STATUS "Boost_LIBRARY_DIR: " ${Boost_LIBRARY_DIR} )
+find_package(Boost REQUIRED)
+if (Boost_FOUND)
+	set(Boost_USE_STATIC_LIBS ON)
+	set(Boost_USE_STATIC_RUNTIME ON) 
 
-include_directories(${Boost_INCLUDE_DIR})
-#link_directories(${Boost_LIBRARY_DIR})
-
-if (WIN32)
-find_library (PSAPI Psapi PATH_SUFFIXES "x64")
-message (STATUS "PSAPI: ${PSAPI}")
+	if(WIN32)
+		add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
+	endif()
+	message(STATUS "BOOST FOUND: " ${Boost_LIB_VERSION})
+	message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
+	message(STATUS "Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIR})
+	message(STATUS "Boost_LIB_VERSION: " ${Boost_LIB_VERSION})
+	message(STATUS "Boost_libraries: " ${Boost_LIBRARIES})
+	link_directories(${Boost_LIBRARY_DIRS})
+	include_directories(${Boost_INCLUDE_DIR})
+	# suppress warnings in boost libraries with attribute SYSTEM
+	#include_directories(SYSTEM ${Boost_INCLUDE_DIR})
+	else()
+    message(WARNING "BOOST NOT FOUND")
 endif()
+
+#if (WIN32)
+#find_library (PSAPI Psapi PATH_SUFFIXES "x64")
+#message (STATUS "PSAPI: ${PSAPI}")
+#endif()
 
 add_library ( geometrycore STATIC ${source_files} )
 add_executable(
         jpsreport main.cpp
 )
-
-
+if (Boost_FOUND)
+target_link_libraries(geometrycore ${Boost_LIBRARIES})
+endif()
 if(WIN32)
 target_link_libraries (jpsreport wsock32)
-target_link_libraries( jpsreport ${PSAPI} )
+#target_link_libraries( jpsreport ${PSAPI} )
 endif()
 
 target_link_libraries( jpsreport geometrycore )
+if(CMAKE_VERSION GREATER_EQUAL "3.6") 
+	if(WIN32)
+		if(MSVC)
+			set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT jpsreport)
+			message(STATUS "set start project for VS")
+		endif()
+	endif()
+endif()
 
+if(CMAKE_VERSION GREATER_EQUAL "3.6") 
+	if(WIN32)
+		if(MSVC)
+			set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT jpsreport)
+		endif()
+	endif()
+endif()
 # ----------------------------- cTest ------------------------------------------
 if(BUILD_TESTING)
   SET(BUILD_TEST_TIMEOUT 10800   CACHE STRING "Global timeout on all tests (seconds).")
@@ -314,3 +354,88 @@ if(BUILD_TESTING)
     message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
   endif(PYTHONINTERP_FOUND)
 endif(BUILD_TESTING)
+
+# ----------- CPACK
+set(DEMOS_DIR "demos")
+set(DEMO1_DIR "${DEMOS_DIR}/T-Junction")
+set(DEMO2_DIR "${DEMOS_DIR}/bottleneck")
+set(SCRIPTS_DIR "scripts")
+set(NOTEBOOK "${CMAKE_SOURCE_DIR}/${DEMOS_DIR}/HowTo.ipynb")
+
+file(GLOB CT_FILES "${CMAKE_SOURCE_DIR}/${DEMO1_DIR}/*")
+file(GLOB CT_FILES2 "${CMAKE_SOURCE_DIR}/${DEMO2_DIR}/*")
+file(GLOB SCRIPT_FILES "${CMAKE_SOURCE_DIR}/${SCRIPTS_DIR}/*")
+
+install(TARGETS jpsreport 
+	DESTINATION bin 
+	COMPONENT applications)
+
+install(DIRECTORY DESTINATION ${DEMO1_DIR})
+install(DIRECTORY DESTINATION ${DEMO2_DIR})
+
+# notebook 
+install(FILES ${NOTEBOOK}
+        DESTINATION ${DEMOS_DIR}
+        COMPONENT demos)
+	
+install(FILES ${CT_FILES}
+        DESTINATION ${DEMO1_DIR}
+        COMPONENT demos)
+
+install(FILES ${CT_FILES2}
+        DESTINATION ${DEMO2_DIR}
+        COMPONENT demos)
+		
+install(FILES ${SCRIPT_FILES}
+	DESTINATION ${SCRIPTS_DIR}
+    COMPONENT scripts)	
+	
+	
+if(WIN32 AND NOT UNIX)
+	message(STATUS "Package generation - Windows")
+	set(CPACK_GENERATOR "NSIS")
+	find_program(NSIS_PATH nsis PATH_SUFFIXES nsis)
+	if(NSIS_PATH)
+        set(CPACK_GENERATOR "${CPACK_GENERATOR};NSIS")
+        message(STATUS "   + NSIS                                 YES ")
+	else(NSIS_PATH)
+        message(STATUS "   + NSIS                                 NO ")
+	endif(NSIS_PATH)
+
+#CPACK_NSIS_URL_INFO_ABOUT
+	set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+	include(InstallRequiredSystemLibraries)
+	#message(STATUS "System Dependencies: " ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
+	install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+        DESTINATION sys
+        COMPONENT applications)
+		
+elseif(APPLE)
+set(DEFAULT_CPACK_GENERATOR "DragNDrop")
+endif()
+set(CPACK_COMPONENTS_ALL applications)
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/LICENSE")
+set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/forms/jpsreport.ico")
+set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/forms/jpsreport.ico")
+set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+set(CPACK_NSIS_MODIFY_PATH ON)
+set(CPACK_COMPONENTS_ALL applications demos scripts)
+#set(CPACK_COMPONENT_CTDATA_GROUP "Demos")
+set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "jpsreport")
+set(CPACK_COMPONENT_GROUP_DATA_DESCRIPTION "demo files" "Scripts")
+set(CPACK_COMPONENT_DATA_FILES_DESCRIPTION "demo files to get started" "scripts")
+	
+SET(CPACK_PACKAGE_DESCRIPTION "Simulation core of JuPedSim")
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The simulation core of JuPedSim, a framework for simulation and analysis of pedestrian dynamics")
+SET(CPACK_PACKAGE_VENDOR "Forschungszentrum Juelich GmbH")
+SET(CPACK_PACKAGE_NAME "JPSreport")
+SET(CPACK_PACKAGE_CONTACT "m.chraibi@fz-juelich.de")
+SET(CPACK_PACKAGE_VERSION_MAJOR "${JPSREPORT_MAJOR_VERSION}")
+SET(CPACK_PACKAGE_VERSION_MINOR "${JPSREPORT_MINOR_VERSION}")
+SET(CPACK_PACKAGE_VERSION_PATCH "${JPSREPORT_PATCH_VERSION}")
+SET(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${JPSREPORT_VERSION}")
+SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${JPSREPORT_VERSION}")
+
+INCLUDE(CPack)
+
