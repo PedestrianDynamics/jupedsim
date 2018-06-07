@@ -302,9 +302,11 @@ def handleAllPoint(trajData,geoData):
     
     smooth_order = 3
     for index,inputs in enumerate(new_trajectories):
-        if (smooth_order < int(inputs[1]) and index < len(new_trajectories)-smooth_order and new_trajectories[index + smooth_order][0] == new_trajectories[index][0]):
-            new_x,new_y = smoothPoint(new_trajectories[index - smooth_order : index + smooth_order])
-            new_trajectories[index] = [inputs[0],inputs[1],floatToString(new_x),floatToString(new_y),inputs[4]]
+        if (smooth_order < index and index < len(new_trajectories)-smooth_order 
+            and new_trajectories[index + smooth_order][0] == new_trajectories[index][0]
+            and new_trajectories[index - smooth_order][0] == new_trajectories[index][0]):
+                new_x,new_y = smoothPoint(new_trajectories[index - smooth_order : index + smooth_order])
+                new_trajectories[index] = [inputs[0],inputs[1],floatToString(new_x),floatToString(new_y),inputs[4]]
         if (math.fmod(index,10000) == 0):
             print("Smoothing: [",index,"/",len(trajData),"]")   
            
