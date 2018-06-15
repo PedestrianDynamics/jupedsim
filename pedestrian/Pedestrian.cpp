@@ -636,7 +636,7 @@ double Pedestrian::GetV0Norm() const
 
      //IF execution of WalkingInSmoke depending on JPSfire section in INI file
      if(_WalkingSpeed && _WalkingSpeed->ReduceWalkingSpeed()) {
-         std::cout << "JPSfire?" << std::endl;
+         //std::cout << "JPSfire?" << std::endl;
          walking_speed = _WalkingSpeed->WalkingInSmoke(this, walking_speed);
      }
 
