@@ -6,7 +6,6 @@
 
 cmake_minimum_required(VERSION 3.1)
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
-
 project(JPSreport)
 
 IF (POLICY CMP0054)
@@ -157,6 +156,14 @@ if(BUILD_TESTING)
   file(GLOB_RECURSE  test_py_files "${CMAKE_TEST_DIR}/*runtest_*.py")
 endif(BUILD_TESTING)
 
+set(methods
+  methods/VoronoiDiagram.cpp
+  methods/PedData.cpp
+  methods/Method_A.cpp
+  methods/Method_B.cpp
+  methods/Method_C.cpp
+  methods/Method_D.cpp
+  )
 set(source_files
   Analysis.cpp
   IO/OutputHandler.cpp
@@ -165,12 +172,6 @@ set(source_files
   tinyxml/tinyxml.cpp
   tinyxml/tinyxmlerror.cpp
   tinyxml/tinyxmlparser.cpp
-  methods/VoronoiDiagram.cpp
-  methods/PedData.cpp
-  methods/Method_A.cpp
-  methods/Method_B.cpp
-  methods/Method_C.cpp
-  methods/Method_D.cpp
   geometry/Building.cpp
   geometry/Line.cpp
   geometry/Point.cpp
@@ -253,32 +254,32 @@ if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES Debug)
 endif(CMAKE_COMPILER_IS_GNUCXX  AND CMAKE_BUILD_TYPE MATCHES Debug)
 
 if (Boost_NO_SYSTEM_PATHS)
-	set(Boost_NO_SYSTEM_PATHS ON)
-	set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
-	set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/stage/lib")
-	set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${BOOST_ROOT})
-	set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${BOOST_LIBRARY_DIRS})
+        set(Boost_NO_SYSTEM_PATHS ON)
+        set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
+        set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/stage/lib")
+        set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${BOOST_ROOT})
+        set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${BOOST_LIBRARY_DIRS})
 endif (Boost_NO_SYSTEM_PATHS)
 
 #find_package(Boost COMPONENTS system filesystem REQUIRED)
 find_package(Boost REQUIRED)
 if (Boost_FOUND)
-	set(Boost_USE_STATIC_LIBS ON)
-	set(Boost_USE_STATIC_RUNTIME ON) 
+        set(Boost_USE_STATIC_LIBS ON)
+        set(Boost_USE_STATIC_RUNTIME ON)
 
-	if(WIN32)
-		add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
-	endif()
-	message(STATUS "BOOST FOUND: " ${Boost_LIB_VERSION})
-	message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
-	message(STATUS "Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIR})
-	message(STATUS "Boost_LIB_VERSION: " ${Boost_LIB_VERSION})
-	message(STATUS "Boost_libraries: " ${Boost_LIBRARIES})
-	link_directories(${Boost_LIBRARY_DIRS})
-	include_directories(${Boost_INCLUDE_DIR})
-	# suppress warnings in boost libraries with attribute SYSTEM
-	#include_directories(SYSTEM ${Boost_INCLUDE_DIR})
-	else()
+        if(WIN32)
+                add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
+        endif()
+        message(STATUS "BOOST FOUND: " ${Boost_LIB_VERSION})
+        message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
+        message(STATUS "Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIR})
+        message(STATUS "Boost_LIB_VERSION: " ${Boost_LIB_VERSION})
+        message(STATUS "Boost_libraries: " ${Boost_LIBRARIES})
+        link_directories(${Boost_LIBRARY_DIRS})
+        include_directories(${Boost_INCLUDE_DIR})
+        # suppress warnings in boost libraries with attribute SYSTEM
+        #include_directories(SYSTEM ${Boost_INCLUDE_DIR})
+        else()
     message(WARNING "BOOST NOT FOUND")
 endif()
 
@@ -289,7 +290,7 @@ endif()
 
 add_library ( geometrycore STATIC ${source_files} )
 add_executable(
-        jpsreport main.cpp
+        jpsreport main.cpp ${methods}
 )
 if (Boost_FOUND)
 target_link_libraries(geometrycore ${Boost_LIBRARIES})
@@ -300,21 +301,21 @@ target_link_libraries (jpsreport wsock32)
 endif()
 
 target_link_libraries( jpsreport geometrycore )
-if(CMAKE_VERSION GREATER_EQUAL "3.6") 
-	if(WIN32)
-		if(MSVC)
-			set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT jpsreport)
-			message(STATUS "set start project for VS")
-		endif()
-	endif()
+if(CMAKE_VERSION GREATER_EQUAL "3.6")
+        if(WIN32)
+                if(MSVC)
+                        set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT jpsreport)
+                        message(STATUS "set start project for VS")
+                endif()
+        endif()
 endif()
 
-if(CMAKE_VERSION GREATER_EQUAL "3.6") 
-	if(WIN32)
-		if(MSVC)
-			set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT jpsreport)
-		endif()
-	endif()
+if(CMAKE_VERSION GREATER_EQUAL "3.6")
+        if(WIN32)
+                if(MSVC)
+                        set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT jpsreport)
+                endif()
+        endif()
 endif()
 # ----------------------------- cTest ------------------------------------------
 if(BUILD_TESTING)
@@ -367,18 +368,18 @@ file(GLOB CT_FILES "${CMAKE_SOURCE_DIR}/${DEMO1_DIR}/*")
 file(GLOB CT_FILES2 "${CMAKE_SOURCE_DIR}/${DEMO2_DIR}/*")
 file(GLOB SCRIPT_FILES "${CMAKE_SOURCE_DIR}/${SCRIPTS_DIR}/*")
 
-install(TARGETS jpsreport 
-	DESTINATION bin 
-	COMPONENT applications)
+install(TARGETS jpsreport
+        DESTINATION bin
+        COMPONENT applications)
 
 install(DIRECTORY DESTINATION ${DEMO1_DIR})
 install(DIRECTORY DESTINATION ${DEMO2_DIR})
 
-# notebook 
+# notebook
 install(FILES ${NOTEBOOK}
         DESTINATION ${DEMOS_DIR}
         COMPONENT demos)
-	
+
 install(FILES ${CT_FILES}
         DESTINATION ${DEMO1_DIR}
         COMPONENT demos)
@@ -386,31 +387,31 @@ install(FILES ${CT_FILES}
 install(FILES ${CT_FILES2}
         DESTINATION ${DEMO2_DIR}
         COMPONENT demos)
-		
+
 install(FILES ${SCRIPT_FILES}
-	DESTINATION ${SCRIPTS_DIR}
-    COMPONENT scripts)	
-	
-	
+        DESTINATION ${SCRIPTS_DIR}
+    COMPONENT scripts)
+
+
 if(WIN32 AND NOT UNIX)
-	message(STATUS "Package generation - Windows")
-	set(CPACK_GENERATOR "NSIS")
-	find_program(NSIS_PATH nsis PATH_SUFFIXES nsis)
-	if(NSIS_PATH)
+        message(STATUS "Package generation - Windows")
+        set(CPACK_GENERATOR "NSIS")
+        find_program(NSIS_PATH nsis PATH_SUFFIXES nsis)
+        if(NSIS_PATH)
         set(CPACK_GENERATOR "${CPACK_GENERATOR};NSIS")
         message(STATUS "   + NSIS                                 YES ")
-	else(NSIS_PATH)
+        else(NSIS_PATH)
         message(STATUS "   + NSIS                                 NO ")
-	endif(NSIS_PATH)
+        endif(NSIS_PATH)
 
 #CPACK_NSIS_URL_INFO_ABOUT
-	set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
-	include(InstallRequiredSystemLibraries)
-	#message(STATUS "System Dependencies: " ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
-	install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+        set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+        include(InstallRequiredSystemLibraries)
+        #message(STATUS "System Dependencies: " ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
+        install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
         DESTINATION sys
         COMPONENT applications)
-		
+
 elseif(APPLE)
 set(DEFAULT_CPACK_GENERATOR "DragNDrop")
 endif()
@@ -426,7 +427,7 @@ set(CPACK_COMPONENTS_ALL applications demos scripts)
 set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "jpsreport")
 set(CPACK_COMPONENT_GROUP_DATA_DESCRIPTION "demo files" "Scripts")
 set(CPACK_COMPONENT_DATA_FILES_DESCRIPTION "demo files to get started" "scripts")
-	
+
 SET(CPACK_PACKAGE_DESCRIPTION "Simulation core of JuPedSim")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The simulation core of JuPedSim, a framework for simulation and analysis of pedestrian dynamics")
 SET(CPACK_PACKAGE_VENDOR "Forschungszentrum Juelich GmbH")
@@ -439,4 +440,3 @@ SET(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${JPSREPORT_VERSION}")
 SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${JPSREPORT_VERSION}")
 
 INCLUDE(CPack)
-
