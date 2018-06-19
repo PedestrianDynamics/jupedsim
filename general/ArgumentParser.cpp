@@ -188,7 +188,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
 {
      time_t now = chrono::system_clock::to_time_t(chrono::system_clock::now());
      std::ostringstream oss;
-     oss << std::put_time(std::localtime(&now), "%Y-%m-%d %X");
+     oss << std::put_time(std::localtime(&now), "%a %b %d %X %Y");
     auto currentTime = oss.str();
 
      // first logs will go to stdout
