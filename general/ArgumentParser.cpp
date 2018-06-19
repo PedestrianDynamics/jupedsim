@@ -186,9 +186,14 @@ const string& ArgumentParser::GetProjectRootDir() const
 
 bool ArgumentParser::ParseIniFile(const string& inifile)
 {
+     time_t now = chrono::system_clock::to_time_t(chrono::system_clock::now());
+     std::ostringstream oss;
+     oss << std::put_time(std::localtime(&now), "%Y-%m-%d %X");
+    auto currentTime = oss.str();
+
      // first logs will go to stdout
      Log->Write("----\nJuPedSim - JPSreport\n");
-     Log->Write("Current date   : %s %s", __DATE__, __TIME__);
+     Log->Write("Current date   : %s", currentTime.c_str());
      Log->Write("Version        : %s", JPSREPORT_VERSION);
      Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
      Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
