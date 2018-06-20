@@ -516,6 +516,7 @@ math/VelocityModel.h
 math/OperationalModel.h
 
 
+
 poly2tri/poly2tri.h
 poly2tri/common/shapes.h
 poly2tri/sweep/cdt.h
@@ -736,6 +737,9 @@ endif ()
 
 if (MSVC)
 message(STATUS "MSVC: " ${MSVC})
+#add_compile_options(cnpy PRIVATE "/W4" "WX-")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /WX-")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /WX-")
 elseif (MSVC_IDE)
 message(STATUS "MSVC_IDE: " ${MSVC_IDE})
 elseif(MSVC60)
@@ -752,6 +756,8 @@ elseif(MSVC12)
 message(STATUS "MSVC12: " ${MSVC12})
 elseif(MSVC13)
 message(STATUS "MSVC13: " ${MSVC13})
+elseif(MSVC14)
+message(STATUS "MSVC14: " ${MSVC14})
 endif()
 #---------------------
 message(STATUS "C++ Compiler: " ${CMAKE_CXX_COMPILER})
