@@ -31,6 +31,7 @@
 #include<map>
 #include<iostream>
 #include<vector>
+#include <tuple>
 //using std::string;
 //using std::vector;
 //using std::ofstream;
@@ -297,68 +298,21 @@ std::vector<std::pair<polygon_2d, int> > Method_D::GetPolygons(vector<double>& X
  */
 void Method_D::OutputVoronoiResults(const vector<polygon_2d>&  polygons, const string& frid, const vector<double>& VInFrame)
 {
-     double VoronoiVelocity = GetVoronoiVelocity(polygons,VInFrame,_areaForMethod_D->_poly);
-     double VoronoiDensity=GetVoronoiDensity(polygons, _areaForMethod_D->_poly);
+     double VoronoiVelocity=1;
+     double VoronoiDensity=-1;
+     std::tie(VoronoiDensity, VoronoiVelocity) = GetVoronoiDensityVelocity(polygons,VInFrame,_areaForMethod_D->_poly);
      fprintf(_fVoronoiRhoV,"%s\t%.3f\t%.3f\n",frid.c_str(),VoronoiDensity, VoronoiVelocity);
 }
 
-
-double Method_D::GetVoronoiDensity(const vector<polygon_2d>& polygon, const polygon_2d & measureArea)
-{
-     double density=0;
-     for (const auto & polygon_iterator:polygon)
-     {
-          polygon_list v;
-          intersection(measureArea, polygon_iterator, v);
-          if(!v.empty())
-          {
-               density+=area(v[0])/area(polygon_iterator);
-               if((area(v[0]) - area(polygon_iterator))>J_EPS)
-               {
-                    std::cout<<"----------------------Now calculating density!!!-----------------\n ";
-                    std::cout<<"measure area: \t"<<std::setprecision(16)<<dsv(measureArea)<<"\n";
-                    std::cout<<"Original polygon:\t"<<std::setprecision(16)<<dsv(polygon_iterator)<<"\n";
-                    std::cout<<"intersected polygon: \t"<<std::setprecision(16)<<dsv(v[0])<<"\n";
-                    std::cout<<"this is a wrong result in density calculation\t "<<area(v[0])<<'\t'<<area(polygon_iterator)<<  "  (diff=" << (area(v[0]) - area(polygon_iterator)) << ")" << "\n";
-                    //exit(EXIT_FAILURE);
-               }
-          }
-     }
-     density = density/(area(measureArea)*CMtoM*CMtoM);
-     return density;
-
-}
-
-double Method_D::GetVoronoiDensity2(const vector<polygon_2d>& polygon, double* XInFrame, double* YInFrame, const polygon_2d& measureArea)
-{
-     double area_i=0;
-     int pedsinMeasureArea=0;
-     int temp=0;
-
-     for(vector<polygon_2d>::const_iterator polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end();polygon_iterator++)
-     {
-          if(within(make<point_2d>(XInFrame[temp], YInFrame[temp]), measureArea))
-          {
-               area_i += (area(*polygon_iterator)*CMtoM*CMtoM);
-               pedsinMeasureArea++;
-          }
-          temp++;
-     }
-     if(area_i==0)
-     {
-          return 0;
-     }
-     return pedsinMeasureArea/area_i;
-}
-
 /*
- * calculate the voronoi velocity according to voronoi cell of each pedestrian and their instantaneous velocity "Velocity".
+ * calculate the voronoi density and velocity according to voronoi cell of each pedestrian and their instantaneous velocity "Velocity".
  * input: voronoi cell and velocity of each pedestrian and the measurement area
- * output: the voronoi velocity in the measurement area
+ * output: the voronoi density and velocity in the measurement area (tuple)
  */
-double Method_D::GetVoronoiVelocity(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const polygon_2d & measureArea)
+std::tuple<double,double> Method_D::GetVoronoiDensityVelocity(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const polygon_2d & measureArea)
 {
      double meanV=0;
+     double density=0;
      int temp=0;
      for (auto && polygon_iterator:polygon)
      {
@@ -366,19 +320,25 @@ double Method_D::GetVoronoiVelocity(const vector<polygon_2d>& polygon, const vec
           intersection(measureArea, polygon_iterator, v);
           if(!v.empty())
           {
-               meanV+=Velocity[temp]*area(v[0])/area(polygon_iterator);
+               meanV+=Velocity[temp]*area(v[0]);
+
+               density+=area(v[0])/area(polygon_iterator);
                if((area(v[0]) - area(polygon_iterator))>J_EPS)
                {
-                    std::cout<<"this is a wrong result in calculating velocity\t"<<area(v[0])<<'\t'<<area(polygon_iterator)<< "  (diff=" << area(v[0]) - area(polygon_iterator) << ")"<< std::endl;
+                    std::cout<<"----------------------Now calculating density-velocity!!!-----------------\n ";
+                    std::cout<<"measure area: \t"<<std::setprecision(16)<<dsv(measureArea)<<"\n";
+                    std::cout<<"Original polygon:\t"<<std::setprecision(16)<<dsv(polygon_iterator)<<"\n";
+                    std::cout<<"intersected polygon: \t"<<std::setprecision(16)<<dsv(v[0])<<"\n";
+                    std::cout<<"this is a wrong result in density calculation\t "<<area(v[0])<<'\t'<<area(polygon_iterator)<<  "  (diff=" << (area(v[0]) - area(polygon_iterator)) << ")" << "\n";
                }
           }
           temp++;
      }
-     meanV = meanV/area(measureArea)*CMtoM*CMtoM;
-
-     return meanV;
+     meanV = meanV/area(measureArea);
+     density = density/(area(measureArea)*CMtoM*CMtoM);
+     return std::make_tuple(density, meanV);
 }
-
+// and velocity is calculated for every frame
 void Method_D::GetProfiles(const string& frameId, const vector<polygon_2d>& polygons, const vector<double>& velocity)
 {
      string voronoiLocation=_projectRootDir+VORO_LOCATION+"field/";
@@ -411,9 +371,11 @@ void Method_D::GetProfiles(const string& frameId, const vector<polygon_2d>& poly
                     assign_points(measurezoneXY, coor);
                }
                correct(measurezoneXY);     // Polygons should be closed, and directed clockwise. If you're not sure if that is the case, call this function
-               double densityXY=GetVoronoiDensity(polygons,measurezoneXY);
+
+               double densityXY;
+               double velocityXY;
+               std::tie(densityXY, velocityXY) = GetVoronoiDensityVelocity(polygons,velocity,measurezoneXY);
                fprintf(Prf_density,"%.3f\t",densityXY);
-               double velocityXY = GetVoronoiVelocity(polygons,velocity,measurezoneXY);
                fprintf(Prf_velocity,"%.3f\t",velocityXY);
           }
           fprintf(Prf_density,"\n");
