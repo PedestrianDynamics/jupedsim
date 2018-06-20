@@ -321,7 +321,6 @@ std::tuple<double,double> Method_D::GetVoronoiDensityVelocity(const vector<polyg
           if(!v.empty())
           {
                meanV+=Velocity[temp]*area(v[0]);
-
                density+=area(v[0])/area(polygon_iterator);
                if((area(v[0]) - area(polygon_iterator))>J_EPS)
                {
