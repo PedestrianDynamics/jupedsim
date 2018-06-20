@@ -366,7 +366,7 @@ double Method_D::GetVoronoiVelocity(const vector<polygon_2d>& polygon, const vec
           intersection(measureArea, polygon_iterator, v);
           if(!v.empty())
           {
-               meanV+=(Velocity[temp]*area(v[0])/area(measureArea));
+               meanV+=Velocity[temp]*area(v[0])/area(polygon_iterator);
                if((area(v[0]) - area(polygon_iterator))>J_EPS)
                {
                     std::cout<<"this is a wrong result in calculating velocity\t"<<area(v[0])<<'\t'<<area(polygon_iterator)<< "  (diff=" << area(v[0]) - area(polygon_iterator) << ")"<< std::endl;
@@ -374,6 +374,8 @@ double Method_D::GetVoronoiVelocity(const vector<polygon_2d>& polygon, const vec
           }
           temp++;
      }
+     meanV = meanV/area(measureArea)*CMtoM*CMtoM;
+
      return meanV;
 }
 
