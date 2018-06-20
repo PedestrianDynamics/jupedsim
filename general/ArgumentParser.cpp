@@ -33,6 +33,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <chrono>
 #include <math.h>
 #ifdef _MSC_VER
 #include "../.vs/dirent.h"
