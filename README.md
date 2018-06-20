@@ -1,4 +1,4 @@
-[![Build Status](https://gitlab.version.fz-juelich.de/jupedsim/jpsreport/badges/develop/build.svg)](https://gitlab.version.fz-juelich.de/JuPedSim/jpsreport/pipelines)[![GitHub license](https://img.shields.io/badge/license-GPL-blue.svg)](https://raw.githubusercontent.com/JuPedSim/jpscore/master/LICENSE)
+[![Build Status](https://gitlab.version.fz-juelich.de/jupedsim/jpsreport/badges/develop/build.svg)](https://gitlab.version.fz-juelich.de/JuPedSim/jpsreport/pipelines)[![GitHub license](https://img.shields.io/badge/license-GPL-blue.svg)](https://raw.githubusercontent.com/JuPedSim/jpscore/master/LICENSE)[![DOI](https://zenodo.org/badge/109670242.svg)](https://zenodo.org/badge/latestdoi/109670242)
 
 Documentation  can be found [here](http://jupedsim.github.io/jpsreport/).
 
