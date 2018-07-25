@@ -11,7 +11,7 @@ The desired direction of a pedestrian is defined following different algorithms:
 In the section of the chosen model the direction strategy should be specified as follows:
 
 ```xml
-<exit_crossing_strategy>num</exit_crossing_strategy>
+ <exit_crossing_strategy>num</exit_crossing_strategy>
 ```
 
 with *num* a positive integer.
@@ -31,7 +31,7 @@ The majority of the strategies define how a pedestrian crosses a line $$L = [P_1
 
 5. Does not exist.
 
-6. -9. Strategies using floor fields (ff) (vector fields); one ff per target (door, line, ...)
+6-9. Strategies using floor fields (ff) (vector fields); one ff per target (door, line, ...)
 
     <img src="{{ site.baseurl }}/img/transformFF.png" width="500" height="500" />
     ```xml
@@ -42,7 +42,7 @@ The majority of the strategies define how a pedestrian crosses a line $$L = [P_1
        <use_wall_avoidance>true</use_wall_avoidance>
       </model_parameters>
     ```
-  * 6: This strategy does use a floor field rather than heading towards a point on a line segment.
+
 
     For more details see this [talk](https://fz-juelich.sciebo.de/index.php/s/s1ORGTUssCsHDHC) and the corresponding [thesis](https://fz-juelich.sciebo.de/index.php/s/VFnUCH2gtz1mSoL).
 
