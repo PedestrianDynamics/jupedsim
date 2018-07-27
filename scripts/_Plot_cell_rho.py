@@ -166,16 +166,16 @@ def main():
     geominX, geomaxX, geominY, geomaxY = get_geometry_boundary(geoFile)
     fig = plt.figure(figsize=(16*(geomaxX-geominX)/(geomaxY-geominY)+2, 16), dpi=100)
     ax1 = fig.add_subplot(111, aspect='equal')
-    plt.rc("font", size=30)
-    plt.rc('pdf', fonttype=42)
-    ax1.set_yticks([int(1*j) for j in range(-2, 5)])
-    for label in ax1.get_xticklabels() + ax1.get_yticklabels():
-        label.set_fontsize(30)
+    #plt.rc("font", size=30)
+    #plt.rc('pdf', fonttype=42)
+    #ax1.set_yticks([int(1*j) for j in range(-2, 5)])
+    #for label in ax1.get_xticklabels() + ax1.get_yticklabels():
+    #    label.set_fontsize(30)
 
-    for tick in ax1.get_xticklines() + ax1.get_yticklines():
-        tick.set_markeredgewidth(2)
-        tick.set_markersize(6)
-        ax1.set_aspect("equal")
+    #for tick in ax1.get_xticklines() + ax1.get_yticklines():
+    #    tick.set_markeredgewidth(2)
+    #    tick.set_markersize(6)
+    #    ax1.set_aspect("equal")
 
     plot_geometry(geoFile)
 
@@ -227,7 +227,7 @@ def main():
     sm = cm.ScalarMappable(cmap=cm.jet)
     sm.set_array(density)
     sm.autoscale_None()
-    sm.set_clim(vmin=0, vmax=5)
+    sm.set_clim(vmin=0, vmax=10)
     maxArea = np.max(areas)
     meanArea = np.mean(areas)
     for j, poly in enumerate(polys):
@@ -245,6 +245,8 @@ def main():
     ax1.set_ylim(geominY-0.2, geomaxY+0.2)
     plt.xlabel("x [m]")
     plt.ylabel("y [m]")
+    plt.axhline(y=2.5)
+    plt.axvline(x=0.0)
     plt.title("%s"%namefile)
     divider = make_axes_locatable(ax1)
     cax = divider.append_axes("right", size="2.5%", pad=0.2)

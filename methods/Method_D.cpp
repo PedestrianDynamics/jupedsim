@@ -478,6 +478,23 @@ void Method_D::OutputVoroGraph(const string & frameId,  std::vector<std::pair<po
      velo.close();
 }
 
+std::string polygon_to_string(const polygon_2d & polygon)
+{
+    string polygon_str = "((";
+    for(auto point: boost::geometry::exterior_ring(polygon) )
+    {
+        double x = boost::geometry::get<0>(point);
+        double y = boost::geometry::get<1>(point);
+        polygon_str.append("(");
+        polygon_str.append(std::to_string(x));
+        polygon_str.append(", ");
+        polygon_str.append(std::to_string(y));
+        polygon_str.append("), ");
+    }
+    polygon_str.pop_back(); polygon_str.pop_back();  //remove last komma
+    polygon_str.append("))");
+    return polygon_str;
+}
 
 void Method_D::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const vector<int>& Id, const polygon_2d& measureArea, const string& frid)
 {
@@ -490,10 +507,25 @@ void Method_D::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<d
           polygon_list v;
           intersection(measureArea, polygon_iterator, v);
           if(!v.empty()) {
-               uniquedensity=1.0/(area(polygon_iterator)*CMtoM*CMtoM);
-               uniquevelocity=Velocity[temp];
-               uniqueId=Id[temp];
-               fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\n",frid.c_str(), uniqueId, uniquedensity,uniquevelocity);
+
+              string polygon_str = polygon_to_string(polygon_iterator);
+              string measureArea_str = polygon_to_string(measureArea);
+              string v_str = polygon_to_string(v[0]);
+
+              uniquedensity=1.0/(area(polygon_iterator)*CMtoM*CMtoM);
+              uniquevelocity=Velocity[temp];
+              uniqueId=Id[temp];
+
+              /*
+              std::cout<<std::setprecision(16)<<dsv(polygon_iterator)<<"\n";
+              std::cout<<std::setprecision(16)<<dsv(measureArea)<<"\n";
+              std::cout << dsv(v[0]) << std::endl;
+              */
+
+
+              fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\t%s\t%s\t%s\n",frid.c_str(), uniqueId, uniquedensity,uniquevelocity, polygon_str.c_str(), measureArea_str.c_str(), v_str.c_str());
+              /* fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\n",frid.c_str(), uniqueId, uniquedensity,uniquevelocity); */
+              /* getc(stdin); */
           }
           temp++;
      }
