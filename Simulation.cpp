@@ -222,9 +222,11 @@ bool Simulation::InitArgs()
     _agentSrcManager.SetBuilding(_building.get());
     _agentSrcManager.SetMaxSimTime(GetMaxSimTime());
     _gotSources = (bool) distributor->GetAgentsSources().size(); // did we have any sources? false if no sources
+    std::cout << " Got sources: " << _gotSources;
+
     for (const auto& src: distributor->GetAgentsSources()) {
         _agentSrcManager.AddSource(src);
-        //src->Dump();
+        src->Dump();
     }
 
 

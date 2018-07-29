@@ -123,6 +123,8 @@ bool AgentsSourcesManager::ProcessAllSources() const
                source_peds.reserve(source_peds.size() + peds.size());
 
                Log->Write("> INFO:\tSource %d generating %d agents (%d remaining)\n",src->GetId(),peds.size(),src->GetPoolSize());
+               printf("INFO:\tSource %d generating %d agents (%d remaining)\n",src->GetId(), peds.size(),src->GetPoolSize());
+
                //ComputeBestPositionRandom(src.get(), peds);
                //todo: here every pedestrian needs an exitline
 
