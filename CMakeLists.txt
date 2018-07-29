@@ -602,7 +602,7 @@ add_executable(jpscore main.cpp ${CMAKE_SOURCE_DIR}/forms/JPScore.ico)
 
 if (Boost_FOUND)
 set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_STATIC_RUNTIME ON) 
+set(Boost_USE_STATIC_RUNTIME ON)
  add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 
 if(WIN32)
@@ -841,13 +841,13 @@ endif (BUILD_TESTING)
 
 
 install(TARGETS jpscore DESTINATION bin COMPONENT applications)
-
+if(WIN32)
 set(CT_DATA_FILE_DIR "demos")
 file(GLOB CT_FILES "${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/*/*")
 install(FILES ${CT_FILES}
         DESTINATION ${CT_DATA_FILE_DIR}
         COMPONENT demos)
-
+endif()
 # ------------- CPACK ------------------------------
 IF(UNIX)
 SET(CPACK_GENERATOR "DEB")
@@ -859,40 +859,40 @@ SET(CPACK_DEBIAN_PACKAGE_SECTION "science")
 SET(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 endif()
 if(WIN32 AND NOT UNIX)
-	message(STATUS "Package generation - Windows")
-	set(CPACK_GENERATOR "NSIS")
-	find_program(NSIS_PATH nsis PATH_SUFFIXES nsis)
-	if(NSIS_PATH)
+        message(STATUS "Package generation - Windows")
+        set(CPACK_GENERATOR "NSIS")
+        find_program(NSIS_PATH nsis PATH_SUFFIXES nsis)
+        if(NSIS_PATH)
         set(CPACK_GENERATOR "${CPACK_GENERATOR};NSIS")
         message(STATUS "   + NSIS                                 YES ")
-	else(NSIS_PATH)
+        else(NSIS_PATH)
         message(STATUS "   + NSIS                                 NO ")
-	endif(NSIS_PATH)
+        endif(NSIS_PATH)
 
 #CPACK_NSIS_URL_INFO_ABOUT
-	set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
-	include(InstallRequiredSystemLibraries)
-	
-	message(STATUS "System Dependencies: " ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
-	install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+        set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+        include(InstallRequiredSystemLibraries)
+
+        message(STATUS "System Dependencies: " ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
+        install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
         DESTINATION sys
         COMPONENT applications)
-		
-	install(FILES "${Boost_INCLUDE_DIR}/../bin/boost_system-vc141-mt-x32-1_67.dll"
-	              "${Boost_INCLUDE_DIR}/../bin/boost_filesystem-vc141-mt-x32-1_67.dll"
-				  "${Boost_INCLUDE_DIR}/../bin/zlib1.dll"
-		DESTINATION bin
+
+        install(FILES "${Boost_INCLUDE_DIR}/../bin/boost_system-vc141-mt-x32-1_67.dll"
+                      "${Boost_INCLUDE_DIR}/../bin/boost_filesystem-vc141-mt-x32-1_67.dll"
+                                  "${Boost_INCLUDE_DIR}/../bin/zlib1.dll"
+                DESTINATION bin
         COMPONENT applications)
-		
+
 #	install(PROGRAMS ${Boost_INCLUDE_DIR}/../bin/boost_filesystem-vc141-mt-x32-1_67.dll
 #		DESTINATION bin
-#        COMPONENT applications)		
-	
-	#COPYINSTALL_DLLS("${Boost_INCLUDE_DIR}/../../lib" . boost_system boost_filesystem boost_thread boost_asio)
-		
-	#COPYINSTALL_DLLS("$BOOST_INCLUDE_DIRS/../../lib" . boost_system boost_filesystem)	
-    
-	
+#        COMPONENT applications)
+
+        #COPYINSTALL_DLLS("${Boost_INCLUDE_DIR}/../../lib" . boost_system boost_filesystem boost_thread boost_asio)
+
+        #COPYINSTALL_DLLS("$BOOST_INCLUDE_DIRS/../../lib" . boost_system boost_filesystem)
+
+
 elseif(APPLE)
 set(DEFAULT_CPACK_GENERATOR "DragNDrop")
 endif()
