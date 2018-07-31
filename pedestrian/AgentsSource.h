@@ -49,7 +49,7 @@ public:
      /**
       * Constructor
       */
-     AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency, bool greedy, double time, int agent_id);
+     AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency, bool greedy, double time, int agent_id, float startx, float starty);
 
      /**
       * Destructor
@@ -111,6 +111,8 @@ public:
      int GetGroupId() const;
      int GetId() const;
      int GetAgentId() const;
+     float GetStartX() const;
+     float GetStartY() const;
      double GetPlanTime() const;
      int GetMaxAgents() const;
      bool Greedy() const;
@@ -129,10 +131,11 @@ private:
      double _boundaries[4];// = { 0, 0, 0, 0 };
      int _agent_id;
      double _time;
+     float _startx;
+     float _starty;
      std::vector<Pedestrian*> _agents;
      std::shared_ptr<StartDistribution> _startDistribution;
 
 };
 
 #endif /* AGENTSOURCE_H_ */
-

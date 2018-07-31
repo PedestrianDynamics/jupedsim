@@ -30,8 +30,9 @@
 #include "AgentsSource.h"
 #include "Pedestrian.h"
 
-AgentsSource::AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency, bool greedy, double time, int agent_id):
-     _id(id), _frequency(frequency), _maxAgents(max_agents), _groupID(group_id), _caption(caption), _greedy(greedy), _agent_id(agent_id), _time(time)
+AgentsSource::AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency, bool greedy, double time, int agent_id, float startx, float starty):
+     _id(id), _frequency(frequency), _maxAgents(max_agents), _groupID(group_id), _caption(caption), _greedy(greedy), _agent_id(agent_id), _time(time), _startx(startx), _starty(starty)
+
 {
     _agentsGenerated=0;
     _boundaries[0] = 0;
@@ -145,6 +146,18 @@ int AgentsSource::GetMaxAgents() const
      return _maxAgents;
 }
 
+float AgentsSource::GetStartX() const
+{
+     return _startx;
+}
+
+float AgentsSource::GetStartY() const
+{
+     return _starty;
+}
+
+
+
 void AgentsSource::SetStartDistribution(std::shared_ptr<StartDistribution> startDistribution)
 {
      _startDistribution=startDistribution;
@@ -167,10 +180,10 @@ void AgentsSource::GenerateAgents(std::vector<Pedestrian*>& peds, int count, Bui
      //      for (const auto &source: _start_dis_sources)
      //           if(source->GetAgentId() >= 0)
      //                reserved_ids.push_back(source->GetAgentId());
-     
+
      //      while( std::find(reserved_ids.begin(), reserved_ids.end(), pid) != reserved_ids.end() ){
-     //           std::cout << "\n\nSOURCE  SORRY " << pid << " is reserved!\n";              
-     //           pid += 1;              
+     //           std::cout << "\n\nSOURCE  SORRY " << pid << " is reserved!\n";
+     //           pid += 1;
      //      }
      // }
 

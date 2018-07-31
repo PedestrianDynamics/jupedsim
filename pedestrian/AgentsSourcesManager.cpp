@@ -122,14 +122,19 @@ bool AgentsSourcesManager::ProcessAllSources() const
                src->RemoveAgentsFromPool(peds, src->GetFrequency());
                source_peds.reserve(source_peds.size() + peds.size());
 
-               Log->Write("> INFO:\tSource %d generating %d agents (%d remaining)\n",src->GetId(),peds.size(),src->GetPoolSize());
-               printf("INFO:\tSource %d generating %d agents (%d remaining)\n",src->GetId(), peds.size(),src->GetPoolSize());
+               Log->Write("\nINFO:\tSource %d generating %d agents (%d remaining)\n",src->GetId(),peds.size(),src->GetPoolSize());
+               printf("\nINFO:\tSource %d generating %lu agents (%d remaining)\n",src->GetId(), peds.size(),src->GetPoolSize());
 
                //ComputeBestPositionRandom(src.get(), peds);
                //todo: here every pedestrian needs an exitline
-
-               if( !ComputeBestPositionVoronoiBoost(src.get(), peds, _building, source_peds) )
-                    Log->Write("WARNING:\tThere was no place for some pedestrians");
+                if(!std::isnan(src->GetStartX()) && !std::isnan(src->GetStartY()))
+                {
+                      printf("INFO:\tSet source agent on fixed position (%.2f, %.2f)", src->GetStartX(), src->GetStartY());
+                      InitFixedPosition(src.get(), peds);
+                }
+                else
+                      if( !ComputeBestPositionVoronoiBoost(src.get(), peds, _building, source_peds) )
+                            Log->Write("WARNING:\tThere was no place for some pedestrians");
 
                source_peds.insert(source_peds.end(), peds.begin(), peds.end());
                /* std::cout << KRED << ">>  Add to queue " << peds.size() << "\n" << RESET; */
@@ -155,30 +160,29 @@ bool AgentsSourcesManager::ProcessAllSources() const
      //                                                                                                             std::cout<< KBLU << "BUL: agentssourcesManager: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl;
      //
 /* std::cout << "========================\n"; */
-                                                                                                                                                                                                                                          return empty;
+          return empty;
 }
 
-                                                                                                                                                                                                                             //4 agents frequency, just for an example
-     void AgentsSourcesManager::ComputeBestPositionDummy(AgentsSource* src,
-                                                         vector<Pedestrian*>& peds)const
+
+void AgentsSourcesManager::InitFixedPosition(AgentsSource* src,
+                                                    vector<Pedestrian*>& peds)const
+{
+     for(auto&& ped : peds)
      {
-          peds[0]->SetPos( Point(10,5.5) );
-          peds[1]->SetPos( Point(10,4.9) );
-          peds[2]->SetPos( Point(10,4.3) );
-          peds[3]->SetPos( Point(10,3.7) );
-
-          /*peds[0]->SetPos( Point(10,5.4) );
-            peds[1]->SetPos( Point(10,4.6) );
-            peds[2]->SetPos( Point(10,3.8) );*/
-
-          for(auto&& ped : peds)
-          {
-               Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
-               double speed=ped->GetV0Norm();
-               v=v*speed;
-               ped->SetV(v);
+          Point v;
+          if (ped->GetExitLine()) {
+               v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
+          } else {
+               const NavLine L = Line(Point(0, 0), Point(1,1));
+               ped->SetExitLine(&L); // set dummy line
+               v = Point(0., 0.);
           }
+          double speed=ped->GetEllipse().GetV0();
+          v=v*speed;
+          ped->SetV(v);
+          ped->SetPos( Point(src->GetStartX(), src->GetStartY()) );
      }
+}
 
 void AgentsSourcesManager::ComputeBestPositionCompleteRandom(AgentsSource* src,
                                                              vector<Pedestrian*>& peds)const
