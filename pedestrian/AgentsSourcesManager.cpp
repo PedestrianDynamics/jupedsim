@@ -178,7 +178,7 @@ void AgentsSourcesManager::InitFixedPosition(AgentsSource* src,
                int trans_ID = transition->GetID();
                ped->SetExitLine(transition); // set dummy line
                ped->SetExitIndex(trans_ID);
-               ped->SetFinalDestination(trans_ID);
+               //ped->SetFinalDestination(trans_ID);
                v = Point(0., 0.);
           }
           double speed=ped->GetEllipse().GetV0();
