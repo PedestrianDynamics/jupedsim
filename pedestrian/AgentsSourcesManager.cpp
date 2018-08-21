@@ -173,8 +173,12 @@ void AgentsSourcesManager::InitFixedPosition(AgentsSource* src,
           if (ped->GetExitLine()) {
                v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
           } else {
-               const NavLine L = Line(Point(0, 0), Point(1,1));
-               ped->SetExitLine(&L); // set dummy line
+               auto transitions = ped->GetBuilding()->GetAllTransitions();
+               auto transition = transitions[0];
+               int trans_ID = transition->GetID();
+               ped->SetExitLine(transition); // set dummy line
+               ped->SetExitIndex(trans_ID);
+               ped->SetFinalDestination(trans_ID);
                v = Point(0., 0.);
           }
           double speed=ped->GetEllipse().GetV0();
