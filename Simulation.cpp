@@ -339,7 +339,7 @@ void Simulation::UpdateRoutesAndLocations()
                }
           }
           //finally actualize the route
-          if (ped->FindRoute() == -1) {
+          if ( !_gotSources && ped->FindRoute() == -1) {
                //a destination could not be found for that pedestrian
                Log->Write("ERROR: \tCould not find a route for pedestrian %d",ped->GetID());
                //ped->FindRoute(); //debug only, plz remove
