@@ -199,7 +199,8 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
      Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
      Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
      Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
-     Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
+     Log->Write("Branch         : %s", GIT_BRANCH);
+     Log->Write("Python         : %s (%s)\n----\n", PYTHON, PYTHON_VERSION);
      Log->Write("INFO: \tParsing the ini file <%s>",inifile.c_str());
 
      //extract and set the project root dir

@@ -357,8 +357,10 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                     Log->Write("INFO:\tSuccess with Method C using measurement area id %d!\n",_areaForMethod_C[i]->_id);
                     if(_plotTimeseriesC[i])
                     {
-                         string parameters_Timeseries="python \""+_scriptsLocation+"/_Plot_timeseries_rho_v.py\" -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
+                         string parameters_Timeseries=" " + _scriptsLocation+
+"/_Plot_timeseries_rho_v.py -p "+ _projectRootDir+VORO_LOCATION + " -n "+filename+
                               " -f "+boost::lexical_cast<std::string>(data.GetFps());
+                         parameters_Timeseries = PYTHON + parameters_Timeseries;
                          int res=system(parameters_Timeseries.c_str());
                          Log->Write("INFO:\t time series result: %d ",res);
                     }
@@ -401,8 +403,11 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                     std::cout << "INFO:\tSuccess with Method D using measurement area id "<< _areaForMethod_D[i]->_id << "\n";
                     if(_plotTimeseriesD[i])
                     {
-                         string parameters_Timeseries="python \""+_scriptsLocation+"/_Plot_timeseries_rho_v.py\" -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
+                         string parameters_Timeseries= " " +_scriptsLocation+"/_Plot_timeseries_rho_v.py -p "+ _projectRootDir+VORO_LOCATION + " -n "+filename+
                               " -f "+boost::lexical_cast<std::string>(data.GetFps());
+                         parameters_Timeseries = PYTHON + parameters_Timeseries;
+                         std::cout << parameters_Timeseries << "\n;";
+
                          int res=system(parameters_Timeseries.c_str());
                          Log->Write("INFO:\t time series result: %d ",res);
                     }

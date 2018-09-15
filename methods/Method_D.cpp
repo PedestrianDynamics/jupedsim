@@ -460,9 +460,9 @@ void Method_D::OutputVoroGraph(const string & frameId,  std::vector<std::pair<po
 
      if(_plotVoronoiCellData)
      {
-          string parameters_rho="python "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+          string parameters_rho=" " + _scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
                " -g "+_geometryFileName+" -p "+_trajectoryPath;
-          string parameters_v="python "+_scriptsLocation+"/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+          string parameters_v=" " + _scriptsLocation+"/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
                " -g "+_geometryFileName+" -p "+_trajectoryPath;
 
           if(_plotVoronoiIndex)
@@ -470,6 +470,8 @@ void Method_D::OutputVoroGraph(const string & frameId,  std::vector<std::pair<po
 
           Log->Write("INFO:\t%s",parameters_rho.c_str());
           Log->Write("INFO:\tPlotting Voronoi Cell at the frame <%s>",frameId.c_str());
+          parameters_rho = PYTHON + parameters_rho;
+          parameters_v = PYTHON + parameters_v;
           system(parameters_rho.c_str());
           system(parameters_v.c_str());
      }
