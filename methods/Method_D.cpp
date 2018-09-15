@@ -37,8 +37,23 @@
 //using std::ofstream;
 using namespace std;
 
-
-
+std::string polygon_to_string(const polygon_2d & polygon)
+{
+     string polygon_str = "(";
+     for(auto point: boost::geometry::exterior_ring(polygon) )
+     {
+          double x = boost::geometry::get<0>(point);
+          double y = boost::geometry::get<1>(point);
+          polygon_str.append("(");
+          polygon_str.append(std::to_string(x));
+          polygon_str.append(", ");
+          polygon_str.append(std::to_string(y));
+          polygon_str.append("), ");
+     }
+     polygon_str.pop_back(); polygon_str.pop_back();  //remove last komma
+     polygon_str.append(")");
+     return polygon_str;
+}
 Method_D::Method_D()
 {
      _grid_size_X = 0.10;
@@ -176,7 +191,7 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
                          }
                     }
                     std::vector<std::pair<polygon_2d, int> > polygons_id = GetPolygons(XInFrame, YInFrame, VInFrame, IdInFrame);
-                    // std::cout << ">> polygons_id " << polygons_id.size() << "\n";
+//                    std::cout << ">> polygons_id " << polygons_id.size() << "\n";
                     vector<polygon_2d> polygons;
                     for (auto p: polygons_id)
                          polygons.push_back(p.first);
@@ -460,9 +475,9 @@ void Method_D::OutputVoroGraph(const string & frameId,  std::vector<std::pair<po
 
      if(_plotVoronoiCellData)
      {
-          string parameters_rho="python "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+          string parameters_rho="python3 "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
                " -g "+_geometryFileName+" -p "+_trajectoryPath;
-          string parameters_v="python "+_scriptsLocation+"/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+          string parameters_v="python3 "+_scriptsLocation+"/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
                " -g "+_geometryFileName+" -p "+_trajectoryPath;
 
           if(_plotVoronoiIndex)
@@ -490,10 +505,16 @@ void Method_D::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<d
           polygon_list v;
           intersection(measureArea, polygon_iterator, v);
           if(!v.empty()) {
+               string polygon_str = polygon_to_string(polygon_iterator);
                uniquedensity=1.0/(area(polygon_iterator)*CMtoM*CMtoM);
                uniquevelocity=Velocity[temp];
                uniqueId=Id[temp];
                fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\n",frid.c_str(), uniqueId, uniquedensity,uniquevelocity);
+               std::cout << "STR: " << polygon_str << "\n";
+               std::cout << "\n"<< dsv(polygon_iterator) << "\n ---- "<< std::endl;
+               // std::cout << dsv(measureArea)  << "\n ---- " << std::endl;
+               // std::cout << dsv(v[0])  << "\n ---- " << std::endl;
+               getc(stdin);
           }
           temp++;
      }
