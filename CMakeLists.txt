@@ -314,6 +314,16 @@ if(WIN32)
   endif()
 endif()
 
+set(Python_ADDITIONAL_VERSIONS 3.0 3.3 3.6 3.7)
+find_package(PythonInterp)
+if(PYTHONINTERP_FOUND)
+  message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
+  message(STATUS "Found Python: " ${PYTHON_VERSION_STRING})
+  add_definitions("-DPYTHON=\"${PYTHON_EXECUTABLE}\"")
+else()
+  message (WARNING "Could not find python 3x")
+endif(PYTHONINTERP_FOUND)
+
 # ----------------------------- cTest ------------------------------------------
 if(BUILD_TESTING)
   SET(BUILD_TEST_TIMEOUT 10800   CACHE STRING "Global timeout on all tests (seconds).")
@@ -342,9 +352,11 @@ if(BUILD_TESTING)
   endforeach(test_src ${test_files})
 
 
-
+#  set(Python_ADDITIONAL_VERSIONS 3.0)
   find_package(PythonInterp)
   if(PYTHONINTERP_FOUND)
+  message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
+  message(STATUS "Found Python: " ${PYTHON_VERSION_STRING})
     foreach (test_src ${test_py_files})
       GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
 #     message (STATUS "Add python test: " ${test} " | test_src: " ${test_src})
