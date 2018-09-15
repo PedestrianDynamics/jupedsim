@@ -25,7 +25,7 @@ logging.basicConfig(filename=logfile,
 
 
 def getParserArgs():
-    parser = argparse.ArgumentParser(description='Combine French data to one file')
+    parser = argparse.ArgumentParser(description='Plot Voronoi cell. Color depends on velocity')
     parser.add_argument("-f", "--filepath", default="./", help='give the path of source file')
     parser.add_argument("-n", "--namefile", help='give the name of the source file')
     parser.add_argument("-g", "--geoname", help='give the name of the geometry file')
