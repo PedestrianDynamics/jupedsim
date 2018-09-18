@@ -35,6 +35,7 @@
 #include <sstream>
 #include <chrono>
 #include <math.h>
+#include <ctime>
 #ifdef _MSC_VER
 #include "../.vs/dirent.h"
 #else
@@ -189,7 +190,13 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
 {
      time_t now = chrono::system_clock::to_time_t(chrono::system_clock::now());
      std::ostringstream oss;
-     oss << std::put_time(std::localtime(&now), "%a %b %d %X %Y");
+     char foo[100];
+     if(0 < std::strftime(foo, sizeof(foo), "%a %b %d %X %Y", std::localtime(&now)))
+          oss << foo;
+     else
+          oss << "No time!";
+     // else  // hack for g++ < 5
+     //      oss << std::put_time(std::localtime(&now), "%a %b %d %X %Y");
     auto currentTime = oss.str();
 
      // first logs will go to stdout
