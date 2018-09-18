@@ -87,7 +87,7 @@ bool Method_B::Process (const PedData& peddata)
           Log->Write("INFO:\tThe measurement area length for method B is %.3f", _areaForMethod_B->_length);
      }
      GetFundamentalTinTout(_DensityPerFrame,_areaForMethod_B->_length);
-     
+
      delete []_tIn;
      delete []_tOut;
      return true;
@@ -174,11 +174,12 @@ void Method_B::GetFundamentalTinTout(double *DensityPerFrame,double LengthMeasur
 // @todo: write new script to plot rho-v and j-rho diagrams
      // if(_plotFundamentalDiagram)
      // {
-     //      string parameters_N_t="python \""+_scriptsLocation+"/_Plot_N_t.py\" -p \""+ METHOD_A_LOCATION + "\" -n "+ fFD_TinTout;
+     //      string parameters_N_t=" "+_scriptsLocation+"/_Plot_N_t.py\" -p \""+ METHOD_A_LOCATION + "\" -n "+ fFD_TinTout;
+     //      parameters_N_t = PYTHON + parameters_N_t;
      //      int res = system(parameters_N_t.c_str());
      //      Log->Write("INFO:\tPlotting N-t diagram! Status: %d", res);
      // }
-     
+
 }
 
 void Method_B::SetMeasurementArea (MeasurementArea_B* area)

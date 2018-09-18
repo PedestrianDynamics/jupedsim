@@ -2,7 +2,7 @@
  * \file        Method_C.cpp
  * \date        Oct 10, 2014
  * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -57,8 +57,8 @@ bool Method_C::Process (const PedData& peddata, const double& zPos_measureArea)
      Log->Write("------------------------Analyzing with Method C-----------------------------");
      for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
      {
-    	  int frameNr = ite->first;
-    	  int frid = frameNr  + _minFrame;
+          int frameNr = ite->first;
+          int frid = frameNr  + _minFrame;
 
           if(!(frid%100))
           {
@@ -134,4 +134,3 @@ void Method_C::SetMeasurementArea (MeasurementArea_B* area)
 {
      _areaForMethod_C = area;
 }
-

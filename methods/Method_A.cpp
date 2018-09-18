@@ -123,7 +123,8 @@ void Method_A::WriteFile_N_t(string data)
           string file_N_t ="Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
           if(_plotTimeSeries)
           {
-               string parameters_N_t="python \""+_scriptsLocation+"/_Plot_N_t.py\" -p \""+ METHOD_A_LOCATION + "\" -n "+file_N_t;
+               string parameters_N_t=" " + _scriptsLocation+"/_Plot_N_t.py\" -p \""+ METHOD_A_LOCATION + "\" -n "+file_N_t;
+               parameters_N_t = PYTHON + parameters_N_t;
                int res = system(parameters_N_t.c_str());
                Log->Write("INFO:\tPlotting N-t diagram! Status: %d", res);
           }
