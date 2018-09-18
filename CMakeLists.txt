@@ -322,6 +322,8 @@ if((PYTHONINTERP_FOUND) AND (${PYTHON_VERSION_MAJOR} EQUAL 3))
   add_definitions("-DPYTHON_VERSION=\"${PYTHON_VERSION_STRING}\"")
 else()
   message (WARNING "Could not find python 3x")
+  add_definitions("-DPYTHON=\"${PYTHON_EXECUTABLE}\"")
+  add_definitions("-DPYTHON_VERSION=\"${PYTHON_VERSION_STRING}\"")
 endif()
 
 # ----------------------------- cTest ------------------------------------------
