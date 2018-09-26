@@ -101,7 +101,6 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
     double radius = 0.3; //radius of a person, 0.3 is just some number(needed for the fake_peds bellow), will be changed afterwards
 
     SubRoom* subroom = building->GetRoom( roomID )->GetSubRoom(subroomID);
-
     double factor = 100;  //factor for conversion to integer for the boost voronoi
 
     std::vector<Point> fake_peds;

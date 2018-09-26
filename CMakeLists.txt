@@ -6,7 +6,7 @@
 # -DBUILD_CPPUNIT_TEST=ON (default OFF) for unit tests
 # -DUSE_DUAL_ABI=ON (default OFF)  https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
 # -D Boost_NO_SYSTEM_PATHS=true (default false) -D BOOST_ROOT=PATH_where_to_find_boost
-# -D AIROUTER (default true)
+# -D AIROUTER=true (default false)
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
