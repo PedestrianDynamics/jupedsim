@@ -1794,7 +1794,13 @@ void UnivFFviaFM::getDirectionToUID(int destID, long int key, Point& direction, 
 }
 
 void UnivFFviaFM::getDirectionToUID(int destID, long int key, Point& direction){
-     assert(key > 0 && key < _nPoints);
+     //assert(key > 0 && key < _nPoints);
+     if(key <=0 || key>=_nPoints)
+     {
+          direction._x = 0.;
+          direction._y = 0.;
+          return;
+     }
     if ((_gridCode[key] == OUTSIDE) || (_gridCode[key] == WALL)) {
         //bresenham line (treppenstruktur) getKeyAtPoint yields gridpoint next to edge, although position is on edge
         //find a key that belongs domain (must be one left or right and second one below or above)

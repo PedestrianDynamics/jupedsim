@@ -51,6 +51,8 @@ bool GeoFileParser::LoadGeometry(Building* building)
 {
 
      std::string geoFilenameWithPath = _configuration->GetProjectRootDir()+_configuration->GetGeometryFile();
+     std::cout << "LodGeometry: file: " << geoFilenameWithPath << "\n";
+
      TiXmlDocument docGeo(geoFilenameWithPath);
      if (!docGeo.LoadFile()) {
           Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
@@ -505,14 +507,3 @@ GeoFileParser::~GeoFileParser()
 {
 
 }
-
-
-
-
-
-
-
-
-
-
-

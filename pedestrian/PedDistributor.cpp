@@ -124,7 +124,7 @@ bool PedDistributor::Distribute(Building *building) const {
                                auto tmpPositions = GetPositionsFromFile(p.string(), dist->GetAgentsNumber(), unit);
                                //check if positions are
                                //empty. May happen if file
-                               //is misformed.                                         
+                               //is misformed.
                                if(tmpPositions.empty()){
                                               Log->Write("ERROR: \tproblems with file <%s%s>.", basename.c_str(), extention.c_str());
                                               return false; //maybe just ignore?
@@ -136,12 +136,13 @@ bool PedDistributor::Distribute(Building *building) const {
                                break; //leave BOOST_FOREEACH
                           }//regular file
                     } // for files
-                    if (fromDirectory == false){                         
+                    if (fromDirectory == false){
                          Log->Write("ERROR: \tDistributing pedestrians using file is not successful.");
-                         return false;                         
+                         return false;
                     }
               }// check if directory
         }//if we have a directoy
+
         //------------------------------------- pack in function ------------
         else{
 
@@ -409,7 +410,7 @@ const vector<Point>  PedDistributor::GetPositionsFromFile(std::string filename, 
       float m2cm = 1.0;
       if(unit == "cm")
             m2cm = 100.0;
-      
+
       std::ifstream infile(filename);
       // read all data from file in xpos, ypos, ids and frames
       // @todo: need to read z too
@@ -462,10 +463,11 @@ const vector<Point>  PedDistributor::GetPositionsFromFile(std::string filename, 
       if(first_ids.size() != (unsigned)n){
            Log->Write("ERROR: \tGetPositionsFromFile: number of peds <%d> does not match number of peds from file <%d>",
                       n, first_ids.size());
+
            positions.clear();
       }
       else
-           Log->Write("ERROR: \tGetPositionsFromFile: number of peds <%d> in file. To simulate <%d>", first_ids.size(), n);      
+           Log->Write("INFO: \tGetPositionsFromFile: number of peds <%d> in file. To simulate <%d>", first_ids.size(), n);
       return positions;
 }
 
@@ -608,7 +610,3 @@ void PedDistributor::DistributeInSubRoom(int nAgents, vector<Point> &positions, 
         building->AddPedestrian(ped);
     }
 }
-
-
-
-

@@ -137,7 +137,7 @@ private:
      void ComputeBestPositionVoronoi(AgentsSource* src, Pedestrian* agent) const;
 
 
-     void ComputeBestPositionDummy(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
+     void InitFixedPosition(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
 
      /**
       * Position incoming pedestrians completely random

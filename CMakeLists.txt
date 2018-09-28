@@ -6,11 +6,14 @@
 # -DBUILD_CPPUNIT_TEST=ON (default OFF) for unit tests
 # -DUSE_DUAL_ABI=ON (default OFF)  https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
 # -D Boost_NO_SYSTEM_PATHS=true (default false) -D BOOST_ROOT=PATH_where_to_find_boost
-# -D AIROUTER (default true)
+# -D AIROUTER=true (default false)
 #--------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
+IF (POLICY CMP0054)
+cmake_policy(SET CMP0054 NEW)
+ENDIF (POLICY CMP0054)
 
 project(JPScore)
 
@@ -405,7 +408,7 @@ JPSfire/A_smoke_sensor/SmokeSensor.cpp
 JPSfire/B_walking_speed/WalkingSpeed.cpp
 JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
 JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
-
+forms/jpscore.rc
 math/KrauszModel.cpp)
 
 set(header_files
@@ -516,6 +519,7 @@ math/VelocityModel.h
 math/OperationalModel.h
 
 
+
 poly2tri/poly2tri.h
 poly2tri/common/shapes.h
 poly2tri/sweep/cdt.h
@@ -593,9 +597,17 @@ target_link_libraries(cnpy ${ZLIB_LIBRARIES})
 #add_executable(
 #  jpscore Utest/Fastmarchtest.h
 #)
-add_executable(jpscore main.cpp)
+add_executable(jpscore main.cpp ${CMAKE_SOURCE_DIR}/forms/JPScore.ico)
+
 
 if (Boost_FOUND)
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_STATIC_RUNTIME ON)
+ add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
+
+if(WIN32)
+add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
+endif()
 message(STATUS "BOOST FOUND: " ${Boost_LIB_VERSION})
 message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
 message(STATUS "Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIR})
@@ -605,10 +617,10 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 # suppress warnings in boost libraries with attribute SYSTEM
 include_directories(SYSTEM ${Boost_INCLUDE_DIR})
-target_link_libraries(core ${Boost_LIBRARIES} cnpy)
+target_link_libraries(core ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} cnpy)
 endif ()
 
-
+#${Boost_LIBRARIES}
 
 if (GMP_FOUND)
 message(STATUS "GMP FOUND: " ${GMP_FOUND})
@@ -736,6 +748,9 @@ endif ()
 
 if (MSVC)
 message(STATUS "MSVC: " ${MSVC})
+#add_compile_options(cnpy PRIVATE "/W4" "WX-")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /WX-")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /WX-")
 elseif (MSVC_IDE)
 message(STATUS "MSVC_IDE: " ${MSVC_IDE})
 elseif(MSVC60)
@@ -752,6 +767,8 @@ elseif(MSVC12)
 message(STATUS "MSVC12: " ${MSVC12})
 elseif(MSVC13)
 message(STATUS "MSVC13: " ${MSVC13})
+elseif(MSVC14)
+message(STATUS "MSVC14: " ${MSVC14})
 endif()
 #---------------------
 message(STATUS "C++ Compiler: " ${CMAKE_CXX_COMPILER})
@@ -823,29 +840,89 @@ endif (PYTHONINTERP_FOUND)
 endif (BUILD_TESTING)
 
 
-install(TARGETS jpscore DESTINATION bin)
-
+install(TARGETS jpscore DESTINATION bin COMPONENT applications)
+if(WIN32)
+set(CT_DATA_FILE_DIR "demos")
+file(GLOB CT_FILES "${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/*/*")
+install(FILES ${CT_FILES}
+        DESTINATION ${CT_DATA_FILE_DIR}
+        COMPONENT demos)
+endif()
 # ------------- CPACK ------------------------------
-IF(CMAKE_SYSTEM_NAME STREQUAL Linux)
+IF(UNIX)
 SET(CPACK_GENERATOR "DEB")
-
-SET(CPACK_PACKAGE_DESCRIPTION "simulation core of JuPedSim")
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The simulation core of JuPedSim, a framework for simulation and analysis of pedestrian dynamics")
-#SET(CPACK_PACKAGE_VENDOR "nowardev")
-SET(CPACK_PACKAGE_CONTACT "m.chraibi@fz-juelich.de")
-SET(CPACK_PACKAGE_VERSION_MAJOR "${JPSCORE_MAJOR_VERSION}")
-SET(CPACK_PACKAGE_VERSION_MINOR "${JPSCORE_MINOR_VERSION}")
-SET(CPACK_PACKAGE_VERSION_PATCH "${JPSCORE_PATCH_VERSION}")
-SET(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${JPSCORE_VERSION}")
-SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${JPSCORE_VERSION}")
-#SET(CPACK_DEBIAN_PACKAGE_DEPENDS " Boost (>= 1.59) ")
 SET(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 SET( CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://jupedsim.org")
 SET(CPACK_DEBIAN_PACKAGE_SUGGESTS, "jpsvis, jpsreport, jpseditor")
 SET(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 SET(CPACK_DEBIAN_PACKAGE_SECTION "science")
 SET(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+endif()
+if(WIN32 AND NOT UNIX)
+        message(STATUS "Package generation - Windows")
+        set(CPACK_GENERATOR "NSIS")
+        find_program(NSIS_PATH nsis PATH_SUFFIXES nsis)
+        if(NSIS_PATH)
+        set(CPACK_GENERATOR "${CPACK_GENERATOR};NSIS")
+        message(STATUS "   + NSIS                                 YES ")
+        else(NSIS_PATH)
+        message(STATUS "   + NSIS                                 NO ")
+        endif(NSIS_PATH)
 
+#CPACK_NSIS_URL_INFO_ABOUT
+        set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+        include(InstallRequiredSystemLibraries)
+
+        message(STATUS "System Dependencies: " ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
+        install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+        DESTINATION sys
+        COMPONENT applications)
+
+        install(FILES "${Boost_INCLUDE_DIR}/../bin/boost_system-vc141-mt-x32-1_67.dll"
+                      "${Boost_INCLUDE_DIR}/../bin/boost_filesystem-vc141-mt-x32-1_67.dll"
+                                  "${Boost_INCLUDE_DIR}/../bin/zlib1.dll"
+                DESTINATION bin
+        COMPONENT applications)
+
+#	install(PROGRAMS ${Boost_INCLUDE_DIR}/../bin/boost_filesystem-vc141-mt-x32-1_67.dll
+#		DESTINATION bin
+#        COMPONENT applications)
+
+        #COPYINSTALL_DLLS("${Boost_INCLUDE_DIR}/../../lib" . boost_system boost_filesystem boost_thread boost_asio)
+
+        #COPYINSTALL_DLLS("$BOOST_INCLUDE_DIRS/../../lib" . boost_system boost_filesystem)
+
+
+elseif(APPLE)
+set(DEFAULT_CPACK_GENERATOR "DragNDrop")
+endif()
+
+set(CPACK_COMPONENTS_ALL applications)
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/LICENSE")
+#set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\hw.bmp")
+set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/forms/jpscore.ico")
+set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/forms/jpscore.ico")
+
+#install(DIRECTORY "${PROJECT_SOURCE_DIR}/demos/" DESTINATION "demos")
+
+
+set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+set(CPACK_NSIS_MODIFY_PATH ON)
+set(CPACK_COMPONENTS_ALL applications demos)
+set(CPACK_COMPONENT_CTDATA_GROUP "Demos")
+set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "jpscore and dlls")
+set(CPACK_COMPONENT_GROUP_DATA_DESCRIPTION "demo files")
+set(CPACK_COMPONENT_DATA_FILES_DESCRIPTION "demo files to get started")
+SET(CPACK_PACKAGE_DESCRIPTION "Simulation core of JuPedSim")
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The simulation core of JuPedSim, a framework for simulation and analysis of pedestrian dynamics")
+SET(CPACK_PACKAGE_VENDOR "Forschungszentrum Juelich GmbH")
+SET(CPACK_PACKAGE_NAME "JuPedSim/JPScore")
+SET(CPACK_PACKAGE_CONTACT "m.chraibi@fz-juelich.de")
+SET(CPACK_PACKAGE_VERSION_MAJOR "${JPSCORE_MAJOR_VERSION}")
+SET(CPACK_PACKAGE_VERSION_MINOR "${JPSCORE_MINOR_VERSION}")
+SET(CPACK_PACKAGE_VERSION_PATCH "${JPSCORE_PATCH_VERSION}")
+SET(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${JPSCORE_VERSION}")
+SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${JPSCORE_VERSION}")
 
 INCLUDE(CPack)
-ENDIF(CMAKE_SYSTEM_NAME STREQUAL Linux)

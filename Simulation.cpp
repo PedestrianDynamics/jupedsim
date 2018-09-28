@@ -222,9 +222,11 @@ bool Simulation::InitArgs()
     _agentSrcManager.SetBuilding(_building.get());
     _agentSrcManager.SetMaxSimTime(GetMaxSimTime());
     _gotSources = (bool) distributor->GetAgentsSources().size(); // did we have any sources? false if no sources
+    std::cout << " Got sources: " << _gotSources;
+
     for (const auto& src: distributor->GetAgentsSources()) {
         _agentSrcManager.AddSource(src);
-        //src->Dump();
+        src->Dump();
     }
 
 
@@ -337,7 +339,7 @@ void Simulation::UpdateRoutesAndLocations()
                }
           }
           //finally actualize the route
-          if (ped->FindRoute() == -1) {
+          if ( !_gotSources && ped->FindRoute() == -1) {
                //a destination could not be found for that pedestrian
                Log->Write("ERROR: \tCould not find a route for pedestrian %d",ped->GetID());
                //ped->FindRoute(); //debug only, plz remove
