@@ -1343,6 +1343,7 @@ bool IniFileParser::ParseAIOpts(TiXmlNode* routingNode) {
      {
           cogMapFiles.push_back(cogMap->Attribute("files"));
           r->addOption("CognitiveMapFiles", cogMapFiles);
+          Log->Write("INFO:\tinput files for the cognitive map specified!");
      }
 
      //Signs

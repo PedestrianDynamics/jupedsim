@@ -162,7 +162,7 @@ double WalkingSpeed::WalkingInSmoke(const Pedestrian* p, double walking_speed)
                 walking_speed = Fridolf2018(walking_speed, ExtinctionCoefficient);
             }
             else {
-                Log->Write("ERROR:\tNo study specified");
+                 Log->Write("ERROR:\tNo study specified. Got <%s>, but only <Frantzich+Nilsson2003> and <Jin1978> are available", study.c_str());
                 exit(EXIT_FAILURE);
             }
     }

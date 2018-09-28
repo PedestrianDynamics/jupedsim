@@ -545,7 +545,8 @@ double Pedestrian::GetV0Norm() const
      if (_navLine ==nullptr)
      {
           printf("Error: ped %d has no navline\n", _id);
-          exit(EXIT_FAILURE);
+          //exit(EXIT_FAILURE);
+          return std::max(0.,_ellipse.GetV0());
      }
      const Point& target = _navLine->GetCentre();
      double nav_elevation = sub->GetElevation(target);
@@ -636,7 +637,6 @@ double Pedestrian::GetV0Norm() const
 
      //IF execution of WalkingInSmoke depending on JPSfire section in INI file
      if(_WalkingSpeed && _WalkingSpeed->ReduceWalkingSpeed()) {
-         //std::cout << "JPSfire?" << std::endl;
          walking_speed = _WalkingSpeed->WalkingInSmoke(this, walking_speed);
      }
 
