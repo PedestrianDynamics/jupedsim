@@ -606,7 +606,12 @@ set(Boost_USE_STATIC_RUNTIME ON)
  add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 
 if(WIN32)
-add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
+add_definitions( -DBOOST_ALL_NO_LIB )
+
+  # force all boost libraries to dynamic link (we already disabled
+  # autolinking, so I don't know why we need this, but we do!)
+  add_definitions( -DBOOST_ALL_DYN_LINK )
+# add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 endif()
 message(STATUS "BOOST FOUND: " ${Boost_LIB_VERSION})
 message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})

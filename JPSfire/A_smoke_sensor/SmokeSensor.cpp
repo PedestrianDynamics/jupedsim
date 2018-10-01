@@ -36,6 +36,8 @@
 #include "../generic/FDSMeshStorage.h"
 //#include <set>
 #include "../../tinyxml/tinyxml.h"
+#include <filesystem> 
+namespace fs = std::experimental::filesystem;
 
 SmokeSensor::SmokeSensor(const Building *b) : AbstractSensor(b)
 {
@@ -65,7 +67,10 @@ bool SmokeSensor::LoadJPSfireInfo(const std::string projectFilename)
     if(JPSfireCompElem) {
         if(JPSfireCompElem->FirstAttribute()){
             //std::string filepath = xmltoa(JPSfireCompElem->Attribute("smoke_factor_grids"), "");
-            std::string filepath = _building->GetProjectRootDir() + xmltoa(JPSfireCompElem->Attribute("smoke_factor_grids"), "");
+            //std::string filepath = _building->GetProjectRootDir() + xmltoa(JPSfireCompElem->Attribute("smoke_factor_grids"), "");
+			fs::path file_path(_building->GetProjectRootDir());
+			file_path /= xmltoa(JPSfireCompElem->Attribute("smoke_factor_grids"), "");
+			std::string filepath = file_path.string();
             double updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
             double finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
             Log->Write("INFO:\tJPSfire Module A_smoke_sensor: \n\tdata: %s \n\tupdate time: %.1f s | final time: %.1f s",

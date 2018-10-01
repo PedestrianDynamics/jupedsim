@@ -29,9 +29,8 @@
 #include "FDSMeshStorage.h"
 //#include <unistd.h>
 //#include <glob.h>
-#include <boost/filesystem.hpp>
-
-namespace fs=boost::filesystem;
+#include <filesystem> 
+namespace fs = std::experimental::filesystem;
 
 FDSMeshStorage::FDSMeshStorage()
 {
@@ -44,8 +43,9 @@ FDSMeshStorage::FDSMeshStorage(const std::string &filepath, const double &finalT
     _elevationlist(), _timelist(), _irritant(irritant)
 {
     ///Check if _filepath exists
-
-    if (fs::exists(_filepath ) )
+	fs::path p(_filepath);
+	std::cout << "\nFDSMeshStorage: <" << p << ">\n";
+    if (fs::exists(p) )
     {
         std::cout << "\nCreating QuantityList..." << std::endl;
         CreateQuantityList();
@@ -94,6 +94,7 @@ bool FDSMeshStorage::CreateQuantityList()
         exit(EXIT_FAILURE);
         return false;
     }
+	std::cout << "_quantitylist.size(): " << _quantitylist.size() << "\n";
     return true;
 }
 
@@ -118,6 +119,7 @@ bool FDSMeshStorage::CreateElevationList()
         exit(EXIT_FAILURE);
         return false;
     }
+	std::cout << "_elevationlist.size(): " << _elevationlist.size() << "\n";
     return true;
 }
 
@@ -131,7 +133,6 @@ void FDSMeshStorage::CreateDoorList()
     for( auto &elv:_elevationlist){
         std::string elvAsString = std::to_string(elv);
         for( fs::directory_iterator iter(_filepath + _quantitylist[0] ) ; iter != end ; ++iter ) {
-
            if ( !fs::is_directory( *iter ) )
                 continue;
 
@@ -149,10 +150,12 @@ void FDSMeshStorage::CreateDoorList()
                 unsigned long startChar = tempString.find_last_of("/\\") + 1;
                 tempString = i->path().string();
                 tempString = tempString.substr(startChar);
+				std::replace(tempString.begin(), tempString.end(), '\\', '/'); // fox for windows Z_1\Door_X_2_Y_6 -> Z_1/Door_X_2_Y_6
                 _doorlist.push_back(tempString);
            }
         }
     }
+	std::cout << "_doorlist.size(): " << _doorlist.size() << "\n";
 }
 void FDSMeshStorage::CreateTimeList()
 {
@@ -187,7 +190,7 @@ void FDSMeshStorage::CreateTimeList()
         }
         //std::cout << "LEAVING \n" ;
     }
-
+	std::cout << "_timelist.size(): " << _timelist.size() << "\n";
 }
 
 void FDSMeshStorage::CreateFDSMeshes()
@@ -235,6 +238,8 @@ void FDSMeshStorage::CreateFDSMeshes()
             }
        }
    }
+   std::cout << "_fdcontainer.size(): " << _fMContainer.size() << "\n";
+
 }
 
 const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &pedElev, const std::string &quantity) throw (int)
@@ -255,7 +260,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &p
 
     if (_fMContainer.count(str) == 0) {
         //std::cout << str << std::endl;
-        std::cout << "ERROR: requested grid not available: " << str << std::endl;
+        std::cout << "\nERROR: requested grid not available: " << str << std::endl;
         throw -1;
     }
     return _fMContainer.at(str);
@@ -290,9 +295,8 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
     "Door_X_"+ std::to_string(doorCentre._x) + "_Y_" + std::to_string(doorCentre._y) +
     "/t_"+std::to_string(simT)+".000000";
 
-
     if (_fMContainer.count(str) == 0) {
-        std::cout << "ERROR: requested sfgrid not available: " << str << std::endl;
+        std::cout << "\n > ERROR: requested sfgrid not available: " << str << std::endl;
         throw -1;
     }
 

@@ -1,0 +1,65 @@
+INFO: 	Loading and parsing the persons attributes
+INFO:	risk tolerance alpha = 12.000000, risk tolerance beta = 3.000000
+
+INFO: 	...Done
+INFO: 	Loading building file successful!!!
+
+INFO:	Loading  the traffic info file
+WARNING:	could not find any traffic information
+INFO: 	Init Geometry
+INFO: 	Init Geometry successful!!!
+
+INFO: 	Init Distribute
+INFO: 	Distributing 50 Agents in Room/Subrom [0/0]! Maximum allowed: 208
+	...Done
+INFO: 	Initializing the grid with cell size: 30.000000 
+INFO: 	Done with Initializing the grid 
+INFO:	Init the Cognitive Map Router Engine
+INFO:	CognitiveMapStorage initialized
+INFO:	JPSfire Module A_smoke_sensor: 
+	data: C:\Users\chraibi\JuPedSim\jpscore\A_smoke_sensor\JuPedSim\..\FDS\sf_grids\ 
+	update time: 10.0 s | final time: 100.0 s
+INFO:	SensorManager initialized
+INFO: 	Checking the geometry for artifacts: (Ignore Warnings, if ff_[...] router is used!)
+INFO: 	...Done!!!
+
+INFO:	 Init Operational Model starting ...
+INFO:	 Init Operational Model done
+INFO:	 nPeds 50 received
+INFO:	File 'events.txt' will be monitored for new events.
+INFO: 	Adding a new routing Engine with the key: 
+
+INFO: 	Looking for pre-defined events in other files
+INFO: 	No events found
+INFO: 	Start runSimulation() with 50 pedestrians
+WARNING:	 pedestrian [18] left room/subroom [0/1] in an unusual way. Please check
+       :	 distance to last door (21 | 21) is 22.343171. That should be smaller.
+       :	 correcting the door statistics
+WARNING       :	 correcting the door statistics
+
+INFO: 	End runSimulation()
+
+Rooms Egress Time:
+==================
+id	caption	egress time (s)
+0	hall	67.83
+
+Usage of Exits
+==========
+
+Exit ID [0] used by [32] pedestrians. Last passing time [56.54] s
+More Information in the file: C:\Users\chraibi\JuPedSim\jpscore\A_smoke_sensor\JuPedSim/traj.xml_flow_exit_id_0.dat
+
+Exit ID [1] used by [18] pedestrians. Last passing time [67.83] s
+More Information in the file: C:\Users\chraibi\JuPedSim\jpscore\A_smoke_sensor\JuPedSim/traj.xml_flow_exit_id_1.dat
+
+
+
+Exec Time [s]     : 2.00
+Evac Time [s]     : 67.88
+Realtime Factor   : 33.94 X 
+Number of Threads : 2
+Warnings          : 3
+Errors            : 0
+Deleted Agents    : 0
+

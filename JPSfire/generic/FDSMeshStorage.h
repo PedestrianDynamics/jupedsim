@@ -35,7 +35,6 @@
 #include "FDSMesh.h"
 #include "../../IO/OutputHandler.h"
 #include "../../geometry/Building.h"
-
 class Point;
 
 // Container to store all FDSMeshs. Sorted by simulation's global time
