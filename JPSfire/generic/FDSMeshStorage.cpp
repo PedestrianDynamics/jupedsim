@@ -46,6 +46,8 @@ FDSMeshStorage::FDSMeshStorage(const std::string &filepath, const double &finalT
 {
     ///Check if _filepath exists
         fs::path p(_filepath);
+                p = fs::canonical(p).make_preferred(); //remove ..
+                _filepath = p.string(); // TODO: refactor this class. Use path instead of string
         std::cout << "\nFDSMeshStorage: <" << p << ">\n";
     if (fs::exists(p) )
     {
@@ -206,7 +208,8 @@ void FDSMeshStorage::CreateFDSMeshes()
                     for (auto &k:_timelist)         //list of times
                     {
                         fs::path npz_file(_filepath);
-                                                npz_file = npz_file / h / j / ("t_" + std::to_string(k) + ".npz");
+                        npz_file = npz_file / h / j / ("t_" + std::to_string(k) + ".npz");
+                        npz_file = fs::canonical(npz_file).make_preferred(); // correct sep and remove ..
                         FDSMesh mesh(npz_file.string());
                         _fMContainer.insert(std::make_pair(npz_file.string(), mesh));
                     }
@@ -221,9 +224,10 @@ void FDSMeshStorage::CreateFDSMeshes()
                 //std::cout << "i " << i << std::endl;
                 for (auto &k:_timelist)         //list of times
                 {
-                                        fs::path npz_file(_filepath);
-                                        npz_file = npz_file / h / ("Z_" + std::to_string(i)) / ("t_" + std::to_string(k) + ".npz");
-                    FDSMesh mesh(npz_file.string());
+                     fs::path npz_file(_filepath);
+                     npz_file = npz_file / h / ("Z_" + std::to_string(i)) / ("t_" + std::to_string(k) + ".npz");
+                     npz_file = fs::canonical(npz_file).make_preferred(); // correct sep and remove ..
+                     FDSMesh mesh(npz_file.string());
                     _fMContainer.insert(std::make_pair(npz_file.string(), mesh));
                 }
             }
@@ -248,6 +252,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &p
         fs::path Ztime(quantity);
         Ztime = Ztime / ("Z_" + std::to_string(_NearestHeight)) / ("t_" + std::to_string(simT) + ".000000.npz");
         Ztime = _filepath / Ztime;
+        Ztime = fs::canonical(Ztime).make_preferred();
     if (_fMContainer.count(Ztime.string()) == 0) {
         //std::cout << str << std::endl;
         std::cout << "\n time ERROR: requested grid not available: " << Ztime.string() << std::endl;
@@ -286,6 +291,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
                 ("t_" + std::to_string(simT) + ".000000.npz");
 
         door_xy = _filepath / door_xy;
+        door_xy = fs::canonical(door_xy).make_preferred();
     if (_fMContainer.count(door_xy.string()) == 0) {
         std::cout << "\n > ERROR: requested sfgrid not available: " << door_xy.string() << std::endl;
         throw -1;
