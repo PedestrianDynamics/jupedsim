@@ -36,8 +36,10 @@
 #include "../generic/FDSMeshStorage.h"
 //#include <set>
 #include "../../tinyxml/tinyxml.h"
-#include <filesystem> 
-namespace fs = std::experimental::filesystem;
+//#include <filesystem>
+#include <boost/filesystem.hpp>
+//namespace fs = std::experimental::filesystem;
+namespace fs = boost::filesystem;
 
 SmokeSensor::SmokeSensor(const Building *b) : AbstractSensor(b)
 {
@@ -68,9 +70,9 @@ bool SmokeSensor::LoadJPSfireInfo(const std::string projectFilename)
         if(JPSfireCompElem->FirstAttribute()){
             //std::string filepath = xmltoa(JPSfireCompElem->Attribute("smoke_factor_grids"), "");
             //std::string filepath = _building->GetProjectRootDir() + xmltoa(JPSfireCompElem->Attribute("smoke_factor_grids"), "");
-			fs::path file_path(_building->GetProjectRootDir());
-			file_path /= xmltoa(JPSfireCompElem->Attribute("smoke_factor_grids"), "");
-			std::string filepath = file_path.string();
+                        fs::path file_path(_building->GetProjectRootDir());
+                        file_path /= xmltoa(JPSfireCompElem->Attribute("smoke_factor_grids"), "");
+                        std::string filepath = file_path.string();
             double updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
             double finalTime = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
             Log->Write("INFO:\tJPSfire Module A_smoke_sensor: \n\tdata: %s \n\tupdate time: %.1f s | final time: %.1f s",
@@ -110,7 +112,7 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap& cognitive
                                                         pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x,
                                                                                                  pedestrian->GetPos()._y);
             // if(SmokeFactor > 2){
-                 
+
             //      std::cout << "\n =================================== \n";
             //      std::cout << "Ped: " << pedestrian->GetID() << ", at (" << pedestrian->GetPos()._x << ", " << pedestrian->GetPos()._y << ")" << std::endl;
             //      std::cout << "\tElevation: " << pedestrian->GetElevation() << std::endl;

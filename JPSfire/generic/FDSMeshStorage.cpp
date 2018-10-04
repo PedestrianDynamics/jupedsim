@@ -29,8 +29,10 @@
 #include "FDSMeshStorage.h"
 //#include <unistd.h>
 //#include <glob.h>
-#include <filesystem> 
-namespace fs = std::experimental::filesystem;
+// #include <filesystem>
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+//namespace fs = std::experimental::filesystem;
 
 FDSMeshStorage::FDSMeshStorage()
 {
@@ -43,8 +45,8 @@ FDSMeshStorage::FDSMeshStorage(const std::string &filepath, const double &finalT
     _elevationlist(), _timelist(), _irritant(irritant)
 {
     ///Check if _filepath exists
-	fs::path p(_filepath);
-	std::cout << "\nFDSMeshStorage: <" << p << ">\n";
+        fs::path p(_filepath);
+        std::cout << "\nFDSMeshStorage: <" << p << ">\n";
     if (fs::exists(p) )
     {
         std::cout << "\nCreating QuantityList..." << std::endl;
@@ -83,7 +85,7 @@ bool FDSMeshStorage::CreateQuantityList()
     for( fs::directory_iterator iter(_filepath) ; iter != end ; ++iter ) {
       if ( fs::is_directory( *iter ) )
       {
-		  std::string quant_dir = iter->path().string();
+                  std::string quant_dir = iter->path().string();
           quant_dir =  quant_dir.substr( quant_dir.find_last_of("/\\") + 1 );
           //std::cout << quant_dir << std::endl;
            _quantitylist.push_back(quant_dir);
@@ -94,7 +96,7 @@ bool FDSMeshStorage::CreateQuantityList()
         exit(EXIT_FAILURE);
         return false;
     }
-	std::cout << "_quantitylist.size(): " << _quantitylist.size() << "\n";
+        std::cout << "_quantitylist.size(): " << _quantitylist.size() << "\n";
     return true;
 }
 
@@ -104,8 +106,8 @@ bool FDSMeshStorage::CreateElevationList()
     /// Create elevation list out of the available Z_* dirs for each quantity
     _elevationlist.clear();
     fs::directory_iterator end ;
-	fs::path q(_filepath);
-	q /= fs::path(_quantitylist[0]);
+        fs::path q(_filepath);
+        q /= fs::path(_quantitylist[0]);
     for( fs::directory_iterator iter(q) ; iter != end ; ++iter ) {
       if ( fs::is_directory( *iter ) )
       {
@@ -120,7 +122,7 @@ bool FDSMeshStorage::CreateElevationList()
         exit(EXIT_FAILURE);
         return false;
     }
-	std::cout << "_elevationlist.size(): " << _elevationlist.size() << "\n";
+        std::cout << "_elevationlist.size(): " << _elevationlist.size() << "\n";
     return true;
 }
 
@@ -130,8 +132,8 @@ void FDSMeshStorage::CreateDoorList()
     /// Create door list only neceassry if smoke sensor is active
     _doorlist.clear();
     fs::directory_iterator end ;
-	fs::path q(_filepath);
-	q /= fs::path(_quantitylist[0]);
+        fs::path q(_filepath);
+        q /= fs::path(_quantitylist[0]);
     for( auto &elv:_elevationlist){
         std::string elvAsString = std::to_string(elv);
         for( fs::directory_iterator iter(q) ; iter != end ; ++iter ) {
@@ -152,18 +154,18 @@ void FDSMeshStorage::CreateDoorList()
                 unsigned long startChar = tempString.find_last_of("/\\") + 1;
                 tempString = i->path().string();
                 tempString = tempString.substr(startChar);
-				std::replace(tempString.begin(), tempString.end(), '\\', '/'); // fox for windows Z_1\Door_X_2_Y_6 -> Z_1/Door_X_2_Y_6
+                                std::replace(tempString.begin(), tempString.end(), '\\', '/'); // fox for windows Z_1\Door_X_2_Y_6 -> Z_1/Door_X_2_Y_6
                 _doorlist.push_back(tempString);
            }
         }
     }
-	std::cout << "_doorlist.size(): " << _doorlist.size() << "\n";
+        std::cout << "_doorlist.size(): " << _doorlist.size() << "\n";
 }
 void FDSMeshStorage::CreateTimeList()
 {
     /// Create time list for mesh refreshment
     _timelist.clear();
-    double i=0;    
+    double i=0;
     while (i<=_finalTime)
     {
         _timelist.push_back(i);
@@ -172,12 +174,12 @@ void FDSMeshStorage::CreateTimeList()
 
     ///Check if specified final and update times are compliant with available data
     for(auto elem : _timelist) {
-		fs::path npz_file(_filepath);
+                fs::path npz_file(_filepath);
         if (_doorlist.size() > 0) {     // Smoke sensor active
-			npz_file = npz_file / _quantitylist[0] / _doorlist[0] / ("t_" + std::to_string(elem) + ".npz");
+                        npz_file = npz_file / _quantitylist[0] / _doorlist[0] / ("t_" + std::to_string(elem) + ".npz");
         }
         else if (_doorlist.size() == 0) {   // Smoke sensor not active
-			npz_file = npz_file / _quantitylist[0] / ("Z_" + std::to_string(_elevationlist[0])) / ("t_" + std::to_string(elem) + ".npz");
+                        npz_file = npz_file / _quantitylist[0] / ("Z_" + std::to_string(_elevationlist[0])) / ("t_" + std::to_string(elem) + ".npz");
         }
 
         if (fs::exists(npz_file) == false)
@@ -188,23 +190,23 @@ void FDSMeshStorage::CreateTimeList()
         }
         //std::cout << "LEAVING \n" ;
     }
-	std::cout << "_timelist.size(): " << _timelist.size() << "\n";
+        std::cout << "_timelist.size(): " << _timelist.size() << "\n";
 }
 
 void FDSMeshStorage::CreateFDSMeshes()
 {
-	std::cout << "Enter CreateFDSMeshes\n";
+        std::cout << "Enter CreateFDSMeshes\n";
     _fMContainer.clear();
     if (_doorlist.size() > 0) {     // Smoke sensor active
         for (auto &h:_quantitylist)     //list of quantities
-        {         
+        {
                 for (auto &j:_doorlist)         //list of doors
-                {    
+                {
                     //std::cout << "door " << j << std::endl;
                     for (auto &k:_timelist)         //list of times
                     {
-                        fs::path npz_file(_filepath);  
-						npz_file = npz_file / h / j / ("t_" + std::to_string(k) + ".npz");
+                        fs::path npz_file(_filepath);
+                                                npz_file = npz_file / h / j / ("t_" + std::to_string(k) + ".npz");
                         FDSMesh mesh(npz_file.string());
                         _fMContainer.insert(std::make_pair(npz_file.string(), mesh));
                     }
@@ -219,8 +221,8 @@ void FDSMeshStorage::CreateFDSMeshes()
                 //std::cout << "i " << i << std::endl;
                 for (auto &k:_timelist)         //list of times
                 {
-					fs::path npz_file(_filepath);
-					npz_file = npz_file / h / ("Z_" + std::to_string(i)) / ("t_" + std::to_string(k) + ".npz");
+                                        fs::path npz_file(_filepath);
+                                        npz_file = npz_file / h / ("Z_" + std::to_string(i)) / ("t_" + std::to_string(k) + ".npz");
                     FDSMesh mesh(npz_file.string());
                     _fMContainer.insert(std::make_pair(npz_file.string(), mesh));
                 }
@@ -243,9 +245,9 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &p
         simT=_finalTime;
 
     //std::cout << "\t" << quantity << std::endl;
-	fs::path Ztime(quantity);
-	Ztime = Ztime / ("Z_" + std::to_string(_NearestHeight)) / ("t_" + std::to_string(simT) + ".000000.npz");
-	Ztime = _filepath / Ztime;
+        fs::path Ztime(quantity);
+        Ztime = Ztime / ("Z_" + std::to_string(_NearestHeight)) / ("t_" + std::to_string(simT) + ".000000.npz");
+        Ztime = _filepath / Ztime;
     if (_fMContainer.count(Ztime.string()) == 0) {
         //std::cout << str << std::endl;
         std::cout << "\n time ERROR: requested grid not available: " << Ztime.string() << std::endl;
@@ -278,12 +280,12 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
     if (simT>=_finalTime)
         simT=_finalTime;
     // @todo: what if the files have the format Z_%.2f ?
-	fs::path door_xy(quantity);
-	door_xy = door_xy / ("Z_" + std::to_string(_NearestHeight)) / 
-		("Door_X_" + std::to_string(doorCentre._x) + "_Y_" + std::to_string(doorCentre._y)) /
-		("t_" + std::to_string(simT) + ".000000.npz");
-	
-	door_xy = _filepath / door_xy;
+        fs::path door_xy(quantity);
+        door_xy = door_xy / ("Z_" + std::to_string(_NearestHeight)) /
+                ("Door_X_" + std::to_string(doorCentre._x) + "_Y_" + std::to_string(doorCentre._y)) /
+                ("t_" + std::to_string(simT) + ".000000.npz");
+
+        door_xy = _filepath / door_xy;
     if (_fMContainer.count(door_xy.string()) == 0) {
         std::cout << "\n > ERROR: requested sfgrid not available: " << door_xy.string() << std::endl;
         throw -1;

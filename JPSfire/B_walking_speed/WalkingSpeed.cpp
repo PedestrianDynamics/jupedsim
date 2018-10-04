@@ -36,9 +36,10 @@
 //#include <algorithm>
 //#include <math.h>
 //#include <string>
-#include <filesystem> 
-namespace fs = std::experimental::filesystem;
-
+//#include <filesystem>
+#include <boost/filesystem.hpp>
+//namespace fs = std::experimental::filesystem;
+namespace fs = boost::filesystem;
 WalkingSpeed::WalkingSpeed(const std::string & projectFileName)
 {
      _FMStorage = nullptr;
@@ -71,10 +72,10 @@ bool WalkingSpeed::LoadJPSfireInfo(const std::string & projectFilename )
            std::string study = xmltoa(JPSfireCompElem->Attribute("study"), "");
            std::string irritant = xmltoa(JPSfireCompElem->Attribute("irritant"), "");
            std::string extinction_grids = xmltoa(JPSfireCompElem->Attribute("extinction_grids"), "");
-		   fs::path extinction_grids_path(extinction_grids);
-		   fs::path file_path(projectRootDir);
-		   file_path /= extinction_grids_path;
-		   std::string filepath = file_path.string();  // projectRootDir + "/" + extinction_grids; //TODO: check compatibility
+                   fs::path extinction_grids_path(extinction_grids);
+                   fs::path file_path(projectRootDir);
+                   file_path /= extinction_grids_path;
+                   std::string filepath = file_path.string();  // projectRootDir + "/" + extinction_grids; //TODO: check compatibility
            //if (projectRootDir.empty()  ) // directory is "."
             //    filepath =  extinction_grids;
 
