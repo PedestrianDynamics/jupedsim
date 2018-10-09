@@ -261,7 +261,7 @@ bool Method_D::OpenFileIndividualFD()
           }
           else
           {
-               fprintf(_fIndividualFD,"#framerate (fps):\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-2)) \t   Individual velocity(m/s)\n",_fps);
+               fprintf(_fIndividualFD,"#framerate (fps):\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-2)) \t   Individual velocity(m/s)  \t Voronoi Polygon  \t Intersection Polygon\n",_fps);
           }
           return true;
      }
@@ -522,23 +522,20 @@ void Method_D::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<d
           if(!v.empty()) {
 
               string polygon_str = polygon_to_string(polygon_iterator);
-              string measureArea_str = polygon_to_string(measureArea);
+              // string measureArea_str =
+              // polygon_to_string(measureArea); // maybe used for debugging
               string v_str = polygon_to_string(v[0]);
 
               uniquedensity=1.0/(area(polygon_iterator)*CMtoM*CMtoM);
               uniquevelocity=Velocity[temp];
               uniqueId=Id[temp];
-
-              /*
-              std::cout<<std::setprecision(16)<<dsv(polygon_iterator)<<"\n";
-              std::cout<<std::setprecision(16)<<dsv(measureArea)<<"\n";
-              std::cout << dsv(v[0]) << std::endl;
-              */
-
-
-              fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\t%s\t%s\t%s\n",frid.c_str(), uniqueId, uniquedensity,uniquevelocity, polygon_str.c_str(), measureArea_str.c_str(), v_str.c_str());
-              /* fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\n",frid.c_str(), uniqueId, uniquedensity,uniquevelocity); */
-              /* getc(stdin); */
+              fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\t%s\t%s\n",
+                      frid.c_str(),
+                      uniqueId,
+                      uniquedensity,
+                      uniquevelocity,
+                      polygon_str.c_str(),
+                      v_str.c_str());
           }
           temp++;
      }
