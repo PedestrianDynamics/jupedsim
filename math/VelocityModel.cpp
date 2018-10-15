@@ -105,7 +105,11 @@ bool VelocityModel::Init (Building* building)
          Pedestrian* ped = allPeds[p];
          double cosPhi, sinPhi;
          //a destination could not be found for that pedestrian
-         if (ped->FindRoute() == -1) {
+         int ped_is_waiting = 1;// quick and dirty fix
+         // we should maybe differentiate between pedestrians who did not find
+         // routs because of a bug in the router and these who simplyt just want
+         // to wait in waiting areas
+         if (!ped_is_waiting && ped->FindRoute() == -1) {
               Log->Write(
                    "ERROR:\tVelocityModel::Init() cannot initialise route. ped %d is deleted in Room %d %d.\n",ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID());
               building->DeletePedestrian(ped);
@@ -118,7 +122,9 @@ bool VelocityModel::Init (Building* building)
 
 
 
-         Point target = ped->GetExitLine()->ShortestPoint(ped->GetPos());
+        Point target = Point(0,0);
+        if(ped->GetExitLine())
+            target = ped->GetExitLine()->ShortestPoint(ped->GetPos());
          Point d = target - ped->GetPos();
          double dist = d.Norm();
          if (dist != 0.0) {
