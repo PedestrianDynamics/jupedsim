@@ -170,7 +170,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
            int end;
            end = (threadID < nThreads - 1) ? (threadID + 1) * partSize - 1: (int) (nSize - 1);
            for (int p = start; p <= end; ++p) {
-                 // printf("\n------------------\nid=%d\t p=%d\n", threadID, p);
+                // printf("\n------------------\nid=%d (%d)\t p=%d\n", threadID, nThreads, p);
                 Pedestrian* ped = allPeds[p];
                 Room* room = building->GetRoom(ped->GetRoomID());
                 SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
@@ -245,6 +245,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 Point speed = direction.Normalized() *OptimalSpeed(ped, spacing);
                 result_acc.push_back(speed);
 
+
                 spacings.clear(); //clear for ped p
 
                 // stuck peds get removed. Warning is thrown. low speed due to jam is omitted.
@@ -288,6 +289,11 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 }
                 ped->SetV(v_neu);
            }
+           // if(threadID == -1 )
+           //      std::cout << " result_acc size " << result_acc.size() << "\n";
+           //getc(stdin);
+
+
       }//end parallel
 
       // remove the pedestrians that have left the building
@@ -302,7 +308,9 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
       const Point target = _direction->GetTarget(room, ped); // target is where the ped wants to be after the next timestep
       Point desired_direction;
       const Point pos = ped->GetPos();
-      double dist = ped->GetExitLine()->DistTo(pos);
+      double dist = 0.0;
+      if(ped->GetExitLine())
+           dist = ped->GetExitLine()->DistTo(pos);
       // check if the molified version works
       Point lastE0 = ped->GetLastE0();
       ped->SetLastE0(target-pos);
@@ -314,7 +322,7 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
           if (desired_direction.NormSquare() < 0.25) {
               desired_direction = lastE0;
               ped->SetLastE0(lastE0);
-              Log->Write("%f    %f", desired_direction._x, desired_direction._y);
+              Log->Write("desired_direction: %f    %f", desired_direction._x, desired_direction._y);
               //_direction->GetTarget(room, ped);
           }
 //          if (dist > 1*J_EPS_GOAL) {
@@ -331,7 +339,8 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
       }
       //Log->Write("%f    %f", desired_direction._x, desired_direction._y);
       if (desired_direction.NormSquare() < 0.1) {
-          Log->Write("ERROR:\t desired_direction in VelocityModel::e0 is too small.");
+           Log->Write("ERROR:\t desired_direction in VelocityModel::e0 is too small (%f, %f)", desired_direction._x, desired_direction._y);
+
       }
       return desired_direction;
 }
@@ -505,7 +514,10 @@ Point VelocityModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
      //-------------------------
 
      const Point& pos = ped->GetPos();
-     double distGoal = ped->GetExitLine()->DistToSquare(pos);
+     double distGoal = 0.0;
+     if(ped->GetExitLine())
+          distGoal = ped->GetExitLine()->DistToSquare(pos);
+
      if(distGoal < J_EPS_GOAL*J_EPS_GOAL)
           return F_wrep;
 //-------------------------
