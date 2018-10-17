@@ -9,7 +9,7 @@ All notable changes to this project will be documented in this file.
 - Make Windows executables with CPack !28
 - New wiki page for AI-Router [WIKI](https://gitlab.version.fz-juelich.de/jupedsim/jpscore/wikis/AI-Router)
 - New model (number 6) GCVM !30
-- Distribute source agents on a fixed position. Use attributes `startX` and `startX`  6766950e
+- Distribute source agents on a fixed position. Use attributes `startX` and `startY`  6766950e
 - Feature dynamic transitions, moving danger line !32
 
 ### Changed
