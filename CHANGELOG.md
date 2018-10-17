@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 ## v0.8.4 [TBD]
 
 ### Added
-- JPSfire-module: Walking speed and toxicity analysis functional (thanks to @hein1)  !30
+- JPSfire-module: Walking speed and toxicity analysis functional (thanks to @hein1)  !31
 - Add study Fridolf2018 !29
 - Make Windows executables with CPack !28
 - New wiki page for AI-Router [WIKI](https://gitlab.version.fz-juelich.de/jupedsim/jpscore/wikis/AI-Router)
