@@ -17,7 +17,8 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - Windows path compatibility for JPSfire-module d14229f7
-- Several SegFaults related to agents without navigation lines (especially agents created by sources)   
+- Several SegFaults related to agents without navigation lines (especially agents created by sources)
+- C++11 support for XCode fbb3038a
 
 ## v0.8.3 [2018-05-18]
 ### Added
