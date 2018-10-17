@@ -4,10 +4,20 @@ All notable changes to this project will be documented in this file.
 ## v0.8.4 [TBD]
 
 ### Added
+- JPSfire-module: Walking speed and toxicity analysis functional (thanks to @hein1)  !30
+- Add study Fridolf2018 !29
+- Make Windows executables with CPack !28
+- New wiki page for AI-Router [WIKI](https://gitlab.version.fz-juelich.de/jupedsim/jpscore/wikis/AI-Router)
+- New model (number 6) GCVM !30
+- Distribute source agents on a fixed position. Use attributes `startX` and `startX`  6766950e
+- Feature dynamic transitions, moving danger line !32
 
 ### Changed
+- Agents without any exits should not be deleted 67ce14cf
 
 ### Fixed
+- Windows path compatibility for JPSfire-module d14229f7
+- Several SegFaults related to agents without navigation lines (especially agents created by sources)   
 
 ## v0.8.3 [2018-05-18]
 ### Added
