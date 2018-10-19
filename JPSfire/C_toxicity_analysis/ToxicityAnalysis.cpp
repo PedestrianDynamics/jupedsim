@@ -161,9 +161,8 @@ double ToxicityAnalysis::CalculateFEDHeat(Pedestrian* p, double T, double FED_He
 void ToxicityAnalysis::HazardAnalysis(Pedestrian* p)
 {
     double FEC_Smoke, FED_In = 0.0, FED_Heat = 0.0, FIC_Im, FIC_In;
-
     // Smoke extinction in 1/m
-    double E = GetFDSQuantity(p, "SOOT_EXTINCTION_COEFFICIENT");
+    double E = GetFDSQuantity(p, "EXTINCTION_COEFFICIENT"); //TODO: check this string.. SOOT??
 
     // gas species in ppm
     double CO2 = 0., CO = 0., HCN = 0., HCL = 0., O2 = 0.;
@@ -199,8 +198,8 @@ void ToxicityAnalysis::HazardAnalysis(Pedestrian* p)
 
 void ToxicityAnalysis::InitializeWriteOut()
 {
-    string fileNameWithoutExtension = _projectFileName.substr(0, _projectFileName.find_last_of("."));
-    std::string ToxAnalysisXML = "fire_" + fileNameWithoutExtension + ".xml";
+    string fileNameWithoutExtension = _projectFileName.substr(0, _projectFileName.find_last_of("_"));
+    std::string ToxAnalysisXML = "toxicity_output_" + fileNameWithoutExtension + ".xml";
     _outputhandler = std::make_shared<ToxicityOutputHandler>(ToxAnalysisXML.c_str());
     _outputhandler->WriteToFileHeader();
 }
