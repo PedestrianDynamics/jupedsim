@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## v0.8.4 [TBD]
 
 ### Added
+- use cmake option `-D JPSFIRE=true` (default false) !33
 - JPSfire-module: Walking speed and toxicity analysis functional (thanks to @hein1)  !31
 - Add study Fridolf2018 !29
 - Make Windows executables with CPack !28
