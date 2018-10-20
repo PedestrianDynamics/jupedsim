@@ -288,11 +288,13 @@ bool IniFileParser::Parse(std::string iniFile)
      // JPSfire
      // -------------------------------------
      // read walkingspeed
+     #ifdef JPSFIRE
      std::shared_ptr<WalkingSpeed> W( new WalkingSpeed(iniFile) );
      _config->SetWalkingSpeed(W);
      // read  ToxicityAnalysis
      std::shared_ptr<ToxicityAnalysis> T( new ToxicityAnalysis(iniFile, _config->GetFps()));
      _config->SetToxicityAnalysis(T);
+     #endif
      // -------------------------------------
 
      //pick up which model to use

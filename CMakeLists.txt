@@ -7,6 +7,7 @@
 # -DUSE_DUAL_ABI=ON (default OFF)  https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
 # -D Boost_NO_SYSTEM_PATHS=true (default false) -D BOOST_ROOT=PATH_where_to_find_boost
 # -D AIROUTER=true (default false)
+# -D JPSFIRE=true (default false)
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
@@ -21,6 +22,12 @@ if(NOT AIROUTER)
 set(AIROUTER false)
 else()
 set(AIROUTER true)
+endif()
+
+if(NOT JPSFIRE)
+set(JPSFIRE false)
+else()
+SET(JPSFIRE true)
 endif()
 
 set(CMAKE_COLOR_MAKEFILE ON)
@@ -229,8 +236,11 @@ endif (Boost_NO_SYSTEM_PATHS)
 # in case boost is a non-default location
 # SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "C:/win32libs/boost")
 # SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "C:/win32libs/boost/lib")
-#find_package(Boost REQUIRED)
-
+if(MSVC)
+   find_package(Boost QUITE)
+else()
+   find_package(Boost REQUIRED)
+endif()
 
 # find the correct OpenMP flag
 FIND_PACKAGE(OpenMP)
@@ -401,6 +411,10 @@ poly2tri/sweep/cdt.cpp
 events/EventManager.cpp
 events/Event.cpp
 
+forms/jpscore.rc
+math/KrauszModel.cpp)
+
+set(JPSFIRE_SRC
 JPSfire/generic/FDSMesh.cpp
 JPSfire/generic/Knot.cpp
 JPSfire/generic/FDSMeshStorage.cpp
@@ -408,9 +422,7 @@ JPSfire/A_smoke_sensor/SmokeSensor.cpp
 JPSfire/B_walking_speed/WalkingSpeed.cpp
 JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
 JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
-forms/jpscore.rc
-math/KrauszModel.cpp)
-
+)
 set(header_files
 
 #floorfield
@@ -529,7 +541,9 @@ poly2tri/sweep/advancing_front.h
 poly2tri/sweep/sweep.h
 events/EventManager.h
 events/Event.h
+)
 
+set(JPSFIRE_HDR
 JPSfire/generic/FDSMesh.h
 JPSfire/generic/Knot.h
 JPSfire/generic/FDSMeshStorage.h
@@ -537,8 +551,8 @@ JPSfire/A_smoke_sensor/SmokeSensor.h
 JPSfire/B_walking_speed/WalkingSpeed.h
 JPSfire/C_toxicity_analysis/ToxicityAnalysis.h
 JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
-)
 
+)
 SET(AIROUTER_SRC
 #AI router
 routing/ai_router/AIRouter.cpp
@@ -582,14 +596,22 @@ message(STATUS "USE AI ROUTER")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DAIROUTER")
 endif()
 
+if(JPSFIRE)
+SET(source_files ${source_files} ${JPSFIRE_SRC})
+SET(header_files ${header_files} ${JPSFIRE_HDR})
+message(STATUS "USE JPSFIRE")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJPSFIRE")
+endif()
+
 add_library(core STATIC ${source_files})
 
-find_package(ZLIB REQUIRED)
-include_directories(${ZLIB_INCLUDE_DIRS})
-
-add_library(cnpy STATIC "cnpy/cnpy.cpp")
-target_link_libraries(cnpy ${ZLIB_LIBRARIES})
-
+message(STATUS "JPSFIRE: ${JPSFIRE}")
+if(JPSFIRE)
+    find_package(ZLIB REQUIRED)
+    include_directories(${ZLIB_INCLUDE_DIRS})
+    add_library(cnpy STATIC "cnpy/cnpy.cpp")
+    target_link_libraries(cnpy ${ZLIB_LIBRARIES})
+endif()
 
 #add_library ( core SHARED ${source_files} )
 
@@ -612,7 +634,6 @@ add_definitions( -DBOOST_ALL_NO_LIB )
   # autolinking, so I don't know why we need this, but we do!)
   add_definitions( -DBOOST_ALL_DYN_LINK )
 # add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
-endif()
 message(STATUS "BOOST FOUND: " ${Boost_LIB_VERSION})
 message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
 message(STATUS "Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIR})
@@ -622,7 +643,13 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 # suppress warnings in boost libraries with attribute SYSTEM
 include_directories(SYSTEM ${Boost_INCLUDE_DIR})
-target_link_libraries(core ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} cnpy)
+endif()
+
+if(JPSFIRE)
+    target_link_libraries(core ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} cnpy)
+else()
+    target_link_libraries(core ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+endif()
 endif ()
 
 #${Boost_LIBRARIES}
