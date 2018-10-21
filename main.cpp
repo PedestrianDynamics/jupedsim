@@ -89,7 +89,7 @@ int main(int argc, char** argv)
             std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());
             while(!sim.GetAgentSrcManager().IsRunning())
             {
-                 // std::cout << "waiting...\n";
+                 //std::cout << "waiting...\n";
             }
            //main thread for the simulation
             evacTime = sim.RunStandardSimulation(simMaxTime);

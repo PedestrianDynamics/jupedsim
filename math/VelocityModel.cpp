@@ -70,8 +70,7 @@ VelocityModel::~VelocityModel()
 
 bool VelocityModel::Init (Building* building)
 {
-
-    if(auto dirff = dynamic_cast<DirectionFloorfield*>(_direction.get())){
+     if(auto dirff = dynamic_cast<DirectionFloorfield*>(_direction.get())){
         Log->Write("INFO:\t Init DirectionFloorfield starting ...");
         double _deltaH = building->GetConfig()->get_deltaH();
         double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
@@ -100,6 +99,7 @@ bool VelocityModel::Init (Building* building)
 
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
      size_t peds_size = allPeds.size();
+     std::cout << "Building has " << peds_size << " peds\n";
     for(unsigned int p=0;p < peds_size;p++)
     {
          Pedestrian* ped = allPeds[p];
@@ -109,7 +109,9 @@ bool VelocityModel::Init (Building* building)
          // we should maybe differentiate between pedestrians who did not find
          // routs because of a bug in the router and these who simplyt just want
          // to wait in waiting areas
-         if (!ped_is_waiting && ped->FindRoute() == -1) {
+         int res = ped->FindRoute();
+         if (!ped_is_waiting && res == -1) {
+              std::cout << ped->GetID() << " has no route\n";
               Log->Write(
                    "ERROR:\tVelocityModel::Init() cannot initialise route. ped %d is deleted in Room %d %d.\n",ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID());
               building->DeletePedestrian(ped);
@@ -119,12 +121,18 @@ bool VelocityModel::Init (Building* building)
               continue;
          }
 
-
+         // TODO
+         // HERE every ped should have a navline already
+         //
 
 
         Point target = Point(0,0);
         if(ped->GetExitLine())
             target = ped->GetExitLine()->ShortestPoint(ped->GetPos());
+        else{
+             std::cout << "Ped " << ped->GetID() << " has no exit line in INIT\n";
+             //exit(EXIT_FAILURE);
+        }
          Point d = target - ped->GetPos();
          double dist = d.Norm();
          if (dist != 0.0) {
@@ -311,7 +319,13 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
 Point VelocityModel::e0(Pedestrian* ped, Room* room) const
 {
-      const Point target = _direction->GetTarget(room, ped); // target is where the ped wants to be after the next timestep
+      Point target;
+      if(_direction && ped->GetExitLine())
+           target = _direction->GetTarget(room, ped); // target is where the ped wants to be after the next timestep
+      else {
+           std::cout << ped->GetID() << " VelocityModel::e0 Ped has no navline.\n";
+           exit(EXIT_FAILURE);
+      }
       Point desired_direction;
       const Point pos = ped->GetPos();
       double dist = 0.0;
