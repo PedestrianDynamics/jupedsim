@@ -1142,6 +1142,11 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
           }
           else if ((strategy == "smoke") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+#ifndef JPSFIRE
+               std::cerr << "\nCan not use smoke router without jpsfire.\n";
+
+               exit(EXIT_FAILURE);
+#endif
                Router *r = new SmokeRouter(id, ROUTING_SMOKE);
                _config->GetRoutingEngine()->AddRouter(r);
 

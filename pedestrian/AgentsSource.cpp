@@ -190,7 +190,7 @@ void AgentsSource::GenerateAgents(std::vector<Pedestrian*>& peds, int count, Bui
      pid = (this->GetAgentId() >=0 )?this->GetAgentId() : Pedestrian::GetAgentsCreated() + building->GetAllPedestrians().size();
      for(int i=0;i<count;i++)
      {
-          peds.push_back(_startDistribution->GenerateAgent(building, &pid,emptyPositions));
+          peds.push_back(GetStartDistribution()->GenerateAgent(building, &pid,emptyPositions));
      }
 }
 
