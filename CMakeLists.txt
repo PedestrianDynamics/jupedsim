@@ -138,7 +138,7 @@ message(STATUS "")
 # message( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
 # message( STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE} )
 
-find_package(Git REQUIRED) # no need for this msg. It comes from cmake.findgit()
+find_package(Git QUIET) # no need for this msg. It comes from cmake.findgit()
 find_program(GIT_SCM git DOC "Git version control")
 mark_as_advanced(GIT_SCM)
 find_file(GITDIR NAMES .git PATHS ${CMAKE_SOURCE_DIR} NO_DEFAULT_PATH)
@@ -180,6 +180,10 @@ add_definitions("-DGIT_COMMIT_DATE=\"${GIT_DATE}\"")
 add_definitions("-DGIT_COMMIT_SUBJECT=\"${GIT_COMMIT_SUBJECT}\"")
 add_definitions("-DGIT_BRANCH=\"${GIT_BRANCH}\"")
 else()
+add_definitions("-DGIT_COMMIT_HASH=\"NONE"\")
+add_definitions("-DGIT_COMMIT_DATE=\"NONE\"")
+add_definitions("-DGIT_COMMIT_SUBJECT=\"NONE\"")
+add_definitions("-DGIT_BRANCH=\"NONE\"")
 message(STATUS "Not in a git repo")
 endif()
 
@@ -236,11 +240,7 @@ endif (Boost_NO_SYSTEM_PATHS)
 # in case boost is a non-default location
 # SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "C:/win32libs/boost")
 # SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "C:/win32libs/boost/lib")
-if(MSVC)
-   find_package(Boost QUITE)
-else()
-   find_package(Boost REQUIRED)
-endif()
+
 
 # find the correct OpenMP flag
 FIND_PACKAGE(OpenMP)
@@ -262,8 +262,12 @@ endif (OPENMP_FOUND)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 #boost
-find_package(Boost COMPONENTS timer chrono system filesystem unit_test_framework REQUIRED)
+if(MSVC)
+   find_package(Boost COMPONENTS timer chrono system filesystem unit_test_framework QUIET)
+else()
+   find_package(Boost COMPONENTS timer chrono system filesystem unit_test_framework REQUIRED)
 
+endif()
 if(AIROUTER)
 #CGAL
 find_package(CGAL REQUIRED) # for AI router
