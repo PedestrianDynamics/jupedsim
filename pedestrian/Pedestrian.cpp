@@ -551,7 +551,7 @@ double Pedestrian::GetV0Norm() const
      double ped_elevation = sub->GetElevation(_ellipse.GetCenter());
      if (_navLine ==nullptr)
      {
-          printf("Error: ped %d has no navline\n", _id);
+          //printf("Error: ped %d has no navline\n", _id);
           //exit(EXIT_FAILURE);
           return std::max(0.,_ellipse.GetV0());
      }
