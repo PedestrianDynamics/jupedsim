@@ -10,7 +10,7 @@
 
   <!-- trajectories file and format -->
   <trajectories format="xml-plain" fps="16" color_mode="final_goal">
-	    <file location="trajectories.xml" />
+            <file location="trajectories.xml" />
     <!-- <socket_ hostname="127.0.0.1" port="8989" /> -->
   </trajectories>
 
@@ -21,7 +21,7 @@
   <traffic_constraints>
     <!-- doors states are: close or open -->
     <doors>
-	<!-- <door trans_id="1" caption="exit" state="open" /> -->
+        <!-- <door trans_id="1" caption="exit" state="open" /> -->
     </doors>
   </traffic_constraints>
 
@@ -73,10 +73,12 @@
     </agents_distribution>
 
     <agents_sources><!-- frequency in persons/seconds -->
-      <source id="1" frequency="2" agents_max="5" group_id="6" caption="source 1" />
-      <source id="2" agent_id="3" time="5" group_id="5" caption="source 2" />
-      <source id="3" agent_id="2" time="3" group_id="5" caption="source 3" />
-      <source id="4" agent_id="8" time="7" group_id="5" caption="source 4" />
+       <source id="1" frequency="2" agents_max="5" group_id="0" caption="source 1" />
+       <source id="2" agent_id="3" time="5" group_id="0" caption="source 2" />
+       <source id="3" agent_id="2" time="3" group_id="0" caption="source 3" />
+      <source id="4" agent_id="8" time="7" group_id="0" caption="source 4" />
+      <source id="5" agent_id="9" time="7" group_id="0" caption="source 5" startX="8" startY="5.4" />
+      <source id="6" agent_id="10" time="7" group_id="0" caption="source 6" startX="13" startY="5" />
     </agents_sources>
 
   </agents>

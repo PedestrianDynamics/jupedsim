@@ -57,13 +57,13 @@ void AgentsSourcesManager::Run()
 {
       SetRunning(true);
      Log->Write("INFO:\tStarting agent manager thread");
-     /* std::cout<< KGRN << "\n Starting agent manager thread\n" << "\n>> time: " << Pedestrian::GetGlobalTime() << RESET << "\n"; */
+     std::cout<< KRED << "\n Starting agent manager thread\n" << ">> time: " << Pedestrian::GetGlobalTime() << RESET << "\n";
      //Generate all agents required for the complete simulation
      //It might be more efficient to generate at each frequency step
      //TODO  this loop is exactly GenerateAgents( --> REFACTOR)
      for (const auto& src : _sources)
      {
-           /* std::cout << "Generate AgentsAndAddToPool src: " << src->GetId() << "\n" ; */
+          std::cout << "Generate src: " << src->GetId() << "\n" ;
           src->GenerateAgentsAndAddToPool(src->GetMaxAgents(), _building);
      }
 
