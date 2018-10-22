@@ -129,7 +129,7 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
           int frid =  frameNr + minFrame;
           //padd the frameid with 0
           std::ostringstream ss;
-          ss << std::setw(5) << std::setfill('0') << frid;
+          ss << std::setw(5) << std::setfill('0') << std::internal << frid;
           const std::string str_frid = ss.str();
           if(!(frid%50))
           {
