@@ -198,10 +198,12 @@ void ToxicityAnalysis::HazardAnalysis(Pedestrian* p)
 
 void ToxicityAnalysis::InitializeWriteOut()
 {
-    string fileNameWithoutExtension = _projectFileName.substr(0, _projectFileName.find_last_of("_"));
-    std::string ToxAnalysisXML = "toxicity_output_" + fileNameWithoutExtension + ".xml";
-    _outputhandler = std::make_shared<ToxicityOutputHandler>(ToxAnalysisXML.c_str());
-    _outputhandler->WriteToFileHeader();
+     path p(_projectFileName);
+     std::string ToxAnalysisXML =  "toxicity_output_" + p.stem().string() + p.extension().string();
+     path t(ToxAnalysisXML);
+     t = p.parent_path() / t;
+     _outputhandler = std::make_shared<ToxicityOutputHandler>(t.string().c_str());
+     _outputhandler->WriteToFileHeader();
 }
 
 void ToxicityAnalysis::WriteOutHazardAnalysis(const Pedestrian* p, double E, double FEC_Smoke, double O2, double CO2, double CO, double HCN, double HCL, double FED_In, double FIC_Im, double FIC_In, double T, double FED_Heat)

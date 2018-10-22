@@ -528,11 +528,13 @@ double Simulation::RunBody(double maxSimTime)
 
         //Trigger JPSfire Toxicity Analysis
         //only executed every 3 seconds
+        #ifdef JPSFIRE
         if( fmod(Pedestrian::GetGlobalTime(), 3) == 0 ) {
             for (auto&& ped: _building->GetAllPedestrians()) {
                 ped->ConductToxicityAnalysis();
             }
         }
+        #endif
     }
     return t;
 }

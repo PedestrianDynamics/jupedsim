@@ -288,11 +288,13 @@ bool IniFileParser::Parse(std::string iniFile)
      // JPSfire
      // -------------------------------------
      // read walkingspeed
+     #ifdef JPSFIRE
      std::shared_ptr<WalkingSpeed> W( new WalkingSpeed(iniFile) );
      _config->SetWalkingSpeed(W);
      // read  ToxicityAnalysis
      std::shared_ptr<ToxicityAnalysis> T( new ToxicityAnalysis(iniFile, _config->GetFps()));
      _config->SetToxicityAnalysis(T);
+     #endif
      // -------------------------------------
 
      //pick up which model to use
@@ -1140,6 +1142,11 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
           }
           else if ((strategy == "smoke") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+#ifndef JPSFIRE
+               std::cerr << "\nCan not use smoke router without jpsfire.\n";
+
+               exit(EXIT_FAILURE);
+#endif
                Router *r = new SmokeRouter(id, ROUTING_SMOKE);
                _config->GetRoutingEngine()->AddRouter(r);
 
