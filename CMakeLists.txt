@@ -796,6 +796,12 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")
 endif ()
 
+if(WIN32)
+  if(MSVC)
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT jpscore)
+    message(STATUS "set start project for VS")
+  endif()
+endif()
 
 # ----------------------------- cTest ------------------------------------------
 if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
