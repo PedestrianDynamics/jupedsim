@@ -194,13 +194,16 @@ void AgentsSource::GenerateAgents(std::vector<Pedestrian*>& peds, int count, Bui
           {
                //std::cout << "AgentsSource::GenerateAgents Generates an Agent\n";
                auto ped = GetStartDistribution()->GenerateAgent(building, &pid,emptyPositions);
-               // here actually the router should initialize again
-               //
-               auto transitions = building->GetAllTransitions();
-               auto transition = transitions[0]; //dummy
-               int trans_ID = transition->GetID();
-               ped->SetExitLine(transition); // set dummy line
-               ped->SetExitIndex(trans_ID);
+               if(ped->FindRoute()==-1) {
+                    Log->Write("WARNING: Can not set destination for source agent %d", ped->GetID());
+                    // Sometimes the router can not find a target for ped
+                    auto transitions = building->GetAllTransitions();
+                    auto transition = transitions[0]; //dummy
+                    int trans_ID = transition->GetID();
+                    ped->SetExitLine(transition); // set dummy line
+                    ped->SetExitIndex(trans_ID);
+               }
+
                //
                peds.push_back(ped);
           }

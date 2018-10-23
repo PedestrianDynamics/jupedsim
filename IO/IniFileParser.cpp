@@ -1143,8 +1143,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
           else if ((strategy == "smoke") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
 #ifndef JPSFIRE
-               std::cerr << "\nCan not use smoke router without jpsfire.\n";
-
+               std::cerr << "\nCan not use smoke router without jpsfire. Rerun cmake with option  -DJPSFIRE=true and recompile.\n";
                exit(EXIT_FAILURE);
 #endif
                Router *r = new SmokeRouter(id, ROUTING_SMOKE);
@@ -1165,6 +1164,9 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                ///Parsing additional options
                if (!ParseAIOpts(e))
                     return false;
+     #else
+               std::cerr << "\nCan not use AI Router. Rerun cmake with option  -DAIROUTER=true and recompile.\n";
+               exit(EXIT_FAILURE);
      #endif
           }
           else if ((strategy == "ff_global_shortest") &&
