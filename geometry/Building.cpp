@@ -370,55 +370,27 @@ bool Building::correct() const {
      for(auto&& room: this->GetAllRooms()) {
           for(auto&& subroom: room.second->GetAllSubRooms()) {
                std::vector<Wall> walls = subroom.second->GetAllWalls();
-               for(auto wall: walls) //self checking
+               for(auto const & bigWall: walls) //self checking
                {
-                    for(auto&& other: walls) {
-                         if((wall == other) || (wall.ShareCommonPointWith(other))) continue;
+                    for(auto const & other: walls) {
+                         if((bigWall == other) || (bigWall.ShareCommonPointWith(other))) continue;
                          Point intersectionPoint;
-                         if(wall.IntersectionWith(other, intersectionPoint))
+                         if(bigWall.IntersectionWith(other, intersectionPoint))
                          {
-                              if(intersectionPoint == wall.GetPoint1() || intersectionPoint == wall.GetPoint2()) continue;
+                              if(intersectionPoint == bigWall.GetPoint1() || intersectionPoint == bigWall.GetPoint2()) continue;
                               Log->Write("INFO Cutting a big line in Room %d | Subroom %d with:", room.first, subroom.first);
-                              wall.WriteToErrorLog();
+                              bigWall.WriteToErrorLog();
                               //other.WriteToErrorLog();
                               //string s = intersectionPoint.toString();
                               //std::cout << "\t >> Intersection at Point: " << s.c_str() << "\n";
-                              Wall newWall(intersectionPoint, wall.GetPoint2());// [IP -- P2]
-                              Wall newWall2(wall.GetPoint1(), intersectionPoint);// [IP -- P2]
-                              bool res = subroom.second->RemoveWall(wall);
+                              Wall newWall(intersectionPoint, bigWall.GetPoint2());// [IP -- P2]
+                              Wall newWall2(bigWall.GetPoint1(), intersectionPoint);// [IP -- P2]
+                              bool res = subroom.second->RemoveWall(bigWall);
                               if(!res) {
                                    Log->Write("ERROR:  Correct fails, because could not remove wall");
                                    return false;
                               }
-                              // we add new wall with >= 2 common walls
-                              // and reject the new wall with  <= 1 common points
-                              int count = 0;
-                              for(auto const & checkWall: walls)
-                              {
-                                   if( (checkWall == newWall) || (checkWall == wall)) continue;// don't count big wall
-                                   if(newWall.ShareCommonPointWith(checkWall)) count++;
-                              }
-                              auto transitions = subroom.second->GetAllTransitions();
-                              auto crossings = subroom.second->GetAllCrossings();
-                              //auto h = subroom.second->GetAllHlines();
-                              for(auto transition: transitions)
-                                   if(newWall.ShareCommonPointWith(*transition)) count++;
-                              for(auto crossing: crossings)
-                                   if(newWall.ShareCommonPointWith(*crossing)) count++;
-
-                              if (count >=2)
-                              {
-                                   subroom.second->AddWall(newWall);
-                                   walls.push_back(newWall);
-                                   //std::cout << "\n---new walls ---\n";
-                                   //newWall.WriteToErrorLog();
-                              }
-                              else{
-                                   subroom.second->AddWall(newWall2);
-                                   walls.push_back(newWall2);
-                                   //std::cout << "\n---new wall2 ---\n";
-                                   //newWall2.WriteToErrorLog();
-                              }
+                              add_wall_to_subroom(subroom.second, bigWall, newWall, newWall2);
                          }
                     }//other walls
                }//
@@ -428,6 +400,42 @@ bool Building::correct() const {
           }//s
      }//r
      return true;
+}
+
+bool Building::add_wall_to_subroom(
+        const std::shared_ptr<SubRoom> & subroom,
+        const Wall& bigWall,
+        const Wall& newWall, const Wall& newWall2) const
+{
+     int count = 0;
+     auto walls = subroom->GetAllWalls();
+     for(auto const & checkWall: walls)
+     {
+          if( (checkWall == newWall) || (checkWall == bigWall)) continue;// don't count big wall
+          if(newWall.ShareCommonPointWith(checkWall)) count++;
+     }
+     auto transitions = subroom->GetAllTransitions();
+     auto crossings = subroom->GetAllCrossings();
+     //auto h = subroom.second->GetAllHlines();
+     for(auto transition: transitions)
+          if(newWall.ShareCommonPointWith(*transition)) count++;
+     for(auto crossing: crossings)
+          if(newWall.ShareCommonPointWith(*crossing)) count++;
+
+     if (count >=2)
+     {
+          subroom->AddWall(newWall);
+          walls.push_back(newWall);
+          //std::cout << "\n---new walls ---\n";
+          //newWall.WriteToErrorLog();
+     }
+     else{
+          subroom->AddWall(newWall2);
+          walls.push_back(newWall2);
+          //std::cout << "\n---new wall2 ---\n";
+          //newWall2.WriteToErrorLog();
+     }
+     return false;
 }
 
 const string& Building::GetProjectFilename() const

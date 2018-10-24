@@ -260,28 +260,41 @@ private:
      * For example:
      *                             C
      *  A x------------------------o-----------------x B
-     *                ^           |
-     *                wall1       |
-     *                            |  <--- wall2
-     *                            o
-     *                            D
-     *  Here wall [AB] is a big wall, then it intersects wall [CD] whether in A not in B
+     *                ^            |
+     *                wall1        |
+     *                             |  <--- wall2
+     *                             o
+     *                             D
+     *  Here wall [AB] is a big wall, then it intersects wall [CD] whether in A nor in B
      *  What happens in this method:
      *  1. [AB] will be splited in two lines [AC] and [CB]
      *  2. [AB] will be removed
      *  3. [AC] or [CB] will be added to the subroom
      *
-     *  How do we choose between [AC] and [CB]
-     *  We count for [AC] if it has more than 2 common points with walls+transitions+crossings of the subroom.
-     *  If so, then we take [AC] otherwise we take [CB]
      *
-     *  Assumption: We assume one of the new lines need to be added.
-     *
-     *  Is there a case where none should be chosen?
      *  @TODO: What happens if the line is "really" big? Here we should call the function in a recursive way..
      *
      */
      bool correct() const;
+     /**
+      * bigWall split into newWall and newWall2
+      * Add newWall OR newWall2 to subroom
+      *
+      * How do we choose between [AC] and [CB]
+      *
+      *  We count for [AC] if it has more than 2 common points with walls+transitions+crossings of the subroom.
+      *  If so, then we take [AC] otherwise we take [CB]
+      *  Assumption: We assume one of the new lines need to be added.
+      *
+      *  Is there a case where none should be chosen?
+      *
+      * @TODO: Maybe we should not pass bigWall here. It's just checked for equality
+      *
+      */
+     bool add_wall_to_subroom(
+            const std::shared_ptr<SubRoom> & subroom,
+            const Wall& bigWall,
+            const Wall& newWall, const Wall& newWall2) const;
 };
 
 #endif  /* _BUILDING_H */
