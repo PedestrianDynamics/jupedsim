@@ -335,6 +335,12 @@ public:
      const std::vector<SubRoom*>& GetNeighbors() const ;
 
      /**
+      * remove wall w from subroom
+      * @param w: wall to remove
+      * @return: true if w was removed, otherwise false
+      */
+    bool RemoveWall(const Wall& w);
+     /**
       * Add a wall to the subroom
       */
      bool AddWall(const Wall& w);

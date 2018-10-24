@@ -190,7 +190,16 @@ const vector<int>& SubRoom::GetAllGoalIDs() const
      return _goalIDs;
 }
 
-
+// return true is walls was erased, otherwise false.
+bool SubRoom::RemoveWall(const Wall& w)
+{
+     auto it = std::find(_walls.begin(), _walls.end(), w);
+     if (it != _walls.end()) {
+          _walls.erase(it);
+          return true;
+     }
+     return false;
+}
 bool SubRoom::AddWall(const Wall& w)
 {
      //check for duplicated walls
@@ -1054,6 +1063,7 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
                 if(IsPartOfPolygon(ptw)==false)
                 {
                      Log->Write("ERROR:\t Wall %s was not used during polygon creation for room/subroom: %d/%d",w.toString().c_str(),GetRoomID(),GetSubRoomID());
+
                      return false;
                 }
            }

@@ -288,7 +288,7 @@ void Building::AddSurroundingRoom()
 bool Building::InitGeometry()
 {
      Log->Write("INFO: \tInit Geometry");
-
+     correct();
      for (auto&& itr_room: _rooms) {
           for (auto&& itr_subroom: itr_room.second->GetAllSubRooms()) {
                //create a close polyline out of everything
@@ -363,6 +363,70 @@ bool Building::InitGeometry()
 
      Log->Write("INFO: \tInit Geometry successful!!!\n");
 
+     return true;
+}
+
+bool Building::correct() const {
+     for(auto&& room: this->GetAllRooms()) {
+          for(auto&& subroom: room.second->GetAllSubRooms()) {
+               std::vector<Wall> walls = subroom.second->GetAllWalls();
+               for(auto wall: walls) //self checking
+               {
+                    for(auto&& other: walls) {
+                         if((wall == other) || (wall.ShareCommonPointWith(other))) continue;
+                         Point intersectionPoint;
+                         if(wall.IntersectionWith(other, intersectionPoint))
+                         {
+                              if(intersectionPoint == wall.GetPoint1() || intersectionPoint == wall.GetPoint2()) continue;
+                              Log->Write("INFO Cutting a big line in Room %d | Subroom %d with:", room.first, subroom.first);
+                              wall.WriteToErrorLog();
+                              //other.WriteToErrorLog();
+                              //string s = intersectionPoint.toString();
+                              //std::cout << "\t >> Intersection at Point: " << s.c_str() << "\n";
+                              Wall newWall(intersectionPoint, wall.GetPoint2());// [IP -- P2]
+                              Wall newWall2(wall.GetPoint1(), intersectionPoint);// [IP -- P2]
+                              bool res = subroom.second->RemoveWall(wall);
+                              if(!res) {
+                                   Log->Write("ERROR:  Correct fails, because could not remove wall");
+                                   return false;
+                              }
+                              // we add new wall with >= 2 common walls
+                              // and reject the new wall with  <= 1 common points
+                              int count = 0;
+                              for(auto const & checkWall: walls)
+                              {
+                                   if( (checkWall == newWall) || (checkWall == wall)) continue;// don't count big wall
+                                   if(newWall.ShareCommonPointWith(checkWall)) count++;
+                              }
+                              auto transitions = subroom.second->GetAllTransitions();
+                              auto crossings = subroom.second->GetAllCrossings();
+                              //auto h = subroom.second->GetAllHlines();
+                              for(auto transition: transitions)
+                                   if(newWall.ShareCommonPointWith(*transition)) count++;
+                              for(auto crossing: crossings)
+                                   if(newWall.ShareCommonPointWith(*crossing)) count++;
+
+                              if (count >=2)
+                              {
+                                   subroom.second->AddWall(newWall);
+                                   walls.push_back(newWall);
+                                   //std::cout << "\n---new walls ---\n";
+                                   //newWall.WriteToErrorLog();
+                              }
+                              else{
+                                   subroom.second->AddWall(newWall2);
+                                   walls.push_back(newWall2);
+                                   //std::cout << "\n---new wall2 ---\n";
+                                   //newWall2.WriteToErrorLog();
+                              }
+                         }
+                    }//other walls
+               }//
+               // now check with other subrooms
+
+               // TODO: check with goals?
+          }//s
+     }//r
      return true;
 }
 

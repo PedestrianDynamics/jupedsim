@@ -253,7 +253,35 @@ public:
 
 private:
      void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);
-
+    /**
+     * Correct geometries by deleting "big" walls
+     * In a subroom, "big" refers to a wall that intersects with other walls in the same subroom in a point,
+     * which does not coincide with one of the end points.
+     * For example:
+     *                             C
+     *  A x------------------------o-----------------x B
+     *                ^           |
+     *                wall1       |
+     *                            |  <--- wall2
+     *                            o
+     *                            D
+     *  Here wall [AB] is a big wall, then it intersects wall [CD] whether in A not in B
+     *  What happens in this method:
+     *  1. [AB] will be splited in two lines [AC] and [CB]
+     *  2. [AB] will be removed
+     *  3. [AC] or [CB] will be added to the subroom
+     *
+     *  How do we choose between [AC] and [CB]
+     *  We count for [AC] if it has more than 2 common points with walls+transitions+crossings of the subroom.
+     *  If so, then we take [AC] otherwise we take [CB]
+     *
+     *  Assumption: We assume one of the new lines need to be added.
+     *
+     *  Is there a case where none should be chosen?
+     *  @TODO: What happens if the line is "really" big? Here we should call the function in a recursive way..
+     *
+     */
+     bool correct() const;
 };
 
 #endif  /* _BUILDING_H */
