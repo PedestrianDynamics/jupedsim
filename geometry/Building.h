@@ -264,7 +264,7 @@ private:
      *                wall1        |
      *                             |  <--- wall2
      *                             o
-     *                             D
+a     *                             D
      *  Here wall [AB] is a big wall, then it intersects wall [CD] whether in A nor in B
      *  What happens in this method:
      *  1. [AB] will be splited in two lines [AC] and [CB]
@@ -291,10 +291,19 @@ private:
       * @TODO: Maybe we should not pass bigWall here. It's just checked for equality
       *
       */
-     bool add_wall_to_subroom(
-            const std::shared_ptr<SubRoom> & subroom,
-            const Wall& bigWall,
-            const Wall& newWall, const Wall& newWall2) const;
+     bool AddWallToSubroom(
+             const std::shared_ptr<SubRoom> & subroom,
+             std::vector<Wall>  WallPieces) const;
+
+
+     std::vector<Wall>  SplitWall(
+          const std::shared_ptr<SubRoom>& subroom,
+          const Wall&  bigWall) const;
+
+     bool ReplaceBigWall(
+             const std::shared_ptr<SubRoom> & subroom,
+             const Wall& bigWall,
+             std::vector<Wall> & WallPieces) const;
 };
 
 #endif  /* _BUILDING_H */
