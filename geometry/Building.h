@@ -277,29 +277,50 @@ a     *                             D
      */
      bool correct() const;
      /**
-      * bigWall split into newWall and newWall2
-      * Add newWall OR newWall2 to subroom
+      * @brief Add newWall  subroom
       *
-      * How do we choose between [AC] and [CB]
+      *  We count for a candidate wall if it has more than 2 common points with
+      *  walls+transitions+crossings of the subroom.
       *
-      *  We count for [AC] if it has more than 2 common points with walls+transitions+crossings of the subroom.
-      *  If so, then we take [AC] otherwise we take [CB]
-      *  Assumption: We assume one of the new lines need to be added.
+      *  Assumption: We assume one of the new lines needs to be added.
       *
-      *  Is there a case where none should be chosen?
+      *  @todo: Is there a case where none should be chosen?
+      *  @todo: Or more than one wall *can* be choosen?
       *
-      * @TODO: Maybe we should not pass bigWall here. It's just checked for equality
-      *
+      * @param subroom: subroom where new wall shoud be added to
+      * @param WallPieces: vector of candidates. One of these walls is going to
+      *        be added to subroom
       */
      bool AddWallToSubroom(
              const std::shared_ptr<SubRoom> & subroom,
              std::vector<Wall>  WallPieces) const;
 
 
-     std::vector<Wall>  SplitWall(
+     /**
+      * @brief Split a wall in several small walls
+      *
+      * search all walls+crossings+transitions that intersect <bigwall>
+      * not in an endpoint
+      *
+      * @param subroom: subroom containing <bigwall>
+      * @param bigWall: wall to split
+      * @return std::vector: a vector of all small walls. Can be empty.
+      */
+std::vector<Wall>  SplitWall(
           const std::shared_ptr<SubRoom>& subroom,
           const Wall&  bigWall) const;
 
+     /**
+      * @brief Replace BigWall with a smaller wall
+      *
+      * this function should be called after \fn SplitWall()
+      *
+      * @param subroom: subroom containing <bigwall>
+      * @param bigWall: bigWall is going to be removes from subroom
+      * @param WallPieces: vector of candidates. One of these walls is going to
+      * replace bigwall (\fn AddWallToSubroom() is called)
+      * @return bool: true if successful
+      */
      bool ReplaceBigWall(
              const std::shared_ptr<SubRoom> & subroom,
              const Wall& bigWall,
