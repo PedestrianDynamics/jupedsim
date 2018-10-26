@@ -24,7 +24,7 @@
  *
  *
  **/
- 
+
 
 #ifndef _SUBROOM_H
 #define _SUBROOM_H
@@ -82,7 +82,7 @@ private:
      std::string _type;
      double _minElevation;
      double _maxElevation;
-     
+
      //different types of navigation lines
      std::vector<Crossing*> _crossings;
      std::vector<Transition*> _transitions;
@@ -239,7 +239,7 @@ public:
      void SetMinElevation(double m);
 
      void SetMaxElevation(double M);
-     
+
      /**
       * compute the cosine of the dihedral angle with the Horizontal plane Z=h
       * @return the cosine of the angle
@@ -318,9 +318,9 @@ public:
      bool IsPartOfPolygon(const Point& pt);
 
      /**
-	  *
-	  * @return true if the Point is inside any obstacle
-	  */
+          *
+          * @return true if the Point is inside any obstacle
+          */
      bool IsInObstacle(const Point& pt);
 
      /**
@@ -468,6 +468,7 @@ private:
 
 public:
     Escalator();
+
     Escalator(const Escalator& orig);
     virtual ~Escalator();
 
@@ -482,4 +483,3 @@ public:
 };
 
 #endif  /* _SUBROOM_H */
-
