@@ -374,7 +374,7 @@ bool Building::correct() const {
                for(auto const & bigWall: walls) //self checking
                {
                     // std::cout << "BigWall: " << std::endl;
-                    bigWall.WriteToErrorLog();
+                    //bigWall.WriteToErrorLog();
                     std::vector<Wall> WallPieces = SplitWall(subroom.second, bigWall);
                     // std::cout << "Wall peces size : " <<  WallPieces.size() << std::endl;
                     int ok=0;
@@ -395,7 +395,7 @@ bool Building::correct() const {
                                     if (it != WallPieces.end())
                                     {
                                          // std::cout<< KGRN << "delete wall ..." << RESET <<std::endl;
-                                         wallPiece.WriteToErrorLog();
+                                         // wallPiece.WriteToErrorLog();
                                          WallPieces.erase(it);
                                     }
 
@@ -444,8 +444,8 @@ std::vector<Wall>  Building::SplitWall(const std::shared_ptr<SubRoom>& subroom, 
           {
                if(intersectionPoint == bigWall.GetPoint1() || intersectionPoint == bigWall.GetPoint2()) continue;
                // std::cout << "intersectin with: " << std::endl;
-               other.WriteToErrorLog();
-               string s = intersectionPoint.toString();
+               //other.WriteToErrorLog();
+               //string s = intersectionPoint.toString();
                // std::cout << "\t >> Intersection at Point: " << s.c_str() << "\n";
                Wall NewWall(intersectionPoint, bigWall.GetPoint2());// [IP -- P2]
                Wall NewWall2(bigWall.GetPoint1(), intersectionPoint);// [IP -- P2]
@@ -521,12 +521,12 @@ bool Building::AddWallToSubroom(
 
           if (count>=2) {
                subroom->AddWall(w);
-               std::cout << "\n--- REPLACE BIG WALL WITH ---\n count= " << count << "\n";
+               Log->Write("INFO: Replacing wall with ");
                w.WriteToErrorLog();
                return true;
           }
-          else
-               std::cout << "\n -- count= " << count << "\n";
+          // else
+          //      std::cout << "\n -- count= " << count << "\n";
      }// WallPieces
 
      return false;
