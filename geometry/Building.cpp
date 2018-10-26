@@ -436,7 +436,22 @@ std::vector<Wall>  Building::SplitWall(const std::shared_ptr<SubRoom>& subroom, 
      std::vector<Wall> WallPieces;
      // std::cout << "collect wall pieces with " << std::endl;
      // bigWall.WriteToErrorLog();
-     for(auto const & other: subroom->GetAllWalls())
+     auto walls = subroom->GetAllWalls();
+     auto crossings = subroom->GetAllCrossings();
+     auto transitions = subroom->GetAllTransitions();
+     // TODO: Hlines too?
+     vector<Line> walls_and_exits = vector<Line>();
+
+     //  collect all crossings
+     for (auto&& cros:crossings)
+          walls_and_exits.push_back(*cros);
+     //collect all transitions
+     for (auto&& trans: transitions)
+          walls_and_exits.push_back(*trans);
+     for (auto&& wall: walls)
+          walls_and_exits.push_back(wall);
+
+     for(auto const & other: walls_and_exits)
      {
           if((bigWall == other) || (bigWall.ShareCommonPointWith(other))) continue;
           Point intersectionPoint;
