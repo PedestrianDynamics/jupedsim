@@ -306,7 +306,7 @@ a     *                             D
       * @param bigWall: wall to split
       * @return std::vector: a vector of all small walls. Can be empty.
       */
-std::vector<Wall>  SplitWall(
+     std::vector<Wall>  SplitWall(
           const std::shared_ptr<SubRoom>& subroom,
           const Wall&  bigWall) const;
 
@@ -325,6 +325,16 @@ std::vector<Wall>  SplitWall(
              const std::shared_ptr<SubRoom> & subroom,
              const Wall& bigWall,
              std::vector<Wall> & WallPieces) const;
+
+     /**
+      * @brief Removes doors on walls
+      *
+      * @param subroom
+      * @return bool
+      */
+bool RemoveOverlappingDoors(
+          const std::shared_ptr<SubRoom>& subroom) const;
+
 };
 
 #endif  /* _BUILDING_H */
