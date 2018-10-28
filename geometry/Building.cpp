@@ -97,7 +97,6 @@ Building::Building(Configuration* configuration, PedDistributor& pedDistributor)
           Log->Write("ERROR:\tcould not distribute the pedestrians\n");
           exit(EXIT_FAILURE);
      }
-
      InitGrid();
 
      if (!_routingEngine->Init(this)) {
@@ -456,12 +455,18 @@ bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom>& subroom) c
             exits.push_back(*trans);
 
       // removing doors on walls
-      for(auto const & wall: subroom->GetAllWalls())
+      auto walls = subroom->GetAllWalls();
+      // std::cout << "walls: " << walls.size()<< std::endl;
+      for(auto const & wall: walls)
       {
             for(auto e: exits)
             {
-                  if(wall.IsInLineSegment(e.GetPoint1()) && wall.IsInLineSegment(e.GetPoint2()))
+                  if(wall.NearlyInLineSegment(e.GetPoint1()) && wall.NearlyInLineSegment(e.GetPoint2()))
                   {
+                        std::cout <<KGRN << "\n -- Remove overlapping wall with door" << RESET << std::endl;
+                        std::cout << "REMOVE" << std::endl;
+                        wall.WriteToErrorLog();
+
                         double dist_pt1 = (wall.GetPoint1()-e.GetPoint1()).NormSquare();
                         double dist_pt2 = (wall.GetPoint1()-e.GetPoint2()).NormSquare();
                         if(dist_pt1<dist_pt2)
@@ -470,6 +475,7 @@ bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom>& subroom) c
                               Wall NewWall1(wall.GetPoint2(), e.GetPoint2());
                               subroom->AddWall(NewWall);
                               subroom->AddWall(NewWall1);
+                              std::cout << " -->  Wall replaced by: " << std::endl;
                               NewWall.WriteToErrorLog();
                               NewWall1.WriteToErrorLog();
                         }
@@ -479,17 +485,21 @@ bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom>& subroom) c
                               Wall NewWall1(wall.GetPoint2(), e.GetPoint1());
                               subroom->AddWall(NewWall);
                               subroom->AddWall(NewWall1);
-                              std::cout << "REPLACED DURCH" << std::endl;
+                              std::cout << " --> Wall replaced by:" << std::endl;
                               NewWall.WriteToErrorLog();
                               NewWall1.WriteToErrorLog();
                         }
                         subroom->RemoveWall(wall);
-                        std::cout <<KGRN << "OVERLLAPING" << RESET << std::endl;
-                        std::cout << "REMOVE" << std::endl;
-                        wall.WriteToErrorLog();
                   }
             }
       }
+      // std::cout << "LEAVE " << std::endl;
+      // std::cout << ">> walls: " << subroom->GetAllWalls().size()<< std::endl;
+      // for(auto w: subroom->GetAllWalls())
+      //       w.WriteToErrorLog();
+      // getc(stdin);
+
+
       return true;
 }
 

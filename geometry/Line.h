@@ -57,7 +57,7 @@ public:
      Line();
 
      Line(const Point& p1, const Point& p2, int count); // count = 0 --> don't count the line. Useful for temporary lines.
-     
+
      Line(const Point& p1, const Point& p2);
 
      Line(const Line& orig);
@@ -100,7 +100,7 @@ public:
       */
      double GetLength(void) const;
 
-     
+
      /**
       * @return a normal vector to this line
       */
@@ -132,6 +132,8 @@ public:
       * @return true if the point p is within the line segment defined the line end points
       */
      bool IsInLineSegment(const Point& p) const;
+
+     bool NearlyInLineSegment(const Point& p) const;
 
      /**
       * @return the distance from the line to the point p
@@ -306,14 +308,3 @@ private:
 };
 
 #endif  /* _LINE_H */
-
-
-
-
-
-
-
-
-
-
-
