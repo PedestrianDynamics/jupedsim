@@ -155,6 +155,48 @@
                         </xs:attribute>
                       </xs:complexType>
                     </xs:element>
+                    <xs:element name="waiting_area" maxOccurs="unbounded" minOccurs="0">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="polygon">
+                            <xs:complexType>
+                              <xs:choice maxOccurs="unbounded" minOccurs="1">
+                                <xs:element name="vertex">
+                                  <xs:complexType>
+                                    <xs:simpleContent>
+                                      <xs:extension base="xs:string">
+                                        <xs:attribute type="xs:float" name="px" use="required" />
+                                        <xs:attribute type="xs:float" name="py" use="required" />
+                                      </xs:extension>
+                                    </xs:simpleContent>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:choice>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="next_wa">
+                            <xs:complexType>
+                              <xs:attribute type="xs:int" name="id" use="required" />
+                              <xs:attribute type="xs:int" name="p" use="required" />
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute type="xs:int" name="id" use="required" />
+                        <xs:attribute type="xs:string" name="caption" use="required" />
+                        <xs:attribute type="xs:int" name="waiting_time" use="required" />
+                        <xs:attribute type="xs:int" name="min_peds" use="optional" />
+                        <xs:attribute type="xs:int" name="max_peds" use="optional" />
+                        <xs:attribute name="is_open" use="required">
+                          <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                              <xs:enumeration value="true" />
+                              <xs:enumeration value="false" />
+                            </xs:restriction>
+                          </xs:simpleType>
+                        </xs:attribute>
+
+                      </xs:complexType>
+                    </xs:element>
                   </xs:sequence>
                 </xs:complexType>
               </xs:element>

@@ -312,7 +312,7 @@ geometry/Room.cpp
 geometry/Wall.cpp
 geometry/Goal.cpp
 
-IO/GeoFileParser.cpp
+        IO/GeoFileParser.cpp
 IO/IniFileParser.cpp
 IO/IODispatcher.cpp
 IO/OutputHandler.cpp
@@ -409,7 +409,7 @@ JPSfire/B_walking_speed/WalkingSpeed.cpp
 JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
 JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
 forms/jpscore.rc
-math/KrauszModel.cpp)
+math/KrauszModel.cpp geometry/WaitingArea.cpp geometry/WaitingArea.h)
 
 set(header_files
 
@@ -501,8 +501,7 @@ geometry/Hline.h
 geometry/Obstacle.h
 geometry/SubRoom.h
 geometry/Goal.h
-
-IO/GeoFileParser.h
+        IO/GeoFileParser.h
 IO/IniFileParser.h
 IO/IODispatcher.h
 IO/OutputHandler.h

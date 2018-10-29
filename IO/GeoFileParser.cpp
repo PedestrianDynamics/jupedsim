@@ -22,6 +22,7 @@
 #include "GeoFileParser.h"
 #include "../tinyxml/tinyxml.h"
 #include "../geometry/SubRoom.h"
+#include "../geometry/WaitingArea.h"
 
 GeoFileParser::GeoFileParser(Configuration* configuration)
           :_configuration(configuration)
@@ -363,7 +364,7 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
      //load goals and routes
      TiXmlNode* xGoalsNode = xRootNode->FirstChild("routing")->FirstChild("goals");
 
-     if (xGoalsNode)
+     if (xGoalsNode) {
           for (TiXmlElement* e = xGoalsNode->FirstChildElement("goal"); e;
                e = e->NextSiblingElement("goal")) {
 
@@ -399,6 +400,71 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                building->AddGoal(goal);
                _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
           }
+
+
+          for (TiXmlElement* e = xGoalsNode->FirstChildElement("waiting_area"); e;
+               e = e->NextSiblingElement("waiting_area")) {
+
+               // Read valus from ini File
+               int id = xmltoi(e->Attribute("id"), -1);
+               int open = std::string(e->Attribute("is_open"))=="true" ? true : false;
+               int min_peds = xmltoi(e->Attribute("min_peds"), -1);
+               int max_peds = xmltoi(e->Attribute("max_peds"), -1);
+               int waiting_time = xmltoi(e->Attribute("waiting_time"), -1);
+               std::string caption = xmltoa(e->Attribute("caption"), "-1");
+
+               Goal* wa = new WaitingArea();
+               WaitingArea* waitingArea = static_cast<WaitingArea*>(wa);
+               waitingArea->SetId(id);
+               waitingArea->SetCaption(caption);
+               waitingArea->setOpen(open);
+               waitingArea->setMinNumPed(min_peds);
+               waitingArea->setMaxNumPed(max_peds);
+               waitingArea->setWaitingTime(waiting_time);
+
+               std::map<int, double> nextGoals;
+
+               //looking for next_wa
+               for (TiXmlElement* nextWa = e->FirstChildElement("next_wa"); nextWa;
+                    nextWa = nextWa->NextSiblingElement("next_wa")) {
+                    int nextWaId = xmltoi(nextWa->Attribute("id"));
+                    double nextWaP = xmltof(nextWa->Attribute("p"));
+
+                    std::cout << "nextWaID=" << nextWaId << ", nextWaP=" << nextWaP << std::endl;
+                    nextGoals.insert(std::pair<int, double>(nextWaId, nextWaP));
+               }
+               if (!waitingArea->setNextGoals(nextGoals)){
+                    return false;
+               };
+
+               //looking for polygons (walls)
+               for (TiXmlElement* xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
+                    xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
+
+                    for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
+                              "vertex");
+                         xVertex && xVertex!=xPolyVertices->LastChild("vertex");
+                         xVertex = xVertex->NextSiblingElement("vertex")) {
+
+                         double x1 = xmltof(xVertex->Attribute("px"));
+                         double y1 = xmltof(xVertex->Attribute("py"));
+                         double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
+                         double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
+                         wa->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
+                    }
+               }
+
+               if (!wa->ConvertLineToPoly()){
+                    return false;
+               }
+
+               building->AddGoal(wa);
+               _configuration->GetRoutingEngine()->AddFinalDestinationID(wa->GetId());
+
+
+               std::cout << waitingArea->toString() << std::endl;
+          }
+     }
 
      //load routes
      TiXmlNode* xTripsNode = xRootNode->FirstChild("routing")->FirstChild("routes");

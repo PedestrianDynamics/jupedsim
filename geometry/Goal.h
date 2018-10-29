@@ -32,15 +32,16 @@
 #include <string>
 #include <vector>
 
+#include "Point.h"
 
 //forward declarations
 class Wall;
-class Point;
+//class Point;
 
 
 class Goal {
 
-private:
+protected:
      int _isFinalGoal;
      int _id;
      Point _centroid;
