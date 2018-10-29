@@ -1,0 +1,392 @@
+INFO: 	Loading and parsing the persons attributes
+INFO:	risk tolerance mu = 0.000000, risk tolerance sigma = 1.000000
+
+INFO:	risk tolerance mu = 0.000000, risk tolerance sigma = 1.000000
+
+INFO:	risk tolerance mu = 0.000000, risk tolerance sigma = 1.000000
+
+INFO:	risk tolerance mu = 0.000000, risk tolerance sigma = 1.000000
+
+INFO:	risk tolerance mu = 0.000000, risk tolerance sigma = 1.000000
+
+INFO: 	...Done
+ERROR:	 Duplicate wall found in Room/Subroom 0/5  ( 3.62 : 7.73 )--( 6.24 : 7.73 )
+ERROR:	 will not be added
+INFO: 	Loading building file successful!!!
+
+INFO:	done with loading extra routing information
+INFO:	Loading  the traffic info file
+INFO:	Done with loading traffic info file
+INFO: 	Init Geometry
+INFO: enter correct ...
+		WALL: (3.620000, 6.270000) -- (0.100000, 6.270000)
+
+		WALL: (3.620000, 6.270000) -- (2.300000, 6.300000)
+
+		WALL: (0.100000, 6.270000) -- (1.500000, 6.300000)
+
+		WALL: (3.620000, 6.270000) -- (3.620000, 7.730000)
+
+		WALL: (3.620000, 6.270000) -- (3.600000, 6.600000)
+
+		WALL: (3.620000, 7.730000) -- (3.600000, 7.400000)
+
+		WALL: (9.900000, 9.900000) -- (0.100000, 9.900000)
+
+		WALL: (5.060000, 9.900000) -- (0.100000, 9.900000)
+
+		WALL: (9.900000, 9.900000) -- (5.060000, 9.900000)
+
+INFO Replacing big line in Room 0 | Subroom 1 with:
+		WALL: (9.900000, 9.900000) -- (0.100000, 9.900000)
+
+INFO: Replacing wall with 
+		WALL: (5.060000, 9.900000) -- (0.100000, 9.900000)
+
+		WALL: (0.100000, 9.900000) -- (0.100000, 0.100000)
+
+		WALL: (0.100000, 6.270000) -- (0.100000, 0.100000)
+
+		WALL: (0.100000, 9.900000) -- (0.100000, 6.270000)
+
+INFO Replacing big line in Room 0 | Subroom 1 with:
+		WALL: (0.100000, 9.900000) -- (0.100000, 0.100000)
+
+INFO: Replacing wall with 
+		WALL: (0.100000, 9.900000) -- (0.100000, 6.270000)
+
+		WALL: (3.620000, 7.730000) -- (6.240000, 7.730000)
+
+		WALL: (5.060000, 7.730000) -- (6.240000, 7.730000)
+
+		WALL: (3.620000, 7.730000) -- (5.060000, 7.730000)
+
+INFO Replacing big line in Room 0 | Subroom 1 with:
+		WALL: (3.620000, 7.730000) -- (6.240000, 7.730000)
+
+INFO: Replacing wall with 
+		WALL: (3.620000, 7.730000) -- (5.060000, 7.730000)
+
+		WALL: (5.060000, 9.900000) -- (5.060000, 7.730000)
+
+		WALL: (3.620000, 6.270000) -- (2.300000, 6.300000)
+
+		WALL: (0.100000, 6.270000) -- (1.500000, 6.300000)
+
+		WALL: (3.620000, 6.270000) -- (3.600000, 6.600000)
+
+		WALL: (3.620000, 7.730000) -- (3.600000, 7.400000)
+
+		WALL: (6.240000, 7.730000) -- (6.240000, 6.270000)
+
+		WALL: (6.240000, 7.730000) -- (6.200000, 7.400000)
+
+		WALL: (6.240000, 6.270000) -- (6.200000, 6.600000)
+
+		WALL: (6.240000, 6.270000) -- (9.900000, 6.270000)
+
+		WALL: (6.240000, 6.270000) -- (7.000000, 6.300000)
+
+		WALL: (9.900000, 6.270000) -- (7.800000, 6.300000)
+
+		WALL: (9.900000, 0.100000) -- (9.900000, 9.900000)
+
+		WALL: (9.900000, 6.270000) -- (9.900000, 9.900000)
+
+		WALL: (9.900000, 0.100000) -- (9.900000, 6.270000)
+
+INFO Replacing big line in Room 0 | Subroom 2 with:
+		WALL: (9.900000, 0.100000) -- (9.900000, 9.900000)
+
+INFO: Replacing wall with 
+		WALL: (9.900000, 6.270000) -- (9.900000, 9.900000)
+
+		WALL: (9.900000, 9.900000) -- (0.100000, 9.900000)
+
+		WALL: (5.060000, 9.900000) -- (0.100000, 9.900000)
+
+		WALL: (9.900000, 9.900000) -- (5.060000, 9.900000)
+
+INFO Replacing big line in Room 0 | Subroom 2 with:
+		WALL: (9.900000, 9.900000) -- (0.100000, 9.900000)
+
+INFO: Replacing wall with 
+		WALL: (9.900000, 9.900000) -- (5.060000, 9.900000)
+
+		WALL: (5.060000, 9.900000) -- (5.060000, 7.730000)
+
+		WALL: (3.620000, 7.730000) -- (6.240000, 7.730000)
+
+		WALL: (5.060000, 7.730000) -- (6.240000, 7.730000)
+
+		WALL: (3.620000, 7.730000) -- (5.060000, 7.730000)
+
+INFO Replacing big line in Room 0 | Subroom 2 with:
+		WALL: (3.620000, 7.730000) -- (6.240000, 7.730000)
+
+INFO: Replacing wall with 
+		WALL: (5.060000, 7.730000) -- (6.240000, 7.730000)
+
+		WALL: (6.240000, 7.730000) -- (6.200000, 7.400000)
+
+		WALL: (6.240000, 6.270000) -- (6.200000, 6.600000)
+
+		WALL: (6.240000, 6.270000) -- (7.000000, 6.300000)
+
+		WALL: (9.900000, 6.270000) -- (7.800000, 6.300000)
+
+		WALL: (4.940000, 3.670000) -- (0.100000, 3.670000)
+
+		WALL: (4.940000, 3.670000) -- (2.900000, 3.700000)
+
+		WALL: (0.100000, 3.670000) -- (2.100000, 3.700000)
+
+		WALL: (0.100000, 0.100000) -- (9.900000, 0.100000)
+
+		WALL: (4.940000, 0.100000) -- (9.900000, 0.100000)
+
+		WALL: (0.100000, 0.100000) -- (4.940000, 0.100000)
+
+INFO Replacing big line in Room 0 | Subroom 3 with:
+		WALL: (0.100000, 0.100000) -- (9.900000, 0.100000)
+
+INFO: Replacing wall with 
+		WALL: (0.100000, 0.100000) -- (4.940000, 0.100000)
+
+		WALL: (4.940000, 0.100000) -- (4.940000, 3.670000)
+
+		WALL: (0.100000, 9.900000) -- (0.100000, 0.100000)
+
+		WALL: (0.100000, 3.670000) -- (0.100000, 0.100000)
+
+		WALL: (0.100000, 9.900000) -- (0.100000, 3.670000)
+
+INFO Replacing big line in Room 0 | Subroom 3 with:
+		WALL: (0.100000, 9.900000) -- (0.100000, 0.100000)
+
+INFO: Replacing wall with 
+		WALL: (0.100000, 3.670000) -- (0.100000, 0.100000)
+
+		WALL: (4.940000, 3.670000) -- (2.900000, 3.700000)
+
+		WALL: (0.100000, 3.670000) -- (2.100000, 3.700000)
+
+		WALL: (4.940000, 3.670000) -- (9.900000, 3.670000)
+
+		WALL: (4.940000, 3.670000) -- (7.000000, 3.700000)
+
+		WALL: (9.900000, 3.670000) -- (7.800000, 3.700000)
+
+		WALL: (0.100000, 0.100000) -- (9.900000, 0.100000)
+
+		WALL: (4.940000, 0.100000) -- (9.900000, 0.100000)
+
+		WALL: (0.100000, 0.100000) -- (4.940000, 0.100000)
+
+INFO Replacing big line in Room 0 | Subroom 4 with:
+		WALL: (0.100000, 0.100000) -- (9.900000, 0.100000)
+
+INFO: Replacing wall with 
+		WALL: (4.940000, 0.100000) -- (9.900000, 0.100000)
+
+		WALL: (9.900000, 0.100000) -- (9.900000, 9.900000)
+
+		WALL: (9.900000, 3.670000) -- (9.900000, 9.900000)
+
+		WALL: (9.900000, 0.100000) -- (9.900000, 3.670000)
+
+INFO Replacing big line in Room 0 | Subroom 4 with:
+		WALL: (9.900000, 0.100000) -- (9.900000, 9.900000)
+
+INFO: Replacing wall with 
+		WALL: (9.900000, 0.100000) -- (9.900000, 3.670000)
+
+		WALL: (4.940000, 0.100000) -- (4.940000, 3.670000)
+
+		WALL: (4.940000, 3.670000) -- (7.000000, 3.700000)
+
+		WALL: (9.900000, 3.670000) -- (7.800000, 3.700000)
+
+		WALL: (9.900000, 0.100000) -- (9.900000, 9.900000)
+
+		WALL: (9.900000, 0.100000) -- (9.900000, 4.600000)
+
+		WALL: (9.900000, 9.900000) -- (9.900000, 5.400000)
+
+		WALL: (6.240000, 6.270000) -- (9.900000, 6.270000)
+
+		WALL: (6.240000, 6.270000) -- (7.000000, 6.300000)
+
+		WALL: (9.900000, 6.270000) -- (7.800000, 6.300000)
+
+		WALL: (6.240000, 7.730000) -- (6.240000, 6.270000)
+
+		WALL: (6.240000, 7.730000) -- (6.200000, 7.400000)
+
+		WALL: (6.240000, 6.270000) -- (6.200000, 6.600000)
+
+		WALL: (3.620000, 6.270000) -- (3.620000, 7.730000)
+
+		WALL: (3.620000, 6.270000) -- (3.600000, 6.600000)
+
+		WALL: (3.620000, 7.730000) -- (3.600000, 7.400000)
+
+		WALL: (3.620000, 6.270000) -- (0.100000, 6.270000)
+
+		WALL: (3.620000, 6.270000) -- (2.300000, 6.300000)
+
+		WALL: (0.100000, 6.270000) -- (1.500000, 6.300000)
+
+		WALL: (0.100000, 9.900000) -- (0.100000, 0.100000)
+
+		WALL: (0.100000, 9.900000) -- (0.100000, 5.400000)
+
+		WALL: (0.100000, 0.100000) -- (0.100000, 4.600000)
+
+		WALL: (4.940000, 3.670000) -- (0.100000, 3.670000)
+
+		WALL: (4.940000, 3.670000) -- (2.900000, 3.700000)
+
+		WALL: (0.100000, 3.670000) -- (2.100000, 3.700000)
+
+		WALL: (4.940000, 3.670000) -- (9.900000, 3.670000)
+
+		WALL: (4.940000, 3.670000) -- (7.000000, 3.700000)
+
+		WALL: (9.900000, 3.670000) -- (7.800000, 3.700000)
+
+		WALL: (3.620000, 7.730000) -- (6.240000, 7.730000)
+
+		WALL: (9.900000, 0.100000) -- (9.900000, 4.600000)
+
+		WALL: (9.900000, 3.670000) -- (9.900000, 4.600000)
+
+		WALL: (9.900000, 0.100000) -- (9.900000, 3.670000)
+
+INFO Replacing big line in Room 0 | Subroom 5 with:
+		WALL: (9.900000, 0.100000) -- (9.900000, 4.600000)
+
+INFO: Replacing wall with 
+		WALL: (9.900000, 3.670000) -- (9.900000, 4.600000)
+
+		WALL: (9.900000, 9.900000) -- (9.900000, 5.400000)
+
+		WALL: (9.900000, 6.270000) -- (9.900000, 5.400000)
+
+		WALL: (9.900000, 9.900000) -- (9.900000, 6.270000)
+
+INFO Replacing big line in Room 0 | Subroom 5 with:
+		WALL: (9.900000, 9.900000) -- (9.900000, 5.400000)
+
+INFO: Replacing wall with 
+		WALL: (9.900000, 6.270000) -- (9.900000, 5.400000)
+
+		WALL: (6.240000, 6.270000) -- (7.000000, 6.300000)
+
+		WALL: (9.900000, 6.270000) -- (7.800000, 6.300000)
+
+		WALL: (6.240000, 7.730000) -- (6.200000, 7.400000)
+
+		WALL: (6.240000, 6.270000) -- (6.200000, 6.600000)
+
+		WALL: (3.620000, 6.270000) -- (3.600000, 6.600000)
+
+		WALL: (3.620000, 7.730000) -- (3.600000, 7.400000)
+
+		WALL: (3.620000, 6.270000) -- (2.300000, 6.300000)
+
+		WALL: (0.100000, 6.270000) -- (1.500000, 6.300000)
+
+		WALL: (0.100000, 9.900000) -- (0.100000, 5.400000)
+
+		WALL: (0.100000, 6.270000) -- (0.100000, 5.400000)
+
+		WALL: (0.100000, 9.900000) -- (0.100000, 6.270000)
+
+INFO Replacing big line in Room 0 | Subroom 5 with:
+		WALL: (0.100000, 9.900000) -- (0.100000, 5.400000)
+
+INFO: Replacing wall with 
+		WALL: (0.100000, 6.270000) -- (0.100000, 5.400000)
+
+		WALL: (0.100000, 0.100000) -- (0.100000, 4.600000)
+
+		WALL: (0.100000, 3.670000) -- (0.100000, 4.600000)
+
+		WALL: (0.100000, 0.100000) -- (0.100000, 3.670000)
+
+INFO Replacing big line in Room 0 | Subroom 5 with:
+		WALL: (0.100000, 0.100000) -- (0.100000, 4.600000)
+
+INFO: Replacing wall with 
+		WALL: (0.100000, 3.670000) -- (0.100000, 4.600000)
+
+		WALL: (4.940000, 3.670000) -- (2.900000, 3.700000)
+
+		WALL: (0.100000, 3.670000) -- (2.100000, 3.700000)
+
+		WALL: (4.940000, 3.670000) -- (7.000000, 3.700000)
+
+		WALL: (9.900000, 3.670000) -- (7.800000, 3.700000)
+
+INFO: 	Init Geometry successful!!!
+
+INFO: 	Init Distribute
+INFO: 	Distributing 2 Agents in Room/Subrom [0/1]! Maximum allowed: 124
+	...Done
+INFO: 	Distributing 2 Agents in Room/Subrom [0/2]! Maximum allowed: 119
+	...Done
+INFO: 	Distributing 2 Agents in Room/Subrom [0/3]! Maximum allowed: 135
+	...Done
+INFO: 	Distributing 2 Agents in Room/Subrom [0/4]! Maximum allowed: 144
+	...Done
+INFO: 	Distributing 2 Agents in Room/Subrom [0/5]! Maximum allowed: 221
+	...Done
+INFO: 	Initializing the grid with cell size: 2.200000 
+INFO: 	Done with Initializing the grid 
+INFO: 	Adding distances in Room 0 to matrix
+INFO:	 FloydWarshall done!
+INFO: 	FF Router Init done.
+INFO: 	Checking the geometry for artifacts: (Ignore Warnings, if ff_[...] router is used!)
+WARNING:	 Room [0] Subroom [1] is not convex!
+        	 you might consider adding extra hlines in your routing.xml file
+WARNING:	 Room [0] Subroom [2] is not convex!
+        	 you might consider adding extra hlines in your routing.xml file
+WARNING:	 Room [0] Subroom [5] is not convex!
+        	 you might consider adding extra hlines in your routing.xml file
+INFO: 	...Done!!!
+
+INFO:	 Init Operational Model starting ...
+INFO:	 Init DirectionLOCALFloorfield starting ...
+INFO: 	Calling Constructor of UnivFFviaFM(Room-scale) in DirectionLocalFloorfield::Init(...)
+INFO: 	Time to construct FF in DirectionLocalFloorfield: 0.115925
+INFO:	 Init DirectionLOCALFloorfield done
+INFO:	 Init Operational Model done
+INFO:	 nPeds 10 received
+INFO:	File 'events.txt' will be monitored for new events.
+INFO: 	Adding a new routing Engine with the key: 
+
+INFO: 	Looking for pre-defined events in other files
+INFO: 	No events found
+INFO: 	Start runSimulation() with 10 pedestrians
+ERROR: 	Could not find a route for pedestrian 10
+ERROR: 	Could not find a route for pedestrian 8
+ERROR: 	Could not find a route for pedestrian 9
+ERROR: 	Could not find a route for pedestrian 5
+ERROR: 	Could not find a route for pedestrian 6
+ERROR: 	Could not find a route for pedestrian 7
+ERROR: 	Could not find a route for pedestrian 4
+ERROR: 	Could not find a route for pedestrian 1
+ERROR: 	Could not find a route for pedestrian 2
+ERROR: 	Could not find a route for pedestrian 3
+
+INFO: 	End runSimulation()
+
+Exec Time [s]     : 1.00
+Evac Time [s]     : 17.54
+Realtime Factor   : 17.54 X 
+Number of Threads : 1
+Warnings          : 3
+Errors            : 12
+Deleted Agents    : 10
+
