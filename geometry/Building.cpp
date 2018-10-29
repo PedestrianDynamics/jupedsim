@@ -377,15 +377,15 @@ bool Building::correct() const {
                                                                 // after
                                                                 // eliminating
                                                                 // nasty exits
-               std::cout<< "\n" << KRED << "correct Room " << room.first << "  Subroom " << subroom.first << RESET  << std::endl;
+               // std::cout<< "\n" << KRED << "correct Room " << room.first << "  Subroom " << subroom.first << RESET  << std::endl;
                for(auto const & bigWall: walls) //self checking
                {
-                    std::cout << "BigWall: " << std::endl;
-                    bigWall.WriteToErrorLog();
+                    // std::cout << "BigWall: " << std::endl;
+                      // bigWall.WriteToErrorLog();
                     //special treatment for doors
 /////
                     std::vector<Wall> WallPieces = SplitWall(subroom.second, bigWall);
-                    std::cout << "Wall peces size : " <<  WallPieces.size() << std::endl;
+                    // std::cout << "Wall peces size : " <<  WallPieces.size() << std::endl;
                     for(auto w:WallPieces)
                          w.WriteToErrorLog();
 
