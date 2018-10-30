@@ -228,7 +228,7 @@ public:
       * @param filename the relative location of the file
       * @return true if everything went fine.
       */
-  //   bool SaveGeometry(const std::string& filename);
+    bool SaveGeometry(const std::string& filename) const;
 
      void WriteToErrorLog() const;
 
@@ -249,7 +249,6 @@ public:
       */
 
      std::vector<Point> GetBoundaryVertices() const;
-
 
 private:
      void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);

@@ -37,6 +37,9 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../mpi/LCGrid.h"
 #include "../IO/GeoFileParser.h"
+#include <boost/filesystem.hpp>
+//namespace fs = std::experimental::filesystem;
+namespace fs = boost::filesystem;
 
 #endif
 //#undef _OPENMP
@@ -440,6 +443,16 @@ bool Building::correct() const {
                }// bigLine
           }//s
      }//r
+     bool change=true; // todo: initialize if any changed have been done
+     if(change)
+     {
+          fs::path f("correct_"+this->GetConfig()->GetGeometryFile());
+          fs::path p(this->GetConfig()->GetProjectRootDir());
+          p = p / f;
+          std::string filename = p.string();
+          std::cout <<  "\n--> Corrected geometry: " << filename<< "\n";
+          SaveGeometry(filename);
+     }
 
      return true;
 }
@@ -1210,121 +1223,121 @@ Transition* Building::GetTransitionByUID(int uid) const
      return nullptr;
 }
 
-//bool Building::SaveGeometry(const std::string& filename)
-//{
-//     std::stringstream geometry;
-//
-//     //write the header
-//     geometry << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" << endl;
-//     geometry << "<geometry version=\"0.5\" caption=\"second life\" unit=\"m\"\n "
-//               " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n  "
-//               " xsi:noNamespaceSchemaLocation=\"http://134.94.2.137/jps_geoemtry.xsd\">" << endl << endl;
-//
-//     //write the rooms
-//     geometry << "<rooms>" << endl;
-//     for (auto&& itroom : _rooms) {
-//          auto&& room = itroom.second;
-//          geometry << "\t<room id =\"" << room->GetID() << "\" caption =\"" << room->GetCaption() << "\">" << endl;
-//          for (auto&& itr_sub : room->GetAllSubRooms()) {
-//               auto&& sub = itr_sub.second;
-//               const double* plane = sub->GetPlaneEquation();
-//               geometry << "\t\t<subroom id =\"" << sub->GetSubRoomID()
-//                         << "\" closed=\"" << 0
-//                         << "\" class=\"" << sub->GetType()
-//                         << "\" A_x=\"" << plane[0]
-//                         << "\" B_y=\"" << plane[1]
-//                         << "\" C_z=\"" << plane[2] << "\">" << endl;
-//
-//               for (auto&& wall : sub->GetAllWalls()) {
-//                    const Point& p1 = wall.GetPoint1();
-//                    const Point& p2 = wall.GetPoint2();
-//
-//                    geometry << "\t\t\t<polygon caption=\"wall\" type=\"" << wall.GetType() << "\">" << endl
-//                              << "\t\t\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << endl
-//                              << "\t\t\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << endl
-//                              << "\t\t\t</polygon>" << endl;
-//               }
-//
-//               if (sub->GetType()=="stair") {
-//                    const Point& up = ((Stair*) sub.get())->GetUp();
-//                    const Point& down = ((Stair*) sub.get())->GetDown();
-//                    geometry << "\t\t\t<up px=\"" << up._x << "\" py=\"" << up._y << "\"/>" << endl;
-//                    geometry << "\t\t\t<down px=\"" << down._x << "\" py=\"" << down._y << "\"/>" << endl;
-//               }
-//
-//               geometry << "\t\t</subroom>" << endl;
-//          }
-//
-//          //write the crossings
-//          geometry << "\t\t<crossings>" << endl;
-//          for (auto const& mapcross : _crossings) {
-//               Crossing* cross = mapcross.second;
-//
-//               //only write the crossings in this rooms
-//               if (cross->GetRoom1()->GetID()!=room->GetID()) continue;
-//
-//               const Point& p1 = cross->GetPoint1();
-//               const Point& p2 = cross->GetPoint2();
-//
-//               geometry << "\t<crossing id =\"" << cross->GetID()
-//                         << "\" subroom1_id=\"" << cross->GetSubRoom1()->GetSubRoomID()
-//                         << "\" subroom2_id=\"" << cross->GetSubRoom2()->GetSubRoomID() << "\">" << endl;
-//
-//               geometry << "\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << endl
-//                         << "\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << endl
-//                         << "\t</crossing>" << endl;
-//          }
-//          geometry << "\t\t</crossings>" << endl;
-//          geometry << "\t</room>" << endl;
-//     }
-//
-//     geometry << "</rooms>" << endl;
-//
-//     //write the transitions
-//     geometry << "<transitions>" << endl;
-//
-//     for (auto const& maptrans : _transitions) {
-//          Transition* trans = maptrans.second;
-//          const Point& p1 = trans->GetPoint1();
-//          const Point& p2 = trans->GetPoint2();
-//          int room2_id = -1;
-//          int subroom2_id = -1;
-//          if (trans->GetRoom2()) {
-//               room2_id = trans->GetRoom2()->GetID();
-//               subroom2_id = trans->GetSubRoom2()->GetSubRoomID();
-//          }
-//
-//          geometry << "\t<transition id =\"" << trans->GetID()
-//                    << "\" caption=\"" << trans->GetCaption()
-//                    << "\" type=\"" << trans->GetType()
-//                    << "\" room1_id=\"" << trans->GetRoom1()->GetID()
-//                    << "\" subroom1_id=\"" << trans->GetSubRoom1()->GetSubRoomID()
-//                    << "\" room2_id=\"" << room2_id
-//                    << "\" subroom2_id=\"" << subroom2_id << "\">" << endl;
-//
-//          geometry << "\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << endl
-//                    << "\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << endl
-//                    << "\t</transition>" << endl;
-//
-//     }
-//
-//     geometry << "</transitions>" << endl;
-//     geometry << "</geometry>" << endl;
-//     //write the routing file
-//
-//     //cout<<endl<<geometry.str()<<endl;
-//
-//     ofstream geofile(filename);
-//     if (geofile.is_open()) {
-//          geofile << geometry.str();
-//          Log->Write("INFO:\tfile saved to %s", filename.c_str());
-//     }
-//     else {
-//          Log->Write("ERROR:\tunable to save the geometry to %s", filename.c_str());
-//          return false;
-//     }
-//
-//     return true;
-//}
+bool Building::SaveGeometry(const std::string& filename) const
+{
+    std::stringstream geometry;
+
+    //write the header
+    geometry << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" << endl;
+    geometry << "<geometry version=\"0.8\" caption=\"second life\" unit=\"m\"\n "
+              " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n  "
+              " xsi:noNamespaceSchemaLocation=\"http://134.94.2.137/jps_geoemtry.xsd\">" << endl << endl;
+
+    //write the rooms
+    geometry << "<rooms>" << endl;
+    for (auto&& itroom : _rooms) {
+         auto&& room = itroom.second;
+         geometry << "\t<room id =\"" << room->GetID() << "\" caption =\"" << room->GetCaption() << "\">" << endl;
+         for (auto&& itr_sub : room->GetAllSubRooms()) {
+              auto&& sub = itr_sub.second;
+              const double* plane = sub->GetPlaneEquation();
+              geometry << "\t\t<subroom id =\"" << sub->GetSubRoomID()
+                        << "\" closed=\"" << 0
+                        << "\" class=\"" << sub->GetType()
+                        << "\" A_x=\"" << plane[0]
+                        << "\" B_y=\"" << plane[1]
+                        << "\" C_z=\"" << plane[2] << "\">" << endl;
+
+              for (auto&& wall : sub->GetAllWalls()) {
+                   const Point& p1 = wall.GetPoint1();
+                   const Point& p2 = wall.GetPoint2();
+
+                   geometry << "\t\t\t<polygon caption=\"wall\" type=\"" << wall.GetType() << "\">" << endl
+                             << "\t\t\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << endl
+                             << "\t\t\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << endl
+                             << "\t\t\t</polygon>" << endl;
+              }
+
+              if (sub->GetType()=="stair") {
+                   const Point& up = ((Stair*) sub.get())->GetUp();
+                   const Point& down = ((Stair*) sub.get())->GetDown();
+                   geometry << "\t\t\t<up px=\"" << up._x << "\" py=\"" << up._y << "\"/>" << endl;
+                   geometry << "\t\t\t<down px=\"" << down._x << "\" py=\"" << down._y << "\"/>" << endl;
+              }
+
+              geometry << "\t\t</subroom>" << endl;
+         }
+
+         //write the crossings
+         geometry << "\t\t<crossings>" << endl;
+         for (auto const& mapcross : _crossings) {
+              Crossing* cross = mapcross.second;
+
+              //only write the crossings in this rooms
+              if (cross->GetRoom1()->GetID()!=room->GetID()) continue;
+
+              const Point& p1 = cross->GetPoint1();
+              const Point& p2 = cross->GetPoint2();
+
+              geometry << "\t<crossing id =\"" << cross->GetID()
+                        << "\" subroom1_id=\"" << cross->GetSubRoom1()->GetSubRoomID()
+                        << "\" subroom2_id=\"" << cross->GetSubRoom2()->GetSubRoomID() << "\">" << endl;
+
+              geometry << "\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << endl
+                        << "\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << endl
+                        << "\t</crossing>" << endl;
+         }
+         geometry << "\t\t</crossings>" << endl;
+         geometry << "\t</room>" << endl;
+    }
+
+    geometry << "</rooms>" << endl;
+
+    //write the transitions
+    geometry << "<transitions>" << endl;
+
+    for (auto const& maptrans : _transitions) {
+         Transition* trans = maptrans.second;
+         const Point& p1 = trans->GetPoint1();
+         const Point& p2 = trans->GetPoint2();
+         int room2_id = -1;
+         int subroom2_id = -1;
+         if (trans->GetRoom2()) {
+              room2_id = trans->GetRoom2()->GetID();
+              subroom2_id = trans->GetSubRoom2()->GetSubRoomID();
+         }
+
+         geometry << "\t<transition id =\"" << trans->GetID()
+                   << "\" caption=\"" << trans->GetCaption()
+                   << "\" type=\"" << trans->GetType()
+                   << "\" room1_id=\"" << trans->GetRoom1()->GetID()
+                   << "\" subroom1_id=\"" << trans->GetSubRoom1()->GetSubRoomID()
+                   << "\" room2_id=\"" << room2_id
+                   << "\" subroom2_id=\"" << subroom2_id << "\">" << endl;
+
+         geometry << "\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << endl
+                   << "\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << endl
+                   << "\t</transition>" << endl;
+
+    }
+
+    geometry << "</transitions>" << endl;
+    geometry << "</geometry>" << endl;
+    //write the routing file
+
+    //cout<<endl<<geometry.str()<<endl;
+
+    ofstream geofile(filename);
+    if (geofile.is_open()) {
+         geofile << geometry.str();
+         Log->Write("INFO:\tfile saved to %s", filename.c_str());
+    }
+    else {
+         Log->Write("ERROR:\tunable to save the geometry to %s", filename.c_str());
+         return false;
+    }
+
+    return true;
+}
 
 #endif // _SIMULATOR
