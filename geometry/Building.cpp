@@ -445,8 +445,12 @@ bool Building::correct() const {
 }
 bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom>& subroom) const
 {
+     std::cout << KRED << "\nEnter RemoveOverlappingDoors with subroom " << subroom->GetRoomID() << "," << subroom->GetSubRoomID() << RESET<<"\n";
 
-      vector<Line> exits = vector<Line>(); //check is = goals?
+      vector<Line> exits = vector<Line>(); // transitions+crossings
+      auto walls = subroom->GetAllWalls();
+      vector<Wall> tmpWalls = vector<Wall>(); //splited big walls are stored here
+      bool isBigWall = false; // mark walls as big. If not big, add them to tmpWalls
       //  collect all crossings
       for (auto&& cros: subroom->GetAllCrossings())
             exits.push_back(*cros);
@@ -454,50 +458,73 @@ bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom>& subroom) c
       for (auto&& trans: subroom->GetAllTransitions())
             exits.push_back(*trans);
 
+      for(auto w: subroom->GetAllWalls())
+            w.WriteToErrorLog();
+      std::cout << "---------------\n";
       // removing doors on walls
-      auto walls = subroom->GetAllWalls();
-      // std::cout << "walls: " << walls.size()<< std::endl;
-      for(auto const & wall: walls)
-      {
-            for(auto e: exits)
-            {
-                  if(wall.NearlyInLineSegment(e.GetPoint1()) && wall.NearlyInLineSegment(e.GetPoint2()))
-                  {
-                        std::cout <<KGRN << "\n -- Remove overlapping wall with door" << RESET << std::endl;
-                        std::cout << "REMOVE" << std::endl;
-                        wall.WriteToErrorLog();
 
-                        double dist_pt1 = (wall.GetPoint1()-e.GetPoint1()).NormSquare();
-                        double dist_pt2 = (wall.GetPoint1()-e.GetPoint2()).NormSquare();
-                        if(dist_pt1<dist_pt2)
-                        {
-                              Wall NewWall(wall.GetPoint1(), e.GetPoint1());
-                              Wall NewWall1(wall.GetPoint2(), e.GetPoint2());
-                              subroom->AddWall(NewWall);
-                              subroom->AddWall(NewWall1);
-                              std::cout << " -->  Wall replaced by: " << std::endl;
-                              NewWall.WriteToErrorLog();
-                              NewWall1.WriteToErrorLog();
-                        }
-                        else
-                        {
-                              Wall NewWall(wall.GetPoint1(), e.GetPoint2());
-                              Wall NewWall1(wall.GetPoint2(), e.GetPoint1());
-                              subroom->AddWall(NewWall);
-                              subroom->AddWall(NewWall1);
-                              std::cout << " --> Wall replaced by:" << std::endl;
-                              NewWall.WriteToErrorLog();
-                              NewWall1.WriteToErrorLog();
-                        }
-                        subroom->RemoveWall(wall);
-                  }
-            }
+      while(!walls.empty())
+      {
+           auto wall = walls.back();
+           walls.pop_back();
+           isBigWall = false;
+           for(auto  e=exits.begin(); e!=exits.end(); )
+           {
+                if(wall.NearlyInLineSegment(e->GetPoint1()) && wall.NearlyInLineSegment(e->GetPoint2()))
+                {
+                     isBigWall = true; // mark walls as big
+                     double dist_pt1 = (wall.GetPoint1() - e->GetPoint1()).NormSquare();
+                     double dist_pt2 = (wall.GetPoint1() - e->GetPoint2()).NormSquare();
+                     if(dist_pt1<dist_pt2)
+                     {
+                          Wall NewWall(wall.GetPoint1(), e->GetPoint1());
+                          Wall NewWall1(wall.GetPoint2(), e->GetPoint2());
+                          std::cout << " 1 -->  Wall replaced by: " << std::endl;
+                          NewWall.WriteToErrorLog();
+                          NewWall1.WriteToErrorLog();
+                          // add new lines to be controled against overlap with exits
+                          walls.push_back(NewWall);
+                          walls.push_back(NewWall1);
+                     }
+                     else
+                     {
+                          Wall NewWall(wall.GetPoint1(), e->GetPoint2());
+                          Wall NewWall1(wall.GetPoint2(), e->GetPoint1());
+                          std::cout << " 2 --> Wall replaced by:" << std::endl;
+                          NewWall.WriteToErrorLog();
+                          NewWall1.WriteToErrorLog();
+                          // add new lines to be controled against overlap with exits
+                          walls.push_back(NewWall);
+                          walls.push_back(NewWall1);
+                     }
+                     subroom->RemoveWall(wall);
+                     exits.erase(e); // we don't need to check this exit again
+                     break; // we are done with this wall. get next wall.
+
+                }// if
+                else
+                {
+                     e++;
+                }
+           } // exits
+           if(!isBigWall)
+                tmpWalls.push_back(wall);
+
+      }// while
+
+      // copy walls in subroom
+      for(auto const & wall: tmpWalls)
+      {
+           subroom->AddWall(wall);
       }
-      // std::cout << "LEAVE " << std::endl;
-      // std::cout << ">> walls: " << subroom->GetAllWalls().size()<< std::endl;
-      // for(auto w: subroom->GetAllWalls())
-      //       w.WriteToErrorLog();
-      // getc(stdin);
+
+
+      std::cout << "\nnew Subroom:  " << std::endl;
+      for(auto w: subroom->GetAllWalls())
+           w.WriteToErrorLog(); // AddWall won't add existing walls
+
+      std::cout << KGRN << "\nLEAVE.  " << RESET << std::endl;
+//       getc(stdin);
 
 
       return true;
@@ -505,8 +532,8 @@ bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom>& subroom) c
 
 std::vector<Wall>  Building::SplitWall(const std::shared_ptr<SubRoom>& subroom, const Wall&  bigWall) const{
      std::vector<Wall> WallPieces;
-     // std::cout << "collect wall pieces with " << std::endl;
-     // bigWall.WriteToErrorLog();
+     std::cout << subroom->GetSubRoomID() << "collect wall pieces with " << std::endl;
+     bigWall.WriteToErrorLog();
      auto walls = subroom->GetAllWalls();
      auto crossings = subroom->GetAllCrossings();
      auto transitions = subroom->GetAllTransitions();
@@ -528,24 +555,40 @@ std::vector<Wall>  Building::SplitWall(const std::shared_ptr<SubRoom>& subroom, 
 
           if((bigWall == other) || (bigWall.ShareCommonPointWith(other))) continue;
           Point intersectionPoint;
+
           if(bigWall.IntersectionWith(other, intersectionPoint))
           {
                if(intersectionPoint == bigWall.GetPoint1() || intersectionPoint == bigWall.GetPoint2()) continue;
+               std::cout << "BIG\n";
+
+                            std::cout << bigWall.GetPoint1()._x << " " << bigWall.GetPoint1()._y << "\n";
+                                                                                                    std::cout << bigWall.GetPoint2()._x << " " << bigWall.GetPoint2()._y << "\n";
+
                std::cout<< "intersectin with: " << std::endl;
                std::cout << other.toString() << "\n";
+                                                std::cout << intersectionPoint._x <<" " <<intersectionPoint._y << "\n";
+
                string s = intersectionPoint.toString();
+                                                Point NAN_p(J_NAN, J_NAN);
+
+                                                                                                                  if(std::isnan(intersectionPoint._x) || std::isnan(intersectionPoint._y))
+                                                     continue;
+
+
                std::cout << "\t >> Intersection at Point: " << s.c_str() << "\n";
                Wall NewWall(intersectionPoint, bigWall.GetPoint2());// [IP -- P2]
                Wall NewWall2(bigWall.GetPoint1(), intersectionPoint);// [IP -- P2]
 
                WallPieces.push_back(NewWall);
                WallPieces.push_back(NewWall2);
-               // std::cout << "Add newwall: " << std::endl;
-               //                                 NewWall.WriteToErrorLog();
-               //                                 NewWall2.WriteToErrorLog();
+               std::cout << "Add newwall: " << std::endl;
+                                               NewWall.WriteToErrorLog();
+                                               NewWall2.WriteToErrorLog();
           }
      }//other walls
-     // std::cout << "Leave collect\n--------" << std::endl;
+     std::cout << "Leave collect\n--------" << std::endl;
+// getc(stdin);
+
      return WallPieces;
 }
 bool Building::ReplaceBigWall(const std::shared_ptr<SubRoom>& subroom, const Wall& bigWall, std::vector<Wall>& WallPieces) const
