@@ -207,22 +207,18 @@ bool SubRoom::AddWall(const Wall& w)
      {
           if(w==w1)
           {
-               Log->Write("ERROR:\t Duplicate wall found in Room/Subroom %d/%d  %s",_roomID,_id ,w.toString().c_str());
-               Log->Write("ERROR:\t will not be added");
-               //exit(EXIT_FAILURE);
+               Log->Write("WARNING:\t Subroom::AddWall, Wall %s already exists in Room/Subroom %d/%d. Won't AddWall.",_roomID,_id ,w.toString().c_str());
                return false;
           }
      }
      //checking for wall chunks.
      if(w.Length()<J_TOLERANZ)
      {
-          Log->Write("ERROR:\t Wall too small (length = %lf) found in Room/Subroom %d/%d  %s",w.Length(),_roomID,_id ,w.toString().c_str());
+          Log->Write("WARNING:\t Subroom::AddWall, Wall too small (length = %lf) in Room/Subroom %d/%d  %s. Won't AddWall.",w.Length(),_roomID,_id ,w.toString().c_str());
           Log->Write("ERROR:\t will not be added");
-          //exit(EXIT_FAILURE);
           return false;
      }
      _walls.push_back(w);
-
      return true;
 }
 
