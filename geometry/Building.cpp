@@ -475,28 +475,27 @@ bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom>& subroom) c
                      isBigWall = true; // mark walls as big
                      double dist_pt1 = (wall.GetPoint1() - e->GetPoint1()).NormSquare();
                      double dist_pt2 = (wall.GetPoint1() - e->GetPoint2()).NormSquare();
+                     Point A, B;
+
                      if(dist_pt1<dist_pt2)
                      {
-                          Wall NewWall(wall.GetPoint1(), e->GetPoint1());
-                          Wall NewWall1(wall.GetPoint2(), e->GetPoint2());
-                          std::cout << " 1 -->  Wall replaced by: " << std::endl;
-                          NewWall.WriteToErrorLog();
-                          NewWall1.WriteToErrorLog();
-                          // add new lines to be controled against overlap with exits
-                          walls.push_back(NewWall);
-                          walls.push_back(NewWall1);
+                          A = e->GetPoint1();
+                          B = e->GetPoint2();
                      }
                      else
                      {
-                          Wall NewWall(wall.GetPoint1(), e->GetPoint2());
-                          Wall NewWall1(wall.GetPoint2(), e->GetPoint1());
-                          std::cout << " 2 --> Wall replaced by:" << std::endl;
-                          NewWall.WriteToErrorLog();
-                          NewWall1.WriteToErrorLog();
-                          // add new lines to be controled against overlap with exits
-                          walls.push_back(NewWall);
-                          walls.push_back(NewWall1);
+                          A = e->GetPoint2();
+                          B = e->GetPoint1();
                      }
+
+                     Wall NewWall(wall.GetPoint1(), A);
+                     Wall NewWall1(wall.GetPoint2(), B);
+                     std::cout << " -->  Wall replaced by: " << std::endl;
+                     NewWall.WriteToErrorLog();
+                     NewWall1.WriteToErrorLog();
+                     // add new lines to be controled against overlap with exits
+                     walls.push_back(NewWall);
+                     walls.push_back(NewWall1);
                      subroom->RemoveWall(wall);
                      exits.erase(e); // we don't need to check this exit again
                      break; // we are done with this wall. get next wall.
