@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<JuPedSim project="Subway-Project" version="0.7"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
+
+<!-- seed used for initialising random generator -->
+<seed>1254</seed>
+<max_sim_time>200</max_sim_time>
+<!-- geometry file -->
+<geometry>geometry7.xml</geometry>
+<!-- trajectories file and format -->
+<trajectories format="xml-plain" fps="8">
+    <file location="traj7.xml" />
+</trajectories>
+<!-- where to store the logs -->
+<logfile>log7</logfile>
+
+<routing>
+</routing>
+
+<!--persons information and distribution -->
+<agents operational_model_id="4">
+    <agents_distribution>
+        <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="1" number="20" goal_id="-1" router_id="1" />
+    </agents_distribution>
+</agents>
+
+<!-- These parameters may be overwritten -->
+<operational_models>
+
+    <model operational_model_id="3" description="Tordeux2015">
+        <model_parameters>
+            <solver>euler</solver>
+            <stepsize>0.05</stepsize>
+            <exit_crossing_strategy>8</exit_crossing_strategy>
+            <linkedcells enabled="true" cell_size="2"/>
+            <force_ped  a="2" D="0.1"/>
+            <force_wall a="5" D="0.02"/>
+        </model_parameters>
+        <agent_parameters agent_parameter_id="1">
+            <v0 mu="1.34" sigma="0.0" />
+            <v0_upstairs mu="0.668" sigma="0.167" />
+            <v0_downstairs mu="0.750" sigma="0.188" />
+            <v0_idle_escalator_upstairs mu="0.5" sigma="0.0" />
+            <v0_idle_escalator_downstairs mu="0.5" sigma="0.0" />
+            <bmax mu="0.25" sigma="0.0" /> <!--Bmax=bmin=amin und atau=0, damit Kreise-->
+            <bmin mu="0.25" sigma="0.0" />
+            <amin mu="0.25" sigma="0.0" />
+            <atau mu="0." sigma="0.0" />
+            <tau mu="0.5" sigma="0.0" />
+            <T mu="1" sigma="0.0" />
+        </agent_parameters>
+    </model>
+
+    <model operational_model_id="4" description="gradnav">
+        <model_parameters>
+            <solver>euler</solver>
+            <stepsize>0.01</stepsize>
+            <exit_crossing_strategy>8</exit_crossing_strategy>
+            <floorfield delta_h="0.0625" wall_avoid_distance="0.4" use_wall_avoidance="true" />
+            <linkedcells enabled="true" cell_size="4.2" />
+            <force_ped nu="15" b="0.25" c="3.0" />
+            <force_wall nu="0" b="0.70" c="3.0" />
+            <anti_clipping slow_down_distance="0.8" />
+        </model_parameters>
+        <agent_parameters agent_parameter_id="1">
+            <v0 mu="1.2" sigma="0.0" />
+            <bmax mu="0.15" sigma="0.001" />
+            <bmin mu="0.15" sigma="0.001" />
+            <amin mu="0.15" sigma="0.001" />
+            <tau mu="0.5" sigma="0.001" />
+            <atau mu="0.0" sigma="0.001" />
+        </agent_parameters>
+    </model>
+
+</operational_models>
+
+<route_choice_models>
+    <router router_id="1" description="ff_global_shortest">
+    </router>
+</route_choice_models>
+
+
+
+</JuPedSim>
