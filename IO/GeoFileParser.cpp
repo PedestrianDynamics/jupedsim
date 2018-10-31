@@ -415,6 +415,7 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
 
                Goal* wa = new WaitingArea();
                WaitingArea* waitingArea = static_cast<WaitingArea*>(wa);
+               waitingArea->SetIsFinalGoal(1);
                waitingArea->SetId(id);
                waitingArea->SetCaption(caption);
                waitingArea->setOpen(open);
@@ -433,6 +434,7 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                     std::cout << "nextWaID=" << nextWaId << ", nextWaP=" << nextWaP << std::endl;
                     nextGoals.insert(std::pair<int, double>(nextWaId, nextWaP));
                }
+
                if (!waitingArea->setNextGoals(nextGoals)){
                     return false;
                };
@@ -459,11 +461,12 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                }
 
                building->AddGoal(wa);
-               _configuration->GetRoutingEngine()->AddFinalDestinationID(wa->GetId());
-
+//               _configuration->GetRoutingEngine()->AddFinalDestinationID(wa->GetId());
 
                std::cout << waitingArea->toString() << std::endl;
           }
+
+
      }
 
      //load routes

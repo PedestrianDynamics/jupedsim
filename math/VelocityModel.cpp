@@ -329,8 +329,11 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
           ped->SetSmoothTurning();
           desired_direction = ped->GetV0();
       }
-      //Log->Write("%f    %f", desired_direction._x, desired_direction._y);
-      if (desired_direction.NormSquare() < 0.1) {
+      Log->Write("Desired direction: %f    %f", desired_direction._x, desired_direction._y);
+      Log->Write("Target:            %f    %f", target._x, target._y);
+      Log->Write("Ped pos:           %f    %f", ped->GetPos()._x, ped->GetPos()._y);
+
+     if (desired_direction.NormSquare() < 0.1) {
           Log->Write("ERROR:\t desired_direction in VelocityModel::e0 is too small.");
       }
       return desired_direction;
