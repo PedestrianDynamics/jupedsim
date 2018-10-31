@@ -451,7 +451,8 @@ bool Building::correct() const {
           p = p / f;
           std::string filename = p.string();
           std::cout <<  "\n--> Corrected geometry: " << filename<< "\n";
-          SaveGeometry(filename);
+          if(SaveGeometry(filename))
+               this->GetConfig()->SetGeometryFile(filename);
      }
 
      return true;
