@@ -84,9 +84,10 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(README_FILE "${CMAKE_SOURCE_DIR}/README.md")
 if(APPLE AND CMAKE_INSTALL_PREFIX MATCHES "/usr/local")
-        set(CMAKE_INSTALL_PREFIX ${EXECUTABLE_OUTPUT_PATH}) #"/Applications")
+        set(CMAKE_INSTALL_PREFIX ${EXECUTABLE_OUTPUT_PATH}) #"/nApplications")
 endif()
 
+set(CMAKE_INSTALL_PREFIX /tmp)
 # these files compile need Cocoa (evtl. Mac specific)
 SET(MAC_FIX_SRC src/fix/osx_thread_fix.mm) #.mm
 SET(MAC_FIX_HDR src/fix/osx_thread_fix.h) #.h
