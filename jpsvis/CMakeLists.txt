@@ -223,12 +223,6 @@ ENDIF (WIN32)
 #--------------- here comes QT. Version problem (4 or 5?)
 # cmake does not provide findqt5-modules
 #message(STATUS "QT_Qmake_executable " ${QT_QMAKE_EXECUTABLE})
-if($QT_QMAKE_EXECUTABLE STREQUAL "")
-  FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake)
-  if (NOT QT_QMAKE_EXECUTABL)
-    message(WARNING "Check Qt          ...  no")
-  endif()
-endif()
 # default qt version is 4
 if("${DESIRED_QT_VERSION}" STREQUAL "")
   set(DESIRED_QT_VERSION "5")
@@ -401,7 +395,7 @@ add_definitions("-DUSED_COMPILER=\"${USED_COMPILER}\"")
 # Install the QtTest application, on Apple, the bundle is at the root of the
 # install tree, and on other platforms it'll go into the bin directory.
 INSTALL(TARGETS jpsvis
-  BUNDLE DESTINATION . COMPONENT Runtime
+  BUNDLE DESTINATION ${CMAKE_INSTALL_PREFIX} COMPONENT Runtime
   RUNTIME DESTINATION bin COMPONENT Runtime
   )
 
@@ -409,14 +403,14 @@ INSTALL(TARGETS jpsvis
 #--------------------------------------------------------------------------------
 # Install needed Qt plugins by copying directories from the qt installation
 # One can cull what gets copied by using 'REGEX "..." EXCLUDE'
-INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${plugin_dest_dir}/plugins COMPONENT Runtime)
+#INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${plugin_dest_dir}/plugins COMPONENT Runtime)
 
 #--------------------------------------------------------------------------------
 # install a qt.conf file
 # this inserts some cmake code into the install script to write the file
-INSTALL(CODE "
-    file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"\")
-    " COMPONENT Runtime)
+# INSTALL(CODE "
+#     file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"\")
+#     " COMPONENT Runtime)
 
 
 #--------------------------------------------------------------------------------
@@ -437,14 +431,14 @@ message(STATUS "qt_lib_dirs  ${QT_LIBRARY_DIRS}")
 # An alternative is the do a configure_file() on a script and use install(SCRIPT  ...).
 # Note that the image plugins depend on QtSvg and QtXml, and it got those copied
 # over.
-if(APPLE)
-INSTALL(CODE "
-    file(GLOB_RECURSE QTPLUGINS
-      \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-    include(BundleUtilities)
-    fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
-    " COMPONENT Runtime)
-endif()
+#if(APPLE)
+# INSTALL(CODE "
+#     file(GLOB_RECURSE QTPLUGINS
+#       \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+#     include(BundleUtilities)
+#     fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
+#     " COMPONENT Runtime)
+# endif()
 
 IF(APPLE)
   # set how it shows up in the Info.plist file
