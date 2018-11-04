@@ -23,6 +23,8 @@ else()
 set(AIROUTER true)
 endif()
 
+set (CMAKE_INSTALL_PREFIX "/usr/local/Cellar")
+
 set(CMAKE_COLOR_MAKEFILE ON)
 set(JPSCORE_MAJOR_VERSION 0)
 set(JPSCORE_MINOR_VERSION 8)
