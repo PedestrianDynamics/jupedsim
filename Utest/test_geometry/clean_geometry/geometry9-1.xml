@@ -87,9 +87,9 @@
             <vertex px="-2" py="4.5"/>
             <vertex px="-2" py="5.5"/>
         </transition>
-        <transition id="2" caption="exit1" type="NaN" room1_id="0" subroom1_id="3" room2_id="-1" subroom2_id="-1">
+        <transition id="2" caption="exit2" type="NaN" room1_id="0" subroom1_id="3" room2_id="-1" subroom2_id="-1">
             <vertex px="0.5" py="8"/>
             <vertex px="1.5" py="8"/>
         </transition>
-    <transitions/>
+    </transitions>
 </geometry>
