@@ -382,7 +382,7 @@ bool Building::correct() const {
                                                                 // after
                                                                 // eliminating
                                                                 // nasty exits
-               // std::cout<< "\n" << KRED << "correct Room " << room.first << "  Subroom " << subroom.first << RESET  << std::endl;
+               std::cout<< "\n" << KRED << "correct Room " << room.first << "  Subroom " << subroom.first << RESET  << std::endl;
                for(auto const & bigWall: walls) //self checking
                {
                     // std::cout << "BigWall: " << std::endl;
@@ -394,7 +394,7 @@ bool Building::correct() const {
                     if(!WallPieces.empty())
                          removed = true;
 
-                    // std::cout << "Wall peces size : " <<  WallPieces.size() << std::endl;
+                    std::cout << "Wall pieces size : " <<  WallPieces.size() << std::endl;
                     for(auto w:WallPieces)
                          w.WriteToErrorLog();
 
@@ -424,14 +424,14 @@ bool Building::correct() const {
                                     // std::cout << "BNow Wall peces size : " <<  WallPieces.size() << std::endl;
                               }
                          }
-                         // std::cout << "ok "<< ok << std::endl;
-                         // std::cout << "new while  Wall peces size : " <<  WallPieces.size() << std::endl;
-                         // std::cout << "====" << std::endl;
-                         // for(auto t: WallPieces){
-                         //      std::cout << ">> Piece: " << std::endl;
-                         //      t.WriteToErrorLog();
-                         // }
-                         // getc(stdin);
+                                std::cout << "ok "<< ok << std::endl;
+                         std::cout << "new while  Wall peces size : " <<  WallPieces.size() << std::endl;
+                         std::cout << "====" << std::endl;
+                         for(auto t: WallPieces){
+                              std::cout << ">> Piece: " << std::endl;
+                              t.WriteToErrorLog();
+                         }
+                         getc(stdin);
                     }// while
                     // remove
                     // duplicates fromWllPiecs
@@ -444,6 +444,11 @@ bool Building::correct() const {
                                 end = std::remove(it + 1, end, *it);
                          }
                          WallPieces.erase(end, WallPieces.end());
+                         for(auto t: WallPieces){
+                              std::cout << ">>>> Piece: " << std::endl;
+                              t.WriteToErrorLog();
+                         }
+
                          // remove big wall and add one wallpiece to walls
                          ReplaceBigWall(subroom.second, bigWall, WallPieces);
                     }
@@ -461,6 +466,7 @@ bool Building::correct() const {
           if(SaveGeometry(filename))
                this->GetConfig()->SetGeometryFile(filename);
      }
+     Log->Write("INFO: Leave geometry correct");
 
      return true;
 }
@@ -621,9 +627,9 @@ bool Building::ReplaceBigWall(const std::shared_ptr<SubRoom>& subroom, const Wal
      bigWall.WriteToErrorLog();
 
      // REMOVE BigLINE
-     // std::cout << "\ns+ =" << subroom->GetAllWalls().size() << "\n";
+     std::cout << "\ns+ =" << subroom->GetAllWalls().size() << "\n";
      bool res = subroom->RemoveWall(bigWall);
-     // std::cout << "s- =" << subroom->GetAllWalls().size() << "\n";
+     std::cout << "s- =" << subroom->GetAllWalls().size() << "\n";
      if(!res) {
           Log->Write("ERROR:  Correct fails. Could not remove wall: ");
           bigWall.WriteToErrorLog();
@@ -653,9 +659,9 @@ bool Building::AddWallToSubroom(
         std::vector<Wall> WallPieces) const
 { // CHOOSE WHICH PIECE SHOULD BE ADDED TO SUBROOM
 // this is a challngig function
-     // std::cout << "\n-----\nEnter add_wall with:\n";
-     // for(const auto & w : WallPieces)
-     //      w.WriteToErrorLog();
+     std::cout << "\n-----\nEnter add_wall with:\n";
+     for(const auto & w : WallPieces)
+          w.WriteToErrorLog();
 
      auto walls = subroom->GetAllWalls();
      for(const auto & w : WallPieces) {
@@ -665,6 +671,16 @@ bool Building::AddWallToSubroom(
           for (const auto & checkWall: walls) {
                if (checkWall==w) continue;// don't count big wall
                if (w.ShareCommonPointWith(checkWall)) count++;
+               else
+               {   // first use the cheap ShareCommonPointWith() before entering
+                   // this else
+                    Point interP;
+                    if (w.IntersectionWith(checkWall, interP))
+                    {
+                         if( (!std::isnan(interP._x)) && (!std::isnan(interP._y)))
+                              count++;
+                    }
+               }
           }
           auto transitions = subroom->GetAllTransitions();
           auto crossings = subroom->GetAllCrossings();
@@ -678,10 +694,11 @@ bool Building::AddWallToSubroom(
                subroom->AddWall(w);
                Log->Write("INFO: Replacing wall with ");
                w.WriteToErrorLog();
+               std::cout << "\n -- count= " << count << "\n";
                return true;
           }
           // else
-          //      std::cout << "\n -- count= " << count << "\n";
+          std::cout << "\n -- count= " << count << "\n";
      }// WallPieces
 
      return false;
