@@ -1313,7 +1313,7 @@ bool Building::SaveGeometry(const std::string& filename) const
               auto&& sub = itr_sub.second;
               const double* plane = sub->GetPlaneEquation();
               geometry << "\t\t<subroom id =\"" << sub->GetSubRoomID()
-                        << "\" closed=\"" << 0
+                       << "\" caption=\"dummy_caption"
                         << "\" class=\"" << sub->GetType()
                         << "\" A_x=\"" << plane[0]
                         << "\" B_y=\"" << plane[1]
