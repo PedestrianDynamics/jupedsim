@@ -80,14 +80,21 @@ if(NOT USE_DUAL_ABI)
     set (USE_DUAL_ABI FALSE)
 endif()
 #------------------ set important directories --------------------
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
-set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
+if (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+endif()
+
+if(NOT EXECUTABLE_OUTPUT_PATH)
+  set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
+endif()
 set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib/${CMAKE_BUILD_TYPE})
 set(CMAKE_TEST_DIR ${CMAKE_SOURCE_DIR}/Utest)
 # Debug messages
 message(STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR})
 message(STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR})
 message(STATUS "CMAKE_TEST_DIR: " ${CMAKE_TEST_DIR})
+message(STATUS "RUN TIME " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+message(STATUS "EXECUTABE" ${EXECUTABLE_OUTPUT_PATH})
 # ========================== build platform ==========================
 message(STATUS "")
 message(STATUS "Platform: ")
@@ -836,7 +843,7 @@ message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
 endif (BUILD_TESTING)
 
 
-install(TARGETS jpscore DESTINATION bin COMPONENT applications)
+install(TARGETS jpscore DESTINATION bin)
 if(WIN32)
     set(CT_DATA_FILE_DIR "demos")
     file(GLOB CT_FILES "${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/*/*")
