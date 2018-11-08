@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 ## v0.8.4 [TBD]
 
 ### Added
+- Added homebrew [packages](https://github.com/JuPedSim/homebrew-jps/blob/master/README.md)
+- added function `correct` to fix sloppily drawn geometries !36
 - use cmake option `-D JPSFIRE=true` (default false) !33
 - JPSfire-module: Walking speed and toxicity analysis functional (thanks to @hein1)  !31
 - Add study Fridolf2018 !29
