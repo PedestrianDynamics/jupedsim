@@ -5,7 +5,7 @@
 #    docker -it jupedsim/jpscore
 # -----------------------------------------
 
-FROM ubuntu:14.04
+FROM ubuntu:18.04
 
 MAINTAINER Mohcine Chraibi <m.chraibi@gmail.com>
 
