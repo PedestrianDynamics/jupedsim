@@ -156,7 +156,7 @@ add_definitions("-DGIT_BRANCH=\"${GIT_BRANCH}\"")
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
     add_custom_target(doc
             ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -787,7 +787,7 @@ endif()
 
 # ----------------------------- cTest ------------------------------------------
 if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
-    set(counter "0")
+set(counter "0")
     SET(BUILD_TEST_TIMEOUT 10800 CACHE STRING "Global timeout on all tests (seconds).")
     SET(DART_TESTING_TIMEOUT "${BUILD_TEST_TIMEOUT}" CACHE STRING "" FORCE)
     message(STATUS "Timeout: " ${BUILD_TEST_TIMEOUT} " s")
@@ -805,12 +805,24 @@ if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
         target_link_libraries(${test} core ${Boost_LIBRARIES})
         add_test(NAME ${test} COMMAND ${test})
     endforeach (test_src ${test_files})
+
+# -- new clean geometry tests
+file(GLOB_RECURSE cgeo_inifiles "${CMAKE_TEST_DIR}/test_geometry/clean_geometry/ini*.xml")
+set(ini_counter "0")
+foreach (cgeo-ini ${cgeo_inifiles})
+   MATH(EXPR ini_counter "${ini_counter}+1")
+   set(testName "test_clean_geometry_${ini_counter}")
+   message(STATUS "Add " ${testName})
+   add_test(NAME "${testName}" COMMAND jpscore "${cgeo-ini}")
+ endforeach()
+
+
 endif (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
 if (BUILD_TESTING)
-    find_package(PythonInterp)
-    if (PYTHONINTERP_FOUND)
-        message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
+find_package(PythonInterp)
+if (PYTHONINTERP_FOUND)
+message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
         foreach (test_src ${test_py_files})
             MATH(EXPR counter "${counter}+1")
             GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)

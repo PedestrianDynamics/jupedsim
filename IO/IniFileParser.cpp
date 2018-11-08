@@ -1524,10 +1524,10 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                if (pExitStrategy == 8 || pExitStrategy ==9){
                     _config->set_write_VTK_files_direction(false);
                    if (strategyNode.FirstChild("write_VTK_files"))  {
-                       const char* tmp =
+                       const char* tmp1 =
                                strategyNode.FirstChild("write_VTK_files")->FirstChild()->Value();
                        //remark: std::strcmp returns 0 if the strings are equal
-                       bool tmp_write_VTK = !std::strcmp(tmp, "true");
+                       bool tmp_write_VTK = !std::strcmp(tmp1, "true");
                         _config->set_write_VTK_files_direction(tmp_write_VTK);
                    }
 
