@@ -153,7 +153,11 @@ if (GIT_SCM AND GITDIR)
     ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
 else()
     message(STATUS "Not in a git repo")
-endif()
+  endif()
+  string(REGEX REPLACE "\#"
+       "" GIT_COMMIT_SUBJECT
+       ${GIT_COMMIT_SUBJECT})
+
 # even if not in a git repository we need to define these
 add_definitions("-DGIT_COMMIT_HASH=\"${GIT_SHA1}\"")
 add_definitions("-DGIT_COMMIT_DATE=\"${GIT_DATE}\"")
