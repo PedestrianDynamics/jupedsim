@@ -369,7 +369,7 @@ bool Building::InitGeometry()
 }
 
 bool Building::correct() const {
-     Log->Write("INFO: enter correct ...");
+     Log->Write("INFO:\tenter correct ...");
      bool removed = false;
 
      for(auto&& room: this->GetAllRooms()) {
@@ -397,11 +397,10 @@ bool Building::correct() const {
                     if(!WallPieces.empty())
                          removed = true;
 #if DEBUG
-                    std::cout << "Wall pieces size : " <<  WallPieces.size() << std::endl;
-#endif
+z                    std::cout << "Wall pieces size : " <<  WallPieces.size() << std::endl;
                     for(auto w:WallPieces)
                          w.WriteToErrorLog();
-
+#endif
                     int ok=0;
                     while(!ok)
                     {
@@ -471,11 +470,10 @@ bool Building::correct() const {
           //fs::path p(this->GetConfig()->GetProjectRootDir());
           //p = p / f;
           std::string filename = f.string();
-          std::cout <<  "\n--> Corrected geometry: " << filename<< "\n";
           if(SaveGeometry(filename))
                this->GetConfig()->SetGeometryFile(filename);
      }
-     Log->Write("INFO: Leave geometry correct");
+     Log->Write("INFO:\tLeave geometry correct with success .. maybe");
 
      return true;
 }
@@ -529,8 +527,8 @@ bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom>& subroom) c
 
                      Wall NewWall(wall.GetPoint1(), A);
                      Wall NewWall1(wall.GetPoint2(), B);
-                     NewWall.WriteToErrorLog();
-                     NewWall1.WriteToErrorLog();
+                     // NewWall.WriteToErrorLog();
+                     // NewWall1.WriteToErrorLog();
                      // add new lines to be controled against overlap with exits
                      walls.push_back(NewWall);
                      walls.push_back(NewWall1);
@@ -572,8 +570,8 @@ std::vector<Wall>  Building::SplitWall(const std::shared_ptr<SubRoom>& subroom, 
      std::vector<Wall> WallPieces;
 #if DEBUG
      std::cout << subroom->GetSubRoomID() << "collect wall pieces with " << std::endl;
-#endif
      bigWall.WriteToErrorLog();
+#endif
      auto walls = subroom->GetAllWalls();
      auto crossings = subroom->GetAllCrossings();
      auto transitions = subroom->GetAllTransitions();
@@ -637,14 +635,17 @@ std::vector<Wall>  Building::SplitWall(const std::shared_ptr<SubRoom>& subroom, 
 }
 bool Building::ReplaceBigWall(const std::shared_ptr<SubRoom>& subroom, const Wall& bigWall, std::vector<Wall>& WallPieces) const
 {
+#if DEBUG
      Log->Write("INFO Replacing big line in Room %d | Subroom %d with:", subroom->GetRoomID(), subroom->GetSubRoomID());
      bigWall.WriteToErrorLog();
 
      // REMOVE BigLINE
-#if DEBUG
+
      std::cout << "\ns+ =" << subroom->GetAllWalls().size() << "\n";
 #endif
+
      bool res = subroom->RemoveWall(bigWall);
+
 #if DEBUG
      std::cout << "s- =" << subroom->GetAllWalls().size() << "\n";
 #endif
