@@ -13,7 +13,8 @@ stages:
   - configure
   - compile
   - unit_test
-  - juelich_tests
+  # - juelich_tests
+   # - rimea_tests
 #=====================================
 
 #============== configure ============
@@ -65,21 +66,22 @@ test:
   script:
     - cd build
     - ctest -R Boost
+    - ctest -R clean
   tags:
     - linux
 #============== juelich ============
-verification:
-  dependencies:
-    - make-linux
+# verification:
+#   dependencies:
+#     - make-linux
 
-  stage: juelich_tests
-  script:
-    - cd build
-    - ctest -R juelich
-  only:
-    - develop
-  tags:
-    - linux
+#   stage: juelich_tests
+#   script:
+#     - cd build
+#     - ctest -R juelich
+#   only:
+#     - develop
+#   tags:
+#     - linux
 #=================================
 
 #============== rimea ============
@@ -113,4 +115,4 @@ verification:
 #=================================
 
 after_script:
-  - echo "End CI" # todo: run report script
+  - echo "End CI" # todo: run report script and upload resulting pdf somewhere
