@@ -6,8 +6,8 @@
 # MARK_AS_ADVANCED (BUILD_TESTING CMAKE_BUILD_TYPE=Debug)
 #windows flags: -DDESIRED_QT_VERSION=5 -DCMAKE_PREFIX_PATH=D:\Qt32bit\Qt5.4.1\5.4\msvc2013 -DCMAKE_PREFIX_PATH=VTK.0.0\VTK-7.0.0\build -G "Visual Studio 12 2013"
 #--------------------------------------------------------------------------
-cmake_minimum_required(VERSION 2.8)
-project( jpsvis )
+cmake_minimum_required(VERSION 3.2)
+project( jpsvis LANGUAGES CXX)
 IF(APPLE)
   cmake_policy(SET CMP0025 NEW) #fixes error No known features for CXX compiler (on mac)
 ENDIF(APPLE)
@@ -409,14 +409,14 @@ INSTALL(TARGETS jpsvis
 #--------------------------------------------------------------------------------
 # Install needed Qt plugins by copying directories from the qt installation
 # One can cull what gets copied by using 'REGEX "..." EXCLUDE'
-INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${plugin_dest_dir}/plugins COMPONENT Runtime)
+# INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${plugin_dest_dir}/plugins COMPONENT Runtime)
 
 #--------------------------------------------------------------------------------
 # install a qt.conf file
 # this inserts some cmake code into the install script to write the file
-INSTALL(CODE "
-    file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"\")
-    " COMPONENT Runtime)
+# INSTALL(CODE "
+#     file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"\")
+#     " COMPONENT Runtime)
 
 
 #--------------------------------------------------------------------------------
@@ -437,14 +437,14 @@ message(STATUS "qt_lib_dirs  ${QT_LIBRARY_DIRS}")
 # An alternative is the do a configure_file() on a script and use install(SCRIPT  ...).
 # Note that the image plugins depend on QtSvg and QtXml, and it got those copied
 # over.
-if(APPLE)
-INSTALL(CODE "
-    file(GLOB_RECURSE QTPLUGINS
-      \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-    include(BundleUtilities)
-    fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
-    " COMPONENT Runtime)
-endif()
+# if(APPLE)
+# INSTALL(CODE "
+#     file(GLOB_RECURSE QTPLUGINS
+#       \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+#     include(BundleUtilities)
+#     fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
+#     " COMPONENT Runtime)
+# endif()
 
 IF(APPLE)
   # set how it shows up in the Info.plist file
