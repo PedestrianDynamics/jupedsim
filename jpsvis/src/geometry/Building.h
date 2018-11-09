@@ -24,7 +24,7 @@
  *
  *
  **/
- 
+
 
 #ifndef _BUILDING_H
 #define _BUILDING_H
@@ -170,7 +170,7 @@ public:
      const std::map<int, Hline*>& GetAllHlines() const;
      const std::map<int, Goal*>& GetAllGoals() const;
 
-     void AddCrossing(Crossing* line);
+     bool AddCrossing(Crossing* line);
      void AddTransition(Transition* line);
      void AddHline(Hline* line);
      void AddGoal(Goal* goal);
