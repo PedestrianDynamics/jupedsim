@@ -784,15 +784,19 @@ Room* Building::GetRoom(string caption) const
 
 bool Building::AddCrossing(Crossing* line)
 {
-     if (_crossings.count(line->GetID())!=0) {
-          char tmp[CLENGTH];
-          sprintf(tmp,
-                    "ERROR: Duplicate index for crossing found [%d] in Routing::AddCrossing()",
-                    line->GetID());
-          Log->Write(tmp);
-          exit(EXIT_FAILURE);
-     }
-     _crossings[line->GetID()] = line;
+	 int IDRoom = line->GetRoom1()->GetID();
+	 int IDLine = line->GetID();
+	 int IDCrossing = 1000 * IDRoom + IDLine;
+	 if (_crossings.count(IDCrossing) != 0)
+	 {
+		 char tmp[CLENGTH];
+		 sprintf(tmp,
+			 "ERROR: Duplicate index for crossing found [%d] in Routing::AddCrossing()",
+			 IDCrossing);
+		 Log->Write(tmp);
+		 exit(EXIT_FAILURE);
+	 }
+     _crossings[IDCrossing] = line;
      return true;
 }
 
