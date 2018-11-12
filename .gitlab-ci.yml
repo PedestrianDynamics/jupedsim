@@ -28,7 +28,7 @@ configure-linux:
     - which git
     -  which g++
     -  ls /usr/bin/g++*
-    - cmake -DCMAKE_BUILD_TYPE=Debug -DBoost_NO_SYSTEM_PATHS=true -DBOOST_ROOT=~/boost_1_61_0  ..
+    - cmake -DCMAKE_BUILD_TYPE=Debug   ..
     - echo "configure | ${CI_PROJECT_DIR}"
   stage: configure
   tags:
