@@ -4,6 +4,8 @@
  * \version     v0.5
  * \copyright   <2009-2014> Forschungszentrum J�lich GmbH. All rights reserved.
  *
+ * \ingroup OperationalModels
+ *
  * \section License
  * This file is part of JuPedSim.
  *
@@ -42,6 +44,15 @@ class Pedestrian;
 class DirectionStrategy;
 
 
+/*!
+ * \class GradientModel
+ *
+ * \brief @todo
+ *
+ *\ingroup OperationalModels
+ *
+ * \author Arne graf
+ */
 class GradientModel : public OperationalModel {
 private:
 

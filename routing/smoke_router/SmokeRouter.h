@@ -42,16 +42,15 @@ class SensorManager;
 class NavLine;
 
 
-/**
- * @brief Routing Engine for Cognitive Map/ Smoke Sensor / Perception Abilities
- *
- *
- */
 
 
 //c++11 alias: Container to store options for the router (i. a. sensors)
 using optStorage = std::unordered_map<std::string,std::vector<std::string> >;
-
+/**
+ * @brief Smoke router
+ *\ingroup Router
+ *
+ */
 class SmokeRouter: public Router {
 public:
      SmokeRouter();

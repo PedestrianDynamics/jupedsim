@@ -49,6 +49,17 @@ extern OutputHandler* Log;
 
 #include <random>
 
+/*!
+ * \class GlobalRouter
+ *
+ * \brief global router
+ *
+ *\ingroup Router
+ *
+ * We will derive from the <Router> class to fit the interface.
+ *
+ * \author Ulrich Kemloh
+ */
 class GlobalRouter: public Router
 {
 
