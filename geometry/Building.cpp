@@ -25,7 +25,7 @@
  *
  **/
 
-
+#include <chrono>
 #include "Building.h"
 
 #include "../geometry/SubRoom.h"
@@ -369,6 +369,7 @@ bool Building::InitGeometry()
 }
 
 bool Building::correct() const {
+     auto t_start = std::chrono::high_resolution_clock::now();
      Log->Write("INFO:\tenter correct ...");
      bool removed = false;
 
@@ -473,9 +474,11 @@ z                    std::cout << "Wall pieces size : " <<  WallPieces.size() <<
           if(SaveGeometry(filename))
                this->GetConfig()->SetGeometryFile(filename);
      }
-     Log->Write("INFO:\tLeave geometry correct with success .. maybe");
 
-     return true;
+    auto t_end = std::chrono::high_resolution_clock::now();
+    double elapsedTimeMs = std::chrono::duration<double, std::milli>(t_end-t_start).count();
+    Log->Write("INFO:\tLeave geometry correct with success (%.3f s)", elapsedTimeMs);
+    return true;
 }
 bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom>& subroom) const
 {
@@ -784,18 +787,18 @@ Room* Building::GetRoom(string caption) const
 
 bool Building::AddCrossing(Crossing* line)
 {
-	 int IDRoom = line->GetRoom1()->GetID();
-	 int IDLine = line->GetID();
-	 int IDCrossing = 1000 * IDRoom + IDLine;
-	 if (_crossings.count(IDCrossing) != 0)
-	 {
-		 char tmp[CLENGTH];
-		 sprintf(tmp,
-			 "ERROR: Duplicate index for crossing found [%d] in Routing::AddCrossing()",
-			 IDCrossing);
-		 Log->Write(tmp);
-		 exit(EXIT_FAILURE);
-	 }
+         int IDRoom = line->GetRoom1()->GetID();
+         int IDLine = line->GetID();
+         int IDCrossing = 1000 * IDRoom + IDLine;
+         if (_crossings.count(IDCrossing) != 0)
+         {
+                 char tmp[CLENGTH];
+                 sprintf(tmp,
+                         "ERROR: Duplicate index for crossing found [%d] in Routing::AddCrossing()",
+                         IDCrossing);
+                 Log->Write(tmp);
+                 exit(EXIT_FAILURE);
+         }
      _crossings[IDCrossing] = line;
      return true;
 }

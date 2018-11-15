@@ -6,7 +6,6 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 
   <!-- seed used for initialising random generator -->
   <seed>1254</seed>
-  <progressbar/>
   <max_sim_time>200</max_sim_time>
   <!-- geometry file -->
   <geometry>geometry1.xml</geometry>
