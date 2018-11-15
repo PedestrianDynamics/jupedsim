@@ -37,6 +37,10 @@
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/geometry/geometries/adapted/c_array.hpp>
+#include <filesystem>
+
+namespace fs = std::filesystem;
+
 using namespace boost::geometry;
 typedef model::d2::point_xy<double, cs::cartesian> point_2d;
 typedef model::polygon<point_2d> polygon_2d;
@@ -48,14 +52,16 @@ extern OutputHandler* Log;
 class ArgumentParser {
 private:
 
-     std::string _geometryFileName;
-     std::string _scriptsLocation;
-     std::string _errorLogFile;
-     std::string _trajectoriesLocation;
-     std::string _trajectoriesFilename;
-     std::string _projectRootDir;
+     fs::path _geometryFileName;
+     fs::path _scriptsLocation;
+     fs::path _errorLogFile;
+     fs::path _trajectoriesLocation;
+     fs::path _trajectoriesFilename;
+     fs::path _projectRootDir;
+     fs::path _outputDir;
+
      FileFormat _fileFormat;
-     std::vector<std::string> _trajectoriesFiles;
+     std::vector<fs::path> _trajectoriesFiles;
 
      std::string _vComponent;
      bool _IgnoreBackwardMovement;
@@ -70,8 +76,8 @@ private:
      bool _isPlotGraph;
      bool _isPlotIndex;
      /*bool _isPlotTimeSeriesA;
-     bool _isPlotTimeSeriesC;
-     bool _isPlotTimeSeriesD;*/
+       bool _isPlotTimeSeriesC;
+       bool _isPlotTimeSeriesD;*/
      bool _isOneDimensional;
      bool _isGetProfile;
      double _steadyStart;
@@ -100,15 +106,15 @@ private:
 public:
      // Konstruktor
      ArgumentParser();
-
-     const std::string& GetTrajectoriesFilename() const;
-     const std::vector<std::string>& GetTrajectoriesFiles() const;
-     const std::string& GetTrajectoriesLocation() const;
-     const std::string& GetScriptsLocation() const;
+     const fs::path& GetTrajectoriesFilename() const;
+     const std::vector<fs::path>& GetTrajectoriesFiles() const;
+     const fs::path& GetTrajectoriesLocation() const;
+     const fs::path& GetScriptsLocation() const;
      const FileFormat& GetFileFormat() const;
-     const std::string& GetGeometryFilename() const;
-     const std::string& GetErrorLogFile() const;
-     const std::string& GetProjectRootDir() const;
+     const fs::path& GetGeometryFilename() const;
+     const fs::path& GetErrorLogFile() const;
+     const fs::path& GetProjectRootDir() const;
+     const fs::path& GetOutputLocation() const;
 
      double GetLengthMeasurementArea() const;
      polygon_2d GetMeasureArea() const;
@@ -151,7 +157,7 @@ public:
      float GetGridSizeY() const;
      int GetLog() const;
      bool ParseArgs(int argc, char **argv);
-     void SetErrorLogFile(std::string errorLogFile);
+     void SetErrorLogFile(fs::path errorLogFile);
      void SetLog(int log);
      MeasurementArea* GetMeasurementArea(int id);
 

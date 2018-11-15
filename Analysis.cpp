@@ -180,14 +180,15 @@ void Analysis::InitArgs(ArgumentParser* args)
      _cutRadius=args->GetCutRadius();
      _circleEdges=args->GetCircleEdges();
      _scriptsLocation=args->GetScriptsLocation();
+     _outputLocation=args->GetOutputLocation();
 }
 
 
-std::map<int, polygon_2d> Analysis::ReadGeometry(const std::string& geometryFile, const std::vector<MeasurementArea_B*>& areas)
+std::map<int, polygon_2d> Analysis::ReadGeometry(const fs::path& geometryFile, const std::vector<MeasurementArea_B*>& areas)
 {
 
      _building = new Building();
-     _building->LoadGeometry(geometryFile);
+     _building->LoadGeometry(geometryFile.string());
      // create the polygons
      _building->InitGeometry();
 
@@ -260,12 +261,12 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const std::string& geometryFile
 }
 
 
-int Analysis::RunAnalysis(const string& filename, const string& path)
+int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
 {
      PedData data;
-     if(data.ReadData(_projectRootDir, path, filename, _trajFormat, _deltaF, _vComponent, _IgnoreBackwardMovement)==false)
+     if(data.ReadData(_projectRootDir, _outputLocation, path, filename, _trajFormat, _deltaF, _vComponent, _IgnoreBackwardMovement)==false)
      {
-          Log->Write("ERROR:\tCould not parse the file");
+          Log->Write("ERROR:\tCould not parse the file %d", filename.c_str());
           return -1;
      }
 
@@ -306,14 +307,19 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 
      if(_DoesUseMethodA) //Method A
      {
+          if(_areaForMethod_A.empty())
+          {
+               Log->Write("ERROR: Method A selected with no measurement area!");
+               exit(EXIT_FAILURE);
+          }
 #pragma omp parallel for
-          for(signed int i=0; i<_areaForMethod_A.size(); i++)
+          for(long unsigned int i=0; i < _areaForMethod_A.size(); i++)
           {
                Method_A method_A ;
                method_A.SetMeasurementArea(_areaForMethod_A[i]);
                method_A.SetTimeInterval(_deltaT[i]);
                method_A.SetPlotTimeSeries(_plotTimeseriesA[i]);
-               bool result_A=method_A.Process(data,_scriptsLocation, _areaForMethod_A[i]->_zPos);
+               bool result_A=method_A.Process(data,_scriptsLocation,_areaForMethod_A[i]->_zPos);
                if(result_A)
                {
                     Log->Write("INFO:\tSuccess with Method A using measurement area id %d!\n",_areaForMethod_A[i]->_id);
@@ -327,8 +333,14 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 
      if(_DoesUseMethodB) //Method_B
      {
+          if(_areaForMethod_B.empty())
+          {
+               Log->Write("ERROR: Method B selected with no measurement area!");
+               exit(EXIT_FAILURE);
+          }
+
 #pragma omp parallel for
-          for(signed int i=0; i<_areaForMethod_B.size(); i++)
+          for(long unsigned int i=0; i < _areaForMethod_B.size(); i++)
           {
                Method_B method_B;
                method_B.SetMeasurementArea(_areaForMethod_B[i]);
@@ -346,8 +358,13 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 
      if(_DoesUseMethodC) //Method C
      {
+          if(_areaForMethod_C.empty())
+          {
+               Log->Write("ERROR: Method C selected with no measurement area!");
+               exit(EXIT_FAILURE);
+          }
 #pragma omp parallel for
-          for(signed int i=0; i<_areaForMethod_C.size(); i++)
+          for(long unsigned int i=0; i < _areaForMethod_C.size(); i++)
           {
                Method_C method_C;
                method_C.SetMeasurementArea(_areaForMethod_C[i]);
@@ -357,8 +374,8 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                     Log->Write("INFO:\tSuccess with Method C using measurement area id %d!\n",_areaForMethod_C[i]->_id);
                     if(_plotTimeseriesC[i])
                     {
-                         string parameters_Timeseries=" " + _scriptsLocation+
-"/_Plot_timeseries_rho_v.py -p "+ _projectRootDir+VORO_LOCATION + " -n "+filename+
+                         string parameters_Timeseries=" " + _scriptsLocation.string()+
+                              "/_Plot_timeseries_rho_v.py -p "+ _projectRootDir.string()+VORO_LOCATION + " -n "+filename.string()+
                               " -f "+boost::lexical_cast<std::string>(data.GetFps());
                          parameters_Timeseries = PYTHON + parameters_Timeseries;
                          int res=system(parameters_Timeseries.c_str());
@@ -374,8 +391,14 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 
      if(_DoesUseMethodD) //method_D
      {
+          if(_areaForMethod_D.empty())
+          {
+               Log->Write("ERROR: Method D selected with no measurement area!");
+               exit(EXIT_FAILURE);
+          }
+
 #pragma omp parallel for
-          for(signed int i=0; i<_areaForMethod_D.size(); i++)
+          for(long unsigned int i=0; i<_areaForMethod_D.size(); i++)
           {
                Method_D method_D;
                method_D.SetStartFrame(_StartFramesMethodD[i]);
@@ -403,7 +426,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                     std::cout << "INFO:\tSuccess with Method D using measurement area id "<< _areaForMethod_D[i]->_id << "\n";
                     if(_plotTimeseriesD[i])
                     {
-                         string parameters_Timeseries= " " +_scriptsLocation+"/_Plot_timeseries_rho_v.py -p "+ _projectRootDir+VORO_LOCATION + " -n "+filename+
+                         string parameters_Timeseries= " " +_scriptsLocation.string()+"/_Plot_timeseries_rho_v.py -p "+ _projectRootDir.string()+VORO_LOCATION + " -n "+filename.string()+
                               " -f "+boost::lexical_cast<std::string>(data.GetFps());
                          parameters_Timeseries = PYTHON + parameters_Timeseries;
                          std::cout << parameters_Timeseries << "\n;";

@@ -47,20 +47,20 @@ int main(int argc, char **argv)
      if(args->ParseArgs(argc, argv))
      {
           // get the number of file to analyse
-          const vector<string>& files = args->GetTrajectoriesFiles();
-          const string& path = args->GetTrajectoriesLocation();
+          const vector<fs::path>& files = args->GetTrajectoriesFiles();
+          const fs::path& Path = args->GetTrajectoriesLocation();
           // create and initialize the analysis engine
           for (unsigned int i = 0; i < files.size(); i++)
           {
-               const string& file = files[i];
+               const fs::path& File = files[i];
                Analysis analysis = Analysis();
-               Log->Write("\nINFO: \tStart Analysis for the file: %s",file.c_str());
+               Log->Write("\nINFO: \tStart Analysis for the file: %s", File.string().c_str());
                Log->Write("**********************************************************************");
                analysis.InitArgs(args);
-               analysis.RunAnalysis(file, path);
+               analysis.RunAnalysis(File, Path);
                Log->Write("**********************************************************************");
-               Log->Write("INFO: \tEnd Analysis for the file: %s\n",file.c_str());
-               std::cout << "INFO: \tEnd Analysis for the file: " << file.c_str() << "\n";
+               Log->Write("INFO: \tEnd Analysis for the file: %s\n", File.string().c_str());
+               std::cout << "INFO: \tEnd Analysis for the file: " << File.string().c_str() << "\n";
           }
      }
      else

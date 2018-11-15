@@ -31,7 +31,7 @@
 #include "PedData.h"
 #include "MeasurementArea.h"
 #include "Method_C.h"
-#include "../Analysis.h"
+
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
@@ -47,8 +47,10 @@ public:
      void SetMeasurementArea (MeasurementArea_B* area);
 
 private:
-     std::string _trajName;
-     std::string _projectRootDir;
+
+     fs::path  _trajName;
+     fs::path  _projectRootDir;
+     fs::path _outputLocation;
      std::string _measureAreaId;
      std::map<int , std::vector<int> > _peds_t;
      MeasurementArea_B* _areaForMethod_B;

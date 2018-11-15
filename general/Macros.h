@@ -25,7 +25,7 @@
  *
  *
  **/
- 
+
 
 #ifndef _MACROS_H
 #define _MACROS_H
@@ -41,10 +41,10 @@
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
-#endif 
+#endif
 
 #ifndef VORO_LOCATION
-#define VORO_LOCATION "./Output/Fundamental_Diagram/Classical_Voronoi/"
+#define VORO_LOCATION "Fundamental_Diagram/Classical_Voronoi/"
 #endif
 
 // should be true only when using this file in the simulation core

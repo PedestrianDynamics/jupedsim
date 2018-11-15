@@ -67,7 +67,7 @@ public:
      void InitArgs(ArgumentParser *args);
      void InitializeFiles(const std::string& file);
 
-     std::map<int, polygon_2d> ReadGeometry(const std::string& geometryFile, const std::vector<MeasurementArea_B*>& areas);
+     std::map<int, polygon_2d> ReadGeometry(const fs::path& geometryFile, const std::vector<MeasurementArea_B*>& areas);
 
      /**
       * Run the analysis for different files.
@@ -75,7 +75,7 @@ public:
       * @param path
       * @return
       */
-     int RunAnalysis(const std::string& file, const std::string& path);
+     int RunAnalysis(const fs::path& file, const fs::path& path);
 
      /**
       * return the base name from the string.
@@ -145,9 +145,11 @@ private:
      bool _calcIndividualFD;  //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
      std::string _vComponent;        // to mark whether x, y or x and y coordinate are used when calculating the velocity
      bool _IgnoreBackwardMovement;
-     std::string _projectRootDir;
-     std::string _scriptsLocation;
-     std::string _geometryFileName;
+
+     fs::path _projectRootDir;
+     fs::path _scriptsLocation;
+     fs::path _outputLocation;
+     fs::path _geometryFileName;
      FileFormat _trajFormat;  // format of the trajectory file
 
      std::vector<MeasurementArea_L*> _areaForMethod_A;

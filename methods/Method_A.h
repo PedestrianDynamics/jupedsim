@@ -28,20 +28,19 @@
 #ifndef METHOD_A_H_
 #define METHOD_A_H_
 
-#include <string>
 #include "MeasurementArea.h"
 #include "PedData.h"
-#include <vector>
 #include "../general/Macros.h"
 #include "../tinyxml/tinyxml.h"
 #include "../IO/OutputHandler.h"
 
-using namespace boost::geometry;
-typedef boost::geometry::model::segment<boost::geometry::model::d2::point_xy<double> > segment;
-
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
+
+typedef boost::geometry::model::segment<boost::geometry::model::d2::point_xy<double> > segment;
+
 namespace ub=boost::numeric::ublas;
+using namespace boost::geometry;
 
 class Method_A
 {
@@ -50,15 +49,17 @@ public:
      virtual ~Method_A();
      void SetMeasurementArea (MeasurementArea_L* area);
      void SetTimeInterval(int deltaT);
-     bool Process (const PedData& peddata,const std::string& scriptsLocation, const double& zPos_measureArea);
+     bool Process (const PedData& peddata,const fs::path& scriptsLocation, const double& zPos_measureArea);
      void SetPlotTimeSeries(bool plotTimeseries);
 
 private:
-     std::string _trajName;
+     fs::path _trajName;
      std::string _measureAreaId;
      MeasurementArea_L* _areaForMethod_A;
-     std::string _projectRootDir;
-     std::string _scriptsLocation;
+
+     fs::path _projectRootDir;
+     fs::path _scriptsLocation;
+     fs::path _outputLocation;
 
      std::vector<int> _accumPedsPassLine; // the accumulative pedestrians pass a line with time
      std::vector<double> _accumVPassLine; // the accumulative instantaneous velocity of the pedestrians pass a line

@@ -139,12 +139,15 @@ void STDIOHandler::Write(const string& str)
 
 FileHandler::FileHandler(const char *fn)
 {
-     _pfp.open(fn);
-     if (!fn) {
+     if (fn== nullptr) {
           char tmp[CLENGTH];
-          sprintf(tmp, "Error!!! File [%s] could not be opened!", fn);
+          sprintf(tmp, "Error!!! File could not be opened!");
           cerr << tmp << endl;
           exit(0);
+     }
+     else
+     {
+         _pfp.open(fn);
      }
 }
 
