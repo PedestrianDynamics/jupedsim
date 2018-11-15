@@ -69,10 +69,18 @@ if __name__ == '__main__':
     plot_geometry(geoFile)
 
     velocity = np.array([])
-    polygon_filename = os.path.join(filepath, "polygon"+namefile+".dat")
+    polygon_path = os.path.join(filepath, "polygon")
+    polygon_filename = os.path.join(polygon_path, '.'.join((namefile, "dat")))
+    if(not os.path.exists(polygon_filename)):
+        sys.exit("ERROR %s:  File does not exist. <%s>"%(argv[0], polygon_filename))
+
     File = open(polygon_filename)
     polys = File.readlines()
-    velocity_filename = os.path.join(filepath, "speed"+namefile+".dat")
+    velocity_path = os.path.join(filepath, "speed")
+    velocity_filename = os.path.join(velocity_path, '.'.join((namefile, "dat")))
+    if(not os.path.exists(velocity_filename)):
+        sys.exit("ERROR %s:  File does not exist. <%s>"%(argv[0], velocity_filename))
+
     velocity = np.loadtxt(velocity_filename)
     sm = cm.ScalarMappable(cmap=cm.jet)
     sm.set_array(velocity)

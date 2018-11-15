@@ -26,9 +26,7 @@ configure-linux:
     - mkdir -p build
     - cd build
     - which git
-    -  which g++
-    -  ls /usr/bin/g++*
-    - cmake -DCMAKE_BUILD_TYPE=Debug   ..
+    - cmake -DCMAKE_BUILD_TYPE=Debug  ..
     - echo "configure | ${CI_PROJECT_DIR}"
   stage: configure
   tags:

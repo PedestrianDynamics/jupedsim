@@ -178,11 +178,14 @@ def main():
     #    ax1.set_aspect("equal")
 
     plot_geometry(geoFile)
-
     density = np.array([])
     density_orig = np.array([])
     polygons = [] # polygons converted from string
-    polygon_filename = os.path.join(filepath, "polygon"+namefile+".dat")
+    polygon_path = os.path.join(filepath, "polygon")
+    polygon_filename = os.path.join(polygon_path, '.'.join((namefile, "dat")))
+    if(not os.path.exists(polygon_filename)):
+        sys.exit("ERROR %s:  File does not exist. <%s>"%(argv[0], polygon_filename))
+
     File = open(polygon_filename)
     polys = File.readlines()
     File.close()
