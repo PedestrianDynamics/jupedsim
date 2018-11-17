@@ -818,34 +818,33 @@ endif()
 
 # ----------------------------- cTest ------------------------------------------
 if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
-set(counter "0")
-    SET(BUILD_TEST_TIMEOUT 10800 CACHE STRING "Global timeout on all tests (seconds).")
-    SET(DART_TESTING_TIMEOUT "${BUILD_TEST_TIMEOUT}" CACHE STRING "" FORCE)
-    message(STATUS "Timeout: " ${BUILD_TEST_TIMEOUT} " s")
-    enable_testing() # adds another build target, which is test for Makefile generators
-    include(CTest) # adding Dart support
+  set(counter "0")
+  set(BUILD_TEST_TIMEOUT 10800 CACHE STRING "Global timeout on all tests (seconds).")
+  set(DART_TESTING_TIMEOUT "${BUILD_TEST_TIMEOUT}" CACHE STRING "" FORCE)
+  message(STATUS "Timeout: " ${BUILD_TEST_TIMEOUT} " s")
+  enable_testing() # adds another build target, which is test for Makefile generators
+  include(CTest) # adding Dart support
 
-    # test if code compiles and runs default setting. Takes about 30 seconds
-
-    # link_directories(${Boost_LIBRARY_DIRS})
+  # test if code compiles and runs default setting. Takes about 30 seconds
+  if(BUILD_CPPUNIT_TEST)
     foreach (test_src ${test_files})
-        MATH(EXPR counter "${counter}+1")
-        GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
-        message(STATUS "Add test " ${counter} "  : " ${test})
-        add_executable(${test} ${test_src})
-        target_link_libraries(${test} core ${Boost_LIBRARIES})
-        add_test(NAME ${test} COMMAND ${test})
+      MATH(EXPR counter "${counter}+1")
+      GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
+      message(STATUS "Add test " ${counter} "  : " ${test})
+      add_executable(${test} ${test_src})
+      target_link_libraries(${test} core ${Boost_LIBRARIES})
+      add_test(NAME ${test} COMMAND ${test})
     endforeach (test_src ${test_files})
-
-# -- new clean geometry tests
-file(GLOB_RECURSE cgeo_inifiles "${CMAKE_TEST_DIR}/test_geometry/clean_geometry/ini*.xml")
-set(ini_counter "0")
-foreach (cgeo-ini ${cgeo_inifiles})
-   MATH(EXPR ini_counter "${ini_counter}+1")
-   set(testName "test_clean_geometry_${ini_counter}")
-   message(STATUS "Add " ${testName})
-   add_test(NAME "${testName}" COMMAND jpscore "${cgeo-ini}")
- endforeach()
+  endif()
+  # -- new clean geometry tests
+  file(GLOB_RECURSE cgeo_inifiles "${CMAKE_TEST_DIR}/test_geometry/clean_geometry/ini*.xml")
+  set(ini_counter "0")
+  foreach (cgeo-ini ${cgeo_inifiles})
+    MATH(EXPR ini_counter "${ini_counter}+1")
+    set(testName "test_clean_geometry_${ini_counter}")
+    message(STATUS "Add " ${testName})
+    add_test(NAME "${testName}" COMMAND jpscore "${cgeo-ini}")
+  endforeach()
 
 
 endif (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
