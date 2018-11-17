@@ -30,7 +30,7 @@ configure-linux:
   script:
     - mkdir -p build
     - cd build
-    - cmake -DBUILD_TESTING=ON -DCMAKE_CXX_COMPILER=g++-8  ..
+    - cmake -DBUILD_TESTING=ON -DCMAKE_CXX_COMPILER=g++-8 ..
     - echo "configure | ${CI_PROJECT_DIR}"
   stage: configure
   tags:

@@ -37,9 +37,9 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../mpi/LCGrid.h"
 #include "../IO/GeoFileParser.h"
-#include <boost/filesystem.hpp>
-//namespace fs = std::experimental::filesystem;
-namespace fs = boost::filesystem;
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 #endif
 //#undef _OPENMP
