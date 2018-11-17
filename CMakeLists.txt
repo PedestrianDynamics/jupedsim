@@ -42,7 +42,7 @@ add_definitions("-DJPSCORE_VERSION=\"${JPSCORE_VERSION}\"")
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
 "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(warnings "-Wall -Wextra")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     set(warnings "/W4 /WX /EHsc")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
@@ -236,9 +236,9 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 #boost
 if(MSVC)
-   find_package(Boost COMPONENTS timer chrono system filesystem unit_test_framework QUIET)
+   find_package(Boost COMPONENTS  QUIET)
 else()
-   find_package(Boost COMPONENTS timer chrono system filesystem unit_test_framework REQUIRED)
+   find_package(Boost COMPONENTS  REQUIRED)
 
 endif()
 if(AIROUTER)
@@ -248,8 +248,6 @@ endif()
 
 # test all cpp-files in Utest
 if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
-
-    find_package(Boost COMPONENTS timer chrono system filesystem unit_test_framework REQUIRED)
         IF (CMAKE_COMPILER_IS_GNUCXX)
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
     IF (USE_DUAL_ABI)
@@ -280,10 +278,6 @@ set(source_files
 Simulation.cpp
 general/ArgumentParser.cpp
 IO/progress_bar.cpp
-tinyxml/tinystr.cpp
-tinyxml/tinyxml.cpp
-tinyxml/tinyxmlerror.cpp
-tinyxml/tinyxmlparser.cpp
 
 geometry/Building.cpp
 geometry/Line.cpp
@@ -377,18 +371,42 @@ routing/smoke_router/cognitiveMap/cogmapoutputhandler.cpp
 routing/smoke_router/cognitiveMap/landmarknetwork.cpp
 routing/smoke_router/Brain.cpp
 routing/smoke_router/cognitiveMap/internnavigationnetwork.cpp
-visiLibity/source_code/visilibity.cpp
 
-poly2tri/common/shapes.cpp
-poly2tri/sweep/sweep_context.cpp
-poly2tri/sweep/advancing_front.cpp
-poly2tri/sweep/sweep.cpp
-poly2tri/sweep/cdt.cpp
+
 events/EventManager.cpp
 events/Event.cpp
 
 forms/jpscore.rc
 math/KrauszModel.cpp)
+
+set(THIRD_PARTY_SRC
+  tinyxml/tinystr.cpp
+  tinyxml/tinyxml.cpp
+  tinyxml/tinyxmlerror.cpp
+  tinyxml/tinyxmlparser.cpp
+
+  poly2tri/common/shapes.cpp
+  poly2tri/sweep/sweep_context.cpp
+  poly2tri/sweep/advancing_front.cpp
+  poly2tri/sweep/sweep.cpp
+  poly2tri/sweep/cdt.cpp
+
+  visiLibity/source_code/visilibity.cpp
+  )
+set(THIRD_PARTY_HDR
+  tinyxml/tinyxml.h
+  tinyxml/tinystr.h
+
+  poly2tri/poly2tri.h
+  poly2tri/common/shapes.h
+  poly2tri/sweep/cdt.h
+  poly2tri/common/utils.h
+  poly2tri/sweep/sweep_context.h
+  poly2tri/sweep/advancing_front.h
+  poly2tri/sweep/sweep.h
+
+  visiLibity/source_code/visilibity.hpp
+  )
 
 set(JPSFIRE_SRC
 JPSfire/generic/FDSMesh.cpp
@@ -451,7 +469,6 @@ routing/smoke_router/cognitiveMap/cogmapoutputhandler.h
 routing/smoke_router/cognitiveMap/landmarknetwork.h
 routing/smoke_router/Brain.h
 routing/smoke_router/cognitiveMap/internnavigationnetwork.h
-visiLibity/source_code/visilibity.hpp
 
 pedestrian/Pedestrian.h
 pedestrian/PedDistributor.h
@@ -469,8 +486,6 @@ voronoi-boost/VoronoiPositionGenerator.h
 
 mpi/LCGrid.h
 
-tinyxml/tinyxml.h
-tinyxml/tinystr.h
 
 general/ArgumentParser.h
 general/Configuration.h
@@ -506,15 +521,6 @@ math/GradientModel.h
 math/VelocityModel.h
 math/OperationalModel.h
 
-
-
-poly2tri/poly2tri.h
-poly2tri/common/shapes.h
-poly2tri/sweep/cdt.h
-poly2tri/common/utils.h
-poly2tri/sweep/sweep_context.h
-poly2tri/sweep/advancing_front.h
-poly2tri/sweep/sweep.h
 events/EventManager.h
 events/Event.h
 )
@@ -579,15 +585,29 @@ if(JPSFIRE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJPSFIRE")
 endif()
 
-add_library(core STATIC ${source_files})
-
 message(STATUS "JPSFIRE: ${JPSFIRE}")
+# ----- add here 3th party
 if(JPSFIRE)
     find_package(ZLIB REQUIRED)
     include_directories(${ZLIB_INCLUDE_DIRS})
     add_library(cnpy STATIC "cnpy/cnpy.cpp")
     target_link_libraries(cnpy ${ZLIB_LIBRARIES})
 endif()
+
+# todo make this system
+add_library(thirdParty STATIC ${THIRD_PARTY_SRC})
+
+add_library(core STATIC ${source_files})
+# c++17 ----
+set(CMAKE_CXX_EXTENSIONS OFF)
+set_property(TARGET core PROPERTY CXX_STANDARD 17)
+set_property(TARGET core PROPERTY CXX_STANDARD_REQUIRED ON)
+if(CMAKE_COMPILER_IS_GNUCXX)
+  target_link_libraries(core thirdParty stdc++fs) # link to lib filesystem
+else()
+  message(WARNING "I don't know how to link filesystem with ${CMAKE_CXX_COMPILER_ID}")
+endif()
+
 
 #add_library ( core SHARED ${source_files} )
 add_executable(jpscore main.cpp ${CMAKE_SOURCE_DIR}/forms/JPScore.ico)
@@ -613,9 +633,9 @@ if (Boost_FOUND)
     include_directories(SYSTEM ${Boost_INCLUDE_DIR})
 
     if(JPSFIRE)
-        target_link_libraries(core ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} cnpy)
+        target_link_libraries(core cnpy)
     else()
-        target_link_libraries(core ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+        target_link_libraries(core)
     endif()
 else()
     message(WARNING did not find BOOST)
@@ -721,26 +741,26 @@ if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif ()
 
 #--------------------
-if (APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
-    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libc++")
-    SET(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -stdlib=libc++")
-endif (APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+# if (APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+#     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+#     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+#     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
+#     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libc++")
+#     SET(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -stdlib=libc++")
+# endif (APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 
-#if (NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+# #if (NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
+# include(CheckCXXCompilerFlag)
+# CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+# CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 
-if (COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-elseif (COMPILER_SUPPORTS_CXX0X)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-else ()
-    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-endif ()
+# if (COMPILER_SUPPORTS_CXX11)
+#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+# elseif (COMPILER_SUPPORTS_CXX0X)
+#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+# else ()
+#     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+# endif ()
 #endif ()
 
 
@@ -785,9 +805,9 @@ else (CMAKE_BUILD_TYPE MATCHES Debug)
 endif (CMAKE_BUILD_TYPE MATCHES Debug)
 
 # PGI ++ Flags
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")
-endif ()
+# if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
+#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")
+# endif ()
 
 if(WIN32)
   if(MSVC)
@@ -798,34 +818,33 @@ endif()
 
 # ----------------------------- cTest ------------------------------------------
 if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
-set(counter "0")
-    SET(BUILD_TEST_TIMEOUT 10800 CACHE STRING "Global timeout on all tests (seconds).")
-    SET(DART_TESTING_TIMEOUT "${BUILD_TEST_TIMEOUT}" CACHE STRING "" FORCE)
-    message(STATUS "Timeout: " ${BUILD_TEST_TIMEOUT} " s")
-    enable_testing() # adds another build target, which is test for Makefile generators
-    include(CTest) # adding Dart support
+  set(counter "0")
+  set(BUILD_TEST_TIMEOUT 10800 CACHE STRING "Global timeout on all tests (seconds).")
+  set(DART_TESTING_TIMEOUT "${BUILD_TEST_TIMEOUT}" CACHE STRING "" FORCE)
+  message(STATUS "Timeout: " ${BUILD_TEST_TIMEOUT} " s")
+  enable_testing() # adds another build target, which is test for Makefile generators
+  include(CTest) # adding Dart support
 
-    # test if code compiles and runs default setting. Takes about 30 seconds
-
-    # link_directories(${Boost_LIBRARY_DIRS})
+  # test if code compiles and runs default setting. Takes about 30 seconds
+  if(BUILD_CPPUNIT_TEST)
     foreach (test_src ${test_files})
-        MATH(EXPR counter "${counter}+1")
-        GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
-        message(STATUS "Add test " ${counter} "  : " ${test})
-        add_executable(${test} ${test_src})
-        target_link_libraries(${test} core ${Boost_LIBRARIES})
-        add_test(NAME ${test} COMMAND ${test})
+      MATH(EXPR counter "${counter}+1")
+      GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
+      message(STATUS "Add test " ${counter} "  : " ${test})
+      add_executable(${test} ${test_src})
+      target_link_libraries(${test} core ${Boost_LIBRARIES})
+      add_test(NAME ${test} COMMAND ${test})
     endforeach (test_src ${test_files})
-
-# -- new clean geometry tests
-file(GLOB_RECURSE cgeo_inifiles "${CMAKE_TEST_DIR}/test_geometry/clean_geometry/ini*.xml")
-set(ini_counter "0")
-foreach (cgeo-ini ${cgeo_inifiles})
-   MATH(EXPR ini_counter "${ini_counter}+1")
-   set(testName "test_clean_geometry_${ini_counter}")
-   message(STATUS "Add " ${testName})
-   add_test(NAME "${testName}" COMMAND jpscore "${cgeo-ini}")
- endforeach()
+  endif()
+  # -- new clean geometry tests
+  file(GLOB_RECURSE cgeo_inifiles "${CMAKE_TEST_DIR}/test_geometry/clean_geometry/ini*.xml")
+  set(ini_counter "0")
+  foreach (cgeo-ini ${cgeo_inifiles})
+    MATH(EXPR ini_counter "${ini_counter}+1")
+    set(testName "test_clean_geometry_${ini_counter}")
+    message(STATUS "Add " ${testName})
+    add_test(NAME "${testName}" COMMAND jpscore "${cgeo-ini}")
+  endforeach()
 
 
 endif (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
@@ -885,11 +904,11 @@ if(WIN32 AND NOT UNIX)
             DESTINATION sys
             COMPONENT applications)
 
-    install(FILES "${Boost_INCLUDE_DIR}/../bin/boost_system-vc141-mt-x32-1_67.dll"
-            "${Boost_INCLUDE_DIR}/../bin/boost_filesystem-vc141-mt-x32-1_67.dll"
-            "${Boost_INCLUDE_DIR}/../bin/zlib1.dll"
-            DESTINATION bin
-            COMPONENT applications)
+    # install(FILES "${Boost_INCLUDE_DIR}/../bin/boost_system-vc141-mt-x32-1_67.dll"
+    #         "${Boost_INCLUDE_DIR}/../bin/boost_filesystem-vc141-mt-x32-1_67.dll"
+    #         "${Boost_INCLUDE_DIR}/../bin/zlib1.dll"
+    #         DESTINATION bin
+    #         COMPONENT applications)
 elseif(APPLE)
     set(DEFAULT_CPACK_GENERATOR "DragNDrop")
 endif()

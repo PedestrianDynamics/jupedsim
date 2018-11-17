@@ -30,9 +30,9 @@
 //#include <unistd.h>
 //#include <glob.h>
 // #include <filesystem>
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
-//namespace fs = std::experimental::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
+
 
 FDSMeshStorage::FDSMeshStorage()
 {
@@ -237,7 +237,7 @@ void FDSMeshStorage::CreateFDSMeshes()
 
 }
 
-const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &pedElev, const std::string &quantity) throw (int)
+const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &pedElev, const std::string &quantity)
 {
     //Smoke Sensor NOT active
     int simT=simTime/_updateIntervall;
@@ -256,7 +256,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &p
     if (_fMContainer.count(Ztime.string()) == 0) {
         //std::cout << str << std::endl;
         std::cout << "\n time ERROR: requested grid not available: " << Ztime.string() << std::endl;
-        throw -1;
+        return(EXIT_FAILURE);
     }
     return _fMContainer.at(Ztime.string());
 
@@ -270,7 +270,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &p
     //    }
 }
 
-const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &doorCentre, const double &simTime) throw (int)
+const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &doorCentre, const double &simTime)
 {
     //Smoke Sensor active
 
@@ -294,7 +294,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
         door_xy = fs::canonical(door_xy).make_preferred();
     if (_fMContainer.count(door_xy.string()) == 0) {
         std::cout << "\n > ERROR: requested sfgrid not available: " << door_xy.string() << std::endl;
-        throw -1;
+        return(EXIT_FAILURE);
     }
 
     // if (_fMContainer.count(str) == 1) {

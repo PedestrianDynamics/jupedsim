@@ -36,10 +36,9 @@
 //#include <algorithm>
 //#include <math.h>
 //#include <string>
-//#include <filesystem>
-#include <boost/filesystem.hpp>
-//namespace fs = std::experimental::filesystem;
-namespace fs = boost::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
+
 WalkingSpeed::WalkingSpeed(const std::string & projectFileName)
 {
      _FMStorage = nullptr;
