@@ -30,15 +30,16 @@
 #include "AgentsSource.h"
 #include "Pedestrian.h"
 
-AgentsSource::AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency, bool greedy, double time, int agent_id, float startx, float starty):
-     _id(id), _frequency(frequency), _maxAgents(max_agents), _groupID(group_id), _caption(caption), _greedy(greedy), _agent_id(agent_id), _time(time), _startx(startx), _starty(starty)
-
+AgentsSource::AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency, bool greedy, double time, int agent_id, float startx, float starty, bool conti, int chunkAgents, std::vector<float> boundaries, std::vector<float> lifeSpan):
+     _id(id), _frequency(frequency), _maxAgents(max_agents), _groupID(group_id), _caption(caption), _greedy(greedy), _agent_id(agent_id), _time(time), _startx(startx), _starty(starty), _chunkAgents(chunkAgents), _conti(conti)
 {
     _agentsGenerated=0;
-    _boundaries[0] = 0;
-    _boundaries[1] = 0;
-    _boundaries[2] = 0;
-    _boundaries[3] = 0;
+    _boundaries[0] = boundaries[0];
+    _boundaries[1] = boundaries[1];
+    _boundaries[2] = boundaries[2];
+    _boundaries[3] = boundaries[3];
+    _lifeSpan[0] = lifeSpan[0];
+    _lifeSpan[0] = lifeSpan[1];
     _agents.clear();
 }
 
@@ -97,12 +98,12 @@ void AgentsSource::SetAgentsGenerated(int agentsGenerated)
      _agentsGenerated = agentsGenerated;
 }
 
-const double* AgentsSource::GetBoundaries() const
+const std::vector<float> AgentsSource::GetBoundaries() const
 {
      return _boundaries;
 }
 
-void AgentsSource::Setboundaries(double * bounds)
+void AgentsSource::Setboundaries(std::vector<float> bounds)
 {
      _boundaries[0]=bounds[0];
      _boundaries[1]=bounds[1];
@@ -144,6 +145,18 @@ double AgentsSource::GetPlanTime() const
 int AgentsSource::GetMaxAgents() const
 {
      return _maxAgents;
+}
+int AgentsSource::GetChunkAgents() const
+{
+     return  _chunkAgents;
+}
+bool AgentsSource::isContinuous() const
+{
+     return _conti;
+}
+std::vector<float> AgentsSource::GetLifeSpan() const
+{
+     return  _lifeSpan;
 }
 
 float AgentsSource::GetStartX() const

@@ -49,7 +49,7 @@ public:
      /**
       * Constructor
       */
-     AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency, bool greedy, double time, int agent_id, float startx, float starty);
+     AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency, bool greedy, double time, int agent_id, float startx, float starty, bool conti,  int chunkAgents, std::vector<float> boundaries, std::vector<float> lifeSpan);
 
      /**
       * Destructor
@@ -104,8 +104,8 @@ public:
 
      int GetAgentsGenerated() const;
      void SetAgentsGenerated(int agentsGenerated);
-     const double* GetBoundaries() const;
-     void Setboundaries(double * bounds);
+     const std::vector<float> GetBoundaries() const;
+     void Setboundaries(std::vector<float> bounds);
      const std::string& GetCaption() const;
      int GetFrequency() const;
      int GetGroupId() const;
@@ -115,6 +115,9 @@ public:
      float GetStartY() const;
      double GetPlanTime() const;
      int GetMaxAgents() const;
+     int GetChunkAgents() const;
+     bool isContinuous() const;
+     std::vector<float> GetLifeSpan() const;
      bool Greedy() const;
      void SetStartDistribution(std::shared_ptr<StartDistribution>);
      const std::shared_ptr<StartDistribution> GetStartDistribution() const;
@@ -122,20 +125,22 @@ public:
 
 private:
      int _id=-1;
-     int _frequency=0;
+     int _frequency=1; // # pedestrians per second
      int _maxAgents=0;
      int _groupID=-1;
      std::string _caption="no caption";
      bool _greedy = false;
      int _agentsGenerated=0;
-     double _boundaries[4];// = { 0, 0, 0, 0 };
+     std::vector<float> _boundaries;
      int _agent_id;
      double _time;
      float _startx;
      float _starty;
+     std::vector<float> _lifeSpan;
+     int _chunkAgents; // create <chunk_agents> per <frequency> time
+     bool _conti=false;
      std::vector<Pedestrian*> _agents;
      std::shared_ptr<StartDistribution> _startDistribution;
-
 };
 
 #endif /* AGENTSOURCE_H_ */

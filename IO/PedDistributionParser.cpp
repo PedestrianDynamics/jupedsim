@@ -170,18 +170,30 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
             int group_id = xmltoi(e->Attribute("group_id"), -1);
             string caption = xmltoa(e->Attribute("caption"), "no caption");
             string str_greedy = xmltoa(e->Attribute("greedy"), "false");
+            string str_conti = xmltoa(e->Attribute("conti"), "false");
             double time = xmltof(e->Attribute("time"), 0);
             int agent_id = xmltoi(e->Attribute("agent_id"), -1);
             float startx = xmltof(e->Attribute("startX"), std::numeric_limits<float>::quiet_NaN());
             float starty = xmltof(e->Attribute("startY"), std::numeric_limits<float>::quiet_NaN());
             bool greedy = (str_greedy == "true")?true:false;
+            bool conti = (str_conti == "true")?true:false;
+            float xmin =  xmltof(e->Attribute("x_min"), std::numeric_limits<float>:: min());
+            float xmax =  xmltof(e->Attribute("x_max"), std::numeric_limits<float>:: max());
+            float ymin =  xmltof(e->Attribute("y_min"), std::numeric_limits<float>:: min());
+            float ymax =  xmltof(e->Attribute("y_max"), std::numeric_limits<float>:: max());
+            float chunkAgents = xmltof(e->Attribute("N_create"), 1);
+            float timeMin = xmltof(e->Attribute("time_min"), std::numeric_limits<float>:: min());
+            float timeMax = xmltof(e->Attribute("time_max"), std::numeric_limits<float>:: max());
+            std::vector<float> boundaries = {xmin, xmax, ymin, ymax};
+            std::vector<float> lifeSpan = {timeMin, timeMax};
             if (agent_id >= 0){
               agents_max = 1;
               frequency = 1;
             }
             auto source = std::shared_ptr<AgentsSource>(
                     new AgentsSource(id, caption, agents_max, group_id,
-                                     frequency, greedy, time, agent_id, startx, starty));
+                                     frequency, greedy, time, agent_id, startx, starty,
+                                     conti, chunkAgents, boundaries, lifeSpan));
             startDisSources.push_back(source);
 
             Log->Write("INFO:\tSource with id %d will be parsed (greedy = %d)!", id, greedy);
