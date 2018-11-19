@@ -338,6 +338,9 @@ void Simulation::UpdateRoutesAndLocations()
 
                }
           }
+          // actualize routes for sources
+          if(_gotSources)
+               ped->FindRoute();
           //finally actualize the route
           if ( !_gotSources && ped->FindRoute() == -1) {
                //a destination could not be found for that pedestrian
