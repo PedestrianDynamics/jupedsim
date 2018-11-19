@@ -458,6 +458,11 @@ void VoronoiBestVertexGreedy (const std::vector<Point>& discrete_positions, cons
 
                }
      }
+     if(possible_vertices.empty())
+     {
+          Log->Write("No possible vertices. Exit.");
+          exit(EXIT_FAILURE); // maybe not exit, just ignore
+     }
 
      auto biggest = std::max_element(distances.begin(), distances.end());
      int iposition = biggest - distances.begin(); // first biggest distance
