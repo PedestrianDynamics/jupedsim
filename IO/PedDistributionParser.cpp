@@ -211,7 +211,6 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
               agents_max = 1;
               frequency = 1;
             }
-            std::cout << "\nHere" << std::endl;
             auto source = std::shared_ptr<AgentsSource>(
                     new AgentsSource(id,
                                      caption,
@@ -227,7 +226,6 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
                                      chunkAgents,
                                      boundaries,
                                      lifeSpan));
-            std::cout << "\nHere" << std::endl;
             startDisSources.push_back(source);
 
             Log->Write("INFO:\tSource with id %d will be parsed (greedy = %d)!", id, greedy);

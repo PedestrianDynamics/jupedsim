@@ -119,11 +119,11 @@ bool AgentsSourcesManager::ProcessAllSources() const
           // inTime is always true if src got some PlanTime (default values
           // if src has no PlanTime, then this is set to 0. In this case inTime
           // is important in the following condition
-          if (src->GetPoolSize() && (src->GetPlanTime() <= current_time) && inTime )// maybe diff<eps
+          if (std::fmod(current_time, src->GetFrequency())==0 && src->GetPoolSize() && (src->GetPlanTime() <= current_time) && inTime )// maybe diff<eps
           {
                vector<Pedestrian*> peds;
 
-               src->RemoveAgentsFromPool(peds, src->GetFrequency());
+               src->RemoveAgentsFromPool(peds, src->GetChunkAgents());
                source_peds.reserve(source_peds.size() + peds.size());
 
                Log->Write("\nINFO:\tSource %d generating %d agents (%d remaining)\n",src->GetId(),peds.size(),src->GetPoolSize());
@@ -156,11 +156,14 @@ bool AgentsSourcesManager::ProcessAllSources() const
           if (timeConstraint) // for the case we still expect
                // agents coming
                empty = false;
-          if(current_time > srcLifeSpan[1]) //time is over
-               empty = true;
+          if(current_time < srcLifeSpan[1]) //time is over
+               empty = false;
+          std::cout << current_time << ", " << srcLifeSpan[1] << " constraint " << timeConstraint<< " --- "<< empty << "\n";
      }
      std::cout << "LEAVE   AgentsSourcesManager::ProcessAllSources()\n";
-     std::cout << " Source building: "<<  _building << " size "  << _building->GetAllPedestrians().size()<< std::endl;
+     std::cout << current_time << "\n";
+
+     std::cout << " Source building: "<<  _building << " size "  << _building->GetAllPedestrians().size()<< " empty = " << empty << std::endl;
 
      // for(auto pp: _building->GetAllPedestrians())
      //      std::cout<< KBLU << "BUL: agentssourcesManager: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl;
