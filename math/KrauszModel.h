@@ -3,6 +3,7 @@
  * \date        Jul 19, 2016
  * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \ingroup OperationalModels
  *
  * \section License
  * This file is part of JuPedSim.
@@ -21,10 +22,7 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * \section Description
- * Implementation of classes for force-based models.
- * Actually we've got two different models:
- * 1. Generalized Centrifugal Force Model
- *
+ * Implementation of classes for force-based models.*
  *
  **/
 
@@ -44,6 +42,15 @@ class Pedestrian;
 class DirectionStrategy;
 
 
+/*!
+ * \class KrauszModel
+ *
+ * \brief @todo
+ *
+ *\ingroup OperationalModels
+ *
+ * \author Carlos
+ */
 class KrauszModel : public OperationalModel
 {
 public:

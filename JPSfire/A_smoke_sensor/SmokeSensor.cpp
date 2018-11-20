@@ -36,10 +36,9 @@
 #include "../generic/FDSMeshStorage.h"
 //#include <set>
 #include "../../tinyxml/tinyxml.h"
-//#include <filesystem>
-#include <boost/filesystem.hpp>
-//namespace fs = std::experimental::filesystem;
-namespace fs = boost::filesystem;
+
+#include <filesystem>
+namespace fs = std::filesystem;
 
 SmokeSensor::SmokeSensor(const Building *b) : AbstractSensor(b)
 {

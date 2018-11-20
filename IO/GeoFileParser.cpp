@@ -52,7 +52,7 @@ bool GeoFileParser::LoadGeometry(Building* building)
 {
 
      std::string geoFilenameWithPath = _configuration->GetProjectRootDir()+_configuration->GetGeometryFile();
-     std::cout << "LodGeometry: file: " << geoFilenameWithPath << "\n";
+     std::cout << "\nLoadGeometry: file: " << geoFilenameWithPath << "\n";
 
      TiXmlDocument docGeo(geoFilenameWithPath);
      if (!docGeo.LoadFile()) {
@@ -135,7 +135,7 @@ bool GeoFileParser::LoadGeometry(Building* building)
                SubRoom* subroom = nullptr;
 
                if (type=="stair" || type=="escalator" || type=="idle_escalator") {
-                    if (xSubRoom->FirstChildElement("up") == NULL) {
+                    if (xSubRoom->FirstChildElement("up") == nullptr) {
                          Log->Write("ERROR:\t the attribute <up> and <down> are missing for the " + type);
                          Log->Write("ERROR:\t check your geometry file");
                          return false;
@@ -148,7 +148,7 @@ bool GeoFileParser::LoadGeometry(Building* building)
                     ((Stair *) subroom)->SetUp(Point(up_x, up_y));
                     ((Stair *) subroom)->SetDown(Point(down_x, down_y));
                } else if (type =="escalator_up") {
-                    if (xSubRoom->FirstChildElement("up") == NULL) {
+                    if (xSubRoom->FirstChildElement("up") == nullptr) {
                          Log->Write("ERROR:\t the attribute <up> and <down> are missing for the " + type);
                          Log->Write("ERROR:\t check your geometry file");
                          return false;
@@ -163,7 +163,7 @@ bool GeoFileParser::LoadGeometry(Building* building)
                     ((Escalator*) subroom)->SetEscalatorUp();
                     _configuration->set_has_directional_escalators(true);
                } else if (type == "escalator_down") {
-                    if (xSubRoom->FirstChildElement("up") == NULL) {
+                    if (xSubRoom->FirstChildElement("up") ==nullptr) {
                          Log->Write("ERROR:\t the attribute <up> and <down> are missing for the " + type);
                          Log->Write("ERROR:\t check your geometry file");
                          return false;

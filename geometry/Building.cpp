@@ -25,7 +25,7 @@
  *
  **/
 
-
+#include <chrono>
 #include "Building.h"
 
 #include "../geometry/SubRoom.h"
@@ -37,9 +37,11 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../mpi/LCGrid.h"
 #include "../IO/GeoFileParser.h"
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 #endif
-
 //#undef _OPENMP
 
 #ifdef _OPENMP
@@ -48,6 +50,7 @@
 #define omp_get_thread_num()    0
 #define omp_get_max_threads()   1
 #endif
+#define DEBUG 0
 
 using namespace std;
 
@@ -98,7 +101,6 @@ Building::Building(Configuration* configuration, PedDistributor& pedDistributor)
           Log->Write("ERROR:\tcould not distribute the pedestrians\n");
           exit(EXIT_FAILURE);
      }
-
      InitGrid();
 
      if (!_routingEngine->Init(this)) {
@@ -288,7 +290,7 @@ void Building::AddSurroundingRoom()
 bool Building::InitGeometry()
 {
      Log->Write("INFO: \tInit Geometry");
-
+     correct();
      for (auto&& itr_room: _rooms) {
           for (auto&& itr_subroom: itr_room.second->GetAllSubRooms()) {
                //create a close polyline out of everything
@@ -366,6 +368,304 @@ bool Building::InitGeometry()
      return true;
 }
 
+bool Building::correct() const {
+     auto t_start = std::chrono::high_resolution_clock::now();
+     Log->Write("INFO:\tenter correct ...");
+     bool removed = false;
+
+     for(auto&& room: this->GetAllRooms()) {
+          for(auto&& subroom: room.second->GetAllSubRooms()) {
+                // -- remove exits *on* walls
+                removed = RemoveOverlappingDoors(subroom.second);
+               // --------------------------
+               // -- remove overlapping walls
+               auto walls = subroom.second->GetAllWalls(); // this call
+                                                                // should be
+                                                                // after
+                                                                // eliminating
+                                                                // nasty exits
+#if DEBUG
+               std::cout<< "\n" << KRED << "correct Room " << room.first << "  Subroom " << subroom.first << RESET  << std::endl;
+#endif
+               for(auto const & bigWall: walls) //self checking
+               {
+                    // std::cout << "BigWall: " << std::endl;
+                      // bigWall.WriteToErrorLog();
+                    //special treatment for doors
+/////
+                    std::vector<Wall> WallPieces;
+                    WallPieces = SplitWall(subroom.second, bigWall);
+                    if(!WallPieces.empty())
+                         removed = true;
+#if DEBUG
+z                    std::cout << "Wall pieces size : " <<  WallPieces.size() << std::endl;
+                    for(auto w:WallPieces)
+                         w.WriteToErrorLog();
+#endif
+                    int ok=0;
+                    while(!ok)
+                    {
+                         ok = 1; // ok ==1 means no new pieces are found
+                         for (auto wallPiece: WallPieces)
+                         {
+                              std::vector<Wall> tmpWallPieces;
+                              tmpWallPieces = SplitWall(subroom.second, wallPiece);
+                              if(!tmpWallPieces.empty())
+                              {
+                                   // std::cout << "set ok because tmp size =" << tmpWallPieces.size() << std::endl;
+                                    ok = 0; /// stay in the loop
+                                    // append tmpWallPieces to WallPiece
+                                    WallPieces.insert(std::end(WallPieces),std::begin(tmpWallPieces), std::end(tmpWallPieces));
+                                    // remove the line since it was split already
+                                    auto it = std::find(WallPieces.begin(), WallPieces.end(), wallPiece);
+                                    if (it != WallPieces.end())
+                                    {
+                                         // std::cout<< KGRN << "delete wall ..." << RESET <<std::endl;
+                                         // wallPiece.WriteToErrorLog();
+                                         WallPieces.erase(it);
+                                    }
+
+                                    // std::cout << "BNow Wall peces size : " <<  WallPieces.size() << std::endl;
+                              }
+                         }
+#if DEBUG
+                         std::cout << "ok "<< ok << std::endl;
+                         std::cout << "new while  Wall peces size : " <<  WallPieces.size() << std::endl;
+                         std::cout << "====" << std::endl;
+
+                         for(auto t: WallPieces){
+                              std::cout << ">> Piece: " << std::endl;
+                              t.WriteToErrorLog();
+                         }
+#endif
+                         // getc(stdin);
+                    }// while
+                    // remove
+                    // duplicates fromWllPiecs
+                    if(!WallPieces.empty())
+                    {
+                         //remove  duplicaes from wallPiecess
+
+                         auto end = WallPieces.end();
+                         for (auto it = WallPieces.begin(); it != end; ++it) {
+                                end = std::remove(it + 1, end, *it);
+                         }
+                         WallPieces.erase(end, WallPieces.end());
+#if DEBUG
+                         std::cout << "..removing duplicates pieces..\n";
+                         for(auto t: WallPieces){
+                              std::cout << ">>>> Piece: " << std::endl;
+                              t.WriteToErrorLog();
+                         }
+#endif
+                         // remove big wall and add one wallpiece to walls
+                         ReplaceBigWall(subroom.second, bigWall, WallPieces);
+                    }
+               }// bigLine
+          }//s
+     }//r
+
+     if(removed)
+     {
+          fs::path f("correct_"+this->GetConfig()->GetGeometryFile());
+          //fs::path p(this->GetConfig()->GetProjectRootDir());
+          //p = p / f;
+          std::string filename = f.string();
+          if(SaveGeometry(filename))
+               this->GetConfig()->SetGeometryFile(filename);
+     }
+
+    auto t_end = std::chrono::high_resolution_clock::now();
+    double elapsedTimeMs = std::chrono::duration<double, std::milli>(t_end-t_start).count();
+    Log->Write("INFO:\tLeave geometry correct with success (%.3f s)", elapsedTimeMs);
+    return true;
+}
+bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom>& subroom) const
+{
+#if DEBUG
+     std::cout << KRED << "\nEnter RemoveOverlappingDoors with subroom " << subroom->GetRoomID() << "," << subroom->GetSubRoomID() << RESET<<"\n";
+#endif
+     bool removed = false; // did we remove anything?
+      vector<Line> exits = vector<Line>(); // transitions+crossings
+      auto walls = subroom->GetAllWalls();
+      vector<Wall> tmpWalls = vector<Wall>(); //splited big walls are stored here
+      bool isBigWall = false; // mark walls as big. If not big, add them to tmpWalls
+      //  collect all crossings
+      for (auto&& cros: subroom->GetAllCrossings())
+            exits.push_back(*cros);
+      //collect all transitions
+      for (auto&& trans: subroom->GetAllTransitions())
+            exits.push_back(*trans);
+#if DEBUG
+      std::cout << "subroom walls: \n";
+      for(auto w: subroom->GetAllWalls())
+            w.WriteToErrorLog();
+      std::cout << "---------------\n";
+      // removing doors on walls
+#endif
+      while(!walls.empty())
+      {
+           auto wall = walls.back();
+           walls.pop_back();
+           isBigWall = false;
+           for(auto  e=exits.begin(); e!=exits.end(); )
+           {
+                if(wall.NearlyInLineSegment(e->GetPoint1()) && wall.NearlyInLineSegment(e->GetPoint2()))
+                {
+                     isBigWall = true; // mark walls as big
+                     double dist_pt1 = (wall.GetPoint1() - e->GetPoint1()).NormSquare();
+                     double dist_pt2 = (wall.GetPoint1() - e->GetPoint2()).NormSquare();
+                     Point A, B;
+
+                     if(dist_pt1<dist_pt2)
+                     {
+                          A = e->GetPoint1();
+                          B = e->GetPoint2();
+                     }
+                     else
+                     {
+                          A = e->GetPoint2();
+                          B = e->GetPoint1();
+                     }
+
+                     Wall NewWall(wall.GetPoint1(), A);
+                     Wall NewWall1(wall.GetPoint2(), B);
+                     // NewWall.WriteToErrorLog();
+                     // NewWall1.WriteToErrorLog();
+                     // add new lines to be controled against overlap with exits
+                     walls.push_back(NewWall);
+                     walls.push_back(NewWall1);
+                     subroom->RemoveWall(wall);
+                     exits.erase(e); // we don't need to check this exit again
+                     removed = true;
+                     break; // we are done with this wall. get next wall.
+
+                }// if
+                else
+                {
+                     e++;
+                }
+           } // exits
+           if(!isBigWall)
+                tmpWalls.push_back(wall);
+
+      }// while
+
+      // copy walls in subroom
+      for(auto const & wall: tmpWalls)
+      {
+           subroom->AddWall(wall);
+      }
+
+#if DEBUG
+      std::cout << "\nnew Subroom:  " << std::endl;
+      for(auto w: subroom->GetAllWalls())
+           w.WriteToErrorLog(); // AddWall won't add existing walls
+
+      std::cout << KGRN << "\nLEAVE with removed=:   "<< removed << RESET << std::endl;
+      getc(stdin);
+#endif
+
+      return removed;
+}
+
+std::vector<Wall>  Building::SplitWall(const std::shared_ptr<SubRoom>& subroom, const Wall&  bigWall) const{
+     std::vector<Wall> WallPieces;
+#if DEBUG
+     std::cout << subroom->GetSubRoomID() << "collect wall pieces with " << std::endl;
+     bigWall.WriteToErrorLog();
+#endif
+     auto walls = subroom->GetAllWalls();
+     auto crossings = subroom->GetAllCrossings();
+     auto transitions = subroom->GetAllTransitions();
+     // TODO: Hlines too?
+     vector<Line> walls_and_exits = vector<Line>();
+     // @todo: check if this is GetAllGoals()?
+     //  collect all crossings
+     for (auto&& cros:crossings)
+          walls_and_exits.push_back(*cros);
+     //collect all transitions
+     for (auto&& trans: transitions)
+          walls_and_exits.push_back(*trans);
+     for (auto&& wall: walls)
+          walls_and_exits.push_back(wall);
+
+     for(auto const & other: walls_and_exits)
+     {
+#if DEBUG
+          std::cout << other.toString() << "\n";
+#endif
+          if((bigWall == other) || (bigWall.ShareCommonPointWith(other))) continue;
+          Point intersectionPoint;
+
+          if(bigWall.IntersectionWith(other, intersectionPoint))
+          {
+               if(intersectionPoint == bigWall.GetPoint1() || intersectionPoint == bigWall.GetPoint2()) continue;
+#if DEBUG
+               std::cout << "BIG\n";
+               std::cout << bigWall.GetPoint1()._x << " " << bigWall.GetPoint1()._y << "\n";
+               std::cout << bigWall.GetPoint2()._x << " " << bigWall.GetPoint2()._y << "\n";
+               std::cout<< "intersectin with: " << std::endl;
+               std::cout << other.toString() << "\n";
+               std::cout << intersectionPoint._x <<" " <<intersectionPoint._y << "\n";
+               string s = intersectionPoint.toString();
+               std::cout << "\t >> Intersection at Point: " << s.c_str() << "\n";
+#endif
+               //Point NAN_p(J_NAN, J_NAN);
+
+               if(std::isnan(intersectionPoint._x) || std::isnan(intersectionPoint._y))
+                    continue;
+
+               Wall NewWall(intersectionPoint, bigWall.GetPoint2());// [IP -- P2]
+               Wall NewWall2(bigWall.GetPoint1(), intersectionPoint);// [IP -- P2]
+
+               WallPieces.push_back(NewWall);
+               WallPieces.push_back(NewWall2);
+#if DEBUG
+               std::cout << "Add newwall: " << std::endl;
+               NewWall.WriteToErrorLog();
+               NewWall2.WriteToErrorLog();
+#endif
+          }
+     }//other walls
+#if DEBUG
+     std::cout << "size " << WallPieces.size() << "\n";
+     std::cout << "Leave collect\n--------" << std::endl;
+#endif
+// getc(stdin);
+
+     return WallPieces;
+}
+bool Building::ReplaceBigWall(const std::shared_ptr<SubRoom>& subroom, const Wall& bigWall, std::vector<Wall>& WallPieces) const
+{
+#if DEBUG
+     Log->Write("INFO Replacing big line in Room %d | Subroom %d with:", subroom->GetRoomID(), subroom->GetSubRoomID());
+     bigWall.WriteToErrorLog();
+
+     // REMOVE BigLINE
+
+     std::cout << "\ns+ =" << subroom->GetAllWalls().size() << "\n";
+#endif
+
+     bool res = subroom->RemoveWall(bigWall);
+
+#if DEBUG
+     std::cout << "s- =" << subroom->GetAllWalls().size() << "\n";
+#endif
+     if(!res) {
+          Log->Write("ERROR:  Correct fails. Could not remove wall: ");
+          bigWall.WriteToErrorLog();
+          return false;
+     }
+     // ADD SOME LINE
+     res = AddWallToSubroom(subroom, WallPieces);
+     if(!res) {
+          Log->Write("ERROR:  Correct fails. Could not add new wall piece");
+          return false;
+     }
+
+     return true;
+}
 const string& Building::GetProjectFilename() const
 {
      return _configuration->GetProjectFile();
@@ -379,6 +679,75 @@ const string& Building::GetProjectRootDir() const
 const std::string& Building::GetGeometryFilename() const
 {
      return _configuration->GetGeometryFile();
+}
+
+bool Building::AddWallToSubroom(
+        const std::shared_ptr<SubRoom> & subroom,
+        std::vector<Wall> WallPieces) const
+{ // CHOOSE WHICH PIECE SHOULD BE ADDED TO SUBROOM
+// this is a challngig function
+#if DEBUG
+     std::cout << "\n-----\nEnter add_wall with:\n";
+     for(const auto & w : WallPieces)
+          w.WriteToErrorLog();
+#endif
+     auto walls = subroom->GetAllWalls();
+     int maxCount = -1;
+     Wall choosenWall;
+     for(const auto & w : WallPieces) {
+          // std::cout <<"\n check wall: \n";
+          // w.WriteToErrorLog();
+          int count = 0;
+          for (const auto & checkWall: walls) {
+               if (checkWall==w) continue;// don't count big wall
+               if (w.ShareCommonPointWith(checkWall)) count++;
+               else
+               {   // first use the cheap ShareCommonPointWith() before entering
+                   // this else
+                    Point interP;
+                    if (w.IntersectionWith(checkWall, interP))
+                    {
+                         if( (!std::isnan(interP._x)) && (!std::isnan(interP._y)))
+                              count++;
+                    }
+               }
+          }
+          auto transitions = subroom->GetAllTransitions();
+          auto crossings = subroom->GetAllCrossings();
+          //auto h = subroom.second->GetAllHlines();
+          for (auto transition: transitions)
+               if (w.ShareCommonPointWith(*transition)) count++;
+          for (auto crossing: crossings)
+               if (w.ShareCommonPointWith(*crossing)) count++;
+
+          if (count>=2)
+          {
+               subroom->AddWall(w);
+#if DEBUG
+               Log->Write("INFO: Wall candidate: ");
+               w.WriteToErrorLog();
+#endif
+               if (count > maxCount)
+               {
+                    maxCount = count;
+                    choosenWall = w;
+               }
+#if DEBUG
+               std::cout << "\n -- count= " << count << ",  maxCount= " << maxCount << "\n";
+#endif
+          }
+     }// WallPieces
+     if(maxCount<0)
+          return false;
+     else
+     {
+#if DEBUG
+          std::cout << KGRN << "Choosen Wall: " << RESET << std::endl;
+          choosenWall.WriteToErrorLog();
+#endif
+          subroom->AddWall(choosenWall);
+          return true;
+     }
 }
 
 void Building::WriteToErrorLog() const
@@ -418,15 +787,19 @@ Room* Building::GetRoom(string caption) const
 
 bool Building::AddCrossing(Crossing* line)
 {
-     if (_crossings.count(line->GetID())!=0) {
-          char tmp[CLENGTH];
-          sprintf(tmp,
-                    "ERROR: Duplicate index for crossing found [%d] in Routing::AddCrossing()",
-                    line->GetID());
-          Log->Write(tmp);
-          exit(EXIT_FAILURE);
-     }
-     _crossings[line->GetID()] = line;
+         int IDRoom = line->GetRoom1()->GetID();
+         int IDLine = line->GetID();
+         int IDCrossing = 1000 * IDRoom + IDLine;
+         if (_crossings.count(IDCrossing) != 0)
+         {
+                 char tmp[CLENGTH];
+                 sprintf(tmp,
+                         "ERROR: Duplicate index for crossing found [%d] in Routing::AddCrossing()",
+                         IDCrossing);
+                 Log->Write(tmp);
+                 exit(EXIT_FAILURE);
+         }
+     _crossings[IDCrossing] = line;
      return true;
 }
 
@@ -929,121 +1302,121 @@ Transition* Building::GetTransitionByUID(int uid) const
      return nullptr;
 }
 
-//bool Building::SaveGeometry(const std::string& filename)
-//{
-//     std::stringstream geometry;
-//
-//     //write the header
-//     geometry << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" << endl;
-//     geometry << "<geometry version=\"0.5\" caption=\"second life\" unit=\"m\"\n "
-//               " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n  "
-//               " xsi:noNamespaceSchemaLocation=\"http://134.94.2.137/jps_geoemtry.xsd\">" << endl << endl;
-//
-//     //write the rooms
-//     geometry << "<rooms>" << endl;
-//     for (auto&& itroom : _rooms) {
-//          auto&& room = itroom.second;
-//          geometry << "\t<room id =\"" << room->GetID() << "\" caption =\"" << room->GetCaption() << "\">" << endl;
-//          for (auto&& itr_sub : room->GetAllSubRooms()) {
-//               auto&& sub = itr_sub.second;
-//               const double* plane = sub->GetPlaneEquation();
-//               geometry << "\t\t<subroom id =\"" << sub->GetSubRoomID()
-//                         << "\" closed=\"" << 0
-//                         << "\" class=\"" << sub->GetType()
-//                         << "\" A_x=\"" << plane[0]
-//                         << "\" B_y=\"" << plane[1]
-//                         << "\" C_z=\"" << plane[2] << "\">" << endl;
-//
-//               for (auto&& wall : sub->GetAllWalls()) {
-//                    const Point& p1 = wall.GetPoint1();
-//                    const Point& p2 = wall.GetPoint2();
-//
-//                    geometry << "\t\t\t<polygon caption=\"wall\" type=\"" << wall.GetType() << "\">" << endl
-//                              << "\t\t\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << endl
-//                              << "\t\t\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << endl
-//                              << "\t\t\t</polygon>" << endl;
-//               }
-//
-//               if (sub->GetType()=="stair") {
-//                    const Point& up = ((Stair*) sub.get())->GetUp();
-//                    const Point& down = ((Stair*) sub.get())->GetDown();
-//                    geometry << "\t\t\t<up px=\"" << up._x << "\" py=\"" << up._y << "\"/>" << endl;
-//                    geometry << "\t\t\t<down px=\"" << down._x << "\" py=\"" << down._y << "\"/>" << endl;
-//               }
-//
-//               geometry << "\t\t</subroom>" << endl;
-//          }
-//
-//          //write the crossings
-//          geometry << "\t\t<crossings>" << endl;
-//          for (auto const& mapcross : _crossings) {
-//               Crossing* cross = mapcross.second;
-//
-//               //only write the crossings in this rooms
-//               if (cross->GetRoom1()->GetID()!=room->GetID()) continue;
-//
-//               const Point& p1 = cross->GetPoint1();
-//               const Point& p2 = cross->GetPoint2();
-//
-//               geometry << "\t<crossing id =\"" << cross->GetID()
-//                         << "\" subroom1_id=\"" << cross->GetSubRoom1()->GetSubRoomID()
-//                         << "\" subroom2_id=\"" << cross->GetSubRoom2()->GetSubRoomID() << "\">" << endl;
-//
-//               geometry << "\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << endl
-//                         << "\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << endl
-//                         << "\t</crossing>" << endl;
-//          }
-//          geometry << "\t\t</crossings>" << endl;
-//          geometry << "\t</room>" << endl;
-//     }
-//
-//     geometry << "</rooms>" << endl;
-//
-//     //write the transitions
-//     geometry << "<transitions>" << endl;
-//
-//     for (auto const& maptrans : _transitions) {
-//          Transition* trans = maptrans.second;
-//          const Point& p1 = trans->GetPoint1();
-//          const Point& p2 = trans->GetPoint2();
-//          int room2_id = -1;
-//          int subroom2_id = -1;
-//          if (trans->GetRoom2()) {
-//               room2_id = trans->GetRoom2()->GetID();
-//               subroom2_id = trans->GetSubRoom2()->GetSubRoomID();
-//          }
-//
-//          geometry << "\t<transition id =\"" << trans->GetID()
-//                    << "\" caption=\"" << trans->GetCaption()
-//                    << "\" type=\"" << trans->GetType()
-//                    << "\" room1_id=\"" << trans->GetRoom1()->GetID()
-//                    << "\" subroom1_id=\"" << trans->GetSubRoom1()->GetSubRoomID()
-//                    << "\" room2_id=\"" << room2_id
-//                    << "\" subroom2_id=\"" << subroom2_id << "\">" << endl;
-//
-//          geometry << "\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << endl
-//                    << "\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << endl
-//                    << "\t</transition>" << endl;
-//
-//     }
-//
-//     geometry << "</transitions>" << endl;
-//     geometry << "</geometry>" << endl;
-//     //write the routing file
-//
-//     //cout<<endl<<geometry.str()<<endl;
-//
-//     ofstream geofile(filename);
-//     if (geofile.is_open()) {
-//          geofile << geometry.str();
-//          Log->Write("INFO:\tfile saved to %s", filename.c_str());
-//     }
-//     else {
-//          Log->Write("ERROR:\tunable to save the geometry to %s", filename.c_str());
-//          return false;
-//     }
-//
-//     return true;
-//}
+bool Building::SaveGeometry(const std::string& filename) const
+{
+    std::stringstream geometry;
+
+    //write the header
+    geometry << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" << endl;
+    geometry << "<geometry version=\"0.8\" caption=\"second life\" unit=\"m\"\n "
+              " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n  "
+              " xsi:noNamespaceSchemaLocation=\"http://134.94.2.137/jps_geoemtry.xsd\">" << endl << endl;
+
+    //write the rooms
+    geometry << "<rooms>" << endl;
+    for (auto&& itroom : _rooms) {
+         auto&& room = itroom.second;
+         geometry << "\t<room id =\"" << room->GetID() << "\" caption =\"" << room->GetCaption() << "\">" << endl;
+         for (auto&& itr_sub : room->GetAllSubRooms()) {
+              auto&& sub = itr_sub.second;
+              const double* plane = sub->GetPlaneEquation();
+              geometry << "\t\t<subroom id =\"" << sub->GetSubRoomID()
+                       << "\" caption=\"dummy_caption"
+                        << "\" class=\"" << sub->GetType()
+                        << "\" A_x=\"" << plane[0]
+                        << "\" B_y=\"" << plane[1]
+                        << "\" C_z=\"" << plane[2] << "\">" << endl;
+
+              for (auto&& wall : sub->GetAllWalls()) {
+                   const Point& p1 = wall.GetPoint1();
+                   const Point& p2 = wall.GetPoint2();
+
+                   geometry << "\t\t\t<polygon caption=\"wall\" type=\"" << wall.GetType() << "\">" << endl
+                             << "\t\t\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << endl
+                             << "\t\t\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << endl
+                             << "\t\t\t</polygon>" << endl;
+              }
+
+              if (sub->GetType()=="stair") {
+                   const Point& up = ((Stair*) sub.get())->GetUp();
+                   const Point& down = ((Stair*) sub.get())->GetDown();
+                   geometry << "\t\t\t<up px=\"" << up._x << "\" py=\"" << up._y << "\"/>" << endl;
+                   geometry << "\t\t\t<down px=\"" << down._x << "\" py=\"" << down._y << "\"/>" << endl;
+              }
+
+              geometry << "\t\t</subroom>" << endl;
+         }
+
+         //write the crossings
+         geometry << "\t\t<crossings>" << endl;
+         for (auto const& mapcross : _crossings) {
+              Crossing* cross = mapcross.second;
+
+              //only write the crossings in this rooms
+              if (cross->GetRoom1()->GetID()!=room->GetID()) continue;
+
+              const Point& p1 = cross->GetPoint1();
+              const Point& p2 = cross->GetPoint2();
+
+              geometry << "\t<crossing id =\"" << cross->GetID()
+                        << "\" subroom1_id=\"" << cross->GetSubRoom1()->GetSubRoomID()
+                        << "\" subroom2_id=\"" << cross->GetSubRoom2()->GetSubRoomID() << "\">" << endl;
+
+              geometry << "\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << endl
+                        << "\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << endl
+                        << "\t</crossing>" << endl;
+         }
+         geometry << "\t\t</crossings>" << endl;
+         geometry << "\t</room>" << endl;
+    }
+
+    geometry << "</rooms>" << endl;
+
+    //write the transitions
+    geometry << "<transitions>" << endl;
+
+    for (auto const& maptrans : _transitions) {
+         Transition* trans = maptrans.second;
+         const Point& p1 = trans->GetPoint1();
+         const Point& p2 = trans->GetPoint2();
+         int room2_id = -1;
+         int subroom2_id = -1;
+         if (trans->GetRoom2()) {
+              room2_id = trans->GetRoom2()->GetID();
+              subroom2_id = trans->GetSubRoom2()->GetSubRoomID();
+         }
+
+         geometry << "\t<transition id =\"" << trans->GetID()
+                   << "\" caption=\"" << trans->GetCaption()
+                   << "\" type=\"" << trans->GetType()
+                   << "\" room1_id=\"" << trans->GetRoom1()->GetID()
+                   << "\" subroom1_id=\"" << trans->GetSubRoom1()->GetSubRoomID()
+                   << "\" room2_id=\"" << room2_id
+                   << "\" subroom2_id=\"" << subroom2_id << "\">" << endl;
+
+         geometry << "\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << endl
+                   << "\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << endl
+                   << "\t</transition>" << endl;
+
+    }
+
+    geometry << "</transitions>" << endl;
+    geometry << "</geometry>" << endl;
+    //write the routing file
+
+    //cout<<endl<<geometry.str()<<endl;
+
+    ofstream geofile(filename);
+    if (geofile.is_open()) {
+         geofile << geometry.str();
+         Log->Write("INFO:\tfile saved to %s", filename.c_str());
+    }
+    else {
+         Log->Write("ERROR:\tunable to save the geometry to %s", filename.c_str());
+         return false;
+    }
+
+    return true;
+}
 
 #endif // _SIMULATOR

@@ -109,7 +109,12 @@ Pedestrian::Pedestrian()
      _agentsCreated++;//increase the number of object created
      _FED_In = 0.0;
      _FED_Heat = 0.0;
+     _WalkingSpeed = nullptr;
+     _ToxicityAnalysis = nullptr;
 }
+
+//const shared_ptr<ToxicityAnalysis> &Pedestrian::getToxicityAnalysis() { return _ToxicityAnalysis; }
+
 Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& building)
 :
      _group(agentsParameters.GetGroupId()),
@@ -185,6 +190,8 @@ Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& buil
      _agentsCreated++;//increase the number of object created
      _FED_In = 0.0;
      _FED_Heat = 0.0;
+     _ToxicityAnalysis = nullptr;
+     _WalkingSpeed = nullptr;
 }
 
 
@@ -544,7 +551,7 @@ double Pedestrian::GetV0Norm() const
      double ped_elevation = sub->GetElevation(_ellipse.GetCenter());
      if (_navLine ==nullptr)
      {
-          printf("Error: ped %d has no navline\n", _id);
+          //printf("Error: ped %d has no navline\n", _id);
           //exit(EXIT_FAILURE);
           return std::max(0.,_ellipse.GetV0());
      }
@@ -636,10 +643,11 @@ double Pedestrian::GetV0Norm() const
      }
 
      //IF execution of WalkingInSmoke depending on JPSfire section in INI file
+     #ifdef JPSFIRE
      if(_WalkingSpeed && _WalkingSpeed->ReduceWalkingSpeed()) {
          walking_speed = _WalkingSpeed->WalkingInSmoke(this, walking_speed);
      }
-
+     #endif
      //WHERE should the call to that routine be placed properly?
      //only executed every 3 seconds
      // fprintf(stderr, "%f\n", walking_speed);
@@ -648,14 +656,14 @@ double Pedestrian::GetV0Norm() const
      // orthogonal projection on the stair
      //return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
 }
-
+#ifdef JPSFIRE
 void Pedestrian::ConductToxicityAnalysis()
 {
-    if( _ToxicityAnalysis->ConductToxicityAnalysis() ) {
-       _ToxicityAnalysis->HazardAnalysis(this);
-    }
+    if(_ToxicityAnalysis->ConductToxicityAnalysis()){
+             _ToxicityAnalysis->HazardAnalysis(this);
+        }
 }
-
+#endif
 // get axis in the walking direction
 double Pedestrian::GetLargerAxis() const
 {

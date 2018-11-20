@@ -1536,7 +1536,7 @@ void UnivFFviaFM::writeFF(const std::string& filename, std::vector<int> targetID
 
     int numX = (int) ((_grid->GetxMax()-_grid->GetxMin())/_grid->Gethx());
     int numY = (int) ((_grid->GetyMax()-_grid->GetyMin())/_grid->Gethy());
-    int numTotal = numX * numY;
+    //int numTotal = numX * numY;
     //std::cerr << numTotal << " numTotal" << std::endl;
     //std::cerr << grid->GetnPoints() << " grid" << std::endl;
     file.open(_configuration->GetProjectRootDir()+filename);

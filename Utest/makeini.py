@@ -1,4 +1,3 @@
-
 # help: python3 makeini.py -h
 import argparse
 import errno
@@ -19,8 +18,8 @@ except ImportError:
 SUCCESS = 0
 FAILURE = 1
 
-ego = os.path.splitext(sys.argv[0])[0] + ".txt"
-
+ego = os.path.basename(sys.argv[0]).split(".")[0] + ".txt"
+print("ego: ", ego)
 logfile = "log_%s"%ego
 logging.basicConfig(filename=logfile, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 # ============= some directories =============
@@ -212,7 +211,7 @@ def make_file(masterfile, tree, result):
     Given a list of dictionaries produce an xml file for each dic.
     The file is first copied from masterfile.
     """
-    directory = os.path.dirname(masterfile)    #args.directory
+    directory = os.path.dirname(os.path.abspath(masterfile))    #args.directory
     root = tree.getroot()
     for item in result:
         newfile, trajfile = make_filename(directory, item)
@@ -243,7 +242,7 @@ if __name__ == "__main__":
         logging.error("ERROR: file %s does not exist."%masterfile)
         sys.exit(FAILURE)
 
-    directory = os.path.dirname(masterfile)    #args.directory
+    directory = os.path.dirname(os.path.abspath(masterfile))    #args.directory
     logging.info('working directory = <%s>'%directory)
     logging.info('master inifile = <%s>'%masterfile)
     make_dir("%s/trajectories"%directory)
@@ -255,6 +254,10 @@ if __name__ == "__main__":
     make_file(masterfile, tree, result)
 
     time2 = time.clock()
+    print(directory)
+    print("%s/%s"%(directory, logfile))
+    print(os.path.isfile("%s/%s"%(directory, logfile)))
+
     if not  os.path.isfile("%s/%s"%(directory, logfile)):
         move(logfile, directory)
     logging.info('time elapsed: %.2f to generate %d files'%(time2 - time1, len(result)))
@@ -262,5 +265,3 @@ if __name__ == "__main__":
         sys.exit(FAILURE)
     else:
         sys.exit(SUCCESS)
-
-

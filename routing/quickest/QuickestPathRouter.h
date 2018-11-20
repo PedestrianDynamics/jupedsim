@@ -59,7 +59,17 @@ enum DefaultStrategy
 
 //log output
 extern OutputHandler* Log;
-
+/*!
+ * \class QuickestPathRouter
+ *
+ * \brief Quickest path router
+ *
+ *\ingroup Router
+ *
+ * We will derive from the <Router> class to fit the interface.
+ *
+ * \author Ulrich Kemloh
+ */
 class QuickestPathRouter: public GlobalRouter
 {
 

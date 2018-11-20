@@ -24,7 +24,7 @@
  *
  *
  **/
- 
+
 
 #include "SensorManager.h"
 #include "AbstractSensor.h"
@@ -81,7 +81,7 @@ SensorManager * SensorManager::InitWithAllSensors(const Building * b, BrainStora
 
     return sensor_manager;
 }
-
+#ifdef JPSFIRE
 SensorManager *SensorManager::InitWithCertainSensors(const Building * b, BrainStorage * cm_storage, const optStorage& optSto)
 {
     SensorManager * sensor_manager = new SensorManager(b, cm_storage);
@@ -112,7 +112,7 @@ SensorManager *SensorManager::InitWithCertainSensors(const Building * b, BrainSt
 
     return sensor_manager;
 }
-
+#endif
 void SensorManager::SetIntVPeriodicUpdate(const double &interval)
 {
     _periodicUpdateInterval=interval;

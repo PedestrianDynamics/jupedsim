@@ -190,7 +190,31 @@ void AgentsSource::GenerateAgents(std::vector<Pedestrian*>& peds, int count, Bui
      pid = (this->GetAgentId() >=0 )?this->GetAgentId() : Pedestrian::GetAgentsCreated() + building->GetAllPedestrians().size();
      for(int i=0;i<count;i++)
      {
-          peds.push_back(_startDistribution->GenerateAgent(building, &pid,emptyPositions));
+          if(GetStartDistribution())
+          {
+               //std::cout << "AgentsSource::GenerateAgents Generates an Agent\n";
+               auto ped = GetStartDistribution()->GenerateAgent(building, &pid,emptyPositions);
+               if(ped->FindRoute()==-1) {
+                    Log->Write("WARNING: Can not set destination for source agent %d", ped->GetID());
+                    // Sometimes the router can not find a target for ped
+                    auto transitions = building->GetAllTransitions();
+                    auto transition = transitions[0]; //dummy
+                    int trans_ID = transition->GetID();
+                    ped->SetExitLine(transition); // set dummy line
+                    ped->SetExitIndex(trans_ID);
+               }
+
+               //
+               peds.push_back(ped);
+          }
+
+          else
+          {
+               std::cout << " \n Source: StartDistribution is null!\n"
+                            " This happens when group_id in <source> does not much any group_id in <agents>\n"
+                            " Check again your inifile. If the problem persists report an issue\n";
+               exit(EXIT_FAILURE);
+          }
      }
 }
 

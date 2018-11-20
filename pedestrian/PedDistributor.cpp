@@ -32,13 +32,15 @@
 #include "../geometry/SubRoom.h"
 #include "../IO/PedDistributionParser.h"
 
-#include <boost/filesystem.hpp>
+
 #include <boost/lambda/bind.hpp>
 #include <boost/foreach.hpp>
 #include <boost/range/combine.hpp>
 
+#include <filesystem>
+
 using namespace std;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 using namespace boost::lambda;
 /************************************************************
  PedDistributor
@@ -119,8 +121,8 @@ bool PedDistributor::Distribute(Building *building) const {
                     {
                           if(fs::is_regular_file(p))
                           {
-                               std::string basename = fs::basename(p);
-                               std::string extention = fs::extension(p);
+                               std::string basename =  p.stem(); //
+                               std::string extention = p.extension();
                                auto tmpPositions = GetPositionsFromFile(p.string(), dist->GetAgentsNumber(), unit);
                                //check if positions are
                                //empty. May happen if file
