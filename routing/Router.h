@@ -34,9 +34,22 @@
 #include <vector>
 
 #include "../general/Macros.h"
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
+
 
 class Building;
 class Pedestrian;
+
+typedef boost::property<boost::edge_weight_t, double> EdgeWeightGoal;
+
+/*
+adjacency_list<OutEdgeList, VertexList, Directed,
+               VertexProperties, EdgeProperties,
+               GraphProperties, EdgeList>
+*/
+typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, boost::no_property, EdgeWeightGoal> Graph_Goal;
+
 
 class Router {
 
@@ -50,7 +63,7 @@ private:
 protected:
 
      /// Contain the ids of the intermediate destinations
-     std::vector<std::vector<int> >_trips;
+    Graph_Goal _trips;
 
      /// All final destinations of the pedestrians
      std::vector<int> _finalDestinations;
@@ -78,7 +91,7 @@ public:
       * Add a new trip to this router
       * @param trip A vector containing the IDs of the intermediate destination
       */
-     void AddTrip(std::vector<int> trip);
+//     void AddTrip(std::vector<int> trip);
 
      /**
       * Add a new final destination to this router
@@ -89,7 +102,7 @@ public:
      /**
       * @return a vector containing the IDs of the intermediate destinations
       */
-     const std::vector<int> GetTrip(int id) const;
+//     const std::vector<int> GetTrip(int id) const;
 
      /**
       * @return all final destinations

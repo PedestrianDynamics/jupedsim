@@ -461,11 +461,30 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                }
 
                building->AddGoal(wa);
-//               _configuration->GetRoutingEngine()->AddFinalDestinationID(wa->GetId());
+               _configuration->GetRoutingEngine()->AddFinalDestinationID(wa->GetId());
 
                std::cout << waitingArea->toString() << std::endl;
           }
 
+          // Save all saved goals in a vector
+          std::map<int, Goal*> allGoalsMap(building->GetAllGoals());
+          std::vector<Goal*> allGoals;
+
+          for(auto goal : allGoalsMap) {
+               allGoals.push_back(goal.second);
+          }
+
+
+          for (auto goal : allGoals){
+               // Check if current goal is a WaitingArea
+               if(WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)) {
+
+               }
+          }
+
+//          for (auto const& goals : building->GetAllGoals()){
+//
+//          }
 
      }
 

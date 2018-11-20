@@ -4,6 +4,9 @@
 
 #include "WaitingArea.h"
 
+WaitingArea::WaitingArea(){
+     _isFinalGoal = false;
+}
 int WaitingArea::getMaxNumPed() const
 {
      return maxNumPed;
