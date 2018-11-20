@@ -195,9 +195,9 @@ void FacilityGeometry::addNewElement(double center[3], double length, double ori
     actor->GetProperty()->SetAmbient(0.2);
     actor->GetProperty()->SetDiffuse(0.8);
 
-    // 	double data[3];
-    // 	actor->GetPosition(data);
-    // 	actor->SetPosition(data[0],data[1],src->GetZLength()/2);
+    //  double data[3];
+    //  actor->GetPosition(data);
+    //  actor->SetPosition(data[0],data[1],src->GetZLength()/2);
 
     switch (type) {
     case DOOR: {
@@ -572,6 +572,69 @@ void FacilityGeometry::addObstacles(vtkPolyData* polygonPolyData )
     assembly2D->AddPart(obstaclesActor);
     assembly3D->AddPart(obstaclesActor);
 }
+
+
+
+void FacilityGeometry::addSource(double x1, double y1, double x2, double y2, double z)
+{
+    //if(z!=1)return;
+    const double cellSize=40; //cm
+    //	const int dimX=(x2-x1)/cellSize+1;
+    //	const int dimY=(y2-y1)/cellSize+1;
+    const int dimX= (int)ceil((x2-x1)/cellSize) +1;
+    const int dimY= (int)ceil((y2-y1)/cellSize) +1;
+
+
+    const int dimZ=1;
+    //vtkDoubleArray *scalars = vtkDoubleArray::New();
+    vtkDataArray* pData = vtkUnsignedCharArray::New();
+    pData->SetNumberOfComponents(3);
+
+    double color[2][3]= {{120, 120, 120},{150,150,150}};
+    bool idx=0;
+    bool lastColorUsed=0;
+    for(int i=0; i<dimY-1; i++) {
+
+        if(idx==lastColorUsed) {
+            lastColorUsed= !lastColorUsed;
+            idx=lastColorUsed;
+        } else {
+            lastColorUsed=idx;
+        }
+
+        for(int j=0; j<dimX-1; j++) {
+            pData->InsertNextTuple3(color[idx][0],color[idx][1],color[idx][2]);
+            idx=!idx;
+        }
+    }
+
+    // data as cellData of imageData
+    VTK_CREATE(vtkImageData, image);
+    image->SetDimensions(dimX, dimY, dimZ);
+    image->SetSpacing(cellSize, cellSize, cellSize);
+    image->GetCellData()->SetScalars(pData);
+
+
+    VTK_CREATE(vtkActor, imageActor);
+    VTK_CREATE(vtkDataSetMapper, map);
+
+#if VTK_MAJOR_VERSION <= 5
+    map->SetInput(image);
+#else
+    map->SetInputData(image);
+#endif
+
+    //map->SetLookupTable(lookupTable);
+    imageActor->SetMapper(map);
+    imageActor->GetProperty()->SetAmbient(0.2);
+    //imageActor->GetProperty()->SetDiffuse(0.8);
+
+    // move the actor in x-direction
+    imageActor->SetPosition(x1, y1, z);
+    assembly2D->AddPart(imageActor);
+
+}
+
 
 void FacilityGeometry::addFloor(double x1, double y1, double x2, double y2, double z)
 {

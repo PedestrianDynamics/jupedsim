@@ -150,6 +150,44 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
                 }
             }
         }
+        else if (qName == "source")
+        {
+             double xmin, xmax, ymin, ymax;
+             double z=0;// @todo read this some when we go 3D
+
+             int source_id=-1;
+             for(int i=0; i<at.length(); i++) {
+                  if(at.localName(i)=="id") {
+                       source_id=at.value(i).toInt();
+                  } else if(at.localName(i)=="x_min") {
+                       xmin=at.value(i).toDouble()*FAKTOR;
+                  }
+                  else if(at.localName(i)=="x_max") {
+                       xmax=at.value(i).toDouble()*FAKTOR;
+                  }
+                  else if(at.localName(i)=="y_min") {
+                       ymin=at.value(i).toDouble()*FAKTOR;
+                  }
+                  else if(at.localName(i)=="y_max") {
+                       ymax=at.value(i).toDouble()*FAKTOR;
+                  }
+             }
+             _geometry->addSource(xmin,ymin,xmax,ymax);
+
+             // double CHT[3]= {_color,_height,_thickness};
+             // JPoint* pt1= new JPoint(xmin,ymin,z);
+             // JPoint* pt2= new JPoint(xmin,ymax,z);
+             // JPoint* pt3= new JPoint(xmax,ymin,z);
+             // JPoint* pt4= new JPoint(xmax,ymax,z);
+             // pt1->setColorHeightThicknes(CHT);
+             // pt2->setColorHeightThicknes(CHT);
+             // pt3->setColorHeightThicknes(CHT);
+             // pt4->setColorHeightThicknes(CHT);
+             // _currentPointsList.push_back(pt1);
+             // _currentPointsList.push_back(pt2);
+             // _currentPointsList.push_back(pt3);
+             // _currentPointsList.push_back(pt4);
+        } // source
     } else if (qName == "floor") {
         double xMin=0,
                 xMax=0,
@@ -423,17 +461,17 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
         double el_z=std::numeric_limits<double>::quiet_NaN();
 
         for(int i=0; i<at.length(); i++) {
-            if(at.localName(i)=="ID") {
-                id=at.value(i).toInt();
-                //TODO: maybe you should change ur format to take the ID 0 as first valid ID.
-                if (id==0) {
-                    //slotErrorOutput("Person with ID=0 detected. ID should start with 1 !");
-                    return false;
-                }
-            } else if(at.localName(i)==_jps_xPos) {
-                xPos=at.value(i).toDouble()*FAKTOR;
-                //xPos=at.value(i).toDouble();
-            } else if(at.localName(i)==_jps_yPos) {
+             if(at.localName(i)=="ID") {
+                  id=at.value(i).toInt();
+                  //TODO: maybe you should change ur format to take the ID 0 as first valid ID.
+                  if (id==0) {
+                       //slotErrorOutput("Person with ID=0 detected. ID should start with 1 !");
+                       return false;
+                  }
+             } else if(at.localName(i)==_jps_xPos) {
+                  xPos=at.value(i).toDouble()*FAKTOR;
+                  //xPos=at.value(i).toDouble();
+             } else if(at.localName(i)==_jps_yPos) {
                 //yPos=at.value(i).toDouble();
                 yPos=at.value(i).toDouble()*FAKTOR;
             } else if(at.localName(i)==_jps_zPos) {
