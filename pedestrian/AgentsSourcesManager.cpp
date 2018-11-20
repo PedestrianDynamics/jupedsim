@@ -106,16 +106,20 @@ void AgentsSourcesManager::Run()
 
 bool AgentsSourcesManager::ProcessAllSources() const
 {
-     /* std::cout << "\nSTART   AgentsSourcesManager::ProcessAllSources()\n"; */
+     std::cout << "\nSTART   AgentsSourcesManager::ProcessAllSources()\n";
 
      bool empty=true;
      double current_time = Pedestrian::GetGlobalTime();
      vector<Pedestrian*> source_peds; // we have to collect peds from all sources, so that we can consider them  while computing new positions
      for (const auto& src : _sources)
      {
-          /* std::cout << KRED << "\nprocessing src: " <<  src->GetId() << " -- current time: " << current_time << " schedule time: " << src->GetPlanTime() <<". number of peds in building " << _building->GetAllPedestrians().size() << "\n" << RESET; */
-
-          if (src->GetPoolSize() && (src->GetPlanTime() <= current_time) )// maybe diff<eps
+          std::cout << KRED << "\nprocessing src: " <<  src->GetId() << " -- current time: " << current_time << " schedule time: " << src->GetPlanTime() <<". number of peds in building " << _building->GetAllPedestrians().size() << "\n" << RESET;
+          auto srcLifeSpan = src-> GetLifeSpan();
+          bool inTime = (current_time >= srcLifeSpan[0]) && (current_time <= srcLifeSpan[1]);
+          // inTime is always true if src got some PlanTime (default values
+          // if src has no PlanTime, then this is set to 0. In this case inTime
+          // is important in the following condition
+          if (src->GetPoolSize() && (src->GetPlanTime() <= current_time) && inTime )// maybe diff<eps
           {
                vector<Pedestrian*> peds;
 
@@ -148,18 +152,20 @@ bool AgentsSourcesManager::ProcessAllSources() const
                empty = false;
                //src->Dump();
           }
-          if (src->GetPlanTime() > current_time) // for the case we still expect
+          bool timeConstraint = (src->GetPlanTime() > current_time) || (current_time < srcLifeSpan[0]);
+          if (timeConstraint) // for the case we still expect
                // agents coming
                empty = false;
-          //src->Dump();//exit(0);
+          if(current_time > srcLifeSpan[1]) //time is over
+               empty = true;
      }
-     /* std::cout << "LEAVE   AgentsSourcesManager::ProcessAllSources()\n"; */
-     // std::cout << " Source building: "<<  _building << " size "  << _building->GetAllPedestrians().size()<< std::endl;
+     std::cout << "LEAVE   AgentsSourcesManager::ProcessAllSources()\n";
+     std::cout << " Source building: "<<  _building << " size "  << _building->GetAllPedestrians().size()<< std::endl;
 
-     //                                                                                                        for(auto pp: _building->GetAllPedestrians())
-     //                                                                                                             std::cout<< KBLU << "BUL: agentssourcesManager: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl;
+     // for(auto pp: _building->GetAllPedestrians())
+     //      std::cout<< KBLU << "BUL: agentssourcesManager: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl;
      //
-/* std::cout << "========================\n"; */
+std::cout << "========================\n";
           return empty;
 }
 

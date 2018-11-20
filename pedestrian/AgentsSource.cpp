@@ -30,16 +30,25 @@
 #include "AgentsSource.h"
 #include "Pedestrian.h"
 
-AgentsSource::AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency, bool greedy, double time, int agent_id, float startx, float starty, bool conti, int chunkAgents, std::vector<float> boundaries, std::vector<float> lifeSpan):
+AgentsSource::AgentsSource(int id,
+                           const std::string& caption,
+                           int max_agents,
+                           int group_id,
+                           int frequency,
+                           bool greedy,
+                           double time,
+                           int agent_id,
+                           float startx,
+                           float starty,
+                           bool conti,
+                           int chunkAgents,
+                           std::vector<float> boundaries,
+                           std::vector<int> lifeSpan):
      _id(id), _frequency(frequency), _maxAgents(max_agents), _groupID(group_id), _caption(caption), _greedy(greedy), _agent_id(agent_id), _time(time), _startx(startx), _starty(starty), _chunkAgents(chunkAgents), _conti(conti)
 {
     _agentsGenerated=0;
-    _boundaries[0] = boundaries[0];
-    _boundaries[1] = boundaries[1];
-    _boundaries[2] = boundaries[2];
-    _boundaries[3] = boundaries[3];
-    _lifeSpan[0] = lifeSpan[0];
-    _lifeSpan[0] = lifeSpan[1];
+    _boundaries = boundaries;
+    _lifeSpan = lifeSpan;
     _agents.clear();
 }
 
@@ -105,10 +114,7 @@ const std::vector<float> AgentsSource::GetBoundaries() const
 
 void AgentsSource::Setboundaries(std::vector<float> bounds)
 {
-     _boundaries[0]=bounds[0];
-     _boundaries[1]=bounds[1];
-     _boundaries[2]=bounds[2];
-     _boundaries[3]=bounds[3];
+     _boundaries=bounds;
 }
 
 const std::string& AgentsSource::GetCaption() const
@@ -154,7 +160,7 @@ bool AgentsSource::isContinuous() const
 {
      return _conti;
 }
-std::vector<float> AgentsSource::GetLifeSpan() const
+std::vector<int> AgentsSource::GetLifeSpan() const
 {
      return  _lifeSpan;
 }
@@ -208,7 +214,7 @@ void AgentsSource::GenerateAgents(std::vector<Pedestrian*>& peds, int count, Bui
                //std::cout << "AgentsSource::GenerateAgents Generates an Agent\n";
                auto ped = GetStartDistribution()->GenerateAgent(building, &pid,emptyPositions);
                if(ped->FindRoute()==-1) {
-                    Log->Write("WARNING: Can not set destination for source agent %d", ped->GetID());
+                    // Log->Write("WARNING: Can not set destination for source agent %d", ped->GetID());
                     // Sometimes the router can not find a target for ped
                     auto transitions = building->GetAllTransitions();
                     auto transition = transitions[0]; //dummy
@@ -236,14 +242,23 @@ void AgentsSource::Dump() const
 {
      Log->Write("\n--------------------------");
      Log->Write("Dumping Source");
-     Log->Write("Caption: %s", this->GetCaption().c_str());
-     Log->Write("ID: %d", _id);
-     Log->Write("Group ID: %d", _groupID);
-     Log->Write("Frequency: %d", _frequency);
-     Log->Write("Agents Max: %d", _maxAgents);
-     Log->Write("Agents Pool: %d", _agents.size());
-     Log->Write("Agent id: %d", this->GetAgentId());
-     Log->Write("Time: %f", this->GetPlanTime());
+     Log->Write(">> Caption    : %s", this->GetCaption().c_str());
+     Log->Write(">> Source ID  : %d", _id);
+     Log->Write(">> Group ID   : %d", _groupID);
+     Log->Write(">> Frequency  : %d", _frequency);
+     Log->Write(">> Agents Max : %d", _maxAgents);
+     Log->Write(">> Agents Pool: %d", _agents.size());
+     Log->Write(">> Agent id   : %d", this->GetAgentId());
+     Log->Write(">> Time       : %.2f", this->GetPlanTime());
+     Log->Write(">> StartX     : %.2f", this->GetStartX());
+     Log->Write(">> StartY     : %.2f", this->GetStartY());
+     Log->Write(">> Continuous : %s", (this->isContinuous())?"True":"False");
+     Log->Write(">> N_create   : %d", this->GetChunkAgents());
+     auto tmpB = this->GetBoundaries();
+     Log->Write(">> Boundaries : X-axis [%.4f -- %.4f]", tmpB[0], tmpB[1]) ;
+     Log->Write("                Y-axis [%.4f -- %.4f]", tmpB[2], tmpB[3]);
+     auto tmpL = this->GetLifeSpan();
+     Log->Write(">> LifeSpan   : [%d -- %d]", tmpL[0], tmpL[1]);
      Log->Write("\n--------------------------\n");
      //getc(stdin);
 

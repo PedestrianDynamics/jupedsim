@@ -49,7 +49,20 @@ public:
      /**
       * Constructor
       */
-     AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency, bool greedy, double time, int agent_id, float startx, float starty, bool conti,  int chunkAgents, std::vector<float> boundaries, std::vector<float> lifeSpan);
+     AgentsSource(int id,
+                  const std::string& caption,
+                  int max_agents,
+                  int group_id,
+                  int frequency,
+                  bool greedy,
+                  double time,
+                  int agent_id,
+                  float startx,
+                  float starty,
+                  bool conti,
+                  int chunkAgents,
+                  std::vector<float> boundaries,
+                  std::vector<int> lifeSpan);
 
      /**
       * Destructor
@@ -64,7 +77,7 @@ public:
 
      /**
       * Generate a number of agents, based on the frequency given in the constructor.
-      * No agents are generated if the the maximum (_maxAgents) is reached.
+      * No agents are generated if the maximum (_maxAgents) is reached.
       * @see _maxAgents
       * @param ped
       */
@@ -117,7 +130,7 @@ public:
      int GetMaxAgents() const;
      int GetChunkAgents() const;
      bool isContinuous() const;
-     std::vector<float> GetLifeSpan() const;
+     std::vector<int> GetLifeSpan() const;
      bool Greedy() const;
      void SetStartDistribution(std::shared_ptr<StartDistribution>);
      const std::shared_ptr<StartDistribution> GetStartDistribution() const;
@@ -136,7 +149,7 @@ private:
      double _time;
      float _startx;
      float _starty;
-     std::vector<float> _lifeSpan;
+     std::vector<int> _lifeSpan;
      int _chunkAgents; // create <chunk_agents> per <frequency> time
      bool _conti=false;
      std::vector<Pedestrian*> _agents;

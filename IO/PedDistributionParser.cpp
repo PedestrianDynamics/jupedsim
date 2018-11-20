@@ -177,23 +177,57 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
             float starty = xmltof(e->Attribute("startY"), std::numeric_limits<float>::quiet_NaN());
             bool greedy = (str_greedy == "true")?true:false;
             bool conti = (str_conti == "true")?true:false;
-            float xmin =  xmltof(e->Attribute("x_min"), std::numeric_limits<float>:: min());
-            float xmax =  xmltof(e->Attribute("x_max"), std::numeric_limits<float>:: max());
-            float ymin =  xmltof(e->Attribute("y_min"), std::numeric_limits<float>:: min());
-            float ymax =  xmltof(e->Attribute("y_max"), std::numeric_limits<float>:: max());
+            float xmin =  xmltof(e->Attribute("x_min"), std::numeric_limits<float>::lowest());
+            float xmax =  xmltof(e->Attribute("x_max"), std::numeric_limits<float>::max());
+            float ymin =  xmltof(e->Attribute("y_min"), std::numeric_limits<float>::lowest());
+            float ymax =  xmltof(e->Attribute("y_max"), std::numeric_limits<float>::max());
             float chunkAgents = xmltof(e->Attribute("N_create"), 1);
-            float timeMin = xmltof(e->Attribute("time_min"), std::numeric_limits<float>:: min());
-            float timeMax = xmltof(e->Attribute("time_max"), std::numeric_limits<float>:: max());
+            int timeMin = xmltof(e->Attribute("time_min"), std::numeric_limits<int>::min());
+            int timeMax = xmltof(e->Attribute("time_max"), std::numeric_limits<int>::max());
             std::vector<float> boundaries = {xmin, xmax, ymin, ymax};
-            std::vector<float> lifeSpan = {timeMin, timeMax};
+            std::vector<int> lifeSpan = {timeMin, timeMax};
+            float SizeBB = 1;
+            bool isBigEnough = (abs(xmin-xmax) > SizeBB) && (abs(ymin-ymax) > SizeBB);
+            if(! isBigEnough )
+            {
+                 Log->Write("Warning: Source %d got too small bounding box.\n\t BB [Dx, Dy] should be such Dx>%.2f and Dy>%.2f. Ignoring BB!!", id, SizeBB, SizeBB);
+                 xmin = std::numeric_limits<float>::min();
+                 xmax = std::numeric_limits<float>::max();
+                 ymin = std::numeric_limits<float>::min();
+                 ymax = std::numeric_limits<float>::max();
+            }
+            if(timeMin > timeMax)
+            {
+                 Log->Write("Warning: Source %d given wrong life span. Assuming timeMin = timeMax.", id);
+                 timeMin = timeMax;
+            }
+            if(time > 0)
+            {
+                 timeMin = std::numeric_limits<int>::min();
+                 timeMax = std::numeric_limits<int>::max();
+                 Log->Write("Warning: Source %d. Planned time %d. Ignoring timeMin and timeMax (in case they are specified)", id, time);
+            }
             if (agent_id >= 0){
               agents_max = 1;
               frequency = 1;
             }
+            std::cout << "\nHere" << std::endl;
             auto source = std::shared_ptr<AgentsSource>(
-                    new AgentsSource(id, caption, agents_max, group_id,
-                                     frequency, greedy, time, agent_id, startx, starty,
-                                     conti, chunkAgents, boundaries, lifeSpan));
+                    new AgentsSource(id,
+                                     caption,
+                                     agents_max,
+                                     group_id,
+                                     frequency,
+                                     greedy,
+                                     time,
+                                     agent_id,
+                                     startx,
+                                     starty,
+                                     conti,
+                                     chunkAgents,
+                                     boundaries,
+                                     lifeSpan));
+            std::cout << "\nHere" << std::endl;
             startDisSources.push_back(source);
 
             Log->Write("INFO:\tSource with id %d will be parsed (greedy = %d)!", id, greedy);

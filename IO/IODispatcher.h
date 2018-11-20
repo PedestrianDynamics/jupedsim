@@ -38,6 +38,8 @@ extern OutputHandler* Log;
 
 class Trajectories;
 
+class  AgentsSource;
+
 class IODispatcher
 {
 private:
@@ -53,6 +55,8 @@ public:
      void WriteGeometry(Building* building);
      void WriteFrame(int frameNr, Building* building);
      void WriteFooter();
+     void WriteSources(const std::vector<std::shared_ptr<AgentsSource> >);
+
 };
 
 class Trajectories
@@ -67,8 +71,9 @@ public:
      virtual void WriteGeometry(Building* building)=0;
      virtual void WriteFrame(int frameNr, Building* building)=0;
      virtual void WriteFooter()=0;
+     virtual void WriteSources(const std::vector<std::shared_ptr<AgentsSource> >)=0;
 
-     void Write(const std::string& str)
+    void Write(const std::string& str)
      {
           _outputHandler->Write(str);
      }
@@ -120,6 +125,7 @@ public:
      virtual void WriteGeometry(Building* building);
      virtual void WriteFrame(int frameNr, Building* building);
      virtual void WriteFooter();
+     virtual void WriteSources(const std::vector<std::shared_ptr<AgentsSource> >);
 };
 
 
@@ -137,6 +143,7 @@ public:
      virtual void WriteGeometry(Building* building);
      virtual void WriteFrame(int frameNr, Building* building);
      virtual void WriteFooter();
+     virtual void WriteSources(const std::vector<std::shared_ptr<AgentsSource> >);
 
 };
 
@@ -154,6 +161,7 @@ public:
      virtual void WriteGeometry(Building* building);
      virtual void WriteFrame(int frameNr, Building* building);
      virtual void WriteFooter();
+     virtual void WriteSources(const std::vector<std::shared_ptr<AgentsSource> >);
 
 };
 
@@ -174,6 +182,7 @@ public:
      //virtual void WriteFrame(int frameNr, Building* building);
      //virtual void WriteFooter();
      virtual void WriteGeometry(Building* building);
+     virtual void WriteSources(const std::vector<std::shared_ptr<AgentsSource> >);
 };
 
 class TrajectoriesJPSV06: public Trajectories
@@ -187,6 +196,8 @@ public:
      virtual void WriteGeometry(Building* building);
      virtual void WriteFrame(int frameNr, Building* building);
      virtual void WriteFooter();
+     virtual void WriteSources(const std::vector<std::shared_ptr<AgentsSource> >);
+
 };
 
 #endif  /* _IODISPATCHER_H */
