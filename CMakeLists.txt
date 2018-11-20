@@ -291,6 +291,7 @@ geometry/NavLine.cpp
 geometry/Room.cpp
 geometry/Wall.cpp
 geometry/Goal.cpp
+geometry/WaitingArea.cpp
 
 IO/GeoFileParser.cpp
 IO/IniFileParser.cpp
@@ -504,6 +505,7 @@ geometry/Hline.h
 geometry/Obstacle.h
 geometry/SubRoom.h
 geometry/Goal.h
+geometry/WaitingArea.h
 
 IO/GeoFileParser.h
 IO/IniFileParser.h

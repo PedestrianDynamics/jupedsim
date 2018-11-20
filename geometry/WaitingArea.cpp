@@ -4,9 +4,6 @@
 
 #include "WaitingArea.h"
 
-WaitingArea::WaitingArea(){
-     _isFinalGoal = false;
-}
 int WaitingArea::getMaxNumPed() const
 {
      return maxNumPed;
@@ -80,7 +77,7 @@ std::string WaitingArea::toString()
      out.append(buffer);
      sprintf(buffer, "\tis_open=%d\n", open);
      out.append(buffer);
-     sprintf(buffer, "\twaiting_time=%d\n", waitingTime);
+     sprintf(buffer, "\twaiting_time=%f\n", waitingTime);
      out.append(buffer);
 
      for (auto const& nextWa : nextGoals){
