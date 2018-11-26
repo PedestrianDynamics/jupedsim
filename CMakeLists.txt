@@ -378,7 +378,7 @@ events/EventManager.cpp
 events/Event.cpp
 
 forms/jpscore.rc
-math/KrauszModel.cpp)
+math/KrauszModel.cpp IO/Trips.cpp IO/Trips.h)
 
 set(THIRD_PARTY_SRC
   tinyxml/tinystr.cpp

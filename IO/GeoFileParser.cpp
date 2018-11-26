@@ -24,6 +24,9 @@
 #include "../geometry/SubRoom.h"
 #include "../geometry/WaitingArea.h"
 
+
+
+
 GeoFileParser::GeoFileParser(Configuration* configuration)
           :_configuration(configuration)
 {
@@ -361,10 +364,13 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
           return true; // no extra routing information
      }
 
+
      //load goals and routes
      TiXmlNode* xGoalsNode = xRootNode->FirstChild("routing")->FirstChild("goals");
 
      if (xGoalsNode) {
+          Trips trips;
+
           for (TiXmlElement* e = xGoalsNode->FirstChildElement("goal"); e;
                e = e->NextSiblingElement("goal")) {
 
@@ -399,6 +405,8 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
 
                building->AddGoal(goal);
                _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
+
+               trips.addGoal(goal->GetId());
           }
 
 
@@ -425,19 +433,26 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
 
                std::map<int, double> nextGoals;
 
+               trips.addGoal(wa->GetId());
+
                //looking for next_wa
                for (TiXmlElement* nextWa = e->FirstChildElement("next_wa"); nextWa;
                     nextWa = nextWa->NextSiblingElement("next_wa")) {
                     int nextWaId = xmltoi(nextWa->Attribute("id"));
                     double nextWaP = xmltof(nextWa->Attribute("p"));
 
-                    std::cout << "nextWaID=" << nextWaId << ", nextWaP=" << nextWaP << std::endl;
+                    EdgeProperty weight = EdgeProperty(-1, nextWaP);
+                    trips.addGoal(nextWaId);
+                    trips.addConnection(wa->GetId(), nextWaId, weight);
+
                     nextGoals.insert(std::pair<int, double>(nextWaId, nextWaP));
                }
 
                if (!waitingArea->setNextGoals(nextGoals)){
+                    std::cout << "wa setNextGoals!";
                     return false;
                };
+
 
                //looking for polygons (walls)
                for (TiXmlElement* xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
@@ -457,6 +472,7 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                }
 
                if (!wa->ConvertLineToPoly()){
+                    std::cout << "wa convertLineToPoly!";
                     return false;
                }
 
@@ -464,28 +480,10 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                _configuration->GetRoutingEngine()->AddFinalDestinationID(wa->GetId());
 
                std::cout << waitingArea->toString() << std::endl;
+
           }
 
-          // Save all saved goals in a vector
-          std::map<int, Goal*> allGoalsMap(building->GetAllGoals());
-          std::vector<Goal*> allGoals;
-
-          for(auto goal : allGoalsMap) {
-               allGoals.push_back(goal.second);
-          }
-
-
-          for (auto goal : allGoals){
-               // Check if current goal is a WaitingArea
-               if(WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)) {
-
-               }
-          }
-
-//          for (auto const& goals : building->GetAllGoals()){
-//
-//          }
-
+          std::cout << trips;
      }
 
      //load routes
