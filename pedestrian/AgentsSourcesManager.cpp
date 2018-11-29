@@ -80,7 +80,7 @@ void AgentsSourcesManager::Run()
      do
      {
           int current_time = (int)Pedestrian::GetGlobalTime();
-          /* std::cout << KBLU << ">> RUN: current_time " << current_time << " last update  " << _lastUpdateTime << "\n" << RESET; */
+          // std::cout << KBLU << ">> RUN: current_time " << current_time << " last update  " << _lastUpdateTime << "\n" << RESET;
 
           if ((current_time != _lastUpdateTime)
               && ((current_time % updateFrequency) == 0))
@@ -109,7 +109,7 @@ bool AgentsSourcesManager::ProcessAllSources() const
      // std::cout << "\nSTART   AgentsSourcesManager::ProcessAllSources()\n";
 
      bool empty=true;
-     double current_time = Pedestrian::GetGlobalTime();
+     double current_time = (int)Pedestrian::GetGlobalTime();
      vector<Pedestrian*> source_peds; // we have to collect peds from all sources, so that we can consider them  while computing new positions
      for (const auto& src : _sources)
      {
