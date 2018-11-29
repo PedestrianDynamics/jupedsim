@@ -595,7 +595,6 @@ void plotVoronoi(const std::vector<Point>& discrete_positions, const voronoi_dia
      fprintf(f, "plt.ylim([%f, %f])\n", min_y-eps, max_y+eps);
      fprintf(f, "plt.title(\"agents = %3d\")\n", (int)discrete_positions.size());
      fprintf(f, "plt.savefig(\"%.4d.png\", dpi=600)\n", global_count++);
-     std::cout << "HHH\n";
 
      fclose(f);
 }

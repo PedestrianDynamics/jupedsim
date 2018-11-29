@@ -59,7 +59,8 @@ public:
                   int agent_id,
                   float startx,
                   float starty,
-                  bool conti,
+                  float percent,
+                  float rate,
                   int chunkAgents,
                   std::vector<float> boundaries,
                   std::vector<int> lifeSpan);
@@ -129,16 +130,19 @@ public:
      double GetPlanTime() const;
      int GetMaxAgents() const;
      int GetChunkAgents() const;
-     bool isContinuous() const;
+     int GetRemainingAgents() const;
+     int ResetRemainingAgents();
+     void UpdateRemainingAgents(int remaining);
+     float GetPercent() const;
+     float GetRate() const;
      std::vector<int> GetLifeSpan() const;
      bool Greedy() const;
      void SetStartDistribution(std::shared_ptr<StartDistribution>);
      const std::shared_ptr<StartDistribution> GetStartDistribution() const;
 
-
 private:
      int _id=-1;
-     int _frequency=1; // # pedestrians per second
+     int _frequency=1; /// create \var _chunkAgents every \var _frequency seconds
      int _maxAgents=0;
      int _groupID=-1;
      std::string _caption="no caption";
@@ -146,12 +150,18 @@ private:
      int _agentsGenerated=0;
      std::vector<float> _boundaries;
      int _agent_id;
-     double _time;
-     float _startx;
-     float _starty;
+     double _time; /// planned generation time. here \var _maxAgents = 1
+     float _startx; /// \var _maxAgents = 1
+     float _starty; /// \var _maxAgents = 1
      std::vector<int> _lifeSpan;
-     int _chunkAgents; // create <chunk_agents> per <frequency> time
-     bool _conti=false;
+
+     int _chunkAgents; /// generate \var chunk_agents per \var frequency seconds
+     int _remainingAgents; /// After generating \var chunk_agents \time \var
+                           /// _percent per \var frequency seconds, this is the
+                           /// remaining of agents still to be produced
+     float _percent=1.0; /// generate \var _percent * \var _chunkAgents
+     float _rate=1.0;
+
      std::vector<Pedestrian*> _agents;
      std::shared_ptr<StartDistribution> _startDistribution;
 };

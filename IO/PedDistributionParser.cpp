@@ -170,13 +170,13 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
             int group_id = xmltoi(e->Attribute("group_id"), -1);
             string caption = xmltoa(e->Attribute("caption"), "no caption");
             string str_greedy = xmltoa(e->Attribute("greedy"), "false");
-            string str_conti = xmltoa(e->Attribute("conti"), "false");
+            float percent = xmltof(e->Attribute("percent"), 1);
+            float rate = xmltof(e->Attribute("rate"), 1);
             double time = xmltof(e->Attribute("time"), 0);
             int agent_id = xmltoi(e->Attribute("agent_id"), -1);
             float startx = xmltof(e->Attribute("startX"), std::numeric_limits<float>::quiet_NaN());
             float starty = xmltof(e->Attribute("startY"), std::numeric_limits<float>::quiet_NaN());
             bool greedy = (str_greedy == "true")?true:false;
-            bool conti = (str_conti == "true")?true:false;
             float xmin =  xmltof(e->Attribute("x_min"), std::numeric_limits<float>::lowest());
             float xmax =  xmltof(e->Attribute("x_max"), std::numeric_limits<float>::max());
             float ymin =  xmltof(e->Attribute("y_min"), std::numeric_limits<float>::lowest());
@@ -211,6 +211,11 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
               agents_max = 1;
               frequency = 1;
             }
+            if(percent < 0 || percent > 1)
+            {
+                 Log->Write("Warning: Source %d. Passed erronuous percent <%.2f>. Set percent=1", id, percent);
+                 percent = 1.0;
+            }
             auto source = std::shared_ptr<AgentsSource>(
                     new AgentsSource(id,
                                      caption,
@@ -222,7 +227,8 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
                                      agent_id,
                                      startx,
                                      starty,
-                                     conti,
+                                     percent,
+                                     rate,
                                      chunkAgents,
                                      boundaries,
                                      lifeSpan));

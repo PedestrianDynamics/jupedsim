@@ -114,32 +114,36 @@ bool AgentsSourcesManager::ProcessAllSources() const
      for (const auto& src : _sources)
      {
           // std::cout << KRED << "\nprocessing src: " <<  src->GetId() << " -- current time: " << current_time << " schedule time: " << src->GetPlanTime() <<". number of peds in building " << _building->GetAllPedestrians().size() << "\n" << RESET;
+
           auto srcLifeSpan = src-> GetLifeSpan();
           bool inTime = (current_time >= srcLifeSpan[0]) && (current_time <= srcLifeSpan[1]);
           // inTime is always true if src got some PlanTime (default values
           // if src has no PlanTime, then this is set to 0. In this case inTime
           // is important in the following condition
-          bool timeToCreate = std::fmod(current_time, src->GetFrequency())==0;
+          bool newCycle =  std::fmod(current_time, src->GetFrequency()) == 0;
+          bool subCycle;
+          subCycle = (current_time > src->GetFrequency())?std::fmod((current_time-src->GetFrequency()), src->GetRate()) == 0:false;
 
-          if(src->isContinuous())
-          {
-//               src->dt
-//               src->percent * GetChunkAgents
-//               timeToCreate = timeToCreate || std::fmod(current_time + src->dt, src->GetFrequency())==0;
-          }
+          if(newCycle)
+               src->ResetRemainingAgents();
 
-          if (timeToCreate && src->GetPoolSize() && (src->GetPlanTime() <= current_time) && inTime )// maybe diff<eps
+          bool timeToCreate = newCycle || subCycle;
+
+          // std::cout << KGRN << " freq: " << src->GetFrequency() << ", rate: " << src->GetRate() << ", " << ": remaining: " << src->GetRemainingAgents() <<"\n" << RESET;                                                                                                                                                             std::cout << " <<<<  time to create " <<  timeToCreate  << "  newCycle: " << newCycle << ", subcycle: " << subCycle << "\n";
+
+
+          if (timeToCreate && src->GetPoolSize() && (src->GetPlanTime() <= current_time) && inTime && src->GetRemainingAgents())// maybe diff<eps
           {
                vector<Pedestrian*> peds;
 
-               src->RemoveAgentsFromPool(peds, src->GetChunkAgents());//src->percent
-                                                                      //*
-                                                                      //GetChunkAgents
+               src->RemoveAgentsFromPool(peds, src->GetChunkAgents() * src->GetPercent());
+               src->UpdateRemainingAgents(src->GetChunkAgents() * src->GetPercent());
+
                // percent = 1 if not continuous
                //setChunkAgents = Chi
                source_peds.reserve(source_peds.size() + peds.size());
 
-               Log->Write("\nINFO:\tSource %d generating %d agents (%d remaining)\n",src->GetId(),peds.size(),src->GetPoolSize());
+               Log->Write("\nINFO:\tSource %d generating %d agents at %3.3f s (%d remaining in pool)\n",src->GetId(),peds.size(), current_time,src->GetPoolSize());
                // printf("\nINFO:\tSource %d generating %lu agents (%d remaining)\n",src->GetId(), peds.size(),src->GetPoolSize());
 
                //ComputeBestPositionRandom(src.get(), peds);

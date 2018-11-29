@@ -40,12 +40,14 @@ AgentsSource::AgentsSource(int id,
                            int agent_id,
                            float startx,
                            float starty,
-                           bool conti,
+                           float percent,
+                           float rate,
                            int chunkAgents,
                            std::vector<float> boundaries,
                            std::vector<int> lifeSpan):
-     _id(id), _frequency(frequency), _maxAgents(max_agents), _groupID(group_id), _caption(caption), _greedy(greedy), _agent_id(agent_id), _time(time), _startx(startx), _starty(starty), _chunkAgents(chunkAgents), _conti(conti)
+     _id(id), _frequency(frequency), _maxAgents(max_agents), _groupID(group_id), _caption(caption), _greedy(greedy), _agent_id(agent_id), _time(time), _startx(startx), _starty(starty), _chunkAgents(chunkAgents), _percent(percent), _rate(rate)
 {
+    _remainingAgents = _chunkAgents;
     _agentsGenerated=0;
     _boundaries = boundaries;
     _lifeSpan = lifeSpan;
@@ -152,13 +154,33 @@ int AgentsSource::GetMaxAgents() const
 {
      return _maxAgents;
 }
+
 int AgentsSource::GetChunkAgents() const
 {
      return  _chunkAgents;
 }
-bool AgentsSource::isContinuous() const
+
+int AgentsSource::GetRemainingAgents() const
 {
-     return _conti;
+     return  _remainingAgents;
+}
+
+int AgentsSource::ResetRemainingAgents()
+{
+     _remainingAgents = _chunkAgents;
+}
+
+void AgentsSource::UpdateRemainingAgents(int remaining)
+{
+     _remainingAgents =  (remaining < _remainingAgents)? _remainingAgents - remaining:0;
+}
+float AgentsSource::GetPercent() const
+{
+     return _percent;
+}
+float AgentsSource::GetRate() const
+{
+     return _rate;
 }
 std::vector<int> AgentsSource::GetLifeSpan() const
 {
@@ -252,7 +274,8 @@ void AgentsSource::Dump() const
      Log->Write(">> Time       : %.2f", this->GetPlanTime());
      Log->Write(">> StartX     : %.2f", this->GetStartX());
      Log->Write(">> StartY     : %.2f", this->GetStartY());
-     Log->Write(">> Continuous : %s", (this->isContinuous())?"True":"False");
+     Log->Write(">> Percent    : %.2f", this->GetPercent());
+     Log->Write(">> Rate       : %.2f", this->GetRate());
      Log->Write(">> N_create   : %d", this->GetChunkAgents());
      auto tmpB = this->GetBoundaries();
      Log->Write(">> Boundaries : X-axis [%.4f -- %.4f]", tmpB[0], tmpB[1]) ;
