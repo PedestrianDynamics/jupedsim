@@ -605,7 +605,8 @@ set_property(TARGET core PROPERTY CXX_STANDARD_REQUIRED ON)
 if(CMAKE_COMPILER_IS_GNUCXX)
   target_link_libraries(core thirdParty stdc++fs) # link to lib filesystem
 else()
-  message(WARNING "I don't know how to link filesystem with ${CMAKE_CXX_COMPILER_ID}")
+  target_link_libraries(core thirdParty)
+  #message(WARNING "I don't know how to link filesystem with ${CMAKE_CXX_COMPILER_ID}")
 endif()
 
 

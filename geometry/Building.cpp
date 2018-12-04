@@ -1302,6 +1302,16 @@ Transition* Building::GetTransitionByUID(int uid) const
      return nullptr;
 }
 
+Crossing* Building::GetCrossingByUID(int uid) const
+{
+
+	for (auto&& cross : _crossings) {
+		if (cross.second->GetUniqueID() == uid)
+			return cross.second;
+	}
+	return nullptr;
+}
+
 bool Building::SaveGeometry(const std::string& filename) const
 {
     std::stringstream geometry;
