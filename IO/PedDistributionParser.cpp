@@ -188,7 +188,7 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
             std::vector<int> lifeSpan = {timeMin, timeMax};
             float SizeBB = 1;
             bool isBigEnough = (abs(xmin-xmax) > SizeBB) && (abs(ymin-ymax) > SizeBB);
-            if(! isBigEnough )
+            if(!isBigEnough )
             {
                  Log->Write("Warning: Source %d got too small bounding box.\n\t BB [Dx, Dy] should be such Dx>%.2f and Dy>%.2f. Ignoring BB!!", id, SizeBB, SizeBB);
                  xmin = std::numeric_limits<float>::min();
@@ -208,16 +208,21 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
                  Log->Write("Warning: Source %d. Planned time %d. Ignoring timeMin and timeMax (in case they are specified)", id, time);
             }
             if (agent_id >= 0){
-              agents_max = 1;
-              frequency = 1;
+                 agents_max = 1;
+                 frequency = 1;
             }
-            if(percent < 0 || percent > 1)
+            if(percent > 1)
             {
                  Log->Write("Warning: Source %d. Passed erronuous percent <%.2f>. Set percent=1", id, percent);
                  percent = 1.0;
             }
+            else if(percent < 0)
+            {
+                 Log->Write("Warning: Source %d. Passed erronuous percent <%.2f>. Set percent=0 (this source is kinda inactive)", id, percent);
+                 percent = 0.0;
+            }
             auto source = std::shared_ptr<AgentsSource>(
-                    new AgentsSource(id,
+                 new AgentsSource(id,
                                      caption,
                                      agents_max,
                                      group_id,
@@ -233,7 +238,6 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
                                      boundaries,
                                      lifeSpan));
             startDisSources.push_back(source);
-
             Log->Write("INFO:\tSource with id %d will be parsed (greedy = %d)!", id, greedy);
         }
     }

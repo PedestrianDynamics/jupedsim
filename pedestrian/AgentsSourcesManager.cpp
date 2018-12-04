@@ -75,7 +75,7 @@ void AgentsSourcesManager::Run()
      _isCompleted = false;
      bool finished = false;
      SetBuildingUpdated(false);
-     long updateFrequency = 1; //TODO parse this from inifile
+     long updateFrequency = 1; // @todo parse this from inifile
      /* std::cout << KMAG << "RUN Starting thread manager with _lastUpdateTime " << _lastUpdateTime<< std::endl; */
      do
      {
@@ -128,8 +128,8 @@ bool AgentsSourcesManager::ProcessAllSources() const
                src->ResetRemainingAgents();
 
           bool timeToCreate = newCycle || subCycle;
-
-          // std::cout << KGRN << " freq: " << src->GetFrequency() << ", rate: " << src->GetRate() << ", " << ": remaining: " << src->GetRemainingAgents() <<"\n" << RESET;                                                                                                                                                             std::cout << " <<<<  time to create " <<  timeToCreate  << "  newCycle: " << newCycle << ", subcycle: " << subCycle << "\n";
+          // if(subCycle)
+          //      std::cout << KGRN << " freq: " << src->GetFrequency() << ", rate: " << src->GetRate() << ", " << ": remaining: " << src->GetRemainingAgents() <<"\n" << RESET;                                                                                                                                                             std::cout << " <<<<  time to create " <<  timeToCreate  << "  newCycle: " << newCycle << ", subcycle: " << subCycle << ", inTime: " << inTime<< "\n";
 
 
           if (timeToCreate && src->GetPoolSize() && (src->GetPlanTime() <= current_time) && inTime && src->GetRemainingAgents())// maybe diff<eps
@@ -139,12 +139,10 @@ bool AgentsSourcesManager::ProcessAllSources() const
                src->RemoveAgentsFromPool(peds, src->GetChunkAgents() * src->GetPercent());
                src->UpdateRemainingAgents(src->GetChunkAgents() * src->GetPercent());
 
-               // percent = 1 if not continuous
-               //setChunkAgents = Chi
                source_peds.reserve(source_peds.size() + peds.size());
 
-               Log->Write("\nINFO:\tSource %d generating %d agents at %3.3f s (%d remaining in pool)\n",src->GetId(),peds.size(), current_time,src->GetPoolSize());
-               // printf("\nINFO:\tSource %d generating %lu agents (%d remaining)\n",src->GetId(), peds.size(),src->GetPoolSize());
+               Log->Write("\nINFO:\tSource %d generating %d agents at %3.3f s, %d (%d remaining in pool)\n",src->GetId(),peds.size(), current_time,src->GetRemainingAgents(),src->GetPoolSize());
+               printf("\nINFO:\tSource %d generating %lu agents (%d remaining)\n",src->GetId(), peds.size(),src->GetPoolSize());
 
                //ComputeBestPositionRandom(src.get(), peds);
                //todo: here every pedestrian needs an exitline
@@ -154,8 +152,8 @@ bool AgentsSourcesManager::ProcessAllSources() const
                       InitFixedPosition(src.get(), peds);
                 }
                 else
-                      if( !ComputeBestPositionVoronoiBoost(src.get(), peds, _building, source_peds) )
-                            Log->Write("WARNING:\tThere was no place for some pedestrians");
+                     if( !ComputeBestPositionVoronoiBoost(src.get(), peds, _building, source_peds) )
+                          Log->Write("WARNING:\tThere was no place for some pedestrians");
 
                source_peds.insert(source_peds.end(), peds.begin(), peds.end());
                /* std::cout << KRED << ">>  Add to queue " << peds.size() << "\n" << RESET; */

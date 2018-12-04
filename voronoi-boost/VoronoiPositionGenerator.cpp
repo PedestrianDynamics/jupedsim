@@ -98,7 +98,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
     building->GetPedestrians(roomID, subroomID, existing_peds);
     existing_peds.insert(existing_peds.end(), peds_queue.begin(), peds_queue.end());
 
-    double radius = 0.3; //radius of a person, 0.3 is just some number(needed for the fake_peds bellow), will be changed afterwards
+    double radius = 0.3; //radius of a person, 0.3 is just some number(needed for the fake_peds bellow). should be changed afterwards
 
     SubRoom* subroom = building->GetRoom( roomID )->GetSubRoom(subroomID);
     double factor = 100;  //factor for conversion to integer for the boost voronoi
@@ -225,7 +225,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
               voronoi_diagram<double>::const_vertex_iterator chosen_it = vd.vertices().begin();
               double dis = 0;
               //std::default_random_engine gen = dist->GetGenerator();
-              if(!src->Greedy()) // @todo replace subroom with
+              if(!src->Greedy())
                     VoronoiBestVertexRandMax(src, discrete_positions, vd, subroom, factor, chosen_it, dis, radius);
               else
                     VoronoiBestVertexGreedy(src, discrete_positions, vd, subroom, factor, chosen_it, dis, radius);
@@ -471,11 +471,11 @@ void VoronoiBestVertexGreedy (AgentsSource* src, const std::vector<Point>& discr
      vector<double> distances;
      for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it){
           Point vert_pos = Point( it->x()/factor, it->y()/factor );
-         float BBxmin = src->GetBoundaries()[0];
-         float BBxmax = src->GetBoundaries()[1];
-         float BBymin = src->GetBoundaries()[2];
-         float BBymax = src->GetBoundaries()[3];
-         bool inBox = (vert_pos._x <= BBxmax) && (vert_pos._x >= BBxmin) && (vert_pos._y <= BBymax) && (vert_pos._y >= BBymin);
+          float BBxmin = src->GetBoundaries()[0];
+          float BBxmax = src->GetBoundaries()[1];
+          float BBymin = src->GetBoundaries()[2];
+          float BBymax = src->GetBoundaries()[3];
+          bool inBox = (vert_pos._x <= BBxmax) && (vert_pos._x >= BBxmin) && (vert_pos._y <= BBymax) && (vert_pos._y >= BBymin);
           if( subroom->IsInSubRoom( vert_pos ) && inBox )
                if( IsEnoughInSubroom(subroom, vert_pos, radius) )
                {
