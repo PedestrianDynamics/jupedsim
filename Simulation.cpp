@@ -112,7 +112,7 @@ bool Simulation::InitArgs()
         case FORMAT_XML_PLAIN: {
             OutputHandler* travisto = new SocketHandler(_config->GetHostname(),
                     _config->GetPort());
-            Trajectories* output = new TrajectoriesJPSV06();
+            Trajectories* output = new TrajectoriesJPSV05();
             output->SetOutputHandler(travisto);
             _iod->AddIO(output);
             break;
@@ -338,6 +338,9 @@ void Simulation::UpdateRoutesAndLocations()
 
                }
           }
+          // actualize routes for sources
+          if(_gotSources)
+               ped->FindRoute();
           //finally actualize the route
           if ( !_gotSources && ped->FindRoute() == -1) {
                //a destination could not be found for that pedestrian
@@ -419,6 +422,8 @@ void Simulation::RunHeader(long nPed)
     if (nPed==-1) nPed = _nPeds;
     _iod->WriteHeader(nPed, _fps, _building.get(), _seed);
     _iod->WriteGeometry(_building.get());
+    if( _gotSources)
+         _iod->WriteSources( GetAgentSrcManager().GetSources());
 
     int writeInterval = (int) ((1./_fps)/_deltaT+0.5);
     writeInterval = (writeInterval<=0) ? 1 : writeInterval; // mustn't be <= 0

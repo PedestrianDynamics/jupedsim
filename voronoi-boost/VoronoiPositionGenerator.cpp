@@ -98,7 +98,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
     building->GetPedestrians(roomID, subroomID, existing_peds);
     existing_peds.insert(existing_peds.end(), peds_queue.begin(), peds_queue.end());
 
-    double radius = 0.3; //radius of a person, 0.3 is just some number(needed for the fake_peds bellow), will be changed afterwards
+    double radius = 0.3; //radius of a person, 0.3 is just some number(needed for the fake_peds bellow). should be changed afterwards
 
     SubRoom* subroom = building->GetRoom( roomID )->GetSubRoom(subroomID);
     double factor = 100;  //factor for conversion to integer for the boost voronoi
@@ -106,19 +106,35 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
     std::vector<Point> fake_peds;
     Point temp(0,0);
     //fake_peds will be the positions of "fake" pedestrians, multiplied by factor and converted to int
-    for (auto vert: subroom->GetPolygon() ) //room vertices
-    {
-          const Point& center_pos = subroom->GetCentroid();
-          temp._x = ( center_pos._x-vert._x );
-          temp._y = ( center_pos._y-vert._y );
-          temp = temp/temp.Norm();
-          temp = temp*(radius*1.4);  //now the norm of the vector is ~r*sqrt(2), pointing to the center
-          temp = temp + vert;
-          temp._x = (int)(temp._x*factor);
-          temp._y = (int)(temp._y*factor);
-          fake_peds.push_back( temp );
-    }
+    float BBxmin = src->GetBoundaries()[0];
+    float BBxmax = src->GetBoundaries()[1];
+    float BBymin = src->GetBoundaries()[2];
+    float BBymax = src->GetBoundaries()[3];
+    bool haveBB = (BBxmin != std::numeric_limits<float>::lowest()) ||
+         (BBxmax != std::numeric_limits<float>::max()) ||
+         (BBymin != std::numeric_limits<float>::lowest()) ||
+         (BBymax != std::numeric_limits<float>::max());
 
+    if(haveBB == false)
+         for (auto vert: subroom->GetPolygon() ) //room vertices
+         {
+              const Point& center_pos = subroom->GetCentroid();
+              temp._x = ( center_pos._x-vert._x );
+              temp._y = ( center_pos._y-vert._y );
+              temp = temp/temp.Norm();
+              temp = temp*(radius*1.4);  //now the norm of the vector is ~r*sqrt(2), pointing to the center
+              temp = temp + vert;
+              temp._x = (int)(temp._x*factor);
+              temp._y = (int)(temp._y*factor);
+              fake_peds.push_back( temp );
+         }
+    else
+    {
+         fake_peds.push_back(Point(BBxmin,BBymin)*factor);
+         fake_peds.push_back(Point(BBxmin,BBymax)*factor);
+         fake_peds.push_back(Point(BBxmax,BBymin)*factor);
+         fake_peds.push_back(Point(BBxmax,BBymax)*factor);
+    }
     std::vector<Pedestrian*>::iterator iter_ped;
     std::srand(0);
     for (iter_ped = peds.begin(); iter_ped != peds.end(); )
@@ -127,14 +143,17 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
          radius = ped->GetEllipse().GetBmax(); //max radius of the current pedestrian
          if(existing_peds.size() == 0 )
          {
-              const Point& center_pos = subroom->GetCentroid();
+              Point center_pos = subroom->GetCentroid();
+              if(haveBB)
+                   center_pos = Point(0.5*(BBxmax-BBxmin), 0.5*(BBymax-BBymin));
 
               double x_coor = 3 * ( (double)rand() / (double)RAND_MAX ) - 1.5;
               double y_coor = 3 * ( (double)rand() / (double)RAND_MAX ) - 1.5;
               Point random_pos(x_coor, y_coor);
               Point new_pos = center_pos + random_pos;
               //this could be better, but needs to work with any polygon - random point inside a polygon?
-              if ( subroom->IsInSubRoom( new_pos ) )
+              bool inBox = (new_pos._x <= BBxmax) && (new_pos._x >= BBxmin) && (new_pos._y <= BBymax) && (new_pos._y >= BBymin);
+              if ( subroom->IsInSubRoom( new_pos ) && inBox)
               {
                    if( IsEnoughInSubroom(subroom, new_pos, radius ) )
                    {
@@ -207,13 +226,14 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
               double dis = 0;
               //std::default_random_engine gen = dist->GetGenerator();
               if(!src->Greedy())
-                    VoronoiBestVertexRandMax(discrete_positions, vd, subroom, factor, chosen_it, dis, radius);
+                    VoronoiBestVertexRandMax(src, discrete_positions, vd, subroom, factor, chosen_it, dis, radius);
               else
-                    VoronoiBestVertexGreedy(discrete_positions, vd, subroom, factor, chosen_it, dis, radius);
+                    VoronoiBestVertexGreedy(src, discrete_positions, vd, subroom, factor, chosen_it, dis, radius);
 
               if( dis > 4*radius*radius)
               {
                    Point pos( chosen_it->x()/factor, chosen_it->y()/factor ); //check!
+
                    ped->SetPos(pos , true);
                    VoronoiAdjustVelocityNeighbour(chosen_it, ped, velocities_vector, goal_vector);
                    // proceed to the next pedestrian
@@ -233,6 +253,9 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
 
     }//for loop
 
+    // for(auto x : existing_peds)
+    //      std::cout << "-- " << x->GetPos()._x << ", " << x->GetPos()._y << "---\n";
+    // getc(stdin);
 
     //maybe not all pedestrians could find a place, requeue them in the source
     if(peds_without_place.size()>0)
@@ -367,7 +390,7 @@ void VoronoiAdjustVelocityNeighbour(voronoi_diagram<double>::const_vertex_iterat
  * @param dis: distance squared of  the best_vertex to its surrouding seeds.
  * @param radius: radius of pedestrian
  */
-void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
+void VoronoiBestVertexRandMax (AgentsSource* src, const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
                                double factor, voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	, double radius)
 {
      std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
@@ -375,7 +398,12 @@ void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, con
      unsigned long size=0;
      for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it){
           Point vert_pos = Point( it->x()/factor, it->y()/factor );
-          if( subroom->IsInSubRoom( vert_pos ) )
+          float BBxmin = src->GetBoundaries()[0];
+          float BBxmax = src->GetBoundaries()[1];
+          float BBymin = src->GetBoundaries()[2];
+          float BBymax = src->GetBoundaries()[3];
+          bool inBox = (vert_pos._x <= BBxmax) && (vert_pos._x >= BBxmin) && (vert_pos._y <= BBymax) && (vert_pos._y >= BBymin);
+          if( subroom->IsInSubRoom( vert_pos ) && inBox)
                if( IsEnoughInSubroom(subroom, vert_pos,radius) )
                {
                     const voronoi_diagram<double>::vertex_type &vertex = *it;
@@ -436,27 +464,37 @@ void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, con
  * @param dis: distance squared of  the best_vertex to its surrouding seeds.
  * @param radius: radius of pedestrian
  */
-void VoronoiBestVertexGreedy (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
-                               double factor, voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	, double radius)
+void VoronoiBestVertexGreedy (AgentsSource* src, const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
+                              double factor, voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	, double radius)
 {
      std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
      vector<double> distances;
      for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it){
           Point vert_pos = Point( it->x()/factor, it->y()/factor );
-          if( subroom->IsInSubRoom( vert_pos ) )
+          float BBxmin = src->GetBoundaries()[0];
+          float BBxmax = src->GetBoundaries()[1];
+          float BBymin = src->GetBoundaries()[2];
+          float BBymax = src->GetBoundaries()[3];
+          bool inBox = (vert_pos._x <= BBxmax) && (vert_pos._x >= BBxmin) && (vert_pos._y <= BBymax) && (vert_pos._y >= BBymin);
+          if( subroom->IsInSubRoom( vert_pos ) && inBox )
                if( IsEnoughInSubroom(subroom, vert_pos, radius) )
                {
                     const voronoi_diagram<double>::vertex_type &vertex = *it;
                     const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
                     std::size_t index = ( edge->cell() )->source_index();
                     Point p = discrete_positions[index];
-
                     dis = ( p._x - it->x() )*( p._x - it->x() )   + ( p._y - it->y() )*( p._y - it->y() ) ;
                     dis = dis / factor / factor;
                     possible_vertices.push_back( it );
                     distances.push_back( dis );
-
                }
+     }
+     if(possible_vertices.empty())
+     {
+          Log->Write("Warning: No possible vertices. Maybe BB too small for %d agents?", src->GetChunkAgents());
+ //         exit(EXIT_FAILURE); // maybe not exit, just ignore
+          dis = 0;
+    return;
      }
 
      auto biggest = std::max_element(distances.begin(), distances.end());
@@ -557,5 +595,6 @@ void plotVoronoi(const std::vector<Point>& discrete_positions, const voronoi_dia
      fprintf(f, "plt.ylim([%f, %f])\n", min_y-eps, max_y+eps);
      fprintf(f, "plt.title(\"agents = %3d\")\n", (int)discrete_positions.size());
      fprintf(f, "plt.savefig(\"%.4d.png\", dpi=600)\n", global_count++);
+
      fclose(f);
 }
