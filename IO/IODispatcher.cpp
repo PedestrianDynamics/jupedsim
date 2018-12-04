@@ -89,6 +89,13 @@ void IODispatcher::WriteFooter()
           it->WriteFooter();
      }
 }
+ void IODispatcher::WriteSources(const std::vector<std::shared_ptr<AgentsSource> > sources)
+ {
+      for(auto const it : _outputHandlers)
+      {
+           it->WriteSources(sources);
+      }
+ }
 
 
 string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
@@ -363,7 +370,22 @@ void TrajectoriesFLAT::WriteFooter()
 {
 
 }
+void TrajectoriesFLAT::WriteSources(const std::vector<std::shared_ptr<AgentsSource> > sources)
+{
 
+}
+void TrajectoriesVTK::WriteSources(const std::vector<std::shared_ptr<AgentsSource> > sources)
+{
+
+}
+void TrajectoriesJPSV06::WriteSources(const std::vector<std::shared_ptr<AgentsSource> > sources)
+{
+
+}
+void TrajectoriesXML_MESH::WriteSources(const std::vector<std::shared_ptr<AgentsSource> > sources)
+{
+
+}
 
 /**
  *  VTK Implementation of the geometry and trajectories
@@ -620,7 +642,21 @@ void TrajectoriesJPSV05::WriteHeader(long nPeds, double fps, Building* building,
      tmp.append("\t</header>\n");
      _outputHandler->Write(tmp);
 }
+void TrajectoriesJPSV05::WriteSources(const std::vector<std::shared_ptr<AgentsSource> > sources)
+{
+     std::string tmp("");
 
+     for (const auto& src: sources) {
+          auto BB =  src->GetBoundaries();
+          tmp += "<source  id=\"" + std::to_string(src->GetId()) +
+               "\"  caption=\"" + src->GetCaption() + "\"" +
+               "  x_min=\"" + to_string(BB[0]) + "\"" +
+               "  x_max=\"" + to_string(BB[1]) + "\"" +
+               "  y_min=\"" + to_string(BB[2]) + "\"" +
+               "  y_max=\"" + to_string(BB[3]) + "\" />\n";
+    }
+     _outputHandler->Write(tmp);
+}
 void TrajectoriesJPSV05::WriteGeometry(Building* building)
 {
      // just put a link to the geometry file
@@ -645,7 +681,9 @@ void TrajectoriesJPSV05::WriteGeometry(Building* building)
 
      embed_geometry.append("\t</geometry>\n");
      _outputHandler->Write(embed_geometry);
-
+     //write sources
+    // if(building->G )
+     //
      _outputHandler->Write("\t<AttributeDescription>");
      _outputHandler->Write("\t\t<property tag=\"x\" description=\"xPosition\"/>");
      _outputHandler->Write("\t\t<property tag=\"y\" description=\"yPosition\"/>");
@@ -695,4 +733,3 @@ void TrajectoriesJPSV05::WriteFooter()
 {
      _outputHandler->Write("</trajectories>\n");
 }
-
