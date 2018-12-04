@@ -1239,7 +1239,7 @@ bool Pedestrian::Relocate(std::function<void(const Pedestrian&)> flowupdater) {
                       //the agent left the old room
                       //actualize the egress time for that room
 #pragma omp critical(SetEgressTime)
-                     allRooms.at(GetRoomID())->SetEgressTime(GetGlobalTime()); //set Egresstime to old room //@todo: ar.graf : GetRoomID() yields NEW room
+                     allRooms.at(oldRoomID)->SetEgressTime(GetGlobalTime()); //set Egresstime to old room //@todo: ar.graf : GetRoomID() yields NEW room
                }
                status = true;
                break;
