@@ -131,7 +131,7 @@ public:
      int GetMaxAgents() const;
      int GetChunkAgents() const;
      int GetRemainingAgents() const;
-     int ResetRemainingAgents();
+     void ResetRemainingAgents();
      void UpdateRemainingAgents(int remaining);
      float GetPercent() const;
      float GetRate() const;

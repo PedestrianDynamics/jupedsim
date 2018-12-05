@@ -18,7 +18,7 @@
 //
 // Created by laemmel on 31.03.16.
 //
-
+#define NOMINMAX
 #include "PedDistributionParser.h"
 #include "../tinyxml/tinyxml.h"
 #include <cstdarg> // va_start and va_end

@@ -165,7 +165,7 @@ int AgentsSource::GetRemainingAgents() const
      return  _remainingAgents;
 }
 
-int AgentsSource::ResetRemainingAgents()
+void AgentsSource::ResetRemainingAgents()
 {
      _remainingAgents = _chunkAgents;
 }
