@@ -66,15 +66,11 @@ AIRouter::~AIRouter()
 int AIRouter::FindExit(Pedestrian * p)
 {
 
+    // Update isovist and return next target every given update step
     if (std::fmod(std::roundf(p->GetGlobalTime()*100),std::roundf(1.0/AI_UPDATE_RATE*100))==0.0)// && p->GetGlobalTime()>0)
     {
-
-        //Log->Write(std::to_string(p->GetGlobalTime()));
-        //sensor_manager->execute(p, SensorManager::PERIODIC);
-
+        // Find next destination
         int status = FindDestination(p);
-
-        //(*cm_storage)[p]->UpdateSubRoom();
 
         return status;
 
@@ -84,30 +80,32 @@ int AIRouter::FindExit(Pedestrian * p)
 
 int AIRouter::FindDestination(Pedestrian * p)
 {
-        // Discover doors
-        //sensor_manager->execute(p, SensorManager::NO_WAY);
-        //check if there is a way to the outside the pedestrian knows (in the cognitive map)
 
         //--------------------COGMAP----------------------------
+
         //Update isovists
+        // Update (red) currently visible polygon
         (*brain_storage)[p]->GetPerceptionAbilities().UpdateCurrentEnvironment();
+        // Update (blue) already explored polygon
         (*brain_storage)[p]->GetPerceptionAbilities().UpdateSeenEnv();
+
         // update cogmap
         (*brain_storage)[p]->GetCognitiveMap().UpdateMap();
 
         //Find next appropriate landmark
         (*brain_storage)[p]->GetCognitiveMap().FindNextTarget();
+
         // find possible crossings in seenEnvironment e.g. to proceed to landmark
         std::vector<NavLine> navLines = (*brain_storage)[p]->GetPerceptionAbilities().GetPossibleNavLines(
                     (*brain_storage)[p]->GetPerceptionAbilities().GetSeenEnvironmentAsPointVec(building->GetRoom(p->GetRoomID())));
 
         NavLine nextNvLine=(*brain_storage)[p]->FindApprCrossing(navLines);
 
-//        std::ofstream myfile2;
-//        std::string str2 = "./isovists/navLinesBefore_pos"+std::to_string(p->GetID())+"_"+std::to_string((int)(std::round(p->GetGlobalTime()*100)))+".txt";
-//        myfile2.open (str2);
-//        myfile2 << std::to_string(nextNvLine.GetCentre()._x) << " " << std::to_string(nextNvLine.GetCentre()._y) << std::endl;
-//        myfile2.close();
+        std::ofstream myfile2;
+        std::string str2 = "./isovists/navLinesBefore_pos"+std::to_string(p->GetID())+"_"+std::to_string((int)(std::round(p->GetGlobalTime()*100)))+".txt";
+        myfile2.open (str2);
+        myfile2 << std::to_string(nextNvLine.GetCentre()._x) << " " << std::to_string(nextNvLine.GetCentre()._y) << std::endl;
+        myfile2.close();
 
 
         // find possible crossings in currentEnv to proceed to nextNvLine
@@ -118,11 +116,11 @@ int AIRouter::FindDestination(Pedestrian * p)
 
 
 
-//        std::ofstream myfile;
-//        std::string str = "./isovists/navLines_pos"+std::to_string(p->GetID())+"_"+std::to_string((int)(std::round(p->GetGlobalTime()*100)))+".txt";
-//        myfile.open (str);
-//        myfile << std::to_string(nextNvLine.GetCentre()._x) << " " << std::to_string(nextNvLine.GetCentre()._y) << std::endl;
-//        myfile.close();
+        std::ofstream myfile;
+        std::string str = "./isovists/navLines_pos"+std::to_string(p->GetID())+"_"+std::to_string((int)(std::round(p->GetGlobalTime()*100)))+".txt";
+        myfile.open (str);
+        myfile << std::to_string(nextNvLine.GetCentre()._x) << " " << std::to_string(nextNvLine.GetCentre()._y) << std::endl;
+        myfile.close();
 
         p->SetExitLine(&nextNvLine);
 

@@ -75,24 +75,24 @@ const std::unordered_map<ptrFloor, BoostPolygon> &VisualSystem::UpdateSeenEnv()
         _seenEnvironment.at(_building->GetRoom(_ped->GetRoomID())) = _currentEnv;
     }
 
-//    std::ofstream myfile2;
-//    std::string str2 = "./isovists/seen_env_"+std::to_string(_ped->GetID())+"_"+std::to_string((int)(std::round(_ped->GetGlobalTime()*100)))+".txt";
-//    myfile2.open (str2);
-//    for(auto it1 = boost::begin(boost::geometry::exterior_ring(_seenEnvironment.at(_building->GetRoom(_ped->GetRoomID()))));
-//            it1 != boost::end(boost::geometry::exterior_ring(_seenEnvironment.at(_building->GetRoom(_ped->GetRoomID()))));
-//            ++it1)
-//    {
-//        myfile2 << it1->_x << " " << it1->_y << std::endl;
-//        //seenEnvPolygon.push_back(*it1);
+    std::ofstream myfile2;
+    std::string str2 = "./isovists/seen_env_"+std::to_string(_ped->GetID())+"_"+std::to_string((int)(std::round(_ped->GetGlobalTime()*100)))+".txt";
+    myfile2.open (str2);
+    for(auto it1 = boost::begin(boost::geometry::exterior_ring(_seenEnvironment.at(_building->GetRoom(_ped->GetRoomID()))));
+            it1 != boost::end(boost::geometry::exterior_ring(_seenEnvironment.at(_building->GetRoom(_ped->GetRoomID()))));
+            ++it1)
+    {
+        myfile2 << it1->_x << " " << it1->_y << std::endl;
+        //seenEnvPolygon.push_back(*it1);
 
-//    }
-//    myfile2.close();
+    }
+    myfile2.close();
 
-//    std::ofstream myfile3;
-//    std::string str3 = "./isovists/real_pos"+std::to_string(_ped->GetID())+"_"+std::to_string((int)(std::round(_ped->GetGlobalTime()*100)))+".txt";
-//    myfile3.open (str3);
-//    myfile3 << std::to_string(_ped->GetPos()._x) << " " << std::to_string(_ped->GetPos()._y) << std::endl;
-//    myfile3.close();
+    std::ofstream myfile3;
+    std::string str3 = "./isovists/real_pos"+std::to_string(_ped->GetID())+"_"+std::to_string((int)(std::round(_ped->GetGlobalTime()*100)))+".txt";
+    myfile3.open (str3);
+    myfile3 << std::to_string(_ped->GetPos()._x) << " " << std::to_string(_ped->GetPos()._y) << std::endl;
+    myfile3.close();
 
 
     return _seenEnvironment;
@@ -167,18 +167,18 @@ const BoostPolygon &VisualSystem::UpdateCurrentEnvironment()
 
 //   }
 
-//    std::ofstream myfile;
-//    std::string str = "./isovists/current_env_"+std::to_string(_ped->GetID())+"_"+std::to_string((int)(std::round(_ped->GetGlobalTime()*100)))+".txt";
-//    myfile.open (str);
-//    for(auto it1 = boost::begin(boost::geometry::exterior_ring(currentEnv));
-//            it1 != boost::end(boost::geometry::exterior_ring(currentEnv));
-//            ++it1)
-//    {
-//        myfile << it1->_x << " " << it1->_y << std::endl;
-//        //seenEnvPolygon.push_back(*it1);
+    std::ofstream myfile;
+    std::string str = "./isovists/current_env_"+std::to_string(_ped->GetID())+"_"+std::to_string((int)(std::round(_ped->GetGlobalTime()*100)))+".txt";
+    myfile.open (str);
+    for(auto it1 = boost::begin(boost::geometry::exterior_ring(currentEnv));
+            it1 != boost::end(boost::geometry::exterior_ring(currentEnv));
+            ++it1)
+    {
+        myfile << it1->_x << " " << it1->_y << std::endl;
+        //seenEnvPolygon.push_back(*it1);
 
-//    }
-//    myfile.close();
+    }
+    myfile.close();
 
     boost::geometry::correct(currentEnv);
 
