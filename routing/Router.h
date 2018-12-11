@@ -34,7 +34,7 @@
 #include <vector>
 
 #include "../general/Macros.h"
-#include "../IO/Trips.h"
+#include "../geometry/Trips.h"
 
 class Building;
 class Pedestrian;
@@ -139,6 +139,8 @@ public:
       * @return
       */
      virtual bool ParseAdditionalParameters(){return true;};
+
+     void SetTrips(const Trips& trips);
 
 };
 

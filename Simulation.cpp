@@ -299,6 +299,12 @@ void Simulation::UpdateRoutesAndLocations()
      const map<int, Goal*>& goals = _building->GetAllGoals();
      auto allRooms = _building->GetAllRooms();
 
+//    for (signed int p = 0; p < allPeds.size(); ++p) {
+//        Pedestrian* ped = allPeds[p];
+//
+//        std::cout << "FinalDestination of [" << ped->GetID() << "] in (" << ped->GetRoomID() << ", " << ped->GetSubRoomID() << "/" <<  ped->GetSubRoomUID() << "): " << ped->GetFinalDestination() << std::endl;
+//    }
+
 #pragma omp parallel for shared(pedsToRemove, allRooms)
      for (signed int p = 0; p < allPeds.size(); ++p) {
           auto ped = allPeds[p];
@@ -307,8 +313,7 @@ void Simulation::UpdateRoutesAndLocations()
 
           //set the new room if needed
           if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
-                    && (room->GetCaption() == "outside")) {
-
+                    && (room->GetCaption() == "outside")) { //TODO Hier aendern fuer inside goals?
 #pragma omp critical(Simulation_Update_pedsToRemove)
                pedsToRemove.insert(ped);
           } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)

@@ -40,10 +40,13 @@
 #include "../math/GradientModel.h"
 #include "../math/VelocityModel.h"
 #include "../routing/global_shortest/GlobalRouter.h"
+#include "../routing/global_shortest_trips/GlobalRouterTrips.h"
 #include "../routing/quickest/QuickestPathRouter.h"
 #include "../routing/smoke_router/SmokeRouter.h"
 #include "../routing/ai_router/AIRouter.h"
 #include "../routing/ff_router/ffRouter.h"
+#include "../routing/ff_router_trips/ffRouterTrips.h"
+#include "../routing/trips_router/TripsRouter.h"
 
 /* https://stackoverflow.com/questions/38530981/output-compiler-version-in-a-c-program#38531037 */
 std::string ver_string(int a, int b, int c) {
@@ -1134,6 +1137,13 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                Router *r = new GlobalRouter(id, ROUTING_GLOBAL_SHORTEST);
                _config->GetRoutingEngine()->AddRouter(r);
           }
+          else if ((strategy == "global_shortest_trips") &&
+                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+               //pRoutingStrategies.push_back(make_pair(id, ROUTING_GLOBAL_SHORTEST));
+               Router *r = new GlobalRouterTrips(id, ROUTING_GLOBAL_SHORTEST);
+               _config->GetRoutingEngine()->AddRouter(r);
+          }
+
           else if ((strategy == "quickest")  &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                //pRoutingStrategies.push_back(make_pair(id, ROUTING_QUICKEST));
@@ -1169,14 +1179,30 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                exit(EXIT_FAILURE);
      #endif
           }
-          else if ((strategy == "ff_global_shortest") &&
+                    else if ((strategy == "AI_trips") &&
+                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+     #ifdef AIROUTER
+               Router *r = new AIRouterTrips(id, ROUTING_AI_TRIPS);
+               _config->GetRoutingEngine()->AddRouter(r);
+
+               Log->Write("\nINFO: \tUsing AIRouter Trips");
+               ///Parsing additional options
+               if (!ParseAIOpts(e))
+                    return false;
+     #else
+               std::cerr << "\nCan not use AI Router. Rerun cmake with option  -DAIROUTER=true and recompile.\n";
+               exit(EXIT_FAILURE);
+     #endif
+          }
+
+          else if ((strategy == "ff_global_shortest_trips") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
-               Router *r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals, _config);
+               Router *r = new FFRouterTrips(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals, _config);
                _config->GetRoutingEngine()->AddRouter(r);
 
                if ((_exit_strat_number == 8) || (_exit_strat_number == 9)){
-                   Log->Write("\nINFO: \tUsing FF Global Shortest Router");
+                   Log->Write("\nINFO: \tUsing FF Global Shortest Router Trips");
                }
                else {
                    Log->Write("\nWARNING: \tExit Strategy Number is not 8 or 9!!!");
@@ -1188,6 +1214,26 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                     return false;
                }
           }
+          else if ((strategy == "ff_global_shortest") &&
+                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+               //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
+               Router *r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals, _config);
+               _config->GetRoutingEngine()->AddRouter(r);
+
+               if ((_exit_strat_number == 8) || (_exit_strat_number == 9)){
+                    Log->Write("\nINFO: \tUsing FF Global Shortest Router");
+               }
+               else {
+                    Log->Write("\nWARNING: \tExit Strategy Number is not 8 or 9!!!");
+                    // config object holds default values, so we omit any set operations
+               }
+
+               ///Parsing additional options
+               if (!ParseFfRouterOps(e, ROUTING_FF_GLOBAL_SHORTEST)) {
+                    return false;
+               }
+          }
+
           else if ((strategy == "ff_local_shortest") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
@@ -1221,6 +1267,12 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                     return false;
                }
           }
+          else if ((strategy == "trips")  &&
+                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+               Router *r = new TripsRouter(id, ROUTING_TRIPS, _config);
+               _config->GetRoutingEngine()->AddRouter(r);
+          }
+
           else if (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) {
                Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",
                          strategy.c_str());

@@ -28,6 +28,7 @@
 
 #include "RoutingEngine.h"
 #include "../pedestrian/Pedestrian.h"
+#include "../geometry/Trips.h"
 
 using namespace std;
 
@@ -68,19 +69,19 @@ void RoutingEngine::AddRouter(Router* router)
      }
      _routersCollection.push_back(router);
 }
-
-const vector<string>& RoutingEngine::GetTrip(int index) const
-{
-     if ((index >= 0) && (index < (int) _tripsCollection.size()))
-          return _tripsCollection[index];
-     else {
-          char tmp[CLENGTH];
-          sprintf(tmp, "ERROR: \tWrong 'index' [%d] > [%d] in Routing::GetTrip()",
-                  index, int(_tripsCollection.size()));
-          Log->Write(tmp);
-          exit(EXIT_FAILURE);
-     }
-}
+//
+//const vector<string>& RoutingEngine::GetTrip(int index) const
+//{
+//     if ((index >= 0) && (index < (int) _tripsCollection.size()))
+//          return _tripsCollection[index];
+//     else {
+//          char tmp[CLENGTH];
+//          sprintf(tmp, "ERROR: \tWrong 'index' [%d] > [%d] in Routing::GetTrip()",
+//                  index, int(_tripsCollection.size()));
+//          Log->Write(tmp);
+//          exit(EXIT_FAILURE);
+//     }
+//}
 
 const std::vector<Router*> RoutingEngine::GetAvailableRouters() const
 {
@@ -110,9 +111,14 @@ Router* RoutingEngine::GetRouter(int id) const
      return /*(Router*)*/ nullptr;
 }
 
-void RoutingEngine::AddTrip(vector<string> trip)
+void RoutingEngine::AddTrip(Trips trip)
 {
-     _tripsCollection.push_back(trip);
+//     _tripsCollection.push_back(trip);
+//     _tripsCollection = trip;
+     for(Router* router:_routersCollection)
+     {
+          router->SetTrips(trip);
+     }
 }
 
 bool RoutingEngine::Init(Building* building)

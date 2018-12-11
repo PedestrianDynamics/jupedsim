@@ -482,34 +482,36 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                std::cout << waitingArea->toString() << std::endl;
 
           }
+//          building->AddTrip(trips);
+          _configuration->GetRoutingEngine()->AddTrip(trips);
 
-          std::cout << trips;
+
      }
 
      //load routes
-     TiXmlNode* xTripsNode = xRootNode->FirstChild("routing")->FirstChild("routes");
-
-     if (xTripsNode)
-          for (TiXmlElement* trip = xTripsNode->FirstChildElement("route"); trip;
-               trip = trip->NextSiblingElement("route")) {
-
-               double id = xmltof(trip->Attribute("id"), -1);
-               if (id==-1) {
-                    Log->Write("ERROR:\t id missing for trip");
-                    return false;
-               }
-               std::string sTrip = trip->FirstChild()->ValueStr();
-               std::vector<std::string> vTrip;
-               vTrip.clear();
-
-               char* str = (char*) sTrip.c_str();
-               char* p = strtok(str, ":");
-               while (p) {
-                    vTrip.push_back(xmltoa(p));
-                    p = strtok(NULL, ":");
-               }
-               _configuration->GetRoutingEngine()->AddTrip(vTrip);
-          }
+//     TiXmlNode* xTripsNode = xRootNode->FirstChild("routing")->FirstChild("routes");
+//
+//     if (xTripsNode)
+//          for (TiXmlElement* trip = xTripsNode->FirstChildElement("route"); trip;
+//               trip = trip->NextSiblingElement("route")) {
+//
+//               double id = xmltof(trip->Attribute("id"), -1);
+//               if (id==-1) {
+//                    Log->Write("ERROR:\t id missing for trip");
+//                    return false;
+//               }
+//               std::string sTrip = trip->FirstChild()->ValueStr();
+//               std::vector<std::string> vTrip;
+//               vTrip.clear();
+//
+//               char* str = (char*) sTrip.c_str();
+//               char* p = strtok(str, ":");
+//               while (p) {
+//                    vTrip.push_back(xmltoa(p));
+//                    p = strtok(NULL, ":");
+//               }
+//               _configuration->GetRoutingEngine()->AddTrip(vTrip);
+//          }
      Log->Write("INFO:\tdone with loading extra routing information");
      return true;
 }

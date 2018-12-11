@@ -32,6 +32,9 @@
 
 #include "../global_shortest/GlobalRouter.h"
 #include "../global_shortest/AccessPoint.h"
+//#include "../global_shortest_trips/GlobalRouterTrips.h"
+//#include "../global_shortest_trips/AccessPoint.h"
+
 #include "../Router.h"
 #include "../../geometry/Building.h"
 #include "../../pedestrian/Pedestrian.h"
@@ -70,8 +73,8 @@ extern OutputHandler* Log;
  *
  * \author Ulrich Kemloh
  */
-class QuickestPathRouter: public GlobalRouter
-{
+class QuickestPathRouter: public GlobalRouter{
+
 
 public:
      QuickestPathRouter();

@@ -94,3 +94,7 @@ RoutingStrategy Router::GetStrategy() const
      return _strategy;
 }
 
+void Router::SetTrips(const Trips& trips){
+     _trips = trips;
+     std::cout << _trips << std::endl;
+}

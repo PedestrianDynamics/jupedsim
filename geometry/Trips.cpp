@@ -3,7 +3,6 @@
 //
 
 #include "Trips.h"
-//#include <random>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/discrete_distribution.hpp>
 
@@ -39,7 +38,8 @@ VertexItr Trips::getGoal(int id)
      for (boost::tie(vi, vi_end) = boost::vertices(trips); vi != vi_end; ++vi) {
           if(trips[*vi].getID() == id) return vi;
      }
-     return vi_end;}
+     return vi_end;
+}
 
 void Trips::addConnection(int sourceId, int destinationId, EdgeProperty& weight)
 {
@@ -87,12 +87,6 @@ int Trips::getNextGoal(int id)
      }
 
      // Random number generator
-//     std::random_device rd;
-//     std::mt19937 gen(rd());
-//
-//     std::default_random_engine generator;
-//     std::discrete_distribution<double> distribution (weights.begin(), weights.end());
-
      boost::mt19937 gen;
      boost::random::discrete_distribution<> dist(weights.begin(), weights.end());
 
