@@ -3,6 +3,7 @@
  * \date        Apr 15, 2014
  * \version     v0.8
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \ingroup OperationalModels
  *
  * \section License
  * This file is part of JuPedSim.
@@ -43,8 +44,8 @@ struct sort_pred
 {
       bool operator () (const my_pair& left, const my_pair& right)
             {
-                  return (left.first == right.first) ? 
-                        (left.second > right.second) : 
+                  return (left.first == right.first) ?
+                        (left.second > right.second) :
                         (left.first < right.first);
             }
 };
@@ -54,7 +55,15 @@ struct sort_pred
 class Pedestrian;
 class DirectionStrategy;
 
-
+/*!
+ * \class VelocityModel
+ *
+ * \brief @todo
+ *
+ *\ingroup OperationalModels
+ *
+ * \author Mohcine Chraibi
+ */
 class VelocityModel : public OperationalModel {
 private:
 
@@ -83,19 +92,19 @@ private:
       * @param room: Pointer to room
       *
       * @return Point
-      */ 
+      */
      Point e0(Pedestrian *ped, Room* room) const;
      /**
       * Get the spacing between ped1 and ped2
       *
       * @param ped1 Pointer to Pedestrian: First pedestrian
       * @param ped2 Pointer to Pedestrian: Second pedestrian
-      * @param ei the direction of pedestrian. 
+      * @param ei the direction of pedestrian.
       * This direction is: \f$ e_0 + \sum_j{R(spacing_{ij})*e_{ij}}\f$
       * and should be calculated *before* calling OptimalSpeed
       * @return Point
       */
-     my_pair GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei, int periodic) const;           
+     my_pair GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei, int periodic) const;
      /**
       * Repulsive force between two pedestrians ped1 and ped2 according to
       * the Velocity model (to be published in TGF15)
@@ -132,11 +141,11 @@ public:
                    double awall, double Dwall);
      virtual ~VelocityModel(void);
 
-     
+
      std::shared_ptr<DirectionStrategy> GetDirection() const;
 
      /**
-      * ToDO: What is this parameter doing?
+      * @todo What is this parameter doing?
       *
       * @return double
       *
@@ -144,21 +153,21 @@ public:
      double GetaPed() const;
 
      /**
-      * ToDO: What is this parameter doing?
+      * @todo What is this parameter doing?
       *
       * @return double
       */
      double GetDPed() const;
 
      /**
-      * ToDO: What is this parameter doing?
+      * @todo What is this parameter doing?
       *
       * @return double
       */
      double GetaWall() const;
 
      /**
-      * ToDO: What is this parameter doing?
+      * @todo What is this parameter doing?
       *
       * @return double
       */
@@ -187,4 +196,4 @@ public:
 };
 
 
-#endif /* GOMPERTZMODEL_H_ */
+#endif

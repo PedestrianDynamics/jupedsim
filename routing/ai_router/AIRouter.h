@@ -42,16 +42,15 @@ class AIBrainStorage;
 class NavLine;
 
 
-/**
- * @brief Routing Engine for Cognitive Map/ Smoke Sensor / Perception Abilities
- *
- *
- */
 
 
 //c++11 alias: Container to store options for the router (i. a. sensors)
 using optStorage = std::unordered_map<std::string,std::vector<std::string> >;
-
+/**
+ * @brief Routing Engine for Cognitive Map/ Smoke Sensor / Perception Abilities
+ * \ingroup Router
+ *
+ */
 class AIRouter: public Router {
 public:
      AIRouter();

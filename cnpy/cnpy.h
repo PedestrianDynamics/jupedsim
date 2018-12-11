@@ -27,7 +27,7 @@ namespace cnpy {
         {
             num_vals = 1;
             for(size_t i = 0;i < shape.size();i++) num_vals *= shape[i];
-            data_holder = std::shared_ptr<std::vector<char>>(
+            data_holder = std::shared_ptr<std::vector<char> >(
                 new std::vector<char>(num_vals * word_size));
         }
 
@@ -48,7 +48,7 @@ namespace cnpy {
             return data_holder->size();
         }
 
-        std::shared_ptr<std::vector<char>> data_holder;
+        std::shared_ptr<std::vector<char> > data_holder;
         std::vector<size_t> shape;
         size_t word_size;
         bool fortran_order;

@@ -31,15 +31,14 @@
 #include "../generic/FDSMesh.h"
 #include "../generic/FDSMeshStorage.h"
 #include "../../tinyxml/tinyxml.h"
-#include <boost/filesystem.hpp>
-using namespace boost::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 
 ToxicityAnalysis::ToxicityAnalysis(const std::string & projectFileName, double fps):  _projectFileName(projectFileName), _fps(fps)
 {
     _FMStorage = nullptr;
-    _dt = 1/20.; //time fraction for which doses are cumulated. TODO:
-                 //parse in inifile?
+    _dt = 1/20.;     // @todo time fraction for which doses are cumulated. Parse in inifile?
     _t_prev = -1;
     LoadJPSfireInfo(projectFileName);
 }
@@ -51,7 +50,7 @@ ToxicityAnalysis::~ToxicityAnalysis()
 
 bool ToxicityAnalysis::LoadJPSfireInfo(const std::string projectFilename )
 {
-     boost::filesystem::path p(projectFilename);
+     fs::path p(projectFilename);
      std::string projectRootDir = p.parent_path().string();
 
    TiXmlDocument doc(projectFilename);
@@ -80,7 +79,7 @@ bool ToxicityAnalysis::LoadJPSfireInfo(const std::string projectFilename )
            std::string irritant = "";
            Log->Write("INFO:\tJPSfire Module C_toxicity_analysis: \n \tdata: %s \n\tupdate time: %.1f s | final time: %.1f s",
                       filepath.c_str(), updateIntervall, finalTime);
-           //TODO Is there a posibility to pass a variable number of arguments to a function?
+           //@todo Is there a posibility to pass a variable number of arguments to a function?
            _FMStorage = std::make_shared<FDSMeshStorage>(filepath, finalTime, updateIntervall, study, irritant);
 
            InitializeWriteOut();
@@ -161,9 +160,8 @@ double ToxicityAnalysis::CalculateFEDHeat(Pedestrian* p, double T, double FED_He
 void ToxicityAnalysis::HazardAnalysis(Pedestrian* p)
 {
     double FEC_Smoke, FED_In = 0.0, FED_Heat = 0.0, FIC_Im, FIC_In;
-
     // Smoke extinction in 1/m
-    double E = GetFDSQuantity(p, "SOOT_EXTINCTION_COEFFICIENT");
+    double E = GetFDSQuantity(p, "EXTINCTION_COEFFICIENT"); //@todo check this string.. SOOT??
 
     // gas species in ppm
     double CO2 = 0., CO = 0., HCN = 0., HCL = 0., O2 = 0.;
@@ -199,10 +197,12 @@ void ToxicityAnalysis::HazardAnalysis(Pedestrian* p)
 
 void ToxicityAnalysis::InitializeWriteOut()
 {
-    string fileNameWithoutExtension = _projectFileName.substr(0, _projectFileName.find_last_of("."));
-    std::string ToxAnalysisXML = "fire_" + fileNameWithoutExtension + ".xml";
-    _outputhandler = std::make_shared<ToxicityOutputHandler>(ToxAnalysisXML.c_str());
-    _outputhandler->WriteToFileHeader();
+     fs::path p(_projectFileName);
+     std::string ToxAnalysisXML =  "toxicity_output_" + p.stem().string() + p.extension().string();
+     fs::path t(ToxAnalysisXML);
+     t = p.parent_path() / t;
+     _outputhandler = std::make_shared<ToxicityOutputHandler>(t.string().c_str());
+     _outputhandler->WriteToFileHeader();
 }
 
 void ToxicityAnalysis::WriteOutHazardAnalysis(const Pedestrian* p, double E, double FEC_Smoke, double O2, double CO2, double CO, double HCN, double HCL, double FED_In, double FIC_Im, double FIC_In, double T, double FED_Heat)

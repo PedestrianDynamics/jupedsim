@@ -150,3 +150,11 @@ idea/codeStyleSettings.xml
 /Utest/rimea_tests/figures
 
 cmake-build-debug
+*.vcxproj
+*.vcxproj.filters
+*.cmake
+*.sln
+Win32/
+*.dir/
+*.user
+packages/

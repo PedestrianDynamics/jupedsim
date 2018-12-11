@@ -149,7 +149,7 @@ Point Line::NormalVec() const
           ny = 0;
      }
      else {
-          double norm; 
+          double norm;
           nx = -r._y/r._x;
           ny = 1;
           /* Normieren */
@@ -230,6 +230,10 @@ Point Line::ShortestPoint(const Point& p) const
 bool Line::IsInLineSegment(const Point& p) const
 {
      return fabs((_point1-p).Norm()+(_point2-p).Norm()-(_point2-_point1).Norm())<J_EPS; // old version
+}
+bool Line::NearlyInLineSegment(const Point& p) const
+{
+     return fabs((_point1-p).Norm()+(_point2-p).Norm()-(_point2-_point1).Norm())<J_EPS_DIST; // old version
 }
 
 /* Berechnet direkt den Abstand von p zum Segment l
@@ -795,13 +799,3 @@ double Line::GetObstacleDeviationAngle(const std::vector<Wall>& owalls, const st
      return minAngle;
 
 }
-
-
-
-
-
-
-
-
-
-

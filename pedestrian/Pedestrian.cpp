@@ -41,6 +41,15 @@ double Pedestrian::_globalTime = 0.0;
 int Pedestrian::_agentsCreated=1;
 double Pedestrian::_minPremovementTime = FLT_MAX;
 AgentColorMode Pedestrian::_colorMode=BY_VELOCITY;
+std::vector<int> colors = {
+     0,
+     255,
+     35,
+     127,
+     90,
+};
+
+
 
 Pedestrian::Pedestrian()
 {
@@ -109,7 +118,12 @@ Pedestrian::Pedestrian()
      _agentsCreated++;//increase the number of object created
      _FED_In = 0.0;
      _FED_Heat = 0.0;
+     _WalkingSpeed = nullptr;
+     _ToxicityAnalysis = nullptr;
 }
+
+//const shared_ptr<ToxicityAnalysis> &Pedestrian::getToxicityAnalysis() { return _ToxicityAnalysis; }
+
 Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& building)
 :
      _group(agentsParameters.GetGroupId()),
@@ -185,6 +199,8 @@ Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& buil
      _agentsCreated++;//increase the number of object created
      _FED_In = 0.0;
      _FED_Heat = 0.0;
+     _ToxicityAnalysis = nullptr;
+     _WalkingSpeed = nullptr;
 }
 
 
@@ -544,8 +560,9 @@ double Pedestrian::GetV0Norm() const
      double ped_elevation = sub->GetElevation(_ellipse.GetCenter());
      if (_navLine ==nullptr)
      {
-          printf("Error: ped %d has no navline\n", _id);
-          exit(EXIT_FAILURE);
+          //printf("Error: ped %d has no navline\n", _id);
+          //exit(EXIT_FAILURE);
+          return std::max(0.,_ellipse.GetV0());
      }
      const Point& target = _navLine->GetCentre();
      double nav_elevation = sub->GetElevation(target);
@@ -635,11 +652,11 @@ double Pedestrian::GetV0Norm() const
      }
 
      //IF execution of WalkingInSmoke depending on JPSfire section in INI file
+     #ifdef JPSFIRE
      if(_WalkingSpeed && _WalkingSpeed->ReduceWalkingSpeed()) {
-         std::cout << "JPSfire?" << std::endl;
          walking_speed = _WalkingSpeed->WalkingInSmoke(this, walking_speed);
      }
-
+     #endif
      //WHERE should the call to that routine be placed properly?
      //only executed every 3 seconds
      // fprintf(stderr, "%f\n", walking_speed);
@@ -648,14 +665,14 @@ double Pedestrian::GetV0Norm() const
      // orthogonal projection on the stair
      //return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
 }
-
+#ifdef JPSFIRE
 void Pedestrian::ConductToxicityAnalysis()
 {
-    if( _ToxicityAnalysis->ConductToxicityAnalysis() ) {
-       _ToxicityAnalysis->HazardAnalysis(this);
-    }
+    if(_ToxicityAnalysis->ConductToxicityAnalysis()){
+             _ToxicityAnalysis->HazardAnalysis(this);
+        }
 }
-
+#endif
 // get axis in the walking direction
 double Pedestrian::GetLargerAxis() const
 {
@@ -1170,7 +1187,10 @@ int Pedestrian::GetColor() const
 
      case BY_GROUP:
      {
-          key = std::to_string(_group);
+          key = std::to_string(_group); // @todo find a better solution to get
+                                        // colors clearly distinguishable form
+                                        // each other
+          return(colors[_group%colors.size()]);
      }
      break;
 
@@ -1219,7 +1239,7 @@ bool Pedestrian::Relocate(std::function<void(const Pedestrian&)> flowupdater) {
                       //the agent left the old room
                       //actualize the egress time for that room
 #pragma omp critical(SetEgressTime)
-                     allRooms.at(GetRoomID())->SetEgressTime(GetGlobalTime()); //set Egresstime to old room //@todo: ar.graf : GetRoomID() yields NEW room
+                     allRooms.at(oldRoomID)->SetEgressTime(GetGlobalTime()); //set Egresstime to old room //@todo: ar.graf : GetRoomID() yields NEW room
                }
                status = true;
                break;

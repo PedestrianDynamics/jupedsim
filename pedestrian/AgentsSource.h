@@ -49,7 +49,21 @@ public:
      /**
       * Constructor
       */
-     AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency, bool greedy, double time, int agent_id, float startx, float starty);
+     AgentsSource(int id,
+                  const std::string& caption,
+                  int max_agents,
+                  int group_id,
+                  int frequency,
+                  bool greedy,
+                  double time,
+                  int agent_id,
+                  float startx,
+                  float starty,
+                  float percent,
+                  float rate,
+                  int chunkAgents,
+                  std::vector<float> boundaries,
+                  std::vector<int> lifeSpan);
 
      /**
       * Destructor
@@ -64,7 +78,7 @@ public:
 
      /**
       * Generate a number of agents, based on the frequency given in the constructor.
-      * No agents are generated if the the maximum (_maxAgents) is reached.
+      * No agents are generated if the maximum (_maxAgents) is reached.
       * @see _maxAgents
       * @param ped
       */
@@ -104,8 +118,8 @@ public:
 
      int GetAgentsGenerated() const;
      void SetAgentsGenerated(int agentsGenerated);
-     const double* GetBoundaries() const;
-     void Setboundaries(double * bounds);
+     const std::vector<float> GetBoundaries() const;
+     void Setboundaries(std::vector<float> bounds);
      const std::string& GetCaption() const;
      int GetFrequency() const;
      int GetGroupId() const;
@@ -115,27 +129,41 @@ public:
      float GetStartY() const;
      double GetPlanTime() const;
      int GetMaxAgents() const;
+     int GetChunkAgents() const;
+     int GetRemainingAgents() const;
+     void ResetRemainingAgents();
+     void UpdateRemainingAgents(int remaining);
+     float GetPercent() const;
+     float GetRate() const;
+     std::vector<int> GetLifeSpan() const;
      bool Greedy() const;
      void SetStartDistribution(std::shared_ptr<StartDistribution>);
      const std::shared_ptr<StartDistribution> GetStartDistribution() const;
 
-
 private:
      int _id=-1;
-     int _frequency=0;
+     int _frequency=1; /// create \var _chunkAgents every \var _frequency seconds
      int _maxAgents=0;
      int _groupID=-1;
      std::string _caption="no caption";
      bool _greedy = false;
      int _agentsGenerated=0;
-     double _boundaries[4];// = { 0, 0, 0, 0 };
+     std::vector<float> _boundaries;
      int _agent_id;
-     double _time;
-     float _startx;
-     float _starty;
+     double _time; /// planned generation time. here \var _maxAgents = 1
+     float _startx; /// \var _maxAgents = 1
+     float _starty; /// \var _maxAgents = 1
+     std::vector<int> _lifeSpan;
+
+     int _chunkAgents; /// generate \var chunk_agents per \var frequency seconds
+     int _remainingAgents; /// After generating \var chunk_agents \time \var
+                           /// _percent per \var frequency seconds, this is the
+                           /// remaining of agents still to be produced
+     float _percent=1.0; /// generate \var _percent * \var _chunkAgents
+     float _rate=1.0;
+
      std::vector<Pedestrian*> _agents;
      std::shared_ptr<StartDistribution> _startDistribution;
-
 };
 
 #endif /* AGENTSOURCE_H_ */

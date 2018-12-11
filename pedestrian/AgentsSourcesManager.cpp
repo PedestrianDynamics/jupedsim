@@ -57,13 +57,13 @@ void AgentsSourcesManager::Run()
 {
       SetRunning(true);
      Log->Write("INFO:\tStarting agent manager thread");
-     /* std::cout<< KGRN << "\n Starting agent manager thread\n" << "\n>> time: " << Pedestrian::GetGlobalTime() << RESET << "\n"; */
+     std::cout<< KRED << "\n Starting agent manager thread\n" << ">> time: " << Pedestrian::GetGlobalTime() << RESET << "\n";
      //Generate all agents required for the complete simulation
      //It might be more efficient to generate at each frequency step
      //TODO  this loop is exactly GenerateAgents( --> REFACTOR)
      for (const auto& src : _sources)
      {
-           /* std::cout << "Generate AgentsAndAddToPool src: " << src->GetId() << "\n" ; */
+          std::cout << "Generate src: " << src->GetId() << "\n" ;
           src->GenerateAgentsAndAddToPool(src->GetMaxAgents(), _building);
      }
 
@@ -75,12 +75,12 @@ void AgentsSourcesManager::Run()
      _isCompleted = false;
      bool finished = false;
      SetBuildingUpdated(false);
-     long updateFrequency = 1; //TODO parse this from inifile
+     long updateFrequency = 1; // @todo parse this from inifile
      /* std::cout << KMAG << "RUN Starting thread manager with _lastUpdateTime " << _lastUpdateTime<< std::endl; */
      do
      {
           int current_time = (int)Pedestrian::GetGlobalTime();
-          /* std::cout << KBLU << ">> RUN: current_time " << current_time << " last update  " << _lastUpdateTime << "\n" << RESET; */
+          // std::cout << KBLU << ">> RUN: current_time " << current_time << " last update  " << _lastUpdateTime << "\n" << RESET;
 
           if ((current_time != _lastUpdateTime)
               && ((current_time % updateFrequency) == 0))
@@ -106,23 +106,42 @@ void AgentsSourcesManager::Run()
 
 bool AgentsSourcesManager::ProcessAllSources() const
 {
-     /* std::cout << "\nSTART   AgentsSourcesManager::ProcessAllSources()\n"; */
+     // std::cout << "\nSTART   AgentsSourcesManager::ProcessAllSources()\n";
 
      bool empty=true;
-     double current_time = Pedestrian::GetGlobalTime();
+     double current_time = (int)Pedestrian::GetGlobalTime();
      vector<Pedestrian*> source_peds; // we have to collect peds from all sources, so that we can consider them  while computing new positions
      for (const auto& src : _sources)
      {
-          /* std::cout << KRED << "\nprocessing src: " <<  src->GetId() << " -- current time: " << current_time << " schedule time: " << src->GetPlanTime() <<". number of peds in building " << _building->GetAllPedestrians().size() << "\n" << RESET; */
+          // std::cout << KRED << "\nprocessing src: " <<  src->GetId() << " -- current time: " << current_time << " schedule time: " << src->GetPlanTime() <<". number of peds in building " << _building->GetAllPedestrians().size() << "\n" << RESET;
 
-          if (src->GetPoolSize() && (src->GetPlanTime() <= current_time) )// maybe diff<eps
+          auto srcLifeSpan = src-> GetLifeSpan();
+          bool inTime = (current_time >= srcLifeSpan[0]) && (current_time <= srcLifeSpan[1]);
+          // inTime is always true if src got some PlanTime (default values
+          // if src has no PlanTime, then this is set to 0. In this case inTime
+          // is important in the following condition
+          bool newCycle =  std::fmod(current_time, src->GetFrequency()) == 0;
+          bool subCycle;
+          subCycle = (current_time > src->GetFrequency())?std::fmod((current_time-src->GetFrequency()), src->GetRate()) == 0:false;
+
+          if(newCycle)
+               src->ResetRemainingAgents();
+
+          bool timeToCreate = newCycle || subCycle;
+          // if(subCycle)
+          //      std::cout << KGRN << " freq: " << src->GetFrequency() << ", rate: " << src->GetRate() << ", " << ": remaining: " << src->GetRemainingAgents() <<"\n" << RESET;                                                                                                                                                             std::cout << " <<<<  time to create " <<  timeToCreate  << "  newCycle: " << newCycle << ", subcycle: " << subCycle << ", inTime: " << inTime<< "\n";
+
+
+          if (timeToCreate && src->GetPoolSize() && (src->GetPlanTime() <= current_time) && inTime && src->GetRemainingAgents())// maybe diff<eps
           {
                vector<Pedestrian*> peds;
 
-               src->RemoveAgentsFromPool(peds, src->GetFrequency());
+               src->RemoveAgentsFromPool(peds, src->GetChunkAgents() * src->GetPercent());
+               src->UpdateRemainingAgents(src->GetChunkAgents() * src->GetPercent());
+
                source_peds.reserve(source_peds.size() + peds.size());
 
-               Log->Write("\nINFO:\tSource %d generating %d agents (%d remaining)\n",src->GetId(),peds.size(),src->GetPoolSize());
+               Log->Write("\nINFO:\tSource %d generating %d agents at %3.3f s, %d (%d remaining in pool)\n",src->GetId(),peds.size(), current_time,src->GetRemainingAgents(),src->GetPoolSize());
                printf("\nINFO:\tSource %d generating %lu agents (%d remaining)\n",src->GetId(), peds.size(),src->GetPoolSize());
 
                //ComputeBestPositionRandom(src.get(), peds);
@@ -133,8 +152,8 @@ bool AgentsSourcesManager::ProcessAllSources() const
                       InitFixedPosition(src.get(), peds);
                 }
                 else
-                      if( !ComputeBestPositionVoronoiBoost(src.get(), peds, _building, source_peds) )
-                            Log->Write("WARNING:\tThere was no place for some pedestrians");
+                     if( !ComputeBestPositionVoronoiBoost(src.get(), peds, _building, source_peds) )
+                          Log->Write("WARNING:\tThere was no place for some pedestrians");
 
                source_peds.insert(source_peds.end(), peds.begin(), peds.end());
                /* std::cout << KRED << ">>  Add to queue " << peds.size() << "\n" << RESET; */
@@ -148,18 +167,21 @@ bool AgentsSourcesManager::ProcessAllSources() const
                empty = false;
                //src->Dump();
           }
-          if (src->GetPlanTime() > current_time) // for the case we still expect
+          bool timeConstraint = (src->GetPlanTime() > current_time) || (current_time < srcLifeSpan[1]);
+          if (timeConstraint) // for the case we still expect
                // agents coming
                empty = false;
-          //src->Dump();//exit(0);
-     }
-     /* std::cout << "LEAVE   AgentsSourcesManager::ProcessAllSources()\n"; */
-     // std::cout << " Source building: "<<  _building << " size "  << _building->GetAllPedestrians().size()<< std::endl;
 
-     //                                                                                                        for(auto pp: _building->GetAllPedestrians())
-     //                                                                                                             std::cout<< KBLU << "BUL: agentssourcesManager: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl;
+     }
+     // std::cout << "LEAVE   AgentsSourcesManager::ProcessAllSources()\n";
+     // std::cout << current_time << "\n";
+
+     // std::cout << " Source building: "<<  _building << " size "  << _building->GetAllPedestrians().size()<< " empty = " << empty << std::endl;
+
+     // for(auto pp: _building->GetAllPedestrians())
+     //      std::cout<< KBLU << "BUL: agentssourcesManager: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl;
      //
-/* std::cout << "========================\n"; */
+// std::cout << "========================\n";
           return empty;
 }
 

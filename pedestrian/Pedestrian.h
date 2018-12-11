@@ -494,6 +494,8 @@ public:
      double GetSwayAmpA() const;
 
      double GetSwayAmpB() const;
+
+     const std::shared_ptr<ToxicityAnalysis> &getToxicityAnalysis();
 };
 
 #endif  /* _PEDESTRIAN_H */

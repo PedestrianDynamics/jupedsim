@@ -28,6 +28,14 @@
  *
  **/
 
+
+/** @defgroup OperationalModels
+ * Collection of different operational models
+ * [documentation](http://www.jupedsim.org/jpscore/2016-11-01-operativ)
+ *  @{
+ */
+/** @} */ // end of group
+
 #ifndef OPERATIONALMODEL_H_
 #define OPERATIONALMODEL_H_
 

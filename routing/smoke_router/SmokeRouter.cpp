@@ -188,7 +188,9 @@ bool SmokeRouter::Init(Building * b)
 
      //Init Sensor Manager
      //sensor_manager = SensorManager::InitWithAllSensors(b, cm_storage);
+     #ifdef JPSFIRE
      sensor_manager = SensorManager::InitWithCertainSensors(b, brain_storage.get(), getOptions());
+     #endif
      Log->Write("INFO:\tSensorManager initialized");
      return true;
 }
@@ -315,11 +317,3 @@ std::string SmokeRouter::GetRoutingInfoFile()
     else
          return building->GetProjectRootDir()+nav_line_file;
 }
-
-
-
-
-
-
-
-

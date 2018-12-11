@@ -39,6 +39,12 @@ class Building;
 class Pedestrian;
 
 class Router {
+     /** @defgroup Router
+      * Collection of different router classes
+      * [documentation](http://www.jupedsim.org/jpscore/2016-11-03-routing.html)
+      *  @{
+      */
+     /** @} */ // end of group
 
 private:
      /// routing strategy ID as defined in the Macros.h file
@@ -136,4 +142,3 @@ public:
 };
 
 #endif  /* _ROUTING_H */
-

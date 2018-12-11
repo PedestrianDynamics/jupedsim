@@ -78,6 +78,7 @@ extern OutputHandler* Log;
  *
  * \brief router using floor fields to measure distances of doors, no hlines
  *
+ *\ingroup Router
  * This router is an update of the former Router.{cpp, h} - Global-, Quickest
  * Router System. In the __former__ version, a graph was created with doors and
  * hlines as nodes and the distances of (doors, hlines), connected with a line-

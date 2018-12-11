@@ -36,6 +36,8 @@ Crossing::Crossing()
 {
      _id = -1;
      _isOpen=true;
+	 _doorUsage = 0;
+	 _lastPassingTime = 0;
 }
 
 Crossing::~Crossing()
@@ -171,4 +173,26 @@ int Crossing::CommonSubroomWith(Crossing* other, SubRoom* &subroom) {
           subroom = _subRoom2;
      }
      return result;
+}
+
+void Crossing::IncreaseDoorUsage(int number, double time)
+{
+	_doorUsage += number;
+	_lastPassingTime = time;
+	_flowAtExit += to_string(time) + "  " + to_string(_doorUsage) + "\n";
+}
+
+int Crossing::GetDoorUsage() const
+{
+	return _doorUsage;
+}
+
+double Crossing::GetLastPassingTime() const
+{
+	return _lastPassingTime;
+}
+
+const std::string & Crossing::GetFlowCurve() const
+{
+	return _flowAtExit;
 }

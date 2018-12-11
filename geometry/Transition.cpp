@@ -38,8 +38,6 @@ using namespace std;
 Transition::Transition() : Crossing()
 {
      _isOpen = true;
-     _doorUsage=0;
-     _lastPassingTime=0;
      _room2 = nullptr;
 //     _lastTickTime1 = 0;
 //     _lastTickTime2 = 0;
@@ -190,24 +188,3 @@ string Transition::GetDescription() const
      return geometry;
 }
 
-void Transition::IncreaseDoorUsage(int number, double time)
-{
-     _doorUsage+=number;
-     _lastPassingTime=time;
-     _flowAtExit+=to_string(time)+"  "+to_string(_doorUsage)+"\n";
-}
-
-int Transition::GetDoorUsage() const
-{
-     return _doorUsage;
-}
-
-double Transition::GetLastPassingTime() const
-{
-     return _lastPassingTime;
-}
-
-const std::string & Transition::GetFlowCurve() const
-{
-     return _flowAtExit;
-}

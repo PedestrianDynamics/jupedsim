@@ -72,7 +72,7 @@ SubRoom::SubRoom()
      _tanAngleWithHorizontalPlane=0;
      _minElevation=0;
      _maxElevation=0;
-     
+
      _goalIDs = vector<int> ();
      _area = 0.0;
      _uid = _static_uid++;
@@ -117,24 +117,24 @@ SubRoom::~SubRoom()
 /*
 void SubRoom::SetHelpVariables()
 {
-	unsigned int i, j= _poly.size()-1;
+        unsigned int i, j= _poly.size()-1;
 
-	for( i=0; i< _poly.size(); i++)
-	{
-		if ( _poly[i]._y == _poly[j]._y ) //not important
-		{
-			_poly_help_constatnt.push_back( _poly[i]._x ) ;
-			_poly_help_multiple.push_back( 0 );
-		}
-		else
-		{
-			_poly_help_constatnt.push_back( _poly[i]._x - ( _poly[i]._y*_poly[j]._x ) / ( _poly[j]._y - _poly[i]._y)
-										+ ( _poly[i]._y*_poly[i]._x )/ ( _poly[j]._y - _poly[i]._y  )  );
+        for( i=0; i< _poly.size(); i++)
+        {
+                if ( _poly[i]._y == _poly[j]._y ) //not important
+                {
+                        _poly_help_constatnt.push_back( _poly[i]._x ) ;
+                        _poly_help_multiple.push_back( 0 );
+                }
+                else
+                {
+                        _poly_help_constatnt.push_back( _poly[i]._x - ( _poly[i]._y*_poly[j]._x ) / ( _poly[j]._y - _poly[i]._y)
+                                                                                + ( _poly[i]._y*_poly[i]._x )/ ( _poly[j]._y - _poly[i]._y  )  );
 
-			_poly_help_multiple.push_back( (_poly[j]._x-_poly[i]._x)/(_poly[j]._y-_poly[i]._y) );
-		}
-	j=i;
-	}
+                        _poly_help_multiple.push_back( (_poly[j]._x-_poly[i]._x)/(_poly[j]._y-_poly[i]._y) );
+                }
+        j=i;
+        }
 }
 */
 void SubRoom::SetSubRoomID(int ID)
@@ -190,7 +190,16 @@ const vector<int>& SubRoom::GetAllGoalIDs() const
      return _goalIDs;
 }
 
-
+// return true is walls was erased, otherwise false.
+bool SubRoom::RemoveWall(const Wall& w)
+{
+     auto it = std::find(_walls.begin(), _walls.end(), w);
+     if (it != _walls.end()) {
+          _walls.erase(it);
+          return true;
+     }
+     return false;
+}
 bool SubRoom::AddWall(const Wall& w)
 {
      //check for duplicated walls
@@ -198,22 +207,18 @@ bool SubRoom::AddWall(const Wall& w)
      {
           if(w==w1)
           {
-               Log->Write("ERROR:\t Duplicate wall found in Room/Subroom %d/%d  %s",_roomID,_id ,w.toString().c_str());
-               Log->Write("ERROR:\t will not be added");
-               //exit(EXIT_FAILURE);
+               // Log->Write("WARNING:\t Subroom::AddWall, Wall %s already exists in Room/Subroom %d/%d. Won't AddWall.",_roomID,_id ,w.toString().c_str());
                return false;
           }
      }
      //checking for wall chunks.
      if(w.Length()<J_TOLERANZ)
      {
-          Log->Write("ERROR:\t Wall too small (length = %lf) found in Room/Subroom %d/%d  %s",w.Length(),_roomID,_id ,w.toString().c_str());
-          Log->Write("ERROR:\t will not be added");
-          //exit(EXIT_FAILURE);
+          // Log->Write("WARNING:\t Subroom::AddWall, Wall too small (length = %lf) in Room/Subroom %d/%d  %s. Won't AddWall.",w.Length(),_roomID,_id ,w.toString().c_str());
+          // Log->Write("ERROR:\t will not be added");
           return false;
      }
      _walls.push_back(w);
-
      return true;
 }
 
@@ -456,8 +461,8 @@ bool SubRoom::IsVisible(const Line &wall, const Point &position)
      return wall_is_vis;
 }
 
-// p1 and p2 are supposed to be pedestrian's positions. This function does not work properly 
-// for visibility checks with walls, since the line connecting the pedestrian's position 
+// p1 and p2 are supposed to be pedestrian's positions. This function does not work properly
+// for visibility checks with walls, since the line connecting the pedestrian's position
 // with the nearest point on the wall IS intersecting with the wall.
 bool SubRoom::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
 {
@@ -513,7 +518,7 @@ void SubRoom::SetPlanEquation(double A, double B, double C)
      _planeEquation[2]=C;
      //compute and cache the cosine of angle with the plane z=h
      _cosAngleWithHorizontalPlane= (1.0/sqrt(A*A+B*B+1));
-     // tan = sin/cos = |n1 x n2|/|n1.n2|; n1= (A, B, -1), n2 = (0, 0, 1) 
+     // tan = sin/cos = |n1 x n2|/|n1.n2|; n1= (A, B, -1), n2 = (0, 0, 1)
      _tanAngleWithHorizontalPlane = sqrt(A*A+B*B); // n1.n2 = -1
 }
 
@@ -584,7 +589,14 @@ bool SubRoom::Overlapp(const std::vector<Line*>& goals) const
       {
           for(const auto& goal:goals)
           {
-               if (wall.Overlapp(*goal)) return true;
+               if (wall.Overlapp(*goal))
+
+                    {
+                         wall.WriteToErrorLog();
+                         std::cout << "Goal " << goal->GetPoint1()._x << ", " << goal->GetPoint1()._y << "| "
+                                   << goal->GetPoint2()._x<< ", " << goal->GetPoint2()._y << std::endl;
+                         return true;
+                    }
           }
       }
 
@@ -983,32 +995,32 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
      Point pIntsct(J_NAN, J_NAN);
      int itr = 1;
      for (auto& it : _walls) {
-    	 int j = 0;
-    	 for (unsigned int i = itr; i < copy.size(); ++i) {
-    		 if (it.IntersectionWith(*copy[i], pIntsct) == true) {
-    			 if (it.ShareCommonPointWith(*copy[i]) == false) {
-    				 char tmp[CLENGTH];
-    				 sprintf(tmp, "ERROR: \tNormanSubRoom::ConvertLineToPoly(): SubRoom %d Room %d !!\n", GetSubRoomID(), GetRoomID());
-    				 Log->Write(tmp);
-    				 sprintf(tmp, "ERROR: \tWalls %s & %s intersect: !!!\n", it.toString().c_str(),
-    						 copy[i]->toString().c_str());
-    				 Log->Write(tmp);
-    				 return false;
-    			 }
-    			 else
+         int j = 0;
+         for (unsigned int i = itr; i < copy.size(); ++i) {
+                 if (it.IntersectionWith(*copy[i], pIntsct) == true) {
+                         if (it.ShareCommonPointWith(*copy[i]) == false) {
+                                 char tmp[CLENGTH];
+                                 sprintf(tmp, "ERROR: \tNormanSubRoom::ConvertLineToPoly(): SubRoom %d Room %d !!\n", GetSubRoomID(), GetRoomID());
+                                 Log->Write(tmp);
+                                 sprintf(tmp, "ERROR: \tWalls %s & %s intersect: !!!\n", it.toString().c_str(),
+                                                 copy[i]->toString().c_str());
+                                 Log->Write(tmp);
+                                 return false;
+                         }
+                         else
                                ++j; //number of lines, that share endpoints with wall "it"
-    		 }
+                 }
          }
-    	 if (j <= 2)
-    		 j = 0; //all good, set j back to 0 for next iteration
-    	 else {
-    		 char tmp[CLENGTH];
-    		 sprintf(tmp, "WARNING: \tNormanSubRoom::ConvertLineToPoly(): SubRoom %d Room %d !!\n", GetSubRoomID(), GetRoomID());
-    		 Log->Write(tmp);
-    		 sprintf(tmp, "WARNING: \tWall %s shares edge with multiple walls!!! j=%d\n", it.toString().c_str(), j);
-    		 Log->Write(tmp); // why should this return false?
-    	 }
-    	 ++itr; // only check lines that have greater index than current "it" (inner loop goes from itr to size)
+         if (j <= 2)
+                 j = 0; //all good, set j back to 0 for next iteration
+         else {
+                 char tmp[CLENGTH];
+                 sprintf(tmp, "WARNING: \tNormanSubRoom::ConvertLineToPoly(): SubRoom %d Room %d !!\n", GetSubRoomID(), GetRoomID());
+                 Log->Write(tmp);
+                 sprintf(tmp, "WARNING: \tWall %s shares edge with multiple walls!!! j=%d\n", it.toString().c_str(), j);
+                 Log->Write(tmp); // why should this return false?
+         }
+         ++itr; // only check lines that have greater index than current "it" (inner loop goes from itr to size)
      }
 
 
@@ -1054,6 +1066,7 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
                 if(IsPartOfPolygon(ptw)==false)
                 {
                      Log->Write("ERROR:\t Wall %s was not used during polygon creation for room/subroom: %d/%d",w.toString().c_str(),GetRoomID(),GetSubRoomID());
+
                      return false;
                 }
            }

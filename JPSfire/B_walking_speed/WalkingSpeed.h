@@ -57,6 +57,7 @@ public:
     bool ReduceWalkingSpeed();
     double FrantzichNilsson2003(double &walking_speed, double ExtinctionCoefficient);
     double Jin1978(double &walking_speed, double ExtinctionCoefficient);
+    double Fridolf2018(double &walking_speed, double ExtinctionCoefficient);
 
 private:
 

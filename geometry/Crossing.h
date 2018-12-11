@@ -45,6 +45,9 @@ private:
      //SubRoom* _subRoom1;
      //SubRoom* _subRoom2;
      bool _isOpen;
+	 int _doorUsage;
+	 double _lastPassingTime;
+	 std::string _flowAtExit;
 
 public:
      // last ped that passed was in room {1,2} that many ticks
@@ -139,6 +142,29 @@ public:
       * @param subroom returns one of the common subrooms
       */
      virtual int CommonSubroomWith(Crossing* other, SubRoom* &subroom);
+
+	 /**
+	  * Increment the number of persons that used that crossing
+	  * @param number, how many person have passed the crossing
+	  * @param time, at which time
+	  */
+	 void IncreaseDoorUsage(int number, double time);
+
+	 /**
+	  * @return the number of pedestrians that used that crossing.
+	  */
+	 int GetDoorUsage() const;
+
+
+	 /**
+	  * @return the flow curve for this crossing
+	  */
+	 const std::string & GetFlowCurve() const;
+
+	 /**
+	  * @return the last time this crossing was crossed
+	  */
+	 double GetLastPassingTime() const;
 };
 
 #endif  /* _CROSSING_H */

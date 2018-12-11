@@ -55,7 +55,7 @@ std::string ver_string(int a, int b, int c) {
 std::string true_cxx =
 #ifdef __clang__
       "clang++";
-#elif defined(__GNU__)
+#elif defined(__GNUC__)
 "g++";
 #elif defined(__MINGW32__)
    "MinGW";
@@ -69,7 +69,7 @@ std::string true_cxx =
 std::string true_cxx_ver =
 #ifdef __clang__
     ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__);
-#elif defined(__GNU__)
+#elif defined(__GNUC__)
     ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
 #elif defined(__MINGW32__)
 ver_string(__MINGW32__, __MINGW32_MAJOR_VERSION, __MINGW32_MINOR_VERSION);
@@ -288,11 +288,13 @@ bool IniFileParser::Parse(std::string iniFile)
      // JPSfire
      // -------------------------------------
      // read walkingspeed
+     #ifdef JPSFIRE
      std::shared_ptr<WalkingSpeed> W( new WalkingSpeed(iniFile) );
      _config->SetWalkingSpeed(W);
      // read  ToxicityAnalysis
      std::shared_ptr<ToxicityAnalysis> T( new ToxicityAnalysis(iniFile, _config->GetFps()));
      _config->SetToxicityAnalysis(T);
+     #endif
      // -------------------------------------
 
      //pick up which model to use
@@ -1140,6 +1142,10 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
           }
           else if ((strategy == "smoke") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+#ifndef JPSFIRE
+               std::cerr << "\nCan not use smoke router without jpsfire. Rerun cmake with option  -DJPSFIRE=true and recompile.\n";
+               exit(EXIT_FAILURE);
+#endif
                Router *r = new SmokeRouter(id, ROUTING_SMOKE);
                _config->GetRoutingEngine()->AddRouter(r);
 
@@ -1158,6 +1164,9 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                ///Parsing additional options
                if (!ParseAIOpts(e))
                     return false;
+     #else
+               std::cerr << "\nCan not use AI Router. Rerun cmake with option  -DAIROUTER=true and recompile.\n";
+               exit(EXIT_FAILURE);
      #endif
           }
           else if ((strategy == "ff_global_shortest") &&
@@ -1343,6 +1352,7 @@ bool IniFileParser::ParseAIOpts(TiXmlNode* routingNode) {
      {
           cogMapFiles.push_back(cogMap->Attribute("files"));
           r->addOption("CognitiveMapFiles", cogMapFiles);
+          Log->Write("INFO:\tinput files for the cognitive map specified!");
      }
 
      //Signs
@@ -1514,10 +1524,10 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                if (pExitStrategy == 8 || pExitStrategy ==9){
                     _config->set_write_VTK_files_direction(false);
                    if (strategyNode.FirstChild("write_VTK_files"))  {
-                       const char* tmp =
+                       const char* tmp1 =
                                strategyNode.FirstChild("write_VTK_files")->FirstChild()->Value();
                        //remark: std::strcmp returns 0 if the strings are equal
-                       bool tmp_write_VTK = !std::strcmp(tmp, "true");
+                       bool tmp_write_VTK = !std::strcmp(tmp1, "true");
                         _config->set_write_VTK_files_direction(tmp_write_VTK);
                    }
 

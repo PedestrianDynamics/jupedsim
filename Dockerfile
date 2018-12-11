@@ -5,7 +5,7 @@
 #    docker -it jupedsim/jpscore
 # -----------------------------------------
 
-FROM ubuntu:14.04
+FROM ubuntu:18.04
 
 MAINTAINER Mohcine Chraibi <m.chraibi@gmail.com>
 
@@ -51,12 +51,12 @@ RUN mkdir -p /home/jupedsim/workspace \
     && pwd
 
 # compile cgal
-RUN cd ~ \
-     && wget https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-4.10.2/CGAL-4.10.2.tar.xz \
-     && tar -xJvf CGAL-4.10.2.tar.xz \
-     && cd CGAL-4.10.2 \
-     && cmake . \
-     && make
+# RUN cd ~ \
+#      && wget https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-4.10.2/CGAL-4.10.2.tar.xz \
+#      && tar -xJvf CGAL-4.10.2.tar.xz \
+#      && cd CGAL-4.10.2 \
+#      && cmake . \
+#      && make
 
 
 RUN cd /home/jupedsim/workspace \
@@ -64,7 +64,7 @@ RUN cd /home/jupedsim/workspace \
     && cd jpscore \
     && mkdir -p build \
     && cd build \
-    && cmake -DBUILD_TESTING=ON -DCGAL_DIR=~/CGAL-4.10.2  ..\
+    && cmake  ..\
     && make
 
 # install python variant filtering dependencies
