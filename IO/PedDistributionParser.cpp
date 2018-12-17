@@ -178,9 +178,9 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
             float starty = xmltof(e->Attribute("startY"), std::numeric_limits<float>::quiet_NaN());
             bool greedy = (str_greedy == "true")?true:false;
             float xmin =  xmltof(e->Attribute("x_min"), std::numeric_limits<float>::lowest());
-            float xmax =  xmltof(e->Attribute("x_max"), std::numeric_limits<float>::max());
+            float xmax =  xmltof(e->Attribute("x_max"), FLT_MAX);
             float ymin =  xmltof(e->Attribute("y_min"), std::numeric_limits<float>::lowest());
-            float ymax =  xmltof(e->Attribute("y_max"), std::numeric_limits<float>::max());
+            float ymax =  xmltof(e->Attribute("y_max"), FLT_MAX);
             float chunkAgents = xmltof(e->Attribute("N_create"), 1);
             int timeMin = xmltof(e->Attribute("time_min"), std::numeric_limits<int>::min());
             int timeMax = xmltof(e->Attribute("time_max"), std::numeric_limits<int>::max());
