@@ -17,6 +17,13 @@ nav:
 ---
 
 
+## Windows
+
+See [this tutorial with VS](http://www.jupedsim.org/jpscore/2018-10-21-windows)
+
+
+## Linux and MacOS
+
 To install `JPScore` there  are three steps to follow:
 
 
