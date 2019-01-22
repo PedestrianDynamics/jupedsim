@@ -99,3 +99,7 @@ void WaitingArea::setWaitingTime(double waitingTime)
      WaitingArea::waitingTime = waitingTime;
 }
 
+std::vector<Line> WaitingArea::getAllLines()
+{
+
+}

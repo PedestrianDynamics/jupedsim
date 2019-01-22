@@ -209,6 +209,22 @@ enum MagicNumbers{
      TARGET_REGION
 };
 
+enum SPEEDFIELD {        //this enum is used as index in _speedFieldSelector
+    INITIAL_SPEED=0,    //homogen speed in walkable area, nealy zero in walls
+    REDU_WALL_SPEED=1,   //reduced wall speed
+    PED_SPEED=2         //standing agents reduce speed, so that jams will be considered in ff
+};
+
+enum TARGETMODE {
+    LINESEGMENT=0,
+    CENTERPOINT
+};
+
+enum USERMODE {
+    DISTANCE_MEASUREMENTS_ONLY,
+    DISTANCE_AND_DIRECTIONS_USED
+};
+
 constexpr double magicnum(int i) {
      return (i == UNKNOWN_DISTANCE) ? -3.0 : (i == UNKNOWN_COST) ? -2.0 : (i == WALL_ON_COSTARRAY) ? -7.0 : (i == TARGET_REGION) ? 0.0 : J_NAN;
 //     switch (i) {

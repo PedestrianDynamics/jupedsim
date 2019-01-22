@@ -59,6 +59,8 @@ class PedDistributor;
 
 class Configuration;
 
+class WaitingArea;
+
 class Building {
 private:
      Configuration* _configuration;
@@ -72,6 +74,7 @@ private:
      std::map<int, Transition*> _transitions;
      std::map<int, Hline*> _hLines;
      std::map<int, Goal*> _goals;
+     std::map<int, std::vector<WaitingArea*>> _sr2wa;
 
      /// pedestrians pathway
      bool _savePathway;

@@ -846,6 +846,8 @@ bool Building::AddGoal(Goal* goal)
           exit(EXIT_FAILURE);
      }
      _goals[goal->GetId()] = goal;
+
+
      return true;
 }
 

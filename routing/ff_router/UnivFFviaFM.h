@@ -51,25 +51,25 @@ class Point;
 class RectGrid;
 class Line;
 
-enum SPEEDFIELD {        //this enum is used as index in _speedFieldSelector
-     INITIAL_SPEED=0,    //homogen speed in walkable area, nealy zero in walls
-     REDU_WALL_SPEED=1,   //reduced wall speed
-     PED_SPEED=2         //standing agents reduce speed, so that jams will be considered in ff
-};
+//enum SPEEDFIELD {        //this enum is used as index in _speedFieldSelector
+//     INITIAL_SPEED=0,    //homogen speed in walkable area, nealy zero in walls
+//     REDU_WALL_SPEED=1,   //reduced wall speed
+//     PED_SPEED=2         //standing agents reduce speed, so that jams will be considered in ff
+//};
+//
+//enum TARGETMODE {
+//     LINESEGMENT=0,
+//     CENTERPOINT
+//};
+//
+//enum USERMODE {
+//     DISTANCE_MEASUREMENTS_ONLY,
+//     DISTANCE_AND_DIRECTIONS_USED
+//};
 
-enum TARGETMODE {
-     LINESEGMENT=0,
-     CENTERPOINT
-};
-
-enum USERMODE {
-     DISTANCE_MEASUREMENTS_ONLY,
-     DISTANCE_AND_DIRECTIONS_USED
-};
-
-class CompareCost {      //this class is used in std::priority_queue in UnivFFviaFM::calcFF
+class CompareCostTrips {      //this class is used in std::priority_queue in UnivFFviaFM::calcFF
 public:
-     CompareCost(double* costarray) : _costarray(costarray) {}
+     CompareCostTrips(double* costarray) : _costarray(costarray) {}
      bool operator() (const int a, const int b) const {
           return _costarray[a] > _costarray[b];
      }

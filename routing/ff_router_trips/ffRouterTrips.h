@@ -63,8 +63,8 @@
 #include "../Router.h"
 #include "../../general/Macros.h"
 #include "../../geometry/Building.h"
-#include "FloorfieldViaFM.h"
-#include "UnivFFviaFM.h"
+#include "./FloorfieldViaFMTrips.h"
+#include "./UnivFFviaFMTrips.h"
 
 class Building;
 class Pedestrian;
@@ -205,8 +205,8 @@ protected:
      std::vector<int>                         _directionalEscalatorsUID;
      std::vector<std::pair<int, int>>         _penaltyList;
      const Building*                          _building;
-     std::map<int, UnivFFviaFM*>     _locffviafm; // the actual type might be CentrePointLocalFFViaFM
-     FloorfieldViaFM*                         _globalFF;
+     std::map<int, UnivFFviaFMTrips*>     _locffviafm; // the actual type might be CentrePointLocalFFViaFM
+     FloorfieldViaFMTrips*                         _globalFF;
      std::map<int, Transition*>               _TransByUID;
      std::map<int, Transition*>               _ExitsByUID;
      std::map<int, Crossing*>                 _CroTrByUID;

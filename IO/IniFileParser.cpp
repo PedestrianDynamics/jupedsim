@@ -1179,21 +1179,21 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                exit(EXIT_FAILURE);
      #endif
           }
-                    else if ((strategy == "AI_trips") &&
-                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
-     #ifdef AIROUTER
-               Router *r = new AIRouterTrips(id, ROUTING_AI_TRIPS);
-               _config->GetRoutingEngine()->AddRouter(r);
-
-               Log->Write("\nINFO: \tUsing AIRouter Trips");
-               ///Parsing additional options
-               if (!ParseAIOpts(e))
-                    return false;
-     #else
-               std::cerr << "\nCan not use AI Router. Rerun cmake with option  -DAIROUTER=true and recompile.\n";
-               exit(EXIT_FAILURE);
-     #endif
-          }
+//                    else if ((strategy == "AI_trips") &&
+//                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
+//     #ifdef AIROUTER
+//               Router *r = new AIRouterTrips(id, ROUTING_AI_TRIPS);
+//               _config->GetRoutingEngine()->AddRouter(r);
+//
+//               Log->Write("\nINFO: \tUsing AIRouter Trips");
+//               ///Parsing additional options
+//               if (!ParseAIOpts(e))
+//                    return false;
+//     #else
+//               std::cerr << "\nCan not use AI Router. Rerun cmake with option  -DAIROUTER=true and recompile.\n";
+//               exit(EXIT_FAILURE);
+//     #endif
+//          }
 
           else if ((strategy == "ff_global_shortest_trips") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {

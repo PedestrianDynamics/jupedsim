@@ -48,8 +48,10 @@
 #include <cfloat>
 #include <algorithm>
 #include "ffRouterTrips.h"
-//#include "FloorfieldViaFM.h"
+#include "FloorfieldViaFMTrips.h"
+#include "UnivFFviaFMTrips.h"
 //#include "../../geometry/Building.h"
+#include "../../geometry/WaitingArea.h"
 
 int FFRouterTrips::_cnt = 0;
 
@@ -85,7 +87,7 @@ FFRouterTrips::~FFRouterTrips()
           delete _globalFF;
      }
      //delete localffs
-     std::map<int, UnivFFviaFM*>::reverse_iterator delIter;
+     std::map<int, UnivFFviaFMTrips*>::reverse_iterator delIter;
      for (delIter = _locffviafm.rbegin();
           delIter != _locffviafm.rend();
           ++delIter) {
@@ -97,12 +99,15 @@ bool FFRouterTrips::Init(Building* building)
 {
      std::cout << "bool FFRouterTrips::Init(Building* building)" << std::endl;
      _building = building;
+
      if (_hasSpecificGoals) {
           std::vector<int> goalIDs;
           goalIDs.clear();
           //get global field to manage goals (which are not in a subroom)
-          _globalFF = new FloorfieldViaFM(building, 0.25, 0.25, 0.0, false, true);
+          _globalFF = new FloorfieldViaFMTrips(building, 0.25, 0.25, 0.0, false, true);
+          std::cout << std::endl;
           for (auto &itrGoal : building->GetAllGoals()) {
+               std::cout << "Goal ID: " << itrGoal.second->GetId() << std::endl;
                _globalFF->createMapEntryInLineToGoalID(itrGoal.first);
                goalIDs.emplace_back(itrGoal.first);
           }
@@ -119,6 +124,8 @@ bool FFRouterTrips::Init(Building* building)
      _CroTrByUID.clear();
      auto& allTrans = building->GetAllTransitions();
      auto& allCross = building->GetAllCrossings();
+     auto& allGoals = building->GetAllGoals();
+
      std::vector<std::pair<int, int>> roomAndCroTrVector;
      roomAndCroTrVector.clear();
      for (auto& pair:allTrans) {
@@ -142,6 +149,35 @@ bool FFRouterTrips::Init(Building* building)
                if (room1) roomAndCroTrVector.emplace_back(std::make_pair(room1->GetID(), pair.second->GetUniqueID()));
           }
      }
+     for (auto& goalMap : allGoals) {
+          Goal* goal = goalMap.second;
+          if (WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)) {
+               if (wa->isOpen()){
+                    int roomID;
+                    for (auto& room : _building->GetAllRooms()){
+                         for (auto& subroom : room.second->GetAllSubRooms()){
+                              if (subroom.second->IsInSubRoom(wa->GetCentroid())){
+                                   roomID = room.second->GetID();
+                              }
+                         }
+                    }
+
+                    for (const Wall wall : wa->GetAllWalls()) {
+                         int uid = wall.GetUniqueID();
+                         if (std::find(_allDoorUIDs.begin(), _allDoorUIDs.end(), uid) == _allDoorUIDs.end()) {
+                              _allDoorUIDs.emplace_back(uid);
+                              Crossing cross;
+                              cross.SetPoint1(wall.GetPoint1());
+                              cross.SetPoint2(wall.GetPoint2());
+                              cross.SetCaption(wa->GetCaption());
+                              _CroTrByUID.insert(std::make_pair(uid, &cross));
+                              roomAndCroTrVector.emplace_back(roomID, uid);
+                         }
+                    }
+               }
+          }
+     }
+
      //make unique
      std::sort(_allDoorUIDs.begin(), _allDoorUIDs.end());
      _allDoorUIDs.erase( std::unique(_allDoorUIDs.begin(),_allDoorUIDs.end()), _allDoorUIDs.end());
@@ -178,8 +214,8 @@ bool FFRouterTrips::Init(Building* building)
 
           auto pairRoomIt = allRooms.begin();
           std::advance(pairRoomIt, i);
-          UnivFFviaFM *locffptr = nullptr;
-          locffptr = new UnivFFviaFM(pairRoomIt->second.get(), building, 0.125, 0.0, false);
+          UnivFFviaFMTrips *locffptr = nullptr;
+          locffptr = new UnivFFviaFMTrips(pairRoomIt->second.get(), building, 0.125, 0.0, false);
 
           locffptr->setUser(DISTANCE_MEASUREMENTS_ONLY);
           locffptr->setMode(CENTERPOINT);
@@ -228,7 +264,7 @@ bool FFRouterTrips::Init(Building* building)
                     continue;
                }
 
-               UnivFFviaFM* locffptr = _locffviafm[rctIt->first];
+               UnivFFviaFMTrips* locffptr = _locffviafm[rctIt->first];
                double tempDistance = locffptr->getDistanceBetweenDoors(rctIt->second, otherDoor.second);
 
                if (tempDistance < locffptr->getGrid()->Gethx()) {
@@ -427,6 +463,7 @@ bool FFRouterTrips::ReInit()
 
 int FFRouterTrips::FindExit(Pedestrian* ped)
 {
+     std::cout << std::endl;
      std::cout << "Ped[" << ped->GetID() << "] in (" << ped->GetRoomID() << ", " << ped->GetSubRoomID()
                << "/" << ped->GetSubRoomUID() << "): " << std::endl;
      std::cout << "FinalDestination: " << ped->GetFinalDestination() << std::endl;

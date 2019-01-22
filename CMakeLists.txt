@@ -11,11 +11,13 @@
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 IF (POLICY CMP0054)
     cmake_policy(SET CMP0054 NEW)
 ENDIF (POLICY CMP0054)
+IF (POLICY CMP0077)
+    cmake_policy(SET CMP0077 OLD)
+ENDIF (POLICY CMP0077)
 
 project(JPScore LANGUAGES CXX)
 
@@ -32,6 +34,8 @@ else()
     set(JPSFIRE true)
 endif()
 
+message(STATUS "BUILD_TESTING01: " ${BUILD_TESTING})
+
 set(CMAKE_COLOR_MAKEFILE ON)
 set(JPSCORE_MAJOR_VERSION 0)
 set(JPSCORE_MINOR_VERSION 8)
@@ -42,7 +46,7 @@ message(STATUS "JPSCORE_VERSION: " ${JPSCORE_VERSION})
 add_definitions("-DJPSCORE_VERSION=\"${JPSCORE_VERSION}\"")
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
 "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(warnings "-Wall -Wextra -")
+    set(warnings "-Wall -Wextra")
     # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     set(warnings "/W4 /WX /EHsc")
@@ -55,7 +59,7 @@ endif ()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${warnings}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${warnings}")
 
-message(STATUS "!BUILD_TESTING: " ${BUILD_TESTING})
+message(STATUS "BUILD_TESTING02: " ${BUILD_TESTING})
 
 if (NOT BUILD_TESTING)
     set(BUILD_TESTING OFF) # test units & python tests are not generated.
@@ -72,45 +76,28 @@ if (NOT CMAKE_EXPORT_COMPILE_COMMANDS)
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif (NOT CMAKE_EXPORT_COMPILE_COMMANDS)
 
-# Get number of processors. Mac is not supported
-if (NOT DEFINED PROCESSOR_COUNT)
-# Unknown:
-set(PROCESSOR_COUNT 0)
-
-# Linux:
-set(cpuinfo_file "/proc/cpuinfo")
-if (EXISTS "${cpuinfo_file}")
-file(STRINGS "${cpuinfo_file}" procs REGEX "^processor.: [0-9]+$")
-list(LENGTH procs PROCESSOR_COUNT)
-endif (EXISTS "${cpuinfo_file}")
-
-# Windows:
-if (WIN32)
-set(PROCESSOR_COUNT "$ENV{NUMBER_OF_PROCESSORS}")
-endif (WIN32)
-endif (NOT DEFINED PROCESSOR_COUNT)
-
-if (PROCESSOR_COUNT)
-message( STATUS "PROCESSOR_COUNT: " ${PROCESSOR_COUNT})
-#  set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
-message(STATUS "PROCESSOR_COUNT: 1")
-
-set(CTEST_BUILD_FLAGS "-j0")
-endif (PROCESSOR_COUNT)
+set(CTEST_BUILD_FLAGS "-j")
 
 if (NOT CMAKE_BUILD_TYPE)
-#  set (CMAKE_BUILD_TYPE Release)
-set(CMAKE_BUILD_TYPE Debug)
+    #  set (CMAKE_BUILD_TYPE Release)
+    set(CMAKE_BUILD_TYPE Debug)
 endif (NOT CMAKE_BUILD_TYPE)
 message(STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE})
 if(NOT USE_DUAL_ABI)
-set (USE_DUAL_ABI FALSE)
+    set (USE_DUAL_ABI FALSE)
 endif()
 #------------------ set important directories --------------------
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
-set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
+if (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+endif()
+
+if(NOT EXECUTABLE_OUTPUT_PATH)
+  set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
+endif()
 set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib/${CMAKE_BUILD_TYPE})
 set(CMAKE_TEST_DIR ${CMAKE_SOURCE_DIR}/Utest)
+message(STATUS "BUILD_TESTING03: " ${BUILD_TESTING})
+
 # Debug messages
 message(STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR})
 message(STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR})
@@ -122,142 +109,134 @@ message(STATUS "")
 message(STATUS "Platform: ")
 message(STATUS "    Host: " ${CMAKE_HOST_SYSTEM_NAME} ${CMAKE_HOST_SYSTEM_VERSION} ${CMAKE_HOST_SYSTEM_PROCESSOR})
 if (CMAKE_CROSSCOMPILING)
-message(STATUS "    Target: " ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION} ${CMAKE_SYSTEM_PROCESSOR})
+    message(STATUS "    Target: " ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION} ${CMAKE_SYSTEM_PROCESSOR})
 endif ()
 message(STATUS "    CMake: " ${CMAKE_VERSION})
 message(STATUS "    CMake generator: " ${CMAKE_GENERATOR})
 message(STATUS "    CMake build tool: " ${CMAKE_BUILD_TOOL})
 if (MSVC)
-message(STATUS "    MSVC: " ${MSVC_VERSION})
+    message(STATUS "    MSVC: " ${MSVC_VERSION})
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ZLIB_WINAPI)
 endif ()
 if (CMAKE_GENERATOR MATCHES Xcode)
-message(STATUS "    Xcode: " ${XCODE_VERSION})
+    message(STATUS "    Xcode: " ${XCODE_VERSION})
 endif ()
 if (NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
-message(STATUS "    Configuration: " ${CMAKE_BUILD_TYPE})
+    message(STATUS "    Configuration: " ${CMAKE_BUILD_TYPE})
 endif ()
 message(STATUS "")
 
-# message( STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR} )
-# message( STATUS "CMAKE_RUNTIME_OUTPUT_DIRECTORY: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} )
-# message( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
-# message( STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE} )
-
-find_package(Git REQUIRED) # no need for this msg. It comes from cmake.findgit()
+find_package(Git QUIET) # no need for this msg. It comes from cmake.findgit()
 find_program(GIT_SCM git DOC "Git version control")
 mark_as_advanced(GIT_SCM)
 find_file(GITDIR NAMES .git PATHS ${CMAKE_SOURCE_DIR} NO_DEFAULT_PATH)
 if (GIT_SCM AND GITDIR)
-# the commit's SHA1, and whether the building workspace was dirty or not
-# describe --match=NeVeRmAtCh --always --tags --abbrev=40 --dirty
-execute_process(COMMAND
-"${GIT_EXECUTABLE}" --no-pager describe --tags --always --dirty
-WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-OUTPUT_VARIABLE GIT_SHA1
-ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    # the commit's SHA1, and whether the building workspace was dirty or not
+    # describe --match=NeVeRmAtCh --always --tags --abbrev=40 --dirty
+    execute_process(COMMAND
+    "${GIT_EXECUTABLE}" --no-pager describe --tags --always --dirty
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    OUTPUT_VARIABLE GIT_SHA1
+    ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-# branch
-execute_process(
-COMMAND "${GIT_EXECUTABLE}" rev-parse --abbrev-ref HEAD
-WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-OUTPUT_VARIABLE GIT_BRANCH
-OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+    # branch
+    execute_process(
+    COMMAND "${GIT_EXECUTABLE}" rev-parse --abbrev-ref HEAD
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    OUTPUT_VARIABLE GIT_BRANCH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 
-# the date of the commit
-execute_process(COMMAND
-"${GIT_EXECUTABLE}" log -1 --format=%ad --date=local
-WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-OUTPUT_VARIABLE GIT_DATE
-ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    # the date of the commit
+    execute_process(COMMAND
+    "${GIT_EXECUTABLE}" log -1 --format=%ad --date=local
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    OUTPUT_VARIABLE GIT_DATE
+    ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-# the subject of the commit
-execute_process(COMMAND
-"${GIT_EXECUTABLE}" log -1 --format=%s
-WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-OUTPUT_VARIABLE GIT_COMMIT_SUBJECT
-ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    # the subject of the commit
+    execute_process(COMMAND
+    "${GIT_EXECUTABLE}" log -1 --format=%s
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    OUTPUT_VARIABLE GIT_COMMIT_SUBJECT
+    ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+else()
+    message(STATUS "Not in a git repo")
+  endif()
+  string(REGEX REPLACE "\#"
+       "" GIT_COMMIT_SUBJECT
+       ${GIT_COMMIT_SUBJECT})
 
-
-
+# even if not in a git repository we need to define these
 add_definitions("-DGIT_COMMIT_HASH=\"${GIT_SHA1}\"")
 add_definitions("-DGIT_COMMIT_DATE=\"${GIT_DATE}\"")
 add_definitions("-DGIT_COMMIT_SUBJECT=\"${GIT_COMMIT_SUBJECT}\"")
 add_definitions("-DGIT_BRANCH=\"${GIT_BRANCH}\"")
-else()
-message(STATUS "Not in a git repo")
-endif()
-
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
-add_custom_target(doc
-${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-COMMENT "Generating API documentation with Doxygen" VERBATIM
-)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+    add_custom_target(doc
+            ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Generating API documentation with Doxygen" VERBATIM)
 endif (DOXYGEN_FOUND)
 #http://stackoverflow.com/questions/1487752/how-do-i-instruct-cmake-to-look-for-libraries-installed-by-macports
 if (APPLE)
-# Detect if the "port" command is valid on this system; if so, return full path
-execute_process(COMMAND which port RESULT_VARIABLE DETECT_MACPORTS OUTPUT_VARIABLE MACPORTS_PREFIX ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
-if (${DETECT_MACPORTS} EQUAL 0)
-# "/opt/local/bin/port" doesn't have libs, so we get the parent directory
-get_filename_component(MACPORTS_PREFIX ${MACPORTS_PREFIX} DIRECTORY)
-# "/opt/local/bin" doesn't have libs, so we get the parent directory
-get_filename_component(MACPORTS_PREFIX ${MACPORTS_PREFIX} DIRECTORY)
-# "/opt/local" is where MacPorts lives, add `/lib` suffix and link
-link_directories(${MACPORTS_PREFIX}/lib)
-message(STATUS "Macports detected: ${MACPORTS_PREFIX}/lib")
-# SET(CMAKE_SYSTEM_NAME Darwin)
-# # Add MacPorts
-# INCLUDE_DIRECTORIES(/opt/local/include)
+    # Detect if the "port" command is valid on this system; if so, return full path
+    execute_process(COMMAND which port RESULT_VARIABLE DETECT_MACPORTS OUTPUT_VARIABLE MACPORTS_PREFIX ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (${DETECT_MACPORTS} EQUAL 0)
+        # "/opt/local/bin/port" doesn't have libs, so we get the parent directory
+        get_filename_component(MACPORTS_PREFIX ${MACPORTS_PREFIX} DIRECTORY)
+        # "/opt/local/bin" doesn't have libs, so we get the parent directory
+        get_filename_component(MACPORTS_PREFIX ${MACPORTS_PREFIX} DIRECTORY)
+        # "/opt/local" is where MacPorts lives, add `/lib` suffix and link
+        link_directories(${MACPORTS_PREFIX}/lib)
+        message(STATUS "Macports detected: ${MACPORTS_PREFIX}/lib")
+        # SET(CMAKE_SYSTEM_NAME Darwin)
+        # # Add MacPorts
+        # INCLUDE_DIRECTORIES(/opt/local/include)
 
-# LINK_DIRECTORIES(/opt/local/lib)
+        # LINK_DIRECTORIES(/opt/local/lib)
 
-else ()
-# Recommendation, also add a "brew --prefix" custom command to detect a homebrew build environment
-execute_process(COMMAND brew --prefix RESULT_VARIABLE DETECT_BREW OUTPUT_VARIABLE BREW_PREFIX ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
-if (${DETECT_BREW} EQUAL 0)
-link_directories(${BREW_PREFIX}/lib)
-message(STATUS "Brew detected: ${BREW_PREFIX}")
-endif ()
-endif ()
-
-
+    else ()
+        # Recommendation, also add a "brew --prefix" custom command to detect a homebrew build environment
+        execute_process(COMMAND brew --prefix RESULT_VARIABLE DETECT_BREW OUTPUT_VARIABLE BREW_PREFIX ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if (${DETECT_BREW} EQUAL 0)
+            link_directories(${BREW_PREFIX}/lib)
+            message(STATUS "Brew detected: ${BREW_PREFIX}")
+        endif ()
+    endif ()
 endif (APPLE)
 
 
 
 if (Boost_NO_SYSTEM_PATHS)
-set(Boost_NO_SYSTEM_PATHS ON)
-set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
-set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/stage/lib")
-set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${BOOST_ROOT})
-set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${BOOST_LIBRARY_DIRS})
+    set(Boost_NO_SYSTEM_PATHS ON)
+    set(BOOST_INCLUDE_DIRS "${BOOST_ROOT}/include")
+    set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/stage/lib")
+    set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${BOOST_ROOT})
+    set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${BOOST_LIBRARY_DIRS})
 endif (Boost_NO_SYSTEM_PATHS)
 # in case boost is a non-default location
 # SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "C:/win32libs/boost")
 # SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "C:/win32libs/boost/lib")
-#find_package(Boost REQUIRED)
 
 
 # find the correct OpenMP flag
 FIND_PACKAGE(OpenMP)
 if (OPENMP_FOUND)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 else (OPENMP_FOUND)
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
-# somehow find_package(openmp) does not work properly with clang
-else (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-message(STATUS "Disabling OpenMP support")
-endif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+        # somehow find_package(openmp) does not work properly with clang
+    else (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        message(STATUS "Disabling OpenMP support")
+    endif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif (OPENMP_FOUND)
 
 #statically link all gcc stuffs
@@ -265,41 +244,44 @@ endif (OPENMP_FOUND)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 #boost
-find_package(Boost COMPONENTS timer chrono system filesystem unit_test_framework REQUIRED)
+if(MSVC)
+   find_package(Boost COMPONENTS  QUIET)
+else()
+   find_package(Boost COMPONENTS  REQUIRED)
 
+endif()
+
+message(STATUS "BUILD_TESTING0: " ${BUILD_TESTING})
 if(AIROUTER)
-#CGAL
-find_package(CGAL REQUIRED) # for AI router
+    #CGAL
+    find_package(CGAL REQUIRED) # for AI router
 endif()
 
 # test all cpp-files in Utest
 if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
-
-find_package(Boost COMPONENTS timer chrono system filesystem unit_test_framework REQUIRED)
-IF (CMAKE_COMPILER_IS_GNUCXX)
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
-IF (USE_DUAL_ABI)
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_USE_CXX11_ABI=0")
-ENDIF(USE_DUAL_ABI)
-set(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake_modules/")
-INCLUDE(CodeCoverage)
-set(ENABLE_COVERAGE ON)
-SETUP_TARGET_FOR_COVERAGE(
-cov  # Name for custom target.
-ctest         # Name of the test driver executable that runs the tests.
-# NOTE! This should always have a ZERO as exit code
-# otherwise the coverage generation will not complete.
-coverage            # Name of output directory.
-)
-
-endif (CMAKE_COMPILER_IS_GNUCXX)
-file(GLOB_RECURSE test_files "${CMAKE_TEST_DIR}/*.cpp")
-#  file(GLOB test_py_files "${CMAKE_TEST_DIR}/*/runtest*.py")
+        IF (CMAKE_COMPILER_IS_GNUCXX)
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
+    IF (USE_DUAL_ABI)
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_USE_CXX11_ABI=0")
+    ENDIF(USE_DUAL_ABI)
+        set(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
+        set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake_modules/")
+        INCLUDE(CodeCoverage)
+        set(ENABLE_COVERAGE ON)
+        SETUP_TARGET_FOR_COVERAGE(
+        cov  # Name for custom target.
+        ctest         # Name of the test driver executable that runs the tests.
+        # NOTE! This should always have a ZERO as exit code
+        # otherwise the coverage generation will not complete.
+        coverage            # Name of output directory.
+        )
+    endif (CMAKE_COMPILER_IS_GNUCXX)
+    file(GLOB_RECURSE test_files "${CMAKE_TEST_DIR}/*.cpp")
+    #  file(GLOB test_py_files "${CMAKE_TEST_DIR}/*/runtest*.py")
 endif (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
 if (BUILD_TESTING)
-file(GLOB_RECURSE test_py_files "${CMAKE_TEST_DIR}/*runtest_*.py")
+    file(GLOB_RECURSE test_py_files "${CMAKE_TEST_DIR}/*runtest_*.py")
 endif (BUILD_TESTING)
 
 # add sources and headers
@@ -307,10 +289,6 @@ set(source_files
 Simulation.cpp
 general/ArgumentParser.cpp
 IO/progress_bar.cpp
-tinyxml/tinystr.cpp
-tinyxml/tinyxml.cpp
-tinyxml/tinyxmlerror.cpp
-tinyxml/tinyxmlparser.cpp
 
 geometry/Building.cpp
 geometry/Line.cpp
@@ -369,10 +347,8 @@ routing/ff_router/UnivFFviaFM.cpp
 
 #floorfield
 routing/ff_router_trips/ffRouterTrips.cpp
-#routing/ff_router/LocalFloorfieldViaFM.cpp
-routing/ff_router_trips/FloorfieldViaFM.cpp
-#routing/ff_router/FFKit.cpp
-routing/ff_router_trips/UnivFFviaFM.cpp
+routing/ff_router_trips/FloorfieldViaFMTrips.cpp
+routing/ff_router_trips/UnivFFviaFMTrips.cpp
 
         #global_shortest
 routing/global_shortest/AccessPoint.cpp
@@ -417,13 +393,8 @@ routing/smoke_router/cognitiveMap/cogmapoutputhandler.cpp
 routing/smoke_router/cognitiveMap/landmarknetwork.cpp
 routing/smoke_router/Brain.cpp
 routing/smoke_router/cognitiveMap/internnavigationnetwork.cpp
-visiLibity/source_code/visilibity.cpp
 
-poly2tri/common/shapes.cpp
-poly2tri/sweep/sweep_context.cpp
-poly2tri/sweep/advancing_front.cpp
-poly2tri/sweep/sweep.cpp
-poly2tri/sweep/cdt.cpp
+
 events/EventManager.cpp
 events/Event.cpp
 
@@ -431,7 +402,7 @@ geometry/Trips.cpp
 routing/trips_router/TripsRouter.cpp
 
 forms/jpscore.rc
-math/KrauszModel.cpp )
+math/KrauszModel.cpp)
 
 set(THIRD_PARTY_SRC
   tinyxml/tinystr.cpp
@@ -471,7 +442,6 @@ JPSfire/B_walking_speed/WalkingSpeed.cpp
 JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
 JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
 )
-
 set(header_files
 
 #floorfield
@@ -487,10 +457,8 @@ routing/ff_router/UnivFFviaFM.h
 routing/ff_router_trips/ffRouterTrips.h
 routing/ff_router_trips/RectGrid.h
 routing/ff_router_trips/Trial.h
-#routing/ff_router/LocalFloorfieldViaFM.h
-routing/ff_router_trips/FloorfieldViaFM.h
-#routing/ff_router/FFKit.h
-routing/ff_router_trips/UnivFFviaFM.h
+routing/ff_router_trips/FloorfieldViaFMTrips.h
+routing/ff_router_trips/UnivFFviaFMTrips.h
 
 #general
 routing/DirectionStrategy.h
@@ -538,7 +506,6 @@ routing/smoke_router/cognitiveMap/cogmapoutputhandler.h
 routing/smoke_router/cognitiveMap/landmarknetwork.h
 routing/smoke_router/Brain.h
 routing/smoke_router/cognitiveMap/internnavigationnetwork.h
-visiLibity/source_code/visilibity.hpp
 
 pedestrian/Pedestrian.h
 pedestrian/PedDistributor.h
@@ -556,8 +523,6 @@ voronoi-boost/VoronoiPositionGenerator.h
 
 mpi/LCGrid.h
 
-tinyxml/tinyxml.h
-tinyxml/tinystr.h
 
 general/ArgumentParser.h
 general/Configuration.h
@@ -594,15 +559,6 @@ math/GradientModel.h
 math/VelocityModel.h
 math/OperationalModel.h
 
-
-
-poly2tri/poly2tri.h
-poly2tri/common/shapes.h
-poly2tri/sweep/cdt.h
-poly2tri/common/utils.h
-poly2tri/sweep/sweep_context.h
-poly2tri/sweep/advancing_front.h
-poly2tri/sweep/sweep.h
 events/EventManager.h
 events/Event.h
 
@@ -619,8 +575,8 @@ JPSfire/A_smoke_sensor/SmokeSensor.h
 JPSfire/B_walking_speed/WalkingSpeed.h
 JPSfire/C_toxicity_analysis/ToxicityAnalysis.h
 JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
-)
 
+)
 SET(AIROUTER_SRC
 #AI router
 routing/ai_router/AIRouter.cpp

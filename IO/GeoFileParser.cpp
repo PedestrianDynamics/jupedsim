@@ -476,8 +476,23 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                     return false;
                }
 
+
+//               for (auto& room : building->GetAllRooms()){
+//                    for (auto& subroomMap : room.second->GetAllSubRooms()){
+//                         std::cout << "check if wa " << wa->GetId() << " is in subroom " << subroomMap.second->GetSubRoomID() << std::endl;
+//                         std::cout << "wa centroid " << wa->GetCentroid().toString()  << std::endl;
+//
+//                         if (subroomMap.second->IsInSubRoom(wa->GetCentroid()) || subroomMap.second->GetSubRoomID() == 3){
+//                              subroomMap.second->AddGoalID(wa->GetId());
+//                         }
+//                    }
+//               }
+
                building->AddGoal(wa);
                _configuration->GetRoutingEngine()->AddFinalDestinationID(wa->GetId());
+               for (auto &itrGoal : building->GetAllGoals()) {
+                    std::cout << "Goal ID: " << itrGoal.second->GetId() << std::endl;
+               }
 
                std::cout << waitingArea->toString() << std::endl;
 

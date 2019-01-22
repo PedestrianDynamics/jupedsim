@@ -6,9 +6,12 @@
 #define _WAITINGAREA_H
 
 #include "Goal.h"
+#include "Line.h"
+
 #include <vector>
 #include <map>
 #include <stdio.h>
+
 class WaitingArea : public Goal{
 
 protected:
@@ -60,6 +63,8 @@ public:
     double getWaitingTime() const;
 
     void setWaitingTime(double waitingTime);
+
+    std::vector<Line> getAllLines();
 
 private:
     void updateProbabilities();

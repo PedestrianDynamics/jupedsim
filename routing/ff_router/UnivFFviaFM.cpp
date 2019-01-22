@@ -919,9 +919,9 @@ void UnivFFviaFM::drawLinesOnWall(Line& line, T* const target, const T value) { 
 } //drawLinesOnWall
 
 void UnivFFviaFM::calcFF(double* costOutput, Point* directionOutput, const double *const speed) {
-     //CompareCost comp = CompareCost(costOutput);
-     std::priority_queue<long int, std::vector<long int>, CompareCost> trialfield(costOutput); //pass the argument for the constr of CompareCost
-     //std::priority_queue<long int, std::vector<long int>, CompareCost> trialfield2(comp);      //pass the CompareCost object directly
+     //CompareCostTrips comp = CompareCostTrips(costOutput);
+     std::priority_queue<long int, std::vector<long int>, CompareCostTrips> trialfield(costOutput); //pass the argument for the constr of CompareCostTrips
+     //std::priority_queue<long int, std::vector<long int>, CompareCostTrips> trialfield2(comp);      //pass the CompareCostTrips object directly
 
      directNeighbor local_neighbor = _grid->getNeighbors(0);
      long int aux = 0;
@@ -1111,9 +1111,9 @@ void UnivFFviaFM::calcCost(const long int key, double* cost, Point* dir, const d
 }
 
 void UnivFFviaFM::calcDF(double* costOutput, Point* directionOutput, const double *const speed) {
-     //CompareCost comp = CompareCost(costOutput);
-     std::priority_queue<long int, std::vector<long int>, CompareCost> trialfield(costOutput); //pass the argument for the constr of CompareCost
-     //std::priority_queue<long int, std::vector<long int>, CompareCost> trialfield2(comp);      //pass the CompareCost object directly
+     //CompareCostTrips comp = CompareCostTrips(costOutput);
+     std::priority_queue<long int, std::vector<long int>, CompareCostTrips> trialfield(costOutput); //pass the argument for the constr of CompareCostTrips
+     //std::priority_queue<long int, std::vector<long int>, CompareCostTrips> trialfield2(comp);      //pass the CompareCostTrips object directly
 
      directNeighbor local_neighbor = _grid->getNeighbors(0);
      long int aux = 0;

@@ -33,6 +33,7 @@
 #include "SubRoom.h"
 #include "Transition.h"
 #include "Hline.h"
+#include "WaitingArea.h"
 
 
 #ifdef _SIMULATOR
@@ -1489,6 +1490,13 @@ std::vector<Point> SubRoom::StartLLCorner(const std::vector<Point> &polygon)
 
     return cwPolygon;
 
+}
+
+std::vector<WaitingArea*> SubRoom::GetAllWaitingAreas()
+{
+
+
+     return vector<WaitingArea*>();
 }
 
 /// Escalator
