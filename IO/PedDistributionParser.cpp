@@ -147,6 +147,9 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
                     "ERROR:\t Please specify which set of agents parameters (agent_parameter_id) to use for the group [%d]!",
                     group_id);
             Log->Write("ERROR:\t Default values are not implemented yet");
+
+            std::cout << "\n >> Exit with failure. See <" << _configuration->GetErrorLogFile() <<"> for details << \n";
+            exit(EXIT_FAILURE);
             return false;
         }
         dis->SetGroupParameters(_configuration->GetAgentsParameters().at(agent_para_id).get());
