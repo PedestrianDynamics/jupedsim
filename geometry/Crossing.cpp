@@ -36,8 +36,10 @@ Crossing::Crossing()
 {
      _id = -1;
      _isOpen=true;
-	 _doorUsage = 0;
-	 _lastPassingTime = 0;
+     _doorUsage = 0;
+     _maxDoorUsage = std::numeric_limits<int>::max();
+     _outflowRate = std::numeric_limits<double>::max();
+     _lastPassingTime = 0;
 }
 
 Crossing::~Crossing()
@@ -177,22 +179,50 @@ int Crossing::CommonSubroomWith(Crossing* other, SubRoom* &subroom) {
 
 void Crossing::IncreaseDoorUsage(int number, double time)
 {
-	_doorUsage += number;
-	_lastPassingTime = time;
-	_flowAtExit += to_string(time) + "  " + to_string(_doorUsage) + "\n";
+     _doorUsage += number;
+     _lastPassingTime = time;
+     _flowAtExit += to_string(time) + "  " + to_string(_doorUsage) + "\n";
+
+     if(_doorUsage >= _maxDoorUsage)
+     {
+          Log-> Write("INFO:\tClosing door %d. DoorUsage = %d (>= %d). Time=%.2f", GetID(), GetDoorUsage(), GetMaxDoorUsage(), time);
+          this->Close();
+     }
 }
 
 int Crossing::GetDoorUsage() const
 {
-	return _doorUsage;
+     return _doorUsage;
 }
+
+int Crossing::GetMaxDoorUsage() const
+{
+     return  _maxDoorUsage;
+}
+
+
+double Crossing::GetOutflowRate() const
+{
+     return _outflowRate;
+}
+
 
 double Crossing::GetLastPassingTime() const
 {
-	return _lastPassingTime;
+     return _lastPassingTime;
 }
 
 const std::string & Crossing::GetFlowCurve() const
 {
-	return _flowAtExit;
+     return _flowAtExit;
+}
+
+void Crossing::SetOutflowRate(double outflow)
+{
+     _outflowRate = outflow;
+}
+
+void Crossing::SetMaxDoorUsage(int mdu)
+{
+     _maxDoorUsage = mdu;
 }

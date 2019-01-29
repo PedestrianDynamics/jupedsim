@@ -24,7 +24,7 @@
  *
  *
  **/
- 
+
 
 #ifndef _CROSSING_H
 #define _CROSSING_H
@@ -45,9 +45,11 @@ private:
      //SubRoom* _subRoom1;
      //SubRoom* _subRoom2;
      bool _isOpen;
-	 int _doorUsage;
-	 double _lastPassingTime;
-	 std::string _flowAtExit;
+     int _doorUsage;
+     double _lastPassingTime;
+     double _outflowRate;
+     int _maxDoorUsage;
+     std::string _flowAtExit;
 
 public:
      // last ped that passed was in room {1,2} that many ticks
@@ -143,29 +145,50 @@ public:
       */
      virtual int CommonSubroomWith(Crossing* other, SubRoom* &subroom);
 
-	 /**
-	  * Increment the number of persons that used that crossing
-	  * @param number, how many person have passed the crossing
-	  * @param time, at which time
-	  */
-	 void IncreaseDoorUsage(int number, double time);
+     /**
+      * Increment the number of persons that used that crossing
+      * @param number, how many person have passed the crossing
+      * @param time, at which time
+      */
+     void IncreaseDoorUsage(int number, double time);
 
-	 /**
-	  * @return the number of pedestrians that used that crossing.
-	  */
-	 int GetDoorUsage() const;
+     /**
+      * @return the number of pedestrians that used that crossing.
+      */
+     int GetDoorUsage() const;
 
+     /**
+      * @return outflow rate of crossing/transition
+      */
+     double  GetOutflowRate() const;
 
-	 /**
-	  * @return the flow curve for this crossing
-	  */
-	 const std::string & GetFlowCurve() const;
+     /**
+      * @return max of number of agents that can pass crossing/transition
+      */
+     int  GetMaxDoorUsage() const;
 
-	 /**
-	  * @return the last time this crossing was crossed
-	  */
-	 double GetLastPassingTime() const;
+     /**
+      * set _maxDoorUsage
+      * @param max door usage
+      */
+     void SetMaxDoorUsage(int mdu);
+
+    /**
+     * set outflow rate
+     * @param outflow
+     *
+     */
+     void SetOutflowRate(double outflow);
+
+     /**
+      * @return the flow curve for this crossing
+      */
+     const std::string & GetFlowCurve() const;
+
+     /**
+      * @return the last time this crossing was crossed
+      */
+     double GetLastPassingTime() const;
 };
 
 #endif  /* _CROSSING_H */
-

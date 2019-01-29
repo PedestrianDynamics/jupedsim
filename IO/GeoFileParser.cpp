@@ -466,8 +466,8 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
 
                int id = xmltoi(xDoor->Attribute("trans_id"), -1);
                if (id!=-1) {
+                    //------------------ state
                     std::string state = xmltoa(xDoor->Attribute("state"), "open");
-
                     //store transition in a map and call getTransition/getCrossin
                     if (state=="open") {
                          building->GetTransition(id)->Open();
@@ -476,8 +476,21 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
                          building->GetTransition(id)->Close();
                     }
                     else {
-                         Log->Write("WARNING:\t Unknown door state: <%s>", state.c_str());
+                         Log->Write("WARNING:\t Unknown door state: <%s>. open or close. Default: open", state.c_str());
                     }
+                    //------------------ outflow
+                    double outflow = xmltof(xDoor->Attribute("outflow"), -1.0);
+                    if(outflow >= 0)
+                    {
+                         building->GetTransition(id)->SetOutflowRate(outflow);
+                    }
+                    //------------------ max door usage
+                    double mdu = xmltof(xDoor->Attribute("max_agents"), -1);
+                    if(mdu >= 0)
+                    {
+                         building->GetTransition(id)->SetMaxDoorUsage(mdu);
+                    }
+                    //------------------
                }
                else {
                     id = xmltoi(xDoor->Attribute("cross_id"), -1);
