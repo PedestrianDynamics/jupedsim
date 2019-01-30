@@ -23,6 +23,11 @@ TripsRouter::~TripsRouter()
 
 bool TripsRouter::Init(Building* building)
 {
+     Log->Write("TripsRouter::Init");
+
+
+     // Create Floorfield for each subroom
+          // If goal inside room, start wave from each edge to the outside
      return true;
 }
 
@@ -36,8 +41,6 @@ int TripsRouter::FindExit(Pedestrian* p)
      // Check if current position is already waiting area
      // yes: set next goal and return findExit(p)
 
-     p->SetExitIndex(17);
-     p->SetExitLine(0);
 
-     return 17;
+     return 0;
 }

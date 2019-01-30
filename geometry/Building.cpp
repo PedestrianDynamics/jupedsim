@@ -363,6 +363,7 @@ bool Building::InitGeometry()
           if (s2) s2->AddNeighbor(s1);
      }
 
+
      Log->Write("INFO: \tInit Geometry successful!!!\n");
 
      return true;

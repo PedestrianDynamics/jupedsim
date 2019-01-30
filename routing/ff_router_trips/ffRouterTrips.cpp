@@ -108,7 +108,11 @@ bool FFRouterTrips::Init(Building* building)
           std::cout << std::endl;
           for (auto &itrGoal : building->GetAllGoals()) {
                std::cout << "Goal ID: " << itrGoal.second->GetId() << std::endl;
-               _globalFF->createMapEntryInLineToGoalID(itrGoal.first);
+               if(WaitingArea* wa = dynamic_cast<WaitingArea*>(itrGoal.second)) {
+                    _globalFF->createMapEntryInLineToGoalID(itrGoal.first, true);
+               }else{
+                    _globalFF->createMapEntryInLineToGoalID(itrGoal.first, false);
+               }
                goalIDs.emplace_back(itrGoal.first);
           }
           _goalToLineUIDmap = _globalFF->getGoalToLineUIDmap();
@@ -470,10 +474,27 @@ int FFRouterTrips::FindExit(Pedestrian* ped)
 //     std::cout << "ExitLine: "  << ped->GetExitLine() << std::endl;
      std::cout << "ExitIndex: "  << ped->GetExitIndex() << std::endl << std::endl;
 
+     for (auto& goal : _goalToLineUIDmap){
+          std::cout << goal.first << " -> " << goal.second << std::endl;
+     }
+
+     SubRoom* subroom = _building->GetSubRoomByUID(ped->GetSubRoomUID());
+     Goal* goal = _building->GetFinalGoal(ped->GetFinalDestination());
+
+     int ret;
 
      // Check if current position is already waiting area
      // yes: set next goal and return findExit(p)
-     int ret = FindExit1(ped);
+     if (subroom->IsInSubRoom(goal->GetCentroid())){
+          std::cout << "Ped and Goal in same subroom: " << subroom->IsInSubRoom(goal->GetCentroid()) << std::endl;
+          int bestDoor = 31;
+          ped->SetExitIndex(bestDoor);
+          ped->SetExitLine(_CroTrByUID.at(bestDoor));
+
+     }else{
+          ret = FindExit1(ped);
+     }
+
 
      std::cout << "Ped[" << ped->GetID() << "] in (" << ped->GetRoomID() << ", " << ped->GetSubRoomID()
                << "/" << ped->GetSubRoomUID() << "): " << std::endl;
@@ -526,6 +547,7 @@ int FFRouterTrips::FindExit1(Pedestrian* p)
                validFinalDoor.emplace_back(_goalToLineUIDmap.at(goalID));
           }
      }
+
 
      std::vector<int> DoorUIDsOfRoom;
      DoorUIDsOfRoom.clear();
@@ -624,12 +646,12 @@ int FFRouterTrips::FindExit1(Pedestrian* p)
      }
 
      //at this point, bestDoor is either a crossing or a transition
-     if ((!_targetWithinSubroom) && (_CroTrByUID.count(bestDoor) != 0)) {
-          while (!_CroTrByUID[bestDoor]->IsTransition()) {
-               std::pair<int, int> key = std::make_pair(bestDoor, bestFinalDoor);
-               bestDoor = _pathsMatrix[key];
-          }
-     }
+//     if ((!_targetWithinSubroom) && (_CroTrByUID.count(bestDoor) != 0)) {
+//          while (!_CroTrByUID[bestDoor]->IsTransition()) {
+//               std::pair<int, int> key = std::make_pair(bestDoor, bestFinalDoor);
+//               bestDoor = _pathsMatrix[key];
+//          }
+//     }
 
 //#pragma omp critical(finalDoors)
 //     _finalDoors.emplace(std::make_pair(p->GetID(), bestFinalDoor));
