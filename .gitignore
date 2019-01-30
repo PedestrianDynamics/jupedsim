@@ -158,3 +158,14 @@ Win32/
 *.dir/
 *.user
 packages/
+/jpscore.srctrlbm
+/jpscore.srctrldb
+/jpscore.srctrlprj
+/jpscore2.srctrlbm
+/jpscore2.srctrldb
+/jpscore2.srctrlprj
+/test.py
+/threads.cpp
+/geometry.png
+/run.py
+/Utest/Validation/7test_BO/jpsreport_ini.xml

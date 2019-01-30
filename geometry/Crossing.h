@@ -45,10 +45,13 @@ private:
      //SubRoom* _subRoom1;
      //SubRoom* _subRoom2;
      bool _isOpen;
+     bool _temporaryClosed;
      int _doorUsage;
      double _lastPassingTime;
-     double _outflowRate;
+     double _outflowRate; // pedestrians / second
      int _maxDoorUsage;
+     double _closingTime; // time to wait until door is reopened
+
      std::string _flowAtExit;
 
 public:
@@ -189,6 +192,26 @@ public:
       * @return the last time this crossing was crossed
       */
      double GetLastPassingTime() const;
+
+     /**
+      * @return the time we should wait until the door is reopened
+      *
+      */
+     double GetClosingTime() const;
+
+     /**
+      *  @param dt: time to decrease the waiting time until door is reopened
+      */
+     void UpdateClosingTime(double dt);
+
+     bool isTemporaryClosed();
+     /**
+      * changes two private variables
+      * _temporaryClosed is false
+      * and _closingTime is 0
+      */
+     void changeTemporaryState();
+
 };
 
 #endif  /* _CROSSING_H */
