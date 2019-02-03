@@ -487,10 +487,12 @@ int FFRouterTrips::FindExit(Pedestrian* ped)
      // yes: set next goal and return findExit(p)
      if (subroom->IsInSubRoom(goal->GetCentroid())){
           std::cout << "Ped and Goal in same subroom: " << subroom->IsInSubRoom(goal->GetCentroid()) << std::endl;
-          int bestDoor = 31;
-          ped->SetExitIndex(bestDoor);
-          ped->SetExitLine(_CroTrByUID.at(bestDoor));
-
+          std::cout << "Ped Final Destination before: " << ped->GetFinalDestination() << std::endl;
+          if(WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)) {
+               ped->SetFinalDestination(wa->GetNextGoal());
+          }
+          std::cout << "Ped Final Destination after: " << ped->GetFinalDestination() << std::endl;
+          ret = FindExit1(ped);
      }else{
           ret = FindExit1(ped);
      }

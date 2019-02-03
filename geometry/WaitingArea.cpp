@@ -101,5 +101,18 @@ void WaitingArea::setWaitingTime(double waitingTime)
 
 std::vector<Line> WaitingArea::getAllLines()
 {
+}
+
+int WaitingArea::GetNextGoal()
+{
+     double random = std::rand()/RAND_MAX;
+     double cumProb = 0.;
+
+     for (auto& nextGoal : nextGoals){
+          cumProb += nextGoal.second;
+          if (random <= cumProb ){
+               return nextGoal.first;
+          }
+     }
 
 }

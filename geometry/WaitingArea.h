@@ -66,6 +66,8 @@ public:
 
     std::vector<Line> getAllLines();
 
+    int GetNextGoal();
+
 private:
     void updateProbabilities();
     bool checkProbabilities();
