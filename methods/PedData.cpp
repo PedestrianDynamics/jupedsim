@@ -29,7 +29,7 @@
 #include "PedData.h"
 #include <cmath>
 #include <string>
-
+#include <set>
 using std::string;
 using std::map;
 using std::vector;
@@ -47,6 +47,7 @@ PedData::~PedData()
 bool PedData::ReadData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& trajformat, int deltaF, std::string vComponent, const bool IgnoreBackwardMovement)
 {
      _minID = INT_MAX;
+     _maxID = INT_MAX;
      _minFrame = INT_MAX;
      _deltaF = deltaF;
      _vComponent = vComponent;
@@ -217,10 +218,13 @@ bool PedData::InitializeVariables(const string& filename)
           Log->Write("INFO:\t Finished reading the data");
 
      }
+
      fdata.close();
      Log->Write("INFO: Got %d lines", _IdsTXT.size());
      _minID = *min_element(_IdsTXT.begin(),_IdsTXT.end());
+     _maxID = *max_element(_IdsTXT.begin(),_IdsTXT.end());
      Log->Write("INFO: minID: %d", _minID);
+     Log->Write("INFO: maxID: %d", _maxID);
      _minFrame = *min_element(_FramesTXT.begin(),_FramesTXT.end());
      Log->Write("INFO: minFrame: %d", _minFrame);
      //Total number of frames
@@ -229,15 +233,19 @@ bool PedData::InitializeVariables(const string& filename)
 
      //Total number of agents
      std::vector<int> unique_ids = _IdsTXT;
-     // no need to
+
+    // no need to
      //sort. Assume that ids are ascendant
-     sort(unique_ids.begin(), unique_ids.end());
-     std::vector<int>::iterator it;
-     it = unique(unique_ids.begin(), unique_ids.end());
-     unique_ids.resize(distance(unique_ids.begin(),it));
+
+    std::set<int> s;
+    for( auto a: _IdsTXT )
+    {
+        s.insert( a );
+    }
+    unique_ids.assign( s.begin(), s.end() );
      _numPeds = unique_ids.size();
      Log->Write("INFO: Total number of Agents: %d", _numPeds);
-     CreateGlobalVariables(_numPeds, _numFrames);
+    CreateGlobalVariables(_numPeds, _numFrames);
      Log->Write("INFO: Create Global Variables done");
 
 
@@ -302,6 +310,8 @@ bool PedData::InitializeVariables(const string& filename)
           _xCor(ID,frm) = x;
           _yCor(ID,frm) = y;
           _zCor(ID,frm) = z;
+         //_IdsTXT[i]
+         //unique_ids
           if(_vComponent == "F")
           {
                _vComp(ID,frm) = vcmp[i];

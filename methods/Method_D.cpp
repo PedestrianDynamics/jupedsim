@@ -137,7 +137,7 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
           }
           vector<int> ids=_peds_t[frameNr];
           vector<int> IdInFrame = peddata.GetIdInFrame(frameNr, ids, zPos_measureArea);
-          vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids, zPos_measureArea);
+          //    vector<int> RealIdInFrame = peddata.GetRealIdInFrame(frameNr, ids, zPos_measureArea);
           vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids, zPos_measureArea);
           vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
           //vector int to_remove
