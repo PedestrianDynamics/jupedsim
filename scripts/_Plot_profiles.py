@@ -48,14 +48,15 @@ if __name__ == '__main__':
     print("geometry: X [%.1f, %.1f], Y=[%.1f, %.1f]" %
           (geominX, geomaxX, geominY, geomaxY))
 
-    density_files = os.path.join(
-        pathfile, "density", "*%s*%d.dat" %
-                             (nametraj, beginsteady))
+    density_files_path = os.path.join(pathfile, "density")
+    density_files = os.path.join(density_files_path,
+                                      "*%s*%d.dat"%(nametraj, beginsteady))
+
     print("looking for %s" % density_files)
     f_Voronoi = glob.glob(density_files)
     # get the shape of the matrices
-    if len(f_Voronoi) == 0:
-        sys.exit("no Voronoi files found in %s" % pathfile)
+    if not f_Voronoi:
+        sys.exit("%s: no Voronoi files found in %s" %(sys.argv[0], pathfile))
 
     shape = np.shape(np.loadtxt(f_Voronoi[0]))
     density = np.zeros(shape)
@@ -66,14 +67,14 @@ if __name__ == '__main__':
     ax1 = fig.add_subplot(111, aspect='1')
     plt.rc("font", size=40)
     for j in range(beginsteady, endsteady):
-        density_file = os.path.join(pathfile, "density", "Prf_d_%s_id_1_%.5d.dat" %(nametraj, j))
+        density_file = os.path.join(density_files_path, "Prf_d_%s_id_1_%.5d.dat" %(nametraj, j))
         if os.path.exists(density_file):
             print("loading: %s" % density_file)
             density += np.loadtxt(density_file)
-            
+
         else:
             print("WARNING: file not found %s"%density_file)
-        
+
 
     density = density / (endsteady - beginsteady)
 
@@ -98,8 +99,9 @@ if __name__ == '__main__':
     ax1 = fig.add_subplot(111, aspect='1')
     plt.rc("font", size=40)
     for j in range(beginsteady, endsteady):
-        velocity_file = os.path.join(
-            pathfile, "velocity", "Prf_v_%s_id_1_%.5d.dat" % (nametraj, j))
+        velocity_file_path = os.path.join(pathfile, "velocity")
+        velocity_file = os.path.join(velocity_file_path,
+                                     "Prf_v_%s_id_1_%.5d.dat" % (nametraj, j))
         if os.path.exists(velocity_file):
                 print("loading: %s" % velocity_file)
                 velocity += np.loadtxt(velocity_file)
@@ -137,10 +139,8 @@ if __name__ == '__main__':
     divider = make_axes_locatable(ax1)
     cax = divider.append_axes("right", size="2.5%", pad=0.3)
     cb = plt.colorbar(im, cax=cax)
-    cb.set_label('Specific flow [$1/m \cdot s$]')
-    figname = "%s/profile_flux_%s.png" % (pathfile, nametraj)
+    cb.set_label(r'Specific flow [$1/m \cdot s$]')
     flux_figname = os.path.join(pathfile, "profile_flux_%s.png" % nametraj)
-
     plt.savefig(flux_figname)
     plt.close()
 

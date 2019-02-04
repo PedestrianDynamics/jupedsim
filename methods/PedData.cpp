@@ -30,6 +30,7 @@
 #include <cmath>
 #include <string>
 #include <set>
+
 using std::string;
 using std::map;
 using std::vector;
@@ -43,8 +44,7 @@ PedData::~PedData()
 {
 
 }
-
-bool PedData::ReadData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& trajformat, int deltaF, std::string vComponent, const bool IgnoreBackwardMovement)
+bool PedData::ReadData(const fs::path& projectRootDir, const fs::path&outputLocation, const fs::path& path, const fs::path& filename, const FileFormat& trajformat, int deltaF, std::string vComponent, const bool IgnoreBackwardMovement)
 {
      _minID = INT_MAX;
      _maxID = INT_MAX;
@@ -53,22 +53,25 @@ bool PedData::ReadData(const string& projectRootDir, const string& path, const s
      _vComponent = vComponent;
      _IgnoreBackwardMovement=IgnoreBackwardMovement;
      _projectRootDir = projectRootDir;
+     _outputLocation = outputLocation;
      _trajName = filename;
-
-     string fullTrajectoriesPathName= path+ "/" +_trajName;
-     Log->Write("INFO:\tthe name of the trajectory is: <%s>",_trajName.c_str());
-     Log->Write("INFO:\tfull name of the trajectory is: <%s>",fullTrajectoriesPathName.c_str());
+     fs::path p(path);
+     p /= _trajName;
+     fs::path fullTrajectoriesPathName= path / _trajName;
+     Log->Write("INFO:\tthe name of the trajectory is: <%s>", _trajName.string().c_str());
+     Log->Write("INFO:\tfull name of the trajectory is: <%s>", fullTrajectoriesPathName.string().c_str());
      bool result=true;
      if(trajformat == FORMAT_XML_PLAIN)
      {
-          TiXmlDocument docGeo(fullTrajectoriesPathName);
+           TiXmlDocument docGeo(fullTrajectoriesPathName.string());
           if (!docGeo.LoadFile()) {
                Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
-               Log->Write("ERROR: \tcould not parse the trajectories file <%s>",fullTrajectoriesPathName.c_str());
+               Log->Write("ERROR: \tcould not parse the trajectories file <%s>",fullTrajectoriesPathName.string().c_str());
                return false;
           }
           TiXmlElement* xRootNode = docGeo.RootElement();
-          result=InitializeVariables(xRootNode);	//initialize some global variables
+          fs::path filename(xRootNode->ValueStr());
+          result=InitializeVariables(filename);	//initialize some global variables
      }
 
      else if(trajformat == FORMAT_PLAIN)
@@ -79,7 +82,7 @@ bool PedData::ReadData(const string& projectRootDir, const string& path, const s
 }
 
 // init _xCor, _yCor and _zCor
-bool PedData::InitializeVariables(const string& filename)
+bool PedData::InitializeVariables(const fs::path& filename)
 {
      vector<double> xs;
      vector<double> ys;
@@ -89,10 +92,10 @@ bool PedData::InitializeVariables(const string& filename)
      vector<int> _FramesTXT;  // the Frame data from txt format trajectory data
      //string fullTrajectoriesPathName= _projectRootDir+"./"+_trajName;
      ifstream  fdata;
-     fdata.open(filename.c_str());
+     fdata.open(filename.string());
      if (fdata.is_open() == false)
      {
-          Log->Write("ERROR: \t could not parse the trajectories file <%s>",filename.c_str());
+           Log->Write("ERROR: \t could not parse the trajectories file <%s>",filename.string().c_str());
           return false;
      }
      else
@@ -213,7 +216,7 @@ bool PedData::InitializeVariables(const string& filename)
           if(fps_found == 0)
           {
                Log->Write("ERROR:\tFrame rate fps not defined ");
-               exit(1);
+               exit(EXIT_FAILURE);
           }
           Log->Write("INFO:\t Finished reading the data");
 
@@ -789,7 +792,7 @@ float PedData::GetFps() const
      return _fps;
 }
 
-string PedData::GetTrajName() const
+fs::path PedData::GetTrajName() const
 {
      return _trajName;
 }
@@ -822,7 +825,12 @@ int* PedData::GetLastFrame() const
      return _lastFrame;
 }
 
-string PedData::GetProjectRootDir() const
+fs::path PedData::GetProjectRootDir() const
 {
      return _projectRootDir;
+}
+
+fs::path PedData::GetOutputLocation() const
+{
+     return _outputLocation;
 }

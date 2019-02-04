@@ -1,6 +1,27 @@
 # Change Log
 All notable changes to `jpsreport` will be documented in this file.
 
+## v0.8.4 [TBD]
+### Added
+
+- brew install [jpsreport](https://github.com/JuPedSim/homebrew-jps/blob/master/README.md)
+- added option --version -version 2e0632be
+- Option added to define a customized output directory
+  ```xml
+     <output location="path/to/directory"/>
+  ```
+
+### Changed
+- use c++17 for filesystem functionality !10
+- call python detected by cmake 5fb97f32
+
+
+### Fixed
+- Better handling negative frame id 5304efb8 
+- Fix for polygon output considering interior and exterior rings 361cffdd
+- Exit if no measurement area is selected cdf28328
+- Exit if no measurement method is selected cdf28328
+
 ## v0.8.3 [16.05.2018]
 ### Added
 - Option to output log in a file instead of the screen fe66fa49
