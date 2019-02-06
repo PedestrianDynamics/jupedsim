@@ -28,6 +28,9 @@ protected:
 
     double waitingTime = -1;
 
+    double startTime = -1;
+
+    int numPed = 0;
 protected:
 
     /**
@@ -67,6 +70,12 @@ public:
     std::vector<Line> getAllLines();
 
     int GetNextGoal();
+
+    void addPed();
+    void removePed();
+    void startTimer(double time);
+    int  getNumPed();
+    bool isWaiting(double time);
 
 private:
     void updateProbabilities();

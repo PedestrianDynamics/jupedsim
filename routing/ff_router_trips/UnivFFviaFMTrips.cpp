@@ -114,20 +114,20 @@ UnivFFviaFMTrips::UnivFFviaFMTrips(Room* roomArg, Configuration* const confArg, 
           }
 
 //          //save all waiting area walls in tmpdoors
-          for (auto& goalMap : goals){
-               Goal* goal = goalMap.second;
-               if(WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)) {
-                    std::cout << "Testing for subroom " << subRoomPtr->GetSubRoomID() << std::endl;
-                    if ((subRoomPtr->IsInSubRoom(wa->GetCentroid())) && (wa->isOpen())){
-                         for (const Wall wall : wa->GetAllWalls()){
-                              int uid = wall.GetUniqueID();
-                              if (tmpDoors.count(uid) == 0) {
-                                   tmpDoors.emplace(std::make_pair(uid, (Line) wall));
-                              }
-                         }
-                    }
-               }
-          }
+//          for (auto& goalMap : goals){
+//               Goal* goal = goalMap.second;
+//               if(WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)) {
+//                    std::cout << "Testing for subroom " << subRoomPtr->GetSubRoomID() << std::endl;
+//                    if ((subRoomPtr->IsInSubRoom(wa->GetCentroid())) && (wa->isOpen())){
+//                         for (const Wall wall : wa->GetAllWalls()){
+//                              int uid = wall.GetUniqueID();
+//                              if (tmpDoors.count(uid) == 0) {
+//                                   tmpDoors.emplace(std::make_pair(uid, (Line) wall));
+//                              }
+//                         }
+//                    }
+//               }
+//          }
 
           for (auto& door : tmpDoors){
                std::cout << "uid: " << door.first << " door: " << door.second.toString() << std::endl;

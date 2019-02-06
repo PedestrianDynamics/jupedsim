@@ -36,6 +36,8 @@
 #include "math/GradientModel.h"
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
+#include "geometry/WaitingArea.h"
+
 #ifdef _OPENMP
 
 #else
@@ -318,7 +320,7 @@ void Simulation::UpdateRoutesAndLocations()
                pedsToRemove.insert(ped);
           } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
                     && (goals.at(ped->GetFinalDestination())->Contains(
-                              ped->GetPos()))) {
+                              ped->GetPos()))&& (goals.at(ped->GetFinalDestination())->GetIsFinalGoal())) {
 #pragma omp critical(Simulation_Update_pedsToRemove)
                pedsToRemove.insert(ped);
           }

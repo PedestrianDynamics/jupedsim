@@ -363,12 +363,44 @@ bool Building::InitGeometry()
           if (s2) s2->AddNeighbor(s1);
      }
 
-
+     InitInsideGoals();
      Log->Write("INFO: \tInit Geometry successful!!!\n");
 
      return true;
 }
 
+bool Building::InitInsideGoals()
+{
+     for (auto& goalItr : _goals){
+          Goal* goal = goalItr.second;
+          for (auto& roomItr : _rooms){
+               Room* room = roomItr.second.get();
+               for (auto& subRoomItr : room->GetAllSubRooms()){
+                    SubRoom* subRoom = subRoomItr.second.get();
+                    if (subRoom->IsInSubRoom(goal->GetCentroid())){
+                         std::cout << "Goal " << goal->GetId() << " is in subroom " << subRoom->GetUID() << std::endl;
+                         Crossing* crossing = &(goal->GetCentreCrossing());
+                         subRoom->AddCrossing(crossing);
+                         crossing->SetRoom1(room);
+                         crossing->SetSubRoom1(subRoom);
+                         crossing->SetSubRoom2(subRoom);
+                         AddCrossing(crossing);
+
+                         for (auto& cross : subRoom->GetAllCrossings()){
+                              std::cout << "Crossing Subroom: " << cross->GetUniqueID() << std::endl;
+                         }
+
+                         for (auto& cross: _crossings){
+                              std::cout << "Crossing Building: " << cross.second->GetUniqueID() << std::endl;
+                         }
+
+                    }
+               }
+          }
+     }
+
+     return true;
+}
 bool Building::correct() const {
      auto t_start = std::chrono::high_resolution_clock::now();
      Log->Write("INFO:\tenter correct ...");

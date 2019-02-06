@@ -116,3 +116,39 @@ int WaitingArea::GetNextGoal()
      }
 
 }
+
+void WaitingArea::addPed()
+{
+     numPed++;
+}
+
+void WaitingArea::removePed()
+{
+     numPed--;
+}
+
+void WaitingArea::startTimer(double time)
+{
+     startTime = time;
+     std::cout << "Timer started at " << startTime << std::endl;
+}
+
+bool WaitingArea::isWaiting(double time)
+{
+     if ((numPed >= minNumPed) && (startTime < 0. )){
+          startTimer(time);
+     }
+
+     if ((time < startTime + waitingTime) || (startTime < 0. )){
+          std::cout << "Waiting ..." << std::endl;
+          return true;
+     }else{
+          std::cout << "Waiting over!" << std::endl;
+          return false;
+     }
+}
+
+int WaitingArea::getNumPed()
+{
+     return numPed;
+}

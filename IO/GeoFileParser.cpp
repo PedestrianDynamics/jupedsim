@@ -423,7 +423,7 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
 
                Goal* wa = new WaitingArea();
                WaitingArea* waitingArea = static_cast<WaitingArea*>(wa);
-               waitingArea->SetIsFinalGoal(1);
+               waitingArea->SetIsFinalGoal(0);
                waitingArea->SetId(id);
                waitingArea->SetCaption(caption);
                waitingArea->setOpen(open);
@@ -471,7 +471,7 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                     }
                }
 
-               if (!wa->ConvertLineToPoly()){
+               if (!waitingArea->ConvertLineToPoly()){
                     std::cout << "wa convertLineToPoly!";
                     return false;
                }
@@ -490,6 +490,8 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
 
                building->AddGoal(wa);
                _configuration->GetRoutingEngine()->AddFinalDestinationID(wa->GetId());
+
+
                for (auto &itrGoal : building->GetAllGoals()) {
                     std::cout << "Goal ID: " << itrGoal.second->GetId() << std::endl;
                }

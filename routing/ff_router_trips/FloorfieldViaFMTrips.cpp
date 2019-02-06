@@ -368,38 +368,42 @@ void FloorfieldViaFMTrips::createMapEntryInLineToGoalID(const int goalID, bool i
             long int dummykey;
 
             if (isInside) {
-                for (const auto& loccross : crossings) {
-                    std::cout << "Check crossing ID " << loccross.second->GetID() << " " << loccross.second->toString() << std::endl;
-                    if ( !loccross.second->IsOpen()) {
-                        continue;
-                    }
-                    dummykey = _grid->getKeyAtPoint(loccross.second->GetCentre());
-                    if ((cost_of_MIN>localcostptr[dummykey]) && (localcostptr[dummykey]>=0.)) {
-                        UID_of_MIN3 = UID_of_MIN2;
-                        cost_of_MIN3 = cost_of_MIN2;
-
-                        UID_of_MIN2 = UID_of_MIN;
-                        cost_of_MIN2 = cost_of_MIN;
-
-                        UID_of_MIN = loccross.second->GetUniqueID();
-                        cost_of_MIN = localcostptr[dummykey];
-                        std::cout << "Closer Line found: " << UID_of_MIN << std::endl;
-                        continue;
-                    }
-                    if ((cost_of_MIN2>localcostptr[dummykey]) && (localcostptr[dummykey]>=0.)) {
-                        UID_of_MIN3 = UID_of_MIN2;
-                        cost_of_MIN3 = cost_of_MIN2;
-
-                        UID_of_MIN2 = loccross.second->GetUniqueID();
-                        cost_of_MIN2 = localcostptr[dummykey];
-                        continue;
-                    }
-                    if ((cost_of_MIN3>localcostptr[dummykey]) && (localcostptr[dummykey]>=0.)) {
-                        UID_of_MIN3 = loccross.second->GetUniqueID();
-                        cost_of_MIN3 = localcostptr[dummykey];
-                        continue;
-                    }
-                }
+//                for (const auto& loccross : crossings) {
+//                    std::cout << "Check crossing ID " << loccross.second->GetID() << " " << loccross.second->toString() << std::endl;
+//                    if ( !loccross.second->IsOpen()) {
+//                        continue;
+//                    }
+//                    dummykey = _grid->getKeyAtPoint(loccross.second->GetCentre());
+//                    if ((cost_of_MIN>localcostptr[dummykey]) && (localcostptr[dummykey]>=0.)) {
+//                        UID_of_MIN3 = UID_of_MIN2;
+//                        cost_of_MIN3 = cost_of_MIN2;
+//
+//                        UID_of_MIN2 = UID_of_MIN;
+//                        cost_of_MIN2 = cost_of_MIN;
+//
+//                        UID_of_MIN = loccross.second->GetUniqueID();
+//                        cost_of_MIN = localcostptr[dummykey];
+//                        std::cout << "Closer Line found: " << UID_of_MIN << " " << cost_of_MIN << std::endl;
+//                        continue;
+//                    }
+//                    if ((cost_of_MIN2>localcostptr[dummykey]) && (localcostptr[dummykey]>=0.)) {
+//                        UID_of_MIN3 = UID_of_MIN2;
+//                        cost_of_MIN3 = cost_of_MIN2;
+//
+//                        UID_of_MIN2 = loccross.second->GetUniqueID();
+//                        cost_of_MIN2 = localcostptr[dummykey];
+//                        continue;
+//                    }
+//                    if ((cost_of_MIN3>localcostptr[dummykey]) && (localcostptr[dummykey]>=0.)) {
+//                        UID_of_MIN3 = loccross.second->GetUniqueID();
+//                        cost_of_MIN3 = localcostptr[dummykey];
+//                        continue;
+//                    }
+//
+//                    UID_of_MIN = 33;
+//
+//                }
+                UID_of_MIN = allgoals.at(goalID)->GetCentreCrossing().GetUniqueID();
             }
             else {
                 for (const auto& loctrans : transitions) {

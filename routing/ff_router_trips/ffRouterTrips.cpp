@@ -116,6 +116,11 @@ bool FFRouterTrips::Init(Building* building)
                goalIDs.emplace_back(itrGoal.first);
           }
           _goalToLineUIDmap = _globalFF->getGoalToLineUIDmap();
+
+          for (auto& tmp : _goalToLineUIDmap) {
+               std::cout << "Goal: " << tmp.first << " Crossing: " << tmp.second << std::endl;
+          }
+
           _goalToLineUIDmap2 = _globalFF->getGoalToLineUIDmap2();
           _goalToLineUIDmap3 = _globalFF->getGoalToLineUIDmap3();
           _globalFF->writeGoalFF("goal.vtk", goalIDs);
@@ -153,34 +158,34 @@ bool FFRouterTrips::Init(Building* building)
                if (room1) roomAndCroTrVector.emplace_back(std::make_pair(room1->GetID(), pair.second->GetUniqueID()));
           }
      }
-     for (auto& goalMap : allGoals) {
-          Goal* goal = goalMap.second;
-          if (WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)) {
-               if (wa->isOpen()){
-                    int roomID;
-                    for (auto& room : _building->GetAllRooms()){
-                         for (auto& subroom : room.second->GetAllSubRooms()){
-                              if (subroom.second->IsInSubRoom(wa->GetCentroid())){
-                                   roomID = room.second->GetID();
-                              }
-                         }
-                    }
-
-                    for (const Wall wall : wa->GetAllWalls()) {
-                         int uid = wall.GetUniqueID();
-                         if (std::find(_allDoorUIDs.begin(), _allDoorUIDs.end(), uid) == _allDoorUIDs.end()) {
-                              _allDoorUIDs.emplace_back(uid);
-                              Crossing cross;
-                              cross.SetPoint1(wall.GetPoint1());
-                              cross.SetPoint2(wall.GetPoint2());
-                              cross.SetCaption(wa->GetCaption());
-                              _CroTrByUID.insert(std::make_pair(uid, &cross));
-                              roomAndCroTrVector.emplace_back(roomID, uid);
-                         }
-                    }
-               }
-          }
-     }
+//     for (auto& goalMap : allGoals) {
+//          Goal* goal = goalMap.second;
+//          if (WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)) {
+//               if (wa->isOpen()){
+//                    int roomID;
+//                    for (auto& room : _building->GetAllRooms()){
+//                         for (auto& subroom : room.second->GetAllSubRooms()){
+//                              if (subroom.second->IsInSubRoom(wa->GetCentroid())){
+//                                   roomID = room.second->GetID();
+//                              }
+//                         }
+//                    }
+//
+//                    for (const Wall wall : wa->GetAllWalls()) {
+//                         int uid = wall.GetUniqueID();
+//                         if (std::find(_allDoorUIDs.begin(), _allDoorUIDs.end(), uid) == _allDoorUIDs.end()) {
+//                              _allDoorUIDs.emplace_back(uid);
+//                              Crossing cross;
+//                              cross.SetPoint1(wall.GetPoint1());
+//                              cross.SetPoint2(wall.GetPoint2());
+//                              cross.SetCaption(wa->GetCaption());
+//                              _CroTrByUID.insert(std::make_pair(uid, &cross));
+//                              roomAndCroTrVector.emplace_back(roomID, uid);
+//                         }
+//                    }
+//               }
+//          }
+//     }
 
      //make unique
      std::sort(_allDoorUIDs.begin(), _allDoorUIDs.end());
@@ -485,11 +490,18 @@ int FFRouterTrips::FindExit(Pedestrian* ped)
 
      // Check if current position is already waiting area
      // yes: set next goal and return findExit(p)
-     if (subroom->IsInSubRoom(goal->GetCentroid())){
+     if (goal->IsInsideGoal(ped->GetPos())){
           std::cout << "Ped and Goal in same subroom: " << subroom->IsInSubRoom(goal->GetCentroid()) << std::endl;
           std::cout << "Ped Final Destination before: " << ped->GetFinalDestination() << std::endl;
           if(WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)) {
-               ped->SetFinalDestination(wa->GetNextGoal());
+               //take the current time from the pedestrian
+               double t = Pedestrian::GetGlobalTime();
+
+               wa->addPed();
+
+               if (!wa->isWaiting(t)){
+                    ped->SetFinalDestination(wa->GetNextGoal());
+               }
           }
           std::cout << "Ped Final Destination after: " << ped->GetFinalDestination() << std::endl;
           ret = FindExit1(ped);

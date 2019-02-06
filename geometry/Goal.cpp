@@ -29,7 +29,7 @@
 #include "Point.h"
 #include "Goal.h"
 #include "Wall.h"
-
+#include "Crossing.h"
 
 using namespace std;
 
@@ -41,6 +41,7 @@ Goal::Goal()
      _isFinalGoal=0;
      _walls = vector<Wall > ();
      _poly = vector<Point > ();
+     _crossing = Crossing();
 }
 
 Goal::~Goal()
@@ -221,7 +222,29 @@ bool Goal::ConvertLineToPoly()
           return false;
      }
      _poly = tmpPoly;
-     ComputeControid();
+     CreateBoostPoly();
+     ComputeCentroid();
+
+     //compute dummy crossing in the middle
+     Point point1, point2, tmp, diff, diff1, diff2;
+     if (_poly.size() %2 == 0){
+          point1 = _poly[0];
+          tmp = _poly[_poly.size()/2];
+          diff = point1 - tmp;
+
+          point1 = tmp +  diff * 0.95;
+          point2 = tmp +  diff * 0.05;
+
+          _crossing.SetPoint1(point1);
+          _crossing.SetPoint2(point2);
+     }else{
+          _crossing.SetPoint1(_poly[0]);
+          Line line(_poly[_poly.size()/2], _poly[(_poly.size()/2)+1], 0);
+          _crossing.SetPoint2(line.GetCentre());
+     }
+
+
+     std::cout << "Crossing goal: " << _crossing.GetUniqueID() << _crossing.toString() << std::endl;
      return true;
 }
 
@@ -230,7 +253,7 @@ const Point& Goal::GetCentroid() const
      return _centroid;
 }
 
-void  Goal::ComputeControid()
+void  Goal::ComputeCentroid()
 {
 
      double px=0,py=0;
@@ -270,4 +293,53 @@ void  Goal::ComputeControid()
 
      _centroid._x=px;
      _centroid._y=py;
+}
+
+Crossing& Goal::GetCentreCrossing()
+{
+     return _crossing;
+}
+
+//bool Goal::IsInsideGoal(Pedestrian* ped) const
+//{
+//     return IsInsideGoal(ped->GetPos());
+//}
+
+bool Goal::IsInsideGoal(const Point& point) const
+{
+     return boost::geometry::within(point, _boostPoly);
+}
+
+bool Goal::CreateBoostPoly() {
+     std::vector<Point> copyPts;
+     copyPts.insert(copyPts.begin(), _poly.begin(), _poly.end());
+
+     if(!IsClockwise()){
+          std::reverse(copyPts.begin(), copyPts.end());
+     }
+
+     boost::geometry::assign_points(_boostPoly, _poly);
+
+     return true;
+}
+
+bool Goal::IsClockwise()
+{
+     //http://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order
+     if(_poly.size()<3) {
+          Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Obstacle ID [%d]",_id);
+          return false;
+          //exit(EXIT_FAILURE);
+     }
+     double sum = 0;
+     for (unsigned int i = 0; i < _poly.size() - 1; ++i) {
+          Point a = _poly[i];
+          Point b = _poly[i+1];
+          sum += (b._x - a._x) * (b._y + a._y);
+     }
+     Point first = _poly[0];
+     Point last = _poly[_poly.size()-1];
+     sum += (first._x - last._x) * (first._y + last._y);
+
+     return (sum > 0.);
 }

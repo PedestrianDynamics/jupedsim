@@ -187,6 +187,7 @@ public:
      // convenience methods
      bool InitGeometry();
 
+
      void InitGrid();
 
      //void InitRoomsAndSubroomsMap();
@@ -254,7 +255,10 @@ public:
      std::vector<Point> GetBoundaryVertices() const;
 
 private:
-     void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);
+
+    bool InitInsideGoals();
+
+    void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);
      /** @defgroup auto-correct-geometry
       * functions used to auto-correct the geometry.
       * Main function is correct()
