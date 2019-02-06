@@ -38,8 +38,8 @@ class SubRoom;
 
 class Crossing : public Hline {
 private:
-     /// TODO ? unique between crossings and transitions ?
-     int _id;
+//     /// TODO ? unique between crossings and transitions ?
+//     int _id;
      /// only one room needed, since a crossing only separates 2 subrooms
      //Room* _room1;
      //SubRoom* _subRoom1;
@@ -64,17 +64,17 @@ public:
       */
      virtual ~Crossing();
 
-     /**
-      * Set/Get the Id of the crossing
-      * TODO: do you really want to shadow ?
-      */
-     void SetID(int ID);
-
-     /**
-      * Set/Get the Id of the crossing
-      * TODO: do you really want to shadow ?
-      */
-     int GetID () const;
+//     /**
+//      * Set/Get the Id of the crossing
+//      * TODO: do you really want to shadow ?
+//      */
+//     void SetID(int ID);
+//
+//     /**
+//      * Set/Get the Id of the crossing
+//      * TODO: do you really want to shadow ?
+//      */
+//     int GetID () const;
 
      /**
       * Set/Get the second subroom

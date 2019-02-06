@@ -821,7 +821,7 @@ Room* Building::GetRoom(string caption) const
 bool Building::AddCrossing(Crossing* line)
 {
          int IDRoom = line->GetRoom1()->GetID();
-         int IDLine = line->GetID();
+         int IDLine = line->GetUniqueID();
          int IDCrossing = 1000 * IDRoom + IDLine;
          if (_crossings.count(IDCrossing) != 0)
          {

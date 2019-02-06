@@ -38,7 +38,7 @@ class Room;
 
 class Hline: public NavLine {
 
-private:
+protected:
      int _id;
      std::string _caption;
 

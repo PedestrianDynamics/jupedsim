@@ -12,6 +12,7 @@
 #include <map>
 #include <stdio.h>
 
+class Building;
 class WaitingArea : public Goal{
 
 protected:
@@ -30,7 +31,12 @@ protected:
 
     double startTime = -1;
 
-    int numPed = 0;
+    int transitionID = -1;
+public:
+    int getTransitionID() const;
+
+    void setTransitionID(int transitionID);
+
 protected:
 
     /**
@@ -42,6 +48,11 @@ protected:
      * Map of possible next goals/waiting areas (id) with corresponding probability
      */
     std::map<int, double> nextGoals;
+
+    /**
+     * Set of pedestrians who are currently in waiting area
+     */
+     std::set<int> pedInside;
 
 public:
 
@@ -71,11 +82,11 @@ public:
 
     int GetNextGoal();
 
-    void addPed();
-    void removePed();
+    void addPed(int ped);
+    void removePed(int ped);
     void startTimer(double time);
     int  getNumPed();
-    bool isWaiting(double time);
+    bool isWaiting(double time, const Building* building);
 
 private:
     void updateProbabilities();

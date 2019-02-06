@@ -41,7 +41,7 @@ Goal::Goal()
      _isFinalGoal=0;
      _walls = vector<Wall > ();
      _poly = vector<Point > ();
-     _crossing = Crossing();
+//     _crossing = Crossing();
 }
 
 Goal::~Goal()
@@ -72,6 +72,7 @@ int Goal::GetId() const
 void Goal::SetId(int id)
 {
      _id = id;
+     _crossing.SetID(id);
 }
 
 const vector<Point>& Goal::GetPolygon() const

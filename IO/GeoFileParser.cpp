@@ -419,6 +419,8 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                int min_peds = xmltoi(e->Attribute("min_peds"), -1);
                int max_peds = xmltoi(e->Attribute("max_peds"), -1);
                int waiting_time = xmltoi(e->Attribute("waiting_time"), -1);
+               int transition_id = xmltoi(e->Attribute("transition_id"), -1);
+
                std::string caption = xmltoa(e->Attribute("caption"), "-1");
 
                Goal* wa = new WaitingArea();
@@ -430,7 +432,7 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                waitingArea->setMinNumPed(min_peds);
                waitingArea->setMaxNumPed(max_peds);
                waitingArea->setWaitingTime(waiting_time);
-
+               waitingArea->setTransitionID(transition_id);
                std::map<int, double> nextGoals;
 
                trips.addGoal(wa->GetId());

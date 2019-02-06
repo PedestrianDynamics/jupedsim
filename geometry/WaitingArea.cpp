@@ -3,6 +3,7 @@
 //
 
 #include "WaitingArea.h"
+#include "Building.h"
 
 int WaitingArea::getMaxNumPed() const
 {
@@ -99,13 +100,10 @@ void WaitingArea::setWaitingTime(double waitingTime)
      WaitingArea::waitingTime = waitingTime;
 }
 
-std::vector<Line> WaitingArea::getAllLines()
-{
-}
-
 int WaitingArea::GetNextGoal()
 {
-     double random = std::rand()/RAND_MAX;
+     std::srand( (unsigned)time( NULL ) );
+     double random = ((double) std::rand() / (RAND_MAX));
      double cumProb = 0.;
 
      for (auto& nextGoal : nextGoals){
@@ -114,17 +112,16 @@ int WaitingArea::GetNextGoal()
                return nextGoal.first;
           }
      }
-
 }
 
-void WaitingArea::addPed()
+void WaitingArea::addPed(int ped)
 {
-     numPed++;
+     pedInside.insert(ped);
 }
 
-void WaitingArea::removePed()
+void WaitingArea::removePed(int ped)
 {
-     numPed--;
+     pedInside.erase(ped);
 }
 
 void WaitingArea::startTimer(double time)
@@ -133,22 +130,41 @@ void WaitingArea::startTimer(double time)
      std::cout << "Timer started at " << startTime << std::endl;
 }
 
-bool WaitingArea::isWaiting(double time)
+bool WaitingArea::isWaiting(double time, const Building* building)
 {
-     if ((numPed >= minNumPed) && (startTime < 0. )){
+     Transition* trans;
+     if (transitionID >= 0){
+          trans = building->GetTransition(transitionID);
+     }
+
+     if ((pedInside.size() >= minNumPed) && (startTime < 0. )){
           startTimer(time);
      }
 
-     if ((time < startTime + waitingTime) || (startTime < 0. )){
-          std::cout << "Waiting ..." << std::endl;
-          return true;
-     }else{
-          std::cout << "Waiting over!" << std::endl;
+     if ((time > startTime + waitingTime) && (startTime > 0. ) && (transitionID < 0)){
           return false;
      }
+
+     if ((startTime > 0. ) && (time > startTime + waitingTime) && (trans->IsOpen())){
+          std::cout << "Waiting ended" << std::endl;
+          return false;
+     }
+
+     std::cout << "Waiting ..." << std::endl;
+     return true;
 }
 
 int WaitingArea::getNumPed()
 {
-     return numPed;
+     return pedInside.size();
+}
+
+int WaitingArea::getTransitionID() const
+{
+     return transitionID;
+}
+
+void WaitingArea::setTransitionID(int transitionID)
+{
+     WaitingArea::transitionID = transitionID;
 }

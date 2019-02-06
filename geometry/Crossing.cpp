@@ -42,10 +42,10 @@ Crossing::~Crossing()
 {
 }
 
-void Crossing::SetID(int ID)
-{
-     _id = ID;
-}
+//void Crossing::SetID(int ID)
+//{
+//     _id = ID;
+//}
 
 //void Crossing::SetSubRoom2(SubRoom* r2)
 //{
@@ -54,10 +54,10 @@ void Crossing::SetID(int ID)
 
 // Getter-Funktionen
 
-int Crossing::GetID() const
-{
-     return _id;
-}
+//int Crossing::GetID() const
+//{
+//     return _id;
+//}
 
 //SubRoom* Crossing::GetSubRoom2() const
 //{

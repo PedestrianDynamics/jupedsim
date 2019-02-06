@@ -497,9 +497,9 @@ int FFRouterTrips::FindExit(Pedestrian* ped)
                //take the current time from the pedestrian
                double t = Pedestrian::GetGlobalTime();
 
-               wa->addPed();
+               wa->addPed(ped->GetID());
 
-               if (!wa->isWaiting(t)){
+               if (!wa->isWaiting(t, _building)){
                     ped->SetFinalDestination(wa->GetNextGoal());
                }
           }
