@@ -484,6 +484,19 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
                     {
                          building->GetTransition(id)->SetOutflowRate(outflow);
                     }
+                    //----------------- dt
+                    double DT = xmltof(xDoor->Attribute("dt"), -1.0);
+                    if(DT >= 0)
+                    {
+                         building->GetTransition(id)->SetDT(DT);
+                    }
+                    //----------------- dn
+                    double DN = xmltof(xDoor->Attribute("dn"), -1.0);
+                    if(DN >= 0)
+                    {
+                         building->GetTransition(id)->SetDN(DN);
+                    }
+
                     //------------------ max door usage
                     double mdu = xmltof(xDoor->Attribute("max_agents"), -1);
                     if(mdu >= 0)
