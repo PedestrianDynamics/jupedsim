@@ -406,6 +406,12 @@ void Simulation::PrintStatistics()
                     goal->GetLastPassingTime());
 
             string statsfile = _config->GetTrajectoriesFile()+"_flow_exit_id_"+to_string(goal->GetID())+".dat";
+            if(goal->GetOutflowRate() <  (std::numeric_limits<double>::max)())
+            {
+                 char tmp[50];
+                 sprintf(tmp, "%.2f", goal->GetOutflowRate());
+                 statsfile = _config->GetTrajectoriesFile()+"_flow_exit_id_"+to_string(goal->GetID())+"_rate_"+tmp+".dat";
+            }
             Log->Write("More Information in the file: %s", statsfile.c_str());
             auto output = new FileHandler(statsfile.c_str());
             output->Write("#Flow at exit "+goal->GetCaption()+"( ID "+to_string(goal->GetID())+" )");
@@ -497,6 +503,7 @@ double Simulation::RunBody(double maxSimTime)
     // main program loop
     while ((_nPeds || (!_agentSrcManager.IsCompleted()&& _gotSources) ) && t<maxSimTime) {
         t = 0+(frameNr-1)*_deltaT;
+
         //process the queue for incoming pedestrians
         ProcessAgentsQueue();
 
@@ -574,6 +581,7 @@ double Simulation::RunBody(double maxSimTime)
                   {
                        std::cout << KRED << " In simulation:" << Pedestrian::GetGlobalTime() << RESET << "\n";
                        Trans->changeTemporaryState();
+                       std::cerr << Trans->GetID() << "  " << Pedestrian::GetGlobalTime() << "  open   " << Trans->GetDoorUsage() << std::endl;
                   }
              }
 
@@ -686,8 +694,23 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
                 }
             }
 //#pragma omp critical
+
             trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
+            trans->IncreasePartialDoorUsage(1);
+            std::cout << KYEL << Pedestrian::GetGlobalTime() << "  " << trans->GetPartialDoorUsage() << "  " <<  trans->GetDN()<< "\n" << RESET;
+            // when <dn> agents pass <trans>, we start evaluating the flow
+            // .. and maybe close the <trans>
+            if( trans->GetPartialDoorUsage() ==  trans->GetDN() ) {
+                 std::cout << "Regulate flow at " << Pedestrian::GetGlobalTime() << "\n";
+                 std::cout << "dn = " << trans->GetDN() << "\n";
+
+                 trans->regulateFlow(Pedestrian::GetGlobalTime());
+                 trans->ResetPartialDoorUsage();
+                 getc(stdin);
+
+            }
         }
+
         Crossing* cross = _building->GetCrossingByUID(ped.GetExitIndex());
         if (cross) {
              cross->IncreaseDoorUsage(1, ped.GetGlobalTime());
