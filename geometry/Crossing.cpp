@@ -39,9 +39,15 @@ Crossing::Crossing()
      _temporaryClosed=false; // some doors have to be closed and opened again
                              // depending on _outflowRate.
      _doorUsage = 0;
-     _maxDoorUsage = std::numeric_limits<int>::max();
-     _outflowRate = std::numeric_limits<double>::max();
+     _maxDoorUsage = (std::numeric_limits<int>::max)(); //avoid name conflicts in windows winmindef.h
+     _outflowRate = (std::numeric_limits<double>::max)();
      _lastPassingTime = 0;
+     _lastFlowMeasurement = 0;
+     _DT = 1;
+     _DN = 1;
+     _partialDoorUsage = 0;
+     _closingTime = 0;
+
 }
 
 Crossing::~Crossing()
@@ -181,48 +187,31 @@ int Crossing::CommonSubroomWith(Crossing* other, SubRoom* &subroom) {
 
 void Crossing::IncreaseDoorUsage(int number, double time)
 {
-     double oldTime = _lastPassingTime;
+//     std::cout << "IncreaseDoorUsage with door " << GetID() << " status: " << _isOpen<< "  lastpassing " <<   _lastPassingTime << " time "<< time<<"\n";
      _doorUsage += number;
      _lastPassingTime = time;
      _flowAtExit += to_string(time) + "  " + to_string(_doorUsage) + "\n";
+}
 
-
-     double deltaTime =  _lastPassingTime - oldTime;
-     double flow = number/deltaTime;
-
-     if(flow >  _outflowRate)
-     {
-          // _outflowRate > flow (=number/deltaTime)
-          // _outflowRate = number/(deltaTime + t1)
-          // --> [1]
-
-           _closingTime = number / _outflowRate - deltaTime; //[1]
-           _temporaryClosed = true;
-          this->Close();
-          std::cout << KGRN  << "Closing transition " << GetID() <<  ". Closing time " <<  _closingTime <<"\n";
-          std::cout << "time: " << time << "\n";
-          std::cout << "last passing time " << oldTime << "\n";
-          std::cout << "delta time " <<  deltaTime << "\n";
-          std::cout << "door usage " << _doorUsage << std::endl;
-          std::cout << "\n ---> J = " << number/ deltaTime << std::endl ;
-          std::cout << "Max J " << _outflowRate << "\n" << RESET;
-     }
-
-     // close the door is mdu is reached
-     if(_doorUsage >= _maxDoorUsage)
-     {
-          std::cout << KGRN << "Closing door " << GetID() << "\n"<< RESET;
-
-
-          Log-> Write("INFO:\tClosing door %d. DoorUsage = %d (>= %d). Time=%.2f", GetID(), GetDoorUsage(), GetMaxDoorUsage(), time);
-          this->Close();
-     }
+void Crossing::IncreasePartialDoorUsage(int number)
+{
+     _partialDoorUsage += number;
+}
+void Crossing::ResetPartialDoorUsage()
+{
+     _partialDoorUsage = 0;
 }
 
 int Crossing::GetDoorUsage() const
 {
      return _doorUsage;
 }
+
+int Crossing::GetPartialDoorUsage() const
+{
+     return _partialDoorUsage;
+}
+
 
 int Crossing::GetMaxDoorUsage() const
 {
@@ -264,6 +253,8 @@ double Crossing::GetClosingTime() const
 void Crossing::UpdateClosingTime(double dt)
 {
      _closingTime -= dt;
+     // std::cout << "UPdateClosingTime for " << GetID() << ",  "<< _closingTime << "\n";
+     // std::cout << "Status: " << _isOpen << "\n";
 }
 
 bool Crossing::isTemporaryClosed()
@@ -271,11 +262,90 @@ bool Crossing::isTemporaryClosed()
      return  _temporaryClosed;
 }
 
+
+double Crossing::GetDT()
+{
+     return _DT;
+}
+
+void Crossing::SetDT(double dt)
+{
+     _DT = dt;
+}
+int Crossing::GetDN()
+{
+     return _DN;
+}
+
+void Crossing::SetDN(int dn)
+{
+     _DN = dn;
+}
+
+// changes:
+// - _lasFlowMeasurement
+// - _closingTime
+// - state of door (close/open)
+// - _temporaryClosed (false if maxDoorUsage is reached)
+void Crossing::regulateFlow(double time)
+{
+     double number = GetPartialDoorUsage();
+     double T = time -  _lastFlowMeasurement;
+     double flow =  number / T;
+     std::cout << KRED << "time " << time << std::endl;
+     std::cout << KRED << "lastFlowMeasurement " << _lastFlowMeasurement << std::endl;
+     std::cout << KRED << "closingTime " <<  _closingTime << std::endl;
+     std::cout << KRED << "T " << T << std::endl;
+     std::cout << KRED << "flow " << flow << RESET <<std::endl;
+     if(flow >  _outflowRate)
+     {
+          // _outflowRate > flow (=number/deltaTime)
+          // _outflowRate = number/(deltaTime + t1)
+          // --> [1]
+
+
+//---------------------------
+          _closingTime = number / _outflowRate -  T; //[1]
+           _temporaryClosed = true;
+          this->Close();
+//---------------------------
+          std::cout << GetID() << "  " << "  close   " << _doorUsage << "  " <<  GetPartialDoorUsage() << "  " <<  _lastFlowMeasurement << "  " << time <<   std::endl;
+          std::cout << KGRN  << "Closing transition " << GetID() <<  ". Closing time " <<  _closingTime <<"\n";
+          std::cout << "time: " << time << "   _lastFlowMeasurement: "<<_lastFlowMeasurement << "  Waiting time " <<  "\n";
+//          std::cout << "last passing time " << xoldTime << "\n";
+//          std::cout << "delta time " <<  deltaTime << "\n";
+          std::cout << "door usage " << _doorUsage << std::endl;
+          std::cout << "PartialDoorUsage " << number << "\n";
+          std::cout << "\n ---> J = " << flow << std::endl ;
+          std::cout << "Max J " << _outflowRate << "\n" << RESET;
+          std::cout <<  "Temporary state " << _temporaryClosed << std::endl;
+          // getc(stdin);
+
+     }
+     else{
+          std::cout << KYEL << GetID()<<  ": Nice Flow " << flow <<" max " <<  _outflowRate << "\n" << RESET;
+     }
+
+     // close the door is mdu is reached
+     if(_doorUsage >= _maxDoorUsage)
+     {
+          std::cerr << GetID() << "  " << time << "  CLOSE   " << _doorUsage << std::endl;
+
+
+          std::cout << KGRN << "Closing door " << GetID() << "because doorUsage " << _doorUsage << " > maxDoorUsage " << _maxDoorUsage << "\n"<< RESET;
+
+
+          Log-> Write("INFO:\tClosing door %d. DoorUsage = %d (>= %d). Time=%.2f", GetID(), GetDoorUsage(), GetMaxDoorUsage(), time);
+          this->Close();
+          _temporaryClosed = false;
+     }
+     _lastFlowMeasurement = time +  _closingTime;
+}
+
 void Crossing::changeTemporaryState()
 {
        _temporaryClosed = false;
        _closingTime = 0;
        this->Open();
-       std::cout << KRED<< ">> Open door for trans "<< GetID() << "\n" << RESET;
-
+       std::cout << KRED<< ">> ChangeTemporaryState Open door for trans "<< GetID() <<", " <<this->_lastPassingTime << "\n" << RESET;
 }

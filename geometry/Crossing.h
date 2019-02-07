@@ -51,6 +51,11 @@ private:
      double _outflowRate; // pedestrians / second
      int _maxDoorUsage;
      double _closingTime; // time to wait until door is reopened
+     double _DT; // flow observation time
+     int _DN; // number of pedestrians that pass the line to trigger measurement
+              // of the flow
+     int _partialDoorUsage; //door usage in _DT
+     double  _lastFlowMeasurement;
 
      std::string _flowAtExit;
 
@@ -154,7 +159,9 @@ public:
       * @param time, at which time
       */
      void IncreaseDoorUsage(int number, double time);
-
+     void IncreasePartialDoorUsage(int number);
+     void ResetPartialDoorUsage();
+     int GetPartialDoorUsage() const;
      /**
       * @return the number of pedestrians that used that crossing.
       */
@@ -211,6 +218,13 @@ public:
       * and _closingTime is 0
       */
      void changeTemporaryState();
+     double GetDT();
+     void SetDT(double dt);
+     int GetDN();
+     void SetDN(int dt);
+
+     void regulateFlow(double time);
+
 
 };
 
