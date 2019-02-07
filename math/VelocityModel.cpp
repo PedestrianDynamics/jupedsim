@@ -70,6 +70,8 @@ VelocityModel::~VelocityModel()
 
 bool VelocityModel::Init (Building* building)
 {
+
+     //FIXME really???
      if(auto dirff = dynamic_cast<DirectionFloorfield*>(_direction.get())){
         Log->Write("INFO:\t Init DirectionFloorfield starting ...");
         double _deltaH = building->GetConfig()->get_deltaH();
@@ -95,6 +97,15 @@ bool VelocityModel::Init (Building* building)
           bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
           dirsublocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
           Log->Write("INFO:\t Init DirectionSubLOCALFloorfield done");
+     }
+
+     if(auto dirsublocffTrips = dynamic_cast<DirectionSubLocalFloorfieldTrips*>(_direction.get())){
+          Log->Write("INFO:\t Init DirectionSubLOCALFloorfieldTrips starting ...");
+          double _deltaH = building->GetConfig()->get_deltaH();
+          double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
+          bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
+          dirsublocffTrips->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          Log->Write("INFO:\t Init DirectionSubLOCALFloorfieldTrips done");
      }
 
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();

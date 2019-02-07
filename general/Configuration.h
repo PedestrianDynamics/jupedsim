@@ -46,6 +46,7 @@
 class AgentsParameters;
 class DirectionSubLocalFloorfield;
 class DirectionLocalFloorfield;
+class DirectionSubLocalFloorfieldTrips;
 
 #ifdef _JPS_AS_A_SERVICE
 
@@ -287,12 +288,17 @@ public:
      int get_exit_strat() const {return _exit_strat;}
 
      void set_dirSubLocal(DirectionSubLocalFloorfield* dir) {_dirSubLocal = dir;}
-     void set_dirLocal(DirectionLocalFloorfield* dir) {_dirLocal = dir;}
 
-     DirectionSubLocalFloorfield* get_dirSubLocal() const {return _dirSubLocal;}
+    void set_dirLocal(DirectionLocalFloorfield* dir) {_dirLocal = dir;}
+
+    void set_dirSubLocalTrips(DirectionSubLocalFloorfieldTrips* dir) {_dirSubLocalTrips = dir;}
+
+    DirectionSubLocalFloorfield* get_dirSubLocal() const {return _dirSubLocal;}
      DirectionLocalFloorfield* get_dirLocal() const {return _dirLocal;}
 
-     const std::string& GetHostname() const { return _hostname; };
+    DirectionSubLocalFloorfieldTrips* get_dirSubLocalTrips() const {return _dirSubLocalTrips;}
+
+    const std::string& GetHostname() const { return _hostname; };
 
     void set_write_VTK_files_direction(bool write_VTK_files_direction) {_write_VTK_files_direction = write_VTK_files_direction;}
 
@@ -410,8 +416,10 @@ private:
      bool _write_VTK_files_direction;
 
      int _exit_strat;
+
      DirectionSubLocalFloorfield* _dirSubLocal;
      DirectionLocalFloorfield* _dirLocal;
+     DirectionSubLocalFloorfieldTrips* _dirSubLocalTrips;
 
      std::string _hostname;
      std::string _trajectoriesFile;

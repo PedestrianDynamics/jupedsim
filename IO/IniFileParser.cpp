@@ -1629,6 +1629,14 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                     };
                     _config->set_dirSubLocal(dynamic_cast<DirectionSubLocalFloorfield*>(_exit_strategy.get()));
                     break;
+               case 10:
+                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfieldTrips());
+                    if(!ParseFfOpts(strategyNode)) {
+                         return false;
+                    };
+                    _config->set_dirSubLocalTrips(dynamic_cast<DirectionSubLocalFloorfieldTrips*>(_exit_strategy.get()));
+                    break;
+
                default:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
                     Log->Write("ERROR:\t unknown exit_crossing_strategy <%d>", pExitStrategy);
