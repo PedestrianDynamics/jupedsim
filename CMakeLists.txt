@@ -180,6 +180,7 @@ set(methods
   methods/Method_B.cpp
   methods/Method_C.cpp
   methods/Method_D.cpp
+  methods/Method_I.cpp
   )
 set(source_files
   Analysis.cpp
@@ -211,6 +212,7 @@ set (  header_files
   methods/Method_B.h
   methods/Method_C.h
   methods/Method_D.h
+  methods/Method_I.h
   IO/OutputHandler.h
   general/ArgumentParser.h
   general/Macros.h
