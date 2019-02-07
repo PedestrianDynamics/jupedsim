@@ -403,7 +403,7 @@ void FloorfieldViaFMTrips::createMapEntryInLineToGoalID(const int goalID, bool i
 //                    UID_of_MIN = 33;
 //
 //                }
-                UID_of_MIN = allgoals.at(goalID)->GetCentreCrossing().GetUniqueID();
+                UID_of_MIN = allgoals.at(goalID)->GetCentreCrossing()->GetUniqueID();
             }
             else {
                 for (const auto& loctrans : transitions) {

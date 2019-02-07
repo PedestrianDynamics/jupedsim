@@ -379,7 +379,7 @@ bool Building::InitInsideGoals()
                     SubRoom* subRoom = subRoomItr.second.get();
                     if (subRoom->IsInSubRoom(goal->GetCentroid())){
                          std::cout << "Goal " << goal->GetId() << " is in subroom " << subRoom->GetUID() << std::endl;
-                         Crossing* crossing = &(goal->GetCentreCrossing());
+                         Crossing* crossing = goal->GetCentreCrossing();
                          subRoom->AddCrossing(crossing);
                          crossing->SetRoom1(room);
                          crossing->SetSubRoom1(subRoom);

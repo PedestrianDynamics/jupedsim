@@ -117,11 +117,18 @@ int WaitingArea::GetNextGoal()
 void WaitingArea::addPed(int ped)
 {
      pedInside.insert(ped);
+     if (pedInside.size() > maxNumPed){
+          open = false;
+     }
 }
 
 void WaitingArea::removePed(int ped)
 {
      pedInside.erase(ped);
+     if (pedInside.size() <= maxNumPed){
+          open = true;
+     }
+
 }
 
 void WaitingArea::startTimer(double time)
@@ -146,6 +153,11 @@ bool WaitingArea::isWaiting(double time, const Building* building)
      }
 
      if ((startTime > 0. ) && (time > startTime + waitingTime) && (trans->IsOpen())){
+          std::cout << "Waiting ended" << std::endl;
+          return false;
+     }
+
+     if ((waitingTime < 0. ) && (trans->IsOpen())){
           std::cout << "Waiting ended" << std::endl;
           return false;
      }
