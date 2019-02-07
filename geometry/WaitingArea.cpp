@@ -102,7 +102,6 @@ void WaitingArea::setWaitingTime(double waitingTime)
 
 int WaitingArea::GetNextGoal()
 {
-     std::srand( (unsigned)time( NULL ) );
      double random = ((double) std::rand() / (RAND_MAX));
      double cumProb = 0.;
 
