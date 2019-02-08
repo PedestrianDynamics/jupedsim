@@ -47,6 +47,7 @@ class AgentsParameters;
 class DirectionSubLocalFloorfield;
 class DirectionLocalFloorfield;
 class DirectionSubLocalFloorfieldTrips;
+class DirectionSubLocalFloorfieldTripsVoronoi;
 
 #ifdef _JPS_AS_A_SERVICE
 
@@ -129,6 +130,8 @@ public:
 
 	  //for random numbers
           _rdGenerator=RandomNumberGenerator();
+
+
      }
      std::shared_ptr<WalkingSpeed> GetWalkingSpeed () {return _walkingSpeed; };
      void SetWalkingSpeed(std::shared_ptr<WalkingSpeed> & w) {_walkingSpeed = w; };
@@ -293,10 +296,13 @@ public:
 
     void set_dirSubLocalTrips(DirectionSubLocalFloorfieldTrips* dir) {_dirSubLocalTrips = dir;}
 
+    void set_dirSubLocalTripsVoronoi(DirectionSubLocalFloorfieldTripsVoronoi* dir) {_dirSubLocalTripsVoronoi = dir;}
+
     DirectionSubLocalFloorfield* get_dirSubLocal() const {return _dirSubLocal;}
      DirectionLocalFloorfield* get_dirLocal() const {return _dirLocal;}
 
     DirectionSubLocalFloorfieldTrips* get_dirSubLocalTrips() const {return _dirSubLocalTrips;}
+    DirectionSubLocalFloorfieldTripsVoronoi* get_dirSubLocalTripsVoronoi() const {return _dirSubLocalTripsVoronoi;}
 
     const std::string& GetHostname() const { return _hostname; };
 
@@ -420,6 +426,7 @@ private:
      DirectionSubLocalFloorfield* _dirSubLocal;
      DirectionLocalFloorfield* _dirLocal;
      DirectionSubLocalFloorfieldTrips* _dirSubLocalTrips;
+     DirectionSubLocalFloorfieldTripsVoronoi* _dirSubLocalTripsVoronoi;
 
      std::string _hostname;
      std::string _trajectoriesFile;
