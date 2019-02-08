@@ -40,10 +40,7 @@ private:
      bool _isOpen;
      std::string _type;
      // number of agents that passed that exit
-     int _doorUsage;
-     double _lastPassingTime;
-     std::string _flowAtExit;
-
+     
 public:
      /**
       * Cosntructor
@@ -65,30 +62,7 @@ public:
       * The first one is set in the crossing class.
       */
      void SetRoom2(Room* ID);
-
-     /**
-      * Increment the number of persons that used that exit
-      * @param number, how many person have passed the door
-      * @param time, at which time
-      */
-     void IncreaseDoorUsage(int number, double time);
-
-     /**
-      * @return the number of pedestrians that used that exit.
-      */
-     int GetDoorUsage() const;
-
-
-     /**
-      * @return the flow curve for this exit
-      */
-     const std::string & GetFlowCurve() const;
-
-     /**
-      * @return the last time this door was crossed
-      */
-     double GetLastPassingTime() const;
-
+	    
      /**
       * Set/Get the type of the transition
       */

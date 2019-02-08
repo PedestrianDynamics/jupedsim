@@ -680,7 +680,8 @@ set_property(TARGET core PROPERTY CXX_STANDARD_REQUIRED ON)
 if(CMAKE_COMPILER_IS_GNUCXX)
   target_link_libraries(core thirdParty stdc++fs) # link to lib filesystem
 else()
-  message(WARNING "I don't know how to link filesystem with ${CMAKE_CXX_COMPILER_ID}")
+  target_link_libraries(core thirdParty)
+  #message(WARNING "I don't know how to link filesystem with ${CMAKE_CXX_COMPILER_ID}")
 endif()
 
 
@@ -941,7 +942,9 @@ message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
 endif (BUILD_TESTING)
 
 
-install(TARGETS jpscore DESTINATION bin)
+install(TARGETS jpscore
+        DESTINATION bin
+        COMPONENT applications)
 if(WIN32)
     set(CT_DATA_FILE_DIR "demos")
     file(GLOB CT_FILES "${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/*/*")
@@ -1008,7 +1011,7 @@ set(CPACK_COMPONENT_DATA_FILES_DESCRIPTION "demo files to get started")
 SET(CPACK_PACKAGE_DESCRIPTION "Simulation core of JuPedSim")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The simulation core of JuPedSim, a framework for simulation and analysis of pedestrian dynamics")
 SET(CPACK_PACKAGE_VENDOR "Forschungszentrum Juelich GmbH")
-SET(CPACK_PACKAGE_NAME "JuPedSim/JPScore")
+SET(CPACK_PACKAGE_NAME "jpscore")
 SET(CPACK_PACKAGE_CONTACT "m.chraibi@fz-juelich.de")
 SET(CPACK_PACKAGE_VERSION_MAJOR "${JPSCORE_MAJOR_VERSION}")
 SET(CPACK_PACKAGE_VERSION_MINOR "${JPSCORE_MINOR_VERSION}")

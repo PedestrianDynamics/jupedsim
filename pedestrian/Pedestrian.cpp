@@ -41,6 +41,15 @@ double Pedestrian::_globalTime = 0.0;
 int Pedestrian::_agentsCreated=1;
 double Pedestrian::_minPremovementTime = FLT_MAX;
 AgentColorMode Pedestrian::_colorMode=BY_VELOCITY;
+std::vector<int> colors = {
+     0,
+     255,
+     35,
+     127,
+     90,
+};
+
+
 
 Pedestrian::Pedestrian()
 {
@@ -1178,7 +1187,10 @@ int Pedestrian::GetColor() const
 
      case BY_GROUP:
      {
-          key = std::to_string(_group);
+          key = std::to_string(_group); // @todo find a better solution to get
+                                        // colors clearly distinguishable form
+                                        // each other
+          return(colors[_group%colors.size()]);
      }
      break;
 
@@ -1227,7 +1239,7 @@ bool Pedestrian::Relocate(std::function<void(const Pedestrian&)> flowupdater) {
                       //the agent left the old room
                       //actualize the egress time for that room
 #pragma omp critical(SetEgressTime)
-                     allRooms.at(GetRoomID())->SetEgressTime(GetGlobalTime()); //set Egresstime to old room //@todo: ar.graf : GetRoomID() yields NEW room
+                     allRooms.at(oldRoomID)->SetEgressTime(GetGlobalTime()); //set Egresstime to old room //@todo: ar.graf : GetRoomID() yields NEW room
                }
                status = true;
                break;

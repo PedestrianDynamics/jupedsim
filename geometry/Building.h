@@ -176,6 +176,8 @@ public:
       */
      Transition* GetTransitionByUID(int uid) const;
 
+	 Crossing* GetCrossingByUID(int uid) const;
+
      //TOD0: rename later to GetGoal
      Goal* GetFinalGoal(int id) const;
 

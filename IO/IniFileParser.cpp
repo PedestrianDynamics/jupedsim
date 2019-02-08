@@ -58,7 +58,7 @@ std::string ver_string(int a, int b, int c) {
 std::string true_cxx =
 #ifdef __clang__
       "clang++";
-#elif defined(__GNU__)
+#elif defined(__GNUC__)
 "g++";
 #elif defined(__MINGW32__)
    "MinGW";
@@ -72,7 +72,7 @@ std::string true_cxx =
 std::string true_cxx_ver =
 #ifdef __clang__
     ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__);
-#elif defined(__GNU__)
+#elif defined(__GNUC__)
     ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
 #elif defined(__MINGW32__)
 ver_string(__MINGW32__, __MINGW32_MAJOR_VERSION, __MINGW32_MINOR_VERSION);

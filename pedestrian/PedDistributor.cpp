@@ -121,8 +121,8 @@ bool PedDistributor::Distribute(Building *building) const {
                     {
                           if(fs::is_regular_file(p))
                           {
-                               std::string basename =  p.stem(); //
-                               std::string extention = p.extension();
+                               std::string basename =  p.stem().string(); //
+                               std::string extention = p.extension().string();
                                auto tmpPositions = GetPositionsFromFile(p.string(), dist->GetAgentsNumber(), unit);
                                //check if positions are
                                //empty. May happen if file

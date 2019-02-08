@@ -36,6 +36,18 @@ Crossing::Crossing()
 {
      _id = -1;
      _isOpen=true;
+     _temporaryClosed=false; // some doors have to be closed and opened again
+                             // depending on _outflowRate.
+     _doorUsage = 0;
+     _maxDoorUsage = (std::numeric_limits<int>::max)(); //avoid name conflicts in windows winmindef.h
+     _outflowRate = (std::numeric_limits<double>::max)();
+     _lastPassingTime = 0;
+     _lastFlowMeasurement = 0;
+     _DT = 1;
+     _DN = 1;
+     _partialDoorUsage = 0;
+     _closingTime = 0;
+
 }
 
 Crossing::~Crossing()
@@ -171,4 +183,153 @@ int Crossing::CommonSubroomWith(Crossing* other, SubRoom* &subroom) {
           subroom = _subRoom2;
      }
      return result;
+}
+
+void Crossing::IncreaseDoorUsage(int number, double time)
+{
+
+     _doorUsage += number;
+     _lastPassingTime = time;
+     _flowAtExit += to_string(time) + "  " + to_string(_doorUsage) + "\n";
+}
+
+void Crossing::IncreasePartialDoorUsage(int number)
+{
+     _partialDoorUsage += number;
+}
+void Crossing::ResetPartialDoorUsage()
+{
+     _partialDoorUsage = 0;
+}
+
+int Crossing::GetDoorUsage() const
+{
+     return _doorUsage;
+}
+
+int Crossing::GetPartialDoorUsage() const
+{
+     return _partialDoorUsage;
+}
+
+
+int Crossing::GetMaxDoorUsage() const
+{
+     return  _maxDoorUsage;
+}
+
+
+double Crossing::GetOutflowRate() const
+{
+     return _outflowRate;
+}
+
+
+double Crossing::GetLastPassingTime() const
+{
+     return _lastPassingTime;
+}
+
+const std::string & Crossing::GetFlowCurve() const
+{
+     return _flowAtExit;
+}
+
+void Crossing::SetOutflowRate(double outflow)
+{
+     _outflowRate = outflow;
+}
+
+void Crossing::SetMaxDoorUsage(int mdu)
+{
+     _maxDoorUsage = mdu;
+}
+
+double Crossing::GetClosingTime() const
+{
+     return _closingTime;
+}
+
+void Crossing::UpdateClosingTime(double dt)
+{
+     _closingTime -= dt;
+}
+
+bool Crossing::isTemporaryClosed()
+{
+     return  _temporaryClosed;
+}
+
+
+double Crossing::GetDT()
+{
+     return _DT;
+}
+
+void Crossing::SetDT(double dt)
+{
+     _DT = dt;
+}
+int Crossing::GetDN()
+{
+     return _DN;
+}
+
+void Crossing::SetDN(int dn)
+{
+     _DN = dn;
+}
+
+// changes:
+// - _lasFlowMeasurement
+// - _closingTime
+// - state of door (close/open)
+// - _temporaryClosed (false if maxDoorUsage is reached)
+void Crossing::regulateFlow(double time)
+{
+     double number = GetPartialDoorUsage();
+     double T = time -  _lastFlowMeasurement;
+     double flow =  number / T;
+     if(flow >  _outflowRate)
+     {
+          // _outflowRate > flow (=number/deltaTime)
+          // _outflowRate = number/(deltaTime + t1)
+          // --> [1]
+          //---------------------------
+          _closingTime = number / _outflowRate -  T; //[1]
+           _temporaryClosed = true;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          this->Close();
+          Log-> Write("INFO:\tClosing door %d. DoorUsage = %d (max = %d). Flow = %.2f (max =  %.2f) Time=%.2f", GetID(), GetDoorUsage(), GetMaxDoorUsage(), flow, _outflowRate, time);
+     }
+
+     // close the door is mdu is reached
+     if(_doorUsage >= _maxDoorUsage)
+     {
+          Log-> Write("INFO:\tClosing door %d. DoorUsage = %d (>= %d). Time=%.2f", GetID(), GetDoorUsage(), GetMaxDoorUsage(), time);
+          this->Close();
+          _temporaryClosed = false;
+     }
+     _lastFlowMeasurement = time +  _closingTime;
+}
+
+void Crossing::changeTemporaryState()
+{
+       _temporaryClosed = false;
+       _closingTime = 0;
+       this->Open();
 }

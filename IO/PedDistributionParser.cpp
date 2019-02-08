@@ -18,7 +18,7 @@
 //
 // Created by laemmel on 31.03.16.
 //
-
+#define NOMINMAX
 #include "PedDistributionParser.h"
 #include "../tinyxml/tinyxml.h"
 #include <cstdarg> // va_start and va_end
@@ -147,6 +147,9 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
                     "ERROR:\t Please specify which set of agents parameters (agent_parameter_id) to use for the group [%d]!",
                     group_id);
             Log->Write("ERROR:\t Default values are not implemented yet");
+
+            std::cout << "\n >> Exit with failure. See <" << _configuration->GetErrorLogFile() <<"> for details << \n";
+            exit(EXIT_FAILURE);
             return false;
         }
         dis->SetGroupParameters(_configuration->GetAgentsParameters().at(agent_para_id).get());
@@ -170,20 +173,74 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
             int group_id = xmltoi(e->Attribute("group_id"), -1);
             string caption = xmltoa(e->Attribute("caption"), "no caption");
             string str_greedy = xmltoa(e->Attribute("greedy"), "false");
+            float percent = xmltof(e->Attribute("percent"), 1);
+            float rate = xmltof(e->Attribute("rate"), 1);
             double time = xmltof(e->Attribute("time"), 0);
             int agent_id = xmltoi(e->Attribute("agent_id"), -1);
             float startx = xmltof(e->Attribute("startX"), std::numeric_limits<float>::quiet_NaN());
             float starty = xmltof(e->Attribute("startY"), std::numeric_limits<float>::quiet_NaN());
             bool greedy = (str_greedy == "true")?true:false;
+            float xmin =  xmltof(e->Attribute("x_min"), std::numeric_limits<float>::lowest());
+            float xmax =  xmltof(e->Attribute("x_max"), FLT_MAX);
+            float ymin =  xmltof(e->Attribute("y_min"), std::numeric_limits<float>::lowest());
+            float ymax =  xmltof(e->Attribute("y_max"), FLT_MAX);
+            float chunkAgents = xmltof(e->Attribute("N_create"), 1);
+            int timeMin = xmltof(e->Attribute("time_min"), std::numeric_limits<int>::min());
+            int timeMax = xmltof(e->Attribute("time_max"), std::numeric_limits<int>::max());
+            std::vector<float> boundaries = {xmin, xmax, ymin, ymax};
+            std::vector<int> lifeSpan = {timeMin, timeMax};
+            float SizeBB = 1;
+            bool isBigEnough = (abs(xmin-xmax) > SizeBB) && (abs(ymin-ymax) > SizeBB);
+            if(!isBigEnough )
+            {
+                 Log->Write("Warning: Source %d got too small bounding box.\n\t BB [Dx, Dy] should be such Dx>%.2f and Dy>%.2f. Ignoring BB!!", id, SizeBB, SizeBB);
+                 xmin = std::numeric_limits<float>::min();
+                 xmax = std::numeric_limits<float>::max();
+                 ymin = std::numeric_limits<float>::min();
+                 ymax = std::numeric_limits<float>::max();
+            }
+            if(timeMin > timeMax)
+            {
+                 Log->Write("Warning: Source %d given wrong life span. Assuming timeMin = timeMax.", id);
+                 timeMin = timeMax;
+            }
+            if(time > 0)
+            {
+                 timeMin = std::numeric_limits<int>::min();
+                 timeMax = std::numeric_limits<int>::max();
+                 Log->Write("Warning: Source %d. Planned time %d. Ignoring timeMin and timeMax (in case they are specified)", id, time);
+            }
             if (agent_id >= 0){
-              agents_max = 1;
-              frequency = 1;
+                 agents_max = 1;
+                 frequency = 1;
+            }
+            if(percent > 1)
+            {
+                 Log->Write("Warning: Source %d. Passed erronuous percent <%.2f>. Set percent=1", id, percent);
+                 percent = 1.0;
+            }
+            else if(percent < 0)
+            {
+                 Log->Write("Warning: Source %d. Passed erronuous percent <%.2f>. Set percent=0 (this source is kinda inactive)", id, percent);
+                 percent = 0.0;
             }
             auto source = std::shared_ptr<AgentsSource>(
-                    new AgentsSource(id, caption, agents_max, group_id,
-                                     frequency, greedy, time, agent_id, startx, starty));
+                 new AgentsSource(id,
+                                     caption,
+                                     agents_max,
+                                     group_id,
+                                     frequency,
+                                     greedy,
+                                     time,
+                                     agent_id,
+                                     startx,
+                                     starty,
+                                     percent,
+                                     rate,
+                                     chunkAgents,
+                                     boundaries,
+                                     lifeSpan));
             startDisSources.push_back(source);
-
             Log->Write("INFO:\tSource with id %d will be parsed (greedy = %d)!", id, greedy);
         }
     }
