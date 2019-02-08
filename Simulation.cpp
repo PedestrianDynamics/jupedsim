@@ -406,6 +406,12 @@ void Simulation::PrintStatistics()
                     goal->GetLastPassingTime());
 
             string statsfile = _config->GetTrajectoriesFile()+"_flow_exit_id_"+to_string(goal->GetID())+".dat";
+            if(goal->GetOutflowRate() <  (std::numeric_limits<double>::max)())
+            {
+                 char tmp[50];
+                 sprintf(tmp, "%.2f", goal->GetOutflowRate());
+                 statsfile = _config->GetTrajectoriesFile()+"_flow_exit_id_"+to_string(goal->GetID())+"_rate_"+tmp+".dat";
+            }
             Log->Write("More Information in the file: %s", statsfile.c_str());
             auto output = new FileHandler(statsfile.c_str());
             output->Write("#Flow at exit "+goal->GetCaption()+"( ID "+to_string(goal->GetID())+" )");
@@ -413,28 +419,28 @@ void Simulation::PrintStatistics()
             output->Write(goal->GetFlowCurve());
         }
     }
-	
-	Log->Write("\nUsage of Crossings");
-	Log->Write("==========");
-	for (const auto& itr : _building->GetAllCrossings()) {
-		Crossing* goal = itr.second;
-		if (goal->GetDoorUsage()) {
-			Log->Write(
-				"\nCrossing ID [%d] in Room ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",
-				goal->GetID(), itr.first/1000, goal->GetDoorUsage(),
-				goal->GetLastPassingTime());
 
-			string statsfile = _config->GetTrajectoriesFile() + "_flow_crossing_id_" 
-				+ to_string(itr.first/1000) + "_" + to_string(itr.first % 1000) +".dat";
-			Log->Write("More Information in the file: %s", statsfile.c_str());
-			auto output = new FileHandler(statsfile.c_str());
-			output->Write("#Flow at crossing " + goal->GetCaption() + "( ID " + to_string(goal->GetID()) 
-				+ " ) in Room ( ID "+ to_string(itr.first / 1000) + " )");
-			output->Write("#Time (s)  cummulative number of agents \n");
-			output->Write(goal->GetFlowCurve());
-		}
-	}
-	
+        Log->Write("\nUsage of Crossings");
+        Log->Write("==========");
+        for (const auto& itr : _building->GetAllCrossings()) {
+                Crossing* goal = itr.second;
+                if (goal->GetDoorUsage()) {
+                        Log->Write(
+                                "\nCrossing ID [%d] in Room ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",
+                                goal->GetID(), itr.first/1000, goal->GetDoorUsage(),
+                                goal->GetLastPassingTime());
+
+                        string statsfile = _config->GetTrajectoriesFile() + "_flow_crossing_id_"
+                                + to_string(itr.first/1000) + "_" + to_string(itr.first % 1000) +".dat";
+                        Log->Write("More Information in the file: %s", statsfile.c_str());
+                        auto output = new FileHandler(statsfile.c_str());
+                        output->Write("#Flow at crossing " + goal->GetCaption() + "( ID " + to_string(goal->GetID())
+                                + " ) in Room ( ID "+ to_string(itr.first / 1000) + " )");
+                        output->Write("#Time (s)  cummulative number of agents \n");
+                        output->Write(goal->GetFlowCurve());
+                }
+        }
+
     Log->Write("\n");
 }
 
@@ -497,6 +503,7 @@ double Simulation::RunBody(double maxSimTime)
     // main program loop
     while ((_nPeds || (!_agentSrcManager.IsCompleted()&& _gotSources) ) && t<maxSimTime) {
         t = 0+(frameNr-1)*_deltaT;
+
         //process the queue for incoming pedestrians
         ProcessAgentsQueue();
 
@@ -562,7 +569,24 @@ double Simulation::RunBody(double maxSimTime)
             }
         }
         #endif
-    }
+
+        // here open transition that should be closed
+        for (auto& itr: _building->GetAllTransitions())
+        {
+             Transition* Trans = itr.second;
+             if(Trans->isTemporaryClosed())
+             {
+                  Trans->UpdateClosingTime( _deltaT);
+                  if(Trans->GetClosingTime() <= _deltaT)
+                  {
+                       Trans->changeTemporaryState();
+                       Log-> Write("INFO:\tReset state of door %d,  Time=%.2f", Trans->GetID(), Pedestrian::GetGlobalTime());
+                  }
+             }
+
+
+        }
+    }// while time
     return t;
 }
 
@@ -669,12 +693,21 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
                 }
             }
 //#pragma omp critical
+
             trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
+            trans->IncreasePartialDoorUsage(1);
+            // when <dn> agents pass <trans>, we start evaluating the flow
+            // .. and maybe close the <trans>
+            if( trans->GetPartialDoorUsage() ==  trans->GetDN() ) {
+                 trans->regulateFlow(Pedestrian::GetGlobalTime());
+                 trans->ResetPartialDoorUsage();
+            }
         }
-		Crossing* cross = _building->GetCrossingByUID(ped.GetExitIndex());
-		if (cross) {
-			cross->IncreaseDoorUsage(1, ped.GetGlobalTime());
-		}
+
+        Crossing* cross = _building->GetCrossingByUID(ped.GetExitIndex());
+        if (cross) {
+             cross->IncreaseDoorUsage(1, ped.GetGlobalTime());
+        }
     }
 }
 

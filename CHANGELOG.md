@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 ## v0.8.4 [TBD]
 
 ### Added
+- Add new properties to doors #299, #295
+- Add new properties to sources !41 #298
 - Added homebrew [packages](https://github.com/JuPedSim/homebrew-jps/blob/master/README.md)
 - added function `correct` to fix sloppily drawn geometries !36
 - use cmake option `-D JPSFIRE=true` (default false) !33
