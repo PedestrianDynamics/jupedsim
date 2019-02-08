@@ -579,9 +579,8 @@ double Simulation::RunBody(double maxSimTime)
                   Trans->UpdateClosingTime( _deltaT);
                   if(Trans->GetClosingTime() <= _deltaT)
                   {
-                       std::cout << KRED << " In simulation:" << Pedestrian::GetGlobalTime() << RESET << "\n";
                        Trans->changeTemporaryState();
-                       std::cerr << Trans->GetID() << "  " << Pedestrian::GetGlobalTime() << "  open   " << Trans->GetDoorUsage() << std::endl;
+                       Log-> Write("INFO:\tReset state of door %d,  Time=%.2f", Trans->GetID(), Pedestrian::GetGlobalTime());
                   }
              }
 
@@ -697,17 +696,11 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
 
             trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
             trans->IncreasePartialDoorUsage(1);
-            std::cout << KYEL << Pedestrian::GetGlobalTime() << "  " << trans->GetPartialDoorUsage() << "  " <<  trans->GetDN()<< "\n" << RESET;
             // when <dn> agents pass <trans>, we start evaluating the flow
             // .. and maybe close the <trans>
             if( trans->GetPartialDoorUsage() ==  trans->GetDN() ) {
-                 std::cout << "Regulate flow at " << Pedestrian::GetGlobalTime() << "\n";
-                 std::cout << "dn = " << trans->GetDN() << "\n";
-
                  trans->regulateFlow(Pedestrian::GetGlobalTime());
                  trans->ResetPartialDoorUsage();
-                 getc(stdin);
-
             }
         }
 
