@@ -49,6 +49,9 @@ public:
 
 
      virtual Point GetTarget(Room* room, Pedestrian* ped) const = 0;
+     virtual double GetDistance2Wall(Pedestrian* ped) const;
+     virtual double GetDistance2Target(Pedestrian* ped, int UID);
+
 };
 
 class DirectionMiddlePoint : public DirectionStrategy {

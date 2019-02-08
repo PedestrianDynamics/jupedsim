@@ -105,9 +105,7 @@ bool FFRouterTrips::Init(Building* building)
           goalIDs.clear();
           //get global field to manage goals (which are not in a subroom)
           _globalFF = new FloorfieldViaFMTrips(building, 0.25, 0.25, 0.0, false, true);
-          std::cout << std::endl;
           for (auto &itrGoal : building->GetAllGoals()) {
-               std::cout << "Goal ID: " << itrGoal.second->GetId() << std::endl;
                if(WaitingArea* wa = dynamic_cast<WaitingArea*>(itrGoal.second)) {
                     _globalFF->createMapEntryInLineToGoalID(itrGoal.first, true);
                }else{
@@ -117,9 +115,6 @@ bool FFRouterTrips::Init(Building* building)
           }
           _goalToLineUIDmap = _globalFF->getGoalToLineUIDmap();
 
-          for (auto& tmp : _goalToLineUIDmap) {
-               std::cout << "Goal: " << tmp.first << " Crossing: " << tmp.second << std::endl;
-          }
 
           _goalToLineUIDmap2 = _globalFF->getGoalToLineUIDmap2();
           _goalToLineUIDmap3 = _globalFF->getGoalToLineUIDmap3();
@@ -358,9 +353,9 @@ bool FFRouterTrips::Init(Building* building)
 //     }
 //     matrixfile.close();
 
-     for (auto dist : _distMatrix){
-          std::cout << dist.first.first << "->" << dist.first.second << ": " << dist.second << std::endl;
-     }
+//     for (auto dist : _distMatrix){
+//          std::cout << dist.first.first << "->" << dist.first.second << ": " << dist.second << std::endl;
+//     }
 
      Log->Write("INFO: \tFF Router Init done.");
      return true;
@@ -472,16 +467,10 @@ bool FFRouterTrips::ReInit()
 
 int FFRouterTrips::FindExit(Pedestrian* ped)
 {
-     std::cout << std::endl;
-     std::cout << "Ped[" << ped->GetID() << "] in (" << ped->GetRoomID() << ", " << ped->GetSubRoomID()
-               << "/" << ped->GetSubRoomUID() << "): " << std::endl;
-     std::cout << "FinalDestination: " << ped->GetFinalDestination() << std::endl;
-//     std::cout << "ExitLine: "  << ped->GetExitLine() << std::endl;
-     std::cout << "ExitIndex: "  << ped->GetExitIndex() << std::endl << std::endl;
 
-     for (auto& goal : _goalToLineUIDmap){
-          std::cout << goal.first << " -> " << goal.second << std::endl;
-     }
+//     for (auto& goal : _goalToLineUIDmap){
+//          std::cout << goal.first << " -> " << goal.second << std::endl;
+//     }
 
      SubRoom* subroom = _building->GetSubRoomByUID(ped->GetSubRoomUID());
      Goal* goal = _building->GetFinalGoal(ped->GetFinalDestination());
@@ -491,8 +480,6 @@ int FFRouterTrips::FindExit(Pedestrian* ped)
      // Check if current position is already waiting area
      // yes: set next goal and return findExit(p)
      if (goal->IsInsideGoal(ped->GetPos())){
-          std::cout << "Ped and Goal in same subroom: " << subroom->IsInSubRoom(goal->GetCentroid()) << std::endl;
-          std::cout << "Ped Final Destination before: " << ped->GetFinalDestination() << std::endl;
           if(WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)) {
                //take the current time from the pedestrian
                double t = Pedestrian::GetGlobalTime();
@@ -503,27 +490,14 @@ int FFRouterTrips::FindExit(Pedestrian* ped)
                     ped->SetFinalDestination(wa->GetNextGoal());
                }
           }
-          std::cout << "Ped Final Destination after: " << ped->GetFinalDestination() << std::endl;
-          ret = FindExit1(ped);
-     }else{
-          ret = FindExit1(ped);
      }
 
-
-     std::cout << "Ped[" << ped->GetID() << "] in (" << ped->GetRoomID() << ", " << ped->GetSubRoomID()
-               << "/" << ped->GetSubRoomUID() << "): " << std::endl;
-     std::cout << "FinalDestination: " << ped->GetFinalDestination() << std::endl;
-//     std::cout << "ExitLine: "  << ped->GetExitLine() << std::endl;
-     std::cout << "ExitIndex: "  << ped->GetExitIndex() << std::endl;
-     std::cout << "===================================================="  << std::endl;
-
-     return ret;
+     return FindExit1(ped);
 }
 
 int FFRouterTrips::FindExit1(Pedestrian* p)
 {
 
-     std::cout << "------ FindExit1 ------" << std::endl;
      if (_mode == quickest) {
           if (p->GetGlobalTime() > _recalc_interval
                && _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->IsInSubRoom(p)
@@ -631,7 +605,7 @@ int FFRouterTrips::FindExit1(Pedestrian* p)
 //                   locDistToDoor = _config->get_dirLocal()->GetDistance2Target(p, doorUID);
 //               }
 //
-               locDistToDoor = _config->get_dirSubLocalTrips()->GetDistance2Target(p, doorUID);
+               locDistToDoor = _config->get_dirStrategy()->GetDistance2Target(p, doorUID);
 
 
                if (locDistToDoor < -J_EPS) {     //for old ff: //this can happen, if the point is not reachable and therefore has init val -7
@@ -678,7 +652,6 @@ int FFRouterTrips::FindExit1(Pedestrian* p)
           p->SetExitLine(_CroTrByUID.at(bestDoor));
      }
 
-     std::cout << "-----------------------" << std::endl << std::endl;
 
      return bestDoor; //-1 if no way was found, doorUID of best, if path found
 }

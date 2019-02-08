@@ -50,6 +50,16 @@ DirectionStrategy::DirectionStrategy()
 DirectionStrategy::~DirectionStrategy()
 {
 }
+
+double DirectionStrategy::GetDistance2Wall(Pedestrian* ped) const
+{
+     return -1.;
+}
+double DirectionStrategy::GetDistance2Target(Pedestrian* ped, int UID)
+{
+     return -1.;
+}
+
 /// 1
 Point DirectionMiddlePoint::GetTarget(Room* room, Pedestrian* ped) const
 {
@@ -724,14 +734,12 @@ Point DirectionSubLocalFloorfieldTripsVoronoi::GetTarget(Room* room, Pedestrian*
 
           Point p = p1 + p2 + p3;
 
-//          UnivFFviaFM* floorfield = _locffviafm.at(ped->GetSubRoomUID());
-//          floorfield->getDirectionToUID(ped->GetExitIndex(), ped->GetPos(),p);
-//          return (p + ped->GetPos());
           return p;
      } else {
           Point p;
           UnivFFviaFM* floorfield = _locffviafm.at(ped->GetSubRoomUID());
           floorfield->getDirectionToUID(ped->GetExitIndex(), ped->GetPos(),p);
+
           return (p + ped->GetPos());
 
      }

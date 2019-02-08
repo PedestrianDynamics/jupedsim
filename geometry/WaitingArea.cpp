@@ -133,7 +133,7 @@ void WaitingArea::removePed(int ped)
 void WaitingArea::startTimer(double time)
 {
      startTime = time;
-     std::cout << "Timer started at " << startTime << std::endl;
+//     std::cout << "Timer started at " << startTime << std::endl;
 }
 
 bool WaitingArea::isWaiting(double time, const Building* building)
@@ -152,16 +152,16 @@ bool WaitingArea::isWaiting(double time, const Building* building)
      }
 
      if ((startTime > 0. ) && (time > startTime + waitingTime) && (trans->IsOpen())){
-          std::cout << "Waiting ended" << std::endl;
+//          std::cout << "Waiting ended" << std::endl;
           return false;
      }
 
      if ((waitingTime < 0. ) && (trans->IsOpen())){
-          std::cout << "Waiting ended" << std::endl;
+//          std::cout << "Waiting ended" << std::endl;
           return false;
      }
 
-     std::cout << "Waiting ..." << std::endl;
+//     std::cout << "Waiting ..." << std::endl;
      return true;
 }
 

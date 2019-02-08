@@ -129,9 +129,9 @@ UnivFFviaFMTrips::UnivFFviaFMTrips(Room* roomArg, Configuration* const confArg, 
 //               }
 //          }
 
-          for (auto& door : tmpDoors){
-               std::cout << "uid: " << door.first << " door: " << door.second.toString() << std::endl;
-          }
+//          for (auto& door : tmpDoors){
+//               std::cout << "uid: " << door.first << " door: " << door.second.toString() << std::endl;
+//          }
 
           //find insidePoint and save it, together with UID
           Point normalVec = anyDoor.NormalVec();
