@@ -121,11 +121,18 @@ public:
      /// nice formating of the point
      std::string toString() const;
 
+    bool operator<(const Point& rhs) const;
 
-     /**
-      * @param [in/out] ostream& : ostream to write the point as xml-format into
-      * @return the given ostream with point as xml-format written into
-      */
+    bool operator>(const Point& rhs) const;
+
+    bool operator<=(const Point& rhs) const;
+
+    bool operator>=(const Point& rhs) const;
+
+    /**
+     * @param [in/out] ostream& : ostream to write the point as xml-format into
+     * @return the given ostream with point as xml-format written into
+     */
      std::ostream& SaveToXml(std::ostream&) const;
 };
 

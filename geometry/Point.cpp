@@ -241,7 +241,82 @@ std::ostream& Point::SaveToXml(std::ostream& ostream) const
      return ostream;;
 }
 
+bool Point::operator<(const Point& rhs) const
+{
+     if( *this != *this || rhs != rhs )
+          return false;
+     if(_x < rhs._x)
+          return true;
+     else if(  ( _x == rhs._x )
+               && ( _y < rhs._y )  )
+          return true;
+     return false;
+
+//     if (_x<rhs._x)
+//          return true;
+//     else if (rhs._x<_x)
+//          return false;
+//     return _y<rhs._y;
+}
+
+bool Point::operator>(const Point& rhs) const
+{
+     return rhs<*this;
+}
+
+bool Point::operator<=(const Point& rhs) const
+{
+     return !(rhs<*this);
+}
+
+bool Point::operator>=(const Point& rhs) const
+{
+     return !(*this<rhs);
+}
+
 double Distance(const Point& point1, const Point& point2)
 {
      return boost::geometry::distance(point1, point2);
 }
+
+//bool operator == (const Point& point1, const Point& point2)
+//{ return (  ( point1.x() == point2.x() )
+//               && ( point1.y() == point2.y() )  ); }
+//bool operator != (const Point& point1, const Point& point2)
+//{ return !( point1 == point2 ); }
+//
+//
+//bool operator < (const Point& point1, const Point& point2)
+//{
+//     if( point1 != point1 || point2 != point2 )
+//          return false;
+//     if(point1.x() < point2.x())
+//          return true;
+//     else if(  ( point1.x() == point2.x() )
+//               && ( point1.y() < point2.y() )  )
+//          return true;
+//     return false;
+//}
+//bool operator > (const Point& point1, const Point& point2)
+//{
+//     if( point1 != point1 || point2 != point2 )
+//          return false;
+//     if( point1.x() > point2.x() )
+//          return true;
+//     else if(  ( point1.x() == point2.x() )
+//               && ( point1.y() > point2.y() )  )
+//          return true;
+//     return false;
+//}
+//bool operator >= (const Point& point1, const Point& point2)
+//{
+//     if( point1 != point1 || point2 != point2 )
+//          return false;
+//     return !( point1 < point2 );
+//}
+//bool operator <= (const Point& point1, const Point& point2)
+//{
+//     if( point1 != point1 || point2 != point2 )
+//          return false;
+//     return !( point1 > point2 );
+//}
