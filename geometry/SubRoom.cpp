@@ -1499,6 +1499,12 @@ std::vector<WaitingArea*> SubRoom::GetAllWaitingAreas()
      return vector<WaitingArea*>();
 }
 
+bool SubRoom::HasGoal(int id)
+{
+     return std::find(_goalIDs.begin(), _goalIDs.end(), id) != _goalIDs.end();
+}
+
+
 /// Escalator
 
 Escalator::Escalator(): Stair() {

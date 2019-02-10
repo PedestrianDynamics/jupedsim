@@ -397,6 +397,7 @@ public:
 
      std::vector<WaitingArea*> GetAllWaitingAreas();
 
+     bool HasGoal(int id);
 #ifdef _SIMULATOR
 
      virtual bool IsInSubRoom(Pedestrian* ped) const;
