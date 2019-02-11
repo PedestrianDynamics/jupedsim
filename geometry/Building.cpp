@@ -371,13 +371,26 @@ bool Building::InitGeometry()
 
 bool Building::InitInsideGoals()
 {
+     bool found = false;
      for (auto& goalItr : _goals){
           Goal* goal = goalItr.second;
+          if (goal->GetRoomID() == -1){
+               found == true;
+               std::cout << "Goal " << goal->GetId() << " is outside" << std::endl;
+               continue;
+          }
+
           for (auto& roomItr : _rooms){
                Room* room = roomItr.second.get();
+
+               if (goal->GetRoomID() != room->GetID()){
+                    continue;
+               }
+
                for (auto& subRoomItr : room->GetAllSubRooms()){
                     SubRoom* subRoom = subRoomItr.second.get();
-                    if (subRoom->IsInSubRoom(goal->GetCentroid())){
+
+                    if ((goal->GetSubRoomID() == subRoom->GetSubRoomID()) && (subRoom->IsInSubRoom(goal->GetCentroid()))){
                          std::cout << "Goal " << goal->GetId() << " is in subroom " << subRoom->GetUID() << std::endl;
                          Crossing* crossing = goal->GetCentreCrossing();
                          subRoom->AddCrossing(crossing);
@@ -385,18 +398,25 @@ bool Building::InitInsideGoals()
                          crossing->SetSubRoom1(subRoom);
                          crossing->SetSubRoom2(subRoom);
                          AddCrossing(crossing);
-
-                         for (auto& cross : subRoom->GetAllCrossings()){
-                              std::cout << "Crossing Subroom: " << cross->GetUniqueID() << std::endl;
-                         }
-
-                         for (auto& cross: _crossings){
-                              std::cout << "Crossing Building: " << cross.second->GetUniqueID() << std::endl;
-                         }
+                         found = true;
+                         break;
+//                         for (auto& cross : subRoom->GetAllCrossings()){
+//                              std::cout << "Crossing Subroom: " << cross->GetUniqueID() << std::endl;
+//                         }
+//
+//                         for (auto& cross: _crossings){
+//                              std::cout << "Crossing Building: " << cross.second->GetUniqueID() << std::endl;
+//                         }
 
                     }
                }
           }
+
+          if (!found){
+               Log->Write("Warning: \t Goal %d seems to have no subroom and is not outside, please check your input",
+                         goal->GetId());
+          }
+          found = false;
      }
 
      return true;

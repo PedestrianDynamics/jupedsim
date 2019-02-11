@@ -123,7 +123,9 @@ bool GeoFileParser::LoadGeometry(Building* building)
           for (TiXmlElement* xSubRoom = xRoom->FirstChildElement("subroom"); xSubRoom;
                xSubRoom = xSubRoom->NextSiblingElement("subroom")) {
 
-               std::string subroom_id = xmltoa(xSubRoom->Attribute("id"), "-1");
+//               std::string subroom_id = xmltoa(xSubRoom->Attribute("id"), "-1");
+               int subroom_id = xmltoi(xSubRoom->Attribute("id"), -1);
+
                std::string SubroomClosed = xmltoa(xSubRoom->Attribute("closed"), "0");
                std::string type = xmltoa(xSubRoom->Attribute("class"), "subroom");
 
@@ -188,7 +190,7 @@ bool GeoFileParser::LoadGeometry(Building* building)
                subroom->SetType(type);
                subroom->SetPlanEquation(A_x, B_y, C_z);
                subroom->SetRoomID(room->GetID());
-               subroom->SetSubRoomID(xmltoi(subroom_id.c_str(), -1));
+               subroom->SetSubRoomID(subroom_id);
 
                //static int p_id=1;
                //cout<<endl<<"wall polygon: "<< p_id++<<endl;
@@ -369,7 +371,7 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
      TiXmlNode* xGoalsNode = xRootNode->FirstChild("routing")->FirstChild("goals");
 
      if (xGoalsNode) {
-          Trips trips;
+//          Trips trips;
 
           for (TiXmlElement* e = xGoalsNode->FirstChildElement("goal"); e;
                e = e->NextSiblingElement("goal")) {
@@ -377,11 +379,15 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                int id = xmltoi(e->Attribute("id"), -1);
                int isFinal = std::string(e->Attribute("final"))=="true" ? true : false;
                std::string caption = xmltoa(e->Attribute("caption"), "-1");
+               int room_id = xmltoi(e->Attribute("room_id"), -1);
+               int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
 
                Goal* goal = new Goal();
                goal->SetId(id);
                goal->SetCaption(caption);
                goal->SetIsFinalGoal(isFinal);
+               goal->SetRoomID(room_id);
+               goal->SetSubRoomID(subroom_id);
 
                //looking for polygons (walls)
                for (TiXmlElement* xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
@@ -406,7 +412,7 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                building->AddGoal(goal);
                _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
 
-               trips.addGoal(goal->GetId());
+//               trips.addGoal(goal->GetId());
           }
 
 
@@ -420,6 +426,8 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                int max_peds = xmltoi(e->Attribute("max_peds"), -1);
                int waiting_time = xmltoi(e->Attribute("waiting_time"), -1);
                int transition_id = xmltoi(e->Attribute("transition_id"), -1);
+               int room_id = xmltoi(e->Attribute("room_id"), -1);
+               int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
 
                std::string caption = xmltoa(e->Attribute("caption"), "-1");
 
@@ -433,9 +441,12 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                waitingArea->setMaxNumPed(max_peds);
                waitingArea->setWaitingTime(waiting_time);
                waitingArea->setTransitionID(transition_id);
+               waitingArea->SetRoomID(room_id);
+               waitingArea->SetSubRoomID(subroom_id);
+
                std::map<int, double> nextGoals;
 
-               trips.addGoal(wa->GetId());
+//               trips.addGoal(wa->GetId());
 
                //looking for next_wa
                for (TiXmlElement* nextWa = e->FirstChildElement("next_wa"); nextWa;
@@ -443,9 +454,9 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                     int nextWaId = xmltoi(nextWa->Attribute("id"));
                     double nextWaP = xmltof(nextWa->Attribute("p"));
 
-                    EdgeProperty weight = EdgeProperty(-1, nextWaP);
-                    trips.addGoal(nextWaId);
-                    trips.addConnection(wa->GetId(), nextWaId, weight);
+//                    EdgeProperty weight = EdgeProperty(-1, nextWaP);
+//                    trips.addGoal(nextWaId);
+//                    trips.addConnection(wa->GetId(), nextWaId, weight);
 
                     nextGoals.insert(std::pair<int, double>(nextWaId, nextWaP));
                }
@@ -492,17 +503,9 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
 
                building->AddGoal(wa);
                _configuration->GetRoutingEngine()->AddFinalDestinationID(wa->GetId());
-
-
-               for (auto &itrGoal : building->GetAllGoals()) {
-                    std::cout << "Goal ID: " << itrGoal.second->GetId() << std::endl;
-               }
-
-               std::cout << waitingArea->toString() << std::endl;
-
           }
 //          building->AddTrip(trips);
-          _configuration->GetRoutingEngine()->AddTrip(trips);
+//          _configuration->GetRoutingEngine()->AddTrip(trips);
 
 
      }

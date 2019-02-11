@@ -42,6 +42,8 @@ Goal::Goal()
      _walls = vector<Wall > ();
      _poly = vector<Point > ();
      _crossing = new Crossing();
+     _roomID = -1;
+     _subRoomID = -1;
 }
 
 Goal::~Goal()
@@ -245,7 +247,7 @@ bool Goal::ConvertLineToPoly()
      }
 
 
-     std::cout << "Crossing goal: " << _crossing->GetUniqueID() << _crossing->toString() << std::endl;
+//     std::cout << "Crossing goal: " << _crossing->GetUniqueID() << _crossing->toString() << std::endl;
      return true;
 }
 
@@ -343,4 +345,24 @@ bool Goal::IsClockwise()
      sum += (first._x - last._x) * (first._y + last._y);
 
      return (sum > 0.);
+}
+
+int Goal::GetRoomID() const
+{
+     return _roomID;
+}
+
+void Goal::SetRoomID(int _roomID)
+{
+     Goal::_roomID = _roomID;
+}
+
+int Goal::GetSubRoomID() const
+{
+     return _subRoomID;
+}
+
+void Goal::SetSubRoomID(int _subRoomID)
+{
+     Goal::_subRoomID = _subRoomID;
 }

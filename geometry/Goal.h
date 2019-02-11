@@ -50,14 +50,21 @@ class Goal {
 protected:
      int _isFinalGoal;
      int _id;
-     Point _centroid;
-     std::string _caption;
-     std::vector<Wall> _walls;
-     std::vector<Point> _poly;
-     Crossing* _crossing;
+     int _roomID;
+     int _subRoomID;
 
-     polygon_type _boostPoly;
-     bool _inside;
+    Point _centroid;
+    std::string _caption;
+    std::vector<Wall> _walls;
+    std::vector<Point> _poly;
+    Crossing* _crossing;
+
+    polygon_type _boostPoly;
+    bool _inside;
+
+public:
+
+
 
 public:
      Goal();
@@ -140,7 +147,15 @@ public:
 //     bool IsInsideGoal(Pedestrian* ped) const;
 
      bool IsInsideGoal(const Point& point) const;
-     
+
+    int GetRoomID() const;
+
+    void SetRoomID(int _roomID);
+
+    int GetSubRoomID() const;
+
+    void SetSubRoomID(int _subRoomID);
+
 private:
     bool IsClockwise();
     bool CreateBoostPoly();
