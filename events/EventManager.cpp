@@ -61,15 +61,6 @@ EventManager::EventManager(Building *_b, unsigned int seed)
      _updateFrequency =1 ;//seconds
      _updateRadius =2;//meters
 
-     _file = fopen("../events/events.txt", "r");
-     if (!_file) {
-          Log->Write("INFO:\tFiles 'events.txt' missing. "
-                    "Realtime interaction with the simulation not possible.");
-     } else {
-          Log->Write("INFO:\tFile 'events.txt' will be monitored for new events.");
-          _dynamic = true;
-     }
-
      //generate random number between 0 and 1 uniformly distributed
      _rdDistribution = std::uniform_real_distribution<double> (0,1);
      //std::random_device rd;
@@ -103,6 +94,23 @@ bool EventManager::ReadEventsXml()
      }
 
      TiXmlElement* xMainNode = doc.RootElement();
+
+     string realtimefile;
+     if (xMainNode->FirstChild("event_realtime")) {
+          realtimefile = _projectRootDir
+                    + xMainNode->FirstChild("event_realtime")->FirstChild()->Value();
+          _file = fopen(realtimefile.c_str(), "r");
+          if (!_file) {
+               Log->Write("INFO:\tFiles '"+ realtimefile+ "' missing. "
+                          "Realtime interaction with the simulation not possible.");
+          } else {
+               Log->Write("INFO:\tFile '"+ realtimefile+ "' will be monitored for new events.");
+               _dynamic = true;
+          }
+     } else {
+          Log->Write("INFO: \tNo realtime events found");
+     }
+
      string eventfile = "";
      if (xMainNode->FirstChild("events_file")) {
           eventfile = _projectRootDir
@@ -112,6 +120,7 @@ bool EventManager::ReadEventsXml()
           Log->Write("INFO: \tNo events found");
           return true;
      }
+
 
      Log->Write("INFO: \tParsing the event file");
      TiXmlDocument docEvent(eventfile);
@@ -174,8 +183,8 @@ void EventManager::ReadEventsTxt(double time)
      char cstring[256];
      int lines = 0;
      do {
-          if (fgets(cstring, 30, _file) == NULL) {
-               Log->Write("WARNING: \tCould not read the event file");
+          if (fgets(cstring, 30, _file) == nullptr) {
+//               Log->Write("WARNING: \tCould not read the event file");
                return;
           }
           if (cstring[0] != '#') {// skip comments
@@ -525,6 +534,7 @@ void EventManager::ProcessEvent()
 void EventManager::CloseDoor(int id)
 {
      Transition *t = _building->GetTransition(id);
+
      if (t->IsOpen())
      {
           t->Close();

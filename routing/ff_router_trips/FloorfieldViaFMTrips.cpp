@@ -331,7 +331,7 @@ void FloorfieldViaFMTrips::createMapEntryInLineToGoalID(const int goalID, bool i
                                     && (b._y>=yMin) && (b._y<=yMax)
                           ) {
                     localline.emplace_back(Line((Line) iwall));
-                    std::cout << "(Line) iwall : " << ((Line) iwall).toString() << std::endl;
+//                    std::cout << "(Line) iwall : " << ((Line) iwall).toString() << std::endl;
 
                 }
                 else {

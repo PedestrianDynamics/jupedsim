@@ -53,7 +53,6 @@ UnivFFviaFMTrips::UnivFFviaFMTrips(Room* r, Configuration* const conf, double hx
 UnivFFviaFMTrips::UnivFFviaFMTrips(Room* roomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallDistances, std::vector<int> wantedDoors, std::map<int, Goal*> goals) {
      //build the vector with walls(wall or obstacle), the map with <UID, Door(Cross or Trans)>, the vector with targets(UIDs)
      //then call other constructor including the mode
-     Log->Write("UnivFFviaFMTrips::UnivFFviaFMTrips(Room* roomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallDistances, std::vector<int> wantedDoors)\n");
      _configuration = confArg;
      _scope = FF_ROOM_SCALE;
      _room = roomArg->GetID();
@@ -169,8 +168,6 @@ UnivFFviaFMTrips::UnivFFviaFMTrips(SubRoom* sr, Configuration* const conf, doubl
 UnivFFviaFMTrips::UnivFFviaFMTrips(SubRoom* subRoomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallDistances, std::vector<int> wantedDoors, std::map<int, Goal*> goals) {
      //build the vector with walls(wall or obstacle), the map with <UID, Door(Cross or Trans)>, the vector with targets(UIDs)
      //then call other constructor including the mode
-
-     Log->Write("UnivFFviaFMTrips::UnivFFviaFMTrips(SubRoom* subRoomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallDistances, std::vector<int> wantedDoors))");
 
      _configuration = confArg;
      _scope = FF_SUBROOM_SCALE;

@@ -130,7 +130,7 @@ public:
       * @param ID of Crossing: int
       * @return Pointer of Crossing
       */
-     Crossing* GetCrossing(int ID);
+     Crossing* GetCrossing(int ID) const;
 
      /**
       * Not implemented

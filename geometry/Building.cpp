@@ -366,6 +366,10 @@ bool Building::InitGeometry()
      InitInsideGoals();
      Log->Write("INFO: \tInit Geometry successful!!!\n");
 
+     for (auto& transItr : _transitions){
+          Transition* trans = transItr.second;
+          std::cout << trans->GetID() << " is open " << trans->IsOpen() << std::endl;
+     }
      return true;
 }
 
@@ -418,6 +422,8 @@ bool Building::InitInsideGoals()
           }
           found = false;
      }
+
+     Log->Write("INFO: \tInitInsideGoals successful!!!\n");
 
      return true;
 }
@@ -954,10 +960,10 @@ Transition* Building::GetTransition(int ID) const //ar.graf: added const 2015-12
      }
 }
 
-Crossing* Building::GetCrossing(int ID)
+Crossing* Building::GetCrossing(int ID) const
 {
      if (_crossings.count(ID)==1) {
-          return _crossings[ID];
+          return _crossings.at(ID);
      }
      else {
           if (ID==-1)
