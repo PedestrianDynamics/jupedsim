@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 ## v0.8.4 [TBD]
 
 ### Added
+- Added waiting areas, waiting for certain time or till transition opens
+- Improve realtime event handling, new tag in ini <event_realtime> with commit 292b8381
 - Add new properties to doors #299, #295
 - Add new properties to sources !41 #298
 - Added homebrew [packages](https://github.com/JuPedSim/homebrew-jps/blob/master/README.md)
