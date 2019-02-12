@@ -35,6 +35,17 @@ void WaitingArea::setOpen(bool open)
      WaitingArea::open = open;
 }
 
+bool WaitingArea::isGlobalTimer() const
+{
+     return globalTimer;
+}
+
+void WaitingArea::setGlobalTimer(bool timer)
+{
+     WaitingArea::globalTimer = timer;
+}
+
+
 const std::map<int, double>& WaitingArea::getNextGoals() const
 {
      return nextGoals;
@@ -138,7 +149,7 @@ void WaitingArea::startTimer(double time)
 
 bool WaitingArea::isWaiting(double time, const Building* building)
 {
-     Transition* trans;
+     Transition* trans = nullptr;
      if (transitionID >= 0){
           trans = building->GetTransition(transitionID);
      }
@@ -147,18 +158,20 @@ bool WaitingArea::isWaiting(double time, const Building* building)
           startTimer(time);
      }
 
-     if ((time > startTime + waitingTime) && (startTime > 0. ) && (transitionID < 0)){
-          return false;
-     }
-
-     if ((startTime > 0. ) && (time > startTime + waitingTime) && (trans->IsOpen())){
-//          std::cout << "Waiting ended" << std::endl;
-          return false;
-     }
-
-     if ((waitingTime < 0. ) && (trans->IsOpen())){
-//          std::cout << "Waiting ended" << std::endl;
-          return false;
+     if ((trans == nullptr) ){
+          if (globalTimer){
+               if (time > waitingTime){
+                    return false;
+               }
+          }else{
+               if ((time > startTime + waitingTime) && (startTime > 0. )){
+                    return false;
+               }
+          }
+     }else{
+          if (trans->IsOpen()){
+               return false;
+          }
      }
 
 //     std::cout << "Waiting ..." << std::endl;

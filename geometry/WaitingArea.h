@@ -32,6 +32,9 @@ protected:
     double startTime = -1;
 
     int transitionID = -1;
+
+    bool globalTimer = false;
+
 public:
     int getTransitionID() const;
 
@@ -67,6 +70,10 @@ public:
     bool isOpen() const;
 
     void setOpen(bool open);
+
+    bool isGlobalTimer() const;
+
+    void setGlobalTimer(bool timer);
 
     const std::map<int, double>& getNextGoals() const;
 

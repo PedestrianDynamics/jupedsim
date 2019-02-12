@@ -421,13 +421,14 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
 
                // Read valus from ini File
                int id = xmltoi(e->Attribute("id"), -1);
-               int open = std::string(e->Attribute("is_open"))=="true" ? true : false;
                int min_peds = xmltoi(e->Attribute("min_peds"), -1);
                int max_peds = xmltoi(e->Attribute("max_peds"), -1);
                int waiting_time = xmltoi(e->Attribute("waiting_time"), -1);
                int transition_id = xmltoi(e->Attribute("transition_id"), -1);
                int room_id = xmltoi(e->Attribute("room_id"), -1);
                int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
+               bool open = strcmp(xmltoa(e->Attribute("is_open"), "false"), "true") == 0;
+               bool global_timer = strcmp(xmltoa(e->Attribute("global_timer"), "false"), "true") == 0;
 
                std::string caption = xmltoa(e->Attribute("caption"), "-1");
 
@@ -437,6 +438,7 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                waitingArea->SetId(id);
                waitingArea->SetCaption(caption);
                waitingArea->setOpen(open);
+               waitingArea->setGlobalTimer(global_timer);
                waitingArea->setMinNumPed(min_peds);
                waitingArea->setMaxNumPed(max_peds);
                waitingArea->setWaitingTime(waiting_time);
@@ -446,17 +448,12 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
 
                std::map<int, double> nextGoals;
 
-//               trips.addGoal(wa->GetId());
 
                //looking for next_wa
                for (TiXmlElement* nextWa = e->FirstChildElement("next_wa"); nextWa;
                     nextWa = nextWa->NextSiblingElement("next_wa")) {
                     int nextWaId = xmltoi(nextWa->Attribute("id"));
                     double nextWaP = xmltof(nextWa->Attribute("p"));
-
-//                    EdgeProperty weight = EdgeProperty(-1, nextWaP);
-//                    trips.addGoal(nextWaId);
-//                    trips.addConnection(wa->GetId(), nextWaId, weight);
 
                     nextGoals.insert(std::pair<int, double>(nextWaId, nextWaP));
                }
