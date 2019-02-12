@@ -66,7 +66,7 @@ EventManager::EventManager(Building *_b, unsigned int seed)
      //std::random_device rd;
      //_rdGenerator=std::mt19937(rd());
      _rdGenerator=std::mt19937(seed);
-
+     _file = nullptr;
      //save the first graph
      CreateRoutingEngine(_b, true);
 
