@@ -108,11 +108,10 @@ bool FFRouterTrips::Init(Building* building)
           for (auto &itrGoal : building->GetAllGoals()) {
                if(WaitingArea* wa = dynamic_cast<WaitingArea*>(itrGoal.second)) {
                     _globalFF->createMapEntryInLineToGoalID(itrGoal.first, true);
-                    std::cout << "Added " << itrGoal.first << " to goalIDs " << wa->getTransitionID() << std::endl;
-
+//                    std::cout << "Added " << itrGoal.first << " to goalIDs " << wa->getTransitionID() << std::endl;
                }else{
                     _globalFF->createMapEntryInLineToGoalID(itrGoal.first, false);
-                    std::cout << "Added " << itrGoal.first << " to goalIDs " << std::endl;
+//                    std::cout << "Added " << itrGoal.first << " to goalIDs " << std::endl;
                }
                goalIDs.emplace_back(itrGoal.first);
           }
@@ -463,7 +462,7 @@ int FFRouterTrips::FindExit(Pedestrian* ped)
 
      // Check if current position is already waiting area
      // yes: set next goal and return findExit(p)
-     if (goal->IsInsideGoal(ped->GetPos())){
+     if ((goal!=nullptr) && (goal->IsInsideGoal(ped->GetPos()))){
           if(WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)) {
                //take the current time from the pedestrian
                double t = Pedestrian::GetGlobalTime();
@@ -593,11 +592,11 @@ int FFRouterTrips::FindExit1(Pedestrian* p)
                //auto subroomDoors = _building->GetSubRoomByUID(p->GetSubRoomUID())->GetAllGoalIDs();
                //only consider, if paths exists
                if (_pathsMatrix.count(key)==0) {
-                    Crossing* cross1 =  _building->GetCrossing(key.first);
-                    Crossing* cross2 =  _building->GetCrossing(key.second);
-
-                    Transition* trans1 = _building->GetTransition(key.first);
-                    Transition* trans2 = _building->GetTransition(key.first);
+//                    Crossing* cross1 =  _building->GetCrossing(key.first);
+//                    Crossing* cross2 =  _building->GetCrossing(key.second);
+//
+//                    Transition* trans1 = _building->GetTransition(key.first);
+//                    Transition* trans2 = _building->GetTransition(key.first);
 
                     Log->Write("no key for %d %d", key.first, key.second);
                     continue;
