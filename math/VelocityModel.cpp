@@ -365,10 +365,10 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
           desired_direction = ped->GetV0();
       }
       //Log->Write("%f    %f", desired_direction._x, desired_direction._y);
-      if (desired_direction.NormSquare() < 0.1) {
-           Log->Write("ERROR:\t desired_direction in VelocityModel::e0 is too small (%f, %f)", desired_direction._x, desired_direction._y);
-
-      }
+//      if (desired_direction.NormSquare() < 0.1) {
+//           Log->Write("ERROR:\t desired_direction in VelocityModel::e0 is too small (%f, %f)", desired_direction._x, desired_direction._y);
+//
+//      }
       return desired_direction;
 }
 

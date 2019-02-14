@@ -84,6 +84,11 @@ bool IsEnoughInSubroom( SubRoom* subroom, Point& pt, double radius )
      return true;
 }
 
+//Point ComputeBestPositionVoronoiBoost(Goal* goal, std::vector<Pedestrian*>& pedInside)
+//{
+//
+//}
+
 bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>& peds,
                                      Building* building, std::vector<Pedestrian*>& peds_queue)
 {

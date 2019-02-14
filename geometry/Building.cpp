@@ -379,7 +379,7 @@ bool Building::InitInsideGoals()
      for (auto& goalItr : _goals){
           Goal* goal = goalItr.second;
           if (goal->GetRoomID() == -1){
-               found == true;
+               found = true;
                std::cout << "Goal " << goal->GetId() << " is outside" << std::endl;
                continue;
           }
@@ -873,6 +873,7 @@ bool Building::AddTransition(Transition* line)
           exit(EXIT_FAILURE);
      }
      _transitions[line->GetID()] = line;
+
      return true;
 }
 

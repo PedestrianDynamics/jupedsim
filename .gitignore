@@ -169,3 +169,8 @@ packages/
 /geometry.png
 /run.py
 /Utest/Validation/7test_BO/jpsreport_ini.xml
+
+/doc*
+/cmake-*
+/issues
+/latex
