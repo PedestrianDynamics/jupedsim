@@ -239,7 +239,7 @@ void AgentsSource::GenerateAgents(std::vector<Pedestrian*>& peds, int count, Bui
                     // Log->Write("WARNING: Can not set destination for source agent %d", ped->GetID());
                     // Sometimes the router can not find a target for ped
                     auto transitions = building->GetAllTransitions();
-                    auto transition = transitions[0]; //dummy
+                    auto transition = transitions.begin()->second; //dummy
                     int trans_ID = transition->GetID();
                     ped->SetExitLine(transition); // set dummy line
                     ped->SetExitIndex(trans_ID);
