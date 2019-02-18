@@ -37,6 +37,7 @@
 #include "methods/Method_B.h"
 #include "methods/Method_C.h"
 #include "methods/Method_D.h"
+#include "methods/Method_I.h"
 #include "methods/PedData.h"
 
 #include <iostream>

@@ -530,7 +530,7 @@ void Method_D::OutputVoroGraph(const string & frameId,  std::vector<std::pair<po
      velo.close();
 }
 
-std::string polygon_to_string(const polygon_2d & polygon)
+/*std::string polygon_to_string(const polygon_2d & polygon)
 {
     string polygon_str = "((";
     for(auto point: boost::geometry::exterior_ring(polygon) )
@@ -559,7 +559,7 @@ std::string polygon_to_string(const polygon_2d & polygon)
     polygon_str.pop_back(); polygon_str.pop_back();  //remove last komma
     polygon_str.append("))");
     return polygon_str;
-}
+}*/
 
 void Method_D::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const vector<int>& Id, const polygon_2d& measureArea, const string& frid)
 {

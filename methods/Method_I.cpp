@@ -530,7 +530,7 @@ void Method_I::OutputVoroGraph(const string & frameId,  std::vector<std::pair<po
      velo.close();
 }
 
-std::string polygon_to_string2(const polygon_2d & polygon)
+/*std::string polygon_to_string2(const polygon_2d & polygon)
 {
     string polygon_str = "((";
     for(auto point: boost::geometry::exterior_ring(polygon) )
@@ -559,7 +559,7 @@ std::string polygon_to_string2(const polygon_2d & polygon)
     polygon_str.pop_back(); polygon_str.pop_back();  //remove last komma
     polygon_str.append("))");
     return polygon_str;
-}
+}*/
 
 void Method_I::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const vector<int>& Id, const polygon_2d& measureArea, const string& frid)
 {
@@ -573,10 +573,10 @@ void Method_I::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<d
           intersection(measureArea, polygon_iterator, v);
           if(!v.empty()) {
 
-              string polygon_str = polygon_to_string2(polygon_iterator);
+              string polygon_str = polygon_to_string(polygon_iterator);
               // string measureArea_str =
               // polygon_to_string(measureArea); // maybe used for debugging
-              string v_str = polygon_to_string2(v[0]);
+              string v_str = polygon_to_string(v[0]);
 
               uniquedensity=1.0/(area(polygon_iterator)*CMtoM*CMtoM);
               uniquevelocity=Velocity[temp];
