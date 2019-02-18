@@ -163,9 +163,8 @@ if (GIT_SCM AND GITDIR)
 else()
     message(STATUS "Not in a git repo")
   endif()
-  string(REGEX REPLACE "\#"
-       "" GIT_COMMIT_SUBJECT
-       ${GIT_COMMIT_SUBJECT})
+
+# string(REGEX REPLACE "\#" "" GIT_COMMIT_SUBJECT ${GIT_COMMIT_SUBJECT})
 
 # even if not in a git repository we need to define these
 add_definitions("-DGIT_COMMIT_HASH=\"${GIT_SHA1}\"")
@@ -402,7 +401,7 @@ geometry/Trips.cpp
 routing/trips_router/TripsRouter.cpp
 
 forms/jpscore.rc
-math/KrauszModel.cpp)
+math/KrauszModel.cpp geometry/GoalManager.cpp geometry/GoalManager.h)
 
 set(THIRD_PARTY_SRC
   tinyxml/tinystr.cpp

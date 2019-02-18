@@ -54,6 +54,13 @@ const std::map<int, double>& WaitingArea::getNextGoals() const
 bool WaitingArea::setNextGoals(const std::map<int, double>& nextGoals)
 {
      WaitingArea::nextGoals = nextGoals;
+
+     nextGoalsOpen.clear();
+
+     for (auto& goalItr : nextGoals){
+          nextGoalsOpen[goalItr.first] = true;
+     }
+
      return checkProbabilities();
 }
 
@@ -71,6 +78,15 @@ void WaitingArea::updateProbabilities()
 {
 
 }
+
+// Open or closes goal with id
+void WaitingArea::updateProbabilities(bool isOpen, int id)
+{
+     if ( nextGoalsOpen.find(id) != nextGoalsOpen.end() ) {
+          nextGoalsOpen[id] = isOpen;
+     }
+}
+
 
 std::string WaitingArea::toString()
 {
@@ -118,16 +134,17 @@ int WaitingArea::GetNextGoal()
 
      for (auto& nextGoal : nextGoals){
           cumProb += nextGoal.second;
-          if (random <= cumProb ){
+          if ((nextGoalsOpen[nextGoal.first]) && (random <= cumProb)){
                return nextGoal.first;
           }
      }
+     return this->_id;
 }
 
 void WaitingArea::addPed(int ped)
 {
      pedInside.insert(ped);
-     if (pedInside.size() > maxNumPed){
+     if (pedInside.size() >= maxNumPed){
           open = false;
      }
 }
@@ -135,9 +152,14 @@ void WaitingArea::addPed(int ped)
 void WaitingArea::removePed(int ped)
 {
      pedInside.erase(ped);
-     if (pedInside.size() <= maxNumPed){
+     if (pedInside.size() < maxNumPed){
           open = true;
      }
+     if (pedInside.size() < minNumPed){
+          startTime = -1.;
+     }
+
+
 
 }
 
@@ -164,7 +186,7 @@ bool WaitingArea::isWaiting(double time, const Building* building)
                     return false;
                }
           }else{
-               if ((time > startTime + waitingTime) && (startTime > 0. )){
+               if ((time > startTime + waitingTime) && (startTime >= 0. )){
                     return false;
                }
           }

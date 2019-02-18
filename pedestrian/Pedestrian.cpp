@@ -1247,3 +1247,24 @@ bool Pedestrian::Relocate(std::function<void(const Pedestrian&)> flowupdater) {
      }
      return status;
 }
+
+int Pedestrian::GetLastGoalID() const
+{
+     return _lastGoalID;
+}
+
+bool Pedestrian::IsInsideGoal() const
+{
+     return _insideGoal;
+}
+
+void Pedestrian::EnterGoal()
+{
+     _insideGoal = true;
+     _lastGoalID = _desiredFinalDestination;
+}
+
+void Pedestrian::LeaveGoal()
+{
+     _insideGoal = false;
+}

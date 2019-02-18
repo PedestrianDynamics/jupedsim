@@ -52,6 +52,7 @@
 #include "UnivFFviaFMTrips.h"
 //#include "../../geometry/Building.h"
 #include "../../geometry/WaitingArea.h"
+#include "../../geometry/GoalManager.h"
 
 int FFRouterTrips::_cnt = 0;
 
@@ -340,6 +341,8 @@ bool FFRouterTrips::Init(Building* building)
 //          std::cout << dist.first.first << "->" << dist.first.second << ": " << dist.second << std::endl;
 //     }
 
+
+     goalManager.SetGoals(_building->GetAllGoals());
      Log->Write("INFO: \tFF Router Init done.");
      return true;
 }
@@ -443,6 +446,8 @@ bool FFRouterTrips::ReInit()
     }
 
      FloydWarshall();
+     goalManager.SetGoals(_building->GetAllGoals());
+
      _plzReInit = false;
      return true;
 }
@@ -462,12 +467,12 @@ int FFRouterTrips::FindExit(Pedestrian* ped)
 
      // Check if current position is already waiting area
      // yes: set next goal and return findExit(p)
+     goalManager.ProcessPedPosition(ped);
+
      if ((goal!=nullptr) && (goal->IsInsideGoal(ped->GetPos()))){
           if(WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)) {
                //take the current time from the pedestrian
                double t = Pedestrian::GetGlobalTime();
-
-               wa->addPed(ped->GetID());
 
                if (!wa->isWaiting(t, _building)){
                     ped->SetFinalDestination(wa->GetNextGoal());

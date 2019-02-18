@@ -65,6 +65,7 @@
 #include "../../geometry/Building.h"
 #include "./FloorfieldViaFMTrips.h"
 #include "./UnivFFviaFMTrips.h"
+#include "../../geometry/GoalManager.h"
 
 class Building;
 class Pedestrian;
@@ -227,6 +228,8 @@ protected:
      bool _useCentrePointDistance = true;
      //output filename counter: cnt
      static int _cnt;
+
+     GoalManager goalManager;
 };
 
 #endif /* FFROUTER_H_ */

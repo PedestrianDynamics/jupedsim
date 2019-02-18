@@ -53,6 +53,11 @@ protected:
     std::map<int, double> nextGoals;
 
     /**
+     * Map of possible next goals/waiting areas (id) with corresponding state
+     */
+    std::map<int, bool> nextGoalsOpen;
+
+    /**
      * Set of pedestrians who are currently in waiting area
      */
      std::set<int> pedInside;
@@ -94,6 +99,8 @@ public:
     void startTimer(double time);
     int  getNumPed();
     bool isWaiting(double time, const Building* building);
+
+    void updateProbabilities(bool isOpen, int id);
 
 private:
     void updateProbabilities();
