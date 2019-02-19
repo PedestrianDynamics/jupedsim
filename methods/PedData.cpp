@@ -67,8 +67,8 @@ bool PedData::ReadData(const fs::path& projectRootDir, const fs::path&outputLoca
                return false;
           }
           TiXmlElement* xRootNode = docGeo.RootElement();
-          fs::path filename(xRootNode->ValueStr());
-          result=InitializeVariables(filename);	//initialize some global variables
+          result=InitializeVariables(xRootNode);	//initialize some global
+                                                        //variables using xml format
      }
 
      else if(trajformat == FORMAT_PLAIN)
@@ -92,7 +92,7 @@ bool PedData::InitializeVariables(const fs::path& filename)
      fdata.open(filename.string());
      if (fdata.is_open() == false)
      {
-           Log->Write("ERROR: \t could not parse the trajectories file <%s>",filename.string().c_str());
+           Log->Write("ERROR: \t could not open the trajectories file <%s>",filename.string().c_str());
           return false;
      }
      else
@@ -340,15 +340,15 @@ bool PedData::InitializeVariables(const fs::path& filename)
      return true;
 }
 
-// initialize the global variables variables
+// initialize the global variables. xml format
 bool PedData::InitializeVariables(TiXmlElement* xRootNode)
 {
      if( ! xRootNode ) {
-          Log->Write("ERROR:\tRoot element does not exist");
+          Log->Write("ERROR:\tPedData::InitializeVariables: Root element does not exist");
           return false;
      }
      if( xRootNode->ValueStr () != "trajectories" ) {
-          Log->Write("ERROR:\tRoot element value is not 'trajectories'.");
+          Log->Write("ERROR:\tPedData::InitializeVariables. Root element value is not 'trajectories'.");
           return false;
      }
 
