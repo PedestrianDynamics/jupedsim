@@ -259,6 +259,10 @@ void Building::AddSurroundingRoom()
      bigRoom->SetCaption("outside");
      bigRoom->SetID(_rooms.size());
      AddRoom(bigRoom);
+     _xMin = x_min;
+     _xMax = x_max;
+     _yMin = y_min;
+     _yMax = y_max;
 }
 
 
@@ -1411,5 +1415,3 @@ bool Building::SaveGeometry(const std::string &filename)
 }
 
 #endif // _SIMULATOR
-
-

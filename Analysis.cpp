@@ -247,7 +247,7 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const fs::path& geometryFile, c
           if(geoPoly.count(area->_id)==0)
           {
                Log->Write("ERROR: \t No polygon containing the measurement id [%d]", area->_id);
-               exit(1);
+               geoPoly[area->_id] = area->_poly;
           }
      }
 

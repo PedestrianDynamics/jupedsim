@@ -480,14 +480,55 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                {
                     areaB->_zPos=10000001.0;
                }
+               // get bounding box
+               // loading geometry is done in  analysis.cpp
+               // so this is done twice, which is not nice.
+               // For big geometries it could be slow.
+               Building*  building  = new Building();
+               building->LoadGeometry(GetGeometryFilename().string());
+               building->InitGeometry();
+               building->AddSurroundingRoom(); // this is a big reactagle
+                                               // slightly bigger than the
+                                               // geometry boundaries
+               double geo_minX = building->_xMin;
+               double geo_minY = building->_yMin;
+               double geo_maxX = building->_xMax;
+               double geo_maxY = building->_yMax;
+
+
+               std::map<int, polygon_2d> geoPoly;
                polygon_2d poly;
                Log->Write("INFO: \tMeasure area id  <%d> with type <%s>",areaB->_id, areaB->_type.c_str());
+               int num_verteces = 0;
                for(TiXmlElement* xVertex=xMeasurementArea_B->FirstChildElement("vertex"); xVertex; xVertex=xVertex->NextSiblingElement("vertex") )
                {
                     double box_px = xmltof(xVertex->Attribute("x"))*M2CM;
                     double box_py = xmltof(xVertex->Attribute("y"))*M2CM;
                     boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
                     Log->Write("\t\tMeasure area points  < %.3f, %.3f>",box_px*CMtoM,box_py*CMtoM);
+                    num_verteces++;
+               }
+               if(num_verteces < 3 && num_verteces > 0)
+                    Log->Write("\tWARNING: Less than 3 measure area points given (%d). At least 3 or nothing at all!!", num_verteces);
+               if(num_verteces == 0) // big bounding box
+               {
+                    Log->Write("\tWARNING: NO measure area points given (%d). default BB!!", num_verteces);
+                    //1
+                    double box_px = geo_minX*M2CM;
+                    double box_py = geo_minY*M2CM;
+                    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+                    //2
+                    box_px = geo_minX*M2CM;
+                    box_py = geo_maxY*M2CM;
+                    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+                    //3
+                    box_px = geo_maxX*M2CM;
+                    box_py = geo_maxY*M2CM;
+                    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+                    //4
+                    box_px = geo_maxX*M2CM;
+                    box_py = geo_minY*M2CM;
+                    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
                }
                correct(poly); // in the case the Polygone is not closed
                areaB->_poly=poly;
