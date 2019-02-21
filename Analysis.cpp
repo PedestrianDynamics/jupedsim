@@ -442,6 +442,61 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
                }
           }
      }
+
+     if(_DoesUseMethodI) //method_I
+     {
+          if(_areaForMethod_I.empty())
+          {
+               Log->Write("ERROR: Method I selected with no measurement area!");
+               exit(EXIT_FAILURE);
+          }
+
+#pragma omp parallel for
+          for(long unsigned int i=0; i<_areaForMethod_I.size(); i++)
+          {
+               Method_I method_I;
+               method_I.SetStartFrame(_StartFramesMethodI[i]);
+               method_I.SetStopFrame(_StopFramesMethodI[i]);
+               method_I.SetCalculateIndividualFD(_IndividualFDFlags[i]);
+               method_I.SetGeometryPolygon(_geoPoly[_areaForMethod_I[i]->_id]);
+               method_I.SetGeometryFileName(_geometryFileName);
+               method_I.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
+               method_I.SetGridSize(_grid_size_X, _grid_size_Y);
+               method_I.SetOutputVoronoiCellData(_outputGraph);
+               method_I.SetPlotVoronoiGraph(_plotGraph);
+               method_I.SetPlotVoronoiIndex(_plotIndex);
+               method_I.SetDimensional(_isOneDimensional);
+               method_I.SetCalculateProfiles(_getProfile);
+               method_I.SetTrajectoriesLocation(path);
+               if(_cutByCircle)
+               {
+                    method_I.Setcutbycircle(_cutRadius, _circleEdges);
+               }
+               method_I.SetMeasurementArea(_areaForMethod_I[i]);
+               bool result_I = method_I.Process(data,_scriptsLocation, _areaForMethod_I[i]->_zPos);
+               if(result_I)
+               {
+                    Log->Write("INFO:\tSuccess with Method I uing measurement area id %d!\n",_areaForMethod_I[i]->_id);
+                    std::cout << "INFO:\tSuccess with Method I using measurement area id "<< _areaForMethod_I[i]->_id << "\n";
+                    if(_plotTimeseriesI[i])
+                    {
+                         string parameters_Timeseries= " " +_scriptsLocation.string()+"/_Plot_timeseries_rho_v.py -p "+ _projectRootDir.string()+VORO_LOCATION + " -n "+filename.string()+
+                              " -f "+boost::lexical_cast<std::string>(data.GetFps());
+                         parameters_Timeseries = PYTHON + parameters_Timeseries;
+                         std::cout << parameters_Timeseries << "\n;";
+
+                         int res=system(parameters_Timeseries.c_str());
+                         Log->Write("INFO:\t time series result: %d ",res);
+                    }
+               }
+               else
+               {
+                    Log->Write("INFO:\tFailed with Method I using measurement area id %d!\n",_areaForMethod_I[i]->_id);
+               }
+          }
+     }
+
+
      return 0;
 }
 

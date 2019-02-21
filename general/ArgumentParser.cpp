@@ -129,6 +129,7 @@ ArgumentParser::ArgumentParser()
      _isMethodB = false;
      _isMethodC =false;
      _isMethodD = false;
+     _isMethodI= false;
      _isCutByCircle = false;
      _isOutputGraph= false;
      _isPlotGraph= false;
@@ -274,8 +275,8 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
      //geometry
      if(xMainNode->FirstChild("geometry"))
      {
-          fs::path p(xMainNode->FirstChildElement("geometry")->Attribute("file"));
-           _geometryFileName = GetProjectRootDir() / p;
+          fs::path pathGeo(xMainNode->FirstChildElement("geometry")->Attribute("file"));
+           _geometryFileName = GetProjectRootDir() / pathGeo;
            if(!fs::exists(_geometryFileName)){
                 Log->Write("ERROR: \tGeometry File <%s> does not exist",  _geometryFileName.string().c_str());
                 return false;
@@ -938,8 +939,159 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                }
           }
      }
+     // method I
+     TiXmlElement* xMethod_I=xMainNode->FirstChildElement("method_I");
+     if(xMethod_I) {
+          if(string(xMethod_I->Attribute("enabled"))=="true")
+          {
+               _isMethodI = true;
+               Log->Write("INFO: \tMethod I is selected" );
+
+               for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_I")->FirstChildElement("measurement_area");
+                   xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
+               {
+                    _areaIDforMethodI.push_back(xmltoi(xMeasurementArea->Attribute("id")));
+                    Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
+                    if(xMeasurementArea->Attribute("start_frame"))
+                    {
+                         if(string(xMeasurementArea->Attribute("start_frame"))!="None")
+                         {
+                              _start_frames_MethodD.push_back(xmltoi(xMeasurementArea->Attribute("start_frame")));
+                              Log->Write("\tthe analysis starts from frame <%d>",xmltoi(xMeasurementArea->Attribute("start_frame")));
+                         }
+                         else
+                         {
+                              _start_frames_MethodI.push_back(-1);
+                         }
+                    }
+                    else
+                    {
+                         _start_frames_MethodI.push_back(-1);
+                    }
+                    if(xMeasurementArea->Attribute("stop_frame"))
+                    {
+                         if(string(xMeasurementArea->Attribute("stop_frame"))!="None")
+                         {
+                              _stop_frames_MethodI.push_back(xmltoi(xMeasurementArea->Attribute("stop_frame")));
+                              Log->Write("\tthe analysis stops from frame <%d>", xmltoi(xMeasurementArea->Attribute("stop_frame")));
+                         }
+                         else
+                         {
+                              _stop_frames_MethodI.push_back(-1);
+                         }
+                    }
+                    else
+                    {
+                         _stop_frames_MethodI.push_back(-1);
+                    }
+
+                    if(xMeasurementArea->Attribute("get_individual_FD"))
+                    {
+                         if(string(xMeasurementArea->Attribute("get_individual_FD"))=="true")
+                         {
+                              _individual_FD_flags.push_back(true);
+                              Log->Write("INFO: \tIndividual FD will be output");
+                         }
+                         else
+                         {
+                              _individual_FD_flags.push_back(false);
+                         }
+                    }
+                    else
+                    {
+                         _individual_FD_flags.push_back(false);
+                    }
+                    if(xMeasurementArea->Attribute("plot_time_series"))
+                    {
+                         if(string(xMeasurementArea->Attribute("plot_time_series"))=="true")
+                         {
+                              _isPlotTimeSeriesI.push_back(true);
+                              Log->Write("\tThe Time series will be plotted!! ");
+                         }
+                         else
+                         {
+                              _isPlotTimeSeriesI.push_back(false);
+                         }
+                    }
+                    else
+                    {
+                         _isPlotTimeSeriesI.push_back(false);
+                    }
+
+               }
+               if (xMethod_I->FirstChildElement("one_dimensional"))
+               {
+                    if ( string(xMethod_I->FirstChildElement("one_dimensional")->Attribute("enabled"))=="true")
+                    {
+                         _isOneDimensional=true;
+                         Log->Write("INFO: \tThe data will be analyzed with one dimensional way!!");
+                    }
+               }
+
+               if ( xMethod_I->FirstChildElement("cut_by_circle"))
+               {
+                    if ( string(xMethod_I->FirstChildElement("cut_by_circle")->Attribute("enabled"))=="true")
+                    {
+                         _isCutByCircle=true;
+                         _cutRadius=xmltof(xMethod_I->FirstChildElement("cut_by_circle")->Attribute("radius"))*M2CM;
+                         _circleEdges=xmltoi(xMethod_I->FirstChildElement("cut_by_circle")->Attribute("edges"));
+                         Log->Write("INFO: \tEach Voronoi cell will be cut by a circle with the radius of < %f > m!!", _cutRadius*CMtoM);
+                         Log->Write("INFO: \tThe circle is discretized to a polygon with < %d> edges!!", _circleEdges);
+                    }
+               }
+
+               if ( xMethod_I->FirstChildElement("output_voronoi_cells"))
+               {
+                    auto enabled = xMethod_I->FirstChildElement("output_voronoi_cells")->Attribute("enabled");
+                    if(enabled)
+                         if ( string(enabled)=="true")
+                         {
+                              _isOutputGraph=true;
+                              Log->Write("INFO: \tData of voronoi diagram is asked to output" );
+                              auto plot_graphs = xMethod_I->FirstChildElement("output_voronoi_cells")->Attribute("plot_graphs");
+                              if(plot_graphs)
+                              {
+                                   if (string(plot_graphs)=="true")
+                                   {
+                                        _isPlotGraph = true;
+                                        Log->Write("INFO: \tGraph of voronoi diagram will be plotted");
+                                   }
+                                   auto plot_index = xMethod_I->FirstChildElement("output_voronoi_cells")->Attribute(
+                                           "plot_index");
+                                   if (plot_index)
+                                        if (string(plot_index)=="true")
+                                        {
+                                             _isPlotIndex = true;
+                                             Log->Write(
+                                                     "INFO: \tVoronoi diagram will be plotted with index of pedestrians");
+                                        } // plot_index
+                              } // plot_graphs
+                         }// enabled
+               }
+
+               if ( xMethod_I->FirstChildElement("steadyState"))
+               {
+                    _steadyStart =xmltof(xMethod_I->FirstChildElement("steadyState")->Attribute("start"));
+                    _steadyEnd =xmltof(xMethod_I->FirstChildElement("steadyState")->Attribute("end"));
+                    Log->Write("INFO: \tthe steady state is from  <%f> to <%f> frames", _steadyStart, _steadyEnd);
+               }
+
+               if(xMethod_I->FirstChildElement("profiles"))
+               {
+                    if ( string(xMethod_I->FirstChildElement("profiles")->Attribute("enabled"))=="true")
+                    {
+                         _isGetProfile = true;
+                         _grid_size_X =xmltof(xMethod_I->FirstChildElement("profiles")->Attribute("grid_size_x"))*M2CM;
+                         _grid_size_Y =xmltof(xMethod_I->FirstChildElement("profiles")->Attribute("grid_size_y"))*M2CM;
+                         Log->Write("INFO: \tProfiles will be calculated" );
+                         Log->Write("INFO: \tThe discretized grid size in x, y direction is: < %f >m by < %f >m ",_grid_size_X*CMtoM, _grid_size_Y*CMtoM);
+                    }
+               }
+          }
+     }
+
      Log->Write("INFO: \tFinish parsing inifile");
-     if(!(_isMethodA || _isMethodB || _isMethodC || _isMethodD))
+     if(!(_isMethodA || _isMethodB || _isMethodC || _isMethodD ||  _isMethodI))
      {
           Log->Write("WARNING: No measurement method enabled. Nothing to do.");
           exit(EXIT_SUCCESS);
