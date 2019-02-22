@@ -121,7 +121,7 @@ bool Method_I::Process (const PedData& peddata,const fs::path& scriptsLocation, 
                return_value = false;
           }
      }
-     Log->Write("------------------------Analyzing with Method D-----------------------------");
+     Log->Write("------------------------ Analyzing with Method I -----------------------------");
      //for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
      //for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
      for(auto ite: _peds_t)

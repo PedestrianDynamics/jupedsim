@@ -342,9 +342,9 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           }
           else
           {
-               fs::path p(GetProjectRootDir());
-                p = canonical(p);
-                _trajectoriesLocation=p.string();
+               fs::path path_root(GetProjectRootDir());
+                path_root = canonical(path_root);
+                _trajectoriesLocation=path_root.string();
           }
           Log->Write("INFO: \tInput directory for loading trajectory is <%s>", _trajectoriesLocation.string().c_str());
 
@@ -354,9 +354,9 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                if(exists(_trajectoriesLocation))
                {
                     /* print all the files and directories within directory */
-                    fs::path p(GetTrajectoriesLocation());
-                    p = canonical(p);
-                    for (auto& filename : boost::make_iterator_range(fs::directory_iterator(p), {}))
+                    fs::path path_traj(GetTrajectoriesLocation());
+                    path_traj = canonical(path_traj);
+                    for (auto& filename : boost::make_iterator_range(fs::directory_iterator(path_traj), {}))
                     {
                          string s = filename.path().string();
                          if (boost::algorithm::ends_with(s, fmt))
@@ -453,7 +453,9 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
      //measurement area
      if(xMainNode->FirstChild("measurement_areas"))
      {
-          string unit = xMainNode->FirstChildElement("measurement_areas")->Attribute("unit");
+          string unit ="";
+          if(xMainNode->FirstChildElement("measurement_areas")->Attribute("unit"))
+               unit = xMainNode->FirstChildElement("measurement_areas")->Attribute("unit");
           if(unit!="m")
           {
                Log->Write("WARNING: \tonly <m> unit is supported. Convert your units.");
@@ -495,6 +497,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                double geo_minY = building->_yMin;
                double geo_maxX = building->_xMax;
                double geo_maxY = building->_yMax;
+               Log->Write("INFO: \tBounding box:\n \t\tminX = %.2f\n \t\tmaxX = %.2f \n \t\tminY = %.2f \n\t\tmaxY = %.2f", geo_minX, geo_maxX, geo_minY, geo_maxY);
 
 
                std::map<int, polygon_2d> geoPoly;
