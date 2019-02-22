@@ -140,7 +140,7 @@ void Analysis::InitArgs(ArgumentParser* args)
           }
      }
 
-     if(args ->GetIsMethodC()) {
+     if(args->GetIsMethodC()) {
           _DoesUseMethodC = true;
           vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodC();
           for(unsigned int i=0; i<Measurement_Area_IDs.size(); i++)
@@ -150,7 +150,7 @@ void Analysis::InitArgs(ArgumentParser* args)
           _plotTimeseriesC=args->GetIsPlotTimeSeriesC();
      }
 
-     if(args ->GetIsMethodD()) {
+     if(args->GetIsMethodD()) {
           _DoesUseMethodD = true;
           vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodD();
           for(unsigned int i=0; i<Measurement_Area_IDs.size(); i++)
@@ -161,6 +161,18 @@ void Analysis::InitArgs(ArgumentParser* args)
           _StopFramesMethodD = args->GetStopFramesMethodD();
           _IndividualFDFlags = args->GetIndividualFDFlags();
           _plotTimeseriesD=args->GetIsPlotTimeSeriesD();
+     }
+     if(args->GetIsMethodI()) {
+          _DoesUseMethodI = true;
+          vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodI();
+          for(unsigned int i=0; i<Measurement_Area_IDs.size(); i++)
+          {
+               _areaForMethod_I.push_back(dynamic_cast<MeasurementArea_B*>( args->GetMeasurementArea(Measurement_Area_IDs[i])));
+          }
+          _StartFramesMethodI = args->GetStartFramesMethodI();
+          _StopFramesMethodI = args->GetStopFramesMethodI();
+          _IndividualFDFlags = args->GetIndividualFDFlags();
+          _plotTimeseriesI=args->GetIsPlotTimeSeriesI();
      }
 
      _deltaF = args->GetDelatT_Vins();

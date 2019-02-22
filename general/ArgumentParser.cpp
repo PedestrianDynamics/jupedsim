@@ -483,23 +483,6 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                {
                     areaB->_zPos=10000001.0;
                }
-               // get bounding box
-               // loading geometry is done in  analysis.cpp
-               // so this is done twice, which is not nice.
-               // For big geometries it could be slow.
-               Building*  building  = new Building();
-               building->LoadGeometry(GetGeometryFilename().string());
-               building->InitGeometry();
-               building->AddSurroundingRoom(); // this is a big reactagle
-                                               // slightly bigger than the
-                                               // geometry boundaries
-               double geo_minX = building->_xMin;
-               double geo_minY = building->_yMin;
-               double geo_maxX = building->_xMax;
-               double geo_maxY = building->_yMax;
-               Log->Write("INFO: \tBounding box:\n \t\tminX = %.2f\n \t\tmaxX = %.2f \n \t\tminY = %.2f \n\t\tmaxY = %.2f", geo_minX, geo_maxX, geo_minY, geo_maxY);
-
-
                std::map<int, polygon_2d> geoPoly;
                polygon_2d poly;
                Log->Write("INFO: \tMeasure area id  <%d> with type <%s>",areaB->_id, areaB->_type.c_str());
@@ -517,6 +500,24 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                if(num_verteces == 0) // big bounding box
                {
                     Log->Write("\tWARNING: NO measure area points given (%d). default BB!!", num_verteces);
+                    // get bounding box
+                    // loading geometry is done in  analysis.cpp
+                    // so this is done twice, which is not nice.
+                    // For big geometries it could be slow.
+                    Building*  building  = new Building();
+                    building->LoadGeometry(GetGeometryFilename().string());
+                    building->InitGeometry();
+                    building->AddSurroundingRoom(); // this is a big reactagle
+                    // slightly bigger than the
+                    // geometry boundaries
+                    double geo_minX = building->_xMin;
+                    double geo_minY = building->_yMin;
+                    double geo_maxX = building->_xMax;
+                    double geo_maxY = building->_yMax;
+                    Log->Write("INFO: \tBounding box:\n \t\tminX = %.2f\n \t\tmaxX = %.2f \n \t\tminY = %.2f \n\t\tmaxY = %.2f", geo_minX, geo_maxX, geo_minY, geo_maxY);
+
+
+
                     //1
                     double box_px = geo_minX*M2CM;
                     double box_py = geo_minY*M2CM;
@@ -1182,6 +1183,10 @@ bool ArgumentParser::GetIsMethodD() const
 {
      return _isMethodD;
 }
+bool ArgumentParser::GetIsMethodI() const
+{
+     return _isMethodI;
+}
 
 bool ArgumentParser::GetIsCutByCircle() const
 {
@@ -1225,6 +1230,11 @@ vector<bool> ArgumentParser::GetIsPlotTimeSeriesC() const
 vector<bool> ArgumentParser::GetIsPlotTimeSeriesD() const
 {
      return _isPlotTimeSeriesD;
+}
+
+vector<bool> ArgumentParser::GetIsPlotTimeSeriesI() const
+{
+     return _isPlotTimeSeriesI;
 }
 
 bool ArgumentParser::GetIsOneDimensional() const
@@ -1278,14 +1288,29 @@ vector<int> ArgumentParser::GetAreaIDforMethodD() const
      return _areaIDforMethodD;
 }
 
+vector<int> ArgumentParser::GetAreaIDforMethodI() const
+{
+     return _areaIDforMethodI;
+}
+
 vector<int> ArgumentParser::GetStartFramesMethodD() const
 {
      return _start_frames_MethodD;
 }
 
+vector<int> ArgumentParser::GetStartFramesMethodI() const
+{
+     return _start_frames_MethodI;
+}
+
 vector<int> ArgumentParser::GetStopFramesMethodD() const
 {
      return _stop_frames_MethodD;
+}
+
+vector<int> ArgumentParser::GetStopFramesMethodI() const
+{
+     return _stop_frames_MethodI;
 }
 
 vector<bool> ArgumentParser::GetIndividualFDFlags() const

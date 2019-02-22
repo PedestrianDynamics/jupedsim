@@ -136,10 +136,12 @@ public:
      bool GetIsMethodB() const;
      bool GetIsMethodC() const;
      bool GetIsMethodD() const;
+     bool GetIsMethodI() const;
      std::vector<int> GetAreaIDforMethodA() const;
      std::vector<int> GetAreaIDforMethodB() const;
      std::vector<int> GetAreaIDforMethodC() const;
      std::vector<int> GetAreaIDforMethodD() const;
+     std::vector<int> GetAreaIDforMethodI() const;
      std::vector<int> GetStartFramesMethodD() const;
      std::vector<int> GetStopFramesMethodD() const;
      std::vector<int> GetStartFramesMethodI() const;
