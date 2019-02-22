@@ -217,6 +217,26 @@ void Building::AddSurroundingRoom()
                     y_max = (ymax >= y_max) ? ymax : y_max;
                     y_min = (ymin <= y_min) ? ymin : y_min;
                }
+               for(auto&& obs:itr_subroom.second->GetAllObstacles())
+               {
+                    for(auto&& wall: obs->GetAllWalls())
+                    {
+                         double x1 = wall.GetPoint1().GetX();
+                         double y1 = wall.GetPoint1().GetY();
+                         double x2 = wall.GetPoint2().GetX();
+                         double y2 = wall.GetPoint2().GetY();
+
+                         double xmax = (x1 > x2) ? x1 : x2;
+                         double xmin = (x1 > x2) ? x2 : x1;
+                         double ymax = (y1 > y2) ? y1 : y2;
+                         double ymin = (y1 > y2) ? y2 : y1;
+
+                         x_min = (xmin <= x_min) ? xmin : x_min;
+                         x_max = (xmax >= x_max) ? xmax : x_max;
+                         y_max = (ymax >= y_max) ? ymax : y_max;
+                         y_min = (ymin <= y_min) ? ymin : y_min;
+                    }
+               }
           }
      }
 
