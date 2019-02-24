@@ -206,6 +206,9 @@ Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& buil
 
 Pedestrian::~Pedestrian()
 {
+     if ((_id>72) && (_id<81)){
+          std::cout << "Ped destructor" << std::endl;
+     }
 }
 
 

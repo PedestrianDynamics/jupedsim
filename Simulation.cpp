@@ -625,6 +625,7 @@ void Simulation::ProcessAgentsQueue()
             /* std::cout << "Add to building : " << ped->GetPos()._x << ", " << ped->GetPos()._y << " t: "<< Pedestrian::GetGlobalTime() << std::endl; */
         _building->AddPedestrian(ped);
     }
+    _building->UpdateGrid();
     //  for(auto pp: _building->GetAllPedestrians())
     //         std::cout<< KBLU << "BUL: Simulation: " << pp->GetPos()._x << ", " << pp->GetPos()._y  << " t: "<< Pedestrian::GetGlobalTime() <<RESET << std::endl;
 

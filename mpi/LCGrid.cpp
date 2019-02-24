@@ -36,8 +36,12 @@
 
 #include"LCGrid.h"
 #include "../pedestrian/Pedestrian.h"
+#include <mutex>
+
 
 using namespace std;
+
+std::mutex grid_mutex;
 
 //FIXME:
 #define MAX_AGENT_COUNT  10000 // 1000000
@@ -99,11 +103,12 @@ void LCGrid::ShallowCopy(const vector<Pedestrian*>& peds)
 
 void LCGrid::Update(const vector<Pedestrian*>& peds)
 {
+     grid_mutex.lock();
      ClearGrid();
 
      for (auto& ped: peds)
      {
-          //Pedestrian* ped = peds[p];
+               //Pedestrian* ped = peds[p];
           int id=ped->GetID()-1;
           // determine the cell coordinates of pedestrian i
           int ix = (int) ((ped->GetPos()._x - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
@@ -115,13 +120,22 @@ void LCGrid::Update(const vector<Pedestrian*>& peds)
           _cellHead[iy][ix] = id;
 
           _localPedsCopy[id]=ped;
+
+//          if (ped->GetID() == 71) {
+//               std::cout << "pos: " << ped->GetPos().toString() << " ix:"  << ix << " iy:" << iy << std::endl;
+//          }
+
      }
+     grid_mutex.unlock();
+
 }
 
 // I hope you had called Clear() first
 // todo: can be used to solve the issue with MAX_AGENT_COUNT
 void LCGrid::Update(Pedestrian* ped)
 {
+     grid_mutex.lock();
+
      int id=ped->GetID()-1;
      // determine the cell coordinates of pedestrian i
      int ix = (int) ((ped->GetPos()._x - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
@@ -133,6 +147,8 @@ void LCGrid::Update(Pedestrian* ped)
 
      // this is probably a pedestrian coming from the mpi routine, so made a copy
      _localPedsCopy[id]=ped;
+     grid_mutex.unlock();
+
 }
 
 void LCGrid::ClearGrid()
@@ -202,6 +218,7 @@ void LCGrid::HighlightNeighborhood(int pedID, Building* building)
 */
 void LCGrid::GetNeighbourhood(const Pedestrian* ped, vector<Pedestrian*>& neighbourhood)
 {
+     grid_mutex.lock();
 
      double xPed=ped->GetPos()._x;
      double yPed=ped->GetPos()._y;
@@ -231,10 +248,25 @@ void LCGrid::GetNeighbourhood(const Pedestrian* ped, vector<Pedestrian*>& neighb
                }
           }
      }
+
+     if ((myID == 70) && (fmod(Pedestrian::GetGlobalTime() , 45.) == 0) ){
+          std::cout << Pedestrian::GetGlobalTime() << ":\t\tNeighborhood of 71 " << neighbourhood.size() << std::endl;
+
+          for (auto& ped : neighbourhood){
+               std::cout << "Neighbor added: " << ped->GetID() << " at " << ped->GetPos().toString() << std::endl;
+          }
+          std::cout << "---------------------------" << std::endl;
+
+
+     }
+
+     grid_mutex.unlock();
+
 }
 
 void LCGrid::GetNeighbourhood(const Point& pos, std::vector<Pedestrian*>& neighbourhood)
 {
+     grid_mutex.lock();
 
      double xPed=pos._x;
      double yPed=pos._y;
@@ -255,6 +287,8 @@ void LCGrid::GetNeighbourhood(const Point& pos, std::vector<Pedestrian*>& neighb
                }
           }
      }
+     grid_mutex.unlock();
+
 }
 
 

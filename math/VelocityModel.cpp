@@ -178,6 +178,9 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
       partSize = ((int)nSize > nThreads)? (int) (nSize / nThreads):(int)nSize;
       if(partSize == (int)nSize)
             nThreads = 1; // not worthy to parallelize
+
+
+     //TODO richtig parallelisieren!
       #pragma omp parallel default(shared) num_threads(nThreads)
       {
            vector< Point > result_acc = vector<Point > ();
@@ -199,11 +202,31 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 vector<Pedestrian*> neighbours;
                 building->GetGrid()->GetNeighbourhood(ped,neighbours);
 
+                double time = Pedestrian::GetGlobalTime();
                 int size = (int) neighbours.size();
+////                if (ped->GetID() == 71) {
+////                     std::cout << "------------------------------------" << std::endl;
+//                     std::cout << Pedestrian::GetGlobalTime() << ":\t\tVelocity Model debug ped: " << ped->GetID()
+//                               << "\t" << ped->GetPos().toString() << "\t" << size<< std::endl;
+////                }
+
+
                 for (int i = 0; i < size; i++) {
+               
                      Pedestrian* ped1 = neighbours[i];
+//                     if (ped->GetID() == 71) {
+//                         std::cout << "Velocity Model debug ped1: " << ped1->GetID() << "\t" <<  ped1->GetPos().toString() <<std::endl;
+//                     }
+
+//                     std::cout << "Velocity Model debug ped1: " << ped1 << std::endl;
+//                     std::cout << ped1->GetID() << std::endl;
+
+                     if (ped1 == nullptr){
+                          std::cout << "Velocity Model debug: " << size << std::endl;
+                     }
                      //if they are in the same subroom
                      Point p1 = ped->GetPos();
+
                      Point p2 = ped1->GetPos();
                      //subrooms to consider when looking for neighbour for the 3d visibility
                      vector<SubRoom*> emptyVector;

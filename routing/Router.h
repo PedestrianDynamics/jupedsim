@@ -142,6 +142,7 @@ public:
 
      void SetTrips(const Trips& trips);
 
+
 };
 
 #endif  /* _ROUTING_H */

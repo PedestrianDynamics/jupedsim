@@ -39,8 +39,8 @@
 
 class Point {
 public:
-     double _x; //*<x-coordinate of a 2-d point*/
-     double _y; //*<y-coordinate of a 2-d point*/
+     double _x = 0.; //*<x-coordinate of a 2-d point*/
+     double _y = 0.; //*<y-coordinate of a 2-d point*/
 
 public:
 

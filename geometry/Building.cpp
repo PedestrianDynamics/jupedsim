@@ -38,6 +38,7 @@
 #include "../mpi/LCGrid.h"
 #include "../IO/GeoFileParser.h"
 #include <filesystem>
+#include <thread>         // std::thread, std::thread::id, std::this_thread::get_id
 
 namespace fs = std::filesystem;
 
@@ -1156,6 +1157,7 @@ bool Building::SanityCheck()
 
 void Building::UpdateGrid()
 {
+//     std::cout << Pedestrian::GetGlobalTime() <<":\t\tBuilding::UpdateGrid from: " << std::this_thread::get_id() <<std::endl;
      _linkedCellGrid->Update(_allPedestians);
 }
 
