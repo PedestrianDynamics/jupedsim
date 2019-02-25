@@ -137,17 +137,20 @@ bool FFRouterTrips::Init(Building* building)
      roomAndCroTrVector.clear();
 
      for (auto& pair:allTrans) {
-          if (pair.second->IsOpen()) {
+//          TODO temp_close
+//          if (pair.second->IsOpen()) {
                _allDoorUIDs.emplace_back(pair.second->GetUniqueID());
                _CroTrByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
                if (pair.second->IsExit()) {
                     _ExitsByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
                }
                Room* room1 = pair.second->GetRoom1();
-               if (room1) roomAndCroTrVector.emplace_back(std::make_pair(room1->GetID(), pair.second->GetUniqueID()));
+               if (room1)
+                    roomAndCroTrVector.emplace_back(std::make_pair(room1->GetID(), pair.second->GetUniqueID()));
                Room* room2 = pair.second->GetRoom2();
-               if (room2) roomAndCroTrVector.emplace_back(std::make_pair(room2->GetID(), pair.second->GetUniqueID()));
-          }
+               if (room2)
+                    roomAndCroTrVector.emplace_back(std::make_pair(room2->GetID(), pair.second->GetUniqueID()));
+//          }
      }
 
      for (auto& pair:allCross) {
@@ -164,9 +167,9 @@ bool FFRouterTrips::Init(Building* building)
      std::sort(_allDoorUIDs.begin(), _allDoorUIDs.end());
      _allDoorUIDs.erase( std::unique(_allDoorUIDs.begin(),_allDoorUIDs.end()), _allDoorUIDs.end());
 
-//     for (auto& door : _allDoorUIDs){
-//          std::cout << "Door: " << door << std::endl;
-//     }
+     for (auto& door : _allDoorUIDs){
+          std::cout << "Door: " << door << std::endl;
+     }
 
      //cleanse maps
      _distMatrix.clear();
@@ -553,6 +556,7 @@ int FFRouterTrips::FindExit1(Pedestrian* p)
      if (!_targetWithinSubroom) {
           //candidates of current room (ID) (provided by Room)
           for (auto transUID : _building->GetRoom(p->GetRoomID())->GetAllTransitionsIDs()) {
+               //          TODO temp_close
                if ((_CroTrByUID.count(transUID) != 0) && (_CroTrByUID[transUID]->IsOpen())) {
                     DoorUIDsOfRoom.emplace_back(transUID);
                }
@@ -575,6 +579,7 @@ int FFRouterTrips::FindExit1(Pedestrian* p)
           }
 
           for (auto &transI : _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->GetAllTransitions()) {
+               //          TODO temp_close
                if (transI->IsOpen()) {
                     DoorUIDsOfRoom.emplace_back(transI->GetUniqueID());
                }

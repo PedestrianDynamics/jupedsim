@@ -372,7 +372,7 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
           if (desired_direction.NormSquare() < 0.25) {
               desired_direction = lastE0;
               ped->SetLastE0(lastE0);
-              Log->Write("desired_direction: %f    %f", desired_direction._x, desired_direction._y);
+//              Log->Write("desired_direction: %f    %f", desired_direction._x, desired_direction._y);
               //_direction->GetTarget(room, ped);
           }
 //          if (dist > 1*J_EPS_GOAL) {
