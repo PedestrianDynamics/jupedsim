@@ -71,7 +71,7 @@ Method_I::~Method_I()
 // {
 //      return (number < start || number > end);
 // };
-bool Method_I::Process (const PedData& peddata,const fs::path& scriptsLocation, const double& zPos_measureArea)
+bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, const double& zPos_measureArea)
 {
      bool return_value = true;
      _scriptsLocation = scriptsLocation;
@@ -110,7 +110,7 @@ bool Method_I::Process (const PedData& peddata,const fs::path& scriptsLocation, 
           }
      }
 
-     if(!OpenFileMethodD())
+     if(!OpenFileMethodI())
      {
           return_value = false;
      }
@@ -216,8 +216,9 @@ bool Method_I::Process (const PedData& peddata,const fs::path& scriptsLocation, 
           }
           return return_value;
      }
+}
 
-     bool Method_I::OpenFileMethodD()
+     bool Method_I::OpenFileMethodI()
      {
 
           std::string voroLocation(VORO_LOCATION);

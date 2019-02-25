@@ -89,7 +89,7 @@ private:
      double _grid_size_X;      // the size of the grid
      double _grid_size_Y;
      float _fps;
-     bool OpenFileMethodD();
+     bool OpenFileMethodI();
      bool OpenFileIndividualFD();
      fs::path _geometryFileName;
      fs::path _trajectoryPath;
