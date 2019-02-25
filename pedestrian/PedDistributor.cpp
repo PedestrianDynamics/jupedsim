@@ -147,7 +147,6 @@ bool PedDistributor::Distribute(Building *building) const {
 
         //------------------------------------- pack in function ------------
         else{
-
              auto possibleSubroomPositions = PedDistributor::PossiblePositions(*sr);
              shuffle(possibleSubroomPositions.begin(), possibleSubroomPositions.end(), dist->GetGenerator());
              allFreePosRoom[subroomID] = possibleSubroomPositions;
@@ -407,6 +406,15 @@ vector<Point>PedDistributor::PositionsOnFixY(double min_x, double max_x, double 
 }
 
 // format: id fr x y
+// @todo
+// - id
+// - past_frame: should be in the header. Same for all agents
+// - entrance_frame
+// - x
+// - y
+// - z
+// - vx
+// - vy
 
 const vector<Point>  PedDistributor::GetPositionsFromFile(std::string filename, int n, std::string unit) const{
       float m2cm = 1.0;
@@ -418,6 +426,9 @@ const vector<Point>  PedDistributor::GetPositionsFromFile(std::string filename, 
       // @todo: need to read z too
       std::vector<double> xpos;
       std::vector<double> ypos;
+      std::vector<double> zpos;
+      std::vector<double> vx;
+      std::vector<double> vy;
       std::vector<int> ids;
       std::vector<int> frames;
       // here we push_back only the first (x,y) of every id.
