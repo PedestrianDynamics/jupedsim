@@ -349,6 +349,8 @@ bool GeoFileParser::LoadGeometry(Building* building)
 
 bool GeoFileParser::LoadRoutingInfo(Building* building)
 {
+     //TODO read schedule
+
      TiXmlDocument docRouting(_configuration->GetProjectFile());
      if (!docRouting.LoadFile()) {
           Log->Write("ERROR: \t%s", docRouting.ErrorDesc());
