@@ -49,11 +49,39 @@ VoronoiDiagram::~VoronoiDiagram()
 std::vector<std::pair<polygon_2d, int> > VoronoiDiagram::getVoronoiPolygons(vector<double>& XInFrame, vector<double>& YInFrame,
           vector<double>& VInFrame, vector<int>& IdInFrame, const double Bound_Max)
 {
-     const int numPedsInFrame = IdInFrame.size();
+     int numPedsInFrame = IdInFrame.size();
      vector<int> XInFrame_temp;
      vector<int> YInFrame_temp;
      vector<double> VInFrame_temp;
      vector<int> IdInFrame_temp;
+     // in case 1 or 2 pedestrians are in the geometry
+     // add dummy pedestrians around to enable voronoi calculations
+     // @todo: maybe use negative ids for these dummy pedestrians to exclude
+     // them from any analysis.
+     if(numPedsInFrame == 1 || numPedsInFrame == 2)
+     {
+          numPedsInFrame += 4;
+          // up right
+          XInFrame.push_back(XInFrame[0]+10);
+          YInFrame.push_back(YInFrame[0]+10);
+          VInFrame.push_back(VInFrame[0]);
+          IdInFrame.push_back(IdInFrame[0]+1);
+          // up left
+          XInFrame.push_back(XInFrame[0]-10);
+          YInFrame.push_back(YInFrame[0]+10);
+          VInFrame.push_back(VInFrame[0]);
+          IdInFrame.push_back(IdInFrame[0]+2);
+          // down right
+          XInFrame.push_back(XInFrame[0]+10);
+          YInFrame.push_back(YInFrame[0]-10);
+          VInFrame.push_back(VInFrame[0]);
+          IdInFrame.push_back(IdInFrame[0]+3);
+          // down left
+          XInFrame.push_back(XInFrame[0]-10);
+          YInFrame.push_back(YInFrame[0]-10);
+          VInFrame.push_back(VInFrame[0]);
+          IdInFrame.push_back(IdInFrame[0]+4);
+     }
 
      for (int i = 0; i < numPedsInFrame; i++)
      {
@@ -63,6 +91,7 @@ std::vector<std::pair<polygon_2d, int> > VoronoiDiagram::getVoronoiPolygons(vect
           VInFrame_temp.push_back(VInFrame[i]);
           IdInFrame_temp.push_back(IdInFrame[i]);
      }
+
 
      VD voronoidiagram;
      construct_voronoi(points.begin(), points.end(), &voronoidiagram);

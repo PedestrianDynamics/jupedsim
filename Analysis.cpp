@@ -161,6 +161,7 @@ void Analysis::InitArgs(ArgumentParser* args)
           _StopFramesMethodD = args->GetStopFramesMethodD();
           _IndividualFDFlags = args->GetIndividualFDFlags();
           _plotTimeseriesD=args->GetIsPlotTimeSeriesD();
+          _geoPoly = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_D);
      }
      if(args->GetIsMethodI()) {
           _DoesUseMethodI = true;
@@ -173,6 +174,7 @@ void Analysis::InitArgs(ArgumentParser* args)
           _StopFramesMethodI = args->GetStopFramesMethodI();
           _IndividualFDFlags = args->GetIndividualFDFlags();
           _plotTimeseriesI=args->GetIsPlotTimeSeriesI();
+          _geoPoly = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_I);
      }
 
      _deltaF = args->GetDelatT_Vins();
@@ -186,7 +188,6 @@ void Analysis::InitArgs(ArgumentParser* args)
      _IgnoreBackwardMovement =args->GetIgnoreBackwardMovement();
      _grid_size_X = int(args->GetGridSizeX());
      _grid_size_Y = int(args->GetGridSizeY());
-     _geoPoly = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_D);
      _geometryFileName=args->GetGeometryFilename();
      _projectRootDir=args->GetProjectRootDir();
      _trajFormat=args->GetFileFormat();
@@ -199,11 +200,11 @@ void Analysis::InitArgs(ArgumentParser* args)
 
 std::map<int, polygon_2d> Analysis::ReadGeometry(const fs::path& geometryFile, const std::vector<MeasurementArea_B*>& areas)
 {
-
      _building = new Building();
      _building->LoadGeometry(geometryFile.string());
      // create the polygons
      _building->InitGeometry();
+     // _building->AddSurroundingRoom();
 
      double geo_minX  = FLT_MAX;
      double geo_minY  = FLT_MAX;
@@ -221,10 +222,8 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const fs::path& geometryFile, c
                for (auto&& it_sub : it_room.second->GetAllSubRooms())
                {
                     SubRoom* subroom = it_sub.second.get();
-
                     point_2d point(0,0);
                     boost::geometry::centroid(area->_poly,point);
-
                     //check if the area is contained in the obstacle
                     if(subroom->IsInSubRoom(Point(point.x()/M2CM,point.y()/M2CM)))
                     {
@@ -245,7 +244,6 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const fs::path& geometryFile, c
                               geoPoly[area->_id].inners().resize(k++);
                               geoPoly[area->_id].inners().back();
                               model::ring<point_2d>& inner = geoPoly[area->_id].inners().back();
-
                               for(auto&& tmp_point:obst->GetPolygon())
                               {
                                    append(inner, make<point_2d>(tmp_point._x*M2CM, tmp_point._y*M2CM));
@@ -267,9 +265,8 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const fs::path& geometryFile, c
      _highVertexY = geo_maxY;
      _lowVertexX = geo_minX;
      _lowVertexY = geo_minY;
-     // using boost::geometry::dsv;
+     using boost::geometry::dsv;
      // cout<<"INFO: \tGeometry polygon is:\t" << dsv(geoPoly[1])<<endl;
-
      return geoPoly;
 }
 
@@ -488,7 +485,7 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
                bool result_I = method_I.Process(data,_scriptsLocation, _areaForMethod_I[i]->_zPos);
                if(result_I)
                {
-                    Log->Write("INFO:\tSuccess with Method I uing measurement area id %d!\n",_areaForMethod_I[i]->_id);
+                    Log->Write("INFO:\tSuccess with Method I using measurement area id %d!\n",_areaForMethod_I[i]->_id);
                     std::cout << "INFO:\tSuccess with Method I using measurement area id "<< _areaForMethod_I[i]->_id << "\n";
                     if(_plotTimeseriesI[i])
                     {
