@@ -159,7 +159,6 @@ public:
      {
           return _goalToLineUIDmap;
      }
-
      std::map<int, int> getGoalToLineUIDmap2() const
      {
           return _goalToLineUIDmap2;
