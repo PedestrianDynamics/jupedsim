@@ -41,7 +41,6 @@
 #include "math/OperationalModel.h"
 #include "math/ODESolver.h"
 #include "routing/global_shortest/GlobalRouter.h"
-#include "routing/global_shortest_trips/GlobalRouterTrips.h"
 #include "routing/quickest/QuickestPathRouter.h"
 #include "routing/DirectionStrategy.h"
 #include "routing/RoutingEngine.h"

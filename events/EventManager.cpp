@@ -38,7 +38,6 @@
 #include "../geometry/SubRoom.h"
 #include "../tinyxml/tinyxml.h"
 #include "../routing/global_shortest/GlobalRouter.h"
-#include "../routing/global_shortest_trips/GlobalRouterTrips.h"
 #include "../routing/quickest/QuickestPathRouter.h"
 #include "../routing/smoke_router/SmokeRouter.h"
 #include "../routing/ff_router/ffRouter.h"
@@ -670,11 +669,11 @@ Router * EventManager::CreateRouter(const RoutingStrategy& strategy)
      switch(strategy)
      {
           case ROUTING_LOCAL_SHORTEST:
-               rout = new GlobalRouterTrips(ROUTING_LOCAL_SHORTEST, ROUTING_LOCAL_SHORTEST);
+               rout = new GlobalRouter(ROUTING_LOCAL_SHORTEST, ROUTING_LOCAL_SHORTEST);
                break;
 
           case ROUTING_GLOBAL_SHORTEST:
-               rout = new GlobalRouterTrips(ROUTING_GLOBAL_SHORTEST, ROUTING_GLOBAL_SHORTEST);
+               rout = new GlobalRouter(ROUTING_GLOBAL_SHORTEST, ROUTING_GLOBAL_SHORTEST);
                break;
 
           case ROUTING_QUICKEST:
