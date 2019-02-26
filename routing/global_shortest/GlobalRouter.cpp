@@ -185,7 +185,7 @@ bool GlobalRouter::Init(Building* building)
                     cross->GetSubRoom1()->GetSubRoomID());
           ap->SetFriendlyName(friendlyName);
 
-          ap->SetClosed(!cross->IsOpen());
+          ap->SetClosed(cross->IsClose());
           // save the connecting sub/rooms IDs
           int id1 = -1;
           if (cross->GetSubRoom1()) {
@@ -222,7 +222,7 @@ bool GlobalRouter::Init(Building* building)
                     cross->GetSubRoom1()->GetSubRoomID());
           ap->SetFriendlyName(friendlyName);
 
-          ap->SetClosed(!cross->IsOpen());
+          ap->SetClosed(cross->IsClose());
           // save the connecting sub/rooms IDs
           int id1 = -1;
           if (cross->GetSubRoom1()) {
@@ -238,7 +238,7 @@ bool GlobalRouter::Init(Building* building)
           _accessPoints[door] = ap;
 
           //set the final destination
-          if (cross->IsExit() && cross->IsOpen()) {
+          if (cross->IsExit() && !cross->IsClose()) {
                ap->SetFinalExitToOutside(true);
                Log->Write("INFO: \tExit to outside found: %d [%s]",ap->GetID(),ap->GetFriendlyName().c_str());
           } else if ((id1 == -1) && (id2 == -1)) {
