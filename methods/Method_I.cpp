@@ -214,8 +214,8 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
           {
                fclose(_fIndividualFD);
           }
-          return return_value;
      }
+    return return_value;
 }
 
      bool Method_I::OpenFileMethodI()
@@ -522,36 +522,6 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
           velo.close();
      }
 
-/*std::string polygon_to_string2(const polygon_2d & polygon)
-  {
-  string polygon_str = "((";
-  for(auto point: boost::geometry::exterior_ring(polygon) )
-  {
-  double x = boost::geometry::get<0>(point);
-  double y = boost::geometry::get<1>(point);
-  polygon_str.append("(");
-  polygon_str.append(std::to_string(x));
-  polygon_str.append(", ");
-  polygon_str.append(std::to_string(y));
-  polygon_str.append("), ");
-  }
-  for(auto ring: boost::geometry::interior_rings(polygon) )
-  {
-  for(auto point: ring )
-  {
-  double x = boost::geometry::get<0>(point);
-  double y = boost::geometry::get<1>(point);
-  polygon_str.append("(");
-  polygon_str.append(std::to_string(x));
-  polygon_str.append(", ");
-  polygon_str.append(std::to_string(y));
-  polygon_str.append("), ");
-  }
-  }
-  polygon_str.pop_back(); polygon_str.pop_back();  //remove last komma
-  polygon_str.append("))");
-  return polygon_str;
-  }*/
 
      void Method_I::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const vector<int>& Id, const polygon_2d& measureArea, const string& frid)
      {
