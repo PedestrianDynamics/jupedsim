@@ -516,11 +516,11 @@ Point VelocityModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
      }
 
      // and finally the closed doors
-     for(const auto & goal: subroom->GetAllTransitions())
+     for(const auto & trans: subroom->GetAllTransitions())
      {
-          if(! goal->IsOpen())
+          if(!trans->IsOpen())
           {
-                f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)), centroid, inside);
+                f +=  ForceRepWall(ped,*(static_cast<Line*>(trans)), centroid, inside);
           }
           // int uid1= goal->GetUniqueID();
           // int uid2=ped->GetExitIndex();
