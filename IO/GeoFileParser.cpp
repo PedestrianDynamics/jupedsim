@@ -46,8 +46,8 @@ void GeoFileParser::LoadBuilding(Building* building)
           exit(EXIT_FAILURE);
      }
      if (!LoadTrafficInfo(building)) {
-           Log->Write("ERROR:\t could not load extra traffic information!");
-           exit(EXIT_FAILURE);
+          Log->Write("ERROR:\t could not load extra traffic information!");
+          exit(EXIT_FAILURE);
      }
 }
 
@@ -75,10 +75,10 @@ bool GeoFileParser::LoadGeometry(Building* building)
           return false;
      }
      if (xRootNode->Attribute("unit")) if (std::string(xRootNode->Attribute("unit"))!="m") {
-          Log->Write("ERROR:\tOnly the unit m (meters) is supported. \n\tYou supplied [%s]",
-                    xRootNode->Attribute("unit"));
-          return false;
-     }
+               Log->Write("ERROR:\tOnly the unit m (meters) is supported. \n\tYou supplied [%s]",
+                         xRootNode->Attribute("unit"));
+               return false;
+          }
 
      double version = xmltof(xRootNode->Attribute("version"), -1);
 
@@ -580,18 +580,37 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
                     sprintf(tmp, "\t>> ID: %d\n", id);
                     str.append(tmp);
                     //------------------ state
-                    std::string state = xmltoa(xDoor->Attribute("state"), "open");
-                    //store transition in a map and call getTransition/getCrossin
-                    if (state=="open") {
+                    std::string stateStr = xmltoa(xDoor->Attribute("state"), "open");
+                    DoorState state = StringToDoorState(stateStr);
+                    //store transition in a map and call getTransition/getCrossing
+                    switch (state) {
+                    case DoorState::OPEN:
                          building->GetTransition(id)->Open();
-                    }
-                    else if (state=="close") {
+                         break;
+                    case DoorState::CLOSE:
                          building->GetTransition(id)->Close();
+                         break;
+                    case DoorState::TEMP_CLOSE:
+                         building->GetTransition(id)->TempClose();
+                         break;
+                    case DoorState::ERROR:
+                         Log->Write("WARNING:\t Unknown door state: <%s>. open or close. Default: open",
+                                   stateStr.c_str());
+                         building->GetTransition(id)->Open();
+                         break;
                     }
-                    else {
-                         Log->Write("WARNING:\t Unknown door state: <%s>. open or close. Default: open", state.c_str());
-                    }
-                    sprintf(tmp, "\t>> state: %s\n", state.c_str());
+
+//                    if (state=="open") {
+//                         building->GetTransition(id)->Open();
+//                    }
+//                    else if (state=="close") {
+//                         building->GetTransition(id)->Close();
+//                    }
+//                    else {
+//                         Log->Write("WARNING:\t Unknown door state: <%s>. open or close. Default: open", state.c_str());
+//                    }
+//                    }
+                    sprintf(tmp, "\t>> state: %s\n", stateStr.c_str());
                     str.append(tmp);
                     //------------------ outflow
                     double outflow = xmltof(xDoor->Attribute("outflow"), -1.0);

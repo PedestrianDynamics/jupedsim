@@ -24,7 +24,7 @@
  *
  *
  **/
- 
+
 
 #ifndef _TRANSITION_H
 #define _TRANSITION_H
@@ -36,60 +36,58 @@ class Room;
 
 class Transition : public Crossing {
 private:
-     Room* _room2;
-     bool _isOpen;
-     std::string _type;
-     // number of agents that passed that exit
-     
+    Room* _room2;
+    std::string _type;
+    // number of agents that passed that exit
+
 public:
-     /**
-      * Cosntructor
-      */
-     Transition();
+    /**
+     * Cosntructor
+     */
+    Transition();
 
-     /**
-      * Destructor
-      */
-     virtual ~Transition();
+    /**
+     * Destructor
+     */
+    virtual ~Transition();
 
-     /**
-      * Set/Get the type of the transition
-      */
-     void SetType(std::string s);
+    /**
+     * Set/Get the type of the transition
+     */
+    void SetType(std::string s);
 
-     /**
-      * Set/Get the second room associated with this transition.
-      * The first one is set in the crossing class.
-      */
-     void SetRoom2(Room* ID);
-	    
-     /**
-      * Set/Get the type of the transition
-      */
-     std::string GetType() const;
+    /**
+     * Set/Get the second room associated with this transition.
+     * The first one is set in the crossing class.
+     */
+    void SetRoom2(Room* ID);
 
-     /**
-      * Set/Get the second room associated with this transition.
-      * The first one is set in the crossing class.
-      */
-     Room* GetRoom2() const;
+    /**
+     * Set/Get the type of the transition
+     */
+    std::string GetType() const;
 
-
-     /**
-      * @return the other room.
-      */
-     Room* GetOtherRoom(int room_id) const;
-
-     // virtual functions
-     virtual bool IsOpen() const;
-     virtual bool IsExit() const;
-     virtual bool IsTransition() const;
-     virtual bool IsInRoom(int roomID) const;
-     virtual SubRoom* GetOtherSubRoom(int roomID, int subroomID) const;
+    /**
+     * Set/Get the second room associated with this transition.
+     * The first one is set in the crossing class.
+     */
+    Room* GetRoom2() const;
 
 
-     virtual void WriteToErrorLog() const;
-     virtual std::string GetDescription() const; // TraVisTo Ausgabe
+    /**
+     * @return the other room.
+     */
+    Room* GetOtherRoom(int room_id) const;
+
+    // virtual functions
+    virtual bool IsExit() const;
+    virtual bool IsTransition() const;
+    virtual bool IsInRoom(int roomID) const;
+    virtual SubRoom* GetOtherSubRoom(int roomID, int subroomID) const;
+
+
+    virtual void WriteToErrorLog() const;
+    virtual std::string GetDescription() const; // TraVisTo Ausgabe
 };
 
 #endif  /* _TRANSITION_H */

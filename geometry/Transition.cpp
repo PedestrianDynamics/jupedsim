@@ -37,7 +37,7 @@ using namespace std;
 
 Transition::Transition() : Crossing()
 {
-     _isOpen = true;
+//     _isOpen = true;
      _room2 = nullptr;
 //     _lastTickTime1 = 0;
 //     _lastTickTime2 = 0;
@@ -62,10 +62,10 @@ void Transition::SetRoom2(Room* r)
      _room2 = r;
 }
 
-bool Transition::IsOpen() const
-{
-     return Crossing::IsOpen();
-}
+//bool Transition::IsOpen() const
+//{
+//     return Crossing::IsOpen();
+//}
 
 
 Room* Transition::GetRoom2() const
@@ -145,12 +145,12 @@ void Transition::WriteToErrorLog() const
      string s;
      char tmp[CLENGTH];
      sprintf(tmp, "\t\tTRANS: %d [%s] (%f, %f) -- (%f, %f)\n", GetID(), GetCaption().c_str(),
-             GetPoint1()._x, GetPoint1()._y, GetPoint2()._x, GetPoint2()._y);
+               GetPoint1()._x, GetPoint1()._y, GetPoint2()._x, GetPoint2()._y);
      s.append(tmp);
      // erster Raum
      if (GetRoom1() != nullptr) {
           sprintf(tmp, "\t\t\t\tRoom: %d [%s] SubRoom: %d", GetRoom1()->GetID(),
-                  GetRoom1()->GetCaption().c_str(), GetSubRoom1()->GetSubRoomID());
+                    GetRoom1()->GetCaption().c_str(), GetSubRoom1()->GetSubRoomID());
      } else {
           sprintf(tmp, "\t\t\t\tAusgang");
      }
@@ -158,7 +158,7 @@ void Transition::WriteToErrorLog() const
      // zweiter Raum
      if (GetRoom2() != nullptr) {
           sprintf(tmp, " <->\tRoom: %d [%s] SubRoom: %d\n", GetRoom2()->GetID(),
-                  GetRoom2()->GetCaption().c_str(), GetSubRoom2()->GetSubRoomID());
+                    GetRoom2()->GetCaption().c_str(), GetSubRoom2()->GetSubRoomID());
      } else {
           sprintf(tmp, " <->\tAusgang\n");
      }
@@ -175,14 +175,14 @@ string Transition::GetDescription() const
      sprintf(tmp,"\t\t<door ID=\"%d\" color=\"180\" caption=\"%d_%d_%s\">\n",GetUniqueID(),GetID(),GetUniqueID(),GetCaption().c_str());
      geometry.append(tmp);
      sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-             (GetPoint1()._x) * FAKTOR,
-             (GetPoint1()._y) * FAKTOR,
-             GetSubRoom1()->GetElevation(GetPoint1())*FAKTOR);
+               (GetPoint1()._x) * FAKTOR,
+               (GetPoint1()._y) * FAKTOR,
+               GetSubRoom1()->GetElevation(GetPoint1())*FAKTOR);
      geometry.append(tmp);
      sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-             (GetPoint2()._x) * FAKTOR,
-             (GetPoint2()._y) * FAKTOR,
-             GetSubRoom1()->GetElevation(GetPoint2())*FAKTOR);
+               (GetPoint2()._x) * FAKTOR,
+               (GetPoint2()._y) * FAKTOR,
+               GetSubRoom1()->GetElevation(GetPoint2())*FAKTOR);
      geometry.append(tmp);
      geometry.append("\t\t</door>\n");
      return geometry;
