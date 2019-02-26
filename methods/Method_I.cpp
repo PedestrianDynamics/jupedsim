@@ -83,7 +83,7 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
      _fps =peddata.GetFps();
      int mycounter = 0;
      int minFrame = peddata.GetMinFrame();
-     Log->Write("INFO:\tMethod D: frame rate fps: <%.2f>, start: <%d>, stop: <%d> (minFrame = %d)", _fps, _startFrame, _stopFrame, minFrame);
+     Log->Write("INFO:\tMethod I: frame rate fps: <%.2f>, start: <%d>, stop: <%d> (minFrame = %d)", _fps, _startFrame, _stopFrame, minFrame);
      if(_startFrame != _stopFrame)
      {
           if(_startFrame==-1)
@@ -124,6 +124,7 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
      Log->Write("------------------------ Analyzing with Method I -----------------------------");
      //for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
      //for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
+
      for(auto ite: _peds_t)
      {
           int frameNr = ite.first;
@@ -154,10 +155,13 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
                     VInFrame.erase(VInFrame.begin() + i);
                     Log->Write("Warning:\t Pedestrian removed");
                     i--;
+
                }
           }
           int NumPeds = IdInFrame.size();
-          //---------------------------------------------------------------------------------------------------------------
+          // std::cout << "numpeds = " << NumPeds << "\n";
+
+//---------------------------------------------------------------------------------------------------------------
           if(_isOneDimensional)
           {
                CalcVoronoiResults1D(XInFrame, VInFrame, IdInFrame, _areaForMethod_I->_poly,str_frid);
@@ -209,11 +213,11 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
                     Log->Write("WARNING: \tVoronoi Diagrams are not obtained!. Frame: %d (minFrame = %d)\n", frid, minFrame);
                }
           }
-          fclose(_fVoronoiRhoV);
-          if(_calcIndividualFD)
-          {
-               fclose(_fIndividualFD);
-          }
+     }//peds
+     fclose(_fVoronoiRhoV);
+     if(_calcIndividualFD)
+     {
+          fclose(_fIndividualFD);
      }
     return return_value;
 }
@@ -551,6 +555,9 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
                             polygon_str.c_str(),
                             v_str.c_str());
                }
+               else{
+                    std::cout << "empty interectio with the measurement aren\n";
+                    }
                temp++;
           }
      }

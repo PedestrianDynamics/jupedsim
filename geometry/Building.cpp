@@ -265,19 +265,25 @@ void Building::AddSurroundingRoom()
      x_max = x_max + 10.0;
      y_min = y_min - 10.0;
      y_max = y_max + 10.0;
-
+     Log->Write("INFO: \tAdding surrounding room X: %f, Y: %f -- %f,  %f\n", x_min, x_max, y_min, y_max);
      SubRoom* bigSubroom = new NormalSubRoom();
+     bigSubroom->SetType("Subroom");
+     bigSubroom->SetPlanEquation(0,0,1); //@todo: dummy values
+
      bigSubroom->SetRoomID(_rooms.size());
      bigSubroom->SetSubRoomID(0); // should be the single subroom
      bigSubroom->AddWall(Wall(Point(x_min, y_min), Point(x_min, y_max)));
      bigSubroom->AddWall(Wall(Point(x_min, y_max), Point(x_max, y_max)));
      bigSubroom->AddWall(Wall(Point(x_max, y_max), Point(x_max, y_min)));
      bigSubroom->AddWall(Wall(Point(x_max, y_min), Point(x_min, y_min)));
+     vector<Line*> goals = vector<Line*>(); // dummy vector
+     bigSubroom->ConvertLineToPoly(goals);
 
      Room * bigRoom = new Room();
      bigRoom->AddSubRoom(bigSubroom);
      bigRoom->SetCaption("outside");
      bigRoom->SetID(_rooms.size());
+     bigRoom->SetZPos(0); //@todo: dummy value
      AddRoom(bigRoom);
      _xMin = x_min;
      _xMax = x_max;
