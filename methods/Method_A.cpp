@@ -38,8 +38,8 @@ Method_A::Method_A()
 {
      _classicFlow = 0;
      _vDeltaT = 0;
-     ub::matrix<double> _xCor(0,0);
-     ub::matrix<double> _yCor(0,0);
+     _xCor(0,0);
+     _yCor(0,0);
      _firstFrame = nullptr;
      _passLine = nullptr;
      _deltaT = 100;

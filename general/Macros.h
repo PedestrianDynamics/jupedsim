@@ -217,9 +217,9 @@ inline std::string polygon_to_string(const polygon_2d & polygon)
           polygon_str.append(std::to_string(y));
           polygon_str.append("), ");
      }
-     for(auto ring: boost::geometry::interior_rings(polygon) )
+     for(auto pRing: boost::geometry::interior_rings(polygon) )
      {
-          for(auto point: ring )
+          for(auto point: pRing )
           {
                double x = boost::geometry::get<0>(point);
                double y = boost::geometry::get<1>(point);

@@ -284,15 +284,15 @@ bool PedData::InitializeVariables(const fs::path& filename)
                                          // are consecutive. 1, 2, 10,
                                          // 11 does not work
           //---------- get position of index in unique index vector ---------------
-          auto it = std::find(unique_ids.begin(), unique_ids.end(), _IdsTXT[i]);
-          if (it == unique_ids.end())
+          auto it_uid = std::find(unique_ids.begin(), unique_ids.end(), _IdsTXT[i]);
+          if (it_uid == unique_ids.end())
           {
                Log->Write("Error:\t Id %d does not exist in file", _IdsTXT[i]);
                return false;
           }
           else
           {
-               ID  = std::distance(unique_ids.begin(), it);
+               ID  = std::distance(unique_ids.begin(), it_uid);
           }
           //--------------------
           int frm = _FramesTXT[i] - _minFrame;
@@ -321,15 +321,15 @@ bool PedData::InitializeVariables(const fs::path& filename)
                                       // indexes in the trajectories
                                       // are consecutive
 
-          auto it = std::find(unique_ids.begin(), unique_ids.end(), _IdsTXT[i]);
-          if (it == unique_ids.end())
+          auto itIds = std::find(unique_ids.begin(), unique_ids.end(), _IdsTXT[i]);
+          if (itIds == unique_ids.end())
           {
                Log->Write("Error2:\t Id %d does not exist in file", _IdsTXT[i]);
                return false;
           }
           else
           {
-               id  = std::distance(unique_ids.begin(), it);
+               id  = std::distance(unique_ids.begin(), itIds);
           }
 
           int t =_FramesTXT[i]- _minFrame;

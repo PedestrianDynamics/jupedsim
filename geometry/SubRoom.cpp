@@ -379,8 +379,8 @@ bool SubRoom::IsVisible(const Line &wall, const Point &position)
      return wall_is_vis;
 }
 
-// p1 and p2 are supposed to be pedestrian's positions. This function does not work properly 
-// for visibility checks with walls, since the line connecting the pedestrian's position 
+// p1 and p2 are supposed to be pedestrian's positions. This function does not work properly
+// for visibility checks with walls, since the line connecting the pedestrian's position
 // with the nearest point on the wall IS intersecting with the wall.
 bool SubRoom::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
 {
@@ -744,13 +744,13 @@ string NormalSubRoom::WriteSubRoom() const
                s.append("\t\t</wall>\n");
           }
 
-          const Point& pos = obst->GetCentroid();
+          const Point& posCenter = obst->GetCentroid();
 
           //add the obstacle caption
-          char tmp[CLENGTH];
-          sprintf(tmp, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" color=\"100\" />\n"
-                    , pos.GetX() * FAKTOR, pos.GetY() * FAKTOR,GetElevation(pos)*FAKTOR ,obst->GetId());
-          s.append(tmp);
+          char Tmp[CLENGTH];
+          sprintf(Tmp, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" color=\"100\" />\n"
+                    , posCenter.GetX() * FAKTOR, posCenter.GetY() * FAKTOR,GetElevation(posCenter)*FAKTOR ,obst->GetId());
+          s.append(Tmp);
      }
 
      return s;

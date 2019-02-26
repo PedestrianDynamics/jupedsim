@@ -198,7 +198,7 @@ bool Method_D::Process (const PedData& peddata,const fs::path& scriptsLocation, 
                          }
                          if(_outputVoronoiCellData)
                          { // output the Voronoi polygons of a frame
-                              OutputVoroGraph(str_frid, polygons_id, NumPeds, XInFrame, YInFrame,VInFrame);
+                              OutputVoroGraph(str_frid, polygons_id, NumPeds, VInFrame);
                          }
                     }
                     else
@@ -404,7 +404,7 @@ void Method_D::GetProfiles(const string& frameId, const vector<polygon_2d>& poly
      fclose(Prf_density);
 }
 
-void Method_D::OutputVoroGraph(const string & frameId,  std::vector<std::pair<polygon_2d, int> >& polygons_id, int numPedsInFrame, vector<double>& XInFrame, vector<double>& YInFrame,const vector<double>& VInFrame)
+void Method_D::OutputVoroGraph(const string & frameId,  std::vector<std::pair<polygon_2d, int> >& polygons_id, int numPedsInFrame,const vector<double>& VInFrame)
 {
      //string voronoiLocation=_projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/id_"+_measureAreaId;
 
@@ -444,9 +444,9 @@ void Method_D::OutputVoroGraph(const string & frameId,  std::vector<std::pair<po
      if(polys.is_open())
      {
           //for(vector<polygon_2d> polygon_iterator=polygons.begin(); polygon_iterator!=polygons.end(); polygon_iterator++)
-          for(auto && p:polygons_id)
+          for(auto && p_it : polygons_id)
           {
-               poly = p.first;
+               poly = p_it.first;
                for(auto&& point:poly.outer())
                {
                     point.x(point.x()*CMtoM);
@@ -460,7 +460,7 @@ void Method_D::OutputVoroGraph(const string & frameId,  std::vector<std::pair<po
                          point.y(point.y()*CMtoM);
                     }
                }
-               polys << p.second << " | " << dsv(poly) << endl;
+               polys << p_it.second << " | " << dsv(poly) << endl;
                //polys  <<dsv(poly)<< endl;
           }
      }

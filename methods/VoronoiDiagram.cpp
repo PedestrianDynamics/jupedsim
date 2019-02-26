@@ -447,10 +447,10 @@ point_type2 VoronoiDiagram::getIntersectionPoint(const point_2d& pt0, const poin
 {
      vector<point_2d> pt;
      segment edge0(pt0, pt1);
-     vector<point_2d> const& points = square.outer();
-     for (vector<point_2d>::size_type i = 1; i < points.size(); ++i)
+     vector<point_2d> const& opoints = square.outer();
+     for (vector<point_2d>::size_type i = 1; i < opoints.size(); ++i)
      {
-          segment edge1(points[i], points[i-1]);
+          segment edge1(opoints[i], opoints[i-1]);
           if(intersects(edge0, edge1))
           {
                intersection(edge0, edge1, pt);
@@ -459,7 +459,7 @@ point_type2 VoronoiDiagram::getIntersectionPoint(const point_2d& pt0, const poin
      }
      if(pt.empty())
      {
-          segment edge1(points[3], points[0]);
+          segment edge1(opoints[3], opoints[0]);
           intersection(edge0, edge1, pt);
      }
      point_type2 interpts(pt[0].x(), pt[0].y());

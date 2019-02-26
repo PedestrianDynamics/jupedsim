@@ -34,8 +34,8 @@ using std::vector;
 
 Method_B::Method_B()
 {
-     ub::matrix<double> _xCor(0,0);
-     ub::matrix<double> _yCor(0,0);
+     _xCor(0,0);
+     _yCor(0,0);
      _tIn = nullptr;
      _tOut = nullptr;
      _entrancePoint = {};

@@ -197,7 +197,7 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
                     }
                     if(_outputVoronoiCellData)
                     { // output the Voronoi polygons of a frame
-                         OutputVoroGraph(str_frid, polygons_id, NumPeds, XInFrame, YInFrame,VInFrame);
+                         OutputVoroGraph(str_frid, polygons_id, NumPeds,VInFrame);
                     }
                }
                else
@@ -396,7 +396,7 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
           fclose(Prf_density);
      }
 
-     void Method_I::OutputVoroGraph(const string & frameId,  std::vector<std::pair<polygon_2d, int> >& polygons_id, int numPedsInFrame, vector<double>& XInFrame, vector<double>& YInFrame,const vector<double>& VInFrame)
+     void Method_I::OutputVoroGraph(const string & frameId,  std::vector<std::pair<polygon_2d, int> >& polygons_id, int numPedsInFrame,const vector<double>& VInFrame)
      {
           //string voronoiLocation=_projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/id_"+_measureAreaId;
 
@@ -436,9 +436,9 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
           if(polys.is_open())
           {
                //for(vector<polygon_2d> polygon_iterator=polygons.begin(); polygon_iterator!=polygons.end(); polygon_iterator++)
-               for(auto && p:polygons_id)
+               for(auto && polygon_id:polygons_id)
                {
-                    poly = p.first;
+                    poly = polygon_id.first;
                     for(auto&& point:poly.outer())
                     {
                          point.x(point.x()*CMtoM);
@@ -452,7 +452,7 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
                               point.y(point.y()*CMtoM);
                          }
                     }
-                    polys << p.second << " | " << dsv(poly) << endl;
+                    polys << polygon_id.second << " | " << dsv(poly) << endl;
                     //polys  <<dsv(poly)<< endl;
                }
           }
