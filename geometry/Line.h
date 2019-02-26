@@ -277,7 +277,7 @@ public:
      /**
       * @return a nice formated string describing the line
       */
-     std::string toString() const;
+     virtual std::string toString() const;
 
      /**
       * @return the angle between two lines

@@ -226,6 +226,7 @@ public:
 
     void SetState(DoorState _state);
 
+    std::string toString() const;
 };
 
 #endif  /* _CROSSING_H */

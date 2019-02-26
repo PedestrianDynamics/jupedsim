@@ -338,3 +338,24 @@ void Crossing::SetState(DoorState _state)
 {
      Crossing::_state = _state;
 }
+
+std::string Crossing::toString() const
+{
+     std::stringstream tmp;
+//     tmp << _point1.toString() << "--" << _point2.toString();
+
+     tmp << this->GetPoint1().toString() << "--" << this->GetPoint2().toString();
+     switch (_state){
+     case DoorState::OPEN:
+          tmp << " open";
+          break;
+     case DoorState::CLOSE:
+          tmp << " close";
+          break;
+     case DoorState::TEMP_CLOSE:
+          tmp << " temp_close";
+          break;
+
+     }
+     return tmp.str();
+}
