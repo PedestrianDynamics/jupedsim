@@ -349,9 +349,10 @@ void Simulation::UpdateRoutesAndLocations()
           if(_gotSources)
                ped->FindRoute();
           //finally actualize the route
-          if ( !_gotSources && ped->FindRoute() == -1) {
+          if ( !_gotSources && ped->FindRoute() == -1 ) {
                //a destination could not be found for that pedestrian
-               Log->Write("ERROR: \tCould not find a route for pedestrian %d",ped->GetID());
+               Log->Write("ERROR: \tCould not find a route for pedestrian %d in room %d and subroom %d",
+                         ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID());
                //ped->FindRoute(); //debug only, plz remove
                std::function<void(const Pedestrian&)> f = std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
                ped->Relocate(f);

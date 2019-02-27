@@ -74,6 +74,7 @@ public:
      void ProcessEvent();
      //Eventhandling
      void CloseDoor(int id);
+     void TempCloseDoor(int id);
      void OpenDoor(int id);
      //void ChangeRouting(int id, const std::string& state);
      void GetEvent(char* c);

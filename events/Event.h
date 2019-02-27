@@ -9,6 +9,7 @@
 #define EVENTS_EVENT_H_
 
 #include <string>
+#include "../general/Macros.h"
 
 class Event
 {
@@ -37,7 +38,7 @@ public:
      /**
       * @return the state (open, close) of the event
       */
-     const std::string& GetState() const;
+     const DoorState GetState() const;
 
      /**
       * @return the time at which the event was recorded
@@ -58,7 +59,7 @@ private:
      double _time;
      int _id;
      std::string _type;
-     std::string _state;
+     DoorState _state;
 };
 
 #endif /* EVENTS_EVENT_H_ */

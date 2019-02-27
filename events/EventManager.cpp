@@ -258,24 +258,25 @@ bool EventManager::DisseminateKnowledge(Building* _b)
      }
 
 
+     //TODO Was passiert hier?
      //update the routers based on the configurations
      //#pragma omp parallel
      for(auto&& ped:_b->GetAllPedestrians())
      {
-          if(UpdateRoute(ped)==false)
-          {
-               //Clear the memory and attempt to reroute
-               //this can happen if all doors are known to be closed
-               ped->ClearKnowledge();
-               Log->Write("ERROR: \t clearing ped knowledge");
-               //ped->Dump(ped->GetID());
-               if(UpdateRoute(ped)==false)
-               {
-                    Log->Write("ERROR: \t cannot reroute the pedestrian. unknown problem");
-                    //return false;
-                    exit(EXIT_FAILURE);
-               }
-          }
+//          if(UpdateRoute(ped)==false)
+//          {
+//               //Clear the memory and attempt to reroute
+//               //this can happen if all doors are known to be closed
+//               ped->ClearKnowledge();
+//               Log->Write("ERROR: \t clearing ped knowledge");
+//               //ped->Dump(ped->GetID());
+//               if(UpdateRoute(ped)==false)
+//               {
+//                    Log->Write("ERROR: \t cannot reroute the pedestrian. unknown problem");
+//                    //return false;
+//                    exit(EXIT_FAILURE);
+//               }
+//          }
      }
      return true;
 }
@@ -516,10 +517,17 @@ void EventManager::ProcessEvent()
           if (fabs(event.GetTime() - current_time_d) < J_EPS_EVENT) {
                //Event with current time stamp detected
                Log->Write("INFO:\tEvent: after %.2f sec: ", current_time_d);
-               if (event.GetState().compare("close") == 0) {
-                    CloseDoor(event.GetId());
-               } else {
+               switch (event.GetState()){
+               case DoorState::OPEN:
                     OpenDoor(event.GetId());
+                    break;
+               case DoorState::CLOSE:
+                    CloseDoor(event.GetId());
+                    break;
+               case DoorState::TEMP_CLOSE:
+                    TempCloseDoor(event.GetId());
+                    break;
+
                }
           }
 
@@ -534,7 +542,7 @@ void EventManager::CloseDoor(int id)
 {
      Transition *t = _building->GetTransition(id);
 
-     if (t->IsOpen())
+     if (!t->IsClose())
      {
           t->Close();
           Log->Write("INFO:\tClosing door %d ", id);
@@ -548,6 +556,26 @@ void EventManager::CloseDoor(int id)
      }
 
 }
+
+void EventManager::TempCloseDoor(int id)
+{
+     Transition *t = _building->GetTransition(id);
+
+     if (!t->IsTempClose())
+     {
+          t->TempClose();
+          Log->Write("INFO:\tClosing door %d ", id);
+          //Create and save a graph corresponding to the actual state of the building.
+          if(CreateRoutingEngine(_building)==false)
+          {
+               Log->Write("ERROR: \tcannot create a routing engine with the new event");
+          }
+     } else {
+          Log->Write("WARNING: \tdoor %d is already close", id);
+     }
+
+}
+
 
 //open the door if it was open and relaunch the routing procedure
 void EventManager::OpenDoor(int id)
