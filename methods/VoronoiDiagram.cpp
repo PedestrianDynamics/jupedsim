@@ -65,22 +65,26 @@ std::vector<std::pair<polygon_2d, int> > VoronoiDiagram::getVoronoiPolygons(vect
           XInFrame.push_back(XInFrame[0]+10);
           YInFrame.push_back(YInFrame[0]+10);
           VInFrame.push_back(VInFrame[0]);
-          IdInFrame.push_back(IdInFrame[0]+1);
+          //IdInFrame.push_back(IdInFrame[0]+1);
+          IdInFrame.push_back(-1);
           // up left
           XInFrame.push_back(XInFrame[0]-10);
           YInFrame.push_back(YInFrame[0]+10);
           VInFrame.push_back(VInFrame[0]);
-          IdInFrame.push_back(IdInFrame[0]+2);
+          //IdInFrame.push_back(IdInFrame[0]+2);
+          IdInFrame.push_back(-2);
           // down right
           XInFrame.push_back(XInFrame[0]+10);
           YInFrame.push_back(YInFrame[0]-10);
           VInFrame.push_back(VInFrame[0]);
-          IdInFrame.push_back(IdInFrame[0]+3);
+          //IdInFrame.push_back(IdInFrame[0]+3);
+          IdInFrame.push_back(-3);
           // down left
           XInFrame.push_back(XInFrame[0]-10);
           YInFrame.push_back(YInFrame[0]-10);
           VInFrame.push_back(VInFrame[0]);
-          IdInFrame.push_back(IdInFrame[0]+4);
+          // IdInFrame.push_back(IdInFrame[0]+4);
+          IdInFrame.push_back(-4);
      }
 
      for (int i = 0; i < numPedsInFrame; i++)
@@ -129,6 +133,9 @@ std::vector<std::pair<polygon_2d, int> > VoronoiDiagram::getVoronoiPolygons(vect
                     break;
                }
           }
+          if(IdInFrame[Ncell] < 0 )
+               continue;
+
           XInFrame[Ncell] = thispoint.x();
           YInFrame[Ncell] = thispoint.y();
           int NumVertex = 0;
@@ -222,9 +229,14 @@ std::vector<std::pair<polygon_2d, int> > VoronoiDiagram::getVoronoiPolygons(vect
           //cout << "poly is: " << typeid(poly).name() << '\n'
           int id_ped = IdInFrame[Ncell];
           std::pair<polygon_2d, int>  poly_id = std::make_pair(poly, id_ped);
+          // if (id_ped < 0 )
+          // {
+          //      std::cout << "HH id: " << id_ped << "\n";
+          //      continue;
+          // }
           polygons_id.push_back(poly_id);
           Ncell++;
-     }
+     }// for voronoi cells
      return polygons_id;
 }
 
