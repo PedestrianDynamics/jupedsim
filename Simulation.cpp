@@ -579,20 +579,23 @@ double Simulation::RunBody(double maxSimTime)
         #endif
 
         // here open transition that should be closed
-//        TODO fix, opens door everytime...
-//        for (auto& itr: _building->GetAllTransitions())
-//        {
-//             Transition* Trans = itr.second;
-//             if(Trans->IsTempClose())
-//             {
-//                  Trans->UpdateClosingTime( _deltaT);
-//                  if(Trans->GetClosingTime() <= _deltaT)
-//                  {
-//                       Trans->changeTemporaryState();
-//                       Log-> Write("INFO:\tReset state of door %d,  Time=%.2f", Trans->GetID(), Pedestrian::GetGlobalTime());
-//                  }
-//             }
-//        }
+        //        TODO fix, opens door everytime...
+        for (auto& itr: _building->GetAllTransitions())
+        {
+             Transition* Trans = itr.second;
+             if(Trans->IsTempClose())
+             {
+                  if ((Trans->GetMaxDoorUsage() != std::numeric_limits<int>::max()) ||
+                    (Trans->GetOutflowRate() != std::numeric_limits<double>::max()) ){
+//                        || (Trans->GetOutflowRate() != std::numeric_limits<double>::max)){
+                      Trans->UpdateClosingTime( _deltaT);
+                      if(Trans->GetClosingTime() <= _deltaT){
+                          Trans->changeTemporaryState();
+                      }
+                      Log-> Write("INFO:\tReset state of door %d,  Time=%.2f", Trans->GetID(), Pedestrian::GetGlobalTime());
+                  }
+             }
+        }
     }// while time
     return t;
 }

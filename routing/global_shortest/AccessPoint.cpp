@@ -46,8 +46,9 @@ AccessPoint::AccessPoint(int id, double center[2],double radius)
      pCentre=Point(center[0],center[1]);
      _transitPedestrians = vector<Pedestrian*>();
      _connectingAPs = vector<AccessPoint*>();
-     _isClosed=0;
+//     _isClosed=0
      _navLine=nullptr;
+     _state = DoorState::OPEN;
 }
 
 AccessPoint::~AccessPoint()
@@ -60,15 +61,16 @@ int AccessPoint::GetID()
      return _id;
 }
 
-int AccessPoint::IsClosed()
+bool AccessPoint::IsClosed()
 {
-     return _isClosed;
+     return _state == DoorState::CLOSE;
 }
 
-void AccessPoint::SetClosed(int isClosed)
-{
-     _isClosed=isClosed;
-}
+//void AccessPoint::SetClosed(int isClosed)
+//{
+//     _isClosed=isClosed;
+//}
+
 void AccessPoint::SetFinalExitToOutside(bool isFinal)
 {
      _finaExitToOutside=isFinal;
@@ -258,6 +260,16 @@ void AccessPoint::SetFriendlyName(const std::string& name)
 const std::string AccessPoint::GetFriendlyName()
 {
      return _friendlyName;
+}
+
+void AccessPoint::SetState(DoorState state)
+{
+     _state = state;
+}
+
+DoorState AccessPoint::GetState() const
+{
+     return _state;
 }
 
 

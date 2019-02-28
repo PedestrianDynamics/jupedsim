@@ -261,8 +261,8 @@ bool EventManager::DisseminateKnowledge(Building* _b)
      //TODO Was passiert hier?
      //update the routers based on the configurations
      //#pragma omp parallel
-     for(auto&& ped:_b->GetAllPedestrians())
-     {
+//     for(auto&& ped:_b->GetAllPedestrians())
+//     {
 //          if(UpdateRoute(ped)==false)
 //          {
 //               //Clear the memory and attempt to reroute
@@ -277,7 +277,7 @@ bool EventManager::DisseminateKnowledge(Building* _b)
 //                    exit(EXIT_FAILURE);
 //               }
 //          }
-     }
+//     }
      return true;
 }
 
@@ -286,8 +286,17 @@ bool EventManager::UpdateRoute(Pedestrian* ped)
      //create the key as string.
      //map are sorted by default
      string key= ped->GetKnowledgeAsString();
+//     std::cout << "key: <" << key << ">" << std::endl;
      //get the router engine corresponding to the actual configuration
      bool status=true;
+
+//     for (auto event : _eventEngineStorage){
+//          std::cout << "_eventEngineStorage " << event.first << ": " << std::endl;
+//          for (auto router : event.second->GetAvailableRouters()){
+//               std::cout << router->GetStrategy() << std::endl;
+//          }
+//     }
+
      if (_eventEngineStorage.count(key)>0)
      {
           RoutingEngine* engine=_eventEngineStorage[key];
@@ -309,9 +318,9 @@ bool EventManager::UpdateRoute(Pedestrian* ped)
      }
      else
      {
-          //Log->Write("WARNING: \t unknown configuration <%s>", key.c_str());
-          //Log->Write("WARNING: \t  [%d] router available", _eventEngineStorage.size());
-          //Log->Write("       : \t trying to create");
+//          Log->Write("WARNING: \t unknown configuration <%s>", key.c_str());
+//          Log->Write("WARNING: \t  [%d] router available", _eventEngineStorage.size());
+//          Log->Write("       : \t trying to create");
           //CreateRoutingEngine(_building);
           status= false;
      }
@@ -527,7 +536,6 @@ void EventManager::ProcessEvent()
                case DoorState::TEMP_CLOSE:
                     TempCloseDoor(event.GetId());
                     break;
-
                }
           }
 
@@ -632,7 +640,7 @@ bool EventManager::CreateRoutingEngine(Building* _b, int first_engine)
 
      for(auto&& t:_b->GetAllTransitions())
      {
-          if(t.second->IsOpen()==false)
+          if(!t.second->IsClose())
                closed_doors.push_back(t.second->GetID());
      }
      std::sort(closed_doors.begin(), closed_doors.end());

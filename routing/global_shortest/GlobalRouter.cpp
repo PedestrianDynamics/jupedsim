@@ -185,7 +185,8 @@ bool GlobalRouter::Init(Building* building)
                     cross->GetSubRoom1()->GetSubRoomID());
           ap->SetFriendlyName(friendlyName);
 
-          ap->SetClosed(cross->IsClose());
+//          ap->SetClosed(cross->IsClose());
+          ap->SetState(cross->GetState());
           // save the connecting sub/rooms IDs
           int id1 = -1;
           if (cross->GetSubRoom1()) {
@@ -222,7 +223,8 @@ bool GlobalRouter::Init(Building* building)
                     cross->GetSubRoom1()->GetSubRoomID());
           ap->SetFriendlyName(friendlyName);
 
-          ap->SetClosed(cross->IsClose());
+//          ap->SetClosed(cross->IsClose());
+          ap->SetState(cross->GetState());
           // save the connecting sub/rooms IDs
           int id1 = -1;
           if (cross->GetSubRoom1()) {
@@ -389,6 +391,7 @@ bool GlobalRouter::Init(Building* building)
      //run the floyd warshall algorithm
      FloydWarshall();
 
+
      // set the configuration for reaching the outside
      // set the distances to all final APs
 
@@ -399,7 +402,8 @@ bool GlobalRouter::Init(Building* building)
           if(from_AP->GetFinalGoalOutside()) continue;
 
           //maybe put the distance to FLT_MAX
-          if(from_AP->IsClosed()) continue;
+          if(from_AP->IsClosed())
+               continue;
 
           double tmpMinDist = FLT_MAX;
           int tmpFinalGlobalNearestID = from_door;
@@ -687,13 +691,29 @@ bool GlobalRouter::GetPath(Pedestrian*ped, int goalID, std::vector<SubRoom*>& pa
 void GlobalRouter::FloydWarshall()
 {
      const int n = (const int) (_building->GetNumberOfGoals() + _building->GetAllGoals().size());
-     for (int k = 0; k < n; k++)
-          for (int i = 0; i < n; i++)
-               for (int j = 0; j < n; j++)
-                    if (_distMatrix[i][k] + _distMatrix[k][j] < _distMatrix[i][j]) {
-                         _distMatrix[i][j] = _distMatrix[i][k] + _distMatrix[k][j];
+     std::cout << "FloydWarshall ------------------" << std::endl;
+     for (int k = 0; k < n; k++) {
+          for (int i = 0; i<n; i++) {
+               for (int j = 0; j<n; j++) {
+                    if (_distMatrix[i][k]+_distMatrix[k][j]<_distMatrix[i][j]) {
+                         _distMatrix[i][j] = _distMatrix[i][k]+_distMatrix[k][j];
                          _pathsMatrix[i][j] = _pathsMatrix[k][j];
+
                     }
+               }
+          }
+     }
+
+     for (int i = 0; i<n; i++) {
+          for (int j = 0; j<n; j++) {
+               std::cout << _distMatrix[i][j] << "\t";
+          }
+          std::cout << std::endl;
+     }
+
+
+     std::cout << "FloydWarshall Ende----------------" << std::endl;
+
 }
 
 //void GlobalRouter::DumpAccessPoints(int p)
@@ -921,7 +941,7 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
                }
                if(relevant) {
                     //only if not closed
-                    if(ap->IsClosed()==0)
+                    if(!ap->IsClosed())
                          relevantAPS.push_back(ap);
                }
           }
@@ -976,7 +996,7 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
                }
                if(relevant)
                {
-                    if(ap->IsClosed()==0)
+                    if(!ap->IsClosed())
                          relevantAPS.push_back(ap);
                }
           }
