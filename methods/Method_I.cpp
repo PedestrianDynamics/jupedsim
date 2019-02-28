@@ -265,7 +265,7 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
                }
                else
                {
-                    fprintf(_fIndividualFD,"#framerate (fps):\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-2)) \t   Individual velocity(m/s)  \t Voronoi Polygon  \t Intersection Polygon\n",_fps);
+                    fprintf(_fIndividualFD,"#framerate (fps):\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-2)) \t   Individual velocity(m/s)  \t Voronoi Polygon\n",_fps);
                }
                return true;
           }
