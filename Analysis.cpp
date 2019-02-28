@@ -204,7 +204,7 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const fs::path& geometryFile, c
      _building->LoadGeometry(geometryFile.string());
      // create the polygons
      _building->InitGeometry();
-     _building->AddSurroundingRoom();
+     // _building->AddSurroundingRoom();
 
      double geo_minX  = FLT_MAX;
      double geo_minY  = FLT_MAX;
@@ -216,8 +216,6 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const fs::path& geometryFile, c
      //loop over all areas
      for(auto&& area: areas)
      {
-          std::cout << "area " << area->_id << "\n";
-
           //search for the subroom that contains that area
           for (auto&& it_room : _building->GetAllRooms())
           {
