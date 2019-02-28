@@ -103,7 +103,7 @@ private:
      std::tuple<double,double> GetVoronoiDensityVelocity(const std::vector<polygon_2d>& polygon, const std::vector<double>& Velocity, const polygon_2d & measureArea);
      void GetProfiles(const std::string& frameId, const std::vector<polygon_2d>& polygons, const std::vector<double>& velocity);
      void OutputVoroGraph(const std::string & frameId,  std::vector<std::pair<polygon_2d, int> >& polygons, int numPedsInFrame,const std::vector<double>& VInFrame);
-     void GetIndividualFD(const std::vector<polygon_2d>& polygon, const std::vector<double>& Velocity, const std::vector<int>& Id, const polygon_2d& measureArea, const std::string& frid);
+     void GetIndividualFD(const std::vector<polygon_2d>& polygon, const std::vector<double>& Velocity, const std::vector<int>& Id, const std::string& frid);
      /**
       * Reduce the precision of the points to two digits
       * @param polygon

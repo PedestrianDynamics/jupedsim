@@ -49,6 +49,7 @@ VoronoiDiagram::~VoronoiDiagram()
 std::vector<std::pair<polygon_2d, int> > VoronoiDiagram::getVoronoiPolygons(vector<double>& XInFrame, vector<double>& YInFrame,
           vector<double>& VInFrame, vector<int>& IdInFrame, const double Bound_Max)
 {
+     double  M2CM =  10000;
      int numPedsInFrame = IdInFrame.size();
      vector<int> XInFrame_temp;
      vector<int> YInFrame_temp;
@@ -62,26 +63,26 @@ std::vector<std::pair<polygon_2d, int> > VoronoiDiagram::getVoronoiPolygons(vect
      {
           numPedsInFrame += 4;
           // up right
-          XInFrame.push_back(XInFrame[0]+10);
-          YInFrame.push_back(YInFrame[0]+10);
+          XInFrame.push_back(XInFrame[0]+10*M2CM);
+          YInFrame.push_back(YInFrame[0]+10*M2CM);
           VInFrame.push_back(VInFrame[0]);
           //IdInFrame.push_back(IdInFrame[0]+1);
           IdInFrame.push_back(-1);
           // up left
-          XInFrame.push_back(XInFrame[0]-10);
-          YInFrame.push_back(YInFrame[0]+10);
+          XInFrame.push_back(XInFrame[0]-10*M2CM);
+          YInFrame.push_back(YInFrame[0]+10*M2CM);
           VInFrame.push_back(VInFrame[0]);
           //IdInFrame.push_back(IdInFrame[0]+2);
           IdInFrame.push_back(-2);
           // down right
-          XInFrame.push_back(XInFrame[0]+10);
-          YInFrame.push_back(YInFrame[0]-10);
+          XInFrame.push_back(XInFrame[0]+10*M2CM);
+          YInFrame.push_back(YInFrame[0]-10*M2CM);
           VInFrame.push_back(VInFrame[0]);
           //IdInFrame.push_back(IdInFrame[0]+3);
           IdInFrame.push_back(-3);
           // down left
-          XInFrame.push_back(XInFrame[0]-10);
-          YInFrame.push_back(YInFrame[0]-10);
+          XInFrame.push_back(XInFrame[0]-10*M2CM);
+          YInFrame.push_back(YInFrame[0]-10*M2CM);
           VInFrame.push_back(VInFrame[0]);
           // IdInFrame.push_back(IdInFrame[0]+4);
           IdInFrame.push_back(-4);
@@ -94,7 +95,10 @@ std::vector<std::pair<polygon_2d, int> > VoronoiDiagram::getVoronoiPolygons(vect
           YInFrame_temp.push_back(round(YInFrame[i]));
           VInFrame_temp.push_back(VInFrame[i]);
           IdInFrame_temp.push_back(IdInFrame[i]);
+          // std::cout << "i: " << i << " Id " << IdInFrame[i] << "  pos = " << XInFrame[i] << ", " << YInFrame[i] << "\n";
+
      }
+
 
 
      VD voronoidiagram;
@@ -133,8 +137,6 @@ std::vector<std::pair<polygon_2d, int> > VoronoiDiagram::getVoronoiPolygons(vect
                     break;
                }
           }
-          if(IdInFrame[Ncell] < 0 )
-               continue;
 
           XInFrame[Ncell] = thispoint.x();
           YInFrame[Ncell] = thispoint.y();
@@ -229,11 +231,10 @@ std::vector<std::pair<polygon_2d, int> > VoronoiDiagram::getVoronoiPolygons(vect
           //cout << "poly is: " << typeid(poly).name() << '\n'
           int id_ped = IdInFrame[Ncell];
           std::pair<polygon_2d, int>  poly_id = std::make_pair(poly, id_ped);
-          // if (id_ped < 0 )
-          // {
-          //      std::cout << "HH id: " << id_ped << "\n";
-          //      continue;
-          // }
+         if (id_ped < 0 )
+         {
+              continue;
+         }
           polygons_id.push_back(poly_id);
           Ncell++;
      }// for voronoi cells

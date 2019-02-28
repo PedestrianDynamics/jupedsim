@@ -55,7 +55,6 @@ Method_I::Method_I()
      _circleEdges = -1;
      _fIndividualFD = nullptr;
      _calcIndividualFD = false;
-     _fVoronoiRhoV = nullptr;
      _areaForMethod_I = nullptr;
      _plotVoronoiCellData=false;
      _isOneDimensional=false;
@@ -110,10 +109,6 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
           }
      }
 
-     if(!OpenFileMethodI())
-     {
-          return_value = false;
-     }
      if(_calcIndividualFD)
      {
           if (!OpenFileIndividualFD())
@@ -183,16 +178,17 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
                // std::cout << ">> polygons_id " << polygons_id.size() << "\n";
                vector<polygon_2d> polygons;
                for (auto p: polygons_id)
+               {
                     polygons.push_back(p.first);
+          }
 
                if(!polygons.empty())
                {
-                    OutputVoronoiResults(polygons, str_frid, VInFrame); // TODO polygons_id
                     if(_calcIndividualFD)
                     {
                          if(!_isOneDimensional)
                          {
-                              GetIndividualFD(polygons,VInFrame, IdInFrame, _areaForMethod_I->_poly, str_frid); // TODO polygons_id
+                              GetIndividualFD(polygons,VInFrame, IdInFrame,  str_frid); // TODO polygons_id
                          }
                     }
                     if(_getProfile)
@@ -214,7 +210,6 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
                }
           }
      }//peds
-     fclose(_fVoronoiRhoV);
      if(_calcIndividualFD)
      {
           fclose(_fIndividualFD);
@@ -288,9 +283,10 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
           {
                polygons_id = vd.cutPolygonsWithCircle(polygons_id, XInFrame, YInFrame, _cutRadius,_circleEdges);
           }
-          // std:: cout << " GetPolygons cirlces " << polygons_id.size() << "\n";
+//todo HH
           polygons_id = vd.cutPolygonsWithGeometry(polygons_id, _geoPoly, XInFrame, YInFrame);
-          // std:: cout << " GetPolygons geometry " << polygons_id.size() << "\n";
+          // todo HH
+          // std:: cout  << dsv(_geoPoly) << "\n";
           for(auto && p:polygons_id)
           {
                poly = p.first;
@@ -527,7 +523,7 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
      }
 
 
-     void Method_I::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const vector<int>& Id, const polygon_2d& measureArea, const string& frid)
+     void Method_I::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const vector<int>& Id, const string& frid)
      {
           double uniquedensity=0;
           double uniquevelocity=0;
@@ -535,29 +531,17 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
           int temp=0;
           for (const auto & polygon_iterator:polygon)
           {
-               polygon_list v;
-               intersection(measureArea, polygon_iterator, v);
-               if(!v.empty()) {
-
-                    string polygon_str = polygon_to_string(polygon_iterator);
-                    // string measureArea_str =
-                    // polygon_to_string(measureArea); // maybe used for debugging
-                    string v_str = polygon_to_string(v[0]);
-
-                    uniquedensity=1.0/(area(polygon_iterator)*CMtoM*CMtoM);
-                    uniquevelocity=Velocity[temp];
-                    uniqueId=Id[temp];
-                    fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\t%s\t%s\n",
-                            frid.c_str(),
-                            uniqueId,
-                            uniquedensity,
-                            uniquevelocity,
-                            polygon_str.c_str(),
-                            v_str.c_str());
-               }
-               else{
-                    std::cout << "empty interectio with the measurement aren\n";
-                    }
+               string polygon_str = polygon_to_string(polygon_iterator);
+               uniquedensity=1.0/(area(polygon_iterator)*CMtoM*CMtoM);
+               uniquevelocity=Velocity[temp];
+               uniqueId=Id[temp];
+               fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\t%s\n",
+                       frid.c_str(),
+                       uniqueId,
+                       uniquedensity,
+                       uniquevelocity,
+                       polygon_str.c_str()
+                    );
                temp++;
           }
      }
