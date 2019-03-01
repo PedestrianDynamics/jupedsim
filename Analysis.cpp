@@ -283,7 +283,7 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
      for(int frameNr = 0; frameNr < data.GetNumFrames(); frameNr++ )
      {
           vector<int> ids=_peds_t[frameNr];
-          vector<int> IdInFrame = data.GetIdInFrame(ids);
+          vector<int> IdInFrame = data.GetIdInFrame(frameNr, ids);
           vector<double> XInFrame = data.GetXInFrame(frameNr, ids);
           vector<double> YInFrame = data.GetYInFrame(frameNr, ids);
           for( unsigned int i=0;i<IdInFrame.size();i++)

@@ -240,8 +240,6 @@ bool PedData::InitializeVariables(const fs::path& filename)
      Log->Write("INFO: Total number of Agents: %d", _numPeds);
      CreateGlobalVariables(_numPeds, _numFrames);
      Log->Write("INFO: Create Global Variables done");
-
-
      for(int i=_minID;i<_minID+_numPeds; i++){
           int firstFrameIndex=INT_MAX;   //The first frame index of a pedestrian
           int lastFrameIndex=-1;    //The last frame index of a pedestrian
@@ -303,6 +301,7 @@ bool PedData::InitializeVariables(const fs::path& filename)
           _xCor(ID,frm) = x;
           _yCor(ID,frm) = y;
           _zCor(ID,frm) = z;
+          _id(ID,frm) = _IdsTXT[i];
           if(_vComponent == "F")
           {
                _vComp(ID,frm) = vcmp[i];
@@ -317,6 +316,7 @@ bool PedData::InitializeVariables(const fs::path& filename)
      //save the data for each frame
      for (unsigned int i = 0; i < _FramesTXT.size(); i++ )
      {
+
           int id = _IdsTXT[i]-_minID; // this make the assumption that
                                       // indexes in the trajectories
                                       // are consecutive
@@ -331,7 +331,6 @@ bool PedData::InitializeVariables(const fs::path& filename)
           {
                id  = std::distance(unique_ids.begin(), itIds);
           }
-
           int t =_FramesTXT[i]- _minFrame;
           _peds_t[t].push_back(id);
 
@@ -339,7 +338,6 @@ bool PedData::InitializeVariables(const fs::path& filename)
 
      return true;
 }
-
 // initialize the global variables. xml format
 bool PedData::InitializeVariables(TiXmlElement* xRootNode)
 {
@@ -433,6 +431,7 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
                _xCor(ID,frameNr) =  x*M2CM;
                _yCor(ID,frameNr) =  y*M2CM;
                _zCor(ID,frameNr) =  z*M2CM;
+               _id(ID,frameNr) = ID + _minID;
                if(_vComponent == "F")
                {
                     if(xAgent->Attribute("VD"))
@@ -574,13 +573,12 @@ vector<double> PedData::GetZInFrame(int frame, const vector<int>& ids) const
      return ZInFrame;
 }
 
-vector<int> PedData::GetIdInFrame(const vector<int>& ids) const
+vector<int> PedData::GetIdInFrame(int frame, const vector<int>& ids) const
 {
      vector<int> IdInFrame;
      for(int id:ids)
      {
-          id = id +_minID;
-          IdInFrame.push_back(id);
+          IdInFrame.push_back(_id(id,frame));
      }
      return IdInFrame;
 }
@@ -594,12 +592,14 @@ vector<int> PedData::GetIdInFrame(int frame, const vector<int>& ids, double zPos
           {
                if(fabs(_zCor(id,frame)-zPos*M2CM)<J_EPS_EVENT)
                {
-                    IdInFrame.push_back(id +_minID);
+                    //IdInFrame.push_back(id +_minID);
+                    IdInFrame.push_back(_id(id,frame));
                }
           }
           else
           {
-               IdInFrame.push_back(id +_minID);
+               // IdInFrame.push_back(id +_minID);
+               IdInFrame.push_back(_id(id,frame));
           }
      }
      return IdInFrame;
@@ -736,6 +736,8 @@ void PedData::CreateGlobalVariables(int numPeds, int numFrames)
      _yCor = ub::matrix<double>(numPeds, numFrames);
      Log->Write("INFO: allocate memory for zCor");
      _zCor = ub::matrix<double>(numPeds, numFrames);
+     Log->Write("INFO: allocate memory for index");
+     _id = ub::matrix<double>(numPeds, numFrames);
      Log->Write("INFO: allocate memory for vComp");
      _vComp = ub::matrix<std::string>(numPeds, numFrames);
      Log->Write(" Finished memory allocation");

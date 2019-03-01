@@ -67,9 +67,10 @@ public:
      ub::matrix<double> GetXCor() const;
      ub::matrix<double> GetYCor() const;
      ub::matrix<double> GetZCor() const;
+     ub::matrix<double> GetId() const;
      int* GetFirstFrame() const;
      int* GetLastFrame() const;
-     std::vector<int> GetIdInFrame(const std::vector<int>& ids) const;
+     std::vector<int> GetIdInFrame(int frame, const std::vector<int>& ids) const;
      std::vector<int> GetIdInFrame(int frame, const std::vector<int>& ids, double zPos) const;
      std::vector<double> GetXInFrame(int frame, const std::vector<int>& ids, double zPos) const;
      std::vector<double> GetYInFrame(int frame, const std::vector<int>& ids, double zPos) const;
@@ -108,6 +109,7 @@ private:
      ub::matrix<double> _xCor;
      ub::matrix<double> _yCor;
      ub::matrix<double> _zCor;
+     ub::matrix<double> _id;
      ub::matrix<std::string> _vComp;
 
 };
