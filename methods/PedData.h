@@ -95,6 +95,7 @@ private:
      fs::path _outputLocation="";
      int _minFrame=0;
      int _minID=1;
+     int _maxID=0;
      int _numFrames=0;  // total number of frames
      int _numPeds=0; // total number of pedestrians
      float _fps=16;
