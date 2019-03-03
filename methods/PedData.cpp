@@ -29,6 +29,8 @@
 #include "PedData.h"
 #include <cmath>
 #include <string>
+#include <set>
+
 using std::string;
 using std::map;
 using std::vector;
@@ -45,6 +47,7 @@ PedData::~PedData()
 bool PedData::ReadData(const fs::path& projectRootDir, const fs::path&outputLocation, const fs::path& path, const fs::path& filename, const FileFormat& trajformat, int deltaF, std::string vComponent, const bool IgnoreBackwardMovement)
 {
      _minID = INT_MAX;
+     _maxID = INT_MAX;
      _minFrame = INT_MAX;
      _deltaF = deltaF;
      _vComponent = vComponent;
@@ -67,8 +70,8 @@ bool PedData::ReadData(const fs::path& projectRootDir, const fs::path&outputLoca
                return false;
           }
           TiXmlElement* xRootNode = docGeo.RootElement();
-          fs::path filename(xRootNode->ValueStr());
-          result=InitializeVariables(filename);	//initialize some global variables
+          result=InitializeVariables(xRootNode);	//initialize some global
+                                                        //variables using xml format
      }
 
      else if(trajformat == FORMAT_PLAIN)
@@ -92,7 +95,7 @@ bool PedData::InitializeVariables(const fs::path& filename)
      fdata.open(filename.string());
      if (fdata.is_open() == false)
      {
-           Log->Write("ERROR: \t could not parse the trajectories file <%s>",filename.string().c_str());
+           Log->Write("ERROR: \t could not open the trajectories file <%s>",filename.string().c_str());
           return false;
      }
      else
@@ -218,10 +221,13 @@ bool PedData::InitializeVariables(const fs::path& filename)
           Log->Write("INFO:\t Finished reading the data");
 
      }
+
      fdata.close();
      Log->Write("INFO: Got %d lines", _IdsTXT.size());
      _minID = *min_element(_IdsTXT.begin(),_IdsTXT.end());
+     _maxID = *max_element(_IdsTXT.begin(),_IdsTXT.end());
      Log->Write("INFO: minID: %d", _minID);
+     Log->Write("INFO: maxID: %d", _maxID);
      _minFrame = *min_element(_FramesTXT.begin(),_FramesTXT.end());
      Log->Write("INFO: minFrame: %d", _minFrame);
      //Total number of frames
@@ -230,18 +236,20 @@ bool PedData::InitializeVariables(const fs::path& filename)
 
      //Total number of agents
      std::vector<int> unique_ids = _IdsTXT;
-     // no need to
+
+    // no need to
      //sort. Assume that ids are ascendant
-     sort(unique_ids.begin(), unique_ids.end());
-     std::vector<int>::iterator it;
-     it = unique(unique_ids.begin(), unique_ids.end());
-     unique_ids.resize(distance(unique_ids.begin(),it));
+
+    std::set<int> s;
+    for( auto a: _IdsTXT )
+    {
+        s.insert( a );
+    }
+    unique_ids.assign( s.begin(), s.end() );
      _numPeds = unique_ids.size();
      Log->Write("INFO: Total number of Agents: %d", _numPeds);
      CreateGlobalVariables(_numPeds, _numFrames);
      Log->Write("INFO: Create Global Variables done");
-
-
      for(int i=_minID;i<_minID+_numPeds; i++){
           int firstFrameIndex=INT_MAX;   //The first frame index of a pedestrian
           int lastFrameIndex=-1;    //The last frame index of a pedestrian
@@ -284,15 +292,15 @@ bool PedData::InitializeVariables(const fs::path& filename)
                                          // are consecutive. 1, 2, 10,
                                          // 11 does not work
           //---------- get position of index in unique index vector ---------------
-          auto it = std::find(unique_ids.begin(), unique_ids.end(), _IdsTXT[i]);
-          if (it == unique_ids.end())
+          auto it_uid = std::find(unique_ids.begin(), unique_ids.end(), _IdsTXT[i]);
+          if (it_uid == unique_ids.end())
           {
                Log->Write("Error:\t Id %d does not exist in file", _IdsTXT[i]);
                return false;
           }
           else
           {
-               ID  = std::distance(unique_ids.begin(), it);
+               ID  = std::distance(unique_ids.begin(), it_uid);
           }
           //--------------------
           int frm = _FramesTXT[i] - _minFrame;
@@ -303,6 +311,7 @@ bool PedData::InitializeVariables(const fs::path& filename)
           _xCor(ID,frm) = x;
           _yCor(ID,frm) = y;
           _zCor(ID,frm) = z;
+          _id(ID,frm) = _IdsTXT[i];
           if(_vComponent == "F")
           {
                _vComp(ID,frm) = vcmp[i];
@@ -317,21 +326,21 @@ bool PedData::InitializeVariables(const fs::path& filename)
      //save the data for each frame
      for (unsigned int i = 0; i < _FramesTXT.size(); i++ )
      {
+
           int id = _IdsTXT[i]-_minID; // this make the assumption that
                                       // indexes in the trajectories
                                       // are consecutive
 
-          auto it = std::find(unique_ids.begin(), unique_ids.end(), _IdsTXT[i]);
-          if (it == unique_ids.end())
+          auto itIds = std::find(unique_ids.begin(), unique_ids.end(), _IdsTXT[i]);
+          if (itIds == unique_ids.end())
           {
                Log->Write("Error2:\t Id %d does not exist in file", _IdsTXT[i]);
                return false;
           }
           else
           {
-               id  = std::distance(unique_ids.begin(), it);
+               id  = std::distance(unique_ids.begin(), itIds);
           }
-
           int t =_FramesTXT[i]- _minFrame;
           _peds_t[t].push_back(id);
 
@@ -339,16 +348,15 @@ bool PedData::InitializeVariables(const fs::path& filename)
 
      return true;
 }
-
-// initialize the global variables variables
+// initialize the global variables. xml format
 bool PedData::InitializeVariables(TiXmlElement* xRootNode)
 {
      if( ! xRootNode ) {
-          Log->Write("ERROR:\tRoot element does not exist");
+          Log->Write("ERROR:\tPedData::InitializeVariables: Root element does not exist");
           return false;
      }
      if( xRootNode->ValueStr () != "trajectories" ) {
-          Log->Write("ERROR:\tRoot element value is not 'trajectories'.");
+          Log->Write("ERROR:\tPedData::InitializeVariables. Root element value is not 'trajectories'.");
           return false;
      }
 
@@ -433,6 +441,7 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
                _xCor(ID,frameNr) =  x*M2CM;
                _yCor(ID,frameNr) =  y*M2CM;
                _zCor(ID,frameNr) =  z*M2CM;
+               _id(ID,frameNr) = ID + _minID;
                if(_vComponent == "F")
                {
                     if(xAgent->Attribute("VD"))
@@ -574,13 +583,12 @@ vector<double> PedData::GetZInFrame(int frame, const vector<int>& ids) const
      return ZInFrame;
 }
 
-vector<int> PedData::GetIdInFrame(const vector<int>& ids) const
+vector<int> PedData::GetIdInFrame(int frame, const vector<int>& ids) const
 {
      vector<int> IdInFrame;
      for(int id:ids)
      {
-          id = id +_minID;
-          IdInFrame.push_back(id);
+          IdInFrame.push_back(_id(id,frame));
      }
      return IdInFrame;
 }
@@ -594,12 +602,14 @@ vector<int> PedData::GetIdInFrame(int frame, const vector<int>& ids, double zPos
           {
                if(fabs(_zCor(id,frame)-zPos*M2CM)<J_EPS_EVENT)
                {
-                    IdInFrame.push_back(id +_minID);
+                    //IdInFrame.push_back(id +_minID);
+                    IdInFrame.push_back(_id(id,frame));
                }
           }
           else
           {
-               IdInFrame.push_back(id +_minID);
+               // IdInFrame.push_back(id +_minID);
+               IdInFrame.push_back(_id(id,frame));
           }
      }
      return IdInFrame;
@@ -736,6 +746,8 @@ void PedData::CreateGlobalVariables(int numPeds, int numFrames)
      _yCor = ub::matrix<double>(numPeds, numFrames);
      Log->Write("INFO: allocate memory for zCor");
      _zCor = ub::matrix<double>(numPeds, numFrames);
+     Log->Write("INFO: allocate memory for index");
+     _id = ub::matrix<double>(numPeds, numFrames);
      Log->Write("INFO: allocate memory for vComp");
      _vComp = ub::matrix<std::string>(numPeds, numFrames);
      Log->Write(" Finished memory allocation");

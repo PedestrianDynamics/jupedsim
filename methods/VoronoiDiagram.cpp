@@ -49,11 +49,44 @@ VoronoiDiagram::~VoronoiDiagram()
 std::vector<std::pair<polygon_2d, int> > VoronoiDiagram::getVoronoiPolygons(vector<double>& XInFrame, vector<double>& YInFrame,
           vector<double>& VInFrame, vector<int>& IdInFrame, const double Bound_Max)
 {
-     const int numPedsInFrame = IdInFrame.size();
+     double  M2CM =  10000;
+     int numPedsInFrame = IdInFrame.size();
      vector<int> XInFrame_temp;
      vector<int> YInFrame_temp;
      vector<double> VInFrame_temp;
      vector<int> IdInFrame_temp;
+     // in case 1 or 2 pedestrians are in the geometry
+     // add dummy pedestrians around to enable voronoi calculations
+     // @todo: maybe use negative ids for these dummy pedestrians to exclude
+     // them from any analysis.
+     if(numPedsInFrame == 1 || numPedsInFrame == 2)
+     {
+          numPedsInFrame += 4;
+          // up right
+          XInFrame.push_back(XInFrame[0]+10*M2CM);
+          YInFrame.push_back(YInFrame[0]+10*M2CM);
+          VInFrame.push_back(VInFrame[0]);
+          //IdInFrame.push_back(IdInFrame[0]+1);
+          IdInFrame.push_back(-1);
+          // up left
+          XInFrame.push_back(XInFrame[0]-10*M2CM);
+          YInFrame.push_back(YInFrame[0]+10*M2CM);
+          VInFrame.push_back(VInFrame[0]);
+          //IdInFrame.push_back(IdInFrame[0]+2);
+          IdInFrame.push_back(-2);
+          // down right
+          XInFrame.push_back(XInFrame[0]+10*M2CM);
+          YInFrame.push_back(YInFrame[0]-10*M2CM);
+          VInFrame.push_back(VInFrame[0]);
+          //IdInFrame.push_back(IdInFrame[0]+3);
+          IdInFrame.push_back(-3);
+          // down left
+          XInFrame.push_back(XInFrame[0]-10*M2CM);
+          YInFrame.push_back(YInFrame[0]-10*M2CM);
+          VInFrame.push_back(VInFrame[0]);
+          // IdInFrame.push_back(IdInFrame[0]+4);
+          IdInFrame.push_back(-4);
+     }
 
      for (int i = 0; i < numPedsInFrame; i++)
      {
@@ -62,7 +95,11 @@ std::vector<std::pair<polygon_2d, int> > VoronoiDiagram::getVoronoiPolygons(vect
           YInFrame_temp.push_back(round(YInFrame[i]));
           VInFrame_temp.push_back(VInFrame[i]);
           IdInFrame_temp.push_back(IdInFrame[i]);
+          // std::cout << "i: " << i << " Id " << IdInFrame[i] << "  pos = " << XInFrame[i] << ", " << YInFrame[i] << "\n";
+
      }
+
+
 
      VD voronoidiagram;
      construct_voronoi(points.begin(), points.end(), &voronoidiagram);
@@ -100,6 +137,7 @@ std::vector<std::pair<polygon_2d, int> > VoronoiDiagram::getVoronoiPolygons(vect
                     break;
                }
           }
+
           XInFrame[Ncell] = thispoint.x();
           YInFrame[Ncell] = thispoint.y();
           int NumVertex = 0;
@@ -193,9 +231,13 @@ std::vector<std::pair<polygon_2d, int> > VoronoiDiagram::getVoronoiPolygons(vect
           //cout << "poly is: " << typeid(poly).name() << '\n'
           int id_ped = IdInFrame[Ncell];
           std::pair<polygon_2d, int>  poly_id = std::make_pair(poly, id_ped);
+         if (id_ped < 0 )
+         {
+              continue;
+         }
           polygons_id.push_back(poly_id);
           Ncell++;
-     }
+     }// for voronoi cells
      return polygons_id;
 }
 
@@ -418,10 +460,10 @@ point_type2 VoronoiDiagram::getIntersectionPoint(const point_2d& pt0, const poin
 {
      vector<point_2d> pt;
      segment edge0(pt0, pt1);
-     vector<point_2d> const& points = square.outer();
-     for (vector<point_2d>::size_type i = 1; i < points.size(); ++i)
+     vector<point_2d> const& opoints = square.outer();
+     for (vector<point_2d>::size_type i = 1; i < opoints.size(); ++i)
      {
-          segment edge1(points[i], points[i-1]);
+          segment edge1(opoints[i], opoints[i-1]);
           if(intersects(edge0, edge1))
           {
                intersection(edge0, edge1, pt);
@@ -430,7 +472,7 @@ point_type2 VoronoiDiagram::getIntersectionPoint(const point_2d& pt0, const poin
      }
      if(pt.empty())
      {
-          segment edge1(points[3], points[0]);
+          segment edge1(opoints[3], opoints[0]);
           intersection(edge0, edge1, pt);
      }
      point_type2 interpts(pt[0].x(), pt[0].y());
