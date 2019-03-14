@@ -250,12 +250,13 @@ bool PedData::InitializeVariables(const fs::path& filename)
      Log->Write("INFO: Total number of Agents: %d", _numPeds);
      CreateGlobalVariables(_numPeds, _numFrames);
      Log->Write("INFO: Create Global Variables done");
-     for(int i=_minID;i<_minID+_numPeds; i++){
+     for(int i = 0; i < (int)unique_ids.size(); i++){
           int firstFrameIndex=INT_MAX;   //The first frame index of a pedestrian
           int lastFrameIndex=-1;    //The last frame index of a pedestrian
           int actual_totalframe=0;  //The total data points of a pedestrian in the trajectory
+          int pos_i = i; //std::distance(_IdsTXT.begin(), &i);
           for (auto j = _IdsTXT.begin(); j != _IdsTXT.end(); ++j){
-               if (*j ==i){
+               if (*j == unique_ids[i]){
                     int pos = std::distance(_IdsTXT.begin(), j);
                     if(pos<firstFrameIndex)
                     {
@@ -270,27 +271,24 @@ bool PedData::InitializeVariables(const fs::path& filename)
           }
           if(lastFrameIndex <=0 || lastFrameIndex == INT_MAX)
           {
-               Log->Write("Warning:\tThere is no trajectory for ped with ID <%d>!",i);
+               Log->Write("Warning:\tThere is no trajectory for ped with ID <%d>!", unique_ids[i]);
                continue;
           }
-          _firstFrame[i-_minID] = _FramesTXT[firstFrameIndex] - _minFrame;
-          _lastFrame[i-_minID] = _FramesTXT[lastFrameIndex] - _minFrame;
+          _firstFrame[pos_i] = _FramesTXT[firstFrameIndex] - _minFrame;
+          _lastFrame[pos_i] = _FramesTXT[lastFrameIndex] - _minFrame;
 
-          int expect_totalframe=_lastFrame[i-_minID]-_firstFrame[i-_minID]+1;
+          int expect_totalframe=_lastFrame[pos_i]-_firstFrame[pos_i]+1;
           if(actual_totalframe != expect_totalframe)
           {
-               Log->Write("Error:\tThe trajectory of ped with ID <%d> is not continuous. Please modify the trajectory file!",i);
+               Log->Write("Error:\tThe trajectory of ped with ID <%d> is not continuous. Please modify the trajectory file!", _IdsTXT[pos_i]);
                Log->Write("Error:\t actual_totalfame = <%d>, expected_totalframe = <%d> ", actual_totalframe, expect_totalframe);
                return false;
           }
      }
      Log->Write("convert x and y");
      for(unsigned int i = 0; i < _IdsTXT.size(); i++)
-          //for(unsigned int i = 0; i < unique_ids .size(); i++)
      {
-          int ID = _IdsTXT[i] - _minID;  // this asumes that idstxt
-                                         // are consecutive. 1, 2, 10,
-                                         // 11 does not work
+          int id_pos = 0; // position in array unique_ids
           //---------- get position of index in unique index vector ---------------
           auto it_uid = std::find(unique_ids.begin(), unique_ids.end(), _IdsTXT[i]);
           if (it_uid == unique_ids.end())
@@ -300,7 +298,7 @@ bool PedData::InitializeVariables(const fs::path& filename)
           }
           else
           {
-               ID  = std::distance(unique_ids.begin(), it_uid);
+               id_pos  = std::distance(unique_ids.begin(), it_uid);
           }
           //--------------------
           int frm = _FramesTXT[i] - _minFrame;
@@ -308,17 +306,22 @@ bool PedData::InitializeVariables(const fs::path& filename)
           double y = ys[i]*M2CM;
           double z = zs[i]*M2CM;
 
-          _xCor(ID,frm) = x;
-          _yCor(ID,frm) = y;
-          _zCor(ID,frm) = z;
-          _id(ID,frm) = _IdsTXT[i];
+          /* structure of these matrices
+           * line:  position id in unique_ids
+           * column: frame id - minFrame
+           */
+          _xCor(id_pos,frm) = x;
+          _yCor(id_pos,frm) = y;
+          _zCor(id_pos,frm) = z;
+          _id(id_pos,frm) = _IdsTXT[i];
+          // std::cout << "id_pos " << id_pos << " FR " << frm << ": " << _id(id_pos,frm) << ", " << _xCor(id_pos, frm) << ", " <<  _yCor(id_pos,frm) << ", " << _zCor(id_pos,frm) << "\n";
           if(_vComponent == "F")
           {
-               _vComp(ID,frm) = vcmp[i];
+               _vComp(id_pos,frm) = vcmp[i];
           }
           else
           {
-               _vComp(ID,frm) = _vComponent;
+               _vComp(id_pos,frm) = _vComponent;
           }
      }
      Log->Write("Save the data for each frame");
@@ -327,10 +330,7 @@ bool PedData::InitializeVariables(const fs::path& filename)
      for (unsigned int i = 0; i < _FramesTXT.size(); i++ )
      {
 
-          int id = _IdsTXT[i]-_minID; // this make the assumption that
-                                      // indexes in the trajectories
-                                      // are consecutive
-
+          int id_pos = 0;
           auto itIds = std::find(unique_ids.begin(), unique_ids.end(), _IdsTXT[i]);
           if (itIds == unique_ids.end())
           {
@@ -339,11 +339,16 @@ bool PedData::InitializeVariables(const fs::path& filename)
           }
           else
           {
-               id  = std::distance(unique_ids.begin(), itIds);
+               id_pos  = std::distance(unique_ids.begin(), itIds);
           }
           int t =_FramesTXT[i]- _minFrame;
-          _peds_t[t].push_back(id);
+          /* structure of peds_t
+           *
+           * index: frame id - minFrame, value: position id in unique_ids
+           */
 
+          _peds_t[t].push_back(id_pos);
+          // std::cout << "frame: " << _FramesTXT[i] << " t: " << t << " > " << id_pos << "\n";
      }
 
      return true;
