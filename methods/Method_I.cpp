@@ -188,7 +188,8 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
                     {
                          if(!_isOneDimensional)
                          {
-                              GetIndividualFD(polygons,VInFrame, IdInFrame,  str_frid); // TODO polygons_id
+                              // GetIndividualFD(polygons,VInFrame, IdInFrame,  str_frid); // TODO polygons_id
+                              GetIndividualFD(polygons,VInFrame, IdInFrame,  str_frid, XInFrame, YInFrame); //
                          }
                     }
                     if(_getProfile)
@@ -261,11 +262,11 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
           {
                if(_isOneDimensional)
                {
-                    fprintf(_fIndividualFD,"#framerate (fps):\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-1)) \t   Individual velocity(m/s)	\t	Headway(m)\n",_fps);
+                    fprintf(_fIndividualFD,"#framerate (fps):\t%.2f\n\n#Frame	\t	PersID	\t	Individual density(m^(-1)) \t   Individual velocity(m/s)	\t	Headway(m)\n",_fps);
                }
                else
                {
-                    fprintf(_fIndividualFD,"#framerate (fps):\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-2)) \t   Individual velocity(m/s)  \t Voronoi Polygon\n",_fps);
+                    fprintf(_fIndividualFD,"#framerate (fps):\t%.2f\n\n#Frame	\t	PersID	\t	x/m \t y/m \t Individual density(m^(-2)) \t   Individual velocity(m/s)  \t Voronoi Polygon\n",_fps);
                }
                return true;
           }
@@ -545,6 +546,34 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
                temp++;
           }
      }
+
+void Method_I::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const vector<int>& Id, const string& frid, vector<double>& XInFrame, vector<double>& YInFrame)
+{
+     double uniquedensity=0;
+     double uniquevelocity=0;
+     double x, y;
+     int uniqueId=0;
+     int temp=0;
+     for (const auto & polygon_iterator:polygon)
+     {
+          string polygon_str = polygon_to_string(polygon_iterator);
+          uniquedensity=1.0/(area(polygon_iterator)*CMtoM*CMtoM);
+          uniquevelocity=Velocity[temp];
+          uniqueId=Id[temp];
+          x = XInFrame[temp]*CMtoM;
+          y = YInFrame[temp]*CMtoM;
+          fprintf(_fIndividualFD,"%s\t %d\t %.4f\t %.4f\t %.4f\t %.4f\t %s\n",
+                  frid.c_str(),
+                  uniqueId,
+                  x,
+                  y,
+                  uniquedensity,
+                  uniquevelocity,
+                  polygon_str.c_str()
+          );
+          temp++;
+     }
+}
 
      void Method_I::SetCalculateIndividualFD(bool individualFD)
      {

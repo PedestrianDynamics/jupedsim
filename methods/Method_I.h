@@ -104,6 +104,7 @@ private:
      void GetProfiles(const std::string& frameId, const std::vector<polygon_2d>& polygons, const std::vector<double>& velocity);
      void OutputVoroGraph(const std::string & frameId,  std::vector<std::pair<polygon_2d, int> >& polygons, int numPedsInFrame,const std::vector<double>& VInFrame);
      void GetIndividualFD(const std::vector<polygon_2d>& polygon, const std::vector<double>& Velocity, const std::vector<int>& Id, const std::string& frid);
+     void GetIndividualFD(const std::vector<polygon_2d>& polygon, const std::vector<double>& Velocity, const std::vector<int>& Id, const std::string& frid, std::vector<double>& XInFrame, std::vector<double>& YInFrame);
      /**
       * Reduce the precision of the points to two digits
       * @param polygon
