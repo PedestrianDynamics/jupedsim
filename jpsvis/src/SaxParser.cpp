@@ -1350,7 +1350,7 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
                     qDebug()<<"WARNING: Could not parse geometry file."<<endl;
                }
                else
-                    qDebug()<<"INFO: geometry file: "<<geometry_filename.toStdString().c_str()<<endl; //exit(0);
+                    qDebug()<<"INFO: geometry file: "<<geometry_filename.c_str()<<endl; //exit(0);
           }
           // 4th line max frame
           line = in.readLine();
