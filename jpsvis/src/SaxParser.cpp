@@ -1118,7 +1118,7 @@ QString SaxParser::extractGeometryFilenameTXT(QString &filename)
                {
                     if(line.split(":")[0] == "#geometry")
                     {
-                         extracted_geo_name = line.split(":")[1]
+                         extracted_geo_name = line.split(":")[1];
                     }
                }
           }// while
