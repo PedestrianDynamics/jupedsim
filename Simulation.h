@@ -157,7 +157,7 @@ public:
     /**
      * print some statistics about the simulation
      */
-    void PrintStatistics();
+    void PrintStatistics(double time);
 
     /**
      * @return the agents source manager

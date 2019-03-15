@@ -106,7 +106,7 @@ int main(int argc, char** argv)
 
         // some statistics output
         if (configuration->ShowStatistics()) {
-            sim.PrintStatistics();
+             sim.PrintStatistics(evacTime);// negative means end of simulation
         }
 
         if (sim.GetPedsNumber()) {
