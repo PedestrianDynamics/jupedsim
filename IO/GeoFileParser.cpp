@@ -540,7 +540,7 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
 bool GeoFileParser::LoadTrafficInfo(Building* building)
 {
 
-     Log->Write("INFO:\tLoading  the traffic info file");
+     Log->Write("INFO:\tLoading the traffic info file");
 
      TiXmlDocument doc(_configuration->GetProjectFile());
      if (!doc.LoadFile()) {
@@ -574,7 +574,8 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
                xDoor = xDoor->NextSiblingElement("door")) {
 
                int id = xmltoi(xDoor->Attribute("trans_id"), -1);
-               if (id!=-1) {
+
+               if (id!=-1 && building->GetTransition(id)) {
                     std::string str("INFO:\tParsed Door: \n");
                     char tmp[100];
                     sprintf(tmp, "\t>> ID: %d\n", id);
@@ -628,25 +629,27 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
                     //-----------------
                     Log->Write(str);
                }
-               else {
-                    id = xmltoi(xDoor->Attribute("cross_id"), -1);
-                    if (id!=-1) {
-                         std::string state = xmltoa(xDoor->Attribute("state"), "open");
+               // deactivate crossings, since they are not equally updated as transitions.
+               // maybe remove them once for all.
+               // else {
+               //      id = xmltoi(xDoor->Attribute("cross_id"), -1);
+               //      if (id!=-1) {
+               //           std::string state = xmltoa(xDoor->Attribute("state"), "open");
 
-                         //store transition in a map and call getTransition/getCrossin
-                         if (state=="open") {
-                              building->GetCrossing(id)->Open();
-                         }
-                         else if (state=="close") {
-                              building->GetCrossing(id)->Close();
-                         }
-                         else {
-                              Log->Write("WARNING:\t Unknown door state: %s", state.c_str());
-                         }
-                    }
-                    else
-                         Log->Write("WARNING:\t Unknown door id");
-               }
+               //           //store transition in a map and call getTransition/getCrossin
+               //           if (state=="open") {
+               //                building->GetCrossing(id)->Open();
+               //           }
+               //           else if (state=="close") {
+               //                building->GetCrossing(id)->Close();
+               //           }
+               //           else {
+               //                Log->Write("WARNING:\t Unknown door state: %s", state.c_str());
+               //           }
+               //      }
+               //      else
+               //           Log->Write("WARNING:\t Unknown door id");
+               // }
           }
      Log->Write("INFO:\tDone with loading traffic info file");
      return true;
