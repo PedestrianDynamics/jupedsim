@@ -420,7 +420,12 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
      } //xgoalsNode
      //load routes
      // Waiting areas @todo refactor
-
+     TiXmlNode* xWaitingArea = xRootNode->FirstChild("routing")->FirstChild("waiting_areas");
+     if (!xWaitingArea) {
+          Log->Write("INFO:\tNo Waiting Areas found.");
+          return true;
+     }
+     // we should not enter this loop before making sure e is not null
      for (TiXmlElement* e = xGoalsNode->FirstChildElement("waiting_area"); e;
           e = e->NextSiblingElement("waiting_area")) {
 
