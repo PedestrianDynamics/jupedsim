@@ -1123,7 +1123,7 @@ QString SaxParser::extractGeometryFilenameTXT(QString &filename)
                }
           }// while
      } // if open
-     cout << ">> geo: " <<   extracted_geo_name << endl;
+     cout << ">> geo: " <<   extracted_geo_name.toStdString().c_str() << endl;
      return extracted_geo_name;
 }
 
