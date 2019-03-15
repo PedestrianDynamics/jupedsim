@@ -218,7 +218,6 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
 std::shared_ptr<AgentsSource> PedDistributionParser::parseSourceNode(TiXmlElement* e)
 {
      int id = xmltoi(e->Attribute("id"), -1);
-     std::cout << ">>> id " << id << "\n";
      int frequency = xmltoi(e->Attribute("frequency"), -1);
      int agents_max = xmltoi(e->Attribute("agents_max"), -1);
      int group_id = xmltoi(e->Attribute("group_id"), -1);

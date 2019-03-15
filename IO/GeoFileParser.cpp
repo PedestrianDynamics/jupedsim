@@ -370,168 +370,130 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
 
      //load goals and routes
      TiXmlNode* xGoalsNode = xRootNode->FirstChild("routing")->FirstChild("goals");
-
      if (xGoalsNode) {
 //          Trips trips;
-
+          // ---- parse goals from inifile
           for (TiXmlElement* e = xGoalsNode->FirstChildElement("goal"); e;
                e = e->NextSiblingElement("goal")) {
-
-               int id = xmltoi(e->Attribute("id"), -1);
-               int isFinal = std::string(e->Attribute("final"))=="true" ? true : false;
-               std::string caption = xmltoa(e->Attribute("caption"), "-1");
-               int room_id = xmltoi(e->Attribute("room_id"), -1);
-               int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
-
-               Goal* goal = new Goal();
-               goal->SetId(id);
-               goal->SetCaption(caption);
-               goal->SetIsFinalGoal(isFinal);
-               goal->SetRoomID(room_id);
-               goal->SetSubRoomID(subroom_id);
-
-               //looking for polygons (walls)
-               for (TiXmlElement* xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
-                    xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
-
-                    for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
-                              "vertex");
-                         xVertex && xVertex!=xPolyVertices->LastChild("vertex");
-                         xVertex = xVertex->NextSiblingElement("vertex")) {
-
-                         double x1 = xmltof(xVertex->Attribute("px"));
-                         double y1 = xmltof(xVertex->Attribute("py"));
-                         double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
-                         double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
-                         goal->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
-                    }
-               }
-
-               if (!goal->ConvertLineToPoly())
-                    return false;
-
+               Goal * goal = parseGoalNode(e);
                building->AddGoal(goal);
                _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
 
 //               trips.addGoal(goal->GetId());
           }
-
-
-          for (TiXmlElement* e = xGoalsNode->FirstChildElement("waiting_area"); e;
-               e = e->NextSiblingElement("waiting_area")) {
-
-               // Read valus from ini File
-               int id = xmltoi(e->Attribute("id"), -1);
-               int min_peds = xmltoi(e->Attribute("min_peds"), -1);
-               int max_peds = xmltoi(e->Attribute("max_peds"), -1);
-               int waiting_time = xmltoi(e->Attribute("waiting_time"), -1);
-               int transition_id = xmltoi(e->Attribute("transition_id"), -1);
-               int room_id = xmltoi(e->Attribute("room_id"), -1);
-               int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
-               bool open = strcmp(xmltoa(e->Attribute("is_open"), "false"), "true") == 0;
-               bool global_timer = strcmp(xmltoa(e->Attribute("global_timer"), "false"), "true") == 0;
-
-               std::string caption = xmltoa(e->Attribute("caption"), "-1");
-
-               Goal* wa = new WaitingArea();
-               WaitingArea* waitingArea = static_cast<WaitingArea*>(wa);
-               waitingArea->SetIsFinalGoal(0);
-               waitingArea->SetId(id);
-               waitingArea->SetCaption(caption);
-               waitingArea->setOpen(open);
-               waitingArea->setGlobalTimer(global_timer);
-               waitingArea->setMinNumPed(min_peds);
-               waitingArea->setMaxNumPed(max_peds);
-               waitingArea->setWaitingTime(waiting_time);
-               waitingArea->setTransitionID(transition_id);
-               waitingArea->SetRoomID(room_id);
-               waitingArea->SetSubRoomID(subroom_id);
-
-               std::map<int, double> nextGoals;
-
-
-               //looking for next_wa
-               for (TiXmlElement* nextWa = e->FirstChildElement("next_wa"); nextWa;
-                    nextWa = nextWa->NextSiblingElement("next_wa")) {
-                    int nextWaId = xmltoi(nextWa->Attribute("id"));
-                    double nextWaP = xmltof(nextWa->Attribute("p"));
-
-                    nextGoals.insert(std::pair<int, double>(nextWaId, nextWaP));
-               }
-
-               if (!waitingArea->setNextGoals(nextGoals)){
-                    std::cout << "wa setNextGoals!";
-                    return false;
-               };
-
-
-               //looking for polygons (walls)
-               for (TiXmlElement* xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
-                    xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
-
-                    for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
-                              "vertex");
-                         xVertex && xVertex!=xPolyVertices->LastChild("vertex");
-                         xVertex = xVertex->NextSiblingElement("vertex")) {
-
-                         double x1 = xmltof(xVertex->Attribute("px"));
-                         double y1 = xmltof(xVertex->Attribute("py"));
-                         double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
-                         double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
-                         wa->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
-                    }
-               }
-
-               if (!waitingArea->ConvertLineToPoly()){
-                    std::cout << "wa convertLineToPoly!";
+          // ---- parse goals from external file
+          TiXmlNode* xGoalsNodeFile = xGoalsNode->FirstChild("file");
+          if(xGoalsNodeFile)
+          {
+               std::string goalFilename = xGoalsNodeFile->FirstChild()->ValueStr();
+               Log->Write("INFO:\tGoal file <%s> will be parsed", goalFilename.c_str());
+               TiXmlDocument docGoal(goalFilename);
+               if (!docGoal.LoadFile()) {
+                    Log->Write("ERROR: \t%s", docGoal.ErrorDesc());
+                    Log->Write("ERROR: \t could not parse the goal file.");
                     return false;
                }
+               TiXmlElement* xRootNodeGoal = docGoal.RootElement();
+               if (!xRootNodeGoal) {
+                    Log->Write("ERROR:\tRoot element does not exist in goal file.");
+                    return false;
+               }
+               if (xRootNodeGoal->ValueStr() != "JPScore") {
+                    Log->Write("ERROR:\tParsing goal file. Root element value is not 'JPScore'.");
+                    return false;
+               }
+               TiXmlNode* xGoal = xRootNodeGoal->FirstChild("goals");
+               if (!xGoal) {
+                    Log->Write("ERROR:\tNo Goals in file found.");
+                    return false;
+               }
+               for (TiXmlElement* e = xGoal->FirstChildElement("goal"); e;
+                    e = e->NextSiblingElement("goal")) {
+                    Goal * goal = parseGoalNode(e);
+                    building->AddGoal(goal);
+                    _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
+               }
 
-
-//               for (auto& room : building->GetAllRooms()){
-//                    for (auto& subroomMap : room.second->GetAllSubRooms()){
-//                         std::cout << "check if wa " << wa->GetId() << " is in subroom " << subroomMap.second->GetSubRoomID() << std::endl;
-//                         std::cout << "wa centroid " << wa->GetCentroid().toString()  << std::endl;
-//
-//                         if (subroomMap.second->IsInSubRoom(wa->GetCentroid()) || subroomMap.second->GetSubRoomID() == 3){
-//                              subroomMap.second->AddGoalID(wa->GetId());
-//                         }
-//                    }
-//               }
-
-               building->AddGoal(wa);
-               _configuration->GetRoutingEngine()->AddFinalDestinationID(wa->GetId());
           }
-//          building->AddTrip(trips);
-//          _configuration->GetRoutingEngine()->AddTrip(trips);
-
-
-     }
-
+          else
+               Log->Write("INFO:\tGoal file not parsed");
+     } //xgoalsNode
      //load routes
-//     TiXmlNode* xTripsNode = xRootNode->FirstChild("routing")->FirstChild("routes");
-//
-//     if (xTripsNode)
-//          for (TiXmlElement* trip = xTripsNode->FirstChildElement("route"); trip;
-//               trip = trip->NextSiblingElement("route")) {
-//
-//               double id = xmltof(trip->Attribute("id"), -1);
-//               if (id==-1) {
-//                    Log->Write("ERROR:\t id missing for trip");
-//                    return false;
-//               }
-//               std::string sTrip = trip->FirstChild()->ValueStr();
-//               std::vector<std::string> vTrip;
-//               vTrip.clear();
-//
-//               char* str = (char*) sTrip.c_str();
-//               char* p = strtok(str, ":");
-//               while (p) {
-//                    vTrip.push_back(xmltoa(p));
-//                    p = strtok(NULL, ":");
-//               }
-//               _configuration->GetRoutingEngine()->AddTrip(vTrip);
-//          }
+     // Waiting areas @todo refactor
+
+     for (TiXmlElement* e = xGoalsNode->FirstChildElement("waiting_area"); e;
+          e = e->NextSiblingElement("waiting_area")) {
+
+          // Read valus from ini File
+          int id = xmltoi(e->Attribute("id"), -1);
+          int min_peds = xmltoi(e->Attribute("min_peds"), -1);
+          int max_peds = xmltoi(e->Attribute("max_peds"), -1);
+          int waiting_time = xmltoi(e->Attribute("waiting_time"), -1);
+          int transition_id = xmltoi(e->Attribute("transition_id"), -1);
+          int room_id = xmltoi(e->Attribute("room_id"), -1);
+          int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
+          bool open = strcmp(xmltoa(e->Attribute("is_open"), "false"), "true") == 0;
+          bool global_timer = strcmp(xmltoa(e->Attribute("global_timer"), "false"), "true") == 0;
+
+          std::string caption = xmltoa(e->Attribute("caption"), "-1");
+
+          Goal* wa = new WaitingArea();
+          WaitingArea* waitingArea = static_cast<WaitingArea*>(wa);
+          waitingArea->SetIsFinalGoal(0);
+          waitingArea->SetId(id);
+          waitingArea->SetCaption(caption);
+          waitingArea->setOpen(open);
+          waitingArea->setGlobalTimer(global_timer);
+          waitingArea->setMinNumPed(min_peds);
+          waitingArea->setMaxNumPed(max_peds);
+          waitingArea->setWaitingTime(waiting_time);
+          waitingArea->setTransitionID(transition_id);
+          waitingArea->SetRoomID(room_id);
+          waitingArea->SetSubRoomID(subroom_id);
+
+          std::map<int, double> nextGoals;
+
+
+          //looking for next_wa
+          for (TiXmlElement* nextWa = e->FirstChildElement("next_wa"); nextWa;
+               nextWa = nextWa->NextSiblingElement("next_wa")) {
+               int nextWaId = xmltoi(nextWa->Attribute("id"));
+               double nextWaP = xmltof(nextWa->Attribute("p"));
+
+               nextGoals.insert(std::pair<int, double>(nextWaId, nextWaP));
+          }
+
+          if (!waitingArea->setNextGoals(nextGoals)){
+               std::cout << "wa setNextGoals!";
+               return false;
+          };
+
+
+          //looking for polygons (walls)
+          for (TiXmlElement* xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
+               xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
+
+               for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
+                         "vertex");
+                    xVertex && xVertex!=xPolyVertices->LastChild("vertex");
+                    xVertex = xVertex->NextSiblingElement("vertex")) {
+
+                    double x1 = xmltof(xVertex->Attribute("px"));
+                    double y1 = xmltof(xVertex->Attribute("py"));
+                    double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
+                    double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
+                    wa->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
+               }
+          }
+
+          if (!waitingArea->ConvertLineToPoly()){
+               std::cout << "wa convertLineToPoly!";
+               return false;
+          }
+          building->AddGoal(wa);
+          _configuration->GetRoutingEngine()->AddFinalDestinationID(wa->GetId());
+     }
+     //-------
      Log->Write("INFO:\tdone with loading extra routing information");
      return true;
 }
@@ -692,6 +654,52 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
      Log->Write("INFO:\tDone with loading traffic info file");
      return true;
 }
+
+Goal* GeoFileParser::parseGoalNode(TiXmlElement * e)
+{
+     Log->Write("INFO:\tLoading goal");
+     int id = xmltoi(e->Attribute("id"), -1);
+     int isFinal = std::string(e->Attribute("final"))=="true" ? true : false;
+     std::string caption = xmltoa(e->Attribute("caption"), "-1");
+     int room_id = xmltoi(e->Attribute("room_id"), -1);
+     int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
+     Log->Write("INFO:\t  Goal id: %d", id);
+     Log->Write("INFO:\t  Goal caption: %s", caption.c_str());
+     Log->Write("INFO:\t  Goal room_id: %d", room_id);
+     Log->Write("INFO:\t  Goal subroom_id: %d", subroom_id);
+     Goal* goal = new Goal();
+     goal->SetId(id);
+     goal->SetCaption(caption);
+     goal->SetIsFinalGoal(isFinal);
+     goal->SetRoomID(room_id);
+     goal->SetSubRoomID(subroom_id);
+
+     //looking for polygons (walls)
+     for (TiXmlElement* xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
+          xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
+
+          for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
+                    "vertex");
+               xVertex && xVertex!=xPolyVertices->LastChild("vertex");
+               xVertex = xVertex->NextSiblingElement("vertex")) {
+
+               double x1 = xmltof(xVertex->Attribute("px"));
+               double y1 = xmltof(xVertex->Attribute("py"));
+               double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
+               double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
+               goal->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
+          }
+     }
+
+     if (!goal->ConvertLineToPoly())
+     {
+          Log->Write("ERROR:\t parsing polygon of goal %d", id);
+          return nullptr;
+     }
+     Log->Write("INFO:\t  finished parsing goal %d", id);
+     return goal;
+}
+
 
 GeoFileParser::~GeoFileParser()
 {
