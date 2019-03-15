@@ -659,12 +659,12 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     //try to get a geometry filename
     if(fileName.endsWith(".xml",Qt::CaseInsensitive))
     {
-         Debug::Messages("Extract geometry file from <xml> trajectories");
+         //Debug::Messages("Extract geometry file from <xml> trajectories");
          geometry_file=SaxParser::extractGeometryFilename(fileName);
     }
     else
     {
-         Debug::Messages("Extract geometry file from <txt> trajectories");
+         //Debug::Messages("Extract geometry file from <txt> trajectories");
          geometry_file=SaxParser::extractGeometryFilenameTXT(fileName);
     }
 
