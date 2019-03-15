@@ -42,6 +42,7 @@ public:
      virtual bool LoadTrafficInfo(Building* building) override;
      bool parseDoorNode(TiXmlElement * xDoor, int id, Building* building);
      Goal* parseGoalNode(TiXmlElement * e);
+     Transition* parseTransitionNode(TiXmlElement * xTrans, Building * building);
 
 private:
      Configuration* _configuration;

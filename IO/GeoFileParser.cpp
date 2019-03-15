@@ -283,63 +283,49 @@ bool GeoFileParser::LoadGeometry(Building* building)
      // all rooms are read, now proceed with transitions
      TiXmlNode* xTransNode = xRootNode->FirstChild("transitions");
      if (xTransNode)
+     {
           for (TiXmlElement* xTrans = xTransNode->FirstChildElement("transition"); xTrans;
                xTrans = xTrans->NextSiblingElement("transition")) {
-
-               int id = xmltoi(xTrans->Attribute("id"), -1);
-               // string caption = "door " + id;
-               std::string caption = "door ";
-               caption += std::to_string(id);
-               caption = xmltoa(xTrans->Attribute("caption"), caption.c_str());
-               int room1_id = xmltoi(xTrans->Attribute("room1_id"), -1);
-               int room2_id = xmltoi(xTrans->Attribute("room2_id"), -1);
-               int subroom1_id = xmltoi(xTrans->Attribute("subroom1_id"), -1);
-               int subroom2_id = xmltoi(xTrans->Attribute("subroom2_id"), -1);
-               std::string type = xmltoa(xTrans->Attribute("type"), "normal");
-
-               double x1 = xmltof(xTrans->FirstChildElement("vertex")->Attribute("px"));
-               double y1 = xmltof(xTrans->FirstChildElement("vertex")->Attribute("py"));
-
-               double x2 = xmltof(xTrans->LastChild("vertex")->ToElement()->Attribute("px"));
-               double y2 = xmltof(xTrans->LastChild("vertex")->ToElement()->Attribute("py"));
-
-               Transition* t = new Transition();
-               t->SetID(id);
-               t->SetCaption(caption);
-               t->SetPoint1(Point(x1, y1));
-               t->SetPoint2(Point(x2, y2));
-               t->SetType(type);
-
-               if (room1_id!=-1 && subroom1_id!=-1) {
-                    //Room* room = _rooms[room1_id];
-                    Room* room = building->GetRoom(room1_id);
-                    SubRoom* subroom = room->GetSubRoom(subroom1_id);
-
-                    //subroom->AddGoalID(t->GetUniqueID());
-                    //MPI
-                    room->AddTransitionID(t->GetUniqueID());
-                    t->SetRoom1(room);
-                    t->SetSubRoom1(subroom);
-
-                    //new implementation
-                    subroom->AddTransition(t);
-               }
-               if (room2_id!=-1 && subroom2_id!=-1) {
-                    Room* room = building->GetRoom(room2_id);
-                    SubRoom* subroom = room->GetSubRoom(subroom2_id);
-                    //subroom->AddGoalID(t->GetUniqueID());
-                    //MPI
-                    room->AddTransitionID(t->GetUniqueID());
-                    t->SetRoom2(room);
-                    t->SetSubRoom2(subroom);
-
-                    //new implementation
-                    subroom->AddTransition(t);
-               }
-
+               Transition * t = parseTransitionNode(xTrans, building);
                building->AddTransition(t);
           }
+          TiXmlNode * xNodeFile = xTransNode->FirstChild("file");
+          if(xNodeFile)
+          {
+               std::string transFilename = xNodeFile->FirstChild()->ValueStr();
+               Log->Write("INFO:\tParsing transition from file <%s>", transFilename.c_str());
+               TiXmlDocument docTrans(transFilename);
+               if (!docTrans.LoadFile()) {
+                    Log->Write("ERROR: \t%s", docTrans.ErrorDesc());
+                    Log->Write("ERROR: \t could not parse the transitions file.");
+                    return false;
+               }
+               TiXmlElement* xRootNodeTrans = docTrans.RootElement();
+               if (!xRootNodeTrans) {
+                    Log->Write("ERROR:\tRoot element does not exist in transitions file.");
+                    return false;
+               }
+               if (xRootNodeTrans->ValueStr() != "JPScore") {
+                    Log->Write("ERROR:\tParsing transitions file. Root element value is not 'JPScore'.");
+                    return false;
+               }
+               TiXmlNode* xTransNodeFile = xRootNodeTrans->FirstChild("transitions");
+               if (!xTransNodeFile) {
+                    Log->Write("ERROR:\tNo Transitions in file found.");
+                    return false;
+               }
+               for (TiXmlElement* xTrans = xTransNodeFile->FirstChildElement("transition"); xTrans;
+               xTrans = xTrans->NextSiblingElement("transition")) {
+                    Transition * t = parseTransitionNode(xTrans, building);
+                    building->AddTransition(t);
+               }
+          }
+          else{
+               Log->Write("INFO:\tNot parsing transition from file %s");
+          }
+          Log->Write("INFO:\tGot %d transitions", building-> GetAllTransitions().size());
 
+     }// xTransNode
      Log->Write("INFO: \tLoading building file successful!!!\n");
 
      //everything went fine
@@ -660,6 +646,61 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
      return true;
 }
 
+Transition* GeoFileParser::parseTransitionNode(TiXmlElement * xTrans, Building * building)
+{
+     int id = xmltoi(xTrans->Attribute("id"), -1);
+     // string caption = "door " + id;
+     std::string caption = "door ";
+     caption += std::to_string(id);
+     caption = xmltoa(xTrans->Attribute("caption"), caption.c_str());
+     int room1_id = xmltoi(xTrans->Attribute("room1_id"), -1);
+     int room2_id = xmltoi(xTrans->Attribute("room2_id"), -1);
+     int subroom1_id = xmltoi(xTrans->Attribute("subroom1_id"), -1);
+     int subroom2_id = xmltoi(xTrans->Attribute("subroom2_id"), -1);
+     std::string type = xmltoa(xTrans->Attribute("type"), "normal");
+
+     double x1 = xmltof(xTrans->FirstChildElement("vertex")->Attribute("px"));
+     double y1 = xmltof(xTrans->FirstChildElement("vertex")->Attribute("py"));
+
+     double x2 = xmltof(xTrans->LastChild("vertex")->ToElement()->Attribute("px"));
+     double y2 = xmltof(xTrans->LastChild("vertex")->ToElement()->Attribute("py"));
+
+     Transition* t = new Transition();
+     t->SetID(id);
+     t->SetCaption(caption);
+     t->SetPoint1(Point(x1, y1));
+     t->SetPoint2(Point(x2, y2));
+     t->SetType(type);
+     //--- danger area
+     if (room1_id!=-1 && subroom1_id!=-1) {
+          //Room* room = _rooms[room1_id];
+          Room* room = building->GetRoom(room1_id);
+          SubRoom* subroom = room->GetSubRoom(subroom1_id);
+
+          //subroom->AddGoalID(t->GetUniqueID());
+          //MPI
+          room->AddTransitionID(t->GetUniqueID());
+          t->SetRoom1(room);
+          t->SetSubRoom1(subroom);
+
+          //new implementation
+          subroom->AddTransition(t);
+     }
+     if (room2_id!=-1 && subroom2_id!=-1) {
+          Room* room = building->GetRoom(room2_id);
+          SubRoom* subroom = room->GetSubRoom(subroom2_id);
+          //subroom->AddGoalID(t->GetUniqueID());
+          //MPI
+          room->AddTransitionID(t->GetUniqueID());
+          t->SetRoom2(room);
+          t->SetSubRoom2(subroom);
+
+          //new implementation
+          subroom->AddTransition(t);
+     }
+     return t;
+
+}
 Goal* GeoFileParser::parseGoalNode(TiXmlElement * e)
 {
      Log->Write("INFO:\tLoading goal");
