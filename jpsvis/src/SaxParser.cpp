@@ -1314,8 +1314,6 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
                else
                     qDebug()<<"INFo: frame rate: "<<*fps<<endl; //exit(0);
           }
-          // skip header
-          in.readLine();
           line = in.readLine();
           int maxFrame=1000;
           if(line.split(":").size()==2)
@@ -1329,6 +1327,9 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
                else
                     qDebug()<<"INFO: max frame: "<<maxFrame<<endl; //exit(0);
           }
+          // skip header
+          in.readLine();
+
           //initialize the process dialog
           QProgressDialog progressDialog ("Simulation","Abbrechen",1, maxFrame,NULL);
           progressDialog.setModal(true);
@@ -1347,7 +1348,7 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
           while ( !in.atEnd() )
           {
                QString line = in.readLine();
-               QStringList pieces = line.split(QRegExp("\\s"));
+               QStringList pieces = line.split(QRegExp("\\s+"));
 
                double pos[3];
                double angle[3]={0,0,30};
