@@ -655,17 +655,17 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
 
     //the geometry actor
     auto&& geometry = _visualisationThread->getGeometry();
-
+    QString geometry_file;
     //try to get a geometry filename
     if(fileName.endsWith(".xml",Qt::CaseInsensitive))
     {
          Debug::Messages("Extract geometry file from <xml> trajectories");
-         QString geometry_file=SaxParser::extractGeometryFilename(fileName);
+         geometry_file=SaxParser::extractGeometryFilename(fileName);
     }
     else
     {
          Debug::Messages("Extract geometry file from <txt> trajectories");
-         QString geometry_file=SaxParser::extractGeometryFilenameTXT(fileName);
+         geometry_file=SaxParser::extractGeometryFilenameTXT(fileName);
     }
 
 
