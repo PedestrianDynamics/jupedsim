@@ -1371,7 +1371,7 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
           progressDialog.setValue(1);
           progressDialog.show();
 
-          double unitFactor=1;// I assume meter
+          double unitFactor=FAKTOR;// @todo: use correct unit
 
           while ( !in.atEnd() )
           {
