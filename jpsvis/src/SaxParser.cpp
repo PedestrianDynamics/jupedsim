@@ -1113,7 +1113,7 @@ QString SaxParser::extractGeometryFilenameTXT(QString &filename)
           while (!in.atEnd()) {
                //look for a line with
                line = in.readLine();
-               std::cout << " >> " <<  line << endl;
+               std::cout << " >> " <<  line.toStdString().c_str() << endl;
                if(line.split(":").size()==2)
                {
                     if(line.split(":")[0] == "#geometry")
