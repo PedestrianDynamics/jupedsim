@@ -1113,7 +1113,7 @@ QString SaxParser::extractGeometryFilenameTXT(QString &filename)
           while (!in.atEnd()) {
                //look for a line with
                line = in.readLine();
-               std::cout << " >> " <<  line.toStdString().c_str() << endl;
+               // std::cout << " >> " <<  line.toStdString().c_str() << endl;
                if(line.split(":").size()==2)
                {
                     if(line.split(":")[0] == "#geometry")
@@ -1123,7 +1123,7 @@ QString SaxParser::extractGeometryFilenameTXT(QString &filename)
                }
           }// while
      } // if open
-          cout << ">> geo: " <<   extracted_geo_name.toStdString().c_str() << endl;
+          // cout << ">> geo: " <<   extracted_geo_name.toStdString().c_str() << endl;
           return extracted_geo_name;
 }
 
@@ -1341,17 +1341,6 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
           }
           // third line geometry
           line = in.readLine();
-          std::string geometry_filename="";
-          if(line.split(":").size()==2)
-          {
-               bool ok;
-               geometry_filename=line.split(":")[1].toDouble(&ok);
-               if(!ok) {
-                    qDebug()<<"WARNING: Could not parse geometry file."<<endl;
-               }
-               else
-                    qDebug()<<"INFO: geometry file: "<<geometry_filename.c_str()<<endl; //exit(0);
-          }
           // 4th line max frame
           line = in.readLine();
           int maxFrame=1000;
@@ -1391,7 +1380,7 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
 
                double pos[3];
                double angle[3]={0,0,30};
-               double radius[3]={0.3,0.3,0.3};
+               double radius[3]={0.3*FAKTOR,0.3*FAKTOR,0.3*FAKTOR};
 
                int agentID=-1 ;
                int frameID=-1;
