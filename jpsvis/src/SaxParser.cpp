@@ -1103,6 +1103,31 @@ QString SaxParser::extractGeometryFilename(QString &filename)
      return "";
 }
 
+QString SaxParser::extractGeometryFilenameTXT(QString &filename)
+{
+     QString extracted_geo_name="";
+     QFile file(filename);
+     QString line;
+     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+          QTextStream in(&file);
+          while (!in.atEnd()) {
+               //look for a line with
+               line = in.readLine();
+               std::cout << " >> " >> line >> endl;
+               if(line.split(":").size()==2)
+               {
+                    if(line.split(":")[0] == "#geometry")
+                    {
+                         extracted_geo_name = line.split(":")[1]
+                    }
+               }
+          }// while
+     } // if open
+     cout << ">> geo: " <<   extracted_geo_name << endl;
+     return extracted_geo_name;
+}
+
+
 void SaxParser::parseGeometryXMLV04(QString filename, GeometryFactory& geoFac)
 {
      cout << "parsing 04\n" ;
@@ -1371,8 +1396,6 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
                int agentID=-1 ;
                int frameID=-1;
                double color=155 ;
-               std::cout << pieces.size() << "\n";
-
                switch(pieces.size())
                {
                case 5:
