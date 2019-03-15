@@ -42,7 +42,7 @@
 #include "Hline.h"
 #include "Obstacle.h"
 #include "Goal.h"
-
+#include "../tinyxml/tinyxml.h"
 class RoutingEngine;
 class Pedestrian;
 class Transition;
