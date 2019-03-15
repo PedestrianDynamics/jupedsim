@@ -622,6 +622,8 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
                RoomState status = (state=="good") ? ROOM_CLEAN : ROOM_SMOKED;
                building->GetRoom(id)->SetState(status);
           }
+     else
+          Log->Write("Info:\t  no room info found in inifile");
 
      //processing the doors node
      TiXmlNode* xDoorsNode = xRootNode->FirstChild("doors");
@@ -638,6 +640,55 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
                }
           }//for xDoor
      }
+     else
+          Log->Write("Info:\t  no door info found in inifile");
+     // processing file node
+     TiXmlNode* xFileNode = xRootNode->FirstChild("file");
+     if(xFileNode)
+     {
+          std::string trafficFilename = xFileNode->FirstChild()->ValueStr();
+          Log->Write("Info:\t  traffic file found <%s>", trafficFilename.c_str());
+          TiXmlDocument docTraffic(trafficFilename);
+          if (!docTraffic.LoadFile()) {
+               Log->Write("ERROR: \t%s", docTraffic.ErrorDesc());
+               Log->Write("ERROR: \t could not parse the traffic file.");
+               return false;
+          }
+          TiXmlElement* xRootNodeTraffic = docTraffic.RootElement();
+          if (!xRootNodeTraffic) {
+               Log->Write("ERROR:\tRoot element does not exist.");
+               return false;
+          }
+
+          if (xRootNodeTraffic->ValueStr() != "JPScore") {
+               Log->Write("ERROR:\tRoot element value is not 'JPScore'.");
+               return false;
+          }
+          TiXmlNode* xTraffic = xRootNodeTraffic->FirstChild("traffic_constraints");
+          if (!xTraffic) {
+               Log->Write("ERROR:\tNo traffic constraints in file found.");
+               return false;
+          }
+          TiXmlNode* xDoorsNodeF = xTraffic->FirstChild("doors");
+          if(xDoorsNodeF)
+          {
+               bool res_parseDoor;
+               for (TiXmlElement* xDoor = xDoorsNodeF->FirstChildElement("door"); xDoor;
+                    xDoor = xDoor->NextSiblingElement("door")) {
+                    int id = xmltoi(xDoor->Attribute("trans_id"), -1);
+                    if (id!=-1 && building->GetTransition(id)) {
+                         res_parseDoor = parseDoorNode(xDoor, id, building);
+                         if(!res_parseDoor)
+                              return false;
+                    }
+               }//for xDoor
+          }
+          else
+               Log->Write("Info:\t  no door info found in traffic file");
+     }
+     else
+          Log->Write("Info:\t  no traffic file found.");
+
      Log->Write("INFO:\tDone with loading traffic info file");
      return true;
 }
