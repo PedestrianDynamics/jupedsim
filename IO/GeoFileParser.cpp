@@ -20,7 +20,6 @@
 //
 
 #include "GeoFileParser.h"
-#include "../tinyxml/tinyxml.h"
 #include "../geometry/SubRoom.h"
 #include "../geometry/WaitingArea.h"
 
@@ -536,11 +535,68 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
      Log->Write("INFO:\tdone with loading extra routing information");
      return true;
 }
+bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building* building)
+{
+     bool result = false;// this return value is not needed.
+                         // maybe in the future it might be...
+     std::string str("INFO:\tParsed Door: \n");
+     char tmp[100];
+     sprintf(tmp, "\t>> ID: %d\n", id);
+     str.append(tmp);
+     //------------------ state
+     std::string state = xmltoa(xDoor->Attribute("state"), "open");
+     //store transition in a map and call getTransition/getCrossin
+     if (state=="open") {
+          building->GetTransition(id)->Open();
+     }
+     else if (state=="close") {
+          building->GetTransition(id)->Close();
+     }
+     else {
+          Log->Write("WARNING:\t Unknown door state: <%s>. open or close. Default: open", state.c_str());
+     }
+     sprintf(tmp, "\t>> state: %s\n", state.c_str());
+     str.append(tmp);
+     //------------------ outflow
+     double outflow = xmltof(xDoor->Attribute("outflow"), -1.0);
+     if(outflow >= 0)
+     {
+          building->GetTransition(id)->SetOutflowRate(outflow);
+          sprintf(tmp, "\t>> ouflow: %.2f\n", outflow);
+          str.append(tmp);
+     }
+     //----------------- dt
+     double DT = xmltof(xDoor->Attribute("dt"), -1.0);
+     if(DT >= 0)
+     {
+          building->GetTransition(id)->SetDT(DT);
+     }
+     //----------------- dn
+     int DN = xmltof(xDoor->Attribute("dn"), -1.0);
+     if(DN >= 0)
+     {
+          building->GetTransition(id)->SetDN(DN);
+          sprintf(tmp, "\t>> dn: %d\n", DN);
+          str.append(tmp);
+     }
 
+     //------------------ max door usage
+     int mdu = xmltof(xDoor->Attribute("max_agents"), -1);
+     if(mdu >= 0)
+     {
+          building->GetTransition(id)->SetMaxDoorUsage(mdu);
+          sprintf(tmp, "\t>> max_agents: %d\n", mdu);
+          str.append(tmp);
+     }
+     //-----------------
+     Log->Write(str);
+     result = true;
+     return result;
+}
 bool GeoFileParser::LoadTrafficInfo(Building* building)
 {
 
-     Log->Write("INFO:\tLoading the traffic info file");
+     Log->Write("INFO:\tLoading the traffic info");
 
      TiXmlDocument doc(_configuration->GetProjectFile());
      if (!doc.LoadFile()) {
@@ -569,88 +625,19 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
 
      //processing the doors node
      TiXmlNode* xDoorsNode = xRootNode->FirstChild("doors");
-     if (xDoorsNode)
+     if(xDoorsNode)
+     {
+          bool res_parseDoor;
           for (TiXmlElement* xDoor = xDoorsNode->FirstChildElement("door"); xDoor;
                xDoor = xDoor->NextSiblingElement("door")) {
-
                int id = xmltoi(xDoor->Attribute("trans_id"), -1);
-
                if (id!=-1 && building->GetTransition(id)) {
-                    std::string str("INFO:\tParsed Door: \n");
-                    char tmp[100];
-                    sprintf(tmp, "\t>> ID: %d\n", id);
-                    str.append(tmp);
-                    //------------------ state
-                    std::string state = xmltoa(xDoor->Attribute("state"), "open");
-                    //store transition in a map and call getTransition/getCrossin
-                    if (state=="open") {
-                         building->GetTransition(id)->Open();
-                    }
-                    else if (state=="close") {
-                         building->GetTransition(id)->Close();
-                    }
-                    else {
-                         Log->Write("WARNING:\t Unknown door state: <%s>. open or close. Default: open", state.c_str());
-                    }
-                    sprintf(tmp, "\t>> state: %s\n", state.c_str());
-                    str.append(tmp);
-                    //------------------ outflow
-                    double outflow = xmltof(xDoor->Attribute("outflow"), -1.0);
-                    if(outflow >= 0)
-                    {
-                         building->GetTransition(id)->SetOutflowRate(outflow);
-                         sprintf(tmp, "\t>> ouflow: %.2f\n", outflow);
-                         str.append(tmp);
-                    }
-                    //----------------- dt
-                    double DT = xmltof(xDoor->Attribute("dt"), -1.0);
-                    if(DT >= 0)
-                    {
-                         building->GetTransition(id)->SetDT(DT);
-                    }
-                    //----------------- dn
-                    int DN = xmltof(xDoor->Attribute("dn"), -1.0);
-                    if(DN >= 0)
-                    {
-                         building->GetTransition(id)->SetDN(DN);
-                         sprintf(tmp, "\t>> dn: %d\n", DN);
-                         str.append(tmp);
-                    }
-
-                    //------------------ max door usage
-                    int mdu = xmltof(xDoor->Attribute("max_agents"), -1);
-                    if(mdu >= 0)
-                    {
-                         building->GetTransition(id)->SetMaxDoorUsage(mdu);
-                         sprintf(tmp, "\t>> max_agents: %d\n", mdu);
-                         str.append(tmp);
-
-                    }
-                    //-----------------
-                    Log->Write(str);
+                    res_parseDoor = parseDoorNode(xDoor, id, building);
+                    if(!res_parseDoor)
+                         return false;
                }
-               // deactivate crossings, since they are not equally updated as transitions.
-               // maybe remove them once for all.
-               // else {
-               //      id = xmltoi(xDoor->Attribute("cross_id"), -1);
-               //      if (id!=-1) {
-               //           std::string state = xmltoa(xDoor->Attribute("state"), "open");
-
-               //           //store transition in a map and call getTransition/getCrossin
-               //           if (state=="open") {
-               //                building->GetCrossing(id)->Open();
-               //           }
-               //           else if (state=="close") {
-               //                building->GetCrossing(id)->Close();
-               //           }
-               //           else {
-               //                Log->Write("WARNING:\t Unknown door state: %s", state.c_str());
-               //           }
-               //      }
-               //      else
-               //           Log->Write("WARNING:\t Unknown door id");
-               // }
-          }
+          }//for xDoor
+     }
      Log->Write("INFO:\tDone with loading traffic info file");
      return true;
 }

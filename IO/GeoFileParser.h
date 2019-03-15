@@ -26,6 +26,7 @@
 #include "../geometry/Building.h"
 #include "../geometry/GeometryReader.h"
 #include "../geometry/Trips.h"
+#include "../tinyxml/tinyxml.h"
 
 //TODO: the class name GeoFileParser is misleading as the ``geometry'' file contains among others also relations (transitions)
 //TODO: between geometries/rooms. Probably, EnvironmentFileParser would be better, still parts of the environment are
@@ -39,7 +40,7 @@ public:
      virtual void LoadBuilding(Building* building) override;
 
      virtual bool LoadTrafficInfo(Building* building) override;
-
+     bool parseDoorNode(TiXmlElement * xDoor, int id, Building* building);
 private:
      Configuration* _configuration;
 
