@@ -613,8 +613,8 @@ bool Building::LoadGeometry(const std::string &geometryfile)
                }
                for (TiXmlElement* xTrans = xTransNodeFile->FirstChildElement("transition"); xTrans;
                     xTrans = xTrans->NextSiblingElement("transition")) {
-                    Transition * t = parseTransitionNode(xTrans);
-                    building->AddTransition(t);
+                    Transition * t = ParseTransitionNode(xTrans);
+                    this->AddTransition(t);
                }
           }
           else{
@@ -630,7 +630,7 @@ bool Building::LoadGeometry(const std::string &geometryfile)
 }
 
 
-Transition* Building::ParseTransition(TiXmlElement * xTrans)
+Transition* Building::ParseTransitionNode(TiXmlElement * xTrans)
 {
 
      int id = xmltoi(xTrans->Attribute("id"), -1);
