@@ -77,7 +77,7 @@ public:
 
     /// take a large file and find the geometry file location.
     static QString extractGeometryFilename(QString& filename);
-     static QString SaxParser::extractGeometryFilenameTXT(QString &filename);
+     static QString extractGeometryFilenameTXT(QString &filename);
     /// parse the txt file format
     static bool ParseTxtFormat(const QString& fileName, SyncData* dataset, double * fps);
 
