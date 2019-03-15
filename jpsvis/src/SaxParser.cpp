@@ -1306,20 +1306,29 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
           {
                bool ok;
                *fps=line.split(":")[1].toDouble(&ok);
-               if(!ok) *fps=16;//default value
-               qDebug()<<"frame rate: "<<*fps<<endl; //exit(0);
+               if(!ok)
+               {
+                    *fps=16;//default value
+                    qDebug()<<"WARNING: Could not parse frame rate. Setting to default: "<<*fps<<endl; //exit(0);
+               }
+               else
+                    qDebug()<<"INFo: frame rate: "<<*fps<<endl; //exit(0);
           }
-
+          // skip header
+          in.readLine();
           line = in.readLine();
           int maxFrame=1000;
           if(line.split(":").size()==2)
           {
                bool ok;
                maxFrame=line.split(":")[1].toDouble(&ok);
-               if(!ok) maxFrame=1000;//default value
-               //cout<<"frame: "<<maxFrame<<endl; exit(0);
+               if(!ok) {
+                    maxFrame=1000;//default value
+                    qDebug()<<"WARNING: Could not parse maxFrame. Setting to default: "<<maxFrame<<endl; //exit(0);
+               }
+               else
+                    qDebug()<<"INFO: max frame: "<<maxFrame<<endl; //exit(0);
           }
-
           //initialize the process dialog
           QProgressDialog progressDialog ("Simulation","Abbrechen",1, maxFrame,NULL);
           progressDialog.setModal(true);
@@ -1347,6 +1356,7 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
                int agentID=-1 ;
                int frameID=-1;
                double color=155 ;
+               std::cout << pieces.size() << "\n";
 
                switch(pieces.size())
                {
