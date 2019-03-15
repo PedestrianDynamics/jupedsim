@@ -131,7 +131,7 @@ void Debug::Warning(const char *format, ...)
         va_start (ap, format);
         vsprintf (msg,format ,ap);
         va_end (ap);
-        os<<"Warning["<< std::setw(3)<<WAR_Count<<"]"<<msg<<endl;
+os<<"Warning ["<< std::setw(3)<<WAR_Count<<"]: "<<msg<<endl;
     }
     break;
 
@@ -157,7 +157,7 @@ void Debug::Error(const char *format, ...)
         va_start (ap, format);
         vsprintf (msg,format ,ap);
         va_end (ap);
-        os<<"Error["<< std::setw(3)<<ERR_Count<<"]"<<msg<<endl;
+        os<<"Error ["<< std::setw(3)<<ERR_Count<<"]: "<<msg<<endl;
     }
     break;
 

@@ -693,8 +693,8 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
             SaxParser::parseGeometryXMLV04(wd+"/"+geometry_file,geometry);
         } else {
             //everything was fine. Delete the log file
-             std::cout << "won't delete logfile\n";
-            //SystemSettings::DeleteLogfile();
+             //std::cout << "won't delete logfile\n";
+            SystemSettings::DeleteLogfile();
         }
 
         //SaxParser::parseGeometryXMLV04(fileName,geometry);

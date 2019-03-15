@@ -1116,15 +1116,19 @@ QString SaxParser::extractGeometryFilenameTXT(QString &filename)
                // std::cout << " >> " <<  line.toStdString().c_str() << endl;
                if(line.split(":").size()==2)
                {
-                    if(line.split(":")[0].contains("geometry",Qt::CaseInsensitive)
+                    if(line.split(":")[0].contains("geometry",Qt::CaseInsensitive))
                     {
-                         extracted_geo_name = line.split(":")[1];
+                         extracted_geo_name = line.split(":")[1].simplified().remove(' ');
+                         break;
                     }
                }
           }// while
      } // if open
-          // cout << ">> geo: " <<   extracted_geo_name.toStdString().c_str() << endl;
-          return extracted_geo_name;
+     if(extracted_geo_name=="")
+          Debug::Warning("Could not extracted geometry file!");
+     else
+          Debug::Messages("Extracted geometry from TXT file <%s>", extracted_geo_name.toStdString().c_str());
+     return extracted_geo_name;
 }
 
 
@@ -1315,51 +1319,16 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
 {
      //fileName="data/trajectories/1000_1_0_0_1_1.txt";
      //fileName="data/trajectories/50_3_0_1_1_2.txt";
-     qDebug()<<"parsing the text file: "<<fileName<<endl;
+     Debug::Messages("parsing txt trajectory <%s> ", fileName.toStdString().c_str());
+     *fps=16;//default value
      QFile inputFile(fileName);
      if (inputFile.open(QIODevice::ReadOnly))
      {
           QTextStream in(&inputFile);
           int lastFrameID=-1;
-
-
-          //skip the first line
-          in.readLine();
-          //the second line contains the framerate
-          QString line = in.readLine();
-          if(line.split(":").size()==2)
-          {
-               bool ok;
-               *fps=line.split(":")[1].toDouble(&ok);
-               if(!ok)
-               {
-                    *fps=16;//default value
-                    qDebug()<<"WARNING: Could not parse frame rate. Setting to default: "<<*fps<<endl; //exit(0);
-               }
-               else
-                    qDebug()<<"INFo: frame rate: "<<*fps<<endl; //exit(0);
-          }
-          // third line geometry
-          line = in.readLine();
-          // 4th line max frame
-          line = in.readLine();
           int maxFrame=1000;
-          if(line.split(":").size()==2)
-          {
-               bool ok;
-               maxFrame=line.split(":")[1].toDouble(&ok);
-               if(!ok) {
-                    maxFrame=1000;//default value
-                    qDebug()<<"WARNING: Could not parse maxFrame. Setting to default: "<<maxFrame<<endl; //exit(0);
-               }
-               else
-                    qDebug()<<"INFO: max frame: "<<maxFrame<<endl; //exit(0);
-          }
-          // skip header
-          in.readLine();
-
           //initialize the process dialog
-          QProgressDialog progressDialog ("Simulation","Abbrechen",1, maxFrame,NULL);
+          QProgressDialog progressDialog ("Simulation","Cancel",1, maxFrame,NULL);
           progressDialog.setModal(true);
           //_progressDialog->setStyleSheet(stylesheet);
           progressDialog.setWindowFlags(Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint);
@@ -1376,6 +1345,19 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
           while ( !in.atEnd() )
           {
                QString line = in.readLine();
+               if(line[0] == "#")  // looking for framerate
+               {
+                    if(line.split(":").size()==2)
+                    {
+                         if(line.split(":")[0].contains("framerate",Qt::CaseInsensitive))
+                         {
+                              *fps = line.split(":")[1].toDouble();
+                              Debug::Messages("Frame rate  <%.0f>", *fps);
+                         }
+                    }
+                    continue;
+               }
+
                QStringList pieces = line.split(QRegExp("\\s+"));
 
                double pos[3];
@@ -1424,7 +1406,7 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
                          }
                          else
                          {
-                              qDebug()<<"Ignoring line: "<<line;
+                              Debug::Warning("Ignoring line: <%s>",line.toStdString().c_str());
                          }
                     continue;//next line
                     break;
@@ -1459,7 +1441,7 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
           }
 
           inputFile.close();
-          qDebug()<<dataset->GetFrames().size()<<" frames added";
+          Debug::Messages("%d frames added!", dataset->GetFrames().size());
           //construct the polydata
           for( const auto & frame:dataset->GetFrames())
           {
@@ -1471,7 +1453,7 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
      }
      else
      {
-          qDebug()<<"could not open the file: "<<fileName<<endl;
+          Debug::Error("could not open the file  <%s>", fileName.toStdString().c_str());
           return false;
      }
 

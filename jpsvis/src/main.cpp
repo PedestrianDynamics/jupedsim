@@ -58,6 +58,7 @@
 #include <QApplication>
 #include <QDir>
 #include <locale.h>
+#include <sstream>
 #include "Debug.h"
 // for compiling a standalone windows exe with VS
 #ifdef _MSC_VER
@@ -67,6 +68,38 @@
 #        pragma comment(linker, "/SUBSYSTEM:CONSOLE")
 #    endif
 #endif
+std::string ver_string(int a, int b, int c) {
+      std::ostringstream ss;
+      ss << a << '.' << b << '.' << c;
+      return ss.str();
+}
+
+std::string true_cxx =
+#ifdef __clang__
+      "clang++";
+#elif defined(__GNUC__)
+"g++";
+#elif defined(__MINGW32__)
+   "MinGW";
+#elif defined(_MSC_VER)
+  "Visual Studio";
+#else
+"Compiler not identified";
+#endif
+
+std::string true_cxx_ver =
+#ifdef __clang__
+    ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__);
+#elif defined(__GNUC__)
+    ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+#elif defined(__MINGW32__)
+ver_string(__MINGW32__, __MINGW32_MAJOR_VERSION, __MINGW32_MINOR_VERSION);
+#elif defined( _MSC_VER)
+    ver_string(_MSC_VER, _MSC_FULL_VER,_MSC_BUILD);
+#else
+"";
+#endif
+
 
 #define vtkErrorMacro (x) ()
 
@@ -75,7 +108,7 @@ int main(int argc, char *argv[])
          Debug::Info("----\nJuPedSim - JPSvis\n");
          Debug::Info("Current date   : %s %s", __DATE__, __TIME__);
          Debug::Info("Version        : %s", JPSVIS_VERSION);
-         Debug::Info("Compiler       : %s", USED_COMPILER);
+         Debug::Info("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
          Debug::Info("Commit hash    : %s", GIT_COMMIT_HASH);
          Debug::Info("Commit date    : %s", GIT_COMMIT_DATE);
          Debug::Info("Branch         : %s\n----\n", GIT_BRANCH);
