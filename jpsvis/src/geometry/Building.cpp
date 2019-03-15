@@ -613,7 +613,7 @@ bool Building::LoadGeometry(const std::string &geometryfile)
                }
                for (TiXmlElement* xTrans = xTransNodeFile->FirstChildElement("transition"); xTrans;
                     xTrans = xTrans->NextSiblingElement("transition")) {
-                    Transition * t = parseTransitionNode(xTrans, building);
+                    Transition * t = parseTransitionNode(xTrans);
                     building->AddTransition(t);
                }
           }

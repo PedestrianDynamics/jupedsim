@@ -99,6 +99,7 @@ public:
 
      Transition* GetTransition(std::string caption) const;
      Transition* GetTransition(int id) ;
+     Transition* ParseTransition(TiXmlElement * xTrans);
 
      /**
       * Not implemented
