@@ -61,11 +61,11 @@ const vector<Trajectories*>& IODispatcher::GetIOHandlers()
      return _outputHandlers;
 }
 
-void IODispatcher::WriteHeader(long nPeds, double fps, Building* building, int seed)
+void IODispatcher::WriteHeader(long nPeds, double fps, Building* building, int seed, int count)
 {
      for (auto const & it : _outputHandlers)
      {
-          it->WriteHeader(nPeds, fps, building, seed);
+          it->WriteHeader(nPeds, fps, building, seed, count);
      }
 }
 void IODispatcher::WriteGeometry(Building* building)
@@ -118,7 +118,7 @@ string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
      return string(tmp);
 }
 
-void TrajectoriesJPSV04::WriteHeader(long nPeds, double fps, Building* building, int seed)
+void TrajectoriesJPSV04::WriteHeader(long nPeds, double fps, Building* building, int seed, int count)
 {
      building->GetCaption();
      string tmp;
@@ -329,11 +329,14 @@ TrajectoriesFLAT::TrajectoriesFLAT() : Trajectories()
 {
 }
 
-void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building* building, int seed)
+void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building* building, int seed, int count)
 {
      (void) seed; (void) nPeds;
-     char tmp[CLENGTH] = "";
-     Write("#description: my super simulation");
+     char tmp[100] = "";
+     sprintf(tmp, "#description: jpscore (%s)", JPSCORE_VERSION);
+     Write(tmp);
+     sprintf(tmp, "#count: %d", count);
+     Write(tmp);
      sprintf(tmp, "#framerate: %0.2f",fps);
      Write(tmp);
      sprintf(tmp,"#geometry: %s",building->GetGeometryFilename().c_str());
@@ -353,7 +356,6 @@ void TrajectoriesFLAT::WriteGeometry(Building* building)
 void TrajectoriesFLAT::WriteFrame(int frameNr, Building* building)
 {
      char tmp[CLENGTH] = "";
-
      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
      for(unsigned int p=0;p<allPeds.size();p++){
           Pedestrian* ped = allPeds[p];
@@ -363,7 +365,6 @@ void TrajectoriesFLAT::WriteFrame(int frameNr, Building* building)
           sprintf(tmp, "%d\t%d\t%0.2f\t%0.2f\t%0.2f", ped->GetID(), frameNr, x, y,z);
           Write(tmp);
      }
-
 }
 
 void TrajectoriesFLAT::WriteFooter()
@@ -396,10 +397,11 @@ TrajectoriesVTK::TrajectoriesVTK()
 {
 }
 
-void TrajectoriesVTK::WriteHeader(long nPeds, double fps, Building* building, int seed)
+void TrajectoriesVTK::WriteHeader(long nPeds, double fps, Building* building, int seed, int count)
 {
      //suppress unused warnings
-     (void) nPeds; (void) fps ; (void) seed;
+     (void) nPeds; (void) fps ; (void) seed; (void) count;
+
      Write("# vtk DataFile Version 4.0");
      Write(building->GetCaption());
      Write("ASCII");
@@ -465,7 +467,7 @@ void TrajectoriesVTK::WriteFooter()
 }
 
 
-void TrajectoriesJPSV06::WriteHeader(long nPeds, double fps, Building* building, int seed)
+void TrajectoriesJPSV06::WriteHeader(long nPeds, double fps, Building* building, int seed, int count)
 {
      building->GetCaption();
      string tmp;
@@ -621,7 +623,7 @@ void TrajectoriesXML_MESH::WriteGeometry(Building* building)
 }
 
 
-void TrajectoriesJPSV05::WriteHeader(long nPeds, double fps, Building* building, int seed)
+void TrajectoriesJPSV05::WriteHeader(long nPeds, double fps, Building* building, int seed, int count)
 {
      building->GetCaption();
      string tmp;
