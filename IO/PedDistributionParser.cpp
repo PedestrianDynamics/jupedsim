@@ -180,22 +180,22 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
              if (!docSource.LoadFile()) {
                Log->Write("ERROR: \t%s", docSource.ErrorDesc());
                Log->Write("ERROR: \t could not parse the sources file.");
-               //return false;
+               return false;
              }
              TiXmlElement* xRootNodeSource = docSource.RootElement();
              if (!xRootNodeSource) {
                   Log->Write("ERROR:\tRoot element does not exist in source file.");
-                  //return false;
+                  return false;
              }
 
              if (xRootNodeSource->ValueStr() != "JPScore") {
                   Log->Write("ERROR:\tRoot element value in source file is not 'JPScore'.");
-                  // return false;
+                  return false;
              }
              TiXmlNode* xSourceF = xRootNodeSource->FirstChild("agents_sources");
              if (!xSourceF) {
                   Log->Write("ERROR:\tNo agents_sources tag in file not found.");
-                  //return false;
+                  return false;
              }
              Log->Write("INFO:\t  Loading sources from file");
              TiXmlNode* xSourceNodeF = xSourceF->FirstChild("source");

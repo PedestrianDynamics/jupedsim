@@ -187,7 +187,8 @@ public:
      void UpdateDoorticks() const;
      int GetMaxSimTime() const;
 
-
+     int _countTraj=0; // count number of TXT trajectories to produce
+     double _maxFileSize; // in MB
 };
 
 #endif /*SIMULATION_H_*/

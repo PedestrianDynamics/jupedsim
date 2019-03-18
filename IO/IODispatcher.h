@@ -51,7 +51,7 @@ public:
 
      void AddIO(Trajectories* ioh);
      const std::vector<Trajectories*>& GetIOHandlers();
-     void WriteHeader(long nPeds, double fps, Building* building, int seed);
+     void WriteHeader(long nPeds, double fps, Building* building, int seed, int count);
      void WriteGeometry(Building* building);
      void WriteFrame(int frameNr, Building* building);
      void WriteFooter();
@@ -67,7 +67,7 @@ public:
           _outputHandler = nullptr;
      };
      virtual ~Trajectories(){delete _outputHandler;};
-     virtual void WriteHeader(long nPeds, double fps, Building* building, int seed)=0;
+     virtual void WriteHeader(long nPeds, double fps, Building* building, int seed, int count)=0;
      virtual void WriteGeometry(Building* building)=0;
      virtual void WriteFrame(int frameNr, Building* building)=0;
      virtual void WriteFooter()=0;
@@ -108,7 +108,7 @@ public:
      TrajectoriesJPSV04(){};
      virtual ~TrajectoriesJPSV04(){};
 
-     virtual void WriteHeader(long nPeds, double fps, Building* building, int seed);
+     virtual void WriteHeader(long nPeds, double fps, Building* building, int seed, int count);
      virtual void WriteGeometry(Building* building);
      virtual void WriteFrame(int frameNr, Building* building);
      virtual void WriteFooter();
@@ -121,7 +121,7 @@ public:
      TrajectoriesJPSV05(){};
      virtual ~TrajectoriesJPSV05(){};
 
-     virtual void WriteHeader(long nPeds, double fps, Building* building, int seed);
+     virtual void WriteHeader(long nPeds, double fps, Building* building, int seed, int count);
      virtual void WriteGeometry(Building* building);
      virtual void WriteFrame(int frameNr, Building* building);
      virtual void WriteFooter();
@@ -139,7 +139,7 @@ public:
      }
      ;
 
-     virtual void WriteHeader(long nPeds, double fps, Building* building, int seed);
+     virtual void WriteHeader(long nPeds, double fps, Building* building, int seed, int count);
      virtual void WriteGeometry(Building* building);
      virtual void WriteFrame(int frameNr, Building* building);
      virtual void WriteFooter();
@@ -157,7 +157,7 @@ public:
      }
      ;
 
-     virtual void WriteHeader(long nPeds, double fps, Building* building, int seed);
+     virtual void WriteHeader(long nPeds, double fps, Building* building, int seed, int count);
      virtual void WriteGeometry(Building* building);
      virtual void WriteFrame(int frameNr, Building* building);
      virtual void WriteFooter();
@@ -192,7 +192,7 @@ public:
      TrajectoriesJPSV06(){};
      virtual ~TrajectoriesJPSV06(){ };
 
-     virtual void WriteHeader(long nPeds, double fps, Building* building, int seed);
+     virtual void WriteHeader(long nPeds, double fps, Building* building, int seed, int count);
      virtual void WriteGeometry(Building* building);
      virtual void WriteFrame(int frameNr, Building* building);
      virtual void WriteFooter();
