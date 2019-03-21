@@ -1357,7 +1357,8 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
                     }
                     continue;
                }
-
+               line = line.trimmed(); // remove whitespaces from
+                                      // beginning and end
                QStringList pieces = line.split(QRegExp("\\s+"));
 
                double pos[3];
