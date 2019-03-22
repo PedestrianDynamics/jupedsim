@@ -13,7 +13,7 @@ Event::Event(int id, double time, const std::string& type,
      _id=id;
      _time=time;
      _type=type;
-     _state=state;
+     _state= StringToDoorState(state);
 }
 
 Event::~Event()
@@ -25,7 +25,7 @@ int Event::GetId() const
      return _id;
 }
 
-const std::string& Event::GetState() const
+const DoorState Event::GetState() const
 {
      return _state;
 }
@@ -43,6 +43,21 @@ const std::string& Event::GetType() const
 const std::string Event::GetDescription() const
 {
      char tmp[1024];
-     sprintf(tmp,"After %.2f sec, %s door %d", _time,_state.c_str(), _id);
+     std::string state;
+     switch (_state){
+     case DoorState::OPEN:
+          state = "open";
+          break;
+     case DoorState::CLOSE:
+          state = "close";
+          break;
+     case DoorState::TEMP_CLOSE:
+          state = "temp_close";
+          break;
+     default:
+          state = "error";
+          break;
+     }
+     sprintf(tmp,"After %.2f sec, %s door %d", _time, state.c_str(), _id);
      return std::string(tmp);
 }

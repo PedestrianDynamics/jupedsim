@@ -143,13 +143,13 @@ public:
      /**
       * @return true if the door is closed
       */
-     int IsClosed();
-
-     /**
-      * Close the door
-      * @param isClosed
-      */
-     void  SetClosed(int isClosed);
+     bool IsClosed();
+//
+//     /**
+//      * Close the door
+//      * @param isClosed
+//      */
+//     void  SetClosed(int isClosed);
 
      /**
       * Set/Get the navigation line.
@@ -192,6 +192,9 @@ public:
      int GetNearestTransitAPTO(int UID=FINAL_DEST_OUT);
      void AddTransitAPsTo(int UID,AccessPoint* ap);
 
+     void SetState(DoorState state);
+     DoorState GetState() const;
+
 private:
      int _id;
      double _center[2];
@@ -205,7 +208,7 @@ private:
      Point pCentre;
      NavLine* _navLine;
      std::vector<Pedestrian*> _transitPedestrians;
-     int _isClosed;
+//     int _isClosed;
      std::string _friendlyName;
 
      // stores the connecting APs
@@ -223,6 +226,7 @@ private:
      //store the navigation graph
      std::map<int,std::vector<AccessPoint*> > _navigationGraphTo;
 
+     DoorState _state;
 };
 
 #endif /* ACCESSPOINT_H_ */

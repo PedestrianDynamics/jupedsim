@@ -40,7 +40,6 @@
 #include "../math/GradientModel.h"
 #include "../math/VelocityModel.h"
 #include "../routing/global_shortest/GlobalRouter.h"
-#include "../routing/global_shortest_trips/GlobalRouterTrips.h"
 #include "../routing/quickest/QuickestPathRouter.h"
 #include "../routing/smoke_router/SmokeRouter.h"
 #include "../routing/ai_router/AIRouter.h"
@@ -1137,13 +1136,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                Router *r = new GlobalRouter(id, ROUTING_GLOBAL_SHORTEST);
                _config->GetRoutingEngine()->AddRouter(r);
           }
-          else if ((strategy == "global_shortest_trips") &&
-                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
-               //pRoutingStrategies.push_back(make_pair(id, ROUTING_GLOBAL_SHORTEST));
-               Router *r = new GlobalRouterTrips(id, ROUTING_GLOBAL_SHORTEST);
-               _config->GetRoutingEngine()->AddRouter(r);
-          }
-
           else if ((strategy == "quickest")  &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                //pRoutingStrategies.push_back(make_pair(id, ROUTING_QUICKEST));

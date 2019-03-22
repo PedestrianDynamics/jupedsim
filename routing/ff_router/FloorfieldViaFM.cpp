@@ -369,7 +369,8 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
             double cost_of_MIN3 = DBL_MAX;
             long int dummykey;
             for (const auto& loctrans : transitions) {
-                if (!loctrans.second->IsExit() || !loctrans.second->IsOpen()) {
+                //TODO if (!loctrans.second->IsExit() || !loctrans.second->IsOpen()) {
+                if (!loctrans.second->IsExit() || loctrans.second->IsClose()) {
                     continue;
                 }
                 dummykey = _grid->getKeyAtPoint(loctrans.second->GetCentre());
@@ -488,9 +489,8 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     //create a list of walls
     const std::map<int, Transition*>& allTransitions = buildingArg->GetAllTransitions();
     for (auto& trans : allTransitions) {
-        if (
-            trans.second->IsExit() && trans.second->IsOpen()
-           )
+        //TODO if (trans.second->IsExit() && trans.second->IsOpen())
+        if (trans.second->IsExit() && !trans.second->IsClose())
         {
             _exitsFromScope.emplace_back(Line ( (Line) *(trans.second)));
         }
@@ -500,6 +500,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     }
     _numOfExits = (unsigned int) _exitsFromScope.size();
     for (auto& trans : allTransitions) {
+        //TODO if (!trans.second->IsOpen()) {
         if (!trans.second->IsOpen()) {
             _wall.emplace_back(Line ( (Line) *(trans.second)));
         }
@@ -546,6 +547,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
 
             const vector<Crossing*>& allCrossings = itSubroom.second->GetAllCrossings();
             for (Crossing* crossPtr : allCrossings) {
+                //TODO if (!crossPtr->IsOpen()) {
                 if (!crossPtr->IsOpen()) {
                     _wall.emplace_back( Line( (Line) *crossPtr));
 
@@ -661,9 +663,8 @@ void FloorfieldViaFM::parseBuildingForExits(const Building* const buildingArg, c
     //create a list of walls
     const std::map<int, Transition*>& allTransitions = buildingArg->GetAllTransitions();
     for (auto& trans : allTransitions) {
-        if (
-                  trans.second->IsExit() && trans.second->IsOpen()
-                  )
+        //TODO if (trans.second->IsExit() && trans.second->IsOpen())
+        if (trans.second->IsExit() && !trans.second->IsClose())
         {
             _exitsFromScope.emplace_back(Line ( (Line) *(trans.second)));
             int roomID = -1;
@@ -683,6 +684,7 @@ void FloorfieldViaFM::parseBuildingForExits(const Building* const buildingArg, c
     }
     _numOfExits = (unsigned int) _exitsFromScope.size();
     for (auto& trans : allTransitions) {
+        //TODO if (!trans.second->IsOpen()) {
         if (!trans.second->IsOpen()) {
             _wall.emplace_back(Line ( (Line) *(trans.second)));
         }
@@ -731,6 +733,7 @@ void FloorfieldViaFM::parseBuildingForExits(const Building* const buildingArg, c
             }
             const vector<Crossing*>& allCrossings = itSubroom.second->GetAllCrossings();
             for (Crossing* crossPtr : allCrossings) {
+                //TODO if (!crossPtr->IsOpen()) {
                 if (!crossPtr->IsOpen()) {
                     _wall.emplace_back( Line( (Line) *crossPtr));
 

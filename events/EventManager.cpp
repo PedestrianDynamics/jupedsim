@@ -38,7 +38,6 @@
 #include "../geometry/SubRoom.h"
 #include "../tinyxml/tinyxml.h"
 #include "../routing/global_shortest/GlobalRouter.h"
-#include "../routing/global_shortest_trips/GlobalRouterTrips.h"
 #include "../routing/quickest/QuickestPathRouter.h"
 #include "../routing/smoke_router/SmokeRouter.h"
 #include "../routing/ff_router/ffRouter.h"
@@ -259,25 +258,26 @@ bool EventManager::DisseminateKnowledge(Building* _b)
      }
 
 
+     //TODO Was passiert hier?
      //update the routers based on the configurations
      //#pragma omp parallel
-     for(auto&& ped:_b->GetAllPedestrians())
-     {
-          if(UpdateRoute(ped)==false)
-          {
-               //Clear the memory and attempt to reroute
-               //this can happen if all doors are known to be closed
-               ped->ClearKnowledge();
-               Log->Write("ERROR: \t clearing ped knowledge");
-               //ped->Dump(ped->GetID());
-               if(UpdateRoute(ped)==false)
-               {
-                    Log->Write("ERROR: \t cannot reroute the pedestrian. unknown problem");
-                    //return false;
-                    exit(EXIT_FAILURE);
-               }
-          }
-     }
+//     for(auto&& ped:_b->GetAllPedestrians())
+//     {
+//          if(UpdateRoute(ped)==false)
+//          {
+//               //Clear the memory and attempt to reroute
+//               //this can happen if all doors are known to be closed
+//               ped->ClearKnowledge();
+//               Log->Write("ERROR: \t clearing ped knowledge");
+//               //ped->Dump(ped->GetID());
+//               if(UpdateRoute(ped)==false)
+//               {
+//                    Log->Write("ERROR: \t cannot reroute the pedestrian. unknown problem");
+//                    //return false;
+//                    exit(EXIT_FAILURE);
+//               }
+//          }
+//     }
      return true;
 }
 
@@ -286,8 +286,17 @@ bool EventManager::UpdateRoute(Pedestrian* ped)
      //create the key as string.
      //map are sorted by default
      string key= ped->GetKnowledgeAsString();
+//     std::cout << "key: <" << key << ">" << std::endl;
      //get the router engine corresponding to the actual configuration
      bool status=true;
+
+//     for (auto event : _eventEngineStorage){
+//          std::cout << "_eventEngineStorage " << event.first << ": " << std::endl;
+//          for (auto router : event.second->GetAvailableRouters()){
+//               std::cout << router->GetStrategy() << std::endl;
+//          }
+//     }
+
      if (_eventEngineStorage.count(key)>0)
      {
           RoutingEngine* engine=_eventEngineStorage[key];
@@ -309,9 +318,9 @@ bool EventManager::UpdateRoute(Pedestrian* ped)
      }
      else
      {
-          //Log->Write("WARNING: \t unknown configuration <%s>", key.c_str());
-          //Log->Write("WARNING: \t  [%d] router available", _eventEngineStorage.size());
-          //Log->Write("       : \t trying to create");
+//          Log->Write("WARNING: \t unknown configuration <%s>", key.c_str());
+//          Log->Write("WARNING: \t  [%d] router available", _eventEngineStorage.size());
+//          Log->Write("       : \t trying to create");
           //CreateRoutingEngine(_building);
           status= false;
      }
@@ -517,10 +526,16 @@ void EventManager::ProcessEvent()
           if (fabs(event.GetTime() - current_time_d) < J_EPS_EVENT) {
                //Event with current time stamp detected
                Log->Write("INFO:\tEvent: after %.2f sec: ", current_time_d);
-               if (event.GetState().compare("close") == 0) {
-                    CloseDoor(event.GetId());
-               } else {
+               switch (event.GetState()){
+               case DoorState::OPEN:
                     OpenDoor(event.GetId());
+                    break;
+               case DoorState::CLOSE:
+                    CloseDoor(event.GetId());
+                    break;
+               case DoorState::TEMP_CLOSE:
+                    TempCloseDoor(event.GetId());
+                    break;
                }
           }
 
@@ -535,7 +550,7 @@ void EventManager::CloseDoor(int id)
 {
      Transition *t = _building->GetTransition(id);
 
-     if (t->IsOpen())
+     if (!t->IsClose())
      {
           t->Close();
           Log->Write("INFO:\tClosing door %d ", id);
@@ -549,6 +564,26 @@ void EventManager::CloseDoor(int id)
      }
 
 }
+
+void EventManager::TempCloseDoor(int id)
+{
+     Transition *t = _building->GetTransition(id);
+
+     if (!t->IsTempClose())
+     {
+          t->TempClose();
+          Log->Write("INFO:\tClosing door %d ", id);
+          //Create and save a graph corresponding to the actual state of the building.
+          if(CreateRoutingEngine(_building)==false)
+          {
+               Log->Write("ERROR: \tcannot create a routing engine with the new event");
+          }
+     } else {
+          Log->Write("WARNING: \tdoor %d is already close", id);
+     }
+
+}
+
 
 //open the door if it was open and relaunch the routing procedure
 void EventManager::OpenDoor(int id)
@@ -605,7 +640,7 @@ bool EventManager::CreateRoutingEngine(Building* _b, int first_engine)
 
      for(auto&& t:_b->GetAllTransitions())
      {
-          if(t.second->IsOpen()==false)
+          if(!t.second->IsClose())
                closed_doors.push_back(t.second->GetID());
      }
      std::sort(closed_doors.begin(), closed_doors.end());
@@ -670,11 +705,11 @@ Router * EventManager::CreateRouter(const RoutingStrategy& strategy)
      switch(strategy)
      {
           case ROUTING_LOCAL_SHORTEST:
-               rout = new GlobalRouterTrips(ROUTING_LOCAL_SHORTEST, ROUTING_LOCAL_SHORTEST);
+               rout = new GlobalRouter(ROUTING_LOCAL_SHORTEST, ROUTING_LOCAL_SHORTEST);
                break;
 
           case ROUTING_GLOBAL_SHORTEST:
-               rout = new GlobalRouterTrips(ROUTING_GLOBAL_SHORTEST, ROUTING_GLOBAL_SHORTEST);
+               rout = new GlobalRouter(ROUTING_GLOBAL_SHORTEST, ROUTING_GLOBAL_SHORTEST);
                break;
 
           case ROUTING_QUICKEST:

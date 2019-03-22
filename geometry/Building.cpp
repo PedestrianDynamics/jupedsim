@@ -370,6 +370,9 @@ bool Building::InitGeometry()
      for (auto& transItr : _transitions){
           Transition* trans = transItr.second;
           std::cout << trans->GetID() << " is open " << trans->IsOpen() << std::endl;
+          std::cout << trans->GetID() << " is close " << trans->IsClose() << std::endl;
+          std::cout << trans->GetID() << " is temp_close " << trans->IsTempClose() << std::endl;
+
      }
      return true;
 }

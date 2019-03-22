@@ -22,6 +22,7 @@
  *
  * \section Description
  *
+ * TODO update to work with door states (OPEN, CLOSE, TEMP_CLOSE)
  *
  **/
 

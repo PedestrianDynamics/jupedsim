@@ -35,9 +35,6 @@ using namespace std;
 Crossing::Crossing()
 {
      _id = -1;
-     _isOpen=true;
-     _temporaryClosed=false; // some doors have to be closed and opened again
-                             // depending on _outflowRate.
      _doorUsage = 0;
      _maxDoorUsage = (std::numeric_limits<int>::max)(); //avoid name conflicts in windows winmindef.h
      _outflowRate = (std::numeric_limits<double>::max)();
@@ -48,6 +45,7 @@ Crossing::Crossing()
      _partialDoorUsage = 0;
      _closingTime = 0;
 
+     _state = DoorState::OPEN;
 }
 
 Crossing::~Crossing()
@@ -86,7 +84,17 @@ bool Crossing::IsExit() const
 
 bool Crossing::IsOpen() const
 {
-     return _isOpen;
+     return _state == DoorState::OPEN;
+}
+
+bool Crossing::IsClose() const
+{
+     return _state == DoorState::CLOSE;
+}
+
+bool Crossing::IsTempClose() const
+{
+     return _state == DoorState::TEMP_CLOSE;
 }
 
 bool Crossing::IsTransition() const
@@ -96,12 +104,18 @@ bool Crossing::IsTransition() const
 
 void Crossing::Close()
 {
-     _isOpen = false;
+     _state = DoorState::CLOSE;
 }
+
+void Crossing::TempClose()
+{
+     _state = DoorState::TEMP_CLOSE;
+}
+
 
 void Crossing::Open()
 {
-     _isOpen = true;
+     _state = DoorState::OPEN;
 }
 
 bool Crossing::IsInSubRoom(int subroomID) const
@@ -141,10 +155,10 @@ void Crossing::WriteToErrorLog() const
      string s;
      char tmp[CLENGTH];
      sprintf(tmp, "\t\tCROSS: %d (%f, %f) -- (%f, %f)\n", GetID(), GetPoint1()._x,
-             GetPoint1()._y, GetPoint2()._x, GetPoint2()._y);
+               GetPoint1()._y, GetPoint2()._x, GetPoint2()._y);
      s.append(tmp);
      sprintf(tmp, "\t\t\t\tSubRoom: %d <-> SubRoom: %d\n", GetSubRoom1()->GetSubRoomID(),
-             GetSubRoom2()->GetSubRoomID());
+               GetSubRoom2()->GetSubRoomID());
      s.append(tmp);
      Log->Write(s);
 }
@@ -159,14 +173,14 @@ string Crossing::GetDescription() const
      geometry.append(tmp);
      //geometry.append("\t\t<door color=\"250\">\n");
      sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\" />\n",
-             (GetPoint1()._x) * FAKTOR,
-             (GetPoint1()._y) * FAKTOR,
-             _subRoom1->GetElevation(GetPoint1())*FAKTOR);
+               (GetPoint1()._x) * FAKTOR,
+               (GetPoint1()._y) * FAKTOR,
+               _subRoom1->GetElevation(GetPoint1())*FAKTOR);
      geometry.append(tmp);
      sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\" />\n",
-             (GetPoint2()._x) * FAKTOR,
-             (GetPoint2()._y) * FAKTOR,
-             _subRoom1->GetElevation(GetPoint2())*FAKTOR);
+               (GetPoint2()._x) * FAKTOR,
+               (GetPoint2()._y) * FAKTOR,
+               _subRoom1->GetElevation(GetPoint2())*FAKTOR);
      geometry.append(tmp);
      geometry.append("\t\t</crossing>\n");
      return geometry;
@@ -255,11 +269,6 @@ void Crossing::UpdateClosingTime(double dt)
      _closingTime -= dt;
 }
 
-bool Crossing::isTemporaryClosed()
-{
-     return  _temporaryClosed;
-}
-
 
 double Crossing::GetDT()
 {
@@ -297,23 +306,9 @@ void Crossing::regulateFlow(double time)
           // --> [1]
           //---------------------------
           _closingTime = number / _outflowRate -  T; //[1]
-           _temporaryClosed = true;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          this->Close();
+//           _temporaryClosed = true;
+//          this->Close();
+          this->TempClose();
           Log-> Write("INFO:\tClosing door %d. DoorUsage = %d (max = %d). Flow = %.2f (max =  %.2f) Time=%.2f", GetID(), GetDoorUsage(), GetMaxDoorUsage(), flow, _outflowRate, time);
      }
 
@@ -322,14 +317,45 @@ void Crossing::regulateFlow(double time)
      {
           Log-> Write("INFO:\tClosing door %d. DoorUsage = %d (>= %d). Time=%.2f", GetID(), GetDoorUsage(), GetMaxDoorUsage(), time);
           this->Close();
-          _temporaryClosed = false;
+//          _temporaryClosed = false;
      }
      _lastFlowMeasurement = time +  _closingTime;
 }
 
 void Crossing::changeTemporaryState()
 {
-       _temporaryClosed = false;
-       _closingTime = 0;
-       this->Open();
+//       _temporaryClosed = false;
+     _closingTime = 0;
+     this->Open();
+}
+
+DoorState Crossing::GetState() const
+{
+     return _state;
+}
+
+void Crossing::SetState(DoorState _state)
+{
+     Crossing::_state = _state;
+}
+
+std::string Crossing::toString() const
+{
+     std::stringstream tmp;
+//     tmp << _point1.toString() << "--" << _point2.toString();
+
+     tmp << this->GetPoint1().toString() << "--" << this->GetPoint2().toString();
+     switch (_state){
+     case DoorState::OPEN:
+          tmp << " open";
+          break;
+     case DoorState::CLOSE:
+          tmp << " close";
+          break;
+     case DoorState::TEMP_CLOSE:
+          tmp << " temp_close";
+          break;
+
+     }
+     return tmp.str();
 }

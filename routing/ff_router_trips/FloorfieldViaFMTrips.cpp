@@ -371,8 +371,8 @@ void FloorfieldViaFMTrips::createMapEntryInLineToGoalID(const int goalID, bool i
                 UID_of_MIN = allgoals.at(goalID)->GetCentreCrossing()->GetUniqueID();
             } else {
                 for (const auto& loctrans : transitions) {
-//                    if (!loctrans.second->IsExit() || !loctrans.second->IsOpen()) {
-                    if (!loctrans.second->IsExit()) {
+                    //TODO if (!loctrans.second->IsExit() || !loctrans.second->IsOpen()) {
+                    if (!loctrans.second->IsExit() || loctrans.second->IsClose()) {
 
                             continue;
                     }
@@ -494,9 +494,8 @@ void FloorfieldViaFMTrips::parseBuilding(const Building* const buildingArg, cons
     //create a list of walls
     const std::map<int, Transition*>& allTransitions = buildingArg->GetAllTransitions();
     for (auto& trans : allTransitions) {
-         //          TODO temp_close
-//        if (trans.second->IsExit() && trans.second->IsOpen())
-        if (trans.second->IsExit() ) {
+        //TODO if (trans.second->IsExit() && trans.second->IsOpen()){
+        if (trans.second->IsExit() && !trans.second->IsClose()){
             _exitsFromScope.emplace_back(Line ( (Line) *(trans.second)));
         }
         //populate both maps: costmap, neggradmap. These are the lookup maps for floorfields to specific transitions
@@ -505,13 +504,13 @@ void FloorfieldViaFMTrips::parseBuilding(const Building* const buildingArg, cons
     }
     _numOfExits = (unsigned int) _exitsFromScope.size();
 
-     //          TODO temp_close
-//    for (auto& trans : allTransitions) {
-//        if (!trans.second->IsOpen()) {
-//            _wall.emplace_back(Line ( (Line) *(trans.second)));
-//        }
-//
-//    }
+    for (auto& trans : allTransitions) {
+        //TODO if (!trans.second->IsOpen()) {
+        if (!trans.second->IsOpen()) {
+            _wall.emplace_back(Line ( (Line) *(trans.second)));
+        }
+
+    }
 
     for (const auto& itRoom : buildingArg->GetAllRooms()) {
         for (const auto& itSubroom : itRoom.second->GetAllSubRooms()) {
@@ -554,6 +553,7 @@ void FloorfieldViaFMTrips::parseBuilding(const Building* const buildingArg, cons
 
             const vector<Crossing*>& allCrossings = itSubroom.second->GetAllCrossings();
             for (Crossing* crossPtr : allCrossings) {
+                //TODO if (!crossPtr->IsOpen()) {
                 if (!crossPtr->IsOpen()) {
                     _wall.emplace_back( Line( (Line) *crossPtr));
 
@@ -669,9 +669,8 @@ void FloorfieldViaFMTrips::parseBuildingForExits(const Building* const buildingA
     //create a list of walls
     const std::map<int, Transition*>& allTransitions = buildingArg->GetAllTransitions();
     for (auto& trans : allTransitions) {
-         //          TODO temp_close
-//        if ( trans.second->IsExit() && trans.second->IsOpen() ) {
-        if ( trans.second->IsExit() ) {
+        //TODO if ( trans.second->IsExit() && trans.second->IsOpen() ) {
+        if ( trans.second->IsExit() && !trans.second->IsClose() ) {
             _exitsFromScope.emplace_back(Line ( (Line) *(trans.second)));
             int roomID = -1;
             if (trans.second->GetRoom1()) {
@@ -689,13 +688,13 @@ void FloorfieldViaFMTrips::parseBuildingForExits(const Building* const buildingA
         _neggradmap.emplace(trans.second->GetUniqueID(), nullptr);
     }
     _numOfExits = (unsigned int) _exitsFromScope.size();
-     //          TODO temp_close
-//    for (auto& trans : allTransitions) {
-//        if (!trans.second->IsOpen()) {
-//            _wall.emplace_back(Line ( (Line) *(trans.second)));
-//        }
-//
-//    }
+    for (auto& trans : allTransitions) {
+        //TODO if (!trans.second->IsOpen()) {
+        if (!trans.second->IsOpen()) {
+            _wall.emplace_back(Line ( (Line) *(trans.second)));
+        }
+
+    }
     for (const auto& itRoom : buildingArg->GetAllRooms()) {
         if (std::find(exitRoomIDs.begin(), exitRoomIDs.end(), itRoom.second->GetID()) == exitRoomIDs.end()) { //room with no exit
             continue;
@@ -739,6 +738,7 @@ void FloorfieldViaFMTrips::parseBuildingForExits(const Building* const buildingA
             }
             const vector<Crossing*>& allCrossings = itSubroom.second->GetAllCrossings();
             for (Crossing* crossPtr : allCrossings) {
+                //TODO if (!crossPtr->IsOpen()) {
                 if (!crossPtr->IsOpen()) {
                     _wall.emplace_back( Line( (Line) *crossPtr));
 

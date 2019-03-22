@@ -349,9 +349,10 @@ void Simulation::UpdateRoutesAndLocations()
           if(_gotSources)
                ped->FindRoute();
           //finally actualize the route
-          if ( !_gotSources && ped->FindRoute() == -1) {
+          if ( !_gotSources && ped->FindRoute() == -1 ) {
                //a destination could not be found for that pedestrian
-               Log->Write("ERROR: \tCould not find a route for pedestrian %d",ped->GetID());
+               Log->Write("ERROR: \tCould not find a route for pedestrian %d in room %d and subroom %d",
+                         ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID());
                //ped->FindRoute(); //debug only, plz remove
                std::function<void(const Pedestrian&)> f = std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
                ped->Relocate(f);
@@ -578,20 +579,22 @@ double Simulation::RunBody(double maxSimTime)
         #endif
 
         // here open transition that should be closed
+        //        TODO fix, opens door everytime...
         for (auto& itr: _building->GetAllTransitions())
         {
              Transition* Trans = itr.second;
-             if(Trans->isTemporaryClosed())
+             if(Trans->IsTempClose())
              {
-                  Trans->UpdateClosingTime( _deltaT);
-                  if(Trans->GetClosingTime() <= _deltaT)
-                  {
-                       Trans->changeTemporaryState();
-                       Log-> Write("INFO:\tReset state of door %d,  Time=%.2f", Trans->GetID(), Pedestrian::GetGlobalTime());
+                  if ((Trans->GetMaxDoorUsage() != std::numeric_limits<int>::max()) ||
+                    (Trans->GetOutflowRate() != std::numeric_limits<double>::max()) ){
+//                        || (Trans->GetOutflowRate() != std::numeric_limits<double>::max)){
+                      Trans->UpdateClosingTime( _deltaT);
+                      if(Trans->GetClosingTime() <= _deltaT){
+                          Trans->changeTemporaryState();
+                      }
+                      Log-> Write("INFO:\tReset state of door %d,  Time=%.2f", Trans->GetID(), Pedestrian::GetGlobalTime());
                   }
              }
-
-
         }
     }// while time
     return t;

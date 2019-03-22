@@ -225,6 +225,27 @@ enum USERMODE {
     DISTANCE_AND_DIRECTIONS_USED
 };
 
+// Describes the door
+enum class DoorState { OPEN, CLOSE, TEMP_CLOSE, ERROR };
+
+inline DoorState StringToDoorState(std::string name){
+     std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+
+     if (name.compare("open") == 0){
+          return DoorState::OPEN;
+     }
+
+     if (name.compare("temp_close") == 0){
+          return DoorState::TEMP_CLOSE;
+     }
+
+     if (name.compare("close") == 0){
+          return DoorState::CLOSE;
+     }
+
+     return DoorState::ERROR;
+};
+
 constexpr double magicnum(int i) {
      return (i == UNKNOWN_DISTANCE) ? -3.0 : (i == UNKNOWN_COST) ? -2.0 : (i == WALL_ON_COSTARRAY) ? -7.0 : (i == TARGET_REGION) ? 0.0 : J_NAN;
 //     switch (i) {

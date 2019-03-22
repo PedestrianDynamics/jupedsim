@@ -81,7 +81,8 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
           bool isOpen = false;
           for (auto& cross : tmpCross) {
                uidNotConst = cross->GetUniqueID();
-               isOpen = cross->IsOpen();
+               //TODO isOpen = cross->IsOpen();
+               isOpen = !cross->IsClose();
                if (!isOpen) {
                     //will be added twice! is it a problem?
                     lines.emplace_back((Line)*cross);
@@ -94,7 +95,8 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
           }
           for (auto& trans : tmpTrans) {
                uidNotConst = trans->GetUniqueID();
-               isOpen = trans->IsOpen();
+               //TODO isOpen = trans->IsOpen();
+               isOpen = !trans->IsClose();
                if (!isOpen) {
                     //will be added twice! is it a problem?
                     lines.emplace_back((Line)*trans);
@@ -167,7 +169,8 @@ UnivFFviaFM::UnivFFviaFM(SubRoom* subRoomArg, Configuration* const confArg, doub
      bool isOpen = false;
      for (auto& cross : tmpCross) {
           uidNotConst = cross->GetUniqueID();
-          isOpen = cross->IsOpen();
+          //TODO isOpen = cross->IsOpen();
+          isOpen = !cross->IsClose();
           if (!isOpen) {
                lines.emplace_back((Line)*cross);
           } else {
@@ -176,7 +179,8 @@ UnivFFviaFM::UnivFFviaFM(SubRoom* subRoomArg, Configuration* const confArg, doub
      }
      for (auto& trans : tmpTrans) {
           uidNotConst = trans->GetUniqueID();
-          isOpen = trans->IsOpen();
+          //TODO  isOpen = trans->IsOpen();
+          isOpen = !trans->IsClose();
           if (!isOpen) {
                lines.emplace_back((Line)*trans);
           } else {

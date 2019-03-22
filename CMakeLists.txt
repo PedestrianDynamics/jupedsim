@@ -354,11 +354,6 @@ routing/global_shortest/AccessPoint.cpp
 routing/global_shortest/GlobalRouter.cpp
 routing/global_shortest/DTriangulation.cpp
 
-#global_shortest
-routing/global_shortest_trips/AccessPoint.cpp
-routing/global_shortest_trips/GlobalRouterTrips.cpp
-routing/global_shortest_trips/DTriangulation.cpp
-
 #general
 routing/DirectionStrategy.cpp
 routing/Router.cpp
@@ -472,11 +467,6 @@ routing/RoutingEngine.h
 routing/global_shortest/GlobalRouter.h
 routing/global_shortest/AccessPoint.h
 routing/global_shortest/DTriangulation.h
-
-#global_shortest trips
-routing/global_shortest_trips/AccessPoint.h
-routing/global_shortest_trips/GlobalRouterTrips.h
-routing/global_shortest_trips/DTriangulation.h
 
 #quickest
 routing/quickest/QuickestPathRouter.h

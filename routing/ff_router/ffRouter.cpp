@@ -120,7 +120,8 @@ bool FFRouter::Init(Building* building)
      std::vector<std::pair<int, int>> roomAndCroTrVector;
      roomAndCroTrVector.clear();
      for (auto& pair:allTrans) {
-          if (pair.second->IsOpen()) {
+          //TODO if (pair.second->IsOpen()) {
+          if (!pair.second->IsClose()) {
                _allDoorUIDs.emplace_back(pair.second->GetUniqueID());
                _CroTrByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
                if (pair.second->IsExit()) {
@@ -133,7 +134,8 @@ bool FFRouter::Init(Building* building)
           }
      }
      for (auto& pair:allCross) {
-          if (pair.second->IsOpen()) {
+          //TODO if (pair.second->IsOpen()) {
+          if (!pair.second->IsClose()) {
                _allDoorUIDs.emplace_back(pair.second->GetUniqueID());
                _CroTrByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
                Room* room1 = pair.second->GetRoom1();
@@ -494,13 +496,15 @@ int FFRouter::FindExit(Pedestrian* p)
      if (!_targetWithinSubroom) {
           //candidates of current room (ID) (provided by Room)
           for (auto transUID : _building->GetRoom(p->GetRoomID())->GetAllTransitionsIDs()) {
-               if ((_CroTrByUID.count(transUID) != 0) && (_CroTrByUID[transUID]->IsOpen())) {
+               // TODO if ((_CroTrByUID.count(transUID) != 0) && (_CroTrByUID[transUID]->IsOpen())) {
+               if ((_CroTrByUID.count(transUID) != 0) && (!_CroTrByUID[transUID]->IsClose())) {
                     DoorUIDsOfRoom.emplace_back(transUID);
                }
           }
           for (auto &subIPair : _building->GetRoom(p->GetRoomID())->GetAllSubRooms()) {
                for (auto &crossI : subIPair.second->GetAllCrossings()) {
-                    if (crossI->IsOpen()) {
+                    // TODO if (crossI->IsOpen()) {
+                    if (!crossI->IsClose()) {
                          DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
                     }
                }
@@ -510,13 +514,15 @@ int FFRouter::FindExit(Pedestrian* p)
      {
           //candidates of current subroom only
           for (auto &crossI : _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->GetAllCrossings()) {
-               if (crossI->IsOpen()) {
+               //TODO if (crossI->IsOpen()) {
+               if (!crossI->IsClose()) {
                     DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
                }
           }
 
           for (auto &transI : _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->GetAllTransitions()) {
-               if (transI->IsOpen()) {
+               //TODO if (transI->IsClose()) {
+               if (!transI->IsClose()) {
                     DoorUIDsOfRoom.emplace_back(transI->GetUniqueID());
                }
           }

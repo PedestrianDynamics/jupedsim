@@ -87,7 +87,8 @@ UnivFFviaFMTrips::UnivFFviaFMTrips(Room* roomArg, Configuration* const confArg, 
           bool isOpen = false;
           for (auto& cross : tmpCross) {
                uidNotConst = cross->GetUniqueID();
-               isOpen = cross->IsOpen();
+               //TODO isOpen = cross->IsOpen();
+               isOpen = !cross->IsClose();
                if (!isOpen) {
                     //will be added twice! is it a problem?
                     lines.emplace_back((Line)*cross);
@@ -100,17 +101,17 @@ UnivFFviaFMTrips::UnivFFviaFMTrips(Room* roomArg, Configuration* const confArg, 
           }
           for (auto& trans : tmpTrans) {
                uidNotConst = trans->GetUniqueID();
-               isOpen = trans->IsOpen();
-               //          TODO temp_close
-//               if (!isOpen) {
-//                    //will be added twice! is it a problem?
-//                    lines.emplace_back((Line)*trans);
-//               } else {
+               //TODO isOpen = trans->IsOpen();
+               isOpen = !trans->IsClose();
+               if (!isOpen) {
+                    //will be added twice! is it a problem?
+                    lines.emplace_back((Line)*trans);
+               } else {
                    anyDoor = Line{*trans};
                    if (tmpDoors.count(uidNotConst) == 0) {
                        tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *trans));
                    }
-//               }
+               }
           }
 
           //find insidePoint and save it, together with UID
@@ -176,7 +177,8 @@ UnivFFviaFMTrips::UnivFFviaFMTrips(SubRoom* subRoomArg, Configuration* const con
      bool isOpen = false;
      for (auto& cross : tmpCross) {
           uidNotConst = cross->GetUniqueID();
-          isOpen = cross->IsOpen();
+          //TODO isOpen = cross->IsOpen();
+          isOpen = !cross->IsClose();
           if (!isOpen) {
                lines.emplace_back((Line)*cross);
           } else {
@@ -185,13 +187,13 @@ UnivFFviaFMTrips::UnivFFviaFMTrips(SubRoom* subRoomArg, Configuration* const con
      }
      for (auto& trans : tmpTrans) {
           uidNotConst = trans->GetUniqueID();
-          //          TODO temp_close
-          isOpen = trans->IsOpen();
-//          if (!isOpen) {
-//               lines.emplace_back((Line)*trans);
-//          } else {
+          //TODO isOpen = trans->IsOpen();
+          isOpen = !trans->IsClose();
+          if (!isOpen) {
+               lines.emplace_back((Line)*trans);
+          } else {
                tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *trans));
-//          }
+          }
      }
 
      _building->GetAllGoals();
