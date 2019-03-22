@@ -156,7 +156,7 @@ public:
     /**
      * print some statistics about the simulation
      */
-    void PrintStatistics();
+    void PrintStatistics(double time);
 
     /**
      * @return the agents source manager
@@ -186,7 +186,8 @@ public:
      void UpdateDoorticks() const;
      int GetMaxSimTime() const;
 
-
+     int _countTraj=0; // count number of TXT trajectories to produce
+     double _maxFileSize; // in MB
 };
 
 #endif /*SIMULATION_H_*/
