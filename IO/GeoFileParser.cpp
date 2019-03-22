@@ -361,8 +361,10 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
           for (TiXmlElement* e = xGoalsNode->FirstChildElement("goal"); e;
                e = e->NextSiblingElement("goal")) {
                Goal * goal = parseGoalNode(e);
-               building->AddGoal(goal);
-               _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
+               if (goal) {
+                    building->AddGoal(goal);
+                    _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
+               }
 
           }
 
@@ -370,8 +372,10 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
           for (TiXmlElement* e = xGoalsNode->FirstChildElement("waiting_area"); e;
                e = e->NextSiblingElement("waiting_area")) {
                Goal * goal = parseWaitingAreaNode(e);
-               building->AddGoal(goal);
-               _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
+               if (goal) {
+                    building->AddGoal(goal);
+                    _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
+               }
 
           }
           // ---- parse goals/waiting areas from external file
@@ -403,15 +407,19 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                for (TiXmlElement* e = xGoal->FirstChildElement("goal"); e;
                     e = e->NextSiblingElement("goal")) {
                     Goal * goal = parseGoalNode(e);
-                    building->AddGoal(goal);
-                    _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
+                    if (goal) {
+                         building->AddGoal(goal);
+                         _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
+                    }
                }
 
                for (TiXmlElement* e = xGoal->FirstChildElement("waiting_area"); e;
                     e = e->NextSiblingElement("waiting_area")) {
                     Goal * goal = parseWaitingAreaNode(e);
-                    building->AddGoal(goal);
-                    _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
+                    if (goal) {
+                         building->AddGoal(goal);
+                         _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
+                    }
                }
 
 
@@ -730,8 +738,8 @@ Goal* GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
      }
 
      if (!waitingArea->setNextGoals(nextGoals)){
-          std::cout << "wa setNextGoals!";
-          exit(EXIT_FAILURE);
+          Log->Write("ERROR:\t  check probabilties of next goal of WA  %d", id);
+          return nullptr;
      };
 
 
@@ -753,9 +761,11 @@ Goal* GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
      }
 
      if (!waitingArea->ConvertLineToPoly()){
-          std::cout << "wa convertLineToPoly!";
-          exit(EXIT_FAILURE);
+          Log->Write("ERROR:\t   parsing polygon of waiting area %d", id);
+          return nullptr;
      }
+
+     Log->Write("INFO:\t  finished parsing waiting area %d", id);
 
      return wa;
 }
