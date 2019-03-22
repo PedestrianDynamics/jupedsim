@@ -43,6 +43,7 @@ public:
      bool parseDoorNode(TiXmlElement * xDoor, int id, Building* building);
      Goal* parseGoalNode(TiXmlElement * e);
      Transition* parseTransitionNode(TiXmlElement * xTrans, Building * building);
+     Goal* parseWaitingAreaNode(TiXmlElement * e);
 
 private:
      Configuration* _configuration;
