@@ -584,20 +584,20 @@ routing/ai_router/perception/sign.cpp
 routing/ai_router/Cortex.cpp
 
 #AI router trips
-routing/ai_router_trips/AIRouterTrips.cpp
-routing/ai_router_trips/BrainStorage.cpp
-routing/ai_router_trips/cognitiveMap/associations.cpp
-routing/ai_router_trips/cognitiveMap/connection.cpp
-routing/ai_router_trips/cognitiveMap/cognitivemap.cpp
-routing/ai_router_trips/cognitiveMap/landmark.cpp
-routing/ai_router_trips/cognitiveMap/region.cpp
-routing/ai_router_trips/cognitiveMap/landmarknetwork.cpp
-routing/ai_router_trips/cognitiveMap/internnavigationnetwork.cpp
-routing/ai_router_trips/perception/visualsystem.cpp
-routing/ai_router_trips/perception/visibleenvironment.cpp
-routing/ai_router_trips/perception/cgalgeometry.cpp
-routing/ai_router_trips/perception/sign.cpp
-routing/ai_router_trips/Cortex.cpp
+#routing/ai_router_trips/AIRouterTrips.cpp
+#routing/ai_router_trips/BrainStorage.cpp
+#routing/ai_router_trips/cognitiveMap/associations.cpp
+#routing/ai_router_trips/cognitiveMap/connection.cpp
+#routing/ai_router_trips/cognitiveMap/cognitivemap.cpp
+#routing/ai_router_trips/cognitiveMap/landmark.cpp
+#routing/ai_router_trips/cognitiveMap/region.cpp
+#routing/ai_router_trips/cognitiveMap/landmarknetwork.cpp
+#routing/ai_router_trips/cognitiveMap/internnavigationnetwork.cpp
+#routing/ai_router_trips/perception/visualsystem.cpp
+#routing/ai_router_trips/perception/visibleenvironment.cpp
+#routing/ai_router_trips/perception/cgalgeometry.cpp
+#routing/ai_router_trips/perception/sign.cpp
+#routing/ai_router_trips/Cortex.cpp
 )
 
 SET(AIROUTER_HDR

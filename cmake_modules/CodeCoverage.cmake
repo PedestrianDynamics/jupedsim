@@ -74,42 +74,42 @@ FIND_PROGRAM( GENHTML_PATH genhtml )
 FIND_PROGRAM( GCOVR_PATH gcovr PATHS ${CMAKE_SOURCE_DIR}/tests)
 
 IF(NOT GCOV_PATH)
-    MESSAGE(FATAL_ERROR "gcov not found! Aborting...")
+	MESSAGE(FATAL_ERROR "gcov not found! Aborting...")
 ENDIF() # NOT GCOV_PATH
 
 IF(NOT CMAKE_COMPILER_IS_GNUCXX)
-    # Clang version 3.0.0 and greater now supports gcov as well.
-    MESSAGE(WARNING "Compiler is not GNU gcc! Clang Version 3.0.0 and greater supports gcov as well, but older versions don't.")
+	# Clang version 3.0.0 and greater now supports gcov as well.
+	MESSAGE(WARNING "Compiler is not GNU gcc! Clang Version 3.0.0 and greater supports gcov as well, but older versions don't.")
 
-    IF(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-        MESSAGE(FATAL_ERROR "Compiler is not GNU gcc! Aborting...")
-    ENDIF()
+	IF(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+		MESSAGE(FATAL_ERROR "Compiler is not GNU gcc! Aborting...")
+	ENDIF()
 ENDIF() # NOT CMAKE_COMPILER_IS_GNUCXX
 
 SET(CMAKE_CXX_FLAGS_COVERAGE
-        "-g -O0 --coverage -fprofile-arcs -ftest-coverage"
-        CACHE STRING "Flags used by the C++ compiler during coverage builds."
-        FORCE )
+    "-g -O0 --coverage -fprofile-arcs -ftest-coverage"
+    CACHE STRING "Flags used by the C++ compiler during coverage builds."
+    FORCE )
 SET(CMAKE_C_FLAGS_COVERAGE
-        "-g -O0 --coverage -fprofile-arcs -ftest-coverage"
-        CACHE STRING "Flags used by the C compiler during coverage builds."
-        FORCE )
+    "-g -O0 --coverage -fprofile-arcs -ftest-coverage"
+    CACHE STRING "Flags used by the C compiler during coverage builds."
+    FORCE )
 SET(CMAKE_EXE_LINKER_FLAGS_COVERAGE
-        ""
-        CACHE STRING "Flags used for linking binaries during coverage builds."
-        FORCE )
+    ""
+    CACHE STRING "Flags used for linking binaries during coverage builds."
+    FORCE )
 SET(CMAKE_SHARED_LINKER_FLAGS_COVERAGE
-        ""
-        CACHE STRING "Flags used by the shared libraries linker during coverage builds."
-        FORCE )
+    ""
+    CACHE STRING "Flags used by the shared libraries linker during coverage builds."
+    FORCE )
 MARK_AS_ADVANCED(
-        CMAKE_CXX_FLAGS_COVERAGE
-        CMAKE_C_FLAGS_COVERAGE
-        CMAKE_EXE_LINKER_FLAGS_COVERAGE
-        CMAKE_SHARED_LINKER_FLAGS_COVERAGE )
+    CMAKE_CXX_FLAGS_COVERAGE
+    CMAKE_C_FLAGS_COVERAGE
+    CMAKE_EXE_LINKER_FLAGS_COVERAGE
+    CMAKE_SHARED_LINKER_FLAGS_COVERAGE )
 
 IF ( NOT (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "Coverage"))
-    MESSAGE( WARNING "Code coverage results with an optimized (non-Debug) build may be misleading" )
+  MESSAGE( WARNING "Code coverage results with an optimized (non-Debug) build may be misleading" )
 ENDIF() # NOT CMAKE_BUILD_TYPE STREQUAL "Debug"
 
 
@@ -123,38 +123,38 @@ ENDIF() # NOT CMAKE_BUILD_TYPE STREQUAL "Debug"
 #   Pass them in list form, e.g.: "-j;2" for -j 2
 FUNCTION(SETUP_TARGET_FOR_COVERAGE _targetname _testrunner _outputname)
 
-    IF(NOT LCOV_PATH)
-        MESSAGE(FATAL_ERROR "lcov not found! Aborting...")
-    ENDIF() # NOT LCOV_PATH
+	IF(NOT LCOV_PATH)
+		MESSAGE(FATAL_ERROR "lcov not found! Aborting...")
+	ENDIF() # NOT LCOV_PATH
 
-    IF(NOT GENHTML_PATH)
-        MESSAGE(FATAL_ERROR "genhtml not found! Aborting...")
-    ENDIF() # NOT GENHTML_PATH
+	IF(NOT GENHTML_PATH)
+		MESSAGE(FATAL_ERROR "genhtml not found! Aborting...")
+	ENDIF() # NOT GENHTML_PATH
 
-    # Setup target
-    ADD_CUSTOM_TARGET(${_targetname}
+	# Setup target
+	ADD_CUSTOM_TARGET(${_targetname}
 
-            # Cleanup lcov
-            ${LCOV_PATH} --directory . --zerocounters
+		# Cleanup lcov
+		${LCOV_PATH} --directory . --zerocounters
 
-            # Run tests
-            COMMAND ${_testrunner} -R Boost ${ARGV3}
+		# Run tests
+		COMMAND ${_testrunner} -R Boost ${ARGV3}
 
-            # Capturing lcov counters and generating report
-            COMMAND ${LCOV_PATH} --directory . --capture --output-file ${_outputname}.info
-            COMMAND ${LCOV_PATH} --remove ${_outputname}.info 'tests/*' '/usr/*' --output-file ${_outputname}.info.cleaned
-            COMMAND ${GENHTML_PATH} -o ${_outputname} ${_outputname}.info.cleaned
-            COMMAND ${CMAKE_COMMAND} -E remove ${_outputname}.info ${_outputname}.info.cleaned
+		# Capturing lcov counters and generating report
+		COMMAND ${LCOV_PATH} --directory . --capture --output-file ${_outputname}.info
+		COMMAND ${LCOV_PATH} --remove ${_outputname}.info 'tests/*' '/usr/*' --output-file ${_outputname}.info.cleaned
+		COMMAND ${GENHTML_PATH} -o ${_outputname} ${_outputname}.info.cleaned
+		COMMAND ${CMAKE_COMMAND} -E remove ${_outputname}.info ${_outputname}.info.cleaned
 
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-            COMMENT "Resetting code coverage counters to zero.\nProcessing code coverage counters and generating report."
-            )
+		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+		COMMENT "Resetting code coverage counters to zero.\nProcessing code coverage counters and generating report."
+	)
 
-    # Show info where to find the report
-    ADD_CUSTOM_COMMAND(TARGET ${_targetname} POST_BUILD
-            COMMAND ;
-            COMMENT "Open ./${_outputname}/index.html in your browser to view the coverage report."
-            )
+	# Show info where to find the report
+	ADD_CUSTOM_COMMAND(TARGET ${_targetname} POST_BUILD
+		COMMAND ;
+		COMMENT "Open ./${_outputname}/index.html in your browser to view the coverage report."
+	)
 
 ENDFUNCTION() # SETUP_TARGET_FOR_COVERAGE
 
@@ -165,30 +165,30 @@ ENDFUNCTION() # SETUP_TARGET_FOR_COVERAGE
 #   Pass them in list form, e.g.: "-j;2" for -j 2
 FUNCTION(SETUP_TARGET_FOR_COVERAGE_COBERTURA _targetname _testrunner _outputname)
 
-    IF(NOT PYTHON_EXECUTABLE)
-        MESSAGE(FATAL_ERROR "Python 3 not found! Aborting...")
-    ENDIF() # NOT PYTHON_EXECUTABLE
+	IF(NOT PYTHON_EXECUTABLE)
+		MESSAGE(FATAL_ERROR "Python 3 not found! Aborting...")
+	ENDIF() # NOT PYTHON_EXECUTABLE
 
-    IF(NOT GCOVR_PATH)
-        MESSAGE(FATAL_ERROR "gcovr not found! Aborting...")
-    ENDIF() # NOT GCOVR_PATH
+	IF(NOT GCOVR_PATH)
+		MESSAGE(FATAL_ERROR "gcovr not found! Aborting...")
+	ENDIF() # NOT GCOVR_PATH
 
-    ADD_CUSTOM_TARGET(${_targetname}
+	ADD_CUSTOM_TARGET(${_targetname}
 
-            # Run tests
-            MESSAGE(WARNING "running: " 		${_testrunner} -R Boost ${ARGV3})
-            ${_testrunner} -R Boost ${ARGV3}
+	  # Run tests
+                MESSAGE(WARNING "running: " 		${_testrunner} -R Boost ${ARGV3})
+		${_testrunner} -R Boost ${ARGV3}
 
-            # Running gcovr
-            COMMAND ${GCOVR_PATH} -x -r ${CMAKE_SOURCE_DIR} -e '${CMAKE_SOURCE_DIR}/tests/'  -o ${_outputname}.xml
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-            COMMENT "Running gcovr to produce Cobertura code coverage report."
-            )
+		# Running gcovr
+		COMMAND ${GCOVR_PATH} -x -r ${CMAKE_SOURCE_DIR} -e '${CMAKE_SOURCE_DIR}/tests/'  -o ${_outputname}.xml
+		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+		COMMENT "Running gcovr to produce Cobertura code coverage report."
+	)
 
-    # Show info where to find the report
-    ADD_CUSTOM_COMMAND(TARGET ${_targetname} POST_BUILD
-            COMMAND ;
-            COMMENT "Cobertura code coverage report saved in ${_outputname}.xml."
-            )
+	# Show info where to find the report
+	ADD_CUSTOM_COMMAND(TARGET ${_targetname} POST_BUILD
+		COMMAND ;
+		COMMENT "Cobertura code coverage report saved in ${_outputname}.xml."
+	)
 
 ENDFUNCTION() # SETUP_TARGET_FOR_COVERAGE_COBERTURA

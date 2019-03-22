@@ -37,6 +37,8 @@
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "geometry/WaitingArea.h"
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #ifdef _OPENMP
 
@@ -48,10 +50,13 @@
 using namespace std;
 
 OutputHandler* Log;
+Trajectories* outputTXT;
 
 Simulation::Simulation(Configuration* args)
         :_config(args)
 {
+     _countTraj = 0;
+     _maxFileSize = 10; // MB
     _nPeds = 0;
     _seed = 8091983;
     _deltaT = 0;
@@ -156,9 +161,9 @@ bool Simulation::InitArgs()
         case FORMAT_PLAIN: {
             OutputHandler* file = new FileHandler(
                     _config->GetTrajectoriesFile().c_str());
-            Trajectories* output = new TrajectoriesFLAT();
-            output->SetOutputHandler(file);
-            _iod->AddIO(output);
+            outputTXT = new TrajectoriesFLAT();
+            outputTXT->SetOutputHandler(file);
+            _iod->AddIO(outputTXT);
             break;
         }
         case FORMAT_VTK: {
@@ -391,9 +396,9 @@ void Simulation::UpdateRoutesAndLocations()
     //    }
 }
 
-void Simulation::PrintStatistics()
+void Simulation::PrintStatistics(double simTime)
 {
-    Log->Write("\nRooms Egress Time:");
+    Log->Write("\nRooms Egress. Simulation Time: %.2f", simTime);
     Log->Write("==================");
     Log->Write("id\tcaption\tegress time (s)");
 
@@ -422,6 +427,7 @@ void Simulation::PrintStatistics()
             }
             Log->Write("More Information in the file: %s", statsfile.c_str());
             auto output = new FileHandler(statsfile.c_str());
+            output->Write("#Simulation time: %.2f", simTime);
             output->Write("#Flow at exit "+goal->GetCaption()+"( ID "+to_string(goal->GetID())+" )");
             output->Write("#Time (s)  cummulative number of agents \n");
             output->Write(goal->GetFlowCurve());
@@ -442,6 +448,7 @@ void Simulation::PrintStatistics()
                                 + to_string(itr.first/1000) + "_" + to_string(itr.first % 1000) +".dat";
                         Log->Write("More Information in the file: %s", statsfile.c_str());
                         auto output = new FileHandler(statsfile.c_str());
+                        output->Write("#Simulation time: %.2f", simTime);
                         output->Write("#Flow at crossing " + goal->GetCaption() + "( ID " + to_string(goal->GetID())
                                 + " ) in Room ( ID "+ to_string(itr.first / 1000) + " )");
                         output->Write("#Time (s)  cummulative number of agents \n");
@@ -456,7 +463,8 @@ void Simulation::RunHeader(long nPed)
 {
     // writing the header
     if (nPed==-1) nPed = _nPeds;
-    _iod->WriteHeader(nPed, _fps, _building.get(), _seed);
+    _iod->WriteHeader(nPed, _fps, _building.get(), _seed, 0);// first trajectory
+                                                             // count = 0
     _iod->WriteGeometry(_building.get());
     if( _gotSources)
          _iod->WriteSources( GetAgentSrcManager().GetSources());
@@ -466,7 +474,6 @@ void Simulation::RunHeader(long nPed)
     int firstframe = (Pedestrian::GetGlobalTime()/_deltaT)/writeInterval;
 
     _iod->WriteFrame(firstframe, _building.get());
-
     //first initialisation needed by the linked-cells
     UpdateRoutesAndLocations();
     ProcessAgentsQueue();
@@ -481,7 +488,10 @@ double Simulation::RunBody(double maxSimTime)
 
     //take the current time from the pedestrian
     double t = Pedestrian::GetGlobalTime();
-
+    fs::path TrajectoryName(_config->GetTrajectoriesFile());// in case we
+                                                                // may need to
+                                                                // generate
+                                                                // several small files
     //frame number. This function can be called many times,
     static int frameNr = (int) (1+t/_deltaT); // Frame Number
 
@@ -508,6 +518,7 @@ double Simulation::RunBody(double maxSimTime)
     bar->SetStyle("\u2588", "-"); //for linux
 #endif
     int initialnPeds = _nPeds;
+
     // main program loop
     while ((_nPeds || (!_agentSrcManager.IsCompleted()&& _gotSources) ) && t<maxSimTime) {
         t = 0+(frameNr-1)*_deltaT;
@@ -549,6 +560,24 @@ double Simulation::RunBody(double maxSimTime)
         // write the trajectories
         if (0==frameNr%writeInterval) {
             _iod->WriteFrame(frameNr/writeInterval, _building.get());
+            fs::path p = _config->GetTrajectoriesFile();
+            int sf = fs::file_size(p);
+            if(sf>_maxFileSize*1024*1024)
+            {
+                 std::string extention = p.extension().string();
+                 _countTraj++;
+                 char tmp_traj_name[100];
+                 sprintf(tmp_traj_name,"%s_%.4d_%s", TrajectoryName.stem().string().c_str(), _countTraj, extention.c_str());
+                 _config->SetTrajectoriesFile(tmp_traj_name);
+                 Log->Write("INFO:\tNew trajectory file <%s>", tmp_traj_name);
+                 OutputHandler* file = new FileHandler(_config->GetTrajectoriesFile().c_str());
+                 outputTXT->SetOutputHandler(file);
+
+//_config->GetProjectRootDir()+"_1_"+_config->GetTrajectoriesFile());
+                 // _config->SetTrajectoriesFile(name);
+                 _iod->WriteHeader(_nPeds, _fps, _building.get(), _seed, _countTraj);
+                 // _iod->WriteGeometry(_building.get());
+            }
         }
 
         if(!_gotSources && !_periodic && _config->print_prog_bar())
@@ -596,6 +625,13 @@ double Simulation::RunBody(double maxSimTime)
                   }
              }
         }
+        if(frameNr % 1000 == 0)
+        {
+             Log->Write("INFO:\tUpdate door statistics at t=%.2f", t);
+             PrintStatistics(t);
+        }
+
+
     }// while time
     return t;
 }
