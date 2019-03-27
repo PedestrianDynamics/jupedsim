@@ -740,15 +740,21 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
                 }
             }
 //#pragma omp critical
+            bool regulateFlow = trans->GetOutflowRate() <  (std::numeric_limits<double>::max)();
 
-            trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
-            trans->IncreasePartialDoorUsage(1);
-            // when <dn> agents pass <trans>, we start evaluating the flow
-            // .. and maybe close the <trans>
-            if( trans->GetPartialDoorUsage() ==  trans->GetDN() ) {
-                 trans->regulateFlow(Pedestrian::GetGlobalTime());
-                 trans->ResetPartialDoorUsage();
+
+            if(regulateFlow)
+            {
+                 trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
+                 trans->IncreasePartialDoorUsage(1);
+                 // when <dn> agents pass <trans>, we start evaluating the flow
+                 // .. and maybe close the <trans>
+                 if( trans->GetPartialDoorUsage() ==  trans->GetDN() ) {
+                      trans->regulateFlow(Pedestrian::GetGlobalTime());
+                      trans->ResetPartialDoorUsage();
+                 }
             }
+
         }
 
         Crossing* cross = _building->GetCrossingByUID(ped.GetExitIndex());
