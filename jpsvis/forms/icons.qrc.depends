@@ -1,0 +1,11 @@
+<RCC>
+  <qresource prefix="/new/iconsS" lang="english" >
+    <file>icons/fullscreen.PNG</file>
+    <file>icons/window_fullscreen-64.png</file>
+    <file>icons/Play1Hot.png</file>
+    <file>icons/Stop1PressedBlue.png</file>
+    <file>icons/JPSvis.png</file>
+    <file>icons/PauseHot.png</file>
+    <file>icons/RecordPressed.png</file>
+  </qresource>
+</RCC>
