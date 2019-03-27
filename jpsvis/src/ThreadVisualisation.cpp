@@ -534,8 +534,6 @@ void  ThreadVisualisation::initGlyphs2D()
     VTK_CREATE(vtkPolyDataMapper, mapper);
     mapper->SetInputConnection(extern_glyphs_pedestrians->GetOutputPort());
     //improve the performance
-    mapper->GlobalImmediateModeRenderingOn();
-
 
     VTK_CREATE(vtkLookupTable, lut);
     lut->SetHueRange(0.0,0.470);
@@ -637,7 +635,6 @@ void ThreadVisualisation::initGlyphs3D()
 
     VTK_CREATE(vtkPolyDataMapper, mapper);
     mapper->SetInputConnection(extern_glyphs_pedestrians_3D->GetOutputPort());
-    mapper->GlobalImmediateModeRenderingOn();
 
     VTK_CREATE(vtkLookupTable, lut);
     lut->SetHueRange(0.0,0.470);
