@@ -546,6 +546,10 @@ double Simulation::RunBody(double maxSimTime)
                 }
             }
 
+            if (_routingEngine->isNeedUpdate()){
+                 _routingEngine->UpdateRouter();
+            }
+
             //update the routes and locations
             UpdateRoutesAndLocations();
 

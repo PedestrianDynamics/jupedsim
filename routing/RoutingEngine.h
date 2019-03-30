@@ -113,6 +113,13 @@ private:
      std::vector<Router*> _routersCollection;
      /// collection of all trips/routes
      Trips _tripsCollection;
+     bool _needUpdate = false;
+public:
+    bool isNeedUpdate() const;
+
+    void setNeedUpdate(bool needUpdate);
+
+    void UpdateRouter();
 };
 
 #endif /* ROUTINGENGINE_H_ */

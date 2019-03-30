@@ -25,7 +25,6 @@
  *
  **/
 
-
 #include <string>
 #include <cstdlib>
 #include <iostream>
@@ -537,6 +536,7 @@ void EventManager::ProcessEvent()
                     TempCloseDoor(event.GetId());
                     break;
                }
+               _building->GetRoutingEngine()->setNeedUpdate(true);
           }
 
      }

@@ -98,3 +98,7 @@ void Router::SetTrips(const Trips& trips){
      _trips = trips;
      std::cout << _trips << std::endl;
 }
+
+void Router::Update(){
+
+}

@@ -707,3 +707,7 @@ bool FFRouterTrips::MustReInit() {
 void FFRouterTrips::SetRecalc(double t) {
      _timeToRecalc = t + _recalc_interval;
 }
+
+void FFRouterTrips::Update(){
+     this->ReInit();
+}

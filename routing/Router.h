@@ -142,7 +142,7 @@ public:
 
      void SetTrips(const Trips& trips);
 
-
+     virtual void Update();
 };
 
 #endif  /* _ROUTING_H */
