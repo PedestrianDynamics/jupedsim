@@ -184,6 +184,8 @@ public:
       bool MustReInit();
       void SetRecalc(double t);
 
+    virtual void Update();
+
 private:
 
 protected:
