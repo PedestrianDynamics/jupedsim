@@ -107,6 +107,22 @@ public:
       */
      bool Init(Building* building);
 
+     /**
+      * Returns if routers need to be updated
+      * @return routers need to be updated
+      */
+     bool NeedsUpdate() const;
+
+     /**
+      * Set if routers need to be updated
+      * @param needUpdate
+      */
+     void setNeedUpdate(bool needUpdate);
+
+     /**
+      * Updates all used routers
+      */
+     void UpdateRouter();
 
 private:
      /// collections of all routers used
@@ -114,12 +130,6 @@ private:
      /// collection of all trips/routes
      Trips _tripsCollection;
      bool _needUpdate = false;
-public:
-    bool isNeedUpdate() const;
-
-    void setNeedUpdate(bool needUpdate);
-
-    void UpdateRouter();
 };
 
 #endif /* ROUTINGENGINE_H_ */

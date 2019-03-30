@@ -546,7 +546,8 @@ double Simulation::RunBody(double maxSimTime)
                 }
             }
 
-            if (_routingEngine->isNeedUpdate()){
+            // here the used routers are update, when needed due to external changes
+            if (_routingEngine->NeedsUpdate()){
                  _routingEngine->UpdateRouter();
             }
 

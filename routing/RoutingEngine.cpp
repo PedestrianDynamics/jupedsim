@@ -131,7 +131,7 @@ bool RoutingEngine::Init(Building* building)
      return status;
 }
 
-bool RoutingEngine::isNeedUpdate() const
+bool RoutingEngine::NeedsUpdate() const
 {
      return _needUpdate;
 }
