@@ -794,3 +794,105 @@ void EventManager::CreateSomeEngines()
      exit(0);
 }
 
+bool EventManager::ReadSchedule()
+{
+     Log->Write("INFO: \tReading schedule");
+     //get the geometry filename from the project file
+     TiXmlDocument doc(_projectFilename);
+     if (!doc.LoadFile()) {
+          Log->Write("ERROR: \t%s", doc.ErrorDesc());
+          Log->Write("ERROR: \t could not parse the project file.");
+          return false;
+     }
+
+     TiXmlElement* xMainNode = doc.RootElement();
+
+     string scheduleFile = "";
+     if (xMainNode->FirstChild("schedule_file")) {
+          scheduleFile = _projectRootDir
+                    + xMainNode->FirstChild("schedule_file")->FirstChild()->Value();
+          Log->Write("INFO: \tevents <" + scheduleFile + ">");
+     } else {
+          Log->Write("INFO: \tNo events found");
+          return true;
+     }
+
+
+     Log->Write("INFO: \tParsing the schedule file");
+     TiXmlDocument docSchedule(scheduleFile);
+     if (!docSchedule.LoadFile()) {
+          Log->Write("ERROR: \t%s", docSchedule.ErrorDesc());
+          Log->Write("ERROR: \t could not parse the schedule file.");
+          return false;
+     }
+
+     TiXmlElement* xRootNode = docSchedule.RootElement();
+     if (!xRootNode) {
+          Log->Write("ERROR:\tRoot element does not exist.");
+          return false;
+     }
+
+     if (xRootNode->ValueStr() != "JPScore") {
+          Log->Write("ERROR:\tRoot element value is not 'JPScore'.");
+          return false;
+     }
+
+     // Read groups
+     TiXmlNode* xGroups = xRootNode->FirstChild("groups");
+     if (!xGroups) {
+          Log->Write("ERROR:\tNo groups found.");
+          return false;
+     }
+
+     for (TiXmlElement* e = xGroups->FirstChildElement("group"); e;
+          e = e->NextSiblingElement("group")){
+          int id = atoi(e->Attribute("id"));
+          std::vector<int> member;
+          for (TiXmlElement* xmember = e->FirstChildElement("member"); xmember;
+               xmember = xmember->NextSiblingElement("member")){
+               int tId = atoi(xmember->Attribute("t_id"));
+               member.push_back(tId);
+          }
+          groupDoor[id] = member;
+     }
+
+     // Read times
+     TiXmlNode* xTimes = xRootNode->FirstChild("times");
+     if (!xTimes) {
+          Log->Write("ERROR:\tNo times found.");
+          return false;
+     }
+
+     for (TiXmlElement* e = xTimes->FirstChildElement("time"); e;
+          e = e->NextSiblingElement("time")) {
+          int id = atoi(e->Attribute("group_id"));
+          int closing_time = atoi(e->Attribute("closing_time"));
+
+          std::vector<int> timeOpen;
+          std::vector<int> timeClose;
+
+          for (TiXmlElement* time = e->FirstChildElement("t"); time;
+               time = time->NextSiblingElement("t")) {
+               int t = atoi(time->Attribute("t"));
+               timeOpen.push_back(t);
+               timeClose.push_back(t+closing_time);
+          }
+
+          for (auto door : groupDoor[id]){
+               for (auto open : timeOpen){
+                    Event event(door, open, "door", "open");
+                    _events.push_back(event);
+               }
+
+               for (auto close : timeClose){
+                    Event event(door, close, "door", "temp_close");
+                    _events.push_back(event);
+               }
+          }
+     }
+
+     Log->Write("INFO: \tSchedule initialized");
+
+     return true;
+}
+
