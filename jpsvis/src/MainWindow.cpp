@@ -635,7 +635,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
      Debug::Messages("Enter MainWindow::addPedestrianGroup with filename <%s>", fileName.toStdString().c_str());
 
     statusBar()->showMessage(tr("Select a file"));
-    if(fileName.isEmpty())
+     if(fileName.isEmpty())
         fileName = QFileDialog::getOpenFileName(this,
                                                 "Select the file containing the data to visualize",
                                                 QDir::currentPath(),
@@ -670,6 +670,38 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
 
 
     Debug::Messages("MainWindow::addPedestrianGroup: geometry name: <%s>", geometry_file.toStdString().c_str());
+    if(geometry_file.isEmpty())
+    {
+         auto fileDir = fileInfo.path();
+         if(fileName.endsWith(".txt",Qt::CaseInsensitive))
+         {
+              int res = QMessageBox::warning(this, "Did not find geometry name in TXT file",
+                                             "Warning: Did not find geometry name in TXT file\nOpen geometry file?"
+                                             , QMessageBox::Yes
+                                             | QMessageBox::No, QMessageBox::Yes);
+              if (res == QMessageBox::No) {
+                   exit(EXIT_FAILURE);
+                   //return false;
+              }
+              geometry_file = QFileDialog::getOpenFileName(this,
+                                                           "Select a geometry file",
+                                                           fileDir,
+                                                           "Geometry (*.xml)");
+              Debug::Messages("Got geometry file: <%s>", geometry_file.toStdString().c_str());
+              QFileInfo check_file(geometry_file);
+              if( !(check_file.exists() && check_file.isFile()) )
+              {
+                   Debug::Error("Geomery file does not exist.");
+                   exit(EXIT_FAILURE);
+              }
+              geometry_file =  check_file.fileName();
+         }
+         // @todo: check xml file too, although probably xml files
+         // always have a geometry tag
+
+    }
+    std::cout << "---> geometry " << geometry_file.toStdString().c_str() << "\n" ;
+
     // if xml is detected, just load and show the geometry then exit
     if(geometry_file.endsWith(".xml",Qt::CaseInsensitive)) {
 
@@ -690,7 +722,9 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
             if (res == QMessageBox::No) {
                 return false;
             }
-            SaxParser::parseGeometryXMLV04(wd+"/"+geometry_file,geometry);
+            SaxParser::parseGeometryXMLV04(wd+"/"+geometry_file,geometry);//@todo:
+                                                                          //use
+                                                                          //qt sep
         } else {
             //everything was fine. Delete the log file
              //std::cout << "won't delete logfile\n";

@@ -1125,7 +1125,11 @@ QString SaxParser::extractGeometryFilenameTXT(QString &filename)
           }// while
      } // if open
      if(extracted_geo_name=="")
-          Debug::Warning("Could not extracted geometry file!");
+     {
+          Debug::Warning("Could not extract geometry file!");
+//          extracted_geo_name = "geo.xml";
+     }
+
      else
           Debug::Messages("Extracted geometry from TXT file <%s>", extracted_geo_name.toStdString().c_str());
      return extracted_geo_name;

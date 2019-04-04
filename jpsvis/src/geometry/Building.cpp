@@ -380,7 +380,7 @@ bool Building::LoadGeometry(const std::string &geometryfile)
      TiXmlDocument docGeo(geoFilenameWithPath);
      if (!docGeo.LoadFile()) {
            Debug::Messages("%s", docGeo.ErrorDesc());
-           Debug::Error("LoadGeometry: could not parse the geometry file");
+           Debug::Error("LoadGeometry: could not parse the geometry file %s", geoFilenameWithPath.c_str());
           return false;
      }
 
