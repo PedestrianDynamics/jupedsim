@@ -639,7 +639,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
         fileName = QFileDialog::getOpenFileName(this,
                                                 "Select the file containing the data to visualize",
                                                 QDir::currentPath(),
-                                                "Geometry or trajectory files (*.xml);;All Files (*.*)");
+                                                "JuPedSim Files (*.xml, *.txt);;All Files (*.*)");
 
     //the action was cancelled
     if (fileName.isNull()) {
