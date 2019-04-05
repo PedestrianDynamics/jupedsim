@@ -738,7 +738,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
                    Debug::Error("Geomery file does not exist.");
                    exit(EXIT_FAILURE);
               }
-              geometry_file =  check_file.fileName();
+              //geometry_file =  check_file.fileName();
          }
          // @todo: check xml file too, although probably xml files
          // always have a geometry tag
@@ -756,11 +756,11 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
         if(! SaxParser::parseGeometryJPS(geometry_file,geometry)) {
             int res = QMessageBox::warning(this, "Errors in Geometry. Continue Parsing?",
                                            "JuPedSim has detected an error in the supplied geometry.\n"
-                                           "The simulation will likely failed using that geometry.\n"
+                                           "The simulation will likely fail using this geometry.\n"
                                            "Also make sure to validate your file.\n"
                                            "More information are provided in the log file:\n"
                                            +SystemSettings::getLogfile()+
-                                           "\n\nShould I try to parse and display what I can ?"
+                                           "\n\nShould I try to parse and display what I can?"
                                            , QMessageBox::Yes
                                            | QMessageBox::No, QMessageBox::No);
             if (res == QMessageBox::No) {
