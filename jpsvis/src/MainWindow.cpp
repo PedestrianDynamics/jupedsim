@@ -34,6 +34,7 @@
 #include "SaxParser.h"
 #include "SystemSettings.h"
 #include "./forms/Settings.h"
+#include <sstream>
 
 
 #include "extern_var.h"
@@ -75,6 +76,39 @@
 
 using namespace std;
 
+//----------- @todo: this part is copy/paste from main.cpp.
+std::string ver_string1(int a, int b, int c) {
+      std::ostringstream ss;
+      ss << a << '.' << b << '.' << c;
+      return ss.str();
+}
+
+std::string true_cxx1 =
+#ifdef __clang__
+      "clang++";
+#elif defined(__GNUC__)
+"g++";
+#elif defined(__MINGW32__)
+   "MinGW";
+#elif defined(_MSC_VER)
+  "Visual Studio";
+#else
+"Compiler not identified";
+#endif
+
+std::string true_cxx_ver1 =
+#ifdef __clang__
+    ver_string1(__clang_major__, __clang_minor__, __clang_patchlevel__);
+#elif defined(__GNUC__)
+    ver_string1(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+#elif defined(__MINGW32__)
+ver_string1(__MINGW32__, __MINGW32_MAJOR_VERSION, __MINGW32_MINOR_VERSION);
+#elif defined( _MSC_VER)
+    ver_string1(_MSC_VER, _MSC_FULL_VER,_MSC_BUILD);
+#else
+"";
+#endif
+//----------
 
 #ifdef __APPLE__
 #include <thread>
@@ -306,16 +340,26 @@ MainWindow::~MainWindow()
 void MainWindow::slotHelpAbout()
 {
      Debug::Messages("About jpsvis");
+     QString version =  QString("Version: %1\n").arg(JPSVIS_VERSION);
+     QString compiler = QString("Compiler: %1 (%2)\n").arg(true_cxx1.c_str()).arg(true_cxx_ver1.c_str());
+     QString commHash = QString("Commit hash: %1\n").arg(GIT_COMMIT_HASH);
+     QString commDate = QString("Commit date: %1\n").arg(GIT_COMMIT_DATE);
+     QString branch =   QString("Branch: %1\n").arg(GIT_BRANCH);
+
+     QFont serifFont("Times", 10, QFont::Bold);
     QMessageBox::about(
                 this,
-                "About JPSVis",
-                "Version 0.8.2 built with  QT 4.8 and VTK 5.10\n\n"
-                "JPSvis is part of the Juelich Pedestrian Simulator (JuPedsim)"
-                "It is a tool for visualizing pedestrians motion\n"
-                "developped at the Forschungszentrum Juelich GmbH, Germany\n\n"
-                "Copyright 2009-2018.\n"
-                "Authors: Ulrich Kemloh\n\n"
-                "Issue tracker: https://gitlab.version.fz-juelich.de/jupedsim/jpsvis/issues \n");
+                "About JPSvis",
+                +"JuPedSim - JPSvis\n\n"
+                +version
+                +commHash
+                +commDate
+                +branch
+                +compiler
+                +"Issue tracker: https://gitlab.version.fz-juelich.de/jupedsim/jpsvis/issues \n\n"
+                +"Copyright 2009-2018.\n"
+                "Author: Ulrich Kemloh\n\n"
+                );
 }
 
 
@@ -639,7 +683,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
         fileName = QFileDialog::getOpenFileName(this,
                                                 "Select the file containing the data to visualize",
                                                 QDir::currentPath(),
-                                                "JuPedSim Files (*.xml, *.txt);;All Files (*.*)");
+                                                "JuPedSim Files (*.xml *.txt);;All Files (*.*)");
 
     //the action was cancelled
     if (fileName.isNull()) {
