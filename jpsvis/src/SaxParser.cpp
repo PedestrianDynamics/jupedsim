@@ -680,12 +680,14 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
      double captionsColor=0;//red
      if(!fileName.endsWith(".xml",Qt::CaseInsensitive)) return false;
      QString wd;
+     QDir dir(wd);
      SystemSettings::getWorkingDirectory(wd);
-     fileName=wd + "/" + fileName; //TODO: is this windows compatible?
+     QString s = dir.relativeFilePath(fileName);
+     fileName=wd + QDir::separator() + s;
      // QString = QDir::cleanPath(wd + QDir::separator() + fileName);
      Debug::Messages("filename: <%s)", fileName.toStdString().c_str());
      Debug::Messages("wd: <%s>",wd.toStdString().c_str());
-     Debug::Messages("filename2: <%s>",fileName.toStdString().c_str());
+
      Building* building = new Building();
      string geometrypath = fileName.toStdString();
      // read the geometry

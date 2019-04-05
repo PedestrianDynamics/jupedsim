@@ -1,4 +1,3 @@
-
 # Created by https://www.gitignore.io/api/c++,clion,emacs,cmake
 # Edit at https://www.gitignore.io/?templates=c++,clion,emacs,cmake
 
@@ -185,3 +184,6 @@ flycheck_*.el
 
 # End of https://www.gitignore.io/api/c++,clion,emacs,cmake
 .idea/*
+
+.vscode/
+build*
