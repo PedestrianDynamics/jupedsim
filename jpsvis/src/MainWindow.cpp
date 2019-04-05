@@ -358,8 +358,9 @@ void MainWindow::slotHelpAbout()
 
 
 QMessageBox msg(QMessageBox::Information,"About JPSvis", gittext+text, QMessageBox::Ok);
+QString logo = ":/new/iconsS/icons/JPSvis.icns" ;
+msg.setIconPixmap(QPixmap(logo));
 
-msg.setIconPixmap(QPixmap("../forms/icons/JPSvis.icns"));
     //Change font
 QFont font( "Tokyo" );
 font.setPointSize( 10 );
