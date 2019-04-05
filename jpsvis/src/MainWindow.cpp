@@ -339,27 +339,35 @@ MainWindow::~MainWindow()
 
 void MainWindow::slotHelpAbout()
 {
-     Debug::Messages("About jpsvis");
-     QString version =  QString("Version: %1\n").arg(JPSVIS_VERSION);
-     QString compiler = QString("Compiler: %1 (%2)\n").arg(true_cxx1.c_str()).arg(true_cxx_ver1.c_str());
-     QString commHash = QString("Commit hash: %1\n").arg(GIT_COMMIT_HASH);
-     QString commDate = QString("Commit date: %1\n").arg(GIT_COMMIT_DATE);
-     QString branch =   QString("Branch: %1\n").arg(GIT_BRANCH);
 
-     QFont serifFont("Times", 10, QFont::Bold);
-    QMessageBox::about(
-                this,
-                "About JPSvis",
-                +"JuPedSim - JPSvis\n\n"
-                +version
-                +commHash
-                +commDate
-                +branch
-                +compiler
-                +"Issue tracker: https://gitlab.version.fz-juelich.de/jupedsim/jpsvis/issues \n\n"
-                +"Copyright 2009-2018.\n"
-                "Author: Ulrich Kemloh\n\n"
-                );
+     Debug::Messages("About JPSvis");
+     QString gittext = QMessageBox::tr(
+          "<h1><p style=\"line-height:0.7\">JPSvis</p></h1><p style=\"line-height:1.4\" style=\"color:Gray;\"><small><i>Version %1</i></small></p>"
+          "<p style=\"line-height:0.4\" style=\"color:Gray;\"><i>CommHash</i> %2</p>"
+          "<p  style=\"line-height:0.4\" style=\"color:Gray;\"><i>CommDate</i> %3</p>"
+          "<p  style=\"line-height:0.4\" style=\"color:Gray;\"><i>Branch</i> %4</p><hr>"
+          ).arg(JPSVIS_VERSION).arg(GIT_COMMIT_HASH).arg(GIT_COMMIT_DATE).arg(GIT_BRANCH);
+
+     QString text = QMessageBox::tr(
+          "<p style=\"color:Gray;\"><small><i> &copy; 2009-2019  Ulrich Kemloh <br><a href=\"http://jupedsim.org\">jupedsim.org</a></i></small></p>"
+
+        );
+
+
+
+
+
+QMessageBox msg(QMessageBox::Information,"About JPSvis", gittext+text, QMessageBox::Ok);
+
+msg.setIconPixmap(QPixmap("../forms/icons/JPSvis.icns"));
+    //Change font
+QFont font( "Tokyo" );
+font.setPointSize( 10 );
+// font.setWeight( QFont::Bold );
+//font.setItalic( TRUE );
+msg.setFont(font);
+msg.setStandardButtons(0);
+msg.exec();
 }
 
 
