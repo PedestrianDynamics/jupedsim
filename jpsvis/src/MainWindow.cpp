@@ -366,7 +366,7 @@ font.setPointSize( 10 );
 // font.setWeight( QFont::Bold );
 //font.setItalic( TRUE );
 msg.setFont(font);
-msg.setStandardButtons(0);
+//msg.setStandardButtons(0);
 msg.exec();
 }
 
