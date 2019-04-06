@@ -765,8 +765,10 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
         if(! SaxParser::parseGeometryJPS(geometry_file,geometry)) {
             int res = QMessageBox::warning(this, "Errors in Geometry. Continue Parsing?",
                                            "JuPedSim has detected an error in the supplied geometry.\n"
+                                           "<"
+                                           +geometry_file+
+                                           ">"
                                            "The simulation will likely fail using this geometry.\n"
-                                           "Also make sure to validate your file.\n"
                                            "More information are provided in the log file:\n"
                                            +SystemSettings::getLogfile()+
                                            "\n\nShould I try to parse and display what I can?"
