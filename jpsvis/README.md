@@ -1,4 +1,4 @@
-[![Build Status](https://gitlab.version.fz-juelich.de/jupedsim/jpsvis/badges/develop/build.svg)](https://gitlab.version.fz-juelich.de/JuPedSim/jpsvis/pipelines)
+[![Build Status](https://gitlab.version.fz-juelich.de/jupedsim/jpsvis/badges/master/build.svg)](https://gitlab.version.fz-juelich.de/JuPedSim/jpsvis/pipelines)
 [![GitHub license](https://img.shields.io/badge/license-GPL-blue.svg)](https://raw.githubusercontent.com/JuPedSim/jpsvis/master/LICENSE)
 
 
