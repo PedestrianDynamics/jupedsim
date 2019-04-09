@@ -329,8 +329,38 @@ TrajectoriesFLAT::TrajectoriesFLAT() : Trajectories()
 {
 }
 
+std::string getSourceFileName(const std::string & GetProjectFile)
+{
+     std::string ret="";
+
+     TiXmlDocument doc(GetProjectFile);
+     if (!doc.LoadFile()) {
+          Log->Write("ERROR: \t%s", doc.ErrorDesc());
+          Log->Write("ERROR: \tGetSourceFileName could not parse the project file");
+          return ret;
+     }
+     TiXmlNode* xRootNode = doc.RootElement()->FirstChild("agents");
+     if (!xRootNode) {
+          Log->Write("ERROR:\tGetSourceFileName could not load persons attributes");
+          return ret;
+     }
+
+    TiXmlNode* xSources = xRootNode->FirstChild("agents_sources");
+    if (xSources) {
+        TiXmlNode* xFileNode = xSources->FirstChild("file");
+        //------- parse sources from external file
+        if(xFileNode)
+        {
+             ret = xFileNode->FirstChild()->ValueStr();
+        }
+        return ret;
+    }
+}
+
+
 void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building* building, int seed, int count)
 {
+     std::string sourceFileName = getSourceFileName(building->GetProjectFilename());
      (void) seed; (void) nPeds;
      char tmp[100] = "";
      sprintf(tmp, "#description: jpscore (%s)", JPSCORE_VERSION);
@@ -341,6 +371,9 @@ void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building* building, i
      Write(tmp);
      sprintf(tmp,"#geometry: %s",building->GetGeometryFilename().c_str());
      Write(tmp);
+     sprintf(tmp,"#sources: %s", sourceFileName.c_str());
+     Write(tmp);
+
      Write("#ID: the agent ID");
      Write("#FR: the current frame");
      Write("#X,Y,Z: the agents coordinates (in metres)");
