@@ -1,6 +1,10 @@
+[![Build Status](https://gitlab.version.fz-juelich.de/jupedsim/jpsvis/badges/develop/build.svg)](https://gitlab.version.fz-juelich.de/JuPedSim/jpsvis/pipelines)
+[![GitHub license](https://img.shields.io/badge/license-GPL-blue.svg)](https://raw.githubusercontent.com/JuPedSim/jpsvis/master/LICENSE)
+
+
 ## Get the source code 
 
-- The project is being developed in a [Gitlab repository](https://cst.version.fz-juelich.de/jupedsim/jpsvis). 
+- The project is being developed in a [Gitlab repository](https://gitlab.version.fz-juelich.de/jupedsim/jpsvis). 
 - Our [GitHub repository](https://github.com/JuPedSim/jpsvis) is used to host selected tags and releases.
 
 So, get the code from Gitlab and the releases from GitHub. :-)
@@ -16,7 +20,7 @@ To highlight some features of JuPedSim we have uploaded some videos on our [YouT
 We are heavily working on this project which means that:
 
 - It’s not done. We will be releasing new enhancements, bug fixes etc.
-- We love your support. If you find any errors or have suggestions, please write an issue in our [issue-tracker](https://cst.version.fz-juelich.de/jupedsim/jpsvis/issues). We will try hard to fix it.
+- We love your support. If you find any errors or have suggestions, please write an issue in our [issue-tracker](https://gitlab.version.fz-juelich.de/jupedsim/jpsvis/issues). We will try hard to fix it.
 - Be patient. We are scientists and PhD/master students. Therefore, we primarily care about our research and theses. 
 
 ## Requirements 
