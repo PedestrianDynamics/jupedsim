@@ -708,7 +708,6 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
 
     //the geometry actor
     auto&& geometry = _visualisationThread->getGeometry();
-//    geometry.addSource(1,4,2,5);
     QString geometry_file;
     //try to get a geometry filename
     if(fileName.endsWith(".xml",Qt::CaseInsensitive))
@@ -856,6 +855,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     else if(fileName.endsWith(".txt",Qt::CaseInsensitive))
     {
          QString source_file=SaxParser::extractSourceFileTXT(fileName);
+         QString goal_file=SaxParser::extractGoalFileTXT(fileName);
          QFileInfo check_file(source_file);
          if( !(check_file.exists() && check_file.isFile()) )
         {
@@ -864,14 +864,31 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
          else
               Debug::Messages("INFO: MainWindow::addPedestrianGroup: source name: <%s>", source_file.toStdString().c_str());
 
+         check_file = source_file;
+         if( !(check_file.exists() && check_file.isFile()) )
+        {
+             Debug::Messages("WARNING: MainWindow::addPedestrianGroup: goal name: <%s> not found!", goal_file.toStdString().c_str());
+        }
+         else
+              Debug::Messages("INFO: MainWindow::addPedestrianGroup: goal name: <%s>", goal_file.toStdString().c_str());
+
+
+        // ------ parsing sources
         QFile file(source_file);
         QXmlInputSource source(&file);
         QXmlSimpleReader reader;
-
         SaxParser handler(geometry,*dataset,&frameRate);
         reader.setContentHandler(&handler);
         reader.parse(source);
         file.close();
+        QFile file2(goal_file);
+        QXmlInputSource source2(&file2);
+        reader.parse(source2);
+        file2.close();
+        // -----
+        // // ---- parsing goals
+        // -----
+
 
         if(false==SaxParser::ParseTxtFormat(fileName, dataset,&frameRate))
             return false;

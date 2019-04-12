@@ -575,12 +575,13 @@ void FacilityGeometry::addObstacles(vtkPolyData* polygonPolyData )
 
 
 
-void FacilityGeometry::addRectangle(double x1, double y1, double x2, double y2, double z, double color1, double color2)
+void FacilityGeometry::addRectangle(double x1, double y1, double x2, double y2, double z, double color1, double color2, string text)
 {
     //if(z!=1)return;
-    const double cellSize=40; //cm
+     const double cellSize=40; //cm
     //	const int dimX=(x2-x1)/cellSize+1;
     //	const int dimY=(y2-y1)/cellSize+1;
+
     const int dimX= (int)ceil((x2-x1)/cellSize) +1;
     const int dimY= (int)ceil((y2-y1)/cellSize) +1;
 
@@ -589,8 +590,6 @@ void FacilityGeometry::addRectangle(double x1, double y1, double x2, double y2, 
     //vtkDoubleArray *scalars = vtkDoubleArray::New();
     vtkDataArray* pData = vtkUnsignedCharArray::New();
     pData->SetNumberOfComponents(3);
-    std::cout << "---- " << color1 << "  " << color2 << "\n" ;
-
     double color[2][3]= {{color1, color1, color1},{color2,color2,color2}};
     bool idx=0;
     bool lastColorUsed=0;
@@ -627,12 +626,17 @@ void FacilityGeometry::addRectangle(double x1, double y1, double x2, double y2, 
 
     //map->SetLookupTable(lookupTable);
     imageActor->SetMapper(map);
-    imageActor->GetProperty()->SetAmbient(0.2);
+    if(color2==90) // quick and dirty --> goal
+         imageActor->GetProperty()->SetAmbient(1.5);
+    else
+         imageActor->GetProperty()->SetAmbient(0.6);
     //imageActor->GetProperty()->SetDiffuse(0.8);
 
     // move the actor in x-direction
     imageActor->SetPosition(x1, y1, z);
     assembly2D->AddPart(imageActor);
+    double center[3]={x1/2+x2/2, y1/2+y2/2, 0};
+    addNewElementText(center, 0, text, 0);
 
 }
 

@@ -156,10 +156,10 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
           double xmin, xmax, ymin, ymax;
           double z=0;// @todo read this some when we go 3D
 
-          int source_id=-1;
+          string source_id="";
           for(int i=0; i<at.length(); i++) {
                if(at.localName(i)=="id") {
-                    source_id=at.value(i).toInt();
+                    source_id=at.value(i).toStdString();
                } else if(at.localName(i)=="x_min") {
                     xmin=at.value(i).toDouble()*FAKTOR;
                }
@@ -173,24 +173,33 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
                     ymax=at.value(i).toDouble()*FAKTOR;
                }
           }
-          _geometry->addRectangle(xmin,ymin,xmax,ymax, 0, 120.0, 150.0);
+          _geometry->addRectangle(xmin,ymin,xmax,ymax, 0, 120.0, 150.0, source_id);
            //@todo: here z=0. What about sources in the 2 floor?
+     }
 
-
-          // double CHT[3]= {_color,_height,_thickness};
-          // JPoint* pt1= new JPoint(xmin,ymin,z);
-          // JPoint* pt2= new JPoint(xmin,ymax,z);
-          // JPoint* pt3= new JPoint(xmax,ymin,z);
-          // JPoint* pt4= new JPoint(xmax,ymax,z);
-          // pt1->setColorHeightThicknes(CHT);
-          // pt2->setColorHeightThicknes(CHT);
-          // pt3->setColorHeightThicknes(CHT);
-          // pt4->setColorHeightThicknes(CHT);
-          // _currentPointsList.push_back(pt1);
-          // _currentPointsList.push_back(pt2);
-          // _currentPointsList.push_back(pt3);
-          // _currentPointsList.push_back(pt4);
-     } // source
+     else if (qName == "goal")
+     {
+          double xmin, xmax, ymin, ymax;
+          double z=0;// @todo read this some when we go 3D
+          QString caption = "";
+          for(int i=0; i<at.length(); i++) {
+               if(at.localName(i)=="caption") {
+                    caption=at.value(i);
+               } else if(at.localName(i)=="x_min") {
+                    xmin=at.value(i).toDouble()*FAKTOR;
+               }
+               else if(at.localName(i)=="x_max") {
+                    xmax=at.value(i).toDouble()*FAKTOR;
+               }
+               else if(at.localName(i)=="y_min") {
+                    ymin=at.value(i).toDouble()*FAKTOR;
+               }
+               else if(at.localName(i)=="y_max") {
+                    ymax=at.value(i).toDouble()*FAKTOR;
+               }
+          }
+          _geometry->addRectangle(xmin,ymin,xmax,ymax, z, 90.0, 90.0, caption.toStdString());
+     } // goal
      else if (qName == "floor") {
           double xMin=0,
                xMax=0,
