@@ -275,7 +275,11 @@ bool Simulation::InitArgs()
     if (!_em->ReadEventsXml()) {
         Log->Write("ERROR: \tCould not initialize events handling");
     }
-    _em->ListEvents();
+     if (!_em->ReadSchedule()) {
+          Log->Write("ERROR: \tCould not initialize schedule handling");
+     }
+
+     _em->ListEvents();
 
     //_building->SaveGeometry("test.sav.xml");
 

@@ -67,6 +67,10 @@ public:
       */
      void ReadEventsTxt(double time);
 
+     /**
+      * Reads the schedule file
+      */
+     bool ReadSchedule();
 
      //process the event using the current time stamp
      //from the pedestrian class
@@ -163,4 +167,5 @@ private:
      std::mt19937 _rdGenerator;
      std::uniform_real_distribution<double> _rdDistribution;
 //     std::uniform_real_distribution<double> d(0, 1);
+     std::map<int, std::vector<int>> groupDoor;
 };
