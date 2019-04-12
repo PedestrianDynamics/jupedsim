@@ -560,23 +560,27 @@ double Simulation::RunBody(double maxSimTime)
         // write the trajectories
         if (0==frameNr%writeInterval) {
             _iod->WriteFrame(frameNr/writeInterval, _building.get());
-            fs::path p = _config->GetTrajectoriesFile();
-            int sf = fs::file_size(p);
-            if(sf>_maxFileSize*1024*1024)
+
+            if(_config-> GetFileFormat() == FORMAT_PLAIN)
             {
-                 std::string extention = p.extension().string();
-                 _countTraj++;
-                 char tmp_traj_name[100];
-                 sprintf(tmp_traj_name,"%s_%.4d_%s", TrajectoryName.stem().string().c_str(), _countTraj, extention.c_str());
-                 _config->SetTrajectoriesFile(tmp_traj_name);
-                 Log->Write("INFO:\tNew trajectory file <%s>", tmp_traj_name);
-                 OutputHandler* file = new FileHandler(_config->GetTrajectoriesFile().c_str());
-                 outputTXT->SetOutputHandler(file);
+                 fs::path p = _config->GetTrajectoriesFile();
+                 int sf = fs::file_size(p);
+                 if(sf>_maxFileSize*1024*1024)
+                 {
+                      std::string extention = p.extension().string();
+                      _countTraj++;
+                      char tmp_traj_name[100];
+                      sprintf(tmp_traj_name,"%s_%.4d_%s", TrajectoryName.stem().string().c_str(), _countTraj, extention.c_str());
+                      _config->SetTrajectoriesFile(tmp_traj_name);
+                      Log->Write("INFO:\tNew trajectory file <%s>", tmp_traj_name);
+                      OutputHandler* file = new FileHandler(_config->GetTrajectoriesFile().c_str());
+                      outputTXT->SetOutputHandler(file);
 
 //_config->GetProjectRootDir()+"_1_"+_config->GetTrajectoriesFile());
-                 // _config->SetTrajectoriesFile(name);
-                 _iod->WriteHeader(_nPeds, _fps, _building.get(), _seed, _countTraj);
-                 // _iod->WriteGeometry(_building.get());
+                      // _config->SetTrajectoriesFile(name);
+                      _iod->WriteHeader(_nPeds, _fps, _building.get(), _seed, _countTraj);
+                      // _iod->WriteGeometry(_building.get());
+                 }
             }
         }
 
@@ -740,15 +744,21 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
                 }
             }
 //#pragma omp critical
+            bool regulateFlow = trans->GetOutflowRate() <  (std::numeric_limits<double>::max)();
 
             trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
             trans->IncreasePartialDoorUsage(1);
-            // when <dn> agents pass <trans>, we start evaluating the flow
-            // .. and maybe close the <trans>
-            if( trans->GetPartialDoorUsage() ==  trans->GetDN() ) {
-                 trans->regulateFlow(Pedestrian::GetGlobalTime());
-                 trans->ResetPartialDoorUsage();
+
+            if(regulateFlow)
+            {
+                 // when <dn> agents pass <trans>, we start evaluating the flow
+                 // .. and maybe close the <trans>
+                 if( trans->GetPartialDoorUsage() ==  trans->GetDN() ) {
+                      trans->regulateFlow(Pedestrian::GetGlobalTime());
+                      trans->ResetPartialDoorUsage();
+                 }
             }
+
         }
 
         Crossing* cross = _building->GetCrossingByUID(ped.GetExitIndex());
