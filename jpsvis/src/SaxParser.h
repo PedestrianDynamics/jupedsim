@@ -6,20 +6,20 @@
  * Copyright (C) <2009-2010>
  *
  * @section LICENSE
- * This file is part of OpenPedSim.
+ * This file is part of JuPedSim.
  *
- * OpenPedSim is free software: you can redistribute it and/or modify
+ * JuPedSim is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
- * OpenPedSim is distributed in the hope that it will be useful,
+ * JuPedSim is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * @section DESCRIPTION
  *
@@ -65,7 +65,12 @@ public:
                        const QString& type,
                        const QString& valueDefault,
                        const QString& value);
+     std::shared_ptr<FacilityGeometry> GetGeometryFactory()
+     {
+          return _geometry;
 
+     }
+     bool getSourcesTXT(QString &filename);
     /// provided for convenience and will be removed in the next version
     static bool parseGeometryJPS(QString content, GeometryFactory& geo);
 
@@ -76,8 +81,9 @@ public:
     static void parseGeometryTRAV(QString fileName, GeometryFactory& geoFac, QDomNode geoNode=QDomNode());
 
     /// take a large file and find the geometry file location.
-    static QString extractGeometryFilename(QString& filename);
+     static QString extractGeometryFilename(QString& filename);
      static QString extractGeometryFilenameTXT(QString &filename);
+     static QString extractSourceFileTXT(QString &filename);
     /// parse the txt file format
     static bool ParseTxtFormat(const QString& fileName, SyncData* dataset, double * fps);
 

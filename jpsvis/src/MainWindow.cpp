@@ -18,7 +18,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * @section DESCRIPTION
  *
@@ -708,6 +708,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
 
     //the geometry actor
     auto&& geometry = _visualisationThread->getGeometry();
+//    geometry.addSource(1,4,2,5);
     QString geometry_file;
     //try to get a geometry filename
     if(fileName.endsWith(".xml",Qt::CaseInsensitive))
@@ -720,7 +721,6 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
          Debug::Messages("Extract geometry file from <%s>", fileName.toStdString().c_str());
          geometry_file=SaxParser::extractGeometryFilenameTXT(fileName);
     }
-
 
     Debug::Messages("MainWindow::addPedestrianGroup: geometry name: <%s>", geometry_file.toStdString().c_str());
     if(geometry_file.isEmpty())
@@ -745,7 +745,9 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
               if( !(check_file.exists() && check_file.isFile()) )
               {
                    Debug::Error("Geomery file does not exist.");
-                   exit(EXIT_FAILURE);
+                   //exit(EXIT_FAILURE);
+                   return(false);
+
               }
               //geometry_file =  check_file.fileName();
          }
@@ -831,6 +833,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     statusBar()->showMessage(tr("parsing the file"));
 
 
+
     //parsing the xml file
     if(fileName.endsWith(".xml",Qt::CaseInsensitive))
     {
@@ -852,8 +855,27 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     // try to parse the txt file
     else if(fileName.endsWith(".txt",Qt::CaseInsensitive))
     {
+         QString source_file=SaxParser::extractSourceFileTXT(fileName);
+         QFileInfo check_file(source_file);
+         if( !(check_file.exists() && check_file.isFile()) )
+        {
+             Debug::Messages("WARNING: MainWindow::addPedestrianGroup: source name: <%s> not found!", source_file.toStdString().c_str());
+        }
+         else
+              Debug::Messages("INFO: MainWindow::addPedestrianGroup: source name: <%s>", source_file.toStdString().c_str());
+
+        QFile file(source_file);
+        QXmlInputSource source(&file);
+        QXmlSimpleReader reader;
+
+        SaxParser handler(geometry,*dataset,&frameRate);
+        reader.setContentHandler(&handler);
+        reader.parse(source);
+        file.close();
+
         if(false==SaxParser::ParseTxtFormat(fileName, dataset,&frameRate))
             return false;
+
     }
 
 

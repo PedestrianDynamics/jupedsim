@@ -13,7 +13,7 @@
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
- * OpenPedSim is distributed in the hope that it will be useful,
+ * JuPedSim is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
@@ -672,7 +672,7 @@ void SaxParser::clearPoints()
      return;
 }
 
-/// provided for convenience and will be removed in the next version
+
 bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
 {
      Debug::Messages( "Enter SaxParser::parseGeometryJPS with filename <%s>",fileName.toStdString().c_str());
@@ -712,9 +712,8 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
                string room_caption = itr_room.second->GetCaption() + "_RId_" + QString::number(itr_room.first).toStdString();
                string subroom_caption = itr_subroom.second->GetCaption()+ "_RId_" + QString::number(itr_room.first).toStdString();
                auto geometry= shared_ptr<FacilityGeometry>(
-                    new FacilityGeometry(itr_subroom.second->GetType(), room_caption, subroom_caption
-                         )
-                    );
+                    new FacilityGeometry(itr_subroom.second->GetType(), room_caption, subroom_caption));
+
                int currentFloorPolyID=0;
                int currentObstPolyID=0;
 
@@ -859,8 +858,6 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
                geoFac.AddElement(room_id,subroom_id,geometry);
           }
      }
-
-
      // free memory
      delete building;
      return true;
@@ -1108,6 +1105,83 @@ QString SaxParser::extractGeometryFilename(QString &filename)
      //    delete geo;
 
      return "";
+}
+// not used yet!!
+bool SaxParser::getSourcesTXT(QString &filename)
+{
+     std::cout << "Enter getSourcesTXT with " << filename.toStdString().c_str() << "\n";
+
+     std::string  sfilename = filename.toStdString();
+     TiXmlDocument docSource(sfilename);
+     if (!docSource.LoadFile()) {
+          Debug::Error("ERROR: \t%s", docSource.ErrorDesc());
+          Debug::Error("ERROR: \t could not parse the sources file.");
+          return false;
+     }
+
+     TiXmlElement* xRootNodeSource = docSource.RootElement();
+     if (!xRootNodeSource) {
+          Debug::Messages("ERROR:\tRoot element does not exist in source file.");
+          return false;
+     }
+     if (xRootNodeSource->ValueStr() != "JPScore") {
+          Debug::Messages("ERROR:\tRoot element value in source file is not 'JPScore'.");
+          return false;
+     }
+     TiXmlNode* xSourceF = xRootNodeSource->FirstChild("agents_sources");
+     if (!xSourceF) {
+          Debug::Messages("ERROR:\tNo agents_sources tag in file not found.");
+          return false;
+     }
+                                                 Debug::Messages("INFO:\t  Loading sources from file");
+     TiXmlNode* xSourceNodeF = xSourceF->FirstChild("source");
+     if(xSourceNodeF)
+     {
+          for (TiXmlElement* e = xSourceF->FirstChildElement("source"); e;
+               e = e->NextSiblingElement("source"))
+          {
+               float xmin =  xmltof(e->Attribute("x_min"), 0);
+               float xmax =  xmltof(e->Attribute("x_max"), 0);
+               float ymin =  xmltof(e->Attribute("y_min"), 0);
+               float ymax =  xmltof(e->Attribute("y_max"), 0);
+               bool dont_add = (xmin==0) && (xmax==0) && (ymin==0) && (ymax==0);
+               if(! dont_add)
+                    _geometry->addSource(xmin,ymin,xmax,ymax);
+          }//for
+     }
+     return true;
+}
+
+
+QString SaxParser::extractSourceFileTXT(QString &filename)
+{
+     QString extracted_source_name="";
+     QFile file(filename);
+     QString line;
+     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+          QTextStream in(&file);
+          while (!in.atEnd()) {
+               //look for a line with
+               line = in.readLine();
+               // std::cout << " >> " <<  line.toStdString().c_str() << endl;
+               if(line.split(":").size()==2)
+               {
+                    if(line.split(":")[0].contains("sources",Qt::CaseInsensitive))
+                    {
+                         extracted_source_name = line.split(":")[1].simplified().remove(' ');
+                         break;
+                    }
+               }
+          }// while
+     } // if open
+     if(extracted_source_name=="")
+     {
+          Debug::Warning("Could not extract source file!");
+     }
+
+     else
+          Debug::Messages("Extracted source from TXT file <%s>", extracted_source_name.toStdString().c_str());
+     return extracted_source_name;
 }
 
 QString SaxParser::extractGeometryFilenameTXT(QString &filename)
@@ -1468,7 +1542,6 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
           Debug::Error("could not open the file  <%s>", fileName.toStdString().c_str());
           return false;
      }
-
      return true;
 }
 
