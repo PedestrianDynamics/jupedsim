@@ -405,6 +405,10 @@ void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building* building, i
      Write("#ID: the agent ID");
      Write("#FR: the current frame");
      Write("#X,Y,Z: the agents coordinates (in metres)");
+     Write("#A, B: semi-axes of the ellipse");
+     Write("#ANGLE: orientation of the ellipse");
+     Write("#COLOR: color of the ellipse");
+
      Write("\n");
      //Write("#ID\tFR\tX\tY\tZ");// @todo: maybe use two different formats
      Write("#ID\tFR\tX\tY\tZ\tA\tB\tANGLE\tCOLOR");// a b angle color
