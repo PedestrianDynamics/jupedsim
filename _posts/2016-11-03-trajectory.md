@@ -1,7 +1,7 @@
 ---
 layout: post2
 title: Trajectory file
-subtitle: 
+subtitle:
 #bigimg: /img/jupedsim_small.png
 permalink: 2016-11-03-trajectory.html
 nav:
@@ -21,7 +21,7 @@ Possible formats are:
 - `xml-plain` which is the default xml format
 - `plain` a flat format (just numbers)
 
-Note that if you are using the streaming mode or want to visualize the trajectories with `jpsvis`, 
+Note that if you are using the streaming mode or want to visualize the trajectories with `jpsvis`,
 the format should be `xml-plain`.
 
 ## XML
@@ -30,7 +30,7 @@ The file has three main sections: `header`, `geometry` and `frames`.
 ```xml
  <header version = "0.8">
      <agents>1</agents>
- 	<frameRate>8</frameRate>
+    <frameRate>8</frameRate>
  </header>
 ```
 
@@ -43,7 +43,7 @@ The geometry can be completely embedded within the trajectories or a reference t
 
 ```xml
  <geometry>
- 	<file location="corridor_geometry.xml"/>
+    <file location="corridor_geometry.xml"/>
  </geometry>
 
 ```
@@ -53,11 +53,11 @@ The coordinates of the trajectory are defined in the session `frames`
 
 ```xml
  <frame ID="0">
-     <agent ID="1"	x="660.00"	y="333.00"	z="30.00"	
- 	rA="17.94"	rB="24.94"	eO="-168.61" eC="0"/>
+     <agent ID="1"	x="660.00"	y="333.00"	z="30.00"
+    rA="17.94"	rB="24.94"	eO="-168.61" eC="0"/>
  </frame>
  <frame ID="1">
- <agent ID="1"	x="658.20"	y="332.86"	z="30.00"	
+ <agent ID="1"	x="658.20"	y="332.86"	z="30.00"
  rA="31.29"	rB="23.87"	eO="-175.41" eC="54"/>
  </frame>
 ```
@@ -66,14 +66,14 @@ The coordinates of the trajectory are defined in the session `frames`
 - `ID` the id of the pedestrians starting with 1.
 - `x, y, z` the position of the agent.
 
-- `rA, rB`  The shape which is defined by a circle (ellipse) drawn around a human-like figure.	
-  `radiusA` and `radiusB` are respectively the semi major axis and the semi minor axis of the ellipse, 
-  if the modeled pedestrians' shape is an ellipse. 
+- `rA, rB`  The shape which is defined by a circle (ellipse) drawn around a human-like figure.
+  `radiusA` and `radiusB` are respectively the semi major axis and the semi minor axis of the ellipse,
+  if the modeled pedestrians' shape is an ellipse.
   Otherwise, if it is a circle those values should be equal to the radius of the circle.
-- `eO, eC` are the "ellipseOrientation" and the "ellipseColor". 
-  "ellipseOrientation" is the angle between the  major axis and the X-axis (zero for circle). 
-   A color can also be provided, for example for displaying change in velocity. 
-   The colours are in the range `[0=red, 255=green]` and define the proportion between 
+- `eO, eC` are the "ellipseOrientation" and the "ellipseColor".
+  "ellipseOrientation" is the angle between the  major axis and the X-axis (zero for circle).
+   A color can also be provided, for example for displaying change in velocity.
+   The colours are in the range `[0=red, 255=green]` and define the proportion between
    the desired speed ($$v_0$$) and the instantaneous velocity.
 
 
@@ -83,24 +83,24 @@ A sample trajectory in the xml format is
 ```xml
  <?xml version="1.0" encoding="UTF-8"?>
  <trajectories>
- 	<header version = "0.5">
- 		<agents>1</agents>
- 		<frameRate>8</frameRate>
- 	</header>
- 
- 	<geometry>
- 		<file location="corridor_geometry.xml"/>
- 	</geometry>
- 
- 	<frame ID="0">
- 		<agent ID="1"	x="660.00"	y="333.00"	z="30.00"	
- 		rA="17.94"	rB="24.94"	eO="-168.61"	eC="0"/>
- 	</frame>
- 
- 	<frame ID="1">
- 		<agent ID="1"	x="658.20"	y="332.86"	z="30.00"	
- 	rA="31.29"	rB="23.87" 	eO="-175.41"	eC="54"/>
- 	</frame>
+    <header version = "0.5">
+        <agents>1</agents>
+        <frameRate>8</frameRate>
+    </header>
+
+    <geometry>
+        <file location="corridor_geometry.xml"/>
+    </geometry>
+
+    <frame ID="0">
+        <agent ID="1"	x="660.00"	y="333.00"	z="30.00"
+        rA="17.94"	rB="24.94"	eO="-168.61"	eC="0"/>
+    </frame>
+
+    <frame ID="1">
+        <agent ID="1"	x="658.20"	y="332.86"	z="30.00"
+    rA="31.29"	rB="23.87"  eO="-175.41"	eC="54"/>
+    </frame>
  </trajectories>
 ```
 
@@ -110,20 +110,26 @@ The other format of the trajectory file is `plain`
 A sample trajectory in the plain format is as follows:
 
 ```xml
- #description: simulation
- #framerate: 16
- #geometry: /home/sim/corridor.xml
- #ID: the agent ID
- #FR: the current frame
- #X,Y,Z: the agents coordinates in metres
- 				
- #ID	FR	X		Y		Z
- 1	0	28.21	131.57	0.00
- 2	0	38.41	133.42	0.00
- 1	1	28.21	131.57	0.00
- 2	1	38.41	133.42	0.00
- 1	2	28.24	131.57	0.00
- 2	2	38.44	133.42	0.00
- 1	3	28.29	131.57	0.00
-```				
+#description: jpscore (0.8.4)
+#count: 0
+#framerate: 16.00
+#geometry: geometry.xml
+#sources: sources.xml
+#ID: the agent ID
+#FR: the current frame
+#X,Y,Z: the agents coordinates (in metres)
+#A, B: semi-axes of the ellipse
+#ANGLE: orientation of the ellipse
+#COLOR: color of the ellipse
 
+#ID	FR	X	Y	Z	A	B	ANGLE	COLOR
+1	0	3.30	3.33	0.00	0.18	0.25	-90.00	0
+2	0	4.50	4.44	0.00	0.18	0.25	-90.00	0
+3	0	3.60	3.70	0.00	0.18	0.25	180.00	0
+4	0	3.60	4.07	0.00	0.18	0.25	180.00	0
+5	0	4.50	4.07	0.00	0.18	0.25	-90.00	0
+6	0	4.20	3.33	0.00	0.18	0.25	-90.00	0
+```
+
+
+`count` is a running number. Handy when big simulations are splitted into small 10 MB large files.
