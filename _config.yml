@@ -32,6 +32,10 @@ navbar-links:
     - JuPedSim: "http://jupedsim.org"
     - Inifile: "2016-11-01-inifile"
     - Geometry: "2016-11-02-geometry"
+    - Sources: "2019-04-12-sources"
+    - Goals: "2019-04-12-goals"
+    - Traffic: "2019-04-12-traffic"
+    - Transitions: "2019-04-12-transitions"
     - Trajectory: "2016-11-03-trajectory"
 
   Models:
@@ -39,7 +43,7 @@ navbar-links:
     - Direction strategies: "2016-11-02-direction"
     - Routing: "2016-11-03-routing"
 
-  Tests: 
+  Tests:
      - RiMEA: "2016-11-01-rimea"
      - Juelich: "2016-11-02-juelich"
 
@@ -117,7 +121,7 @@ excerpt_length: 50
 
 # Output options (more information on Jekyll's site)
 timezone: "Berlin"
-markdown: Kramdown # Pandoc # 
+markdown: Kramdown # Pandoc #
 highlighter: rouge
 permalink: /:year-:month-:day-:title/
 paginate: 5
@@ -218,8 +222,7 @@ prose:
 gems:
   - jekyll-paginate
   # - jekyll-pandoc-multiple-formats
-  
+
   # - jekyll-pdf
 # Beautiful Jekyll / Dean Attali
 # 2fc73a3a967e97599c9763d05e564189
-
