@@ -131,3 +131,21 @@ bool RoutingEngine::Init(Building* building)
      return status;
 }
 
+bool RoutingEngine::NeedsUpdate() const
+{
+     return _needUpdate;
+}
+
+void RoutingEngine::setNeedUpdate(bool needUpdate)
+{
+     _needUpdate = needUpdate;
+}
+
+void RoutingEngine::UpdateRouter()
+{
+     for (auto* router : _routersCollection){
+          router->Update();
+     }
+     _needUpdate = false;
+}
+

@@ -142,7 +142,11 @@ public:
 
      void SetTrips(const Trips& trips);
 
-
+     /**
+      * Update the router, when geometry changed due to external changes.
+      * Remark: Depends on router if needed!
+      */
+     virtual void Update();
 };
 
 #endif  /* _ROUTING_H */

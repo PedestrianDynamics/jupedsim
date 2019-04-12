@@ -31,7 +31,6 @@
 
 class Building;
 class Router;
-class GlobalRouterTrips;
 class QuickestPathRouter;
 class RoutingEngine;
 class Event;

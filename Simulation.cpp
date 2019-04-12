@@ -546,6 +546,11 @@ double Simulation::RunBody(double maxSimTime)
                 }
             }
 
+            // here the used routers are update, when needed due to external changes
+            if (_routingEngine->NeedsUpdate()){
+                 _routingEngine->UpdateRouter();
+            }
+
             //update the routes and locations
             UpdateRoutesAndLocations();
 
