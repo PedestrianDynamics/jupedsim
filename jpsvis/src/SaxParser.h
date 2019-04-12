@@ -84,6 +84,7 @@ public:
      static QString extractGeometryFilename(QString& filename);
      static QString extractGeometryFilenameTXT(QString &filename);
      static QString extractSourceFileTXT(QString &filename);
+     static QString extractGoalFileTXT(QString &filename);
     /// parse the txt file format
     static bool ParseTxtFormat(const QString& fileName, SyncData* dataset, double * fps);
 

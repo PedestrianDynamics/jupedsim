@@ -104,7 +104,7 @@ public:
 
     /// draw a floor, divided in cells,
     void addFloor(double x1, double y1, double x2, double y2, double z=0);
-    void addSource(double x1, double y1, double x2, double y2, double z=0);
+     void addRectangle(double x1, double y1, double x2, double y2, double z=0, double c1=120, double c2=150);
     void addFloor(vtkPolyData* polygonPolyData);
 
     ///draw obstacles

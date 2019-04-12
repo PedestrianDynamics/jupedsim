@@ -173,7 +173,9 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
                     ymax=at.value(i).toDouble()*FAKTOR;
                }
           }
-          _geometry->addSource(xmin,ymin,xmax,ymax);
+          _geometry->addRectangle(xmin,ymin,xmax,ymax, 0, 120.0, 150.0);
+           //@todo: here z=0. What about sources in the 2 floor?
+
 
           // double CHT[3]= {_color,_height,_thickness};
           // JPoint* pt1= new JPoint(xmin,ymin,z);
@@ -1145,8 +1147,8 @@ bool SaxParser::getSourcesTXT(QString &filename)
                float ymin =  xmltof(e->Attribute("y_min"), 0);
                float ymax =  xmltof(e->Attribute("y_max"), 0);
                bool dont_add = (xmin==0) && (xmax==0) && (ymin==0) && (ymax==0);
-               if(! dont_add)
-                    _geometry->addSource(xmin,ymin,xmax,ymax);
+               // if(! dont_add)
+                    // _geometry->addSource(xmin,ymin,xmax,ymax);
           }//for
      }
      return true;
@@ -1183,6 +1185,39 @@ QString SaxParser::extractSourceFileTXT(QString &filename)
           Debug::Messages("Extracted source from TXT file <%s>", extracted_source_name.toStdString().c_str());
      return extracted_source_name;
 }
+
+QString SaxParser::extractGoalFileTXT(QString &filename)
+{
+     QString extracted_goal_name="";
+     QFile file(filename);
+     QString line;
+     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+          QTextStream in(&file);
+          while (!in.atEnd()) {
+               //look for a line with
+               line = in.readLine();
+               // std::cout << " >> " <<  line.toStdString().c_str() << endl;
+               if(line.split(":").size()==2)
+               {
+                    if(line.split(":")[0].contains("goals",Qt::CaseInsensitive))
+                    {
+                         extracted_goal_name = line.split(":")[1].simplified().remove(' ');
+                         break;
+                    }
+               }
+          }// while
+     } // if open
+     if(extracted_goal_name=="")
+     {
+          Debug::Warning("Could not extract goal file!");
+     }
+
+     else
+          Debug::Messages("Extracted goal from TXT file <%s>", extracted_goal_name.toStdString().c_str());
+     return extracted_goal_name;
+}
+
+
 
 QString SaxParser::extractGeometryFilenameTXT(QString &filename)
 {

@@ -575,7 +575,7 @@ void FacilityGeometry::addObstacles(vtkPolyData* polygonPolyData )
 
 
 
-void FacilityGeometry::addSource(double x1, double y1, double x2, double y2, double z)
+void FacilityGeometry::addRectangle(double x1, double y1, double x2, double y2, double z, double color1, double color2)
 {
     //if(z!=1)return;
     const double cellSize=40; //cm
@@ -589,8 +589,9 @@ void FacilityGeometry::addSource(double x1, double y1, double x2, double y2, dou
     //vtkDoubleArray *scalars = vtkDoubleArray::New();
     vtkDataArray* pData = vtkUnsignedCharArray::New();
     pData->SetNumberOfComponents(3);
+    std::cout << "---- " << color1 << "  " << color2 << "\n" ;
 
-    double color[2][3]= {{120, 120, 120},{150,150,150}};
+    double color[2][3]= {{color1, color1, color1},{color2,color2,color2}};
     bool idx=0;
     bool lastColorUsed=0;
     for(int i=0; i<dimY-1; i++) {
