@@ -115,6 +115,7 @@ A sample trajectory in the plain format is as follows:
 #framerate: 16.00
 #geometry: geometry.xml
 #sources: sources.xml
+#goals: goals.xml
 #ID: the agent ID
 #FR: the current frame
 #X,Y,Z: the agents coordinates (in metres)
