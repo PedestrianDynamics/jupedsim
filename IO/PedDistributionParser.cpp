@@ -21,6 +21,9 @@
 #define NOMINMAX
 #include "PedDistributionParser.h"
 #include <cstdarg> // va_start and va_end
+#include <filesystem>
+namespace fs = std::filesystem;
+
 PedDistributionParser::PedDistributionParser(const Configuration* configuration)
         :_configuration(configuration)
 {
@@ -174,7 +177,10 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
         //------- parse sources from external file
         if(xFileNode)
         {
+             fs::path p(_configuration->GetProjectRootDir());
              std::string sourceFilename = xFileNode->FirstChild()->ValueStr();
+             p /= sourceFilename;
+             sourceFilename = p.string();
              Log->Write("Info:\t  Source file found <%s>", sourceFilename.c_str());
              TiXmlDocument docSource(sourceFilename);
              if (!docSource.LoadFile()) {
