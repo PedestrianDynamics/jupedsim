@@ -350,10 +350,12 @@ const std::string& Building::GetGeometryFilename() const
 bool Building::LoadGeometry(const std::string &geometryfile)
 {
      //get the geometry filename from the project file
-     string geoFilenameWithPath= _projectRootDir + geometryfile;
+     string geoFilenameWithPath=  geometryfile; //_projectRootDir +
+
      Debug::Messages("LoadGeometry: Root Dir: <%s>", _projectRootDir.c_str());
      Debug::Messages("LoadGeometry: geometryfile: <%s>", geometryfile.c_str());
      Debug::Messages("LoadGeometry: geoFilenameWithPath: <%s>", geoFilenameWithPath.c_str());
+
      if(geometryfile=="")
      {
           TiXmlDocument doc(_projectFilename);
@@ -587,7 +589,7 @@ bool Building::LoadGeometry(const std::string &geometryfile)
           TiXmlNode * xNodeFile = xTransNode->FirstChild("file");
           if(xNodeFile)
           {
-               std::string transFilename = xNodeFile->FirstChild()->ValueStr();
+               std::string transFilename = _projectRootDir + "/" +xNodeFile->FirstChild()->ValueStr();
                Log->Write("INFO:\tParsing transition from file <%s>", transFilename.c_str());
                TiXmlDocument docTrans(transFilename);
                if (!docTrans.LoadFile()) {

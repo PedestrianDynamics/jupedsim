@@ -706,6 +706,8 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
      Debug::Messages("wd: <%s>",wd.toStdString().c_str());
      Building* building = new Building();
      string geometrypath = fileName.toStdString();
+     building->SetProjectRootDir(wd.toStdString());
+
      // read the geometry
      if(!building->LoadGeometry(geometrypath))
           return false;
