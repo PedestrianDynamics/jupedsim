@@ -25,7 +25,7 @@
 #include <string>
 
 #include "../general/Configuration.h"
-#include "../routing/DirectionStrategy.h"
+#include "../routing/direction/DirectionStrategy.h"
 
 class OutputHandler;
 

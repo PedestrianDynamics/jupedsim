@@ -338,62 +338,71 @@ pedestrian/StartDistribution.cpp
 voronoi-boost/VoronoiPositionGenerator.cpp
 
 #floorfield
-routing/ff_router/ffRouter.cpp
+        routing/router/ff_router/ffRouter.cpp
 #routing/ff_router/LocalFloorfieldViaFM.cpp
-routing/ff_router/FloorfieldViaFM.cpp
+        routing/router/ff_router/FloorfieldViaFM.cpp
 #routing/ff_router/FFKit.cpp
-routing/ff_router/UnivFFviaFM.cpp
+        routing/router/ff_router/UnivFFviaFM.cpp
 
 #floorfield
-routing/ff_router_trips/ffRouterTrips.cpp
-routing/ff_router_trips/FloorfieldViaFMTrips.cpp
-routing/ff_router_trips/UnivFFviaFMTrips.cpp
+        routing/router/ff_router_trips/ffRouterTrips.cpp
+        routing/router/ff_router_trips/FloorfieldViaFMTrips.cpp
+        routing/router/ff_router_trips/UnivFFviaFMTrips.cpp
 
         #global_shortest
-routing/global_shortest/AccessPoint.cpp
-routing/global_shortest/GlobalRouter.cpp
-routing/global_shortest/DTriangulation.cpp
+        routing/router/global_shortest/AccessPoint.cpp
+        routing/router/global_shortest/GlobalRouter.cpp
+        routing/router/global_shortest/DTriangulation.cpp
 
 #general
-routing/DirectionStrategy.cpp
-routing/Router.cpp
+        routing/direction/DirectionStrategy.cpp
+        routing/router/Router.cpp
 routing/RoutingEngine.cpp
 
 
 #quickest
-routing/quickest/QuickestPathRouter.cpp
+        routing/router/quickest/QuickestPathRouter.cpp
 
 #Smoke router
-routing/smoke_router/SmokeRouter.cpp
-routing/smoke_router/GraphNetwork.cpp
-routing/smoke_router/NavigationGraph.cpp
-routing/smoke_router/BrainStorage.cpp
-routing/smoke_router/navigation_graph/GraphEdge.cpp
-routing/smoke_router/navigation_graph/GraphVertex.cpp
-routing/smoke_router/sensor/RoomToFloorSensor.cpp
-routing/smoke_router/sensor/SensorManager.cpp
-routing/smoke_router/sensor/AbstractSensor.cpp
-routing/smoke_router/sensor/DiscoverDoorsSensor.cpp
-routing/smoke_router/sensor/JamSensor.cpp
-routing/smoke_router/sensor/LastDestinationsSensor.cpp
-routing/smoke_router/sensor/locater.cpp
-routing/smoke_router/cognitiveMap/associations.cpp
-routing/smoke_router/cognitiveMap/connection.cpp
-routing/smoke_router/cognitiveMap/cognitivemap.cpp
-routing/smoke_router/cognitiveMap/landmark.cpp
-routing/smoke_router/cognitiveMap/region.cpp
-routing/smoke_router/cognitiveMap/youareherepointer.cpp
-routing/smoke_router/cognitiveMap/cogmapoutputhandler.cpp
-routing/smoke_router/cognitiveMap/landmarknetwork.cpp
-routing/smoke_router/Brain.cpp
-routing/smoke_router/cognitiveMap/internnavigationnetwork.cpp
+        routing/router/smoke_router/SmokeRouter.cpp
+        routing/router/smoke_router/GraphNetwork.cpp
+        routing/router/smoke_router/NavigationGraph.cpp
+        routing/router/smoke_router/BrainStorage.cpp
+        routing/router/smoke_router/navigation_graph/GraphEdge.cpp
+        routing/router/smoke_router/navigation_graph/GraphVertex.cpp
+        routing/router/smoke_router/sensor/RoomToFloorSensor.cpp
+        routing/router/smoke_router/sensor/SensorManager.cpp
+        routing/router/smoke_router/sensor/AbstractSensor.cpp
+        routing/router/smoke_router/sensor/DiscoverDoorsSensor.cpp
+        routing/router/smoke_router/sensor/JamSensor.cpp
+        routing/router/smoke_router/sensor/LastDestinationsSensor.cpp
+        routing/router/smoke_router/sensor/locater.cpp
+        routing/router/smoke_router/cognitiveMap/associations.cpp
+        routing/router/smoke_router/cognitiveMap/connection.cpp
+        routing/router/smoke_router/cognitiveMap/cognitivemap.cpp
+        routing/router/smoke_router/cognitiveMap/landmark.cpp
+        routing/router/smoke_router/cognitiveMap/region.cpp
+        routing/router/smoke_router/cognitiveMap/youareherepointer.cpp
+        routing/router/smoke_router/cognitiveMap/cogmapoutputhandler.cpp
+        routing/router/smoke_router/cognitiveMap/landmarknetwork.cpp
+        routing/router/smoke_router/Brain.cpp
+        routing/router/smoke_router/cognitiveMap/internnavigationnetwork.cpp
 
+#direction
+        routing/direction/walking/DirectionMiddlePoint.cpp
+        routing/direction/walking/DirectionMinSeperation.cpp
+        routing/direction/walking/DirectionMinSeperationShorterLine.cpp
+        routing/direction/walking/DirectionGeneral.cpp
+        routing/direction/walking/DirectionInRangeBottleneck.cpp
+        routing/direction/walking/DirectionFloorfield.cpp
+        routing/direction/walking/DirectionLocalFloorfield.cpp
+        routing/direction/walking/DirectionSubLocalFloorfield.cpp
 
 events/EventManager.cpp
 events/Event.cpp
 
 geometry/Trips.cpp
-routing/trips_router/TripsRouter.cpp
+        routing/router/trips_router/TripsRouter.cpp
 
 forms/jpscore.rc
 math/KrauszModel.cpp geometry/GoalManager.cpp geometry/GoalManager.h)
@@ -439,63 +448,72 @@ JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
 set(header_files
 
 #floorfield
-routing/ff_router/ffRouter.h
-routing/ff_router/RectGrid.h
-routing/ff_router/Trial.h
+        routing/router/ff_router/ffRouter.h
+        routing/router/ff_router/RectGrid.h
+        routing/router/ff_router/Trial.h
 #routing/ff_router/LocalFloorfieldViaFM.h
-routing/ff_router/FloorfieldViaFM.h
+        routing/router/ff_router/FloorfieldViaFM.h
 #routing/ff_router/FFKit.h
-routing/ff_router/UnivFFviaFM.h
+        routing/router/ff_router/UnivFFviaFM.h
 
 #floorfield
-routing/ff_router_trips/ffRouterTrips.h
-routing/ff_router_trips/RectGrid.h
-routing/ff_router_trips/Trial.h
-routing/ff_router_trips/FloorfieldViaFMTrips.h
-routing/ff_router_trips/UnivFFviaFMTrips.h
+        routing/router/ff_router_trips/ffRouterTrips.h
+        routing/router/ff_router_trips/RectGrid.h
+        routing/router/ff_router_trips/Trial.h
+        routing/router/ff_router_trips/FloorfieldViaFMTrips.h
+        routing/router/ff_router_trips/UnivFFviaFMTrips.h
 
 #general
-routing/DirectionStrategy.h
+        routing/direction/DirectionStrategy.h
 routing/DummyRouter.h
 routing/GlobalRouter.h
 routing/QuickestPathRouter.h
 routing/SafestPathRouter.h
-routing/Router.h
+        routing/router/Router.h
 routing/RoutingEngine.h
 
 #global_shortest
-routing/global_shortest/GlobalRouter.h
-routing/global_shortest/AccessPoint.h
-routing/global_shortest/DTriangulation.h
+        routing/router/global_shortest/GlobalRouter.h
+        routing/router/global_shortest/AccessPoint.h
+        routing/router/global_shortest/DTriangulation.h
 
 #quickest
-routing/quickest/QuickestPathRouter.h
+        routing/router/quickest/QuickestPathRouter.h
 
 #Smoke router
-routing/smoke_router/SmokeRouter.h
-routing/smoke_router/GraphNetwork.h
-routing/smoke_router/NavigationGraph.h
-routing/smoke_router/BrainStorage.h
-routing/smoke_router/navigation_graph/GraphEdge.h
-routing/smoke_router/navigation_graph/GraphVertex.h
-routing/smoke_router/sensor/AbstractSensor.h
-routing/smoke_router/sensor/RoomToFloorSensor.h
-routing/smoke_router/sensor/SensorManager.h
-routing/smoke_router/sensor/DiscoverDoorsSensor.h
-routing/smoke_router/sensor/JamSensor.h
-routing/smoke_router/sensor/LastDestinationsSensor.h
-routing/smoke_router/sensor/locater.h
-routing/smoke_router/cognitiveMap/associations.h
-routing/smoke_router/cognitiveMap/connection.cpp
-routing/smoke_router/cognitiveMap/cognitivemap.h
-routing/smoke_router/cognitiveMap/landmark.h
-routing/smoke_router/cognitiveMap/region.h
-routing/smoke_router/cognitiveMap/youareherepointer.h
-routing/smoke_router/cognitiveMap/cogmapoutputhandler.h
-routing/smoke_router/cognitiveMap/landmarknetwork.h
-routing/smoke_router/Brain.h
-routing/smoke_router/cognitiveMap/internnavigationnetwork.h
+        routing/router/smoke_router/SmokeRouter.h
+        routing/router/smoke_router/GraphNetwork.h
+        routing/router/smoke_router/NavigationGraph.h
+        routing/router/smoke_router/BrainStorage.h
+        routing/router/smoke_router/navigation_graph/GraphEdge.h
+        routing/router/smoke_router/navigation_graph/GraphVertex.h
+        routing/router/smoke_router/sensor/AbstractSensor.h
+        routing/router/smoke_router/sensor/RoomToFloorSensor.h
+        routing/router/smoke_router/sensor/SensorManager.h
+        routing/router/smoke_router/sensor/DiscoverDoorsSensor.h
+        routing/router/smoke_router/sensor/JamSensor.h
+        routing/router/smoke_router/sensor/LastDestinationsSensor.h
+        routing/router/smoke_router/sensor/locater.h
+        routing/router/smoke_router/cognitiveMap/associations.h
+        routing/router/smoke_router/cognitiveMap/connection.cpp
+        routing/router/smoke_router/cognitiveMap/cognitivemap.h
+        routing/router/smoke_router/cognitiveMap/landmark.h
+        routing/router/smoke_router/cognitiveMap/region.h
+        routing/router/smoke_router/cognitiveMap/youareherepointer.h
+        routing/router/smoke_router/cognitiveMap/cogmapoutputhandler.h
+        routing/router/smoke_router/cognitiveMap/landmarknetwork.h
+        routing/router/smoke_router/Brain.h
+        routing/router/smoke_router/cognitiveMap/internnavigationnetwork.h
 
+#directions
+        routing/direction/walking/DirectionMiddlePoint.h
+        routing/direction/walking/DirectionMinSeperation.h
+        routing/direction/walking/DirectionMinSeperationShorterLine.h
+        routing/direction/walking/DirectionGeneral.h
+        routing/direction/walking/DirectionInRangeBottleneck.h
+        routing/direction/walking/DirectionFloorfield.h
+        routing/direction/walking/DirectionLocalFloorfield.h
+        routing/direction/walking/DirectionSubLocalFloorfield.h
 pedestrian/Pedestrian.h
 pedestrian/PedDistributor.h
 pedestrian/Ellipse.h
@@ -552,7 +570,7 @@ events/EventManager.h
 events/Event.h
 
         geometry/Trips.h
-        routing/trips_router/TripsRouter.h
+        routing/router/trips_router/TripsRouter.h
 
         )
 
@@ -568,70 +586,38 @@ JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
 )
 SET(AIROUTER_SRC
 #AI router
-routing/ai_router/AIRouter.cpp
-routing/ai_router/BrainStorage.cpp
-routing/ai_router/cognitiveMap/associations.cpp
-routing/ai_router/cognitiveMap/connection.cpp
-routing/ai_router/cognitiveMap/cognitivemap.cpp
-routing/ai_router/cognitiveMap/landmark.cpp
-routing/ai_router/cognitiveMap/region.cpp
-routing/ai_router/cognitiveMap/landmarknetwork.cpp
-routing/ai_router/cognitiveMap/internnavigationnetwork.cpp
-routing/ai_router/perception/visualsystem.cpp
-routing/ai_router/perception/visibleenvironment.cpp
-routing/ai_router/perception/cgalgeometry.cpp
-routing/ai_router/perception/sign.cpp
-routing/ai_router/Cortex.cpp
-
-#AI router trips
-#routing/ai_router_trips/AIRouterTrips.cpp
-#routing/ai_router_trips/BrainStorage.cpp
-#routing/ai_router_trips/cognitiveMap/associations.cpp
-#routing/ai_router_trips/cognitiveMap/connection.cpp
-#routing/ai_router_trips/cognitiveMap/cognitivemap.cpp
-#routing/ai_router_trips/cognitiveMap/landmark.cpp
-#routing/ai_router_trips/cognitiveMap/region.cpp
-#routing/ai_router_trips/cognitiveMap/landmarknetwork.cpp
-#routing/ai_router_trips/cognitiveMap/internnavigationnetwork.cpp
-#routing/ai_router_trips/perception/visualsystem.cpp
-#routing/ai_router_trips/perception/visibleenvironment.cpp
-#routing/ai_router_trips/perception/cgalgeometry.cpp
-#routing/ai_router_trips/perception/sign.cpp
-#routing/ai_router_trips/Cortex.cpp
+        routing/router/ai_router/AIRouter.cpp
+        routing/router/ai_router/BrainStorage.cpp
+        routing/router/ai_router/cognitiveMap/associations.cpp
+        routing/router/ai_router/cognitiveMap/connection.cpp
+        routing/router/ai_router/cognitiveMap/cognitivemap.cpp
+        routing/router/ai_router/cognitiveMap/landmark.cpp
+        routing/router/ai_router/cognitiveMap/region.cpp
+        routing/router/ai_router/cognitiveMap/landmarknetwork.cpp
+        routing/router/ai_router/cognitiveMap/internnavigationnetwork.cpp
+        routing/router/ai_router/perception/visualsystem.cpp
+        routing/router/ai_router/perception/visibleenvironment.cpp
+        routing/router/ai_router/perception/cgalgeometry.cpp
+        routing/router/ai_router/perception/sign.cpp
+        routing/router/ai_router/Cortex.cpp
 )
 
 SET(AIROUTER_HDR
 #AI router
-routing/ai_router/AIRouter.h
-routing/ai_router/BrainStorage.h
-routing/ai_router/cognitiveMap/associations.h
-routing/ai_router/cognitiveMap/connection.cpp
-routing/ai_router/cognitiveMap/cognitivemap.h
-routing/ai_router/cognitiveMap/landmark.h
-routing/ai_router/cognitiveMap/region.h
-routing/ai_router/cognitiveMap/landmarknetwork.h
-routing/ai_router/cognitiveMap/internnavigationnetwork.h
-routing/ai_router/perception/visualsystem.h
-routing/ai_router/perception/visibleenvironment.h
-routing/ai_router/perception/cgalgeometry.h
-routing/ai_router/perception/sign.h
-routing/ai_router/Cortex.h
-
-#AI router trips
-routing/ai_router_trips/AIRouterTrips.h
-routing/ai_router_trips/BrainStorage.h
-routing/ai_router_trips/cognitiveMap/associations.h
-routing/ai_router_trips/cognitiveMap/connection.cpp
-routing/ai_router_trips/cognitiveMap/cognitivemap.h
-routing/ai_router_trips/cognitiveMap/landmark.h
-routing/ai_router_trips/cognitiveMap/region.h
-routing/ai_router_trips/cognitiveMap/landmarknetwork.h
-routing/ai_router_trips/cognitiveMap/internnavigationnetwork.h
-routing/ai_router_trips/perception/visualsystem.h
-routing/ai_router_trips/perception/visibleenvironment.h
-routing/ai_router_trips/perception/cgalgeometry.h
-routing/ai_router_trips/perception/sign.h
-routing/ai_router_trips/Cortex.h
+        routing/router/ai_router/AIRouter.h
+        routing/router/ai_router/BrainStorage.h
+        routing/router/ai_router/cognitiveMap/associations.h
+        routing/router/ai_router/cognitiveMap/connection.cpp
+        routing/router/ai_router/cognitiveMap/cognitivemap.h
+        routing/router/ai_router/cognitiveMap/landmark.h
+        routing/router/ai_router/cognitiveMap/region.h
+        routing/router/ai_router/cognitiveMap/landmarknetwork.h
+        routing/router/ai_router/cognitiveMap/internnavigationnetwork.h
+        routing/router/ai_router/perception/visualsystem.h
+        routing/router/ai_router/perception/visibleenvironment.h
+        routing/router/ai_router/perception/cgalgeometry.h
+        routing/router/ai_router/perception/sign.h
+        routing/router/ai_router/Cortex.h
 )
 
 message(STATUS "AIROUTER: ${AIROUTER}")

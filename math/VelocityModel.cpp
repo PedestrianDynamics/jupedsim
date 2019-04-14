@@ -29,7 +29,7 @@
 
 # define NOMINMAX
 #include "../pedestrian/Pedestrian.h"
-//#include "../routing/DirectionStrategy.h"
+//#include "../routing/router/DirectionStrategy.h"
 #include "../mpi/LCGrid.h"
 #include "../geometry/Wall.h"
 #include "../geometry/SubRoom.h"
@@ -42,6 +42,17 @@
 #define omp_get_thread_num() 0
 #define omp_get_max_threads()  1
 #endif
+
+#include "../routing/direction/DirectionStrategy.h"
+#include "../routing/direction/walking/DirectionFloorfield.h"
+#include "../routing/direction/walking/DirectionGeneral.h"
+#include "../routing/direction/walking/DirectionInRangeBottleneck.h"
+#include "../routing/direction/walking/DirectionLocalFloorfield.h"
+#include "../routing/direction/walking/DirectionMiddlePoint.h"
+#include "../routing/direction/walking/DirectionMinSeperation.h"
+#include "../routing/direction/walking/DirectionMinSeperationShorterLine.h"
+#include "../routing/direction/walking/DirectionSubLocalFloorfield.h"
+
 
 double xRight = 26.0;
 double xLeft = 0.0;
@@ -91,17 +102,17 @@ bool VelocityModel::Init (Building* building)
           Log->Write("INFO:\t Init DirectionSubLOCALFloorfield done");
      }
 
-     if(auto dirsublocffTrips = dynamic_cast<DirectionSubLocalFloorfieldTrips*>(_direction.get())){
-          Log->Write("INFO:\t Init DirectionSubLOCALFloorfieldTrips starting ...");
-          dirsublocffTrips->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-          Log->Write("INFO:\t Init DirectionSubLOCALFloorfieldTrips done");
-     }
-
-     if(auto dirsublocffTripsVoronoi = dynamic_cast<DirectionSubLocalFloorfieldTripsVoronoi*>(_direction.get())){
-          Log->Write("INFO:\t Init DirectionSubLOCALFloorfieldTripsVoronoi starting ...");
-          dirsublocffTripsVoronoi->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-          Log->Write("INFO:\t Init DirectionSubLOCALFloorfieldTripsVoronoi done");
-     }
+//     if(auto dirsublocffTrips = dynamic_cast<DirectionSubLocalFloorfieldTrips*>(_direction.get())){
+//          Log->Write("INFO:\t Init DirectionSubLOCALFloorfieldTrips starting ...");
+//          dirsublocffTrips->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+//          Log->Write("INFO:\t Init DirectionSubLOCALFloorfieldTrips done");
+//     }
+//
+//     if(auto dirsublocffTripsVoronoi = dynamic_cast<DirectionSubLocalFloorfieldTripsVoronoi*>(_direction.get())){
+//          Log->Write("INFO:\t Init DirectionSubLOCALFloorfieldTripsVoronoi starting ...");
+//          dirsublocffTripsVoronoi->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+//          Log->Write("INFO:\t Init DirectionSubLOCALFloorfieldTripsVoronoi done");
+//     }
 
 
      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();

@@ -33,6 +33,15 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../mpi/LCGrid.h"
 #include "../geometry/SubRoom.h"
+#include "../routing/direction/DirectionStrategy.h"
+#include "../routing/direction/walking/DirectionFloorfield.h"
+#include "../routing/direction/walking/DirectionGeneral.h"
+#include "../routing/direction/walking/DirectionInRangeBottleneck.h"
+#include "../routing/direction/walking/DirectionLocalFloorfield.h"
+#include "../routing/direction/walking/DirectionMiddlePoint.h"
+#include "../routing/direction/walking/DirectionMinSeperation.h"
+#include "../routing/direction/walking/DirectionMinSeperationShorterLine.h"
+#include "../routing/direction/walking/DirectionSubLocalFloorfield.h"
 
 #ifdef _OPENMP
 #include <omp.h>

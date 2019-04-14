@@ -39,13 +39,23 @@
 #include "../math/GompertzModel.h"
 #include "../math/GradientModel.h"
 #include "../math/VelocityModel.h"
-#include "../routing/global_shortest/GlobalRouter.h"
-#include "../routing/quickest/QuickestPathRouter.h"
-#include "../routing/smoke_router/SmokeRouter.h"
-#include "../routing/ai_router/AIRouter.h"
-#include "../routing/ff_router/ffRouter.h"
-#include "../routing/ff_router_trips/ffRouterTrips.h"
-#include "../routing/trips_router/TripsRouter.h"
+#include "../routing/router/global_shortest/GlobalRouter.h"
+#include "../routing/router/quickest/QuickestPathRouter.h"
+#include "../routing/router/smoke_router/SmokeRouter.h"
+#include "../routing/router/ai_router/AIRouter.h"
+#include "../routing/router/ff_router/ffRouter.h"
+#include "../routing/router/ff_router_trips/ffRouterTrips.h"
+#include "../routing/router/trips_router/TripsRouter.h"
+#include "../routing/direction/DirectionStrategy.h"
+#include "../routing/direction/walking/DirectionFloorfield.h"
+#include "../routing/direction/walking/DirectionGeneral.h"
+#include "../routing/direction/walking/DirectionInRangeBottleneck.h"
+#include "../routing/direction/walking/DirectionLocalFloorfield.h"
+#include "../routing/direction/walking/DirectionMiddlePoint.h"
+#include "../routing/direction/walking/DirectionMinSeperation.h"
+#include "../routing/direction/walking/DirectionMinSeperationShorterLine.h"
+#include "../routing/direction/walking/DirectionSubLocalFloorfield.h"
+
 
 /* https://stackoverflow.com/questions/38530981/output-compiler-version-in-a-c-program#38531037 */
 std::string ver_string(int a, int b, int c) {
@@ -1621,20 +1631,20 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                     };
                     _config->set_dirStrategy(dynamic_cast<DirectionSubLocalFloorfield*>(_exit_strategy.get()));
                     break;
-               case 10:
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfieldTrips());
-                    if(!ParseFfOpts(strategyNode)) {
-                         return false;
-                    };
-                    _config->set_dirStrategy(dynamic_cast<DirectionSubLocalFloorfieldTrips*>(_exit_strategy.get()));
-                    break;
-               case 11:
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfieldTripsVoronoi());
-                    if(!ParseFfOpts(strategyNode)) {
-                         return false;
-                    };
-                    _config->set_dirStrategy(dynamic_cast<DirectionSubLocalFloorfieldTripsVoronoi*>(_exit_strategy.get()));
-                    break;
+//               case 10:
+//                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfieldTrips());
+//                    if(!ParseFfOpts(strategyNode)) {
+//                         return false;
+//                    };
+//                    _config->set_dirStrategy(dynamic_cast<DirectionSubLocalFloorfieldTrips*>(_exit_strategy.get()));
+//                    break;
+//               case 11:
+//                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfieldTripsVoronoi());
+//                    if(!ParseFfOpts(strategyNode)) {
+//                         return false;
+//                    };
+//                    _config->set_dirStrategy(dynamic_cast<DirectionSubLocalFloorfieldTripsVoronoi*>(_exit_strategy.get()));
+//                    break;
 
                default:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());

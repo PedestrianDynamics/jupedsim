@@ -42,9 +42,9 @@
 #include "../IO/OutputHandler.h"
 #include "ArgumentParser.h"
 #include "../pedestrian/AgentsParameters.h"
-#include "../routing/global_shortest/GlobalRouter.h"
-#include "../routing/quickest/QuickestPathRouter.h"
-#include "../routing/smoke_router/SmokeRouter.h"
+#include "../routing/router/global_shortest/GlobalRouter.h"
+#include "../routing/router/quickest/QuickestPathRouter.h"
+#include "../routing/router/smoke_router/SmokeRouter.h"
 #include "../IO/IniFileParser.h"
 
 using namespace std;

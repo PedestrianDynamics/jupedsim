@@ -34,7 +34,7 @@
 #include <cstdlib>
 #include "Macros.h"
 #include "Configuration.h"
-#include "../routing/DirectionStrategy.h"
+#include "../routing/direction/DirectionStrategy.h"
 #include "../math/OperationalModel.h"
 #include "../math/ODESolver.h"
 #include "../routing/RoutingEngine.h"

@@ -32,7 +32,7 @@
 #include <string>
 #include <memory>
 
-#include "../routing/Router.h"
+#include "../routing/router/Router.h"
 #include "../geometry/Building.h"
 #include "AgentsParameters.h"
 #include "AgentsSource.h"

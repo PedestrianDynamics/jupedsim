@@ -24,12 +24,12 @@
 #include "IniFromProtobufLoader.h"
 #include "../math/GompertzModel.h"
 #include "../pedestrian/AgentsParameters.h"
-#include "../routing/GlobalRouter.h"
-#include "../routing/QuickestPathRouter.h"
-#include "../routing/MeshRouter.h"
-#include "../routing/DummyRouter.h"
-#include "../routing/SafestPathRouter.h"
-#include "../routing/CognitiveMapRouter.h"
+#include "../routing/router/GlobalRouter.h"
+#include "../routing/router/QuickestPathRouter.h"
+#include "../routing/router/MeshRouter.h"
+#include "../routing/router/DummyRouter.h"
+#include "../routing/router/SafestPathRouter.h"
+#include "../routing/router/CognitiveMapRouter.h"
 
 IniFromProtobufLoader::IniFromProtobufLoader(Configuration* configuration)
           :_configuration(configuration)
