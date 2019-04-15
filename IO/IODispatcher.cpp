@@ -357,6 +357,28 @@ std::string getSourceFileName(const std::string & GetProjectFile)
     }
 }
 
+std::string getEventFileName(const std::string & GetProjectFile)
+{
+     std::string ret="";
+
+     TiXmlDocument doc(GetProjectFile);
+     if (!doc.LoadFile()) {
+          Log->Write("ERROR: \t%s", doc.ErrorDesc());
+          Log->Write("ERROR: \tGetEventFileName could not parse the project file");
+          return ret;
+     }
+     TiXmlNode* xMainNode = doc.RootElement();
+     string eventfile = "";
+     if (xMainNode->FirstChild("events_file")) {
+          ret = xMainNode->FirstChild("events_file")->FirstChild()->Value();
+          Log->Write("INFO: \tevents <" + eventfile + ">");
+     } else {
+          Log->Write("INFO: \tNo events found");
+          return ret;
+     }
+     return ret;
+}
+
 
 std::string getGoalFileName(const std::string & GetProjectFile)
 {
@@ -388,6 +410,7 @@ void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building* building, i
 {
      std::string sourceFileName = getSourceFileName(building->GetProjectFilename());
      std::string goalFileName = getGoalFileName(building->GetProjectFilename());
+     std::string eventFileName = getEventFileName(building->GetProjectFilename());
      (void) seed; (void) nPeds;
      char tmp[100] = "";
      sprintf(tmp, "#description: jpscore (%s)", JPSCORE_VERSION);
@@ -398,10 +421,21 @@ void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building* building, i
      Write(tmp);
      sprintf(tmp,"#geometry: %s",building->GetGeometryFilename().c_str());
      Write(tmp);
-     sprintf(tmp,"#sources: %s", sourceFileName.c_str());
-     Write(tmp);
-     sprintf(tmp,"#goals: %s", goalFileName.c_str());
-     Write(tmp);
+     if(sourceFileName != "")
+     {
+          sprintf(tmp,"#sources: %s", sourceFileName.c_str());
+          Write(tmp);
+     }
+     if(goalFileName != "")
+     {
+          sprintf(tmp,"#goals: %s", goalFileName.c_str());
+          Write(tmp);
+     }
+     if( eventFileName != "")
+     {
+          sprintf(tmp,"#events: %s", eventFileName.c_str());
+          Write(tmp);
+     }
      Write("#ID: the agent ID");
      Write("#FR: the current frame");
      Write("#X,Y,Z: the agents coordinates (in metres)");
