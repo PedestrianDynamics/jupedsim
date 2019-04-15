@@ -340,9 +340,9 @@ voronoi-boost/VoronoiPositionGenerator.cpp
 #floorfield
         routing/router/ff_router/ffRouter.cpp
 #routing/ff_router/LocalFloorfieldViaFM.cpp
-        routing/router/ff_router/FloorfieldViaFM.cpp
+        routing/precomputation/floorfield/FloorfieldViaFM.cpp
 #routing/ff_router/FFKit.cpp
-        routing/router/ff_router/UnivFFviaFM.cpp
+        routing/precomputation/floorfield/UnivFFviaFM.cpp
 
 #floorfield
         routing/router/ff_router_trips/ffRouterTrips.cpp
@@ -452,9 +452,9 @@ set(header_files
         routing/router/ff_router/RectGrid.h
         routing/router/ff_router/Trial.h
 #routing/ff_router/LocalFloorfieldViaFM.h
-        routing/router/ff_router/FloorfieldViaFM.h
+        routing/precomputation/floorfield/FloorfieldViaFM.h
 #routing/ff_router/FFKit.h
-        routing/router/ff_router/UnivFFviaFM.h
+        routing/precomputation/floorfield/UnivFFviaFM.h
 
 #floorfield
         routing/router/ff_router_trips/ffRouterTrips.h

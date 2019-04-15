@@ -41,15 +41,6 @@
 #include <chrono>
 
 
-DirectionStrategy::DirectionStrategy()
-{
-}
-
-
-DirectionStrategy::~DirectionStrategy()
-{
-}
-
 double DirectionStrategy::GetDistance2Wall(Pedestrian* ped) const
 {
      return -1.;

@@ -7,12 +7,15 @@
 
 #include "../DirectionStrategy.h"
 
+class Building;
+class UnivFFviaFM;
+
 class DirectionSubLocalFloorfield : public DirectionStrategy {
 public:
     DirectionSubLocalFloorfield();
-    void Init(Building* building, double stepsize, double threshold,
-              bool useDistanceMap);
     ~DirectionSubLocalFloorfield();
+
+    virtual void Init(Building* building);
     virtual Point GetTarget(Room* room, Pedestrian* ped) const;
     virtual Point GetDir2Wall(Pedestrian* ped) const;
     virtual double GetDistance2Wall(Pedestrian* ped) const;

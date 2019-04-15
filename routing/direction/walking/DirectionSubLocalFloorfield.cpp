@@ -10,8 +10,8 @@
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../geometry/SubRoom.h"
 
-#include "../../router/ff_router/UnivFFviaFM.h"
-#include "../../router/ff_router/FloorfieldViaFM.h"
+#include "../../precomputation/floorfield/UnivFFviaFM.h"
+#include "../../precomputation/floorfield/FloorfieldViaFM.h"
 #include "../../router/ff_router/ffRouter.h"
 
 #include <chrono>
@@ -62,12 +62,12 @@ double DirectionSubLocalFloorfield::GetDistance2Target(Pedestrian* ped, int UID)
      return _locffviafm.at(subroomUID)->getCostToDestination(UID, ped->GetPos());
 }
 
-void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
-          double threshold, bool useDistanceMap) {
-     _stepsize = stepsize;
-     _building = buildingArg;
-     _wallAvoidDistance = threshold;
-     _useDistancefield = useDistanceMap;
+void DirectionSubLocalFloorfield::Init(Building* building) {
+     _building = building;
+
+     _stepsize = building->GetConfig()->get_deltaH();
+     _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
+     _useDistancefield = building->GetConfig()->get_use_wall_avoidance();
 
      std::chrono::time_point<std::chrono::system_clock> start, end;
      start = std::chrono::system_clock::now();
@@ -76,11 +76,11 @@ void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
      for (auto& roomPair : _building->GetAllRooms()) {
           for (auto& subPair : roomPair.second->GetAllSubRooms()) {
                int subUID = subPair.second->GetUID();
-               UnivFFviaFM* floorfield = new UnivFFviaFM(subPair.second.get(), _building, stepsize, _wallAvoidDistance, _useDistancefield);
+               UnivFFviaFM* floorfield = new UnivFFviaFM(subPair.second.get(), _building, _stepsize, _wallAvoidDistance, _useDistancefield);
                _locffviafm[subUID] = floorfield;
                floorfield->setUser(DISTANCE_AND_DIRECTIONS_USED);
                floorfield->setMode(LINESEGMENT);
-               if (useDistanceMap) {
+               if (_useDistancefield) {
                     floorfield->setSpeedMode(FF_WALL_AVOID);
                } else {
                     floorfield->setSpeedMode(FF_HOMO_SPEED);

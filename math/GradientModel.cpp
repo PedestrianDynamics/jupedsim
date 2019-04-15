@@ -105,24 +105,33 @@ GradientModel::~GradientModel()
 bool GradientModel::Init (Building* building)
 {
 
-    if(auto dirff = dynamic_cast<DirectionFloorfield*>(_direction.get())){
-         Log->Write("INFO:\t Init DirectionFloorfield starting ...");
-         dirff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-         Log->Write("INFO:\t Init DirectionFloorfield done");
-    }
-
-     if(auto dirlocff = dynamic_cast<DirectionLocalFloorfield*>(_direction.get())){
-          Log->Write("INFO:\t Init Direction LOCAL Floorfield starting ...");
-          dirlocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-          Log->Write("INFO:\t Init Direction LOCAL Floorfield done");
-     }
-
-     if(auto dirsublocff = dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())){
-          Log->Write("INFO:\t Init Direction SubLOCAL Floorfield starting ...");
-          dirsublocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-          Log->Write("INFO:\t Init Direction SubLOCAL Floorfield done");
-     }
-
+     _direction->Init(building);
+//     if(auto dirff = dynamic_cast<DirectionFloorfield*>(_direction.get())){
+//          Log->Write("INFO:\t Init DirectionFloorfield starting ...");
+//          double _deltaH = building->GetConfig()->get_deltaH();
+//          double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
+//          bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
+//          dirff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+//          Log->Write("INFO:\t Init DirectionFloorfield done");
+//     }
+//
+//     if(auto dirlocff = dynamic_cast<DirectionLocalFloorfield*>(_direction.get())){
+//          Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
+//          double _deltaH = building->GetConfig()->get_deltaH();
+//          double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
+//          bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
+//          dirlocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+//          Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
+//     }
+//
+//     if(auto dirsublocff = dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())){
+//          Log->Write("INFO:\t Init DirectionSubLOCALFloorfield starting ...");
+//          double _deltaH = building->GetConfig()->get_deltaH();;
+//          double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
+//          bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
+//          dirsublocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+//          Log->Write("INFO:\t Init DirectionSubLOCALFloorfield done");
+//     }
 
      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 

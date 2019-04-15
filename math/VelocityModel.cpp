@@ -85,35 +85,7 @@ bool VelocityModel::Init (Building* building)
      double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
      bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
 
-     if(auto dirff = dynamic_cast<DirectionFloorfield*>(_direction.get())){
-        dirff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-        Log->Write("INFO:\t Init DirectionFloorfield done");
-    }
-
-     if(auto dirlocff = dynamic_cast<DirectionLocalFloorfield*>(_direction.get())){
-          Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
-          dirlocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-          Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
-     }
-
-     if(auto dirsublocff = dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())){
-          Log->Write("INFO:\t Init DirectionSubLOCALFloorfield starting ...");
-          dirsublocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-          Log->Write("INFO:\t Init DirectionSubLOCALFloorfield done");
-     }
-
-//     if(auto dirsublocffTrips = dynamic_cast<DirectionSubLocalFloorfieldTrips*>(_direction.get())){
-//          Log->Write("INFO:\t Init DirectionSubLOCALFloorfieldTrips starting ...");
-//          dirsublocffTrips->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-//          Log->Write("INFO:\t Init DirectionSubLOCALFloorfieldTrips done");
-//     }
-//
-//     if(auto dirsublocffTripsVoronoi = dynamic_cast<DirectionSubLocalFloorfieldTripsVoronoi*>(_direction.get())){
-//          Log->Write("INFO:\t Init DirectionSubLOCALFloorfieldTripsVoronoi starting ...");
-//          dirsublocffTripsVoronoi->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-//          Log->Write("INFO:\t Init DirectionSubLOCALFloorfieldTripsVoronoi done");
-//     }
-
+     _direction->Init(building);
 
      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
      size_t peds_size = allPeds.size();

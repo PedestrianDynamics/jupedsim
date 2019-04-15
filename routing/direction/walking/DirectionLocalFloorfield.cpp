@@ -10,8 +10,8 @@
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../geometry/SubRoom.h"
 
-#include "../../router/ff_router/UnivFFviaFM.h"
-#include "../../router/ff_router/FloorfieldViaFM.h"
+#include "../../precomputation/floorfield/UnivFFviaFM.h"
+#include "../../precomputation/floorfield/FloorfieldViaFM.h"
 #include "../../router/ff_router/ffRouter.h"
 
 #include <chrono>
@@ -66,24 +66,23 @@ double DirectionLocalFloorfield::GetDistance2Target(Pedestrian* ped, int UID) {
      return _locffviafm.at(roomID)->getCostToDestination(UID, ped->GetPos());
 }
 
-void DirectionLocalFloorfield::Init(Building* buildingArg, double stepsize,
-          double threshold, bool useDistanceMap) {
-     _stepsize = stepsize;
-     _building = buildingArg;
-     _wallAvoidDistance = threshold;
-     _useDistancefield = useDistanceMap;
+void DirectionLocalFloorfield::Init(Building* building) {
+     _building = building;
 
+     _stepsize = building->GetConfig()->get_deltaH();
+     _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
+     _useDistancefield = building->GetConfig()->get_use_wall_avoidance();
 
      std::chrono::time_point<std::chrono::system_clock> start, end;
      start = std::chrono::system_clock::now();
      Log->Write("INFO: \tCalling Constructor of UnivFFviaFM(Room-scale) in DirectionLocalFloorfield::Init(...)");
 
      for (auto& roomPair : _building->GetAllRooms()) {
-          UnivFFviaFM* newfield =  new UnivFFviaFM(roomPair.second.get(), _building, stepsize, _wallAvoidDistance, _useDistancefield);
+          UnivFFviaFM* newfield =  new UnivFFviaFM(roomPair.second.get(), _building, _stepsize, _wallAvoidDistance, _useDistancefield);
           _locffviafm[roomPair.first] = newfield;
           newfield->setUser(DISTANCE_AND_DIRECTIONS_USED);
           newfield->setMode(LINESEGMENT);
-          if (useDistanceMap) {
+          if (_useDistancefield) {
                newfield->setSpeedMode(FF_WALL_AVOID);
           } else {
                newfield->setSpeedMode(FF_HOMO_SPEED);

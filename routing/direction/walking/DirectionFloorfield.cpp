@@ -10,8 +10,8 @@
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../geometry/SubRoom.h"
 
-#include "../../router/ff_router/UnivFFviaFM.h"
-#include "../../router/ff_router/FloorfieldViaFM.h"
+#include "../../precomputation/floorfield/UnivFFviaFM.h"
+#include "../../precomputation/floorfield/FloorfieldViaFM.h"
 #include "../../router/ff_router/ffRouter.h"
 
 #include <chrono>
@@ -50,8 +50,11 @@ double DirectionFloorfield::GetDistance2Wall(Pedestrian* ped) const
      return _ffviafm->getDistance2WallAt(ped->GetPos());
 }
 
-void DirectionFloorfield::Init(Building* building, double stepsize,
-          double threshold, bool useDistancMap) {
+void DirectionFloorfield::Init(Building* building) {
+
+     double stepsize = building->GetConfig()->get_deltaH();
+     double threshold = building->GetConfig()->get_wall_avoid_distance();
+     bool useDistancMap = building->GetConfig()->get_use_wall_avoidance();
 
      std::chrono::time_point<std::chrono::system_clock> start, end;
      start = std::chrono::system_clock::now();

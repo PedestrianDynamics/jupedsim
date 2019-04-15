@@ -225,6 +225,14 @@ enum USERMODE {
     DISTANCE_AND_DIRECTIONS_USED
 };
 
+// Describes which precomputations are needed for router/direction strategy respectively
+enum class RoutingPrecomputation {
+    NONE,
+    FF_GLOBAL_SHORTEST,
+    FF_LOCAL_SHORTEST,
+    FF_QUICKEST
+};
+
 // Describes the door
 enum class DoorState { OPEN, CLOSE, TEMP_CLOSE, ERROR };
 
