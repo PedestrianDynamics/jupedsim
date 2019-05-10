@@ -140,7 +140,7 @@ void ThreadVisualisation::slotSetFrameRate(float fps)
 
 void ThreadVisualisation::run()
 {
-
+//     std::cout << "RUN " << _runningTime << "\n";
     //deactivate the output windows
     vtkObject::GlobalWarningDisplayOff();
 
@@ -311,6 +311,7 @@ void ThreadVisualisation::run()
 
     QObject::connect(renderingTimer, SIGNAL(signalRenderingTime(int)),
                      this->parent(), SLOT(slotRenderingTime(int)));
+//    std::cout << "timer " << timer << "\n";
 
     // Create my interactor style
     InteractorStyle* style = InteractorStyle::New();
@@ -410,7 +411,7 @@ void ThreadVisualisation::setGeometryVisibility( bool status)
         _geometry.Set2D(status);
     } else
     {
-        _geometry.Set3D(status);
+       _geometry.Set3D(status);
     }
 }
 
@@ -514,8 +515,9 @@ void  ThreadVisualisation::initGlyphs2D()
     if(frames.empty()) return;
 
     Frame * frame = frames.begin()->second;
-
+//    std::cout << "FRAME " << frames.begin()->first << "\n";
     vtkPolyData* pData=NULL;
+
     if(frame) pData=frame->GetPolyData2D();
 
 #if VTK_MAJOR_VERSION <= 5
@@ -819,6 +821,8 @@ void ThreadVisualisation::setExitsColor(const QColor &color)
 {
     double  rbgColor[3];
     QcolorToDouble(color,rbgColor);
+    // std::cout << "ENTER: " << rbgColor[0] << ", " << rbgColor[1] << ", " << rbgColor[2] << "\n";
+// HH
     _geometry.ChangeExitsColor(rbgColor);
 }
 

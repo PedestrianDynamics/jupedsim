@@ -1056,6 +1056,22 @@ void MainWindow::slotRunningTime(unsigned long timems)
     //	msg.append(" milsec");
     //labelRunningTime->setText(msg);
     ui.lcdRunningTime->display((int)timems);
+// TODO HHH this slows down the thread
+    // std::cout << timems  << "\n";
+
+    // QColor col="green";
+    // if(fmod(timems,1000) <=100 )
+    // {
+    //      col=Qt::red;
+    //      _visualisationThread->setExitsColor(col);
+    // }
+    // else if(fmod(timems,5000) <=100 )
+    // {
+    //      col=Qt::white;
+    //      _visualisationThread->setExitsColor(col);
+    // }
+
+
 }
 
 void MainWindow::slotRenderingTime(int fps)
@@ -1289,7 +1305,6 @@ void MainWindow::slotUpdateFrameSlider(int newValue)
     if(extern_first_dataset_loaded) {
         extern_trajectories_firstSet.setFrameCursorTo(update);
         //Debug::Error( " first dataset frames update to [1] : " <<update<<endl;
-
     }
 }
 
@@ -1494,6 +1509,7 @@ void MainWindow::slotNextFrame()
         int newValue=extern_trajectories_firstSet.getFrameCursor()+1;
         extern_trajectories_firstSet.setFrameCursorTo(newValue);
         //Debug::Error( " update to : " <<newValue<<endl;
+        // HH
     }
 }
 
