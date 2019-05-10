@@ -146,7 +146,7 @@ private:
 
 Q_SIGNALS:
     void signalStatusMessage(QString msg);
-    void signalFrameNumber(unsigned long timems);
+     void signalFrameNumber(unsigned long timems, unsigned long minframe);
     void signalRunningTime(unsigned long timems);
     void signalRenderingTime(int fps);
 
@@ -165,5 +165,3 @@ Q_SIGNALS:
 
 
 #endif /* TIMERCALLBACK_H_ */
-
-

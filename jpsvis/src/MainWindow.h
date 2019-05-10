@@ -138,7 +138,7 @@ public Q_SLOTS:
 
     /// update the status message
     void slotCurrentAction(QString msg);
-    void slotFrameNumber(unsigned long timems);
+     void slotFrameNumber(unsigned long timems, unsigned long minFrame);
     void slotRunningTime(unsigned long timems);
     void slotRenderingTime(int fps);
     void slotControlSequence(const char *);

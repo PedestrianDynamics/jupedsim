@@ -1031,7 +1031,7 @@ void MainWindow::slotCurrentAction(QString msg)
     //	labelMode->setText(msg);
 }
 
-void MainWindow::slotFrameNumber(unsigned long actualFrameCount)
+void MainWindow::slotFrameNumber(unsigned long actualFrameCount, unsigned long minFrame)
 {
 
     //compute the  mamixum framenumber
@@ -1039,6 +1039,7 @@ void MainWindow::slotFrameNumber(unsigned long actualFrameCount)
     if(extern_first_dataset_loaded) {
         maxFrameCount=extern_trajectories_firstSet.getFramesNumber();
     }
+    maxFrameCount += minFrame;
 
     if(actualFrameCount>maxFrameCount) actualFrameCount=maxFrameCount;
     QString msg;
@@ -1291,6 +1292,7 @@ void MainWindow::slotUpdateSpeedSlider(int newValue)
 /// update the position slider
 void MainWindow::slotUpdateFrameSlider(int newValue)
 {
+     // std::cout << "update frame slide " << newValue << "\n";
 
     // first get the correct position
     int maxFrameCount=1;
@@ -1304,7 +1306,7 @@ void MainWindow::slotUpdateFrameSlider(int newValue)
     // then set the correct position
     if(extern_first_dataset_loaded) {
         extern_trajectories_firstSet.setFrameCursorTo(update);
-        //Debug::Error( " first dataset frames update to [1] : " <<update<<endl;
+        // Debug::Error( " first dataset frames update to [1] : " <<update<<endl;
     }
 }
 

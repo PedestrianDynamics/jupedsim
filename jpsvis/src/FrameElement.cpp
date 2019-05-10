@@ -47,12 +47,23 @@ FrameElement::FrameElement(int id)
     _radius[0] = std::numeric_limits<double>::quiet_NaN();
     _radius[1] = std::numeric_limits<double>::quiet_NaN();
     _radius[2] = std::numeric_limits<double>::quiet_NaN();
+    _minFrame = 0;
 }
 
 FrameElement::~FrameElement()
 {
 
 }
+
+void FrameElement::SetMinFrame(int minframe)
+{
+    _minFrame = minframe;
+}
+int FrameElement::GetMinFrame()
+{
+     return _minFrame;
+}
+
 
 void FrameElement::SetId(int index)
 {
@@ -115,4 +126,3 @@ int FrameElement::GetId()
 {
     return _id;
 }
-

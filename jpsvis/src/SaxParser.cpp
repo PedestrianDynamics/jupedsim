@@ -1474,7 +1474,7 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
           progressDialog.show();
 
           double unitFactor=FAKTOR;// @todo: use correct unit
-
+          int minFrame = 0;
           while ( !in.atEnd() )
           {
                QString line = in.readLine();
@@ -1501,11 +1501,23 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
                int agentID=-1 ;
                int frameID=-1;
                double color=155 ;
+               static int once = 1;
                switch(pieces.size())
                {
                case 5:
                     agentID=pieces[0].toInt();
                     frameID=pieces[1].toInt();
+                    if (once) // first frame we get
+                    {
+                         minFrame =  frameID;
+                         once = 0;
+                         std::cout << "minFrame =  " << minFrame << "\n";
+                    }
+
+
+                    // todo: for some reason when trajectories start
+                    // with frames bigger than 0, display is not correct
+
                     pos[0]=pieces[2].toDouble()*unitFactor;
                     pos[1]=pieces[3].toDouble()*unitFactor;
                     pos[2]=pieces[4].toDouble()*unitFactor;
@@ -1521,6 +1533,14 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
                     radius[0]=pieces[5].toDouble()*unitFactor;
                     radius[1]=pieces[6].toDouble()*unitFactor;
                     angle[2]=pieces[7].toDouble();
+                    if (once) // first frame we get
+                    {
+                         minFrame =  frameID;
+                         std::cout << ">> minFrame =  " << minFrame << "\n";
+                         once = 0;
+                    }
+                    // std::cout << ">> minFrame =  " << minFrame << " frame " << frameID<< "\n";
+
                     break;
 
                default:
@@ -1545,19 +1565,19 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
                     continue;//next line
                     break;
                }
-
+               frameID -=  minFrame;
                FrameElement *element = new FrameElement(agentID-1);
                element->SetPos(pos);
                element->SetOrientation(angle);
                element->SetRadius(radius);
                element->SetColor(color);
-
+               element->SetMinFrame(minFrame);
                if(dataset->GetFrames().count(frameID)<1)
                {
                     Frame* frame = new Frame(frameID);
                     frame->addElement(element);
                     dataset->addFrame(frame);
-                    //cout<<"adding frame: "<<frameID<<endl;
+                    // cout<<"adding frame: "<<frameID<<endl;
                }
                else
                {

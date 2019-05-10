@@ -113,6 +113,7 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 {
     if (vtkCommand::TimerEvent == eventId) {
         int  frameNumber=0;
+        int minFrame=0;
         int nPeds=0;
         static bool isRecording =false;
         int tid = * static_cast<int *>(callData);
@@ -174,7 +175,8 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 #endif
                             extern_glyphs_pedestrians_3D->Update();
                         }
-
+                        minFrame = frame->GetFrameElements()[0]->GetMinFrame();
+                        frameNumber += minFrame;
                         if(SystemSettings::getShowTrajectories()) {
                             const std::vector<FrameElement *> &elements=frame->GetFrameElements();
 
@@ -242,7 +244,7 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 
                     effectivefps = (effectivefps>desiredfps)?desiredfps:effectivefps;
 
-                    emit signalFrameNumber(frameNumber);
+                    emit signalFrameNumber(frameNumber, minFrame);
                     emit signalRunningTime(frameNumber*iren->GetTimerDuration(tid));
                     emit signalRenderingTime(effectivefps);
                 }
@@ -308,7 +310,7 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 #endif //TRAVISTO_FFMPEG
 
                 if(extern_shutdown_visual_thread) {
-                    emit signalFrameNumber(0);
+                     emit signalFrameNumber(0, 0);
 
                     // this will force an update of the windows
                     lastWinX=0;
@@ -535,4 +537,3 @@ void TimerCallback::setTextActor(vtkTextActor* ra)
 {
     runningTime=ra;
 }
-

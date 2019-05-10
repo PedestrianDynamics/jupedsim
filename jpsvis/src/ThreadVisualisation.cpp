@@ -306,8 +306,8 @@ void ThreadVisualisation::run()
     QObject::connect(renderingTimer, SIGNAL(signalRunningTime(unsigned long )),
                      this->parent(), SLOT(slotRunningTime(unsigned long )));
 
-    QObject::connect(renderingTimer, SIGNAL(signalFrameNumber(unsigned long )),
-                     this->parent(), SLOT(slotFrameNumber(unsigned long )));
+    QObject::connect(renderingTimer, SIGNAL(signalFrameNumber(unsigned long, unsigned long )),
+                     this->parent(), SLOT(slotFrameNumber(unsigned long, unsigned long )));
 
     QObject::connect(renderingTimer, SIGNAL(signalRenderingTime(int)),
                      this->parent(), SLOT(slotRenderingTime(int)));

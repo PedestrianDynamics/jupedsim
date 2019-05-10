@@ -41,6 +41,9 @@ public:
     void SetId(int _id);
     /// set/get the point ID
     int GetId();
+    void SetMinFrame(int minframe);
+    int GetMinFrame();
+
 
     /// set/get the position of the point/agent
     void GetPos(double pos[3]);
@@ -65,7 +68,7 @@ private:
     double _radius[3];
     double _orientation[3];
     double _color;
-
+     int _minFrame;
 };
 
 #endif /* FRAME_ELEMENT_H_ */
