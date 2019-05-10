@@ -226,7 +226,7 @@ enum USERMODE {
 };
 
 // Describes the door
-enum class DoorState { OPEN, CLOSE, TEMP_CLOSE, ERROR };
+enum class DoorState { OPEN, CLOSE, TEMP_CLOSE, Error };
 
 inline DoorState StringToDoorState(std::string name){
      std::transform(name.begin(), name.end(), name.begin(), ::tolower);
@@ -243,7 +243,7 @@ inline DoorState StringToDoorState(std::string name){
           return DoorState::CLOSE;
      }
 
-     return DoorState::ERROR;
+     return DoorState::Error;
 };
 
 constexpr double magicnum(int i) {

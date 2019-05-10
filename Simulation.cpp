@@ -627,8 +627,8 @@ double Simulation::RunBody(double maxSimTime)
              Transition* Trans = itr.second;
              if(Trans->IsTempClose())
              {
-                  if ((Trans->GetMaxDoorUsage() != std::numeric_limits<int>::max()) ||
-                    (Trans->GetOutflowRate() != std::numeric_limits<double>::max()) ){
+                  if ((Trans->GetMaxDoorUsage() != (std::numeric_limits<int>::max)()) ||
+                    (Trans->GetOutflowRate() != (std::numeric_limits<double>::max)()) ){
 //                        || (Trans->GetOutflowRate() != std::numeric_limits<double>::max)){
                       Trans->UpdateClosingTime( _deltaT);
                       if(Trans->GetClosingTime() <= _deltaT){

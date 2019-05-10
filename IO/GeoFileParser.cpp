@@ -463,7 +463,7 @@ bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building* buildi
      case DoorState::TEMP_CLOSE:
           building->GetTransition(id)->TempClose();
           break;
-     case DoorState::ERROR:
+     case DoorState::Error:
           Log->Write("WARNING:\t Unknown door state: <%s>. open or close. Default: open",
                     stateStr.c_str());
           building->GetTransition(id)->Open();
