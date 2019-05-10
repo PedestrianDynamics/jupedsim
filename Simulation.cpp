@@ -422,42 +422,46 @@ void Simulation::PrintStatistics(double simTime)
                     goal->GetID(), goal->GetDoorUsage(),
                     goal->GetLastPassingTime());
 
-            string statsfile = _config->GetTrajectoriesFile()+"_flow_exit_id_"+to_string(goal->GetID())+".dat";
+            string statsfile = "flow_exit_id_"+to_string(goal->GetID())+".txt";
             if(goal->GetOutflowRate() <  (std::numeric_limits<double>::max)())
             {
                  char tmp[50];
                  sprintf(tmp, "%.2f", goal->GetOutflowRate());
-                 statsfile = _config->GetTrajectoriesFile()+"_flow_exit_id_"+to_string(goal->GetID())+"_rate_"+tmp+".dat";
+                 statsfile = "flow_exit_id_"+to_string(goal->GetID())+"_rate_"+tmp+".txt";
             }
             Log->Write("More Information in the file: %s", statsfile.c_str());
-            auto output = new FileHandler(statsfile.c_str());
-            output->Write("#Simulation time: %.2f", simTime);
-            output->Write("#Flow at exit "+goal->GetCaption()+"( ID "+to_string(goal->GetID())+" )");
-            output->Write("#Time (s)  cummulative number of agents \n");
-            output->Write(goal->GetFlowCurve());
+            {
+                 auto statOutput = new FileHandler(statsfile.c_str());
+                 statOutput->Write("#Simulation time: %.2f", simTime);
+                 statOutput->Write("#Flow at exit "+goal->GetCaption()+"( ID "+to_string(goal->GetID())+" )");
+                 statOutput->Write("#Time (s)  cummulative number of agents \n");
+                 statOutput->Write(goal->GetFlowCurve());
+                 statOutput->FileHandler::~FileHandler();
+            }
+
         }
     }
 
         Log->Write("\nUsage of Crossings");
         Log->Write("==========");
         for (const auto& itr : _building->GetAllCrossings()) {
-                Crossing* goal = itr.second;
-                if (goal->GetDoorUsage()) {
-                        Log->Write(
-                                "\nCrossing ID [%d] in Room ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",
-                                goal->GetID(), itr.first/1000, goal->GetDoorUsage(),
-                                goal->GetLastPassingTime());
+             Crossing* goal = itr.second;
+             if (goal->GetDoorUsage()) {
+                  Log->Write(
+                       "\nCrossing ID [%d] in Room ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",
+                       goal->GetID(), itr.first/1000, goal->GetDoorUsage(),
+                       goal->GetLastPassingTime());
 
-                        string statsfile = _config->GetTrajectoriesFile() + "_flow_crossing_id_"
-                                + to_string(itr.first/1000) + "_" + to_string(itr.first % 1000) +".dat";
-                        Log->Write("More Information in the file: %s", statsfile.c_str());
-                        auto output = new FileHandler(statsfile.c_str());
-                        output->Write("#Simulation time: %.2f", simTime);
-                        output->Write("#Flow at crossing " + goal->GetCaption() + "( ID " + to_string(goal->GetID())
+                  string statsfile = "flow_crossing_id_"
+                       + to_string(itr.first/1000) + "_" + to_string(itr.first % 1000) +".dat";
+                  Log->Write("More Information in the file: %s", statsfile.c_str());
+                  auto output = new FileHandler(statsfile.c_str());
+                  output->Write("#Simulation time: %.2f", simTime);
+                  output->Write("#Flow at crossing " + goal->GetCaption() + "( ID " + to_string(goal->GetID())
                                 + " ) in Room ( ID "+ to_string(itr.first / 1000) + " )");
-                        output->Write("#Time (s)  cummulative number of agents \n");
-                        output->Write(goal->GetFlowCurve());
-                }
+                  output->Write("#Time (s)  cummulative number of agents \n");
+                  output->Write(goal->GetFlowCurve());
+             }
         }
 
     Log->Write("\n");
@@ -522,7 +526,6 @@ double Simulation::RunBody(double maxSimTime)
     bar->SetStyle("\u2588", "-"); //for linux
 #endif
     int initialnPeds = _nPeds;
-
     // main program loop
     while ((_nPeds || (!_agentSrcManager.IsCompleted()&& _gotSources) ) && t<maxSimTime) {
         t = 0+(frameNr-1)*_deltaT;
