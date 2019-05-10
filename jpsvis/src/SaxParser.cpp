@@ -361,8 +361,11 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
                     _caption=at.value(i);
                }
           }
-
      }
+//     <event time="9" type="door" state="open" id="0" caption="door0" />
+// call void GeometryFactory::ChangeExitsColor(double* color)
+// _geoFactory.ChangeExitsColor(Qt::red);
+
 //FIXME
      else if (qName == "crossing") {
           _parsingWalls=false;
@@ -383,7 +386,6 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
                     _caption=at.value(i);
                }
           }
-
      }else if (qName == "hline") {
           _parsingWalls=false;
           _parsingCrossings=true;
@@ -1578,7 +1580,7 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
           for( const auto & frame:dataset->GetFrames())
           {
                frame.second->ComputePolyData();
-               //cout<<"computing polydata"<<endl;
+               // cout<<"computing polydata " << frame.first<<endl;
           }
           //dataset->setNumberOfAgents(50);
 
