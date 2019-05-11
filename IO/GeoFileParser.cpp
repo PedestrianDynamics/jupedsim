@@ -19,11 +19,12 @@
 // Created by laemmel on 30.03.16.
 //
 
+#include <filesystem>
 #include "GeoFileParser.h"
 #include "../tinyxml/tinyxml.h"
 #include "../geometry/SubRoom.h"
 #include "../geometry/WaitingArea.h"
-
+namespace fs = std::filesystem;
 
 
 
@@ -293,7 +294,11 @@ bool GeoFileParser::LoadGeometry(Building* building)
           TiXmlNode * xNodeFile = xTransNode->FirstChild("file");
           if(xNodeFile)
           {
+               fs::path p(_configuration->GetProjectRootDir());
                std::string transFilename = xNodeFile->FirstChild()->ValueStr();
+               p /= transFilename;
+               transFilename = p.string();
+
                Log->Write("INFO:\tParsing transition from file <%s>", transFilename.c_str());
                TiXmlDocument docTrans(transFilename);
                if (!docTrans.LoadFile()) {
@@ -383,7 +388,10 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
           TiXmlNode* xGoalsNodeFile = xGoalsNode->FirstChild("file");
           if(xGoalsNodeFile)
           {
+               fs::path p(_configuration->GetProjectRootDir());
                std::string goalFilename = xGoalsNodeFile->FirstChild()->ValueStr();
+               p /= goalFilename;
+               goalFilename = p.string();
                Log->Write("INFO:\tGoal file <%s> will be parsed", goalFilename.c_str());
                TiXmlDocument docGoal(goalFilename);
                if (!docGoal.LoadFile()) {
@@ -455,7 +463,7 @@ bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building* buildi
      case DoorState::TEMP_CLOSE:
           building->GetTransition(id)->TempClose();
           break;
-     case DoorState::ERROR:
+     case DoorState::Error:
           Log->Write("WARNING:\t Unknown door state: <%s>. open or close. Default: open",
                     stateStr.c_str());
           building->GetTransition(id)->Open();
@@ -554,7 +562,10 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
      TiXmlNode* xFileNode = xRootNode->FirstChild("file");
      if(xFileNode)
      {
+          fs::path p(_configuration->GetProjectRootDir());
           std::string trafficFilename = xFileNode->FirstChild()->ValueStr();
+          p /= trafficFilename;
+          trafficFilename = p.string();
           Log->Write("Info:\t  traffic file found <%s>", trafficFilename.c_str());
           TiXmlDocument docTraffic(trafficFilename);
           if (!docTraffic.LoadFile()) {
