@@ -109,10 +109,10 @@ bool FFRouterTrips::Init(Building* building)
           for (auto &itrGoal : building->GetAllGoals()) {
                if(WaitingArea* wa = dynamic_cast<WaitingArea*>(itrGoal.second)) {
                     _globalFF->createMapEntryInLineToGoalID(itrGoal.first, true);
-//                    std::cout << "Added " << itrGoal.first << " to goalIDs " << wa->getTransitionID() << std::endl;
+                    std::cout << "Added " << itrGoal.first << " to goalIDs " << wa->getTransitionID() << std::endl;
                }else{
                     _globalFF->createMapEntryInLineToGoalID(itrGoal.first, false);
-//                    std::cout << "Added " << itrGoal.first << " to goalIDs " << std::endl;
+                    std::cout << "Added " << itrGoal.first << " to goalIDs " << std::endl;
                }
                goalIDs.emplace_back(itrGoal.first);
           }

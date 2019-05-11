@@ -372,11 +372,16 @@ void FloorfieldViaFMTrips::createMapEntryInLineToGoalID(const int goalID, bool i
             } else {
                 for (const auto& loctrans : transitions) {
                     //TODO if (!loctrans.second->IsExit() || !loctrans.second->IsOpen()) {
+                    std::cout << "Check trans " << loctrans.second->GetUniqueID() << std::endl;
                     if (!loctrans.second->IsExit() || loctrans.second->IsClose()) {
-
+                          std::cout << "cont" << std::endl;
                             continue;
                     }
                     dummykey = _grid->getKeyAtPoint(loctrans.second->GetCentre());
+                    std::cout << "dummykey: " << dummykey << std::endl;
+                    std::cout << "localcostptr[dummykey]: " << localcostptr[dummykey] << std::endl;
+                    std::cout << "cost_of_MIN: " << cost_of_MIN << std::endl;
+                    
                     if ((cost_of_MIN>localcostptr[dummykey]) && (localcostptr[dummykey]>=0.)) {
                         UID_of_MIN3 = UID_of_MIN2;
                         cost_of_MIN3 = cost_of_MIN2;
@@ -386,7 +391,7 @@ void FloorfieldViaFMTrips::createMapEntryInLineToGoalID(const int goalID, bool i
 
                         UID_of_MIN = loctrans.second->GetUniqueID();
                         cost_of_MIN = localcostptr[dummykey];
-                        //std::cerr << std::endl << "Closer Line found: " << UID_of_MIN ;
+                        std::cerr << std::endl << "Closer Line found: " << UID_of_MIN << cost_of_MIN;
                         continue;
                     }
                     if ((cost_of_MIN2>localcostptr[dummykey]) && (localcostptr[dummykey]>=0.)) {
@@ -407,6 +412,7 @@ void FloorfieldViaFMTrips::createMapEntryInLineToGoalID(const int goalID, bool i
 
             _goalToLineUIDmap.erase(goalID);
             _goalToLineUIDmap.emplace(goalID, UID_of_MIN);
+               std::cout << "Foo added " << goalID << " with " << UID_of_MIN << std::endl;
             _goalToLineUIDmap2.erase(goalID);
             _goalToLineUIDmap2.emplace(goalID, UID_of_MIN2);
             _goalToLineUIDmap3.erase(goalID);
