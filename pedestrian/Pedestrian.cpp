@@ -1271,3 +1271,13 @@ void Pedestrian::LeaveGoal()
 {
      _insideGoal = false;
 }
+
+bool Pedestrian::IsWaiting() const
+{
+     return _waiting;
+}
+
+void Pedestrian::SetWaiting(bool waiting)
+{
+     _waiting = waiting;
+}

@@ -372,6 +372,16 @@ void Simulation::UpdateRoutesAndLocations()
                     Log->incrementDeletedAgents();
                }
           }
+
+          // Set pedestrian waiting when find route temp_close
+          int goal = ped->FindRoute();
+          Hline* target = _building->GetTransOrCrossByUID(goal);
+          if( Transition* trans = dynamic_cast<Transition*>(target) ) {
+               ped->SetWaiting(trans->IsTempClose());
+          }
+          if( Crossing* cross = dynamic_cast<Crossing*>(target) ) {
+               ped->SetWaiting(cross->IsTempClose());
+          }
      }
 
 
@@ -513,7 +523,7 @@ double Simulation::RunBody(double maxSimTime)
     ProcessAgentsQueue();
     _nPeds = _building->GetAllPedestrians().size();
     std::cout << "\n";
-    std::string description = "Evacutation ";
+    std::string description = "Evacuation ";
     ProgressBar *bar = new ProgressBar(_nPeds, description);
     // bar->SetFrequencyUpdate(10);
 #ifdef _WINDOWS
@@ -550,7 +560,7 @@ double Simulation::RunBody(double maxSimTime)
                 }
             }
 
-            // here the used routers are update, when needed due to external changes
+            // here the used routers are updated, when needed due to external changes
             if (_routingEngine->NeedsUpdate()){
                  _routingEngine->UpdateRouter();
             }

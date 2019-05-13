@@ -154,7 +154,11 @@ private:
 
      int _lastGoalID = -1;
      bool _insideGoal =false;
+     bool _waiting = false;
+public:
+    bool IsWaiting() const;
 
+    void SetWaiting(bool waiting);
 
 public:
      // public member
