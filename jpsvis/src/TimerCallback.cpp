@@ -175,7 +175,12 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 #endif
                             extern_glyphs_pedestrians_3D->Update();
                         }
-                        minFrame = frame->GetFrameElements()[0]->GetMinFrame();
+                        auto FrameElements =  frame->GetFrameElements();
+                        if(FrameElements.size())
+                             minFrame = frame->GetFrameElements()[0]->GetMinFrame();
+                        else
+                             minFrame = 0;
+
                         frameNumber += minFrame;
                         if(SystemSettings::getShowTrajectories()) {
                             const std::vector<FrameElement *> &elements=frame->GetFrameElements();
