@@ -44,6 +44,8 @@ public:
      Goal* parseGoalNode(TiXmlElement * e);
      Transition* parseTransitionNode(TiXmlElement * xTrans, Building * building);
      Goal* parseWaitingAreaNode(TiXmlElement * e);
+     TrainType parseTrainTypeNode(TiXmlElement * e);
+     TrainTable parseTrainTimeTableNode(TiXmlElement * e);
 
 private:
      Configuration* _configuration;

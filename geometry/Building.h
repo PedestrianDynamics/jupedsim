@@ -45,6 +45,27 @@
 #include "Goal.h"
 #include "../general/Configuration.h"
 
+struct TrainTable
+{
+     int _id;
+     std::string _type;
+     int _rid; // room id
+     double _tin; // arrival time
+     double _tout; //leaving time
+     Point _pstart; // track start
+     Point _pend; // track end
+     Point _tstart; // train start
+     Point _tend; // train end
+
+};
+struct TrainType
+{
+     std::string _type;
+     int _nmax; // agents_max
+     std::vector<Transition> _doors;
+};
+
+
 class RoutingEngine;
 
 class Pedestrian;
@@ -74,8 +95,9 @@ private:
      std::map<int, Transition*> _transitions;
      std::map<int, Hline*> _hLines;
      std::map<int, Goal*> _goals;
-     std::map<int, std::vector<WaitingArea*>> _sr2wa;
-
+     std::map<int, std::vector<WaitingArea*> > _sr2wa;
+     std::vector<TrainType> trainTypes; // todo, maybe map<string, TrainType>. shared_ptr?>
+     std::vector<TrainType> trainTimeTable;
      /// pedestrians pathway
      bool _savePathway;
      std::ofstream _pathWayStream;
@@ -176,7 +198,7 @@ public:
       */
      Transition* GetTransitionByUID(int uid) const;
 
-	 Crossing* GetCrossingByUID(int uid) const;
+         Crossing* GetCrossingByUID(int uid) const;
 
      //TOD0: rename later to GetGoal
      Goal* GetFinalGoal(int id) const;

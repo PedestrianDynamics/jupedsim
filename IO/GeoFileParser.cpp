@@ -791,6 +791,103 @@ Goal* GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
      return wa;
 }
 
+// <train_time_tables>
+//    <train id="1" type="RE" room_id="1"
+//            track_start_x="0" track_start_y="0" track_x-end="300" track_y-end="0"
+//            train_start_x="0" train_start_y="0" train_x-end="300" train_y-end="0"
+//            arrival_time="5" departure_time="20>
+// <\train_time_tables>
+TrainTable GeoFileParser::parseTrainTimeTableNode(TiXmlElement * e)
+{
+     Log->Write("INFO:\tLoading train time table");
+     std::string caption = xmltoa(e->Attribute("caption"), "-1");
+     int id = xmltoi(e->Attribute("id"), -1);
+     std::string type = xmltoa(e->Attribute("type"), "-1");
+     int room_id = xmltoi(e->Attribute("room_id"), -1);
+
+     float track_start_x = xmltof(e->Attribute("track_start_x"), -1);
+     float track_start_y = xmltof(e->Attribute("track_start_y"), -1);
+     float track_end_x = xmltof(e->Attribute("track_end_x"), -1);
+     float track_end_y = xmltof(e->Attribute("track_end_y"), -1);
+
+     float train_start_x = xmltof(e->Attribute("train_start_x"),-1);
+     float train_start_y = xmltof(e->Attribute("train_start_y"), -1);
+     float train_end_x = xmltof(e->Attribute("train_end_x"), -1);
+     float train_end_y = xmltof(e->Attribute("train_end_y"), -1);
+
+     float arrival_time = xmltof(e->Attribute("arrival_time"), -1);
+     float departure_time = xmltof(e->Attribute("departure_time"), -1);
+     Log->Write("INFO:\tTrain time table:");
+     Log->Write("INFO:\t   id: %d", id);
+     Log->Write("INFO:\t   type: %s", type.c_str());
+     Log->Write("INFO:\t   room_id: %d", room_id);
+     Log->Write("INFO:\t   track_start: [%.2f, %.2f]", track_start_x, track_start_y);
+     Log->Write("INFO:\t   track_end: [%.2f, %.2f]", track_end_x, track_end_y);
+     Log->Write("INFO:\t   arrival_time: %d", arrival_time);
+     Log->Write("INFO:\t   departure_time: %d", departure_time);
+     Point track_start(track_start_x, track_start_y);
+     Point track_end(track_end_x, track_end_y);
+     Point train_start(train_start_x, train_start_y);
+     Point train_end(train_end_x, train_end_y);
+     TrainTable trainTab = {
+          id,
+          type,
+          room_id,
+          arrival_time,
+          departure_time,
+          track_start,
+          track_end,
+          train_start,
+          train_end,
+     };
+     return trainTab;
+}
+
+// <train type="RE" agents_max="600">
+//    <door id="1" x="3" y="5.5" frequency="2">
+//    <door id="2" x="13" y="15.5" frequency="3">
+// <\train>
+TrainType GeoFileParser::parseTrainTypeNode(TiXmlElement * e)
+{
+     Log->Write("INFO:\tLoading train type");
+     // int T_id = xmltoi(e->Attribute("id"), -1);
+     std::string type = xmltoa(e->Attribute("type"), "-1");
+     int agents_max = xmltoi(e->Attribute("agents_max"), -1);
+     // std::shared_ptr<Transition> t = new Transition();
+     // std::shared_ptr<Transition> doors;
+     Transition t;
+     std::vector<Transition> doors;
+
+     for (TiXmlElement* xDoor = e->FirstChildElement("door"); xDoor;
+          xDoor = xDoor->NextSiblingElement("door")) {
+          int D_id = xmltoi(e->Attribute("id"), -1);
+          float x1 = xmltof(e->Attribute("x1"), -1);
+          float y1 = xmltof(e->Attribute("y1"), -1);
+          float x2 = xmltof(e->Attribute("x2"), -1);
+          float y2 = xmltof(e->Attribute("y2"), -1);
+          Point start(x1, y1);
+          Point end(x2, y2);
+          float frequency = xmltof(e->Attribute("frequency"), -1);
+
+          t.SetID(D_id);
+          t.SetCaption(type + std::to_string(D_id));
+          t.SetPoint1(start);
+          t.SetPoint2(end);
+          t.SetOutflowRate(frequency);
+          doors.push_back(t);
+     }
+
+     Log->Write("INFO:\tTrain type:");
+     Log->Write("INFO:\t   type: %s", type.c_str());
+
+   TrainType Type = {
+        type,
+        agents_max,
+        doors,
+    };
+   return Type;
+
+}
 
 GeoFileParser::~GeoFileParser()
 {
