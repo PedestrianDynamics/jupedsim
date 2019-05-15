@@ -50,6 +50,11 @@ void GeoFileParser::LoadBuilding(Building* building)
           Log->Write("ERROR:\t could not load extra traffic information!");
           exit(EXIT_FAILURE);
      }
+     if(!LoadTrainInfo(building))
+     {
+          Log->Write("ERROR:\t could not load train information!");
+          exit(EXIT_FAILURE);
+     }
 }
 
 bool GeoFileParser::LoadGeometry(Building* building)
@@ -791,15 +796,122 @@ Goal* GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
      return wa;
 }
 
+bool GeoFileParser::LoadTrainInfo(Building* building)
+{
+     Log->Write("--------\nINFO:\tLoading the train info");
+
+     TiXmlDocument doc(_configuration->GetProjectFile());
+     if (!doc.LoadFile()) {
+          Log->Write("ERROR: \t%s", doc.ErrorDesc());
+          Log->Write("ERROR: \t could not parse the project file");
+          return false;
+     }
+     TiXmlElement* xRootNode = doc.RootElement();
+     if (!xRootNode) {
+          Log->Write("ERROR:\tRoot element does not exist");
+          return false;
+     }
+     if (!xRootNode->FirstChild("train_constraints")) {
+          Log->Write("WARNING:\tNo train constraints were found. Continue.");
+     }
+     bool resTTT = LoadTrainTimetable(building, xRootNode);
+     std::cout << "\nresTTT " << resTTT << "\n";
+     bool resType =  LoadTrainType(building, xRootNode);
+     std::cout << "\nresType " << resType << "\n";
+     exit(1);
+     return (resTTT && resType);
+}
+bool GeoFileParser::LoadTrainTimetable(Building* building, TiXmlElement * xRootNode)
+{
+     TiXmlNode* xTTTNode = xRootNode->FirstChild("train_constraints")->FirstChild("train_time_table");
+     std::string TTTFilename;
+     if(xTTTNode)
+     {
+          fs::path p(_configuration->GetProjectRootDir());
+          TTTFilename = xTTTNode->FirstChild()->ValueStr();
+          p /= TTTFilename;
+          TTTFilename = p.string();
+          Log->Write("INFO:\tTrain Timetable file <%s> will be parsed", TTTFilename.c_str());
+     }
+     else return true;
+
+
+     TiXmlDocument docTTT(TTTFilename);
+     if (!docTTT.LoadFile()) {
+          Log->Write("ERROR: \t%s", docTTT.ErrorDesc());
+          Log->Write("ERROR: \t could not parse the train timetable file.");
+          return false;
+     }
+     TiXmlElement* xTTT = docTTT.RootElement();
+     if (!xTTT) {
+          Log->Write("ERROR:\tRoot element does not exist in TTT file.");
+          return false;
+     }
+     if (xTTT->ValueStr() != "train_time_table") {
+          Log->Write("ERROR:\tParsing train timetable file. Root element value is not 'train_time_table'.");
+          return false;
+     }
+     for (TiXmlElement* e = xTTT->FirstChildElement("train"); e;
+                    e = e->NextSiblingElement("train")) {
+          TrainTable TTT = parseTrainTimeTableNode(e);
+
+          if (1) { // todo: maybe get pointer to train
+               //building->AddGoal(goal);
+               std::cout << "\nTODO: add train to building\n----\n";
+          }
+     }
+}
+bool GeoFileParser::LoadTrainType(Building* building, TiXmlElement * xRootNode)
+{
+     TiXmlNode* xTTNode = xRootNode->FirstChild("train_constraints")->FirstChild("train_types");
+     std::string TTFilename;
+     if(xTTNode)
+     {
+          fs::path p(_configuration->GetProjectRootDir());
+          TTFilename = xTTNode->FirstChild()->ValueStr();
+          p /= TTFilename;
+          TTFilename = p.string();
+          Log->Write("INFO:\tTrain Type file <%s> will be parsed", TTFilename.c_str());
+     }
+     else return true;
+
+
+     TiXmlDocument docTT(TTFilename);
+     if (!docTT.LoadFile()) {
+          Log->Write("ERROR: \t%s", docTT.ErrorDesc());
+          Log->Write("ERROR: \t could not parse the train type file.");
+          return false;
+     }
+     TiXmlElement* xTT = docTT.RootElement();
+     if (!xTT) {
+          Log->Write("ERROR:\tRoot element does not exist in TT file.");
+          return false;
+     }
+     if (xTT->ValueStr() != "train_type") {
+          Log->Write("ERROR:\tParsing train type file. Root element value is not 'train_type'.");
+          return false;
+     }
+     for (TiXmlElement* e = xTT->FirstChildElement("train"); e;
+                    e = e->NextSiblingElement("train")) {
+          TrainType TT = parseTrainTypeNode(e);
+
+          if (1) { // todo: maybe get pointer to train
+               //building->AddGoal(goal);
+               std::cout << "\nTODO: add train type to building\n----\n";
+          }
+     }
+     return true;
+
+}
 // <train_time_tables>
 //    <train id="1" type="RE" room_id="1"
 //            track_start_x="0" track_start_y="0" track_x-end="300" track_y-end="0"
 //            train_start_x="0" train_start_y="0" train_x-end="300" train_y-end="0"
 //            arrival_time="5" departure_time="20>
-// <\train_time_tables>
+// </train_time_tables>
 TrainTable GeoFileParser::parseTrainTimeTableNode(TiXmlElement * e)
 {
-     Log->Write("INFO:\tLoading train time table");
+     Log->Write("INFO:\tLoading train time table NODE");
      std::string caption = xmltoa(e->Attribute("caption"), "-1");
      int id = xmltoi(e->Attribute("id"), -1);
      std::string type = xmltoa(e->Attribute("type"), "-1");
@@ -823,8 +935,8 @@ TrainTable GeoFileParser::parseTrainTimeTableNode(TiXmlElement * e)
      Log->Write("INFO:\t   room_id: %d", room_id);
      Log->Write("INFO:\t   track_start: [%.2f, %.2f]", track_start_x, track_start_y);
      Log->Write("INFO:\t   track_end: [%.2f, %.2f]", track_end_x, track_end_y);
-     Log->Write("INFO:\t   arrival_time: %d", arrival_time);
-     Log->Write("INFO:\t   departure_time: %d", departure_time);
+     Log->Write("INFO:\t   arrival_time: %.2f", arrival_time);
+     Log->Write("INFO:\t   departure_time: %.2f", departure_time);
      Point track_start(track_start_x, track_start_y);
      Point track_end(track_end_x, track_end_y);
      Point train_start(train_start_x, train_start_y);
@@ -876,9 +988,9 @@ TrainType GeoFileParser::parseTrainTypeNode(TiXmlElement * e)
           t.SetOutflowRate(frequency);
           doors.push_back(t);
      }
-
-     Log->Write("INFO:\tTrain type:");
      Log->Write("INFO:\t   type: %s", type.c_str());
+     Log->Write("INFO:\t   capacity: %d", agents_max);
+     Log->Write("INFO:\t   number of doors: %d", doors.size());
 
    TrainType Type = {
         type,

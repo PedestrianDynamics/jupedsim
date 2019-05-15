@@ -44,6 +44,9 @@ public:
      Goal* parseGoalNode(TiXmlElement * e);
      Transition* parseTransitionNode(TiXmlElement * xTrans, Building * building);
      Goal* parseWaitingAreaNode(TiXmlElement * e);
+     bool LoadTrainInfo(Building* building);
+     bool LoadTrainTimetable(Building* building, TiXmlElement * xRootNode);
+     bool LoadTrainType(Building* building, TiXmlElement * xRootNode);
      TrainType parseTrainTypeNode(TiXmlElement * e);
      TrainTable parseTrainTimeTableNode(TiXmlElement * e);
 
