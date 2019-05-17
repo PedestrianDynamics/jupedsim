@@ -837,3 +837,43 @@ DirectionSubLocalFloorfieldTripsVoronoi::~DirectionSubLocalFloorfieldTripsVorono
      }
 }
 
+// 12
+Point DirectionTrain::GetTarget(Room* room, Pedestrian* ped) const
+{
+
+     Point p1 = ped->GetExitLine()->GetPoint1();
+     Point p2 = ped->GetExitLine()->GetPoint2();
+     Line ExitLine = Line(p1, p2, 0);
+     auto TrainTypes = ped->GetBuilding()->GetTrainTypes();
+     auto TrainTimeTables = ped->GetBuilding()->GetTrainTimeTables();
+     auto now = ped->GetGlobalTime();
+
+     for(auto && t: TrainTimeTables)
+     {
+          if(ped->GetRoomID() != t.second->rid) continue;
+
+          if( (now>=t.second->tin) && (now<=t.second->tout) )
+          {
+               auto doors = TrainTypes[t.second->type]->doors;
+               int i=-1, imin=0;
+               double dist_min = 10000;
+               for(auto door: doors)
+               {
+                    i++;
+                    const Point & d1 = door.GetPoint1();
+                    const Point & d2 = door.GetPoint2();
+                    double dist = (d1*0.5+d2*0.5).Norm();
+                    if(dist <= dist_min)
+                    {
+                         dist_min = dist;
+                         imin=i;
+                    }
+               }// doors
+               p1  = doors[imin].GetPoint1();
+               p2 = doors[imin].GetPoint2();
+          }// if time in
+     }
+
+
+     return (p1+ p2)*0.5;
+}
