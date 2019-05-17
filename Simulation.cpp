@@ -246,7 +246,26 @@ bool Simulation::InitArgs()
     if (!_operationalModel->Init(_building.get()))
         return false;
     Log->Write("INFO:\t Init Operational Model done");
-
+    Log->Write("Got %d Train Types", _building->GetTrainTypes().size());
+    for(auto&& TT: _building->GetTrainTypes())
+    {
+          Log->Write("INFO\ttype         : %s",TT.second->type.c_str());
+          Log->Write("INFO\tMax          : %d",TT.second->nmax);
+          Log->Write("INFO\tnumber doors : %d\n",TT.second->doors.size());
+    }
+    Log->Write("Got %d Train Time Tables",_building->GetTrainTimeTables().size());
+    for(auto&& TT: _building->GetTrainTimeTables())
+    {
+          Log->Write("INFO\tid           : %d",TT.second->id);
+          Log->Write("INFO\ttype         : %s",TT.second->type.c_str());
+          Log->Write("INFO\troom id      : %d",TT.second->rid);
+          Log->Write("INFO\ttin          : %.2f%",TT.second->tin);
+          Log->Write("INFO\ttout         : %.2f",TT.second->tout);
+          Log->Write("INFO\ttrack start  : (%.2f, %.2f)",TT.second->pstart._x,TT.second->pstart._y);
+          Log->Write("INFO\ttrack end    : (%.2f, %.2f)",TT.second->pend._x,TT.second->pend._y);
+          Log->Write("INFO\ttrain start  : (%.2f, %.2f)",TT.second->tstart._x, TT.second->tstart._y);
+          Log->Write("INFO\ttrain end    : (%.2f, %.2f)\n",TT.second->tend._x, TT.second->tend._y);
+    }
     // Give the DirectionStrategy the chance to perform some initialization.
     // This should be done after the initialization of the operationalModel
     // because then, invalid pedestrians have been deleted and FindExit()
@@ -636,8 +655,8 @@ double Simulation::RunBody(double maxSimTime)
                       Trans->UpdateClosingTime( _deltaT);
                       if(Trans->GetClosingTime() <= _deltaT){
                           Trans->changeTemporaryState();
+                          Log-> Write("INFO:\tReset state of door %d,  Time=%.2f", Trans->GetID(), Pedestrian::GetGlobalTime());
                       }
-                      Log-> Write("INFO:\tReset state of door %d,  Time=%.2f", Trans->GetID(), Pedestrian::GetGlobalTime());
                   }
              }
         }

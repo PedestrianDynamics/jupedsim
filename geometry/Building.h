@@ -45,24 +45,24 @@
 #include "Goal.h"
 #include "../general/Configuration.h"
 
-struct TrainTable
+struct TrainTimeTable
 {
-     int _id;
-     std::string _type;
-     int _rid; // room id
-     double _tin; // arrival time
-     double _tout; //leaving time
-     Point _pstart; // track start
-     Point _pend; // track end
-     Point _tstart; // train start
-     Point _tend; // train end
+     int id;
+     std::string type;
+     int rid; // room id
+     double tin; // arrival time
+     double tout; //leaving time
+     Point pstart; // track start
+     Point pend; // track end
+     Point tstart; // train start
+     Point tend; // train end
 
 };
 struct TrainType
 {
-     std::string _type;
-     int _nmax; // agents_max
-     std::vector<Transition> _doors;
+     std::string type;
+     int nmax; // agents_max
+     std::vector<Transition> doors;
 };
 
 
@@ -95,9 +95,8 @@ private:
      std::map<int, Transition*> _transitions;
      std::map<int, Hline*> _hLines;
      std::map<int, Goal*> _goals;
-     std::map<int, std::vector<WaitingArea*> > _sr2wa;
-     std::vector<TrainType> trainTypes; // todo, maybe map<string, TrainType>. shared_ptr?>
-     std::vector<TrainType> trainTimeTable;
+     std::map<std::string, std::shared_ptr<TrainType> > _trainTypes;
+     std::map<int, std::shared_ptr<TrainTimeTable> > _trainTimeTables;
      /// pedestrians pathway
      bool _savePathway;
      std::ofstream _pathWayStream;
@@ -231,6 +230,10 @@ public:
 
      const std::map<int, Goal*>& GetAllGoals() const;
 
+     const std::map<std::string, std::shared_ptr<TrainType> >& GetTrainTypes() const;
+
+     const std::map<int, std::shared_ptr<TrainTimeTable> >& GetTrainTimeTables() const;
+
      bool AddCrossing(Crossing* line);
 
      bool AddTransition(Transition* line);
@@ -238,6 +241,10 @@ public:
      bool AddHline(Hline* line);
 
      bool AddGoal(Goal* goal);
+
+     bool AddTrainType(std::shared_ptr<TrainType> TT);
+
+     bool AddTrainTimeTable(std::shared_ptr<TrainTimeTable> TTT);
 
      const std::string& GetProjectRootDir() const;
 

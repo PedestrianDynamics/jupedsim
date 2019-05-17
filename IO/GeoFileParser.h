@@ -47,8 +47,8 @@ public:
      bool LoadTrainInfo(Building* building);
      bool LoadTrainTimetable(Building* building, TiXmlElement * xRootNode);
      bool LoadTrainType(Building* building, TiXmlElement * xRootNode);
-     TrainType parseTrainTypeNode(TiXmlElement * e);
-     TrainTable parseTrainTimeTableNode(TiXmlElement * e);
+     std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement * e);
+     std::shared_ptr<TrainTimeTable> parseTrainTimeTableNode(TiXmlElement * e);
 
 private:
      Configuration* _configuration;

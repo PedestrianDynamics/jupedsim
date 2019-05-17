@@ -815,10 +815,8 @@ bool GeoFileParser::LoadTrainInfo(Building* building)
           Log->Write("WARNING:\tNo train constraints were found. Continue.");
      }
      bool resTTT = LoadTrainTimetable(building, xRootNode);
-     std::cout << "\nresTTT " << resTTT << "\n";
      bool resType =  LoadTrainType(building, xRootNode);
-     std::cout << "\nresType " << resType << "\n";
-     exit(1);
+
      return (resTTT && resType);
 }
 bool GeoFileParser::LoadTrainTimetable(Building* building, TiXmlElement * xRootNode)
@@ -853,11 +851,10 @@ bool GeoFileParser::LoadTrainTimetable(Building* building, TiXmlElement * xRootN
      }
      for (TiXmlElement* e = xTTT->FirstChildElement("train"); e;
                     e = e->NextSiblingElement("train")) {
-          TrainTable TTT = parseTrainTimeTableNode(e);
+          std::shared_ptr<TrainTimeTable> TTT = parseTrainTimeTableNode(e);
 
-          if (1) { // todo: maybe get pointer to train
-               //building->AddGoal(goal);
-               std::cout << "\nTODO: add train to building\n----\n";
+          if (TTT) { // todo: maybe get pointer to train
+               building->AddTrainTimeTable(TTT);
           }
      }
 }
@@ -893,23 +890,16 @@ bool GeoFileParser::LoadTrainType(Building* building, TiXmlElement * xRootNode)
      }
      for (TiXmlElement* e = xTT->FirstChildElement("train"); e;
                     e = e->NextSiblingElement("train")) {
-          TrainType TT = parseTrainTypeNode(e);
-
-          if (1) { // todo: maybe get pointer to train
-               //building->AddGoal(goal);
-               std::cout << "\nTODO: add train type to building\n----\n";
+          std::shared_ptr<TrainType> TT = parseTrainTypeNode(e);
+          if (TT) {
+               building->AddTrainType(TT);
           }
      }
      return true;
 
 }
-// <train_time_tables>
-//    <train id="1" type="RE" room_id="1"
-//            track_start_x="0" track_start_y="0" track_x-end="300" track_y-end="0"
-//            train_start_x="0" train_start_y="0" train_x-end="300" train_y-end="0"
-//            arrival_time="5" departure_time="20>
-// </train_time_tables>
-TrainTable GeoFileParser::parseTrainTimeTableNode(TiXmlElement * e)
+
+std::shared_ptr<TrainTimeTable> GeoFileParser::parseTrainTimeTableNode(TiXmlElement * e)
 {
      Log->Write("INFO:\tLoading train time table NODE");
      std::string caption = xmltoa(e->Attribute("caption"), "-1");
@@ -941,25 +931,23 @@ TrainTable GeoFileParser::parseTrainTimeTableNode(TiXmlElement * e)
      Point track_end(track_end_x, track_end_y);
      Point train_start(train_start_x, train_start_y);
      Point train_end(train_end_x, train_end_y);
-     TrainTable trainTab = {
-          id,
-          type,
-          room_id,
-          arrival_time,
-          departure_time,
-          track_start,
-          track_end,
-          train_start,
-          train_end,
-     };
-     return trainTab;
+     std::shared_ptr<TrainTimeTable> trainTimeTab = std::make_shared<TrainTimeTable>(
+          TrainTimeTable{
+                    id,
+                    type,
+                    room_id,
+                    arrival_time,
+                    departure_time,
+                    track_start,
+                    track_end,
+                    train_start,
+                    train_end,
+                    });
+
+     return trainTimeTab;
 }
 
-// <train type="RE" agents_max="600">
-//    <door id="1" x="3" y="5.5" frequency="2">
-//    <door id="2" x="13" y="15.5" frequency="3">
-// <\train>
-TrainType GeoFileParser::parseTrainTypeNode(TiXmlElement * e)
+std::shared_ptr<TrainType> GeoFileParser::parseTrainTypeNode(TiXmlElement * e)
 {
      Log->Write("INFO:\tLoading train type");
      // int T_id = xmltoi(e->Attribute("id"), -1);
@@ -992,11 +980,12 @@ TrainType GeoFileParser::parseTrainTypeNode(TiXmlElement * e)
      Log->Write("INFO:\t   capacity: %d", agents_max);
      Log->Write("INFO:\t   number of doors: %d", doors.size());
 
-   TrainType Type = {
-        type,
-        agents_max,
-        doors,
-    };
+     std::shared_ptr<TrainType> Type = std::make_shared<TrainType>(
+          TrainType{
+                    type,
+                    agents_max,
+                    doors,
+                    });
    return Type;
 
 }
