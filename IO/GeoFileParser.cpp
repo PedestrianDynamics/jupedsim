@@ -857,6 +857,7 @@ bool GeoFileParser::LoadTrainTimetable(Building* building, TiXmlElement * xRootN
                building->AddTrainTimeTable(TTT);
           }
      }
+     return true;
 }
 bool GeoFileParser::LoadTrainType(Building* building, TiXmlElement * xRootNode)
 {
@@ -960,15 +961,14 @@ std::shared_ptr<TrainType> GeoFileParser::parseTrainTypeNode(TiXmlElement * e)
 
      for (TiXmlElement* xDoor = e->FirstChildElement("door"); xDoor;
           xDoor = xDoor->NextSiblingElement("door")) {
-          int D_id = xmltoi(e->Attribute("id"), -1);
-          float x1 = xmltof(e->Attribute("x1"), -1);
-          float y1 = xmltof(e->Attribute("y1"), -1);
-          float x2 = xmltof(e->Attribute("x2"), -1);
-          float y2 = xmltof(e->Attribute("y2"), -1);
+          int D_id = xmltoi(xDoor->Attribute("id"), -1);
+          float x1 = xmltof(xDoor->FirstChildElement("vertex")->Attribute("px"), -1);
+          float y1 = xmltof(xDoor->FirstChildElement("vertex")->Attribute("py"), -1);
+          float x2 = xmltof(xDoor->LastChild("vertex")->ToElement()->Attribute("px"), -1);
+          float y2 = xmltof(xDoor->LastChild("vertex")->ToElement()->Attribute("py"), -1);
           Point start(x1, y1);
           Point end(x2, y2);
-          float frequency = xmltof(e->Attribute("frequency"), -1);
-
+          float frequency = xmltof(xDoor->Attribute("frequency"), -1);
           t.SetID(D_id);
           t.SetCaption(type + std::to_string(D_id));
           t.SetPoint1(start);
@@ -979,6 +979,10 @@ std::shared_ptr<TrainType> GeoFileParser::parseTrainTypeNode(TiXmlElement * e)
      Log->Write("INFO:\t   type: %s", type.c_str());
      Log->Write("INFO:\t   capacity: %d", agents_max);
      Log->Write("INFO:\t   number of doors: %d", doors.size());
+     for(auto d: doors)
+     {
+          Log->Write("INFO\t      door (%d): %s | %s", d.GetID(), d.GetPoint1().toString().c_str(), d.GetPoint2().toString().c_str());
+     }
 
      std::shared_ptr<TrainType> Type = std::make_shared<TrainType>(
           TrainType{
