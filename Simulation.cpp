@@ -51,7 +51,10 @@ using namespace std;
 
 OutputHandler* Log;
 Trajectories* outputTXT;
-
+// todo: add these variables to class simulation
+std::map<std::string, std::shared_ptr<TrainType> > TrainTypes;
+std::map<int, std::shared_ptr<TrainTimeTable> >  TrainTimeTables;
+//--------
 Simulation::Simulation(Configuration* args)
         :_config(args)
 {
@@ -266,6 +269,11 @@ bool Simulation::InitArgs()
           Log->Write("INFO\ttrain start  : (%.2f, %.2f)",TT.second->tstart._x, TT.second->tstart._y);
           Log->Write("INFO\ttrain end    : (%.2f, %.2f)\n",TT.second->tend._x, TT.second->tend._y);
     }
+    //@todo: these variables are global
+    TrainTypes = _building->GetTrainTypes();
+    TrainTimeTables = _building->GetTrainTimeTables();
+
+    //-----
     // Give the DirectionStrategy the chance to perform some initialization.
     // This should be done after the initialization of the operationalModel
     // because then, invalid pedestrians have been deleted and FindExit()
@@ -644,6 +652,18 @@ double Simulation::RunBody(double maxSimTime)
 
         // here open transition that should be closed
         //        TODO fix, opens door everytime...
+        bool trainHere = false;
+        std::string train = "";
+        auto now = Pedestrian::GetGlobalTime();
+        for(auto && tab: TrainTimeTables)
+        {
+              if( (now>=tab.second->tin) && (now<=tab.second->tout) )
+              {
+                    trainHere = true;
+                    train = tab.second->type;
+                    continue;
+              }
+        }
         for (auto& itr: _building->GetAllTransitions())
         {
              Transition* Trans = itr.second;
@@ -652,21 +672,52 @@ double Simulation::RunBody(double maxSimTime)
                   if ((Trans->GetMaxDoorUsage() != (std::numeric_limits<int>::max)()) ||
                     (Trans->GetOutflowRate() != (std::numeric_limits<double>::max)()) ){
 //                        || (Trans->GetOutflowRate() != std::numeric_limits<double>::max)){
-                      Trans->UpdateClosingTime( _deltaT);
-                      if(Trans->GetClosingTime() <= _deltaT){
+                        Trans->UpdateClosingTime( _deltaT);
+                        if(Trans->GetClosingTime() <= _deltaT){
                           Trans->changeTemporaryState();
                           Log-> Write("INFO:\tReset state of door %d,  Time=%.2f", Trans->GetID(), Pedestrian::GetGlobalTime());
                       }
-                  }
+                  }// normal transition
+             }
+             // ------ train
+             if(trainHere) // track?
+             {
+                   auto doors = TrainTypes[train]->doors;
+                   for(auto door: doors)
+                   {
+                         auto tp1 = door.GetPoint1();
+                         auto tp2 = door.GetPoint2();
+                         if(Trans->IsInLineSegment(tp1) && Trans->IsInLineSegment(tp2))
+                         {
+                               Trans->SetMaxDoorUsage(TrainTypes[train]->nmax);
+                               //  SetOutflowRate() in initialisation phase
+                               Trans->Open();
+                         }
+                   }
+             }
+             else
+             {
+                   for(auto tt: TrainTypes)
+                   {
+                         auto doors = tt.second->doors;
+                         for(auto door: doors)
+                         {
+                               auto tp1 = door.GetPoint1();
+                               auto tp2 = door.GetPoint2();
+                               if(Trans->IsInLineSegment(tp1) && Trans->IsInLineSegment(tp2))
+                                     //todo: If only we knew that Trans is a track
+                               {
+                                     Trans->TempClose();
+                               }
+                         }
+                   }
              }
         }
         if(frameNr % 1000 == 0)
         {
-             Log->Write("INFO:\tUpdate door statistics at t=%.2f", t);
-             PrintStatistics(t);
+              Log->Write("INFO:\tUpdate door statistics at t=%.2f", t);
+              PrintStatistics(t);
         }
-
-
     }// while time
     return t;
 }
