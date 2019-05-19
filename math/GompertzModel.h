@@ -38,7 +38,7 @@
 
 //forward declaration
 class Pedestrian;
-class DirectionStrategy;
+class DirectionManager;
 
 /*!
  * \class GompertzModel
@@ -105,11 +105,11 @@ private:
 
 public:
 
-     GompertzModel(std::shared_ptr<DirectionStrategy> dir, double nuped, double aped, double bped, double cped,
+     GompertzModel(std::shared_ptr<DirectionManager> dir, double nuped, double aped, double bped, double cped,
                    double nuwall, double awall, double bwall, double cwall);
      virtual ~GompertzModel(void);
 
-    std::shared_ptr<DirectionStrategy> GetDirection() const;
+//    std::shared_ptr<DirectionStrategy> GetDirection() const;
 
      /**
       * Get the parameter for the strength of the ped-PED repulsive force

@@ -53,7 +53,7 @@ struct sort_pred
 
 //forward declaration
 class Pedestrian;
-class DirectionStrategy;
+class DirectionManager;
 
 /*!
  * \class VelocityModel
@@ -137,12 +137,12 @@ private:
 
 public:
 
-     VelocityModel(std::shared_ptr<DirectionStrategy> dir, double aped, double Dped,
+     VelocityModel(std::shared_ptr<DirectionManager> dir, double aped, double Dped,
                    double awall, double Dwall);
      virtual ~VelocityModel(void);
 
 
-     std::shared_ptr<DirectionStrategy> GetDirection() const;
+//     std::shared_ptr<DirectionStrategy> GetDirection() const;
 
      /**
       * @todo What is this parameter doing?

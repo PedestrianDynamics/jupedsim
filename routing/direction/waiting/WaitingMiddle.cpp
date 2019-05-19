@@ -1,0 +1,14 @@
+//
+// Created by Tobias Schrödter on 2019-05-13.
+//
+
+#include "WaitingMiddle.h"
+#include "../../../geometry/Room.h"
+#include "../../../geometry/SubRoom.h"
+#include "../../../pedestrian/Pedestrian.h"
+#include "../../../geometry/Point.h"
+
+Point WaitingMiddle::GetWaitingPosition(Room* room, Pedestrian* ped) const{
+     SubRoom* subRoom = room->GetSubRoom(ped->GetSubRoomID());
+     return subRoom->GetCentroid();
+}

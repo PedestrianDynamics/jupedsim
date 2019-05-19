@@ -535,13 +535,19 @@ int FFRouter::FindExit(Pedestrian* p)
                //double locDistToDoor = _locffviafm[p->GetRoomID()]->getCostToDestination(doorUID, p->GetPos(), _mode);
                double locDistToDoor = 0.;
                if (_targetWithinSubroom) {
-                   locDistToDoor = _config->get_dirStrategy()->GetDistance2Target(p, doorUID);
+                   locDistToDoor = _config->GetDirectionManager()->GetDirectionStrategy()->GetDistance2Target(p, doorUID);
                } else {
-                   locDistToDoor = _config->get_dirStrategy()->GetDistance2Target(p, doorUID);
+                   std::cout << "config: " << _config << std::endl;
+                    std::cout << "_config->GetDirectionManager(): " << _config->GetDirectionManager() << std::endl;
+                    std::cout << "_config->GetDirectionManager()->GetDirectionStrategy(): " << _config->GetDirectionManager()->GetDirectionStrategy() << std::endl;
+                    std::cout << "_config->GetDirectionManager()->GetDirectionStrategy()->GetDistance2Target(p, doorUID): " << _config->GetDirectionManager()->GetDirectionStrategy()->GetDistance2Target(p, doorUID) << std::endl;
+
+                    locDistToDoor = _config->GetDirectionManager()->GetDirectionStrategy()->GetDistance2Target(p, doorUID);
                }
 
                if (locDistToDoor < -J_EPS) {     //for old ff: //this can happen, if the point is not reachable and therefore has init val -7
                     continue;
+
                }
                std::pair<int, int> key = std::make_pair(doorUID, finalDoor);
                //auto subroomDoors = _building->GetSubRoomByUID(p->GetSubRoomUID())->GetAllGoalIDs();

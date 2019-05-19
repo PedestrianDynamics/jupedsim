@@ -107,6 +107,7 @@ protected:
      std::vector<double> _poly_help_constatnt; //for the function IsInsidePolygon, a.brkic
      std::vector<double> _poly_help_multiple; //for the function IsInsidePolygon, a.brkic
      std::vector<Obstacle*> _obstacles;
+     std::vector<double> _boundingBox;
 
 public:
 
@@ -404,6 +405,10 @@ public:
 
 #endif
 
+     std::vector<double> GetBoundingBox() const;
+
+private:
+     void ComputeBoundingBox();
 };
 
 /************************************************************

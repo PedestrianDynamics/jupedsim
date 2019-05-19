@@ -39,7 +39,7 @@
 
 //forward declaration
 class Pedestrian;
-class DirectionStrategy;
+class DirectionManager;
 
 
 /*!
@@ -55,12 +55,12 @@ class KrauszModel : public OperationalModel
 {
 public:
 
-    KrauszModel(std::shared_ptr<DirectionStrategy> dir, double nuped, double nuwall, double dist_effPed, double dist_effWall,
+    KrauszModel(std::shared_ptr<DirectionManager> dir, double nuped, double nuwall, double dist_effPed, double dist_effWall,
               double intp_widthped, double intp_widthwall, double maxfped, double maxfwall);
     virtual ~KrauszModel(void);
 
     // Getter
-    std::shared_ptr<DirectionStrategy> GetDirection() const;
+//    std::shared_ptr<DirectionStrategy> GetDirection() const;
     double GetNuPed() const;
     double GetNuWall() const;
     double GetDistEffMax() const;
