@@ -5,7 +5,7 @@
 #ifndef JPSCORE_DIRECTIONINRANGEBOTTLENECK_H
 #define JPSCORE_DIRECTIONINRANGEBOTTLENECK_H
 
-#include "../DirectionStrategy.h"
+#include "DirectionStrategy.h"
 
 class DirectionInRangeBottleneck : public DirectionStrategy {
 public:

@@ -31,6 +31,7 @@
 #include "../geometry/SubRoom.h"
 #include "Knowledge.h"
 #include "Pedestrian.h"
+#include <limits>
 
 #include "../JPSfire/generic/FDSMeshStorage.h"
 
@@ -1277,7 +1278,25 @@ bool Pedestrian::IsWaiting() const
      return _waiting;
 }
 
-void Pedestrian::SetWaiting(bool waiting)
+const Point& Pedestrian::GetWaitingPos() const
 {
-     _waiting = waiting;
+     return _waitingPos;
+}
+
+void Pedestrian::SetWaitingPos(const Point& waitingPos)
+{
+     _waitingPos = waitingPos;
+}
+
+
+void Pedestrian::StartWaiting()
+{
+     _waitingPos._x = std::numeric_limits<double>::max();
+     _waitingPos._y = std::numeric_limits<double>::max();
+     _waiting = true;
+}
+
+void Pedestrian::EndWaiting()
+{
+     _waiting = false;
 }

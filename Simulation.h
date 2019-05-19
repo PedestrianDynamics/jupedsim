@@ -42,7 +42,7 @@
 #include "math/ODESolver.h"
 #include "routing/router/global_shortest/GlobalRouter.h"
 #include "routing/router/quickest/QuickestPathRouter.h"
-#include "routing/direction/DirectionStrategy.h"
+#include "routing/direction/walking/DirectionStrategy.h"
 #include "routing/RoutingEngine.h"
 #include "pedestrian/PedDistributor.h"
 #include "routing/router/smoke_router/SmokeRouter.h"

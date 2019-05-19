@@ -5,7 +5,7 @@
 #ifndef JPSCORE_DIRECTIONFLOORFIELD_H
 #define JPSCORE_DIRECTIONFLOORFIELD_H
 
-#include "../DirectionStrategy.h"
+#include "DirectionStrategy.h"
 
 class Building;
 class FloorfieldViaFM;

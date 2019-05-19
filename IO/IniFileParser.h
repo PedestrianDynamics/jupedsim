@@ -25,7 +25,7 @@
 #include <string>
 
 #include "../general/Configuration.h"
-#include "../routing/direction/DirectionStrategy.h"
+#include "../routing/direction/DirectionManager.h"
 
 class OutputHandler;
 
@@ -78,8 +78,10 @@ private:
 
      Configuration* _config;
      int _model;
-     std::shared_ptr<DirectionStrategy> _exit_strategy;
-     int _exit_strat_number;
+     std::shared_ptr<DirectionStrategy> _directionStrategy;
+     std::shared_ptr<WaitingStrategy> _waitingStrategy;
+     std::shared_ptr<DirectionManager> _directionManager;
+    int _exit_strat_number;
 
 };
 

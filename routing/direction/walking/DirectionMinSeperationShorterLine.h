@@ -5,7 +5,7 @@
 #ifndef JPSCORE_DIRECTIONMINSEPERATIONSHORTERLINE_H
 #define JPSCORE_DIRECTIONMINSEPERATIONSHORTERLINE_H
 
-#include "../DirectionStrategy.h"
+#include "DirectionStrategy.h"
 
 class DirectionMinSeperationShorterLine : public DirectionStrategy {
 public:

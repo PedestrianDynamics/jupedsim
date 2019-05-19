@@ -5,7 +5,7 @@
 #ifndef JPSCORE_DIRECTIONGENERAL_H
 #define JPSCORE_DIRECTIONGENERAL_H
 
-#include "../DirectionStrategy.h"
+#include "DirectionStrategy.h"
 
 class DirectionGeneral : public DirectionStrategy {
 public:

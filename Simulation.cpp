@@ -375,13 +375,22 @@ void Simulation::UpdateRoutesAndLocations()
 
           // Set pedestrian waiting when find route temp_close
           int goal = ped->FindRoute();
+//          std::cout << std::endl;
+//          std::cout << "Ped " << ped->GetID() << " Goal: " << goal << std::endl;
           Hline* target = _building->GetTransOrCrossByUID(goal);
           int roomID = ped->GetRoomID();
           int subRoomID = ped ->GetSubRoomID();
 
           if( Crossing* cross = dynamic_cast<Crossing*>(target) ) {
+//               std::cout << "cross state: " << cross->IsTempClose() <<std::endl;
                if (cross->IsInRoom(roomID) && cross->IsInSubRoom(subRoomID)){
-                    ped->SetWaiting(cross->IsTempClose());
+                    if (!ped->IsWaiting() && cross->IsTempClose()){
+                         ped->StartWaiting();
+                    }
+
+                    if (ped->IsWaiting() && cross->IsOpen()){
+                        ped->EndWaiting();
+                    }
                }
           }
 

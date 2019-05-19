@@ -355,7 +355,7 @@ voronoi-boost/VoronoiPositionGenerator.cpp
         routing/router/global_shortest/DTriangulation.cpp
 
 #general
-        routing/direction/DirectionStrategy.cpp
+        routing/direction/walking/DirectionStrategy.cpp
         routing/router/Router.cpp
 routing/RoutingEngine.cpp
 
@@ -389,6 +389,8 @@ routing/RoutingEngine.cpp
         routing/router/smoke_router/cognitiveMap/internnavigationnetwork.cpp
 
 #direction
+        routing/direction/DirectionManager.cpp
+
         routing/direction/walking/DirectionMiddlePoint.cpp
         routing/direction/walking/DirectionMinSeperation.cpp
         routing/direction/walking/DirectionMinSeperationShorterLine.cpp
@@ -397,6 +399,12 @@ routing/RoutingEngine.cpp
         routing/direction/walking/DirectionFloorfield.cpp
         routing/direction/walking/DirectionLocalFloorfield.cpp
         routing/direction/walking/DirectionSubLocalFloorfield.cpp
+        routing/direction/walking/DirectionStrategy.cpp
+
+        routing/direction/waiting/WaitingStrategy.cpp
+        routing/direction/waiting/WaitingMiddle.cpp
+        routing/direction/waiting/WaitingVoronoi.cpp
+        routing/direction/waiting/WaitingRandom.cpp
 
 events/EventManager.cpp
 events/Event.cpp
@@ -464,7 +472,7 @@ set(header_files
         routing/router/ff_router_trips/UnivFFviaFMTrips.h
 
 #general
-        routing/direction/DirectionStrategy.h
+        routing/direction/walking/DirectionStrategy.h
 routing/DummyRouter.h
 routing/GlobalRouter.h
 routing/QuickestPathRouter.h
@@ -506,6 +514,8 @@ routing/RoutingEngine.h
         routing/router/smoke_router/cognitiveMap/internnavigationnetwork.h
 
 #directions
+        routing/direction/DirectionManager.h
+
         routing/direction/walking/DirectionMiddlePoint.h
         routing/direction/walking/DirectionMinSeperation.h
         routing/direction/walking/DirectionMinSeperationShorterLine.h
@@ -514,7 +524,15 @@ routing/RoutingEngine.h
         routing/direction/walking/DirectionFloorfield.h
         routing/direction/walking/DirectionLocalFloorfield.h
         routing/direction/walking/DirectionSubLocalFloorfield.h
-pedestrian/Pedestrian.h
+        routing/direction/walking/DirectionStrategy.h
+
+        routing/direction/waiting/WaitingStrategy.h
+        routing/direction/waiting/WaitingMiddle.h
+        routing/direction/waiting/WaitingVoronoi.h
+        routing/direction/waiting/WaitingRandom.h
+
+
+        pedestrian/Pedestrian.h
 pedestrian/PedDistributor.h
 pedestrian/Ellipse.h
 pedestrian/AgentsParameters.h
@@ -569,10 +587,9 @@ math/OperationalModel.h
 events/EventManager.h
 events/Event.h
 
-        geometry/Trips.h
-        routing/router/trips_router/TripsRouter.h
-
-        )
+geometry/Trips.h
+routing/router/trips_router/TripsRouter.h
+)
 
 set(JPSFIRE_HDR
 JPSfire/generic/FDSMesh.h

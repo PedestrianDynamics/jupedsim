@@ -34,7 +34,7 @@
 #include "../mpi/LCGrid.h"
 #include "../geometry/SubRoom.h"
 
-#include "../routing/direction/DirectionStrategy.h"
+#include "../routing/direction/walking/DirectionStrategy.h"
 #include "../routing/direction/walking/DirectionFloorfield.h"
 #include "../routing/direction/walking/DirectionGeneral.h"
 #include "../routing/direction/walking/DirectionInRangeBottleneck.h"
@@ -55,7 +55,7 @@
 using std::vector;
 using std::string;
 
-KrauszModel::KrauszModel(std::shared_ptr<DirectionStrategy> dir, double nuped, double nuwall, double dist_effPed,
+KrauszModel::KrauszModel(std::shared_ptr<DirectionManager> dir, double nuped, double nuwall, double dist_effPed,
                      double dist_effWall, double intp_widthped, double intp_widthwall, double maxfped,
                      double maxfwall)
 {
@@ -256,9 +256,9 @@ inline  Point KrauszModel::ForceDriv(Pedestrian* ped, Room* room) const
      Point lastE0 = ped->GetLastE0();
      ped->SetLastE0(target-pos);
 
-     if (  (dynamic_cast<DirectionFloorfield*>(_direction.get())) ||
-           (dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) ||
-           (dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get()))  ) {
+     if (  (dynamic_cast<DirectionFloorfield*>(_direction->GetDirectionStrategy().get())) ||
+           (dynamic_cast<DirectionLocalFloorfield*>(_direction->GetDirectionStrategy().get())) ||
+           (dynamic_cast<DirectionSubLocalFloorfield*>(_direction->GetDirectionStrategy().get()))  ) {
           if (dist > 50*J_EPS_GOAL) {
                const Point& v0 = ped->GetV0(target);
                F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
@@ -621,10 +621,10 @@ Point KrauszModel::ForceInterpolation(double v0, double K_ij, const Point& e, do
 
 // Getter-Funktionen
 
-std::shared_ptr<DirectionStrategy> KrauszModel::GetDirection() const
-{
-     return _direction;
-}
+//std::shared_ptr<DirectionStrategy> KrauszModel::GetDirection() const
+//{
+//     return _direction;
+//}
 
 double KrauszModel::GetNuPed() const
 {

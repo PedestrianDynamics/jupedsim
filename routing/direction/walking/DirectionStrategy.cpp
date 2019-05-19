@@ -26,12 +26,12 @@
  **/
 
 //#include "DirectionStrategy.h"
-#include "../../geometry/Line.h"
-#include "../../geometry/NavLine.h"
-#include "../../geometry/Building.h"
+#include "../../../geometry/Line.h"
+#include "../../../geometry/NavLine.h"
+#include "../../../geometry/Building.h"
 //#include "../geometry/Room.h"
-#include "../../pedestrian/Pedestrian.h"
-#include "../../geometry/SubRoom.h"
+#include "../../../pedestrian/Pedestrian.h"
+#include "../../../geometry/SubRoom.h"
 //#include "../geometry/Wall.h"
 //#include "../routing/router/ff_router/UnivFFviaFM.h"
 //#include "../routing/router/ff_router/FloorfieldViaFM.h"

@@ -45,12 +45,12 @@
 #define omp_get_max_threads()  1
 #endif
 
-#include "../routing/direction/DirectionStrategy.h"
+#include "../routing/direction/walking/DirectionStrategy.h"
 
 using std::vector;
 using std::string;
 
-GompertzModel::GompertzModel(std::shared_ptr<DirectionStrategy> dir, double nuped, double aped, double bped, double cped,
+GompertzModel::GompertzModel(std::shared_ptr<DirectionManager> dir, double nuped, double aped, double bped, double cped,
                              double nuwall, double awall, double bwall, double cwall) {
     _direction = dir;
     // Force_rep_PED Parameter
@@ -73,6 +73,7 @@ GompertzModel::~GompertzModel() {
 bool GompertzModel::Init(Building *building) {
 
      _direction->Init(building);
+
 //     if(auto dirff = dynamic_cast<DirectionFloorfield*>(_direction.get())){
 //          Log->Write("INFO:\t Init DirectionFloorfield starting ...");
 //          double _deltaH = building->GetConfig()->get_deltaH();
@@ -534,9 +535,9 @@ string GompertzModel::GetDescription() {
     return rueck;
 }
 
-std::shared_ptr<DirectionStrategy> GompertzModel::GetDirection() const {
-    return _direction;
-}
+//std::shared_ptr<DirectionStrategy> GompertzModel::GetDirection() const {
+//    return _direction;
+//}
 
 double GompertzModel::GetNuPed() const {
     return _nuPed;

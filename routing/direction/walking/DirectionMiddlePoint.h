@@ -5,7 +5,7 @@
 #ifndef JPSCORE_DIRECTIONMIDDLEPOINT_H
 #define JPSCORE_DIRECTIONMIDDLEPOINT_H
 
-#include "../DirectionStrategy.h"
+#include "DirectionStrategy.h"
 
 class DirectionMiddlePoint : public DirectionStrategy {
 public:
