@@ -814,9 +814,13 @@ bool GeoFileParser::LoadTrainInfo(Building* building)
      if (!xRootNode->FirstChild("train_constraints")) {
           Log->Write("WARNING:\tNo train constraints were found. Continue.");
      }
-     bool resTTT = LoadTrainTimetable(building, xRootNode);
-     bool resType =  LoadTrainType(building, xRootNode);
-
+     bool resTTT = true;
+     bool resType = true;
+     if(xRootNode->FirstChild("train_constraints"))
+     {
+          resTTT = LoadTrainTimetable(building, xRootNode);
+          resType = LoadTrainType(building, xRootNode);
+     }
      return (resTTT && resType);
 }
 bool GeoFileParser::LoadTrainTimetable(Building* building, TiXmlElement * xRootNode)
@@ -954,6 +958,7 @@ std::shared_ptr<TrainType> GeoFileParser::parseTrainTypeNode(TiXmlElement * e)
      // int T_id = xmltoi(e->Attribute("id"), -1);
      std::string type = xmltoa(e->Attribute("type"), "-1");
      int agents_max = xmltoi(e->Attribute("agents_max"), -1);
+     int length = xmltof(e->Attribute("length"), -1);
      // std::shared_ptr<Transition> t = new Transition();
      // std::shared_ptr<Transition> doors;
      Transition t;
@@ -968,7 +973,8 @@ std::shared_ptr<TrainType> GeoFileParser::parseTrainTypeNode(TiXmlElement * e)
           float y2 = xmltof(xDoor->LastChild("vertex")->ToElement()->Attribute("py"), -1);
           Point start(x1, y1);
           Point end(x2, y2);
-          float frequency = xmltof(xDoor->Attribute("frequency"), -1);
+          float outflow = xmltof(xDoor->Attribute("outflow"), -1);
+          float dn = xmltoi(xDoor->Attribute("dn"), -1);
           t.SetID(D_id);
           t.SetCaption(type + std::to_string(D_id));
           t.SetPoint1(start);
