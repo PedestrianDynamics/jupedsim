@@ -322,9 +322,13 @@ bool GeoFileParser::LoadGeometry(Building* building)
                }
           }
           else{
-               Log->Write("INFO:\tNot parsing transition from file %s");
+               Log->Write("INFO:\tNot parsing transition from file");
           }
-          Log->Write("INFO:\tGot %d transitions", building-> GetAllTransitions().size());
+          Log->Write("INFO:\tGot %d transitions", building->GetAllTransitions().size());
+
+          for (auto transItr : building->GetAllTransitions()){
+               std::cout << transItr.second->toString() << std::endl;
+          }
 
      }// xTransNode
      Log->Write("INFO: \tLoading building file successful!!!\n");

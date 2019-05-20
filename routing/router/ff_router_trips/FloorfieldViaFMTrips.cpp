@@ -412,7 +412,6 @@ void FloorfieldViaFMTrips::createMapEntryInLineToGoalID(const int goalID, bool i
 
             _goalToLineUIDmap.erase(goalID);
             _goalToLineUIDmap.emplace(goalID, UID_of_MIN);
-               std::cout << "Foo added " << goalID << " with " << UID_of_MIN << std::endl;
             _goalToLineUIDmap2.erase(goalID);
             _goalToLineUIDmap2.emplace(goalID, UID_of_MIN2);
             _goalToLineUIDmap3.erase(goalID);

@@ -90,7 +90,7 @@ public:
 
     void setWaitingTime(double waitingTime);
 
-    std::vector<Line> getAllLines();
+//    std::vector<Line> getAllLines();
 
     int GetNextGoal();
 

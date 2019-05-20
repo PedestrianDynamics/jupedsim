@@ -484,7 +484,8 @@ int FFRouterTrips::FindExit(Pedestrian* ped)
           }
      }
 
-     return FindExit1(ped);
+     int bestDoor = FindExit1(ped);
+     return bestDoor;
 }
 
 int FFRouterTrips::FindExit1(Pedestrian* p)
