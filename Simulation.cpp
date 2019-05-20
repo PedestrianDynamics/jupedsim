@@ -675,7 +675,7 @@ double Simulation::RunBody(double maxSimTime)
                         Trans->UpdateClosingTime( _deltaT);
                         if(Trans->GetClosingTime() <= _deltaT){
                           Trans->changeTemporaryState();
-                          Log-> Write("INFO:\tReset state of door %d,  Time=%.2f", Trans->GetID(), Pedestrian::GetGlobalTime());
+                          /* Log-> Write("INFO:\tReset state of door %d,  Time=%.2f", Trans->GetID(), Pedestrian::GetGlobalTime()); */
                       }
                   }// normal transition
              }
@@ -690,7 +690,7 @@ double Simulation::RunBody(double maxSimTime)
                          if(Trans->IsInLineSegment(tp1) && Trans->IsInLineSegment(tp2))
                          {
                                Trans->SetMaxDoorUsage(TrainTypes[train]->nmax);
-                               //  SetOutflowRate() in initialisation phase
+                               //todo:  SetOutflowRate() to sum of doors of train
                                Trans->Open();
                          }
                    }
