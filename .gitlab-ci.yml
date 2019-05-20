@@ -13,6 +13,7 @@ stages:
   - configure
   - compile
   - unit_test
+  - dev_tests
   # - juelich_tests
    # - rimea_tests
 #=====================================
@@ -67,6 +68,17 @@ test:
     - cd build
     - ctest -R Boost
     - ctest -R clean
+  tags:
+    - linux
+#============== dev_test ============
+test:
+  dependencies:
+    - make-linux
+
+  stage: dev_test
+  script:
+    - cd build
+    - ctest -R dev
   tags:
     - linux
 #============== juelich ============
