@@ -62,6 +62,7 @@ struct TrainType
 {
      std::string type;
      int nmax; // agents_max
+     float len; //length
      std::vector<Transition> doors;
 };
 

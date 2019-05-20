@@ -958,7 +958,7 @@ std::shared_ptr<TrainType> GeoFileParser::parseTrainTypeNode(TiXmlElement * e)
      // int T_id = xmltoi(e->Attribute("id"), -1);
      std::string type = xmltoa(e->Attribute("type"), "-1");
      int agents_max = xmltoi(e->Attribute("agents_max"), -1);
-     int length = xmltof(e->Attribute("length"), -1);
+     float length = xmltof(e->Attribute("length"), -1);
      // std::shared_ptr<Transition> t = new Transition();
      // std::shared_ptr<Transition> doors;
      Transition t;
@@ -979,7 +979,8 @@ std::shared_ptr<TrainType> GeoFileParser::parseTrainTypeNode(TiXmlElement * e)
           t.SetCaption(type + std::to_string(D_id));
           t.SetPoint1(start);
           t.SetPoint2(end);
-          t.SetOutflowRate(frequency);
+          t.SetOutflowRate(outflow);
+          t.SetDN(dn);
           doors.push_back(t);
      }
      Log->Write("INFO:\t   type: %s", type.c_str());
@@ -994,6 +995,7 @@ std::shared_ptr<TrainType> GeoFileParser::parseTrainTypeNode(TiXmlElement * e)
           TrainType{
                     type,
                     agents_max,
+                    length,
                     doors,
                     });
    return Type;
