@@ -105,11 +105,11 @@ def PassedLineX(p, exit):
     x = exit[0]
     y1 = exit[1]
     y2 = exit[2]
-    
+
     X = p[:, 2]
     Y = p[:, 3]
 
-    return (np.logical_and(np.logical_and(X >= x-eps, X <= x+eps), np.logical_and(Y >= y1, Y <= y2) ) ).any() 
+    return (np.logical_and(np.logical_and(X >= x-eps, X <= x+eps), np.logical_and(Y >= y1, Y <= y2) ) ).any()
 
 
 def PassedLineY(p, exit):
@@ -124,7 +124,7 @@ def PassedLineY(p, exit):
     X = p[:, 2]
     Y = p[:, 3]
 
-    return (np.logical_and(np.logical_and(Y >= y-eps, Y <= y+eps), np.logical_and(X >= x1, X <= x2) ) ).any() 
+    return (np.logical_and(np.logical_and(Y >= y-eps, Y <= y+eps), np.logical_and(X >= x1, X <= x2) ) ).any()
 
 def get_num_threads(filename):
     """
@@ -138,7 +138,7 @@ def get_num_threads(filename):
         exit(FAILURE)
     num_threads = float(xmldoc.getElementsByTagName('num_threads')[0].firstChild.nodeValue)
     return num_threads
-    
+
 def get_maxtime(filename):
     """
     get max sim time
@@ -151,6 +151,23 @@ def get_maxtime(filename):
         exit(FAILURE)
     maxtime = float(xmldoc.getElementsByTagName('max_sim_time')[0].firstChild.nodeValue)
     return maxtime
+
+def get_outflow(filename):
+    """
+    get outflow of doors
+    """
+    tree = ET.parse(filename)
+    root = tree.getroot()
+    ids = []
+    outflow = []
+    for node in root.iter():
+        tag = node.tag
+        if tag == "traffic_constraints":
+            for doors in node.getchildren(): # doors
+                for door in doors.getchildren(): # door
+                    ids.append(int(door.attrib['trans_id']))
+                    outflow.append(float(door.attrib['outflow']))
+    return ids, outflow
 
 def parse_file(filename):
     """
@@ -198,7 +215,7 @@ def parse_file(filename):
                 data = np.vstack((data, list(map(float, [ID, frame, x, y, z]) ) ) )
 
 
-                # data += [ID, frame, x, y, z] 
+                # data += [ID, frame, x, y, z]
 
     # data = np.array(data, dtype=float).reshape((-1, 5))
     return fps, N, data
@@ -277,9 +294,9 @@ def rolling_flow(fps, N, data, x0, name):
     flow = fps*(windows-1)/(serie.rolling(windows, min_periods=minp).max()  - serie.rolling(windows, min_periods=minp).min() )
     flow = flow[~np.isnan(flow)] # remove NaN
     wmean = flow.rolling(windows, min_periods=minp).mean()
- 
+
     np.savetxt(name, np.array(times))
-    
+
     logging.info("min(times)=%f max(times)=%f"%(min(times), max(times)))
     return np.mean(wmean) #fps * float(N-1) / (max(times) - min(times))
 
@@ -314,19 +331,19 @@ def flow(fps, N, data, x0):
     if len(times) < 2:
         logging.warning("Number of pedestrians passing the line is small. return 0")
         return 0
-    
+
     logging.info("min(times)=%f max(times)=%f"%(min(times), max(times)))
     return fps * float(N-1) / (max(times) - min(times))
 
 def CalcBiVarCDF(x,y,xGrid,yGrid):
     """
-    Calculate the bivariate CDF of two given input signals on predefined grids. 
-    input: 
+    Calculate the bivariate CDF of two given input signals on predefined grids.
+    input:
       - x: array of size n1
       - y: array of size n2
       - xGrid: array of size m1
       - yGrid: array of size m2
-    output: 
+    output:
       - CDF2D: matrix
     """
     nPoints = np.size(x);
@@ -345,13 +362,13 @@ def CalcBiVarCDF(x,y,xGrid,yGrid):
 
 def CDFDistance(x1, y1, x2, y2):
     """
-    For two input 2D signals calculate the distance between their CDFs. 
-    input: 
+    For two input 2D signals calculate the distance between their CDFs.
+    input:
       - x1: array of size n
       - y2: array of size n
       - x2: array of size m
       - y2: array of size m
-    output: 
+    output:
       - KSD: not negative number
     """
     xPoints = 100;
@@ -365,7 +382,3 @@ def CDFDistance(x1, y1, x2, y2):
 #    KSD = np.linalg.norm(CDF1-CDF2)/(np.linalg.norm(CDF1)+np.linalg.norm(CDF1); # Frobenius norm (p=2)
     KSD = np.max(np.abs(CDF1-CDF2)); # Kolmogorov-Smirnov distance (p=inf)
     return KSD
-
-
-
-
