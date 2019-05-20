@@ -26,7 +26,7 @@ def runtest(inifile, trajfile):
         J = N[-1]/T[-1]
         plt.plot(T, N)
         plt.plot(T, N, lw=2)
-        plt.plot(T, o*T, "-k", lw=2
+        plt.plot(T, o*T, "-k", lw=2)
         logging.info("outflow (file %s) |  inifile: %.2f | state-file: %.2f (+-%.2f)"%(filename, o, J, abs(J-o)))
         if abs(J-o) > tolerance:
             failure = 1
