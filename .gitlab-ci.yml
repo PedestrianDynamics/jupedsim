@@ -71,7 +71,7 @@ test:
   tags:
     - linux
 #============== dev_test ============
-test:
+dev:
   dependencies:
     - make-linux
 
