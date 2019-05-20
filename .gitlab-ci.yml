@@ -13,9 +13,9 @@ stages:
   - configure
   - compile
   - unit_test
-  - dev_tests
+  - dev_test
   # - juelich_tests
-   # - rimea_tests
+  # - rimea_tests
 #=====================================
 
 #============== configure ============
