@@ -77,6 +77,7 @@ public:
      std::vector<double> GetXInFrame(int frame, const std::vector<int>& ids) const;
      std::vector<double> GetYInFrame(int frame, const std::vector<int>& ids) const;
      std::vector<double> GetZInFrame(int frame, const std::vector<int>& ids) const;
+     std::vector<double> GetZInFrame(int frame, const std::vector<int>& ids, double zPos) const;
      std::vector<double> GetVInFrame(int frame, const std::vector<int>& ids, double zPos) const;
      bool ReadData(const fs::path& projectRootDir,const fs::path& outputDir, const fs::path& path, const fs::path& filename, const FileFormat& _trajformat, int deltaF, std::string vComponent, const bool IgnoreBackwardMovement);
      fs::path GetOutputLocation() const;
