@@ -119,6 +119,11 @@ std::string Analysis::GetFilename (const std::string& str)
 void Analysis::InitArgs(ArgumentParser* args)
 {
      string s = "Parameter:\n";
+     _building = new Building();
+     _building->LoadGeometry(args->GetGeometryFilename());
+     // create the polygons
+     _building->InitGeometry();
+     // _building->AddSurroundingRoom();
 
      if(args->GetIsMethodA()) {
           _DoesUseMethodA = true;
@@ -177,6 +182,11 @@ void Analysis::InitArgs(ArgumentParser* args)
           _geoPoly = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_I);
      }
 
+     if( _DoesUseMethodD &&  _DoesUseMethodI)
+     {
+          Log->Write("Warning:\t Using both method D and I is not safe!");
+          // because ReadGeomtry() may be called twice
+     }
      _deltaF = args->GetDelatT_Vins();
      _cutByCircle = args->GetIsCutByCircle();
      _getProfile = args->GetIsGetProfile();
@@ -200,12 +210,7 @@ void Analysis::InitArgs(ArgumentParser* args)
 
 std::map<int, polygon_2d> Analysis::ReadGeometry(const fs::path& geometryFile, const std::vector<MeasurementArea_B*>& areas)
 {
-     _building = new Building();
-     _building->LoadGeometry(geometryFile.string());
-     // create the polygons
-     _building->InitGeometry();
-     // _building->AddSurroundingRoom();
-
+     Log->Write("INFO:\tReadGeometry with %s", geometryFile.string().c_str());
      double geo_minX  = FLT_MAX;
      double geo_minY  = FLT_MAX;
      double geo_maxX  = -FLT_MAX;

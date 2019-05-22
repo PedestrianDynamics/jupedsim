@@ -430,7 +430,7 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
           for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
               xAgent = xAgent->NextSiblingElement("agent"))
           {
-               //get agent id, x, y
+               //get agent id, x, y, z
                double x= atof(xAgent->Attribute("x"));
                double y= atof(xAgent->Attribute("y"));
                double z= atof(xAgent->Attribute("z"));
@@ -584,6 +584,27 @@ vector<double> PedData::GetZInFrame(int frame, const vector<int>& ids) const
      {
           int id = ids[i];
           ZInFrame.push_back(_zCor(id,frame));
+     }
+     return ZInFrame;
+}
+vector<double> PedData::GetZInFrame(int frame, const vector<int>& ids, double zPos) const
+{
+     vector<double> ZInFrame;
+     for(unsigned int i=0; i<ids.size();i++)
+     {
+          int id = ids[i];
+          if(zPos<1000000.0)
+          {
+               if(fabs(_zCor(id,frame)-zPos*M2CM)<J_EPS_EVENT)
+               {
+                    ZInFrame.push_back(_zCor(id,frame));
+               }
+          }
+          else
+          {
+               ZInFrame.push_back(_zCor(id,frame));
+          }
+
      }
      return ZInFrame;
 }
