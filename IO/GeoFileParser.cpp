@@ -204,6 +204,7 @@ bool GeoFileParser::LoadGeometry(Building* building)
                for (TiXmlElement* xPolyVertices = xSubRoom->FirstChildElement("polygon"); xPolyVertices;
                     xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
 
+                    std::string wall_type = xPolyVertices->Attribute("type");
                     for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
                               "vertex");
                          xVertex && xVertex!=xPolyVertices->LastChild("vertex");
@@ -213,7 +214,7 @@ bool GeoFileParser::LoadGeometry(Building* building)
                          double y1 = xmltof(xVertex->Attribute("py"));
                          double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
                          double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
-                         subroom->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
+                         subroom->AddWall(Wall(Point(x1, y1), Point(x2, y2), wall_type));
                          //printf("%0.2f %0.2f %0.2f %0.2f\n",x1,y1,x2,y2);
                     }
 
@@ -911,7 +912,7 @@ std::shared_ptr<TrainTimeTable> GeoFileParser::parseTrainTimeTableNode(TiXmlElem
      int id = xmltoi(e->Attribute("id"), -1);
      std::string type = xmltoa(e->Attribute("type"), "-1");
      int room_id = xmltoi(e->Attribute("room_id"), -1);
-
+     int platform_id = xmltoi(e->Attribute("platform_id"), -1);
      float track_start_x = xmltof(e->Attribute("track_start_x"), -1);
      float track_start_y = xmltof(e->Attribute("track_start_y"), -1);
      float track_end_x = xmltof(e->Attribute("track_end_x"), -1);
@@ -928,6 +929,7 @@ std::shared_ptr<TrainTimeTable> GeoFileParser::parseTrainTimeTableNode(TiXmlElem
      Log->Write("INFO:\t   id: %d", id);
      Log->Write("INFO:\t   type: %s", type.c_str());
      Log->Write("INFO:\t   room_id: %d", room_id);
+     Log->Write("INFO:\t   platform_id: %d", platform_id);
      Log->Write("INFO:\t   track_start: [%.2f, %.2f]", track_start_x, track_start_y);
      Log->Write("INFO:\t   track_end: [%.2f, %.2f]", track_end_x, track_end_y);
      Log->Write("INFO:\t   arrival_time: %.2f", arrival_time);
@@ -947,6 +949,7 @@ std::shared_ptr<TrainTimeTable> GeoFileParser::parseTrainTimeTableNode(TiXmlElem
                     track_end,
                     train_start,
                     train_end,
+                    platform_id,
                     });
 
      return trainTimeTab;

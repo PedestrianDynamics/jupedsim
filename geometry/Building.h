@@ -45,6 +45,13 @@
 #include "Goal.h"
 #include "../general/Configuration.h"
 
+struct Platform
+{
+     int id;
+     int rid;
+     std::map<int, std::vector<Wall> > tracks;
+};
+
 struct TrainTimeTable
 {
      int id;
@@ -56,7 +63,7 @@ struct TrainTimeTable
      Point pend; // track end
      Point tstart; // train start
      Point tend; // train end
-
+     int pid; // Platform id
 };
 struct TrainType
 {
@@ -98,6 +105,7 @@ private:
      std::map<int, Goal*> _goals;
      std::map<std::string, std::shared_ptr<TrainType> > _trainTypes;
      std::map<int, std::shared_ptr<TrainTimeTable> > _trainTimeTables;
+     std::map<int, std::shared_ptr<Platform> > _platforms;
      /// pedestrians pathway
      bool _savePathway;
      std::ofstream _pathWayStream;
@@ -235,6 +243,8 @@ public:
 
      const std::map<int, std::shared_ptr<TrainTimeTable> >& GetTrainTimeTables() const;
 
+     const std::map<int, std::shared_ptr<Platform> >& GetPlatforms() const;
+
      bool AddCrossing(Crossing* line);
 
      bool AddTransition(Transition* line);
@@ -246,6 +256,8 @@ public:
      bool AddTrainType(std::shared_ptr<TrainType> TT);
 
      bool AddTrainTimeTable(std::shared_ptr<TrainTimeTable> TTT);
+
+     bool AddPlatform(std::shared_ptr<Platform> P);
 
      const std::string& GetProjectRootDir() const;
 
@@ -288,9 +300,9 @@ public:
 
 private:
 
-    bool InitInsideGoals();
-
-    void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);
+     bool InitInsideGoals();
+     bool InitPlatforms();
+     void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);
      /** @defgroup auto-correct-geometry
       * functions used to auto-correct the geometry.
       * Main function is correct()
