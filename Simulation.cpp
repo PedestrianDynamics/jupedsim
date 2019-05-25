@@ -71,6 +71,7 @@ Simulation::Simulation(Configuration* args)
     _fps = 1;
     _em = nullptr;
     _gotSources = false;
+    _trainConstraints = false;
     _maxSimTime = 100;
 //     _config = args;
 }
@@ -272,6 +273,7 @@ bool Simulation::InitArgs()
     //@todo: these variables are global
     TrainTypes = _building->GetTrainTypes();
     TrainTimeTables = _building->GetTrainTimeTables();
+    _trainConstraints = (bool) TrainTimeTables.size();
 
     //-----
     // Give the DirectionStrategy the chance to perform some initialization.
@@ -385,7 +387,7 @@ void Simulation::UpdateRoutesAndLocations()
           if(_gotSources)
                ped->FindRoute();
           //finally actualize the route
-          if ( !_gotSources && ped->FindRoute() == -1 ) {
+          if ( !_gotSources && ped->FindRoute() == -1 && !_trainConstraints) {
                //a destination could not be found for that pedestrian
                Log->Write("ERROR: \tCould not find a route for pedestrian %d in room %d and subroom %d",
                          ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID());

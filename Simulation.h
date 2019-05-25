@@ -88,6 +88,8 @@ private:
      int _maxSimTime;
 
     bool _gotSources; // is true if we got some sources. Otherwise, false.
+     bool _trainConstraints; // true if inifile has some train constraints
+
     // bool _printPB; // print progressbar
 public:
     /**
