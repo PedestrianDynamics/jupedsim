@@ -204,7 +204,7 @@ bool GeoFileParser::LoadGeometry(Building* building)
                for (TiXmlElement* xPolyVertices = xSubRoom->FirstChildElement("polygon"); xPolyVertices;
                     xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
 
-                    std::string wall_type = xPolyVertices->Attribute("type");
+                    std::string wall_type = xmltoa(xPolyVertices->Attribute("type"), "wall");
                     for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
                               "vertex");
                          xVertex && xVertex!=xPolyVertices->LastChild("vertex");
