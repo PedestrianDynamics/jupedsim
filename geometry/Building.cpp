@@ -396,7 +396,7 @@ bool Building::InitGeometry()
 
       return true;
 }
-const std::vector<Wall> Building::GetTrackWalls(Point TrackStart, Point TrackEnd, int & subroomId) const
+const std::vector<Wall> Building::GetTrackWalls(Point TrackStart, Point TrackEnd, SubRoom * subroom) const
 {
       bool trackFound = false;
       int track_id = -1;
@@ -436,7 +436,7 @@ const std::vector<Wall> Building::GetTrackWalls(Point TrackStart, Point TrackEnd
       } // plattforms
       if(trackFound)
       {
-            subroomId = _platforms.at(platform_id)->sid;
+            subroom = _platforms.at(platform_id)->sub;
             mytrack = _platforms.at(platform_id)->tracks[track_id];
             std::cout << "track has walls:  " << mytrack.size() << "\n";
             std::cout << "platform " << platform_id << " track " << track_id << "\n";
@@ -495,7 +495,75 @@ const std::vector<std::pair<PointWall, PointWall > > Building::GetIntersectionPo
       }// doors
       return pws;
 }
+bool Building::resetTempVectors()
+{
+      // remove temp added walls
+      for(auto wall: TempAddedWalls)
+      {
+            for (auto platform: _platforms)
+            {
+                  auto tracks =  platform.second->tracks;
+                  for (auto track : tracks)
+                  {
+                        auto walls = track.second;
+                        for(auto trackWall : walls)
+                        {
+                              if (trackWall == wall)
+                              {
+                                    auto sub = platform.second->sub;
+                                    sub->RemoveWall(wall);
+                              }
+                        }
+                  }
+            }
+      }
+/*       // add remove walls */
+      for(auto wall: TempRemovedWalls)
+      {
+            for (auto platform: _platforms)
+            {
+                  auto tracks =  platform.second->tracks;
+                  for (auto track : tracks)
+                  {
+                        auto walls = track.second;
+                        for(auto trackWall : walls)
+                        {
+                              if (trackWall == wall)
+                              {
+                                    auto sub = platform.second->sub;
+                                    sub->AddWall(wall);
+                              }
+                        }
+                  }
+            }
+      }
 
+/*       // remove added doors */
+      for(auto door: TempAddedDoors)
+      {
+            for (auto platform: _platforms)
+            {
+                  auto tracks =  platform.second->tracks;
+                  for (auto track : tracks)
+                  {
+                        auto walls = track.second;
+                        for(auto trackWall : walls)
+                        {
+                              if (trackWall == door)
+                              {
+                                    auto sub = platform.second->sub;
+                                    sub->RemoveTransition(&door);
+                              }
+                        }
+                  }
+            }
+      }
+
+      TempAddedWalls.clear();
+      TempRemovedWalls.clear();
+      TempAddedDoors.clear();
+      return true;
+}
 bool Building::InitPlatforms()
 {
       int num_platform = -1;
@@ -504,7 +572,7 @@ bool Building::InitPlatforms()
             Room* room = roomItr.second.get();
             for (auto& subRoomItr : room->GetAllSubRooms())
             {
-                  SubRoom* subRoom = subRoomItr.second.get();
+                  auto subRoom = subRoomItr.second.get();
                   int subroom_id = subRoom->GetSubRoomID();
                   if(subRoom->GetType() != "Platform" ) continue;
                   std::map<int, std::vector<Wall> > tracks;
@@ -527,7 +595,7 @@ bool Building::InitPlatforms()
                         Platform{
                               num_platform,
                               room->GetID(),
-                              subroom_id,
+                              subRoom,
                               tracks,
                               });
                   AddPlatform(p);
@@ -1266,6 +1334,7 @@ SubRoom* Building::GetSubRoomByUID(int uid) const
       Log->Write("ERROR:\t No subroom exits with the unique id %d", uid);
       return nullptr;
 }
+
 
 //bool Building::IsVisible(Line* l1, Line* l2, bool considerHlines)
 //{
