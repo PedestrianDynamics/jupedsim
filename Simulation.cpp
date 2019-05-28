@@ -655,17 +655,23 @@ double Simulation::RunBody(double maxSimTime)
         // here open transition that should be closed
         //        TODO fix, opens door everytime...
         bool trainHere = false;
-        std::string train = "";
+        std::string trainType = "";
+        Point trackStart, trackEnd;
         auto now = Pedestrian::GetGlobalTime();
         for(auto && tab: TrainTimeTables)
         {
               if( (now>=tab.second->tin) && (now<=tab.second->tout) )
               {
                     trainHere = true;
-                    train = tab.second->type;
+                    trainType = tab.second->type;
+                    trackStart = tab.second->pstart;
+                    trackEnd = tab.second->pend;
                     continue;
               }
         }
+        if(trainHere)
+             correctGeometry(_building, trainType, trackStart, trackEnd);
+
         for (auto& itr: _building->GetAllTransitions())
         {
              Transition* Trans = itr.second;
@@ -682,38 +688,39 @@ double Simulation::RunBody(double maxSimTime)
                   }// normal transition
              }
              // ------ train
-             if(trainHere) // track?
-             {
-                   auto doors = TrainTypes[train]->doors;
-                   for(auto door: doors)
-                   {
-                         auto tp1 = door.GetPoint1();
-                         auto tp2 = door.GetPoint2();
-                         if(Trans->IsInLineSegment(tp1) && Trans->IsInLineSegment(tp2))
-                         {
-                               Trans->SetMaxDoorUsage(TrainTypes[train]->nmax);
-                               //todo:  SetOutflowRate() to sum of doors of train
-                               Trans->Open();
-                         }
-                   }
-             }
-             else
-             {
-                   for(auto tt: TrainTypes)
-                   {
-                         auto doors = tt.second->doors;
-                         for(auto door: doors)
-                         {
-                               auto tp1 = door.GetPoint1();
-                               auto tp2 = door.GetPoint2();
-                               if(Trans->IsInLineSegment(tp1) && Trans->IsInLineSegment(tp2))
-                                     //todo: If only we knew that Trans is a track
-                               {
-                                     Trans->TempClose();
-                               }
-                         }
-                   }
-             }
+             // if(trainHere) // track?
+             // {
+             //      coorect_geometry(_building, train)
+             //       auto doors = TrainTypes[train]->doors;
+             //       for(auto door: doors)
+             //       {
+             //             auto tp1 = door.GetPoint1();
+             //             auto tp2 = door.GetPoint2();
+             //             if(Trans->IsInLineSegment(tp1) && Trans->IsInLineSegment(tp2))
+             //             {
+             //                   Trans->SetMaxDoorUsage(TrainTypes[train]->nmax);
+             //                   //todo:  SetOutflowRate() to sum of doors of train
+             //                   Trans->Open();
+             //             }
+             //       }
+             // }
+             // else
+             // {
+             //       for(auto tt: TrainTypes)
+             //       {
+             //             auto doors = tt.second->doors;
+             //             for(auto door: doors)
+             //             {
+             //                   auto tp1 = door.GetPoint1();
+             //                   auto tp2 = door.GetPoint2();
+             //                   if(Trans->IsInLineSegment(tp1) && Trans->IsInLineSegment(tp2))
+             //                         //todo: If only we knew that Trans is a track
+             //                   {
+             //                         Trans->TempClose();
+             //                   }
+             //             }
+             //       }
+             // }
         }
         if(frameNr % 1000 == 0)
         {
@@ -723,7 +730,76 @@ double Simulation::RunBody(double maxSimTime)
     }// while time
     return t;
 }
+//      |             |
+//      *-------------* <---door
+//      |             |
+//      |             |
+//      |             |
+//      |             |
+//      |             |
+//*-----x-------------x--------* <- wall
+//      |             |
 
+bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::string trainType, Point TrackStart, Point TrackEnd)
+{
+      std::cout << "enter with train " << trainType.c_str() << "\n";
+      int subroomId = -1;
+
+      //auto platforms = building->GetPlatforms();
+
+      auto mytrack = building->GetTrackWalls(TrackStart, TrackEnd, subroomId);
+      if(mytrack.empty())
+            return false;
+
+      std::cout << "subroom: " << subroomId << "\n";
+      auto train = building->GetTrainTypes().at(trainType);
+      auto doors = train->doors;
+      // std::vector<std::pair<PointWall, pointWall > >
+      auto pws = building->GetIntersectionPoints(doors, mytrack);
+      if(pws.empty())
+            std::cout << "simulation::correctGeometry: pws are empty\n";
+
+      // debugging
+      std::cout << "------\n";
+      for(auto pw: pws)
+      {
+            auto pw1 = pw.first;
+            auto pw2 = pw.second;
+            auto p1 = pw1.first;
+            auto w1 = pw1.second;
+            auto p2 = pw2.first;
+            auto w2 = pw2.second;
+            std::cout << "p1 " << p1.toString() << ", wall: " << w1.toString() << "\n";
+            std::cout << "p2 " << p2.toString() << ", wall: " << w2.toString() << "\n";
+            std::cout << "------\n";
+            // case 1
+            Point P;
+            if(w1.ShareCommonPointWith(w2, P))
+            {
+                  // add AP and BP: walls
+                  // remove walls w1 and w2
+                  // p1 p2 door
+            }
+            else if(w1 == w2)
+            {
+                  // use function we have in correct geometry
+            }
+            else // disjoint
+            {
+                  // find points on w1 and w2 between p1 and p2
+                  // (A, B)
+                  // remove all walls connected to A
+                  // move A forwards
+                  // remove walls... until B is found
+                  // remove walls w1 and w2
+            }
+      }
+      std::cout << "------\n";
+      getc(stdin);
+
+     return true;
+
+}
 void Simulation::RunFooter()
 {
     // writing the footer

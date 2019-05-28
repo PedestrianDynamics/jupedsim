@@ -912,6 +912,7 @@ std::shared_ptr<TrainTimeTable> GeoFileParser::parseTrainTimeTableNode(TiXmlElem
      int id = xmltoi(e->Attribute("id"), -1);
      std::string type = xmltoa(e->Attribute("type"), "-1");
      int room_id = xmltoi(e->Attribute("room_id"), -1);
+     int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
      int platform_id = xmltoi(e->Attribute("platform_id"), -1);
      float track_start_x = xmltof(e->Attribute("track_start_x"), -1);
      float track_start_y = xmltof(e->Attribute("track_start_y"), -1);
@@ -929,6 +930,7 @@ std::shared_ptr<TrainTimeTable> GeoFileParser::parseTrainTimeTableNode(TiXmlElem
      Log->Write("INFO:\t   id: %d", id);
      Log->Write("INFO:\t   type: %s", type.c_str());
      Log->Write("INFO:\t   room_id: %d", room_id);
+     Log->Write("INFO:\t   subroom_id: %d", subroom_id);
      Log->Write("INFO:\t   platform_id: %d", platform_id);
      Log->Write("INFO:\t   track_start: [%.2f, %.2f]", track_start_x, track_start_y);
      Log->Write("INFO:\t   track_end: [%.2f, %.2f]", track_end_x, track_end_y);
@@ -943,6 +945,7 @@ std::shared_ptr<TrainTimeTable> GeoFileParser::parseTrainTimeTableNode(TiXmlElem
                     id,
                     type,
                     room_id,
+                    subroom_id,
                     arrival_time,
                     departure_time,
                     track_start,

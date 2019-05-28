@@ -45,10 +45,17 @@
 #include "Goal.h"
 #include "../general/Configuration.h"
 
+typedef std::pair<Point, Wall> PointWall;
+
+// train schedules: Trains get deleted and added.
+//std::vector<Wall> TempAddedWalls;
+//std::vector<Wall> TempRemovedWalls;
+
 struct Platform
 {
      int id;
      int rid;
+     int sid;
      std::map<int, std::vector<Wall> > tracks;
 };
 
@@ -57,6 +64,7 @@ struct TrainTimeTable
      int id;
      std::string type;
      int rid; // room id
+     int sid; // subroom id
      double tin; // arrival time
      double tout; //leaving time
      Point pstart; // track start
@@ -238,13 +246,17 @@ public:
      const std::map<int, Hline*>& GetAllHlines() const;
 
      const std::map<int, Goal*>& GetAllGoals() const;
-
+     // --------------- Trains interface
      const std::map<std::string, std::shared_ptr<TrainType> >& GetTrainTypes() const;
 
      const std::map<int, std::shared_ptr<TrainTimeTable> >& GetTrainTimeTables() const;
 
      const std::map<int, std::shared_ptr<Platform> >& GetPlatforms() const;
 
+     const std::vector<Wall> GetTrackWalls(Point TrackStart, Point TrackEnd, int & subroomId) const;
+     const std::vector<std::pair<PointWall, PointWall > > GetIntersectionPoints(const std::vector<Transition> doors, const std::vector<Wall>) const;
+
+     // ------------------------------------
      bool AddCrossing(Crossing* line);
 
      bool AddTransition(Transition* line);

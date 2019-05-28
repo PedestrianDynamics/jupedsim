@@ -366,7 +366,23 @@ bool Building::InitGeometry()
 
       InitInsideGoals();
       InitPlatforms();
+      //---
+      for (auto platform: _platforms)
+      {
+            std::cout << "\n platform " << platform.first << ", "<< platform.second->id << "\n";
+            std::cout <<  "\t rid " << platform.second->rid << "\n";
+            auto tracks = platform.second->tracks;
+            for(auto track: tracks)
+            {
+                  std::cout << "\t track " << track.first << "\n";
+                  auto walls = track.second;
+                  for(auto wall: walls)
+                  {
+                        std::cout << "\t\t wall: " << wall.GetType() << ". " << wall.GetPoint1().toString() << " | " <<  wall.GetPoint2().toString() << "\n";
+                  }
+            }
 
+      }
       Log->Write("INFO: \tInit Geometry successful!!!\n");
 
       // for (auto& transItr : _transitions){
@@ -380,6 +396,106 @@ bool Building::InitGeometry()
 
       return true;
 }
+const std::vector<Wall> Building::GetTrackWalls(Point TrackStart, Point TrackEnd, int & subroomId) const
+{
+      bool trackFound = false;
+      int track_id = -1;
+      int platform_id = -1;
+      std::vector<Wall> mytrack;
+      for(auto platform: _platforms)
+      {
+            platform_id = platform.second->id;
+            auto tracks = platform.second->tracks;
+            for(auto track: tracks)
+            {
+                  track_id=track.first;
+                  int commonPoints = 0;
+                  std::cout << "\t track " << track.first << "\n";
+                  auto walls = track.second;
+                  for(auto wall: walls)
+                  {
+                        Point P1 =  wall.GetPoint1();
+                        Point P2 =  wall.GetPoint2();
+                        //std::cout << "\t\t wall: " << wall.GetType() << ". " << wall.GetPoint1().toString() << " | " <<  wall.GetPoint2().toString() << "\n";
+                        if (P1 == TrackStart)
+                              commonPoints++;
+                        if(P1 == TrackEnd)
+                              commonPoints++;
+                        if(P2 == TrackStart)
+                              commonPoints++;
+                        if(P2 == TrackEnd)
+                              commonPoints++;
+                  }
+                  if(commonPoints == 2 )
+                  {
+                        trackFound = true;
+                        break;
+                  }
+            } // tracks
+            if (trackFound) break;
+      } // plattforms
+      if(trackFound)
+      {
+            subroomId = _platforms.at(platform_id)->sid;
+            mytrack = _platforms.at(platform_id)->tracks[track_id];
+            std::cout << "track has walls:  " << mytrack.size() << "\n";
+            std::cout << "platform " << platform_id << " track " << track_id << "\n";
+      }
+      else
+      {
+            std::cout << "could not find any track! \n";
+      }
+      return mytrack;
+}
+
+const std::vector<std::pair<PointWall, PointWall > > Building::GetIntersectionPoints(const std::vector<Transition> doors, const std::vector<Wall> mytrack) const
+{
+      const int scaleFactor = 1000; // very long orthogonal walls to train's doors
+      std::vector<std::pair<PointWall, PointWall > > pws;
+      // every door has two points.
+      // for every point -> get pair<P, W>
+      // collect pairs of pairs
+      for(auto door: doors)
+      {
+            PointWall pw1, pw2;
+            int nintersections = 0;
+            auto n = door.NormalVec();
+            auto p11 = door.GetPoint1() + n*scaleFactor;
+            auto p12 = door.GetPoint1() - n*scaleFactor;
+            auto p21 = door.GetPoint2() + n*scaleFactor;
+            auto p22 = door.GetPoint2() - n*scaleFactor;
+            auto normalWall1 = Wall(p11, p12);
+            auto normalWall2 = Wall(p21, p22);
+            /* std::cout << "normal wall 1: " << normalWall1.toString() << "\n"; */
+            /* std::cout << "normal wall 2: " << normalWall2.toString() << "\n"; */
+            for(auto twall: mytrack)
+            {
+                  /* std::cout << "  twall " << twall.toString() << "\n"; */
+                  Point interPoint1, interPoint2;
+                  auto res = normalWall1.IntersectionWith(twall, interPoint1);
+                  auto res2 = normalWall2.IntersectionWith(twall, interPoint2);
+                  if(res == 1)
+                  {
+                        /* std::cout << "intersection at :" << interPoint1.toString() << "\n"; */
+                        pw1 = std::make_pair(interPoint1, twall);
+                        nintersections++;
+
+                  }
+                  if(res2 == 1)
+                  {
+                        pw2 = std::make_pair(interPoint2, twall);
+                        nintersections++;
+                        /* std::cout << "intersection at :" << interPoint2.toString() << "\n"; */
+                  }
+            } // tracks
+            std::cout << "door: " << door.toString() << ", intersections: " <<  nintersections << "\n";
+            if(nintersections == 2)
+                  pws.push_back(std::make_pair(pw1, pw2));
+
+      }// doors
+      return pws;
+}
+
 bool Building::InitPlatforms()
 {
       int num_platform = -1;
@@ -389,6 +505,7 @@ bool Building::InitPlatforms()
             for (auto& subRoomItr : room->GetAllSubRooms())
             {
                   SubRoom* subRoom = subRoomItr.second.get();
+                  int subroom_id = subRoom->GetSubRoomID();
                   if(subRoom->GetType() != "Platform" ) continue;
                   std::map<int, std::vector<Wall> > tracks;
                   num_platform++;
@@ -409,9 +526,10 @@ bool Building::InitPlatforms()
                   std::shared_ptr<Platform> p = std::make_shared<Platform>(
                         Platform{
                               num_platform,
-                                    room->GetID(),
-                                    tracks,
-                                    });
+                              room->GetID(),
+                              subroom_id,
+                              tracks,
+                              });
                   AddPlatform(p);
 
             }//subroom
