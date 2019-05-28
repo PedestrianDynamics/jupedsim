@@ -743,15 +743,14 @@ double Simulation::RunBody(double maxSimTime)
 bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::string trainType, Point TrackStart, Point TrackEnd)
 {
       std::cout << "enter with train " << trainType.c_str() << "\n";
-      int subroomId = -1;
-
       //auto platforms = building->GetPlatforms();
-
-      auto mytrack = building->GetTrackWalls(TrackStart, TrackEnd, subroomId);
-      if(mytrack.empty())
+      SubRoom * subroom;
+      auto mytrack = building->GetTrackWalls(TrackStart, TrackEnd, subroom);
+      if(mytrack.empty() || subroom == nullptr)
             return false;
 
-      std::cout << "subroom: " << subroomId << "\n";
+      //auto subroom = building->GetSubRoomByID(subroomId);
+
       auto train = building->GetTrainTypes().at(trainType);
       auto doors = train->doors;
       // std::vector<std::pair<PointWall, pointWall > >
@@ -782,6 +781,8 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::string
             }
             else if(w1 == w2)
             {
+                  subroom->RemoveWall(w1);
+                  //building->TempRemoveWalls()
                   // use function we have in correct geometry
             }
             else // disjoint

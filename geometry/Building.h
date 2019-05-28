@@ -48,14 +48,12 @@
 typedef std::pair<Point, Wall> PointWall;
 
 // train schedules: Trains get deleted and added.
-//std::vector<Wall> TempAddedWalls;
-//std::vector<Wall> TempRemovedWalls;
 
 struct Platform
 {
      int id;
      int rid;
-     int sid;
+     SubRoom * sub;
      std::map<int, std::vector<Wall> > tracks;
 };
 
@@ -121,6 +119,11 @@ private:
 public:
      /// constructor
      Building();
+     std::vector<Wall> TempAddedWalls;
+     std::vector<Wall> TempRemovedWalls;
+     std::vector<Transition> TempAddedDoors;
+     bool resetTempVectors();
+
 
 //    Building(const std::string &, const std::string &, RoutingEngine &, PedDistributor &, double);
      Building(Configuration* config, PedDistributor& pedDistributor);
@@ -253,7 +256,7 @@ public:
 
      const std::map<int, std::shared_ptr<Platform> >& GetPlatforms() const;
 
-     const std::vector<Wall> GetTrackWalls(Point TrackStart, Point TrackEnd, int & subroomId) const;
+     const std::vector<Wall> GetTrackWalls(Point TrackStart, Point TrackEnd, SubRoom * subroom) const;
      const std::vector<std::pair<PointWall, PointWall > > GetIntersectionPoints(const std::vector<Transition> doors, const std::vector<Wall>) const;
 
      // ------------------------------------
