@@ -94,8 +94,6 @@ bool Crossing::IsClose() const
 
 bool Crossing::IsTempClose() const
 {
-     std::cout << "\n enter istempclose with " <<  this->GetID() << "\n";
-
      return _state == DoorState::TEMP_CLOSE;
 }
 

@@ -941,8 +941,9 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
                }
                if(relevant) {
                     //only if not closed
-                    if(!ap->IsClosed())
-                         relevantAPS.push_back(ap);
+                    if(ap)
+                         if(!ap->IsClosed())
+                              relevantAPS.push_back(ap);
                }
           }
      }

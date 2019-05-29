@@ -37,8 +37,6 @@
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "geometry/WaitingArea.h"
-#include <filesystem>
-namespace fs = std::filesystem;
 
 #ifdef _OPENMP
 
@@ -46,7 +44,7 @@ namespace fs = std::filesystem;
 #define omp_get_thread_num() 0
 #define omp_get_max_threads()  1
 #endif
-
+namespace fs = std::filesystem;
 using namespace std;
 
 OutputHandler* Log;
@@ -558,6 +556,8 @@ double Simulation::RunBody(double maxSimTime)
     // main program loop
     while ((_nPeds || (!_agentSrcManager.IsCompleted()&& _gotSources) ) && t<maxSimTime) {
         t = 0+(frameNr-1)*_deltaT;
+        // Handle train traffic: coorect geometry
+        bool geometryChanged= TrainTraffic();
 
         //process the queue for incoming pedestrians
         ProcessAgentsQueue();
@@ -576,10 +576,18 @@ double Simulation::RunBody(double maxSimTime)
             //update quickestRouter
             if (_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST)) {
                 FFRouter* ffrouter = dynamic_cast<FFRouter*>(_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST));
+                if(geometryChanged)
+                {
+                     ffrouter->Init(_building.get());
+                     std::cout << KBLU << " Init router in simulation\n" << RESET;
+                }
+
+
                 if (ffrouter->MustReInit()) {
                     ffrouter->ReInit();
                     ffrouter->SetRecalc(t);
                 }
+
             }
 
             // here the used routers are update, when needed due to external changes
@@ -600,29 +608,8 @@ double Simulation::RunBody(double maxSimTime)
 
         // write the trajectories
         if (0==frameNr%writeInterval) {
-            _iod->WriteFrame(frameNr/writeInterval, _building.get());
-
-            if(_config-> GetFileFormat() == FORMAT_PLAIN)
-            {
-                 fs::path p = _config->GetTrajectoriesFile();
-                 int sf = fs::file_size(p);
-                 if(sf>_maxFileSize*1024*1024)
-                 {
-                      std::string extention = p.extension().string();
-                      _countTraj++;
-                      char tmp_traj_name[100];
-                      sprintf(tmp_traj_name,"%s_%.4d_%s", TrajectoryName.stem().string().c_str(), _countTraj, extention.c_str());
-                      _config->SetTrajectoriesFile(tmp_traj_name);
-                      Log->Write("INFO:\tNew trajectory file <%s>", tmp_traj_name);
-                      OutputHandler* file = new FileHandler(_config->GetTrajectoriesFile().c_str());
-                      outputTXT->SetOutputHandler(file);
-
-//_config->GetProjectRootDir()+"_1_"+_config->GetTrajectoriesFile());
-                      // _config->SetTrajectoriesFile(name);
-                      _iod->WriteHeader(_nPeds, _fps, _building.get(), _seed, _countTraj);
-                      // _iod->WriteGeometry(_building.get());
-                 }
-            }
+              _iod->WriteFrame(frameNr/writeInterval, _building.get());
+              WriteTrajectories(TrajectoryName.stem().string());
         }
 
         if(!_gotSources && !_periodic && _config->print_prog_bar())
@@ -652,87 +639,20 @@ double Simulation::RunBody(double maxSimTime)
         }
         #endif
 
-        // here open transition that should be closed
-        //        TODO fix, opens door everytime...
-        bool trainHere = false;
-        std::string trainType = "";
-        Point trackStart, trackEnd;
-        auto now = Pedestrian::GetGlobalTime();
-        static int once =1;
-        for(auto && tab: TrainTimeTables)
-        {
-              if( (now>=tab.second->tin) && (now<=tab.second->tout) )
-              {
-                    trainHere = true;
-                    trainType = tab.second->type;
-                    trackStart = tab.second->pstart;
-                    trackEnd = tab.second->pend;
-                    continue;
-              }
-        }
-        // todo: correctgeometry on arrival of a train. Reset it on departure of train.
-        if(trainHere && once)
-        {
-              correctGeometry(_building, trainType, trackStart, trackEnd);
-              _routingEngine->UpdateRouter();
-              once=0;
-        }
-        std::cout<< KRED << "Check: Building Has " << _building->GetAllTransitions().size() << " Transitions\n" << RESET;
         for (auto& itr: _building->GetAllTransitions())
         {
              Transition* Trans = itr.second;
-             std::cout << "HH TRAN " << Trans->GetID()<< " room " << Trans->GetID()<<  "\n";
-             std::cout << "KNALL TRANS " << Trans->IsOpen()<< "\n";
-             std::cout << "KNALL TRANS " << Trans->IsClose()<< "\n";
-             std::cout << "KNALL TRANS " << Trans->IsTempClose()<< "\n";
              if(Trans->IsTempClose())
              {
-                   std::cout << "enter IF\n";
                   if ((Trans->GetMaxDoorUsage() != (std::numeric_limits<int>::max)()) ||
                     (Trans->GetOutflowRate() != (std::numeric_limits<double>::max)()) ){
-//                        || (Trans->GetOutflowRate() != std::numeric_limits<double>::max)){
                         Trans->UpdateClosingTime( _deltaT);
                         if(Trans->GetClosingTime() <= _deltaT){
-                          Trans->changeTemporaryState();
-                          /* Log-> Write("INFO:\tReset state of door %d,  Time=%.2f", Trans->GetID(), Pedestrian::GetGlobalTime()); */
+                             Trans->changeTemporaryState();
                       }
                   }// normal transition
              }
-             // ------ train
-             // if(trainHere) // track?
-             // {
-             //      coorect_geometry(_building, train)
-             //       auto doors = TrainTypes[train]->doors;
-             //       for(auto door: doors)
-             //       {
-             //             auto tp1 = door.GetPoint1();
-             //             auto tp2 = door.GetPoint2();
-             //             if(Trans->IsInLineSegment(tp1) && Trans->IsInLineSegment(tp2))
-             //             {
-             //                   Trans->SetMaxDoorUsage(TrainTypes[train]->nmax);
-             //                   //todo:  SetOutflowRate() to sum of doors of train
-             //                   Trans->Open();
-             //             }
-             //       }
-             // }
-             // else
-             // {
-             //       for(auto tt: TrainTypes)
-             //       {
-             //             auto doors = tt.second->doors;
-             //             for(auto door: doors)
-             //             {
-             //                   auto tp1 = door.GetPoint1();
-             //                   auto tp2 = door.GetPoint2();
-             //                   if(Trans->IsInLineSegment(tp1) && Trans->IsInLineSegment(tp2))
-             //                         //todo: If only we knew that Trans is a track
-             //                   {
-             //                         Trans->TempClose();
-             //                   }
-             //             }
-             //       }
-             // }
-        }
+        }// Transitions
         if(frameNr % 1000 == 0)
         {
               Log->Write("INFO:\tUpdate door statistics at t=%.2f", t);
@@ -740,6 +660,30 @@ double Simulation::RunBody(double maxSimTime)
         }
     }// while time
     return t;
+}
+bool Simulation::WriteTrajectories(std::string trajectoryName)
+{
+      if(_config-> GetFileFormat() == FORMAT_PLAIN)
+      {
+            fs::path p = _config->GetTrajectoriesFile();
+            int sf = fs::file_size(p);
+            if(sf>_maxFileSize*1024*1024)
+            {
+                  std::string extention = p.extension().string();
+                  this->incrementCountTraj();
+                  char tmp_traj_name[100];
+                  sprintf(tmp_traj_name,"%s_%.4d_%s", trajectoryName.c_str(), _countTraj, extention.c_str());
+                  _config->SetTrajectoriesFile(tmp_traj_name);
+                  Log->Write("INFO:\tNew trajectory file <%s>", tmp_traj_name);
+                  OutputHandler* file = new FileHandler(_config->GetTrajectoriesFile().c_str());
+                  outputTXT->SetOutputHandler(file);
+
+//_config->GetProjectRootDir()+"_1_"+_config->GetTrajectoriesFile());
+                  // _config->SetTrajectoriesFile(name);
+                  _iod->WriteHeader(_nPeds, _fps, _building.get(), _seed, _countTraj);
+                  // _iod->WriteGeometry(_building.get());
+            }
+      }
 }
 //      |             |
 //      *-------------* <---door
@@ -751,6 +695,14 @@ double Simulation::RunBody(double maxSimTime)
 //*-----x-------------x--------* <- wall
 //      |             |
 
+
+/*
+ * in this function this happens:
+* remove walls
+* add walls
+* add doors
+* set _routingEngine->setNeedUpdate(true);
+*/
 bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::string trainType, Point TrackStart, Point TrackEnd)
 {
       std::cout << "enter with train " << trainType.c_str() << "\n";
@@ -858,7 +810,7 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::string
       }
       std::cout << "------\n";
       /* getc(stdin); */
-
+      _routingEngine->setNeedUpdate(true);
      return true;
 
 }
@@ -990,6 +942,11 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
     }
 }
 
+void Simulation::incrementCountTraj()
+{
+      _countTraj++;
+}
+
 AgentsSourcesManager& Simulation::GetAgentSrcManager()
 {
     return _agentSrcManager;
@@ -1002,4 +959,40 @@ Building* Simulation::GetBuilding()
 
 int Simulation::GetMaxSimTime() const{
       return _maxSimTime;
+}
+// return true is changes are made to the geometry
+bool Simulation::TrainTraffic()
+{
+     // here open transition that should be closed
+     //        TODO fix, opens door everytime...
+     bool trainHere = false;
+     std::string trainType = "";
+     Point trackStart, trackEnd;
+     auto now = Pedestrian::GetGlobalTime();
+     static int once =1;
+     for(auto && tab: TrainTimeTables)
+     {
+          if( (now>=tab.second->tin) && (now<=tab.second->tout) )
+          {
+               trainHere = true;
+               trainType = tab.second->type;
+               trackStart = tab.second->pstart;
+               trackEnd = tab.second->pend;
+               continue;
+          }
+     }
+
+     // todo: correctgeometry on arrival of a train. Reset it on departure of train.
+     if(trainHere && once)
+     {
+          correctGeometry(_building, trainType, trackStart, trackEnd);
+          std::cout << KRED << ">> update router\n" << RESET;
+          once=0;
+          return true;
+     }
+
+     /* std::cout<< KRED << "Check: Building Has " << _building->GetAllTransitions().size() << " Transitions\n" << RESET; */
+
+     return false;
+
 }
