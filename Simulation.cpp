@@ -658,6 +658,7 @@ double Simulation::RunBody(double maxSimTime)
         std::string trainType = "";
         Point trackStart, trackEnd;
         auto now = Pedestrian::GetGlobalTime();
+        static int once =1;
         for(auto && tab: TrainTimeTables)
         {
               if( (now>=tab.second->tin) && (now<=tab.second->tout) )
@@ -669,14 +670,24 @@ double Simulation::RunBody(double maxSimTime)
                     continue;
               }
         }
-        if(trainHere)
-             correctGeometry(_building, trainType, trackStart, trackEnd);
-
+        // todo: correctgeometry on arrival of a train. Reset it on departure of train.
+        if(trainHere && once)
+        {
+              correctGeometry(_building, trainType, trackStart, trackEnd);
+              _routingEngine->UpdateRouter();
+              once=0;
+        }
+        std::cout<< KRED << "Check: Building Has " << _building->GetAllTransitions().size() << " Transitions\n" << RESET;
         for (auto& itr: _building->GetAllTransitions())
         {
              Transition* Trans = itr.second;
+             std::cout << "HH TRAN " << Trans->GetID()<< " room " << Trans->GetID()<<  "\n";
+             std::cout << "KNALL TRANS " << Trans->IsOpen()<< "\n";
+             std::cout << "KNALL TRANS " << Trans->IsClose()<< "\n";
+             std::cout << "KNALL TRANS " << Trans->IsTempClose()<< "\n";
              if(Trans->IsTempClose())
              {
+                   std::cout << "enter IF\n";
                   if ((Trans->GetMaxDoorUsage() != (std::numeric_limits<int>::max)()) ||
                     (Trans->GetOutflowRate() != (std::numeric_limits<double>::max)()) ){
 //                        || (Trans->GetOutflowRate() != std::numeric_limits<double>::max)){
@@ -743,13 +754,19 @@ double Simulation::RunBody(double maxSimTime)
 bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::string trainType, Point TrackStart, Point TrackEnd)
 {
       std::cout << "enter with train " << trainType.c_str() << "\n";
+      std::cout<< KBLU << "Enter correctGeometry: Building Has " << building->GetAllTransitions().size() << " Transitions\n" << RESET;
       //auto platforms = building->GetPlatforms();
       SubRoom * subroom;
-      auto mytrack = building->GetTrackWalls(TrackStart, TrackEnd, subroom);
+      int room_id, subroom_id;
+      auto mytrack = building->GetTrackWalls(TrackStart, TrackEnd, room_id, subroom_id);
+      std::cout << "room: " << room_id << " subroom_id " << subroom_id << "\n" ;
+      Room* room = building->GetRoom(room_id);
+      subroom = room->GetSubRoom(subroom_id);//todo safety check
+      int transition_id = 10000;
+
       if(mytrack.empty() || subroom == nullptr)
             return false;
 
-      //auto subroom = building->GetSubRoomByID(subroomId);
 
       auto train = building->GetTrainTypes().at(trainType);
       auto doors = train->doors;
@@ -758,6 +775,8 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::string
       if(pws.empty())
             std::cout << "simulation::correctGeometry: pws are empty\n";
 
+      subroom->GetUID();
+      auto walls = subroom->GetAllWalls();
       // debugging
       std::cout << "------\n";
       for(auto pw: pws)
@@ -773,20 +792,62 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::string
             std::cout << "------\n";
             // case 1
             Point P;
-            if(w1.ShareCommonPointWith(w2, P))
+            if(w1 == w2)
             {
+                  std::cout << "EQUAL\n";
+                  Transition* e = new Transition();
+                  e->SetID(transition_id++);
+                  e->SetCaption("tempDoor");
+                  e->SetPoint1(p1);
+                  e->SetPoint2(p2);
+                  e->SetType("train_door");
+                  room->AddTransitionID(e->GetUniqueID());// danger area
+                  e->SetRoom1(room);
+                  e->SetSubRoom1(subroom);
+                  subroom->AddTransition(e);// danger area
+                  building->AddTransition(e);// danger area
+                  std::cout << "added transition\n";
+                  std::cout << "open:  " << e->IsOpen() << "\n" ;
+                  std::cout << "Close:  " << e->IsClose() << "\n";
+                  std::cout << "TempClose:  " << e->IsTempClose() << "\n" ;
+                  std::cout<< KGRN << "Transition added. Building Has " << building->GetAllTransitions().size() << " Transitions\n" << RESET;
+                  double dist_pt1 = (w1.GetPoint1() - e->GetPoint1()).NormSquare();
+                  double dist_pt2 = (w1.GetPoint1() - e->GetPoint2()).NormSquare();
+                  Point A, B;
+
+                  if(dist_pt1<dist_pt2)
+                  {
+                        A = e->GetPoint1();
+                        B = e->GetPoint2();
+                  }
+                  else
+                  {
+                        A = e->GetPoint2();
+                        B = e->GetPoint1();
+                  }
+
+                  Wall NewWall(w1.GetPoint1(), A);
+                  Wall NewWall1(w1.GetPoint2(), B);
+                  // add new lines to be controled against overlap with exits
+                  building->TempAddedWalls.push_back(NewWall);
+                  building->TempAddedWalls.push_back(NewWall1);
+                  building->TempAddedDoors.push_back(*e);
+                  building->TempRemovedWalls.push_back(w1);
+                  subroom->AddWall(NewWall);
+                  subroom->AddWall(NewWall1);
+                  subroom->RemoveWall(w1);
+                  //room->AddTransitionID(e->GetUniqueID());
+            }
+            else if(w1.ShareCommonPointWith(w2, P))
+            {
+                  std::cout << "ONE POINT COMON\n";
                   // add AP and BP: walls
                   // remove walls w1 and w2
                   // p1 p2 door
             }
-            else if(w1 == w2)
-            {
-                  subroom->RemoveWall(w1);
-                  //building->TempRemoveWalls()
-                  // use function we have in correct geometry
-            }
             else // disjoint
             {
+                  std::cout << "DISJOINT\n";
                   // find points on w1 and w2 between p1 and p2
                   // (A, B)
                   // remove all walls connected to A
@@ -796,7 +857,7 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::string
             }
       }
       std::cout << "------\n";
-      getc(stdin);
+      /* getc(stdin); */
 
      return true;
 

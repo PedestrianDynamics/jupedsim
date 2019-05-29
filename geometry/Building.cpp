@@ -396,7 +396,7 @@ bool Building::InitGeometry()
 
       return true;
 }
-const std::vector<Wall> Building::GetTrackWalls(Point TrackStart, Point TrackEnd, SubRoom * subroom) const
+const std::vector<Wall> Building::GetTrackWalls(Point TrackStart, Point TrackEnd, int & room_id, int & subroom_id) const
 {
       bool trackFound = false;
       int track_id = -1;
@@ -436,10 +436,12 @@ const std::vector<Wall> Building::GetTrackWalls(Point TrackStart, Point TrackEnd
       } // plattforms
       if(trackFound)
       {
-            subroom = _platforms.at(platform_id)->sub;
+            room_id = _platforms.at(platform_id)->rid;
+            subroom_id = _platforms.at(platform_id)->sid;
             mytrack = _platforms.at(platform_id)->tracks[track_id];
             std::cout << "track has walls:  " << mytrack.size() << "\n";
             std::cout << "platform " << platform_id << " track " << track_id << "\n";
+            std::cout << "room " << room_id << " subroom " << subroom_id << "\n";
       }
       else
       {
@@ -497,12 +499,23 @@ const std::vector<std::pair<PointWall, PointWall > > Building::GetIntersectionPo
 }
 bool Building::resetTempVectors()
 {
+      int room_id, subroom_id;
+      SubRoom * subroom;
       // remove temp added walls
       for(auto wall: TempAddedWalls)
       {
             for (auto platform: _platforms)
             {
                   auto tracks =  platform.second->tracks;
+                  room_id = platform.second->rid;
+                  subroom_id = platform.second->sid;
+                  for(auto r: GetAllRooms())
+                  {
+                        if(r.first != room_id)
+                              continue;
+                        subroom = r.second->GetSubRoom(subroom_id);
+                  }
+
                   for (auto track : tracks)
                   {
                         auto walls = track.second;
@@ -510,8 +523,8 @@ bool Building::resetTempVectors()
                         {
                               if (trackWall == wall)
                               {
-                                    auto sub = platform.second->sub;
-                                    sub->RemoveWall(wall);
+                                    std::cout<< "todo\n";
+                                    subroom->RemoveWall(wall);
                               }
                         }
                   }
@@ -523,17 +536,25 @@ bool Building::resetTempVectors()
             for (auto platform: _platforms)
             {
                   auto tracks =  platform.second->tracks;
+                  room_id = platform.second->rid;
+                  subroom_id = platform.second->sid;
+                  for(auto r: GetAllRooms())
+                  {
+                        if(r.first != room_id)
+                              continue;
+                        subroom = r.second->GetSubRoom(subroom_id);
+                  }
                   for (auto track : tracks)
                   {
-                        auto walls = track.second;
-                        for(auto trackWall : walls)
-                        {
-                              if (trackWall == wall)
-                              {
-                                    auto sub = platform.second->sub;
-                                    sub->AddWall(wall);
-                              }
-                        }
+                       auto walls = track.second;
+                       for(auto trackWall : walls)
+                       {
+                             if (trackWall == wall)
+                             {
+                                   subroom->AddWall(wall);
+                                   std::cout<< "todo\n";
+                             }
+                       }
                   }
             }
       }
@@ -544,6 +565,14 @@ bool Building::resetTempVectors()
             for (auto platform: _platforms)
             {
                   auto tracks =  platform.second->tracks;
+                  room_id = platform.second->rid;
+                  subroom_id = platform.second->sid;
+                  for(auto r: GetAllRooms())
+                  {                        if(r.first != room_id)
+                              continue;
+                        subroom = r.second->GetSubRoom(subroom_id);
+                  }
+
                   for (auto track : tracks)
                   {
                         auto walls = track.second;
@@ -551,8 +580,8 @@ bool Building::resetTempVectors()
                         {
                               if (trackWall == door)
                               {
-                                    auto sub = platform.second->sub;
-                                    sub->RemoveTransition(&door);
+                                    subroom->RemoveTransition(&door);
+                                    std::cout<< "todo\n";
                               }
                         }
                   }
@@ -595,7 +624,7 @@ bool Building::InitPlatforms()
                         Platform{
                               num_platform,
                               room->GetID(),
-                              subRoom,
+                              subroom_id,
                               tracks,
                               });
                   AddPlatform(p);
@@ -1094,6 +1123,7 @@ bool Building::AddCrossing(Crossing* line)
 
 bool Building::AddTransition(Transition* line)
 {
+      std::cout << "building addtransition "<< line->GetID()<< "\n";
       if (_transitions.count(line->GetID())!=0) {
             char tmp[CLENGTH];
             sprintf(tmp,
@@ -1170,6 +1200,7 @@ const map<int, Crossing*>& Building::GetAllCrossings() const
 
 const map<int, Transition*>& Building::GetAllTransitions() const
 {
+//      std::cout << "BUILDING " << _transitions.
       return _transitions;
 }
 

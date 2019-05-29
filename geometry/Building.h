@@ -53,7 +53,7 @@ struct Platform
 {
      int id;
      int rid;
-     SubRoom * sub;
+     int sid;
      std::map<int, std::vector<Wall> > tracks;
 };
 
@@ -256,7 +256,7 @@ public:
 
      const std::map<int, std::shared_ptr<Platform> >& GetPlatforms() const;
 
-     const std::vector<Wall> GetTrackWalls(Point TrackStart, Point TrackEnd, SubRoom * subroom) const;
+     const std::vector<Wall> GetTrackWalls(Point TrackStart, Point TrackEnd, int & room_id, int & subroom_id) const;
      const std::vector<std::pair<PointWall, PointWall > > GetIntersectionPoints(const std::vector<Transition> doors, const std::vector<Wall>) const;
 
      // ------------------------------------

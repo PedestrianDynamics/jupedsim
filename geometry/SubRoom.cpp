@@ -260,6 +260,7 @@ bool SubRoom::RemoveTransition(Transition * t)
 }
 bool SubRoom::AddTransition(Transition* line)
 {
+     std::cout << "subroom addtransition "<< line->GetID() << ", " << line->GetUniqueID()<< "\n";
      _transitions.push_back(line);
      _goalIDs.push_back(line->GetUniqueID());
      return true;
