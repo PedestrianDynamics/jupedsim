@@ -370,16 +370,69 @@ std::string getEventFileName(const std::string & GetProjectFile)
      TiXmlNode* xMainNode = doc.RootElement();
      string eventfile = "";
      if (xMainNode->FirstChild("events_file")) {
-          ret = xMainNode->FirstChild("events_file")->FirstChild()->Value();
-          Log->Write("INFO: \tevents <" + eventfile + ">");
+          ret = xMainNode->FirstChild("events_file")->FirstChild()->ValueStr();
+          Log->Write("INFO: \tevents <" + ret + ">");
      } else {
           Log->Write("INFO: \tNo events found");
           return ret;
      }
      return ret;
 }
+ // <train_constraints>
+ //   <train_time_table>ttt.xml</train_time_table>
+ //   <train_types>train_types.xml</train_types>
+ // </train_constraints>
 
 
+std::string getTrainTimeTableFileName(const std::string & GetProjectFile)
+{
+     std::string ret="";
+
+     TiXmlDocument doc(GetProjectFile);
+     if (!doc.LoadFile()) {
+          Log->Write("ERROR: \t%s", doc.ErrorDesc());
+          Log->Write("ERROR: \tGetTrainTimeTable could not parse the project file");
+          return ret;
+     }
+     TiXmlNode* xMainNode = doc.RootElement();
+     string tttfile = "";
+     if (xMainNode->FirstChild("train_constraints")) {
+          TiXmlNode * xFileNode = xMainNode->FirstChild("train_constraints")->FirstChild("train_time_table");
+
+          if(xFileNode)
+               ret = xFileNode->FirstChild()->ValueStr();
+          Log->Write("INFO: \ttrain_time_table <" + ret + ">");
+     } else {
+          Log->Write("INFO: \tNo events no ttt file found");
+          return ret;
+     }
+     return ret;
+}
+
+
+std::string getTrainTypeFileName(const std::string & GetProjectFile)
+{
+     std::string ret="";
+
+     TiXmlDocument doc(GetProjectFile);
+     if (!doc.LoadFile()) {
+          Log->Write("ERROR: \t%s", doc.ErrorDesc());
+          Log->Write("ERROR: \tGetTrainType could not parse the project file");
+          return ret;
+     }
+     TiXmlNode* xMainNode = doc.RootElement();
+     string tttfile = "";
+     if (xMainNode->FirstChild("train_constraints")) {
+          auto xFileNode = xMainNode->FirstChild("train_constraints")->FirstChild("train_types");
+          if(xFileNode)
+               ret = xFileNode->FirstChild()->ValueStr();
+          Log->Write("INFO: \ttrain_types <" + ret + ">");
+     } else {
+          Log->Write("INFO: \tNo events no train types file found");
+          return ret;
+     }
+     return ret;
+}
 std::string getGoalFileName(const std::string & GetProjectFile)
 {
      std::string ret="";
@@ -411,6 +464,8 @@ void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building* building, i
      std::string sourceFileName = getSourceFileName(building->GetProjectFilename());
      std::string goalFileName = getGoalFileName(building->GetProjectFilename());
      std::string eventFileName = getEventFileName(building->GetProjectFilename());
+     std::string trainTimeTableFileName = getTrainTimeTableFileName(building->GetProjectFilename());
+     std::string trainTypeFileName = getTrainTypeFileName(building->GetProjectFilename());
      (void) seed; (void) nPeds;
      char tmp[100] = "";
      sprintf(tmp, "#description: jpscore (%s)", JPSCORE_VERSION);
@@ -434,6 +489,16 @@ void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building* building, i
      if( eventFileName != "")
      {
           sprintf(tmp,"#events: %s", eventFileName.c_str());
+          Write(tmp);
+     }
+     if( trainTimeTableFileName  != "")
+     {
+          sprintf(tmp,"#trainTimeTable: %s", trainTimeTableFileName.c_str());
+          Write(tmp);
+     }
+     if( trainTypeFileName  != "")
+     {
+          sprintf(tmp,"#trainType: %s", trainTypeFileName.c_str());
           Write(tmp);
      }
      Write("#ID: the agent ID");
