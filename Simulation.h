@@ -192,7 +192,7 @@ public:
      int GetMaxSimTime() const;
      void  incrementCountTraj();
 
-     bool correctGeometry(std::shared_ptr<Building> building,  std::string trainType, Point TrackStart, Point TrackEnd);
+     bool correctGeometry(std::shared_ptr<Building> building,  std::shared_ptr<TrainTimeTable>);
      bool WriteTrajectories(std::string trajName);
      bool TrainTraffic();
 

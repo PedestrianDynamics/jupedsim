@@ -410,7 +410,7 @@ const std::vector<Wall> Building::GetTrackWalls(Point TrackStart, Point TrackEnd
             {
                   track_id=track.first;
                   int commonPoints = 0;
-                  std::cout << "\t track " << track.first << "\n";
+                  // std::cout << "\t track " << track.first << "\n";
                   auto walls = track.second;
                   for(auto wall: walls)
                   {
@@ -439,13 +439,15 @@ const std::vector<Wall> Building::GetTrackWalls(Point TrackStart, Point TrackEnd
             room_id = _platforms.at(platform_id)->rid;
             subroom_id = _platforms.at(platform_id)->sid;
             mytrack = _platforms.at(platform_id)->tracks[track_id];
-            std::cout << "track has walls:  " << mytrack.size() << "\n";
-            std::cout << "platform " << platform_id << " track " << track_id << "\n";
-            std::cout << "room " << room_id << " subroom " << subroom_id << "\n";
+            // std::cout << "track has walls:  " << mytrack.size() << "\n";
+            // std::cout << "platform " << platform_id << " track " << track_id << "\n";
+            // std::cout << "room " << room_id << " subroom " << subroom_id << "\n";
       }
       else
       {
-            std::cout << "could not find any track! \n";
+            std::cout << "could not find any track! Exit.\n";
+            exit(-1);
+
       }
       return mytrack;
 }
@@ -490,107 +492,144 @@ const std::vector<std::pair<PointWall, PointWall > > Building::GetIntersectionPo
                         /* std::cout << "intersection at :" << interPoint2.toString() << "\n"; */
                   }
             } // tracks
-            std::cout << "door: " << door.toString() << ", intersections: " <<  nintersections << "\n";
+            // std::cout << "door: " << door.toString() << ", intersections: " <<  nintersections << "\n";
             if(nintersections == 2)
                   pws.push_back(std::make_pair(pw1, pw2));
 
       }// doors
       return pws;
 }
-bool Building::resetTempVectors()
+// reset changes made by trainTimeTable[id]
+bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
 {
+     // this function is composed of three copy/pasted blocks.
       int room_id, subroom_id;
       SubRoom * subroom;
       // remove temp added walls
-      for(auto wall: TempAddedWalls)
+      for(auto id_wall: TempAddedWalls)
       {
-            for (auto platform: _platforms)
-            {
-                  auto tracks =  platform.second->tracks;
-                  room_id = platform.second->rid;
-                  subroom_id = platform.second->sid;
-                  for(auto r: GetAllRooms())
-                  {
-                        if(r.first != room_id)
-                              continue;
-                        subroom = r.second->GetSubRoom(subroom_id);
-                  }
+           int i = id_wall.first;
+           if(i != tab->id) continue;
+           auto tempWalls = id_wall.second;
+           for(auto wall: tempWalls)
+           {
+                for (auto platform: _platforms)
+                {
+                     auto tracks =  platform.second->tracks;
+                     room_id = platform.second->rid;
+                     subroom_id = platform.second->sid;
+                     for(auto r: GetAllRooms())
+                     {
+                          if(r.first != room_id)
+                               continue;
+                          subroom = r.second->GetSubRoom(subroom_id);
+                     }
 
-                  for (auto track : tracks)
-                  {
-                        auto walls = track.second;
-                        for(auto trackWall : walls)
-                        {
-                              if (trackWall == wall)
-                              {
-                                    std::cout<< "todo\n";
+                     for (auto track : tracks)
+                     {
+                          auto walls = track.second;
+                          for(auto trackWall : walls)
+                          {
+                               if (trackWall == wall)
+                               {
                                     subroom->RemoveWall(wall);
-                              }
-                        }
-                  }
-            }
+                                    auto it = std::find(tempWalls.begin(), tempWalls.end(), wall);
+                                          if (it != tempWalls.end())
+                                          {
+                                                // std::cout<< KGRN << "delete wall ..." << RESET <<std::endl;
+                                                // wallPiece.WriteToErrorLog();
+                                               tempWalls.erase(it);
+                                          }
+                               }
+                          }
+                     }
+                }
+           }
       }
+
 /*       // add remove walls */
-      for(auto wall: TempRemovedWalls)
+      for(auto id_wall: TempRemovedWalls)
       {
-            for (auto platform: _platforms)
-            {
-                  auto tracks =  platform.second->tracks;
-                  room_id = platform.second->rid;
-                  subroom_id = platform.second->sid;
-                  for(auto r: GetAllRooms())
-                  {
-                        if(r.first != room_id)
-                              continue;
-                        subroom = r.second->GetSubRoom(subroom_id);
-                  }
-                  for (auto track : tracks)
-                  {
-                       auto walls = track.second;
-                       for(auto trackWall : walls)
-                       {
-                             if (trackWall == wall)
-                             {
-                                   subroom->AddWall(wall);
-                                   std::cout<< "todo\n";
-                             }
-                       }
-                  }
-            }
+           int i = id_wall.first;
+           if(i != tab->id) continue;
+           auto tempWalls = id_wall.second;
+
+           for(auto wall: tempWalls)
+           {
+                for (auto platform: _platforms)
+                {
+                     auto tracks =  platform.second->tracks;
+                     room_id = platform.second->rid;
+                     subroom_id = platform.second->sid;
+                     for(auto r: GetAllRooms())
+                     {
+                          if(r.first != room_id)
+                               continue;
+                          subroom = r.second->GetSubRoom(subroom_id);
+                     }
+                     for (auto track : tracks)
+                     {
+                          auto walls = track.second;
+                          for(auto trackWall : walls)
+                          {
+                               if (trackWall == wall)
+                               {
+                                    subroom->AddWall(wall);
+                                    auto it = std::find(tempWalls.begin(), tempWalls.end(), wall);
+                                    if (it != tempWalls.end())
+                                    {
+                                         // std::cout<< KGRN << "delete wall ..." << RESET <<std::endl;
+                                         // wallPiece.WriteToErrorLog();
+                                         tempWalls.erase(it);
+                                    }
+                               }
+                          }
+                     }
+                }
+           }
       }
 
 /*       // remove added doors */
-      for(auto door: TempAddedDoors)
+      for(auto id_wall: TempAddedDoors)
       {
-            for (auto platform: _platforms)
-            {
-                  auto tracks =  platform.second->tracks;
-                  room_id = platform.second->rid;
-                  subroom_id = platform.second->sid;
-                  for(auto r: GetAllRooms())
-                  {                        if(r.first != room_id)
-                              continue;
-                        subroom = r.second->GetSubRoom(subroom_id);
-                  }
+           int i = id_wall.first;
+           if(i != tab->id) continue;
+           auto tempWalls = id_wall.second;
 
-                  for (auto track : tracks)
-                  {
-                        auto walls = track.second;
-                        for(auto trackWall : walls)
-                        {
-                              if (trackWall == door)
-                              {
+           for(auto door: tempWalls)
+           {
+                for (auto platform: _platforms)
+                {
+                     auto tracks =  platform.second->tracks;
+                     room_id = platform.second->rid;
+                     subroom_id = platform.second->sid;
+                     for(auto r: GetAllRooms())
+                     {                        if(r.first != room_id)
+                               continue;
+                          subroom = r.second->GetSubRoom(subroom_id);
+                     }
+
+                     for (auto track : tracks)
+                     {
+                          auto walls = track.second;
+                          for(auto trackWall : walls)
+                          {
+                               if (trackWall == door)
+                               {
                                     subroom->RemoveTransition(&door);
-                                    std::cout<< "todo\n";
-                              }
-                        }
-                  }
-            }
+                                    auto it = std::find(tempWalls.begin(), tempWalls.end(), door);
+                                    if (it != tempWalls.end())
+                                    {
+                                         // std::cout<< KGRN << "delete wall ..." << RESET <<std::endl;
+                                         // wallPiece.WriteToErrorLog();
+                                         tempWalls.erase(it);
+                                    }
+                               }
+                          }
+                     }
+                }
+           }
       }
-
-      TempAddedWalls.clear();
-      TempRemovedWalls.clear();
-      TempAddedDoors.clear();
       return true;
 }
 bool Building::InitPlatforms()

@@ -470,7 +470,7 @@ bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building* buildi
           building->GetTransition(id)->TempClose();
           break;
      case DoorState::Error:
-          Log->Write("WARNING:\t Unknown door state: <%s>. open or close. Default: open",
+          Log->Write("WARNING:\t Unknown door state: <%s>. open, close or temp_close. Default: open",
                     stateStr.c_str());
           building->GetTransition(id)->Open();
           break;
@@ -926,6 +926,7 @@ std::shared_ptr<TrainTimeTable> GeoFileParser::parseTrainTimeTableNode(TiXmlElem
 
      float arrival_time = xmltof(e->Attribute("arrival_time"), -1);
      float departure_time = xmltof(e->Attribute("departure_time"), -1);
+     // @todo: check these values for correctness e.g. arrival < departure
      Log->Write("INFO:\tTrain time table:");
      Log->Write("INFO:\t   id: %d", id);
      Log->Write("INFO:\t   type: %s", type.c_str());
@@ -953,6 +954,8 @@ std::shared_ptr<TrainTimeTable> GeoFileParser::parseTrainTimeTableNode(TiXmlElem
                     train_start,
                     train_end,
                     platform_id,
+                    false,
+                    false,
                     });
 
      return trainTimeTab;

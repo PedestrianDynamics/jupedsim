@@ -70,6 +70,8 @@ struct TrainTimeTable
      Point tstart; // train start
      Point tend; // train end
      int pid; // Platform id
+     bool arrival;
+     bool departure;
 };
 struct TrainType
 {
@@ -119,15 +121,13 @@ private:
 public:
      /// constructor
      Building();
-     std::vector<Wall> TempAddedWalls;
-     std::vector<Wall> TempRemovedWalls;
-     std::vector<Transition> TempAddedDoors;
-     bool resetTempVectors();
-
+     std::map<int, std::vector<Wall> > TempAddedWalls; // map to trainTimeTable
+     std::map<int, std::vector<Wall> > TempRemovedWalls;
+     std::map<int, std::vector<Transition> > TempAddedDoors;
 
 //    Building(const std::string &, const std::string &, RoutingEngine &, PedDistributor &, double);
      Building(Configuration* config, PedDistributor& pedDistributor);
-
+     bool resetGeometry(std::shared_ptr<TrainTimeTable> tab);
      /// destructor
      virtual ~Building();
 
@@ -406,7 +406,7 @@ private:
       * @param subroom
       * @return bool
       */
-bool RemoveOverlappingDoors(
+     bool RemoveOverlappingDoors(
           const std::shared_ptr<SubRoom>& subroom) const;
      /** @} */ // end of group
 

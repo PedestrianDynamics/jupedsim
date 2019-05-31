@@ -575,19 +575,36 @@ double Simulation::RunBody(double maxSimTime)
             //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
             //update quickestRouter
             if (_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST)) {
-                FFRouter* ffrouter = dynamic_cast<FFRouter*>(_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST));
                 if(geometryChanged)
                 {
-                     ffrouter->Init(_building.get());
+                     FFRouter* ffrouter2 = dynamic_cast<FFRouter*>(_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST));
+                     ffrouter2->Init(_building.get());
+                     // debug
+                     fs::path f("tmp_"+std::to_string(t)+"_"+_config->GetGeometryFile());
+                     std::string filename = f.string();
+                     std::cout << "\n Write geometry --> " << filename.c_str() << "\n";
+                     _building->SaveGeometry(filename);
+                     //
+                     double _deltaH = _building->GetConfig()->get_deltaH();
+                     double _wallAvoidDistance = _building->GetConfig()->get_wall_avoid_distance();
+                     bool _useWallAvoidance = _building->GetConfig()->get_use_wall_avoidance();
+
+                     if(auto dirlocff = dynamic_cast<DirectionLocalFloorfield*>(_building->GetConfig()->get_dirStrategy())){
+                          Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
+                          dirlocff->Init(_building.get(), _deltaH, _wallAvoidDistance, _useWallAvoidance);
+                          Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
+                     }
+
+
                      std::cout << KBLU << " Init router in simulation\n" << RESET;
                 }
-
-
-                if (ffrouter->MustReInit()) {
-                    ffrouter->ReInit();
-                    ffrouter->SetRecalc(t);
+                else{
+                     FFRouter* ffrouter = dynamic_cast<FFRouter*>(_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST));
+                     if (ffrouter->MustReInit()) {
+                          ffrouter->ReInit();
+                          ffrouter->SetRecalc(t);
+                     }
                 }
-
             }
 
             // here the used routers are update, when needed due to external changes
@@ -703,18 +720,24 @@ bool Simulation::WriteTrajectories(std::string trajectoryName)
 * add doors
 * set _routingEngine->setNeedUpdate(true);
 */
-bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::string trainType, Point TrackStart, Point TrackEnd)
+bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared_ptr<TrainTimeTable> tab)
 {
-      std::cout << "enter with train " << trainType.c_str() << "\n";
-      std::cout<< KBLU << "Enter correctGeometry: Building Has " << building->GetAllTransitions().size() << " Transitions\n" << RESET;
-      //auto platforms = building->GetPlatforms();
-      SubRoom * subroom;
-      int room_id, subroom_id;
-      auto mytrack = building->GetTrackWalls(TrackStart, TrackEnd, room_id, subroom_id);
-      std::cout << "room: " << room_id << " subroom_id " << subroom_id << "\n" ;
-      Room* room = building->GetRoom(room_id);
-      subroom = room->GetSubRoom(subroom_id);//todo safety check
-      int transition_id = 10000;
+     //auto platforms = building->GetPlatforms();
+     int trainId = tab->id;
+     std::string trainType = tab->type;
+     Point TrackStart = tab->pstart;
+     Point TrackEnd = tab->pend;
+     SubRoom * subroom;
+     int room_id, subroom_id;
+     auto mytrack = building->GetTrackWalls(TrackStart, TrackEnd, room_id, subroom_id);
+     Room* room = building->GetRoom(room_id);
+     subroom = room->GetSubRoom(subroom_id);//todo safety check
+     int transition_id = 10000;
+
+     std::cout << "enter with train " << trainType.c_str() << "\n";
+     std::cout<< KBLU << "Enter correctGeometry: Building Has " << building->GetAllTransitions().size() << " Transitions\n" << RESET;
+     std::cout << "room: " << room_id << " subroom_id " << subroom_id << "\n" ;
+
 
       if(mytrack.empty() || subroom == nullptr)
             return false;
@@ -730,7 +753,7 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::string
       subroom->GetUID();
       auto walls = subroom->GetAllWalls();
       // debugging
-      std::cout << "------\n";
+      // std::cout << "------\n";
       for(auto pw: pws)
       {
             auto pw1 = pw.first;
@@ -739,9 +762,9 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::string
             auto w1 = pw1.second;
             auto p2 = pw2.first;
             auto w2 = pw2.second;
-            std::cout << "p1 " << p1.toString() << ", wall: " << w1.toString() << "\n";
-            std::cout << "p2 " << p2.toString() << ", wall: " << w2.toString() << "\n";
-            std::cout << "------\n";
+            // std::cout << "p1 " << p1.toString() << ", wall: " << w1.toString() << "\n";
+            // std::cout << "p2 " << p2.toString() << ", wall: " << w2.toString() << "\n";
+            // std::cout << "------\n";
             // case 1
             Point P;
             if(w1 == w2)
@@ -758,10 +781,6 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::string
                   e->SetSubRoom1(subroom);
                   subroom->AddTransition(e);// danger area
                   building->AddTransition(e);// danger area
-                  std::cout << "added transition\n";
-                  std::cout << "open:  " << e->IsOpen() << "\n" ;
-                  std::cout << "Close:  " << e->IsClose() << "\n";
-                  std::cout << "TempClose:  " << e->IsTempClose() << "\n" ;
                   std::cout<< KGRN << "Transition added. Building Has " << building->GetAllTransitions().size() << " Transitions\n" << RESET;
                   double dist_pt1 = (w1.GetPoint1() - e->GetPoint1()).NormSquare();
                   double dist_pt2 = (w1.GetPoint1() - e->GetPoint2()).NormSquare();
@@ -781,10 +800,10 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::string
                   Wall NewWall(w1.GetPoint1(), A);
                   Wall NewWall1(w1.GetPoint2(), B);
                   // add new lines to be controled against overlap with exits
-                  building->TempAddedWalls.push_back(NewWall);
-                  building->TempAddedWalls.push_back(NewWall1);
-                  building->TempAddedDoors.push_back(*e);
-                  building->TempRemovedWalls.push_back(w1);
+                  building->TempAddedWalls[trainId].push_back(NewWall);
+                  building->TempAddedWalls[trainId].push_back(NewWall1);
+                  building->TempAddedDoors[trainId].push_back(*e);
+                  building->TempRemovedWalls[trainId].push_back(w1);
                   subroom->AddWall(NewWall);
                   subroom->AddWall(NewWall1);
                   subroom->RemoveWall(w1);
@@ -963,31 +982,40 @@ int Simulation::GetMaxSimTime() const{
 // return true is changes are made to the geometry
 bool Simulation::TrainTraffic()
 {
-     // here open transition that should be closed
-     //        TODO fix, opens door everytime...
      bool trainHere = false;
+     bool trainLeave = false;
      std::string trainType = "";
      Point trackStart, trackEnd;
+     int trainId = 0;
      auto now = Pedestrian::GetGlobalTime();
-     static int once =1;
      for(auto && tab: TrainTimeTables)
      {
-          if( (now>=tab.second->tin) && (now<=tab.second->tout) )
+          trainType = tab.second->type;
+          trainId = tab.second->id;
+          trackStart = tab.second->pstart;
+          trackEnd = tab.second->pend;
+          if(!tab.second->arrival && (now >= tab.second->tin) && (now <= tab.second->tout))
           {
                trainHere = true;
-               trainType = tab.second->type;
-               trackStart = tab.second->pstart;
-               trackEnd = tab.second->pend;
-               continue;
+               TrainTimeTables.at(trainId)->arrival = true;
+               std::cout << KRED << "Arrival: TRAIN " << trainType << " at time: " << now << "\n" << RESET;
+               correctGeometry(_building, tab.second);
+
+          }
+          else if(tab.second->arrival && now >= tab.second->tout)
+          {
+               std::cout <<KGRN << "Departure: TRAIN " << trainType << " at time: " << now  << "\n" << RESET;
+
+               _building->resetGeometry(tab.second);
+               trainLeave = true;
+               TrainTimeTables.at(trainId)->arrival = false;
+
           }
      }
 
      // todo: correctgeometry on arrival of a train. Reset it on departure of train.
-     if(trainHere && once)
+     if(trainHere || trainLeave)
      {
-          correctGeometry(_building, trainType, trackStart, trackEnd);
-          std::cout << KRED << ">> update router\n" << RESET;
-          once=0;
           return true;
      }
 

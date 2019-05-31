@@ -108,7 +108,7 @@ bool FFRouter::Init(Building* building)
           _goalToLineUIDmap = _globalFF->getGoalToLineUIDmap();
           _goalToLineUIDmap2 = _globalFF->getGoalToLineUIDmap2();
           _goalToLineUIDmap3 = _globalFF->getGoalToLineUIDmap3();
-          //_globalFF->writeGoalFF("goal.vtk", goalIDs);
+          _globalFF->writeGoalFF("goal.vtk", goalIDs);
      }
      //get all door UIDs
      _allDoorUIDs.clear();
