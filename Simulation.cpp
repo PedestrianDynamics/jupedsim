@@ -582,7 +582,9 @@ double Simulation::RunBody(double maxSimTime)
                      // debug
                      fs::path f("tmp_"+std::to_string(t)+"_"+_config->GetGeometryFile());
                      std::string filename = f.string();
-                     std::cout << "\n Write geometry --> " << filename.c_str() << "\n";
+                     std::cout << "\nUpdate geometry. New  geometry --> " << filename.c_str() << "\n";
+
+                     std::cout<< KGRN << "Enter correctGeometry: Building Has " << _building->GetAllTransitions().size() << " Transitions\n" << RESET;
                      _building->SaveGeometry(filename);
                      //
                      double _deltaH = _building->GetConfig()->get_deltaH();
@@ -701,6 +703,7 @@ bool Simulation::WriteTrajectories(std::string trajectoryName)
                   // _iod->WriteGeometry(_building.get());
             }
       }
+      return true;
 }
 //      |             |
 //      *-------------* <---door
@@ -781,7 +784,9 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
                   e->SetSubRoom1(subroom);
                   subroom->AddTransition(e);// danger area
                   building->AddTransition(e);// danger area
-                  std::cout<< KGRN << "Transition added. Building Has " << building->GetAllTransitions().size() << " Transitions\n" << RESET;
+                  /* std::cout << KRED << "Trans added: " << e->toString() << "\n" << RESET; */
+
+                  /* std::cout<< KGRN << "Transition added. Building Has " << building->GetAllTransitions().size() << " Transitions\n" << RESET; */
                   double dist_pt1 = (w1.GetPoint1() - e->GetPoint1()).NormSquare();
                   double dist_pt2 = (w1.GetPoint1() - e->GetPoint2()).NormSquare();
                   Point A, B;
@@ -799,6 +804,9 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
 
                   Wall NewWall(w1.GetPoint1(), A);
                   Wall NewWall1(w1.GetPoint2(), B);
+                  NewWall.SetType(w1.GetType());
+                  NewWall1.SetType(w1.GetType());
+
                   // add new lines to be controled against overlap with exits
                   building->TempAddedWalls[trainId].push_back(NewWall);
                   building->TempAddedWalls[trainId].push_back(NewWall1);
@@ -807,6 +815,12 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
                   subroom->AddWall(NewWall);
                   subroom->AddWall(NewWall1);
                   subroom->RemoveWall(w1);
+
+                  /* std::cout << KRED << "WALL added " << NewWall.toString() << "\n" << RESET ; */
+                  /* std::cout << KRED << "WALL added " << NewWall1.toString() << "\n" << RESET ; */
+                  /* std::cout << KRED << "WALL removed " << w1.toString() << "\n" << RESET ; */
+                  /* getc(stdin); */
+
                   //room->AddTransitionID(e->GetUniqueID());
             }
             else if(w1.ShareCommonPointWith(w2, P))
@@ -1005,15 +1019,12 @@ bool Simulation::TrainTraffic()
           else if(tab.second->arrival && now >= tab.second->tout)
           {
                std::cout <<KGRN << "Departure: TRAIN " << trainType << " at time: " << now  << "\n" << RESET;
-
                _building->resetGeometry(tab.second);
                trainLeave = true;
                TrainTimeTables.at(trainId)->arrival = false;
 
           }
      }
-
-     // todo: correctgeometry on arrival of a train. Reset it on departure of train.
      if(trainHere || trainLeave)
      {
           return true;
