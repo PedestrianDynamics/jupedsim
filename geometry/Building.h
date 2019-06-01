@@ -262,6 +262,8 @@ public:
      // ------------------------------------
      bool AddCrossing(Crossing* line);
 
+     bool RemoveTransition(Transition * line);
+
      bool AddTransition(Transition* line);
 
      bool AddHline(Hline* line);

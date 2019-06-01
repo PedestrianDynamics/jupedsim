@@ -504,132 +504,128 @@ bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
 {
      // this function is composed of three copy/pasted blocks.
       int room_id, subroom_id;
-      SubRoom * subroom;
-      // remove temp added walls
-      for(auto id_wall: TempAddedWalls)
-      {
-           int i = id_wall.first;
-           if(i != tab->id) continue;
-           auto tempWalls = id_wall.second;
-           for(auto wall: tempWalls)
-           {
-                for (auto platform: _platforms)
-                {
-                     auto tracks =  platform.second->tracks;
-                     room_id = platform.second->rid;
-                     subroom_id = platform.second->sid;
-                     for(auto r: GetAllRooms())
-                     {
-                          if(r.first != room_id)
-                               continue;
-                          subroom = r.second->GetSubRoom(subroom_id);
-                     }
 
-                     for (auto track : tracks)
+      // std::cout << "enter resetGeometry with tab id: " << tab->id << "\n" ;
+      // std::cout << "temp Added Walls\n";
+      // for(auto id_wall: TempAddedWalls)
+      // {
+      //      std::cout << "i " << id_wall.first << "\n";
+      //      auto walls = id_wall.second;
+      //      for(auto wall: walls )
+      //           std::cout << wall.toString() << "\n";
+      // }
+      // std::cout << "temp Removed Walls\n";
+      // for(auto id_wall: TempRemovedWalls)
+      // {
+      //      std::cout << "i " << id_wall.first << "\n";
+      //      auto walls = id_wall.second;
+      //      for(auto wall: walls )
+      //           std::cout << wall.toString() << "\n";
+      // }
+      // std::cout << "temp Added Doors\n";
+      // for(auto id_wall: TempAddedDoors)
+      // {
+      //      std::cout << "i " << id_wall.first << "\n";
+      //      auto walls = id_wall.second;
+      //      for(auto wall: walls )
+      //           std::cout << wall.toString() << "\n";
+      // }
+      // remove temp added walls
+      auto tempWalls = TempAddedWalls[tab->id];
+
+      for(auto wall: tempWalls)
+      {
+           for (auto platform: _platforms)
+           {
+                // auto tracks =  platform.second->tracks;
+                room_id = platform.second->rid;
+                subroom_id = platform.second->sid;
+                // auto room = this->GetAllRooms().at(room_id);
+                SubRoom * subroom = this->GetAllRooms().at(room_id)->GetAllSubRooms().at(subroom_id).get();
+                for(auto subWall: subroom->GetAllWalls())
+                {
+                     if(subWall == wall)
                      {
-                          auto walls = track.second;
-                          for(auto trackWall : walls)
+                          subroom->RemoveWall(wall);
+                          // std::cout << KGRN << "RESET REMOVE wall " << wall.toString() << "\n" << RESET;
+                          auto it = std::find(tempWalls.begin(), tempWalls.end(), wall);
+                          if (it != tempWalls.end())
                           {
-                               if (trackWall == wall)
-                               {
-                                    subroom->RemoveWall(wall);
-                                    auto it = std::find(tempWalls.begin(), tempWalls.end(), wall);
-                                          if (it != tempWalls.end())
-                                          {
-                                                // std::cout<< KGRN << "delete wall ..." << RESET <<std::endl;
-                                                // wallPiece.WriteToErrorLog();
-                                               tempWalls.erase(it);
-                                          }
-                               }
+                               tempWalls.erase(it);
                           }
-                     }
-                }
-           }
+                     }//if
+                }//subroom
+           }//platforms
       }
+      TempAddedWalls[tab->id] = tempWalls;
 
 /*       // add remove walls */
-      for(auto id_wall: TempRemovedWalls)
+      auto tempRemovedWalls = TempRemovedWalls[tab->id];
+      for(auto wall: tempRemovedWalls)
       {
-           int i = id_wall.first;
-           if(i != tab->id) continue;
-           auto tempWalls = id_wall.second;
-
-           for(auto wall: tempWalls)
+           for (auto platform: _platforms)
            {
-                for (auto platform: _platforms)
+                auto tracks =  platform.second->tracks;
+                room_id = platform.second->rid;
+                subroom_id = platform.second->sid;
+                SubRoom * subroom = this->GetAllRooms().at(room_id)->GetAllSubRooms().at(subroom_id).get();
+                for (auto track : tracks)
                 {
-                     auto tracks =  platform.second->tracks;
-                     room_id = platform.second->rid;
-                     subroom_id = platform.second->sid;
-                     for(auto r: GetAllRooms())
+                     auto walls = track.second;
+                     for(auto trackWall : walls)
                      {
-                          if(r.first != room_id)
-                               continue;
-                          subroom = r.second->GetSubRoom(subroom_id);
-                     }
-                     for (auto track : tracks)
-                     {
-                          auto walls = track.second;
-                          for(auto trackWall : walls)
+                          if (trackWall == wall)
                           {
-                               if (trackWall == wall)
+                               subroom->AddWall(wall);
+                               // std::cout << KGRN << "ADD BACK wall " << wall.toString() << "\n" << RESET;
+                               auto it = std::find(tempRemovedWalls.begin(), tempRemovedWalls.end(), wall);
+                               if (it != tempRemovedWalls.end())
                                {
-                                    subroom->AddWall(wall);
-                                    auto it = std::find(tempWalls.begin(), tempWalls.end(), wall);
-                                    if (it != tempWalls.end())
-                                    {
-                                         // std::cout<< KGRN << "delete wall ..." << RESET <<std::endl;
-                                         // wallPiece.WriteToErrorLog();
-                                         tempWalls.erase(it);
-                                    }
+                                    tempRemovedWalls.erase(it);
                                }
                           }
                      }
                 }
            }
       }
+      TempRemovedWalls[tab->id] = tempRemovedWalls;
 
 /*       // remove added doors */
-      for(auto id_wall: TempAddedDoors)
+      auto tempDoors = TempAddedDoors[tab->id];
+
+      for(auto door: tempDoors)
       {
-           int i = id_wall.first;
-           if(i != tab->id) continue;
-           auto tempWalls = id_wall.second;
-
-           for(auto door: tempWalls)
+           for (auto platform: _platforms)
            {
-                for (auto platform: _platforms)
+                auto tracks =  platform.second->tracks;
+                room_id = platform.second->rid;
+                subroom_id = platform.second->sid;
+                SubRoom * subroom = this->GetAllRooms().at(room_id)->GetAllSubRooms().at(subroom_id).get();
+                for(auto subTrans: subroom->GetAllTransitions())
                 {
-                     auto tracks =  platform.second->tracks;
-                     room_id = platform.second->rid;
-                     subroom_id = platform.second->sid;
-                     for(auto r: GetAllRooms())
-                     {                        if(r.first != room_id)
-                               continue;
-                          subroom = r.second->GetSubRoom(subroom_id);
-                     }
-
-                     for (auto track : tracks)
+                     if (*subTrans == door)
                      {
-                          auto walls = track.second;
-                          for(auto trackWall : walls)
+                          // Trnasitions are added to subrooms and building!!
+                          subroom->RemoveTransition(subTrans);
+                          this->RemoveTransition(subTrans);
+
+                          // std::cout << KGRN << "RESET remove door " << door.toString() << "\n" << RESET;
+
+                          auto it = std::find(tempDoors.begin(), tempDoors.end(), door);
+                          if (it != tempDoors.end())
                           {
-                               if (trackWall == door)
-                               {
-                                    subroom->RemoveTransition(&door);
-                                    auto it = std::find(tempWalls.begin(), tempWalls.end(), door);
-                                    if (it != tempWalls.end())
-                                    {
-                                         // std::cout<< KGRN << "delete wall ..." << RESET <<std::endl;
-                                         // wallPiece.WriteToErrorLog();
-                                         tempWalls.erase(it);
-                                    }
-                               }
+                               tempDoors.erase(it);
                           }
                      }
+
                 }
            }
       }
+      TempAddedDoors[tab->id] = tempDoors;
+      // std::cout << "leave resetGeometry with tab id: " << tab->id << "\n" ;
+      // std::cout << "temp Added Walls: " << TempAddedWalls[tab->id].size() << "\n";
+      // std::cout << "temp Removed Walls: " << TempRemovedWalls[tab->id].size()<<  "\n";
+      // std::cout << "temp Added Doors: " <<TempAddedDoors[tab->id].size() <<  "\n";
       return true;
 }
 bool Building::InitPlatforms()
@@ -1159,10 +1155,20 @@ bool Building::AddCrossing(Crossing* line)
       _crossings[IDCrossing] = line;
       return true;
 }
-
+bool Building::RemoveTransition(Transition * line)
+{
+     // std::cout << "enter Building Remove Transitions with " << _transitions.size() << "\n";
+      if (_transitions.count(line->GetID())!=0) {
+           _transitions.erase(line->GetID());
+           // std::cout << " enter Nuilding  Remove Transitions with " << _transitions.size() << "\n";
+           return true;
+      }
+     // std::cout << "2 enter Nuilding  Remove Transitions with " << _transitions.size() << "\n";
+     return false;
+}
 bool Building::AddTransition(Transition* line)
 {
-      std::cout << "building addtransition "<< line->GetID()<< "\n";
+      // std::cout << "building add transition "<< line->GetID()<< "\n";
       if (_transitions.count(line->GetID())!=0) {
             char tmp[CLENGTH];
             sprintf(tmp,
