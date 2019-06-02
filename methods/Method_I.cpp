@@ -138,6 +138,11 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
           vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids, zPos_measureArea);
           vector<double> ZInFrame = peddata.GetZInFrame(frameNr, ids, zPos_measureArea);
           vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
+          if(XInFrame.size() == 0)
+          {
+               Log->Write("Warning:\t no pedestrians in frame <%d>", frameNr);
+               continue;
+          }
           //vector int to_remove
           //------------------------------Remove peds outside geometry------------------------------------------
           for( int i=0;i<(int)IdInFrame.size();i++)
