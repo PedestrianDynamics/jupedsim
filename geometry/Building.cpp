@@ -530,11 +530,17 @@ bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
       //      for(auto wall: walls )
       //           std::cout << wall.toString() << "\n";
       // }
+      // getc(stdin);
+
       // remove temp added walls
       auto tempWalls = TempAddedWalls[tab->id];
-
-      for(auto wall: tempWalls)
+      for(auto  it=tempWalls.begin(); it!=tempWalls.end(); )
       {
+           auto wall = *it;
+           if (it != tempWalls.end())
+           {
+                tempWalls.erase(it);
+           }
            for (auto platform: _platforms)
            {
                 // auto tracks =  platform.second->tracks;
@@ -542,17 +548,18 @@ bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
                 subroom_id = platform.second->sid;
                 // auto room = this->GetAllRooms().at(room_id);
                 SubRoom * subroom = this->GetAllRooms().at(room_id)->GetAllSubRooms().at(subroom_id).get();
+                // std::cout << "----\n";
+                // for(auto subWall: subroom->GetAllWalls())
+                //      std::cout << ">> "<< subWall.toString() << "\n";
+                // std::cout << "----\n";
                 for(auto subWall: subroom->GetAllWalls())
                 {
                      if(subWall == wall)
                      {
+                          // if everything goes right, then we should enter this
+                          // if. We already erased from tempWalls!
                           subroom->RemoveWall(wall);
                           // std::cout << KGRN << "RESET REMOVE wall " << wall.toString() << "\n" << RESET;
-                          auto it = std::find(tempWalls.begin(), tempWalls.end(), wall);
-                          if (it != tempWalls.end())
-                          {
-                               tempWalls.erase(it);
-                          }
                      }//if
                 }//subroom
            }//platforms
@@ -561,8 +568,13 @@ bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
 
 /*       // add remove walls */
       auto tempRemovedWalls = TempRemovedWalls[tab->id];
-      for(auto wall: tempRemovedWalls)
+      for(auto  it=tempRemovedWalls.begin(); it!=tempRemovedWalls.end(); )
       {
+           auto wall = *it;
+           if (it != tempRemovedWalls.end())
+           {
+                tempRemovedWalls.erase(it);
+           }
            for (auto platform: _platforms)
            {
                 auto tracks =  platform.second->tracks;
@@ -578,11 +590,6 @@ bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
                           {
                                subroom->AddWall(wall);
                                // std::cout << KGRN << "ADD BACK wall " << wall.toString() << "\n" << RESET;
-                               auto it = std::find(tempRemovedWalls.begin(), tempRemovedWalls.end(), wall);
-                               if (it != tempRemovedWalls.end())
-                               {
-                                    tempRemovedWalls.erase(it);
-                               }
                           }
                      }
                 }
@@ -592,9 +599,13 @@ bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
 
 /*       // remove added doors */
       auto tempDoors = TempAddedDoors[tab->id];
-
-      for(auto door: tempDoors)
+      for(auto  it=tempDoors.begin(); it!=tempDoors.end(); )
       {
+           auto door = *it;
+           if (it != tempDoors.end())
+           {
+                tempDoors.erase(it);
+           }
            for (auto platform: _platforms)
            {
                 auto tracks =  platform.second->tracks;
@@ -608,14 +619,7 @@ bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
                           // Trnasitions are added to subrooms and building!!
                           subroom->RemoveTransition(subTrans);
                           this->RemoveTransition(subTrans);
-
                           // std::cout << KGRN << "RESET remove door " << door.toString() << "\n" << RESET;
-
-                          auto it = std::find(tempDoors.begin(), tempDoors.end(), door);
-                          if (it != tempDoors.end())
-                          {
-                               tempDoors.erase(it);
-                          }
                      }
 
                 }
