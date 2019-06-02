@@ -679,7 +679,7 @@ double Simulation::RunBody(double maxSimTime)
                   }// normal transition
              }
              //-----------
-             // regulate train doorusag
+             // regulate train doorusage
              std::string transType = Trans->GetType();
              if (Trans->IsOpen() && transType.rfind("Train", 0) == 0)
              {
@@ -694,7 +694,6 @@ double Simulation::RunBody(double maxSimTime)
                          Log->Write("INFO:\tclosing train door %s at t=%.2f", transType.c_str(), Pedestrian::GetGlobalTime());
                          Trans->Close();
                    }
-
              }
              //-----------
         }// Transitions
@@ -852,10 +851,53 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
             }
             else if(w1.ShareCommonPointWith(w2, P))
             {
+
                   std::cout << "ONE POINT COMON\n";
-                  // add AP and BP: walls
-                  // remove walls w1 and w2
-                  // p1 p2 door
+                  //------------ transition --------
+                  Transition* e = new Transition();
+                  e->SetID(transition_id++);
+                  e->SetCaption(trainType);
+                  e->SetPoint1(p1);
+                  e->SetPoint2(p2);
+                  std::string transType = "Train_"+std::to_string(tab->id)+"_"+std::to_string(tab->tin)+"_"+std::to_string(tab->tout);
+                  e->SetType(transType);
+                  room->AddTransitionID(e->GetUniqueID());// danger area
+                  e->SetRoom1(room);
+                  e->SetSubRoom1(subroom);
+
+                  subroom->AddTransition(e);// danger area
+                  building->AddTransition(e);// danger area
+                  //--------------------------------
+                  Point N, M;
+                  if(w1.GetPoint1()==P)
+                        N = w1.GetPoint2();
+                  else
+                        N = w1.GetPoint1();
+
+                  if(w2.GetPoint1()==P)
+                        M = w2.GetPoint2();
+                  else
+                        M = w2.GetPoint1();
+
+                  Wall NewWall(N, p1);
+                  Wall NewWall1(M, p2);
+                  NewWall.SetType(w1.GetType());
+                  NewWall1.SetType(w2.GetType());
+                  // changes to building
+                  building->TempAddedWalls[trainId].push_back(NewWall);
+                  building->TempAddedWalls[trainId].push_back(NewWall1);
+                  building->TempAddedDoors[trainId].push_back(*e);
+                  building->TempRemovedWalls[trainId].push_back(w1);
+                  building->TempRemovedWalls[trainId].push_back(w2);
+                  subroom->AddWall(NewWall);
+                  subroom->AddWall(NewWall1);
+                  subroom->RemoveWall(w1);
+                  subroom->RemoveWall(w2);
+                  /* std::cout << KRED << ". WALL added " << NewWall.toString() << "\n" << RESET ; */
+                  /* std::cout << KRED << "WALL added " << NewWall1.toString() << "\n" << RESET ; */
+                  /* std::cout << KRED << "WALL removed " << w1.toString() << "\n" << RESET ; */
+                  /* std::cout << KRED << "WALL removed " << w2.toString() << "\n" << RESET ; */
+                  /* getc(stdin); */
             }
             else // disjoint
             {
