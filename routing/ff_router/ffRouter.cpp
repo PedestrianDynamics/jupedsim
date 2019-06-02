@@ -299,7 +299,7 @@ bool FFRouter::Init(Building* building)
                auto iter = _locffviafm.begin();
                std::advance(iter, i);
                int roomNr = iter->first;
-               iter->second->writeFF("ffrouterOfRoom" + std::to_string(roomNr) + ".vtk", _allDoorUIDs);
+               iter->second->writeFF("ffrouterRoom_" + std::to_string(roomNr) + "_t_"+ std::to_string(Pedestrian::GetGlobalTime()) + ".vtk", _allDoorUIDs);
           }
      }
 

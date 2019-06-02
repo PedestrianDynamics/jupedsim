@@ -1651,7 +1651,7 @@ double UnivFFviaFM::getCostToDestination(const int destID, const Point& position
         } else if ((key < _grid->GetnPoints()-_grid->GetiMax()) && (_gridCode[key+_grid->GetiMax()] != OUTSIDE) && (_gridCode[key+_grid->GetiMax()] != WALL)) {
             key = key + _grid->GetiMax();
         } else {
-            Log->Write("ERROR:\t In getCostToDestination(3 args)");
+             // Log->Write("ERROR:\t In getCostToDestination(3 args)");
         }
     }
      if (_costFieldWithKey.count(destID)==1 && _costFieldWithKey[destID]) {

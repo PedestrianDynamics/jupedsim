@@ -333,7 +333,7 @@ bool GeoFileParser::LoadGeometry(Building* building)
                }
           }
           else{
-               Log->Write("INFO:\tNot parsing transition from file %s");
+               Log->Write("INFO:\tNot parsing transition from file");
           }
           Log->Write("INFO:\tGot %d transitions", building-> GetAllTransitions().size());
 
