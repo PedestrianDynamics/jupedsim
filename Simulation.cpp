@@ -52,6 +52,7 @@ Trajectories* outputTXT;
 // todo: add these variables to class simulation
 std::map<std::string, std::shared_ptr<TrainType> > TrainTypes;
 std::map<int, std::shared_ptr<TrainTimeTable> >  TrainTimeTables;
+std::map<int, double> trainOutflow;
 //--------
 Simulation::Simulation(Configuration* args)
         :_config(args)
@@ -658,6 +659,12 @@ double Simulation::RunBody(double maxSimTime)
         }
         #endif
 
+        //init train trainOutfloww
+        for (auto tab : TrainTimeTables)
+        {
+              trainOutflow[tab.first] = 0;
+        }
+        // regulate flow
         for (auto& itr: _building->GetAllTransitions())
         {
              Transition* Trans = itr.second;
@@ -671,6 +678,25 @@ double Simulation::RunBody(double maxSimTime)
                       }
                   }// normal transition
              }
+             //-----------
+             // regulate train doorusag
+             std::string transType = Trans->GetType();
+             if (Trans->IsOpen() && transType.rfind("Train", 0) == 0)
+             {
+                   std::vector<std::string> strs;
+                   boost::split(strs, transType, boost::is_any_of("_"),boost::token_compress_on);
+                   int id = atoi(strs[1].c_str());
+                   std::string type = Trans->GetCaption();
+                   trainOutflow[id] += Trans->GetDoorUsage();
+                   if(trainOutflow[id] >= TrainTypes[type]->nmax)
+                   {
+                         std::cout << "INFO:\tclosing train door "<<  transType.c_str() << " at "<<  Pedestrian::GetGlobalTime() << "\n";
+                         Log->Write("INFO:\tclosing train door %s at t=%.2f", transType.c_str(), Pedestrian::GetGlobalTime());
+                         Trans->Close();
+                   }
+
+             }
+             //-----------
         }// Transitions
         if(frameNr % 1000 == 0)
         {
@@ -735,7 +761,7 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
      auto mytrack = building->GetTrackWalls(TrackStart, TrackEnd, room_id, subroom_id);
      Room* room = building->GetRoom(room_id);
      subroom = room->GetSubRoom(subroom_id);//todo safety check
-     int transition_id = 10000;
+     int transition_id = 10000; // randomly high number
 
      std::cout << "enter with train " << trainType.c_str() << "\n";
      std::cout<< KBLU << "Enter correctGeometry: Building Has " << building->GetAllTransitions().size() << " Transitions\n" << RESET;
@@ -775,10 +801,11 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
                   std::cout << "EQUAL\n";
                   Transition* e = new Transition();
                   e->SetID(transition_id++);
-                  e->SetCaption("tempDoor");
+                  e->SetCaption(trainType);
                   e->SetPoint1(p1);
                   e->SetPoint2(p2);
-                  e->SetType("train_door");
+                  std::string transType = "Train_"+std::to_string(tab->id)+"_"+std::to_string(tab->tin)+"_"+std::to_string(tab->tout);
+                  e->SetType(transType);
                   room->AddTransitionID(e->GetUniqueID());// danger area
                   e->SetRoom1(room);
                   e->SetSubRoom1(subroom);
