@@ -162,6 +162,12 @@ public:
      bool Overlapp(const Line& l) const;
 
      /**
+      * return true if point the orthogonal projection of p on Line segment is on the
+      * line segment.
+      */
+     bool isBetween(const Point& p) const;
+
+     /**
       * @return true if both segments are equal. The end points must be in the range of J_EPS.
       * @see Macro.h
       */
@@ -172,6 +178,15 @@ public:
       * @see Macro.h
       */
      bool operator!=(const Line& l) const;
+
+
+     /**
+      * @return true if this < l segments are not equal. The end points must be in the range of J_EPS.
+      * @see Macro.h
+      */
+     bool operator<(const Line& l) const;
+
+
 
      /**
       * @see http://alienryderflex.com/intersect/

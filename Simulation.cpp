@@ -691,7 +691,7 @@ double Simulation::RunBody(double maxSimTime)
                    if(trainOutflow[id] >= TrainTypes[type]->nmax)
                    {
                          std::cout << "INFO:\tclosing train door "<<  transType.c_str() << " at "<<  Pedestrian::GetGlobalTime() << "\n";
-                         Log->Write("INFO:\tclosing train door %s at t=%.2f", transType.c_str(), Pedestrian::GetGlobalTime());
+                         Log->Write("INFO:\tclosing train door %s at t=%.2f. Flow = %.2f (Train Capacity %.2f)", transType.c_str(), Pedestrian::GetGlobalTime(), trainOutflow[id], TrainTypes[type]->nmax);
                          Trans->Close();
                    }
              }
@@ -780,8 +780,8 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
 
       subroom->GetUID();
       auto walls = subroom->GetAllWalls();
-      // debugging
-      // std::cout << "------\n";
+
+      //---
       for(auto pw: pws)
       {
             auto pw1 = pw.first;
@@ -902,16 +902,57 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
             else // disjoint
             {
                   std::cout << "DISJOINT\n";
+                                    //------------ transition --------
+                  Transition* e = new Transition();
+                  e->SetID(transition_id++);
+                  e->SetCaption(trainType);
+                  e->SetPoint1(p1);
+                  e->SetPoint2(p2);
+                  std::string transType = "Train_"+std::to_string(tab->id)+"_"+std::to_string(tab->tin)+"_"+std::to_string(tab->tout);
+                  e->SetType(transType);
+                  room->AddTransitionID(e->GetUniqueID());// danger area
+                  e->SetRoom1(room);
+                  e->SetSubRoom1(subroom);
+
+                  subroom->AddTransition(e);// danger area
+                  building->AddTransition(e);// danger area
+                  //--------------------------------
                   // find points on w1 and w2 between p1 and p2
                   // (A, B)
-                  // remove all walls connected to A
-                  // move A forwards
-                  // remove walls... until B is found
+                  Point A, B;
+                  if(e->isBetween(w1.GetPoint1()))
+                        A = w1.GetPoint2();
+                  else
+                        A = w1.GetPoint1();
+
+                  if(e->isBetween(w2.GetPoint1()))
+                        B = w2.GetPoint2();
+                  else
+                        B = w2.GetPoint1();
+
+                  Wall NewWall(A, p1);
+                  Wall NewWall1(B, p2);
+                  NewWall.SetType(w1.GetType());
+                  NewWall1.SetType(w2.GetType());
+                  // remove walls between
+                  for(auto wall: mytrack)
+                  {
+                       if(e->isBetween(wall.GetPoint1()) || e->isBetween(wall.GetPoint2()))
+                        {
+                             building->TempRemovedWalls[trainId].push_back(wall);
+                             subroom->RemoveWall(wall);
+                        }
+                  }
+                  // changes to building
+                  building->TempAddedWalls[trainId].push_back(NewWall);
+                  building->TempAddedWalls[trainId].push_back(NewWall1);
+                  building->TempAddedDoors[trainId].push_back(*e);
+                  subroom->AddWall(NewWall);
+                  subroom->AddWall(NewWall1);
+
                   // remove walls w1 and w2
             }
       }
-      std::cout << "------\n";
-      /* getc(stdin); */
       _routingEngine->setNeedUpdate(true);
      return true;
 

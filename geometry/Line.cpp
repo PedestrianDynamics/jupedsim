@@ -201,6 +201,16 @@ Point Line::LotPoint(const Point& p) const
      return f;
 }
 
+// return true if point the orthogonal projection of p on Line segment is on the
+// line segment.
+bool Line::isBetween(const Point& p) const
+{
+     const Point& t = _point1-_point2;
+     double lambda = (p-_point2).ScalarProduct(t)/t.ScalarProduct(t);
+     return  (lambda>0) && (lambda <1);
+}
+
+
 /* Punkt auf der Linie mit kürzestem Abstand zu p
  * In der Regel Lotfußpunkt, Ist der Lotfußpunkt nicht im Segment
  * wird der entsprechende Eckpunkt der Line genommen
@@ -273,6 +283,12 @@ bool Line::operator!=(const Line& l) const
      return (!(*this==l));
 
 }
+// this function is necessary to use std::set and is basically the same as !=
+bool Line::operator<(const Line& l) const
+{
+     return (!(*this==l));
+}
+
 
 double Line::GetLength() const
 {
