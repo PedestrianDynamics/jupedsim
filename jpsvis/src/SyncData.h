@@ -42,7 +42,8 @@
 #include <memory>
 #include <vector>
 #include <map>
-
+#include <vtkSmartPointer.h>
+#include <vtkSphereSource.h>
 
 class QObject;
 class QStringList;
@@ -84,6 +85,9 @@ public:
 
     /// return the frame at position i
     Frame* getFrame(int i);
+     vtkSmartPointer<vtkSphereSource> getTTT();
+     void setTTT(vtkSmartPointer<vtkSphereSource> s);
+
 
     /// return a pointer to the next frame
     Frame* getNextFrame();
@@ -166,6 +170,8 @@ private:
     //std::vector<Frame*> _frames;
     std::map <int, Frame*> _frames;
     //std::map<int, std::unique_ptr<Frame> > _frames;
+     vtkSmartPointer<vtkSphereSource> _ttt;
+
 };
 
 #endif /* SYNCDATA_H_ */

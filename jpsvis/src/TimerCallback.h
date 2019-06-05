@@ -52,6 +52,8 @@ class vtkFFMPEGWriter;
 #include <vtkTensorGlyph.h>
 #include <vtkSmartPointer.h>
 #include <vtkPolyDataMapper.h>
+#include <vtkLineSource.h>
+#include "train.h"
 
 class SyncData;
 class QObject;
@@ -89,6 +91,9 @@ extern PointPlotter* extern_trail_plotter;
 
 extern SyncData extern_trajectories_firstSet;
 
+extern SyncData mysphere;
+extern std::map<std::string, std::shared_ptr<TrainType> > extern_trainTypes;
+extern std::map<int, std::shared_ptr<TrainTimeTable> > extern_trainTimeTables;
 //states if the datasets are loaded.
 extern bool extern_first_dataset_loaded;
 
@@ -126,6 +131,8 @@ public:
     void SetRenderTimerId(int tid);
 
     void setTextActor(vtkTextActor* runningTime);
+     vtkSmartPointer<vtkPolyData> train(double x1, double y1, double x2, double y2);
+     vtkSmartPointer<vtkLineSource> door(double x1, double y1, double x2, double y2);
 
 private:
     ///updates system global changes, like fullscreen, ffw and soone
