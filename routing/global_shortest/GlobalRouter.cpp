@@ -44,7 +44,7 @@
 //#include <cfloat>
 //#include <fstream>
 //#include <iomanip>
-
+#include "../../geometry/WaitingArea.h"
 
 using namespace std;
 
@@ -256,6 +256,38 @@ bool GlobalRouter::Init(Building* building)
           index++;
      }
 
+     // iterate over goals and check for waiting areasa
+     for (auto itrGoal : _building->GetAllGoals()){
+          if (WaitingArea* wa = dynamic_cast<WaitingArea*>(itrGoal.second)){
+               int door = wa->GetCentreCrossing()->GetUniqueID();
+               Crossing* cross = wa->GetCentreCrossing();
+               const Point& centre = cross->GetCentre();
+               double center[2] = { centre._x, centre._y };
+
+               AccessPoint* ap = new AccessPoint(door, center);
+               ap->SetNavLine(cross);
+               char friendlyName[CLENGTH];
+               ap->SetFinalExitToOutside(false);
+               ap->SetFinalGoalOutside(false);
+               sprintf(friendlyName, "wa_%d_room_%d_subroom_%d", cross->GetID(),
+                         wa->GetRoomID(), wa->GetSubRoomID());
+               ap->SetFriendlyName(friendlyName);
+               ap->SetState(cross->GetState());
+               std::cout << wa->GetSubRoomID() << std::endl;
+               std::cout << wa->GetRoomID() << std::endl;
+
+               int id = _building->GetRoom(wa->GetRoomID())->GetSubRoom(wa->GetSubRoomID())->GetUID();
+               ap->setConnectingRooms(id, id);
+               _accessPoints[door] = ap;
+
+               //very nasty
+               _map_id_to_index[door] = index;
+               _map_index_to_id[index] = door;
+               index++;
+
+          }
+     }
+
      // populate the subrooms at the elevation
      for(auto && itroom:_building->GetAllRooms())
      {
@@ -341,6 +373,7 @@ bool GlobalRouter::Init(Building* building)
           }
      }
 
+
      //complete the matrix with the final distances between the exits to the outside and the
      //final marked goals
 
@@ -386,6 +419,10 @@ bool GlobalRouter::Init(Building* building)
                if (_distMatrix[from_door][to_door] > 10.0)
                      _distMatrix[from_door][to_door]*=100;
           }
+     }
+
+     for (auto itr : _accessPoints ){
+          itr.second->Dump();
      }
 
      //run the floyd warshall algorithm
