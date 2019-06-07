@@ -3,6 +3,8 @@
 
 #include "geometry/Point.h"
 #include "geometry/Transition.h"
+#include <vtkPolyDataMapper.h>
+#include <vtkTextActor3D.h>
 
 struct TrainTimeTable
 {
@@ -19,6 +21,9 @@ struct TrainTimeTable
      int pid; // Platform id
      bool arrival;
      bool departure;
+     vtkSmartPointer<vtkPolyDataMapper> mapper;
+     vtkSmartPointer<vtkActor> actor;
+     vtkSmartPointer<vtkTextActor3D> textActor;
 };
 struct TrainType
 {

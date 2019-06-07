@@ -1773,23 +1773,18 @@ bool SaxParser::LoadTrainTimetable(std::string Filename, std::map<int, std::shar
      for (TiXmlElement* e = xTTT->FirstChildElement("train"); e;
                     e = e->NextSiblingElement("train")) {
           std::shared_ptr<TrainTimeTable> TTT = parseTrainTimeTableNode(e);
-          std::cout << "SI BEFORE" << trainTimeTables.size() << "\n";
           if (TTT) { // todo: maybe get pointer to train
                if (trainTimeTables.count(TTT->id)!=0) {
                     Debug::Messages("WARNING: Duplicate id for train time table found [%d]",TTT->id);
                     exit(EXIT_FAILURE);
                }
-               std::cout << "parse " << TTT->id << "\n";
                trainTimeTables[TTT->id] = TTT;
           }
           else {
-          std:cout << "HHH\n" ;
+          std:cout << "too bad! \n" ;
 
-               }
-          std::cout << "SI AFTER" << trainTimeTables.size() << "\n";
+          }
      }
-
-
      return true;
 }
 
@@ -1880,6 +1875,9 @@ std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement 
                     platform_id,
                     false,
                     false,
+                    vtkSmartPointer<vtkPolyDataMapper>::New(),
+                    vtkSmartPointer<vtkActor>::New(),
+                    vtkSmartPointer<vtkTextActor3D>::New(),
                     });
 
      return trainTimeTab;

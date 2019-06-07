@@ -106,6 +106,9 @@
 
 using namespace std;
 
+static int once=1;
+
+
 TimerCallback* TimerCallback::New()
 {
     TimerCallback *cb = new TimerCallback;
@@ -163,10 +166,17 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 
                     double now = frameNumber*iren->GetTimerDuration(tid)/1000;
 
+                    // {
+                    //      for (auto tab: extern_trainTimeTables)
+                    //      {
+                    //           VTK_CREATE(vtkPolyDataMapper, mapper);
+                    //           VTK_CREATE(vtkActor, actor);
+                    //      }
+
+                    // }
+                    int countTrains  = 0;
                     for (auto tab: extern_trainTimeTables)
                         {
-                             VTK_CREATE(vtkPolyDataMapper, mapper);
-                             VTK_CREATE(vtkActor, actor);
                              // VTK_CREATE(vtkTextActor, textActor);
                              VTK_CREATE(vtkTextActor3D, textActor);
                              auto trainType = tab.second->type;
@@ -178,43 +188,53 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                              auto train = extern_trainTypes[trainType];
                              auto doors = train->doors;
                              std::vector<Point> doorPoints;
+                             auto mapper = tab.second->mapper;
+                             auto actor = tab.second->actor;
+                             auto txtActor = tab.second->textActor;
                              for(auto door: doors)
                              {
                                   doorPoints.push_back(door.GetPoint1());
                                   doorPoints.push_back(door.GetPoint2());
                              }//doors
+                             if(once)
+                             {
+                                  auto data = getTrainData(trainStart, trainEnd, doorPoints);
+                                  mapper->SetInputData(data);
+                                  actor->SetMapper(mapper);
+                                  actor->GetProperty()->SetLineWidth(10);
+                                  actor->GetProperty()->SetOpacity(0.1);//feels cool!
+                                  actor->GetProperty()->SetColor(0.1,.1,0.0);
+                                  // text
+                                  txtActor->GetTextProperty()->SetOpacity(0.7);
+                                  double pos_x = 50*(trainStart._x + trainEnd._x);
+                                  double pos_y = 50*(trainStart._y + trainEnd._y);
 
-                             auto data = getTrainData(trainStart, trainEnd, doorPoints);
-                             mapper->SetInputData(data);
-                             actor->SetMapper(mapper);
-                             actor->GetProperty()->SetLineWidth(10);
-                             actor->GetProperty()->SetOpacity(0.1);//feels cool!
-                             // text
-                             textActor->GetTextProperty()->SetOpacity(0.1);
-                             double pos_x = mapper->GetInput()->GetPoint(0)[0];
-                             double pos_y = mapper->GetInput()->GetPoint(0)[1];
-
-                             textActor->SetPosition (pos_x, pos_y+2, 20);
-                             textActor->SetInput (trainType.c_str());
-                             textActor->GetTextProperty()->SetFontSize (30);
-                             textActor->SetVisibility(false);
+                                  txtActor->SetPosition (pos_x, pos_y+2, 20);
+                                  txtActor->SetInput (trainType.c_str());
+                                  txtActor->GetTextProperty()->SetFontSize (30);
+                                  txtActor->GetTextProperty()->SetBold (true);
+                                  txtActor->GetTextProperty()->SetColor (0.1,0.1,0.5);
+                                  txtActor->SetVisibility(false);
+                             }
                              if((now >= tab.second->tin) && (now <= tab.second->tout))
                              {
-                                  actor->GetProperty()->SetColor(0.1,.1,0.0);
-                                  textActor->GetTextProperty()->SetColor (1.0,0.0,0.0);
-                                  textActor->SetVisibility(true);
+                                  actor->SetVisibility(true);
+                                  txtActor->SetVisibility(true);
                              }
                              else
                              {
-                                  actor->GetProperty()->SetColor(renderer->GetBackground());
-                                  textActor->GetTextProperty()->SetColor(renderer->GetBackground());
+                                  actor->SetVisibility(false);
+                                  txtActor->SetVisibility(false);
                              }
-                             renderer->AddActor(actor);
-                             renderer->AddActor(textActor);
-                             mapper=nullptr;
-                             actor=nullptr;
-                             textActor=nullptr;
+                             if(once)
+                             {
+                                  renderer->AddActor(actor);
+                                  renderer->AddActor(txtActor);
+                                  if(countTrains == extern_trainTimeTables.size())
+                                       once = 0;
+                             }
 
+                             countTrains++;
                         }// time table
 
 
