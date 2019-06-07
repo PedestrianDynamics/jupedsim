@@ -35,6 +35,12 @@
 #include <vector>
 #include "SyncData.h"
 #include"geometry/GeometryFactory.h"
+#include "tinyxml/tinyxml.h"
+#include "general/Macros.h"
+
+#include "train.h"
+
+
 
 
 
@@ -90,6 +96,14 @@ public:
 
     /// parse a vtk file
     static bool ParseGradientFieldVTK(QString fileName, GeometryFactory& geoFac);
+     /// Trains
+     static bool LoadTrainTimetable(std::string filename, std::map<int, std::shared_ptr<TrainTimeTable> > & trainTimeTables);
+     static std::shared_ptr<TrainTimeTable> parseTrainTimeTableNode(TiXmlElement * e);
+     static std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement * e);
+     static QString extractTrainTypeFileTXT(QString &filename);
+     static QString extractTrainTimeTableFileTXT(QString &filename);
+
+     static bool   LoadTrainType(std::string Filename, std::map<std::string, std::shared_ptr<TrainType> > & trainTypes);
 
 private:
     //clear the mo

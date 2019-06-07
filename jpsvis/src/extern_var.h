@@ -46,10 +46,9 @@
 #include <vtkSmartPointer.h>
 #include <vtkPolyDataMapper.h>
 
-
-
+#include "train.h"
 #define VTK_CREATE(type, name) \
-		vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
+                vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 //external variables
 /// define the speed/rate/pace at which  the trajectories are displayed.
@@ -84,6 +83,9 @@ double extern_scale_pedestrian=0.1;
 // At most three pedestrians groups can be loaded
 ///The first pedestrian group
 Pedestrian** extern_pedestrians_firstSet=NULL;
+vtkSmartPointer<vtkSphereSource> extern_mysphere=nullptr;
+std::map<std::string, std::shared_ptr<TrainType> > extern_trainTypes;
+std::map<int, std::shared_ptr<TrainTimeTable> > extern_trainTimeTables;
 
 
 //vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians=NULL;

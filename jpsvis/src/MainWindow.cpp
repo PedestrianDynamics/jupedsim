@@ -808,7 +808,14 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     }
 
     SyncData* dataset=NULL;
+
     extern_trajectories_firstSet.clearFrames();
+
+
+    vtkSmartPointer<vtkSphereSource> org = vtkSphereSource::New();
+    org->SetRadius(10);
+    // extern_mysphere = org;
+
 
     switch(groupID) {
     case 1:
@@ -855,6 +862,8 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     else if(fileName.endsWith(".txt",Qt::CaseInsensitive))
     {
          QString source_file= wd + QDir::separator() + SaxParser::extractSourceFileTXT(fileName);
+         QString ttt_file= wd + QDir::separator() + SaxParser::extractTrainTimeTableFileTXT(fileName);
+         QString tt_file= wd + QDir::separator() + SaxParser::extractTrainTypeFileTXT(fileName);
          QString goal_file=wd + QDir::separator() + SaxParser::extractGoalFileTXT(fileName);
          QFileInfo check_file(source_file);
          if( !(check_file.exists() && check_file.isFile()) )
@@ -864,13 +873,32 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
          else
               Debug::Messages("INFO: MainWindow::addPedestrianGroup: source name: <%s>", source_file.toStdString().c_str());
 
-         check_file = source_file;
+         check_file = goal_file;
          if( !(check_file.exists() && check_file.isFile()) )
         {
              Debug::Messages("WARNING: MainWindow::addPedestrianGroup: goal name: <%s> not found!", goal_file.toStdString().c_str());
         }
          else
               Debug::Messages("INFO: MainWindow::addPedestrianGroup: goal name: <%s>", goal_file.toStdString().c_str());
+
+
+         check_file = ttt_file;
+         if( !(check_file.exists() && check_file.isFile()) )
+        {
+             Debug::Messages("WARNING: MainWindow::addPedestrianGroup: ttt name: <%s> not found!", ttt_file.toStdString().c_str());
+        }
+         else
+              Debug::Messages("INFO: MainWindow::addPedestrianGroup: ttt name: <%s>", ttt_file.toStdString().c_str());
+
+         check_file = tt_file;
+         if( !(check_file.exists() && check_file.isFile()) )
+        {
+             Debug::Messages("WARNING: MainWindow::addPedestrianGroup: tt name: <%s> not found!", tt_file.toStdString().c_str());
+        }
+         else
+              Debug::Messages("INFO: MainWindow::addPedestrianGroup: tt name: <%s>", tt_file.toStdString().c_str());
+
+
 
 
         // ------ parsing sources
@@ -881,14 +909,30 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
         reader.setContentHandler(&handler);
         reader.parse(source);
         file.close();
+        // -----
+        // // ---- parsing goals
+        // -----
         QFile file2(goal_file);
         QXmlInputSource source2(&file2);
         reader.parse(source2);
         file2.close();
-        // -----
-        // // ---- parsing goals
-        // -----
+        // parsing trains
+        // train type
+        std::map<int, std::shared_ptr<TrainTimeTable> > trainTimeTable;
+        std::map<std::string, std::shared_ptr<TrainType> > trainTypes;
 
+        SaxParser::LoadTrainType(tt_file.toStdString(), trainTypes);
+        extern_trainTypes = trainTypes;
+
+        bool ret = SaxParser::LoadTrainTimetable(ttt_file.toStdString(), trainTimeTable);
+        if(!ret) std::cout << "hmmm\n";
+
+        extern_trainTimeTables = trainTimeTable;
+        for(auto tab: trainTimeTable)
+             std::cout << "tab: " << tab.first << "\n";
+
+        for(auto tab: trainTypes)
+             std::cout << "type: " << tab.first << "\n";
 
         if(false==SaxParser::ParseTxtFormat(fileName, dataset,&frameRate))
             return false;

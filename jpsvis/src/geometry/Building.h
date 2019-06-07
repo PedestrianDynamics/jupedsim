@@ -43,6 +43,12 @@
 #include "Obstacle.h"
 #include "Goal.h"
 #include "../tinyxml/tinyxml.h"
+
+// train schedules: Trains get deleted and added.
+
+
+
+
 class RoutingEngine;
 class Pedestrian;
 class Transition;
@@ -66,6 +72,8 @@ private:
      std::map<int, Transition*> _transitions;
      std::map<int, Hline*> _hLines;
      std::map<int, Goal*>_goals;
+
+
 
      /// pedestrians pathway
      bool _savePathway;
@@ -100,6 +108,9 @@ public:
      Transition* GetTransition(std::string caption) const;
      Transition* GetTransition(int id) ;
      Transition* ParseTransitionNode(TiXmlElement * xTrans);
+
+
+
 
      /**
       * Not implemented

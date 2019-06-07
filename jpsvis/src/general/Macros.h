@@ -25,7 +25,7 @@
  *
  *
  **/
- 
+
 
 #ifndef _MACROS_H
 #define _MACROS_H
@@ -39,9 +39,15 @@
 #include <iostream>
 
 
+enum RoomState {
+     ROOM_CLEAN=0,
+     ROOM_SMOKED=1
+};
+
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
-#endif 
+#endif
 
 //fix for osx/linux/win
 #define  _isnan(x) std::isnan(x)
@@ -88,11 +94,6 @@
 // Linked cells
 #define LIST_EMPTY  -1
 
-
-enum RoomState {
-     ROOM_CLEAN=0,
-     ROOM_SMOKED=1
-};
 
 enum AgentType {
      MALE=0,
