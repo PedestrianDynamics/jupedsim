@@ -203,7 +203,12 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                                   actor->SetMapper(mapper);
                                   actor->GetProperty()->SetLineWidth(10);
                                   actor->GetProperty()->SetOpacity(0.1);//feels cool!
-                                  actor->GetProperty()->SetColor(0.1,.1,0.0);
+                                  actor->GetProperty()->SetColor(
+                                       std::abs(0.9-renderer->GetBackground()[0]),
+                                       std::abs(0.9-renderer->GetBackground()[1]),
+                                       std::abs(1.0-renderer->GetBackground()[2])
+                                       );
+
                                   // text
                                   txtActor->GetTextProperty()->SetOpacity(0.7);
                                   double pos_x = 50*(trainStart._x + trainEnd._x);
@@ -213,7 +218,11 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                                   txtActor->SetInput (trainType.c_str());
                                   txtActor->GetTextProperty()->SetFontSize (30);
                                   txtActor->GetTextProperty()->SetBold (true);
-                                  txtActor->GetTextProperty()->SetColor (0.1,0.1,0.5);
+                                  txtActor->GetTextProperty()->SetColor (
+                                       std::abs(0.9-renderer->GetBackground()[0]),
+                                       std::abs(0.9-renderer->GetBackground()[1]),
+                                       std::abs(0.5-renderer->GetBackground()[2])
+                                       );
                                   txtActor->SetVisibility(false);
                              }
                              if((now >= tab.second->tin) && (now <= tab.second->tout))
