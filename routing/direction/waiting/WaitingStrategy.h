@@ -18,7 +18,7 @@ protected:
     RoutingPrecomputation precomputation = RoutingPrecomputation::NONE;
 
 public:
-    virtual void Init(){};
+    virtual void Init(Building* ){};
 
     virtual Point GetTarget(Room* room, Pedestrian* ped);
 

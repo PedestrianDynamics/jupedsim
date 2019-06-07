@@ -9,9 +9,12 @@
 #include "../../geometry/Building.h"
 #include "../../pedestrian/Pedestrian.h"
 
-void DirectionManager::Init(Building*)
+void DirectionManager::Init(Building* building)
 {
      std::cout << "DirectionManager::Init(Building*)" << std::endl;
+
+     directionStrategy->Init(building);
+     waitingStrategy->Init(building);
 }
 
 Point DirectionManager::GetTarget(Room* room, Pedestrian* ped)

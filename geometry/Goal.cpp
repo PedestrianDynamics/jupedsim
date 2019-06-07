@@ -235,8 +235,8 @@ bool Goal::ConvertLineToPoly()
           tmp = _poly[_poly.size()/2];
           diff = point1 - tmp;
 
-          point1 = tmp +  diff * 0.95;
-          point2 = tmp +  diff * 0.05;
+          point1 = tmp +  diff * 0.5;
+          point2 = point1;
 
           _crossing->SetPoint1(point1);
           _crossing->SetPoint2(point2);
@@ -245,6 +245,7 @@ bool Goal::ConvertLineToPoly()
           Line line(_poly[_poly.size()/2], _poly[(_poly.size()/2)+1], 0);
           _crossing->SetPoint2(line.GetCentre());
      }
+
 
 
 //     std::cout << "Crossing goal: " << _crossing->GetUniqueID() << _crossing->toString() << std::endl;

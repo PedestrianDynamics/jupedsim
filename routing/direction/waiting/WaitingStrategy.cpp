@@ -19,7 +19,7 @@ Point WaitingStrategy::GetTarget(Room* room, Pedestrian* ped)
           ped->SetWaitingPos(target);
      }
      // check if in close range to desired position, hard coded!
-     else  if ((ped->GetWaitingPos()-ped->GetPos()).Norm() <= 0.5){
+     else  if ((ped->GetWaitingPos()-ped->GetPos()).Norm() <= 0.25){
           target = ped->GetPos();
      }
      // head to desired waiting position

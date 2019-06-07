@@ -109,10 +109,10 @@ bool FFRouterTrips::Init(Building* building)
           for (auto &itrGoal : building->GetAllGoals()) {
                if(WaitingArea* wa = dynamic_cast<WaitingArea*>(itrGoal.second)) {
                     _globalFF->createMapEntryInLineToGoalID(itrGoal.first, true);
-                    std::cout << "Added " << itrGoal.first << " to goalIDs " << wa->getTransitionID() << std::endl;
+                    std::cout << "Added wa" << itrGoal.first << " to goalIDs " << wa->GetCentreCrossing()->toString() << std::endl;
                }else{
                     _globalFF->createMapEntryInLineToGoalID(itrGoal.first, false);
-                    std::cout << "Added " << itrGoal.first << " to goalIDs " << std::endl;
+                    std::cout << "Added goal" << itrGoal.first << " to goalIDs " << std::endl;
                }
                goalIDs.emplace_back(itrGoal.first);
           }
@@ -312,6 +312,7 @@ bool FFRouterTrips::Init(Building* building)
              _distMatrix.insert(std::make_pair(key, DBL_MAX));
          }
      }
+
 
      FloydWarshall();
 

@@ -104,6 +104,8 @@ Building::Building(Configuration* configuration, PedDistributor& pedDistributor)
      }
      InitGrid();
 
+     _configuration->GetDirectionManager()->Init(this);
+
      if (!_routingEngine->Init(this)) {
           Log->Write("ERROR:\t could not initialize the routers!");
           exit(EXIT_FAILURE);

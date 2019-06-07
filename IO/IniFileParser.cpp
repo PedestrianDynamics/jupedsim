@@ -1674,7 +1674,6 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
 //     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
      _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingMiddle());
 
-     _waitingStrategy->Init();
      _directionManager->SetWaitingStrategy(_waitingStrategy);
 
      _config->SetDirectionManager(_directionManager);
