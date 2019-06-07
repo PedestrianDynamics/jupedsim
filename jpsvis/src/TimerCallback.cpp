@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <iostream>
-
+#include <stdio.h>
 
 #ifdef TRAVISTO_FFMPEG
 #ifdef _WIN32
@@ -175,11 +175,14 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 
                     // }
                     int countTrains  = 0;
+                    char label[100];
+
                     for (auto tab: extern_trainTimeTables)
                         {
                              // VTK_CREATE(vtkTextActor, textActor);
                              VTK_CREATE(vtkTextActor3D, textActor);
                              auto trainType = tab.second->type;
+                             sprintf(label, "%s_%d", trainType.c_str(), tab.second->id);
                              auto trainId = tab.second->id;
                              auto trackStart = tab.second->pstart;
                              auto trackEnd = tab.second->pend;
@@ -211,11 +214,11 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 
                                   // text
                                   txtActor->GetTextProperty()->SetOpacity(0.7);
-                                  double pos_x = 50*(trainStart._x + trainEnd._x);
-                                  double pos_y = 50*(trainStart._y + trainEnd._y);
+                                  double pos_x = 50*(trainStart._x + trainEnd._x+0.5);
+z                                  double pos_y = 50*(trainStart._y + trainEnd._y+0.5);
 
                                   txtActor->SetPosition (pos_x, pos_y+2, 20);
-                                  txtActor->SetInput (trainType.c_str());
+                                  txtActor->SetInput (label);
                                   txtActor->GetTextProperty()->SetFontSize (30);
                                   txtActor->GetTextProperty()->SetBold (true);
                                   txtActor->GetTextProperty()->SetColor (
