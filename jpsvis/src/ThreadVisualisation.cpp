@@ -140,7 +140,6 @@ void ThreadVisualisation::slotSetFrameRate(float fps)
 
 void ThreadVisualisation::run()
 {
-     std::cout << "RUN " << _runningTime << "\n";
     //deactivate the output windows
     vtkObject::GlobalWarningDisplayOff();
 
@@ -339,7 +338,7 @@ void ThreadVisualisation::run()
 
     QObject::connect(renderingTimer, SIGNAL(signalRenderingTime(int)),
                      this->parent(), SLOT(slotRenderingTime(int)));
-   std::cout << "timer " << timer << "\n";
+
     // Create my interactor style
     InteractorStyle* style = InteractorStyle::New();
     _renderWinInteractor->SetInteractorStyle( style );
