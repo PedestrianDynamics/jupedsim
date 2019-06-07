@@ -578,7 +578,7 @@ void FacilityGeometry::addObstacles(vtkPolyData* polygonPolyData )
 void FacilityGeometry::addRectangle(double x1, double y1, double x2, double y2, double z, double color1, double color2, string text)
 {
     //if(z!=1)return;
-     const double cellSize=40; //cm
+     const double cellSize=10; //cm
     //	const int dimX=(x2-x1)/cellSize+1;
     //	const int dimY=(y2-y1)/cellSize+1;
 

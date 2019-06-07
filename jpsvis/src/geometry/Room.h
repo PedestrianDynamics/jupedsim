@@ -23,7 +23,7 @@
  *
  *
  **/
- 
+
 
 #ifndef _ROOM_H
 #define _ROOM_H
@@ -165,4 +165,3 @@ public:
 };
 
 #endif  /* _ROOM_H */
-

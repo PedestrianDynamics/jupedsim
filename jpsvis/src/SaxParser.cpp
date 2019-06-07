@@ -1199,6 +1199,70 @@ QString SaxParser::extractSourceFileTXT(QString &filename)
      return extracted_source_name;
 }
 
+QString SaxParser::extractTrainTypeFileTXT(QString &filename)
+{
+     QString extracted_tt_name="";
+     QFile file(filename);
+     QString line;
+     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+          QTextStream in(&file);
+          while (!in.atEnd()) {
+               //look for a line with
+               line = in.readLine();
+               // std::cout << " >> " <<  line.toStdString().c_str() << endl;
+               if(line.split(":").size()==2)
+               {
+                    if(line.split(":")[0].contains("trainType",Qt::CaseInsensitive))
+                    {
+                         extracted_tt_name = line.split(":")[1].simplified().remove(' ');
+                         break;
+                    }
+               }
+          }// while
+     } // if open
+     if(extracted_tt_name=="")
+     {
+          Debug::Warning("Could not extract trainType file!");
+     }
+
+     else
+          Debug::Messages("Extracted trainType from TXT file <%s>", extracted_tt_name.toStdString().c_str());
+     return extracted_tt_name;
+}
+
+QString SaxParser::extractTrainTimeTableFileTXT(QString &filename)
+{
+     QString extracted_ttt_name="";
+     QFile file(filename);
+     QString line;
+     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+          QTextStream in(&file);
+          while (!in.atEnd()) {
+               //look for a line with
+               line = in.readLine();
+               // std::cout << " >> " <<  line.toStdString().c_str() << endl;
+               if(line.split(":").size()==2)
+               {
+                    if(line.split(":")[0].contains("trainTimeTable",Qt::CaseInsensitive))
+                    {
+                         extracted_ttt_name = line.split(":")[1].simplified().remove(' ');
+                         break;
+                    }
+               }
+          }// while
+     } // if open
+     if(extracted_ttt_name=="")
+     {
+          Debug::Warning("Could not extract trainTimeTable file!");
+     }
+
+     else
+          Debug::Messages("Extracted trainTimeTable from TXT file <%s>", extracted_ttt_name.toStdString().c_str());
+     return extracted_ttt_name;
+}
+
+
+
 QString SaxParser::extractGoalFileTXT(QString &filename)
 {
      QString extracted_goal_name="";
@@ -1686,4 +1750,185 @@ void SaxParser::InitHeader(int major, int minor, int patch)
           cout<<"Please use 0.5 0.5.1 or 0.6 "<<endl;
           exit(0);
      }
+}
+
+
+bool SaxParser::LoadTrainTimetable(std::string Filename, std::map<int, std::shared_ptr<TrainTimeTable> > & trainTimeTables)
+{
+     TiXmlDocument docTTT(Filename);
+     if (!docTTT.LoadFile()) {
+          Debug::Messages("ERROR: \t%s", docTTT.ErrorDesc());
+          Debug::Messages("ERROR: \t could not parse the train timetable file.");
+          return false;
+     }
+     TiXmlElement* xTTT = docTTT.RootElement();
+     if (!xTTT) {
+          Debug::Messages("ERROR:\tRoot element does not exist in TTT file.");
+          return false;
+     }
+     if (xTTT->ValueStr() != "train_time_table") {
+          Debug::Messages("ERROR:\tParsing train timetable file. Root element value is not 'train_time_table'.");
+          return false;
+     }
+     for (TiXmlElement* e = xTTT->FirstChildElement("train"); e;
+                    e = e->NextSiblingElement("train")) {
+          std::shared_ptr<TrainTimeTable> TTT = parseTrainTimeTableNode(e);
+          if (TTT) { // todo: maybe get pointer to train
+               if (trainTimeTables.count(TTT->id)!=0) {
+                    Debug::Messages("WARNING: Duplicate id for train time table found [%d]",TTT->id);
+                    exit(EXIT_FAILURE);
+               }
+               trainTimeTables[TTT->id] = TTT;
+          }
+          else {
+          std:cout << "too bad! \n" ;
+
+          }
+     }
+     return true;
+}
+
+
+bool   SaxParser::LoadTrainType(std::string Filename, std::map<std::string, std::shared_ptr<TrainType> > & trainTypes)
+{
+
+     TiXmlDocument docTT(Filename);
+     if (!docTT.LoadFile()) {
+          Debug::Messages("ERROR: \t%s", docTT.ErrorDesc());
+          Debug::Messages("ERROR: \t could not parse the train type file.");
+          return false;
+     }
+     TiXmlElement* xTT = docTT.RootElement();
+     if (!xTT) {
+          Debug::Messages("ERROR:\tRoot element does not exist in TT file.");
+          return false;
+     }
+     if (xTT->ValueStr() != "train_type") {
+          Debug::Messages("ERROR:\tParsing train type file. Root element value is not 'train_type'.");
+          return false;
+     }
+     for (TiXmlElement* e = xTT->FirstChildElement("train"); e;
+                    e = e->NextSiblingElement("train")) {
+          std::shared_ptr<TrainType> TT = parseTrainTypeNode(e);
+          if (TT) {
+               if (trainTypes.count(TT->type)!=0) {
+                    Debug::Messages("WARNING: Duplicate type for train found [%s]",TT->type.c_str());
+               }
+               trainTypes[TT->type] = TT;
+          }
+     }
+     return true;
+
+
+}
+
+
+
+std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement * e)
+{
+     Debug::Messages("INFO:\tLoading train time table NODE");
+     std::string caption = xmltoa(e->Attribute("caption"), "-1");
+     int id = xmltoi(e->Attribute("id"), -1);
+     std::string type = xmltoa(e->Attribute("type"), "-1");
+     int room_id = xmltoi(e->Attribute("room_id"), -1);
+     int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
+     int platform_id = xmltoi(e->Attribute("platform_id"), -1);
+     float track_start_x = xmltof(e->Attribute("track_start_x"), -1);
+     float track_start_y = xmltof(e->Attribute("track_start_y"), -1);
+     float track_end_x = xmltof(e->Attribute("track_end_x"), -1);
+     float track_end_y = xmltof(e->Attribute("track_end_y"), -1);
+
+     float train_start_x = xmltof(e->Attribute("train_start_x"),-1);
+     float train_start_y = xmltof(e->Attribute("train_start_y"), -1);
+     float train_end_x = xmltof(e->Attribute("train_end_x"), -1);
+     float train_end_y = xmltof(e->Attribute("train_end_y"), -1);
+
+     float arrival_time = xmltof(e->Attribute("arrival_time"), -1);
+     float departure_time = xmltof(e->Attribute("departure_time"), -1);
+     // @todo: check these values for correctness e.g. arrival < departure
+     Debug::Messages("INFO:\tTrain time table:");
+     Debug::Messages("INFO:\t   id: %d", id);
+     Debug::Messages("INFO:\t   type: %s", type.c_str());
+     Debug::Messages("INFO:\t   room_id: %d", room_id);
+     Debug::Messages("INFO:\t   subroom_id: %d", subroom_id);
+     Debug::Messages("INFO:\t   platform_id: %d", platform_id);
+     Debug::Messages("INFO:\t   track_start: [%.2f, %.2f]", track_start_x, track_start_y);
+     Debug::Messages("INFO:\t   track_end: [%.2f, %.2f]", track_end_x, track_end_y);
+     Debug::Messages("INFO:\t   arrival_time: %.2f", arrival_time);
+     Debug::Messages("INFO:\t   departure_time: %.2f", departure_time);
+     Point track_start(track_start_x, track_start_y);
+     Point track_end(track_end_x, track_end_y);
+     Point train_start(train_start_x, train_start_y);
+     Point train_end(train_end_x, train_end_y);
+     std::shared_ptr<TrainTimeTable> trainTimeTab = std::make_shared<TrainTimeTable>(
+          TrainTimeTable{
+                    id,
+                    type,
+                    room_id,
+                    subroom_id,
+                    arrival_time,
+                    departure_time,
+                    track_start,
+                    track_end,
+                    train_start,
+                    train_end,
+                    platform_id,
+                    false,
+                    false,
+                    vtkSmartPointer<vtkPolyDataMapper>::New(),
+                    vtkSmartPointer<vtkActor>::New(),
+                    vtkSmartPointer<vtkTextActor3D>::New(),
+                    });
+
+     return trainTimeTab;
+}
+
+std::shared_ptr<TrainType> SaxParser::parseTrainTypeNode(TiXmlElement * e)
+{
+     Debug::Messages("INFO:\tLoading train type");
+     // int T_id = xmltoi(e->Attribute("id"), -1);
+     std::string type = xmltoa(e->Attribute("type"), "-1");
+     int agents_max = xmltoi(e->Attribute("agents_max"), -1);
+     float length = xmltof(e->Attribute("length"), -1);
+     // std::shared_ptr<Transition> t = new Transition();
+     // std::shared_ptr<Transition> doors;
+     Transition t;
+     std::vector<Transition> doors;
+
+     for (TiXmlElement* xDoor = e->FirstChildElement("door"); xDoor;
+          xDoor = xDoor->NextSiblingElement("door")) {
+          int D_id = xmltoi(xDoor->Attribute("id"), -1);
+          float x1 = xmltof(xDoor->FirstChildElement("vertex")->Attribute("px"), -1);
+          float y1 = xmltof(xDoor->FirstChildElement("vertex")->Attribute("py"), -1);
+          float x2 = xmltof(xDoor->LastChild("vertex")->ToElement()->Attribute("px"), -1);
+          float y2 = xmltof(xDoor->LastChild("vertex")->ToElement()->Attribute("py"), -1);
+          Point start(x1, y1);
+          Point end(x2, y2);
+          float outflow = xmltof(xDoor->Attribute("outflow"), -1);
+          float dn = xmltoi(xDoor->Attribute("dn"), -1);
+          t.SetID(D_id);
+          t.SetCaption(type + std::to_string(D_id));
+          t.SetPoint1(start);
+          t.SetPoint2(end);
+          //t.SetOutflowRate(outflow);
+          //t.SetDN(dn);
+          doors.push_back(t);
+     }
+     Debug::Messages("INFO:\t   type: %s", type.c_str());
+     Debug::Messages("INFO:\t   capacity: %d", agents_max);
+     Debug::Messages("INFO:\t   number of doors: %d", doors.size());
+     for(auto d: doors)
+     {
+          Debug::Messages("INFO\t      door (%d): %s | %s", d.GetID(), d.GetPoint1().toString().c_str(), d.GetPoint2().toString().c_str());
+     }
+
+     std::shared_ptr<TrainType> Type = std::make_shared<TrainType>(
+          TrainType{
+                    type,
+                    agents_max,
+                    length,
+                    doors,
+                    });
+   return Type;
+
 }

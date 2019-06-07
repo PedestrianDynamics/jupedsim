@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <iostream>
-
+#include <stdio.h>
 
 #ifdef TRAVISTO_FFMPEG
 #ifdef _WIN32
@@ -77,8 +77,14 @@
 #include <vtkLabeledDataMapper.h>
 #include <vtkMath.h>
 
-
-
+#include <vtkPolyLine.h>
+#include <vtkTextProperty.h>
+#include <vtkProperty.h>
+#include <vtkLineSource.h>
+#include <vtkVectorText.h>
+#include <vtkFollower.h>
+#include <vtkLine.h>
+#include <vtkTubeFilter.h>
 
 #include "geometry/FacilityGeometry.h"
 #include "geometry/Point.h"
@@ -92,11 +98,16 @@
 #include "TrailPlotter.h"
 #include "geometry/PointPlotter.h"
 #include "TimerCallback.h"
+#include <vtkTextActor3D.h>
+
 
 #define VTK_CREATE(type, name) \
     vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 using namespace std;
+
+static int once=1;
+
 
 TimerCallback* TimerCallback::New()
 {
@@ -126,6 +137,10 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
             vtkRenderWindow  *renderWindow = iren->GetRenderWindow();
             vtkRenderer *renderer =renderWindow->GetRenderers()->GetFirstRenderer();
 
+
+
+
+
             if (iren && renderWindow && renderer) {
 
                 //first pedestrian group
@@ -145,9 +160,98 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                         frame = extern_trajectories_firstSet.getNextFrame();
                     }
 
-                        frameNumber=extern_trajectories_firstSet.getFrameCursor();
 
-                    if(frame==NULL)
+                    frameNumber=extern_trajectories_firstSet.getFrameCursor();
+
+
+                    double now = frameNumber*iren->GetTimerDuration(tid)/1000;
+
+                    // {
+                    //      for (auto tab: extern_trainTimeTables)
+                    //      {
+                    //           VTK_CREATE(vtkPolyDataMapper, mapper);
+                    //           VTK_CREATE(vtkActor, actor);
+                    //      }
+
+                    // }
+                    int countTrains  = 0;
+                    char label[100];
+
+                    for (auto tab: extern_trainTimeTables)
+                        {
+                             // VTK_CREATE(vtkTextActor, textActor);
+                             VTK_CREATE(vtkTextActor3D, textActor);
+                             auto trainType = tab.second->type;
+                             sprintf(label, "%s_%d", trainType.c_str(), tab.second->id);
+                             auto trainId = tab.second->id;
+                             auto trackStart = tab.second->pstart;
+                             auto trackEnd = tab.second->pend;
+                             auto trainStart = tab.second->tstart;
+                             auto trainEnd = tab.second->tend;
+                             auto train = extern_trainTypes[trainType];
+                             auto doors = train->doors;
+                             std::vector<Point> doorPoints;
+                             auto mapper = tab.second->mapper;
+                             auto actor = tab.second->actor;
+                             auto txtActor = tab.second->textActor;
+                             for(auto door: doors)
+                             {
+                                  doorPoints.push_back(door.GetPoint1());
+                                  doorPoints.push_back(door.GetPoint2());
+                             }//doors
+                             if(once)
+                             {
+                                  auto data = getTrainData(trainStart, trainEnd, doorPoints);
+                                  mapper->SetInputData(data);
+                                  actor->SetMapper(mapper);
+                                  actor->GetProperty()->SetLineWidth(10);
+                                  actor->GetProperty()->SetOpacity(0.1);//feels cool!
+                                  actor->GetProperty()->SetColor(
+                                       std::abs(0.9-renderer->GetBackground()[0]),
+                                       std::abs(0.9-renderer->GetBackground()[1]),
+                                       std::abs(1.0-renderer->GetBackground()[2])
+                                       );
+                                  // text
+                                  txtActor->GetTextProperty()->SetOpacity(0.7);
+                                  double pos_x = 50*(trainStart._x + trainEnd._x+0.5);
+                                  double pos_y = 50*(trainStart._y + trainEnd._y+0.5);
+
+                                  txtActor->SetPosition (pos_x, pos_y+2, 20);
+                                  txtActor->SetInput (label);
+                                  txtActor->GetTextProperty()->SetFontSize (30);
+                                  txtActor->GetTextProperty()->SetBold (true);
+                                  txtActor->GetTextProperty()->SetColor (
+                                       std::abs(0.9-renderer->GetBackground()[0]),
+                                       std::abs(0.9-renderer->GetBackground()[1]),
+                                       std::abs(0.5-renderer->GetBackground()[2])
+                                       );
+                                  txtActor->SetVisibility(false);
+                             }
+                             if((now >= tab.second->tin) && (now <= tab.second->tout))
+                             {
+                                  actor->SetVisibility(true);
+                                  txtActor->SetVisibility(true);
+                             }
+                             else
+                             {
+                                  actor->SetVisibility(false);
+                                  txtActor->SetVisibility(false);
+                             }
+                             if(once)
+                             {
+                                  renderer->AddActor(actor);
+                                  renderer->AddActor(txtActor);
+                                  if(countTrains == extern_trainTimeTables.size())
+                                       once = 0;
+                             }
+
+                             countTrains++;
+                        }// time table
+
+
+
+
+                     if(frame==NULL)
                     {
 
                     } else {
@@ -205,7 +309,7 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                 int* winSize=renderWindow->GetSize();
                 static int  lastWinX=winSize[0]+1; // +1 to trigger a first change
                 static int lastWinY=winSize[1];
-
+                // HHHHHH
                 sprintf(runningTimeText,"Pedestrians: %d      Time: %ld Sec",nPeds,frameNumber*iren->GetTimerDuration(tid)/1000);
                 runningTime->SetInput(runningTimeText);
                 runningTime->Modified();
@@ -252,6 +356,7 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                     emit signalFrameNumber(frameNumber, minFrame);
                     emit signalRunningTime(frameNumber*iren->GetTimerDuration(tid));
                     emit signalRenderingTime(effectivefps);
+
                 }
 
 #ifdef TRAVISTO_FFMPEG
@@ -541,4 +646,61 @@ void TimerCallback::SetRenderTimerId(int tid)
 void TimerCallback::setTextActor(vtkTextActor* ra)
 {
     runningTime=ra;
+}
+
+
+// https://vtk.org/Wiki/VTK/Examples/Cxx/GeometricObjects/ColoredLines
+
+
+vtkSmartPointer<vtkPolyData>  TimerCallback::getTrainData(
+     Point trainStart, Point trainEnd, std::vector<Point> doorPoints)
+{
+     float factor = 100.0;
+
+     double pt[3] = { 1.0, 0.0, 0.0 }; // to convert from Point
+     // Create the polydata where we will store all the geometric data
+     vtkSmartPointer<vtkPolyData> linesPolyData =
+          vtkSmartPointer<vtkPolyData>::New();
+
+     // Create a vtkPoints container and store the points in it
+     vtkSmartPointer<vtkPoints> pts =
+          vtkSmartPointer<vtkPoints>::New();
+
+     pt[0] = factor*trainStart._x; pt[1] = factor*trainStart._y;
+     pts->InsertNextPoint(pt);
+
+     for(auto p: doorPoints)
+     {
+          pt[0] = factor*p._x; pt[1] = factor*p._y;
+           pts->InsertNextPoint(pt);
+     }
+     pt[0] = factor*trainEnd._x; pt[1] = factor*trainEnd._y;
+     pts->InsertNextPoint(pt);
+
+
+     // Add the points to the polydata container
+     linesPolyData->SetPoints(pts);
+
+
+     vtkSmartPointer<vtkCellArray> lines =
+          vtkSmartPointer<vtkCellArray>::New();
+
+
+     // Create the first line (between Origin and P0)
+     for(int i = 0; i<= doorPoints.size(); i+=2 )
+     {
+          vtkSmartPointer<vtkLine> line =
+               vtkSmartPointer<vtkLine>::New();
+          line->GetPointIds()->SetId(0, i);
+          line->GetPointIds()->SetId(1, i+1);
+
+          lines->InsertNextCell(line);
+          lines->InsertNextCell(line);
+          line = nullptr;
+     }
+
+     // Add the lines to the polydata container
+     linesPolyData->SetLines(lines);
+     return linesPolyData;
+
 }

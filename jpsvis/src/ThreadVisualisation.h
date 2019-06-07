@@ -74,6 +74,8 @@ extern  vtkActor* extern_glyphs_pedestrians_actor_2D;
 extern  vtkActor* extern_glyphs_pedestrians_actor_3D;
 
 extern SyncData extern_trajectories_firstSet;
+// extern vtkSmartPointer<vtkSphereSource> extern_mysphere;
+
 
 class ThreadVisualisation :public QThread {
     Q_OBJECT

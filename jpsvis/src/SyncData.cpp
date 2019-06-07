@@ -138,6 +138,17 @@ Frame* SyncData::getFrame( int i)
 
 }
 
+vtkSmartPointer<vtkSphereSource> SyncData::getTTT()
+{
+     return _ttt;
+}
+
+void SyncData::setTTT(vtkSmartPointer<vtkSphereSource> s)
+{
+     _ttt = s;
+}
+
+
 Frame* SyncData::getNextFrame()
 {
 
@@ -193,8 +204,8 @@ Frame* SyncData::getNextFrame()
 /***
 * This method is for convenience only.
 * The normal way to get the previous frame is:
-* 		1. either set the variable extern_update_step to a negative value;
-* 		2. using the function getFrame(int frameNumber). one may first get
+*               1. either set the variable extern_update_step to a negative value;
+*               2. using the function getFrame(int frameNumber). one may first get
 * the current framecursor position using getFrameCursor()
 */
 //Frame* SyncData::getPreviousFrame()

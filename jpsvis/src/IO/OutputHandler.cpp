@@ -57,8 +57,7 @@ int OutputHandler::GetErrors()
 
 void OutputHandler::Write(const string& str)
 {
-     if (this != NULL)
-          cout << str << endl;
+     cout << str << endl;
 }
 
 void OutputHandler::ProgressBar(double TotalPeds, double NowPeds)
@@ -157,10 +156,10 @@ FileHandler::~FileHandler()
 
 void FileHandler::Write(const string& str)
 {
-    if (this != NULL) {
+    // if (this != NULL) {
         _pfp << str << endl;
         _pfp.flush();
-    }
+    // }
 
     if (str.find("ERROR") != string::npos)
     {

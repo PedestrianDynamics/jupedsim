@@ -82,6 +82,35 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
 }
 #endif
 
+// bool Building::AddTrainType(std::shared_ptr<TrainType> TT)
+// {
+//       if (_trainTypes.count(TT->type)!=0) {
+//             // Log->Write("WARNING: Duplicate type for train found [%s]",TT->type);
+//       }
+//       _trainTypes[TT->type] = TT;
+//       return true;
+// }
+
+// bool Building::AddTrainTimeTable(std::shared_ptr<TrainTimeTable> TTT)
+// {
+//       if (_trainTimeTables.count(TTT->id)!=0) {
+//             Log->Write("WARNING: Duplicate id for train time table found [%d]",TTT->id);
+//             exit(EXIT_FAILURE);
+//       }
+//       _trainTimeTables[TTT->id] = TTT;
+//       return true;
+// }
+// const std::map<std::string, std::shared_ptr<TrainType> >& Building::GetTrainTypes() const
+// {
+//       return _trainTypes;
+// }
+
+// const std::map<int, std::shared_ptr<TrainTimeTable> >& Building::GetTrainTimeTables() const
+// {
+//       return _trainTimeTables;
+// }
+
+
 Building::~Building()
 {
      //

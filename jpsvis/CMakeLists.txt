@@ -159,6 +159,7 @@ set( HDR
   src/IO/TraVisToClient.h
   forms/Settings.h
   src/SaxParser.h
+  src/train.h
   src/Debug.h
   src/Frame.h
   src/InteractorStyle.h

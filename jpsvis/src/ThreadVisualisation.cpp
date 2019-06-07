@@ -76,7 +76,7 @@
 #include <vtkWindowToImageFilter.h>
 #include <vtkActor.h>
 #include <vtkLightKit.h>
-
+#include <vtkPolyLine.h>
 
 #include "geometry/FacilityGeometry.h"
 #include "geometry/GeometryFactory.h"
@@ -140,7 +140,6 @@ void ThreadVisualisation::slotSetFrameRate(float fps)
 
 void ThreadVisualisation::run()
 {
-//     std::cout << "RUN " << _runningTime << "\n";
     //deactivate the output windows
     vtkObject::GlobalWarningDisplayOff();
 
@@ -180,59 +179,83 @@ void ThreadVisualisation::run()
     //renderer->AddActor(axis);
 
     //add big circle at null point
-    {
-        vtkSphereSource* org = vtkSphereSource::New();
-        org->SetRadius(300);
+    // {
+    //      vtkSphereSource* org = vtkSphereSource::New();
+    //     org->SetRadius(10);
+    //     vtkPolyDataMapper* mapper = vtkPolyDataMapper::New();
+    //     mapper->SetInputConnection(org->GetOutputPort());
+    //     org->Delete();
+    //     //------
+    //     // create actor
+    //     vtkActor* actor = vtkActor::New();
+    //     actor->SetMapper(mapper);
+    //     mapper->Delete();
+    //     actor->GetProperty()->SetColor(.1,.10,0.0);
+    //     _renderer->AddActor(actor);
+    //     actor->Delete();
+    //      mysphere;
+    //     //
+    // }
+    // {
+    //     vtkPolyDataMapper* mapper = vtkPolyDataMapper::New();
+    //     mapper->SetInputConnection(extern_mysphere->GetOutputPort());
+    //     //------
+    //     // create actor
+    //     vtkActor* actor = vtkActor::New();
+    //     actor->SetMapper(mapper);
+    //     mapper->Delete();
+    //     actor->GetProperty()->SetColor(.1,.10,0.0);
+    //     _renderer->AddActor(actor);
+    //     actor->Delete();
+    //     //
+    // }
 
-        vtkPolyDataMapper* mapper = vtkPolyDataMapper::New();
-        mapper->SetInputConnection(org->GetOutputPort());
-        org->Delete();
+    // {
+    //      // Train
+    //      double p0[3] = {1.0*100, 4.0*100, 0.0};
+    //      double p1[3] = {3.0*100, 4.0*100, 0.0};
+    //      double p2[3] = {3.0*100, 5.0*100, 0.0};
+    //      double p3[3] = {1.0*100, 5.0*100, 0.0};
+    //      double p4[3] = {1.0*100, 4.0*100, 0.0};
+    //      // Create a vtkPoints object and store the points in it
+    //      VTK_CREATE(vtkPoints, points);
 
-        // create actor
-        vtkActor* actor = vtkActor::New();
-        actor->SetMapper(mapper);
-        mapper->Delete();
-        actor->GetProperty()->SetColor(.90,.90,0.0);
-        actor->Delete();
-        //renderer->AddActor(actor);
-    }
-    //add another big circle at null point
-    {
-        vtkSphereSource* org = vtkSphereSource::New();
-        org->SetRadius(300);
-        //org->SetCenter(50,80,0);
+    //      points->InsertNextPoint(p0);
+    //      points->InsertNextPoint(p1);
+    //      points->InsertNextPoint(p2);
+    //      points->InsertNextPoint(p3);
+    //      points->InsertNextPoint(p4);
 
-        vtkPolyDataMapper* mapper = vtkPolyDataMapper::New();
-        mapper->SetInputConnection(org->GetOutputPort());
-        org->Delete();
+    //      VTK_CREATE(vtkPolyLine, polyLine);
 
-        // create actor
-        vtkActor* actor = vtkActor::New();
-        actor->SetMapper(mapper);
-        mapper->Delete();
-        actor->GetProperty()->SetColor(.90,.90,0.0);
-        actor->SetPosition(5000,8000,0);
-        actor->Delete();
-        //renderer->AddActor(actor);
-    }
+    //      polyLine->GetPointIds()->SetNumberOfIds(5);
+    //      for(unsigned int i = 0; i < 5; i++)
+    //      {
+    //           polyLine->GetPointIds()->SetId(i,i);
+    //      }
+
+    //      // Create a cell array to store the lines in and add the lines to it
+    //      VTK_CREATE(vtkCellArray, cells);
+    //      cells->InsertNextCell(polyLine);
+
+    //      // Create a polydata to store everything in
+    //      VTK_CREATE(vtkPolyData, polyData);
+
+    //      // Add the points to the dataset
+    //      polyData->SetPoints(points);
+
+    //      // Add the lines to the dataset
+    //      polyData->SetLines(cells);
+
+    //      VTK_CREATE(vtkPolyDataMapper, mapper);
+    //      mapper->SetInputData(polyData);
 
 
-    // Create a real circle, not a sphere
-    {
-        VTK_CREATE(vtkRegularPolygonSource, polygonSource);
-        polygonSource->GeneratePolygonOff();
-        polygonSource->SetNumberOfSides(50);
-        polygonSource->SetRadius(1000);
-        polygonSource->SetCenter(0,0,0);
-        polygonSource->Update();
-
-        VTK_CREATE(vtkPolyDataMapper,mapper);
-        mapper->SetInputConnection(polygonSource->GetOutputPort());
-        VTK_CREATE(vtkActor,actor);
-        actor->GetProperty()->SetColor(180.0/255,180.0/255.0,180.0/255.0);
-        actor->SetMapper(mapper);
-        //renderer->AddActor(actor);
-    }
+    //      VTK_CREATE(vtkActor, actor);
+    //      actor->SetMapper(mapper);
+    //      actor->GetProperty()->SetColor(.1,.10,0.0);
+    //     _renderer->AddActor(actor);
+    // }
 
     // Create the render window
     _renderWindow = vtkRenderWindow::New();
@@ -302,6 +325,10 @@ void ThreadVisualisation::run()
     renderingTimer->setTextActor(_runningTime);
     _renderWinInteractor->AddObserver(vtkCommand::TimerEvent,renderingTimer);
 
+
+
+
+
     //create the necessary connections
     QObject::connect(renderingTimer, SIGNAL(signalRunningTime(unsigned long )),
                      this->parent(), SLOT(slotRunningTime(unsigned long )));
@@ -311,7 +338,6 @@ void ThreadVisualisation::run()
 
     QObject::connect(renderingTimer, SIGNAL(signalRenderingTime(int)),
                      this->parent(), SLOT(slotRenderingTime(int)));
-//    std::cout << "timer " << timer << "\n";
 
     // Create my interactor style
     InteractorStyle* style = InteractorStyle::New();
@@ -586,7 +612,7 @@ void ThreadVisualisation::initGlyphs3D()
         //importer->GetRenderWindow()->GetInteractor()->Start();
 
         ////collect all the elements from the 3ds
-        vtkActorCollection* collection=importer->GetRenderer()->GetActors();
+        vtkActorCollection* collection=importer->GetRenderer()x->GetActors();
         vtkActor *actorCharlie= collection->GetLastActor();
         actorCharlie->InitPathTraversal();
         vtkMapper *mapperCharlie=actorCharlie->GetMapper();
