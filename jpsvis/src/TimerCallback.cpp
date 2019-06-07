@@ -211,11 +211,10 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                                        std::abs(0.9-renderer->GetBackground()[1]),
                                        std::abs(1.0-renderer->GetBackground()[2])
                                        );
-
                                   // text
                                   txtActor->GetTextProperty()->SetOpacity(0.7);
                                   double pos_x = 50*(trainStart._x + trainEnd._x+0.5);
-z                                  double pos_y = 50*(trainStart._y + trainEnd._y+0.5);
+                                  double pos_y = 50*(trainStart._y + trainEnd._y+0.5);
 
                                   txtActor->SetPosition (pos_x, pos_y+2, 20);
                                   txtActor->SetInput (label);
