@@ -83,6 +83,8 @@
 #include <vtkLineSource.h>
 #include <vtkVectorText.h>
 #include <vtkFollower.h>
+#include <vtkLine.h>
+#include <vtkTubeFilter.h>
 
 #include "geometry/FacilityGeometry.h"
 #include "geometry/Point.h"
@@ -96,6 +98,8 @@
 #include "TrailPlotter.h"
 #include "geometry/PointPlotter.h"
 #include "TimerCallback.h"
+#include <vtkTextActor3D.h>
+
 
 #define VTK_CREATE(type, name) \
     vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
@@ -154,118 +158,69 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                     }
 
 
-                        frameNumber=extern_trajectories_firstSet.getFrameCursor();
+                    frameNumber=extern_trajectories_firstSet.getFrameCursor();
 
 
-                        double now = frameNumber*iren->GetTimerDuration(tid)/1000;
-                        VTK_CREATE(vtkActor, trainActor);
-                        VTK_CREATE(vtkActor, doorActor);
-                        VTK_CREATE(vtkActor, doorActor22);
-                        // std::cout << "HH " <<extern_trainTypes["RE"]->nmax << "\n";
-                        // std::cout << "Tab " <<extern_trainTimeTables[1]->id << "\n";
-                        auto polyData = train(0.8, 4.1, 5.2, 4.5);
-                        auto doorData = door(1, 4.1, 3.0, 4.1);
-                        auto doorData2 = door(3.5, 4.1, 5.0, 4.1);
-                        if ( now >= 5 && now < 10){
-                             trainActor->GetProperty()->SetColor(.1,.10,0.0);
-                             trainActor->GetProperty()->SetLineWidth(5);
-                             VTK_CREATE(vtkPolyDataMapper, mapper);
-                             mapper->SetInputData(polyData);
-                             trainActor->SetMapper(mapper);
-                             // door
-                             doorActor->GetProperty()->SetColor(renderer->GetBackground());
-                             doorActor->GetProperty()->SetLineWidth(5);
-                             VTK_CREATE(vtkPolyDataMapper, doorMapper);
-                             doorMapper->SetInputConnection(doorData->GetOutputPort());
-                             doorActor->SetMapper(doorMapper);
+                    double now = frameNumber*iren->GetTimerDuration(tid)/1000;
 
-                             doorActor22->GetProperty()->SetColor(renderer->GetBackground());
-                             doorActor22->GetProperty()->SetLineWidth(5);
-                             VTK_CREATE(vtkPolyDataMapper, doorMapper2);
-                             doorMapper2->SetInputConnection(doorData2->GetOutputPort());
-                             doorActor22->SetMapper(doorMapper2);
-
-                             // text
-                             VTK_CREATE(vtkTextActor, textActor);
-                             textActor->SetInput ( "RE" );
-                             textActor->SetPosition ( 300, 600 );
-                             textActor->GetTextProperty()->SetFontSize ( 24 );
-                             textActor->GetTextProperty()->SetColor ( 1.0, 0.0, 0.0 );
-                             // add renderer
-                             renderer->AddActor(trainActor);
-                             renderer->AddActor(doorActor);
-                             renderer->AddActor(doorActor22);
-                             renderer->AddActor(textActor);
-                        }
-                        else
+                    for (auto tab: extern_trainTimeTables)
                         {
-                             trainActor->GetProperty()->SetColor(renderer->GetBackground());
-                             trainActor->GetProperty()->SetLineWidth(5);
                              VTK_CREATE(vtkPolyDataMapper, mapper);
-                             mapper->SetInputData(polyData);
-                             trainActor->SetMapper(mapper);
-                             VTK_CREATE(vtkTextActor, textActor);
-                             textActor->SetInput ( "RE" );
-                             textActor->SetPosition ( 300, 600 );
-                             textActor->GetTextProperty()->SetFontSize ( 24 );
-                             textActor->GetTextProperty()->SetColor(renderer->GetBackground());
-                             renderer->AddActor(textActor);
-                             renderer->AddActor(trainActor);
-                        }
-                        // ICE
-                        auto polyData2 = train(6.3, 4.1, 9.7, 4.5);
-                        auto doorData22 = door(6.5, 4.1, 9.5, 4.1);
-                        VTK_CREATE(vtkActor, trainActor2);
-                        VTK_CREATE(vtkActor, doorActor2);
-                        if ( now >= 15 && now < 35){
-                             trainActor2->GetProperty()->SetColor(1,.5,1);
-                             trainActor2->GetProperty()->SetLineWidth(5);
-                             VTK_CREATE(vtkPolyDataMapper, mapper);
-                             mapper->SetInputData(polyData2);
-                             trainActor2->SetMapper(mapper);
-                             // door
-                             doorActor2->GetProperty()->SetColor(renderer->GetBackground());
-                             doorActor2->GetProperty()->SetLineWidth(5);
-                             VTK_CREATE(vtkPolyDataMapper, doorMapper);
-                             doorMapper->SetInputConnection(doorData22->GetOutputPort());
-                             doorActor2->SetMapper(doorMapper);
+                             VTK_CREATE(vtkActor, actor);
+                             // VTK_CREATE(vtkTextActor, textActor);
+                             VTK_CREATE(vtkTextActor3D, textActor);
+                             auto trainType = tab.second->type;
+                             auto trainId = tab.second->id;
+                             auto trackStart = tab.second->pstart;
+                             auto trackEnd = tab.second->pend;
+                             auto trainStart = tab.second->tstart;
+                             auto trainEnd = tab.second->tend;
+                             auto train = extern_trainTypes[trainType];
+                             auto doors = train->doors;
+                             std::vector<Point> doorPoints;
+                             for(auto door: doors)
+                             {
+                                  doorPoints.push_back(door.GetPoint1());
+                                  doorPoints.push_back(door.GetPoint2());
+                             }//doors
+
+                             auto data = getTrainData(trainStart, trainEnd, doorPoints);
+                             mapper->SetInputData(data);
+                             actor->SetMapper(mapper);
+                             actor->GetProperty()->SetLineWidth(10);
+                             actor->GetProperty()->SetOpacity(0.1);//feels cool!
                              // text
-                             VTK_CREATE(vtkTextActor, textActor);
-                             textActor->SetInput ( "ICE" );
-                             textActor->SetPosition ( 700, 600 );
-                             textActor->GetTextProperty()->SetFontSize ( 24 );
-                             textActor->GetTextProperty()->SetColor ( 1.0, 0.0, 0.0 );
+                             textActor->GetTextProperty()->SetOpacity(0.1);
+                             double pos_x = mapper->GetInput()->GetPoint(0)[0];
+                             double pos_y = mapper->GetInput()->GetPoint(0)[1];
 
-                             // renderer
-                             renderer->AddActor(trainActor2);
-                             renderer->AddActor(doorActor2);
+                             textActor->SetPosition (pos_x, pos_y+2, 20);
+                             textActor->SetInput (trainType.c_str());
+                             textActor->GetTextProperty()->SetFontSize (30);
+                             textActor->SetVisibility(false);
+                             if((now >= tab.second->tin) && (now <= tab.second->tout))
+                             {
+                                  actor->GetProperty()->SetColor(0.1,.1,0.0);
+                                  textActor->GetTextProperty()->SetColor (1.0,0.0,0.0);
+                                  textActor->SetVisibility(true);
+                             }
+                             else
+                             {
+                                  actor->GetProperty()->SetColor(renderer->GetBackground());
+                                  textActor->GetTextProperty()->SetColor(renderer->GetBackground());
+                             }
+                             renderer->AddActor(actor);
                              renderer->AddActor(textActor);
-                        }
-                        else
-                        {
-                             trainActor2->GetProperty()->SetColor(renderer->GetBackground());
-                             trainActor2->GetProperty()->SetLineWidth(5);
-                             VTK_CREATE(vtkPolyDataMapper, mapper);
-                             mapper->SetInputData(polyData2);
-                             trainActor2->SetMapper(mapper);
-                             // text
-                             VTK_CREATE(vtkTextActor, textActor);
-                             textActor->SetInput ( "ICE" );
-                             textActor->SetPosition ( 700, 600 );
-                             textActor->GetTextProperty()->SetFontSize ( 24 );
-                             textActor->GetTextProperty()->SetColor (renderer->GetBackground());
+                             mapper=nullptr;
+                             actor=nullptr;
+                             textActor=nullptr;
 
-                             renderer->AddActor(trainActor2);
-                             renderer->AddActor(textActor);
-                        }
+                        }// time table
 
 
 
-                        // std::cout << "   TimerCallback::Execute " << frameNumber <<  " " << frameNumber*iren->GetTimerDuration(tid)/1000<< "\n";
 
-
-
-                    if(frame==NULL)
+                     if(frame==NULL)
                     {
 
                     } else {
@@ -662,82 +617,59 @@ void TimerCallback::setTextActor(vtkTextActor* ra)
     runningTime=ra;
 }
 
-vtkSmartPointer<vtkPolyData> TimerCallback::train(double x1, double y1, double x2, double y2)
+
+// https://vtk.org/Wiki/VTK/Examples/Cxx/GeometricObjects/ColoredLines
+
+
+vtkSmartPointer<vtkPolyData>  TimerCallback::getTrainData(
+     Point trainStart, Point trainEnd, std::vector<Point> doorPoints)
 {
-     // Train
-     double p0[3] = {x1*100, y1*100, 0.0};
-     double p1[3] = {x2*100, y1*100, 0.0};
-     double p2[3] = {x2*100, y2*100, 0.0};
-     double p3[3] = {x1*100, y2*100, 0.0};
-     double p4[3] = {x1*100, y1*100, 0.0};
-     // Create a vtkPoints object and store the points in it
+     float factor = 100.0;
 
-     VTK_CREATE(vtkPoints, points);
+     double pt[3] = { 1.0, 0.0, 0.0 }; // to convert from Point
+     // Create the polydata where we will store all the geometric data
+     vtkSmartPointer<vtkPolyData> linesPolyData =
+          vtkSmartPointer<vtkPolyData>::New();
 
-     points->InsertNextPoint(p0);
-     points->InsertNextPoint(p1);
-     points->InsertNextPoint(p2);
-     points->InsertNextPoint(p3);
-     points->InsertNextPoint(p4);
+     // Create a vtkPoints container and store the points in it
+     vtkSmartPointer<vtkPoints> pts =
+          vtkSmartPointer<vtkPoints>::New();
 
-     VTK_CREATE(vtkPolyLine, polyLine);
+     pt[0] = factor*trainStart._x; pt[1] = factor*trainStart._y;
+     pts->InsertNextPoint(pt);
 
-     polyLine->GetPointIds()->SetNumberOfIds(5);
-     for(unsigned int i = 0; i < 5; i++)
+     for(auto p: doorPoints)
      {
-          polyLine->GetPointIds()->SetId(i,i);
+          pt[0] = factor*p._x; pt[1] = factor*p._y;
+           pts->InsertNextPoint(pt);
+     }
+     pt[0] = factor*trainEnd._x; pt[1] = factor*trainEnd._y;
+     pts->InsertNextPoint(pt);
+
+
+     // Add the points to the polydata container
+     linesPolyData->SetPoints(pts);
+
+
+     vtkSmartPointer<vtkCellArray> lines =
+          vtkSmartPointer<vtkCellArray>::New();
+
+
+     // Create the first line (between Origin and P0)
+     for(int i = 0; i<= doorPoints.size(); i+=2 )
+     {
+          vtkSmartPointer<vtkLine> line =
+               vtkSmartPointer<vtkLine>::New();
+          line->GetPointIds()->SetId(0, i);
+          line->GetPointIds()->SetId(1, i+1);
+
+          lines->InsertNextCell(line);
+          lines->InsertNextCell(line);
+          line = nullptr;
      }
 
-     // Create a cell array to store the lines in and add the lines to it
-     VTK_CREATE(vtkCellArray, cells);
-     cells->InsertNextCell(polyLine);
+     // Add the lines to the polydata container
+     linesPolyData->SetLines(lines);
+     return linesPolyData;
 
-     // Create a polydata to store everything in
-     VTK_CREATE(vtkPolyData, polyData);
-
-     // Add the points to the dataset
-     polyData->SetPoints(points);
-
-     // Add the lines to the dataset
-     polyData->SetLines(cells);
-     return polyData;
-
-
-}
-
-vtkSmartPointer<vtkLineSource> TimerCallback::door(double x1, double y1, double x2, double y2)
-{
-     // Train
-     double p0[3] = {x1*100, y1*100, 0.0};
-     double p1[3] = {x2*100, y2*100, 0.0};
-     // Create a vtkPoints object and store the points in it
-
-     VTK_CREATE(vtkPoints, points);
-
-     points->InsertNextPoint(p0);
-     points->InsertNextPoint(p1);
-
-     VTK_CREATE(vtkLineSource, lineSource);
-     lineSource->SetPoint1(p0);
-     lineSource->SetPoint2(p1);
-     lineSource->Update();
-     // polyLine->GetPointIds()->SetNumberOfIds(5);
-     // for(unsigned int i = 0; i < 5; i++)
-     // {
-     //      polyLine->GetPointIds()->SetId(i,i);
-     // }
-
-     // Create a cell array to store the lines in and add the lines to it
-     // VTK_CREATE(vtkCellArray, cells);
-     // cells->InsertNextCell(polyLine);
-
-     // Create a polydata to store everything in
-     // VTK_CREATE(vtkPolyData, polyData);
-
-     // Add the points to the dataset
-     // polyData->SetPoints(points);
-
-     // Add the lines to the dataset
-     // polyData->SetLines(cells);
-     return lineSource;
 }

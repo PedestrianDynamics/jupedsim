@@ -131,8 +131,12 @@ public:
     void SetRenderTimerId(int tid);
 
     void setTextActor(vtkTextActor* runningTime);
-     vtkSmartPointer<vtkPolyData> train(double x1, double y1, double x2, double y2);
-     vtkSmartPointer<vtkLineSource> door(double x1, double y1, double x2, double y2);
+     // vtkSmartPointer<vtkActor> setTrainActor(
+     //      Point trainStart, Point trainEnd, std::vector<Point> doorPoints);
+
+     vtkSmartPointer<vtkPolyData> getTrainData(
+          Point trainStart, Point trainEnd, std::vector<Point> doorPoints);
+
 
 private:
     ///updates system global changes, like fullscreen, ffw and soone
