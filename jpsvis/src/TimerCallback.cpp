@@ -84,7 +84,7 @@
 #include <vtkVectorText.h>
 #include <vtkFollower.h>
 #include <vtkLine.h>
-#include <vtkTubeFilter.h>
+#include <vtkCellArray.h>
 
 #include "geometry/FacilityGeometry.h"
 #include "geometry/Point.h"

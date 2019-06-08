@@ -1542,7 +1542,7 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
           while ( !in.atEnd() )
           {
                QString line = in.readLine();
-               if(line[0] == "#")  // looking for framerate
+               if(line.startsWith("#"))  // looking for framerate
                {
                     if(line.split(":").size()==2)
                     {
