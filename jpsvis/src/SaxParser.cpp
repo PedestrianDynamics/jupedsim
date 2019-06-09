@@ -1878,6 +1878,8 @@ std::shared_ptr<TrainTimeTable> SaxParser::parseTrainTimeTableNode(TiXmlElement 
                     vtkSmartPointer<vtkPolyDataMapper>::New(),
                     vtkSmartPointer<vtkActor>::New(),
                     vtkSmartPointer<vtkTextActor3D>::New(),
+                    vtkSmartPointer<vtkPolyDataMapper>::New(),
+                    vtkSmartPointer<vtkActor>::New(),
                     });
 
      return trainTimeTab;

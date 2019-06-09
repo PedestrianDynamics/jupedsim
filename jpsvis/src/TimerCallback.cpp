@@ -85,6 +85,7 @@
 #include <vtkFollower.h>
 #include <vtkLine.h>
 #include <vtkCellArray.h>
+#include <vtkCylinderSource.h>
 
 #include "geometry/FacilityGeometry.h"
 #include "geometry/Point.h"
@@ -165,22 +166,12 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 
 
                     double now = frameNumber*iren->GetTimerDuration(tid)/1000;
-
-                    // {
-                    //      for (auto tab: extern_trainTimeTables)
-                    //      {
-                    //           VTK_CREATE(vtkPolyDataMapper, mapper);
-                    //           VTK_CREATE(vtkActor, actor);
-                    //      }
-
-                    // }
                     int countTrains  = 0;
                     char label[100];
 
                     for (auto tab: extern_trainTimeTables)
                         {
-                             // VTK_CREATE(vtkTextActor, textActor);
-                             VTK_CREATE(vtkTextActor3D, textActor);
+
                              auto trainType = tab.second->type;
                              sprintf(label, "%s_%d", trainType.c_str(), tab.second->id);
                              auto trainId = tab.second->id;
@@ -194,6 +185,9 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                              auto mapper = tab.second->mapper;
                              auto actor = tab.second->actor;
                              auto txtActor = tab.second->textActor;
+                             auto tactor = tab.second->tubeActor;
+                             auto tmapper = tab.second->tubeMapper;
+
                              for(auto door: doors)
                              {
                                   doorPoints.push_back(door.GetPoint1());
@@ -204,12 +198,12 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                                   auto data = getTrainData(trainStart, trainEnd, doorPoints);
                                   mapper->SetInputData(data);
                                   actor->SetMapper(mapper);
-                                  actor->GetProperty()->SetLineWidth(10);
-                                  actor->GetProperty()->SetOpacity(0.1);//feels cool!
+                                  actor->GetProperty()->SetLineWidth(12.5);
+                                  actor->GetProperty()->SetOpacity(0.9);
                                   actor->GetProperty()->SetColor(
                                        std::abs(0.9-renderer->GetBackground()[0]),
                                        std::abs(0.9-renderer->GetBackground()[1]),
-                                       std::abs(1.0-renderer->GetBackground()[2])
+                                       std::abs(0.9-renderer->GetBackground()[2])
                                        );
                                   // text
                                   txtActor->GetTextProperty()->SetOpacity(0.7);
@@ -226,26 +220,51 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                                        std::abs(0.5-renderer->GetBackground()[2])
                                        );
                                   txtActor->SetVisibility(false);
+                                  //-----------
+                                  // Create a line
+                                  vtkSmartPointer<vtkLineSource> lineSource =
+                                       vtkSmartPointer<vtkLineSource>::New();
+                                  lineSource->SetPoint1(100*trainStart._x, 100*trainStart._y, 0.0);
+                                  lineSource->SetPoint2(100*trainEnd._x, 100*trainEnd._y, 0.0);
+
+                                  // Create a tube (cylinder) around the line
+                                  vtkSmartPointer<vtkTubeFilter> tubeFilter =
+                                       vtkSmartPointer<vtkTubeFilter>::New();
+                                  tubeFilter->SetInputConnection(lineSource->GetOutputPort());
+                                  tubeFilter->SetRadius(12.5);
+                                  tubeFilter->SetNumberOfSides(50);
+                                  tubeFilter->Update();
+
+                                  // Create a mapper and actor
+                                  tmapper->SetInputConnection(tubeFilter->GetOutputPort());
+                                  tactor->GetProperty()->SetOpacity(0.3); //Make the tube have some transparency.
+                                  tactor->SetMapper(tmapper);
+
+
                              }
                              if((now >= tab.second->tin) && (now <= tab.second->tout))
                              {
                                   actor->SetVisibility(true);
                                   txtActor->SetVisibility(true);
+                                  tactor->SetVisibility(true);
                              }
                              else
                              {
                                   actor->SetVisibility(false);
                                   txtActor->SetVisibility(false);
+                                  tactor->SetVisibility(false);
                              }
                              if(once)
                              {
                                   renderer->AddActor(actor);
                                   renderer->AddActor(txtActor);
+                                  renderer->AddActor(tactor);
                                   if(countTrains == extern_trainTimeTables.size())
                                        once = 0;
                              }
 
                              countTrains++;
+
                         }// time table
 
 
