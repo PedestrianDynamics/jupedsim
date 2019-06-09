@@ -149,11 +149,22 @@ int  AccessPoint::GetNextApTo(int UID)
 
 int AccessPoint::GetNearestTransitAPTO(int UID)
 {
+     for (auto itr: _navigationGraphTo){
+          std::cout << "Navigation to " << itr.first << std::endl;
+          for (auto ap : itr.second){
+               std::cout << ap->GetID() << std::endl;
+          }
+     }
+
      const vector <AccessPoint*>& possibleDest=_navigationGraphTo[UID];
 
+
      if(possibleDest.size()==0) {
+          std::cout << "return -1" << std::endl;
           return -1;
      } else if (possibleDest.size()==1) {
+          std::cout << "return " << possibleDest[0]->GetID() << std::endl;
+
           return possibleDest[0]->GetID();
      } else {
           AccessPoint* best_ap=possibleDest[0];
@@ -166,6 +177,8 @@ int AccessPoint::GetNearestTransitAPTO(int UID)
                     best_ap=possibleDest[i];
                }
           }
+          std::cout << "return " << best_ap->GetID() << std::endl;
+
           return best_ap->GetID();
      }
 }
@@ -282,7 +295,7 @@ void AccessPoint::Dump()
      cout<<" Real ID: " <<_id<<endl;
      cout<<" Length:  "<<_navLine->LengthSquare()<<endl;
 
-     cout <<" Is final exit to outside :"<<GetFinalExitToOutside()<<endl;
+     cout <<" Is final exit to outside: " << boolalpha << GetFinalExitToOutside()<<endl;
      cout <<" Distance to final goals"<<endl;
 
      for(std::map<int, double>::iterator p = _mapDestToDist.begin(); p != _mapDestToDist.end(); ++p) {

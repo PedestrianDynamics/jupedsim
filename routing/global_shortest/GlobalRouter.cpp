@@ -119,6 +119,7 @@ bool GlobalRouter::Init(Building* building)
 
      // initialize the distances matrix for the floydwahrshall
      const int exitsCnt = (const int) (_building->GetNumberOfGoals() + _building->GetAllGoals().size());
+     std::cout << "ExitsCnt: " << exitsCnt << std::endl;
 
      _distMatrix = new double*[exitsCnt];
      _pathsMatrix = new int*[exitsCnt];
@@ -127,6 +128,7 @@ bool GlobalRouter::Init(Building* building)
           _distMatrix[i] = new double[exitsCnt];
           _pathsMatrix[i] = new int[exitsCnt];
      }
+
 
      // Initializing the values
      // all nodes are disconnected
@@ -165,6 +167,7 @@ bool GlobalRouter::Init(Building* building)
           _accessPoints[door] = ap;
 
           //very nasty
+          std::cout << "hline id: " << ap->GetID() << "\t index: " << index << std::endl;
           _map_id_to_index[door] = index;
           _map_index_to_id[index] = door;
           index++;
@@ -202,6 +205,7 @@ bool GlobalRouter::Init(Building* building)
           _accessPoints[door] = ap;
 
           //very nasty
+          std::cout << "cross id: " << ap->GetID() << "\t index: " << index << std::endl;
           _map_id_to_index[door] = index;
           _map_index_to_id[index] = door;
           index++;
@@ -251,42 +255,49 @@ bool GlobalRouter::Init(Building* building)
           }
 
           //very nasty
+          std::cout << "trans id: " << ap->GetID() << "\t index: " << index << std::endl;
           _map_id_to_index[door] = index;
           _map_index_to_id[index] = door;
           index++;
      }
 
-     // iterate over goals and check for waiting areasa
-     for (auto itrGoal : _building->GetAllGoals()){
-          if (WaitingArea* wa = dynamic_cast<WaitingArea*>(itrGoal.second)){
-               int door = wa->GetCentreCrossing()->GetUniqueID();
-               Crossing* cross = wa->GetCentreCrossing();
-               const Point& centre = cross->GetCentre();
-               double center[2] = { centre._x, centre._y };
 
-               AccessPoint* ap = new AccessPoint(door, center);
-               ap->SetNavLine(cross);
-               char friendlyName[CLENGTH];
-               ap->SetFinalExitToOutside(false);
-               ap->SetFinalGoalOutside(false);
-               sprintf(friendlyName, "wa_%d_room_%d_subroom_%d", cross->GetID(),
-                         wa->GetRoomID(), wa->GetSubRoomID());
-               ap->SetFriendlyName(friendlyName);
-               ap->SetState(cross->GetState());
-               std::cout << wa->GetSubRoomID() << std::endl;
-               std::cout << wa->GetRoomID() << std::endl;
-
-               int id = _building->GetRoom(wa->GetRoomID())->GetSubRoom(wa->GetSubRoomID())->GetUID();
-               ap->setConnectingRooms(id, id);
-               _accessPoints[door] = ap;
-
-               //very nasty
-               _map_id_to_index[door] = index;
-               _map_index_to_id[index] = door;
-               index++;
-
-          }
-     }
+//     // iterate over goals and check for waiting areasa
+//     for (auto itrGoal : _building->GetAllGoals()){
+//          if (WaitingArea* wa = dynamic_cast<WaitingArea*>(itrGoal.second)){
+//               int door = wa->GetCentreCrossing()->GetUniqueID();
+//               Crossing* cross = wa->GetCentreCrossing();
+//               const Point& centre = cross->GetCentre();
+//               double center[2] = { centre._x, centre._y };
+//
+//               AccessPoint* ap = new AccessPoint(door, center);
+//               ap->SetNavLine(cross);
+//               char friendlyName[CLENGTH];
+//               ap->SetFinalExitToOutside(false);
+//               ap->SetFinalGoalOutside(true);
+//               sprintf(friendlyName, "wa_%d_room_%d_subroom_%d", cross->GetID(),
+//                         wa->GetRoomID(), wa->GetSubRoomID());
+//               ap->SetFriendlyName(friendlyName);
+//               ap->SetState(cross->GetState());
+//               std::cout << wa->GetSubRoomID() << std::endl;
+//               std::cout << wa->GetRoomID() << std::endl;
+//
+//               SubRoom* subRoom = _building->GetRoom(wa->GetRoomID())->GetSubRoom(wa->GetSubRoomID());
+//
+//               int id = subRoom->GetUID();
+//               ap->setConnectingRooms(id, id);
+//               _accessPoints[door] = ap;
+//
+//               //very nasty
+//               std::cout << "wa id: " << ap->GetID() << "\t index: " << index << std::endl;
+//               _map_id_to_index[door] = index;
+//               _map_index_to_id[index] = door;
+//               index++;
+//
+//               //add connections
+//
+//          }
+//     }
 
      // populate the subrooms at the elevation
      for(auto && itroom:_building->GetAllRooms())
@@ -307,7 +318,6 @@ bool GlobalRouter::Init(Building* building)
      // loop over the subrooms
      // get the transitions in the subrooms
      // and compute the distances
-
      for(auto && itroom:_building->GetAllRooms())
      {
           auto&& room= (shared_ptr<Room>&&) itroom.second;
@@ -372,11 +382,12 @@ bool GlobalRouter::Init(Building* building)
                }
           }
      }
-
+//     for (auto itr : _accessPoints ){
+//          itr.second->Dump();
+//     }
 
      //complete the matrix with the final distances between the exits to the outside and the
      //final marked goals
-
      for (int final_dest:_finalDestinations)
      {
           Goal* goal =_building->GetFinalGoal(final_dest);
@@ -424,6 +435,12 @@ bool GlobalRouter::Init(Building* building)
      for (auto itr : _accessPoints ){
           itr.second->Dump();
      }
+
+     std::cout << "Map:" << std::endl;
+     for (auto itr: _map_id_to_index){
+          std::cout << itr.first << " -> " << itr.second << std::endl;
+     }
+
 
      //run the floyd warshall algorithm
      FloydWarshall();
@@ -533,6 +550,12 @@ bool GlobalRouter::Init(Building* building)
 
                // set the intermediate path
                // set the intermediate path to global final destination
+               std::cout << "From door: " << itr.first << std::endl;
+               std::cout << "To door:   " << to_door_uid << std::endl;
+
+               std::cout << "From door index: " << from_door_matrix_index << std::endl;
+               std::cout << "To door index:   " << to_door_matrix_index << std::endl;
+
                GetPath(from_door_matrix_index, to_door_matrix_index);
                if (_tmpPedPath.size() >= 2) {
                     from_AP->AddTransitAPsTo(_finalDestinations[p],
@@ -741,9 +764,18 @@ void GlobalRouter::FloydWarshall()
           }
      }
 
+     std::cout << "dist matrix: " << std::endl;
      for (int i = 0; i<n; i++) {
           for (int j = 0; j<n; j++) {
                std::cout << _distMatrix[i][j] << "\t";
+          }
+          std::cout << std::endl;
+     }
+
+     std::cout << "paths matrix: " << std::endl;
+     for (int p = 0; p < n ; ++p) {
+          for (int r = 0; r < n; ++r) {
+               std::cout << _pathsMatrix[p][r] << "\t";
           }
           std::cout << std::endl;
      }
@@ -798,6 +830,10 @@ int GlobalRouter::FindExit(Pedestrian* ped)
      }
      // else proceed as usual and return the closest navigation line
      int nextDestination = ped->GetNextDestination();
+     int nextGoal = ped->GetFinalDestination();
+
+     std::cout << "NextDestination: " << nextDestination << std::endl;
+     std::cout << "nextGoal: " << nextGoal << std::endl;
 
      if (nextDestination == -1)
      {
@@ -865,6 +901,11 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      // get the relevant opened exits
      vector <AccessPoint*> relevantAPs;
      GetRelevantRoutesTofinalDestination(ped,relevantAPs);
+
+     std::cout << "relevantAPs: " << std::endl;
+     for (auto ap : relevantAPs){
+          std::cout << ap->GetID() << std::endl;
+     }
      //in the case there is only one alternative
      //save some computation
      if(relevantAPs.size()==1)
@@ -953,7 +994,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 
 void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<AccessPoint*>& relevantAPS)
 {
-
+     std::cout << "Ped final destination: " << ped->GetFinalDestination() << std::endl;
      Room* room=_building->GetRoom(ped->GetRoomID());
      SubRoom* sub=room->GetSubRoom(ped->GetSubRoomID());
 
