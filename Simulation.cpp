@@ -766,7 +766,7 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
           Log->Write("ERROR:\t Simulation::correctGeometry got wrong room_id|subroom_id (%d|%d). TrainId %d", room_id, subroom_id, trainId);
           exit(EXIT_FAILURE);
      }
-     int transition_id = 10000; // randomly high number
+     static int transition_id = 10000; // randomly high number
 
      std::cout << "enter with train " << trainType.c_str() << "\n";
      std::cout<< KBLU << "Enter correctGeometry: Building Has " << building->GetAllTransitions().size() << " Transitions\n" << RESET;
