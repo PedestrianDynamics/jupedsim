@@ -187,11 +187,12 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                              auto txtActor = tab.second->textActor;
                              auto tactor = tab.second->tubeActor;
                              auto tmapper = tab.second->tubeMapper;
-
-                             for(auto door: doors)
+                             trainStart = trainStart + trackStart;
+                             trainEnd = trainEnd + trackStart;
+                             for(auto && door: doors)
                              {
-                                  doorPoints.push_back(door.GetPoint1());
-                                  doorPoints.push_back(door.GetPoint2());
+                                  doorPoints.push_back(door.GetPoint1() + trainStart);
+                                  doorPoints.push_back(door.GetPoint2() + trainStart);
                              }//doors
                              if(once)
                              {
