@@ -29,6 +29,7 @@
 #include <cassert>
 #include "../geometry/Building.h"
 #include "../geometry/SubRoom.h"
+#include "../geometry/WaitingArea.h"
 #include "Knowledge.h"
 #include "Pedestrian.h"
 #include <limits>
@@ -725,7 +726,7 @@ void Pedestrian::InitV0(const Point& target)
 const Point& Pedestrian::GetV0(const Point& target)
 {
 
-#define DEBUGV0 1
+#define DEBUGV0 0
      const Point& pos = GetPos();
      Point delta = target - pos;
      Point new_v0;
@@ -737,8 +738,15 @@ const Point& Pedestrian::GetV0(const Point& target)
      t = _newOrientationDelay++ *_deltaT/(1.0+100* _distToBlockade);
 
      _V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
+
+     printf("=====\nGoal Line=[%f, %f]-[%f, %f]\n", _navLine->GetPoint1()._x, _navLine->GetPoint1()._y, _navLine->GetPoint2()._x, _navLine->GetPoint2()._y);
+     printf("Ped=%d, sub=%d, room=%d pos=[%f, %f], target=[%f, %f]\n", _id, _subRoomID, _roomID, pos._x, pos._y, target._x, target._y);
+     printf("Ped=%d : BEFORE new_v0=%f %f norm = %f\n", _id, new_v0._x, new_v0._y, new_v0.Norm());
+     printf("ped=%d: t=%f, _newOrientationFlag=%d, neworientationDelay=%d, _DistToBlockade=%f\n", _id,t, _newOrientationFlag, _newOrientationDelay, _distToBlockade);
+     printf("_v0=[%f, %f] norm = %f\n=====\n", _V0._x, _V0._y, _V0.Norm());
+
 #if DEBUGV0
-     if(0){
+     if(DEBUGV0 == 0){
           printf("=====\nGoal Line=[%f, %f]-[%f, %f]\n", _navLine->GetPoint1()._x, _navLine->GetPoint1()._y, _navLine->GetPoint2()._x, _navLine->GetPoint2()._y);
           printf("Ped=%d, sub=%d, room=%d pos=[%f, %f], target=[%f, %f]\n", _id, _subRoomID, _roomID, pos._x, pos._y, target._x, target._y);
           printf("Ped=%d : BEFORE new_v0=%f %f norm = %f\n", _id, new_v0._x, new_v0._y, new_v0.Norm());
@@ -1260,6 +1268,20 @@ int Pedestrian::GetLastGoalID() const
 bool Pedestrian::IsInsideGoal() const
 {
      return _insideGoal;
+}
+
+bool Pedestrian::IsInsideWaitingAreaWaiting() const
+{
+     if (_insideGoal){
+          auto itr = _building->GetAllGoals().find(_desiredFinalDestination);
+          if (itr != _building->GetAllGoals().end()){
+               Goal* goal = itr->second;
+               if (WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)){
+                    return wa->isWaiting(Pedestrian::GetGlobalTime(), _building);
+               }
+          }
+     }
+     return false;
 }
 
 void Pedestrian::EnterGoal()

@@ -388,7 +388,7 @@ void Simulation::UpdateRoutesAndLocations()
                          ped->StartWaiting();
                     }
 
-                    if (ped->IsWaiting() && cross->IsOpen()){
+                    if (ped->IsWaiting() && cross->IsOpen() && !ped->IsInsideWaitingAreaWaiting()){
                         ped->EndWaiting();
                     }
                }

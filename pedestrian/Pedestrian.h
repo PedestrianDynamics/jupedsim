@@ -509,7 +509,9 @@ public:
 
      bool IsInsideGoal() const;
 
-     const Point& GetWaitingPos() const;
+     bool IsInsideWaitingAreaWaiting() const;
+
+    const Point& GetWaitingPos() const;
 
      void SetWaitingPos(const Point& waitingPos);
 

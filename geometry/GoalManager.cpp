@@ -52,6 +52,13 @@ void GoalManager::ProcessPedPosition(Pedestrian* ped)
           if (!wa->isOpen()) {
                SetState(wa->GetId(), false);
           }
+
+          double t = Pedestrian::GetGlobalTime();
+
+          if ((wa->isWaiting(t, ped->GetBuilding())) && (!ped->IsWaiting())){
+//               std::cout << t << ": " << ped->GetID() << " " << ped->GetRoomID() << " " << ped->GetSubRoomID() << std::endl;
+               ped->StartWaiting();
+          }
      }
 
      if ((ped->GetLastGoalID() != -1 ) && (ped->GetFinalDestination() != ped->GetLastGoalID())){
