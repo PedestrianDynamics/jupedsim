@@ -690,8 +690,8 @@ double Simulation::RunBody(double maxSimTime)
                    trainOutflow[id] += Trans->GetDoorUsage();
                    if(trainOutflow[id] >= TrainTypes[type]->nmax)
                    {
-                         std::cout << "INFO:\tclosing train door "<<  transType.c_str() << " at "<<  Pedestrian::GetGlobalTime() << "\n";
-                         Log->Write("INFO:\tclosing train door %s at t=%.2f. Flow = %.2f (Train Capacity %.2f)", transType.c_str(), Pedestrian::GetGlobalTime(), trainOutflow[id], TrainTypes[type]->nmax);
+                        std::cout << "INFO:\tclosing train door "<<  transType.c_str() << " at "<<  Pedestrian::GetGlobalTime() << " capacity " <<  TrainTypes[type]->nmax<< "\n";
+                         Log->Write("INFO:\tclosing train door %s at t=%.2f. Flow = %.2f (Train Capacity %d)", transType.c_str(), Pedestrian::GetGlobalTime(), trainOutflow[id], TrainTypes[type]->nmax);
                          Trans->Close();
                    }
              }
@@ -754,12 +754,18 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
      int trainId = tab->id;
      std::string trainType = tab->type;
      Point TrackStart = tab->pstart;
+     Point TrainStart = tab->tstart;
      Point TrackEnd = tab->pend;
      SubRoom * subroom;
      int room_id, subroom_id;
      auto mytrack = building->GetTrackWalls(TrackStart, TrackEnd, room_id, subroom_id);
      Room* room = building->GetRoom(room_id);
-     subroom = room->GetSubRoom(subroom_id);//todo safety check
+     subroom = room->GetSubRoom(subroom_id);
+     if(subroom == nullptr)
+     {
+          Log->Write("ERROR:\t Simulation::correctGeometry got wrong room_id|subroom_id (%d|%d). TrainId %d", room_id, subroom_id, trainId);
+          exit(EXIT_FAILURE);
+     }
      int transition_id = 10000; // randomly high number
 
      std::cout << "enter with train " << trainType.c_str() << "\n";
@@ -773,14 +779,26 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
 
       auto train = building->GetTrainTypes().at(trainType);
       auto doors = train->doors;
+      for(auto && d: doors)
+      {
+           auto newX  = d.GetPoint1()._x + TrainStart._x + TrackStart._x;
+           auto newY  = d.GetPoint1()._y + TrainStart._y + TrackStart._y;
+           d.SetPoint1(Point(newX, newY));
+           newX  = d.GetPoint2()._x + TrainStart._x + TrackStart._x;
+           newY  = d.GetPoint2()._y + TrainStart._y + TrackStart._y;
+           d.SetPoint2(Point(newX, newY));
+      }
+      for(auto d: doors)
+      {
+           Log->Write("Train %s %d. Transformed coordinates of doors: %s -- %s", trainType.c_str(), trainId, d.GetPoint1().toString().c_str(), d.GetPoint2().toString().c_str());
+      }
+
       // std::vector<std::pair<PointWall, pointWall > >
       auto pws = building->GetIntersectionPoints(doors, mytrack);
       if(pws.empty())
-            std::cout << "simulation::correctGeometry: pws are empty\n";
+           std::cout << KRED << "simulation::correctGeometry: pws are empty. Something went south with train doors\n" << RESET;
 
-      subroom->GetUID();
       auto walls = subroom->GetAllWalls();
-
       //---
       for(auto pw: pws)
       {

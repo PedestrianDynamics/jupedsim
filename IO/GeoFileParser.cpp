@@ -822,6 +822,7 @@ bool GeoFileParser::LoadTrainInfo(Building* building)
           resTTT = LoadTrainTimetable(building, xRootNode);
           resType = LoadTrainType(building, xRootNode);
      }
+
      return (resTTT && resType);
 }
 bool GeoFileParser::LoadTrainTimetable(Building* building, TiXmlElement * xRootNode)
@@ -858,7 +859,7 @@ bool GeoFileParser::LoadTrainTimetable(Building* building, TiXmlElement * xRootN
                     e = e->NextSiblingElement("train")) {
           std::shared_ptr<TrainTimeTable> TTT = parseTrainTimeTableNode(e);
 
-          if (TTT) { // todo: maybe get pointer to train
+          if (TTT) {
                building->AddTrainTimeTable(TTT);
           }
      }
