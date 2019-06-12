@@ -576,7 +576,7 @@ Point DirectionSubLocalFloorfieldTrips::GetTarget(Room* room, Pedestrian* ped) c
 {
      Goal* goal = ped->GetBuilding()->GetFinalGoal(ped->GetFinalDestination());
      // Pedestrian is inside a waiting area
-     if ((goal!=nullptr) && (goal->IsInsideGoal(ped->GetPos()))){
+     if ((goal!=nullptr) && (goal->IsInsideGoal(ped))){
 
           std::vector<Point> polygon(goal->GetPolygon());
           std::set<Point> triangle;
@@ -710,7 +710,7 @@ Point DirectionSubLocalFloorfieldTripsVoronoi::GetTarget(Room* room, Pedestrian*
 {
      Goal* goal = ped->GetBuilding()->GetFinalGoal(ped->GetFinalDestination());
      // Pedestrian is inside a waiting area
-     if ((goal!=nullptr) && (goal->IsInsideGoal(ped->GetPos()))){
+     if ((goal!=nullptr) && (goal->IsInsideGoal(ped))){
 
           std::vector<Point> polygon(goal->GetPolygon());
           std::set<Point> triangle;

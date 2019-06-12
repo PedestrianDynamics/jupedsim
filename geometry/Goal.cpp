@@ -30,6 +30,7 @@
 #include "Goal.h"
 #include "Wall.h"
 #include "Crossing.h"
+#include "../pedestrian/Pedestrian.h"
 
 using namespace std;
 
@@ -306,10 +307,13 @@ Crossing* Goal::GetCentreCrossing()
      return _crossing;
 }
 
-//bool Goal::IsInsideGoal(Pedestrian* ped) const
-//{
-//     return IsInsideGoal(ped->GetPos());
-//}
+bool Goal::IsInsideGoal(Pedestrian* ped) const
+{
+     if (_roomID == ped->GetRoomID() && _subRoomID == ped->GetSubRoomID()){
+          return IsInsideGoal(ped->GetPos());
+     }
+     return false;
+}
 
 bool Goal::IsInsideGoal(const Point& point) const
 {
