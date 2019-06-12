@@ -405,6 +405,7 @@ routing/RoutingEngine.cpp
         routing/direction/waiting/WaitingMiddle.cpp
         routing/direction/waiting/WaitingVoronoi.cpp
         routing/direction/waiting/WaitingRandom.cpp
+        routing/direction/waiting/WaitingProbability.cpp
 
 events/EventManager.cpp
 events/Event.cpp
@@ -530,7 +531,7 @@ routing/RoutingEngine.h
         routing/direction/waiting/WaitingMiddle.h
         routing/direction/waiting/WaitingVoronoi.h
         routing/direction/waiting/WaitingRandom.h
-
+        routing/direction/waiting/WaitingProbability.h
 
         pedestrian/Pedestrian.h
 pedestrian/PedDistributor.h

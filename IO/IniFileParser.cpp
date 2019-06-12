@@ -59,6 +59,7 @@
 #include "../routing/direction/waiting/WaitingMiddle.h"
 #include "../routing/direction/waiting/WaitingVoronoi.h"
 #include "../routing/direction/waiting/WaitingRandom.h"
+#include "../routing/direction/waiting/WaitingProbability.h"
 
 
 /* https://stackoverflow.com/questions/38530981/output-compiler-version-in-a-c-program#38531037 */
@@ -1671,7 +1672,8 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
 
      // Read waiting
 //     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingVoronoi());
-     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
+//     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
+     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingProbability());
 //     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingMiddle());
 
      _directionManager->SetWaitingStrategy(_waitingStrategy);
