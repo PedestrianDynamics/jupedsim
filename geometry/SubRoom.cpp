@@ -255,6 +255,12 @@ bool SubRoom::AddTransition(Transition* line)
      return true;
 }
 
+bool SubRoom::AddWaitingArea(WaitingArea* wa)
+{
+     _goalIDs.push_back(wa->GetCentreCrossing()->GetUniqueID());
+     return true;
+}
+
 void SubRoom::AddNeighbor(SubRoom* sub)
 {
      if(sub && (IsElementInVector(_neighbors, sub)==false))

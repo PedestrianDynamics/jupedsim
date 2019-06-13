@@ -379,6 +379,8 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
                Goal * goal = parseWaitingAreaNode(e);
                if (goal) {
                     building->AddGoal(goal);
+//                    building->GetRoom(goal->GetRoomID())->GetSubRoom(goal->GetSubRoomID())->AddWaitingArea(
+//                              dynamic_cast<WaitingArea*>(goal));
                     _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
                }
 
@@ -773,6 +775,7 @@ Goal* GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
                wa->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
           }
      }
+
 
      if (!waitingArea->ConvertLineToPoly()){
           Log->Write("ERROR:\t   parsing polygon of waiting area %d", id);

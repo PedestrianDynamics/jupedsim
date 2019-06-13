@@ -460,21 +460,14 @@ bool FFRouterTrips::ReInit()
 
 int FFRouterTrips::FindExit(Pedestrian* ped)
 {
-
-//     for (auto& goal : _goalToLineUIDmap){
-//          std::cout << goal.first << " -> " << goal.second << std::endl;
-//     }
-
      SubRoom* subroom = _building->GetSubRoomByUID(ped->GetSubRoomUID());
      Goal* goal = _building->GetFinalGoal(ped->GetFinalDestination());
-
-     int ret;
 
      // Check if current position is already waiting area
      // yes: set next goal and return findExit(p)
      goalManager.ProcessPedPosition(ped);
 
-     if ((goal!=nullptr) && (goal->IsInsideGoal(ped->GetPos()))){
+     if ((goal!=nullptr) && (goal->IsInsideGoal(ped))){
           if(WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)) {
                //take the current time from the pedestrian
                double t = Pedestrian::GetGlobalTime();
@@ -491,7 +484,6 @@ int FFRouterTrips::FindExit(Pedestrian* ped)
 
 int FFRouterTrips::FindExit1(Pedestrian* p)
 {
-
      if (_mode == quickest) {
           if (p->GetGlobalTime() > _recalc_interval
                && _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->IsInSubRoom(p)

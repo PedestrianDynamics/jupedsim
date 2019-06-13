@@ -35,9 +35,8 @@
 
 //#include "../geometry/Building.h"
 //#include "../pedestrian/Pedestrian.h"
-#include "../../../tinyxml/tinyxml.h"
-#include "../../../geometry/SubRoom.h"
-#include "../../../geometry/WaitingArea.h"
+#include "../../tinyxml/tinyxml.h"
+#include "../../geometry/SubRoom.h"
 //#include "../geometry/Wall.h"
 //#include "../IO/OutputHandler.h"
 
@@ -257,83 +256,6 @@ bool GlobalRouter::Init(Building* building)
           index++;
      }
 
-     for(const auto & itr:_building->GetAllGoals()) {
-          Goal* goal = itr.second;
-          if (WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)) {
-               for (auto line : wa->GetAllWalls()){
-                    int door = line.GetUniqueID();
-                    Point p1 = line.GetPoint1();
-                    Point p2 = line.GetPoint2();
-
-                    double center[2] = { (p1._x + p2._x)/2., (p1._y + p2._y)/2.};
-
-                    AccessPoint* ap = new AccessPoint(door, center);
-//                    ap->SetNavLine(line);
-//                    char friendlyName[CLENGTH];
-//                    sprintf(friendlyName, "wa_%d_room_%d_subroom_%d", wa->GetID(),
-//                              cross->GetRoom1()->GetID(),
-//                              cross->GetSubRoom1()->GetSubRoomID());
-//                    ap->SetFriendlyName(friendlyName);
-//
-                    ap->SetState(DoorState::OPEN);
-//                    // save the connecting sub/rooms IDs
-//                    int id1 = -1;
-//                    if (cross->GetSubRoom1()) {
-//                         id1 = cross->GetSubRoom1()->GetUID();
-//                    }
-//
-//                    int id2 = -1;
-//                    if (cross->GetSubRoom2()) {
-//                         id2 = cross->GetSubRoom2()->GetUID();
-//                    }
-//
-//                    ap->setConnectingRooms(id1, id2);
-//                    _accessPoints[door] = ap;
-//
-//                    //very nasty
-//                    _map_id_to_index[door] = index;
-//                    _map_index_to_id[index] = door;
-
-               }
-          }
-     }
-//          int door = itr.second->GetID();
-//          Crossing* cross = itr.second;
-//          const Point& centre = cross->GetCentre();
-//          double center[2] = { centre._x, centre._y };
-//
-//          AccessPoint* ap = new AccessPoint(door, center);
-//          ap->SetNavLine(cross);
-//          char friendlyName[CLENGTH];
-//          sprintf(friendlyName, "wa_%d_room_%d_subroom_%d", cross->GetID(),
-//                    cross->GetRoom1()->GetID(),
-//                    cross->GetSubRoom1()->GetSubRoomID());
-//          ap->SetFriendlyName(friendlyName);
-//
-////          ap->SetClosed(cross->IsClose());
-//          ap->SetState(cross->GetState());
-//          // save the connecting sub/rooms IDs
-//          int id1 = -1;
-//          if (cross->GetSubRoom1()) {
-//               id1 = cross->GetSubRoom1()->GetUID();
-//          }
-//
-//          int id2 = -1;
-//          if (cross->GetSubRoom2()) {
-//               id2 = cross->GetSubRoom2()->GetUID();
-//          }
-//
-//          ap->setConnectingRooms(id1, id2);
-//          _accessPoints[door] = ap;
-//
-//          //very nasty
-//          _map_id_to_index[door] = index;
-//          _map_index_to_id[index] = door;
-//          index++;
-//     }
-
-
-
      // populate the subrooms at the elevation
      for(auto && itroom:_building->GetAllRooms())
      {
@@ -353,7 +275,6 @@ bool GlobalRouter::Init(Building* building)
      // loop over the subrooms
      // get the transitions in the subrooms
      // and compute the distances
-
      for(auto && itroom:_building->GetAllRooms())
      {
           auto&& room= (shared_ptr<Room>&&) itroom.second;
@@ -421,7 +342,6 @@ bool GlobalRouter::Init(Building* building)
 
      //complete the matrix with the final distances between the exits to the outside and the
      //final marked goals
-
      for (int final_dest:_finalDestinations)
      {
           Goal* goal =_building->GetFinalGoal(final_dest);
@@ -590,15 +510,6 @@ bool GlobalRouter::Init(Building* building)
                }
                _tmpPedPath.clear();
           }
-     }
-
-     std::cout << std::endl;
-     std::cout << "DistMatrix:" << std::endl;
-     for (int i = 0; i < exitsCnt; ++i){
-          for (int j = 0; j < exitsCnt; ++j){
-               std::cout << setw(8) << _distMatrix[i][j];
-          }
-          std::cout << std::endl;
      }
 
      //dumping the complete system

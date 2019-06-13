@@ -40,7 +40,7 @@
 //forward declarations
 class Wall;
 class Point;
-//class Pedestrian;
+class Pedestrian;
 
 namespace bg = boost::geometry;
 typedef bg::model::polygon<Point, false, false> polygon_type;
@@ -144,9 +144,8 @@ public:
 
      Crossing* GetCentreCrossing();
 
-//     bool IsInsideGoal(Pedestrian* ped) const;
+     bool IsInsideGoal(Pedestrian* ped) const;
 
-     bool IsInsideGoal(const Point& point) const;
 
     int GetRoomID() const;
 
@@ -165,6 +164,7 @@ private:
      // x-Koordinate der Linie von einer Eccke zur nächsten
      double Xintercept(const Point& point1, const Point& point2,
                        double hitY) const;
+    bool IsInsideGoal(const Point& point) const;
 
 };
 

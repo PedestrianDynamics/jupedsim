@@ -307,6 +307,7 @@ public:
      bool AddTransition(Transition* line);
      bool AddHline(Hline* line);
      void AddNeighbor(SubRoom* sub);
+     bool AddWaitingArea(WaitingArea* line);
 
      const std::vector<Crossing*>& GetAllCrossings() const;
      const std::vector<Transition*>& GetAllTransitions() const;
