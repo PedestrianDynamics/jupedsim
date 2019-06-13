@@ -352,7 +352,7 @@ void Simulation::UpdateRoutesAndLocations()
 
           //set the new room if needed
           if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
-                    && (room->GetCaption() == "outside")) { //TODO Hier aendern fuer inside goals?
+              && (room->GetCaption() == "outside")) { //TODO Hier aendern fuer inside goals?
 #pragma omp critical(Simulation_Update_pedsToRemove)
                pedsToRemove.insert(ped);
           } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
@@ -575,43 +575,37 @@ double Simulation::RunBody(double maxSimTime)
 
             //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
             //update quickestRouter
-            if (_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST)) {
-                if(geometryChanged)
-                {
-                     FFRouter* ffrouter2 = dynamic_cast<FFRouter*>(_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST));
-                     ffrouter2->Init(_building.get());
-                     // debug
-                     fs::path f("tmp_"+std::to_string(t)+"_"+_config->GetGeometryFile());
-                     std::string filename = f.string();
-                     std::cout << "\nUpdate geometry. New  geometry --> " << filename.c_str() << "\n";
+            if(geometryChanged)
+            {
+                 // debug
+                 fs::path f("tmp_"+std::to_string(t)+"_"+_config->GetGeometryFile());
+                 std::string filename = f.string();
+                 std::cout << "\nUpdate geometry. New  geometry --> " << filename.c_str() << "\n";
 
-                     std::cout<< KGRN << "Enter correctGeometry: Building Has " << _building->GetAllTransitions().size() << " Transitions\n" << RESET;
-                     _building->SaveGeometry(filename);
-                     //
-                     double _deltaH = _building->GetConfig()->get_deltaH();
-                     double _wallAvoidDistance = _building->GetConfig()->get_wall_avoid_distance();
-                     bool _useWallAvoidance = _building->GetConfig()->get_use_wall_avoidance();
+                 std::cout<< KGRN << "Enter correctGeometry: Building Has " << _building->GetAllTransitions().size() << " Transitions\n" << RESET;
+                 _building->SaveGeometry(filename);
+                 //
+                 double _deltaH = _building->GetConfig()->get_deltaH();
+                 double _wallAvoidDistance = _building->GetConfig()->get_wall_avoid_distance();
+                 bool _useWallAvoidance = _building->GetConfig()->get_use_wall_avoidance();
 
-                     if(auto dirlocff = dynamic_cast<DirectionLocalFloorfield*>(_building->GetConfig()->get_dirStrategy())){
-                          Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
-                          dirlocff->Init(_building.get(), _deltaH, _wallAvoidDistance, _useWallAvoidance);
-                          Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
-                     }
-
-
-                     std::cout << KBLU << " Init router in simulation\n" << RESET;
+                 if(auto dirlocff = dynamic_cast<DirectionLocalFloorfield*>(_building->GetConfig()->get_dirStrategy())){
+                      Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
+                      dirlocff->Init(_building.get(), _deltaH, _wallAvoidDistance, _useWallAvoidance);
+                      Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
+                 }
                 }
-                else{
-                     FFRouter* ffrouter = dynamic_cast<FFRouter*>(_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST));
-                     if (ffrouter->MustReInit()) {
-                          ffrouter->ReInit();
-                          ffrouter->SetRecalc(t);
-                     }
-                }
+            else{ // quickest needs update even if NeedsUpdate() is false
+                 FFRouter* ffrouter = dynamic_cast<FFRouter*>(_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST));
+                 if (ffrouter->MustReInit()) {
+                      ffrouter->ReInit();
+                      ffrouter->SetRecalc(t);
+                 }
             }
 
             // here the used routers are update, when needed due to external changes
             if (_routingEngine->NeedsUpdate()){
+                 std::cout << KBLU << " Init router in simulation\n" << RESET;
                  _routingEngine->UpdateRouter();
             }
 
