@@ -134,6 +134,7 @@ public:
      bool IsInLineSegment(const Point& p) const;
 
      bool NearlyInLineSegment(const Point& p) const;
+     bool NearlyHasEndPoint(const Point& point) const;
 
      /**
       * @return the distance from the line to the point p

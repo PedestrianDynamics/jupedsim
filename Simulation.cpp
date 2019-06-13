@@ -256,7 +256,10 @@ bool Simulation::InitArgs()
           Log->Write("INFO\tMax          : %d",TT.second->nmax);
           Log->Write("INFO\tnumber doors : %d\n",TT.second->doors.size());
     }
-    Log->Write("Got %d Train Time Tables",_building->GetTrainTimeTables().size());
+    if(_building->GetTrainTimeTables().size())
+         Log->Write("INFO:\tGot %d Train Time Tables",_building->GetTrainTimeTables().size());
+    else
+         Log->Write("WARNING:\tGot %d Train Time Tables",_building->GetTrainTimeTables().size());
     for(auto&& TT: _building->GetTrainTimeTables())
     {
           Log->Write("INFO\tid           : %d",TT.second->id);
@@ -597,10 +600,11 @@ double Simulation::RunBody(double maxSimTime)
                 }
             else{ // quickest needs update even if NeedsUpdate() is false
                  FFRouter* ffrouter = dynamic_cast<FFRouter*>(_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST));
-                 if (ffrouter->MustReInit()) {
-                      ffrouter->ReInit();
-                      ffrouter->SetRecalc(t);
-                 }
+                 if(ffrouter != nullptr)
+                      if (ffrouter->MustReInit()) {
+                           ffrouter->ReInit();
+                           ffrouter->SetRecalc(t);
+                      }
             }
 
             // here the used routers are update, when needed due to external changes
@@ -846,15 +850,29 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
                   NewWall1.SetType(w1.GetType());
 
                   // add new lines to be controled against overlap with exits
-                  building->TempAddedWalls[trainId].push_back(NewWall);
-                  building->TempAddedWalls[trainId].push_back(NewWall1);
+                  if(NewWall.GetLength() > J_EPS_DIST)
+                  {
+                       building->TempAddedWalls[trainId].push_back(NewWall);
+                       subroom->AddWall(NewWall);
+                  }
+
+                  else
+                       std::cout << KRED << ">> WALL did not add: " << NewWall.toString() << "\n" << RESET ;
+
+                  if(NewWall1.GetLength() > J_EPS_DIST)
+                  {
+                       building->TempAddedWalls[trainId].push_back(NewWall1);
+                       subroom->AddWall(NewWall1);
+                  }
+                  else
+                       std::cout << KRED << ">> WALL did not add: " << NewWall1.toString() << "\n" << RESET ;
+
                   building->TempAddedDoors[trainId].push_back(*e);
                   building->TempRemovedWalls[trainId].push_back(w1);
-                  subroom->AddWall(NewWall);
-                  subroom->AddWall(NewWall1);
+
                   subroom->RemoveWall(w1);
 
-                  /* std::cout << KRED << "WALL added " << NewWall.toString() << "\n" << RESET ; */
+
                   /* std::cout << KRED << "WALL added " << NewWall1.toString() << "\n" << RESET ; */
                   /* std::cout << KRED << "WALL removed " << w1.toString() << "\n" << RESET ; */
                   /* getc(stdin); */

@@ -366,7 +366,8 @@ int Line::IntersectionWith(const Point& p1, const Point& p2, Point& p3) const
      double t = (_point1-p1).CrossProduct(s)/(r.CrossProduct(s));
      double u = (_point1-p1).CrossProduct(r)/(r.CrossProduct(s));
 
-     if (0>t || t>1) {
+
+     if (-0.05>t || t>1) {
           return LineIntersectType::NO_INTERSECTION;
      }
 
@@ -464,6 +465,7 @@ int Line::WichSide(const Point& pt)
 
 bool Line::ShareCommonPointWith(const Line& line, Point& P) const
 {
+
      if (line.GetPoint1()==_point1 || line.GetPoint2()==_point1) {
           P = _point1;
           return true;
@@ -487,6 +489,23 @@ bool Line::HasEndPoint(const Point& point) const
      if (_point1==point) return true;
      return _point2==point;
 }
+
+bool Line::NearlyHasEndPoint(const Point& point) const
+{
+     // std::cout << _point1.toString() << "\n";
+     // std::cout << _point2.toString() << "\n";
+     // std::cout << point.toString() << "\n";
+
+
+     // std::cout << "--> " << (_point1-point).Norm() << "\n";
+     // std::cout << "--> " << (_point2-point).Norm() << "\n";
+     // std::cout << "<-- " << J_EPS_DIST << "\n";
+
+
+     if ((_point1-point).Norm() <= J_EPS_DIST) return true;
+     return ((_point2-point).Norm() <= J_EPS_DIST);
+}
+
 
 bool Line::IntersectionWithCircle(const Point& centre, double radius /*cm for pedestrians*/)
 {

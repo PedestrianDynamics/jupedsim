@@ -461,6 +461,8 @@ const std::vector<std::pair<PointWall, PointWall > > Building::GetIntersectionPo
       // collect pairs of pairs
       for(auto door: doors)
       {
+           // std::cout << "================================\n";
+           // std::cout << "door: " << door.toString() <<  "\n";
             PointWall pw1, pw2;
             int nintersections = 0;
             auto n = door.NormalVec();
@@ -470,33 +472,86 @@ const std::vector<std::pair<PointWall, PointWall > > Building::GetIntersectionPo
             auto p22 = door.GetPoint2() - n*scaleFactor;
             auto normalWall1 = Wall(p11, p12);
             auto normalWall2 = Wall(p21, p22);
-            /* std::cout << "normal wall 1: " << normalWall1.toString() << "\n"; */
-            /* std::cout << "normal wall 2: " << normalWall2.toString() << "\n"; */
+            // std::cout << "normal wall 1: " << normalWall1.toString() << "\n";
+            // std::cout << "normal wall 2: " << normalWall2.toString() << "\n";
             for(auto twall: mytrack)
             {
-                  /* std::cout << "  twall " << twall.toString() << "\n"; */
-                  Point interPoint1, interPoint2;
-                  auto res = normalWall1.IntersectionWith(twall, interPoint1);
-                  auto res2 = normalWall2.IntersectionWith(twall, interPoint2);
-                  if(res == 1)
-                  {
-                        /* std::cout << "intersection at :" << interPoint1.toString() << "\n"; */
-                        pw1 = std::make_pair(interPoint1, twall);
-                        nintersections++;
 
+                 Point interPoint1, interPoint2;
+                 auto res = normalWall1.IntersectionWith(twall, interPoint1);
+                 auto res2 = normalWall2.IntersectionWith(twall, interPoint2);
+                 // std::cout << " res " << res << "  res2 " << res2 << "\n";
+                 if(res == 1)
+                 {
+                      if(!twall.NearlyHasEndPoint(interPoint1))
+                      {
+                           // std::cout << "res  twall " << twall.toString() << "\n";
+                           pw1 = std::make_pair(interPoint1, twall);
+                           nintersections++;
+                           // std::cout << "intersection at :" << interPoint1.toString() << "\n";
+                      }
+                      else // end point
+                      {
+                           if(res2 == 0)
+                           {
+
+                                // std::cout << "twall " << twall.toString() << "\n";
+                                // std::cout << "YY intersection 1 at :" << interPoint1.toString() << "\n";
+                                // std::cout << "YY intersection 2 at :" << interPoint2.toString() << "\n";
+
+                           }
+                           else{
+
+                                // std::cout << "res  twall " << twall.toString() << "\n";
+                                pw1 = std::make_pair(interPoint1, twall);
+                                nintersections++;
+                                // std::cout << "BB: intersection at :" << interPoint1.toString() << "\n";
+                           }
+                       }
                   }
                   if(res2 == 1)
                   {
-                        pw2 = std::make_pair(interPoint2, twall);
-                        nintersections++;
-                        /* std::cout << "intersection at :" << interPoint2.toString() << "\n"; */
+                       if(!twall.NearlyHasEndPoint(interPoint2))
+                       {
+                            // std::cout << "res2  twall " << twall.toString() << "\n";
+                            pw2 = std::make_pair(interPoint2, twall);
+                            nintersections++;
+                            // std::cout << "intersection at :" << interPoint2.toString() << "\n";
+                       }
+                       else
+                       {
+                            if(res == 0)
+                            {
+                                 // std::cout << "twall " << twall.toString() << "\n";
+                                 // std::cout << "XX intersection 1 at :" << interPoint1.toString() << "\n";
+                                 // std::cout << "XX intersection 2 at :" << interPoint2.toString() << "\n";
+                            }
+                            else{
+                                 // std::cout << "res2  twall " << twall.toString() << "\n";
+                                 pw2 = std::make_pair(interPoint2, twall);
+                                 nintersections++;
+                                 // std::cout << "CC intersection at :" << interPoint2.toString() << "\n";
+                            }
+                       }
                   }
+                  // std::cout << "door: " << door.toString() << ", intersections: " <<  nintersections << "\n";
+
+
             } // tracks
             // std::cout << "door: " << door.toString() << ", intersections: " <<  nintersections << "\n";
+            // std::cout << "================================\n";
+
             if(nintersections == 2)
                   pws.push_back(std::make_pair(pw1, pw2));
 
+            else
+            {
+                 std::cout << KRED << "Error in GetIntersection. Should be 2 but got  " << nintersections << "\n";
+                                                                                                             exit(-1);
+            }
       }// doors
+      // getc(stdin);
+
       return pws;
 }
 // reset changes made by trainTimeTable[id]
