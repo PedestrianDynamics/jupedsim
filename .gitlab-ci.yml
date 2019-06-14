@@ -63,7 +63,7 @@ verification:
   stage: methods_tests
   script:
     - cd build
-    - ctest -R methods
+    - ctest -R Methods
 
   only:
     - 102-Utest
