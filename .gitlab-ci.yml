@@ -60,7 +60,7 @@ verification:
   dependencies:
     - make-linux
 
-  stage: methods
+  stage: methods_tests
   script:
     - cd build
     - ctest -R methods
