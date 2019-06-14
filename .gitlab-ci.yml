@@ -10,6 +10,7 @@ before_script:
 stages:
   - configure
   - compile
+  - methods_tests
 #=====================================
 
 #============== configure ============
@@ -30,6 +31,8 @@ configure-linux:
   stage: configure
   tags:
     - linux
+#=====================================
+
 #============== compile ============
 make-linux:
   dependencies:
@@ -50,6 +53,24 @@ make-linux:
     - echo "compile | ${CI_PROJECT_DIR}"
   tags:
     - linux
+#=====================================
+
+#============== methods ============
+verification:
+  dpendencies:
+    - make-linux
+
+  stage: methods
+  script:
+    - cd build
+    - ctest -R methods
+
+  only:
+    - 102-Utest
+
+  tags:
+    - linux
+#=====================================
 
 after_script:
   - echo "End CI" # todo: run report script
