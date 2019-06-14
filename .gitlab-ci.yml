@@ -57,7 +57,7 @@ make-linux:
 
 #============== methods ============
 verification:
-  dpendencies:
+  dependencies:
     - make-linux
 
   stage: methods
