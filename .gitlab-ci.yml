@@ -5,7 +5,7 @@ variables:
 before_script:
   - nproc=`grep -c '^processor' /proc/cpuinfo`
   - echo "nproc = $nproc"
-   
+
 #========== Pipeline ==================
 stages:
   - configure
@@ -26,7 +26,7 @@ configure-linux:
   script:
     - mkdir -p build
     - cd build
-    - cmake -DCMAKE_BUILD_TYPE=Debug  ..
+    - cmake -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Debug  ..
     - echo "configure | ${CI_PROJECT_DIR}"
   stage: configure
   tags:
@@ -45,7 +45,7 @@ make-linux:
       - bin
       - lib
       - lib/Debug
-      
+
   stage: compile
   script:
     - cd build
