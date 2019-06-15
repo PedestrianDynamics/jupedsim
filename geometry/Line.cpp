@@ -637,6 +637,7 @@ double Line::GetAngle(const Line& l) const
      Point R = l._point2;
 
      double angleL, angleR;
+
      // we don't need to calculate both angles, but for debugging purposes we do it.
      angleL = atan((Goal-P).CrossProduct(L-P)/(Goal-P).ScalarProduct(L-P));
      angleR = atan((Goal-P).CrossProduct(R-P)/(Goal-P).ScalarProduct(R-P));

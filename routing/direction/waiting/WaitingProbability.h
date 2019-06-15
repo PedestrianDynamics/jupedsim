@@ -5,6 +5,7 @@
 #ifndef JPSCORE_WAITINGPROBABILITY_H
 #define JPSCORE_WAITINGPROBABILITY_H
 
+#include <memory>
 #include "WaitingStrategy.h"
 
 //#include <boost/numeric/ublas/matrix.hpp>
@@ -12,12 +13,13 @@
 
 class RectGrid;
 class SubRoom;
+class Line;
 
 class WaitingProbability : public WaitingStrategy{
 
 private:
     Building* _building;
-    std::map<int, RectGrid> _gridMap;
+    std::map<int, RectGrid*> _gridMap;
 //    std::map<int, boost::numeric::ublas::matrix<double>> _flowMap;
 //    std::map<int, boost::numeric::ublas::matrix<double>> _boundaryMap;
 //    std::map<int, boost::numeric::ublas::matrix<double>> _distanceMap;
@@ -29,6 +31,13 @@ private:
     std::map<int, std::vector<double>> _angleMap;
     std::map<int, std::vector<double>> _staticMap;
 
+//     int* _gcode;
+//     double* _distance;
+
+//    unsigned int _numOfExits;
+//    RectGrid* _grid = nullptr;
+
+
 protected:
     RoutingPrecomputation precomputation = RoutingPrecomputation::NONE;
 
@@ -38,13 +47,20 @@ public:
     virtual Point GetWaitingPosition(Room* room, Pedestrian* ped) const;
 
 private:
-     void computeStatic(RectGrid grid, std::shared_ptr<SubRoom>& subroom);
-     void computeFlowAvoidance(RectGrid grid, std::shared_ptr<SubRoom>& subroom);
-     void computeBoundaryPreference(RectGrid grid, std::shared_ptr<SubRoom>& subroom);
-     void computeDistanceCost(RectGrid grid, std::shared_ptr<SubRoom>& subroom);
-     void computeAngleCost(RectGrid grid, std::shared_ptr<SubRoom>& subroom);
+     void parseBuilding();
+     void computeStatic();
+     void computeFlowAvoidance();
+     void computeBoundaryPreference();
+     void computeDistanceCost(std::shared_ptr<SubRoom>);
+     void computeAngleCost(std::shared_ptr<SubRoom>);
 
-     void writeVTK(RectGrid grid, std::vector<double> values, std::string filename);
+     double checkAngles(double a, double b);
+
+     void writeVTK(std::shared_ptr<SubRoom>, std::string filename);
+
+    template <typename T>
+    void drawLinesOnGrid(std::vector<Line>& wallArg, T* const target, const T value);
+
 };
 
 #endif //JPSCORE_WAITINGPROBABILITY_H
