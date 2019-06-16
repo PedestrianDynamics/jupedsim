@@ -2,7 +2,7 @@
 <JPSreport project="JPS-Project" version="0.8.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_report.xsd">
   <geometry file = "geo_Methods.xml" />
 
-  <logfile>log_Methods.txt</logfile>
+  <logfile>logfile_Methods.txt</logfile>
 
   <trajectories format="txt" unit="m">
     <file name="traj_Methods.txt" />
@@ -11,7 +11,7 @@
 
   <output location="Output_Methods/"/>
 
-  <scripts location="../scripts"/>
+  <scripts location="../../scripts"/>
 
   <measurement_areas unit="m">
     <area_B id="1" type="BoundingBox" zPos="None">
@@ -31,6 +31,7 @@
       <vertex x="24" y="12" />
       <vertex x="24" y="8" />
       <vertex x="20" y="8" />
+      <length_in_movement_direction distance="4" />
     </area_B>
     <area_B id="5" type="BoundingBox" zPos="None">
       <vertex x="20" y="12" />
@@ -62,7 +63,7 @@
     <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/>
 	</method_D>
 
-  <method_I enabled="true">
+  <method_I enabled="false">
     <measurement_area id="1" start_frame="None" stop_frame="None" get_individual_FD="true"/>
     <cut_by_circle enabled="true" radius="1.0" edges="10"/>
 	</method_I>
