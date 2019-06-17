@@ -98,15 +98,9 @@ bool IniFileParser::Parse(std::string iniFile)
      // and as I just realized, I called it configuration. We should be consistent here anything else
      // is confusing [gl march '16]
 
-
-
-     //extract and set the project root dir
-     size_t found = iniFile.find_last_of("/\\");
-     if (found!=std::string::npos) {
-          _config->SetProjectRootDir(iniFile.substr(0, found)+"/");
-     } else {
-          _config->SetProjectRootDir("./");
-     }
+     fs::path root(iniFile);
+     fs::path q(iniFile);
+     _config->SetProjectRootDir(fs::absolute(q.parent_path()).string());
 
      TiXmlDocument doc(iniFile);
      if (!doc.LoadFile()) {
