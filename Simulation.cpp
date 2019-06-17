@@ -37,8 +37,6 @@
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "geometry/WaitingArea.h"
-#include <filesystem>
-namespace fs = std::filesystem;
 
 #ifdef _OPENMP
 
@@ -46,12 +44,16 @@ namespace fs = std::filesystem;
 #define omp_get_thread_num() 0
 #define omp_get_max_threads()  1
 #endif
-
+namespace fs = std::filesystem;
 using namespace std;
 
 OutputHandler* Log;
 Trajectories* outputTXT;
-
+// todo: add these variables to class simulation
+std::map<std::string, std::shared_ptr<TrainType> > TrainTypes;
+std::map<int, std::shared_ptr<TrainTimeTable> >  TrainTimeTables;
+std::map<int, double> trainOutflow;
+//--------
 Simulation::Simulation(Configuration* args)
         :_config(args)
 {
@@ -68,6 +70,7 @@ Simulation::Simulation(Configuration* args)
     _fps = 1;
     _em = nullptr;
     _gotSources = false;
+    _trainConstraints = false;
     _maxSimTime = 100;
 //     _config = args;
 }
@@ -246,7 +249,35 @@ bool Simulation::InitArgs()
     if (!_operationalModel->Init(_building.get()))
         return false;
     Log->Write("INFO:\t Init Operational Model done");
+    Log->Write("Got %d Train Types", _building->GetTrainTypes().size());
+    for(auto&& TT: _building->GetTrainTypes())
+    {
+          Log->Write("INFO\ttype         : %s",TT.second->type.c_str());
+          Log->Write("INFO\tMax          : %d",TT.second->nmax);
+          Log->Write("INFO\tnumber doors : %d\n",TT.second->doors.size());
+    }
+    if(_building->GetTrainTimeTables().size())
+         Log->Write("INFO:\tGot %d Train Time Tables",_building->GetTrainTimeTables().size());
+    else
+         Log->Write("WARNING:\tGot %d Train Time Tables",_building->GetTrainTimeTables().size());
+    for(auto&& TT: _building->GetTrainTimeTables())
+    {
+          Log->Write("INFO\tid           : %d",TT.second->id);
+          Log->Write("INFO\ttype         : %s",TT.second->type.c_str());
+          Log->Write("INFO\troom id      : %d",TT.second->rid);
+          Log->Write("INFO\ttin          : %.2f%",TT.second->tin);
+          Log->Write("INFO\ttout         : %.2f",TT.second->tout);
+          Log->Write("INFO\ttrack start  : (%.2f, %.2f)",TT.second->pstart._x,TT.second->pstart._y);
+          Log->Write("INFO\ttrack end    : (%.2f, %.2f)",TT.second->pend._x,TT.second->pend._y);
+          Log->Write("INFO\ttrain start  : (%.2f, %.2f)",TT.second->tstart._x, TT.second->tstart._y);
+          Log->Write("INFO\ttrain end    : (%.2f, %.2f)\n",TT.second->tend._x, TT.second->tend._y);
+    }
+    //@todo: these variables are global
+    TrainTypes = _building->GetTrainTypes();
+    TrainTimeTables = _building->GetTrainTimeTables();
+    _trainConstraints = (bool) TrainTimeTables.size();
 
+    //-----
     // Give the DirectionStrategy the chance to perform some initialization.
     // This should be done after the initialization of the operationalModel
     // because then, invalid pedestrians have been deleted and FindExit()
@@ -324,7 +355,7 @@ void Simulation::UpdateRoutesAndLocations()
 
           //set the new room if needed
           if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
-                    && (room->GetCaption() == "outside")) { //TODO Hier aendern fuer inside goals?
+              && (room->GetCaption() == "outside")) { //TODO Hier aendern fuer inside goals?
 #pragma omp critical(Simulation_Update_pedsToRemove)
                pedsToRemove.insert(ped);
           } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
@@ -358,7 +389,7 @@ void Simulation::UpdateRoutesAndLocations()
           if(_gotSources)
                ped->FindRoute();
           //finally actualize the route
-          if ( !_gotSources && ped->FindRoute() == -1 ) {
+          if ( !_gotSources && ped->FindRoute() == -1 && !_trainConstraints) {
                //a destination could not be found for that pedestrian
                Log->Write("ERROR: \tCould not find a route for pedestrian %d in room %d and subroom %d",
                          ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID());
@@ -529,6 +560,8 @@ double Simulation::RunBody(double maxSimTime)
     // main program loop
     while ((_nPeds || (!_agentSrcManager.IsCompleted()&& _gotSources) ) && t<maxSimTime) {
         t = 0+(frameNr-1)*_deltaT;
+        // Handle train traffic: coorect geometry
+        bool geometryChanged= TrainTraffic();
 
         //process the queue for incoming pedestrians
         ProcessAgentsQueue();
@@ -545,16 +578,38 @@ double Simulation::RunBody(double maxSimTime)
 
             //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
             //update quickestRouter
-            if (_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST)) {
-                FFRouter* ffrouter = dynamic_cast<FFRouter*>(_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST));
-                if (ffrouter->MustReInit()) {
-                    ffrouter->ReInit();
-                    ffrouter->SetRecalc(t);
+            if(geometryChanged)
+            {
+                 // debug
+                 fs::path f("tmp_"+std::to_string(t)+"_"+_config->GetGeometryFile());
+                 std::string filename = f.string();
+                 std::cout << "\nUpdate geometry. New  geometry --> " << filename.c_str() << "\n";
+
+                 std::cout<< KGRN << "Enter correctGeometry: Building Has " << _building->GetAllTransitions().size() << " Transitions\n" << RESET;
+                 _building->SaveGeometry(filename);
+                 //
+                 double _deltaH = _building->GetConfig()->get_deltaH();
+                 double _wallAvoidDistance = _building->GetConfig()->get_wall_avoid_distance();
+                 bool _useWallAvoidance = _building->GetConfig()->get_use_wall_avoidance();
+
+                 if(auto dirlocff = dynamic_cast<DirectionLocalFloorfield*>(_building->GetConfig()->get_dirStrategy())){
+                      Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
+                      dirlocff->Init(_building.get(), _deltaH, _wallAvoidDistance, _useWallAvoidance);
+                      Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
+                 }
                 }
+            else{ // quickest needs update even if NeedsUpdate() is false
+                 FFRouter* ffrouter = dynamic_cast<FFRouter*>(_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST));
+                 if(ffrouter != nullptr)
+                      if (ffrouter->MustReInit()) {
+                           ffrouter->ReInit();
+                           ffrouter->SetRecalc(t);
+                      }
             }
 
             // here the used routers are update, when needed due to external changes
             if (_routingEngine->NeedsUpdate()){
+                 std::cout << KBLU << " Init router in simulation\n" << RESET;
                  _routingEngine->UpdateRouter();
             }
 
@@ -571,29 +626,8 @@ double Simulation::RunBody(double maxSimTime)
 
         // write the trajectories
         if (0==frameNr%writeInterval) {
-            _iod->WriteFrame(frameNr/writeInterval, _building.get());
-
-            if(_config-> GetFileFormat() == FORMAT_PLAIN)
-            {
-                 fs::path p = _config->GetTrajectoriesFile();
-                 int sf = fs::file_size(p);
-                 if(sf>_maxFileSize*1024*1024)
-                 {
-                      std::string extention = p.extension().string();
-                      _countTraj++;
-                      char tmp_traj_name[100];
-                      sprintf(tmp_traj_name,"%s_%.4d_%s", TrajectoryName.stem().string().c_str(), _countTraj, extention.c_str());
-                      _config->SetTrajectoriesFile(tmp_traj_name);
-                      Log->Write("INFO:\tNew trajectory file <%s>", tmp_traj_name);
-                      OutputHandler* file = new FileHandler(_config->GetTrajectoriesFile().c_str());
-                      outputTXT->SetOutputHandler(file);
-
-//_config->GetProjectRootDir()+"_1_"+_config->GetTrajectoriesFile());
-                      // _config->SetTrajectoriesFile(name);
-                      _iod->WriteHeader(_nPeds, _fps, _building.get(), _seed, _countTraj);
-                      // _iod->WriteGeometry(_building.get());
-                 }
-            }
+              _iod->WriteFrame(frameNr/writeInterval, _building.get());
+              WriteTrajectories(TrajectoryName.stem().string());
         }
 
         if(!_gotSources && !_periodic && _config->print_prog_bar())
@@ -623,8 +657,12 @@ double Simulation::RunBody(double maxSimTime)
         }
         #endif
 
-        // here open transition that should be closed
-        //        TODO fix, opens door everytime...
+        //init train trainOutfloww
+        for (auto tab : TrainTimeTables)
+        {
+              trainOutflow[tab.first] = 0;
+        }
+        // regulate flow
         for (auto& itr: _building->GetAllTransitions())
         {
              Transition* Trans = itr.second;
@@ -632,26 +670,323 @@ double Simulation::RunBody(double maxSimTime)
              {
                   if ((Trans->GetMaxDoorUsage() != (std::numeric_limits<int>::max)()) ||
                     (Trans->GetOutflowRate() != (std::numeric_limits<double>::max)()) ){
-//                        || (Trans->GetOutflowRate() != std::numeric_limits<double>::max)){
-                      Trans->UpdateClosingTime( _deltaT);
-                      if(Trans->GetClosingTime() <= _deltaT){
-                          Trans->changeTemporaryState();
+                        Trans->UpdateClosingTime( _deltaT);
+                        if(Trans->GetClosingTime() <= _deltaT){
+                             Trans->changeTemporaryState();
                       }
-                      Log-> Write("INFO:\tReset state of door %d,  Time=%.2f", Trans->GetID(), Pedestrian::GetGlobalTime());
-                  }
+                  }// normal transition
              }
-        }
+             //-----------
+             // regulate train doorusage
+             std::string transType = Trans->GetType();
+             if (Trans->IsOpen() && transType.rfind("Train", 0) == 0)
+             {
+                   std::vector<std::string> strs;
+                   boost::split(strs, transType, boost::is_any_of("_"),boost::token_compress_on);
+                   int id = atoi(strs[1].c_str());
+                   std::string type = Trans->GetCaption();
+                   trainOutflow[id] += Trans->GetDoorUsage();
+                   if(trainOutflow[id] >= TrainTypes[type]->nmax)
+                   {
+                        std::cout << "INFO:\tclosing train door "<<  transType.c_str() << " at "<<  Pedestrian::GetGlobalTime() << " capacity " <<  TrainTypes[type]->nmax<< "\n";
+                         Log->Write("INFO:\tclosing train door %s at t=%.2f. Flow = %.2f (Train Capacity %d)", transType.c_str(), Pedestrian::GetGlobalTime(), trainOutflow[id], TrainTypes[type]->nmax);
+                         Trans->Close();
+                   }
+             }
+             //-----------
+        }// Transitions
         if(frameNr % 1000 == 0)
         {
-             Log->Write("INFO:\tUpdate door statistics at t=%.2f", t);
-             PrintStatistics(t);
+              Log->Write("INFO:\tUpdate door statistics at t=%.2f", t);
+              PrintStatistics(t);
         }
-
-
     }// while time
     return t;
 }
+bool Simulation::WriteTrajectories(std::string trajectoryName)
+{
+      if(_config-> GetFileFormat() == FORMAT_PLAIN)
+      {
+            fs::path p = _config->GetTrajectoriesFile();
+            int sf = fs::file_size(p);
+            if(sf>_maxFileSize*1024*1024)
+            {
+                  std::string extention = p.extension().string();
+                  this->incrementCountTraj();
+                  char tmp_traj_name[100];
+                  sprintf(tmp_traj_name,"%s_%.4d_%s", trajectoryName.c_str(), _countTraj, extention.c_str());
+                  _config->SetTrajectoriesFile(tmp_traj_name);
+                  Log->Write("INFO:\tNew trajectory file <%s>", tmp_traj_name);
+                  OutputHandler* file = new FileHandler(_config->GetTrajectoriesFile().c_str());
+                  outputTXT->SetOutputHandler(file);
 
+//_config->GetProjectRootDir()+"_1_"+_config->GetTrajectoriesFile());
+                  // _config->SetTrajectoriesFile(name);
+                  _iod->WriteHeader(_nPeds, _fps, _building.get(), _seed, _countTraj);
+                  // _iod->WriteGeometry(_building.get());
+            }
+      }
+      return true;
+}
+//      |             |
+//      *-------------* <---door
+//      |             |
+//      |             |
+//      |             |
+//      |             |
+//      |             |
+//*-----x-------------x--------* <- wall
+//      |             |
+
+
+/*
+ * in this function this happens:
+* remove walls
+* add walls
+* add doors
+* set _routingEngine->setNeedUpdate(true);
+*/
+bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared_ptr<TrainTimeTable> tab)
+{
+     //auto platforms = building->GetPlatforms();
+     int trainId = tab->id;
+     std::string trainType = tab->type;
+     Point TrackStart = tab->pstart;
+     Point TrainStart = tab->tstart;
+     Point TrackEnd = tab->pend;
+     SubRoom * subroom;
+     int room_id, subroom_id;
+     auto mytrack = building->GetTrackWalls(TrackStart, TrackEnd, room_id, subroom_id);
+     Room* room = building->GetRoom(room_id);
+     subroom = room->GetSubRoom(subroom_id);
+     if(subroom == nullptr)
+     {
+          Log->Write("ERROR:\t Simulation::correctGeometry got wrong room_id|subroom_id (%d|%d). TrainId %d", room_id, subroom_id, trainId);
+          exit(EXIT_FAILURE);
+     }
+     static int transition_id = 10000; // randomly high number
+
+     std::cout << "enter with train " << trainType.c_str() << "\n";
+     std::cout<< KBLU << "Enter correctGeometry: Building Has " << building->GetAllTransitions().size() << " Transitions\n" << RESET;
+     std::cout << "room: " << room_id << " subroom_id " << subroom_id << "\n" ;
+
+
+      if(mytrack.empty() || subroom == nullptr)
+            return false;
+
+
+      auto train = building->GetTrainTypes().at(trainType);
+      auto doors = train->doors;
+      for(auto && d: doors)
+      {
+           auto newX  = d.GetPoint1()._x + TrainStart._x + TrackStart._x;
+           auto newY  = d.GetPoint1()._y + TrainStart._y + TrackStart._y;
+           d.SetPoint1(Point(newX, newY));
+           newX  = d.GetPoint2()._x + TrainStart._x + TrackStart._x;
+           newY  = d.GetPoint2()._y + TrainStart._y + TrackStart._y;
+           d.SetPoint2(Point(newX, newY));
+      }
+      for(auto d: doors)
+      {
+           Log->Write("Train %s %d. Transformed coordinates of doors: %s -- %s", trainType.c_str(), trainId, d.GetPoint1().toString().c_str(), d.GetPoint2().toString().c_str());
+      }
+
+      // std::vector<std::pair<PointWall, pointWall > >
+      auto pws = building->GetIntersectionPoints(doors, mytrack);
+      if(pws.empty())
+           std::cout << KRED << "simulation::correctGeometry: pws are empty. Something went south with train doors\n" << RESET;
+
+      auto walls = subroom->GetAllWalls();
+      //---
+      for(auto pw: pws)
+      {
+            auto pw1 = pw.first;
+            auto pw2 = pw.second;
+            auto p1 = pw1.first;
+            auto w1 = pw1.second;
+            auto p2 = pw2.first;
+            auto w2 = pw2.second;
+            // std::cout << "p1 " << p1.toString() << ", wall: " << w1.toString() << "\n";
+            // std::cout << "p2 " << p2.toString() << ", wall: " << w2.toString() << "\n";
+            // std::cout << "------\n";
+            // case 1
+            Point P;
+            if(w1 == w2)
+            {
+                  std::cout << "EQUAL\n";
+                  Transition* e = new Transition();
+                  e->SetID(transition_id++);
+                  e->SetCaption(trainType);
+                  e->SetPoint1(p1);
+                  e->SetPoint2(p2);
+                  std::string transType = "Train_"+std::to_string(tab->id)+"_"+std::to_string(tab->tin)+"_"+std::to_string(tab->tout);
+                  e->SetType(transType);
+                  room->AddTransitionID(e->GetUniqueID());// danger area
+                  e->SetRoom1(room);
+                  e->SetSubRoom1(subroom);
+                  subroom->AddTransition(e);// danger area
+                  building->AddTransition(e);// danger area
+                  /* std::cout << KRED << "Trans added: " << e->toString() << "\n" << RESET; */
+
+                  /* std::cout<< KGRN << "Transition added. Building Has " << building->GetAllTransitions().size() << " Transitions\n" << RESET; */
+                  double dist_pt1 = (w1.GetPoint1() - e->GetPoint1()).NormSquare();
+                  double dist_pt2 = (w1.GetPoint1() - e->GetPoint2()).NormSquare();
+                  Point A, B;
+
+                  if(dist_pt1<dist_pt2)
+                  {
+                        A = e->GetPoint1();
+                        B = e->GetPoint2();
+                  }
+                  else
+                  {
+                        A = e->GetPoint2();
+                        B = e->GetPoint1();
+                  }
+
+                  Wall NewWall(w1.GetPoint1(), A);
+                  Wall NewWall1(w1.GetPoint2(), B);
+                  NewWall.SetType(w1.GetType());
+                  NewWall1.SetType(w1.GetType());
+
+                  // add new lines to be controled against overlap with exits
+                  if(NewWall.GetLength() > J_EPS_DIST)
+                  {
+                       building->TempAddedWalls[trainId].push_back(NewWall);
+                       subroom->AddWall(NewWall);
+                  }
+
+                  else
+                       std::cout << KRED << ">> WALL did not add: " << NewWall.toString() << "\n" << RESET ;
+
+                  if(NewWall1.GetLength() > J_EPS_DIST)
+                  {
+                       building->TempAddedWalls[trainId].push_back(NewWall1);
+                       subroom->AddWall(NewWall1);
+                  }
+                  else
+                       std::cout << KRED << ">> WALL did not add: " << NewWall1.toString() << "\n" << RESET ;
+
+                  building->TempAddedDoors[trainId].push_back(*e);
+                  building->TempRemovedWalls[trainId].push_back(w1);
+
+                  subroom->RemoveWall(w1);
+
+
+                  /* std::cout << KRED << "WALL added " << NewWall1.toString() << "\n" << RESET ; */
+                  /* std::cout << KRED << "WALL removed " << w1.toString() << "\n" << RESET ; */
+                  /* getc(stdin); */
+
+                  //room->AddTransitionID(e->GetUniqueID());
+            }
+            else if(w1.ShareCommonPointWith(w2, P))
+            {
+
+                  std::cout << "ONE POINT COMON\n";
+                  //------------ transition --------
+                  Transition* e = new Transition();
+                  e->SetID(transition_id++);
+                  e->SetCaption(trainType);
+                  e->SetPoint1(p1);
+                  e->SetPoint2(p2);
+                  std::string transType = "Train_"+std::to_string(tab->id)+"_"+std::to_string(tab->tin)+"_"+std::to_string(tab->tout);
+                  e->SetType(transType);
+                  room->AddTransitionID(e->GetUniqueID());// danger area
+                  e->SetRoom1(room);
+                  e->SetSubRoom1(subroom);
+
+                  subroom->AddTransition(e);// danger area
+                  building->AddTransition(e);// danger area
+                  //--------------------------------
+                  Point N, M;
+                  if(w1.GetPoint1()==P)
+                        N = w1.GetPoint2();
+                  else
+                        N = w1.GetPoint1();
+
+                  if(w2.GetPoint1()==P)
+                        M = w2.GetPoint2();
+                  else
+                        M = w2.GetPoint1();
+
+                  Wall NewWall(N, p1);
+                  Wall NewWall1(M, p2);
+                  NewWall.SetType(w1.GetType());
+                  NewWall1.SetType(w2.GetType());
+                  // changes to building
+                  building->TempAddedWalls[trainId].push_back(NewWall);
+                  building->TempAddedWalls[trainId].push_back(NewWall1);
+                  building->TempAddedDoors[trainId].push_back(*e);
+                  building->TempRemovedWalls[trainId].push_back(w1);
+                  building->TempRemovedWalls[trainId].push_back(w2);
+                  subroom->AddWall(NewWall);
+                  subroom->AddWall(NewWall1);
+                  subroom->RemoveWall(w1);
+                  subroom->RemoveWall(w2);
+                  /* std::cout << KRED << ". WALL added " << NewWall.toString() << "\n" << RESET ; */
+                  /* std::cout << KRED << "WALL added " << NewWall1.toString() << "\n" << RESET ; */
+                  /* std::cout << KRED << "WALL removed " << w1.toString() << "\n" << RESET ; */
+                  /* std::cout << KRED << "WALL removed " << w2.toString() << "\n" << RESET ; */
+                  /* getc(stdin); */
+            }
+            else // disjoint
+            {
+                  std::cout << "DISJOINT\n";
+                                    //------------ transition --------
+                  Transition* e = new Transition();
+                  e->SetID(transition_id++);
+                  e->SetCaption(trainType);
+                  e->SetPoint1(p1);
+                  e->SetPoint2(p2);
+                  std::string transType = "Train_"+std::to_string(tab->id)+"_"+std::to_string(tab->tin)+"_"+std::to_string(tab->tout);
+                  e->SetType(transType);
+                  room->AddTransitionID(e->GetUniqueID());// danger area
+                  e->SetRoom1(room);
+                  e->SetSubRoom1(subroom);
+
+                  subroom->AddTransition(e);// danger area
+                  building->AddTransition(e);// danger area
+                  //--------------------------------
+                  // find points on w1 and w2 between p1 and p2
+                  // (A, B)
+                  Point A, B;
+                  if(e->isBetween(w1.GetPoint1()))
+                        A = w1.GetPoint2();
+                  else
+                        A = w1.GetPoint1();
+
+                  if(e->isBetween(w2.GetPoint1()))
+                        B = w2.GetPoint2();
+                  else
+                        B = w2.GetPoint1();
+
+                  Wall NewWall(A, p1);
+                  Wall NewWall1(B, p2);
+                  NewWall.SetType(w1.GetType());
+                  NewWall1.SetType(w2.GetType());
+                  // remove walls between
+                  for(auto wall: mytrack)
+                  {
+                       if(e->isBetween(wall.GetPoint1()) || e->isBetween(wall.GetPoint2()))
+                        {
+                             building->TempRemovedWalls[trainId].push_back(wall);
+                             subroom->RemoveWall(wall);
+                        }
+                  }
+                  // changes to building
+                  building->TempAddedWalls[trainId].push_back(NewWall);
+                  building->TempAddedWalls[trainId].push_back(NewWall1);
+                  building->TempAddedDoors[trainId].push_back(*e);
+                  subroom->AddWall(NewWall);
+                  subroom->AddWall(NewWall1);
+
+                  // remove walls w1 and w2
+            }
+      }
+      _routingEngine->setNeedUpdate(true);
+     return true;
+
+}
 void Simulation::RunFooter()
 {
     // writing the footer
@@ -780,6 +1115,11 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
     }
 }
 
+void Simulation::incrementCountTraj()
+{
+      _countTraj++;
+}
+
 AgentsSourcesManager& Simulation::GetAgentSrcManager()
 {
     return _agentSrcManager;
@@ -792,4 +1132,46 @@ Building* Simulation::GetBuilding()
 
 int Simulation::GetMaxSimTime() const{
       return _maxSimTime;
+}
+// return true is changes are made to the geometry
+bool Simulation::TrainTraffic()
+{
+     bool trainHere = false;
+     bool trainLeave = false;
+     std::string trainType = "";
+     Point trackStart, trackEnd;
+     int trainId = 0;
+     auto now = Pedestrian::GetGlobalTime();
+     for(auto && tab: TrainTimeTables)
+     {
+          trainType = tab.second->type;
+          trainId = tab.second->id;
+          trackStart = tab.second->pstart;
+          trackEnd = tab.second->pend;
+          if(!tab.second->arrival && (now >= tab.second->tin) && (now <= tab.second->tout))
+          {
+               trainHere = true;
+               TrainTimeTables.at(trainId)->arrival = true;
+               std::cout << KRED << "Arrival: TRAIN " << trainType << " at time: " << now << "\n" << RESET;
+               correctGeometry(_building, tab.second);
+
+          }
+          else if(tab.second->arrival && now >= tab.second->tout)
+          {
+               std::cout <<KGRN << "Departure: TRAIN " << trainType << " at time: " << now  << "\n" << RESET;
+               _building->resetGeometry(tab.second);
+               trainLeave = true;
+               TrainTimeTables.at(trainId)->arrival = false;
+
+          }
+     }
+     if(trainHere || trainLeave)
+     {
+          return true;
+     }
+
+     /* std::cout<< KRED << "Check: Building Has " << _building->GetAllTransitions().size() << " Transitions\n" << RESET; */
+
+     return false;
+
 }

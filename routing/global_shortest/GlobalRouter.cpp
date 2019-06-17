@@ -890,7 +890,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      }
      else
      {
-          if (_building->GetRoom(ped->GetRoomID())->GetCaption() != "outside")
+          if (_building->GetRoom(ped->GetRoomID())->GetCaption() != "outside" && relevantAPs.size()>0)
           {
                //Log->Write(
                //
@@ -941,8 +941,9 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
                }
                if(relevant) {
                     //only if not closed
-                    if(!ap->IsClosed())
-                         relevantAPS.push_back(ap);
+                    if(ap)
+                         if(!ap->IsClosed())
+                              relevantAPS.push_back(ap);
                }
           }
      }
@@ -1388,7 +1389,7 @@ string GlobalRouter::GetRoutingInfoFile()
                                                                                             //wronf
                                                                                             //router section
                          nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
-                    
+
                     TiXmlElement* para =e->FirstChild("parameters")->FirstChildElement("navigation_mesh");
                     if (para)
                     {
@@ -1491,7 +1492,7 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
                if(_building->AddHline(h))
                {
                     subroom->AddHline(h);
-                    HlineCount++;                    
+                    HlineCount++;
                     //h is freed in building
                }
                else
@@ -1619,7 +1620,7 @@ double GlobalRouter::MinAngle(const Point& p1, const Point& p2, const Point& p3)
 
      if(fabs(alpha+beta+gamma-M_PI)<J_EPS)
      {
-		  std::vector<double> vec = { alpha, beta, gamma };
+                  std::vector<double> vec = { alpha, beta, gamma };
           return *std::min_element(vec.begin(), vec.end()) * (180.0 / M_PI);
      }
      else

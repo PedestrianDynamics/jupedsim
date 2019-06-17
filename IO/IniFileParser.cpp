@@ -1635,6 +1635,9 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                     };
                     _config->set_dirStrategy(dynamic_cast<DirectionSubLocalFloorfieldTripsVoronoi*>(_exit_strategy.get()));
                     break;
+               case 12:
+                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionTrain());
+                    break;
 
                default:
                     _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
