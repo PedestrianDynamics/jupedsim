@@ -99,6 +99,7 @@ public:
 
           _hostname = "localhost";
           _trajectoriesFile = "trajectories.xml";
+          _originalTrajectoriesFile = "trajectories.xml";
           _errorLogFile = "log.txt";
           _projectFile = "";
           _geometryFile = "";
@@ -125,7 +126,7 @@ public:
 //          _dirSubLocal = nullptr;
 //          _dirLocal = nullptr;
           _dirStrategy = nullptr;
-	  //for random numbers
+          //for random numbers
           _rdGenerator=RandomNumberGenerator();
 
 
@@ -315,6 +316,10 @@ public:
 
      void SetTrajectoriesFile(std::string trajectoriesFile) { _trajectoriesFile = trajectoriesFile; };
 
+     const std::string& GetOriginalTrajectoriesFile() const { return _originalTrajectoriesFile; };
+
+     void SetOriginalTrajectoriesFile(std::string trajectoriesFile) { _originalTrajectoriesFile = trajectoriesFile; };
+
      const std::string& GetErrorLogFile() const { return _errorLogFile; };
 
      void SetErrorLogFile(std::string errorLogFile) { _errorLogFile = errorLogFile; };
@@ -431,6 +436,7 @@ private:
 
      std::string _hostname;
      std::string _trajectoriesFile;
+     std::string _originalTrajectoriesFile;
      std::string _errorLogFile;
      std::string _projectFile;
      std::string _geometryFile;

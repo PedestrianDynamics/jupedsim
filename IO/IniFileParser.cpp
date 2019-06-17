@@ -47,6 +47,9 @@
 #include "../routing/ff_router_trips/ffRouterTrips.h"
 #include "../routing/trips_router/TripsRouter.h"
 
+
+namespace fs = std::filesystem;
+
 /* https://stackoverflow.com/questions/38530981/output-compiler-version-in-a-c-program#38531037 */
 std::string ver_string(int a, int b, int c) {
       std::ostringstream ss;
@@ -268,8 +271,19 @@ bool IniFileParser::Parse(std::string iniFile)
                std::string tmp;
                tmp = xTrajectories->FirstChildElement("file")->Attribute(
                                                   "location");
-               if (tmp.c_str())
-                    _config->SetTrajectoriesFile(_config->GetProjectRootDir()+tmp);
+               fs::path p(tmp);
+               fs::path curr_abs_path = fs::current_path();
+               fs::path rel_path = fs::path(_config->GetProjectRootDir()) / fs::path(tmp);
+               fs::path combined = (curr_abs_path /= rel_path);
+               std::string traj = combined.string();
+
+               if (traj.c_str())
+               {
+                    _config->SetTrajectoriesFile(traj);
+                    _config->SetOriginalTrajectoriesFile(traj);
+               }
+
+
                Log->Write("INFO: \toutput file  <%s>", _config->GetTrajectoriesFile().c_str());
                Log->Write("INFO: \tin format <%s> at <%.0f> frames per seconds",format.c_str(), _config->GetFps());
           }
