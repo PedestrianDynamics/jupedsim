@@ -15,7 +15,7 @@ def runtest(inifile, trajfile):
     failure = 0
     ids, outflow = get_outflow(inifile)
     for (i, o) in zip(ids, outflow):
-        filename = "flow_exit_id_%d_rate_%.2f.txt"%(i, o)
+        filename = "flow_exit_id_%d_rate_%.2f_%s.txt"%(i, o, os.path.basename(trajfile).split(".")[0])
         if not os.path.exists(filename):
             logging.info("ERROR: can not find statistics file %s"%filename)
             exit(FAILURE)
@@ -31,7 +31,7 @@ def runtest(inifile, trajfile):
         if abs(J-o) > tolerance:
             failure = 1
 
-
+    logging.info("Plot to flow.png")
     plt.savefig("flow.png")
     if failure:
         logging.info("flow from statistics files does not much expected flow from inifile")
