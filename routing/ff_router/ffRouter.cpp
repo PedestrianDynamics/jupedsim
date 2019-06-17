@@ -108,7 +108,7 @@ bool FFRouter::Init(Building* building)
           _goalToLineUIDmap = _globalFF->getGoalToLineUIDmap();
           _goalToLineUIDmap2 = _globalFF->getGoalToLineUIDmap2();
           _goalToLineUIDmap3 = _globalFF->getGoalToLineUIDmap3();
-          //_globalFF->writeGoalFF("goal.vtk", goalIDs);
+          _globalFF->writeGoalFF("goal.vtk", goalIDs);
      }
      //get all door UIDs
      _allDoorUIDs.clear();
@@ -299,7 +299,7 @@ bool FFRouter::Init(Building* building)
                auto iter = _locffviafm.begin();
                std::advance(iter, i);
                int roomNr = iter->first;
-               iter->second->writeFF("ffrouterOfRoom" + std::to_string(roomNr) + ".vtk", _allDoorUIDs);
+               iter->second->writeFF("ffrouterRoom_" + std::to_string(roomNr) + "_t_"+ std::to_string(Pedestrian::GetGlobalTime()) + ".vtk", _allDoorUIDs);
           }
      }
 
@@ -322,6 +322,44 @@ bool FFRouter::ReInit()
      _distMatrix.clear();
      _pathsMatrix.clear();
 
+     // Geommetry may change dure to trains or whatever happens in the future
+     //get all door UIDs
+     _allDoorUIDs.clear();
+     _TransByUID.clear();
+     _ExitsByUID.clear();
+     _CroTrByUID.clear();
+     auto& allTrans = _building->GetAllTransitions();
+     auto& allCross = _building->GetAllCrossings();
+     std::vector<std::pair<int, int>> roomAndCroTrVector;
+     roomAndCroTrVector.clear();
+     for (auto& pair:allTrans) {
+          //TODO if (pair.second->IsOpen()) {
+          if (!pair.second->IsClose()) {
+               _allDoorUIDs.emplace_back(pair.second->GetUniqueID());
+               _CroTrByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
+               if (pair.second->IsExit()) {
+                    _ExitsByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
+               }
+               Room* room1 = pair.second->GetRoom1();
+               if (room1) roomAndCroTrVector.emplace_back(std::make_pair(room1->GetID(), pair.second->GetUniqueID()));
+               Room* room2 = pair.second->GetRoom2();
+               if (room2) roomAndCroTrVector.emplace_back(std::make_pair(room2->GetID(), pair.second->GetUniqueID()));
+          }
+     }
+     for (auto& pair:allCross) {
+          //TODO if (pair.second->IsOpen()) {
+          if (!pair.second->IsClose()) {
+               _allDoorUIDs.emplace_back(pair.second->GetUniqueID());
+               _CroTrByUID.insert(std::make_pair(pair.second->GetUniqueID(), pair.second));
+               Room* room1 = pair.second->GetRoom1();
+               if (room1) roomAndCroTrVector.emplace_back(std::make_pair(room1->GetID(), pair.second->GetUniqueID()));
+          }
+     }
+     //make unique
+     std::sort(_allDoorUIDs.begin(), _allDoorUIDs.end());
+     _allDoorUIDs.erase( std::unique(_allDoorUIDs.begin(),_allDoorUIDs.end()), _allDoorUIDs.end());
+
+// alldoorUIDs reinit
      //init, yet no distances, only create map entries
      for(auto& id1 : _allDoorUIDs) {
           for(auto& id2 : _allDoorUIDs){

@@ -50,6 +50,11 @@ void GeoFileParser::LoadBuilding(Building* building)
           Log->Write("ERROR:\t could not load extra traffic information!");
           exit(EXIT_FAILURE);
      }
+     if(!LoadTrainInfo(building))
+     {
+          Log->Write("ERROR:\t could not load train information!");
+          exit(EXIT_FAILURE);
+     }
 }
 
 bool GeoFileParser::LoadGeometry(Building* building)
@@ -199,6 +204,7 @@ bool GeoFileParser::LoadGeometry(Building* building)
                for (TiXmlElement* xPolyVertices = xSubRoom->FirstChildElement("polygon"); xPolyVertices;
                     xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
 
+                    std::string wall_type = xmltoa(xPolyVertices->Attribute("type"), "wall");
                     for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
                               "vertex");
                          xVertex && xVertex!=xPolyVertices->LastChild("vertex");
@@ -208,7 +214,7 @@ bool GeoFileParser::LoadGeometry(Building* building)
                          double y1 = xmltof(xVertex->Attribute("py"));
                          double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
                          double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
-                         subroom->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
+                         subroom->AddWall(Wall(Point(x1, y1), Point(x2, y2), wall_type));
                          //printf("%0.2f %0.2f %0.2f %0.2f\n",x1,y1,x2,y2);
                     }
 
@@ -327,7 +333,7 @@ bool GeoFileParser::LoadGeometry(Building* building)
                }
           }
           else{
-               Log->Write("INFO:\tNot parsing transition from file %s");
+               Log->Write("INFO:\tNot parsing transition from file");
           }
           Log->Write("INFO:\tGot %d transitions", building-> GetAllTransitions().size());
 
@@ -464,7 +470,7 @@ bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building* buildi
           building->GetTransition(id)->TempClose();
           break;
      case DoorState::Error:
-          Log->Write("WARNING:\t Unknown door state: <%s>. open or close. Default: open",
+          Log->Write("WARNING:\t Unknown door state: <%s>. open, close or temp_close. Default: open",
                     stateStr.c_str());
           building->GetTransition(id)->Open();
           break;
@@ -791,6 +797,220 @@ Goal* GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
      return wa;
 }
 
+bool GeoFileParser::LoadTrainInfo(Building* building)
+{
+     Log->Write("--------\nINFO:\tLoading the train info");
+
+     TiXmlDocument doc(_configuration->GetProjectFile());
+     if (!doc.LoadFile()) {
+          Log->Write("ERROR: \t%s", doc.ErrorDesc());
+          Log->Write("ERROR: \t could not parse the project file");
+          return false;
+     }
+     TiXmlElement* xRootNode = doc.RootElement();
+     if (!xRootNode) {
+          Log->Write("ERROR:\tRoot element does not exist");
+          return false;
+     }
+     if (!xRootNode->FirstChild("train_constraints")) {
+          Log->Write("WARNING:\tNo train constraints were found. Continue.");
+     }
+     bool resTTT = true;
+     bool resType = true;
+     if(xRootNode->FirstChild("train_constraints"))
+     {
+          resTTT = LoadTrainTimetable(building, xRootNode);
+          resType = LoadTrainType(building, xRootNode);
+     }
+
+     return (resTTT && resType);
+}
+bool GeoFileParser::LoadTrainTimetable(Building* building, TiXmlElement * xRootNode)
+{
+     TiXmlNode* xTTTNode = xRootNode->FirstChild("train_constraints")->FirstChild("train_time_table");
+     std::string TTTFilename;
+     if(xTTTNode)
+     {
+          fs::path p(_configuration->GetProjectRootDir());
+          TTTFilename = xTTTNode->FirstChild()->ValueStr();
+          p /= TTTFilename;
+          TTTFilename = p.string();
+          Log->Write("INFO:\tTrain Timetable file <%s> will be parsed", TTTFilename.c_str());
+     }
+     else return true;
+
+
+     TiXmlDocument docTTT(TTTFilename);
+     if (!docTTT.LoadFile()) {
+          Log->Write("ERROR: \t%s", docTTT.ErrorDesc());
+          Log->Write("ERROR: \t could not parse the train timetable file.");
+          return false;
+     }
+     TiXmlElement* xTTT = docTTT.RootElement();
+     if (!xTTT) {
+          Log->Write("ERROR:\tRoot element does not exist in TTT file.");
+          return false;
+     }
+     if (xTTT->ValueStr() != "train_time_table") {
+          Log->Write("ERROR:\tParsing train timetable file. Root element value is not 'train_time_table'.");
+          return false;
+     }
+     for (TiXmlElement* e = xTTT->FirstChildElement("train"); e;
+                    e = e->NextSiblingElement("train")) {
+          std::shared_ptr<TrainTimeTable> TTT = parseTrainTimeTableNode(e);
+
+          if (TTT) {
+               building->AddTrainTimeTable(TTT);
+          }
+     }
+     return true;
+}
+bool GeoFileParser::LoadTrainType(Building* building, TiXmlElement * xRootNode)
+{
+     TiXmlNode* xTTNode = xRootNode->FirstChild("train_constraints")->FirstChild("train_types");
+     std::string TTFilename;
+     if(xTTNode)
+     {
+          fs::path p(_configuration->GetProjectRootDir());
+          TTFilename = xTTNode->FirstChild()->ValueStr();
+          p /= TTFilename;
+          TTFilename = p.string();
+          Log->Write("INFO:\tTrain Type file <%s> will be parsed", TTFilename.c_str());
+     }
+     else return true;
+
+
+     TiXmlDocument docTT(TTFilename);
+     if (!docTT.LoadFile()) {
+          Log->Write("ERROR: \t%s", docTT.ErrorDesc());
+          Log->Write("ERROR: \t could not parse the train type file.");
+          return false;
+     }
+     TiXmlElement* xTT = docTT.RootElement();
+     if (!xTT) {
+          Log->Write("ERROR:\tRoot element does not exist in TT file.");
+          return false;
+     }
+     if (xTT->ValueStr() != "train_type") {
+          Log->Write("ERROR:\tParsing train type file. Root element value is not 'train_type'.");
+          return false;
+     }
+     for (TiXmlElement* e = xTT->FirstChildElement("train"); e;
+                    e = e->NextSiblingElement("train")) {
+          std::shared_ptr<TrainType> TT = parseTrainTypeNode(e);
+          if (TT) {
+               building->AddTrainType(TT);
+          }
+     }
+     return true;
+
+}
+
+std::shared_ptr<TrainTimeTable> GeoFileParser::parseTrainTimeTableNode(TiXmlElement * e)
+{
+     Log->Write("INFO:\tLoading train time table NODE");
+     std::string caption = xmltoa(e->Attribute("caption"), "-1");
+     int id = xmltoi(e->Attribute("id"), -1);
+     std::string type = xmltoa(e->Attribute("type"), "-1");
+     int room_id = xmltoi(e->Attribute("room_id"), -1);
+     int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
+     int platform_id = xmltoi(e->Attribute("platform_id"), -1);
+     float track_start_x = xmltof(e->Attribute("track_start_x"), -1);
+     float track_start_y = xmltof(e->Attribute("track_start_y"), -1);
+     float track_end_x = xmltof(e->Attribute("track_end_x"), -1);
+     float track_end_y = xmltof(e->Attribute("track_end_y"), -1);
+
+     float train_start_x = xmltof(e->Attribute("train_start_x"),-1);
+     float train_start_y = xmltof(e->Attribute("train_start_y"), -1);
+     float train_end_x = xmltof(e->Attribute("train_end_x"), -1);
+     float train_end_y = xmltof(e->Attribute("train_end_y"), -1);
+
+     float arrival_time = xmltof(e->Attribute("arrival_time"), -1);
+     float departure_time = xmltof(e->Attribute("departure_time"), -1);
+     // @todo: check these values for correctness e.g. arrival < departure
+     Log->Write("INFO:\tTrain time table:");
+     Log->Write("INFO:\t   id: %d", id);
+     Log->Write("INFO:\t   type: %s", type.c_str());
+     Log->Write("INFO:\t   room_id: %d", room_id);
+     Log->Write("INFO:\t   subroom_id: %d", subroom_id);
+     Log->Write("INFO:\t   platform_id: %d", platform_id);
+     Log->Write("INFO:\t   track_start: [%.2f, %.2f]", track_start_x, track_start_y);
+     Log->Write("INFO:\t   track_end: [%.2f, %.2f]", track_end_x, track_end_y);
+     Log->Write("INFO:\t   arrival_time: %.2f", arrival_time);
+     Log->Write("INFO:\t   departure_time: %.2f", departure_time);
+     Point track_start(track_start_x, track_start_y);
+     Point track_end(track_end_x, track_end_y);
+     Point train_start(train_start_x, train_start_y);
+     Point train_end(train_end_x, train_end_y);
+     std::shared_ptr<TrainTimeTable> trainTimeTab = std::make_shared<TrainTimeTable>(
+          TrainTimeTable{
+                    id,
+                    type,
+                    room_id,
+                    subroom_id,
+                    arrival_time,
+                    departure_time,
+                    track_start,
+                    track_end,
+                    train_start,
+                    train_end,
+                    platform_id,
+                    false,
+                    false,
+                    });
+
+     return trainTimeTab;
+}
+
+std::shared_ptr<TrainType> GeoFileParser::parseTrainTypeNode(TiXmlElement * e)
+{
+     Log->Write("INFO:\tLoading train type");
+     // int T_id = xmltoi(e->Attribute("id"), -1);
+     std::string type = xmltoa(e->Attribute("type"), "-1");
+     int agents_max = xmltoi(e->Attribute("agents_max"), -1);
+     float length = xmltof(e->Attribute("length"), -1);
+     // std::shared_ptr<Transition> t = new Transition();
+     // std::shared_ptr<Transition> doors;
+     Transition t;
+     std::vector<Transition> doors;
+
+     for (TiXmlElement* xDoor = e->FirstChildElement("door"); xDoor;
+          xDoor = xDoor->NextSiblingElement("door")) {
+          int D_id = xmltoi(xDoor->Attribute("id"), -1);
+          float x1 = xmltof(xDoor->FirstChildElement("vertex")->Attribute("px"), -1);
+          float y1 = xmltof(xDoor->FirstChildElement("vertex")->Attribute("py"), -1);
+          float x2 = xmltof(xDoor->LastChild("vertex")->ToElement()->Attribute("px"), -1);
+          float y2 = xmltof(xDoor->LastChild("vertex")->ToElement()->Attribute("py"), -1);
+          Point start(x1, y1);
+          Point end(x2, y2);
+          float outflow = xmltof(xDoor->Attribute("outflow"), -1);
+          float dn = xmltoi(xDoor->Attribute("dn"), -1);
+          t.SetID(D_id);
+          t.SetCaption(type + std::to_string(D_id));
+          t.SetPoint1(start);
+          t.SetPoint2(end);
+          t.SetOutflowRate(outflow);
+          t.SetDN(dn);
+          doors.push_back(t);
+     }
+     Log->Write("INFO:\t   type: %s", type.c_str());
+     Log->Write("INFO:\t   capacity: %d", agents_max);
+     Log->Write("INFO:\t   number of doors: %d", doors.size());
+     for(auto d: doors)
+     {
+          Log->Write("INFO\t      door (%d): %s | %s", d.GetID(), d.GetPoint1().toString().c_str(), d.GetPoint2().toString().c_str());
+     }
+
+     std::shared_ptr<TrainType> Type = std::make_shared<TrainType>(
+          TrainType{
+                    type,
+                    agents_max,
+                    length,
+                    doors,
+                    });
+   return Type;
+
+}
 
 GeoFileParser::~GeoFileParser()
 {

@@ -1664,7 +1664,7 @@ double UnivFFviaFMTrips::getCostToDestination(const int destID, const Point& pos
         } else if ((key < _grid->GetnPoints()-_grid->GetiMax()) && (_gridCode[key+_grid->GetiMax()] != OUTSIDE) && (_gridCode[key+_grid->GetiMax()] != WALL)) {
             key = key + _grid->GetiMax();
         } else {
-            Log->Write("ERROR:\t In getCostToDestination(3 args)");
+            // Log->Write("ERROR:\t In getCostToDestination(3 args)");
         }
     }
      if (_costFieldWithKey.count(destID)==1 && _costFieldWithKey[destID]) {
@@ -1702,7 +1702,7 @@ double UnivFFviaFMTrips::getCostToDestination(const int destID, const Point& pos
         } else if ((key < _grid->GetnPoints()-_grid->GetiMax()) && (_gridCode[key+_grid->GetiMax()] != OUTSIDE) && (_gridCode[key+_grid->GetiMax()] != WALL)) {
             key = key + _grid->GetiMax();
         } else {
-            Log->Write("ERROR:\t In getCostToDestination(2 args)");
+            // Log->Write("ERROR:\t In getCostToDestination(2 args)");
         }
     }
      if (_costFieldWithKey.count(destID)==1 && _costFieldWithKey[destID]) {
@@ -1834,7 +1834,7 @@ void UnivFFviaFMTrips::getDirectionToUID(int destID, long int key, Point& direct
         } else if ((key < _grid->GetnPoints()-_grid->GetiMax()) && (_gridCode[key+_grid->GetiMax()] != OUTSIDE) && (_gridCode[key+_grid->GetiMax()] != WALL)) {
             key = key + _grid->GetiMax();
         } else {
-            Log->Write("ERROR:\t In getDirectionToUID (3 args)");
+            // Log->Write("ERROR:\t In getDirectionToUID (3 args)");
         }
     }
      if (_directionFieldWithKey.count(destID)==1 && _directionFieldWithKey[destID]) {

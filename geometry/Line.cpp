@@ -201,6 +201,16 @@ Point Line::LotPoint(const Point& p) const
      return f;
 }
 
+// return true if point the orthogonal projection of p on Line segment is on the
+// line segment.
+bool Line::isBetween(const Point& p) const
+{
+     const Point& t = _point1-_point2;
+     double lambda = (p-_point2).ScalarProduct(t)/t.ScalarProduct(t);
+     return  (lambda>0) && (lambda <1);
+}
+
+
 /* Punkt auf der Linie mit kürzestem Abstand zu p
  * In der Regel Lotfußpunkt, Ist der Lotfußpunkt nicht im Segment
  * wird der entsprechende Eckpunkt der Line genommen
@@ -273,6 +283,12 @@ bool Line::operator!=(const Line& l) const
      return (!(*this==l));
 
 }
+// this function is necessary to use std::set and is basically the same as !=
+bool Line::operator<(const Line& l) const
+{
+     return (!(*this==l));
+}
+
 
 double Line::GetLength() const
 {
@@ -350,7 +366,8 @@ int Line::IntersectionWith(const Point& p1, const Point& p2, Point& p3) const
      double t = (_point1-p1).CrossProduct(s)/(r.CrossProduct(s));
      double u = (_point1-p1).CrossProduct(r)/(r.CrossProduct(s));
 
-     if (0>t || t>1) {
+
+     if (-0.05>t || t>1) {
           return LineIntersectType::NO_INTERSECTION;
      }
 
@@ -448,6 +465,7 @@ int Line::WichSide(const Point& pt)
 
 bool Line::ShareCommonPointWith(const Line& line, Point& P) const
 {
+
      if (line.GetPoint1()==_point1 || line.GetPoint2()==_point1) {
           P = _point1;
           return true;
@@ -471,6 +489,23 @@ bool Line::HasEndPoint(const Point& point) const
      if (_point1==point) return true;
      return _point2==point;
 }
+
+bool Line::NearlyHasEndPoint(const Point& point) const
+{
+     // std::cout << _point1.toString() << "\n";
+     // std::cout << _point2.toString() << "\n";
+     // std::cout << point.toString() << "\n";
+
+
+     // std::cout << "--> " << (_point1-point).Norm() << "\n";
+     // std::cout << "--> " << (_point2-point).Norm() << "\n";
+     // std::cout << "<-- " << J_EPS_DIST << "\n";
+
+
+     if ((_point1-point).Norm() <= J_EPS_DIST) return true;
+     return ((_point2-point).Norm() <= J_EPS_DIST);
+}
+
 
 bool Line::IntersectionWithCircle(const Point& centre, double radius /*cm for pedestrians*/)
 {

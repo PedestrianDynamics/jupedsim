@@ -49,6 +49,9 @@
 #include "events/EventManager.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "general/Configuration.h"
+#include <filesystem>
+
+
 
 //Forward declarations
 //class AgentsSourcesManager;
@@ -88,6 +91,8 @@ private:
      int _maxSimTime;
 
     bool _gotSources; // is true if we got some sources. Otherwise, false.
+     bool _trainConstraints; // true if inifile has some train constraints
+
     // bool _printPB; // print progressbar
 public:
     /**
@@ -185,6 +190,11 @@ public:
      */
      void UpdateDoorticks() const;
      int GetMaxSimTime() const;
+     void  incrementCountTraj();
+
+     bool correctGeometry(std::shared_ptr<Building> building,  std::shared_ptr<TrainTimeTable>);
+     bool WriteTrajectories(std::string trajName);
+     bool TrainTraffic();
 
      int _countTraj=0; // count number of TXT trajectories to produce
      double _maxFileSize; // in MB
