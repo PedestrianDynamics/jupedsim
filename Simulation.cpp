@@ -58,7 +58,7 @@ Simulation::Simulation(Configuration* args)
         :_config(args)
 {
      _countTraj = 0;
-     _maxFileSize = 1; // MB
+     _maxFileSize = 10; // MB
     _nPeds = 0;
     _seed = 8091983;
     _deltaT = 0;
@@ -724,7 +724,6 @@ bool Simulation::WriteTrajectories(std::string trajectoryName)
       {
             fs::path p = _config->GetTrajectoriesFile();
             fs::path parent = p.parent_path();
-
             int sf = fs::file_size(p);
             if(sf>_maxFileSize*1024*1024)
             {
@@ -787,7 +786,6 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
      std::cout << "enter with train " << trainType.c_str() << "\n";
      std::cout<< KBLU << "Enter correctGeometry: Building Has " << building->GetAllTransitions().size() << " Transitions\n" << RESET;
      std::cout << "room: " << room_id << " subroom_id " << subroom_id << "\n" ;
-
 
       if(mytrack.empty() || subroom == nullptr)
             return false;
@@ -1003,7 +1001,6 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
       }
       _routingEngine->setNeedUpdate(true);
      return true;
-
 }
 void Simulation::RunFooter()
 {
