@@ -861,10 +861,10 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     // try to parse the txt file
     else if(fileName.endsWith(".txt",Qt::CaseInsensitive))
     {
-         QString source_file= wd + QDir::separator() + SaxParser::extractSourceFileTXT(fileName);
-         QString ttt_file= wd + QDir::separator() + SaxParser::extractTrainTimeTableFileTXT(fileName);
-         QString tt_file= wd + QDir::separator() + SaxParser::extractTrainTypeFileTXT(fileName);
-         QString goal_file=wd + QDir::separator() + SaxParser::extractGoalFileTXT(fileName);
+         QString source_file= SaxParser::extractSourceFileTXT(fileName);
+         QString ttt_file= SaxParser::extractTrainTimeTableFileTXT(fileName);
+         QString tt_file= SaxParser::extractTrainTypeFileTXT(fileName);
+         QString goal_file=SaxParser::extractGoalFileTXT(fileName);
          QFileInfo check_file(source_file);
          if( !(check_file.exists() && check_file.isFile()) )
         {
