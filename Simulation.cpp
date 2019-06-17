@@ -472,8 +472,8 @@ void Simulation::PrintStatistics(double simTime)
             if(goal->GetOutflowRate() <  (std::numeric_limits<double>::max)())
             {
                  char tmp[50];
-                 sprintf(tmp, "%.2f", goal->GetOutflowRate());
-                 statsfile = "flow_exit_id_"+to_string(goal->GetID())+"_rate_"+tmp+".txt";
+                 sprintf(tmp, "%.2f_", goal->GetOutflowRate());
+                 statsfile = "flow_exit_id_"+to_string(goal->GetID())+"_rate_"+tmp+p.stem().string()+".txt";
             }
             Log->Write("More Information in the file: %s", statsfile.c_str());
             {
