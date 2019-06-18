@@ -8,7 +8,7 @@
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../geometry/Point.h"
 
-Point WaitingMiddle::GetWaitingPosition(Room* room, Pedestrian* ped) const{
+Point WaitingMiddle::GetWaitingPosition(Room* room, Pedestrian* ped){
      SubRoom* subRoom = room->GetSubRoom(ped->GetSubRoomID());
      return subRoom->GetCentroid();
 }

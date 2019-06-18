@@ -11,7 +11,7 @@ class WaitingRandom : public WaitingStrategy{
          srand(time(0));
     };
 
-    virtual Point GetWaitingPosition(Room* room, Pedestrian* ped) const;
+    virtual Point GetWaitingPosition(Room* room, Pedestrian* ped);
 
 };
 

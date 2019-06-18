@@ -22,7 +22,7 @@ public:
 
     virtual Point GetTarget(Room* room, Pedestrian* ped);
 
-    virtual Point GetWaitingPosition(Room* room, Pedestrian* ped) const = 0;
+    virtual Point GetWaitingPosition(Room* room, Pedestrian* ped) = 0;
 
 };
 

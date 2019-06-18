@@ -15,7 +15,7 @@ double fRand(double fMin, double fMax)
 }
 
 
-Point WaitingRandom::GetWaitingPosition(Room* room, Pedestrian* ped) const{
+Point WaitingRandom::GetWaitingPosition(Room* room, Pedestrian* ped){
 //     srand(time(0));
 
      SubRoom* subRoom = room->GetSubRoom(ped->GetSubRoomID());

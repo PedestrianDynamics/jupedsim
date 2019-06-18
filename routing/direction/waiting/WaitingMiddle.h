@@ -9,7 +9,7 @@
 
 class WaitingMiddle : public WaitingStrategy{
 
-    virtual Point GetWaitingPosition(Room* room, Pedestrian* ped) const;
+    virtual Point GetWaitingPosition(Room* room, Pedestrian* ped);
 
 };
 
