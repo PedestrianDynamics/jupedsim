@@ -6,12 +6,6 @@
 
 The core module for performing the simulation (i.e. computing the trajectories). See the [online documentation](http://jupedsim.org/jpscore/)
 
-## Get the source code
-
-- The project is being developed in a [Gitlab repository](https://gitlab.version.fz-juelich.de/jupedsim/jpscore).
-- Our [GitHub repository](https://github.com/JuPedSim/jpscore) is used to host selected tags and releases, only.
-
-So, get the code from Gitlab and the releases from GitHub. :-)
 
 ## Quick start
 
@@ -27,7 +21,7 @@ To highlight some features of JuPedSim we have uploaded some videos on our [YouT
 We are heavily working on this project which means that:
 
 - It’s not done. We will be releasing new enhancements, bug fixes etc.
-- We love your support. If you find any errors or have suggestions, please write an issue in our [issue-tracker](https://gitlab.version.fz-juelich.de/jupedsim/jpscore/issues). We will try hard to fix it.
+- We love your support. If you find any errors or have suggestions, please write an issue in our [issue-tracker](https://github.com/JuPedSim/jpscore/issues). We will try hard to fix it.
 - Be patient. We are scientists and PhD/master students. Therefore, we primarily care about our research and theses.
 
 Enjoy!
