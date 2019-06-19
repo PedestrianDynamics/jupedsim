@@ -383,12 +383,6 @@ if(BUILD_TESTING)
   )
 
 
-  foreach (test_src ${test_files})
-    GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
-    add_executable( ${test} ${test_src})
-    target_link_libraries (${test} geometrycore)
-    add_test(NAME ${test} COMMAND ${test})
-  endforeach(test_src ${test_files})
 
 
 #  set(Python_ADDITIONAL_VERSIONS 3.0)
