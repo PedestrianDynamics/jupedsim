@@ -166,7 +166,8 @@ void Analysis::InitArgs(ArgumentParser* args)
           _StopFramesMethodD = args->GetStopFramesMethodD();
           _IndividualFDFlags = args->GetIndividualFDFlags();
           _plotTimeseriesD=args->GetIsPlotTimeSeriesD();
-          _geoPoly = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_D);
+          _geoPolyMethodD = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_D);
+
      }
      if(args->GetIsMethodI()) {
           _DoesUseMethodI = true;
@@ -179,14 +180,19 @@ void Analysis::InitArgs(ArgumentParser* args)
           _StopFramesMethodI = args->GetStopFramesMethodI();
           _IndividualFDFlags = args->GetIndividualFDFlags();
           _plotTimeseriesI=args->GetIsPlotTimeSeriesI();
-          _geoPoly = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_I);
+          _geoPolyMethodI = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_I);
      }
 
-     if( _DoesUseMethodD &&  _DoesUseMethodI)
-     {
-          Log->Write("Warning:\t Using both method D and I is not safe!");
-          // because ReadGeomtry() may be called twice
-     }
+// ToDo: obsolete ?
+
+//     if( _DoesUseMethodD &&  _DoesUseMethodI)
+//     {
+//          Log->Write("Warning:\t Using both method D and I is not safe!");
+//          // because ReadGeometry() may be called twice (line 169 and 182)
+//          // overwrite _geoPoly -> new value for each Method
+//          Log->Write("Info:\t Using both method D and I is safe! :-)");
+//     }
+
      _deltaF = args->GetDelatT_Vins();
      _cutByCircle = args->GetIsCutByCircle();
      _getProfile = args->GetIsGetProfile();
@@ -336,6 +342,7 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
                if(result_A)
                {
                     Log->Write("INFO:\tSuccess with Method A using measurement area id %d!\n",_areaForMethod_A[i]->_id);
+                    std::cout << "INFO:\tSuccess with Method A using measurement area id "<< _areaForMethod_A[i]->_id << "\n";
                }
                else
                {
@@ -361,6 +368,7 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
                if(result_B)
                {
                     Log->Write("INFO:\tSuccess with Method B using measurement area id %d!\n",_areaForMethod_B[i]->_id);
+                    std::cout << "INFO:\tSuccess with Method B using measurement area id "<< _areaForMethod_B[i]->_id << "\n";
                }
                else
                {
@@ -385,6 +393,7 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
                if(result_C)
                {
                     Log->Write("INFO:\tSuccess with Method C using measurement area id %d!\n",_areaForMethod_C[i]->_id);
+                    std::cout << "INFO:\tSuccess with Method C using measurement area id "<< _areaForMethod_C[i]->_id << "\n";
                     if(_plotTimeseriesC[i])
                     {
                          string parameters_Timeseries=" " + _scriptsLocation.string()+
@@ -417,7 +426,7 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
                method_D.SetStartFrame(_StartFramesMethodD[i]);
                method_D.SetStopFrame(_StopFramesMethodD[i]);
                method_D.SetCalculateIndividualFD(_IndividualFDFlags[i]);
-               method_D.SetGeometryPolygon(_geoPoly[_areaForMethod_D[i]->_id]);
+               method_D.SetGeometryPolygon(_geoPolyMethodD[_areaForMethod_D[i]->_id]);
                method_D.SetGeometryFileName(_geometryFileName);
                method_D.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
                method_D.SetGridSize(_grid_size_X, _grid_size_Y);
@@ -470,15 +479,15 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
                method_I.SetStartFrame(_StartFramesMethodI[i]);
                method_I.SetStopFrame(_StopFramesMethodI[i]);
                method_I.SetCalculateIndividualFD(_IndividualFDFlags[i]);
-               method_I.SetGeometryPolygon(_geoPoly[_areaForMethod_I[i]->_id]);
+               method_I.SetGeometryPolygon(_geoPolyMethodI[_areaForMethod_I[i]->_id]);
                method_I.SetGeometryFileName(_geometryFileName);
                method_I.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
                method_I.SetGridSize(_grid_size_X, _grid_size_Y);
                method_I.SetOutputVoronoiCellData(_outputGraph);
-               method_I.SetPlotVoronoiGraph(_plotGraph);
+               // method_I.SetPlotVoronoiGraph(_plotGraph);
                method_I.SetPlotVoronoiIndex(_plotIndex);
                method_I.SetDimensional(_isOneDimensional);
-               method_I.SetCalculateProfiles(_getProfile);
+               // method_I.SetCalculateProfiles(_getProfile);
                method_I.SetTrajectoriesLocation(path);
                if(_cutByCircle)
                {
