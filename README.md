@@ -2,5 +2,5 @@
 
 Documentation  can be found [here](http://jupedsim.github.io/jpsreport/).
 
-Please open a new [issue](https://gitlab.version.fz-juelich.de/jupedsim/jpsreport/issues) if you encouter problems or have found a bug in the code.
+Please open a new [issue](https://github.com/jupedsim/jpsreport/issues) if you encouter problems or have found a bug in the code.
 
