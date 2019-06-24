@@ -4,20 +4,23 @@
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 
-        <!-- seed used for initialising random generator -->
-        <seed>12542</seed>
-        <!-- geometry file -->
-        <max_sim_time>110</max_sim_time>
-        <geometry>schedule_geo.xml</geometry>
-        <num_threads>1</num_threads>
-        <!-- traectories file and format -->
-        <trajectories format="xml-plain"  fps="8">
-                <file location="schedule_traj.xml" />
-        </trajectories>
-        <!-- where to store the logs -->
-        <!--<logfile>log.txt</logfile>-->
-        <events_file>events.xml</events_file>
-        <schedule_file>schedule.xml</schedule_file>
+  <header>
+    <!-- seed used for initialising random generator -->
+    <seed>12542</seed>
+    <!-- geometry file -->
+    <max_sim_time>110</max_sim_time>
+    <geometry>schedule_geo.xml</geometry>
+    <num_threads>1</num_threads>
+    <!-- traectories file and format -->
+    <trajectories format="xml-plain"  fps="8">
+      <file location="schedule_traj.xml" />
+    </trajectories>
+    <!-- where to store the logs -->
+    <logfile>log.txt</logfile>
+    <!-- events and schedule files -->
+    <events_file>events.xml</events_file>
+    <schedule_file>schedule.xml</schedule_file>
+  </header>
 
         <!-- traffic information: e.g closed doors or smoked rooms -->
         <traffic_constraints>
