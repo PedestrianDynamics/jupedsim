@@ -32,6 +32,9 @@ private:
     std::map<int, std::vector<double>> _angleMap;
     std::map<int, std::vector<double>> _staticMap;
     std::map<int, std::vector<double>> _wallDistanceMap;
+    std::map<int, std::vector<double>> _wallPreferenceMap;
+    std::map<int, std::vector<double>> _attractionRepulsionMap;
+    std::map<int, std::vector<double>> _forbidenMap;
 
     // dynamic influences
     std::map<int, std::vector<double>> _distanceFieldMap;
@@ -43,6 +46,8 @@ private:
 
     // combined influences
     std::map<int, std::vector<double>> _probMap;
+    std::map<int, std::vector<double>> _valueMap;
+    std::map<int, std::vector<double>> _filterMap;
 
     // random generator
     std::mt19937 _rdGenerator;::
@@ -71,6 +76,9 @@ private:
      void computeDistanceCost(const SubRoom*);
      void computeAngleCost(const SubRoom*);
      void computeWallDistance(const SubRoom*);
+     void computeWallPreference(const SubRoom*);
+     void computeAttractionRepulsionZones(const SubRoom*);
+     void computeForbidenZones(const SubRoom*);
 
      void computeDistanceField(const SubRoom*, Pedestrian* ped);
      void computeDynamicDistance(const SubRoom* subroom);

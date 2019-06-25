@@ -86,6 +86,9 @@ void WaitingProbability::parseBuilding(Building* building){
                _angleMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
                _staticMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
                _wallDistanceMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
+               _wallPreferenceMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
+               _attractionRepulsionMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
+               _forbidenMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
 
                _distanceFieldMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
                _dynamicDistanceMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
@@ -94,6 +97,8 @@ void WaitingProbability::parseBuilding(Building* building){
                _pathMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
 
                _probMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
+               _valueMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
+               _filterMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
           }
      }
 }
@@ -146,17 +151,29 @@ Point WaitingProbability::GetPath(Pedestrian* ped){
      Point waitingPos = ped->GetWaitingPos();
      Point currentPos = ped->GetPos();
 
-     int uid = ped->GetSubRoomUID();
-     uid = 1;
-
-     double maxStep = * std::max_element(std::begin(_pathMap.at(uid)), std::end(_pathMap.at(uid))); // c++11
-
-     int step = 0;
 
      if (_building->IsVisible(waitingPos, currentPos, std::vector<SubRoom*>(), false)){
           return waitingPos;
      } else {
-          std::vector<double> path = _pathMap.at(uid);
+
+          int uid = ped->GetSubRoomUID();
+          uid = 1;
+
+          double maxStep = * std::max_element(std::begin(_pathMap.at(uid)), std::end(_pathMap.at(uid))); // c++11
+
+          int step = 0;
+
+//          std::cout << std::endl;
+          std::cout << "Path size: " << _pathMap.at(uid).size() << std::endl;
+//          std::vector<double> path;
+//
+//          for (int i = 0; i<_pathMap.at(uid).size(); ++i){
+//               path.emplace_back(_pathMap.at(uid).at(i));
+//          }
+
+          std::vector<double> path(_pathMap.at(uid));
+//          std::vector<double> path(_pathMap.at(uid).size());
+//          std::copy(_pathMap.at(uid).begin(), )
           double tmp = std::numeric_limits<double>::max();
           double min = std::numeric_limits<double>::max();
 
@@ -460,12 +477,24 @@ void WaitingProbability::combineAll(const SubRoom* subroom){
      int uid = subroom->GetUID();
 
      for (int i = 0; i<_gridMap.at(uid)->GetnPoints(); ++i) {
-          _probMap.at(uid).at(i) = (
-                         1.*_flowMap.at(uid).at(i)+
-                                   1.*_boundaryMap.at(uid).at(i)+
-                                   1.*_dynamicDistanceMap.at(uid).at(i)+
-                                   1.*_angleMap.at(uid).at(i)
-               )*_distanceProbMap.at(uid).at(i);
+          double value =
+                    1.*_flowMap.at(uid).at(i)+
+                    1.*_angleMap.at(uid).at(i)+
+                    1.*_attractionRepulsionMap.at(uid).at(i)+
+                    1.*_wallPreferenceMap.at(uid).at(i) +
+                    1.*_dynamicDistanceMap.at(uid).at(i) ;
+
+          double filter = _distanceProbMap.at(uid).at(i) *  _forbidenMap.at(uid).at(i);
+          _valueMap.at(uid).at(i) = value;
+          _filterMap.at(uid).at(i) = filter;
+
+          _probMap.at(uid).at(i) = value * filter;
+//          _probMap.at(uid).at(i) = (
+//                         1.*_flowMap.at(uid).at(i)+
+//                                   1.*_boundaryMap.at(uid).at(i)+
+//                                   1.*_dynamicDistanceMap.at(uid).at(i)+
+//                                   1.*_angleMap.at(uid).at(i)
+//               )*_distanceProbMap.at(uid).at(i);
      }
 
      for (int i = 0; i<_gridMap.at(uid)->GetnPoints(); ++i) {
@@ -488,11 +517,14 @@ void WaitingProbability::computeStatic(){
                computeDistanceCost(subroom);
                computeAngleCost(subroom);
                computeFlowAvoidance(subroom);
-               computeBoundaryPreference(subroom);
+//               computeBoundaryPreference(subroom);
                computeWallDistance(subroom);
-               computeStatic(subroom);
+               computeWallPreference(subroom);
+               computeAttractionRepulsionZones(subroom);
+               computeForbidenZones(subroom);
+//               computeStatic(subroom);
 
-               writeVTK(subroom, "static_" + std::to_string(subroom->GetUID()) + ".vtk");
+//               writeVTK(subroom, "static_" + std::to_string(subroom->GetUID()) + ".vtk");
           }
      }
 }
@@ -504,9 +536,11 @@ void WaitingProbability::computeStatic(const SubRoom* subroom)
      for (int i = 0; i<_gridMap.at(uid)->GetnPoints(); ++i) {
           double value =
                     1.*_flowMap.at(uid).at(i)+
-                    1.*_boundaryMap.at(uid).at(i)+
-                    1.*_distanceMap.at(uid).at(i)+
-                    1.*_angleMap.at(uid).at(i);
+//                    1.*_boundaryMap.at(uid).at(i)+
+//                    1.*_distanceMap.at(uid).at(i)+
+                    1.*_angleMap.at(uid).at(i)+
+                    1.*_attractionRepulsionMap.at(uid).at(i)+
+                    1.*_wallPreferenceMap.at(uid).at(i);
 
           _staticMap.at(uid).at(i) = value;
      }
@@ -647,9 +681,9 @@ void WaitingProbability::computeWallDistance(const SubRoom* subroom){
 
           if (subroom->IsInSubRoom(p)){
 
-               for (auto line : subroom->GetAllTransitions()) {
-                    minDist = std::min(minDist, line->DistTo(p));
-               }
+//               for (auto line : subroom->GetAllTransitions()) {
+//                    minDist = std::min(minDist, line->DistTo(p));
+//               }
                for (auto line : subroom->GetAllWalls()){
                     minDist = std::min(minDist, line.DistTo(p));
                }
@@ -659,6 +693,85 @@ void WaitingProbability::computeWallDistance(const SubRoom* subroom){
           _wallDistanceMap.at(uid).at(i) = minDist;
      }
 
+}
+
+void WaitingProbability::computeWallPreference(const SubRoom* subroom){
+     Log->Write("Start compute wall pref");
+     int uid = subroom->GetUID();
+
+     for (int i=0; i< _gridMap.at(uid)->GetnPoints(); ++i) {
+          double x = _gridMap.at(uid)->get_x_fromKey(i);
+          double y = _gridMap.at(uid)->get_y_fromKey(i);
+          Point p(x, y);
+
+          if (subroom->IsInSubRoom(p)) {
+               double dist = _wallDistanceMap.at(uid).at(i);
+               _wallPreferenceMap.at(uid).at(i) = 0.5 * exp(-1* dist *dist);
+          }
+     }
+
+     postProcess(_wallPreferenceMap.at(uid), subroom);
+     normalize(_wallPreferenceMap.at(uid));
+}
+
+void WaitingProbability::computeAttractionRepulsionZones(const SubRoom* subroom){
+     Log->Write("Start compute attraction cost");
+     int uid = subroom->GetUID();
+
+     //TODO read from file
+     double xMinAtt = 0.5;
+     double xMaxAtt = 1.5;
+     double yMinAtt = 3.5;
+     double yMaxAtt = 4.5;
+
+     double xMinRep = 4.5;
+     double xMaxRep = 5.5;
+     double yMinRep = 3.5;
+     double yMaxRep = 4.5;
+
+     for (int i=0; i< _gridMap.at(uid)->GetnPoints(); ++i) {
+          double x = _gridMap.at(uid)->get_x_fromKey(i);
+          double y = _gridMap.at(uid)->get_y_fromKey(i);
+          Point p(x, y);
+
+          if (subroom->IsInSubRoom(p)) {
+               if ( xMinAtt <= x && x <= xMaxAtt && yMinAtt <= y && y <= yMaxAtt){
+                    _attractionRepulsionMap.at(uid).at(i) = -1.;
+               }
+
+               if ( xMinRep <= x && x <= xMaxRep && yMinRep <= y && y <= yMaxRep){
+                    _attractionRepulsionMap.at(uid).at(i) = 1.;
+               }
+          }
+     }
+
+     postProcess(_attractionRepulsionMap.at(uid), subroom);
+     normalize(_attractionRepulsionMap.at(uid));
+}
+
+void WaitingProbability::computeForbidenZones(const SubRoom* subroom){
+     Log->Write("Start compute attraction cost");
+     int uid = subroom->GetUID();
+
+     //TODO read from file
+     double xMin = 0.5;
+     double xMax = 1.5;
+     double yMin = 0.5;
+     double yMax = 1.5;
+
+     for (int i=0; i< _gridMap.at(uid)->GetnPoints(); ++i) {
+          double x = _gridMap.at(uid)->get_x_fromKey(i);
+          double y = _gridMap.at(uid)->get_y_fromKey(i);
+          Point p(x, y);
+
+          if (subroom->IsInSubRoom(p)) {
+               if ( xMin <= x && x <= xMax && yMin <= y && y <= yMax){
+                    _forbidenMap.at(uid).at(i) = 0.;
+               } else {
+                    _forbidenMap.at(uid).at(i) = 1.;
+               }
+          }
+     }
 }
 
 void WaitingProbability::computeAngleCost(const SubRoom* subroom){
@@ -838,6 +951,18 @@ void WaitingProbability::writeVTK(const SubRoom* subroom, const std::string file
           file << _wallDistanceMap.at(uid).at(i) << std::endl;
      }
 
+     file << "SCALARS wallPref float 1" << std::endl;
+     file << "LOOKUP_TABLE default" << std::endl;
+     for (long int i = 0; i < grid->GetnPoints(); ++i) {
+          file << _wallPreferenceMap.at(uid).at(i) << std::endl;
+     }
+
+     file << "SCALARS attRep float 1" << std::endl;
+     file << "LOOKUP_TABLE default" << std::endl;
+     for (long int i = 0; i < grid->GetnPoints(); ++i) {
+          file << _attractionRepulsionMap.at(uid).at(i) << std::endl;
+     }
+
      file << "SCALARS distanceProb float 1" << std::endl;
      file << "LOOKUP_TABLE default" << std::endl;
      for (long int i = 0; i < grid->GetnPoints(); ++i) {
@@ -849,6 +974,23 @@ void WaitingProbability::writeVTK(const SubRoom* subroom, const std::string file
      for (long int i = 0; i < grid->GetnPoints(); ++i) {
           file << _probMap.at(uid).at(i) << std::endl;
      }
+
+     file << "SCALARS forbiden float 1" << std::endl;
+     file << "LOOKUP_TABLE default" << std::endl;
+     for (long int i = 0; i < grid->GetnPoints(); ++i) {
+          file << _forbidenMap.at(uid).at(i) << std::endl;
+     }
+     file << "SCALARS value float 1" << std::endl;
+     file << "LOOKUP_TABLE default" << std::endl;
+     for (long int i = 0; i < grid->GetnPoints(); ++i) {
+          file << _valueMap.at(uid).at(i) << std::endl;
+     }
+     file << "SCALARS filter float 1" << std::endl;
+     file << "LOOKUP_TABLE default" << std::endl;
+     for (long int i = 0; i < grid->GetnPoints(); ++i) {
+          file << _filterMap.at(uid).at(i) << std::endl;
+     }
+
 
      file.close();
 }

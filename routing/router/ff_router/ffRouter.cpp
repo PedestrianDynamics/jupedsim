@@ -537,10 +537,10 @@ int FFRouter::FindExit(Pedestrian* p)
                if (_targetWithinSubroom) {
                    locDistToDoor = _config->GetDirectionManager()->GetDirectionStrategy()->GetDistance2Target(p, doorUID);
                } else {
-                   std::cout << "config: " << _config << std::endl;
-                    std::cout << "_config->GetDirectionManager(): " << _config->GetDirectionManager() << std::endl;
-                    std::cout << "_config->GetDirectionManager()->GetDirectionStrategy(): " << _config->GetDirectionManager()->GetDirectionStrategy() << std::endl;
-                    std::cout << "_config->GetDirectionManager()->GetDirectionStrategy()->GetDistance2Target(p, doorUID): " << _config->GetDirectionManager()->GetDirectionStrategy()->GetDistance2Target(p, doorUID) << std::endl;
+//                   std::cout << "config: " << _config << std::endl;
+//                    std::cout << "_config->GetDirectionManager(): " << _config->GetDirectionManager() << std::endl;
+//                    std::cout << "_config->GetDirectionManager()->GetDirectionStrategy(): " << _config->GetDirectionManager()->GetDirectionStrategy() << std::endl;
+//                    std::cout << "_config->GetDirectionManager()->GetDirectionStrategy()->GetDistance2Target(p, doorUID): " << _config->GetDirectionManager()->GetDirectionStrategy()->GetDistance2Target(p, doorUID) << std::endl;
 
                     locDistToDoor = _config->GetDirectionManager()->GetDirectionStrategy()->GetDistance2Target(p, doorUID);
                }
