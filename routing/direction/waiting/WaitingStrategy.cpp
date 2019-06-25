@@ -15,18 +15,26 @@ Point WaitingStrategy::GetTarget(Room* room, Pedestrian* ped)
 
      // check if waiting pos is set
      if (waitingPos._x == std::numeric_limits<double>::max() && waitingPos._y == std::numeric_limits<double>::max()){
-          target = GetWaitingPosition(room, ped);
+          do {
+               target = GetWaitingPosition(room, ped);
+          }while(!ped->GetBuilding()->GetSubRoomByUID(ped->GetSubRoomUID())->IsInSubRoom(target));
+
           ped->SetWaitingPos(target);
      }
      // check if in close range to desired position, hard coded!
-     else  if ((ped->GetWaitingPos()-ped->GetPos()).Norm() <= 0.25){
+     else  if ((ped->GetWaitingPos()-ped->GetPos()).Norm() <= 0.1 && ped->GetV0Norm() < 0.5){
           target = ped->GetPos();
+          ped->SetWaitingPos(target);
      }
      // head to desired waiting position
      else {
-          target = waitingPos;
+          target = GetPath(ped);
+//          target = waitingPos;
      }
 
      return target;
+}
 
+Point WaitingStrategy::GetPath(Pedestrian* ped){
+     return ped->GetWaitingPos();
 }

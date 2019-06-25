@@ -739,12 +739,6 @@ const Point& Pedestrian::GetV0(const Point& target)
 
      _V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
 
-     printf("=====\nGoal Line=[%f, %f]-[%f, %f]\n", _navLine->GetPoint1()._x, _navLine->GetPoint1()._y, _navLine->GetPoint2()._x, _navLine->GetPoint2()._y);
-     printf("Ped=%d, sub=%d, room=%d pos=[%f, %f], target=[%f, %f]\n", _id, _subRoomID, _roomID, pos._x, pos._y, target._x, target._y);
-     printf("Ped=%d : BEFORE new_v0=%f %f norm = %f\n", _id, new_v0._x, new_v0._y, new_v0.Norm());
-     printf("ped=%d: t=%f, _newOrientationFlag=%d, neworientationDelay=%d, _DistToBlockade=%f\n", _id,t, _newOrientationFlag, _newOrientationDelay, _distToBlockade);
-     printf("_v0=[%f, %f] norm = %f\n=====\n", _V0._x, _V0._y, _V0.Norm());
-
 #if DEBUGV0
      if(DEBUGV0 == 0){
           printf("=====\nGoal Line=[%f, %f]-[%f, %f]\n", _navLine->GetPoint1()._x, _navLine->GetPoint1()._y, _navLine->GetPoint2()._x, _navLine->GetPoint2()._y);

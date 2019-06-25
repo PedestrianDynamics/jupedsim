@@ -16,30 +16,31 @@
 
 void  WaitingProbability::Init(Building* building){
      Log->Write("Start init Waiting Probability");
+
      _building = building;
 
      // Init random generator
      _rdGenerator=std::mt19937(building->GetConfig()->GetSeed());
      _rdDistribution = std::uniform_real_distribution<double> (0.,1.);
 
-     parseBuilding();
+     parseBuilding(building);
      computeStatic();
 
      Log->Write("End init Waiting Probability-----------------");
 }
 
-void WaitingProbability::parseBuilding(){
+void WaitingProbability::parseBuilding(Building* building){
      Log->Write("Start parseBuilding");
 
-     double stepSizeX = 0.1;
-     double stepSizeY = 0.1;
+     double stepSizeX = 1.*0.125;
+     double stepSizeY = 1.*0.125;
 
      std::vector<Line> _wall;
      std::vector<Line> _exitsFromScope;
 
-     for (const auto roomItr : _building->GetAllRooms()){
+     for (const auto roomItr : building->GetAllRooms()){
           for (const auto subRoomItr : roomItr.second->GetAllSubRooms()){
-               std::shared_ptr<SubRoom> subroom = subRoomItr.second;
+               SubRoom* subroom = subRoomItr.second.get();
 
                for (auto trans : subroom->GetAllTransitions()) {
                     if (trans->IsExit() && !trans->IsClose()){
@@ -84,11 +85,13 @@ void WaitingProbability::parseBuilding(){
                _distanceMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
                _angleMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
                _staticMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
+               _wallDistanceMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
 
                _distanceFieldMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
                _dynamicDistanceMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
                _distanceProbMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
                _dynamicMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
+               _pathMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
 
                _probMap[uid]=std::vector<double>(_gridMap[uid]->GetnPoints(), 0.);
           }
@@ -98,11 +101,13 @@ void WaitingProbability::parseBuilding(){
 Point WaitingProbability::GetWaitingPosition(Room* room, Pedestrian* ped){
      SubRoom* subRoom = room->GetSubRoom(ped->GetSubRoomID());
 
-//     std::shared_ptr<SubRoom> subRoom = std::shared_ptr<SubRoom>(_building->GetSubRoomByUID(ped->GetSubRoomUID()));
+     int uid = subRoom->GetUID();
+     double x=0., y=0.;
 
-//     int uid = subRoom->GetUID();
-//     computeDynamic(subRoom);
-//     combineDynamicStatic(subRoom);
+     computeDynamic(subRoom, ped);
+
+     combineAll(subRoom);
+
 
      //TODO random generator as class member
      std::random_device rd;
@@ -113,10 +118,6 @@ Point WaitingProbability::GetWaitingPosition(Room* room, Pedestrian* ped){
 
      double sum = 0.;
 
-     int uid = subRoom->GetUID();
-
-     double x=0., y=0.;
-
      for (int i = 0; i<_gridMap.at(uid)->GetnPoints(); ++i) {
           sum += _probMap.at(uid).at(i);
           x = _gridMap.at(uid)->get_x_fromKey(i);
@@ -126,7 +127,7 @@ Point WaitingProbability::GetWaitingPosition(Room* room, Pedestrian* ped){
                x = _gridMap.at(uid)->get_x_fromKey(i);
                y = _gridMap.at(uid)->get_y_fromKey(i);
 
-               if (subRoom->IsInSubRoom(Point(x,y))){
+               if (subRoom->IsInSubRoom(Point(x,y)) && _distanceFieldMap.at(uid).at(i) > 0.3 ){
                     break;
                }
           }
@@ -141,52 +142,349 @@ Point WaitingProbability::GetWaitingPosition(Room* room, Pedestrian* ped){
      return ret;
 }
 
-void WaitingProbability::computeDynamic(const std::shared_ptr<SubRoom>& subroom){
+Point WaitingProbability::GetPath(Pedestrian* ped){
+     Point waitingPos = ped->GetWaitingPos();
+     Point currentPos = ped->GetPos();
+
+     int uid = ped->GetSubRoomUID();
+     uid = 1;
+
+     double maxStep = * std::max_element(std::begin(_pathMap.at(uid)), std::end(_pathMap.at(uid))); // c++11
+
+     int step = 0;
+
+     if (_building->IsVisible(waitingPos, currentPos, std::vector<SubRoom*>(), false)){
+          return waitingPos;
+     } else {
+          std::vector<double> path = _pathMap.at(uid);
+          double tmp = std::numeric_limits<double>::max();
+          double min = std::numeric_limits<double>::max();
+
+
+          // 0 = right
+          // 1 = top
+          // 2 = left
+          // 3 = down
+          int direction = -1;
+
+          // Search grid point of waiting pos
+          Point gridPoint = _gridMap.at(uid)->getNearestGridPoint(waitingPos);
+          int currentIndex = _gridMap.at(uid)->getKeyAtPoint(gridPoint);
+
+          Point current = gridPoint;
+
+          // While no sight connection between
+          do{
+               // check neighbors if direction change needed
+               directNeighbor neighbors = _gridMap.at(uid)->getNeighbors(currentIndex);
+
+               double dirMin = std::numeric_limits<double>::max();
+               // Set min to value in direction if reachable
+               if (direction != -1 && neighbors.key[direction] != -2){
+                    double x = _gridMap.at(uid)->get_x_fromKey(neighbors.key[direction]);
+                    double y = _gridMap.at(uid)->get_y_fromKey(neighbors.key[direction]);
+
+                    if (_building->GetSubRoomByUID(uid)->IsInSubRoom(Point(x,y))){
+                         dirMin = path.at(neighbors.key[direction]);
+                    }
+               }
+
+               double tmpMin = std::numeric_limits<double>::max();
+               int tmpDirection = -1;
+
+               for (int i=0; i<4; ++i){
+                    int neighbor = neighbors.key[i];
+                    double x0 = _gridMap.at(uid)->get_x_fromKey(neighbor);
+                    double y0 = _gridMap.at(uid)->get_y_fromKey(neighbor);
+                    if (neighbor != -2 && _building->GetSubRoomByUID(uid)->IsInSubRoom(Point(x0,y0)) ){
+                         tmp = path.at(neighbor);
+                         if (tmp < tmpMin && tmp < min && tmp > 0.){
+                              tmpMin = tmp;
+                              tmpDirection = i;
+                         }
+                    }
+               }
+
+               std::cout << "tmpDir: " << tmpDirection << "\ttmpMin: " << tmpMin << std::endl;
+               std::cout << "dir:    " << direction    << "\tdirMin: " << dirMin << std::endl;
+
+               std::cout << "neighbors:" << std::endl;
+               for (int i=0; i<4; ++i) {
+                    int neighbor = neighbors.key[i];
+                    if (neighbor == -2 ){
+                         std::cout << i << ": not grid" <<std::endl;
+                    }else{
+                         double x0 = _gridMap.at(uid)->get_x_fromKey(neighbor);
+                         double y0 = _gridMap.at(uid)->get_y_fromKey(neighbor);
+                         Point p0(x0, y0);
+
+                         if (!_building->GetSubRoomByUID(uid)->IsInSubRoom(p0)) {
+                              std::cout << i << ": not in subroom" <<std::endl;
+                         }else {
+                              std::cout << i << ": " << p0.toString() << "\tpath: " << path.at(neighbor) << std::endl;
+                         }
+                    }
+               }
+
+               if (direction == -1) {
+                    direction = tmpDirection;
+                    min = tmpMin;
+               } else {
+                    if (tmpMin < dirMin){
+                         direction = tmpDirection;
+                         min = tmpMin;
+                    } else {
+                         direction = direction;
+                         min = dirMin;
+                    }
+               }
+//               // tmpMin is small -> change direction
+//               if (tmpMin < dirMin){
+//                    min = tmpMin;
+//                    direction = tmpDirection;
+//               } else
+//                    // tmpMin == tmpDirection -> do not change direction
+//                    if (std::abs(tmpMin - DirMin) < 1e-5){
+//                         if (direction == -1 && tmpDirection != -1) {
+//                              direction = direction;
+//                              min = minDir;
+//                         } else {
+//                              std::cout << "WHY????" << std::endl;
+//                         }
+//                    }
+//               }    // tmpMin > tmpDirection
+//                    else{
+//
+//               }
+
+//               if (tmpMin == dirMin){
+//                    direction = direction;
+//                    min = dirMin;
+//                    std::cout <
+//               } else {
+//                    direction = tmpDirection;
+//                    min = tmpMin;
+//               }
+
+               current = _gridMap.at(uid)->getPointFromKey(neighbors.key[direction]);
+               currentIndex = neighbors.key[direction];
+//               x = _gridMap.at(uid)->get_x_fromKey(currentIndex);
+//               y = _gridMap.at(uid)->get_y_fromKey(currentIndex);
+//               std::cout << "Using: " << current.toString() << "\tmin: " << min << "\tdir: " << direction << std::endl;
+               std::cout << "Direction: " << direction << "\tmin: " << min << std::endl;
+               std::cout << "--------------------------------------------------" << std::endl;
+
+               if (direction == -1){
+                    std::cout << "...." << std::endl;
+               }
+
+//               std::cout << "Direction: " << direction << "\tmin: " << min << std::endl;
+
+               step++;
+               path.at(currentIndex) = std::numeric_limits<double>::max();
+
+          }while(!_building->IsVisible(currentPos, current, std::vector<SubRoom*>(), false) && step < maxStep);
+
+          std::cout << "First stop: " << current.toString() << std::endl;
+          std::cout << "Steps: " << step << std::endl;
+
+          if (step > maxStep-2){
+               std::cout << "STEP!" << std::endl;
+          }
+          return current;
+//          directNeighbor neighbors = _gridMap.at(uid)->getNeighbors(index);
+//
+//          std::cout << "neighbors:" << std::endl;
+//          for (int i=0; i<4; ++i) {
+//               int neighbor = neighbors.key[i];
+//               if (neighbor == -2 ){
+//                    std::cout << i << ": not grid" <<std::endl;
+//               }else if (!_building->GetSubRoomByUID(uid)->IsInSubRoom(Point(x,y))) {
+//                    std::cout << i << ": not in subroom" <<std::endl;
+//               }else {
+//                    double x0 = _gridMap.at(uid)->get_x_fromKey(neighbor);
+//                    double y0 = _gridMap.at(uid)->get_y_fromKey(neighbor);
+//                    Point p0(x0, y0);
+//
+//                    std::cout << i << ": " << p0.toString() << "\tpath: " << path.at(neighbor) << std::endl;
+//               }
+//          }
+//
+//          for (int i=0; i<4; ++i){
+//               int neighbor = neighbors.key[i];
+//               x = _gridMap.at(uid)->get_x_fromKey(neighbor);
+//               y = _gridMap.at(uid)->get_y_fromKey(neighbor);
+//
+//               if (neighbor != -2 && _building->GetSubRoomByUID(uid)->IsInSubRoom(Point(x,y))){
+//                    tmp = path.at(neighbor);
+//                    if (tmp < min && tmp > 0.){
+//                         min = tmp;
+//                         direction = i;
+//                    }
+//               }
+//          }
+//          if (direction == -1){
+//               std::cout << "???" << std::endl;
+//          }
+//
+//          // Set current point to lowest neighbor
+//          int currentIndex = neighbors.key[direction];
+//          x = _gridMap.at(uid)->get_x_fromKey(currentIndex);
+//          y = _gridMap.at(uid)->get_y_fromKey(currentIndex);
+//
+//          Point current = _gridMap.at(uid)->getPointFromKey(currentIndex);
+//          std::cout << "Using: " << current.toString() << std::endl;
+//
+//          // While no sight connection between
+//          while(!_building->IsVisible(currentPos, current, std::vector<SubRoom*>(), false) && step < maxStep){
+//               // check neighbors if direction change needed
+//               directNeighbor neighbors = _gridMap.at(uid)->getNeighbors(currentIndex);
+//
+//               std::cout << "neighbors:" << std::endl;
+//               for (int i=0; i<4; ++i) {
+//                    int neighbor = neighbors.key[i];
+//                    if (neighbor == -2 ){
+//                         std::cout << i << ": not grid" <<std::endl;
+//                    }else if (!_building->GetSubRoomByUID(uid)->IsInSubRoom(Point(x,y))) {
+//                         std::cout << i << ": not in subroom" <<std::endl;
+//                    }else {
+//                         double x0 = _gridMap.at(uid)->get_x_fromKey(neighbor);
+//                         double y0 = _gridMap.at(uid)->get_y_fromKey(neighbor);
+//                         Point p0(x0, y0);
+//
+//                         std::cout << i << ": " << p0.toString() << "\tpath: " << path.at(neighbor) << std::endl;
+//                    }
+//               }
+////                    tmp = std::numeric_limits<double>::max();
+//
+//               double dirMin = std::numeric_limits<double>::max();
+//               // Set min to value in direction if reachable
+//               if (neighbors.key[direction] != -2 && _building->GetSubRoomByUID(uid)->IsInSubRoom(Point(x,y))){
+//                    dirMin = path.at(neighbors.key[direction]);
+//               }
+////               double dirMin = _pathMap.at(uid).at(neighbors.key[direction]);
+////               if (dirMin == -2 || !_building->GetSubRoomByUID(uid)->IsInSubRoom(Point(x,y))){
+////               }
+//               double tmpMin = std::numeric_limits<double>::max();
+//               int tmpDirection = -1;
+//
+//               for (int i=0; i<4; ++i){
+//                    int neighbor = neighbors.key[i];
+//                    if (neighbor != -2 && _building->GetSubRoomByUID(uid)->IsInSubRoom(Point(x,y)) ){
+//                         tmp = path.at(neighbor);
+//                         if (tmp < tmpMin && tmp < min && tmp > 0.){
+//                              tmpMin = tmp;
+//                              tmpDirection = i;
+//                         }
+//                    }
+//               }
+//
+//               if (tmpMin == dirMin){
+//                    direction = direction;
+//                    min = dirMin;
+//               } else {
+//                    direction = tmpDirection;
+//                    min = tmpMin;
+//               }
+//
+//               current = _gridMap.at(uid)->getPointFromKey(neighbors.key[direction]);
+//               currentIndex = neighbors.key[direction];
+//               x = _gridMap.at(uid)->get_x_fromKey(currentIndex);
+//               y = _gridMap.at(uid)->get_y_fromKey(currentIndex);
+//               std::cout << "Using: " << current.toString() << "\tmin: " << min << "\tdir: " << direction << std::endl;
+//               if (direction == -1){
+//                    std::cout << "...." << std::endl;
+//               }
+//
+//               step++;
+//               path.at(currentIndex) = std::numeric_limits<double>::max();
+//          }
+//
+//          std::cout << "First stop: " << current.toString() << std::endl;
+//          std::cout << "Steps: " << step << std::endl;
+//
+//          if (step > maxStep-2){
+//               std::cout << "STEP!" << std::endl;
+//          }
+//          return current;
+//               directNeighbor neighbors = _gridMap.at(uid)->getNeighbors(index);
+//               x = _gridMap.at(uid)->get_x_fromKey(index);
+//               y = _gridMap.at(uid)->get_y_fromKey(index);
+//               uniqueAdd(points, pointsSet, Point(x,y));
+//               _dynamicDistanceMap.at(uid).at(index) = step;
+//               for (int i=0; i<4; ++i){
+//                    int neighbor = neighbors.key[i];
+//                    if (neighbor != -2 ){
+//                         x = _gridMap.at(uid)->get_x_fromKey(neighbor);
+//                         y = _gridMap.at(uid)->get_y_fromKey(neighbor);
+//                         uniqueAdd(points, pointsSet, Point(x,y));
+//                    }
+//               }
+//
+//
+//
+//          }
+     }
+
+     return ped->GetWaitingPos();
+}
+
+void WaitingProbability::computeDynamic(const SubRoom* subroom, Pedestrian* ped){
      Log->Write("Start compute dynamic");
 
-     computeDistanceField(subroom);
+     computeDistanceField(subroom, ped);
      computeDynamicDistance(subroom);
      computeDistanceProb(subroom);
+     computeWallPath(subroom);
 
-     combineAll(subroom);
      writeVTK(subroom, "dynamic_" + std::to_string(subroom->GetUID()) +"_" + std::to_string(numPed) + ".vtk");
      numPed++;
 }
 
-void WaitingProbability::computeDistanceField(const std::shared_ptr<SubRoom>& subroom){
+void WaitingProbability::computeDistanceField(const SubRoom* subroom, Pedestrian* pedestrian){
      Log->Write("Start compute distancefield");
+     int uid = subroom->GetUID();
+
+     double xMin = _gridMap.at(uid)->GetxMin();
+     double xMax = _gridMap.at(uid)->GetxMax();
+     double yMin = _gridMap.at(uid)->GetyMin();
+     double yMax = _gridMap.at(uid)->GetyMax();
+
+     double maxDist = std::pow(xMax-xMin, 2.) + std::pow(yMax-yMin, 2.);
 
      double x,y;
      double minDist;
 
-     int uid = subroom->GetUID();
-
      std::vector<Pedestrian*> peds;
-//     _building->GetPedestrians(subroom->GetRoomID(), subroom->GetSubRoomID(), peds);
-     for (int i=0; i<10; ++i){
-          peds.push_back(new Pedestrian());
-     }
-
-     peds[0]->SetWaitingPos(Point(0.6, 3.0));
-     peds[1]->SetWaitingPos(Point(0.3, 2.7));
-     peds[2]->SetWaitingPos(Point(0.3, 2.1));
-     peds[3]->SetWaitingPos(Point(0.6, 1.2));
-     peds[4]->SetWaitingPos(Point(1.5, 0.6));
-     peds[5]->SetWaitingPos(Point(3.3, 0.3));
-     peds[6]->SetWaitingPos(Point(2.4, 1.5));
-     peds[7]->SetWaitingPos(Point(2.7, 2.1));
-     peds[8]->SetWaitingPos(Point(3.0, 3.3));
-     peds[9]->SetWaitingPos(Point(3.3, 2.7));
+     _building->GetPedestrians(subroom->GetRoomID(), subroom->GetSubRoomID(), peds);
+//     for (int i=0; i<10; ++i){
+//          peds.push_back(new Pedestrian());
+//     }
+//
+//     peds[0]->SetWaitingPos(Point(0.6, 3.0));
+//     peds[1]->SetWaitingPos(Point(0.3, 2.7));
+//     peds[2]->SetWaitingPos(Point(0.3, 2.1));
+//     peds[3]->SetWaitingPos(Point(0.6, 1.2));
+//     peds[4]->SetWaitingPos(Point(1.5, 0.6));
+//     peds[5]->SetWaitingPos(Point(3.3, 0.3));
+//     peds[6]->SetWaitingPos(Point(2.4, 1.5));
+//     peds[7]->SetWaitingPos(Point(2.7, 2.1));
+//     peds[8]->SetWaitingPos(Point(3.0, 3.3));
+//     peds[9]->SetWaitingPos(Point(3.3, 2.7));
 
 
      for (int i = 0; i<_gridMap.at(uid)->GetnPoints(); ++i) {
-          minDist = DBL_MAX;
+//          minDist = DBL_MAX;
+          minDist = maxDist;
 
           x = _gridMap.at(uid)->get_x_fromKey(i);
           y = _gridMap.at(uid)->get_y_fromKey(i);
           Point p(x, y);
 
           for (auto ped : peds){
+               if (ped->GetID() == pedestrian->GetID()){
+                    continue;
+               }
                // TODO change to actual pos, when making it iterative
                Point pos = ped->GetWaitingPos();
 
@@ -199,10 +497,9 @@ void WaitingProbability::computeDistanceField(const std::shared_ptr<SubRoom>& su
 
 //     normalize(_distanceFieldMap.at(uid));
      markOutside(_distanceFieldMap.at(uid), subroom);
-
 }
 
-void WaitingProbability::computeDynamicDistance(const std::shared_ptr<SubRoom>& subroom){
+void WaitingProbability::computeDynamicDistance(const SubRoom* subroom){
      Log->Write("Start compute DynamicDistance");
 
      int uid = subroom->GetUID();
@@ -244,9 +541,6 @@ void WaitingProbability::computeDynamicDistance(const std::shared_ptr<SubRoom>& 
                moving = moving + (direction * stepSize);
 
                tmp = (p2 - moving).Norm();
-//               std::cout << "moving:    " << moving.toString() << std::endl;
-//               std::cout << "p2:        " << p2.toString() << std::endl;
-//               std::cout << "tmp:       " << tmp << std::endl;
 
                if (tmp >= minDist || tmp < J_EPS){
                     break;
@@ -258,10 +552,6 @@ void WaitingProbability::computeDynamicDistance(const std::shared_ptr<SubRoom>& 
 
      step++;
      points.push(Point(DBL_MAX, DBL_MAX));
-
-//     std::cout << std::endl;
-//     std::cout << "Points: " << std::endl;
-//     std::cout << "size: " << points.size() << std::endl;
 
      Point point;
      while(!points.empty()){
@@ -276,7 +566,6 @@ void WaitingProbability::computeDynamicDistance(const std::shared_ptr<SubRoom>& 
                continue;
           }
 
-//          point = points.front();
           Point gridPoint = _gridMap.at(uid)->getNearestGridPoint(point);
           int index = _gridMap.at(uid)->getKeyAtPoint(gridPoint);
 
@@ -302,10 +591,11 @@ void WaitingProbability::computeDynamicDistance(const std::shared_ptr<SubRoom>& 
      double d = 0.4;
 
 
+     std::copy(_dynamicDistanceMap.at(uid).begin(), _dynamicDistanceMap.at(uid).end(), _pathMap.at(uid).begin());
+
      for (int i = 0; i<_gridMap.at(uid)->GetnPoints(); ++i) {
           x = _gridMap.at(uid)->get_x_fromKey(i);
           y = _gridMap.at(uid)->get_y_fromKey(i);
-          Point p(x, y);
 
           if (_dynamicDistanceMap.at(uid).at(i) < 0. ){
                _dynamicDistanceMap.at(uid).at(i) = 2*step;
@@ -318,7 +608,36 @@ void WaitingProbability::computeDynamicDistance(const std::shared_ptr<SubRoom>& 
 
      markOutside(_dynamicDistanceMap.at(uid), subroom);
      postProcess(_dynamicDistanceMap.at(uid), subroom);
+     normalize(_dynamicDistanceMap.at(uid));
+}
 
+void WaitingProbability::computeWallPath(const SubRoom* subroom){
+     Log->Write("Start compute wall path");
+     double tres = 1.2;
+
+     int uid = subroom->GetUID();
+
+     for (int i = 0; i<_gridMap.at(uid)->GetnPoints(); ++i) {
+          double x = _gridMap.at(uid)->get_x_fromKey(i);
+          double y = _gridMap.at(uid)->get_y_fromKey(i);
+          Point p(x, y);
+
+          if (subroom->IsInSubRoom(p)){
+               if (_wallDistanceMap.at(uid).at(i) < tres && _pathMap.at(uid).at(i) > 0.){
+//                    _pathMap.at(uid).at(i) = _pathMap.at(uid).at(i) +1 ;
+//
+//                    if (_wallDistanceMap.at(uid).at(i) < 0.5 *tres){
+//                         _pathMap.at(uid).at(i) = _pathMap.at(uid).at(i) +1;
+//
+//                         if (_wallDistanceMap.at(uid).at(i) < 0.25 * tres){
+//                              _pathMap.at(uid).at(i) = _pathMap.at(uid).at(i) +1;
+//
+//                         }
+//                    }
+                    _pathMap.at(uid).at(i) += 1./_wallDistanceMap.at(uid).at(i);
+               }
+          }
+     }
 }
 
 void WaitingProbability::uniqueAdd(std::queue<Point>& points, std::set<Point>& pointsSet, Point p){
@@ -329,8 +648,7 @@ void WaitingProbability::uniqueAdd(std::queue<Point>& points, std::set<Point>& p
      }
 }
 
-void WaitingProbability::computeDistanceProb(const std::shared_ptr<SubRoom>& subroom)
-{
+void WaitingProbability::computeDistanceProb(const SubRoom* subroom){
      Log->Write("Start compute distance prob");
 
      int uid = subroom->GetUID();
@@ -341,25 +659,31 @@ void WaitingProbability::computeDistanceProb(const std::shared_ptr<SubRoom>& sub
           _distanceProbMap.at(uid).at(i) = -1. *  f * exp(-1.*(std::pow(_distanceFieldMap.at(uid).at(i), 2.)/f1));
      }
      postProcess(_distanceProbMap.at(uid), subroom);
-
+     normalize(_distanceProbMap.at(uid));
 }
 
-void WaitingProbability::combineAll(const std::shared_ptr<SubRoom>& subroom){
+void WaitingProbability::combineAll(const SubRoom* subroom){
      Log->Write("Start compute distance prob");
 
      int uid = subroom->GetUID();
 
      for (int i = 0; i<_gridMap.at(uid)->GetnPoints(); ++i) {
           _probMap.at(uid).at(i) = (
-                              1.*_flowMap.at(uid).at(i)+
-                              1.*_boundaryMap.at(uid).at(i)+
-                              1.*_dynamicDistanceMap.at(uid).at(i)+
-                              1.*_angleMap.at(uid).at(i)
-                    ) * _distanceProbMap.at(uid).at(i);
+                         1.*_flowMap.at(uid).at(i)+
+                                   1.*_boundaryMap.at(uid).at(i)+
+                                   1.*_dynamicDistanceMap.at(uid).at(i)+
+                                   1.*_angleMap.at(uid).at(i)
+               )*_distanceProbMap.at(uid).at(i);
      }
 
-     normalize(_probMap.at(uid));
+     for (int i = 0; i<_gridMap.at(uid)->GetnPoints(); ++i) {
+          if (_pathMap.at(uid).at(i) < 0){
+               _probMap.at(uid).at(i) = 0.;
+          }
+     }
 
+
+     normalize(_probMap.at(uid));
 }
 
 void WaitingProbability::computeStatic(){
@@ -367,28 +691,28 @@ void WaitingProbability::computeStatic(){
 
      for (auto roomItr : _building->GetAllRooms()){
           for (auto subRoomItr : roomItr.second->GetAllSubRooms()) {
-               std::shared_ptr<SubRoom> subroom = subRoomItr.second;
+               SubRoom* subroom = subRoomItr.second.get();
 
                computeDistanceCost(subroom);
                computeAngleCost(subroom);
                computeFlowAvoidance(subroom);
                computeBoundaryPreference(subroom);
-
+               computeWallDistance(subroom);
                computeStatic(subroom);
-               computeDynamic(subroom);
+//               computeDynamic(subroom);
 
                writeVTK(subroom, "static_" + std::to_string(subroom->GetUID()) + ".vtk");
           }
      }
 }
 
-void WaitingProbability::computeStatic(const std::shared_ptr<SubRoom>& subroom)
+void WaitingProbability::computeStatic(const SubRoom* subroom)
 {
      int uid = subroom->GetUID();
 
      for (int i = 0; i<_gridMap.at(uid)->GetnPoints(); ++i) {
           double value =
-                    3.*_flowMap.at(uid).at(i)+
+                    1.*_flowMap.at(uid).at(i)+
                     1.*_boundaryMap.at(uid).at(i)+
                     1.*_distanceMap.at(uid).at(i)+
                     1.*_angleMap.at(uid).at(i);
@@ -403,7 +727,7 @@ void WaitingProbability::computeStatic(const std::shared_ptr<SubRoom>& subroom)
      }
 }
 
-void WaitingProbability::computeFlowAvoidance(const std::shared_ptr<SubRoom>& subroom){
+void WaitingProbability::computeFlowAvoidance(const SubRoom* subroom){
      Log->Write("Start compute flow avoidance");
 
      double x,y, theta;
@@ -443,10 +767,10 @@ void WaitingProbability::computeFlowAvoidance(const std::shared_ptr<SubRoom>& su
           }
      }
      postProcess(_flowMap.at(uid), subroom);
-
+     normalize(_flowMap.at(uid));
 }
 
-void WaitingProbability::computeBoundaryPreference(const std::shared_ptr<SubRoom>& subroom){
+void WaitingProbability::computeBoundaryPreference(const SubRoom* subroom){
      Log->Write("Start compute boundary preference");
 
      double x0, y0, x1, y1, sum;
@@ -471,7 +795,7 @@ void WaitingProbability::computeBoundaryPreference(const std::shared_ptr<SubRoom
 
                     if (subroom->IsInSubRoom(p1)) {
                          double distance = (p0-p1).Norm();
-                         double bp = -1. * b*std::pow(1.+distance, -2.)*gridsize;
+                         double bp = -1. * b*std::pow(1.+distance, -2.)*gridsize*gridsize;
                          sum += bp;
                     }
                }
@@ -480,9 +804,10 @@ void WaitingProbability::computeBoundaryPreference(const std::shared_ptr<SubRoom
           _boundaryMap.at(uid).at(i) = sum/5.;
      }
      postProcess(_boundaryMap.at(uid), subroom);
+     normalize(_boundaryMap.at(uid));
 }
 
-void WaitingProbability::computeDistanceCost(const std::shared_ptr<SubRoom>& subroom){
+void WaitingProbability::computeDistanceCost(const SubRoom* subroom){
      Log->Write("Start compute distance cost");
 
      double x,y, minDist;
@@ -504,9 +829,53 @@ void WaitingProbability::computeDistanceCost(const std::shared_ptr<SubRoom>& sub
           }
      }
      postProcess(_distanceMap.at(uid), subroom);
+     normalize(_distanceMap.at(uid));
 }
 
-void WaitingProbability::computeAngleCost(const std::shared_ptr<SubRoom>& subroom){
+void WaitingProbability::computeWallDistance(const SubRoom* subroom){
+     Log->Write("Start compute wall distance");
+
+//     std::vector<Line> allLines; // = subroom->GetAllWalls();
+//     allLines.emplace_back(subroom->GetAllTransitions());
+
+     int uid = subroom->GetUID();
+     double minDist, dist;
+     double x,y;
+
+//     double xMin, xMax, yMin, yMax;
+     double xMin = _gridMap.at(uid)->GetxMin();
+     double xMax = _gridMap.at(uid)->GetxMax();
+     double yMin = _gridMap.at(uid)->GetyMin();
+     double yMax = _gridMap.at(uid)->GetyMax();
+
+     double maxDist = std::sqrt(std::pow(xMax - xMin, 2.) + std::pow(yMax - yMin, 2.));
+
+     for (int i=0; i< _gridMap.at(uid)->GetnPoints(); ++i) {
+          minDist = std::numeric_limits<double>::max();
+
+          x = _gridMap.at(uid)->get_x_fromKey(i);
+          y = _gridMap.at(uid)->get_y_fromKey(i);
+          Point p(x, y);
+
+          if (subroom->IsInSubRoom(p)){
+
+               for (auto line : subroom->GetAllTransitions()) {
+                    minDist = std::min(minDist, line->DistTo(p));
+               }
+               for (auto line : subroom->GetAllWalls()){
+                    minDist = std::min(minDist, line.DistTo(p));
+               }
+          } else {
+
+               minDist = maxDist;
+          }
+          _wallDistanceMap.at(uid).at(i) = minDist;
+     }
+
+//     markOutside(_wallDistanceMap.at(uid), subroom);
+}
+
+void WaitingProbability::computeAngleCost(const SubRoom* subroom){
      Log->Write("Start compute angle cost");
 
      double x,y, minAngle;
@@ -544,6 +913,7 @@ void WaitingProbability::computeAngleCost(const std::shared_ptr<SubRoom>& subroo
      }
 
      postProcess(_angleMap.at(uid), subroom);
+     normalize(_angleMap.at(uid));
 }
 
 double WaitingProbability::checkAngles(double a, double b){
@@ -564,7 +934,7 @@ double WaitingProbability::checkAngles(double a, double b){
      }
 }
 
-void WaitingProbability::postProcess(std::vector<double>& data, const std::shared_ptr<SubRoom>& subroom){
+void WaitingProbability::postProcess(std::vector<double>& data, const SubRoom* subroom){
      double max = 0;
      for(auto it = data.begin(); it != data.end(); ++it){
           max = std::max(max, std::abs(*it));
@@ -575,9 +945,10 @@ void WaitingProbability::postProcess(std::vector<double>& data, const std::share
      }
 
      markOutside(data, subroom);
+//     markDoors(data, subroom);
 }
 
-void WaitingProbability::markOutside(std::vector<double>& data, const std::shared_ptr<SubRoom>& subroom){
+void WaitingProbability::markOutside(std::vector<double>& data, const SubRoom* subroom){
 
      int uid = subroom->GetUID();
      double x, y;
@@ -591,8 +962,8 @@ void WaitingProbability::markOutside(std::vector<double>& data, const std::share
                data.at(key) = 0;
           }
      }
-
 }
+
 
 void WaitingProbability::normalize(std::vector<double>& data){
      double sum = 0.;
@@ -606,7 +977,7 @@ void WaitingProbability::normalize(std::vector<double>& data){
      }
 }
 
-void WaitingProbability::writeVTK(const std::shared_ptr<SubRoom>& subroom, const std::string filename){
+void WaitingProbability::writeVTK(const SubRoom* subroom, const std::string filename){
 
      Log->Write("INFO: \tWrite Floorfield to file");
      Log->Write(filename);
@@ -667,6 +1038,18 @@ void WaitingProbability::writeVTK(const std::shared_ptr<SubRoom>& subroom, const
      file << "LOOKUP_TABLE default" << std::endl;
      for (long int i = 0; i < grid->GetnPoints(); ++i) {
           file << _dynamicDistanceMap.at(uid).at(i) << std::endl;
+     }
+
+     file << "SCALARS path float 1" << std::endl;
+     file << "LOOKUP_TABLE default" << std::endl;
+     for (long int i = 0; i < grid->GetnPoints(); ++i) {
+          file << _pathMap.at(uid).at(i) << std::endl;
+     }
+
+     file << "SCALARS wallDist float 1" << std::endl;
+     file << "LOOKUP_TABLE default" << std::endl;
+     for (long int i = 0; i < grid->GetnPoints(); ++i) {
+          file << _wallDistanceMap.at(uid).at(i) << std::endl;
      }
 
      file << "SCALARS distanceProb float 1" << std::endl;

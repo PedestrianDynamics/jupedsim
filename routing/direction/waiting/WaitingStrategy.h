@@ -24,6 +24,7 @@ public:
 
     virtual Point GetWaitingPosition(Room* room, Pedestrian* ped) = 0;
 
+    virtual Point GetPath(Pedestrian* ped);
 };
 
 #endif //JPSCORE_WAITINGSTRATEGY_H

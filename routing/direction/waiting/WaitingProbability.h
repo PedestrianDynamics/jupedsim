@@ -16,6 +16,7 @@
 class RectGrid;
 class SubRoom;
 class Line;
+class Wall;
 
 class WaitingProbability : public WaitingStrategy{
 
@@ -30,21 +31,24 @@ private:
     std::map<int, std::vector<double>> _distanceMap;
     std::map<int, std::vector<double>> _angleMap;
     std::map<int, std::vector<double>> _staticMap;
+    std::map<int, std::vector<double>> _wallDistanceMap;
 
     // dynamic influences
     std::map<int, std::vector<double>> _distanceFieldMap;
     std::map<int, std::vector<double>> _distanceProbMap;
 
     std::map<int, std::vector<double>> _dynamicDistanceMap;
+    std::map<int, std::vector<double>> _pathMap;
     std::map<int, std::vector<double>> _dynamicMap;
 
     // combined influences
     std::map<int, std::vector<double>> _probMap;
 
     // random generator
-    std::mt19937 _rdGenerator;
+    std::mt19937 _rdGenerator;::
     std::uniform_real_distribution<double> _rdDistribution;
 
+    std::map<int, std::vector<Point>> _pedPaths;
 
 protected:
     RoutingPrecomputation precomputation = RoutingPrecomputation::NONE;
@@ -54,30 +58,33 @@ public:
 
     virtual Point GetWaitingPosition(Room* room, Pedestrian* ped);
 
+    virtual Point GetPath(Pedestrian* ped);
+
 private:
-     void parseBuilding();
+     void parseBuilding(Building* building);
      void computeStatic();
-     void computeDynamic(const std::shared_ptr<SubRoom>&);
+     void computeDynamic(const SubRoom*, Pedestrian* ped);
 
-     void computeStatic(const std::shared_ptr<SubRoom>& subroom);
-     void computeFlowAvoidance(const std::shared_ptr<SubRoom>&);
-     void computeBoundaryPreference(const std::shared_ptr<SubRoom>&);
-     void computeDistanceCost(const std::shared_ptr<SubRoom>&);
-     void computeAngleCost(const std::shared_ptr<SubRoom>&);
+     void computeStatic(const SubRoom* subroom);
+     void computeFlowAvoidance(const SubRoom*);
+     void computeBoundaryPreference(const SubRoom*);
+     void computeDistanceCost(const SubRoom*);
+     void computeAngleCost(const SubRoom*);
+     void computeWallDistance(const SubRoom*);
 
-     void computeDistanceField(const std::shared_ptr<SubRoom>&);
-     void computeDynamicDistance(const std::shared_ptr<SubRoom>& subroom);
-     void computeDistanceProb(const std::shared_ptr<SubRoom>& subroom);
-     void combineAll(const std::shared_ptr<SubRoom>& subroom);
+     void computeDistanceField(const SubRoom*, Pedestrian* ped);
+     void computeDynamicDistance(const SubRoom* subroom);
+     void computeDistanceProb(const SubRoom* subroom);
+     void computeWallPath(const SubRoom* subroom);
+     void combineAll(const SubRoom* subroom);
 
      void uniqueAdd(std::queue<Point>& points, std::set<Point>& pointsSet, Point p);
      void normalize(std::vector<double>& data);
-     void postProcess(std::vector<double>& data, const std::shared_ptr<SubRoom>& subroom);
-     void markOutside(std::vector<double>& data, const std::shared_ptr<SubRoom>& subroom);
+     void postProcess(std::vector<double>& data, const SubRoom* subroom);
+     void markOutside(std::vector<double>& data, const SubRoom* subroom);
      double checkAngles(double a, double b);
 
-     void writeVTK(const std::shared_ptr<SubRoom>&, std::string filename);
-
+     void writeVTK(const SubRoom*, std::string filename);
 };
 
 #endif //JPSCORE_WAITINGPROBABILITY_H

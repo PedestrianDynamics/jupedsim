@@ -247,6 +247,15 @@ bool Simulation::InitArgs()
         return false;
     Log->Write("INFO:\t Init Operational Model done");
 
+    std::cout << std::endl;
+     for (const auto& it:_building->GetAllRooms()) {
+          auto&& room = it.second;
+          printf("%d\t%s\n", room->GetID(), room->GetCaption().c_str());
+
+          for (auto sub : room->GetAllSubRooms()){
+               std::cout << "sub: " << sub.second->GetSubRoomID() << std::endl;
+          }
+     }
     // Give the DirectionStrategy the chance to perform some initialization.
     // This should be done after the initialization of the operationalModel
     // because then, invalid pedestrians have been deleted and FindExit()
@@ -316,11 +325,31 @@ void Simulation::UpdateRoutesAndLocations()
 //        std::cout << "FinalDestination of [" << ped->GetID() << "] in (" << ped->GetRoomID() << ", " << ped->GetSubRoomID() << "/" <<  ped->GetSubRoomUID() << "): " << ped->GetFinalDestination() << std::endl;
 //    }
 
+//     for (const auto& it:_building->GetAllRooms()) {
+//          auto&& room = it.second;
+//          printf("%d\t%s\n", room->GetID(), room->GetCaption().c_str());
+//
+//          for (auto sub : room->GetAllSubRooms()){
+//               std::cout << "sub: " << sub.second->GetSubRoomID() << std::endl;
+//          }
+//     }
+
 #pragma omp parallel for shared(pedsToRemove, allRooms)
      for (signed int p = 0; p < allPeds.size(); ++p) {
           auto ped = allPeds[p];
+//          std::cout << "Ped room: " << ped->GetRoomID() << std::endl;
+//          std::cout << "Ped subroom: " << ped->GetSubRoomID() << std::endl;
+
           Room* room = _building->GetRoom(ped->GetRoomID());
           SubRoom* sub0 = room->GetSubRoom(ped->GetSubRoomID());
+
+//          for (auto sub : room->GetAllSubRooms()){
+//               std::cout << "sub: " << sub.second->GetSubRoomID() << std::endl;
+//          }
+//
+//          if(sub0 == nullptr)
+//               std::cout << "HH\n";
+//          else std::cout << "11 \n" << ped->GetSubRoomID() << std::endl ;
 
           //set the new room if needed
           if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
