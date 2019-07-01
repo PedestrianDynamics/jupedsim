@@ -132,70 +132,73 @@ bool IniFileParser::Parse(std::string iniFile)
           return false;
      }
 
-     //logfile
-     if (xMainNode->FirstChild("logfile")) {
-          _config->SetErrorLogFile(
-                    _config->GetProjectRootDir()+xMainNode->FirstChild("logfile")->FirstChild()->Value());
-          _config->SetLog(2);
-          Log->Write("INFO:\tlogfile <%s>", _config->GetErrorLogFile().c_str());
-     }
+         //check the structure of inifile
+         if (xMainNode->FirstChild("header")) {
+                 //logfile
+                 TiXmlNode* xHeader = xMainNode->FirstChild("header");
+                 if (xHeader->FirstChild("logfile")) {
+                         _config->SetErrorLogFile(
+                                 _config->GetProjectRootDir() + xHeader->FirstChild("logfile")->FirstChild()->Value());
+                         _config->SetLog(2);
+                         Log->Write("INFO:\tlogfile <%s>", _config->GetErrorLogFile().c_str());
+                 }
 
 
-     Log->Write("----\nJuPedSim - JPScore\n");
-     Log->Write("Current date   : %s %s", __DATE__, __TIME__);
-     Log->Write("Version        : %s", JPSCORE_VERSION);
-     Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
-     Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
-     Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
-     Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
+                 Log->Write("----\nJuPedSim - JPScore\n");
+                 Log->Write("Current date   : %s %s", __DATE__, __TIME__);
+                 Log->Write("Version        : %s", JPSCORE_VERSION);
+                 Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
+                 Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
+                 Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
+                 Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
 
 
-     //seed
-     if (xMainNode->FirstChild("seed")) {
-          TiXmlNode* seedNode = xMainNode->FirstChild("seed")->FirstChild();
-          if (seedNode) {
-               const char* seedValue = seedNode->Value();
-               _config->SetSeed((unsigned int) atoi(seedValue));//strtol
-          }
-          else {
-               _config->SetSeed((unsigned int) time(NULL));
-          }
-     }
-     // srand(_config->GetSeed());
-     Log->Write("INFO:\trandom seed <%d>", _config->GetSeed());
+                 //seed
+                 if (xHeader->FirstChild("seed")) {
+                         TiXmlNode* seedNode = xHeader->FirstChild("seed")->FirstChild();
+                         if (seedNode) {
+                                 const char* seedValue = seedNode->Value();
+                                 _config->SetSeed((unsigned int)atoi(seedValue));//strtol
+                         }
+                         else {
+                                 _config->SetSeed((unsigned int)time(NULL));
+                         }
+                 }
+                 // srand(_config->GetSeed());
+                 Log->Write("INFO:\trandom seed <%d>", _config->GetSeed());
 
-     // max simulation time
-     if (xMainNode->FirstChild("max_sim_time")) {
-          const char* tmax =
-                    xMainNode->FirstChildElement("max_sim_time")->FirstChild()->Value();
-          _config->SetTmax(atof(tmax));
-          Log->Write("INFO: \tMaximal simulation time <%.2f> seconds", _config->GetTmax());
-     }
+                 // max simulation time
+                 if (xHeader->FirstChild("max_sim_time")) {
+                         const char* tmax =
+                                 xHeader->FirstChildElement("max_sim_time")->FirstChild()->Value();
+                         _config->SetTmax(atof(tmax));
+                         Log->Write("INFO: \tMaximal simulation time <%.2f> seconds", _config->GetTmax());
+                 }
 
-     // Progressbar
-     if (xMainNode->FirstChild("progressbar")) {
-          _config->SetPRB(true);
-          Log->Write("INFO: \tUse Progressbar");
-     }
+                 // Progressbar
+                 if (xHeader->FirstChild("progressbar")) {
+                         _config->SetPRB(true);
+                         Log->Write("INFO: \tUse Progressbar");
+                 }
 
-     // geometry file name
-     if (xMainNode->FirstChild("geometry")) {
-          std::string filename = xMainNode->FirstChild("geometry")->FirstChild()->Value();
-          _config->SetGeometryFile(filename);
-          Log->Write("INFO: \tgeometry <%s>", filename.c_str());
-     }
+                 // geometry file name
+                 if (xHeader->FirstChild("geometry")) {
+                         std::string filename = xHeader->FirstChild("geometry")->FirstChild()->Value();
+                         _config->SetGeometryFile(filename);
+                         Log->Write("INFO: \tgeometry <%s>", filename.c_str());
+                 }
 
 
-     //max CPU
-     int max_threads =  1;
+                 //max CPU
+                 int max_threads = 1;
 #ifdef _OPENMP
-     max_threads = omp_get_max_threads();
+                 max_threads = omp_get_max_threads();
 #endif
-     if (xMainNode->FirstChild("num_threads")) {
-          TiXmlNode* numthreads = xMainNode->FirstChild("num_threads")->FirstChild();
-          if (numthreads) {
+                 if (xHeader->FirstChild("num_threads")) {
+                         TiXmlNode* numthreads = xHeader->FirstChild("num_threads")->FirstChild();
+                         if (numthreads) {
 #ifdef _OPENMP
-                omp_set_num_threads(xmltoi(numthreads->Value()));
+                                 omp_set_num_threads(xmltoi(numthreads->Value()));
 #endif
           }
      }
