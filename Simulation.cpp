@@ -152,18 +152,31 @@ bool Simulation::InitArgs()
     }
 
     if (!_config->GetTrajectoriesFile().empty()) {
+         fs::path p(_config->GetTrajectoriesFile());
+         fs::path curr_abs_path = fs::current_path();
+         fs::path rel_path = _config->GetTrajectoriesFile();
+         fs::path combined = (curr_abs_path /= rel_path);
+         std::string traj = combined.string();
+         _config->SetTrajectoriesFile(combined);
+         if(!fs::exists(traj))
+              fs::create_directories(combined.parent_path());
+
+
         switch (_config->GetFileFormat()) {
         case FORMAT_XML_PLAIN: {
             OutputHandler* tofile = new FileHandler(
-                    _config->GetTrajectoriesFile().c_str());
+                    traj.c_str());
             Trajectories* output = new TrajectoriesJPSV05();
             output->SetOutputHandler(tofile);
             _iod->AddIO(output);
             break;
         }
         case FORMAT_PLAIN: {
+
+
+
             OutputHandler* file = new FileHandler(
-                    _config->GetTrajectoriesFile().c_str());
+                 traj.c_str());
             outputTXT = new TrajectoriesFLAT();
             outputTXT->SetOutputHandler(file);
             _iod->AddIO(outputTXT);
@@ -172,7 +185,7 @@ bool Simulation::InitArgs()
         case FORMAT_VTK: {
             Log->Write("INFO: \tFormat vtk not yet supported\n");
             OutputHandler* file = new FileHandler(
-                    (_config->GetTrajectoriesFile()+".vtk").c_str());
+                    (traj+".vtk").c_str());
             Trajectories* output = new TrajectoriesVTK();
             output->SetOutputHandler(file);
             _iod->AddIO(output);
@@ -453,12 +466,14 @@ void Simulation::PrintStatistics(double simTime)
                     goal->GetID(), goal->GetDoorUsage(),
                     goal->GetLastPassingTime());
 
-            string statsfile = "flow_exit_id_"+to_string(goal->GetID())+".txt";
+            fs::path p(_config->GetOriginalTrajectoriesFile());
+
+            string statsfile = "flow_exit_id_"+to_string(goal->GetID())+"_"+p.stem().string()+".txt";
             if(goal->GetOutflowRate() <  (std::numeric_limits<double>::max)())
             {
                  char tmp[50];
-                 sprintf(tmp, "%.2f", goal->GetOutflowRate());
-                 statsfile = "flow_exit_id_"+to_string(goal->GetID())+"_rate_"+tmp+".txt";
+                 sprintf(tmp, "%.2f_", goal->GetOutflowRate());
+                 statsfile = "flow_exit_id_"+to_string(goal->GetID())+"_rate_"+tmp+p.stem().string()+".txt";
             }
             Log->Write("More Information in the file: %s", statsfile.c_str());
             {
@@ -708,6 +723,7 @@ bool Simulation::WriteTrajectories(std::string trajectoryName)
       if(_config-> GetFileFormat() == FORMAT_PLAIN)
       {
             fs::path p = _config->GetTrajectoriesFile();
+            fs::path parent = p.parent_path();
             int sf = fs::file_size(p);
             if(sf>_maxFileSize*1024*1024)
             {
@@ -715,7 +731,8 @@ bool Simulation::WriteTrajectories(std::string trajectoryName)
                   this->incrementCountTraj();
                   char tmp_traj_name[100];
                   sprintf(tmp_traj_name,"%s_%.4d_%s", trajectoryName.c_str(), _countTraj, extention.c_str());
-                  _config->SetTrajectoriesFile(tmp_traj_name);
+                  fs::path abs_traj_name = parent/ fs::path(tmp_traj_name);
+                  _config->SetTrajectoriesFile(abs_traj_name.string());
                   Log->Write("INFO:\tNew trajectory file <%s>", tmp_traj_name);
                   OutputHandler* file = new FileHandler(_config->GetTrajectoriesFile().c_str());
                   outputTXT->SetOutputHandler(file);
@@ -769,7 +786,6 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
      std::cout << "enter with train " << trainType.c_str() << "\n";
      std::cout<< KBLU << "Enter correctGeometry: Building Has " << building->GetAllTransitions().size() << " Transitions\n" << RESET;
      std::cout << "room: " << room_id << " subroom_id " << subroom_id << "\n" ;
-
 
       if(mytrack.empty() || subroom == nullptr)
             return false;
@@ -985,7 +1001,6 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
       }
       _routingEngine->setNeedUpdate(true);
      return true;
-
 }
 void Simulation::RunFooter()
 {
