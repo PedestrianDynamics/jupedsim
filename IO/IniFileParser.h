@@ -44,6 +44,8 @@ public:
      bool Parse(std::string iniFile);
 
 private:
+     bool ParseHeader(TiXmlNode* xHeader);
+
      bool ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMain);
 
      bool ParseKrauszModel(TiXmlElement* xKrausz, TiXmlElement* xMain);
