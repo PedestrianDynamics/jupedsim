@@ -25,31 +25,41 @@ This is a list of some works that contributed to JuPedSim or used it to
 produce results.
 
 ## Theses
-- Benjamin Schröder
+- Hein, Ben
+  [Agent-based modelling for crowding and queuing in front of bottlenecks]
+  Master Thesis, University of Wuppertal, 2019
+
+- Andresen, Erik
+  [Wayfinding and Perception Abilities for Pedestrian Simulations](http://juser.fz-juelich.de/record/859864/files/IAS_Series_38.pdf)
+  PhD, University of Wuppertal, 2018
+
+- Zhang, Cheng
+  [Simulation der Räumung einer Schule mit JuPedSim - Einflussfaktoren auf die Räumungszeit]
+  Bachelor Thesis, University of Wuppertal, 2018
+
+- Schröder, Benjamin
   [Multivariate Methods for Life Safety Analysis in Case of Fire](http://juser.fz-juelich.de/record/838011)
-  PhD Wuppertal University, 2017
+  PhD, University of Wuppertal, 2017
 
 - Rüping, Fabian
    "Computersimulation einer Schulevakuierung - Reproduzierbarkeit von Evakuierungszeiten und Fundamentaldiagrammen auf Treppen"
-   Bachlor thesis, Wuppertal University, 2016
+   Bachelor thesis, University of Wuppertal, 2016
    [Talk](https://fz-juelich.sciebo.de/index.php/s/XuaUZU1CsbpQ4d9)
    [Thesis](https://fz-juelich.sciebo.de/index.php/s/AHaUuNaEjDCs4HC)
 
 -  Axnich, Robert
   "Parameterstudie zur Evakuierung einer unterirdischen Personenverkehrsanlage mit dem Jülich Pedestrian Simulator"
-  Master thesis, Wuppertal University, 2016
+  Master thesis, University of Wuppertal, 2016
   Thesis:
 
 - Hein, Ben
    "Sensitivity analysis of a perception-based route choice algorithm for a continuous evacuation model"
-   Bachlor thesis, Cologne University, 2016
-   [Talk](https://fz-juelich.sciebo.de/index.php/s/a3yxiC4nHGYL4lC)
+   Bachelor thesis, TH Köln, 2016
    [Thesis](https://fz-juelich.sciebo.de/index.php/s/If9iq6S8HI5I9Qh)
 
 - Osterkamp, Maximilian
-   "Simulation der Räumung einer unterirdischen Personenverkehrsanlage mit dem Jülich Pedestrian Simulator"
-   Bachlor thesis, Wuppertal University, 2015
-   [Thesis](https://fz-juelich.sciebo.de/index.php/s/yn3akbFBhZyDkPA)
+   "Simulation der Räumung einer unterirdischen Personenverkehrsanlage mit dem Jülich Pedestrian Simulator"
+   Bachlor thesis, University of Wuppertal, 2015
 
 - Graf, Arne
     "Automated Routing in Pedestrian Dynamics"
