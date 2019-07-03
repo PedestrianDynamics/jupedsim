@@ -32,6 +32,8 @@ navbar-links:
     - JuPedSim: "http://jupedsim.org"
     - Inifile: "2016-11-01-inifile"
     - Geometry: "2016-11-02-geometry"
+    - Events: "2019-07-03-events"
+    - Schedule: "2019-07-03-schedule"
     - Sources: "2019-04-12-sources"
     - Goals: "2019-04-12-goals"
     - Traffic: "2019-04-12-traffic"
