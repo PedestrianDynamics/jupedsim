@@ -25,7 +25,6 @@ configure-linux:
   script:
     - mkdir -p build
     - cd build
-    - which git
     - cmake -DCMAKE_BUILD_TYPE=Debug  ..
     - echo "configure | ${CI_PROJECT_DIR}"
   stage: configure

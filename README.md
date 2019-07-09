@@ -2,7 +2,7 @@
 
 `JuPedSim` is an open source framework for simulation, analyzing and visualizing pedestrian dynamics. It consists of four modules which are loosely coupled and can be used independently at the moment. For more information, please visit the [JuPedSim website](https://www.jupedsim.org).
 
-`JPSreport` is a tool for analyzing the trajectories of pedestrians. It implements different measurement methods to analyze pedestrian movement in different aspects and scales.
+`JPSreport` is a tool for analyzing the trajectories of pedestrians. It implements different measurement methods to analyze pedestrian movement in different aspects and scales.  
 
 Here are some useful links:
 

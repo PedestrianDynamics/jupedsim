@@ -1,8 +1,8 @@
 /**
- * \file        Method_D.h
- * \date        Oct 10, 2014
- * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum Juelich GmbH. All rights reserved.
+ * \file        Method_I.h
+ * \date        Feb 07, 201
+ * \version     v0.8
+ * \copyright   <2009-2019> Forschungszentrum Juelich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -25,8 +25,8 @@
  *
  **/
 
-#ifndef METHOD_D_H_
-#define METHOD_D_H_
+#ifndef Method_I_H_
+#define Method_I_H_
 
 #include "PedData.h"
 #include "../Analysis.h"
@@ -39,11 +39,11 @@
 #define offset 200
 
 
-class Method_D
+class Method_I
 {
 public:
-     Method_D();
-     virtual ~Method_D();
+     Method_I();
+     virtual ~Method_I();
      bool Process (const PedData& peddata,const fs::path& scriptsLocation, const double& zPos_measureArea);
      void SetCalculateIndividualFD(bool individualFD);
      void Setcutbycircle(double radius,int edges);
@@ -64,7 +64,7 @@ public:
 private:
      std::map<int , std::vector<int> > _peds_t;
      std::string _measureAreaId;
-     MeasurementArea_B* _areaForMethod_D;
+     MeasurementArea_B* _areaForMethod_I;
      fs::path _trajName;
      fs::path _projectRootDir;
      fs::path _outputLocation;
@@ -89,7 +89,7 @@ private:
      double _grid_size_X;      // the size of the grid
      double _grid_size_Y;
      float _fps;
-     bool OpenFileMethodD();
+     bool OpenFileMethodI();
      bool OpenFileIndividualFD();
      fs::path _geometryFileName;
      fs::path _trajectoryPath;
@@ -103,7 +103,8 @@ private:
      std::tuple<double,double> GetVoronoiDensityVelocity(const std::vector<polygon_2d>& polygon, const std::vector<double>& Velocity, const polygon_2d & measureArea);
      void GetProfiles(const std::string& frameId, const std::vector<polygon_2d>& polygons, const std::vector<double>& velocity);
      void OutputVoroGraph(const std::string & frameId,  std::vector<std::pair<polygon_2d, int> >& polygons, int numPedsInFrame,const std::vector<double>& VInFrame);
-     void GetIndividualFD(const std::vector<polygon_2d>& polygon, const std::vector<double>& Velocity, const std::vector<int>& Id, const polygon_2d& measureArea, const std::string& frid);
+     void GetIndividualFD(const std::vector<polygon_2d>& polygon, const std::vector<double>& Velocity, const std::vector<int>& Id, const std::string& frid);
+     void GetIndividualFD(const std::vector<polygon_2d>& polygon, const std::vector<double>& Velocity, const std::vector<int>& Id, const std::string& frid, std::vector<double>& XInFrame, std::vector<double>& YInFrame, std::vector<double>& ZInFrame);
      /**
       * Reduce the precision of the points to two digits
       * @param polygon
@@ -115,4 +116,4 @@ private:
      bool IsPointsOnOneLine(std::vector<double>& XInFrame, std::vector<double>& YInFrame);
 };
 
-#endif /* METHOD_D_H_ */
+#endif /* Method_I_H_ */

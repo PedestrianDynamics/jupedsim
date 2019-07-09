@@ -37,6 +37,7 @@
 #include "methods/Method_B.h"
 #include "methods/Method_C.h"
 #include "methods/Method_D.h"
+#include "methods/Method_I.h"
 #include "methods/PedData.h"
 
 #include <iostream>
@@ -58,7 +59,7 @@
 #endif
 
 
-
+using boost::geometry::dsv;
 using namespace std;
 OutputHandler* Log = new STDIOHandler();
 
@@ -118,6 +119,11 @@ std::string Analysis::GetFilename (const std::string& str)
 void Analysis::InitArgs(ArgumentParser* args)
 {
      string s = "Parameter:\n";
+     _building = new Building();
+     _building->LoadGeometry(args->GetGeometryFilename());
+     // create the polygons
+     _building->InitGeometry();
+     // _building->AddSurroundingRoom();
 
      if(args->GetIsMethodA()) {
           _DoesUseMethodA = true;
@@ -139,7 +145,7 @@ void Analysis::InitArgs(ArgumentParser* args)
           }
      }
 
-     if(args ->GetIsMethodC()) {
+     if(args->GetIsMethodC()) {
           _DoesUseMethodC = true;
           vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodC();
           for(unsigned int i=0; i<Measurement_Area_IDs.size(); i++)
@@ -149,7 +155,7 @@ void Analysis::InitArgs(ArgumentParser* args)
           _plotTimeseriesC=args->GetIsPlotTimeSeriesC();
      }
 
-     if(args ->GetIsMethodD()) {
+     if(args->GetIsMethodD()) {
           _DoesUseMethodD = true;
           vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodD();
           for(unsigned int i=0; i<Measurement_Area_IDs.size(); i++)
@@ -160,8 +166,27 @@ void Analysis::InitArgs(ArgumentParser* args)
           _StopFramesMethodD = args->GetStopFramesMethodD();
           _IndividualFDFlags = args->GetIndividualFDFlags();
           _plotTimeseriesD=args->GetIsPlotTimeSeriesD();
+          _geoPoly = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_D);
+     }
+     if(args->GetIsMethodI()) {
+          _DoesUseMethodI = true;
+          vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodI();
+          for(unsigned int i=0; i<Measurement_Area_IDs.size(); i++)
+          {
+               _areaForMethod_I.push_back(dynamic_cast<MeasurementArea_B*>( args->GetMeasurementArea(Measurement_Area_IDs[i])));
+          }
+          _StartFramesMethodI = args->GetStartFramesMethodI();
+          _StopFramesMethodI = args->GetStopFramesMethodI();
+          _IndividualFDFlags = args->GetIndividualFDFlags();
+          _plotTimeseriesI=args->GetIsPlotTimeSeriesI();
+          _geoPoly = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_I);
      }
 
+     if( _DoesUseMethodD &&  _DoesUseMethodI)
+     {
+          Log->Write("Warning:\t Using both method D and I is not safe!");
+          // because ReadGeomtry() may be called twice
+     }
      _deltaF = args->GetDelatT_Vins();
      _cutByCircle = args->GetIsCutByCircle();
      _getProfile = args->GetIsGetProfile();
@@ -173,7 +198,6 @@ void Analysis::InitArgs(ArgumentParser* args)
      _IgnoreBackwardMovement =args->GetIgnoreBackwardMovement();
      _grid_size_X = int(args->GetGridSizeX());
      _grid_size_Y = int(args->GetGridSizeY());
-     _geoPoly = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_D);
      _geometryFileName=args->GetGeometryFilename();
      _projectRootDir=args->GetProjectRootDir();
      _trajFormat=args->GetFileFormat();
@@ -186,12 +210,7 @@ void Analysis::InitArgs(ArgumentParser* args)
 
 std::map<int, polygon_2d> Analysis::ReadGeometry(const fs::path& geometryFile, const std::vector<MeasurementArea_B*>& areas)
 {
-
-     _building = new Building();
-     _building->LoadGeometry(geometryFile.string());
-     // create the polygons
-     _building->InitGeometry();
-
+     Log->Write("INFO:\tReadGeometry with %s", geometryFile.string().c_str());
      double geo_minX  = FLT_MAX;
      double geo_minY  = FLT_MAX;
      double geo_maxX  = -FLT_MAX;
@@ -208,10 +227,8 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const fs::path& geometryFile, c
                for (auto&& it_sub : it_room.second->GetAllSubRooms())
                {
                     SubRoom* subroom = it_sub.second.get();
-
                     point_2d point(0,0);
                     boost::geometry::centroid(area->_poly,point);
-
                     //check if the area is contained in the obstacle
                     if(subroom->IsInSubRoom(Point(point.x()/M2CM,point.y()/M2CM)))
                     {
@@ -232,7 +249,6 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const fs::path& geometryFile, c
                               geoPoly[area->_id].inners().resize(k++);
                               geoPoly[area->_id].inners().back();
                               model::ring<point_2d>& inner = geoPoly[area->_id].inners().back();
-
                               for(auto&& tmp_point:obst->GetPolygon())
                               {
                                    append(inner, make<point_2d>(tmp_point._x*M2CM, tmp_point._y*M2CM));
@@ -241,12 +257,12 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const fs::path& geometryFile, c
                          }
                     }
                }
-          }
+          }//room
 
           if(geoPoly.count(area->_id)==0)
           {
                Log->Write("ERROR: \t No polygon containing the measurement id [%d]", area->_id);
-               exit(1);
+               geoPoly[area->_id] = area->_poly;
           }
      }
 
@@ -254,9 +270,6 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const fs::path& geometryFile, c
      _highVertexY = geo_maxY;
      _lowVertexX = geo_minX;
      _lowVertexY = geo_minY;
-     // using boost::geometry::dsv;
-     // cout<<"INFO: \tGeometry polygon is:\t" << dsv(geoPoly[1])<<endl;
-
      return geoPoly;
 }
 
@@ -275,7 +288,7 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
      for(int frameNr = 0; frameNr < data.GetNumFrames(); frameNr++ )
      {
           vector<int> ids=_peds_t[frameNr];
-          vector<int> IdInFrame = data.GetIdInFrame(ids);
+          vector<int> IdInFrame = data.GetIdInFrame(frameNr, ids);
           vector<double> XInFrame = data.GetXInFrame(frameNr, ids);
           vector<double> YInFrame = data.GetYInFrame(frameNr, ids);
           for( unsigned int i=0;i<IdInFrame.size();i++)
@@ -441,6 +454,61 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
                }
           }
      }
+
+     if(_DoesUseMethodI) //method_I
+     {
+          if(_areaForMethod_I.empty())
+          {
+               Log->Write("ERROR: Method I selected with no measurement area!");
+               exit(EXIT_FAILURE);
+          }
+
+#pragma omp parallel for
+          for(long unsigned int i=0; i<_areaForMethod_I.size(); i++)
+          {
+               Method_I method_I;
+               method_I.SetStartFrame(_StartFramesMethodI[i]);
+               method_I.SetStopFrame(_StopFramesMethodI[i]);
+               method_I.SetCalculateIndividualFD(_IndividualFDFlags[i]);
+               method_I.SetGeometryPolygon(_geoPoly[_areaForMethod_I[i]->_id]);
+               method_I.SetGeometryFileName(_geometryFileName);
+               method_I.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
+               method_I.SetGridSize(_grid_size_X, _grid_size_Y);
+               method_I.SetOutputVoronoiCellData(_outputGraph);
+               method_I.SetPlotVoronoiGraph(_plotGraph);
+               method_I.SetPlotVoronoiIndex(_plotIndex);
+               method_I.SetDimensional(_isOneDimensional);
+               method_I.SetCalculateProfiles(_getProfile);
+               method_I.SetTrajectoriesLocation(path);
+               if(_cutByCircle)
+               {
+                    method_I.Setcutbycircle(_cutRadius, _circleEdges);
+               }
+               method_I.SetMeasurementArea(_areaForMethod_I[i]);
+               bool result_I = method_I.Process(data,_scriptsLocation, _areaForMethod_I[i]->_zPos);
+               if(result_I)
+               {
+                    Log->Write("INFO:\tSuccess with Method I using measurement area id %d!\n",_areaForMethod_I[i]->_id);
+                    std::cout << "INFO:\tSuccess with Method I using measurement area id "<< _areaForMethod_I[i]->_id << "\n";
+                    if(_plotTimeseriesI[i])
+                    {
+                         string parameters_Timeseries= " " +_scriptsLocation.string()+"/_Plot_timeseries_rho_v.py -p "+ _projectRootDir.string()+VORO_LOCATION + " -n "+filename.string()+
+                              " -f "+boost::lexical_cast<std::string>(data.GetFps());
+                         parameters_Timeseries = PYTHON + parameters_Timeseries;
+                         std::cout << parameters_Timeseries << "\n;";
+
+                         int res=system(parameters_Timeseries.c_str());
+                         Log->Write("INFO:\t time series result: %d ",res);
+                    }
+               }
+               else
+               {
+                    Log->Write("INFO:\tFailed with Method I using measurement area id %d!\n",_areaForMethod_I[i]->_id);
+               }
+          }
+     }
+
+
      return 0;
 }
 

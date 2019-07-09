@@ -180,6 +180,7 @@ set(methods
   methods/Method_B.cpp
   methods/Method_C.cpp
   methods/Method_D.cpp
+  methods/Method_I.cpp
   )
 set(source_files
   Analysis.cpp
@@ -211,6 +212,7 @@ set (  header_files
   methods/Method_B.h
   methods/Method_C.h
   methods/Method_D.h
+  methods/Method_I.h
   IO/OutputHandler.h
   general/ArgumentParser.h
   general/Macros.h
@@ -310,14 +312,14 @@ endif()
 #message (STATUS "PSAPI: ${PSAPI}")
 #endif()
 
-add_library ( geometrycore STATIC ${source_files} )
+add_library ( geometrycore SHARED ${source_files}  ${methods})
 set_property(TARGET geometrycore PROPERTY CXX_STANDARD 17)
 set_property(TARGET geometrycore PROPERTY CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 target_link_libraries(geometrycore  stdc++fs)
 
 add_executable(
-        jpsreport main.cpp ${methods}
+        jpsreport main.cpp
 )
 
 set_property(TARGET jpsreport PROPERTY CXX_STANDARD 17)
@@ -381,12 +383,6 @@ if(BUILD_TESTING)
   )
 
 
-  foreach (test_src ${test_files})
-    GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
-    add_executable( ${test} ${test_src})
-    target_link_libraries (${test} geometrycore)
-    add_test(NAME ${test} COMMAND ${test})
-  endforeach(test_src ${test_files})
 
 
 #  set(Python_ADDITIONAL_VERSIONS 3.0)

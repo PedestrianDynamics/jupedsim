@@ -67,15 +67,17 @@ public:
      ub::matrix<double> GetXCor() const;
      ub::matrix<double> GetYCor() const;
      ub::matrix<double> GetZCor() const;
+     ub::matrix<double> GetId() const;
      int* GetFirstFrame() const;
      int* GetLastFrame() const;
-     std::vector<int> GetIdInFrame(const std::vector<int>& ids) const;
+     std::vector<int> GetIdInFrame(int frame, const std::vector<int>& ids) const;
      std::vector<int> GetIdInFrame(int frame, const std::vector<int>& ids, double zPos) const;
      std::vector<double> GetXInFrame(int frame, const std::vector<int>& ids, double zPos) const;
      std::vector<double> GetYInFrame(int frame, const std::vector<int>& ids, double zPos) const;
      std::vector<double> GetXInFrame(int frame, const std::vector<int>& ids) const;
      std::vector<double> GetYInFrame(int frame, const std::vector<int>& ids) const;
      std::vector<double> GetZInFrame(int frame, const std::vector<int>& ids) const;
+     std::vector<double> GetZInFrame(int frame, const std::vector<int>& ids, double zPos) const;
      std::vector<double> GetVInFrame(int frame, const std::vector<int>& ids, double zPos) const;
      bool ReadData(const fs::path& projectRootDir,const fs::path& outputDir, const fs::path& path, const fs::path& filename, const FileFormat& _trajformat, int deltaF, std::string vComponent, const bool IgnoreBackwardMovement);
      fs::path GetOutputLocation() const;
@@ -94,6 +96,7 @@ private:
      fs::path _outputLocation="";
      int _minFrame=0;
      int _minID=1;
+     int _maxID=0;
      int _numFrames=0;  // total number of frames
      int _numPeds=0; // total number of pedestrians
      float _fps=16;
@@ -108,6 +111,7 @@ private:
      ub::matrix<double> _xCor;
      ub::matrix<double> _yCor;
      ub::matrix<double> _zCor;
+     ub::matrix<double> _id;
      ub::matrix<std::string> _vComp;
 
 };

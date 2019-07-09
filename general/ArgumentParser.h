@@ -69,6 +69,7 @@ private:
      bool _isMethodB;
      bool _isMethodC;
      bool _isMethodD;
+     bool _isMethodI;
      bool _isCutByCircle;
      double _cutRadius;
      int _circleEdges;
@@ -88,15 +89,19 @@ private:
      std::vector<int> _areaIDforMethodB;
      std::vector<int> _areaIDforMethodC;
      std::vector<int> _areaIDforMethodD;
+     std::vector<int> _areaIDforMethodI;
      float _grid_size_X;
      float _grid_size_Y;
      int _log;
      std::vector<int> _start_frames_MethodD;
      std::vector<int> _stop_frames_MethodD;
+     std::vector<int> _start_frames_MethodI;
+     std::vector<int> _stop_frames_MethodI;
      std::vector<bool> _individual_FD_flags;
      std::vector<bool> _isPlotTimeSeriesA;
      std::vector<bool> _isPlotTimeSeriesC;
      std::vector<bool> _isPlotTimeSeriesD;
+     std::vector<bool> _isPlotTimeSeriesI;
      std::vector<int> _timeIntervalA;
 
 
@@ -131,12 +136,16 @@ public:
      bool GetIsMethodB() const;
      bool GetIsMethodC() const;
      bool GetIsMethodD() const;
+     bool GetIsMethodI() const;
      std::vector<int> GetAreaIDforMethodA() const;
      std::vector<int> GetAreaIDforMethodB() const;
      std::vector<int> GetAreaIDforMethodC() const;
      std::vector<int> GetAreaIDforMethodD() const;
+     std::vector<int> GetAreaIDforMethodI() const;
      std::vector<int> GetStartFramesMethodD() const;
      std::vector<int> GetStopFramesMethodD() const;
+     std::vector<int> GetStartFramesMethodI() const;
+     std::vector<int> GetStopFramesMethodI() const;
      std::vector<bool> GetIndividualFDFlags() const;
      bool GetIsCutByCircle() const;
      double GetCutRadius() const;
@@ -147,6 +156,7 @@ public:
      std::vector<bool> GetIsPlotTimeSeriesA() const;
      std::vector<bool> GetIsPlotTimeSeriesC() const;
      std::vector<bool> GetIsPlotTimeSeriesD() const;
+     std::vector<bool> GetIsPlotTimeSeriesI() const;
      bool GetIsOneDimensional() const;
      bool GetIsIndividualFD() const;
      polygon_2d GetAreaIndividualFD() const;
