@@ -8,7 +8,7 @@ Here are some useful links:
 
 * [Manual](http://jupedsim.github.io/jpsreport/).
 * Please open a new [issue](https://github.com/JuPedSim/jpsreport/issues) if you encouter problems or have found a bug in the code.
-* [Contributing Guidelines](https://github.com/JuPedSim/jpsreport/blob/develop/CONTRIBUTING.md) to the JuPedSim/JPSreport project.
+* [Contributing Guidelines](https://github.com/JuPedSim/jpsreport/blob/develop/CONTRIBUTING.md) to the JuPedSim/jpsreport project.
 
 Pull requests welcome!
 

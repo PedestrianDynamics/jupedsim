@@ -1,6 +1,6 @@
 # Contributing
 
-This page provides a starting point for getting involved with the JuPedSim/JPSreport project.
+This page provides a starting point for getting involved with the JuPedSim/jpsreport project.
 
 There are several ways to contribute to a project with Git. These are guidelines, not laws. But following this workflow adds a level of quality assurance to the project. Notes describing how to perform specific tasks using Git are given here.
 
@@ -102,7 +102,7 @@ $ git push origin develop
 
 ## Making changes
 
-When you're working on the JuPedSim/JPSreport project, you're going to have a bunch of different features or ideas in progress at any given time – some of which are ready to go, and others which are not. Branching exists to help you manage this workflow. When you create a branch in your project, you're creating an environment where you can try out new ideas. Changes you make on a branch don't affect the main develop branch, so you're free to experiment and commit changes, safe in the knowledge that your branch won't be merged until it's ready to be reviewed by someone you're collaborating with.
+When you're working on the JuPedSim/jpsreport project, you're going to have a bunch of different features or ideas in progress at any given time – some of which are ready to go, and others which are not. Branching exists to help you manage this workflow. When you create a branch in your project, you're creating an environment where you can try out new ideas. Changes you make on a branch don't affect the main develop branch, so you're free to experiment and commit changes, safe in the knowledge that your branch won't be merged until it's ready to be reviewed by someone you're collaborating with.
 
 The next step is to "stage" your changes for commit and then to "commit" the changes to your local repo.
 
