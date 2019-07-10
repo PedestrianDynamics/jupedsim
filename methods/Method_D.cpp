@@ -140,6 +140,7 @@ bool Method_D::Process (const PedData& peddata,const fs::path& scriptsLocation, 
           vector<int> IdInFrame = peddata.GetIdInFrame(frameNr, ids, zPos_measureArea);
           vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids, zPos_measureArea);
           vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids, zPos_measureArea);
+          vector<double> ZInFrame = peddata.GetZInFrame(frameNr, ids, zPos_measureArea);
           vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
           //vector int to_remove
           //------------------------------Remove peds outside geometry------------------------------------------
@@ -151,6 +152,7 @@ bool Method_D::Process (const PedData& peddata,const fs::path& scriptsLocation, 
                     IdInFrame.erase(IdInFrame.begin() + i);
                     XInFrame.erase(XInFrame.begin() + i);
                     YInFrame.erase(YInFrame.begin() + i);
+                    ZInFrame.erase(ZInFrame.begin() + i);
                     VInFrame.erase(VInFrame.begin() + i);
                     i--;
                }
@@ -189,7 +191,8 @@ bool Method_D::Process (const PedData& peddata,const fs::path& scriptsLocation, 
                          {
                               if(!_isOneDimensional)
                               {
-                                   GetIndividualFD(polygons,VInFrame, IdInFrame, _areaForMethod_D->_poly, str_frid); // TODO polygons_id
+                                   // GetIndividualFD(polygons,VInFrame, IdInFrame, _areaForMethod_D->_poly, str_frid); // TODO polygons_id
+                                  GetIndividualFD(polygons,VInFrame, IdInFrame, _areaForMethod_D->_poly, str_frid, XInFrame, YInFrame, ZInFrame);
                               }
                          }
                          if(_getProfile)
@@ -257,7 +260,7 @@ bool Method_D::OpenFileIndividualFD()
 {
      fs::path trajFileName("_id_"+_measureAreaId+".dat");
      fs::path indFDPath("Fundamental_Diagram");
-     indFDPath = _outputLocation / indFDPath / "IndividualFD" / (_trajName.string() + trajFileName.string());
+     indFDPath = _outputLocation / indFDPath / "IndividualFD" / ("IFD_D_" +_trajName.string() + trajFileName.string());
      string Individualfundment=indFDPath.string();
      if((_fIndividualFD=Analysis::CreateFile(Individualfundment))==nullptr)
      {
@@ -268,11 +271,11 @@ bool Method_D::OpenFileIndividualFD()
      {
           if(_isOneDimensional)
           {
-               fprintf(_fIndividualFD,"#framerate (fps):\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-1)) \t   Individual velocity(m/s)	\t	Headway(m)\n",_fps);
+               fprintf(_fIndividualFD,"#framerate (fps):\t%.2f\n\n#Frame\tPersID\tIndividual density(m^(-1))\tIndividual velocity(m/s)\tHeadway(m)\n",_fps);
           }
           else
           {
-               fprintf(_fIndividualFD,"#framerate (fps):\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-2)) \t   Individual velocity(m/s)  \t Voronoi Polygon  \t Intersection Polygon\n",_fps);
+               fprintf(_fIndividualFD,"#framerate (fps):\t%.2f\n\n#Frame\tPersID\tx/m\ty/m\tz/m\tIndividual density(m^(-2))\tIndividual velocity(m/s)\tVoronoi Polygon\tIntersection Polygon\n",_fps);
           }
           return true;
      }
@@ -561,10 +564,11 @@ void Method_D::OutputVoroGraph(const string & frameId,  std::vector<std::pair<po
     return polygon_str;
 }*/
 
-void Method_D::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const vector<int>& Id, const polygon_2d& measureArea, const string& frid)
+void Method_D::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const vector<int>& Id, const polygon_2d& measureArea, const string& frid, vector<double>& XInFrame, vector<double>& YInFrame, vector<double>& ZInFrame)
 {
      double uniquedensity=0;
      double uniquevelocity=0;
+     double x, y, z;
      int uniqueId=0;
      int temp=0;
      for (const auto & polygon_iterator:polygon)
@@ -581,9 +585,15 @@ void Method_D::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<d
               uniquedensity=1.0/(area(polygon_iterator)*CMtoM*CMtoM);
               uniquevelocity=Velocity[temp];
               uniqueId=Id[temp];
-              fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\t%s\t%s\n",
+              x = XInFrame[temp]*CMtoM;
+              y = YInFrame[temp]*CMtoM;
+              z = ZInFrame[temp]*CMtoM;
+              fprintf(_fIndividualFD,"%s\t %d\t %.4f\t %.4f\t %.4f\t %.4f\t %.4f\t%s\t%s\n",
                       frid.c_str(),
                       uniqueId,
+                      x,
+                      y,
+                      z,
                       uniquedensity,
                       uniquevelocity,
                       polygon_str.c_str(),
