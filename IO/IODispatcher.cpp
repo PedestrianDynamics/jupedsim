@@ -118,7 +118,7 @@ string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
      return string(tmp);
 }
 
-void TrajectoriesJPSV04::WriteHeader(long nPeds, double fps, Building* building, int seed, int count)
+void TrajectoriesJPSV04::WriteHeader(long nPeds, double fps, Building* building, int seed, int /*count*/)
 {
      building->GetCaption();
      string tmp;
@@ -355,6 +355,7 @@ std::string getSourceFileName(const std::string & GetProjectFile)
         }
         return ret;
     }
+    return ret;
 }
 
 std::string getEventFileName(const std::string & GetProjectFile)
@@ -543,19 +544,19 @@ void TrajectoriesFLAT::WriteFooter()
 {
 
 }
-void TrajectoriesFLAT::WriteSources(const std::vector<std::shared_ptr<AgentsSource> > sources)
+void TrajectoriesFLAT::WriteSources(const std::vector<std::shared_ptr<AgentsSource> > /*sources*/)
 {
 
 }
-void TrajectoriesVTK::WriteSources(const std::vector<std::shared_ptr<AgentsSource> > sources)
+void TrajectoriesVTK::WriteSources(const std::vector<std::shared_ptr<AgentsSource> > /*sources*/)
 {
 
 }
-void TrajectoriesJPSV06::WriteSources(const std::vector<std::shared_ptr<AgentsSource> > sources)
+void TrajectoriesJPSV06::WriteSources(const std::vector<std::shared_ptr<AgentsSource> > /*sources*/)
 {
 
 }
-void TrajectoriesXML_MESH::WriteSources(const std::vector<std::shared_ptr<AgentsSource> > sources)
+void TrajectoriesXML_MESH::WriteSources(const std::vector<std::shared_ptr<AgentsSource> > /*sources*/)
 {
 
 }
@@ -639,7 +640,7 @@ void TrajectoriesVTK::WriteFooter()
 }
 
 
-void TrajectoriesJPSV06::WriteHeader(long nPeds, double fps, Building* building, int seed, int count)
+void TrajectoriesJPSV06::WriteHeader(long nPeds, double fps, Building* building, int seed, int /*count*/)
 {
      building->GetCaption();
      string tmp;
@@ -795,7 +796,7 @@ void TrajectoriesXML_MESH::WriteGeometry(Building* building)
 }
 
 
-void TrajectoriesJPSV05::WriteHeader(long nPeds, double fps, Building* building, int seed, int count)
+void TrajectoriesJPSV05::WriteHeader(long nPeds, double fps, Building* building, int seed, int /*count*/)
 {
      building->GetCaption();
      string tmp;

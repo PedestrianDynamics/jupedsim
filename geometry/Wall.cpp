@@ -42,11 +42,6 @@ Wall::Wall(const Point& p1, const Point& p2, const std::string& type) : Line(p1,
 {
 }
 
-Wall::Wall(const Wall& orig) : Line(orig)
-{
-     _type=orig.GetType();
-}
-
 void Wall::WriteToErrorLog() const
 {
      char tmp[CLENGTH];

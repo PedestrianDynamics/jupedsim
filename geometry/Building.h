@@ -318,7 +318,7 @@ public:
 private:
 
      bool InitInsideGoals();
-     bool InitPlatforms();
+     void InitPlatforms();
      void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);
      /** @defgroup auto-correct-geometry
       * functions used to auto-correct the geometry.

@@ -86,7 +86,7 @@ bool GoalManager::CheckInsideWaitingArea(Pedestrian* ped, int goalID)
      Goal* goal = _allGoals[goalID];
 
      if (goal!=nullptr){
-          if (WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)) {
+          if (dynamic_cast<WaitingArea*>(goal)) {
                return goal->IsInsideGoal(ped->GetPos());
           }
      }

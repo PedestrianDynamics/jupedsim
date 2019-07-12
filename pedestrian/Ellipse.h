@@ -50,9 +50,7 @@ private:
 
 
 public:
-
      JEllipse();
-     JEllipse(const JEllipse& orig);
 
 
      void SetV(const Point& v);

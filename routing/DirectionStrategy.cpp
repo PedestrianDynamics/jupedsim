@@ -40,8 +40,6 @@
 //#include <ctime>
 #include <chrono>
 
-#define UNUSED(x) [&x]{}()  // c++11 silence warnings
-
 DirectionStrategy::DirectionStrategy()
 {
 }
@@ -51,26 +49,23 @@ DirectionStrategy::~DirectionStrategy()
 {
 }
 
-double DirectionStrategy::GetDistance2Wall(Pedestrian* ped) const
+double DirectionStrategy::GetDistance2Wall(Pedestrian* /*ped*/) const
 {
      return -1.;
 }
-double DirectionStrategy::GetDistance2Target(Pedestrian* ped, int UID)
+double DirectionStrategy::GetDistance2Target(Pedestrian* /*ped*/, int /*UID*/)
 {
      return -1.;
 }
 
 /// 1
-Point DirectionMiddlePoint::GetTarget(Room* room, Pedestrian* ped) const
+Point DirectionMiddlePoint::GetTarget(Room* /*room*/, Pedestrian* ped) const
 {
-    UNUSED(room); // suppress the unused warning
     return (ped->GetExitLine()->GetPoint1() + ped->GetExitLine()->GetPoint2())*0.5;
 }
 /// 2
-Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) const
+Point DirectionMinSeperationShorterLine::GetTarget(Room* /*room*/, Pedestrian* ped) const
 {
-    UNUSED(room); // suppress the unused warning
-
      double d = ped->GetEllipse().GetBmin() + 0.1 ; // shoulder//0.5;
      const Point& p1 = ped->GetExitLine()->GetPoint1();
      const Point& p2 = ped->GetExitLine()->GetPoint2();
@@ -98,10 +93,8 @@ Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) 
 
 }
 /// 3
-Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
+Point DirectionInRangeBottleneck::GetTarget(Room* /*room*/, Pedestrian* ped) const
 {
-   UNUSED(room); // suppress the unused warning
-
     const Point& p1 = ped->GetExitLine()->GetPoint1();
     const Point& p2 = ped->GetExitLine()->GetPoint2();
     Line ExitLine = Line(p1, p2, 0);
@@ -288,9 +281,8 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
 }
 
 /// 6
-Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
+Point DirectionFloorfield::GetTarget(Room* /*room*/, Pedestrian* ped) const
 {
-     UNUSED(room);
 #if DEBUG
 
     if (1) {
@@ -368,7 +360,6 @@ Point DirectionLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 //     if (floorfield->getCostToDestination(ped->GetExitIndex(), ped->GetPos()) < 1.0) {
 //          p = p * floorfield->getCostToDestination(ped->GetExitIndex(), ped->GetPos());
 //     }
-     Point P = p + ped->GetPos();
      return (p + ped->GetPos());
 
 #if DEBUG
@@ -574,7 +565,7 @@ DirectionSubLocalFloorfield::~DirectionSubLocalFloorfield() {
 }
 
 ///10
-Point DirectionSubLocalFloorfieldTrips::GetTarget(Room* room, Pedestrian* ped) const
+Point DirectionSubLocalFloorfieldTrips::GetTarget(Room* /*room*/, Pedestrian* ped) const
 {
      Goal* goal = ped->GetBuilding()->GetFinalGoal(ped->GetFinalDestination());
      // Pedestrian is inside a waiting area
@@ -708,7 +699,7 @@ DirectionSubLocalFloorfieldTrips::~DirectionSubLocalFloorfieldTrips() {
 }
 
 ///11
-Point DirectionSubLocalFloorfieldTripsVoronoi::GetTarget(Room* room, Pedestrian* ped) const
+Point DirectionSubLocalFloorfieldTripsVoronoi::GetTarget(Room* /*room*/, Pedestrian* ped) const
 {
      Goal* goal = ped->GetBuilding()->GetFinalGoal(ped->GetFinalDestination());
      // Pedestrian is inside a waiting area
@@ -840,7 +831,7 @@ DirectionSubLocalFloorfieldTripsVoronoi::~DirectionSubLocalFloorfieldTripsVorono
 }
 
 // 12
-Point DirectionTrain::GetTarget(Room* room, Pedestrian* ped) const
+Point DirectionTrain::GetTarget(Room* /*room*/, Pedestrian* ped) const
 {
 
      Point p1 = ped->GetExitLine()->GetPoint1();

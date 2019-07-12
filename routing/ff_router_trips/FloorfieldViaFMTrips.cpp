@@ -357,7 +357,6 @@ void FloorfieldViaFMTrips::createMapEntryInLineToGoalID(const int goalID, bool i
             //find closest door and add to cheatmap "goalToLineUID" map
 
             const std::map<int, Transition*>& transitions = _building->GetAllTransitions();
-            const std::map<int, Crossing*>& crossings = _building->GetAllCrossings();
 
             int UID_of_MIN = -1;
             int UID_of_MIN2 = -1;
@@ -1664,7 +1663,7 @@ void FloorfieldViaFMTrips::writeGoalFF(const std::string& filename, std::vector<
     file.close();
 }
 
-SubRoom* FloorfieldViaFMTrips::isInside(const long int key) {
+SubRoom* FloorfieldViaFMTrips::isInside(const long int /*key*/) {
 //    Point probe = _grid->getPointFromKey(key);
 
 //    const std::map<int, std::shared_ptr<Room>>& roomMap = _building->GetAllRooms();

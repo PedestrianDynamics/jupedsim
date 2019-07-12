@@ -45,7 +45,7 @@ License along with VisiLibity.  If not, see <http://www.gnu.org/licenses/>.
 ///Hide helping functions in unnamed namespace (local to .C file).
 namespace
 {
-  
+
 }
 
 
@@ -60,7 +60,7 @@ namespace VisiLibity
       return lower_bound;
     double sample_point;
     double span = upper_bound - lower_bound;
-    sample_point = lower_bound 
+    sample_point = lower_bound
                    + span * static_cast<double>( std::rand() )
                    / static_cast<double>( RAND_MAX );
     return sample_point;
@@ -84,13 +84,13 @@ namespace VisiLibity
     //(1.0-theta)*line_segment_temp.second.  if theta is outside
     //the interval [0,1], then one of the Line_Segment's endpoints
     //must be closest to calling Point.
-    double theta = 
+    double theta =
       ( (line_segment_temp.second().x()-x())
 	*(line_segment_temp.second().x()
-	  -line_segment_temp.first().x()) 
+	  -line_segment_temp.first().x())
 	+ (line_segment_temp.second().y()-y())
 	*(line_segment_temp.second().y()
-	  -line_segment_temp.first().y()) ) 
+	  -line_segment_temp.first().y()) )
       / ( pow(line_segment_temp.second().x()
 	      -line_segment_temp.first().x(),2)
 	  + pow(line_segment_temp.second().y()
@@ -98,10 +98,10 @@ namespace VisiLibity
     //std::cout << "\E[1;37;40m" << "Theta is: " << theta << "\x1b[0m"
     //<< std::endl;
     if( (0.0<=theta) && (theta<=1.0) )
-      return theta*line_segment_temp.first() 
+      return theta*line_segment_temp.first()
 	+ (1.0-theta)*line_segment_temp.second();
     //Else pick closest endpoint.
-    if( distance(*this, line_segment_temp.first()) 
+    if( distance(*this, line_segment_temp.first())
 	< distance(*this, line_segment_temp.second()) )
       return line_segment_temp.first();
     return line_segment_temp.second();
@@ -132,7 +132,7 @@ namespace VisiLibity
 	    && polyline_temp.size() > 0 );
 
     Point running_projection = polyline_temp[0];
-    double running_min = distance(*this, running_projection);    
+    double running_min = distance(*this, running_projection);
     Point point_temp;
     for(unsigned i=0; i<=polyline_temp.size()-1; i++){
       point_temp = projection_onto( Line_Segment(polyline_temp[i],
@@ -148,7 +148,7 @@ namespace VisiLibity
 
   Point Point::projection_onto_vertices_of(const Polygon& polygon_temp) const
   {
-    assert(*this == *this 
+    assert(*this == *this
 	   && polygon_temp.vertices_.size() > 0 );
 
     Point running_projection = polygon_temp[0];
@@ -166,12 +166,12 @@ namespace VisiLibity
   Point Point::projection_onto_vertices_of(const Environment&
 					   environment_temp) const
   {
-    assert(*this == *this 
+    assert(*this == *this
 	   && environment_temp.n() > 0 );
 
-    Point running_projection 
+    Point running_projection
       = projection_onto_vertices_of(environment_temp.outer_boundary_);
-    double running_min = distance(*this, running_projection);   
+    double running_min = distance(*this, running_projection);
     Point point_temp;
     for(unsigned i=0; i<environment_temp.h(); i++){
       point_temp = projection_onto_vertices_of(environment_temp.holes_[i]);
@@ -190,7 +190,7 @@ namespace VisiLibity
 	    && polygon_temp.n() > 0 );
 
     Point running_projection = polygon_temp[0];
-    double running_min = distance(*this, running_projection);    
+    double running_min = distance(*this, running_projection);
     Point point_temp;
     for(unsigned i=0; i<=polygon_temp.n()-1; i++){
       point_temp = projection_onto( Line_Segment(polygon_temp[i],
@@ -210,7 +210,7 @@ namespace VisiLibity
     assert( *this == *this
 	    && environment_temp.n() > 0 );
 
-    Point running_projection 
+    Point running_projection
       = projection_onto_boundary_of(environment_temp.outer_boundary_);
     double running_min = distance(*this, running_projection);
     Point point_temp;
@@ -224,20 +224,20 @@ namespace VisiLibity
     return running_projection;
   }
 
-  
+
   bool Point::on_boundary_of(const Polygon& polygon_temp,
 			     double epsilon) const
   {
     assert( *this == *this
 	    && polygon_temp.vertices_.size() > 0 );
 
-    if( distance(*this, projection_onto_boundary_of(polygon_temp) ) 
+    if( distance(*this, projection_onto_boundary_of(polygon_temp) )
 	<= epsilon ){
       return true;
     }
     return false;
   }
- 
+
 
   bool Point::on_boundary_of(const Environment& environment_temp,
 			     double epsilon) const
@@ -245,12 +245,12 @@ namespace VisiLibity
     assert( *this == *this
 	    && environment_temp.outer_boundary_.n() > 0 );
 
-    if( distance(*this, projection_onto_boundary_of(environment_temp) ) 
+    if( distance(*this, projection_onto_boundary_of(environment_temp) )
 	<= epsilon ){
       return true;
     }
     return false;
-  }    
+  }
 
 
   bool Point::in(const Line_Segment& line_segment_temp,
@@ -270,8 +270,8 @@ namespace VisiLibity
   {
     assert( *this == *this
 	    && line_segment_temp.size() > 0 );
-      
-    return in(line_segment_temp, epsilon) 
+
+    return in(line_segment_temp, epsilon)
       && distance(*this, line_segment_temp.first()) > epsilon
       && distance(*this, line_segment_temp.second()) > epsilon;
   }
@@ -293,21 +293,21 @@ namespace VisiLibity
     // http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
     int i, j; bool c = false;
     for (i = 0, j = n-1; i < n; j = i++){
-      if ( (((polygon_temp[i].y() <= y()) 
-	     && (y() < polygon_temp[j].y())) 
-	    || ((polygon_temp[j].y() <= y()) 
-		 && (y() < polygon_temp[i].y()))) 
-	   && ( x() < (polygon_temp[j].x() 
-		       - polygon_temp[i].x()) 
-		* (y() - polygon_temp[i].y()) 
-		/ (polygon_temp[j].y() 
-		   - polygon_temp[i].y()) 
-		   + polygon_temp[i].x()) )     
+      if ( (((polygon_temp[i].y() <= y())
+	     && (y() < polygon_temp[j].y()))
+	    || ((polygon_temp[j].y() <= y())
+		 && (y() < polygon_temp[i].y())))
+	   && ( x() < (polygon_temp[j].x()
+		       - polygon_temp[i].x())
+		* (y() - polygon_temp[i].y())
+		/ (polygon_temp[j].y()
+		   - polygon_temp[i].y())
+		   + polygon_temp[i].x()) )
 	c = !c;
     }
     return c;
   }
- 
+
 
   bool Point::in(const Environment& environment_temp, double epsilon) const
   {
@@ -335,7 +335,7 @@ namespace VisiLibity
     assert( *this == *this
 	    && line_segment_temp.size() > 0 );
 
-    if( distance(line_segment_temp.first(), *this)<=epsilon 
+    if( distance(line_segment_temp.first(), *this)<=epsilon
 	|| distance(line_segment_temp.second(), *this)<=epsilon )
       return true;
     return false;
@@ -387,7 +387,7 @@ namespace VisiLibity
 
 
   bool operator == (const Point& point1, const Point& point2)
-  { return (  ( point1.x() == point2.x() ) 
+  { return (  ( point1.x() == point2.x() )
 	      && ( point1.y() == point2.y() )  ); }
   bool operator != (const Point& point1, const Point& point2)
   { return !( point1 == point2 ); }
@@ -399,7 +399,7 @@ namespace VisiLibity
       return false;
     if(point1.x() < point2.x())
       return true;
-    else if(  ( point1.x() == point2.x() ) 
+    else if(  ( point1.x() == point2.x() )
 	      && ( point1.y() < point2.y() )  )
       return true;
     return false;
@@ -410,7 +410,7 @@ namespace VisiLibity
       return false;
     if( point1.x() > point2.x() )
       return true;
-    else if(  ( point1.x() == point2.x() ) 
+    else if(  ( point1.x() == point2.x() )
 	      && ( point1.y() > point2.y() )  )
       return true;
     return false;
@@ -444,19 +444,19 @@ namespace VisiLibity
   Point operator * (const Point& point1, const Point& point2)
   {
     return Point( point1.x()*point2.x(),
-		  point1.y()*point2.y() ); 
+		  point1.y()*point2.y() );
   }
 
 
   Point operator * (double scalar, const Point& point2)
   {
     return Point( scalar*point2.x(),
-		  scalar*point2.y()); 
+		  scalar*point2.y());
   }
   Point operator * (const Point& point1, double scalar)
   {
     return Point( scalar*point1.x(),
-		  scalar*point1.y()); 
+		  scalar*point1.y());
   }
 
 
@@ -486,7 +486,7 @@ namespace VisiLibity
     assert( point_temp == point_temp
 	    && line_segment_temp.size() > 0 );
 
-    return distance( point_temp, 
+    return distance( point_temp,
 		     point_temp.projection_onto(line_segment_temp) );
   }
   double distance(const Line_Segment& line_segment_temp,
@@ -502,7 +502,7 @@ namespace VisiLibity
   {
     assert( point_temp == point_temp
 	    && ray_temp == ray_temp );
-    return distance( point_temp, 
+    return distance( point_temp,
 		     point_temp.projection_onto(ray_temp) );
   }
   double distance(const Ray& ray_temp,
@@ -555,9 +555,9 @@ namespace VisiLibity
   double boundary_distance(const Polygon& polygon_temp, const Point& point_temp)
   {
     return boundary_distance(point_temp, polygon_temp);
-  } 
+  }
 
- 
+
   double boundary_distance(const Point& point_temp,
 			   const Environment& environment_temp)
   {
@@ -572,7 +572,7 @@ namespace VisiLibity
 	running_min = distance_temp;
     }
     return running_min;
-  }  
+  }
   double boundary_distance(const Environment& environment_temp,
 			   const Point& point_temp)
   {
@@ -808,7 +808,7 @@ namespace VisiLibity
   bool  operator == (const Line_Segment& line_segment1,
 		     const Line_Segment& line_segment2)
   {
-    if( line_segment1.size() != line_segment2.size() 
+    if( line_segment1.size() != line_segment2.size()
 	|| line_segment1.size() == 0
 	|| line_segment2.size() == 0 )
       return false;
@@ -817,30 +817,30 @@ namespace VisiLibity
       return true;
     else
       return false;
-  } 
+  }
 
 
   bool  operator != (const Line_Segment& line_segment1,
 		     const Line_Segment& line_segment2)
   {
     return !( line_segment1 == line_segment2 );
-  } 
+  }
 
 
-  bool equivalent(Line_Segment line_segment1, 
+  bool equivalent(Line_Segment line_segment1,
 		  Line_Segment line_segment2, double epsilon)
   {
     if( line_segment1.size() != line_segment2.size()
 	|| line_segment1.size() == 0
 	|| line_segment2.size() == 0 )
       return false;
-    else if(   (  distance( line_segment1.first(), 
-			    line_segment2.first() ) <= epsilon  
-		  &&  distance( line_segment1.second(), 
+    else if(   (  distance( line_segment1.first(),
+			    line_segment2.first() ) <= epsilon
+		  &&  distance( line_segment1.second(),
 				 line_segment2.second() ) <= epsilon  )
-	    || (  distance( line_segment1.first(), 
-			    line_segment2.second() ) <= epsilon  
-		  &&  distance( line_segment1.second(), 
+	    || (  distance( line_segment1.first(),
+			    line_segment2.second() ) <= epsilon
+		  &&  distance( line_segment1.second(),
 				 line_segment2.first() ) <= epsilon  )   )
       return true;
     else
@@ -852,7 +852,7 @@ namespace VisiLibity
 		  const Line_Segment& line_segment2)
   {
     assert( line_segment1.size() > 0  &&  line_segment2.size() > 0 );
-    
+
     if(intersect_proper(line_segment1, line_segment2))
       return 0;
     //But if two line segments intersect improperly, the distance
@@ -882,7 +882,7 @@ namespace VisiLibity
     double running_min = distance( line_segment , polygon[0] );
     if( polygon.n() > 1 )
       for(unsigned i=0; i<polygon.n(); i++){
-	double d = distance(  line_segment, 
+	double d = distance(  line_segment,
 			      Line_Segment( polygon[i] , polygon[i+1] )  );
 	if( running_min > d )
 	  running_min = d;
@@ -905,7 +905,7 @@ namespace VisiLibity
     return false;
   }
 
-  
+
   bool intersect_proper(const Line_Segment& line_segment1,
 			const Line_Segment& line_segment2, double epsilon)
   {
@@ -934,16 +934,16 @@ namespace VisiLibity
     //If an endpoint is close enough to the other segment, the
     //intersection is not considered proper.
     if(running_min <= epsilon)
-      return false; 
+      return false;
     //This test is from O'Rourke's "Computational Geometry in C",
     //p.30.  Checks left and right turns.
-    if(  cross(b-a, c-b) * cross(b-a, d-b) < 0   
+    if(  cross(b-a, c-b) * cross(b-a, d-b) < 0
 	 &&   cross(d-c, b-d) * cross(d-c, a-d) < 0  )
       return true;
     return false;
   }
 
-  
+
   Line_Segment intersection(const Line_Segment& line_segment1,
 			    const Line_Segment& line_segment2, double epsilon)
   {
@@ -965,12 +965,12 @@ namespace VisiLibity
     if( intersect_proper(line_segment1, line_segment2, epsilon) ){
       //Use formula from O'Rourke's "Computational Geometry in C", p. 221.
       //Note D=0 iff the line segments are parallel.
-      double D = a.x()*( d.y() - c.y() ) 
-	+ b.x()*( c.y() - d.y() ) 
-	+ d.x()*( b.y() - a.y() ) 
+      double D = a.x()*( d.y() - c.y() )
+	+ b.x()*( c.y() - d.y() )
+	+ d.x()*( b.y() - a.y() )
 	+ c.x()*( a.y() - b.y() );
-      double s = (  a.x()*( d.y() - c.y() ) 
-		    + c.x()*( a.y() - d.y() ) 
+      double s = (  a.x()*( d.y() - c.y() )
+		    + c.x()*( a.y() - d.y() )
 		    + d.x()*( c.y() - a.y() )  ) / D;
       line_segment_temp.set_first( a + s * ( b - a ) );
       return line_segment_temp;
@@ -1040,12 +1040,12 @@ namespace VisiLibity
       return outs;
       break;
     case 1:
-      outs << line_segment_temp.first() << std::endl 
+      outs << line_segment_temp.first() << std::endl
 	   << line_segment_temp.second() << std::endl;
       return outs;
       break;
     case 2:
-      outs << line_segment_temp.first() << std::endl 
+      outs << line_segment_temp.first() << std::endl
 	   << line_segment_temp.second() << std::endl;
       return outs;
     }
@@ -1081,7 +1081,7 @@ namespace VisiLibity
 
 
   void Angle::set(double data_temp)
-  { 
+  {
     *this = Angle(data_temp);
   }
 
@@ -1135,7 +1135,7 @@ namespace VisiLibity
     assert( angle1.get() == angle1.get()
 	    && angle2.get() == angle2.get() );
 
-    double distance1 = std::fabs( angle1.get() 
+    double distance1 = std::fabs( angle1.get()
 				  - angle2.get() );
     double distance2 = 2*M_PI - distance1;
     if(distance1 < distance2)
@@ -1149,7 +1149,7 @@ namespace VisiLibity
     assert( angle1.get() == angle1.get()
 	    && angle2.get() == angle2.get() );
 
-    double distance1 = std::fabs( angle1.get() 
+    double distance1 = std::fabs( angle1.get()
 				  - angle2.get() );
     double distance2 = 2*M_PI - distance1;
     if(angle1 <= angle2){
@@ -1187,7 +1187,7 @@ namespace VisiLibity
     }
     else if( polar_origin_==polar_origin_
 	     && point_temp==point_temp){
-      bearing_ = Angle(  point_temp.y()-polar_origin_temp.y(), 
+      bearing_ = Angle(  point_temp.y()-polar_origin_temp.y(),
 			 point_temp.x()-polar_origin_temp.x()  );
       range_ = distance(polar_origin_temp, point_temp);
     }
@@ -1215,9 +1215,9 @@ namespace VisiLibity
   void Polar_Point::set_range(double range_temp)
   {
     range_ = range_temp;
-    x_ = polar_origin_.x() 
+    x_ = polar_origin_.x()
       + range_*std::cos( bearing_.get() );
-    y_ = polar_origin_.y() 
+    y_ = polar_origin_.y()
       + range_*std::sin( bearing_.get() );
   }
 
@@ -1225,13 +1225,13 @@ namespace VisiLibity
   void Polar_Point::set_bearing(const Angle& bearing_temp)
   {
     bearing_ = bearing_temp;
-    x_ = polar_origin_.x() 
+    x_ = polar_origin_.x()
       + range_*std::cos( bearing_.get() );
-    y_ = polar_origin_.y() 
+    y_ = polar_origin_.y()
              + range_*std::sin( bearing_.get() );
   }
 
-  
+
   bool operator == (const Polar_Point& polar_point1,
 		    const Polar_Point& polar_point2)
   {
@@ -1254,16 +1254,16 @@ namespace VisiLibity
   {
     if( polar_point1.polar_origin() != polar_point1.polar_origin()
 	|| polar_point1.range() != polar_point1.range()
-	|| polar_point1.bearing() != polar_point1.bearing() 
+	|| polar_point1.bearing() != polar_point1.bearing()
 	|| polar_point2.polar_origin() != polar_point2.polar_origin()
 	|| polar_point2.range() != polar_point2.range()
-	|| polar_point2.bearing() != polar_point2.bearing() 
+	|| polar_point2.bearing() != polar_point2.bearing()
 	)
       return false;
 
     if( polar_point1.bearing() > polar_point2.bearing() )
       return true;
-    else if( polar_point1.bearing() == polar_point2.bearing() 
+    else if( polar_point1.bearing() == polar_point2.bearing()
 	     &&  polar_point1.range() > polar_point2.range() )
       return true;
     return false;
@@ -1273,16 +1273,16 @@ namespace VisiLibity
   {
     if( polar_point1.polar_origin() != polar_point1.polar_origin()
 	|| polar_point1.range() != polar_point1.range()
-	|| polar_point1.bearing() != polar_point1.bearing() 
+	|| polar_point1.bearing() != polar_point1.bearing()
 	|| polar_point2.polar_origin() != polar_point2.polar_origin()
 	|| polar_point2.range() != polar_point2.range()
-	|| polar_point2.bearing() != polar_point2.bearing() 
+	|| polar_point2.bearing() != polar_point2.bearing()
 	)
       return false;
 
     if( polar_point1.bearing() < polar_point2.bearing() )
       return true;
-    else if( polar_point1.bearing() == polar_point2.bearing() 
+    else if( polar_point1.bearing() == polar_point2.bearing()
 	     &&  polar_point1.range() < polar_point2.range() )
       return true;
     return false;
@@ -1293,24 +1293,24 @@ namespace VisiLibity
   {
     if( polar_point1.polar_origin() != polar_point1.polar_origin()
 	|| polar_point1.range() != polar_point1.range()
-	|| polar_point1.bearing() != polar_point1.bearing() 
+	|| polar_point1.bearing() != polar_point1.bearing()
 	|| polar_point2.polar_origin() != polar_point2.polar_origin()
 	|| polar_point2.range() != polar_point2.range()
-	|| polar_point2.bearing() != polar_point2.bearing() 
+	|| polar_point2.bearing() != polar_point2.bearing()
 	)
       return false;
 
     return !(polar_point1<polar_point2);
   }
   bool operator <= (const Polar_Point& polar_point1,
-		    const Polar_Point& polar_point2) 
+		    const Polar_Point& polar_point2)
   {
     if( polar_point1.polar_origin() != polar_point1.polar_origin()
 	|| polar_point1.range() != polar_point1.range()
-	|| polar_point1.bearing() != polar_point1.bearing() 
+	|| polar_point1.bearing() != polar_point1.bearing()
 	|| polar_point2.polar_origin() != polar_point2.polar_origin()
 	|| polar_point2.range() != polar_point2.range()
-	|| polar_point2.bearing() != polar_point2.bearing() 
+	|| polar_point2.bearing() != polar_point2.bearing()
 	)
       return false;
 
@@ -1330,8 +1330,8 @@ namespace VisiLibity
 
 
   Ray::Ray(Point base_point_temp, Point bearing_point)
-  { 
-      assert(  !( base_point_temp == bearing_point )  ); 
+  {
+      assert(  !( base_point_temp == bearing_point )  );
 
       base_point_ = base_point_temp;
       bearing_ = Angle( bearing_point.y()-base_point_temp.y(),
@@ -1366,7 +1366,7 @@ namespace VisiLibity
     //First construct a Line_Segment parallel with the Ray which is so
     //long, that it's intersection with line_segment_temp will be
     //equal to the intersection of ray_temp with line_segment_temp.
-    double R = distance(ray_temp.base_point(), line_segment_temp) 
+    double R = distance(ray_temp.base_point(), line_segment_temp)
                + line_segment_temp.length();
     Line_Segment seg_approx =
       Line_Segment(  ray_temp.base_point(), ray_temp.base_point() +
@@ -1460,9 +1460,9 @@ namespace VisiLibity
 
     while( third < vertices_.size() ){
       //if second redundant
-      if(   distance(  Line_Segment( (*this)[first], 
+      if(   distance(  Line_Segment( (*this)[first],
 				     (*this)[third] ) ,
-		       (*this)[second]  ) 
+		       (*this)[second]  )
 	    <= epsilon   ){
 	//=>skip it
 	second = third;
@@ -1532,7 +1532,7 @@ namespace VisiLibity
 
   Polygon::Polygon(const std::vector<Point>& vertices_temp)
   {
-    vertices_ = vertices_temp; 
+    vertices_ = vertices_temp;
   }
 
 
@@ -1553,11 +1553,11 @@ namespace VisiLibity
       //Use cross product to count right turns.
       for(unsigned i=0; i<=n()-1; i++)
 	if( ((*this)[i+1].x()-(*this)[i].x())
-	    *((*this)[i+2].y()-(*this)[i].y()) 
+	    *((*this)[i+2].y()-(*this)[i].y())
 	    - ((*this)[i+1].y()-(*this)[i].y())
 	    *((*this)[i+2].x()-(*this)[i].x()) < 0 )
 	  r_count++;
-      if( area() < 0 ){ 
+      if( area() < 0 ){
 	r_count = n() - r_count;
       }
     }
@@ -1567,25 +1567,25 @@ namespace VisiLibity
 
   bool Polygon::is_simple(double epsilon) const
   {
-    
+
     if(n()==0 || n()==1 || n()==2)
       return false;
 
     //Make sure adjacent edges only intersect at a single point.
     for(unsigned i=0; i<=n()-1; i++)
-      if(  intersection( Line_Segment((*this)[i],(*this)[i+1]) , 
-			 Line_Segment((*this)[i+1],(*this)[i+2]) , 
+      if(  intersection( Line_Segment((*this)[i],(*this)[i+1]) ,
+			 Line_Segment((*this)[i+1],(*this)[i+2]) ,
 			 epsilon ).size() > 1  )
 	return false;
 
     //Make sure nonadjacent edges do not intersect.
     for(unsigned i=0; i<n()-2; i++)
       for(unsigned j=i+2; j<=n()-1; j++)
-	if( 0!=(j+1)%vertices_.size()  
-	    && distance( Line_Segment((*this)[i],(*this)[i+1]) , 
+	if( 0!=(j+1)%vertices_.size()
+	    && distance( Line_Segment((*this)[i],(*this)[i+1]) ,
 			  Line_Segment((*this)[j],(*this)[j+1]) ) <= epsilon  )
 	  return false;
-    
+
     return true;
   }
 
@@ -1607,7 +1607,7 @@ namespace VisiLibity
       return 0;
     for(unsigned i=0; i<n()-1; i++)
       length_temp += distance( vertices_[i] , vertices_[i+1] );
-    length_temp += distance( vertices_[n()-1] , 
+    length_temp += distance( vertices_[n()-1] ,
 			     vertices_[0] );
     return length_temp;
   }
@@ -1619,7 +1619,7 @@ namespace VisiLibity
     if(n()==0)
       return 0;
     for(unsigned i=0; i<=n()-1; i++)
-      area_temp += (*this)[i].x()*(*this)[i+1].y() 
+      area_temp += (*this)[i].x()*(*this)[i+1].y()
 	- (*this)[i+1].x()*(*this)[i].y();
     return area_temp/2.0;
   }
@@ -1631,18 +1631,18 @@ namespace VisiLibity
 
     double area_temp=area();
     if(area_temp==0)
-      { std::cerr << "\x1b[5;31m" 
-	 << "Warning:  tried to compute centoid of polygon with zero area!" 
-	 << "\x1b[0m\n" << "\a \n"; exit(1); } 
+      { std::cerr << "\x1b[5;31m"
+	 << "Warning:  tried to compute centoid of polygon with zero area!"
+	 << "\x1b[0m\n" << "\a \n"; exit(1); }
     double x_temp=0;
     for(unsigned i=0; i<=n()-1; i++)
-      x_temp += ( (*this)[i].x() + (*this)[i+1].x() ) 
-	* ( (*this)[i].x()*(*this)[i+1].y() 
+      x_temp += ( (*this)[i].x() + (*this)[i+1].x() )
+	* ( (*this)[i].x()*(*this)[i+1].y()
 	    - (*this)[i+1].x()*(*this)[i].y() );
     double y_temp=0;
     for(unsigned i=0; i<=n()-1; i++)
-      y_temp += ( (*this)[i].y() + (*this)[i+1].y() ) 
-	* ( (*this)[i].x()*(*this)[i+1].y() 
+      y_temp += ( (*this)[i].y() + (*this)[i+1].y() )
+	* ( (*this)[i].x()*(*this)[i+1].y()
 	    - (*this)[i+1].x()*(*this)[i].y() );
     return Point(x_temp/(6*area_temp), y_temp/(6*area_temp));
   }
@@ -1691,21 +1691,21 @@ namespace VisiLibity
 
     Bounding_Box bounding_box = bbox();
     std::vector<Point> pts_in_polygon; pts_in_polygon.reserve(count);
-    Point pt_temp( uniform_random_sample(bounding_box.x_min, 
+    Point pt_temp( uniform_random_sample(bounding_box.x_min,
 					 bounding_box.x_max),
-		   uniform_random_sample(bounding_box.y_min, 
+		   uniform_random_sample(bounding_box.y_min,
 					 bounding_box.y_max) );
     while(pts_in_polygon.size() < count){
       while(!pt_temp.in(*this, epsilon)){
-	pt_temp.set_x( uniform_random_sample(bounding_box.x_min, 
+	pt_temp.set_x( uniform_random_sample(bounding_box.x_min,
 					     bounding_box.x_max) );
-	pt_temp.set_y( uniform_random_sample(bounding_box.y_min, 
+	pt_temp.set_y( uniform_random_sample(bounding_box.y_min,
 					     bounding_box.y_max) );
       }
       pts_in_polygon.push_back(pt_temp);
-      pt_temp.set_x( uniform_random_sample(bounding_box.x_min, 
+      pt_temp.set_x( uniform_random_sample(bounding_box.x_min,
 					   bounding_box.x_max) );
-      pt_temp.set_y( uniform_random_sample(bounding_box.y_min, 
+      pt_temp.set_y( uniform_random_sample(bounding_box.y_min,
 					   bounding_box.y_max) );
     }
     return pts_in_polygon;
@@ -1760,7 +1760,7 @@ namespace VisiLibity
     //Store new minimal length list of vertices.
     std::vector<Point> vertices_temp;
     vertices_temp.reserve( vertices_.size() );
- 
+
     //Place holders.
     unsigned first  = 0;
     unsigned second = 1;
@@ -1768,9 +1768,9 @@ namespace VisiLibity
 
     while( third <= vertices_.size() ){
       //if second is redundant
-      if(   distance(  Line_Segment( (*this)[first], 
+      if(   distance(  Line_Segment( (*this)[first],
 				     (*this)[third] ) ,
-		       (*this)[second]  ) 
+		       (*this)[second]  )
 	    <= epsilon   ){
 	//=>skip it
 	second = third;
@@ -1787,14 +1787,14 @@ namespace VisiLibity
     }
 
     //decide whether to add original first point
-    if(   distance(  Line_Segment( vertices_temp.front(), 
+    if(   distance(  Line_Segment( vertices_temp.front(),
 				   vertices_temp.back() ) ,
-		     vertices_.front()  ) 
+		     vertices_.front()  )
 	  > epsilon   )
       vertices_temp.push_back( vertices_.front() );
-    
+
     //Update list of vertices.
-    vertices_ = vertices_temp;   
+    vertices_ = vertices_temp;
   }
 
 
@@ -1807,7 +1807,7 @@ namespace VisiLibity
 
   bool operator == (Polygon polygon1, Polygon polygon2)
   {
-    if( polygon1.n() != polygon2.n() 
+    if( polygon1.n() != polygon2.n()
 	|| polygon1.n() == 0
 	|| polygon2.n() == 0 )
       return false;
@@ -1876,8 +1876,8 @@ namespace VisiLibity
 
 
   //Environment
-  
-  
+
+
   Environment::Environment(const std::vector<Polygon>& polygons)
   {
     outer_boundary_ = polygons[0];
@@ -1893,11 +1893,11 @@ namespace VisiLibity
     assert( !fin.fail() );
 
     //Temporary vars for numbers to be read from file.
-    double x_temp, y_temp;  
+    double x_temp, y_temp;
     std::vector<Point> vertices_temp;
 
     //Skip comments
-    while( fin.peek() == '/' ) 
+    while( fin.peek() == '/' )
       fin.ignore(200,'\n');
 
     //Read outer_boundary.
@@ -1906,16 +1906,16 @@ namespace VisiLibity
       //Skip to next line.
       fin.ignore(1);
       if( fin.eof() )
-	{ 
+	{
 	  outer_boundary_.set_vertices(vertices_temp);
-	  fin.close(); 
+	  fin.close();
 	  update_flattened_index_key(); return;
-	}      
+	}
       vertices_temp.push_back( Point(x_temp, y_temp) );
     }
     outer_boundary_.set_vertices(vertices_temp);
     vertices_temp.clear();
-    
+
     //Read holes.
     Polygon polygon_temp;
     while(1){
@@ -1924,13 +1924,13 @@ namespace VisiLibity
 	fin.ignore(200,'\n');
       if( fin.eof() )
 	{ fin.close(); update_flattened_index_key(); return; }
-      while( fin.peek() != '/' ){	
+      while( fin.peek() != '/' ){
 	fin >> x_temp >> y_temp;
 	if( fin.eof() )
-	  { 
+	  {
 	    polygon_temp.set_vertices(vertices_temp);
 	    holes_.push_back(polygon_temp);
-	    fin.close(); 
+	    fin.close();
 	    update_flattened_index_key(); return;
 	  }
 	vertices_temp.push_back( Point(x_temp, y_temp) );
@@ -1978,17 +1978,17 @@ namespace VisiLibity
 
   bool Environment::is_in_standard_form() const
   {
-    if( outer_boundary_.is_in_standard_form() == false 
+    if( outer_boundary_.is_in_standard_form() == false
 	|| outer_boundary_.area() < 0 )
       return false;
     for(unsigned i=0; i<holes_.size(); i++)
-      if( holes_[i].is_in_standard_form() == false 
+      if( holes_[i].is_in_standard_form() == false
 	  || holes_[i].area() > 0 )
 	return false;
     return true;
   }
 
-  
+
   bool Environment::is_valid(double epsilon) const
   {
     if( n() <= 2 )
@@ -1996,33 +1996,33 @@ namespace VisiLibity
 
     //Check all Polygons are simple.
     if( !outer_boundary_.is_simple(epsilon) ){
-      std::cerr << std::endl << "\x1b[31m" 
-		<< "The outer boundary is not simple." 
+      std::cerr << std::endl << "\x1b[31m"
+		<< "The outer boundary is not simple."
 		<<  "\x1b[0m" << std::endl;
       return false;
     }
     for(unsigned i=0; i<h(); i++)
       if( !holes_[i].is_simple(epsilon) ){
-	std::cerr << std::endl << "\x1b[31m" 
-		  << "Hole " << i << " is not simple." 
+	std::cerr << std::endl << "\x1b[31m"
+		  << "Hole " << i << " is not simple."
 		  <<  "\x1b[0m" << std::endl;
-	return false; 
+	return false;
       }
 
     //Check none of the Polygons' boundaries intersect w/in epsilon.
     for(unsigned i=0; i<h(); i++)
       if( boundary_distance(outer_boundary_, holes_[i]) <= epsilon ){
-	std::cerr << std::endl << "\x1b[31m" 
-	  << "The outer boundary intersects the boundary of hole " << i << "." 
+	std::cerr << std::endl << "\x1b[31m"
+	  << "The outer boundary intersects the boundary of hole " << i << "."
 	  <<  "\x1b[0m" << std::endl;
-	return false; 
+	return false;
       }
     for(unsigned i=0; i<h(); i++)
       for(unsigned j=i+1; j<h(); j++)
 	if( boundary_distance(holes_[i], holes_[j]) <= epsilon ){
-	  std::cerr << std::endl << "\x1b[31m" 
-		    << "The boundary of hole " << i 
-		    << " intersects the boundary of hole " << j << "." 
+	  std::cerr << std::endl << "\x1b[31m"
+		    << "The boundary of hole " << i
+		    << " intersects the boundary of hole " << j << "."
 		    <<  "\x1b[0m" << std::endl;
 	  return false;
 	}
@@ -2034,19 +2034,19 @@ namespace VisiLibity
       //Loop over vertices of a hole
       for(unsigned j=0; j<holes_[i].n(); j++){
 	if( !holes_[i][j].in(outer_boundary_, epsilon) ){
-	  std::cerr << std::endl << "\x1b[31m" 
-		    << "Vertex " << j << " of hole " << i 
-		    << " is not within the outer boundary." 
+	  std::cerr << std::endl << "\x1b[31m"
+		    << "Vertex " << j << " of hole " << i
+		    << " is not within the outer boundary."
 		    <<  "\x1b[0m" << std::endl;
-	  return false; 
+	  return false;
 	}
 	//Second loop over holes.
 	for(unsigned k=0; k<h(); k++)
 	  if( i!=k && holes_[i][j].in(holes_[k], epsilon) ){
-	    std::cerr << std::endl << "\x1b[31m" 
-		      << "Vertex " << j 
-		      << " of hole " << i 
-		      << " is in hole " << k << "." 
+	    std::cerr << std::endl << "\x1b[31m"
+		      << "Vertex " << j
+		      << " of hole " << i
+		      << " is in hole " << k << "."
 		      <<  "\x1b[0m" << std::endl;
 	    return false;
 	  }
@@ -2055,21 +2055,21 @@ namespace VisiLibity
 
     //Check outer_boundary is ccw and holes are cw.
     if( outer_boundary_.area() <= 0 ){
-      std::cerr << std::endl << "\x1b[31m" 
-		<< "The outer boundary vertices are not listed ccw." 
+      std::cerr << std::endl << "\x1b[31m"
+		<< "The outer boundary vertices are not listed ccw."
 		<<  "\x1b[0m" << std::endl;
-      return false; 
+      return false;
     }
     for(unsigned i=0; i<h(); i++)
       if( holes_[i].area() >= 0 ){
-	std::cerr << std::endl << "\x1b[31m" 
-		  << "The vertices of hole " << i << " are not listed cw." 
+	std::cerr << std::endl << "\x1b[31m"
+		  << "The vertices of hole " << i << " are not listed cw."
 		  <<  "\x1b[0m" << std::endl;
-	return false; 
+	return false;
       }
 
-    return true; 
-  } 
+    return true;
+  }
 
 
   double Environment::boundary_length() const
@@ -2099,7 +2099,7 @@ namespace VisiLibity
     assert( area() > 0 );
 
     Bounding_Box bounding_box = bbox();
-    std::vector<Point> pts_in_environment; 
+    std::vector<Point> pts_in_environment;
     pts_in_environment.reserve(count);
     Point pt_temp( uniform_random_sample(bounding_box.x_min,
 					 bounding_box.x_max),
@@ -2107,13 +2107,13 @@ namespace VisiLibity
 					 bounding_box.y_max) );
     while(pts_in_environment.size() < count){
       while(!pt_temp.in(*this, epsilon)){
-	pt_temp.set_x( uniform_random_sample(bounding_box.x_min, 
+	pt_temp.set_x( uniform_random_sample(bounding_box.x_min,
 					     bounding_box.x_max) );
 	pt_temp.set_y( uniform_random_sample(bounding_box.y_min,
-					     bounding_box.y_max) );	  
+					     bounding_box.y_max) );
       }
       pts_in_environment.push_back(pt_temp);
-      pt_temp.set_x( uniform_random_sample(bounding_box.x_min, 
+      pt_temp.set_x( uniform_random_sample(bounding_box.x_min,
 					   bounding_box.x_max) );
       pt_temp.set_y( uniform_random_sample(bounding_box.y_min,
 					   bounding_box.y_max) );
@@ -2213,13 +2213,13 @@ namespace VisiLibity
 		  current_node.print();
 		  std::cout << std::endl;
       }
-      
+
       //Check for goal state
       //(if current node corresponds to finish)
       if( current_node.vertex_index == n() + 1 ){
-	
+
 	if( PRINTING_DEBUG_DATA ){
-	  std::cout <<"solution found!" 
+	  std::cout <<"solution found!"
 		    << std::endl
 		    << std::endl;
 	}
@@ -2236,11 +2236,11 @@ namespace VisiLibity
 		  << std::endl
 		  << "Expanding Current Node (Computing Children)"
 		  << std::endl
-		  << "current size of search tree T = " 
+		  << "current size of search tree T = "
 		  << T.size()
 		  << std::endl
 		  << "-------------------------------------------"
-		  << std::endl;      
+		  << std::endl;
       }
 
       //if current_node corresponds to start
@@ -2249,14 +2249,14 @@ namespace VisiLibity
 	for(unsigned i=0; i < n(); i++){
 	  if( start_visible[i] ){
 	    child.vertex_index = i;
-	    child.parent_search_tree_location 
+	    child.parent_search_tree_location
 	      = current_node.search_tree_location;
 	    child.cost_to_come = distance( start , (*this)(i) );
-	    child.estimated_cost_to_go = distance( (*this)(i) , finish );	    
+	    child.estimated_cost_to_go = distance( (*this)(i) , finish );
 	    children.push_back( child );
-	    
+
 	    if( PRINTING_DEBUG_DATA ){
-	      std::cout << std::endl << "computed child: " 
+	      std::cout << std::endl << "computed child: "
 			<< std::endl;
 	      child.print();
 	    }
@@ -2271,7 +2271,7 @@ namespace VisiLibity
 	  if( current_node.vertex_index != i )
 	    if( visibility_graph( current_node.vertex_index , i ) ){
 	      child.vertex_index = i;
-	      child.parent_search_tree_location 
+	      child.parent_search_tree_location
 		= current_node.search_tree_location;
 	      child.cost_to_come = current_node.cost_to_come
 		+ distance( (*this)(current_node.vertex_index),
@@ -2280,40 +2280,40 @@ namespace VisiLibity
 	      children.push_back( child );
 
 	      if( PRINTING_DEBUG_DATA ){
-		std::cout << std::endl << "computed child: " 
+		std::cout << std::endl << "computed child: "
 			  << std::endl;
 		child.print();
 	      }
-	      
+
 	    }
 	}
 	//check if finish is visible
 	if( finish_visible[ current_node.vertex_index ] ){
 	  child.vertex_index = n() + 1;
-	  child.parent_search_tree_location 
+	  child.parent_search_tree_location
 	    = current_node.search_tree_location;
 	  child.cost_to_come = current_node.cost_to_come
 	    + distance( (*this)(current_node.vertex_index) , finish );
-	  child.estimated_cost_to_go = 0;	    
+	  child.estimated_cost_to_go = 0;
 	  children.push_back( child );
 
 	  if( PRINTING_DEBUG_DATA ){
-	    std::cout << std::endl << "computed child: " 
+	    std::cout << std::endl << "computed child: "
 		      << std::endl;
 	    child.print();
 	  }
 
 	}
       }
-      
+
       if( PRINTING_DEBUG_DATA ){
 	std::cout << std::endl
 		  <<"-----------------------------------------"
 		  << std::endl
-		  << "Processing " << children.size() 
+		  << "Processing " << children.size()
 		  << " children" << std::endl
 		  << "-----------------------------------------"
-		  << std::endl;      
+		  << std::endl;
       }
 
       //Process children
@@ -2324,22 +2324,22 @@ namespace VisiLibity
 	child_already_visited = false;
 
 	if( PRINTING_DEBUG_DATA ){
-	  std::cout << std::endl << "current child being processed: " 
+	  std::cout << std::endl << "current child being processed: "
 		    << std::endl;
-	  children_itr->print();	  
+	  children_itr->print();
 	}
 
-	//Check if child state has already been visited 
-	//(by looking in search tree T) 
+	//Check if child state has already been visited
+	//(by looking in search tree T)
 	for( std::list<Shortest_Path_Node>::iterator T_itr = T.begin();
 	     T_itr != T.end(); T_itr++ ){
-	  if( children_itr->vertex_index 
+	  if( children_itr->vertex_index
 	      == T_itr->vertex_index ){
 	    children_itr->search_tree_location = T_itr;
 	    child_already_visited = true;
 	    break;
-	  }    
-	}	
+	  }
+	}
 
 	if( !child_already_visited ){
 	  //Add child to search tree T
@@ -2348,7 +2348,7 @@ namespace VisiLibity
 	  children_itr->search_tree_location = --T.end();
 	  Q.insert( *children_itr );
 	}
-	else if( children_itr->search_tree_location->cost_to_come > 
+	else if( children_itr->search_tree_location->cost_to_come >
 		 children_itr->cost_to_come ){
 	  //redirect parent pointer in search tree
 	  children_itr->search_tree_location->parent_search_tree_location
@@ -2357,16 +2357,16 @@ namespace VisiLibity
 	  children_itr->search_tree_location->cost_to_come
 	    = children_itr->cost_to_come;
 	  //update Q
-	  for(std::set<Shortest_Path_Node>::iterator 
+	  for(std::set<Shortest_Path_Node>::iterator
 		Q_itr = Q.begin();
 	      Q_itr!= Q.end();
 	      Q_itr++){
 	    if( children_itr->vertex_index == Q_itr->vertex_index ){
 	      Q.erase( Q_itr );
 	      break;
-	    }	  
+	    }
 	  }
-	  Q.insert( *children_itr );	  
+	  Q.insert( *children_itr );
 	}
 
 	//If not already visited, insert into Q
@@ -2376,9 +2376,9 @@ namespace VisiLibity
 	if( PRINTING_DEBUG_DATA ){
 	  std::cout << "child already visited? "
 		    << child_already_visited
-		    << std::endl;      
+		    << std::endl;
 	}
-      
+
       }
     }
     //-----------End Main Loop-----------
@@ -2403,7 +2403,7 @@ namespace VisiLibity
 	  std::cout << "backtrace node is "
 		    << std::endl;
 	  backtrace_itr->print();
-	  std::cout << std::endl;      
+	  std::cout << std::endl;
 	}
 
 	if( backtrace_itr->vertex_index < n() )
@@ -2458,7 +2458,7 @@ namespace VisiLibity
     fout.setf(std::ios::showpoint);
     fout.precision(fios_precision_temp);
     fout << "//Environment Model" << std::endl;
-    fout << "//Outer Boundary" << std::endl << outer_boundary_; 
+    fout << "//Outer Boundary" << std::endl << outer_boundary_;
     for(unsigned i=0; i<h(); i++)
       {
 	fout << "//Hole" << std::endl << holes_[i];
@@ -2536,23 +2536,23 @@ namespace VisiLibity
       vertex_count_up_to_current_polygon += (*this)[current_polygon_index].n();
     }
     two.second = k - vertex_count_up_to_last_polygon;
-    
+
     return two;
   }
 
 
-  std::ostream& operator << (std::ostream& outs, 
+  std::ostream& operator << (std::ostream& outs,
 			     const Environment& environment_temp)
   {
     outs << "//Environment Model" << std::endl;
-    outs << "//Outer Boundary" << std::endl << environment_temp[0]; 
+    outs << "//Outer Boundary" << std::endl << environment_temp[0];
     for(unsigned i=1; i<=environment_temp.h(); i++){
       outs << "//Hole" << std::endl << environment_temp[i];
     }
     //outs << "//EOF marker";
     return outs;
   }
-  
+
 
   //Guards
 
@@ -2565,10 +2565,10 @@ namespace VisiLibity
     assert( !fin.fail() );
 
     //Temp vars for numbers to be read from file.
-    double x_temp, y_temp;  
-    
+    double x_temp, y_temp;
+
     //Skip comments
-    while( fin.peek() == '/' ) 
+    while( fin.peek() == '/' )
       fin.ignore(200,'\n');
 
     //Read positions.
@@ -2671,7 +2671,7 @@ namespace VisiLibity
     fout.setf(std::ios::fixed);
     fout.setf(std::ios::showpoint);
     fout.precision(fios_precision_temp);
-    fout << "//Guard Positions" << std::endl; 
+    fout << "//Guard Positions" << std::endl;
     for(unsigned i=0; i<positions_.size(); i++)
       fout << positions_[i].x() << "  " << positions_[i].y() << std::endl;
     //fout << "//EOF marker";
@@ -2693,18 +2693,16 @@ namespace VisiLibity
 
 
   void Guards::snap_to_vertices_of(const Environment& environment_temp,
-				   double epsilon)
+				   double /*epsilon*/)
   {
-    UNUSED(epsilon);
     for(unsigned i=0; i<positions_.size(); i++)
       positions_[i].snap_to_vertices_of(environment_temp);
   }
 
 
   void Guards::snap_to_vertices_of(const Polygon& polygon_temp,
-				   double epsilon)
+				   double /*epsilon*/)
   {
-    UNUSED(epsilon);
     for(unsigned i=0; i<positions_.size(); i++)
       positions_[i].snap_to_vertices_of(polygon_temp);
   }
@@ -2718,9 +2716,8 @@ namespace VisiLibity
 
 
   void Guards::snap_to_boundary_of(const Polygon& polygon_temp,
-				   double epsilon)
+				   double /*epsilon*/)
   {
-    UNUSED(epsilon);
     for(unsigned i=0; i<positions_.size(); i++)
       positions_[i].snap_to_boundary_of(polygon_temp);
   }
@@ -2728,7 +2725,7 @@ namespace VisiLibity
 
   std::ostream& operator << (std::ostream& outs, const Guards& guards)
   {
-    outs << "//Guard Positions" << std::endl; 
+    outs << "//Guard Positions" << std::endl;
     for(unsigned i=0; i<guards.N(); i++)
       outs << guards[i].x() << "  " << guards[i].y() << std::endl;
     //outs << "//EOF marker";
@@ -2742,11 +2739,11 @@ namespace VisiLibity
   bool Visibility_Polygon::is_spike( const Point& Observer,
 				     const Point& point1,
 				     const Point& point2,
-				     const Point& point3, 
+				     const Point& point3,
 				     double epsilon) const
   {
 
-    return(  
+    return(
          //Make sure Observer not colocated with any of the points.
 	   distance( Observer , point1 ) > epsilon
 	   && distance( Observer , point2 ) > epsilon
@@ -2763,20 +2760,20 @@ namespace VisiLibity
 	 //and the pike is sufficiently sharp,
 	   && std::max(  distance( Ray(Observer, point1), point2 ),
 			  distance( Ray(Observer, point3), point2 )  )
-	   <= epsilon  
+	   <= epsilon
 	     );
     //Formerly used
     //std::fabs( Polygon(point1, point2, point3).area() ) < epsilon
   }
 
-  
+
   void Visibility_Polygon::chop_spikes_at_back(const Point& observer,
 					       double epsilon)
   {
     //Eliminate "special case" vertices of the visibility polygon.
     //While the top three vertices form a spike.
     while(  vertices_.size() >= 3
-	    && is_spike( observer, 
+	    && is_spike( observer,
 			  vertices_[vertices_.size()-3],
 			  vertices_[vertices_.size()-2],
 			  vertices_[vertices_.size()-1], epsilon )  ){
@@ -2791,7 +2788,7 @@ namespace VisiLibity
   {
     //Eliminate "special case" vertices of the visibility polygon at
     //wrap-around.  While the there's a spike at the wrap-around,
-    while(  vertices_.size() >= 3 
+    while(  vertices_.size() >= 3
 	    && is_spike( Observer,
 			  vertices_[vertices_.size()-2],
 			  vertices_[vertices_.size()-1],
@@ -2802,23 +2799,22 @@ namespace VisiLibity
   }
 
 
-  void Visibility_Polygon::chop_spikes(const Point& Observer,
+  void Visibility_Polygon::chop_spikes(const Point& /*Observer*/,
 				       double epsilon)
   {
-    UNUSED(Observer);
     std::set<Point> spike_tips;
     std::vector<Point> vertices_temp;
     //Middle point is potentially the tip of a spike
     for(unsigned i=0; i<vertices_.size(); i++)
-      if(   distance(  (*this)[i+2], 
+      if(   distance(  (*this)[i+2],
 		       Line_Segment( (*this)[i], (*this)[i+1] )  )
 	    <= epsilon
 	    ||
-	    distance(  (*this)[i], 
+	    distance(  (*this)[i],
 		       Line_Segment( (*this)[i+1], (*this)[i+2] )  )
 	    <= epsilon   )
 	spike_tips.insert( (*this)[i+1] );
-    
+
     for(unsigned i=0; i<vertices_.size(); i++)
       if( spike_tips.find(vertices_[i]) == spike_tips.end() )
 	vertices_temp.push_back( vertices_[i] );
@@ -2838,24 +2834,24 @@ namespace VisiLibity
 	      << current_vertex.range() << "  "
 	      << current_vertex.is_first << "]" << std::endl;
     std::cout << "1st point of current_vertex's edge [x  y  bearing  range] = ["
-	      << (current_vertex.incident_edge->first).x() << "  " 
+	      << (current_vertex.incident_edge->first).x() << "  "
 	      << (current_vertex.incident_edge->first).y() << "  "
 	      << (current_vertex.incident_edge->first).bearing() << "  "
-	      << (current_vertex.incident_edge->first).range() << "]" 
+	      << (current_vertex.incident_edge->first).range() << "]"
 	      << std::endl;
-    std::cout << "2nd point of current_vertex's edge [x  y  bearing  range] = [" 
-	      << (current_vertex.incident_edge->second).x() << "  " 
+    std::cout << "2nd point of current_vertex's edge [x  y  bearing  range] = ["
+	      << (current_vertex.incident_edge->second).x() << "  "
 	      << (current_vertex.incident_edge->second).y() << "  "
 	      << (current_vertex.incident_edge->second).bearing() << "  "
-	      << (current_vertex.incident_edge->second).range() << "]" 
+	      << (current_vertex.incident_edge->second).range() << "]"
 	      << std::endl;
     std::cout << "          1st point of active_edge [x  y  bearing  range] = ["
-	      << (active_edge->first).x() << "  " 
+	      << (active_edge->first).x() << "  "
 	      << (active_edge->first).y() << "  "
 	      << (active_edge->first).bearing() << "  "
 	      << (active_edge->first).range() << "]" << std::endl;
-    std::cout << "          2nd point of active_edge [x  y  bearing  range] = [" 
-	      << (active_edge->second).x() << "  " 
+    std::cout << "          2nd point of active_edge [x  y  bearing  range] = ["
+	      << (active_edge->second).x() << "  "
 	      << (active_edge->second).y() << "  "
 	      << (active_edge->second).bearing() << "  "
 	      << (active_edge->second).range() << "]" << std::endl;
@@ -2867,10 +2863,10 @@ namespace VisiLibity
 					 double epsilon)
     : observer_(Observer)
   {
-    //Visibility polygon algorithm for environments with holes 
+    //Visibility polygon algorithm for environments with holes
     //Radial line (AKA angular plane) sweep technique.
     //
-    //Based on algorithms described in 
+    //Based on algorithms described in
     //
     //[1] "Automated Camera Layout to Satisfy Task-Specific and
     //Floorplan-Specific Coverage Requirements" by Ugur Murat Erdem
@@ -2897,7 +2893,7 @@ namespace VisiLibity
     //     by vertices of the environment (the order of the snapping
     //     is important).
     //
-    //:WARNING: 
+    //:WARNING:
     //For efficiency, the assertions corresponding to these
     //preconditions have been excluded.
     //
@@ -2915,7 +2911,7 @@ namespace VisiLibity
     //
     //--------PREPROCESSING--------
     //
-     
+
     //Construct a POLAR EDGE LIST from environment_temp's outer
     //boundary and holes.  During this construction, those edges are
     //split which either (1) cross the ray emanating from the Observer
@@ -2934,7 +2930,7 @@ namespace VisiLibity
     Angle right_wall_bearing;
     Angle left_wall_bearing;
     for(unsigned i=0; i<=environment_temp.h(); i++){
-    for(unsigned j=0; j<environment_temp[i].n(); j++){      
+    for(unsigned j=0; j<environment_temp[i].n(); j++){
       ppoint1 = Polar_Point( Observer, environment_temp[i][j] );
       ppoint2 = Polar_Point( Observer, environment_temp[i][j+1] );
 
@@ -2948,7 +2944,7 @@ namespace VisiLibity
 
 	if( ppoint2.bearing() == Angle(0.0) )
 	  ppoint2.set_bearing_to_2pi();
-	
+
 	left_wall_bearing = ppoint1.bearing();
 	right_wall_bearing = ppoint2.bearing();
 
@@ -2985,7 +2981,7 @@ namespace VisiLibity
 	  / ( ppoint1.y() - ppoint2.y() );
 	//If edge crosses the ray emanating horizontal and right of
 	//the Observer.
-	if( 0 < t && t < 1 && 
+	if( 0 < t && t < 1 &&
 	    Observer.x() < t*ppoint1.x() + (1-t)*ppoint2.x() ){
 	  //If first point is above, omit edge because it runs
 	  //'against the grain'.
@@ -2993,7 +2989,7 @@ namespace VisiLibity
 	    continue;
 	  //Otherwise split the edge, making sure angles are assigned
 	  //correctly on each side of the split point.
-	  split_bottom = split_top 
+	  split_bottom = split_top
 	    = Polar_Point(  Observer,
 			    Point( t*ppoint1.x() + (1-t)*ppoint2.x(),
 				   Observer.y() )  );
@@ -3006,7 +3002,7 @@ namespace VisiLibity
 	//If the edge is not horizontal and doesn't cross the ray
 	//emanating horizontal and right of the Observer.
 	else if( ppoint1.bearing() >= ppoint2.bearing()
-		 && ppoint2.bearing() == Angle(0.0) 
+		 && ppoint2.bearing() == Angle(0.0)
 		 && ppoint1.bearing() > Angle(M_PI) )
 	  ppoint2.set_bearing_to_2pi();
 	//Filter out edges which run 'against the grain'.
@@ -3016,16 +3012,16 @@ namespace VisiLibity
 	  continue;
 	elp.push_back(  Polar_Edge( ppoint1, ppoint2 )  );
 	continue;
-      }    
+      }
       //If edge is horizontal (w/in epsilon).
       else{
 	//Filter out edges which run 'against the grain'.
-	if( ppoint1.bearing() >= ppoint2.bearing() ) 
+	if( ppoint1.bearing() >= ppoint2.bearing() )
 	  continue;
 	elp.push_back(  Polar_Edge( ppoint1, ppoint2 )  );
       }
     }}
-  
+
     //Construct a SORTED LIST, q1, OF VERTICES represented by
     //Polar_Point_With_Edge_Info objects.  A
     //Polar_Point_With_Edge_Info is a derived class of Polar_Point
@@ -3042,8 +3038,8 @@ namespace VisiLibity
     std::list<Polar_Point_With_Edge_Info> q1;
     Polar_Point_With_Edge_Info ppoint_wei1, ppoint_wei2;
     std::list<Polar_Edge>::iterator elp_iterator;
-    for(elp_iterator=elp.begin(); 
-	elp_iterator!=elp.end(); 
+    for(elp_iterator=elp.begin();
+	elp_iterator!=elp.end();
 	elp_iterator++){
       ppoint_wei1.set_polar_point( elp_iterator->first );
       ppoint_wei1.incident_edge = elp_iterator;
@@ -3062,7 +3058,7 @@ namespace VisiLibity
 	  ppoint_wei1.set_bearing( Angle(0.0) );
 	  (elp_iterator->first).set_bearing( Angle(0.0) );
 	}
-      } 
+      }
       else if( distance(Observer, ppoint_wei2) <= epsilon ){
 	if( right_wall_bearing > left_wall_bearing ){
 	  ppoint_wei2.set_bearing(right_wall_bearing);
@@ -3077,28 +3073,28 @@ namespace VisiLibity
       q1.push_back(ppoint_wei2);
     }
     //Put event point in correct order.
-    //STL list's sort method is a stable sort. 
+    //STL list's sort method is a stable sort.
     q1.sort();
 
     if(PRINTING_DEBUG_DATA){
-      std::cout << std::endl 
-		<< "\E[1;37;40m" 
+      std::cout << std::endl
+		<< "\E[1;37;40m"
 		<< "COMPUTING VISIBILITY POLYGON " << std::endl
 		<<  "for an Observer located at [x y] = ["
 		<< Observer << "]"
-		<< "\x1b[0m" 
+		<< "\x1b[0m"
 		<< std::endl << std::endl
-		<< "\E[1;37;40m" <<"PREPROCESSING" << "\x1b[0m" 
-		<< std::endl << std::endl 
+		<< "\E[1;37;40m" <<"PREPROCESSING" << "\x1b[0m"
+		<< std::endl << std::endl
 		<< "q1 is" << std::endl;
       std::list<Polar_Point_With_Edge_Info>::iterator q1_itr;
       for(q1_itr=q1.begin(); q1_itr!=q1.end(); q1_itr++){
-	std::cout << "[x  y  bearing  range is_first] = [" 
-		  << q1_itr->x() << "  " 
-		  << q1_itr->y() << "  " 
-		  << q1_itr->bearing() << "  " 
-		  << q1_itr->range() << "  " 
-		  << q1_itr->is_first << "]" 
+	std::cout << "[x  y  bearing  range is_first] = ["
+		  << q1_itr->x() << "  "
+		  << q1_itr->y() << "  "
+		  << q1_itr->bearing() << "  "
+		  << q1_itr->range() << "  "
+		  << q1_itr->is_first << "]"
 		  << std::endl;
       }
     }
@@ -3126,32 +3122,32 @@ namespace VisiLibity
     std::priority_queue<std::list<Polar_Edge>::iterator,
                         std::vector<std::list<Polar_Edge>::iterator>,
                         Incident_Edge_Compare> q2(my_iec);
-   
+
     //Initialize main loop.
     current_vertex = q1.front(); q1.pop_front();
     active_edge = current_vertex.incident_edge;
 
     if(PRINTING_DEBUG_DATA){
       std::cout << std::endl
-		<< "\E[1;37;40m" 
-		<< "INITIALIZATION" 
-		<< "\x1b[0m" 
+		<< "\E[1;37;40m"
+		<< "INITIALIZATION"
+		<< "\x1b[0m"
 		<< std::endl << std::endl
-		<< "\x1b[35m" 
-		<< "Pop first vertex off q1" 
+		<< "\x1b[35m"
+		<< "Pop first vertex off q1"
 		<< "\x1b[0m"
 		<< ", set as current_vertex, \n"
 		<< "and set active_edge to the corresponding "
 		<< "incident edge."
 		<< std::endl;
-      print_cv_and_ae(current_vertex, active_edge); 
+      print_cv_and_ae(current_vertex, active_edge);
     }
 
     //Insert e into q2 as long as it doesn't contain the
     //Observer.
     if( distance(Observer,active_edge->first) > epsilon
 	 && distance(Observer,active_edge->second) > epsilon ){
-     
+
       if(PRINTING_DEBUG_DATA){
 	std::cout << std::endl
 		  << "Push current_vertex's edge onto q2."
@@ -3163,13 +3159,13 @@ namespace VisiLibity
 
     if(PRINTING_DEBUG_DATA){
       std::cout << std::endl
-		<< "\E[32m" 
-		<< "Add current_vertex to visibility polygon." 
-		<< "\x1b[0m" 
+		<< "\E[32m"
+		<< "Add current_vertex to visibility polygon."
+		<< "\x1b[0m"
 		<< std::endl << std::endl
-		<< "\E[1;37;40m" 
-		<< "MAIN LOOP" 
-		<< "\x1b[0m" 
+		<< "\E[1;37;40m"
+		<< "MAIN LOOP"
+		<< "\x1b[0m"
 		<< std::endl;
     }
 
@@ -3186,7 +3182,7 @@ namespace VisiLibity
 
       if(PRINTING_DEBUG_DATA){
 	std::cout << std::endl
-		  << "\x1b[35m" 
+		  << "\x1b[35m"
 		  << "Pop next vertex off q1" << "\x1b[0m"
 		  << " and set as current_vertex."
 		  << std::endl;
@@ -3196,7 +3192,7 @@ namespace VisiLibity
       //---Handle Event Point---
 
       //TYPE 1: current_vertex is the _second_vertex_ of active_edge.
-      if( current_vertex.incident_edge == active_edge 
+      if( current_vertex.incident_edge == active_edge
 	  && !current_vertex.is_first ){
 
 	if(PRINTING_DEBUG_DATA){
@@ -3206,7 +3202,7 @@ namespace VisiLibity
 		    << std::endl;
 	}
 
-	if( !q1.empty() ){ 
+	if( !q1.empty() ){
 	  //If the next vertex in q1 is contiguous.
 	  if( distance( current_vertex, q1.front() ) <= epsilon ){
 
@@ -3223,11 +3219,11 @@ namespace VisiLibity
 
 	if(PRINTING_DEBUG_DATA){
 	  std::cout << std::endl
-		    << "\E[32m" << "Add current_vertex to visibility polygon." 
+		    << "\E[32m" << "Add current_vertex to visibility polygon."
 		    << "\x1b[0m" << std::endl;
 	}
 
-	//Push current_vertex onto visibility polygon 
+	//Push current_vertex onto visibility polygon
 	vertices_.push_back( current_vertex );
 	chop_spikes_at_back(Observer, epsilon);
 
@@ -3238,12 +3234,12 @@ namespace VisiLibity
 	    std::cout << std::endl
 		      << "Examine edge at top of q2." << std::endl
 		      << "1st point of e [x  y  bearing  range] = ["
-		      << (e->first).x() << "  " 
+		      << (e->first).x() << "  "
 		      << (e->first).y() << "  "
 		      << (e->first).bearing() << "  "
 		      << (e->first).range() << "]" << std::endl
-		      << "2nd point of e [x  y  bearing  range] = [" 
-		      << (e->second).x() << "  " 
+		      << "2nd point of e [x  y  bearing  range] = ["
+		      << (e->second).x() << "  "
 		      << (e->second).y() << "  "
 		      << (e->second).bearing() << "  "
 		      << (e->second).range() << "]" << std::endl;
@@ -3252,16 +3248,16 @@ namespace VisiLibity
 	  //If the current_vertex bearing has not passed, in the
 	  //lex. order sense, the bearing of the second point of the
 	  //edge at the front of q2.
-	  if(  ( current_vertex.bearing().get() 
+	  if(  ( current_vertex.bearing().get()
 		 <= e->second.bearing().get() )
 	       //For robustness.
 	       && distance( Ray(Observer, current_vertex.bearing()),
 			     e->second ) >= epsilon
 	       /* was
 	       and std::min( distance(Ray(Observer, current_vertex.bearing()),
-				      e->second), 
+				      e->second),
 			     distance(Ray(Observer, e->second.bearing()),
-				      current_vertex) 
+				      current_vertex)
 			     ) >= epsilon
 	       */
 	       ){
@@ -3271,9 +3267,9 @@ namespace VisiLibity
 				 Line_Segment(e->first,
 					      e->second),
 				 epsilon );
-	    	    
+
 	    //assert( xing.size() > 0 );
-	    
+
 	    if( xing.size() > 0 ){
 	      k = Polar_Point( Observer , xing.first() );
 	    }
@@ -3284,11 +3280,11 @@ namespace VisiLibity
 
 	    if(PRINTING_DEBUG_DATA){
 	      std::cout << std::endl
-			<< "\E[32m" 
-			<< "Add a type 1 k-point to visibility polygon." 
+			<< "\E[32m"
+			<< "Add a type 1 k-point to visibility polygon."
 			<< "\x1b[0m" << std::endl
 			<< std::endl
-			<< "Set active_edge to edge at top of q2." 
+			<< "Set active_edge to edge at top of q2."
 			<< std::endl;
 	    }
 
@@ -3303,7 +3299,7 @@ namespace VisiLibity
 	    std::cout << std::endl
 		      << "Pop edge off top of q2." << std::endl;
 	  }
-	  
+
 	  q2.pop();
 	}
       } //Close Type 1.
@@ -3316,9 +3312,9 @@ namespace VisiLibity
 			     Line_Segment(active_edge->first,
 					  active_edge->second),
 			     epsilon );
-	if(  xing.size() == 0 
+	if(  xing.size() == 0
 	     || ( distance(active_edge->first, Observer) <= epsilon
-		  && active_edge->second.bearing() 
+		  && active_edge->second.bearing()
 		  <= current_vertex.bearing() )
 	     || active_edge->second < current_vertex  ){
 	  k_range = INFINITY;
@@ -3330,28 +3326,28 @@ namespace VisiLibity
 
 	//Incident edge of current_vertex.
 	e = current_vertex.incident_edge;
-	
+
 	if(PRINTING_DEBUG_DATA){
 	  std::cout << std::endl
-		    << "               k_range = " 
-		    << k_range 
+		    << "               k_range = "
+		    << k_range
 		    << " (range of active edge along "
 		    <<   "bearing of current vertex)" << std::endl
-		    << "current_vertex.range() = " 
+		    << "current_vertex.range() = "
 		    << current_vertex.range() << std::endl;
 	}
-	
+
 	//Insert e into q2 as long as it doesn't contain the
 	//Observer.
 	if( distance(Observer, e->first) > epsilon
 	    && distance(Observer, e->second) > epsilon ){
-	 
+
 	  if(PRINTING_DEBUG_DATA){
 	    std::cout << std::endl
 		      << "Push current_vertex's edge onto q2."
 		      << std::endl;
 	  }
-	  
+
 	  q2.push(e);
 	}
 
@@ -3370,7 +3366,7 @@ namespace VisiLibity
 		      << "(2) that edge should not become "
 		      << "the next active_edge."
 		      << std::endl;
-	 
+
 	  }
 
 	} //Close Type 2.
@@ -3379,9 +3375,9 @@ namespace VisiLibity
 	//other than active_edge, and (2) that edge should become the
 	//next active_edge.  This happens, e.g., if that edge is
 	//(rangewise) in front along the current bearing.
-	if(  k_range >= current_vertex.range() 
+	if(  k_range >= current_vertex.range()
 	     ){
-	  
+
 	  if(PRINTING_DEBUG_DATA){
 	    std::cout << std::endl
 		      << "\E[36m" << "TYPE 3:" << "\x1b[0m"
@@ -3398,14 +3394,14 @@ namespace VisiLibity
 	  if( xing.size() > 0
 	      //and k == k
 	      && k_range != INFINITY
-	      && distance(k, current_vertex) > epsilon 
+	      && distance(k, current_vertex) > epsilon
 	      && distance(active_edge->first, Observer) > epsilon
 	      ){
-	   
+
 	    if(PRINTING_DEBUG_DATA){
 	      std::cout << std::endl
-			<< "\E[32m" 
-			<< "Add type 3 k-point to visibility polygon." 
+			<< "\E[32m"
+			<< "Add type 3 k-point to visibility polygon."
 			<< "\x1b[0m" << std::endl;
 	    }
 
@@ -3422,16 +3418,16 @@ namespace VisiLibity
 
 	  if(PRINTING_DEBUG_DATA){
 	    std::cout << std::endl
-		      << "\E[32m" << "Add current_vertex to visibility polygon." 
+		      << "\E[32m" << "Add current_vertex to visibility polygon."
 		      << "\x1b[0m" << std::endl
 		      << std::endl
-		      << "Set active_edge to edge of current_vertex." 
+		      << "Set active_edge to edge of current_vertex."
 		      << std::endl;
 	  }
 
 	} //Close Type 3.
       }
-      
+
       if(PRINTING_DEBUG_DATA){
 	std::cout << std::endl
 		  << "visibility polygon vertices so far are \n"
@@ -3441,18 +3437,18 @@ namespace VisiLibity
     }                            //
                                  //
     //-------END MAIN LOOP-------//
-  
+
     //The Visibility_Polygon should have a minimal representation
     chop_spikes_at_wrap_around( Observer , epsilon );
     eliminate_redundant_vertices( epsilon );
     chop_spikes( Observer, epsilon );
     enforce_standard_form();
-    
+
     if(PRINTING_DEBUG_DATA){
       std::cout << std::endl
 		<< "Final visibility polygon vertices are \n"
 		<< Polygon(vertices_) << std::endl
-		<< std::endl;      
+		<< std::endl;
     }
 
   }
@@ -3481,7 +3477,7 @@ namespace VisiLibity
     //copy each entry
     for(unsigned i=0; i<n_; i++){
     for(unsigned j=0; j<n_; j++){
-      adjacency_matrix_[i][j] 
+      adjacency_matrix_[i][j]
 	= vg2.adjacency_matrix_[i][j];
     }}
   }
@@ -3502,7 +3498,7 @@ namespace VisiLibity
     adjacency_matrix_[0] = new bool[n_*n_];
     for(unsigned i=1; i<n_; i++)
       adjacency_matrix_[i] = adjacency_matrix_[i-1] + n_;
-    
+
     // fill adjacency matrix by checking for inclusion in the
     // visibility polygons
     Polygon polygon_temp;
@@ -3515,8 +3511,8 @@ namespace VisiLibity
 	  adjacency_matrix_[ k1 ][ k1 ] = true;
 	else
 	  adjacency_matrix_[ k1 ][ k2 ] =
-	    adjacency_matrix_[ k2 ][ k1 ] =    
-	    environment(k2).in( polygon_temp , epsilon ); 
+	    adjacency_matrix_[ k2 ][ k1 ] =
+	    environment(k2).in( polygon_temp , epsilon );
       }
     }
   }
@@ -3536,7 +3532,7 @@ namespace VisiLibity
     adjacency_matrix_[0] = new bool[n_*n_];
     for(unsigned i=1; i<n_; i++)
       adjacency_matrix_[i] = adjacency_matrix_[i-1] + n_;
-    
+
     // fill adjacency matrix by checking for inclusion in the
     // visibility polygons
     Polygon polygon_temp;
@@ -3549,32 +3545,32 @@ namespace VisiLibity
 	  adjacency_matrix_[ k1 ][ k1 ] = true;
 	else
 	  adjacency_matrix_[ k1 ][ k2 ] =
-	    adjacency_matrix_[ k2 ][ k1 ] =    
-	    points[k2].in( polygon_temp , epsilon ); 
+	    adjacency_matrix_[ k2 ][ k1 ] =
+	    points[k2].in( polygon_temp , epsilon );
       }
     }
   }
 
-  
+
   Visibility_Graph::Visibility_Graph(const Guards& guards,
-				     const Environment& environment, 
+				     const Environment& environment,
 				     double epsilon)
   {
     *this = Visibility_Graph( guards.positions_,
-			      environment, 
+			      environment,
 			      epsilon );
   }
-  
-  
+
+
   bool Visibility_Graph::operator () (unsigned i1,
 				      unsigned j1,
 				      unsigned i2,
-				      unsigned j2) const 
+				      unsigned j2) const
   {
     return adjacency_matrix_[ two_to_one(i1,j1) ][ two_to_one(i2,j2) ];
   }
   bool Visibility_Graph::operator () (unsigned k1,
-				      unsigned k2) const 
+				      unsigned k2) const
   {
     return adjacency_matrix_[ k1 ][ k2 ];
   }
@@ -3592,19 +3588,19 @@ namespace VisiLibity
   }
 
 
-  Visibility_Graph& Visibility_Graph::operator = 
+  Visibility_Graph& Visibility_Graph::operator =
   (const Visibility_Graph& visibility_graph_temp)
   {
     if( this == &visibility_graph_temp )
       return *this;
-    
+
     n_ = visibility_graph_temp.n_;
     vertex_counts_ = visibility_graph_temp.vertex_counts_;
 
     //resize adjacency_matrix_
     if( adjacency_matrix_ != NULL ){
       delete [] adjacency_matrix_[0];
-      delete [] adjacency_matrix_; 
+      delete [] adjacency_matrix_;
     }
     adjacency_matrix_ = new bool*[n_];
     adjacency_matrix_[0] = new bool[n_*n_];
@@ -3614,14 +3610,14 @@ namespace VisiLibity
     //copy each entry
     for(unsigned i=0; i<n_; i++){
     for(unsigned j=0; j<n_; j++){
-      adjacency_matrix_[i][j] 
+      adjacency_matrix_[i][j]
 	= visibility_graph_temp.adjacency_matrix_[i][j];
     }}
-    
+
     return *this;
   }
-  
-  
+
+
   unsigned Visibility_Graph::two_to_one(unsigned i,
 					unsigned j) const
   {
@@ -3635,11 +3631,11 @@ namespace VisiLibity
   }
 
 
-  Visibility_Graph::~Visibility_Graph()    
-  { 
+  Visibility_Graph::~Visibility_Graph()
+  {
     if( adjacency_matrix_ != NULL ){
       delete [] adjacency_matrix_[0];
-      delete [] adjacency_matrix_; 
+      delete [] adjacency_matrix_;
     }
   }
 

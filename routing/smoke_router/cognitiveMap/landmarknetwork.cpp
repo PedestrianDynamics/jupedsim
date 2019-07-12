@@ -118,8 +118,8 @@ void LandmarkNetwork::AddConnection(const ptrConnection &connection)
     //find indeces of vertices(landmarks) in graph
     ptrLandmark landmarkA = connection->GetLandmarks().first;
     ptrLandmark landmarkB = connection->GetLandmarks().second;
-    Vertex A;
-    Vertex B;
+    Vertex A{};
+    Vertex B{};
 
     for (auto it=_landmarks.begin(); it!=_landmarks.end(); ++it)
     {
