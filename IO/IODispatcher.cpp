@@ -35,6 +35,7 @@
 #define _USE_MATH_DEFINES
 
 using namespace std;
+namespace fs = std::filesystem;
 
 
 IODispatcher::IODispatcher()
@@ -466,6 +467,8 @@ void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building* building, i
      std::string eventFileName = getEventFileName(building->GetProjectFilename());
      std::string trainTimeTableFileName = getTrainTimeTableFileName(building->GetProjectFilename());
      std::string trainTypeFileName = getTrainTypeFileName(building->GetProjectFilename());
+     fs::path projRoot(building->GetProjectRootDir());
+
      (void) seed; (void) nPeds;
      char tmp[100] = "";
      sprintf(tmp, "#description: jpscore (%s)", JPSCORE_VERSION);
@@ -474,31 +477,37 @@ void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building* building, i
      Write(tmp);
      sprintf(tmp, "#framerate: %0.2f",fps);
      Write(tmp);
-     sprintf(tmp,"#geometry: %s",building->GetGeometryFilename().c_str());
+     std::string tmpGeo= (projRoot/fs::path(building->GetGeometryFilename())).string();
+     sprintf(tmp,"#geometry: %s",  tmpGeo.c_str());
      Write(tmp);
      if(sourceFileName != "")
      {
-          sprintf(tmp,"#sources: %s", sourceFileName.c_str());
+          std::string tmpSource= (projRoot/fs::path(sourceFileName)).string();
+          sprintf(tmp,"#sources: %s", tmpSource.c_str());
           Write(tmp);
      }
      if(goalFileName != "")
      {
-          sprintf(tmp,"#goals: %s", goalFileName.c_str());
+          std::string tmpGoal= (projRoot/fs::path(goalFileName)).string();
+          sprintf(tmp,"#goals: %s", tmpGoal.c_str());
           Write(tmp);
      }
      if( eventFileName != "")
      {
-          sprintf(tmp,"#events: %s", eventFileName.c_str());
+          std::string tmpEvent= (projRoot/fs::path(eventFileName)).string();
+          sprintf(tmp,"#events: %s", tmpEvent.c_str());
           Write(tmp);
      }
      if( trainTimeTableFileName  != "")
      {
-          sprintf(tmp,"#trainTimeTable: %s", trainTimeTableFileName.c_str());
+          std::string tmpTTT= (projRoot/fs::path(trainTimeTableFileName)).string();
+          sprintf(tmp,"#trainTimeTable: %s", tmpTTT.c_str());
           Write(tmp);
      }
      if( trainTypeFileName  != "")
      {
-          sprintf(tmp,"#trainType: %s", trainTypeFileName.c_str());
+          std::string tmpTT= (projRoot/fs::path(trainTypeFileName)).string();
+          sprintf(tmp,"#trainType: %s", tmpTT.c_str());
           Write(tmp);
      }
      Write("#ID: the agent ID");

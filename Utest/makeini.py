@@ -8,6 +8,7 @@ import sys
 import time
 import itertools
 import numpy as np
+from numpy import linspace
 from shutil import copy2, rmtree, move
 
 try:
