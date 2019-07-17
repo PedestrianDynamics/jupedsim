@@ -4,22 +4,23 @@
 		  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		  xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 
-	<!-- seed used for initialising random generator -->
-	<seed>12542</seed>
-	<!-- geometry file -->
-	<max_sim_time>300</max_sim_time>
-	<geometry>wa_triangle_geo.xml</geometry>
-	<!--<geometry>wa_triangle_geo_wa_outside3.xml</geometry>-->
-	<!--<events_file>events_list.xml</events_file>-->
-	<!--<event_realtime>events.txt</event_realtime>-->
-	<num_threads>1</num_threads>
-
-	<!-- traectories file and format -->
-	<trajectories format="xml-plain"  fps="8">
-		<file location="wa_triangle_traj.xml" />
-	</trajectories>
-	<!-- where to store the logs -->
-	<!--<logfile>log.txt</logfile>-->
+  <header>
+    <!-- seed used for initialising random generator -->
+    <seed>12542</seed>
+    <!-- geometry file -->
+    <max_sim_time>300</max_sim_time>
+    <geometry>wa_triangle_geo.xml</geometry>
+    <!--<geometry>wa_triangle_geo_wa_outside3.xml</geometry>-->
+    <!--<events_file>events_list.xml</events_file>-->
+    <!--<event_realtime>events.txt</event_realtime>-->
+    <num_threads>1</num_threads>
+    <!-- traectories file and format -->
+    <trajectories format="xml-plain"  fps="8">
+      <file location="wa_triangle_traj.xml" />
+    </trajectories>
+    <!-- where to store the logs -->
+    <logfile>log.txt</logfile>
+  </header>
 
 	<!-- traffic information: e.g closed doors or smoked rooms -->
 	<!--<traffic_constraints>-->

@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <JuPedSim project="JPS-Project" version="0.8"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 
-  <!-- seed used for initialising random generator -->
-  <seed>12542</seed>
-  <max_sim_time>1800</max_sim_time>
-  <num_threads>1</num_threads>
-  <show_statistics>true</show_statistics>
-  <logfile>log.txt</logfile>
-  <!-- geometry file -->
-  <geometry>geometry.xml</geometry>
-  <!-- trajectories file and format -->
-  <trajectories format="xml-plain" fps="8">
-    <file location="CS1_traj.xml" />
-    <!--<socket hostname="127.0.0.1" port="8989"/> -->
-  </trajectories>
-  <!-- where to store the logs -->
-  <!--<logfile>log.txt</logfile> -->
-
+  <header>
+    <!-- seed used for initialising random generator -->
+    <seed>12542</seed>
+    <max_sim_time>1800</max_sim_time>
+    <num_threads>1</num_threads>
+    <show_statistics>true</show_statistics>
+    <logfile>log.txt</logfile>
+    <!-- geometry file -->
+    <geometry>geometry.xml</geometry>
+    <!-- trajectories file and format -->
+    <trajectories format="xml-plain" fps="8">
+      <file location="CS1_traj.xml" />
+      <!--<socket hostname="127.0.0.1" port="8989"/> -->
+    </trajectories>
+    <!-- where to store the logs -->
+    <logfile>log.txt</logfile>
+  </header>
 
   <!-- traffic information: e.g closed doors -->
   <traffic_constraints>
@@ -69,7 +70,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
             <atau mu="0.5" sigma="0.001" />
         </agent_parameters>
     </model>
-    
+
     <model operational_model_id="2" description="gompertz">
         <model_parameters>
             <solver>euler</solver>
@@ -96,7 +97,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
             <atau mu="0.5" sigma="0.001" />
         </agent_parameters>
     </model>
-    
+
     <model operational_model_id="3" description="Tordeux2015">
         <model_parameters>
             <solver>euler</solver>
@@ -127,9 +128,9 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
         <!-- <parameters> -->
         <!--     <navigation_lines file="routing.xml" /> -->
         <!-- </parameters> -->
-        
+
     </router>
-    
+
 </route_choice_models>
 
 </JuPedSim>
