@@ -1276,13 +1276,10 @@ bool Building::AddGoal(Goal* goal)
       return true;
 }
 
-bool Building::
-
-
-AddTrainType(std::shared_ptr<TrainType> TT)
+bool Building::AddTrainType(std::shared_ptr<TrainType> TT)
 {
       if (_trainTypes.count(TT->type)!=0) {
-            Log->Write("WARNING: Duplicate type for train found [%s]",TT->type);
+            Log->Write("WARNING: Duplicate type for train found [%s]",TT->type.c_str());
       }
       _trainTypes[TT->type] = TT;
       return true;
