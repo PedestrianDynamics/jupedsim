@@ -252,167 +252,167 @@ bool IniFileParser::Parse(std::string iniFile)
 
 bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
 {
-          //logfile
-          if (xHeader->FirstChild("logfile")) {
-               _config->SetErrorLogFile(
-                    _config->GetProjectRootDir() + xHeader->FirstChild("logfile")->FirstChild()->Value());
-               _config->SetLog(2);
-               Log->Write("INFO:\tlogfile <%s>", _config->GetErrorLogFile().c_str());
+     //logfile
+     if (xHeader->FirstChild("logfile")) {
+          _config->SetErrorLogFile(
+               _config->GetProjectRootDir() + xHeader->FirstChild("logfile")->FirstChild()->Value());
+          _config->SetLog(2);
+          Log->Write("INFO:\tlogfile <%s>", _config->GetErrorLogFile().c_str());
+     }
+     Log->Write("----\nJuPedSim - JPScore\n");
+     Log->Write("Current date   : %s %s", __DATE__, __TIME__);
+     Log->Write("Version        : %s", JPSCORE_VERSION);
+     Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
+     Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
+     Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
+     Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
+
+
+     //seed
+     if (xHeader->FirstChild("seed")) {
+          TiXmlNode* seedNode = xHeader->FirstChild("seed")->FirstChild();
+          if (seedNode) {
+               const char* seedValue = seedNode->Value();
+               _config->SetSeed((unsigned int)atoi(seedValue));//strtol
           }
-          Log->Write("----\nJuPedSim - JPScore\n");
-          Log->Write("Current date   : %s %s", __DATE__, __TIME__);
-          Log->Write("Version        : %s", JPSCORE_VERSION);
-          Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
-          Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
-          Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
-          Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
-
-
-          //seed
-          if (xHeader->FirstChild("seed")) {
-               TiXmlNode* seedNode = xHeader->FirstChild("seed")->FirstChild();
-               if (seedNode) {
-                    const char* seedValue = seedNode->Value();
-                    _config->SetSeed((unsigned int)atoi(seedValue));//strtol
-               }
-               else {
-                    _config->SetSeed((unsigned int)time(NULL));
-               }
+          else {
+               _config->SetSeed((unsigned int)time(NULL));
           }
-          // srand(_config->GetSeed());
-          Log->Write("INFO:\trandom seed <%d>", _config->GetSeed());
+     }
+     // srand(_config->GetSeed());
+     Log->Write("INFO:\trandom seed <%d>", _config->GetSeed());
 
-          // max simulation time
-          if (xHeader->FirstChild("max_sim_time")) {
-               const char* tmax =
-                    xHeader->FirstChildElement("max_sim_time")->FirstChild()->Value();
-               _config->SetTmax(atof(tmax));
-               Log->Write("INFO: \tMaximal simulation time <%.2f> seconds", _config->GetTmax());
-          }
+     // max simulation time
+     if (xHeader->FirstChild("max_sim_time")) {
+          const char* tmax =
+               xHeader->FirstChildElement("max_sim_time")->FirstChild()->Value();
+          _config->SetTmax(atof(tmax));
+          Log->Write("INFO: \tMaximal simulation time <%.2f> seconds", _config->GetTmax());
+     }
 
-          // Progressbar
-          if (xHeader->FirstChild("progressbar")) {
-               _config->SetPRB(true);
-               Log->Write("INFO: \tUse Progressbar");
-          }
+     // Progressbar
+     if (xHeader->FirstChild("progressbar")) {
+          _config->SetPRB(true);
+          Log->Write("INFO: \tUse Progressbar");
+     }
 
-          // geometry file name
-          if (xHeader->FirstChild("geometry")) {
-               std::string filename = xHeader->FirstChild("geometry")->FirstChild()->Value();
-               _config->SetGeometryFile(filename);
-               Log->Write("INFO: \tgeometry <%s>", filename.c_str());
-          }
+     // geometry file name
+     if (xHeader->FirstChild("geometry")) {
+          std::string filename = xHeader->FirstChild("geometry")->FirstChild()->Value();
+          _config->SetGeometryFile(filename);
+          Log->Write("INFO: \tgeometry <%s>", filename.c_str());
+     }
 
 
-          //max CPU
-          int max_threads = 1;
+     //max CPU
+     int max_threads = 1;
 #ifdef _OPENMP
-          max_threads = omp_get_max_threads();
+     max_threads = omp_get_max_threads();
 #endif
-          if (xHeader->FirstChild("num_threads")) {
-               TiXmlNode* numthreads = xHeader->FirstChild("num_threads")->FirstChild();
-               if (numthreads) {
+     if (xHeader->FirstChild("num_threads")) {
+          TiXmlNode* numthreads = xHeader->FirstChild("num_threads")->FirstChild();
+          if (numthreads) {
 #ifdef _OPENMP
-                    omp_set_num_threads(xmltoi(numthreads->Value()));
+               omp_set_num_threads(xmltoi(numthreads->Value()));
 #endif
-               }
           }
-          _config->SetMaxOpenMPThreads(omp_get_max_threads());
-          Log->Write("INFO:\tUsing num_threads <%d> threads (%d available)", _config->GetMaxOpenMPThreads(), max_threads);
+     }
+     _config->SetMaxOpenMPThreads(omp_get_max_threads());
+     Log->Write("INFO:\tUsing num_threads <%d> threads (%d available)", _config->GetMaxOpenMPThreads(), max_threads);
 
-          //display statistics
-          if (xHeader->FirstChild("show_statistics")) {
-               std::string value = xHeader->FirstChild("show_statistics")->FirstChild()->Value();
-               _config->SetShowStatistics(value=="true");
-               Log->Write("INFO: \tShow statistics: %s", value.c_str());
+     //display statistics
+     if (xHeader->FirstChild("show_statistics")) {
+          std::string value = xHeader->FirstChild("show_statistics")->FirstChild()->Value();
+          _config->SetShowStatistics(value=="true");
+          Log->Write("INFO: \tShow statistics: %s", value.c_str());
+     }
+
+     //trajectories
+     TiXmlNode* xTrajectories = xHeader->FirstChild("trajectories");
+     if (xTrajectories) {
+          double fps;
+          xHeader->FirstChildElement("trajectories")->Attribute("fps", &fps);
+          _config->SetFps(fps);
+
+          string format =
+               xHeader->FirstChildElement("trajectories")->Attribute(
+                    "format") ?
+               xHeader->FirstChildElement("trajectories")->Attribute(
+                    "format") :
+               "xml-plain";
+          int embedMesh = 0;
+          if (xHeader->FirstChildElement("trajectories")->Attribute(
+                   "embed_mesh")) {
+               embedMesh =
+                    string(xHeader->FirstChildElement("trajectories")->Attribute("embed_mesh"))=="true" ? 1 : 0;
           }
+          if (format=="xml-plain")
+               _config->SetFileFormat(FORMAT_XML_PLAIN);
+          if (format=="xml-plain" && embedMesh==1)
+               _config->SetFileFormat(FORMAT_XML_PLAIN_WITH_MESH);
+          if (format=="xml-bin")
+               _config->SetFileFormat(FORMAT_XML_BIN);
+          if (format=="plain")
+               _config->SetFileFormat(FORMAT_PLAIN);
+          if (format=="vtk")
+               _config->SetFileFormat(FORMAT_VTK);
 
-          //trajectories
-          TiXmlNode* xTrajectories = xHeader->FirstChild("trajectories");
-          if (xTrajectories) {
-               double fps;
-               xHeader->FirstChildElement("trajectories")->Attribute("fps", &fps);
-               _config->SetFps(fps);
+          //color mode
+          string color_mode =
+               xHeader->FirstChildElement("trajectories")->Attribute(
+                    "color_mode") ?
+               xHeader->FirstChildElement("trajectories")->Attribute(
+                    "color_mode") :
+               "velocity";
 
-               string format =
-                    xHeader->FirstChildElement("trajectories")->Attribute(
-                         "format") ?
-                    xHeader->FirstChildElement("trajectories")->Attribute(
-                         "format") :
-                    "xml-plain";
-               int embedMesh = 0;
-               if (xHeader->FirstChildElement("trajectories")->Attribute(
-                        "embed_mesh")) {
-                    embedMesh =
-                         string(xHeader->FirstChildElement("trajectories")->Attribute("embed_mesh"))=="true" ? 1 : 0;
-               }
-               if (format=="xml-plain")
-                    _config->SetFileFormat(FORMAT_XML_PLAIN);
-               if (format=="xml-plain" && embedMesh==1)
-                    _config->SetFileFormat(FORMAT_XML_PLAIN_WITH_MESH);
-               if (format=="xml-bin")
-                    _config->SetFileFormat(FORMAT_XML_BIN);
-               if (format=="plain")
-                    _config->SetFileFormat(FORMAT_PLAIN);
-               if (format=="vtk")
-                    _config->SetFileFormat(FORMAT_VTK);
-
-               //color mode
-               string color_mode =
-                    xHeader->FirstChildElement("trajectories")->Attribute(
-                         "color_mode") ?
-                    xHeader->FirstChildElement("trajectories")->Attribute(
-                         "color_mode") :
-                    "velocity";
-
-               if (color_mode=="velocity")
-                    Pedestrian::SetColorMode(
-                         AgentColorMode::BY_VELOCITY); //TODO: config parameter! does not belong to the pedestrian model, we should create a pedestrian config instead. [gl march '16]
-               if (color_mode=="spotlight") Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
-               if (color_mode=="group") Pedestrian::SetColorMode(AgentColorMode::BY_GROUP);
-               if (color_mode=="knowledge") Pedestrian::SetColorMode(AgentColorMode::BY_KNOWLEDGE);
-               if (color_mode=="router") Pedestrian::SetColorMode(AgentColorMode::BY_ROUTER);
-               if (color_mode=="final_goal") Pedestrian::SetColorMode(AgentColorMode::BY_FINAL_GOAL);
-               if (color_mode=="intermediate_goal") Pedestrian::SetColorMode(AgentColorMode::BY_INTERMEDIATE_GOAL);
+          if (color_mode=="velocity")
+               Pedestrian::SetColorMode(
+                    AgentColorMode::BY_VELOCITY); //TODO: config parameter! does not belong to the pedestrian model, we should create a pedestrian config instead. [gl march '16]
+          if (color_mode=="spotlight") Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
+          if (color_mode=="group") Pedestrian::SetColorMode(AgentColorMode::BY_GROUP);
+          if (color_mode=="knowledge") Pedestrian::SetColorMode(AgentColorMode::BY_KNOWLEDGE);
+          if (color_mode=="router") Pedestrian::SetColorMode(AgentColorMode::BY_ROUTER);
+          if (color_mode=="final_goal") Pedestrian::SetColorMode(AgentColorMode::BY_FINAL_GOAL);
+          if (color_mode=="intermediate_goal") Pedestrian::SetColorMode(AgentColorMode::BY_INTERMEDIATE_GOAL);
 
 
 
 
-               //a file descriptor was given
-               if (xTrajectories->FirstChild("file")) {
-                    std::string tmp;
-                    tmp = xTrajectories->FirstChildElement("file")->Attribute(
-                         "location");
-                    fs::path p(tmp);
-                    fs::path curr_abs_path = fs::current_path();
-                    fs::path rel_path = fs::path(_config->GetProjectRootDir()) / fs::path(tmp);
-                    fs::path combined = (curr_abs_path /= rel_path);
-                    std::string traj = combined.string();
+          //a file descriptor was given
+          if (xTrajectories->FirstChild("file")) {
+               std::string tmp;
+               tmp = xTrajectories->FirstChildElement("file")->Attribute(
+                    "location");
+               fs::path p(tmp);
+               fs::path curr_abs_path = fs::current_path();
+               fs::path rel_path = fs::path(_config->GetProjectRootDir()) / fs::path(tmp);
+               fs::path combined = (curr_abs_path /= rel_path);
+               std::string traj = combined.string();
 
-                    if (traj.c_str())
-                    {
-                         _config->SetTrajectoriesFile(traj);
-                         _config->SetOriginalTrajectoriesFile(traj);
-                    }
-
-
-                    Log->Write("INFO: \toutput file  <%s>", _config->GetTrajectoriesFile().c_str());
-                    Log->Write("INFO: \tin format <%s> at <%.0f> frames per seconds",format.c_str(), _config->GetFps());
+               if (traj.c_str())
+               {
+                    _config->SetTrajectoriesFile(traj);
+                    _config->SetOriginalTrajectoriesFile(traj);
                }
 
-               if (xTrajectories->FirstChild("socket")) {
-                    std::string tmp =
-                         xTrajectories->FirstChildElement("socket")->Attribute("hostname");
-                    if (tmp.c_str())
-                         _config->SetHostname(tmp);
-                    int port;
-                    xTrajectories->FirstChildElement("socket")->Attribute("port", &port);
-                    _config->SetPort(port);
-                    Log->Write("INFO: \tStreaming results to output [%s:%d] ",
-                               _config->GetHostname().c_str(), _config->GetPort());
-               }
+
+               Log->Write("INFO: \toutput file  <%s>", _config->GetTrajectoriesFile().c_str());
+               Log->Write("INFO: \tin format <%s> at <%.0f> frames per seconds",format.c_str(), _config->GetFps());
           }
 
+          if (xTrajectories->FirstChild("socket")) {
+               std::string tmp =
+                    xTrajectories->FirstChildElement("socket")->Attribute("hostname");
+               if (tmp.c_str())
+                    _config->SetHostname(tmp);
+               int port;
+               xTrajectories->FirstChildElement("socket")->Attribute("port", &port);
+               _config->SetPort(port);
+               Log->Write("INFO: \tStreaming results to output [%s:%d] ",
+                          _config->GetHostname().c_str(), _config->GetPort());
+          }
+     }
+     return true;
 }
 bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
 {
