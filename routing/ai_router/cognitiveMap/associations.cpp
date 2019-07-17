@@ -10,7 +10,7 @@ AIAssociation::AIAssociation()
 
 }
 
-AIAssociation::AIAssociation(const AILandmark *landmark, const AILandmark *associated_landmark, bool connected)
+AIAssociation::AIAssociation(const AILandmark *landmark, const AILandmark *associated_landmark, bool /*connected*/)
 {
     _landmark=landmark;
     _associatedLandmark=associated_landmark;
@@ -58,4 +58,3 @@ bool AIAssociation::operator==(const AIAssociation &asso2) const
 {
     return this==&asso2;
 }
-

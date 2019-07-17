@@ -725,7 +725,6 @@ void Building::InitPlatforms()
 
             }//subroom
       }//rooms
-	  return true;
 }
       bool Building::InitInsideGoals()
       {
