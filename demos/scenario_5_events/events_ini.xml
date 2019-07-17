@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.7" 
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<JuPedSim project="JPS-Project" version="0.7"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
 
-  <!-- seed used for initialising random generator -->
-  <seed>12542</seed>
-  <!-- geometry file -->
-  <geometry>events_geo.xml</geometry>
-  <max_sim_time>900</max_sim_time>
-  <events_file>events_list.xml</events_file>
-  <!-- trajectories file and format -->
-  <trajectories format="xml-plain" fps="8">
-    <file location="event_traj.xml" />
-<!--     <socket hostname="127.0.0.1" port="8989"/> -->
-  </trajectories>
-  <!-- where to store the logs -->
-  <logfile>log.txt</logfile>
+  <header>
+    <!-- seed used for initialising random generator -->
+    <seed>12542</seed>
+    <!-- geometry file -->
+    <geometry>events_geo.xml</geometry>
+    <max_sim_time>900</max_sim_time>
+    <events_file>events_list.xml</events_file>
+    <!-- trajectories file and format -->
+    <trajectories format="xml-plain" fps="8">
+      <file location="event_traj.xml" />
+      <!-- <socket hostname="127.0.0.1" port="8989"/> -->
+    </trajectories>
+    <!-- where to store the logs -->
+    <logfile>log.txt</logfile>
+  </header>
 
   <!-- traffic information: e.g closed doors or smoked rooms -->
   <traffic_constraints>
@@ -135,7 +137,7 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
     </router>
 
     <router router_id="2" description="ff_global_shortest"/>
-    
+
   </route_choice_models>
 
 </JuPedSim>
