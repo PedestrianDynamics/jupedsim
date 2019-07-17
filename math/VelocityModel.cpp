@@ -202,7 +202,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 vector<Pedestrian*> neighbours;
                 building->GetGrid()->GetNeighbourhood(ped,neighbours);
 
-                double time = Pedestrian::GetGlobalTime();
                 int size = (int) neighbours.size();
 ////                if (ped->GetID() == 71) {
 ////                     std::cout << "------------------------------------" << std::endl;

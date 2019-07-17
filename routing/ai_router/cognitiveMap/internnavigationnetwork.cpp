@@ -50,8 +50,8 @@ void InternNavigationNetwork::AddVertex(const NavLine *navLine)
 void InternNavigationNetwork::AddEdge(const NavLine *navLine1, const NavLine *navLine2)
 {
     //find indeces of vertices(landmarks) in graph
-    Vertex A;
-    Vertex B;
+    Vertex A{};
+    Vertex B{};
 
     for (auto it=_navLines.begin(); it!=_navLines.end(); ++it)
     {

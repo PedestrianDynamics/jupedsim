@@ -60,9 +60,7 @@ public:
 
      Line(const Point& p1, const Point& p2);
 
-     Line(const Line& orig);
-
-     virtual ~Line();
+     virtual ~Line() = default;
 
      /**
       * All Line elements (also derived class) have a unique ID

@@ -242,8 +242,8 @@ bool Goal::ConvertLineToPoly()
           _crossing->SetPoint2(point2);
      }else{
           _crossing->SetPoint1(_poly[0]);
-          Line line(_poly[_poly.size()/2], _poly[(_poly.size()/2)+1], 0);
-          _crossing->SetPoint2(line.GetCentre());
+          Line tmp_line(_poly[_poly.size()/2], _poly[(_poly.size()/2)+1], 0);
+          _crossing->SetPoint2(tmp_line.GetCentre());
      }
 
 
@@ -352,9 +352,9 @@ int Goal::GetRoomID() const
      return _roomID;
 }
 
-void Goal::SetRoomID(int _roomID)
+void Goal::SetRoomID(int roomID)
 {
-     Goal::_roomID = _roomID;
+     _roomID = roomID;
 }
 
 int Goal::GetSubRoomID() const
@@ -362,7 +362,7 @@ int Goal::GetSubRoomID() const
      return _subRoomID;
 }
 
-void Goal::SetSubRoomID(int _subRoomID)
+void Goal::SetSubRoomID(int subRoomID)
 {
-     Goal::_subRoomID = _subRoomID;
+     _subRoomID = subRoomID;
 }

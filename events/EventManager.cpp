@@ -726,6 +726,7 @@ Router * EventManager::CreateRouter(const RoutingStrategy& strategy)
 
           case ROUTING_FF_QUICKEST:
                rout = new FFRouter(ROUTING_FF_QUICKEST, ROUTING_FF_QUICKEST, _building->GetConfig()->get_has_specific_goals(), _building->GetConfig());
+               break;
 
           default:
                Log->Write("ERROR: \twrong value for routing strategy [%d]!!!\n", strategy );

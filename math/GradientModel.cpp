@@ -120,9 +120,10 @@ bool GradientModel::Init (Building* building)
      pedsToRemove.clear();
      bool error_occurred = false;
 #pragma omp parallel for
-    for(signed int p=0;p<allPeds.size();p++) {
+    for(size_t p=0;p<allPeds.size();p++) {
          Pedestrian* ped = allPeds[p];
-         double cosPhi, sinPhi;
+         double cosPhi = 0;
+         double sinPhi = 0;
          //a destination could not be found for that pedestrian
          if (ped->FindRoute() == -1) {
               Log->Write(

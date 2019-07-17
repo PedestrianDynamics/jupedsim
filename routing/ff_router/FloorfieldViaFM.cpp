@@ -1659,7 +1659,7 @@ void FloorfieldViaFM::writeGoalFF(const std::string& filename, std::vector<int> 
     file.close();
 }
 
-SubRoom* FloorfieldViaFM::isInside(const long int key) {
+SubRoom* FloorfieldViaFM::isInside(const long int /*key*/) {
 //    Point probe = _grid->getPointFromKey(key);
 
 //    const std::map<int, std::shared_ptr<Room>>& roomMap = _building->GetAllRooms();

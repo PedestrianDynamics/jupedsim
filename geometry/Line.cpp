@@ -67,14 +67,6 @@ int Line::GetUniqueID() const
      return _uid;
 }
 
-Line::Line(const Line& orig):
-      _point1(orig.GetPoint1()), _point2(orig.GetPoint2()), _centre(orig.GetCentre()), _length(orig.GetLength()), _uid(orig.GetUniqueID())
-{
-}
-
-Line::~Line()
-{
-}
 
 /*************************************************************
  Setter-Funktionen

@@ -55,21 +55,6 @@ JEllipse::JEllipse()
      _vel0 = 0; // desired speed
 }
 
-JEllipse::JEllipse(const JEllipse& orig)
-{
-     _vel = orig.GetV(); // velocity vector
-     _center = orig.GetCenter();
-     _cosPhi = orig.GetCosPhi();
-     _sinPhi = orig.GetSinPhi();
-     _Xp = orig.GetXp(); //x Ellipse-coord of the centre (Center in (xc,yc) )
-     _Amin = orig.GetAmin(); // Semi-axis in direction of motion:  pAmin + V * pAv
-     _Av = orig.GetAv();
-     _Bmin = orig.GetBmin(); // Semi-axis in direction of shoulders: pBmax - V *[(pBmax - pBmin) / V0]
-     _Bmax = orig.GetBmax();
-     _do_stretch = orig.DoesStretch();
-     _vel0 = orig.GetV0(); // desired speed
-}
-
 
 /*************************************************************
  Setter-Funktionen
@@ -239,9 +224,9 @@ double JEllipse::GetEB() const
      // return (v<v_min)? 0.5*b_shoulder: 0.5*(b_shoulder + a * exp(b*v));
       // todo: we dont  have the possiblity to choose between ellipses and circles.
       // for the moment we can control this only with the parameter values in the following formula
-      
+
       //double x;
-      //if(_vel0 > 0.001) 
+      //if(_vel0 > 0.001)
       //      x = (_Bmax - _Bmin) / _vel0;
       //else
       //      x = 0;

@@ -81,7 +81,7 @@ GlobalRouter::GlobalRouter(int id, RoutingStrategy s) :  Router(id, s)
 GlobalRouter::~GlobalRouter()
 {
      if (_distMatrix && _pathsMatrix) {
-          const int exitsCnt = (const int) (_building->GetNumberOfGoals() + _building->GetAllGoals().size());
+          const int exitsCnt = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
           for (int p = 0; p < exitsCnt; ++p) {
                delete[] _distMatrix[p];
                delete[] _pathsMatrix[p];
@@ -118,7 +118,7 @@ bool GlobalRouter::Init(Building* building)
      }
 
      // initialize the distances matrix for the floydwahrshall
-     const int exitsCnt = (const int) (_building->GetNumberOfGoals() + _building->GetAllGoals().size());
+     const int exitsCnt = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
 
      _distMatrix = new double*[exitsCnt];
      _pathsMatrix = new int*[exitsCnt];
@@ -690,7 +690,7 @@ bool GlobalRouter::GetPath(Pedestrian*ped, int goalID, std::vector<SubRoom*>& pa
  */
 void GlobalRouter::FloydWarshall()
 {
-     const int n = (const int) (_building->GetNumberOfGoals() + _building->GetAllGoals().size());
+     const int n = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
      std::cout << "FloydWarshall ------------------" << std::endl;
      for (int k = 0; k < n; k++) {
           for (int i = 0; i<n; i++) {

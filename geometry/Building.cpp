@@ -687,7 +687,7 @@ bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
       // std::cout << "temp Added Doors: " <<TempAddedDoors[tab->id].size() <<  "\n";
       return true;
 }
-bool Building::InitPlatforms()
+void Building::InitPlatforms()
 {
       int num_platform = -1;
       for (auto& roomItr : _rooms)
