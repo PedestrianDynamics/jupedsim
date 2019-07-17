@@ -535,6 +535,10 @@ void EventManager::ProcessEvent()
                case DoorState::TEMP_CLOSE:
                     TempCloseDoor(event.GetId());
                     break;
+               case DoorState::Error:
+                    Log->Write("WARNING:\t Unknown door state in events. open, close or temp_close. Default: open");
+                    OpenDoor(event.GetId());
+                    break;
                }
                _building->GetRoutingEngine()->setNeedUpdate(true);
           }
@@ -896,4 +900,3 @@ bool EventManager::ReadSchedule()
 
      return true;
 }
-
