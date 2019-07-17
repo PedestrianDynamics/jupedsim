@@ -39,12 +39,9 @@
 #include "../../../geometry/Building.h"
 #include "../BrainStorage.h"
 
-#define UNUSED(x) [&x]{}()  // c++11 silence warnings
-
-SensorManager::SensorManager(const Building * b, BrainStorage * cms)
+SensorManager::SensorManager(const Building * /*b*/, BrainStorage * cms)
      : /*building(b), */cm_storage(cms)
 {
-     UNUSED(b);
     _periodicUpdateInterval=1/UPDATE_RATE;
 }
 

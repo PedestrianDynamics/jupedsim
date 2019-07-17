@@ -34,7 +34,6 @@
 #include "AgentsQueue.h"
 
 #include "../voronoi-boost/VoronoiPositionGenerator.h"
-#define UNUSED(x) [&x]{}()  // c++11 silence warnings
 
 using namespace std;
 

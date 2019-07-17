@@ -252,8 +252,8 @@ void LCGrid::GetNeighbourhood(const Pedestrian* ped, vector<Pedestrian*>& neighb
      if ((myID == 70) && (fmod(Pedestrian::GetGlobalTime() , 45.) == 0) ){
           std::cout << Pedestrian::GetGlobalTime() << ":\t\tNeighborhood of 71 " << neighbourhood.size() << std::endl;
 
-          for (auto& ped : neighbourhood){
-               std::cout << "Neighbor added: " << ped->GetID() << " at " << ped->GetPos().toString() << std::endl;
+          for (auto& neighbour : neighbourhood){
+               std::cout << "Neighbor added: " << neighbour->GetID() << " at " << neighbour->GetPos().toString() << std::endl;
           }
           std::cout << "---------------------------" << std::endl;
 

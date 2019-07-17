@@ -627,7 +627,6 @@ int FFRouter::FindExit(Pedestrian* p)
 void FFRouter::FloydWarshall()
 {
      bool change = false;
-     double savedDistance = 0.;
      int totalnum = _allDoorUIDs.size();
      for(int k = 0; k<totalnum; ++k) {
           for(int i = 0; i<totalnum; ++i) {
@@ -638,7 +637,6 @@ void FFRouter::FloydWarshall()
                     if ((_distMatrix[key_ik] < DBL_MAX) && (_distMatrix[key_kj] < DBL_MAX) &&
                        (_distMatrix[key_ik] + _distMatrix[key_kj] < _distMatrix[key_ij]))
                     {
-                         savedDistance = _distMatrix[key_ij] - _distMatrix[key_ik] - _distMatrix[key_kj];
                          _distMatrix.erase(key_ij);
                          _distMatrix.insert(std::make_pair(key_ij, _distMatrix[key_ik] + _distMatrix[key_kj]));
                          _pathsMatrix.erase(key_ij);
@@ -649,7 +647,6 @@ void FFRouter::FloydWarshall()
           }
      }
      if (change) {
-          //Log->Write("Floyd nochmal!!! %f", savedDistance);
           FloydWarshall();
      } else {
           Log->Write("INFO:\t FloydWarshall done!");

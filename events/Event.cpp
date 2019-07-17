@@ -25,7 +25,7 @@ int Event::GetId() const
      return _id;
 }
 
-const DoorState Event::GetState() const
+const DoorState& Event::GetState() const
 {
      return _state;
 }
