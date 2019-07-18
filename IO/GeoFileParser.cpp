@@ -733,33 +733,32 @@ Goal* GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
      Log->Write("INFO:\t  Goal subroom_id: %d", subroom_id);
 
      Goal* wa = new WaitingArea();
-     WaitingArea* waitingArea = static_cast<WaitingArea*>(wa);
+     auto waitingArea = dynamic_cast<WaitingArea*>(wa);
      waitingArea->SetIsFinalGoal(0);
      waitingArea->SetId(id);
      waitingArea->SetCaption(caption);
-     waitingArea->setOpen(open);
-     waitingArea->setGlobalTimer(global_timer);
-     waitingArea->setMinNumPed(min_peds);
-     waitingArea->setMaxNumPed(max_peds);
-     waitingArea->setWaitingTime(waiting_time);
-     waitingArea->setTransitionID(transition_id);
+     waitingArea->SetOpen(open);
+     waitingArea->SetGlobalTimer(global_timer);
+     waitingArea->SetMinNumPed(min_peds);
+     waitingArea->SetMaxNumPed(max_peds);
+     waitingArea->SetWaitingTime(waiting_time);
+     waitingArea->SetTransitionID(transition_id);
      waitingArea->SetRoomID(room_id);
      waitingArea->SetSubRoomID(subroom_id);
 
      std::map<int, double> nextGoals;
 
-
      //looking for next_wa
      for (TiXmlElement* nextWa = e->FirstChildElement("next_wa"); nextWa;
           nextWa = nextWa->NextSiblingElement("next_wa")) {
-          int nextWaId = xmltoi(nextWa->Attribute("id"));
-          double nextWaP = xmltof(nextWa->Attribute("p"));
+          int nextWaId = xmltoi(nextWa->Attribute("id"), -1);
+          double nextWaP = xmltof(nextWa->Attribute("p"), -1.);
 
           nextGoals.insert(std::pair<int, double>(nextWaId, nextWaP));
      }
 
-     if (!waitingArea->setNextGoals(nextGoals)){
-          Log->Write("ERROR:\t  check probabilties of next goal of WA  %d", id);
+     if (!waitingArea->SetNextGoals(nextGoals)){
+          Log->Write("ERROR:\t  check probabilities of next goal of WA  %d", id);
           return nullptr;
      };
 

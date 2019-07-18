@@ -1,92 +1,108 @@
-//
-// Created by Tobias Schrödter on 15.10.18.
-//
+/**
+ * \file        WaitingArea.cpp
+ * \date        Oct 15, 2018
+ * \version     v0.8
+ * \copyright   <2016-2022> Forschungszentrum Jülich GmbH. All rights reserved.
+ *
+ * \section License
+ * This file is part of JuPedSim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * JuPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * \section Description
+ * Class providing inside goals which can be used to model intermediate goals
+ * within the geometry. Additionally the pedestrians may wait for a certain
+ * time or till a transition opens inside the waiting area.
+ */
 
 #include "WaitingArea.h"
 #include "Building.h"
 
-int WaitingArea::getMaxNumPed() const
+int WaitingArea::GetMaxNumPed() const
 {
-     return maxNumPed;
+     return _maxNumPed;
 }
 
-void WaitingArea::setMaxNumPed(int maxNumPed)
+void WaitingArea::SetMaxNumPed(int maxNumPed)
 {
-     WaitingArea::maxNumPed = maxNumPed;
+     WaitingArea::_maxNumPed = maxNumPed;
 }
 
-int WaitingArea::getMinNumPed() const
+int WaitingArea::GetMinNumPed() const
 {
-     return minNumPed;
+     return _minNumPed;
 }
 
-void WaitingArea::setMinNumPed(int minNumPed)
+void WaitingArea::SetMinNumPed(int minNumPed)
 {
-     WaitingArea::minNumPed = minNumPed;
+     WaitingArea::_minNumPed = minNumPed;
 }
 
-bool WaitingArea::isOpen() const
+bool WaitingArea::IsOpen() const
 {
-     return open;
+     return _open;
 }
 
-void WaitingArea::setOpen(bool open)
+void WaitingArea::SetOpen(bool open)
 {
-     WaitingArea::open = open;
+     WaitingArea::_open = open;
 }
 
-bool WaitingArea::isGlobalTimer() const
+bool WaitingArea::IsGlobalTimer() const
 {
-     return globalTimer;
+     return _globalTimer;
 }
 
-void WaitingArea::setGlobalTimer(bool timer)
+void WaitingArea::SetGlobalTimer(bool timer)
 {
-     WaitingArea::globalTimer = timer;
+     WaitingArea::_globalTimer = timer;
 }
 
-
-const std::map<int, double>& WaitingArea::getNextGoals() const
+const std::map<int, double>& WaitingArea::GetNextGoals() const
 {
-     return nextGoals;
+     return _nextGoals;
 }
 
-bool WaitingArea::setNextGoals(const std::map<int, double>& nextGoals)
+bool WaitingArea::SetNextGoals(const std::map<int, double>& nextGoals)
 {
-     WaitingArea::nextGoals = nextGoals;
+     WaitingArea::_nextGoals = nextGoals;
 
-     nextGoalsOpen.clear();
-
+     // Check for open waiting areas
+     _nextGoalsOpen.clear();
      for (auto& goalItr : nextGoals){
-          nextGoalsOpen[goalItr.first] = true;
+          _nextGoalsOpen[goalItr.first] = true;
      }
 
-     return checkProbabilities();
+     return CheckProbabilities();
 }
 
-bool WaitingArea::checkProbabilities()
+bool WaitingArea::CheckProbabilities()
 {
      double p =0.;
-     for ( std::map<int, double>::iterator it = nextGoals.begin(); it != nextGoals.end(); it++ ){
-          p += it->second;
+     for ( auto it : _nextGoals ){
+          p += it.second;
      }
 
      return (p>0.9999) && (p<1.000001);
 }
 
-void WaitingArea::updateProbabilities()
+void WaitingArea::UpdateProbabilities(bool isOpen, int id)
 {
-
-}
-
-// Open or closes goal with id
-void WaitingArea::updateProbabilities(bool isOpen, int id)
-{
-     if ( nextGoalsOpen.find(id) != nextGoalsOpen.end() ) {
-          nextGoalsOpen[id] = isOpen;
+     if ( _nextGoalsOpen.find(id) != _nextGoalsOpen.end() ) {
+          _nextGoalsOpen[id] = isOpen;
      }
 }
-
 
 std::string WaitingArea::toString()
 {
@@ -99,118 +115,124 @@ std::string WaitingArea::toString()
      out.append(buffer);
      sprintf(buffer, "\tcaption=%s\n", _caption.c_str());
      out.append(buffer);
-     sprintf(buffer, "\tmin_peds=%d\n", minNumPed);
+     sprintf(buffer, "\tmin_peds=%ld\n", _minNumPed);
      out.append(buffer);
-     sprintf(buffer, "\tmax_peds=%d\n", maxNumPed);
+     sprintf(buffer, "\tmax_peds=%ld\n", _maxNumPed);
      out.append(buffer);
-     sprintf(buffer, "\tis_open=%d\n", open);
+     sprintf(buffer, "\tis_open=%d\n", _open);
      out.append(buffer);
-     sprintf(buffer, "\twaiting_time=%f\n", waitingTime);
+     sprintf(buffer, "\twaiting_time=%f\n", _waitingTime);
      out.append(buffer);
 
-     for (auto const& nextWa : nextGoals){
+     for (auto const& nextWa : _nextGoals){
           sprintf(buffer, "\tnext id=%d\tp=%f\n", nextWa.first, nextWa.second);
           out.append(buffer);
      }
      out.append("]");
      return out;
-
 }
 
-double WaitingArea::getWaitingTime() const
+double WaitingArea::GetWaitingTime() const
 {
-     return waitingTime;
+     return _waitingTime;
 }
 
-void WaitingArea::setWaitingTime(double waitingTime)
+void WaitingArea::SetWaitingTime(double waitingTime)
 {
-     WaitingArea::waitingTime = waitingTime;
+     WaitingArea::_waitingTime = waitingTime;
 }
 
 int WaitingArea::GetNextGoal()
 {
-     double random = ((double) std::rand() / (RAND_MAX));
+     std::mt19937_64 gen(_rd());
+     std::uniform_real_distribution<double> unif(0, 1);
+
+     double random = unif(gen);
      double cumProb = 0.;
 
-     for (auto& nextGoal : nextGoals){
+     for (auto& nextGoal : _nextGoals){
           cumProb += nextGoal.second;
-          if ((nextGoalsOpen[nextGoal.first]) && (random <= cumProb)){
+          if ((_nextGoalsOpen[nextGoal.first]) && (random <= cumProb)){
                return nextGoal.first;
           }
      }
      return this->_id;
 }
 
-void WaitingArea::addPed(int ped)
+void WaitingArea::AddPed(int ped)
 {
-     pedInside.insert(ped);
-     if (pedInside.size() >= maxNumPed){
-          open = false;
+     _pedInside.insert(ped);
+     if (_pedInside.size() >= _maxNumPed){
+          _open = false;
      }
 }
 
-void WaitingArea::removePed(int ped)
+void WaitingArea::RemovePed(int ped)
 {
-     pedInside.erase(ped);
-     if (pedInside.size() < maxNumPed){
-          open = true;
+     _pedInside.erase(ped);
+     if (_pedInside.size() < _maxNumPed){
+          _open = true;
      }
-     if (pedInside.size() < minNumPed){
-          startTime = -1.;
+     if (_pedInside.size() < _minNumPed){
+          _startTime = -1.;
      }
-
-
-
 }
 
-void WaitingArea::startTimer(double time)
+void WaitingArea::StartTimer(double time)
 {
-     startTime = time;
-//     std::cout << "Timer started at " << startTime << std::endl;
+     _startTime = time;
 }
 
-bool WaitingArea::isWaiting(double time, const Building* building)
+bool WaitingArea::IsWaiting(double time, const Building* building)
 {
      Transition* trans = nullptr;
-     if (transitionID >= 0){
-          trans = building->GetTransition(transitionID);
+
+     // check if transition id is set
+     if (_transitionID >= 0){
+          trans = building->GetTransition(_transitionID);
      }
 
-     if ((pedInside.size() >= minNumPed) && (startTime < 0. )){
-          startTimer(time);
+     // if numPed > minNumPed and timer not started: start timer
+     if ((_pedInside.size() >= _minNumPed) && (_startTime < 0. )){
+          StartTimer(time);
      }
 
-     if ((trans == nullptr) ){
-          if (globalTimer){
-               if (time > waitingTime){
+     // if no transition is used as waiting reference
+     if (trans == nullptr){
+          // if global timer is used
+          if (_globalTimer){
+               // if time since simulation is started is larger than waiting time: no more waiting
+               if (time > _waitingTime){
                     return false;
                }
           }else{
-               if ((time > startTime + waitingTime) && (startTime >= 0. )){
+               // if start time is set and waitingTime is exceeded: no more waitng
+               if ((time > _startTime + _waitingTime) && (_startTime >= 0. )){
                     return false;
                }
           }
      }else{
+          // if transition is open: no more waiting
           if (trans->IsOpen()){
                return false;
           }
      }
 
-//     std::cout << "Waiting ..." << std::endl;
+     // if none of the case above: waiting
      return true;
 }
 
-int WaitingArea::getNumPed()
+int WaitingArea::GetNumPed()
 {
-     return pedInside.size();
+     return _pedInside.size();
 }
 
-int WaitingArea::getTransitionID() const
+int WaitingArea::GetTransitionID() const
 {
-     return transitionID;
+     return _transitionID;
 }
 
-void WaitingArea::setTransitionID(int transitionID)
+void WaitingArea::SetTransitionID(int transitionID)
 {
-     WaitingArea::transitionID = transitionID;
+     WaitingArea::_transitionID = transitionID;
 }
