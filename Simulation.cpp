@@ -477,12 +477,11 @@ void Simulation::PrintStatistics(double simTime)
             }
             Log->Write("More Information in the file: %s", statsfile.c_str());
             {
-                 auto statOutput = new FileHandler(statsfile.c_str());
-                 statOutput->Write("#Simulation time: %.2f", simTime);
-                 statOutput->Write("#Flow at exit "+goal->GetCaption()+"( ID "+to_string(goal->GetID())+" )");
-                 statOutput->Write("#Time (s)  cummulative number of agents \n");
-                 statOutput->Write(goal->GetFlowCurve());
-                 statOutput->FileHandler::~FileHandler();
+                 FileHandler statOutput(statsfile.c_str());
+                 statOutput.Write("#Simulation time: %.2f", simTime);
+                 statOutput.Write("#Flow at exit "+goal->GetCaption()+"( ID "+to_string(goal->GetID())+" )");
+                 statOutput.Write("#Time (s)  cummulative number of agents \n");
+                 statOutput.Write(goal->GetFlowCurve());
             }
 
         }
@@ -501,12 +500,12 @@ void Simulation::PrintStatistics(double simTime)
                   string statsfile = "flow_crossing_id_"
                        + to_string(itr.first/1000) + "_" + to_string(itr.first % 1000) +".dat";
                   Log->Write("More Information in the file: %s", statsfile.c_str());
-                  auto output = new FileHandler(statsfile.c_str());
-                  output->Write("#Simulation time: %.2f", simTime);
-                  output->Write("#Flow at crossing " + goal->GetCaption() + "( ID " + to_string(goal->GetID())
+                  FileHandler output(statsfile.c_str());
+                  output.Write("#Simulation time: %.2f", simTime);
+                  output.Write("#Flow at crossing " + goal->GetCaption() + "( ID " + to_string(goal->GetID())
                                 + " ) in Room ( ID "+ to_string(itr.first / 1000) + " )");
-                  output->Write("#Time (s)  cummulative number of agents \n");
-                  output->Write(goal->GetFlowCurve());
+                  output.Write("#Time (s)  cummulative number of agents \n");
+                  output.Write(goal->GetFlowCurve());
              }
         }
 
