@@ -367,13 +367,6 @@ bool Building::InitGeometry()
      InitInsideGoals();
      Log->Write("INFO: \tInit Geometry successful!!!\n");
 
-     for (auto& transItr : _transitions){
-          Transition* trans = transItr.second;
-          std::cout << trans->GetID() << " is open " << trans->IsOpen() << std::endl;
-          std::cout << trans->GetID() << " is close " << trans->IsClose() << std::endl;
-          std::cout << trans->GetID() << " is temp_close " << trans->IsTempClose() << std::endl;
-
-     }
      return true;
 }
 
@@ -408,14 +401,6 @@ bool Building::InitInsideGoals()
                          AddCrossing(crossing);
                          found = true;
                          break;
-//                         for (auto& cross : subRoom->GetAllCrossings()){
-//                              std::cout << "Crossing Subroom: " << cross->GetUniqueID() << std::endl;
-//                         }
-//
-//                         for (auto& cross: _crossings){
-//                              std::cout << "Crossing Building: " << cross.second->GetUniqueID() << std::endl;
-//                         }
-
                     }
                }
           }

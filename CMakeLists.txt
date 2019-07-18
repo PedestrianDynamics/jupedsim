@@ -392,10 +392,7 @@ routing/smoke_router/cognitiveMap/internnavigationnetwork.cpp
 events/EventManager.cpp
 events/Event.cpp
 
-geometry/Trips.cpp
-routing/trips_router/TripsRouter.cpp
-
-forms/jpscore.rc
+        forms/jpscore.rc
 math/KrauszModel.cpp geometry/GoalManager.cpp geometry/GoalManager.h)
 
 set(THIRD_PARTY_SRC
@@ -550,9 +547,6 @@ math/OperationalModel.h
 
 events/EventManager.h
 events/Event.h
-
-        geometry/Trips.h
-        routing/trips_router/TripsRouter.h
 
         )
 

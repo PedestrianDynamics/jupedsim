@@ -25,7 +25,6 @@
 #include "../general/Configuration.h"
 #include "../geometry/Building.h"
 #include "../geometry/GeometryReader.h"
-#include "../geometry/Trips.h"
 #include "../tinyxml/tinyxml.h"
 
 //TODO: the class name GeoFileParser is misleading as the ``geometry'' file contains among others also relations (transitions)
@@ -51,10 +50,6 @@ private:
      bool LoadGeometry(Building* building);
 
      bool LoadRoutingInfo(Building* filename);
-
-     bool ReadGoal();
-
-     bool ReadWaitingArea();
 };
 
 #endif //JPSCORE_GEOFILEPARSER_H
