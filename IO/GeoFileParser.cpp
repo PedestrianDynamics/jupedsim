@@ -725,6 +725,30 @@ Goal* GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
      bool open = strcmp(xmltoa(e->Attribute("is_open"), "false"), "true") == 0;
      bool global_timer = strcmp(xmltoa(e->Attribute("global_timer"), "false"), "true") == 0;
 
+     //Check input values
+     // mandantory: if fail -> ERROR
+     if (id < 0){
+          Log->Write("ERROR:\t  waiting area id not set properly");
+          return nullptr;
+     }
+
+     if (room_id < 0){
+          Log->Write("ERROR:\t  WA  %d: room_id not set properly", id);
+          return nullptr;
+     }
+
+     if (subroom_id < 0){
+          Log->Write("ERROR:\t  WA  %d: subroom_id not set properly", id);
+          return nullptr;
+     }
+
+     if ((min_peds < 0 || max_peds < 0 || waiting_time < 0) && transition_id < 0){
+          Log->Write("ERROR:\t  WA  %d: min_peds, max_peds, transition_id not set properly. "
+                     "Set either (min_peds, max_peds, waiting_time) or transition_id.", id);
+          return nullptr;
+     }
+
+
      std::string caption = xmltoa(e->Attribute("caption"), "-1");
 
      Log->Write("INFO:\t  Goal id: %d", id);
@@ -754,14 +778,17 @@ Goal* GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
           int nextWaId = xmltoi(nextWa->Attribute("id"), -1);
           double nextWaP = xmltof(nextWa->Attribute("p"), -1.);
 
+          if (nextWaId == -1 || nextWaP == -1){
+               Log->Write("ERROR:\t  check next_wa of of WA  %d: id or p not set properly", id);
+               return nullptr;
+          }
           nextGoals.insert(std::pair<int, double>(nextWaId, nextWaP));
      }
 
      if (!waitingArea->SetNextGoals(nextGoals)){
-          Log->Write("ERROR:\t  check probabilities of next goal of WA  %d", id);
+          Log->Write("ERROR:\t  check probabilities of next goal of WA  %d: sum of p over all next_wa ids != 1", id);
           return nullptr;
      };
-
 
      //looking for polygons (walls)
      for (TiXmlElement* xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
