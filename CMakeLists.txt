@@ -1,7 +1,7 @@
 # Documentation: Some useful options:
-# -DCMAKE_CXX_COMPILER:STRING=clang++   -DCMAKE_C_COMPILER:STRING=clang .
-# -DCMAKE_BUILD_TYPE:STRING=Debug (default Release)
-# -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON (default OFF)
+# -DCMAKE_CXX_COMPILER=clang++
+# -DCMAKE_BUILD_TYPE=Debug (default Release)
+# -DCMAKE_VERBOSE_MAKEFILE=ON (default OFF)
 # -DBUILD_TESTING=ON (default OFF) for python tests
 # -DBUILD_CPPUNIT_TEST=ON (default OFF) for unit tests
 # -DUSE_DUAL_ABI=ON (default OFF)  https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
@@ -10,7 +10,7 @@
 # -D JPSFIRE=true (default false)
 #--------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 IF (POLICY CMP0054)
     cmake_policy(SET CMP0054 NEW)
