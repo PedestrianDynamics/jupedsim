@@ -1,0 +1,74 @@
+language: cpp
+dist: xenial
+git:
+  depth: 5
+  quiet: true
+
+python: 3.7
+
+
+
+matrix:
+  include:
+  # todo
+    # - name: Static checks (clang-format)
+    #   env: STATIC_CHECKS=yes
+    #   os: linux
+    #   compiler: gcc
+    #   addons:
+    #     apt:
+    #       sources:
+    #         - llvm-toolchain-xenial-8
+    #       packages:
+    #         - clang-format-8
+    #   script:
+    #    - $CXX --version
+    #    - mkdir build && cd build
+    #    - cmake -DBUILD_TESTING=ON ..
+    #    - make
+
+    # todo
+    # - name: osx
+    #   os: osx
+    #   osx_image: xcode11
+    #   compiler: clang
+    #   script:
+    #    - mkdir build && cd build
+    #    - cmake  ..
+    #    - make
+
+    - name: linux (clang)
+      os: linux
+      compiler: clang++
+      script:
+       - mkdir build && cd build
+       - cmake  ..
+       - make
+    # run tests only here
+    - name: linux (gcc)
+      os: linux
+      compiler: gcc
+      script:
+       - $CXX --version
+       - mkdir build && cd build
+       - cmake -DBUILD_TESTING=ON ..
+       - make
+       - ctest --verbose -R dev
+       - ctest -R clean
+       - ctest --verbose -R rimea
+#      - ctest -R juelich
+
+    # todo
+    # for windows boost is too old. Chocolatey is outdated
+    # - name: windows
+    #   os: windows
+
+
+before_script:
+    - source .travis_before_script.bash
+
+before_install:
+    - source .travis_before_install.bash
+
+install:
+    - source .travis_install.bash
