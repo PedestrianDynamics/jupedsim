@@ -32,7 +32,7 @@ def runtest(inifile, trajfile):
             failure = 1
 
  #   logging.info("Plot to flow.png")
-    plt.savefig("flow.png")
+    # plt.savefig("flow.png")
     if failure:
         logging.info("flow from statistics files does not much expected flow from inifile")
         exit(FAILURE)
