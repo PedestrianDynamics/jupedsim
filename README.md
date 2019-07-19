@@ -1,6 +1,6 @@
 # JPScore
 
-[![Build Status](https://gitlab.version.fz-juelich.de/jupedsim/jpscore/badges/develop/build.svg)](https://gitlab.version.fz-juelich.de/JuPedSim/jpscore/pipelines)
+[![Build Status](https://travis-ci.org/JuPedSim/jpscore.svg?branch=develop)](https://travis-ci.org/JuPedSim/jpscore)
 [![GitHub license](https://img.shields.io/badge/license-GPL-blue.svg)](https://raw.githubusercontent.com/JuPedSim/jpscore/master/LICENSE)
 [![DOI](https://zenodo.org/badge/36440436.svg)](https://zenodo.org/badge/latestdoi/36440436)
 
