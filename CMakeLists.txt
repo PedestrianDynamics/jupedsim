@@ -11,14 +11,6 @@
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-set(CMAKE_LEGACY_CYGWIN_WIN32 0)
-IF (POLICY CMP0054)
-    cmake_policy(SET CMP0054 NEW)
-ENDIF (POLICY CMP0054)
-IF (POLICY CMP0077)
-    cmake_policy(SET CMP0077 OLD)
-ENDIF (POLICY CMP0077)
-
 project(JPScore LANGUAGES CXX)
 
 # Project setup
