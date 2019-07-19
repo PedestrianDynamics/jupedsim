@@ -247,9 +247,23 @@ bool SubRoom::AddCrossing(Crossing* line)
      _goalIDs.push_back(line->GetUniqueID());
      return true;
 }
-
+// return true is walls was erased, otherwise false.
+bool SubRoom::RemoveTransition(Transition * t)
+{
+     auto it = std::find(_transitions.begin(), _transitions.end(), t);
+     if (it != _transitions.end()) {
+          // std::cout << "subroom remove transition "<< t->GetID() << ", " << t->GetUniqueID()<< "\n";
+          _transitions.erase(it);
+          RemoveGoalID(t->GetUniqueID());
+          // std::cout << "enter Remove Transitions with " << _transitions.size() << "\n";
+          return true;
+     }
+     // std::cout << "2 enter Remove Transitions with " << _transitions.size() << "\n";
+     return false;
+}
 bool SubRoom::AddTransition(Transition* line)
 {
+     // std::cout << "subroom addtransition "<< line->GetID() << ", " << line->GetUniqueID()<< "\n";
      _transitions.push_back(line);
      _goalIDs.push_back(line->GetUniqueID());
      return true;

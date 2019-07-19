@@ -51,7 +51,7 @@ public:
      virtual Point GetTarget(Room* room, Pedestrian* ped) const = 0;
      virtual double GetDistance2Wall(Pedestrian* ped) const;
      virtual double GetDistance2Target(Pedestrian* ped, int UID);
-     
+
 
 };
 
@@ -61,6 +61,11 @@ public:
 };
 
 class DirectionMinSeperation : public DirectionStrategy {
+public:
+     virtual Point GetTarget(Room* room, Pedestrian* ped) const;
+};
+
+class DirectionTrain : public DirectionStrategy {
 public:
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
 };
@@ -204,4 +209,3 @@ protected:
 
 
 #endif  /* _DIRECTIONSTRATEGY_H */
-

@@ -334,9 +334,9 @@ DoorState Crossing::GetState() const
      return _state;
 }
 
-void Crossing::SetState(DoorState _state)
+void Crossing::SetState(DoorState state)
 {
-     Crossing::_state = _state;
+     Crossing::_state = state;
 }
 
 std::string Crossing::toString() const
@@ -354,6 +354,9 @@ std::string Crossing::toString() const
           break;
      case DoorState::TEMP_CLOSE:
           tmp << " temp_close";
+          break;
+     case DoorState::Error:
+          tmp << " Error";
           break;
 
      }

@@ -202,7 +202,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 vector<Pedestrian*> neighbours;
                 building->GetGrid()->GetNeighbourhood(ped,neighbours);
 
-                double time = Pedestrian::GetGlobalTime();
                 int size = (int) neighbours.size();
 ////                if (ped->GetID() == 71) {
 ////                     std::cout << "------------------------------------" << std::endl;
@@ -212,7 +211,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
 
                 for (int i = 0; i < size; i++) {
-               
+
                      Pedestrian* ped1 = neighbours[i];
 //                     if (ped->GetID() == 71) {
 //                         std::cout << "Velocity Model debug ped1: " << ped1->GetID() << "\t" <<  ped1->GetPos().toString() <<std::endl;
@@ -293,11 +292,11 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 spacings.clear(); //clear for ped p
 
                 // stuck peds get removed. Warning is thrown. low speed due to jam is omitted.
-                if(ped->GetTimeInJam() > ped->GetPatienceTime() && ped->GetGlobalTime() > 30 + ped->GetPremovementTime() &&
+                if(ped->GetTimeInJam() > ped->GetPatienceTime() && ped->GetGlobalTime() > 10000 + ped->GetPremovementTime() &&
                           std::max(ped->GetMeanVelOverRecTime(), ped->GetV().Norm()) < 0.01 &&
                           size == 0 ) // size length of peds neighbour vector
                 {
-                      Log->Write("WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time %f s (current=%f\n", ped->GetID(), ped->GetMeanVelOverRecTime(), ped->GetRoomID(), ped->GetSubRoomID(), ped->GetGlobalTime(), current);
+                     Log->Write("WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time %f s (current=%f\n", ped->GetID(), ped->GetMeanVelOverRecTime(), ped->GetRoomID(), ped->GetSubRoomID(), ped->GetGlobalTime(), current);
                       Log->incrementDeletedAgents();
                       #pragma omp critical(VelocityModel_ComputeNextTimeStep_pedsToRemove)
                       pedsToRemove.push_back(ped);
@@ -352,9 +351,19 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
       Point target;
       if(_direction && ped->GetExitLine())
            target = _direction->GetTarget(room, ped); // target is where the ped wants to be after the next timestep
-      else {
+      else { //@todo: we need a model for waiting pedestrians
            std::cout << ped->GetID() << " VelocityModel::e0 Ped has no navline.\n";
-           exit(EXIT_FAILURE);
+           //exit(EXIT_FAILURE);
+           // set random destination
+           std::mt19937 mt(ped->GetBuilding()->GetConfig()->GetSeed());
+           std::uniform_real_distribution<double> dist(0, 1.0);
+           double random_x = dist(mt);
+           double random_y = dist(mt);
+           Point P1 = Point(ped->GetPos()._x - random_x, ped->GetPos()._y - random_y);
+           Point P2 = Point(ped->GetPos()._x + random_x, ped->GetPos()._y + random_y);
+           const NavLine  L = Line(P1, P2);
+           ped->SetExitLine((const NavLine *)&L);
+           target = P1;
       }
       Point desired_direction;
       const Point pos = ped->GetPos();

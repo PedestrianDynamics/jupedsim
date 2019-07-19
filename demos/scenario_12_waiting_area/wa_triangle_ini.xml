@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<JuPedSim project="JPS-Project" version="0.7"
+		  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		  xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
+
+  <header>
+    <!-- seed used for initialising random generator -->
+    <seed>12542</seed>
+    <!-- geometry file -->
+    <max_sim_time>300</max_sim_time>
+    <geometry>wa_triangle_geo.xml</geometry>
+    <!--<geometry>wa_triangle_geo_wa_outside3.xml</geometry>-->
+    <!--<events_file>events_list.xml</events_file>-->
+    <!--<event_realtime>events.txt</event_realtime>-->
+    <num_threads>1</num_threads>
+    <!-- traectories file and format -->
+    <trajectories format="xml-plain"  fps="8">
+      <file location="wa_triangle_traj.xml" />
+    </trajectories>
+    <!-- where to store the logs -->
+    <logfile>log.txt</logfile>
+  </header>
+
+	<!-- traffic information: e.g closed doors or smoked rooms -->
+	<!--<traffic_constraints>-->
+		<!--&lt;!&ndash; doors states are: close or open &ndash;&gt;-->
+		<!--<doors>-->
+			<!--<door trans_id="0" caption="main_exit" state="open" />-->
+		<!--</doors>-->
+	<!--</traffic_constraints>-->
+
+	<routing>
+		<goals>
+			<goal id="10" final="true" caption="goal 1">
+				<polygon>
+					<vertex px="25" py="32" />
+					<vertex px="30" py="32" />
+					<vertex px="30" py="37" />
+					<vertex px="25" py="37" />
+					<vertex px="25" py="32" />
+				</polygon>
+			</goal>
+			<!--<goal id="3" final="false" caption="goal 1">-->
+				<!--<polygon>-->
+					<!--<vertex px="26" py="1" />-->
+					<!--<vertex px="29" py="1" />-->
+					<!--<vertex px="29" py="4" />-->
+					<!--<vertex px="26" py="4" />-->
+					<!--<vertex px="26" py="1" />-->
+				<!--</polygon>-->
+			<!--</goal>-->
+			<!--<goal id="3" final="false" caption="goal 3">-->
+				<!--<polygon>-->
+					<!--<vertex px="10" py="0" />-->
+					<!--<vertex px="15" py="0" />-->
+					<!--<vertex px="15" py="5" />-->
+					<!--<vertex px="10" py="5" />-->
+					<!--<vertex px="10" py="0" />-->
+				<!--</polygon>-->
+			<!--</goal>-->
+
+			<waiting_area caption="wa1" id="1" waiting_time="10" min_peds="1" max_peds="10" is_open="true" room_id="0" subroom_id="0">
+				<polygon>
+					<vertex px="1" py="1" />
+					<vertex px="9" py="1" />
+					<vertex px="9" py="4" />
+					<vertex px="1" py="4" />
+					<vertex px="1" py="1" />
+				</polygon>
+				<next_wa id="2" p="1"/>
+			</waiting_area>
+
+			<waiting_area caption="wa2" id="2" waiting_time="30" min_peds="1" max_peds="10" is_open="true" room_id="0" subroom_id="1">
+				<polygon>
+					<vertex px="11" py="1" />
+					<vertex px="14" py="1" />
+					<vertex px="14" py="4" />
+					<vertex px="11" py="4" />
+					<vertex px="11" py="1" />
+				</polygon>
+				<next_wa id="3" p="1"/>
+				<next_wa id="4" p="0"/>
+			</waiting_area>
+
+			<waiting_area caption="wa3" id="3" waiting_time="60" min_peds="1" max_peds="10" is_open="true" room_id="0" subroom_id="3">
+				<polygon>
+					<vertex px="26" py="1" />
+					<vertex px="29" py="1" />
+					<vertex px="29" py="4" />
+					<vertex px="26" py="4" />
+					<vertex px="26" py="1" />
+				</polygon>
+				<next_wa id="4" p="1"/>
+			</waiting_area>
+
+			<!-- <waiting_area caption="wa3" id="3" is_open="true" transition_id="0" room_id="0" subroom_id="7"> -->
+			<waiting_area caption="wa4" id="4" waiting_time="20" min_peds="15" max_peds="20" is_open="true" room_id="0" subroom_id="7">
+				<polygon>
+					<vertex px="26" py="21" />
+					<vertex px="29" py="21" />
+					<vertex px="29" py="24" />
+					<vertex px="26" py="24" />
+					<vertex px="26" py="21" />
+				</polygon>
+				<next_wa id="10" p="1"/>
+			</waiting_area>
+
+			<!-- <waiting_area caption="wa4" id="4" is_open="true" transition_id="1" room_id="1" subroom_id="0"> -->
+			<!-- <waiting_area caption="wa4" id="4" is_open="true" transition_id="1" room_id="1" subroom_id="0">
+				<polygon>
+					<vertex px="25.5" py="25.5" />
+					<vertex px="25.5" py="29.5" />
+					<vertex px="29.5" py="29.5" />
+					<vertex px="29.5" py="25.5" />
+					<vertex px="25.5" py="25.5" />
+				</polygon>
+				<next_wa id="10" p="1"/>
+			</waiting_area> -->
+
+		</goals>
+	</routing>
+
+	<!--persons information and distribution -->
+	<agents operational_model_id="3">
+		<agents_distribution>
+			<group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="5" goal_id="1" router_id="1" />
+			<group group_id="2" agent_parameter_id="1" room_id="0" subroom_id="1" number="10" goal_id="2" router_id="1" />
+		</agents_distribution>
+	</agents>
+
+	<!-- These parameters may be overwritten -->
+	<operational_models>
+		<model operational_model_id="1" description="gcfm">
+			<model_parameters>
+				<solver>euler</solver>
+				<stepsize>0.01</stepsize>
+				<exit_crossing_strategy>9</exit_crossing_strategy>
+				<linkedcells enabled="true" cell_size="2.2" />
+				<force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+				<force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+			</model_parameters>
+			<agent_parameters agent_parameter_id="1">
+				<v0 mu="0.5" sigma="0.0" />
+				<bmax mu="0.25" sigma="0.001" />
+				<bmin mu="0.20" sigma="0.001" />
+				<amin mu="0.18" sigma="0.001" />
+				<tau mu="0.5" sigma="0.001" />
+				<atau mu="0.5" sigma="0.001" />
+			</agent_parameters>
+			<agent_parameters agent_parameter_id="2">
+				<v0 mu="0.5" sigma="0.0" />
+				<bmax mu="0.25" sigma="0.001" />
+				<bmin mu="0.20" sigma="0.001" />
+				<amin mu="0.18" sigma="0.001" />
+				<tau mu="0.5" sigma="0.001" />
+				<atau mu="0.5" sigma="0.001" />
+			</agent_parameters>
+		</model>
+
+		<model operational_model_id="2" description="gompertz">
+			<model_parameters>
+				<solver>euler</solver>
+				<stepsize>0.01</stepsize>
+				<exit_crossing_strategy>3</exit_crossing_strategy>
+				<linkedcells enabled="true" cell_size="2.2" />
+				<force_ped nu="3"  b="0.25" c="3.0"/>
+				<force_wall nu="10" b="0.70" c="3.0"/>
+			</model_parameters>
+			<agent_parameters agent_parameter_id="1">
+				<v0 mu="0.5" sigma="0.0" />
+				<bmax mu="0.25" sigma="0.001" />
+				<bmin mu="0.20" sigma="0.001" />
+				<amin mu="0.18" sigma="0.001" />
+				<tau mu="0.5" sigma="0.001" />
+				<atau mu="0.5" sigma="0.001" />
+			</agent_parameters>
+			<agent_parameters agent_parameter_id="2">
+				<v0 mu="0" sigma="0.0" />
+				<bmax mu="0.25" sigma="0.001" />
+				<bmin mu="0.20" sigma="0.001" />
+				<amin mu="0.18" sigma="0.001" />
+				<tau mu="0.5" sigma="0.001" />
+				<atau mu="0.5" sigma="0.001" />
+			</agent_parameters>
+		</model>
+
+
+		<model operational_model_id="3" description="Tordeux2015">
+			<model_parameters>
+				<solver>euler</solver>
+				<stepsize>0.01</stepsize>
+				<exit_crossing_strategy>11</exit_crossing_strategy>
+				<!--<exit_crossing_strategy>8</exit_crossing_strategy>-->
+				<linkedcells enabled="true" cell_size="2.2" />
+				<force_ped a="8" D="0.1" />
+				<force_wall a="5" D="0.02" />
+			</model_parameters>
+			<agent_parameters agent_parameter_id="1">
+				<v0 mu="1.0" sigma="0.001" />
+				<bmax mu="0.15" sigma="0.00000" /> <!-- this is l, assuming peds are circles with constant radius -->
+				<bmin mu="0.15" sigma="0.00000" />
+				<amin mu="0.15" sigma="0.00000" />
+				<tau mu="0.5" sigma="0.001" />
+				<atau mu="0.0" sigma="0.00000" />
+				<T mu="1" sigma="0.001" />
+			</agent_parameters>
+		</model>
+
+	</operational_models>
+
+	<!--<route_choice_models>-->
+		<!--<router router_id="1" description="global_shortest_trips">-->
+			<!--<parameters>-->
+			<!--</parameters>-->
+		<!--</router>-->
+	<!--</route_choice_models>-->
+
+	<!--<route_choice_models>-->
+		<!--<router router_id="1" description="trips">-->
+			<!--<parameters>-->
+			<!--</parameters>-->
+		<!--</router>-->
+	<!--</route_choice_models>-->
+
+	<route_choice_models>
+		<router router_id="1" description="ff_global_shortest_trips">
+			<parameters>
+				<!--<write_VTK_files>true</write_VTK_files>-->
+			</parameters>
+		</router>
+	</route_choice_models>
+
+	<!--<route_choice_models>-->
+		<!--<router router_id="1" description="AI">-->
+			<!--&lt;!&ndash;<cognitive_map files="./cognitive.xml"/>&ndash;&gt;-->
+			<!--<cognitive_map status="empty"/>-->
+		<!--</router>-->
+	<!--</route_choice_models>-->
+
+	<!--<route_choice_models>-->
+	<!--<router router_id="1" description="ff_global_shortest">-->
+	<!--<parameters>-->
+		<!--<write_VTK_files>true</write_VTK_files>-->
+	<!--</parameters>-->
+	<!--</router>-->
+	<!--</route_choice_models>-->
+
+</JuPedSim>

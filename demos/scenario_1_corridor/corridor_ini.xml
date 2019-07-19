@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.7" 
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<JuPedSim project="JPS-Project" version="0.7"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 
-  <!-- seed used for initialising random generator -->
-  <seed>1254</seed>
-  <progressbar/>
-  <max_sim_time>200</max_sim_time>
-  <!-- geometry file -->
-  <geometry>corridor_geo.xml</geometry>
-  <!-- trajectories file and format -->
-  <trajectories format="xml-plain" fps="8">
-    <file location="corridor_traj.xml" />
-    <!--<socket hostname="127.0.0.1" port="8989"/> -->
-  </trajectories>
-  <!-- where to store the logs -->
-  <!--<logfile>log.txt</logfile> -->
-
+  <header>
+    <!-- seed used for initialising random generator -->
+    <seed>1254</seed>
+    <progressbar/>
+    <max_sim_time>200</max_sim_time>
+    <!-- geometry file -->
+    <geometry>corridor_geo.xml</geometry>
+    <!-- trajectories file and format -->
+    <trajectories format="xml-plain" fps="8">
+      <file location="corridor_traj.xml" />
+      <!--<socket hostname="127.0.0.1" port="8989"/> -->
+    </trajectories>
+    <!-- where to store the logs -->
+    <!--<logfile>log.txt</logfile> -->
+  </header>
 
   <!-- traffic information: e.g closed doors -->
   <traffic_constraints>

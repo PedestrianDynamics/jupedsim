@@ -40,8 +40,6 @@
 //#include <ctime>
 #include <chrono>
 
-#define UNUSED(x) [&x]{}()  // c++11 silence warnings
-
 DirectionStrategy::DirectionStrategy()
 {
 }
@@ -51,26 +49,23 @@ DirectionStrategy::~DirectionStrategy()
 {
 }
 
-double DirectionStrategy::GetDistance2Wall(Pedestrian* ped) const
+double DirectionStrategy::GetDistance2Wall(Pedestrian* /*ped*/) const
 {
      return -1.;
 }
-double DirectionStrategy::GetDistance2Target(Pedestrian* ped, int UID)
+double DirectionStrategy::GetDistance2Target(Pedestrian* /*ped*/, int /*UID*/)
 {
      return -1.;
 }
 
 /// 1
-Point DirectionMiddlePoint::GetTarget(Room* room, Pedestrian* ped) const
+Point DirectionMiddlePoint::GetTarget(Room* /*room*/, Pedestrian* ped) const
 {
-    UNUSED(room); // suppress the unused warning
     return (ped->GetExitLine()->GetPoint1() + ped->GetExitLine()->GetPoint2())*0.5;
 }
 /// 2
-Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) const
+Point DirectionMinSeperationShorterLine::GetTarget(Room* /*room*/, Pedestrian* ped) const
 {
-    UNUSED(room); // suppress the unused warning
-
      double d = ped->GetEllipse().GetBmin() + 0.1 ; // shoulder//0.5;
      const Point& p1 = ped->GetExitLine()->GetPoint1();
      const Point& p2 = ped->GetExitLine()->GetPoint2();
@@ -98,10 +93,8 @@ Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) 
 
 }
 /// 3
-Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
+Point DirectionInRangeBottleneck::GetTarget(Room* /*room*/, Pedestrian* ped) const
 {
-   UNUSED(room); // suppress the unused warning
-
     const Point& p1 = ped->GetExitLine()->GetPoint1();
     const Point& p2 = ped->GetExitLine()->GetPoint2();
     Line ExitLine = Line(p1, p2, 0);
@@ -167,7 +160,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
 
 #if DEBUG
       printf("\n----------\nEnter GetTarget() with PED=%d\n----------\n",ped->GetID());
-      printf("nextPointOn Line: %f %f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY());
+      printf("nextPointOn Line: %f %f\n", NextPointOnLine._x, NextPointOnLine._y);
 #endif
       double dist;
       int inear = -1;
@@ -186,7 +179,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
 
 #if DEBUG
                   printf("Check wall number %d. Dist = %f (%f)\n", i, dist, minDist);
-                  printf("%f    %f --- %f    %f\n===========\n",walls[i].GetPoint1().GetX(),walls[i].GetPoint1().GetY(), walls[i].GetPoint2().GetX(),walls[i].GetPoint2().GetY());
+                  printf("%f    %f --- %f    %f\n===========\n",walls[i].GetPoint1()._x,walls[i].GetPoint1()._y, walls[i].GetPoint2()._x,walls[i].GetPoint2()._y);
 #endif
 
             }
@@ -207,7 +200,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
                         iObs = obs;
 #if DEBUG
                         printf("Check OBS:obs=%d, i=%d Dist = %f (%f)\n", obs, i, dist, minDist);
-                        printf("%f    %f --- %f    %f\n===========\n",owalls[i].GetPoint1().GetX(),owalls[i].GetPoint1().GetY(), owalls[i].GetPoint2().GetX(),owalls[i].GetPoint2().GetY());
+                        printf("%f    %f --- %f    %f\n===========\n",owalls[i].GetPoint1()._x,owalls[i].GetPoint1()._y, owalls[i].GetPoint2()._x,owalls[i].GetPoint2()._y);
 #endif
                   }
             }//walls of obstacle
@@ -226,7 +219,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
                   // angle =  tmpDirection.GetDeviationAngle(owalls[inear].enlarge(2*ped->GetLargerAxis()));
 
 #if DEBUG
-                  printf("COLLISION WITH OBSTACLE %f    %f --- %f    %f\n===========\n",owalls[inear].GetPoint1().GetX(),owalls[inear].GetPoint1().GetY(), owalls[inear].GetPoint2().GetX(),owalls[inear].GetPoint2().GetY());
+                  printf("COLLISION WITH OBSTACLE %f    %f --- %f    %f\n===========\n",owalls[inear].GetPoint1()._x,owalls[inear].GetPoint1()._y, owalls[inear].GetPoint2()._x,owalls[inear].GetPoint2()._y);
 
 #endif
             } //iObs
@@ -234,7 +227,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
                   angle =  tmpDirection.GetDeviationAngle(walls[inear].Enlarge(2*ped->GetLargerAxis()));
 
 #if DEBUG
-                  printf("COLLISION WITH WALL %f    %f --- %f    %f\n===========\n",walls[inear].GetPoint1().GetX(),walls[inear].GetPoint1().GetY(), walls[inear].GetPoint2().GetX(),walls[inear].GetPoint2().GetY());
+                  printf("COLLISION WITH WALL %f    %f --- %f    %f\n===========\n",walls[inear].GetPoint1()._x,walls[inear].GetPoint1()._y, walls[inear].GetPoint2()._x,walls[inear].GetPoint2()._y);
 #endif
             } //else
       }//inear
@@ -263,9 +256,9 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
 #if DEBUG
       printf("inear=%d, iObs=%d, minDist=%f\n", inear, iObs, minDist);
       printf("PED=%d\n",  ped->GetID());
-      printf ("MC Posx = %.2f, Posy=%.2f, Lot=[%.2f, %.2f]\n", ped->GetPos().GetX(), ped->GetPos().GetY(), NextPointOnLine.GetX(), NextPointOnLine.GetY());
-      printf("MC p1=[%.2f, %.2f] p2=[%.2f, %.2f]\n", p1.GetX(), p1.GetY(),  p2.GetX(), p2.GetY());
-      printf("angle=%f, G=[%.2f, %.2f]\n", angle, G.GetX(), G.GetY());
+      printf ("MC Posx = %.2f, Posy=%.2f, Lot=[%.2f, %.2f]\n", ped->GetPos()._x, ped->GetPos()._y, NextPointOnLine._x, NextPointOnLine._y);
+      printf("MC p1=[%.2f, %.2f] p2=[%.2f, %.2f]\n", p1._x, p1._y,  p2._x, p2._y);
+      printf("angle=%f, G=[%.2f, %.2f]\n", angle, G._x, G._y);
       printf("\n----------\nLEAVE function with PED=%d\n----------\n",ped->GetID());
       // getc(stdin);
 
@@ -288,11 +281,11 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
 }
 
 /// 6
-Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
+Point DirectionFloorfield::GetTarget(Room* /*room*/, Pedestrian* ped) const
 {
-     UNUSED(room);
 #if DEBUG
-    if (initDone && (ffviafm != nullptr)) {
+
+    if (1) {
 #endif // DEBUG
 
         Point p;
@@ -351,7 +344,7 @@ DirectionFloorfield::~DirectionFloorfield() {
 Point DirectionLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 {
 #if DEBUG
-     if (initDone && (ffviafm != nullptr)) {
+     if (1) {
 #endif // DEBUG
 
      Point p;
@@ -374,7 +367,7 @@ Point DirectionLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 #endif // DEBUG
 
      //this should not execute:
-     //std::cerr << "Failure in DirectionFloorfield::GetTarget!!" << std::endl;
+     std::cerr << "Failure in DirectionFloorfield::GetTarget!!" << std::endl;
     // exit(EXIT_FAILURE);
 }
 
@@ -456,7 +449,7 @@ Point DirectionSubLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 {
      (void)room; // silence warning
 #if DEBUG
-     if (initDone && (ffviafm != nullptr)) {
+     if (1) {
 #endif // DEBUG
 
      Point p;
@@ -572,7 +565,7 @@ DirectionSubLocalFloorfield::~DirectionSubLocalFloorfield() {
 }
 
 ///10
-Point DirectionSubLocalFloorfieldTrips::GetTarget(Room* room, Pedestrian* ped) const
+Point DirectionSubLocalFloorfieldTrips::GetTarget(Room* /*room*/, Pedestrian* ped) const
 {
      Goal* goal = ped->GetBuilding()->GetFinalGoal(ped->GetFinalDestination());
      // Pedestrian is inside a waiting area
@@ -706,7 +699,7 @@ DirectionSubLocalFloorfieldTrips::~DirectionSubLocalFloorfieldTrips() {
 }
 
 ///11
-Point DirectionSubLocalFloorfieldTripsVoronoi::GetTarget(Room* room, Pedestrian* ped) const
+Point DirectionSubLocalFloorfieldTripsVoronoi::GetTarget(Room* /*room*/, Pedestrian* ped) const
 {
      Goal* goal = ped->GetBuilding()->GetFinalGoal(ped->GetFinalDestination());
      // Pedestrian is inside a waiting area
@@ -837,3 +830,55 @@ DirectionSubLocalFloorfieldTripsVoronoi::~DirectionSubLocalFloorfieldTripsVorono
      }
 }
 
+// 12
+Point DirectionTrain::GetTarget(Room* /*room*/, Pedestrian* ped) const
+{
+
+     Point p1 = ped->GetExitLine()->GetPoint1();
+     Point p2 = ped->GetExitLine()->GetPoint2();
+     Line ExitLine = Line(p1, p2, 0);
+     auto TrainTypes = ped->GetBuilding()->GetTrainTypes();
+     auto TrainTimeTables = ped->GetBuilding()->GetTrainTimeTables();
+     auto now = ped->GetGlobalTime();
+     string type_delme="";
+     // std::cout << ">>> Enter with ped at " << ped->GetPos().toString().c_str() << "\n";
+     for(auto && t: TrainTimeTables)
+     {
+          if(ped->GetRoomID() != t.second->rid) continue;
+
+          if( (now>=t.second->tin) && (now<=t.second->tout) )
+          {
+               auto doors = TrainTypes[t.second->type]->doors;
+               int i=-1, imin=0;
+               double dist_min = 10000;
+               for(auto door: doors)
+               {
+                    i++;
+                    const Point & d1 = door.GetPoint1();
+                    const Point & d2 = door.GetPoint2();
+                    const Point & c = (d1+d2)*0.5;
+
+                    double dist = (ped->GetPos()-c).Norm();
+                    // std::cout << "door id: " << door.GetID()<< " dist: " << dist<< "\n";
+
+                    if(dist <= dist_min)
+                    {
+                         dist_min = dist;
+                         imin=i;
+                         type_delme=t.second->type;
+                         // std::cout << "    > imin " << imin << "  mindist " << dist_min << "\n";
+                    }
+               }// doors
+               p1  = doors[imin].GetPoint1();
+               p2 = doors[imin].GetPoint2();
+               // std::cout << "\n>>> train: now " << now << ", type: " << type_delme.c_str() << "\n";
+               // std::cout << ">>> p1=" << p1.toString().c_str() << ". p2=" << p2.toString().c_str()<< "\n";
+               // std::cout << ">>> ped at " << ped->GetPos().toString().c_str() << "\n";
+               // getc(stdin);
+
+          }// if time in
+     }
+
+
+     return (p1+ p2)*0.5;
+}

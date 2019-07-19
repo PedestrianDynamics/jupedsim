@@ -57,11 +57,11 @@ using namespace std;
 
 Building::Building()
 {
-     _caption = "no_caption";
-     _geometryFilename = "";
-     _routingEngine = nullptr;
-     _linkedCellGrid = nullptr;
-     _savePathway = false;
+      _caption = "no_caption";
+      _geometryFilename = "";
+      _routingEngine = nullptr;
+      _linkedCellGrid = nullptr;
+      _savePathway = false;
 }
 
 #ifdef _SIMULATOR
@@ -72,8 +72,8 @@ Building::Building(Configuration* configuration, PedDistributor& pedDistributor)
                  configuration->GetRoutingEngine()),
            _caption("no_caption")
 {
-     _savePathway = false;
-     _linkedCellGrid = nullptr;
+      _savePathway = false;
+      _linkedCellGrid = nullptr;
 
 #ifdef _JPS_AS_A_SERVICE
      if (_configuration->GetRunAsService()) {
@@ -105,13 +105,13 @@ Building::Building(Configuration* configuration, PedDistributor& pedDistributor)
      InitGrid();
 
      if (!_routingEngine->Init(this)) {
-          Log->Write("ERROR:\t could not initialize the routers!");
-          exit(EXIT_FAILURE);
+           Log->Write("ERROR:\t could not initialize the routers!");
+           exit(EXIT_FAILURE);
      }
 
      if (!SanityCheck()) {
-          Log->Write("ERROR:\t There are sanity errors in the geometry file");
-          exit(EXIT_FAILURE);
+           Log->Write("ERROR:\t There are sanity errors in the geometry file");
+           exit(EXIT_FAILURE);
      }
 
 //     SaveGeometry("/home/laemmel/Desktop/geo.xml");
@@ -364,10 +364,355 @@ bool Building::InitGeometry()
           if (s2) s2->AddNeighbor(s1);
      }
 
-     InitInsideGoals();
-     Log->Write("INFO: \tInit Geometry successful!!!\n");
+      InitInsideGoals();
+      InitPlatforms();
+      //---
+      for (auto platform: _platforms)
+      {
+            std::cout << "\n platform " << platform.first << ", "<< platform.second->id << "\n";
+            std::cout <<  "\t rid " << platform.second->rid << "\n";
+            auto tracks = platform.second->tracks;
+            for(auto track: tracks)
+            {
+                  std::cout << "\t track " << track.first << "\n";
+                  auto walls = track.second;
+                  for(auto wall: walls)
+                  {
+                        std::cout << "\t\t wall: " << wall.GetType() << ". " << wall.GetPoint1().toString() << " | " <<  wall.GetPoint2().toString() << "\n";
+                  }
+            }
+
+      }
+      Log->Write("INFO: \tInit Geometry successful!!!\n");
 
      return true;
+}
+
+const std::vector<Wall> Building::GetTrackWalls(Point TrackStart, Point TrackEnd, int & room_id, int & subroom_id) const
+{
+      bool trackFound = false;
+      int track_id = -1;
+      int platform_id = -1;
+      std::vector<Wall> mytrack;
+      for(auto platform: _platforms)
+      {
+            platform_id = platform.second->id;
+            auto tracks = platform.second->tracks;
+            for(auto track: tracks)
+            {
+                  track_id=track.first;
+                  int commonPoints = 0;
+                  // std::cout << "\t track " << track.first << "\n";
+                  auto walls = track.second;
+                  for(auto wall: walls)
+                  {
+                        Point P1 =  wall.GetPoint1();
+                        Point P2 =  wall.GetPoint2();
+                        //std::cout << "\t\t wall: " << wall.GetType() << ". " << wall.GetPoint1().toString() << " | " <<  wall.GetPoint2().toString() << "\n";
+                        if (P1 == TrackStart)
+                              commonPoints++;
+                        if(P1 == TrackEnd)
+                              commonPoints++;
+                        if(P2 == TrackStart)
+                              commonPoints++;
+                        if(P2 == TrackEnd)
+                              commonPoints++;
+                  }
+                  if(commonPoints == 2 )
+                  {
+                        trackFound = true;
+                        break;
+                  }
+            } // tracks
+            if (trackFound) break;
+      } // plattforms
+      if(trackFound)
+      {
+            room_id = _platforms.at(platform_id)->rid;
+            subroom_id = _platforms.at(platform_id)->sid;
+            mytrack = _platforms.at(platform_id)->tracks[track_id];
+            // std::cout << "track has walls:  " << mytrack.size() << "\n";
+            // std::cout << "platform " << platform_id << " track " << track_id << "\n";
+            // std::cout << "room " << room_id << " subroom " << subroom_id << "\n";
+      }
+      else
+      {
+            std::cout << "could not find any track! Exit.\n";
+            exit(-1);
+
+      }
+      return mytrack;
+}
+
+const std::vector<std::pair<PointWall, PointWall > > Building::GetIntersectionPoints(const std::vector<Transition> doors, const std::vector<Wall> mytrack) const
+{
+      const int scaleFactor = 1000; // very long orthogonal walls to train's doors
+      std::vector<std::pair<PointWall, PointWall > > pws;
+      // every door has two points.
+      // for every point -> get pair<P, W>
+      // collect pairs of pairs
+      for(auto door: doors)
+      {
+           // std::cout << "================================\n";
+           // std::cout << "door: " << door.toString() <<  "\n";
+            PointWall pw1, pw2;
+            int nintersections = 0;
+            auto n = door.NormalVec();
+            auto p11 = door.GetPoint1() + n*scaleFactor;
+            auto p12 = door.GetPoint1() - n*scaleFactor;
+            auto p21 = door.GetPoint2() + n*scaleFactor;
+            auto p22 = door.GetPoint2() - n*scaleFactor;
+            auto normalWall1 = Wall(p11, p12);
+            auto normalWall2 = Wall(p21, p22);
+            // std::cout << "normal wall 1: " << normalWall1.toString() << "\n";
+            // std::cout << "normal wall 2: " << normalWall2.toString() << "\n";
+            for(auto twall: mytrack)
+            {
+
+                 Point interPoint1, interPoint2;
+                 auto res = normalWall1.IntersectionWith(twall, interPoint1);
+                 auto res2 = normalWall2.IntersectionWith(twall, interPoint2);
+                 // std::cout << " res " << res << "  res2 " << res2 << "\n";
+                 if(res == 1)
+                 {
+                      if(!twall.NearlyHasEndPoint(interPoint1))
+                      {
+                           // std::cout << "res  twall " << twall.toString() << "\n";
+                           pw1 = std::make_pair(interPoint1, twall);
+                           nintersections++;
+                           // std::cout << "intersection at :" << interPoint1.toString() << "\n";
+                      }
+                      else // end point
+                      {
+                           if(res2 == 0)
+                           {
+
+                                // std::cout << "twall " << twall.toString() << "\n";
+                                // std::cout << "YY intersection 1 at :" << interPoint1.toString() << "\n";
+                                // std::cout << "YY intersection 2 at :" << interPoint2.toString() << "\n";
+
+                           }
+                           else{
+
+                                // std::cout << "res  twall " << twall.toString() << "\n";
+                                pw1 = std::make_pair(interPoint1, twall);
+                                nintersections++;
+                                // std::cout << "BB: intersection at :" << interPoint1.toString() << "\n";
+                           }
+                       }
+                  }
+                  if(res2 == 1)
+                  {
+                       if(!twall.NearlyHasEndPoint(interPoint2))
+                       {
+                            // std::cout << "res2  twall " << twall.toString() << "\n";
+                            pw2 = std::make_pair(interPoint2, twall);
+                            nintersections++;
+                            // std::cout << "intersection at :" << interPoint2.toString() << "\n";
+                       }
+                       else
+                       {
+                            if(res == 0)
+                            {
+                                 // std::cout << "twall " << twall.toString() << "\n";
+                                 // std::cout << "XX intersection 1 at :" << interPoint1.toString() << "\n";
+                                 // std::cout << "XX intersection 2 at :" << interPoint2.toString() << "\n";
+                            }
+                            else{
+                                 // std::cout << "res2  twall " << twall.toString() << "\n";
+                                 pw2 = std::make_pair(interPoint2, twall);
+                                 nintersections++;
+                                 // std::cout << "CC intersection at :" << interPoint2.toString() << "\n";
+                            }
+                       }
+                  }
+                  // std::cout << "door: " << door.toString() << ", intersections: " <<  nintersections << "\n";
+
+
+            } // tracks
+            // std::cout << "door: " << door.toString() << ", intersections: " <<  nintersections << "\n";
+            // std::cout << "================================\n";
+
+            if(nintersections == 2)
+                  pws.push_back(std::make_pair(pw1, pw2));
+
+            else
+            {
+                 std::cout << KRED << "Error in GetIntersection. Should be 2 but got  " << nintersections << "\n";
+                                                                                                             exit(-1);
+            }
+      }// doors
+      // getc(stdin);
+
+      return pws;
+}
+// reset changes made by trainTimeTable[id]
+bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
+{
+     // this function is composed of three copy/pasted blocks.
+      int room_id, subroom_id;
+
+      // std::cout << "enter resetGeometry with tab id: " << tab->id << "\n" ;
+      // std::cout << "temp Added Walls\n";
+      // for(auto id_wall: TempAddedWalls)
+      // {
+      //      std::cout << "i " << id_wall.first << "\n";
+      //      auto walls = id_wall.second;
+      //      for(auto wall: walls )
+      //           std::cout << wall.toString() << "\n";
+      // }
+      // std::cout << "temp Removed Walls\n";
+      // for(auto id_wall: TempRemovedWalls)
+      // {
+      //      std::cout << "i " << id_wall.first << "\n";
+      //      auto walls = id_wall.second;
+      //      for(auto wall: walls )
+      //           std::cout << wall.toString() << "\n";
+      // }
+      // std::cout << "temp Added Doors\n";
+      // for(auto id_wall: TempAddedDoors)
+      // {
+      //      std::cout << "i " << id_wall.first << "\n";
+      //      auto walls = id_wall.second;
+      //      for(auto wall: walls )
+      //           std::cout << wall.toString() << "\n";
+      // }
+      // getc(stdin);
+
+      // remove temp added walls
+      auto tempWalls = TempAddedWalls[tab->id];
+      for(auto  it=tempWalls.begin(); it!=tempWalls.end(); )
+      {
+           auto wall = *it;
+           if (it != tempWalls.end())
+           {
+                tempWalls.erase(it);
+           }
+           for (auto platform: _platforms)
+           {
+                // auto tracks =  platform.second->tracks;
+                room_id = platform.second->rid;
+                subroom_id = platform.second->sid;
+                // auto room = this->GetAllRooms().at(room_id);
+                SubRoom * subroom = this->GetAllRooms().at(room_id)->GetAllSubRooms().at(subroom_id).get();
+                // std::cout << "----\n";
+                // for(auto subWall: subroom->GetAllWalls())
+                //      std::cout << ">> "<< subWall.toString() << "\n";
+                // std::cout << "----\n";
+                for(auto subWall: subroom->GetAllWalls())
+                {
+                     if(subWall == wall)
+                     {
+                          // if everything goes right, then we should enter this
+                          // if. We already erased from tempWalls!
+                          subroom->RemoveWall(wall);
+                          // std::cout << KGRN << "RESET REMOVE wall " << wall.toString() << "\n" << RESET;
+                     }//if
+                }//subroom
+           }//platforms
+      }
+      TempAddedWalls[tab->id] = tempWalls;
+
+/*       // add remove walls */
+      auto tempRemovedWalls = TempRemovedWalls[tab->id];
+      for(auto  it=tempRemovedWalls.begin(); it!=tempRemovedWalls.end(); )
+      {
+           auto wall = *it;
+           if (it != tempRemovedWalls.end())
+           {
+                tempRemovedWalls.erase(it);
+           }
+           for (auto platform: _platforms)
+           {
+                auto tracks =  platform.second->tracks;
+                room_id = platform.second->rid;
+                subroom_id = platform.second->sid;
+                SubRoom * subroom = this->GetAllRooms().at(room_id)->GetAllSubRooms().at(subroom_id).get();
+                for (auto track : tracks)
+                {
+                     auto walls = track.second;
+                     for(auto trackWall : walls)
+                     {
+                          if (trackWall == wall)
+                          {
+                               subroom->AddWall(wall);
+                               // std::cout << KGRN << "ADD BACK wall " << wall.toString() << "\n" << RESET;
+                          }
+                     }
+                }
+           }
+      }
+      TempRemovedWalls[tab->id] = tempRemovedWalls;
+
+/*       // remove added doors */
+      auto tempDoors = TempAddedDoors[tab->id];
+      for(auto  it=tempDoors.begin(); it!=tempDoors.end(); )
+      {
+           auto door = *it;
+           if (it != tempDoors.end())
+           {
+                tempDoors.erase(it);
+           }
+           for (auto platform: _platforms)
+           {
+                auto tracks =  platform.second->tracks;
+                room_id = platform.second->rid;
+                subroom_id = platform.second->sid;
+                SubRoom * subroom = this->GetAllRooms().at(room_id)->GetAllSubRooms().at(subroom_id).get();
+                for(auto subTrans: subroom->GetAllTransitions())
+                {
+                     if (*subTrans == door)
+                     {
+                          // Trnasitions are added to subrooms and building!!
+                          subroom->RemoveTransition(subTrans);
+                          this->RemoveTransition(subTrans);
+                          // std::cout << KGRN << "RESET remove door " << door.toString() << "\n" << RESET;
+                     }
+
+                }
+           }
+      }
+      TempAddedDoors[tab->id] = tempDoors;
+      // std::cout << "leave resetGeometry with tab id: " << tab->id << "\n" ;
+      // std::cout << "temp Added Walls: " << TempAddedWalls[tab->id].size() << "\n";
+      // std::cout << "temp Removed Walls: " << TempRemovedWalls[tab->id].size()<<  "\n";
+      // std::cout << "temp Added Doors: " <<TempAddedDoors[tab->id].size() <<  "\n";
+      return true;
+}
+void Building::InitPlatforms()
+{
+     int num_platform = -1;
+     for (auto& roomItr : _rooms) {
+          Room* room = roomItr.second.get();
+          for (auto& subRoomItr : room->GetAllSubRooms()) {
+               auto subRoom = subRoomItr.second.get();
+               int subroom_id = subRoom->GetSubRoomID();
+               if (subRoom->GetType()!="Platform") continue;
+               std::map<int, std::vector<Wall> > tracks;
+               num_platform++;
+               for (auto&& wall:subRoom->GetAllWalls()) {
+                    if (wall.GetType().find("track")==std::string::npos) continue;
+                    // add wall to track
+                    std::vector<std::string> strs;
+                    boost::split(strs, wall.GetType(), boost::is_any_of("-"), boost::token_compress_on);
+                    if (strs.size()<=1) continue;
+                    int n = atoi(strs[1].c_str());
+                    /* std::cout << "caption: " << wall.GetCaption().c_str() << " > " << n << "\n"; */
+                    /* if(tracks.count[n] == 0) */
+                    /* { */
+                    tracks[n].push_back(wall);
+                    /* } */
+               } //walls
+               std::shared_ptr<Platform> p = std::make_shared<Platform>(
+                       Platform{
+                               num_platform,
+                               room->GetID(),
+                               subroom_id,
+                               tracks,
+                       });
+               AddPlatform(p);
+          }
+     }
 }
 
 bool Building::InitInsideGoals()
@@ -414,89 +759,90 @@ bool Building::InitInsideGoals()
 
      return true;
 }
+
 bool Building::correct() const {
-     auto t_start = std::chrono::high_resolution_clock::now();
-     Log->Write("INFO:\tenter correct ...");
-     bool removed = false;
+      auto t_start = std::chrono::high_resolution_clock::now();
+      Log->Write("INFO:\tenter correct ...");
+      bool removed = false;
 
-     for(auto&& room: this->GetAllRooms()) {
-          for(auto&& subroom: room.second->GetAllSubRooms()) {
-                // -- remove exits *on* walls
-                removed = RemoveOverlappingDoors(subroom.second);
-               // --------------------------
-               // -- remove overlapping walls
-               auto walls = subroom.second->GetAllWalls(); // this call
-                                                                // should be
-                                                                // after
-                                                                // eliminating
-                                                                // nasty exits
+      for(auto&& room: this->GetAllRooms()) {
+            for(auto&& subroom: room.second->GetAllSubRooms()) {
+                  // -- remove exits *on* walls
+                  removed = RemoveOverlappingDoors(subroom.second);
+                  // --------------------------
+                  // -- remove overlapping walls
+                  auto walls = subroom.second->GetAllWalls(); // this call
+                  // should be
+                  // after
+                  // eliminating
+                  // nasty exits
 #if DEBUG
-               std::cout<< "\n" << KRED << "correct Room " << room.first << "  Subroom " << subroom.first << RESET  << std::endl;
+                  std::cout<< "\n" << KRED << "correct Room " << room.first << "  Subroom " << subroom.first << RESET  << std::endl;
 #endif
-               for(auto const & bigWall: walls) //self checking
-               {
-                    // std::cout << "BigWall: " << std::endl;
-                      // bigWall.WriteToErrorLog();
-                    //special treatment for doors
+                  for(auto const & bigWall: walls) //self checking
+                  {
+                        // std::cout << "BigWall: " << std::endl;
+                        // bigWall.WriteToErrorLog();
+                        //special treatment for doors
 /////
-                    std::vector<Wall> WallPieces;
-                    WallPieces = SplitWall(subroom.second, bigWall);
-                    if(!WallPieces.empty())
-                         removed = true;
+                        std::vector<Wall> WallPieces;
+                        WallPieces = SplitWall(subroom.second, bigWall);
+                        if(!WallPieces.empty())
+                              removed = true;
 #if DEBUG
-z                    std::cout << "Wall pieces size : " <<  WallPieces.size() << std::endl;
-                    for(auto w:WallPieces)
-                         w.WriteToErrorLog();
+                        z                    std::cout << "Wall pieces size : " <<  WallPieces.size() << std::endl;
+                        for(auto w:WallPieces)
+                              w.WriteToErrorLog();
 #endif
-                    int ok=0;
-                    while(!ok)
-                    {
-                         ok = 1; // ok ==1 means no new pieces are found
-                         for (auto wallPiece: WallPieces)
-                         {
-                              std::vector<Wall> tmpWallPieces;
-                              tmpWallPieces = SplitWall(subroom.second, wallPiece);
-                              if(!tmpWallPieces.empty())
+                        int ok=0;
+                        while(!ok)
+                        {
+                              ok = 1; // ok ==1 means no new pieces are found
+                              for (auto wallPiece: WallPieces)
                               {
-                                   // std::cout << "set ok because tmp size =" << tmpWallPieces.size() << std::endl;
-                                    ok = 0; /// stay in the loop
-                                    // append tmpWallPieces to WallPiece
-                                    WallPieces.insert(std::end(WallPieces),std::begin(tmpWallPieces), std::end(tmpWallPieces));
-                                    // remove the line since it was split already
-                                    auto it = std::find(WallPieces.begin(), WallPieces.end(), wallPiece);
-                                    if (it != WallPieces.end())
+                                    std::vector<Wall> tmpWallPieces;
+                                    tmpWallPieces = SplitWall(subroom.second, wallPiece);
+                                    if(!tmpWallPieces.empty())
                                     {
-                                         // std::cout<< KGRN << "delete wall ..." << RESET <<std::endl;
-                                         // wallPiece.WriteToErrorLog();
-                                         WallPieces.erase(it);
+                                          // std::cout << "set ok because tmp size =" << tmpWallPieces.size() << std::endl;
+                                          ok = 0; /// stay in the loop
+                                          // append tmpWallPieces to WallPiece
+                                          WallPieces.insert(std::end(WallPieces),std::begin(tmpWallPieces), std::end(tmpWallPieces));
+                                          // remove the line since it was split already
+                                          auto it = std::find(WallPieces.begin(), WallPieces.end(), wallPiece);
+                                          if (it != WallPieces.end())
+                                          {
+                                                // std::cout<< KGRN << "delete wall ..." << RESET <<std::endl;
+                                                // wallPiece.WriteToErrorLog();
+                                                WallPieces.erase(it);
+                                          }
+
+                                          // std::cout << "BNow Wall peces size : " <<  WallPieces.size() << std::endl;
                                     }
-
-                                    // std::cout << "BNow Wall peces size : " <<  WallPieces.size() << std::endl;
                               }
-                         }
 #if DEBUG
-                         std::cout << "ok "<< ok << std::endl;
-                         std::cout << "new while  Wall peces size : " <<  WallPieces.size() << std::endl;
-                         std::cout << "====" << std::endl;
+                              std::cout << "ok "<< ok << std::endl;
+                              std::cout << "new while  Wall peces size : " <<  WallPieces.size() << std::endl;
+                              std::cout << "====" << std::endl;
 
-                         for(auto t: WallPieces){
-                              std::cout << ">> Piece: " << std::endl;
-                              t.WriteToErrorLog();
-                         }
+                              for(auto t: WallPieces){
+                                    std::cout << ">> Piece: " << std::endl;
+                                    t.WriteToErrorLog();
+                              }
 #endif
-                         // getc(stdin);
-                    }// while
-                    // remove
-                    // duplicates fromWllPiecs
-                    if(!WallPieces.empty())
-                    {
-                         //remove  duplicaes from wallPiecess
+                              // getc(stdin);
+                        }// while
+                        // remove
+                        // duplicates fromWllPiecs
+                        if(!WallPieces.empty())
+                        {
+                              //remove  duplicaes from wallPiecess
 
-                         auto end = WallPieces.end();
-                         for (auto it = WallPieces.begin(); it != end; ++it) {
-                                end = std::remove(it + 1, end, *it);
-                         }
-                         WallPieces.erase(end, WallPieces.end());
+                              auto end = WallPieces.end();
+                              for (auto it = WallPieces.begin(); it != end; ++it) {
+                                    end = std::remove(it + 1, end, *it);
+                              }
+                              WallPieces.erase(end, WallPieces.end());
 #if DEBUG
                          std::cout << "..removing duplicates pieces..\n";
                          for(auto t: WallPieces){
@@ -898,6 +1244,25 @@ bool Building::AddGoal(Goal* goal)
      return true;
 }
 
+bool Building::AddTrainType(std::shared_ptr<TrainType> TT)
+{
+      if (_trainTypes.count(TT->type)!=0) {
+            Log->Write("WARNING: Duplicate type for train found [%s]",TT->type.c_str());
+      }
+      _trainTypes[TT->type] = TT;
+      return true;
+}
+
+bool Building::AddTrainTimeTable(std::shared_ptr<TrainTimeTable> TTT)
+{
+      if (_trainTimeTables.count(TTT->id)!=0) {
+            Log->Write("WARNING: Duplicate id for train time table found [%d]",TTT->id);
+            exit(EXIT_FAILURE);
+      }
+      _trainTimeTables[TTT->id] = TTT;
+      return true;
+}
+
 const map<int, Crossing*>& Building::GetAllCrossings() const
 {
      return _crossings;
@@ -911,6 +1276,31 @@ const map<int, Transition*>& Building::GetAllTransitions() const
 const map<int, Hline*>& Building::GetAllHlines() const
 {
      return _hLines;
+}
+
+const std::map<std::string, std::shared_ptr<TrainType> >& Building::GetTrainTypes() const
+{
+      return _trainTypes;
+}
+
+const std::map<int, std::shared_ptr<TrainTimeTable> >& Building::GetTrainTimeTables() const
+{
+      return _trainTimeTables;
+}
+
+const std::map<int, std::shared_ptr<Platform> >& Building::GetPlatforms() const
+{
+      return _platforms;
+}
+
+bool Building::AddPlatform(std::shared_ptr<Platform> P)
+{
+      if (_platforms.count(P->id)!=0) {
+            Log->Write("WARNING: Duplicate platform found [%d]", P->id);
+      }
+      _platforms[P->id] = P;
+      return true;
+
 }
 
 const map<int, Goal*>& Building::GetAllGoals() const

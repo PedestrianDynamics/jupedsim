@@ -8,42 +8,99 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
     <!-- seed used for initialising random generator -->
     <seed>12542</seed>
     <!-- geometry file -->
-    <max_sim_time>100</max_sim_time>
-    <geometry>bottleneck_geo.xml</geometry>
+    <max_sim_time>110</max_sim_time>
+    <geometry>schedule_geo.xml</geometry>
+    <num_threads>1</num_threads>
     <!-- traectories file and format -->
     <trajectories format="xml-plain"  fps="8">
-      <file location="bottleneck_traj.xml" />
+      <file location="schedule_traj.xml" />
     </trajectories>
     <!-- where to store the logs -->
     <logfile>log.txt</logfile>
+    <!-- events and schedule files -->
+    <events_file>events.xml</events_file>
+    <schedule_file>schedule.xml</schedule_file>
   </header>
-  
+
         <!-- traffic information: e.g closed doors or smoked rooms -->
         <traffic_constraints>
-                <!-- doors states are: close or open -->
-                <doors>
-                        <door trans_id="2" caption="main_exit" state="open" />
-                </doors>
         </traffic_constraints>
 
         <routing>
-                <goals>
-                        <goal id="0" final="true" caption="goal 1">
-                                <polygon>
-                                        <vertex px="70" py="101" />
-                                        <vertex px="70" py="103" />
-                                        <vertex px="75" py="103" />
-                                        <vertex px="75" py="101" />
-                                        <vertex px="70" py="101" />
-                                </polygon>
-                        </goal>
-                </goals>
+            <goals>
+                <goal id="0" final="true" caption="goal 1">
+                    <polygon>
+                        <vertex px="8" py="6" />
+                        <vertex px="10" py="6" />
+                        <vertex px="10" py="7" />
+                        <vertex px="8" py="7" />
+                        <vertex px="8" py="6" />
+                    </polygon>
+                </goal>
+
+                <goal id="1" final="true" caption="goal 1">
+                    <polygon>
+                        <vertex px="8" py="-1" />
+                        <vertex px="10" py="-1" />
+                        <vertex px="10" py="-2" />
+                        <vertex px="8" py="-2" />
+                        <vertex px="8" py="-1" />
+                    </polygon>
+                </goal>
+
+
+                <goal id="2" final="true" caption="goal 1">
+                    <polygon>
+                        <vertex px="11" py="6" />
+                        <vertex px="13" py="6" />
+                        <vertex px="13" py="7" />
+                        <vertex px="11" py="7" />
+                        <vertex px="11" py="6" />
+                    </polygon>
+                </goal>
+
+                <goal id="3" final="true" caption="goal 1">
+                    <polygon>
+                        <vertex px="11" py="-1" />
+                        <vertex px="13" py="-1" />
+                        <vertex px="13" py="-2" />
+                        <vertex px="11" py="-2" />
+                        <vertex px="11" py="-1" />
+                    </polygon>
+                </goal>
+
+                <goal id="4" final="true" caption="goal 1">
+                    <polygon>
+                        <vertex px="14" py="6" />
+                        <vertex px="16" py="6" />
+                        <vertex px="16" py="7" />
+                        <vertex px="14" py="7" />
+                        <vertex px="14" py="6" />
+                    </polygon>
+                </goal>
+
+                <goal id="5" final="true" caption="goal 1">
+                    <polygon>
+                        <vertex px="14" py="-1" />
+                        <vertex px="16" py="-1" />
+                        <vertex px="16" py="-2" />
+                        <vertex px="14" py="-2" />
+                        <vertex px="14" py="-1" />
+                    </polygon>
+                </goal>
+
+            </goals>
         </routing>
 
-        <!--persons information and distribution -->
+    <!--persons information and distribution -->
         <agents operational_model_id="3">
                 <agents_distribution>
-                        <group group_id="1" agent_parameter_id="1" room_id="1" subroom_id="0" number="30" goal_id="0" router_id="1" />
+                    <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="10" goal_id="0" router_id="2" />
+                    <group group_id="2" agent_parameter_id="1" room_id="0" subroom_id="0" number="10" goal_id="2" router_id="2" />
+                    <group group_id="3" agent_parameter_id="1" room_id="0" subroom_id="0" number="10" goal_id="4" router_id="2" />
+                    <group group_id="4" agent_parameter_id="1" room_id="4" subroom_id="0" number="10" goal_id="1" router_id="2" />
+                    <group group_id="5" agent_parameter_id="1" room_id="4" subroom_id="0" number="10" goal_id="3" router_id="2" />
+                    <group group_id="6" agent_parameter_id="1" room_id="4" subroom_id="0" number="10" goal_id="5" router_id="2" />
                 </agents_distribution>
         </agents>
 
@@ -53,7 +110,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
                   <model_parameters>
                         <solver>euler</solver>
                         <stepsize>0.01</stepsize>
-                        <exit_crossing_strategy>4</exit_crossing_strategy>
+                        <exit_crossing_strategy>3</exit_crossing_strategy>
                         <linkedcells enabled="true" cell_size="2.2" />
                         <force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
                         <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
@@ -103,15 +160,14 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
                   </agent_parameters>
                 </model>
 
-
      <model operational_model_id="3" description="Tordeux2015">
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.01</stepsize>
-        <exit_crossing_strategy>3</exit_crossing_strategy>
+        <exit_crossing_strategy>8</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
-        <force_ped a="8" D="0.1" />
-        <force_wall a="5" D="0.02" />
+        <force_ped a="6" D="0.1" />
+        <force_wall a="8" D="0.01" />
       </model_parameters>
       <agent_parameters agent_parameter_id="1">
         <v0 mu="1.0" sigma="0.001" />
@@ -129,9 +185,19 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
         <route_choice_models>
                 <router router_id="1" description="global_shortest">
                         <parameters>
-             <!-- <navigation_lines file="routing.xml" /> -->
                         </parameters>
                 </router>
+            <router router_id="2" description="ff_global_shortest_trips">
+                <parameters>
+                </parameters>
+            </router>
+
+            <router router_id="3" description="ff_global_shortest">
+                <parameters>
+
+                </parameters>
+            </router>
+
         </route_choice_models>
 
 </JuPedSim>

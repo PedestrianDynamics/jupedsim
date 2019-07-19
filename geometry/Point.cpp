@@ -32,16 +32,6 @@
 /************************************************************
   Konstruktoren
  ************************************************************/
-
-Point::Point(const Point& orig) 
-{
-//     std::cout << "Point: " << toString() << std::endl;
-//     std::cout << "orig:  " << toString() << std::endl;
-
-     _x = orig._x;
-     _y = orig._y;
-}
-
 std::string Point::toString() const
 {
      std::stringstream tmp;

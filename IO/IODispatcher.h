@@ -33,7 +33,7 @@
 
 #include <cstring>
 #include <vector>
-
+#include <filesystem>
 extern OutputHandler* Log;
 
 class Trajectories;
@@ -63,10 +63,8 @@ class Trajectories
 {
 public:
      Trajectories()
-     {
-          _outputHandler = nullptr;
-     };
-     virtual ~Trajectories(){delete _outputHandler;};
+     : _outputHandler(nullptr) {}
+     virtual ~Trajectories() = default;
      virtual void WriteHeader(long nPeds, double fps, Building* building, int seed, int count)=0;
      virtual void WriteGeometry(Building* building)=0;
      virtual void WriteFrame(int frameNr, Building* building)=0;
@@ -77,7 +75,7 @@ public:
      {
           _outputHandler->Write(str);
      }
-     void SetOutputHandler(OutputHandler* outputHandler)
+     void SetOutputHandler(std::shared_ptr<OutputHandler> outputHandler)
      {
           _outputHandler=outputHandler;
      }
@@ -98,7 +96,7 @@ public:
          }
 
 protected:
-     OutputHandler* _outputHandler;
+     std::shared_ptr<OutputHandler> _outputHandler;
 };
 
 

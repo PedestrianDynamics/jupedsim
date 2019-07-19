@@ -21,6 +21,11 @@ ENDIF (POLICY CMP0077)
 
 project(JPScore LANGUAGES CXX)
 
+# Project setup
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # Options for  jpscore
 if(NOT AIROUTER)
     set(AIROUTER false)
@@ -655,10 +660,6 @@ endif()
 add_library(thirdParty STATIC ${THIRD_PARTY_SRC})
 
 add_library(core STATIC ${source_files})
-# c++17 ----
-set(CMAKE_CXX_EXTENSIONS OFF)
-set_property(TARGET core PROPERTY CXX_STANDARD 17)
-set_property(TARGET core PROPERTY CXX_STANDARD_REQUIRED ON)
 if(CMAKE_COMPILER_IS_GNUCXX)
   target_link_libraries(core thirdParty stdc++fs) # link to lib filesystem
 else()

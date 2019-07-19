@@ -109,7 +109,6 @@ UnivFFviaFM::UnivFFviaFM(Room* roomArg, Configuration* const confArg, double hx,
           }
           //find insidePoint and save it, together with UID
           Point normalVec = anyDoor.NormalVec();
-          double length = normalVec.Norm();
           Point midPoint = anyDoor.GetCentre();
           Point candidate01 = midPoint + (normalVec * 0.25);
           Point candidate02 = midPoint - (normalVec * 0.25);
@@ -191,7 +190,6 @@ UnivFFviaFM::UnivFFviaFM(SubRoom* subRoomArg, Configuration* const confArg, doub
      //find insidePoint and save it, together with UID
     Line anyDoor = Line{(--tmpDoors.end())->second};
     Point normalVec = anyDoor.NormalVec();
-    double length = normalVec.Norm();
     Point midPoint = anyDoor.GetCentre();
     Point candidate01 = midPoint + (normalVec * 0.25);
     Point candidate02 = midPoint - (normalVec * 0.25);
@@ -442,7 +440,7 @@ void UnivFFviaFM::recreateAllForQuickest() {
 #pragma omp parallel
      {
 #pragma omp for
-          for (signed int i = 0; i < _doors.size(); ++i) {
+          for (size_t i = 0; i < _doors.size(); ++i) {
                auto doorPair = _doors.begin();
                std::advance(doorPair, i);
                addTarget(doorPair->first, _costFieldWithKey[doorPair->first], _directionFieldWithKey[doorPair->first]);
@@ -533,8 +531,8 @@ void UnivFFviaFM::finalizeTargetLine(const int uid, const Line& line, Point* tar
     long int key;
     long int deltaX, deltaY, deltaX1, deltaY1, px, py, xe, ye, i; //Bresenham Algorithm
 
-    long int goodneighbor;
-    directNeighbor neigh;
+    //long int goodneighbor;
+    //directNeighbor neigh;
 
 
     key = _grid->getKeyAtPoint(line.GetPoint1());
@@ -1458,7 +1456,7 @@ void UnivFFviaFM::addAllTargetsParallel() {
 #pragma omp parallel
      {
 #pragma omp for
-          for (signed int i = 0; i < _doors.size(); ++i) {
+          for (size_t i = 0; i < _doors.size(); ++i) {
                auto doorPair = _doors.begin();
                std::advance(doorPair, i);
                addTarget(doorPair->first, _costFieldWithKey[doorPair->first], _directionFieldWithKey[doorPair->first]);
@@ -1491,7 +1489,7 @@ void UnivFFviaFM::addTargetsParallel(std::vector<int> wantedDoors) {
 #pragma omp parallel
      {
 #pragma omp for
-          for (signed int i = 0; i < wantedDoors.size(); ++i) {
+          for (size_t i = 0; i < wantedDoors.size(); ++i) {
                auto doorUID = wantedDoors.begin();
                std::advance(doorUID, i);
                addTarget(*doorUID, _costFieldWithKey[*doorUID], _directionFieldWithKey[*doorUID]);
@@ -1651,7 +1649,7 @@ double UnivFFviaFM::getCostToDestination(const int destID, const Point& position
         } else if ((key < _grid->GetnPoints()-_grid->GetiMax()) && (_gridCode[key+_grid->GetiMax()] != OUTSIDE) && (_gridCode[key+_grid->GetiMax()] != WALL)) {
             key = key + _grid->GetiMax();
         } else {
-            Log->Write("ERROR:\t In getCostToDestination(3 args)");
+             // Log->Write("ERROR:\t In getCostToDestination(3 args)");
         }
     }
      if (_costFieldWithKey.count(destID)==1 && _costFieldWithKey[destID]) {
@@ -1689,7 +1687,7 @@ double UnivFFviaFM::getCostToDestination(const int destID, const Point& position
         } else if ((key < _grid->GetnPoints()-_grid->GetiMax()) && (_gridCode[key+_grid->GetiMax()] != OUTSIDE) && (_gridCode[key+_grid->GetiMax()] != WALL)) {
             key = key + _grid->GetiMax();
         } else {
-            Log->Write("ERROR:\t In getCostToDestination(2 args)");
+            // Log->Write("ERROR:\t In getCostToDestination(2 args)");
         }
     }
      if (_costFieldWithKey.count(destID)==1 && _costFieldWithKey[destID]) {
@@ -1817,7 +1815,7 @@ void UnivFFviaFM::getDirectionToUID(int destID, long int key, Point& direction){
         } else if ((key < _grid->GetnPoints()-_grid->GetiMax()) && (_gridCode[key+_grid->GetiMax()] != OUTSIDE) && (_gridCode[key+_grid->GetiMax()] != WALL)) {
             key = key + _grid->GetiMax();
         } else {
-            Log->Write("ERROR:\t In getDirectionToUID (3 args)");
+            // Log->Write("ERROR:\t In getDirectionToUID (3 args)");
         }
     }
      if (_directionFieldWithKey.count(destID)==1 && _directionFieldWithKey[destID]) {

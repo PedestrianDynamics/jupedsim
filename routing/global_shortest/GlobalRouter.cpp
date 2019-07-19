@@ -81,7 +81,7 @@ GlobalRouter::GlobalRouter(int id, RoutingStrategy s) :  Router(id, s)
 GlobalRouter::~GlobalRouter()
 {
      if (_distMatrix && _pathsMatrix) {
-          const int exitsCnt = (const int) (_building->GetNumberOfGoals() + _building->GetAllGoals().size());
+          const int exitsCnt = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
           for (int p = 0; p < exitsCnt; ++p) {
                delete[] _distMatrix[p];
                delete[] _pathsMatrix[p];
@@ -118,7 +118,7 @@ bool GlobalRouter::Init(Building* building)
      }
 
      // initialize the distances matrix for the floydwahrshall
-     const int exitsCnt = (const int) (_building->GetNumberOfGoals() + _building->GetAllGoals().size());
+     const int exitsCnt = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
 
      _distMatrix = new double*[exitsCnt];
      _pathsMatrix = new int*[exitsCnt];
@@ -690,7 +690,7 @@ bool GlobalRouter::GetPath(Pedestrian*ped, int goalID, std::vector<SubRoom*>& pa
  */
 void GlobalRouter::FloydWarshall()
 {
-     const int n = (const int) (_building->GetNumberOfGoals() + _building->GetAllGoals().size());
+     const int n = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
      std::cout << "FloydWarshall ------------------" << std::endl;
      for (int k = 0; k < n; k++) {
           for (int i = 0; i<n; i++) {
@@ -890,7 +890,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      }
      else
      {
-          if (_building->GetRoom(ped->GetRoomID())->GetCaption() != "outside")
+          if (_building->GetRoom(ped->GetRoomID())->GetCaption() != "outside" && relevantAPs.size()>0)
           {
                //Log->Write(
                //
@@ -941,8 +941,9 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
                }
                if(relevant) {
                     //only if not closed
-                    if(!ap->IsClosed())
-                         relevantAPS.push_back(ap);
+                    if(ap)
+                         if(!ap->IsClosed())
+                              relevantAPS.push_back(ap);
                }
           }
      }
@@ -1388,7 +1389,7 @@ string GlobalRouter::GetRoutingInfoFile()
                                                                                             //wronf
                                                                                             //router section
                          nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
-                    
+
                     TiXmlElement* para =e->FirstChild("parameters")->FirstChildElement("navigation_mesh");
                     if (para)
                     {
@@ -1491,7 +1492,7 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
                if(_building->AddHline(h))
                {
                     subroom->AddHline(h);
-                    HlineCount++;                    
+                    HlineCount++;
                     //h is freed in building
                }
                else
@@ -1619,7 +1620,7 @@ double GlobalRouter::MinAngle(const Point& p1, const Point& p2, const Point& p3)
 
      if(fabs(alpha+beta+gamma-M_PI)<J_EPS)
      {
-		  std::vector<double> vec = { alpha, beta, gamma };
+                  std::vector<double> vec = { alpha, beta, gamma };
           return *std::min_element(vec.begin(), vec.end()) * (180.0 / M_PI);
      }
      else

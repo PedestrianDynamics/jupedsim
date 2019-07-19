@@ -43,6 +43,11 @@ public:
      Goal* parseGoalNode(TiXmlElement * e);
      Transition* parseTransitionNode(TiXmlElement * xTrans, Building * building);
      Goal* parseWaitingAreaNode(TiXmlElement * e);
+     bool LoadTrainInfo(Building* building);
+     bool LoadTrainTimetable(Building* building, TiXmlElement * xRootNode);
+     bool LoadTrainType(Building* building, TiXmlElement * xRootNode);
+     std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement * e);
+     std::shared_ptr<TrainTimeTable> parseTrainTimeTableNode(TiXmlElement * e);
 
 private:
      Configuration* _configuration;

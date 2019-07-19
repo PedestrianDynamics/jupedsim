@@ -106,12 +106,10 @@ bool FFRouterTrips::Init(Building* building)
           //get global field to manage goals (which are not in a subroom)
           _globalFF = new FloorfieldViaFMTrips(building, 0.25, 0.25, 0.0, false, true);
           for (auto &itrGoal : building->GetAllGoals()) {
-               if(WaitingArea* wa = dynamic_cast<WaitingArea*>(itrGoal.second)) {
+               if(dynamic_cast<WaitingArea*>(itrGoal.second)) {
                     _globalFF->createMapEntryInLineToGoalID(itrGoal.first, true);
-//                    std::cout << "Added " << itrGoal.first << " to goalIDs " << wa->getTransitionID() << std::endl;
                }else{
                     _globalFF->createMapEntryInLineToGoalID(itrGoal.first, false);
-//                    std::cout << "Added " << itrGoal.first << " to goalIDs " << std::endl;
                }
                goalIDs.emplace_back(itrGoal.first);
           }
@@ -130,7 +128,6 @@ bool FFRouterTrips::Init(Building* building)
      _CroTrByUID.clear();
      auto& allTrans = building->GetAllTransitions();
      auto& allCross = building->GetAllCrossings();
-     auto& allGoals = building->GetAllGoals();
 
      std::vector<std::pair<int, int>> roomAndCroTrVector;
      roomAndCroTrVector.clear();
@@ -455,8 +452,6 @@ int FFRouterTrips::FindExit(Pedestrian* ped)
      SubRoom* subroom = _building->GetSubRoomByUID(ped->GetSubRoomUID());
      Goal* goal = _building->GetFinalGoal(ped->GetFinalDestination());
 
-     int ret;
-
      // Check if current position is already waiting area
      // yes: set next goal and return findExit(p)
      goalManager.ProcessPedPosition(ped);
@@ -578,7 +573,7 @@ int FFRouterTrips::FindExit1(Pedestrian* p)
      }
 
 
-     int bestFinalDoor = -1; // to silence the compiler
+     //int bestFinalDoor = -1; // to silence the compiler
      for(int finalDoor : validFinalDoor) {
           //with UIDs, we can ask for shortest path
           for (int doorUID : DoorUIDsOfRoom) {
@@ -614,7 +609,7 @@ int FFRouterTrips::FindExit1(Pedestrian* p)
                                  bestDoor = _pathsMatrix[key]; //@todo: @ar.graf: check this hack
                              }
                          }
-                         bestFinalDoor = key.second;
+                         //bestFinalDoor = key.second;
                     }
                }
           }
@@ -643,7 +638,6 @@ int FFRouterTrips::FindExit1(Pedestrian* p)
 void FFRouterTrips::FloydWarshall()
 {
      bool change = false;
-     double savedDistance = 0.;
      int totalnum = _allDoorUIDs.size();
      for(int k = 0; k<totalnum; ++k) {
           for(int i = 0; i<totalnum; ++i) {
@@ -654,7 +648,6 @@ void FFRouterTrips::FloydWarshall()
                     if ((_distMatrix[key_ik] < DBL_MAX) && (_distMatrix[key_kj] < DBL_MAX) &&
                        (_distMatrix[key_ik] + _distMatrix[key_kj] < _distMatrix[key_ij]))
                     {
-                         savedDistance = _distMatrix[key_ij] - _distMatrix[key_ik] - _distMatrix[key_kj];
                          _distMatrix.erase(key_ij);
                          _distMatrix.insert(std::make_pair(key_ij, _distMatrix[key_ik] + _distMatrix[key_kj]));
                          _pathsMatrix.erase(key_ij);
@@ -665,7 +658,6 @@ void FFRouterTrips::FloydWarshall()
           }
      }
      if (change) {
-          //Log->Write("Floyd nochmal!!! %f", savedDistance);
           FloydWarshall();
      } else {
           Log->Write("INFO:\t FloydWarshall done!");

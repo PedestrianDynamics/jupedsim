@@ -23,7 +23,7 @@
 #define JPSCORE_INIFILEPARSER_H
 
 #include <string>
-
+#include <filesystem>
 #include "../general/Configuration.h"
 #include "../routing/DirectionStrategy.h"
 
@@ -44,6 +44,8 @@ public:
      bool Parse(std::string iniFile);
 
 private:
+     bool ParseHeader(TiXmlNode* xHeader);
+
      bool ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMain);
 
      bool ParseKrauszModel(TiXmlElement* xKrausz, TiXmlElement* xMain);
