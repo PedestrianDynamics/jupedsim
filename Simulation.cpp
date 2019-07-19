@@ -120,7 +120,7 @@ bool Simulation::InitArgs()
         switch (_config->GetFileFormat()) {
         case FORMAT_XML_PLAIN_WITH_MESH:
         case FORMAT_XML_PLAIN: {
-            OutputHandler* travisto = new SocketHandler(_config->GetHostname(),
+            auto travisto = std::make_shared<SocketHandler>(_config->GetHostname(),
                     _config->GetPort());
             Trajectories* output = new TrajectoriesJPSV05();
             output->SetOutputHandler(travisto);
@@ -164,7 +164,7 @@ bool Simulation::InitArgs()
 
         switch (_config->GetFileFormat()) {
         case FORMAT_XML_PLAIN: {
-            OutputHandler* tofile = new FileHandler(
+            auto tofile = std::make_shared<FileHandler>(
                     traj.c_str());
             Trajectories* output = new TrajectoriesJPSV05();
             output->SetOutputHandler(tofile);
@@ -175,7 +175,7 @@ bool Simulation::InitArgs()
 
 
 
-            OutputHandler* file = new FileHandler(
+            auto file = std::make_shared<FileHandler>(
                  traj.c_str());
             outputTXT = new TrajectoriesFLAT();
             outputTXT->SetOutputHandler(file);
@@ -184,7 +184,7 @@ bool Simulation::InitArgs()
         }
         case FORMAT_VTK: {
             Log->Write("INFO: \tFormat vtk not yet supported\n");
-            OutputHandler* file = new FileHandler(
+            auto file = std::make_shared<FileHandler>(
                     (traj+".vtk").c_str());
             Trajectories* output = new TrajectoriesVTK();
             output->SetOutputHandler(file);
@@ -717,33 +717,28 @@ double Simulation::RunBody(double maxSimTime)
     }// while time
     return t;
 }
-bool Simulation::WriteTrajectories(std::string trajectoryName)
+void Simulation::WriteTrajectories(std::string trajectoryName)
 {
-      if(_config-> GetFileFormat() == FORMAT_PLAIN)
-      {
-            fs::path p = _config->GetTrajectoriesFile();
-            fs::path parent = p.parent_path();
-            int sf = fs::file_size(p);
-            if(sf>_maxFileSize*1024*1024)
-            {
-                  std::string extention = p.extension().string();
-                  this->incrementCountTraj();
-                  char tmp_traj_name[100];
-                  sprintf(tmp_traj_name,"%s_%.4d_%s", trajectoryName.c_str(), _countTraj, extention.c_str());
-                  fs::path abs_traj_name = parent/ fs::path(tmp_traj_name);
-                  _config->SetTrajectoriesFile(abs_traj_name.string());
-                  Log->Write("INFO:\tNew trajectory file <%s>", tmp_traj_name);
-                  OutputHandler* file = new FileHandler(_config->GetTrajectoriesFile().c_str());
-                  outputTXT->SetOutputHandler(file);
+    if(_config->GetFileFormat() != FORMAT_PLAIN) {return;}
 
-//_config->GetProjectRootDir()+"_1_"+_config->GetTrajectoriesFile());
-                  // _config->SetTrajectoriesFile(name);
-                  _iod->WriteHeader(_nPeds, _fps, _building.get(), _seed, _countTraj);
-                  // _iod->WriteGeometry(_building.get());
-            }
-      }
-      return true;
+    fs::path p = _config->GetTrajectoriesFile();
+    fs::path parent = p.parent_path();
+    int sf = fs::file_size(p);
+    if(sf > _maxFileSize * 1024 * 1024)
+    {
+          std::string extention = p.extension().string();
+          this->incrementCountTraj();
+          char tmp_traj_name[100];
+          sprintf(tmp_traj_name,"%s_%.4d_%s", trajectoryName.c_str(), _countTraj, extention.c_str());
+          fs::path abs_traj_name = parent/ fs::path(tmp_traj_name);
+          _config->SetTrajectoriesFile(abs_traj_name.string());
+          Log->Write("INFO:\tNew trajectory file <%s>", tmp_traj_name);
+          auto file = std::make_shared<FileHandler>(_config->GetTrajectoriesFile().c_str());
+          outputTXT->SetOutputHandler(file);
+          _iod->WriteHeader(_nPeds, _fps, _building.get(), _seed, _countTraj);
+    }
 }
+
 //      |             |
 //      *-------------* <---door
 //      |             |
