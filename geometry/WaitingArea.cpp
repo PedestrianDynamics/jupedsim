@@ -28,6 +28,7 @@
 
 #include "WaitingArea.h"
 #include "Building.h"
+#include <sstream>
 
 int WaitingArea::GetMaxNumPed() const
 {
@@ -90,8 +91,8 @@ bool WaitingArea::SetNextGoals(const std::map<int, double>& nextGoals)
 bool WaitingArea::CheckProbabilities()
 {
      double p =0.;
-     for ( auto it : _nextGoals ){
-          p += it.second;
+     for(auto[_, value] : _nextGoals) {
+          p += value;
      }
 
      return (p>0.9999) && (p<1.000001);
@@ -106,30 +107,21 @@ void WaitingArea::UpdateProbabilities(bool isOpen, int id)
 
 std::string WaitingArea::toString()
 {
-     std::string out;
-     char buffer [50];
+     std::stringstream buffer;
+     buffer << "WaitingArea[\n\tid=" << _id
+            << "\n\tcaption=" << _caption
+            << "\n\tmin_peds=" << _minNumPed
+            << "\n\tmax_peds=" << _maxNumPed
+            << "\n\tis_open=" << std::boolalpha << _open
+            << "\n\twaiting_time=" << _waitingTime
+            << "\n\tglobal_timer=" << std::boolalpha << _caption
+            << "\n\ttransition_id=" << _transitionID;
 
-
-     out.append("WaitingArea[\n");
-     sprintf(buffer, "\tid=%d\n", _id);
-     out.append(buffer);
-     sprintf(buffer, "\tcaption=%s\n", _caption.c_str());
-     out.append(buffer);
-     sprintf(buffer, "\tmin_peds=%ld\n", _minNumPed);
-     out.append(buffer);
-     sprintf(buffer, "\tmax_peds=%ld\n", _maxNumPed);
-     out.append(buffer);
-     sprintf(buffer, "\tis_open=%d\n", _open);
-     out.append(buffer);
-     sprintf(buffer, "\twaiting_time=%f\n", _waitingTime);
-     out.append(buffer);
-
-     for (auto const& nextWa : _nextGoals){
-          sprintf(buffer, "\tnext id=%d\tp=%f\n", nextWa.first, nextWa.second);
-          out.append(buffer);
+     for(auto[id, p] : _nextGoals) {
+          buffer << "\n\tnext id="<< id << "\tp="<<p;
      }
-     out.append("]");
-     return out;
+     buffer << "\n]";
+     return buffer.str();
 }
 
 double WaitingArea::GetWaitingTime() const

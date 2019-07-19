@@ -41,7 +41,6 @@ void GoalManager::ProcessPedPosition(Pedestrian* ped)
           WaitingArea* wa = dynamic_cast<WaitingArea*>(_allGoals[ped->GetFinalDestination()]);
           // Add ped to waiting area
           wa->AddPed(ped->GetID());
-          // Ped enters waiting area
           ped->EnterGoal();
 
           // Check state of waiting area
@@ -50,8 +49,11 @@ void GoalManager::ProcessPedPosition(Pedestrian* ped)
           }
      }
 
-     // Ped already had a goal AND has not reached final goal
-     if ((ped->GetLastGoalID() != -1 ) && (ped->GetFinalDestination() != ped->GetLastGoalID())){
+
+     const bool pedHasGoal = ped->GetLastGoalID() != -1 ;
+     const bool pedHasNotReachedFinalGoal = ped->GetFinalDestination() != ped->GetLastGoalID();
+
+     if(pedHasGoal && pedHasNotReachedFinalGoal) {
           // Ped is not in waiting area which was the last goal
           if (!CheckInsideWaitingArea(ped, ped->GetLastGoalID())){
                WaitingArea* wa = dynamic_cast<WaitingArea*>(_allGoals[ped->GetLastGoalID()]);
@@ -59,7 +61,6 @@ void GoalManager::ProcessPedPosition(Pedestrian* ped)
                if (wa != nullptr){
                     // Remove ped from waiting area
                     wa->RemovePed(ped->GetID());
-                    // ped leaves waiting area
                     ped->LeaveGoal();
 
                     // Check state of waiting area

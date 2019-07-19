@@ -98,7 +98,6 @@ FFRouterTrips::~FFRouterTrips()
 
 bool FFRouterTrips::Init(Building* building)
 {
-     std::cout << "bool FFRouterTrips::Init(Building* building)" << std::endl;
      _building = building;
 
      if (_hasSpecificGoals) {
@@ -167,10 +166,6 @@ bool FFRouterTrips::Init(Building* building)
      //make unique
      std::sort(_allDoorUIDs.begin(), _allDoorUIDs.end());
      _allDoorUIDs.erase( std::unique(_allDoorUIDs.begin(),_allDoorUIDs.end()), _allDoorUIDs.end());
-
-     for (auto& door : _allDoorUIDs){
-          std::cout << "Door: " << door << std::endl;
-     }
 
      //cleanse maps
      _distMatrix.clear();
@@ -353,8 +348,6 @@ bool FFRouterTrips::Init(Building* building)
 
 bool FFRouterTrips::ReInit()
 {
-     std::cout << "bool FFRouterTrips::ReInit()" << std::endl;
-
      //cleanse maps
      _distMatrix.clear();
      _pathsMatrix.clear();
@@ -459,11 +452,6 @@ bool FFRouterTrips::ReInit()
 
 int FFRouterTrips::FindExit(Pedestrian* ped)
 {
-
-//     for (auto& goal : _goalToLineUIDmap){
-//          std::cout << goal.first << " -> " << goal.second << std::endl;
-//     }
-
      SubRoom* subroom = _building->GetSubRoomByUID(ped->GetSubRoomUID());
      Goal* goal = _building->GetFinalGoal(ped->GetFinalDestination());
 

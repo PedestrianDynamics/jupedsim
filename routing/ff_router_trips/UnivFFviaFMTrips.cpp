@@ -331,7 +331,6 @@ void UnivFFviaFMTrips::processGeometry(std::vector<Line>&walls, std::map<int, Li
 
      for (auto mapentry : doors) {
           _doors.insert(mapentry);
-          std::cout << "Added: " << mapentry.first << std::endl;
      }
      //_doors = doors;
 
@@ -1726,10 +1725,6 @@ double UnivFFviaFMTrips::getCostToDestination(const int destID, const Point& pos
 }
 
 double UnivFFviaFMTrips::getDistanceBetweenDoors(const int door1_ID, const int door2_ID) {
-     std::cout << " ------------ " << std::endl;
-     for (auto door : _doors){
-          std::cout << door.first << " " << door.second.toString() << std::endl;
-     }
     assert(_doors.count(door1_ID) != 0);
     assert(_doors.count(door2_ID) != 0);
 

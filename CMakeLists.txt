@@ -391,8 +391,7 @@ routing/smoke_router/cognitiveMap/internnavigationnetwork.cpp
 
 events/EventManager.cpp
 events/Event.cpp
-
-        forms/jpscore.rc
+forms/jpscore.rc
 math/KrauszModel.cpp geometry/GoalManager.cpp geometry/GoalManager.h)
 
 set(THIRD_PARTY_SRC

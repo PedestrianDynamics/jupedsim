@@ -377,7 +377,6 @@ bool Building::InitInsideGoals()
           Goal* goal = goalItr.second;
           if (goal->GetRoomID() == -1){
                found = true;
-               std::cout << "Goal " << goal->GetId() << " is outside" << std::endl;
                continue;
           }
 
@@ -392,7 +391,6 @@ bool Building::InitInsideGoals()
                     SubRoom* subRoom = subRoomItr.second.get();
 
                     if ((goal->GetSubRoomID() == subRoom->GetSubRoomID()) && (subRoom->IsInSubRoom(goal->GetCentroid()))){
-                         std::cout << "Goal " << goal->GetId() << " is in subroom " << subRoom->GetUID() << std::endl;
                          Crossing* crossing = goal->GetCentreCrossing();
                          subRoom->AddCrossing(crossing);
                          crossing->SetRoom1(room);
