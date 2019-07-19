@@ -8,7 +8,7 @@ then
         export CXX="g++-9"
     elif [ "$CXX" == "clang++" ]
     then
-        sudo apt-get install -y  --allow-unauthenticated -qq clang-8 libomp-8-dev libc++-8-dev libc++abi-8-dev
+        sudo apt-get install -y -qq clang-8 libomp-8-dev g++-9
         export CXX="clang++-8";
     fi
 elif [ "$TRAVIS_OS_NAME" == "osx" ]

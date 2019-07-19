@@ -654,14 +654,11 @@ if(JPSFIRE)
 endif()
 
 # todo make this system
-add_library(thirdParty SHARED ${THIRD_PARTY_SRC})
+add_library(thirdParty STATIC ${THIRD_PARTY_SRC})
 
 add_library(core STATIC ${source_files})
-if(CMAKE_COMPILER_IS_GNUCXX)
+if(${CMAKE_CXX_COMPILER_ID} MATCHES "^(GNU|Clang)$")
   target_link_libraries(core thirdParty stdc++fs) # link to lib filesystem
-elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  target_link_libraries(core thirdParty  stdc++fs)
-#  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
   message(WARNING "TODO: AppleClang requires Xcode 11 and OSX 10.15")
   target_link_libraries(core thirdParty)
