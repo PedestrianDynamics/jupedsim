@@ -270,18 +270,8 @@ if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
     ENDIF(USE_DUAL_ABI)
         set(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
         set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake_modules/")
-        INCLUDE(CodeCoverage)
-        set(ENABLE_COVERAGE ON)
-        SETUP_TARGET_FOR_COVERAGE(
-        cov  # Name for custom target.
-        ctest         # Name of the test driver executable that runs the tests.
-        # NOTE! This should always have a ZERO as exit code
-        # otherwise the coverage generation will not complete.
-        coverage            # Name of output directory.
-        )
     endif (CMAKE_COMPILER_IS_GNUCXX)
     file(GLOB_RECURSE test_files "${CMAKE_TEST_DIR}/*.cpp")
-    #  file(GLOB test_py_files "${CMAKE_TEST_DIR}/*/runtest*.py")
 endif (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
 if (BUILD_TESTING)
