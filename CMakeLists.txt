@@ -22,6 +22,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Optional features
 ################################################################################
 set(JPSFIRE OFF CACHE BOOL "Build with jps fire support")
+message(STATUS "JPSFIRE=${JPSFIRE}")
 
 # Options for  jpscore
 if(NOT AIROUTER)
@@ -631,11 +632,9 @@ endif()
 if(JPSFIRE)
     SET(source_files ${source_files} ${JPSFIRE_SRC})
     SET(header_files ${header_files} ${JPSFIRE_HDR})
-    message(STATUS "USE JPSFIRE")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJPSFIRE")
 endif()
 
-message(STATUS "JPSFIRE: ${JPSFIRE}")
 # ----- add here 3th party
 if(JPSFIRE)
     find_package(ZLIB REQUIRED)
