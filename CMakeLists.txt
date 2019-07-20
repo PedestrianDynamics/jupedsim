@@ -1,7 +1,7 @@
 # Documentation: Some useful options:
-# -DCMAKE_CXX_COMPILER:STRING=clang++   -DCMAKE_C_COMPILER:STRING=clang .
-# -DCMAKE_BUILD_TYPE:STRING=Debug (default Release)
-# -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON (default OFF)
+# -DCMAKE_CXX_COMPILER=clang++
+# -DCMAKE_BUILD_TYPE=Debug (default Release)
+# -DCMAKE_VERBOSE_MAKEFILE=ON (default OFF)
 # -DBUILD_TESTING=ON (default OFF) for python tests
 # -DBUILD_CPPUNIT_TEST=ON (default OFF) for unit tests
 # -DUSE_DUAL_ABI=ON (default OFF)  https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
@@ -10,7 +10,7 @@
 # -D JPSFIRE=true (default false)
 #--------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 IF (POLICY CMP0054)
     cmake_policy(SET CMP0054 NEW)
@@ -270,18 +270,8 @@ if (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
     ENDIF(USE_DUAL_ABI)
         set(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
         set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake_modules/")
-        INCLUDE(CodeCoverage)
-        set(ENABLE_COVERAGE ON)
-        SETUP_TARGET_FOR_COVERAGE(
-        cov  # Name for custom target.
-        ctest         # Name of the test driver executable that runs the tests.
-        # NOTE! This should always have a ZERO as exit code
-        # otherwise the coverage generation will not complete.
-        coverage            # Name of output directory.
-        )
     endif (CMAKE_COMPILER_IS_GNUCXX)
     file(GLOB_RECURSE test_files "${CMAKE_TEST_DIR}/*.cpp")
-    #  file(GLOB test_py_files "${CMAKE_TEST_DIR}/*/runtest*.py")
 endif (BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
 if (BUILD_TESTING)
@@ -667,11 +657,11 @@ endif()
 add_library(thirdParty STATIC ${THIRD_PARTY_SRC})
 
 add_library(core STATIC ${source_files})
-if(CMAKE_COMPILER_IS_GNUCXX)
+if(${CMAKE_CXX_COMPILER_ID} MATCHES "^(GNU|Clang)$")
   target_link_libraries(core thirdParty stdc++fs) # link to lib filesystem
-else()
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+  message(WARNING "TODO: AppleClang requires Xcode 11 and OSX 10.15")
   target_link_libraries(core thirdParty)
-  #message(WARNING "I don't know how to link filesystem with ${CMAKE_CXX_COMPILER_ID}")
 endif()
 
 

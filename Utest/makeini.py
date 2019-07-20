@@ -1,15 +1,14 @@
-# help: python3 makeini.py -h
+#!/usr/bin/env python3
 import argparse
 import errno
 import glob
 import logging
 import os
 import sys
-import time
 import itertools
-import numpy as np
-from numpy import linspace
 from shutil import copy2, rmtree, move
+import numpy as np
+
 
 try:
     import xml.etree.cElementTree as ET
@@ -235,7 +234,6 @@ def make_file(masterfile, tree, result):
 # =======================================================
 
 if __name__ == "__main__":
-    time1 = time.clock()
     args = getParserArgs()
 
     masterfile = args.file
@@ -254,15 +252,5 @@ if __name__ == "__main__":
     result = get_product(root)
     make_file(masterfile, tree, result)
 
-    time2 = time.clock()
-    print(directory)
-    print("%s/%s"%(directory, logfile))
-    print(os.path.isfile("%s/%s"%(directory, logfile)))
-
     if not  os.path.isfile("%s/%s"%(directory, logfile)):
         move(logfile, directory)
-    logging.info('time elapsed: %.2f to generate %d files'%(time2 - time1, len(result)))
-    if 0:
-        sys.exit(FAILURE)
-    else:
-        sys.exit(SUCCESS)
