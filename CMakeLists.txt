@@ -10,15 +10,7 @@
 # -D JPSFIRE=true (default false)
 #--------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
-set(CMAKE_LEGACY_CYGWIN_WIN32 0)
-IF (POLICY CMP0054)
-    cmake_policy(SET CMP0054 NEW)
-ENDIF (POLICY CMP0054)
-IF (POLICY CMP0077)
-    cmake_policy(SET CMP0077 OLD)
-ENDIF (POLICY CMP0077)
-
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(JPScore LANGUAGES CXX)
 
 # Project setup
@@ -165,6 +157,11 @@ if (GIT_SCM AND GITDIR)
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     OUTPUT_VARIABLE GIT_COMMIT_SUBJECT
     ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    # remove # from subject
+    string(REGEX REPLACE "\#"
+       "" GIT_COMMIT_SUBJECT
+       ${GIT_COMMIT_SUBJECT})
+
 else()
     message(STATUS "Not in a git repo")
   endif()
