@@ -25,33 +25,23 @@
  *
  *
  **/
-
-#define BOOST_TEST_MODULE SubRoomTest
 #define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_NO_MAIN
 #include <boost/test/unit_test.hpp>
-#include "../../geometry/SubRoom.h" 
+#include "../../geometry/SubRoom.h"
 
 #include <vector>
 
-OutputHandler* Log;
-
 BOOST_AUTO_TEST_SUITE(SubRoomTest)
-
-    struct Handler {
-        Handler() {Log = new STDIOHandler();}
-        ~ Handler() {delete Log;}
-    };
-
-    BOOST_GLOBAL_FIXTURE(Handler);
 
 BOOST_AUTO_TEST_CASE(JTol_WallGap_test)
 {
     BOOST_TEST_MESSAGE("starting small gap between wall test");
-    
+
     NormalSubRoom sub1;
     sub1.SetSubRoomID(1);
     sub1.SetRoomID(1);
-    
+
     Point P1 (00.0, 00);
     Point P2 (00.0, 10);
     Point P3 (05.0, 10);
@@ -66,7 +56,7 @@ BOOST_AUTO_TEST_CASE(JTol_WallGap_test)
     Point P12(10.0, 10);
     Point P13(10.0, 05);
     Point P14(10.0, 00);
-    
+
     // Walls with gap less than 0.03 were created
     sub1.AddWall(Wall(P1, P2));
     sub1.AddWall(Wall(P2, P3));
@@ -77,13 +67,13 @@ BOOST_AUTO_TEST_CASE(JTol_WallGap_test)
     sub1.AddWall(Wall(P11, P12));
     sub1.AddWall(Wall(P12, P13));
     sub1.AddWall(Wall(P14, P1));
-    
+
     Line exit(P14, P13);
-    
+
     std::vector<Line*> goal; // (Line(Point(10, 5), Point(10, 0)));
     goal.push_back(&exit);
-    
-   
+
+
     if (sub1.ConvertLineToPoly(goal) == true) {
         std::vector<Point> poly = sub1.GetPolygon();
         for (auto it:poly)
@@ -91,7 +81,7 @@ BOOST_AUTO_TEST_CASE(JTol_WallGap_test)
     }
     else
         BOOST_CHECK(false);
-    
+
     BOOST_TEST_MESSAGE("Leaving small wall test");
 }
 
@@ -100,11 +90,11 @@ BOOST_AUTO_TEST_CASE(JTol_WallGap_test)
 BOOST_AUTO_TEST_CASE(small_wall_test)
 {
     BOOST_TEST_MESSAGE("starting small wall test");
-    
+
     NormalSubRoom sub;
     sub.SetSubRoomID(1);
     sub.SetRoomID(1);
-    
+
     Point P1 (0, 0);
     Point P2 (0, 10);
     Point P3 (5.0, 10);
@@ -112,7 +102,7 @@ BOOST_AUTO_TEST_CASE(small_wall_test)
     Point P5 (10, 10);
     Point P6 (10, 5);
     Point P7 (10, 0);
-    
+
 
     BOOST_CHECK(sub.AddWall(Wall(P1, P2)) == true);
     BOOST_CHECK(sub.AddWall(Wall(P2, P3)) == true);
@@ -132,14 +122,14 @@ BOOST_AUTO_TEST_CASE(overlap_wall_test)
     NormalSubRoom sub;
     sub.SetSubRoomID(1);
     sub.SetRoomID(1);
-    
+
     Point P1 (0, 0);
     Point P2 (0, 10);
     Point P3 (10, 10);
     Point P4 (10, 8);
     Point P5 (10, 0);
     Point P6 (10, 5);
-    
+
     sub.AddWall(Wall(P1, P2));
     sub.AddWall(Wall(P5, P1));
     sub.AddWall(Wall(P3, P6));
@@ -149,9 +139,9 @@ BOOST_AUTO_TEST_CASE(overlap_wall_test)
     Line exit(P6, P4);
     std::vector<Line*> door; // door overlaps with the wall
     door.push_back(&exit);
-    
+
     BOOST_CHECK(sub.ConvertLineToPoly(door) == false);
-    
+
     NormalSubRoom sub2;
     sub2.SetSubRoomID(2);
     sub2.SetRoomID(2);
@@ -163,7 +153,7 @@ BOOST_AUTO_TEST_CASE(overlap_wall_test)
     sub2.AddWall(Wall(P4, P6)); // Overlapping Walls
 
     BOOST_CHECK(sub.ConvertLineToPoly(door) == false);
-    
+
     BOOST_TEST_MESSAGE("Leaving overlap wall test");
 }
 

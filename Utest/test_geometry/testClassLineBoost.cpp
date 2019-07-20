@@ -1,5 +1,5 @@
-#define BOOST_TEST_MODULE LineTest
 #define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_NO_MAIN
 #include <boost/test/unit_test.hpp>
 #include "../../geometry/Line.h"
 

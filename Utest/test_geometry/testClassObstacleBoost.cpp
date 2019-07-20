@@ -1,4 +1,4 @@
- 
+
 /**
  * \file        testClassLine.cpp
  * \date        April 27, 2015
@@ -25,30 +25,19 @@
  *
  *
  **/
-
-#define BOOST_TEST_MODULE ObstacleTest
 #define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_NO_MAIN
 #include <boost/test/unit_test.hpp>
-#include "../../geometry/Obstacle.h"
-#include "../../geometry/Point.h"
-#include "../../geometry/Wall.h"
-#include "../../IO/OutputHandler.h"
+#include "geometry/Obstacle.h"
+#include "geometry/Point.h"
+#include "geometry/Wall.h"
 
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
 #include <vector>
 
-
-OutputHandler* Log;
 BOOST_AUTO_TEST_SUITE(ObstacleTest)
-
-struct Handler {
-     Handler() {Log = new STDIOHandler();}
-     ~ Handler() {delete Log;}
-};
-
-BOOST_GLOBAL_FIXTURE(Handler);
 
 BOOST_AUTO_TEST_CASE(Obstacle_Constr_setGet_Test)
 {
@@ -59,7 +48,7 @@ BOOST_AUTO_TEST_CASE(Obstacle_Constr_setGet_Test)
      std::vector<Wall> walls_test;
      for (int i = 1; i < 10; ++i)
      {
-          Point P1 (cos(PI/i), sin(PI/i));  
+          Point P1 (cos(PI/i), sin(PI/i));
           Point P2 (i, i*i);
           Wall W1(P1, P2, "interior");
           obs1.AddWall(W1);
@@ -67,7 +56,7 @@ BOOST_AUTO_TEST_CASE(Obstacle_Constr_setGet_Test)
           obs1.SetCaption("obstacle" + std::to_string(i));
           obs1.SetHeight(-i);  // logically incorrect
           obs1.SetId(i-1);
-          
+
           BOOST_CHECK(obs1.GetCaption() == "obstacle" + std::to_string(i));
           BOOST_CHECK(obs1.GetHeight() == -i); // logically incorrect
           BOOST_CHECK(obs1.GetId() == (i-1));
@@ -82,26 +71,26 @@ BOOST_FIXTURE_TEST_CASE(Obstacle_whichQuad_test, Obstacle)
      Point vertex;
      Point hitPos;
      Obstacle obs;
-          
+
      BOOST_CHECK(WhichQuad(vertex, hitPos) == 3);
      for (int i = 1, j = 1; i < 10; ++i, ++j)
      {
           vertex = Point(i, j);
-          hitPos = Point(-i, -j);  
+          hitPos = Point(-i, -j);
           BOOST_CHECK(obs.WhichQuad(vertex, hitPos) == 1);
-          
+
           vertex = Point(-i, j);
-          hitPos = Point(i, -j);	  
+          hitPos = Point(i, -j);
           BOOST_CHECK(obs.WhichQuad(vertex, hitPos) == 2);
-                    
+
           vertex = Point(-i, -j);
-          hitPos = Point(i, j);	  
+          hitPos = Point(i, j);
           BOOST_CHECK(obs.WhichQuad(vertex, hitPos) == 3);
-                    
+
           vertex = Point(i, -j);
-          hitPos = Point(-i, j);	  
+          hitPos = Point(-i, j);
           BOOST_CHECK(obs.WhichQuad(vertex, hitPos) == 4);
-          
+
      }
      BOOST_TEST_MESSAGE("Leaving obstacle which_quad test");
 } */
@@ -113,25 +102,25 @@ BOOST_AUTO_TEST_CASE(Obstacle_Contains_test)
      Point P2(0, 10);
      Point P3(10, 10);
      Point P4(10, 0);
-     
+
      Obstacle obs1;
-     
+
      Wall w1(P1, P2);
      Wall w2(P2, P3);
      Wall w3(P3, P4);
      Wall w4(P4, P1);
-     
+
      obs1.AddWall(w1);
      obs1.AddWall(w2);
      obs1.AddWall(w3);
      obs1.AddWall(w4);
-     
+
      obs1.ConvertLineToPoly();
-     
+
      // inside the obstacle check
      for (int i = 1; i < 10; ++i)
           BOOST_CHECK(obs1.Contains(Point(i, static_cast<float>(i) / 100)) == true);
-     
+
      // on the edge check
      for (int i = 0; i <11; ++i) {
           BOOST_CHECK_MESSAGE(obs1.Contains(Point(0, i)) == true, " ( " << 0 <<", "<< i << ")");
@@ -139,11 +128,11 @@ BOOST_AUTO_TEST_CASE(Obstacle_Contains_test)
           BOOST_CHECK_MESSAGE(obs1.Contains(Point(10, i)) == true, " ( " << 10 <<", "<< i << ")");
           BOOST_CHECK_MESSAGE(obs1.Contains(Point(i, 10)) == true, " ( " << i <<", "<< 10 << ")");
      }
-     
+
      // outside the obstacle check
      for (int i = 1; i < 10; ++i)
           BOOST_CHECK(obs1.Contains(Point(-i, i*i)) == false);
-     
+
      BOOST_TEST_MESSAGE("Leaving obstacle contains test");
 }
 
@@ -218,23 +207,23 @@ BOOST_AUTO_TEST_CASE(Obstacle_GetCentroid_Test)
           Point P2(i+10, i);
           Point P3(i+5, i+5);
           Point P4(i+5, i-5);
-                    
+
           Wall w1(P1, P2);
           Wall w2(P2, P3);
           Wall w3(P3, P1);
-          
+
           Obstacle obs1;
           obs1.SetId(i-1);
-          
+
           obs1.AddWall(w1);
           obs1.AddWall(w2);
           obs1.AddWall(w3);
-          
+
           obs1.ConvertLineToPoly();
-          BOOST_CHECK(obs1.GetCentroid() == (P1 + P2 + P3) / 3);  
-          
+          BOOST_CHECK(obs1.GetCentroid() == (P1 + P2 + P3) / 3);
+
           Line L1(P3, P4);
-          BOOST_CHECK(obs1.IntersectWithLine(L1) == true);          
+          BOOST_CHECK(obs1.IntersectWithLine(L1) == true);
      }
      BOOST_TEST_MESSAGE("Leaving obstacle GetCentroid & IntersectWithLine test");
 }

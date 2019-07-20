@@ -7,6 +7,70 @@
 The core module for performing simulations. See the [online documentation](http://jupedsim.org/jpscore/)
 
 
+## Building from source
+
+### Linux / macOS
+The build is tested on Ubuntu 18.04 with gcc-9.1 / clang-8 and on macOS Mojave
+10.14.5 with dependencies from Homebrew and Apple LLVM 10.
+
+#### Requirements
+On Linux you will need a C++17 capable compiler and a standard library that
+supports `<filesystem>`. On macOS you will need the system compiler with C++17
+and filesystem from boost.
+
+Required:
+* boost (>= 1.65)
+* libomp (if you want to use OpenMP with Apple LLVm or Clang on Linux)
+* cgal
+* cmake (>= 3.1)
+
+Recommended:
+* ninja-build
+
+#### How to build
+Once you have installed all dependencies and cloned the repository continue
+with a ninja based build:
+```bash
+mkdir build
+cd build
+cmake -GNinja -DCMAKE_BUILD_TYPE=Debug <path-to-cmakelists>
+ninja
+```
+
+Alternatively you can generate a make based build with:
+```bash
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Debug <path-to-cmakelists>
+make -j$(nproc)
+```
+Note: If you do not want to use OpenMP you have to pass `-DUSE_OPENMP=OFF` to
+cmake on generation.
+```bash
+cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_OPENMP=OFF <path-to-cmakelists>
+```
+
+The following configuration flags are available:
+
+##### USE_OPENMP defaults to ON
+Build `jpscore` with OpenMP support, generation will fail if OpenMP cannot be
+found.
+
+##### JPSFIRE defaults to OFF
+Build `jpscore` with jpsfire features
+
+##### AIROUTER defaults to OFF
+Build `jpscore` with an AI based router
+
+##### BUILD_DOC defaults to OFF
+Build internal Doxygen based documentation
+
+##### BUILD_CPPUNIT_TEST defaults to OFF
+Build unit tests and add them to ctest
+
+##### BUILD_TESTING defaults to OFF
+Build full system tests and add them to ctest
+
 ## Quick start
 
 See [installation and configuration](http://jupedsim.org/jpscore/2016-11-02-quickstart.html)

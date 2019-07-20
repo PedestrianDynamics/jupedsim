@@ -37,10 +37,9 @@
 #include <boost/foreach.hpp>
 #include <boost/range/combine.hpp>
 
-#include <filesystem>
+#include "general/Filesystem.hpp"
 
 using namespace std;
-namespace fs = std::filesystem;
 using namespace boost::lambda;
 /************************************************************
  PedDistributor
@@ -490,10 +489,10 @@ vector<Point>  PedDistributor::PossiblePositions(const SubRoom &r) const{
 
     double amin = GetA_dist();
     double bmax = GetB_dist();
-    
+
     double bufx = GetA_dist();
     double bufy = GetB_dist();
-    
+
     double dx = 2*amin;
     double dy = 2*bmax;
 
