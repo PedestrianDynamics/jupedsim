@@ -30,7 +30,7 @@
 #include "../../pedestrian/Pedestrian.h"
 #include "../generic/FDSMesh.h"
 #include "../generic/FDSMeshStorage.h"
-#include "../../tinyxml/tinyxml.h"
+#include <tinyxml.h>
 #include <filesystem>
 namespace fs = std::filesystem;
 

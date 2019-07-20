@@ -40,7 +40,7 @@
 #include "../../geometry/Building.h"
 
 #include "../../pedestrian/Pedestrian.h"
-#include "../../tinyxml/tinyxml.h"
+#include <tinyxml.h>
 
 AIRouter::AIRouter()
 {

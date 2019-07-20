@@ -31,7 +31,7 @@
 #include "../generic/FDSMesh.h"
 #include "../generic/FDSMeshStorage.h"
 //#include "../../pedestrian/PedDistributor.h"
-#include "../../tinyxml/tinyxml.h"
+#include <tinyxml.h>
 //#include <set>
 //#include <algorithm>
 //#include <math.h>
