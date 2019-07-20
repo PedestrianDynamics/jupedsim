@@ -157,6 +157,11 @@ if (GIT_SCM AND GITDIR)
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     OUTPUT_VARIABLE GIT_COMMIT_SUBJECT
     ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    # remove # from subject
+    string(REGEX REPLACE "\#"
+       "" GIT_COMMIT_SUBJECT
+       ${GIT_COMMIT_SUBJECT})
+
 else()
     message(STATUS "Not in a git repo")
   endif()
