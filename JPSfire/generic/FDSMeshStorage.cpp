@@ -27,9 +27,6 @@
  *
  **/
 #include "FDSMeshStorage.h"
-//#include <unistd.h>
-//#include <glob.h>
-// #include <filesystem>
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -256,7 +253,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &simTime, const double &p
     if (_fMContainer.count(Ztime.string()) == 0) {
         //std::cout << str << std::endl;
         std::cout << "\n time ERROR: requested grid not available: " << Ztime.string() << std::endl;
-        return(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
     }
     return _fMContainer.at(Ztime.string());
 
@@ -294,7 +291,7 @@ const FDSMesh &FDSMeshStorage::GetFDSMesh(const double &pedElev, const Point &do
         door_xy = fs::canonical(door_xy).make_preferred();
     if (_fMContainer.count(door_xy.string()) == 0) {
         std::cout << "\n > ERROR: requested sfgrid not available: " << door_xy.string() << std::endl;
-        return(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
     }
 
     // if (_fMContainer.count(str) == 1) {
