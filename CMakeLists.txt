@@ -637,13 +637,10 @@ if(JPSFIRE)
 endif()
 
 message(STATUS "JPSFIRE: ${JPSFIRE}")
-# ----- add here 3th party
-if(JPSFIRE)
-    find_package(ZLIB REQUIRED)
-    include_directories(${ZLIB_INCLUDE_DIRS})
-    add_library(cnpy STATIC "cnpy/cnpy.cpp")
-    target_link_libraries(cnpy ${ZLIB_LIBRARIES})
-endif()
+
+# Build included dependencies
+add_subdirectory(third-party)
+
 
 # todo make this system
 add_library(thirdParty STATIC ${THIRD_PARTY_SRC})
