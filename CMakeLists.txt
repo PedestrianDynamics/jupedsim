@@ -7,28 +7,27 @@
 # -DUSE_DUAL_ABI=ON (default OFF)  https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
 # -D Boost_NO_SYSTEM_PATHS=true (default false) -D BOOST_ROOT=PATH_where_to_find_boost
 # -D AIROUTER=true (default false)
-# -D JPSFIRE=true (default false)
+# -D JPSFIRE=ON (default OFF)
 #--------------------------------------------------------------------------
-
+################################################################################
+# Project setup
+################################################################################
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(JPScore LANGUAGES CXX)
-
-# Project setup
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+################################################################################
+# Optional features
+################################################################################
+set(JPSFIRE OFF CACHE BOOL "Build with jps fire support")
 
 # Options for  jpscore
 if(NOT AIROUTER)
     set(AIROUTER false)
 else()
     set(AIROUTER true)
-endif()
-
-if(NOT JPSFIRE)
-    set(JPSFIRE false)
-else()
-    set(JPSFIRE true)
 endif()
 
 message(STATUS "BUILD_TESTING01: " ${BUILD_TESTING})
