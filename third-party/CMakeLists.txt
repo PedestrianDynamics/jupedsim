@@ -33,3 +33,14 @@ add_library(tinyxml STATIC
 target_include_directories(tinyxml PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/tinyxml"
 )
+
+################################################################################
+# Build visLibity
+################################################################################
+add_library(visilibity STATIC
+    visiLibity/source_code/visilibity.cpp
+    visiLibity/source_code/visilibity.hpp
+)
+target_include_directories(visilibity PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/visiLibity/source_code"
+)

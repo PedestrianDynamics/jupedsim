@@ -391,8 +391,6 @@ set(THIRD_PARTY_SRC
   poly2tri/sweep/advancing_front.cpp
   poly2tri/sweep/sweep.cpp
   poly2tri/sweep/cdt.cpp
-
-  visiLibity/source_code/visilibity.cpp
   )
 set(THIRD_PARTY_HDR
 
@@ -403,8 +401,6 @@ set(THIRD_PARTY_HDR
   poly2tri/sweep/sweep_context.h
   poly2tri/sweep/advancing_front.h
   poly2tri/sweep/sweep.h
-
-  visiLibity/source_code/visilibity.hpp
   )
 
 set(JPSFIRE_SRC
@@ -640,10 +636,10 @@ add_library(thirdParty STATIC ${THIRD_PARTY_SRC})
 
 add_library(core STATIC ${source_files})
 if(${CMAKE_CXX_COMPILER_ID} MATCHES "^(GNU|Clang)$")
-  target_link_libraries(core thirdParty tinyxml stdc++fs) # link to lib filesystem
+  target_link_libraries(core thirdParty tinyxml visilibity stdc++fs) # link to lib filesystem
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
   message(WARNING "TODO: AppleClang requires Xcode 11 and OSX 10.15")
-  target_link_libraries(core thirdParty tinyxml)
+  target_link_libraries(core thirdParty tinyxml visilibity)
 endif()
 
 
