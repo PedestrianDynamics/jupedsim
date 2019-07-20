@@ -44,3 +44,24 @@ add_library(visilibity STATIC
 target_include_directories(visilibity PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/visiLibity/source_code"
 )
+
+################################################################################
+# Build poly2tri
+################################################################################
+add_library(poly2tri STATIC
+    poly2tri/common/shapes.cpp
+    poly2tri/common/shapes.h
+    poly2tri/common/utils.h
+    poly2tri/poly2tri.h
+    poly2tri/sweep/advancing_front.cpp
+    poly2tri/sweep/advancing_front.h
+    poly2tri/sweep/cdt.cpp
+    poly2tri/sweep/cdt.h
+    poly2tri/sweep/sweep.cpp
+    poly2tri/sweep/sweep.h
+    poly2tri/sweep/sweep_context.cpp
+    poly2tri/sweep/sweep_context.h
+)
+target_include_directories(visilibity PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/poly2tri"
+)

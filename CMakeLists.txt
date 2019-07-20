@@ -385,23 +385,6 @@ routing/trips_router/TripsRouter.cpp
 forms/jpscore.rc
 math/KrauszModel.cpp geometry/GoalManager.cpp geometry/GoalManager.h)
 
-set(THIRD_PARTY_SRC
-  poly2tri/common/shapes.cpp
-  poly2tri/sweep/sweep_context.cpp
-  poly2tri/sweep/advancing_front.cpp
-  poly2tri/sweep/sweep.cpp
-  poly2tri/sweep/cdt.cpp
-  )
-set(THIRD_PARTY_HDR
-
-  poly2tri/poly2tri.h
-  poly2tri/common/shapes.h
-  poly2tri/sweep/cdt.h
-  poly2tri/common/utils.h
-  poly2tri/sweep/sweep_context.h
-  poly2tri/sweep/advancing_front.h
-  poly2tri/sweep/sweep.h
-  )
 
 set(JPSFIRE_SRC
 JPSfire/generic/FDSMesh.cpp
@@ -631,15 +614,12 @@ message(STATUS "JPSFIRE: ${JPSFIRE}")
 add_subdirectory(third-party)
 
 
-# todo make this system
-add_library(thirdParty STATIC ${THIRD_PARTY_SRC})
-
 add_library(core STATIC ${source_files})
 if(${CMAKE_CXX_COMPILER_ID} MATCHES "^(GNU|Clang)$")
-  target_link_libraries(core thirdParty tinyxml visilibity stdc++fs) # link to lib filesystem
+  target_link_libraries(core poly2tri tinyxml visilibity stdc++fs) # link to lib filesystem
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
   message(WARNING "TODO: AppleClang requires Xcode 11 and OSX 10.15")
-  target_link_libraries(core thirdParty tinyxml visilibity)
+  target_link_libraries(core poly2tri tinyxml visilibity)
 endif()
 
 
