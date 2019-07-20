@@ -386,11 +386,6 @@ forms/jpscore.rc
 math/KrauszModel.cpp geometry/GoalManager.cpp geometry/GoalManager.h)
 
 set(THIRD_PARTY_SRC
-  tinyxml/tinystr.cpp
-  tinyxml/tinyxml.cpp
-  tinyxml/tinyxmlerror.cpp
-  tinyxml/tinyxmlparser.cpp
-
   poly2tri/common/shapes.cpp
   poly2tri/sweep/sweep_context.cpp
   poly2tri/sweep/advancing_front.cpp
@@ -400,8 +395,6 @@ set(THIRD_PARTY_SRC
   visiLibity/source_code/visilibity.cpp
   )
 set(THIRD_PARTY_HDR
-  tinyxml/tinyxml.h
-  tinyxml/tinystr.h
 
   poly2tri/poly2tri.h
   poly2tri/common/shapes.h
@@ -647,10 +640,10 @@ add_library(thirdParty STATIC ${THIRD_PARTY_SRC})
 
 add_library(core STATIC ${source_files})
 if(${CMAKE_CXX_COMPILER_ID} MATCHES "^(GNU|Clang)$")
-  target_link_libraries(core thirdParty stdc++fs) # link to lib filesystem
+  target_link_libraries(core thirdParty tinyxml stdc++fs) # link to lib filesystem
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
   message(WARNING "TODO: AppleClang requires Xcode 11 and OSX 10.15")
-  target_link_libraries(core thirdParty)
+  target_link_libraries(core thirdParty tinyxml)
 endif()
 
 
