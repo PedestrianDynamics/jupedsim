@@ -358,8 +358,7 @@ void Simulation::UpdateRoutesAndLocations()
 //    }
 
 #pragma omp parallel for shared(pedsToRemove, allRooms)
-     for (size_t p = 0; p < allPeds.size(); ++p) {
-          auto ped = allPeds[p];
+     for(auto& ped : allPeds){
           Room* room = _building->GetRoom(ped->GetRoomID());
           SubRoom* sub0 = room->GetSubRoom(ped->GetSubRoomID());
 

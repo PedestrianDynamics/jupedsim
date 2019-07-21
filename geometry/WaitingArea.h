@@ -58,7 +58,7 @@ protected:
     /** 
      * Time after which the waiting area releases the pedestrians inside
      */
-    double _waitingTime = -1;
+    int _waitingTime = -1;
 
     /**
      * Time at which the timer is started
@@ -150,13 +150,13 @@ public:
      * Returns the waiting time of the waiting area
      * @return waiting time of the waiting area
      */
-    double GetWaitingTime() const;
+    int GetWaitingTime() const;
 
     /**
      * Sets the waiting time of the waiting area
      * @param[in] waitingTime waiting time of the waiting area
      */
-    void SetWaitingTime(double waitingTime);
+    void SetWaitingTime(int waitingTime);
 
     /**
      * Returns the ID of the next goal based on the probability
