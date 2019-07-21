@@ -677,6 +677,7 @@ double Simulation::RunBody(double maxSimTime)
         for (auto& itr: _building->GetAllTransitions())
         {
              Transition* Trans = itr.second;
+
              if(Trans->IsTempClose())
              {
                   if ((Trans->GetMaxDoorUsage() != (std::numeric_limits<int>::max)()) ||
@@ -685,8 +686,9 @@ double Simulation::RunBody(double maxSimTime)
                         if(Trans->GetClosingTime() <= _deltaT){
                              Trans->changeTemporaryState();
                       }
-                  }// normal transition
+                  }
              }
+
              //-----------
              // regulate train doorusage
              std::string transType = Trans->GetType();
@@ -1065,7 +1067,7 @@ void Simulation::UpdateDoorticks() const {
 
 void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
 {
-    if (_config->ShowStatistics()) {
+    if (_config->ShowStatistics() || true) {
         Transition* trans = _building->GetTransitionByUID(ped.GetExitIndex());
         if (trans) {
             //check if the pedestrian left the door correctly
@@ -1099,7 +1101,7 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
                 }
             }
 //#pragma omp critical
-            bool regulateFlow = trans->GetOutflowRate() <  (std::numeric_limits<double>::max)();
+            bool regulateFlow = trans->GetOutflowRate() <  (std::numeric_limits<double>::max)() || trans->GetMaxDoorUsage() <  (std::numeric_limits<double>::max)();
 
             trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
             trans->IncreasePartialDoorUsage(1);
@@ -1108,7 +1110,7 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
             {
                  // when <dn> agents pass <trans>, we start evaluating the flow
                  // .. and maybe close the <trans>
-                 if( trans->GetPartialDoorUsage() ==  trans->GetDN() ) {
+                 if( trans->GetPartialDoorUsage() >=  trans->GetDN() ) {
                       trans->regulateFlow(Pedestrian::GetGlobalTime());
                       trans->ResetPartialDoorUsage();
                  }

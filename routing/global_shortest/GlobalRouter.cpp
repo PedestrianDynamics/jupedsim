@@ -691,7 +691,6 @@ bool GlobalRouter::GetPath(Pedestrian*ped, int goalID, std::vector<SubRoom*>& pa
 void GlobalRouter::FloydWarshall()
 {
      const int n = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
-     std::cout << "FloydWarshall ------------------" << std::endl;
      for (int k = 0; k < n; k++) {
           for (int i = 0; i<n; i++) {
                for (int j = 0; j<n; j++) {
@@ -710,10 +709,6 @@ void GlobalRouter::FloydWarshall()
           }
           std::cout << std::endl;
      }
-
-
-     std::cout << "FloydWarshall Ende----------------" << std::endl;
-
 }
 
 //void GlobalRouter::DumpAccessPoints(int p)

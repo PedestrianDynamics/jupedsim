@@ -546,6 +546,7 @@ const std::vector<std::pair<PointWall, PointWall > > Building::GetIntersectionPo
 
       return pws;
 }
+
 // reset changes made by trainTimeTable[id]
 bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
 {
@@ -1193,6 +1194,18 @@ bool Building::AddCrossing(Crossing* line)
          }
      _crossings[IDCrossing] = line;
      return true;
+}
+
+bool Building::RemoveTransition(Transition * line)
+{
+     // std::cout << "enter Building Remove Transitions with " << _transitions.size() << "\n";
+     if (_transitions.count(line->GetID())!=0) {
+          _transitions.erase(line->GetID());
+          // std::cout << " enter Nuilding  Remove Transitions with " << _transitions.size() << "\n";
+          return true;
+     }
+     // std::cout << "2 enter Nuilding  Remove Transitions with " << _transitions.size() << "\n";
+     return false;
 }
 
 bool Building::AddTransition(Transition* line)

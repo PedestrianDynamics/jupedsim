@@ -6,6 +6,7 @@
  */
 
 #include "Event.h"
+#include <algorithm>
 
 Event::Event(int id, double time, const std::string& type,
           const std::string& state)
@@ -13,7 +14,7 @@ Event::Event(int id, double time, const std::string& type,
      _id=id;
      _time=time;
      _type=type;
-     _state= StringToDoorState(state);
+     _action= StringToEventAction(state);
 }
 
 Event::~Event()
@@ -25,9 +26,9 @@ int Event::GetId() const
      return _id;
 }
 
-const DoorState& Event::GetState() const
+const EventAction& Event::GetAction() const
 {
-     return _state;
+     return _action;
 }
 
 double Event::GetTime() const
@@ -44,20 +45,51 @@ const std::string Event::GetDescription() const
 {
      char tmp[1024];
      std::string state;
-     switch (_state){
-     case DoorState::OPEN:
+     switch (_action){
+     case EventAction::OPEN:
           state = "open";
           break;
-     case DoorState::CLOSE:
+     case EventAction::CLOSE:
           state = "close";
           break;
-     case DoorState::TEMP_CLOSE:
+     case EventAction::TEMP_CLOSE:
           state = "temp_close";
           break;
-     default:
-          state = "error";
+     case EventAction::RESET_USAGE:
+          state = "reset_usage";
+          break;
+     case EventAction::NOTHING:
+          state = "nothing";
           break;
      }
      sprintf(tmp,"After %.2f sec, %s door %d", _time, state.c_str(), _id);
      return std::string(tmp);
+}
+
+EventAction Event::StringToEventAction(const std::string& in)
+{
+     std::string name;
+     std::transform(in.begin(), in.end(), name.begin(), ::tolower);
+
+     if (name == "open"){
+          return EventAction::OPEN;
+     }
+
+     if (name == "temp_close"){
+          return EventAction::TEMP_CLOSE;
+     }
+
+     if (name == "close"){
+          return EventAction::CLOSE;
+     }
+
+     if (name == "close"){
+          return EventAction::CLOSE;
+     }
+
+     if (name == "reset"){
+          return EventAction::RESET_USAGE;
+     }
+
+     return EventAction::NOTHING;
 }

@@ -115,7 +115,7 @@ bool EventManager::ReadEventsXml()
                     + xMainNode->FirstChild("events_file")->FirstChild()->Value();
           Log->Write("INFO: \tevents <" + eventfile + ">");
      } else {
-          Log->Write("INFO: \tNo events found");
+          Log->Write("INFO: \tNo events found: <" + eventfile + ">");
           return true;
      }
 
@@ -525,19 +525,21 @@ void EventManager::ProcessEvent()
           if (fabs(event.GetTime() - current_time_d) < J_EPS_EVENT) {
                //Event with current time stamp detected
                Log->Write("INFO:\tEvent: after %.2f sec: ", current_time_d);
-               switch (event.GetState()){
-               case DoorState::OPEN:
+               switch (event.GetAction()){
+               case EventAction::OPEN:
                     OpenDoor(event.GetId());
                     break;
-               case DoorState::CLOSE:
+               case EventAction::CLOSE:
                     CloseDoor(event.GetId());
                     break;
-               case DoorState::TEMP_CLOSE:
+               case EventAction::TEMP_CLOSE:
                     TempCloseDoor(event.GetId());
                     break;
-               case DoorState::Error:
-                    Log->Write("WARNING:\t Unknown door state in events. open, close or temp_close. Default: open");
-                    OpenDoor(event.GetId());
+               case EventAction::RESET_USAGE:
+                    ResetDoor(event.GetId());
+                    break;
+               case EventAction::NOTHING:
+                    Log->Write("WARNING:\t Unknown event action in events. open, close, reset or temp_close. Default: do nothing");
                     break;
                }
                _building->GetRoutingEngine()->setNeedUpdate(true);
@@ -604,6 +606,20 @@ void EventManager::OpenDoor(int id)
           }
      } else {
           Log->Write("WARNING: \tdoor %d is already open", id);
+     }
+}
+
+//resets the door if it was open and relaunch the routing procedure
+void EventManager::ResetDoor(int id)
+{
+     Transition *t = _building->GetTransition(id);
+     t->ResetDoorUsage();
+     t->ResetPartialDoorUsage();
+     Log->Write("INFO:\tResetting door usage %d ", id);
+
+     if(CreateRoutingEngine(_building)==false)
+     {
+          Log->Write("ERROR: \tcannot create a routing engine with the new event");
      }
 }
 
