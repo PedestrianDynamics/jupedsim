@@ -358,7 +358,8 @@ void Simulation::UpdateRoutesAndLocations()
 //    }
 
 #pragma omp parallel for shared(pedsToRemove, allRooms)
-     for(auto& ped : allPeds){
+     for (long unsigned int p = 0; p < allPeds.size(); ++p) {
+          auto ped = allPeds[p];
           Room* room = _building->GetRoom(ped->GetRoomID());
           SubRoom* sub0 = room->GetSubRoom(ped->GetSubRoomID());
 
@@ -374,7 +375,7 @@ void Simulation::UpdateRoutesAndLocations()
                pedsToRemove.insert(ped);
           }
 
-          // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
+          // reposition in the case the pedestrians "accidentally left the room" not via the intended exit.
           // That may happen if the forces are too high for instance
           // the ped is removed from the simulation, if it could not be reassigned
           else if (!sub0->IsInSubRoom(ped))
