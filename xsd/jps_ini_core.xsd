@@ -182,7 +182,7 @@
                           </xs:element>
                         </xs:sequence>
                         <xs:attribute type="xs:int" name="id" use="required" />
-                        <xs:attribute type="xs:string" name="caption" use="required"/>
+                        <xs:attribute type="xs:string" name="caption"/>
                         <xs:attribute type="xs:int" name="room_id"  use="required"/>
                         <xs:attribute type="xs:int" name="subroom_id"  use="required"/>
                         <xs:attribute type="xs:int" name="transition_id" />
