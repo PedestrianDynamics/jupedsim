@@ -449,7 +449,7 @@ bool FFRouterTrips::ReInit()
 
 int FFRouterTrips::FindExit(Pedestrian* ped)
 {
-     SubRoom* subroom = _building->GetSubRoomByUID(ped->GetSubRoomUID());
+//     SubRoom* subroom = _building->GetSubRoomByUID(ped->GetSubRoomUID());
      Goal* goal = _building->GetFinalGoal(ped->GetFinalDestination());
 
      // Check if current position is already waiting area

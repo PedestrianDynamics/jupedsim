@@ -559,7 +559,7 @@ double Simulation::RunBody(double maxSimTime)
     ProcessAgentsQueue();
     _nPeds = _building->GetAllPedestrians().size();
     std::cout << "\n";
-    std::string description = "Evacutation ";
+    std::string description = "Evacuation ";
     ProgressBar *bar = new ProgressBar(_nPeds, description);
     // bar->SetFrequencyUpdate(10);
 #ifdef _WINDOWS
@@ -1071,7 +1071,8 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
      if (!trans)
           return;
 
-     bool regulateFlow = trans->GetOutflowRate() <  (std::numeric_limits<double>::max)();
+     bool regulateFlow = trans->GetOutflowRate() <  (std::numeric_limits<double>::max)() ||
+             trans->GetMaxDoorUsage() < std::numeric_limits<double>::max();
      // flow of trans does not need regulation
      // and we don't want to have statistics
      if(!(regulateFlow || _config->ShowStatistics())) return;

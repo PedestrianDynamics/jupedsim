@@ -1195,6 +1195,18 @@ bool Building::AddCrossing(Crossing* line)
      return true;
 }
 
+bool Building::RemoveTransition(Transition * line)
+{
+     // std::cout << "enter Building Remove Transitions with " << _transitions.size() << "\n";
+     if (_transitions.count(line->GetID())!=0) {
+          _transitions.erase(line->GetID());
+          // std::cout << " enter Nuilding  Remove Transitions with " << _transitions.size() << "\n";
+          return true;
+     }
+     // std::cout << "2 enter Nuilding  Remove Transitions with " << _transitions.size() << "\n";
+     return false;
+}
+
 bool Building::AddTransition(Transition* line)
 {
      if (_transitions.count(line->GetID())!=0) {

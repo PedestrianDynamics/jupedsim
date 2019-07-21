@@ -211,6 +211,7 @@ void Crossing::IncreasePartialDoorUsage(int number)
 {
      _partialDoorUsage += number;
 }
+
 void Crossing::ResetPartialDoorUsage()
 {
      _partialDoorUsage = 0;
@@ -226,6 +227,17 @@ int Crossing::GetPartialDoorUsage() const
      return _partialDoorUsage;
 }
 
+void Crossing::ResetDoorUsage()
+{
+     _doorUsage = 0;
+
+     if ((_outflowRate >= std::numeric_limits<double>::max())){
+          if (_maxDoorUsage < std::numeric_limits<double>::max()){
+               Open();
+               Log->Write("INFO:\tReopening door %d ", _id);
+          }
+     }
+}
 
 int Crossing::GetMaxDoorUsage() const
 {
@@ -307,8 +319,8 @@ void Crossing::regulateFlow(double time)
           //---------------------------
           _closingTime = number / _outflowRate -  T; //[1]
 //           _temporaryClosed = true;
-//          this->Close();
-          this->TempClose();
+          this->Close();
+//          this->TempClose();
           Log-> Write("INFO:\tClosing door %d. DoorUsage = %d (max = %d). Flow = %.2f (max =  %.2f) Time=%.2f", GetID(), GetDoorUsage(), GetMaxDoorUsage(), flow, _outflowRate, time);
      }
 
