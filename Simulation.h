@@ -164,6 +164,16 @@ public:
     void PrintStatistics(double time);
 
     /**
+     * In case the distance of <ped> to its actual transition is bigger than 0.5 m
+     * search in the the history of <ped> and pick up the nearest closest transition
+     * @param[in]:  Pedestrian <ped>
+     * @param[in]:  distance of <ped> to its actual transition
+     * @param[in]:  unique id of that transition
+     * @param[out]: nearest closest transition or nullptr if no correction was needed
+     **/
+     Transition*  correctDoorStatistics(const Pedestrian& ped, double distance, int trans_id) const;
+
+    /**
      * @return the agents source manager
      */
     AgentsSourcesManager& GetAgentSrcManager();
