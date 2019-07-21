@@ -358,7 +358,7 @@ void Simulation::UpdateRoutesAndLocations()
 //    }
 
 #pragma omp parallel for shared(pedsToRemove, allRooms)
-     for (size_t p = 0; p < allPeds.size(); ++p) {
+     for (long unsigned int p = 0; p < allPeds.size(); ++p) {
           auto ped = allPeds[p];
           Room* room = _building->GetRoom(ped->GetRoomID());
           SubRoom* sub0 = room->GetSubRoom(ped->GetSubRoomID());
@@ -375,7 +375,7 @@ void Simulation::UpdateRoutesAndLocations()
                pedsToRemove.insert(ped);
           }
 
-          // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
+          // reposition in the case the pedestrians "accidentally left the room" not via the intended exit.
           // That may happen if the forces are too high for instance
           // the ped is removed from the simulation, if it could not be reassigned
           else if (!sub0->IsInSubRoom(ped))
@@ -677,6 +677,7 @@ double Simulation::RunBody(double maxSimTime)
         for (auto& itr: _building->GetAllTransitions())
         {
              Transition* Trans = itr.second;
+
              if(Trans->IsTempClose())
              {
                   if ((Trans->GetMaxDoorUsage() != (std::numeric_limits<int>::max)()) ||
@@ -1157,6 +1158,7 @@ bool Simulation::TrainTraffic()
      return false;
 
 }
+
 Transition* Simulation::correctDoorStatistics(const Pedestrian& ped, double distance, int trans_id) const
 {
      if(distance<=0.5) return nullptr;

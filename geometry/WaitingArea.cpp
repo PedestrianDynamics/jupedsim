@@ -124,12 +124,12 @@ std::string WaitingArea::toString()
      return buffer.str();
 }
 
-double WaitingArea::GetWaitingTime() const
+int WaitingArea::GetWaitingTime() const
 {
      return _waitingTime;
 }
 
-void WaitingArea::SetWaitingTime(double waitingTime)
+void WaitingArea::SetWaitingTime(int waitingTime)
 {
      WaitingArea::_waitingTime = waitingTime;
 }

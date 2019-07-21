@@ -546,6 +546,7 @@ const std::vector<std::pair<PointWall, PointWall > > Building::GetIntersectionPo
 
       return pws;
 }
+
 // reset changes made by trainTimeTable[id]
 bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
 {
