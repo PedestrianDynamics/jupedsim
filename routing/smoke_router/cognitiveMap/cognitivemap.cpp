@@ -1,7 +1,7 @@
 #include "cognitivemap.h"
 #include "../../../geometry/SubRoom.h"
 #include "../../../pedestrian/Pedestrian.h"
-#include "../../../visiLibity/source_code/visilibity.hpp"
+#include <visilibity.hpp>
 #include <chrono>
 
 //for shortest path calculations

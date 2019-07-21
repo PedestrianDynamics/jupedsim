@@ -35,7 +35,7 @@
 #include "../generic/FDSMesh.h"
 #include "../generic/FDSMeshStorage.h"
 //#include <set>
-#include "../../tinyxml/tinyxml.h"
+#include <tinyxml.h>
 
 #include <filesystem>
 namespace fs = std::filesystem;
