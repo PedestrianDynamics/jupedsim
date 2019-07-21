@@ -27,7 +27,7 @@
 
 
 #include "QuickestPathRouter.h"
-#include "../../tinyxml/tinyxml.h"
+#include <tinyxml.h>
 #include "../../mpi/LCGrid.h"
 #include "../../geometry/SubRoom.h"
 //#include "../IO/OutputHandler.h"

@@ -1,0 +1,33 @@
+language: cpp
+dist: bionic
+
+git:
+  depth: 1
+  quiet: true
+
+matrix:
+  include:
+    - name: linux (clang)
+      os: linux
+      compiler: clang++
+      script:
+       - mkdir build && cd build
+       - cmake  ..
+       - make -j $(nproc)
+
+    - name: linux (gcc)
+      os: linux
+      compiler: gcc
+      script:
+       - mkdir build && cd build
+       - cmake ..
+       - make -j $(nproc)
+
+before_script:
+    - source .travis_before_script.bash
+
+before_install:
+    - source .travis_before_install.bash
+
+install:
+    - source .travis_install.bash

@@ -30,7 +30,7 @@
 #include "BrainStorage.h"
 #include "cognitiveMap/internnavigationnetwork.h"
 
-#include "../../tinyxml/tinyxml.h"
+#include <tinyxml.h>
 #include <memory>
 
 #include "../../geometry/Building.h"
@@ -365,7 +365,7 @@ void AIBrainStorage::ParseSigns() {
         std::string px = xmltoa(xSign->Attribute("px"), "-1");
         std::string py = xmltoa(xSign->Attribute("py"), "-1");
         std::string alpha = xmltoa(xSign->Attribute("alpha"), "-1");
-        std::string alphaPointing = xmltoa(xSign->Attribute("alphaPointing"), "-1"); 
+        std::string alphaPointing = xmltoa(xSign->Attribute("alphaPointing"), "-1");
 
         Log->Write("Sign read!");
 
