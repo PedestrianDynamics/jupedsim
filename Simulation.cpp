@@ -711,8 +711,10 @@ double Simulation::RunBody(double maxSimTime)
         }// Transitions
         if(frameNr % 1000 == 0)
         {
-              Log->Write("INFO:\tUpdate door statistics at t=%.2f", t);
-              PrintStatistics(t);
+             if (_config->ShowStatistics()){
+                  Log->Write("INFO:\tUpdate door statistics at t=%.2f", t);
+                  PrintStatistics(t);
+             }
         }
     }// while time
     return t;
@@ -1066,62 +1068,33 @@ void Simulation::UpdateDoorticks() const {
 
 void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
 {
-    if (_config->ShowStatistics()) {
-        Transition* trans = _building->GetTransitionByUID(ped.GetExitIndex());
-        if (trans) {
-            //check if the pedestrian left the door correctly
-            if (trans->DistTo(ped.GetPos())>0.5) {
-                Log->Write("WARNING:\t pedestrian [%d] left room/subroom [%d/%d] in an unusual way. Please check",
-                        ped.GetID(), ped.GetRoomID(), ped.GetSubRoomID());
-                Log->Write("       :\t distance to last door (%d | %d) is %f. That should be smaller.",
-                        trans->GetUniqueID(), ped.GetExitIndex(),
-                        trans->DistTo(ped.GetPos()));
-                Log->Write("       :\t correcting the door statistics");
-                //ped.Dump(ped.GetID());
+     Transition* trans = _building->GetTransitionByUID(ped.GetExitIndex());
+     if (!trans)
+          return;
 
-                //checking the history and picking the nearest previous destination
-                double biggest = 0.3;
-                bool success = false;
-                for (const auto& dest:ped.GetLastDestinations()) {
-                    if (dest!=-1) {
-                        Transition* trans_tmp = _building->GetTransitionByUID(dest);
-                        if (trans_tmp && trans_tmp->DistTo(ped.GetPos())<biggest) {
-                            biggest = trans_tmp->DistTo(ped.GetPos());
-                            trans = trans_tmp;
-                            Log->Write("       :\t Best match found at door %d", dest);
-                            success = true;//at least one door was found
-                        }
-                    }
-                }
+     bool regulateFlow = trans->GetOutflowRate() <  (std::numeric_limits<double>::max)();
+     // flow of trans does not need regulation
+     // and we don't want to have statistics
+     if(!(regulateFlow || _config->ShowStatistics())) return;
+     if(auto new_trans = correctDoorStatistics(ped, trans->DistTo(ped.GetPos()), trans->GetUniqueID()); new_trans)
+          trans = new_trans;
 
-                if (!success) {
-                    Log->Write("WARNING       :\t correcting the door statistics");
-                    return; //todo we need to check if the ped is in a subroom neighboring the target. If so, no problems!
-                }
-            }
-//#pragma omp critical
-            bool regulateFlow = trans->GetOutflowRate() <  (std::numeric_limits<double>::max)();
-
-            trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
-            trans->IncreasePartialDoorUsage(1);
-
-            if(regulateFlow)
-            {
-                 // when <dn> agents pass <trans>, we start evaluating the flow
-                 // .. and maybe close the <trans>
-                 if( trans->GetPartialDoorUsage() ==  trans->GetDN() ) {
-                      trans->regulateFlow(Pedestrian::GetGlobalTime());
-                      trans->ResetPartialDoorUsage();
-                 }
-            }
-
-        }
-
-        Crossing* cross = _building->GetCrossingByUID(ped.GetExitIndex());
-        if (cross) {
-             cross->IncreaseDoorUsage(1, ped.GetGlobalTime());
-        }
-    }
+     trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
+     trans->IncreasePartialDoorUsage(1);
+     if(regulateFlow)
+     {
+          // when <dn> agents pass <trans>, we start evaluating the flow
+          // .. and maybe close the <trans>
+          if( trans->GetPartialDoorUsage() ==  trans->GetDN() ) {
+               trans->regulateFlow(Pedestrian::GetGlobalTime());
+               trans->ResetPartialDoorUsage();
+          }
+     }
+     // no flow regulation for crossings
+     Crossing* cross = _building->GetCrossingByUID(ped.GetExitIndex());
+     if (cross) {
+          cross->IncreaseDoorUsage(1, ped.GetGlobalTime());
+     }
 }
 
 void Simulation::incrementCountTraj()
@@ -1183,4 +1156,35 @@ bool Simulation::TrainTraffic()
 
      return false;
 
+}
+Transition* Simulation::correctDoorStatistics(const Pedestrian& ped, double distance, int trans_id) const
+{
+     if(distance<=0.5) return nullptr;
+     Transition* trans = nullptr;
+     double smallest_distance = 0.3;
+     bool success = false;
+     Log->Write("WARNING:\t pedestrian [%d] left room/subroom [%d/%d] in an unusual way. Please check",
+                ped.GetID(), ped.GetRoomID(), ped.GetSubRoomID());
+     Log->Write("       :\t distance to last door (%d | %d) is %f. That should be smaller.",
+                trans_id, ped.GetExitIndex(),
+                distance);
+     Log->Write("       :\t correcting the door statistics");
+     //checking the history and picking the nearest previous destination
+     for (const auto& dest:ped.GetLastDestinations()) {
+          if (dest == -1) continue;
+          Transition* trans_tmp = _building->GetTransitionByUID(dest);
+          if(!trans_tmp) continue;
+          if (auto tmp_distance = trans_tmp->DistTo(ped.GetPos());
+              tmp_distance < smallest_distance) {
+               smallest_distance = tmp_distance;
+               trans = trans_tmp;
+               Log->Write("       :\t Best match found at door %d", dest);
+               success = true;//at least one door was found
+          }
+     }
+     if (!success) {
+          Log->Write("WARNING       :\t correcting the door statistics failed!");
+          //todo we need to check if the ped is in a subroom neighboring the target. If so, no problems!
+     }
+     return trans;
 }

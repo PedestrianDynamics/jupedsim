@@ -29,7 +29,7 @@
 
 #include "BrainStorage.h"
 
-#include "../../tinyxml/tinyxml.h"
+#include <tinyxml.h>
 
 #include "../../pedestrian/Pedestrian.h"
 //#include "NavigationGraph.h"

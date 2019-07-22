@@ -32,7 +32,7 @@
 #include "./sensor/SensorManager.h"
 
 #include "../../pedestrian/Pedestrian.h"
-#include "../../tinyxml/tinyxml.h"
+#include <tinyxml.h>
 
 SmokeRouter::SmokeRouter()
 {

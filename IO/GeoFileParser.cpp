@@ -496,7 +496,7 @@ bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building* buildi
      }
      //----------------- dn
      int DN = xmltof(xDoor->Attribute("dn"), -1.0);
-     if(DN >= 0)
+     if(DN > 0)
      {
           building->GetTransition(id)->SetDN(DN);
           sprintf(tmp, "\t>> dn: %d\n", DN);
