@@ -433,11 +433,11 @@ std::string AgentsParameters::writeParameter()
 }
 
 double AgentsParameters::GetAminMean() {
-	return _Amin.mean();
+    return _Amin.mean();
 }
 
 double AgentsParameters::GetBmaxMean() {
-	return _Bmax.mean();
+    return _Bmax.mean();
 }
 
 
