@@ -62,6 +62,11 @@ add_library(poly2tri STATIC
     poly2tri/sweep/sweep_context.cpp
     poly2tri/sweep/sweep_context.h
 )
-target_include_directories(visilibity PUBLIC
+target_include_directories(poly2tri PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/poly2tri"
 )
+
+if (MSVC)
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /WX-")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /WX-")
+endif()

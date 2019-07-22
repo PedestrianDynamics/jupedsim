@@ -631,6 +631,8 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES "^(GNU|Clang)$")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
   message(WARNING "TODO: AppleClang requires Xcode 11 and OSX 10.15")
   target_link_libraries(core poly2tri tinyxml visilibity)
+else()
+  target_link_libraries(core poly2tri tinyxml visilibity)
 endif()
 
 
