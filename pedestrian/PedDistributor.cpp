@@ -147,7 +147,7 @@ bool PedDistributor::Distribute(Building *building) const {
 
         //------------------------------------- pack in function ------------
         else{
-             auto possibleSubroomPositions = PedDistributor::PossiblePositions(*sr);
+             auto possibleSubroomPositions = PossiblePositions(*sr);
              shuffle(possibleSubroomPositions.begin(), possibleSubroomPositions.end(), dist->GetGenerator());
              allFreePosRoom[subroomID] = possibleSubroomPositions;
         }
@@ -167,7 +167,7 @@ bool PedDistributor::Distribute(Building *building) const {
             // the positions were already computed
             if (allFreePosRoom.count(subroomID) > 0)
                 continue;
-            auto possibleSubroomPositions = PedDistributor::PossiblePositions(*it_sr.second);
+            auto possibleSubroomPositions = PossiblePositions(*it_sr.second);
             shuffle(possibleSubroomPositions.begin(), possibleSubroomPositions.end(), dist->GetGenerator());
             allFreePosRoom[subroomID] = possibleSubroomPositions;
         }
@@ -320,7 +320,7 @@ bool PedDistributor::Distribute(Building *building) const {
 
 
 vector<Point> PedDistributor::PositionsOnFixX(double min_x, double max_x, double min_y, double max_y,
-                                              const SubRoom &r, double bufx, double bufy, double dy) {
+                                              const SubRoom &r, double bufx, double bufy, double dy) const{
     vector<Point> positions;
     double x = (max_x + min_x) * 0.5;
     double y = min_y;
@@ -363,7 +363,7 @@ vector<Point> PedDistributor::PositionsOnFixX(double min_x, double max_x, double
 }
 
 vector<Point>PedDistributor::PositionsOnFixY(double min_x, double max_x, double min_y, double max_y,
-                                             const SubRoom &r, double bufx, double bufy, double dx) {
+                                             const SubRoom &r, double bufx, double bufy, double dx) const{
     vector<Point> positions;
     double y = (max_y + min_y) * 0.5;
     double x = min_x;
@@ -485,18 +485,20 @@ const vector<Point>  PedDistributor::GetPositionsFromFile(std::string filename, 
 }
 
 
-vector<Point>  PedDistributor::PossiblePositions(const SubRoom &r) {
+vector<Point>  PedDistributor::PossiblePositions(const SubRoom &r) const{
     double uni = 0.7; // wenn ein Raum in x oder y -Richtung schmaler ist als 0.7 wird in der Mitte verteilt
-    double bufx = 0.12;
-    double bufy = 0.12;
 
-    double amin = 0.18; // = GetAmin()->GetMean();
-    double bmax = 0.25; // = GetBmax()->GetMean();
-
-    double dx = amin + bufx;
-    double dy = bmax + bufy;
+    double amin = GetA_dist();
+    double bmax = GetB_dist();
+    
+    double bufx = GetA_dist();
+    double bufy = GetB_dist();
+    
+    double dx = 2*amin;
+    double dy = 2*bmax;
 
     double max_buf = max(bufx, bufy);
+    double max_size = max(dx,dy);// In case of using ellipse
 
     vector<double>::iterator min_x, max_x, min_y, max_y;
     const vector<Point> &poly = r.GetPolygon();
@@ -515,16 +517,16 @@ vector<Point>  PedDistributor::PossiblePositions(const SubRoom &r) {
     max_y = max_element(ys.begin(), ys.end());
 
     if (*max_y - *min_y < uni) {
-        all_positions = PositionsOnFixY(*min_x, *max_x, *min_y, *max_y, r, bufx, bufy, dx);
+        all_positions = PositionsOnFixY(*min_x, *max_x, *min_y, *max_y, r, bufx, bufy, max_size);
     } else if (*max_x - *min_x < uni) {
-        all_positions = PositionsOnFixX(*min_x, *max_x, *min_y, *max_y, r, bufx, bufy, dy);
+        all_positions = PositionsOnFixX(*min_x, *max_x, *min_y, *max_y, r, bufx, bufy, max_size);
     } else {
         // create the grid
         double x = (*min_x);
         while (x < *max_x) {
             double y = (*min_y);
             while (y < *max_y) {
-                y += dy;
+                y += max_size;
                 Point pos = Point(x, y);
                 bool tooNear = false;
 
@@ -581,7 +583,7 @@ vector<Point>  PedDistributor::PossiblePositions(const SubRoom &r) {
 
                 if (tooNear == false) all_positions.push_back(pos);
             }
-            x += dx;
+            x += max_size;
         }
     }
     return all_positions;
@@ -622,4 +624,26 @@ void PedDistributor::DistributeInSubRoom(int nAgents, vector<Point> &positions, 
         Pedestrian *ped = para->GenerateAgent(building, pid, positions);
         building->AddPedestrian(ped);
     }
+}
+
+double PedDistributor::GetA_dist() const{
+    double A_dist=0;
+    auto APS=_configuration->GetAgentsParameters();
+    std::map<int, std::shared_ptr<AgentsParameters> >::iterator iter;
+    for (iter=APS.begin();iter!=APS.end();iter++){
+        auto AP=iter->second;
+        A_dist=A_dist>AP->GetAminMean()?A_dist:AP->GetAminMean();
+    }
+    return A_dist;
+}
+
+double PedDistributor::GetB_dist() const{
+    double B_dist=0;
+    auto APS=_configuration->GetAgentsParameters();
+    std::map<int, std::shared_ptr<AgentsParameters> >::iterator iter;
+    for (iter=APS.begin();iter!=APS.end();iter++){
+        auto AP=iter->second;
+        B_dist=B_dist>AP->GetBmaxMean()?B_dist:AP->GetBmaxMean();
+    }
+    return B_dist;
 }

@@ -236,6 +236,10 @@ public:
      */
     std::string writeParameter();
 
+    double GetAminMean();
+
+    double GetBmaxMean();
+
 private:
     int _id;
     //std::random_device _rd;

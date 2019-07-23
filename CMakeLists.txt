@@ -384,7 +384,10 @@ routing/smoke_router/cognitiveMap/internnavigationnetwork.cpp
 events/EventManager.cpp
 events/Event.cpp
 forms/jpscore.rc
-math/KrauszModel.cpp geometry/GoalManager.cpp geometry/GoalManager.h)
+math/KrauszModel.cpp
+geometry/GoalManager.cpp
+geometry/GoalManager.h
+)
 
 
 set(JPSFIRE_SRC
@@ -510,8 +513,7 @@ math/OperationalModel.h
 
 events/EventManager.h
 events/Event.h
-
-        )
+)
 
 set(JPSFIRE_HDR
 JPSfire/generic/FDSMesh.h
@@ -623,6 +625,8 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES "^(GNU|Clang)$")
   target_link_libraries(core poly2tri tinyxml visilibity stdc++fs) # link to lib filesystem
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
   message(WARNING "TODO: AppleClang requires Xcode 11 and OSX 10.15")
+  target_link_libraries(core poly2tri tinyxml visilibity)
+else()
   target_link_libraries(core poly2tri tinyxml visilibity)
 endif()
 
