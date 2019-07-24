@@ -449,7 +449,7 @@ void UnivFFviaFMTrips::recreateAllForQuickest() {
 #pragma omp parallel
      {
 #pragma omp for
-          for (size_t i = 0; i < _doors.size(); ++i) {
+          for (int i = 0; i < _doors.size(); ++i) {
                auto doorPair = _doors.begin();
                std::advance(doorPair, i);
                addTarget(doorPair->first, _costFieldWithKey[doorPair->first], _directionFieldWithKey[doorPair->first]);
@@ -1465,7 +1465,7 @@ void UnivFFviaFMTrips::addAllTargetsParallel() {
 #pragma omp parallel
      {
 #pragma omp for
-          for (size_t i = 0; i < _doors.size(); ++i) {
+          for (int i = 0; i < _doors.size(); ++i) {
                auto doorPair = _doors.begin();
                std::advance(doorPair, i);
                addTarget(doorPair->first, _costFieldWithKey[doorPair->first], _directionFieldWithKey[doorPair->first]);
@@ -1498,7 +1498,7 @@ void UnivFFviaFMTrips::addTargetsParallel(std::vector<int> wantedDoors) {
 #pragma omp parallel
      {
 #pragma omp for
-          for (size_t i = 0; i < wantedDoors.size(); ++i) {
+          for (int i = 0; i < wantedDoors.size(); ++i) {
                auto doorUID = wantedDoors.begin();
                std::advance(doorUID, i);
                addTarget(*doorUID, _costFieldWithKey[*doorUID], _directionFieldWithKey[*doorUID]);
