@@ -10,8 +10,8 @@
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../geometry/SubRoom.h"
 
-#include "../../precomputation/floorfield/UnivFFviaFM.h"
-#include "../../precomputation/floorfield/FloorfieldViaFM.h"
+#include "../../router/ff_router/UnivFFviaFM.h"
+#include "../../router/ff_router/FloorfieldViaFM.h"
 #include "../../router/ff_router/ffRouter.h"
 
 #include <chrono>
@@ -89,17 +89,17 @@ void DirectionLocalFloorfield::Init(Building* building) {
           }
           newfield->addAllTargetsParallel();
 
-          //newfield->writeFF("directionsOfRoom" + std::to_string(roomPair.first) + ".vtk", newfield->getKnownDoorUIDs());
+//          newfield->writeFF("directionsOfRoom" + std::to_string(roomPair.first) + ".vtk", newfield->getKnownDoorUIDs());
      }
 
-     if (_building->GetConfig()->get_write_VTK_files_direction()) {
+//     if (_building->GetConfig()->get_write_VTK_files_direction()) {
           for (unsigned int i = 0; i < _locffviafm.size(); ++i) {
                auto iter = _locffviafm.begin();
                std::advance(iter, i);
                int roomNr = iter->first;
                iter->second->writeFF("direction" + std::to_string(roomNr) + ".vtk", iter->second->getKnownDoorUIDs());
           }
-     }
+//     }
 
      end = std::chrono::system_clock::now();
      std::chrono::duration<double> elapsed_seconds = end-start;

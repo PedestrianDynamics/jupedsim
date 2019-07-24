@@ -63,8 +63,8 @@
 #include "../Router.h"
 #include "../../../general/Macros.h"
 #include "../../../geometry/Building.h"
-#include "../../precomputation/floorfield/FloorfieldViaFM.h"
-#include "../../precomputation/floorfield/UnivFFviaFM.h"
+#include "FloorfieldViaFM.h"
+#include "UnivFFviaFM.h"
 
 class Building;
 class Pedestrian;

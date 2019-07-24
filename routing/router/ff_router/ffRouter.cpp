@@ -50,6 +50,8 @@
 #include "ffRouter.h"
 //#include "FloorfieldViaFM.h"
 //#include "../../geometry/Building.h"
+#include "../../../geometry/WaitingArea.h"
+#include "../../../geometry/GoalManager.h"
 
 int FFRouter::_cnt = 0;
 
@@ -421,6 +423,24 @@ bool FFRouter::ReInit()
 
 int FFRouter::FindExit(Pedestrian* p)
 {
+//     SubRoom* subroom = _building->GetSubRoomByUID(p->GetSubRoomUID());
+//     Goal* goal = _building->GetFinalGoal(p->GetFinalDestination());
+//
+//     // Check if current position is already waiting area
+//     // yes: set next goal and return findExit(p)
+//     goalManager.ProcessPedPosition(p);
+//
+//     if ((goal!=nullptr) && (goal->IsInsideGoal(p))) {
+//          if (WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)) {
+//               //take the current time from the pedestrian
+//               double t = Pedestrian::GetGlobalTime();
+//
+//               if (!wa->isWaiting(t, _building)) {
+//                    p->SetFinalDestination(wa->GetNextGoal());
+//               }
+//          }
+//     }
+
 //     if (_mode == local_shortest) {
 //          if ((_locffviafm.at(p->GetRoomID())->getGrid()->includesPoint(p->GetPos())) &&
 //              (p->GetSubRoomUID() != _locffviafm.at(p->GetRoomID())->getSubroomUIDAt(p->GetPos()))) {
@@ -452,6 +472,14 @@ int FFRouter::FindExit(Pedestrian* p)
      int bestDoor = -1;
 
      int goalID = p->GetFinalDestination();
+
+     if (WaitingArea* wa = dynamic_cast<WaitingArea*>(_building->GetFinalGoal(goalID))){
+          bestDoor = wa->GetCentreCrossing()->GetUniqueID();
+          p->SetExitIndex(bestDoor);
+          p->SetExitLine(_CroTrByUID.at(bestDoor));
+          return bestDoor;
+     }
+
      std::vector<int> validFinalDoor; //UIDs of doors
      validFinalDoor.clear();
      if (goalID == -1) {

@@ -34,6 +34,7 @@
 //#include <fstream>
 //#include <cfloat>
 //#include <chrono>
+#include "../../../geometry/WaitingArea.h"
 
 #ifdef _OPENMP
 #else
@@ -368,38 +369,44 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
             double cost_of_MIN2 = DBL_MAX;
             double cost_of_MIN3 = DBL_MAX;
             long int dummykey;
-            for (const auto& loctrans : transitions) {
-                //TODO if (!loctrans.second->IsExit() || !loctrans.second->IsOpen()) {
-                if (!loctrans.second->IsExit() || loctrans.second->IsClose()) {
-                    continue;
-                }
-                dummykey = _grid->getKeyAtPoint(loctrans.second->GetCentre());
-                if ((cost_of_MIN > localcostptr[dummykey]) && (localcostptr[dummykey] >= 0.)) {
-                    UID_of_MIN3 = UID_of_MIN2;
-                    cost_of_MIN3 = cost_of_MIN2;
 
-                    UID_of_MIN2 = UID_of_MIN;
-                    cost_of_MIN2 = cost_of_MIN;
+//            if (WaitingArea* wa = dynamic_cast<WaitingArea*>(allgoals.at(goalID))){
+//                 UID_of_MIN = wa->GetCentreCrossing()->GetUniqueID();
+//            } else {
+                 for (const auto& loctrans : transitions) {
+                      //TODO if (!loctrans.second->IsExit() || !loctrans.second->IsOpen()) {
+                      if (!loctrans.second->IsExit() || loctrans.second->IsClose()) {
+                           continue;
+                      }
+                      dummykey = _grid->getKeyAtPoint(loctrans.second->GetCentre());
+                      if ((cost_of_MIN>localcostptr[dummykey]) && (localcostptr[dummykey]>=0.)) {
+                           UID_of_MIN3 = UID_of_MIN2;
+                           cost_of_MIN3 = cost_of_MIN2;
 
-                    UID_of_MIN = loctrans.second->GetUniqueID();
-                    cost_of_MIN = localcostptr[dummykey];
-                    //std::cerr << std::endl << "Closer Line found: " << UID_of_MIN ;
-                    continue;
-                }
-                if ((cost_of_MIN2 > localcostptr[dummykey]) && (localcostptr[dummykey] >= 0.)) {
-                    UID_of_MIN3 = UID_of_MIN2;
-                    cost_of_MIN3 = cost_of_MIN2;
+                           UID_of_MIN2 = UID_of_MIN;
+                           cost_of_MIN2 = cost_of_MIN;
 
-                    UID_of_MIN2 = loctrans.second->GetUniqueID();
-                    cost_of_MIN2 = localcostptr[dummykey];
-                    continue;
-                }
-                if ((cost_of_MIN3 > localcostptr[dummykey]) && (localcostptr[dummykey] >= 0.)) {
-                    UID_of_MIN3 = loctrans.second->GetUniqueID();
-                    cost_of_MIN3 = localcostptr[dummykey];
-                    continue;
-                }
-            }
+                           UID_of_MIN = loctrans.second->GetUniqueID();
+                           cost_of_MIN = localcostptr[dummykey];
+                           //std::cerr << std::endl << "Closer Line found: " << UID_of_MIN ;
+                           continue;
+                      }
+                      if ((cost_of_MIN2>localcostptr[dummykey]) && (localcostptr[dummykey]>=0.)) {
+                           UID_of_MIN3 = UID_of_MIN2;
+                           cost_of_MIN3 = cost_of_MIN2;
+
+                           UID_of_MIN2 = loctrans.second->GetUniqueID();
+                           cost_of_MIN2 = localcostptr[dummykey];
+                           continue;
+                      }
+                      if ((cost_of_MIN3>localcostptr[dummykey]) && (localcostptr[dummykey]>=0.)) {
+                           UID_of_MIN3 = loctrans.second->GetUniqueID();
+                           cost_of_MIN3 = localcostptr[dummykey];
+                           continue;
+                      }
+                 }
+//            }
+
             _goalToLineUIDmap.erase(goalID);
             _goalToLineUIDmap.emplace(goalID, UID_of_MIN);
             _goalToLineUIDmap2.erase(goalID);

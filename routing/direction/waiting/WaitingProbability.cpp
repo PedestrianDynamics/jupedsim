@@ -4,8 +4,7 @@
 
 #include "WaitingProbability.h"
 
-#include "../../precomputation/floorfield/mesh/RectGrid.h"
-
+#include "../../router/ff_router/mesh/RectGrid.h"
 #include "../../../geometry/Room.h"
 #include "../../../geometry/SubRoom.h"
 #include "../../../pedestrian/Pedestrian.h"

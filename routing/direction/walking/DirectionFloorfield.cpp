@@ -10,8 +10,8 @@
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../geometry/SubRoom.h"
 
-#include "../../precomputation/floorfield/UnivFFviaFM.h"
-#include "../../precomputation/floorfield/FloorfieldViaFM.h"
+#include "../../router/ff_router/UnivFFviaFM.h"
+#include "../../router/ff_router/FloorfieldViaFM.h"
 #include "../../router/ff_router/ffRouter.h"
 
 #include <chrono>

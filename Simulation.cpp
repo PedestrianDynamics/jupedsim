@@ -37,6 +37,7 @@
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "geometry/WaitingArea.h"
+#include "geometry/GoalManager.h"
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -70,6 +71,7 @@ Simulation::Simulation(Configuration* args)
     _gotSources = false;
     _maxSimTime = 100;
 //     _config = args;
+     _goalManager = new GoalManager();
 }
 
 Simulation::~Simulation()
@@ -77,6 +79,7 @@ Simulation::~Simulation()
     delete _solver;
     delete _iod;
     delete _em;
+    delete _goalManager;
 }
 
 long Simulation::GetPedsNumber() const
@@ -423,6 +426,23 @@ void Simulation::UpdateRoutesAndLocations()
                }
           }
 
+          // Get new goal for pedestrians who are inside waiting area and wait time is over
+          // Check if current position is already waiting area
+          // yes: set next goal and return findExit(p)
+          _goalManager->ProcessPedPosition(ped);
+          Goal* goalPtr = _building->GetFinalGoal(ped->GetFinalDestination());
+
+          if ((goalPtr!=nullptr) && (goalPtr->IsInsideGoal(ped))){
+               if(WaitingArea* wa = dynamic_cast<WaitingArea*>(goalPtr)) {
+                    //take the current time from the pedestrian
+
+                    if (!wa->isWaiting(Pedestrian::GetGlobalTime(), _building.get())){
+                         ped->SetFinalDestination(wa->GetNextGoal());
+                    }
+               }
+          }
+
+
 //          if (ped->IsWaiting()){
 //               std::cout << ped->GetGlobalTime() << ": Ped " << ped->GetID() << " is waiting" << std::endl;
 //          }
@@ -575,6 +595,8 @@ double Simulation::RunBody(double maxSimTime)
 #else
     bar->SetStyle("\u2588", "-"); //for linux
 #endif
+     _goalManager->SetGoals(_building->GetAllGoals());
+
     int initialnPeds = _nPeds;
 
     // main program loop

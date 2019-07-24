@@ -53,6 +53,7 @@
 //Forward declarations
 //class AgentsSourcesManager;
 class EventManager;
+class GoalManager;
 
 class Simulation {
 private:
@@ -89,6 +90,10 @@ private:
 
     bool _gotSources; // is true if we got some sources. Otherwise, false.
     // bool _printPB; // print progressbar
+
+    ///
+    GoalManager* _goalManager;
+
 public:
     /**
      * Constructor

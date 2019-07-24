@@ -96,6 +96,7 @@ public:
 
     void addPed(int ped);
     void removePed(int ped);
+    void startTimer();
     void startTimer(double time);
     int  getNumPed();
     bool isWaiting(double time, const Building* building);

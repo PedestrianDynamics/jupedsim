@@ -4,6 +4,7 @@
 
 #include "WaitingArea.h"
 #include "Building.h"
+#include "../pedestrian/Pedestrian.h"
 
 int WaitingArea::getMaxNumPed() const
 {
@@ -147,6 +148,11 @@ void WaitingArea::addPed(int ped)
      if (pedInside.size() >= maxNumPed){
           open = false;
      }
+
+     if ((pedInside.size() >= minNumPed) && (startTime < 0. )){
+          startTimer();
+     }
+
 }
 
 void WaitingArea::removePed(int ped)
@@ -163,6 +169,11 @@ void WaitingArea::removePed(int ped)
 
 }
 
+void WaitingArea::startTimer()
+{
+     startTime = Pedestrian::GetGlobalTime();
+}
+
 void WaitingArea::startTimer(double time)
 {
      startTime = time;
@@ -174,10 +185,6 @@ bool WaitingArea::isWaiting(double time, const Building* building)
      Transition* trans = nullptr;
      if (transitionID >= 0){
           trans = building->GetTransition(transitionID);
-     }
-
-     if ((pedInside.size() >= minNumPed) && (startTime < 0. )){
-          startTimer(time);
      }
 
      if ((trans == nullptr) ){
