@@ -25,7 +25,6 @@
 #include "../general/Configuration.h"
 #include "../geometry/Building.h"
 #include "../geometry/GeometryReader.h"
-#include "../geometry/Trips.h"
 #include "../tinyxml/tinyxml.h"
 
 //TODO: the class name GeoFileParser is misleading as the ``geometry'' file contains among others also relations (transitions)
@@ -44,6 +43,11 @@ public:
      Goal* parseGoalNode(TiXmlElement * e);
      Transition* parseTransitionNode(TiXmlElement * xTrans, Building * building);
      Goal* parseWaitingAreaNode(TiXmlElement * e);
+     bool LoadTrainInfo(Building* building);
+     bool LoadTrainTimetable(Building* building, TiXmlElement * xRootNode);
+     bool LoadTrainType(Building* building, TiXmlElement * xRootNode);
+     std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement * e);
+     std::shared_ptr<TrainTimeTable> parseTrainTimeTableNode(TiXmlElement * e);
 
 private:
      Configuration* _configuration;

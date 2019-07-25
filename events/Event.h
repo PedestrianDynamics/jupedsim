@@ -38,7 +38,7 @@ public:
      /**
       * @return the state (open, close) of the event
       */
-     const DoorState GetState() const;
+     const DoorState& GetState() const;
 
      /**
       * @return the time at which the event was recorded

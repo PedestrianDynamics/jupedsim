@@ -535,6 +535,10 @@ void EventManager::ProcessEvent()
                case DoorState::TEMP_CLOSE:
                     TempCloseDoor(event.GetId());
                     break;
+               case DoorState::Error:
+                    Log->Write("WARNING:\t Unknown door state in events. open, close or temp_close. Default: open");
+                    OpenDoor(event.GetId());
+                    break;
                }
                _building->GetRoutingEngine()->setNeedUpdate(true);
           }
@@ -726,6 +730,7 @@ Router * EventManager::CreateRouter(const RoutingStrategy& strategy)
 
           case ROUTING_FF_QUICKEST:
                rout = new FFRouter(ROUTING_FF_QUICKEST, ROUTING_FF_QUICKEST, _building->GetConfig()->get_has_specific_goals(), _building->GetConfig());
+               break;
 
           default:
                Log->Write("ERROR: \twrong value for routing strategy [%d]!!!\n", strategy );
@@ -895,4 +900,3 @@ bool EventManager::ReadSchedule()
 
      return true;
 }
-

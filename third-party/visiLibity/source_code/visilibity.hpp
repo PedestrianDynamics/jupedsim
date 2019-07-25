@@ -72,8 +72,6 @@ License along with VisiLibity.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>     //string class
 #include <cassert>    //assertions
 
-#define UNUSED(x) [&x]{}()  // c++11 silence warnings
-
 /// VisiLibity's sole namespace
 namespace VisiLibity
 {
@@ -1513,11 +1511,9 @@ namespace VisiLibity
      * \todo  finish this
      */
     std::vector<Polygon> compute_partition_cells( std::vector<Line_Segment>
-                                                  partition_inducing_segments,
-                                                  double epsilon=0.0 )
+                                                  /*partition_inducing_segments*/,
+                                                  double /*epsilon*/ )
     {
-      UNUSED(partition_inducing_segments);
-      UNUSED(epsilon);
       std::vector<Polygon> cells;
       return cells;
     }

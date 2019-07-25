@@ -1,14 +1,14 @@
-# help: python3 makeini.py -h
+#!/usr/bin/env python3
 import argparse
 import errno
 import glob
 import logging
 import os
 import sys
-import time
 import itertools
-from numpy import *
 from shutil import copy2, rmtree, move
+import numpy as np
+
 
 try:
     import xml.etree.cElementTree as ET
@@ -70,7 +70,7 @@ attributes_tags = ['group-pre_movement_mean',
                    'source-agents_max',
                ]
 
-import numpy as np
+
 # cor_tags = np.unique([att.split("_")[0] for att in attributes_tags]).astype(str)a
 cor_tags = [att.split("-")[0] for att in attributes_tags]
 attributes = [att.split(tag+"-")[1] for (att, tag) in zip(attributes_tags, cor_tags)]
@@ -124,7 +124,7 @@ def get_attribute(node):
                 value = eval(text)
             else:
                 value = 0
-            if isinstance(value, list) or isinstance(value, ndarray):
+            if isinstance(value, list) or isinstance(value, np.ndarray):
                 if len(value) > 1:
                     values.append([value, str(node.tag)+"-"+str(node_attrib), node_attrib])
 
@@ -148,7 +148,7 @@ def get_product(root):
         tag = node.tag
         if tag in tags:   # ignore tags that are not of interest
             d = get_tag(node)
-            if isinstance(d, list) or isinstance(d, ndarray) or isinstance(d, range):
+            if isinstance(d, list)  or isinstance(d, np.ndarray):
                 # in case some tags have multiple values
                 if tag not in input_tags and len(d) > 1:
             # ignore lists with one element (equiv to scalars)
@@ -234,7 +234,6 @@ def make_file(masterfile, tree, result):
 # =======================================================
 
 if __name__ == "__main__":
-    time1 = time.clock()
     args = getParserArgs()
 
     masterfile = args.file
@@ -253,15 +252,5 @@ if __name__ == "__main__":
     result = get_product(root)
     make_file(masterfile, tree, result)
 
-    time2 = time.clock()
-    print(directory)
-    print("%s/%s"%(directory, logfile))
-    print(os.path.isfile("%s/%s"%(directory, logfile)))
-
     if not  os.path.isfile("%s/%s"%(directory, logfile)):
         move(logfile, directory)
-    logging.info('time elapsed: %.2f to generate %d files'%(time2 - time1, len(result)))
-    if 0:
-        sys.exit(FAILURE)
-    else:
-        sys.exit(SUCCESS)

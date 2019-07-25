@@ -27,7 +27,7 @@
  *
  *
  **/
- 
+
 
 #ifndef _POINT_H
 #define _POINT_H
@@ -52,13 +52,6 @@ public:
       * @param [in] y: y-coordinate as double
       */
      Point(double x = 0, double y = 0) : _x(x), _y(y) {};
-
-     /**
-      * **Copy-Ctor**
-      * Constructs a new point as copy of the original point.
-      * @param [in] orig: original point which shall be copied
-      */
-     Point(const Point& orig);
 
      /// Norm
      double Norm() const;

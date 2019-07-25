@@ -51,11 +51,11 @@ private:
     //std::string _projectFilename; // store the file for later user
     //std::map<int, AgentsParameters*> _agentsParameters;
 
-    static std::vector<Point> PositionsOnFixX(double max_x, double min_x, double max_y,
-                                              double min_y, const SubRoom &r, double bufx, double bufy, double dy);
+    std::vector<Point> PositionsOnFixX(double max_x, double min_x, double max_y,
+                                              double min_y, const SubRoom &r, double bufx, double bufy, double dy) const;
 
-    static std::vector<Point> PositionsOnFixY(double max_x, double min_x, double max_y,
-                                              double min_y, const SubRoom &r, double bufx, double bufy, double dx);
+    std::vector<Point> PositionsOnFixY(double max_x, double min_x, double max_y,
+                                              double min_y, const SubRoom &r, double bufx, double bufy, double dx) const;
 
     const Configuration * _configuration;
 public:
@@ -72,7 +72,7 @@ public:
     /**
      * Return the possible positions for distributing the agents in the subroom
      */
-    static vector<Point> PossiblePositions(const SubRoom &r);
+    vector<Point> PossiblePositions(const SubRoom &r) const;
 
     /**
      * Distribute the pedestrians in the Subroom with the given parameters
@@ -101,6 +101,9 @@ public:
      */
     const vector<Point>  GetPositionsFromFile(std::string filename, int n, std::string unit) const;
 
+    double GetA_dist() const;
+
+    double GetB_dist() const;
 };
 
 #endif  /* _PEDDISTRIBUTOR_H */

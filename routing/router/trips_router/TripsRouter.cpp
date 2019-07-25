@@ -11,7 +11,7 @@ TripsRouter::TripsRouter()
      Log->Write("TripsRouter!");
 }
 
-TripsRouter::TripsRouter(int id, RoutingStrategy s, Configuration* config) : Router(id, s)
+TripsRouter::TripsRouter(int id, RoutingStrategy s, Configuration* /*config*/) : Router(id, s)
 {
 
 }
@@ -21,7 +21,7 @@ TripsRouter::~TripsRouter()
 
 }
 
-bool TripsRouter::Init(Building* building)
+bool TripsRouter::Init(Building* /*building*/)
 {
      Log->Write("TripsRouter::Init");
 
@@ -36,7 +36,7 @@ bool TripsRouter::ReInit()
      return true;
 }
 
-int TripsRouter::FindExit(Pedestrian* p)
+int TripsRouter::FindExit(Pedestrian* /*p*/)
 {
      // Check if current position is already waiting area
      // yes: set next goal and return findExit(p)

@@ -121,8 +121,8 @@ void AILandmarkNetwork::AddConnection(const AIConnection *connection)
     //find indeces of vertices(landmarks) in graph
     const AILandmark* landmarkA = _region->GetLandmarkByID(connection->GetLandmarkIds().first);
     const AILandmark* landmarkB = _region->GetLandmarkByID(connection->GetLandmarkIds().second);
-    Vertex A;
-    Vertex B;
+    Vertex A = _landmarks[landmarkA];
+    Vertex B = _landmarks[landmarkB];
 
 //    for (auto it=_landmarks.begin(); it!=_landmarks.end(); ++it)
 //    {
@@ -142,9 +142,6 @@ void AILandmarkNetwork::AddConnection(const AIConnection *connection)
 //                break;
 //        }
 //    }
-
-    A=_landmarks[landmarkA];
-    B=_landmarks[landmarkB];
 
     Point vector = landmarkA->GetRandomPoint()-landmarkB->GetRandomPoint();//->GetRandomPoint()-landmarkB->GetRandomPoint();
     double distance = vector.Norm();

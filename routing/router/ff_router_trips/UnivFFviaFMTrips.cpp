@@ -50,7 +50,7 @@ UnivFFviaFMTrips::UnivFFviaFMTrips(Room* r, Configuration* const conf, double hx
           : UnivFFviaFMTrips(r, conf, hx, wallAvoid, useWallDistances, std::vector<int>(), goals){
 }
 
-UnivFFviaFMTrips::UnivFFviaFMTrips(Room* roomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallDistances, std::vector<int> wantedDoors, std::map<int, Goal*> goals) {
+UnivFFviaFMTrips::UnivFFviaFMTrips(Room* roomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallDistances, std::vector<int> wantedDoors, std::map<int, Goal*> /*goals*/) {
      //build the vector with walls(wall or obstacle), the map with <UID, Door(Cross or Trans)>, the vector with targets(UIDs)
      //then call other constructor including the mode
      _configuration = confArg;
@@ -116,7 +116,6 @@ UnivFFviaFMTrips::UnivFFviaFMTrips(Room* roomArg, Configuration* const confArg, 
 
           //find insidePoint and save it, together with UID
           Point normalVec = anyDoor.NormalVec();
-          double length = normalVec.Norm();
           Point midPoint = anyDoor.GetCentre();
           Point candidate01 = midPoint + (normalVec * 0.25);
           Point candidate02 = midPoint - (normalVec * 0.25);
@@ -147,7 +146,7 @@ UnivFFviaFMTrips::UnivFFviaFMTrips(SubRoom* sr, Configuration* const conf, doubl
           : UnivFFviaFMTrips(sr, conf, hx, wallAvoid, useWallDistances, std::vector<int>(), goals){
 }
 
-UnivFFviaFMTrips::UnivFFviaFMTrips(SubRoom* subRoomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallDistances, std::vector<int> wantedDoors, std::map<int, Goal*> goals) {
+UnivFFviaFMTrips::UnivFFviaFMTrips(SubRoom* subRoomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallDistances, std::vector<int> wantedDoors, std::map<int, Goal*> /*goals*/) {
      //build the vector with walls(wall or obstacle), the map with <UID, Door(Cross or Trans)>, the vector with targets(UIDs)
      //then call other constructor including the mode
 
@@ -200,7 +199,6 @@ UnivFFviaFMTrips::UnivFFviaFMTrips(SubRoom* subRoomArg, Configuration* const con
      //find insidePoint and save it, together with UID
     Line anyDoor = Line{(--tmpDoors.end())->second};
     Point normalVec = anyDoor.NormalVec();
-    double length = normalVec.Norm();
     Point midPoint = anyDoor.GetCentre();
     Point candidate01 = midPoint + (normalVec * 0.25);
     Point candidate02 = midPoint - (normalVec * 0.25);
@@ -452,7 +450,7 @@ void UnivFFviaFMTrips::recreateAllForQuickest() {
 #pragma omp parallel
      {
 #pragma omp for
-          for (signed int i = 0; i < _doors.size(); ++i) {
+          for (int i = 0; i < _doors.size(); ++i) {
                auto doorPair = _doors.begin();
                std::advance(doorPair, i);
                addTarget(doorPair->first, _costFieldWithKey[doorPair->first], _directionFieldWithKey[doorPair->first]);
@@ -543,8 +541,8 @@ void UnivFFviaFMTrips::finalizeTargetLine(const int uid, const Line& line, Point
     long int key;
     long int deltaX, deltaY, deltaX1, deltaY1, px, py, xe, ye, i; //Bresenham Algorithm
 
-    long int goodneighbor;
-    directNeighbor neigh;
+    //long int goodneighbor;
+    //directNeighbor neigh;
 
 
     key = _grid->getKeyAtPoint(line.GetPoint1());
@@ -1468,7 +1466,7 @@ void UnivFFviaFMTrips::addAllTargetsParallel() {
 #pragma omp parallel
      {
 #pragma omp for
-          for (signed int i = 0; i < _doors.size(); ++i) {
+          for (int i = 0; i < _doors.size(); ++i) {
                auto doorPair = _doors.begin();
                std::advance(doorPair, i);
                addTarget(doorPair->first, _costFieldWithKey[doorPair->first], _directionFieldWithKey[doorPair->first]);
@@ -1501,7 +1499,7 @@ void UnivFFviaFMTrips::addTargetsParallel(std::vector<int> wantedDoors) {
 #pragma omp parallel
      {
 #pragma omp for
-          for (signed int i = 0; i < wantedDoors.size(); ++i) {
+          for (int i = 0; i < wantedDoors.size(); ++i) {
                auto doorUID = wantedDoors.begin();
                std::advance(doorUID, i);
                addTarget(*doorUID, _costFieldWithKey[*doorUID], _directionFieldWithKey[*doorUID]);
@@ -1548,8 +1546,6 @@ void UnivFFviaFMTrips::writeFF(const std::string& filename, std::vector<int> tar
 
     Log->Write("FloorfieldViaFM::writeFF(): writing to file %s: There are %d targets.", filename.c_str(), targetID.size());
 
-    int numX = (int) ((_grid->GetxMax()-_grid->GetxMin())/_grid->Gethx());
-    int numY = (int) ((_grid->GetyMax()-_grid->GetyMin())/_grid->Gethy());
     //int numTotal = numX * numY;
     //std::cerr << numTotal << " numTotal" << std::endl;
     //std::cerr << grid->GetnPoints() << " grid" << std::endl;
@@ -1664,7 +1660,7 @@ double UnivFFviaFMTrips::getCostToDestination(const int destID, const Point& pos
         } else if ((key < _grid->GetnPoints()-_grid->GetiMax()) && (_gridCode[key+_grid->GetiMax()] != OUTSIDE) && (_gridCode[key+_grid->GetiMax()] != WALL)) {
             key = key + _grid->GetiMax();
         } else {
-            Log->Write("ERROR:\t In getCostToDestination(3 args)");
+            // Log->Write("ERROR:\t In getCostToDestination(3 args)");
         }
     }
      if (_costFieldWithKey.count(destID)==1 && _costFieldWithKey[destID]) {
@@ -1702,7 +1698,7 @@ double UnivFFviaFMTrips::getCostToDestination(const int destID, const Point& pos
         } else if ((key < _grid->GetnPoints()-_grid->GetiMax()) && (_gridCode[key+_grid->GetiMax()] != OUTSIDE) && (_gridCode[key+_grid->GetiMax()] != WALL)) {
             key = key + _grid->GetiMax();
         } else {
-            Log->Write("ERROR:\t In getCostToDestination(2 args)");
+            // Log->Write("ERROR:\t In getCostToDestination(2 args)");
         }
     }
      if (_costFieldWithKey.count(destID)==1 && _costFieldWithKey[destID]) {
@@ -1834,7 +1830,7 @@ void UnivFFviaFMTrips::getDirectionToUID(int destID, long int key, Point& direct
         } else if ((key < _grid->GetnPoints()-_grid->GetiMax()) && (_gridCode[key+_grid->GetiMax()] != OUTSIDE) && (_gridCode[key+_grid->GetiMax()] != WALL)) {
             key = key + _grid->GetiMax();
         } else {
-            Log->Write("ERROR:\t In getDirectionToUID (3 args)");
+            // Log->Write("ERROR:\t In getDirectionToUID (3 args)");
         }
     }
      if (_directionFieldWithKey.count(destID)==1 && _directionFieldWithKey[destID]) {

@@ -2,21 +2,20 @@
 
 <JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
 
-  <!-- seed used for initialising random generator -->
-  <seed>12542</seed>
-  <!-- geometry file -->
-  <geometry>geometry.xml</geometry>
-  <max_sim_time>5000</max_sim_time>
-
-  <!-- trajectories file and format -->
-  <trajectories format="xml-plain" fps="16" color_mode="group">
-            <file location="trajectories.xml" />
-    <!-- <socket_ hostname="127.0.0.1" port="8989" /> -->
-  </trajectories>
-
-  <!-- where to store the logs -->
-  <logfile>log.txt</logfile>
-
+  <header>
+    <!-- seed used for initialising random generator -->
+    <seed>12542</seed>
+    <!-- geometry file -->
+    <geometry>geometry.xml</geometry>
+    <max_sim_time>5000</max_sim_time>
+    <!-- trajectories file and format -->
+    <trajectories format="xml-plain" fps="16" color_mode="group">
+      <file location="trajectories.xml" />
+      <!-- <socket_ hostname="127.0.0.1" port="8989" /> -->
+    </trajectories>
+    <!-- where to store the logs -->
+    <logfile>log.txt</logfile>
+  </header>
   <!-- traffic information: e.g closed doors or smoked rooms -->
   <traffic_constraints>
     <!-- doors states are: close or open -->

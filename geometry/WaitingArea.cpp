@@ -11,9 +11,9 @@ int WaitingArea::getMaxNumPed() const
      return maxNumPed;
 }
 
-void WaitingArea::setMaxNumPed(int maxNumPed)
+void WaitingArea::setMaxNumPed(int newMaxNumPed)
 {
-     WaitingArea::maxNumPed = maxNumPed;
+     maxNumPed = newMaxNumPed;
 }
 
 int WaitingArea::getMinNumPed() const
@@ -21,9 +21,9 @@ int WaitingArea::getMinNumPed() const
      return minNumPed;
 }
 
-void WaitingArea::setMinNumPed(int minNumPed)
+void WaitingArea::setMinNumPed(int newMinNumPed)
 {
-     WaitingArea::minNumPed = minNumPed;
+     minNumPed = newMinNumPed;
 }
 
 bool WaitingArea::isOpen() const
@@ -31,9 +31,9 @@ bool WaitingArea::isOpen() const
      return open;
 }
 
-void WaitingArea::setOpen(bool open)
+void WaitingArea::setOpen(bool newOpenState)
 {
-     WaitingArea::open = open;
+     open = newOpenState;
 }
 
 bool WaitingArea::isGlobalTimer() const
@@ -52,9 +52,9 @@ const std::map<int, double>& WaitingArea::getNextGoals() const
      return nextGoals;
 }
 
-bool WaitingArea::setNextGoals(const std::map<int, double>& nextGoals)
+bool WaitingArea::setNextGoals(const std::map<int, double>& newNextGoals)
 {
-     WaitingArea::nextGoals = nextGoals;
+     nextGoals = newNextGoals;
 
      nextGoalsOpen.clear();
 
@@ -123,9 +123,9 @@ double WaitingArea::getWaitingTime() const
      return waitingTime;
 }
 
-void WaitingArea::setWaitingTime(double waitingTime)
+void WaitingArea::setWaitingTime(double newWaitingTime)
 {
-     WaitingArea::waitingTime = waitingTime;
+     waitingTime = newWaitingTime;
 }
 
 int WaitingArea::GetNextGoal()
@@ -164,9 +164,6 @@ void WaitingArea::removePed(int ped)
      if (pedInside.size() < minNumPed){
           startTime = -1.;
      }
-
-
-
 }
 
 void WaitingArea::startTimer()
@@ -217,7 +214,7 @@ int WaitingArea::getTransitionID() const
      return transitionID;
 }
 
-void WaitingArea::setTransitionID(int transitionID)
+void WaitingArea::setTransitionID(int newTransitionID)
 {
-     WaitingArea::transitionID = transitionID;
+     transitionID = newTransitionID;
 }

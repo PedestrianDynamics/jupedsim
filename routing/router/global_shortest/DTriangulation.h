@@ -30,6 +30,9 @@
 #ifndef DTRIANGULATION_H_
 #define DTRIANGULATION_H_
 
+
+#include <poly2tri.h>
+
 #include <cstdlib>
 #include <time.h>
 #include <fstream>
@@ -41,7 +44,6 @@
 #include <vector>
 
 #include "../../../geometry/Point.h"
-#include "../../../poly2tri/poly2tri.h"
 
 
 class DTriangulation {

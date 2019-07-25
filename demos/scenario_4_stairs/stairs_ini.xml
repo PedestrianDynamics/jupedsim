@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="Subway-Project" version="0.7" 
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<JuPedSim project="Subway-Project" version="0.7"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 
-	<!-- seed used for initialising random generator -->
-	<seed>12542</seed>
-	<!-- max simulation time in seconds-->
-	<max_sim_time>300</max_sim_time>
-	<!-- geometry file -->
-	<geometry>stairs_geo.xml</geometry>
-  <num_threads>1</num_threads>
-	<!-- traectories file and format -->
-	<trajectories format="xml-plain" fps="8">
-		<file location="stairs_traj.xml" />
-	</trajectories>
-	<!-- where to store the logs -->
-	<logfile>log_stairs</logfile>
+  <header>
+    <!-- seed used for initialising random generator -->
+    <seed>12542</seed>
+    <!-- max simulation time in seconds-->
+    <max_sim_time>300</max_sim_time>
+    <!-- geometry file -->
+    <geometry>stairs_geo.xml</geometry>
+    <num_threads>1</num_threads>
+    <!-- traectories file and format -->
+    <trajectories format="xml-plain" fps="8">
+      <file location="stairs_traj.xml" />
+    </trajectories>
+    <!-- where to store the logs -->
+    <logfile>log_stairs</logfile>
+  </header>
 
 	<!-- traffic information: e.g closed doors or smoked rooms -->
 	<traffic_constraints>
@@ -24,8 +26,8 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 		<doors>
 		</doors>
 	</traffic_constraints>
-	
-	
+
+
 	<routing>
 		<goals>
 			<goal id="0" final="true" caption="goal 0">
@@ -40,7 +42,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 		</goals>
 	</routing>
 
-	
+
 	<!--persons information and distribution -->
 	<agents operational_model_id="2">
 		<agents_distribution>
@@ -116,6 +118,6 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 			<parameters>
 			</parameters>
 		</router>
-                
+
 	</route_choice_models>
 </JuPedSim>

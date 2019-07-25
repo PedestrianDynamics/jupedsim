@@ -29,6 +29,8 @@
 #ifndef TRIANGULATION_H_
 #define TRIANGULATION_H_
 
+#include <poly2tri.h>
+
 #include <cstdlib>
 #include <time.h>
 #include <fstream>
@@ -39,7 +41,6 @@
 #include <iostream>
 #include <vector>
 
-#include "../poly2tri/poly2tri.h"
 using std::vector;
 using std::endl;
 using std::cout;
