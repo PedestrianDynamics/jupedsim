@@ -53,6 +53,12 @@ print_var(AIROUTER)
 set(USE_OPENMP ON CACHE BOOL "Build with OpenMP")
 print_var(USE_OPENMP)
 
+set(BUILD_WITH_ASAN OFF CACHE BOOL
+  "Build with address sanitizer support. Linux / macOS only.")
+print_var(BUILD_WITH_ASAN)
+if(BUILD_WITH_ASAN AND ${CMAKE_SYSTEM} MATCHES "Windows")
+    message(FATAL_ERROR "Address sanitizer builds are not supported on Windows")
+endif()
 ################################################################################
 # Compilation flags
 ################################################################################
@@ -523,6 +529,60 @@ if(WIN32)
   endif()
 endif()
 
+################################################################################
+# Build jspcore_asan executable - jpscore with address sanitizer
+################################################################################
+if(BUILD_WITH_ASAN)
+    get_target_property(core_source core SOURCES)
+    get_target_property(core_compile_options core COMPILE_OPTIONS)
+    get_target_property(core_compile_definitions core COMPILE_DEFINITIONS)
+    get_target_property(core_link_libraries core LINK_LIBRARIES)
+    get_target_property(core_include_directories core INCLUDE_DIRECTORIES)
+
+    add_library(core_asan STATIC
+        ${core_source}
+    )
+
+    target_compile_options(core_asan PRIVATE
+        ${core_compile_options}
+        -fno-omit-frame-pointer
+        -fno-optimize-sibling-calls
+        -fsanitize=address
+    )
+
+    target_compile_definitions(core_asan PRIVATE
+        ${core_compile_definitions}
+    )
+
+    target_link_libraries(core_asan
+        ${core_link_libraries}
+    )
+
+  target_include_directories(core_asan PUBLIC
+        ${core_include_directories}
+    )
+
+    get_target_property(jpscore_source jpscore SOURCES)
+    get_target_property(jpscore_compile_options jpscore COMPILE_OPTIONS)
+    get_target_property(jpscore_link_libraries jpscore LINK_LIBRARIES)
+    list(REMOVE_ITEM jpscore_link_libraries core)
+    list(APPEND jpscore_link_libraries core_asan)
+    add_executable(jpscore_asan
+        ${jpscore_source}
+    )
+
+    target_compile_options(jpscore_asan PRIVATE
+        ${jpscore_compile_options}
+        -fno-omit-frame-pointer
+        -fno-optimize-sibling-calls
+        -fsanitize=address
+    )
+
+    target_link_libraries(jpscore_asan
+        ${jpscore_link_libraries}
+        -fsanitize=address
+    )
+endif()
 ################################################################################
 # Testing
 ################################################################################
