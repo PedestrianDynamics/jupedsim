@@ -563,13 +563,7 @@ double Simulation::RunBody(double maxSimTime)
     _nPeds = _building->GetAllPedestrians().size();
     std::cout << "\n";
     std::string description = "Evacutation ";
-    ProgressBar *bar = new ProgressBar(_nPeds, description);
-    // bar->SetFrequencyUpdate(10);
-#ifdef _WINDOWS
-    bar->SetStyle("|","-");
-#else
-    bar->SetStyle("\u2588", "-"); //for linux
-#endif
+    ProgressBar bar(_nPeds, description);
     int initialnPeds = _nPeds;
     // main program loop
     while ((_nPeds || (!_agentSrcManager.IsCompleted()&& _gotSources) ) && t<maxSimTime) {
@@ -646,7 +640,7 @@ double Simulation::RunBody(double maxSimTime)
 
         if(!_gotSources && !_periodic && _config->print_prog_bar())
               // Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
-              bar->Progressed(initialnPeds-_nPeds);
+              bar.Progressed(initialnPeds-_nPeds);
         else
              if ((!_gotSources) &&
                  ((frameNr < 100 &&  frameNr % 10 == 0) ||
