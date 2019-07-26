@@ -26,7 +26,7 @@
 	</routing>
 
 	<!--persons information and distribution -->
-	<agents operational_model_id="1">
+	<agents operational_model_id="2">
 		<agents_distribution>
 			<!-- 20 < age < 30 -->
 			<group group_id="0" agent_parameter_id="1"  subroom_id="0" goal_id="-1" number="50" router_id="1" pre_movement_mean="0" pre_movement_sigma="0" x_min="19.5" x_max="20.5"/>
@@ -44,7 +44,7 @@
 		<model operational_model_id="1" description="gcfm">
 			<model_parameters>
 				<solver>euler</solver>
-				<stepsize>0.01</stepsize>
+				<stepsize>0.009615</stepsize>
 				<exit_crossing_strategy>4</exit_crossing_strategy>
 				<linkedcells enabled="true" cell_size="2.2" />
 				<force_ped nu="0.0" dist_max="3" disteff_max="2" interpolation_width="0.1" />

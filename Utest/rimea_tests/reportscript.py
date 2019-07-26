@@ -3,6 +3,8 @@ import subprocess
 from pylatex import Document, Command, PageStyle, Head, MiniPage, LargeText, LineBreak, \
     MediumText, LongTabu, NewPage, Package, Section, Description, Figure
 from pylatex.utils import NoEscape, bold
+import datetime
+import os
 
 
 def get_evac_time(testnumber):
@@ -18,7 +20,7 @@ def get_evac_time(testnumber):
 				for line in log:
 					## Use Regular Expression to filter, fetch lines which contain the evac time.
 					if re.match(
-							r'^2017-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} - INFO - evac_time: \d{2}.\d{6} <= \d{2}.\d{6} <= \d{2}.\d{6}$',
+							r'^2019-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} - INFO - evac_time: \d{2}.\d{6} <= \d{2}.\d{6} <= \d{2}.\d{6}$',
 							line):
 						evac_time.append(float(re.split('<=', line)[-2])) ## The second to last number is the evac time
 
@@ -69,7 +71,7 @@ def generate_eva_report():
 
 		doc.append(NewPage())
 
-		doc.generate_pdf("RiMEA-Projekt Evacution Analyse", clean_tex=False)
+		doc.generate_pdf("RiMEA-Projekt-Evacution-Analyse", clean_tex=False)
 
 
 def generate_info_report():
@@ -98,11 +100,11 @@ def generate_info_report():
 			doc.append(NewPage())
 
 			## Add last 2 lines in log.txt
-			for i in range(1, 4):
-					generate_info_list(doc, i)
+			for i in range(1, 16):
+#				get_diagrams(doc, i)
+				generate_info_list(doc, i)
 
-
-			doc.generate_pdf("RiMEA-Projekt Analyse", clean_tex=False)
+			doc.generate_pdf('RiMEA-Projekt-Analyse', clean_tex=False)  #orginal
 
 
 def generate_cover(doc):
@@ -145,26 +147,30 @@ def generate_cover2(doc):
 		doc.append(NoEscape(r"\begin{titlepage}"))
 		doc.append(NoEscape(r"\begin{center}"))
 
-		with doc.create(Figure(position='t', width=NoEscape(r'0.4\textwidth'))) as logo:
-				logo.add_image("./figures/logo.png")
+		with doc.create(Figure(position='t')) as logo:
+				logo.add_image("logo.png")
 
 		doc.append(NoEscape(r"\textsc{\LARGE J\"ulich Pedestrian Simulator}\\[1.5cm]"))
 		doc.append(NoEscape(r"\textsc{\small Forschungszentrum J\"ulich GmbH}\\[0.5cm]"))
 
-		doc.append(NoEscape(r"\HRule \\[0.4cm]"))
+		doc.append(NoEscape(r"\hrule \vspace{1.5mm}"))
 		doc.append(NoEscape(r"{ \huge \bfseries RiMEA-Projekt Analyse Report}\\[0.4cm]"))
-		doc.append(NoEscape(r"\HRule \\[1.5cm]"))
+		doc.append(NoEscape(r"\hrule \vspace{5.5cm}"))
 
 		## Add author date branch commit in a miniPage on title
 		author = get_git_status()[1] + "\par"
 		date = get_git_status()[2] + "\par"
 		branch = "Branch: " + get_git_status()[0] + "\par"
 		commit = "Commit: " + get_git_status()[3] + "\par"
-
-		InfoBlock = MiniPage(width=NoEscape(r"0.8\textwidth"),
+                # get date today
+                # change Date to ..
+		InfoBlock = MiniPage(width=NoEscape(r"1\textwidth"),
                 align='c')
-		InfoBlock.append(NoEscape(author))
-		InfoBlock.append(NoEscape(date))
+		today = "Date: "+ datetime.datetime.now().strftime("%d - %m - %Y   (%H:%M)") + "\par"
+
+		InfoBlock.append(NoEscape(today))
+#		InfoBlock.append(NoEscape(author))
+#		InfoBlock.append(NoEscape(date))
 		InfoBlock.append(NoEscape(branch))
 		InfoBlock.append(NoEscape(commit))
 
@@ -181,8 +187,8 @@ def generate_status_tabel(doc):
 		:return: null
 		"""
 		## Create a long table object in LaTeX object
-		with doc.create(LongTabu("X[c] X[c]")) as status_table:
-				header_row1 = ["Test Number", "Status"]
+		with doc.create(LongTabu("X[c] X[c] X[r]")) as status_table:
+				header_row1 = ["Test Number", "Status", "Exec time"]
 
 				status_table.add_row(header_row1, mapper=[bold])
 				status_table.add_hline()
@@ -190,9 +196,10 @@ def generate_status_tabel(doc):
 				status_table.end_table_header()
 
 
-				for i in range(3):
-						row = [str(i+1), get_tests_status(i+1)]
+				for i in range(15):
+						row = [str(i+1), get_tests_status(i+1),get_exec_time(i+1)+'[sec]']
 						status_table.add_row(row)
+						get_evac_time(i+1)
 
 
 def generate_info_table(doc):
@@ -222,19 +229,25 @@ def generate_info_table(doc):
 						info_table.add_empty_row()
 
 
+
 def generate_info_list(doc, testnumber):
 		"""
 		Generate a list which contains last 2 line of tests from log.txt
 		:param doc: LaTeX object, a instance of Document Class
 		:return: null
 		"""
-		section_name = 'Test' + str(testnumber) + ': Last 2 lines in log_test_' + str(testnumber ) + '.txt'
+		section_name = 'Test' + str(testnumber) #+ ': Last 2 lines in log_test_' + str(testnumber ) + '.txt'
 
 		## Create a long table object in LaTeX object
 		with doc.create(Section(section_name)):
+			if get_diagrams(testnumber)[1] == True:
 				with doc.create(Description()) as desc:
-						desc.add_item("Second last line: ", get_log(testnumber)[0])
-						desc.add_item("Last line: ", get_log(testnumber)[1])
+					desc.add_item("\t Diagram name:", get_diagrams(testnumber)[2])
+				with doc.create(Figure(position='h')) as diagram:
+					diagram.add_image(get_diagrams(testnumber)[0])#, width=NoEscape('0.4\textwidth'))
+			with doc.create(Description()) as desc:
+				desc.add_item("\t", get_log(testnumber)[0])
+				desc.add_item("\t", get_log(testnumber)[1])
 
 		doc.append(NewPage())
 
@@ -245,13 +258,17 @@ def get_git_status():
 		:return: branch, author, date, commit of the newst commit(tuple)
 		"""
 		## Get the branch name by `git status` command
-		branch = subprocess.check_output(["git", "status"]).splitlines()[0].split(' ')[-1]
+		branch =str(subprocess.check_output(["git", "status"]))
+		branch = branch.strip("b'On branch")
+		branch = branch.split("\\n")[0]
+
 
 		## Get the commit, author und date name by `git show` command
-		git_status = subprocess.check_output(["git", "show", "--pretty=medium"])
-		commit = git_status.split("\n")[0].split(' ')[1]
-		author = git_status.split('\n')[1]
-		date = git_status.split('\n')[2]
+		git_status = str(subprocess.check_output(["git", "show", "--pretty=medium"]))
+		git_status = git_status.split("\\n")
+		commit = git_status[0].split(' ')[1]
+		author = git_status[1]
+		date = git_status[2]
 
 		return branch, author, date, commit
 
@@ -268,14 +285,27 @@ def get_tests_status(testnumber):
 				for line in log:
 								## Use Regular Expression to filter.
 								if re.match(
-										r'^2017-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} - INFO - runtest_rimea_\d{1}.py exits with SUCCESS$',
+										r'^2019-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} - INFO - test_\d{1}/runtest_rimea_\d{1}.py exits with SUCCESS$',
 										line):
 										status = "Succeed"
 										break
 
+								elif re.match(
+                                        r'^2019-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} - INFO - runtest_rimea_\d{1}.py exits with SUCCESS$',
+                                        line):
+										status = "Succeed"
+										break
+
+
+								elif re.match(
+                                        					r'^2019-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} - INFO - test_\d{2}/runtest_rimea_\d{2}.py exits with SUCCESS$',
+                                        					line):
+                                        					status = "Succeed"
+                                       						break
+
 								else:
 										status = "Failed"
- 
+
 		return status
 
 
@@ -289,10 +319,49 @@ def get_log(testnumber):
 		log_name = "./test_" + str(testnumber) + "/log_test_" + str(testnumber) + ".txt"
 		with open(log_name) as log:
 				return log.read().split("\n")[-3:-1]
+def get_diagrams(testnumber):
+	start_direc = os.getcwd()
+	direc = start_direc + '/test_' + str(testnumber)
+	os.chdir(direc)
+	data_list = os.listdir(direc)
+	i=0
+	arc=False
+	while i <= (len(data_list)-1) and arc!= True:
+		j = data_list[i].split('.')
+		if len(j) == 2:
+			if j[1] == 'png':
+				d_path = direc + '/' + str(j[0]) + '.png'
+				arc=True
+				title=j[0]
+			else:
+				arc=False
+		else:
+			arc=False
+		i=i+1
+	if arc == False:
+		d_path='_'
+		title='_'
+	os.chdir(start_direc)
+	return(d_path,arc,title)
+
+def get_exec_time(testnumber):
+    start_direc = os.getcwd()
+    direc = start_direc + '/test_' + str(testnumber)
+    os.chdir(direc)
+    textfile=open('log_test_' + str(testnumber) + '.txt')
+    for line in textfile:
+        line=line.split(' ')
+        exec_time='-'
+        if line[0] == 'Execution':
+            exec_time=line[2]
+    os.chdir(start_direc)
+    return exec_time
+
+def test():
+    print('reportscript successfully imported')
 
 
 if __name__ == "__main__":
 		generate_info_report()
+		print('reportscript successfully created')
 		# generate_eva_report()
-
-

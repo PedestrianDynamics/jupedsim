@@ -54,13 +54,15 @@ import glob
 sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
+import time
 
-def run_rimea_test4():
+def run_rimea_test4(inifile, trajfile):
     # Catch all Traji-files
     files = glob.glob("trajectories/*")
     
-    density = [2.0,3.0,4.0,0.5,1.0,1.5] #DO NOT CHANGE THE ORDER
-    
+#    density = [2.0,3.0,4.0,0.5,1.0,1.5] #DO NOT CHANGE THE ORDER
+    density =  [2.0,1.0,6.0,3.0,4.0,5.0,0.5]
+	
     # Main measuring point
     flow_Main = []
     v_mean_Main = []
@@ -218,7 +220,8 @@ def run_rimea_test4():
         txt_file.close()
 
 if __name__ == "__main__":
+    start_time=time.time()
     test = JPSRunTestDriver(4, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
     test.run_test(testfunction=run_rimea_test4)
-    logging.info("%s exits with SUCCESS" % (argv[0]))
+    logging.info("%s exits with SUCCESS\nExecution time %.3f seconds." % (argv[0],time.time()-start_time))
     exit(SUCCESS)

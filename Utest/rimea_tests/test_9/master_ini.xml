@@ -17,6 +17,7 @@
 	
 	<!-- where to store the logs -->
 	<!-- <logfile>log.txt</logfile> -->
+	<show_statistics>true</show_statistics>
 
 	<!-- traffic information: e.g closed doors -->
 	<traffic_constraints>
@@ -84,7 +85,7 @@
 				<atau mu="0.5" sigma="0.001" />
 			</agent_parameters>
 			<agent_parameters agent_parameter_id="2">
-				<v0 mu="0" sigma="0.0" />
+				<v0 mu="0.5" sigma="0.0" />
 				<bmax mu="0.25" sigma="0.001" />
 				<bmin mu="0.20" sigma="0.001" />
 				<amin mu="0.18" sigma="0.001" />
@@ -96,28 +97,28 @@
 		<model operational_model_id="3" description="Tordeux2015">
 			<model_parameters>
 				<solver>euler</solver>
-				<stepsize>0.05</stepsize>
+				<stepsize>0.01</stepsize>
 				<exit_crossing_strategy>3</exit_crossing_strategy>
 				<linkedcells enabled="true" cell_size="2.2"/>
 				<force_ped  a="5" D="0.1"/>
 				<force_wall a="5" D="0.02"/>
 			</model_parameters>
 			<agent_parameters agent_parameter_id="1">
-				<v0 mu="1.2" sigma="0.0" />
-				<bmax mu="0.3" sigma="0.0" /> <!-- this is l/2, assuming peds are circles with constant radius-->
-				<bmin mu="0.3" sigma="0.0" />
-				<amin mu="0.3" sigma="0.0" />
-				<tau mu="0.5" sigma="0.0" />
-				<atau mu="0.0" sigma="0.0" />
+				<v0 mu="1.33" sigma="0.0" />
+				<bmax mu="0.25" sigma="0.001" /> 
+				<bmin mu="0.20" sigma="0.001" />
+				<amin mu="0.18" sigma="0.001" />
+				<tau mu="0.5" sigma="0.001" />
+				<atau mu="0.5" sigma="0.001" />
 				<T mu="1" sigma="0.0" />        
 			</agent_parameters>
 			<agent_parameters agent_parameter_id="2">
-				<v0 mu="0.01" sigma="0.0" />
-				<bmax mu="0.15" sigma="0.0" /> <!-- this is l/2, assuming peds are circles with constant radius-->
-				<bmin mu="0.15" sigma="0.0" />
-				<amin mu="0.15" sigma="0.0" />
-				<tau mu="0.5" sigma="0.0" />
-				<atau mu="0." sigma="0.0" />
+				<v0 mu="0.5" sigma="0.0" />
+				<bmax mu="0.25" sigma="0.01" /> 
+				<bmin mu="0.20" sigma="0.001" />
+				<amin mu="0.18" sigma="0.001" />
+				<tau mu="0.5" sigma="0.001" />
+				<atau mu="0.5" sigma="0.001" />
 				<T mu="1" sigma="0.0" />        
 			</agent_parameters>
 		</model>

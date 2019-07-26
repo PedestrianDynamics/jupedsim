@@ -13,9 +13,10 @@ stages:
   - configure
   - compile
   - unit_test
-  - dev_test
   # - juelich_tests
-  # - rimea_tests
+  - rimea
+  - rimea_reportscript
+
 #=====================================
 
 #============== configure ============
@@ -70,17 +71,6 @@ test:
     - ctest -R clean
   tags:
     - linux
-#============== dev_test ============
-dev:
-  dependencies:
-    - make-linux
-
-  stage: dev_test
-  script:
-    - cd build
-    - ctest -R dev
-  tags:
-    - linux
 #============== juelich ============
 # verification:
 #   dependencies:
@@ -96,20 +86,37 @@ dev:
 #     - linux
 #=================================
 
-#============== rimea ============
-# verification:
-#   dependencies:
-#     - make-linux
 
-#   stage: rimea
-#   script:
-#     - cd build
-#     - ctest -R rimea
-#   only:
-#     - develop
-#   tags:
-#     - linux
-#=================================
+#============== rimea ============
+verification:
+   dependencies:
+    - make-linux
+
+   stage: rimea
+   script:
+    - cd build
+    - ctest -R rimea
+   only:
+    - develope
+   tags:
+    - linux
+
+#====== rimea reportscript =======
+report:
+   dependencies:
+    - verification
+
+   stage: rimea_reportscript
+   script:
+    - cd Utest/rimea_tests
+    - python reportscript.py
+     #     -scp RiMEA-Projekt-Analyse.pdf ($HOME/) #for saving file on the same server
+     #     -scp RiMEA-Projekt-Analyse.pds basten1@https://gitlab.version.fz-juelich.de/
+   only:
+     - GuidoBasten
+   tags:
+     - linux 
+
 
 #============== validation =======
 # validation:

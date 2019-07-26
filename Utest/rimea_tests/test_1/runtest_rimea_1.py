@@ -23,6 +23,8 @@ from sys import *
 sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
+import time
+
 
 def run_rimea_test1(inifile, trajfile):
     # Geometry data
@@ -48,8 +50,11 @@ def run_rimea_test1(inifile, trajfile):
                      argv[0], must_min_time, evac_time, must_max_time)
         exit(FAILURE)
 
+
 if __name__ == "__main__":
+    start_time=time.time()
     test = JPSRunTestDriver(1, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
     test.run_test(testfunction=run_rimea_test1)
-    logging.info("%s exits with SUCCESS" % (argv[0]))
+    logging.info("%s exits with SUCCESS\nExecution time %.3f seconds." % (argv[0],time.time()-start_time))
     exit(SUCCESS)
+
