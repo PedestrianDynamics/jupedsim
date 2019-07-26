@@ -49,6 +49,7 @@ target_include_directories(visilibity PUBLIC
 # Build poly2tri
 ################################################################################
 add_library(poly2tri STATIC
+
     poly2tri/common/shapes.cpp
     poly2tri/common/shapes.h
     poly2tri/common/utils.h

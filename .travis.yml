@@ -11,16 +11,18 @@ matrix:
       os: linux
       env: TOOLCHAIN=clang
       script:
+       - ./scripts/setup-deps.sh
        - mkdir build && cd build
-       - cmake  .. -DBUILD_CPPUNIT_TEST=ON -DBUILD_TESTING=ON -DAIROUTER=ON -DJPSFIRE=ON
+       - cmake  .. -DCMAKE_PREFIX_PATH=$(pwd)/../deps -DBUILD_CPPUNIT_TEST=ON -DBUILD_TESTING=ON -DAIROUTER=ON -DJPSFIRE=ON
        - make -j $(nproc)
 
     - name: linux (gcc9)
       os: linux
       env: TOOLCHAIN=gcc
       script:
+       - ./scripts/setup-deps.sh
        - mkdir build && cd build
-       - cmake .. -DBUILD_CPPUNIT_TEST=ON -DBUILD_TESTING=ON -DAIROUTER=ON -DJPSFIRE=ON
+       - cmake .. -DCMAKE_PREFIX_PATH=$(pwd)/../deps -DBUILD_CPPUNIT_TEST=ON -DBUILD_TESTING=ON -DAIROUTER=ON -DJPSFIRE=ON
        - make -j $(nproc)
 
 before_install:
