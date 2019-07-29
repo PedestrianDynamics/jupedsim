@@ -16,16 +16,23 @@ double fRand(double fMin, double fMax)
 
 
 Point WaitingRandom::GetWaitingPosition(Room* room, Pedestrian* ped){
-//     srand(time(0));
 
-     SubRoom* subRoom = room->GetSubRoom(ped->GetSubRoomID());
+     std::vector<Point> polygon;
+
+     if (ped->IsInsideWaitingAreaWaiting()){
+          polygon = ped->GetBuilding()->GetFinalGoal(ped->GetLastGoalID())->GetPolygon();
+     } else {
+          SubRoom* subRoom = room->GetSubRoom(ped->GetSubRoomID());
+
+          polygon = subRoom->GetPolygon();
+     }
 
      double xMin = std::numeric_limits<double>::max(),
-          xMax =std::numeric_limits<double>::min(),
-          yMin = std::numeric_limits<double>::max(),
-          yMax = std::numeric_limits<double>::min();
+            xMax =std::numeric_limits<double>::min(),
+            yMin = std::numeric_limits<double>::max(),
+            yMax = std::numeric_limits<double>::min();
 
-     for (auto poly : subRoom->GetPolygon()){
+     for (auto poly : polygon){
           xMin = (xMin <= poly._x)?(xMin):(poly._x);
           xMax = (xMax >= poly._x)?(xMax):(poly._x);
 
@@ -34,10 +41,24 @@ Point WaitingRandom::GetWaitingPosition(Room* room, Pedestrian* ped){
      }
 
      Point target;
-     do{
-          target._x = fRand(xMin, xMax);
-          target._y = fRand(yMin, yMax);
-     }while (!subRoom->IsInSubRoom(target));
+
+     if (ped->IsInsideWaitingAreaWaiting()){
+          auto goal = ped->GetBuilding()->GetFinalGoal(ped->GetLastGoalID());
+
+          do{
+               target._x = fRand(xMin, xMax);
+               target._y = fRand(yMin, yMax);
+          }while (!goal->IsInsideGoal(target));
+
+     } else {
+          SubRoom* subRoom = room->GetSubRoom(ped->GetSubRoomID());
+
+          do{
+               target._x = fRand(xMin, xMax);
+               target._y = fRand(yMin, yMax);
+          }while (!subRoom->IsInSubRoom(target));
+     }
+
 
      std::cout << "Ped " << ped->GetID() << " Target: " << target.toString() << std::endl;
 

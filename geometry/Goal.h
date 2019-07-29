@@ -155,6 +155,8 @@ public:
 
     void SetSubRoomID(int _subRoomID);
 
+    bool IsInsideGoal(const Point& point) const;
+
 private:
     bool IsClockwise();
     bool CreateBoostPoly();
@@ -164,7 +166,6 @@ private:
      // x-Koordinate der Linie von einer Eccke zur nächsten
      double Xintercept(const Point& point1, const Point& point2,
                        double hitY) const;
-    bool IsInsideGoal(const Point& point) const;
 
 };
 

@@ -61,6 +61,8 @@ protected:
      * Set of pedestrians who are currently in waiting area
      */
      std::set<int> pedInside;
+public:
+    const std::set<int>& GetPedInside() const;
 
 public:
 

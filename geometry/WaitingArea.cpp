@@ -218,3 +218,9 @@ void WaitingArea::setTransitionID(int newTransitionID)
 {
      transitionID = newTransitionID;
 }
+
+const std::set<int>& WaitingArea::GetPedInside() const
+{
+     return pedInside;
+}
+

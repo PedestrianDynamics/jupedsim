@@ -446,24 +446,9 @@ void Simulation::UpdateRoutesAndLocations()
           // Check if current position is already waiting area
           // yes: set next goal and return findExit(p)
           _goalManager->ProcessPedPosition(ped);
-          Goal* goalPtr = _building->GetFinalGoal(ped->GetFinalDestination());
-
-          if ((goalPtr!=nullptr) && (goalPtr->IsInsideGoal(ped))){
-               if(WaitingArea* wa = dynamic_cast<WaitingArea*>(goalPtr)) {
-                    //take the current time from the pedestrian
-
-                    if (!wa->isWaiting(Pedestrian::GetGlobalTime(), _building.get())){
-                         ped->SetFinalDestination(wa->GetNextGoal());
-                    }
-               }
-          }
-
-
-//          if (ped->IsWaiting()){
-//               std::cout << ped->GetGlobalTime() << ": Ped " << ped->GetID() << " is waiting" << std::endl;
-//          }
      }
 
+     _goalManager->ProcessWaitingAreas(Pedestrian::GetGlobalTime());
 
 #ifdef _USE_PROTOCOL_BUFFER
      if (_hybridSimManager)
@@ -616,6 +601,7 @@ double Simulation::RunBody(double maxSimTime)
 #else
     bar->SetStyle("\u2588", "-"); //for linux
 #endif
+     _goalManager->SetBuilding(_building.get());
      _goalManager->SetGoals(_building->GetAllGoals());
 
     int initialnPeds = _nPeds;
