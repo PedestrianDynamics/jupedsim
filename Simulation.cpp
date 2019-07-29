@@ -372,7 +372,8 @@ void Simulation::UpdateRoutesAndLocations()
 
           //set the new room if needed
           if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
-              && (room->GetCaption() == "outside")) { //TODO Hier aendern fuer inside goals?
+//              && (room->GetCaption() == "outside")) { //TODO Hier aendern fuer inside goals?
+               && ped->IsOutside()){
 #pragma omp critical(Simulation_Update_pedsToRemove)
                pedsToRemove.insert(ped);
           } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)

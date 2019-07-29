@@ -1160,6 +1160,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
           e = e->NextSiblingElement("router")) {
 
           string strategy = e->Attribute("description");
+          std::cout << "Description: <" <<strategy << ">" << std::endl;
           int id = atoi(e->Attribute("router_id"));
 
           if ((strategy == "local_shortest") &&
@@ -1225,25 +1226,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
 //     #endif
 //          }
 
-          else if ((strategy == "ff_global_shortest_trips") &&
-                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
-               //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
-               Router *r = new FFRouterTrips(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals, _config);
-               _config->GetRoutingEngine()->AddRouter(r);
-
-               if ((_exit_strat_number == 8) || (_exit_strat_number == 9)){
-                   Log->Write("\nINFO: \tUsing FF Global Shortest Router Trips");
-               }
-               else {
-                   Log->Write("\nWARNING: \tExit Strategy Number is not 8 or 9!!!");
-                   // config object holds default values, so we omit any set operations
-               }
-
-               ///Parsing additional options
-               if (!ParseFfRouterOps(e, ROUTING_FF_GLOBAL_SHORTEST)) {
-                    return false;
-               }
-          }
           else if ((strategy == "ff_global_shortest") &&
                     (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
@@ -1698,9 +1680,9 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
 
      // Read waiting
 //     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingVoronoi());
-     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
+//     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
 //     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingProbability());
-//     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingMiddle());
+     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingMiddle());
 
      _directionManager->SetWaitingStrategy(_waitingStrategy);
 

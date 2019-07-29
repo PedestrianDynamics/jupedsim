@@ -149,21 +149,21 @@ int  AccessPoint::GetNextApTo(int UID)
 
 int AccessPoint::GetNearestTransitAPTO(int UID)
 {
-     for (auto itr: _navigationGraphTo){
-          std::cout << "Navigation to " << itr.first << std::endl;
-          for (auto ap : itr.second){
-               std::cout << ap->GetID() << std::endl;
-          }
-     }
+//     for (auto itr: _navigationGraphTo){
+//          std::cout << "Navigation to " << itr.first << std::endl;
+//          for (auto ap : itr.second){
+//               std::cout << ap->GetID() << std::endl;
+//          }
+//     }
 
      const vector <AccessPoint*>& possibleDest=_navigationGraphTo[UID];
 
 
      if(possibleDest.size()==0) {
-          std::cout << "return -1" << std::endl;
+//          std::cout << "return -1" << std::endl;
           return -1;
      } else if (possibleDest.size()==1) {
-          std::cout << "return " << possibleDest[0]->GetID() << std::endl;
+//          std::cout << "return " << possibleDest[0]->GetID() << std::endl;
 
           return possibleDest[0]->GetID();
      } else {
@@ -177,7 +177,7 @@ int AccessPoint::GetNearestTransitAPTO(int UID)
                     best_ap=possibleDest[i];
                }
           }
-          std::cout << "return " << best_ap->GetID() << std::endl;
+//          std::cout << "return " << best_ap->GetID() << std::endl;
 
           return best_ap->GetID();
      }
@@ -337,4 +337,14 @@ void AccessPoint::Dump()
      cout<<endl;
      cout<<endl<<"------------------------------"<<endl<<endl;
 
+}
+
+bool AccessPoint::IsGoalInside() const
+{
+     return _goalInside;
+}
+
+void AccessPoint::SetGoalInside(bool goalInside)
+{
+     _goalInside = goalInside;
 }

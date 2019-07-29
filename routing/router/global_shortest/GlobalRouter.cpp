@@ -37,6 +37,7 @@
 //#include "../pedestrian/Pedestrian.h"
 #include <tinyxml.h>
 #include "../../../geometry/SubRoom.h"
+#include "../../../geometry/WaitingArea.h"
 //#include "../geometry/Wall.h"
 //#include "../IO/OutputHandler.h"
 
@@ -254,6 +255,20 @@ bool GlobalRouter::Init(Building* building)
           _map_id_to_index[door] = index;
           _map_index_to_id[index] = door;
           index++;
+     }
+
+
+     for (const auto & itr:_building->GetAllGoals()){
+          if (dynamic_cast<WaitingArea*>(itr.second)){
+               int door = itr.second->GetCentreCrossing()->GetUniqueID();
+               _accessPoints[door]->SetFinalExitToOutside(true);
+
+          }
+     }
+
+     std::cout << std::endl;
+     for (auto& itr : _accessPoints){
+          std::cout << itr.first << ": " << itr.second->GetFriendlyName() << std::endl;
      }
 
      // populate the subrooms at the elevation
@@ -689,7 +704,6 @@ bool GlobalRouter::GetPath(Pedestrian*ped, int goalID, std::vector<SubRoom*>& pa
 void GlobalRouter::FloydWarshall()
 {
      const int n = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
-     std::cout << "FloydWarshall ------------------" << std::endl;
      for (int k = 0; k < n; k++) {
           for (int i = 0; i<n; i++) {
                for (int j = 0; j<n; j++) {
@@ -701,17 +715,6 @@ void GlobalRouter::FloydWarshall()
                }
           }
      }
-
-     for (int i = 0; i<n; i++) {
-          for (int j = 0; j<n; j++) {
-               std::cout << _distMatrix[i][j] << "\t";
-          }
-          std::cout << std::endl;
-     }
-
-
-     std::cout << "FloydWarshall Ende----------------" << std::endl;
-
 }
 
 //void GlobalRouter::DumpAccessPoints(int p)
@@ -728,6 +731,9 @@ void GlobalRouter::FloydWarshall()
 
 int GlobalRouter::FindExit(Pedestrian* ped)
 {
+     if (ped->GetFinalDestination() == -1){
+          bool foo = true;
+     }
      if(!_useMeshForLocalNavigation)
      {
           std::vector<NavLine*> path;

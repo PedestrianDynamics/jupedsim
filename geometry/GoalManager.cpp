@@ -20,6 +20,11 @@ void GoalManager::SetBuilding(Building* building)
 
 void GoalManager::ProcessPedPosition(Pedestrian* ped)
 {
+//     std::cout << "----------" << std::endl;
+//     std::cout << "Ped: " << ped->GetPos().toString() << std::endl;
+//     std::cout << "Exit: " << ped->GetFinalDestination() << std::endl;
+//     std::cout << "WA: " << _building->GetFinalGoal(ped->GetFinalDestination())->GetCentreCrossing()->toString() << std::endl;
+
      // Ped is in current waiting area
      if (CheckInsideWaitingArea(ped, ped->GetFinalDestination())){
           WaitingArea* wa = dynamic_cast<WaitingArea*>(_allGoals[ped->GetFinalDestination()]);

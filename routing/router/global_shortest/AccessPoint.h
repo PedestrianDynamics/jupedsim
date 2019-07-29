@@ -49,8 +49,7 @@ public:
       * @param center
       * @param radius
       */
-
-     AccessPoint(int id, double center[2],double radius=0.30);
+     AccessPoint(int id, double center[2], double radius=0.30);
 
      /**
       *
@@ -76,7 +75,6 @@ public:
       * given the actual room of the pedestrian
       * determine if that AP is 'visible'
       */
-
      bool isInRange(int roomID);
 
      /**
@@ -197,12 +195,20 @@ public:
 
 private:
      int _id;
-     double _center[2];
+public:
+    bool IsGoalInside() const;
+
+    void SetGoalInside(bool goalInside);
+
+private:
+    double _center[2];
      double _radius;
      /// true if this exit leads to outside
      bool _finaExitToOutside;
      /// true if this a goal outside the building
      bool _finalGoalOutside;
+     bool _goalInside;
+
      int _room1ID;
      int _room2ID;
      Point pCentre;

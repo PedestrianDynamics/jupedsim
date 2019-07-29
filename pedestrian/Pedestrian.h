@@ -520,6 +520,7 @@ public:
      void StartWaiting();
      void EndWaiting();
 
+     bool IsOutside();
 
 };
 

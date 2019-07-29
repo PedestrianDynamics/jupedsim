@@ -1316,3 +1316,21 @@ void Pedestrian::EndWaiting()
 {
      _waiting = false;
 }
+
+bool Pedestrian::IsOutside()
+{
+     Room* room = _building->GetRoom(_roomID);
+
+     if (room->GetCaption() == "outside"){
+          return true;
+     }
+
+     for (auto& itr : room->GetAllSubRooms()){
+          auto subRoom =itr.second;
+
+          if (subRoom->IsInSubRoom(this)){
+               return false;
+          }
+     }
+     return true;
+}
