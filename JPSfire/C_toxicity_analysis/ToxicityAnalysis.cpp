@@ -30,9 +30,8 @@
 #include "../../pedestrian/Pedestrian.h"
 #include "../generic/FDSMesh.h"
 #include "../generic/FDSMeshStorage.h"
+#include "general/Filesystem.hpp"
 #include <tinyxml.h>
-#include <filesystem>
-namespace fs = std::filesystem;
 
 
 ToxicityAnalysis::ToxicityAnalysis(const std::string & projectFileName, double fps):  _projectFileName(projectFileName), _fps(fps)

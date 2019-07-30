@@ -19,14 +19,11 @@
 // Created by laemmel on 30.03.16.
 //
 
-#include <filesystem>
+#include <general/Filesystem.hpp>
 #include "GeoFileParser.h"
 #include "../tinyxml/tinyxml.h"
 #include "../geometry/SubRoom.h"
 #include "../geometry/WaitingArea.h"
-namespace fs = std::filesystem;
-
-
 
 GeoFileParser::GeoFileParser(Configuration* configuration)
           :_configuration(configuration)

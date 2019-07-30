@@ -1,4 +1,4 @@
- 
+
 /**
  * \file        testClassLine.cpp
  * \date        May 10, 2015
@@ -25,9 +25,8 @@
  *
  *
  **/
-
-#define BOOST_TEST_MODULE RoomTest
 #define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_NO_MAIN
 #include <boost/test/unit_test.hpp>
 #include "../../geometry/Room.h"
 #include "../../general/Macros.h"

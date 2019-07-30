@@ -172,5 +172,6 @@ packages/
 
 /doc*
 /cmake-*
+!/cmake_modules
 /issues
 /latex

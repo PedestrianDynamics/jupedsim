@@ -33,7 +33,6 @@
 
 #include <cstring>
 #include <vector>
-#include <filesystem>
 extern OutputHandler* Log;
 
 class Trajectories;

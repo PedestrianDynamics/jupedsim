@@ -27,9 +27,6 @@
  *
  *
  **/
-
-
-
 #ifndef SIMULATION_H_
 #define SIMULATION_H_
 
@@ -49,12 +46,7 @@
 #include "events/EventManager.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "general/Configuration.h"
-#include <filesystem>
 
-
-
-//Forward declarations
-//class AgentsSourcesManager;
 class EventManager;
 
 class Simulation {
