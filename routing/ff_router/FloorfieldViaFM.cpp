@@ -28,18 +28,7 @@
 #define TESTING
 #define GEO_UP_SCALE 1
 #include "FloorfieldViaFM.h"
-//#include <iostream>
-//#include <string>
-//#include <sstream>
-//#include <fstream>
-//#include <cfloat>
-//#include <chrono>
-
-#ifdef _OPENMP
-#else
-#define omp_get_thread_num() 0
-#define omp_get_max_threads()  1
-#endif
+#include "general/OpenMP.h"
 
 FloorfieldViaFM::FloorfieldViaFM()
 {

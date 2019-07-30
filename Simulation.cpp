@@ -38,13 +38,8 @@
 #include "pedestrian/AgentsSourcesManager.h"
 #include "geometry/WaitingArea.h"
 #include "general/Filesystem.hpp"
+#include "general/OpenMP.h"
 
-#ifdef _OPENMP
-
-#else
-#define omp_get_thread_num() 0
-#define omp_get_max_threads()  1
-#endif
 using namespace std;
 
 OutputHandler* Log;

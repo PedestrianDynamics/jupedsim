@@ -32,13 +32,7 @@
 #include <iostream>
 #include <sstream>
 
-#ifdef _OPENMP
-
-#else
-#define omp_get_thread_num() 0
-#define omp_get_max_threads()  1
-#endif
-
+#include "general/OpenMP.h"
 #include "../IO/OutputHandler.h"
 #include "ArgumentParser.h"
 #include "../pedestrian/AgentsParameters.h"
