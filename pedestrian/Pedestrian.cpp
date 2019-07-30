@@ -206,7 +206,7 @@ Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& buil
 
 Pedestrian::~Pedestrian()
 {
-
+     delete _navLine;
 }
 
 
