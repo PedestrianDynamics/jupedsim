@@ -31,16 +31,13 @@
 #include "Wall.h"
 #include "Crossing.h"
 
-using namespace std;
-
-
 Goal::Goal()
 {
      _id=-1;
      _caption="Goal";
      _isFinalGoal=0;
-     _walls = vector<Wall > ();
-     _poly = vector<Point > ();
+     _walls = std::vector<Wall > ();
+     _poly = std::vector<Point > ();
      _crossing = new Crossing();
      _roomID = -1;
      _subRoomID = -1;
@@ -56,12 +53,12 @@ void Goal::AddWall(const Wall& w)
      _walls.push_back(w);
 }
 
-string Goal::GetCaption() const
+std::string Goal::GetCaption() const
 {
      return _caption;
 }
 
-void Goal::SetCaption(string caption)
+void Goal::SetCaption(std::string caption)
 {
      _caption = caption;
 }
@@ -77,14 +74,14 @@ void Goal::SetId(int id)
      _crossing->SetID(id);
 }
 
-const vector<Point>& Goal::GetPolygon() const
+const std::vector<Point>& Goal::GetPolygon() const
 {
      return _poly;
 }
 
-string Goal::Write()
+std::string Goal::Write()
 {
-     string s;
+     std::string s;
      Point pos;
 
      for (unsigned int j = 0; j < _walls.size(); j++) {
@@ -108,7 +105,7 @@ string Goal::Write()
      return s;
 }
 
-const vector<Wall>& Goal::GetAllWalls() const
+const std::vector<Wall>& Goal::GetAllWalls() const
 {
      return _walls;
 }
@@ -188,8 +185,8 @@ bool Goal::Contains(const Point& ped) const
 
 bool Goal::ConvertLineToPoly()
 {
-     vector<Line*> copy;
-     vector<Point> tmpPoly;
+     std::vector<Line*> copy;
+     std::vector<Point> tmpPoly;
      Point point;
      Line* line;
      // Alle Linienelemente in copy speichern

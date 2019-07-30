@@ -37,8 +37,6 @@
 // external variables
 extern OutputHandler* Log;
 
-using namespace std;
-
 JPSserver::JPSserver(HybridSimulationManager* hsm, std::shared_ptr<Latches> latches, Configuration* configuration)
           :_HybridSimulationManager(hsm), _latches(latches), _configuration(configuration)
 {

@@ -41,11 +41,6 @@
 #include "../routing/smoke_router/SmokeRouter.h"
 #include "../IO/IniFileParser.h"
 
-using namespace std;
-
-
-
-
 void ArgumentParser::Usage(const std::string file)
 {
      fprintf(stderr, "Usages: \n");

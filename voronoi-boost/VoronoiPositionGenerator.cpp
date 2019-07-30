@@ -62,9 +62,6 @@ struct point_traits<Point> {
 }  // boost
 
 
-using namespace std;
-
-
 //functions
 //TODO: refactor the function
 bool IsEnoughInSubroom( SubRoom* subroom, Point& pt, double radius )

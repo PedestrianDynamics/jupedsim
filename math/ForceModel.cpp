@@ -29,8 +29,6 @@
 #include "ForceModel.h"
 #include "../pedestrian/Pedestrian.h"
 
-using namespace std;
-
 ForceModel::ForceModel()
 {
 }

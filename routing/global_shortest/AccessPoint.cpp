@@ -28,8 +28,6 @@
 
 #include "AccessPoint.h"
 
-using namespace std;
-
 
 AccessPoint::AccessPoint(int id, double center[2],double radius)
 {
@@ -229,7 +227,7 @@ void AccessPoint::RemoveConnectingAP(AccessPoint* ap)
      vector<AccessPoint*>::iterator it;
      it = find (_connectingAPs.begin(), _connectingAPs.end(), ap);
      if(it==_connectingAPs.end()) {
-          cout<<" there is no connection to AP: "<< ap->GetID()<<endl;
+          std::cout<<" there is no connection to AP: "<< ap->GetID()<<std::endl;
      } else {
           _connectingAPs.erase(it);
      }
@@ -276,52 +274,52 @@ DoorState AccessPoint::GetState() const
 void AccessPoint::Dump()
 {
 
-     cout<<endl<<"--------> Dumping AP <-----------"<<endl<<endl;
+     std::cout<<std::endl<<"--------> Dumping AP <-----------"<<std::endl<<std::endl;
      //cout<<" ID: " <<_id<<" centre = [ "<< _center[0] <<", " <<_center[1] <<" ]"<<endl;
-     cout<<" Friendly ID: " <<_friendlyName<<" centre = [ "<< _center[0] <<", " <<_center[1] <<" ]"<<endl;
-     cout<<" Real ID: " <<_id<<endl;
-     cout<<" Length:  "<<_navLine->LengthSquare()<<endl;
+     std::cout<<" Friendly ID: " <<_friendlyName<<" centre = [ "<< _center[0] <<", " <<_center[1] <<" ]"<<std::endl;
+     std::cout<<" Real ID: " <<_id<<std::endl;
+     std::cout<<" Length:  "<<_navLine->LengthSquare()<<std::endl;
 
-     cout <<" Is final exit to outside :"<<GetFinalExitToOutside()<<endl;
-     cout <<" Distance to final goals"<<endl;
+     std::cout <<" Is final exit to outside :"<<GetFinalExitToOutside()<<std::endl;
+     std::cout <<" Distance to final goals"<<std::endl;
 
      for(std::map<int, double>::iterator p = _mapDestToDist.begin(); p != _mapDestToDist.end(); ++p) {
-          cout<<"\t [ "<<p->first<<", " << p->second<<" m ]";
+          std::cout<<"\t [ "<<p->first<<", " << p->second<<" m ]";
      }
-     cout<<endl<<endl;
+     std::cout<<std::endl<<std::endl;
 
-     cout<<" transit to final goals:"<<endl;
+     std::cout<<" transit to final goals:"<<std::endl;
      for(std::map<int, std::vector<AccessPoint*> >::iterator p = _navigationGraphTo.begin(); p != _navigationGraphTo.end(); ++p) {
-          cout<<endl<<"\t to UID ---> [ "<<p->first <<" ]";
+          std::cout<<std::endl<<"\t to UID ---> [ "<<p->first <<" ]";
 
           if(p->second.size()==0) {
-               cout<<"\t ---> [ Nothing ]";
+               std::cout<<"\t ---> [ Nothing ]";
           } else {
 
                for(unsigned int i=0; i<p->second.size(); i++) {
-                    cout<<"\t distance ---> [ "<<GetDistanceTo(p->second[i])+p->second[i]->GetDistanceTo(p->first) <<" m via "<<p->second[i]->GetID() <<" ]";
+                    std::cout<<"\t distance ---> [ "<<GetDistanceTo(p->second[i])+p->second[i]->GetDistanceTo(p->first) <<" m via "<<p->second[i]->GetID() <<" ]";
                     //cout<<"\t distance ---> [ "<<p->second[i]->GetID()<<" @ " << GetDistanceTo(p->first)<<" ]";
                }
           }
      }
 
-     cout<<endl<<endl;
+     std::cout<<std::endl<<std::endl;
 
-     cout<<" connected to aps : " ;
+     std::cout<<" connected to aps : " ;
      for(unsigned int p=0; p<_connectingAPs.size(); p++) {
           //cout<<" [ "<<_connectingAPs[p]->GetID()<<" , "<<_connectingAPs[p]->GetDistanceTo(this)<<" m ]";
-          cout<<endl<<"\t [ "<<_connectingAPs[p]->GetID()<<"_"<<_connectingAPs[p]->GetFriendlyName()<<" , "<<_connectingAPs[p]->GetDistanceTo(this)<<" m ]";
+          std::cout<<std::endl<<"\t [ "<<_connectingAPs[p]->GetID()<<"_"<<_connectingAPs[p]->GetFriendlyName()<<" , "<<_connectingAPs[p]->GetDistanceTo(this)<<" m ]";
      }
 
-     cout<<endl<<endl;
-     cout <<" queue [ ";
+     std::cout<<std::endl<<std::endl;
+     std::cout <<" queue [ ";
      for(unsigned int p=0; p<_transitPedestrians.size(); p++) {
-          cout<<" "<<_transitPedestrians[p]->GetID();
+          std::cout<<" "<<_transitPedestrians[p]->GetID();
      }
-     cout<<" ]"<<endl;
+     std::cout<<" ]"<<std::endl;
 
      //cout<<endl<<" connected to rooms: "<<_room1ID<<" and "<<_room2ID<<endl;
-     cout<<endl;
-     cout<<endl<<"------------------------------"<<endl<<endl;
+     std::cout<<std::endl;
+     std::cout<<std::endl<<"------------------------------"<<std::endl<<std::endl;
 
 }

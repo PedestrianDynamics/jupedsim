@@ -33,8 +33,6 @@
 #include "../../../geometry/Crossing.h"
 #include "../../../geometry/Transition.h"
 
-using namespace std;
-
 
 
 /**
@@ -104,7 +102,7 @@ double GraphEdge::GetFactor() const
     return factor;
 }
 
-double GraphEdge::GetSpecificFactor(string name) const
+double GraphEdge::GetSpecificFactor(std::string name) const
 {
     for(FactorContainer::const_iterator it = factors.begin(); it != factors.end(); ++it)
     {

@@ -39,7 +39,6 @@
 
 #include "general/Filesystem.hpp"
 
-using namespace std;
 using namespace boost::lambda;
 /************************************************************
  PedDistributor
@@ -329,7 +328,7 @@ vector<Point> PedDistributor::PositionsOnFixX(double min_x, double max_x, double
         // Abstand zu allen Wänden prüfen
         bool ok = true;
         for (auto &&w: r.GetAllWalls()) {
-            if (w.DistTo(pos) < max(bufx, bufy) || !r.IsInSubRoom(pos)) {
+            if (w.DistTo(pos) < std::max(bufx, bufy) || !r.IsInSubRoom(pos)) {
                 ok = false;
                 break; // Punkt ist zu nah an einer Wand oder nicht im Raum => ungültig
             }
@@ -372,7 +371,7 @@ vector<Point>PedDistributor::PositionsOnFixY(double min_x, double max_x, double 
         // check distance to wall
         bool ok = true;
         for (auto &&w: r.GetAllWalls()) {
-            if (w.DistTo(pos) < max(bufx, bufy) || !r.IsInSubRoom(pos)) {
+            if (w.DistTo(pos) < std::max(bufx, bufy) || !r.IsInSubRoom(pos)) {
                 ok = false;
                 break; // Punkt ist zu nah an einer Wand oder nicht im Raum => ungültig
             }
@@ -496,8 +495,8 @@ vector<Point>  PedDistributor::PossiblePositions(const SubRoom &r) const{
     double dx = 2*amin;
     double dy = 2*bmax;
 
-    double max_buf = max(bufx, bufy);
-    double max_size = max(dx,dy);// In case of using ellipse
+    double max_buf = std::max(bufx, bufy);
+    double max_size = std::max(dx,dy);// In case of using ellipse
 
     vector<double>::iterator min_x, max_x, min_y, max_y;
     const vector<Point> &poly = r.GetPolygon();

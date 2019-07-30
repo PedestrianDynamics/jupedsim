@@ -24,13 +24,13 @@
  *
  *
  **/
+#include "Building.h"
 
 #include <chrono>
-#include "Building.h"
 
 #include "../geometry/SubRoom.h"
 #include "../tinyxml/tinyxml.h"
-
+#include "general/OpenMP.h"
 #ifdef _SIMULATOR
 
 #include "GeometryReader.h"
@@ -41,17 +41,7 @@
 #include <thread>         // std::thread, std::thread::id, std::this_thread::get_id
 
 #endif
-//#undef _OPENMP
 
-#ifdef _OPENMP
-
-#else
-#define omp_get_thread_num()    0
-#define omp_get_max_threads()   1
-#endif
-#define DEBUG 0
-
-using namespace std;
 
 Building::Building()
 {
@@ -134,19 +124,19 @@ Building::~Building()
      if (_pathWayStream.is_open())
           _pathWayStream.close();
 
-     for (map<int, Crossing*>::const_iterator iter = _crossings.begin();
+     for (std::map<int, Crossing*>::const_iterator iter = _crossings.begin();
           iter!=_crossings.end(); ++iter) {
           delete iter->second;
      }
-     for (map<int, Transition*>::const_iterator iter = _transitions.begin();
+     for (std::map<int, Transition*>::const_iterator iter = _transitions.begin();
           iter!=_transitions.end(); ++iter) {
           delete iter->second;
      }
-     for (map<int, Hline*>::const_iterator iter = _hLines.begin();
+     for (std::map<int, Hline*>::const_iterator iter = _hLines.begin();
           iter!=_hLines.end(); ++iter) {
           delete iter->second;
      }
-     for (map<int, Goal*>::const_iterator iter = _goals.begin();
+     for (std::map<int, Goal*>::const_iterator iter = _goals.begin();
           iter!=_goals.end(); ++iter) {
           delete iter->second;
      }
@@ -999,7 +989,7 @@ std::vector<Wall>  Building::SplitWall(const std::shared_ptr<SubRoom>& subroom, 
                std::cout<< "intersectin with: " << std::endl;
                std::cout << other.toString() << "\n";
                std::cout << intersectionPoint._x <<" " <<intersectionPoint._y << "\n";
-               string s = intersectionPoint.toString();
+               std::string s = intersectionPoint.toString();
                std::cout << "\t >> Intersection at Point: " << s.c_str() << "\n";
 #endif
                //Point NAN_p(J_NAN, J_NAN);
@@ -1057,12 +1047,12 @@ bool Building::ReplaceBigWall(const std::shared_ptr<SubRoom>& subroom, const Wal
 
      return true;
 }
-const string& Building::GetProjectFilename() const
+const std::string& Building::GetProjectFilename() const
 {
      return _configuration->GetProjectFile();
 }
 
-const string& Building::GetProjectRootDir() const
+const std::string& Building::GetProjectRootDir() const
 {
      return _configuration->GetProjectRootDir();
 }
@@ -1150,15 +1140,15 @@ void Building::WriteToErrorLog() const
      }
      Log->Write("ROUTING: ");
 
-     for (map<int, Crossing*>::const_iterator iter = _crossings.begin();
+     for (std::map<int, Crossing*>::const_iterator iter = _crossings.begin();
           iter!=_crossings.end(); ++iter) {
           iter->second->WriteToErrorLog();
      }
-     for (map<int, Transition*>::const_iterator iter = _transitions.begin();
+     for (std::map<int, Transition*>::const_iterator iter = _transitions.begin();
           iter!=_transitions.end(); ++iter) {
           iter->second->WriteToErrorLog();
      }
-     for (map<int, Hline*>::const_iterator iter = _hLines.begin();
+     for (std::map<int, Hline*>::const_iterator iter = _hLines.begin();
           iter!=_hLines.end(); ++iter) {
           iter->second->WriteToErrorLog();
      }
@@ -1274,17 +1264,17 @@ bool Building::AddTrainTimeTable(std::shared_ptr<TrainTimeTable> TTT)
       return true;
 }
 
-const map<int, Crossing*>& Building::GetAllCrossings() const
+const std::map<int, Crossing*>& Building::GetAllCrossings() const
 {
      return _crossings;
 }
 
-const map<int, Transition*>& Building::GetAllTransitions() const
+const std::map<int, Transition*>& Building::GetAllTransitions() const
 {
      return _transitions;
 }
 
-const map<int, Hline*>& Building::GetAllHlines() const
+const std::map<int, Hline*>& Building::GetAllHlines() const
 {
      return _hLines;
 }
@@ -1314,7 +1304,7 @@ bool Building::AddPlatform(std::shared_ptr<Platform> P)
 
 }
 
-const map<int, Goal*>& Building::GetAllGoals() const
+const std::map<int, Goal*>& Building::GetAllGoals() const
 {
      return _goals;
 }
@@ -1322,7 +1312,7 @@ const map<int, Goal*>& Building::GetAllGoals() const
 Transition* Building::GetTransition(string caption) const
 {
      //eventually
-     map<int, Transition*>::const_iterator itr;
+     std::map<int, Transition*>::const_iterator itr;
      for (itr = _transitions.begin(); itr!=_transitions.end(); ++itr) {
           if (itr->second->GetCaption()==caption)
                return itr->second;
@@ -1387,7 +1377,7 @@ Crossing* Building::GetTransOrCrossByName(string caption) const
 {
      {
           //eventually
-          map<int, Transition*>::const_iterator itr;
+          std::map<int, Transition*>::const_iterator itr;
           for (itr = _transitions.begin(); itr!=_transitions.end(); ++itr) {
                if (itr->second->GetCaption()==caption)
                     return itr->second;
@@ -1395,7 +1385,7 @@ Crossing* Building::GetTransOrCrossByName(string caption) const
      }
      {
           //finally the  crossings
-          map<int, Crossing*>::const_iterator itr;
+          std::map<int, Crossing*>::const_iterator itr;
           for (itr = _crossings.begin(); itr!=_crossings.end(); ++itr) {
                if (itr->second->GetCaption()==caption)
                     return itr->second;
@@ -1410,7 +1400,7 @@ Hline* Building::GetTransOrCrossByUID(int id) const
 {
      {
           //eventually transitions
-          map<int, Transition*>::const_iterator itr;
+          std::map<int, Transition*>::const_iterator itr;
           for (itr = _transitions.begin(); itr!=_transitions.end(); ++itr) {
                if (itr->second->GetUniqueID()==id)
                     return itr->second;
@@ -1418,7 +1408,7 @@ Hline* Building::GetTransOrCrossByUID(int id) const
      }
      {
           //then the  crossings
-          map<int, Crossing*>::const_iterator itr;
+          std::map<int, Crossing*>::const_iterator itr;
           for (itr = _crossings.begin(); itr!=_crossings.end(); ++itr) {
                if (itr->second->GetUniqueID()==id)
                     return itr->second;
@@ -1626,17 +1616,17 @@ void Building::DeletePedestrian(Pedestrian*& ped)
           // save the path history for this pedestrian before removing from the simulation
           if (_savePathway) {
                // string results;
-               string path = (*it)->GetPath();
-               vector<string> brokenpaths;
+               std::string path = (*it)->GetPath();
+               std::vector<string> brokenpaths;
                StringExplode(path, ">", &brokenpaths);
                for (unsigned int i = 0; i<brokenpaths.size(); i++) {
                     vector<string> tags;
                     StringExplode(brokenpaths[i], ":", &tags);
-                    string room = _rooms[atoi(tags[0].c_str())]->GetCaption();
-                    string trans = GetTransition(atoi(tags[1].c_str()))->GetCaption();
+                    std::string room = _rooms[atoi(tags[0].c_str())]->GetCaption();
+                    std::string trans = GetTransition(atoi(tags[1].c_str()))->GetCaption();
                     //ignore crossings/hlines
                     if (trans!="")
-                         _pathWayStream << room << " " << trans << endl;
+                         _pathWayStream << room << " " << trans << std::endl;
                }
 
           }
@@ -1665,7 +1655,7 @@ void Building::AddPedestrian(Pedestrian* ped)
      for (unsigned int p = 0; p<_allPedestians.size(); p++) {
           Pedestrian* ped1 = _allPedestians[p];
           if (ped->GetID()==ped1->GetID()) {
-               cout << "Pedestrian " << ped->GetID() << " already in the room." << endl;
+               std::cout << "Pedestrian " << ped->GetID() << " already in the room." << std::endl;
                return;
           }
      }
@@ -1685,15 +1675,15 @@ void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& p
 }
 
 //obsolete
-void Building::InitSavePedPathway(const string& filename)
+void Building::InitSavePedPathway(const std::string& filename)
 {
      _pathWayStream.open(filename.c_str());
      _savePathway = true;
 
      if (_pathWayStream.is_open()) {
           Log->Write("#INFO:\tsaving pedestrian paths to [ "+filename+" ]");
-          _pathWayStream << "##pedestrian ways" << endl;
-          _pathWayStream << "#nomenclature roomid  caption" << endl;
+          _pathWayStream << "##pedestrian ways" << std::endl;
+          _pathWayStream << "#nomenclature roomid  caption" << std::endl;
           //              for (unsigned int r=0;r< pRooms.size();r++){
           //                      Room* room= GetRoom(r);
           //                      const vector<int>& goals=room->GetAllTransitionsIDs();
@@ -1705,7 +1695,7 @@ void Building::InitSavePedPathway(const string& filename)
           //                      }
           //              }
           //
-          _pathWayStream << "#data room exit_id" << endl;
+          _pathWayStream << "#data room exit_id" << std::endl;
      }
      else {
           Log->Write("#INFO:\t Unable to open [ "+filename+" ]");
@@ -1714,7 +1704,7 @@ void Building::InitSavePedPathway(const string& filename)
      }
 }
 
-void Building::StringExplode(string str, string separator,
+void Building::StringExplode(string str, std::string separator,
           vector<string>* results)
 {
      size_t found;
@@ -1768,16 +1758,16 @@ bool Building::SaveGeometry(const std::string& filename) const
     std::stringstream geometry;
 
     //write the header
-    geometry << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" << endl;
+    geometry << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" << std::endl;
     geometry << "<geometry version=\"0.8\" caption=\"second life\" unit=\"m\"\n "
               " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n  "
-              " xsi:noNamespaceSchemaLocation=\"http://134.94.2.137/jps_geoemtry.xsd\">" << endl << endl;
+              " xsi:noNamespaceSchemaLocation=\"http://134.94.2.137/jps_geoemtry.xsd\">" << std::endl << std::endl;
 
     //write the rooms
-    geometry << "<rooms>" << endl;
+    geometry << "<rooms>" << std::endl;
     for (auto&& itroom : _rooms) {
          auto&& room = itroom.second;
-         geometry << "\t<room id =\"" << room->GetID() << "\" caption =\"" << room->GetCaption() << "\">" << endl;
+         geometry << "\t<room id =\"" << room->GetID() << "\" caption =\"" << room->GetCaption() << "\">" << std::endl;
          for (auto&& itr_sub : room->GetAllSubRooms()) {
               auto&& sub = itr_sub.second;
               const double* plane = sub->GetPlaneEquation();
@@ -1786,30 +1776,30 @@ bool Building::SaveGeometry(const std::string& filename) const
                         << "\" class=\"" << sub->GetType()
                         << "\" A_x=\"" << plane[0]
                         << "\" B_y=\"" << plane[1]
-                        << "\" C_z=\"" << plane[2] << "\">" << endl;
+                        << "\" C_z=\"" << plane[2] << "\">" << std::endl;
 
               for (auto&& wall : sub->GetAllWalls()) {
                    const Point& p1 = wall.GetPoint1();
                    const Point& p2 = wall.GetPoint2();
 
-                   geometry << "\t\t\t<polygon caption=\"wall\" type=\"" << wall.GetType() << "\">" << endl
-                             << "\t\t\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << endl
-                             << "\t\t\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << endl
-                             << "\t\t\t</polygon>" << endl;
+                   geometry << "\t\t\t<polygon caption=\"wall\" type=\"" << wall.GetType() << "\">" << std::endl
+                             << "\t\t\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << std::endl
+                             << "\t\t\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << std::endl
+                             << "\t\t\t</polygon>" << std::endl;
               }
 
               if (sub->GetType()=="stair") {
                    const Point& up = ((Stair*) sub.get())->GetUp();
                    const Point& down = ((Stair*) sub.get())->GetDown();
-                   geometry << "\t\t\t<up px=\"" << up._x << "\" py=\"" << up._y << "\"/>" << endl;
-                   geometry << "\t\t\t<down px=\"" << down._x << "\" py=\"" << down._y << "\"/>" << endl;
+                   geometry << "\t\t\t<up px=\"" << up._x << "\" py=\"" << up._y << "\"/>" << std::endl;
+                   geometry << "\t\t\t<down px=\"" << down._x << "\" py=\"" << down._y << "\"/>" << std::endl;
               }
 
-              geometry << "\t\t</subroom>" << endl;
+              geometry << "\t\t</subroom>" << std::endl;
          }
 
          //write the crossings
-         geometry << "\t\t<crossings>" << endl;
+         geometry << "\t\t<crossings>" << std::endl;
          for (auto const& mapcross : _crossings) {
               Crossing* cross = mapcross.second;
 
@@ -1821,20 +1811,20 @@ bool Building::SaveGeometry(const std::string& filename) const
 
               geometry << "\t<crossing id =\"" << cross->GetID()
                         << "\" subroom1_id=\"" << cross->GetSubRoom1()->GetSubRoomID()
-                        << "\" subroom2_id=\"" << cross->GetSubRoom2()->GetSubRoomID() << "\">" << endl;
+                        << "\" subroom2_id=\"" << cross->GetSubRoom2()->GetSubRoomID() << "\">" << std::endl;
 
-              geometry << "\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << endl
-                        << "\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << endl
-                        << "\t</crossing>" << endl;
+              geometry << "\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << std::endl
+                        << "\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << std::endl
+                        << "\t</crossing>" << std::endl;
          }
-         geometry << "\t\t</crossings>" << endl;
-         geometry << "\t</room>" << endl;
+         geometry << "\t\t</crossings>" << std::endl;
+         geometry << "\t</room>" << std::endl;
     }
 
-    geometry << "</rooms>" << endl;
+    geometry << "</rooms>" << std::endl;
 
     //write the transitions
-    geometry << "<transitions>" << endl;
+    geometry << "<transitions>" << std::endl;
 
     for (auto const& maptrans : _transitions) {
          Transition* trans = maptrans.second;
@@ -1853,21 +1843,21 @@ bool Building::SaveGeometry(const std::string& filename) const
                    << "\" room1_id=\"" << trans->GetRoom1()->GetID()
                    << "\" subroom1_id=\"" << trans->GetSubRoom1()->GetSubRoomID()
                    << "\" room2_id=\"" << room2_id
-                   << "\" subroom2_id=\"" << subroom2_id << "\">" << endl;
+                   << "\" subroom2_id=\"" << subroom2_id << "\">" << std::endl;
 
-         geometry << "\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << endl
-                   << "\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << endl
-                   << "\t</transition>" << endl;
+         geometry << "\t\t<vertex px=\"" << p1._x << "\" py=\"" << p1._y << "\"/>" << std::endl
+                   << "\t\t<vertex px=\"" << p2._x << "\" py=\"" << p2._y << "\"/>" << std::endl
+                   << "\t</transition>" << std::endl;
 
     }
 
-    geometry << "</transitions>" << endl;
-    geometry << "</geometry>" << endl;
+    geometry << "</transitions>" << std::endl;
+    geometry << "</geometry>" << std::endl;
     //write the routing file
 
     //cout<<endl<<geometry.str()<<endl;
 
-    ofstream geofile(filename);
+    std::ofstream geofile(filename);
     if (geofile.is_open()) {
          geofile << geometry.str();
          Log->Write("INFO:\tfile saved to %s", filename.c_str());

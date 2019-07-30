@@ -33,8 +33,6 @@
 //#include "../IO/OutputHandler.h"
 
 
-using namespace std;
-
 QuickestPathRouter::QuickestPathRouter( ):GlobalRouter() { }
 
 QuickestPathRouter::~QuickestPathRouter() { }
@@ -822,7 +820,7 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           }
           else
           {
-               cout<<"Unknown Strategy: "<<_defaultStrategy<<endl;
+               std::cout<<"Unknown Strategy: "<<_defaultStrategy<<std::endl;
                exit(0);
           }
 

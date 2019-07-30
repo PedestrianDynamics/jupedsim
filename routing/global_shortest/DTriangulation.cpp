@@ -28,8 +28,6 @@
 
 #include "DTriangulation.h"
 
-using namespace std;
-
 DTriangulation::DTriangulation()
 {
      _cdt=nullptr;
@@ -39,7 +37,7 @@ DTriangulation::~DTriangulation()
 {
 
      for(unsigned int i = 0; i < _holesPolylines.size(); i++) {
-          vector<p2t::Point*> poly = _holesPolylines[i];
+          std::vector<p2t::Point*> poly = _holesPolylines[i];
           FreeClear(poly);
      }
 

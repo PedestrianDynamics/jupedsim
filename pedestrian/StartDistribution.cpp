@@ -31,8 +31,6 @@
 #include "Pedestrian.h"
 #include "../geometry/SubRoom.h"
 
-using namespace std;
-
 
 StartDistribution::StartDistribution(int seed)
 {
@@ -70,7 +68,7 @@ StartDistribution::~StartDistribution()
 }
 
 
-std::default_random_engine StartDistribution::GetGenerator() 
+std::default_random_engine StartDistribution::GetGenerator()
 {
      return _generator;
 }

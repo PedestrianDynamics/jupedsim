@@ -35,7 +35,6 @@
 
 #include "../voronoi-boost/VoronoiPositionGenerator.h"
 
-using namespace std;
 
 bool AgentsSourcesManager::_isCompleted=true;
 

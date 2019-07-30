@@ -34,8 +34,6 @@
 #include "../../../geometry/Transition.h"
 #include <queue>
 
-using namespace std;
-
 /**
  * Constructors & Destructors
  */
@@ -152,7 +150,7 @@ const GraphEdge * GraphVertex::GetCheapestDestinationByEdges(const Point & posit
     // priority queue with discovered Edges and their distance.
     std::priority_queue<
         std::pair<double, const GraphEdge *>,
-        vector<std::pair<double, const GraphEdge *> >,
+        std::vector<std::pair<double, const GraphEdge *> >,
         std::greater<std::pair<double, const GraphEdge *> >
         > queue;
     const GraphEdge * exit_edge = nullptr;
@@ -223,19 +221,19 @@ const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & positio
 
     std::priority_queue<
         std::pair<double, const GraphEdge *>,
-        vector<std::pair<double, const GraphEdge *> >,
+        std::vector<std::pair<double, const GraphEdge *> >,
         std::greater<std::pair<double, const GraphEdge *> >
         > edges;
 
     std::priority_queue<
         std::pair<double, const GraphEdge *>,
-        vector<std::pair<double, const GraphEdge *> >,
+        std::vector<std::pair<double, const GraphEdge *> >,
         std::greater<std::pair<double, const GraphEdge *> >
         > exitEdges;
 
     std::priority_queue<
         std::pair<double, const GraphEdge *>,
-        vector<std::pair<double, const GraphEdge *> >,
+        std::vector<std::pair<double, const GraphEdge *> >,
         std::greater<std::pair<double, const GraphEdge *> >
         > sameFactorEdges;
 

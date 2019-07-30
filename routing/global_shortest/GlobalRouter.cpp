@@ -45,13 +45,10 @@
 //#include <fstream>
 //#include <iomanip>
 
-
-using namespace std;
-
 GlobalRouter::GlobalRouter() :
                               Router()
 {
-     _accessPoints = map<int, AccessPoint*>();
+     _accessPoints = std::map<int, AccessPoint*>();
      _map_id_to_index = std::map<int, int>();
      _map_index_to_id = std::map<int, int>();
      _distMatrix = nullptr;
@@ -65,7 +62,7 @@ GlobalRouter::GlobalRouter() :
 
 GlobalRouter::GlobalRouter(int id, RoutingStrategy s) :  Router(id, s)
 {
-     _accessPoints = map<int, AccessPoint*>();
+     _accessPoints = std::map<int, AccessPoint*>();
      _map_id_to_index = std::map<int, int>();
      _map_index_to_id = std::map<int, int>();
      _distMatrix = nullptr;
@@ -91,7 +88,7 @@ GlobalRouter::~GlobalRouter()
           delete[] _pathsMatrix;
      }
 
-     map<int, AccessPoint*>::const_iterator itr;
+     std::map<int, AccessPoint*>::const_iterator itr;
      for (itr = _accessPoints.begin(); itr != _accessPoints.end(); ++itr) {
           delete itr->second;
      }
@@ -259,10 +256,10 @@ bool GlobalRouter::Init(Building* building)
      // populate the subrooms at the elevation
      for(auto && itroom:_building->GetAllRooms())
      {
-          auto&& room= (shared_ptr<Room>&&) itroom.second;
+          auto&& room= (std::shared_ptr<Room>&&) itroom.second;
           for(const auto & it_sub:room->GetAllSubRooms())
           {
-               auto&& sub= (shared_ptr<SubRoom>&&) it_sub.second;
+               auto&& sub= (std::shared_ptr<SubRoom>&&) it_sub.second;
                //maybe truncate the elevation.
                // because using a double as key to map is not exact
                //double elevation =  ceilf(sub->GetMaxElevation() * 100) / 100;
@@ -278,11 +275,11 @@ bool GlobalRouter::Init(Building* building)
 
      for(auto && itroom:_building->GetAllRooms())
      {
-          auto&& room= (shared_ptr<Room>&&) itroom.second;
+          auto&& room= (std::shared_ptr<Room>&&) itroom.second;
           for(const auto & it_sub:room->GetAllSubRooms())
           {
                // The penalty factor should discourage pedestrians to evacuation through rooms
-               auto&& sub= (shared_ptr<SubRoom>&&) it_sub.second;
+               auto&& sub= (std::shared_ptr<SubRoom>&&) it_sub.second;
                double  penalty=1.0;
                if((sub->GetType()!="floor") && (sub->GetType()!="dA") ) {
                     penalty=_edgeCost;
@@ -1170,8 +1167,8 @@ void GlobalRouter::TriangulateGeometry()
      {
           for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
           {
-               auto&& subroom= (shared_ptr<SubRoom>&&) itr_subroom.second;
-               auto&& room= (shared_ptr<Room>&&) itr_room.second;
+               auto&& subroom= (std::shared_ptr<SubRoom>&&) itr_subroom.second;
+               auto&& room= (std::shared_ptr<Room>&&) itr_room.second;
                auto&& obstacles= (const vector<Obstacle*>&&) subroom->GetAllObstacles();
                if(!subroom->IsAccessible()) continue;
 

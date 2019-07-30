@@ -35,8 +35,6 @@
 
 #define _USE_MATH_DEFINES
 
-using namespace std;
-
 
 IODispatcher::IODispatcher()
 {
@@ -252,7 +250,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
      }
 
      //eventually write any goal
-     for (map<int, Goal*>::const_iterator itr = building->GetAllGoals().begin();
+     for (std::map<int, Goal*>::const_iterator itr = building->GetAllGoals().begin();
                itr != building->GetAllGoals().end(); ++itr) {
           geometry.append(itr->second->Write());
      }
@@ -834,10 +832,10 @@ void TrajectoriesJPSV05::WriteSources(const std::vector<std::shared_ptr<AgentsSo
           auto BB =  src->GetBoundaries();
           tmp += "<source  id=\"" + std::to_string(src->GetId()) +
                "\"  caption=\"" + src->GetCaption() + "\"" +
-               "  x_min=\"" + to_string(BB[0]) + "\"" +
-               "  x_max=\"" + to_string(BB[1]) + "\"" +
-               "  y_min=\"" + to_string(BB[2]) + "\"" +
-               "  y_max=\"" + to_string(BB[3]) + "\" />\n";
+               "  x_min=\"" + std::to_string(BB[0]) + "\"" +
+               "  x_max=\"" + std::to_string(BB[1]) + "\"" +
+               "  y_min=\"" + std::to_string(BB[2]) + "\"" +
+               "  y_max=\"" + std::to_string(BB[3]) + "\" />\n";
     }
      _outputHandler->Write(tmp);
 }

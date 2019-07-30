@@ -31,7 +31,6 @@
 #include "../geometry/Building.h"
 #include "../pedestrian/Pedestrian.h"
 
-using namespace std;
 
 ODESolver::ODESolver(ForceModel *tmodel) : model(tmodel)
 {
