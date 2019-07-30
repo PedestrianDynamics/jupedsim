@@ -28,7 +28,6 @@
 
 #include "RoutingEngine.h"
 #include "../pedestrian/Pedestrian.h"
-#include "../geometry/Trips.h"
 
 using namespace std;
 
@@ -109,16 +108,6 @@ Router* RoutingEngine::GetRouter(int id) const
      }
      Log->Write("ERROR: \t Could not Find any router with ID:  [%d].",id);
      return /*(Router*)*/ nullptr;
-}
-
-void RoutingEngine::AddTrip(Trips trip)
-{
-//     _tripsCollection.push_back(trip);
-//     _tripsCollection = trip;
-     for(Router* router:_routersCollection)
-     {
-          router->SetTrips(trip);
-     }
 }
 
 bool RoutingEngine::Init(Building* building)

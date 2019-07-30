@@ -34,7 +34,6 @@
 #include <vector>
 
 #include "../general/Macros.h"
-#include "../geometry/Trips.h"
 
 class Building;
 class Pedestrian;
@@ -55,9 +54,6 @@ private:
      int _id;
 
 protected:
-
-     /// Contain the ids of the intermediate destinations
-     Trips _trips;
 
      /// All final destinations of the pedestrians
      std::vector<int> _finalDestinations;
@@ -92,11 +88,6 @@ public:
       * @param id of an intermediate destination as presented in the geometry/routing files
       */
      void AddFinalDestinationID(int id);
-
-     /**
-      * @return a vector containing the IDs of the intermediate destinations
-      */
-//     const std::vector<int> GetTrip(int id) const;
 
      /**
       * @return all final destinations
@@ -139,8 +130,6 @@ public:
       * @return
       */
      virtual bool ParseAdditionalParameters(){return true;};
-
-     void SetTrips(const Trips& trips);
 
      /**
       * Update the router, when geometry changed due to external changes.

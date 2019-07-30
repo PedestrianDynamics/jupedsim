@@ -496,7 +496,7 @@ bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building* buildi
      }
      //----------------- dn
      int DN = xmltof(xDoor->Attribute("dn"), -1.0);
-     if(DN > 0)
+     if(DN >= 0)
      {
           building->GetTransition(id)->SetDN(DN);
           sprintf(tmp, "\t>> dn: %d\n", DN);
@@ -723,56 +723,197 @@ Goal* GeoFileParser::parseGoalNode(TiXmlElement * e)
 Goal* GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
 {
      Log->Write("INFO:\tLoading Waiting Area");
-     int id = xmltoi(e->Attribute("id"), -1);
-     int min_peds = xmltoi(e->Attribute("min_peds"), -1);
-     int max_peds = xmltoi(e->Attribute("max_peds"), -1);
-     int waiting_time = xmltoi(e->Attribute("waiting_time"), -1);
-     int transition_id = xmltoi(e->Attribute("transition_id"), -1);
-     int room_id = xmltoi(e->Attribute("room_id"), -1);
-     int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
-     bool open = strcmp(xmltoa(e->Attribute("is_open"), "false"), "true") == 0;
-     bool global_timer = strcmp(xmltoa(e->Attribute("global_timer"), "false"), "true") == 0;
 
-     std::string caption = xmltoa(e->Attribute("caption"), "-1");
+     WaitingArea* wa = new WaitingArea();
 
-     Log->Write("INFO:\t  Goal id: %d", id);
-     Log->Write("INFO:\t  Goal caption: %s", caption.c_str());
-     Log->Write("INFO:\t  Goal room_id: %d", room_id);
-     Log->Write("INFO:\t  Goal subroom_id: %d", subroom_id);
+     // Read mandatory values and check for valid values, on fail write error
+     // Read id and check for correct value
+     if(const char* attribute = e->Attribute("id"); attribute) {
+          if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
+               wa->SetId(value);
+          } else {
+               Log->Write("ERROR:\t  waiting area id set but not an integer");
+               delete wa;
+               return nullptr;
+          }
+     } else {
+          Log->Write("ERROR:\t  waiting area id required");
+          delete wa;
+          return nullptr;
+     }
 
-     Goal* wa = new WaitingArea();
-     WaitingArea* waitingArea = static_cast<WaitingArea*>(wa);
-     waitingArea->SetIsFinalGoal(0);
-     waitingArea->SetId(id);
-     waitingArea->SetCaption(caption);
-     waitingArea->setOpen(open);
-     waitingArea->setGlobalTimer(global_timer);
-     waitingArea->setMinNumPed(min_peds);
-     waitingArea->setMaxNumPed(max_peds);
-     waitingArea->setWaitingTime(waiting_time);
-     waitingArea->setTransitionID(transition_id);
-     waitingArea->SetRoomID(room_id);
-     waitingArea->SetSubRoomID(subroom_id);
+     // Read room_id and check for correct value
+     if(const char* attribute = e->Attribute("room_id"); attribute) {
+          if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
+               wa->SetRoomID(value);
+          } else {
+               Log->Write("ERROR:\t  waiting area %d: room_id set but not an integer", wa->GetId());
+               delete wa;
+               return nullptr;
+          }
+     } else {
+          Log->Write("ERROR:\t  waiting area %d: room_id required", wa->GetId());
+          delete wa;
+          return nullptr;
+     }
 
+     // Read subroom_id and check for correct value
+     if(const char* attribute = e->Attribute("subroom_id"); attribute) {
+          if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
+               wa->SetSubRoomID(value);
+          } else {
+               Log->Write("ERROR:\t  waiting area %d: subroom_id set but not an integer", wa->GetId());
+               delete wa;
+               return nullptr;
+          }
+     } else {
+          Log->Write("ERROR:\t  waiting area %d: subroom_id required", wa->GetId());
+          delete wa;
+          return nullptr;
+     }
+
+     // Read caption and check if correct value
+     if(const char* attribute = e->Attribute("caption"); attribute) {
+          if (std::string value = xmltoa(attribute, ""); !value.empty()) {
+               wa->SetCaption(value);
+          }else{
+               wa->SetCaption("WA " + std::to_string(wa->GetId()));
+          }
+     }
+
+     Log->Write("INFO:\t  Goal id: %d", wa->GetId());
+     Log->Write("INFO:\t  Goal caption: %s", wa->GetCaption().c_str());
+     Log->Write("INFO:\t  Goal room_id: %d", wa->GetRoomID());
+     Log->Write("INFO:\t  Goal subroom_id: %d", wa->GetSubRoomID());
+
+     // Read optional values and check for valid values, on fail write error
+     // Read min_peds and check if correct value
+     if(const char* attribute = e->Attribute("min_peds"); attribute) {
+          if (int value = xmltoi(attribute, -1); value>0 && attribute == std::to_string(value)) {
+               wa->SetMinNumPed(value);
+          } else {
+               Log->Write("WARNING:\t  waiting area %d: input for min_peds "
+                          "should be positive integer.", wa->GetId());
+          }
+     }
+
+     // Read max_peds and check if correct value
+     if(const char* attribute = e->Attribute("max_peds"); attribute) {
+          if (int value = xmltoi(attribute, -1); value>0 && attribute == std::to_string(value)) {
+               wa->SetMaxNumPed(value);
+          }else {
+               Log->Write("WARNING:\t  waiting area %d: input for max_peds "
+                          "should be positive integer.", wa->GetId());
+          }
+     }
+
+     // Read waiting_time and check if correct value
+     if(const char* attribute = e->Attribute("waiting_time"); attribute) {
+          if (int value = xmltoi(attribute, -1); value>=0 && attribute == std::to_string(value)) {
+               wa->SetWaitingTime(value);
+          }else {
+               Log->Write("WARNING:\t  waiting area %d: input for waiting_time "
+                          "should be positive integer.", wa->GetId());
+          }
+     }
+
+     // Read transition_id and check if correct value
+     if(const char* attribute = e->Attribute("transition_id"); attribute) {
+          if (int value = xmltoi(attribute, -1); value>-1 && attribute == std::to_string(value)) {
+               wa->SetTransitionID(value);
+          }else {
+               Log->Write("WARNING:\t  waiting area %d: input for transition_id "
+                          "should be positive integer.", wa->GetId());
+          }
+     }
+
+     // Read is_open and check if correct value
+     if(const char* attribute = e->Attribute("is_open"); attribute) {
+          std::string in = xmltoa(attribute, "false");
+          std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+          if (in == "false"){
+               wa->SetOpen(false);
+          } else if (in == "true"){
+               wa->SetOpen(true);
+          } else{
+               wa->SetOpen(true);
+               Log->Write("WARNING:\t  waiting area %d: input for is_open neither <true> nor <false>. "
+                          "Default <true> is used.", wa->GetId());
+          }
+     }
+
+     // Read global_timer and check if correct value
+     if(const char* attribute = e->Attribute("global_timer"); attribute) {
+          std::string in = xmltoa(attribute, "false");
+          std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+          if (in == "false"){
+               wa->SetGlobalTimer(false);
+          } else if (in == "true"){
+               wa->SetGlobalTimer(true);
+          } else{
+               wa->SetGlobalTimer(false);
+               Log->Write("WARNING:\t  waiting area %d: input for global_timer neither <true> nor <false>. "
+                          "Default <false> is used.", wa->GetId());
+          }
+     }
+
+     // Additional checks:
+     const bool waitPed = (wa->GetMinNumPed()  > 0 && wa->GetMaxNumPed() > 0 && wa->GetWaitingTime() > 0.);
+     const bool waitDoor = (wa->GetTransitionID() > 0);
+
+     // Either (minPed, maxPed, waitingTime) OR transitionID are set
+     if (!waitPed && !waitDoor){
+          Log->Write("ERROR:\t  waiting area %d: min_peds, max_peds, waiting_time, transition_id not set properly. "
+                     "Set either (min_peds, max_peds, waiting_time) or transition_id.", wa->GetId());
+          delete wa;
+          return nullptr;
+     }
+
+     // If (minPed, maxPed, waitingTime) AND transitionID are set only
+     // transitionID is considered
+     if (waitPed && waitDoor){
+          Log->Write("WARNING:\t  waiting area %d: min_peds, max_peds and waiting_time "
+                     "not considered since transition_id set", wa->GetId());
+     }
+
+     // Read the suceeding goals of waiting area
      std::map<int, double> nextGoals;
-
 
      //looking for next_wa
      for (TiXmlElement* nextWa = e->FirstChildElement("next_wa"); nextWa;
           nextWa = nextWa->NextSiblingElement("next_wa")) {
-          int nextWaId = xmltoi(nextWa->Attribute("id"));
-          double nextWaP = xmltof(nextWa->Attribute("p"));
+          int nextWaId = xmltoi(nextWa->Attribute("id"), -1);
+          double nextWaP = xmltof(nextWa->Attribute("p"), -1.);
 
+          if (nextWaId == -1 || nextWaP == -1){
+               Log->Write("ERROR:\t  check next_wa of WA  %d: id or p not set properly", wa->GetId());
+               delete wa;
+               return nullptr;
+          }
+
+          if (nextWaId < 0){
+               Log->Write("ERROR:\t  check next_wa of WA  %d: id should be positive integer", wa->GetId());
+               delete wa;
+               return nullptr;
+          }
+
+          if (nextWaP <= 0. || nextWaP > 1.){
+               Log->Write("ERROR:\t  check next_wa of WA  %d: p should be in (0, 1]", wa->GetId());
+               delete wa;
+               return nullptr;
+          }
           nextGoals.insert(std::pair<int, double>(nextWaId, nextWaP));
      }
 
-     if (!waitingArea->setNextGoals(nextGoals)){
-          Log->Write("ERROR:\t  check probabilties of next goal of WA  %d", id);
+     if (!wa->SetNextGoals(nextGoals)){
+          Log->Write("ERROR:\t  check probabilities of next goal of WA  %d: sum of p over all next_wa ids != 1", wa->GetId());
+          delete wa;
           return nullptr;
-     };
+     }
 
-
-     //looking for polygons (walls)
+     //Read boundaries of waiting area
      for (TiXmlElement* xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
           xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
 
@@ -789,12 +930,14 @@ Goal* GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
           }
      }
 
-     if (!waitingArea->ConvertLineToPoly()){
-          Log->Write("ERROR:\t   parsing polygon of waiting area %d", id);
+     // Check if boundaries area a valid polygon
+     if (!wa->ConvertLineToPoly()){
+          Log->Write("ERROR:\t   parsing polygon of waiting area %d", wa->GetId());
+          delete wa;
           return nullptr;
      }
 
-     Log->Write("INFO:\t  finished parsing waiting area %d", id);
+     Log->Write("INFO:\t  finished parsing waiting area %d", wa->GetId());
 
      return wa;
 }

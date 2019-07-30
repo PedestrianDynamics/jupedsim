@@ -211,6 +211,7 @@ void Crossing::IncreasePartialDoorUsage(int number)
 {
      _partialDoorUsage += number;
 }
+
 void Crossing::ResetPartialDoorUsage()
 {
      _partialDoorUsage = 0;
@@ -226,6 +227,10 @@ int Crossing::GetPartialDoorUsage() const
      return _partialDoorUsage;
 }
 
+void Crossing::ResetDoorUsage()
+{
+     _doorUsage = 0;
+}
 
 int Crossing::GetMaxDoorUsage() const
 {
@@ -299,26 +304,27 @@ void Crossing::regulateFlow(double time)
      double number = GetPartialDoorUsage();
      double T = time -  _lastFlowMeasurement;
      double flow =  number / T;
-     if(flow >  _outflowRate)
-     {
-          // _outflowRate > flow (=number/deltaTime)
-          // _outflowRate = number/(deltaTime + t1)
-          // --> [1]
-          //---------------------------
-          _closingTime = number / _outflowRate -  T; //[1]
-//           _temporaryClosed = true;
-//          this->Close();
-          this->TempClose();
-          Log-> Write("INFO:\tClosing door %d. DoorUsage = %d (max = %d). Flow = %.2f (max =  %.2f) Time=%.2f", GetID(), GetDoorUsage(), GetMaxDoorUsage(), flow, _outflowRate, time);
+     if (_outflowRate != std::numeric_limits<double>::max()){
+          if(flow >  _outflowRate){
+               // _outflowRate > flow (=number/deltaTime)
+               // _outflowRate = number/(deltaTime + t1)
+               // --> [1]
+               //---------------------------
+               _closingTime = number / _outflowRate -  T; //[1]
+               this->TempClose();
+               Log-> Write("INFO:\tClosing door %d. DoorUsage = %d (max = %d). Flow = %.2f (max =  %.2f) Time=%.2f", GetID(), GetDoorUsage(), GetMaxDoorUsage(), flow, _outflowRate, time);
+          }
      }
 
      // close the door is mdu is reached
-     if(_doorUsage >= _maxDoorUsage)
-     {
-          Log-> Write("INFO:\tClosing door %d. DoorUsage = %d (>= %d). Time=%.2f", GetID(), GetDoorUsage(), GetMaxDoorUsage(), time);
-          this->Close();
+     if (_maxDoorUsage != std::numeric_limits<double>::max()){
+          if(_doorUsage >= _maxDoorUsage){
+               Log-> Write("INFO:\tClosing door %d. DoorUsage = %d (>= %d). Time=%.2f", GetID(), GetDoorUsage(), GetMaxDoorUsage(), time);
+               this->TempClose();
 //          _temporaryClosed = false;
+          }
      }
+
      _lastFlowMeasurement = time +  _closingTime;
 }
 

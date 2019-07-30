@@ -35,7 +35,6 @@ using namespace std;
 
 Router::Router()
 {
-//     _trips = vector<vector<int> >();
      _finalDestinations = vector<int>();
      _id=-1;
      _strategy=ROUTING_UNDEFINED;
@@ -50,24 +49,6 @@ Router::Router(int id, RoutingStrategy s)
 Router::~Router()
 {
 }
-
-//const vector<int> Router::GetTrip(int index) const
-//{
-//     if ((index >= 0) && (index < (int) _trips.size()))
-//          return _trips[index];
-//     else {
-//          char tmp[CLENGTH];
-//          sprintf(tmp, "ERROR: \tWrong 'index' [%d] > [%d] in Routing::GetTrip()",
-//                  index, int(_trips.size()));
-//          Log->Write(tmp);
-//          exit(EXIT_FAILURE);
-//     }
-//}
-
-//void Router::AddTrip(vector<int> trip)
-//{
-//     _trips.push_back(trip);
-//}
 
 void Router::AddFinalDestinationID(int id)
 {
@@ -92,11 +73,6 @@ void Router::SetStrategy(const RoutingStrategy& strategy)
 RoutingStrategy Router::GetStrategy() const
 {
      return _strategy;
-}
-
-void Router::SetTrips(const Trips& trips){
-     _trips = trips;
-     std::cout << _trips << std::endl;
 }
 
 void Router::Update(){

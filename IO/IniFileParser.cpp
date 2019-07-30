@@ -45,7 +45,6 @@
 #include "../routing/ai_router/AIRouter.h"
 #include "../routing/ff_router/ffRouter.h"
 #include "../routing/ff_router_trips/ffRouterTrips.h"
-#include "../routing/trips_router/TripsRouter.h"
 
 
 namespace fs = std::filesystem;
@@ -1192,22 +1191,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                exit(EXIT_FAILURE);
      #endif
           }
-//                    else if ((strategy == "AI_trips") &&
-//                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
-//     #ifdef AIROUTER
-//               Router *r = new AIRouterTrips(id, ROUTING_AI_TRIPS);
-//               _config->GetRoutingEngine()->AddRouter(r);
-//
-//               Log->Write("\nINFO: \tUsing AIRouter Trips");
-//               ///Parsing additional options
-//               if (!ParseAIOpts(e))
-//                    return false;
-//     #else
-//               std::cerr << "\nCan not use AI Router. Rerun cmake with option  -DAIROUTER=true and recompile.\n";
-//               exit(EXIT_FAILURE);
-//     #endif
-//          }
-
           else if ((strategy == "ff_global_shortest_trips") &&
                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
@@ -1280,12 +1263,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                     return false;
                }
           }
-          else if ((strategy == "trips")  &&
-                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
-               Router *r = new TripsRouter(id, ROUTING_TRIPS, _config);
-               _config->GetRoutingEngine()->AddRouter(r);
-          }
-
           else if (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) {
                Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",
                          strategy.c_str());

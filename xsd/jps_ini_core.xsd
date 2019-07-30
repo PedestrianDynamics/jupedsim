@@ -177,16 +177,27 @@
                           <xs:element name="next_wa">
                             <xs:complexType>
                               <xs:attribute type="xs:int" name="id" use="required" />
-                              <xs:attribute type="xs:int" name="p" use="required" />
+                              <xs:attribute type="xs:float" name="p" use="required" />
                             </xs:complexType>
                           </xs:element>
                         </xs:sequence>
                         <xs:attribute type="xs:int" name="id" use="required" />
-                        <xs:attribute type="xs:string" name="caption" use="required" />
-                        <xs:attribute type="xs:int" name="waiting_time" use="required" />
-                        <xs:attribute type="xs:int" name="min_peds" use="optional" />
-                        <xs:attribute type="xs:int" name="max_peds" use="optional" />
-                        <xs:attribute name="is_open" use="required">
+                        <xs:attribute type="xs:string" name="caption"/>
+                        <xs:attribute type="xs:int" name="room_id"  use="required"/>
+                        <xs:attribute type="xs:int" name="subroom_id"  use="required"/>
+                        <xs:attribute type="xs:int" name="transition_id" />
+                        <xs:attribute type="xs:int" name="waiting_time" />
+                        <xs:attribute type="xs:int" name="min_peds" />
+                        <xs:attribute type="xs:int" name="max_peds" />
+                        <xs:attribute name="is_open">
+                          <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                              <xs:enumeration value="true" />
+                              <xs:enumeration value="false" />
+                            </xs:restriction>
+                          </xs:simpleType>
+                        </xs:attribute>
+                        <xs:attribute name="global_timer">
                           <xs:simpleType>
                             <xs:restriction base="xs:string">
                               <xs:enumeration value="true" />

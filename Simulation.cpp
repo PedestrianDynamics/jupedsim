@@ -172,9 +172,6 @@ bool Simulation::InitArgs()
             break;
         }
         case FORMAT_PLAIN: {
-
-
-
             auto file = std::make_shared<FileHandler>(
                  traj.c_str());
             outputTXT = new TrajectoriesFLAT();
@@ -378,7 +375,7 @@ void Simulation::UpdateRoutesAndLocations()
                pedsToRemove.insert(ped);
           }
 
-          // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
+          // reposition in the case the pedestrians "accidentally left the room" not via the intended exit.
           // That may happen if the forces are too high for instance
           // the ped is removed from the simulation, if it could not be reassigned
           else if (!sub0->IsInSubRoom(ped))
@@ -674,6 +671,7 @@ double Simulation::RunBody(double maxSimTime)
         for (auto& itr: _building->GetAllTransitions())
         {
              Transition* Trans = itr.second;
+
              if(Trans->IsTempClose())
              {
                   if ((Trans->GetMaxDoorUsage() != (std::numeric_limits<int>::max)()) ||
@@ -713,6 +711,7 @@ double Simulation::RunBody(double maxSimTime)
     }// while time
     return t;
 }
+
 void Simulation::WriteTrajectories(std::string trajectoryName)
 {
     if(_config->GetFileFormat() != FORMAT_PLAIN) {return;}
@@ -992,6 +991,7 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
       _routingEngine->setNeedUpdate(true);
      return true;
 }
+
 void Simulation::RunFooter()
 {
     // writing the footer
@@ -1151,6 +1151,7 @@ bool Simulation::TrainTraffic()
      return false;
 
 }
+
 Transition* Simulation::correctDoorStatistics(const Pedestrian& ped, double distance, int trans_id) const
 {
      if(distance<=0.5) return nullptr;

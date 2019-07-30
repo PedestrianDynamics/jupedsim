@@ -160,6 +160,12 @@ public:
     void IncreasePartialDoorUsage(int number);
     void ResetPartialDoorUsage();
     int GetPartialDoorUsage() const;
+
+    /**
+     * Resets the number of pedestrians that used that crossing
+     */
+    void ResetDoorUsage();
+
     /**
      * @return the number of pedestrians that used that crossing.
      */
