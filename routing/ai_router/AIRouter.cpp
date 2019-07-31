@@ -195,7 +195,7 @@ bool AIRouter::LoadRoutingInfos(const std::string &filename)
          return false;
     }
 
-    string  version = xRootNode->Attribute("version");
+    std::string  version = xRootNode->Attribute("version");
     if (version < JPS_OLD_VERSION) {
          Log->Write("ERROR: \tOnly version greater than %d supported",JPS_OLD_VERSION);
          Log->Write("ERROR: \tparsing routing file failed!");
@@ -258,13 +258,13 @@ std::string AIRouter::GetRoutingInfoFile()
     // everything is fine. proceed with parsing
     TiXmlElement* xMainNode = doc.RootElement();
     TiXmlNode* xRouters=xMainNode->FirstChild("route_choice_models");
-    string nav_line_file="";
+    std::string nav_line_file="";
 
     for(TiXmlElement* e = xRouters->FirstChildElement("router"); e;
               e = e->NextSiblingElement("router"))
     {
 
-         string strategy=e->Attribute("description");
+         std::string strategy=e->Attribute("description");
 
          if(strategy=="cognitive_map")
          {

@@ -72,7 +72,7 @@ public:
     /**
      * Return the possible positions for distributing the agents in the subroom
      */
-    vector<Point> PossiblePositions(const SubRoom &r) const;
+    std::vector<Point> PossiblePositions(const SubRoom &r) const;
 
     /**
      * Distribute the pedestrians in the Subroom with the given parameters
@@ -99,7 +99,7 @@ public:
      * WARNING: It is assumed that positions should be in the corresponding room/subroom. 
      * checks with n if the file delivers the right number of peds
      */
-    const vector<Point>  GetPositionsFromFile(std::string filename, int n, std::string unit) const;
+    const std::vector<Point>  GetPositionsFromFile(std::string filename, int n, std::string unit) const;
 
     double GetA_dist() const;
 

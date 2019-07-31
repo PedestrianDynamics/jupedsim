@@ -26,15 +26,16 @@
  **/
 #include "EventManager.h"
 
-#include "pedestrian/Pedestrian.h"
-#include "pedestrian/Knowledge.h"
-#include "mpi/LCGrid.h"
+#include "Event.h"
+
 #include "geometry/SubRoom.h"
+#include "mpi/LCGrid.h"
+#include "pedestrian/Knowledge.h"
+#include "pedestrian/Pedestrian.h"
+#include "routing/ff_router/ffRouter.h"
 #include "routing/global_shortest/GlobalRouter.h"
 #include "routing/quickest/QuickestPathRouter.h"
 #include "routing/smoke_router/SmokeRouter.h"
-#include "routing/ff_router/ffRouter.h"
-#include "Event.h"
 
 #include <tinyxml.h>
 
@@ -94,7 +95,7 @@ bool EventManager::ReadEventsXml()
 
      TiXmlElement* xMainNode = doc.RootElement();
 
-     string realtimefile;
+     std::string realtimefile;
      if (xMainNode->FirstChild("event_realtime")) {
           realtimefile = _projectRootDir
                     + xMainNode->FirstChild("event_realtime")->FirstChild()->Value();
@@ -110,7 +111,7 @@ bool EventManager::ReadEventsXml()
           Log->Write("INFO: \tNo realtime events found");
      }
 
-     string eventfile = "";
+     std::string eventfile = "";
      if (xMainNode->FirstChild("events_file")) {
           eventfile = _projectRootDir
                     + xMainNode->FirstChild("events_file")->FirstChild()->Value();
@@ -160,8 +161,8 @@ bool EventManager::ReadEventsXml()
 
           int id = atoi(e->Attribute("id"));
           double zeit = atoi(e->Attribute("time"));
-          string state (e->Attribute("state"));
-          string type (e->Attribute("type"));
+          std::string state (e->Attribute("state"));
+          std::string type (e->Attribute("type"));
           _events.push_back(Event(id,zeit,type,state));
      }
      Log->Write("INFO: \tEvents were initialized");
@@ -239,14 +240,14 @@ bool EventManager::DisseminateKnowledge(Building* _b)
 
      for(auto&& ped1:_b->GetAllPedestrians())
      {
-          vector<Pedestrian*> neighbourhood;
+          std::vector<Pedestrian*> neighbourhood;
           _b->GetGrid()->GetNeighbourhood(ped1,neighbourhood);
           for(auto&& ped2:neighbourhood)
           {
                if( (ped1->GetPos()-ped2->GetPos()).Norm()<_updateRadius)
                {
                     //maybe same room and subroom ?
-                    vector<SubRoom*> empty;
+                    std::vector<SubRoom*> empty;
                     if(_b->IsVisible(ped1->GetPos(),ped2->GetPos(),empty))
                     {
                          //if(!SynchronizeKnowledge(ped1, ped2))  //ped1->SetSpotlight(true);
@@ -291,7 +292,7 @@ bool EventManager::UpdateRoute(Pedestrian* ped)
 {
      //create the key as string.
      //map are sorted by default
-     string key= ped->GetKnowledgeAsString();
+     std::string key= ped->GetKnowledgeAsString();
 //     std::cout << "key: <" << key << ">" << std::endl;
      //get the router engine corresponding to the actual configuration
      bool status=true;
@@ -633,9 +634,9 @@ void EventManager::ResetDoor(int id)
 void EventManager::GetEvent(char* c)
 {
      int split = 0;
-     string type = "";
-     string id = "";
-     string state = "";
+     std::string type = "";
+     std::string id = "";
+     std::string state = "";
      for (int i = 0; i < 20; i++) {
           if (!c[i]) {
                break;
@@ -673,7 +674,7 @@ bool EventManager::CreateRoutingEngine(Building* _b, int first_engine)
      std::sort(closed_doors.begin(), closed_doors.end());
 
      //create the key as string.
-     string key="";
+     std::string key="";
      for(int door:closed_doors)
      {
           if(key.empty())
@@ -835,7 +836,7 @@ bool EventManager::ReadSchedule()
 
      TiXmlElement* xMainNode = doc.RootElement();
 
-     string scheduleFile = "";
+     std::string scheduleFile = "";
      if (xMainNode->FirstChild("schedule_file")) {
           scheduleFile = _projectRootDir
                     + xMainNode->FirstChild("schedule_file")->FirstChild()->Value();

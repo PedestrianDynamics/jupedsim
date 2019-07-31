@@ -219,7 +219,7 @@ void Pedestrian::SetID(int i)
      }
 }
 
-void Pedestrian::SetRoomID(int i, string roomCaption)
+void Pedestrian::SetRoomID(int i, std::string roomCaption)
 {
      _roomID = i;
      _roomCaption = roomCaption;
@@ -352,7 +352,7 @@ double Pedestrian::Getdt()
      return _deltaT;
 }
 
-void Pedestrian::SetTrip(const vector<int>& trip)
+void Pedestrian::SetTrip(const std::vector<int>& trip)
 {
      _trip = trip;
 }
@@ -429,7 +429,7 @@ NavLine* Pedestrian::GetExitLine() const
      return _navLine;
 }
 
-const vector<int>& Pedestrian::GetTrip() const
+const std::vector<int>& Pedestrian::GetTrip() const
 {
      return _trip;
 }
@@ -1146,7 +1146,7 @@ int Pedestrian::GetAgentsCreated()
 int Pedestrian::GetColor() const
 {
      //default color is by velocity
-     string key;
+     std::string key;
 
      switch (_colorMode)
      {

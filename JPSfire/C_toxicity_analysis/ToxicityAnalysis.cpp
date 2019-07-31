@@ -206,7 +206,7 @@ void ToxicityAnalysis::InitializeWriteOut()
 
 void ToxicityAnalysis::WriteOutHazardAnalysis(const Pedestrian* p, double E, double FEC_Smoke, double O2, double CO2, double CO, double HCN, double HCL, double FED_In, double FIC_Im, double FIC_In, double T, double FED_Heat)
 {
-    string data;
+    std::string data;
     char tmp[CLENGTH] = "";
     //_fps = 1; // fixme: why 1?
     int frameNr = int(p->GetGlobalTime()/_fps);
