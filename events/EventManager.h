@@ -26,15 +26,18 @@
  **/
 #pragma once
 
+#include "general/Macros.h"
+#include "Event.h"
+
 #include <vector>
 #include <string>
 #include <random>
 
 class Building;
+class Pedestrian;
 class Router;
-class QuickestPathRouter;
 class RoutingEngine;
-class Event;
+class OutputHandler;
 
 extern OutputHandler* Log;
 
@@ -168,6 +171,5 @@ private:
      // random number generator
      std::mt19937 _rdGenerator;
      std::uniform_real_distribution<double> _rdDistribution;
-//     std::uniform_real_distribution<double> d(0, 1);
      std::map<int, std::vector<int>> groupDoor;
 };

@@ -24,6 +24,19 @@
  *
  *
  **/
+#include "EventManager.h"
+
+#include "pedestrian/Pedestrian.h"
+#include "pedestrian/Knowledge.h"
+#include "mpi/LCGrid.h"
+#include "geometry/SubRoom.h"
+#include "routing/global_shortest/GlobalRouter.h"
+#include "routing/quickest/QuickestPathRouter.h"
+#include "routing/smoke_router/SmokeRouter.h"
+#include "routing/ff_router/ffRouter.h"
+#include "Event.h"
+
+#include <tinyxml.h>
 
 #include <string>
 #include <cstdlib>
@@ -31,22 +44,10 @@
 #include <fstream>
 #include <vector>
 #include <math.h>
-#include "../pedestrian/Pedestrian.h"
-#include "../pedestrian/Knowledge.h"
-#include "../mpi/LCGrid.h"
-#include "../geometry/SubRoom.h"
-#include "../tinyxml/tinyxml.h"
-#include "../routing/global_shortest/GlobalRouter.h"
-#include "../routing/quickest/QuickestPathRouter.h"
-#include "../routing/smoke_router/SmokeRouter.h"
-#include "../routing/ff_router/ffRouter.h"
-#include "EventManager.h"
-#include "Event.h"
 
 using std::map;
 using std::cout;
 using std::endl;
-
 
 EventManager::EventManager(Building *_b, unsigned int seed)
 {
