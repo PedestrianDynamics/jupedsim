@@ -23,7 +23,6 @@
 #define JPSCORE_INIFILEPARSER_H
 
 #include <string>
-#include <filesystem>
 #include "../general/Configuration.h"
 #include "../routing/DirectionStrategy.h"
 

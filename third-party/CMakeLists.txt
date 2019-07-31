@@ -62,6 +62,6 @@ add_library(poly2tri STATIC
     poly2tri/sweep/sweep_context.cpp
     poly2tri/sweep/sweep_context.h
 )
-target_include_directories(visilibity PUBLIC
+target_include_directories(poly2tri PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/poly2tri"
 )

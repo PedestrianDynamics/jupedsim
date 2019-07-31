@@ -2,13 +2,17 @@
 
 if [ "$TRAVIS_OS_NAME" == "linux" ]
 then
-    if [ "$CXX" = "g++" ];
+    sudo apt install -y \
+         g++-9 \
+         libboost-dev \
+         libboost-test-dev \
+         libcgal-dev
+    if [ "$TOOLCHAIN" = "gcc" ];
     then
-        sudo apt-get install -qq g++-9
         export CXX="g++-9"
-    elif [ "$CXX" == "clang++" ]
+    elif [ "$TOOLCHAIN" == "clang" ]
     then
-        sudo apt-get install -y -qq clang-8 libomp-8-dev g++-9
+        sudo apt install -y clang-8 libomp-8-dev
         export CXX="clang++-8";
     fi
 elif [ "$TRAVIS_OS_NAME" == "osx" ]

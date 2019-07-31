@@ -31,11 +31,11 @@
 #include "../tinyxml/tinyxml.h"
 #include "../geometry/SubRoom.h"
 #include "../mpi/LCGrid.h"
+#include "general/Filesystem.hpp"
 
 #define _USE_MATH_DEFINES
 
 using namespace std;
-namespace fs = std::filesystem;
 
 
 IODispatcher::IODispatcher()

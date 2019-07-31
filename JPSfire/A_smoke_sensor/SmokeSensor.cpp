@@ -34,11 +34,8 @@
 #include "../../geometry/SubRoom.h"
 #include "../generic/FDSMesh.h"
 #include "../generic/FDSMeshStorage.h"
-//#include <set>
 #include <tinyxml.h>
-
-#include <filesystem>
-namespace fs = std::filesystem;
+#include "general/Filesystem.hpp"
 
 SmokeSensor::SmokeSensor(const Building *b) : AbstractSensor(b)
 {

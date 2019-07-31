@@ -1,4 +1,4 @@
- 
+
 /**
  * \file        testClassLine.cpp
  * \date        April 27, 2015
@@ -25,9 +25,8 @@
  *
  *
  **/
-
-#define BOOST_TEST_MODULE WallTest
 #define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_NO_MAIN
 #include <boost/test/unit_test.hpp>
 #include "../../geometry/Wall.h"
 
@@ -44,15 +43,15 @@ BOOST_AUTO_TEST_CASE(Wall_Constr_Test)
      {
           Point P2(0, i*i);
           Point P3(static_cast<float>(i)/1000000, i*i);
-          
+
           Line L1(P2, P3);
           Wall W2(P2, P3, type[i%2]);
-          BOOST_CHECK_MESSAGE(W2 == L1, "");  
+          BOOST_CHECK_MESSAGE(W2 == L1, "");
           // GetType test
           BOOST_CHECK(W2.GetType() == type[i%2]);
      }
      BOOST_TEST_MESSAGE("Leaving wall constructor test");
-         
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()

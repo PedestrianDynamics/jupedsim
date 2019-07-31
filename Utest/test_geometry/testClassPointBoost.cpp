@@ -24,10 +24,8 @@
  *
  *
  **/
-
-
-#define BOOST_TEST_MODULE PointTest
 #define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_NO_MAIN
 #include <boost/test/unit_test.hpp>
 #include "../../geometry/Point.h"
 #include <cmath>
@@ -71,7 +69,7 @@ BOOST_AUTO_TEST_CASE(Point_Norm_Tests)
     BOOST_CHECK(p1.Norm() == 1);
     p1._y = (3);
     BOOST_CHECK(p1.Norm() == 3);
-    
+
     p1._x = (3);
     p1._y = (4);
     BOOST_CHECK(p1.Norm() == 5);
@@ -91,7 +89,7 @@ BOOST_AUTO_TEST_CASE(POINT_TO_STRING_Test)
         BOOST_CHECK( p1.toString() == "( " + xpt[int(i)] +
                                      " : " + ypt[int(i)] + " )" );
     }
-    
+
     Point p2(-2,-0.5);
     BOOST_CHECK( p2.toString() == "( -2 : -0.5 )" );
     BOOST_TEST_MESSAGE("Leaving string conv test");
@@ -131,21 +129,21 @@ BOOST_AUTO_TEST_CASE(POINT_NORMALIZE_TEST)
     p2 = p1.Normalized();
     BOOST_TEST_MESSAGE(" check for norm < J_EPS ");
     BOOST_REQUIRE( p2._x == 0.0 && p2._y == 0.0 );
-    
+
     for (double i = 0, j = -10; i < 5; ++i, ++j)
     {
         p1._x = (i);
         p1._y = (j);
         p2 = p1.Normalized();
         BOOST_TEST_MESSAGE(" check for norm > J_EPS ");
-        BOOST_REQUIRE( p2._x == i / p1.Norm() && 
+        BOOST_REQUIRE( p2._x == i / p1.Norm() &&
                        p2._y == j / p1.Norm() );
-        
+
         p2 = p1.NormalizedMolified();
         BOOST_TEST_MESSAGE(" check for norm > J_EPS_GOAL ");
-        BOOST_REQUIRE( p2._x == i / p1.NormMolified() && 
+        BOOST_REQUIRE( p2._x == i / p1.NormMolified() &&
                        p2._y == j / p1.NormMolified() );
-        
+
     }
     BOOST_TEST_MESSAGE("Leaving normalize test");
 }
@@ -189,7 +187,7 @@ BOOST_AUTO_TEST_CASE(POINT_OPEROVERLOADING_TEST)
     {
         Point p1(i, -i*10);
         Point p2( cos(PI/i), sin(PI/i) );
-        
+
         Point sum = p1 + p2;
         BOOST_REQUIRE( sum._x == i + cos(PI/i) &&
                        sum._y == -i*10 + sin(PI/i) );
@@ -209,7 +207,7 @@ BOOST_AUTO_TEST_CASE(POINT_OPEROVERLOADING_TEST)
         div = p2 / 2;
         BOOST_REQUIRE( div._x == p2._x / 2 &&
                        div._y == p2._y / 2 );
-        
+
         BOOST_CHECK( p1 != p2 );
         p1._x = ( p2._x );
         p1._y = ( p2._y );

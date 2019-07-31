@@ -20,9 +20,9 @@
 //
 #define NOMINMAX
 #include "PedDistributionParser.h"
+
+#include "general/Filesystem.hpp"
 #include <cstdarg> // va_start and va_end
-#include <filesystem>
-namespace fs = std::filesystem;
 
 PedDistributionParser::PedDistributionParser(const Configuration* configuration)
         :_configuration(configuration)

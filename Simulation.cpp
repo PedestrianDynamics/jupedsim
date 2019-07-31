@@ -37,6 +37,7 @@
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "geometry/WaitingArea.h"
+#include "general/Filesystem.hpp"
 
 #ifdef _OPENMP
 
@@ -44,7 +45,6 @@
 #define omp_get_thread_num() 0
 #define omp_get_max_threads()  1
 #endif
-namespace fs = std::filesystem;
 using namespace std;
 
 OutputHandler* Log;
