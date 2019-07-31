@@ -37,7 +37,7 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../mpi/LCGrid.h"
 #include "../IO/GeoFileParser.h"
-#include "general/Filesystem.hpp"
+#include "general/Filesystem.h"
 #include <thread>         // std::thread, std::thread::id, std::this_thread::get_id
 
 #endif

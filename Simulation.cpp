@@ -37,7 +37,7 @@
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "geometry/WaitingArea.h"
-#include "general/Filesystem.hpp"
+#include "general/Filesystem.h"
 #include "general/OpenMP.h"
 
 OutputHandler* Log;

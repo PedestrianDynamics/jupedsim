@@ -19,7 +19,7 @@
 // Created by laemmel on 30.03.16.
 //
 
-#include <general/Filesystem.hpp>
+#include "general/Filesystem.h"
 #include "GeoFileParser.h"
 #include "../tinyxml/tinyxml.h"
 #include "../geometry/SubRoom.h"

@@ -30,7 +30,7 @@
 #include "../../pedestrian/Pedestrian.h"
 #include "../generic/FDSMesh.h"
 #include "../generic/FDSMeshStorage.h"
-#include "general/Filesystem.hpp"
+#include "general/Filesystem.h"
 #include <tinyxml.h>
 
 

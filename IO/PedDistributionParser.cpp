@@ -21,7 +21,7 @@
 #define NOMINMAX
 #include "PedDistributionParser.h"
 
-#include "general/Filesystem.hpp"
+#include "general/Filesystem.h"
 #include <cstdarg> // va_start and va_end
 
 PedDistributionParser::PedDistributionParser(const Configuration* configuration)

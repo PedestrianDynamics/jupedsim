@@ -31,7 +31,7 @@
 #include "../tinyxml/tinyxml.h"
 #include "../geometry/SubRoom.h"
 #include "../mpi/LCGrid.h"
-#include "general/Filesystem.hpp"
+#include "general/Filesystem.h"
 
 #define _USE_MATH_DEFINES
 

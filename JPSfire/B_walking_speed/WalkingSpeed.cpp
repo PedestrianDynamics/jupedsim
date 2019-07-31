@@ -32,7 +32,7 @@
 #include "../generic/FDSMeshStorage.h"
 #include <tinyxml.h>
 
-#include "general/Filesystem.hpp"
+#include "general/Filesystem.h"
 
 WalkingSpeed::WalkingSpeed(const std::string & projectFileName)
 {

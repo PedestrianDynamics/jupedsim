@@ -35,7 +35,7 @@
 #include "../generic/FDSMesh.h"
 #include "../generic/FDSMeshStorage.h"
 #include <tinyxml.h>
-#include "general/Filesystem.hpp"
+#include "general/Filesystem.h"
 
 SmokeSensor::SmokeSensor(const Building *b) : AbstractSensor(b)
 {

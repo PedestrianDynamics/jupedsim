@@ -37,7 +37,7 @@
 #include <boost/foreach.hpp>
 #include <boost/range/combine.hpp>
 
-#include "general/Filesystem.hpp"
+#include "general/Filesystem.h"
 
 using namespace boost::lambda;
 /************************************************************
