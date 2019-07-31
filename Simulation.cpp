@@ -358,7 +358,7 @@ void Simulation::UpdateRoutesAndLocations()
 //    }
 
 #pragma omp parallel for shared(pedsToRemove, allRooms)
-     for (size_t p = 0; p < allPeds.size(); ++p) {
+     for (int p = 0; p < allPeds.size(); ++p) {
           auto ped = allPeds[p];
           Room* room = _building->GetRoom(ped->GetRoomID());
           SubRoom* sub0 = room->GetSubRoom(ped->GetSubRoomID());
@@ -567,14 +567,8 @@ double Simulation::RunBody(double maxSimTime)
     ProcessAgentsQueue();
     _nPeds = _building->GetAllPedestrians().size();
     std::cout << "\n";
-    std::string description = "Evacuation ";
-    ProgressBar *bar = new ProgressBar(_nPeds, description);
-    // bar->SetFrequencyUpdate(10);
-#ifdef _WINDOWS
-    bar->SetStyle("|","-");
-#else
-    bar->SetStyle("\u2588", "-"); //for linux
-#endif
+    std::string description = "Evacutation ";
+    ProgressBar bar(_nPeds, description);
     int initialnPeds = _nPeds;
     // main program loop
     while ((_nPeds || (!_agentSrcManager.IsCompleted()&& _gotSources) ) && t<maxSimTime) {
@@ -651,7 +645,7 @@ double Simulation::RunBody(double maxSimTime)
 
         if(!_gotSources && !_periodic && _config->print_prog_bar())
               // Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
-              bar->Progressed(initialnPeds-_nPeds);
+              bar.Progressed(initialnPeds-_nPeds);
         else
              if ((!_gotSources) &&
                  ((frameNr < 100 &&  frameNr % 10 == 0) ||
@@ -1067,7 +1061,6 @@ void Simulation::UpdateDoorticks() const {
 
 void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
 {
-//     bool update;
      Transition* trans = _building->GetTransitionByUID(ped.GetExitIndex());
      if (!trans)
           return;
