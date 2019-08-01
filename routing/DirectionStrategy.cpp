@@ -143,7 +143,6 @@ Point DirectionInRangeBottleneck::GetTarget(Room* /*room*/, Pedestrian* ped) con
 Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
 {
 #define DEBUG 0
-      using namespace std;
       const Point& p1 = ped->GetExitLine()->GetPoint1();
       const Point& p2 = ped->GetExitLine()->GetPoint2();
       Line ExitLine = Line(p1, p2, 0);

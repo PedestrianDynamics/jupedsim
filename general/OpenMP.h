@@ -1,8 +1,6 @@
 /**
- * \file        ForceModel.cpp
- * \date        Dec 13, 2010
- * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.8
+ * \copyright   <2009-2019> Forschungszentrum J?lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -21,25 +19,17 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * \section Description
- * Implementation of the GCFM and the Gompertz model.
+ * The Simulation class represents a simulation of pedestrians
+ * based on a certain model in a specific scenario. A simulation is defined by
+ * various parameters and functions.
+ *
  *
  **/
+#pragma once
 
-
-#include "ForceModel.h"
-#include "../pedestrian/Pedestrian.h"
-
-ForceModel::ForceModel()
-{
-}
-
-ForceModel::~ForceModel()
-{
-}
-
-
-
-/************************************************************
- Gompertz ForceModel
- ************************************************************/
-
+#ifdef _OPENMP
+#include <omp.h>
+#else
+#define omp_get_thread_num() 0
+#define omp_get_max_threads()  1
+#endif

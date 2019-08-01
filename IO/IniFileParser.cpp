@@ -19,19 +19,9 @@
 // Created by laemmel on 24.03.16.
 //
 
-#ifdef _OPENMP
-
-#include <omp.h>
-
-
-#else
-#define omp_get_thread_num() 0
-#define omp_get_max_threads()  1
-#endif
-
 #include "../tinyxml/tinyxml.h"
 #include "OutputHandler.h"
-
+#include "general/OpenMP.h"
 #include "IniFileParser.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../math/GCFMModel.h"

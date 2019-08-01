@@ -39,8 +39,6 @@
 #include <mutex>
 
 
-using namespace std;
-
 std::mutex grid_mutex;
 
 //FIXME:

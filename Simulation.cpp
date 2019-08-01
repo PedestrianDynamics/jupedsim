@@ -38,14 +38,7 @@
 #include "pedestrian/AgentsSourcesManager.h"
 #include "geometry/WaitingArea.h"
 #include "general/Filesystem.hpp"
-
-#ifdef _OPENMP
-
-#else
-#define omp_get_thread_num() 0
-#define omp_get_max_threads()  1
-#endif
-using namespace std;
+#include "general/OpenMP.h"
 
 OutputHandler* Log;
 Trajectories* outputTXT;
@@ -343,12 +336,12 @@ void Simulation::UpdateRoutesAndLocations()
 {
      //pedestrians to be deleted
      //you should better create this in the constructor and allocate it once.
-     set<Pedestrian*> pedsToRemove;
+     std::set<Pedestrian*> pedsToRemove;
 //     pedsToRemove.reserve(500); //just reserve some space
 
      // collect all pedestrians in the simulation.
-     const vector<Pedestrian*>& allPeds = _building->GetAllPedestrians();
-     const map<int, Goal*>& goals = _building->GetAllGoals();
+     const std::vector<Pedestrian*>& allPeds = _building->GetAllPedestrians();
+     const std::map<int, Goal*>& goals = _building->GetAllGoals();
      auto allRooms = _building->GetAllRooms();
 
 //    for (signed int p = 0; p < allPeds.size(); ++p) {
@@ -465,18 +458,18 @@ void Simulation::PrintStatistics(double simTime)
 
             fs::path p(_config->GetOriginalTrajectoriesFile());
 
-            string statsfile = "flow_exit_id_"+to_string(goal->GetID())+"_"+p.stem().string()+".txt";
+            string statsfile = "flow_exit_id_"+std::to_string(goal->GetID())+"_"+p.stem().string()+".txt";
             if(goal->GetOutflowRate() <  (std::numeric_limits<double>::max)())
             {
                  char tmp[50];
                  sprintf(tmp, "%.2f_", goal->GetOutflowRate());
-                 statsfile = "flow_exit_id_"+to_string(goal->GetID())+"_rate_"+tmp+p.stem().string()+".txt";
+                 statsfile = "flow_exit_id_"+std::to_string(goal->GetID())+"_rate_"+tmp+p.stem().string()+".txt";
             }
             Log->Write("More Information in the file: %s", statsfile.c_str());
             {
                  FileHandler statOutput(statsfile.c_str());
                  statOutput.Write("#Simulation time: %.2f", simTime);
-                 statOutput.Write("#Flow at exit "+goal->GetCaption()+"( ID "+to_string(goal->GetID())+" )");
+                 statOutput.Write("#Flow at exit "+goal->GetCaption()+"( ID "+std::to_string(goal->GetID())+" )");
                  statOutput.Write("#Time (s)  cummulative number of agents \n");
                  statOutput.Write(goal->GetFlowCurve());
             }
@@ -495,12 +488,12 @@ void Simulation::PrintStatistics(double simTime)
                        goal->GetLastPassingTime());
 
                   string statsfile = "flow_crossing_id_"
-                       + to_string(itr.first/1000) + "_" + to_string(itr.first % 1000) +".dat";
+                       + std::to_string(itr.first/1000) + "_" + std::to_string(itr.first % 1000) +".dat";
                   Log->Write("More Information in the file: %s", statsfile.c_str());
                   FileHandler output(statsfile.c_str());
                   output.Write("#Simulation time: %.2f", simTime);
-                  output.Write("#Flow at crossing " + goal->GetCaption() + "( ID " + to_string(goal->GetID())
-                                + " ) in Room ( ID "+ to_string(itr.first / 1000) + " )");
+                  output.Write("#Flow at crossing " + goal->GetCaption() + "( ID " + std::to_string(goal->GetID())
+                                + " ) in Room ( ID "+ std::to_string(itr.first / 1000) + " )");
                   output.Write("#Time (s)  cummulative number of agents \n");
                   output.Write(goal->GetFlowCurve());
              }

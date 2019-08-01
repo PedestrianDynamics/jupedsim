@@ -29,8 +29,6 @@
 #include "RoutingEngine.h"
 #include "../pedestrian/Pedestrian.h"
 
-using namespace std;
-
 
 RoutingEngine::RoutingEngine()
 {

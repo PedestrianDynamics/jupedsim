@@ -30,7 +30,6 @@
 
 #include <cmath>
 #include <cstdarg> // va_start and va_end
-using namespace std;
 
 void OutputHandler::incrementWarnings()
 {
@@ -64,9 +63,9 @@ int OutputHandler::GetDeletedAgents()
 }
 
 
-void OutputHandler::Write(const string& str)
+void OutputHandler::Write(const std::string& str)
 {
-          cout << endl << str;
+          std::cout << std::endl << str;
 }
 
 void OutputHandler::ProgressBar(double TotalPeds, double NowPeds, double simTime)
@@ -104,45 +103,45 @@ void OutputHandler::Write(const char* message,...)
     vsprintf(msg, message, ap);
     va_end(ap);
 
-    string str(msg);
+    std::string str(msg);
 
-    if (str.find("ERROR") != string::npos)
+    if (str.find("ERROR") != std::string::npos)
     {
-        cerr << endl << msg ;
-        cerr.flush();
+        std::cerr << std::endl << msg ;
+        std::cerr.flush();
         incrementErrors();
     }
-    else if (str.find("WARNING") != string::npos)
+    else if (str.find("WARNING") != std::string::npos)
     {
-        cerr << endl << msg ;
-        cerr.flush();
+        std::cerr << std::endl << msg ;
+        std::cerr.flush();
         incrementWarnings();
     }
     else
     { // infos
-        cout << endl << msg ;
-        cout.flush();
+        std::cout << std::endl << msg ;
+        std::cout.flush();
     }
 }
 
-void STDIOHandler::Write(const string& str)
+void STDIOHandler::Write(const std::string& str)
 {
-    if (str.find("ERROR") != string::npos)
+    if (str.find("ERROR") != std::string::npos)
        {
-           cerr << endl << str;
-           cerr.flush();
+           std::cerr << std::endl << str;
+           std::cerr.flush();
            incrementErrors();
        }
-       else if (str.find("WARNING") != string::npos)
+       else if (str.find("WARNING") != std::string::npos)
        {
-           cerr << endl << str;
-           cerr.flush();
+           std::cerr << std::endl << str;
+           std::cerr.flush();
            incrementWarnings();
        }
        else
        { // infos
-           cout << endl << str;
-           cout.flush();
+           std::cout << std::endl << str;
+           std::cout.flush();
        }
 }
 
@@ -153,7 +152,7 @@ FileHandler::FileHandler(const char *fn)
      {
           char tmp[CLENGTH];
           sprintf(tmp, "Error!!! File [%s] could not be opened!", fn);
-          cerr << tmp << endl;
+          std::cerr << tmp << std::endl;
           exit(0);
      }
 }
@@ -163,16 +162,16 @@ FileHandler::~FileHandler()
      _pfp.close();
 }
 
-void FileHandler::Write(const string& str)
+void FileHandler::Write(const std::string& str)
 {
-        _pfp << str << endl;
+        _pfp << str << std::endl;
         _pfp.flush();
 
-    if (str.find("ERROR") != string::npos)
+    if (str.find("ERROR") != std::string::npos)
     {
         incrementErrors();
     }
-    else if (str.find("WARNING") != string::npos)
+    else if (str.find("WARNING") != std::string::npos)
     {
         incrementWarnings();
     }
@@ -185,15 +184,15 @@ void FileHandler::Write(const char* str_msg,...)
      va_start (ap, str_msg);
      vsprintf (msg,str_msg ,ap);
      va_end (ap);
-     _pfp<<msg<<endl;
+     _pfp<<msg<<std::endl;
      _pfp.flush();
 
-     string str(msg);
-     if (str.find("ERROR") != string::npos)
+     std::string str(msg);
+     if (str.find("ERROR") != std::string::npos)
      {
          incrementErrors();
      }
-     else if (str.find("WARNING") != string::npos)
+     else if (str.find("WARNING") != std::string::npos)
      {
          incrementWarnings();
      }
@@ -201,7 +200,7 @@ void FileHandler::Write(const char* str_msg,...)
 
 #ifdef _SIMULATOR
 
-SocketHandler::SocketHandler(const string& host, int port)
+SocketHandler::SocketHandler(const std::string& host, int port)
 {
      client = new TraVisToClient(host, port);
      brokentags.push_back("<trajectories>");
@@ -214,16 +213,16 @@ SocketHandler::~SocketHandler()
      delete client;
 }
 
-void SocketHandler::Write(const string& stringRef)
+void SocketHandler::Write(const std::string& stringRef)
 {
 
-     vector<string>::iterator str_it;
-     string str=stringRef;
+     std::vector<std::string>::iterator str_it;
+     std::string str=stringRef;
 
      //There are a few broken tags which need to be checked for and removed.
      for (str_it = brokentags.begin(); str_it != brokentags.end(); ++str_it) {
           int tagstart = str.find(*str_it);
-          if (tagstart != (int) string::npos) {
+          if (tagstart != (int) std::string::npos) {
                str.erase(str.begin() + tagstart, str.begin() + tagstart + (*str_it).size());
           }
      }

@@ -29,8 +29,6 @@
 #include "Crossing.h"
 #include "SubRoom.h"
 
-using namespace std;
-
 
 Crossing::Crossing()
 {
@@ -152,7 +150,7 @@ SubRoom* Crossing::GetOtherSubRoom(int roomID, int subroomID) const
 // Ausgabe
 void Crossing::WriteToErrorLog() const
 {
-     string s;
+     std::string s;
      char tmp[CLENGTH];
      sprintf(tmp, "\t\tCROSS: %d (%f, %f) -- (%f, %f)\n", GetID(), GetPoint1()._x,
                GetPoint1()._y, GetPoint2()._x, GetPoint2()._y);
@@ -164,10 +162,10 @@ void Crossing::WriteToErrorLog() const
 }
 
 // TraVisTo Ausgabe
-string Crossing::GetDescription() const
+std::string Crossing::GetDescription() const
 {
      //return "";
-     string geometry;
+     std::string geometry;
      char tmp[CLENGTH] = "";
      sprintf(tmp,"\t\t<crossing ID=\"%d\" color = \"250\" caption=\"%d_%d\">\n",GetUniqueID(),GetID(),GetUniqueID());
      geometry.append(tmp);
@@ -204,7 +202,7 @@ void Crossing::IncreaseDoorUsage(int number, double time)
 
      _doorUsage += number;
      _lastPassingTime = time;
-     _flowAtExit += to_string(time) + "  " + to_string(_doorUsage) + "\n";
+     _flowAtExit += std::to_string(time) + "  " + std::to_string(_doorUsage) + "\n";
 }
 
 void Crossing::IncreasePartialDoorUsage(int number)

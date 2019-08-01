@@ -32,13 +32,7 @@
 #include <iostream>
 #include <sstream>
 
-#ifdef _OPENMP
-
-#else
-#define omp_get_thread_num() 0
-#define omp_get_max_threads()  1
-#endif
-
+#include "general/OpenMP.h"
 #include "../IO/OutputHandler.h"
 #include "ArgumentParser.h"
 #include "../pedestrian/AgentsParameters.h"
@@ -46,11 +40,6 @@
 #include "../routing/quickest/QuickestPathRouter.h"
 #include "../routing/smoke_router/SmokeRouter.h"
 #include "../IO/IniFileParser.h"
-
-using namespace std;
-
-
-
 
 void ArgumentParser::Usage(const std::string file)
 {

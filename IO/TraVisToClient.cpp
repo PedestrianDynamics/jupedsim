@@ -32,8 +32,6 @@
 #include "TraVisToClient.h"
 #include "../general/Macros.h"
 
-
-//using namespace std;
 using std::string;
 
 

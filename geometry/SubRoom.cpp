@@ -42,7 +42,6 @@
 
 #include <cmath>
 
-using namespace std;
 
 /************************************************************
  SubRoom

@@ -34,7 +34,6 @@
 
 int Line::_static_UID = 0;
 
-using namespace std;
 
 #define DEBUG 0
 
@@ -108,9 +107,9 @@ const Point& Line::GetCentre() const
 /*************************************************************
  Ausgabe
  ************************************************************/
-string Line::Write() const
+std::string Line::Write() const
 {
-     string geometry;
+     std::string geometry;
      char wall[500] = "";
      geometry.append("\t\t<wall color=\"100\">\n");
      sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",
