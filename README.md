@@ -71,6 +71,11 @@ Build unit tests and add them to ctest
 ##### BUILD_TESTING defaults to OFF
 Build full system tests and add them to ctest
 
+##### BUILD_WITH_ASAN defaults to OFF (Does not support Windows)
+Build an additional target `jpscore_asan` with address and undefined behavior
+sanitizer enabled. Note there is an approx. 2x slowdown when using 
+`jpscore_asan` over `jpscore`
+
 ## Quick start
 
 See [installation and configuration](http://jupedsim.org/jpscore/2016-11-02-quickstart.html)
