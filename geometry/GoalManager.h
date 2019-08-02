@@ -23,9 +23,7 @@
  * \section Description
  * Class mananging pedestrians who enter/leave waiting areas
  */
-
-#ifndef JPSCORE_GOALMANAGER_H
-#define JPSCORE_GOALMANAGER_H
+#pragma once
 
 #include <map>
 
@@ -79,5 +77,3 @@ private:
     void SetState(int goalID, bool state);
 
 };
-
-#endif //JPSCORE_GOALMANAGER_H

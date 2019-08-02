@@ -23,21 +23,18 @@
  *
  *
  **/
- 
+#pragma once
 
-#ifndef _ROOM_H
-#define _ROOM_H
+#include "general/Macros.h"
+#include "geometry/Point.h"
 
-#include <string>
 #include <algorithm>
 #include <memory>
-#include "../general/Macros.h"
-#include "../geometry/Point.h"
+#include <string>
 
 //forward declarations
 class OutputHandler;
 class SubRoom;
-
 
 // external variables
 extern OutputHandler* Log;
@@ -172,6 +169,3 @@ public:
      OutputHandler* GetOutputHandler() const;
 
 };
-
-#endif  /* _ROOM_H */
-

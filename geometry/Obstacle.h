@@ -24,10 +24,7 @@
  *
  *
  **/
-
-
-#ifndef OBSTACLE_H_
-#define OBSTACLE_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -149,5 +146,3 @@ private:
                        double hitY) const;
 
 };
-
-#endif /* OBSTACLE_H_ */

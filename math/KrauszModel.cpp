@@ -33,6 +33,7 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../mpi/LCGrid.h"
 #include "../geometry/SubRoom.h"
+#include "geometry/Wall.h"
 #include "general/OpenMP.h"
 
 

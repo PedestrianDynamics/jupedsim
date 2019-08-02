@@ -34,6 +34,8 @@
 #include "../mpi/LCGrid.h"
 #include "../geometry/SubRoom.h"
 #include "general/OpenMP.h"
+#include "geometry/Wall.h"
+
 
 
 using std::vector;

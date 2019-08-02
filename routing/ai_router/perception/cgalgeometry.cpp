@@ -1,5 +1,7 @@
 #include "cgalgeometry.h"
 #include "../../../geometry/SubRoom.h"
+#include "geometry/Wall.h"
+
 #include <iostream>
 
 CGALGeometry::CGALGeometry()

@@ -2,8 +2,7 @@
 // Created by Gregor Lämmel on 30/03/16.
 //
 
-#ifndef JPSCORE_GEOMETRYREADER_H
-#define JPSCORE_GEOMETRYREADER_H
+#pragma once
 
 class Building;
 
@@ -14,5 +13,3 @@ public:
      virtual bool LoadTrafficInfo(Building* building) = 0;
      virtual ~GeometryReader(){};
 };
-
-#endif //JPSCORE_GEOMETRYREADER_H

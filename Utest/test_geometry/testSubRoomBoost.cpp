@@ -25,10 +25,15 @@
  *
  *
  **/
+
+#include "geometry/SubRoom.h"
+#include "geometry/Wall.h"
+#include "geometry/Point.h"
+#include "geometry/Line.h"
+
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_NO_MAIN
 #include <boost/test/unit_test.hpp>
-#include "../../geometry/SubRoom.h"
 
 #include <vector>
 

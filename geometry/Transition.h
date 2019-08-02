@@ -24,12 +24,10 @@
  *
  *
  **/
-
-
-#ifndef _TRANSITION_H
-#define _TRANSITION_H
+#pragma once
 
 #include "Crossing.h"
+
 #include <string>
 
 class Room;
@@ -89,6 +87,3 @@ public:
     virtual void WriteToErrorLog() const;
     virtual std::string GetDescription() const; // TraVisTo Ausgabe
 };
-
-#endif  /* _TRANSITION_H */
-

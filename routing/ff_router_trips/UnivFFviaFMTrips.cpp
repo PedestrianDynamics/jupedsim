@@ -11,6 +11,8 @@
 #include "mesh/RectGrid.h"
 #include "../../geometry/Goal.h"
 #include "../../geometry/WaitingArea.h"
+#include "geometry/Wall.h"
+
 
 UnivFFviaFMTrips::~UnivFFviaFMTrips() {
      if (_grid) delete _grid;

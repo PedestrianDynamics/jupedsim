@@ -24,23 +24,20 @@
  *
  *
  **/
- 
+#pragma once
 
-#ifndef GOAL_H_
-#define GOAL_H_
+#include "Point.h"
+
+#include <boost/polygon/polygon.hpp>
+#include <boost/geometry.hpp>
 
 #include <string>
 #include <vector>
 
-#include "Point.h"
-#include "Crossing.h"
-#include <boost/polygon/polygon.hpp>
-#include <boost/geometry.hpp>
-
 //forward declarations
 class Wall;
 class Point;
-//class Pedestrian;
+class Crossing;
 
 namespace bg = boost::geometry;
 typedef bg::model::polygon<Point, false, false> polygon_type;
@@ -167,5 +164,3 @@ private:
                        double hitY) const;
 
 };
-
-#endif /* GOAL_H_ */

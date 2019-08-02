@@ -15,6 +15,8 @@ static int global_count = 0;
 //check if all includes are necessary
 #include "../pedestrian/AgentsSourcesManager.h"
 #include "../pedestrian/Pedestrian.h"
+#include "geometry/Wall.h"
+
 //#include "../pedestrian/StartDistribution.h"
 //#include "../pedestrian/PedDistributor.h"
 //#include "../pedestrian/AgentsSource.h"

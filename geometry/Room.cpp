@@ -24,11 +24,11 @@
  *
  *
  **/
-
-
 #include "Room.h"
+
 #include "SubRoom.h"
-#include "../IO/OutputHandler.h"
+
+#include "IO/OutputHandler.h"
 
 #include <sstream>
 #include <memory>

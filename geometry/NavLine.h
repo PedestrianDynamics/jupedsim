@@ -24,10 +24,8 @@
  *
  *
  **/
- 
+#pragma once
 
-#ifndef NAVLINE_H_
-#define NAVLINE_H_
 #include "Line.h"
 
 class NavLine: public Line {
@@ -38,5 +36,3 @@ public:
      virtual ~NavLine();
 
 };
-
-#endif /* NAVLINE_H_ */

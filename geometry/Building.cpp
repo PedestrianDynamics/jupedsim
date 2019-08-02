@@ -26,20 +26,23 @@
  **/
 #include "Building.h"
 
+#include "general/OpenMP.h"
+#include "geometry/SubRoom.h"
+#include "geometry/Wall.h"
+
+#include <tinyxml.h>
+
 #include <chrono>
 
-#include "../geometry/SubRoom.h"
-#include "../tinyxml/tinyxml.h"
-#include "general/OpenMP.h"
 #ifdef _SIMULATOR
-
 #include "GeometryReader.h"
-#include "../pedestrian/Pedestrian.h"
-#include "../mpi/LCGrid.h"
-#include "../IO/GeoFileParser.h"
-#include "general/Filesystem.h"
-#include <thread>         // std::thread, std::thread::id, std::this_thread::get_id
 
+#include "general/Filesystem.h"
+#include "IO/GeoFileParser.h"
+#include "mpi/LCGrid.h"
+#include "pedestrian/Pedestrian.h"
+
+#include <thread>
 #endif
 
 

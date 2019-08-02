@@ -24,6 +24,7 @@
 #include "../tinyxml/tinyxml.h"
 #include "../geometry/SubRoom.h"
 #include "../geometry/WaitingArea.h"
+#include "geometry/Wall.h"
 
 GeoFileParser::GeoFileParser(Configuration* configuration)
           :_configuration(configuration)

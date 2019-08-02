@@ -30,6 +30,8 @@
 #include <tinyxml.h>
 #include "../../mpi/LCGrid.h"
 #include "../../geometry/SubRoom.h"
+#include "geometry/Wall.h"
+
 //#include "../IO/OutputHandler.h"
 
 

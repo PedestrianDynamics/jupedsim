@@ -2,6 +2,8 @@
 #include "../../../geometry/Building.h"
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../geometry/SubRoom.h"
+#include "geometry/Wall.h"
+
 
 #include <boost/foreach.hpp>
 

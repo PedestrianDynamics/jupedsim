@@ -9,6 +9,8 @@
 #include "../../geometry/SubRoom.h"
 #include "../../pedestrian/Pedestrian.h"
 #include "mesh/RectGrid.h"
+#include "geometry/Wall.h"
+
 
 
 UnivFFviaFM::~UnivFFviaFM() {
