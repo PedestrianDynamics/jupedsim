@@ -26,15 +26,15 @@
  * the Voronoi algorithm or the Mitchell Best candidate algorithm.
  *
  **/
-
 #include "AgentsSourcesManager.h"
-#include "Pedestrian.h"
-#include "../mpi/LCGrid.h"
-#include <thread>
+
 #include "AgentsQueue.h"
+#include "Pedestrian.h"
 
-#include "../voronoi-boost/VoronoiPositionGenerator.h"
+#include "mpi/LCGrid.h"
+#include "voronoi-boost/VoronoiPositionGenerator.h"
 
+#include <thread>
 
 bool AgentsSourcesManager::_isCompleted=true;
 

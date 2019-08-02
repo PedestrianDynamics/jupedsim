@@ -23,10 +23,7 @@
  * \section Description
  *
  **/
-
-#ifndef AGENTSQUEUE_H_
-#define AGENTSQUEUE_H_
-
+#pragma once
 
 #include <mutex>
 #include <vector>
@@ -71,5 +68,3 @@ private:
      static std::vector<Pedestrian*> _agentsQueue;
      static std::mutex _queueMutex;
 };
-
-#endif /* AGENTSQUEUE_H_ */

@@ -24,12 +24,12 @@
  *
  *
  **/
-
-
 #include "StartDistribution.h"
+
 #include "AgentsParameters.h"
 #include "Pedestrian.h"
-#include "../geometry/SubRoom.h"
+
+#include "geometry/SubRoom.h"
 
 
 StartDistribution::StartDistribution(int seed)

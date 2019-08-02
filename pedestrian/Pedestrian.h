@@ -24,24 +24,22 @@
  *
  *
  **/
+#pragma once
 
+#include "Ellipse.h"
+#include "AgentsParameters.h"
+#include "PedDistributor.h"
 
-#ifndef _PEDESTRIAN_H
-#define _PEDESTRIAN_H
+#include "general/Macros.h"
+#include "geometry/NavLine.h"
+#include "JPSfire/B_walking_speed/WalkingSpeed.h"
+#include "JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
 
 #include <vector>
 #include <queue>
 #include <map>
 #include <set>
 #include <time.h>
-
-#include "Ellipse.h"
-#include "../general/Macros.h"
-#include "../geometry/NavLine.h"
-#include "AgentsParameters.h"
-#include "PedDistributor.h"
-#include "../JPSfire/B_walking_speed/WalkingSpeed.h"
-#include "../JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
 
 class Building;
 class NavLine;
@@ -509,5 +507,3 @@ public:
      bool IsInsideGoal() const;
 
 };
-
-#endif  /* _PEDESTRIAN_H */

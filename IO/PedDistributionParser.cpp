@@ -21,6 +21,7 @@
 #include "PedDistributionParser.h"
 
 #include "general/Filesystem.h"
+#include "IO/OutputHandler.h"
 
 #include <cstdarg> // va_start and va_end
 

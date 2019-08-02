@@ -24,14 +24,15 @@
  *
  *
  **/
-#include <cassert>
-#include "../geometry/Building.h"
-#include "../geometry/SubRoom.h"
-#include "Knowledge.h"
 #include "Pedestrian.h"
 
-#include "../JPSfire/generic/FDSMeshStorage.h"
+#include "Knowledge.h"
 
+#include "geometry/Building.h"
+#include "geometry/SubRoom.h"
+#include "JPSfire/generic/FDSMeshStorage.h"
+
+#include <cassert>
 // initialize the static variables
 double Pedestrian::_globalTime = 0.0;
 int Pedestrian::_agentsCreated=1;

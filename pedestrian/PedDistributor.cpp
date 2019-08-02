@@ -24,21 +24,20 @@
  *
  *
  **/
-
-
-#include <cmath>
 #include "PedDistributor.h"
-#include "../pedestrian/Pedestrian.h"
-#include "../geometry/SubRoom.h"
+
+#include "pedestrian/Pedestrian.h"
+#include "geometry/SubRoom.h"
+#include "IO/PedDistributionParser.h"
 #include "geometry/Wall.h"
-#include "../IO/PedDistributionParser.h"
+#include "general/Filesystem.h"
 
 
 #include <boost/lambda/bind.hpp>
 #include <boost/foreach.hpp>
 #include <boost/range/combine.hpp>
 
-#include "general/Filesystem.h"
+#include <cmath>
 
 using namespace boost::lambda;
 /************************************************************

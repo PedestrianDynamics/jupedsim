@@ -26,9 +26,7 @@
  * the Voronoi algorithm or the Mitchell Best candidate algorithm.
  *
  **/
-
-#ifndef AGENTSOURCE_H_
-#define AGENTSOURCE_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -165,5 +163,3 @@ private:
      std::vector<Pedestrian*> _agents;
      std::shared_ptr<StartDistribution> _startDistribution;
 };
-
-#endif /* AGENTSOURCE_H_ */

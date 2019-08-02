@@ -20,8 +20,11 @@
 //
 #pragma once
 
-#include "../pedestrian/PedDistributionLoader.h"
-#include "../tinyxml/tinyxml.h"
+#include "pedestrian/PedDistributionLoader.h"
+
+#include <tinyxml.h>
+
+class Configuration;
 
 class PedDistributionParser : public PedDistributionLoader {
 

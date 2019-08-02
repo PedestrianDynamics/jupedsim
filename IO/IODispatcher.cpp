@@ -32,6 +32,7 @@
 #include "geometry/SubRoom.h"
 #include "mpi/LCGrid.h"
 #include "pedestrian/Pedestrian.h"
+#include "pedestrian/AgentsSource.h"
 
 #include <tinyxml.h>
 

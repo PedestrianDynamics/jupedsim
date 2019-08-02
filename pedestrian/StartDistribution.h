@@ -24,14 +24,13 @@
  *
  *
  **/
+#pragma once
 
-#ifndef STARTDISTRIBUTION_H_
-#define STARTDISTRIBUTION_H_
+#include <boost/math/distributions.hpp>
 
 #include <vector>
 #include <string>
 #include <random>
-#include "boost/math/distributions.hpp"
 
 //Forward declarations
 class AgentsParameters;
@@ -131,8 +130,6 @@ public:
      const std::string& GetPositionsDir()  const;
      void SetUnitTraj(const std::string& unit);
      const std::string& GetUnitTraj()  const;
-     
+
      Pedestrian* GenerateAgent(Building* building, int* pid, std::vector<Point>& positions);
 };
-
-#endif /* STARTDISTRIBUTION_H_ */

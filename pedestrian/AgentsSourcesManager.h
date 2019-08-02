@@ -26,10 +26,7 @@
  * the Voronoi algorithm or the Mitchell Best candidate algorithm.
  *
  **/
-
-
-#ifndef AGENTSSOURCESMANAGER_H_
-#define AGENTSSOURCESMANAGER_H_
+#pragma once
 
 #include <vector>
 #include <memory>
@@ -188,5 +185,3 @@ private:
      bool _isRunning = false;
 
 };
-
-#endif /* AGENTSSOURCESMANAGER_H_ */
