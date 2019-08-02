@@ -18,14 +18,13 @@
 //
 // Created by laemmel on 30.03.16.
 //
+#pragma once
 
-#ifndef JPSCORE_GEOFILEPARSER_H
-#define JPSCORE_GEOFILEPARSER_H
+#include "general/Configuration.h"
+#include "geometry/Building.h"
+#include "geometry/GeometryReader.h"
 
-#include "../general/Configuration.h"
-#include "../geometry/Building.h"
-#include "../geometry/GeometryReader.h"
-#include "../tinyxml/tinyxml.h"
+#include <tinyxml.h>
 
 //TODO: the class name GeoFileParser is misleading as the ``geometry'' file contains among others also relations (transitions)
 //TODO: between geometries/rooms. Probably, EnvironmentFileParser would be better, still parts of the environment are
@@ -56,5 +55,3 @@ private:
 
      bool LoadRoutingInfo(Building* filename);
 };
-
-#endif //JPSCORE_GEOFILEPARSER_H

@@ -18,10 +18,10 @@
 //
 // Created by laemmel on 31.03.16.
 //
-#define NOMINMAX
 #include "PedDistributionParser.h"
 
 #include "general/Filesystem.h"
+
 #include <cstdarg> // va_start and va_end
 
 PedDistributionParser::PedDistributionParser(const Configuration* configuration)

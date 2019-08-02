@@ -6,7 +6,6 @@
  */
 
 #define PLOT_VORONOI_DIAGRAM 0
-#define NOMINMAX
 static int global_count = 0;
 
 

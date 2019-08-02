@@ -24,14 +24,16 @@
  *
  *
  **/
-
-
 #include "IODispatcher.h"
-#include "../pedestrian/Pedestrian.h"
-#include "../tinyxml/tinyxml.h"
-#include "../geometry/SubRoom.h"
-#include "../mpi/LCGrid.h"
+
+#include "OutputHandler.h"
+
 #include "general/Filesystem.h"
+#include "geometry/SubRoom.h"
+#include "mpi/LCGrid.h"
+#include "pedestrian/Pedestrian.h"
+
+#include <tinyxml.h>
 
 #define _USE_MATH_DEFINES
 

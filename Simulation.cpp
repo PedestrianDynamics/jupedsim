@@ -29,7 +29,7 @@
  **/
 
 #include "Simulation.h"
-#include "IO/progress_bar.hpp"
+#include "IO/progress_bar.h"
 #include "routing/ff_router/ffRouter.h"
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"

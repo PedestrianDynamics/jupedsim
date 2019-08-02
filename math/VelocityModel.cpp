@@ -27,7 +27,6 @@
  *
  **/
 #include "VelocityModel.h"
-# define NOMINMAX
 #include "../pedestrian/Pedestrian.h"
 //#include "../routing/DirectionStrategy.h"
 #include "../mpi/LCGrid.h"

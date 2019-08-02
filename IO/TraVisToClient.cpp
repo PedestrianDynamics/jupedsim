@@ -28,14 +28,13 @@
 
 /********* include files ******************************************************/
 
-#include <iostream>
 #include "TraVisToClient.h"
-#include "../general/Macros.h"
 
-using std::string;
+#include "general/Macros.h"
 
+#include <iostream>
 
-TraVisToClient::TraVisToClient(string hostname, unsigned short port)
+TraVisToClient::TraVisToClient(std::string hostname, unsigned short port)
 {
      _hostname=hostname;
      _port = port;

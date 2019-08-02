@@ -1,7 +1,6 @@
 //
 // Created by arne on 5/9/17.
 //
-#define NOMINMAX
 #include <unordered_set>
 #include "UnivFFviaFM.h"
 #include "../../geometry/Line.h"

@@ -18,24 +18,26 @@
 //
 // Created by laemmel on 24.03.16.
 //
-
-#include "../tinyxml/tinyxml.h"
-#include "OutputHandler.h"
-#include "general/OpenMP.h"
 #include "IniFileParser.h"
-#include "../pedestrian/Pedestrian.h"
-#include "../math/GCFMModel.h"
-#include "../math/KrauszModel.h"
-#include "../math/GompertzModel.h"
-#include "../math/GradientModel.h"
-#include "../math/VelocityModel.h"
-#include "../routing/global_shortest/GlobalRouter.h"
-#include "../routing/quickest/QuickestPathRouter.h"
-#include "../routing/smoke_router/SmokeRouter.h"
-#include "../routing/ai_router/AIRouter.h"
-#include "../routing/ff_router/ffRouter.h"
-#include "../routing/ff_router_trips/ffRouterTrips.h"
+
+#include "OutputHandler.h"
+
 #include "general/Filesystem.h"
+#include "general/OpenMP.h"
+#include "math/GCFMModel.h"
+#include "math/GompertzModel.h"
+#include "math/GradientModel.h"
+#include "math/KrauszModel.h"
+#include "math/VelocityModel.h"
+#include "pedestrian/Pedestrian.h"
+#include "routing/ai_router/AIRouter.h"
+#include "routing/ff_router/ffRouter.h"
+#include "routing/ff_router_trips/ffRouterTrips.h"
+#include "routing/global_shortest/GlobalRouter.h"
+#include "routing/quickest/QuickestPathRouter.h"
+#include "routing/smoke_router/SmokeRouter.h"
+
+#include <tinyxml.h>
 
 /* https://stackoverflow.com/questions/38530981/output-compiler-version-in-a-c-program#38531037 */
 std::string ver_string(int a, int b, int c) {

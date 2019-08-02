@@ -24,8 +24,6 @@
  *
  *
  **/
-
-#define NOMINMAX
 #include <cassert>
 #include "../geometry/Building.h"
 #include "../geometry/SubRoom.h"

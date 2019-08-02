@@ -24,21 +24,16 @@
  *
  *
  **/
+#pragma once
 
-
-#ifndef OUTPUT_HANDLER_H_
-#define OUTPUT_HANDLER_H_
+#include "general/Macros.h"
+#ifdef _SIMULATOR
+#include "IO/TraVisToClient.h"
+#endif
 
 #include <iostream>
 #include <fstream>
 #include <vector>
-
-#include "../general/Macros.h"
-
-#ifdef _SIMULATOR
-#include "../IO/TraVisToClient.h"
-#endif
-
 
 class OutputHandler {
 protected:
@@ -92,5 +87,3 @@ public:
 };
 
 #endif
-
-#endif /*OUTPUT_HANDLER_H_*/

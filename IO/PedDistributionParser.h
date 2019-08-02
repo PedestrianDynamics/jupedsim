@@ -18,9 +18,7 @@
 //
 // Created by laemmel on 31.03.16.
 //
-
-#ifndef JPSCORE_PEDDISTRIBUTIONPARSER_H
-#define JPSCORE_PEDDISTRIBUTIONPARSER_H
+#pragma once
 
 #include "../pedestrian/PedDistributionLoader.h"
 #include "../tinyxml/tinyxml.h"
@@ -40,5 +38,3 @@ private:
      const Configuration* _configuration;
 
 };
-
-#endif //JPSCORE_PEDDISTRIBUTIONPARSER_H
