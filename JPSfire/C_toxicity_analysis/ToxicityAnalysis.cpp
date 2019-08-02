@@ -25,12 +25,13 @@
  *
  *
  **/
-
 #include "ToxicityAnalysis.h"
-#include "../../pedestrian/Pedestrian.h"
-#include "../generic/FDSMesh.h"
-#include "../generic/FDSMeshStorage.h"
+
 #include "general/Filesystem.h"
+#include "JPSfire/generic/FDSMesh.h"
+#include "JPSfire/generic/FDSMeshStorage.h"
+#include "pedestrian/Pedestrian.h"
+
 #include <tinyxml.h>
 
 

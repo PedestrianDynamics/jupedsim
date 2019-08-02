@@ -26,10 +26,8 @@
  *
  **/
 
-#ifndef SMOKESENSOR_H
-#define SMOKESENSOR_H 1
+#include "routing/smoke_router/sensor/AbstractSensor.h"
 
-#include "../../routing/smoke_router/sensor/AbstractSensor.h"
 #include <memory>
 
 class Point;
@@ -50,14 +48,7 @@ public:
 
     void set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage);
     const std::shared_ptr<FDSMeshStorage> get_FMStorage();
-
-
-
-
 private:
-
     const Building* _building;
     std::shared_ptr<FDSMeshStorage> _FMStorage;
 };
-
-#endif // SMOKESENSOR_H

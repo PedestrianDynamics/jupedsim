@@ -28,6 +28,7 @@
  **/
 #include "FDSMeshStorage.h"
 #include "general/Filesystem.h"
+#include "IO/OutputHandler.h"
 
 
 FDSMeshStorage::FDSMeshStorage()

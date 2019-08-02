@@ -31,7 +31,7 @@
 
 #include <vector>
 #include <string>
-#include "Knot.h"
+#include "JPSfire/generic/Knot.h"
 #include "../../../IO/OutputHandler.h"
 //using Matrix = std::array<std::array<T, COL>, ROW>;
 
