@@ -337,6 +337,7 @@ bool Crossing::RegulateFlow(double time)
      }
 
      _lastFlowMeasurement = time +  _closingTime;
+     return change;
 }
 
 void Crossing::UpdateTemporaryState(double dt)
