@@ -24,20 +24,18 @@
  *
  *
  **/
-
-
 #include "SensorManager.h"
-#include "AbstractSensor.h"
-//sensors
-#include "RoomToFloorSensor.h"
-#include "DiscoverDoorsSensor.h"
-#include "LastDestinationsSensor.h"
-#include "../../../JPSfire/A_smoke_sensor/SmokeSensor.h"
-#include "JamSensor.h"
-#include "locater.h"
 
-#include "../../../geometry/Building.h"
-#include "../BrainStorage.h"
+#include "AbstractSensor.h"
+#include "DiscoverDoorsSensor.h"
+#include "JamSensor.h"
+#include "LastDestinationsSensor.h"
+#include "locater.h"
+#include "RoomToFloorSensor.h"
+
+#include "geometry/Building.h"
+#include "JPSfire/A_smoke_sensor/SmokeSensor.h"
+#include "routing/smoke_router/BrainStorage.h"
 
 SensorManager::SensorManager(const Building * /*b*/, BrainStorage * cms)
      : /*building(b), */cm_storage(cms)

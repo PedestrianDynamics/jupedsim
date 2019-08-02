@@ -1,14 +1,11 @@
-#ifndef INTERNNAVIGATIONNETWORK_H
-#define INTERNNAVIGATIONNETWORK_H
+#pragma once
 
-
-//based on boost
+#include "geometry/SubRoom.h"
+#include "geometry/NavLine.h"
 
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
-#include "../../../geometry/SubRoom.h"
-#include "../../../geometry/NavLine.h"
 
 typedef boost::adjacency_list<boost::listS, boost::vecS, boost::directedS,
                        boost::no_property, boost::property<boost::edge_weight_t, double> > Graph;
@@ -51,12 +48,4 @@ private:
     std::vector<Linestring> _currentRoom;
 
     bool LineIntersectsWalls(const std::pair<const Point&, const Point&> &line, const std::vector<Linestring> &walls);
-
-
-
-
-
-
 };
-
-#endif // INTERNNAVIGATIONNETWORK_H

@@ -1,7 +1,9 @@
 #include "landmark.h"
+
+#include "general/Macros.h"
 #include "associations.h"
+
 #include <math.h>
-#include "../../../general/Macros.h"
 
 AILandmark::AILandmark(const Point &pos)
 {

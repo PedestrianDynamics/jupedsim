@@ -28,6 +28,7 @@
 #define TESTING
 #define GEO_UP_SCALE 1
 #include "FloorfieldViaFMTrips.h"
+
 #include "general/OpenMP.h"
 
 FloorfieldViaFMTrips::FloorfieldViaFMTrips()

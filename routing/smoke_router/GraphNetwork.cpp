@@ -25,13 +25,11 @@
  *
  *
  **/
-
-
 #include "GraphNetwork.h"
 
-#include "../../geometry/Crossing.h"
-#include "../../geometry/Building.h"
-#include "../../pedestrian/Pedestrian.h"
+#include "geometry/Crossing.h"
+#include "geometry/Building.h"
+#include "pedestrian/Pedestrian.h"
 
 /**
  * Constructors & Destructors

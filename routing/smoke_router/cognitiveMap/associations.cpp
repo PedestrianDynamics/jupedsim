@@ -1,4 +1,5 @@
 #include "associations.h"
+
 #include "connection.h"
 
 Association::Association()
@@ -51,4 +52,3 @@ ptrConnection Association::GetConnectionAssoziation() const
 {
     return _connection;
 }
-

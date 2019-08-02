@@ -24,10 +24,7 @@
  *
  *
  **/
-
-
-#ifndef ROUTINGENGINE_H_
-#define ROUTINGENGINE_H_
+#pragma once
 
 #include "Router.h"
 
@@ -116,5 +113,3 @@ private:
      /// states if the routers need to be updated
      bool _needUpdate = false;
 };
-
-#endif /* ROUTINGENGINE_H_ */

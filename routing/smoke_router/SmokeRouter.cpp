@@ -24,14 +24,13 @@
  *
  *
  **/
-
 #include "SmokeRouter.h"
-#include "../Router.h"
 
 #include "BrainStorage.h"
-#include "./sensor/SensorManager.h"
 
-#include "../../pedestrian/Pedestrian.h"
+#include "pedestrian/Pedestrian.h"
+#include "sensor/SensorManager.h"
+
 #include <tinyxml.h>
 
 SmokeRouter::SmokeRouter()

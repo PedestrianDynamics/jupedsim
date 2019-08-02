@@ -25,12 +25,10 @@
  *
  *
  **/
-
-
-#ifndef AIROUTER_H_
-#define AIROUTER_H_
+#pragma once
 
 #include "../Router.h"
+
 #include <string>
 #include <unordered_map>
 #include <memory>
@@ -38,11 +36,7 @@
 class Building;
 class Router;
 class AIBrainStorage;
-//class SensorManager;
 class NavLine;
-
-
-
 
 //c++11 alias: Container to store options for the router (i. a. sensors)
 using optStorage = std::unordered_map<std::string,std::vector<std::string> >;
@@ -106,7 +100,4 @@ private:
 
      // Optional options which are supposed to be used
      optStorage options;
-
 };
-
-#endif /* AIROUTER_H_ */

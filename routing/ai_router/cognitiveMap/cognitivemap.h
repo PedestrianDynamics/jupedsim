@@ -1,11 +1,11 @@
-#ifndef COGNITIVEMAP_H
-#define COGNITIVEMAP_H
+#pragma once
 
 #include "associations.h"
 #include "region.h"
+#include "geometry/NavLine.h"
+
 #include <memory>
 #include <vector>
-#include "../../../geometry/NavLine.h"
 
 
 class Pedestrian;
@@ -83,5 +83,3 @@ private:
 };
 
 Point GetCloserPoint(const Point &origin, const Point &target1, const Point& target2);
-
-#endif // COGNITIVEMAP_H

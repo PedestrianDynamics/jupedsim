@@ -25,14 +25,10 @@
  *
  *
  **/
-
-
 #include "NavigationGraph.h"
 
-#include "../../geometry/Building.h"
-#include "../../geometry/SubRoom.h"
-
-
+#include "geometry/Building.h"
+#include "geometry/SubRoom.h"
 
 /**
  * Constructors & Destructors

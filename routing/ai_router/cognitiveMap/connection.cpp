@@ -1,4 +1,5 @@
 #include "connection.h"
+
 #include <utility>
 
 AIConnection::AIConnection(int id, const std::string &caption, const std::string &type, int landmarkId1, int landmarkId2)
@@ -50,4 +51,3 @@ void AIConnection::SetType(const std::string &type)
 {
     _type=type;
 }
-

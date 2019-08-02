@@ -25,16 +25,15 @@
  *
  *
  **/
+#pragma once
 
+#include "Cortex.h"
 
-#ifndef BRAINSTORAGE_H_
-#define BRAINSTORAGE_H_
+#include "cognitiveMap/cognitivemap.h"
+#include "perception/visibleenvironment.h"
 
 #include <unordered_map>
 #include <vector>
-#include "./cognitiveMap/cognitivemap.h"
-#include "./perception/visibleenvironment.h"
-#include "Cortex.h"
 
 class Building;
 class Pedestrian;
@@ -88,5 +87,3 @@ private:
      std::unordered_map<const SubRoom*,ptrIntNetwork> _roominternalNetworks;
 
 };
-
-#endif /* BRAINSTORAGE_H_ */

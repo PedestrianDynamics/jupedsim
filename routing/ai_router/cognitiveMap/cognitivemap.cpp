@@ -1,12 +1,13 @@
 #include "cognitivemap.h"
+
+#include "pedestrian/Pedestrian.h"
+#include "routing/ai_router/perception/visualsystem.h"
+
 #include <chrono>
 #include <random>
 #include <algorithm>
 #include <cmath>
 #include <fstream>
-#include "../../../pedestrian/Pedestrian.h"
-#include "../perception/visualsystem.h"
-
 
 
 AICognitiveMap::AICognitiveMap()
@@ -33,11 +34,11 @@ AICognitiveMap::AICognitiveMap(const Pedestrian *ped, const VisualSystem* percep
 //    newRegion.SetA(20.0);
 //    newRegion.SetB(20.0);
 //    newRegion.SetId(1);
-    
+
 //    Landmark finalDest(Point(5.0,5.0),0.1,0.1,1);
 //    finalDest.SetPosInMap(Point(15.0,8.0));
 //    finalDest.SetType("main");
-	
+
 //    newRegion.AddLandmark(finalDest);
 //    AddRegion(newRegion);
 
@@ -51,7 +52,7 @@ void AICognitiveMap::UpdateMap()
 {
     FindCurrentRegion();
 
-    CheckIfLandmarksReached();		
+    CheckIfLandmarksReached();
 
 }
 
@@ -364,7 +365,7 @@ void AICognitiveMap::FindCurrentRegion()
     //for test purposes. has to be changed
     if (_regions.empty())
         return;
-     
+
     //needs to be fixed
     _currentRegion=&(_regions.back());
     return;
@@ -400,7 +401,7 @@ void AICognitiveMap::CheckIfLandmarksReached()
 			_nextTarget=nullptr;
 		    }
 		}
-            
+
         }
     }
 
@@ -463,7 +464,7 @@ void AICognitiveMap::FindNextTarget()
     {
         return;
     }
-	
+
     if (_targetRegion!=_currentRegion)
     {
         _nextTarget=FindConnectionPoint(_currentRegion,_targetRegion);
@@ -480,7 +481,7 @@ void AICognitiveMap::FindNextTarget()
     {
        _nextTarget=_mainDestination;
     }
-	
+
     // Function considers that nearLandmark can be the target itself if no nearer was found.
     const AILandmark* nearLandmark = FindNearLandmarkConnectedToTarget(_nextTarget);
 
@@ -674,6 +675,3 @@ Point GetCloserPoint(const Point &origin, const Point &target1, const Point& tar
     else
         return target2;
 }
-
-
-

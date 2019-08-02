@@ -24,11 +24,9 @@
  *
  *
  **/
-
-
 #include "RoutingEngine.h"
-#include "../pedestrian/Pedestrian.h"
 
+#include "pedestrian/Pedestrian.h"
 
 RoutingEngine::RoutingEngine()
 {

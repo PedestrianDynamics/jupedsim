@@ -1,16 +1,16 @@
 //
 // Created by arne on 5/9/17.
 //
-#include <unordered_set>
 #include "UnivFFviaFM.h"
-#include "../../geometry/Line.h"
-#include "../../geometry/Building.h"
-#include "../../geometry/SubRoom.h"
-#include "../../pedestrian/Pedestrian.h"
-#include "mesh/RectGrid.h"
+
+#include "geometry/Building.h"
+#include "geometry/Line.h"
+#include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
+#include "pedestrian/Pedestrian.h"
+#include "routing/mesh/RectGrid.h"
 
-
+#include <unordered_set>
 
 UnivFFviaFM::~UnivFFviaFM() {
      if (_grid) delete _grid;

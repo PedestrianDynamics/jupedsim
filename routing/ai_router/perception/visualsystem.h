@@ -1,12 +1,13 @@
-#ifndef VISUALSYSTEM_H
-#define VISUALSYSTEM_H
+#pragma once
+
+#include "geometry/Point.h"
+#include "general/Macros.h"
 
 #include <boost/geometry/geometry.hpp>
+
 #include <memory>
 #include <vector>
 #include <unordered_map>
-#include "../../../geometry/Point.h"
-#include "../../../general/Macros.h"
 
 
 class NavLine;
@@ -76,12 +77,6 @@ private:
     std::vector<const Sign*> _hardlyVisibleSigns;
     std::vector<const Sign*> _detectedSigns;
     int _signPerceived;
-
-
-
-
 };
 
 double LegibleDistance(double phi);
-
-#endif // VISUALSYSTEM_H

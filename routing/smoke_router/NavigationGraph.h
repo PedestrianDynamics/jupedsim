@@ -25,24 +25,19 @@
  *
  *
  **/
+#pragma once
 
-
-#ifndef NAVIGATIONGRAPH1_H_
-#define NAVIGATIONGRAPH1_H_
-
-#include <unordered_map>
 #include "navigation_graph/GraphVertex.h"
 #include "navigation_graph/GraphEdge.h"
+
 #include <string>
+#include <unordered_map>
 
 class Building;
 class NavLine;
 class SubRoom;
 class Crossing;
 class Transition;
-
-
-
 
 /**
  * @brief Navigation Graph
@@ -86,6 +81,3 @@ private:
 
 
 };
-
-
-#endif /* NAVIGATIONGRAPH1_H_ */

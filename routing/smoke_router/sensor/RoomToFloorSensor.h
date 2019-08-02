@@ -24,13 +24,9 @@
  *
  *
  **/
-
-
-#ifndef ROOMTOFLOORSENSOR_H
-#define ROOMTOFLOORSENSOR_H 1
+#pragma once
 
 #include "AbstractSensor.h"
-
 
 class RoomToFloorSensor : public AbstractSensor {
 
@@ -44,5 +40,3 @@ public:
 private:
 
 };
-
-#endif // ROOMTOFLOORSENSOR_H

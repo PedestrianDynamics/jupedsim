@@ -1,5 +1,4 @@
-#ifndef REGION_H
-#define REGION_H
+#pragma once
 
 #include "landmark.h"
 #include "connection.h"
@@ -41,5 +40,3 @@ private:
     Connections _connections;
     LandmarkNetwork _landmarkNetwork;
 };
-
-#endif // REGION_H

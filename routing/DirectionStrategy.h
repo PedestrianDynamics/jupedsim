@@ -24,10 +24,7 @@
  *
  *
  **/
-
-
-#ifndef _DIRECTIONSTRATEGY_H
-#define _DIRECTIONSTRATEGY_H
+#pragma once
 
 #include <map>
 #include <vector>
@@ -206,6 +203,3 @@ protected:
     bool _useDistancefield;
     std::string _filename;
 };
-
-
-#endif  /* _DIRECTIONSTRATEGY_H */

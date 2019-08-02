@@ -1,7 +1,9 @@
+#include "Cortex.h"
+
+#include "pedestrian/Pedestrian.h"
+
 #include <cstdlib>
 #include <cmath>
-#include "Cortex.h"
-#include "../../pedestrian/Pedestrian.h"
 
 Cortex::Cortex()
 {
@@ -126,7 +128,7 @@ std::vector<const NavLine*> Cortex::SortConGeneralKnow(const std::vector<const N
             }
 
             else
-            {   
+            {
                 sortedNavLinesStairsDown.push_back(transition);
 
             }
@@ -137,7 +139,7 @@ std::vector<const NavLine*> Cortex::SortConGeneralKnow(const std::vector<const N
 
 
     //settings for underground station!
-    sortedNavLines.insert(std::end(sortedNavLines), std::begin(sortedNavLinesOutside), std::end(sortedNavLinesOutside));   
+    sortedNavLines.insert(std::end(sortedNavLines), std::begin(sortedNavLinesOutside), std::end(sortedNavLinesOutside));
     sortedNavLines.insert(std::end(sortedNavLines), std::begin(sortedNavLinesLobbies), std::end(sortedNavLinesLobbies));
     sortedNavLines.insert(std::end(sortedNavLines), std::begin(sortedNavLinesStairsUp), std::end(sortedNavLinesStairsUp));
     sortedNavLines.insert(std::end(sortedNavLines), std::begin(sortedNavLinesStairs), std::end(sortedNavLinesStairs));

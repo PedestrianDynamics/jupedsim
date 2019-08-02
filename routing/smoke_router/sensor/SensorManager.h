@@ -25,24 +25,20 @@
  *
  *
  **/
+#pragma once
 
-
-#ifndef SENSORMANAGER_H_
-#define SENSORMANAGER_H_
+#include<unordered_map>
+#include<vector>
+#include <set>
+#include <string>
 
 class Building;
 class BrainStorage;
 class AbstractSensor;
 class Pedestrian;
 
-#include<unordered_map>
-#include<vector>
 //c++11 alias: Container to store options for the router (i. a. sensors)
 using optStorage = std::unordered_map<std::string,std::vector<std::string> >;
-
-//#include <vector>
-#include <set>
-#include <string>
 
 class SensorManager {
 public:
@@ -54,7 +50,7 @@ public:
     static const EventType CHANGED_ROOM = 8;
     static const EventType NEW_DESTINATION = 16;
 
- 
+
      typedef std::vector<std::pair<AbstractSensor *, EventType> > SensorContainer;
 
      /****************************
@@ -80,6 +76,3 @@ private:
 
      double _periodicUpdateInterval;
 };
-
-
-#endif /* SENSORMANAGER_H_ */

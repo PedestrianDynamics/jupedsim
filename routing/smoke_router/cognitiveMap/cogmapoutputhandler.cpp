@@ -1,6 +1,5 @@
 #include "cogmapoutputhandler.h"
 
-
 CogMapOutputHandler::CogMapOutputHandler(const char *fn):FileHandler(fn)
 {
 

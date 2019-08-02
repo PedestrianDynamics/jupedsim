@@ -1,18 +1,14 @@
-#ifndef CORTEX_H
-#define CORTEX_H
+#pragma once
 
 #include "cognitiveMap/cognitivemap.h"
-#include "./perception/visibleenvironment.h"
-#include "./cognitiveMap/internnavigationnetwork.h"
-#include "./perception/visualsystem.h"
-
+#include "perception/visibleenvironment.h"
+#include "cognitiveMap/internnavigationnetwork.h"
+#include "perception/visualsystem.h"
 
 using ptrIntNetwork = std::unique_ptr<InternNavigationNetwork>;
 
-
-
 class Cortex
-{   
+{
 
 public:
     Cortex();
@@ -63,5 +59,3 @@ private:
 };
 
 bool IsInsideRectangle(const Point& point, const Point& leftUp, const Point& rightDown);
-
-#endif // CORTEX_H

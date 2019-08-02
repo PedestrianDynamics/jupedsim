@@ -31,21 +31,20 @@
  //was considered, but enum classes do not implicitly cast to int
  //rather use makros/masks like in plain C? or just makros (defines)?
  //this would make it easier to read
+#pragma once
 
-#ifndef FloorfieldViaFMTrips_H
-#define FloorfieldViaFMTrips_H
+#include "geometry/Building.h"
+#include "geometry/Point.h"
+#include "geometry/SubRoom.h"
+#include "geometry/Wall.h"
+#include "pedestrian/Pedestrian.h"
+#include "routing/mesh/RectGrid.h"
+#include "routing/mesh/Trial.h"
 
-#include <vector>
-#include <unordered_set>
 #include <cmath>
 #include <functional>
-#include "mesh/RectGrid.h"
-#include "../../geometry/Wall.h"
-#include "../../geometry/Point.h"
-#include "../../geometry/Building.h"
-#include "../../geometry/SubRoom.h" //check: should Room.h include SubRoom.h??
-#include "./mesh/Trial.h"
-#include "../../pedestrian/Pedestrian.h"
+#include <unordered_set>
+#include <vector>
 
 //maybe put following in macros.h
 #define LOWSPEED 0.001
@@ -221,5 +220,3 @@ class CentrePointFFViaFMTrips : public virtual FloorfieldViaFMTrips {
 public:
      virtual void getDirectionToUID(int destID, const long int key, Point& direction, int mode);
 };
-
-#endif // FloorfieldViaFMTrips_H

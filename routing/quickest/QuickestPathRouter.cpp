@@ -24,16 +24,13 @@
  *
  *
  **/
-
-
 #include "QuickestPathRouter.h"
-#include <tinyxml.h>
-#include "../../mpi/LCGrid.h"
-#include "../../geometry/SubRoom.h"
+
+#include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
+#include "mpi/LCGrid.h"
 
-//#include "../IO/OutputHandler.h"
-
+#include <tinyxml.h>
 
 QuickestPathRouter::QuickestPathRouter( ):GlobalRouter() { }
 

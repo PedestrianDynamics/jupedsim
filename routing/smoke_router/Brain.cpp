@@ -1,5 +1,6 @@
 #include "Brain.h"
-#include "../../pedestrian/Pedestrian.h"
+
+#include "pedestrian/Pedestrian.h"
 
 Brain::Brain()
 {
@@ -43,5 +44,3 @@ bool Brain::HlineReached() const
 
     return false;
 }
-
-

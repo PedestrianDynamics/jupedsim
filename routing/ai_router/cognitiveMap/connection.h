@@ -1,8 +1,6 @@
-#ifndef CONNECTION_H
-#define CONNECTION_H
+#pragma once
 
 #include "landmark.h"
-
 
 using AILandmarks = std::vector<AILandmark>;
 
@@ -31,5 +29,3 @@ private:
     int _landmarkId1;
     int _landmarkId2;
 };
-
-#endif // CONNECTION_H

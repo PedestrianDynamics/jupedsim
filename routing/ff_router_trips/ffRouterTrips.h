@@ -55,17 +55,15 @@
  * functions of (x, y) and not (x, y, z). Any slope will be neglected.
  *
  **/
+#pragma once
 
-#ifndef FFROUTERTRIPS_H_
-#define FFROUTERTRIPS_H_
+#include "FloorfieldViaFMTrips.h"
+#include "UnivFFviaFMTrips.h"
 
-
-#include "../Router.h"
-#include "../../general/Macros.h"
-#include "../../geometry/Building.h"
-#include "./FloorfieldViaFMTrips.h"
-#include "./UnivFFviaFMTrips.h"
-#include "../../geometry/GoalManager.h"
+#include "general/Macros.h"
+#include "geometry/Building.h"
+#include "geometry/GoalManager.h"
+#include "routing/Router.h"
 
 class Building;
 class Pedestrian;
@@ -233,5 +231,3 @@ protected:
 
      GoalManager goalManager;
 };
-
-#endif /* FFROUTER_H_ */

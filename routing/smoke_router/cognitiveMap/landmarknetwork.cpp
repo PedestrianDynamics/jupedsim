@@ -212,4 +212,3 @@ void LandmarkNetwork::RemoveAdjacentEdges(const Vertex &vertex)
         }
     }
 }
-

@@ -1,5 +1,4 @@
-#ifndef REGION_H
-#define REGION_H
+#pragma once
 
 #include "landmark.h"
 #include "connection.h"
@@ -42,5 +41,3 @@ private:
     AIAssociations _assoContainer;
     AILandmarks _landmarksSubConcious;
 };
-
-#endif // REGION_H

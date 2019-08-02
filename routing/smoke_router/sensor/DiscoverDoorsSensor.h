@@ -25,13 +25,9 @@
  *
  *
  **/
-
-
-#ifndef DISCOVERDOORSSENSOR_H
-#define DISCOVERDOORSSENSOR_H 1
+#pragma once
 
 #include "AbstractSensor.h"
-
 
 class DiscoverDoorsSensor : public AbstractSensor
 {
@@ -46,5 +42,3 @@ public:
 private:
 
 };
-
-#endif // DISCOVERDOORSSENSOR_H

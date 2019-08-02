@@ -1,16 +1,11 @@
 //
 // Created by erik on 30.12.16.
 //
+#pragma once
 
-#ifndef JPSCORE_SIGN_H
-#define JPSCORE_SIGN_H
-
-
-#include "../../../geometry/Point.h"
+#include "geometry/Point.h"
 
 class Sign {
-
-
 public:
 
     Sign(int id, int room_id, const Point &pos, const double& alpha, const double& alphaPointing, const double& width=0.3, const double &height=0.1);
@@ -45,6 +40,3 @@ private:
 
 
 };
-
-
-#endif //JPSCORE_SIGN_H

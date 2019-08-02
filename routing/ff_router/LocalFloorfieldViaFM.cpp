@@ -1,7 +1,6 @@
 //
 // Created by ar.graf on 1/28/16.
 //
-
 #include "LocalFloorfieldViaFM.h"
 
 LocalFloorfieldViaFM::LocalFloorfieldViaFM(){};

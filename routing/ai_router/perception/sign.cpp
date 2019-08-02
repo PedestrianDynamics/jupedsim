@@ -1,7 +1,6 @@
 //
 // Created by erik on 30.12.16.
 //
-
 #include "sign.h"
 
 Sign::Sign(int id, int room_id, const Point &pos, const double &alpha, const double &alphaPointing, const double &width, const double &height) : _id(id), _roomId(room_id), _pos(pos), _alpha(alpha),_alphaPointing(alphaPointing),_width(width), _height(height) {
@@ -77,7 +76,3 @@ void Sign::SetHeight(const double &height)
 {
     _height=height;
 }
-
-
-
-

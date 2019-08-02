@@ -29,11 +29,9 @@
  *
  *
  **/
+#pragma once
 
-#ifndef TRIAL_H
-#define TRIAL_H
-
-#include "../../../geometry/Point.h"
+#include "geometry/Point.h"
 
 class Trial // father := smaller; child := bigger (in terms of cost); cost/speed := ptr to its cost/speed
 {
@@ -162,11 +160,4 @@ class Trial // father := smaller; child := bigger (in terms of cost); cost/speed
             curr->father = nullptr;
             curr->child = nullptr;
         }
-
-
-
-    protected:
-    private:
 };
-
-#endif // TRIAL_H

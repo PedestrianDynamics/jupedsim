@@ -24,28 +24,15 @@
  *
  *
  **/
-
-
 #include "GlobalRouter.h"
 
 #include "AccessPoint.h"
-//#include "Router.h"
-//#include "NavMesh.h"
 #include "DTriangulation.h"
 
-//#include "../geometry/Building.h"
-//#include "../pedestrian/Pedestrian.h"
-#include <tinyxml.h>
-#include "../../geometry/SubRoom.h"
+#include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 
-//#include "../geometry/Wall.h"
-//#include "../IO/OutputHandler.h"
-
-//#include <sstream>
-//#include <cfloat>
-//#include <fstream>
-//#include <iomanip>
+#include <tinyxml.h>
 
 GlobalRouter::GlobalRouter() :
                               Router()

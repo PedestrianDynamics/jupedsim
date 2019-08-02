@@ -25,12 +25,9 @@
  *
  *
  **/
-
-#ifndef LASTDESTINATIONSSENSOR_H
-#define LASTDESTINATIONSSENSOR_H 1
+#pragma once
 
 #include "AbstractSensor.h"
-
 
 class LastDestinationsSensor : public AbstractSensor
 {
@@ -45,5 +42,3 @@ public:
 private:
 
 };
-
-#endif // LASTDESTINATIONSSENSOR_H

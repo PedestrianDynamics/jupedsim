@@ -25,10 +25,7 @@
  *
  *
  **/
-
-
-#ifndef DTRIANGULATION_H_
-#define DTRIANGULATION_H_
+#pragma once
 
 #include "../../geometry/Point.h"
 
@@ -92,5 +89,3 @@ private:
      p2t::CDT* _cdt;
 
 };
-
-#endif /* DTRIANGULATION_H_ */

@@ -1,7 +1,6 @@
 #include "associations.h"
+
 #include "connection.h"
-
-
 
 AIAssociation::AIAssociation()
 {

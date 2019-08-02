@@ -24,52 +24,36 @@
  *
  *
  **/
- 
- 
-#ifndef _GEOMETRY_FUNCTIONS_
-#define _GEOMETRY_FUNCTIONS_
+#pragma once
 
 #ifdef _CGAL
-#include <CGAL/basic.h>
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Partition_traits_2.h>
-#include <CGAL/Partition_is_valid_traits_2.h>
-#include <CGAL/polygon_function_objects.h>
-#include <CGAL/partition_2.h>
-#include <CGAL/point_generators_2.h>
-#include <CGAL/random_polygon_2.h>
-#include <CGAL/connect_holes.h>
-#include <cassert>
-#include <list>
-//
-//#include <CGAL/Partition_traits_2.h>
-//#include <CGAL/Partition_is_valid_traits_2.h>
-//#include <CGAL/polygon_function_objects.h>
-//#include <CGAL/partition_2.h>
-//#include <CGAL/point_generators_2.h>
-//#include <CGAL/random_polygon_2.h>
-//
-
-#include <CGAL/Constrained_Delaunay_triangulation_2.h>
-#include <CGAL/Triangulation_face_base_with_info_2.h>
-#include <CGAL/Polygon_2.h>
-
-#include <CGAL/IO/Geomview_stream.h>
-#include <CGAL/Delaunay_triangulation_2.h>
-#include <CGAL/Alpha_shape_euclidean_traits_2.h>
-#include <CGAL/Alpha_shape_vertex_base_2.h>
-#include <CGAL/Triangulation_face_base_2.h>
-#include <CGAL/Alpha_shape_face_base_2.h>
 #include <CGAL/Alpha_shape_2.h>
-
-#include <iostream>
-#include <cstdio>
-#include <cstdlib>
-
-
+#include <CGAL/Alpha_shape_euclidean_traits_2.h>
+#include <CGAL/Alpha_shape_face_base_2.h>
+#include <CGAL/Alpha_shape_vertex_base_2.h>
+#include <CGAL/basic.h>
 #include <CGAL/Cartesian.h>
 #include <CGAL/centroid.h>
+#include <CGAL/connect_holes.h>
+#include <CGAL/Constrained_Delaunay_triangulation_2.h>
+#include <CGAL/Delaunay_triangulation_2.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/IO/Geomview_stream.h>
+#include <CGAL/partition_2.h>
+#include <CGAL/Partition_is_valid_traits_2.h>
+#include <CGAL/Partition_traits_2.h>
+#include <CGAL/point_generators_2.h>
+#include <CGAL/Polygon_2.h>
+#include <CGAL/polygon_function_objects.h>
+#include <CGAL/random_polygon_2.h>
+#include <CGAL/Triangulation_face_base_2.h>
+#include <CGAL/Triangulation_face_base_with_info_2.h>
 
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include <list>
 
 struct FaceInfo2 {
      FaceInfo2() {}
@@ -80,56 +64,32 @@ struct FaceInfo2 {
      }
 };
 
-
-
-typedef CGAL::Exact_predicates_inexact_constructions_kernel             K;
-typedef CGAL::Partition_traits_2<K>                                                             Traits;
-typedef CGAL::Is_convex_2<Traits>                                                                       Is_convex_2;
-typedef Traits::Polygon_2                                                                                       Polygon_2;
-//typedef CGAL::Polygon_2<K>                                                                                    Polygon_2;
-typedef Traits::Point_2                                                                                         Point_2;
-typedef Polygon_2::Vertex_const_iterator                                                        Vertex_iterator;
-typedef std::list<Polygon_2>                                                                            Polygon_list;
-typedef Polygon_list::const_iterator                                                            Polygon_iterator;
-typedef CGAL::Partition_is_valid_traits_2<Traits, Is_convex_2>          Validity_traits;
-typedef Polygon_2::Edge_const_iterator                                                          Edge_iterator;
-
-
-typedef CGAL::Triangulation_vertex_base_2<K>                      Vb;
-typedef CGAL::Triangulation_face_base_with_info_2<FaceInfo2,K>    Fbb;
-typedef CGAL::Constrained_triangulation_face_base_2<K,Fbb>        Fb;
-typedef CGAL::Triangulation_data_structure_2<Vb,Fb>               TDS;
-typedef CGAL::Exact_predicates_tag                                Itag;
-typedef CGAL::Constrained_Delaunay_triangulation_2<K, TDS, Itag>  CDT;
-
-
-
-typedef CGAL::Alpha_shape_vertex_base_2<K>                                                      Av;
-typedef CGAL::Triangulation_face_base_2<K>                                                      Tf;
-typedef CGAL::Alpha_shape_face_base_2<K,Tf>                                             Af;
-typedef CGAL::Triangulation_default_data_structure_2<K,Av,Af>           Tds;
-typedef CGAL::Delaunay_triangulation_2<K,Tds>                                           DT;
-
-typedef CGAL::Polygon_with_holes_2<K>                                           Polygon_with_holes_2;
-
-typedef CGAL::Segment_2<K>                                                                                      Segment_2;
-
-//fast delauney
-//typedef CGAL::Alpha_shape_vertex_base_3<K>               Vb;
-//typedef CGAL::Alpha_shape_cell_base_3<K>                 Fb;
-//typedef CGAL::Triangulation_data_structure_3<Vb,Fb>      Tds;
-//typedef CGAL::Delaunay_triangulation_3<K,Tds,CGAL::Fast_location>  Delaunay;
-//typedef CGAL::Alpha_shape_3<Delaunay>                    Alpha_shape_3;
-//typedef Alpha_shape_3::Alpha_iterator               Alpha_iterator;
-//typedef Alpha_shape_3::NT                           NT;
-
-
+typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+typedef CGAL::Partition_traits_2<K> Traits;
+typedef CGAL::Is_convex_2<Traits> Is_convex_2;
+typedef Traits::Polygon_2 Polygon_2;
+typedef Traits::Point_2 Point_2;
+typedef Polygon_2::Vertex_const_iterator Vertex_iterator;
+typedef std::list<Polygon_2> Polygon_list;
+typedef Polygon_list::const_iterator Polygon_iterator;
+typedef CGAL::Partition_is_valid_traits_2<Traits, Is_convex_2> Validity_traits;
+typedef Polygon_2::Edge_const_iterator Edge_iterator;
+typedef CGAL::Triangulation_vertex_base_2<K> Vb;
+typedef CGAL::Triangulation_face_base_with_info_2<FaceInfo2, K> Fbb;
+typedef CGAL::Constrained_triangulation_face_base_2<K, Fbb> Fb;
+typedef CGAL::Triangulation_data_structure_2<Vb, Fb> TDS;
+typedef CGAL::Exact_predicates_tag Itag;
+typedef CGAL::Constrained_Delaunay_triangulation_2<K, TDS, Itag> CDT;
+typedef CGAL::Alpha_shape_vertex_base_2<K> Av;
+typedef CGAL::Triangulation_face_base_2<K> Tf;
+typedef CGAL::Alpha_shape_face_base_2<K, Tf> Af;
+typedef CGAL::Triangulation_default_data_structure_2<K, Av, Af> Tds;
+typedef CGAL::Delaunay_triangulation_2<K, Tds> DT;
+typedef CGAL::Polygon_with_holes_2<K> Polygon_with_holes_2;
+typedef CGAL::Segment_2<K> Segment_2;
 typedef CGAL::Alpha_shape_2<DT> Alpha_shape_2;
-typedef Alpha_shape_2::Alpha_iterator               Alpha_iterator;
-typedef Alpha_shape_2::Vertex_iterator                                  Alpha_vertex_iterator;
-
-
-
+typedef Alpha_shape_2::Alpha_iterator Alpha_iterator;
+typedef Alpha_shape_2::Vertex_iterator Alpha_vertex_iterator;
 
 inline
 void
@@ -324,4 +284,3 @@ void print_polygon_with_holes(const CGAL::Polygon_with_holes_2<Kernel, Container
      std::cout << " }" << std::endl;
 }
 #endif /* _CGAL */
-#endif /* _GEOMETRY_FUNCTIONS_ */

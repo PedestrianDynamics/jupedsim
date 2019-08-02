@@ -25,13 +25,11 @@
  *
  *
  **/
+#pragma once
 
+#include "geometry/Line.h"
+#include "routing/smoke_router/fire_mesh/FireMesh.h"
 
-#ifndef GRAPHEDGE_H_
-#define GRAPHEDGE_H_
-
-#include "../../../geometry/Line.h"
-#include "../fire_mesh/FireMesh.h"
 #include <map>
 
 class SubRoom;
@@ -90,6 +88,3 @@ private:
      double _approximate_distance;
 
 };
-
-
-#endif /* GRAPHEDGE_H_ */

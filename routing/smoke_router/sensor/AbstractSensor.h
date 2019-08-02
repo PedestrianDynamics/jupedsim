@@ -24,17 +24,13 @@
  *
  *
  **/
-
-
-#ifndef ABSTRACTSENSOR_H
-#define ABSTRACTSENSOR_H 1
+#pragma once
 
 #include <string>
+
 class Building;
 class Pedestrian;
 class CognitiveMap;
-
-
 
 class AbstractSensor {
 public:
@@ -47,5 +43,3 @@ protected:
      const Building * const building;
 
 };
-
-#endif // ABSTRACTSENSOR_H

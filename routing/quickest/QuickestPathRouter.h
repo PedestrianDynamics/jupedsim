@@ -24,20 +24,14 @@
  *
  *
  **/
+#pragma once
 
+#include "routing/global_shortest/GlobalRouter.h"
+#include "routing/global_shortest/AccessPoint.h"
 
-#ifndef QUICKESTPATHROUTER_H_
-#define QUICKESTPATHROUTER_H_
-
-
-#include "../global_shortest/GlobalRouter.h"
-#include "../global_shortest/AccessPoint.h"
-//#include "../global_shortest_trips/GlobalRouterTrips.h"
-//#include "../global_shortest_trips/AccessPoint.h"
-
-#include "../Router.h"
-#include "../../geometry/Building.h"
-#include "../../pedestrian/Pedestrian.h"
+#include "routing/Router.h"
+#include "geometry/Building.h"
+#include "pedestrian/Pedestrian.h"
 
 #include <cfloat>
 
@@ -239,5 +233,3 @@ private:
      // defauult initial strategy for the pedestrians
      DefaultStrategy _defaultStrategy=DefaultStrategy::GLOBAL_SHORTEST;
 };
-
-#endif /* QUICKESTPATHROUTER_H_ */

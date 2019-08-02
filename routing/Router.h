@@ -26,14 +26,11 @@
  *
  *
  **/
+#pragma once
 
-
-#ifndef _ROUTER_H
-#define  _ROUTER_H
+#include "general/Macros.h"
 
 #include <vector>
-
-#include "../general/Macros.h"
 
 class Building;
 class Pedestrian;
@@ -137,5 +134,3 @@ public:
       */
      virtual void Update();
 };
-
-#endif  /* _ROUTING_H */

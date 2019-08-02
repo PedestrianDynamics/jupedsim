@@ -25,12 +25,10 @@
  *
  *
  **/
+#pragma once
 
+#include "routing/Router.h"
 
-#ifndef SMOKEROUTER_H_
-#define SMOKEROUTER_H_
-
-#include "../Router.h"
 #include <string>
 #include <unordered_map>
 #include <memory>
@@ -40,9 +38,6 @@ class Router;
 class BrainStorage;
 class SensorManager;
 class NavLine;
-
-
-
 
 //c++11 alias: Container to store options for the router (i. a. sensors)
 using optStorage = std::unordered_map<std::string,std::vector<std::string> >;
@@ -96,5 +91,3 @@ private:
      optStorage options;
 
 };
-
-#endif /* SMOKEROUTER_H_ */

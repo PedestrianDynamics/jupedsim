@@ -44,15 +44,15 @@
  * We will derive from the <Router> class to fit the interface.
  *
  **/
-
-#include <cfloat>
-#include <algorithm>
 #include "ffRouterTrips.h"
+
 #include "FloorfieldViaFMTrips.h"
 #include "UnivFFviaFMTrips.h"
-//#include "../../geometry/Building.h"
-#include "../../geometry/WaitingArea.h"
-#include "../../geometry/GoalManager.h"
+#include "geometry/GoalManager.h"
+#include "geometry/WaitingArea.h"
+
+#include <algorithm>
+#include <cfloat>
 
 int FFRouterTrips::_cnt = 0;
 
