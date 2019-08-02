@@ -25,16 +25,13 @@
  * Implementation of classes for Gompertz Model
  *
  **/
+#pragma once
 
-
-#ifndef GOMPERTZMODEL_H_
-#define GOMPERTZMODEL_H_
-
-#include <vector>
-
-#include "../geometry/Building.h"
 #include "OperationalModel.h"
 
+#include "geometry/Building.h"
+
+#include <vector>
 
 //forward declaration
 class Pedestrian;
@@ -187,6 +184,3 @@ public:
       */
      virtual void ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic);
 };
-
-
-#endif /* GOMPERTZMODEL_H_ */

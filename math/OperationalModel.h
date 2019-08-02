@@ -35,9 +35,7 @@
  *  @{
  */
 /** @} */ // end of group
-
-#ifndef OPERATIONALMODEL_H_
-#define OPERATIONALMODEL_H_
+#pragma once
 
 #include <string>
 #include <memory>
@@ -86,5 +84,3 @@ public:
 
      std::shared_ptr<DirectionStrategy> GetDirection() {return _direction;};
 };
-
-#endif /* OPERATIONALMODEL_H_ */

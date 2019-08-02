@@ -25,9 +25,8 @@
  *
  **/
 
-
 #include "ForceModel.h"
-#include "../pedestrian/Pedestrian.h"
+
 
 ForceModel::ForceModel()
 {

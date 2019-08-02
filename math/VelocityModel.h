@@ -27,15 +27,13 @@
  *
  *
  **/
+#pragma once
 
+#include "OperationalModel.h"
 
-#ifndef VELOCITYMODEL_H_
-#define VELOCITYMODEL_H_
+#include "geometry/Building.h"
 
 #include <vector>
-
-#include "../geometry/Building.h"
-#include "OperationalModel.h"
 
 typedef std::pair<double, double> my_pair;
 // sort with respect to first element (ascending).
@@ -194,6 +192,3 @@ public:
       */
      virtual void ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic);
 };
-
-
-#endif
