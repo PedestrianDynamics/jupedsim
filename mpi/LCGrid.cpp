@@ -32,10 +32,10 @@
  *
  *
  **/
-
-
 #include"LCGrid.h"
-#include "../pedestrian/Pedestrian.h"
+
+#include "pedestrian/Pedestrian.h"
+
 #include <mutex>
 
 
