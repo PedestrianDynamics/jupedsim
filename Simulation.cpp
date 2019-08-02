@@ -346,18 +346,10 @@ void Simulation::UpdateRoutesAndLocations()
 //    }
 
 #pragma omp parallel for shared(pedsToRemove, allRooms)
-     for (int p = 0; p < allPeds.size(); ++p) {
+     for (size_t p = 0; p < allPeds.size(); ++p) {
           auto ped = allPeds[p];
           Room* room = _building->GetRoom(ped->GetRoomID());
           SubRoom* sub0 = room->GetSubRoom(ped->GetSubRoomID());
-
-          Transition* door0 = _building->GetTransition(0);
-          Transition* door1 = _building->GetTransition(1);
-
-          if (!door0->IsOpen() || !door1->IsOpen()){
-//               std::cout << "One door not open ..." << std::endl;
-               bool foo = false;
-          }
 
           //set the new room if needed
           if ((ped->GetFinalDestination() == FINAL_DEST_OUT)

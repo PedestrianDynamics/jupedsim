@@ -535,7 +535,7 @@ double VisualSystem::HeadDirCompToSign(const Sign &sign) const
 }
 
 
-double VisualSystem::GetProbabilityToDetectSign(double headDir, bool hardlyVisSign)
+double VisualSystem::GetProbabilityToDetectSign(double /*headDir*/, bool hardlyVisSign)
 {
 
     double P=1.0;
