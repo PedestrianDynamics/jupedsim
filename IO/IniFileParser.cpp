@@ -241,8 +241,11 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
 {
      //logfile
      if (xHeader->FirstChild("logfile")) {
-          _config->SetErrorLogFile(
-               _config->GetProjectRootDir() + xHeader->FirstChild("logfile")->FirstChild()->Value());
+          fs::path logPath( xHeader->FirstChild("logfile")->FirstChild()->Value());
+          fs::path root(_config->GetProjectRootDir()); // returns an absolute path already
+          fs::path canonicalPath = fs::weakly_canonical(root / logPath);
+          std::string log = canonicalPath.string();
+          _config->SetErrorLogFile(log);
           _config->SetLog(2);
           Log->Write("INFO:\tlogfile <%s>", _config->GetErrorLogFile().c_str());
      }
@@ -367,21 +370,16 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
 
           //a file descriptor was given
           if (xTrajectories->FirstChild("file")) {
-               std::string tmp;
-               tmp = xTrajectories->FirstChildElement("file")->Attribute(
-                    "location");
-               fs::path p(tmp);
-               fs::path curr_abs_path = fs::current_path();
-               fs::path rel_path = fs::path(_config->GetProjectRootDir()) / fs::path(tmp);
-               fs::path combined = (curr_abs_path /= rel_path);
-               std::string traj = combined.string();
+               fs::path trajLoc( xTrajectories->FirstChildElement("file")->Attribute("location"));
+               fs::path root(_config->GetProjectRootDir()); // returns an absolute path already
+               fs::path canonicalPath = fs::weakly_canonical(root / trajLoc);
+               std::string traj = canonicalPath.string();
 
                if (traj.c_str())
                {
                     _config->SetTrajectoriesFile(traj);
                     _config->SetOriginalTrajectoriesFile(traj);
                }
-
 
                Log->Write("INFO: \toutput file  <%s>", _config->GetTrajectoriesFile().c_str());
                Log->Write("INFO: \tin format <%s> at <%.0f> frames per seconds",format.c_str(), _config->GetFps());
