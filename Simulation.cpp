@@ -152,15 +152,12 @@ bool Simulation::InitArgs()
     }
 
     if (!_config->GetTrajectoriesFile().empty()) {
-         fs::path p(_config->GetTrajectoriesFile());
-         fs::path curr_abs_path = fs::current_path();
-         fs::path rel_path = _config->GetTrajectoriesFile();
-         fs::path combined = (curr_abs_path /= rel_path);
-         std::string traj = combined.string();
-         _config->SetTrajectoriesFile(traj);
-         if(!fs::exists(traj))
-              fs::create_directories(combined.parent_path());
+         fs::path trajPath(_config->GetTrajectoriesFile());
+         if(!fs::exists(trajPath)) {
+              fs::create_directories(trajPath.parent_path());
+         }
 
+         std::string traj = trajPath.string();
 
         switch (_config->GetFileFormat()) {
         case FORMAT_XML_PLAIN: {
