@@ -153,9 +153,7 @@ bool Simulation::InitArgs()
 
     if (!_config->GetTrajectoriesFile().empty()) {
          fs::path trajPath(_config->GetTrajectoriesFile());
-         if(!fs::exists(trajPath)) {
-              fs::create_directories(trajPath.parent_path());
-         }
+         fs::create_directories(trajPath.parent_path());
 
          std::string traj = trajPath.string();
 
