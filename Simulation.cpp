@@ -145,20 +145,14 @@ bool Simulation::InitArgs()
     }
 
     if (!_config->GetTrajectoriesFile().empty()) {
-         fs::path p(_config->GetTrajectoriesFile());
-         fs::path curr_abs_path = fs::current_path();
-         fs::path rel_path = _config->GetTrajectoriesFile();
-         fs::path combined = (curr_abs_path /= rel_path);
-         std::string traj = combined.string();
-         _config->SetTrajectoriesFile(traj);
-         if(!fs::exists(traj))
-              fs::create_directories(combined.parent_path());
+        fs::path trajectoriesFile(_config->GetTrajectoriesFile());
+        fs::create_directories(trajectoriesFile.parent_path());
 
 
         switch (_config->GetFileFormat()) {
         case FORMAT_XML_PLAIN: {
             auto tofile = std::make_shared<FileHandler>(
-                    traj.c_str());
+                    trajectoriesFile.c_str());
             Trajectories* output = new TrajectoriesJPSV05();
             output->SetOutputHandler(tofile);
             _iod->AddIO(output);
@@ -166,7 +160,7 @@ bool Simulation::InitArgs()
         }
         case FORMAT_PLAIN: {
             auto file = std::make_shared<FileHandler>(
-                 traj.c_str());
+                 trajectoriesFile.c_str());
             outputTXT = new TrajectoriesFLAT();
             outputTXT->SetOutputHandler(file);
             _iod->AddIO(outputTXT);
@@ -175,7 +169,7 @@ bool Simulation::InitArgs()
         case FORMAT_VTK: {
             Log->Write("INFO: \tFormat vtk not yet supported\n");
             auto file = std::make_shared<FileHandler>(
-                    (traj+".vtk").c_str());
+                    trajectoriesFile.replace_extension({".vtk"}).c_str());
             Trajectories* output = new TrajectoriesVTK();
             output->SetOutputHandler(file);
             _iod->AddIO(output);

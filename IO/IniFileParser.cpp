@@ -367,14 +367,10 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
 
           //a file descriptor was given
           if (xTrajectories->FirstChild("file")) {
-               std::string tmp;
-               tmp = xTrajectories->FirstChildElement("file")->Attribute(
-                    "location");
-               fs::path p(tmp);
-               fs::path curr_abs_path = fs::current_path();
-               fs::path rel_path = fs::path(_config->GetProjectRootDir()) / fs::path(tmp);
-               fs::path combined = (curr_abs_path /= rel_path);
-               std::string traj = combined.string();
+               fs::path trajLoc( xTrajectories->FirstChildElement("file")->Attribute("location"));
+               fs::path root(_config->GetProjectRootDir());
+               fs::path canonicalPath = fs::weakly_canonical(root / trajLoc);
+               std::string traj = canonicalPath.string();
 
                if (traj.c_str())
                {
