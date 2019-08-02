@@ -228,6 +228,13 @@ int Crossing::GetPartialDoorUsage() const
 void Crossing::ResetDoorUsage()
 {
      _doorUsage = 0;
+
+     if ((_outflowRate >= std::numeric_limits<double>::max())){
+          if (_maxDoorUsage < std::numeric_limits<double>::max()){
+               Open();
+               Log->Write("INFO:\tReopening door %d ", _id);
+          }
+     }
 }
 
 int Crossing::GetMaxDoorUsage() const
@@ -297,8 +304,10 @@ void Crossing::SetDN(int dn)
 // - _closingTime
 // - state of door (close/open)
 // - _temporaryClosed (false if maxDoorUsage is reached)
-void Crossing::regulateFlow(double time)
+// return a change, e.g. door closed was made.
+bool Crossing::RegulateFlow(double time)
 {
+     bool change = false;
      double number = GetPartialDoorUsage();
      double T = time -  _lastFlowMeasurement;
      double flow =  number / T;
@@ -309,8 +318,10 @@ void Crossing::regulateFlow(double time)
                // --> [1]
                //---------------------------
                _closingTime = number / _outflowRate -  T; //[1]
+//               this->Close();
                this->TempClose();
                Log-> Write("INFO:\tClosing door %d. DoorUsage = %d (max = %d). Flow = %.2f (max =  %.2f) Time=%.2f", GetID(), GetDoorUsage(), GetMaxDoorUsage(), flow, _outflowRate, time);
+               change = true;
           }
      }
 
@@ -318,7 +329,9 @@ void Crossing::regulateFlow(double time)
      if (_maxDoorUsage != std::numeric_limits<double>::max()){
           if(_doorUsage >= _maxDoorUsage){
                Log-> Write("INFO:\tClosing door %d. DoorUsage = %d (>= %d). Time=%.2f", GetID(), GetDoorUsage(), GetMaxDoorUsage(), time);
+//               this->Close();
                this->TempClose();
+               change = true;
 //          _temporaryClosed = false;
           }
      }
@@ -326,11 +339,30 @@ void Crossing::regulateFlow(double time)
      _lastFlowMeasurement = time +  _closingTime;
 }
 
-void Crossing::changeTemporaryState()
+void Crossing::UpdateTemporaryState(double dt)
 {
-//       _temporaryClosed = false;
-     _closingTime = 0;
-     this->Open();
+     // Only update doors which are temp closed (by flow regulation or events)
+     if(IsTempClose()) {
+          // States if the door has to be opened due to flow control
+          bool change = false;
+
+          // Check if door needs to be opened due to flow control
+          if (_outflowRate!=std::numeric_limits<double>::max()) {
+               UpdateClosingTime(dt);
+               change = (_closingTime<=dt);
+          }
+
+          // Check of door is allowd to be openend due to max door usage
+          if (_maxDoorUsage!=std::numeric_limits<int>::max()) {
+               change = change && (_doorUsage<_maxDoorUsage);
+          }
+
+          // If needed opens the door
+          if (change) {
+               _closingTime = 0;
+               Open();
+          }
+     }
 }
 
 DoorState Crossing::GetState() const

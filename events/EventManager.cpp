@@ -114,8 +114,13 @@ bool EventManager::ReadEventsXml()
           eventfile = _projectRootDir
                     + xMainNode->FirstChild("events_file")->FirstChild()->Value();
           Log->Write("INFO: \tevents <" + eventfile + ">");
+     } else if (xMainNode->FirstChild("header")->FirstChild("events_file")) {
+          eventfile = _projectRootDir
+                  + xMainNode->FirstChild("header")->FirstChild("events_file")->FirstChild()->Value();
+          Log->Write("INFO: \tevents <" + eventfile + ">");
+
      } else {
-          Log->Write("INFO: \tNo events found: <" + eventfile + ">");
+          Log->Write("INFO: \tNo events found");
           return true;
      }
 
@@ -164,6 +169,7 @@ bool EventManager::ReadEventsXml()
      //FIXME: creating some engine before starting is not working.
      // seom doors are still perceived as beeing closed.
      //CreateSomeEngines();
+
      return true;
 }
 
@@ -614,7 +620,7 @@ void EventManager::ResetDoor(int id)
 {
      Transition *t = _building->GetTransition(id);
      t->ResetDoorUsage();
-     t->ResetPartialDoorUsage();
+
      Log->Write("INFO:\tResetting door usage %d ", id);
 
      if(CreateRoutingEngine(_building)==false)

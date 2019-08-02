@@ -216,17 +216,18 @@ public:
     void UpdateClosingTime(double dt);
 
     /**
-     * changes two private variables
-     * _temporaryClosed is false
-     * and _closingTime is 0
+     * Updates the state of temp closed doors. Door will be openend if it is
+     * closed due to flow regulation if maxDoorUsage is not reached yet.
+     *
+     * @param[in] dt
      */
-    void changeTemporaryState();
+    void UpdateTemporaryState(double dt);
     double GetDT();
     void SetDT(double dt);
     int GetDN();
     void SetDN(int dt);
 
-    void regulateFlow(double time);
+    bool RegulateFlow(double time);
 
     DoorState GetState() const;
 

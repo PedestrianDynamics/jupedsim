@@ -68,8 +68,8 @@ const std::string Event::GetDescription() const
 
 EventAction Event::StringToEventAction(const std::string& in)
 {
-     std::string name;
-     std::transform(in.begin(), in.end(), name.begin(), ::tolower);
+     std::string name(in);
+     std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
      if (name == "open"){
           return EventAction::OPEN;
