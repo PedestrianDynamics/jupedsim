@@ -24,10 +24,9 @@
  *
  *
  **/
-
+#include "Goal.h"
 
 #include "Point.h"
-#include "Goal.h"
 #include "Wall.h"
 #include "Crossing.h"
 

@@ -27,15 +27,14 @@
  *
  *
  **/
+#pragma once
 
+#include <boost/geometry/geometries/register/point.hpp>
+#include <boost/geometry.hpp>
 
-#ifndef _POINT_H
-#define _POINT_H
 #include <string>
 #include <math.h>
 #include <iostream>
-#include <boost/geometry/geometries/register/point.hpp>
-#include <boost/geometry.hpp>
 
 class Point {
 public:
@@ -145,6 +144,3 @@ double Distance(const Point&, const Point&);
 const Point operator*(const Point& p, const double f);
 /// division
 const Point operator/(const Point& p, const double f);
-
-#endif  /* _POINT_H */
-

@@ -28,6 +28,7 @@
 #define TESTING
 #define GEO_UP_SCALE 1
 #include "FloorfieldViaFM.h"
+
 #include "general/OpenMP.h"
 
 FloorfieldViaFM::FloorfieldViaFM()
@@ -305,9 +306,9 @@ void FloorfieldViaFM::createMapEntryInLineToGoalID(const int goalID)
 //            clearAndPrepareForFloorfieldReCalc(localcostptr);
 
             //get all lines/walls of goalID
-            vector<Line> localline;
+            std::vector<Line> localline;
             const std::map<int, Goal*>& allgoals = _building->GetAllGoals();
-            vector<Wall> localwalls = allgoals.at(goalID)->GetAllWalls();
+            std::vector<Wall> localwalls = allgoals.at(goalID)->GetAllWalls();
 
             double xMin = _grid->GetxMin();
             double xMax = _grid->GetxMax();
@@ -534,7 +535,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
                 if ((*itWall).GetPoint2()._y > yMax) yMax = (*itWall).GetPoint2()._y;
             }
 
-            const vector<Crossing*>& allCrossings = itSubroom.second->GetAllCrossings();
+            const std::vector<Crossing*>& allCrossings = itSubroom.second->GetAllCrossings();
             for (Crossing* crossPtr : allCrossings) {
                 //TODO if (!crossPtr->IsOpen()) {
                 if (!crossPtr->IsOpen()) {
@@ -720,7 +721,7 @@ void FloorfieldViaFM::parseBuildingForExits(const Building* const buildingArg, c
                 if ((*itWall).GetPoint1()._y > yMax) yMax = (*itWall).GetPoint1()._y;
                 if ((*itWall).GetPoint2()._y > yMax) yMax = (*itWall).GetPoint2()._y;
             }
-            const vector<Crossing*>& allCrossings = itSubroom.second->GetAllCrossings();
+            const std::vector<Crossing*>& allCrossings = itSubroom.second->GetAllCrossings();
             for (Crossing* crossPtr : allCrossings) {
                 //TODO if (!crossPtr->IsOpen()) {
                 if (!crossPtr->IsOpen()) {

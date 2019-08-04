@@ -1,16 +1,12 @@
-#ifndef BRAIN_H
-#define BRAIN_H
+#pragma once
 
-#include "cognitiveMap/cognitivemap.h"
-#include "./cognitiveMap/internnavigationnetwork.h"
-
+#include "routing/smoke_router/cognitiveMap/cognitivemap.h"
+#include "routing/smoke_router/cognitiveMap/internnavigationnetwork.h"
 
 using ptrIntNetwork = std::shared_ptr<InternNavigationNetwork>;
 
-
-
 class Brain
-{   
+{
 
 public:
     Brain();
@@ -32,5 +28,3 @@ private:
 
 
 };
-
-#endif // BRAIN_H

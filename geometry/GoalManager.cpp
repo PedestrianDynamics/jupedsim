@@ -23,11 +23,11 @@
  * \section Description
  * Class mananging pedestrians who enter/leave waiting areas
  */
-
 #include "GoalManager.h"
 
-#include "../pedestrian/Pedestrian.h"
 #include "WaitingArea.h"
+
+#include "pedestrian/Pedestrian.h"
 
 void GoalManager::SetGoals(std::map<int, Goal*> goals)
 {

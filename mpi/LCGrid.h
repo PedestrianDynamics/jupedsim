@@ -31,13 +31,12 @@
  *
  *
  **/
+#pragma once
 
-#ifndef LCGRID_H_
-#define LCGRID_H_
+#include "geometry/Point.h"
 
 #include <vector>
 #include <string>
-#include "../geometry/Point.h"
 
 //forwarded classes
 class Pedestrian;
@@ -140,5 +139,3 @@ public:
      std::string ToXML();
 
 };
-
-#endif /* LGRID_H_ */

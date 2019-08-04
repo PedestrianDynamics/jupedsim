@@ -49,4 +49,3 @@ void Connection::SetType(const std::string &type)
 {
     _type=type;
 }
-

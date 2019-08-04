@@ -1,16 +1,18 @@
 //
 // Created by arne on 5/9/17.
 //
-#define NOMINMAX
-#include <unordered_set>
 #include "UnivFFviaFMTrips.h"
-#include "../../geometry/Line.h"
-#include "../../geometry/Building.h"
-#include "../../geometry/SubRoom.h"
-#include "../../pedestrian/Pedestrian.h"
-#include "mesh/RectGrid.h"
-#include "../../geometry/Goal.h"
-#include "../../geometry/WaitingArea.h"
+
+#include "geometry/Building.h"
+#include "geometry/Goal.h"
+#include "geometry/Line.h"
+#include "geometry/SubRoom.h"
+#include "geometry/WaitingArea.h"
+#include "geometry/Wall.h"
+#include "routing/mesh/RectGrid.h"
+#include "pedestrian/Pedestrian.h"
+
+#include <unordered_set>
 
 UnivFFviaFMTrips::~UnivFFviaFMTrips() {
      if (_grid) delete _grid;

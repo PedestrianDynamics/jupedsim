@@ -1,7 +1,7 @@
-#ifndef ToxicityOUTPUTHANDLER_H
-#define ToxicityOUTPUTHANDLER_H
+#pragma once
 
-#include "../../IO/OutputHandler.h"
+#include "IO/OutputHandler.h"
+
 #include <string>
 
 class ToxicityOutputHandler : public FileHandler
@@ -13,5 +13,3 @@ public:
     void WriteToFile(std::string& string);
     void WriteToFileFooter();
 };
-
-#endif // ToxicityOUTPUTHANDLER_H

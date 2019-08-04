@@ -27,18 +27,15 @@
  *
  *
  **/
+#include "GradientModel.h"
+
+#include "general/OpenMP.h"
+#include "geometry/SubRoom.h"
+#include "geometry/Wall.h"
+#include "mpi/LCGrid.h"
+#include "pedestrian/Pedestrian.h"
 
 #include <math.h>
-#include "../pedestrian/Pedestrian.h"
-#include "../mpi/LCGrid.h"
-#include "../geometry/Wall.h"
-#include "../geometry/SubRoom.h"
-
-#include "GradientModel.h"
-#include "general/OpenMP.h"
-
-using std::vector;
-using std::string;
 
 GradientModel::GradientModel(std::shared_ptr<DirectionStrategy> dir, double nuped, double aped, double bped, double cped,
                              double nuwall, double awall, double bwall, double cwall,
@@ -108,7 +105,7 @@ bool GradientModel::Init (Building* building)
      }
 
 
-     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+     const std::vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
      std::vector<Pedestrian*> pedsToRemove;
      pedsToRemove.clear();
@@ -166,7 +163,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 {
      double delta = 0.5;
       // collect all pedestrians in the simulation.
-      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+      const std::vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
      unsigned long nSize;
      nSize = allPeds.size();
@@ -193,7 +190,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
       #pragma omp parallel  default(shared) num_threads(nThreads)
       {
-           vector< Point > result_acc = vector<Point > ();
+           std::vector< Point > result_acc = std::vector<Point > ();
            result_acc.reserve(nSize);
 
            const int threadID = omp_get_thread_num();
@@ -229,7 +226,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 }
 
                 Point repPed = Point(0,0);
-                vector<Pedestrian*> neighbours;
+                std::vector<Pedestrian*> neighbours;
                 building->GetGrid()->GetNeighbourhood(ped,neighbours);
                 int size = (int) neighbours.size();
                 for (int i = 0; i < size; i++) {
@@ -243,7 +240,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      Point p2 = ped1->GetPos();
 
                      //subrooms to consider when looking for neighbour for the 3d visibility
-                     vector<SubRoom*> emptyVector;
+                     std::vector<SubRoom*> emptyVector;
                      emptyVector.push_back(subroom);
                      emptyVector.push_back(building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID()));
 
@@ -579,7 +576,7 @@ Point GradientModel::ForceRepWall(Pedestrian* ped, const Line& w) const
 
 std::string GradientModel::GetDescription()
 {
-     string rueck;
+     std::string rueck;
      char tmp[CLENGTH];
      sprintf(tmp, "\t\tNu: \t\tPed: %f \tWall: %f\n", _nuPed, _nuWall);
      rueck.append(tmp);

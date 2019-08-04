@@ -24,9 +24,7 @@
  *
  *
  **/
-
-#ifndef KNOWLEDGE_H_
-#define KNOWLEDGE_H_
+#pragma once
 
 #include <iostream>
 
@@ -128,5 +126,3 @@ private:
      double _latency;
 
 };
-#endif /* KNOWLEDGE_H_ */
-

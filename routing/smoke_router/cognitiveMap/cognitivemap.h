@@ -1,14 +1,12 @@
-#ifndef COGNITIVEMAP_H
-#define COGNITIVEMAP_H
+#pragma once
 
 #ifndef UPDATE_RATE
 #define UPDATE_RATE 1.0
 #endif
 
-
 #include "associations.h"
 #include "region.h"
-#include "../GraphNetwork.h"
+#include "routing/smoke_router/GraphNetwork.h"
 #include "youareherepointer.h"
 #include "cogmapoutputhandler.h"
 
@@ -16,12 +14,8 @@
 #include <memory>
 #include <vector>
 
-
 class Pedestrian;
 class Building;
-
-
-
 
 //class priorityCheck
 //{
@@ -135,5 +129,3 @@ private:
 
 
 };
-
-#endif // COGNITIVEMAP_H

@@ -18,10 +18,11 @@
 //
 // Created by laemmel on 31.03.16.
 //
-#define NOMINMAX
 #include "PedDistributionParser.h"
 
-#include "general/Filesystem.hpp"
+#include "general/Filesystem.h"
+#include "IO/OutputHandler.h"
+
 #include <cstdarg> // va_start and va_end
 
 PedDistributionParser::PedDistributionParser(const Configuration* configuration)
@@ -34,8 +35,8 @@ PedDistributionParser::~PedDistributionParser() {
       // delete _configuration;
 }
 
-bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDistribution> >& startDis,
-        vector<std::shared_ptr<StartDistribution> >& startDisSub,
+bool PedDistributionParser::LoadPedDistribution(std::vector<std::shared_ptr<StartDistribution> >& startDis,
+        std::vector<std::shared_ptr<StartDistribution> >& startDisSub,
         std::vector<std::shared_ptr<AgentsSource> >& startDisSources)
 {
     Log->Write("INFO: \tLoading and parsing the persons attributes");
@@ -68,15 +69,15 @@ bool PedDistributionParser::LoadPedDistribution(vector<std::shared_ptr<StartDist
         int router_id = xmltoi(e->Attribute("router_id"), -1);
         int route_id = xmltoi(e->Attribute("route_id"), -1);
         int age = xmltoi(e->Attribute("age"), -1);
-        string gender = xmltoa(e->Attribute("gender"), "female");
+        std::string gender = xmltoa(e->Attribute("gender"), "female");
         double height = xmltof(e->Attribute("height"), -1);
         double patience = xmltof(e->Attribute("patience"), 5);
         double premovement_mean = xmltof(e->Attribute("pre_movement_mean"), 0);
         double premovement_sigma = xmltof(e->Attribute("pre_movement_sigma"), 0);
         //double risk_tolerance_mean = xmltof(e->Attribute("risk_tolerance_mean"), 0);
         //double risk_tolerance_sigma = xmltof(e->Attribute("risk_tolerance_sigma"), 0);
-        string positions_dir = xmltoa(e->Attribute("positions_dir"), "");
-        string unit_traj = xmltoa(e->Attribute("unit"), "m");
+        std::string positions_dir = xmltoa(e->Attribute("positions_dir"), "");
+        std::string unit_traj = xmltoa(e->Attribute("unit"), "m");
         double x_min = xmltof(e->Attribute("x_min"), -FLT_MAX);
         double x_max = xmltof(e->Attribute("x_max"), FLT_MAX);
         double y_min = xmltof(e->Attribute("y_min"), -FLT_MAX);
@@ -227,8 +228,8 @@ std::shared_ptr<AgentsSource> PedDistributionParser::parseSourceNode(TiXmlElemen
      int frequency = xmltoi(e->Attribute("frequency"), -1);
      int agents_max = xmltoi(e->Attribute("agents_max"), -1);
      int group_id = xmltoi(e->Attribute("group_id"), -1);
-     string caption = xmltoa(e->Attribute("caption"), "no caption");
-     string str_greedy = xmltoa(e->Attribute("greedy"), "false");
+     std::string caption = xmltoa(e->Attribute("caption"), "no caption");
+     std::string str_greedy = xmltoa(e->Attribute("greedy"), "false");
      float percent = xmltof(e->Attribute("percent"), 1);
      float rate = xmltof(e->Attribute("rate"), 1);
      double time = xmltof(e->Attribute("time"), 0);

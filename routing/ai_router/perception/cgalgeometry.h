@@ -1,19 +1,16 @@
-#ifndef CGALGEOMETRY_H
-#define CGALGEOMETRY_H
+#pragma once
 
-//#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include "geometry/Room.h"
+
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Boolean_set_operations_2.h>
 #include <CGAL/Triangular_expansion_visibility_2.h>
 #include <CGAL/Arr_segment_traits_2.h>
 #include <CGAL/Arr_naive_point_location.h>
 #include <CGAL/Arrangement_2.h>
-//#include <CGAL/Lazy_exact_nt.h>
-
 
 #include <unordered_map>
 
-#include "../../../geometry/Room.h"
 
 class Building;
 class Line;
@@ -49,5 +46,3 @@ private:
 };
 
 float roundfloat(float num, int precision);
-
-#endif // CGALGEOMETRY_H

@@ -27,15 +27,13 @@
  *
  *
  **/
+#pragma once
 
+#include "ForceModel.h"
 
-#ifndef GRADIENTMODEL_H_
-#define GRADIENTMODEL_H_
+#include "geometry/Building.h"
 
 #include <vector>
-
-#include "../geometry/Building.h"
-#include "ForceModel.h"
 
 #define _ARNEDEBUG
 
@@ -237,6 +235,3 @@ public:
       */
      //virtual std::string writeParameter() const;
 };
-
-
-#endif /* GRADIENTMODEL_H_ */

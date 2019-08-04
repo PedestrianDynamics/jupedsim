@@ -29,7 +29,7 @@
  **/
 
 #include "Simulation.h"
-#include "IO/progress_bar.hpp"
+#include "IO/progress_bar.h"
 #include "routing/ff_router/ffRouter.h"
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
@@ -37,7 +37,7 @@
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "geometry/WaitingArea.h"
-#include "general/Filesystem.hpp"
+#include "general/Filesystem.h"
 #include "general/OpenMP.h"
 
 OutputHandler* Log;
@@ -83,7 +83,7 @@ long Simulation::GetPedsNumber() const
 bool Simulation::InitArgs()
 {
     char tmp[CLENGTH];
-    string s = "Parameter:\n";
+    std::string s = "Parameter:\n";
 
     switch (_config->GetLog()) {
     case 0: {
@@ -346,18 +346,10 @@ void Simulation::UpdateRoutesAndLocations()
 //    }
 
 #pragma omp parallel for shared(pedsToRemove, allRooms)
-     for (int p = 0; p < allPeds.size(); ++p) {
+     for (size_t p = 0; p < allPeds.size(); ++p) {
           auto ped = allPeds[p];
           Room* room = _building->GetRoom(ped->GetRoomID());
           SubRoom* sub0 = room->GetSubRoom(ped->GetSubRoomID());
-
-          Transition* door0 = _building->GetTransition(0);
-          Transition* door1 = _building->GetTransition(1);
-
-          if (!door0->IsOpen() || !door1->IsOpen()){
-//               std::cout << "One door not open ..." << std::endl;
-               bool foo = false;
-          }
 
           //set the new room if needed
           if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
@@ -461,7 +453,7 @@ void Simulation::PrintStatistics(double simTime)
 
             fs::path p(_config->GetOriginalTrajectoriesFile());
 
-            string statsfile = "flow_exit_id_"+std::to_string(goal->GetID())+"_"+p.stem().string()+".txt";
+            std::string statsfile = "flow_exit_id_"+std::to_string(goal->GetID())+"_"+p.stem().string()+".txt";
             if(goal->GetOutflowRate() <  (std::numeric_limits<double>::max)())
             {
                  char tmp[50];
@@ -490,7 +482,7 @@ void Simulation::PrintStatistics(double simTime)
                        goal->GetID(), itr.first/1000, goal->GetDoorUsage(),
                        goal->GetLastPassingTime());
 
-                  string statsfile = "flow_crossing_id_"
+                  std::string statsfile = "flow_crossing_id_"
                        + std::to_string(itr.first/1000) + "_" + std::to_string(itr.first % 1000) +".dat";
                   Log->Write("More Information in the file: %s", statsfile.c_str());
                   FileHandler output(statsfile.c_str());
@@ -994,7 +986,7 @@ void Simulation::ProcessAgentsQueue()
      /*           std::cout<< KBLU << "BUL: Simulation: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl; */
 
     //incoming pedestrians
-    vector<Pedestrian*> peds;
+    std::vector<Pedestrian*> peds;
     //  std::cout << ">>> peds " << peds.size() << RESET<< std::endl;
 
     AgentsQueueIn::GetandClear(peds);

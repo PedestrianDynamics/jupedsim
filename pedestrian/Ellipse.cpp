@@ -24,8 +24,6 @@
  *
  *
  **/
-
-
 #include "Ellipse.h"
 
 #define _USE_MATH_DEFINES

@@ -25,17 +25,14 @@
  *
  *
  **/
+#pragma once
 
-
-#ifndef GRAPHVERTEX_H_
-#define GRAPHVERTEX_H_
+#include "geometry/Line.h"
 
 #include <unordered_map>
 #include <set>
 #include <string>
 #include <utility>
-
-#include "../../../geometry/Line.h"
 
 class SubRoom;
 class NavLine;
@@ -43,9 +40,6 @@ class Crossing;
 class Transition;
 class GraphEdge;
 class GraphVertex;
-
-
-//using NextDoorKnowlegde = std::unordered_map<const GraphVertex *,const GraphEdge *>;
 
 /**
  * @brief Graph Vertex.
@@ -95,5 +89,3 @@ private:
      const SubRoom * const sub_room;
 
 };
-
-#endif /* GRAPHVERTEX_H_ */

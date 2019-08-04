@@ -25,10 +25,7 @@
  *
  *
  **/
-
-
-#ifndef GRAPHNETWORK_H_
-#define GRAPHNETWORK_H_
+#pragma once
 
 #include "NavigationGraph.h"
 
@@ -84,11 +81,4 @@ private:
     const Pedestrian* pedestrian;
     const SubRoom * current_subroom = nullptr;
     std::vector<const GraphEdge *> destinations;
-
-
-
-
 };
-
-
-#endif /* GRAPH_NETWORK_H_ */

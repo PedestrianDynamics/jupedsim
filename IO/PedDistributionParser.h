@@ -18,12 +18,13 @@
 //
 // Created by laemmel on 31.03.16.
 //
+#pragma once
 
-#ifndef JPSCORE_PEDDISTRIBUTIONPARSER_H
-#define JPSCORE_PEDDISTRIBUTIONPARSER_H
+#include "pedestrian/PedDistributionLoader.h"
 
-#include "../pedestrian/PedDistributionLoader.h"
-#include "../tinyxml/tinyxml.h"
+#include <tinyxml.h>
+
+class Configuration;
 
 class PedDistributionParser : public PedDistributionLoader {
 
@@ -40,5 +41,3 @@ private:
      const Configuration* _configuration;
 
 };
-
-#endif //JPSCORE_PEDDISTRIBUTIONPARSER_H

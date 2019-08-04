@@ -24,11 +24,7 @@
  *
  *
  **/
-
-
-#ifndef _ODESOLVER_H
-#define _ODESOLVER_H
-
+#pragma once
 
 //forward declarations
 class ForceModel;
@@ -57,8 +53,3 @@ public:
      EulerSolver(ForceModel *tmodel);
      virtual void solveODE(double t, double tp, Building* building) const;
 };
-
-
-
-#endif  /* _ODESOLVER_H */
-

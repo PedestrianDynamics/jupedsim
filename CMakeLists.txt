@@ -340,6 +340,7 @@ set(header_files
     events/EventManager.h
     general/ArgumentParser.h
     general/Configuration.h
+    general/Filesystem.h
     general/Macros.h
     general/randomnumbergenerator.h
     geometry/Building.h

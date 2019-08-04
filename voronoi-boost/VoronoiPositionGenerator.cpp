@@ -6,7 +6,6 @@
  */
 
 #define PLOT_VORONOI_DIAGRAM 0
-#define NOMINMAX
 static int global_count = 0;
 
 
@@ -15,6 +14,8 @@ static int global_count = 0;
 //check if all includes are necessary
 #include "../pedestrian/AgentsSourcesManager.h"
 #include "../pedestrian/Pedestrian.h"
+#include "geometry/Wall.h"
+
 //#include "../pedestrian/StartDistribution.h"
 //#include "../pedestrian/PedDistributor.h"
 //#include "../pedestrian/AgentsSource.h"
@@ -396,7 +397,7 @@ void VoronoiBestVertexRandMax (AgentsSource* src, const std::vector<Point>& disc
                                double factor, voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	, double radius)
 {
      std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
-     vector<double> partial_sums;
+     std::vector<double> partial_sums;
      unsigned long size=0;
      for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it){
           Point vert_pos = Point( it->x()/factor, it->y()/factor );
@@ -442,7 +443,7 @@ void VoronoiBestVertexRandMax (AgentsSource* src, const std::vector<Point>& disc
      //std::mt19937 gen(rd()); //@todo use seed instead of rd(). Generator should not be here
      std::mt19937 gen(1); //@todo use seed instead of rd(). Generator should not be here
      std::uniform_real_distribution<double> distribution(lower_bound, upper_bound); //std::nextafter(upper_bound, DBL_MAX));
-     vector<double> random_numbers;
+     std::vector<double> random_numbers;
      for(unsigned int r=0; r<size;r++)
            random_numbers.push_back(distribution(gen));
 
@@ -478,7 +479,7 @@ void VoronoiBestVertexGreedy (AgentsSource* src, const std::vector<Point>& discr
                               double factor, voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	, double radius)
 {
      std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
-     vector<double> distances;
+     std::vector<double> distances;
      for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it){
           Point vert_pos = Point( it->x()/factor, it->y()/factor );
           float BBxmin = src->GetBoundaries()[0];
@@ -581,7 +582,7 @@ void plotVoronoi(const std::vector<Point>& discrete_positions, const voronoi_dia
 // plot geometry
      double max_x=std::numeric_limits<double>::min(), min_x=std::numeric_limits<double>::max();
      double max_y=std::numeric_limits<double>::min(), min_y=std::numeric_limits<double>::max();
-     const vector<Point> polygon = subroom->GetPolygon();
+     const std::vector<Point> polygon = subroom->GetPolygon();
      for(auto it = polygon.begin(); it != polygon.end(); ) {
            Point gpoint = *(it++);
            // Point gpointNext = *it;

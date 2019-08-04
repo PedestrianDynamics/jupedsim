@@ -1,7 +1,7 @@
-#ifndef COGMAPOUTPUTHANDLER_H
-#define COGMAPOUTPUTHANDLER_H
+#pragma once
 
-#include "../../../IO/OutputHandler.h"
+#include "IO/OutputHandler.h"
+
 #include <string>
 
 class CogMapOutputHandler : public FileHandler
@@ -13,5 +13,3 @@ public:
     void WriteToFile(std::string& string);
     void WriteToFileFooter();
 };
-
-#endif // COGMAPOUTPUTHANDLER_H

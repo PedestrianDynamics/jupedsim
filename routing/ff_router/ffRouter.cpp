@@ -44,12 +44,10 @@
  * We will derive from the <Router> class to fit the interface.
  *
  **/
+#include "ffRouter.h"
 
 #include <cfloat>
 #include <algorithm>
-#include "ffRouter.h"
-//#include "FloorfieldViaFM.h"
-//#include "../../geometry/Building.h"
 
 int FFRouter::_cnt = 0;
 

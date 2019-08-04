@@ -25,18 +25,17 @@
  *
  *
  **/
+#pragma once
 
+#include "geometry/Building.h"
+#include "routing/Router.h"
 
-#ifndef GLOBALROUTER_H_
-#define GLOBALROUTER_H_
-
-#include <string>
-#include <sstream>
 #include <cfloat>
 #include <fstream>
+#include <random>
+#include <sstream>
+#include <string>
 #include <vector>
-#include "../Router.h"
-#include "../../geometry/Building.h"
 
 // forwarded classes
 class Pedestrian;
@@ -47,7 +46,6 @@ class OutputHandler;
 //log output
 extern OutputHandler* Log;
 
-#include <random>
 
 /*!
  * \class GlobalRouter
@@ -239,5 +237,3 @@ protected:
      Building *_building;
 
 };
-
-#endif /* GLOBALROUTER_H_ */

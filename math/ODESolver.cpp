@@ -24,12 +24,12 @@
  *
  *
  **/
-
-
 #include "ODESolver.h"
+
 #include "ForceModel.h"
-#include "../geometry/Building.h"
-#include "../pedestrian/Pedestrian.h"
+
+#include "geometry/Building.h"
+#include "pedestrian/Pedestrian.h"
 
 
 ODESolver::ODESolver(ForceModel *tmodel) : model(tmodel)

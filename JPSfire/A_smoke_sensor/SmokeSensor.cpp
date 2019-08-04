@@ -25,17 +25,18 @@
  *
  *
  **/
-
 #include "SmokeSensor.h"
-#include "../../routing/smoke_router/NavigationGraph.h"
-#include "../../geometry/Building.h"
-#include "../../routing/smoke_router/cognitiveMap/cognitivemap.h"
-#include "../../pedestrian/Pedestrian.h"
-#include "../../geometry/SubRoom.h"
-#include "../generic/FDSMesh.h"
-#include "../generic/FDSMeshStorage.h"
+
+#include "general/Filesystem.h"
+#include "geometry/Building.h"
+#include "geometry/SubRoom.h"
+#include "JPSfire/generic/FDSMesh.h"
+#include "JPSfire/generic/FDSMeshStorage.h"
+#include "pedestrian/Pedestrian.h"
+#include "routing/smoke_router/cognitiveMap/cognitivemap.h"
+#include "routing/smoke_router/NavigationGraph.h"
+
 #include <tinyxml.h>
-#include "general/Filesystem.hpp"
 
 SmokeSensor::SmokeSensor(const Building *b) : AbstractSensor(b)
 {

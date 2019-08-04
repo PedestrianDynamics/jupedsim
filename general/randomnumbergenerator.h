@@ -1,5 +1,4 @@
-#ifndef RANDOMNUMBERGENERATOR_H
-#define RANDOMNUMBERGENERATOR_H
+#pragma once
 
 #include <random>
 
@@ -25,6 +24,3 @@ private:
 
 
 };
-
-#endif // RANDOMNUMBERGENERATOR_H
-

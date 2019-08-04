@@ -28,15 +28,10 @@
  *
  *
  **/
-
-
-#ifndef _FORCEMODEL_H
-#define _FORCEMODEL_H
+#pragma once
 
 #include <string>
 
-
-//forward declaration
 class Building;
 
 
@@ -66,6 +61,3 @@ public:
       */
      virtual std::string writeParameter() const = 0;
 };
-
-
-#endif  /* _FORCEMODEL_H */

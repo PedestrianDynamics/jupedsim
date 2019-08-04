@@ -25,10 +25,7 @@
  *
  *
  **/
-
-
-#ifndef _MACROS_H
-#define _MACROS_H
+#pragma once
 
 #include <cstdlib>
 #include <vector>
@@ -407,5 +404,3 @@ std::cerr  << "["<< lineNumber  << "]: ---"<< fileName.substr(found+1)<< " ---"<
     (fprintf(stderr, __VA_ARGS__)           \
     )
 #endif /* TRACE_LOGGING */
-
-#endif  /* _MACROS_H */

@@ -24,14 +24,13 @@
  *
  *
  **/
-
-
 #include "QuickestPathRouter.h"
-#include <tinyxml.h>
-#include "../../mpi/LCGrid.h"
-#include "../../geometry/SubRoom.h"
-//#include "../IO/OutputHandler.h"
 
+#include "geometry/SubRoom.h"
+#include "geometry/Wall.h"
+#include "mpi/LCGrid.h"
+
+#include <tinyxml.h>
 
 QuickestPathRouter::QuickestPathRouter( ):GlobalRouter() { }
 
@@ -184,7 +183,7 @@ int QuickestPathRouter::GetQuickestRoute(Pedestrian* ped)
 
      //const vector<AccessPoint*>& aps = nearestAP->GetTransitAPsTo(ped->GetFinalDestination());
 
-     vector <AccessPoint*> aps;
+     std::vector <AccessPoint*> aps;
 
      GetRelevantRoutesTofinalDestination(ped,aps);
 
@@ -251,7 +250,7 @@ bool QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
      bool done=false;
 
      do {
-          vector<Pedestrian*> queue;
+          std::vector<Pedestrian*> queue;
           queue.reserve(250);
           GetQueueAtExit(crossing,jamThreshold,radius,queue,myself->GetSubRoomID());
 
@@ -333,7 +332,7 @@ bool QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
 }
 
 void QuickestPathRouter::GetQueueAtExit(Hline* hline, double minVel,
-          double radius, vector<Pedestrian*>& queue,int subroomToConsider)
+          double radius, std::vector<Pedestrian*>& queue,int subroomToConsider)
 {
 
      SubRoom* sbr1 = hline->GetSubRoom1();
@@ -358,7 +357,7 @@ void QuickestPathRouter::GetQueueAtExit(Hline* hline, double minVel,
      if (sbr1 && (sbr1->GetSubRoomID()==subroomToConsider))
      {
           //double closestDistance=FLT_MAX;
-          vector<Pedestrian*> peds;
+          std::vector<Pedestrian*> peds;
           _building->GetPedestrians(sbr1->GetRoomID(),sbr1->GetSubRoomID(),peds);
 
           for(const auto& ped:peds)
@@ -381,7 +380,7 @@ void QuickestPathRouter::GetQueueAtExit(Hline* hline, double minVel,
      if (sbr2 && (sbr2->GetSubRoomID()==subroomToConsider))
      {
           //double closestDistance=FLT_MAX;
-          vector<Pedestrian*> peds;
+          std::vector<Pedestrian*> peds;
           _building->GetPedestrians(sbr2->GetRoomID(),sbr2->GetSubRoomID(),peds);
 
           for(const auto& ped:peds)
@@ -457,7 +456,7 @@ unsigned int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const
 
      if (sbr1)
      {
-          vector<Pedestrian*> peds;
+          std::vector<Pedestrian*> peds;
           _building->GetPedestrians(sbr1->GetRoomID(),sbr1->GetSubRoomID(),peds);
 
           for(const auto& ped:peds)
@@ -477,7 +476,7 @@ unsigned int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const
      }
 
      if (sbr2) {
-          vector<Pedestrian*> peds;
+          std::vector<Pedestrian*> peds;
           _building->GetPedestrians(sbr2->GetRoomID(),sbr2->GetSubRoomID(),peds);
 
           for(const auto& ped:peds)
@@ -502,7 +501,7 @@ unsigned int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const
 int QuickestPathRouter::isCongested(Pedestrian* ped)
 {
      //define as the ratio of people in front of me and behind me
-     vector<Pedestrian*> allPeds;
+     std::vector<Pedestrian*> allPeds;
      _building->GetPedestrians(ped->GetRoomID(),ped->GetSubRoomID(),allPeds);
 
      //in the case there are only few people in the room
@@ -623,7 +622,7 @@ void QuickestPathRouter::Redirect(Pedestrian* ped)
      //const vector<int>& goals=room->GetAllTransitionsIDs();
      //filter to keep only the emergencies exits.
 
-     vector <AccessPoint*> relevantAPs;
+     std::vector <AccessPoint*> relevantAPs;
      GetRelevantRoutesTofinalDestination(ped,relevantAPs);
 
      if(relevantAPs.size()==0)
@@ -706,7 +705,7 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 
 
      // get the relevant opened exits
-     vector <AccessPoint*> relevantAPs;
+     std::vector <AccessPoint*> relevantAPs;
      GetRelevantRoutesTofinalDestination(ped,relevantAPs);
 
      if(relevantAPs.size()==1)
@@ -861,7 +860,7 @@ bool QuickestPathRouter::ParseAdditionalParameters()
                e = e->NextSiblingElement("router"))
      {
 
-          string strategy=e->Attribute("description");
+          std::string strategy=e->Attribute("description");
 
           if( ( strategy=="quickest") && e->FirstChild("parameters"))
           {
@@ -876,11 +875,11 @@ bool QuickestPathRouter::ParseAdditionalParameters()
                     _queueVelocityNewRoom=xmltof(para->Attribute("queue_vel_new_room"), _queueVelocityNewRoom);
                     _visibilityObstruction=(unsigned int)xmltoi(para->Attribute("visibility_obstruction"), _visibilityObstruction);
 
-                    string selection_mode=xmltoa(para->Attribute("reference_peds_selection"), "single");
+                    std::string selection_mode=xmltoa(para->Attribute("reference_peds_selection"), "single");
                     if(selection_mode=="single") _refPedSelectionMode=RefSelectionMode::SINGLE;
                     if(selection_mode=="all") _refPedSelectionMode=RefSelectionMode::ALL;
 
-                    string default_strategy=xmltoa(para->Attribute("default_strategy"), "local_shortest");
+                    std::string default_strategy=xmltoa(para->Attribute("default_strategy"), "local_shortest");
                     if(default_strategy=="local_shortest") _defaultStrategy=DefaultStrategy::LOCAL_SHORTEST;
                     if(default_strategy=="global_shortest") _defaultStrategy=DefaultStrategy::GLOBAL_SHORTEST;
 

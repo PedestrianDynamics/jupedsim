@@ -25,18 +25,15 @@
  *
  *
  **/
-
-
 #include "BrainStorage.h"
+
 #include "cognitiveMap/internnavigationnetwork.h"
+#include "geometry/Building.h"
+#include "pedestrian/Pedestrian.h"
 
 #include <tinyxml.h>
+
 #include <memory>
-
-#include "../../geometry/Building.h"
-#include "../../pedestrian/Pedestrian.h"
-//#include "NavigationGraph.h"
-
 
 AIBrainStorage::AIBrainStorage(const Building * const b, const std::string &cogMapFiles, const std::string &signFiles)
      : _building(b),_visibleEnv(VisibleEnvironment(b)),_cogMapFiles(cogMapFiles),_signFiles(signFiles)

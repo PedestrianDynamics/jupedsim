@@ -1,8 +1,8 @@
-#ifndef VISIBLEENVIRONMENT_H
-#define VISIBLEENVIRONMENT_H
+#pragma once
 
 #include "sign.h"
 #include "cgalgeometry.h"
+
 #include <boost/geometry/geometry.hpp>
 
 // Define the used kernel and arrangement
@@ -36,5 +36,3 @@ private:
     std::vector<Line> _additionalLines;
 
 };
-
-#endif // VISIBLEENVIRONMENT_H

@@ -24,14 +24,14 @@
  *
  *
  **/
-
-
 #include "GraphVertex.h"
 
 #include "GraphEdge.h"
-#include "../../../geometry/SubRoom.h"
-#include "../NavigationGraph.h"
-#include "../../../geometry/Transition.h"
+
+#include "geometry/SubRoom.h"
+#include "geometry/Transition.h"
+#include "routing/smoke_router/NavigationGraph.h"
+
 #include <queue>
 
 /**

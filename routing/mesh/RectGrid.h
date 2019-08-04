@@ -25,11 +25,9 @@
  *
  *
  **/
+#pragma once
 
-#ifndef RECTGRID_H
-#define RECTGRID_H
-
-#include "../../../geometry/Point.h"
+#include "geometry/Point.h"
 
 // geometric interpretation of index in "directNeighbor"
 //          x (1)              ^ y
@@ -253,5 +251,3 @@ class RectGrid
         long int jMax; // indices must be smaller than jMax
         bool isInitialized;
 };
-
-#endif // RECTGRID_H

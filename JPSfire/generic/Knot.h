@@ -26,9 +26,7 @@
  *
  **/
 
-#ifndef KNOT_H
-#define KNOT_H
-
+#pragma once
 
 class Knot
 {
@@ -45,5 +43,3 @@ private:
     double _y;
     double _value;
 };
-
-#endif // KNOT_H

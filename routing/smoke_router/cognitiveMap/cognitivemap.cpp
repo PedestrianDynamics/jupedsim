@@ -1,6 +1,8 @@
 #include "cognitivemap.h"
-#include "../../../geometry/SubRoom.h"
-#include "../../../pedestrian/Pedestrian.h"
+
+#include "geometry/SubRoom.h"
+#include "pedestrian/Pedestrian.h"
+
 #include <visilibity.hpp>
 #include <chrono>
 

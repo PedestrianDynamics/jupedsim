@@ -18,13 +18,12 @@
 //
 // Created by laemmel on 24.03.16.
 //
+#pragma once
 
-#ifndef JPSCORE_INIFILEPARSER_H
-#define JPSCORE_INIFILEPARSER_H
+#include "general/Configuration.h"
+#include "routing/DirectionStrategy.h"
 
 #include <string>
-#include "../general/Configuration.h"
-#include "../routing/DirectionStrategy.h"
 
 class OutputHandler;
 
@@ -83,5 +82,3 @@ private:
      int _exit_strat_number;
 
 };
-
-#endif //JPSCORE_INIFILEPARSER_H

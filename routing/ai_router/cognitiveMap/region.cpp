@@ -107,6 +107,3 @@ std::vector<const AILandmark*> AIRegion::ConnectedWith(const AILandmark *landmar
     return cLandmarks;
 
 }
-
-
-

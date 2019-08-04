@@ -25,14 +25,14 @@
  *
  *
  **/
-
 #include "WalkingSpeed.h"
-#include "../../pedestrian/Pedestrian.h"
-#include "../generic/FDSMesh.h"
-#include "../generic/FDSMeshStorage.h"
-#include <tinyxml.h>
 
-#include "general/Filesystem.hpp"
+#include "general/Filesystem.h"
+#include "JPSfire/generic/FDSMesh.h"
+#include "JPSfire/generic/FDSMeshStorage.h"
+#include "pedestrian/Pedestrian.h"
+
+#include <tinyxml.h>
 
 WalkingSpeed::WalkingSpeed(const std::string & projectFileName)
 {

@@ -1,5 +1,4 @@
-#ifndef ASSOCIATIONS_H
-#define ASSOCIATIONS_H
+#pragma once
 
 #include<memory>
 
@@ -22,5 +21,3 @@ private:
     ptrLandmark _associatedLandmark;
     ptrConnection _connection;
 };
-
-#endif // ASSOCIATIONS_H

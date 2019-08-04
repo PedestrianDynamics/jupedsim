@@ -23,7 +23,6 @@
  * \section Description
  *
  **/
-
 #include "AgentsQueue.h"
 
 #include "Pedestrian.h"

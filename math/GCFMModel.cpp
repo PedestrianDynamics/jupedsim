@@ -27,17 +27,13 @@
  *
  *
  **/
-
-
 #include "GCFMModel.h"
-#include "../pedestrian/Pedestrian.h"
-#include "../mpi/LCGrid.h"
-#include "../geometry/SubRoom.h"
+
 #include "general/OpenMP.h"
-
-
-using std::vector;
-using std::string;
+#include "geometry/SubRoom.h"
+#include "geometry/Wall.h"
+#include "mpi/LCGrid.h"
+#include "pedestrian/Pedestrian.h"
 
 GCFMModel::GCFMModel(std::shared_ptr<DirectionStrategy> dir, double nuped, double nuwall, double dist_effPed,
                      double dist_effWall, double intp_widthped, double intp_widthwall, double maxfped,
@@ -90,7 +86,7 @@ bool GCFMModel::Init (Building* building)
           Log->Write("INFO:\t Init DirectionSubLOCALFloorfield done");
      }
 
-    const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+    const std::vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
     size_t peds_size = allPeds.size();
     for(unsigned int p=0;p<peds_size;p++)
     {
@@ -131,7 +127,7 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
      double delta = 1.5;
 
      // collect all pedestrians in the simulation.
-     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+     const std::vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
      unsigned int nSize = allPeds.size();
      int nThreads = omp_get_max_threads();
@@ -146,7 +142,7 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
      //building->GetGrid()->HighlightNeighborhood(debugPed, building);
 #pragma omp parallel  default(shared) num_threads(nThreads)
      {
-          vector< Point > result_acc = vector<Point > ();
+          std::vector< Point > result_acc = std::vector<Point > ();
           result_acc.reserve(2200);
 
           const int threadID = omp_get_thread_num();
@@ -177,10 +173,10 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
                }
 
                Point F_rep;
-               vector<Pedestrian*> neighbours;
+               std::vector<Pedestrian*> neighbours;
                building->GetGrid()->GetNeighbourhood(ped,neighbours);
                //if(ped->GetID()==61) building->GetGrid()->HighlightNeighborhood(ped,building);
-               vector<SubRoom*> emptyVector;
+               std::vector<SubRoom*> emptyVector;
 
                int neighborsSize = neighbours.size();
                for (int i = 0; i < neighborsSize; i++) {
@@ -644,9 +640,9 @@ double GCFMModel::GetDistEffMaxWall() const
      return _distEffMaxWall;
 }
 
-string GCFMModel::GetDescription()
+std::string GCFMModel::GetDescription()
 {
-     string rueck;
+     std::string rueck;
      char tmp[CLENGTH];
 
      sprintf(tmp, "\t\tNu: \t\tPed: %f \tWall: %f\n", _nuPed, _nuWall);

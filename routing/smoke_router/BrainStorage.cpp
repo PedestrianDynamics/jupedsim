@@ -25,15 +25,11 @@
  *
  *
  **/
-
-
 #include "BrainStorage.h"
 
+#include "pedestrian/Pedestrian.h"
+
 #include <tinyxml.h>
-
-#include "../../pedestrian/Pedestrian.h"
-//#include "NavigationGraph.h"
-
 
 BrainStorage::BrainStorage(const Building * const b, std::string cogMapStatus, std::string cogMapFiles)
      : _building(b)

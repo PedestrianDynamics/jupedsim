@@ -18,40 +18,28 @@
 //
 // Created by laemmel on 23.03.16.
 //
+#pragma once
 
-#ifndef JPSCORE_CONFIGURATION_H
-#define JPSCORE_CONFIGURATION_H
+#include "randomnumbergenerator.h"
+#include "Macros.h"
+
+#include "JPSfire/B_walking_speed/WalkingSpeed.h"
+#include "JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
+#include "math/OperationalModel.h"
+#include "pedestrian/AgentsParameters.h"
+#include "routing/RoutingEngine.h"
+
+#ifdef _JPS_AS_A_SERVICE
+#include "hybrid/HybridSimulationManager.h"
+#endif
 
 #include <string>
 #include <cstdlib>
 #include <memory>
-#include "Macros.h"
 
-#ifdef _JPS_AS_A_SERVICE
-
-#include "../hybrid/HybridSimulationManager.h"
-
-#endif
-
-#include "../routing/RoutingEngine.h"
-#include "../math/OperationalModel.h"
-#include "../JPSfire/B_walking_speed/WalkingSpeed.h"
-#include "../JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
-
-//for random numbers
-#include "randomnumbergenerator.h"
-
-//This class provides a data container for all configuration parameters.
-
-class AgentsParameters;
 class DirectionStrategy;
 
-#ifdef _JPS_AS_A_SERVICE
-
-class HybridSimulationManager;
-
-#endif
-
+//This class provides a data container for all configuration parameters.
 class Configuration {
 
 public:
@@ -457,7 +445,3 @@ private:
 
 
 };
-
-
-
-#endif //JPSCORE_CONFIGURATION_H

@@ -24,11 +24,9 @@
  * This class is used to define mathematical parameters, constants and functions.
  *
  **/
-
-
 #include "Mathematics.h"
-#include <cassert>
 
+#include <cassert>
 
 // ok that is not perfect. For a profound discussion see http://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
 bool  almostEqual (double a, double b, double eps)
@@ -188,7 +186,3 @@ std::complex<double> c_cbrt(std::complex<double> x)
      s = sin(phi);
      return rn * cos(phi) + I * rn*s;
 }
-
-
-
-

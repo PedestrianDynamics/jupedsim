@@ -25,15 +25,13 @@
  *
  *
  **/
+#pragma once
 
-#ifndef FIREMESH_H
-#define FIREMESH_H
+#include "JPSfire/generic/Knot.h"
+#include "IO/OutputHandler.h"
 
 #include <vector>
 #include <string>
-#include "Knot.h"
-#include "../../../IO/OutputHandler.h"
-//using Matrix = std::array<std::array<T, COL>, ROW>;
 
 //log output
 extern OutputHandler* Log;
@@ -67,5 +65,3 @@ private:
     bool _statMesh;
 
 };
-
-#endif // FIREMESH_H

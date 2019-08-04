@@ -1,18 +1,13 @@
-#ifndef LANDMARKNETWORK_H
-#define LANDMARKNETWORK_H
+#pragma once
 
-
-
-//based on boost
+#include "connection.h"
+#include "landmark.h"
 
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
-#include "connection.h"
-#include "landmark.h"
+
 #include <unordered_map>
-
-
 
 typedef boost::adjacency_list<boost::listS, boost::vecS, boost::directedS,
                        boost::no_property, boost::property<boost::edge_weight_t, double> > Graph;
@@ -48,5 +43,3 @@ private:
 
 
 };
-
-#endif // LANDMARKNETWORK_H

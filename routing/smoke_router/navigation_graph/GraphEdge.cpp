@@ -24,16 +24,13 @@
  *
  *
  **/
-
-
 #include "GraphEdge.h"
 
 #include "GraphVertex.h"
-#include "../../../geometry/SubRoom.h"
-#include "../../../geometry/Crossing.h"
-#include "../../../geometry/Transition.h"
 
-
+#include "geometry/SubRoom.h"
+#include "geometry/Crossing.h"
+#include "geometry/Transition.h"
 
 /**
  * Constructors & Destructors

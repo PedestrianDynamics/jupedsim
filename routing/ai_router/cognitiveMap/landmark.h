@@ -1,12 +1,10 @@
-#ifndef LANDMARK_H
-#define LANDMARK_H
+#pragma once
+
+#include "associations.h"
+#include "geometry/Point.h"
 
 #include <vector>
 #include <list>
-#include "../../../geometry/Point.h"
-#include "associations.h"
-
-
 
 using AIAssociations = std::vector<AIAssociation>;
 
@@ -78,5 +76,3 @@ private:
     AIAssociations _assoContainer;
     const AIRegion* _region;
 };
-
-#endif // LANDMARK_H

@@ -1,11 +1,11 @@
 #include "visualsystem.h"
+
 #include "visibleenvironment.h"
-#include "../../../geometry/SubRoom.h"
-#include "../../../pedestrian/Pedestrian.h"
+#include "geometry/SubRoom.h"
+#include "pedestrian/Pedestrian.h"
+
 #include <chrono>
 #include <iostream>
-
-
 
 VisualSystem::VisualSystem()
 {
@@ -365,7 +365,7 @@ std::vector<NavLine> VisualSystem::FindTransitions() const
 
     std::vector<Transition*> transitions;
     for (int transID:_building->GetRoom(_ped->GetRoomID())->GetAllTransitionsIDs())
-    {       
+    {
         Point normal = Point(-(_building->GetTransitionByUID(transID)->GetPoint2()-_building->GetTransitionByUID(transID)->GetPoint1())._y,
                              (_building->GetTransitionByUID(transID)->GetPoint2()-_building->GetTransitionByUID(transID)->GetPoint1())._x);
         normal=normal/normal.Norm();
@@ -535,7 +535,7 @@ double VisualSystem::HeadDirCompToSign(const Sign &sign) const
 }
 
 
-double VisualSystem::GetProbabilityToDetectSign(double headDir, bool hardlyVisSign)
+double VisualSystem::GetProbabilityToDetectSign(double /*headDir*/, bool hardlyVisSign)
 {
 
     double P=1.0;

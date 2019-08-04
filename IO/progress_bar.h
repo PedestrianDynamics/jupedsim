@@ -21,10 +21,11 @@
 // SOFTWARE.
 // https://github.com/htailor/cpp_progress_bar
 
-#ifndef _PROGRESS_BAR_
-#define _PROGRESS_BAR_
+#pragma once
 
 #ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <windows.h>
 #else
 #include <sys/ioctl.h>
@@ -60,5 +61,3 @@ private:
     int GetBarLength();
 
 };
-
-#endif

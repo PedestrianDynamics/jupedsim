@@ -157,41 +157,8 @@ std::pair<std::vector<const AILandmark*>,double> AILandmarkNetwork::LengthofShor
     if (landmark==target)
         return std::make_pair<std::vector<const AILandmark*>,double>(std::vector<const AILandmark*>{landmark},0.0);
 
-    int startVertex=-1;
-    int targetVertex=-1;
-
-    // get the start vertex
-
-
-//    for (auto it=_landmarks.begin(); it!=_landmarks.end(); ++it)
-//    {
-
-//        int counter=0;
-//        if (it->first==landmark)
-//        {
-//            startVertex=it->second;
-//            counter++;
-//            if (counter==2)
-//                break;
-//        }
-//        else if (it->first==target)
-//        {
-//            targetVertex=it->second;
-//            counter++;
-//            if (counter==2)
-//                break;
-//        }
-
-//    }
-
-    startVertex=_landmarks.at(landmark);
-    targetVertex=_landmarks.at(target);
-
-
-    if (targetVertex==-1 || startVertex==-1)
-        throw std::invalid_argument("Wrong target or landmark!");
-
-    //std::vector<double> edgeWeights;
+    auto startVertex = _landmarks.at(landmark);
+    auto targetVertex = _landmarks.at(target);
 
     // vector for storing distance property
     std::vector<Vertex> p(boost::num_vertices(_graph));
@@ -209,7 +176,7 @@ std::pair<std::vector<const AILandmark*>,double> AILandmarkNetwork::LengthofShor
                               distance_map(boost::make_iterator_property_map(d.begin(), get(boost::vertex_index, _graph))));
 
    //std::cout << "distances and parents:" << std::endl;
-   Vertex vi=targetVertex;
+   Vertex vi = targetVertex;
 
 
    std::vector<const AILandmark*> landmarksOnShortestPath;

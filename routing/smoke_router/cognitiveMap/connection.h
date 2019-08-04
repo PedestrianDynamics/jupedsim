@@ -1,5 +1,4 @@
-#ifndef CONNECTION_H
-#define CONNECTION_H
+#pragma once
 
 #include "landmark.h"
 
@@ -31,5 +30,3 @@ private:
     ptrLandmark _landmark1;
     ptrLandmark _landmark2;
 };
-
-#endif // CONNECTION_H

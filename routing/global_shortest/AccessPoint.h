@@ -24,20 +24,18 @@
  *
  *
  **/
+#pragma once
 
+#include "pedestrian/Pedestrian.h"
+#include "geometry/Point.h"
+#include "geometry/Line.h"
 
-#ifndef ACCESSPOINT_H_
-#define ACCESSPOINT_H_
-
-#include <map>
-#include <vector>
+#include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <map>
 #include <string>
-#include <algorithm>
-#include "../../pedestrian/Pedestrian.h"
-#include "../../geometry/Point.h"
-#include "../../geometry/Line.h"
+#include <vector>
 
 class AccessPoint {
 public:
@@ -228,5 +226,3 @@ private:
 
      DoorState _state;
 };
-
-#endif /* ACCESSPOINT_H_ */

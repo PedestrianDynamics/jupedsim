@@ -25,12 +25,11 @@
  *
  *
  **/
+#pragma once
 
-#ifndef TOXICITYANALYSIS_H
-#define TOXICITYANALYSIS_H 1
+#include "ToxicityOutputhandler.h"
 
 #include <memory>
-#include "ToxicityOutputhandler.h"
 #include <string>
 
 class Pedestrian;
@@ -69,5 +68,3 @@ private:
     double _t_prev;
     void InitializeWriteOut();
 };
-
-#endif // ToxicityAnalysis_H

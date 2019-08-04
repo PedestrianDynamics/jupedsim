@@ -26,15 +26,15 @@
  * the Voronoi algorithm or the Mitchell Best candidate algorithm.
  *
  **/
-
 #include "AgentsSourcesManager.h"
-#include "Pedestrian.h"
-#include "../mpi/LCGrid.h"
-#include <thread>
+
 #include "AgentsQueue.h"
+#include "Pedestrian.h"
 
-#include "../voronoi-boost/VoronoiPositionGenerator.h"
+#include "mpi/LCGrid.h"
+#include "voronoi-boost/VoronoiPositionGenerator.h"
 
+#include <thread>
 
 bool AgentsSourcesManager::_isCompleted=true;
 
@@ -108,7 +108,7 @@ bool AgentsSourcesManager::ProcessAllSources() const
 
      bool empty=true;
      double current_time = (int)Pedestrian::GetGlobalTime();
-     vector<Pedestrian*> source_peds; // we have to collect peds from all sources, so that we can consider them  while computing new positions
+     std::vector<Pedestrian*> source_peds; // we have to collect peds from all sources, so that we can consider them  while computing new positions
      for (const auto& src : _sources)
      {
           // std::cout << KRED << "\nprocessing src: " <<  src->GetId() << " -- current time: " << current_time << " schedule time: " << src->GetPlanTime() <<". number of peds in building " << _building->GetAllPedestrians().size() << "\n" << RESET;
@@ -132,7 +132,7 @@ bool AgentsSourcesManager::ProcessAllSources() const
 
           if (timeToCreate && src->GetPoolSize() && (src->GetPlanTime() <= current_time) && inTime && src->GetRemainingAgents())// maybe diff<eps
           {
-               vector<Pedestrian*> peds;
+               std::vector<Pedestrian*> peds;
 
                src->RemoveAgentsFromPool(peds, src->GetChunkAgents() * src->GetPercent());
                src->UpdateRemainingAgents(src->GetChunkAgents() * src->GetPercent());
@@ -185,7 +185,7 @@ bool AgentsSourcesManager::ProcessAllSources() const
 
 
 void AgentsSourcesManager::InitFixedPosition(AgentsSource* src,
-                                                    vector<Pedestrian*>& peds)const
+                                                    std::vector<Pedestrian*>& peds)const
 {
      for(auto&& ped : peds)
      {
@@ -209,13 +209,13 @@ void AgentsSourcesManager::InitFixedPosition(AgentsSource* src,
 }
 
 void AgentsSourcesManager::ComputeBestPositionCompleteRandom(AgentsSource* src,
-                                                             vector<Pedestrian*>& peds)const
+                                                             std::vector<Pedestrian*>& peds)const
 {
      auto dist = src->GetStartDistribution();
      auto subroom = _building->GetRoom(dist->GetRoomId())->GetSubRoom(dist->GetSubroomID());
      auto config=GetBuilding()->GetConfig();
      auto distributor = std::unique_ptr<PedDistributor>(new PedDistributor(config));
-     vector<Point> positions = distributor->PossiblePositions(*subroom);
+     std::vector<Point> positions = distributor->PossiblePositions(*subroom);
      double seed = time(0);
      //TODO: get the seed from the simulation
      std:: cout << "seed: "<< seed << std::endl;
@@ -374,13 +374,13 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
           dist->GetSubroomID());
      auto config=GetBuilding()->GetConfig();
      auto distributor = std::unique_ptr<PedDistributor>(new PedDistributor(config));
-     vector<Point> positions = distributor->PossiblePositions(*subroom);
+     std::vector<Point> positions = distributor->PossiblePositions(*subroom);
      double bounds[4] = { 0, 0, 0, 0 };
      dist->Getbounds(bounds);
 
      std::vector<Pedestrian*> peds_without_place;
 
-     vector<Point> extra_positions;
+     std::vector<Point> extra_positions;
 
      std::vector<Pedestrian*>::iterator iter_ped;
      for (iter_ped = peds.begin(); iter_ped != peds.end(); )
@@ -405,7 +405,7 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
                     bool enough_space = true;
 
                     //checking enough space!!
-                    vector<Pedestrian*> neighbours;
+                    std::vector<Pedestrian*> neighbours;
                     _building->GetGrid()->GetNeighbourhood(pos,neighbours);
 
                     for (const auto& ngh: neighbours)
@@ -465,7 +465,7 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
 void AgentsSourcesManager::AdjustVelocityByNeighbour(Pedestrian* ped) const
 {
      //get the density
-     vector<Pedestrian*> neighbours;
+     std::vector<Pedestrian*> neighbours;
      _building->GetGrid()->GetNeighbourhood(ped,neighbours);
 
      double speed=0.0;
@@ -522,7 +522,7 @@ void AgentsSourcesManager::AdjustVelocityByNeighbour(Pedestrian* ped) const
 void AgentsSourcesManager::AdjustVelocityUsingWeidmann(Pedestrian* ped) const
 {
      //get the density
-     vector<Pedestrian*> neighbours;
+     std::vector<Pedestrian*> neighbours;
      _building->GetGrid()->GetNeighbourhood(ped,neighbours);
 
      //density in pers per m2
@@ -573,7 +573,7 @@ void AgentsSourcesManager::SortPositionByDensity(std::vector<Point>& positions, 
 
      for(auto&& pt:positions)
      {
-          vector<Pedestrian*> neighbours;
+          std::vector<Pedestrian*> neighbours;
           _building->GetGrid()->GetNeighbourhood(pt,neighbours);
           //density in pers per m2
           double density = 0.0;

@@ -27,20 +27,16 @@
  *
  **/
 #include "VelocityModel.h"
-# define NOMINMAX
-#include "../pedestrian/Pedestrian.h"
-//#include "../routing/DirectionStrategy.h"
-#include "../mpi/LCGrid.h"
-#include "../geometry/Wall.h"
-#include "../geometry/SubRoom.h"
+
 #include "general/OpenMP.h"
+#include "geometry/SubRoom.h"
+#include "geometry/Wall.h"
+#include "mpi/LCGrid.h"
+#include "pedestrian/Pedestrian.h"
 
 double xRight = 26.0;
 double xLeft = 0.0;
 double cutoff = 2.0;
-
-using std::vector;
-using std::string;
 
 VelocityModel::VelocityModel(std::shared_ptr<DirectionStrategy> dir, double aped, double Dped,
                              double awall, double Dwall)
@@ -96,7 +92,7 @@ bool VelocityModel::Init (Building* building)
      }
 
 
-     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+     const std::vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
      size_t peds_size = allPeds.size();
      std::cout << "Building has " << peds_size << " peds\n";
     for(unsigned int p=0;p < peds_size;p++)
@@ -157,8 +153,8 @@ bool VelocityModel::Init (Building* building)
 void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic)
 {
       // collect all pedestrians in the simulation.
-      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
-      vector<Pedestrian*> pedsToRemove;
+      const std::vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+      std::vector<Pedestrian*> pedsToRemove;
       pedsToRemove.reserve(500);
       unsigned long nSize;
       nSize = allPeds.size();
@@ -175,9 +171,9 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
      //TODO richtig parallelisieren!
       #pragma omp parallel default(shared) num_threads(nThreads)
       {
-           vector< Point > result_acc = vector<Point > ();
+           std::vector< Point > result_acc = std::vector<Point > ();
            result_acc.reserve(nSize);
-           vector< my_pair > spacings = vector<my_pair > ();
+           std::vector< my_pair > spacings = std::vector<my_pair > ();
            spacings.reserve(nSize); // larger than needed
            spacings.push_back(my_pair(100, 1)); // in case there are no neighbors
            const int threadID = omp_get_thread_num();
@@ -191,7 +187,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 Room* room = building->GetRoom(ped->GetRoomID());
                 SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
                 Point repPed = Point(0,0);
-                vector<Pedestrian*> neighbours;
+                std::vector<Pedestrian*> neighbours;
                 building->GetGrid()->GetNeighbourhood(ped,neighbours);
 
                 int size = (int) neighbours.size();
@@ -220,7 +216,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
                      Point p2 = ped1->GetPos();
                      //subrooms to consider when looking for neighbour for the 3d visibility
-                     vector<SubRoom*> emptyVector;
+                     std::vector<SubRoom*> emptyVector;
                      emptyVector.push_back(subroom);
                      emptyVector.push_back(building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID()));
                      bool isVisible = building->IsVisible(p1, p2, emptyVector, false);
@@ -578,9 +574,9 @@ Point VelocityModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
      return F_wrep;
 }
 
-string VelocityModel::GetDescription()
+std::string VelocityModel::GetDescription()
 {
-     string rueck;
+     std::string rueck;
      char tmp[CLENGTH];
 
      sprintf(tmp, "\t\ta: \t\tPed: %f \tWall: %f\n", _aPed, _aWall);

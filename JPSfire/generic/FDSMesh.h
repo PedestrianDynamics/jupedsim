@@ -1,12 +1,11 @@
-#ifndef FDSMESH_H
-#define FDSMESH_H
+#pragma once
+
+#include "Knot.h"
 
 #include <vector>
 #include <string>
-#include "Knot.h"
-#include "../../IO/OutputHandler.h"
-
 //log output
+class OutputHandler;
 extern OutputHandler* Log;
 
 using Matrix = std::vector<std::vector<Knot> >;
@@ -41,5 +40,3 @@ private:
     double _ymax;
     bool _statMesh;
 };
-
-#endif // FDSIMPORT_H

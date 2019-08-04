@@ -24,10 +24,7 @@
  *
  *
  **/
-
-
 #include "AccessPoint.h"
-
 
 AccessPoint::AccessPoint(int id, double center[2],double radius)
 {
@@ -42,8 +39,8 @@ AccessPoint::AccessPoint(int id, double center[2],double radius)
      _connectingAPs.clear();
      _mapDestToDist.clear();
      pCentre=Point(center[0],center[1]);
-     _transitPedestrians = vector<Pedestrian*>();
-     _connectingAPs = vector<AccessPoint*>();
+     _transitPedestrians = std::vector<Pedestrian*>();
+     _connectingAPs = std::vector<AccessPoint*>();
 //     _isClosed=0
      _navLine=nullptr;
      _state = DoorState::OPEN;
@@ -147,7 +144,7 @@ int  AccessPoint::GetNextApTo(int UID)
 
 int AccessPoint::GetNearestTransitAPTO(int UID)
 {
-     const vector <AccessPoint*>& possibleDest=_navigationGraphTo[UID];
+     const std::vector <AccessPoint*>& possibleDest=_navigationGraphTo[UID];
 
      if(possibleDest.size()==0) {
           return -1;
@@ -217,14 +214,14 @@ NavLine* AccessPoint::GetNavLine() const
      return _navLine;
 }
 
-const vector <AccessPoint*>& AccessPoint::GetConnectingAPs()
+const std::vector <AccessPoint*>& AccessPoint::GetConnectingAPs()
 {
      return _connectingAPs;
 }
 
 void AccessPoint::RemoveConnectingAP(AccessPoint* ap)
 {
-     vector<AccessPoint*>::iterator it;
+     std::vector<AccessPoint*>::iterator it;
      it = find (_connectingAPs.begin(), _connectingAPs.end(), ap);
      if(it==_connectingAPs.end()) {
           std::cout<<" there is no connection to AP: "<< ap->GetID()<<std::endl;
@@ -233,7 +230,7 @@ void AccessPoint::RemoveConnectingAP(AccessPoint* ap)
      }
 }
 
-const vector <AccessPoint*>& AccessPoint::GetTransitAPsTo(int UID)
+const std::vector <AccessPoint*>& AccessPoint::GetTransitAPsTo(int UID)
 {
      return _navigationGraphTo[UID];
 }

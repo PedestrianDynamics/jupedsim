@@ -33,14 +33,14 @@
  *
  *
  **/
-#ifndef JPSCORE_UNIVFFVIAFM_H
-#define JPSCORE_UNIVFFVIAFM_H
+#pragma once
+
+#include "general/Macros.h"
 
 #include <string>
 #include <vector>
 #include <map>
 #include <float.h>
-#include "../../general/Macros.h"
 
 class Pedestrian;
 class Room;
@@ -174,6 +174,3 @@ private:
      std::map<SubRoom*, Point> _subRoomPtrTOinsidePoint;
 
 };
-
-
-#endif //JPSCORE_UNIVFFVIAFM_H

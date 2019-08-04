@@ -1,5 +1,4 @@
-#ifndef FILESYSTEM_HPP
-#define FILESYSTEM_HPP
+#pragma once
 
 #ifdef __APPLE__
 #include <boost/filesystem.hpp>
@@ -8,5 +7,3 @@ namespace fs = boost::filesystem;
 #include <filesystem>
 namespace fs = std::filesystem;
 #endif
-
-#endif // FILESYSTEM_HPP

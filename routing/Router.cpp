@@ -24,16 +24,14 @@
  *
  *
  **/
-
-
 #include "Router.h"
-#include "../geometry/Building.h"
-#include "../pedestrian/Pedestrian.h"
 
+#include "geometry/Building.h"
+#include "pedestrian/Pedestrian.h"
 
 Router::Router()
 {
-     _finalDestinations = vector<int>();
+     _finalDestinations = std::vector<int>();
      _id=-1;
      _strategy=ROUTING_UNDEFINED;
 }
@@ -53,7 +51,7 @@ void Router::AddFinalDestinationID(int id)
      _finalDestinations.push_back(id);
 }
 
-const vector<int> Router::GetFinalDestinations() const
+const std::vector<int> Router::GetFinalDestinations() const
 {
      return _finalDestinations;
 }

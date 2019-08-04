@@ -55,16 +55,14 @@
  * functions of (x, y) and not (x, y, z). Any slope will be neglected.
  *
  **/
+#pragma once
 
-#ifndef FFROUTER_H_
-#define FFROUTER_H_
-
-
-#include "../Router.h"
-#include "../../general/Macros.h"
-#include "../../geometry/Building.h"
+#include "routing/Router.h"
 #include "FloorfieldViaFM.h"
 #include "UnivFFviaFM.h"
+
+#include "general/Macros.h"
+#include "geometry/Building.h"
 
 class Building;
 class Pedestrian;
@@ -221,5 +219,3 @@ protected:
      //output filename counter: cnt
      static int _cnt;
 };
-
-#endif /* FFROUTER_H_ */

@@ -25,15 +25,14 @@
  *
  *
  **/
+#pragma once
 
+#include "Brain.h"
 
-#ifndef COGNITIVEMAPSTORAGE_H_
-#define COGNITIVEMAPSTORAGE_H_
+#include "routing/smoke_router/cognitiveMap/cognitivemap.h"
 
 #include <unordered_map>
 #include <vector>
-#include "./cognitiveMap/cognitivemap.h"
-#include "Brain.h"
 
 class Building;
 class Pedestrian;
@@ -81,5 +80,3 @@ private:
      std::unordered_map<const SubRoom*,ptrIntNetwork> _roominternalNetworks;
 
 };
-
-#endif /* COGNITIVEMAPSTORAGE_H_ */

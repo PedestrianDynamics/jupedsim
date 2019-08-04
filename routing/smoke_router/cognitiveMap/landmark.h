@@ -1,12 +1,11 @@
-#ifndef LANDMARK_H
-#define LANDMARK_H
+#pragma once
+
+#include "geometry/Point.h"
+#include "pedestrian/Ellipse.h"
+#include "geometry/Building.h"
 
 #include <vector>
 #include <list>
-#include "../../../geometry/Point.h"
-#include "../../../pedestrian/Ellipse.h"
-#include "../../../geometry/Building.h"
-
 
 using ptrRoom = SubRoom*;
 
@@ -16,8 +15,6 @@ using Associations = std::vector<ptrAssociation>;
 
 class Region;
 using ptrRegion = std::shared_ptr<Region>;
-
-
 
 class Landmark
 {
@@ -88,5 +85,3 @@ private:
     ptrRegion _region;
     JEllipse _ellipse;
 };
-
-#endif // LANDMARK_H

@@ -27,14 +27,11 @@
  * goals which are a door in the same room. It uses all the calculations and the
  * working on grid form the motherclass, yet it has a different constructor.
  **/
+#pragma once
 
-
-#ifndef JPSCORE_LOCALFLOORFIELDVIAFM_H
-#define JPSCORE_LOCALFLOORFIELDVIAFM_H
-
-//#include <vector>
-#include <string>
 #include "FloorfieldViaFM.h"
+
+#include <string>
 
 class LocalFloorfieldViaFM : public virtual FloorfieldViaFM {
 public:
@@ -82,5 +79,3 @@ public:
 protected:
      SubRoom* _subroom;
 };
-
-#endif //JPSCORE_LOCALFLOORFIELDVIAFM_H

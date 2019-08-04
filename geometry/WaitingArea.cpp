@@ -25,9 +25,10 @@
  * within the geometry. Additionally the pedestrians may wait for a certain
  * time or till a transition opens inside the waiting area.
  */
-
 #include "WaitingArea.h"
+
 #include "Building.h"
+
 #include <sstream>
 
 int WaitingArea::GetMaxNumPed() const

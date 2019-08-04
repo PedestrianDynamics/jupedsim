@@ -1,6 +1,7 @@
 #include "locater.h"
-#include "../cognitiveMap/cognitivemap.h"
-#include "../../../pedestrian/Pedestrian.h"
+
+#include "pedestrian/Pedestrian.h"
+#include "routing/smoke_router/cognitiveMap/cognitivemap.h"
 
 Locater::Locater(const Building *b, const double &updateInterval): AbstractSensor(b)
 {
@@ -33,4 +34,3 @@ void Locater::execute(const Pedestrian * ped, CognitiveMap &cogMap) const
    //cogMap->WriteToFile();
 
 }
-

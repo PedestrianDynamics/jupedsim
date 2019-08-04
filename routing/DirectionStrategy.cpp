@@ -24,20 +24,17 @@
  *
  *
  **/
+#include "DirectionStrategy.h"
 
-//#include "DirectionStrategy.h"
-#include "../geometry/Line.h"
-#include "../geometry/NavLine.h"
-#include "../geometry/Building.h"
-//#include "../geometry/Room.h"
-#include "../pedestrian/Pedestrian.h"
-#include "../geometry/SubRoom.h"
-//#include "../geometry/Wall.h"
-#include "../routing/ff_router/UnivFFviaFM.h"
-#include "../routing/ff_router/FloorfieldViaFM.h"
-#include "../routing/ff_router/ffRouter.h"
-//#include <fstream>
-//#include <ctime>
+#include "geometry/Building.h"
+#include "geometry/Line.h"
+#include "geometry/NavLine.h"
+#include "geometry/SubRoom.h"
+#include "pedestrian/Pedestrian.h"
+#include "routing/ff_router/ffRouter.h"
+#include "routing/ff_router/FloorfieldViaFM.h"
+#include "routing/ff_router/UnivFFviaFM.h"
+
 #include <chrono>
 
 DirectionStrategy::DirectionStrategy()
@@ -169,7 +166,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
       SubRoom * subroom = room->GetSubRoom(subroomId);
 
       //============================ WALLS ===========================
-      const vector<Wall>& walls = subroom->GetAllWalls();
+      const std::vector<Wall>& walls = subroom->GetAllWalls();
       for (unsigned int i = 0; i < walls.size(); i++) {
             dist = tmpDirection.GetDistanceToIntersectionPoint(walls[i]);
             if (dist < minDist) {
@@ -188,9 +185,9 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
 
 
       //============================ OBST ===========================
-      const vector<Obstacle*>& obstacles = subroom->GetAllObstacles();
+      const std::vector<Obstacle*>& obstacles = subroom->GetAllObstacles();
       for(unsigned int obs=0; obs<obstacles.size(); ++obs) {
-            const vector<Wall>& owalls = obstacles[obs]->GetAllWalls();
+            const std::vector<Wall>& owalls = obstacles[obs]->GetAllWalls();
             for (unsigned int i = 0; i < owalls.size(); i++) {
                   dist = tmpDirection.GetDistanceToIntersectionPoint(owalls[i]);
                   if (dist < minDist) {
@@ -212,7 +209,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
             ped->SetNewOrientationFlag(true); //Mark this pedestrian for next target calculation
             ped->SetDistToBlockade(minDist);
             if(iObs >= 0){ // obstacle is nearest
-                  const vector<Wall>& owalls = obstacles[iObs]->GetAllWalls();
+                  const std::vector<Wall>& owalls = obstacles[iObs]->GetAllWalls();
                   angle = tmpDirection.GetObstacleDeviationAngle(owalls, walls);
 
                   // angle =  tmpDirection.GetDeviationAngle(owalls[inear].enlarge(2*ped->GetLargerAxis()));
@@ -839,7 +836,7 @@ Point DirectionTrain::GetTarget(Room* /*room*/, Pedestrian* ped) const
      auto TrainTypes = ped->GetBuilding()->GetTrainTypes();
      auto TrainTimeTables = ped->GetBuilding()->GetTrainTimeTables();
      auto now = ped->GetGlobalTime();
-     string type_delme="";
+     std::string type_delme="";
      // std::cout << ">>> Enter with ped at " << ped->GetPos().toString().c_str() << "\n";
      for(auto && t: TrainTimeTables)
      {

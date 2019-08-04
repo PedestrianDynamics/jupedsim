@@ -1,6 +1,7 @@
 #include "internnavigationnetwork.h"
 
-#include "../../../geometry/Obstacle.h"
+#include "geometry/Obstacle.h"
+#include "geometry/Wall.h"
 
 InternNavigationNetwork::InternNavigationNetwork()
 {

@@ -1,10 +1,8 @@
-#ifndef YOUAREHEREPOINTER_H
-#define YOUAREHEREPOINTER_H
+#pragma once
 
-#include "../../../geometry/Point.h"
+#include "geometry/Point.h"
+
 class Pedestrian;
-
-
 
 // Ellipse representing the approximative position of a pedestrian in his cognitive map
 class YouAreHerePointer
@@ -42,5 +40,3 @@ private:
     //Region
 
 };
-
-#endif // YOUAREHEREPOINTER_H

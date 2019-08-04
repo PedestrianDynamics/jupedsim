@@ -25,12 +25,9 @@
  *
  *
  **/
-
-#ifndef JAMSENSOR_H
-#define JAMSENSOR_H 1
+#pragma once
 
 #include "AbstractSensor.h"
-
 
 class JamSensor : public AbstractSensor
 {
@@ -45,5 +42,3 @@ public:
 private:
 
 };
-
-#endif // JAMSENSOR_H

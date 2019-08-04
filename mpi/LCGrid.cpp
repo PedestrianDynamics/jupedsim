@@ -32,10 +32,10 @@
  *
  *
  **/
-
-
 #include"LCGrid.h"
-#include "../pedestrian/Pedestrian.h"
+
+#include "pedestrian/Pedestrian.h"
+
 #include <mutex>
 
 
@@ -90,7 +90,7 @@ LCGrid::~LCGrid()
      delete[] _cellHead;
 }
 
-void LCGrid::ShallowCopy(const vector<Pedestrian*>& peds)
+void LCGrid::ShallowCopy(const std::vector<Pedestrian*>& peds)
 {
      for(unsigned int p=0; p<peds.size(); p++)
      {
@@ -99,7 +99,7 @@ void LCGrid::ShallowCopy(const vector<Pedestrian*>& peds)
      }
 }
 
-void LCGrid::Update(const vector<Pedestrian*>& peds)
+void LCGrid::Update(const std::vector<Pedestrian*>& peds)
 {
      grid_mutex.lock();
      ClearGrid();
@@ -177,7 +177,7 @@ void LCGrid::HighlightNeighborhood(int pedID, Building* building)
      Pedestrian* ped=building->GetPedestrian(pedID);
      //get and highlight the neighborhood
      if(ped){
-          vector<Pedestrian*> neighbours;
+          std::vector<Pedestrian*> neighbours;
           GetNeighbourhood(ped,neighbours);
 
           for(auto&& p: neighbours)
@@ -214,7 +214,7 @@ void LCGrid::HighlightNeighborhood(int pedID, Building* building)
      }
 }
 */
-void LCGrid::GetNeighbourhood(const Pedestrian* ped, vector<Pedestrian*>& neighbourhood)
+void LCGrid::GetNeighbourhood(const Pedestrian* ped, std::vector<Pedestrian*>& neighbourhood)
 {
      grid_mutex.lock();
 
@@ -340,7 +340,7 @@ void LCGrid::dumpCellsOnly()
 
 std::string LCGrid::ToXML()
 {
-     string grid;
+     std::string grid;
      for (double x=_gridXmin;x<=_gridXmax;x+=_cellSize)
      {
           char wall[500] = "";

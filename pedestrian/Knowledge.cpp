@@ -24,8 +24,6 @@
  *
  *
  **/
-
-
 #include "Knowledge.h"
 
 Knowledge::Knowledge()

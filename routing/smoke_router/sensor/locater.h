@@ -1,9 +1,6 @@
-#ifndef LOCATER_H
-#define LOCATER_H
-
+#pragma once
 
 #include "AbstractSensor.h"
-//class Point;
 
 class Locater : public AbstractSensor
 {
@@ -16,5 +13,3 @@ public:
 private:
     double _updateInterval;
 };
-
-#endif // LOCATER_H

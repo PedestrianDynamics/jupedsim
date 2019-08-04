@@ -24,16 +24,10 @@
  *
  *
  **/
+#pragma once
 
-
-#ifndef _CROSSING_H
-#define _CROSSING_H
-
-#include "NavLine.h"
 #include "Hline.h"
 
-//class Line;
-class Room;
 class SubRoom;
 
 class Crossing : public Hline {
@@ -235,5 +229,3 @@ public:
 
     std::string toString() const;
 };
-
-#endif  /* _CROSSING_H */

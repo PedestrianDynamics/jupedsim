@@ -26,20 +26,23 @@
  **/
 #include "Building.h"
 
+#include "general/OpenMP.h"
+#include "geometry/SubRoom.h"
+#include "geometry/Wall.h"
+
+#include <tinyxml.h>
+
 #include <chrono>
 
-#include "../geometry/SubRoom.h"
-#include "../tinyxml/tinyxml.h"
-#include "general/OpenMP.h"
 #ifdef _SIMULATOR
-
 #include "GeometryReader.h"
-#include "../pedestrian/Pedestrian.h"
-#include "../mpi/LCGrid.h"
-#include "../IO/GeoFileParser.h"
-#include "general/Filesystem.hpp"
-#include <thread>         // std::thread, std::thread::id, std::this_thread::get_id
 
+#include "general/Filesystem.h"
+#include "IO/GeoFileParser.h"
+#include "mpi/LCGrid.h"
+#include "pedestrian/Pedestrian.h"
+
+#include <thread>
 #endif
 
 
@@ -158,7 +161,7 @@ void Building::SetCaption(const std::string& s)
  getters
  ************************************************************/
 
-string Building::GetCaption() const
+std::string Building::GetCaption() const
 {
      return _caption;
 }
@@ -283,7 +286,7 @@ bool Building::InitGeometry()
      for (auto&& itr_room: _rooms) {
           for (auto&& itr_subroom: itr_room.second->GetAllSubRooms()) {
                //create a close polyline out of everything
-               vector<Line*> goals = vector<Line*>();
+               std::vector<Line*> goals = std::vector<Line*>();
 
                //  collect all crossings
                for (auto&& cros:itr_subroom.second->GetAllCrossings()) {
@@ -867,9 +870,9 @@ bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom>& subroom) c
      std::cout << KRED << "\nEnter RemoveOverlappingDoors with subroom " << subroom->GetRoomID() << "," << subroom->GetSubRoomID() << RESET<<"\n";
 #endif
      bool removed = false; // did we remove anything?
-      vector<Line> exits = vector<Line>(); // transitions+crossings
+      std::vector<Line> exits = std::vector<Line>(); // transitions+crossings
       auto walls = subroom->GetAllWalls();
-      vector<Wall> tmpWalls = vector<Wall>(); //splited big walls are stored here
+      std::vector<Wall> tmpWalls = std::vector<Wall>(); //splited big walls are stored here
       bool isBigWall = false; // mark walls as big. If not big, add them to tmpWalls
       //  collect all crossings
       for (auto&& cros: subroom->GetAllCrossings())
@@ -960,7 +963,7 @@ std::vector<Wall>  Building::SplitWall(const std::shared_ptr<SubRoom>& subroom, 
      auto crossings = subroom->GetAllCrossings();
      auto transitions = subroom->GetAllTransitions();
      // TODO: Hlines too?
-     vector<Line> walls_and_exits = vector<Line>();
+     std::vector<Line> walls_and_exits = std::vector<Line>();
      // @todo: check if this is GetAllGoals()?
      //  collect all crossings
      for (auto&& cros:crossings)
@@ -1155,7 +1158,7 @@ void Building::WriteToErrorLog() const
      Log->Write("\n");
 }
 
-Room* Building::GetRoom(string caption) const
+Room* Building::GetRoom(std::string caption) const
 {
      for (const auto& it: _rooms) {
           if (it.second->GetCaption()==caption)
@@ -1309,7 +1312,7 @@ const std::map<int, Goal*>& Building::GetAllGoals() const
      return _goals;
 }
 
-Transition* Building::GetTransition(string caption) const
+Transition* Building::GetTransition(std::string caption) const
 {
      //eventually
      std::map<int, Transition*>::const_iterator itr;
@@ -1373,7 +1376,7 @@ Goal* Building::GetFinalGoal(int ID) const
      }
 }
 
-Crossing* Building::GetTransOrCrossByName(string caption) const
+Crossing* Building::GetTransOrCrossByName(std::string caption) const
 {
      {
           //eventually
@@ -1605,7 +1608,7 @@ void Building::InitGrid()
 
 void Building::DeletePedestrian(Pedestrian*& ped)
 {
-     vector<Pedestrian*>::iterator it;
+     std::vector<Pedestrian*>::iterator it;
      it = find(_allPedestians.begin(), _allPedestians.end(), ped);
      if (it==_allPedestians.end()) {
           Log->Write("\tERROR: \tPed not found with ID %d ", ped->GetID());
@@ -1617,10 +1620,10 @@ void Building::DeletePedestrian(Pedestrian*& ped)
           if (_savePathway) {
                // string results;
                std::string path = (*it)->GetPath();
-               std::vector<string> brokenpaths;
+               std::vector<std::string> brokenpaths;
                StringExplode(path, ">", &brokenpaths);
                for (unsigned int i = 0; i<brokenpaths.size(); i++) {
-                    vector<string> tags;
+                    std::vector<std::string> tags;
                     StringExplode(brokenpaths[i], ":", &tags);
                     std::string room = _rooms[atoi(tags[0].c_str())]->GetCaption();
                     std::string trans = GetTransition(atoi(tags[1].c_str()))->GetCaption();
@@ -1645,7 +1648,7 @@ void Building::DeletePedestrian(Pedestrian*& ped)
      delete ped;
 }
 
-const vector<Pedestrian*>& Building::GetAllPedestrians() const
+const std::vector<Pedestrian*>& Building::GetAllPedestrians() const
 {
      return _allPedestians;
 }
@@ -1704,12 +1707,12 @@ void Building::InitSavePedPathway(const std::string& filename)
      }
 }
 
-void Building::StringExplode(string str, std::string separator,
-          vector<string>* results)
+void Building::StringExplode(std::string str, std::string separator,
+          std::vector<std::string>* results)
 {
      size_t found;
      found = str.find_first_of(separator);
-     while (found!=string::npos) {
+     while (found!=std::string::npos) {
           if (found>0) {
                results->push_back(str.substr(0, found));
           }

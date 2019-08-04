@@ -25,16 +25,14 @@
  * within the geometry. Additionally the pedestrians may wait for a certain
  * time or till a transition opens inside the waiting area.
  */
-
-#ifndef _WAITINGAREA_H
-#define _WAITINGAREA_H
+#pragma once
 
 #include "Goal.h"
 
-#include <vector>
+#include <cstdio>
 #include <map>
-#include <stdio.h>
 #include <random>
+#include <vector>
 
 class Building;
 class WaitingArea : public Goal{
@@ -55,7 +53,7 @@ protected:
      */
     unsigned long _minNumPed = -1;
 
-    /** 
+    /**
      * Time after which the waiting area releases the pedestrians inside
      */
     int _waitingTime = -1;
@@ -239,4 +237,3 @@ public:
      */
     std::string toString();
 };
-#endif //_WAITINGAREA_H

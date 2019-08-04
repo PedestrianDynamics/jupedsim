@@ -6,6 +6,7 @@
  */
 
 #include "Event.h"
+
 #include <algorithm>
 
 Event::Event(int id, double time, const std::string& type,

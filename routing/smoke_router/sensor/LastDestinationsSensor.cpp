@@ -29,12 +29,10 @@
 #include "LastDestinationsSensor.h"
 
 
-#include "../NavigationGraph.h"
-#include "../../../geometry/Building.h"
-#include "../cognitiveMap/cognitivemap.h"
-#include "../../../pedestrian/Pedestrian.h"
-//#include <vector>
-//#include <set>
+#include "geometry/Building.h"
+#include "pedestrian/Pedestrian.h"
+#include "routing/smoke_router/cognitiveMap/cognitivemap.h"
+#include "routing/smoke_router/NavigationGraph.h"
 
 LastDestinationsSensor::~LastDestinationsSensor()
 {

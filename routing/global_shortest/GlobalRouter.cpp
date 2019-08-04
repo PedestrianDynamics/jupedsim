@@ -24,26 +24,15 @@
  *
  *
  **/
-
-
 #include "GlobalRouter.h"
 
 #include "AccessPoint.h"
-//#include "Router.h"
-//#include "NavMesh.h"
 #include "DTriangulation.h"
 
-//#include "../geometry/Building.h"
-//#include "../pedestrian/Pedestrian.h"
-#include <tinyxml.h>
-#include "../../geometry/SubRoom.h"
-//#include "../geometry/Wall.h"
-//#include "../IO/OutputHandler.h"
+#include "geometry/SubRoom.h"
+#include "geometry/Wall.h"
 
-//#include <sstream>
-//#include <cfloat>
-//#include <fstream>
-//#include <iomanip>
+#include <tinyxml.h>
 
 GlobalRouter::GlobalRouter() :
                               Router()
@@ -286,7 +275,7 @@ bool GlobalRouter::Init(Building* building)
                }
 
                //collect all navigation objects
-               vector<Hline*> allGoals;
+               std::vector<Hline*> allGoals;
                const auto & crossings = sub->GetAllCrossings();
                allGoals.insert(allGoals.end(), crossings.begin(), crossings.end());
                const auto & transitions = sub->GetAllTransitions();
@@ -811,7 +800,7 @@ int GlobalRouter::FindExit(Pedestrian* ped)
 int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 {
      // get the relevant opened exits
-     vector <AccessPoint*> relevantAPs;
+     std::vector <AccessPoint*> relevantAPs;
      GetRelevantRoutesTofinalDestination(ped,relevantAPs);
      //in the case there is only one alternative
      //save some computation
@@ -899,7 +888,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 }
 
 
-void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<AccessPoint*>& relevantAPS)
+void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, std::vector<AccessPoint*>& relevantAPS)
 {
 
      Room* room=_building->GetRoom(ped->GetRoomID());
@@ -910,7 +899,7 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
      // It might be time consuming, you many pre compute and cache the results.
      if(sub->GetAllHlines().size()==0)
      {
-          const vector<int>& goals=sub->GetAllGoalIDs();
+          const std::vector<int>& goals=sub->GetAllGoalIDs();
           //filter to keep only the emergencies exits.
 
           for(unsigned int g1=0; g1<goals.size(); g1++) {
@@ -936,7 +925,7 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
      // it should be safe now to delete the first preceding if block
      else
      {
-          const vector<int>& goals=sub->GetAllGoalIDs();
+          const std::vector<int>& goals=sub->GetAllGoalIDs();
           for(unsigned int g1=0; g1<goals.size(); g1++)
           {
                AccessPoint* ap=_accessPoints[goals[g1]];
@@ -992,7 +981,7 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
      if(relevantAPS.size()==0)
      {
           //fixme: this should also never happened. But happen due to previous bugs..
-          const vector<int>& goals=sub->GetAllGoalIDs();
+          const std::vector<int>& goals=sub->GetAllGoalIDs();
           for(unsigned int g1=0; g1<goals.size(); g1++)
           {
                relevantAPS.push_back(_accessPoints[goals[g1]]);
@@ -1162,7 +1151,7 @@ void GlobalRouter::TriangulateGeometry()
           {
                auto&& subroom= (std::shared_ptr<SubRoom>&&) itr_subroom.second;
                auto&& room= (std::shared_ptr<Room>&&) itr_room.second;
-               auto&& obstacles= (const vector<Obstacle*>&&) subroom->GetAllObstacles();
+               auto&& obstacles= (const std::vector<Obstacle*>&&) subroom->GetAllObstacles();
                if(!subroom->IsAccessible()) continue;
 
                //Triangulate if obstacle or concave and no hlines ?
@@ -1187,14 +1176,14 @@ void GlobalRouter::TriangulateGeometry()
                     //                    tri->Triangulate();
                     //                    vector<p2t::Triangle*> triangles=tri->GetTriangles();
 
-                    vector<p2t::Triangle*> triangles=subroom->GetTriangles();
+                    std::vector<p2t::Triangle*> triangles=subroom->GetTriangles();
 
                     for (const auto & tr: triangles)
                     {
                          Point P0  = Point (tr->GetPoint(0)->x,tr->GetPoint(0)->y);
                          Point P1  = Point (tr->GetPoint(1)->x,tr->GetPoint(1)->y);
                          Point P2  = Point (tr->GetPoint(2)->x,tr->GetPoint(2)->y);
-                         vector<Line> edges;
+                         std::vector<Line> edges;
                          edges.push_back(Line(P0,P1));
                          edges.push_back(Line(P1,P2));
                          edges.push_back(Line(P2,P0));
@@ -1339,7 +1328,7 @@ bool GlobalRouter::GenerateNavigationMesh()
      return true;
 }
 
-string GlobalRouter::GetRoutingInfoFile()
+std::string GlobalRouter::GetRoutingInfoFile()
 {
 
      TiXmlDocument doc(_building->GetProjectFilename());
@@ -1352,14 +1341,14 @@ string GlobalRouter::GetRoutingInfoFile()
      // everything is fine. proceed with parsing
      TiXmlElement* xMainNode = doc.RootElement();
      TiXmlNode* xRouters=xMainNode->FirstChild("route_choice_models");
-     string nav_line_file="";
+     std::string nav_line_file="";
 
      for(TiXmlElement* e = xRouters->FirstChildElement("router"); e;
                e = e->NextSiblingElement("router"))
      {
 
-          string strategy=e->Attribute("description");
-          vector<string> routers={"local_shortest", "global_shortest", "global_safest","dynamic","quickest"};
+          std::string strategy=e->Attribute("description");
+          std::vector<std::string> routers={"local_shortest", "global_shortest", "global_safest","dynamic","quickest"};
 
           if(std::find(routers.begin(), routers.end(), strategy) != routers.end())
           {
@@ -1385,7 +1374,7 @@ string GlobalRouter::GetRoutingInfoFile()
                                 exit (EXIT_FAILURE);
                           }
 
-                         string local_planing=xmltoa(para->Attribute("use_for_local_planning"),"false");
+                         std::string local_planing=xmltoa(para->Attribute("use_for_local_planning"),"false");
                          if(local_planing=="true") {
                               _useMeshForLocalNavigation = 1;
                          }
@@ -1393,7 +1382,7 @@ string GlobalRouter::GetRoutingInfoFile()
                               _useMeshForLocalNavigation = 0;
                          }
 
-                         string method = xmltoa(para->Attribute("method"),"");
+                         std::string method = xmltoa(para->Attribute("method"),"");
                          if(method=="triangulation")
                          {
                               _generateNavigationMesh=true;
@@ -1440,7 +1429,7 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
           return false;
      }
 
-     string  version = xRootNode->Attribute("version");
+     std::string  version = xRootNode->Attribute("version");
      if (version < JPS_OLD_VERSION) {
           Log->Write("ERROR: \tOnly version greater than %d supported",JPS_OLD_VERSION);
           Log->Write("ERROR: \tparsing routing file failed!");

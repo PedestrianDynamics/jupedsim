@@ -5,8 +5,7 @@
  *      Author: piccolo
  */
 
-#ifndef EVENTS_EVENT_H_
-#define EVENTS_EVENT_H_
+#pragma once
 
 #include <string>
 
@@ -65,5 +64,3 @@ private:
 
      EventAction StringToEventAction(const std::string&);
 };
-
-#endif /* EVENTS_EVENT_H_ */
