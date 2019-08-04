@@ -28,7 +28,7 @@
 
 #include <map>
 #include <vector>
-
+#include <string>
 class Room;
 class Building;
 class Pedestrian;
