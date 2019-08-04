@@ -116,11 +116,12 @@ bool EventManager::ReadEventsXml()
           eventfile = _projectRootDir
                     + xMainNode->FirstChild("events_file")->FirstChild()->Value();
           Log->Write("INFO: \tevents <" + eventfile + ">");
-     } else if (xMainNode->FirstChild("header")->FirstChild("events_file")) {
-          eventfile = _projectRootDir
-                  + xMainNode->FirstChild("header")->FirstChild("events_file")->FirstChild()->Value();
-          Log->Write("INFO: \tevents <" + eventfile + ">");
-
+     } else if (xMainNode->FirstChild("header")){
+          if (xMainNode->FirstChild("header")->FirstChild("events_file")) {
+               eventfile = _projectRootDir
+                       +xMainNode->FirstChild("header")->FirstChild("events_file")->FirstChild()->Value();
+               Log->Write("INFO: \tevents <" + eventfile + ">");
+          }
      } else {
           Log->Write("INFO: \tNo events found");
           return true;
