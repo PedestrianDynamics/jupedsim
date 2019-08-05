@@ -472,7 +472,7 @@ void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building* building, i
      fs::path projRoot(building->GetProjectRootDir());
 
      (void) seed; (void) nPeds;
-     char tmp[100] = "";
+     char tmp[500] = "";
      sprintf(tmp, "#description: jpscore (%s)", JPSCORE_VERSION);
      Write(tmp);
      sprintf(tmp, "#count: %d", count);
