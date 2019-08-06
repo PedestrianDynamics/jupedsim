@@ -35,9 +35,9 @@ states = ["short", "long", "mixed"]
 
 def run_rimea_test14(inifile, trajfile):
     # Read data
-    if os.path.isfile('flow_exit_id_1.txt'):
-        data_short = np.loadtxt('flow_exit_id_4.txt')
-        data_main = np.loadtxt('flow_exit_id_1.txt')
+    if os.path.isfile('flow_exit_id_1_traj.txt'):
+        data_short = np.loadtxt('flow_exit_id_4_traj.txt')
+        data_main = np.loadtxt('flow_exit_id_1_traj.txt')
 
     elif os.path.isfile('trajectories/traj.xml_flow_exit_id_1.dat'):
         data_short = np.loadtxt('trajectories/traj.xml_flow_exit_id_4.dat')

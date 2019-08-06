@@ -36,23 +36,10 @@ import matplotlib.pyplot as plt
 import os
 
 def run_rimea_test15(inifile, trajfile):
-
-
-    if os.path.isfile('flow_exit_id_0.txt'):
-        data_long = np.loadtxt('flow_exit_id_0.txt')
-        data_short = np.loadtxt('flow_exit_id_1.txt')
-        data_corner = np.loadtxt('flow_exit_id_2.txt')
-
-    elif os.path.isfile('trajectories/traj.xml_flow_exit_id_1.dat'):
-        data_long = np.loadtxt('trajectories/traj.xml_flow_exit_id_0.dat')
-        data_short = np.loadtxt('trajectories/traj.xml_flow_exit_id_1.dat')
-        data_corner = np.loadtxt('trajectories/traj.xml_flow_exit_id_2.dat')
-
-    else:
-        print('Can not find Exit Files')
-
-    # Read data
-
+    #read data
+    data_long = np.loadtxt('flow_exit_id_0_traj.txt')
+    data_short = np.loadtxt('flow_exit_id_1_traj.txt')
+    data_corner = np.loadtxt('flow_exit_id_2_traj.txt')
 
     # Evac times
     evac_long = data_long[-1,0]
@@ -84,7 +71,7 @@ def get_data (number):
 
 def get_dia_data (number):
     time=[]
-    textfile=open("flow_exit_id_"+str(number)+".txt")
+    textfile=open("flow_exit_id_"+str(number)+"_traj.txt")
     for i in range(3):
         textfile.readline()
     for line in textfile:
@@ -117,6 +104,7 @@ if __name__ == "__main__":
     start_time=time.time()
     test = JPSRunTestDriver(15, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
     test.run_test(testfunction=run_rimea_test15)
-    create_dia(500)
     logging.info("%s exits with SUCCESS\nExecution time %.3f seconds." % (argv[0],time.time()-start_time))
     exit(SUCCESS)
+
+create_dia(500)
