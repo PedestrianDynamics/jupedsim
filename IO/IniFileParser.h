@@ -21,6 +21,7 @@
 #pragma once
 
 #include "general/Configuration.h"
+#include "general/Filesystem.h"
 #include "routing/DirectionStrategy.h"
 
 #include <string>
@@ -39,7 +40,7 @@ public:
      IniFileParser(Configuration* config);
      ~IniFileParser(){};
 
-     bool Parse(std::string iniFile);
+     bool Parse(const fs::path& iniFile);
 
 private:
      bool ParseHeader(TiXmlNode* xHeader);

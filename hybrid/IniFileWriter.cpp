@@ -118,7 +118,7 @@ void IniFileWriter::WriteTrajectoryOutputDefinition()
           exit(-1);
      }
      str << "\t<trajectories format=\"" << fm << "\" fps=\"" << _configuration->GetFps() << "\">" << std::endl;
-     if (_configuration->GetTrajectoriesFile()!="") {
+     if (!_configuration->GetTrajectoriesFile().empty()) {
           str << "\t\t<file location=\"" << _configuration->GetTrajectoriesFile() << "\"/>" << std::endl;
      }
      else {
@@ -140,7 +140,7 @@ void IniFileWriter::WriteLogFileLocation()
 {
      std::stringstream str;
      str << "\t<!-- output log file location -->" << std::endl;
-     if (_configuration->GetErrorLogFile()!="") {
+     if (!_configuration->GetErrorLogFile().empty()) {
           str << "\t<logfile>" << _configuration->GetErrorLogFile() << "</logfile>" << std::endl;
      }
      else {

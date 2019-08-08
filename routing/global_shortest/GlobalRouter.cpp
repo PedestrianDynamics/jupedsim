@@ -1328,10 +1328,10 @@ bool GlobalRouter::GenerateNavigationMesh()
      return true;
 }
 
-std::string GlobalRouter::GetRoutingInfoFile()
+fs::path GlobalRouter::GetRoutingInfoFile()
 {
 
-     TiXmlDocument doc(_building->GetProjectFilename());
+     TiXmlDocument doc(_building->GetProjectFilename().c_str());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \t GlobalRouter: could not parse the project file");
@@ -1400,18 +1400,18 @@ std::string GlobalRouter::GetRoutingInfoFile()
      if (nav_line_file == "")
           return nav_line_file;
      else
-          return _building->GetProjectRootDir()+nav_line_file;
+          return _building->GetProjectRootDir() / nav_line_file;
 }
 
 
-bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
+bool GlobalRouter::LoadRoutingInfos(const fs::path &filename)
 {
-     if(filename=="") return true;
+     if(filename.empty()) return true;
 
      Log->Write("INFO:\tLoading extra routing information for the global/quickest path router");
-     Log->Write("INFO:\t  from the file "+filename);
+     Log->Write("INFO:\t  from the file "+filename.string());
 
-     TiXmlDocument docRouting(filename);
+     TiXmlDocument docRouting(filename.c_str());
      if (!docRouting.LoadFile()) {
           Log->Write("ERROR: \t%s", docRouting.ErrorDesc());
           Log->Write("ERROR: \t could not parse the routing file [%s]",filename.c_str());

@@ -25,6 +25,7 @@
 
 #include "JPSfire/B_walking_speed/WalkingSpeed.h"
 #include "JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
+#include "general/Filesystem.h"
 #include "math/OperationalModel.h"
 #include "pedestrian/AgentsParameters.h"
 #include "routing/RoutingEngine.h"
@@ -300,29 +301,29 @@ public:
 
      void SetHostname(std::string hostname) { _hostname = hostname; };
 
-     const std::string& GetTrajectoriesFile() const { return _trajectoriesFile; };
+     const fs::path& GetTrajectoriesFile() const { return _trajectoriesFile; };
 
-     void SetTrajectoriesFile(std::string trajectoriesFile) { _trajectoriesFile = trajectoriesFile; };
+     void SetTrajectoriesFile(const fs::path& trajectoriesFile) { _trajectoriesFile = trajectoriesFile; };
 
-     const std::string& GetOriginalTrajectoriesFile() const { return _originalTrajectoriesFile; };
+     const fs::path& GetOriginalTrajectoriesFile() const { return _originalTrajectoriesFile; };
 
-     void SetOriginalTrajectoriesFile(std::string trajectoriesFile) { _originalTrajectoriesFile = trajectoriesFile; };
+     void SetOriginalTrajectoriesFile(const fs::path& trajectoriesFile) { _originalTrajectoriesFile = trajectoriesFile; };
 
-     const std::string& GetErrorLogFile() const { return _errorLogFile; };
+     const fs::path& GetErrorLogFile() const { return _errorLogFile; };
 
-     void SetErrorLogFile(std::string errorLogFile) { _errorLogFile = errorLogFile; };
+     void SetErrorLogFile(const fs::path& errorLogFile) { _errorLogFile = errorLogFile; };
 
-     const std::string& GetProjectFile() const { return _projectFile; };
+     const fs::path& GetProjectFile() const { return _projectFile; };
 
-     void SetProjectFile(std::string projectFile) { _projectFile = projectFile; };
+     void SetProjectFile(const fs::path& projectFile) { _projectFile = projectFile; };
 
-     const std::string& GetGeometryFile() const { return _geometryFile; };
+     const fs::path& GetGeometryFile() const { return _geometryFile; };
 
-     void SetGeometryFile(std::string geometryFile) { _geometryFile = geometryFile; };
+     void SetGeometryFile(const fs::path& geometryFile) { _geometryFile = geometryFile; };
 
-     const std::string& GetProjectRootDir() const { return _projectRootDir; };
+     const fs::path& GetProjectRootDir() const { return _projectRootDir; };
 
-     void SetProjectRootDir(std::string projectRootDir) { _projectRootDir = projectRootDir; };
+     void SetProjectRootDir(const fs::path& projectRootDir) { _projectRootDir = projectRootDir; };
 
      bool ShowStatistics() const { return _showStatistics; };
 
@@ -415,20 +416,15 @@ private:
 
      int _exit_strat;
 
-//     DirectionSubLocalFloorfield* _dirSubLocal;
-//     DirectionLocalFloorfield* _dirLocal;
-//     DirectionSubLocalFloorfieldTrips* _dirSubLocalTrips;
-//     DirectionSubLocalFloorfieldTripsVoronoi* _dirSubLocalTripsVoronoi;
-
      DirectionStrategy* _dirStrategy;
 
      std::string _hostname;
-     std::string _trajectoriesFile;
-     std::string _originalTrajectoriesFile;
-     std::string _errorLogFile;
-     std::string _projectFile;
-     std::string _geometryFile;
-     std::string _projectRootDir;
+     fs::path _trajectoriesFile;
+     fs::path _originalTrajectoriesFile;
+     fs::path _errorLogFile;
+     fs::path _projectFile;
+     fs::path _geometryFile;
+     fs::path _projectRootDir;
      bool _showStatistics;
 
      mutable RandomNumberGenerator _rdGenerator;

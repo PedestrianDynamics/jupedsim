@@ -67,10 +67,10 @@ void AIBrainStorage::ParseCogMap(BStorageKeyType ped)
     std::string cMFileName=_cogMapFiles;
     cMFileName.replace(cMFileName.size()-4,4,std::to_string(groupId)+".xml");
 
-    std::string cogMapFilenameWithPath = _building->GetProjectRootDir() + cMFileName;
+    auto cogMapFilenameWithPath = _building->GetProjectRootDir() / cMFileName;
 
-    Log->Write(cogMapFilenameWithPath);
-    TiXmlDocument doccogMap(cogMapFilenameWithPath);
+    Log->Write(cogMapFilenameWithPath.string());
+    TiXmlDocument doccogMap(cogMapFilenameWithPath.c_str());
     if (!doccogMap.LoadFile()) {
          Log->Write("ERROR: \t%s", doccogMap.ErrorDesc());
          Log->Write("\t could not parse the cognitive map file");
@@ -304,10 +304,10 @@ void AIBrainStorage::ParseSigns() {
         Log->Write("INFO: \tNo signs specified \n");
         return;
     }
-    std::string signFilenameWithPath = _building->GetProjectRootDir() + _signFiles;
+    auto signFilenameWithPath = _building->GetProjectRootDir() / _signFiles;
 
-    Log->Write("INFO: \tRead Signs from " + signFilenameWithPath);
-    TiXmlDocument docSigns(signFilenameWithPath);
+    Log->Write("INFO: \tRead Signs from %s", signFilenameWithPath.string().c_str());
+    TiXmlDocument docSigns(signFilenameWithPath.c_str());
     if (!docSigns.LoadFile()) {
         Log->Write("WARNING: \t%s", docSigns.ErrorDesc());
         Log->Write("\t could not parse the sign file");

@@ -27,6 +27,7 @@
  **/
 #pragma once
 
+#include "general/Filesystem.h"
 #include "routing/Router.h"
 
 #include <string>
@@ -69,13 +70,13 @@ public:
      /**
       * Load extra routing information e.g navigation lines
       */
-     bool LoadRoutingInfos(const std::string &filename);
+     bool LoadRoutingInfos(const fs::path &filename);
 
      /**
       * Each router is responsible of getting the correct filename
       * and doing other initializations
       */
-     virtual std::string GetRoutingInfoFile();
+     virtual fs::path GetRoutingInfoFile();
 
 protected:
 

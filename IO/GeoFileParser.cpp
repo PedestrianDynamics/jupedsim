@@ -59,12 +59,12 @@ void GeoFileParser::LoadBuilding(Building* building)
 bool GeoFileParser::LoadGeometry(Building* building)
 {
 
-     fs::path rootDir(_configuration->GetProjectRootDir());
+     const fs::path& rootDir(_configuration->GetProjectRootDir());
 
-     std::string geoFilenameWithPath = (rootDir/fs::path(_configuration->GetGeometryFile())).string();
+     const fs::path geoFilenameWithPath =  rootDir / _configuration->GetGeometryFile();
      std::cout << "\nLoadGeometry: file: " << geoFilenameWithPath << "\n";
 
-     TiXmlDocument docGeo(geoFilenameWithPath);
+     TiXmlDocument docGeo(geoFilenameWithPath.c_str());
      if (!docGeo.LoadFile()) {
           Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
           Log->Write("\t could not parse the geometry file");
@@ -349,7 +349,7 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
 {
      //TODO read schedule
 
-     TiXmlDocument docRouting(_configuration->GetProjectFile());
+     TiXmlDocument docRouting(_configuration->GetProjectFile().c_str());
      if (!docRouting.LoadFile()) {
           Log->Write("ERROR: \t%s", docRouting.ErrorDesc());
           Log->Write("ERROR: \t could not parse the routing file");
@@ -521,7 +521,7 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
 
      Log->Write("INFO:\tLoading the traffic info");
 
-     TiXmlDocument doc(_configuration->GetProjectFile());
+     TiXmlDocument doc(_configuration->GetProjectFile().c_str());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \t could not parse the project file");
@@ -945,7 +945,7 @@ bool GeoFileParser::LoadTrainInfo(Building* building)
 {
      Log->Write("--------\nINFO:\tLoading the train info");
 
-     TiXmlDocument doc(_configuration->GetProjectFile());
+     TiXmlDocument doc(_configuration->GetProjectFile().c_str());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \t could not parse the project file");

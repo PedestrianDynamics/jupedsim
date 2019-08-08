@@ -331,11 +331,11 @@ TrajectoriesFLAT::TrajectoriesFLAT() : Trajectories()
 {
 }
 
-std::string getSourceFileName(const std::string & GetProjectFile)
+static fs::path getSourceFileName(const fs::path& projectFile)
 {
-     std::string ret="";
+     fs::path ret{};
 
-     TiXmlDocument doc(GetProjectFile);
+     TiXmlDocument doc(projectFile.c_str());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \tGetSourceFileName could not parse the project file");
@@ -360,11 +360,11 @@ std::string getSourceFileName(const std::string & GetProjectFile)
     return ret;
 }
 
-std::string getEventFileName(const std::string & GetProjectFile)
+static fs::path getEventFileName(const fs::path& projectFile)
 {
-     std::string ret="";
+     fs::path ret{};
 
-     TiXmlDocument doc(GetProjectFile);
+     TiXmlDocument doc(projectFile.c_str());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \tGetEventFileName could not parse the project file");
@@ -374,7 +374,7 @@ std::string getEventFileName(const std::string & GetProjectFile)
      std::string eventfile = "";
      if (xMainNode->FirstChild("events_file")) {
           ret = xMainNode->FirstChild("events_file")->FirstChild()->ValueStr();
-          Log->Write("INFO: \tevents <" + ret + ">");
+          Log->Write("INFO: \tevents <" + ret.string() + ">");
      } else {
           Log->Write("INFO: \tNo events found");
           return ret;
@@ -387,11 +387,11 @@ std::string getEventFileName(const std::string & GetProjectFile)
  // </train_constraints>
 
 
-std::string getTrainTimeTableFileName(const std::string & GetProjectFile)
+static fs::path getTrainTimeTableFileName(const fs::path& projectFile)
 {
-     std::string ret="";
+     fs::path ret{};
 
-     TiXmlDocument doc(GetProjectFile);
+     TiXmlDocument doc(projectFile.c_str());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \tGetTrainTimeTable could not parse the project file");
@@ -404,7 +404,7 @@ std::string getTrainTimeTableFileName(const std::string & GetProjectFile)
 
           if(xFileNode)
                ret = xFileNode->FirstChild()->ValueStr();
-          Log->Write("INFO: \ttrain_time_table <" + ret + ">");
+          Log->Write("INFO: \ttrain_time_table <" + ret.string() + ">");
      } else {
           Log->Write("INFO: \tNo events no ttt file found");
           return ret;
@@ -412,12 +412,11 @@ std::string getTrainTimeTableFileName(const std::string & GetProjectFile)
      return ret;
 }
 
-
-std::string getTrainTypeFileName(const std::string & GetProjectFile)
+static fs::path getTrainTypeFileName(const fs::path& projectFile)
 {
-     std::string ret="";
+     fs::path ret{};
 
-     TiXmlDocument doc(GetProjectFile);
+     TiXmlDocument doc(projectFile.c_str());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \tGetTrainType could not parse the project file");
@@ -429,18 +428,19 @@ std::string getTrainTypeFileName(const std::string & GetProjectFile)
           auto xFileNode = xMainNode->FirstChild("train_constraints")->FirstChild("train_types");
           if(xFileNode)
                ret = xFileNode->FirstChild()->ValueStr();
-          Log->Write("INFO: \ttrain_types <" + ret + ">");
+          Log->Write("INFO: \ttrain_types <" + ret.string() + ">");
      } else {
           Log->Write("INFO: \tNo events no train types file found");
           return ret;
      }
      return ret;
 }
-std::string getGoalFileName(const std::string & GetProjectFile)
-{
-     std::string ret="";
 
-     TiXmlDocument doc(GetProjectFile);
+static fs::path getGoalFileName(const fs::path& projectFile)
+{
+     fs::path ret{};
+
+     TiXmlDocument doc(projectFile.c_str());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \tGetSourceFileName could not parse the project file");
@@ -461,15 +461,9 @@ std::string getGoalFileName(const std::string & GetProjectFile)
      return ret;
 }
 
-
 void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building* building, int seed, int count)
 {
-     std::string sourceFileName = getSourceFileName(building->GetProjectFilename());
-     std::string goalFileName = getGoalFileName(building->GetProjectFilename());
-     std::string eventFileName = getEventFileName(building->GetProjectFilename());
-     std::string trainTimeTableFileName = getTrainTimeTableFileName(building->GetProjectFilename());
-     std::string trainTypeFileName = getTrainTypeFileName(building->GetProjectFilename());
-     fs::path projRoot(building->GetProjectRootDir());
+     const fs::path projRoot(building->GetProjectRootDir());
 
      (void) seed; (void) nPeds;
      char tmp[500] = "";
@@ -479,36 +473,46 @@ void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building* building, i
      Write(tmp);
      sprintf(tmp, "#framerate: %0.2f",fps);
      Write(tmp);
-     std::string tmpGeo= (projRoot/fs::path(building->GetGeometryFilename())).string();
+     const fs::path tmpGeo = projRoot / building->GetGeometryFilename();
      sprintf(tmp,"#geometry: %s",  tmpGeo.c_str());
      Write(tmp);
-     if(sourceFileName != "")
+
+     if(const fs::path sourceFileName = getSourceFileName(building->GetProjectFilename());
+          !sourceFileName.empty())
      {
-          std::string tmpSource= (projRoot/fs::path(sourceFileName)).string();
+          const fs::path tmpSource = projRoot / sourceFileName;
           sprintf(tmp,"#sources: %s", tmpSource.c_str());
           Write(tmp);
      }
-     if(goalFileName != "")
+
+     if(const fs::path goalFileName = getGoalFileName(building->GetProjectFilename());
+          !goalFileName.empty())
      {
-          std::string tmpGoal= (projRoot/fs::path(goalFileName)).string();
+          const fs::path tmpGoal = projRoot / goalFileName;
           sprintf(tmp,"#goals: %s", tmpGoal.c_str());
           Write(tmp);
      }
-     if( eventFileName != "")
+
+     if(const fs::path eventFileName = getEventFileName(building->GetProjectFilename());
+          !eventFileName.empty())
      {
-          std::string tmpEvent= (projRoot/fs::path(eventFileName)).string();
+          const fs::path tmpEvent = projRoot / eventFileName;
           sprintf(tmp,"#events: %s", tmpEvent.c_str());
           Write(tmp);
      }
-     if( trainTimeTableFileName  != "")
+
+     if(const fs::path  trainTimeTableFileName = getTrainTimeTableFileName(building->GetProjectFilename());
+          !trainTimeTableFileName.empty())
      {
-          std::string tmpTTT= (projRoot/fs::path(trainTimeTableFileName)).string();
+          const fs::path tmpTTT = projRoot / trainTimeTableFileName;
           sprintf(tmp,"#trainTimeTable: %s", tmpTTT.c_str());
           Write(tmp);
      }
-     if( trainTypeFileName  != "")
+
+     if(const fs::path  trainTypeFileName = getTrainTypeFileName(building->GetProjectFilename());
+          !trainTypeFileName.empty())
      {
-          std::string tmpTT= (projRoot/fs::path(trainTypeFileName)).string();
+          const fs::path tmpTT = projRoot / trainTypeFileName;
           sprintf(tmp,"#trainType: %s", tmpTT.c_str());
           Write(tmp);
      }
@@ -697,20 +701,19 @@ void TrajectoriesJPSV06::WriteGeometry(Building* building)
      //     Write(embed_geometry);
 
      //set the content of the file
-     std::string fileName=building->GetProjectRootDir()+"/"+building->GetGeometryFilename().c_str();
-     std::string embed_geometry;
-     std::string tmp; //lines to drop
-     std::ifstream t(fileName.c_str());
-     std::getline(t,tmp); //drop the first line <?xml version="1.0" encoding="UTF-8"?>
+     const fs::path fileName =
+          building->GetProjectRootDir() / building->GetGeometryFilename();
+     std::ifstream t(fileName.string());
+     std::string dropedLine;
+     std::getline(t, dropedLine); //drop the first line <?xml version="1.0" encoding="UTF-8"?>
      std::stringstream buffer;
      buffer << t.rdbuf();
-     embed_geometry=buffer.str();
+     std::string embed_geometry = buffer.str();
 
      //write the hlines
      std::string embed_hlines;
      embed_hlines.append("\n\t<hlines>");
-     for (const auto& hline: building->GetAllHlines())
-     {
+     for (const auto& hline: building->GetAllHlines()) {
           embed_hlines.append(hline.second->GetDescription());
      }
      embed_hlines.append("\n\t</hlines>");
@@ -725,16 +728,6 @@ void TrajectoriesJPSV06::WriteGeometry(Building* building)
      ReplaceStringInPlace(embed_geometry,"</geometry>",embed_hlines);
 
      Write(embed_geometry);
-
-     //     Write("\t<AttributeDescription>");
-     //     Write("\t\t<property tag=\"x\" description=\"xPosition\"/>");
-     //     Write("\t\t<property tag=\"y\" description=\"yPosition\"/>");
-     //     Write("\t\t<property tag=\"z\" description=\"zPosition\"/>");
-     //     Write("\t\t<property tag=\"rA\" description=\"radiusA\"/>");
-     //     Write("\t\t<property tag=\"rB\" description=\"radiusB\"/>");
-     //     Write("\t\t<property tag=\"eC\" description=\"ellipseColor\"/>");
-     //     Write("\t\t<property tag=\"eO\" description=\"ellipseOrientation\"/>");
-     //     Write("\t</AttributeDescription>\n");
 }
 
 void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)

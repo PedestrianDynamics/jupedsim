@@ -129,7 +129,7 @@ bool ArgumentParser::ParseArgs(int argc, char** argv)
                                    _config->SetProjectRootDir(argument5);
                                    _config->SetGeometryFile("geo.xml");
                                    _config->SetProjectFile("ini.xml");
-                                   _config->SetTrajectoriesFile(_config->GetProjectRootDir()+"tra.xml");
+                                   _config->SetTrajectoriesFile(_config->GetProjectRootDir() / "tra.xml");
                                    _config->SetFileFormat(FileFormat::FORMAT_XML_PLAIN);
                                    _config->SetFps(25);
                                    _config->SetDumpScenario(true);

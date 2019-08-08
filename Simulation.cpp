@@ -91,17 +91,13 @@ bool Simulation::InitArgs()
         break;
     }
     case 1: {
-        if (Log)
-            delete Log;
+        delete Log;
         Log = new STDIOHandler();
         break;
     }
     case 2: {
-        char name[CLENGTH] = "";
-        sprintf(name, "%s.txt", _config->GetErrorLogFile().c_str());
-        if (Log)
-            delete Log;
-        Log = new FileHandler(name);
+        delete Log;
+        Log = new FileHandler(_config->GetErrorLogFile().c_str());
     }
         break;
     default:
@@ -145,15 +141,13 @@ bool Simulation::InitArgs()
     }
 
     if (!_config->GetTrajectoriesFile().empty()) {
-         fs::path trajPath(_config->GetTrajectoriesFile());
+         const fs::path& trajPath(_config->GetTrajectoriesFile());
          fs::create_directories(trajPath.parent_path());
-
-         std::string traj = trajPath.string();
 
         switch (_config->GetFileFormat()) {
         case FORMAT_XML_PLAIN: {
             auto tofile = std::make_shared<FileHandler>(
-                    traj.c_str());
+                    trajPath.c_str());
             Trajectories* output = new TrajectoriesJPSV05();
             output->SetOutputHandler(tofile);
             _iod->AddIO(output);
@@ -161,7 +155,7 @@ bool Simulation::InitArgs()
         }
         case FORMAT_PLAIN: {
             auto file = std::make_shared<FileHandler>(
-                 traj.c_str());
+                 trajPath.c_str());
             outputTXT = new TrajectoriesFLAT();
             outputTXT->SetOutputHandler(file);
             _iod->AddIO(outputTXT);
@@ -169,8 +163,10 @@ bool Simulation::InitArgs()
         }
         case FORMAT_VTK: {
             Log->Write("INFO: \tFormat vtk not yet supported\n");
+            auto vtkTraj = trajPath;
+            vtkTraj.replace_extension(".vtk");
             auto file = std::make_shared<FileHandler>(
-                    (traj+".vtk").c_str());
+                    vtkTraj.c_str());
             Trajectories* output = new TrajectoriesVTK();
             output->SetOutputHandler(file);
             _iod->AddIO(output);
@@ -300,7 +296,7 @@ bool Simulation::InitArgs()
     }
 
     //read and initialize events
-    _em = new EventManager(_building.get(), _config->GetSeed());
+    _em = new EventManager(_config, _building.get(), _config->GetSeed());
     if (!_em->ReadEventsXml()) {
         Log->Write("ERROR: \tCould not initialize events handling");
     }
@@ -451,15 +447,17 @@ void Simulation::PrintStatistics(double simTime)
                     goal->GetID(), goal->GetDoorUsage(),
                     goal->GetLastPassingTime());
 
-            fs::path p(_config->GetOriginalTrajectoriesFile());
-
-            std::string statsfile = "flow_exit_id_"+std::to_string(goal->GetID())+"_"+p.stem().string()+".txt";
-            if(goal->GetOutflowRate() <  (std::numeric_limits<double>::max)())
-            {
-                 char tmp[50];
-                 sprintf(tmp, "%.2f_", goal->GetOutflowRate());
-                 statsfile = "flow_exit_id_"+std::to_string(goal->GetID())+"_rate_"+tmp+p.stem().string()+".txt";
+            fs::path statsfile{"flow_exit_id_"+std::to_string(goal->GetID())+"_"};
+            if(goal->GetOutflowRate() <  std::numeric_limits<double>::max()) {
+              statsfile += "rate_";
+              std::stringstream buffer;
+              buffer << std::setprecision(2)
+                     << std::fixed
+                     << goal->GetOutflowRate();
+              statsfile += buffer.str();
+              statsfile += '_';
             }
+            statsfile += _config->GetOriginalTrajectoriesFile().filename().replace_extension("txt");
             Log->Write("More Information in the file: %s", statsfile.c_str());
             {
                  FileHandler statOutput(statsfile.c_str());
@@ -482,7 +480,7 @@ void Simulation::PrintStatistics(double simTime)
                        goal->GetID(), itr.first/1000, goal->GetDoorUsage(),
                        goal->GetLastPassingTime());
 
-                  std::string statsfile = "flow_crossing_id_"
+                  fs::path statsfile = "flow_crossing_id_"
                        + std::to_string(itr.first/1000) + "_" + std::to_string(itr.first % 1000) +".dat";
                   Log->Write("More Information in the file: %s", statsfile.c_str());
                   FileHandler output(statsfile.c_str());
@@ -526,10 +524,7 @@ double Simulation::RunBody(double maxSimTime)
 
     //take the current time from the pedestrian
     double t = Pedestrian::GetGlobalTime();
-    fs::path TrajectoryName(_config->GetTrajectoriesFile());// in case we
-                                                                // may need to
-                                                                // generate
-                                                                // several small files
+
     //frame number. This function can be called many times,
     static int frameNr = (int) (1+t/_deltaT); // Frame Number
 
@@ -574,12 +569,12 @@ double Simulation::RunBody(double maxSimTime)
             if(geometryChanged)
             {
                  // debug
-                 fs::path f("tmp_"+std::to_string(t)+"_"+_config->GetGeometryFile());
-                 std::string filename = f.string();
-                 std::cout << "\nUpdate geometry. New  geometry --> " << filename.c_str() << "\n";
+                 const std::string prefix = "tmp_" + std::to_string(t) + "_";
+                 auto changedGeometryFile = add_prefix_to_filename(prefix, _config->GetGeometryFile());
+                 std::cout << "\nUpdate geometry. New  geometry --> " << changedGeometryFile << "\n";
 
                  std::cout<< KGRN << "Enter correctGeometry: Building Has " << _building->GetAllTransitions().size() << " Transitions\n" << RESET;
-                 _building->SaveGeometry(filename);
+                 _building->SaveGeometry(changedGeometryFile);
                  //
                  double _deltaH = _building->GetConfig()->get_deltaH();
                  double _wallAvoidDistance = _building->GetConfig()->get_wall_avoid_distance();
@@ -618,9 +613,9 @@ double Simulation::RunBody(double maxSimTime)
         Pedestrian::SetGlobalTime(t);
 
         // write the trajectories
-        if (0==frameNr%writeInterval) {
-              _iod->WriteFrame(frameNr/writeInterval, _building.get());
-              WriteTrajectories(TrajectoryName.stem().string());
+        if (0 == frameNr % writeInterval) {
+              _iod->WriteFrame(frameNr / writeInterval, _building.get());
+              WriteTrajectories();
         }
 
         if(!_gotSources && !_periodic && _config->print_prog_bar())
@@ -691,21 +686,23 @@ double Simulation::RunBody(double maxSimTime)
     return t;
 }
 
-void Simulation::WriteTrajectories(std::string trajectoryName)
+void Simulation::WriteTrajectories()
 {
     if(_config->GetFileFormat() != FORMAT_PLAIN) {return;}
 
-    fs::path p = _config->GetTrajectoriesFile();
-    fs::path parent = p.parent_path();
+    const fs::path& p = _config->GetTrajectoriesFile();
+
     int sf = fs::file_size(p);
     if(sf > _maxFileSize * 1024 * 1024)
     {
-          std::string extention = p.extension().string();
-          this->incrementCountTraj();
+          const fs::path stem = p.stem();
+          const fs::path extention = p.extension();
+          const fs::path parent = p.parent_path();
+          incrementCountTraj();
           char tmp_traj_name[100];
-          sprintf(tmp_traj_name,"%s_%.4d_%s", trajectoryName.c_str(), _countTraj, extention.c_str());
-          fs::path abs_traj_name = parent/ fs::path(tmp_traj_name);
-          _config->SetTrajectoriesFile(abs_traj_name.string());
+          sprintf(tmp_traj_name,"%s_%.4d_%s", stem.c_str(), _countTraj, extention.c_str());
+          const fs::path abs_traj_name = parent / fs::path(tmp_traj_name);
+          _config->SetTrajectoriesFile(abs_traj_name);
           Log->Write("INFO:\tNew trajectory file <%s>", tmp_traj_name);
           auto file = std::make_shared<FileHandler>(_config->GetTrajectoriesFile().c_str());
           outputTXT->SetOutputHandler(file);

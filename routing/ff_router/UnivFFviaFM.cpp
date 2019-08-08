@@ -1530,19 +1530,20 @@ void UnivFFviaFM::setSpeedMode(int speedModeArg) {
 }
 
 
-void UnivFFviaFM::writeFF(const std::string& filename, std::vector<int> targetID) {
+void UnivFFviaFM::writeFF(const fs::path& filename, std::vector<int> targetID) {
     Log->Write("INFO: \tWrite Floorfield to file");
-    Log->Write(filename);
+    auto floorfieldFile = _configuration->GetProjectRootDir() / filename;
+    Log->Write(floorfieldFile.string());
     std::ofstream file;
 
-    Log->Write("FloorfieldViaFM::writeFF(): writing to file %s: There are %d targets.", filename.c_str(), targetID.size());
+    Log->Write("FloorfieldViaFM::writeFF(): writing to file %s: There are %d targets.", floorfieldFile.string().c_str(), targetID.size());
 
     // int numX = (int) ((_grid->GetxMax()-_grid->GetxMin())/_grid->Gethx());
     // int numY = (int) ((_grid->GetyMax()-_grid->GetyMin())/_grid->Gethy());
     //int numTotal = numX * numY;
     //std::cerr << numTotal << " numTotal" << std::endl;
     //std::cerr << grid->GetnPoints() << " grid" << std::endl;
-    file.open(_configuration->GetProjectRootDir()+filename);
+    file.open(floorfieldFile.string());
 
     file << "# vtk DataFile Version 3.0" << std::endl;
     file << "Testdata: Fast Marching: Test: " << std::endl;
