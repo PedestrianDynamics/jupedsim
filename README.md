@@ -73,8 +73,13 @@ Build full system tests and add them to ctest
 
 ##### BUILD_WITH_ASAN defaults to OFF (Does not support Windows)
 Build an additional target `jpscore_asan` with address and undefined behavior
-sanitizer enabled. Note there is an approx. 2x slowdown when using 
+sanitizer enabled. Note there is an approx. 2x slowdown when using
 `jpscore_asan` over `jpscore`
+
+##### BUILD_WITH_TSAN defaults to OFF (Does not support Windows)
+Build an additional target `jpscore_tsan` with thread sanitizer
+enabled. Note there is an approx. 5-10x slowdown when using
+`jpscore_tsan` over `jpscore`
 
 ## Quick start
 
