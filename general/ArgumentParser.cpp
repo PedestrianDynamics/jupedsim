@@ -352,6 +352,9 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                     for (auto& filename : boost::make_iterator_range(fs::directory_iterator(path_traj), {}))
                     {
                          string s = filename.path().string();
+						 string::size_type pos = s.find_last_of('/');
+						 pos = pos == -1 ? s.find_last_of('\\') : pos;
+						 s = pos == -1 ? s : s.substr(pos + 1);
                          if (boost::algorithm::ends_with(s, fmt))
                          {
                               _trajectoriesFiles.push_back(s);
@@ -386,12 +389,14 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
      //scripts
      if(xMainNode->FirstChild("scripts"))
      {
-          _scriptsLocation=fs::path(xMainNode->FirstChildElement("scripts")->Attribute("location"));
+          _scriptsLocation= fs::path(xMainNode->FirstChildElement("scripts")->Attribute("location"));
+		/*
         if(!fs::exists(_scriptsLocation))
         {
              Log->Write("ERROR: \tcould not find the directory <%s>", _scriptsLocation.string().c_str());
              return false;
         }
+		*/
         if(! _scriptsLocation.is_absolute())
         {
              _scriptsLocation = GetProjectRootDir() / _scriptsLocation;

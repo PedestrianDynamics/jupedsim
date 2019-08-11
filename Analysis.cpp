@@ -546,17 +546,19 @@ int Analysis::mkpath(char* file_path)
 {
      assert(file_path && *file_path);
      char* p;
-     for (p=strchr(file_path+1, '/'); p; p=strchr(p+1, '/')) {
+	 for (p = strchr(file_path + 1, '/'); p; p = strchr(p + 1, '/')) {
+		 *p = '\\';
+	 }
+     for (p=strchr(file_path+1, '\\'); p; p=strchr(p+1, '\\')) {
           *p='\0';
-
           if (_mkdir(file_path)==-1) {
 
                if (errno!=EEXIST) {
-                    *p='/';
+                    *p='\\';
                     return -1;
                }
           }
-          *p='/';
+          *p='\\';
      }
      return 0;
 }
