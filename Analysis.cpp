@@ -76,6 +76,7 @@ Analysis::Analysis()
      _DoesUseMethodB = false;                   // Method B (Zhang2011a)
      _DoesUseMethodC = false;                                   // Method C //calculate and save results of classic in separate file
      _DoesUseMethodD = false;                                   // Method D--Voronoi method
+     _DoesUseMethodI = false;
      _cutByCircle = false;  //Adjust whether cut each original voronoi cell by a circle
      _getProfile = false;   // Whether make field analysis or not
      _outputGraph = false;   // Whether output the data for plot the fundamental diagram each frame
