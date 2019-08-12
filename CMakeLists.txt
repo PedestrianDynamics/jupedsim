@@ -317,7 +317,7 @@ set_property(TARGET geometrycore PROPERTY CXX_STANDARD 17)
 set_property(TARGET geometrycore PROPERTY CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if(!MSVC)
+if(NOT MSVC)
 	target_link_libraries(geometrycore  stdc++fs)
 endif()
 
@@ -328,7 +328,7 @@ add_executable(
 set_property(TARGET jpsreport PROPERTY CXX_STANDARD 17)
 set_property(TARGET jpsreport PROPERTY CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-if(!MSVC)
+if(NOT MSVC)
 	target_link_libraries(jpsreport  stdc++fs)
 endif()
 

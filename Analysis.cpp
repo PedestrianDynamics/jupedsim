@@ -332,7 +332,7 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
                exit(EXIT_FAILURE);
           }
 #pragma omp parallel for
-          for(long int i=0; i < _areaForMethod_A.size(); i++)
+          for(int i=0; i < int(_areaForMethod_A.size()); i++)
           {
                Method_A method_A ;
                method_A.SetMeasurementArea(_areaForMethod_A[i]);
@@ -360,7 +360,7 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
           }
 
 #pragma omp parallel for
-          for(long int i=0; i < _areaForMethod_B.size(); i++)
+          for(int i=0; i < int(_areaForMethod_B.size()); i++)
           {
                Method_B method_B;
                method_B.SetMeasurementArea(_areaForMethod_B[i]);
@@ -385,7 +385,7 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
                exit(EXIT_FAILURE);
           }
 #pragma omp parallel for
-          for(long int i=0; i < _areaForMethod_C.size(); i++)
+          for(int i=0; i < int(_areaForMethod_C.size()); i++)
           {
                Method_C method_C;
                method_C.SetMeasurementArea(_areaForMethod_C[i]);
@@ -420,7 +420,7 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
           }
 
 #pragma omp parallel for
-          for(long int i=0; i<_areaForMethod_D.size(); i++)
+          for(int i=0; i<int(_areaForMethod_D.size()); i++)
           {
                Method_D method_D;
                method_D.SetStartFrame(_StartFramesMethodD[i]);
@@ -473,7 +473,7 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
           }
 
 #pragma omp parallel for
-          for(long int i=0; i<_areaForMethod_I.size(); i++)
+          for(int i=0; i<int(_areaForMethod_I.size()); i++)
           {
                Method_I method_I;
                method_I.SetStartFrame(_StartFramesMethodI[i]);
@@ -546,9 +546,9 @@ int Analysis::mkpath(char* file_path)
 {
      assert(file_path && *file_path);
      char* p;
-	 for (p = strchr(file_path + 1, '/'); p; p = strchr(p + 1, '/')) {
-		 *p = '\\';
-	 }
+     for (p = strchr(file_path + 1, '/'); p; p = strchr(p + 1, '/')) {
+          *p = '\\';
+	}
      for (p=strchr(file_path+1, '\\'); p; p=strchr(p+1, '\\')) {
           *p='\0';
           if (_mkdir(file_path)==-1) {

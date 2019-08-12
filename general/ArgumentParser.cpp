@@ -352,9 +352,9 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                     for (auto& filename : boost::make_iterator_range(fs::directory_iterator(path_traj), {}))
                     {
                          string s = filename.path().string();
-						 string::size_type pos = s.find_last_of('/');
-						 pos = pos == -1 ? s.find_last_of('\\') : pos;
-						 s = pos == -1 ? s : s.substr(pos + 1);
+                         int pos = s.find_last_of('/');
+                         pos = pos == -1 ? int(s.find_last_of('\\')) : pos;
+                         s = pos == -1 ? s : s.substr(pos + 1);
                          if (boost::algorithm::ends_with(s, fmt))
                          {
                               _trajectoriesFiles.push_back(s);
