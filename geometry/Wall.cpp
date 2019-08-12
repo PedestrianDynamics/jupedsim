@@ -24,11 +24,7 @@
  *
  *
  **/
-
-
 #include "Wall.h"
-
-using namespace std;
 
 /************************************************************
  Wall
@@ -50,9 +46,9 @@ void Wall::WriteToErrorLog() const
      Log->Write(tmp);
 }
 
-string Wall::Write() const
+std::string Wall::Write() const
 {
-     string geometry;
+     std::string geometry;
      char wall[500] = "";
      geometry.append("\t\t<wall>\n");
      sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",

@@ -1,22 +1,25 @@
-#include "progress_bar.hpp"
-#include "string"
-ProgressBar::ProgressBar() {}
+#include "progress_bar.h"
 
+#include <string>
 ProgressBar::ProgressBar(unsigned long n_, std::string description_, std::ostream& out_){
-    
+
       n = n_;
       frequency_update = n_;
       description = description_;
       out = &out_;
-	
+
       unit_bar = "=";
       unit_space = " ";
       desc_width = description.length();	// character width of description field
-
+#ifdef _WINDOWS
+      SetStyle("|","-");
+#else
+      SetStyle("\u2588", "-"); //for linux
+#endif
 }
 
 void ProgressBar::SetFrequencyUpdate(unsigned long frequency_update_){
-	
+
       if(frequency_update_ > n){
             frequency_update = n;	 // prevents crash if freq_updates_ > n_
       }
@@ -26,7 +29,7 @@ void ProgressBar::SetFrequencyUpdate(unsigned long frequency_update_){
 }
 
 void ProgressBar::SetStyle(const char* unit_bar_, const char* unit_space_){
-	
+
       unit_bar = unit_bar_;
       unit_space = unit_space_;
 }
@@ -75,11 +78,11 @@ void ProgressBar::Progressed(unsigned long idx_)
 
             // calculate the size of the progress bar
 	    int bar_size = GetBarLength();
-    
+
             // calculate percentage of progress
             double progress_percent = idx_* TOTAL_PERCENTAGE/n;
 
-            // calculate the percentage value of a unit bar 
+            // calculate the percentage value of a unit bar
             double percent_per_unit_bar = TOTAL_PERCENTAGE/bar_size;
 
             // display progress bar

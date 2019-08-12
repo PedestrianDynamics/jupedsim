@@ -25,9 +25,7 @@
  *
  *
  **/
-
-#ifndef WALKINGSPEED_H
-#define WALKINGSPEED_H 1
+#pragma once
 
 #include <memory>
 #include <string>
@@ -64,5 +62,3 @@ private:
     std::shared_ptr<FDSMeshStorage> _FMStorage;
 
 };
-
-#endif // WalkingSpeed_H

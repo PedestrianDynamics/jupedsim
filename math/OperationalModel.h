@@ -35,14 +35,10 @@
  *  @{
  */
 /** @} */ // end of group
-
-#ifndef OPERATIONALMODEL_H_
-#define OPERATIONALMODEL_H_
+#pragma once
 
 #include <string>
 #include <memory>
-#include "../routing/direction/walking/DirectionStrategy.h"
-#include "../routing/direction/DirectionManager.h"
 
 class Building;
 class DirectionManager;
@@ -86,7 +82,5 @@ public:
       */
      virtual void ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic) = 0 ;
 
-     std::shared_ptr<DirectionStrategy> GetDirection() {return _direction->GetDirectionStrategy();};
+//     std::shared_ptr<DirectionStrategy> GetDirection() {return _direction->GetDirectionStrategy();};
 };
-
-#endif /* OPERATIONALMODEL_H_ */

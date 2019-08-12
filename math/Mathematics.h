@@ -25,10 +25,7 @@
  *
  *
  **/
-
-
-#ifndef MATHEMATICS_H_
-#define MATHEMATICS_H_
+#pragma once
 
 #include <complex>
 #include <cmath>
@@ -42,6 +39,3 @@ double hermite_interp(double x, double x1, double x2, double y1, double y2,
                       double dy1, double dy2);
 
 std::complex<double> c_cbrt(std::complex<double> x);
-
-
-#endif /*MATHEMATICS_H_*/

@@ -26,10 +26,7 @@
  * It is done by specifying different sizes, desired velocities and reaction times
  *
  **/
-
-
-#ifndef AGENTSPARAMETERS_H_
-#define AGENTSPARAMETERS_H_
+#pragma once
 
 #include <random>
 
@@ -104,7 +101,7 @@ public:
      * @param stv, standard deviation
      */
     void InitV0IdleEscalatorDownStairs(double mean, double stv);
-     
+
     /**
      * Initialize the maximal value if the major axis
      * @param mean, mean value
@@ -264,5 +261,3 @@ private:
     double _swayAmpB = 0.21;
 	const double judge = 10000;
 };
-
-#endif /* AGENTSPARAMETERS_H_ */

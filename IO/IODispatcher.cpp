@@ -24,23 +24,24 @@
  *
  *
  **/
-
-
 #include "IODispatcher.h"
-#include "../pedestrian/Pedestrian.h"
-#include "../tinyxml/tinyxml.h"
-#include "../geometry/SubRoom.h"
-#include "../mpi/LCGrid.h"
+
+#include "OutputHandler.h"
+
+#include "general/Filesystem.h"
+#include "geometry/SubRoom.h"
+#include "mpi/LCGrid.h"
+#include "pedestrian/Pedestrian.h"
+#include "pedestrian/AgentsSource.h"
+
+#include <tinyxml.h>
 
 #define _USE_MATH_DEFINES
-
-using namespace std;
-namespace fs = std::filesystem;
 
 
 IODispatcher::IODispatcher()
 {
-     _outputHandlers = vector<Trajectories*>();
+     _outputHandlers = std::vector<Trajectories*>();
 }
 
 IODispatcher::~IODispatcher()
@@ -57,7 +58,7 @@ void IODispatcher::AddIO(Trajectories* ioh)
 }
 
 
-const vector<Trajectories*>& IODispatcher::GetIOHandlers()
+const std::vector<Trajectories*>& IODispatcher::GetIOHandlers()
 {
      return _outputHandlers;
 }
@@ -99,7 +100,7 @@ void IODispatcher::WriteFooter()
  }
 
 
-string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
+std::string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
 {
      double RAD2DEG = 180.0 / M_PI;
      char tmp[CLENGTH] = "";
@@ -116,13 +117,13 @@ string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
                (ped->GetPos()._y) * FAKTOR,(ped->GetElevation()) * FAKTOR ,a * FAKTOR, b * FAKTOR,
                phi * RAD2DEG, color);
 
-     return string(tmp);
+     return std::string(tmp);
 }
 
 void TrajectoriesJPSV04::WriteHeader(long nPeds, double fps, Building* building, int seed, int /*count*/)
 {
      building->GetCaption();
-     string tmp;
+     std::string tmp;
      tmp =
                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
      char agents[CLENGTH] = "";
@@ -142,7 +143,7 @@ void TrajectoriesJPSV04::WriteHeader(long nPeds, double fps, Building* building,
 void TrajectoriesJPSV04::WriteGeometry(Building* building)
 {
      // just put a link to the geometry file
-     string embed_geometry;
+     std::string embed_geometry;
      embed_geometry.append("\t<geometry>\n");
      char file_location[CLENGTH] = "";
      sprintf(file_location, "\t<file location= \"%s\"/>\n", building->GetGeometryFilename().c_str());
@@ -151,24 +152,24 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
      //Write(embed_geometry);
      //return;
      //
-     string geometry;
+     std::string geometry;
      geometry.append("\t<geometry>\n");
 
      bool plotHlines = true;
      bool plotCrossings = true;
      bool plotTransitions = true;
      bool plotPlayingField=false;
-     vector<string> rooms_to_plot;
+     std::vector<std::string> rooms_to_plot;
      unsigned int i;
      // first the rooms
      //to avoid writing navigation line twice
-     vector<int> navLineWritten;
+     std::vector<int> navLineWritten;
      //rooms_to_plot.push_back("U9");
 
      for (const auto& it:building->GetAllRooms())
      {
           auto&& r = it.second;
-          string caption = r->GetCaption(); //if(r->GetID()!=1) continue;
+          std::string caption = r->GetCaption(); //if(r->GetID()!=1) continue;
           if (!rooms_to_plot.empty() && !IsElementInVector(rooms_to_plot, caption))
                continue;
 
@@ -179,7 +180,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
 
                // the hlines
                if (plotHlines) {
-                    const vector<Hline*>& hlines = s->GetAllHlines();
+                    const std::vector<Hline*>& hlines = s->GetAllHlines();
                     for (i = 0; i < hlines.size(); i++) {
                          Hline* hline = hlines[i];
                          int uid1 = hline->GetUniqueID();
@@ -194,7 +195,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
 
                     // the crossings
                     if (plotCrossings) {
-                         const vector<Crossing*>& crossings = s->GetAllCrossings();
+                         const std::vector<Crossing*>& crossings = s->GetAllCrossings();
                          for (i = 0; i < crossings.size(); i++) {
                               Crossing* crossing = crossings[i];
                               int uid1 = crossing->GetUniqueID();
@@ -211,7 +212,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
 
                     // the transitions
                     if (plotTransitions) {
-                         const vector<Transition*>& transitions =
+                         const std::vector<Transition*>& transitions =
                                    s->GetAllTransitions();
                          for (i = 0; i < transitions.size(); i++) {
                               Transition* transition = transitions[i];
@@ -226,9 +227,9 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
 
                                         Room* room1 = transition->GetRoom1();
                                         Room* room2 = transition->GetRoom2();
-                                        string caption1 = room1->GetCaption();
+                                        std::string caption1 = room1->GetCaption();
                                         if (room2) {
-                                             string caption2 = room2->GetCaption();
+                                             std::string caption2 = room2->GetCaption();
                                              if (IsElementInVector(rooms_to_plot,
                                                        caption1)
                                                        || IsElementInVector(rooms_to_plot,
@@ -252,7 +253,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
      }
 
      //eventually write any goal
-     for (map<int, Goal*>::const_iterator itr = building->GetAllGoals().begin();
+     for (std::map<int, Goal*>::const_iterator itr = building->GetAllGoals().begin();
                itr != building->GetAllGoals().end(); ++itr) {
           geometry.append(itr->second->Write());
      }
@@ -289,9 +290,9 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
 
 void TrajectoriesJPSV04::WriteFrame(int frameNr, Building* building)
 {
-     string data;
+     std::string data;
      char tmp[CLENGTH] = "";
-     vector<string> rooms_to_plot;
+     std::vector<std::string> rooms_to_plot;
 
      if( building->GetAllPedestrians().size() == 0)
           return;
@@ -299,12 +300,12 @@ void TrajectoriesJPSV04::WriteFrame(int frameNr, Building* building)
      sprintf(tmp, "<frame ID=\"%d\">\n", frameNr);
      data.append(tmp);
 
-     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+     const std::vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
      for(unsigned int p=0;p<allPeds.size();p++)
      {
           Pedestrian* ped = allPeds[p];
           Room* r = building->GetRoom(ped->GetRoomID());
-          string caption = r->GetCaption();
+          std::string caption = r->GetCaption();
 
           if ((rooms_to_plot.empty() == false)
                     && (IsElementInVector(rooms_to_plot, caption) == false)) {
@@ -370,7 +371,7 @@ std::string getEventFileName(const std::string & GetProjectFile)
           return ret;
      }
      TiXmlNode* xMainNode = doc.RootElement();
-     string eventfile = "";
+     std::string eventfile = "";
      if (xMainNode->FirstChild("events_file")) {
           ret = xMainNode->FirstChild("events_file")->FirstChild()->ValueStr();
           Log->Write("INFO: \tevents <" + ret + ">");
@@ -397,7 +398,7 @@ std::string getTrainTimeTableFileName(const std::string & GetProjectFile)
           return ret;
      }
      TiXmlNode* xMainNode = doc.RootElement();
-     string tttfile = "";
+     std::string tttfile = "";
      if (xMainNode->FirstChild("train_constraints")) {
           TiXmlNode * xFileNode = xMainNode->FirstChild("train_constraints")->FirstChild("train_time_table");
 
@@ -423,7 +424,7 @@ std::string getTrainTypeFileName(const std::string & GetProjectFile)
           return ret;
      }
      TiXmlNode* xMainNode = doc.RootElement();
-     string tttfile = "";
+     std::string tttfile = "";
      if (xMainNode->FirstChild("train_constraints")) {
           auto xFileNode = xMainNode->FirstChild("train_constraints")->FirstChild("train_types");
           if(xFileNode)
@@ -471,7 +472,7 @@ void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building* building, i
      fs::path projRoot(building->GetProjectRootDir());
 
      (void) seed; (void) nPeds;
-     char tmp[100] = "";
+     char tmp[500] = "";
      sprintf(tmp, "#description: jpscore (%s)", JPSCORE_VERSION);
      Write(tmp);
      sprintf(tmp, "#count: %d", count);
@@ -531,7 +532,7 @@ void TrajectoriesFLAT::WriteGeometry(Building* building)
 void TrajectoriesFLAT::WriteFrame(int frameNr, Building* building)
 {
      char tmp[CLENGTH] = "";
-     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+     const std::vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
      for(unsigned int p=0;p<allPeds.size();p++){
           Pedestrian* ped = allPeds[p];
           double x = ped->GetPos()._x;
@@ -652,7 +653,7 @@ void TrajectoriesVTK::WriteFooter()
 void TrajectoriesJPSV06::WriteHeader(long nPeds, double fps, Building* building, int seed, int /*count*/)
 {
      building->GetCaption();
-     string tmp;
+     std::string tmp;
      tmp =
                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
      char agents[CLENGTH] = "";
@@ -696,9 +697,9 @@ void TrajectoriesJPSV06::WriteGeometry(Building* building)
      //     Write(embed_geometry);
 
      //set the content of the file
-     string fileName=building->GetProjectRootDir()+"/"+building->GetGeometryFilename().c_str();
-     string embed_geometry;
-     string tmp; //lines to drop
+     std::string fileName=building->GetProjectRootDir()+"/"+building->GetGeometryFilename().c_str();
+     std::string embed_geometry;
+     std::string tmp; //lines to drop
      std::ifstream t(fileName.c_str());
      std::getline(t,tmp); //drop the first line <?xml version="1.0" encoding="UTF-8"?>
      std::stringstream buffer;
@@ -706,7 +707,7 @@ void TrajectoriesJPSV06::WriteGeometry(Building* building)
      embed_geometry=buffer.str();
 
      //write the hlines
-     string embed_hlines;
+     std::string embed_hlines;
      embed_hlines.append("\n\t<hlines>");
      for (const auto& hline: building->GetAllHlines())
      {
@@ -738,21 +739,21 @@ void TrajectoriesJPSV06::WriteGeometry(Building* building)
 
 void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
 {
-     string data;
+     std::string data;
      char tmp[CLENGTH] = "";
      double RAD2DEG = 180.0 / M_PI;
-     vector<string> rooms_to_plot;
+     std::vector<std::string> rooms_to_plot;
 
      sprintf(tmp, "<frame ID=\"%d\">\n", frameNr);
      data.append(tmp);
 
 
-     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+     const std::vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
      for(unsigned int p=0;p<allPeds.size();++p)
      {
           Pedestrian* ped = allPeds[p];
           Room* r = building->GetRoom(ped->GetRoomID());
-          string caption = r->GetCaption();
+          std::string caption = r->GetCaption();
 
           if (!IsElementInVector(rooms_to_plot, caption)) {
                if (!rooms_to_plot.empty()) {
@@ -808,7 +809,7 @@ void TrajectoriesXML_MESH::WriteGeometry(Building* building)
 void TrajectoriesJPSV05::WriteHeader(long nPeds, double fps, Building* building, int seed, int /*count*/)
 {
      building->GetCaption();
-     string tmp;
+     std::string tmp;
      tmp = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
      char agents[CLENGTH] = "";
      sprintf(agents, "\t<header version = \"0.5.1\">\n");
@@ -834,17 +835,17 @@ void TrajectoriesJPSV05::WriteSources(const std::vector<std::shared_ptr<AgentsSo
           auto BB =  src->GetBoundaries();
           tmp += "<source  id=\"" + std::to_string(src->GetId()) +
                "\"  caption=\"" + src->GetCaption() + "\"" +
-               "  x_min=\"" + to_string(BB[0]) + "\"" +
-               "  x_max=\"" + to_string(BB[1]) + "\"" +
-               "  y_min=\"" + to_string(BB[2]) + "\"" +
-               "  y_max=\"" + to_string(BB[3]) + "\" />\n";
+               "  x_min=\"" + std::to_string(BB[0]) + "\"" +
+               "  x_max=\"" + std::to_string(BB[1]) + "\"" +
+               "  y_min=\"" + std::to_string(BB[2]) + "\"" +
+               "  y_max=\"" + std::to_string(BB[3]) + "\" />\n";
     }
      _outputHandler->Write(tmp);
 }
 void TrajectoriesJPSV05::WriteGeometry(Building* building)
 {
      // just put a link to the geometry file
-     string embed_geometry;
+     std::string embed_geometry;
      embed_geometry.append("\t<geometry>\n");
      char file_location[CLENGTH] = "";
      sprintf(file_location, "\t<file location= \"%s\"/>\n", building->GetGeometryFilename().c_str());
@@ -881,19 +882,19 @@ void TrajectoriesJPSV05::WriteGeometry(Building* building)
 
 void TrajectoriesJPSV05::WriteFrame(int frameNr, Building* building)
 {
-     string data;
+     std::string data;
      char tmp[CLENGTH] = "";
      double RAD2DEG = 180.0 / M_PI;
 
      sprintf(tmp, "<frame ID=\"%d\">\n", frameNr);
      data.append(tmp);
 
-     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+     const std::vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
      for(unsigned int p=0;p<allPeds.size();p++)
      {
           Pedestrian* ped = allPeds[p];
           Room* r = building->GetRoom(ped->GetRoomID());
-          string caption = r->GetCaption();
+          std::string caption = r->GetCaption();
           char s[CLENGTH] = "";
           int color=ped->GetColor();
           double a = ped->GetLargerAxis();

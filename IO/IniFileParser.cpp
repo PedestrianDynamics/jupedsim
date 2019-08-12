@@ -18,53 +18,41 @@
 //
 // Created by laemmel on 24.03.16.
 //
+#include "IniFileParser.h"
 
-#ifdef _OPENMP
-
-#include <omp.h>
-
-
-#else
-#define omp_get_thread_num() 0
-#define omp_get_max_threads()  1
-#endif
-
-#include "../tinyxml/tinyxml.h"
 #include "OutputHandler.h"
 
-#include "IniFileParser.h"
-#include "../pedestrian/Pedestrian.h"
-#include "../math/GCFMModel.h"
-#include "../math/KrauszModel.h"
-#include "../math/GompertzModel.h"
-#include "../math/GradientModel.h"
-#include "../math/VelocityModel.h"
-#include "../routing/router/global_shortest/GlobalRouter.h"
-#include "../routing/router/quickest/QuickestPathRouter.h"
-#include "../routing/router/smoke_router/SmokeRouter.h"
-#include "../routing/router/ai_router/AIRouter.h"
-#include "../routing/router/ff_router/ffRouter.h"
-#include "../routing/router/ff_router_trips/ffRouterTrips.h"
-#include "../routing/router/trips_router/TripsRouter.h"
-#include "../routing/direction/walking/DirectionStrategy.h"
-#include "../routing/direction/walking/DirectionFloorfield.h"
-#include "../routing/direction/walking/DirectionGeneral.h"
-#include "../routing/direction/walking/DirectionInRangeBottleneck.h"
-#include "../routing/direction/walking/DirectionLocalFloorfield.h"
-#include "../routing/direction/walking/DirectionMiddlePoint.h"
-#include "../routing/direction/walking/DirectionMinSeperation.h"
-#include "../routing/direction/walking/DirectionMinSeperationShorterLine.h"
-#include "../routing/direction/walking/DirectionSubLocalFloorfield.h"
-#include "../routing/direction/walking/DirectionTrain.h"
-#include "../routing/direction/waiting/WaitingStrategy.h"
-#include "../routing/direction/waiting/WaitingMiddle.h"
-#include "../routing/direction/waiting/WaitingVoronoi.h"
-#include "../routing/direction/waiting/WaitingRandom.h"
-#include "../routing/direction/waiting/WaitingProbability.h"
+#include "general/Filesystem.h"
+#include "general/OpenMP.h"
+#include "math/GCFMModel.h"
+#include "math/GompertzModel.h"
+#include "math/GradientModel.h"
+#include "math/KrauszModel.h"
+#include "math/VelocityModel.h"
+#include "pedestrian/Pedestrian.h"
+#include "router/ai_router/AIRouter.h"
+#include "router/ff_router/ffRouter.h"
+#include "router/global_shortest/GlobalRouter.h"
+#include "router/quickest/QuickestPathRouter.h"
+#include "router/smoke_router/SmokeRouter.h"
+#include "direction/DirectionManager.h"
+#include "direction/walking/DirectionStrategy.h"
+#include "direction/walking/DirectionFloorfield.h"
+#include "direction/walking/DirectionGeneral.h"
+#include "direction/walking/DirectionInRangeBottleneck.h"
+#include "direction/walking/DirectionLocalFloorfield.h"
+#include "direction/walking/DirectionMiddlePoint.h"
+#include "direction/walking/DirectionMinSeperation.h"
+#include "direction/walking/DirectionMinSeperationShorterLine.h"
+#include "direction/walking/DirectionSubLocalFloorfield.h"
+#include "direction/walking/DirectionTrain.h"
+#include "direction/waiting/WaitingStrategy.h"
+#include "direction/waiting/WaitingMiddle.h"
+#include "direction/waiting/WaitingVoronoi.h"
+#include "direction/waiting/WaitingRandom.h"
+#include "direction/waiting/WaitingProbability.h"
 
-
-
-namespace fs = std::filesystem;
+#include <tinyxml.h>
 
 /* https://stackoverflow.com/questions/38530981/output-compiler-version-in-a-c-program#38531037 */
 std::string ver_string(int a, int b, int c) {
@@ -189,7 +177,7 @@ bool IniFileParser::Parse(std::string iniFile)
                return false;
           }
 
-          string modelName = string(xModel->Attribute("description"));
+          std::string modelName = std::string(xModel->Attribute("description"));
           int model_id = xmltoi(xModel->Attribute("operational_model_id"), -1);
 
           if ((_model==MODEL_GCFM) && (model_id==MODEL_GCFM)) {
@@ -270,8 +258,11 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
 {
      //logfile
      if (xHeader->FirstChild("logfile")) {
-          _config->SetErrorLogFile(
-               _config->GetProjectRootDir() + xHeader->FirstChild("logfile")->FirstChild()->Value());
+          fs::path logPath( xHeader->FirstChild("logfile")->FirstChild()->Value());
+          fs::path root(_config->GetProjectRootDir()); // returns an absolute path already
+          fs::path canonicalPath = fs::weakly_canonical(root / logPath);
+          std::string log = canonicalPath.string();
+          _config->SetErrorLogFile(log);
           _config->SetLog(2);
           Log->Write("INFO:\tlogfile <%s>", _config->GetErrorLogFile().c_str());
      }
@@ -350,7 +341,7 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
           xHeader->FirstChildElement("trajectories")->Attribute("fps", &fps);
           _config->SetFps(fps);
 
-          string format =
+          std::string format =
                xHeader->FirstChildElement("trajectories")->Attribute(
                     "format") ?
                xHeader->FirstChildElement("trajectories")->Attribute(
@@ -360,7 +351,7 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
           if (xHeader->FirstChildElement("trajectories")->Attribute(
                    "embed_mesh")) {
                embedMesh =
-                    string(xHeader->FirstChildElement("trajectories")->Attribute("embed_mesh"))=="true" ? 1 : 0;
+                    std::string(xHeader->FirstChildElement("trajectories")->Attribute("embed_mesh"))=="true" ? 1 : 0;
           }
           if (format=="xml-plain")
                _config->SetFileFormat(FORMAT_XML_PLAIN);
@@ -374,7 +365,7 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
                _config->SetFileFormat(FORMAT_VTK);
 
           //color mode
-          string color_mode =
+          std::string color_mode =
                xHeader->FirstChildElement("trajectories")->Attribute(
                     "color_mode") ?
                xHeader->FirstChildElement("trajectories")->Attribute(
@@ -396,21 +387,16 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
 
           //a file descriptor was given
           if (xTrajectories->FirstChild("file")) {
-               std::string tmp;
-               tmp = xTrajectories->FirstChildElement("file")->Attribute(
-                    "location");
-               fs::path p(tmp);
-               fs::path curr_abs_path = fs::current_path();
-               fs::path rel_path = fs::path(_config->GetProjectRootDir()) / fs::path(tmp);
-               fs::path combined = (curr_abs_path /= rel_path);
-               std::string traj = combined.string();
+               fs::path trajLoc( xTrajectories->FirstChildElement("file")->Attribute("location"));
+               fs::path root(_config->GetProjectRootDir()); // returns an absolute path already
+               fs::path canonicalPath = fs::weakly_canonical(root / trajLoc);
+               std::string traj = canonicalPath.string();
 
                if (traj.c_str())
                {
                     _config->SetTrajectoriesFile(traj);
                     _config->SetOriginalTrajectoriesFile(traj);
                }
-
 
                Log->Write("INFO: \toutput file  <%s>", _config->GetTrajectoriesFile().c_str());
                Log->Write("INFO: \tin format <%s> at <%.0f> frames per seconds",format.c_str(), _config->GetFps());
@@ -469,13 +455,13 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
 
      //force_ped
          if (xModelPara->FirstChild("force_ped")) {
-                 string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
-                 string dist_max = xModelPara->FirstChildElement("force_ped")->Attribute(
+                 std::string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
+                 std::string dist_max = xModelPara->FirstChildElement("force_ped")->Attribute(
                          "dist_max");
-                 string disteff_max =
+                 std::string disteff_max =
                          xModelPara->FirstChildElement("force_ped")->Attribute(
                                  "disteff_max"); // @todo: rename disteff_max to force_max
-                 string interpolation_width =
+                 std::string interpolation_width =
                          xModelPara->FirstChildElement("force_ped")->Attribute(
                                  "interpolation_width");
 
@@ -490,13 +476,13 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
 
      //force_wall
      if (xModelPara->FirstChild("force_wall")) {
-          string nu = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
-          string dist_max = xModelPara->FirstChildElement("force_wall")->Attribute(
+          std::string nu = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
+          std::string dist_max = xModelPara->FirstChildElement("force_wall")->Attribute(
                     "dist_max");
-          string disteff_max =
+          std::string disteff_max =
                     xModelPara->FirstChildElement("force_wall")->Attribute(
                               "disteff_max");
-          string interpolation_width =
+          std::string interpolation_width =
                     xModelPara->FirstChildElement("force_wall")->Attribute(
                               "interpolation_width");
           _config->SetMaxFWall(atof(dist_max.c_str()));
@@ -560,13 +546,13 @@ bool IniFileParser::ParseKrauszModel(TiXmlElement* xKrausz, TiXmlElement* xMainN
 
      //force_ped
      if (xModelPara->FirstChild("force_ped")) {
-          string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
-          string dist_max = xModelPara->FirstChildElement("force_ped")->Attribute(
+          std::string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
+          std::string dist_max = xModelPara->FirstChildElement("force_ped")->Attribute(
                   "dist_max");
-          string disteff_max =
+          std::string disteff_max =
                   xModelPara->FirstChildElement("force_ped")->Attribute(
                           "disteff_max"); // @todo: rename disteff_max to force_max
-          string interpolation_width =
+          std::string interpolation_width =
                   xModelPara->FirstChildElement("force_ped")->Attribute(
                           "interpolation_width");
 
@@ -581,13 +567,13 @@ bool IniFileParser::ParseKrauszModel(TiXmlElement* xKrausz, TiXmlElement* xMainN
 
      //force_wall
      if (xModelPara->FirstChild("force_wall")) {
-          string nu = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
-          string dist_max = xModelPara->FirstChildElement("force_wall")->Attribute(
+          std::string nu = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
+          std::string dist_max = xModelPara->FirstChildElement("force_wall")->Attribute(
                   "dist_max");
-          string disteff_max =
+          std::string disteff_max =
                   xModelPara->FirstChildElement("force_wall")->Attribute(
                           "disteff_max");
-          string interpolation_width =
+          std::string interpolation_width =
                   xModelPara->FirstChildElement("force_wall")->Attribute(
                           "interpolation_width");
           _config->SetMaxFWall(atof(dist_max.c_str()));
@@ -651,25 +637,25 @@ bool IniFileParser::ParseGompertzModel(TiXmlElement* xGompertz, TiXmlElement* xM
 
      //force_ped
      if (xModelPara->FirstChild("force_ped")) {
-          string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
+          std::string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
           _config->SetNuPed(atof(nu.c_str()));
 
           if (!xModelPara->FirstChildElement("force_ped")->Attribute("a"))
                _config->SetaPed(1.0); // default value
           else {
-               string a = xModelPara->FirstChildElement("force_ped")->Attribute("a");
+               std::string a = xModelPara->FirstChildElement("force_ped")->Attribute("a");
                _config->SetaPed(atof(a.c_str()));
           }
           if (!xModelPara->FirstChildElement("force_ped")->Attribute("b"))
                _config->SetbPed(0.25); // default value
           else {
-               string b = xModelPara->FirstChildElement("force_ped")->Attribute("b");
+               std::string b = xModelPara->FirstChildElement("force_ped")->Attribute("b");
                _config->SetbPed(atof(b.c_str()));
           }
           if (!xModelPara->FirstChildElement("force_ped")->Attribute("c"))
                _config->SetcPed(3.0); // default value
           else {
-               string c = xModelPara->FirstChildElement("force_ped")->Attribute("c");
+               std::string c = xModelPara->FirstChildElement("force_ped")->Attribute("c");
                _config->SetcPed(atof(c.c_str()));
           }
           Log->Write("INFO: \tfrep_ped mu=%s, a=%0.2f, b=%0.2f c=%0.2f", nu.c_str(), _config->GetaPed(),
@@ -677,24 +663,24 @@ bool IniFileParser::ParseGompertzModel(TiXmlElement* xGompertz, TiXmlElement* xM
      }
      //force_wall
      if (xModelPara->FirstChild("force_wall")) {
-          string nu = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
+          std::string nu = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
           _config->SetNuWall(atof(nu.c_str()));
           if (!xModelPara->FirstChildElement("force_wall")->Attribute("a"))
                _config->SetaWall(1.0); // default value
           else {
-               string a = xModelPara->FirstChildElement("force_wall")->Attribute("a");
+               std::string a = xModelPara->FirstChildElement("force_wall")->Attribute("a");
                _config->SetaWall(atof(a.c_str()));
           }
           if (!xModelPara->FirstChildElement("force_wall")->Attribute("b"))
                _config->SetbWall(0.7); // default value
           else {
-               string b = xModelPara->FirstChildElement("force_wall")->Attribute("b");
+               std::string b = xModelPara->FirstChildElement("force_wall")->Attribute("b");
                _config->SetbWall(atof(b.c_str()));
           }
           if (!xModelPara->FirstChildElement("force_wall")->Attribute("c"))
                _config->SetcWall(3.0); // default value
           else {
-               string c = xModelPara->FirstChildElement("force_wall")->Attribute("c");
+               std::string c = xModelPara->FirstChildElement("force_wall")->Attribute("c");
                _config->SetcWall(atof(c.c_str()));
           }
 
@@ -756,7 +742,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
           if (!xModelPara->FirstChildElement("floorfield")->Attribute("delta_h"))
                pDeltaH = 0.0625; // default value
           else {
-               string delta_h = xModelPara->FirstChildElement("floorfield")->Attribute("delta_h");
+               std::string delta_h = xModelPara->FirstChildElement("floorfield")->Attribute("delta_h");
                pDeltaH = atof(delta_h.c_str());
           }
           _config->set_deltaH(pDeltaH);
@@ -764,7 +750,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
           if (!xModelPara->FirstChildElement("floorfield")->Attribute("wall_avoid_distance"))
                pWallAvoidDistance = .8; // default value
           else {
-               string wall_avoid_distance = xModelPara->FirstChildElement("floorfield")->Attribute(
+               std::string wall_avoid_distance = xModelPara->FirstChildElement("floorfield")->Attribute(
                          "wall_avoid_distance");
                pWallAvoidDistance = atof(wall_avoid_distance.c_str());
           }
@@ -773,7 +759,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
           if (!xModelPara->FirstChildElement("floorfield")->Attribute("use_wall_avoidance"))
                pUseWallAvoidance = true; // default value
           else {
-               string use_wall_avoidance = xModelPara->FirstChildElement("floorfield")->Attribute("use_wall_avoidance");
+               std::string use_wall_avoidance = xModelPara->FirstChildElement("floorfield")->Attribute("use_wall_avoidance");
                pUseWallAvoidance = !(use_wall_avoidance=="false");
           }
           _config->set_use_wall_avoidance(pUseWallAvoidance);
@@ -788,26 +774,26 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
 
      //force_ped
      if (xModelPara->FirstChild("force_ped")) {
-          string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
+          std::string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
           _config->SetNuPed(atof(nu.c_str()));
 
           if (!xModelPara->FirstChildElement("force_ped")->Attribute("a"))
                _config->SetaPed(1.0); // default value
           else {
-               string a = xModelPara->FirstChildElement("force_ped")->Attribute("a");
+               std::string a = xModelPara->FirstChildElement("force_ped")->Attribute("a");
                _config->SetaPed(atof(a.c_str()));
           }
 
           if (!xModelPara->FirstChildElement("force_ped")->Attribute("b"))
                _config->SetbPed(0.25); // default value
           else {
-               string b = xModelPara->FirstChildElement("force_ped")->Attribute("b");
+               std::string b = xModelPara->FirstChildElement("force_ped")->Attribute("b");
                _config->SetbPed(atof(b.c_str()));
           }
           if (!xModelPara->FirstChildElement("force_ped")->Attribute("c"))
                _config->SetcPed(3.0); // default value
           else {
-               string c = xModelPara->FirstChildElement("force_ped")->Attribute("c");
+               std::string c = xModelPara->FirstChildElement("force_ped")->Attribute("c");
                _config->SetcPed(atof(c.c_str()));
           }
           Log->Write("INFO: \tfrep_ped mu=%s, a=%0.2f, b=%0.2f c=%0.2f", nu.c_str(), _config->GetaPed(),
@@ -815,26 +801,26 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
      }
      //force_wall
      if (xModelPara->FirstChild("force_wall")) {
-          string nu = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
+          std::string nu = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
           _config->SetNuWall(atof(nu.c_str()));
 
           if (!xModelPara->FirstChildElement("force_wall")->Attribute("a"))
                _config->SetaWall(1.0); // default value
           else {
-               string a = xModelPara->FirstChildElement("force_wall")->Attribute("a");
+               std::string a = xModelPara->FirstChildElement("force_wall")->Attribute("a");
                _config->SetaWall(atof(a.c_str()));
           }
 
           if (!xModelPara->FirstChildElement("force_wall")->Attribute("b"))
                _config->SetbWall(0.7); // default value
           else {
-               string b = xModelPara->FirstChildElement("force_wall")->Attribute("b");
+               std::string b = xModelPara->FirstChildElement("force_wall")->Attribute("b");
                _config->SetbWall(atof(b.c_str()));
           }
           if (!xModelPara->FirstChildElement("force_wall")->Attribute("c"))
                _config->SetcWall(3.0); // default value
           else {
-               string c = xModelPara->FirstChildElement("force_wall")->Attribute("c");
+               std::string c = xModelPara->FirstChildElement("force_wall")->Attribute("c");
                _config->SetcWall(atof(c.c_str()));
           }
           Log->Write("INFO: \tfrep_wall mu=%s, a=%0.2f, b=%0.2f c=%0.2f", nu.c_str(), _config->GetaWall(),
@@ -845,7 +831,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
           if (!xModelPara->FirstChildElement("anti_clipping")->Attribute("slow_down_distance"))
                pSlowDownDistance = .2; //default value
           else {
-               string slow_down_distance = xModelPara->FirstChildElement("anti_clipping")->Attribute(
+               std::string slow_down_distance = xModelPara->FirstChildElement("anti_clipping")->Attribute(
                          "slow_down_distance");
                pSlowDownDistance = atof(slow_down_distance.c_str());
           }
@@ -914,14 +900,14 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement* xVelocity, TiXmlElement* xM
           if (!xModelPara->FirstChildElement("force_ped")->Attribute("a"))
                _config->SetaPed(1.0); // default value
           else {
-               string a = xModelPara->FirstChildElement("force_ped")->Attribute("a");
+               std::string a = xModelPara->FirstChildElement("force_ped")->Attribute("a");
                _config->SetaPed(atof(a.c_str()));
           }
 
           if (!xModelPara->FirstChildElement("force_ped")->Attribute("D"))
                _config->SetDPed(0.1); // default value in [m]
           else {
-               string D = xModelPara->FirstChildElement("force_ped")->Attribute("D");
+               std::string D = xModelPara->FirstChildElement("force_ped")->Attribute("D");
                _config->SetDPed(atof(D.c_str()));
           }
           Log->Write("INFO: \tfrep_ped a=%0.2f, D=%0.2f", _config->GetaPed(), _config->GetDPed());
@@ -933,14 +919,14 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement* xVelocity, TiXmlElement* xM
           if (!xModelPara->FirstChildElement("force_wall")->Attribute("a"))
                _config->SetaWall(1.0); // default value
           else {
-               string a = xModelPara->FirstChildElement("force_wall")->Attribute("a");
+               std::string a = xModelPara->FirstChildElement("force_wall")->Attribute("a");
                _config->SetaWall(atof(a.c_str()));
           }
 
           if (!xModelPara->FirstChildElement("force_wall")->Attribute("D"))
                _config->SetDWall(0.1); // default value in [m]
           else {
-               string D = xModelPara->FirstChildElement("force_wall")->Attribute("D");
+               std::string D = xModelPara->FirstChildElement("force_wall")->Attribute("D");
                _config->SetDWall(atof(D.c_str()));
           }
           Log->Write("INFO: \tfrep_wall a=%0.2f, D=%0.2f", _config->GetaWall(), _config->GetDWall());
@@ -1159,7 +1145,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
      for (TiXmlElement* e = routingNode->FirstChildElement("router"); e;
           e = e->NextSiblingElement("router")) {
 
-          string strategy = e->Attribute("description");
+          std::string strategy = e->Attribute("description");
           std::cout << "Description: <" <<strategy << ">" << std::endl;
           int id = atoi(e->Attribute("router_id"));
 
@@ -1210,22 +1196,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                exit(EXIT_FAILURE);
      #endif
           }
-//                    else if ((strategy == "AI_trips") &&
-//                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
-//     #ifdef AIROUTER
-//               Router *r = new AIRouterTrips(id, ROUTING_AI_TRIPS);
-//               _config->GetRoutingEngine()->AddRouter(r);
-//
-//               Log->Write("\nINFO: \tUsing AIRouter Trips");
-//               ///Parsing additional options
-//               if (!ParseAIOpts(e))
-//                    return false;
-//     #else
-//               std::cerr << "\nCan not use AI Router. Rerun cmake with option  -DAIROUTER=true and recompile.\n";
-//               exit(EXIT_FAILURE);
-//     #endif
-//          }
-
           else if ((strategy == "ff_global_shortest") &&
                     (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
                //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
@@ -1279,12 +1249,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                     return false;
                }
           }
-          else if ((strategy == "trips")  &&
-                    (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
-               Router *r = new TripsRouter(id, ROUTING_TRIPS, _config);
-               _config->GetRoutingEngine()->AddRouter(r);
-          }
-
           else if (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) {
                Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",
                          strategy.c_str());
@@ -1341,7 +1305,7 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode* routingNode)
      std::vector<std::string> sensorVec;
      for (TiXmlElement* e = sensorNode->FirstChildElement("sensor"); e;
           e = e->NextSiblingElement("sensor")) {
-          string sensor = e->Attribute("description");
+          std::string sensor = e->Attribute("description");
           //adding Smoke Sensor specific parameters is executed in the class FDSFIreMeshStorage
           sensorVec.push_back(sensor);
 
@@ -1388,7 +1352,7 @@ bool IniFileParser::ParseAIOpts(TiXmlNode* routingNode) {
      std::vector<std::string> sensorVec;
      for (TiXmlElement *e = sensorNode->FirstChildElement("sensor"); e;
           e = e->NextSiblingElement("sensor")) {
-          string sensor = e->Attribute("description");
+          std::string sensor = e->Attribute("description");
           sensorVec.push_back(sensor);
 
           Log->Write("INFO: \tSensor <%s> added.", sensor.c_str());
@@ -1439,9 +1403,9 @@ bool IniFileParser::ParseAIOpts(TiXmlNode* routingNode) {
 bool IniFileParser::ParseLinkedCells(const TiXmlNode& linkedCellNode)
 {
      if (linkedCellNode.FirstChild("linkedcells")) {
-          string linkedcells = linkedCellNode.FirstChildElement("linkedcells")->Attribute(
+          std::string linkedcells = linkedCellNode.FirstChildElement("linkedcells")->Attribute(
                     "enabled");
-          string cell_size = linkedCellNode.FirstChildElement("linkedcells")->Attribute(
+          std::string cell_size = linkedCellNode.FirstChildElement("linkedcells")->Attribute(
                     "cell_size");
 
           if (linkedcells=="true") {
@@ -1516,7 +1480,7 @@ bool IniFileParser::ParsePeriodic(TiXmlNode& Node)
 bool IniFileParser::ParseNodeToSolver(const TiXmlNode& solverNode)
 {
      if (solverNode.FirstChild("solver")) {
-          string solver = solverNode.FirstChild("solver")->FirstChild()->Value();
+          std::string solver = solverNode.FirstChild("solver")->FirstChild()->Value();
           if (solver=="euler") {
                _config->SetSolver(1);
           }
@@ -1539,7 +1503,7 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
      // Init DirectionManager
      _directionManager = std::shared_ptr<DirectionManager>(new DirectionManager);
     //Read direction strategy
-    string query = "exit_crossing_strategy";
+    std::string query = "exit_crossing_strategy";
      if (!strategyNode.FirstChild(query.c_str())) {
           query = "exitCrossingStrategy";
           Log->Write(
@@ -1693,7 +1657,7 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
 
 bool IniFileParser::ParseFfOpts(const TiXmlNode &strategyNode) {
 
-     string query = "delta_h";
+     std::string query = "delta_h";
      if (strategyNode.FirstChild(query.c_str())) {
           const char *tmp =
                     strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
@@ -1715,7 +1679,7 @@ bool IniFileParser::ParseFfOpts(const TiXmlNode &strategyNode) {
 
      query = "use_wall_avoidance";
      if (strategyNode.FirstChild(query.c_str())) {
-          string tmp =
+          std::string tmp =
                     strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
           bool pUseWallAvoidance = !(tmp=="false");
           _config->set_use_wall_avoidance(pUseWallAvoidance);

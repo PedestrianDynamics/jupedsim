@@ -18,20 +18,21 @@
 //
 // Created by laemmel on 24.03.16.
 //
+#pragma once
 
-#ifndef JPSCORE_INIFILEPARSER_H
-#define JPSCORE_INIFILEPARSER_H
+#include "general/Configuration.h"
 
 #include <string>
-#include <filesystem>
-#include "../general/Configuration.h"
-#include "../routing/direction/DirectionManager.h"
 
 class OutputHandler;
 
 class TiXmlElement;
 
 class TiXmlNode;
+
+class DirectionManager;
+
+class WaitingStrategy;
 
 extern OutputHandler* Log;
 
@@ -86,5 +87,3 @@ private:
     int _exit_strat_number;
 
 };
-
-#endif //JPSCORE_INIFILEPARSER_H

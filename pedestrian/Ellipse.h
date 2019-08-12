@@ -24,14 +24,11 @@
  *
  *
  **/
+#pragma once
 
-
-#ifndef _ELLIPSE_H
-#define _ELLIPSE_H
-
-#include "../geometry/Line.h"
-#include "../general/Macros.h"
-#include "../math/Mathematics.h"
+#include "general/Macros.h"
+#include "geometry/Line.h"
+#include "math/Mathematics.h"
 
 class JEllipse {
 private:
@@ -108,6 +105,3 @@ public:
 
 
 };
-
-#endif  /* _ELLIPSE_H */
-

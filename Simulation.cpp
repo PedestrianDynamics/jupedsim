@@ -29,28 +29,19 @@
  **/
 
 #include "Simulation.h"
-#include "IO/progress_bar.hpp"
-#include "routing/router/ff_router/ffRouter.h"
+#include "IO/progress_bar.h"
+#include "router/ff_router/ffRouter.h"
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
 #include "math/GradientModel.h"
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "geometry/WaitingArea.h"
+#include "general/Filesystem.h"
+#include "general/OpenMP.h"
 #include "geometry/GoalManager.h"
-#include "routing/direction/walking/DirectionLocalFloorfield.h"
-
-#include <filesystem>
-namespace fs = std::filesystem;
-
-#ifdef _OPENMP
-
-#else
-#define omp_get_thread_num() 0
-#define omp_get_max_threads()  1
-#endif
-namespace fs = std::filesystem;
-using namespace std;
+#include "direction/DirectionManager.h"
+#include "direction/walking/DirectionLocalFloorfield.h"
 
 OutputHandler* Log;
 Trajectories* outputTXT;
@@ -97,7 +88,7 @@ long Simulation::GetPedsNumber() const
 bool Simulation::InitArgs()
 {
     char tmp[CLENGTH];
-    string s = "Parameter:\n";
+    std::string s = "Parameter:\n";
 
     switch (_config->GetLog()) {
     case 0: {
@@ -159,15 +150,10 @@ bool Simulation::InitArgs()
     }
 
     if (!_config->GetTrajectoriesFile().empty()) {
-         fs::path p(_config->GetTrajectoriesFile());
-         fs::path curr_abs_path = fs::current_path();
-         fs::path rel_path = _config->GetTrajectoriesFile();
-         fs::path combined = (curr_abs_path /= rel_path);
-         std::string traj = combined.string();
-         _config->SetTrajectoriesFile(traj);
-         if(!fs::exists(traj))
-              fs::create_directories(combined.parent_path());
+         fs::path trajPath(_config->GetTrajectoriesFile());
+         fs::create_directories(trajPath.parent_path());
 
+         std::string traj = trajPath.string();
 
         switch (_config->GetFileFormat()) {
         case FORMAT_XML_PLAIN: {
@@ -350,12 +336,12 @@ void Simulation::UpdateRoutesAndLocations()
 {
      //pedestrians to be deleted
      //you should better create this in the constructor and allocate it once.
-     set<Pedestrian*> pedsToRemove;
+     std::set<Pedestrian*> pedsToRemove;
 //     pedsToRemove.reserve(500); //just reserve some space
 
      // collect all pedestrians in the simulation.
-     const vector<Pedestrian*>& allPeds = _building->GetAllPedestrians();
-     const map<int, Goal*>& goals = _building->GetAllGoals();
+     const std::vector<Pedestrian*>& allPeds = _building->GetAllPedestrians();
+     const std::map<int, Goal*>& goals = _building->GetAllGoals();
      auto allRooms = _building->GetAllRooms();
 
 //    for (signed int p = 0; p < allPeds.size(); ++p) {
@@ -365,7 +351,7 @@ void Simulation::UpdateRoutesAndLocations()
 //    }
 
 #pragma omp parallel for shared(pedsToRemove, allRooms)
-     for (int p = 0; p < allPeds.size(); ++p) {
+     for (size_t p = 0; p < allPeds.size(); ++p) {
           auto ped = allPeds[p];
           Room* room = _building->GetRoom(ped->GetRoomID());
           SubRoom* sub0 = room->GetSubRoom(ped->GetSubRoomID());
@@ -383,7 +369,7 @@ void Simulation::UpdateRoutesAndLocations()
                pedsToRemove.insert(ped);
           }
 
-          // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
+          // reposition in the case the pedestrians "accidentally left the room" not via the intended exit.
           // That may happen if the forces are too high for instance
           // the ped is removed from the simulation, if it could not be reassigned
           else if (!sub0->IsInSubRoom(ped))
@@ -500,18 +486,18 @@ void Simulation::PrintStatistics(double simTime)
 
             fs::path p(_config->GetOriginalTrajectoriesFile());
 
-            string statsfile = "flow_exit_id_"+to_string(goal->GetID())+"_"+p.stem().string()+".txt";
+            std::string statsfile = "flow_exit_id_"+std::to_string(goal->GetID())+"_"+p.stem().string()+".txt";
             if(goal->GetOutflowRate() <  (std::numeric_limits<double>::max)())
             {
                  char tmp[50];
                  sprintf(tmp, "%.2f_", goal->GetOutflowRate());
-                 statsfile = "flow_exit_id_"+to_string(goal->GetID())+"_rate_"+tmp+p.stem().string()+".txt";
+                 statsfile = "flow_exit_id_"+std::to_string(goal->GetID())+"_rate_"+tmp+p.stem().string()+".txt";
             }
             Log->Write("More Information in the file: %s", statsfile.c_str());
             {
                  FileHandler statOutput(statsfile.c_str());
                  statOutput.Write("#Simulation time: %.2f", simTime);
-                 statOutput.Write("#Flow at exit "+goal->GetCaption()+"( ID "+to_string(goal->GetID())+" )");
+                 statOutput.Write("#Flow at exit "+goal->GetCaption()+"( ID "+std::to_string(goal->GetID())+" )");
                  statOutput.Write("#Time (s)  cummulative number of agents \n");
                  statOutput.Write(goal->GetFlowCurve());
             }
@@ -529,13 +515,13 @@ void Simulation::PrintStatistics(double simTime)
                        goal->GetID(), itr.first/1000, goal->GetDoorUsage(),
                        goal->GetLastPassingTime());
 
-                  string statsfile = "flow_crossing_id_"
-                       + to_string(itr.first/1000) + "_" + to_string(itr.first % 1000) +".dat";
+                  std::string statsfile = "flow_crossing_id_"
+                       + std::to_string(itr.first/1000) + "_" + std::to_string(itr.first % 1000) +".dat";
                   Log->Write("More Information in the file: %s", statsfile.c_str());
                   FileHandler output(statsfile.c_str());
                   output.Write("#Simulation time: %.2f", simTime);
-                  output.Write("#Flow at crossing " + goal->GetCaption() + "( ID " + to_string(goal->GetID())
-                                + " ) in Room ( ID "+ to_string(itr.first / 1000) + " )");
+                  output.Write("#Flow at crossing " + goal->GetCaption() + "( ID " + std::to_string(goal->GetID())
+                                + " ) in Room ( ID "+ std::to_string(itr.first / 1000) + " )");
                   output.Write("#Time (s)  cummulative number of agents \n");
                   output.Write(goal->GetFlowCurve());
              }
@@ -595,17 +581,11 @@ double Simulation::RunBody(double maxSimTime)
     _nPeds = _building->GetAllPedestrians().size();
     std::cout << "\n";
     std::string description = "Evacuation ";
-    ProgressBar *bar = new ProgressBar(_nPeds, description);
-    // bar->SetFrequencyUpdate(10);
-#ifdef _WINDOWS
-    bar->SetStyle("|","-");
-#else
-    bar->SetStyle("\u2588", "-"); //for linux
-#endif
-     _goalManager->SetBuilding(_building.get());
-     _goalManager->SetGoals(_building->GetAllGoals());
-
+    ProgressBar bar(_nPeds, description);
     int initialnPeds = _nPeds;
+
+    _goalManager->SetBuilding(_building.get());
+    _goalManager->SetGoals(_building->GetAllGoals());
 
     // main program loop
     while ((_nPeds || (!_agentSrcManager.IsCompleted()&& _gotSources) ) && t<maxSimTime) {
@@ -682,12 +662,13 @@ double Simulation::RunBody(double maxSimTime)
 
         if(!_gotSources && !_periodic && _config->print_prog_bar())
               // Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
-              bar->Progressed(initialnPeds-_nPeds);
+              bar.Progressed(initialnPeds-_nPeds);
         else
              if ((!_gotSources) &&
                  ((frameNr < 100 &&  frameNr % 10 == 0) ||
-                  (frameNr > 100 &&  frameNr % 100 == 0)))
+                  (frameNr > 100 &&  frameNr % 100 == 0))){
                   printf("time: %6.2f (%4.0f)  | Agents: %6ld / %d [%4.1f%%]\n",  t , maxSimTime, _nPeds, initialnPeds, (double)(initialnPeds-_nPeds)/initialnPeds*100);
+             }
 
 
         // needed to control the execution time PART 2
@@ -716,16 +697,8 @@ double Simulation::RunBody(double maxSimTime)
         for (auto& itr: _building->GetAllTransitions())
         {
              Transition* Trans = itr.second;
-             if(Trans->IsTempClose())
-             {
-                  if ((Trans->GetMaxDoorUsage() != (std::numeric_limits<int>::max)()) ||
-                    (Trans->GetOutflowRate() != (std::numeric_limits<double>::max)()) ){
-                        Trans->UpdateClosingTime( _deltaT);
-                        if(Trans->GetClosingTime() <= _deltaT){
-                             Trans->changeTemporaryState();
-                      }
-                  }// normal transition
-             }
+
+             Trans->UpdateTemporaryState(_deltaT);
              //-----------
              // regulate train doorusage
              std::string transType = Trans->GetType();
@@ -1035,6 +1008,7 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
       _routingEngine->setNeedUpdate(true);
      return true;
 }
+
 void Simulation::RunFooter()
 {
     // writing the footer
@@ -1050,7 +1024,7 @@ void Simulation::ProcessAgentsQueue()
      /*           std::cout<< KBLU << "BUL: Simulation: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl; */
 
     //incoming pedestrians
-    vector<Pedestrian*> peds;
+    std::vector<Pedestrian*> peds;
     //  std::cout << ">>> peds " << peds.size() << RESET<< std::endl;
 
     AgentsQueueIn::GetandClear(peds);
@@ -1109,7 +1083,8 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
      if (!trans)
           return;
 
-     bool regulateFlow = trans->GetOutflowRate() <  (std::numeric_limits<double>::max)();
+     bool regulateFlow = trans->GetOutflowRate() <  (std::numeric_limits<double>::max)() ||
+             trans->GetMaxDoorUsage() < std::numeric_limits<double>::max();
      // flow of trans does not need regulation
      // and we don't want to have statistics
      if(!(regulateFlow || _config->ShowStatistics())) return;
@@ -1123,7 +1098,7 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
           // when <dn> agents pass <trans>, we start evaluating the flow
           // .. and maybe close the <trans>
           if( trans->GetPartialDoorUsage() ==  trans->GetDN() ) {
-               trans->regulateFlow(Pedestrian::GetGlobalTime());
+               trans->RegulateFlow(Pedestrian::GetGlobalTime());
                trans->ResetPartialDoorUsage();
           }
      }
@@ -1195,6 +1170,7 @@ bool Simulation::TrainTraffic()
      return false;
 
 }
+
 Transition* Simulation::correctDoorStatistics(const Pedestrian& ped, double distance, int trans_id) const
 {
      if(distance<=0.5) return nullptr;

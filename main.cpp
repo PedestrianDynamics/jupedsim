@@ -25,18 +25,26 @@
  *
  *
  **/
-
-#include "geometry/Building.h"
+#include "Simulation.h"
+#include "IO/OutputHandler.h"
+#include "events/EventManager.h"
+#include "general/Configuration.h"
 #include "general/ArgumentParser.h"
-#include "./Simulation.h"
+#include "pedestrian/AgentsSourcesManager.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <iomanip>
+#include <memory>
+#include <ostream>
+#include <string>
+#include <thread>
+
 
 #ifdef _JPS_AS_A_SERVICE
-
 #include "hybrid/HybridSimulationManager.h"
-
 #endif
-
-#include <thread>
 
 int main(int argc, char** argv)
 {

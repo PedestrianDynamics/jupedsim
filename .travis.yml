@@ -7,24 +7,21 @@ git:
 
 matrix:
   include:
-    - name: linux (clang)
+    - name: linux (clang8)
       os: linux
-      compiler: clang++
+      env: TOOLCHAIN=clang
       script:
        - mkdir build && cd build
-       - cmake  ..
+       - cmake  .. -DBUILD_CPPUNIT_TEST=ON -DBUILD_TESTING=ON -DAIROUTER=ON -DJPSFIRE=ON
        - make -j $(nproc)
 
-    - name: linux (gcc)
+    - name: linux (gcc9)
       os: linux
-      compiler: gcc
+      env: TOOLCHAIN=gcc
       script:
        - mkdir build && cd build
-       - cmake ..
+       - cmake .. -DBUILD_CPPUNIT_TEST=ON -DBUILD_TESTING=ON -DAIROUTER=ON -DJPSFIRE=ON
        - make -j $(nproc)
-
-before_script:
-    - source .travis_before_script.bash
 
 before_install:
     - source .travis_before_install.bash

@@ -26,21 +26,21 @@
  *
  *
  **/
+#pragma once
 
-#ifndef FDSMeshSTORAGE_H
-#define FDSMeshSTORAGE_H
+#include "FDSMesh.h"
+
+#include "geometry/Building.h"
 
 #include <unordered_map>
 #include <vector>
-#include "FDSMesh.h"
-#include "../../IO/OutputHandler.h"
-#include "../../geometry/Building.h"
-class Point;
 
+class Point;
+class OutputHandler;
+extern OutputHandler* Log;
 // Container to store all FDSMeshs. Sorted by simulation's global time
 using FDSMeshContainer = std::unordered_map<std::string, FDSMesh>;
 
-extern OutputHandler* Log;
 
 class FDSMeshStorage
 {
@@ -76,5 +76,3 @@ private:
     // const char * glob_str;
 
 };
-
-#endif // FDSMeshSTORAGE_H

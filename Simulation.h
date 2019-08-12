@@ -27,9 +27,6 @@
  *
  *
  **/
-
-
-
 #ifndef SIMULATION_H_
 #define SIMULATION_H_
 
@@ -40,21 +37,16 @@
 #include "IO/IODispatcher.h"
 #include "math/OperationalModel.h"
 #include "math/ODESolver.h"
-#include "routing/router/global_shortest/GlobalRouter.h"
-#include "routing/router/quickest/QuickestPathRouter.h"
-#include "routing/direction/walking/DirectionStrategy.h"
-#include "routing/RoutingEngine.h"
+#include "router/global_shortest/GlobalRouter.h"
+#include "router/quickest/QuickestPathRouter.h"
+#include "direction/walking/DirectionStrategy.h"
+#include "router/RoutingEngine.h"
 #include "pedestrian/PedDistributor.h"
-#include "routing/router/smoke_router/SmokeRouter.h"
+#include "router/smoke_router/SmokeRouter.h"
 #include "events/EventManager.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "general/Configuration.h"
-#include <filesystem>
 
-
-
-//Forward declarations
-//class AgentsSourcesManager;
 class EventManager;
 class GoalManager;
 

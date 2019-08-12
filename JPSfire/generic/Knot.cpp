@@ -25,8 +25,6 @@
  *
  *
  **/
-
-
 #include "Knot.h"
 
 Knot::Knot()

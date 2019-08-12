@@ -1,4 +1,7 @@
 #include "FDSMesh.h"
+
+#include "IO/OutputHandler.h"
+
 #include <cnpy.h>
 #include <cmath>
 

@@ -24,16 +24,15 @@
  *
  *
  **/
-
-
 #include "Room.h"
+
 #include "SubRoom.h"
-#include "../IO/OutputHandler.h"
+
+#include "IO/OutputHandler.h"
 
 #include <sstream>
 #include <memory>
 
-using namespace std;
 
 /************************************************************
   Konstruktoren
@@ -73,7 +72,7 @@ void Room::SetID(int ID)
      _id = ID;
 }
 
-void Room::SetCaption(const string& s)
+void Room::SetCaption(const std::string& s)
 {
      _caption = s;
 }
@@ -101,7 +100,7 @@ int Room::GetID() const
      return _id;
 }
 
-const string& Room::GetCaption() const
+const std::string& Room::GetCaption() const
 {
      return _caption;
 }
@@ -167,7 +166,7 @@ void Room::AddSubRoom(SubRoom* r)
 void Room::WriteToErrorLog() const
 {
      char tmp[CLENGTH];
-     string s;
+     std::string s;
      sprintf(tmp, "\tRaum: %d [%s]:\n", _id, _caption.c_str());
      s.append(tmp);
      Log->Write(s);
@@ -179,7 +178,7 @@ void Room::WriteToErrorLog() const
 
 }
 
-const vector<int>& Room::GetAllTransitionsIDs() const
+const std::vector<int>& Room::GetAllTransitionsIDs() const
 {
      return _transitionsIDs;
 }

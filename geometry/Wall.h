@@ -24,10 +24,7 @@
  *
  *
  **/
-
-
-#ifndef _WALL_H
-#define _WALL_H
+#pragma once
 
 #include "Line.h"
 
@@ -72,7 +69,3 @@ public:
 private:
      std::string _type;
 };
-
-
-#endif  /* _WALL_H */
-

@@ -27,8 +27,6 @@
  * the pedestrians.
  *
  **/
-
-
 #include "OperationalModel.h"
 
 OperationalModel::OperationalModel()

@@ -24,19 +24,17 @@
  *
  *
  **/
-
-
-#ifndef _LINE_H
-#define _LINE_H
+#pragma once
 
 #include "Point.h"
-#include "../IO/OutputHandler.h"
+
+#include "IO/OutputHandler.h"
 
 #include <string>
+#include <vector>
 
 //forward declarations
 class OutputHandler;
-
 class Wall;
 
 // external variables
@@ -320,5 +318,3 @@ private:
      }
 
 };
-
-#endif  /* _LINE_H */

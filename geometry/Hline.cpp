@@ -24,12 +24,11 @@
  *
  *
  **/
-
-
 #include "Hline.h"
+
+#include "Room.h"
 #include "SubRoom.h"
 
-using namespace std;
 
 Hline::Hline()
 {
@@ -50,7 +49,7 @@ void Hline::SetRoom1(Room* r)
      _room1=r;
 }
 
-void Hline::SetCaption(string s)
+void Hline::SetCaption(std::string s)
 {
      _caption=s;
 }
@@ -65,7 +64,7 @@ int Hline::GetID() const
      return _id;
 }
 
-string Hline::GetCaption() const
+std::string Hline::GetCaption() const
 {
      return _caption;
 }
@@ -103,7 +102,7 @@ bool Hline::IsInRoom(int roomID) const
 
 void Hline::WriteToErrorLog() const
 {
-     string s;
+     std::string s;
      char tmp[CLENGTH];
      sprintf(tmp, "\t\tHline: %d (%f, %f) -- (%f, %f)\n", GetID(), GetPoint1()._x,
              GetPoint1()._y, GetPoint2()._x, GetPoint2()._y);
@@ -115,9 +114,9 @@ void Hline::WriteToErrorLog() const
 }
 
 // TraVisTo Ausgabe
-string Hline::GetDescription() const
+std::string Hline::GetDescription() const
 {
-     string geometry;
+     std::string geometry;
      char tmp[CLENGTH] = "";
      sprintf(tmp,"\t\t<hline ID=\"%d\" room_id=\"%d\" subroom_id=\"%d\" color = \"250\" caption=\"h_%d_%d\">\n",GetUniqueID(),_room1->GetID(),_subRoom1->GetSubRoomID(),GetID(),GetUniqueID());
      geometry.append(tmp);

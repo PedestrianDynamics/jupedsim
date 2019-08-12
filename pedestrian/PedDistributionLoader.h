@@ -1,9 +1,7 @@
 //
 // Created by laemmel on 31.03.16.
 //
-
-#ifndef JPSCORE_PEDDISTRIBUTIONLOADER_H
-#define JPSCORE_PEDDISTRIBUTIONLOADER_H
+#pragma once
 
 #include "PedDistributor.h"
 
@@ -16,6 +14,3 @@ public:
                                      std::vector<std::shared_ptr<AgentsSource>> &startDisSources) = 0;
     virtual ~PedDistributionLoader() {};
 };
-
-#endif //JPSCORE_PEDDISTRIBUTIONLOADER_H
-

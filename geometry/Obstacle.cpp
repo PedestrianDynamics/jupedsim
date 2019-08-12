@@ -24,27 +24,23 @@
  *
  *
  **/
-
-
 #include "Obstacle.h"
 
-#include <cstdlib>
-
-#include "../IO/OutputHandler.h"
 #include "Line.h"
+#include "Point.h"
 #include "Wall.h"
 
+#include "IO/OutputHandler.h"
 
-using namespace std;
-
+#include <cstdlib>
 
 Obstacle::Obstacle()
 {
      _height=0.0;
      _id=-1;
      _caption="obstacle";
-     _walls = vector<Wall > ();
-     _poly = vector<Point > ();
+     _walls = std::vector<Wall > ();
+     _poly = std::vector<Point > ();
 }
 
 Obstacle::~Obstacle() {}
@@ -55,12 +51,12 @@ void Obstacle::AddWall(const Wall& w)
      _walls.push_back(w);
 }
 
-string Obstacle::GetCaption() const
+std::string Obstacle::GetCaption() const
 {
      return _caption;
 }
 
-void Obstacle::SetCaption(string caption)
+void Obstacle::SetCaption(std::string caption)
 {
      _caption = caption;
 }
@@ -85,14 +81,14 @@ void Obstacle::SetId(int id)
      _id = id;
 }
 
-const vector<Point>& Obstacle::GetPolygon() const
+const std::vector<Point>& Obstacle::GetPolygon() const
 {
      return _poly;
 }
 
-string Obstacle::Write()
+std::string Obstacle::Write()
 {
-     string s;
+     std::string s;
 
      for (unsigned int j = 0; j < _walls.size(); j++) {
           const Wall& w = _walls[j];
@@ -115,7 +111,7 @@ string Obstacle::Write()
      return s;
 }
 
-const vector<Wall>& Obstacle::GetAllWalls() const
+const std::vector<Wall>& Obstacle::GetAllWalls() const
 {
      return _walls;
 }
@@ -217,8 +213,8 @@ bool Obstacle::Contains(const Point& ped) const
 
 bool Obstacle::ConvertLineToPoly()
 {
-     vector<Line*> copy;
-     vector<Point> tmpPoly;
+     std::vector<Line*> copy;
+     std::vector<Point> tmpPoly;
      Point point;
      Line* line;
      // Alle Linienelemente in copy speichern

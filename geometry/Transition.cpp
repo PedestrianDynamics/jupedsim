@@ -24,12 +24,10 @@
  *
  *
  **/
-
-
 #include "Transition.h"
-#include "SubRoom.h"
 
-using namespace std;
+#include "Room.h"
+#include "SubRoom.h"
 
 /************************************************************
  Transition (abgeleitet von Crossing)
@@ -52,7 +50,7 @@ Transition::~Transition()
 
 
 
-void Transition::SetType(string type)
+void Transition::SetType(std::string type)
 {
      _type=type;
 }
@@ -73,7 +71,7 @@ Room* Transition::GetRoom2() const
      return _room2;
 }
 
-string Transition::GetType() const
+std::string Transition::GetType() const
 {
      return _type;
 }
@@ -142,7 +140,7 @@ SubRoom* Transition::GetOtherSubRoom(int roomID, int subroomID) const
 
 void Transition::WriteToErrorLog() const
 {
-     string s;
+     std::string s;
      char tmp[CLENGTH];
      sprintf(tmp, "\t\tTRANS: %d [%s] (%f, %f) -- (%f, %f)\n", GetID(), GetCaption().c_str(),
                GetPoint1()._x, GetPoint1()._y, GetPoint2()._x, GetPoint2()._y);
@@ -167,9 +165,9 @@ void Transition::WriteToErrorLog() const
 }
 
 // TraVisTo Ausgabe
-string Transition::GetDescription() const
+std::string Transition::GetDescription() const
 {
-     string geometry;
+     std::string geometry;
      char tmp[CLENGTH] = "";
 
      sprintf(tmp,"\t\t<door ID=\"%d\" color=\"180\" caption=\"%d_%d_%s\">\n",GetUniqueID(),GetID(),GetUniqueID(),GetCaption().c_str());

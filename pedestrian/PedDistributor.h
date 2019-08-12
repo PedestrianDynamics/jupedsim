@@ -24,23 +24,19 @@
  *
  *
  **/
-
-#ifndef _PEDDISTRIBUTOR_H
-#define _PEDDISTRIBUTOR_H
+#pragma once
 
 #include <vector>
 #include <string>
 #include <memory>
 
-#include "../routing/router/Router.h"
-#include "../geometry/Building.h"
 #include "AgentsParameters.h"
 #include "AgentsSource.h"
 #include "StartDistribution.h"
-#include "../general/ArgumentParser.h"
 
-//typedef vector<Point> tPoints;
-//typedef vector<tPoints> GridPoints;
+#include "router/Router.h"
+#include "geometry/Building.h"
+#include "general/ArgumentParser.h"
 
 
 class PedDistributor {
@@ -65,14 +61,14 @@ public:
     PedDistributor(const Configuration *configuration);
 
     /**
-     * desctructor
+     * destructor
      */
     virtual ~PedDistributor();
 
     /**
      * Return the possible positions for distributing the agents in the subroom
      */
-    vector<Point> PossiblePositions(const SubRoom &r) const;
+    std::vector<Point> PossiblePositions(const SubRoom &r) const;
 
     /**
      * Distribute the pedestrians in the Subroom with the given parameters
@@ -96,15 +92,12 @@ public:
     /**
      * Get positions from filename
      * Only for frame's position for every id is given
-     * WARNING: It is assumed that positions should be in the corresponding room/subroom. 
+     * WARNING: It is assumed that positions should be in the corresponding room/subroom.
      * checks with n if the file delivers the right number of peds
      */
-    const vector<Point>  GetPositionsFromFile(std::string filename, int n, std::string unit) const;
+    const std::vector<Point> GetPositionsFromFile(std::string filename, int n, std::string unit) const;
 
     double GetA_dist() const;
 
     double GetB_dist() const;
 };
-
-#endif  /* _PEDDISTRIBUTOR_H */
-

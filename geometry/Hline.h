@@ -24,12 +24,8 @@
  *
  *
  **/
- 
+#pragma once
 
-#ifndef HLINE_H_
-#define HLINE_H_
-
-#include "Room.h"
 #include "NavLine.h"
 
 class SubRoom;
@@ -129,5 +125,3 @@ public:
       */
      virtual std::string GetDescription() const;
 };
-
-#endif /* HLINE_H_ */

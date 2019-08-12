@@ -24,16 +24,16 @@
  *
  *
  **/
+#pragma once
 
-#ifndef _IODISPATCHER_H
-#define _IODISPATCHER_H
 
-#include "OutputHandler.h"
-#include "../geometry/Building.h"
+
+#include "geometry/Building.h"
 
 #include <cstring>
 #include <vector>
-#include <filesystem>
+
+class OutputHandler;
 extern OutputHandler* Log;
 
 class Trajectories;
@@ -197,5 +197,3 @@ public:
      virtual void WriteSources(const std::vector<std::shared_ptr<AgentsSource> >);
 
 };
-
-#endif  /* _IODISPATCHER_H */

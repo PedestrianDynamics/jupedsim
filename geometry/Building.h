@@ -24,18 +24,7 @@
  *
  *
  **/
-
-
-#ifndef _BUILDING_H
-#define _BUILDING_H
-
-// nclude <cstdlib>
-// #include <string>
-// #include <vector>
-// #include <fstream>
-// #include <cfloat>
-// #include <map>
-// #include <memory>
+#pragma once
 
 #include "Room.h"
 #include "NavLine.h"
@@ -43,7 +32,8 @@
 #include "Hline.h"
 #include "Obstacle.h"
 #include "Goal.h"
-#include "../general/Configuration.h"
+
+#include "general/Configuration.h"
 
 typedef std::pair<Point, Wall> PointWall;
 
@@ -413,5 +403,3 @@ private:
      /** @} */ // end of group
 
 };
-
-#endif  /* _BUILDING_H */

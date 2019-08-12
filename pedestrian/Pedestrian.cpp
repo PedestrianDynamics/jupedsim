@@ -24,19 +24,16 @@
  *
  *
  **/
-
-#define NOMINMAX
-#include <cassert>
-#include "../geometry/Building.h"
-#include "../geometry/SubRoom.h"
-#include "../geometry/WaitingArea.h"
-#include "Knowledge.h"
 #include "Pedestrian.h"
-#include <limits>
 
-#include "../JPSfire/generic/FDSMeshStorage.h"
+#include "Knowledge.h"
 
-using namespace std;
+#include "geometry/Building.h"
+#include "geometry/SubRoom.h"
+#include "geometry/WaitingArea.h"
+#include "JPSfire/generic/FDSMeshStorage.h"
+
+#include <cassert>
 
 // initialize the static variables
 double Pedestrian::_globalTime = 0.0;
@@ -88,9 +85,9 @@ Pedestrian::Pedestrian()
      _oldSubRoomID = -1;
      _lastE0 = Point(0,0);
      _navLine = nullptr;
-     _mentalMap = map<int, int>();
-     _destHistory = vector<int>();
-     _trip = vector<int> ();
+     _mentalMap = std::map<int, int>();
+     _destHistory = std::vector<int>();
+     _trip = std::vector<int> ();
      _lastPosition = Point(0,0);
      _lastCellPosition = -1;
      _knownDoors.clear();
@@ -173,8 +170,8 @@ Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& buil
      _timeInJam = 0.0;
      _patienceTime = 5.0;// time after which the ped feels to be in jam
      _desiredFinalDestination = FINAL_DEST_OUT;
-     _mentalMap = map<int, int>();
-     _destHistory = vector<int>();
+     _mentalMap = std::map<int, int>();
+     _destHistory = std::vector<int>();
      _deltaT = 0.01;
      _updateRate = _deltaT;
      _V0 = Point(0,0);
@@ -186,7 +183,7 @@ Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& buil
      _height = 170;
      _age = 30;
      _gender = "male";
-     _trip = vector<int> ();
+     _trip = std::vector<int> ();
      _group = -1;
      _spotlight = false;
      _V0UpStairs=0.6;
@@ -208,9 +205,7 @@ Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& buil
 
 Pedestrian::~Pedestrian()
 {
-     if ((_id>72) && (_id<81)){
-          std::cout << "Ped destructor" << std::endl;
-     }
+     delete _navLine;
 }
 
 
@@ -219,13 +214,13 @@ void Pedestrian::SetID(int i)
      _id = i;
      if(i<=0)
      {
-          cerr<<">> Invalid pedestrians ID " << i<< endl;
-          cerr<<">> Pedestrian ID should be > 0. Exit." << endl;
+          std::cerr<<">> Invalid pedestrians ID " << i<< std::endl;
+          std::cerr<<">> Pedestrian ID should be > 0. Exit." << std::endl;
           exit(0);
      }
 }
 
-void Pedestrian::SetRoomID(int i, string roomCaption)
+void Pedestrian::SetRoomID(int i, std::string roomCaption)
 {
      _roomID = i;
      _roomCaption = roomCaption;
@@ -358,7 +353,7 @@ double Pedestrian::Getdt()
      return _deltaT;
 }
 
-void Pedestrian::SetTrip(const vector<int>& trip)
+void Pedestrian::SetTrip(const std::vector<int>& trip)
 {
      _trip = trip;
 }
@@ -435,7 +430,7 @@ NavLine* Pedestrian::GetExitLine() const
      return _navLine;
 }
 
-const vector<int>& Pedestrian::GetTrip() const
+const std::vector<int>& Pedestrian::GetTrip() const
 {
      return _trip;
 }
@@ -509,7 +504,7 @@ void Pedestrian::ClearKnowledge()
      _knownDoors.clear();
 }
 
-map<int, Knowledge>&  Pedestrian::GetKnownledge()
+std::map<int, Knowledge>&  Pedestrian::GetKnownledge()
 {
      return _knownDoors;
 }
@@ -521,7 +516,7 @@ const std::vector<int>& Pedestrian::GetLastDestinations() const
 
 const std::string Pedestrian::GetKnowledgeAsString() const
 {
-     string key="";
+     std::string key="";
      for(auto&& knowledge:_knownDoors)
      {
           //skip low quality information
@@ -726,7 +721,7 @@ void Pedestrian::InitV0(const Point& target)
 const Point& Pedestrian::GetV0(const Point& target)
 {
 
-#define DEBUGV0 0
+#define DEBUGV0 1
      const Point& pos = GetPos();
      Point delta = target - pos;
      Point new_v0;
@@ -740,7 +735,7 @@ const Point& Pedestrian::GetV0(const Point& target)
      _V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
 
 #if DEBUGV0
-     if(DEBUGV0 == 0){
+     if(0){
           printf("=====\nGoal Line=[%f, %f]-[%f, %f]\n", _navLine->GetPoint1()._x, _navLine->GetPoint1()._y, _navLine->GetPoint2()._x, _navLine->GetPoint2()._y);
           printf("Ped=%d, sub=%d, room=%d pos=[%f, %f], target=[%f, %f]\n", _id, _subRoomID, _roomID, pos._x, pos._y, target._x, target._y);
           printf("Ped=%d : BEFORE new_v0=%f %f norm = %f\n", _id, new_v0._x, new_v0._y, new_v0.Norm());
@@ -862,12 +857,12 @@ void Pedestrian::SetAge(double age)
      _age = age;
 }
 
-string Pedestrian::GetGender() const
+std::string Pedestrian::GetGender() const
 {
      return _gender;
 }
 
-void Pedestrian::SetGender(string gender)
+void Pedestrian::SetGender(std::string gender)
 {
      _gender = gender;
 }
@@ -945,13 +940,13 @@ int Pedestrian::GetFinalDestination() const
 //     }
 //}
 
-string Pedestrian::GetPath()
+std::string Pedestrian::GetPath()
 {
-     map<int, int>::iterator iter;
-     string path;
+     std::map<int, int>::iterator iter;
+     std::string path;
 
      for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
-          stringstream ss;//create a stringstream
+          std::stringstream ss;//create a stringstream
           ss << iter->first/1000<<":"<<iter->second<<">"; //@todo:ar.graf: has this to do with roomNr*1000+subroom and is now wrong?
           path.append(ss.str());
      }
@@ -1153,7 +1148,7 @@ int Pedestrian::GetAgentsCreated()
 int Pedestrian::GetColor() const
 {
      //default color is by velocity
-     string key;
+     std::string key;
 
      switch (_colorMode)
      {
@@ -1229,7 +1224,7 @@ bool Pedestrian::Relocate(std::function<void(const Pedestrian&)> flowupdater) {
      {
           auto& room = it_room.second;
           auto subrooms = room->GetAllSubRooms();
-          map<int, std::shared_ptr<SubRoom> >::iterator sub =
+          std::map<int, std::shared_ptr<SubRoom> >::iterator sub =
                   std::find_if(subrooms.begin(), subrooms.end(), [&] (std::pair<int, std::shared_ptr<SubRoom>> iterator) {
                       return ((iterator.second->IsDirectlyConnectedWith(allRooms[_roomID]->GetSubRoom(_subRoomID))) && iterator.second->IsInSubRoom(this));
                   });
@@ -1271,7 +1266,7 @@ bool Pedestrian::IsInsideWaitingAreaWaiting() const
           if (itr != _building->GetAllGoals().end()){
                Goal* goal = itr->second;
                if (WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)){
-                    return wa->isWaiting(Pedestrian::GetGlobalTime(), _building);
+                    return wa->IsWaiting(Pedestrian::GetGlobalTime(), _building);
                }
           }
      }

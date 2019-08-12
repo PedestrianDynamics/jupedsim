@@ -25,10 +25,7 @@
  *
  *
  **/
-
-
-#ifndef _MACROS_H
-#define _MACROS_H
+#pragma once
 
 #include <cstdlib>
 #include <vector>
@@ -133,7 +130,6 @@ enum RoutingStrategy {
      ROUTING_FF_GLOBAL_SHORTEST,
      ROUTING_FF_LOCAL_SHORTEST,
      ROUTING_FF_QUICKEST,
-     ROUTING_TRIPS,
      ROUTING_UNDEFINED =-1
 };
 
@@ -416,5 +412,3 @@ std::cerr  << "["<< lineNumber  << "]: ---"<< fileName.substr(found+1)<< " ---"<
     (fprintf(stderr, __VA_ARGS__)           \
     )
 #endif /* TRACE_LOGGING */
-
-#endif  /* _MACROS_H */

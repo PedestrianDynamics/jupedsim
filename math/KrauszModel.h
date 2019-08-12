@@ -25,17 +25,13 @@
  * Implementation of classes for force-based models.*
  *
  **/
+#pragma once
 
-
-#ifndef KrauszMODEL_H_
-#define KrauszMODEL_H_
-
-#include <vector>
-
-#include "../geometry/Building.h"
 #include "OperationalModel.h"
 
+#include "geometry/Building.h"
 
+#include <vector>
 
 //forward declaration
 class Pedestrian;
@@ -131,6 +127,3 @@ private:
     Point ForceInterpolation(double v0, double K_ij, const Point& e, double v, double d, double r, double l) const;
 
 };
-
-
-#endif /* KrauszMODEL_H_ */

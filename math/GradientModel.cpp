@@ -27,34 +27,19 @@
  *
  *
  **/
-
-#include <math.h>
-#include "../pedestrian/Pedestrian.h"
-#include "../mpi/LCGrid.h"
-#include "../geometry/Wall.h"
-#include "../geometry/SubRoom.h"
-
 #include "GradientModel.h"
 
-#ifdef _OPENMP
-#include <omp.h>
-#else
-#define omp_get_thread_num() 0
-#define omp_get_max_threads()  1
-#endif
+#include "general/OpenMP.h"
+#include "geometry/SubRoom.h"
+#include "geometry/Wall.h"
+#include "mpi/LCGrid.h"
+#include "pedestrian/Pedestrian.h"
+#include "direction/DirectionManager.h"
+#include "direction/walking/DirectionFloorfield.h"
+#include "direction/walking/DirectionLocalFloorfield.h"
+#include "direction/walking/DirectionSubLocalFloorfield.h"
 
-#include "../routing/direction/walking/DirectionStrategy.h"
-#include "../routing/direction/walking/DirectionFloorfield.h"
-#include "../routing/direction/walking/DirectionGeneral.h"
-#include "../routing/direction/walking/DirectionInRangeBottleneck.h"
-#include "../routing/direction/walking/DirectionLocalFloorfield.h"
-#include "../routing/direction/walking/DirectionMiddlePoint.h"
-#include "../routing/direction/walking/DirectionMinSeperation.h"
-#include "../routing/direction/walking/DirectionMinSeperationShorterLine.h"
-#include "../routing/direction/walking/DirectionSubLocalFloorfield.h"
-
-using std::vector;
-using std::string;
+#include <math.h>
 
 GradientModel::GradientModel(std::shared_ptr<DirectionManager> dir, double nuped, double aped, double bped, double cped,
                              double nuwall, double awall, double bwall, double cwall,
@@ -133,13 +118,13 @@ bool GradientModel::Init (Building* building)
 //          Log->Write("INFO:\t Init DirectionSubLOCALFloorfield done");
 //     }
 
-     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+     const std::vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
      std::vector<Pedestrian*> pedsToRemove;
      pedsToRemove.clear();
      bool error_occurred = false;
 #pragma omp parallel for
-    for(int p=0;p<allPeds.size();p++) {
+    for(size_t p=0;p<allPeds.size();p++) {
          Pedestrian* ped = allPeds[p];
          double cosPhi = 0;
          double sinPhi = 0;
@@ -191,7 +176,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 {
      double delta = 0.5;
       // collect all pedestrians in the simulation.
-      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+      const std::vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
      unsigned long nSize;
      nSize = allPeds.size();
@@ -218,7 +203,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
       #pragma omp parallel  default(shared) num_threads(nThreads)
       {
-           vector< Point > result_acc = vector<Point > ();
+           std::vector< Point > result_acc = std::vector<Point > ();
            result_acc.reserve(nSize);
 
            const int threadID = omp_get_thread_num();
@@ -254,7 +239,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 }
 
                 Point repPed = Point(0,0);
-                vector<Pedestrian*> neighbours;
+                std::vector<Pedestrian*> neighbours;
                 building->GetGrid()->GetNeighbourhood(ped,neighbours);
                 int size = (int) neighbours.size();
                 for (int i = 0; i < size; i++) {
@@ -268,7 +253,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      Point p2 = ped1->GetPos();
 
                      //subrooms to consider when looking for neighbour for the 3d visibility
-                     vector<SubRoom*> emptyVector;
+                     std::vector<SubRoom*> emptyVector;
                      emptyVector.push_back(subroom);
                      emptyVector.push_back(building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID()));
 
@@ -604,7 +589,7 @@ Point GradientModel::ForceRepWall(Pedestrian* ped, const Line& w) const
 
 std::string GradientModel::GetDescription()
 {
-     string rueck;
+     std::string rueck;
      char tmp[CLENGTH];
      sprintf(tmp, "\t\tNu: \t\tPed: %f \tWall: %f\n", _nuPed, _nuWall);
      rueck.append(tmp);

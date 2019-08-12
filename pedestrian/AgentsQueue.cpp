@@ -23,21 +23,18 @@
  * \section Description
  *
  **/
-
 #include "AgentsQueue.h"
 
 #include "Pedestrian.h"
 
-using namespace std;
+std::vector<Pedestrian*> AgentsQueueIn::_agentsQueue;
+std::vector<Pedestrian*> AgentsQueueOut::_agentsQueue;
 
-vector<Pedestrian*> AgentsQueueIn::_agentsQueue;
-vector<Pedestrian*> AgentsQueueOut::_agentsQueue;
-
-mutex AgentsQueueIn::_queueMutex;
-mutex AgentsQueueOut::_queueMutex;
+std::mutex AgentsQueueIn::_queueMutex;
+std::mutex AgentsQueueOut::_queueMutex;
 
 
-void AgentsQueueIn::Add(vector<Pedestrian*>& peds)
+void AgentsQueueIn::Add(std::vector<Pedestrian*>& peds)
 {
      _queueMutex.lock();
      _agentsQueue.insert(_agentsQueue.end(),peds.begin(),peds.end());
@@ -70,7 +67,7 @@ int AgentsQueueIn::Size()
 /////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
 
-void AgentsQueueOut::Add(vector<Pedestrian*>& peds)
+void AgentsQueueOut::Add(std::vector<Pedestrian*>& peds)
 {
      _queueMutex.lock();
      _agentsQueue.insert(_agentsQueue.end(),peds.begin(),peds.end());

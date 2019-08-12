@@ -25,17 +25,12 @@
  * Implementation of classes for Generalized Centrifugal Force Model
  *
  **/
-
-
-#ifndef GCFMMODEL_H_
-#define GCFMMODEL_H_
-
-#include <vector>
-
-#include "../geometry/Building.h"
+#pragma once
 #include "OperationalModel.h"
 
+#include "geometry/Building.h"
 
+#include <vector>
 
 //forward declaration
 class Pedestrian;
@@ -127,6 +122,3 @@ private:
     Point ForceInterpolation(double v0, double K_ij, const Point& e, double v, double d, double r, double l) const;
 
 };
-
-
-#endif /* GCFMMODEL_H_ */

@@ -5,11 +5,12 @@
  *      Author: piccolo
  */
 
-#ifndef EVENTS_EVENT_H_
-#define EVENTS_EVENT_H_
+#pragma once
 
 #include <string>
-#include "../general/Macros.h"
+
+// Describes the event
+enum class EventAction { OPEN, CLOSE, TEMP_CLOSE, RESET_USAGE, NOTHING};
 
 class Event
 {
@@ -36,9 +37,9 @@ public:
      int GetId() const;
 
      /**
-      * @return the state (open, close) of the event
+      * @return the type of the event
       */
-     const DoorState& GetState() const;
+     const EventAction& GetAction() const;
 
      /**
       * @return the time at which the event was recorded
@@ -59,7 +60,7 @@ private:
      double _time;
      int _id;
      std::string _type;
-     DoorState _state;
-};
+     EventAction _action;
 
-#endif /* EVENTS_EVENT_H_ */
+     EventAction StringToEventAction(const std::string&);
+};

@@ -24,15 +24,9 @@
  * This class is used to define mathematical parameters, constants and functions.
  *
  **/
-
-
 #include "Mathematics.h"
+
 #include <cassert>
-
-
-
-using namespace std;
-
 
 // ok that is not perfect. For a profound discussion see http://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
 bool  almostEqual (double a, double b, double eps)
@@ -150,7 +144,7 @@ Y(x) = y1 +  dy1*(x-x1) +  [x1 x1 x2]y*(x-x1)^2 + [x1 x1 x2 x2]y*(x-x1)^2*(x-x2)
 /// a is positive
 
 double sigmoid(double a, double b, double x)
-{     
+{
      return a/( 1+exp(b*x) );
 }
 // thanks to Sean Curtis
@@ -176,10 +170,10 @@ double hermite_interp(double t, double x1, double x2, double y1, double y2, doub
 /////////////////////////////////////////////////////////////////////////////
 
 /* Principal cubic root of a complex number */
-complex<double> c_cbrt(complex<double> x)
+std::complex<double> c_cbrt(std::complex<double> x)
 {
      double a, b, r, phi, rn;
-     complex<double> I(0, 1);
+     std::complex<double> I(0, 1);
      double s;
      a = real(x);
      b = imag(x);
@@ -192,7 +186,3 @@ complex<double> c_cbrt(complex<double> x)
      s = sin(phi);
      return rn * cos(phi) + I * rn*s;
 }
-
-
-
-
