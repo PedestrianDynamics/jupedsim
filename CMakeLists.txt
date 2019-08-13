@@ -98,6 +98,13 @@ if(${CMAKE_SYSTEM} MATCHES "Darwin")
 endif()
 find_package(Boost 1.65 REQUIRED ${BOOST_COMPONENTS})
 
+# boost filesystem / std::filesystem
+add_library(fs INTERFACE)
+target_link_libraries(fs INTERFACE
+    $<$<PLATFORM_ID:Darwin>:Boost::filesystem>
+    $<$<PLATFORM_ID:Linux>:stdc++fs>
+)
+
 # CMakes find module for openmp (FindOpenMP) is currently (cmake 1.15.1) broken
 # in several ways:
 # 1st. Version detection does only work on first cmake generation. E.g. if
@@ -496,8 +503,7 @@ target_link_libraries(core
     visilibity
     $<$<BOOL:${AIROUTER}>:CGAL::CGAL>
     $<$<BOOL:${JPSFIRE}>:cnpy>
-    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>>:stdc++fs>
-    $<$<CXX_COMPILER_ID:AppleClang>:Boost::filesystem>
+    fs
 )
 target_include_directories(core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
