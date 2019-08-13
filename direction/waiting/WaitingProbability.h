@@ -1,9 +1,7 @@
 //
 // Created by Tobias Schrödter on 2019-06-11.
 //
-
-#ifndef JPSCORE_WAITINGPROBABILITY_H
-#define JPSCORE_WAITINGPROBABILITY_H
+#pragma  once
 
 #include <memory>
 #include "WaitingStrategy.h"
@@ -94,5 +92,3 @@ private:
 
      void writeVTK(const SubRoom*, std::string filename);
 };
-
-#endif //JPSCORE_WAITINGPROBABILITY_H

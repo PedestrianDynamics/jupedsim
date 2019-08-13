@@ -1,9 +1,7 @@
 //
 // Created by Tobias Schrödter on 2019-04-14.
 //
-
-#ifndef JPSCORE_DIRECTIONLOCALFLOORFIELD_H
-#define JPSCORE_DIRECTIONLOCALFLOORFIELD_H
+#pragma  once
 
 #include "DirectionStrategy.h"
 
@@ -30,6 +28,3 @@ protected:
     bool _useDistancefield;
     std::string _filename;
 };
-
-
-#endif //JPSCORE_DIRECTIONLOCALFLOORFIELD_H

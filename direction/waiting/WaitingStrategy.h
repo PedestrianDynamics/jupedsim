@@ -1,9 +1,7 @@
 //
 // Created by Tobias Schrödter on 2019-05-13.
 //
-
-#ifndef JPSCORE_WAITINGSTRATEGY_H
-#define JPSCORE_WAITINGSTRATEGY_H
+#pragma  once
 
 #include "general/Macros.h"
 
@@ -26,5 +24,3 @@ public:
 
     virtual Point GetPath(Pedestrian* ped);
 };
-
-#endif //JPSCORE_WAITINGSTRATEGY_H

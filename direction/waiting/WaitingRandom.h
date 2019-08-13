@@ -1,9 +1,7 @@
 //
 // Created by Tobias Schrödter on 2019-05-14.
 //
-
-#ifndef JPSCORE_WAITINGRANDOM_H
-#define JPSCORE_WAITINGRANDOM_H
+#pragma  once
 
 #include "WaitingStrategy.h"
 class WaitingRandom : public WaitingStrategy{
@@ -14,5 +12,3 @@ class WaitingRandom : public WaitingStrategy{
     virtual Point GetWaitingPosition(Room* room, Pedestrian* ped);
 
 };
-
-#endif //JPSCORE_WAITINGRANDOM_H

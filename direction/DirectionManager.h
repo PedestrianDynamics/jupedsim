@@ -18,11 +18,8 @@ class Room;
 class DirectionManager {
 
 private:
-     std::shared_ptr<WaitingStrategy> waitingStrategy;
-     std::shared_ptr<DirectionStrategy> directionStrategy;
-
-private:
-    Building* building;
+     std::shared_ptr<WaitingStrategy> _waitingStrategy;
+     std::shared_ptr<DirectionStrategy> _directionStrategy;
 
 public:
     void Init(Building*);

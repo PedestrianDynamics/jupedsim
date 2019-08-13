@@ -1,10 +1,7 @@
 //
 // Created by Tobias Schrödter on 2019-04-14.
 //
-
-#ifndef JPSCORE_DIRECTIONFLOORFIELD_H
-#define JPSCORE_DIRECTIONFLOORFIELD_H
-
+#pragma  once
 #include "DirectionStrategy.h"
 
 class Building;
@@ -25,5 +22,3 @@ private:
     FloorfieldViaFM* _ffviafm;
     bool _initDone;
 };
-
-#endif //JPSCORE_DIRECTIONFLOORFIELD_H

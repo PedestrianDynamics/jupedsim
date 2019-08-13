@@ -1649,16 +1649,12 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
      if (waitingStrategyIndex < 0){
           _waitingStrategy = nullptr;
 
-          Log->Write("INFO:\t  could not parse waiting_strategy, no waiting_strategy is used");
+          Log->Write("INFO:\tcould not parse waiting_strategy, no waiting_strategy is used");
      }
+     Log->Write("INFO:\twaiting_strategy < %d >", waitingStrategyIndex);
+
      _directionManager->SetWaitingStrategy(_waitingStrategy);
      _config->SetDirectionManager(_directionManager);
-
-////     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingVoronoi());
-////     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
-////     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingProbability());
-//     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingMiddle());
-
 
      return true;
 }

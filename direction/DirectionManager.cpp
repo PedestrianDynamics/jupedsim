@@ -13,35 +13,37 @@ void DirectionManager::Init(Building* building)
 {
      std::cout << "DirectionManager::Init(Building*)" << std::endl;
 
-     directionStrategy->Init(building);
-     waitingStrategy->Init(building);
+     _directionStrategy->Init(building);
+     if (_waitingStrategy){
+          _waitingStrategy->Init(building);
+     }
 }
 
 Point DirectionManager::GetTarget(Room* room, Pedestrian* ped)
 {
-     if (ped->IsWaiting()){
-          return waitingStrategy->GetTarget(room, ped);
+     if (ped->IsWaiting() && _waitingStrategy){
+          return _waitingStrategy->GetTarget(room, ped);
      }else{
-          return directionStrategy->GetTarget(room, ped);
+          return _directionStrategy->GetTarget(room, ped);
      }
 }
 
 const std::shared_ptr<WaitingStrategy>& DirectionManager::GetWaitingStrategy() const
 {
-     return waitingStrategy;
+     return _waitingStrategy;
 }
 
 void DirectionManager::SetWaitingStrategy(const std::shared_ptr<WaitingStrategy>& waitingStrategy)
 {
-     DirectionManager::waitingStrategy = waitingStrategy;
+     DirectionManager::_waitingStrategy = waitingStrategy;
 }
 
 const std::shared_ptr<DirectionStrategy>& DirectionManager::GetDirectionStrategy() const
 {
-     return directionStrategy;
+     return _directionStrategy;
 }
 
 void DirectionManager::SetDirectionStrategy(const std::shared_ptr<DirectionStrategy>& directionStrategy)
 {
-     DirectionManager::directionStrategy = directionStrategy;
+     DirectionManager::_directionStrategy = directionStrategy;
 }

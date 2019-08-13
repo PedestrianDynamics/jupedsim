@@ -1,9 +1,7 @@
 //
 // Created by Tobias Schrödter on 2019-05-13.
 //
-
-#ifndef JPSCORE_WAITINGMIDDLE_H
-#define JPSCORE_WAITINGMIDDLE_H
+#pragma  once
 
 #include "WaitingStrategy.h"
 
@@ -12,5 +10,3 @@ class WaitingMiddle : public WaitingStrategy{
     virtual Point GetWaitingPosition(Room* room, Pedestrian* ped);
 
 };
-
-#endif //JPSCORE_WAITINGMIDDLE_H
