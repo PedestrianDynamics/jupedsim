@@ -139,3 +139,14 @@ Go to your account on GitHub. Make sure you are on your develop branch. You shou
 ## Accept or reject the request
 
 Pull requests are accepted or rejected by project members. You can accept your own pull request if you are a member of the JuPedSim organization. The four-eye principle is desirable.
+
+### Checking Out GitHub Pull requests locally
+
+To check out GitHub pull requests locally, use this command:
+
+```
+git fetch JuPedSim pull/$1/head:pr$1
+git checkout pr$1
+```
+
+The variable `$1` stands for the number of the pull request.
