@@ -42,7 +42,6 @@
 #include "direction/walking/DirectionInRangeBottleneck.h"
 #include "direction/walking/DirectionLocalFloorfield.h"
 #include "direction/walking/DirectionMiddlePoint.h"
-#include "direction/walking/DirectionMinSeperation.h"
 #include "direction/walking/DirectionMinSeperationShorterLine.h"
 #include "direction/walking/DirectionSubLocalFloorfield.h"
 #include "direction/walking/DirectionTrain.h"
@@ -1591,36 +1590,19 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                     if(!ParseFfOpts(strategyNode)) {
                         return false;
                     };
-//                    _config->set_dirStrategy(dynamic_cast<DirectionSubLocalFloorfield*>(_directionStrategy.get()));
                     break;
                case 8:
                     _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
                     if(!ParseFfOpts(strategyNode)) {
                          return false;
                     };
-//                    _config->set_dirStrategy(dynamic_cast<DirectionLocalFloorfield*>(_directionStrategy.get()));
                     break;
                case 9:
                     _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
                     if(!ParseFfOpts(strategyNode)) {
                          return false;
                     };
-//                    _config->set_dirStrategy(dynamic_cast<DirectionSubLocalFloorfield*>(_directionStrategy.get()));
                     break;
-//               case 10:
-//                    _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfieldTrips());
-//                    if(!ParseFfOpts(strategyNode)) {
-//                         return false;
-//                    };
-//                    _config->set_dirStrategy(dynamic_cast<DirectionSubLocalFloorfieldTrips*>(_directionStrategy.get()));
-//                    break;
-//               case 11:
-//                    _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfieldTripsVoronoi());
-//                    if(!ParseFfOpts(strategyNode)) {
-//                         return false;
-//                    };
-//                    _config->set_dirStrategy(dynamic_cast<DirectionSubLocalFloorfieldTripsVoronoi*>(_directionStrategy.get()));
-//                    break;
                case 12:
                     _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionTrain());
                     break;
@@ -1643,14 +1625,40 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
      }
 
      // Read waiting
-//     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingVoronoi());
-//     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
-//     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingProbability());
-     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingMiddle());
+     std::string queryWaiting = "waiting_strategy";
+     int waitingStrategyIndex = -1;
+     if (strategyNode.FirstChild(queryWaiting)){
+          if(const char* attribute = strategyNode.FirstChild(queryWaiting)->FirstChild()->Value(); attribute) {
+               if(waitingStrategyIndex = xmltoi(attribute, -1); waitingStrategyIndex > -1
+                    && attribute == std::to_string(waitingStrategyIndex)) {
+                    switch (waitingStrategyIndex) {
+                    case 1:
+                         _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingMiddle());
+                         break;
+                    case 2:
+                         _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
+                    default:
+                         _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
+                         Log->Write("ERROR:\t unknown waiting_strategy <%d>", waitingStrategyIndex);
+                         Log->Write("     :\t the default <%d> will be used", 2);
+                    }
+               }
+          }
+     }
 
+     if (waitingStrategyIndex < 0){
+          _waitingStrategy = nullptr;
+
+          Log->Write("INFO:\t  could not parse waiting_strategy, no waiting_strategy is used");
+     }
      _directionManager->SetWaitingStrategy(_waitingStrategy);
-
      _config->SetDirectionManager(_directionManager);
+
+////     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingVoronoi());
+////     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
+////     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingProbability());
+//     _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingMiddle());
+
 
      return true;
 }

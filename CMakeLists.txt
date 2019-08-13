@@ -307,7 +307,6 @@ set(source_files
     direction/walking/DirectionInRangeBottleneck.cpp
     direction/walking/DirectionLocalFloorfield.cpp
     direction/walking/DirectionMiddlePoint.cpp
-    direction/walking/DirectionMinSeperation.cpp
     direction/walking/DirectionMinSeperationShorterLine.cpp
     direction/walking/DirectionStrategy.cpp
     direction/walking/DirectionSubLocalFloorfield.cpp
@@ -404,7 +403,6 @@ set(header_files
     direction/walking/DirectionInRangeBottleneck.h
     direction/walking/DirectionLocalFloorfield.h
     direction/walking/DirectionMiddlePoint.h
-    direction/walking/DirectionMinSeperation.h
     direction/walking/DirectionMinSeperationShorterLine.h
     direction/walking/DirectionStrategy.h
     direction/walking/DirectionSubLocalFloorfield.h

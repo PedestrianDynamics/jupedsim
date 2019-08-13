@@ -41,7 +41,6 @@
 #include "direction/walking/DirectionInRangeBottleneck.h"
 #include "direction/walking/DirectionLocalFloorfield.h"
 #include "direction/walking/DirectionMiddlePoint.h"
-#include "direction/walking/DirectionMinSeperation.h"
 #include "direction/walking/DirectionMinSeperationShorterLine.h"
 #include "direction/walking/DirectionSubLocalFloorfield.h"
 
