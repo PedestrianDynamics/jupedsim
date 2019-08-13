@@ -45,7 +45,6 @@
 #include <thread>
 #endif
 
-
 Building::Building()
 {
       _caption = "no_caption";
@@ -756,11 +755,13 @@ bool Building::correct() const {
       auto t_start = std::chrono::high_resolution_clock::now();
       Log->Write("INFO:\tenter correct ...");
       bool removed = false;
-
+      bool removed_room = false;
       for(auto&& room: this->GetAllRooms()) {
             for(auto&& subroom: room.second->GetAllSubRooms()) {
                   // -- remove exits *on* walls
-                  removed = RemoveOverlappingDoors(subroom.second);
+                  removed_room = RemoveOverlappingDoors(subroom.second);
+                  removed = removed || removed_room;
+
                   // --------------------------
                   // -- remove overlapping walls
                   auto walls = subroom.second->GetAllWalls(); // this call
@@ -782,7 +783,7 @@ bool Building::correct() const {
                         if(!WallPieces.empty())
                               removed = true;
 #if DEBUG
-                        z                    std::cout << "Wall pieces size : " <<  WallPieces.size() << std::endl;
+                        std::cout << "Wall pieces size : " <<  WallPieces.size() << std::endl;
                         for(auto w:WallPieces)
                               w.WriteToErrorLog();
 #endif
@@ -1749,11 +1750,11 @@ Transition* Building::GetTransitionByUID(int uid) const
 Crossing* Building::GetCrossingByUID(int uid) const
 {
 
-	for (auto&& cross : _crossings) {
-		if (cross.second->GetUniqueID() == uid)
-			return cross.second;
-	}
-	return nullptr;
+        for (auto&& cross : _crossings) {
+                if (cross.second->GetUniqueID() == uid)
+                        return cross.second;
+        }
+        return nullptr;
 }
 
 bool Building::SaveGeometry(const std::string& filename) const
