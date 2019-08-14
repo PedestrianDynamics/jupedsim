@@ -617,10 +617,6 @@ double Simulation::RunBody(double maxSimTime)
 
                  std::cout<< KGRN << "Enter correctGeometry: Building Has " << _building->GetAllTransitions().size() << " Transitions\n" << RESET;
                  _building->SaveGeometry(filename);
-                 //
-                 double _deltaH = _building->GetConfig()->get_deltaH();
-                 double _wallAvoidDistance = _building->GetConfig()->get_wall_avoid_distance();
-                 bool _useWallAvoidance = _building->GetConfig()->get_use_wall_avoidance();
 
                  if(auto dirlocff = dynamic_cast<DirectionLocalFloorfield*>(_building->GetConfig()->GetDirectionManager()->GetDirectionStrategy().get())){
                       Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
@@ -629,7 +625,7 @@ double Simulation::RunBody(double maxSimTime)
                  }
                 }
             else{ // quickest needs update even if NeedsUpdate() is false
-                 FFRouter* ffrouter = dynamic_cast<FFRouter*>(_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST));
+                 auto ffrouter = dynamic_cast<FFRouter*>(_routingEngine->GetRouter(ROUTING_FF_QUICKEST));
                  if(ffrouter != nullptr)
                       if (ffrouter->MustReInit()) {
                            ffrouter->ReInit();

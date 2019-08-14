@@ -1,6 +1,30 @@
-//
-// Created by Tobias Schrödter on 2019-06-11.
-//
+/**
+ * \file        WaitingProbability.cpp
+ * \date        Jun 11, 2019
+ * \version     v0.8.1
+ * \copyright   <2009-2025> Forschungszentrum Jülich GmbH. All rights reserved.
+ *
+ * \section License
+ * This file is part of JuPedSim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * JuPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * \section Description
+ * Implementation of a waiting strategy:
+ * Goal of this strategy is a random point of the subroom or waiting area based on a individual distribution.
+ * The distribution is determined by static and dynamic influences.
+ **/
 #pragma  once
 
 #include <memory>
@@ -19,7 +43,7 @@ class Wall;
 class WaitingProbability : public WaitingStrategy{
 
 private:
-    int numPed = 1;
+    int _numPed = 1;
     Building* _building;
     std::map<int, RectGrid*> _gridMap;
 
@@ -48,20 +72,20 @@ private:
     std::map<int, std::vector<double>> _filterMap;
 
     // random generator
-    std::mt19937 _rdGenerator;::
+    std::mt19937 _rdGenerator;
     std::uniform_real_distribution<double> _rdDistribution;
 
     std::map<int, std::vector<Point>> _pedPaths;
 
 protected:
-    RoutingPrecomputation precomputation = RoutingPrecomputation::NONE;
+    RoutingPrecomputation _precomputation = RoutingPrecomputation::NONE;
 
 public:
-    virtual void Init(Building* building);
+    void Init(Building* building) override;
 
-    virtual Point GetWaitingPosition(Room* room, Pedestrian* ped);
+    Point GetWaitingPosition(Room* room, Pedestrian* ped) override;
 
-    virtual Point GetPath(Pedestrian* ped);
+    Point GetPath(Pedestrian* ped) override;
 
 private:
      void parseBuilding(Building* building);

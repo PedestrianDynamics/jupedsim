@@ -1,18 +1,36 @@
-//
-// Created by Tobias Schrödter on 2019-06-11.
-//
-
+/**
+ * \file        WaitingProbability.cpp
+ * \date        Jun 11, 2019
+ * \version     v0.8.1
+ * \copyright   <2009-2025> Forschungszentrum Jülich GmbH. All rights reserved.
+ *
+ * \section License
+ * This file is part of JuPedSim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * JuPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * \section Description
+ * Implementation of a waiting strategy:
+ * Goal of this strategy is a random point of the subroom or waiting area based on a individual distribution.
+ * The distribution is determined by static and dynamic influences.
+ **/
 #include "WaitingProbability.h"
 
 #include "router/ff_router/mesh/RectGrid.h"
-#include "geometry/Room.h"
 #include "geometry/SubRoom.h"
 #include "pedestrian/Pedestrian.h"
-#include "geometry/Point.h"
 #include "geometry/Wall.h"
-
-#include <iomanip>
-#include <random>
 
 void  WaitingProbability::Init(Building* building){
      Log->Write("Start init Waiting Probability");
@@ -256,8 +274,8 @@ void WaitingProbability::computeDynamic(const SubRoom* subroom, Pedestrian* ped)
      computeDistanceProb(subroom);
      computeWallPath(subroom);
 
-     writeVTK(subroom, "dynamic_" + std::to_string(subroom->GetUID()) +"_" + std::to_string(numPed) + ".vtk");
-     numPed++;
+     writeVTK(subroom, "dynamic_" + std::to_string(subroom->GetUID()) +"_" + std::to_string(_numPed) + ".vtk");
+     _numPed++;
 }
 
 void WaitingProbability::computeDistanceField(const SubRoom* subroom, Pedestrian* pedestrian){
