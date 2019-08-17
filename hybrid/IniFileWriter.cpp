@@ -39,7 +39,7 @@ IniFileWriter::IniFileWriter(const Configuration* configuration, Simulation* sim
 
 void IniFileWriter::WriteToFile(std::string file)
 {
-     _fileHandler = std::unique_ptr<FileHandler>(new FileHandler(file.c_str()));
+     _fileHandler = std::unique_ptr<FileHandler>(new FileHandler(file));
      WriteHeader();
 
      WriteBody();

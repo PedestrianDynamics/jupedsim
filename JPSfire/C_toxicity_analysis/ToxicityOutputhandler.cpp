@@ -1,10 +1,9 @@
 #include "ToxicityOutputhandler.h"
 
 
-ToxicityOutputHandler::ToxicityOutputHandler(const char *fn):FileHandler(fn)
-{
-
-}
+ToxicityOutputHandler::ToxicityOutputHandler(const fs::path& file)
+    :FileHandler(file)
+{}
 
 ToxicityOutputHandler::~ToxicityOutputHandler()
 {
@@ -23,7 +22,7 @@ void ToxicityOutputHandler::WriteToFileHeader()
     Write(tmp);
 }
 
-void ToxicityOutputHandler::WriteToFile(std::string &string)
+void ToxicityOutputHandler::WriteToFile(const std::string& string)
 {
     Write(string);
 }

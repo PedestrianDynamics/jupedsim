@@ -85,7 +85,7 @@ bool EventManager::ReadEventsXml()
 {
      Log->Write("INFO: \tLooking for pre-defined events in other files");
      //get the geometry filename from the project file
-     TiXmlDocument doc(_config->GetProjectFile().c_str());
+     TiXmlDocument doc(_config->GetProjectFile().string());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \t could not parse the project file.");
@@ -129,7 +129,7 @@ bool EventManager::ReadEventsXml()
 
 
      Log->Write("INFO: \tParsing the event file");
-     TiXmlDocument docEvent(eventfile.c_str());
+     TiXmlDocument docEvent(eventfile.string());
      if (!docEvent.LoadFile()) {
           Log->Write("ERROR: \t%s", docEvent.ErrorDesc());
           Log->Write("ERROR: \t could not parse the event file.");
@@ -828,7 +828,7 @@ bool EventManager::ReadSchedule()
 {
      Log->Write("INFO: \tReading schedule");
      //get the geometry filename from the project file
-     TiXmlDocument doc(_config->GetProjectFile().c_str());
+     TiXmlDocument doc(_config->GetProjectFile().string());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \t could not parse the project file.");
@@ -849,7 +849,7 @@ bool EventManager::ReadSchedule()
 
 
      Log->Write("INFO: \tParsing the schedule file");
-     TiXmlDocument docSchedule(scheduleFile.c_str());
+     TiXmlDocument docSchedule(scheduleFile.string());
      if (!docSchedule.LoadFile()) {
           Log->Write("ERROR: \t%s", docSchedule.ErrorDesc());
           Log->Write("ERROR: \t could not parse the schedule file.");

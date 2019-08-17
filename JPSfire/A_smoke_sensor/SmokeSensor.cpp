@@ -49,7 +49,7 @@ SmokeSensor::~SmokeSensor() = default;
 
 bool SmokeSensor::LoadJPSfireInfo()
 {
-    TiXmlDocument doc(_building->GetProjectFilename().c_str());
+    TiXmlDocument doc(_building->GetProjectFilename().string());
     if (!doc.LoadFile()) {
          Log->Write("ERROR: \t%s", doc.ErrorDesc());
          Log->Write("ERROR: \t could not parse the project file");

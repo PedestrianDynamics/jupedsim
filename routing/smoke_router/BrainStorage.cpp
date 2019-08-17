@@ -85,7 +85,7 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
     auto cogMapFilenameWithPath = _building->GetProjectRootDir() / cMFileName;
 
     Log->Write(cogMapFilenameWithPath.string());
-    TiXmlDocument doccogMap(cogMapFilenameWithPath.c_str());
+    TiXmlDocument doccogMap(cogMapFilenameWithPath.string());
     if (!doccogMap.LoadFile()) {
          Log->Write("ERROR: \t%s", doccogMap.ErrorDesc());
          Log->Write("\t could not parse the cognitive map file");

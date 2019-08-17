@@ -172,10 +172,10 @@ bool AIRouter::LoadRoutingInfos(const fs::path &filename)
     Log->Write("INFO:\tLoading extra routing information for the global/quickest path router");
     Log->Write("INFO:\t  from the file "+filename.string());
 
-    TiXmlDocument docRouting(filename.c_str());
+    TiXmlDocument docRouting(filename.string());
     if (!docRouting.LoadFile()) {
          Log->Write("ERROR: \t%s", docRouting.ErrorDesc());
-         Log->Write("ERROR: \t could not parse the routing file [%s]",filename.c_str());
+         Log->Write("ERROR: \t could not parse the routing file [%s]",filename.string().c_str());
          return false;
     }
 
@@ -243,7 +243,7 @@ bool AIRouter::LoadRoutingInfos(const fs::path &filename)
 fs::path AIRouter::GetRoutingInfoFile()
 {
 
-    TiXmlDocument doc(building->GetProjectFilename().c_str());
+    TiXmlDocument doc(building->GetProjectFilename().string());
     if (!doc.LoadFile()) {
          Log->Write("ERROR: \t%s", doc.ErrorDesc());
          Log->Write("ERROR: \t GlobalRouter: could not parse the project file");

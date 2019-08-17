@@ -97,7 +97,7 @@ bool Simulation::InitArgs()
     }
     case 2: {
         delete Log;
-        Log = new FileHandler(_config->GetErrorLogFile().c_str());
+        Log = new FileHandler(_config->GetErrorLogFile());
     }
         break;
     default:
@@ -154,8 +154,7 @@ bool Simulation::InitArgs()
             break;
         }
         case FORMAT_PLAIN: {
-            auto file = std::make_shared<FileHandler>(
-                 trajPath.c_str());
+            auto file = std::make_shared<FileHandler>(trajPath);
             outputTXT = new TrajectoriesFLAT();
             outputTXT->SetOutputHandler(file);
             _iod->AddIO(outputTXT);
@@ -165,8 +164,7 @@ bool Simulation::InitArgs()
             Log->Write("INFO: \tFormat vtk not yet supported\n");
             auto vtkTraj = trajPath;
             vtkTraj.replace_extension(".vtk");
-            auto file = std::make_shared<FileHandler>(
-                    vtkTraj.c_str());
+            auto file = std::make_shared<FileHandler>(vtkTraj);
             Trajectories* output = new TrajectoriesVTK();
             output->SetOutputHandler(file);
             _iod->AddIO(output);
@@ -458,9 +456,9 @@ void Simulation::PrintStatistics(double simTime)
               statsfile += '_';
             }
             statsfile += _config->GetOriginalTrajectoriesFile().filename().replace_extension("txt");
-            Log->Write("More Information in the file: %s", statsfile.c_str());
+            Log->Write("More Information in the file: %s", statsfile.string().c_str());
             {
-                 FileHandler statOutput(statsfile.c_str());
+                 FileHandler statOutput(statsfile);
                  statOutput.Write("#Simulation time: %.2f", simTime);
                  statOutput.Write("#Flow at exit "+goal->GetCaption()+"( ID "+std::to_string(goal->GetID())+" )");
                  statOutput.Write("#Time (s)  cummulative number of agents \n");
@@ -482,8 +480,8 @@ void Simulation::PrintStatistics(double simTime)
 
                   fs::path statsfile = "flow_crossing_id_"
                        + std::to_string(itr.first/1000) + "_" + std::to_string(itr.first % 1000) +".dat";
-                  Log->Write("More Information in the file: %s", statsfile.c_str());
-                  FileHandler output(statsfile.c_str());
+                  Log->Write("More Information in the file: %s", statsfile.string().c_str());
+                  FileHandler output(statsfile);
                   output.Write("#Simulation time: %.2f", simTime);
                   output.Write("#Flow at crossing " + goal->GetCaption() + "( ID " + std::to_string(goal->GetID())
                                 + " ) in Room ( ID "+ std::to_string(itr.first / 1000) + " )");
@@ -700,11 +698,12 @@ void Simulation::WriteTrajectories()
           const fs::path parent = p.parent_path();
           incrementCountTraj();
           char tmp_traj_name[100];
-          sprintf(tmp_traj_name,"%s_%.4d_%s", stem.c_str(), _countTraj, extention.c_str());
+          sprintf(tmp_traj_name,"%s_%.4d_%s", stem.string().c_str(), _countTraj,
+              extention.string().c_str());
           const fs::path abs_traj_name = parent / fs::path(tmp_traj_name);
           _config->SetTrajectoriesFile(abs_traj_name);
           Log->Write("INFO:\tNew trajectory file <%s>", tmp_traj_name);
-          auto file = std::make_shared<FileHandler>(_config->GetTrajectoriesFile().c_str());
+          auto file = std::make_shared<FileHandler>(_config->GetTrajectoriesFile());
           outputTXT->SetOutputHandler(file);
           _iod->WriteHeader(_nPeds, _fps, _building.get(), _seed, _countTraj);
     }

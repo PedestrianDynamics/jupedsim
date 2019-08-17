@@ -82,13 +82,13 @@ IniFileParser::IniFileParser(Configuration* config)
 bool IniFileParser::Parse(const fs::path& iniFile)
 {
      Log->Write("INFO: \tLoading and parsing the project file <%s>",
-               iniFile.c_str());
+               iniFile.string().c_str());
      _config->SetProjectFile(iniFile);//TODO in some locations it is called iniFile and in others project file,
      // and as I just realized, I called it configuration. We should be consistent here anything else
      // is confusing [gl march '16]
      _config->SetProjectRootDir(fs::absolute(iniFile.parent_path()));
 
-     TiXmlDocument doc(iniFile.c_str());
+     TiXmlDocument doc(iniFile.string());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \tCould not parse the project file");
@@ -245,7 +245,7 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
           const fs::path canonicalPath = fs::weakly_canonical(root / logPath);
           _config->SetErrorLogFile(canonicalPath);
           _config->SetLog(2);
-          Log->Write("INFO:\tlogfile <%s>", _config->GetErrorLogFile().c_str());
+          Log->Write("INFO:\tlogfile <%s>", _config->GetErrorLogFile().string().c_str());
      }
      Log->Write("----\nJuPedSim - JPScore\n");
      Log->Write("Current date   : %s %s", __DATE__, __TIME__);
@@ -377,7 +377,7 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
                     _config->SetOriginalTrajectoriesFile(canonicalTrajPath);
                }
 
-               Log->Write("INFO: \toutput file  <%s>", _config->GetTrajectoriesFile().c_str());
+               Log->Write("INFO: \toutput file  <%s>", _config->GetTrajectoriesFile().string().c_str());
                Log->Write("INFO: \tin format <%s> at <%.0f> frames per seconds",format.c_str(), _config->GetFps());
           }
 

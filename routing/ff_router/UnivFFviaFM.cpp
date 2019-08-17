@@ -1598,7 +1598,7 @@ void UnivFFviaFM::writeFF(const fs::path& filename, std::vector<int> targetID) {
               }
               double *costarray = _costFieldWithKey[targetID[iTarget]];
 
-              Log->Write("%s: target number %d: UID %d", filename.c_str(), iTarget, targetID[iTarget]);
+              Log->Write("%s: target number %d: UID %d", filename.string().c_str(), iTarget, targetID[iTarget]);
 
               std::string name = _building->GetTransOrCrossByUID(targetID[iTarget])->GetCaption() + "-" +
                                                                                           std::to_string(targetID[iTarget]);
