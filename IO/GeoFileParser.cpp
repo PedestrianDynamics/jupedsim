@@ -859,7 +859,7 @@ Goal* GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
      }
 
      // Additional checks:
-     const bool waitPed = (wa->GetMinNumPed()  > 0 && wa->GetMaxNumPed() > 0 && wa->GetWaitingTime() > 0.);
+     const bool waitPed = (wa->GetMinNumPed()  > 0 && wa->GetMaxNumPed() > 0 && wa->GetWaitingTime() >= 0.);
      const bool waitDoor = (wa->GetTransitionID() > 0);
 
      // Either (minPed, maxPed, waitingTime) OR transitionID are set
@@ -877,22 +877,22 @@ Goal* GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
                      "not considered since transition_id set", wa->GetId());
      }
 
-     // Read the suceeding goals of waiting area
+     // Read the succeeding goals of waiting area
      std::map<int, double> nextGoals;
 
      //looking for next_wa
      for (TiXmlElement* nextWa = e->FirstChildElement("next_wa"); nextWa;
           nextWa = nextWa->NextSiblingElement("next_wa")) {
-          int nextWaId = xmltoi(nextWa->Attribute("id"), -1);
-          double nextWaP = xmltof(nextWa->Attribute("p"), -1.);
+          int nextWaId = xmltoi(nextWa->Attribute("id"), std::numeric_limits<int>::min());
+          double nextWaP = xmltof(nextWa->Attribute("p"), std::numeric_limits<double>::min());
 
-          if (nextWaId == -1 || nextWaP == -1){
+          if (nextWaId == std::numeric_limits<int>::min() || nextWaP == std::numeric_limits<double>::min()){
                Log->Write("ERROR:\t  check next_wa of WA  %d: id or p not set properly", wa->GetId());
                delete wa;
                return nullptr;
           }
 
-          if (nextWaId < 0){
+          if (nextWaId < -2){
                Log->Write("ERROR:\t  check next_wa of WA  %d: id should be positive integer", wa->GetId());
                delete wa;
                return nullptr;
