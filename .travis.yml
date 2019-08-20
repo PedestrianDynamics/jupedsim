@@ -1,5 +1,4 @@
 language: cpp
-dist: bionic
 
 git:
   depth: 1
@@ -9,22 +8,50 @@ matrix:
   include:
     - name: linux (clang8)
       os: linux
+      dist: bionic
       env: TOOLCHAIN=clang
       script:
        - mkdir build && cd build
        - cmake  .. -DBUILD_CPPUNIT_TEST=ON -DBUILD_TESTING=ON -DAIROUTER=ON -DJPSFIRE=ON
        - make -j $(nproc)
+       - cd ../demos/scenario_2_bottleneck
+       - ../../build/bin/jpscore bottleneck_ini.xml
 
     - name: linux (gcc9)
       os: linux
+      dist: bionic
       env: TOOLCHAIN=gcc
       script:
        - mkdir build && cd build
        - cmake .. -DBUILD_CPPUNIT_TEST=ON -DBUILD_TESTING=ON -DAIROUTER=ON -DJPSFIRE=ON
        - make -j $(nproc)
+       - cd ../demos/scenario_2_bottleneck
+       - ../../build/bin/jpscore bottleneck_ini.xml
+
+    - name: mac (appleclang)
+      os: osx
+      osx_image: xcode10.2
+      env: TOOLCHAIN=clang
+      script:
+        - mkdir build && cd build
+        - cmake  .. -DBUILD_CPPUNIT_TEST=ON -DBUILD_TESTING=ON -DAIROUTER=ON -DJPSFIRE=ON
+        - make -j $(nproc)
+        - cd ../demos/scenario_2_bottleneck
+        - ../../build/bin/jpscore bottleneck_ini.xml
+
+#    - name: mac (gcc8)
+#      os: osx
+#      osx_image: xcode10.2
+#      env: TOOLCHAIN=gcc
+#      script:
+#        - mkdir build && cd build
+#        - cmake  .. -DBUILD_CPPUNIT_TEST=ON -DBUILD_TESTING=ON -DAIROUTER=ON -DJPSFIRE=ON -DCMAKE_CXX_COMPILER=g++-8
+#        - make -j $(nproc)
+#        - cd ../demos/scenario_2_bottleneck
+#        - ../../build/bin/jpscore bottleneck_ini.xml
 
 before_install:
-    - source .travis_before_install.bash
+  - source .travis_before_install.bash
 
 install:
-    - source .travis_install.bash
+  - source .travis_install.bash
