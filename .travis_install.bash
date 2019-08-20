@@ -17,5 +17,8 @@ then
     fi
 elif [ "$TRAVIS_OS_NAME" == "osx" ]
 then
-    echo "not yet implemented"
+    if [ "$TOOLCHAIN" == "clang" ]
+    then
+        brew install libomp
+    fi
 fi
