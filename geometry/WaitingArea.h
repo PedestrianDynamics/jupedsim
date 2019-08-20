@@ -157,8 +157,9 @@ public:
     void SetWaitingTime(int waitingTime);
 
     /**
-     * Returns the ID of the next goal based on the probability
-     * @return ID of the next goal
+     * Returns the ID of the next goal based on the probability. Only
+     * considers open goals.
+     * @return ID of the next goal or own ID if no open goal available
      */
     int GetNextGoal();
 
