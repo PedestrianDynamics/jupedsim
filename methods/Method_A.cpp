@@ -138,12 +138,11 @@ void Method_A::WriteFile_N_t(string data)
                int res = system(parameters_N_t.c_str());
                if(res)
                {
-                   Log->Write("ERROR:\tPlotting N-t diagram not success! %d", res);
+                   Log->Write("ERROR:\tPlotting N-t diagram not success! Check your python environment.");
                } else
                {
-                   Log->Write("INFO:\tPlotting N-t diagram success! %d", res);
+                   Log->Write("INFO:\tPlotting N-t diagram success!");
                }
-               /// todo: return value of this function: true or false
           }
      }
      else
