@@ -111,7 +111,8 @@ private:
 
      Building* _building;
      //polygon_2d _geoPoly;
-     std::map<int, polygon_2d> _geoPoly;
+     std::map<int, polygon_2d> _geoPolyMethodD;
+     std::map<int, polygon_2d> _geoPolyMethodI;
 
      double _grid_size_X;      // the size of the grid
      double _grid_size_Y;
