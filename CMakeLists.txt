@@ -262,6 +262,7 @@ set(source_files
     events/EventManager.cpp
     forms/jpscore.rc
     general/ArgumentParser.cpp
+    general/Filesystem.cpp
     geometry/Building.cpp
     geometry/Crossing.cpp
     geometry/Goal.cpp

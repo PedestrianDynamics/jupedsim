@@ -852,12 +852,13 @@ bool Building::correct() const {
 
      if(removed)
      {
-          fs::path f("correct_"+this->GetConfig()->GetGeometryFile());
-          //fs::path p(this->GetConfig()->GetProjectRootDir());
-          //p = p / f;
-          std::string filename = f.string();
-          if(SaveGeometry(filename))
-               this->GetConfig()->SetGeometryFile(filename);
+          auto geometryFile = add_prefix_to_filename(
+            "correct_", GetGeometryFilename());
+
+          if(SaveGeometry(geometryFile)) {
+              GetConfig()->SetGeometryFile(geometryFile);
+          }
+
      }
 
     auto t_end = std::chrono::high_resolution_clock::now();
@@ -1051,17 +1052,17 @@ bool Building::ReplaceBigWall(const std::shared_ptr<SubRoom>& subroom, const Wal
 
      return true;
 }
-const std::string& Building::GetProjectFilename() const
+const fs::path& Building::GetProjectFilename() const
 {
      return _configuration->GetProjectFile();
 }
 
-const std::string& Building::GetProjectRootDir() const
+const fs::path& Building::GetProjectRootDir() const
 {
      return _configuration->GetProjectRootDir();
 }
 
-const std::string& Building::GetGeometryFilename() const
+const fs::path& Building::GetGeometryFilename() const
 {
      return _configuration->GetGeometryFile();
 }
@@ -1757,7 +1758,7 @@ Crossing* Building::GetCrossingByUID(int uid) const
         return nullptr;
 }
 
-bool Building::SaveGeometry(const std::string& filename) const
+bool Building::SaveGeometry(const fs::path& filename) const
 {
     std::stringstream geometry;
 
@@ -1861,7 +1862,7 @@ bool Building::SaveGeometry(const std::string& filename) const
 
     //cout<<endl<<geometry.str()<<endl;
 
-    std::ofstream geofile(filename);
+    std::ofstream geofile(filename.string());
     if (geofile.is_open()) {
          geofile << geometry.str();
          Log->Write("INFO:\tfile saved to %s", filename.c_str());

@@ -845,7 +845,7 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 
 bool QuickestPathRouter::ParseAdditionalParameters()
 {
-     TiXmlDocument doc(_building->GetProjectFilename());
+     TiXmlDocument doc(_building->GetProjectFilename().string());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \t GlobalRouter: could not parse the project file");

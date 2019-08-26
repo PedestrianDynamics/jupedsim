@@ -41,7 +41,7 @@ bool PedDistributionParser::LoadPedDistribution(std::vector<std::shared_ptr<Star
 {
     Log->Write("INFO: \tLoading and parsing the persons attributes");
 
-    TiXmlDocument doc(_configuration->GetProjectFile());
+    TiXmlDocument doc(_configuration->GetProjectFile().string());
 
     if (!doc.LoadFile()) {
         Log->Write("ERROR: \t%s", doc.ErrorDesc());
