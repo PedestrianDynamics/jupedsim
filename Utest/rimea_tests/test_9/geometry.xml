@@ -54,22 +54,21 @@
 	</rooms>
 
 	<transitions>
-    <!-- exits like crossings but between rooms or to outside (room with index = -1) -->
 		<transition id="0" caption="exit 1 r1" type="emergency" room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
 			<vertex px="4.0" py="20.0" />
 			<vertex px="5.0" py="20.0" />
 		</transition>
-    
+
 		<transition id="1" caption="exit 2 r1" type="emergency" room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
 			<vertex px="25.0" py="20.0" />
 			<vertex px="26.0" py="20.0" />
 		</transition>
-    
+
 		<transition id="2" caption="exit 3 r1" type="emergency" room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
 			<vertex px="4.0" py="0.0" />
 			<vertex px="5.0" py="0.0" />
 		</transition>
-    
+
 		<transition id="3" caption="exit 4 r1" type="emergency" room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
 			<vertex px="25.0" py="0.0" />
 			<vertex px="26.0" py="0.0" />
@@ -79,17 +78,17 @@
 			<vertex px="35.0" py="20.0" />
 			<vertex px="36.0" py="20.0" />
 		</transition>
-    
+
 		<transition id="5" caption="exit 2 r2" type="emergency" room1_id="1" subroom1_id="0" room2_id="-1" subroom2_id="-1">
 			<vertex px="56.0" py="20.0" />
 			<vertex px="57.0" py="20.0" />
 		</transition>
-    
+
 		<transition id="6" caption="exit 3 r2" type="emergency" room1_id="1" subroom1_id="0" room2_id="-1" subroom2_id="-1">
 			<vertex px="35.0" py="0.0" />
 			<vertex px="36.0" py="0.0" />
 		</transition>
-    
+
 		<transition id="7" caption="exit 4 r2" type="emergency" room1_id="1" subroom1_id="0" room2_id="-1" subroom2_id="-1">
 			<vertex px="56.0" py="0.0" />
 			<vertex px="57.0" py="0.0" />

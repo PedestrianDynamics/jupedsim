@@ -1,30 +1,28 @@
 import re
 import subprocess
-from pylatex import Document, Command, PageStyle, Head, MiniPage, LargeText, LineBreak, MediumText, LongTabu, NewPage, Package, Section, Description, Figure
+from pylatex import UnsafeCommand, Document, Command, PageStyle, Head, MiniPage, LargeText, LineBreak, MediumText, LongTabu, NewPage, Package, Section, Description, Figure
 from pylatex.utils import NoEscape, bold
 import datetime
 import os
 
 
 def get_evac_time(testnumber):
-	"""
-	Fetch the evacuation time from log.txt of tests
-	:param testnumber: the number of test(int)
-	:return: All evacuation times(list)
-	"""
-	log_name = "./test_" + str(testnumber) + "/log_test_" + str(testnumber) + ".txt"
+    """
+    Fetch the evacuation time from log.txt of tests
+    :param testnumber: the number of test(int)
+    :return: All evacuation times(list)
+    """
+    log_name = "./test_" + str(testnumber) + "/log_test_" + str(testnumber) + ".txt"
 
-	with open(log_name) as log:
-		evac_time = []
-		for line in log:
-			# Use Regular Expression to filter, fetch lines which contain the evac time.
-			if re.match(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} - INFO - evac_time: \d{2}.\d{6} <= \d{2}.\d{6} <= \d{2}.\d{6}$', line):
-				# The second to last number is the evac time
-				evac_time.append(float(re.split('<=', line)[-2]))
-			else:
-				continue
+    with open(log_name) as log:
+        evac_time = []
+        for line in log:
+            if re.match(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} - INFO - evac_time: \d{2}.\d{6} <= \d{2}.\d{6} <= \d{2}.\d{6}$', line):
+                evac_time.append(float(re.split('<=', line)[-2]))
+            else:
+                continue
 
-	return evac_time ## even only last result
+    return evac_time
 
 
 def generate_eva_report():
@@ -40,7 +38,6 @@ def generate_eva_report():
     }
     doc = Document(geometry_options=geometry_options)
 
-    # Define style of report
     reportStyle = PageStyle("reportStyle")
 
     with reportStyle.create(Head("R")) as left_header:
@@ -51,15 +48,12 @@ def generate_eva_report():
 
     doc.preamble.append(reportStyle)
 
-    # Apply Pagestyle
     doc.change_document_style("reportStyle")
 
-    # Create table
     with doc.create(LongTabu("X[c] X[c]",row_height=1.5)) as report_table:
         report_table.add_row(["Test","evacuation time(s)"],mapper=bold)
         report_table.add_hline()
 
-    # Write the results of 3 tests in table
     for i in range(1,4):
         report_table.add_row(i, get_evac_time(i)[0])
 
@@ -73,7 +67,6 @@ def generate_info_report():
     Generate a report with cover, status und last 2 lines in log for every test
     """
 
-    # Define the geometry for LaTeX files
     geometry_options = {
             "head": "40pt",
             "margin": "0.5in",
@@ -81,20 +74,19 @@ def generate_info_report():
             "includeheadfoot": True
         }
 
-        # Create the LaTeX object, a instance of Document Class
     doc = Document(documentclass='article', geometry_options=geometry_options)
 
-    # Add cover
     generate_cover2(doc)
     doc.append(NewPage())
 
-    # Add status table
     generate_status_tabel(doc)
     doc.append(NewPage())
 
-    # Add last 2 lines in log.txt
     for i in range(1, 16):
+        get_test_description(doc, i)
+        doc.append(NewPage())
         generate_info_list(doc, i)
+        get_diagrams(doc, i)
 
     doc.generate_pdf('RiMEA-Projekt-Analyse', clean_tex=False)
 
@@ -107,15 +99,10 @@ def generate_cover(doc):
     :return: null
     """
 
-    # Convert in default command of LaTeX to make title
-    # \title{}
-    # \author{}
-    # \date{}
     doc.preamble.append(Command('title', 'RiMEA-Projekt Analyse'))
     doc.preamble.append(Command('author', get_git_status()[1]))
     doc.preamble.append(Command('date', get_git_status()[2]))
 
-    # Use titling package to add line on title
     doc.packages.append(Package('titling'))
 
     branch = r"\begin{center}Branch: "+ get_git_status()[0] + "\par"
@@ -135,7 +122,6 @@ def generate_cover2(doc):
     :return: null
     """
 
-    # Define titlepage in title environment
 	doc.append(NoEscape(r"\begin{titlepage}"))
 	doc.append(NoEscape(r"\begin{center}"))
 
@@ -149,14 +135,11 @@ def generate_cover2(doc):
 	doc.append(NoEscape(r"{ \huge \bfseries RiMEA-Projekt Analyse Report}\\[0.4cm]"))
 	doc.append(NoEscape(r"\hrule \vspace{5.5cm}"))
 
-	# Add author date branch commit in a miniPage on title
 	author = get_git_status()[1] + "\par"
 	date = get_git_status()[2] + "\par"
 	branch = "Branch: " + get_git_status()[0] + "\par"
 	commit = "Commit: " + get_git_status()[3] + "\par"
 
-    # get date today
-    # change Date to ..
 	InfoBlock = MiniPage(width=NoEscape(r"1\textwidth"),align='c')
 	today = "Date: "+ datetime.datetime.now().strftime("%d - %m - %Y   (%H:%M)") + "\par"
 
@@ -176,7 +159,6 @@ def generate_status_tabel(doc):
     :param doc: LaTeX object, a instance of Document Class
     :return: null
     """
-    # Create a long table object in LaTeX object
     with doc.create(LongTabu("X[c] X[c] X[r]")) as status_table:
         header_row1 = ["Test Number", "Status", "Exec time"]
 
@@ -198,7 +180,6 @@ def generate_info_table(doc):
     :return: null
     """
 
-    # Create a long table object in LaTeX object
     with doc.create(LongTabu("X[l] X[r]")) as info_table:
         header_row1 = ["Test Number", "Info"]
 
@@ -207,7 +188,6 @@ def generate_info_table(doc):
         info_table.add_empty_row()
         info_table.end_table_header()
 
-        # Add last 2 lines
         for i in range(3):
             row_1 = [str(i + 1), get_log(i + 1)[0]]
             row_2 = [" ", get_log(i + 1)[1]]
@@ -225,20 +205,12 @@ def generate_info_list(doc, testnumber):
     :return: null
     """
 
-    section_name = 'Test' + str(testnumber)
+    section_name = 'Test {} results'.format(testnumber)
 
-    # Create a long table object in LaTeX object
     with doc.create(Section(section_name)):
-        if len(get_diagrams(testnumber)) >= 1:
-            with doc.create(Description()) as desc:
-                desc.add_item("\t Diagram name:", get_diagrams(testnumber)[0].split("/")[-1])
-            with doc.create(Figure(position='h')) as diagram:
-                diagram.add_image(get_diagrams(testnumber)[0])
         with doc.create(Description()) as desc:
             desc.add_item("\t", get_log(testnumber)[0])
             desc.add_item("\t", get_log(testnumber)[1])
-
-    doc.append(NewPage())
 
 
 def get_git_status():
@@ -247,12 +219,10 @@ def get_git_status():
     :return: branch, author, date, commit of the newst commit(tuple)
     """
 
-    # Get the branch name by `git status` command
     branch =str(subprocess.check_output(["git", "status"]))
     branch = branch.strip("b'On branch")
     branch = branch.split("\\n")[0]
 
-    # Get the commit, author und date name by `git show` command
     git_status = str(subprocess.check_output(["git", "show", "--pretty=medium"]))
     git_status = git_status.split("\\n")
     commit = git_status[0].split(' ')[1]
@@ -273,7 +243,6 @@ def get_tests_status(testnumber):
 
     with open(log_name) as log:
         for line in log:
-            # Use Regular Expression to filter.
             if re.match(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}.*?INFO.*?runtest_rimea.*?SUCCESS$',line):
                 status = "Succeed"
                 break
@@ -296,15 +265,19 @@ def get_log(testnumber):
         return log.read().split("\n")[-3:-1]
 
 
-def get_diagrams(testnumber):
+def get_diagrams(doc, testnumber):
     test_directory = os.path.join(os.getcwd(), "test_{}".format(testnumber))
-    diagrams = []
+    is_diagram = False
 
     for filename in os.listdir(test_directory):
         if filename.endswith(".png"):
-            diagrams.append('{}/test_{}/{}'.format(os.getcwd(),testnumber,filename))
-
-    return diagrams
+            is_diagram = True
+            diagram_path = '{}/test_{}/{}'.format(os.getcwd(),testnumber,filename)
+            diagram_description = diagram_path.split("/")[-1]
+    if is_diagram:
+        with doc.create(Figure(position='h!')) as diagram:
+            diagram.add_image(diagram_path)
+            diagram.add_caption(diagram_description)
 
 
 def get_exec_time(testnumber):
@@ -320,6 +293,10 @@ def get_exec_time(testnumber):
     os.chdir(start_direc)
     return exec_time
 
+def get_test_description(doc, testnumber):
+	doc.append(NewPage())
+	description = UnsafeCommand('input','test_description/test_{}.tex'.format(testnumber,testnumber))
+	doc.append(description)
 
 def test():
     print('reportscript successfully imported')

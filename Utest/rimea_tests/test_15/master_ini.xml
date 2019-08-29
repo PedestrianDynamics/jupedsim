@@ -2,31 +2,23 @@
 
 <JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 
-	<!-- seed used for initialising random generator -->
 	<seed>1254</seed>
 	<max_sim_time>1000</max_sim_time>
 
-	<!-- geometry file -->
 	<geometry>../geometry.xml</geometry>
 
-	<!-- trajectories file and format -->
 	<trajectories format="xml-plain" fps="8">
 		<file location="RiMEATest15_traj.xml" />
-		<!--<socket hostname="127.0.0.1" port="8989"/> -->
 	</trajectories>
 
-	<!-- where to store the logs -->
-	<!--<logfile>log.txt</logfile> -->
 	<show_statistics>true</show_statistics>
 
-	<!-- traffic information: e.g closed doors -->
 	<traffic_constraints>
 	</traffic_constraints>
 
 	<routing>
 	</routing>
 
-	<!--persons information and distribution -->
 	<agents operational_model_id="3">
 		<agents_distribution>
 			<group group_id="0" agent_parameter_id="1" room_id="0" subroom_id="0" goal_id="-1" number="500" router_id="2" x_min="0"  x_max="20" y_min="75.4" y_max="81.4" />
@@ -35,7 +27,6 @@
 		</agents_distribution>
 	</agents>
 
-	<!-- These parameters may be overwritten -->
 	<operational_models>
 		<model operational_model_id="1" description="gcfm">
 			<model_parameters>
@@ -119,7 +110,6 @@
 		<router router_id="1" description="ff_global_shortest"/>
 		<router router_id="2" description="global_shortest">
 			<parameters>
-				<!-- extra routing information -->
 				<navigation_lines file="../geometry_routing.xml" />
 			</parameters>
 		</router>

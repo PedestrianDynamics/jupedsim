@@ -15,7 +15,6 @@
 	</rooms>
 
 	<transitions>
-    <!-- exits like crossings but between rooms or to outside (room with index = -1) -->
 		<transition id="0" caption="main exit" type="emergency" room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
 			<vertex px="40.0" py="0.0" />
 			<vertex px="40.0" py="50.0" />
