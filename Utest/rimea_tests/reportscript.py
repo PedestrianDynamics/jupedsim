@@ -7,11 +7,7 @@ import os
 
 
 def get_evac_time(testnumber):
-    """
-    Fetch the evacuation time from log.txt of tests
-    :param testnumber: the number of test(int)
-    :return: All evacuation times(list)
-    """
+
     log_name = "./test_" + str(testnumber) + "/log_test_" + str(testnumber) + ".txt"
 
     with open(log_name) as log:
@@ -26,9 +22,6 @@ def get_evac_time(testnumber):
 
 
 def generate_eva_report():
-    """
-    Generate a report which contains the evacution time for every test
-    """
 
     geometry_options = {
     "head": "40pt",
@@ -63,9 +56,6 @@ def generate_eva_report():
 
 
 def generate_info_report():
-    """
-    Generate a report with cover, status und last 2 lines in log for every test
-    """
 
     geometry_options = {
             "head": "40pt",
@@ -92,12 +82,6 @@ def generate_info_report():
 
 
 def generate_cover(doc):
-    """
-    Generate a cover for generate_info_report func
-    Cover contains name, date and branch info
-    :param doc: a Document Class instance
-    :return: null
-    """
 
     doc.preamble.append(Command('title', 'RiMEA-Projekt Analyse'))
     doc.preamble.append(Command('author', get_git_status()[1]))
@@ -115,12 +99,6 @@ def generate_cover(doc):
 
 
 def generate_cover2(doc):
-	"""
-    Generate a cover for generate_info_report func
-    Without \maketitle in LaTeX, but using titlepage environment
-    :param doc: LaTeX object, a instance of Document Class
-    :return: null
-    """
 
 	doc.append(NoEscape(r"\begin{titlepage}"))
 	doc.append(NoEscape(r"\begin{center}"))
@@ -154,11 +132,7 @@ def generate_cover2(doc):
 
 
 def generate_status_tabel(doc):
-    """
-    Generate a table which contains status of tests
-    :param doc: LaTeX object, a instance of Document Class
-    :return: null
-    """
+
     with doc.create(LongTabu("X[c] X[c] X[r]")) as status_table:
         header_row1 = ["Test Number", "Status", "Exec time"]
 
@@ -174,11 +148,6 @@ def generate_status_tabel(doc):
 
 
 def generate_info_table(doc):
-    """
-    Generate a table which contains last 2 line of tests from log.txt
-    :param doc: LaTeX object, a instance of Document Class
-    :return: null
-    """
 
     with doc.create(LongTabu("X[l] X[r]")) as info_table:
         header_row1 = ["Test Number", "Info"]
@@ -199,11 +168,6 @@ def generate_info_table(doc):
 
 
 def generate_info_list(doc, testnumber):
-    """
-    Generate a list which contains last 2 line of tests from log.txt
-    :param doc: LaTeX object, a instance of Document Class
-    :return: null
-    """
 
     section_name = 'Test {} results'.format(testnumber)
 
@@ -214,10 +178,6 @@ def generate_info_list(doc, testnumber):
 
 
 def get_git_status():
-    """
-    Fetch information of the last git commit.
-    :return: branch, author, date, commit of the newst commit(tuple)
-    """
 
     branch =str(subprocess.check_output(["git", "status"]))
     branch = branch.strip("b'On branch")
@@ -233,11 +193,6 @@ def get_git_status():
 
 
 def get_tests_status(testnumber):
-    """
-    Judge the status(succeed or failed) of a test by log.txt
-    :param testnumber: the number of test(int)
-    :return: status(Succeed or failed)(int)
-    """
 
     log_name = "./test_" + str(testnumber) + "/log_test_" + str(testnumber) + ".txt"
 
@@ -254,12 +209,7 @@ def get_tests_status(testnumber):
 
 
 def get_log(testnumber):
-    """
-    Generate a path of a log.txt file
-    Just for debugging
-    :param testnumber: the number of test(int)
-    :return: a path(str)
-    """
+
     log_name = "./test_" + str(testnumber) + "/log_test_" + str(testnumber) + ".txt"
     with open(log_name) as log:
         return log.read().split("\n")[-3:-1]
@@ -295,7 +245,7 @@ def get_exec_time(testnumber):
 
 def get_test_description(doc, testnumber):
 	doc.append(NewPage())
-	description = UnsafeCommand('input','test_description/test_{}.tex'.format(testnumber,testnumber))
+	description = UnsafeCommand('input','test_description/test_{}.tex'.format(testnumber))
 	doc.append(description)
 
 def test():
