@@ -30,7 +30,6 @@
 #ifndef SIMULATION_H_
 #define SIMULATION_H_
 
-#include "general/ArgumentParser.h"
 #include "geometry/Building.h"
 #include "geometry/SubRoom.h"
 #include "IO/OutputHandler.h"
