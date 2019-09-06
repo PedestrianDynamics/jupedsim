@@ -76,6 +76,7 @@ Analysis::Analysis()
      _DoesUseMethodB = false;                   // Method B (Zhang2011a)
      _DoesUseMethodC = false;                                   // Method C //calculate and save results of classic in separate file
      _DoesUseMethodD = false;                                   // Method D--Voronoi method
+     _DoesUseMethodI = false;
      _cutByCircle = false;  //Adjust whether cut each original voronoi cell by a circle
      _getProfile = false;   // Whether make field analysis or not
      _outputGraph = false;   // Whether output the data for plot the fundamental diagram each frame
@@ -120,7 +121,7 @@ void Analysis::InitArgs(ArgumentParser* args)
 {
      string s = "Parameter:\n";
      _building = new Building();
-     _building->LoadGeometry(args->GetGeometryFilename());
+     _building->LoadGeometry(args->GetGeometryFilename().string());
      // create the polygons
      _building->InitGeometry();
      // _building->AddSurroundingRoom();
@@ -332,7 +333,7 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
                exit(EXIT_FAILURE);
           }
 #pragma omp parallel for
-          for(long unsigned int i=0; i < _areaForMethod_A.size(); i++)
+          for(int i=0; i < int(_areaForMethod_A.size()); i++)
           {
                Method_A method_A ;
                method_A.SetMeasurementArea(_areaForMethod_A[i]);
@@ -360,7 +361,7 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
           }
 
 #pragma omp parallel for
-          for(long unsigned int i=0; i < _areaForMethod_B.size(); i++)
+          for(int i=0; i < int(_areaForMethod_B.size()); i++)
           {
                Method_B method_B;
                method_B.SetMeasurementArea(_areaForMethod_B[i]);
@@ -385,7 +386,7 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
                exit(EXIT_FAILURE);
           }
 #pragma omp parallel for
-          for(long unsigned int i=0; i < _areaForMethod_C.size(); i++)
+          for(int i=0; i < int(_areaForMethod_C.size()); i++)
           {
                Method_C method_C;
                method_C.SetMeasurementArea(_areaForMethod_C[i]);
@@ -420,7 +421,7 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
           }
 
 #pragma omp parallel for
-          for(long unsigned int i=0; i<_areaForMethod_D.size(); i++)
+          for(int i=0; i<int(_areaForMethod_D.size()); i++)
           {
                Method_D method_D;
                method_D.SetStartFrame(_StartFramesMethodD[i]);
@@ -473,7 +474,7 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
           }
 
 #pragma omp parallel for
-          for(long unsigned int i=0; i<_areaForMethod_I.size(); i++)
+          for(int i=0; i<int(_areaForMethod_I.size()); i++)
           {
                Method_I method_I;
                method_I.SetStartFrame(_StartFramesMethodI[i]);
@@ -523,64 +524,19 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
 
 FILE* Analysis::CreateFile(const string& filename)
 {
-     //first try to create the file
+     // create the directory for the file
+     fs::path filepath = fs:: path(filename.c_str()).parent_path();
+     if (fs::is_directory(filepath) == false)
+     {
+         if (fs::create_directories(filepath) == false && fs::is_directory(filepath) == false)
+         {
+             Log->Write("ERROR:\tcannot create the directory <%s>", filepath.string().c_str());
+             return NULL;
+         }
+         Log->Write("INFO:\tcreate the directory <%s>", filepath.string().c_str());
+     }
+     
+     //create the file
      FILE* fHandle= fopen(filename.c_str(),"w");
-     if(fHandle) return fHandle;
-
-     unsigned int found=filename.find_last_of("/\\");
-     string dir = filename.substr(0,found)+"/";
-     //string file= filename.substr(found+1);
-
-     // the directories are probably missing, create it
-     if (mkpath((char*)dir.c_str())==-1) {
-          Log->Write("ERROR:\tcannot create the directory <%s>",dir.c_str());
-          return NULL;
-     }
-     //second and last attempt
-     return fopen(filename.c_str(),"w");
+     return fHandle;
 }
-
-#if defined(_WIN32)
-// @todo: rewrite using boost
-int Analysis::mkpath(char* file_path)
-{
-     assert(file_path && *file_path);
-     char* p;
-     for (p=strchr(file_path+1, '/'); p; p=strchr(p+1, '/')) {
-          *p='\0';
-
-          if (_mkdir(file_path)==-1) {
-
-               if (errno!=EEXIST) {
-                    *p='/';
-                    return -1;
-               }
-          }
-          *p='/';
-     }
-     return 0;
-}
-
-#else
-
-// @todo: rewrite using boost
-int Analysis::mkpath(char* file_path, mode_t mode)
-{
-     assert(file_path && *file_path);
-     char* p;
-     for (p=strchr(file_path+1, '/'); p; p=strchr(p+1, '/')) {
-          *p='\0';
-
-          if (mkdir(file_path, mode)==-1) {
-
-               if (errno!=EEXIST) {
-                    *p='/';
-                    return -1;
-               }
-          }
-          *p='/';
-     }
-     return 0;
-}
-// delete
-#endif

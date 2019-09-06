@@ -312,11 +312,14 @@ endif()
 #message (STATUS "PSAPI: ${PSAPI}")
 #endif()
 
-add_library ( geometrycore SHARED ${source_files}  ${methods})
+add_library ( geometrycore STATIC ${source_files}  ${methods})
 set_property(TARGET geometrycore PROPERTY CXX_STANDARD 17)
 set_property(TARGET geometrycore PROPERTY CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-target_link_libraries(geometrycore  stdc++fs)
+
+if(NOT MSVC)
+	target_link_libraries(geometrycore  stdc++fs)
+endif()
 
 add_executable(
         jpsreport main.cpp
@@ -325,7 +328,9 @@ add_executable(
 set_property(TARGET jpsreport PROPERTY CXX_STANDARD 17)
 set_property(TARGET jpsreport PROPERTY CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-target_link_libraries(jpsreport  stdc++fs)
+if(NOT MSVC)
+	target_link_libraries(jpsreport  stdc++fs)
+endif()
 
 if (Boost_FOUND)
 target_link_libraries(geometrycore ${Boost_LIBRARIES})
