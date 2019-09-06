@@ -136,8 +136,13 @@ void Method_A::WriteFile_N_t(string data)
                std::cout  << ">> <"<< parameters_N_t << ">\n";
 
                int res = system(parameters_N_t.c_str());
-               Log->Write("INFO:\tPlotting N-t diagram! Status: %d", res);
-               /// todo: return value of this function: true or false
+               if(res)
+               {
+                   Log->Write("ERROR:\tPlotting N-t diagram not success! Check your python environment.");
+               } else
+               {
+                   Log->Write("INFO:\tPlotting N-t diagram success!");
+               }
           }
      }
      else
