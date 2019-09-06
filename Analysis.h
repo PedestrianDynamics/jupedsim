@@ -65,7 +65,6 @@ public:
      virtual ~Analysis();
 
      void InitArgs(ArgumentParser *args);
-     void InitializeFiles(const std::string& file);
 
      std::map<int, polygon_2d> ReadGeometry(const fs::path& geometryFile, const std::vector<MeasurementArea_B*>& areas);
 
@@ -97,15 +96,6 @@ public:
       * @return
       */
      static FILE* CreateFile(const std::string& filename);
-
-     //TODO: merge apple and linux
-#ifdef __linux__
-     static int mkpath(char* file_path, mode_t mode=0755);
-#elif __APPLE__
-     static int mkpath(char* file_path, mode_t mode=0755);
-#else //windows
-     static int mkpath(char* file_path);
-#endif
 
 private:
 
