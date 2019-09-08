@@ -79,19 +79,16 @@ IniFileParser::IniFileParser(Configuration* config)
      _config = config;
 }
 
-bool IniFileParser::Parse(std::string iniFile)
+bool IniFileParser::Parse(const fs::path& iniFile)
 {
      Log->Write("INFO: \tLoading and parsing the project file <%s>",
-               iniFile.c_str());
+               iniFile.string().c_str());
      _config->SetProjectFile(iniFile);//TODO in some locations it is called iniFile and in others project file,
      // and as I just realized, I called it configuration. We should be consistent here anything else
      // is confusing [gl march '16]
+     _config->SetProjectRootDir(fs::absolute(iniFile.parent_path()));
 
-     fs::path root(iniFile);
-     fs::path q(iniFile);
-     _config->SetProjectRootDir(fs::absolute(q.parent_path()).string());
-
-     TiXmlDocument doc(iniFile);
+     TiXmlDocument doc(iniFile.string());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \tCould not parse the project file");
@@ -137,10 +134,10 @@ bool IniFileParser::Parse(std::string iniFile)
      // -------------------------------------
      // read walkingspeed
      #ifdef JPSFIRE
-     std::shared_ptr<WalkingSpeed> W( new WalkingSpeed(iniFile) );
+     std::shared_ptr<WalkingSpeed> W( new WalkingSpeed(iniFile.string()) );
      _config->SetWalkingSpeed(W);
      // read  ToxicityAnalysis
-     std::shared_ptr<ToxicityAnalysis> T( new ToxicityAnalysis(iniFile, _config->GetFps()));
+     std::shared_ptr<ToxicityAnalysis> T( new ToxicityAnalysis(iniFile.string(), _config->GetFps()));
      _config->SetToxicityAnalysis(T);
      #endif
      // -------------------------------------
@@ -243,13 +240,12 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
 {
      //logfile
      if (xHeader->FirstChild("logfile")) {
-          fs::path logPath( xHeader->FirstChild("logfile")->FirstChild()->Value());
-          fs::path root(_config->GetProjectRootDir()); // returns an absolute path already
-          fs::path canonicalPath = fs::weakly_canonical(root / logPath);
-          std::string log = canonicalPath.string();
-          _config->SetErrorLogFile(log);
+          const fs::path logPath( xHeader->FirstChild("logfile")->FirstChild()->Value());
+          const fs::path& root(_config->GetProjectRootDir()); // returns an absolute path already
+          const fs::path canonicalPath = fs::weakly_canonical(root / logPath);
+          _config->SetErrorLogFile(canonicalPath);
           _config->SetLog(2);
-          Log->Write("INFO:\tlogfile <%s>", _config->GetErrorLogFile().c_str());
+          Log->Write("INFO:\tlogfile <%s>", _config->GetErrorLogFile().string().c_str());
      }
      Log->Write("----\nJuPedSim - JPScore\n");
      Log->Write("Current date   : %s %s", __DATE__, __TIME__);
@@ -327,16 +323,16 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
           _config->SetFps(fps);
 
           std::string format =
-                  xHeader->FirstChildElement("trajectories")->Attribute(
-                          "format") ?
-                  xHeader->FirstChildElement("trajectories")->Attribute(
-                          "format") :
-                  "xml-plain";
+               xHeader->FirstChildElement("trajectories")->Attribute(
+                    "format") ?
+               xHeader->FirstChildElement("trajectories")->Attribute(
+                    "format") :
+               "xml-plain";
           int embedMesh = 0;
           if (xHeader->FirstChildElement("trajectories")->Attribute(
-                  "embed_mesh")) {
+                   "embed_mesh")) {
                embedMesh =
-                       std::string(xHeader->FirstChildElement("trajectories")->Attribute("embed_mesh"))=="true" ? 1 : 0;
+                    std::string(xHeader->FirstChildElement("trajectories")->Attribute("embed_mesh"))=="true" ? 1 : 0;
           }
           if (format=="xml-plain")
                _config->SetFileFormat(FORMAT_XML_PLAIN);
@@ -351,15 +347,15 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
 
           //color mode
           std::string color_mode =
-                  xHeader->FirstChildElement("trajectories")->Attribute(
-                          "color_mode") ?
-                  xHeader->FirstChildElement("trajectories")->Attribute(
-                          "color_mode") :
-                  "velocity";
+               xHeader->FirstChildElement("trajectories")->Attribute(
+                    "color_mode") ?
+               xHeader->FirstChildElement("trajectories")->Attribute(
+                    "color_mode") :
+               "velocity";
 
           if (color_mode=="velocity")
                Pedestrian::SetColorMode(
-                       AgentColorMode::BY_VELOCITY); //TODO: config parameter! does not belong to the pedestrian model, we should create a pedestrian config instead. [gl march '16]
+                    AgentColorMode::BY_VELOCITY); //TODO: config parameter! does not belong to the pedestrian model, we should create a pedestrian config instead. [gl march '16]
           if (color_mode=="spotlight") Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
           if (color_mode=="group") Pedestrian::SetColorMode(AgentColorMode::BY_GROUP);
           if (color_mode=="knowledge") Pedestrian::SetColorMode(AgentColorMode::BY_KNOWLEDGE);
@@ -369,30 +365,29 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
 
           //a file descriptor was given
           if (xTrajectories->FirstChild("file")) {
-               fs::path trajLoc(xTrajectories->FirstChildElement("file")->Attribute("location"));
-               fs::path root(_config->GetProjectRootDir()); // returns an absolute path already
-               fs::path canonicalPath = fs::weakly_canonical(root/trajLoc);
-               std::string traj = canonicalPath.string();
-
-               if (traj.c_str()) {
-                    _config->SetTrajectoriesFile(traj);
-                    _config->SetOriginalTrajectoriesFile(traj);
+               const fs::path trajLoc( xTrajectories->FirstChildElement("file")->Attribute("location"));
+               if (!trajLoc.empty())
+               {
+                    const fs::path& root(_config->GetProjectRootDir()); // returns an absolute path already
+                    const fs::path canonicalTrajPath = fs::weakly_canonical(root / trajLoc);
+                    _config->SetTrajectoriesFile(canonicalTrajPath);
+                    _config->SetOriginalTrajectoriesFile(canonicalTrajPath);
                }
 
-               Log->Write("INFO: \toutput file  <%s>", _config->GetTrajectoriesFile().c_str());
-               Log->Write("INFO: \tin format <%s> at <%.0f> frames per seconds", format.c_str(), _config->GetFps());
+               Log->Write("INFO: \toutput file  <%s>", _config->GetTrajectoriesFile().string().c_str());
+               Log->Write("INFO: \tin format <%s> at <%.0f> frames per seconds",format.c_str(), _config->GetFps());
           }
 
           if (xTrajectories->FirstChild("socket")) {
                std::string tmp =
-                       xTrajectories->FirstChildElement("socket")->Attribute("hostname");
+                    xTrajectories->FirstChildElement("socket")->Attribute("hostname");
                if (tmp.c_str())
                     _config->SetHostname(tmp);
                int port;
                xTrajectories->FirstChildElement("socket")->Attribute("port", &port);
                _config->SetPort(port);
                Log->Write("INFO: \tStreaming results to output [%s:%d] ",
-                       _config->GetHostname().c_str(), _config->GetPort());
+                          _config->GetHostname().c_str(), _config->GetPort());
           }
 
           if (xTrajectories->FirstChild("optional_output")) {

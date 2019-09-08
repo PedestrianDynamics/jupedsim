@@ -143,14 +143,12 @@ void STDIOHandler::Write(const std::string& str)
        }
 }
 
-FileHandler::FileHandler(const char *fn)
+FileHandler::FileHandler(const fs::path& path)
 {
-     _pfp.open(fn);
+     _pfp.open(path.string());
      if (!_pfp.is_open())
      {
-          char tmp[CLENGTH];
-          sprintf(tmp, "Error!!! File [%s] could not be opened!", fn);
-          std::cerr << tmp << std::endl;
+          std::cerr << "Error!!! File " << path << " could not be opened" << std::endl;
           exit(0);
      }
 }

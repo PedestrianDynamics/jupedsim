@@ -205,14 +205,14 @@ void SmokeRouter::addOption(const std::string &key, const std::vector<std::strin
     options.insert(std::make_pair(key, value));
 }
 
-bool SmokeRouter::LoadRoutingInfos(const std::string &filename)
+bool SmokeRouter::LoadRoutingInfos(const fs::path &filename)
 {
-    if(filename=="") return true;
+    if(filename.empty()) return true;
 
     Log->Write("INFO:\tLoading extra routing information for the global/quickest path router");
-    Log->Write("INFO:\t  from the file "+filename);
+    Log->Write("INFO:\t  from the file "+filename.string());
 
-    TiXmlDocument docRouting(filename);
+    TiXmlDocument docRouting(filename.string());
     if (!docRouting.LoadFile()) {
          Log->Write("ERROR: \t%s", docRouting.ErrorDesc());
          Log->Write("ERROR: \t could not parse the routing file [%s]",filename.c_str());
@@ -280,10 +280,10 @@ bool SmokeRouter::LoadRoutingInfos(const std::string &filename)
     return true;
 }
 
-std::string SmokeRouter::GetRoutingInfoFile()
+fs::path SmokeRouter::GetRoutingInfoFile()
 {
 
-    TiXmlDocument doc(building->GetProjectFilename());
+    TiXmlDocument doc(building->GetProjectFilename().string());
     if (!doc.LoadFile()) {
          Log->Write("ERROR: \t%s", doc.ErrorDesc());
          Log->Write("ERROR: \t GlobalRouter: could not parse the project file");
@@ -314,5 +314,5 @@ std::string SmokeRouter::GetRoutingInfoFile()
     if (nav_line_file == "")
          return nav_line_file;
     else
-         return building->GetProjectRootDir()+nav_line_file;
+         return building->GetProjectRootDir() / nav_line_file;
 }
