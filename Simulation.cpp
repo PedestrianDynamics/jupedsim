@@ -164,6 +164,7 @@ bool Simulation::InitArgs()
                  traj.c_str());
             outputTXT = new TrajectoriesFLAT();
             outputTXT->SetOutputHandler(file);
+            outputTXT->SetOptionalOutput(_config->GetOptionalOutputOptions());
             _iod->AddIO(outputTXT);
             break;
         }

@@ -29,9 +29,11 @@
 
 
 #include "geometry/Building.h"
+#include "general/Macros.h"
 
 #include <cstring>
 #include <vector>
+#include <functional>
 
 class OutputHandler;
 extern OutputHandler* Log;
@@ -39,6 +41,7 @@ extern OutputHandler* Log;
 class Trajectories;
 
 class  AgentsSource;
+
 
 class IODispatcher
 {
@@ -71,32 +74,46 @@ public:
      virtual void WriteFooter()=0;
      virtual void WriteSources(const std::vector<std::shared_ptr<AgentsSource> >)=0;
 
-    void Write(const std::string& str)
+     virtual void AddOptionalOutput(OptionalOutput option){
+          _optionalOutputOptions.insert(option);
+     }
+
+     virtual void SetOptionalOutput(std::set<OptionalOutput> options){
+          _optionalOutputOptions = options;
+     }
+
+     void Write(const std::string& str)
      {
           _outputHandler->Write(str);
      }
+
      void SetOutputHandler(std::shared_ptr<OutputHandler> outputHandler)
      {
           _outputHandler=outputHandler;
      }
 
      template<typename A>
-         bool IsElementInVector(const std::vector<A> &vec, A& el)
-         {
-              typename std::vector<A>::const_iterator it;
-              it = std::find(vec.begin(), vec.end(), el);
-              if (it == vec.end())
-              {
-                   return false;
-              }
-              else
-              {
-                   return true;
-              }
-         }
+     bool IsElementInVector(const std::vector<A> &vec, A& el)
+     {
+          typename std::vector<A>::const_iterator it;
+          it = std::find(vec.begin(), vec.end(), el);
+          if (it == vec.end())
+          {
+              return false;
+          }
+          else
+          {
+              return true;
+          }
+     }
 
 protected:
      std::shared_ptr<OutputHandler> _outputHandler;
+     std::set<OptionalOutput> _optionalOutputOptions;
+     std::map<OptionalOutput, std::function<std::string(Pedestrian*)>> _optionalOutput;
+     std::map<OptionalOutput, std::string> _optionalOutputHeader;
+     std::map<OptionalOutput, std::string> _optionalOutputInfo;
+
 };
 
 

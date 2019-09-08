@@ -35,6 +35,7 @@
 #include "pedestrian/AgentsSource.h"
 
 #include <tinyxml.h>
+#include <iomanip>
 
 #define _USE_MATH_DEFINES
 
@@ -329,6 +330,43 @@ void TrajectoriesJPSV04::WriteFooter()
 
 TrajectoriesFLAT::TrajectoriesFLAT() : Trajectories()
 {
+     // Add header, info and output for speed
+     _optionalOutputHeader[OptionalOutput::speed] = "V\t";
+     _optionalOutputInfo[OptionalOutput::speed] = "#V: speed of the pedestrian (in m/s)";
+     _optionalOutput[OptionalOutput::speed] = [](const Pedestrian* ped){
+         std::stringstream stream;
+         stream << std::setprecision(2) << std::fixed << ped->GetV().Norm() << "\t";
+         return stream.str();
+     };
+
+     // Add header, info and output for velocity
+     _optionalOutputHeader[OptionalOutput::velocity] = "Vx\tVy\t";
+     _optionalOutputInfo[OptionalOutput::velocity] =
+             "#Vx: x component of the pedestrian's velocity\n"
+             "#Vy: y component of the pedestrian's velocity";
+     _optionalOutput[OptionalOutput::velocity] = [](const Pedestrian* ped){
+         std::stringstream stream;
+         stream << std::setprecision(2) << std::fixed << ped->GetV()._x << "\t" << ped->GetV()._y << "\t";
+         return stream.str();
+     };
+
+     // Add header, info and output for final_goal
+     _optionalOutputHeader[OptionalOutput::final_goal] = "FG\t";
+     _optionalOutputInfo[OptionalOutput::final_goal] = "#FG: id of final goal";
+     _optionalOutput[OptionalOutput::final_goal] = [](const Pedestrian* ped){
+         std::stringstream stream;
+         stream << ped->GetFinalDestination() << "\t";
+         return stream.str();
+     };
+
+     // Add header, info and output for intermediate_goal
+     _optionalOutputHeader[OptionalOutput::intermediate_goal] = "CG\t";
+     _optionalOutputInfo[OptionalOutput::intermediate_goal] = "#CG: id of current goal";
+     _optionalOutput[OptionalOutput::intermediate_goal] = [](const Pedestrian* ped){
+         std::stringstream stream;
+         stream << ped->GetExitIndex() << "\t";
+         return stream.str();
+     };
 }
 
 std::string getSourceFileName(const std::string & GetProjectFile)
@@ -518,13 +556,22 @@ void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building* building, i
      Write("#A, B: semi-axes of the ellipse");
      Write("#ANGLE: orientation of the ellipse");
      Write("#COLOR: color of the ellipse");
-     Write("#V: speed of the pedestrian (in m/s)");
-     Write("#Vx: x component of the pedestrian's velocity");
-     Write("#Vy: y component of the pedestrian's velocity");
-//     Write("#Vz: z component of the pedestrian's velocity");
+
+     // Add info for optional output options
+     for (auto option : _optionalOutputOptions){
+          Write(_optionalOutputInfo[option]);
+     }
      Write("\n");
+
      //Write("#ID\tFR\tX\tY\tZ");// @todo: maybe use two different formats
-     Write("#ID\tFR\tX\tY\tZ\tA\tB\tANGLE\tCOLOR\tV\tVx\tVy");// a b angle color
+     std::string header("#ID\tFR\tX\tY\tZ\tA\tB\tANGLE\tCOLOR\t");
+
+     // Add header for optional output options
+     for (auto option : _optionalOutputOptions){
+          header.append(_optionalOutputHeader[option]);
+     }
+     Write(header);
+
 }
 
 void TrajectoriesFLAT::WriteGeometry(Building* building)
@@ -536,6 +583,7 @@ void TrajectoriesFLAT::WriteFrame(int frameNr, Building* building)
 {
      char tmp[CLENGTH] = "";
      const std::vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+
      for(unsigned int p=0;p<allPeds.size();p++){
           Pedestrian* ped = allPeds[p];
           double x = ped->GetPos()._x;
@@ -546,16 +594,18 @@ void TrajectoriesFLAT::WriteFrame(int frameNr, Building* building)
           double b = ped->GetSmallerAxis();
           double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
           double RAD2DEG = 180.0 / M_PI;
-          const Point& velocity = ped->GetV();
-          double v = velocity.Norm();
-          double vx = velocity._x;
-          double vy = velocity._y;
 
           // @todo: maybe two different formats
           //sprintf(tmp, "%d\t%d\t%0.2f\t%0.2f\t%0.2f", ped->GetID(), frameNr, x, y, z);
-          sprintf(tmp, "%d\t%d\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%d\t%0.2f\t%0.2f\t%0.2f\t",
-                  ped->GetID(), frameNr, x, y, z, a, b, phi * RAD2DEG, color, v, vx, vy);
-          Write(tmp);
+          sprintf(tmp, "%d\t%d\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%d\t",
+                  ped->GetID(), frameNr, x, y, z, a, b, phi * RAD2DEG, color);
+
+          std::string frame(tmp);
+          for (auto option : _optionalOutputOptions){
+               frame.append(_optionalOutput[option](ped));
+          }
+
+          Write(frame);
      }
 }
 

@@ -327,16 +327,16 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
           _config->SetFps(fps);
 
           std::string format =
-               xHeader->FirstChildElement("trajectories")->Attribute(
-                    "format") ?
-               xHeader->FirstChildElement("trajectories")->Attribute(
-                    "format") :
-               "xml-plain";
+                  xHeader->FirstChildElement("trajectories")->Attribute(
+                          "format") ?
+                  xHeader->FirstChildElement("trajectories")->Attribute(
+                          "format") :
+                  "xml-plain";
           int embedMesh = 0;
           if (xHeader->FirstChildElement("trajectories")->Attribute(
-                   "embed_mesh")) {
+                  "embed_mesh")) {
                embedMesh =
-                    std::string(xHeader->FirstChildElement("trajectories")->Attribute("embed_mesh"))=="true" ? 1 : 0;
+                       std::string(xHeader->FirstChildElement("trajectories")->Attribute("embed_mesh"))=="true" ? 1 : 0;
           }
           if (format=="xml-plain")
                _config->SetFileFormat(FORMAT_XML_PLAIN);
@@ -351,15 +351,15 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
 
           //color mode
           std::string color_mode =
-               xHeader->FirstChildElement("trajectories")->Attribute(
-                    "color_mode") ?
-               xHeader->FirstChildElement("trajectories")->Attribute(
-                    "color_mode") :
-               "velocity";
+                  xHeader->FirstChildElement("trajectories")->Attribute(
+                          "color_mode") ?
+                  xHeader->FirstChildElement("trajectories")->Attribute(
+                          "color_mode") :
+                  "velocity";
 
           if (color_mode=="velocity")
                Pedestrian::SetColorMode(
-                    AgentColorMode::BY_VELOCITY); //TODO: config parameter! does not belong to the pedestrian model, we should create a pedestrian config instead. [gl march '16]
+                       AgentColorMode::BY_VELOCITY); //TODO: config parameter! does not belong to the pedestrian model, we should create a pedestrian config instead. [gl march '16]
           if (color_mode=="spotlight") Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
           if (color_mode=="group") Pedestrian::SetColorMode(AgentColorMode::BY_GROUP);
           if (color_mode=="knowledge") Pedestrian::SetColorMode(AgentColorMode::BY_KNOWLEDGE);
@@ -367,40 +367,99 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
           if (color_mode=="final_goal") Pedestrian::SetColorMode(AgentColorMode::BY_FINAL_GOAL);
           if (color_mode=="intermediate_goal") Pedestrian::SetColorMode(AgentColorMode::BY_INTERMEDIATE_GOAL);
 
-
-
-
           //a file descriptor was given
           if (xTrajectories->FirstChild("file")) {
-               fs::path trajLoc( xTrajectories->FirstChildElement("file")->Attribute("location"));
+               fs::path trajLoc(xTrajectories->FirstChildElement("file")->Attribute("location"));
                fs::path root(_config->GetProjectRootDir()); // returns an absolute path already
-               fs::path canonicalPath = fs::weakly_canonical(root / trajLoc);
+               fs::path canonicalPath = fs::weakly_canonical(root/trajLoc);
                std::string traj = canonicalPath.string();
 
-               if (traj.c_str())
-               {
+               if (traj.c_str()) {
                     _config->SetTrajectoriesFile(traj);
                     _config->SetOriginalTrajectoriesFile(traj);
                }
 
                Log->Write("INFO: \toutput file  <%s>", _config->GetTrajectoriesFile().c_str());
-               Log->Write("INFO: \tin format <%s> at <%.0f> frames per seconds",format.c_str(), _config->GetFps());
+               Log->Write("INFO: \tin format <%s> at <%.0f> frames per seconds", format.c_str(), _config->GetFps());
           }
 
           if (xTrajectories->FirstChild("socket")) {
                std::string tmp =
-                    xTrajectories->FirstChildElement("socket")->Attribute("hostname");
+                       xTrajectories->FirstChildElement("socket")->Attribute("hostname");
                if (tmp.c_str())
                     _config->SetHostname(tmp);
                int port;
                xTrajectories->FirstChildElement("socket")->Attribute("port", &port);
                _config->SetPort(port);
                Log->Write("INFO: \tStreaming results to output [%s:%d] ",
-                          _config->GetHostname().c_str(), _config->GetPort());
+                       _config->GetHostname().c_str(), _config->GetPort());
+          }
+
+          if (xTrajectories->FirstChild("optional_output")) {
+               Log->Write("WARNING: These optional options do only work with plain output format!");
+
+               auto node = xTrajectories->FirstChildElement("optional_output");
+               //check if speed is wanted
+               if (const char* attribute = node->Attribute("speed"); attribute) {
+                    std::string in = xmltoa(attribute, "false");
+                    std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+                    if (in=="true") {
+                         _config->AddOptionalOutputOption(OptionalOutput::speed);
+                         Log->Write("INFO: speed added to output");
+                    }
+                    else {
+                         Log->Write("INFO: speed not added to output");
+                    }
+               }
+
+               //check if velocity is wanted
+               if (const char* attribute = node->Attribute("velocity"); attribute) {
+                    std::string in = xmltoa(attribute, "false");
+                    std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+                    if (in=="true") {
+                         _config->AddOptionalOutputOption(OptionalOutput::velocity);
+                         Log->Write("INFO: velocity added to output");
+                    }
+                    else {
+                         Log->Write("INFO: velocity not added to output");
+                    }
+               }
+
+               //check if final_goal is wanted
+               if (const char* attribute = node->Attribute("final_goal"); attribute) {
+                    std::string in = xmltoa(attribute, "false");
+                    std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+                    if (in=="true") {
+                         _config->AddOptionalOutputOption(OptionalOutput::final_goal);
+                         Log->Write("INFO: final_goal added to output");
+                    }
+                    else {
+                         Log->Write("INFO: final_goal not added to output");
+                    }
+               }
+
+               //check if intermediate_goal is wanted
+               if (const char* attribute = node->Attribute("intermediate_goal"); attribute) {
+                    std::string in = xmltoa(attribute, "false");
+                    std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+                    if (in=="true") {
+                         _config->AddOptionalOutputOption(OptionalOutput::intermediate_goal);
+                         Log->Write("INFO: intermediate_goal added to output");
+                    }
+                    else {
+                         Log->Write("INFO: intermediate_goal not added to output");
+                    }
+               }
           }
      }
+
      return true;
 }
+
 bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
 {
      Log->Write("\nINFO:\tUsing the GCFM model");

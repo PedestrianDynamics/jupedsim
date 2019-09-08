@@ -28,7 +28,6 @@
 #include "math/OperationalModel.h"
 #include "pedestrian/AgentsParameters.h"
 #include "routing/RoutingEngine.h"
-
 #ifdef _JPS_AS_A_SERVICE
 #include "hybrid/HybridSimulationManager.h"
 #endif
@@ -36,6 +35,7 @@
 #include <string>
 #include <cstdlib>
 #include <memory>
+#include <set>
 
 class DirectionStrategy;
 
@@ -119,6 +119,7 @@ public:
 
 
      }
+
      std::shared_ptr<WalkingSpeed> GetWalkingSpeed () {return _walkingSpeed; };
      void SetWalkingSpeed(std::shared_ptr<WalkingSpeed> & w) {_walkingSpeed = w; };
 
@@ -337,7 +338,16 @@ public:
      void AddAgentsParameters(std::shared_ptr<AgentsParameters> agentsParameters,
                int id) { _agentsParameters[id] = agentsParameters; };
 
-    RandomNumberGenerator* GetRandomNumberGenerator() const {return &_rdGenerator;};
+     RandomNumberGenerator* GetRandomNumberGenerator() const {return &_rdGenerator;};
+
+    void AddOptionalOutputOption(OptionalOutput option){
+         _optionalOutput.insert(option);
+    };
+
+    std::set<OptionalOutput> GetOptionalOutputOptions(){
+         return _optionalOutput;
+    };
+
 
 #ifdef _JPS_AS_A_SERVICE
 
@@ -435,6 +445,8 @@ private:
 
      FileFormat _fileFormat;
      std::map<int, std::shared_ptr<AgentsParameters> > _agentsParameters;
+
+     std::set<OptionalOutput> _optionalOutput;
 #ifdef _JPS_AS_A_SERVICE
      bool _runAsService;
      int _servicePort;

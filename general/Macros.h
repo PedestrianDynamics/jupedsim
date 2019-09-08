@@ -221,6 +221,13 @@ enum USERMODE {
     DISTANCE_AND_DIRECTIONS_USED
 };
 
+enum class OptionalOutput {
+    speed = 0,
+    velocity = 1,
+    final_goal = 2,
+    intermediate_goal = 3,
+}; // enum class
+
 // Describes the door
 enum class DoorState { OPEN, CLOSE, TEMP_CLOSE, Error };
 
