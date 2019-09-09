@@ -3,24 +3,37 @@ All notable changes to `jpsreport` will be documented in this file.
 
 ## v0.8.4 [TBD]
 ### Added
-
-- brew install [jpsreport](https://github.com/JuPedSim/homebrew-jps/blob/master/README.md)
-- added option --version -version 2e0632be
-- Option added to define a customized output directory
+- Option brew install ([for more information](https://github.com/JuPedSim/homebrew-jps/blob/master/README.md))
+- Option --version or -version
+- Option to define a customized output directory
   ```xml
      <output location="path/to/directory"/>
   ```
+- Python script for trajectory correction (`correct_trajectories.py`)
+- Python detected by cmake
+- Python interpreter and version to log
+- Version information: definitions for interpreter and its version
+- Method for calculation for time-series analysis of individual data (see [Method_I](http://www.jupedsim.org/jpsreport/2016-11-01-inifile.html#method-i)) and output data format.
 
 ### Changed
-- use c++17 for filesystem functionality !10
-- call python detected by cmake 5fb97f32
+- Add elapesed time an  reduce print logs per frame
+- deactivate static linking
+- use c++17 for filesystem functionality.
+- Modification of calculation of Voronoi Density (see [Method_D](http://www.jupedsim.org/jpsreport/2016-11-01-inifile.html#method-d)) and output data format.
 
+
+### Deprecated
+
+### Removed
 
 ### Fixed
-- Better handling negative frame id 5304efb8 
-- Fix for polygon output considering interior and exterior rings 361cffdd
-- Exit if no measurement area is selected cdf28328
-- Exit if no measurement method is selected cdf28328
+- Fix for VisualStudio (Windows)
+- Better handling negative frame id
+- Fix for polygon output considering interior and exterior rings
+- Fix if no measurement area is selected
+- Fix if no measurement method is selected
+-
+
 
 ## v0.8.3 [16.05.2018]
 ### Added
@@ -28,7 +41,7 @@ All notable changes to `jpsreport` will be documented in this file.
   ```
   <logfile>log.txt</logfile>
   ```
-- Output useful debug information like date, git and compiler versions. !6 and discussion in #79 
+- Output useful debug information like date, git and compiler versions. !6 and discussion in #79
 - Option to plot Voronoi diagrams with index instead of little blue circles `plot_index`. Use as:
   ```xml
   <output_voronoi_cells enabled="true" plot_graphs="true" plot_index="true"/>
