@@ -14,6 +14,9 @@ All notable changes to `jpsreport` will be documented in this file.
 - Python interpreter and version to log
 - Version information: definitions for interpreter and its version
 - Method for calculation for time-series analysis of individual data (see [Method_I](http://www.jupedsim.org/jpsreport/2016-11-01-inifile.html#method-i)) and output data format.
+- Implementation of Travis CI
+- Qualitative Utest for methods A-D and I
+
 
 ### Changed
 - Add elapesed time an  reduce print logs per frame
