@@ -14,6 +14,8 @@ matrix:
        - mkdir build && cd build
        - cmake  ..
        - make -j $(nproc)
+       - cd ../Utest/Methods
+       - ../../bin/jpsreport ini_Methods.xml
 
     - name: linux (gcc9)
       os: linux
@@ -22,6 +24,8 @@ matrix:
        - mkdir build && cd build
        - cmake ..
        - make -j $(nproc)
+       - cd ../Utest/Methods
+       - ../../bin/jpsreport ini_Methods.xml
 
 before_install:
     - source .travis_before_install.bash

@@ -5,11 +5,12 @@ variables:
 before_script:
   - nproc=`grep -c '^processor' /proc/cpuinfo`
   - echo "nproc = $nproc"
-   
+
 #========== Pipeline ==================
 stages:
   - configure
   - compile
+  - methods_tests
 #=====================================
 
 #============== configure ============
@@ -25,11 +26,13 @@ configure-linux:
   script:
     - mkdir -p build
     - cd build
-    - cmake -DCMAKE_BUILD_TYPE=Debug  ..
+    - cmake -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Debug  ..
     - echo "configure | ${CI_PROJECT_DIR}"
   stage: configure
   tags:
     - linux
+#=====================================
+
 #============== compile ============
 make-linux:
   dependencies:
@@ -42,7 +45,7 @@ make-linux:
       - bin
       - lib
       - lib/Debug
-      
+
   stage: compile
   script:
     - cd build
@@ -50,6 +53,24 @@ make-linux:
     - echo "compile | ${CI_PROJECT_DIR}"
   tags:
     - linux
+#=====================================
+
+#============== methods ============
+verification:
+  dependencies:
+    - make-linux
+
+  stage: methods_tests
+  script:
+    - cd build
+    - ctest -R Methods
+
+  only:
+    - 102-Utest
+
+  tags:
+    - linux
+#=====================================
 
 after_script:
   - echo "End CI" # todo: run report script
