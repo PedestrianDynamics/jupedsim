@@ -24,7 +24,7 @@
  *
  *
  **/
- 
+
 
 #ifndef _BUILDING_H
 #define _BUILDING_H
@@ -206,6 +206,11 @@ public:
       * output user specific informations.
       */
      bool SanityCheck();
+     // ---
+     double _xMin;
+     double _xMax;
+     double _yMin;
+     double _yMax;
 
 
 private:

@@ -61,6 +61,7 @@ public:
 class STDIOHandler : public OutputHandler {
 public:
      void Write(const std::string& str);
+     void Write(const char *string,...);
 };
 
 class FileHandler : public OutputHandler {

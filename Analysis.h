@@ -65,9 +65,8 @@ public:
      virtual ~Analysis();
 
      void InitArgs(ArgumentParser *args);
-     void InitializeFiles(const std::string& file);
 
-     std::map<int, polygon_2d> ReadGeometry(const std::string& geometryFile, const std::vector<MeasurementArea_B*>& areas);
+     std::map<int, polygon_2d> ReadGeometry(const fs::path& geometryFile, const std::vector<MeasurementArea_B*>& areas);
 
      /**
       * Run the analysis for different files.
@@ -75,7 +74,7 @@ public:
       * @param path
       * @return
       */
-     int RunAnalysis(const std::string& file, const std::string& path);
+     int RunAnalysis(const fs::path& file, const fs::path& path);
 
      /**
       * return the base name from the string.
@@ -98,20 +97,12 @@ public:
       */
      static FILE* CreateFile(const std::string& filename);
 
-     //TODO: merge apple and linux
-#ifdef __linux__
-     static int mkpath(char* file_path, mode_t mode=0755);
-#elif __APPLE__
-     static int mkpath(char* file_path, mode_t mode=0755);
-#else //windows
-     static int mkpath(char* file_path);
-#endif
-
 private:
 
      Building* _building;
      //polygon_2d _geoPoly;
-     std::map<int, polygon_2d> _geoPoly;
+     std::map<int, polygon_2d> _geoPolyMethodD;
+     std::map<int, polygon_2d> _geoPolyMethodI;
 
      double _grid_size_X;      // the size of the grid
      double _grid_size_Y;
@@ -125,8 +116,14 @@ private:
      bool _DoesUseMethodB;  // Method B (Zhang2011a)
      bool _DoesUseMethodC;       // Method C //calculate and save results of classic in separate file
      bool _DoesUseMethodD;       // Method D--Voronoi method
+     bool _DoesUseMethodI;       // Method I--Voronoi method  modified
+                                 // no measurement are)
      std::vector<int> _StartFramesMethodD;
      std::vector<int> _StopFramesMethodD;
+
+     std::vector<int> _StartFramesMethodI;
+     std::vector<int> _StopFramesMethodI;
+
      std::vector<bool> _IndividualFDFlags;
      bool _cutByCircle;       //Adjust whether cut each original voronoi cell by a circle
      double _cutRadius;
@@ -141,19 +138,26 @@ private:
      std::vector<bool> _plotTimeseriesA;
      std::vector<bool> _plotTimeseriesC;
      std::vector<bool> _plotTimeseriesD;
+     std::vector<bool> _plotTimeseriesI;
      bool _isOneDimensional;
      bool _calcIndividualFD;  //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
      std::string _vComponent;        // to mark whether x, y or x and y coordinate are used when calculating the velocity
      bool _IgnoreBackwardMovement;
-     std::string _projectRootDir;
-     std::string _scriptsLocation;
-     std::string _geometryFileName;
+
+     fs::path _projectRootDir;
+     fs::path _scriptsLocation;
+     fs::path _outputLocation;
+     fs::path _geometryFileName;
      FileFormat _trajFormat;  // format of the trajectory file
 
      std::vector<MeasurementArea_L*> _areaForMethod_A;
      std::vector<MeasurementArea_B*> _areaForMethod_B;
      std::vector<MeasurementArea_B*> _areaForMethod_C;
      std::vector<MeasurementArea_B*> _areaForMethod_D;
+     std::vector<MeasurementArea_B*> _areaForMethod_I; // we still need to know
+                                                       // the zpos of the
+                                                       // measurement are, even
+                                                       // if we don't use its polygon
 };
 
 #endif /*ANALYSIS_H_*/

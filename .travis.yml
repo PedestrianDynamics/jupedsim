@@ -1,0 +1,34 @@
+language: cpp
+dist: bionic
+
+git:
+  depth: 1
+  quiet: true
+
+matrix:
+  include:
+    - name: linux (clang8)
+      os: linux
+      env: TOOLCHAIN=clang
+      script:
+       - mkdir build && cd build
+       - cmake  ..
+       - make -j $(nproc)
+       - cd ../Utest/Methods
+       - ../../bin/jpsreport ini_Methods.xml
+
+    - name: linux (gcc9)
+      os: linux
+      env: TOOLCHAIN=gcc
+      script:
+       - mkdir build && cd build
+       - cmake ..
+       - make -j $(nproc)
+       - cd ../Utest/Methods
+       - ../../bin/jpsreport ini_Methods.xml
+
+before_install:
+    - source .travis_before_install.bash
+
+install:
+    - source .travis_install.bash

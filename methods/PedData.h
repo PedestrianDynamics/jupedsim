@@ -1,8 +1,8 @@
 /**
  * \file        PedData.h
  * \date        Oct 10, 2014
- * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \version     v0.8.3
+ * \copyright   <2009-2018> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -42,6 +42,9 @@
 #include <boost/numeric/ublas/io.hpp>
 namespace ub=boost::numeric::ublas;
 
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 extern OutputHandler* Log;
 
@@ -58,42 +61,46 @@ public:
      int GetNumFrames() const;
      int GetNumPeds() const;
      float GetFps() const;
-     std::string GetTrajName() const;
-     std::string GetProjectRootDir() const;
+     fs::path GetTrajName() const;
+     fs::path GetProjectRootDir() const;
      std::map<int , std::vector<int>> GetPedsFrame() const;
      ub::matrix<double> GetXCor() const;
      ub::matrix<double> GetYCor() const;
      ub::matrix<double> GetZCor() const;
+     ub::matrix<double> GetId() const;
      int* GetFirstFrame() const;
      int* GetLastFrame() const;
-     std::vector<int> GetIdInFrame(const std::vector<int>& ids) const;
+     std::vector<int> GetIdInFrame(int frame, const std::vector<int>& ids) const;
      std::vector<int> GetIdInFrame(int frame, const std::vector<int>& ids, double zPos) const;
      std::vector<double> GetXInFrame(int frame, const std::vector<int>& ids, double zPos) const;
      std::vector<double> GetYInFrame(int frame, const std::vector<int>& ids, double zPos) const;
      std::vector<double> GetXInFrame(int frame, const std::vector<int>& ids) const;
      std::vector<double> GetYInFrame(int frame, const std::vector<int>& ids) const;
      std::vector<double> GetZInFrame(int frame, const std::vector<int>& ids) const;
+     std::vector<double> GetZInFrame(int frame, const std::vector<int>& ids, double zPos) const;
      std::vector<double> GetVInFrame(int frame, const std::vector<int>& ids, double zPos) const;
-     bool ReadData(const std::string& projectRootDir, const std::string& path, const std::string& filename, const FileFormat& _trajformat, int deltaF, std::string vComponent, const bool IgnoreBackwardMovement);
+     bool ReadData(const fs::path& projectRootDir,const fs::path& outputDir, const fs::path& path, const fs::path& filename, const FileFormat& _trajformat, int deltaF, std::string vComponent, const bool IgnoreBackwardMovement);
+     fs::path GetOutputLocation() const;
 
 
 private:
-     bool InitializeVariables(const std::string& filename);
-     bool InitializeVariables(TiXmlElement* xRootNode);
-     void CreateGlobalVariables(int numPeds, int numFrames);
-     double GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, const ub::matrix<double> & Xcor, const ub::matrix<double> & Ycor) const;
-     double GetInstantaneousVelocity1(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast,  const ub::matrix<double> & Xcor, const ub::matrix<double> & Ycor) const;
+      bool InitializeVariables(const fs::path& filename);
+      bool InitializeVariables(TiXmlElement* xRootNode);
+      void CreateGlobalVariables(int numPeds, int numFrames);
+      double GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, const ub::matrix<double> & Xcor, const ub::matrix<double> & Ycor) const;
+      double GetInstantaneousVelocity1(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast,  const ub::matrix<double> & Xcor, const ub::matrix<double> & Ycor) const;
 
 private:
-
-     std::string _trajName="";
-     std::string _projectRootDir="";
+     fs::path _trajName;
+     fs::path _projectRootDir;
+     fs::path _outputLocation="";
      int _minFrame=0;
      int _minID=1;
+     int _maxID=0;
      int _numFrames=0;  // total number of frames
      int _numPeds=0; // total number of pedestrians
      float _fps=16;
-     std::map<int , std::vector<int>> _peds_t;
+     std::map<int , std::vector<int> > _peds_t;
 
      int _deltaF=5;
      std::string _vComponent="B";
@@ -104,8 +111,9 @@ private:
      ub::matrix<double> _xCor;
      ub::matrix<double> _yCor;
      ub::matrix<double> _zCor;
+     ub::matrix<double> _id;
      ub::matrix<std::string> _vComp;
-     
+
 };
 
 #endif /* PEDDATA_H_ */

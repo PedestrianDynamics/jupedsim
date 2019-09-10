@@ -1,8 +1,8 @@
 /**
  * \file        ArgumentParser.cpp
  * \date        Oct 10, 2014
- * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.8.3
+ * \copyright   <2009-2018> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -36,11 +36,7 @@
 #include <chrono>
 #include <math.h>
 #include <ctime>
-#ifdef _MSC_VER
-#include "../.vs/dirent.h"
-#else
-#include <dirent.h>
-#endif
+
 #ifdef _OPENMP
 #include <omp.h>
 #else
@@ -52,6 +48,7 @@
 #include "../IO/OutputHandler.h"
 #include "ArgumentParser.h"
 #include "../Analysis.h"
+#include <boost/range/iterator_range.hpp>
 
 using namespace std;
 
@@ -65,7 +62,7 @@ std::string ver_string(int a, int b, int c) {
 std::string true_cxx =
 #ifdef __clang__
       "clang++";
-#elif defined(__GNU__)
+#elif defined(__GNUC__)
 "g++";
 #elif defined(__MINGW32__)
    "MinGW";
@@ -75,11 +72,10 @@ std::string true_cxx =
 "Compiler not identified";
 #endif
 
-
 std::string true_cxx_ver =
 #ifdef __clang__
     ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__);
-#elif defined(__GNU__)
+#elif defined(__GNUC__)
     ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
 #elif defined(__MINGW32__)
 ver_string(__MINGW32__, __MINGW32_MAJOR_VERSION, __MINGW32_MINOR_VERSION);
@@ -89,7 +85,29 @@ ver_string(__MINGW32__, __MINGW32_MAJOR_VERSION, __MINGW32_MINOR_VERSION);
 "";
 #endif
 
+void Logs()
+{
+     time_t now = chrono::system_clock::to_time_t(chrono::system_clock::now());
+     std::ostringstream oss;
+     char foo[100];
+     if(0 < std::strftime(foo, sizeof(foo), "%a %b %d %X %Y", std::localtime(&now)))
+          oss << foo;
+     else
+          oss << "No time!";
+     // else  // hack for g++ < 5
+     //      oss << std::put_time(std::localtime(&now), "%a %b %d %X %Y");
+    auto currentTime = oss.str();
 
+     // first logs will go to stdout
+     Log->Write("----\nJuPedSim - JPSreport\n");
+     Log->Write("Current date   : %s", currentTime.c_str());
+     Log->Write("Version        : %s", JPSREPORT_VERSION);
+     Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
+     Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
+     Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
+     Log->Write("Branch         : %s", GIT_BRANCH);
+     Log->Write("Python         : %s (%s)\n----\n", PYTHON, PYTHON_VERSION);
+}
 
 void ArgumentParser::Usage(const std::string file)
 {
@@ -111,6 +129,7 @@ ArgumentParser::ArgumentParser()
      _isMethodB = false;
      _isMethodC =false;
      _isMethodD = false;
+     _isMethodI= false;
      _isCutByCircle = false;
      _isOutputGraph= false;
      _isPlotGraph= false;
@@ -152,7 +171,11 @@ bool ArgumentParser::ParseArgs(int argc, char **argv)
      if (argument == "-h" || argument == "--help")
      {
           Usage(argv[0]);
-          return false;
+     }
+     if (argument == "-v" || argument == "--version")
+     {
+          Logs();
+          exit(EXIT_SUCCESS);
      }
 
      // other special case where a single configuration file is submitted
@@ -175,12 +198,12 @@ bool ArgumentParser::ParseArgs(int argc, char **argv)
      return false;
 }
 
-const vector<string>& ArgumentParser::GetTrajectoriesFiles() const
+const vector<fs::path>& ArgumentParser::GetTrajectoriesFiles() const
 {
      return _trajectoriesFiles;
 }
 
-const string& ArgumentParser::GetProjectRootDir() const
+const fs::path& ArgumentParser::GetProjectRootDir() const
 {
      return _projectRootDir;
 }
@@ -188,42 +211,17 @@ const string& ArgumentParser::GetProjectRootDir() const
 
 bool ArgumentParser::ParseIniFile(const string& inifile)
 {
-     time_t now = chrono::system_clock::to_time_t(chrono::system_clock::now());
-     std::ostringstream oss;
-     char foo[100];
-     if(0 < std::strftime(foo, sizeof(foo), "%a %b %d %X %Y", std::localtime(&now)))
-          oss << foo;
-     else
-          oss << "No time!";
-     // else  // hack for g++ < 5
-     //      oss << std::put_time(std::localtime(&now), "%a %b %d %X %Y");
-    auto currentTime = oss.str();
-
-     // first logs will go to stdout
-     Log->Write("----\nJuPedSim - JPSreport\n");
-     Log->Write("Current date   : %s", currentTime.c_str());
-     Log->Write("Version        : %s", JPSREPORT_VERSION);
-     Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
-     Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
-     Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
-     Log->Write("Branch         : %s", GIT_BRANCH);
-     Log->Write("Python         : %s (%s)\n----\n", PYTHON, PYTHON_VERSION);
+     Logs();
      Log->Write("INFO: \tParsing the ini file <%s>",inifile.c_str());
-
      //extract and set the project root dir
-     size_t found = inifile.find_last_of("/\\");
-     if (found != string::npos)
-          _projectRootDir = inifile.substr(0, found) + "/";
-
-
+     fs::path p(inifile);
+     _projectRootDir = canonical(p).parent_path();
      TiXmlDocument doc(inifile);
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \tCould not parse the ini file");
           return false;
      }
-
-
      TiXmlElement* xMainNode = doc.RootElement();
      if( ! xMainNode ) {
           Log->Write("ERROR:\tRoot element does not exist");
@@ -235,12 +233,12 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           Log->Write("ERROR:\tRoot element value is not 'JPSreport'.");
           return false;
      }
-
      if (xMainNode->FirstChild("logfile")) {
-          this->SetErrorLogFile(
-               this->GetProjectRootDir()+xMainNode->FirstChild("logfile")->FirstChild()->Value());
+          fs::path logfile(xMainNode->FirstChild("logfile")->FirstChild()->Value());
+          logfile =  GetProjectRootDir() / logfile;
+          this->SetErrorLogFile(logfile);
           this->SetLog(2);
-          Log->Write("INFO:\tlogfile <%s>", this->GetErrorLogFile().c_str());
+          Log->Write("INFO:\tlogfile <%s>", GetErrorLogFile().string().c_str());
      }
      switch (this->GetLog()) {
      case 0:
@@ -253,7 +251,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           break;
      case 2: {
           char name[CLENGTH]="";
-          sprintf(name,"%s", this->GetErrorLogFile().c_str());
+          sprintf(name,"%s", GetErrorLogFile().string().c_str());
           if(Log) delete Log;
           Log = new FileHandler(name);
      }
@@ -265,21 +263,19 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
      // from this point if case 2, the logs will go to a logfile
      if(this->GetLog() == 2)
      {
-          Log->Write("----\nJuPedSim - JPSreport\n");
-          Log->Write("Current date   : %s %s", __DATE__, __TIME__);
-          Log->Write("Version        : %s", JPSREPORT_VERSION);
-          Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
-          Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
-          Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
-          Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
+           Logs();
      }
-
-
      //geometry
      if(xMainNode->FirstChild("geometry"))
      {
-          _geometryFileName=_projectRootDir+xMainNode->FirstChildElement("geometry")->Attribute("file");
-          Log->Write("INFO: \tGeometry File is: <"+_geometryFileName+">");
+          fs::path pathGeo(xMainNode->FirstChildElement("geometry")->Attribute("file"));
+           _geometryFileName = GetProjectRootDir() / pathGeo;
+           if(!fs::exists(_geometryFileName)){
+                Log->Write("ERROR: \tGeometry File <%s> does not exist",  _geometryFileName.string().c_str());
+                return false;
+           }
+           _geometryFileName = fs::canonical(_geometryFileName);
+           Log->Write("INFO: \tGeometry File is: <%s>",  _geometryFileName.string().c_str());
      }
 
      //trajectories
@@ -314,72 +310,62 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                xFile; xFile = xFile->NextSiblingElement("file"))
           {
                //collect all the files given
-               _trajectoriesFilename =
-                    + xFile->Attribute("name");
+               _trajectoriesFilename = fs::path(xFile->Attribute("name"));
                _trajectoriesFiles.push_back(_trajectoriesFilename);
 
                //check if the given file match the format
-               if(boost::algorithm::ends_with(_trajectoriesFilename,fmt))
+               if(boost::algorithm::ends_with(_trajectoriesFilename.string(),fmt))
                {
-                    Log->Write("INFO: \tInput trajectory file is\t<"+ (_trajectoriesFilename)+">");
+                     Log->Write("INFO: \tInput trajectory file is <%s>", _trajectoriesFilename.string().c_str());
                }
                else
                {
-                    Log->Write("ERROR: \tWrong file extension\t<%s> for file <%s>",fmt.c_str(),_trajectoriesFilename.c_str());
+                     Log->Write("ERROR: \tWrong file extension\t<%s> for file <%s>",fmt.c_str(),_trajectoriesFilename.string().c_str());
                     return false;
                }
           }
-
-          if (xTrajectories->FirstChildElement("path"))
+          auto xmlpath = xTrajectories->FirstChildElement("path");
+          if (xmlpath)
           {
-               if(xTrajectories->FirstChildElement("path")->Attribute("location"))
+               if(xmlpath->Attribute("location"))
                {
-                    _trajectoriesLocation = xTrajectories->FirstChildElement("path")->Attribute("location");
-
-               }
-               //hack to find if it is an absolute path
-               // ignore the project root in this case
-               if ( (boost::algorithm::contains(_trajectoriesLocation,":")==false) && //windows
-                    (boost::algorithm::starts_with(_trajectoriesLocation,"/") ==false)) //linux
-                    // &&() osx
-               {
-                    Log->Write(_trajectoriesLocation);
-                    _trajectoriesLocation=_projectRootDir+_trajectoriesLocation;
+                    _trajectoriesLocation = GetProjectRootDir() / fs::path(xmlpath->Attribute("location"));
+                     // _trajectoriesLocation = canonical(_trajectoriesLocation);
                }
           }
           else
           {
-               _trajectoriesLocation=_projectRootDir;
+               fs::path path_root(GetProjectRootDir());
+                path_root = canonical(path_root);
+                _trajectoriesLocation=path_root.string();
           }
-
-          Log->Write("INFO: \tInput directory for loading trajectory is:\t<"+ (_trajectoriesLocation)+">");
+          Log->Write("INFO: \tInput directory for loading trajectory is <%s>", _trajectoriesLocation.string().c_str());
 
           // in the case no file was specified, collect all files in the specified directory
           if(_trajectoriesFiles.empty())
           {
-               DIR *dir;
-               struct dirent *ent;
-               if ((dir = opendir (_trajectoriesLocation.c_str())) != NULL)
+               if(exists(_trajectoriesLocation))
                {
                     /* print all the files and directories within directory */
-                    while ((ent = readdir (dir)) != NULL)
+                    fs::path path_traj(GetTrajectoriesLocation());
+                    path_traj = canonical(path_traj);
+                    for (auto& filename : boost::make_iterator_range(fs::directory_iterator(path_traj), {}))
                     {
-                         string filename=ent->d_name;
-
-                         if (boost::algorithm::ends_with(filename, fmt))
-                              //if (filename.find(fmt)!=std::string::npos)
+                         string s = filename.path().string();
+                         int pos = s.find_last_of('/');
+                         pos = pos == -1 ? int(s.find_last_of('\\')) : pos;
+                         s = pos == -1 ? s : s.substr(pos + 1);
+                         if (boost::algorithm::ends_with(s, fmt))
                          {
-                              //_trajectoriesFiles.push_back(_projectRootDir+filename);
-                              _trajectoriesFiles.push_back(filename);
-                              Log->Write("INFO: \tInput trajectory file is\t<"+ (filename)+">");
+                              _trajectoriesFiles.push_back(s);
+                              Log->Write("INFO: \tInput trajectory file is <%s>", s.c_str());
                          }
                     }
-                    closedir (dir);
                }
                else
                {
                     /* could not open directory */
-                    Log->Write("ERROR: \tcould not open the directory <"+_trajectoriesLocation+">");
+                     Log->Write("ERROR: \tcould not open the directory <%s>", _trajectoriesLocation.string().c_str());
                     return false;
                }
           }
@@ -403,33 +389,71 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
      //scripts
      if(xMainNode->FirstChild("scripts"))
      {
-          _scriptsLocation=xMainNode->FirstChildElement("scripts")->Attribute("location");
-          if(_scriptsLocation.empty())
+          _scriptsLocation= fs::path(xMainNode->FirstChildElement("scripts")->Attribute("location"));
+		/*
+        if(!fs::exists(_scriptsLocation))
+        {
+             Log->Write("ERROR: \tcould not find the directory <%s>", _scriptsLocation.string().c_str());
+             return false;
+        }
+		*/
+        if(! _scriptsLocation.is_absolute())
+        {
+             _scriptsLocation = GetProjectRootDir() / _scriptsLocation;
+             _scriptsLocation = fs::canonical(_scriptsLocation);
+        }
+
+        if (!exists(_scriptsLocation))
+        {
+             /* could not open directory */
+             Log->Write("ERROR: \tcould not open the directory <%s>", _scriptsLocation.string().c_str());
+             return false;
+        }
+        else
           {
-               _scriptsLocation="./";
+               Log->Write("INFO: \tInput directory for loading scripts is:\t<%s>", _scriptsLocation.string().c_str());
           }
-          if ( (boost::algorithm::contains(_scriptsLocation,":")==false) && //windows
-               (boost::algorithm::starts_with(_scriptsLocation,"/") ==false)) //linux
-               // &&() osx
+     }
+
+     // output directory
+     _outputDir = GetProjectRootDir() / "Output";
+     if(xMainNode->FirstChild("output"))
+     {
+          string tmp  = xMainNode->FirstChildElement("output")->Attribute("location");
+          fs::path tmpPath(tmp);
+          _outputDir = tmpPath;
+          if(tmp.empty())
           {
-               _scriptsLocation=_projectRootDir+_scriptsLocation;
+               _outputDir = GetProjectRootDir() / "Output";
           }
-          if (opendir (_scriptsLocation.c_str()) == NULL)
+          if (! _outputDir.is_absolute())
           {
-               /* could not open directory */
-               Log->Write("ERROR: \tcould not open the directory <"+_scriptsLocation+">");
+               // _outputDir=_projectRootDir + _outputDir;
+               _outputDir = _projectRootDir / _outputDir;
+          }
+     }
+     else
+          Log->Write("INFO: \tDefault output directory");
+     if (!exists(_outputDir))
+     {
+          // does not exist yet. mkdir
+          bool res = fs::create_directory(_outputDir);
+          if (res == false)
+          {
+               Log->Write("ERROR: \tcould not create the directory <"+_outputDir.string()+">");
                return false;
           }
           else
-          {
-               Log->Write("INFO: \tInput directory for loading scripts is:\t<"+_scriptsLocation+">");
-          }
+               Log->Write("INFO: \tcreated directory <"+_outputDir.string()+">");
      }
+     Log->Write("INFO: \tOutput directory for results is:\t<"+_outputDir.string()+">");
 
      //measurement area
      if(xMainNode->FirstChild("measurement_areas"))
      {
-          string unit = xMainNode->FirstChildElement("measurement_areas")->Attribute("unit");
+          string unit ="";
+          if(xMainNode->FirstChildElement("measurement_areas")->Attribute("unit"))
+               unit = xMainNode->FirstChildElement("measurement_areas")->Attribute("unit");
           if(unit!="m")
           {
                Log->Write("WARNING: \tonly <m> unit is supported. Convert your units.");
@@ -457,14 +481,57 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                {
                     areaB->_zPos=10000001.0;
                }
+               std::map<int, polygon_2d> geoPoly;
                polygon_2d poly;
                Log->Write("INFO: \tMeasure area id  <%d> with type <%s>",areaB->_id, areaB->_type.c_str());
+               int num_verteces = 0;
                for(TiXmlElement* xVertex=xMeasurementArea_B->FirstChildElement("vertex"); xVertex; xVertex=xVertex->NextSiblingElement("vertex") )
                {
                     double box_px = xmltof(xVertex->Attribute("x"))*M2CM;
                     double box_py = xmltof(xVertex->Attribute("y"))*M2CM;
                     boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
                     Log->Write("\t\tMeasure area points  < %.3f, %.3f>",box_px*CMtoM,box_py*CMtoM);
+                    num_verteces++;
+               }
+               if(num_verteces < 3 && num_verteces > 0)
+                    Log->Write("\tWARNING: Less than 3 measure area points given (%d). At least 3 or nothing at all!!", num_verteces);
+               if(num_verteces == 0) // big bounding box
+               {
+                    Log->Write("\tWARNING: NO measure area points given (%d). default BB!!", num_verteces);
+                    // get bounding box
+                    // loading geometry is done in  analysis.cpp
+                    // so this is done twice, which is not nice.
+                    // For big geometries it could be slow.
+                    Building*  building  = new Building();
+                    building->LoadGeometry(GetGeometryFilename().string());
+                    building->InitGeometry();
+                    building->AddSurroundingRoom(); // this is a big reactagle
+                    // slightly bigger than the
+                    // geometry boundaries
+                    double geo_minX = building->_xMin;
+                    double geo_minY = building->_yMin;
+                    double geo_maxX = building->_xMax;
+                    double geo_maxY = building->_yMax;
+                    Log->Write("INFO: \tBounding box:\n \t\tminX = %.2f\n \t\tmaxX = %.2f \n \t\tminY = %.2f \n\t\tmaxY = %.2f", geo_minX, geo_maxX, geo_minY, geo_maxY);
+
+
+
+                    //1
+                    double box_px = geo_minX*M2CM;
+                    double box_py = geo_minY*M2CM;
+                    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+                    //2
+                    box_px = geo_minX*M2CM;
+                    box_py = geo_maxY*M2CM;
+                    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+                    //3
+                    box_px = geo_maxX*M2CM;
+                    box_py = geo_maxY*M2CM;
+                    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+                    //4
+                    box_px = geo_maxX*M2CM;
+                    box_py = geo_minY*M2CM;
+                    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
                }
                correct(poly); // in the case the Polygone is not closed
                areaB->_poly=poly;
@@ -626,8 +693,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                Log->Write("INFO: \tThe instantaneous velocity in the direction of <"+MovementDirection+">  will be calculated over <"+FrameSteps+" frames>" );
           }
      }
-
-     // method A
+     // Method A
      TiXmlElement* xMethod_A=xMainNode->FirstChildElement("method_A");
      if(xMethod_A)
      {
@@ -640,8 +706,21 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_A")->FirstChildElement("measurement_area");
                    xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
                {
-                    _areaIDforMethodA.push_back(xmltoi(xMeasurementArea->Attribute("id")));
-                    Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
+                    int id = xmltoi(xMeasurementArea->Attribute("id"));
+
+                    if( _measurementAreas[id]->_type == "Line")
+                    {
+                         _areaIDforMethodA.push_back(id);
+                         Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", id);
+                    }
+                    else
+                    {
+                         Log->Write("WARNING: \tMeasurement area id <%d> will NOT be used for analysis (Type <%s> is not Line)", id, _measurementAreas[id]->_type.c_str());
+                    }
+
+
+
+
 
                     if(xMeasurementArea->Attribute("frame_interval"))
                     {
@@ -875,12 +954,168 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                }
           }
      }
+     // method I
+     TiXmlElement* xMethod_I=xMainNode->FirstChildElement("method_I");
+     if(xMethod_I) {
+          if(string(xMethod_I->Attribute("enabled"))=="true")
+          {
+               _isMethodI = true;
+               Log->Write("INFO: \tMethod I is selected" );
+
+               for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_I")->FirstChildElement("measurement_area");
+                   xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
+               {
+                    _areaIDforMethodI.push_back(xmltoi(xMeasurementArea->Attribute("id")));
+                    Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
+                    if(xMeasurementArea->Attribute("start_frame"))
+                    {
+                         if(string(xMeasurementArea->Attribute("start_frame"))!="None")
+                         {
+                              _start_frames_MethodD.push_back(xmltoi(xMeasurementArea->Attribute("start_frame")));
+                              Log->Write("\tthe analysis starts from frame <%d>",xmltoi(xMeasurementArea->Attribute("start_frame")));
+                         }
+                         else
+                         {
+                              _start_frames_MethodI.push_back(-1);
+                         }
+                    }
+                    else
+                    {
+                         _start_frames_MethodI.push_back(-1);
+                    }
+                    if(xMeasurementArea->Attribute("stop_frame"))
+                    {
+                         if(string(xMeasurementArea->Attribute("stop_frame"))!="None")
+                         {
+                              _stop_frames_MethodI.push_back(xmltoi(xMeasurementArea->Attribute("stop_frame")));
+                              Log->Write("\tthe analysis stops from frame <%d>", xmltoi(xMeasurementArea->Attribute("stop_frame")));
+                         }
+                         else
+                         {
+                              _stop_frames_MethodI.push_back(-1);
+                         }
+                    }
+                    else
+                    {
+                         _stop_frames_MethodI.push_back(-1);
+                    }
+
+                    if(xMeasurementArea->Attribute("get_individual_FD"))
+                    {
+                         if(string(xMeasurementArea->Attribute("get_individual_FD"))=="true")
+                         {
+                              _individual_FD_flags.push_back(true);
+                              Log->Write("INFO: \tIndividual FD will be output");
+                         }
+                         else
+                         {
+                              _individual_FD_flags.push_back(false);
+                         }
+                    }
+                    else
+                    {
+                         _individual_FD_flags.push_back(false);
+                    }
+                    if(xMeasurementArea->Attribute("plot_time_series"))
+                    {
+                         if(string(xMeasurementArea->Attribute("plot_time_series"))=="true")
+                         {
+                              _isPlotTimeSeriesI.push_back(true);
+                              Log->Write("\tThe Time series will be plotted!! ");
+                         }
+                         else
+                         {
+                              _isPlotTimeSeriesI.push_back(false);
+                         }
+                    }
+                    else
+                    {
+                         _isPlotTimeSeriesI.push_back(false);
+                    }
+
+               }
+               if (xMethod_I->FirstChildElement("one_dimensional"))
+               {
+                    if ( string(xMethod_I->FirstChildElement("one_dimensional")->Attribute("enabled"))=="true")
+                    {
+                         _isOneDimensional=true;
+                         Log->Write("INFO: \tThe data will be analyzed with one dimensional way!!");
+                    }
+               }
+
+               if ( xMethod_I->FirstChildElement("cut_by_circle"))
+               {
+                    if ( string(xMethod_I->FirstChildElement("cut_by_circle")->Attribute("enabled"))=="true")
+                    {
+                         _isCutByCircle=true;
+                         _cutRadius=xmltof(xMethod_I->FirstChildElement("cut_by_circle")->Attribute("radius"))*M2CM;
+                         _circleEdges=xmltoi(xMethod_I->FirstChildElement("cut_by_circle")->Attribute("edges"));
+                         Log->Write("INFO: \tEach Voronoi cell will be cut by a circle with the radius of < %f > m!!", _cutRadius*CMtoM);
+                         Log->Write("INFO: \tThe circle is discretized to a polygon with < %d> edges!!", _circleEdges);
+                    }
+               }
+
+               if ( xMethod_I->FirstChildElement("output_voronoi_cells"))
+               {
+                    auto enabled = xMethod_I->FirstChildElement("output_voronoi_cells")->Attribute("enabled");
+                    if(enabled)
+                         if ( string(enabled)=="true")
+                         {
+                              _isOutputGraph=true;
+                              Log->Write("INFO: \tData of voronoi diagram is asked to output" );
+                              auto plot_graphs = xMethod_I->FirstChildElement("output_voronoi_cells")->Attribute("plot_graphs");
+                              if(plot_graphs)
+                              {
+                                   if (string(plot_graphs)=="true")
+                                   {
+                                        _isPlotGraph = true;
+                                        Log->Write("INFO: \tGraph of voronoi diagram will be plotted");
+                                   }
+                                   auto plot_index = xMethod_I->FirstChildElement("output_voronoi_cells")->Attribute(
+                                           "plot_index");
+                                   if (plot_index)
+                                        if (string(plot_index)=="true")
+                                        {
+                                             _isPlotIndex = true;
+                                             Log->Write(
+                                                     "INFO: \tVoronoi diagram will be plotted with index of pedestrians");
+                                        } // plot_index
+                              } // plot_graphs
+                         }// enabled
+               }
+
+               if ( xMethod_I->FirstChildElement("steadyState"))
+               {
+                    _steadyStart =xmltof(xMethod_I->FirstChildElement("steadyState")->Attribute("start"));
+                    _steadyEnd =xmltof(xMethod_I->FirstChildElement("steadyState")->Attribute("end"));
+                    Log->Write("INFO: \tthe steady state is from  <%f> to <%f> frames", _steadyStart, _steadyEnd);
+               }
+
+               if(xMethod_I->FirstChildElement("profiles"))
+               {
+                    if ( string(xMethod_I->FirstChildElement("profiles")->Attribute("enabled"))=="true")
+                    {
+                         _isGetProfile = true;
+                         _grid_size_X =xmltof(xMethod_I->FirstChildElement("profiles")->Attribute("grid_size_x"))*M2CM;
+                         _grid_size_Y =xmltof(xMethod_I->FirstChildElement("profiles")->Attribute("grid_size_y"))*M2CM;
+                         Log->Write("INFO: \tProfiles will be calculated" );
+                         Log->Write("INFO: \tThe discretized grid size in x, y direction is: < %f >m by < %f >m ",_grid_size_X*CMtoM, _grid_size_Y*CMtoM);
+                    }
+               }
+          }
+     }
+
      Log->Write("INFO: \tFinish parsing inifile");
+     if(!(_isMethodA || _isMethodB || _isMethodC || _isMethodD ||  _isMethodI))
+     {
+          Log->Write("WARNING: No measurement method enabled. Nothing to do.");
+          exit(EXIT_SUCCESS);
+     }
      return true;
 }
 
 
-const string& ArgumentParser::GetErrorLogFile() const
+const fs::path& ArgumentParser::GetErrorLogFile() const
 {
      return _errorLogFile;
 }
@@ -890,7 +1125,7 @@ int ArgumentParser::GetLog() const
      return _log;
 }
 
-const string& ArgumentParser::GetGeometryFilename() const
+const fs::path& ArgumentParser::GetGeometryFilename() const
 {
      return _geometryFileName;
 }
@@ -900,17 +1135,21 @@ const FileFormat& ArgumentParser::GetFileFormat() const
      return _fileFormat;
 }
 
-const string& ArgumentParser::GetTrajectoriesLocation() const
+const fs::path& ArgumentParser::GetTrajectoriesLocation() const
 {
      return _trajectoriesLocation;
 }
 
-const string& ArgumentParser::GetScriptsLocation() const
+const fs::path& ArgumentParser::GetScriptsLocation() const
 {
      return _scriptsLocation;
 }
+const fs::path& ArgumentParser::GetOutputLocation() const
+{
+     return _outputDir;
+}
 
-const string& ArgumentParser::GetTrajectoriesFilename() const
+const fs::path& ArgumentParser::GetTrajectoriesFilename() const
 {
      return _trajectoriesFilename;
 }
@@ -955,6 +1194,10 @@ bool ArgumentParser::GetIsMethodD() const
 {
      return _isMethodD;
 }
+bool ArgumentParser::GetIsMethodI() const
+{
+     return _isMethodI;
+}
 
 bool ArgumentParser::GetIsCutByCircle() const
 {
@@ -998,6 +1241,11 @@ vector<bool> ArgumentParser::GetIsPlotTimeSeriesC() const
 vector<bool> ArgumentParser::GetIsPlotTimeSeriesD() const
 {
      return _isPlotTimeSeriesD;
+}
+
+vector<bool> ArgumentParser::GetIsPlotTimeSeriesI() const
+{
+     return _isPlotTimeSeriesI;
 }
 
 bool ArgumentParser::GetIsOneDimensional() const
@@ -1051,14 +1299,29 @@ vector<int> ArgumentParser::GetAreaIDforMethodD() const
      return _areaIDforMethodD;
 }
 
+vector<int> ArgumentParser::GetAreaIDforMethodI() const
+{
+     return _areaIDforMethodI;
+}
+
 vector<int> ArgumentParser::GetStartFramesMethodD() const
 {
      return _start_frames_MethodD;
 }
 
+vector<int> ArgumentParser::GetStartFramesMethodI() const
+{
+     return _start_frames_MethodI;
+}
+
 vector<int> ArgumentParser::GetStopFramesMethodD() const
 {
      return _stop_frames_MethodD;
+}
+
+vector<int> ArgumentParser::GetStopFramesMethodI() const
+{
+     return _stop_frames_MethodI;
 }
 
 vector<bool> ArgumentParser::GetIndividualFDFlags() const
@@ -1079,9 +1342,9 @@ MeasurementArea* ArgumentParser::GetMeasurementArea(int id)
 
 }
 
-void ArgumentParser::SetErrorLogFile(std::string errorLogFile)
+void ArgumentParser::SetErrorLogFile(fs::path errorLogFile)
 {
-     _errorLogFile = errorLogFile;
+      _errorLogFile = errorLogFile;
 };
 
 void ArgumentParser::SetLog(int log) {

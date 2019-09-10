@@ -6,12 +6,12 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 set(JPSREPORT_MAJOR_VERSION 0)
 set(JPSREPORT_MINOR_VERSION 8)
-set(JPSREPORT_PATCH_VERSION 3)
+set(JPSREPORT_PATCH_VERSION 4)
 set(JPSREPORT_VERSION
   ${JPSREPORT_MAJOR_VERSION}.${JPSREPORT_MINOR_VERSION}.${JPSREPORT_PATCH_VERSION})
 message( STATUS "JPSREPORT_VERSION: " ${JPSREPORT_VERSION} )
 project(JPSreport VERSION ${JPSREPORT_VERSION} LANGUAGES CXX)
-set (CMAKE_CXX_STANDARD 11)
+#set (CMAKE_CXX_STANDARD 17)
 # Fix behavior of CMAKE_CXX_STANDARD when targeting macOS.
 if (POLICY CMP0025)
   cmake_policy(SET CMP0025 NEW)
@@ -180,6 +180,7 @@ set(methods
   methods/Method_B.cpp
   methods/Method_C.cpp
   methods/Method_D.cpp
+  methods/Method_I.cpp
   )
 set(source_files
   Analysis.cpp
@@ -211,6 +212,7 @@ set (  header_files
   methods/Method_B.h
   methods/Method_C.h
   methods/Method_D.h
+  methods/Method_I.h
   IO/OutputHandler.h
   general/ArgumentParser.h
   general/Macros.h
@@ -259,9 +261,12 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wno-unused-local-typedefs")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wno-unused-local-typedefs")
 endif(CMAKE_COMPILER_IS_GNUCXX)
-message(STATUS "Debug flags: " ${CMAKE_CXX_FLAGS_DEBUG} )
-message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS_RELEASE} -static )
-
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  message(STATUS "Debug flags: " ${CMAKE_CXX_FLAGS_DEBUG} )
+endif()
+if(CMAKE_BUILD_TYPE MATCHES Release)
+  message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS_RELEASE} -static )
+endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES Debug)
   set(WITH_COVERAGE TRUE)
@@ -277,9 +282,11 @@ if (Boost_NO_SYSTEM_PATHS)
         set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${BOOST_ROOT})
         set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${BOOST_LIBRARY_DIRS})
 endif (Boost_NO_SYSTEM_PATHS)
-
-#find_package(Boost COMPONENTS system filesystem REQUIRED)
-find_package(Boost REQUIRED)
+if(MSVC)
+  find_package(Boost QUIET)
+else()
+  find_package(Boost REQUIRED)
+endif()
 if (Boost_FOUND)
 #        set(Boost_USE_STATIC_LIBS ON)
 #        set(Boost_USE_STATIC_RUNTIME ON)
@@ -293,7 +300,7 @@ if (Boost_FOUND)
         message(STATUS "Boost_LIB_VERSION: " ${Boost_LIB_VERSION})
         message(STATUS "Boost_libraries: " ${Boost_LIBRARIES})
         link_directories(${Boost_LIBRARY_DIRS})
-        include_directories(${Boost_INCLUDE_DIR})
+        include_directories(SYSTEM ${Boost_INCLUDE_DIR})
         # suppress warnings in boost libraries with attribute SYSTEM
         #include_directories(SYSTEM ${Boost_INCLUDE_DIR})
         else()
@@ -305,10 +312,26 @@ endif()
 #message (STATUS "PSAPI: ${PSAPI}")
 #endif()
 
-add_library ( geometrycore STATIC ${source_files} )
+add_library ( geometrycore STATIC ${source_files}  ${methods})
+set_property(TARGET geometrycore PROPERTY CXX_STANDARD 17)
+set_property(TARGET geometrycore PROPERTY CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(NOT MSVC)
+	target_link_libraries(geometrycore  stdc++fs)
+endif()
+
 add_executable(
-        jpsreport main.cpp ${methods}
+        jpsreport main.cpp
 )
+
+set_property(TARGET jpsreport PROPERTY CXX_STANDARD 17)
+set_property(TARGET jpsreport PROPERTY CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+if(NOT MSVC)
+	target_link_libraries(jpsreport  stdc++fs)
+endif()
+
 if (Boost_FOUND)
 target_link_libraries(geometrycore ${Boost_LIBRARIES})
 endif()
@@ -320,6 +343,14 @@ endif()
 target_link_libraries( jpsreport geometrycore )
 if(WIN32)
   if(MSVC)
+    set_property(GLOBAL PROPERTY USE_FOLDERS ON) # groups cmake-projects in CMakePredefinedTargets
+    set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmake")
+    set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY TRUE)
+    set(CMAKE_SKIP_PACKAGE_ALL_DEPENDENCY TRUE)
+    message(STATUS "MSVC: " ${MSVC})
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /WX-")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /WX-")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
     set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT jpsreport)
     message(STATUS "set start project for VS")
   endif()
@@ -357,22 +388,16 @@ if(BUILD_TESTING)
   )
 
 
-  foreach (test_src ${test_files})
-    GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
-    add_executable( ${test} ${test_src})
-    target_link_libraries (${test} geometrycore)
-    add_test(NAME ${test} COMMAND ${test})
-  endforeach(test_src ${test_files})
 
 
-#  set(Python_ADDITIONAL_VERSIONS 3.0)
+  #  set(Python_ADDITIONAL_VERSIONS 3.0)
   find_package(PythonInterp)
   if(PYTHONINTERP_FOUND)
   message(STATUS "Found Python: " ${PYTHON_EXECUTABLE} " (${PYTHON_VERSION_STRING})")
     foreach (test_src ${test_py_files})
       GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
-#     message (STATUS "Add python test: " ${test} " | test_src: " ${test_src})
-       add_test(NAME ${test} COMMAND ${test_src})
+     message (STATUS "Add python test: " ${test} " | test_src: " ${test_src})
+       add_test(NAME ${test} COMMAND ${PYTHON_EXECUTABLE} ${test_src})
     endforeach(test_src ${test_py_files})
     message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
   endif(PYTHONINTERP_FOUND)

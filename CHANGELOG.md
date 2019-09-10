@@ -1,13 +1,50 @@
 # Change Log
 All notable changes to `jpsreport` will be documented in this file.
 
+## v0.8.4 [10.09.2019]
+### Added
+- Option brew install ([for more information](https://github.com/JuPedSim/homebrew-jps/blob/master/README.md))
+- Option --version or -version
+- Option to define a customized output directory
+  ```xml
+     <output location="path/to/directory"/>
+  ```
+- Python script for trajectory correction (`correct_trajectories.py`)
+- Python detected by cmake
+- Python interpreter and version to log
+- Version information: definitions for interpreter and its version
+- Method for calculation for time-series analysis of individual data (see [Method_I](http://www.jupedsim.org/jpsreport/2016-11-01-inifile.html#method-i)) and output data format.
+- Implementation of Travis CI
+- Qualitative Utest for methods A-D and I
+
+
+### Changed
+- Add elapsed time and reduce print logs per frame
+- deactivate static linking
+- use c++17 for filesystem functionality.
+- Modification of calculation of Voronoi Density (see [Method_D](http://www.jupedsim.org/jpsreport/2016-11-01-inifile.html#method-d)) and output data format.
+
+
+### Deprecated
+
+### Removed
+
+### Fixed
+- Fix for VisualStudio (Windows)
+- Better handling negative frame id
+- Fix for polygon output considering interior and exterior rings
+- Fix if no measurement area is selected
+- Fix if no measurement method is selected
+-
+
+
 ## v0.8.3 [16.05.2018]
 ### Added
 - Option to output log in a file instead of the screen fe66fa49
   ```
   <logfile>log.txt</logfile>
   ```
-- Output useful debug information like date, git and compiler versions. !6 and discussion in #79 
+- Output useful debug information like date, git and compiler versions. !6 and discussion in #79
 - Option to plot Voronoi diagrams with index instead of little blue circles `plot_index`. Use as:
   ```xml
   <output_voronoi_cells enabled="true" plot_graphs="true" plot_index="true"/>

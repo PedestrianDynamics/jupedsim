@@ -25,7 +25,7 @@
  *
  *
  **/
- 
+
 
 #ifndef _MACROS_H
 #define _MACROS_H
@@ -38,13 +38,43 @@
 #include <sstream>
 #include <iostream>
 
+#include <boost/polygon/voronoi.hpp>
+using boost::polygon::voronoi_builder;
+using boost::polygon::voronoi_diagram;
+
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometry.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
+#include <boost/geometry/geometries/adapted/c_array.hpp>
+#include <boost/geometry/geometries/ring.hpp>
+#include <boost/geometry/algorithms/intersection.hpp>
+#include <boost/geometry/algorithms/within.hpp>
+#include <boost/foreach.hpp>
+//#include "../general/Macros.h"
+
+typedef boost::geometry::model::d2::point_xy<double, boost::geometry::cs::cartesian> point_2d;
+typedef boost::geometry::model::polygon<point_2d> polygon_2d;
+typedef std::vector<polygon_2d > polygon_list;
+typedef boost::geometry::model::segment<boost::geometry::model::d2::point_xy<double> > segment;
+
+typedef boost::polygon::point_data<double> point_type2;
+typedef double coordinate_type;
+typedef boost::polygon::voronoi_diagram<double> VD;
+typedef VD::edge_type edge_type;
+typedef VD::cell_type cell_type;
+typedef VD::cell_type::source_index_type source_index_type;
+
+
+
+
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
-#endif 
+#endif
 
 #ifndef VORO_LOCATION
-#define VORO_LOCATION "./Output/Fundamental_Diagram/Classical_Voronoi/"
+#define VORO_LOCATION "Fundamental_Diagram/Classical_Voronoi/"
 #endif
 
 // should be true only when using this file in the simulation core
@@ -172,6 +202,37 @@ inline char xmltoc(const char * t, const char v = '\0')
 {
      if (t && (*t)) return *t;
      return v;
+}
+
+inline std::string polygon_to_string(const polygon_2d & polygon)
+{
+     std::string polygon_str = "((";
+     for(auto point: boost::geometry::exterior_ring(polygon) )
+     {
+          double x = boost::geometry::get<0>(point);
+          double y = boost::geometry::get<1>(point);
+          polygon_str.append("(");
+          polygon_str.append(std::to_string(x));
+          polygon_str.append(", ");
+          polygon_str.append(std::to_string(y));
+          polygon_str.append("), ");
+     }
+     for(auto pRing: boost::geometry::interior_rings(polygon) )
+     {
+          for(auto point: pRing )
+          {
+               double x = boost::geometry::get<0>(point);
+               double y = boost::geometry::get<1>(point);
+               polygon_str.append("(");
+               polygon_str.append(std::to_string(x));
+               polygon_str.append(", ");
+               polygon_str.append(std::to_string(y));
+               polygon_str.append("), ");
+          }
+     }
+     polygon_str.pop_back(); polygon_str.pop_back();  //remove last komma
+     polygon_str.append("))");
+     return polygon_str;
 }
 
 /**

@@ -217,6 +217,26 @@ void Building::AddSurroundingRoom()
                     y_max = (ymax >= y_max) ? ymax : y_max;
                     y_min = (ymin <= y_min) ? ymin : y_min;
                }
+               for(auto&& obs:itr_subroom.second->GetAllObstacles())
+               {
+                    for(auto&& wall: obs->GetAllWalls())
+                    {
+                         double x1 = wall.GetPoint1().GetX();
+                         double y1 = wall.GetPoint1().GetY();
+                         double x2 = wall.GetPoint2().GetX();
+                         double y2 = wall.GetPoint2().GetY();
+
+                         double xmax = (x1 > x2) ? x1 : x2;
+                         double xmin = (x1 > x2) ? x2 : x1;
+                         double ymax = (y1 > y2) ? y1 : y2;
+                         double ymin = (y1 > y2) ? y2 : y1;
+
+                         x_min = (xmin <= x_min) ? xmin : x_min;
+                         x_max = (xmax >= x_max) ? xmax : x_max;
+                         y_max = (ymax >= y_max) ? ymax : y_max;
+                         y_min = (ymin <= y_min) ? ymin : y_min;
+                    }
+               }
           }
      }
 
@@ -245,20 +265,30 @@ void Building::AddSurroundingRoom()
      x_max = x_max + 10.0;
      y_min = y_min - 10.0;
      y_max = y_max + 10.0;
-
+     Log->Write("INFO: \tAdding surrounding room X: %f, Y: %f -- %f,  %f\n", x_min, x_max, y_min, y_max);
      SubRoom* bigSubroom = new NormalSubRoom();
+     bigSubroom->SetType("Subroom");
+     bigSubroom->SetPlanEquation(0,0,1); //@todo: dummy values
+
      bigSubroom->SetRoomID(_rooms.size());
      bigSubroom->SetSubRoomID(0); // should be the single subroom
      bigSubroom->AddWall(Wall(Point(x_min, y_min), Point(x_min, y_max)));
      bigSubroom->AddWall(Wall(Point(x_min, y_max), Point(x_max, y_max)));
      bigSubroom->AddWall(Wall(Point(x_max, y_max), Point(x_max, y_min)));
      bigSubroom->AddWall(Wall(Point(x_max, y_min), Point(x_min, y_min)));
+     vector<Line*> goals = vector<Line*>(); // dummy vector
+     bigSubroom->ConvertLineToPoly(goals);
 
      Room * bigRoom = new Room();
      bigRoom->AddSubRoom(bigSubroom);
      bigRoom->SetCaption("outside");
      bigRoom->SetID(_rooms.size());
+     bigRoom->SetZPos(0); //@todo: dummy value
      AddRoom(bigRoom);
+     _xMin = x_min;
+     _xMax = x_max;
+     _yMin = y_min;
+     _yMax = y_max;
 }
 
 
@@ -1411,5 +1441,3 @@ bool Building::SaveGeometry(const std::string &filename)
 }
 
 #endif // _SIMULATOR
-
-

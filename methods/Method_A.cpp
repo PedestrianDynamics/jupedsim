@@ -2,7 +2,7 @@
  * \file        Method_A.cpp
  * \date        Oct 10, 2014
  * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -38,8 +38,8 @@ Method_A::Method_A()
 {
      _classicFlow = 0;
      _vDeltaT = 0;
-     ub::matrix<double> _xCor(0,0);
-     ub::matrix<double> _yCor(0,0);
+     //_xCor(0,0);
+     //_yCor(0,0);
      _firstFrame = nullptr;
      _passLine = nullptr;
      _deltaT = 100;
@@ -54,11 +54,12 @@ Method_A::~Method_A()
 
 }
 
-bool Method_A::Process (const PedData& peddata,const string& scriptsLocation, const double& zPos_measureArea)
+bool Method_A::Process (const PedData& peddata,const fs::path& scriptsLocation, const double& zPos_measureArea)
 {
      _trajName = peddata.GetTrajName();
      _projectRootDir = peddata.GetProjectRootDir();
      _scriptsLocation=scriptsLocation;
+     _outputLocation=peddata.GetOutputLocation();
      _peds_t = peddata.GetPedsFrame();
      _xCor = peddata.GetXCor();
      _yCor = peddata.GetYCor();
@@ -113,20 +114,35 @@ bool Method_A::Process (const PedData& peddata,const string& scriptsLocation, co
 
 void Method_A::WriteFile_N_t(string data)
 {
-     string fN_t= _projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
+     fs::path tmp = ("_id_"+_measureAreaId+".dat");
+     fs::path FD_FlowVelocity ("Fundamental_Diagram/FlowVelocity");
+     tmp = _outputLocation / FD_FlowVelocity / ("Flow_NT_" + _trajName.string() + tmp.string());
+     // _outputLocation.string()+"Fundamental_Diagram/FlowVelocity/Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
+     string fN_t = tmp.string();
      ofstream file(fN_t);
      if(file.is_open())
      {
           file<<data;
           file.close();
-          string METHOD_A_LOCATION =_projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/";
-          string file_N_t ="Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
+          fs::path tmp2 = _outputLocation / FD_FlowVelocity;
+// _outputLocation.string()+"Fundamental_Diagram/FlowVelocity/";
+          string METHOD_A_LOCATION =tmp2.string();
+          //string file_N_t ="Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
+          string file_N_t = fN_t; //@todo: this is redundant
           if(_plotTimeSeries)
           {
-               string parameters_N_t=" " + _scriptsLocation+"/_Plot_N_t.py\" -p \""+ METHOD_A_LOCATION + "\" -n "+file_N_t;
+               string parameters_N_t=" " + _scriptsLocation.string()+"/_Plot_N_t.py -p  \""+ METHOD_A_LOCATION + "\" -n "+file_N_t;
                parameters_N_t = PYTHON + parameters_N_t;
+               std::cout  << ">> <"<< parameters_N_t << ">\n";
+
                int res = system(parameters_N_t.c_str());
-               Log->Write("INFO:\tPlotting N-t diagram! Status: %d", res);
+               if(res)
+               {
+                   Log->Write("ERROR:\tPlotting N-t diagram not success! Check your python environment.");
+               } else
+               {
+                   Log->Write("INFO:\tPlotting N-t diagram success!");
+               }
           }
      }
      else
@@ -178,10 +194,14 @@ void Method_A::FlowRate_Velocity(int fps, const vector<int>& AccumPeds, const ve
 {
 
      FILE *fFD_FlowVelocity;
-     string fdFlowVelocity =  _projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/FDFlowVelocity_"+_trajName+"_id_"+_measureAreaId+".dat";
-     if((fFD_FlowVelocity=Analysis::CreateFile(fdFlowVelocity))==NULL) {
+     fs::path tmp ("_id_"+_measureAreaId+".dat");
+     tmp = _outputLocation / "Fundamental_Diagram" / "FlowVelocity" / ("FDFlowVelocity_" + _trajName.string() + tmp.string());
+     //string fdFlowVelocity = _outputLocation.string() + "Fundamental_Diagram/FlowVelocity/FDFlowVelocity_"+_trajName+"_id_"+_measureAreaId+".dat";
+     string fdFlowVelocity = tmp.string();
+
+     if((fFD_FlowVelocity=Analysis::CreateFile(fdFlowVelocity))==nullptr) {
           Log->Write("cannot open the file to write the Flow-Velocity data\n");
-          exit(0);
+          exit(EXIT_FAILURE);
      }
      fprintf(fFD_FlowVelocity,"#Flow rate(1/s)	\t Mean velocity(m/s)\n");
      int TotalTime=AccumPeds.size();  // the total Frame of in the data file

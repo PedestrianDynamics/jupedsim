@@ -34,8 +34,8 @@ using std::vector;
 
 Method_B::Method_B()
 {
-     ub::matrix<double> _xCor(0,0);
-     ub::matrix<double> _yCor(0,0);
+     _xCor(0,0);
+     _yCor(0,0);
      _tIn = nullptr;
      _tOut = nullptr;
      _entrancePoint = {};
@@ -57,6 +57,8 @@ bool Method_B::Process (const PedData& peddata)
      Log->Write("------------------------Analyzing with Method B-----------------------------");
      _trajName = peddata.GetTrajName();
      _projectRootDir = peddata.GetProjectRootDir();
+     _outputLocation = peddata.GetOutputLocation();
+
      _fps =peddata.GetFps();
      _peds_t = peddata.GetPedsFrame();
      _NumPeds = peddata.GetNumPeds();
@@ -140,11 +142,15 @@ void Method_B::GetFundamentalTinTout(double *DensityPerFrame,double LengthMeasur
 
      FILE *fFD_TinTout;
      Log->Write("---------Fundamental diagram from Method B will be calculated!------------------");
-     string fdTinTout=_projectRootDir+"./Output/Fundamental_Diagram/TinTout/FDTinTout_"+_trajName+"_id_"+_measureAreaId+".dat";;
-     if((fFD_TinTout=Analysis::CreateFile(fdTinTout))==NULL)
+     fs::path tmp("_id_"+_measureAreaId+".dat");
+     tmp = _outputLocation / "Fundamental_Diagram" / "TinTout" / ("FDTinTout_" + _trajName.string() + tmp.string());
+//     string fdTinTout=_outputLocation.string()+"Fundamental_Diagram/TinTout/FDTinTout_"+_trajName+"_id_"+_measureAreaId+".dat";
+     string fdTinTout = tmp.string();
+
+     if((fFD_TinTout=Analysis::CreateFile(fdTinTout))==nullptr)
      {
-          Log->Write("cannot open the file to write the TinTout data\n");
-          exit(0);
+          Log->Write("ERROR:\tcannot open the file to write the TinTout data\n");
+          exit(EXIT_FAILURE);
      }
      fprintf(fFD_TinTout,"#person Index\t	density_i(m^(-2))\t	velocity_i(m/s)\n");
      for(int i=0; i<_NumPeds; i++)

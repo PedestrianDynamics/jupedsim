@@ -37,6 +37,10 @@
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/geometry/geometries/adapted/c_array.hpp>
+#include <filesystem>
+
+namespace fs = std::filesystem;
+
 using namespace boost::geometry;
 typedef model::d2::point_xy<double, cs::cartesian> point_2d;
 typedef model::polygon<point_2d> polygon_2d;
@@ -48,14 +52,16 @@ extern OutputHandler* Log;
 class ArgumentParser {
 private:
 
-     std::string _geometryFileName;
-     std::string _scriptsLocation;
-     std::string _errorLogFile;
-     std::string _trajectoriesLocation;
-     std::string _trajectoriesFilename;
-     std::string _projectRootDir;
+     fs::path _geometryFileName;
+     fs::path _scriptsLocation;
+     fs::path _errorLogFile;
+     fs::path _trajectoriesLocation;
+     fs::path _trajectoriesFilename;
+     fs::path _projectRootDir;
+     fs::path _outputDir;
+
      FileFormat _fileFormat;
-     std::vector<std::string> _trajectoriesFiles;
+     std::vector<fs::path> _trajectoriesFiles;
 
      std::string _vComponent;
      bool _IgnoreBackwardMovement;
@@ -63,6 +69,7 @@ private:
      bool _isMethodB;
      bool _isMethodC;
      bool _isMethodD;
+     bool _isMethodI;
      bool _isCutByCircle;
      double _cutRadius;
      int _circleEdges;
@@ -70,8 +77,8 @@ private:
      bool _isPlotGraph;
      bool _isPlotIndex;
      /*bool _isPlotTimeSeriesA;
-     bool _isPlotTimeSeriesC;
-     bool _isPlotTimeSeriesD;*/
+       bool _isPlotTimeSeriesC;
+       bool _isPlotTimeSeriesD;*/
      bool _isOneDimensional;
      bool _isGetProfile;
      double _steadyStart;
@@ -82,15 +89,19 @@ private:
      std::vector<int> _areaIDforMethodB;
      std::vector<int> _areaIDforMethodC;
      std::vector<int> _areaIDforMethodD;
+     std::vector<int> _areaIDforMethodI;
      float _grid_size_X;
      float _grid_size_Y;
      int _log;
      std::vector<int> _start_frames_MethodD;
      std::vector<int> _stop_frames_MethodD;
+     std::vector<int> _start_frames_MethodI;
+     std::vector<int> _stop_frames_MethodI;
      std::vector<bool> _individual_FD_flags;
      std::vector<bool> _isPlotTimeSeriesA;
      std::vector<bool> _isPlotTimeSeriesC;
      std::vector<bool> _isPlotTimeSeriesD;
+     std::vector<bool> _isPlotTimeSeriesI;
      std::vector<int> _timeIntervalA;
 
 
@@ -100,15 +111,15 @@ private:
 public:
      // Konstruktor
      ArgumentParser();
-
-     const std::string& GetTrajectoriesFilename() const;
-     const std::vector<std::string>& GetTrajectoriesFiles() const;
-     const std::string& GetTrajectoriesLocation() const;
-     const std::string& GetScriptsLocation() const;
+     const fs::path& GetTrajectoriesFilename() const;
+     const std::vector<fs::path>& GetTrajectoriesFiles() const;
+     const fs::path& GetTrajectoriesLocation() const;
+     const fs::path& GetScriptsLocation() const;
      const FileFormat& GetFileFormat() const;
-     const std::string& GetGeometryFilename() const;
-     const std::string& GetErrorLogFile() const;
-     const std::string& GetProjectRootDir() const;
+     const fs::path& GetGeometryFilename() const;
+     const fs::path& GetErrorLogFile() const;
+     const fs::path& GetProjectRootDir() const;
+     const fs::path& GetOutputLocation() const;
 
      double GetLengthMeasurementArea() const;
      polygon_2d GetMeasureArea() const;
@@ -125,12 +136,16 @@ public:
      bool GetIsMethodB() const;
      bool GetIsMethodC() const;
      bool GetIsMethodD() const;
+     bool GetIsMethodI() const;
      std::vector<int> GetAreaIDforMethodA() const;
      std::vector<int> GetAreaIDforMethodB() const;
      std::vector<int> GetAreaIDforMethodC() const;
      std::vector<int> GetAreaIDforMethodD() const;
+     std::vector<int> GetAreaIDforMethodI() const;
      std::vector<int> GetStartFramesMethodD() const;
      std::vector<int> GetStopFramesMethodD() const;
+     std::vector<int> GetStartFramesMethodI() const;
+     std::vector<int> GetStopFramesMethodI() const;
      std::vector<bool> GetIndividualFDFlags() const;
      bool GetIsCutByCircle() const;
      double GetCutRadius() const;
@@ -141,6 +156,7 @@ public:
      std::vector<bool> GetIsPlotTimeSeriesA() const;
      std::vector<bool> GetIsPlotTimeSeriesC() const;
      std::vector<bool> GetIsPlotTimeSeriesD() const;
+     std::vector<bool> GetIsPlotTimeSeriesI() const;
      bool GetIsOneDimensional() const;
      bool GetIsIndividualFD() const;
      polygon_2d GetAreaIndividualFD() const;
@@ -151,7 +167,7 @@ public:
      float GetGridSizeY() const;
      int GetLog() const;
      bool ParseArgs(int argc, char **argv);
-     void SetErrorLogFile(std::string errorLogFile);
+     void SetErrorLogFile(fs::path errorLogFile);
      void SetLog(int log);
      MeasurementArea* GetMeasurementArea(int id);
 

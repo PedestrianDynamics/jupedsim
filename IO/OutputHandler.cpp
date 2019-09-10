@@ -116,6 +116,35 @@ void OutputHandler::Write(const char* message,...)
      }
 }
 
+void STDIOHandler::Write(const char* message,...)
+{
+     char msg[CLENGTH]="";
+     va_list ap;
+     va_start(ap, message);
+     vsprintf(msg, message, ap);
+     va_end(ap);
+
+     string str(msg);
+
+     if (str.find("ERROR") != string::npos)
+     {
+          cerr << msg << endl;
+          cerr.flush();
+          incrementErrors();
+     }
+     else if (str.find("WARNING") != string::npos)
+     {
+          cerr << msg << endl;
+          cerr.flush();
+          incrementWarnings();
+     }
+     else
+     { // infos
+          cout << msg << endl;
+          cout.flush();
+     }
+}
+
 void STDIOHandler::Write(const string& str)
 {
      if (str.find("ERROR") != string::npos)
@@ -139,12 +168,15 @@ void STDIOHandler::Write(const string& str)
 
 FileHandler::FileHandler(const char *fn)
 {
-     _pfp.open(fn);
-     if (!fn) {
+     if (fn== nullptr) {
           char tmp[CLENGTH];
-          sprintf(tmp, "Error!!! File [%s] could not be opened!", fn);
+          sprintf(tmp, "Error!!! File could not be opened!");
           cerr << tmp << endl;
           exit(0);
+     }
+     else
+     {
+         _pfp.open(fn);
      }
 }
 
