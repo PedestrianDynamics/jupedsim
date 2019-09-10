@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to `jpsreport` will be documented in this file.
 
-## v0.8.4 [TBD]
+## v0.8.4 [10.09.2019]
 ### Added
 - Option brew install ([for more information](https://github.com/JuPedSim/homebrew-jps/blob/master/README.md))
 - Option --version or -version
@@ -19,7 +19,7 @@ All notable changes to `jpsreport` will be documented in this file.
 
 
 ### Changed
-- Add elapesed time an  reduce print logs per frame
+- Add elapsed time and reduce print logs per frame
 - deactivate static linking
 - use c++17 for filesystem functionality.
 - Modification of calculation of Voronoi Density (see [Method_D](http://www.jupedsim.org/jpsreport/2016-11-01-inifile.html#method-d)) and output data format.
