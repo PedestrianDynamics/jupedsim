@@ -1,0 +1,43 @@
+﻿---
+BasedOnStyle: LLVM
+AccessModifierOffset: '-4'
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: 'true'
+AlignConsecutiveDeclarations: 'true'
+AlignTrailingComments: 'true'
+AllowAllParametersOfDeclarationOnNextLine: 'false'
+AllowShortBlocksOnASingleLine: 'true'
+AllowShortCaseLabelsOnASingleLine: 'false'
+AllowShortFunctionsOnASingleLine: Inline
+AlwaysBreakTemplateDeclarations: 'Yes'
+BinPackArguments: 'false'
+BinPackParameters: 'false'
+BreakBeforeBraces: Linux
+BreakBeforeTernaryOperators: 'false'
+BreakConstructorInitializers: AfterColon
+ColumnLimit: '100'
+CompactNamespaces: 'false'
+ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
+Cpp11BracedListStyle: 'true'
+FixNamespaceComments: 'true'
+IncludeBlocks: Regroup
+IndentCaseLabels: 'true'
+IndentWidth: '4'
+KeepEmptyLinesAtTheStartOfBlocks: 'false'
+Language: Cpp
+MaxEmptyLinesToKeep: '2'
+NamespaceIndentation: None
+PointerAlignment: Middle
+SortIncludes: 'true'
+SpaceAfterCStyleCast: 'true'
+SpaceAfterTemplateKeyword: 'true'
+SpaceBeforeAssignmentOperators: 'true'
+SpaceBeforeCtorInitializerColon: 'true'
+SpaceBeforeInheritanceColon: 'true'
+SpaceBeforeParens: Never
+SpaceBeforeRangeBasedForLoopColon: 'true'
+Standard: Cpp11
+TabWidth: '4'
+UseTab: Never
+
+...
