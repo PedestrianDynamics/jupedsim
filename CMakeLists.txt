@@ -17,6 +17,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
+
 include(helper_functions)
 print_var(PROJECT_VERSION)
 
@@ -94,11 +95,6 @@ find_package(spdlog 1.3 REQUIRED CONFIG)
 
 # CMakes find_pacakge has no support for generator expressions hence we have to
 # do this the hard way
-if(BUILD_CPPUNIT_TEST)
-    list(APPEND BOOST_COMPONENTS
-        unit_test_framework
-    )
-endif()
 if(${CMAKE_SYSTEM} MATCHES "Darwin")
     list(APPEND BOOST_COMPONENTS
         filesystem
@@ -617,43 +613,32 @@ endif()
 # Unit tests
 ################################################################################
 if (BUILD_CPPUNIT_TEST)
-    set(UNIT_TESTS
-        Utest/testEffectiveDistanceToEllipse.cpp
-        Utest/testEffectiveDistanceToLine.cpp
-        Utest/testGetArea.cpp
-        Utest/testIsInside.cpp
-        Utest/testIsOn.cpp
-        Utest/testIsOutside.cpp
-        Utest/testPointOnEllipse.cpp
-        Utest/testSign.cpp
-        Utest/testSign1.cpp
+    find_package(Catch2 REQUIRED)
+
+    add_executable(unittests
+      test/catch2/Main.cpp
+      test/catch2/pedestrian/EllipseTest.cpp
+
+      test/catch2/math/MathematicsTest.cpp
+
+      test/catch2/geometry/LineTest.cpp
+      test/catch2/geometry/SubRoomTest.cpp
+      test/catch2/geometry/RoomTest.cpp
+      test/catch2/geometry/PointTest.cpp
+      test/catch2/geometry/ObstacleTest.cpp
     )
-    foreach(file ${UNIT_TESTS})
-        get_filename_component(test ${file} NAME_WE)
-        add_executable(${test} ${file})
-        target_link_libraries(${test} core)
-        target_compile_options(${test} PRIVATE
-            ${COMMON_COMPILE_OPTIONS}
-        )
-        add_test(NAME ${test} COMMAND $<TARGET_FILE:${test}>)
-    endforeach()
-    add_executable(boost-unit-tests
-        Utest/test_geometry/testClassLineBoost.cpp
-        Utest/test_geometry/testClassObstacleBoost.cpp
-        Utest/test_geometry/testClassPointBoost.cpp
-        Utest/test_geometry/testClassRoomBoost.cpp
-        Utest/test_geometry/testClassWallBoost.cpp
-        Utest/test_geometry/testMain.cpp
-        Utest/test_geometry/testSubRoomBoost.cpp
-    )
-    target_link_libraries(boost-unit-tests
-        core
-        Boost::unit_test_framework
-    )
-    target_compile_options(boost-unit-tests PRIVATE
+
+    target_link_libraries(unittests Catch2::Catch2 core)
+
+    target_compile_options(unittests PRIVATE
         ${COMMON_COMPILE_OPTIONS}
     )
-    add_test(NAME boost-unit-tests COMMAND $<TARGET_FILE:boost-unit-tests>)
+
+    include(CTest)
+    include(ParseAndAddCatchTests)
+    set(PARSE_CATCH_TESTS_ADD_TARGET_IN_TEST_NAME Off)
+    set(PARSE_CATCH_TESTS_ADD_TO_CONFIGURE_DEPENDS On)
+    ParseAndAddCatchTests(unittests)
 
 endif()
 

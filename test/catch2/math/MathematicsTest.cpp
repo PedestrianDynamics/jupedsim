@@ -1,10 +1,4 @@
-/**
- * \file        testSign.cpp
- * \date        Jul 4, 2014
- * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
- *
- * \section License
+/*
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
@@ -20,21 +14,21 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * \section Description
- *
- *
  **/
- 
- 
-#include <cstdlib>
-#include "../math/Mathematics.h"
-// test positive number
-int testSign()
-{
-     return (sign(1.0)==1)?EXIT_SUCCESS:EXIT_FAILURE;
-}
 
-int main()
+#include "math/Mathematics.h"
+
+#include <catch2/catch.hpp>
+
+TEST_CASE("math/Mathematics", "[math][Mathematics]")
 {
-     return testSign();
+    SECTION("Sign")
+    {
+        // positive
+        REQUIRE(sign(1.0) == 1);
+        // negative
+        REQUIRE(sign(-1.0) == -1);
+        // zero is positive
+        REQUIRE(sign(0.0) == 1);
+    }
 }
