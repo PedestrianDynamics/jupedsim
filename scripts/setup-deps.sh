@@ -36,3 +36,17 @@ cmake .. \
 cmake --build . --target install -- -j$(nproc)
 cd ../..
 rm -rf v${SPDLOG_VER}.tar.gz spdlog-${SPDLOG_VER}
+
+CATCH2_VER="2.9.2"
+wget https://github.com/catchorg/Catch2/archive/v${CATCH2_VER}.tar.gz
+tar xf v${CATCH2_VER}.tar.gz
+cd Catch2-${CATCH2_VER}
+mkdir build
+cd build
+cmake .. \
+    -DBUILD_TESTING=OFF      \
+    -DCMAKE_PREFIX_PATH=${INSTALL_DIR} \
+    -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
+cmake --build . --target install -- -j$(nproc)
+cd ../..
+rm -rf v${CATCH2_VER}.tar.gz Catch2-${CATCH2_VER}

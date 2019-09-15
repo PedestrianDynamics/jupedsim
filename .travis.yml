@@ -13,18 +13,18 @@ matrix:
       script:
        - ./scripts/setup-deps.sh
        - mkdir build && cd build
-       - cmake  .. -DCMAKE_PREFIX_PATH=$(pwd)/../deps -DBUILD_CPPUNIT_TEST=ON -DBUILD_TESTING=ON -DAIROUTER=ON -DJPSFIRE=ON
+       - cmake  .. -DCMAKE_PREFIX_PATH=$(pwd)/../deps -DBUILD_CPPUNIT_TEST=ON -DAIROUTER=ON -DJPSFIRE=ON
        - make -j $(nproc)
-
+       - CTEST_OUTPUT_ON_FAILURE=1 ctest -j 2
     - name: linux (gcc9)
       os: linux
       env: TOOLCHAIN=gcc
       script:
        - ./scripts/setup-deps.sh
        - mkdir build && cd build
-       - cmake .. -DCMAKE_PREFIX_PATH=$(pwd)/../deps -DBUILD_CPPUNIT_TEST=ON -DBUILD_TESTING=ON -DAIROUTER=ON -DJPSFIRE=ON
+       - cmake .. -DCMAKE_PREFIX_PATH=$(pwd)/../deps -DBUILD_CPPUNIT_TEST=ON -DAIROUTER=ON -DJPSFIRE=ON
        - make -j $(nproc)
-
+       - CTEST_OUTPUT_ON_FAILURE=1 ctest -j 2
 before_install:
     - source .travis_before_install.bash
 
