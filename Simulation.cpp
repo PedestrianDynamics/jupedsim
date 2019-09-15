@@ -29,16 +29,20 @@
  **/
 
 #include "Simulation.h"
+
+#include "general/Filesystem.h"
+#include "general/Logger.h"
+#include "general/OpenMP.h"
+#include "geometry/WaitingArea.h"
 #include "IO/progress_bar.h"
-#include "routing/ff_router/ffRouter.h"
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
 #include "math/GradientModel.h"
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
-#include "geometry/WaitingArea.h"
-#include "general/Filesystem.h"
-#include "general/OpenMP.h"
+#include "routing/ff_router/ffRouter.h"
+
+#include <fmt/format.h>
 
 OutputHandler* Log;
 Trajectories* outputTXT;
@@ -117,19 +121,15 @@ bool Simulation::InitArgs()
             break;
         }
         case FORMAT_XML_BIN: {
-            Log->Write(
-                    "INFO: \tFormat xml-bin not yet supported in streaming\n");
-            //exit(0);
-            break;
+            Logging::Warning("Format xml-bin not yet supported in streaming");
+            return false;
         }
         case FORMAT_PLAIN: {
-            Log->Write(
-                    "INFO: \tFormat plain not yet supported in streaming\n");
+            Logging::Warning("Format plain not yet supported in streaming");
             return false;
         }
         case FORMAT_VTK: {
-            Log->Write(
-                    "INFO: \tFormat vtk not yet supported in streaming\n");
+            Logging::Warning("Format vtk not yet supported in streaming");
             return false;
         }
         default: {
@@ -161,7 +161,7 @@ bool Simulation::InitArgs()
             break;
         }
         case FORMAT_VTK: {
-            Log->Write("INFO: \tFormat vtk not yet supported\n");
+            Logging::Warning("Format vtk not yet supported");
             auto vtkTraj = trajPath;
             vtkTraj.replace_extension(".vtk");
             auto file = std::make_shared<FileHandler>(vtkTraj);
@@ -213,7 +213,6 @@ bool Simulation::InitArgs()
     _fps = _config->GetFps();
     sprintf(tmp, "\tfps: %f\n", _fps);
     s.append(tmp);
-    //Log->Write(s.c_str());
 
     _routingEngine = _config->GetRoutingEngine();
     auto distributor = std::unique_ptr<PedDistributor>(new PedDistributor(_config));
@@ -231,38 +230,38 @@ bool Simulation::InitArgs()
         src->Dump();
     }
 
-
-
-
     //perform customs initialisation, like computing the phi for the gcfm
     //this should be called after the routing engine has been initialised
     // because a direction is needed for this initialisation.
-    Log->Write("INFO:\t Init Operational Model starting ...");
-    if (!_operationalModel->Init(_building.get()))
+    Logging::Info("Init Operationl Model starting ...");
+    if (!_operationalModel->Init(_building.get())) {
         return false;
-    Log->Write("INFO:\t Init Operational Model done");
-    Log->Write("Got %d Train Types", _building->GetTrainTypes().size());
-    for(auto&& TT: _building->GetTrainTypes())
-    {
-          Log->Write("INFO\ttype         : %s",TT.second->type.c_str());
-          Log->Write("INFO\tMax          : %d",TT.second->nmax);
-          Log->Write("INFO\tnumber doors : %d\n",TT.second->doors.size());
     }
-    if(_building->GetTrainTimeTables().size())
-         Log->Write("INFO:\tGot %d Train Time Tables",_building->GetTrainTimeTables().size());
-    else
-         Log->Write("WARNING:\tGot %d Train Time Tables",_building->GetTrainTimeTables().size());
+    Logging::Info("Init Operational Model done");
+    Logging::Info(fmt::format("Got {} Train Types",
+      _building->GetTrainTypes().size()));
+
+    for(auto&& TT: _building->GetTrainTypes()) {
+        Logging::Info(fmt::format("type {}", TT.second->type));
+        Logging::Info(fmt::format("Max {}", TT.second->nmax));
+        Logging::Info(fmt::format("number doors {}", TT.second->doors.size()));
+    }
+    if(_building->GetTrainTimeTables().size()) {
+        Logging::Info(fmt::format("Got {} Train Time Tables", _building->GetTrainTimeTables().size()));
+    } else {
+        Logging::Warning(fmt::format(FMT_STRING("Got {} Train Time Tables"), _building->GetTrainTimeTables().size()));
+    }
     for(auto&& TT: _building->GetTrainTimeTables())
     {
-          Log->Write("INFO\tid           : %d",TT.second->id);
-          Log->Write("INFO\ttype         : %s",TT.second->type.c_str());
-          Log->Write("INFO\troom id      : %d",TT.second->rid);
-          Log->Write("INFO\ttin          : %.2f%",TT.second->tin);
-          Log->Write("INFO\ttout         : %.2f",TT.second->tout);
-          Log->Write("INFO\ttrack start  : (%.2f, %.2f)",TT.second->pstart._x,TT.second->pstart._y);
-          Log->Write("INFO\ttrack end    : (%.2f, %.2f)",TT.second->pend._x,TT.second->pend._y);
-          Log->Write("INFO\ttrain start  : (%.2f, %.2f)",TT.second->tstart._x, TT.second->tstart._y);
-          Log->Write("INFO\ttrain end    : (%.2f, %.2f)\n",TT.second->tend._x, TT.second->tend._y);
+          Logging::Info(fmt::format("id           : {}",TT.second->id));
+          Logging::Info(fmt::format("type         : {}",TT.second->type.c_str()));
+          Logging::Info(fmt::format("room id      : {}",TT.second->rid));
+          Logging::Info(fmt::format("tin          : {:.2f}",TT.second->tin));
+          Logging::Info(fmt::format("tout         : {:.2f}",TT.second->tout));
+          Logging::Info(fmt::format("track start  : ({:.2f}, {:.2f})",TT.second->pstart._x,TT.second->pstart._y));
+          Logging::Info(fmt::format("track end    : ({:.2f}, {:.2f})",TT.second->pend._x,TT.second->pend._y));
+          Logging::Info(fmt::format("train start  : ({:.2f}, {:.2f})",TT.second->tstart._x, TT.second->tstart._y));
+          Logging::Info(fmt::format("train end    : ({:.2f}, {:.2f})",TT.second->tend._x, TT.second->tend._y));
     }
     //@todo: these variables are global
     TrainTypes = _building->GetTrainTypes();
@@ -303,11 +302,6 @@ bool Simulation::InitArgs()
      }
 
      _em->ListEvents();
-
-    //_building->SaveGeometry("test.sav.xml");
-
-    //if(_building->SanityCheck()==false)
-    //     return false;
 
     //everything went fine
     return true;

@@ -30,7 +30,11 @@
 #include "events/EventManager.h"
 #include "general/Configuration.h"
 #include "general/ArgumentParser.h"
+#include "general/Compiler.h"
+#include "general/Logger.h"
 #include "pedestrian/AgentsSourcesManager.h"
+
+#include <fmt/format.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,6 +52,14 @@
 
 int main(int argc, char** argv)
 {
+    Logging::Guard guard;
+    Logging::Info("Starting JuPedSim - JPScore");
+    Logging::Info(fmt::format("Version {}", JPSCORE_VERSION));
+    Logging::Info(fmt::format("Commit id {}", GIT_COMMIT_HASH));
+    Logging::Info(fmt::format("Commit date {}", GIT_COMMIT_DATE));
+    Logging::Info(fmt::format("Build from branch {}", GIT_BRANCH));
+    Logging::Info(fmt::format("Build with {}({})", compiler_id, compiler_version));
+
     //gathering some statistics about the runtime
     time_t starttime, endtime;
 
@@ -81,7 +93,7 @@ int main(int argc, char** argv)
     if (status && sim.InitArgs()) {
         //evacuation time
         double evacTime = 0;
-        Log->Write("INFO: \tStart runSimulation() with %d pedestrians", sim.GetPedsNumber());
+        Logging::Info(fmt::format("Simulation started with {} pedestrians", sim.GetPedsNumber()));
 
 #ifdef _JPS_AS_A_SERVICE
 
@@ -109,7 +121,7 @@ int main(int argc, char** argv)
             evacTime = sim.RunStandardSimulation(configuration->GetTmax());
         }
 
-        Log->Write("\nINFO: \tEnd runSimulation()");
+        Logging::Info(fmt::format("Simulation completed", sim.GetPedsNumber()));
         time(&endtime);
 
         // some statistics output
@@ -118,29 +130,22 @@ int main(int argc, char** argv)
         }
 
         if (sim.GetPedsNumber()) {
-            Log->Write("WARNING: Pedestrians not evacuated [%d] using [%d] threads",
-                    sim.GetPedsNumber(), configuration->GetMaxOpenMPThreads());
+            Logging::Warning(fmt::format("Pedestrians not evacuated [{}] using [{}] threads",
+                sim.GetPedsNumber(), configuration->GetMaxOpenMPThreads()));
         }
 
-        double execTime = difftime(endtime, starttime);
-        std::stringstream summary;
-        summary << std::setprecision(2) << std::fixed;
-        summary << "\nExec Time [s]     : " << execTime << std::endl;
-        summary << "Evac Time [s]     : " << evacTime << std::endl;
-        summary << "Realtime Factor   : " << evacTime/execTime << " X " << std::endl;
-        summary << "Number of Threads : " << configuration->GetMaxOpenMPThreads() << std::endl;
-        summary << "Warnings          : " << Log->GetWarnings() << std::endl;
-        summary << "Errors            : " << Log->GetErrors() << std::endl;
-        summary << "Deleted Agents    : " << Log->GetDeletedAgents() << std::endl;
-        Log->Write(summary.str().c_str());
-
-        //force an output to the screen if the log is not the standard output
-        if (nullptr==dynamic_cast<STDIOHandler*>(Log)) {
-            printf("%s\n", summary.str().c_str());
-        }
+        const double execTime = difftime(endtime, starttime);
+        Logging::Info(fmt::format("Exec Time {:.2f}s", execTime));
+        Logging::Info(fmt::format("Evac Time {:.2f}s", evacTime));
+        Logging::Info(fmt::format("Realtime Factor {:.2f}x", evacTime/execTime));
+        Logging::Info(fmt::format("Number of Threads {}", configuration->GetMaxOpenMPThreads()));
+        Logging::Info(fmt::format("Warnings {}", Log->GetWarnings()));
+        Logging::Info(fmt::format("Errors {}", Log->GetErrors()));
+        Logging::Info(fmt::format("Deleted Agents {}", Log->GetDeletedAgents()));
     }
     else {
-        Log->Write("INFO:\tFinishing...");
+        Logging::Error("Could not start simulation."
+            " Check the log for prior errors");
     }
     // do the last cleaning
     delete configuration;

@@ -32,6 +32,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+check_prefix_path()
+
 ################################################################################
 # Optional features
 ################################################################################
@@ -83,6 +85,12 @@ list(APPEND COMMON_COMPILE_OPTIONS
 # Dependencies
 ################################################################################
 add_subdirectory(third-party)
+
+# libfmt
+find_package(fmt 6.0 REQUIRED CONFIG)
+
+# spdlog
+find_package(spdlog 1.3 REQUIRED CONFIG)
 
 # CMakes find_pacakge has no support for generator expressions hence we have to
 # do this the hard way
@@ -262,6 +270,7 @@ set(source_files
     events/EventManager.cpp
     forms/jpscore.rc
     general/ArgumentParser.cpp
+    general/Logger.cpp
     general/Filesystem.cpp
     geometry/Building.cpp
     geometry/Crossing.cpp
@@ -347,8 +356,10 @@ set(header_files
     events/Event.h
     events/EventManager.h
     general/ArgumentParser.h
+    general/Compiler.h
     general/Configuration.h
     general/Filesystem.h
+    general/Logger.h
     general/Macros.h
     general/randomnumbergenerator.h
     geometry/Building.h
@@ -490,7 +501,7 @@ add_library(core STATIC
 target_compile_options(core PRIVATE
     ${COMMON_COMPILE_OPTIONS}
 )
-target_compile_definitions(core PRIVATE
+target_compile_definitions(core PUBLIC
     $<$<BOOL:${AIROUTER}>:AIROUTER>
     $<$<BOOL:${JPSFIRE}>:JPSFIRE>
     JPSCORE_VERSION="${PROJECT_VERSION}"
@@ -505,6 +516,8 @@ target_link_libraries(core
     $<$<BOOL:${AIROUTER}>:CGAL::CGAL>
     $<$<BOOL:${JPSFIRE}>:cnpy>
     fs
+    spdlog::spdlog
+    fmt::fmt
 )
 target_include_directories(core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -523,6 +536,8 @@ target_compile_options(jpscore PRIVATE
 target_link_libraries(jpscore
     core
     Threads::Threads
+    spdlog::spdlog
+    fmt::fmt
 )
 
 if (WIN32)
