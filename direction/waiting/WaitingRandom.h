@@ -26,10 +26,11 @@
  **/
 #pragma  once
 
+#include <cstdlib>
 #include "WaitingStrategy.h"
 class WaitingRandom : public WaitingStrategy{
     void Init(Building* ) override{
-         srand(time(0));
+       std::srand(time(0));
     };
 
     Point GetWaitingPosition(Room* room, Pedestrian* ped) override;

@@ -30,7 +30,7 @@
 
 double fRand(double fMin, double fMax)
 {
-     double f = (double)rand() / RAND_MAX;
+     double f = static_cast<double>(std::rand()) / RAND_MAX;
      return fMin + f * (fMax - fMin);
 }
 
@@ -52,7 +52,7 @@ Point WaitingRandom::GetWaitingPosition(Room* room, Pedestrian* ped){
             yMax = std::numeric_limits<double>::min();
 
      // get the bounding box of subroom/waiting area
-     for (auto poly : polygon){
+     for (const auto & poly : polygon){
           xMin = (xMin <= poly._x)?(xMin):(poly._x);
           xMax = (xMax >= poly._x)?(xMax):(poly._x);
 
