@@ -3,6 +3,7 @@
 //
 #pragma  once
 
+#include <cstdlib>
 #include "WaitingStrategy.h"
 class WaitingRandom : public WaitingStrategy{
     virtual void Init(){
