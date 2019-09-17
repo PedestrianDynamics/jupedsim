@@ -32,7 +32,7 @@ Point WaitingRandom::GetWaitingPosition(Room* room, Pedestrian* ped){
             yMin = std::numeric_limits<double>::max(),
             yMax = std::numeric_limits<double>::min();
 
-     for (auto poly : polygon){
+     for (const auto & poly : polygon){
           xMin = (xMin <= poly._x)?(xMin):(poly._x);
           xMax = (xMax >= poly._x)?(xMax):(poly._x);
 
