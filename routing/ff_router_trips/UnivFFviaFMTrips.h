@@ -35,6 +35,7 @@
  **/
 #pragma once
 
+#include "general/Filesystem.h"
 #include "general/Macros.h"
 
 #include <float.h>
@@ -102,7 +103,7 @@ public:
      double getDistance2WallAt(const Point& pos);
      void getDir2WallAt(const Point& pos, Point& p);
 
-     void writeFF(const std::string&, std::vector<int> targetID);
+     void writeFF(const fs::path& filename, std::vector<int> targetID);
 
      void createRectGrid(std::vector<Line>& walls, std::map<int, Line>& doors, double spacing);
      void processGeometry(std::vector<Line>&walls, std::map<int, Line>& doors);

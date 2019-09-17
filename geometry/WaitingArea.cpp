@@ -137,19 +137,37 @@ void WaitingArea::SetWaitingTime(int waitingTime)
 
 int WaitingArea::GetNextGoal()
 {
+     //TODO create global util for random numbers
      std::mt19937_64 gen(_rd());
-     std::uniform_real_distribution<double> unif(0, 1);
+     // probability of the next goals
+     std::vector<double> weights;
+     // states if at least one of the succeeding goals is open
+     bool open = false;
 
-     double random = unif(gen);
-     double cumProb = 0.;
-
-     for (auto& nextGoal : _nextGoals){
-          cumProb += nextGoal.second;
-          if ((_nextGoalsOpen[nextGoal.first]) && (random <= cumProb)){
-               return nextGoal.first;
+     // get weights of open goals
+     for (auto& nextGoal : _nextGoals) {
+          if (_nextGoalsOpen[nextGoal.first]){
+               weights.push_back(nextGoal.second);
+               open = true;
+          }else{
+               weights.push_back(0.);
           }
      }
-     return this->_id;
+
+     if (open){
+          // if at least one open goal, get random number regarding the
+          // weights
+          std::discrete_distribution<> distribution(weights.begin(), weights.end());
+          int index = distribution(gen);
+
+          auto iter = _nextGoals.begin();
+          std::advance(iter, index);
+
+          return iter->first;
+     } else {
+          // if no open goals found, return own id
+          return _id;
+     }
 }
 
 void WaitingArea::AddPed(int ped)

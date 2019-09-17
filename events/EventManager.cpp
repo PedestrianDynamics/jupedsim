@@ -50,14 +50,13 @@ using std::map;
 using std::cout;
 using std::endl;
 
-EventManager::EventManager(Building *_b, unsigned int seed)
+EventManager::EventManager(Configuration* config, Building *_b, unsigned int seed)
 {
+     _config = config;
      _building = _b;
      _eventCounter = 0;
      _dynamic = false;
      _lastUpdateTime = 0;
-     _projectFilename=_building->GetProjectFilename();
-     _projectRootDir=_building->GetProjectRootDir();
      _updateFrequency =1 ;//seconds
      _updateRadius =2;//meters
 
@@ -86,7 +85,7 @@ bool EventManager::ReadEventsXml()
 {
      Log->Write("INFO: \tLooking for pre-defined events in other files");
      //get the geometry filename from the project file
-     TiXmlDocument doc(_projectFilename);
+     TiXmlDocument doc(_config->GetProjectFile().string());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \t could not parse the project file.");
@@ -95,32 +94,33 @@ bool EventManager::ReadEventsXml()
 
      TiXmlElement* xMainNode = doc.RootElement();
 
-     std::string realtimefile;
      if (xMainNode->FirstChild("event_realtime")) {
-          realtimefile = _projectRootDir
-                    + xMainNode->FirstChild("event_realtime")->FirstChild()->Value();
-          _file = fopen(realtimefile.c_str(), "r");
+          auto realtimefile = _config->GetProjectRootDir()
+                    / xMainNode->FirstChild("event_realtime")->FirstChild()->Value();
+          _file = fopen(realtimefile.string().c_str(), "r");
           if (!_file) {
-               Log->Write("INFO:\tFiles '"+ realtimefile+ "' missing. "
-                          "Realtime interaction with the simulation not possible.");
+               Log->Write("INFO:\tFiles '%s' missing. "
+                          "Realtime interaction with the simulation not possible.",
+                          realtimefile.string().c_str());
           } else {
-               Log->Write("INFO:\tFile '"+ realtimefile+ "' will be monitored for new events.");
+               Log->Write("INFO:\tFile '%s' will be monitored for new events.",
+                    realtimefile.string().c_str());
                _dynamic = true;
           }
      } else {
           Log->Write("INFO: \tNo realtime events found");
      }
 
-     std::string eventfile = "";
+     fs::path eventfile{};
      if (xMainNode->FirstChild("events_file")) {
-          eventfile = _projectRootDir
-                    + xMainNode->FirstChild("events_file")->FirstChild()->Value();
-          Log->Write("INFO: \tevents <" + eventfile + ">");
+          eventfile = _config->GetProjectRootDir()
+                    / xMainNode->FirstChild("events_file")->FirstChild()->Value();
+          Log->Write("INFO: \tevents <" + eventfile.string() + ">");
      } else if (xMainNode->FirstChild("header")){
           if (xMainNode->FirstChild("header")->FirstChild("events_file")) {
-               eventfile = _projectRootDir
-                       +xMainNode->FirstChild("header")->FirstChild("events_file")->FirstChild()->Value();
-               Log->Write("INFO: \tevents <" + eventfile + ">");
+               eventfile = _config->GetProjectRootDir()
+                       / xMainNode->FirstChild("header")->FirstChild("events_file")->FirstChild()->Value();
+               Log->Write("INFO: \tevents <" + eventfile.string() + ">");
           }
      } else {
           Log->Write("INFO: \tNo events found");
@@ -129,7 +129,7 @@ bool EventManager::ReadEventsXml()
 
 
      Log->Write("INFO: \tParsing the event file");
-     TiXmlDocument docEvent(eventfile);
+     TiXmlDocument docEvent(eventfile.string());
      if (!docEvent.LoadFile()) {
           Log->Write("ERROR: \t%s", docEvent.ErrorDesc());
           Log->Write("ERROR: \t could not parse the event file.");
@@ -750,11 +750,11 @@ Router * EventManager::CreateRouter(const RoutingStrategy& strategy)
                break;
 
           case ROUTING_FF_GLOBAL_SHORTEST:
-               rout = new FFRouter(ROUTING_FF_GLOBAL_SHORTEST, ROUTING_FF_GLOBAL_SHORTEST, _building->GetConfig()->get_has_specific_goals(), _building->GetConfig());
+               rout = new FFRouter(ROUTING_FF_GLOBAL_SHORTEST, ROUTING_FF_GLOBAL_SHORTEST, _config->get_has_specific_goals(), _config);
                break;
 
           case ROUTING_FF_QUICKEST:
-               rout = new FFRouter(ROUTING_FF_QUICKEST, ROUTING_FF_QUICKEST, _building->GetConfig()->get_has_specific_goals(), _building->GetConfig());
+               rout = new FFRouter(ROUTING_FF_QUICKEST, ROUTING_FF_QUICKEST, _config->get_has_specific_goals(), _config);
                break;
 
           default:
@@ -828,7 +828,7 @@ bool EventManager::ReadSchedule()
 {
      Log->Write("INFO: \tReading schedule");
      //get the geometry filename from the project file
-     TiXmlDocument doc(_projectFilename);
+     TiXmlDocument doc(_config->GetProjectFile().string());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \t could not parse the project file.");
@@ -837,11 +837,11 @@ bool EventManager::ReadSchedule()
 
      TiXmlElement* xMainNode = doc.RootElement();
 
-     std::string scheduleFile = "";
+     fs::path scheduleFile = "";
      if (xMainNode->FirstChild("schedule_file")) {
-          scheduleFile = _projectRootDir
-                    + xMainNode->FirstChild("schedule_file")->FirstChild()->Value();
-          Log->Write("INFO: \tevents <" + scheduleFile + ">");
+          scheduleFile = _config->GetProjectRootDir()
+                    / xMainNode->FirstChild("schedule_file")->FirstChild()->Value();
+          Log->Write("INFO: \tevents <" + scheduleFile.string() + ">");
      } else {
           Log->Write("INFO: \tNo events found");
           return true;
@@ -849,7 +849,7 @@ bool EventManager::ReadSchedule()
 
 
      Log->Write("INFO: \tParsing the schedule file");
-     TiXmlDocument docSchedule(scheduleFile);
+     TiXmlDocument docSchedule(scheduleFile.string());
      if (!docSchedule.LoadFile()) {
           Log->Write("ERROR: \t%s", docSchedule.ErrorDesc());
           Log->Write("ERROR: \t could not parse the schedule file.");

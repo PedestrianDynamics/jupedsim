@@ -201,7 +201,7 @@ void ToxicityAnalysis::InitializeWriteOut()
      std::string ToxAnalysisXML =  "toxicity_output_" + p.stem().string() + p.extension().string();
      fs::path t(ToxAnalysisXML);
      t = p.parent_path() / t;
-     _outputhandler = std::make_shared<ToxicityOutputHandler>(t.string().c_str());
+     _outputhandler = std::make_shared<ToxicityOutputHandler>(t);
      _outputhandler->WriteToFileHeader();
 }
 
