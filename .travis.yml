@@ -1,5 +1,4 @@
 language: cpp
-dist: bionic
 
 git:
   depth: 1
@@ -9,6 +8,7 @@ matrix:
   include:
     - name: linux (clang8)
       os: linux
+      dist: bionic
       env: TOOLCHAIN=clang
       script:
        - ./scripts/setup-deps.sh
@@ -16,8 +16,11 @@ matrix:
        - cmake  .. -DCMAKE_PREFIX_PATH=$(pwd)/../deps -DBUILD_CPPUNIT_TEST=ON -DAIROUTER=ON -DJPSFIRE=ON
        - make -j $(nproc)
        - CTEST_OUTPUT_ON_FAILURE=1 ctest -j 2
+       - bin/jpscore $(pwd)/../demos/scenario_2_bottleneck/bottleneck_ini.xml
+
     - name: linux (gcc9)
       os: linux
+      dist: bionic
       env: TOOLCHAIN=gcc
       script:
        - ./scripts/setup-deps.sh
@@ -25,8 +28,22 @@ matrix:
        - cmake .. -DCMAKE_PREFIX_PATH=$(pwd)/../deps -DBUILD_CPPUNIT_TEST=ON -DAIROUTER=ON -DJPSFIRE=ON
        - make -j $(nproc)
        - CTEST_OUTPUT_ON_FAILURE=1 ctest -j 2
+       - bin/jpscore $(pwd)/../demos/scenario_2_bottleneck/bottleneck_ini.xml
+
+    - name: mac (appleclang)
+      os: osx
+      osx_image: xcode10.2
+      env: TOOLCHAIN=clang
+      script:
+        - ./scripts/setup-deps.sh
+        - mkdir build && cd build
+        - cmake .. -DCMAKE_PREFIX_PATH=$(pwd)/../deps -DBUILD_CPPUNIT_TEST=ON -DAIROUTER=ON -DJPSFIRE=ON
+        - make -j $(nproc)
+        - CTEST_OUTPUT_ON_FAILURE=1 ctest -j 2
+        - bin/jpscore $(pwd)/../demos/scenario_2_bottleneck/bottleneck_ini.xml
+
 before_install:
-    - source .travis_before_install.bash
+  - source .travis_before_install.bash
 
 install:
-    - source .travis_install.bash
+  - source .travis_install.bash
