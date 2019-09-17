@@ -223,6 +223,7 @@ Pedestrian* StartDistribution::GenerateAgent(Building* building, int* pid, std::
      E.DoStretch(_groupParameters->StretchEnabled());
      ped->SetEllipse(E);
      ped->SetTau(_groupParameters->GetTau());
+     ped->SetT(_groupParameters->GetT());
      ped->SetV0Norm(_groupParameters->GetV0(),
                     _groupParameters->GetV0UpStairs(),
                     _groupParameters->GetV0DownStairs(),

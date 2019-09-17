@@ -34,6 +34,7 @@
 #include "Goal.h"
 
 #include "general/Configuration.h"
+#include "general/Filesystem.h"
 
 typedef std::pair<Point, Wall> PointWall;
 
@@ -115,7 +116,6 @@ public:
      std::map<int, std::vector<Wall> > TempRemovedWalls;
      std::map<int, std::vector<Transition> > TempAddedDoors;
 
-//    Building(const std::string &, const std::string &, RoutingEngine &, PedDistributor &, double);
      Building(Configuration* config, PedDistributor& pedDistributor);
      bool resetGeometry(std::shared_ptr<TrainTimeTable> tab);
      /// destructor
@@ -124,8 +124,6 @@ public:
      Configuration* GetConfig() const;
 
      void SetCaption(const std::string& s);
-
-//    void SetRoutingEngine(RoutingEngine *r);
 
      /// delete the ped from the ped vector
      void DeletePedestrian(Pedestrian*& ped);
@@ -266,11 +264,11 @@ public:
 
      bool AddPlatform(std::shared_ptr<Platform> P);
 
-     const std::string& GetProjectRootDir() const;
+     const fs::path& GetProjectRootDir() const;
 
-     const std::string& GetProjectFilename() const;
+     const fs::path& GetProjectFilename() const;
 
-     const std::string& GetGeometryFilename() const;
+     const fs::path& GetGeometryFilename() const;
 
 //    void SetProjectFilename(const std::string &filename);
 //
@@ -283,7 +281,7 @@ public:
       * @param filename the relative location of the file
       * @return true if everything went fine.
       */
-    bool SaveGeometry(const std::string& filename) const;
+    bool SaveGeometry(const fs::path& filename) const;
 
      void WriteToErrorLog() const;
 

@@ -26,7 +26,9 @@
  **/
 #pragma once
 
+#include "general/Configuration.h"
 #include "general/Macros.h"
+#include "general/Filesystem.h"
 #include "Event.h"
 
 #include <vector>
@@ -47,7 +49,7 @@ public:
      /**
       * Constructor
       */
-     EventManager(Building *_b, unsigned int seed);
+     EventManager(Configuration* config, Building *_b, unsigned int seed);
 
      /**
       * destructor
@@ -150,10 +152,8 @@ private:
      void CreateSomeEngines();
 
 private:
-
+     Configuration* _config;
      std::vector<Event> _events;
-     std::string _projectFilename;
-     std::string _projectRootDir;
      Building *_building;
      FILE *_file;
      bool _dynamic;

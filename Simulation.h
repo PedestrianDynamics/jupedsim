@@ -200,7 +200,7 @@ public:
      void  incrementCountTraj();
 
      bool correctGeometry(std::shared_ptr<Building> building,  std::shared_ptr<TrainTimeTable>);
-     void WriteTrajectories(std::string trajName);
+     void WriteTrajectories();
      bool TrainTraffic();
 
      int _countTraj=0; // count number of TXT trajectories to produce

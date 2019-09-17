@@ -46,7 +46,6 @@
 #include <thread>
 #endif
 
-
 Building::Building()
 {
      _caption = "no_caption";
@@ -379,16 +378,7 @@ bool Building::InitGeometry()
       }
       Log->Write("INFO: \tInit Geometry successful!!!\n");
 
-      // for (auto& transItr : _transitions){
-      //      Transition* trans = transItr.second;
-      //      std::cout << trans->GetID() << " is open " << trans->IsOpen() << std::endl;
-      //      std::cout << trans->GetID() << " is close " << trans->IsClose() << std::endl;
-      //      std::cout << trans->GetID() << " is temp_close " << trans->IsTempClose() << std::endl;
-
-      // }
-
-
-      return true;
+     return true;
 }
 
 const std::vector<Wall> Building::GetTrackWalls(Point TrackStart, Point TrackEnd, int & room_id, int & subroom_id) const
@@ -768,11 +758,12 @@ bool Building::correct() const {
      auto t_start = std::chrono::high_resolution_clock::now();
      Log->Write("INFO:\tenter correct ...");
      bool removed = false;
-
+bool removed_room = false;
      for(auto&& room: this->GetAllRooms()) {
           for(auto&& subroom: room.second->GetAllSubRooms()) {
                 // -- remove exits *on* walls
-                removed = RemoveOverlappingDoors(subroom.second);
+                removed_room = RemoveOverlappingDoors(subroom.second);
+                removed = removed || removed_room;
                // --------------------------
                // -- remove overlapping walls
                auto walls = subroom.second->GetAllWalls(); // this call
@@ -794,9 +785,9 @@ bool Building::correct() const {
                     if(!WallPieces.empty())
                          removed = true;
 #if DEBUG
-z                    std::cout << "Wall pieces size : " <<  WallPieces.size() << std::endl;
-                    for(auto w:WallPieces)
-                         w.WriteToErrorLog();
+                        std::cout << "Wall pieces size : " <<  WallPieces.size() << std::endl;
+                        for(auto w:WallPieces)
+                              w.WriteToErrorLog();
 #endif
                     int ok=0;
                     while(!ok)
@@ -863,12 +854,13 @@ z                    std::cout << "Wall pieces size : " <<  WallPieces.size() <<
 
      if(removed)
      {
-          fs::path f("correct_"+this->GetConfig()->GetGeometryFile());
-          //fs::path p(this->GetConfig()->GetProjectRootDir());
-          //p = p / f;
-          std::string filename = f.string();
-          if(SaveGeometry(filename))
-               this->GetConfig()->SetGeometryFile(filename);
+          auto geometryFile = add_prefix_to_filename(
+            "correct_", GetGeometryFilename());
+
+          if(SaveGeometry(geometryFile)) {
+              GetConfig()->SetGeometryFile(geometryFile);
+          }
+
      }
 
     auto t_end = std::chrono::high_resolution_clock::now();
@@ -1064,17 +1056,17 @@ bool Building::ReplaceBigWall(const std::shared_ptr<SubRoom>& subroom, const Wal
      return true;
 }
 
-const std::string& Building::GetProjectFilename() const
+const fs::path& Building::GetProjectFilename() const
 {
      return _configuration->GetProjectFile();
 }
 
-const std::string& Building::GetProjectRootDir() const
+const fs::path& Building::GetProjectRootDir() const
 {
      return _configuration->GetProjectRootDir();
 }
 
-const std::string& Building::GetGeometryFilename() const
+const fs::path& Building::GetGeometryFilename() const
 {
      return _configuration->GetGeometryFile();
 }
@@ -1763,14 +1755,14 @@ Transition* Building::GetTransitionByUID(int uid) const
 Crossing* Building::GetCrossingByUID(int uid) const
 {
 
-	for (auto&& cross : _crossings) {
-		if (cross.second->GetUniqueID() == uid)
-			return cross.second;
-	}
-	return nullptr;
+        for (auto&& cross : _crossings) {
+                if (cross.second->GetUniqueID() == uid)
+                        return cross.second;
+        }
+        return nullptr;
 }
 
-bool Building::SaveGeometry(const std::string& filename) const
+bool Building::SaveGeometry(const fs::path& filename) const
 {
     std::stringstream geometry;
 
@@ -1874,7 +1866,7 @@ bool Building::SaveGeometry(const std::string& filename) const
 
     //cout<<endl<<geometry.str()<<endl;
 
-    std::ofstream geofile(filename);
+    std::ofstream geofile(filename.string());
     if (geofile.is_open()) {
          geofile << geometry.str();
          Log->Write("INFO:\tfile saved to %s", filename.c_str());

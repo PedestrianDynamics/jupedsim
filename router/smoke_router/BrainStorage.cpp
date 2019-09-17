@@ -82,10 +82,10 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
     std::string cMFileName=_cogMapFiles;
     cMFileName.replace(cMFileName.size()-4,4,std::to_string(groupId)+".xml");
 
-    std::string cogMapFilenameWithPath = _building->GetProjectRootDir() + cMFileName;
+    auto cogMapFilenameWithPath = _building->GetProjectRootDir() / cMFileName;
 
-    Log->Write(cogMapFilenameWithPath);
-    TiXmlDocument doccogMap(cogMapFilenameWithPath);
+    Log->Write(cogMapFilenameWithPath.string());
+    TiXmlDocument doccogMap(cogMapFilenameWithPath.string());
     if (!doccogMap.LoadFile()) {
          Log->Write("ERROR: \t%s", doccogMap.ErrorDesc());
          Log->Write("\t could not parse the cognitive map file");
