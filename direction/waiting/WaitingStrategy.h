@@ -40,16 +40,18 @@ protected:
     RoutingPrecomputation precomputation = RoutingPrecomputation::NONE;
 
 public:
+    virtual ~WaitingStrategy() = default;
+
     /**
      * Inits the waiting strategy.
      * @param building Reference to the Building used in the simulation
      */
-    virtual void Init(Building* building){};
+    virtual void Init(Building*){};
 
     /**
      * Returns the desired walking direction of a pedestrian.
      * @param room Room the pedestrian is in
-     * @param ped Pedestrians, whose walking diretion is determined
+     * @param ped Pedestrians, whose walking direction is determined
      * @return Desired walking direction of ped
      */
     virtual Point GetTarget(Room* room, Pedestrian* ped);
@@ -63,11 +65,10 @@ public:
     virtual Point GetWaitingPosition(Room* room, Pedestrian* ped) = 0;
 
     /**
-     * Returns the desired walking diection of a pedestrian.
+     * Returns the desired walking direction of a pedestrian.
      * Needed for non-convex rooms! Hopefully removed soon.
-     * @param ped Pedestrians, whose walking diretion is determined
+     * @param ped Pedestrians, whose walking direction is determined
      * @return Desired walking direction of ped along path
      */
-    [[deprecated]]
     virtual Point GetPath(Pedestrian* ped);
 };

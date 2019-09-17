@@ -68,10 +68,6 @@ VelocityModel::~VelocityModel()
 
 bool VelocityModel::Init (Building* building)
 {
-     double _deltaH = building->GetConfig()->get_deltaH();
-     double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
-     bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
-
      _direction->Init(building);
 
      const std::vector< Pedestrian* >& allPeds = building->GetAllPedestrians();

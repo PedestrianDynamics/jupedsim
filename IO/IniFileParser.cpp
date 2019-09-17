@@ -47,9 +47,7 @@
 #include "direction/walking/DirectionTrain.h"
 #include "direction/waiting/WaitingStrategy.h"
 #include "direction/waiting/WaitingMiddle.h"
-#include "direction/waiting/WaitingVoronoi.h"
 #include "direction/waiting/WaitingRandom.h"
-#include "direction/waiting/WaitingProbability.h"
 
 #include <tinyxml.h>
 

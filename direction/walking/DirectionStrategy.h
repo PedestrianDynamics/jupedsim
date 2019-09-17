@@ -1,8 +1,7 @@
 /**
  * \file        DirectionStrategy.h
  * \date        Dec 13, 2010
- * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \copyright   <2009-2025> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.

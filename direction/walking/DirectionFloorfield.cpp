@@ -1,6 +1,23 @@
-//
-// Created by Tobias Schrödter on 2019-04-14.
-//
+/**
+ * \file        DirectionFloorfield.cpp
+ * \copyright   <2009-2025> Forschungszentrum Jülich GmbH. All rights reserved.
+ *
+ * \section License
+ * This file is part of JuPedSim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * JuPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ **/
 
 #include "DirectionFloorfield.h"
 
@@ -16,8 +33,7 @@
 
 #include <chrono>
 
-/// 6
-Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
+Point DirectionFloorfield::GetTarget(Room*, Pedestrian* ped) const
 {
 #if DEBUG
      if (initDone && (ffviafm != nullptr)) {

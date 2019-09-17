@@ -312,8 +312,7 @@ set(source_files
     pedestrian/StartDistribution.cpp
     direction/DirectionManager.cpp
     direction/waiting/WaitingMiddle.cpp
-    direction/waiting/WaitingProbability.cpp
-    direction/waiting/WaitingRandom.cpp
+        direction/waiting/WaitingRandom.cpp
     direction/waiting/WaitingStrategy.cpp
     direction/walking/DirectionFloorfield.cpp
     direction/walking/DirectionGeneral.cpp
@@ -410,8 +409,7 @@ set(header_files
     pedestrian/StartDistribution.h
     direction/DirectionManager.h
     direction/waiting/WaitingMiddle.h
-    direction/waiting/WaitingProbability.h
-    direction/waiting/WaitingRandom.h
+        direction/waiting/WaitingRandom.h
     direction/waiting/WaitingStrategy.h
     direction/walking/DirectionFloorfield.h
     direction/walking/DirectionGeneral.h
