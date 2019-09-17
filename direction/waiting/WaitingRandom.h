@@ -6,7 +6,7 @@
 #include "WaitingStrategy.h"
 class WaitingRandom : public WaitingStrategy{
     virtual void Init(){
-         srand(time(0));
+         std::srand(time(0));
     };
 
     virtual Point GetWaitingPosition(Room* room, Pedestrian* ped);
