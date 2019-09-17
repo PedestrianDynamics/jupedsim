@@ -1594,6 +1594,7 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                          break;
                     case 2:
                          _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
+                         break;
                     default:
                          _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
                          Log->Write("ERROR:\t unknown waiting_strategy <%d>", waitingStrategyIndex);
