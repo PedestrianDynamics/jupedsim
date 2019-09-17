@@ -1,10 +1,4 @@
-/**
- * \file        testSign1.cpp
- * \date        Jul 4, 2014
- * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
- *
- * \section License
+/*
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
@@ -20,22 +14,31 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * \section Description
- *
- *
  **/
- 
 
-#include <cstdlib>
-#include "../math/Mathematics.h"
+#include "geometry/Wall.h"
 
-// test negative number
-int testSign1()
+#include <catch2/catch.hpp>
+
+
+TEST_CASE("geometry/Wall", "[geometry][Wall]")
 {
-     return (sign(-1.0)==-1)?EXIT_SUCCESS:EXIT_FAILURE;
-}
+    SECTION("ctor")
+    {
+        Wall  W1;
+        Point P1;
+        REQUIRE(W1.GetPoint1() == P1);
+        REQUIRE(W1.GetPoint2() == P1);
+        std::string type[] = {"internal", "external"};
+        for(int i = 0; i < 10; ++i) {
+            Point P2(0, i * i);
+            Point P3(static_cast<float>(i) / 1000000, i * i);
 
-int main()
-{
-     return testSign1();
+            Line L1(P2, P3);
+            Wall W2(P2, P3, type[i % 2]);
+            REQUIRE(W2 == L1);
+            // GetType test
+            REQUIRE(W2.GetType() == type[i % 2]);
+        }
+    }
 }

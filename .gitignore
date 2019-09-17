@@ -63,6 +63,7 @@ Matrix.txt
 # Hidden files
 .*
 !/.gitignore
+!/.clang-format
 
 # Cmake
 CMakeCache.txt
