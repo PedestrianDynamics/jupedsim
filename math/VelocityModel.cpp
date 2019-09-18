@@ -33,6 +33,7 @@
 #include "geometry/Wall.h"
 #include "mpi/LCGrid.h"
 #include "pedestrian/Pedestrian.h"
+#include "routing/DirectionStrategy.h"
 
 double xRight = 26.0;
 double xLeft = 0.0;

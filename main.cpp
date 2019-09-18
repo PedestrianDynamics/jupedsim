@@ -25,32 +25,31 @@
  *
  *
  **/
+#include "IO/IniFileParser.h"
 #include "Simulation.h"
-#include "IO/OutputHandler.h"
-#include "events/EventManager.h"
-#include "general/Configuration.h"
 #include "general/ArgumentParser.h"
 #include "general/Compiler.h"
+#include "general/Configuration.h"
 #include "general/Logger.h"
+#include "geometry/Building.h"
 #include "pedestrian/AgentsSourcesManager.h"
 
 #include <fmt/format.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
 #include <iomanip>
 #include <memory>
 #include <ostream>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string>
 #include <thread>
+#include <time.h>
 
 
 #ifdef _JPS_AS_A_SERVICE
 #include "hybrid/HybridSimulationManager.h"
 #endif
 
-int main(int argc, char** argv)
+int main(int argc, char ** argv)
 {
     Logging::Guard guard;
     Logging::Info("Starting JuPedSim - JPScore");
@@ -60,95 +59,97 @@ int main(int argc, char** argv)
     Logging::Info(fmt::format("Build from branch {}", GIT_BRANCH));
     Logging::Info(fmt::format("Build with {}({})", compiler_id, compiler_version));
 
-    //gathering some statistics about the runtime
+    // gathering some statistics about the runtime
     time_t starttime, endtime;
 
     // default logger
     Log = new STDIOHandler();
 
-    Configuration* configuration = new Configuration();
-    // Parsing the arguments
-    bool status = false;
-    {
-          //ArgumentParser* p = new ArgumentParser(configuration); //Memory Leak
-          std::unique_ptr<ArgumentParser> p(new ArgumentParser(configuration));
-          status = p->ParseArgs(argc, argv);
+    ArgumentParser a;
+    if(auto [execution, return_code] = a.Parse(argc, argv);
+       execution == ArgumentParser::Execution::ABORT) {
+        return return_code;
     }
+
+    Configuration config;
+
+    // TODO remove me in refactoring
+    IniFileParser   iniFileParser(&config);
+    if(!iniFileParser.Parse(a.IniFilePath())) {
+        return EXIT_FAILURE;
+    }
+
 #ifdef _JPS_AS_A_SERVICE
-    if (configuration->GetRunAsService()) {
-          std::shared_ptr<HybridSimulationManager> hybridSimulationManager = std::shared_ptr<HybridSimulationManager>(
-                    new HybridSimulationManager(configuration));
-          configuration->SetHybridSimulationManager(hybridSimulationManager);
-          std::thread t = std::thread(&HybridSimulationManager::Start, hybridSimulationManager);
-          hybridSimulationManager->WaitForScenarioLoaded();
-          t.detach();
-     }
+    if(config.GetRunAsService()) {
+        std::shared_ptr<HybridSimulationManager> hybridSimulationManager =
+            std::shared_ptr<HybridSimulationManager>(new HybridSimulationManager(configuration));
+        config.SetHybridSimulationManager(hybridSimulationManager);
+        std::thread t = std::thread(&HybridSimulationManager::Start, hybridSimulationManager);
+        hybridSimulationManager->WaitForScenarioLoaded();
+        t.detach();
+    }
 #endif
     // create and initialize the simulation engine
     // Simulation
     time(&starttime);
 
-    Simulation sim(configuration);
+    Simulation sim(&config);
 
-    if (status && sim.InitArgs()) {
-        //evacuation time
+    if(sim.InitArgs()) {
+        // evacuation time
         double evacTime = 0;
         Logging::Info(fmt::format("Simulation started with {} pedestrians", sim.GetPedsNumber()));
 
 #ifdef _JPS_AS_A_SERVICE
 
-        if (configuration->GetRunAsService()) {
-              configuration->GetHybridSimulationManager()->Run(sim);
-         }
-         else
+        if(config.GetRunAsService()) {
+            config.GetHybridSimulationManager()->Run(sim);
+        } else
 #endif
-        if (sim.GetAgentSrcManager().GetMaxAgentNumber()) {
-            //Start the thread for managing the sources of agents if any
-            //std::thread t1(sim.GetAgentSrcManager());
-            double simMaxTime = configuration->GetTmax();
+            if(sim.GetAgentSrcManager().GetMaxAgentNumber()) {
+            // Start the thread for managing the sources of agents if any
+            // std::thread t1(sim.GetAgentSrcManager());
+            double      simMaxTime = config.GetTmax();
             std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());
-            while(!sim.GetAgentSrcManager().IsRunning())
-            {
-                 //std::cout << "waiting...\n";
+            while(!sim.GetAgentSrcManager().IsRunning()) {
+                // std::cout << "waiting...\n";
             }
-           //main thread for the simulation
+            // main thread for the simulation
             evacTime = sim.RunStandardSimulation(simMaxTime);
-            //Join the main thread
+            // Join the main thread
             t1.join();
-        }
-        else {
-            //main thread for the simulation
-            evacTime = sim.RunStandardSimulation(configuration->GetTmax());
+        } else {
+            // main thread for the simulation
+            evacTime = sim.RunStandardSimulation(config.GetTmax());
         }
 
         Logging::Info(fmt::format("Simulation completed", sim.GetPedsNumber()));
         time(&endtime);
 
         // some statistics output
-        if (configuration->ShowStatistics()) {
-             sim.PrintStatistics(evacTime);// negative means end of simulation
+        if(config.ShowStatistics()) {
+            sim.PrintStatistics(evacTime); // negative means end of simulation
         }
 
-        if (sim.GetPedsNumber()) {
+        if(sim.GetPedsNumber()) {
             Logging::Warning(fmt::format("Pedestrians not evacuated [{}] using [{}] threads",
-                sim.GetPedsNumber(), configuration->GetMaxOpenMPThreads()));
+                                         sim.GetPedsNumber(),
+                                         config.GetMaxOpenMPThreads()));
         }
 
         const double execTime = difftime(endtime, starttime);
         Logging::Info(fmt::format("Exec Time {:.2f}s", execTime));
         Logging::Info(fmt::format("Evac Time {:.2f}s", evacTime));
-        Logging::Info(fmt::format("Realtime Factor {:.2f}x", evacTime/execTime));
-        Logging::Info(fmt::format("Number of Threads {}", configuration->GetMaxOpenMPThreads()));
+        Logging::Info(fmt::format("Realtime Factor {:.2f}x", evacTime / execTime));
+        Logging::Info(fmt::format("Number of Threads {}", config.GetMaxOpenMPThreads()));
         Logging::Info(fmt::format("Warnings {}", Log->GetWarnings()));
         Logging::Info(fmt::format("Errors {}", Log->GetErrors()));
         Logging::Info(fmt::format("Deleted Agents {}", Log->GetDeletedAgents()));
-    }
-    else {
+    } else {
         Logging::Error("Could not start simulation."
-            " Check the log for prior errors");
+                       " Check the log for prior errors");
     }
     // do the last cleaning
-    delete configuration;
     delete Log;
 
     return (EXIT_SUCCESS);

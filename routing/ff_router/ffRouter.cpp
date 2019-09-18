@@ -46,8 +46,11 @@
  **/
 #include "ffRouter.h"
 
+#include "routing/DirectionStrategy.h"
+
 #include <cfloat>
 #include <algorithm>
+
 
 int FFRouter::_cnt = 0;
 

@@ -27,6 +27,11 @@
  *
  *
  **/
+
+
+
+#include "routing/DirectionStrategy.h"
+
 #include "GompertzModel.h"
 
 #include "general/OpenMP.h"

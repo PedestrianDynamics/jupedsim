@@ -93,6 +93,9 @@ find_package(fmt 6.0 REQUIRED CONFIG)
 # spdlog
 find_package(spdlog 1.3 REQUIRED CONFIG)
 
+# CLI11
+find_package(CLI11 1.8 REQUIRED CONFIG)
+
 # CMakes find_pacakge has no support for generator expressions hence we have to
 # do this the hard way
 if(${CMAKE_SYSTEM} MATCHES "Darwin")
@@ -509,6 +512,7 @@ target_link_libraries(core
     poly2tri
     tinyxml
     visilibity
+    CLI11::CLI11
     $<$<BOOL:${AIROUTER}>:CGAL::CGAL>
     $<$<BOOL:${JPSFIRE}>:cnpy>
     fs

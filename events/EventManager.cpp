@@ -291,7 +291,7 @@ bool EventManager::DisseminateKnowledge(Building* _b)
 
 bool EventManager::UpdateRoute(Pedestrian* ped)
 {
-     //create the key as string.
+     //create the key as std::string.
      //map are sorted by default
      std::string key= ped->GetKnowledgeAsString();
 //     std::cout << "key: <" << key << ">" << std::endl;

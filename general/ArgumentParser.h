@@ -1,8 +1,6 @@
 /**
  * \file        ArgumentParser.h
- * \date        Apr 20, 2009
- * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \copyright   <2009-2019> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -21,43 +19,45 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * \section Description
- *
+ * A simple wrapper around CLI11 argument parsing
  *
  **/
 #pragma once
 
-#include "Macros.h"
-#include "Configuration.h"
+#include "general/Filesystem.h"
 
-#include "math/ODESolver.h"
-#include "math/OperationalModel.h"
-#include "routing/DirectionStrategy.h"
-#include "routing/RoutingEngine.h"
+#include <CLI/CLI.hpp>
 
-#ifdef _HYBRID_SIMULATION
-#include "hybrid/HybridSimulationManager.h"
-#endif
+#include <tuple>
 
-#include <cstdlib>
-#include <map>
-#include <memory>
-#include <string>
-#include <vector>
+class ArgumentParser final {
+private:
+    fs::path iniFilePath{"ini.xml"};
+    CLI::App app{"JuPedSim"};
+    CLI::Option* iniFilePathOpt = app.add_option(
+        "inifile", iniFilePath, "Path to your inifile");
 
-class OutputHandler;
-
-extern OutputHandler* Log;
-
-class ArgumentParser {
-     void Usage(const std::string file);
-     Configuration* _config;
 public:
-     // constructor
-     ArgumentParser(Configuration* config);
-     ~ArgumentParser();
-     /**
-      * Parse the commands passed to the command line
-      * specially looks for the initialization file
-      */
-     bool ParseArgs(int argc, char** argv);
+    enum class Execution {
+        CONTINUE,
+        ABORT
+    };
+
+    /// @return inifile argument. If none was parsed this defaults to 'ini.xml'
+    const fs::path& IniFilePath() const;
+
+    /// Parses command line arguments
+    /// Parsing ends in one of three states:
+    ///     1) Everything parsed, all ok -> returns [CONTINUE, 0]
+    ///     2) Error during parsing, e.g. inifile does not exist
+    ///             -> [ABORT, EXIT_FAILURE]
+    ///     3) Parsed -h/--help, not an error but execution should end
+    ///             -> [ABORT, EXIT_SUCCESS]
+    ///
+    /// @param argc argument count
+    /// @param argv arguments
+    /// @return [Execution, ReturnCode] state after parsing. Excution describes
+    ///         if the program shall continue or abort. In case 'Execution' is
+    ///         ABORT returncode contains the to-be-used returncode.
+    std::tuple<Execution, int> Parse(int argc, char* argv[]);
 };

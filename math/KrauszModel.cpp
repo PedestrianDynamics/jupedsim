@@ -28,6 +28,7 @@
  *
  **/
 #include "KrauszModel.h"
+#include "routing/DirectionStrategy.h"
 
 #include "general/OpenMP.h"
 #include "geometry/SubRoom.h"

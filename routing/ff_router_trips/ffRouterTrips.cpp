@@ -48,6 +48,12 @@
 
 #include "FloorfieldViaFMTrips.h"
 #include "UnivFFviaFMTrips.h"
+#include "geometry/WaitingArea.h"
+#include "geometry/GoalManager.h"
+#include "routing/DirectionStrategy.h"
+
+#include "FloorfieldViaFMTrips.h"
+#include "UnivFFviaFMTrips.h"
 #include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
 
