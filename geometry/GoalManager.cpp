@@ -119,6 +119,10 @@ void GoalManager::ProcessWaitingAreas(double time){
 
 bool GoalManager::CheckInside(Pedestrian* ped, int goalID)
 {
+     if (goalID < 0){
+          return false;
+     }
+
      Goal* goal = _allGoals[goalID];
 
      if (goal!=nullptr){
@@ -129,6 +133,10 @@ bool GoalManager::CheckInside(Pedestrian* ped, int goalID)
 
 bool GoalManager::CheckInsideWaitingArea(Pedestrian* ped, int goalID)
 {
+     if (goalID < 0){
+          return false;
+     }
+
      Goal* goal = _allGoals[goalID];
 
      if (goal!=nullptr){
