@@ -898,8 +898,8 @@ Goal* GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
                return nullptr;
           }
 
-          if (nextWaP <= 0. || nextWaP > 1.){
-               Log->Write("ERROR:\t  check next_wa of WA  %d: p should be in (0, 1]", wa->GetId());
+          if (nextWaP < 0. || nextWaP > 1.+1e-5){
+               Log->Write("ERROR:\t  check next_wa of WA  %d: p should be in [0, 1]", wa->GetId());
                delete wa;
                return nullptr;
           }
