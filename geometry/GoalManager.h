@@ -21,7 +21,7 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * \section Description
- * Class mananging pedestrians who enter/leave waiting areas
+ * Class managing pedestrians who enter/leave waiting areas
  */
 #pragma once
 
@@ -54,8 +54,17 @@ public:
      */
     void ProcessPedPosition(Pedestrian* ped);
 
+    /**
+     * Sets the building which should be managed by the GoalManager
+     * @param[in] building building which should be managed
+     */
     void SetBuilding(Building* building);
 
+    /**
+     * Processes the waiting area. The state of the waiting area will be set
+     * according to the time and number of peds inside
+     * @param time[in] global time of the simulation
+     */
     void ProcessWaitingAreas(double time);
 
 private:
@@ -81,5 +90,4 @@ private:
      * @param[in] state open(true)/close(false)
      */
     void SetState(int goalID, bool state);
-
 };
