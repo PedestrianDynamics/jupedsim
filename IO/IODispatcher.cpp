@@ -367,6 +367,18 @@ TrajectoriesFLAT::TrajectoriesFLAT() : Trajectories()
          stream << ped->GetExitIndex() << "\t";
          return stream.str();
      };
+
+     // Add header, info and output for velocity
+     _optionalOutputHeader[OptionalOutput::velocity] = "Dx\tDy\t";
+     _optionalOutputInfo[OptionalOutput::velocity] =
+             "#Dx: x component of the pedestrian's desired direction\n"
+             "#Dy: y component of the pedestrian's desired direction";
+     _optionalOutput[OptionalOutput::velocity] = [](const Pedestrian* ped){
+         std::stringstream stream;
+         stream << std::setprecision(2) << std::fixed << ped->GetLastE0()._x << "\t" << ped->GetLastE0()._y << "\t";
+         return stream.str();
+     };
+
 }
 
 static fs::path getSourceFileName(const fs::path& projectFile)

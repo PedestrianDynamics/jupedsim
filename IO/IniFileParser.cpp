@@ -449,6 +449,21 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
                          Log->Write("INFO: intermediate_goal not added to output");
                     }
                }
+
+               //check if desired_direction is wanted
+               if (const char* attribute = node->Attribute("desired_direction"); attribute) {
+                    std::string in = xmltoa(attribute, "false");
+                    std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+                    if (in=="true") {
+                         _config->AddOptionalOutputOption(OptionalOutput::desired_direction);
+                         Log->Write("INFO: desired_direction added to output");
+                    }
+                    else {
+                         Log->Write("INFO: desired_direction not added to output");
+                    }
+               }
+
           }
      }
 

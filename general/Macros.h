@@ -226,6 +226,7 @@ enum class OptionalOutput {
     velocity = 1,
     final_goal = 2,
     intermediate_goal = 3,
+    desired_direction = 4,
 }; // enum class
 
 // Describes the door
