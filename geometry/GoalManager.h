@@ -38,6 +38,10 @@ private:
      * Map containing goals which should be managed, key is the ID
      */
     std::map<int, Goal*> _allGoals;
+
+    /**
+     * Building which is observed by the GoalManager
+     */
     Building* _building;
 
 public:
@@ -45,7 +49,7 @@ public:
      * Sets the goals which are managed
      * @param[in] goals map containing goals which should be managed
      */
-    void SetGoals(std::map<int, Goal*> goals);
+    void SetGoals(const std::map<int, Goal*>& goals);
 
     /**
      * Checks whether a pedestrian has entered or left a goal/wa and

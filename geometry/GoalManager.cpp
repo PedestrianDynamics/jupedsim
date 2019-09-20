@@ -21,7 +21,7 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * \section Description
- * Class mananging pedestrians who enter/leave waiting areas
+ * Class managing pedestrians who enter/leave waiting areas
  */
 #include "GoalManager.h"
 
@@ -29,7 +29,7 @@
 
 #include "pedestrian/Pedestrian.h"
 
-void GoalManager::SetGoals(std::map<int, Goal*> goals)
+void GoalManager::SetGoals(const std::map<int, Goal*>& goals)
 {
      _allGoals = goals;
 }
@@ -42,44 +42,6 @@ void GoalManager::SetBuilding(Building* building)
 
 void GoalManager::ProcessPedPosition(Pedestrian* ped)
 {
-//     // Ped is in current waiting area
-//     if (CheckInsideWaitingArea(ped, ped->GetFinalDestination())){
-//          WaitingArea* wa = dynamic_cast<WaitingArea*>(_allGoals[ped->GetFinalDestination()]);
-//          // Add ped to waiting area
-//          wa->AddPed(ped->GetID());
-//          ped->EnterGoal();
-//
-//          // Check state of waiting area
-//          if (!wa->IsOpen()) {
-//               SetState(wa->GetId(), false);
-//          }
-//     }
-//
-//     const bool pedHasGoal = ped->GetLastGoalID() != -1 ;
-//     const bool pedHasNotReachedFinalGoal = ped->GetFinalDestination() != ped->GetLastGoalID();
-//
-//     if(pedHasGoal && pedHasNotReachedFinalGoal) {
-//          // Ped is not in waiting area which was the last goal
-//          if (!CheckInsideWaitingArea(ped, ped->GetLastGoalID())){
-//               WaitingArea* wa = dynamic_cast<WaitingArea*>(_allGoals[ped->GetLastGoalID()]);
-//
-//               if (wa != nullptr){
-//                    // Remove ped from waiting area
-//                    wa->RemovePed(ped->GetID());
-//                    ped->LeaveGoal();
-//
-//                    // Check state of waiting area
-//                    if (wa->IsOpen()) {
-//                         SetState(wa->GetId(), true);
-//                    }
-//               }
-//          }
-//     }
-//     std::cout << "----------" << std::endl;
-//     std::cout << "Ped: " << ped->GetPos().toString() << std::endl;
-//     std::cout << "Exit: " << ped->GetFinalDestination() << std::endl;
-//     std::cout << "WA: " << _building->GetFinalGoal(ped->GetFinalDestination())->GetCentreCrossing()->toString() << std::endl;
-
      // Ped is in current waiting area
      if (CheckInsideWaitingArea(ped, ped->GetFinalDestination())){
           WaitingArea* wa = dynamic_cast<WaitingArea*>(_allGoals[ped->GetFinalDestination()]);
