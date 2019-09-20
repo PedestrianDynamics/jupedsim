@@ -99,18 +99,20 @@ void GoalManager::ProcessPedPosition(Pedestrian* ped)
 }
 
 void GoalManager::ProcessWaitingAreas(double time){
-     for (auto goalItr : _allGoals){
-          if (auto wa = dynamic_cast<WaitingArea*>(goalItr.second)){
-               if (!wa->IsWaiting(time, _building)){
-                    auto pedsInside = wa->GetPedInside();
-                    for (auto p : pedsInside){
-                         auto ped = _building->GetPedestrian(p);
-                         wa->RemovePed(p);
-                         ped->LeaveGoal();
-                         if (wa->IsOpen()) {
-                              SetState(wa->GetId(), true);
+     if (_building){
+          for (auto goalItr : _allGoals) {
+               if (auto wa = dynamic_cast<WaitingArea*>(goalItr.second)) {
+                    if (!wa->IsWaiting(time, _building)) {
+                         auto pedsInside = wa->GetPedInside();
+                         for (auto p : pedsInside) {
+                              auto ped = _building->GetPedestrian(p);
+                              wa->RemovePed(p);
+                              ped->LeaveGoal();
+                              if (wa->IsOpen()) {
+                                   SetState(wa->GetId(), true);
+                              }
+                              ped->SetFinalDestination(wa->GetNextGoal());
                          }
-                         ped->SetFinalDestination(wa->GetNextGoal());
                     }
                }
           }
