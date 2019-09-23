@@ -37,14 +37,12 @@ Goal::Goal()
      _isFinalGoal=0;
      _walls = std::vector<Wall > ();
      _poly = std::vector<Point > ();
-     _crossing = new Crossing();
      _roomID = -1;
      _subRoomID = -1;
 }
 
 Goal::~Goal()
 {
-
 }
 
 void Goal::AddWall(const Wall& w)
@@ -70,7 +68,7 @@ int Goal::GetId() const
 void Goal::SetId(int id)
 {
      _id = id;
-     _crossing->SetID(id);
+     _crossing.SetID(id);
 }
 
 const std::vector<Point>& Goal::GetPolygon() const
@@ -234,16 +232,16 @@ bool Goal::ConvertLineToPoly()
           point1 = tmp +  diff * 0.95;
           point2 = tmp +  diff * 0.05;
 
-          _crossing->SetPoint1(point1);
-          _crossing->SetPoint2(point2);
+          _crossing.SetPoint1(point1);
+          _crossing.SetPoint2(point2);
      }else{
-          _crossing->SetPoint1(_poly[0]);
+          _crossing.SetPoint1(_poly[0]);
           Line tmp_line(_poly[_poly.size()/2], _poly[(_poly.size()/2)+1], 0);
-          _crossing->SetPoint2(tmp_line.GetCentre());
+          _crossing.SetPoint2(tmp_line.GetCentre());
      }
 
 
-//     std::cout << "Crossing goal: " << _crossing->GetUniqueID() << _crossing->toString() << std::endl;
+//     std::cout << "Crossing goal: " << _crossing.GetUniqueID() << _crossing.toString() << std::endl;
      return true;
 }
 
@@ -296,7 +294,7 @@ void  Goal::ComputeCentroid()
 
 Crossing* Goal::GetCentreCrossing()
 {
-     return _crossing;
+     return &_crossing;
 }
 
 //bool Goal::IsInsideGoal(Pedestrian* ped) const
