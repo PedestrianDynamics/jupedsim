@@ -220,7 +220,7 @@ void AgentsSourcesManager::ComputeBestPositionCompleteRandom(AgentsSource* src,
      //TODO: get the seed from the simulation
      std:: cout << "seed: "<< seed << std::endl;
 
-     srand (seed);
+//     srand (seed);
 
      for (auto& ped : peds)
      {

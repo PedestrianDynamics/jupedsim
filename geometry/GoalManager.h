@@ -21,7 +21,7 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * \section Description
- * Class mananging pedestrians who enter/leave waiting areas
+ * Class managing pedestrians who enter/leave waiting areas
  */
 #pragma once
 
@@ -29,6 +29,7 @@
 
 class Goal;
 class Pedestrian;
+class Building;
 
 class GoalManager {
 
@@ -38,12 +39,17 @@ private:
      */
     std::map<int, Goal*> _allGoals;
 
+    /**
+     * Building which is observed by the GoalManager
+     */
+    Building* _building;
+
 public:
     /**
      * Sets the goals which are managed
      * @param[in] goals map containing goals which should be managed
      */
-    void SetGoals(std::map<int, Goal*> goals);
+    void SetGoals(const std::map<int, Goal*>& goals);
 
     /**
      * Checks whether a pedestrian has entered or left a goal/wa and
@@ -51,6 +57,19 @@ public:
      * @param[in] ped pedestrian, which position is checked
      */
     void ProcessPedPosition(Pedestrian* ped);
+
+    /**
+     * Sets the building which should be managed by the GoalManager
+     * @param[in] building building which should be managed
+     */
+    void SetBuilding(Building* building);
+
+    /**
+     * Processes the waiting area. The state of the waiting area will be set
+     * according to the time and number of peds inside
+     * @param time[in] global time of the simulation
+     */
+    void ProcessWaitingAreas(double time);
 
 private:
     /**
@@ -75,5 +94,4 @@ private:
      * @param[in] state open(true)/close(false)
      */
     void SetState(int goalID, bool state);
-
 };

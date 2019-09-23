@@ -35,7 +35,7 @@
 #include <vector>
 
 class Building;
-class WaitingArea : public Goal{
+class WaitingArea : public Goal {
 
 protected:
     /**
@@ -80,7 +80,6 @@ protected:
 
     /**
      * Map of possible next goals/waiting areas (id) with corresponding probability ([0., 1.])
-     *
      */
     std::map<int, double> _nextGoals;
 
@@ -92,7 +91,7 @@ protected:
     /**
      * Set of pedestrians who are currently in waiting area
      */
-     std::set<int> _pedInside;
+    std::set<int> _pedInside;
 
 public:
 
@@ -157,8 +156,9 @@ public:
     void SetWaitingTime(int waitingTime);
 
     /**
-     * Returns the ID of the next goal based on the probability
-     * @return ID of the next goal
+     * Returns the ID of the next goal based on the probability. Only
+     * considers open goals.
+     * @return ID of the next goal or own ID if no open goal available
      */
     int GetNextGoal();
 
@@ -184,7 +184,7 @@ public:
      * Returns the number of peds inside the waiting area
      * @return number of peds inside the waiting area
      */
-    int  GetNumPed();
+    int GetNumPed();
 
     /**
      * Returns if the waiting area is waiting
@@ -236,4 +236,6 @@ public:
      * @return string representation of waiting area
      */
     std::string toString();
+
+    const std::set<int>& GetPedInside() const;
 };

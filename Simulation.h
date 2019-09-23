@@ -37,17 +37,18 @@
 #include "IO/IODispatcher.h"
 #include "math/OperationalModel.h"
 #include "math/ODESolver.h"
-#include "routing/global_shortest/GlobalRouter.h"
-#include "routing/quickest/QuickestPathRouter.h"
-#include "routing/DirectionStrategy.h"
-#include "routing/RoutingEngine.h"
+#include "router/global_shortest/GlobalRouter.h"
+#include "router/quickest/QuickestPathRouter.h"
+#include "direction/walking/DirectionStrategy.h"
+#include "router/RoutingEngine.h"
 #include "pedestrian/PedDistributor.h"
-#include "routing/smoke_router/SmokeRouter.h"
+#include "router/smoke_router/SmokeRouter.h"
 #include "events/EventManager.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "general/Configuration.h"
 
 class EventManager;
+class GoalManager;
 
 class Simulation {
 private:
@@ -86,6 +87,10 @@ private:
      bool _trainConstraints; // true if inifile has some train constraints
 
     // bool _printPB; // print progressbar
+
+    ///
+    GoalManager* _goalManager;
+
 public:
     /**
      * Constructor
@@ -195,7 +200,7 @@ public:
      void  incrementCountTraj();
 
      bool correctGeometry(std::shared_ptr<Building> building,  std::shared_ptr<TrainTimeTable>);
-     void WriteTrajectories(std::string trajName);
+     void WriteTrajectories();
      bool TrainTraffic();
 
      int _countTraj=0; // count number of TXT trajectories to produce

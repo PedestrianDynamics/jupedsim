@@ -273,6 +273,17 @@ double Distance(const Point& point1, const Point& point2)
      return boost::geometry::distance(point1, point2);
 }
 
+double Angle(const Point& point1, const Point& point2)
+{
+     double dot = point1.ScalarProduct(point2);
+     double n1 = point1.Norm();
+     double n2 = point2.Norm();
+
+     double cosTheta = dot/(n1*n2);
+     return acos(cosTheta);
+}
+
+
 //bool operator == (const Point& point1, const Point& point2)
 //{ return (  ( point1.x() == point2.x() )
 //               && ( point1.y() == point2.y() )  ); }

@@ -266,6 +266,12 @@ bool SubRoom::AddTransition(Transition* line)
      return true;
 }
 
+bool SubRoom::AddWaitingArea(WaitingArea* wa)
+{
+     _goalIDs.push_back(wa->GetCentreCrossing()->GetUniqueID());
+     return true;
+}
+
 void SubRoom::AddNeighbor(SubRoom* sub)
 {
      if(sub && (IsElementInVector(_neighbors, sub)==false))
@@ -875,6 +881,8 @@ bool SubRoom::CreateBoostPoly() {
           boost::geometry::assign_points(newObstacle, obsPoints);
           _boostPolyObstacles.emplace_back(newObstacle);
      }
+
+     ComputeBoundingBox();
      return true;
 }
 
@@ -1515,6 +1523,30 @@ bool SubRoom::HasGoal(int id)
      return std::find(_goalIDs.begin(), _goalIDs.end(), id) != _goalIDs.end();
 }
 
+
+std::vector<double> SubRoom::GetBoundingBox() const
+{
+     return _boundingBox;
+}
+
+void SubRoom::ComputeBoundingBox()
+{
+     double xMin = std::numeric_limits<double>::max(),
+               xMax =std::numeric_limits<double>::min(),
+               yMin = std::numeric_limits<double>::max(),
+               yMax = std::numeric_limits<double>::min();
+
+     for (auto poly : GetPolygon()){
+          xMin = (xMin <= poly._x)?(xMin):(poly._x);
+          xMax = (xMax >= poly._x)?(xMax):(poly._x);
+
+          yMin = (yMin <= poly._y)?(yMin):(poly._y);
+          yMax = (yMax >= poly._y)?(yMax):(poly._y);
+     }
+
+     _boundingBox = { xMin, xMax, yMin, yMax};
+
+}
 
 /// Escalator
 

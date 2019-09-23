@@ -139,7 +139,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
          fake_peds.push_back(Point(BBxmax,BBymax)*factor);
     }
     std::vector<Pedestrian*>::iterator iter_ped;
-    std::srand(0);
+//    std::srand(0);
     for (iter_ped = peds.begin(); iter_ped != peds.end(); )
     {
          Pedestrian* ped = *iter_ped;
@@ -608,4 +608,178 @@ void plotVoronoi(const std::vector<Point>& discrete_positions, const voronoi_dia
      fprintf(f, "plt.savefig(\"%.4d.png\", dpi=600)\n", global_count++);
 
      fclose(f);
+}
+
+Point ComputeBestPositionVoronoiBoost(Pedestrian* ped, SubRoom* subRoom, std::vector<Pedestrian*> existingPeds)
+{
+     // some ids
+//     int pedID = ped->GetID();
+//     int roomID = ped->GetRoomID();
+//     int subroomID = ped->GetSubRoomID();
+//
+//     std::cout << "Ped:" << std::endl;
+//     std::cout << ped->GetID() << std::endl;
+//     std::cout << ped->GetBuilding() << std::endl;
+//     std::cout << "Rooms:" << std::endl;
+//
+//     for (auto room: ped->GetBuilding()->GetAllRooms()){
+//          std::cout << room.second << std::endl;
+//     }
+     double radius = 0.3; //radius of a person, 0.3 is just some number(needed for the fake_peds bellow). should be changed afterwards
+//     SubRoom* subRoom = ped->GetBuilding()->GetRoom( roomID )->GetSubRoom(subroomID);
+     double factor = 100;  //factor for conversion to integer for the boost voronoi
+
+     std::vector<Point> fakePeds;
+     Point temp(0,0);
+     //fake_peds will be the positions of "fake" pedestrians, multiplied by factor and converted to int
+     double xMin = std::numeric_limits<double>::max(),
+               xMax =std::numeric_limits<double>::min(),
+               yMin = std::numeric_limits<double>::max(),
+               yMax = std::numeric_limits<double>::min();
+
+     for (auto poly : subRoom->GetPolygon()){
+          xMin = (xMin <= poly._x)?(xMin):(poly._x);
+          xMax = (xMax >= poly._x)?(xMax):(poly._x);
+
+          yMin = (yMin <= poly._y)?(yMin):(poly._y);
+          yMax = (yMax >= poly._y)?(yMax):(poly._y);
+     }
+
+     bool haveBB = (xMin != std::numeric_limits<float>::lowest()) ||
+               (xMax != std::numeric_limits<float>::max()) ||
+               (yMin != std::numeric_limits<float>::lowest()) ||
+               (yMax != std::numeric_limits<float>::max());
+
+     if(haveBB == false)
+          for (auto vert: subRoom->GetPolygon() ) //room vertices
+          {
+               const Point& center_pos = subRoom->GetCentroid();
+               temp._x = ( center_pos._x-vert._x );
+               temp._y = ( center_pos._y-vert._y );
+               temp = temp/temp.Norm();
+               temp = temp*(radius*1.4);  //now the norm of the vector is ~r*sqrt(2), pointing to the center
+               temp = temp + vert;
+               temp._x = (int)(temp._x*factor);
+               temp._y = (int)(temp._y*factor);
+               fakePeds.push_back( temp );
+          }
+     else
+     {
+          fakePeds.push_back(Point(xMin, yMin)*factor);
+          fakePeds.push_back(Point(xMin, yMax)*factor);
+          fakePeds.push_back(Point(xMax, yMin)*factor);
+          fakePeds.push_back(Point(xMax, yMax)*factor);
+     }
+
+     // Get existing peds
+//     std::vector<Pedestrian*> existingPeds;
+//     ped->GetBuilding()->GetPedestrians(roomID, subroomID, existingPeds);
+
+     for (auto ped : fakePeds){
+          std::cout << "fake_ped at " << ped.toString() << std::endl;
+     }
+
+     for (auto ped : existingPeds){
+          std::cout << "existing_ped at " << ped->GetPos().toString() << std::endl;
+     }
+
+     std::vector<Point> discretePositions;
+     discretePositions.insert( discretePositions.end(), fakePeds.begin(), fakePeds.end() );
+     for (auto p : existingPeds){
+          if (ped->GetID() != p->GetID()){
+               discretePositions.push_back(ped->GetPos()*factor);
+          }
+     }
+
+     for (auto dp : discretePositions){
+          std::cout << "dp: " << dp.toString() << std::endl;
+     }
+
+     voronoi_diagram<double> vd;
+     construct_voronoi(discretePositions.begin(), discretePositions.end(), &vd);
+     plotVoronoi(discretePositions, vd, subRoom, factor);
+
+     voronoi_diagram<double>::const_vertex_iterator chosenIt = vd.vertices().begin();
+     double dis = 0;
+
+     Point pos;
+
+     do{
+          VoronoiBestVertexRand(discretePositions, vd, subRoom, factor, chosenIt, dis, radius);
+          pos = Point( chosenIt->x()/factor, chosenIt->y()/factor ); //check!
+          std::cout << "Pos: " << pos.toString() << std::endl;
+     }while(!subRoom->IsInSubRoom(pos));
+
+     return pos;
+
+
+}
+
+void VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, double factor,
+          voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius	)
+{
+     std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
+     std::vector<double> partial_sums;
+     unsigned long size=0;
+     std::vector<double> bounding_box = subroom->GetBoundingBox();
+     for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it){
+          Point vert_pos = Point( it->x()/factor, it->y()/factor );
+          float BBxmin = bounding_box[0];
+          float BBxmax = bounding_box[1];
+          float BBymin = bounding_box[2];
+          float BBymax = bounding_box[3];
+          bool inBox = (vert_pos._x <= BBxmax) && (vert_pos._x >= BBxmin) && (vert_pos._y <= BBymax) && (vert_pos._y >= BBymin);
+          if( subroom->IsInSubRoom( vert_pos ) && inBox)
+               if( IsEnoughInSubroom(subroom, vert_pos,radius) )
+               {
+                    const voronoi_diagram<double>::vertex_type &vertex = *it;
+                    const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
+                    std::size_t index = ( edge->cell() )->source_index();
+                    Point p = discrete_positions[index];
+
+                    max_dis = ( p._x - it->x() )*( p._x - it->x() )   + ( p._y - it->y() )*( p._y - it->y() ) ;
+                    max_dis = max_dis / factor / factor;
+                    possible_vertices.push_back( it );
+                    partial_sums.push_back( max_dis );
+
+                    size = partial_sums.size();
+                    if( size > 1 )
+                    {
+                         partial_sums[ size - 1 ] += partial_sums[ size - 2 ];
+                    }
+               }
+     }
+     // partial_sums: [d_0^2,  d_0^2 + d_1^2,  d_0^2 + d_1^2 + d_2^2, ..., \sum_i^{n-1} d_i^3]
+     //now we have the vector of possible vertices and weights and we can choose one randomly
+
+     if(partial_sums.empty())
+     {
+          Log->Write("Warning: No possible vertices. Maybe BB too small?");
+          //         exit(EXIT_FAILURE); // maybe not exit, just ignore
+          // dis = 0;
+          return;
+     }
+
+     double lower_bound = 0;
+     double upper_bound = partial_sums[size-1];
+     std::random_device rd;
+     //std::mt19937 gen(rd()); //@todo use seed instead of rd(). Generator should not be here
+     std::mt19937 gen(1); //@todo use seed instead of rd(). Generator should not be here
+     std::uniform_real_distribution<double> distribution(lower_bound, upper_bound); //std::nextafter(upper_bound, DBL_MAX));
+     std::vector<double> random_numbers;
+     for(unsigned int r=0; r<size;r++)
+          random_numbers.push_back(distribution(gen));
+
+     shuffle(random_numbers.begin(), random_numbers.end(), gen);
+     double a_random_double = random_numbers[0];
+
+     //the first element in the range [first, last) that is not less than a_random_double
+     auto lower = std::lower_bound(partial_sums.begin(), partial_sums.end(), a_random_double);
+     int iposition = lower - partial_sums.begin();
+     // if iposition == size then no element is found. Should not happen..
+     max_it = possible_vertices[iposition];
+     max_dis = partial_sums[iposition];
+     if (iposition>1)
+          max_dis -= partial_sums[iposition-1];
+
 }

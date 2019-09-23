@@ -29,6 +29,7 @@
 #include "general/OpenMP.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
+#include "direction/DirectionManager.h"
 
 #include <tinyxml.h>
 
@@ -47,11 +48,11 @@
 
 Building::Building()
 {
-      _caption = "no_caption";
-      _geometryFilename = "";
-      _routingEngine = nullptr;
-      _linkedCellGrid = nullptr;
-      _savePathway = false;
+     _caption = "no_caption";
+     _geometryFilename = "";
+     _routingEngine = nullptr;
+     _linkedCellGrid = nullptr;
+     _savePathway = false;
 }
 
 #ifdef _SIMULATOR
@@ -62,8 +63,8 @@ Building::Building(Configuration* configuration, PedDistributor& pedDistributor)
                  configuration->GetRoutingEngine()),
            _caption("no_caption")
 {
-      _savePathway = false;
-      _linkedCellGrid = nullptr;
+     _savePathway = false;
+     _linkedCellGrid = nullptr;
 
 #ifdef _JPS_AS_A_SERVICE
      if (_configuration->GetRunAsService()) {
@@ -94,14 +95,16 @@ Building::Building(Configuration* configuration, PedDistributor& pedDistributor)
      }
      InitGrid();
 
+     _configuration->GetDirectionManager()->Init(this);
+
      if (!_routingEngine->Init(this)) {
-           Log->Write("ERROR:\t could not initialize the routers!");
-           exit(EXIT_FAILURE);
+          Log->Write("ERROR:\t could not initialize the routers!");
+          exit(EXIT_FAILURE);
      }
 
      if (!SanityCheck()) {
-           Log->Write("ERROR:\t There are sanity errors in the geometry file");
-           exit(EXIT_FAILURE);
+          Log->Write("ERROR:\t There are sanity errors in the geometry file");
+          exit(EXIT_FAILURE);
      }
 
 //     SaveGeometry("/home/laemmel/Desktop/geo.xml");
@@ -752,90 +755,89 @@ bool Building::InitInsideGoals()
 }
 
 bool Building::correct() const {
-      auto t_start = std::chrono::high_resolution_clock::now();
-      Log->Write("INFO:\tenter correct ...");
-      bool removed = false;
-      bool removed_room = false;
-      for(auto&& room: this->GetAllRooms()) {
-            for(auto&& subroom: room.second->GetAllSubRooms()) {
-                  // -- remove exits *on* walls
-                  removed_room = RemoveOverlappingDoors(subroom.second);
-                  removed = removed || removed_room;
-
-                  // --------------------------
-                  // -- remove overlapping walls
-                  auto walls = subroom.second->GetAllWalls(); // this call
-                  // should be
-                  // after
-                  // eliminating
-                  // nasty exits
+     auto t_start = std::chrono::high_resolution_clock::now();
+     Log->Write("INFO:\tenter correct ...");
+     bool removed = false;
+bool removed_room = false;
+     for(auto&& room: this->GetAllRooms()) {
+          for(auto&& subroom: room.second->GetAllSubRooms()) {
+                // -- remove exits *on* walls
+                removed_room = RemoveOverlappingDoors(subroom.second);
+                removed = removed || removed_room;
+               // --------------------------
+               // -- remove overlapping walls
+               auto walls = subroom.second->GetAllWalls(); // this call
+                                                                // should be
+                                                                // after
+                                                                // eliminating
+                                                                // nasty exits
 #if DEBUG
-                  std::cout<< "\n" << KRED << "correct Room " << room.first << "  Subroom " << subroom.first << RESET  << std::endl;
+               std::cout<< "\n" << KRED << "correct Room " << room.first << "  Subroom " << subroom.first << RESET  << std::endl;
 #endif
-                  for(auto const & bigWall: walls) //self checking
-                  {
-                        // std::cout << "BigWall: " << std::endl;
-                        // bigWall.WriteToErrorLog();
-                        //special treatment for doors
+               for(auto const & bigWall: walls) //self checking
+               {
+                    // std::cout << "BigWall: " << std::endl;
+                      // bigWall.WriteToErrorLog();
+                    //special treatment for doors
 /////
-                        std::vector<Wall> WallPieces;
-                        WallPieces = SplitWall(subroom.second, bigWall);
-                        if(!WallPieces.empty())
-                              removed = true;
+                    std::vector<Wall> WallPieces;
+                    WallPieces = SplitWall(subroom.second, bigWall);
+                    if(!WallPieces.empty())
+                         removed = true;
 #if DEBUG
                         std::cout << "Wall pieces size : " <<  WallPieces.size() << std::endl;
                         for(auto w:WallPieces)
                               w.WriteToErrorLog();
 #endif
-                        int ok=0;
-                        while(!ok)
-                        {
-                              ok = 1; // ok ==1 means no new pieces are found
-                              for (auto wallPiece: WallPieces)
+                    int ok=0;
+                    while(!ok)
+                    {
+                         ok = 1; // ok ==1 means no new pieces are found
+                         for (auto wallPiece: WallPieces)
+                         {
+                              std::vector<Wall> tmpWallPieces;
+                              tmpWallPieces = SplitWall(subroom.second, wallPiece);
+                              if(!tmpWallPieces.empty())
                               {
-                                    std::vector<Wall> tmpWallPieces;
-                                    tmpWallPieces = SplitWall(subroom.second, wallPiece);
-                                    if(!tmpWallPieces.empty())
+                                   // std::cout << "set ok because tmp size =" << tmpWallPieces.size() << std::endl;
+                                    ok = 0; /// stay in the loop
+                                    // append tmpWallPieces to WallPiece
+                                    WallPieces.insert(std::end(WallPieces),std::begin(tmpWallPieces), std::end(tmpWallPieces));
+                                    // remove the line since it was split already
+                                    auto it = std::find(WallPieces.begin(), WallPieces.end(), wallPiece);
+                                    if (it != WallPieces.end())
                                     {
-                                          // std::cout << "set ok because tmp size =" << tmpWallPieces.size() << std::endl;
-                                          ok = 0; /// stay in the loop
-                                          // append tmpWallPieces to WallPiece
-                                          WallPieces.insert(std::end(WallPieces),std::begin(tmpWallPieces), std::end(tmpWallPieces));
-                                          // remove the line since it was split already
-                                          auto it = std::find(WallPieces.begin(), WallPieces.end(), wallPiece);
-                                          if (it != WallPieces.end())
-                                          {
-                                                // std::cout<< KGRN << "delete wall ..." << RESET <<std::endl;
-                                                // wallPiece.WriteToErrorLog();
-                                                WallPieces.erase(it);
-                                          }
-
-                                          // std::cout << "BNow Wall peces size : " <<  WallPieces.size() << std::endl;
+                                         // std::cout<< KGRN << "delete wall ..." << RESET <<std::endl;
+                                         // wallPiece.WriteToErrorLog();
+                                         WallPieces.erase(it);
                                     }
+
+                                    // std::cout << "BNow Wall peces size : " <<  WallPieces.size() << std::endl;
                               }
+                         }
 #if DEBUG
-                              std::cout << "ok "<< ok << std::endl;
-                              std::cout << "new while  Wall peces size : " <<  WallPieces.size() << std::endl;
-                              std::cout << "====" << std::endl;
+                         std::cout << "ok "<< ok << std::endl;
+                         std::cout << "new while  Wall peces size : " <<  WallPieces.size() << std::endl;
+                         std::cout << "====" << std::endl;
 
-                              for(auto t: WallPieces){
-                                    std::cout << ">> Piece: " << std::endl;
-                                    t.WriteToErrorLog();
-                              }
+                         for(auto t: WallPieces){
+                              std::cout << ">> Piece: " << std::endl;
+                              t.WriteToErrorLog();
+                         }
 #endif
-                              // getc(stdin);
-                        }// while
-                        // remove
-                        // duplicates fromWllPiecs
-                        if(!WallPieces.empty())
-                        {
-                              //remove  duplicaes from wallPiecess
+                         // getc(stdin);
+                    }// while
+                    // remove
+                    // duplicates fromWllPiecs
+                    if(!WallPieces.empty())
+                    {
+                         //remove  duplicaes from wallPiecess
 
-                              auto end = WallPieces.end();
-                              for (auto it = WallPieces.begin(); it != end; ++it) {
-                                    end = std::remove(it + 1, end, *it);
-                              }
-                              WallPieces.erase(end, WallPieces.end());
+                         auto end = WallPieces.end();
+                         for (auto it = WallPieces.begin(); it != end; ++it) {
+                                end = std::remove(it + 1, end, *it);
+                         }
+                         WallPieces.erase(end, WallPieces.end());
 #if DEBUG
                          std::cout << "..removing duplicates pieces..\n";
                          for(auto t: WallPieces){
@@ -852,12 +854,13 @@ bool Building::correct() const {
 
      if(removed)
      {
-          fs::path f("correct_"+this->GetConfig()->GetGeometryFile());
-          //fs::path p(this->GetConfig()->GetProjectRootDir());
-          //p = p / f;
-          std::string filename = f.string();
-          if(SaveGeometry(filename))
-               this->GetConfig()->SetGeometryFile(filename);
+          auto geometryFile = add_prefix_to_filename(
+            "correct_", GetGeometryFilename());
+
+          if(SaveGeometry(geometryFile)) {
+              GetConfig()->SetGeometryFile(geometryFile);
+          }
+
      }
 
     auto t_end = std::chrono::high_resolution_clock::now();
@@ -865,6 +868,7 @@ bool Building::correct() const {
     Log->Write("INFO:\tLeave geometry correct with success (%.3f s)", elapsedTimeMs);
     return true;
 }
+
 bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom>& subroom) const
 {
 #if DEBUG
@@ -1051,17 +1055,18 @@ bool Building::ReplaceBigWall(const std::shared_ptr<SubRoom>& subroom, const Wal
 
      return true;
 }
-const std::string& Building::GetProjectFilename() const
+
+const fs::path& Building::GetProjectFilename() const
 {
      return _configuration->GetProjectFile();
 }
 
-const std::string& Building::GetProjectRootDir() const
+const fs::path& Building::GetProjectRootDir() const
 {
      return _configuration->GetProjectRootDir();
 }
 
-const std::string& Building::GetGeometryFilename() const
+const fs::path& Building::GetGeometryFilename() const
 {
      return _configuration->GetGeometryFile();
 }
@@ -1757,7 +1762,7 @@ Crossing* Building::GetCrossingByUID(int uid) const
         return nullptr;
 }
 
-bool Building::SaveGeometry(const std::string& filename) const
+bool Building::SaveGeometry(const fs::path& filename) const
 {
     std::stringstream geometry;
 
@@ -1861,7 +1866,7 @@ bool Building::SaveGeometry(const std::string& filename) const
 
     //cout<<endl<<geometry.str()<<endl;
 
-    std::ofstream geofile(filename);
+    std::ofstream geofile(filename.string());
     if (geofile.is_open()) {
          geofile << geometry.str();
          Log->Write("INFO:\tfile saved to %s", filename.c_str());

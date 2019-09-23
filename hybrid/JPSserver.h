@@ -31,7 +31,7 @@
 #include "hybridsim.grpc.pb.h"
 #include "Latches.h"
 #include "../general/Configuration.h"
-#include "../routing/DirectionStrategy.h"
+#include "../routing/direction/walking/DirectionStrategy.h"
 
 using grpc::ServerBuilder;
 using grpc::ServerContext;

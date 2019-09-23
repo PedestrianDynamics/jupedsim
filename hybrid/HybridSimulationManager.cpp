@@ -81,9 +81,9 @@ bool HybridSimulationManager::Run(Simulation& sim)
      if (_config->GetDumpScenario()) {
           Log->Write("INFO:\tDumping scenario.");
           _config->SetTmax(Pedestrian::GetGlobalTime());
-          sim.GetBuilding()->SaveGeometry(_config->GetProjectRootDir()+_config->GetGeometryFile());
+          sim.GetBuilding()->SaveGeometry(_config->GetProjectRootDir() / _config->GetGeometryFile());
           IniFileWriter* w = new IniFileWriter(_config, &sim, GetSimObserver());
-          w->WriteToFile(_config->GetProjectRootDir()+"ini.xml");
+          w->WriteToFile(_config->GetProjectRootDir() / "ini.xml");
      }
 
      grpc_shutdown();

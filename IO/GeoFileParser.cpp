@@ -59,12 +59,12 @@ void GeoFileParser::LoadBuilding(Building* building)
 bool GeoFileParser::LoadGeometry(Building* building)
 {
 
-     fs::path rootDir(_configuration->GetProjectRootDir());
+     const fs::path& rootDir(_configuration->GetProjectRootDir());
 
-     std::string geoFilenameWithPath = (rootDir/fs::path(_configuration->GetGeometryFile())).string();
+     const fs::path geoFilenameWithPath =  rootDir / _configuration->GetGeometryFile();
      std::cout << "\nLoadGeometry: file: " << geoFilenameWithPath << "\n";
 
-     TiXmlDocument docGeo(geoFilenameWithPath);
+     TiXmlDocument docGeo(geoFilenameWithPath.string());
      if (!docGeo.LoadFile()) {
           Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
           Log->Write("\t could not parse the geometry file");
@@ -336,7 +336,7 @@ bool GeoFileParser::LoadGeometry(Building* building)
           else{
                Log->Write("INFO:\tNot parsing transition from file");
           }
-          Log->Write("INFO:\tGot %d transitions", building-> GetAllTransitions().size());
+          Log->Write("INFO:\tGot %d transitions", building->GetAllTransitions().size());
 
      }// xTransNode
      Log->Write("INFO: \tLoading building file successful!!!\n");
@@ -349,7 +349,7 @@ bool GeoFileParser::LoadRoutingInfo(Building* building)
 {
      //TODO read schedule
 
-     TiXmlDocument docRouting(_configuration->GetProjectFile());
+     TiXmlDocument docRouting(_configuration->GetProjectFile().string());
      if (!docRouting.LoadFile()) {
           Log->Write("ERROR: \t%s", docRouting.ErrorDesc());
           Log->Write("ERROR: \t could not parse the routing file");
@@ -495,7 +495,7 @@ bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building* buildi
      }
      //----------------- dn
      int DN = xmltof(xDoor->Attribute("dn"), -1.0);
-     if(DN >= 0)
+     if(DN > 0)
      {
           building->GetTransition(id)->SetDN(DN);
           sprintf(tmp, "\t>> dn: %d\n", DN);
@@ -521,7 +521,7 @@ bool GeoFileParser::LoadTrafficInfo(Building* building)
 
      Log->Write("INFO:\tLoading the traffic info");
 
-     TiXmlDocument doc(_configuration->GetProjectFile());
+     TiXmlDocument doc(_configuration->GetProjectFile().string());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \t could not parse the project file");
@@ -859,7 +859,7 @@ Goal* GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
      }
 
      // Additional checks:
-     const bool waitPed = (wa->GetMinNumPed()  > 0 && wa->GetMaxNumPed() > 0 && wa->GetWaitingTime() > 0.);
+     const bool waitPed = (wa->GetMinNumPed()  > 0 && wa->GetMaxNumPed() > 0 && wa->GetWaitingTime() >= 0.);
      const bool waitDoor = (wa->GetTransitionID() > 0);
 
      // Either (minPed, maxPed, waitingTime) OR transitionID are set
@@ -877,29 +877,29 @@ Goal* GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
                      "not considered since transition_id set", wa->GetId());
      }
 
-     // Read the suceeding goals of waiting area
+     // Read the succeeding goals of waiting area
      std::map<int, double> nextGoals;
 
      //looking for next_wa
      for (TiXmlElement* nextWa = e->FirstChildElement("next_wa"); nextWa;
           nextWa = nextWa->NextSiblingElement("next_wa")) {
-          int nextWaId = xmltoi(nextWa->Attribute("id"), -1);
-          double nextWaP = xmltof(nextWa->Attribute("p"), -1.);
+          int nextWaId = xmltoi(nextWa->Attribute("id"), std::numeric_limits<int>::min());
+          double nextWaP = xmltof(nextWa->Attribute("p"), std::numeric_limits<double>::min());
 
-          if (nextWaId == -1 || nextWaP == -1){
+          if (nextWaId == std::numeric_limits<int>::min() || nextWaP == std::numeric_limits<double>::min()){
                Log->Write("ERROR:\t  check next_wa of WA  %d: id or p not set properly", wa->GetId());
                delete wa;
                return nullptr;
           }
 
-          if (nextWaId < 0){
+          if (nextWaId < -2){
                Log->Write("ERROR:\t  check next_wa of WA  %d: id should be positive integer", wa->GetId());
                delete wa;
                return nullptr;
           }
 
-          if (nextWaP <= 0. || nextWaP > 1.){
-               Log->Write("ERROR:\t  check next_wa of WA  %d: p should be in (0, 1]", wa->GetId());
+          if (nextWaP < 0. || nextWaP > 1.+1e-5){
+               Log->Write("ERROR:\t  check next_wa of WA  %d: p should be in [0, 1]", wa->GetId());
                delete wa;
                return nullptr;
           }
@@ -945,7 +945,7 @@ bool GeoFileParser::LoadTrainInfo(Building* building)
 {
      Log->Write("--------\nINFO:\tLoading the train info");
 
-     TiXmlDocument doc(_configuration->GetProjectFile());
+     TiXmlDocument doc(_configuration->GetProjectFile().string());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \t could not parse the project file");

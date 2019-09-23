@@ -1,7 +1,7 @@
 # JPScore
 
 [![Build Status](https://travis-ci.org/JuPedSim/jpscore.svg?branch=develop)](https://travis-ci.org/JuPedSim/jpscore)
-[![GitHub license](https://img.shields.io/badge/license-GPL-blue.svg)](https://raw.githubusercontent.com/JuPedSim/jpscore/master/LICENSE)
+[![GitHub license](https://img.shields.io/badge/license-LGPL-blue.svg)](https://raw.githubusercontent.com/JuPedSim/jpscore/master/LICENSE)
 [![DOI](https://zenodo.org/badge/36440436.svg)](https://zenodo.org/badge/latestdoi/36440436)
 
 The core module for performing simulations. See the [online documentation](http://jupedsim.org/jpscore/)
@@ -22,6 +22,8 @@ Required:
 * boost (>= 1.65)
 * libomp (if you want to use OpenMP with Apple LLVm or Clang on Linux)
 * cgal
+* spdlog (libspdlog-dev on Ubuntu, spdlog on brew)
+* fmtlib (libfmt-dev on Ubuntu, fmt on brew)
 * cmake (>= 3.1)
 
 Recommended:
@@ -73,7 +75,7 @@ Build full system tests and add them to ctest
 
 ##### BUILD_WITH_ASAN defaults to OFF (Does not support Windows)
 Build an additional target `jpscore_asan` with address and undefined behavior
-sanitizer enabled. Note there is an approx. 2x slowdown when using 
+sanitizer enabled. Note there is an approx. 2x slowdown when using
 `jpscore_asan` over `jpscore`
 
 ## Quick start

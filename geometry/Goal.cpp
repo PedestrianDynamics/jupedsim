@@ -29,6 +29,7 @@
 #include "Point.h"
 #include "Wall.h"
 #include "Crossing.h"
+#include "../pedestrian/Pedestrian.h"
 
 Goal::Goal()
 {
@@ -231,8 +232,8 @@ bool Goal::ConvertLineToPoly()
           tmp = _poly[_poly.size()/2];
           diff = point1 - tmp;
 
-          point1 = tmp +  diff * 0.95;
-          point2 = tmp +  diff * 0.05;
+          point1 = tmp +  diff * 0.51;
+          point2 = tmp +  diff * 0.49;
 
           _crossing->SetPoint1(point1);
           _crossing->SetPoint2(point2);
@@ -241,6 +242,7 @@ bool Goal::ConvertLineToPoly()
           Line tmp_line(_poly[_poly.size()/2], _poly[(_poly.size()/2)+1], 0);
           _crossing->SetPoint2(tmp_line.GetCentre());
      }
+
 
 
 //     std::cout << "Crossing goal: " << _crossing->GetUniqueID() << _crossing->toString() << std::endl;
@@ -299,10 +301,13 @@ Crossing* Goal::GetCentreCrossing()
      return _crossing;
 }
 
-//bool Goal::IsInsideGoal(Pedestrian* ped) const
-//{
-//     return IsInsideGoal(ped->GetPos());
-//}
+bool Goal::IsInsideGoal(Pedestrian* ped) const
+{
+     if (_roomID == ped->GetRoomID() && _subRoomID == ped->GetSubRoomID()){
+          return IsInsideGoal(ped->GetPos());
+     }
+     return false;
+}
 
 bool Goal::IsInsideGoal(const Point& point) const
 {

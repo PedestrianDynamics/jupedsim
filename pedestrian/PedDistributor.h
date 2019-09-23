@@ -34,7 +34,7 @@
 #include "AgentsSource.h"
 #include "StartDistribution.h"
 
-#include "routing/Router.h"
+#include "router/Router.h"
 #include "geometry/Building.h"
 #include "general/ArgumentParser.h"
 
@@ -61,7 +61,7 @@ public:
     PedDistributor(const Configuration *configuration);
 
     /**
-     * desctructor
+     * destructor
      */
     virtual ~PedDistributor();
 
@@ -95,7 +95,7 @@ public:
      * WARNING: It is assumed that positions should be in the corresponding room/subroom.
      * checks with n if the file delivers the right number of peds
      */
-    const std::vector<Point>  GetPositionsFromFile(std::string filename, int n, std::string unit) const;
+    const std::vector<Point> GetPositionsFromFile(std::string filename, int n, std::string unit) const;
 
     double GetA_dist() const;
 

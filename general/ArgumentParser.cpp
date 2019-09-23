@@ -27,12 +27,10 @@
 #include "ArgumentParser.h"
 
 #include "general/OpenMP.h"
+#include "general/Logger.h"
 #include "IO/IniFileParser.h"
 #include "IO/OutputHandler.h"
 #include "pedestrian/AgentsParameters.h"
-#include "routing/global_shortest/GlobalRouter.h"
-#include "routing/quickest/QuickestPathRouter.h"
-#include "routing/smoke_router/SmokeRouter.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -63,16 +61,7 @@ bool ArgumentParser::ParseArgs(int argc, char** argv)
 {
      //special case of the default configuration ini.xml
      if (argc==1) {
-          Log->Write(
-                     "INFO: \tTrying to load the default configuration from the file <ini.xml>");
-     // first logs will go to stdout
-          Log->Write("----\nJuPedSim - JPScore\n");
-          Log->Write("Current date   : %s %s", __DATE__, __TIME__);
-          Log->Write("Version        : %s", JPSCORE_VERSION);
-          // Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
-          Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
-          Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
-          Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
+          Logging::Info("Trying to load the default configuration from the file <ini.xml>");
 
           IniFileParser* p = new IniFileParser(_config);
           if (!p->Parse("ini.xml")) {
@@ -129,7 +118,7 @@ bool ArgumentParser::ParseArgs(int argc, char** argv)
                                    _config->SetProjectRootDir(argument5);
                                    _config->SetGeometryFile("geo.xml");
                                    _config->SetProjectFile("ini.xml");
-                                   _config->SetTrajectoriesFile(_config->GetProjectRootDir()+"tra.xml");
+                                   _config->SetTrajectoriesFile(_config->GetProjectRootDir() / "tra.xml");
                                    _config->SetFileFormat(FileFormat::FORMAT_XML_PLAIN);
                                    _config->SetFps(25);
                                    _config->SetDumpScenario(true);

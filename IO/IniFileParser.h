@@ -21,7 +21,7 @@
 #pragma once
 
 #include "general/Configuration.h"
-#include "routing/DirectionStrategy.h"
+#include "general/Filesystem.h"
 
 #include <string>
 
@@ -31,6 +31,10 @@ class TiXmlElement;
 
 class TiXmlNode;
 
+class DirectionManager;
+
+class WaitingStrategy;
+
 extern OutputHandler* Log;
 
 class IniFileParser {
@@ -39,7 +43,7 @@ public:
      IniFileParser(Configuration* config);
      ~IniFileParser(){};
 
-     bool Parse(std::string iniFile);
+     bool Parse(const fs::path& iniFile);
 
 private:
      bool ParseHeader(TiXmlNode* xHeader);
@@ -78,7 +82,9 @@ private:
 
      Configuration* _config;
      int _model;
-     std::shared_ptr<DirectionStrategy> _exit_strategy;
-     int _exit_strat_number;
+     std::shared_ptr<DirectionStrategy> _directionStrategy;
+     std::shared_ptr<WaitingStrategy> _waitingStrategy;
+     std::shared_ptr<DirectionManager> _directionManager;
+    int _exit_strat_number;
 
 };

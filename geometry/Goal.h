@@ -38,6 +38,7 @@
 class Wall;
 class Point;
 class Crossing;
+class Pedestrian;
 
 namespace bg = boost::geometry;
 typedef bg::model::polygon<Point, false, false> polygon_type;
@@ -141,9 +142,8 @@ public:
 
      Crossing* GetCentreCrossing();
 
-//     bool IsInsideGoal(Pedestrian* ped) const;
+     bool IsInsideGoal(Pedestrian* ped) const;
 
-     bool IsInsideGoal(const Point& point) const;
 
     int GetRoomID() const;
 
@@ -152,6 +152,8 @@ public:
     int GetSubRoomID() const;
 
     void SetSubRoomID(int _subRoomID);
+
+    bool IsInsideGoal(const Point& point) const;
 
 private:
     bool IsClockwise();

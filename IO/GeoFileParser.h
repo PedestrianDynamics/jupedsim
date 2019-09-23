@@ -54,4 +54,8 @@ private:
      bool LoadGeometry(Building* building);
 
      bool LoadRoutingInfo(Building* filename);
+
+     bool ReadGoal();
+
+     bool ReadWaitingArea();
 };

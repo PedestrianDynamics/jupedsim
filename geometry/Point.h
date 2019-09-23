@@ -98,7 +98,6 @@ public:
      /// rotate the vector by theta
      Point Rotate(double ctheta, double stheta) const;
 
-
      // operators
      /// addition
      const Point operator+(const Point& p) const;
@@ -140,6 +139,14 @@ BOOST_GEOMETRY_REGISTER_POINT_2D(Point, double, cs::cartesian, _x, _y);
  */
 double Distance(const Point&, const Point&);
 
+/**
+ * Computes the angle between the 2 given points
+ * @param [in] point1
+ *  * @param [in] point2
+ * @return distance between point1 and point2
+
+ */
+double Angle(const Point&, const Point&);
 /// multiplication
 const Point operator*(const Point& p, const double f);
 /// division

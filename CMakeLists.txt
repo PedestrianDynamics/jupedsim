@@ -17,6 +17,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
+
 include(helper_functions)
 print_var(PROJECT_VERSION)
 
@@ -31,6 +32,8 @@ endif()
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+check_prefix_path()
 
 ################################################################################
 # Optional features
@@ -59,6 +62,7 @@ print_var(BUILD_WITH_ASAN)
 if(BUILD_WITH_ASAN AND ${CMAKE_SYSTEM} MATCHES "Windows")
     message(FATAL_ERROR "Address sanitizer builds are not supported on Windows")
 endif()
+
 ################################################################################
 # Compilation flags
 ################################################################################
@@ -84,19 +88,27 @@ list(APPEND COMMON_COMPILE_OPTIONS
 ################################################################################
 add_subdirectory(third-party)
 
+# libfmt
+find_package(fmt 6.0 REQUIRED CONFIG)
+
+# spdlog
+find_package(spdlog 1.3 REQUIRED CONFIG)
+
 # CMakes find_pacakge has no support for generator expressions hence we have to
 # do this the hard way
-if(BUILD_CPPUNIT_TEST)
-    list(APPEND BOOST_COMPONENTS
-        unit_test_framework
-    )
-endif()
 if(${CMAKE_SYSTEM} MATCHES "Darwin")
     list(APPEND BOOST_COMPONENTS
         filesystem
     )
 endif()
 find_package(Boost 1.65 REQUIRED ${BOOST_COMPONENTS})
+
+# boost filesystem / std::filesystem
+add_library(fs INTERFACE)
+target_link_libraries(fs INTERFACE
+    $<$<PLATFORM_ID:Darwin>:Boost::filesystem>
+    $<$<PLATFORM_ID:Linux>:stdc++fs>
+)
 
 # CMakes find module for openmp (FindOpenMP) is currently (cmake 1.15.1) broken
 # in several ways:
@@ -255,6 +267,8 @@ set(source_files
     events/EventManager.cpp
     forms/jpscore.rc
     general/ArgumentParser.cpp
+    general/Logger.cpp
+    general/Filesystem.cpp
     geometry/Building.cpp
     geometry/Crossing.cpp
     geometry/Goal.cpp
@@ -296,42 +310,51 @@ set(source_files
     pedestrian/Pedestrian.cpp
     pedestrian/Pedestrian.cpp
     pedestrian/StartDistribution.cpp
-    routing/DirectionStrategy.cpp
-    routing/ff_router/ffRouter.cpp
-    routing/ff_router/FloorfieldViaFM.cpp
-    routing/ff_router/UnivFFviaFM.cpp
-    routing/ff_router_trips/ffRouterTrips.cpp
-    routing/ff_router_trips/FloorfieldViaFMTrips.cpp
-    routing/ff_router_trips/UnivFFviaFMTrips.cpp
-    routing/global_shortest/AccessPoint.cpp
-    routing/global_shortest/DTriangulation.cpp
-    routing/global_shortest/GlobalRouter.cpp
-    routing/quickest/QuickestPathRouter.cpp
-    routing/Router.cpp
-    routing/RoutingEngine.cpp
-    routing/smoke_router/Brain.cpp
-    routing/smoke_router/BrainStorage.cpp
-    routing/smoke_router/cognitiveMap/associations.cpp
-    routing/smoke_router/cognitiveMap/cogmapoutputhandler.cpp
-    routing/smoke_router/cognitiveMap/cognitivemap.cpp
-    routing/smoke_router/cognitiveMap/connection.cpp
-    routing/smoke_router/cognitiveMap/internnavigationnetwork.cpp
-    routing/smoke_router/cognitiveMap/landmark.cpp
-    routing/smoke_router/cognitiveMap/landmarknetwork.cpp
-    routing/smoke_router/cognitiveMap/region.cpp
-    routing/smoke_router/cognitiveMap/youareherepointer.cpp
-    routing/smoke_router/GraphNetwork.cpp
-    routing/smoke_router/navigation_graph/GraphEdge.cpp
-    routing/smoke_router/navigation_graph/GraphVertex.cpp
-    routing/smoke_router/NavigationGraph.cpp
-    routing/smoke_router/sensor/AbstractSensor.cpp
-    routing/smoke_router/sensor/DiscoverDoorsSensor.cpp
-    routing/smoke_router/sensor/JamSensor.cpp
-    routing/smoke_router/sensor/LastDestinationsSensor.cpp
-    routing/smoke_router/sensor/locater.cpp
-    routing/smoke_router/sensor/RoomToFloorSensor.cpp
-    routing/smoke_router/sensor/SensorManager.cpp
-    routing/smoke_router/SmokeRouter.cpp
+    direction/DirectionManager.cpp
+    direction/waiting/WaitingMiddle.cpp
+        direction/waiting/WaitingRandom.cpp
+    direction/waiting/WaitingStrategy.cpp
+    direction/walking/DirectionFloorfield.cpp
+    direction/walking/DirectionGeneral.cpp
+    direction/walking/DirectionInRangeBottleneck.cpp
+    direction/walking/DirectionLocalFloorfield.cpp
+    direction/walking/DirectionMiddlePoint.cpp
+    direction/walking/DirectionMinSeperationShorterLine.cpp
+    direction/walking/DirectionStrategy.cpp
+    direction/walking/DirectionSubLocalFloorfield.cpp
+    direction/walking/DirectionTrain.cpp
+    router/ff_router/ffRouter.cpp
+    router/ff_router/FloorfieldViaFM.cpp
+    router/ff_router/UnivFFviaFM.cpp
+    router/global_shortest/AccessPoint.cpp
+    router/global_shortest/DTriangulation.cpp
+    router/global_shortest/GlobalRouter.cpp
+    router/quickest/QuickestPathRouter.cpp
+    router/Router.cpp
+    router/RoutingEngine.cpp
+    router/smoke_router/Brain.cpp
+    router/smoke_router/BrainStorage.cpp
+    router/smoke_router/cognitiveMap/associations.cpp
+    router/smoke_router/cognitiveMap/cogmapoutputhandler.cpp
+    router/smoke_router/cognitiveMap/cognitivemap.cpp
+    router/smoke_router/cognitiveMap/connection.cpp
+    router/smoke_router/cognitiveMap/internnavigationnetwork.cpp
+    router/smoke_router/cognitiveMap/landmark.cpp
+    router/smoke_router/cognitiveMap/landmarknetwork.cpp
+    router/smoke_router/cognitiveMap/region.cpp
+    router/smoke_router/cognitiveMap/youareherepointer.cpp
+    router/smoke_router/GraphNetwork.cpp
+    router/smoke_router/navigation_graph/GraphEdge.cpp
+    router/smoke_router/navigation_graph/GraphVertex.cpp
+    router/smoke_router/NavigationGraph.cpp
+    router/smoke_router/sensor/AbstractSensor.cpp
+    router/smoke_router/sensor/DiscoverDoorsSensor.cpp
+    router/smoke_router/sensor/JamSensor.cpp
+    router/smoke_router/sensor/LastDestinationsSensor.cpp
+    router/smoke_router/sensor/locater.cpp
+    router/smoke_router/sensor/RoomToFloorSensor.cpp
+    router/smoke_router/sensor/SensorManager.cpp
+    router/smoke_router/SmokeRouter.cpp
     Simulation.cpp
     voronoi-boost/VoronoiPositionGenerator.cpp
 )
@@ -339,8 +362,10 @@ set(header_files
     events/Event.h
     events/EventManager.h
     general/ArgumentParser.h
+    general/Compiler.h
     general/Configuration.h
     general/Filesystem.h
+    general/Logger.h
     general/Macros.h
     general/randomnumbergenerator.h
     geometry/Building.h
@@ -382,42 +407,51 @@ set(header_files
     pedestrian/Pedestrian.h
     pedestrian/Pedestrian.h
     pedestrian/StartDistribution.h
-    routing/DirectionStrategy.h
-    routing/ff_router/ffRouter.h
-    routing/ff_router/FloorfieldViaFM.h
-    routing/ff_router/UnivFFviaFM.h
-    routing/ff_router_trips/ffRouterTrips.h
-    routing/ff_router_trips/FloorfieldViaFMTrips.h
-    routing/ff_router_trips/UnivFFviaFMTrips.h
-    routing/global_shortest/AccessPoint.h
-    routing/global_shortest/DTriangulation.h
-    routing/global_shortest/GlobalRouter.h
-    routing/quickest/QuickestPathRouter.h
-    routing/Router.h
-    routing/RoutingEngine.h
-    routing/smoke_router/Brain.h
-    routing/smoke_router/BrainStorage.h
-    routing/smoke_router/cognitiveMap/associations.h
-    routing/smoke_router/cognitiveMap/cogmapoutputhandler.h
-    routing/smoke_router/cognitiveMap/cognitivemap.h
-    routing/smoke_router/cognitiveMap/connection.cpp
-    routing/smoke_router/cognitiveMap/internnavigationnetwork.h
-    routing/smoke_router/cognitiveMap/landmark.h
-    routing/smoke_router/cognitiveMap/landmarknetwork.h
-    routing/smoke_router/cognitiveMap/region.h
-    routing/smoke_router/cognitiveMap/youareherepointer.h
-    routing/smoke_router/GraphNetwork.h
-    routing/smoke_router/navigation_graph/GraphEdge.h
-    routing/smoke_router/navigation_graph/GraphVertex.h
-    routing/smoke_router/NavigationGraph.h
-    routing/smoke_router/sensor/AbstractSensor.h
-    routing/smoke_router/sensor/DiscoverDoorsSensor.h
-    routing/smoke_router/sensor/JamSensor.h
-    routing/smoke_router/sensor/LastDestinationsSensor.h
-    routing/smoke_router/sensor/locater.h
-    routing/smoke_router/sensor/RoomToFloorSensor.h
-    routing/smoke_router/sensor/SensorManager.h
-    routing/smoke_router/SmokeRouter.h
+    direction/DirectionManager.h
+    direction/waiting/WaitingMiddle.h
+        direction/waiting/WaitingRandom.h
+    direction/waiting/WaitingStrategy.h
+    direction/walking/DirectionFloorfield.h
+    direction/walking/DirectionGeneral.h
+    direction/walking/DirectionInRangeBottleneck.h
+    direction/walking/DirectionLocalFloorfield.h
+    direction/walking/DirectionMiddlePoint.h
+    direction/walking/DirectionMinSeperationShorterLine.h
+    direction/walking/DirectionStrategy.h
+    direction/walking/DirectionSubLocalFloorfield.h
+    direction/walking/DirectionTrain.h
+    router/ff_router/ffRouter.h
+    router/ff_router/FloorfieldViaFM.h
+    router/ff_router/UnivFFviaFM.h
+    router/global_shortest/AccessPoint.h
+    router/global_shortest/DTriangulation.h
+    router/global_shortest/GlobalRouter.h
+    router/quickest/QuickestPathRouter.h
+    router/Router.h
+    router/RoutingEngine.h
+    router/smoke_router/Brain.h
+    router/smoke_router/BrainStorage.h
+    router/smoke_router/cognitiveMap/associations.h
+    router/smoke_router/cognitiveMap/cogmapoutputhandler.h
+    router/smoke_router/cognitiveMap/cognitivemap.h
+    router/smoke_router/cognitiveMap/connection.cpp
+    router/smoke_router/cognitiveMap/internnavigationnetwork.h
+    router/smoke_router/cognitiveMap/landmark.h
+    router/smoke_router/cognitiveMap/landmarknetwork.h
+    router/smoke_router/cognitiveMap/region.h
+    router/smoke_router/cognitiveMap/youareherepointer.h
+    router/smoke_router/GraphNetwork.h
+    router/smoke_router/navigation_graph/GraphEdge.h
+    router/smoke_router/navigation_graph/GraphVertex.h
+    router/smoke_router/NavigationGraph.h
+    router/smoke_router/sensor/AbstractSensor.h
+    router/smoke_router/sensor/DiscoverDoorsSensor.h
+    router/smoke_router/sensor/JamSensor.h
+    router/smoke_router/sensor/LastDestinationsSensor.h
+    router/smoke_router/sensor/locater.h
+    router/smoke_router/sensor/RoomToFloorSensor.h
+    router/smoke_router/sensor/SensorManager.h
+    router/smoke_router/SmokeRouter.h
     voronoi-boost/VoronoiPositionGenerator.h
 )
 set(JPSFIRE_HDR
@@ -439,36 +473,36 @@ set(JPSFIRE_SRC
     JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
 )
 set(AIROUTER_SRC
-    routing/ai_router/AIRouter.cpp
-    routing/ai_router/BrainStorage.cpp
-    routing/ai_router/cognitiveMap/associations.cpp
-    routing/ai_router/cognitiveMap/connection.cpp
-    routing/ai_router/cognitiveMap/cognitivemap.cpp
-    routing/ai_router/cognitiveMap/landmark.cpp
-    routing/ai_router/cognitiveMap/region.cpp
-    routing/ai_router/cognitiveMap/landmarknetwork.cpp
-    routing/ai_router/cognitiveMap/internnavigationnetwork.cpp
-    routing/ai_router/perception/visualsystem.cpp
-    routing/ai_router/perception/visibleenvironment.cpp
-    routing/ai_router/perception/cgalgeometry.cpp
-    routing/ai_router/perception/sign.cpp
-    routing/ai_router/Cortex.cpp
+    router/ai_router/AIRouter.cpp
+    router/ai_router/BrainStorage.cpp
+    router/ai_router/cognitiveMap/associations.cpp
+    router/ai_router/cognitiveMap/connection.cpp
+    router/ai_router/cognitiveMap/cognitivemap.cpp
+    router/ai_router/cognitiveMap/landmark.cpp
+    router/ai_router/cognitiveMap/region.cpp
+    router/ai_router/cognitiveMap/landmarknetwork.cpp
+    router/ai_router/cognitiveMap/internnavigationnetwork.cpp
+    router/ai_router/perception/visualsystem.cpp
+    router/ai_router/perception/visibleenvironment.cpp
+    router/ai_router/perception/cgalgeometry.cpp
+    router/ai_router/perception/sign.cpp
+    router/ai_router/Cortex.cpp
 )
 set(AIROUTER_HDR
-    routing/ai_router/AIRouter.h
-    routing/ai_router/BrainStorage.h
-    routing/ai_router/cognitiveMap/associations.h
-    routing/ai_router/cognitiveMap/connection.cpp
-    routing/ai_router/cognitiveMap/cognitivemap.h
-    routing/ai_router/cognitiveMap/landmark.h
-    routing/ai_router/cognitiveMap/region.h
-    routing/ai_router/cognitiveMap/landmarknetwork.h
-    routing/ai_router/cognitiveMap/internnavigationnetwork.h
-    routing/ai_router/perception/visualsystem.h
-    routing/ai_router/perception/visibleenvironment.h
-    routing/ai_router/perception/cgalgeometry.h
-    routing/ai_router/perception/sign.h
-    routing/ai_router/Cortex.h
+    router/ai_router/AIRouter.h
+    router/ai_router/BrainStorage.h
+    router/ai_router/cognitiveMap/associations.h
+    router/ai_router/cognitiveMap/connection.cpp
+    router/ai_router/cognitiveMap/cognitivemap.h
+    router/ai_router/cognitiveMap/landmark.h
+    router/ai_router/cognitiveMap/region.h
+    router/ai_router/cognitiveMap/landmarknetwork.h
+    router/ai_router/cognitiveMap/internnavigationnetwork.h
+    router/ai_router/perception/visualsystem.h
+    router/ai_router/perception/visibleenvironment.h
+    router/ai_router/perception/cgalgeometry.h
+    router/ai_router/perception/sign.h
+    router/ai_router/Cortex.h
 )
 
 add_library(core STATIC
@@ -482,7 +516,7 @@ add_library(core STATIC
 target_compile_options(core PRIVATE
     ${COMMON_COMPILE_OPTIONS}
 )
-target_compile_definitions(core PRIVATE
+target_compile_definitions(core PUBLIC
     $<$<BOOL:${AIROUTER}>:AIROUTER>
     $<$<BOOL:${JPSFIRE}>:JPSFIRE>
     JPSCORE_VERSION="${PROJECT_VERSION}"
@@ -496,8 +530,9 @@ target_link_libraries(core
     visilibity
     $<$<BOOL:${AIROUTER}>:CGAL::CGAL>
     $<$<BOOL:${JPSFIRE}>:cnpy>
-    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>>:stdc++fs>
-    $<$<CXX_COMPILER_ID:AppleClang>:Boost::filesystem>
+    fs
+    spdlog::spdlog
+    fmt::fmt
 )
 target_include_directories(core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -516,6 +551,8 @@ target_compile_options(jpscore PRIVATE
 target_link_libraries(jpscore
     core
     Threads::Threads
+    spdlog::spdlog
+    fmt::fmt
 )
 
 if (WIN32)
@@ -595,43 +632,32 @@ endif()
 # Unit tests
 ################################################################################
 if (BUILD_CPPUNIT_TEST)
-    set(UNIT_TESTS
-        Utest/testEffectiveDistanceToEllipse.cpp
-        Utest/testEffectiveDistanceToLine.cpp
-        Utest/testGetArea.cpp
-        Utest/testIsInside.cpp
-        Utest/testIsOn.cpp
-        Utest/testIsOutside.cpp
-        Utest/testPointOnEllipse.cpp
-        Utest/testSign.cpp
-        Utest/testSign1.cpp
+    find_package(Catch2 REQUIRED)
+
+    add_executable(unittests
+      test/catch2/Main.cpp
+      test/catch2/pedestrian/EllipseTest.cpp
+
+      test/catch2/math/MathematicsTest.cpp
+
+      test/catch2/geometry/LineTest.cpp
+      test/catch2/geometry/SubRoomTest.cpp
+      test/catch2/geometry/RoomTest.cpp
+      test/catch2/geometry/PointTest.cpp
+      test/catch2/geometry/ObstacleTest.cpp
     )
-    foreach(file ${UNIT_TESTS})
-        get_filename_component(test ${file} NAME_WE)
-        add_executable(${test} ${file})
-        target_link_libraries(${test} core)
-        target_compile_options(${test} PRIVATE
-            ${COMMON_COMPILE_OPTIONS}
-        )
-        add_test(NAME ${test} COMMAND $<TARGET_FILE:${test}>)
-    endforeach()
-    add_executable(boost-unit-tests
-        Utest/test_geometry/testClassLineBoost.cpp
-        Utest/test_geometry/testClassObstacleBoost.cpp
-        Utest/test_geometry/testClassPointBoost.cpp
-        Utest/test_geometry/testClassRoomBoost.cpp
-        Utest/test_geometry/testClassWallBoost.cpp
-        Utest/test_geometry/testMain.cpp
-        Utest/test_geometry/testSubRoomBoost.cpp
-    )
-    target_link_libraries(boost-unit-tests
-        core
-        Boost::unit_test_framework
-    )
-    target_compile_options(boost-unit-tests PRIVATE
+
+    target_link_libraries(unittests Catch2::Catch2 core)
+
+    target_compile_options(unittests PRIVATE
         ${COMMON_COMPILE_OPTIONS}
     )
-    add_test(NAME boost-unit-tests COMMAND $<TARGET_FILE:boost-unit-tests>)
+
+    include(CTest)
+    include(ParseAndAddCatchTests)
+    set(PARSE_CATCH_TESTS_ADD_TARGET_IN_TEST_NAME Off)
+    set(PARSE_CATCH_TESTS_ADD_TO_CONFIGURE_DEPENDS On)
+    ParseAndAddCatchTests(unittests)
 
 endif()
 

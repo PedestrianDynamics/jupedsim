@@ -34,9 +34,13 @@
 #include "geometry/Wall.h"
 #include "mpi/LCGrid.h"
 #include "pedestrian/Pedestrian.h"
+#include "direction/DirectionManager.h"
+#include "direction/walking/DirectionFloorfield.h"
+#include "direction/walking/DirectionLocalFloorfield.h"
+#include "direction/walking/DirectionSubLocalFloorfield.h"
 
 
-KrauszModel::KrauszModel(std::shared_ptr<DirectionStrategy> dir, double nuped, double nuwall, double dist_effPed,
+KrauszModel::KrauszModel(std::shared_ptr<DirectionManager> dir, double nuped, double nuwall, double dist_effPed,
                      double dist_effWall, double intp_widthped, double intp_widthwall, double maxfped,
                      double maxfwall)
 {
@@ -60,32 +64,8 @@ KrauszModel::~KrauszModel(void)
 
 bool KrauszModel::Init (Building* building)
 {
-     if(auto dirff = dynamic_cast<DirectionFloorfield*>(_direction.get())){
-          Log->Write("INFO:\t Init DirectionFloorfield starting ...");
-          double _deltaH = building->GetConfig()->get_deltaH();
-          double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
-          bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
-          dirff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-          Log->Write("INFO:\t Init DirectionFloorfield done");
-     }
 
-     if(auto dirlocff = dynamic_cast<DirectionLocalFloorfield*>(_direction.get())){
-          Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
-          double _deltaH = building->GetConfig()->get_deltaH();
-          double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
-          bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
-          dirlocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-          Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
-     }
-
-     if(auto dirsublocff = dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get())){
-          Log->Write("INFO:\t Init DirectionSubLOCALFloorfield starting ...");
-          double _deltaH = building->GetConfig()->get_deltaH();
-          double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
-          bool _useWallAvoidance = building->GetConfig()->get_use_wall_avoidance();
-          dirsublocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-          Log->Write("INFO:\t Init DirectionSubLOCALFloorfield done");
-     }
+     _direction->Init(building);
 
      const std::vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
      size_t peds_size = allPeds.size();
@@ -261,9 +241,9 @@ inline  Point KrauszModel::ForceDriv(Pedestrian* ped, Room* room) const
      Point lastE0 = ped->GetLastE0();
      ped->SetLastE0(target-pos);
 
-     if (  (dynamic_cast<DirectionFloorfield*>(_direction.get())) ||
-           (dynamic_cast<DirectionLocalFloorfield*>(_direction.get())) ||
-           (dynamic_cast<DirectionSubLocalFloorfield*>(_direction.get()))  ) {
+     if (  (dynamic_cast<DirectionFloorfield*>(_direction->GetDirectionStrategy().get())) ||
+           (dynamic_cast<DirectionLocalFloorfield*>(_direction->GetDirectionStrategy().get())) ||
+           (dynamic_cast<DirectionSubLocalFloorfield*>(_direction->GetDirectionStrategy().get()))  ) {
           if (dist > 50*J_EPS_GOAL) {
                const Point& v0 = ped->GetV0(target);
                F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
@@ -626,11 +606,11 @@ Point KrauszModel::ForceInterpolation(double v0, double K_ij, const Point& e, do
 
 // Getter-Funktionen
 
-std::shared_ptr<DirectionStrategy> KrauszModel::GetDirection() const
-{
-     return _direction;
-}
-
+//std::shared_ptr<DirectionStrategy> KrauszModel::GetDirection() const
+//{
+//     return _direction;
+//}
+//
 double KrauszModel::GetNuPed() const
 {
      return _nuPed;

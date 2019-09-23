@@ -30,9 +30,11 @@
 
 #include "geometry/Building.h"
 #include "geometry/SubRoom.h"
+#include "geometry/WaitingArea.h"
 #include "JPSfire/generic/FDSMeshStorage.h"
 
 #include <cassert>
+
 // initialize the static variables
 double Pedestrian::_globalTime = 0.0;
 int Pedestrian::_agentsCreated=1;
@@ -731,6 +733,7 @@ const Point& Pedestrian::GetV0(const Point& target)
      t = _newOrientationDelay++ *_deltaT/(1.0+100* _distToBlockade);
 
      _V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
+
 #if DEBUGV0
      if(0){
           printf("=====\nGoal Line=[%f, %f]-[%f, %f]\n", _navLine->GetPoint1()._x, _navLine->GetPoint1()._y, _navLine->GetPoint2()._x, _navLine->GetPoint2()._y);
@@ -1256,6 +1259,20 @@ bool Pedestrian::IsInsideGoal() const
      return _insideGoal;
 }
 
+bool Pedestrian::IsInsideWaitingAreaWaiting() const
+{
+     if (_insideGoal){
+          auto itr = _building->GetAllGoals().find(_desiredFinalDestination);
+          if (itr != _building->GetAllGoals().end()){
+               Goal* goal = itr->second;
+               if (WaitingArea* wa = dynamic_cast<WaitingArea*>(goal)){
+                    return wa->IsWaiting(Pedestrian::GetGlobalTime(), _building);
+               }
+          }
+     }
+     return false;
+}
+
 void Pedestrian::EnterGoal()
 {
      _insideGoal = true;
@@ -1265,4 +1282,50 @@ void Pedestrian::EnterGoal()
 void Pedestrian::LeaveGoal()
 {
      _insideGoal = false;
+}
+
+bool Pedestrian::IsWaiting() const
+{
+     return _waiting;
+}
+
+const Point& Pedestrian::GetWaitingPos() const
+{
+     return _waitingPos;
+}
+
+void Pedestrian::SetWaitingPos(const Point& waitingPos)
+{
+     _waitingPos = waitingPos;
+}
+
+
+void Pedestrian::StartWaiting()
+{
+     _waitingPos._x = std::numeric_limits<double>::max();
+     _waitingPos._y = std::numeric_limits<double>::max();
+     _waiting = true;
+}
+
+void Pedestrian::EndWaiting()
+{
+     _waiting = false;
+}
+
+bool Pedestrian::IsOutside()
+{
+     Room* room = _building->GetRoom(_roomID);
+
+     if (room->GetCaption() == "outside"){
+          return true;
+     }
+
+     for (auto& itr : room->GetAllSubRooms()){
+          auto subRoom =itr.second;
+
+          if (subRoom->IsInSubRoom(this)){
+               return false;
+          }
+     }
+     return true;
 }

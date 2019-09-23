@@ -21,6 +21,4 @@ public:
 private:
     std::mt19937 _randomEngine;
     std::uniform_real_distribution<double> _rdDistribution;
-
-
 };

@@ -30,48 +30,26 @@
 #include "math/KrauszModel.h"
 #include "math/VelocityModel.h"
 #include "pedestrian/Pedestrian.h"
-#include "routing/ai_router/AIRouter.h"
-#include "routing/ff_router/ffRouter.h"
-#include "routing/ff_router_trips/ffRouterTrips.h"
-#include "routing/global_shortest/GlobalRouter.h"
-#include "routing/quickest/QuickestPathRouter.h"
-#include "routing/smoke_router/SmokeRouter.h"
+#include "router/ai_router/AIRouter.h"
+#include "router/ff_router/ffRouter.h"
+#include "router/global_shortest/GlobalRouter.h"
+#include "router/quickest/QuickestPathRouter.h"
+#include "router/smoke_router/SmokeRouter.h"
+#include "direction/DirectionManager.h"
+#include "direction/walking/DirectionStrategy.h"
+#include "direction/walking/DirectionFloorfield.h"
+#include "direction/walking/DirectionGeneral.h"
+#include "direction/walking/DirectionInRangeBottleneck.h"
+#include "direction/walking/DirectionLocalFloorfield.h"
+#include "direction/walking/DirectionMiddlePoint.h"
+#include "direction/walking/DirectionMinSeperationShorterLine.h"
+#include "direction/walking/DirectionSubLocalFloorfield.h"
+#include "direction/walking/DirectionTrain.h"
+#include "direction/waiting/WaitingStrategy.h"
+#include "direction/waiting/WaitingMiddle.h"
+#include "direction/waiting/WaitingRandom.h"
 
 #include <tinyxml.h>
-
-/* https://stackoverflow.com/questions/38530981/output-compiler-version-in-a-c-program#38531037 */
-std::string ver_string(int a, int b, int c) {
-      std::ostringstream ss;
-      ss << a << '.' << b << '.' << c;
-      return ss.str();
-}
-//https://sourceforge.net/p/predef/wiki/Compilers/
-std::string true_cxx =
-#ifdef __clang__
-      "clang++";
-#elif defined(__GNUC__)
-"g++";
-#elif defined(__MINGW32__)
-   "MinGW";
-#elif defined(_MSC_VER)
-  "Visual Studio";
-#else
-"Compiler not identified";
-#endif
-
-
-std::string true_cxx_ver =
-#ifdef __clang__
-    ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__);
-#elif defined(__GNUC__)
-    ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
-#elif defined(__MINGW32__)
-ver_string(__MINGW32__, __MINGW32_MAJOR_VERSION, __MINGW32_MINOR_VERSION);
-#elif defined( _MSC_VER)
-    ver_string(_MSC_VER, _MSC_FULL_VER,_MSC_BUILD);
-#else
-"";
-#endif
 
 
 IniFileParser::IniFileParser(Configuration* config)
@@ -79,19 +57,16 @@ IniFileParser::IniFileParser(Configuration* config)
      _config = config;
 }
 
-bool IniFileParser::Parse(std::string iniFile)
+bool IniFileParser::Parse(const fs::path& iniFile)
 {
      Log->Write("INFO: \tLoading and parsing the project file <%s>",
-               iniFile.c_str());
+               iniFile.string().c_str());
      _config->SetProjectFile(iniFile);//TODO in some locations it is called iniFile and in others project file,
      // and as I just realized, I called it configuration. We should be consistent here anything else
      // is confusing [gl march '16]
+     _config->SetProjectRootDir(fs::absolute(iniFile.parent_path()));
 
-     fs::path root(iniFile);
-     fs::path q(iniFile);
-     _config->SetProjectRootDir(fs::absolute(q.parent_path()).string());
-
-     TiXmlDocument doc(iniFile);
+     TiXmlDocument doc(iniFile.string());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \tCould not parse the project file");
@@ -137,10 +112,10 @@ bool IniFileParser::Parse(std::string iniFile)
      // -------------------------------------
      // read walkingspeed
      #ifdef JPSFIRE
-     std::shared_ptr<WalkingSpeed> W( new WalkingSpeed(iniFile) );
+     std::shared_ptr<WalkingSpeed> W( new WalkingSpeed(iniFile.string()) );
      _config->SetWalkingSpeed(W);
      // read  ToxicityAnalysis
-     std::shared_ptr<ToxicityAnalysis> T( new ToxicityAnalysis(iniFile, _config->GetFps()));
+     std::shared_ptr<ToxicityAnalysis> T( new ToxicityAnalysis(iniFile.string(), _config->GetFps()));
      _config->SetToxicityAnalysis(T);
      #endif
      // -------------------------------------
@@ -243,18 +218,16 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
 {
      //logfile
      if (xHeader->FirstChild("logfile")) {
-          fs::path logPath( xHeader->FirstChild("logfile")->FirstChild()->Value());
-          fs::path root(_config->GetProjectRootDir()); // returns an absolute path already
-          fs::path canonicalPath = fs::weakly_canonical(root / logPath);
-          std::string log = canonicalPath.string();
-          _config->SetErrorLogFile(log);
+          const fs::path logPath( xHeader->FirstChild("logfile")->FirstChild()->Value());
+          const fs::path& root(_config->GetProjectRootDir()); // returns an absolute path already
+          const fs::path canonicalPath = fs::weakly_canonical(root / logPath);
+          _config->SetErrorLogFile(canonicalPath);
           _config->SetLog(2);
-          Log->Write("INFO:\tlogfile <%s>", _config->GetErrorLogFile().c_str());
+          Log->Write("INFO:\tlogfile <%s>", _config->GetErrorLogFile().string().c_str());
      }
      Log->Write("----\nJuPedSim - JPScore\n");
      Log->Write("Current date   : %s %s", __DATE__, __TIME__);
      Log->Write("Version        : %s", JPSCORE_VERSION);
-     Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
      Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
      Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
      Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
@@ -372,18 +345,16 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
 
           //a file descriptor was given
           if (xTrajectories->FirstChild("file")) {
-               fs::path trajLoc( xTrajectories->FirstChildElement("file")->Attribute("location"));
-               fs::path root(_config->GetProjectRootDir()); // returns an absolute path already
-               fs::path canonicalPath = fs::weakly_canonical(root / trajLoc);
-               std::string traj = canonicalPath.string();
-
-               if (traj.c_str())
+               const fs::path trajLoc( xTrajectories->FirstChildElement("file")->Attribute("location"));
+               if (!trajLoc.empty())
                {
-                    _config->SetTrajectoriesFile(traj);
-                    _config->SetOriginalTrajectoriesFile(traj);
+                    const fs::path& root(_config->GetProjectRootDir()); // returns an absolute path already
+                    const fs::path canonicalTrajPath = fs::weakly_canonical(root / trajLoc);
+                    _config->SetTrajectoriesFile(canonicalTrajPath);
+                    _config->SetOriginalTrajectoriesFile(canonicalTrajPath);
                }
 
-               Log->Write("INFO: \toutput file  <%s>", _config->GetTrajectoriesFile().c_str());
+               Log->Write("INFO: \toutput file  <%s>", _config->GetTrajectoriesFile().string().c_str());
                Log->Write("INFO: \tin format <%s> at <%.0f> frames per seconds",format.c_str(), _config->GetFps());
           }
 
@@ -401,6 +372,7 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
      }
      return true;
 }
+
 bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
 {
      Log->Write("\nINFO:\tUsing the GCFM model");
@@ -483,7 +455,7 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMainNode)
      ParseAgentParameters(xGCFM, xAgentDistri);
 
      //TODO: models do not belong in a configuration container [gl march '16]
-     _config->SetModel(std::shared_ptr<OperationalModel>(new GCFMModel(_exit_strategy, _config->GetNuPed(),
+     _config->SetModel(std::shared_ptr<OperationalModel>(new GCFMModel(_directionManager, _config->GetNuPed(),
                _config->GetNuWall(), _config->GetDistEffMaxPed(),
                _config->GetDistEffMaxWall(), _config->GetIntPWidthPed(),
                _config->GetIntPWidthWall(), _config->GetMaxFPed(),
@@ -574,7 +546,7 @@ bool IniFileParser::ParseKrauszModel(TiXmlElement* xKrausz, TiXmlElement* xMainN
      ParseAgentParameters(xKrausz, xAgentDistri);
 
      //TODO: models do not belong in a configuration container [gl march '16]
-     _config->SetModel(std::shared_ptr<OperationalModel>(new KrauszModel(_exit_strategy, _config->GetNuPed(),
+     _config->SetModel(std::shared_ptr<OperationalModel>(new KrauszModel(_directionManager, _config->GetNuPed(),
                                                                          _config->GetNuWall(), _config->GetDistEffMaxPed(),
                                                                          _config->GetDistEffMaxWall(), _config->GetIntPWidthPed(),
                                                                          _config->GetIntPWidthWall(), _config->GetMaxFPed(),
@@ -677,7 +649,7 @@ bool IniFileParser::ParseGompertzModel(TiXmlElement* xGompertz, TiXmlElement* xM
      ParseAgentParameters(xGompertz, xAgentDistri);
 
      //TODO: models do not belong in a configuration container [gl march '16]
-     _config->SetModel(std::shared_ptr<OperationalModel>(new GompertzModel(_exit_strategy, _config->GetNuPed(),
+     _config->SetModel(std::shared_ptr<OperationalModel>(new GompertzModel(_directionManager, _config->GetNuPed(),
                _config->GetaPed(), _config->GetbPed(), _config->GetcPed(),
                _config->GetNuWall(), _config->GetaWall(), _config->GetbWall(),
                _config->GetcWall())));
@@ -828,7 +800,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xM
      ParseAgentParameters(xGradient, xAgentDistri);
 
      //TODO: models do not belong in a configuration container [gl march '16]
-     _config->SetModel(std::shared_ptr<OperationalModel>(new GradientModel(_exit_strategy, _config->GetNuPed(),
+     _config->SetModel(std::shared_ptr<OperationalModel>(new GradientModel(_directionManager, _config->GetNuPed(),
                _config->GetaPed(), _config->GetbPed(), _config->GetcPed(),
                _config->GetNuWall(), _config->GetaWall(), _config->GetbWall(),
                _config->GetcWall(), _config->get_deltaH(), _config->get_wall_avoid_distance(), _config->get_use_wall_avoidance(),
@@ -919,7 +891,7 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement* xVelocity, TiXmlElement* xM
      //Parsing the agent parameters
      TiXmlNode* xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
      ParseAgentParameters(xVelocity, xAgentDistri);
-     _config->SetModel(std::shared_ptr<OperationalModel>(new VelocityModel(_exit_strategy, _config->GetaPed(),
+     _config->SetModel(std::shared_ptr<OperationalModel>(new VelocityModel(_directionManager, _config->GetaPed(),
                _config->GetDPed(), _config->GetaWall(),
                _config->GetDWall())));
 
@@ -1130,6 +1102,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
           e = e->NextSiblingElement("router")) {
 
           std::string strategy = e->Attribute("description");
+          std::cout << "Description: <" <<strategy << ">" << std::endl;
           int id = atoi(e->Attribute("router_id"));
 
           if ((strategy == "local_shortest") &&
@@ -1178,25 +1151,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* ag
                std::cerr << "\nCan not use AI Router. Rerun cmake with option  -DAIROUTER=true and recompile.\n";
                exit(EXIT_FAILURE);
      #endif
-          }
-          else if ((strategy == "ff_global_shortest_trips") &&
-                   (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
-               //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
-               Router *r = new FFRouterTrips(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals, _config);
-               _config->GetRoutingEngine()->AddRouter(r);
-
-               if ((_exit_strat_number == 8) || (_exit_strat_number == 9)){
-                   Log->Write("\nINFO: \tUsing FF Global Shortest Router Trips");
-               }
-               else {
-                   Log->Write("\nWARNING: \tExit Strategy Number is not 8 or 9!!!");
-                   // config object holds default values, so we omit any set operations
-               }
-
-               ///Parsing additional options
-               if (!ParseFfRouterOps(e, ROUTING_FF_GLOBAL_SHORTEST)) {
-                    return false;
-               }
           }
           else if ((strategy == "ff_global_shortest") &&
                     (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) ) {
@@ -1502,7 +1456,9 @@ bool IniFileParser::ParseNodeToSolver(const TiXmlNode& solverNode)
 
 bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
 {
-
+     // Init DirectionManager
+     _directionManager = std::shared_ptr<DirectionManager>(new DirectionManager);
+    //Read direction strategy
     std::string query = "exit_crossing_strategy";
      if (!strategyNode.FirstChild(query.c_str())) {
           query = "exitCrossingStrategy";
@@ -1564,19 +1520,19 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                }
                switch (pExitStrategy) {
                case 1:
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMiddlePoint());
+                    _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionMiddlePoint());
                     break;
                case 2:
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
+                    _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
                     break;
                case 3:
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionInRangeBottleneck());
+                    _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionInRangeBottleneck());
                     break;
                case 4:
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionGeneral());
+                    _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionGeneral());
                     break;
                case 6:
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionFloorfield());
+                    _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionFloorfield());
                     if(!ParseFfOpts(strategyNode)) {
                          return false;
                     };
@@ -1587,46 +1543,29 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
                     Log->Write("WARNING: \tChanging Exit-Strategy to #9 (Floorfields with targets within subroom)");
                     pExitStrategy = 9;
                     _exit_strat_number = 9;
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
+                    _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
                     if(!ParseFfOpts(strategyNode)) {
                         return false;
                     };
-                    _config->set_dirStrategy(dynamic_cast<DirectionSubLocalFloorfield*>(_exit_strategy.get()));
                     break;
                case 8:
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
+                    _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
                     if(!ParseFfOpts(strategyNode)) {
                          return false;
                     };
-                    _config->set_dirStrategy(dynamic_cast<DirectionLocalFloorfield*>(_exit_strategy.get()));
                     break;
                case 9:
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
+                    _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
                     if(!ParseFfOpts(strategyNode)) {
                          return false;
                     };
-                    _config->set_dirStrategy(dynamic_cast<DirectionSubLocalFloorfield*>(_exit_strategy.get()));
-                    break;
-               case 10:
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfieldTrips());
-                    if(!ParseFfOpts(strategyNode)) {
-                         return false;
-                    };
-                    _config->set_dirStrategy(dynamic_cast<DirectionSubLocalFloorfieldTrips*>(_exit_strategy.get()));
-                    break;
-               case 11:
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfieldTripsVoronoi());
-                    if(!ParseFfOpts(strategyNode)) {
-                         return false;
-                    };
-                    _config->set_dirStrategy(dynamic_cast<DirectionSubLocalFloorfieldTripsVoronoi*>(_exit_strategy.get()));
                     break;
                case 12:
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionTrain());
+                    _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionTrain());
                     break;
 
                default:
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
+                    _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
                     Log->Write("ERROR:\t unknown exit_crossing_strategy <%d>", pExitStrategy);
                     Log->Write("     :\t the default <%d> will be used", 2);
                     return true;
@@ -1638,7 +1577,43 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
           }
           Log->Write("INFO: \texit_crossing_strategy < %d >", pExitStrategy);
           _config->set_exit_strat(_exit_strat_number);
+          _directionManager->SetDirectionStrategy(_directionStrategy);
+
      }
+
+     // Read waiting
+     std::string queryWaiting = "waiting_strategy";
+     int waitingStrategyIndex = -1;
+     if (strategyNode.FirstChild(queryWaiting)){
+          if(const char* attribute = strategyNode.FirstChild(queryWaiting)->FirstChild()->Value(); attribute) {
+               if(waitingStrategyIndex = xmltoi(attribute, -1); waitingStrategyIndex > -1
+                    && attribute == std::to_string(waitingStrategyIndex)) {
+                    switch (waitingStrategyIndex) {
+                    case 1:
+                         _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingMiddle());
+                         break;
+                    case 2:
+                         _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
+                         break;
+                    default:
+                         _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
+                         Log->Write("ERROR:\t unknown waiting_strategy <%d>", waitingStrategyIndex);
+                         Log->Write("     :\t the default <%d> will be used", 2);
+                    }
+               }
+          }
+     }
+
+     if (waitingStrategyIndex < 0){
+          _waitingStrategy = nullptr;
+
+          Log->Write("INFO:\tcould not parse waiting_strategy, no waiting_strategy is used");
+     }
+     Log->Write("INFO:\twaiting_strategy < %d >", waitingStrategyIndex);
+
+     _directionManager->SetWaitingStrategy(_waitingStrategy);
+     _config->SetDirectionManager(_directionManager);
+
      return true;
 }
 

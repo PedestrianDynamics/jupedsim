@@ -31,8 +31,7 @@
 
 #include "math/ODESolver.h"
 #include "math/OperationalModel.h"
-#include "routing/DirectionStrategy.h"
-#include "routing/RoutingEngine.h"
+#include "router/RoutingEngine.h"
 
 #ifdef _HYBRID_SIMULATION
 #include "hybrid/HybridSimulationManager.h"

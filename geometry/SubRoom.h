@@ -26,7 +26,7 @@
  **/
 #pragma once
 
-#include "routing/global_shortest/DTriangulation.h"
+#include "router/global_shortest/DTriangulation.h"
 #include "general/Macros.h"
 
 #include <boost/polygon/polygon.hpp>
@@ -96,6 +96,7 @@ protected:
      std::vector<double> _poly_help_constatnt; //for the function IsInsidePolygon, a.brkic
      std::vector<double> _poly_help_multiple; //for the function IsInsidePolygon, a.brkic
      std::vector<Obstacle*> _obstacles;
+     std::vector<double> _boundingBox;
 
 public:
 
@@ -296,6 +297,7 @@ public:
      bool RemoveTransition(Transition * t);
      bool AddHline(Hline* line);
      void AddNeighbor(SubRoom* sub);
+     bool AddWaitingArea(WaitingArea* line);
 
      const std::vector<Crossing*>& GetAllCrossings() const;
      const std::vector<Transition*>& GetAllTransitions() const;
@@ -394,6 +396,10 @@ public:
 
 #endif
 
+     std::vector<double> GetBoundingBox() const;
+
+private:
+     void ComputeBoundingBox();
 };
 
 /************************************************************
