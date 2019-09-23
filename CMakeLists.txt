@@ -62,7 +62,6 @@ print_var(BUILD_WITH_ASAN)
 if(BUILD_WITH_ASAN AND ${CMAKE_SYSTEM} MATCHES "Windows")
     message(FATAL_ERROR "Address sanitizer builds are not supported on Windows")
 endif()
-
 ################################################################################
 # Compilation flags
 ################################################################################
@@ -93,6 +92,9 @@ find_package(fmt 6.0 REQUIRED CONFIG)
 
 # spdlog
 find_package(spdlog 1.3 REQUIRED CONFIG)
+
+# CLI11
+find_package(CLI11 1.8 REQUIRED CONFIG)
 
 # CMakes find_pacakge has no support for generator expressions hence we have to
 # do this the hard way
@@ -312,7 +314,7 @@ set(source_files
     pedestrian/StartDistribution.cpp
     direction/DirectionManager.cpp
     direction/waiting/WaitingMiddle.cpp
-        direction/waiting/WaitingRandom.cpp
+    direction/waiting/WaitingRandom.cpp
     direction/waiting/WaitingStrategy.cpp
     direction/walking/DirectionFloorfield.cpp
     direction/walking/DirectionGeneral.cpp
@@ -409,7 +411,7 @@ set(header_files
     pedestrian/StartDistribution.h
     direction/DirectionManager.h
     direction/waiting/WaitingMiddle.h
-        direction/waiting/WaitingRandom.h
+    direction/waiting/WaitingRandom.h
     direction/waiting/WaitingStrategy.h
     direction/walking/DirectionFloorfield.h
     direction/walking/DirectionGeneral.h
@@ -528,6 +530,7 @@ target_link_libraries(core
     poly2tri
     tinyxml
     visilibity
+    CLI11::CLI11
     $<$<BOOL:${AIROUTER}>:CGAL::CGAL>
     $<$<BOOL:${JPSFIRE}>:cnpy>
     fs

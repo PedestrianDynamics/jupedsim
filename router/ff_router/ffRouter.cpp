@@ -53,6 +53,7 @@
 #include "direction/DirectionManager.h"
 #include "direction/walking/DirectionStrategy.h"
 
+
 int FFRouter::_cnt = 0;
 
 FFRouter::FFRouter()

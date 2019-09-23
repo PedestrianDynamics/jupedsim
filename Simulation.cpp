@@ -242,7 +242,7 @@ bool Simulation::InitArgs()
     //perform customs initialisation, like computing the phi for the gcfm
     //this should be called after the routing engine has been initialised
     // because a direction is needed for this initialisation.
-    Logging::Info("Init Operationl Model starting ...");
+    Logging::Info("Init Operational Model starting ...");
     if (!_operationalModel->Init(_building.get())) {
         return false;
     }

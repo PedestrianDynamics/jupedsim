@@ -291,7 +291,7 @@ bool EventManager::DisseminateKnowledge(Building* _b)
 
 bool EventManager::UpdateRoute(Pedestrian* ped)
 {
-     //create the key as string.
+     //create the key as std::string.
      //map are sorted by default
      std::string key= ped->GetKnowledgeAsString();
 //     std::cout << "key: <" << key << ">" << std::endl;
@@ -842,7 +842,13 @@ bool EventManager::ReadSchedule()
           scheduleFile = _config->GetProjectRootDir()
                     / xMainNode->FirstChild("schedule_file")->FirstChild()->Value();
           Log->Write("INFO: \tevents <" + scheduleFile.string() + ">");
-     } else {
+     } else if (xMainNode->FirstChild("header")){
+          if (xMainNode->FirstChild("header")->FirstChild("schedule_file")) {
+               scheduleFile = _config->GetProjectRootDir()
+                       / xMainNode->FirstChild("header")->FirstChild("schedule_file")->FirstChild()->Value();
+               Log->Write("INFO: \tevents <" + scheduleFile.string() + ">");
+          }
+     }else {
           Log->Write("INFO: \tNo events found");
           return true;
      }

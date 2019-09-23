@@ -28,6 +28,7 @@
  *
  **/
 #include "GCFMModel.h"
+#include "direction/DirectionManager.h"
 
 #ifdef _OPENMP
 #include <omp.h>
