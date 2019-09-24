@@ -32,7 +32,6 @@
         </room>
     </rooms>
     <transitions>
-      <!-- DO NOT CHANGE THE TRANSITION CAPTIONS -->
         <transition id="0" caption="1" type="emergency" room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
             <vertex px="21" py="20"/>
             <vertex px="22" py="20"/>

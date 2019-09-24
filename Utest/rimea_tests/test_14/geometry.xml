@@ -15,16 +15,10 @@
 	  <vertex px="5.0" py="15.0" />
 	  <vertex px="5.0" py="6.0" />
 	</polygon>
-	
-	<!-- Treppenansatz	
-	     <polygon caption="wall">
-	     <vertex px="5.0" py="4.0" />
-	     <vertex px="5.0" py="6.0" />
-	     </polygon> -->
-      </subroom>	
-      
-      <subroom id="1" closed="0" class="subroom" A_x="0" B_y="0" C_z="0">	
-	<polygon caption="wall">	
+    </subroom>
+
+      <subroom id="1" closed="0" class="subroom" A_x="0" B_y="0" C_z="0">
+	<polygon caption="wall">
 	  <vertex px="5.0" py="15.0" />
 	  <vertex px="25.0" py="15.0" />
 	</polygon>
@@ -33,16 +27,15 @@
 	  <vertex px="25.0" py="20.0" />
 	</polygon>
       </subroom>
-      
-      Version Treppenaufgang
-      <subroom id="2" closed="0" class="subroom" A_x="0" B_y="0" C_z="0">	
+
+      <subroom id="2" closed="0" class="subroom" A_x="0" B_y="0" C_z="0">
 	<polygon caption="wall">
 	  <vertex px="25.0" py="20.0" />
 	  <vertex px="30.0" py="20.0" />
 	  <vertex px="30.0" py="0.0" />
 	  <vertex px="29.0" py="0.0" />
-	</polygon>		
-	<polygon caption="wall">	
+	</polygon>
+	<polygon caption="wall">
 	  <vertex px="27.0" py="0.0" />
 	  <vertex px="25.0" py="0.0" />
 	  <vertex px="25.0" py="4.0" />
@@ -51,31 +44,9 @@
 	  <vertex px="25.0" py="6.0" />
 	  <vertex px="25.0" py="15.0" />
 	</polygon>
-	
-	<!-- Treppenansatz
-	     <polygon caption="wall">
-	     <vertex px="25.0" py="6.0" />
-	     <vertex px="25.0" py="4.0" />
-	     </polygon> -->
       </subroom>
-      
-      <!-- 	<subroom id="2" closed="0" class="subroom" A_x="0" B_y="0" C_z="0">	
-	   <polygon caption="wall">
-	   <vertex px="25.0" py="20.0" />
-	   <vertex px="30.0" py="20.0" />
-	   <vertex px="30.0" py="0.0" />
-	   <vertex px="29.0" py="0.0" />
-	   </polygon>		
-	   <polygon caption="wall">	
-	   <vertex px="27.0" py="0.0" />
-	   <vertex px="25.0" py="0.0" />
-	   <vertex px="25.0" py="15.0" />
-	   </polygon>
-	   </subroom> -->
-      
-      
+
       <crossings>
-	<!-- virtual exits between subrooms -->
 	<crossing id="0" subroom1_id="0" subroom2_id="1">
 	  <vertex px="5.0" py="15.0" />
 	  <vertex px="5.0" py="20.0" />
@@ -86,7 +57,7 @@
 	</crossing>
       </crossings>
     </room>
-    
+
     <room id="1" caption="Basement">
       <subroom id="0" closed="0" class="subroom" A_x="0" B_y="0" C_z="-5">
 	<polygon caption="wall">
@@ -111,9 +82,7 @@
 	  <vertex px="5.0" py="6.0" />
 	  <vertex px="10.0" py="6.0" />
 	</polygon>
-	<!-- <up px="5.0" py="2" />
-	     <down px="10.0" py="2" /> -->
-	
+
 	<up px="10.0" py="2" />
 	<down px="5.0" py="2" />
       </subroom>
@@ -126,9 +95,7 @@
 	  <vertex px="20.0" py="6.0" />
 	  <vertex px="25.0" py="6.0" />
 	</polygon>
-	<!-- <up px="25.0" py="2" />
-	     <down px="20.0" py="2" /> -->
-	
+
 	<up px="20.0" py="2" />
 	<down px="25.0" py="2" />
       </subroom>
@@ -137,34 +104,34 @@
 	  <vertex px="10.0" py="4.0" />
 	  <vertex px="10.0" py="6.0" />
 	</crossing>
-	<crossing id="3" subroom1_id="0" subroom2_id="2">
-	  <vertex px="20.0" py="4.0" />
-	  <vertex px="20.0" py="6.0" />
-	</crossing>
       </crossings>
-    </room>	
+    </room>
   </rooms>
-  
+
   <transitions>
-    <!-- exits like crossings but between rooms or to outside (room with index
-	 = -1) -->
+	<transition id="4" caption="Basement" type="emergency"
+		room1_id="1" subroom1_id="0" room2_id="1" subroom2_id="2">
+      <vertex px="20.0" py="4.0" />
+      <vertex px="20.0" py="6.0" />
+    </transition>
+
     <transition id="1" caption="main exit" type="emergency"
 		room1_id="0" subroom1_id="2" room2_id="-1" subroom2_id="-1">
       <vertex px="29.0" py="0.0" />
       <vertex px="27.0" py="0.0" />
     </transition>
-    
+
     <transition id="2" caption="StairUpLeft" type="emergency"
 		room1_id="0" subroom1_id="0" room2_id="1" subroom2_id="1">
-      <vertex px="5.0" py="4.0" />
-      <vertex px="5.0" py="6.0" />
+      <vertex px="5.0" py="4.0" pz="-5.0"/>
+      <vertex px="5.0" py="6.0" pz="-5.0"/>
     </transition>
-    
+
     <transition id="3" caption="StairUpRight" type="emergency"
 		room1_id="0" subroom1_id="2" room2_id="1" subroom2_id="2">
-      <vertex px="25.0" py="4.0" />
-      <vertex px="25.0" py="6.0" />
+      <vertex px="25.0" py="4.0"/>
+      <vertex px="25.0" py="6.0"/>
     </transition>
-    
+
   </transitions>
 </geometry>

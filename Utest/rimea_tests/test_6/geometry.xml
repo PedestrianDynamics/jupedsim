@@ -23,7 +23,6 @@
 				</polygon>
 			</subroom>
 			<crossings>
-		<!-- virtual exits between subrooms -->
 				<crossing id="0" subroom1_id="0" subroom2_id="1">
 					<vertex px="10.0" py="2.0" />
 					<vertex px="12.0" py="2.0" />
@@ -33,7 +32,6 @@
 	</rooms>
 
 	<transitions>
-    <!-- exits like crossings but between rooms or to outside (room with index = -1) -->
 		<transition id="1" caption="main exit" type="emergency" room1_id="0" subroom1_id="1" room2_id="-1" subroom2_id="-1">
 			<vertex px="10.0" py="12.0" />
 			<vertex px="12.0" py="12.0" />

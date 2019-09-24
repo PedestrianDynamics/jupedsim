@@ -54,39 +54,42 @@ import glob
 sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
+import time
 
-def run_rimea_test4():
+def run_rimea_test4(inifile, trajfile):
     # Catch all Traji-files
     files = glob.glob("trajectories/*")
-    
-    density = [2.0,3.0,4.0,0.5,1.0,1.5] #DO NOT CHANGE THE ORDER
-    
+
+    files.sort()
+
+    density =  [2.0,3.0,4.0,0.5,5.0,6.0,1.0]
+
     # Main measuring point
     flow_Main = []
     v_mean_Main = []
-    
+
     # Control measruing point 1
     flow_Control1 = []
     v_mean_Control1 = []
-    
+
     # Control measruing point 2
     flow_Control2 = []
     v_mean_Control2 = []
-    
+
     if len(files) == len(density): # Avoiding bug
         for f in files:
             print('Parsing file: %s'%(f))
             v_buffer_Main = []
             v_buffer_Control1 = []
-            v_buffer_Control2 = []            
-            
+            v_buffer_Control2 = []
+
             # Read data
             fps, N, traj = parse_file(f)
-            
+
             peds = np.unique(traj[:,0])
-            
+
 ################## Main measuring point #######################################
-            
+
             for ped in peds:
                 # Take only data of ped i
                 ptraj = traj[traj[:, 0] == ped]
@@ -98,23 +101,23 @@ def run_rimea_test4():
                 # Take only data of ped i, when he is inside measuring point: 0.5 <= y <= 1.5 (geometry from 0 - 2)
                 ptraj = ptraj[ptraj[:,3]>=0.5]
                 ptraj = ptraj[ptraj[:,3]<=1.5]
-                
+
                 if len(ptraj) == 0:
                     continue # If ped will never be on measuring point --> next ped
-                
+
                 # Velocity of ped i
                 v = np.zeros_like(ptraj[1:,2])
                 v[:] = (ptraj[1:,2] - ptraj[:-1,2])/(ptraj[1:,1] - ptraj[:-1,1])*fps
-                
+
                 for i in v:
                     if i >= 0 and i < 1.5: # v needs to be inbetween 0 and 1.5 m/s
                         v_buffer_Main.append(i)
-            
+
             # Average velocity for every density ---> Calculate flow from this one
             v_mean_Main.append(np.mean(v_buffer_Main))
-            
+
 ################## Control1 measuring point ###################################
-            
+
             for ped in peds:
                 # Take only data of ped i
                 ptraj = traj[traj[:, 0] == ped]
@@ -126,24 +129,24 @@ def run_rimea_test4():
                 # Take only data of ped i, when he is inside measuring point: 0 <= y <= 1 (geometry from 0 - 2)
                 ptraj = ptraj[ptraj[:,3]>=0]
                 ptraj = ptraj[ptraj[:,3]<=1]
-                
+
                 if len(ptraj) == 0:
                     continue # If ped will never be on measuring point --> next ped
-                
+
                 # Velocity of ped i
                 v = np.zeros_like(ptraj[1:,2])
                 v[:] = (ptraj[1:,2] - ptraj[:-1,2])/(ptraj[1:,1] - ptraj[:-1,1])*fps
-                
+
                 for i in v:
                     if i >= 0 and i < 1.5: # v needs to be inbetween 0 and 1.5 m/s
                         v_buffer_Control1.append(i)
-                
+
             # Average velocity for every density ---> Calculate flow from this one
             v_mean_Control1.append(np.mean(v_buffer_Control1))
-            
+
 
 ################## Control2 measuring point ###################################
-            
+
             for ped in peds:
                 # Take only data of ped i
                 ptraj = traj[traj[:, 0] == ped]
@@ -155,34 +158,34 @@ def run_rimea_test4():
                 # Take only data of ped i, when he is inside measuring point: 0.5 <= y <= 1.5 (geometry from 0 - 2)
                 ptraj = ptraj[ptraj[:,3]>=0.5]
                 ptraj = ptraj[ptraj[:,3]<=1.5]
-                
+
                 if len(ptraj) == 0:
                     continue # If ped will never be on measuring point --> next ped
-                
+
                 # Velocity of ped i
                 v = np.zeros_like(ptraj[1:,2])
                 v[:] = (ptraj[1:,2] - ptraj[:-1,2])/(ptraj[1:,1] - ptraj[:-1,1])*fps
-                
+
                 for i in v:
                     if i >= 0 and i < 1.5: # v needs to be inbetween 0 and 1.5 m/s
                         v_buffer_Control2.append(i)
-                
+
             # Average velocity for every density ---> Calculate flow from this one
             v_mean_Control2.append(np.mean(v_buffer_Control2))
-        
+
         #Getting the flows:
         #flow_Main:
         for i in range(len(v_mean_Main)):
             flow_Main.append(v_mean_Main[i]*density[i])
-        
+
         #flow_Control1:
         for i in range(len(v_mean_Control1)):
             flow_Control1.append(v_mean_Control1[i]*density[i])
-        
+
         #flow_Control2:
         for i in range(len(v_mean_Control2)):
             flow_Control2.append(v_mean_Control2[i]*density[i])
-        
+
         #Plot fundamental diagramm:
         plt.subplot(311)
         plt.plot(density, flow_Main, 'bo', label='Main')
@@ -191,7 +194,7 @@ def run_rimea_test4():
         plt.ylim(0,np.max(flow_Main)+1)
         plt.ylabel('flow')
         plt.legend(loc=0)
-        
+
         plt.subplot(312)
         plt.plot(density, flow_Control1, 'bo', label='Control1')
         plt.grid()
@@ -199,7 +202,7 @@ def run_rimea_test4():
         plt.ylim(0,np.max(flow_Main)+1)
         plt.ylabel('flow')
         plt.legend(loc=0)
-        
+
         plt.subplot(313)
         plt.plot(density, flow_Control2, 'bo', label='Control2')
         plt.grid()
@@ -209,7 +212,7 @@ def run_rimea_test4():
         plt.ylabel('flow')
         plt.legend(loc=0)
         plt.savefig('fundamental_diag.png')
-        
+
         #Write data in txt:
         txt_file = open('fundamental_diag.txt','w')
         txt_file.write('#density    flow_Main    flow_Control1    flow_Control2\n')
@@ -218,7 +221,8 @@ def run_rimea_test4():
         txt_file.close()
 
 if __name__ == "__main__":
+    start_time=time.time()
     test = JPSRunTestDriver(4, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
     test.run_test(testfunction=run_rimea_test4)
-    logging.info("%s exits with SUCCESS" % (argv[0]))
+    logging.info("%s exits with SUCCESS\nExecution time %.3f seconds." % (argv[0],time.time()-start_time))
     exit(SUCCESS)
