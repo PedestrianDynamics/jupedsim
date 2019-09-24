@@ -23,7 +23,7 @@ Use new dedicated python console if you run this code with spyder
 2. The ped-ped repulsive forces are intentionally set to zero, since in this
    test we are only interested in the desired velocies.
    ---> Overlapping-error to be considered
-   
+
 3. Script Gauss.py checks that the means and sigmas are in accordance with the min-max values.
 
 This test produces two files
@@ -46,6 +46,7 @@ from sys import *
 sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
+import time
 
 # Group 1, 2, 3, 4
 weidman_max_vel = np.array([1.61, 1.54, 1.41, 0.76])
@@ -75,7 +76,9 @@ def run_rimea_test7(inifile, trajfile):
         # Take only data of ped i
         ptraj = traj[traj[:, 0] == ped]
         # Only when ped i moves
-        ptraj = ptraj[np.diff(ptraj[:, 2]) != 0]
+        ptraj2=np.delete(ptraj,1,0) #Das letzte Element entfernt
+#        ptraj = ptraj[np.diff(ptraj[:, 2]) != 0] (Orginalfunktion)
+        ptraj=ptraj2[np.diff(ptraj[:, 2]) != 0]		#Neue Funktion
         # Distance
         dx = np.sqrt(np.sum((ptraj[0, 2:] - ptraj[-1, 2:])**2))
         # Time
@@ -86,18 +89,19 @@ def run_rimea_test7(inifile, trajfile):
 
     id_velocity = np.vstack((peds, velocities))
     np.savetxt(csv_file, id_velocity.T, delimiter=',', fmt=["%d", "%f"])
-    
+
     # Plotting
     i = 0
     j = 1 # Subplot index
     logging.info("Ploting distributions...")
     for (mu, sigma, c) in zip(means, sigmas, colors):
         P.subplot("41%d"%j)
+        numPedsGr = int(numPedsGr)
         n, bins, patches = P.hist(velocities[i:i+numPedsGr-1],50, normed=1,histtype='bar',facecolor='%s'%c, alpha=0.7)
         y = P.normpdf(bins, mu, sigma)
         P.plot(bins, y, 'k--',linewidth=1.5,label=r"$\mathcal{N}(%.2f, %.2f)$"%(mu, sigma))
         P.legend()
-        i += numPedsGr
+        i = int(i + numPedsGr)
         j += 1
 
     P.tight_layout()
@@ -108,7 +112,8 @@ def run_rimea_test7(inifile, trajfile):
         exit(FAILURE)
 
 if __name__ == "__main__":
+    start_time=time.time()
     test = JPSRunTestDriver(7, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
     test.run_test(testfunction=run_rimea_test7)
-    logging.info("%s exits with SUCCESS" % (argv[0]))
+    logging.info("%s exits with SUCCESS\nExecution time %.3f seconds." % (argv[0],time.time()-start_time))
     exit(SUCCESS)

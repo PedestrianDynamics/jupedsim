@@ -29,6 +29,7 @@ from sys import *
 sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
+import time
 
 tolerance = 0.05
 displacement = 1 # in the simulation pedestrians disapear once they are outside
@@ -51,9 +52,10 @@ def run_rimea_test12(inifile, trajfile):
 
 
 if __name__ == "__main__":
+    start_time=time.time()
     test = JPSRunTestDriver(12, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
     test.run_test(testfunction=run_rimea_test12)
-    logging.info("%s exits with SUCCESS" % (argv[0]))
+    logging.info("%s exits with SUCCESS\nExecution time %.3f seconds." % (argv[0],time.time()-start_time))
     exit(SUCCESS)
 
 

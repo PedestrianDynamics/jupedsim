@@ -33,6 +33,7 @@ from sys import *
 sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
+import time
 
 def run_rimea_test5(inifile, trajfile):
     # Reaction times are: 10, 20, ..., 100
@@ -59,6 +60,7 @@ def run_rimea_test5(inifile, trajfile):
         
         # Frame when ped i starts moving along x-axis
         if (xdiff != 0).any():
+            ptraj = np.delete(ptraj,1,0) #delete first entery to match boolean dimension 
             xfr = ptraj[xdiff != 0][0, 1]
         else:
             xfr = np.inf
@@ -82,13 +84,14 @@ def run_rimea_test5(inifile, trajfile):
         errors.append(error)
         logging.info("ped: %2d, df: %6d, dt: %6.2f, must_time: %3d (error: %2.2f )",ped, df, dt, reaction_time, error)
     
-    # If If pedetrian starts moving above threshold, exit with failure
+    # If pedetrian starts moving above threshold, exit with failure
     if not (np.array(errors) <= threshold).all():
         logging.critical("%s exits with FAILURE", argv[0])
         exit(FAILURE)
 
 if __name__ == "__main__":
+    start_time=time.time()
     test = JPSRunTestDriver(5, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
     test.run_test(testfunction=run_rimea_test5)
-    logging.info("%s exits with SUCCESS" % (argv[0]))
+    logging.info("%s exits with SUCCESS\nExecution time %.3f seconds." % (argv[0],time.time()-start_time))
     exit(SUCCESS)

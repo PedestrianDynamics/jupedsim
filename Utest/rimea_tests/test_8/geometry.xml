@@ -3,9 +3,7 @@
 <geometry version="0.5" caption="second life" unit="m" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_geometry.xsd">
 	<rooms>
 		<room caption="EG_Eingang" id="0">
-		<!-- EG_Eingang -->
 
-			<!-- Treppenraum -->
 			<subroom A_x="0" B_y="0" C_z="0" class="subroom" closed="0" id="0">
 				<polygon caption="wall">
 					<vertex px="20.0" py="6.0" />
@@ -25,7 +23,6 @@
 				</polygon>
 			</subroom>
 
-			<!-- Treppe -->
 			<subroom A_x="0" B_y="0" C_z="0" class="subroom" closed="0" id="1">
 				<polygon caption="wall">
 					<vertex px="1" py="3" />
@@ -367,7 +364,6 @@
 				</polygon>
 			</subroom>
 
-			<!-- Platzhalterraum umschlossene Fläche -->
 			<subroom A_x="0" B_y="0" C_z="0" class="subroom" closed="0" id="38">
 				<polygon caption="wall">
 					<vertex px="20.0" py="10.0" />
@@ -378,7 +374,6 @@
 				</polygon>
 			</subroom>
 
-			<!-- Gang_unten -->
 			<subroom A_x="0" B_y="0" C_z="0" class="subroom" closed="0" id="39">
 				<polygon caption="wall">
 					<vertex px="0" py="3" />
@@ -469,8 +464,7 @@
 					<vertex px="22.0" py="4.0" />
 				</polygon>
 			</subroom>
-			
-			<!-- Gang_oben -->
+
 			<subroom A_x="0" B_y="0" C_z="0" class="subroom" closed="0" id="40">
 				<polygon caption="wall">
 					<vertex px="0" py="11" />
@@ -726,7 +720,6 @@
 		</room>
 
 		<room caption="Podest" id="1">
-			<!-- Podest -->
 			<subroom A_x="0" B_y="0" C_z="2" class="subroom" closed="0" id="0">
 				<polygon caption="wall">
 					<vertex px="18.0" py="8.0" />
@@ -754,16 +747,14 @@
 				</crossing>
 			</crossings>
 		</room>
-		
+
 		<room caption="1.OG" id="2">
-			<!-- Treppenraum -->
 			<subroom A_x="0" B_y="0" C_z="4" class="subroom" closed="0" id="0">
 				<polygon caption="wall">
 					<vertex px="21.0" py="10.0" />
 					<vertex px="20.0" py="10.0" />
 					<vertex px="20.0" py="8.0" />
 				</polygon>
-			<!-- Wand weg für Treppenanschluss -->
 				<polygon caption="wall">
 					<vertex px="20.0" py="4.0" />
 					<vertex px="21.0" py="4.0" />
@@ -773,7 +764,6 @@
 					<vertex px="22.0" py="4.0" />
 				</polygon>
 			</subroom>
-			<!-- Treppe -->
 			<subroom A_x="0" B_y="0" C_z="4" class="subroom" closed="0" id="1">
 				<polygon caption="wall">
 					<vertex px="1" py="3" />
@@ -1116,7 +1106,6 @@
 					<vertex px="22.0" py="11.0" />
 				</polygon>
 			</subroom>
-			<!-- Gang_unten -->
 			<subroom A_x="0" B_y="0" C_z="4" class="subroom" closed="0" id="39">
 				<polygon caption="wall">
 					<vertex px="0" py="3" />
@@ -1207,7 +1196,6 @@
 					<vertex px="22.0" py="4.0" />
 				</polygon>
 			</subroom>
-			<!-- Gang_oben -->
 			<subroom A_x="0" B_y="0" C_z="4" class="subroom" closed="0" id="40">
 				<polygon caption="wall">
 					<vertex px="0" py="11" />
@@ -1478,7 +1466,6 @@
 			</crossings>
 		</room>
 		<room caption="Podest" id="3">
-			<!-- Podest -->
 			<subroom A_x="0" B_y="0" C_z="6" class="subroom" closed="0" id="0">
 				<polygon caption="wall">
 					<vertex px="18.0" py="8.0" />
@@ -1507,14 +1494,12 @@
 			</crossings>
 		</room>
 		<room caption="2.OG" id="4">
-		<!-- Treppenraum -->
 			<subroom A_x="0" B_y="0" C_z="8" class="subroom" closed="0" id="0">
 				<polygon caption="wall">
 					<vertex px="21.0" py="10.0" />
 					<vertex px="20.0" py="10.0" />
 					<vertex px="20.0" py="6.0" />
 				</polygon>
-				<!-- Wand weg für Treppenanschluss -->
 				<polygon caption="wall">
 					<vertex px="20.0" py="4.0" />
 					<vertex px="21.0" py="4.0" />
@@ -1524,7 +1509,6 @@
 					<vertex px="22.0" py="4.0" />
 				</polygon>
 			</subroom>
-			<!-- Treppe -->
 			<subroom A_x="0" B_y="0" C_z="8" class="subroom" closed="0" id="1">
 				<polygon caption="wall">
 					<vertex px="1" py="3" />
@@ -1867,7 +1851,6 @@
 					<vertex px="22.0" py="11.0" />
 				</polygon>
 			</subroom>
-			<!-- Gang_unten -->
 			<subroom A_x="0" B_y="0" C_z="8" class="subroom" closed="0" id="39">
 				<polygon caption="wall">
 					<vertex px="0" py="3" />
@@ -1958,7 +1941,6 @@
 					<vertex px="22.0" py="4.0" />
 				</polygon>
 			</subroom>
-			<!-- Gang_oben -->
 			<subroom A_x="0" B_y="0" C_z="8" class="subroom" closed="0" id="40">
 				<polygon caption="wall">
 					<vertex px="0" py="11" />
@@ -2214,9 +2196,6 @@
 		</room>
 	</rooms>
 	<transitions>
-		<!-- exits like crossings but between rooms or to outside (room with index = -1) -->
-		<!-- EG -->
-		<!-- MainExit -->
 		<transition caption="1" id="0" room1_id="0" subroom1_id="37" room2_id="-1" subroom2_id="-1" type="emergency">
 			<vertex px="19.0" py="14.0" />
 			<vertex px="21.0" py="14.0" />

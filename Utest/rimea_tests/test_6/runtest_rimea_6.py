@@ -26,6 +26,7 @@ from sys import *
 sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
+import time
 
 def run_rimea_test6(inifile, trajfile):
     # Coordinates of the square outside the room
@@ -48,7 +49,8 @@ def run_rimea_test6(inifile, trajfile):
         exit(FAILURE)
 
 if __name__ == "__main__":
+    start_time=time.time()
     test = JPSRunTestDriver(6, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
     test.run_test(testfunction=run_rimea_test6)
-    logging.info("%s exits with SUCCESS" % (argv[0]))
+    logging.info("%s exits with SUCCESS\nExecution time %.3f seconds." % (argv[0],time.time()-start_time))
     exit(SUCCESS)

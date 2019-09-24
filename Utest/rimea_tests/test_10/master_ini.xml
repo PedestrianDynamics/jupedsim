@@ -2,23 +2,15 @@
 
 <JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 
-	<!-- seed used for initialising random generator -->
 	<seed>1254</seed>
 	<max_sim_time>1000</max_sim_time>
-	
-	<!-- geometry file -->
+
 	<geometry>../geometry.xml</geometry>
-	
-	<!-- trajectories file and format -->
+
 	<trajectories format="xml-plain" fps="8">
 		<file location="RiMEATest10_traj.xml" />
-		<!--<socket hostname="127.0.0.1" port="8989"/> -->
 	</trajectories>
-	
-	<!-- where to store the logs -->
-	<!--<logfile>log.txt</logfile> -->
 
-	<!-- traffic information: e.g closed doors -->
 	<traffic_constraints>
 		<doors>
 			<door trans_id="0" caption="main_exit" state="open" />
@@ -49,7 +41,6 @@
 		</goals>
 	</routing>
 
-	<!--persons information and distribution -->
 	<agents operational_model_id="1">
 		<agents_distribution>
 			<group group_id="0"  agent_parameter_id="1" room_id="0" subroom_id="0"  number="2" goal_id="0" router_id="1" />
@@ -67,7 +58,6 @@
 		</agents_distribution>
 	</agents>
 
-	<!-- These parameters may be overwritten -->
 	<operational_models>
 		<model operational_model_id="1" description="gcfm">
 			<model_parameters>
@@ -131,5 +121,5 @@
 			</parameters>
 		</router>
 	</route_choice_models>
-	
+
 </JuPedSim>
