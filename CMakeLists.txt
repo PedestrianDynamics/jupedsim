@@ -601,6 +601,10 @@ if(BUILD_WITH_ASAN)
         -fsanitize=address
     )
 
+    target_compile_definitions(jpscore_asan PRIVATE
+        ${core_compile_definitions}
+    )
+
     target_link_libraries(jpscore_asan
         ${jpscore_link_libraries}
         -fsanitize=address
