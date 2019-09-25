@@ -65,7 +65,7 @@ public:
 
 public:
      Goal();
-     virtual ~Goal();
+     virtual ~Goal() = default;
 
      /**
       * Set/Get the obstacles' caption

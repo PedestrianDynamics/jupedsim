@@ -41,10 +41,6 @@ Goal::Goal()
      _subRoomID = -1;
 }
 
-Goal::~Goal()
-{
-}
-
 void Goal::AddWall(const Wall& w)
 {
      _walls.push_back(w);
@@ -240,8 +236,6 @@ bool Goal::ConvertLineToPoly()
           _crossing.SetPoint2(tmp_line.GetCentre());
      }
 
-
-//     std::cout << "Crossing goal: " << _crossing.GetUniqueID() << _crossing.toString() << std::endl;
      return true;
 }
 
