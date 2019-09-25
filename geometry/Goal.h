@@ -26,6 +26,7 @@
  **/
 #pragma once
 
+#include "Crossing.h"
 #include "Point.h"
 
 #include <boost/polygon/polygon.hpp>
@@ -37,7 +38,6 @@
 //forward declarations
 class Wall;
 class Point;
-class Crossing;
 
 namespace bg = boost::geometry;
 typedef bg::model::polygon<Point, false, false> polygon_type;
@@ -54,7 +54,7 @@ protected:
     std::string _caption;
     std::vector<Wall> _walls;
     std::vector<Point> _poly;
-    Crossing* _crossing;
+    Crossing _crossing;
 
     polygon_type _boostPoly;
     bool _inside;
@@ -65,7 +65,7 @@ public:
 
 public:
      Goal();
-     virtual ~Goal();
+     virtual ~Goal() = default;
 
      /**
       * Set/Get the obstacles' caption
