@@ -91,9 +91,6 @@ long Simulation::GetPedsNumber() const
 
 bool Simulation::InitArgs()
 {
-    char tmp[CLENGTH];
-    std::string s = "Parameter:\n";
-
     switch (_config->GetLog()) {
     case 0: {
 
@@ -114,127 +111,58 @@ bool Simulation::InitArgs()
         return false;
     }
 
-//    if (_config->GetPort()!=-1) {
-//        switch (_config->GetFileFormat()) {
-////        case FORMAT_XML_PLAIN_WITH_MESH:
-//        case FileFormat::XML: {
-//            auto travisto = std::make_shared<SocketHandler>(_config->GetHostname(),
-//                    _config->GetPort());
-//            Trajectories* output = new TrajectoriesJPSV05();
-//            output->SetOutputHandler(travisto);
-//            _iod(FileFormat::XML)
-////            _iodAddIO(output);
-//            break;
-//        }
-////        case FORMAT_XML_BIN: {
-////            Logging::Warning("Format xml-bin not yet supported in streaming");
-////            return false;
-////        }
-//        case FileFormat::TXT: {
-//            Logging::Warning("Format plain not yet supported in streaming");
-//            return false;
-//        }
-////        case FORMAT_VTK: {
-////            Logging::Warning("Format vtk not yet supported in streaming");
-////            return false;
-////        }
-//        default: {
-//            return false;
-//        }
-//        }
-//
-//        s.append("\tonline streaming enabled \n");
-//    }
-
-    if (!_config->GetTrajectoriesFile().empty()) {
-        switch (_config->GetFileFormat()) {
-        case FileFormat::XML:
-//            auto tofile = std::make_shared<FileHandler>(
-//                    trajPath.c_str());
-//            Trajectories* output = new TrajectoriesJPSV05();
-//            output->SetOutputHandler(tofile);
-//            _iod->AddIO(output);
-            Logging::Debug("Use FileFormat::XML");
-            _iod = std::unique_ptr<Trajectories>(new TrajectoriesJPSV05());
-            break;
-
-        case FileFormat::TXT:
-//            auto file = std::make_shared<FileHandler>(trajPath);
-//            outputTXT = new TrajectoriesFLAT();
-//            outputTXT->SetOutputHandler(file);
-//            _iod->AddIO(outputTXT);
-               Logging::Debug("Use FileFormat::XML");
-             _iod = std::unique_ptr<Trajectories>(new TrajectoriesFLAT());
+    if (_config->GetPort()!=-1) {
+        switch (_config->GetFileFormat()){
+        case FileFormat::XML: {
+             auto travisto = std::make_shared<SocketHandler>(_config->GetHostname(),
+                     _config->GetPort());
+             _iod = std::unique_ptr<Trajectories>(new TrajectoriesXML());
+             _iod->SetOutputHandler(travisto);
              break;
-
-//        case FORMAT_VTK: {
-//            Logging::Warning("Format vtk not yet supported");
-//            auto vtkTraj = trajPath;
-//            vtkTraj.replace_extension(".vtk");
-//            auto file = std::make_shared<FileHandler>(vtkTraj);
-//            Trajectories* output = new TrajectoriesVTK();
-//            output->SetOutputHandler(file);
-//            _iod->AddIO(output);
-//            break;
-//        }
-
-//        case FORMAT_XML_PLAIN_WITH_MESH: {
-//            //OutputHandler* tofile = new FileHandler(args->GetTrajectoriesFile().c_str());
-//            //if(_iod) delete _iod;
-//            //_iod = new TrajectoriesXML_MESH();
-//            //_iod->AddIO(tofile);
-//            break;
-//        }
-//        case FORMAT_XML_BIN: {
-//            // OutputHandler* travisto = new SocketHandler(args->GetHostname(), args->GetPort());
-//            // Trajectories* output= new TrajectoriesJPSV06();
-//            // output->SetOutputHandler(travisto);
-//            // _iod->AddIO(output);
-//            break;
-//        }
-        default:
-            break;
         }
+        case FileFormat::TXT:
+            Logging::Warning("Format plain not yet supported in streaming");
+            return false;
+        default:
+            return false;
+        }
+    } else {
+         if (!_config->GetTrajectoriesFile().empty()) {
+              switch (_config->GetFileFormat()) {
+              case FileFormat::XML:
+                   _iod = std::make_unique<TrajectoriesXML>(TrajectoriesXML());
+                   break;
+
+              case FileFormat::TXT:
+                   _iod = std::make_unique<TrajectoriesTXT>(TrajectoriesTXT());
+                   break;
+
+              default:
+                   break;
+              }
+         }
+
+         const fs::path& trajPath(_config->GetTrajectoriesFile());
+         fs::create_directories(trajPath.parent_path());
+         auto file = std::make_shared<FileHandler>(trajPath.c_str());
+         _iod->SetOutputHandler(file);
     }
 
-     const fs::path& trajPath(_config->GetTrajectoriesFile());
-     fs::create_directories(trajPath.parent_path());
-     auto file = std::make_shared<FileHandler>(trajPath.c_str());
-     _iod->SetOutputHandler(file);
-
     _operationalModel = _config->GetModel();
-    s.append(_operationalModel->GetDescription());
-
-    // ODE solver which is never used!
-    auto solver = _config->GetSolver();
-    sprintf(tmp, "\tODE Solver: %d\n", solver);
-    s.append(tmp);
-
-    sprintf(tmp, "\tnCPU: %d\n", _config->GetMaxOpenMPThreads());
-    s.append(tmp);
-    sprintf(tmp, "\tt_max: %f\n", _config->GetTmax());
-    s.append(tmp);
     _deltaT = _config->Getdt();
     _maxSimTime = _config->GetTmax();
-    sprintf(tmp, "\tdt: %f\n", _deltaT);
     _periodic = _config->IsPeriodic();
-    sprintf(tmp, "\t periodic: %d\n", _periodic);
-    s.append(tmp);
-
     _fps = _config->GetFps();
-    sprintf(tmp, "\tfps: %f\n", _fps);
-    s.append(tmp);
 
     _routingEngine = _config->GetRoutingEngine();
-    auto distributor = std::unique_ptr<PedDistributor>(new PedDistributor(_config));
+    auto distributor = std::make_unique<PedDistributor>(PedDistributor(_config));
     // IMPORTANT: do not change the order in the following..
     _building = std::shared_ptr<Building>(new Building(_config, *distributor));
 
     // Initialize the agents sources that have been collected in the pedestrians distributor
     _agentSrcManager.SetBuilding(_building.get());
     _agentSrcManager.SetMaxSimTime(GetMaxSimTime());
-    _gotSources = (bool) distributor->GetAgentsSources().size(); // did we have any sources? false if no sources
-    std::cout << "\nGot " << _gotSources  << " sources"<< std::endl ;
+    _gotSources = !distributor->GetAgentsSources().empty(); // did we have any sources? false if no sources
 
     for (const auto& src: distributor->GetAgentsSources()) {
         _agentSrcManager.AddSource(src);
@@ -257,11 +185,10 @@ bool Simulation::InitArgs()
         Logging::Info(fmt::format("Max {}", TT.second->nmax));
         Logging::Info(fmt::format("number doors {}", TT.second->doors.size()));
     }
-    if(_building->GetTrainTimeTables().size()) {
-        Logging::Info(fmt::format("Got {} Train Time Tables", _building->GetTrainTimeTables().size()));
-    } else {
-        Logging::Warning(fmt::format(FMT_STRING("Got {} Train Time Tables"), _building->GetTrainTimeTables().size()));
-    }
+
+
+    Logging::Info(fmt::format("Got {} Train Time Tables", _building->GetTrainTimeTables().size()));
+
     for(auto&& TT: _building->GetTrainTimeTables())
     {
           Logging::Info(fmt::format("id           : {}",TT.second->id));
@@ -274,10 +201,10 @@ bool Simulation::InitArgs()
           Logging::Info(fmt::format("train start  : ({:.2f}, {:.2f})",TT.second->tstart._x, TT.second->tstart._y));
           Logging::Info(fmt::format("train end    : ({:.2f}, {:.2f})",TT.second->tend._x, TT.second->tend._y));
     }
-    //@todo: these variables are global
+    //TODO: these variables are global
     TrainTypes = _building->GetTrainTypes();
     TrainTimeTables = _building->GetTrainTimeTables();
-    _trainConstraints = (bool) TrainTimeTables.size();
+    _trainConstraints = !TrainTimeTables.empty();
 
     //-----
     // Give the DirectionStrategy the chance to perform some initialization.
@@ -291,25 +218,24 @@ bool Simulation::InitArgs()
     }
     _nPeds = _building->GetAllPedestrians().size();
     //_building->WriteToErrorLog();
-    Log->Write("INFO:\t nPeds %d received", _nPeds);
+    Logging::Info(fmt::format("Number of peds received: {}", _nPeds));
     //get the seed
     _seed = _config->GetSeed();
 
     //size of the cells/GCFM/Gompertz
     if (_config->GetDistEffMaxPed()>_config->GetLinkedCellSize()) {
-        Log->Write(
-                "ERROR: the linked-cell size [%f] should be bigger than the force range [%f]",
-                _config->GetLinkedCellSize(), _config->GetDistEffMaxPed());
+        Logging::Error(fmt::format("the linked-cell size {:f} should be larger than the force range {:f}",
+                _config->GetLinkedCellSize(), _config->GetDistEffMaxPed()));
         return false;
     }
 
     //read and initialize events
     _em = new EventManager(_config, _building.get(), _config->GetSeed());
     if (!_em->ReadEventsXml()) {
-        Log->Write("ERROR: \tCould not initialize events handling");
+        Logging::Warning("Could not initialize events handling");
     }
      if (!_em->ReadSchedule()) {
-          Log->Write("ERROR: \tCould not initialize schedule handling");
+          Logging::Warning("Could not initialize schedule handling");
      }
 
      _em->ListEvents();

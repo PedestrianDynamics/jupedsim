@@ -33,7 +33,6 @@
 #include "geometry/Building.h"
 #include "geometry/SubRoom.h"
 #include "IO/OutputHandler.h"
-#include "IO/IODispatcher.h"
 #include "IO/Trajectories.h"
 #include "math/OperationalModel.h"
 #include "math/ODESolver.h"

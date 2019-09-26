@@ -26,115 +26,32 @@ public:
 
     void SetOutputHandler(std::shared_ptr<OutputHandler> outputHandler)
     {
-         _outputHandler = outputHandler;
+         _outputHandler = std::move(outputHandler);
     }
-
-//    template<typename A>
-//    bool IsElementInVector(const std::vector<A> &vec, A& el)
-//    {
-//         typename std::vector<A>::const_iterator it;
-//         it = std::find(vec.begin(), vec.end(), el);
-//         if (it == vec.end())
-//         {
-//              return false;
-//         }
-//         else
-//         {
-//              return true;
-//         }
-//    }
-
 };
 
-
-//class TrajectoriesJPSV04: public Trajectories {
-//
-//public:
-//    TrajectoriesJPSV04() = default;
-////    virtual ~TrajectoriesJPSV04() = default;
-//
-//    virtual void WriteHeader(long nPeds, double fps, Building* building, int seed, int count);
-//    virtual void WriteGeometry(Building* building);
-//    virtual void WriteFrame(int frameNr, Building* building);
-//    virtual void WriteFooter();
-//    std::string  WritePed(Pedestrian* ped);
-//};
-
-class TrajectoriesJPSV05: public Trajectories {
+class TrajectoriesXML: public Trajectories {
 
 public:
-    TrajectoriesJPSV05()= default;
-//    virtual ~TrajectoriesJPSV05(){};
+    TrajectoriesXML()= default;
 
-    virtual void WriteHeader(long nPeds, double fps, Building* building, int seed, int count) override;
-    virtual void WriteGeometry(Building* building) override;
-    virtual void WriteFrame(int frameNr, Building* building) override;
-    virtual void WriteFooter() override;
-    virtual void WriteSources(const std::vector<std::shared_ptr<AgentsSource>>&) override;
+    void WriteHeader(long nPeds, double fps, Building* building, int seed, int count) override;
+    void WriteGeometry(Building* building) override;
+    void WriteFrame(int frameNr, Building* building) override;
+    void WriteFooter() override;
+    void WriteSources(const std::vector<std::shared_ptr<AgentsSource>>&) override;
 };
 
 
-class TrajectoriesFLAT: public Trajectories
+class TrajectoriesTXT: public Trajectories
 {
 
 public:
-    TrajectoriesFLAT() = default;
-//    virtual ~TrajectoriesFLAT()
-//    {
-//    }
-//    ;
+    TrajectoriesTXT() = default;
 
-    virtual void WriteHeader(long nPeds, double fps, Building* building, int seed, int count) override;
-    virtual void WriteGeometry(Building* building) override;
-    virtual void WriteFrame(int frameNr, Building* building) override;
-    virtual void WriteFooter() override { };
-    virtual void WriteSources(const std::vector<std::shared_ptr<AgentsSource>>&) override {};
-
+    void WriteHeader(long nPeds, double fps, Building* building, int seed, int count) override;
+    void WriteGeometry(Building* building) override;
+    void WriteFrame(int frameNr, Building* building) override;
+    void WriteFooter() override { };
+    void WriteSources(const std::vector<std::shared_ptr<AgentsSource>>&) override {};
 };
-
-//class TrajectoriesVTK: public Trajectories
-//{
-//
-//public:
-//    TrajectoriesVTK() = default;
-////    virtual ~TrajectoriesVTK()
-////    {
-////    }
-////    ;
-//
-//    virtual void WriteHeader(long nPeds, double fps, Building* building, int seed, int count);
-//    virtual void WriteGeometry(Building* building);
-//    virtual void WriteFrame(int frameNr, Building* building);
-//    virtual void WriteFooter();
-////    virtual void WriteSources(const std::vector<std::shared_ptr<AgentsSource> >);
-//
-//};
-
-//class TrajectoriesXML_MESH: public Trajectories
-//{
-//
-//public:
-//    TrajectoriesXML_MESH() = default;
-////    virtual ~TrajectoriesXML_MESH()   {   }    ;
-//
-//    //virtual void WriteHeader(int nPeds, double fps, Building* building, int seed);
-//    //virtual void WriteFrame(int frameNr, Building* building);
-//    //virtual void WriteFooter();
-//    virtual void WriteGeometry(Building* building);
-//    virtual void WriteSources(const std::vector<std::shared_ptr<AgentsSource> >);
-//};
-
-//class TrajectoriesJPSV06: public Trajectories
-//{
-//
-//public:
-//    TrajectoriesJPSV06(){};
-//    virtual ~TrajectoriesJPSV06(){ };
-//
-//    virtual void WriteHeader(long nPeds, double fps, Building* building, int seed, int count);
-//    virtual void WriteGeometry(Building* building);
-//    virtual void WriteFrame(int frameNr, Building* building);
-//    virtual void WriteFooter();
-//    virtual void WriteSources(const std::vector<std::shared_ptr<AgentsSource> >);
-//
-//};
