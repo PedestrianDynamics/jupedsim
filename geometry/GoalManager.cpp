@@ -29,11 +29,6 @@
 
 #include "pedestrian/Pedestrian.h"
 
-void GoalManager::SetGoals(const std::map<int, Goal*>& goals)
-{
-     _allGoals = goals;
-}
-
 void GoalManager::SetBuilding(Building* building)
 {
      _building = building;
@@ -44,7 +39,7 @@ void GoalManager::ProcessPedPosition(Pedestrian* ped)
 {
      // Ped is in current waiting area
      if (CheckInsideWaitingArea(ped, ped->GetFinalDestination())){
-          WaitingArea* wa = dynamic_cast<WaitingArea*>(_allGoals[ped->GetFinalDestination()]);
+          WaitingArea* wa = dynamic_cast<WaitingArea*>(_building->GetAllGoals().at(ped->GetFinalDestination()));
           wa->AddPed(ped->GetID());
           ped->EnterGoal();
           if (!wa->IsOpen()) {
@@ -62,7 +57,7 @@ void GoalManager::ProcessPedPosition(Pedestrian* ped)
 
 void GoalManager::ProcessWaitingAreas(double time){
      if (_building){
-          for (auto goalItr : _allGoals) {
+          for (auto goalItr : _building->GetAllGoals()) {
                if (auto wa = dynamic_cast<WaitingArea*>(goalItr.second)) {
                     if (!wa->IsWaiting(time, _building)) {
                          auto pedsInside = wa->GetPedInside();
@@ -87,7 +82,7 @@ bool GoalManager::CheckInside(Pedestrian* ped, int goalID)
           return false;
      }
 
-     Goal* goal = _allGoals[goalID];
+     Goal* goal = _building->GetAllGoals().at(goalID);
 
      if (goal!=nullptr){
           return goal->IsInsideGoal(ped->GetPos());
@@ -101,7 +96,7 @@ bool GoalManager::CheckInsideWaitingArea(Pedestrian* ped, int goalID)
           return false;
      }
 
-     Goal* goal = _allGoals[goalID];
+     Goal* goal = _building->GetAllGoals().at(goalID);
 
      if (goal!=nullptr){
           if (dynamic_cast<WaitingArea*>(goal)) {
@@ -113,7 +108,7 @@ bool GoalManager::CheckInsideWaitingArea(Pedestrian* ped, int goalID)
 
 void GoalManager::SetState(int goalID, bool state)
 {
-     for (auto& goalItr : _allGoals) {
+     for (auto& goalItr : _building->GetAllGoals()) {
           if (auto goal = dynamic_cast<WaitingArea*>(goalItr.second)) {
                goal->UpdateProbabilities(state, goalID);
           }

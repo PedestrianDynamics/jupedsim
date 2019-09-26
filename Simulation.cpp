@@ -77,15 +77,12 @@ Simulation::Simulation(Configuration* args)
     _trainConstraints = false;
     _maxSimTime = 100;
 //     _config = args;
-     _goalManager = new GoalManager();
 }
 
 Simulation::~Simulation()
 {
     delete _solver;
-//    delete _iod;
     delete _em;
-    delete _goalManager;
 
     if (_iod){
          _iod.reset();
@@ -247,7 +244,8 @@ bool Simulation::InitArgs()
 
      _em->ListEvents();
 
-    //everything went fine
+     _goalManager.SetBuilding(_building.get());
+     //everything went fine
     return true;
 }
 
@@ -271,11 +269,6 @@ void Simulation::UpdateRoutesAndLocations()
      const std::map<int, Goal*>& goals = _building->GetAllGoals();
      auto allRooms = _building->GetAllRooms();
 
-//    for (signed int p = 0; p < allPeds.size(); ++p) {
-//        Pedestrian* ped = allPeds[p];
-//
-//        std::cout << "FinalDestination of [" << ped->GetID() << "] in (" << ped->GetRoomID() << ", " << ped->GetSubRoomID() << "/" <<  ped->GetSubRoomUID() << "): " << ped->GetFinalDestination() << std::endl;
-//    }
 
 #pragma omp parallel for shared(pedsToRemove, allRooms)
      for (size_t p = 0; p < allPeds.size(); ++p) {
@@ -337,14 +330,11 @@ void Simulation::UpdateRoutesAndLocations()
 
           // Set pedestrian waiting when find route temp_close
           int goal = ped->FindRoute();
-//          std::cout << std::endl;
-//          std::cout << "Ped " << ped->GetID() << " Goal: " << goal << std::endl;
           Hline* target = _building->GetTransOrCrossByUID(goal);
           int roomID = ped->GetRoomID();
           int subRoomID = ped ->GetSubRoomID();
 
-          if( Crossing* cross = dynamic_cast<Crossing*>(target) ) {
-//               std::cout << "cross state: " << cross->IsTempClose() <<std::endl;
+          if( auto cross = dynamic_cast<Crossing*>(target) ) {
                if (cross->IsInRoom(roomID) && cross->IsInSubRoom(subRoomID)){
                     if (!ped->IsWaiting() && cross->IsTempClose()){
                          ped->StartWaiting();
@@ -359,10 +349,10 @@ void Simulation::UpdateRoutesAndLocations()
           // Get new goal for pedestrians who are inside waiting area and wait time is over
           // Check if current position is already waiting area
           // yes: set next goal and return findExit(p)
-          _goalManager->ProcessPedPosition(ped);
+          _goalManager.ProcessPedPosition(ped);
      }
 
-     _goalManager->ProcessWaitingAreas(Pedestrian::GetGlobalTime());
+     _goalManager.ProcessWaitingAreas(Pedestrian::GetGlobalTime());
 
 #ifdef _USE_PROTOCOL_BUFFER
      if (_hybridSimManager)
@@ -509,9 +499,6 @@ double Simulation::RunBody(double maxSimTime)
     std::string description = "Evacuation ";
     ProgressBar bar(_nPeds, description);
     int initialnPeds = _nPeds;
-
-    _goalManager->SetBuilding(_building.get());
-    _goalManager->SetGoals(_building->GetAllGoals());
 
     // main program loop
     while ((_nPeds || (!_agentSrcManager.IsCompleted()&& _gotSources) ) && t<maxSimTime) {

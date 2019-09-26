@@ -1574,7 +1574,6 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode& strategyNode)
           Log->Write("INFO: \texit_crossing_strategy < %d >", pExitStrategy);
           _config->set_exit_strat(_exit_strat_number);
           _directionManager->SetDirectionStrategy(_directionStrategy);
-
      }
 
      // Read waiting

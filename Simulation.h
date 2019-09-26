@@ -45,9 +45,7 @@
 #include "events/EventManager.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "general/Configuration.h"
-
-class EventManager;
-class GoalManager;
+#include "geometry/GoalManager.h"
 
 class Simulation {
 private:
@@ -88,7 +86,7 @@ private:
     // bool _printPB; // print progressbar
 
     ///
-    GoalManager* _goalManager;
+    GoalManager _goalManager;
 
 public:
     /**
