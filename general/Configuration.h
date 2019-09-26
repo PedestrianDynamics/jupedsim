@@ -94,7 +94,7 @@ public:
           _geometryFile = "";
           _projectRootDir = ".";
           _showStatistics = false;
-          _fileFormat = FORMAT_XML_PLAIN;
+          _fileFormat = FileFormat::XML;
           _agentsParameters = std::map<int, std::shared_ptr<AgentsParameters> >();
           // ---------- floorfield
           _deltaH = 0.0625;

@@ -28,6 +28,7 @@
 
 #include "Event.h"
 
+#include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "mpi/LCGrid.h"
 #include "pedestrian/Knowledge.h"
@@ -180,7 +181,7 @@ void EventManager::ListEvents()
 {
      for(const auto& event: _events)
      {
-          Log->Write("INFO:\t " + event.GetDescription());
+          Logging::Info(event.GetDescription());
      }
 }
 
