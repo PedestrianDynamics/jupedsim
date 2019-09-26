@@ -293,23 +293,19 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
                xHeader->FirstChildElement("trajectories")->Attribute(
                     "format") :
                "xml-plain";
-          int embedMesh = 0;
-          if (xHeader->FirstChildElement("trajectories")->Attribute(
-                   "embed_mesh")) {
-               embedMesh =
-                    std::string(xHeader->FirstChildElement("trajectories")->Attribute("embed_mesh"))=="true" ? 1 : 0;
-          }
-          if (format=="xml-plain")
-               _config->SetFileFormat(FORMAT_XML_PLAIN);
-          if (format=="xml-plain" && embedMesh==1)
-               _config->SetFileFormat(FORMAT_XML_PLAIN_WITH_MESH);
-          if (format=="xml-bin")
-               _config->SetFileFormat(FORMAT_XML_BIN);
-          if (format=="plain")
-               _config->SetFileFormat(FORMAT_PLAIN);
-          if (format=="vtk")
-               _config->SetFileFormat(FORMAT_VTK);
+//          int embedMesh = 0;
+//          if (xHeader->FirstChildElement("trajectories")->Attribute(
+//                   "embed_mesh")) {
+//               embedMesh =
+//                    std::string(xHeader->FirstChildElement("trajectories")->Attribute("embed_mesh"))=="true" ? 1 : 0;
+//          }
+          if (format=="xml-plain"){
+               _config->SetFileFormat(FileFormat::XML);
+          } else if (format=="plain") {
+               _config->SetFileFormat(FileFormat::TXT);
+          } else {
 
+          }
           //color mode
           std::string color_mode =
                xHeader->FirstChildElement("trajectories")->Attribute(

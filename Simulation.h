@@ -34,6 +34,7 @@
 #include "geometry/SubRoom.h"
 #include "IO/OutputHandler.h"
 #include "IO/IODispatcher.h"
+#include "IO/Trajectories.h"
 #include "math/OperationalModel.h"
 #include "math/ODESolver.h"
 #include "routing/global_shortest/GlobalRouter.h"
@@ -46,10 +47,12 @@
 #include "pedestrian/AgentsSourcesManager.h"
 #include "general/Configuration.h"
 
-class EventManager;
+
 
 class Simulation {
 private:
+    /// config
+    Configuration* _config;
     ///Number of pedestrians in the simulation
     long _nPeds;
     ///Maximum simulation time
@@ -69,11 +72,9 @@ private:
     /// differential equation solver
     ODESolver* _solver;
     /// writing the trajectories to file
-    IODispatcher* _iod;
+    std::unique_ptr<Trajectories> _iod;
     /// EventManager
     EventManager* _em;
-    /// config
-    Configuration* _config;
     /// Agents sources manager
     AgentsSourcesManager _agentSrcManager;
     /// hybrid simulation manager

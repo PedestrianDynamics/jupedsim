@@ -110,12 +110,9 @@ enum AgentType {
      ELDERLY
 };
 
-enum FileFormat {
-     FORMAT_XML_PLAIN,
-     FORMAT_XML_BIN,
-     FORMAT_PLAIN,
-     FORMAT_VTK,
-     FORMAT_XML_PLAIN_WITH_MESH
+enum class FileFormat {
+    XML,
+    TXT
 };
 
 enum RoutingStrategy {

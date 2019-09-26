@@ -35,6 +35,7 @@
 #include "general/OpenMP.h"
 #include "geometry/WaitingArea.h"
 #include "IO/progress_bar.h"
+#include "IO/Trajectories.h"
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
 #include "math/GradientModel.h"
@@ -63,7 +64,7 @@ Simulation::Simulation(Configuration* args)
     //_direction = NULL;
     _operationalModel = nullptr;
     _solver = nullptr;
-    _iod = new IODispatcher();
+//    _iod = new IODispatcher();
     _fps = 1;
     _em = nullptr;
     _gotSources = false;
@@ -75,8 +76,12 @@ Simulation::Simulation(Configuration* args)
 Simulation::~Simulation()
 {
     delete _solver;
-    delete _iod;
+//    delete _iod;
     delete _em;
+
+    if (_iod){
+         _iod.reset();
+    }
 }
 
 long Simulation::GetPedsNumber() const
@@ -109,85 +114,89 @@ bool Simulation::InitArgs()
         return false;
     }
 
-    if (_config->GetPort()!=-1) {
-        switch (_config->GetFileFormat()) {
-        case FORMAT_XML_PLAIN_WITH_MESH:
-        case FORMAT_XML_PLAIN: {
-            auto travisto = std::make_shared<SocketHandler>(_config->GetHostname(),
-                    _config->GetPort());
-            Trajectories* output = new TrajectoriesJPSV05();
-            output->SetOutputHandler(travisto);
-            _iod->AddIO(output);
-            break;
-        }
-        case FORMAT_XML_BIN: {
-            Logging::Warning("Format xml-bin not yet supported in streaming");
-            return false;
-        }
-        case FORMAT_PLAIN: {
-            Logging::Warning("Format plain not yet supported in streaming");
-            return false;
-        }
-        case FORMAT_VTK: {
-            Logging::Warning("Format vtk not yet supported in streaming");
-            return false;
-        }
-        default: {
-            return false;
-        }
-        }
-
-        s.append("\tonline streaming enabled \n");
-    }
+//    if (_config->GetPort()!=-1) {
+//        switch (_config->GetFileFormat()) {
+////        case FORMAT_XML_PLAIN_WITH_MESH:
+//        case FileFormat::XML: {
+//            auto travisto = std::make_shared<SocketHandler>(_config->GetHostname(),
+//                    _config->GetPort());
+//            Trajectories* output = new TrajectoriesJPSV05();
+//            output->SetOutputHandler(travisto);
+//            _iod(FileFormat::XML)
+////            _iodAddIO(output);
+//            break;
+//        }
+////        case FORMAT_XML_BIN: {
+////            Logging::Warning("Format xml-bin not yet supported in streaming");
+////            return false;
+////        }
+//        case FileFormat::TXT: {
+//            Logging::Warning("Format plain not yet supported in streaming");
+//            return false;
+//        }
+////        case FORMAT_VTK: {
+////            Logging::Warning("Format vtk not yet supported in streaming");
+////            return false;
+////        }
+//        default: {
+//            return false;
+//        }
+//        }
+//
+//        s.append("\tonline streaming enabled \n");
+//    }
 
     if (!_config->GetTrajectoriesFile().empty()) {
          const fs::path& trajPath(_config->GetTrajectoriesFile());
          fs::create_directories(trajPath.parent_path());
 
         switch (_config->GetFileFormat()) {
-        case FORMAT_XML_PLAIN: {
-            auto tofile = std::make_shared<FileHandler>(
-                    trajPath.c_str());
-            Trajectories* output = new TrajectoriesJPSV05();
-            output->SetOutputHandler(tofile);
-            _iod->AddIO(output);
+        case FileFormat::XML:
+//            auto tofile = std::make_shared<FileHandler>(
+//                    trajPath.c_str());
+//            Trajectories* output = new TrajectoriesJPSV05();
+//            output->SetOutputHandler(tofile);
+//            _iod->AddIO(output);
+            Logging::Debug("Use FileFormat::XML");
+            _iod = std::unique_ptr<Trajectories>(new TrajectoriesJPSV05());
             break;
-        }
-        case FORMAT_PLAIN: {
-            auto file = std::make_shared<FileHandler>(trajPath);
-            outputTXT = new TrajectoriesFLAT();
-            outputTXT->SetOutputHandler(file);
-            _iod->AddIO(outputTXT);
-            break;
-        }
-        case FORMAT_VTK: {
-            Logging::Warning("Format vtk not yet supported");
-            auto vtkTraj = trajPath;
-            vtkTraj.replace_extension(".vtk");
-            auto file = std::make_shared<FileHandler>(vtkTraj);
-            Trajectories* output = new TrajectoriesVTK();
-            output->SetOutputHandler(file);
-            _iod->AddIO(output);
-            break;
-        }
 
-        case FORMAT_XML_PLAIN_WITH_MESH: {
-            //OutputHandler* tofile = new FileHandler(args->GetTrajectoriesFile().c_str());
-            //if(_iod) delete _iod;
-            //_iod = new TrajectoriesXML_MESH();
-            //_iod->AddIO(tofile);
+        case FileFormat::TXT:
+//            auto file = std::make_shared<FileHandler>(trajPath);
+//            outputTXT = new TrajectoriesFLAT();
+//            outputTXT->SetOutputHandler(file);
+//            _iod->AddIO(outputTXT);
+               Logging::Debug("Use FileFormat::XML");
+             _iod = std::unique_ptr<Trajectories>(new TrajectoriesFLAT());
+             break;
+
+//        case FORMAT_VTK: {
+//            Logging::Warning("Format vtk not yet supported");
+//            auto vtkTraj = trajPath;
+//            vtkTraj.replace_extension(".vtk");
+//            auto file = std::make_shared<FileHandler>(vtkTraj);
+//            Trajectories* output = new TrajectoriesVTK();
+//            output->SetOutputHandler(file);
+//            _iod->AddIO(output);
+//            break;
+//        }
+
+//        case FORMAT_XML_PLAIN_WITH_MESH: {
+//            //OutputHandler* tofile = new FileHandler(args->GetTrajectoriesFile().c_str());
+//            //if(_iod) delete _iod;
+//            //_iod = new TrajectoriesXML_MESH();
+//            //_iod->AddIO(tofile);
+//            break;
+//        }
+//        case FORMAT_XML_BIN: {
+//            // OutputHandler* travisto = new SocketHandler(args->GetHostname(), args->GetPort());
+//            // Trajectories* output= new TrajectoriesJPSV06();
+//            // output->SetOutputHandler(travisto);
+//            // _iod->AddIO(output);
+//            break;
+//        }
+        default:
             break;
-        }
-        case FORMAT_XML_BIN: {
-            // OutputHandler* travisto = new SocketHandler(args->GetHostname(), args->GetPort());
-            // Trajectories* output= new TrajectoriesJPSV06();
-            // output->SetOutputHandler(travisto);
-            // _iod->AddIO(output);
-            break;
-        }
-        default: {
-            break;
-        }
         }
     }
 
@@ -680,7 +689,8 @@ double Simulation::RunBody(double maxSimTime)
 
 void Simulation::WriteTrajectories()
 {
-    if(_config->GetFileFormat() != FORMAT_PLAIN) {return;}
+     // FIXME ??????
+    if(_config->GetFileFormat() != FileFormat::TXT) {return;}
 
     const fs::path& p = _config->GetTrajectoriesFile();
 
@@ -964,7 +974,7 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, std::shared
 void Simulation::RunFooter()
 {
     // writing the footer
-    _iod->WriteFooter();
+     _iod->WriteFooter();
 }
 
 void Simulation::ProcessAgentsQueue()

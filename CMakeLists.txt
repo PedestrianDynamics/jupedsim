@@ -291,6 +291,7 @@ set(source_files
     IO/OutputHandler.cpp
     IO/PedDistributionParser.cpp
     IO/progress_bar.cpp
+    IO/Trajectories.cpp
     IO/TraVisToClient.cpp
     math/ForceModel.cpp
     math/GCFMModel.cpp
@@ -380,6 +381,7 @@ set(header_files
     IO/IODispatcher.h
     IO/OutputHandler.h
     IO/PedDistributionParser.h
+    IO/Trajectories.h
     IO/TraVisToClient.h
     math/ForceModel.h
     math/GCFMModel.h
