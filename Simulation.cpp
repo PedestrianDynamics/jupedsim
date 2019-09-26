@@ -147,9 +147,6 @@ bool Simulation::InitArgs()
 //    }
 
     if (!_config->GetTrajectoriesFile().empty()) {
-         const fs::path& trajPath(_config->GetTrajectoriesFile());
-         fs::create_directories(trajPath.parent_path());
-
         switch (_config->GetFileFormat()) {
         case FileFormat::XML:
 //            auto tofile = std::make_shared<FileHandler>(
@@ -199,6 +196,11 @@ bool Simulation::InitArgs()
             break;
         }
     }
+
+     const fs::path& trajPath(_config->GetTrajectoriesFile());
+     fs::create_directories(trajPath.parent_path());
+     auto file = std::make_shared<FileHandler>(trajPath.c_str());
+     _iod->SetOutputHandler(file);
 
     _operationalModel = _config->GetModel();
     s.append(_operationalModel->GetDescription());
