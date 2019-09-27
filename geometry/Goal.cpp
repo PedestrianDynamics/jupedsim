@@ -29,6 +29,7 @@
 #include "Point.h"
 #include "Wall.h"
 #include "Crossing.h"
+#include "pedestrian/Pedestrian.h"
 
 Goal::Goal()
 {
