@@ -123,7 +123,7 @@ int main(int argc, char ** argv)
             evacTime = sim.RunStandardSimulation(config.GetTmax());
         }
 
-        Logging::Info(fmt::format("Simulation completed", sim.GetPedsNumber()));
+        Logging::Info(fmt::format("\n\nSimulation completed", sim.GetPedsNumber()));
         time(&endtime);
 
         // some statistics output
