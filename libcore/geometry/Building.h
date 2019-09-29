@@ -103,6 +103,8 @@ private:
     /// pedestrians pathway
     bool _savePathway;
     std::ofstream _pathWayStream;
+    Point topLeft{};
+    Point bottomRight{};
 
 public:
     /// constructor
@@ -112,6 +114,7 @@ public:
     std::map<int, std::vector<Transition>> TempAddedDoors;
 
     Building(Configuration * config, PedDistributor & pedDistributor);
+    void LoadGeometry(const fs::path& geometry_file);
     bool resetGeometry(std::shared_ptr<TrainTimeTable> tab);
     /// destructor
     virtual ~Building();
@@ -156,6 +159,7 @@ public:
       */
     Crossing * GetCrossing(int ID) const;
 
+    std::tuple<Point, Point> GetAABB();
     /**
       * Not implemented
       */
@@ -226,8 +230,7 @@ public:
 
     void UpdateGrid();
 
-    void
-    AddSurroundingRoom(); // add a final room (outside or world), that encompasses the complete geometry
+    void AddSurroundingRoom(); // add a final room (outside or world), that encompasses the complete geometry
 
     const std::map<int, Crossing *> & GetAllCrossings() const;
 

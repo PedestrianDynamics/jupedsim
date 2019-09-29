@@ -150,6 +150,16 @@ Configuration * Building::GetConfig() const
     return _configuration;
 }
 
+void Building::LoadGeometry(const fs::path& geometry_file)
+{
+    // This is an ugly hack!
+    Configuration cfg{};
+    cfg.SetGeometryFile(geometry_file.filename());
+    cfg.SetProjectRootDir(geometry_file.parent_path());
+    GeoFileParser parser(&cfg);
+    parser.LoadBuilding(this);
+}
+
 ///************************************************************
 // setters
 // ************************************************************/
@@ -267,6 +277,8 @@ void Building::AddSurroundingRoom()
     x_max = x_max + 10.0;
     y_min = y_min - 10.0;
     y_max = y_max + 10.0;
+    topLeft = Point(x_min, y_max);
+    bottomRight = Point(x_max, y_min);
 
     SubRoom * bigSubroom = new NormalSubRoom();
     bigSubroom->SetRoomID((int) _rooms.size());
@@ -281,6 +293,11 @@ void Building::AddSurroundingRoom()
     bigRoom->SetCaption("outside");
     bigRoom->SetID((int) _rooms.size());
     AddRoom(bigRoom);
+
+}
+
+std::tuple<Point, Point> Building::GetAABB() {
+    return {topLeft, bottomRight};
 }
 
 bool Building::InitGeometry()

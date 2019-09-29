@@ -33,13 +33,13 @@
 //this would make it easier to read
 #pragma once
 
-#include "geometry/Building.h"
-#include "geometry/Point.h"
-#include "geometry/SubRoom.h"
-#include "geometry/Wall.h"
-#include "pedestrian/Pedestrian.h"
-#include "routing/ff_router/mesh/RectGrid.h"
-#include "routing/ff_router/mesh/Trial.h"
+#include <geometry/Building.h>
+#include <geometry/Point.h>
+#include <geometry/SubRoom.h>
+#include <geometry/Wall.h>
+#include <pedestrian/Pedestrian.h>
+#include <routing/ff_router/mesh/RectGrid.h>
+#include <routing/ff_router/mesh/Trial.h>
 
 #include <cmath>
 #include <functional>

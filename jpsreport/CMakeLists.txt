@@ -1,0 +1,80 @@
+################################################################################
+# Build jspreport executable
+################################################################################
+add_executable(jpsreport
+    src/Analysis.cpp
+    src/Analysis.h
+    src/ArgumentParser.cpp
+    src/ArgumentParser.h
+    src/buildingOld.cpp
+    src/buildingOld.h
+    src/constants.h
+    src/geometry_helper.cpp
+    src/geometry_helper.h
+    src/main.cpp
+    src/methods/MeasurementArea.h
+    src/methods/Method_A.cpp
+    src/methods/Method_A.h
+    src/methods/Method_B.cpp
+    src/methods/Method_B.h
+    src/methods/Method_C.cpp
+    src/methods/Method_C.h
+    src/methods/Method_D.cpp
+    src/methods/Method_D.h
+    src/methods/Method_I.cpp
+    src/methods/Method_I.h
+    src/methods/PedData.cpp
+    src/methods/PedData.h
+    src/methods/VoronoiDiagram.cpp
+    src/methods/VoronoiDiagram.h
+    $<$<PLATFORM_ID:Windows>:forms/jpscore.rc>
+    $<$<PLATFORM_ID:Windows>:forms/JPScore.ico>
+)
+
+target_include_directories(jpsreport PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+target_compile_definitions(jpsreport PRIVATE
+    PYTHON="${PYTHON_EXECUTABLE}"
+)
+
+target_compile_options(jpsreport PRIVATE
+    ${COMMON_COMPILE_OPTIONS}
+)
+
+target_link_libraries(jpsreport
+    core
+    tinyxml
+    Boost::boost
+    # Threads::Threads
+    # spdlog::spdlog
+    # fmt::fmt
+    $<$<PLATFORM_ID:Windows>:wsock32>
+)
+
+# ################################################################################
+# # Build jspcore_asan executable - jpscore with address sanitizer
+# ################################################################################
+# if(BUILD_WITH_ASAN)
+#     get_target_property(jpscore_source jpscore SOURCES)
+#     get_target_property(jpscore_compile_options jpscore COMPILE_OPTIONS)
+#     get_target_property(jpscore_link_libraries jpscore LINK_LIBRARIES)
+#     list(REMOVE_ITEM jpscore_link_libraries core)
+#     list(APPEND jpscore_link_libraries core_asan)
+#     add_executable(jpscore_asan
+#         ${jpscore_source}
+#     )
+
+#     target_compile_options(jpscore_asan PRIVATE
+#         ${jpscore_compile_options}
+#         -fno-omit-frame-pointer
+#         -fno-optimize-sibling-calls
+#         -fsanitize=address
+#     )
+
+#     target_link_libraries(jpscore_asan
+#         ${jpscore_link_libraries}
+#         -fsanitize=address
+#     )
+# endif()
