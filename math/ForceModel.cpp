@@ -28,17 +28,11 @@
 #include "ForceModel.h"
 
 
-ForceModel::ForceModel()
-{
-}
+ForceModel::ForceModel() {}
 
-ForceModel::~ForceModel()
-{
-}
-
+ForceModel::~ForceModel() {}
 
 
 /************************************************************
  Gompertz ForceModel
  ************************************************************/
-

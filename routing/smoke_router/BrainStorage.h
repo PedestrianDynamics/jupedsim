@@ -28,7 +28,6 @@
 #pragma once
 
 #include "Brain.h"
-
 #include "routing/smoke_router/cognitiveMap/cognitivemap.h"
 
 #include <unordered_map>
@@ -44,39 +43,38 @@ typedef std::shared_ptr<Brain> BStorageValueType;
 typedef std::unordered_map<BStorageKeyType, BStorageValueType> BStorageType;
 
 
-
 /**
  * @brief Brain Storage
  *
  * Cares about Cognitive map storage, creation and delivery
  *
  */
-class BrainStorage {
+class BrainStorage
+{
 public:
-     BrainStorage(const Building * const b, std::string cogMapStatus, std::string cogMapFiles="");
-     virtual ~BrainStorage();
+    BrainStorage(const Building * const b, std::string cogMapStatus, std::string cogMapFiles = "");
+    virtual ~BrainStorage();
 
 
-     BStorageValueType operator[] (BStorageKeyType key);
+    BStorageValueType operator[](BStorageKeyType key);
 
 
 private:
-     const Building * const _building;
-     BStorageType _brains;
+    const Building * const _building;
+    BStorageType _brains;
 
 
-     //cognitive map
-     std::vector<ptrRegion> _regions;
-     std::string _cogMapStatus;
-     std::string _cogMapFiles;
+    //cognitive map
+    std::vector<ptrRegion> _regions;
+    std::string _cogMapStatus;
+    std::string _cogMapFiles;
 
-     //brain
-     void CreateBrain(BStorageKeyType ped);
-     void ParseCogMap(BStorageKeyType ped);
+    //brain
+    void CreateBrain(BStorageKeyType ped);
+    void ParseCogMap(BStorageKeyType ped);
 
 
-     // internal graph network in every room (for locomotion purposes)
-     void InitInternalNetwork(const SubRoom *sub_room);
-     std::unordered_map<const SubRoom*,ptrIntNetwork> _roominternalNetworks;
-
+    // internal graph network in every room (for locomotion purposes)
+    void InitInternalNetwork(const SubRoom * sub_room);
+    std::unordered_map<const SubRoom *, ptrIntNetwork> _roominternalNetworks;
 };

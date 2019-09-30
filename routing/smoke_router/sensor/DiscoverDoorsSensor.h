@@ -31,14 +31,13 @@
 
 class DiscoverDoorsSensor : public AbstractSensor
 {
-
 public:
-    DiscoverDoorsSensor(const Building * b) : AbstractSensor(b) { }
+    DiscoverDoorsSensor(const Building * b) : AbstractSensor(b) {}
 
     virtual ~DiscoverDoorsSensor();
 
     std::string GetName() const;
-    void execute(const Pedestrian *, CognitiveMap& ) const;
-private:
+    void execute(const Pedestrian *, CognitiveMap &) const;
 
+private:
 };

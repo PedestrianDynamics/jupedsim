@@ -59,61 +59,49 @@
 
 LandmarkNetwork::LandmarkNetwork()
 {
-    _graph=Graph();
+    _graph = Graph();
 }
 
-LandmarkNetwork::LandmarkNetwork(const Landmarks &landmarks, const std::vector<ptrConnection> &connections)
+LandmarkNetwork::LandmarkNetwork(
+    const Landmarks & landmarks,
+    const std::vector<ptrConnection> & connections)
 {
-    _graph=Graph();
+    _graph = Graph();
 
-    for (ptrLandmark landmark:landmarks)
-    {
+    for(ptrLandmark landmark : landmarks) {
         AddLandmark(landmark);
     }
 
 
-    for (ptrConnection connection:connections)
-    {
+    for(ptrConnection connection : connections) {
         AddConnection(connection);
-
     }
 }
 
 
-LandmarkNetwork::~LandmarkNetwork()
+LandmarkNetwork::~LandmarkNetwork() {}
+
+void LandmarkNetwork::AddLandmark(const ptrLandmark & landmark)
 {
-
-}
-
-void LandmarkNetwork::AddLandmark(const ptrLandmark& landmark)
-{
-
     Vertex v = boost::add_vertex(_graph);
     //std::make_pair<int,int>(1,1);
-    _landmarks.push_back(std::pair<ptrLandmark,Vertex> (landmark,v));
-
+    _landmarks.push_back(std::pair<ptrLandmark, Vertex>(landmark, v));
 }
 
-void LandmarkNetwork::RemoveLandmark(const ptrLandmark &landmark)
+void LandmarkNetwork::RemoveLandmark(const ptrLandmark & landmark)
 {
-
-
-    for (auto it=_landmarks.begin(); it!=_landmarks.end(); ++it)
-    {
-        if (it->first==landmark)
-        {
-            boost::clear_vertex(it->second,_graph);
+    for(auto it = _landmarks.begin(); it != _landmarks.end(); ++it) {
+        if(it->first == landmark) {
+            boost::clear_vertex(it->second, _graph);
             RemoveAdjacentEdges(it->second);
-            boost::remove_vertex(it->second,_graph);
+            boost::remove_vertex(it->second, _graph);
             _landmarks.remove(*it);
             break;
         }
     }
-
-
 }
 
-void LandmarkNetwork::AddConnection(const ptrConnection &connection)
+void LandmarkNetwork::AddConnection(const ptrConnection & connection)
 {
     //find indeces of vertices(landmarks) in graph
     ptrLandmark landmarkA = connection->GetLandmarks().first;
@@ -121,65 +109,57 @@ void LandmarkNetwork::AddConnection(const ptrConnection &connection)
     Vertex A{};
     Vertex B{};
 
-    for (auto it=_landmarks.begin(); it!=_landmarks.end(); ++it)
-    {
-        int counter=0;
-        if (it->first==landmarkA)
-        {
+    for(auto it = _landmarks.begin(); it != _landmarks.end(); ++it) {
+        int counter = 0;
+        if(it->first == landmarkA) {
             A = it->second;
             counter++;
-            if (counter==2)
+            if(counter == 2)
                 break;
-        }
-        else if (it->first==landmarkB)
-        {
+        } else if(it->first == landmarkB) {
             B = it->second;
             counter++;
-            if (counter==2)
+            if(counter == 2)
                 break;
         }
     }
 
-    Point vector = landmarkA->GetPosInMap()-landmarkB->GetPosInMap();//->GetRandomPoint()-landmarkB->GetRandomPoint();
+    Point vector = landmarkA->GetPosInMap() -
+                   landmarkB->GetPosInMap(); //->GetRandomPoint()-landmarkB->GetRandomPoint();
     double distance = vector.Norm();
-    _connections.push_back(std::pair<Edge,Weight>(Edge(A,B),distance));
+    _connections.push_back(std::pair<Edge, Weight>(Edge(A, B), distance));
 
-    boost::add_edge(A,B,distance,_graph);
-    boost::add_edge(B,A,distance,_graph);
+    boost::add_edge(A, B, distance, _graph);
+    boost::add_edge(B, A, distance, _graph);
 }
 
-double LandmarkNetwork::LengthofShortestPathToTarget(const ptrLandmark &landmark, const ptrLandmark &target) const
+double LandmarkNetwork::LengthofShortestPathToTarget(
+    const ptrLandmark & landmark,
+    const ptrLandmark & target) const
 {
-
-    int startVertex=-1;
-    int targetVertex=-1;
+    int startVertex  = -1;
+    int targetVertex = -1;
 
     // get the start vertex
 
 
-    for (auto it=_landmarks.begin(); it!=_landmarks.end(); ++it)
-    {
-
-        int counter=0;
-        if (it->first==landmark)
-        {
-            startVertex=it->second;
+    for(auto it = _landmarks.begin(); it != _landmarks.end(); ++it) {
+        int counter = 0;
+        if(it->first == landmark) {
+            startVertex = it->second;
             counter++;
-            if (counter==2)
+            if(counter == 2)
+                break;
+        } else if(it->first == target) {
+            targetVertex = it->second;
+            counter++;
+            if(counter == 2)
                 break;
         }
-        else if (it->first==target)
-        {
-            targetVertex=it->second;
-            counter++;
-            if (counter==2)
-                break;
-        }
-
     }
 
 
-    if (targetVertex==-1 || startVertex==-1)
+    if(targetVertex == -1 || startVertex == -1)
         return -1;
 
     //std::vector<double> edgeWeights;
@@ -187,27 +167,25 @@ double LandmarkNetwork::LengthofShortestPathToTarget(const ptrLandmark &landmark
     // vector for storing distance property
     std::vector<double> d(boost::num_vertices(_graph));
 
-//    for (auto it =_connections.begin(); it!=_connections.end(); ++it)
-//    {
-//        edgeWeights.push_back(it->second);
-//    }
+    //    for (auto it =_connections.begin(); it!=_connections.end(); ++it)
+    //    {
+    //        edgeWeights.push_back(it->second);
+    //    }
 
     // invoke variant 2 of Dijkstra's algorithm
     boost::dijkstra_shortest_paths(_graph, startVertex, boost::distance_map(&d[0]));
     //std::cout << "distance from start vertex to target:" << std::endl;
-//    boost::graph_traits<Graph>::vertex_iterator vi;
-//    for(vi = boost::vertices(_graph).first; vi != boost::vertices(_graph).second; ++vi)
-//        std::cout << "distance = "  << d[*vi] << std::endl;
+    //    boost::graph_traits<Graph>::vertex_iterator vi;
+    //    for(vi = boost::vertices(_graph).first; vi != boost::vertices(_graph).second; ++vi)
+    //        std::cout << "distance = "  << d[*vi] << std::endl;
 
     return d[targetVertex];
 }
 
-void LandmarkNetwork::RemoveAdjacentEdges(const Vertex &vertex)
+void LandmarkNetwork::RemoveAdjacentEdges(const Vertex & vertex)
 {
-    for (auto it=_connections.begin(); it!=_connections.end(); ++it)
-    {
-        if (it->first.first == vertex || it->first.second == vertex)
-        {
+    for(auto it = _connections.begin(); it != _connections.end(); ++it) {
+        if(it->first.first == vertex || it->first.second == vertex) {
             _connections.remove(*it);
         }
     }

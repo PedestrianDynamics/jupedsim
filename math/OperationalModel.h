@@ -37,8 +37,8 @@
 /** @} */ // end of group
 #pragma once
 
-#include <string>
 #include <memory>
+#include <string>
 
 class Building;
 class DirectionStrategy;
@@ -46,33 +46,34 @@ class DirectionStrategy;
 class OperationalModel
 {
 protected:
-     // define the strategy for crossing a door (used for calculating the driving force)
-     std::shared_ptr<DirectionStrategy> _direction;
+    // define the strategy for crossing a door (used for calculating the driving force)
+    std::shared_ptr<DirectionStrategy> _direction;
+
 public:
-     /**
+    /**
       * Constructor
       */
-     OperationalModel();
+    OperationalModel();
 
-     /**
+    /**
       * Destructor
       */
-     virtual ~OperationalModel();
+    virtual ~OperationalModel();
 
-     /**
+    /**
       * Performs whatever initialization is needed/required.
       * This function is called at the beginning the simulation once.
       * @param building, the building object
       * return the status of the initialisation
       */
-     virtual bool Init (Building* building) = 0;
+    virtual bool Init(Building * building) = 0;
 
-     /**
+    /**
       * @return a description of the model possibly with all model parameters in a nicely formatted string
       */
-     virtual std::string GetDescription() = 0;
+    virtual std::string GetDescription() = 0;
 
-     /**
+    /**
       * Computes and update the positions/velocities /... of the pedestrians for the next time steps.
       * The pedestrians are stored in the Building object.
       *
@@ -80,7 +81,8 @@ public:
       * @param deltaT, the timestep
       * @param building, the representation of the building
       */
-     virtual void ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic) = 0 ;
+    virtual void
+    ComputeNextTimeStep(double current, double deltaT, Building * building, int periodic) = 0;
 
-     std::shared_ptr<DirectionStrategy> GetDirection() {return _direction;};
+    std::shared_ptr<DirectionStrategy> GetDirection() { return _direction; };
 };

@@ -28,15 +28,15 @@
 
 #include "AbstractSensor.h"
 
-class RoomToFloorSensor : public AbstractSensor {
-
+class RoomToFloorSensor : public AbstractSensor
+{
 public:
-     RoomToFloorSensor(const Building * b) : AbstractSensor(b) { }
+    RoomToFloorSensor(const Building * b) : AbstractSensor(b) {}
 
-     virtual ~RoomToFloorSensor();
+    virtual ~RoomToFloorSensor();
 
-     std::string GetName() const;
-     void execute(const Pedestrian *, CognitiveMap&) const;
+    std::string GetName() const;
+    void execute(const Pedestrian *, CognitiveMap &) const;
+
 private:
-
 };

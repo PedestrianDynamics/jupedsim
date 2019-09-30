@@ -2,34 +2,44 @@
 
 #include "Knot.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 //log output
 class OutputHandler;
-extern OutputHandler* Log;
+extern OutputHandler * Log;
 
-using Matrix = std::vector<std::vector<Knot> >;
+using Matrix = std::vector<std::vector<Knot>>;
 
 class FDSMesh
 {
 public:
     FDSMesh();
-    FDSMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const double &cellsize);
-    FDSMesh(const std::string &filename);
+    FDSMesh(
+        const double & xmin,
+        const double & ymin,
+        const double & xmax,
+        const double & ymax,
+        const double & cellsize);
+    FDSMesh(const std::string & filename);
     ~FDSMesh();
 
-    void SetUpMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const double &cellsize);
-    const Matrix &GetMesh() const;
+    void SetUpMesh(
+        const double & xmin,
+        const double & ymin,
+        const double & xmax,
+        const double & ymax,
+        const double & cellsize);
+    const Matrix & GetMesh() const;
 
-    double GetKnotValue(const double &x, const double &y) const;
-    void SetKnotValuesFromFile(const std::string &filename);
+    double GetKnotValue(const double & x, const double & y) const;
+    void SetKnotValuesFromFile(const std::string & filename);
 
 
     bool statusMesh() const;
 
-    int GetColumn(const double &x, int &col) const;
-    int GetRow(int &row, const double &y) const;
-    void ReadMatrix(std::string line, std::ifstream &pFile);
+    int GetColumn(const double & x, int & col) const;
+    int GetRow(int & row, const double & y) const;
+    void ReadMatrix(std::string line, std::ifstream & pFile);
 
 private:
     Matrix _matrix;

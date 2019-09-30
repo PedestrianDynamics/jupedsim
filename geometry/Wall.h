@@ -28,44 +28,44 @@
 
 #include "Line.h"
 
-class Wall : public Line {
-
+class Wall : public Line
+{
 public:
-     /**
+    /**
       * Constructor
       */
-     Wall();
+    Wall();
 
-     /**
+    /**
       * Constructor
       */
-     Wall(const Point& p1, const Point& p2, const std::string& type="internal");
+    Wall(const Point & p1, const Point & p2, const std::string & type = "internal");
 
-     /**
+    /**
       * Destructor
       */
-     ~Wall() override = default;
+    ~Wall() override = default;
 
-     /**
+    /**
       * set/get the wall type. Values are external and internal
       */
-     const std::string& GetType() const;
+    const std::string & GetType() const;
 
-     /**
+    /**
       * set/get the wall type. Values are external and internal
       */
-     void SetType(const std::string& type);
+    void SetType(const std::string & type);
 
-     /**
+    /**
       *  Debug output from the object
       */
-     void WriteToErrorLog() const;
+    void WriteToErrorLog() const;
 
-     /**
+    /**
       * @return a nicely formated string of the object
       */
-     std::string Write() const override;
+    std::string Write() const override;
 
 private:
-     std::string _type;
+    std::string _type;
 };

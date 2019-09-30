@@ -30,7 +30,6 @@
 #pragma once
 
 #include "OperationalModel.h"
-
 #include "geometry/Building.h"
 
 #include <vector>
@@ -38,14 +37,12 @@
 typedef std::pair<double, double> my_pair;
 // sort with respect to first element (ascending).
 // In case of equality sort with respect to second element (descending)
-struct sort_pred
-{
-      bool operator () (const my_pair& left, const my_pair& right)
-            {
-                  return (left.first == right.first) ?
-                        (left.second > right.second) :
-                        (left.first < right.first);
-            }
+struct sort_pred {
+    bool operator()(const my_pair & left, const my_pair & right)
+    {
+        return (left.first == right.first) ? (left.second > right.second) :
+                                             (left.first < right.first);
+    }
 };
 
 
@@ -62,17 +59,17 @@ class DirectionStrategy;
  *
  * \author Mohcine Chraibi
  */
-class VelocityModel : public OperationalModel {
+class VelocityModel : public OperationalModel
+{
 private:
+    /// Modellparameter
+    double _aPed;
+    double _DPed;
 
-     /// Modellparameter
-     double _aPed;
-     double _DPed;
+    double _aWall;
+    double _DWall;
 
-     double _aWall;
-     double _DWall;
-
-     /**
+    /**
       * Optimal velocity function \f$ V(spacing) =\min{v_0, \max{0, (s-l)/T}}  \f$
       *
       * @param ped: Pointer to Pedestrians
@@ -81,9 +78,9 @@ private:
       *
       * @return double
       */
-     double OptimalSpeed(Pedestrian* ped, double spacing) const;
+    double OptimalSpeed(Pedestrian * ped, double spacing) const;
 
-     /**
+    /**
       * The desired direction of pedestrian
       *
       * @param ped: Pointer to Pedestrians
@@ -91,8 +88,8 @@ private:
       *
       * @return Point
       */
-     Point e0(Pedestrian *ped, Room* room) const;
-     /**
+    Point e0(Pedestrian * ped, Room * room) const;
+    /**
       * Get the spacing between ped1 and ped2
       *
       * @param ped1 Pointer to Pedestrian: First pedestrian
@@ -102,8 +99,8 @@ private:
       * and should be calculated *before* calling OptimalSpeed
       * @return Point
       */
-     my_pair GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei, int periodic) const;
-     /**
+    my_pair GetSpacing(Pedestrian * ped1, Pedestrian * ped2, Point ei, int periodic) const;
+    /**
       * Repulsive force between two pedestrians ped1 and ped2 according to
       * the Velocity model (to be published in TGF15)
       *
@@ -112,8 +109,8 @@ private:
       *
       * @return Point
       */
-     Point ForceRepPed(Pedestrian* ped1, Pedestrian* ped2, int periodic) const;
-     /**
+    Point ForceRepPed(Pedestrian * ped1, Pedestrian * ped2, int periodic) const;
+    /**
       * Repulsive force acting on pedestrian <ped> from the walls in
       * <subroom>. The sum of all repulsive forces of the walls in <subroom> is calculated
       * @see ForceRepWall
@@ -122,8 +119,8 @@ private:
       *
       * @return Point
       */
-     Point ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const;
-     /**
+    Point ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const;
+    /**
       * Repulsive force between pedestrian <ped> and wall <l>
       *
       * @param ped Pointer to Pedestrian
@@ -131,58 +128,61 @@ private:
       *
       * @return Point
       */
-     Point ForceRepWall(Pedestrian* ped, const Line& l, const Point& centroid, bool inside) const;
+    Point ForceRepWall(Pedestrian * ped, const Line & l, const Point & centroid, bool inside) const;
 
 public:
+    VelocityModel(
+        std::shared_ptr<DirectionStrategy> dir,
+        double aped,
+        double Dped,
+        double awall,
+        double Dwall);
+    virtual ~VelocityModel(void);
 
-     VelocityModel(std::shared_ptr<DirectionStrategy> dir, double aped, double Dped,
-                   double awall, double Dwall);
-     virtual ~VelocityModel(void);
 
+    std::shared_ptr<DirectionStrategy> GetDirection() const;
 
-     std::shared_ptr<DirectionStrategy> GetDirection() const;
-
-     /**
+    /**
       * @todo What is this parameter doing?
       *
       * @return double
       *
       */
-     double GetaPed() const;
+    double GetaPed() const;
 
-     /**
+    /**
       * @todo What is this parameter doing?
       *
       * @return double
       */
-     double GetDPed() const;
+    double GetDPed() const;
 
-     /**
+    /**
       * @todo What is this parameter doing?
       *
       * @return double
       */
-     double GetaWall() const;
+    double GetaWall() const;
 
-     /**
+    /**
       * @todo What is this parameter doing?
       *
       * @return double
       */
-     double GetDWall() const;
+    double GetDWall() const;
 
-     /**
+    /**
       * @return all model parameters in a nicely formatted string
       */
-     virtual std::string GetDescription();
+    virtual std::string GetDescription();
 
-     /**
+    /**
       * initialize the phi angle
       * @param building
       */
-     virtual bool Init (Building* building);
+    virtual bool Init(Building * building);
 
-     /**
+    /**
       * Compute the next simulation step
       * Solve the differential equations and update the positions and velocities
       * @param current the actual time
@@ -190,5 +190,6 @@ public:
       * @param building the geometry object
       * @param periodic: used in some utests for periodic scenarios (very specific)
       */
-     virtual void ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic);
+    virtual void
+    ComputeNextTimeStep(double current, double deltaT, Building * building, int periodic);
 };

@@ -30,27 +30,27 @@
 class Goal;
 class Pedestrian;
 
-class GoalManager {
-
+class GoalManager
+{
 private:
     /**
      * Map containing goals which should be managed, key is the ID
      */
-    std::map<int, Goal*> _allGoals;
+    std::map<int, Goal *> _allGoals;
 
 public:
     /**
      * Sets the goals which are managed
      * @param[in] goals map containing goals which should be managed
      */
-    void SetGoals(std::map<int, Goal*> goals);
+    void SetGoals(std::map<int, Goal *> goals);
 
     /**
      * Checks whether a pedestrian has entered or left a goal/wa and
      * perform the corresponding actions
      * @param[in] ped pedestrian, which position is checked
      */
-    void ProcessPedPosition(Pedestrian* ped);
+    void ProcessPedPosition(Pedestrian * ped);
 
 private:
     /**
@@ -59,7 +59,7 @@ private:
      * @param[in] goalID ID of the goal
      * @return ped is inside goalID
      */
-    bool CheckInside(Pedestrian* ped, int goalID);
+    bool CheckInside(Pedestrian * ped, int goalID);
 
     /**
      * Checks if pedestrian is inside a specific waiting area
@@ -67,7 +67,7 @@ private:
      * @param[in] goalID ID of the waiting area
      * @return ped is inside goalID
      */
-    bool CheckInsideWaitingArea(Pedestrian* ped, int goalID);
+    bool CheckInsideWaitingArea(Pedestrian * ped, int goalID);
 
     /**
      * Sets the state of a specific goal and informs the other goals of changes
@@ -75,5 +75,4 @@ private:
      * @param[in] state open(true)/close(false)
      */
     void SetState(int goalID, bool state);
-
 };

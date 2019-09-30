@@ -22,13 +22,14 @@
 #ifndef JPSCORE_HYBRIDSIMULATION_H
 #define JPSCORE_HYBRIDSIMULATION_H
 
-#include <string>
-#include <grpc++/grpc++.h>
 #include "../IO/OutputHandler.h"
+#include "../general/Configuration.h"
 #include "JPSserver.h"
 #include "Latches.h"
-#include "../general/Configuration.h"
 #include "SimObserver.h"
+
+#include <grpc++/grpc++.h>
+#include <string>
 
 using grpc::Server;
 
@@ -40,39 +41,38 @@ class JPSserver;
 
 class Configuration;
 
-extern OutputHandler* Log;
+extern OutputHandler * Log;
 
-class HybridSimulationManager {
+class HybridSimulationManager
+{
 public:
+    HybridSimulationManager(Configuration * config);
 
-     HybridSimulationManager(Configuration* config);
+    virtual ~HybridSimulationManager();
 
-     virtual ~HybridSimulationManager();
+    bool Run(Simulation & sim);
 
-     bool Run(Simulation& sim);
+    std::string ToString();
 
-     std::string ToString();
+    void Start();
 
-     void Start();
+    void Shutdown();
 
-     void Shutdown();
+    void WaitForScenarioLoaded();
 
-     void WaitForScenarioLoaded();
-
-     SimObserver* GetSimObserver();
+    SimObserver * GetSimObserver();
 
 private:
-//    Building* _building=nullptr;
-     SimObserver _simObserver;
+    //    Building* _building=nullptr;
+    SimObserver _simObserver;
 
-     Configuration* _config;
+    Configuration * _config;
 
-     std::shared_ptr<Latches> _latches = nullptr;
-     JPSserver* _service;
+    std::shared_ptr<Latches> _latches = nullptr;
+    JPSserver * _service;
 
-     int _jpsServerPort = 9998;
-     std::shared_ptr<Server> _server = nullptr;
-
+    int _jpsServerPort              = 9998;
+    std::shared_ptr<Server> _server = nullptr;
 };
 
 #endif //JPSCORE_HYBRIDSIMULATION_H

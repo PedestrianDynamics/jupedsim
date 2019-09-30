@@ -37,28 +37,24 @@ class FDSMeshStorage;
 
 class WalkingSpeed
 {
-
 public:
-
     explicit WalkingSpeed(const std::string & projectFilename);
 
     virtual ~WalkingSpeed();
 
-    double WalkingInSmoke(const Pedestrian*, double);
+    double WalkingInSmoke(const Pedestrian *, double);
     double GetExtinction(const Pedestrian *);
 
-    void set_FMStorage(const std::shared_ptr<FDSMeshStorage>& fmStorage);
+    void set_FMStorage(const std::shared_ptr<FDSMeshStorage> & fmStorage);
     const std::shared_ptr<FDSMeshStorage> get_FMStorage();
 
 
     bool LoadJPSfireInfo(const std::string & projectFilename);
     bool ReduceWalkingSpeed();
-    double FrantzichNilsson2003(double &walking_speed, double ExtinctionCoefficient);
-    double Jin1978(double &walking_speed, double ExtinctionCoefficient);
-    double Fridolf2018(double &walking_speed, double ExtinctionCoefficient);
+    double FrantzichNilsson2003(double & walking_speed, double ExtinctionCoefficient);
+    double Jin1978(double & walking_speed, double ExtinctionCoefficient);
+    double Fridolf2018(double & walking_speed, double ExtinctionCoefficient);
 
 private:
-
     std::shared_ptr<FDSMeshStorage> _FMStorage;
-
 };

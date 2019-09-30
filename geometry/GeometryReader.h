@@ -6,10 +6,11 @@
 
 class Building;
 
-class GeometryReader {
+class GeometryReader
+{
 public:
-     virtual void LoadBuilding(Building* building) = 0;
+    virtual void LoadBuilding(Building * building) = 0;
 
-     virtual bool LoadTrafficInfo(Building* building) = 0;
-     virtual ~GeometryReader(){};
+    virtual bool LoadTrafficInfo(Building * building) = 0;
+    virtual ~GeometryReader(){};
 };

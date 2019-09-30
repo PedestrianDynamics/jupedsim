@@ -29,12 +29,6 @@
  **/
 #include "OperationalModel.h"
 
-OperationalModel::OperationalModel()
-{
+OperationalModel::OperationalModel() {}
 
-}
-
-OperationalModel::~OperationalModel()
-{
-}
-
+OperationalModel::~OperationalModel() {}

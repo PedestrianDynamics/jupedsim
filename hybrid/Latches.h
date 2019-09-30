@@ -24,32 +24,31 @@
 
 #include <mutex>
 
-class Latches {
-
+class Latches
+{
 public:
+    explicit Latches();
 
-     explicit Latches();
+    //    Latches(const Latches&) = delete;
+    ////    Latches& operator = (const Latches&) = delete;
+    ~Latches() = default;
 
-//    Latches(const Latches&) = delete;
-////    Latches& operator = (const Latches&) = delete;
-     ~Latches() = default;
+    void WaitForScenarioLoaded();
 
-     void WaitForScenarioLoaded();
+    void WaitForSimulationPrepared();
 
-     void WaitForSimulationPrepared();
+    void WaitForSimulationFinished();
 
-     void WaitForSimulationFinished();
+    void ScenarioLoaded();
 
-     void ScenarioLoaded();
+    void SimulationPrepared();
 
-     void SimulationPrepared();
-
-     void SimulationFinished();
+    void SimulationFinished();
 
 private:
-     std::mutex _sc;
-     std::mutex _simPrep;
-     std::mutex _simFinshed;
+    std::mutex _sc;
+    std::mutex _simPrep;
+    std::mutex _simFinshed;
 };
 
 #endif //JPSCORE_LATCHES_H

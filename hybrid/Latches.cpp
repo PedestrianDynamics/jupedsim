@@ -23,40 +23,38 @@
 
 void Latches::WaitForScenarioLoaded()
 {
-     _sc.lock();
+    _sc.lock();
 }
 
 void Latches::WaitForSimulationPrepared()
 {
-     _simPrep.lock();
+    _simPrep.lock();
 }
 
 void Latches::WaitForSimulationFinished()
 {
-     _simFinshed.lock();
-     _simFinshed.unlock();
+    _simFinshed.lock();
+    _simFinshed.unlock();
 }
 
 void Latches::ScenarioLoaded()
 {
-     _sc.unlock();
+    _sc.unlock();
 }
 
 void Latches::SimulationPrepared()
 {
-     _simPrep.unlock();
+    _simPrep.unlock();
 }
 
 void Latches::SimulationFinished()
 {
-     _simFinshed.unlock();
+    _simFinshed.unlock();
 }
 
 Latches::Latches()
 {
-     _sc.lock();
-     _simFinshed.lock();
-     _simPrep.lock();
+    _sc.lock();
+    _simFinshed.lock();
+    _simPrep.lock();
 }
-
-

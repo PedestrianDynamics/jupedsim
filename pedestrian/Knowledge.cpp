@@ -28,83 +28,95 @@
 
 Knowledge::Knowledge()
 {
-     _isClosed = false;
-     _time = 0;
-     _quality=1;
-     _id=-1;
-     _hasBeenRefusedOnce=false;
-     _latency=0.0;
+    _isClosed           = false;
+    _time               = 0;
+    _quality            = 1;
+    _id                 = -1;
+    _hasBeenRefusedOnce = false;
+    _latency            = 0.0;
 }
 
-Knowledge::~Knowledge()
-{
-}
+Knowledge::~Knowledge() {}
 
 std::string Knowledge::Dump() const
 {
-     char tmp[2048];
-     sprintf(tmp,"door [%d] state [%d]  since [%.2f] sec. Refused= %d, Quality=%.2f, latency=%.2f",_id,_isClosed,_time,_hasBeenRefusedOnce,_quality,_latency);
-     return std::string(tmp);
+    char tmp[2048];
+    sprintf(
+        tmp,
+        "door [%d] state [%d]  since [%.2f] sec. Refused= %d, Quality=%.2f, latency=%.2f",
+        _id,
+        _isClosed,
+        _time,
+        _hasBeenRefusedOnce,
+        _quality,
+        _latency);
+    return std::string(tmp);
 }
 
-void Knowledge::SetState(int id, bool is_closed, double time, double quality, double latency, bool refuse)
+void Knowledge::SetState(
+    int id,
+    bool is_closed,
+    double time,
+    double quality,
+    double latency,
+    bool refuse)
 {
-     _isClosed=is_closed;
-     _time=time;
-     _id=id;
-     _quality=quality;
-     _hasBeenRefusedOnce=refuse;
-     _latency=latency;
+    _isClosed           = is_closed;
+    _time               = time;
+    _id                 = id;
+    _quality            = quality;
+    _hasBeenRefusedOnce = refuse;
+    _latency            = latency;
 }
 
 bool Knowledge::GetState() const
 {
-     return _isClosed;
+    return _isClosed;
 }
 
 double Knowledge::GetQuality() const
 {
-     return _quality;
+    return _quality;
 }
 
 void Knowledge::SetQuality(double quality)
 {
-     _quality=quality;
+    _quality = quality;
 }
 
 double Knowledge::GetTime() const
 {
-     return _time;
+    return _time;
 }
 
 bool Knowledge::HasBeenRefused() const
 {
-     return _hasBeenRefusedOnce;
+    return _hasBeenRefusedOnce;
 }
 
 void Knowledge::Refuse(bool state)
 {
-     _hasBeenRefusedOnce=state;
+    _hasBeenRefusedOnce = state;
 }
 
 bool Knowledge::CanBeForwarded() const
 {
-     return (_latency<=0);
+    return (_latency <= 0);
 }
 
 void Knowledge::SetLatency(double latency)
 {
-     _latency=latency;
+    _latency = latency;
 }
 
 double Knowledge::GetLatency() const
 {
-     return _latency;
+    return _latency;
 }
 
 void Knowledge::DecreaseLatency(double minus)
 {
-     _latency = _latency - minus;
-     if (_latency <= 0)
-          _latency = 0.0;
+    _latency = _latency - minus;
+    if(_latency <= 0)
+        _latency = 0.0;
 }

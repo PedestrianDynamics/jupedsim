@@ -28,41 +28,46 @@
 
 #include "LastDestinationsSensor.h"
 
-
 #include "geometry/Building.h"
 #include "pedestrian/Pedestrian.h"
-#include "routing/smoke_router/cognitiveMap/cognitivemap.h"
 #include "routing/smoke_router/NavigationGraph.h"
+#include "routing/smoke_router/cognitiveMap/cognitivemap.h"
 
-LastDestinationsSensor::~LastDestinationsSensor()
-{
-}
+LastDestinationsSensor::~LastDestinationsSensor() {}
 
 std::string LastDestinationsSensor::GetName() const
 {
     return "LastDestinationsSensor";
 }
 
-void LastDestinationsSensor::execute(const Pedestrian * /*pedestrian*/, CognitiveMap &cognitive_map) const
+void LastDestinationsSensor::execute(
+    const Pedestrian * /*pedestrian*/,
+    CognitiveMap & cognitive_map) const
 {
     NavigationGraph * ng = cognitive_map.GetGraphNetwork()->GetNavigationGraph();
-    std::vector<const GraphEdge *> & destinations = cognitive_map.GetGraphNetwork()->GetDestinations();
+    std::vector<const GraphEdge *> & destinations =
+        cognitive_map.GetGraphNetwork()->GetDestinations();
     int i = 1;
 
     std::set<const GraphEdge *> rated;
 
-    for(std::vector<const GraphEdge *>::reverse_iterator it = destinations.rbegin(); it != destinations.rend(); ++it) {
-        GraphEdge * to_edge = ng->operator []((*it)->GetSrc()->GetSubRoom())->operator []((*it)->GetCrossing());
+    for(std::vector<const GraphEdge *>::reverse_iterator it = destinations.rbegin();
+        it != destinations.rend();
+        ++it) {
+        GraphEdge * to_edge =
+            ng->operator[]((*it)->GetSrc()->GetSubRoom())->operator[]((*it)->GetCrossing());
 
         if(to_edge != nullptr && rated.find(to_edge) == rated.end()) {
-            to_edge->SetFactor(300.0/(i*3.0), GetName());
+            to_edge->SetFactor(300.0 / (i * 3.0), GetName());
             rated.insert(to_edge);
         }
 
-        if((*it)->GetSrc() != nullptr && (*it)->GetDest() != nullptr && (*it)->GetCrossing() != nullptr) {
-            GraphEdge * back_edge = ng->operator []((*it)->GetDest()->GetSubRoom())->operator []((*it)->GetCrossing());
+        if((*it)->GetSrc() != nullptr && (*it)->GetDest() != nullptr &&
+           (*it)->GetCrossing() != nullptr) {
+            GraphEdge * back_edge =
+                ng->operator[]((*it)->GetDest()->GetSubRoom())->operator[]((*it)->GetCrossing());
             if(back_edge != nullptr && rated.find(back_edge) == rated.end()) {
-                back_edge->SetFactor(300.0/(i*3.0), GetName());
+                back_edge->SetFactor(300.0 / (i * 3.0), GetName());
                 rated.insert(back_edge);
             }
         }

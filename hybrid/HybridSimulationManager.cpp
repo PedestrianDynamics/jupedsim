@@ -20,105 +20,98 @@
 //
 
 #include "HybridSimulationManager.h"
+
 #include "../Simulation.h"
 #include "IniFileWriter.h"
 
 #include <google/protobuf/stubs/common.h>
 
-HybridSimulationManager::~HybridSimulationManager()
+HybridSimulationManager::~HybridSimulationManager() {}
+
+HybridSimulationManager::HybridSimulationManager(Configuration * config) :
+    _config(config),
+    _latches(new Latches())
 {
-
-}
-
-HybridSimulationManager::HybridSimulationManager(Configuration* config)
-          :_config(config), _latches(new Latches())
-{
-
 }
 
 std::string HybridSimulationManager::ToString()
 {
-     return "TODO\n";
+    return "TODO\n";
 }
 
 void HybridSimulationManager::Start()
 {
-     GOOGLE_PROTOBUF_VERIFY_VERSION;
-     grpc_init();
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    grpc_init();
 
-     ///0.0.0.0 means to listen on all devices
-     string jupedsim_service_address("0.0.0.0:"+std::to_string(_config->GetServicePort()));
+    ///0.0.0.0 means to listen on all devices
+    string jupedsim_service_address("0.0.0.0:" + std::to_string(_config->GetServicePort()));
 
-     JPSserver service(this, _latches, _config);
-     _service = &service;
-     ServerBuilder builder;
-     builder.AddListeningPort(jupedsim_service_address, grpc::InsecureServerCredentials());
-     builder.RegisterService(&service);
-     _server = builder.BuildAndStart();
+    JPSserver service(this, _latches, _config);
+    _service = &service;
+    ServerBuilder builder;
+    builder.AddListeningPort(jupedsim_service_address, grpc::InsecureServerCredentials());
+    builder.RegisterService(&service);
+    _server = builder.BuildAndStart();
 
-     Log->Write("INFO:\tJPS server at port: "+std::to_string(_config->GetServicePort())+" is up and running.");
+    Log->Write(
+        "INFO:\tJPS server at port: " + std::to_string(_config->GetServicePort()) +
+        " is up and running.");
 
-     _server->Wait();
+    _server->Wait();
 }
 
-bool HybridSimulationManager::Run(Simulation& sim)
+bool HybridSimulationManager::Run(Simulation & sim)
 {
-
-     Log->Write("WARNING:\tJuPedSim requires the maximum number of pedestrians to be known at startup. However,\n"
+    Log->Write("WARNING:\tJuPedSim requires the maximum number of pedestrians to be known at "
+               "startup. However,\n"
                "\t\tin a hybrid approach it is not possible to know this number beforehand.\n"
-               "\t\tThis needs to be fixed in future. For the time being the number is arbitrarily set to 10,000.\n"
-               "\t\tThe simulation is likely to crash if the actual number of pedestrians exceeds 10,000.");
-     sim.RunHeader(10000);
+               "\t\tThis needs to be fixed in future. For the time being the number is arbitrarily "
+               "set to 10,000.\n"
+               "\t\tThe simulation is likely to crash if the actual number of pedestrians exceeds "
+               "10,000.");
+    sim.RunHeader(10000);
 
 
+    _service->SetSimulation(sim);
 
-     _service->SetSimulation(sim);
+    _latches->SimulationPrepared();
+    _latches->WaitForSimulationFinished();
+    //simReady
 
-     _latches->SimulationPrepared();
-     _latches->WaitForSimulationFinished();
-     //simReady
+    if(_config->GetDumpScenario()) {
+        Log->Write("INFO:\tDumping scenario.");
+        _config->SetTmax(Pedestrian::GetGlobalTime());
+        sim.GetBuilding()->SaveGeometry(_config->GetProjectRootDir() / _config->GetGeometryFile());
+        IniFileWriter * w = new IniFileWriter(_config, &sim, GetSimObserver());
+        w->WriteToFile(_config->GetProjectRootDir() / "ini.xml");
+    }
 
-     if (_config->GetDumpScenario()) {
-          Log->Write("INFO:\tDumping scenario.");
-          _config->SetTmax(Pedestrian::GetGlobalTime());
-          sim.GetBuilding()->SaveGeometry(_config->GetProjectRootDir() / _config->GetGeometryFile());
-          IniFileWriter* w = new IniFileWriter(_config, &sim, GetSimObserver());
-          w->WriteToFile(_config->GetProjectRootDir() / "ini.xml");
-     }
+    grpc_shutdown();
+    google::protobuf::ShutdownProtobufLibrary();
+    Log->Write("INFO:\tJPS server shutdown.");
 
-     grpc_shutdown();
-     google::protobuf::ShutdownProtobufLibrary();
-     Log->Write("INFO:\tJPS server shutdown.");
-
-//     if (_config->GetDumpScenario()) {
-//          Log->Write("INFO:\tDumping scenario.");
-//          _config->SetTmax(Pedestrian::GetGlobalTime());
-//          sim.GetBuilding()->SaveGeometry(_config->GetProjectRootDir()+_config->GetGeometryFile());
-//          IniFileWriter* w = new IniFileWriter(_config, &sim, GetSimObserver());
-//          w->WriteToFile(_config->GetProjectRootDir()+"ini.xml");
-//     }
-     return true;
+    //     if (_config->GetDumpScenario()) {
+    //          Log->Write("INFO:\tDumping scenario.");
+    //          _config->SetTmax(Pedestrian::GetGlobalTime());
+    //          sim.GetBuilding()->SaveGeometry(_config->GetProjectRootDir()+_config->GetGeometryFile());
+    //          IniFileWriter* w = new IniFileWriter(_config, &sim, GetSimObserver());
+    //          w->WriteToFile(_config->GetProjectRootDir()+"ini.xml");
+    //     }
+    return true;
 }
 
 void HybridSimulationManager::Shutdown()
 {
-     _server->Shutdown();
-
+    _server->Shutdown();
 }
 
 void HybridSimulationManager::WaitForScenarioLoaded()
 {
-     _latches->WaitForScenarioLoaded();
+    _latches->WaitForScenarioLoaded();
 }
 
-SimObserver* HybridSimulationManager::GetSimObserver()
+SimObserver * HybridSimulationManager::GetSimObserver()
 {
-     return &_simObserver;
+    return &_simObserver;
 }
-
-
-
-
-
-
-

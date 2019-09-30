@@ -25,52 +25,55 @@
 #include "../general/Configuration.h"
 #include "SimObserver.h"
 
-class IniFileWriter {
+class IniFileWriter
+{
 public:
-     IniFileWriter(const Configuration* configuration, Simulation* simulation, SimObserver* simObserver);
+    IniFileWriter(
+        const Configuration * configuration,
+        Simulation * simulation,
+        SimObserver * simObserver);
 
-     void WriteToFile(std::string file);
+    void WriteToFile(std::string file);
 
 private:
-     SimObserver* _simObserver;
+    SimObserver * _simObserver;
 
-     const Configuration* _configuration;
-     Simulation* _simulation;
+    const Configuration * _configuration;
+    Simulation * _simulation;
 
-     std::unique_ptr<FileHandler> _fileHandler;
+    std::unique_ptr<FileHandler> _fileHandler;
 
-     void WriteHeader();
+    void WriteHeader();
 
-     void WriteBody();
+    void WriteBody();
 
-     void WriteRndSeed();
+    void WriteRndSeed();
 
-     void WriteMxSimTm();
+    void WriteMxSimTm();
 
-     void WriteGeoFileName();
+    void WriteGeoFileName();
 
-     void WriteTrajectoryOutputDefinition();
+    void WriteTrajectoryOutputDefinition();
 
-     void WriteLogFileLocation();
+    void WriteLogFileLocation();
 
-     void WriteTrafficInformation();
+    void WriteTrafficInformation();
 
-     void WriteRouting();
+    void WriteRouting();
 
-     void WriteAgents();
+    void WriteAgents();
 
-     void WriteOpModels();
+    void WriteOpModels();
 
-     void WriteRouteChoiceModels();
+    void WriteRouteChoiceModels();
 
-     void WriteFooter();
+    void WriteFooter();
 
-     void WriteGoals(std::stringstream& str);
+    void WriteGoals(std::stringstream & str);
 
-     void WriteGompertzModel(std::stringstream& str);
+    void WriteGompertzModel(std::stringstream & str);
 
-     void WriteAgentParameters(std::stringstream& str);
-
+    void WriteAgentParameters(std::stringstream & str);
 };
 
 #endif //JPSCORE_INIFILEWRITER_H

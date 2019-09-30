@@ -25,7 +25,7 @@ TEST_CASE("geometry/Wall", "[geometry][Wall]")
 {
     SECTION("ctor")
     {
-        Wall  W1;
+        Wall W1;
         Point P1;
         REQUIRE(W1.GetPoint1() == P1);
         REQUIRE(W1.GetPoint2() == P1);

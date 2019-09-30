@@ -27,23 +27,16 @@
 #include "ODESolver.h"
 
 #include "ForceModel.h"
-
 #include "geometry/Building.h"
 #include "pedestrian/Pedestrian.h"
 
 
-ODESolver::ODESolver(ForceModel *tmodel) : model(tmodel)
-{
-
-}
+ODESolver::ODESolver(ForceModel * tmodel) : model(tmodel) {}
 
 
-EulerSolver::EulerSolver(ForceModel *tmodel) : ODESolver(tmodel)
-{
+EulerSolver::EulerSolver(ForceModel * tmodel) : ODESolver(tmodel) {}
 
-}
-
-void EulerSolver::solveODE(double ti, double tip1, Building* building) const
+void EulerSolver::solveODE(double ti, double tip1, Building * building) const
 {
     model->CalculateForce(ti, tip1, building);
 }

@@ -31,14 +31,13 @@
 
 class JamSensor : public AbstractSensor
 {
-
 public:
-    JamSensor(const Building * b) : AbstractSensor(b) { }
+    JamSensor(const Building * b) : AbstractSensor(b) {}
 
     virtual ~JamSensor();
 
     std::string GetName() const;
-    void execute(const Pedestrian *, CognitiveMap& ) const;
-private:
+    void execute(const Pedestrian *, CognitiveMap &) const;
 
+private:
 };

@@ -74,7 +74,7 @@ int main(int argc, char ** argv)
     Configuration config;
 
     // TODO remove me in refactoring
-    IniFileParser   iniFileParser(&config);
+    IniFileParser iniFileParser(&config);
     if(!iniFileParser.Parse(a.IniFilePath())) {
         return EXIT_FAILURE;
     }
@@ -109,7 +109,7 @@ int main(int argc, char ** argv)
             if(sim.GetAgentSrcManager().GetMaxAgentNumber()) {
             // Start the thread for managing the sources of agents if any
             // std::thread t1(sim.GetAgentSrcManager());
-            double      simMaxTime = config.GetTmax();
+            double simMaxTime = config.GetTmax();
             std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());
             while(!sim.GetAgentSrcManager().IsRunning()) {
                 // std::cout << "waiting...\n";
@@ -132,9 +132,10 @@ int main(int argc, char ** argv)
         }
 
         if(sim.GetPedsNumber()) {
-            Logging::Warning(fmt::format("Pedestrians not evacuated [{}] using [{}] threads",
-                                         sim.GetPedsNumber(),
-                                         config.GetMaxOpenMPThreads()));
+            Logging::Warning(fmt::format(
+                "Pedestrians not evacuated [{}] using [{}] threads",
+                sim.GetPedsNumber(),
+                config.GetMaxOpenMPThreads()));
         }
 
         const double execTime = difftime(endtime, starttime);

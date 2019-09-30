@@ -2,18 +2,18 @@
 
 #include <string_view>
 
-namespace Logging {
+namespace Logging
+{
+void Setup();
+void Teardown();
 
-    void Setup();
-    void Teardown();
+void Debug(std::string_view msg);
+void Info(std::string_view msg);
+void Warning(std::string_view msg);
+void Error(std::string_view msg);
 
-    void Debug(std::string_view msg);
-    void Info(std::string_view msg);
-    void Warning(std::string_view msg);
-    void Error(std::string_view msg);
-
-    struct Guard {
-        Guard();
-        ~Guard();
-    };
-}
+struct Guard {
+    Guard();
+    ~Guard();
+};
+} // namespace Logging

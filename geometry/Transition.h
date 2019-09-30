@@ -32,9 +32,10 @@
 
 class Room;
 
-class Transition : public Crossing {
+class Transition : public Crossing
+{
 private:
-    Room* _room2;
+    Room * _room2;
     std::string _type;
     // number of agents that passed that exit
 
@@ -58,7 +59,7 @@ public:
      * Set/Get the second room associated with this transition.
      * The first one is set in the crossing class.
      */
-    void SetRoom2(Room* ID);
+    void SetRoom2(Room * ID);
 
     /**
      * Set/Get the type of the transition
@@ -69,19 +70,19 @@ public:
      * Set/Get the second room associated with this transition.
      * The first one is set in the crossing class.
      */
-    Room* GetRoom2() const;
+    Room * GetRoom2() const;
 
 
     /**
      * @return the other room.
      */
-    Room* GetOtherRoom(int room_id) const;
+    Room * GetOtherRoom(int room_id) const;
 
     // virtual functions
     virtual bool IsExit() const;
     virtual bool IsTransition() const;
     virtual bool IsInRoom(int roomID) const;
-    virtual SubRoom* GetOtherSubRoom(int roomID, int subroomID) const;
+    virtual SubRoom * GetOtherSubRoom(int roomID, int subroomID) const;
 
 
     virtual void WriteToErrorLog() const;

@@ -32,105 +32,120 @@
 
 Hline::Hline()
 {
-     _id=-1;
+    _id = -1;
 }
 
-Hline::~Hline()
-{
-}
+Hline::~Hline() {}
 
 void Hline::SetID(int ID)
 {
-     _id=ID;
+    _id = ID;
 }
 
-void Hline::SetRoom1(Room* r)
+void Hline::SetRoom1(Room * r)
 {
-     _room1=r;
+    _room1 = r;
 }
 
 void Hline::SetCaption(std::string s)
 {
-     _caption=s;
+    _caption = s;
 }
 
-void Hline::SetSubRoom1(SubRoom* s)
+void Hline::SetSubRoom1(SubRoom * s)
 {
-     _subRoom1=s;
+    _subRoom1 = s;
 }
 
 int Hline::GetID() const
 {
-     return _id;
+    return _id;
 }
 
 std::string Hline::GetCaption() const
 {
-     return _caption;
+    return _caption;
 }
 
-Room* Hline::GetRoom1() const
+Room * Hline::GetRoom1() const
 {
-     return _room1;
+    return _room1;
 }
 
-SubRoom* Hline::GetSubRoom1() const
+SubRoom * Hline::GetSubRoom1() const
 {
-     return _subRoom1;
+    return _subRoom1;
 }
 
-void Hline::SetSubRoom2(SubRoom* r2)
+void Hline::SetSubRoom2(SubRoom * r2)
 {
-     _subRoom2 = r2;
+    _subRoom2 = r2;
 }
 
 
-SubRoom* Hline::GetSubRoom2() const
+SubRoom * Hline::GetSubRoom2() const
 {
-     return _subRoom2;
+    return _subRoom2;
 }
 
 bool Hline::IsInSubRoom(int subroomID) const
 {
-     return _subRoom1->GetSubRoomID() == subroomID;
+    return _subRoom1->GetSubRoomID() == subroomID;
 }
 
 bool Hline::IsInRoom(int roomID) const
 {
-     return _room1->GetID() == roomID;
+    return _room1->GetID() == roomID;
 }
 
 void Hline::WriteToErrorLog() const
 {
-     std::string s;
-     char tmp[CLENGTH];
-     sprintf(tmp, "\t\tHline: %d (%f, %f) -- (%f, %f)\n", GetID(), GetPoint1()._x,
-             GetPoint1()._y, GetPoint2()._x, GetPoint2()._y);
-     s.append(tmp);
-     sprintf(tmp, "\t\t\t\tRoom: %d <-> SubRoom: %d\n", _room1->GetID(),
-             _subRoom1->GetSubRoomID());
-     s.append(tmp);
-     Log->Write(s);
+    std::string s;
+    char tmp[CLENGTH];
+    sprintf(
+        tmp,
+        "\t\tHline: %d (%f, %f) -- (%f, %f)\n",
+        GetID(),
+        GetPoint1()._x,
+        GetPoint1()._y,
+        GetPoint2()._x,
+        GetPoint2()._y);
+    s.append(tmp);
+    sprintf(tmp, "\t\t\t\tRoom: %d <-> SubRoom: %d\n", _room1->GetID(), _subRoom1->GetSubRoomID());
+    s.append(tmp);
+    Log->Write(s);
 }
 
 // TraVisTo Ausgabe
 std::string Hline::GetDescription() const
 {
-     std::string geometry;
-     char tmp[CLENGTH] = "";
-     sprintf(tmp,"\t\t<hline ID=\"%d\" room_id=\"%d\" subroom_id=\"%d\" color = \"250\" caption=\"h_%d_%d\">\n",GetUniqueID(),_room1->GetID(),_subRoom1->GetSubRoomID(),GetID(),GetUniqueID());
-     geometry.append(tmp);
-     //geometry.append("\t\t<door color=\"250\">\n");
-     sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-             (GetPoint1()._x) * FAKTOR,
-             (GetPoint1()._y) * FAKTOR,
-             _subRoom1->GetElevation(GetPoint1())*FAKTOR);
-     geometry.append(tmp);
-     sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-             (GetPoint2()._x) * FAKTOR,
-             (GetPoint2()._y) * FAKTOR,
-             _subRoom1->GetElevation(GetPoint2())*FAKTOR);
-     geometry.append(tmp);
-     geometry.append("\t\t</hline>\n");
-     return geometry;
+    std::string geometry;
+    char tmp[CLENGTH] = "";
+    sprintf(
+        tmp,
+        "\t\t<hline ID=\"%d\" room_id=\"%d\" subroom_id=\"%d\" color = \"250\" "
+        "caption=\"h_%d_%d\">\n",
+        GetUniqueID(),
+        _room1->GetID(),
+        _subRoom1->GetSubRoomID(),
+        GetID(),
+        GetUniqueID());
+    geometry.append(tmp);
+    //geometry.append("\t\t<door color=\"250\">\n");
+    sprintf(
+        tmp,
+        "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
+        (GetPoint1()._x) * FAKTOR,
+        (GetPoint1()._y) * FAKTOR,
+        _subRoom1->GetElevation(GetPoint1()) * FAKTOR);
+    geometry.append(tmp);
+    sprintf(
+        tmp,
+        "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
+        (GetPoint2()._x) * FAKTOR,
+        (GetPoint2()._y) * FAKTOR,
+        _subRoom1->GetElevation(GetPoint2()) * FAKTOR);
+    geometry.append(tmp);
+    geometry.append("\t\t</hline>\n");
+    return geometry;
 }

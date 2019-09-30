@@ -31,46 +31,42 @@
 
 Router::Router()
 {
-     _finalDestinations = std::vector<int>();
-     _id=-1;
-     _strategy=ROUTING_UNDEFINED;
+    _finalDestinations = std::vector<int>();
+    _id                = -1;
+    _strategy          = ROUTING_UNDEFINED;
 }
 
 Router::Router(int id, RoutingStrategy s)
 {
-    _id = id;
+    _id       = id;
     _strategy = s;
 }
 
-Router::~Router()
-{
-}
+Router::~Router() {}
 
 void Router::AddFinalDestinationID(int id)
 {
-     _finalDestinations.push_back(id);
+    _finalDestinations.push_back(id);
 }
 
 const std::vector<int> Router::GetFinalDestinations() const
 {
-     return _finalDestinations;
+    return _finalDestinations;
 }
 
 int Router::GetID() const
 {
-     return _id;
+    return _id;
 }
 
-void Router::SetStrategy(const RoutingStrategy& strategy)
+void Router::SetStrategy(const RoutingStrategy & strategy)
 {
-     _strategy=strategy;
+    _strategy = strategy;
 }
 
 RoutingStrategy Router::GetStrategy() const
 {
-     return _strategy;
+    return _strategy;
 }
 
-void Router::Update(){
-
-}
+void Router::Update() {}

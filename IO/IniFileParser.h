@@ -32,54 +32,53 @@ class TiXmlElement;
 
 class TiXmlNode;
 
-extern OutputHandler* Log;
+extern OutputHandler * Log;
 
-class IniFileParser {
-
+class IniFileParser
+{
 public:
-     IniFileParser(Configuration* config);
-     ~IniFileParser(){};
+    IniFileParser(Configuration * config);
+    ~IniFileParser(){};
 
-     bool Parse(const fs::path& iniFile);
+    bool Parse(const fs::path & iniFile);
 
 private:
-     bool ParseHeader(TiXmlNode* xHeader);
+    bool ParseHeader(TiXmlNode * xHeader);
 
-     bool ParseGCFMModel(TiXmlElement* xGCFM, TiXmlElement* xMain);
+    bool ParseGCFMModel(TiXmlElement * xGCFM, TiXmlElement * xMain);
 
-     bool ParseKrauszModel(TiXmlElement* xKrausz, TiXmlElement* xMain);
+    bool ParseKrauszModel(TiXmlElement * xKrausz, TiXmlElement * xMain);
 
-     bool ParseGompertzModel(TiXmlElement* xGompertz, TiXmlElement* xMain);
+    bool ParseGompertzModel(TiXmlElement * xGompertz, TiXmlElement * xMain);
 
-     bool ParseGradientModel(TiXmlElement* xGradient, TiXmlElement* xMain);
+    bool ParseGradientModel(TiXmlElement * xGradient, TiXmlElement * xMain);
 
-     bool ParseVelocityModel(TiXmlElement* xVelocity, TiXmlElement* xMain);
+    bool ParseVelocityModel(TiXmlElement * xVelocity, TiXmlElement * xMain);
 
-     void ParseAgentParameters(TiXmlElement* operativModel, TiXmlNode* agentDistri);
+    void ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode * agentDistri);
 
-     bool ParseRoutingStrategies(TiXmlNode* routingNode, TiXmlNode* agentDistri);
+    bool ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * agentDistri);
 
-     bool ParseFfRouterOps(TiXmlNode* routingNode, RoutingStrategy s);
+    bool ParseFfRouterOps(TiXmlNode * routingNode, RoutingStrategy s);
 
-     bool ParseCogMapOpts(TiXmlNode* routingNode);
+    bool ParseCogMapOpts(TiXmlNode * routingNode);
 #ifdef AIROUTER
-     bool ParseAIOpts(TiXmlNode* routingNode);
+    bool ParseAIOpts(TiXmlNode * routingNode);
 #endif
-     bool ParseLinkedCells(const TiXmlNode& linkedCellNode);
+    bool ParseLinkedCells(const TiXmlNode & linkedCellNode);
 
-     bool ParseStepSize(TiXmlNode& stepNode);
+    bool ParseStepSize(TiXmlNode & stepNode);
 
-     bool ParsePeriodic(TiXmlNode& Node);
+    bool ParsePeriodic(TiXmlNode & Node);
 
-     bool ParseNodeToSolver(const TiXmlNode& solverNode);
+    bool ParseNodeToSolver(const TiXmlNode & solverNode);
 
-     bool ParseStrategyNodeToObject(const TiXmlNode& strategyNode);
+    bool ParseStrategyNodeToObject(const TiXmlNode & strategyNode);
 
-     bool ParseFfOpts(const TiXmlNode& strategyNode);
+    bool ParseFfOpts(const TiXmlNode & strategyNode);
 
-     Configuration* _config;
-     int _model;
-     std::shared_ptr<DirectionStrategy> _exit_strategy;
-     int _exit_strat_number;
-
+    Configuration * _config;
+    int _model;
+    std::shared_ptr<DirectionStrategy> _exit_strategy;
+    int _exit_strat_number;
 };

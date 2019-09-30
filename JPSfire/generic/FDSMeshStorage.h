@@ -29,7 +29,6 @@
 #pragma once
 
 #include "FDSMesh.h"
-
 #include "geometry/Building.h"
 
 #include <unordered_map>
@@ -37,7 +36,7 @@
 
 class Point;
 class OutputHandler;
-extern OutputHandler* Log;
+extern OutputHandler * Log;
 // Container to store all FDSMeshs. Sorted by simulation's global time
 using FDSMeshContainer = std::unordered_map<std::string, FDSMesh>;
 
@@ -46,15 +45,22 @@ class FDSMeshStorage
 {
 public:
     FDSMeshStorage();
-    FDSMeshStorage(const std::string &filepath, const double &finalTime, const double &updateIntervall, const std::string &study="", const std::string &irritant="");
+    FDSMeshStorage(
+        const std::string & filepath,
+        const double & finalTime,
+        const double & updateIntervall,
+        const std::string & study    = "",
+        const std::string & irritant = "");
     ~FDSMeshStorage();
     bool CreateQuantityList();
     void CreateTimeList();
     bool CreateElevationList();
     void CreateDoorList();
     void CreateFDSMeshes();
-     const FDSMesh& GetFDSMesh(const double &simTime, const double &pedElev,const std::string &quantity);
-     const FDSMesh& GetFDSMesh(const double &pedElev, const Point &doorCentre, const double &simTime);
+    const FDSMesh &
+    GetFDSMesh(const double & simTime, const double & pedElev, const std::string & quantity);
+    const FDSMesh &
+    GetFDSMesh(const double & pedElev, const Point & doorCentre, const double & simTime);
     std::string GetStudy() const;
     std::string IrritantOrNot() const;
 
@@ -74,5 +80,4 @@ private:
     double _NearestHeight;
     double GetNearestHeight(double);
     // const char * glob_str;
-
 };

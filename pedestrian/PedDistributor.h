@@ -26,36 +26,51 @@
  **/
 #pragma once
 
-#include <vector>
-#include <string>
-#include <memory>
-
 #include "AgentsParameters.h"
 #include "AgentsSource.h"
 #include "StartDistribution.h"
-
-#include "routing/Router.h"
 #include "geometry/Building.h"
+#include "routing/Router.h"
+
+#include <memory>
+#include <string>
+#include <vector>
 
 
-class PedDistributor {
+class PedDistributor
+{
 private:
-    std::vector<std::shared_ptr<StartDistribution> > _start_dis; // ID startraum, subroom und Anz
-    std::vector<std::shared_ptr<StartDistribution> > _start_dis_sub; // ID startraum, subroom und Anz
-    std::vector<std::shared_ptr<AgentsSource> > _start_dis_sources; // contain the sources
+    std::vector<std::shared_ptr<StartDistribution>> _start_dis;     // ID startraum, subroom und Anz
+    std::vector<std::shared_ptr<StartDistribution>> _start_dis_sub; // ID startraum, subroom und Anz
+    std::vector<std::shared_ptr<AgentsSource>> _start_dis_sources;  // contain the sources
 
-    std::vector<Point> PositionsOnFixX(double max_x, double min_x, double max_y,
-                                              double min_y, const SubRoom &r, double bufx, double bufy, double dy) const;
+    std::vector<Point> PositionsOnFixX(
+        double max_x,
+        double min_x,
+        double max_y,
+        double min_y,
+        const SubRoom & r,
+        double bufx,
+        double bufy,
+        double dy) const;
 
-    std::vector<Point> PositionsOnFixY(double max_x, double min_x, double max_y,
-                                              double min_y, const SubRoom &r, double bufx, double bufy, double dx) const;
+    std::vector<Point> PositionsOnFixY(
+        double max_x,
+        double min_x,
+        double max_y,
+        double min_y,
+        const SubRoom & r,
+        double bufx,
+        double bufy,
+        double dx) const;
 
     const Configuration * _configuration;
+
 public:
     /**
      * constructor
      */
-    PedDistributor(const Configuration *configuration);
+    PedDistributor(const Configuration * configuration);
 
     /**
      * desctructor
@@ -65,26 +80,30 @@ public:
     /**
      * Return the possible positions for distributing the agents in the subroom
      */
-    std::vector<Point> PossiblePositions(const SubRoom &r) const;
+    std::vector<Point> PossiblePositions(const SubRoom & r) const;
 
     /**
      * Distribute the pedestrians in the Subroom with the given parameters
      */
-    void DistributeInSubRoom(int N, std::vector<Point> &positions, int *pid,
-                             StartDistribution *parameters, Building *building) const;
+    void DistributeInSubRoom(
+        int N,
+        std::vector<Point> & positions,
+        int * pid,
+        StartDistribution * parameters,
+        Building * building) const;
 
     /**
      *
      *Distribute all agents based on the configuration (ini) file
      * @return true if everything went fine
      */
-    bool Distribute(Building *building) const;
+    bool Distribute(Building * building) const;
 
     /**
      * provided for convenience
      */
 
-    const std::vector<std::shared_ptr<AgentsSource> > &GetAgentsSources() const;
+    const std::vector<std::shared_ptr<AgentsSource>> & GetAgentsSources() const;
 
     /**
      * Get positions from filename
@@ -92,7 +111,8 @@ public:
      * WARNING: It is assumed that positions should be in the corresponding room/subroom.
      * checks with n if the file delivers the right number of peds
      */
-    const std::vector<Point>  GetPositionsFromFile(std::string filename, int n, std::string unit) const;
+    const std::vector<Point>
+    GetPositionsFromFile(std::string filename, int n, std::string unit) const;
 
     double GetA_dist() const;
 

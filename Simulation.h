@@ -30,25 +30,26 @@
 #ifndef SIMULATION_H_
 #define SIMULATION_H_
 
+#include "IO/IODispatcher.h"
+#include "IO/OutputHandler.h"
+#include "events/EventManager.h"
+#include "general/Configuration.h"
 #include "geometry/Building.h"
 #include "geometry/SubRoom.h"
-#include "IO/OutputHandler.h"
-#include "IO/IODispatcher.h"
-#include "math/OperationalModel.h"
 #include "math/ODESolver.h"
-#include "routing/global_shortest/GlobalRouter.h"
-#include "routing/quickest/QuickestPathRouter.h"
+#include "math/OperationalModel.h"
+#include "pedestrian/AgentsSourcesManager.h"
+#include "pedestrian/PedDistributor.h"
 #include "routing/DirectionStrategy.h"
 #include "routing/RoutingEngine.h"
-#include "pedestrian/PedDistributor.h"
+#include "routing/global_shortest/GlobalRouter.h"
+#include "routing/quickest/QuickestPathRouter.h"
 #include "routing/smoke_router/SmokeRouter.h"
-#include "events/EventManager.h"
-#include "pedestrian/AgentsSourcesManager.h"
-#include "general/Configuration.h"
 
 class EventManager;
 
-class Simulation {
+class Simulation
+{
 private:
     ///Number of pedestrians in the simulation
     long _nPeds;
@@ -67,29 +68,29 @@ private:
     /// Manage all route choices algorithms
     std::shared_ptr<RoutingEngine> _routingEngine;
     /// differential equation solver
-    ODESolver* _solver;
+    ODESolver * _solver;
     /// writing the trajectories to file
-    IODispatcher* _iod;
+    IODispatcher * _iod;
     /// EventManager
-    EventManager* _em;
+    EventManager * _em;
     /// config
-    Configuration* _config;
+    Configuration * _config;
     /// Agents sources manager
     AgentsSourcesManager _agentSrcManager;
     /// hybrid simulation manager
     //HybridSimulationManager
     int _periodic;
-     int _maxSimTime;
+    int _maxSimTime;
 
-    bool _gotSources; // is true if we got some sources. Otherwise, false.
-     bool _trainConstraints; // true if inifile has some train constraints
+    bool _gotSources;       // is true if we got some sources. Otherwise, false.
+    bool _trainConstraints; // true if inifile has some train constraints
 
     // bool _printPB; // print progressbar
 public:
     /**
      * Constructor
      */
-    Simulation(Configuration* args);
+    Simulation(Configuration * args);
 
     /**
      * Destructor
@@ -162,12 +163,12 @@ public:
      * @param[in]:  unique id of that transition
      * @param[out]: nearest closest transition or nullptr if no correction was needed
      **/
-     Transition*  correctDoorStatistics(const Pedestrian& ped, double distance, int trans_id) const;
+    Transition * correctDoorStatistics(const Pedestrian & ped, double distance, int trans_id) const;
 
     /**
      * @return the agents source manager
      */
-    AgentsSourcesManager& GetAgentSrcManager();
+    AgentsSourcesManager & GetAgentSrcManager();
 
     /**
      * Check if any agents are waiting to enter the simulation
@@ -177,28 +178,28 @@ public:
     /**
      * @return a pointer to the building object
      */
-    Building* GetBuilding();
+    Building * GetBuilding();
 
     /**
      * Update the flow for the door that the pedestrian just crossed
      * @param ped
      */
-    void UpdateFlowAtDoors(const Pedestrian& ped) const;
+    void UpdateFlowAtDoors(const Pedestrian & ped) const;
 
-     /**
+    /**
      * Update the refresh ticks for all doors. they count up and measure the age of the tickvalue (ffRouter, quickest)
      *
      */
-     void UpdateDoorticks() const;
-     int GetMaxSimTime() const;
-     void  incrementCountTraj();
+    void UpdateDoorticks() const;
+    int GetMaxSimTime() const;
+    void incrementCountTraj();
 
-     bool correctGeometry(std::shared_ptr<Building> building,  std::shared_ptr<TrainTimeTable>);
-     void WriteTrajectories();
-     bool TrainTraffic();
+    bool correctGeometry(std::shared_ptr<Building> building, std::shared_ptr<TrainTimeTable>);
+    void WriteTrajectories();
+    bool TrainTraffic();
 
-     int _countTraj=0; // count number of TXT trajectories to produce
-     double _maxFileSize; // in MB
+    int _countTraj = 0;  // count number of TXT trajectories to produce
+    double _maxFileSize; // in MB
 };
 
 #endif /*SIMULATION_H_*/
