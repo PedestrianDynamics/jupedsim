@@ -464,6 +464,47 @@ bool IniFileParser::ParseHeader(TiXmlNode* xHeader)
                     }
                }
 
+               //check if spotlight is wanted
+               if (const char* attribute = node->Attribute("spotlight"); attribute) {
+                    std::string in = xmltoa(attribute, "false");
+                    std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+                    if (in=="true") {
+                         _config->AddOptionalOutputOption(OptionalOutput::spotlight);
+                         Log->Write("INFO: spotlight added to output");
+                    }
+                    else {
+                         Log->Write("INFO: spotlight not added to output");
+                    }
+               }
+
+               //check if router is wanted
+               if (const char* attribute = node->Attribute("router"); attribute) {
+                    std::string in = xmltoa(attribute, "false");
+                    std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+                    if (in=="true") {
+                         _config->AddOptionalOutputOption(OptionalOutput::router);
+                         Log->Write("INFO: router added to output");
+                    }
+                    else {
+                         Log->Write("INFO: router not added to output");
+                    }
+               }
+
+               //check if router is wanted
+               if (const char* attribute = node->Attribute("group"); attribute) {
+                    std::string in = xmltoa(attribute, "false");
+                    std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+                    if (in=="true") {
+                         _config->AddOptionalOutputOption(OptionalOutput::group);
+                         Log->Write("INFO: group added to output");
+                    }
+                    else {
+                         Log->Write("INFO: group not added to output");
+                    }
+               }
           }
      }
 

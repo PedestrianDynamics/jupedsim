@@ -379,6 +379,35 @@ TrajectoriesFLAT::TrajectoriesFLAT() : Trajectories()
          return stream.str();
      };
 
+     // Add header, info and output for spotlight
+     _optionalOutputHeader[OptionalOutput::spotlight] = "SPOT\t";
+     _optionalOutputInfo[OptionalOutput::spotlight] =
+             "#SPOT: ped is highlighted";
+     _optionalOutput[OptionalOutput::spotlight] = [](Pedestrian* ped){
+         std::stringstream stream;
+         stream << ped->GetSpotlight() << "\t";
+         return stream.str();
+     };
+
+     // Add header, info and output for router
+     _optionalOutputHeader[OptionalOutput::router] = "ROUTER\t";
+     _optionalOutputInfo[OptionalOutput::router] =
+             "#ROUTER: routing strategy used during strategy";
+     _optionalOutput[OptionalOutput::router] = [](const Pedestrian* ped){
+         std::stringstream stream;
+         stream << ped->GetRoutingStrategy() << "\t";
+         return stream.str();
+     };
+
+     // Add header, info and output for group
+     _optionalOutputHeader[OptionalOutput::group] = "GROUP\t";
+     _optionalOutputInfo[OptionalOutput::group] =
+             "#GROUP: group of the pedestrian";
+     _optionalOutput[OptionalOutput::group] = [](const Pedestrian* ped){
+         std::stringstream stream;
+         stream << ped->GetGroup() << "\t";
+         return stream.str();
+     };
 }
 
 static fs::path getSourceFileName(const fs::path& projectFile)
