@@ -35,29 +35,29 @@
 class Building;
 
 
-class ForceModel {
-
+class ForceModel
+{
 public:
-     // constructor/destructor
-     ForceModel();
-     virtual ~ForceModel();
+    // constructor/destructor
+    ForceModel();
+    virtual ~ForceModel();
 
-     /**
+    /**
       * Solve the differential equations and update the positions and velocities
       * @param t the actual time
       * @param tp the next timestep
       * @param building the geometry object
       */
-     virtual void CalculateForce(double t, double tp, Building* building) const = 0;
+    virtual void CalculateForce(double t, double tp, Building * building) const = 0;
 
-     /**
+    /**
       * Performs whatever initialization is needed/required
       * @param building the building object
       */
-     virtual bool Init (Building* building) const = 0;
+    virtual bool Init(Building * building) const = 0;
 
-     /**
+    /**
       * @return all model parameters in a nicely formatted string
       */
-     virtual std::string writeParameter() const = 0;
+    virtual std::string writeParameter() const = 0;
 };

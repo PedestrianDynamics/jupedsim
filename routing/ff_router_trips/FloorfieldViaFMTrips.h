@@ -26,11 +26,11 @@
  *
  **/
 
- //remark:
- //refac the code to use enums instead of integer values where integer values code sth
- //was considered, but enum classes do not implicitly cast to int
- //rather use makros/masks like in plain C? or just makros (defines)?
- //this would make it easier to read
+//remark:
+//refac the code to use enums instead of integer values where integer values code sth
+//was considered, but enum classes do not implicitly cast to int
+//rather use makros/masks like in plain C? or just makros (defines)?
+//this would make it easier to read
 #pragma once
 
 #include "geometry/Building.h"
@@ -52,171 +52,189 @@
 class TrialPTrips
 {
 public:
-     long int key;
-     int* flag;
-     double* cost;
-     double* speed;
-     Point* neggrad;
+    long int key;
+    int * flag;
+    double * cost;
+    double * speed;
+    Point * neggrad;
 
-     TrialPTrips() {
-          key = 0;
-          flag = nullptr;
-          cost = nullptr;
-          speed = nullptr;
-          neggrad = nullptr;
-     }
+    TrialPTrips()
+    {
+        key     = 0;
+        flag    = nullptr;
+        cost    = nullptr;
+        speed   = nullptr;
+        neggrad = nullptr;
+    }
 
-     TrialPTrips(long int keyArg, double* t, double* f, int* flagArg, Point* neggradArg) {
-          key = keyArg;
-          cost = t;
-          speed = f;
-          flag = flagArg;
-          neggrad = neggradArg;
-     }
+    TrialPTrips(long int keyArg, double * t, double * f, int * flagArg, Point * neggradArg)
+    {
+        key     = keyArg;
+        cost    = t;
+        speed   = f;
+        flag    = flagArg;
+        neggrad = neggradArg;
+    }
 
-     ~TrialPTrips(){}
+    ~TrialPTrips() {}
 
-     bool operator <(const TrialPTrips& rhs) const
-     {
-          return this->cost[this->key] < rhs.cost[rhs.key];
-     }
+    bool operator<(const TrialPTrips & rhs) const
+    {
+        return this->cost[this->key] < rhs.cost[rhs.key];
+    }
 
-     bool operator >(const TrialPTrips& rhs) const
-     {
-          return this->cost[this->key] > rhs.cost[rhs.key];
-     }
+    bool operator>(const TrialPTrips & rhs) const
+    {
+        return this->cost[this->key] > rhs.cost[rhs.key];
+    }
 
-     bool operator ==(const TrialPTrips& rhs) const
-     {
-          return this->cost[this->key] == rhs.cost[rhs.key];
-     }
+    bool operator==(const TrialPTrips & rhs) const
+    {
+        return this->cost[this->key] == rhs.cost[rhs.key];
+    }
 };
 
 class FloorfieldViaFMTrips
 {
 public:
-     FloorfieldViaFMTrips();
-     FloorfieldViaFMTrips(const std::string&);
-     FloorfieldViaFMTrips(const Building* const buildingArg, const double hxArg, const double hyArg,
-                     const double wallAvoidDistance, const bool useDistancefield, const bool onlyRoomsWithExits);
-     //FloorfieldViaFMTrips(const FloorfieldViaFMTrips* const refFM);
-     virtual ~FloorfieldViaFMTrips();
-     FloorfieldViaFMTrips(const FloorfieldViaFMTrips& other); //will not make a copy; only takes geometry info
-     //FloorfieldViaFMTrips& operator=(const FloorfieldViaFMTrips& other);
+    FloorfieldViaFMTrips();
+    FloorfieldViaFMTrips(const std::string &);
+    FloorfieldViaFMTrips(
+        const Building * const buildingArg,
+        const double hxArg,
+        const double hyArg,
+        const double wallAvoidDistance,
+        const bool useDistancefield,
+        const bool onlyRoomsWithExits);
+    //FloorfieldViaFMTrips(const FloorfieldViaFMTrips* const refFM);
+    virtual ~FloorfieldViaFMTrips();
+    FloorfieldViaFMTrips(
+        const FloorfieldViaFMTrips & other); //will not make a copy; only takes geometry info
+    //FloorfieldViaFMTrips& operator=(const FloorfieldViaFMTrips& other);
 
-     //void getDirectionAt(const Point& position, Point& direction);                                   //obsolete
-     //void getDirectionToDestination (const int destID, const Point& position, Point& direction);     //obsolete
-     void getDirectionToUID(int destID, const long int key, Point& direction); // shall not be used any more, therefore not virtual
-     virtual void getDirectionToUID(int destID, const long int key, Point& direction, int mode);
-     //void getDirectionToUIDParallel(int destID, const long int key, Point& direction);
-     virtual void getDirectionToDestination (Pedestrian* ped, Point& direction);
-     //void getDirectionToFinalDestination(Pedestrian* ped, Point& direction); //this is router buissness! problem in multi-storage buildings
+    //void getDirectionAt(const Point& position, Point& direction);                                   //obsolete
+    //void getDirectionToDestination (const int destID, const Point& position, Point& direction);     //obsolete
+    void getDirectionToUID(
+        int destID,
+        const long int key,
+        Point & direction); // shall not be used any more, therefore not virtual
+    virtual void getDirectionToUID(int destID, const long int key, Point & direction, int mode);
+    //void getDirectionToUIDParallel(int destID, const long int key, Point& direction);
+    virtual void getDirectionToDestination(Pedestrian * ped, Point & direction);
+    //void getDirectionToFinalDestination(Pedestrian* ped, Point& direction); //this is router buissness! problem in multi-storage buildings
 
-     void createMapEntryInLineToGoalID(const int goalID, bool isInside);
+    void createMapEntryInLineToGoalID(const int goalID, bool isInside);
 
-     double getCostToDestination(const int destID, const Point& position);
-     double getCostToDestination(const int destID, const Point& position, int mode);
-     //double getCostToDestinationParallel(const int destID, const Point& position);
+    double getCostToDestination(const int destID, const Point & position);
+    double getCostToDestination(const int destID, const Point & position, int mode);
+    //double getCostToDestinationParallel(const int destID, const Point& position);
 
-     void getDir2WallAt(const Point& position, Point& direction);
-     double getDistance2WallAt(const Point& position);
+    void getDir2WallAt(const Point & position, Point & direction);
+    double getDistance2WallAt(const Point & position);
 
-     int getSubroomUIDAt(const Point& position);
+    int getSubroomUIDAt(const Point & position);
 
-     void parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
-     void parseBuildingForExits(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
-     void prepareForDistanceFieldCalculation(const bool withExits);
-     template <typename T>
-     void drawLinesOnGrid(std::vector<Line>& wallArg, T* const target, const T value);
-     void setSpeed(bool useDistance2WallArg);
-     void setSpeedThruPeds(Pedestrian* const* pedsArg, int nPeds, int modechoice, double radius);
-     void deleteAllFFs();
-     void clearAndPrepareForFloorfieldReCalc(double* costarray);
-     void setNewGoalAfterTheClear(double* costarray, std::vector<Line>& GoalWallArg);
-     void calculateFloorfield(std::vector<Line>& wallArg, double* costarray, Point* neggradarray);   //make private
-     void calculateFloorfield(std::vector<Line>& wallArg, double* costarray, Point* neggradarray, double* speedarray);
-     void calculateDistanceField(const double thresholdArg);             //make private
+    void parseBuilding(
+        const Building * const buildingArg,
+        const double stepSizeX,
+        const double stepSizeY);
+    void parseBuildingForExits(
+        const Building * const buildingArg,
+        const double stepSizeX,
+        const double stepSizeY);
+    void prepareForDistanceFieldCalculation(const bool withExits);
+    template <typename T>
+    void drawLinesOnGrid(std::vector<Line> & wallArg, T * const target, const T value);
+    void setSpeed(bool useDistance2WallArg);
+    void setSpeedThruPeds(Pedestrian * const * pedsArg, int nPeds, int modechoice, double radius);
+    void deleteAllFFs();
+    void clearAndPrepareForFloorfieldReCalc(double * costarray);
+    void setNewGoalAfterTheClear(double * costarray, std::vector<Line> & GoalWallArg);
+    void calculateFloorfield(
+        std::vector<Line> & wallArg,
+        double * costarray,
+        Point * neggradarray); //make private
+    void calculateFloorfield(
+        std::vector<Line> & wallArg,
+        double * costarray,
+        Point * neggradarray,
+        double * speedarray);
+    void calculateDistanceField(const double thresholdArg); //make private
 
-     void checkNeighborsAndAddToNarrowband(std::priority_queue<TrialPTrips, std::vector<TrialPTrips>, std::greater<TrialPTrips> >& trialfield, TrialPTrips key,
-                                           std::function<void (TrialPTrips)> calc);
+    void checkNeighborsAndAddToNarrowband(
+        std::priority_queue<TrialPTrips, std::vector<TrialPTrips>, std::greater<TrialPTrips>> &
+            trialfield,
+        TrialPTrips key,
+        std::function<void(TrialPTrips)> calc);
 
-     void calcDist2Wall(TrialPTrips);
-     void calcFloorfield(TrialPTrips);
-     //void (*checkNeighborsAndCalc)(const long int key);
+    void calcDist2Wall(TrialPTrips);
+    void calcFloorfield(TrialPTrips);
+    //void (*checkNeighborsAndCalc)(const long int key);
 
-     inline double onesidedCalc(double xy, double hDivF);
-     inline double twosidedCalc(double x, double y, double hDivF);
+    inline double onesidedCalc(double xy, double hDivF);
+    inline double twosidedCalc(double x, double y, double hDivF);
 
-     void testoutput(const char*, const char*, const double*);
-     void writeFF(const std::string&, std::vector<int> targetID);
-     void writeGoalFF(const std::string&, std::vector<int> targetID);
+    void testoutput(const char *, const char *, const double *);
+    void writeFF(const std::string &, std::vector<int> targetID);
+    void writeGoalFF(const std::string &, std::vector<int> targetID);
 
-     virtual SubRoom* isInside(const long int key);
-     SubRoom* GetSubroom(Pedestrian* p);
+    virtual SubRoom * isInside(const long int key);
+    SubRoom * GetSubroom(Pedestrian * p);
 
-     std::map<int, int> getGoalToLineUIDmap() const
-     {
-          return _goalToLineUIDmap;
-     }
-     std::map<int, int> getGoalToLineUIDmap2() const
-     {
-          return _goalToLineUIDmap2;
-     }
+    std::map<int, int> getGoalToLineUIDmap() const { return _goalToLineUIDmap; }
+    std::map<int, int> getGoalToLineUIDmap2() const { return _goalToLineUIDmap2; }
 
-     std::map<int, int> getGoalToLineUIDmap3() const
-     {
-          return _goalToLineUIDmap3;
-     }
+    std::map<int, int> getGoalToLineUIDmap3() const { return _goalToLineUIDmap3; }
 
-     RectGrid* getGrid() const
-     {
-          return _grid;
-     }
+    RectGrid * getGrid() const { return _grid; }
 
 #ifdef TESTING
-     void setGrid(RectGrid* gridArg) {_grid = gridArg;}
+    void setGrid(RectGrid * gridArg) { _grid = gridArg; }
 #endif //TESTING
 
 protected:
-     RectGrid* _grid = nullptr;
-     std::vector<Line> _wall;
-     std::vector<Line> _exitsFromScope;
-     unsigned int _numOfExits;
+    RectGrid * _grid = nullptr;
+    std::vector<Line> _wall;
+    std::vector<Line> _exitsFromScope;
+    unsigned int _numOfExits;
 
-     const Building* _building;
+    const Building * _building;
 
-     //GridPoint Data in independant arrays (shared primary key)
-     // changed to threadsafe creation when needed: int* flag;
-     int* _gcode = nullptr;                 //gridcode (see Macros.h)
-     SubRoom* * _subrooms = nullptr; // this is an array (first asterisk) of pointers (second asterisk)
-     double* _dist2Wall = nullptr;
-     double* _speedInitial = nullptr;
-     double* _modifiedspeed = nullptr;
-     double* _densityspeed = nullptr;
-     double* _cost = nullptr;
-     //long int* secKey;  //secondary key to address ... not used yet
-     Point* _neggrad = nullptr; //gradients
-     Point* _dirToWall = nullptr;
-     // changed to threadsafe creation when needed: Trial* trialfield;
+    //GridPoint Data in independant arrays (shared primary key)
+    // changed to threadsafe creation when needed: int* flag;
+    int * _gcode = nullptr; //gridcode (see Macros.h)
+    SubRoom ** _subrooms =
+        nullptr; // this is an array (first asterisk) of pointers (second asterisk)
+    double * _dist2Wall     = nullptr;
+    double * _speedInitial  = nullptr;
+    double * _modifiedspeed = nullptr;
+    double * _densityspeed  = nullptr;
+    double * _cost          = nullptr;
+    //long int* secKey;  //secondary key to address ... not used yet
+    Point * _neggrad   = nullptr; //gradients
+    Point * _dirToWall = nullptr;
+    // changed to threadsafe creation when needed: Trial* trialfield;
 
-     std::map<int, double*> _goalcostmap;
-     std::map<int, int>     _goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
-     std::map<int, int>     _goalToLineUIDmap2;
-     std::map<int, int>     _goalToLineUIDmap3;
-     std::map<int, Point*>  _goalneggradmap;
-     std::map<int, double*> _costmap;
-     std::map<int, Point*>  _neggradmap;
-     // use an unordered_set for faster access (it is accessed within a critical region)
-     std::unordered_set<int>  _floorfieldsBeingCalculated;
-     bool maps_deleted = false; // @todo f.mack remove
+    std::map<int, double *> _goalcostmap;
+    std::map<int, int>
+        _goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
+    std::map<int, int> _goalToLineUIDmap2;
+    std::map<int, int> _goalToLineUIDmap3;
+    std::map<int, Point *> _goalneggradmap;
+    std::map<int, double *> _costmap;
+    std::map<int, Point *> _neggradmap;
+    // use an unordered_set for faster access (it is accessed within a critical region)
+    std::unordered_set<int> _floorfieldsBeingCalculated;
+    bool maps_deleted = false; // @todo f.mack remove
 
-     double _threshold;
-     bool _useDistanceToWall;
+    double _threshold;
+    bool _useDistanceToWall;
 };
 
 // very similar to FloorfieldViaFMTrips, but the calculation of floorfields starts at the center of the door only, not on the whole line
 // this happens in order to avoid "door hopping" (for a pedestrian, it is shorter to go to a nearby door and skip half the door width)
-class CentrePointFFViaFMTrips : public virtual FloorfieldViaFMTrips {
+class CentrePointFFViaFMTrips : public virtual FloorfieldViaFMTrips
+{
 public:
-     virtual void getDirectionToUID(int destID, const long int key, Point& direction, int mode);
+    virtual void getDirectionToUID(int destID, const long int key, Point & direction, int mode);
 };

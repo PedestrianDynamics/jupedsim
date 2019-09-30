@@ -30,7 +30,6 @@
 #pragma once
 
 #include "ForceModel.h"
-
 #include "geometry/Building.h"
 
 #include <vector>
@@ -51,33 +50,33 @@ class DirectionStrategy;
  *
  * \author Arne graf
  */
-class GradientModel : public OperationalModel {
+class GradientModel : public OperationalModel
+{
 private:
+    /// Modellparameter
+    double _nuPed;
+    double _aPed;
+    double _bPed;
+    double _cPed;
 
-     /// Modellparameter
-     double _nuPed;
-     double _aPed;
-     double _bPed;
-     double _cPed;
+    double _nuWall;
+    double _aWall;
+    double _bWall;
+    double _cWall;
 
-     double _nuWall;
-     double _aWall;
-     double _bWall;
-     double _cWall;
+    double _deltaH;
+    double _wallAvoidDistance;
+    bool _useWallAvoidance;
 
-     double _deltaH;
-     double _wallAvoidDistance;
-     bool _useWallAvoidance;
+    double _slowDownDistance;
 
-     double _slowDownDistance;
+    long int * over;       //analyze code only - can be removed
+    long int * under;      //analyze code only - can be removed
+    long int * redircnt;   //analyze code only - can be removed
+    long int * slowcnt;    //analyze code only - can be removed
+    long int * overlapcnt; //analyze code only - can be removed
 
-     long int* over;   //analyze code only - can be removed
-     long int* under;  //analyze code only - can be removed
-     long int* redircnt;  //analyze code only - can be removed
-     long int* slowcnt;  //analyze code only - can be removed
-     long int* overlapcnt;  //analyze code only - can be removed
-
-     /**
+    /**
       * Driving force \f$ F_i =\frac{\mathbf{v_0}-\mathbf{v_i}}{\tau}\f$
       * This is a duplicate of @see GCFMModel::ForceDriv
       * @param ped Pointer to Pedestrians
@@ -86,8 +85,8 @@ private:
       *
       * @return Point
       */
-     Point ForceDriv(Pedestrian* ped, Room* room) const;
-     /**
+    Point ForceDriv(Pedestrian * ped, Room * room) const;
+    /**
       * Repulsive force between two pedestrians ped1 and ped2 according to
       * the Gompertz model (unpublished)
       *
@@ -96,8 +95,8 @@ private:
       *
       * @return Point
       */
-     Point ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const;
-     /**
+    Point ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const;
+    /**
       * Repulsive force acting on pedestrian <ped> from the walls in
       * <subroom>. The sum of all repulsive forces of the walls in <subroom> is calculated
       * @see ForceRepWall
@@ -106,8 +105,8 @@ private:
       *
       * @return Point
       */
-     Point ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const;
-     /**
+    Point ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const;
+    /**
       * Repulsive force between pedestrian <ped> and wall <l>
       *
       * @param ped Pointer to Pedestrian
@@ -115,123 +114,133 @@ private:
       *
       * @return Point
       */
-     Point ForceRepWall(Pedestrian* ped, const Line& l) const;
+    Point ForceRepWall(Pedestrian * ped, const Line & l) const;
 
 public:
+    GradientModel(
+        std::shared_ptr<DirectionStrategy> dir,
+        double nuped,
+        double aped,
+        double bped,
+        double cped,
+        double nuwall,
+        double awall,
+        double bwall,
+        double cwall,
+        double deltaH,
+        double wallAvoidDistance,
+        bool useWallAvoidance,
+        double slowDownDistance);
+    virtual ~GradientModel(void);
 
-     GradientModel(std::shared_ptr<DirectionStrategy> dir, double nuped, double aped, double bped, double cped,
-                   double nuwall, double awall, double bwall, double cwall,
-                   double deltaH, double wallAvoidDistance, bool useWallAvoidance,
-                   double slowDownDistance);
-     virtual ~GradientModel(void);
-
-     std::shared_ptr<DirectionStrategy> GetDirection() const;
-     /**
+    std::shared_ptr<DirectionStrategy> GetDirection() const;
+    /**
       * Get the parameter for the strength of the ped-PED repulsive force
       *
       *
       * @return double
       */
-     double GetNuPed() const;
-     /**
+    double GetNuPed() const;
+    /**
       * ToDO: What is this parameter doing?
       *
       *
       * @return double
       */
-     double GetaPed() const;
-     /**
+    double GetaPed() const;
+    /**
       * ToDO: What is this parameter doing?
       *
       *
       * @return double
       */
-     double GetbPed() const;
-     /**
+    double GetbPed() const;
+    /**
       * ToDO: What is this parameter doing?
       *
       *
       * @return double
       */
-     double GetcPed() const;
+    double GetcPed() const;
 
-     /**
+    /**
       * Get the parameter for the strength of the ped-WALL repulsive force
       *
       *
       * @return
       */
-     double GetNuWall() const;
-     /**
+    double GetNuWall() const;
+    /**
       * ToDO: What is this parameter doing?
       *
       *
       * @return double
       */
-     double GetaWall() const;
-     /**
+    double GetaWall() const;
+    /**
       * ToDO: What is this parameter doing?
       *
       *
       * @return double
       */
-     double GetbWall() const;
-     /**
+    double GetbWall() const;
+    /**
       * ToDO: What is this parameter doing?
       *
       *
       * @return double
       */
-     double GetcWall() const;
+    double GetcWall() const;
 
-     /**
+    /**
       * Get the parameter for the strength of the ped-WALL repulsive force
       *
       * @return
       */
 
 #ifdef _ARNEDEBUG
-     /**
+    /**
       * Get the direction of the floorfield (direction is scaled to be in [0, 1]
       * @param ped all pedestrians
       * @param room all rooms
       * @return direction vector of floorfield
       */
-     Point getDirectionFloorfield(const Pedestrian* ped, Room* Room) const;
-     Point getDirectionRepPeds(const Pedestrian* ped, Pedestrian const currentPed) const;
-     Point getDirectionRepWalls(const Wall& wall, Pedestrian const currentPed) const;
+    Point getDirectionFloorfield(const Pedestrian * ped, Room * Room) const;
+    Point getDirectionRepPeds(const Pedestrian * ped, Pedestrian const currentPed) const;
+    Point getDirectionRepWalls(const Wall & wall, Pedestrian const currentPed) const;
 
 #endif // _ARNEDEBUG
 
-     /**
+    /**
       * initialize the phi angle
       * @param building
       */
-     virtual bool Init (Building* building);
+    virtual bool Init(Building * building);
 
-     /**
+    /**
       * @return all model parameters in a nicely formatted string
       */
-     virtual std::string GetDescription();
+    virtual std::string GetDescription();
 
-     /**
+    /**
       * Compute the next simulation step
       * Solve the differential equations and update the positions and velocities
       * @param current the actual time
       * @param deltaT the next timestep
       * @param building the geometry object
       */
-     virtual void ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic);
+    virtual void
+    ComputeNextTimeStep(double current, double deltaT, Building * building, int periodic);
 
-     /**
+    /**
       * Solve the differential equations and update the positions and velocities
       * @param t the actual time
       * @param tp the next timestep
       * @param building the geometry object
       */
-     //virtual void CalculateForce(double t, double tp, Building* building) const;
-     /**
+    //virtual void CalculateForce(double t, double tp, Building* building) const;
+    /**
       * @return all model parameters in a nicely formatted string
       */
-     //virtual std::string writeParameter() const;
+    //virtual std::string writeParameter() const;
 };

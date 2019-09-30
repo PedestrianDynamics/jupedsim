@@ -34,7 +34,7 @@ TEST_CASE("pedestrian/Ellipse", "[pedestrian][Ellipse]")
         double a = 2.0, // semi-axis
             b    = 1.5; // orthogonal semi-axis
         JEllipse E1, E2;
-        double   x2, y2; // E2 center
+        double x2, y2; // E2 center
 
         E1.SetCenter(Point(0, 0));
         E1.SetV0(1);
@@ -241,7 +241,7 @@ TEST_CASE("pedestrian/Ellipse", "[pedestrian][Ellipse]")
         {
             Point P1(2 * a, 0);
             Point P2(2 * a, 3);
-            Line  L(P1, P2);
+            Line L(P1, P2);
 
             REQUIRE(E.EffectiveDistanceToLine(L) == a);
         }
@@ -250,7 +250,7 @@ TEST_CASE("pedestrian/Ellipse", "[pedestrian][Ellipse]")
         {
             Point P1(-3 * a, 0);
             Point P2(-3 * a, 3);
-            Line  L(P1, P2);
+            Line L(P1, P2);
 
             REQUIRE(E.EffectiveDistanceToLine(L) == 2 * a);
         }
@@ -259,7 +259,7 @@ TEST_CASE("pedestrian/Ellipse", "[pedestrian][Ellipse]")
         {
             Point P1(0, 2 * b);
             Point P2(3, 2 * b);
-            Line  L(P1, P2);
+            Line L(P1, P2);
 
             REQUIRE(E.EffectiveDistanceToLine(L) == b);
         }
@@ -268,7 +268,7 @@ TEST_CASE("pedestrian/Ellipse", "[pedestrian][Ellipse]")
         {
             Point P1(0, -2 * b);
             Point P2(3, -2 * b);
-            Line  L(P1, P2);
+            Line L(P1, P2);
 
             REQUIRE(E.EffectiveDistanceToLine(L) == b);
         }
@@ -277,9 +277,9 @@ TEST_CASE("pedestrian/Ellipse", "[pedestrian][Ellipse]")
     SECTION("GetArea of Ellipse")
     {
         const double pi = std::acos(-1);
-        JEllipse     E;
-        double       a = 2.0;
-        double       b = 4.0;
+        JEllipse E;
+        double a = 2.0;
+        double b = 4.0;
 
         E.SetCenter(Point(0, 0));
         E.SetV0(1);
@@ -311,7 +311,7 @@ TEST_CASE("pedestrian/Ellipse", "[pedestrian][Ellipse]")
 
     SECTION("Test if a Point is inside an Ellipse")
     {
-        float    a = 2.0, b = 10.0;
+        float a = 2.0, b = 10.0;
         JEllipse E;
         // double px, py;
         E.SetCenter(Point(0, 0));
@@ -365,7 +365,7 @@ TEST_CASE("pedestrian/Ellipse", "[pedestrian][Ellipse]")
 
     SECTION("Test if a Point is on an Ellipse")
     {
-        float    a = 2.0, b = 10.0;
+        float a = 2.0, b = 10.0;
         JEllipse E;
 
         E.SetCenter(Point(0, 0));
@@ -414,9 +414,9 @@ TEST_CASE("pedestrian/Ellipse", "[pedestrian][Ellipse]")
 
     SECTION("Test If a Point is Outside of an Ellipse")
     {
-        float    a = 2.0, b = 10.0;
+        float a = 2.0, b = 10.0;
         JEllipse E;
-        Point    P;
+        Point P;
         // double px, py;
         E.SetCenter(Point(0, 0));
         E.SetV0(1);
@@ -459,7 +459,7 @@ TEST_CASE("pedestrian/Ellipse", "[pedestrian][Ellipse]")
 
     SECTION("Get Point on Ellipse")
     {
-        double   r = 2.0;
+        double r = 2.0;
         JEllipse E;
         E.SetCenter(Point(0, 0));
         E.SetV0(1);
@@ -477,7 +477,7 @@ TEST_CASE("pedestrian/Ellipse", "[pedestrian][Ellipse]")
                     double sx = i * r;
                     double sy = j * r;
 
-                    Point  S{sx, sy};
+                    Point S{sx, sy};
                     double l = S.Norm();
 
                     REQUIRE(E.PointOnEllipse(S) == Point(r * sx / l, r * sy / l));
@@ -492,8 +492,9 @@ TEST_CASE("pedestrian/Ellipse", "[pedestrian][Ellipse]")
             double sy = 0.5 * r;
 
             Point S{sx, sy};
-            REQUIRE(E.PointOnEllipse(Point(0.5 * r, 0.5 * r)) ==
-                    Point(r * sx / S.Norm(), r * sy / S.Norm()));
+            REQUIRE(
+                E.PointOnEllipse(Point(0.5 * r, 0.5 * r)) ==
+                Point(r * sx / S.Norm(), r * sy / S.Norm()));
         }
 
         SECTION("Test #3")

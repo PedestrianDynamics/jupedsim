@@ -30,34 +30,32 @@
 #include "geometry/Building.h"
 #include "geometry/SubRoom.h"
 #include "pedestrian/Pedestrian.h"
-#include "routing/smoke_router/cognitiveMap/cognitivemap.h"
 #include "routing/smoke_router/NavigationGraph.h"
+#include "routing/smoke_router/cognitiveMap/cognitivemap.h"
 
-DiscoverDoorsSensor::~DiscoverDoorsSensor()
-{
-}
+DiscoverDoorsSensor::~DiscoverDoorsSensor() {}
 
 std::string DiscoverDoorsSensor::GetName() const
 {
     return "DiscoverDoorsSensor";
 }
 
-void DiscoverDoorsSensor::execute(const Pedestrian * pedestrian, CognitiveMap& cognitive_map) const
+void DiscoverDoorsSensor::execute(const Pedestrian * pedestrian, CognitiveMap & cognitive_map) const
 {
-    SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
+    SubRoom * sub_room =
+        building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
 
-    const std::vector<Crossing *>& crossings = sub_room->GetAllCrossings();
-    for(std::vector<Crossing*>::const_iterator it = crossings.begin(); it != crossings.end(); ++it)
-    {
-        if ((*it)->IsOpen())
+    const std::vector<Crossing *> & crossings = sub_room->GetAllCrossings();
+    for(std::vector<Crossing *>::const_iterator it = crossings.begin(); it != crossings.end();
+        ++it) {
+        if((*it)->IsOpen())
             cognitive_map.GetGraphNetwork()->Add((*it));
     }
     //Add transitions as edges
-    const std::vector<Transition *>& transitions = sub_room->GetAllTransitions();
-    for(std::vector<Transition *>::const_iterator it = transitions.begin(); it != transitions.end(); ++it)
-    {
-        if ((*it)->IsOpen())
-        {
+    const std::vector<Transition *> & transitions = sub_room->GetAllTransitions();
+    for(std::vector<Transition *>::const_iterator it = transitions.begin(); it != transitions.end();
+        ++it) {
+        if((*it)->IsOpen()) {
             if((*it)->IsExit()) {
                 cognitive_map.GetGraphNetwork()->AddExit((*it));
             } else {

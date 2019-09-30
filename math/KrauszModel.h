@@ -28,7 +28,6 @@
 #pragma once
 
 #include "OperationalModel.h"
-
 #include "geometry/Building.h"
 
 #include <vector>
@@ -50,9 +49,16 @@ class DirectionStrategy;
 class KrauszModel : public OperationalModel
 {
 public:
-
-    KrauszModel(std::shared_ptr<DirectionStrategy> dir, double nuped, double nuwall, double dist_effPed, double dist_effWall,
-              double intp_widthped, double intp_widthwall, double maxfped, double maxfwall);
+    KrauszModel(
+        std::shared_ptr<DirectionStrategy> dir,
+        double nuped,
+        double nuwall,
+        double dist_effPed,
+        double dist_effWall,
+        double intp_widthped,
+        double intp_widthwall,
+        double maxfped,
+        double maxfwall);
     virtual ~KrauszModel(void);
 
     // Getter
@@ -74,19 +80,20 @@ public:
      * @param deltaT the next timestep
      * @param building the geometry object
      */
-    virtual void ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic);
-    virtual std::string GetDescription() ;
-    virtual bool Init (Building* building);
+    virtual void
+    ComputeNextTimeStep(double current, double deltaT, Building * building, int periodic);
+    virtual std::string GetDescription();
+    virtual bool Init(Building * building);
 
 private:
     // Modellparameter
-    double _nuPed;                /**< strength of the pedestrian repulsive force */
-    double _nuWall;               /**< strength of the wall repulsive force */
-    double _intp_widthPed; /**< Interpolation cutoff radius (in cm) */
+    double _nuPed;          /**< strength of the pedestrian repulsive force */
+    double _nuWall;         /**< strength of the wall repulsive force */
+    double _intp_widthPed;  /**< Interpolation cutoff radius (in cm) */
     double _intp_widthWall; /**< Interpolation cutoff radius (in cm) */
     double _maxfPed;
     double _maxfWall;
-    double _distEffMaxPed; // maximal effective distance
+    double _distEffMaxPed;  // maximal effective distance
     double _distEffMaxWall; // maximal effective distance
 
     // Private Funktionen
@@ -98,7 +105,7 @@ private:
      *
      * @return Point
      */
-    Point ForceDriv(Pedestrian* ped, Room* room) const;
+    Point ForceDriv(Pedestrian * ped, Room * room) const;
     /**
      * Repulsive force between two pedestrians ped1 and ped2 according to
      * the Generalized Centrifugal Force Model (chraibi2010a)
@@ -108,7 +115,7 @@ private:
      *
      * @return Point
      */
-    Point ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const;
+    Point ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const;
     /**
      * Repulsive force acting on pedestrian <ped> from the walls in
      * <subroom>. The sum of all repulsive forces of the walls in <subroom> is calculated
@@ -118,12 +125,18 @@ private:
      *
      * @return
      */
-    Point ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const;
-    Point ForceRepWall(Pedestrian* ped, const Line& l) const;
-    Point AccelOscil(Pedestrian *ped) const;
+    Point ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const;
+    Point ForceRepWall(Pedestrian * ped, const Line & l) const;
+    Point AccelOscil(Pedestrian * ped) const;
     double OscilFreq(double a, double b, double v) const;
     double OscilAmp(double a, double b, double v) const;
-    Point ForceRepStatPoint(Pedestrian* ped, const Point& p, double l, double vn) const;
-    Point ForceInterpolation(double v0, double K_ij, const Point& e, double v, double d, double r, double l) const;
-
+    Point ForceRepStatPoint(Pedestrian * ped, const Point & p, double l, double vn) const;
+    Point ForceInterpolation(
+        double v0,
+        double K_ij,
+        const Point & e,
+        double v,
+        double d,
+        double r,
+        double l) const;
 };

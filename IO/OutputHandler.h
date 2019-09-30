@@ -32,59 +32,70 @@
 #include "IO/TraVisToClient.h"
 #endif
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <vector>
 
-class OutputHandler {
+class OutputHandler
+{
 protected:
-     int _nWarnings;
-     int _nErrors;
-     int _nDeletedAgents;
+    int _nWarnings;
+    int _nErrors;
+    int _nDeletedAgents;
+
 public:
-     OutputHandler() { _nWarnings = 0; _nErrors = 0; _nDeletedAgents = 0;};
-     virtual ~OutputHandler() {};
+    OutputHandler()
+    {
+        _nWarnings      = 0;
+        _nErrors        = 0;
+        _nDeletedAgents = 0;
+    };
+    virtual ~OutputHandler(){};
 
-     int GetWarnings();
-     void incrementWarnings();
-     int GetErrors();
-     void incrementErrors();
-     int GetDeletedAgents();
-     void incrementDeletedAgents();
-     void ProgressBar(double TotalPeds, double NowPeds, double simTime);
+    int GetWarnings();
+    void incrementWarnings();
+    int GetErrors();
+    void incrementErrors();
+    int GetDeletedAgents();
+    void incrementDeletedAgents();
+    void ProgressBar(double TotalPeds, double NowPeds, double simTime);
 
-     virtual void Write(const std::string& str);
-     virtual void Write(const char *string, ...);
+    virtual void Write(const std::string & str);
+    virtual void Write(const char * string, ...);
 };
 
-class STDIOHandler : public OutputHandler {
+class STDIOHandler : public OutputHandler
+{
 public:
-     void Write(const std::string& str) override;
+    void Write(const std::string & str) override;
 };
 
-class FileHandler : public OutputHandler {
+class FileHandler : public OutputHandler
+{
 private:
-     std::ofstream _pfp;
+    std::ofstream _pfp;
+
 public:
-     FileHandler(const fs::path& path);
-     ~FileHandler() override;
-     void Write(const std::string& str) override;
-     void Write(const char *string,...) override;
+    FileHandler(const fs::path & path);
+    ~FileHandler() override;
+    void Write(const std::string & str) override;
+    void Write(const char * string, ...) override;
 };
 
 #ifdef _SIMULATOR
 
-class SocketHandler : public OutputHandler {
+class SocketHandler : public OutputHandler
+{
 private:
-     TraVisToClient* client;
+    TraVisToClient * client;
 
 public:
-     SocketHandler(const std::string& host, int port);
-     ~SocketHandler() override;
-     void Write(const std::string& str) override;
+    SocketHandler(const std::string & host, int port);
+    ~SocketHandler() override;
+    void Write(const std::string & str) override;
 
-     //Some tags are broken
-     std::vector<std::string> brokentags;
+    //Some tags are broken
+    std::vector<std::string> brokentags;
 };
 
 #endif

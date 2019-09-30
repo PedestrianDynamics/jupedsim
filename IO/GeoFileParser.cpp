@@ -27,1136 +27,1117 @@
 
 #include <tinyxml.h>
 
-GeoFileParser::GeoFileParser(Configuration* configuration)
-          :_configuration(configuration)
-{
+GeoFileParser::GeoFileParser(Configuration * configuration) : _configuration(configuration) {}
 
+void GeoFileParser::LoadBuilding(Building * building)
+{
+    //todo: what happens if any of these  methods failed (return false)? throw exception ?
+    if(!LoadGeometry(building)) {
+        Log->Write("ERROR:\t could not load the geometry!");
+        exit(EXIT_FAILURE);
+    }
+
+    if(!LoadRoutingInfo(building)) {
+        Log->Write("ERROR:\t could not load extra routing information!");
+        exit(EXIT_FAILURE);
+    }
+    if(!LoadTrafficInfo(building)) {
+        Log->Write("ERROR:\t could not load extra traffic information!");
+        exit(EXIT_FAILURE);
+    }
+    if(!LoadTrainInfo(building)) {
+        Log->Write("ERROR:\t could not load train information!");
+        exit(EXIT_FAILURE);
+    }
 }
 
-void GeoFileParser::LoadBuilding(Building* building)
+bool GeoFileParser::LoadGeometry(Building * building)
 {
-     //todo: what happens if any of these  methods failed (return false)? throw exception ?
-     if (!LoadGeometry(building)) {
-          Log->Write("ERROR:\t could not load the geometry!");
-          exit(EXIT_FAILURE);
-     }
+    const fs::path & rootDir(_configuration->GetProjectRootDir());
 
-     if (!LoadRoutingInfo(building)) {
-          Log->Write("ERROR:\t could not load extra routing information!");
-          exit(EXIT_FAILURE);
-     }
-     if (!LoadTrafficInfo(building)) {
-          Log->Write("ERROR:\t could not load extra traffic information!");
-          exit(EXIT_FAILURE);
-     }
-     if(!LoadTrainInfo(building))
-     {
-          Log->Write("ERROR:\t could not load train information!");
-          exit(EXIT_FAILURE);
-     }
-}
+    const fs::path geoFilenameWithPath = rootDir / _configuration->GetGeometryFile();
+    std::cout << "\nLoadGeometry: file: " << geoFilenameWithPath << "\n";
 
-bool GeoFileParser::LoadGeometry(Building* building)
-{
+    TiXmlDocument docGeo(geoFilenameWithPath.string());
+    if(!docGeo.LoadFile()) {
+        Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
+        Log->Write("\t could not parse the geometry file");
+        return false;
+    }
 
-     const fs::path& rootDir(_configuration->GetProjectRootDir());
+    TiXmlElement * xRootNode = docGeo.RootElement();
+    if(!xRootNode) {
+        Log->Write("ERROR:\tRoot element does not exist");
+        return false;
+    }
 
-     const fs::path geoFilenameWithPath =  rootDir / _configuration->GetGeometryFile();
-     std::cout << "\nLoadGeometry: file: " << geoFilenameWithPath << "\n";
+    if(xRootNode->ValueStr() != "geometry") {
+        Log->Write("ERROR:\tRoot element value is not 'geometry'.");
+        return false;
+    }
+    if(xRootNode->Attribute("unit"))
+        if(std::string(xRootNode->Attribute("unit")) != "m") {
+            Log->Write(
+                "ERROR:\tOnly the unit m (meters) is supported. \n\tYou supplied [%s]",
+                xRootNode->Attribute("unit"));
+            return false;
+        }
 
-     TiXmlDocument docGeo(geoFilenameWithPath.string());
-     if (!docGeo.LoadFile()) {
-          Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
-          Log->Write("\t could not parse the geometry file");
-          return false;
-     }
+    double version = xmltof(xRootNode->Attribute("version"), -1);
 
-     TiXmlElement* xRootNode = docGeo.RootElement();
-     if (!xRootNode) {
-          Log->Write("ERROR:\tRoot element does not exist");
-          return false;
-     }
+    if(version < std::stod(JPS_OLD_VERSION)) {
+        Log->Write(" \tWrong geometry version!");
+        Log->Write(" \tOnly version >= %s supported", JPS_OLD_VERSION);
+        Log->Write(" \tPlease update the version of your geometry file to %s", JPS_OLD_VERSION);
+        return false;
+    }
 
-     if (xRootNode->ValueStr()!="geometry") {
-          Log->Write("ERROR:\tRoot element value is not 'geometry'.");
-          return false;
-     }
-     if (xRootNode->Attribute("unit")) if (std::string(xRootNode->Attribute("unit"))!="m") {
-          Log->Write("ERROR:\tOnly the unit m (meters) is supported. \n\tYou supplied [%s]",
-                    xRootNode->Attribute("unit"));
-          return false;
-     }
+    building->SetCaption(xmltoa(xRootNode->Attribute("caption"), "virtual building"));
 
-     double version = xmltof(xRootNode->Attribute("version"), -1);
+    //processing the rooms node
+    TiXmlNode * xRoomsNode = xRootNode->FirstChild("rooms");
+    if(!xRoomsNode) {
+        Log->Write("ERROR: \tThe geometry should have at least one room and one subroom");
+        return false;
+    }
 
-     if (version<std::stod(JPS_OLD_VERSION)) {
-          Log->Write(" \tWrong geometry version!");
-          Log->Write(" \tOnly version >= %s supported", JPS_OLD_VERSION);
-          Log->Write(" \tPlease update the version of your geometry file to %s", JPS_OLD_VERSION);
-          return false;
-     }
+    for(TiXmlElement * xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
+        xRoom                = xRoom->NextSiblingElement("room")) {
+        Room * room = new Room();
+        //make_unique<Song>
 
-     building->SetCaption(xmltoa(xRootNode->Attribute("caption"), "virtual building"));
+        std::string room_id = xmltoa(xRoom->Attribute("id"), "-1");
+        room->SetID(xmltoi(room_id.c_str(), -1));
 
-     //processing the rooms node
-     TiXmlNode* xRoomsNode = xRootNode->FirstChild("rooms");
-     if (!xRoomsNode) {
-          Log->Write("ERROR: \tThe geometry should have at least one room and one subroom");
-          return false;
-     }
+        std::string caption = "room " + room_id;
+        room->SetCaption(xmltoa(xRoom->Attribute("caption"), caption.c_str()));
 
-     for (TiXmlElement* xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
-          xRoom = xRoom->NextSiblingElement("room")) {
+        double position = xmltof(xRoom->Attribute("zpos"), 0.0);
 
-          Room* room = new Room();
-          //make_unique<Song>
+        //if(position>6.0) position+=50;
+        room->SetZPos(position);
 
-          std::string room_id = xmltoa(xRoom->Attribute("id"), "-1");
-          room->SetID(xmltoi(room_id.c_str(), -1));
+        //parsing the subrooms
+        //processing the rooms node
+        //TiXmlNode*  xSubroomsNode = xRoom->FirstChild("subroom");
 
-          std::string caption = "room "+room_id;
-          room->SetCaption(
-                    xmltoa(xRoom->Attribute("caption"), caption.c_str()));
+        for(TiXmlElement * xSubRoom = xRoom->FirstChildElement("subroom"); xSubRoom;
+            xSubRoom                = xSubRoom->NextSiblingElement("subroom")) {
+            //               std::string subroom_id = xmltoa(xSubRoom->Attribute("id"), "-1");
+            int subroom_id = xmltoi(xSubRoom->Attribute("id"), -1);
 
-          double position = xmltof(xRoom->Attribute("zpos"), 0.0);
+            std::string SubroomClosed = xmltoa(xSubRoom->Attribute("closed"), "0");
+            std::string type          = xmltoa(xSubRoom->Attribute("class"), "subroom");
 
-          //if(position>6.0) position+=50;
-          room->SetZPos(position);
+            //get the equation of the plane if any
+            double A_x = xmltof(xSubRoom->Attribute("A_x"), 0.0);
+            double B_y = xmltof(xSubRoom->Attribute("B_y"), 0.0);
 
-          //parsing the subrooms
-          //processing the rooms node
-          //TiXmlNode*  xSubroomsNode = xRoom->FirstChild("subroom");
+            // assume either the old "C_z" or the new "C"
+            double C_z = xmltof(xSubRoom->Attribute("C_z"), 0.0);
+            C_z        = xmltof(xSubRoom->Attribute("C"), C_z);
 
-          for (TiXmlElement* xSubRoom = xRoom->FirstChildElement("subroom"); xSubRoom;
-               xSubRoom = xSubRoom->NextSiblingElement("subroom")) {
+            SubRoom * subroom = nullptr;
 
-//               std::string subroom_id = xmltoa(xSubRoom->Attribute("id"), "-1");
-               int subroom_id = xmltoi(xSubRoom->Attribute("id"), -1);
+            if(type == "stair" || type == "escalator" || type == "idle_escalator") {
+                if(xSubRoom->FirstChildElement("up") == nullptr) {
+                    Log->Write(
+                        "ERROR:\t the attribute <up> and <down> are missing for the " + type);
+                    Log->Write("ERROR:\t check your geometry file");
+                    return false;
+                }
+                double up_x   = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
+                double up_y   = xmltof(xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
+                double down_x = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
+                double down_y = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
+                subroom       = new Stair();
+                ((Stair *) subroom)->SetUp(Point(up_x, up_y));
+                ((Stair *) subroom)->SetDown(Point(down_x, down_y));
+            } else if(type == "escalator_up") {
+                if(xSubRoom->FirstChildElement("up") == nullptr) {
+                    Log->Write(
+                        "ERROR:\t the attribute <up> and <down> are missing for the " + type);
+                    Log->Write("ERROR:\t check your geometry file");
+                    return false;
+                }
+                double up_x   = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
+                double up_y   = xmltof(xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
+                double down_x = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
+                double down_y = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
+                subroom       = new Escalator();
+                ((Escalator *) subroom)->SetUp(Point(up_x, up_y));
+                ((Escalator *) subroom)->SetDown(Point(down_x, down_y));
+                ((Escalator *) subroom)->SetEscalatorUp();
+                _configuration->set_has_directional_escalators(true);
+            } else if(type == "escalator_down") {
+                if(xSubRoom->FirstChildElement("up") == nullptr) {
+                    Log->Write(
+                        "ERROR:\t the attribute <up> and <down> are missing for the " + type);
+                    Log->Write("ERROR:\t check your geometry file");
+                    return false;
+                }
+                double up_x   = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
+                double up_y   = xmltof(xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
+                double down_x = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
+                double down_y = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
+                subroom       = new Escalator();
+                ((Escalator *) subroom)->SetUp(Point(up_x, up_y));
+                ((Escalator *) subroom)->SetDown(Point(down_x, down_y));
+                ((Escalator *) subroom)->SetEscalatorDown();
+                _configuration->set_has_directional_escalators(true);
+            } else {
+                //normal subroom or corridor
+                subroom = new NormalSubRoom();
+            }
 
-               std::string SubroomClosed = xmltoa(xSubRoom->Attribute("closed"), "0");
-               std::string type = xmltoa(xSubRoom->Attribute("class"), "subroom");
+            subroom->SetType(type);
+            subroom->SetPlanEquation(A_x, B_y, C_z);
+            subroom->SetRoomID(room->GetID());
+            subroom->SetSubRoomID(subroom_id);
 
-               //get the equation of the plane if any
-               double A_x = xmltof(xSubRoom->Attribute("A_x"), 0.0);
-               double B_y = xmltof(xSubRoom->Attribute("B_y"), 0.0);
+            //static int p_id=1;
+            //cout<<endl<<"wall polygon: "<< p_id++<<endl;
+            //looking for polygons (walls)
+            for(TiXmlElement * xPolyVertices = xSubRoom->FirstChildElement("polygon");
+                xPolyVertices;
+                xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
+                std::string wall_type = xmltoa(xPolyVertices->Attribute("type"), "wall");
+                for(TiXmlElement * xVertex = xPolyVertices->FirstChildElement("vertex");
+                    xVertex && xVertex != xPolyVertices->LastChild("vertex");
+                    xVertex = xVertex->NextSiblingElement("vertex")) {
+                    double x1 = xmltof(xVertex->Attribute("px"));
+                    double y1 = xmltof(xVertex->Attribute("py"));
+                    double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
+                    double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
+                    subroom->AddWall(Wall(Point(x1, y1), Point(x2, y2), wall_type));
+                    //printf("%0.2f %0.2f %0.2f %0.2f\n",x1,y1,x2,y2);
+                }
+            }
 
-               // assume either the old "C_z" or the new "C"
-               double C_z = xmltof(xSubRoom->Attribute("C_z"), 0.0);
-               C_z = xmltof(xSubRoom->Attribute("C"), C_z);
+            //looking for obstacles
+            for(TiXmlElement * xObstacle = xSubRoom->FirstChildElement("obstacle"); xObstacle;
+                xObstacle                = xObstacle->NextSiblingElement("obstacle")) {
+                int id        = xmltoi(xObstacle->Attribute("id"), -1);
+                double height = xmltof(xObstacle->Attribute("height"), 0);
+                //double ObstClosed = xmltof(xObstacle->Attribute("closed"), 0);
+                std::string ObstCaption = xmltoa(xObstacle->Attribute("caption"), "-1");
 
-               SubRoom* subroom = nullptr;
+                Obstacle * obstacle = new Obstacle();
+                obstacle->SetId(id);
+                obstacle->SetCaption(ObstCaption);
+                //obstacle->SetClosed(ObstClosed);
+                obstacle->SetHeight(height);
 
-               if (type=="stair" || type=="escalator" || type=="idle_escalator") {
-                    if (xSubRoom->FirstChildElement("up") == nullptr) {
-                         Log->Write("ERROR:\t the attribute <up> and <down> are missing for the " + type);
-                         Log->Write("ERROR:\t check your geometry file");
-                         return false;
-                    }
-                    double up_x = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
-                    double up_y = xmltof(xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
-                    double down_x = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
-                    double down_y = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
-                    subroom = new Stair();
-                    ((Stair *) subroom)->SetUp(Point(up_x, up_y));
-                    ((Stair *) subroom)->SetDown(Point(down_x, down_y));
-               } else if (type =="escalator_up") {
-                    if (xSubRoom->FirstChildElement("up") == nullptr) {
-                         Log->Write("ERROR:\t the attribute <up> and <down> are missing for the " + type);
-                         Log->Write("ERROR:\t check your geometry file");
-                         return false;
-                    }
-                    double up_x = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
-                    double up_y = xmltof(xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
-                    double down_x = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
-                    double down_y = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
-                    subroom = new Escalator();
-                    ((Escalator *) subroom)->SetUp(Point(up_x, up_y));
-                    ((Escalator *) subroom)->SetDown(Point(down_x, down_y));
-                    ((Escalator*) subroom)->SetEscalatorUp();
-                    _configuration->set_has_directional_escalators(true);
-               } else if (type == "escalator_down") {
-                    if (xSubRoom->FirstChildElement("up") ==nullptr) {
-                         Log->Write("ERROR:\t the attribute <up> and <down> are missing for the " + type);
-                         Log->Write("ERROR:\t check your geometry file");
-                         return false;
-                    }
-                    double up_x = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
-                    double up_y = xmltof(xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
-                    double down_x = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
-                    double down_y = xmltof(xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
-                    subroom = new Escalator();
-                    ((Escalator *) subroom)->SetUp(Point(up_x, up_y));
-                    ((Escalator *) subroom)->SetDown(Point(down_x, down_y));
-                    ((Escalator*) subroom)->SetEscalatorDown();
-                    _configuration->set_has_directional_escalators(true);
-               } else {
-                    //normal subroom or corridor
-                    subroom = new NormalSubRoom();
-               }
-
-               subroom->SetType(type);
-               subroom->SetPlanEquation(A_x, B_y, C_z);
-               subroom->SetRoomID(room->GetID());
-               subroom->SetSubRoomID(subroom_id);
-
-               //static int p_id=1;
-               //cout<<endl<<"wall polygon: "<< p_id++<<endl;
-               //looking for polygons (walls)
-               for (TiXmlElement* xPolyVertices = xSubRoom->FirstChildElement("polygon"); xPolyVertices;
+                //looking for polygons (walls)
+                for(TiXmlElement * xPolyVertices = xObstacle->FirstChildElement("polygon");
+                    xPolyVertices;
                     xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
-
-                    std::string wall_type = xmltoa(xPolyVertices->Attribute("type"), "wall");
-                    for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
-                              "vertex");
-                         xVertex && xVertex!=xPolyVertices->LastChild("vertex");
-                         xVertex = xVertex->NextSiblingElement("vertex")) {
-
-                         double x1 = xmltof(xVertex->Attribute("px"));
-                         double y1 = xmltof(xVertex->Attribute("py"));
-                         double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
-                         double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
-                         subroom->AddWall(Wall(Point(x1, y1), Point(x2, y2), wall_type));
-                         //printf("%0.2f %0.2f %0.2f %0.2f\n",x1,y1,x2,y2);
+                    for(TiXmlElement * xVertex = xPolyVertices->FirstChildElement("vertex");
+                        xVertex && xVertex != xPolyVertices->LastChild("vertex");
+                        xVertex = xVertex->NextSiblingElement("vertex")) {
+                        double x1 = xmltof(xVertex->Attribute("px"));
+                        double y1 = xmltof(xVertex->Attribute("py"));
+                        double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
+                        double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
+                        obstacle->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
                     }
+                }
+                subroom->AddObstacle(obstacle);
+            }
+            room->AddSubRoom(subroom);
+        }
+        //parsing the crossings
+        TiXmlNode * xCrossingsNode = xRoom->FirstChild("crossings");
+        if(xCrossingsNode)
+            for(TiXmlElement * xCrossing = xCrossingsNode->FirstChildElement("crossing"); xCrossing;
+                xCrossing                = xCrossing->NextSiblingElement("crossing")) {
+                int id      = xmltoi(xCrossing->Attribute("id"), -1);
+                int sub1_id = xmltoi(xCrossing->Attribute("subroom1_id"), -1);
+                int sub2_id = xmltoi(xCrossing->Attribute("subroom2_id"), -1);
 
-               }
+                double x1 = xmltof(xCrossing->FirstChildElement("vertex")->Attribute("px"));
+                double y1 = xmltof(xCrossing->FirstChildElement("vertex")->Attribute("py"));
+                double x2 = xmltof(xCrossing->LastChild("vertex")->ToElement()->Attribute("px"));
+                double y2 = xmltof(xCrossing->LastChild("vertex")->ToElement()->Attribute("py"));
 
-               //looking for obstacles
-               for (TiXmlElement* xObstacle = xSubRoom->FirstChildElement("obstacle"); xObstacle;
-                    xObstacle = xObstacle->NextSiblingElement("obstacle")) {
+                Crossing * c = new Crossing();
+                c->SetID(id);
+                c->SetPoint1(Point(x1, y1));
+                c->SetPoint2(Point(x2, y2));
 
-                    int id = xmltoi(xObstacle->Attribute("id"), -1);
-                    double height = xmltof(xObstacle->Attribute("height"), 0);
-                    //double ObstClosed = xmltof(xObstacle->Attribute("closed"), 0);
-                    std::string ObstCaption = xmltoa(xObstacle->Attribute("caption"), "-1");
+                c->SetSubRoom1(room->GetSubRoom(sub1_id));
+                c->SetSubRoom2(room->GetSubRoom(sub2_id));
+                c->SetRoom1(room);
+                building->AddCrossing(c);
 
-                    Obstacle* obstacle = new Obstacle();
-                    obstacle->SetId(id);
-                    obstacle->SetCaption(ObstCaption);
-                    //obstacle->SetClosed(ObstClosed);
-                    obstacle->SetHeight(height);
+                room->GetSubRoom(sub1_id)->AddCrossing(c);
+                room->GetSubRoom(sub2_id)->AddCrossing(c);
+            }
 
-                    //looking for polygons (walls)
-                    for (TiXmlElement* xPolyVertices = xObstacle->FirstChildElement("polygon"); xPolyVertices;
-                         xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
+        building->AddRoom(room);
+    }
 
-                         for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
-                                   "vertex");
-                              xVertex && xVertex!=xPolyVertices->LastChild("vertex");
-                              xVertex = xVertex->NextSiblingElement("vertex")) {
+    // all rooms are read, now proceed with transitions
+    TiXmlNode * xTransNode = xRootNode->FirstChild("transitions");
+    if(xTransNode) {
+        for(TiXmlElement * xTrans = xTransNode->FirstChildElement("transition"); xTrans;
+            xTrans                = xTrans->NextSiblingElement("transition")) {
+            Transition * t = parseTransitionNode(xTrans, building);
+            building->AddTransition(t);
+        }
+        TiXmlNode * xNodeFile = xTransNode->FirstChild("file");
+        if(xNodeFile) {
+            fs::path p(_configuration->GetProjectRootDir());
+            std::string transFilename = xNodeFile->FirstChild()->ValueStr();
+            p /= transFilename;
+            transFilename = p.string();
 
-                              double x1 = xmltof(xVertex->Attribute("px"));
-                              double y1 = xmltof(xVertex->Attribute("py"));
-                              double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
-                              double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
-                              obstacle->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
-                         }
-                    }
-                    subroom->AddObstacle(obstacle);
-               }
-               room->AddSubRoom(subroom);
+            Log->Write("INFO:\tParsing transition from file <%s>", transFilename.c_str());
+            TiXmlDocument docTrans(transFilename);
+            if(!docTrans.LoadFile()) {
+                Log->Write("ERROR: \t%s", docTrans.ErrorDesc());
+                Log->Write("ERROR: \t could not parse the transitions file.");
+                return false;
+            }
+            TiXmlElement * xRootNodeTrans = docTrans.RootElement();
+            if(!xRootNodeTrans) {
+                Log->Write("ERROR:\tRoot element does not exist in transitions file.");
+                return false;
+            }
+            if(xRootNodeTrans->ValueStr() != "JPScore") {
+                Log->Write(
+                    "ERROR:\tParsing transitions file. Root element value is not 'JPScore'.");
+                return false;
+            }
+            TiXmlNode * xTransNodeFile = xRootNodeTrans->FirstChild("transitions");
+            if(!xTransNodeFile) {
+                Log->Write("ERROR:\tNo Transitions in file found.");
+                return false;
+            }
+            for(TiXmlElement * xTrans = xTransNodeFile->FirstChildElement("transition"); xTrans;
+                xTrans                = xTrans->NextSiblingElement("transition")) {
+                Transition * t = parseTransitionNode(xTrans, building);
+                building->AddTransition(t);
+            }
+        } else {
+            Log->Write("INFO:\tNot parsing transition from file");
+        }
+        Log->Write("INFO:\tGot %d transitions", building->GetAllTransitions().size());
 
-          }
-          //parsing the crossings
-          TiXmlNode* xCrossingsNode = xRoom->FirstChild("crossings");
-          if (xCrossingsNode)
-               for (TiXmlElement* xCrossing = xCrossingsNode->FirstChildElement("crossing"); xCrossing;
-                    xCrossing = xCrossing->NextSiblingElement("crossing")) {
+    } // xTransNode
+    Log->Write("INFO: \tLoading building file successful!!!\n");
 
-                    int id = xmltoi(xCrossing->Attribute("id"), -1);
-                    int sub1_id = xmltoi(xCrossing->Attribute("subroom1_id"), -1);
-                    int sub2_id = xmltoi(xCrossing->Attribute("subroom2_id"), -1);
-
-                    double x1 = xmltof(xCrossing->FirstChildElement("vertex")->Attribute("px"));
-                    double y1 = xmltof(xCrossing->FirstChildElement("vertex")->Attribute("py"));
-                    double x2 = xmltof(xCrossing->LastChild("vertex")->ToElement()->Attribute("px"));
-                    double y2 = xmltof(xCrossing->LastChild("vertex")->ToElement()->Attribute("py"));
-
-                    Crossing* c = new Crossing();
-                    c->SetID(id);
-                    c->SetPoint1(Point(x1, y1));
-                    c->SetPoint2(Point(x2, y2));
-
-                    c->SetSubRoom1(room->GetSubRoom(sub1_id));
-                    c->SetSubRoom2(room->GetSubRoom(sub2_id));
-                    c->SetRoom1(room);
-                    building->AddCrossing(c);
-
-                    room->GetSubRoom(sub1_id)->AddCrossing(c);
-                    room->GetSubRoom(sub2_id)->AddCrossing(c);
-               }
-
-          building->AddRoom(room);
-     }
-
-     // all rooms are read, now proceed with transitions
-     TiXmlNode* xTransNode = xRootNode->FirstChild("transitions");
-     if (xTransNode)
-     {
-          for (TiXmlElement* xTrans = xTransNode->FirstChildElement("transition"); xTrans;
-               xTrans = xTrans->NextSiblingElement("transition")) {
-               Transition * t = parseTransitionNode(xTrans, building);
-               building->AddTransition(t);
-          }
-          TiXmlNode * xNodeFile = xTransNode->FirstChild("file");
-          if(xNodeFile)
-          {
-               fs::path p(_configuration->GetProjectRootDir());
-               std::string transFilename = xNodeFile->FirstChild()->ValueStr();
-               p /= transFilename;
-               transFilename = p.string();
-
-               Log->Write("INFO:\tParsing transition from file <%s>", transFilename.c_str());
-               TiXmlDocument docTrans(transFilename);
-               if (!docTrans.LoadFile()) {
-                    Log->Write("ERROR: \t%s", docTrans.ErrorDesc());
-                    Log->Write("ERROR: \t could not parse the transitions file.");
-                    return false;
-               }
-               TiXmlElement* xRootNodeTrans = docTrans.RootElement();
-               if (!xRootNodeTrans) {
-                    Log->Write("ERROR:\tRoot element does not exist in transitions file.");
-                    return false;
-               }
-               if (xRootNodeTrans->ValueStr() != "JPScore") {
-                    Log->Write("ERROR:\tParsing transitions file. Root element value is not 'JPScore'.");
-                    return false;
-               }
-               TiXmlNode* xTransNodeFile = xRootNodeTrans->FirstChild("transitions");
-               if (!xTransNodeFile) {
-                    Log->Write("ERROR:\tNo Transitions in file found.");
-                    return false;
-               }
-               for (TiXmlElement* xTrans = xTransNodeFile->FirstChildElement("transition"); xTrans;
-               xTrans = xTrans->NextSiblingElement("transition")) {
-                    Transition * t = parseTransitionNode(xTrans, building);
-                    building->AddTransition(t);
-               }
-          }
-          else{
-               Log->Write("INFO:\tNot parsing transition from file");
-          }
-          Log->Write("INFO:\tGot %d transitions", building-> GetAllTransitions().size());
-
-     }// xTransNode
-     Log->Write("INFO: \tLoading building file successful!!!\n");
-
-     //everything went fine
-     return true;
+    //everything went fine
+    return true;
 }
 
-bool GeoFileParser::LoadRoutingInfo(Building* building)
+bool GeoFileParser::LoadRoutingInfo(Building * building)
 {
-     //TODO read schedule
+    //TODO read schedule
 
-     TiXmlDocument docRouting(_configuration->GetProjectFile().string());
-     if (!docRouting.LoadFile()) {
-          Log->Write("ERROR: \t%s", docRouting.ErrorDesc());
-          Log->Write("ERROR: \t could not parse the routing file");
-          return false;
-     }
+    TiXmlDocument docRouting(_configuration->GetProjectFile().string());
+    if(!docRouting.LoadFile()) {
+        Log->Write("ERROR: \t%s", docRouting.ErrorDesc());
+        Log->Write("ERROR: \t could not parse the routing file");
+        return false;
+    }
 
-     TiXmlElement* xRootNode = docRouting.RootElement();
-     if (!xRootNode) {
-          Log->Write("ERROR:\tRoot element does not exist");
-          return false;
-     }
+    TiXmlElement * xRootNode = docRouting.RootElement();
+    if(!xRootNode) {
+        Log->Write("ERROR:\tRoot element does not exist");
+        return false;
+    }
 
-     if (!xRootNode->FirstChild("routing")) {
-          return true; // no extra routing information
-     }
+    if(!xRootNode->FirstChild("routing")) {
+        return true; // no extra routing information
+    }
 
 
-     //load goals and routes
-     TiXmlNode* xGoalsNode = xRootNode->FirstChild("routing")->FirstChild("goals");
-     if (xGoalsNode) {
-          // ---- parse goals from inifile
-          for (TiXmlElement* e = xGoalsNode->FirstChildElement("goal"); e;
-               e = e->NextSiblingElement("goal")) {
-               Goal * goal = parseGoalNode(e);
-               if (goal) {
+    //load goals and routes
+    TiXmlNode * xGoalsNode = xRootNode->FirstChild("routing")->FirstChild("goals");
+    if(xGoalsNode) {
+        // ---- parse goals from inifile
+        for(TiXmlElement * e = xGoalsNode->FirstChildElement("goal"); e;
+            e                = e->NextSiblingElement("goal")) {
+            Goal * goal = parseGoalNode(e);
+            if(goal) {
+                building->AddGoal(goal);
+                _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
+            }
+        }
+
+        // ---- parse waiting areas from inifile
+        for(TiXmlElement * e = xGoalsNode->FirstChildElement("waiting_area"); e;
+            e                = e->NextSiblingElement("waiting_area")) {
+            Goal * goal = parseWaitingAreaNode(e);
+            if(goal) {
+                building->AddGoal(goal);
+                _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
+            }
+        }
+        // ---- parse goals/waiting areas from external file
+        TiXmlNode * xGoalsNodeFile = xGoalsNode->FirstChild("file");
+        if(xGoalsNodeFile) {
+            fs::path p(_configuration->GetProjectRootDir());
+            std::string goalFilename = xGoalsNodeFile->FirstChild()->ValueStr();
+            p /= goalFilename;
+            goalFilename = p.string();
+            Log->Write("INFO:\tGoal file <%s> will be parsed", goalFilename.c_str());
+            TiXmlDocument docGoal(goalFilename);
+            if(!docGoal.LoadFile()) {
+                Log->Write("ERROR: \t%s", docGoal.ErrorDesc());
+                Log->Write("ERROR: \t could not parse the goal file.");
+                return false;
+            }
+            TiXmlElement * xRootNodeGoal = docGoal.RootElement();
+            if(!xRootNodeGoal) {
+                Log->Write("ERROR:\tRoot element does not exist in goal file.");
+                return false;
+            }
+            if(xRootNodeGoal->ValueStr() != "JPScore") {
+                Log->Write("ERROR:\tParsing goal file. Root element value is not 'JPScore'.");
+                return false;
+            }
+            TiXmlNode * xGoal = xRootNodeGoal->FirstChild("goals");
+            if(!xGoal) {
+                Log->Write("ERROR:\tNo Goals in file found.");
+                return false;
+            }
+            for(TiXmlElement * e = xGoal->FirstChildElement("goal"); e;
+                e                = e->NextSiblingElement("goal")) {
+                Goal * goal = parseGoalNode(e);
+                if(goal) {
                     building->AddGoal(goal);
                     _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
-               }
+                }
+            }
 
-          }
-
-          // ---- parse waiting areas from inifile
-          for (TiXmlElement* e = xGoalsNode->FirstChildElement("waiting_area"); e;
-               e = e->NextSiblingElement("waiting_area")) {
-               Goal * goal = parseWaitingAreaNode(e);
-               if (goal) {
+            for(TiXmlElement * e = xGoal->FirstChildElement("waiting_area"); e;
+                e                = e->NextSiblingElement("waiting_area")) {
+                Goal * goal = parseWaitingAreaNode(e);
+                if(goal) {
                     building->AddGoal(goal);
                     _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
-               }
-
-          }
-          // ---- parse goals/waiting areas from external file
-          TiXmlNode* xGoalsNodeFile = xGoalsNode->FirstChild("file");
-          if(xGoalsNodeFile)
-          {
-               fs::path p(_configuration->GetProjectRootDir());
-               std::string goalFilename = xGoalsNodeFile->FirstChild()->ValueStr();
-               p /= goalFilename;
-               goalFilename = p.string();
-               Log->Write("INFO:\tGoal file <%s> will be parsed", goalFilename.c_str());
-               TiXmlDocument docGoal(goalFilename);
-               if (!docGoal.LoadFile()) {
-                    Log->Write("ERROR: \t%s", docGoal.ErrorDesc());
-                    Log->Write("ERROR: \t could not parse the goal file.");
-                    return false;
-               }
-               TiXmlElement* xRootNodeGoal = docGoal.RootElement();
-               if (!xRootNodeGoal) {
-                    Log->Write("ERROR:\tRoot element does not exist in goal file.");
-                    return false;
-               }
-               if (xRootNodeGoal->ValueStr() != "JPScore") {
-                    Log->Write("ERROR:\tParsing goal file. Root element value is not 'JPScore'.");
-                    return false;
-               }
-               TiXmlNode* xGoal = xRootNodeGoal->FirstChild("goals");
-               if (!xGoal) {
-                    Log->Write("ERROR:\tNo Goals in file found.");
-                    return false;
-               }
-               for (TiXmlElement* e = xGoal->FirstChildElement("goal"); e;
-                    e = e->NextSiblingElement("goal")) {
-                    Goal * goal = parseGoalNode(e);
-                    if (goal) {
-                         building->AddGoal(goal);
-                         _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
-                    }
-               }
-
-               for (TiXmlElement* e = xGoal->FirstChildElement("waiting_area"); e;
-                    e = e->NextSiblingElement("waiting_area")) {
-                    Goal * goal = parseWaitingAreaNode(e);
-                    if (goal) {
-                         building->AddGoal(goal);
-                         _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
-                    }
-               }
+                }
+            }
 
 
-          }
-          else
-               Log->Write("INFO:\tGoal file not parsed");
-     } //xgoalsNode
+        } else
+            Log->Write("INFO:\tGoal file not parsed");
+    } //xgoalsNode
 
-     Log->Write("INFO:\tdone with loading extra routing information");
-     return true;
+    Log->Write("INFO:\tdone with loading extra routing information");
+    return true;
 }
 
-bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building* building)
+bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building * building)
 {
-     bool result = false;// this return value is not needed.
+    bool result = false; // this return value is not needed.
                          // maybe in the future it might be...
-     std::string str("INFO:\tParsed Door: \n");
-     char tmp[100];
-     sprintf(tmp, "\t>> ID: %d\n", id);
-     str.append(tmp);
-     //------------------ state
-     std::string stateStr = xmltoa(xDoor->Attribute("state"), "open");
-     DoorState state = StringToDoorState(stateStr);
-     //store transition in a map and call getTransition/getCrossing
-     switch (state) {
-     case DoorState::OPEN:
-          building->GetTransition(id)->Open();
-          break;
-     case DoorState::CLOSE:
-          building->GetTransition(id)->Close();
-          break;
-     case DoorState::TEMP_CLOSE:
-          building->GetTransition(id)->TempClose();
-          break;
-     case DoorState::Error:
-          Log->Write("WARNING:\t Unknown door state: <%s>. open, close or temp_close. Default: open",
-                    stateStr.c_str());
-          building->GetTransition(id)->Open();
-          break;
-     }
+    std::string str("INFO:\tParsed Door: \n");
+    char tmp[100];
+    sprintf(tmp, "\t>> ID: %d\n", id);
+    str.append(tmp);
+    //------------------ state
+    std::string stateStr = xmltoa(xDoor->Attribute("state"), "open");
+    DoorState state      = StringToDoorState(stateStr);
+    //store transition in a map and call getTransition/getCrossing
+    switch(state) {
+        case DoorState::OPEN:
+            building->GetTransition(id)->Open();
+            break;
+        case DoorState::CLOSE:
+            building->GetTransition(id)->Close();
+            break;
+        case DoorState::TEMP_CLOSE:
+            building->GetTransition(id)->TempClose();
+            break;
+        case DoorState::Error:
+            Log->Write(
+                "WARNING:\t Unknown door state: <%s>. open, close or temp_close. Default: open",
+                stateStr.c_str());
+            building->GetTransition(id)->Open();
+            break;
+    }
 
-     sprintf(tmp, "\t>> state: %s\n", stateStr.c_str());
-     str.append(tmp);
-     //------------------ outflow
-     double outflow = xmltof(xDoor->Attribute("outflow"), -1.0);
-     if(outflow >= 0)
-     {
-          building->GetTransition(id)->SetOutflowRate(outflow);
-          sprintf(tmp, "\t>> ouflow: %.2f\n", outflow);
-          str.append(tmp);
-     }
-     //----------------- dt
-     double DT = xmltof(xDoor->Attribute("dt"), -1.0);
-     if(DT >= 0)
-     {
-          building->GetTransition(id)->SetDT(DT);
-     }
-     //----------------- dn
-     int DN = xmltof(xDoor->Attribute("dn"), -1.0);
-     if(DN >= 0)
-     {
-          building->GetTransition(id)->SetDN(DN);
-          sprintf(tmp, "\t>> dn: %d\n", DN);
-          str.append(tmp);
-     }
+    sprintf(tmp, "\t>> state: %s\n", stateStr.c_str());
+    str.append(tmp);
+    //------------------ outflow
+    double outflow = xmltof(xDoor->Attribute("outflow"), -1.0);
+    if(outflow >= 0) {
+        building->GetTransition(id)->SetOutflowRate(outflow);
+        sprintf(tmp, "\t>> ouflow: %.2f\n", outflow);
+        str.append(tmp);
+    }
+    //----------------- dt
+    double DT = xmltof(xDoor->Attribute("dt"), -1.0);
+    if(DT >= 0) {
+        building->GetTransition(id)->SetDT(DT);
+    }
+    //----------------- dn
+    int DN = xmltof(xDoor->Attribute("dn"), -1.0);
+    if(DN >= 0) {
+        building->GetTransition(id)->SetDN(DN);
+        sprintf(tmp, "\t>> dn: %d\n", DN);
+        str.append(tmp);
+    }
 
-     //------------------ max door usage
-     int mdu = xmltof(xDoor->Attribute("max_agents"), -1);
-     if(mdu >= 0)
-     {
-          building->GetTransition(id)->SetMaxDoorUsage(mdu);
-          sprintf(tmp, "\t>> max_agents: %d\n", mdu);
-          str.append(tmp);
-     }
-     //-----------------
-     Log->Write(str);
-     result = true;
-     return result;
+    //------------------ max door usage
+    int mdu = xmltof(xDoor->Attribute("max_agents"), -1);
+    if(mdu >= 0) {
+        building->GetTransition(id)->SetMaxDoorUsage(mdu);
+        sprintf(tmp, "\t>> max_agents: %d\n", mdu);
+        str.append(tmp);
+    }
+    //-----------------
+    Log->Write(str);
+    result = true;
+    return result;
 }
 
-bool GeoFileParser::LoadTrafficInfo(Building* building)
+bool GeoFileParser::LoadTrafficInfo(Building * building)
 {
+    Log->Write("INFO:\tLoading the traffic info");
 
-     Log->Write("INFO:\tLoading the traffic info");
+    TiXmlDocument doc(_configuration->GetProjectFile().string());
+    if(!doc.LoadFile()) {
+        Log->Write("ERROR: \t%s", doc.ErrorDesc());
+        Log->Write("ERROR: \t could not parse the project file");
+        return false;
+    }
 
-     TiXmlDocument doc(_configuration->GetProjectFile().string());
-     if (!doc.LoadFile()) {
-          Log->Write("ERROR: \t%s", doc.ErrorDesc());
-          Log->Write("ERROR: \t could not parse the project file");
-          return false;
-     }
+    TiXmlNode * xRootNode = doc.RootElement()->FirstChild("traffic_constraints");
+    if(!xRootNode) {
+        Log->Write("WARNING:\tcould not find any traffic information");
+        return true;
+    }
 
-     TiXmlNode* xRootNode = doc.RootElement()->FirstChild("traffic_constraints");
-     if (!xRootNode) {
-          Log->Write("WARNING:\tcould not find any traffic information");
-          return true;
-     }
+    //processing the rooms node
+    TiXmlNode * xRoomsNode = xRootNode->FirstChild("rooms");
+    if(xRoomsNode)
+        for(TiXmlElement * xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
+            xRoom                = xRoom->NextSiblingElement("room")) {
+            double id         = xmltof(xRoom->Attribute("room_id"), -1);
+            std::string state = xmltoa(xRoom->Attribute("state"), "good");
+            RoomState status  = (state == "good") ? ROOM_CLEAN : ROOM_SMOKED;
+            building->GetRoom(id)->SetState(status);
+        }
+    else
+        Log->Write("Info:\t  no room info found in inifile");
 
-     //processing the rooms node
-     TiXmlNode* xRoomsNode = xRootNode->FirstChild("rooms");
-     if (xRoomsNode)
-          for (TiXmlElement* xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
-               xRoom = xRoom->NextSiblingElement("room")) {
+    //processing the doors node
+    TiXmlNode * xDoorsNode = xRootNode->FirstChild("doors");
+    if(xDoorsNode) {
+        bool res_parseDoor;
+        for(TiXmlElement * xDoor = xDoorsNode->FirstChildElement("door"); xDoor;
+            xDoor                = xDoor->NextSiblingElement("door")) {
+            int id = xmltoi(xDoor->Attribute("trans_id"), -1);
+            if(id != -1 && building->GetTransition(id)) {
+                res_parseDoor = parseDoorNode(xDoor, id, building);
+                if(!res_parseDoor)
+                    return false;
+            }
+        } //for xDoor
+    } else
+        Log->Write("Info:\t  no door info found in inifile");
+    // processing file node
+    TiXmlNode * xFileNode = xRootNode->FirstChild("file");
+    if(xFileNode) {
+        fs::path p(_configuration->GetProjectRootDir());
+        std::string trafficFilename = xFileNode->FirstChild()->ValueStr();
+        p /= trafficFilename;
+        trafficFilename = p.string();
+        Log->Write("Info:\t  traffic file found <%s>", trafficFilename.c_str());
+        TiXmlDocument docTraffic(trafficFilename);
+        if(!docTraffic.LoadFile()) {
+            Log->Write("ERROR: \t%s", docTraffic.ErrorDesc());
+            Log->Write("ERROR: \t could not parse the traffic file.");
+            return false;
+        }
+        TiXmlElement * xRootNodeTraffic = docTraffic.RootElement();
+        if(!xRootNodeTraffic) {
+            Log->Write("ERROR:\tRoot element does not exist.");
+            return false;
+        }
 
-               double id = xmltof(xRoom->Attribute("room_id"), -1);
-               std::string state = xmltoa(xRoom->Attribute("state"), "good");
-               RoomState status = (state=="good") ? ROOM_CLEAN : ROOM_SMOKED;
-               building->GetRoom(id)->SetState(status);
-          }
-     else
-          Log->Write("Info:\t  no room info found in inifile");
-
-     //processing the doors node
-     TiXmlNode* xDoorsNode = xRootNode->FirstChild("doors");
-     if(xDoorsNode)
-     {
-          bool res_parseDoor;
-          for (TiXmlElement* xDoor = xDoorsNode->FirstChildElement("door"); xDoor;
-               xDoor = xDoor->NextSiblingElement("door")) {
-               int id = xmltoi(xDoor->Attribute("trans_id"), -1);
-               if (id!=-1 && building->GetTransition(id)) {
+        if(xRootNodeTraffic->ValueStr() != "JPScore") {
+            Log->Write("ERROR:\tRoot element value is not 'JPScore'.");
+            return false;
+        }
+        TiXmlNode * xTraffic = xRootNodeTraffic->FirstChild("traffic_constraints");
+        if(!xTraffic) {
+            Log->Write("ERROR:\tNo traffic constraints in file found.");
+            return false;
+        }
+        TiXmlNode * xDoorsNodeF = xTraffic->FirstChild("doors");
+        if(xDoorsNodeF) {
+            bool res_parseDoor;
+            for(TiXmlElement * xDoor = xDoorsNodeF->FirstChildElement("door"); xDoor;
+                xDoor                = xDoor->NextSiblingElement("door")) {
+                int id = xmltoi(xDoor->Attribute("trans_id"), -1);
+                if(id != -1 && building->GetTransition(id)) {
                     res_parseDoor = parseDoorNode(xDoor, id, building);
                     if(!res_parseDoor)
-                         return false;
-               }
-          }//for xDoor
-     }
-     else
-          Log->Write("Info:\t  no door info found in inifile");
-     // processing file node
-     TiXmlNode* xFileNode = xRootNode->FirstChild("file");
-     if(xFileNode)
-     {
-          fs::path p(_configuration->GetProjectRootDir());
-          std::string trafficFilename = xFileNode->FirstChild()->ValueStr();
-          p /= trafficFilename;
-          trafficFilename = p.string();
-          Log->Write("Info:\t  traffic file found <%s>", trafficFilename.c_str());
-          TiXmlDocument docTraffic(trafficFilename);
-          if (!docTraffic.LoadFile()) {
-               Log->Write("ERROR: \t%s", docTraffic.ErrorDesc());
-               Log->Write("ERROR: \t could not parse the traffic file.");
-               return false;
-          }
-          TiXmlElement* xRootNodeTraffic = docTraffic.RootElement();
-          if (!xRootNodeTraffic) {
-               Log->Write("ERROR:\tRoot element does not exist.");
-               return false;
-          }
+                        return false;
+                }
+            } //for xDoor
+        } else
+            Log->Write("Info:\t  no door info found in traffic file");
+    } else
+        Log->Write("Info:\t  no traffic file found.");
 
-          if (xRootNodeTraffic->ValueStr() != "JPScore") {
-               Log->Write("ERROR:\tRoot element value is not 'JPScore'.");
-               return false;
-          }
-          TiXmlNode* xTraffic = xRootNodeTraffic->FirstChild("traffic_constraints");
-          if (!xTraffic) {
-               Log->Write("ERROR:\tNo traffic constraints in file found.");
-               return false;
-          }
-          TiXmlNode* xDoorsNodeF = xTraffic->FirstChild("doors");
-          if(xDoorsNodeF)
-          {
-               bool res_parseDoor;
-               for (TiXmlElement* xDoor = xDoorsNodeF->FirstChildElement("door"); xDoor;
-                    xDoor = xDoor->NextSiblingElement("door")) {
-                    int id = xmltoi(xDoor->Attribute("trans_id"), -1);
-                    if (id!=-1 && building->GetTransition(id)) {
-                         res_parseDoor = parseDoorNode(xDoor, id, building);
-                         if(!res_parseDoor)
-                              return false;
-                    }
-               }//for xDoor
-          }
-          else
-               Log->Write("Info:\t  no door info found in traffic file");
-     }
-     else
-          Log->Write("Info:\t  no traffic file found.");
-
-     Log->Write("INFO:\tDone with loading traffic info file");
-     return true;
+    Log->Write("INFO:\tDone with loading traffic info file");
+    return true;
 }
 
-Transition* GeoFileParser::parseTransitionNode(TiXmlElement * xTrans, Building * building)
+Transition * GeoFileParser::parseTransitionNode(TiXmlElement * xTrans, Building * building)
 {
-     int id = xmltoi(xTrans->Attribute("id"), -1);
-     // string caption = "door " + id;
-     std::string caption = "door ";
-     caption += std::to_string(id);
-     caption = xmltoa(xTrans->Attribute("caption"), caption.c_str());
-     int room1_id = xmltoi(xTrans->Attribute("room1_id"), -1);
-     int room2_id = xmltoi(xTrans->Attribute("room2_id"), -1);
-     int subroom1_id = xmltoi(xTrans->Attribute("subroom1_id"), -1);
-     int subroom2_id = xmltoi(xTrans->Attribute("subroom2_id"), -1);
-     std::string type = xmltoa(xTrans->Attribute("type"), "normal");
+    int id = xmltoi(xTrans->Attribute("id"), -1);
+    // string caption = "door " + id;
+    std::string caption = "door ";
+    caption += std::to_string(id);
+    caption          = xmltoa(xTrans->Attribute("caption"), caption.c_str());
+    int room1_id     = xmltoi(xTrans->Attribute("room1_id"), -1);
+    int room2_id     = xmltoi(xTrans->Attribute("room2_id"), -1);
+    int subroom1_id  = xmltoi(xTrans->Attribute("subroom1_id"), -1);
+    int subroom2_id  = xmltoi(xTrans->Attribute("subroom2_id"), -1);
+    std::string type = xmltoa(xTrans->Attribute("type"), "normal");
 
-     double x1 = xmltof(xTrans->FirstChildElement("vertex")->Attribute("px"));
-     double y1 = xmltof(xTrans->FirstChildElement("vertex")->Attribute("py"));
+    double x1 = xmltof(xTrans->FirstChildElement("vertex")->Attribute("px"));
+    double y1 = xmltof(xTrans->FirstChildElement("vertex")->Attribute("py"));
 
-     double x2 = xmltof(xTrans->LastChild("vertex")->ToElement()->Attribute("px"));
-     double y2 = xmltof(xTrans->LastChild("vertex")->ToElement()->Attribute("py"));
+    double x2 = xmltof(xTrans->LastChild("vertex")->ToElement()->Attribute("px"));
+    double y2 = xmltof(xTrans->LastChild("vertex")->ToElement()->Attribute("py"));
 
-     Transition* t = new Transition();
-     t->SetID(id);
-     t->SetCaption(caption);
-     t->SetPoint1(Point(x1, y1));
-     t->SetPoint2(Point(x2, y2));
-     t->SetType(type);
-     //--- danger area
-     if (room1_id!=-1 && subroom1_id!=-1) {
-          //Room* room = _rooms[room1_id];
-          Room* room = building->GetRoom(room1_id);
-          SubRoom* subroom = room->GetSubRoom(subroom1_id);
+    Transition * t = new Transition();
+    t->SetID(id);
+    t->SetCaption(caption);
+    t->SetPoint1(Point(x1, y1));
+    t->SetPoint2(Point(x2, y2));
+    t->SetType(type);
+    //--- danger area
+    if(room1_id != -1 && subroom1_id != -1) {
+        //Room* room = _rooms[room1_id];
+        Room * room       = building->GetRoom(room1_id);
+        SubRoom * subroom = room->GetSubRoom(subroom1_id);
 
-          //subroom->AddGoalID(t->GetUniqueID());
-          //MPI
-          room->AddTransitionID(t->GetUniqueID());
-          t->SetRoom1(room);
-          t->SetSubRoom1(subroom);
+        //subroom->AddGoalID(t->GetUniqueID());
+        //MPI
+        room->AddTransitionID(t->GetUniqueID());
+        t->SetRoom1(room);
+        t->SetSubRoom1(subroom);
 
-          //new implementation
-          subroom->AddTransition(t);
-     }
-     if (room2_id!=-1 && subroom2_id!=-1) {
-          Room* room = building->GetRoom(room2_id);
-          SubRoom* subroom = room->GetSubRoom(subroom2_id);
-          //subroom->AddGoalID(t->GetUniqueID());
-          //MPI
-          room->AddTransitionID(t->GetUniqueID());
-          t->SetRoom2(room);
-          t->SetSubRoom2(subroom);
+        //new implementation
+        subroom->AddTransition(t);
+    }
+    if(room2_id != -1 && subroom2_id != -1) {
+        Room * room       = building->GetRoom(room2_id);
+        SubRoom * subroom = room->GetSubRoom(subroom2_id);
+        //subroom->AddGoalID(t->GetUniqueID());
+        //MPI
+        room->AddTransitionID(t->GetUniqueID());
+        t->SetRoom2(room);
+        t->SetSubRoom2(subroom);
 
-          //new implementation
-          subroom->AddTransition(t);
-     }
-     return t;
+        //new implementation
+        subroom->AddTransition(t);
+    }
+    return t;
 }
 
-Goal* GeoFileParser::parseGoalNode(TiXmlElement * e)
+Goal * GeoFileParser::parseGoalNode(TiXmlElement * e)
 {
-     Log->Write("INFO:\tLoading goal");
-     int id = xmltoi(e->Attribute("id"), -1);
-     int isFinal = std::string(e->Attribute("final"))=="true" ? true : false;
-     std::string caption = xmltoa(e->Attribute("caption"), "-1");
-     int room_id = xmltoi(e->Attribute("room_id"), -1);
-     int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
-     Log->Write("INFO:\t  Goal id: %d", id);
-     Log->Write("INFO:\t  Goal caption: %s", caption.c_str());
-     Log->Write("INFO:\t  Goal room_id: %d", room_id);
-     Log->Write("INFO:\t  Goal subroom_id: %d", subroom_id);
-     Goal* goal = new Goal();
-     goal->SetId(id);
-     goal->SetCaption(caption);
-     goal->SetIsFinalGoal(isFinal);
-     goal->SetRoomID(room_id);
-     goal->SetSubRoomID(subroom_id);
+    Log->Write("INFO:\tLoading goal");
+    int id              = xmltoi(e->Attribute("id"), -1);
+    int isFinal         = std::string(e->Attribute("final")) == "true" ? true : false;
+    std::string caption = xmltoa(e->Attribute("caption"), "-1");
+    int room_id         = xmltoi(e->Attribute("room_id"), -1);
+    int subroom_id      = xmltoi(e->Attribute("subroom_id"), -1);
+    Log->Write("INFO:\t  Goal id: %d", id);
+    Log->Write("INFO:\t  Goal caption: %s", caption.c_str());
+    Log->Write("INFO:\t  Goal room_id: %d", room_id);
+    Log->Write("INFO:\t  Goal subroom_id: %d", subroom_id);
+    Goal * goal = new Goal();
+    goal->SetId(id);
+    goal->SetCaption(caption);
+    goal->SetIsFinalGoal(isFinal);
+    goal->SetRoomID(room_id);
+    goal->SetSubRoomID(subroom_id);
 
-     //looking for polygons (walls)
-     for (TiXmlElement* xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
-          xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
+    //looking for polygons (walls)
+    for(TiXmlElement * xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
+        xPolyVertices                = xPolyVertices->NextSiblingElement("polygon")) {
+        for(TiXmlElement * xVertex = xPolyVertices->FirstChildElement("vertex");
+            xVertex && xVertex != xPolyVertices->LastChild("vertex");
+            xVertex = xVertex->NextSiblingElement("vertex")) {
+            double x1 = xmltof(xVertex->Attribute("px"));
+            double y1 = xmltof(xVertex->Attribute("py"));
+            double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
+            double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
+            goal->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
+        }
+    }
 
-          for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
-                    "vertex");
-               xVertex && xVertex!=xPolyVertices->LastChild("vertex");
-               xVertex = xVertex->NextSiblingElement("vertex")) {
-
-               double x1 = xmltof(xVertex->Attribute("px"));
-               double y1 = xmltof(xVertex->Attribute("py"));
-               double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
-               double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
-               goal->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
-          }
-     }
-
-     if (!goal->ConvertLineToPoly())
-     {
-          Log->Write("ERROR:\t parsing polygon of goal %d", id);
-          return nullptr;
-     }
-     Log->Write("INFO:\t  finished parsing goal %d", id);
-     return goal;
+    if(!goal->ConvertLineToPoly()) {
+        Log->Write("ERROR:\t parsing polygon of goal %d", id);
+        return nullptr;
+    }
+    Log->Write("INFO:\t  finished parsing goal %d", id);
+    return goal;
 }
 
-Goal* GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
+Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
 {
-     Log->Write("INFO:\tLoading Waiting Area");
+    Log->Write("INFO:\tLoading Waiting Area");
 
-     WaitingArea* wa = new WaitingArea();
+    WaitingArea * wa = new WaitingArea();
 
-     // Read mandatory values and check for valid values, on fail write error
-     // Read id and check for correct value
-     if(const char* attribute = e->Attribute("id"); attribute) {
-          if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
-               wa->SetId(value);
-          } else {
-               Log->Write("ERROR:\t  waiting area id set but not an integer");
-               delete wa;
-               return nullptr;
-          }
-     } else {
-          Log->Write("ERROR:\t  waiting area id required");
-          delete wa;
-          return nullptr;
-     }
+    // Read mandatory values and check for valid values, on fail write error
+    // Read id and check for correct value
+    if(const char * attribute = e->Attribute("id"); attribute) {
+        if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
+            wa->SetId(value);
+        } else {
+            Log->Write("ERROR:\t  waiting area id set but not an integer");
+            delete wa;
+            return nullptr;
+        }
+    } else {
+        Log->Write("ERROR:\t  waiting area id required");
+        delete wa;
+        return nullptr;
+    }
 
-     // Read room_id and check for correct value
-     if(const char* attribute = e->Attribute("room_id"); attribute) {
-          if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
-               wa->SetRoomID(value);
-          } else {
-               Log->Write("ERROR:\t  waiting area %d: room_id set but not an integer", wa->GetId());
-               delete wa;
-               return nullptr;
-          }
-     } else {
-          Log->Write("ERROR:\t  waiting area %d: room_id required", wa->GetId());
-          delete wa;
-          return nullptr;
-     }
+    // Read room_id and check for correct value
+    if(const char * attribute = e->Attribute("room_id"); attribute) {
+        if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
+            wa->SetRoomID(value);
+        } else {
+            Log->Write("ERROR:\t  waiting area %d: room_id set but not an integer", wa->GetId());
+            delete wa;
+            return nullptr;
+        }
+    } else {
+        Log->Write("ERROR:\t  waiting area %d: room_id required", wa->GetId());
+        delete wa;
+        return nullptr;
+    }
 
-     // Read subroom_id and check for correct value
-     if(const char* attribute = e->Attribute("subroom_id"); attribute) {
-          if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
-               wa->SetSubRoomID(value);
-          } else {
-               Log->Write("ERROR:\t  waiting area %d: subroom_id set but not an integer", wa->GetId());
-               delete wa;
-               return nullptr;
-          }
-     } else {
-          Log->Write("ERROR:\t  waiting area %d: subroom_id required", wa->GetId());
-          delete wa;
-          return nullptr;
-     }
+    // Read subroom_id and check for correct value
+    if(const char * attribute = e->Attribute("subroom_id"); attribute) {
+        if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
+            wa->SetSubRoomID(value);
+        } else {
+            Log->Write("ERROR:\t  waiting area %d: subroom_id set but not an integer", wa->GetId());
+            delete wa;
+            return nullptr;
+        }
+    } else {
+        Log->Write("ERROR:\t  waiting area %d: subroom_id required", wa->GetId());
+        delete wa;
+        return nullptr;
+    }
 
-     // Read caption and check if correct value
-     if(const char* attribute = e->Attribute("caption"); attribute) {
-          if (std::string value = xmltoa(attribute, ""); !value.empty()) {
-               wa->SetCaption(value);
-          }else{
-               wa->SetCaption("WA " + std::to_string(wa->GetId()));
-          }
-     }
+    // Read caption and check if correct value
+    if(const char * attribute = e->Attribute("caption"); attribute) {
+        if(std::string value = xmltoa(attribute, ""); !value.empty()) {
+            wa->SetCaption(value);
+        } else {
+            wa->SetCaption("WA " + std::to_string(wa->GetId()));
+        }
+    }
 
-     Log->Write("INFO:\t  Goal id: %d", wa->GetId());
-     Log->Write("INFO:\t  Goal caption: %s", wa->GetCaption().c_str());
-     Log->Write("INFO:\t  Goal room_id: %d", wa->GetRoomID());
-     Log->Write("INFO:\t  Goal subroom_id: %d", wa->GetSubRoomID());
+    Log->Write("INFO:\t  Goal id: %d", wa->GetId());
+    Log->Write("INFO:\t  Goal caption: %s", wa->GetCaption().c_str());
+    Log->Write("INFO:\t  Goal room_id: %d", wa->GetRoomID());
+    Log->Write("INFO:\t  Goal subroom_id: %d", wa->GetSubRoomID());
 
-     // Read optional values and check for valid values, on fail write error
-     // Read min_peds and check if correct value
-     if(const char* attribute = e->Attribute("min_peds"); attribute) {
-          if (int value = xmltoi(attribute, -1); value>0 && attribute == std::to_string(value)) {
-               wa->SetMinNumPed(value);
-          } else {
-               Log->Write("WARNING:\t  waiting area %d: input for min_peds "
-                          "should be positive integer.", wa->GetId());
-          }
-     }
+    // Read optional values and check for valid values, on fail write error
+    // Read min_peds and check if correct value
+    if(const char * attribute = e->Attribute("min_peds"); attribute) {
+        if(int value = xmltoi(attribute, -1); value > 0 && attribute == std::to_string(value)) {
+            wa->SetMinNumPed(value);
+        } else {
+            Log->Write(
+                "WARNING:\t  waiting area %d: input for min_peds "
+                "should be positive integer.",
+                wa->GetId());
+        }
+    }
 
-     // Read max_peds and check if correct value
-     if(const char* attribute = e->Attribute("max_peds"); attribute) {
-          if (int value = xmltoi(attribute, -1); value>0 && attribute == std::to_string(value)) {
-               wa->SetMaxNumPed(value);
-          }else {
-               Log->Write("WARNING:\t  waiting area %d: input for max_peds "
-                          "should be positive integer.", wa->GetId());
-          }
-     }
+    // Read max_peds and check if correct value
+    if(const char * attribute = e->Attribute("max_peds"); attribute) {
+        if(int value = xmltoi(attribute, -1); value > 0 && attribute == std::to_string(value)) {
+            wa->SetMaxNumPed(value);
+        } else {
+            Log->Write(
+                "WARNING:\t  waiting area %d: input for max_peds "
+                "should be positive integer.",
+                wa->GetId());
+        }
+    }
 
-     // Read waiting_time and check if correct value
-     if(const char* attribute = e->Attribute("waiting_time"); attribute) {
-          if (int value = xmltoi(attribute, -1); value>=0 && attribute == std::to_string(value)) {
-               wa->SetWaitingTime(value);
-          }else {
-               Log->Write("WARNING:\t  waiting area %d: input for waiting_time "
-                          "should be positive integer.", wa->GetId());
-          }
-     }
+    // Read waiting_time and check if correct value
+    if(const char * attribute = e->Attribute("waiting_time"); attribute) {
+        if(int value = xmltoi(attribute, -1); value >= 0 && attribute == std::to_string(value)) {
+            wa->SetWaitingTime(value);
+        } else {
+            Log->Write(
+                "WARNING:\t  waiting area %d: input for waiting_time "
+                "should be positive integer.",
+                wa->GetId());
+        }
+    }
 
-     // Read transition_id and check if correct value
-     if(const char* attribute = e->Attribute("transition_id"); attribute) {
-          if (int value = xmltoi(attribute, -1); value>-1 && attribute == std::to_string(value)) {
-               wa->SetTransitionID(value);
-          }else {
-               Log->Write("WARNING:\t  waiting area %d: input for transition_id "
-                          "should be positive integer.", wa->GetId());
-          }
-     }
+    // Read transition_id and check if correct value
+    if(const char * attribute = e->Attribute("transition_id"); attribute) {
+        if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
+            wa->SetTransitionID(value);
+        } else {
+            Log->Write(
+                "WARNING:\t  waiting area %d: input for transition_id "
+                "should be positive integer.",
+                wa->GetId());
+        }
+    }
 
-     // Read is_open and check if correct value
-     if(const char* attribute = e->Attribute("is_open"); attribute) {
-          std::string in = xmltoa(attribute, "false");
-          std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+    // Read is_open and check if correct value
+    if(const char * attribute = e->Attribute("is_open"); attribute) {
+        std::string in = xmltoa(attribute, "false");
+        std::transform(in.begin(), in.end(), in.begin(), ::tolower);
 
-          if (in == "false"){
-               wa->SetOpen(false);
-          } else if (in == "true"){
-               wa->SetOpen(true);
-          } else{
-               wa->SetOpen(true);
-               Log->Write("WARNING:\t  waiting area %d: input for is_open neither <true> nor <false>. "
-                          "Default <true> is used.", wa->GetId());
-          }
-     }
+        if(in == "false") {
+            wa->SetOpen(false);
+        } else if(in == "true") {
+            wa->SetOpen(true);
+        } else {
+            wa->SetOpen(true);
+            Log->Write(
+                "WARNING:\t  waiting area %d: input for is_open neither <true> nor <false>. "
+                "Default <true> is used.",
+                wa->GetId());
+        }
+    }
 
-     // Read global_timer and check if correct value
-     if(const char* attribute = e->Attribute("global_timer"); attribute) {
-          std::string in = xmltoa(attribute, "false");
-          std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+    // Read global_timer and check if correct value
+    if(const char * attribute = e->Attribute("global_timer"); attribute) {
+        std::string in = xmltoa(attribute, "false");
+        std::transform(in.begin(), in.end(), in.begin(), ::tolower);
 
-          if (in == "false"){
-               wa->SetGlobalTimer(false);
-          } else if (in == "true"){
-               wa->SetGlobalTimer(true);
-          } else{
-               wa->SetGlobalTimer(false);
-               Log->Write("WARNING:\t  waiting area %d: input for global_timer neither <true> nor <false>. "
-                          "Default <false> is used.", wa->GetId());
-          }
-     }
+        if(in == "false") {
+            wa->SetGlobalTimer(false);
+        } else if(in == "true") {
+            wa->SetGlobalTimer(true);
+        } else {
+            wa->SetGlobalTimer(false);
+            Log->Write(
+                "WARNING:\t  waiting area %d: input for global_timer neither <true> nor <false>. "
+                "Default <false> is used.",
+                wa->GetId());
+        }
+    }
 
-     // Additional checks:
-     const bool waitPed = (wa->GetMinNumPed()  > 0 && wa->GetMaxNumPed() > 0 && wa->GetWaitingTime() >= 0.);
-     const bool waitDoor = (wa->GetTransitionID() > 0);
+    // Additional checks:
+    const bool waitPed =
+        (wa->GetMinNumPed() > 0 && wa->GetMaxNumPed() > 0 && wa->GetWaitingTime() >= 0.);
+    const bool waitDoor = (wa->GetTransitionID() > 0);
 
-     // Either (minPed, maxPed, waitingTime) OR transitionID are set
-     if (!waitPed && !waitDoor){
-          Log->Write("ERROR:\t  waiting area %d: min_peds, max_peds, waiting_time, transition_id not set properly. "
-                     "Set either (min_peds, max_peds, waiting_time) or transition_id.", wa->GetId());
-          delete wa;
-          return nullptr;
-     }
+    // Either (minPed, maxPed, waitingTime) OR transitionID are set
+    if(!waitPed && !waitDoor) {
+        Log->Write(
+            "ERROR:\t  waiting area %d: min_peds, max_peds, waiting_time, transition_id not set "
+            "properly. "
+            "Set either (min_peds, max_peds, waiting_time) or transition_id.",
+            wa->GetId());
+        delete wa;
+        return nullptr;
+    }
 
-     // If (minPed, maxPed, waitingTime) AND transitionID are set only
-     // transitionID is considered
-     if (waitPed && waitDoor){
-          Log->Write("WARNING:\t  waiting area %d: min_peds, max_peds and waiting_time "
-                     "not considered since transition_id set", wa->GetId());
-     }
+    // If (minPed, maxPed, waitingTime) AND transitionID are set only
+    // transitionID is considered
+    if(waitPed && waitDoor) {
+        Log->Write(
+            "WARNING:\t  waiting area %d: min_peds, max_peds and waiting_time "
+            "not considered since transition_id set",
+            wa->GetId());
+    }
 
-     // Read the succeeding goals of waiting area
-     std::map<int, double> nextGoals;
+    // Read the succeeding goals of waiting area
+    std::map<int, double> nextGoals;
 
-     //looking for next_wa
-     for (TiXmlElement* nextWa = e->FirstChildElement("next_wa"); nextWa;
-          nextWa = nextWa->NextSiblingElement("next_wa")) {
-          int nextWaId = xmltoi(nextWa->Attribute("id"), std::numeric_limits<int>::min());
-          double nextWaP = xmltof(nextWa->Attribute("p"), std::numeric_limits<double>::min());
+    //looking for next_wa
+    for(TiXmlElement * nextWa = e->FirstChildElement("next_wa"); nextWa;
+        nextWa                = nextWa->NextSiblingElement("next_wa")) {
+        int nextWaId   = xmltoi(nextWa->Attribute("id"), std::numeric_limits<int>::min());
+        double nextWaP = xmltof(nextWa->Attribute("p"), std::numeric_limits<double>::min());
 
-          if (nextWaId == std::numeric_limits<int>::min() || nextWaP == std::numeric_limits<double>::min()){
-               Log->Write("ERROR:\t  check next_wa of WA  %d: id or p not set properly", wa->GetId());
-               delete wa;
-               return nullptr;
-          }
+        if(nextWaId == std::numeric_limits<int>::min() ||
+           nextWaP == std::numeric_limits<double>::min()) {
+            Log->Write("ERROR:\t  check next_wa of WA  %d: id or p not set properly", wa->GetId());
+            delete wa;
+            return nullptr;
+        }
 
-          if (nextWaId < -2){
-               Log->Write("ERROR:\t  check next_wa of WA  %d: id should be positive integer", wa->GetId());
-               delete wa;
-               return nullptr;
-          }
+        if(nextWaId < -2) {
+            Log->Write(
+                "ERROR:\t  check next_wa of WA  %d: id should be positive integer", wa->GetId());
+            delete wa;
+            return nullptr;
+        }
 
-          if (nextWaP <= 0. || nextWaP > 1.){
-               Log->Write("ERROR:\t  check next_wa of WA  %d: p should be in (0, 1]", wa->GetId());
-               delete wa;
-               return nullptr;
-          }
-          nextGoals.insert(std::pair<int, double>(nextWaId, nextWaP));
-     }
+        if(nextWaP <= 0. || nextWaP > 1.) {
+            Log->Write("ERROR:\t  check next_wa of WA  %d: p should be in (0, 1]", wa->GetId());
+            delete wa;
+            return nullptr;
+        }
+        nextGoals.insert(std::pair<int, double>(nextWaId, nextWaP));
+    }
 
-     if (!wa->SetNextGoals(nextGoals)){
-          Log->Write("ERROR:\t  check probabilities of next goal of WA  %d: sum of p over all next_wa ids != 1", wa->GetId());
-          delete wa;
-          return nullptr;
-     }
+    if(!wa->SetNextGoals(nextGoals)) {
+        Log->Write(
+            "ERROR:\t  check probabilities of next goal of WA  %d: sum of p over all next_wa ids "
+            "!= 1",
+            wa->GetId());
+        delete wa;
+        return nullptr;
+    }
 
-     //Read boundaries of waiting area
-     for (TiXmlElement* xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
-          xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
+    //Read boundaries of waiting area
+    for(TiXmlElement * xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
+        xPolyVertices                = xPolyVertices->NextSiblingElement("polygon")) {
+        for(TiXmlElement * xVertex = xPolyVertices->FirstChildElement("vertex");
+            xVertex && xVertex != xPolyVertices->LastChild("vertex");
+            xVertex = xVertex->NextSiblingElement("vertex")) {
+            double x1 = xmltof(xVertex->Attribute("px"));
+            double y1 = xmltof(xVertex->Attribute("py"));
+            double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
+            double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
+            wa->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
+        }
+    }
 
-          for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
-                    "vertex");
-               xVertex && xVertex!=xPolyVertices->LastChild("vertex");
-               xVertex = xVertex->NextSiblingElement("vertex")) {
+    // Check if boundaries area a valid polygon
+    if(!wa->ConvertLineToPoly()) {
+        Log->Write("ERROR:\t   parsing polygon of waiting area %d", wa->GetId());
+        delete wa;
+        return nullptr;
+    }
 
-               double x1 = xmltof(xVertex->Attribute("px"));
-               double y1 = xmltof(xVertex->Attribute("py"));
-               double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
-               double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
-               wa->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
-          }
-     }
+    Log->Write("INFO:\t  finished parsing waiting area %d", wa->GetId());
 
-     // Check if boundaries area a valid polygon
-     if (!wa->ConvertLineToPoly()){
-          Log->Write("ERROR:\t   parsing polygon of waiting area %d", wa->GetId());
-          delete wa;
-          return nullptr;
-     }
-
-     Log->Write("INFO:\t  finished parsing waiting area %d", wa->GetId());
-
-     return wa;
+    return wa;
 }
 
-bool GeoFileParser::LoadTrainInfo(Building* building)
+bool GeoFileParser::LoadTrainInfo(Building * building)
 {
-     Log->Write("--------\nINFO:\tLoading the train info");
+    Log->Write("--------\nINFO:\tLoading the train info");
 
-     TiXmlDocument doc(_configuration->GetProjectFile().string());
-     if (!doc.LoadFile()) {
-          Log->Write("ERROR: \t%s", doc.ErrorDesc());
-          Log->Write("ERROR: \t could not parse the project file");
-          return false;
-     }
-     TiXmlElement* xRootNode = doc.RootElement();
-     if (!xRootNode) {
-          Log->Write("ERROR:\tRoot element does not exist");
-          return false;
-     }
-     if (!xRootNode->FirstChild("train_constraints")) {
-          Log->Write("WARNING:\tNo train constraints were found. Continue.");
-     }
-     bool resTTT = true;
-     bool resType = true;
-     if(xRootNode->FirstChild("train_constraints"))
-     {
-          resTTT = LoadTrainTimetable(building, xRootNode);
-          resType = LoadTrainType(building, xRootNode);
-     }
+    TiXmlDocument doc(_configuration->GetProjectFile().string());
+    if(!doc.LoadFile()) {
+        Log->Write("ERROR: \t%s", doc.ErrorDesc());
+        Log->Write("ERROR: \t could not parse the project file");
+        return false;
+    }
+    TiXmlElement * xRootNode = doc.RootElement();
+    if(!xRootNode) {
+        Log->Write("ERROR:\tRoot element does not exist");
+        return false;
+    }
+    if(!xRootNode->FirstChild("train_constraints")) {
+        Log->Write("WARNING:\tNo train constraints were found. Continue.");
+    }
+    bool resTTT  = true;
+    bool resType = true;
+    if(xRootNode->FirstChild("train_constraints")) {
+        resTTT  = LoadTrainTimetable(building, xRootNode);
+        resType = LoadTrainType(building, xRootNode);
+    }
 
-     return (resTTT && resType);
+    return (resTTT && resType);
 }
-bool GeoFileParser::LoadTrainTimetable(Building* building, TiXmlElement * xRootNode)
+bool GeoFileParser::LoadTrainTimetable(Building * building, TiXmlElement * xRootNode)
 {
-     TiXmlNode* xTTTNode = xRootNode->FirstChild("train_constraints")->FirstChild("train_time_table");
-     std::string TTTFilename;
-     if(xTTTNode)
-     {
-          fs::path p(_configuration->GetProjectRootDir());
-          TTTFilename = xTTTNode->FirstChild()->ValueStr();
-          p /= TTTFilename;
-          TTTFilename = p.string();
-          Log->Write("INFO:\tTrain Timetable file <%s> will be parsed", TTTFilename.c_str());
-     }
-     else return true;
+    TiXmlNode * xTTTNode =
+        xRootNode->FirstChild("train_constraints")->FirstChild("train_time_table");
+    std::string TTTFilename;
+    if(xTTTNode) {
+        fs::path p(_configuration->GetProjectRootDir());
+        TTTFilename = xTTTNode->FirstChild()->ValueStr();
+        p /= TTTFilename;
+        TTTFilename = p.string();
+        Log->Write("INFO:\tTrain Timetable file <%s> will be parsed", TTTFilename.c_str());
+    } else
+        return true;
 
 
-     TiXmlDocument docTTT(TTTFilename);
-     if (!docTTT.LoadFile()) {
-          Log->Write("ERROR: \t%s", docTTT.ErrorDesc());
-          Log->Write("ERROR: \t could not parse the train timetable file.");
-          return false;
-     }
-     TiXmlElement* xTTT = docTTT.RootElement();
-     if (!xTTT) {
-          Log->Write("ERROR:\tRoot element does not exist in TTT file.");
-          return false;
-     }
-     if (xTTT->ValueStr() != "train_time_table") {
-          Log->Write("ERROR:\tParsing train timetable file. Root element value is not 'train_time_table'.");
-          return false;
-     }
-     for (TiXmlElement* e = xTTT->FirstChildElement("train"); e;
-                    e = e->NextSiblingElement("train")) {
-          std::shared_ptr<TrainTimeTable> TTT = parseTrainTimeTableNode(e);
+    TiXmlDocument docTTT(TTTFilename);
+    if(!docTTT.LoadFile()) {
+        Log->Write("ERROR: \t%s", docTTT.ErrorDesc());
+        Log->Write("ERROR: \t could not parse the train timetable file.");
+        return false;
+    }
+    TiXmlElement * xTTT = docTTT.RootElement();
+    if(!xTTT) {
+        Log->Write("ERROR:\tRoot element does not exist in TTT file.");
+        return false;
+    }
+    if(xTTT->ValueStr() != "train_time_table") {
+        Log->Write(
+            "ERROR:\tParsing train timetable file. Root element value is not 'train_time_table'.");
+        return false;
+    }
+    for(TiXmlElement * e = xTTT->FirstChildElement("train"); e;
+        e                = e->NextSiblingElement("train")) {
+        std::shared_ptr<TrainTimeTable> TTT = parseTrainTimeTableNode(e);
 
-          if (TTT) {
-               building->AddTrainTimeTable(TTT);
-          }
-     }
-     return true;
+        if(TTT) {
+            building->AddTrainTimeTable(TTT);
+        }
+    }
+    return true;
 }
-bool GeoFileParser::LoadTrainType(Building* building, TiXmlElement * xRootNode)
+bool GeoFileParser::LoadTrainType(Building * building, TiXmlElement * xRootNode)
 {
-     TiXmlNode* xTTNode = xRootNode->FirstChild("train_constraints")->FirstChild("train_types");
-     std::string TTFilename;
-     if(xTTNode)
-     {
-          fs::path p(_configuration->GetProjectRootDir());
-          TTFilename = xTTNode->FirstChild()->ValueStr();
-          p /= TTFilename;
-          TTFilename = p.string();
-          Log->Write("INFO:\tTrain Type file <%s> will be parsed", TTFilename.c_str());
-     }
-     else return true;
+    TiXmlNode * xTTNode = xRootNode->FirstChild("train_constraints")->FirstChild("train_types");
+    std::string TTFilename;
+    if(xTTNode) {
+        fs::path p(_configuration->GetProjectRootDir());
+        TTFilename = xTTNode->FirstChild()->ValueStr();
+        p /= TTFilename;
+        TTFilename = p.string();
+        Log->Write("INFO:\tTrain Type file <%s> will be parsed", TTFilename.c_str());
+    } else
+        return true;
 
 
-     TiXmlDocument docTT(TTFilename);
-     if (!docTT.LoadFile()) {
-          Log->Write("ERROR: \t%s", docTT.ErrorDesc());
-          Log->Write("ERROR: \t could not parse the train type file.");
-          return false;
-     }
-     TiXmlElement* xTT = docTT.RootElement();
-     if (!xTT) {
-          Log->Write("ERROR:\tRoot element does not exist in TT file.");
-          return false;
-     }
-     if (xTT->ValueStr() != "train_type") {
-          Log->Write("ERROR:\tParsing train type file. Root element value is not 'train_type'.");
-          return false;
-     }
-     for (TiXmlElement* e = xTT->FirstChildElement("train"); e;
-                    e = e->NextSiblingElement("train")) {
-          std::shared_ptr<TrainType> TT = parseTrainTypeNode(e);
-          if (TT) {
-               building->AddTrainType(TT);
-          }
-     }
-     return true;
-
+    TiXmlDocument docTT(TTFilename);
+    if(!docTT.LoadFile()) {
+        Log->Write("ERROR: \t%s", docTT.ErrorDesc());
+        Log->Write("ERROR: \t could not parse the train type file.");
+        return false;
+    }
+    TiXmlElement * xTT = docTT.RootElement();
+    if(!xTT) {
+        Log->Write("ERROR:\tRoot element does not exist in TT file.");
+        return false;
+    }
+    if(xTT->ValueStr() != "train_type") {
+        Log->Write("ERROR:\tParsing train type file. Root element value is not 'train_type'.");
+        return false;
+    }
+    for(TiXmlElement * e = xTT->FirstChildElement("train"); e; e = e->NextSiblingElement("train")) {
+        std::shared_ptr<TrainType> TT = parseTrainTypeNode(e);
+        if(TT) {
+            building->AddTrainType(TT);
+        }
+    }
+    return true;
 }
 
 std::shared_ptr<TrainTimeTable> GeoFileParser::parseTrainTimeTableNode(TiXmlElement * e)
 {
-     Log->Write("INFO:\tLoading train time table NODE");
-     std::string caption = xmltoa(e->Attribute("caption"), "-1");
-     int id = xmltoi(e->Attribute("id"), -1);
-     std::string type = xmltoa(e->Attribute("type"), "-1");
-     int room_id = xmltoi(e->Attribute("room_id"), -1);
-     int subroom_id = xmltoi(e->Attribute("subroom_id"), -1);
-     int platform_id = xmltoi(e->Attribute("platform_id"), -1);
-     float track_start_x = xmltof(e->Attribute("track_start_x"), -1);
-     float track_start_y = xmltof(e->Attribute("track_start_y"), -1);
-     float track_end_x = xmltof(e->Attribute("track_end_x"), -1);
-     float track_end_y = xmltof(e->Attribute("track_end_y"), -1);
+    Log->Write("INFO:\tLoading train time table NODE");
+    std::string caption = xmltoa(e->Attribute("caption"), "-1");
+    int id              = xmltoi(e->Attribute("id"), -1);
+    std::string type    = xmltoa(e->Attribute("type"), "-1");
+    int room_id         = xmltoi(e->Attribute("room_id"), -1);
+    int subroom_id      = xmltoi(e->Attribute("subroom_id"), -1);
+    int platform_id     = xmltoi(e->Attribute("platform_id"), -1);
+    float track_start_x = xmltof(e->Attribute("track_start_x"), -1);
+    float track_start_y = xmltof(e->Attribute("track_start_y"), -1);
+    float track_end_x   = xmltof(e->Attribute("track_end_x"), -1);
+    float track_end_y   = xmltof(e->Attribute("track_end_y"), -1);
 
-     float train_start_x = xmltof(e->Attribute("train_start_x"),-1);
-     float train_start_y = xmltof(e->Attribute("train_start_y"), -1);
-     float train_end_x = xmltof(e->Attribute("train_end_x"), -1);
-     float train_end_y = xmltof(e->Attribute("train_end_y"), -1);
+    float train_start_x = xmltof(e->Attribute("train_start_x"), -1);
+    float train_start_y = xmltof(e->Attribute("train_start_y"), -1);
+    float train_end_x   = xmltof(e->Attribute("train_end_x"), -1);
+    float train_end_y   = xmltof(e->Attribute("train_end_y"), -1);
 
-     float arrival_time = xmltof(e->Attribute("arrival_time"), -1);
-     float departure_time = xmltof(e->Attribute("departure_time"), -1);
-     // @todo: check these values for correctness e.g. arrival < departure
-     Log->Write("INFO:\tTrain time table:");
-     Log->Write("INFO:\t   id: %d", id);
-     Log->Write("INFO:\t   type: %s", type.c_str());
-     Log->Write("INFO:\t   room_id: %d", room_id);
-     Log->Write("INFO:\t   subroom_id: %d", subroom_id);
-     Log->Write("INFO:\t   platform_id: %d", platform_id);
-     Log->Write("INFO:\t   track_start: [%.2f, %.2f]", track_start_x, track_start_y);
-     Log->Write("INFO:\t   track_end: [%.2f, %.2f]", track_end_x, track_end_y);
-     Log->Write("INFO:\t   arrival_time: %.2f", arrival_time);
-     Log->Write("INFO:\t   departure_time: %.2f", departure_time);
-     Point track_start(track_start_x, track_start_y);
-     Point track_end(track_end_x, track_end_y);
-     Point train_start(train_start_x, train_start_y);
-     Point train_end(train_end_x, train_end_y);
-     std::shared_ptr<TrainTimeTable> trainTimeTab = std::make_shared<TrainTimeTable>(
-          TrainTimeTable{
-                    id,
-                    type,
-                    room_id,
-                    subroom_id,
-                    arrival_time,
-                    departure_time,
-                    track_start,
-                    track_end,
-                    train_start,
-                    train_end,
-                    platform_id,
-                    false,
-                    false,
-                    });
+    float arrival_time   = xmltof(e->Attribute("arrival_time"), -1);
+    float departure_time = xmltof(e->Attribute("departure_time"), -1);
+    // @todo: check these values for correctness e.g. arrival < departure
+    Log->Write("INFO:\tTrain time table:");
+    Log->Write("INFO:\t   id: %d", id);
+    Log->Write("INFO:\t   type: %s", type.c_str());
+    Log->Write("INFO:\t   room_id: %d", room_id);
+    Log->Write("INFO:\t   subroom_id: %d", subroom_id);
+    Log->Write("INFO:\t   platform_id: %d", platform_id);
+    Log->Write("INFO:\t   track_start: [%.2f, %.2f]", track_start_x, track_start_y);
+    Log->Write("INFO:\t   track_end: [%.2f, %.2f]", track_end_x, track_end_y);
+    Log->Write("INFO:\t   arrival_time: %.2f", arrival_time);
+    Log->Write("INFO:\t   departure_time: %.2f", departure_time);
+    Point track_start(track_start_x, track_start_y);
+    Point track_end(track_end_x, track_end_y);
+    Point train_start(train_start_x, train_start_y);
+    Point train_end(train_end_x, train_end_y);
+    std::shared_ptr<TrainTimeTable> trainTimeTab = std::make_shared<TrainTimeTable>(TrainTimeTable{
+        id,
+        type,
+        room_id,
+        subroom_id,
+        arrival_time,
+        departure_time,
+        track_start,
+        track_end,
+        train_start,
+        train_end,
+        platform_id,
+        false,
+        false,
+    });
 
-     return trainTimeTab;
+    return trainTimeTab;
 }
 
 std::shared_ptr<TrainType> GeoFileParser::parseTrainTypeNode(TiXmlElement * e)
 {
-     Log->Write("INFO:\tLoading train type");
-     // int T_id = xmltoi(e->Attribute("id"), -1);
-     std::string type = xmltoa(e->Attribute("type"), "-1");
-     int agents_max = xmltoi(e->Attribute("agents_max"), -1);
-     float length = xmltof(e->Attribute("length"), -1);
-     // std::shared_ptr<Transition> t = new Transition();
-     // std::shared_ptr<Transition> doors;
-     Transition t;
-     std::vector<Transition> doors;
+    Log->Write("INFO:\tLoading train type");
+    // int T_id = xmltoi(e->Attribute("id"), -1);
+    std::string type = xmltoa(e->Attribute("type"), "-1");
+    int agents_max   = xmltoi(e->Attribute("agents_max"), -1);
+    float length     = xmltof(e->Attribute("length"), -1);
+    // std::shared_ptr<Transition> t = new Transition();
+    // std::shared_ptr<Transition> doors;
+    Transition t;
+    std::vector<Transition> doors;
 
-     for (TiXmlElement* xDoor = e->FirstChildElement("door"); xDoor;
-          xDoor = xDoor->NextSiblingElement("door")) {
-          int D_id = xmltoi(xDoor->Attribute("id"), -1);
-          float x1 = xmltof(xDoor->FirstChildElement("vertex")->Attribute("px"), -1);
-          float y1 = xmltof(xDoor->FirstChildElement("vertex")->Attribute("py"), -1);
-          float x2 = xmltof(xDoor->LastChild("vertex")->ToElement()->Attribute("px"), -1);
-          float y2 = xmltof(xDoor->LastChild("vertex")->ToElement()->Attribute("py"), -1);
-          Point start(x1, y1);
-          Point end(x2, y2);
-          float outflow = xmltof(xDoor->Attribute("outflow"), -1);
-          float dn = xmltoi(xDoor->Attribute("dn"), -1);
-          t.SetID(D_id);
-          t.SetCaption(type + std::to_string(D_id));
-          t.SetPoint1(start);
-          t.SetPoint2(end);
-          t.SetOutflowRate(outflow);
-          t.SetDN(dn);
-          doors.push_back(t);
-     }
-     Log->Write("INFO:\t   type: %s", type.c_str());
-     Log->Write("INFO:\t   capacity: %d", agents_max);
-     Log->Write("INFO:\t   number of doors: %d", doors.size());
-     for(auto d: doors)
-     {
-          Log->Write("INFO\t      door (%d): %s | %s", d.GetID(), d.GetPoint1().toString().c_str(), d.GetPoint2().toString().c_str());
-     }
+    for(TiXmlElement * xDoor = e->FirstChildElement("door"); xDoor;
+        xDoor                = xDoor->NextSiblingElement("door")) {
+        int D_id = xmltoi(xDoor->Attribute("id"), -1);
+        float x1 = xmltof(xDoor->FirstChildElement("vertex")->Attribute("px"), -1);
+        float y1 = xmltof(xDoor->FirstChildElement("vertex")->Attribute("py"), -1);
+        float x2 = xmltof(xDoor->LastChild("vertex")->ToElement()->Attribute("px"), -1);
+        float y2 = xmltof(xDoor->LastChild("vertex")->ToElement()->Attribute("py"), -1);
+        Point start(x1, y1);
+        Point end(x2, y2);
+        float outflow = xmltof(xDoor->Attribute("outflow"), -1);
+        float dn      = xmltoi(xDoor->Attribute("dn"), -1);
+        t.SetID(D_id);
+        t.SetCaption(type + std::to_string(D_id));
+        t.SetPoint1(start);
+        t.SetPoint2(end);
+        t.SetOutflowRate(outflow);
+        t.SetDN(dn);
+        doors.push_back(t);
+    }
+    Log->Write("INFO:\t   type: %s", type.c_str());
+    Log->Write("INFO:\t   capacity: %d", agents_max);
+    Log->Write("INFO:\t   number of doors: %d", doors.size());
+    for(auto d : doors) {
+        Log->Write(
+            "INFO\t      door (%d): %s | %s",
+            d.GetID(),
+            d.GetPoint1().toString().c_str(),
+            d.GetPoint2().toString().c_str());
+    }
 
-     std::shared_ptr<TrainType> Type = std::make_shared<TrainType>(
-          TrainType{
-                    type,
-                    agents_max,
-                    length,
-                    doors,
-                    });
-   return Type;
-
+    std::shared_ptr<TrainType> Type = std::make_shared<TrainType>(TrainType{
+        type,
+        agents_max,
+        length,
+        doors,
+    });
+    return Type;
 }
 
-GeoFileParser::~GeoFileParser()
-{
-
-}
+GeoFileParser::~GeoFileParser() {}

@@ -28,7 +28,6 @@
 #pragma once
 
 #include "OperationalModel.h"
-
 #include "geometry/Building.h"
 
 #include <vector>
@@ -46,21 +45,21 @@ class DirectionStrategy;
  *
  * \author Mohcine Chraibi
  */
-class GompertzModel : public OperationalModel {
+class GompertzModel : public OperationalModel
+{
 private:
+    /// Modellparameter
+    double _nuPed;
+    double _aPed;
+    double _bPed;
+    double _cPed;
 
-     /// Modellparameter
-     double _nuPed;
-     double _aPed;
-     double _bPed;
-     double _cPed;
+    double _nuWall;
+    double _aWall;
+    double _bWall;
+    double _cWall;
 
-     double _nuWall;
-     double _aWall;
-     double _bWall;
-     double _cWall;
-
-     /**
+    /**
       * Driving force \f$ F_i =\frac{\mathbf{v_0}-\mathbf{v_i}}{\tau}\f$
       * This is a duplicate of @see GCFMModel::ForceDriv
       * @param ped Pointer to Pedestrians
@@ -69,8 +68,8 @@ private:
       *
       * @return Point
       */
-     Point ForceDriv(Pedestrian* ped, Room* room) const;
-     /**
+    Point ForceDriv(Pedestrian * ped, Room * room) const;
+    /**
       * Repulsive force between two pedestrians ped1 and ped2 according to
       * the Gompertz model (unpublished)
       *
@@ -79,8 +78,8 @@ private:
       *
       * @return Point
       */
-     Point ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const;
-     /**
+    Point ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const;
+    /**
       * Repulsive force acting on pedestrian <ped> from the walls in
       * <subroom>. The sum of all repulsive forces of the walls in <subroom> is calculated
       * @see ForceRepWall
@@ -89,8 +88,8 @@ private:
       *
       * @return Point
       */
-     Point ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const;
-     /**
+    Point ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const;
+    /**
       * Repulsive force between pedestrian <ped> and wall <l>
       *
       * @param ped Pointer to Pedestrian
@@ -98,89 +97,97 @@ private:
       *
       * @return Point
       */
-     Point ForceRepWall(Pedestrian* ped, const Line& l, const Point& centroid, bool inside) const;
+    Point ForceRepWall(Pedestrian * ped, const Line & l, const Point & centroid, bool inside) const;
 
 public:
-
-     GompertzModel(std::shared_ptr<DirectionStrategy> dir, double nuped, double aped, double bped, double cped,
-                   double nuwall, double awall, double bwall, double cwall);
-     virtual ~GompertzModel(void);
+    GompertzModel(
+        std::shared_ptr<DirectionStrategy> dir,
+        double nuped,
+        double aped,
+        double bped,
+        double cped,
+        double nuwall,
+        double awall,
+        double bwall,
+        double cwall);
+    virtual ~GompertzModel(void);
 
     std::shared_ptr<DirectionStrategy> GetDirection() const;
 
-     /**
+    /**
       * Get the parameter for the strength of the ped-PED repulsive force
       *
       * @return double
       */
-     double GetNuPed() const;
+    double GetNuPed() const;
 
-     /**
+    /**
       * ToDO: What is this parameter doing?
       *
       * @return double
       */
-     double GetaPed() const;
+    double GetaPed() const;
 
-     /**
+    /**
       * ToDO: What is this parameter doing?
       *
       * @return double
       */
-     double GetbPed() const;
+    double GetbPed() const;
 
-     /**
+    /**
       * ToDO: What is this parameter doing?
       *
       * @return double
       */
-     double GetcPed() const;
+    double GetcPed() const;
 
-     /**
+    /**
       * Get the parameter for the strength of the ped-WALL repulsive force
       *
       * @return
       */
-     double GetNuWall() const;
+    double GetNuWall() const;
 
-     /**
+    /**
       * ToDO: What is this parameter doing?
       *
       * @return double
       */
-     double GetaWall() const;
+    double GetaWall() const;
 
-     /**
+    /**
       * ToDO: What is this parameter doing?
       *
       * @return double
       */
-     double GetbWall() const;
+    double GetbWall() const;
 
-     /**
+    /**
       * ToDO: What is this parameter doing?
       *
       * @return double
       */
-     double GetcWall() const;
+    double GetcWall() const;
 
-     /**
+    /**
       * @return all model parameters in a nicely formatted string
       */
-     virtual std::string GetDescription();
+    virtual std::string GetDescription();
 
-     /**
+    /**
       * initialize the phi angle
       * @param building
       */
-     virtual bool Init (Building* building);
+    virtual bool Init(Building * building);
 
-     /**
+    /**
       * Compute the next simulation step
       * Solve the differential equations and update the positions and velocities
       * @param current the actual time
       * @param deltaT the next timestep
       * @param building the geometry object
       */
-     virtual void ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic);
+    virtual void
+    ComputeNextTimeStep(double current, double deltaT, Building * building, int periodic);
 };

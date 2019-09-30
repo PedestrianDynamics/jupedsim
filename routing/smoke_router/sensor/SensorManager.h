@@ -27,10 +27,10 @@
  **/
 #pragma once
 
-#include<unordered_map>
-#include<vector>
 #include <set>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 class Building;
 class BrainStorage;
@@ -38,41 +38,43 @@ class AbstractSensor;
 class Pedestrian;
 
 //c++11 alias: Container to store options for the router (i. a. sensors)
-using optStorage = std::unordered_map<std::string,std::vector<std::string> >;
+using optStorage = std::unordered_map<std::string, std::vector<std::string>>;
 
-class SensorManager {
+class SensorManager
+{
 public:
     typedef int EventType;
-    static const EventType NONE = 0;
-    static const EventType INIT = 1;
-    static const EventType PERIODIC = 2;
-    static const EventType NO_WAY = 4;
-    static const EventType CHANGED_ROOM = 8;
+    static const EventType NONE            = 0;
+    static const EventType INIT            = 1;
+    static const EventType PERIODIC        = 2;
+    static const EventType NO_WAY          = 4;
+    static const EventType CHANGED_ROOM    = 8;
     static const EventType NEW_DESTINATION = 16;
 
 
-     typedef std::vector<std::pair<AbstractSensor *, EventType> > SensorContainer;
+    typedef std::vector<std::pair<AbstractSensor *, EventType>> SensorContainer;
 
-     /****************************
+    /****************************
       * Constructors & Destructors
       ****************************/
-     SensorManager(const Building * building, BrainStorage *);
-     virtual ~SensorManager();
+    SensorManager(const Building * building, BrainStorage *);
+    virtual ~SensorManager();
 
-     void Register(AbstractSensor *, EventType);
-     void execute(const Pedestrian *, EventType);
+    void Register(AbstractSensor *, EventType);
+    void execute(const Pedestrian *, EventType);
 
-     static SensorManager * InitWithAllSensors(const Building *, BrainStorage *);
-     static SensorManager * InitWithCertainSensors(const Building*, BrainStorage *, const optStorage& optSto);
+    static SensorManager * InitWithAllSensors(const Building *, BrainStorage *);
+    static SensorManager *
+    InitWithCertainSensors(const Building *, BrainStorage *, const optStorage & optSto);
 
-     void SetIntVPeriodicUpdate(const double& interval);
-     const double& GetIntVPeriodicUpdate();
+    void SetIntVPeriodicUpdate(const double & interval);
+    const double & GetIntVPeriodicUpdate();
 
 private:
-     //const Building * const building; //@todo: unused.
-     BrainStorage * cm_storage;
+    //const Building * const building; //@todo: unused.
+    BrainStorage * cm_storage;
 
-     SensorContainer registered_sensors;
+    SensorContainer registered_sensors;
 
-     double _periodicUpdateInterval;
+    double _periodicUpdateInterval;
 };

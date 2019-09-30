@@ -35,102 +35,101 @@
 class Building;
 class Pedestrian;
 
-class Router {
-     /** @defgroup Router
+class Router
+{
+    /** @defgroup Router
       * Collection of different router classes
       * [documentation](http://www.jupedsim.org/jpscore/2016-11-03-routing.html)
       *  @{
       */
-     /** @} */ // end of group
+    /** @} */ // end of group
 
 private:
-     /// routing strategy ID as defined in the Macros.h file
-     RoutingStrategy _strategy;
+    /// routing strategy ID as defined in the Macros.h file
+    RoutingStrategy _strategy;
 
-     /// the id as present in the persons.xml file
-     int _id;
+    /// the id as present in the persons.xml file
+    int _id;
 
 protected:
-
-     /// All final destinations of the pedestrians
-     std::vector<int> _finalDestinations;
+    /// All final destinations of the pedestrians
+    std::vector<int> _finalDestinations;
 
 public:
-
-     /**
+    /**
       * Constructor
       */
-     Router();
+    Router();
 
-     /**
+    /**
       * Constructor
       * @param id
       * @param s
       */
-     Router(int id, RoutingStrategy s);
+    Router(int id, RoutingStrategy s);
 
-     /**
+    /**
       * Destructor
       */
-     virtual ~Router();
+    virtual ~Router();
 
-     /**
+    /**
       * Add a new trip to this router
       * @param trip A vector containing the IDs of the intermediate destination
       */
-//     void AddTrip(std::vector<int> trip);
+    //     void AddTrip(std::vector<int> trip);
 
-     /**
+    /**
       * Add a new final destination to this router
       * @param id of an intermediate destination as presented in the geometry/routing files
       */
-     void AddFinalDestinationID(int id);
+    void AddFinalDestinationID(int id);
 
-     /**
+    /**
       * @return all final destinations
       */
-     const std::vector<int> GetFinalDestinations() const;
+    const std::vector<int> GetFinalDestinations() const;
 
-     /**
+    /**
       * @return the id of the router as defined in the person file
       */
-     int GetID() const;
+    int GetID() const;
 
-     /**
+    /**
       * The strategy is automatically set based on the description in the
       * ini file.
       */
-     void SetStrategy(const RoutingStrategy& strategy);
+    void SetStrategy(const RoutingStrategy & strategy);
 
-     /**
+    /**
       * The strategy is automatically set based on the description in the
       * person file.
       */
-     RoutingStrategy GetStrategy() const;
+    RoutingStrategy GetStrategy() const;
 
-     /**
+    /**
       * Find the next suitable target for Pedestrian p
       * @param p the Pedestrian
       * @return -1 in the case no destination could be found
       */
-     virtual int FindExit(Pedestrian* p) = 0;
+    virtual int FindExit(Pedestrian * p) = 0;
 
-     /**
+    /**
       * Each implementation of this virtual class has the possibility to initialize
       * its Routing engine using the supplied building object.
       * @param b the building object
       */
-     virtual bool Init(Building* b) = 0;
+    virtual bool Init(Building * b) = 0;
 
-     /**
+    /**
       * Parse additional parameters provided for the specific router
       * @return
       */
-     virtual bool ParseAdditionalParameters(){return true;};
+    virtual bool ParseAdditionalParameters() { return true; };
 
-     /**
+    /**
       * Update the router, when geometry changed due to external changes.
       * Remark: Depends on router if needed!
       */
-     virtual void Update();
+    virtual void Update();
 };

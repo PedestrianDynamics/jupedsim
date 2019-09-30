@@ -24,28 +24,30 @@
 
 #include "../general/Configuration.h"
 
-class IniFromProtobufLoader {
+class IniFromProtobufLoader
+{
 public:
-     IniFromProtobufLoader(Configuration* configuration);
+    IniFromProtobufLoader(Configuration * configuration);
 
-     void Initialize(const hybridsim::Scenario* scenario);
+    void Initialize(const hybridsim::Scenario * scenario);
 
 private:
-     Configuration* _configuration;
+    Configuration * _configuration;
 
-     void configureGompertz(const hybridsim::Model& model);
+    void configureGompertz(const hybridsim::Model & model);
 
-     void setSolver(const std::string& solver);
+    void setSolver(const std::string & solver);
 
-     void setForcePed(const hybridsim::Force& force);
+    void setForcePed(const hybridsim::Force & force);
 
-     void setForceWall(const hybridsim::Force& force);
+    void setForceWall(const hybridsim::Force & force);
 
-     void configureAgentParams(const hybridsim::AgentParams& params);
+    void configureAgentParams(const hybridsim::AgentParams & params);
 
-     std::shared_ptr<DirectionStrategy> configureExitCrossingStrategy(google::protobuf::int32 strategy);
+    std::shared_ptr<DirectionStrategy>
+    configureExitCrossingStrategy(google::protobuf::int32 strategy);
 
-     void IniRoutingStrategies(const google::protobuf::RepeatedPtrField<hybridsim::Router>& field);
+    void IniRoutingStrategies(const google::protobuf::RepeatedPtrField<hybridsim::Router> & field);
 };
 
 #endif //JPSCORE_INIFROMPROTOBUFLOADER_H

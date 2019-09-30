@@ -37,17 +37,17 @@ class Pedestrian;
 class AgentsQueueIn
 {
 public:
-     static void Add(std::vector<Pedestrian*>& ped);
-     static void GetandClear(std::vector<Pedestrian*>& peds);
-     static bool IsEmpty();
-     static int Size();
-     //static std::vector<Pedestrian*> GetandClear();
+    static void Add(std::vector<Pedestrian *> & ped);
+    static void GetandClear(std::vector<Pedestrian *> & peds);
+    static bool IsEmpty();
+    static int Size();
+    //static std::vector<Pedestrian*> GetandClear();
 
 private:
-     AgentsQueueIn(){};
-     virtual ~AgentsQueueIn(){};
-     static std::vector<Pedestrian*> _agentsQueue;
-     static std::mutex _queueMutex;
+    AgentsQueueIn(){};
+    virtual ~AgentsQueueIn(){};
+    static std::vector<Pedestrian *> _agentsQueue;
+    static std::mutex _queueMutex;
 };
 
 /**
@@ -56,15 +56,15 @@ private:
 class AgentsQueueOut
 {
 public:
-     static void Add(std::vector<Pedestrian*>& ped);
-     static void Add(Pedestrian* ped);
-     static void GetandClear(std::vector<Pedestrian*>& peds);
-     static bool IsEmpty();
-     static int Size();
+    static void Add(std::vector<Pedestrian *> & ped);
+    static void Add(Pedestrian * ped);
+    static void GetandClear(std::vector<Pedestrian *> & peds);
+    static bool IsEmpty();
+    static int Size();
 
 private:
-     AgentsQueueOut(){};
-     virtual ~AgentsQueueOut(){};
-     static std::vector<Pedestrian*> _agentsQueue;
-     static std::mutex _queueMutex;
+    AgentsQueueOut(){};
+    virtual ~AgentsQueueOut(){};
+    static std::vector<Pedestrian *> _agentsQueue;
+    static std::mutex _queueMutex;
 };

@@ -38,16 +38,26 @@ class FDSMeshStorage;
 
 class ToxicityAnalysis
 {
-
 public:
-
-     ToxicityAnalysis(const std::string & projectFilename, double _fps);
+    ToxicityAnalysis(const std::string & projectFilename, double _fps);
     virtual ~ToxicityAnalysis();
 
     void HazardAnalysis(Pedestrian *);
     double GetFDSQuantity(const Pedestrian *, std::string);
-    void WriteOutHazardAnalysis(const Pedestrian *, double, double, double, double, double, double, double,
-                             double, double, double, double, double);
+    void WriteOutHazardAnalysis(
+        const Pedestrian *,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double,
+        double);
 
     void set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage);
     const std::shared_ptr<FDSMeshStorage> get_FMStorage();
@@ -56,9 +66,11 @@ public:
     bool LoadJPSfireInfo(const std::string projectFilename);
     bool ConductToxicityAnalysis();
 
-    double CalculateFEDIn(Pedestrian *, double CO2, double CO, double O2, double HCN, double FED_In);
+    double
+    CalculateFEDIn(Pedestrian *, double CO2, double CO, double O2, double HCN, double FED_In);
     double CalculateFEDHeat(Pedestrian *, double T, double FED_Heat);
-     const std::string getProjectFileName(void);
+    const std::string getProjectFileName(void);
+
 private:
     std::shared_ptr<FDSMeshStorage> _FMStorage;
     std::shared_ptr<ToxicityOutputHandler> _outputhandler;

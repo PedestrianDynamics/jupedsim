@@ -29,9 +29,8 @@
 #include "Crossing.h"
 #include "Point.h"
 
-#include <boost/polygon/polygon.hpp>
 #include <boost/geometry.hpp>
-
+#include <boost/polygon/polygon.hpp>
 #include <string>
 #include <vector>
 
@@ -42,13 +41,13 @@ class Point;
 namespace bg = boost::geometry;
 typedef bg::model::polygon<Point, false, false> polygon_type;
 
-class Goal {
-
+class Goal
+{
 protected:
-     int _isFinalGoal;
-     int _id;
-     int _roomID;
-     int _subRoomID;
+    int _isFinalGoal;
+    int _id;
+    int _roomID;
+    int _subRoomID;
 
     Point _centroid;
     std::string _caption;
@@ -60,90 +59,87 @@ protected:
     bool _inside;
 
 public:
-
-
-
 public:
-     Goal();
-     virtual ~Goal() = default;
+    Goal();
+    virtual ~Goal() = default;
 
-     /**
+    /**
       * Set/Get the obstacles' caption
       */
-     std::string GetCaption() const;
+    std::string GetCaption() const;
 
-     /**
+    /**
       * Set/Get the obstacles' caption
       */
-     void SetCaption(std::string caption);
+    void SetCaption(std::string caption);
 
-     /**
+    /**
       * Set/Get the id of the Goal
       */
-     int GetId() const;
+    int GetId() const;
 
-     /**
+    /**
       * Set/Get the id of the Goal
       */
-     void SetId(int id);
+    void SetId(int id);
 
-     /**
+    /**
       * construct the Goal by adding more walls
       */
-     void AddWall(const Wall& w);
+    void AddWall(const Wall & w);
 
-     /**
+    /**
       * @return All walls that constitute the Goal
       */
-     const std::vector<Wall>& GetAllWalls() const;
+    const std::vector<Wall> & GetAllWalls() const;
 
-     /**
+    /**
       * @return true if the point p is contained within the Closed Goal
       */
-     bool Contains(const Point& p) const;
+    bool Contains(const Point & p) const;
 
-     /**
+    /**
       * Create the obstacles polygonal structure from the walls
       */
-     bool ConvertLineToPoly();
+    bool ConvertLineToPoly();
 
-     /**
+    /**
       * @return the Goal as a polygon
       */
-     const std::vector<Point>&  GetPolygon() const;
+    const std::vector<Point> & GetPolygon() const;
 
-     /**
+    /**
       * agents are remove from the simulation when they reached a final goal
       */
-     int GetIsFinalGoal() const;
+    int GetIsFinalGoal() const;
 
-     /**
+    /**
       * agents are remove from the simulation when they reached a final goal
       */
-     void SetIsFinalGoal(int isFinalGoal);
+    void SetIsFinalGoal(int isFinalGoal);
 
-     /**
+    /**
       * @return the centroid of the subroom
       * @see http://en.wikipedia.org/wiki/Centroid
       */
-     void ComputeCentroid() ;
+    void ComputeCentroid();
 
-     /**
+    /**
       * @return the centroid of the goal
       * @see ComputeControid
       */
-     const Point& GetCentroid() const;
+    const Point & GetCentroid() const;
 
-     /**
+    /**
       * @return a nicely formatted string representation of the Goal
       */
-     std::string Write();
+    std::string Write();
 
-     Crossing* GetCentreCrossing();
+    Crossing * GetCentreCrossing();
 
-//     bool IsInsideGoal(Pedestrian* ped) const;
+    //     bool IsInsideGoal(Pedestrian* ped) const;
 
-     bool IsInsideGoal(const Point& point) const;
+    bool IsInsideGoal(const Point & point) const;
 
     int GetRoomID() const;
 
@@ -157,10 +153,8 @@ private:
     bool IsClockwise();
     bool CreateBoostPoly();
 
-    int WhichQuad(const Point& vertex, const Point& hitPos) const;
+    int WhichQuad(const Point & vertex, const Point & hitPos) const;
 
-     // x-Koordinate der Linie von einer Eccke zur nächsten
-     double Xintercept(const Point& point1, const Point& point2,
-                       double hitY) const;
-
+    // x-Koordinate der Linie von einer Eccke zur nächsten
+    double Xintercept(const Point & point1, const Point & point2, double hitY) const;
 };

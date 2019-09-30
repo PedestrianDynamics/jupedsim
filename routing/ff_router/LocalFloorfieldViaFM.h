@@ -33,22 +33,27 @@
 
 #include <string>
 
-class LocalFloorfieldViaFM : public virtual FloorfieldViaFM {
+class LocalFloorfieldViaFM : public virtual FloorfieldViaFM
+{
 public:
-     LocalFloorfieldViaFM();
-     LocalFloorfieldViaFM(const Room* const room, const Building* buildingArg,
-                          const double hxArg, const double hyArg,
-                          const double wallAvoidDistance,
-                          const bool useDistancefield);
+    LocalFloorfieldViaFM();
+    LocalFloorfieldViaFM(
+        const Room * const room,
+        const Building * buildingArg,
+        const double hxArg,
+        const double hyArg,
+        const double wallAvoidDistance,
+        const bool useDistancefield);
 
-     void parseRoom(const Room* const roomArg, const double hxArg, const double hyArg);
-//     void getDirectionToGoalID(const int goalID);
-     void drawBlockerLines();
-     void crossOutOutsideNeighbors(const long int key);
-     // returns the UID of a subroom for a key of th grid, using the information from _subroomMap
-     virtual SubRoom* isInside(const long int key);
+    void parseRoom(const Room * const roomArg, const double hxArg, const double hyArg);
+    //     void getDirectionToGoalID(const int goalID);
+    void drawBlockerLines();
+    void crossOutOutsideNeighbors(const long int key);
+    // returns the UID of a subroom for a key of th grid, using the information from _subroomMap
+    virtual SubRoom * isInside(const long int key);
+
 protected:
-     const Room* _room;
+    const Room * _room;
 };
 
 /*
@@ -56,26 +61,42 @@ protected:
  means that there is only one instance of FloorfieldViaFM in CentrePointLocalFFViaFM, so calls to FlorfieldViaFM's member
  variables and functions are not ambiguous. See http://www.programering.com/a/MDOxITMwATk.html for some nice diagrams.
  */
-class CentrePointLocalFFViaFM : public CentrePointFFViaFM, public LocalFloorfieldViaFM {
+class CentrePointLocalFFViaFM : public CentrePointFFViaFM, public LocalFloorfieldViaFM
+{
 public:
-     CentrePointLocalFFViaFM(const Room* const room, const Building* buildingArg,
-                             const double hxArg, const double hyArg,
-                             const double wallAvoidDistance,
-                             const bool useDistancefield) : LocalFloorfieldViaFM(room, buildingArg, hxArg, hyArg, wallAvoidDistance, useDistancefield) {};
+    CentrePointLocalFFViaFM(
+        const Room * const room,
+        const Building * buildingArg,
+        const double hxArg,
+        const double hyArg,
+        const double wallAvoidDistance,
+        const bool useDistancefield) :
+        LocalFloorfieldViaFM(
+            room,
+            buildingArg,
+            hxArg,
+            hyArg,
+            wallAvoidDistance,
+            useDistancefield){};
 };
 
-class SubLocalFloorfieldViaFM : public FloorfieldViaFM {
+class SubLocalFloorfieldViaFM : public FloorfieldViaFM
+{
 public:
-     SubLocalFloorfieldViaFM();
-     SubLocalFloorfieldViaFM(SubRoom* const subroom, const Building* buildingArg,
-           const double hxArg, const double hyArg,
-           const double wallAvoidDistance,
-           const bool useDistancefield);
+    SubLocalFloorfieldViaFM();
+    SubLocalFloorfieldViaFM(
+        SubRoom * const subroom,
+        const Building * buildingArg,
+        const double hxArg,
+        const double hyArg,
+        const double wallAvoidDistance,
+        const bool useDistancefield);
 
-     void parseRoom(SubRoom* const subroomArg, const double hxArg, const double hyArg);
-     void getDirectionToDestination (Pedestrian* ped, Point& direction);
-     void getDirectionToGoalID(const int goalID);
-     virtual SubRoom* isInside(const long int key);
+    void parseRoom(SubRoom * const subroomArg, const double hxArg, const double hyArg);
+    void getDirectionToDestination(Pedestrian * ped, Point & direction);
+    void getDirectionToGoalID(const int goalID);
+    virtual SubRoom * isInside(const long int key);
+
 protected:
-     SubRoom* _subroom;
+    SubRoom * _subroom;
 };

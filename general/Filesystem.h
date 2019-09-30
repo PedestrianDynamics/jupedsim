@@ -15,5 +15,4 @@ namespace fs = std::filesystem;
  * @param file to prefix.
  * @return path wih new prefix for the last element
  */
-fs::path add_prefix_to_filename(
-    const std::string& prefix, const fs::path& file);
+fs::path add_prefix_to_filename(const std::string & prefix, const fs::path & file);

@@ -34,13 +34,15 @@ class Building;
 /**
  * General template for ODE solvers
  */
-class ODESolver {
+class ODESolver
+{
 protected:
-     ForceModel *model;
+    ForceModel * model;
+
 public:
-     ODESolver(ForceModel* tmodel);
-     virtual ~ODESolver() {};
-     virtual void solveODE(double t, double tp, Building* building) const = 0;
+    ODESolver(ForceModel * tmodel);
+    virtual ~ODESolver(){};
+    virtual void solveODE(double t, double tp, Building * building) const = 0;
 };
 
 
@@ -48,8 +50,9 @@ public:
  * Implementation of the explicit  Euler method for solving different equations.
  */
 
-class EulerSolver : public ODESolver {
+class EulerSolver : public ODESolver
+{
 public:
-     EulerSolver(ForceModel *tmodel);
-     virtual void solveODE(double t, double tp, Building* building) const;
+    EulerSolver(ForceModel * tmodel);
+    virtual void solveODE(double t, double tp, Building * building) const;
 };

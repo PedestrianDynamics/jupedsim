@@ -4,56 +4,50 @@
 
 AIAssociation::AIAssociation()
 {
-    _landmark=nullptr;
-    _associatedLandmark=nullptr;
-
+    _landmark           = nullptr;
+    _associatedLandmark = nullptr;
 }
 
-AIAssociation::AIAssociation(const AILandmark *landmark, const AILandmark *associated_landmark, bool /*connected*/)
+AIAssociation::AIAssociation(
+    const AILandmark * landmark,
+    const AILandmark * associated_landmark,
+    bool /*connected*/)
 {
-    _landmark=landmark;
-    _associatedLandmark=associated_landmark;
+    _landmark           = landmark;
+    _associatedLandmark = associated_landmark;
 
-//    if (connected)
-//        _connection = std::make_shared<Connection>(_landmark, _associatedLandmark);
+    //    if (connected)
+    //        _connection = std::make_shared<Connection>(_landmark, _associatedLandmark);
 
-//    else
-         _connection=nullptr;
-
-
+    //    else
+    _connection = nullptr;
 }
 
-AIAssociation::AIAssociation(const AIConnection *connection)
+AIAssociation::AIAssociation(const AIConnection * connection)
 {
-    _connection=connection;
-    _landmark=nullptr;
-    _associatedLandmark=nullptr;
+    _connection         = connection;
+    _landmark           = nullptr;
+    _associatedLandmark = nullptr;
 }
 
-AIAssociation::~AIAssociation()
-{
+AIAssociation::~AIAssociation() {}
 
-}
-
-const AILandmark *AIAssociation::GetLandmarkAssociation(const AILandmark *landmark) const
+const AILandmark * AIAssociation::GetLandmarkAssociation(const AILandmark * landmark) const
 {
-    if (landmark==nullptr)
+    if(landmark == nullptr)
         return nullptr;
-    if (_landmark==landmark)
-    {
+    if(_landmark == landmark) {
         return _associatedLandmark;
-    }
-    else
+    } else
         return nullptr;
-
 }
 
-const AIConnection *AIAssociation::GetConnectionAssoziation() const
+const AIConnection * AIAssociation::GetConnectionAssoziation() const
 {
     return _connection;
 }
 
-bool AIAssociation::operator==(const AIAssociation &asso2) const
+bool AIAssociation::operator==(const AIAssociation & asso2) const
 {
-    return this==&asso2;
+    return this == &asso2;
 }

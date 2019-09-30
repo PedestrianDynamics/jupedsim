@@ -29,63 +29,61 @@
 
 #include "../../geometry/Point.h"
 
-#include <poly2tri.h>
-
-#include <cstdlib>
-#include <time.h>
-#include <fstream>
-#include <string>
-#include <sstream>
 #include <algorithm>
-#include <iterator>
+#include <cstdlib>
+#include <fstream>
 #include <iostream>
+#include <iterator>
+#include <poly2tri.h>
+#include <sstream>
+#include <string>
+#include <time.h>
 #include <vector>
 
-class DTriangulation {
+class DTriangulation
+{
 public:
-     DTriangulation();
+    DTriangulation();
 
-     virtual ~DTriangulation();
+    virtual ~DTriangulation();
 
-     /**
+    /**
       * Triangulate the specified domain
       * \see SetOuterPolygone
       * \see AddHole
       */
-     void Triangulate();
+    void Triangulate();
 
-     /**
+    /**
       * @return the triangles resulting from the triangulation
       */
-     std::vector<p2t::Triangle*>  GetTriangles() {
-          return _cdt->GetTriangles();
-     }
+    std::vector<p2t::Triangle *> GetTriangles() { return _cdt->GetTriangles(); }
 
-     /**
+    /**
       * Set the boundaries of the domain
       * @param outerConstraints
       */
-     void SetOuterPolygone(const std::vector<Point>&  outerConstraints);
+    void SetOuterPolygone(const std::vector<Point> & outerConstraints);
 
-     /**
+    /**
       * Add a new hole
       * A domain can contains holes.
       * They should fully be inside the domain.
       */
-     void AddHole(const std::vector<Point>&  hole);
+    void AddHole(const std::vector<Point> & hole);
 
-     //templates for freeing and clearing a vector of pointers
-     template <class C> void FreeClear( C & cntr ) {
-          for ( typename C::iterator it = cntr.begin();
-                    it != cntr.end(); ++it ) {
-               delete * it;
-          }
-          cntr.clear();
-     }
+    //templates for freeing and clearing a vector of pointers
+    template <class C>
+    void FreeClear(C & cntr)
+    {
+        for(typename C::iterator it = cntr.begin(); it != cntr.end(); ++it) {
+            delete *it;
+        }
+        cntr.clear();
+    }
 
 private:
-     std::vector< std::vector<p2t::Point*> > _holesPolylines;
-     std::vector<p2t::Point*> _outerConstraintsPolyline;
-     p2t::CDT* _cdt;
-
+    std::vector<std::vector<p2t::Point *>> _holesPolylines;
+    std::vector<p2t::Point *> _outerConstraintsPolyline;
+    p2t::CDT * _cdt;
 };

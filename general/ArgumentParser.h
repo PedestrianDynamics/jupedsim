@@ -27,24 +27,20 @@
 #include "general/Filesystem.h"
 
 #include <CLI/CLI.hpp>
-
 #include <tuple>
 
-class ArgumentParser final {
+class ArgumentParser final
+{
 private:
     fs::path iniFilePath{"ini.xml"};
     CLI::App app{"JuPedSim"};
-    CLI::Option* iniFilePathOpt = app.add_option(
-        "inifile", iniFilePath, "Path to your inifile");
+    CLI::Option * iniFilePathOpt = app.add_option("inifile", iniFilePath, "Path to your inifile");
 
 public:
-    enum class Execution {
-        CONTINUE,
-        ABORT
-    };
+    enum class Execution { CONTINUE, ABORT };
 
     /// @return inifile argument. If none was parsed this defaults to 'ini.xml'
-    const fs::path& IniFilePath() const;
+    const fs::path & IniFilePath() const;
 
     /// Parses command line arguments
     /// Parsing ends in one of three states:
@@ -59,5 +55,5 @@ public:
     /// @return [Execution, ReturnCode] state after parsing. Excution describes
     ///         if the program shall continue or abort. In case 'Execution' is
     ///         ABORT returncode contains the to-be-used returncode.
-    std::tuple<Execution, int> Parse(int argc, char* argv[]);
+    std::tuple<Execution, int> Parse(int argc, char * argv[]);
 };

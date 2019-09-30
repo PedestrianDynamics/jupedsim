@@ -34,7 +34,7 @@ public:
 };
 
 NullOutputHandler handler{};
-OutputHandler *   Log = &handler;
+OutputHandler * Log = &handler;
 
 
 TEST_CASE("geometry/SubRoom", "[geometry][SubRoom]")
@@ -128,7 +128,7 @@ TEST_CASE("geometry/SubRoom", "[geometry][SubRoom]")
         sub.AddWall(Wall(P2, P3));
         sub.AddWall(Wall(P5, P6));
 
-        Line                exit(P6, P4);
+        Line exit(P6, P4);
         std::vector<Line *> door; // door overlaps with the wall
         door.push_back(&exit);
 
@@ -161,7 +161,7 @@ TEST_CASE("geometry/SubRoom", "[geometry][SubRoom]")
         sub1.AddWall(Wall(P2, P3));
         sub1.AddWall(Wall(P3, P4));
 
-        Line                exit(P1, P4);
+        Line exit(P1, P4);
         std::vector<Line *> door;
         door.push_back(&exit);
 

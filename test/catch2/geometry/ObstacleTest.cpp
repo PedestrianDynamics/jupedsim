@@ -34,12 +34,12 @@ TEST_CASE("geometry/Obstacle", "[geometry][Obstacle]")
 {
     SECTION("ctor getter setter")
     {
-        Obstacle          obs1;
+        Obstacle obs1;
         std::vector<Wall> walls_test;
         for(int i = 1; i < 10; ++i) {
             Point P1(cos(PI / i), sin(PI / i));
             Point P2(i, i * i);
-            Wall  W1(P1, P2, "interior");
+            Wall W1(P1, P2, "interior");
             obs1.AddWall(W1);
             walls_test.emplace_back(W1);
             obs1.SetCaption("obstacle" + std::to_string(i));

@@ -39,7 +39,6 @@ class NavLine;
 class Pedestrian;
 
 
-
 /**
  * @brief Graph Network
  *
@@ -48,20 +47,20 @@ class Pedestrian;
  * It is the basis for further developments like individual behavior and information sharing algorithms.
  *
  */
-class GraphNetwork {
-
+class GraphNetwork
+{
 public:
-     /****************************
+    /****************************
       * Constructors & Destructors
       ****************************/
-     GraphNetwork(const Building* buildg, const Pedestrian* ped);
-     virtual ~GraphNetwork();
+    GraphNetwork(const Building * buildg, const Pedestrian * ped);
+    virtual ~GraphNetwork();
 
-     void Add(const SubRoom * sub_room);
-     void Add(const Crossing * crossing);
-     void AddExit(const Transition * exit);
+    void Add(const SubRoom * sub_room);
+    void Add(const Crossing * crossing);
+    void AddExit(const Transition * exit);
 
-     NavigationGraph::VerticesContainer * GetAllVertices();
+    NavigationGraph::VerticesContainer * GetAllVertices();
 
     NavigationGraph * GetNavigationGraph() const;
 
@@ -77,8 +76,8 @@ public:
 
 private:
     NavigationGraph * navigation_graph;
-    const Building* building;
-    const Pedestrian* pedestrian;
+    const Building * building;
+    const Pedestrian * pedestrian;
     const SubRoom * current_subroom = nullptr;
     std::vector<const GraphEdge *> destinations;
 };
