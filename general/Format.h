@@ -1,4 +1,6 @@
 #pragma once
 
-#define FMT_STRING_ALIAS 1
+
 #include <fmt/format.h>
+
+#define check_fmt(s) FMT_STRING(s)

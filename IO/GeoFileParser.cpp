@@ -63,7 +63,7 @@ bool GeoFileParser::LoadGeometry(Building * building)
     TiXmlDocument docGeo(geoFilenameWithPath.string());
     if(!docGeo.LoadFile()) {
         Logging::Error("Could not parse the geometry file.");
-        Logging::Error(fmt::format(fmt("{}"), docGeo.ErrorDesc()));
+        Logging::Error(fmt::format(check_fmt("{}"), docGeo.ErrorDesc()));
         return false;
     }
 
@@ -80,7 +80,8 @@ bool GeoFileParser::LoadGeometry(Building * building)
     if(xRootNode->Attribute("unit"))
         if(std::string(xRootNode->Attribute("unit")) != "m") {
             Logging::Error("Only the unit m (meters) is supported.");
-            Logging::Error(fmt::format(fmt("You supplied [{}]"), xRootNode->Attribute("unit")));
+            Logging::Error(
+                fmt::format(check_fmt("You supplied [{}]"), xRootNode->Attribute("unit")));
             return false;
         }
 
@@ -88,9 +89,9 @@ bool GeoFileParser::LoadGeometry(Building * building)
 
     if(version < std::stod(JPS_OLD_VERSION)) {
         Logging::Error("Wrong geometry version!");
-        Logging::Error(fmt::format(fmt("Only version >= {:s} supported."), JPS_OLD_VERSION));
+        Logging::Error(fmt::format(check_fmt("Only version >= {:s} supported."), JPS_OLD_VERSION));
         Logging::Error(fmt::format(
-            fmt("Please update the version of your geometry file to {:s}"), JPS_OLD_VERSION));
+            check_fmt("Please update the version of your geometry file to {:s}"), JPS_OLD_VERSION));
         return false;
     }
 
@@ -144,7 +145,7 @@ bool GeoFileParser::LoadGeometry(Building * building)
             if(type == "stair" || type == "escalator" || type == "idle_escalator") {
                 if(xSubRoom->FirstChildElement("up") == nullptr) {
                     Logging::Error(fmt::format(
-                        fmt("The attribute <up> and <down> are missing for the {:s}"), type));
+                        check_fmt("The attribute <up> and <down> are missing for the {:s}"), type));
                     Logging::Error("Check your geometry file");
                     return false;
                 }
@@ -158,7 +159,7 @@ bool GeoFileParser::LoadGeometry(Building * building)
             } else if(type == "escalator_up") {
                 if(xSubRoom->FirstChildElement("up") == nullptr) {
                     Logging::Error(fmt::format(
-                        fmt("The attribute <up> and <down> are missing for the {:s}"), type));
+                        check_fmt("The attribute <up> and <down> are missing for the {:s}"), type));
                     Logging::Error("Check your geometry file");
                     return false;
                 }
@@ -174,7 +175,7 @@ bool GeoFileParser::LoadGeometry(Building * building)
             } else if(type == "escalator_down") {
                 if(xSubRoom->FirstChildElement("up") == nullptr) {
                     Logging::Error(fmt::format(
-                        fmt("The attribute <up> and <down> are missing for the {:s}"), type));
+                        check_fmt("The attribute <up> and <down> are missing for the {:s}"), type));
                     Logging::Error("Check your geometry file");
                     return false;
                 }
@@ -294,11 +295,12 @@ bool GeoFileParser::LoadGeometry(Building * building)
             p /= transFilename;
             transFilename = p.string();
 
-            Logging::Info(fmt::format(fmt("Parsing transition from file <{:s}>"), transFilename));
+            Logging::Info(
+                fmt::format(check_fmt("Parsing transition from file <{:s}>"), transFilename));
             TiXmlDocument docTrans(transFilename);
             if(!docTrans.LoadFile()) {
                 Logging::Error("Could not parse the transitions file.");
-                Logging::Error(fmt::format(fmt("{:s}"), docTrans.ErrorDesc()));
+                Logging::Error(fmt::format(check_fmt("{:s}"), docTrans.ErrorDesc()));
                 return false;
             }
             TiXmlElement * xRootNodeTrans = docTrans.RootElement();
@@ -323,7 +325,8 @@ bool GeoFileParser::LoadGeometry(Building * building)
         } else {
             Logging::Info("Not parsing transition from file");
         }
-        Logging::Info(fmt::format(fmt("Got {} transitions"), building->GetAllTransitions().size()));
+        Logging::Info(
+            fmt::format(check_fmt("Got {} transitions"), building->GetAllTransitions().size()));
 
     } // xTransNode
     Logging::Info("Loading building file successful.");
@@ -338,7 +341,7 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
 
     TiXmlDocument docRouting(_configuration->GetProjectFile().string());
     if(!docRouting.LoadFile()) {
-        Logging::Error(fmt::format(fmt("{:s}"), docRouting.ErrorDesc()));
+        Logging::Error(fmt::format(check_fmt("{:s}"), docRouting.ErrorDesc()));
         Logging::Error("Could not parse the routing file");
         return false;
     }
@@ -383,7 +386,7 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
             std::string goalFilename = xGoalsNodeFile->FirstChild()->ValueStr();
             p /= goalFilename;
             goalFilename = p.string();
-            Logging::Info(fmt::format(fmt("Goal file <{:s}> will be parsed."), goalFilename));
+            Logging::Info(fmt::format(check_fmt("Goal file <{:s}> will be parsed."), goalFilename));
             TiXmlDocument docGoal(goalFilename);
             if(!docGoal.LoadFile()) {
                 Log->Write("ERROR: \t%s", docGoal.ErrorDesc());
