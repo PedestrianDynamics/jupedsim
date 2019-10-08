@@ -235,47 +235,33 @@ Here are some hints to configure your editor in order to use the *stroustrup* st
 
 - **Clion**
 
-### Unit tests
+## Unit Tests
 
-Testing should be enabled by cmake as follows:
-```javascript
+JuPedSim uses [Catch2](https://github.com/catchorg/Catch2) as a unit testing library.
+The compilation of unit tests and automatic registration to ctest can be enabled by setting the cmake variable `BUILD_TESTING`:
+```sh
 cmake -DBUILD_TESTING=ON ..
 ```
 
-After compiling (`make`) the tests can be called as follows:
+After compilation the unit tests are part of the test suite run by `ctest`
+Additionally unit tests can be executed using the `unittests` executable in the `bin` folder.
+Use `bin/unittests --help` to see further command line options.
 
-```javascript
-ctest
-```
+### Writing a unit test
 
-This will take some hours time (depending on your machine). Threfore, a quick testing could be used:
-```javascript
-ctest -R Boost
-```
-
-which run a limited set of compiled unit tests on the code.
-
-## Writing a unit test
-If you write a unit test the first lines in your file should be
-
+You can use the following as a unit test template:
 ```c++
-#define BOOST_TEST_MODULE MyTest
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-#include classtotest.h
+#include <catch2/catch.hpp>
 
-BOOST_AUTO_TEST_SUITE(MyTestClass)
-```
-
-Then you can start implementing your test cases by using
-```c++
-BOOST_AUTO_TEST_CASE(MyTestCase) 
+TEST_CASE("Module/Classname", "[TestTags]")
 {
-  ...
+    SECTION("FunctionName")
+    {
+    }
 }
 ```
-
-For each method or function you want to test you should write a new test case and give it a speaking name.
+Unit tests are implemented in the folder `test/catch2`.
+Please use the tests class name as test name and use section names for the tested use case and function.
 
 ### Verification and validation
 
