@@ -102,7 +102,7 @@ bool Simulation::InitArgs()
             Log = new FileHandler(_config->GetErrorLogFile());
         } break;
         default:
-            printf("Wrong option for Logfile!\n\n");
+            Logging::Warning("Wrong option for Logfile!\n");
             return false;
     }
 

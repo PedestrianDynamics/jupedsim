@@ -30,11 +30,11 @@
 #include "general/ArgumentParser.h"
 #include "general/Compiler.h"
 #include "general/Configuration.h"
+#include "general/Format.h"
 #include "general/Logger.h"
 #include "geometry/Building.h"
 #include "pedestrian/AgentsSourcesManager.h"
 
-#include <fmt/format.h>
 #include <iomanip>
 #include <memory>
 #include <ostream>
@@ -53,11 +53,11 @@ int main(int argc, char ** argv)
 {
     Logging::Guard guard;
     Logging::Info("Starting JuPedSim - JPScore");
-    Logging::Info(fmt::format("Version {}", JPSCORE_VERSION));
-    Logging::Info(fmt::format("Commit id {}", GIT_COMMIT_HASH));
-    Logging::Info(fmt::format("Commit date {}", GIT_COMMIT_DATE));
-    Logging::Info(fmt::format("Build from branch {}", GIT_BRANCH));
-    Logging::Info(fmt::format("Build with {}({})", compiler_id, compiler_version));
+    Logging::Info(fmt::format(check_fmt("Version {}"), JPSCORE_VERSION));
+    Logging::Info(fmt::format(check_fmt("Commit id {}"), GIT_COMMIT_HASH));
+    Logging::Info(fmt::format(check_fmt("Commit date {}"), GIT_COMMIT_DATE));
+    Logging::Info(fmt::format(check_fmt("Build from branch {}"), GIT_BRANCH));
+    Logging::Info(fmt::format(check_fmt("Build with {}({})"), compiler_id, compiler_version));
 
     // gathering some statistics about the runtime
     time_t starttime, endtime;
@@ -98,7 +98,8 @@ int main(int argc, char ** argv)
     if(sim.InitArgs()) {
         // evacuation time
         double evacTime = 0;
-        Logging::Info(fmt::format("Simulation started with {} pedestrians", sim.GetPedsNumber()));
+        Logging::Info(
+            fmt::format(check_fmt("Simulation started with {} pedestrians"), sim.GetPedsNumber()));
 
 #ifdef _JPS_AS_A_SERVICE
 
@@ -123,7 +124,7 @@ int main(int argc, char ** argv)
             evacTime = sim.RunStandardSimulation(config.GetTmax());
         }
 
-        Logging::Info(fmt::format("Simulation completed", sim.GetPedsNumber()));
+        Logging::Info(fmt::format(check_fmt("\n\nSimulation completed"), sim.GetPedsNumber()));
         time(&endtime);
 
         // some statistics output
@@ -133,19 +134,19 @@ int main(int argc, char ** argv)
 
         if(sim.GetPedsNumber()) {
             Logging::Warning(fmt::format(
-                "Pedestrians not evacuated [{}] using [{}] threads",
+                check_fmt("Pedestrians not evacuated [{}] using [{}] threads"),
                 sim.GetPedsNumber(),
                 config.GetMaxOpenMPThreads()));
         }
 
         const double execTime = difftime(endtime, starttime);
-        Logging::Info(fmt::format("Exec Time {:.2f}s", execTime));
-        Logging::Info(fmt::format("Evac Time {:.2f}s", evacTime));
-        Logging::Info(fmt::format("Realtime Factor {:.2f}x", evacTime / execTime));
-        Logging::Info(fmt::format("Number of Threads {}", config.GetMaxOpenMPThreads()));
-        Logging::Info(fmt::format("Warnings {}", Log->GetWarnings()));
-        Logging::Info(fmt::format("Errors {}", Log->GetErrors()));
-        Logging::Info(fmt::format("Deleted Agents {}", Log->GetDeletedAgents()));
+        Logging::Info(fmt::format(check_fmt("Exec Time {:.2f}s"), execTime));
+        Logging::Info(fmt::format(check_fmt("Evac Time {:.2f}s"), evacTime));
+        Logging::Info(fmt::format(check_fmt("Realtime Factor {:.2f}x"), evacTime / execTime));
+        Logging::Info(fmt::format(check_fmt("Number of Threads {}"), config.GetMaxOpenMPThreads()));
+        Logging::Info(fmt::format(check_fmt("Warnings {}"), Log->GetWarnings()));
+        Logging::Info(fmt::format(check_fmt("Errors {}"), Log->GetErrors()));
+        Logging::Info(fmt::format(check_fmt("Deleted Agents {}"), Log->GetDeletedAgents()));
     } else {
         Logging::Error("Could not start simulation."
                        " Check the log for prior errors");
