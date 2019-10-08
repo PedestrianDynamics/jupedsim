@@ -1191,7 +1191,7 @@ void Pedestrian::SetSpotlight(bool spotlight)
 
 bool Pedestrian::GetSpotlight()
 {
-     return _spotlight;
+    return _spotlight;
 }
 
 void Pedestrian::SetColorMode(AgentColorMode mode)

@@ -321,7 +321,8 @@ void TrajectoriesJPSV04::WriteFooter()
  * FLAT format implementation
  */
 
-TrajectoriesFLAT::TrajectoriesFLAT() : Trajectories() {
+TrajectoriesFLAT::TrajectoriesFLAT() : Trajectories()
+{
     // Add header, info and output for speed
     _optionalOutputHeader[OptionalOutput::speed] = "V\t";
     _optionalOutputInfo[OptionalOutput::speed]   = "#V: speed of the pedestrian (in m/s)";
@@ -398,7 +399,8 @@ TrajectoriesFLAT::TrajectoriesFLAT() : Trajectories() {
         std::stringstream stream;
         stream << ped->GetGroup() << "\t";
         return stream.str();
-    };}
+    };
+}
 
 static fs::path getSourceFileName(const fs::path & projectFile)
 {
@@ -735,7 +737,8 @@ void TrajectoriesVTK::WriteGeometry(Building * building)
 void TrajectoriesVTK::WriteFrame(int frameNr, Building * building)
 {
     (void) frameNr;
-    (void) building;}
+    (void) building;
+}
 
 void TrajectoriesVTK::WriteFooter() {}
 
