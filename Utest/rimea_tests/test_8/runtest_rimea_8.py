@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
+import time
 
 
 def run_rimea_test8(inifile, trajfile):
@@ -82,7 +83,8 @@ def run_rimea_test8(inifile, trajfile):
         plt.savefig(figname)
 
 if __name__ == "__main__":
+    start_time=time.time()
     test = JPSRunTestDriver(8, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
     test.run_test(testfunction=run_rimea_test8)
-    logging.info("%s exits with SUCCESS" % (argv[0]))
+    logging.info("%s exits with SUCCESS\nExecution time %.3f seconds." % (argv[0],time.time()-start_time))
     exit(SUCCESS)

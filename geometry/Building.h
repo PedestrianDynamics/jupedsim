@@ -26,13 +26,12 @@
  **/
 #pragma once
 
-#include "Room.h"
-#include "NavLine.h"
-#include "Transition.h"
-#include "Hline.h"
-#include "Obstacle.h"
 #include "Goal.h"
-
+#include "Hline.h"
+#include "NavLine.h"
+#include "Obstacle.h"
+#include "Room.h"
+#include "Transition.h"
 #include "general/Configuration.h"
 #include "general/Filesystem.h"
 
@@ -40,36 +39,33 @@ typedef std::pair<Point, Wall> PointWall;
 
 // train schedules: Trains get deleted and added.
 
-struct Platform
-{
-     int id;
-     int rid;
-     int sid;
-     std::map<int, std::vector<Wall> > tracks;
+struct Platform {
+    int id;
+    int rid;
+    int sid;
+    std::map<int, std::vector<Wall>> tracks;
 };
 
-struct TrainTimeTable
-{
-     int id;
-     std::string type;
-     int rid; // room id
-     int sid; // subroom id
-     double tin; // arrival time
-     double tout; //leaving time
-     Point pstart; // track start
-     Point pend; // track end
-     Point tstart; // train start
-     Point tend; // train end
-     int pid; // Platform id
-     bool arrival;
-     bool departure;
+struct TrainTimeTable {
+    int id;
+    std::string type;
+    int rid;      // room id
+    int sid;      // subroom id
+    double tin;   // arrival time
+    double tout;  //leaving time
+    Point pstart; // track start
+    Point pend;   // track end
+    Point tstart; // train start
+    Point tend;   // train end
+    int pid;      // Platform id
+    bool arrival;
+    bool departure;
 };
-struct TrainType
-{
-     std::string type;
-     int nmax; // agents_max
-     float len; //length
-     std::vector<Transition> doors;
+struct TrainType {
+    std::string type;
+    int nmax;  // agents_max
+    float len; //length
+    std::vector<Transition> doors;
 };
 
 
@@ -89,226 +85,232 @@ class Configuration;
 
 class WaitingArea;
 
-class Building {
+class Building
+{
 private:
-     Configuration* _configuration;
-     std::shared_ptr<RoutingEngine> _routingEngine;
-     std::string _caption;
-     std::string _geometryFilename;
-     LCGrid* _linkedCellGrid;
-     std::vector<Pedestrian*> _allPedestians;
-     std::map<int, std::shared_ptr<Room> > _rooms;
-     std::map<int, Crossing*> _crossings;
-     std::map<int, Transition*> _transitions;
-     std::map<int, Hline*> _hLines;
-     std::map<int, Goal*> _goals;
-     std::map<std::string, std::shared_ptr<TrainType> > _trainTypes;
-     std::map<int, std::shared_ptr<TrainTimeTable> > _trainTimeTables;
-     std::map<int, std::shared_ptr<Platform> > _platforms;
-     /// pedestrians pathway
-     bool _savePathway;
-     std::ofstream _pathWayStream;
+    Configuration * _configuration;
+    std::shared_ptr<RoutingEngine> _routingEngine;
+    std::string _caption;
+    std::string _geometryFilename;
+    LCGrid * _linkedCellGrid;
+    std::vector<Pedestrian *> _allPedestians;
+    std::map<int, std::shared_ptr<Room>> _rooms;
+    std::map<int, Crossing *> _crossings;
+    std::map<int, Transition *> _transitions;
+    std::map<int, Hline *> _hLines;
+    std::map<int, Goal *> _goals;
+    std::map<std::string, std::shared_ptr<TrainType>> _trainTypes;
+    std::map<int, std::shared_ptr<TrainTimeTable>> _trainTimeTables;
+    std::map<int, std::shared_ptr<Platform>> _platforms;
+    /// pedestrians pathway
+    bool _savePathway;
+    std::ofstream _pathWayStream;
 
 public:
-     /// constructor
-     Building();
-     std::map<int, std::vector<Wall> > TempAddedWalls; // map to trainTimeTable
-     std::map<int, std::vector<Wall> > TempRemovedWalls;
-     std::map<int, std::vector<Transition> > TempAddedDoors;
+    /// constructor
+    Building();
+    std::map<int, std::vector<Wall>> TempAddedWalls; // map to trainTimeTable
+    std::map<int, std::vector<Wall>> TempRemovedWalls;
+    std::map<int, std::vector<Transition>> TempAddedDoors;
 
-     Building(Configuration* config, PedDistributor& pedDistributor);
-     bool resetGeometry(std::shared_ptr<TrainTimeTable> tab);
-     /// destructor
-     virtual ~Building();
+    Building(Configuration * config, PedDistributor & pedDistributor);
+    bool resetGeometry(std::shared_ptr<TrainTimeTable> tab);
+    /// destructor
+    virtual ~Building();
 
-     Configuration* GetConfig() const;
+    Configuration * GetConfig() const;
 
-     void SetCaption(const std::string& s);
+    void SetCaption(const std::string & s);
 
-     /// delete the ped from the ped vector
-     void DeletePedestrian(Pedestrian*& ped);
+    /// delete the ped from the ped vector
+    void DeletePedestrian(Pedestrian *& ped);
 
-     /// delete the ped from the simulation
-     void AddPedestrian(Pedestrian* ped);
+    /// delete the ped from the simulation
+    void AddPedestrian(Pedestrian * ped);
 
-     void GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds) const;
+    void GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const;
 
-     std::string GetCaption() const;
+    std::string GetCaption() const;
 
-     RoutingEngine* GetRoutingEngine() const;
-     const std::map<int, std::shared_ptr<Room> >& GetAllRooms() const;
-     const std::vector<Pedestrian*>& GetAllPedestrians() const;
+    RoutingEngine * GetRoutingEngine() const;
+    const std::map<int, std::shared_ptr<Room>> & GetAllRooms() const;
+    const std::vector<Pedestrian *> & GetAllPedestrians() const;
 
-     Pedestrian* GetPedestrian(int pedID) const;
+    Pedestrian * GetPedestrian(int pedID) const;
 
-     int GetNumberOfRooms() const;
+    int GetNumberOfRooms() const;
 
-     int GetNumberOfGoals() const;
+    int GetNumberOfGoals() const;
 
-     Room* GetRoom(int index) const;
+    Room * GetRoom(int index) const;
 
-     Room* GetRoom(std::string caption) const;
+    Room * GetRoom(std::string caption) const;
 
-     Transition* GetTransition(std::string caption) const;
+    Transition * GetTransition(std::string caption) const;
 
-     Transition* GetTransition(int id) const;
+    Transition * GetTransition(int id) const;
 
-     /**
+    /**
       * Returns Crossing with a specified ID
       *
       * @param ID of Crossing: int
       * @return Pointer of Crossing
       */
-     Crossing* GetCrossing(int ID) const;
+    Crossing * GetCrossing(int ID) const;
 
-     /**
+    /**
       * Not implemented
       */
-     Hline* GetHline(int id);
+    Hline * GetHline(int id);
 
-     /**
+    /**
       * return the subroom with the corresponding unique identifier
       * @param uid ,the unique identifier
       * @return NULL if no exists with that identifier.
       */
-     SubRoom* GetSubRoomByUID(int uid) const;
+    SubRoom * GetSubRoomByUID(int uid) const;
 
-     /**
+    /**
       * @return true if the two segments are visible from each other.
       * Alls walls and transitions and crossings are used in this check.
       * The use of hlines is optional, because they are not real, can can be considered transparent
       */
-     //bool IsVisible(Line* l1, Line* l2, bool considerHlines=false);
+    //bool IsVisible(Line* l1, Line* l2, bool considerHlines=false);
 
-     /**
+    /**
       * @return true if the two points are visible from each other.
       * Alls walls and transitions and crossings are used in this check.
       * The use of hlines is optional, because they are not real, can be considered transparent
       */
-     bool IsVisible(const Point& p1, const Point& p2, const std::vector<SubRoom*>& subrooms,
-               bool considerHlines = false);
+    bool IsVisible(
+        const Point & p1,
+        const Point & p2,
+        const std::vector<SubRoom *> & subrooms,
+        bool considerHlines = false);
 
-     /**
+    /**
       * @return a crossing or a transition matching the given caption.
       * Return NULL if none is found
       */
-     Crossing* GetTransOrCrossByName(std::string caption) const;
+    Crossing * GetTransOrCrossByName(std::string caption) const;
 
-     /**
+    /**
       * @return a crossing or a transition or a hline matching the given uid.
       * Return NULL if none is found
       */
-     Hline* GetTransOrCrossByUID(int uid) const;
+    Hline * GetTransOrCrossByUID(int uid) const;
 
-     /**
+    /**
       * @return the transition matching the uid
       */
-     Transition* GetTransitionByUID(int uid) const;
+    Transition * GetTransitionByUID(int uid) const;
 
-         Crossing* GetCrossingByUID(int uid) const;
+    Crossing * GetCrossingByUID(int uid) const;
 
-     //TOD0: rename later to GetGoal
-     Goal* GetFinalGoal(int id) const;
+    //TOD0: rename later to GetGoal
+    Goal * GetFinalGoal(int id) const;
 
-     /**
+    /**
       * @return the linked-cell grid used for spatial query
       */
-     LCGrid* GetGrid() const;
+    LCGrid * GetGrid() const;
 
-     // convenience methods
-     bool InitGeometry();
-
-
-     void InitGrid();
-
-     //void InitRoomsAndSubroomsMap();
-     void InitSavePedPathway(const std::string& filename);
-
-     void AddRoom(Room* room);
-
-     void UpdateGrid();
-
-     void AddSurroundingRoom(); // add a final room (outside or world), that encompasses the complete geometry
-
-     const std::map<int, Crossing*>& GetAllCrossings() const;
-
-     const std::map<int, Transition*>& GetAllTransitions() const;
-
-     const std::map<int, Hline*>& GetAllHlines() const;
-
-     const std::map<int, Goal*>& GetAllGoals() const;
-     // --------------- Trains interface
-     const std::map<std::string, std::shared_ptr<TrainType> >& GetTrainTypes() const;
-
-     const std::map<int, std::shared_ptr<TrainTimeTable> >& GetTrainTimeTables() const;
-
-     const std::map<int, std::shared_ptr<Platform> >& GetPlatforms() const;
-
-     const std::vector<Wall> GetTrackWalls(Point TrackStart, Point TrackEnd, int & room_id, int & subroom_id) const;
-     const std::vector<std::pair<PointWall, PointWall > > GetIntersectionPoints(const std::vector<Transition> doors, const std::vector<Wall>) const;
-
-     // ------------------------------------
-     bool AddCrossing(Crossing* line);
-
-     bool RemoveTransition(Transition * line);
-
-     bool AddTransition(Transition* line);
-
-     bool AddHline(Hline* line);
-
-     bool AddGoal(Goal* goal);
-
-     bool AddTrainType(std::shared_ptr<TrainType> TT);
-
-     bool AddTrainTimeTable(std::shared_ptr<TrainTimeTable> TTT);
-
-     bool AddPlatform(std::shared_ptr<Platform> P);
-
-     const fs::path& GetProjectRootDir() const;
-
-     const fs::path& GetProjectFilename() const;
-
-     const fs::path& GetGeometryFilename() const;
-
-//    void SetProjectFilename(const std::string &filename);
-//
-//    void SetProjectRootDir(const std::string &filename);
+    // convenience methods
+    bool InitGeometry();
 
 
-     /**
+    void InitGrid();
+
+    //void InitRoomsAndSubroomsMap();
+    void InitSavePedPathway(const std::string & filename);
+
+    void AddRoom(Room * room);
+
+    void UpdateGrid();
+
+    void
+    AddSurroundingRoom(); // add a final room (outside or world), that encompasses the complete geometry
+
+    const std::map<int, Crossing *> & GetAllCrossings() const;
+
+    const std::map<int, Transition *> & GetAllTransitions() const;
+
+    const std::map<int, Hline *> & GetAllHlines() const;
+
+    const std::map<int, Goal *> & GetAllGoals() const;
+    // --------------- Trains interface
+    const std::map<std::string, std::shared_ptr<TrainType>> & GetTrainTypes() const;
+
+    const std::map<int, std::shared_ptr<TrainTimeTable>> & GetTrainTimeTables() const;
+
+    const std::map<int, std::shared_ptr<Platform>> & GetPlatforms() const;
+
+    const std::vector<Wall>
+    GetTrackWalls(Point TrackStart, Point TrackEnd, int & room_id, int & subroom_id) const;
+    const std::vector<std::pair<PointWall, PointWall>>
+    GetIntersectionPoints(const std::vector<Transition> doors, const std::vector<Wall>) const;
+
+    // ------------------------------------
+    bool AddCrossing(Crossing * line);
+
+    bool RemoveTransition(Transition * line);
+
+    bool AddTransition(Transition * line);
+
+    bool AddHline(Hline * line);
+
+    bool AddGoal(Goal * goal);
+
+    bool AddTrainType(std::shared_ptr<TrainType> TT);
+
+    bool AddTrainTimeTable(std::shared_ptr<TrainTimeTable> TTT);
+
+    bool AddPlatform(std::shared_ptr<Platform> P);
+
+    const fs::path & GetProjectRootDir() const;
+
+    const fs::path & GetProjectFilename() const;
+
+    const fs::path & GetGeometryFilename() const;
+
+    //    void SetProjectFilename(const std::string &filename);
+    //
+    //    void SetProjectRootDir(const std::string &filename);
+
+
+    /**
       * Write the geometry to the given file.
       * That will be useful in the geometry editor.
       * @param filename the relative location of the file
       * @return true if everything went fine.
       */
-    bool SaveGeometry(const fs::path& filename) const;
+    bool SaveGeometry(const fs::path & filename) const;
 
-     void WriteToErrorLog() const;
+    void WriteToErrorLog() const;
 
-     /**
+    /**
       * Check the scenario for possible errors and
       * output user specific informations.
       */
-     bool SanityCheck();
+    bool SanityCheck();
 
-     /**
+    /**
       * Triangulate the geometry
       */
 
-     bool Triangulate();
+    bool Triangulate();
 
-     /**
+    /**
       * @return Vector with the vertices of the geometry's outer boundary rect
       */
 
-     std::vector<Point> GetBoundaryVertices() const;
+    std::vector<Point> GetBoundaryVertices() const;
 
 private:
-
-     bool InitInsideGoals();
-     void InitPlatforms();
-     void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);
-     /** @defgroup auto-correct-geometry
+    bool InitInsideGoals();
+    void InitPlatforms();
+    void StringExplode(std::string str, std::string separator, std::vector<std::string> * results);
+    /** @defgroup auto-correct-geometry
       * functions used to auto-correct the geometry.
       * Main function is correct()
       *  @{
@@ -338,8 +340,8 @@ private:
      *
      *  @todo What happens if the line is _really_ big? Here we should call the function in a recursive way..
      */
-     bool correct() const;
-     /**
+    bool correct() const;
+    /**
       * @brief Add newWall  subroom
       *
       *  We count for a candidate wall if it has more than 2 common points with
@@ -355,12 +357,11 @@ private:
       *        be added to subroom
       *
       */
-     bool AddWallToSubroom(
-             const std::shared_ptr<SubRoom> & subroom,
-             std::vector<Wall>  WallPieces) const;
+    bool
+    AddWallToSubroom(const std::shared_ptr<SubRoom> & subroom, std::vector<Wall> WallPieces) const;
 
 
-     /**
+    /**
       * @brief Split a wall in several small walls
       *
       * search all walls+crossings+transitions that intersect <bigwall>
@@ -370,11 +371,10 @@ private:
       * @param bigWall: wall to split
       * @return std::vector: a vector of all small walls. Can be empty.
       */
-     std::vector<Wall>  SplitWall(
-          const std::shared_ptr<SubRoom>& subroom,
-          const Wall&  bigWall) const;
+    std::vector<Wall>
+    SplitWall(const std::shared_ptr<SubRoom> & subroom, const Wall & bigWall) const;
 
-     /**
+    /**
       * @brief Replace BigWall with a smaller wall
       *
       * this function should be called after \fn SplitWall()
@@ -385,19 +385,17 @@ private:
       * replace bigwall (\fn AddWallToSubroom() is called)
       * @return bool: true if successful
       */
-     bool ReplaceBigWall(
-             const std::shared_ptr<SubRoom> & subroom,
-             const Wall& bigWall,
-             std::vector<Wall> & WallPieces) const;
+    bool ReplaceBigWall(
+        const std::shared_ptr<SubRoom> & subroom,
+        const Wall & bigWall,
+        std::vector<Wall> & WallPieces) const;
 
-     /**
+    /**
       * @brief Removes doors on walls
       *
       * @param subroom
       * @return bool
       */
-     bool RemoveOverlappingDoors(
-          const std::shared_ptr<SubRoom>& subroom) const;
-     /** @} */ // end of group
-
+    bool RemoveOverlappingDoors(const std::shared_ptr<SubRoom> & subroom) const;
+    /** @} */ // end of group
 };

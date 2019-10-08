@@ -54,110 +54,151 @@ class Line;
 class Goal;
 
 
-class CompareCost {      //this class is used in std::priority_queue in UnivFFviaFMTrips::calcFF
+class CompareCost
+{ //this class is used in std::priority_queue in UnivFFviaFMTrips::calcFF
 public:
-     CompareCost(double* costarray) : _costarray(costarray) {}
-     bool operator() (const int a, const int b) const {
-          return _costarray[a] > _costarray[b];
-     }
+    CompareCost(double * costarray) : _costarray(costarray) {}
+    bool operator()(const int a, const int b) const { return _costarray[a] > _costarray[b]; }
 
 private:
-     double* _costarray = nullptr;
+    double * _costarray = nullptr;
 };
 
-class UnivFFviaFMTrips {
+class UnivFFviaFMTrips
+{
 public:
-     UnivFFviaFMTrips(Room* a, Building* b, double c, double e, bool f);
-     UnivFFviaFMTrips(SubRoom* a, Building* b, double c, double e, bool f);
-     UnivFFviaFMTrips(Room* a, Configuration* const b, double hx, double wallAvoid, bool useWallDistances, std::map<int, Goal*> goals);
-     UnivFFviaFMTrips(Room* a, Configuration* const b, double hx, double wallAvoid, bool useWallDistances, std::vector<int> wantedDoors, std::map<int, Goal*> goals);
-     UnivFFviaFMTrips(SubRoom* sr, Configuration* const conf, double hx, double wallAvoid, bool useWallDistances, std::map<int, Goal*> goals);
-     UnivFFviaFMTrips(SubRoom* subRoomArg, Configuration* const confArg, double hx, double wallAvoid, bool useWallDistances, std::vector<int> wantedDoors, std::map<int, Goal*> goals);
-     void create(std::vector<Line>& walls, std::map<int, Line>& doors, std::vector<int> targetUIDs, int mode,
-                 double spacing, double wallAvoidDist, bool useWallDistances);
-     void recreateAllForQuickest();
-     UnivFFviaFMTrips() {};
-     UnivFFviaFMTrips(UnivFFviaFMTrips&){};
-     virtual ~UnivFFviaFMTrips();
+    UnivFFviaFMTrips(Room * a, Building * b, double c, double e, bool f);
+    UnivFFviaFMTrips(SubRoom * a, Building * b, double c, double e, bool f);
+    UnivFFviaFMTrips(
+        Room * a,
+        Configuration * const b,
+        double hx,
+        double wallAvoid,
+        bool useWallDistances,
+        std::map<int, Goal *> goals);
+    UnivFFviaFMTrips(
+        Room * a,
+        Configuration * const b,
+        double hx,
+        double wallAvoid,
+        bool useWallDistances,
+        std::vector<int> wantedDoors,
+        std::map<int, Goal *> goals);
+    UnivFFviaFMTrips(
+        SubRoom * sr,
+        Configuration * const conf,
+        double hx,
+        double wallAvoid,
+        bool useWallDistances,
+        std::map<int, Goal *> goals);
+    UnivFFviaFMTrips(
+        SubRoom * subRoomArg,
+        Configuration * const confArg,
+        double hx,
+        double wallAvoid,
+        bool useWallDistances,
+        std::vector<int> wantedDoors,
+        std::map<int, Goal *> goals);
+    void create(
+        std::vector<Line> & walls,
+        std::map<int, Line> & doors,
+        std::vector<int> targetUIDs,
+        int mode,
+        double spacing,
+        double wallAvoidDist,
+        bool useWallDistances);
+    void recreateAllForQuickest();
+    UnivFFviaFMTrips(){};
+    UnivFFviaFMTrips(UnivFFviaFMTrips &){};
+    virtual ~UnivFFviaFMTrips();
 
-     void addTarget(const int uid, Line* door, double* costarray = nullptr, Point* gradarray = nullptr);
-     void addTarget(const int uid, double* costarray = nullptr, Point* gradarray = nullptr);
-     void addAllTargets();
-     void addAllTargetsParallel();
-     void addTargetsParallel(std::vector<int> wantedDoors);
-     std::vector<int> getKnownDoorUIDs();
-     void setUser(int userArg);
-     void setMode(int modeArg);
-     void setSpeedMode(int speedModeArg);
-     SubRoom** getSubRoomFF();
-     SubRoom* getSubRoom(const Point& pos);
+    void addTarget(
+        const int uid,
+        Line * door,
+        double * costarray = nullptr,
+        Point * gradarray  = nullptr);
+    void addTarget(const int uid, double * costarray = nullptr, Point * gradarray = nullptr);
+    void addAllTargets();
+    void addAllTargetsParallel();
+    void addTargetsParallel(std::vector<int> wantedDoors);
+    std::vector<int> getKnownDoorUIDs();
+    void setUser(int userArg);
+    void setMode(int modeArg);
+    void setSpeedMode(int speedModeArg);
+    SubRoom ** getSubRoomFF();
+    SubRoom * getSubRoom(const Point & pos);
 
-     double getCostToDestination(const int destID, const Point& position, int mode);
-     double getCostToDestination(const int destID, const Point& position);
-     double getDistanceBetweenDoors(const int door1_ID, const int door2_ID);
-     RectGrid* getGrid();
-     virtual void getDirectionToUID(int destID, long int key, Point& direction, int mode);
-     void getDirectionToUID(int destID, long int key, Point& direction);
-     virtual void getDirectionToUID(int destID, const Point& pos, Point& direction, int mode);
-     void getDirectionToUID(int destID, const Point& pos, Point& direction);
-     double getDistance2WallAt(const Point& pos);
-     void getDir2WallAt(const Point& pos, Point& p);
+    double getCostToDestination(const int destID, const Point & position, int mode);
+    double getCostToDestination(const int destID, const Point & position);
+    double getDistanceBetweenDoors(const int door1_ID, const int door2_ID);
+    RectGrid * getGrid();
+    virtual void getDirectionToUID(int destID, long int key, Point & direction, int mode);
+    void getDirectionToUID(int destID, long int key, Point & direction);
+    virtual void getDirectionToUID(int destID, const Point & pos, Point & direction, int mode);
+    void getDirectionToUID(int destID, const Point & pos, Point & direction);
+    double getDistance2WallAt(const Point & pos);
+    void getDir2WallAt(const Point & pos, Point & p);
 
-     void writeFF(const fs::path& filename, std::vector<int> targetID);
+    void writeFF(const fs::path & filename, std::vector<int> targetID);
 
-     void createRectGrid(std::vector<Line>& walls, std::map<int, Line>& doors, double spacing);
-     void processGeometry(std::vector<Line>&walls, std::map<int, Line>& doors);
-     void markSubroom(const Point& insidePoint, SubRoom* const value);
-     void createReduWallSpeed(double* reduWallSpeed);
-     void createPedSpeed(Pedestrian* const * pedsArg, int nsize, int modechoice, double radius);
-     void finalizeTargetLine(const int uid, const Line& tempTargetLine, Point* newArrayPt, Point& passvector);
+    void createRectGrid(std::vector<Line> & walls, std::map<int, Line> & doors, double spacing);
+    void processGeometry(std::vector<Line> & walls, std::map<int, Line> & doors);
+    void markSubroom(const Point & insidePoint, SubRoom * const value);
+    void createReduWallSpeed(double * reduWallSpeed);
+    void createPedSpeed(Pedestrian * const * pedsArg, int nsize, int modechoice, double radius);
+    void finalizeTargetLine(
+        const int uid,
+        const Line & tempTargetLine,
+        Point * newArrayPt,
+        Point & passvector);
 
-     void drawLinesOnGrid(std::map<int, Line>& doors, int *const grid);
-     template <typename T>
-     void drawLinesOnGrid(std::vector<Line>& wallArg, T* const target, const T value);
-     template <typename T>
-     void drawLinesOnGrid(Line& line, T* const target, const T value);
+    void drawLinesOnGrid(std::map<int, Line> & doors, int * const grid);
+    template <typename T>
+    void drawLinesOnGrid(std::vector<Line> & wallArg, T * const target, const T value);
+    template <typename T>
+    void drawLinesOnGrid(Line & line, T * const target, const T value);
 
-     template <typename T>
-     void drawLinesOnWall(std::vector<Line>& wallArg, T* const target, const T value);
-     template <typename T>
-     void drawLinesOnWall(Line& line, T* const target, const T value);
+    template <typename T>
+    void drawLinesOnWall(std::vector<Line> & wallArg, T * const target, const T value);
+    template <typename T>
+    void drawLinesOnWall(Line & line, T * const target, const T value);
 
-     void calcFF(double*, Point*, const double* const);
-     void calcCost(const long int key, double* cost, Point* dir, const double* const speed);
-     void calcDF(double*, Point*, const double* const);
-     void calcDist(const long int key, double* cost, Point* dir, const double* const speed);
-     inline double onesidedCalc(double xy, double hDivF);
-     inline double twosidedCalc(double x, double y, double hDivF);
+    void calcFF(double *, Point *, const double * const);
+    void calcCost(const long int key, double * cost, Point * dir, const double * const speed);
+    void calcDF(double *, Point *, const double * const);
+    void calcDist(const long int key, double * cost, Point * dir, const double * const speed);
+    inline double onesidedCalc(double xy, double hDivF);
+    inline double twosidedCalc(double x, double y, double hDivF);
 
 private:
-     Building* _building = nullptr;
-     Configuration* _configuration = nullptr;
-     int _room = -1;                              //not set
-     int _mode = LINESEGMENT;                     //default
-     int _user = DISTANCE_AND_DIRECTIONS_USED;    //default
-     int _speedmode = FF_HOMO_SPEED;              //default
-     int _scope = 0;                              //not set / unknown
-     bool _directCalculation = true;
-     RectGrid* _grid = nullptr;
-     long int _nPoints = 0;
-     std::vector<double*> _speedFieldSelector;
-     int* _gridCode = nullptr;
-     SubRoom* * _subrooms = nullptr; // this is an array (first asterisk) of pointers (second asterisk)
+    Building * _building           = nullptr;
+    Configuration * _configuration = nullptr;
+    int _room                      = -1;                           //not set
+    int _mode                      = LINESEGMENT;                  //default
+    int _user                      = DISTANCE_AND_DIRECTIONS_USED; //default
+    int _speedmode                 = FF_HOMO_SPEED;                //default
+    int _scope                     = 0;                            //not set / unknown
+    bool _directCalculation        = true;
+    RectGrid * _grid               = nullptr;
+    long int _nPoints              = 0;
+    std::vector<double *> _speedFieldSelector;
+    int * _gridCode = nullptr;
+    SubRoom ** _subrooms =
+        nullptr; // this is an array (first asterisk) of pointers (second asterisk)
 
-     double _wallAvoidDistance = 0.;
-     bool _useWallDistances = false;    //could be used in DirectionStrategy even if mode _speedmode is FF_HOMO_SPEED
+    double _wallAvoidDistance = 0.;
+    bool _useWallDistances =
+        false; //could be used in DirectionStrategy even if mode _speedmode is FF_HOMO_SPEED
 
-     //the following maps are responsible for dealloc the arrays
-     std::map<int, double*> _costFieldWithKey;
-     std::map<int, Point*> _directionFieldWithKey;
+    //the following maps are responsible for dealloc the arrays
+    std::map<int, double *> _costFieldWithKey;
+    std::map<int, Point *> _directionFieldWithKey;
 
-     std::vector<int> _uids;
-     std::map<int, Line> _doors;
-     std::vector<int> _toDo;
+    std::vector<int> _uids;
+    std::map<int, Line> _doors;
+    std::vector<int> _toDo;
 
-     std::map<int, Point> _subroomUIDtoInsidePoint;
-     std::map<int, SubRoom*> _subroomUIDtoSubRoomPtr;
-     std::map<SubRoom*, Point> _subRoomPtrTOinsidePoint;
-
+    std::map<int, Point> _subroomUIDtoInsidePoint;
+    std::map<int, SubRoom *> _subroomUIDtoSubRoomPtr;
+    std::map<SubRoom *, Point> _subRoomPtrTOinsidePoint;
 };

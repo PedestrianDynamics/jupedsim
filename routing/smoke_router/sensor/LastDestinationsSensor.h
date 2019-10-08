@@ -31,14 +31,13 @@
 
 class LastDestinationsSensor : public AbstractSensor
 {
-
 public:
-    LastDestinationsSensor(const Building * b) : AbstractSensor(b) { }
+    LastDestinationsSensor(const Building * b) : AbstractSensor(b) {}
 
     virtual ~LastDestinationsSensor();
 
     std::string GetName() const;
-    void execute(const Pedestrian *, CognitiveMap&) const;
-private:
+    void execute(const Pedestrian *, CognitiveMap &) const;
 
+private:
 };

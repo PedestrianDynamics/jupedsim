@@ -35,7 +35,6 @@ class FDSMeshStorage;
 
 class SmokeSensor : public AbstractSensor
 {
-
 public:
     SmokeSensor(const Building * b);
 
@@ -43,12 +42,13 @@ public:
 
 
     std::string GetName() const;
-    void execute(const Pedestrian *, CognitiveMap&) const;
+    void execute(const Pedestrian *, CognitiveMap &) const;
 
     void set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage);
     const std::shared_ptr<FDSMeshStorage> get_FMStorage();
+
 private:
     bool LoadJPSfireInfo();
-    const Building* _building;
+    const Building * _building;
     std::shared_ptr<FDSMeshStorage> _FMStorage;
 };

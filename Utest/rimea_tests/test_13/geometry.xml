@@ -23,7 +23,7 @@
 	  <vertex px="12.0" py="0.0" />
 	</polygon>
       </subroom>
-      
+
       <subroom id="2" closed="0" class="stair" A_x="1.0" B_y="0" C_z="-12">
 	<polygon caption="wall">
 	  <vertex px="12.0" py="0.0" />
@@ -47,35 +47,33 @@
 	</crossing>
       </crossings>
     </room>
-    
+
     <room id="1" caption="ground floor">
       <subroom id="0" closed="0" class="subroom" A_x="0" B_y="0" C_z="3">
 	<polygon caption="wall">
 	  <vertex px="15.0" py="2.0" />
-	  <vertex px="16.0" py="2.0" />		
+	  <vertex px="16.0" py="2.0" />
 	</polygon>
 	<polygon caption="wall">
 	  <vertex px="15.0" py="0.0" />
 	  <vertex px="16.0" py="0.0" />
 	</polygon>
       </subroom>
-    </room>	
+    </room>
   </rooms>
-  
+
   <transitions>
-    <!-- exits like crossings but between rooms or to outside (room with index
-	 = -1) -->
     <transition id="1" caption="main exit" type="emergency"
 		room1_id="1" subroom1_id="0" room2_id="-1" subroom2_id="-1">
       <vertex px="16.0" py="0.0" />
       <vertex px="16.0" py="2.0" />
     </transition>
-    
+
     <transition id="2" caption="StairUp" type="emergency"
 		room1_id="0" subroom1_id="2" room2_id="1" subroom2_id="0">
       <vertex px="15.0" py="0.0" />
       <vertex px="15.0" py="2.0" />
     </transition>
-    
+
   </transitions>
 </geometry>

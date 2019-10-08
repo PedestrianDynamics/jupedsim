@@ -24,17 +24,18 @@
 
 #include "../pedestrian/PedDistributionLoader.h"
 
-class PedDistributionFromProtobufLoader : public PedDistributionLoader {
-
+class PedDistributionFromProtobufLoader : public PedDistributionLoader
+{
 public:
-     PedDistributionFromProtobufLoader(const Configuration* configuration);
+    PedDistributionFromProtobufLoader(const Configuration * configuration);
 
-     virtual bool LoadPedDistribution(std::vector<std::shared_ptr<StartDistribution>>& startDis,
-               std::vector<std::shared_ptr<StartDistribution>>& startDisSub,
-               std::vector<std::shared_ptr<AgentsSource>>& startDisSources) override;
+    virtual bool LoadPedDistribution(
+        std::vector<std::shared_ptr<StartDistribution>> & startDis,
+        std::vector<std::shared_ptr<StartDistribution>> & startDisSub,
+        std::vector<std::shared_ptr<AgentsSource>> & startDisSources) override;
 
 private:
-     const Configuration* _configuration;
+    const Configuration * _configuration;
 };
 
 #endif //JPSCORE_PEDDISTRIBUTIONFROMPROTOBUFLOADER_H

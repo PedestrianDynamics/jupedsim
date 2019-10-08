@@ -28,11 +28,10 @@
 
 #include "Line.h"
 
-class NavLine: public Line {
-
+class NavLine : public Line
+{
 public:
-     NavLine();
-     NavLine(Line l);
-     virtual ~NavLine();
-
+    NavLine();
+    NavLine(Line l);
+    virtual ~NavLine();
 };

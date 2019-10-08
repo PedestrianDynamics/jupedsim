@@ -22,23 +22,25 @@
 #ifndef JPSCORE_SIMOBSERVER_H
 #define JPSCORE_SIMOBSERVER_H
 
-#include <map>
 #include "../pedestrian/AgentsSource.h"
 
-class SimObserver {
+#include <map>
+
+class SimObserver
+{
 public:
-     struct ODRelation {
-          int nrAgents;
-          std::shared_ptr<AgentsSource> src;
-          int goalId;
-     };
+    struct ODRelation {
+        int nrAgents;
+        std::shared_ptr<AgentsSource> src;
+        int goalId;
+    };
 
-     void AddPedestrian(std::shared_ptr<AgentsSource> src, int goalId);
+    void AddPedestrian(std::shared_ptr<AgentsSource> src, int goalId);
 
-     std::map<std::string, ODRelation> GetAllRelations();
+    std::map<std::string, ODRelation> GetAllRelations();
 
 private:
-     std::map<std::string, ODRelation> _odRelations;
+    std::map<std::string, ODRelation> _odRelations;
 };
 
 #endif //JPSCORE_SIMOBSERVER_H

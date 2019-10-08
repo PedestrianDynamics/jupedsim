@@ -30,9 +30,9 @@
 #include "../Router.h"
 #include "general/Filesystem.h"
 
+#include <memory>
 #include <string>
 #include <unordered_map>
-#include <memory>
 
 class Building;
 class Router;
@@ -40,65 +40,64 @@ class AIBrainStorage;
 class NavLine;
 
 //c++11 alias: Container to store options for the router (i. a. sensors)
-using optStorage = std::unordered_map<std::string,std::vector<std::string> >;
+using optStorage = std::unordered_map<std::string, std::vector<std::string>>;
 /**
  * @brief Routing Engine for Cognitive Map/ Smoke Sensor / Perception Abilities
  * \ingroup Router
  *
  */
-class AIRouter: public Router {
+class AIRouter : public Router
+{
 public:
-     AIRouter();
-     AIRouter(int id, RoutingStrategy s);
-     virtual ~AIRouter();
+    AIRouter();
+    AIRouter(int id, RoutingStrategy s);
+    virtual ~AIRouter();
 
 
-     virtual int FindExit(Pedestrian* p);
-     virtual bool Init(Building* b);
+    virtual int FindExit(Pedestrian * p);
+    virtual bool Init(Building * b);
 
-     /**
+    /**
       * @return options involved in the routing algorithm
       */
-     const optStorage &getOptions() const;
+    const optStorage & getOptions() const;
 
-     /**
+    /**
       * Adds further options (key,value) to the optionContainer
       */
-     void addOption(const std::string &key, const std::vector<std::string> &value);
+    void addOption(const std::string & key, const std::vector<std::string> & value);
 
-     /**
+    /**
       * Load extra routing information e.g navigation lines
       */
-     bool LoadRoutingInfos(const fs::path &filename);
+    bool LoadRoutingInfos(const fs::path & filename);
 
-     /**
+    /**
       * Each router is responsible of getting the correct filename
       * and doing other initializations
       */
-     virtual fs::path GetRoutingInfoFile();
+    virtual fs::path GetRoutingInfoFile();
 
-     /**
+    /**
      *Deletes everything that is related to a deleted pedestrian
      *
      *
      **/
-     void DeleteCortex(const Pedestrian* ped);
+    void DeleteCortex(const Pedestrian * ped);
 
 protected:
-
-     /**
+    /**
      * @brief FindDestination
      * @return NavLine: best crossing to get closer to target/landmark
      */
-    int FindDestination(Pedestrian * );
+    int FindDestination(Pedestrian *);
 
 
 private:
+    Building * building;
+    std::unique_ptr<AIBrainStorage> brain_storage;
+    //SensorManager * sensor_manager;
 
-     Building * building;
-     std::unique_ptr<AIBrainStorage>  brain_storage;
-     //SensorManager * sensor_manager;
-
-     // Optional options which are supposed to be used
-     optStorage options;
+    // Optional options which are supposed to be used
+    optStorage options;
 };

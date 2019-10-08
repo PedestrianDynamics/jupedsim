@@ -32,14 +32,15 @@ class Building;
 class Pedestrian;
 class CognitiveMap;
 
-class AbstractSensor {
+class AbstractSensor
+{
 public:
-     AbstractSensor(const Building * b) : building(b) {}
-     virtual ~AbstractSensor();
+    AbstractSensor(const Building * b) : building(b) {}
+    virtual ~AbstractSensor();
 
-     virtual std::string GetName() const = 0;
-     virtual void execute(const Pedestrian *, CognitiveMap& ) const = 0;
+    virtual std::string GetName() const                            = 0;
+    virtual void execute(const Pedestrian *, CognitiveMap &) const = 0;
+
 protected:
-     const Building * const building;
-
+    const Building * const building;
 };

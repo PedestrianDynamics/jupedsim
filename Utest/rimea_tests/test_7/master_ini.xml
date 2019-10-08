@@ -2,49 +2,35 @@
 
 <JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 
-	<!-- seed used for initialising random generator -->
 	<seed>1254</seed>
 	<max_sim_time>1000</max_sim_time>
-	
-	<!-- geometry file -->
+
 	<geometry>../geometry.xml</geometry>
-	
-	<!-- trajectories file and format -->
+
 	<trajectories format="xml-plain" fps="8" color_mode="group">
 		<file location="RiMEATest7_traj.xml" />
-		<!--<socket hostname="127.0.0.1" port="8989"/> -->
 	</trajectories>
-	
-	<!-- where to store the logs -->
-	<!-- <logfile>log.txt</logfile> -->
 
-	<!-- traffic information: e.g closed doors -->
 	<traffic_constraints>
 	</traffic_constraints>
 
 	<routing>
 	</routing>
 
-	<!--persons information and distribution -->
-	<agents operational_model_id="1">
+	<agents operational_model_id="2">
 		<agents_distribution>
-			<!-- 20 < age < 30 -->
 			<group group_id="0" agent_parameter_id="1"  subroom_id="0" goal_id="-1" number="50" router_id="1" pre_movement_mean="0" pre_movement_sigma="0" x_min="19.5" x_max="20.5"/>
-			<!-- 30 < age < 50 -->
 			<group group_id="1" agent_parameter_id="2"  subroom_id="0" goal_id="-1" number="50" router_id="1" pre_movement_mean="30" pre_movement_sigma="0" x_min="14.5" x_max="15.5"/>
-			<!-- 50 < age < 80 -->
 			<group group_id="2" agent_parameter_id="3"  subroom_id="0" goal_id="-1" number="50" router_id="1" pre_movement_mean="60" pre_movement_sigma="0" x_min="9.5" x_max="10.5"/>
-			<!-- handicapped -->
 			<group group_id="3"  agent_parameter_id="4"  subroom_id="0" goal_id="-1" number="50"  router_id="1"  pre_movement_mean="90" pre_movement_sigma="0" x_min="4.5" x_max="5.5"/>
 		</agents_distribution>
 	</agents>
 
-	<!-- These parameters may be overwritten -->
 	<operational_models>
 		<model operational_model_id="1" description="gcfm">
 			<model_parameters>
 				<solver>euler</solver>
-				<stepsize>0.01</stepsize>
+				<stepsize>0.009615</stepsize>
 				<exit_crossing_strategy>4</exit_crossing_strategy>
 				<linkedcells enabled="true" cell_size="2.2" />
 				<force_ped nu="0.0" dist_max="3" disteff_max="2" interpolation_width="0.1" />

@@ -30,22 +30,22 @@
 #include "geometry/Building.h"
 #include "geometry/SubRoom.h"
 #include "pedestrian/Pedestrian.h"
-#include "routing/smoke_router/cognitiveMap/cognitivemap.h"
 #include "routing/smoke_router/NavigationGraph.h"
+#include "routing/smoke_router/cognitiveMap/cognitivemap.h"
 
-JamSensor::~JamSensor()
-{
-}
+JamSensor::~JamSensor() {}
 
 std::string JamSensor::GetName() const
 {
     return "JamSensor";
 }
 
-void JamSensor::execute(const Pedestrian * pedestrian, CognitiveMap &cognitive_map) const
+void JamSensor::execute(const Pedestrian * pedestrian, CognitiveMap & cognitive_map) const
 {
-    SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
-    GraphVertex * vertex = cognitive_map.GetGraphNetwork()->GetNavigationGraph()->operator [](sub_room);
+    SubRoom * sub_room =
+        building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
+    GraphVertex * vertex =
+        cognitive_map.GetGraphNetwork()->GetNavigationGraph()->operator[](sub_room);
     const GraphVertex::EdgesContainer * edges = vertex->GetAllOutEdges();
 
     for(GraphVertex::EdgesContainer::const_iterator it = edges->begin(); it != edges->end(); ++it) {
@@ -54,11 +54,14 @@ void JamSensor::execute(const Pedestrian * pedestrian, CognitiveMap &cognitive_m
 
         double pedestrians_count = 0;
         if((*it)->GetSrc()) {
-//            const std::vector<Pedestrian*>& pedestrians = (*it)->GetSrc()->GetSubRoom()->GetAllPedestrians();
-            std::vector<Pedestrian*> pedestrians;
+            //            const std::vector<Pedestrian*>& pedestrians = (*it)->GetSrc()->GetSubRoom()->GetAllPedestrians();
+            std::vector<Pedestrian *> pedestrians;
             const SubRoom * sub_room_src = (*it)->GetSrc()->GetSubRoom();
-            building->GetPedestrians(sub_room_src->GetRoomID(), sub_room_src->GetSubRoomID(), pedestrians);
-            for(std::vector<Pedestrian*>::const_iterator ped = pedestrians.begin(); ped != pedestrians.end(); ++ped) {
+            building->GetPedestrians(
+                sub_room_src->GetRoomID(), sub_room_src->GetSubRoomID(), pedestrians);
+            for(std::vector<Pedestrian *>::const_iterator ped = pedestrians.begin();
+                ped != pedestrians.end();
+                ++ped) {
                 /**
                  * If other pedestrians are heading the same destination (corresponding to the edge)
                  * they are counted.
@@ -67,27 +70,27 @@ void JamSensor::execute(const Pedestrian * pedestrian, CognitiveMap &cognitive_m
                  * THIS IS JUST A PROOF OF CONCEPT.
                  * PARAMETERS SHOULD BE CALIBRATED!
                  */
-                if((*ped)->GetExitIndex() == (*it)->GetCrossing()->GetUniqueID() && (*it)->GetCrossing()->DistTo((*ped)->GetPos()) < own_distance) {
+                if((*ped)->GetExitIndex() == (*it)->GetCrossing()->GetUniqueID() &&
+                   (*it)->GetCrossing()->DistTo((*ped)->GetPos()) < own_distance) {
                     if((*ped)->GetV().Norm() > 1.0 || (*ped)->GetV().Norm() == 0.0) {
                         pedestrians_count = pedestrians_count + 1;
                     } else {
-                        pedestrians_count = pedestrians_count +2;
+                        pedestrians_count = pedestrians_count + 2;
                     }
                 }
-
             }
-
-
         }
         if((*it)->GetDest()) {
-//            const std::vector<Pedestrian*>& pedestrians = (*it)->GetDest()->GetSubRoom()->GetAllPedestrians();
-            std::vector<Pedestrian*> pedestrians;
+            //            const std::vector<Pedestrian*>& pedestrians = (*it)->GetDest()->GetSubRoom()->GetAllPedestrians();
+            std::vector<Pedestrian *> pedestrians;
             const SubRoom * sub_room_dest = (*it)->GetDest()->GetSubRoom();
-            building->GetPedestrians(sub_room_dest->GetRoomID(), sub_room_dest->GetSubRoomID(), pedestrians);
+            building->GetPedestrians(
+                sub_room_dest->GetRoomID(), sub_room_dest->GetSubRoomID(), pedestrians);
 
-            for(std::vector<Pedestrian*>::const_iterator ped = pedestrians.begin(); ped != pedestrians.end(); ++ped) {
+            for(std::vector<Pedestrian *>::const_iterator ped = pedestrians.begin();
+                ped != pedestrians.end();
+                ++ped) {
                 if((*ped)->GetExitIndex() == (*it)->GetCrossing()->GetUniqueID()) {
-
                     if((*ped)->GetV().Norm() > 0)
                         pedestrians_count = pedestrians_count + 2;
                 }
@@ -97,8 +100,7 @@ void JamSensor::execute(const Pedestrian * pedestrian, CognitiveMap &cognitive_m
         //normalize the pedestrian count with the door width
         double pedestrians_normalized = pedestrians_count / (*it)->GetCrossing()->Length();
 
-        if(pedestrians_normalized > 0.0 && pedestrians_count > 7) (*it)->SetFactor(pedestrians_normalized, GetName());
-
-
+        if(pedestrians_normalized > 0.0 && pedestrians_count > 7)
+            (*it)->SetFactor(pedestrians_normalized, GetName());
     }
 }

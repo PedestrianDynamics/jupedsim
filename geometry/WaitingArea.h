@@ -35,8 +35,8 @@
 #include <vector>
 
 class Building;
-class WaitingArea : public Goal{
-
+class WaitingArea : public Goal
+{
 protected:
     /**
      * Random device
@@ -92,10 +92,9 @@ protected:
     /**
      * Set of pedestrians who are currently in waiting area
      */
-     std::set<int> _pedInside;
+    std::set<int> _pedInside;
 
 public:
-
     /**
      * Returns the max. number of peds allowed inside waiting area
      * @return max number of peds allowed inside waiting area
@@ -157,8 +156,9 @@ public:
     void SetWaitingTime(int waitingTime);
 
     /**
-     * Returns the ID of the next goal based on the probability
-     * @return ID of the next goal
+     * Returns the ID of the next goal based on the probability. Only
+     * considers open goals.
+     * @return ID of the next goal or own ID if no open goal available
      */
     int GetNextGoal();
 
@@ -184,7 +184,7 @@ public:
      * Returns the number of peds inside the waiting area
      * @return number of peds inside the waiting area
      */
-    int  GetNumPed();
+    int GetNumPed();
 
     /**
      * Returns if the waiting area is waiting
@@ -192,7 +192,7 @@ public:
      * @param[in] building information of the surrounding
      * @return the waiting area is waiting
      */
-    bool IsWaiting(double time, const Building* building);
+    bool IsWaiting(double time, const Building * building);
 
     /**
      * Sets the state of waiting area (id) to isOpen
@@ -217,13 +217,13 @@ public:
      * Returns the map with the following waitings areas and their corresponding probabilities
      * @return map with the following waitings areas and their corresponding probabilities
      */
-    const std::map<int, double>& GetNextGoals() const;
+    const std::map<int, double> & GetNextGoals() const;
 
     /**
      * Sets the map with the following waitings areas and their corresponding probabilities
      * @param[in] nextGoals map with the following waitings areas and their corresponding probabilities
      */
-    bool SetNextGoals(const std::map<int, double>& nextGoals);
+    bool SetNextGoals(const std::map<int, double> & nextGoals);
 
     /**
      * Checks if probabilities combined are 100 percent (1.)

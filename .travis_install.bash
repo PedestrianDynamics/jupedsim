@@ -6,7 +6,8 @@ then
          g++-9 \
          libboost-dev \
          libboost-test-dev \
-         libcgal-dev
+         libcgal-dev \
+         clang-format-8
     if [ "$TOOLCHAIN" = "gcc" ];
     then
         export CXX="g++-9"
@@ -17,5 +18,8 @@ then
     fi
 elif [ "$TRAVIS_OS_NAME" == "osx" ]
 then
-    echo "not yet implemented"
+    if [ "$TOOLCHAIN" == "clang" ]
+    then
+        brew install libomp
+    fi
 fi

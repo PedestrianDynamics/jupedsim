@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?> 
-<routing version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.7/jps_routing.xsd"> 
-    <Hlines> 
-        <Hline id="0" room_id="1" subroom_id="1"> 
-            <vertex px="-2.0" py="-2.0" /> 
-            <vertex px="-2.0" py="-4.0" /> 
-        </Hline> 
-    </Hlines> 
-</routing> 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include<memory>
+#include <memory>
 
 class Landmark;
 using ptrLandmark = std::shared_ptr<Landmark>;
@@ -11,11 +11,12 @@ class Association
 {
 public:
     Association();
-    Association(ptrLandmark landmark, ptrLandmark associated_landmark, bool connected=false);
+    Association(ptrLandmark landmark, ptrLandmark associated_landmark, bool connected = false);
     Association(ptrConnection connection);
     ~Association();
     ptrLandmark GetLandmarkAssociation(ptrLandmark landmark) const;
     ptrConnection GetConnectionAssoziation() const;
+
 private:
     ptrLandmark _landmark;
     ptrLandmark _associatedLandmark;

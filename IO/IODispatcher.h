@@ -41,7 +41,6 @@ class Trajectories;
 
 class AgentsSource;
 
-
 class IODispatcher
 {
 private:

@@ -21,27 +21,27 @@
 #ifndef HYBRID_JPSSERVER_H_
 #define HYBRID_JPSSERVER_H_
 
-#include <thread>
-#include <iostream>
-#include <atomic>
-
-#include <grpc++/grpc++.h>
-#include <set>
-#include "HybridSimulationManager.h"
-#include "hybridsim.grpc.pb.h"
-#include "Latches.h"
 #include "../general/Configuration.h"
 #include "../routing/DirectionStrategy.h"
+#include "HybridSimulationManager.h"
+#include "Latches.h"
+#include "hybridsim.grpc.pb.h"
+
+#include <atomic>
+#include <grpc++/grpc++.h>
+#include <iostream>
+#include <set>
+#include <thread>
 
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
-using hybridsim::HybridSimulation;
 using hybridsim::Agent;
 using hybridsim::Agents;
 using hybridsim::Boolean;
 using hybridsim::Empty;
+using hybridsim::HybridSimulation;
 using hybridsim::LeftClosedRightOpenTimeInterval;
 using hybridsim::Scenario;
 
@@ -51,89 +51,90 @@ class HybridSimulationManager;
 
 class Configuration;
 
-class JPSserver final : public HybridSimulation::Service {
-
+class JPSserver final : public HybridSimulation::Service
+{
 public:
-     /**
+    /**
      * constructor with an agent source manager, which will be
      * responsible for positioning the agents.
      */
-     JPSserver(HybridSimulationManager* hybridSimulationManager, std::shared_ptr<Latches> latches,
-               Configuration* configuration);
+    JPSserver(
+        HybridSimulationManager * hybridSimulationManager,
+        std::shared_ptr<Latches> latches,
+        Configuration * configuration);
 
-     /**
+    /**
       * Destructor
       */
-     virtual ~JPSserver();
+    virtual ~JPSserver();
 
-     void SetSimulation(Simulation& src);
+    void SetSimulation(Simulation & src);
 
-     virtual ::grpc::Status simulatedTimeInerval(::grpc::ServerContext* context,
-               const ::hybridsim::LeftClosedRightOpenTimeInterval* request,
-               ::hybridsim::Empty* response) override;
+    virtual ::grpc::Status simulatedTimeInerval(
+        ::grpc::ServerContext * context,
+        const ::hybridsim::LeftClosedRightOpenTimeInterval * request,
+        ::hybridsim::Empty * response) override;
 
-     virtual ::grpc::Status transferAgent(::grpc::ServerContext* context, const ::hybridsim::Agent* request,
-               ::hybridsim::Boolean* response) override;
+    virtual ::grpc::Status transferAgent(
+        ::grpc::ServerContext * context,
+        const ::hybridsim::Agent * request,
+        ::hybridsim::Boolean * response) override;
 
-     virtual ::grpc::Status receiveTrajectories(::grpc::ServerContext* context, const ::hybridsim::Empty* request,
-               ::hybridsim::Trajectories* response) override;
+    virtual ::grpc::Status receiveTrajectories(
+        ::grpc::ServerContext * context,
+        const ::hybridsim::Empty * request,
+        ::hybridsim::Trajectories * response) override;
 
-     virtual ::grpc::Status retrieveAgents(::grpc::ServerContext* context, const ::hybridsim::Empty* request,
-               ::hybridsim::Agents* response) override;
+    virtual ::grpc::Status retrieveAgents(
+        ::grpc::ServerContext * context,
+        const ::hybridsim::Empty * request,
+        ::hybridsim::Agents * response) override;
 
-     virtual ::grpc::Status shutdown(::grpc::ServerContext* context, const ::hybridsim::Empty* request,
-               ::hybridsim::Empty* response) override;
+    virtual ::grpc::Status shutdown(
+        ::grpc::ServerContext * context,
+        const ::hybridsim::Empty * request,
+        ::hybridsim::Empty * response) override;
 
-     virtual ::grpc::Status initScenario(::grpc::ServerContext* context, const ::hybridsim::Scenario* request,
-               ::hybridsim::Empty* response) override;
+    virtual ::grpc::Status initScenario(
+        ::grpc::ServerContext * context,
+        const ::hybridsim::Scenario * request,
+        ::hybridsim::Empty * response) override;
 
 
-
-     //void SetAgentsSourcesManager(const AgentsSourcesManager& src) const;
+    //void SetAgentsSourcesManager(const AgentsSourcesManager& src) const;
 
 private:
-     std::shared_ptr<Latches> _latches;
-     Simulation* _SimManager;
-     HybridSimulationManager* _HybridSimulationManager;
-     Configuration* _configuration;
+    std::shared_ptr<Latches> _latches;
+    Simulation * _SimManager;
+    HybridSimulationManager * _HybridSimulationManager;
+    Configuration * _configuration;
 
-     std::map<int, std::string> _mapExtID2JPSID;
-     std::map<int, std::string> _mapExtLinkID2JPSRoomID;
-     std::set<std::string> _mappedExtLinkIDs;
+    std::map<int, std::string> _mapExtID2JPSID;
+    std::map<int, std::string> _mapExtLinkID2JPSRoomID;
+    std::set<std::string> _mappedExtLinkIDs;
 
-     inline void AddMappedExtLinkID(std::string linkID)
-     {
-          _mappedExtLinkIDs.insert(linkID);
-     }
+    inline void AddMappedExtLinkID(std::string linkID) { _mappedExtLinkIDs.insert(linkID); }
 
-     inline bool IsExtLinkIDMapped(std::string linkID)
-     {
-          return _mappedExtLinkIDs.find(linkID)!=_mappedExtLinkIDs.end();
-     }
+    inline bool IsExtLinkIDMapped(std::string linkID)
+    {
+        return _mappedExtLinkIDs.find(linkID) != _mappedExtLinkIDs.end();
+    }
 
-     inline void MapExtLinkID2JPSRoomID(int jpsRoomID, std::string linkID)
-     {
-          _mapExtLinkID2JPSRoomID[jpsRoomID] = linkID;
-     }
+    inline void MapExtLinkID2JPSRoomID(int jpsRoomID, std::string linkID)
+    {
+        _mapExtLinkID2JPSRoomID[jpsRoomID] = linkID;
+    }
 
-     inline std::string GetLinkID(int jpsRoomID)
-     {
-          return _mapExtLinkID2JPSRoomID[jpsRoomID];
-     }
+    inline std::string GetLinkID(int jpsRoomID) { return _mapExtLinkID2JPSRoomID[jpsRoomID]; }
 
-     inline void MapExtIdToJPSID(int jpsID, std::string matsimID)
-     {
-          _mapExtID2JPSID[jpsID] = matsimID;
-     }
+    inline void MapExtIdToJPSID(int jpsID, std::string matsimID)
+    {
+        _mapExtID2JPSID[jpsID] = matsimID;
+    }
 
-     inline std::string GEtExtId(int jpsID)
-     {
-          return _mapExtID2JPSID[jpsID];
-     }
+    inline std::string GEtExtId(int jpsID) { return _mapExtID2JPSID[jpsID]; }
 
-     std::thread _t;
-
-
+    std::thread _t;
 };
 
 #endif /* HYBRID_JPSSERVER_H_ */

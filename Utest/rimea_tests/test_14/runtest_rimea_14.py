@@ -29,17 +29,26 @@ from sys import *
 sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
+import time
 
 states = ["short", "long", "mixed"]
 
 def run_rimea_test14(inifile, trajfile):
     # Read data
-    data_short = np.loadtxt('trajectories/traj.xml_flow_exit_id_3.dat')
-    data_main = np.loadtxt('trajectories/traj.xml_flow_exit_id_1.dat')
-    
+    if os.path.isfile('flow_exit_id_1_traj.txt'):
+        data_short = np.loadtxt('flow_exit_id_4_traj.txt')
+        data_main = np.loadtxt('flow_exit_id_1_traj.txt')
+
+    elif os.path.isfile('trajectories/traj.xml_flow_exit_id_1.dat'):
+        data_short = np.loadtxt('trajectories/traj.xml_flow_exit_id_4.dat')
+        data_main = np.loadtxt('trajectories/traj.xml_flow_exit_id_1.dat')
+
+    else:
+        print('Can not find Exit Files')
+
     # Cummulative number of peds using the right stair --> short way
     num_short = data_short[-1,-1]
-    
+
     # Cummulative number of peds using the exit
     # Minus
     # Cummulative number of peds using the right stair --> long way
@@ -56,7 +65,8 @@ def run_rimea_test14(inifile, trajfile):
     logging.info("Return state ---> %s", state)
 
 if __name__ == "__main__":
+    start_time=time.time()
     test = JPSRunTestDriver(14, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
     test.run_test(testfunction=run_rimea_test14)
-    logging.info("%s exits with SUCCESS" % (argv[0]))
+    logging.info("%s exits with SUCCESS\nExecution time %.3f seconds." % (argv[0],time.time()-start_time))
     exit(SUCCESS)

@@ -59,7 +59,6 @@
 
 #include "FloorfieldViaFMTrips.h"
 #include "UnivFFviaFMTrips.h"
-
 #include "general/Macros.h"
 #include "geometry/Building.h"
 #include "geometry/GoalManager.h"
@@ -70,7 +69,7 @@ class Pedestrian;
 class OutputHandler;
 
 //log output
-extern OutputHandler* Log;
+extern OutputHandler * Log;
 
 /*!
  * \class FFRouter
@@ -107,20 +106,20 @@ extern OutputHandler* Log;
 class FFRouterTrips : public Router
 {
 public:
-     /**
+    /**
       * A constructor.
       *
       */
-     FFRouterTrips();
-     FFRouterTrips(int id, RoutingStrategy s, bool hasSpecificGoals, Configuration* config);
-     //FFRouter(const Building* const);
+    FFRouterTrips();
+    FFRouterTrips(int id, RoutingStrategy s, bool hasSpecificGoals, Configuration * config);
+    //FFRouter(const Building* const);
 
-     /**
+    /**
       * Destructor
       */
-     virtual ~FFRouterTrips();
+    virtual ~FFRouterTrips();
 
-     /*!
+    /*!
       * \brief Init the router (must be called before use)
       *
       * Init() will construct the graph (nodes = doors, edges = costs) and
@@ -134,9 +133,9 @@ public:
       * \note [any note about the function you might have]
       * \warning [any warning if necessary]
       */
-     virtual bool Init(Building* building);
+    virtual bool Init(Building * building);
 
-     /*!
+    /*!
       * \brief ReInit the router if quickest router is used. Current position of agents is considered.
       *
       * ReInit() will reconstruct the graph (nodes = doors, edges = costs) and
@@ -151,15 +150,15 @@ public:
       * \note [any note about the function you might have]
       * \warning [any warning if necessary]
       */
-     virtual bool ReInit();
+    virtual bool ReInit();
 
-     /*!
+    /*!
       * \brief interface used by __Pedestrian__, sets (*p).exitline/.exitindex
       *
       * additional info: not available
       *
       */
-     virtual int FindExit(Pedestrian* p);
+    virtual int FindExit(Pedestrian * p);
 
     /*!
      * \brief interface used by __Pedestrian__, sets (*p).exitline/.exitindex
@@ -167,67 +166,69 @@ public:
      * additional info: not available
      *
      */
-    int FindExit1(Pedestrian* p);
+    int FindExit1(Pedestrian * p);
 
 
     /*!
       * \brief Perform the FloydWarshall algorithm
       */
-     void FloydWarshall();
+    void FloydWarshall();
 
-//     /*!
-//      * \brief Sets the door that leaves the subroom in _pathsMatrix
-//      *
-//      * Due to the way we calculate door distances (entries in _pathsMatrix), pedestrians in a corridor
-//      * tend to jump from door to door, i.e. they walk to the next door in the correct direction, but they
-//      * do not traverse it. This algorithm searches for the door on the way that really leaves the subroom,
-//      * and sets this door in _pathsMatrix, which in turn is needed by GetPresumableExitRoute().
-//      */
-//     void AvoidDoorHopping();
+    //     /*!
+    //      * \brief Sets the door that leaves the subroom in _pathsMatrix
+    //      *
+    //      * Due to the way we calculate door distances (entries in _pathsMatrix), pedestrians in a corridor
+    //      * tend to jump from door to door, i.e. they walk to the next door in the correct direction, but they
+    //      * do not traverse it. This algorithm searches for the door on the way that really leaves the subroom,
+    //      * and sets this door in _pathsMatrix, which in turn is needed by GetPresumableExitRoute().
+    //      */
+    //     void AvoidDoorHopping();
 
-     /*!
+    /*!
       * \brief set mode (shortest, quickest, ...)
       */
-      void SetMode(std::string s);
-      bool MustReInit();
-      void SetRecalc(double t);
+    void SetMode(std::string s);
+    bool MustReInit();
+    void SetRecalc(double t);
 
-      virtual void Update();
+    virtual void Update();
 
 private:
-
 protected:
-     Configuration* _config;
-     std::map< std::pair<int, int> , double > _distMatrix;
-     std::map< std::pair<int, int> , int >    _pathsMatrix;
-     //std::map< std::pair<int, int> , SubRoom* > _subroomMatrix;
-     std::vector<int>                         _allDoorUIDs;
-     std::vector<int>                         _localShortestSafedPeds;
-     std::vector<int>                         _directionalEscalatorsUID;
-     std::vector<std::pair<int, int>>         _penaltyList;
-     const Building*                          _building;
-     std::map<int, UnivFFviaFMTrips*>     _locffviafm; // the actual type might be CentrePointLocalFFViaFM
-     FloorfieldViaFMTrips*                         _globalFF;
-     std::map<int, Transition*>               _TransByUID;
-     std::map<int, Transition*>               _ExitsByUID;
-     std::map<int, Crossing*>                 _CroTrByUID;
+    Configuration * _config;
+    std::map<std::pair<int, int>, double> _distMatrix;
+    std::map<std::pair<int, int>, int> _pathsMatrix;
+    //std::map< std::pair<int, int> , SubRoom* > _subroomMatrix;
+    std::vector<int> _allDoorUIDs;
+    std::vector<int> _localShortestSafedPeds;
+    std::vector<int> _directionalEscalatorsUID;
+    std::vector<std::pair<int, int>> _penaltyList;
+    const Building * _building;
+    std::map<int, UnivFFviaFMTrips *>
+        _locffviafm; // the actual type might be CentrePointLocalFFViaFM
+    FloorfieldViaFMTrips * _globalFF;
+    std::map<int, Transition *> _TransByUID;
+    std::map<int, Transition *> _ExitsByUID;
+    std::map<int, Crossing *> _CroTrByUID;
 
-     std::map<int, int>     _goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
-     std::map<int, int>     _goalToLineUIDmap2;
-     std::map<int, int>     _goalToLineUIDmap3;
-     std::map<int, int>     _finalDoors; // _finalDoors[i] the UID of the last door the pedestrian with ID i wants to walk through
+    std::map<int, int>
+        _goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
+    std::map<int, int> _goalToLineUIDmap2;
+    std::map<int, int> _goalToLineUIDmap3;
+    std::map<int, int>
+        _finalDoors; // _finalDoors[i] the UID of the last door the pedestrian with ID i wants to walk through
 
-     int _mode;
-     double _timeToRecalc = 0.;
-     double _recalc_interval;
-     bool _plzReInit = false;
-     bool _hasSpecificGoals;
-     bool _targetWithinSubroom;
-     // If we use CentrePointDistance (i.e. CentrePointLocalFFViaFM), some algorithms can maybe be simplified
-     // (AvoidDoorHopping and _subroomMatrix might be unnecessary, and some code in FindExit could go). --f.mack
-     bool _useCentrePointDistance = true;
-     //output filename counter: cnt
-     static int _cnt;
+    int _mode;
+    double _timeToRecalc = 0.;
+    double _recalc_interval;
+    bool _plzReInit = false;
+    bool _hasSpecificGoals;
+    bool _targetWithinSubroom;
+    // If we use CentrePointDistance (i.e. CentrePointLocalFFViaFM), some algorithms can maybe be simplified
+    // (AvoidDoorHopping and _subroomMatrix might be unnecessary, and some code in FindExit could go). --f.mack
+    bool _useCentrePointDistance = true;
+    //output filename counter: cnt
+    static int _cnt;
 
-     GoalManager goalManager;
+    GoalManager goalManager;
 };

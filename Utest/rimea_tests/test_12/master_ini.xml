@@ -2,31 +2,15 @@
 
 <JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 
-  <!-- seed used for initialising random generator -->
   <seed>12542</seed>
-  <max_sim_time>1000</max_sim_time> 
-  <!-- geometry file -->
+  <max_sim_time>1000</max_sim_time>
   <geometry>../geometry.xml</geometry>
-  <!-- traectories file and format -->
   <trajectories format="xml-plain" fps="8">
     <file location="2.0_TrajBottleneck.xml"/>
   </trajectories>
-  <!-- where to store the logs -->
   <logfile>log</logfile>
 
-  <!-- traffic information: e.g closed doors or smoked rooms -->
   <traffic_constraints>
-    <!-- room states are: good or smoked -->
-    <!-- 		<rooms> -->
-    <!-- 			<room room_id="0" state="good" /> -->
-    <!-- 		</rooms> -->
-    <!-- 		<rooms> -->
-    <!-- 			<room room_id="1" state="good" /> -->
-    <!-- 		</rooms> -->
-    <!-- doors states are: close or open -->
-    <!-- <doors> -->
-    <!--   <door trans_id="2" caption="" state="open" /> -->
-    <!-- </doors> -->
   </traffic_constraints>
   <routing>
     <goals>
@@ -42,20 +26,13 @@
     </goals>
   </routing>
 
-  <!--persons information and distribution -->
   <agents operational_model_id="2">
     <agents_distribution>
       <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="150" goal_id="0" router_id="1" x_min="4" x_max="9" y_min="-4.5" y_max="4.5"/>
-
-      <!-- <group group_id="0" room_id="0" subroom_id="2" number="4" goal_id="0" router_id="1" route_id="" /> -->
-      <!-- <group group_id="1" room_id="1"  number="10" goal_id="0" router_id="1" route_id="" /> -->
     </agents_distribution>
 
-    <!-- frequency in persons/minute -->
-    <!-- 		<agents_sources/> -->
   </agents>
 
-  <!-- These parameters may be overwritten -->
   <operational_models>
     <model operational_model_id="1" description="gcfm">
         <model_parameters>
@@ -84,8 +61,6 @@
             <linkedcells enabled="true" cell_size="2.2" />
             <force_ped nu="0.3"  b="0.034" c="2.451"/>
             <force_wall nu="1.5" b="0.034" c="2.451"/>
-            <!-- <force_ped nu="1"  b="0.06" c="3.45"/> -->
-            <!-- <force_wall nu="5" b="0.4" c="10"/> -->
         </model_parameters>
         <agent_parameters agent_parameter_id="1">
             <v0 mu="1.33" sigma="0.05" />
@@ -128,7 +103,6 @@
   <route_choice_models>
     <router router_id="1" description="global_shortest">
       <parameters>
-        <!-- <navigation_lines file="routing.xml" /> -->
       </parameters>
     </router>
   </route_choice_models>

@@ -12,17 +12,17 @@ public:
     ~YouAreHerePointer();
 
     //Getter
-    const Point& GetPos() const;
-    const double& GetDirection() const;
-    const Pedestrian* GetPed() const;
+    const Point & GetPos() const;
+    const double & GetDirection() const;
+    const Pedestrian * GetPed() const;
 
     //Setter
-    void SetPos(const Point& point);
+    void SetPos(const Point & point);
     void SetDirection();
-    void SetPed(const Pedestrian* ped);
+    void SetPed(const Pedestrian * ped);
 
     //Update
-    void UpdateYAH(const Point& move);
+    void UpdateYAH(const Point & move);
 
     //Difference pos real-cogmap
     const Point GetPosDiff();
@@ -31,12 +31,11 @@ private:
     Point _pos;
     Point _oldpos;
 
-    const Pedestrian* _ped;
+    const Pedestrian * _ped;
 
     //Direction
     double _angle;
 
 
     //Region
-
 };

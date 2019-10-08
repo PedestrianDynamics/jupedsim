@@ -32,11 +32,11 @@ class Knot
 {
 public:
     Knot();
-    Knot(const double &x, const double &y, const double &value=0);
+    Knot(const double & x, const double & y, const double & value = 0);
     ~Knot();
 
-    void SetValue(const double &value);
-    const double &GetValue() const;
+    void SetValue(const double & value);
+    const double & GetValue() const;
 
 private:
     double _x;

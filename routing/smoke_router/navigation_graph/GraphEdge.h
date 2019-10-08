@@ -37,7 +37,7 @@ class GraphVertex;
 class Crossing;
 
 //log output
-extern OutputHandler* Log;
+extern OutputHandler * Log;
 
 /**
  * @brief Graph Edge.
@@ -47,44 +47,46 @@ extern OutputHandler* Log;
 class GraphEdge
 {
 public:
-     typedef std::map<std::string, std::pair<double, double> > FactorContainer;
+    typedef std::map<std::string, std::pair<double, double>> FactorContainer;
 
-     GraphEdge(const GraphVertex * const s, const GraphVertex * const d, const Crossing * const crossing);
-     GraphEdge(GraphEdge const & ge);
-     virtual ~GraphEdge();
+    GraphEdge(
+        const GraphVertex * const s,
+        const GraphVertex * const d,
+        const Crossing * const crossing);
+    GraphEdge(GraphEdge const & ge);
+    virtual ~GraphEdge();
 
-     void CalcApproximateDistance();
+    void CalcApproximateDistance();
 
-     // Getter collection
-     const GraphVertex * GetDest() const;
-     const GraphVertex * GetSrc() const;
-     const Crossing * GetCrossing() const;
+    // Getter collection
+    const GraphVertex * GetDest() const;
+    const GraphVertex * GetSrc() const;
+    const Crossing * GetCrossing() const;
 
-     double GetApproximateDistance() const;
-     double GetApproximateDistance(const Point &) const;
-     void SetFactor(double factor, std::string name);
-     double GetRoomToFloorFactor() const;
-     double GetFactor() const;
-     double GetSpecificFactor(std::string name) const;
-     double GetFactorWithDistance(double distance) const;
-     double GetWeight(const Point &) const;
-     bool IsExit() const;
+    double GetApproximateDistance() const;
+    double GetApproximateDistance(const Point &) const;
+    void SetFactor(double factor, std::string name);
+    double GetRoomToFloorFactor() const;
+    double GetFactor() const;
+    double GetSpecificFactor(std::string name) const;
+    double GetFactorWithDistance(double distance) const;
+    double GetWeight(const Point &) const;
+    bool IsExit() const;
 
 private:
-     const GraphVertex  * const _src;
-     const GraphVertex  * const _dest;
-     const Crossing  * const _crossing;
+    const GraphVertex * const _src;
+    const GraphVertex * const _dest;
+    const Crossing * const _crossing;
 
-     /**
+    /**
       * Factor Bag
       *
       * The Factor map is filled up by sensors. The key string is for identification while sharing information.
       * The second pair value is the GlobalTime value from Pedestrian Class of this information.
       * For calculating the weight we just iterate over the factors and dont care which factors we acutally use.
       */
-     FactorContainer factors;
+    FactorContainer factors;
 
-     //WEIGHTS DEPRECATED!
-     double _approximate_distance;
-
+    //WEIGHTS DEPRECATED!
+    double _approximate_distance;
 };
