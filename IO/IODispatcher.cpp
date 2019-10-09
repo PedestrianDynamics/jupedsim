@@ -590,7 +590,7 @@ void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building * building, 
     Write("#COLOR: color of the ellipse");
 
     // Add info for optional output options
-    for(auto option : _optionalOutputOptions) {
+    for(const auto & option : _optionalOutputOptions) {
         Write(_optionalOutputInfo[option]);
     }
     Write("\n");
