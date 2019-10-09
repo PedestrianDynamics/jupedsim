@@ -643,7 +643,7 @@ void TrajectoriesFLAT::WriteFrame(int frameNr, Building * building)
             color);
 
         std::string frame(tmp);
-        for(auto option : _optionalOutputOptions) {
+        for(const auto & option : _optionalOutputOptions) {
             frame.append(_optionalOutput[option](ped));
         }
 
