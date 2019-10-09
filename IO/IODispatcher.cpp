@@ -599,7 +599,7 @@ void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building * building, 
     std::string header("#ID\tFR\tX\tY\tZ\tA\tB\tANGLE\tCOLOR\t");
 
     // Add header for optional output options
-    for(auto option : _optionalOutputOptions) {
+    for(const auto & option : _optionalOutputOptions) {
         header.append(_optionalOutputHeader[option]);
     }
     Write(header);
