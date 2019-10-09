@@ -367,7 +367,7 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         }
 
         if(xTrajectories->FirstChild("optional_output")) {
-            Log->Write("WARNING: These optional options do only work with plain output format!");
+            Logging::Warning("These optional options do only work with plain output format!");
 
             auto node = xTrajectories->FirstChildElement("optional_output");
             //check if speed is wanted
