@@ -6,7 +6,8 @@ then
          g++-9 \
          libboost-dev \
          libboost-test-dev \
-         libcgal-dev
+         libcgal-dev \
+         clang-format-8
     if [ "$TOOLCHAIN" = "gcc" ];
     then
         export CXX="g++-9"

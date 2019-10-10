@@ -27,84 +27,82 @@
 
 #include "Pedestrian.h"
 
-std::vector<Pedestrian*> AgentsQueueIn::_agentsQueue;
-std::vector<Pedestrian*> AgentsQueueOut::_agentsQueue;
+std::vector<Pedestrian *> AgentsQueueIn::_agentsQueue;
+std::vector<Pedestrian *> AgentsQueueOut::_agentsQueue;
 
 std::mutex AgentsQueueIn::_queueMutex;
 std::mutex AgentsQueueOut::_queueMutex;
 
 
-void AgentsQueueIn::Add(std::vector<Pedestrian*>& peds)
+void AgentsQueueIn::Add(std::vector<Pedestrian *> & peds)
 {
-     _queueMutex.lock();
-     _agentsQueue.insert(_agentsQueue.end(),peds.begin(),peds.end());
-     _queueMutex.unlock();
+    _queueMutex.lock();
+    _agentsQueue.insert(_agentsQueue.end(), peds.begin(), peds.end());
+    _queueMutex.unlock();
 }
 
-void AgentsQueueIn::GetandClear(std::vector<Pedestrian*>& peds)
+void AgentsQueueIn::GetandClear(std::vector<Pedestrian *> & peds)
 {
-     _queueMutex.lock();
+    _queueMutex.lock();
 
-     if(_agentsQueue.size()!=0)
-     {
-          peds.insert(peds.end(),_agentsQueue.begin(), _agentsQueue.end());
-          //_agentsQueue.pop_back();
-          _agentsQueue.clear();
-     }
-     _queueMutex.unlock();
+    if(_agentsQueue.size() != 0) {
+        peds.insert(peds.end(), _agentsQueue.begin(), _agentsQueue.end());
+        //_agentsQueue.pop_back();
+        _agentsQueue.clear();
+    }
+    _queueMutex.unlock();
 }
 
 bool AgentsQueueIn::IsEmpty()
 {
-     return (_agentsQueue.size()==0);
+    return (_agentsQueue.size() == 0);
 }
 
 int AgentsQueueIn::Size()
 {
-     return _agentsQueue.size();
+    return _agentsQueue.size();
 }
 
 /////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
 
-void AgentsQueueOut::Add(std::vector<Pedestrian*>& peds)
+void AgentsQueueOut::Add(std::vector<Pedestrian *> & peds)
 {
-     _queueMutex.lock();
-     _agentsQueue.insert(_agentsQueue.end(),peds.begin(),peds.end());
+    _queueMutex.lock();
+    _agentsQueue.insert(_agentsQueue.end(), peds.begin(), peds.end());
 
-     //todo: Can save time using a map
-     std::sort( _agentsQueue.begin(), _agentsQueue.end() );
-     _agentsQueue.erase( std::unique( _agentsQueue.begin(), _agentsQueue.end() ), _agentsQueue.end() );
+    //todo: Can save time using a map
+    std::sort(_agentsQueue.begin(), _agentsQueue.end());
+    _agentsQueue.erase(std::unique(_agentsQueue.begin(), _agentsQueue.end()), _agentsQueue.end());
 
-     _queueMutex.unlock();
+    _queueMutex.unlock();
 }
 
-void AgentsQueueOut::Add(Pedestrian* ped)
+void AgentsQueueOut::Add(Pedestrian * ped)
 {
-     _queueMutex.lock();
-     _agentsQueue.push_back(ped);
-     _queueMutex.unlock();
+    _queueMutex.lock();
+    _agentsQueue.push_back(ped);
+    _queueMutex.unlock();
 }
 
-void AgentsQueueOut::GetandClear(std::vector<Pedestrian*>& peds)
+void AgentsQueueOut::GetandClear(std::vector<Pedestrian *> & peds)
 {
-     _queueMutex.lock();
+    _queueMutex.lock();
 
-     if(_agentsQueue.size()!=0)
-     {
-          peds.insert(peds.end(),_agentsQueue.begin(), _agentsQueue.end());
-          //_agentsQueue.pop_back();
-          _agentsQueue.clear();
-     }
-     _queueMutex.unlock();
+    if(_agentsQueue.size() != 0) {
+        peds.insert(peds.end(), _agentsQueue.begin(), _agentsQueue.end());
+        //_agentsQueue.pop_back();
+        _agentsQueue.clear();
+    }
+    _queueMutex.unlock();
 }
 
 bool AgentsQueueOut::IsEmpty()
 {
-     return (_agentsQueue.size()==0);
+    return (_agentsQueue.size() == 0);
 }
 
 int AgentsQueueOut::Size()
 {
-     return _agentsQueue.size();
+    return _agentsQueue.size();
 }

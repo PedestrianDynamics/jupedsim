@@ -57,7 +57,7 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
         for(int i : {-5, -4, -3, -2, -1, 1, 2, 3, 4}) {
             Point P1(PI / i, PI * i);
             Point P2(i, std::sin(PI / i));
-            Line  L1(P1, P2);
+            Line L1(P1, P2);
             Point normal = L1.NormalVec();
             Point diff   = P2 - P1;
             REQUIRE(normal.ScalarProduct(diff) == Approx(0).margin(1E-12));
@@ -66,14 +66,14 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
 
     SECTION("Line Shortest Point")
     {
-        Point         PA(-2, 4);
-        Point         PB(14, 9);
-        Line          L1(PA, PB);
+        Point PA(-2, 4);
+        Point PB(14, 9);
+        Line L1(PA, PB);
         const Point & DPAB = PA - PB;
         for(float i = -20; i < 20; ++i) {
             i = (i == 0) ? 0.5 : i;
-            Point  P1(i, std::sin(PI / i));
-            Point  P2     = L1.ShortestPoint(P1);
+            Point P1(i, std::sin(PI / i));
+            Point P2      = L1.ShortestPoint(P1);
             double lambda = (P1 - PB).ScalarProduct(DPAB) / DPAB.ScalarProduct(DPAB);
             if(lambda > 1) {
                 REQUIRE(P2 == PA);
@@ -100,8 +100,8 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
         Point P2(41.4647, 124.485);
         Point P3(38.4046, 104.715);
         Point P4(33.7146, 104.715);
-        Line  L2(P1, P2);
-        Line  L3(P3, P4);
+        Line L2(P1, P2);
+        Line L3(P3, P4);
         REQUIRE_FALSE(L2.IsInLineSegment(P3));
         REQUIRE_FALSE(L2.IsInLineSegment(P4));
         REQUIRE_FALSE(L3.IsInLineSegment(P1));
@@ -122,11 +122,11 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
         for(int i : {-5, -4, -3, -2, -1, 1, 2, 3, 4}) {
             Point P1(PI / i, PI * i);
             Point P2(i, sin(PI / i));
-            Line  L1(P1, P2);
-            Line  L2(P1, P2);
+            Line L1(P1, P2);
+            Line L2(P1, P2);
             REQUIRE(L1 == L2);
             Point P3(i, i);
-            Line  L3(P2, P3);
+            Line L3(P2, P3);
             REQUIRE(L1 != L3);
         }
     }
@@ -136,8 +136,8 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
         Point P1;
         for(int i = -5; i < 5; ++i) {
             i = (i == 0) ? 1 : i;
-            Point  P2(i, sin(PI / i));
-            Line   L1(P1, P2);
+            Point P2(i, sin(PI / i));
+            Line L1(P1, P2);
             double norm = P2.Norm();
             REQUIRE(L1.Length() == norm);
 
@@ -150,7 +150,7 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
     {
         Point P1(0, 0);
         Point P2(10, 0);
-        Line  L1(P1, P2);
+        Line L1(P1, P2);
         for(int i = 0; i < 10; ++i) {
             Line L2(Point(i, 0), Point(i + 4, 0));
             REQUIRE(L1.Overlapp(L2));
@@ -168,7 +168,7 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
     {
         Point P1(-1, 0);
         Point P2(1, 0);
-        Line  L1(P1, P2);
+        Line L1(P1, P2);
 
         for(int i = 0; i <= 6; ++i) {
             Line L2(Point(0, -1), Point(cos(i * PI / 6), sin(i * PI / 6)));
@@ -238,8 +238,8 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
         Point P2(2.3, 6.3);
         Point P3(3.6, 6.6);
         Point P4(3.6, 7.6);
-        Line  L3(P1, P2);
-        Line  L4(P3, P4);
+        Line L3(P1, P2);
+        Line L4(P3, P4);
         REQUIRE(L1.NearlyInLineSegment(P1));
         REQUIRE(L1.NearlyInLineSegment(P2));
         REQUIRE(L2.NearlyInLineSegment(P3));

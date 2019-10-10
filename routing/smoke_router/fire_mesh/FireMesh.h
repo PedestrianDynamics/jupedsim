@@ -27,30 +27,40 @@
  **/
 #pragma once
 
-#include "JPSfire/generic/Knot.h"
 #include "IO/OutputHandler.h"
+#include "JPSfire/generic/Knot.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 //log output
-extern OutputHandler* Log;
+extern OutputHandler * Log;
 
-using Matrix = std::vector<std::vector<Knot> >;
+using Matrix = std::vector<std::vector<Knot>>;
 
 class FireMesh
 {
 public:
     FireMesh();
-    FireMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const double &cellsize);
-    FireMesh(const std::string &filename);
+    FireMesh(
+        const double & xmin,
+        const double & ymin,
+        const double & xmax,
+        const double & ymax,
+        const double & cellsize);
+    FireMesh(const std::string & filename);
     ~FireMesh();
 
-    void SetUpMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const double &cellsize);
-    const Matrix &GetMesh() const;
+    void SetUpMesh(
+        const double & xmin,
+        const double & ymin,
+        const double & xmax,
+        const double & ymax,
+        const double & cellsize);
+    const Matrix & GetMesh() const;
 
-    double GetKnotValue(const double &x, const double &y) const;
-    void SetKnotValuesFromFile(const std::string &filename);
+    double GetKnotValue(const double & x, const double & y) const;
+    void SetKnotValuesFromFile(const std::string & filename);
 
 
     bool statusMesh() const;
@@ -63,5 +73,4 @@ private:
     double _ymin;
     double _ymax;
     bool _statMesh;
-
 };

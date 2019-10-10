@@ -31,17 +31,17 @@
 class Knowledge
 {
 public:
-     /**
+    /**
       * Constructor
       */
-     Knowledge();
+    Knowledge();
 
-     /**
+    /**
       * Destructor
       */
-     ~Knowledge();
+    ~Knowledge();
 
-     /**
+    /**
       * Initialize the knowledge
       * @param id
       * @param is_closed
@@ -49,80 +49,85 @@ public:
       * @param quality
       * @param refuse
       */
-     void SetState(int id, bool is_closed, double time, double quality, double latency, bool refuse=false);
+    void SetState(
+        int id,
+        bool is_closed,
+        double time,
+        double quality,
+        double latency,
+        bool refuse = false);
 
-     /**
+    /**
       * @return the state of the object. close or open
       */
-     bool GetState() const;
+    bool GetState() const;
 
-     /**
+    /**
       * transmitted knowledge have a lower quality than those gathered by oneself.
       * @return the quality of the knowledge
       */
-     double GetQuality() const;
+    double GetQuality() const;
 
-     /**
+    /**
       * transmitted knowledge have a lower quality than those gathered by oneself.
       * @return the quality of the knowledge
       */
-     void SetQuality(double quality);
+    void SetQuality(double quality);
 
-     /**
+    /**
       *  When was the event recorded
       */
-     double GetTime() const;
+    double GetTime() const;
 
-     /**
+    /**
       * @return whether this knowledge has been refused before
       */
-     bool HasBeenRefused() const;
+    bool HasBeenRefused() const;
 
-     /**
+    /**
       * store but refuse the knowledge.
       * @param state
       */
-     void Refuse(bool state);
+    void Refuse(bool state);
 
-     /**
+    /**
       * print the content of the knowledge as string
       */
-     std::string Dump() const;
+    std::string Dump() const;
 
-     /**
+    /**
       * @return true, if the information can be forwarded
       */
-     bool CanBeForwarded() const;
+    bool CanBeForwarded() const;
 
-     /**
+    /**
       * Set/Get the latency time before forwarding the information
       */
-     void SetLatency(double latency);
+    void SetLatency(double latency);
 
-     /**
+    /**
       * Set/Get the latency time before forwarding the information
       */
-     double GetLatency() const;
+    double GetLatency() const;
 
-     /**
+    /**
       * Update the latency by reducing the specified time.
       * The latency will eventually be 0 and the information will be forwarded.
       * @param minus
       */
-     void DecreaseLatency(double minus);
+    void DecreaseLatency(double minus);
 
 private:
-     /// information quality in [0..1]. 1 is very reliable information
-     double _quality; //
-     /// last time the state was recorded.
-     double _time;
-     /// state 0=open, 1=close
-     bool _isClosed;
-     /// id of the door
-     int _id;
-     /// whether I already accepted or refused that information
-     bool _hasBeenRefusedOnce;
-     /// time to retain this information before forwarding
-     double _latency;
-
+    /// information quality in [0..1]. 1 is very reliable information
+    double _quality; //
+    /// last time the state was recorded.
+    double _time;
+    /// state 0=open, 1=close
+    bool _isClosed;
+    /// id of the door
+    int _id;
+    /// whether I already accepted or refused that information
+    bool _hasBeenRefusedOnce;
+    /// time to retain this information before forwarding
+    double _latency;
 };

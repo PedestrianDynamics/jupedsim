@@ -77,7 +77,7 @@ TEST_CASE("geometry/Point", "[geometry][Point]")
     {
         std::string xpt[] = {"0.25", "1.25", "2.25", "3.25"};
         std::string ypt[] = {"10.25", "11.25", "12.25", "13.25"};
-        Point       p1;
+        Point p1;
         for(double i = 0.25; i < 4; ++i) {
             p1._x = (i);
             p1._y = (i + 10);

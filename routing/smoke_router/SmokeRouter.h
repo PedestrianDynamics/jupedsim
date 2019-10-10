@@ -30,9 +30,9 @@
 #include "general/Filesystem.h"
 #include "routing/Router.h"
 
+#include <memory>
 #include <string>
 #include <unordered_map>
-#include <memory>
 
 class Building;
 class Router;
@@ -41,54 +41,52 @@ class SensorManager;
 class NavLine;
 
 //c++11 alias: Container to store options for the router (i. a. sensors)
-using optStorage = std::unordered_map<std::string,std::vector<std::string> >;
+using optStorage = std::unordered_map<std::string, std::vector<std::string>>;
 /**
  * @brief Smoke router
  *\ingroup Router
  *
  */
-class SmokeRouter: public Router {
+class SmokeRouter : public Router
+{
 public:
-     SmokeRouter();
-     SmokeRouter(int id, RoutingStrategy s);
-     virtual ~SmokeRouter();
+    SmokeRouter();
+    SmokeRouter(int id, RoutingStrategy s);
+    virtual ~SmokeRouter();
 
 
-     virtual int FindExit(Pedestrian* p);
-     virtual bool Init(Building* b);
+    virtual int FindExit(Pedestrian * p);
+    virtual bool Init(Building * b);
 
-     /**
+    /**
       * @return options involved in the routing algorithm
       */
-     const optStorage &getOptions() const;
+    const optStorage & getOptions() const;
 
-     /**
+    /**
       * Adds further options (key,value) to the optionContainer
       */
-     void addOption(const std::string &key, const std::vector<std::string> &value);
+    void addOption(const std::string & key, const std::vector<std::string> & value);
 
-     /**
+    /**
       * Load extra routing information e.g navigation lines
       */
-     bool LoadRoutingInfos(const fs::path &filename);
+    bool LoadRoutingInfos(const fs::path & filename);
 
-     /**
+    /**
       * Each router is responsible of getting the correct filename
       * and doing other initializations
       */
-     virtual fs::path GetRoutingInfoFile();
+    virtual fs::path GetRoutingInfoFile();
 
 protected:
-
-    int FindDestination(Pedestrian * );
+    int FindDestination(Pedestrian *);
 
 private:
+    Building * building;
+    std::shared_ptr<BrainStorage> brain_storage;
+    SensorManager * sensor_manager;
 
-     Building * building;
-     std::shared_ptr<BrainStorage>  brain_storage;
-     SensorManager * sensor_manager;
-
-     // Optional options which are supposed to be used
-     optStorage options;
-
+    // Optional options which are supposed to be used
+    optStorage options;
 };

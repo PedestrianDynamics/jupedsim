@@ -30,45 +30,52 @@
  Wall
  ************************************************************/
 
-Wall::Wall() : Line()
-{
-}
+Wall::Wall() : Line() {}
 
-Wall::Wall(const Point& p1, const Point& p2, const std::string& type) : Line(p1, p2), _type(type)
+Wall::Wall(const Point & p1, const Point & p2, const std::string & type) : Line(p1, p2), _type(type)
 {
 }
 
 void Wall::WriteToErrorLog() const
 {
-     char tmp[CLENGTH];
-     sprintf(tmp, "\t\tWALL: (%f, %f) -- (%f, %f)\n", GetPoint1()._x,
-             GetPoint1()._y, GetPoint2()._x, GetPoint2()._y);
-     Log->Write(tmp);
+    char tmp[CLENGTH];
+    sprintf(
+        tmp,
+        "\t\tWALL: (%f, %f) -- (%f, %f)\n",
+        GetPoint1()._x,
+        GetPoint1()._y,
+        GetPoint2()._x,
+        GetPoint2()._y);
+    Log->Write(tmp);
 }
 
 std::string Wall::Write() const
 {
-     std::string geometry;
-     char wall[500] = "";
-     geometry.append("\t\t<wall>\n");
-     sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",
-             (GetPoint1()._x) * FAKTOR,
-             (GetPoint1()._y) * FAKTOR);
-     geometry.append(wall);
-     sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",
-             (GetPoint2()._x) * FAKTOR,
-             (GetPoint2()._y) * FAKTOR);
-     geometry.append(wall);
-     geometry.append("\t\t</wall>\n");
-     return geometry;
+    std::string geometry;
+    char wall[500] = "";
+    geometry.append("\t\t<wall>\n");
+    sprintf(
+        wall,
+        "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",
+        (GetPoint1()._x) * FAKTOR,
+        (GetPoint1()._y) * FAKTOR);
+    geometry.append(wall);
+    sprintf(
+        wall,
+        "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",
+        (GetPoint2()._x) * FAKTOR,
+        (GetPoint2()._y) * FAKTOR);
+    geometry.append(wall);
+    geometry.append("\t\t</wall>\n");
+    return geometry;
 }
 
-const std::string& Wall::GetType() const
+const std::string & Wall::GetType() const
 {
-     return _type;
+    return _type;
 }
 
-void Wall::SetType(const std::string& type)
+void Wall::SetType(const std::string & type)
 {
-     _type=type;
+    _type = type;
 }

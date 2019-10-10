@@ -28,41 +28,38 @@
 
 #include "pedestrian/Pedestrian.h"
 
-RoutingEngine::RoutingEngine()
-{
-
-}
+RoutingEngine::RoutingEngine() {}
 
 RoutingEngine::~RoutingEngine()
 {
-     for(unsigned int r=0; r<_routersCollection.size(); r++) {
-          delete _routersCollection[r];
-     }
-     _routersCollection.clear();
+    for(unsigned int r = 0; r < _routersCollection.size(); r++) {
+        delete _routersCollection[r];
+    }
+    _routersCollection.clear();
 }
 
 void RoutingEngine::AddFinalDestinationID(int id)
 {
-     for(unsigned int r=0; r<_routersCollection.size(); r++) {
-          _routersCollection[r]->AddFinalDestinationID(id);
-     }
+    for(unsigned int r = 0; r < _routersCollection.size(); r++) {
+        _routersCollection[r]->AddFinalDestinationID(id);
+    }
 }
 
-void RoutingEngine::FindRoute(Pedestrian* ped)
+void RoutingEngine::FindRoute(Pedestrian * ped)
 {
-     ped->FindRoute();
+    ped->FindRoute();
 }
 
-void RoutingEngine::AddRouter(Router* router)
+void RoutingEngine::AddRouter(Router * router)
 {
-     for(unsigned int r=0; r<_routersCollection.size(); r++) {
-          if(_routersCollection[r]->GetStrategy()==router->GetStrategy()) {
-               Log->Write("ERROR: \tDuplicate router found with 'id' [%d].",router->GetID());
-               Log->Write("ERROR: \tDouble check your configuration files");
-               exit(EXIT_FAILURE);
-          }
-     }
-     _routersCollection.push_back(router);
+    for(unsigned int r = 0; r < _routersCollection.size(); r++) {
+        if(_routersCollection[r]->GetStrategy() == router->GetStrategy()) {
+            Log->Write("ERROR: \tDuplicate router found with 'id' [%d].", router->GetID());
+            Log->Write("ERROR: \tDouble check your configuration files");
+            exit(EXIT_FAILURE);
+        }
+    }
+    _routersCollection.push_back(router);
 }
 //
 //const vector<string>& RoutingEngine::GetTrip(int index) const
@@ -78,59 +75,56 @@ void RoutingEngine::AddRouter(Router* router)
 //     }
 //}
 
-const std::vector<Router*> RoutingEngine::GetAvailableRouters() const
+const std::vector<Router *> RoutingEngine::GetAvailableRouters() const
 {
-     return _routersCollection;
+    return _routersCollection;
 }
 
 
-Router* RoutingEngine::GetRouter(RoutingStrategy strategy) const
+Router * RoutingEngine::GetRouter(RoutingStrategy strategy) const
 {
-     for(Router* router:_routersCollection)
-     {
-          if(router->GetStrategy()==strategy)
-               return router;
-     }
-     //Log->Write("ERROR: \t Could not Find any router with Strategy:  [%d].",strategy);
-     return /*(Router*)*/ nullptr;
+    for(Router * router : _routersCollection) {
+        if(router->GetStrategy() == strategy)
+            return router;
+    }
+    //Log->Write("ERROR: \t Could not Find any router with Strategy:  [%d].",strategy);
+    return /*(Router*)*/ nullptr;
 }
 
-Router* RoutingEngine::GetRouter(int id) const
+Router * RoutingEngine::GetRouter(int id) const
 {
-     for(Router* router:_routersCollection)
-     {
-          if(router->GetID()==id)
-               return router;
-     }
-     Log->Write("ERROR: \t Could not Find any router with ID:  [%d].",id);
-     return /*(Router*)*/ nullptr;
+    for(Router * router : _routersCollection) {
+        if(router->GetID() == id)
+            return router;
+    }
+    Log->Write("ERROR: \t Could not Find any router with ID:  [%d].", id);
+    return /*(Router*)*/ nullptr;
 }
 
-bool RoutingEngine::Init(Building* building)
+bool RoutingEngine::Init(Building * building)
 {
-     bool status=true;
-     for(unsigned int r=0; r<_routersCollection.size(); r++) {
-          if(_routersCollection[r]->Init(building)==false)
-               status=false;
-     }
-     return status;
+    bool status = true;
+    for(unsigned int r = 0; r < _routersCollection.size(); r++) {
+        if(_routersCollection[r]->Init(building) == false)
+            status = false;
+    }
+    return status;
 }
 
 bool RoutingEngine::NeedsUpdate() const
 {
-     return _needUpdate;
+    return _needUpdate;
 }
 
 void RoutingEngine::setNeedUpdate(bool needUpdate)
 {
-     _needUpdate = needUpdate;
+    _needUpdate = needUpdate;
 }
 
 void RoutingEngine::UpdateRouter()
 {
-     for (auto* router : _routersCollection){
-          router->Update();
-     }
-     _needUpdate = false;
+    for(auto * router : _routersCollection) {
+        router->Update();
+    }
+    _needUpdate = false;
 }
-

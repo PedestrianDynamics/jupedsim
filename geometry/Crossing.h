@@ -30,19 +30,20 @@
 
 class SubRoom;
 
-class Crossing : public Hline {
+class Crossing : public Hline
+{
 private:
-//     /// TODO ? unique between crossings and transitions ?
+    //     /// TODO ? unique between crossings and transitions ?
     int _doorUsage;
     double _lastPassingTime;
     double _outflowRate; // pedestrians / second
     int _maxDoorUsage;
     double _closingTime; // time to wait until door is reopened
-    double _DT; // flow observation time
-    int _DN; // number of pedestrians that pass the line to trigger measurement
+    double _DT;          // flow observation time
+    int _DN;             // number of pedestrians that pass the line to trigger measurement
     // of the flow
     int _partialDoorUsage; //door usage in _DT
-    double  _lastFlowMeasurement;
+    double _lastFlowMeasurement;
 
 
     std::string _flowAtExit;
@@ -50,10 +51,10 @@ private:
 
 public:
     // last ped that passed was in room {1,2} that many ticks
-//     int _lastTickTime1 = 0;
-//     int _lastTickTime2 = 0;
-//     int _refresh1 = 0;
-//     int _refresh2 = 0;
+    //     int _lastTickTime1 = 0;
+    //     int _lastTickTime2 = 0;
+    //     int _refresh1 = 0;
+    //     int _refresh2 = 0;
 
 
     /**
@@ -126,7 +127,7 @@ public:
     /**
      * @return the other subroom not matching the data
      */
-    virtual SubRoom* GetOtherSubRoom(int roomID, int subroomID) const;
+    virtual SubRoom * GetOtherSubRoom(int roomID, int subroomID) const;
 
     /**
      * Debug output
@@ -143,7 +144,7 @@ public:
      * @param other the other crossing
      * @param subroom returns one of the common subrooms
      */
-    virtual int CommonSubroomWith(Crossing* other, SubRoom* &subroom);
+    virtual int CommonSubroomWith(Crossing * other, SubRoom *& subroom);
 
     /**
      * Increment the number of persons that used that crossing
@@ -168,12 +169,12 @@ public:
     /**
      * @return outflow rate of crossing/transition
      */
-    double  GetOutflowRate() const;
+    double GetOutflowRate() const;
 
     /**
      * @return max of number of agents that can pass crossing/transition
      */
-    int  GetMaxDoorUsage() const;
+    int GetMaxDoorUsage() const;
 
     /**
      * set _maxDoorUsage

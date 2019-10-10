@@ -27,8 +27,8 @@
  **/
 #pragma once
 
-#include "navigation_graph/GraphVertex.h"
 #include "navigation_graph/GraphEdge.h"
+#include "navigation_graph/GraphVertex.h"
 
 #include <string>
 #include <unordered_map>
@@ -49,35 +49,34 @@ class Transition;
  *
  */
 
-class NavigationGraph {
+class NavigationGraph
+{
 public:
-     typedef std::unordered_map<const SubRoom * , GraphVertex *> VerticesContainer;
+    typedef std::unordered_map<const SubRoom *, GraphVertex *> VerticesContainer;
 
-     /****************************
+    /****************************
       * Constructors & Destructors
       ****************************/
-     NavigationGraph(const Building * building);
-     NavigationGraph(const NavigationGraph & ng);
+    NavigationGraph(const Building * building);
+    NavigationGraph(const NavigationGraph & ng);
 
-     virtual ~NavigationGraph();
+    virtual ~NavigationGraph();
 
-     void AddVertex(const SubRoom * const sub_room);
-     void AddEdge(const Crossing * crossing);
-     void AddExit(const Transition * transition);
+    void AddVertex(const SubRoom * const sub_room);
+    void AddEdge(const Crossing * crossing);
+    void AddExit(const Transition * transition);
 
-     GraphVertex * operator[](const SubRoom * const sub_room);
+    GraphVertex * operator[](const SubRoom * const sub_room);
 
-     NavigationGraph::VerticesContainer * GetAllVertices();
+    NavigationGraph::VerticesContainer * GetAllVertices();
 
-     void WriteToDotFile(const std::string filepath) const;
+    void WriteToDotFile(const std::string filepath) const;
 
 
 private:
-     /**
+    /**
       * Vertices and Edges
       */
-     NavigationGraph::VerticesContainer vertices;
-     const Building * const building;
-
-
+    NavigationGraph::VerticesContainer vertices;
+    const Building * const building;
 };

@@ -30,12 +30,13 @@
 
 #include <random>
 
-class AgentsParameters {
+class AgentsParameters
+{
 public:
     /**
      * Constructor
      */
-    AgentsParameters(int id, int seed=1234);
+    AgentsParameters(int id, int seed = 1234);
 
     /**
      * Destructor
@@ -51,7 +52,7 @@ public:
      * Set the ID of the parameter set
      * @param id
      */
-    void SetID(int id);//not implemented
+    void SetID(int id); //not implemented
 
     /**
      * Initialize the desired velocity distribution
@@ -74,28 +75,28 @@ public:
      */
     void InitV0DownStairs(double mean, double stv);
 
-     /**
+    /**
      * Initialize the speed distribution of escalators upstairs
      * @param mean, mean value
      * @param stv, standard deviation
      */
     void InitEscalatorUpStairs(double mean, double stv);
 
-     /**
+    /**
      * Initialize the speed distribution of escalators downstairs
      * @param mean, mean value
      * @param stv, standard deviation
      */
     void InitEscalatorDownStairs(double mean, double stv);
 
-     /**
+    /**
      * Initialize the desired speed distribution walking idle escalators upstairs
      * @param mean, mean value
      * @param stv, standard deviation
      */
     void InitV0IdleEscalatorUpStairs(double mean, double stv);
 
-     /**
+    /**
      * Initialize the desired speed distribution walking idle escalators downstairs
      * @param mean, mean value
      * @param stv, standard deviation
@@ -164,7 +165,7 @@ public:
      */
     double GetV0DownStairs();
 
-     /**
+    /**
      * @return a random number following the distribution
      */
     double GetEscalatorUpStairs();
@@ -255,9 +256,9 @@ private:
     std::normal_distribution<double> _Amin;
     std::normal_distribution<double> _Tau;
     std::normal_distribution<double> _T;
-    double _swayFreqA = 0.44;
-    double _swayFreqB = 0.35;
-    double _swayAmpA = -0.14;
-    double _swayAmpB = 0.21;
-	const double judge = 10000;
+    double _swayFreqA  = 0.44;
+    double _swayFreqB  = 0.35;
+    double _swayAmpA   = -0.14;
+    double _swayAmpB   = 0.21;
+    const double judge = 10000;
 };

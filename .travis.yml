@@ -11,6 +11,7 @@ matrix:
       dist: bionic
       env: TOOLCHAIN=clang
       script:
+       - if [[ $(./third-party/clang-format-hooks/apply-format develop) ]]; then travis_terminate 1; fi
        - ./scripts/setup-deps.sh
        - mkdir build && cd build
        - cmake  .. -DCMAKE_PREFIX_PATH=$(pwd)/../deps -DBUILD_CPPUNIT_TEST=ON -DAIROUTER=ON -DJPSFIRE=ON
@@ -23,6 +24,7 @@ matrix:
       dist: bionic
       env: TOOLCHAIN=gcc
       script:
+       - if [[ $(./third-party/clang-format-hooks/apply-format develop) ]]; then travis_terminate 1; fi
        - ./scripts/setup-deps.sh
        - mkdir build && cd build
        - cmake .. -DCMAKE_PREFIX_PATH=$(pwd)/../deps -DBUILD_CPPUNIT_TEST=ON -DAIROUTER=ON -DJPSFIRE=ON

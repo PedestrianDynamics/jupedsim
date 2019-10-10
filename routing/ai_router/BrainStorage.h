@@ -28,7 +28,6 @@
 #pragma once
 
 #include "Cortex.h"
-
 #include "cognitiveMap/cognitivemap.h"
 #include "perception/visibleenvironment.h"
 
@@ -45,45 +44,47 @@ typedef std::unique_ptr<Cortex> BStorageValueType;
 typedef std::unordered_map<BStorageKeyType, BStorageValueType> BStorageType;
 
 
-
 /**
  * @brief Brain Storage
  *
  * Cares about corteces, creation and delivery
  *
  */
-class AIBrainStorage {
+class AIBrainStorage
+{
 public:
-     AIBrainStorage(const Building * const b, const std::string& cogMapFiles="", const std::string& signFiles="");
+    AIBrainStorage(
+        const Building * const b,
+        const std::string & cogMapFiles = "",
+        const std::string & signFiles   = "");
 
 
-     Cortex* operator[] (BStorageKeyType key);
+    Cortex * operator[](BStorageKeyType key);
 
-     void DeleteCortex(BStorageKeyType ped);
+    void DeleteCortex(BStorageKeyType ped);
 
 
 private:
-     const Building * const _building;
-     BStorageType _corteces;
+    const Building * const _building;
+    BStorageType _corteces;
 
 
-     //perception
-     //Complete environment
-     VisibleEnvironment _visibleEnv;
+    //perception
+    //Complete environment
+    VisibleEnvironment _visibleEnv;
 
-     //cognitive map
-     std::vector<AIRegion> _regions;
-     std::string _cogMapFiles;
-     std::string _signFiles;
+    //cognitive map
+    std::vector<AIRegion> _regions;
+    std::string _cogMapFiles;
+    std::string _signFiles;
 
-     //Cortex
-     void CreateCortex(BStorageKeyType ped);
-     void ParseCogMap(BStorageKeyType ped);
-     void ParseSigns();
+    //Cortex
+    void CreateCortex(BStorageKeyType ped);
+    void ParseCogMap(BStorageKeyType ped);
+    void ParseSigns();
 
 
-     // internal graph network in every room (for locomotion purposes)
-     void InitInternalNetwork(const SubRoom *sub_room);
-     std::unordered_map<const SubRoom*,ptrIntNetwork> _roominternalNetworks;
-
+    // internal graph network in every room (for locomotion purposes)
+    void InitInternalNetwork(const SubRoom * sub_room);
+    std::unordered_map<const SubRoom *, ptrIntNetwork> _roominternalNetworks;
 };

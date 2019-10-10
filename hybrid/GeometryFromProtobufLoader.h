@@ -5,23 +5,24 @@
 #ifndef JPSCORE_GEOMETRYFROMPROTOBUFLOADER_H
 #define JPSCORE_GEOMETRYFROMPROTOBUFLOADER_H
 
-#include "../geometry/GeometryReader.h"
 #include "../general/Configuration.h"
+#include "../geometry/GeometryReader.h"
 
-class GeometryFromProtobufLoader : public GeometryReader {
+class GeometryFromProtobufLoader : public GeometryReader
+{
 public:
-     GeometryFromProtobufLoader(const Configuration* configuration);
+    GeometryFromProtobufLoader(const Configuration * configuration);
 
-     virtual void LoadBuilding(Building* building) override;
+    virtual void LoadBuilding(Building * building) override;
 
-     virtual bool LoadTrafficInfo(Building* building) override;
+    virtual bool LoadTrafficInfo(Building * building) override;
 
 private:
-     const Configuration* _configuration;
+    const Configuration * _configuration;
 
-     bool LoadGeometry(Building* building);
+    bool LoadGeometry(Building * building);
 
-     bool LoadRoutingInfo(Building* building);
+    bool LoadRoutingInfo(Building * building);
 };
 
 #endif //JPSCORE_GEOMETRYFROMPROTOBUFLOADER_H

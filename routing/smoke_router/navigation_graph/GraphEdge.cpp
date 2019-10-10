@@ -27,9 +27,8 @@
 #include "GraphEdge.h"
 
 #include "GraphVertex.h"
-
-#include "geometry/SubRoom.h"
 #include "geometry/Crossing.h"
+#include "geometry/SubRoom.h"
 #include "geometry/Transition.h"
 
 /**
@@ -38,48 +37,68 @@
 
 GraphEdge::~GraphEdge()
 {
-     return;
+    return;
 }
 
-GraphEdge::GraphEdge(const GraphVertex * const s, const GraphVertex  * const d, const Crossing * const crossing)
-     : _src(s), _dest(d), _crossing(crossing)
+GraphEdge::GraphEdge(
+    const GraphVertex * const s,
+    const GraphVertex * const d,
+    const Crossing * const crossing) :
+    _src(s),
+    _dest(d),
+    _crossing(crossing)
 {
-     CalcApproximateDistance();
-
+    CalcApproximateDistance();
 }
 
-GraphEdge::GraphEdge(GraphEdge const &ge)
-     : _src(ge._src), _dest(ge._dest), _crossing(ge._crossing), _approximate_distance(ge._approximate_distance)
+GraphEdge::GraphEdge(GraphEdge const & ge) :
+    _src(ge._src),
+    _dest(ge._dest),
+    _crossing(ge._crossing),
+    _approximate_distance(ge._approximate_distance)
 {
 }
 
 void GraphEdge::CalcApproximateDistance()
 {
-     double distance = 0.0;
-     int count = 0;
-     for(std::vector<Crossing*>::const_iterator it = _src->GetSubRoom()->GetAllCrossings().begin(); it != _src->GetSubRoom()->GetAllCrossings().end(); ++it) {
-          if(_crossing->GetUniqueID() == (*it)->GetUniqueID()) continue;
-          if(GetDest() != nullptr && ((*it)->GetSubRoom1() == GetDest()->GetSubRoom() || (*it)->GetSubRoom2() == GetDest()->GetSubRoom())) continue;
-          count++;
-          distance = distance + (((*it)->GetCentre() - _crossing->GetCentre()).Norm());
-     }
+    double distance = 0.0;
+    int count       = 0;
+    for(std::vector<Crossing *>::const_iterator it = _src->GetSubRoom()->GetAllCrossings().begin();
+        it != _src->GetSubRoom()->GetAllCrossings().end();
+        ++it) {
+        if(_crossing->GetUniqueID() == (*it)->GetUniqueID())
+            continue;
+        if(GetDest() != nullptr && ((*it)->GetSubRoom1() == GetDest()->GetSubRoom() ||
+                                    (*it)->GetSubRoom2() == GetDest()->GetSubRoom()))
+            continue;
+        count++;
+        distance = distance + (((*it)->GetCentre() - _crossing->GetCentre()).Norm());
+    }
 
-     for(std::vector<Transition*>::const_iterator it = _src->GetSubRoom()->GetAllTransitions().begin(); it != _src->GetSubRoom()->GetAllTransitions().end(); ++it) {
-          if(_crossing->GetUniqueID() == (*it)->GetUniqueID()) continue;
-          if(GetDest() != nullptr && ((*it)->GetSubRoom1() == GetDest()->GetSubRoom() || (*it)->GetSubRoom2() == GetDest()->GetSubRoom())) continue;
-          count++;
-          distance = distance + (((*it)->GetCentre() - _crossing->GetCentre()).Norm());
-     }
-     if(count == 0) _approximate_distance = 0;
-     else _approximate_distance = distance/count;
+    for(std::vector<Transition *>::const_iterator it =
+            _src->GetSubRoom()->GetAllTransitions().begin();
+        it != _src->GetSubRoom()->GetAllTransitions().end();
+        ++it) {
+        if(_crossing->GetUniqueID() == (*it)->GetUniqueID())
+            continue;
+        if(GetDest() != nullptr && ((*it)->GetSubRoom1() == GetDest()->GetSubRoom() ||
+                                    (*it)->GetSubRoom2() == GetDest()->GetSubRoom()))
+            continue;
+        count++;
+        distance = distance + (((*it)->GetCentre() - _crossing->GetCentre()).Norm());
+    }
+    if(count == 0)
+        _approximate_distance = 0;
+    else
+        _approximate_distance = distance / count;
 }
 
 
 double GraphEdge::GetWeight(const Point & position) const
 {
-//    if(factors.empty()) {
-//        return GetApproximateDistance(position);
-//    }
+    //    if(factors.empty()) {
+    //        return GetApproximateDistance(position);
+    //    }
     //double weight = GetFactorWithDistance(GetApproximateDistance(position));
     //double weight = GetApproximateDistance(position) * GetSpecificFactor("SmokeSensor");
     double weight = GetApproximateDistance(position) * GetFactor();
@@ -101,10 +120,8 @@ double GraphEdge::GetFactor() const
 
 double GraphEdge::GetSpecificFactor(std::string name) const
 {
-    for(FactorContainer::const_iterator it = factors.begin(); it != factors.end(); ++it)
-    {
-        if (it->first==name)
-        {
+    for(FactorContainer::const_iterator it = factors.begin(); it != factors.end(); ++it) {
+        if(it->first == name) {
             return it->second.first;
         }
     }
@@ -124,10 +141,9 @@ double GraphEdge::GetFactorWithDistance(double distance) const
 
 void GraphEdge::SetFactor(double factor, std::string name)
 {
-     //TODO: set global time as second double
-     factors[name] = std::make_pair(factor, 0.0);
+    //TODO: set global time as second double
+    factors[name] = std::make_pair(factor, 0.0);
 }
-
 
 
 /**
@@ -136,28 +152,32 @@ void GraphEdge::SetFactor(double factor, std::string name)
 
 double GraphEdge::GetRoomToFloorFactor() const
 {
-     if(GetDest() == nullptr || GetDest()->GetSubRoom()->GetType() == GetSrc()->GetSubRoom()->GetType()) return 1.0;
-     if(GetDest()->GetSubRoom()->GetType() == "floor") return 1.0;
-     else return 5.0;
+    if(GetDest() == nullptr ||
+       GetDest()->GetSubRoom()->GetType() == GetSrc()->GetSubRoom()->GetType())
+        return 1.0;
+    if(GetDest()->GetSubRoom()->GetType() == "floor")
+        return 1.0;
+    else
+        return 5.0;
 }
 
 double GraphEdge::GetApproximateDistance(const Point & position) const
 {
-     return (_crossing->GetCentre()-position).Norm();
+    return (_crossing->GetCentre() - position).Norm();
 }
 
 double GraphEdge::GetApproximateDistance() const
 {
-     return _approximate_distance;
+    return _approximate_distance;
 }
 
 const GraphVertex * GraphEdge::GetDest() const
 {
-     return _dest;
+    return _dest;
 }
 const GraphVertex * GraphEdge::GetSrc() const
 {
-     return _src;
+    return _src;
 }
 
 const Crossing * GraphEdge::GetCrossing() const
@@ -167,5 +187,5 @@ const Crossing * GraphEdge::GetCrossing() const
 
 bool GraphEdge::IsExit() const
 {
-     return _crossing->IsExit();
+    return _crossing->IsExit();
 }

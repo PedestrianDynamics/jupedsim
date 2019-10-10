@@ -28,9 +28,9 @@
  **/
 #pragma once
 
-#include <vector>
-#include <memory>
 #include <atomic>
+#include <memory>
+#include <vector>
 
 //Forward declarations
 class AgentsSource;
@@ -41,147 +41,148 @@ class Point;
 class AgentsSourcesManager
 {
 public:
-     /**
+    /**
       * Constructor
       */
-     AgentsSourcesManager();
+    AgentsSourcesManager();
 
-     /**
+    /**
       * disable copying
       */
-     AgentsSourcesManager(const AgentsSourcesManager& ) = delete;
+    AgentsSourcesManager(const AgentsSourcesManager &) = delete;
 
-     /**
+    /**
       * Destructor
       */
-     virtual ~AgentsSourcesManager();
+    virtual ~AgentsSourcesManager();
 
-     /**
+    /**
       * Make the class "runnable" by overloading the operator
       * @param value
       */
-     void operator()();
+    void operator()();
 
-     /**
+    /**
       *
       */
-     void Run();
+    void Run();
 
-     /**
+    /**
       *  Add a new agent source
       */
-     void AddSource(std::shared_ptr<AgentsSource> src);
+    void AddSource(std::shared_ptr<AgentsSource> src);
 
-     /**
+    /**
       * @return all sources
       */
-     const std::vector<std::shared_ptr<AgentsSource> >& GetSources() const;
+    const std::vector<std::shared_ptr<AgentsSource>> & GetSources() const;
 
-     /**
+    /**
       * Set the building object
       */
-     void SetBuilding(Building* building);
-     void SetRunning(bool running);
+    void SetBuilding(Building * building);
+    void SetRunning(bool running);
 
-     /**
+    /**
       * @return true if all agents have been generated
       * and the class is ready to leave
       */
-     bool IsCompleted() const;
+    bool IsCompleted() const;
 
-     /**
+    /**
       * @return true if the building is updated
       *
       */
-     bool IsBuildingUpdated() const;
+    bool IsBuildingUpdated() const;
 
-     void SetBuildingUpdated(bool update);
+    void SetBuildingUpdated(bool update);
 
-     /**
+    /**
       * Return a pointer to the building object
       */
-     Building* GetBuilding() const;
+    Building * GetBuilding() const;
 
-     /**
+    /**
       *Schedule the pedestrians for the simulation
       * @return true if all source are empty
       */
-     bool ProcessAllSources() const;
+    bool ProcessAllSources() const;
 
-     /**
+    /**
       * Trigger the sources to generate the specified
       * number of agents for this frequency
       */
-     void GenerateAgents();
+    void GenerateAgents();
 
-     /**
+    /**
       * Return the total number of agents that will be generated.
       * used by visualisation to allocate space
       *
       */
-     long GetMaxAgentNumber() const;
+    long GetMaxAgentNumber() const;
 
-     int GetMaxSimTime() const;
-     void SetMaxSimTime(int t);
-     bool IsRunning() const;
+    int GetMaxSimTime() const;
+    void SetMaxSimTime(int t);
+    bool IsRunning() const;
+
 private:
-
-     /**
+    /**
       * Position incoming pedestrian using voronoi methods
       * @param src
       * @param agent
       */
-     void ComputeBestPositionVoronoi(AgentsSource* src, Pedestrian* agent) const;
+    void ComputeBestPositionVoronoi(AgentsSource * src, Pedestrian * agent) const;
 
 
-     void InitFixedPosition(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
+    void InitFixedPosition(AgentsSource * src, std::vector<Pedestrian *> & peds) const;
 
-     /**
+    /**
       * Position incoming pedestrians completely random
       */
-     void ComputeBestPositionCompleteRandom(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
+    void
+    ComputeBestPositionCompleteRandom(AgentsSource * src, std::vector<Pedestrian *> & peds) const;
 
 
-     /**
+    /**
       * Position incoming pedestrians randomly
       * @param src
       * @param peds
       */
-     void ComputeBestPositionRandom(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
+    void ComputeBestPositionRandom(AgentsSource * src, std::vector<Pedestrian *> & peds) const;
 
 
-     /**
+    /**
       * Adjust the velocity of the pedestrian using the weidmann fundamental diagram
       */
-     void AdjustVelocityUsingWeidmann(Pedestrian* ped) const;
+    void AdjustVelocityUsingWeidmann(Pedestrian * ped) const;
 
-     /**
+    /**
       *
       * @param ped adjust the velocity by using the mean velocity of the neighbor in front of me
       */
-     void AdjustVelocityByNeighbour(Pedestrian* ped) const;
+    void AdjustVelocityByNeighbour(Pedestrian * ped) const;
 
-     /**
+    /**
       * Sort the given position vector by decreasing density
       * @param positions,
       * @param extra_position, an additional vector containing position to be considered in the density calculation
       */
-     void SortPositionByDensity(std::vector<Point>& positions, std::vector<Point>& extra_positions) const;
+    void SortPositionByDensity(std::vector<Point> & positions, std::vector<Point> & extra_positions)
+        const;
 
 
 private:
-     /// contain the sources
-     std::vector<std::shared_ptr<AgentsSource> > _sources;
-     ///to control the trigger of the events
-     long int _lastUpdateTime = 0;
-     int maxSimTime = 0;
-     /// building object
-     Building* _building=nullptr;
-     /// whether all agents have been dispatched
-     static bool _isCompleted;
-     //std::atomic<bool>_isCompleted=false;
-//     std::atomic<bool>_buildingUpdated=false;
-     bool _buildingUpdated;
-     bool _isRunning = false;
-
+    /// contain the sources
+    std::vector<std::shared_ptr<AgentsSource>> _sources;
+    ///to control the trigger of the events
+    long int _lastUpdateTime = 0;
+    int maxSimTime           = 0;
+    /// building object
+    Building * _building = nullptr;
+    /// whether all agents have been dispatched
+    static bool _isCompleted;
+    //std::atomic<bool>_isCompleted=false;
+    //     std::atomic<bool>_buildingUpdated=false;
+    bool _buildingUpdated;
+    bool _isRunning = false;
 };

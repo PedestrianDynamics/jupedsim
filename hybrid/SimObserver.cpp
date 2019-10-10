@@ -19,31 +19,28 @@
 // Created by laemmel on 13.04.16.
 //
 
-#include <sstream>
 #include "SimObserver.h"
+
 #include "../pedestrian/StartDistribution.h"
+
+#include <sstream>
 
 void SimObserver::AddPedestrian(std::shared_ptr<AgentsSource> src, int goalId)
 {
-     StartDistribution* dstr = src->GetStartDistribution().get();
-     std::stringstream str;
-     str << dstr->GetRoomId() << "_" << dstr->GetSubroomID() << "_" << goalId; //TODO bad practice
-     std::string key = str.str();
-     ODRelation* odRelation = &_odRelations[key];
-     if (odRelation->src==0) {
-          odRelation->src = src;
-          odRelation->goalId = goalId;
-          odRelation->nrAgents = 0;
-     }
-     odRelation->nrAgents++;
-
-
+    StartDistribution * dstr = src->GetStartDistribution().get();
+    std::stringstream str;
+    str << dstr->GetRoomId() << "_" << dstr->GetSubroomID() << "_" << goalId; //TODO bad practice
+    std::string key         = str.str();
+    ODRelation * odRelation = &_odRelations[key];
+    if(odRelation->src == 0) {
+        odRelation->src      = src;
+        odRelation->goalId   = goalId;
+        odRelation->nrAgents = 0;
+    }
+    odRelation->nrAgents++;
 }
 
 std::map<std::string, SimObserver::ODRelation> SimObserver::GetAllRelations()
 {
-     return _odRelations;
+    return _odRelations;
 }
-
-
-

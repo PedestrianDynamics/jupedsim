@@ -64,6 +64,7 @@ Matrix.txt
 .*
 !/.gitignore
 !/.clang-format
+!/.clang-tidy
 
 # Cmake
 CMakeCache.txt
