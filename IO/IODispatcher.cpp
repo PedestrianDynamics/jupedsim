@@ -28,6 +28,8 @@
 
 #include "OutputHandler.h"
 #include "general/Filesystem.h"
+#include "general/Format.h"
+#include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "mpi/LCGrid.h"
 #include "pedestrian/AgentsSource.h"
@@ -327,9 +329,7 @@ TrajectoriesFLAT::TrajectoriesFLAT() : Trajectories()
     _optionalOutputHeader[OptionalOutput::speed] = "V\t";
     _optionalOutputInfo[OptionalOutput::speed]   = "#V: speed of the pedestrian (in m/s)";
     _optionalOutput[OptionalOutput::speed]       = [](const Pedestrian * ped) {
-        std::stringstream stream;
-        stream << std::setprecision(2) << std::fixed << ped->GetV().Norm() << "\t";
-        return stream.str();
+        return fmt::format(check_fmt("{:.2f}\t"), ped->GetV().Norm());
     };
 
     // Add header, info and output for velocity
@@ -338,28 +338,21 @@ TrajectoriesFLAT::TrajectoriesFLAT() : Trajectories()
         "#Vx: x component of the pedestrian's velocity\n"
         "#Vy: y component of the pedestrian's velocity";
     _optionalOutput[OptionalOutput::velocity] = [](const Pedestrian * ped) {
-        std::stringstream stream;
-        stream << std::setprecision(2) << std::fixed << ped->GetV()._x << "\t" << ped->GetV()._y
-               << "\t";
-        return stream.str();
+        return fmt::format(check_fmt("{:.2f}\t{:.2f}\t"), ped->GetV()._x, ped->GetV()._y);
     };
 
     // Add header, info and output for final_goal
     _optionalOutputHeader[OptionalOutput::final_goal] = "FG\t";
     _optionalOutputInfo[OptionalOutput::final_goal]   = "#FG: id of final goal";
     _optionalOutput[OptionalOutput::final_goal]       = [](const Pedestrian * ped) {
-        std::stringstream stream;
-        stream << ped->GetFinalDestination() << "\t";
-        return stream.str();
+        return fmt::format(check_fmt("{}\t"), ped->GetFinalDestination());
     };
 
     // Add header, info and output for intermediate_goal
     _optionalOutputHeader[OptionalOutput::intermediate_goal] = "CG\t";
     _optionalOutputInfo[OptionalOutput::intermediate_goal]   = "#CG: id of current goal";
     _optionalOutput[OptionalOutput::intermediate_goal]       = [](const Pedestrian * ped) {
-        std::stringstream stream;
-        stream << ped->GetExitIndex() << "\t";
-        return stream.str();
+        return fmt::format(check_fmt("{}\t"), ped->GetExitIndex());
     };
 
     // Add header, info and output for desired direction
@@ -368,37 +361,29 @@ TrajectoriesFLAT::TrajectoriesFLAT() : Trajectories()
         "#Dx: x component of the pedestrian's desired direction\n"
         "#Dy: y component of the pedestrian's desired direction";
     _optionalOutput[OptionalOutput::desired_direction] = [](const Pedestrian * ped) {
-        std::stringstream stream;
-        stream << std::setprecision(2) << std::fixed << ped->GetLastE0()._x << "\t"
-               << ped->GetLastE0()._y << "\t";
-        return stream.str();
+        return fmt::format(check_fmt("{:.2f}\t{:.2f}\t"), ped->GetLastE0()._x, ped->GetLastE0()._y);
     };
 
     // Add header, info and output for spotlight
     _optionalOutputHeader[OptionalOutput::spotlight] = "SPOT\t";
     _optionalOutputInfo[OptionalOutput::spotlight]   = "#SPOT: ped is highlighted";
     _optionalOutput[OptionalOutput::spotlight]       = [](Pedestrian * ped) {
-        std::stringstream stream;
-        stream << ped->GetSpotlight() << "\t";
-        return stream.str();
+        return fmt::format(check_fmt("{}\t"), (int) ped->GetSpotlight());
     };
 
     // Add header, info and output for router
     _optionalOutputHeader[OptionalOutput::router] = "ROUTER\t";
-    _optionalOutputInfo[OptionalOutput::router] = "#ROUTER: routing strategy used during strategy";
-    _optionalOutput[OptionalOutput::router]     = [](const Pedestrian * ped) {
-        std::stringstream stream;
-        stream << ped->GetRoutingStrategy() << "\t";
-        return stream.str();
+    _optionalOutputInfo[OptionalOutput::router] =
+        "#ROUTER: routing strategy used during simulation";
+    _optionalOutput[OptionalOutput::router] = [](const Pedestrian * ped) {
+        return fmt::format(check_fmt("{}\t"), ped->GetRoutingStrategy());
     };
 
     // Add header, info and output for group
     _optionalOutputHeader[OptionalOutput::group] = "GROUP\t";
     _optionalOutputInfo[OptionalOutput::group]   = "#GROUP: group of the pedestrian";
     _optionalOutput[OptionalOutput::group]       = [](const Pedestrian * ped) {
-        std::stringstream stream;
-        stream << ped->GetGroup() << "\t";
-        return stream.str();
+        return fmt::format(check_fmt("{}\t"), ped->GetGroup());
     };
 }
 
@@ -685,8 +670,7 @@ void TrajectoriesVTK::WriteHeader(long nPeds, double fps, Building * building, i
 void TrajectoriesVTK::WriteGeometry(Building * building)
 {
     (void) building; // avoid warning
-    Log->Write("WARNING:\t Creating NavMesh is deprecated. Please have a look at "
-               "old files on git "
+    Log->Write("WARNING:\t Creating NavMesh is deprecated. Please have a look at old files on git "
                "lab if you want to use this!");
     //     stringstream tmp;
 

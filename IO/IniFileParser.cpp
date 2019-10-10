@@ -22,6 +22,7 @@
 
 #include "OutputHandler.h"
 #include "general/Filesystem.h"
+#include "general/Logger.h"
 #include "general/OpenMP.h"
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
