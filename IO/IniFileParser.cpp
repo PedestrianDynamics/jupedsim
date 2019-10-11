@@ -299,6 +299,8 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         } else if(format == "plain") {
             _config->SetFileFormat(FileFormat::TXT);
         } else {
+            Logging::Warning("no output format specified. Using default: TXT");
+            _config->SetFileFormat(FileFormat::TXT);
         }
         //color mode
         std::string color_mode =
