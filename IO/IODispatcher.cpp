@@ -28,15 +28,17 @@
 
 #include "OutputHandler.h"
 #include "general/Filesystem.h"
+#include "general/Format.h"
+#include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "mpi/LCGrid.h"
 #include "pedestrian/AgentsSource.h"
 #include "pedestrian/Pedestrian.h"
 
+#include <iomanip>
 #include <tinyxml.h>
 
 #define _USE_MATH_DEFINES
-
 
 IODispatcher::IODispatcher()
 {
@@ -50,12 +52,10 @@ IODispatcher::~IODispatcher()
     _outputHandlers.clear();
 }
 
-
 void IODispatcher::AddIO(Trajectories * ioh)
 {
     _outputHandlers.push_back(ioh);
 }
-
 
 const std::vector<Trajectories *> & IODispatcher::GetIOHandlers()
 {
@@ -92,7 +92,6 @@ void IODispatcher::WriteSources(const std::vector<std::shared_ptr<AgentsSource>>
         it->WriteSources(sources);
     }
 }
-
 
 std::string TrajectoriesJPSV04::WritePed(Pedestrian * ped)
 {
@@ -157,8 +156,8 @@ void TrajectoriesJPSV04::WriteGeometry(Building * building)
         building->GetGeometryFilename().string().c_str());
     embed_geometry.append(file_location);
     embed_geometry.append("\t</geometry>\n");
-    //Write(embed_geometry);
-    //return;
+    // Write(embed_geometry);
+    // return;
     //
     std::string geometry;
     geometry.append("\t<geometry>\n");
@@ -170,18 +169,18 @@ void TrajectoriesJPSV04::WriteGeometry(Building * building)
     std::vector<std::string> rooms_to_plot;
     unsigned int i;
     // first the rooms
-    //to avoid writing navigation line twice
+    // to avoid writing navigation line twice
     std::vector<int> navLineWritten;
-    //rooms_to_plot.push_back("U9");
+    // rooms_to_plot.push_back("U9");
 
     for(const auto & it : building->GetAllRooms()) {
         auto && r           = it.second;
-        std::string caption = r->GetCaption(); //if(r->GetID()!=1) continue;
+        std::string caption = r->GetCaption(); // if(r->GetID()!=1) continue;
         if(!rooms_to_plot.empty() && !IsElementInVector(rooms_to_plot, caption))
             continue;
 
         for(auto && sitr : r->GetAllSubRooms()) {
-            auto && s = sitr.second; //if(s->GetSubRoomID()!=7) continue;
+            auto && s = sitr.second; // if(s->GetSubRoomID()!=7) continue;
             geometry.append(s->WriteSubRoom());
 
             // the hlines
@@ -249,7 +248,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building * building)
         }
     }
 
-    //eventually write any goal
+    // eventually write any goal
     for(std::map<int, Goal *>::const_iterator itr = building->GetAllGoals().begin();
         itr != building->GetAllGoals().end();
         ++itr) {
@@ -257,7 +256,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building * building)
     }
 
     if(plotPlayingField) {
-        //add the playing area
+        // add the playing area
         double width  = 3282;
         double length = 5668;
         char tmp[100];
@@ -324,7 +323,69 @@ void TrajectoriesJPSV04::WriteFooter()
  * FLAT format implementation
  */
 
-TrajectoriesFLAT::TrajectoriesFLAT() : Trajectories() {}
+TrajectoriesFLAT::TrajectoriesFLAT() : Trajectories()
+{
+    // Add header, info and output for speed
+    _optionalOutputHeader[OptionalOutput::speed] = "V\t";
+    _optionalOutputInfo[OptionalOutput::speed]   = "#V: speed of the pedestrian (in m/s)";
+    _optionalOutput[OptionalOutput::speed]       = [](const Pedestrian * ped) {
+        return fmt::format(check_fmt("{:.2f}\t"), ped->GetV().Norm());
+    };
+
+    // Add header, info and output for velocity
+    _optionalOutputHeader[OptionalOutput::velocity] = "Vx\tVy\t";
+    _optionalOutputInfo[OptionalOutput::velocity] =
+        "#Vx: x component of the pedestrian's velocity\n"
+        "#Vy: y component of the pedestrian's velocity";
+    _optionalOutput[OptionalOutput::velocity] = [](const Pedestrian * ped) {
+        return fmt::format(check_fmt("{:.2f}\t{:.2f}\t"), ped->GetV()._x, ped->GetV()._y);
+    };
+
+    // Add header, info and output for final_goal
+    _optionalOutputHeader[OptionalOutput::final_goal] = "FG\t";
+    _optionalOutputInfo[OptionalOutput::final_goal]   = "#FG: id of final goal";
+    _optionalOutput[OptionalOutput::final_goal]       = [](const Pedestrian * ped) {
+        return fmt::format(check_fmt("{}\t"), ped->GetFinalDestination());
+    };
+
+    // Add header, info and output for intermediate_goal
+    _optionalOutputHeader[OptionalOutput::intermediate_goal] = "CG\t";
+    _optionalOutputInfo[OptionalOutput::intermediate_goal]   = "#CG: id of current goal";
+    _optionalOutput[OptionalOutput::intermediate_goal]       = [](const Pedestrian * ped) {
+        return fmt::format(check_fmt("{}\t"), ped->GetExitIndex());
+    };
+
+    // Add header, info and output for desired direction
+    _optionalOutputHeader[OptionalOutput::desired_direction] = "Dx\tDy\t";
+    _optionalOutputInfo[OptionalOutput::desired_direction] =
+        "#Dx: x component of the pedestrian's desired direction\n"
+        "#Dy: y component of the pedestrian's desired direction";
+    _optionalOutput[OptionalOutput::desired_direction] = [](const Pedestrian * ped) {
+        return fmt::format(check_fmt("{:.2f}\t{:.2f}\t"), ped->GetLastE0()._x, ped->GetLastE0()._y);
+    };
+
+    // Add header, info and output for spotlight
+    _optionalOutputHeader[OptionalOutput::spotlight] = "SPOT\t";
+    _optionalOutputInfo[OptionalOutput::spotlight]   = "#SPOT: ped is highlighted";
+    _optionalOutput[OptionalOutput::spotlight]       = [](Pedestrian * ped) {
+        return fmt::format(check_fmt("{}\t"), (int) ped->GetSpotlight());
+    };
+
+    // Add header, info and output for router
+    _optionalOutputHeader[OptionalOutput::router] = "ROUTER\t";
+    _optionalOutputInfo[OptionalOutput::router] =
+        "#ROUTER: routing strategy used during simulation";
+    _optionalOutput[OptionalOutput::router] = [](const Pedestrian * ped) {
+        return fmt::format(check_fmt("{}\t"), ped->GetRoutingStrategy());
+    };
+
+    // Add header, info and output for group
+    _optionalOutputHeader[OptionalOutput::group] = "GROUP\t";
+    _optionalOutputInfo[OptionalOutput::group]   = "#GROUP: group of the pedestrian";
+    _optionalOutput[OptionalOutput::group]       = [](const Pedestrian * ped) {
+        return fmt::format(check_fmt("{}\t"), ped->GetGroup());
+    };
+}
 
 static fs::path getSourceFileName(const fs::path & projectFile)
 {
@@ -379,7 +440,6 @@ static fs::path getEventFileName(const fs::path & projectFile)
 //   <train_time_table>ttt.xml</train_time_table>
 //   <train_types>train_types.xml</train_types>
 // </train_constraints>
-
 
 static fs::path getTrainTimeTableFileName(const fs::path & projectFile)
 {
@@ -445,7 +505,7 @@ static fs::path getGoalFileName(const fs::path & projectFile)
     if(!xRootNode->FirstChild("routing")) {
         return ret;
     }
-    //load goals and routes
+    // load goals and routes
     TiXmlNode * xGoalsNode     = xRootNode->FirstChild("routing")->FirstChild("goals");
     TiXmlNode * xGoalsNodeFile = xGoalsNode->FirstChild("file");
     if(xGoalsNodeFile) {
@@ -514,9 +574,20 @@ void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building * building, 
     Write("#ANGLE: orientation of the ellipse");
     Write("#COLOR: color of the ellipse");
 
+    // Add info for optional output options
+    for(const auto & option : _optionalOutputOptions) {
+        Write(_optionalOutputInfo[option]);
+    }
     Write("\n");
-    //Write("#ID\tFR\tX\tY\tZ");// @todo: maybe use two different formats
-    Write("#ID\tFR\tX\tY\tZ\tA\tB\tANGLE\tCOLOR"); // a b angle color
+
+    // Write("#ID\tFR\tX\tY\tZ");// @todo: maybe use two different formats
+    std::string header("#ID\tFR\tX\tY\tZ\tA\tB\tANGLE\tCOLOR\t");
+
+    // Add header for optional output options
+    for(const auto & option : _optionalOutputOptions) {
+        header.append(_optionalOutputHeader[option]);
+    }
+    Write(header);
 }
 
 void TrajectoriesFLAT::WriteGeometry(Building * building)
@@ -528,6 +599,7 @@ void TrajectoriesFLAT::WriteFrame(int frameNr, Building * building)
 {
     char tmp[CLENGTH]                         = "";
     const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
+
     for(unsigned int p = 0; p < allPeds.size(); p++) {
         Pedestrian * ped = allPeds[p];
         double x         = ped->GetPos()._x;
@@ -538,11 +610,13 @@ void TrajectoriesFLAT::WriteFrame(int frameNr, Building * building)
         double b         = ped->GetSmallerAxis();
         double phi       = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
         double RAD2DEG   = 180.0 / M_PI;
+
         // @todo: maybe two different formats
-        //sprintf(tmp, "%d\t%d\t%0.2f\t%0.2f\t%0.2f", ped->GetID(), frameNr, x, y, z);
+        // sprintf(tmp, "%d\t%d\t%0.2f\t%0.2f\t%0.2f", ped->GetID(), frameNr, x, y,
+        // z);
         sprintf(
             tmp,
-            "%d\t%d\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%d",
+            "%d\t%d\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%d\t",
             ped->GetID(),
             frameNr,
             x,
@@ -552,7 +626,13 @@ void TrajectoriesFLAT::WriteFrame(int frameNr, Building * building)
             b,
             phi * RAD2DEG,
             color);
-        Write(tmp);
+
+        std::string frame(tmp);
+        for(const auto & option : _optionalOutputOptions) {
+            frame.append(_optionalOutput[option](ped));
+        }
+
+        Write(frame);
     }
 }
 
@@ -571,12 +651,11 @@ void TrajectoriesXML_MESH::WriteSources(
  *  VTK Implementation of the geometry and trajectories
  */
 
-
 TrajectoriesVTK::TrajectoriesVTK() {}
 
 void TrajectoriesVTK::WriteHeader(long nPeds, double fps, Building * building, int seed, int count)
 {
-    //suppress unused warnings
+    // suppress unused warnings
     (void) nPeds;
     (void) fps;
     (void) seed;
@@ -604,7 +683,8 @@ void TrajectoriesVTK::WriteGeometry(Building * building)
     //     const vector<NavMesh::JVertex*>& vertices= nv->GetVertices() ;
     //     tmp<<"POINTS "<<vertices.size()<<" FLOAT"<<endl;
     //     for (unsigned int v=0; v<vertices.size(); v++) {
-    //          tmp<<vertices[v]->pPos._x<<" " <<vertices[v]->pPos._y <<" 0.0"<<endl;
+    //          tmp<<vertices[v]->pPos._x<<" " <<vertices[v]->pPos._y <<"
+    //          0.0"<<endl;
     //     }
     //     Write(tmp.str());
     //     tmp.str(std::string());
@@ -646,7 +726,6 @@ void TrajectoriesVTK::WriteFrame(int frameNr, Building * building)
 
 void TrajectoriesVTK::WriteFooter() {}
 
-
 void TrajectoriesJPSV06::WriteHeader(
     long nPeds,
     double fps,
@@ -670,7 +749,7 @@ void TrajectoriesJPSV06::WriteHeader(
     tmp.append("\t\t<!-- Frame count HACK\n");
     tmp.append("replace me\n");
     tmp.append("\t\tFrame count HACK -->\n");
-    //tmp.append("<frameCount>xxxxxxx</frameCount>\n");
+    // tmp.append("<frameCount>xxxxxxx</frameCount>\n");
     tmp.append("\t</header>\n");
     Write(tmp);
 }
@@ -681,14 +760,16 @@ void TrajectoriesJPSV06::WriteGeometry(Building * building)
     //     string embed_geometry;
     //     embed_geometry.append("\t<geometry>\n");
     //     char file_location[CLENGTH] = "";
-    //     sprintf(file_location, "\t<file location= \"%s\"/>\n", building->GetGeometryFilename().c_str());
+    //     sprintf(file_location, "\t<file location= \"%s\"/>\n",
+    //     building->GetGeometryFilename().c_str());
     //     embed_geometry.append(file_location);
     //     //embed_geometry.append("\t</geometry>\n");
     //
     //     const map<int, Hline*>& hlines=building->GetAllHlines();
     //     if(hlines.size()>0){
     //          //embed_geometry.append("\t<geometry>\n");
-    //          for (std::map<int, Hline*>::const_iterator it=hlines.begin(); it!=hlines.end(); ++it)
+    //          for (std::map<int, Hline*>::const_iterator it=hlines.begin();
+    //          it!=hlines.end(); ++it)
     //          {
     //               embed_geometry.append(it->second->WriteElement());
     //          }
@@ -697,16 +778,17 @@ void TrajectoriesJPSV06::WriteGeometry(Building * building)
     //     embed_geometry.append("\t</geometry>\n");
     //     Write(embed_geometry);
 
-    //set the content of the file
+    // set the content of the file
     const fs::path fileName = building->GetProjectRootDir() / building->GetGeometryFilename();
     std::ifstream t(fileName.string());
     std::string dropedLine;
-    std::getline(t, dropedLine); //drop the first line <?xml version="1.0" encoding="UTF-8"?>
+    std::getline(t,
+                 dropedLine); // drop the first line <?xml version="1.0" encoding="UTF-8"?>
     std::stringstream buffer;
     buffer << t.rdbuf();
     std::string embed_geometry = buffer.str();
 
-    //write the hlines
+    // write the hlines
     std::string embed_hlines;
     embed_hlines.append("\n\t<hlines>");
     for(const auto & hline : building->GetAllHlines()) {
@@ -720,7 +802,7 @@ void TrajectoriesJPSV06::WriteGeometry(Building * building)
     embed_hlines.append("\n\t</goals>");
     embed_hlines.append("\t</geometry>\n");
 
-    //append the new string hlines and goals to the old one
+    // append the new string hlines and goals to the old one
     ReplaceStringInPlace(embed_geometry, "</geometry>", embed_hlines);
 
     Write(embed_geometry);
@@ -735,7 +817,6 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building * building)
 
     sprintf(tmp, "<frame ID=\"%d\">\n", frameNr);
     data.append(tmp);
-
 
     const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
     for(unsigned int p = 0; p < allPeds.size(); ++p) {
@@ -782,11 +863,11 @@ void TrajectoriesJPSV06::WriteFooter()
     Write("</trajectories>\n");
 }
 
-
 void TrajectoriesXML_MESH::WriteGeometry(Building * building)
 {
     (void) building; // avoid warning
-    Log->Write("WARNING:\t Creating NavMesh is deprecated. Please have a look at old files on git "
+    Log->Write("WARNING:\t Creating NavMesh is deprecated. Please have a look at "
+               "old files on git "
                "lab if you want to use this!");
     //     //Navigation mesh implementation
     //     NavMesh* nv= new NavMesh(building);
@@ -799,7 +880,6 @@ void TrajectoriesXML_MESH::WriteGeometry(Building * building)
     //     nv->WriteToFile(building->GetProjectFilename()+".full.nav");
     //     delete nv;
 }
-
 
 void TrajectoriesJPSV05::WriteHeader(
     long nPeds,
@@ -821,10 +901,10 @@ void TrajectoriesJPSV05::WriteHeader(
     tmp.append(agents);
     sprintf(agents, "\t\t<frameRate>%0.2f</frameRate>\n", fps);
     tmp.append(agents);
-    //tmp.append("\t\t<!-- Frame count HACK\n");
-    //tmp.append("replace me\n");
-    //tmp.append("\t\tFrame count HACK -->\n");
-    //tmp.append("<frameCount>xxxxxxx</frameCount>\n");
+    // tmp.append("\t\t<!-- Frame count HACK\n");
+    // tmp.append("replace me\n");
+    // tmp.append("\t\tFrame count HACK -->\n");
+    // tmp.append("<frameCount>xxxxxxx</frameCount>\n");
     tmp.append("\t</header>\n");
     _outputHandler->Write(tmp);
 }
@@ -852,7 +932,7 @@ void TrajectoriesJPSV05::WriteGeometry(Building * building)
         "\t<file location= \"%s\"/>\n",
         building->GetGeometryFilename().string().c_str());
     embed_geometry.append(file_location);
-    //embed_geometry.append("\t</geometry>\n");
+    // embed_geometry.append("\t</geometry>\n");
 
     for(auto hline : building->GetAllHlines()) {
         embed_geometry.append(hline.second->GetDescription());
@@ -862,12 +942,12 @@ void TrajectoriesJPSV05::WriteGeometry(Building * building)
         embed_geometry.append(goal.second->Write());
     }
 
-    //write the grid
-    //embed_geometry.append(building->GetGrid()->ToXML());
+    // write the grid
+    // embed_geometry.append(building->GetGrid()->ToXML());
 
     embed_geometry.append("\t</geometry>\n");
     _outputHandler->Write(embed_geometry);
-    //write sources
+    // write sources
     // if(building->G )
     //
     _outputHandler->Write("\t<AttributeDescription>");

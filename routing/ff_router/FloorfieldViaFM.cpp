@@ -969,7 +969,7 @@ void FloorfieldViaFM::deleteAllFFs()
 
 template <typename T>
 void FloorfieldViaFM::drawLinesOnGrid(std::vector<Line> & wallArg, T * const target, const T value)
-{   //no init, plz init elsewhere
+{ //no init, plz init elsewhere
     // i~x; j~y;
     //http://stackoverflow.com/questions/10060046/drawing-lines-with-bresenhams-line-algorithm
     //src in answer of "Avi"; adapted to fit this application

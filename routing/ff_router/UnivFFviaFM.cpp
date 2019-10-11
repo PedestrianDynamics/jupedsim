@@ -832,7 +832,7 @@ void UnivFFviaFM::drawLinesOnGrid(std::vector<Line> & wallArg, T * const target,
 
 template <typename T>
 void UnivFFviaFM::drawLinesOnGrid(Line & line, T * const target, const T value)
-{   //no init, plz init elsewhere
+{ //no init, plz init elsewhere
     // i~x; j~y;
     //http://stackoverflow.com/questions/10060046/drawing-lines-with-bresenhams-line-algorithm
     //src in answer of "Avi"; adapted to fit this application
@@ -944,7 +944,7 @@ void UnivFFviaFM::drawLinesOnWall(std::vector<Line> & wallArg, T * const target,
 
 template <typename T>
 void UnivFFviaFM::drawLinesOnWall(Line & line, T * const target, const T value)
-{   //no init, plz init elsewhere
+{ //no init, plz init elsewhere
     // i~x; j~y;
     //http://stackoverflow.com/questions/10060046/drawing-lines-with-bresenhams-line-algorithm
     //src in answer of "Avi"; adapted to fit this application

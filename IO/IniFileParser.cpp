@@ -22,6 +22,7 @@
 
 #include "OutputHandler.h"
 #include "general/Filesystem.h"
+#include "general/Logger.h"
 #include "general/OpenMP.h"
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
@@ -216,6 +217,7 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
     Log->Write("----\nJuPedSim - JPScore\n");
     Log->Write("Current date   : %s %s", __DATE__, __TIME__);
     Log->Write("Version        : %s", JPSCORE_VERSION);
+
     Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
     Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
     Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
@@ -333,7 +335,6 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         if(color_mode == "intermediate_goal")
             Pedestrian::SetColorMode(AgentColorMode::BY_INTERMEDIATE_GOAL);
 
-
         //a file descriptor was given
         if(xTrajectories->FirstChild("file")) {
             const fs::path trajLoc(xTrajectories->FirstChildElement("file")->Attribute("location"));
@@ -365,9 +366,120 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
                 _config->GetHostname().c_str(),
                 _config->GetPort());
         }
+
+        if(xTrajectories->FirstChild("optional_output")) {
+            Logging::Warning("These optional options do only work with plain output format!");
+
+            auto node = xTrajectories->FirstChildElement("optional_output");
+            //check if speed is wanted
+            if(const char * attribute = node->Attribute("speed"); attribute) {
+                std::string in = xmltoa(attribute, "false");
+                std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+                if(in == "true") {
+                    _config->AddOptionalOutputOption(OptionalOutput::speed);
+                    Log->Write("INFO: speed added to output");
+                } else {
+                    Log->Write("INFO: speed not added to output");
+                }
+            }
+
+            //check if velocity is wanted
+            if(const char * attribute = node->Attribute("velocity"); attribute) {
+                std::string in = xmltoa(attribute, "false");
+                std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+                if(in == "true") {
+                    _config->AddOptionalOutputOption(OptionalOutput::velocity);
+                    Log->Write("INFO: velocity added to output");
+                } else {
+                    Log->Write("INFO: velocity not added to output");
+                }
+            }
+
+            //check if final_goal is wanted
+            if(const char * attribute = node->Attribute("final_goal"); attribute) {
+                std::string in = xmltoa(attribute, "false");
+                std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+                if(in == "true") {
+                    _config->AddOptionalOutputOption(OptionalOutput::final_goal);
+                    Log->Write("INFO: final_goal added to output");
+                } else {
+                    Log->Write("INFO: final_goal not added to output");
+                }
+            }
+
+            //check if intermediate_goal is wanted
+            if(const char * attribute = node->Attribute("intermediate_goal"); attribute) {
+                std::string in = xmltoa(attribute, "false");
+                std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+                if(in == "true") {
+                    _config->AddOptionalOutputOption(OptionalOutput::intermediate_goal);
+                    Log->Write("INFO: intermediate_goal added to output");
+                } else {
+                    Log->Write("INFO: intermediate_goal not added to output");
+                }
+            }
+
+            //check if desired_direction is wanted
+            if(const char * attribute = node->Attribute("desired_direction"); attribute) {
+                std::string in = xmltoa(attribute, "false");
+                std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+                if(in == "true") {
+                    _config->AddOptionalOutputOption(OptionalOutput::desired_direction);
+                    Log->Write("INFO: desired_direction added to output");
+                } else {
+                    Log->Write("INFO: desired_direction not added to output");
+                }
+            }
+
+            //check if spotlight is wanted
+            if(const char * attribute = node->Attribute("spotlight"); attribute) {
+                std::string in = xmltoa(attribute, "false");
+                std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+                if(in == "true") {
+                    _config->AddOptionalOutputOption(OptionalOutput::spotlight);
+                    Log->Write("INFO: spotlight added to output");
+                } else {
+                    Log->Write("INFO: spotlight not added to output");
+                }
+            }
+
+            //check if router is wanted
+            if(const char * attribute = node->Attribute("router"); attribute) {
+                std::string in = xmltoa(attribute, "false");
+                std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+                if(in == "true") {
+                    _config->AddOptionalOutputOption(OptionalOutput::router);
+                    Log->Write("INFO: router added to output");
+                } else {
+                    Log->Write("INFO: router not added to output");
+                }
+            }
+
+            //check if router is wanted
+            if(const char * attribute = node->Attribute("group"); attribute) {
+                std::string in = xmltoa(attribute, "false");
+                std::transform(in.begin(), in.end(), in.begin(), ::tolower);
+
+                if(in == "true") {
+                    _config->AddOptionalOutputOption(OptionalOutput::group);
+                    Log->Write("INFO: group added to output");
+                } else {
+                    Log->Write("INFO: group not added to output");
+                }
+            }
+        }
     }
+
     return true;
 }
+
 bool IniFileParser::ParseGCFMModel(TiXmlElement * xGCFM, TiXmlElement * xMainNode)
 {
     Log->Write("\nINFO:\tUsing the GCFM model");

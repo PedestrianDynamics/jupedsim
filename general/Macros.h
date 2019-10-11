@@ -198,6 +198,17 @@ enum TARGETMODE { LINESEGMENT = 0, CENTERPOINT };
 
 enum USERMODE { DISTANCE_MEASUREMENTS_ONLY, DISTANCE_AND_DIRECTIONS_USED };
 
+enum class OptionalOutput {
+    speed             = 0,
+    velocity          = 1,
+    final_goal        = 2,
+    intermediate_goal = 3,
+    desired_direction = 4,
+    spotlight         = 5,
+    router            = 6,
+    group             = 7,
+}; // enum class
+
 // Describes the door
 enum class DoorState { OPEN, CLOSE, TEMP_CLOSE, Error };
 

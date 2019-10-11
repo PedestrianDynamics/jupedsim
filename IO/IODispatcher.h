@@ -27,9 +27,11 @@
 #pragma once
 
 
+#include "general/Macros.h"
 #include "geometry/Building.h"
 
 #include <cstring>
+#include <functional>
 #include <vector>
 
 class OutputHandler;
@@ -68,7 +70,15 @@ public:
     virtual void WriteFooter()                                                                 = 0;
     virtual void WriteSources(const std::vector<std::shared_ptr<AgentsSource>>)                = 0;
 
+    virtual void AddOptionalOutput(OptionalOutput option) { _optionalOutputOptions.insert(option); }
+
+    virtual void SetOptionalOutput(std::set<OptionalOutput> options)
+    {
+        _optionalOutputOptions = options;
+    }
+
     void Write(const std::string & str) { _outputHandler->Write(str); }
+
     void SetOutputHandler(std::shared_ptr<OutputHandler> outputHandler)
     {
         _outputHandler = outputHandler;
@@ -88,6 +98,10 @@ public:
 
 protected:
     std::shared_ptr<OutputHandler> _outputHandler;
+    std::set<OptionalOutput> _optionalOutputOptions;
+    std::map<OptionalOutput, std::function<std::string(Pedestrian *)>> _optionalOutput;
+    std::map<OptionalOutput, std::string> _optionalOutputHeader;
+    std::map<OptionalOutput, std::string> _optionalOutputInfo;
 };
 
 

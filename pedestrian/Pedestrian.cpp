@@ -1189,6 +1189,11 @@ void Pedestrian::SetSpotlight(bool spotlight)
     _spotlight = spotlight;
 }
 
+bool Pedestrian::GetSpotlight()
+{
+    return _spotlight;
+}
+
 void Pedestrian::SetColorMode(AgentColorMode mode)
 {
     _colorMode = mode;

@@ -35,11 +35,12 @@
 
 #include <cstdlib>
 #include <memory>
+#include <set>
 #include <string>
 
 class DirectionStrategy;
 
-//This class provides a data container for all configuration parameters.
+// This class provides a data container for all configuration parameters.
 class Configuration
 {
 public:
@@ -55,7 +56,7 @@ public:
         _seed             = 0;
         _fps              = 8;
         _linkedCellSize   = 2.2;     // meter
-        _model            = nullptr; //std::shared_ptr<OperationalModel>(new OperationalModel());
+        _model            = nullptr; // std::shared_ptr<OperationalModel>(new OperationalModel());
         _tMax             = 500;     // seconds
         _PRB              = false;
         _dT               = 0.01;
@@ -101,10 +102,10 @@ public:
         // ---------- gradientmodel
         _slow_down_distance = 0.2;
 
-        //ff router quickest
+        // ff router quickest
         _recalc_interval = 3;
 
-        //ff router
+        // ff router
         _has_specific_goals         = false;
         _has_directional_escalators = false;
         _write_VTK_files            = false;
@@ -113,9 +114,10 @@ public:
         //          _dirSubLocal = nullptr;
         //          _dirLocal = nullptr;
         _dirStrategy = nullptr;
-        //for random numbers
+        // for random numbers
         _rdGenerator = RandomNumberGenerator();
     }
+
     std::shared_ptr<WalkingSpeed> GetWalkingSpeed() { return _walkingSpeed; };
     void SetWalkingSpeed(std::shared_ptr<WalkingSpeed> & w) { _walkingSpeed = w; };
 
@@ -128,7 +130,8 @@ public:
 
     std::shared_ptr<RoutingEngine> GetRoutingEngine() const { return _routingEngine; };
 
-    //TODO: this is certainly not a config parameter but part of the model, we really should separate data and model [gl march '16]
+    // TODO: this is certainly not a config parameter but part of the model, we
+    // really should separate data and model [gl march '16]
     void SetRoutingEngine(std::shared_ptr<RoutingEngine> routingEngine)
     {
         _routingEngine = routingEngine;
@@ -293,19 +296,25 @@ public:
 
     void set_dirStrategy(DirectionStrategy * dir) { _dirStrategy = dir; }
     DirectionStrategy * get_dirStrategy() { return _dirStrategy; }
-    //     void set_dirSubLocal(DirectionSubLocalFloorfield* dir) {_dirSubLocal = dir;}
+    //     void set_dirSubLocal(DirectionSubLocalFloorfield* dir) {_dirSubLocal =
+    //     dir;}
     //
     //    void set_dirLocal(DirectionLocalFloorfield* dir) {_dirLocal = dir;}
     //
-    //    void set_dirSubLocalTrips(DirectionSubLocalFloorfieldTrips* dir) {_dirSubLocalTrips = dir;}
+    //    void set_dirSubLocalTrips(DirectionSubLocalFloorfieldTrips* dir)
+    //    {_dirSubLocalTrips = dir;}
     //
-    //    void set_dirSubLocalTripsVoronoi(DirectionSubLocalFloorfieldTripsVoronoi* dir) {_dirSubLocalTripsVoronoi = dir;}
+    //    void
+    //    set_dirSubLocalTripsVoronoi(DirectionSubLocalFloorfieldTripsVoronoi*
+    //    dir) {_dirSubLocalTripsVoronoi = dir;}
 
-    //    DirectionSubLocalFloorfield* get_dirSubLocal() const {return _dirSubLocal;}
+    //    DirectionSubLocalFloorfield* get_dirSubLocal() const {return
+    //    _dirSubLocal;}
     //     DirectionLocalFloorfield* get_dirLocal() const {return _dirLocal;}
     //
-    //    DirectionSubLocalFloorfieldTrips* get_dirSubLocalTrips() const {return _dirSubLocalTrips;}
-    //    DirectionSubLocalFloorfieldTripsVoronoi* get_dirSubLocalTripsVoronoi() const {return _dirSubLocalTripsVoronoi;}
+    //    DirectionSubLocalFloorfieldTrips* get_dirSubLocalTrips() const {return
+    //    _dirSubLocalTrips;} DirectionSubLocalFloorfieldTripsVoronoi*
+    //    get_dirSubLocalTripsVoronoi() const {return _dirSubLocalTripsVoronoi;}
 
     const std::string & GetHostname() const { return _hostname; };
 
@@ -367,6 +376,10 @@ public:
     };
 
     RandomNumberGenerator * GetRandomNumberGenerator() const { return &_rdGenerator; };
+
+    void AddOptionalOutputOption(OptionalOutput option) { _optionalOutput.insert(option); };
+
+    std::set<OptionalOutput> GetOptionalOutputOptions() { return _optionalOutput; };
 
 #ifdef _JPS_AS_A_SERVICE
 
@@ -430,17 +443,17 @@ private:
     double _maxFWall;
     double _distEffMaxPed;
     double _distEffMaxWall;
-    //floorfield
+    // floorfield
     double _deltaH;
     double _wall_avoid_distance;
     bool _use_wall_avoidance;
-    //gradientmodel
+    // gradientmodel
     double _slow_down_distance;
 
-    //ff router quickest
+    // ff router quickest
     double _recalc_interval;
 
-    //ff router
+    // ff router
     bool _has_specific_goals;
     bool _has_directional_escalators;
     bool _write_VTK_files;
@@ -463,6 +476,8 @@ private:
 
     FileFormat _fileFormat;
     std::map<int, std::shared_ptr<AgentsParameters>> _agentsParameters;
+
+    std::set<OptionalOutput> _optionalOutput;
 #ifdef _JPS_AS_A_SERVICE
     bool _runAsService;
     int _servicePort;
