@@ -302,6 +302,7 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
             Logging::Warning("no output format specified. Using default: TXT");
             _config->SetFileFormat(FileFormat::TXT);
         }
+
         //color mode
         std::string color_mode =
             xHeader->FirstChildElement("trajectories")->Attribute("color_mode") ?

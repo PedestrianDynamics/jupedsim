@@ -66,7 +66,6 @@ Simulation::Simulation(Configuration * args) : _config(args)
     _fps              = 1;
     _em               = nullptr;
     _gotSources       = false;
-    //    _iod = new IODispatcher();
     _fps              = 1;
     _em               = nullptr;
     _gotSources       = false;
@@ -78,7 +77,6 @@ Simulation::Simulation(Configuration * args) : _config(args)
 Simulation::~Simulation()
 {
     delete _solver;
-    //    delete _iod;
     delete _em;
 
     if(_iod) {
