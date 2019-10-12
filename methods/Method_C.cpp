@@ -58,13 +58,6 @@ bool Method_C::Process (const PedData& peddata, const double& zPos_measureArea)
      Log->Write("------------------------Analyzing with Method C-----------------------------");
      for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
      {
-          int frameNr = ite->first;
-          int frid = frameNr  + _minFrame;
-
-          if(!(frid%100))
-          {
-               Log->Write("frame ID = %d",frid);
-          }
           vector<int> ids=_peds_t[frameNr];
           vector<int> IdInFrame = peddata.GetIdInFrame(frameNr, ids, zPos_measureArea);
           const vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids, zPos_measureArea);
@@ -80,8 +73,8 @@ void Method_C::OpenFileMethodC()
 {
      fs::path tmp("_id_"+_measureAreaId+".dat");
      tmp = _outputLocation / "Fundamental_Diagram" / "Classical_Voronoi" / ("rho_v_Classic_" + _trajName.string() + tmp.string());
-//_outputLocation.string()+"Fundamental_Diagram/Classical_Voronoi/rho_v_Classic_"+_trajName+"_id_"+_measureAreaId+".dat";
      string results_C= tmp.string();
+
      if((_fClassicRhoV=Analysis::CreateFile(results_C))==nullptr) {
           Log->Write("Warning:\tcannot open file %s to write classical density and velocity\n", results_C.c_str());
           exit(EXIT_FAILURE);

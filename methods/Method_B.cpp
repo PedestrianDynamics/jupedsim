@@ -176,15 +176,6 @@ void Method_B::GetFundamentalTinTout(double *DensityPerFrame,double LengthMeasur
           fprintf(fFD_TinTout,"%d\t%f\t%f\n",i+1,density_temp,velocity_temp);
      }
      fclose(fFD_TinTout);
-// plot FD
-// @todo: write new script to plot rho-v and j-rho diagrams
-     // if(_plotFundamentalDiagram)
-     // {
-     //      string parameters_N_t=" "+_scriptsLocation+"/_Plot_N_t.py\" -p \""+ METHOD_A_LOCATION + "\" -n "+ fFD_TinTout;
-     //      parameters_N_t = PYTHON + parameters_N_t;
-     //      int res = system(parameters_N_t.c_str());
-     //      Log->Write("INFO:\tPlotting N-t diagram! Status: %d", res);
-     // }
 
 }
 

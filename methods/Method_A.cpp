@@ -196,7 +196,6 @@ void Method_A::FlowRate_Velocity(int fps, const vector<int>& AccumPeds, const ve
      FILE *fFD_FlowVelocity;
      fs::path tmp ("_id_"+_measureAreaId+".dat");
      tmp = _outputLocation / "Fundamental_Diagram" / "FlowVelocity" / ("FDFlowVelocity_" + _trajName.string() + tmp.string());
-     //string fdFlowVelocity = _outputLocation.string() + "Fundamental_Diagram/FlowVelocity/FDFlowVelocity_"+_trajName+"_id_"+_measureAreaId+".dat";
      string fdFlowVelocity = tmp.string();
 
      if((fFD_FlowVelocity=Analysis::CreateFile(fdFlowVelocity))==nullptr) {
