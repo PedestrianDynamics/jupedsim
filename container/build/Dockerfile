@@ -13,3 +13,7 @@ RUN apt-get install -y wget \
                        libboost-test-dev \
                        libcgal-dev \
                        clang-format-8
+
+COPY scripts/setup-deps.sh /opt/
+
+RUN cd /opt && CXX=/usr/bin/g++-8 CC=/usr/bin/gcc-8 ./setup-deps.sh
