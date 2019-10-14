@@ -195,7 +195,12 @@ public:
     void incrementCountTraj();
 
     bool correctGeometry(std::shared_ptr<Building> building, std::shared_ptr<TrainTimeTable>);
-    void WriteTrajectories();
+
+    /**
+     * Updates the output filename if the current file exceeds 10MB.
+     * Works only for FileFormat::TXT.
+     */
+    void UpdateOutputFileName();
     bool TrainTraffic();
 
     int _countTraj = 0;  // count number of TXT trajectories to produce

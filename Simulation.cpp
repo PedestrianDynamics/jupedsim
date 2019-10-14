@@ -621,7 +621,7 @@ double Simulation::RunBody(double maxSimTime)
         // write the trajectories
         if(0 == frameNr % writeInterval) {
             _iod->WriteFrame(frameNr / writeInterval, _building.get());
-            WriteTrajectories();
+            UpdateOutputFileName();
         }
 
         if(!_gotSources && !_periodic && _config->print_prog_bar())
@@ -699,7 +699,7 @@ double Simulation::RunBody(double maxSimTime)
     return t;
 }
 
-void Simulation::WriteTrajectories()
+void Simulation::UpdateOutputFileName()
 {
     if(_config->GetFileFormat() != FORMAT_PLAIN) {
         return;
