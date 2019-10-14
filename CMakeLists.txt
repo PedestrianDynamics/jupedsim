@@ -317,10 +317,11 @@ set_property(TARGET geometrycore PROPERTY CXX_STANDARD 17)
 set_property(TARGET geometrycore PROPERTY CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if(NOT MSVC)
-	target_link_libraries(geometrycore  stdc++fs)
-endif()
-
+add_library(fs INTERFACE)
+target_link_libraries(fs INTERFACE
+    $<$<PLATFORM_ID:Linux>:stdc++fs>
+)
+target_link_libraries(geometrycore  fs)
 add_executable(
         jpsreport main.cpp
 )
@@ -328,9 +329,8 @@ add_executable(
 set_property(TARGET jpsreport PROPERTY CXX_STANDARD 17)
 set_property(TARGET jpsreport PROPERTY CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-if(NOT MSVC)
-	target_link_libraries(jpsreport  stdc++fs)
-endif()
+
+target_link_libraries(jpsreport  fs)
 
 if (Boost_FOUND)
 target_link_libraries(geometrycore ${Boost_LIBRARIES})
