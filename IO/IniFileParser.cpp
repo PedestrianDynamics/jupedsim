@@ -332,7 +332,32 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
             if(!trajLoc.empty()) {
                 const fs::path & root(
                     _config->GetProjectRootDir()); // returns an absolute path already
-                const fs::path canonicalTrajPath = fs::weakly_canonical(root / trajLoc);
+                fs::path canonicalTrajPath = fs::weakly_canonical(root / trajLoc);
+
+                std::string extension = (canonicalTrajPath.has_extension()) ?
+                                            (canonicalTrajPath.extension().string()) :
+                                            ("");
+                std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+
+                // check file extension and if it is not matching the intended format,
+                // change it to correct one
+                switch(_config->GetFileFormat()) {
+                    case FileFormat::XML: {
+                        if(extension != ".xml") {
+                            canonicalTrajPath.replace_extension(".xml");
+                            Logging::Warning("replaced output file extension with: .xml");
+                        }
+                        break;
+                    }
+                    case FileFormat::TXT: {
+                        if(extension != ".txt") {
+                            canonicalTrajPath.replace_extension(".txt");
+                            Logging::Warning("replaced output file extension with: .txt");
+                        }
+
+                        break;
+                    }
+                }
                 _config->SetTrajectoriesFile(canonicalTrajPath);
                 _config->SetOriginalTrajectoriesFile(canonicalTrajPath);
             }
