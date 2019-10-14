@@ -10,7 +10,8 @@ RUN apt-get install -y wget \
                        cmake \
                        make \
                        libboost-dev \
-                       libcgal-dev
+                       libcgal-dev \
+                       clang-format-8
 
 COPY scripts/setup-deps.sh /opt/
 
