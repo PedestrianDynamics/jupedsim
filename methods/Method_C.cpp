@@ -56,14 +56,22 @@ bool Method_C::Process (const PedData& peddata, const double& zPos_measureArea)
      _fps = peddata.GetFps();
      OpenFileMethodC();
      Log->Write("------------------------Analyzing with Method C-----------------------------");
-     for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
+     for(auto ite=_peds_t.begin();ite!=_peds_t.end();ite++)
      {
-          vector<int> ids=_peds_t[frameNr];
-          vector<int> IdInFrame = peddata.GetIdInFrame(frameNr, ids, zPos_measureArea);
-          const vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids, zPos_measureArea);
-          const vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids, zPos_measureArea);
-          const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
-          OutputClassicalResults(frameNr, IdInFrame.size(),XInFrame,YInFrame,VInFrame);
+       int frameNr = ite->first;
+       int frid = frameNr  + _minFrame;
+
+       if(!(frid%100))
+       {
+         Log->Write("frame ID = %d",frid);
+       }
+
+       vector<int> ids=_peds_t[frameNr];
+       vector<int> IdInFrame = peddata.GetIdInFrame(frameNr, ids, zPos_measureArea);
+       const vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids, zPos_measureArea);
+       const vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids, zPos_measureArea);
+       const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
+       OutputClassicalResults(frameNr, IdInFrame.size(),XInFrame,YInFrame,VInFrame);
      }
      fclose(_fClassicRhoV);
      return true;
