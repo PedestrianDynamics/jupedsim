@@ -1,6 +1,20 @@
 # Change Log
 All notable changes to `jpsreport` will be documented in this file.
 
+## v0.8.5 [under development]
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+- Removed unused code
+
+### Fixed
+- Cmake for macOS 10.15 (Catalina)
+
 ## v0.8.4 [10.09.2019]
 ### Added
 - Option brew install ([for more information](https://github.com/JuPedSim/homebrew-jps/blob/master/README.md))
