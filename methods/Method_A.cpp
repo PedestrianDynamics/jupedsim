@@ -136,8 +136,13 @@ void Method_A::WriteFile_N_t(string data)
                std::cout  << ">> <"<< parameters_N_t << ">\n";
 
                int res = system(parameters_N_t.c_str());
-               Log->Write("INFO:\tPlotting N-t diagram! Status: %d", res);
-               /// todo: return value of this function: true or false
+               if(res)
+               {
+                   Log->Write("ERROR:\tPlotting N-t diagram not success! Check your python environment.");
+               } else
+               {
+                   Log->Write("INFO:\tPlotting N-t diagram success!");
+               }
           }
      }
      else
@@ -191,7 +196,6 @@ void Method_A::FlowRate_Velocity(int fps, const vector<int>& AccumPeds, const ve
      FILE *fFD_FlowVelocity;
      fs::path tmp ("_id_"+_measureAreaId+".dat");
      tmp = _outputLocation / "Fundamental_Diagram" / "FlowVelocity" / ("FDFlowVelocity_" + _trajName.string() + tmp.string());
-     //string fdFlowVelocity = _outputLocation.string() + "Fundamental_Diagram/FlowVelocity/FDFlowVelocity_"+_trajName+"_id_"+_measureAreaId+".dat";
      string fdFlowVelocity = tmp.string();
 
      if((fFD_FlowVelocity=Analysis::CreateFile(fdFlowVelocity))==nullptr) {

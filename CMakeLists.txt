@@ -312,10 +312,11 @@ endif()
 #message (STATUS "PSAPI: ${PSAPI}")
 #endif()
 
-add_library ( geometrycore SHARED ${source_files}  ${methods})
+add_library ( geometrycore STATIC ${source_files}  ${methods})
 set_property(TARGET geometrycore PROPERTY CXX_STANDARD 17)
 set_property(TARGET geometrycore PROPERTY CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
 add_library(fs INTERFACE)
 target_link_libraries(fs INTERFACE
     $<$<PLATFORM_ID:Linux>:stdc++fs>
@@ -328,6 +329,7 @@ add_executable(
 set_property(TARGET jpsreport PROPERTY CXX_STANDARD 17)
 set_property(TARGET jpsreport PROPERTY CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
 target_link_libraries(jpsreport  fs)
 
 if (Boost_FOUND)
@@ -388,14 +390,14 @@ if(BUILD_TESTING)
 
 
 
-#  set(Python_ADDITIONAL_VERSIONS 3.0)
+  #  set(Python_ADDITIONAL_VERSIONS 3.0)
   find_package(PythonInterp)
   if(PYTHONINTERP_FOUND)
   message(STATUS "Found Python: " ${PYTHON_EXECUTABLE} " (${PYTHON_VERSION_STRING})")
     foreach (test_src ${test_py_files})
       GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
-#     message (STATUS "Add python test: " ${test} " | test_src: " ${test_src})
-       add_test(NAME ${test} COMMAND ${test_src})
+     message (STATUS "Add python test: " ${test} " | test_src: " ${test_src})
+       add_test(NAME ${test} COMMAND ${PYTHON_EXECUTABLE} ${test_src})
     endforeach(test_src ${test_py_files})
     message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
   endif(PYTHONINTERP_FOUND)
