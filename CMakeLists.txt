@@ -318,7 +318,6 @@ set_property(TARGET geometrycore PROPERTY CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 add_library(fs INTERFACE)
 target_link_libraries(fs INTERFACE
-    $<$<PLATFORM_ID:Darwin>:-stdlib=libc++>
     $<$<PLATFORM_ID:Linux>:stdc++fs>
 )
 target_link_libraries(geometrycore  fs)

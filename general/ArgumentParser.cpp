@@ -215,7 +215,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
      Log->Write("INFO: \tParsing the ini file <%s>",inifile.c_str());
      //extract and set the project root dir
      fs::path p(inifile);
-     _projectRootDir = canonical(p).parent_path();
+     _projectRootDir = weakly_canonical(p).parent_path();
      TiXmlDocument doc(inifile);
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
