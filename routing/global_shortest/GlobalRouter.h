@@ -215,6 +215,7 @@ private:
     int ** _pathsMatrix;
     double ** _distMatrix;
     double _edgeCost;
+    int _exitsCnt;
     //if false, the router will only return the exits and not the navigations line created through the mesh or inserted
     //via the routing file. The mesh will only be used for computing the distance.
     bool _useMeshForLocalNavigation = true;

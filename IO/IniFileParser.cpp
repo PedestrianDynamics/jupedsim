@@ -217,7 +217,6 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
     Log->Write("----\nJuPedSim - JPScore\n");
     Log->Write("Current date   : %s %s", __DATE__, __TIME__);
     Log->Write("Version        : %s", JPSCORE_VERSION);
-
     Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
     Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
     Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
@@ -293,24 +292,16 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         std::string format = xHeader->FirstChildElement("trajectories")->Attribute("format") ?
                                  xHeader->FirstChildElement("trajectories")->Attribute("format") :
                                  "xml-plain";
-        int embedMesh = 0;
-        if(xHeader->FirstChildElement("trajectories")->Attribute("embed_mesh")) {
-            embedMesh =
-                std::string(xHeader->FirstChildElement("trajectories")->Attribute("embed_mesh")) ==
-                        "true" ?
-                    1 :
-                    0;
+        std::transform(format.begin(), format.end(), format.begin(), ::tolower);
+
+        if(format == "xml-plain") {
+            _config->SetFileFormat(FileFormat::XML);
+        } else if(format == "plain") {
+            _config->SetFileFormat(FileFormat::TXT);
+        } else {
+            Logging::Warning("no output format specified. Using default: TXT");
+            _config->SetFileFormat(FileFormat::TXT);
         }
-        if(format == "xml-plain")
-            _config->SetFileFormat(FORMAT_XML_PLAIN);
-        if(format == "xml-plain" && embedMesh == 1)
-            _config->SetFileFormat(FORMAT_XML_PLAIN_WITH_MESH);
-        if(format == "xml-bin")
-            _config->SetFileFormat(FORMAT_XML_BIN);
-        if(format == "plain")
-            _config->SetFileFormat(FORMAT_PLAIN);
-        if(format == "vtk")
-            _config->SetFileFormat(FORMAT_VTK);
 
         //color mode
         std::string color_mode =
@@ -341,7 +332,32 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
             if(!trajLoc.empty()) {
                 const fs::path & root(
                     _config->GetProjectRootDir()); // returns an absolute path already
-                const fs::path canonicalTrajPath = fs::weakly_canonical(root / trajLoc);
+                fs::path canonicalTrajPath = fs::weakly_canonical(root / trajLoc);
+
+                std::string extension = (canonicalTrajPath.has_extension()) ?
+                                            (canonicalTrajPath.extension().string()) :
+                                            ("");
+                std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+
+                // check file extension and if it is not matching the intended format,
+                // change it to correct one
+                switch(_config->GetFileFormat()) {
+                    case FileFormat::XML: {
+                        if(extension != ".xml") {
+                            canonicalTrajPath.replace_extension(".xml");
+                            Logging::Warning("replaced output file extension with: .xml");
+                        }
+                        break;
+                    }
+                    case FileFormat::TXT: {
+                        if(extension != ".txt") {
+                            canonicalTrajPath.replace_extension(".txt");
+                            Logging::Warning("replaced output file extension with: .txt");
+                        }
+
+                        break;
+                    }
+                }
                 _config->SetTrajectoriesFile(canonicalTrajPath);
                 _config->SetOriginalTrajectoriesFile(canonicalTrajPath);
             }
@@ -378,9 +394,9 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
                 if(in == "true") {
                     _config->AddOptionalOutputOption(OptionalOutput::speed);
-                    Log->Write("INFO: speed added to output");
+                    Logging::Info("speed added to output");
                 } else {
-                    Log->Write("INFO: speed not added to output");
+                    Logging::Info("speed not added to output");
                 }
             }
 
@@ -391,9 +407,9 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
                 if(in == "true") {
                     _config->AddOptionalOutputOption(OptionalOutput::velocity);
-                    Log->Write("INFO: velocity added to output");
+                    Logging::Info("velocity added to output");
                 } else {
-                    Log->Write("INFO: velocity not added to output");
+                    Logging::Info("velocity not added to output");
                 }
             }
 
@@ -404,9 +420,9 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
                 if(in == "true") {
                     _config->AddOptionalOutputOption(OptionalOutput::final_goal);
-                    Log->Write("INFO: final_goal added to output");
+                    Logging::Info("final_goal added to output");
                 } else {
-                    Log->Write("INFO: final_goal not added to output");
+                    Logging::Info("final_goal not added to output");
                 }
             }
 
@@ -417,9 +433,9 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
                 if(in == "true") {
                     _config->AddOptionalOutputOption(OptionalOutput::intermediate_goal);
-                    Log->Write("INFO: intermediate_goal added to output");
+                    Logging::Info("intermediate_goal added to output");
                 } else {
-                    Log->Write("INFO: intermediate_goal not added to output");
+                    Logging::Info("intermediate_goal not added to output");
                 }
             }
 
@@ -430,9 +446,9 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
                 if(in == "true") {
                     _config->AddOptionalOutputOption(OptionalOutput::desired_direction);
-                    Log->Write("INFO: desired_direction added to output");
+                    Logging::Info("desired_direction added to output");
                 } else {
-                    Log->Write("INFO: desired_direction not added to output");
+                    Logging::Info("desired_direction not added to output");
                 }
             }
 
@@ -443,9 +459,9 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
                 if(in == "true") {
                     _config->AddOptionalOutputOption(OptionalOutput::spotlight);
-                    Log->Write("INFO: spotlight added to output");
+                    Logging::Info("spotlight added to output");
                 } else {
-                    Log->Write("INFO: spotlight not added to output");
+                    Logging::Info("spotlight not added to output");
                 }
             }
 
@@ -456,9 +472,9 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
                 if(in == "true") {
                     _config->AddOptionalOutputOption(OptionalOutput::router);
-                    Log->Write("INFO: router added to output");
+                    Logging::Info("router added to output");
                 } else {
-                    Log->Write("INFO: router not added to output");
+                    Logging::Info("router not added to output");
                 }
             }
 
@@ -469,9 +485,9 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
                 if(in == "true") {
                     _config->AddOptionalOutputOption(OptionalOutput::group);
-                    Log->Write("INFO: group added to output");
+                    Logging::Info("group added to output");
                 } else {
-                    Log->Write("INFO: group not added to output");
+                    Logging::Info("group not added to output");
                 }
             }
         }
