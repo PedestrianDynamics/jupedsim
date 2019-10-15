@@ -47,7 +47,6 @@ static fs::path getEventFileName(const fs::path & projectFile)
         return ret;
     }
     TiXmlNode * xMainNode = doc.RootElement();
-    std::string eventfile = "";
     if(xMainNode->FirstChild("events_file")) {
         ret = xMainNode->FirstChild("events_file")->FirstChild()->ValueStr();
         Logging::Info(fmt::format("events <{}>", ret.string()));
@@ -74,7 +73,6 @@ static fs::path getTrainTimeTableFileName(const fs::path & projectFile)
         return ret;
     }
     TiXmlNode * xMainNode = doc.RootElement();
-    std::string tttfile   = "";
     if(xMainNode->FirstChild("train_constraints")) {
         TiXmlNode * xFileNode =
             xMainNode->FirstChild("train_constraints")->FirstChild("train_time_table");
@@ -100,7 +98,6 @@ static fs::path getTrainTypeFileName(const fs::path & projectFile)
         return ret;
     }
     TiXmlNode * xMainNode = doc.RootElement();
-    std::string tttfile   = "";
     if(xMainNode->FirstChild("train_constraints")) {
         auto xFileNode = xMainNode->FirstChild("train_constraints")->FirstChild("train_types");
         if(xFileNode)
@@ -144,7 +141,7 @@ TrajectoriesTXT::TrajectoriesTXT() : Trajectories()
 {
     // Add header, info and output for speed
     _optionalOutputHeader[OptionalOutput::speed] = "V\t";
-    _optionalOutputInfo[OptionalOutput::speed]   = "#V: speed of the pedestrian (in m/s)";
+    _optionalOutputInfo[OptionalOutput::speed]   = "#V: speed of the pedestrian (in m/s)\n";
     _optionalOutput[OptionalOutput::speed]       = [](const Pedestrian * ped) {
         return fmt::format(check_fmt("{:.2f}\t"), ped->GetV().Norm());
     };
@@ -153,21 +150,21 @@ TrajectoriesTXT::TrajectoriesTXT() : Trajectories()
     _optionalOutputHeader[OptionalOutput::velocity] = "Vx\tVy\t";
     _optionalOutputInfo[OptionalOutput::velocity] =
         "#Vx: x component of the pedestrian's velocity\n"
-        "#Vy: y component of the pedestrian's velocity";
+        "#Vy: y component of the pedestrian's velocity\n";
     _optionalOutput[OptionalOutput::velocity] = [](const Pedestrian * ped) {
         return fmt::format(check_fmt("{:.2f}\t{:.2f}\t"), ped->GetV()._x, ped->GetV()._y);
     };
 
     // Add header, info and output for final_goal
     _optionalOutputHeader[OptionalOutput::final_goal] = "FG\t";
-    _optionalOutputInfo[OptionalOutput::final_goal]   = "#FG: id of final goal";
+    _optionalOutputInfo[OptionalOutput::final_goal]   = "#FG: id of final goal\n";
     _optionalOutput[OptionalOutput::final_goal]       = [](const Pedestrian * ped) {
         return fmt::format(check_fmt("{}\t"), ped->GetFinalDestination());
     };
 
     // Add header, info and output for intermediate_goal
     _optionalOutputHeader[OptionalOutput::intermediate_goal] = "CG\t";
-    _optionalOutputInfo[OptionalOutput::intermediate_goal]   = "#CG: id of current goal";
+    _optionalOutputInfo[OptionalOutput::intermediate_goal]   = "#CG: id of current goal\n";
     _optionalOutput[OptionalOutput::intermediate_goal]       = [](const Pedestrian * ped) {
         return fmt::format(check_fmt("{}\t"), ped->GetExitIndex());
     };
@@ -176,14 +173,14 @@ TrajectoriesTXT::TrajectoriesTXT() : Trajectories()
     _optionalOutputHeader[OptionalOutput::desired_direction] = "Dx\tDy\t";
     _optionalOutputInfo[OptionalOutput::desired_direction] =
         "#Dx: x component of the pedestrian's desired direction\n"
-        "#Dy: y component of the pedestrian's desired direction";
+        "#Dy: y component of the pedestrian's desired direction\n";
     _optionalOutput[OptionalOutput::desired_direction] = [](const Pedestrian * ped) {
         return fmt::format(check_fmt("{:.2f}\t{:.2f}\t"), ped->GetLastE0()._x, ped->GetLastE0()._y);
     };
 
     // Add header, info and output for spotlight
     _optionalOutputHeader[OptionalOutput::spotlight] = "SPOT\t";
-    _optionalOutputInfo[OptionalOutput::spotlight]   = "#SPOT: ped is highlighted";
+    _optionalOutputInfo[OptionalOutput::spotlight]   = "#SPOT: ped is highlighted\n";
     _optionalOutput[OptionalOutput::spotlight]       = [](Pedestrian * ped) {
         return fmt::format(check_fmt("{}\t"), (int) ped->GetSpotlight());
     };
@@ -191,85 +188,78 @@ TrajectoriesTXT::TrajectoriesTXT() : Trajectories()
     // Add header, info and output for router
     _optionalOutputHeader[OptionalOutput::router] = "ROUTER\t";
     _optionalOutputInfo[OptionalOutput::router] =
-        "#ROUTER: routing strategy used during simulation";
+        "#ROUTER: routing strategy used during simulation\n";
     _optionalOutput[OptionalOutput::router] = [](const Pedestrian * ped) {
         return fmt::format(check_fmt("{}\t"), ped->GetRoutingStrategy());
     };
 
     // Add header, info and output for group
     _optionalOutputHeader[OptionalOutput::group] = "GROUP\t";
-    _optionalOutputInfo[OptionalOutput::group]   = "#GROUP: group of the pedestrian";
+    _optionalOutputInfo[OptionalOutput::group]   = "#GROUP: group of the pedestrian\n";
     _optionalOutput[OptionalOutput::group]       = [](const Pedestrian * ped) {
         return fmt::format(check_fmt("{}\t"), ped->GetGroup());
     };
 }
 
-void TrajectoriesTXT::WriteHeader(long nPeds, double fps, Building * building, int seed, int count)
+void TrajectoriesTXT::WriteHeader(long, double fps, Building * building, int, int count)
 {
-    const fs::path projRoot(building->GetProjectRootDir());
-
-    (void) seed;
-    (void) nPeds;
-    char tmp[500] = "";
-    sprintf(tmp, "#description: jpscore (%s)", JPSCORE_VERSION);
-    Write(tmp);
-    sprintf(tmp, "#count: %d", count);
-    Write(tmp);
-    sprintf(tmp, "#framerate: %0.2f", fps);
-    Write(tmp);
+    const fs::path & projRoot(building->GetProjectRootDir());
     const fs::path tmpGeo = projRoot / building->GetGeometryFilename();
-    sprintf(tmp, "#geometry: %s", tmpGeo.string().c_str());
-    Write(tmp);
 
+    std::string header = fmt::format("#description: jpscore ({:s})\n", JPSCORE_VERSION);
+    header.append(fmt::format("#count: {:d}\n", count));
+    header.append(fmt::format("#framerate: {:0.2f}\n", fps));
+    header.append(fmt::format("#geometry: {:s}\n", tmpGeo.string()));
+
+    // if used: add source file name
     if(const fs::path sourceFileName = getSourceFileName(building->GetProjectFilename());
        !sourceFileName.empty()) {
         const fs::path tmpSource = projRoot / sourceFileName;
-        sprintf(tmp, "#sources: %s", tmpSource.string().c_str());
-        Write(tmp);
+        header.append(fmt::format("#sources: {:s}\n", tmpSource.string()));
     }
 
+    // if used: add goal file name
     if(const fs::path goalFileName = getGoalFileName(building->GetProjectFilename());
        !goalFileName.empty()) {
         const fs::path tmpGoal = projRoot / goalFileName;
-        sprintf(tmp, "#goals: %s", tmpGoal.string().c_str());
-        Write(tmp);
+        header.append(fmt::format("#goals: {:s}\n", tmpGoal.string()));
     }
 
+    // if used: add event file name
     if(const fs::path eventFileName = getEventFileName(building->GetProjectFilename());
        !eventFileName.empty()) {
         const fs::path tmpEvent = projRoot / eventFileName;
-        sprintf(tmp, "#events: %s", tmpEvent.string().c_str());
-        Write(tmp);
+        header.append(fmt::format("#events: {:s}\n", tmpEvent.string()));
     }
 
+    // if used: add trainTimeTable file name
     if(const fs::path trainTimeTableFileName =
            getTrainTimeTableFileName(building->GetProjectFilename());
        !trainTimeTableFileName.empty()) {
         const fs::path tmpTTT = projRoot / trainTimeTableFileName;
-        sprintf(tmp, "#trainTimeTable: %s", tmpTTT.string().c_str());
-        Write(tmp);
+        header.append(fmt::format("#trainTimeTable: {:s}\n", tmpTTT.string()));
     }
 
+    // if used: add trainType file name
     if(const fs::path trainTypeFileName = getTrainTypeFileName(building->GetProjectFilename());
        !trainTypeFileName.empty()) {
         const fs::path tmpTT = projRoot / trainTypeFileName;
-        sprintf(tmp, "#trainType: %s", tmpTT.string().c_str());
-        Write(tmp);
+        header.append(fmt::format("#trainType: {:s}\n", tmpTT.string()));
     }
-    Write("#ID: the agent ID");
-    Write("#FR: the current frame");
-    Write("#X,Y,Z: the agents coordinates (in metres)");
-    Write("#A, B: semi-axes of the ellipse");
-    Write("#ANGLE: orientation of the ellipse");
-    Write("#COLOR: color of the ellipse");
+
+    header.append("#ID: the agent ID\n");
+    header.append("#FR: the current frame\n");
+    header.append("#X,Y,Z: the agents coordinates (in metres)\n");
+    header.append("#A, B: semi-axes of the ellipse\n");
+    header.append("#ANGLE: orientation of the ellipse\n");
+    header.append("#COLOR: color of the ellipse\n");
 
     // Add info for optional output options
     for(const auto & option : _optionalOutputOptions) {
-        Write(_optionalOutputInfo[option]);
+        header.append(_optionalOutputInfo[option]);
     }
-    Write("\n");
-    std::string header("#ID\tFR\tX\tY\tZ\tA\tB\tANGLE\tCOLOR\t");
 
+    header.append("\n#ID\tFR\tX\tY\tZ\tA\tB\tANGLE\tCOLOR\t");
     // Add header for optional output options
     for(const auto & option : _optionalOutputOptions) {
         header.append(_optionalOutputHeader[option]);
@@ -277,30 +267,23 @@ void TrajectoriesTXT::WriteHeader(long nPeds, double fps, Building * building, i
     Write(header);
 }
 
-void TrajectoriesTXT::WriteGeometry(Building * building)
-{
-    (void) building;
-}
+void TrajectoriesTXT::WriteGeometry(Building *) {}
 
 void TrajectoriesTXT::WriteFrame(int frameNr, Building * building)
 {
-    char tmp[CLENGTH]                         = "";
     const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
-    for(unsigned int p = 0; p < allPeds.size(); p++) {
-        Pedestrian * ped = allPeds[p];
-        double x         = ped->GetPos()._x;
-        double y         = ped->GetPos()._y;
-        double z         = ped->GetElevation();
-        int color        = ped->GetColor();
-        double a         = ped->GetLargerAxis();
-        double b         = ped->GetSmallerAxis();
-        double phi       = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
-        double RAD2DEG   = 180.0 / M_PI;
-        // @todo: maybe two different formats
-        //sprintf(tmp, "%d\t%d\t%0.2f\t%0.2f\t%0.2f", ped->GetID(), frameNr, x, y, z);
-        sprintf(
-            tmp,
-            "%d\t%d\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%d\t",
+    for(auto ped : allPeds) {
+        double x       = ped->GetPos()._x;
+        double y       = ped->GetPos()._y;
+        double z       = ped->GetElevation();
+        int color      = ped->GetColor();
+        double a       = ped->GetLargerAxis();
+        double b       = ped->GetSmallerAxis();
+        double phi     = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
+        double RAD2DEG = 180.0 / M_PI;
+
+        std::string frame = fmt::format(
+            "{:d}\t{:d}\t{:0.2f}\t{:0.2f}\t{:0.2f}\t{:0.2f}\t{:0.2f}\t{:0.2f}\t{:d}\t",
             ped->GetID(),
             frameNr,
             x,
@@ -311,7 +294,6 @@ void TrajectoriesTXT::WriteFrame(int frameNr, Building * building)
             phi * RAD2DEG,
             color);
 
-        std::string frame(tmp);
         for(const auto & option : _optionalOutputOptions) {
             frame.append(_optionalOutput[option](ped));
         }
