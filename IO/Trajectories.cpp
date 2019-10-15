@@ -14,13 +14,13 @@ static fs::path getSourceFileName(const fs::path & projectFile)
 
     TiXmlDocument doc(projectFile.string());
     if(!doc.LoadFile()) {
-        Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \tGetSourceFileName could not parse the project file");
+        Logging::Error(doc.ErrorDesc());
+        Logging::Error("GetSourceFileName could not parse the project file");
         return ret;
     }
     TiXmlNode * xRootNode = doc.RootElement()->FirstChild("agents");
     if(!xRootNode) {
-        Log->Write("ERROR:\tGetSourceFileName could not load persons attributes");
+        Logging::Error("GetSourceFileName could not load persons attributes");
         return ret;
     }
 
@@ -50,9 +50,9 @@ static fs::path getEventFileName(const fs::path & projectFile)
     std::string eventfile = "";
     if(xMainNode->FirstChild("events_file")) {
         ret = xMainNode->FirstChild("events_file")->FirstChild()->ValueStr();
-        Log->Write("INFO: \tevents <" + ret.string() + ">");
+        Logging::Info(fmt::format("events <{}>", ret.string()));
     } else {
-        Log->Write("INFO: \tNo events found");
+        Logging::Info("No events found");
         return ret;
     }
     return ret;
@@ -69,8 +69,8 @@ static fs::path getTrainTimeTableFileName(const fs::path & projectFile)
 
     TiXmlDocument doc(projectFile.string());
     if(!doc.LoadFile()) {
-        Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \tGetTrainTimeTable could not parse the project file");
+        Logging::Error(doc.ErrorDesc());
+        Logging::Error("GetTrainTimeTable could not parse the project file");
         return ret;
     }
     TiXmlNode * xMainNode = doc.RootElement();
@@ -81,9 +81,9 @@ static fs::path getTrainTimeTableFileName(const fs::path & projectFile)
 
         if(xFileNode)
             ret = xFileNode->FirstChild()->ValueStr();
-        Log->Write("INFO: \ttrain_time_table <" + ret.string() + ">");
+        Logging::Info(fmt::format("train_time_table <{}>", ret.string()));
     } else {
-        Log->Write("INFO: \tNo events no ttt file found");
+        Logging::Info("No ttt file found");
         return ret;
     }
     return ret;
@@ -95,8 +95,8 @@ static fs::path getTrainTypeFileName(const fs::path & projectFile)
 
     TiXmlDocument doc(projectFile.string());
     if(!doc.LoadFile()) {
-        Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \tGetTrainType could not parse the project file");
+        Logging::Error(doc.ErrorDesc());
+        Logging::Error("GetTrainType could not parse the project file");
         return ret;
     }
     TiXmlNode * xMainNode = doc.RootElement();
@@ -105,9 +105,9 @@ static fs::path getTrainTypeFileName(const fs::path & projectFile)
         auto xFileNode = xMainNode->FirstChild("train_constraints")->FirstChild("train_types");
         if(xFileNode)
             ret = xFileNode->FirstChild()->ValueStr();
-        Log->Write("INFO: \ttrain_types <" + ret.string() + ">");
+        Logging::Info(fmt::format("train_types <{}>", ret.string()));
     } else {
-        Log->Write("INFO: \tNo events no train types file found");
+        Logging::Info("No train types file found");
         return ret;
     }
     return ret;
@@ -119,8 +119,8 @@ static fs::path getGoalFileName(const fs::path & projectFile)
 
     TiXmlDocument doc(projectFile.string());
     if(!doc.LoadFile()) {
-        Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \tGetSourceFileName could not parse the project file");
+        Logging::Error(doc.ErrorDesc());
+        Logging::Error("GetGoalFileName could not parse the project file");
         return ret;
     }
     TiXmlNode * xRootNode = doc.RootElement();
@@ -132,7 +132,7 @@ static fs::path getGoalFileName(const fs::path & projectFile)
     TiXmlNode * xGoalsNodeFile = xGoalsNode->FirstChild("file");
     if(xGoalsNodeFile) {
         ret = xGoalsNodeFile->FirstChild()->ValueStr();
-        Log->Write("INFO:\tGoal file <%s> will be parsed", ret.string().c_str());
+        Logging::Info(fmt::format("goal file <{}>", ret.string()));
     }
     return ret;
 }
