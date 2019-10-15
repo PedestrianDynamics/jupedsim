@@ -225,8 +225,8 @@ bool Goal::ConvertLineToPoly()
         tmp    = _poly[_poly.size() / 2];
         diff   = point1 - tmp;
 
-        point1 = tmp + diff * 0.95;
-        point2 = tmp + diff * 0.05;
+        point1 = tmp + diff * 0.51;
+        point2 = tmp + diff * 0.49;
 
         _crossing.SetPoint1(point1);
         _crossing.SetPoint2(point2);

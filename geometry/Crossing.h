@@ -65,7 +65,7 @@ public:
     /**
      * Destructor
      */
-    virtual ~Crossing();
+    virtual ~Crossing() = default;
 
     /**
      * Set/Get the second subroom

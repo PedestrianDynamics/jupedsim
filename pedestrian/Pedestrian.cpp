@@ -30,6 +30,7 @@
 #include "Knowledge.h"
 #include "geometry/Building.h"
 #include "geometry/SubRoom.h"
+#include "geometry/WaitingArea.h"
 
 #include <cassert>
 // initialize the static variables
@@ -1311,6 +1312,20 @@ bool Pedestrian::IsInsideGoal() const
     return _insideGoal;
 }
 
+bool Pedestrian::IsInsideWaitingAreaWaiting() const
+{
+    if(_insideGoal) {
+        auto itr = _building->GetAllGoals().find(_desiredFinalDestination);
+        if(itr != _building->GetAllGoals().end()) {
+            Goal * goal = itr->second;
+            if(WaitingArea * wa = dynamic_cast<WaitingArea *>(goal)) {
+                return wa->IsWaiting(Pedestrian::GetGlobalTime(), _building);
+            }
+        }
+    }
+    return false;
+}
+
 void Pedestrian::EnterGoal()
 {
     _insideGoal = true;
@@ -1320,4 +1335,37 @@ void Pedestrian::EnterGoal()
 void Pedestrian::LeaveGoal()
 {
     _insideGoal = false;
+}
+
+bool Pedestrian::IsWaiting() const
+{
+    return _waiting;
+}
+
+void Pedestrian::StartWaiting()
+{
+    _waiting = true;
+}
+
+void Pedestrian::EndWaiting()
+{
+    _waiting = false;
+}
+
+bool Pedestrian::IsOutside()
+{
+    Room * room = _building->GetRoom(_roomID);
+
+    if(room->GetCaption() == "outside") {
+        return true;
+    }
+
+    for(auto & itr : room->GetAllSubRooms()) {
+        auto subRoom = itr.second;
+
+        if(subRoom->IsInSubRoom(this)) {
+            return false;
+        }
+    }
+    return true;
 }

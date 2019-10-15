@@ -717,12 +717,13 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
         if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
             wa->SetRoomID(value);
         } else {
-            Log->Write("ERROR:\t  waiting area %d: room_id set but not an integer", wa->GetId());
+            Logging::Error(
+                fmt::format("waiting area {:d}: room_id set but not an integer", wa->GetId()));
             delete wa;
             return nullptr;
         }
     } else {
-        Log->Write("ERROR:\t  waiting area %d: room_id required", wa->GetId());
+        Logging::Error(fmt::format("waiting area {:d}: room_id required", wa->GetId()));
         delete wa;
         return nullptr;
     }
@@ -732,12 +733,13 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
         if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
             wa->SetSubRoomID(value);
         } else {
-            Log->Write("ERROR:\t  waiting area %d: subroom_id set but not an integer", wa->GetId());
+            Logging::Error(
+                fmt::format("waiting area {:d}: subroom_id set but not an integer", wa->GetId()));
             delete wa;
             return nullptr;
         }
     } else {
-        Log->Write("ERROR:\t  waiting area %d: subroom_id required", wa->GetId());
+        Logging::Error(fmt::format("waiting area {:d}: subroom_id required", wa->GetId()));
         delete wa;
         return nullptr;
     }
@@ -751,10 +753,10 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
         }
     }
 
-    Log->Write("INFO:\t  Goal id: %d", wa->GetId());
-    Log->Write("INFO:\t  Goal caption: %s", wa->GetCaption().c_str());
-    Log->Write("INFO:\t  Goal room_id: %d", wa->GetRoomID());
-    Log->Write("INFO:\t  Goal subroom_id: %d", wa->GetSubRoomID());
+    Logging::Info(fmt::format("Goal id: {:d}", wa->GetId()));
+    Logging::Info(fmt::format("Goal caption: {:s}", wa->GetCaption().c_str()));
+    Logging::Info(fmt::format("Goal room_id: {:d}", wa->GetRoomID()));
+    Logging::Info(fmt::format("Goal subroom_id: {:d}", wa->GetSubRoomID()));
 
     // Read optional values and check for valid values, on fail write error
     // Read min_peds and check if correct value
@@ -762,10 +764,8 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
         if(int value = xmltoi(attribute, -1); value > 0 && attribute == std::to_string(value)) {
             wa->SetMinNumPed(value);
         } else {
-            Log->Write(
-                "WARNING:\t  waiting area %d: input for min_peds "
-                "should be positive integer.",
-                wa->GetId());
+            Logging::Warning(fmt::format(
+                "waiting area {:d}: input for min_peds should be positive integer.", wa->GetId()));
         }
     }
 
@@ -774,10 +774,8 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
         if(int value = xmltoi(attribute, -1); value > 0 && attribute == std::to_string(value)) {
             wa->SetMaxNumPed(value);
         } else {
-            Log->Write(
-                "WARNING:\t  waiting area %d: input for max_peds "
-                "should be positive integer.",
-                wa->GetId());
+            Logging::Warning(fmt::format(
+                "waiting area {:d}: input for max_peds should be positive integer.", wa->GetId()));
         }
     }
 
@@ -786,10 +784,9 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
         if(int value = xmltoi(attribute, -1); value >= 0 && attribute == std::to_string(value)) {
             wa->SetWaitingTime(value);
         } else {
-            Log->Write(
-                "WARNING:\t  waiting area %d: input for waiting_time "
-                "should be positive integer.",
-                wa->GetId());
+            Logging::Warning(fmt::format(
+                "waiting area {:d}: input for waiting_time should be positive integer.",
+                wa->GetId()));
         }
     }
 
@@ -798,10 +795,9 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
         if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
             wa->SetTransitionID(value);
         } else {
-            Log->Write(
-                "WARNING:\t  waiting area %d: input for transition_id "
-                "should be positive integer.",
-                wa->GetId());
+            Logging::Warning(fmt::format(
+                "waiting area {:d}: input for transition_id should be positive integer.",
+                wa->GetId()));
         }
     }
 
@@ -816,10 +812,10 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
             wa->SetOpen(true);
         } else {
             wa->SetOpen(true);
-            Log->Write(
-                "WARNING:\t  waiting area %d: input for is_open neither <true> nor <false>. "
-                "Default <true> is used.",
-                wa->GetId());
+            Logging::Warning(fmt::format(
+                "waiting area {:d}: input for is_open neither <true> nor <false>. Default <true> "
+                "is used.",
+                wa->GetId()));
         }
     }
 
@@ -834,10 +830,10 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
             wa->SetGlobalTimer(true);
         } else {
             wa->SetGlobalTimer(false);
-            Log->Write(
-                "WARNING:\t  waiting area %d: input for global_timer neither <true> nor <false>. "
-                "Default <false> is used.",
-                wa->GetId());
+            Logging::Warning(fmt::format(
+                "waiting area {:d}: input for global_timer neither <true> nor <false>. Default "
+                "<true> is used.",
+                wa->GetId()));
         }
     }
 
@@ -848,11 +844,10 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
 
     // Either (minPed, maxPed, waitingTime) OR transitionID are set
     if(!waitPed && !waitDoor) {
-        Log->Write(
-            "ERROR:\t  waiting area %d: min_peds, max_peds, waiting_time, transition_id not set "
-            "properly. "
+        Logging::Error(fmt::format(
+            "waiting area {:d}: min_peds, max_peds, waiting_time, transition_id not set properly. "
             "Set either (min_peds, max_peds, waiting_time) or transition_id.",
-            wa->GetId());
+            wa->GetId()));
         delete wa;
         return nullptr;
     }
@@ -860,10 +855,10 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
     // If (minPed, maxPed, waitingTime) AND transitionID are set only
     // transitionID is considered
     if(waitPed && waitDoor) {
-        Log->Write(
-            "WARNING:\t  waiting area %d: min_peds, max_peds and waiting_time "
-            "not considered since transition_id set",
-            wa->GetId());
+        Logging::Warning(fmt::format(
+            "waiting area {:d}: min_peds, max_peds and waiting_time not considered since "
+            "transition_id set.",
+            wa->GetId()));
     }
 
     // Read the succeeding goals of waiting area
@@ -877,20 +872,22 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
 
         if(nextWaId == std::numeric_limits<int>::min() ||
            nextWaP == std::numeric_limits<double>::min()) {
-            Log->Write("ERROR:\t  check next_wa of WA  %d: id or p not set properly", wa->GetId());
+            Logging::Error(fmt::format(
+                "waiting area {:d}: check next_wa id or p not set properly.", wa->GetId()));
             delete wa;
             return nullptr;
         }
 
         if(nextWaId < -2) {
-            Log->Write(
-                "ERROR:\t  check next_wa of WA  %d: id should be positive integer", wa->GetId());
+            Logging::Error(fmt::format(
+                "waiting area {:d}: check next_wa id should be positive integer.", wa->GetId()));
             delete wa;
             return nullptr;
         }
 
-        if(nextWaP <= 0. || nextWaP > 1.) {
-            Log->Write("ERROR:\t  check next_wa of WA  %d: p should be in (0, 1]", wa->GetId());
+        if(nextWaP < 0. || nextWaP > 1. + 1e-5) {
+            Logging::Error(fmt::format(
+                "waiting area {:d}: check next_wa p should be in [0, 1].", wa->GetId()));
             delete wa;
             return nullptr;
         }
@@ -898,10 +895,9 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
     }
 
     if(!wa->SetNextGoals(nextGoals)) {
-        Log->Write(
-            "ERROR:\t  check probabilities of next goal of WA  %d: sum of p over all next_wa ids "
-            "!= 1",
-            wa->GetId());
+        Logging::Error(fmt::format(
+            "waiting area {:d}: check probabilities sum of p over all next_wa ids != 1.",
+            wa->GetId()));
         delete wa;
         return nullptr;
     }
@@ -922,13 +918,13 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
 
     // Check if boundaries area a valid polygon
     if(!wa->ConvertLineToPoly()) {
-        Log->Write("ERROR:\t   parsing polygon of waiting area %d", wa->GetId());
+        Logging::Error(
+            fmt::format("waiting area {:d}: parsing polygon of waiting area.", wa->GetId()));
         delete wa;
         return nullptr;
     }
 
-    Log->Write("INFO:\t  finished parsing waiting area %d", wa->GetId());
-
+    Logging::Info(fmt::format("waiting area {:d}: finished parsing waiting area.", wa->GetId()));
     return wa;
 }
 
