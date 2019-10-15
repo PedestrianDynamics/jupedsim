@@ -43,7 +43,7 @@ static fs::path getEventFileName(const fs::path & projectFile)
     TiXmlDocument doc(projectFile.string());
     if(!doc.LoadFile()) {
         Logging::Error(doc.ErrorDesc());
-        Log->Write("ERROR: \tGetEventFileName could not parse the project file");
+        Logging::Error("GetEventFileName could not parse the project file");
         return ret;
     }
     TiXmlNode * xMainNode = doc.RootElement();
