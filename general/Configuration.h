@@ -86,14 +86,14 @@ public:
         // ----------------
 
         _hostname                 = "localhost";
-        _trajectoriesFile         = "trajectories.xml";
-        _originalTrajectoriesFile = "trajectories.xml";
+        _trajectoriesFile         = "trajectories.txt";
+        _originalTrajectoriesFile = "trajectories.txt";
         _errorLogFile             = "log.txt";
         _projectFile              = "";
         _geometryFile             = "";
         _projectRootDir           = ".";
         _showStatistics           = false;
-        _fileFormat               = FORMAT_XML_PLAIN;
+        _fileFormat               = FileFormat::TXT;
         _agentsParameters         = std::map<int, std::shared_ptr<AgentsParameters>>();
         // ---------- floorfield
         _deltaH              = 0.0625;

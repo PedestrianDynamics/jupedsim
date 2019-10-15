@@ -102,13 +102,7 @@ enum RoomState { ROOM_CLEAN = 0, ROOM_SMOKED = 1 };
 
 enum AgentType { MALE = 0, FEMALE, CHILD, ELDERLY };
 
-enum FileFormat {
-    FORMAT_XML_PLAIN,
-    FORMAT_XML_BIN,
-    FORMAT_PLAIN,
-    FORMAT_VTK,
-    FORMAT_XML_PLAIN_WITH_MESH
-};
+enum class FileFormat { XML, TXT };
 
 enum RoutingStrategy {
     ROUTING_LOCAL_SHORTEST = 1,

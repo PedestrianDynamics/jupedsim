@@ -42,6 +42,8 @@ GlobalRouter::GlobalRouter() : Router()
     _pathsMatrix     = nullptr;
     _building        = nullptr;
     _edgeCost        = 100;
+    _exitsCnt        = -1;
+
     //     _rdDistribution = uniform_real_distribution<double> (0,1);
     //     _rdGenerator = default_random_engine(56);
 }
@@ -55,7 +57,7 @@ GlobalRouter::GlobalRouter(int id, RoutingStrategy s) : Router(id, s)
     _pathsMatrix     = nullptr;
     _building        = nullptr;
     _edgeCost        = 100;
-
+    _exitsCnt        = -1;
     //     _rdDistribution = uniform_real_distribution<double> (0,1);
     //     _rdGenerator = default_random_engine(56);
 }
@@ -63,8 +65,7 @@ GlobalRouter::GlobalRouter(int id, RoutingStrategy s) : Router(id, s)
 GlobalRouter::~GlobalRouter()
 {
     if(_distMatrix && _pathsMatrix) {
-        const int exitsCnt = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
-        for(int p = 0; p < exitsCnt; ++p) {
+        for(int p = 0; p < _exitsCnt; ++p) {
             delete[] _distMatrix[p];
             delete[] _pathsMatrix[p];
         }
@@ -99,20 +100,20 @@ bool GlobalRouter::Init(Building * building)
     }
 
     // initialize the distances matrix for the floydwahrshall
-    const int exitsCnt = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
+    _exitsCnt = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
 
-    _distMatrix  = new double *[exitsCnt];
-    _pathsMatrix = new int *[exitsCnt];
+    _distMatrix  = new double *[_exitsCnt];
+    _pathsMatrix = new int *[_exitsCnt];
 
-    for(int i = 0; i < exitsCnt; ++i) {
-        _distMatrix[i]  = new double[exitsCnt];
-        _pathsMatrix[i] = new int[exitsCnt];
+    for(int i = 0; i < _exitsCnt; ++i) {
+        _distMatrix[i]  = new double[_exitsCnt];
+        _pathsMatrix[i] = new int[_exitsCnt];
     }
 
     // Initializing the values
     // all nodes are disconnected
-    for(int p = 0; p < exitsCnt; ++p) {
-        for(int r = 0; r < exitsCnt; ++r) {
+    for(int p = 0; p < _exitsCnt; ++p) {
+        for(int r = 0; r < _exitsCnt; ++r) {
             _distMatrix[p][r]  = (r == p) ? 0.0 : FLT_MAX; /*0.0*/
             _pathsMatrix[p][r] = p;                        /*0.0*/
         }
@@ -520,11 +521,9 @@ bool GlobalRouter::Init(Building * building)
 }
 
 void GlobalRouter::Reset()
-{
-    //clean all allocated spaces
+{ //clean all allocated spaces
     if(_distMatrix && _pathsMatrix) {
-        const int exitsCnt = _building->GetNumberOfGoals();
-        for(int p = 0; p < exitsCnt; ++p) {
+        for(int p = 0; p < _exitsCnt; ++p) {
             delete[] _distMatrix[p];
             delete[] _pathsMatrix[p];
         }

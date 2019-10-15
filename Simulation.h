@@ -30,8 +30,8 @@
 #ifndef SIMULATION_H_
 #define SIMULATION_H_
 
-#include "IO/IODispatcher.h"
 #include "IO/OutputHandler.h"
+#include "IO/Trajectories.h"
 #include "events/EventManager.h"
 #include "general/Configuration.h"
 #include "geometry/Building.h"
@@ -46,11 +46,12 @@
 #include "routing/quickest/QuickestPathRouter.h"
 #include "routing/smoke_router/SmokeRouter.h"
 
-class EventManager;
 
 class Simulation
 {
 private:
+    /// config
+    Configuration * _config;
     ///Number of pedestrians in the simulation
     long _nPeds;
     ///Maximum simulation time
@@ -70,11 +71,9 @@ private:
     /// differential equation solver
     ODESolver * _solver;
     /// writing the trajectories to file
-    IODispatcher * _iod;
+    std::unique_ptr<Trajectories> _iod;
     /// EventManager
     EventManager * _em;
-    /// config
-    Configuration * _config;
     /// Agents sources manager
     AgentsSourcesManager _agentSrcManager;
     /// hybrid simulation manager

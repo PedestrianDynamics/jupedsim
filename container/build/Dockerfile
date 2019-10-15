@@ -10,7 +10,6 @@ RUN apt-get install -y wget \
                        cmake \
                        make \
                        libboost-dev \
-                       libboost-test-dev \
                        libcgal-dev \
                        clang-format-8
 
