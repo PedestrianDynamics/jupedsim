@@ -361,9 +361,9 @@ void Simulation::UpdateRoutesAndLocations()
 
 void Simulation::PrintStatistics(double simTime)
 {
-    Log->Write("\nRooms Egress. Simulation Time: %.2f", simTime);
-    Log->Write("==================");
-    Log->Write("id\tcaption\tegress time (s)");
+    Logging::Info(fmt::format(check_fmt("Rooms Egress. Simulation Time: {:.2f}"), simTime);
+    Logging::Info("==================");
+    Logging::Info("id\tcaption\tegress time (s)");
 
     for(const auto & it : _building->GetAllRooms()) {
         auto && room = it.second;
