@@ -32,7 +32,6 @@
 #include "pedestrian/Pedestrian.h"
 #include "routing/ai_router/AIRouter.h"
 #include "routing/ff_router/ffRouter.h"
-#include "routing/ff_router_trips/ffRouterTrips.h"
 #include "routing/global_shortest/GlobalRouter.h"
 #include "routing/quickest/QuickestPathRouter.h"
 #include "routing/smoke_router/SmokeRouter.h"
@@ -1342,25 +1341,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
             exit(EXIT_FAILURE);
 #endif
         } else if(
-            (strategy == "ff_global_shortest_trips") &&
-            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
-            Router * r =
-                new FFRouterTrips(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals, _config);
-            _config->GetRoutingEngine()->AddRouter(r);
-
-            if((_exit_strat_number == 8) || (_exit_strat_number == 9)) {
-                Log->Write("\nINFO: \tUsing FF Global Shortest Router Trips");
-            } else {
-                Log->Write("\nWARNING: \tExit Strategy Number is not 8 or 9!!!");
-                // config object holds default values, so we omit any set operations
-            }
-
-            ///Parsing additional options
-            if(!ParseFfRouterOps(e, ROUTING_FF_GLOBAL_SHORTEST)) {
-                return false;
-            }
-        } else if(
             (strategy == "ff_global_shortest") &&
             (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
             //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
@@ -1379,7 +1359,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
                 return false;
             }
         }
-
         else if(
             (strategy == "ff_local_shortest") &&
             (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {

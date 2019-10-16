@@ -8,7 +8,7 @@
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 #include "pedestrian/Pedestrian.h"
-#include "routing/mesh/RectGrid.h"
+#include "routing/ff_router/mesh/RectGrid.h"
 
 #include <unordered_set>
 
