@@ -21,50 +21,54 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * \section Description
- * Class mananging pedestrians who enter/leave waiting areas
+ * Class managing pedestrians who enter/leave waiting areas
  */
 #include "GoalManager.h"
 
 #include "WaitingArea.h"
 #include "pedestrian/Pedestrian.h"
 
-void GoalManager::SetGoals(std::map<int, Goal *> goals)
+void GoalManager::SetBuilding(Building * building)
 {
-    _allGoals = goals;
+    _building = building;
 }
 
 void GoalManager::ProcessPedPosition(Pedestrian * ped)
 {
     // Ped is in current waiting area
     if(CheckInsideWaitingArea(ped, ped->GetFinalDestination())) {
-        WaitingArea * wa = dynamic_cast<WaitingArea *>(_allGoals[ped->GetFinalDestination()]);
-        // Add ped to waiting area
+        WaitingArea * wa =
+            dynamic_cast<WaitingArea *>(_building->GetAllGoals().at(ped->GetFinalDestination()));
         wa->AddPed(ped->GetID());
         ped->EnterGoal();
-
-        // Check state of waiting area
         if(!wa->IsOpen()) {
             SetState(wa->GetId(), false);
         }
+
+        double t = Pedestrian::GetGlobalTime();
+
+        if((wa->IsWaiting(t, ped->GetBuilding())) && (!ped->IsWaiting())) {
+            ped->StartWaiting();
+        }
     }
+}
 
-
-    const bool pedHasGoal                = ped->GetLastGoalID() != -1;
-    const bool pedHasNotReachedFinalGoal = ped->GetFinalDestination() != ped->GetLastGoalID();
-
-    if(pedHasGoal && pedHasNotReachedFinalGoal) {
-        // Ped is not in waiting area which was the last goal
-        if(!CheckInsideWaitingArea(ped, ped->GetLastGoalID())) {
-            WaitingArea * wa = dynamic_cast<WaitingArea *>(_allGoals[ped->GetLastGoalID()]);
-
-            if(wa != nullptr) {
-                // Remove ped from waiting area
-                wa->RemovePed(ped->GetID());
-                ped->LeaveGoal();
-
-                // Check state of waiting area
-                if(wa->IsOpen()) {
-                    SetState(wa->GetId(), true);
+void GoalManager::ProcessWaitingAreas(double time)
+{
+    if(_building) {
+        for(auto goalItr : _building->GetAllGoals()) {
+            if(auto wa = dynamic_cast<WaitingArea *>(goalItr.second)) {
+                if(!wa->IsWaiting(time, _building)) {
+                    auto pedsInside = wa->GetPedInside();
+                    for(auto p : pedsInside) {
+                        auto ped = _building->GetPedestrian(p);
+                        wa->RemovePed(p);
+                        ped->LeaveGoal();
+                        if(wa->IsOpen()) {
+                            SetState(wa->GetId(), true);
+                        }
+                        ped->SetFinalDestination(wa->GetNextGoal());
+                    }
                 }
             }
         }
@@ -73,7 +77,11 @@ void GoalManager::ProcessPedPosition(Pedestrian * ped)
 
 bool GoalManager::CheckInside(Pedestrian * ped, int goalID)
 {
-    Goal * goal = _allGoals[goalID];
+    if(goalID < 0) {
+        return false;
+    }
+
+    Goal * goal = _building->GetAllGoals().at(goalID);
 
     if(goal != nullptr) {
         return goal->IsInsideGoal(ped->GetPos());
@@ -83,7 +91,11 @@ bool GoalManager::CheckInside(Pedestrian * ped, int goalID)
 
 bool GoalManager::CheckInsideWaitingArea(Pedestrian * ped, int goalID)
 {
-    Goal * goal = _allGoals[goalID];
+    if(goalID < 0) {
+        return false;
+    }
+
+    Goal * goal = _building->GetAllGoals().at(goalID);
 
     if(goal != nullptr) {
         if(dynamic_cast<WaitingArea *>(goal)) {
@@ -95,7 +107,7 @@ bool GoalManager::CheckInsideWaitingArea(Pedestrian * ped, int goalID)
 
 void GoalManager::SetState(int goalID, bool state)
 {
-    for(auto & goalItr : _allGoals) {
+    for(auto & goalItr : _building->GetAllGoals()) {
         if(auto goal = dynamic_cast<WaitingArea *>(goalItr.second)) {
             goal->UpdateProbabilities(state, goalID);
         }

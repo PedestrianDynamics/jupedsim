@@ -151,7 +151,7 @@ private:
 
     int _lastGoalID  = -1;
     bool _insideGoal = false;
-
+    bool _waiting    = false;
 
 public:
     // public member
@@ -513,4 +513,17 @@ public:
     int GetLastGoalID() const;
 
     bool IsInsideGoal() const;
+
+    bool IsInsideWaitingAreaWaiting() const;
+
+    const Point & GetWaitingPos() const;
+
+    void SetWaitingPos(const Point & waitingPos);
+
+    bool IsWaiting() const;
+
+    void StartWaiting();
+    void EndWaiting();
+
+    bool IsOutside();
 };

@@ -93,7 +93,7 @@ private:
     std::string _caption;
     std::string _geometryFilename;
     LCGrid * _linkedCellGrid;
-    std::vector<Pedestrian *> _allPedestians;
+    std::vector<Pedestrian *> _allPedestrians;
     std::map<int, std::shared_ptr<Room>> _rooms;
     std::map<int, Crossing *> _crossings;
     std::map<int, Transition *> _transitions;

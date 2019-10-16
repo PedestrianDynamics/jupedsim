@@ -45,32 +45,6 @@ Crossing::Crossing()
     _state = DoorState::OPEN;
 }
 
-Crossing::~Crossing() {}
-
-//void Crossing::SetID(int ID)
-//{
-//     _id = ID;
-//}
-
-//void Crossing::SetSubRoom2(SubRoom* r2)
-//{
-//     _subRoom2 = r2;
-//}
-
-// Getter-Funktionen
-
-//int Crossing::GetID() const
-//{
-//     return _id;
-//}
-
-//SubRoom* Crossing::GetSubRoom2() const
-//{
-//     return _subRoom2;
-//}
-// Sonstiges
-
-
 bool Crossing::IsExit() const
 {
     return false;

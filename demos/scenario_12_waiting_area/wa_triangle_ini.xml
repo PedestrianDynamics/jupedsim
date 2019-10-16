@@ -41,24 +41,6 @@
 					<vertex px="25" py="32" />
 				</polygon>
 			</goal>
-			<!--<goal id="3" final="false" caption="goal 1">-->
-				<!--<polygon>-->
-					<!--<vertex px="26" py="1" />-->
-					<!--<vertex px="29" py="1" />-->
-					<!--<vertex px="29" py="4" />-->
-					<!--<vertex px="26" py="4" />-->
-					<!--<vertex px="26" py="1" />-->
-				<!--</polygon>-->
-			<!--</goal>-->
-			<!--<goal id="3" final="false" caption="goal 3">-->
-				<!--<polygon>-->
-					<!--<vertex px="10" py="0" />-->
-					<!--<vertex px="15" py="0" />-->
-					<!--<vertex px="15" py="5" />-->
-					<!--<vertex px="10" py="5" />-->
-					<!--<vertex px="10" py="0" />-->
-				<!--</polygon>-->
-			<!--</goal>-->
 
 			<waiting_area caption="wa1" id="1" waiting_time="10" min_peds="1" max_peds="10" is_open="true" room_id="0" subroom_id="0">
 				<polygon>

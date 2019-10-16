@@ -35,6 +35,7 @@
 #include "events/EventManager.h"
 #include "general/Configuration.h"
 #include "geometry/Building.h"
+#include "geometry/GoalManager.h"
 #include "geometry/SubRoom.h"
 #include "math/ODESolver.h"
 #include "math/OperationalModel.h"
@@ -84,6 +85,7 @@ private:
     bool _gotSources;       // is true if we got some sources. Otherwise, false.
     bool _trainConstraints; // true if inifile has some train constraints
 
+    GoalManager _goalManager;
     // bool _printPB; // print progressbar
 public:
     /**
@@ -194,7 +196,12 @@ public:
     void incrementCountTraj();
 
     bool correctGeometry(std::shared_ptr<Building> building, std::shared_ptr<TrainTimeTable>);
-    void WriteTrajectories();
+
+    /**
+     * Updates the output filename if the current file exceeds 10MB.
+     * Works only for FileFormat::TXT.
+     */
+    void UpdateOutputFileName();
     bool TrainTraffic();
 
     int _countTraj = 0;  // count number of TXT trajectories to produce

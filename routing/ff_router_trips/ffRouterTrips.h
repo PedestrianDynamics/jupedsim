@@ -229,6 +229,4 @@ protected:
     bool _useCentrePointDistance = true;
     //output filename counter: cnt
     static int _cnt;
-
-    GoalManager goalManager;
 };

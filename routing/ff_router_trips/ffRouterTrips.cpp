@@ -48,7 +48,6 @@
 
 #include "FloorfieldViaFMTrips.h"
 #include "UnivFFviaFMTrips.h"
-#include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
 #include "routing/DirectionStrategy.h"
 
@@ -359,7 +358,6 @@ bool FFRouterTrips::Init(Building * building)
     //     }
 
 
-    goalManager.SetGoals(_building->GetAllGoals());
     Log->Write("INFO: \tFF Router Init done.");
     return true;
 }
@@ -477,7 +475,6 @@ bool FFRouterTrips::ReInit()
     }
 
     FloydWarshall();
-    goalManager.SetGoals(_building->GetAllGoals());
 
     _plzReInit = false;
     return true;
@@ -491,7 +488,6 @@ int FFRouterTrips::FindExit(Pedestrian * ped)
 
     // Check if current position is already waiting area
     // yes: set next goal and return findExit(p)
-    goalManager.ProcessPedPosition(ped);
 
     if((goal != nullptr) && (goal->IsInsideGoal(ped->GetPos()))) {
         if(WaitingArea * wa = dynamic_cast<WaitingArea *>(goal)) {
