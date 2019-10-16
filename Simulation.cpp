@@ -33,6 +33,7 @@
 #include "IO/Trajectories.h"
 #include "IO/progress_bar.h"
 #include "general/Filesystem.h"
+#include "general/Format.h"
 #include "general/Logger.h"
 #include "general/OpenMP.h"
 #include "geometry/WaitingArea.h"
@@ -43,7 +44,6 @@
 #include "pedestrian/AgentsSourcesManager.h"
 #include "routing/ff_router/ffRouter.h"
 
-#include <fmt/format.h>
 
 OutputHandler * Log;
 Trajectories * outputTXT;
@@ -361,9 +361,9 @@ void Simulation::UpdateRoutesAndLocations()
 
 void Simulation::PrintStatistics(double simTime)
 {
-    Log->Write("\nRooms Egress. Simulation Time: %.2f", simTime);
-    Log->Write("==================");
-    Log->Write("id\tcaption\tegress time (s)");
+    Logging::Info(fmt::format(check_fmt("Rooms Egress. Simulation Time: {:.2f}"), simTime));
+    Logging::Info("==================");
+    Logging::Info("id\tcaption\tegress time (s)");
 
     for(const auto & it : _building->GetAllRooms()) {
         auto && room = it.second;
