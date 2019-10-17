@@ -46,11 +46,12 @@
  **/
 #include "ffRouter.h"
 
+#include "geometry/GoalManager.h"
+#include "geometry/WaitingArea.h"
 #include "routing/DirectionStrategy.h"
 
 #include <algorithm>
 #include <cfloat>
-
 
 int FFRouter::_cnt = 0;
 
@@ -499,7 +500,6 @@ bool FFRouter::ReInit()
     return true;
 }
 
-
 int FFRouter::FindExit(Pedestrian * p)
 {
     //     if (_mode == local_shortest) {
@@ -536,6 +536,14 @@ int FFRouter::FindExit(Pedestrian * p)
     int bestDoor   = -1;
 
     int goalID = p->GetFinalDestination();
+
+    if(WaitingArea * wa = dynamic_cast<WaitingArea *>(_building->GetFinalGoal(goalID))) {
+        bestDoor = wa->GetCentreCrossing()->GetUniqueID();
+        p->SetExitIndex(bestDoor);
+        p->SetExitLine(_CroTrByUID.at(bestDoor));
+        return bestDoor;
+    }
+
     std::vector<int> validFinalDoor; //UIDs of doors
     validFinalDoor.clear();
     if(goalID == -1) {
@@ -544,7 +552,7 @@ int FFRouter::FindExit(Pedestrian * p)
             validFinalDoor.emplace_back(pairDoor.first); //UID
         }
     } else { //only one specific goal, goalToLineUIDmap gets
-             //populated in Init()
+        //populated in Init()
         if((_goalToLineUIDmap.count(goalID) == 0) || (_goalToLineUIDmap[goalID] == -1)) {
             Log->Write(
                 "ERROR: \t ffRouter: unknown/unreachable goalID: %d in FindExit(Ped)", goalID);
