@@ -228,7 +228,7 @@ bool Simulation::InitArgs()
     //size of the cells/GCFM/Gompertz
     if(_config->GetDistEffMaxPed() > _config->GetLinkedCellSize()) {
         Logging::Error(fmt::format(
-            "the linked-cell size {:f} should be larger than the force range {:f}",
+            check_fmt("The linked-cell size [{}] should be larger than the force range [{}]"),
             _config->GetLinkedCellSize(),
             _config->GetDistEffMaxPed()));
         return false;
@@ -319,11 +319,11 @@ void Simulation::UpdateRoutesAndLocations()
         //finally actualize the route
         if(!_gotSources && ped->FindRoute() == -1 && !_trainConstraints) {
             //a destination could not be found for that pedestrian
-            Log->Write(
-                "ERROR: \tCould not find a route for pedestrian %d in room %d and subroom %d",
+            Logging::Error(fmt::format(
+                check_fmt("Could not find a route for pedestrian {} in room {} and subroom {}"),
                 ped->GetID(),
                 ped->GetRoomID(),
-                ped->GetSubRoomID());
+                ped->GetSubRoomID()));
             //ped->FindRoute(); //debug only, plz remove
             std::function<void(const Pedestrian &)> f =
                 std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
@@ -580,7 +580,6 @@ double Simulation::RunBody(double maxSimTime)
         }
 
         if(!_gotSources && !_periodic && _config->print_prog_bar())
-            // Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
             bar.Progressed(initialnPeds - _nPeds);
         else if(
             (!_gotSources) &&
@@ -633,12 +632,13 @@ double Simulation::RunBody(double maxSimTime)
                     std::cout << "INFO:\tclosing train door " << transType.c_str() << " at "
                               << Pedestrian::GetGlobalTime() << " capacity "
                               << TrainTypes[type]->nmax << "\n";
-                    Log->Write(
-                        "INFO:\tclosing train door %s at t=%.2f. Flow = %.2f (Train Capacity %d)",
-                        transType.c_str(),
+                    Logging::Info(fmt::format(
+                        check_fmt(
+                            "Closing train door {} at t={:.2f}. Flow = {:.2f} (Train Capacity {})"),
+                        transType,
                         Pedestrian::GetGlobalTime(),
                         trainOutflow[id],
-                        TrainTypes[type]->nmax);
+                        TrainTypes[type]->nmax));
                     Trans->Close();
                 }
             }
@@ -718,11 +718,12 @@ bool Simulation::correctGeometry(
     Room * room  = building->GetRoom(room_id);
     subroom      = room->GetSubRoom(subroom_id);
     if(subroom == nullptr) {
-        Log->Write(
-            "ERROR:\t Simulation::correctGeometry got wrong room_id|subroom_id (%d|%d). TrainId %d",
+        Logging::Error(fmt::format(
+            check_fmt(
+                "Simulation::correctGeometry got wrong room_id|subroom_id ({}|{}). TrainId {}"),
             room_id,
             subroom_id,
-            trainId);
+            trainId));
         exit(EXIT_FAILURE);
     }
     static int transition_id = 10000; // randomly high number
