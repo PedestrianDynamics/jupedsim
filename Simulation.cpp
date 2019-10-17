@@ -387,8 +387,11 @@ void Simulation::PrintStatistics(double simTime)
     for(const auto & it : _building->GetAllRooms()) {
         auto && room = it.second;
         if(room->GetCaption() != "outside")
-            Log->Write(
-                "%d\t%s\t%.2f", room->GetID(), room->GetCaption().c_str(), room->GetEgressTime());
+            Logging::Info(fmt::format(
+                check_fmt("{:d}\t{}\t{:.2f}"),
+                room->GetID(),
+                room->GetCaption(),
+                room->GetEgressTime()));
     }
 
     Logging::Info("Usage of Exits");
@@ -396,11 +399,11 @@ void Simulation::PrintStatistics(double simTime)
     for(const auto & itr : _building->GetAllTransitions()) {
         Transition * goal = itr.second;
         if(goal->GetDoorUsage()) {
-            Log->Write(
-                "\nExit ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",
+            Logging::Info(fmt::format(
+                check_fmt("Exit ID [{}] used by [{}] pedestrians. Last passing time [{:.2f}] s"),
                 goal->GetID(),
                 goal->GetDoorUsage(),
-                goal->GetLastPassingTime());
+                goal->GetLastPassingTime()));
 
             fs::path statsfile{"flow_exit_id_" + std::to_string(goal->GetID()) + "_"};
             if(goal->GetOutflowRate() < std::numeric_limits<double>::max()) {
@@ -411,7 +414,8 @@ void Simulation::PrintStatistics(double simTime)
                 statsfile += '_';
             }
             statsfile += _config->GetOriginalTrajectoriesFile().filename().replace_extension("txt");
-            Log->Write("More Information in the file: %s", statsfile.string().c_str());
+            Logging::Info(
+                fmt::format(check_fmt("More Information in the file: {}"), statsfile.string()));
             {
                 FileHandler statOutput(statsfile);
                 statOutput.Write("#Simulation time: %.2f", simTime);
@@ -429,17 +433,18 @@ void Simulation::PrintStatistics(double simTime)
     for(const auto & itr : _building->GetAllCrossings()) {
         Crossing * goal = itr.second;
         if(goal->GetDoorUsage()) {
-            Log->Write(
-                "\nCrossing ID [%d] in Room ID [%d] used by [%d] pedestrians. Last passing time "
-                "[%0.2f] s",
+            Logging::Info(fmt::format(
+                check_fmt("Crossing ID [{}] in Room ID [{}] used by [{}] pedestrians. Last passing "
+                          "time [{:.2f}] s"),
                 goal->GetID(),
                 itr.first / 1000,
                 goal->GetDoorUsage(),
-                goal->GetLastPassingTime());
+                goal->GetLastPassingTime()));
 
             fs::path statsfile = "flow_crossing_id_" + std::to_string(itr.first / 1000) + "_" +
                                  std::to_string(itr.first % 1000) + ".dat";
-            Log->Write("More Information in the file: %s", statsfile.string().c_str());
+            Logging::Info(
+                fmt::format(check_fmt("More Information in the file: {}"), statsfile.string()));
             FileHandler output(statsfile);
             output.Write("#Simulation time: %.2f", simTime);
             output.Write(
@@ -749,12 +754,12 @@ bool Simulation::correctGeometry(
         d.SetPoint2(Point(newX, newY));
     }
     for(auto d : doors) {
-        Log->Write(
-            "Train %s %d. Transformed coordinates of doors: %s -- %s",
-            trainType.c_str(),
+        Logging::Info(fmt::format(
+            check_fmt("Train {} {}. Transformed coordinates of doors: {} -- {}"),
+            trainType,
             trainId,
-            d.GetPoint1().toString().c_str(),
-            d.GetPoint2().toString().c_str());
+            d.GetPoint1().toString(),
+            d.GetPoint2().toString()));
     }
 
     // std::vector<std::pair<PointWall, pointWall > >
@@ -1112,17 +1117,17 @@ Simulation::correctDoorStatistics(const Pedestrian & ped, double distance, int t
     Transition * trans       = nullptr;
     double smallest_distance = 0.3;
     bool success             = false;
-    Log->Write(
-        "WARNING:\t pedestrian [%d] left room/subroom [%d/%d] in an unusual way. Please check",
+    Logging::Warning(fmt::format(
+        check_fmt("Pedestrian [{}] left room/subroom [{}/{}] in an unusual way. Please check"),
         ped.GetID(),
         ped.GetRoomID(),
-        ped.GetSubRoomID());
-    Log->Write(
-        "       :\t distance to last door (%d | %d) is %f. That should be smaller.",
+        ped.GetSubRoomID()));
+    Logging::Info(fmt::format(
+        check_fmt("Distance to last door ({} | {}) is {}. That should be smaller."),
         trans_id,
         ped.GetExitIndex(),
-        distance);
-    Log->Write("       :\t correcting the door statistics");
+        distance));
+    Logging::Info("Correcting the door statistics");
     //checking the history and picking the nearest previous destination
     for(const auto & dest : ped.GetLastDestinations()) {
         if(dest == -1)
@@ -1133,12 +1138,12 @@ Simulation::correctDoorStatistics(const Pedestrian & ped, double distance, int t
         if(auto tmp_distance = trans_tmp->DistTo(ped.GetPos()); tmp_distance < smallest_distance) {
             smallest_distance = tmp_distance;
             trans             = trans_tmp;
-            Log->Write("       :\t Best match found at door %d", dest);
+            Logging::Info(fmt::format(check_fmt("Best match found at door {}"), dest));
             success = true; //at least one door was found
         }
     }
     if(!success) {
-        Log->Write("WARNING       :\t correcting the door statistics failed!");
+        Logging::Warning("Correcting the door statistics failed!");
         //todo we need to check if the ped is in a subroom neighboring the target. If so, no problems!
     }
     return trans;
