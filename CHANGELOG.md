@@ -14,6 +14,7 @@ All notable changes to `jpsreport` will be documented in this file.
 
 ### Fixed
 - Cmake for macOS 10.15 (Catalina)
+- A bug calling `method_B` is fixed.
 
 ## v0.8.4 [10.09.2019]
 ### Added
