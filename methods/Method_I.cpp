@@ -56,7 +56,6 @@ Method_I::Method_I()
      _fIndividualFD = nullptr;
      _calcIndividualFD = true;
      _areaForMethod_I = nullptr;
-     _plotVoronoiCellData=false;
      _isOneDimensional=false;
      _startFrame =-1;
      _stopFrame = -1;
@@ -342,11 +341,6 @@ void Method_I::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<d
      void Method_I::SetOutputVoronoiCellData(bool outputCellData)
      {
           _outputVoronoiCellData = outputCellData;
-     }
-
-     void Method_I::SetPlotVoronoiIndex(bool plotVoronoiIndex)
-     {
-          _plotVoronoiIndex = plotVoronoiIndex;
      }
 
      void Method_I::SetMeasurementArea (MeasurementArea_B* area)

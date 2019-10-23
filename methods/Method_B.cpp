@@ -42,7 +42,6 @@ Method_B::Method_B()
      _fps = 10;
      _NumPeds =0;
      _areaForMethod_B = nullptr;
-     _plotFundamentalDiagram = false;
 }
 
 Method_B::~Method_B()

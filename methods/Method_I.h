@@ -53,8 +53,6 @@ public:
      void SetGridSize(double x, double y);
      void SetCalculateProfiles(bool calcProfile);                               // ToDo: obsolete ?
      void SetOutputVoronoiCellData(bool outputCellData);
-     void SetPlotVoronoiGraph(bool plotVoronoiGraph);                           // ToDo: obsolete ?
-     void SetPlotVoronoiIndex(bool plotVoronoiIndex);
      void SetMeasurementArea (MeasurementArea_B* area);
      void SetDimensional (bool dimension);
      void SetTrajectoriesLocation(const fs::path& trajectoryPath);
@@ -73,8 +71,6 @@ private:
      polygon_2d _areaIndividualFD;  // ToDo: obsolete ?
      bool _getProfile;              // ToDo: obsolete ?
      bool _outputVoronoiCellData;   // ToDo: obsolete ?
-     bool _plotVoronoiCellData;     // ToDo: obsolete ?
-     bool _plotVoronoiIndex;        // ToDo: obsolete ?
      bool _isOneDimensional;
      bool _cutByCircle;       //Adjust whether cut each original voronoi cell by a circle
      double _cutRadius;

@@ -50,7 +50,6 @@ public:
      void SetMeasurementArea (MeasurementArea_L* area);
      void SetTimeInterval(int deltaT);
      bool Process (const PedData& peddata,const fs::path& scriptsLocation, const double& zPos_measureArea);
-     void SetPlotTimeSeries(bool plotTimeseries);
 
 private:
      fs::path _trajName;
@@ -75,7 +74,6 @@ private:
      double _vDeltaT;    // define this is to measure cumulative velocity each pedestrian pass a measure line each time step to calculate the <v>delat T=sum<vi>/N
      int _deltaT;
 
-     bool _plotTimeSeries;
      int _minId;
      /**
       * Calculate the Flow rate during a certain time interval DeltaT and the mean velocity passing a line.

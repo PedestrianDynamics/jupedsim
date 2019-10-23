@@ -131,9 +131,6 @@ ArgumentParser::ArgumentParser()
      _isMethodD = false;
      _isMethodI= false;
      _isCutByCircle = false;
-     _isOutputGraph= false;
-     _isPlotGraph= false;
-     _isPlotIndex = false;
      _isOneDimensional=false;
      _isGetProfile =false;
      _steadyStart =100;
@@ -145,7 +142,6 @@ ArgumentParser::ArgumentParser()
      _trajectoriesLocation="./";
      _trajectoriesFilename="";
      _projectRootDir="./";
-     _scriptsLocation="./";
      _fileFormat=FORMAT_XML_PLAIN;
      _cutRadius =50;
      _circleEdges=6;
@@ -386,35 +382,6 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           Log->Write("INFO: \t Using <%d> threads", omp_get_max_threads());
      }
 
-     //scripts
-     if(xMainNode->FirstChild("scripts"))
-     {
-          _scriptsLocation= fs::path(xMainNode->FirstChildElement("scripts")->Attribute("location"));
-		/*
-        if(!fs::exists(_scriptsLocation))
-        {
-             Log->Write("ERROR: \tcould not find the directory <%s>", _scriptsLocation.string().c_str());
-             return false;
-        }
-		*/
-        if(! _scriptsLocation.is_absolute())
-        {
-             _scriptsLocation = GetProjectRootDir() / _scriptsLocation;
-             _scriptsLocation = fs::canonical(_scriptsLocation);
-        }
-
-        if (!exists(_scriptsLocation))
-        {
-             /* could not open directory */
-             Log->Write("ERROR: \tcould not open the directory <%s>", _scriptsLocation.string().c_str());
-             return false;
-        }
-        else
-          {
-               Log->Write("INFO: \tInput directory for loading scripts is:\t<%s>", _scriptsLocation.string().c_str());
-          }
-     }
-
      // output directory
      _outputDir = GetProjectRootDir() / "Output";
      if(xMainNode->FirstChild("output"))
@@ -428,7 +395,6 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           }
           if (! _outputDir.is_absolute())
           {
-               // _outputDir=_projectRootDir + _outputDir;
                _outputDir = _projectRootDir / _outputDir;
           }
      }
@@ -514,8 +480,6 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                     double geo_maxY = building->_yMax;
                     Log->Write("INFO: \tBounding box:\n \t\tminX = %.2f\n \t\tmaxX = %.2f \n \t\tminY = %.2f \n\t\tmaxY = %.2f", geo_minX, geo_maxX, geo_minY, geo_maxY);
 
-
-
                     //1
                     double box_px = geo_minX*M2CM;
                     double box_py = geo_minY*M2CM;
@@ -575,76 +539,6 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                Log->Write("\t\tMeasurement line starts from  <%.3f, %.3f> to <%.3f, %.3f>",areaL->_lineStartX*CMtoM,areaL->_lineStartY*CMtoM,areaL->_lineEndX*CMtoM,areaL->_lineEndY*CMtoM);
           }
      }
-
-     //instantaneous velocity
-     /*    TiXmlNode* xVelocity=xMainNode->FirstChild("velocity");
-           if(xVelocity)
-           {
-           string FrameSteps = xVelocity->FirstChildElement("frame_step")->GetText();
-           _delatTVInst = atof(FrameSteps.c_str())/2.0;
-           TiXmlNode* xVx=xVelocity->FirstChildElement("use_x_component");
-           TiXmlNode* xVy=xVelocity->FirstChildElement("use_y_component");
-           //decide which component used in velocity calculation
-           if(xVx && xVy)
-           {
-           string UseXComponent = xVelocity->FirstChildElement("use_x_component")->GetText();
-           string UseYComponent = xVelocity->FirstChildElement("use_y_component")->GetText();
-           if(UseXComponent == "true"&&UseYComponent == "false")
-           {
-           _vComponent = "X";
-           Log->Write("INFO: \tOnly x-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
-           }
-           else if(UseXComponent == "false"&&UseYComponent == "true")
-           {
-           _vComponent = "Y";
-           Log->Write("INFO: \tOnly y-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
-           }
-           else if(UseXComponent == "true"&&UseYComponent == "true")
-           {
-           _vComponent = "B";  // both components
-           Log->Write("INFO: \tBoth x and y-component of coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
-           }
-           else if(UseXComponent == "false"&&UseYComponent == "false")
-           {
-           _vComponent = "F";
-           Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
-           }
-           }
-           else if(xVx && !xVy)
-           {
-           string UseXComponent = xVelocity->FirstChildElement("use_x_component")->GetText();
-           if(UseXComponent == "true")
-           {
-           _vComponent = "X";
-           Log->Write("INFO: \tOnly x-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
-           }
-           else if(UseXComponent == "false")
-           {
-           _vComponent = "F";
-           Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
-           }
-           }
-           else if(!xVx && xVy)
-           {
-           string UseYComponent = xVelocity->FirstChildElement("use_y_component")->GetText();
-           if(UseYComponent == "true")
-           {
-           _vComponent = "Y";
-           Log->Write("INFO: \tOnly y-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
-           }
-           else if(UseYComponent == "false")
-           {
-           _vComponent = "F";
-           Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
-           }
-           }
-           else
-           {
-           _vComponent = "F";
-           Log->Write("INFO: \tThe component defined in the trajectory file will be used to calculate instantaneous velocity over <" + FrameSteps + " frames>");
-           }
-           }
-     */
      //instantaneous velocity
      TiXmlNode* xVelocity=xMainNode->FirstChild("velocity");
      if(xVelocity)
@@ -718,10 +612,6 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                          Log->Write("WARNING: \tMeasurement area id <%d> will NOT be used for analysis (Type <%s> is not Line)", id, _measurementAreas[id]->_type.c_str());
                     }
 
-
-
-
-
                     if(xMeasurementArea->Attribute("frame_interval"))
                     {
                          if(string(xMeasurementArea->Attribute("frame_interval"))!="None")
@@ -738,23 +628,6 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                     {
                          _timeIntervalA.push_back(100);
                     }
-                    if(xMeasurementArea->Attribute("plot_time_series"))
-                    {
-                         if(string(xMeasurementArea->Attribute("plot_time_series"))=="true")
-                         {
-                              _isPlotTimeSeriesA.push_back(true);
-                              Log->Write("\tThe Time series N-t measured will be plotted!! ");
-                         }
-                         else
-                         {
-                              _isPlotTimeSeriesA.push_back(false);
-                         }
-                    }
-                    else
-                    {
-                         _isPlotTimeSeriesA.push_back(false);
-                    }
-
                }
           }
      }
@@ -785,23 +658,6 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                {
                     _areaIDforMethodC.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
-
-                    if(xMeasurementArea->Attribute("plot_time_series"))
-                    {
-                         if(string(xMeasurementArea->Attribute("plot_time_series"))=="true")
-                         {
-                              _isPlotTimeSeriesC.push_back(true);
-                              Log->Write("\tThe Time series measured will be plotted!! ");
-                         }
-                         else
-                         {
-                              _isPlotTimeSeriesC.push_back(false);
-                         }
-                    }
-                    else
-                    {
-                         _isPlotTimeSeriesC.push_back(false);
-                    }
                }
           }
      // method D
@@ -866,23 +722,6 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                     {
                          _individual_FD_flags.push_back(false);
                     }
-                    if(xMeasurementArea->Attribute("plot_time_series"))
-                    {
-                         if(string(xMeasurementArea->Attribute("plot_time_series"))=="true")
-                         {
-                              _isPlotTimeSeriesD.push_back(true);
-                              Log->Write("\tThe Time series will be plotted!! ");
-                         }
-                         else
-                         {
-                              _isPlotTimeSeriesD.push_back(false);
-                         }
-                    }
-                    else
-                    {
-                         _isPlotTimeSeriesD.push_back(false);
-                    }
-
                }
                if (xMethod_D->FirstChildElement("one_dimensional"))
                {
@@ -903,35 +742,6 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                          Log->Write("INFO: \tEach Voronoi cell will be cut by a circle with the radius of < %f > m!!", _cutRadius*CMtoM);
                          Log->Write("INFO: \tThe circle is discretized to a polygon with < %d> edges!!", _circleEdges);
                     }
-               }
-
-               if ( xMethod_D->FirstChildElement("output_voronoi_cells"))
-               {
-                    auto enabled = xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("enabled");
-                    if(enabled)
-                         if ( string(enabled)=="true")
-                         {
-                              _isOutputGraph=true;
-                              Log->Write("INFO: \tData of voronoi diagram is asked to output" );
-                              auto plot_graphs = xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("plot_graphs");
-                              if(plot_graphs)
-                              {
-                                   if (string(plot_graphs)=="true")
-                                   {
-                                        _isPlotGraph = true;
-                                        Log->Write("INFO: \tGraph of voronoi diagram will be plotted");
-                                   }
-                                   auto plot_index = xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute(
-                                           "plot_index");
-                                   if (plot_index)
-                                        if (string(plot_index)=="true")
-                                        {
-                                             _isPlotIndex = true;
-                                             Log->Write(
-                                                     "INFO: \tVoronoi diagram will be plotted with index of pedestrians");
-                                        } // plot_index
-                              } // plot_graphs
-                         }// enabled
                }
 
                if ( xMethod_D->FirstChildElement("steadyState"))
@@ -1016,23 +826,6 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                     {
                          _individual_FD_flags.push_back(false);
                     }
-                    if(xMeasurementArea->Attribute("plot_time_series"))
-                    {
-                         if(string(xMeasurementArea->Attribute("plot_time_series"))=="true")
-                         {
-                              _isPlotTimeSeriesI.push_back(true);
-                              Log->Write("\tThe Time series will be plotted!! ");
-                         }
-                         else
-                         {
-                              _isPlotTimeSeriesI.push_back(false);
-                         }
-                    }
-                    else
-                    {
-                         _isPlotTimeSeriesI.push_back(false);
-                    }
-
                }
                if (xMethod_I->FirstChildElement("one_dimensional"))
                {
@@ -1053,35 +846,6 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                          Log->Write("INFO: \tEach Voronoi cell will be cut by a circle with the radius of < %f > m!!", _cutRadius*CMtoM);
                          Log->Write("INFO: \tThe circle is discretized to a polygon with < %d> edges!!", _circleEdges);
                     }
-               }
-
-               if ( xMethod_I->FirstChildElement("output_voronoi_cells"))
-               {
-                    auto enabled = xMethod_I->FirstChildElement("output_voronoi_cells")->Attribute("enabled");
-                    if(enabled)
-                         if ( string(enabled)=="true")
-                         {
-                              _isOutputGraph=true;
-                              Log->Write("INFO: \tData of voronoi diagram is asked to output" );
-                              auto plot_graphs = xMethod_I->FirstChildElement("output_voronoi_cells")->Attribute("plot_graphs");
-                              if(plot_graphs)
-                              {
-                                   if (string(plot_graphs)=="true")
-                                   {
-                                        _isPlotGraph = true;
-                                        Log->Write("INFO: \tGraph of voronoi diagram will be plotted");
-                                   }
-                                   auto plot_index = xMethod_I->FirstChildElement("output_voronoi_cells")->Attribute(
-                                           "plot_index");
-                                   if (plot_index)
-                                        if (string(plot_index)=="true")
-                                        {
-                                             _isPlotIndex = true;
-                                             Log->Write(
-                                                     "INFO: \tVoronoi diagram will be plotted with index of pedestrians");
-                                        } // plot_index
-                              } // plot_graphs
-                         }// enabled
                }
 
                if ( xMethod_I->FirstChildElement("steadyState"))
@@ -1140,10 +904,6 @@ const fs::path& ArgumentParser::GetTrajectoriesLocation() const
      return _trajectoriesLocation;
 }
 
-const fs::path& ArgumentParser::GetScriptsLocation() const
-{
-     return _scriptsLocation;
-}
 const fs::path& ArgumentParser::GetOutputLocation() const
 {
      return _outputDir;
@@ -1212,40 +972,6 @@ double ArgumentParser::GetCutRadius() const
 int ArgumentParser::GetCircleEdges() const
 {
      return _circleEdges;
-}
-bool ArgumentParser::GetIsOutputGraph() const
-{
-     return _isOutputGraph;
-}
-
-bool ArgumentParser::GetIsPlotGraph() const
-{
-     return _isPlotGraph;
-}
-
-bool ArgumentParser::GetIsPlotIndex() const
-{
-     return _isPlotIndex;
-}
-
-vector<bool> ArgumentParser::GetIsPlotTimeSeriesA() const
-{
-     return _isPlotTimeSeriesA;
-}
-
-vector<bool> ArgumentParser::GetIsPlotTimeSeriesC() const
-{
-     return _isPlotTimeSeriesC;
-}
-
-vector<bool> ArgumentParser::GetIsPlotTimeSeriesD() const
-{
-     return _isPlotTimeSeriesD;
-}
-
-vector<bool> ArgumentParser::GetIsPlotTimeSeriesI() const
-{
-     return _isPlotTimeSeriesI;
 }
 
 bool ArgumentParser::GetIsOneDimensional() const

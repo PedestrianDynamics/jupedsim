@@ -56,7 +56,6 @@ private:
      MeasurementArea_B* _areaForMethod_B;
      int _NumPeds;
      float _fps;
-     bool _plotFundamentalDiagram;
      ub::matrix<double> _xCor;
      ub::matrix<double> _yCor;
      int *_tIn;           //the time for each pedestrian enter the measurement area
@@ -66,7 +65,6 @@ private:
      double *_DensityPerFrame; // the measured density in each frame
      void GetTinTout(int numFrames);
      void GetFundamentalTinTout(double *DensityPerFrame,double LengthMeasurementarea);
-     void SetPlotFundamentalDiagram(bool plotFundamentalDiagram);
 };
 
 #endif /* METHOD_B_H_ */

@@ -79,7 +79,6 @@ Analysis::Analysis()
      _DoesUseMethodI = false;
      _cutByCircle = false;  //Adjust whether cut each original voronoi cell by a circle
      _getProfile = false;   // Whether make field analysis or not
-     _outputGraph = false;   // Whether output the data for plot the fundamental diagram each frame
      _calcIndividualFD = false; //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
      _vComponent = "B"; // to mark whether x, y or x and y coordinate are used when calculating the velocity
      _IgnoreBackwardMovement = false;
@@ -89,12 +88,10 @@ Analysis::Analysis()
      _lowVertexY = 0; //  LOWest vertex of the geometry (y coordinate)
      _highVertexX = 10; // Highest vertex of the geometry
      _highVertexY = 10;
-
      _cutRadius=1.0;
      _circleEdges=6;
      _trajFormat=FileFormat::FORMAT_PLAIN;
      _isOneDimensional=false;
-     _plotGraph=false;
 }
 
 Analysis::~Analysis()
@@ -134,7 +131,6 @@ void Analysis::InitArgs(ArgumentParser* args)
                _areaForMethod_A.push_back(dynamic_cast<MeasurementArea_L*>( args->GetMeasurementArea(Measurement_Area_IDs[i])));
           }
           _deltaT = args->GetTimeIntervalA();
-          _plotTimeseriesA=args->GetIsPlotTimeSeriesA();
      }
 
      if(args->GetIsMethodB()) {
@@ -153,7 +149,6 @@ void Analysis::InitArgs(ArgumentParser* args)
           {
                _areaForMethod_C.push_back(dynamic_cast<MeasurementArea_B*>( args->GetMeasurementArea(Measurement_Area_IDs[i])));
           }
-          _plotTimeseriesC=args->GetIsPlotTimeSeriesC();
      }
 
      if(args->GetIsMethodD()) {
@@ -166,8 +161,7 @@ void Analysis::InitArgs(ArgumentParser* args)
           _StartFramesMethodD = args->GetStartFramesMethodD();
           _StopFramesMethodD = args->GetStopFramesMethodD();
           _IndividualFDFlags = args->GetIndividualFDFlags();
-          _plotTimeseriesD=args->GetIsPlotTimeSeriesD();
-          _geoPolyMethodD = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_D);
+           _geoPolyMethodD = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_D);
 
      }
      if(args->GetIsMethodI()) {
@@ -180,26 +174,12 @@ void Analysis::InitArgs(ArgumentParser* args)
           _StartFramesMethodI = args->GetStartFramesMethodI();
           _StopFramesMethodI = args->GetStopFramesMethodI();
           _IndividualFDFlags = args->GetIndividualFDFlags();
-          _plotTimeseriesI=args->GetIsPlotTimeSeriesI();
-          _geoPolyMethodI = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_I);
+           _geoPolyMethodI = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_I);
      }
-
-// ToDo: obsolete ?
-
-//     if( _DoesUseMethodD &&  _DoesUseMethodI)
-//     {
-//          Log->Write("Warning:\t Using both method D and I is not safe!");
-//          // because ReadGeometry() may be called twice (line 169 and 182)
-//          // overwrite _geoPoly -> new value for each Method
-//          Log->Write("Info:\t Using both method D and I is safe! :-)");
-//     }
 
      _deltaF = args->GetDelatT_Vins();
      _cutByCircle = args->GetIsCutByCircle();
      _getProfile = args->GetIsGetProfile();
-     _outputGraph = args->GetIsOutputGraph();
-     _plotGraph = args->GetIsPlotGraph();
-     _plotIndex = args->GetIsPlotIndex();
      _isOneDimensional=args->GetIsOneDimensional();
      _vComponent = args->GetVComponent();
      _IgnoreBackwardMovement =args->GetIgnoreBackwardMovement();
@@ -210,7 +190,6 @@ void Analysis::InitArgs(ArgumentParser* args)
      _trajFormat=args->GetFileFormat();
      _cutRadius=args->GetCutRadius();
      _circleEdges=args->GetCircleEdges();
-     _scriptsLocation=args->GetScriptsLocation();
      _outputLocation=args->GetOutputLocation();
 }
 
@@ -338,7 +317,6 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
                Method_A method_A ;
                method_A.SetMeasurementArea(_areaForMethod_A[i]);
                method_A.SetTimeInterval(_deltaT[i]);
-               method_A.SetPlotTimeSeries(_plotTimeseriesA[i]);
                bool result_A=method_A.Process(data,_scriptsLocation,_areaForMethod_A[i]->_zPos);
                if(result_A)
                {
@@ -395,15 +373,6 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
                {
                     Log->Write("INFO:\tSuccess with Method C using measurement area id %d!\n",_areaForMethod_C[i]->_id);
                     std::cout << "INFO:\tSuccess with Method C using measurement area id "<< _areaForMethod_C[i]->_id << "\n";
-                    if(_plotTimeseriesC[i])
-                    {
-                         string parameters_Timeseries=" " + _scriptsLocation.string()+
-                              "/_Plot_timeseries_rho_v.py -p "+ _projectRootDir.string()+VORO_LOCATION + " -n "+filename.string()+
-                              " -f "+boost::lexical_cast<std::string>(data.GetFps());
-                         parameters_Timeseries = PYTHON + parameters_Timeseries;
-                         int res=system(parameters_Timeseries.c_str());
-                         Log->Write("INFO:\t time series result: %d ",res);
-                    }
                }
                else
                {
@@ -431,9 +400,6 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
                method_D.SetGeometryFileName(_geometryFileName);
                method_D.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
                method_D.SetGridSize(_grid_size_X, _grid_size_Y);
-               method_D.SetOutputVoronoiCellData(_outputGraph);
-               method_D.SetPlotVoronoiGraph(_plotGraph);
-               method_D.SetPlotVoronoiIndex(_plotIndex);
                method_D.SetDimensional(_isOneDimensional);
                method_D.SetCalculateProfiles(_getProfile);
                method_D.SetTrajectoriesLocation(path);
@@ -447,16 +413,6 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
                {
                     Log->Write("INFO:\tSuccess with Method D using measurement area id %d!\n",_areaForMethod_D[i]->_id);
                     std::cout << "INFO:\tSuccess with Method D using measurement area id "<< _areaForMethod_D[i]->_id << "\n";
-                    if(_plotTimeseriesD[i])
-                    {
-                         string parameters_Timeseries= " " +_scriptsLocation.string()+"/_Plot_timeseries_rho_v.py -p "+ _projectRootDir.string()+VORO_LOCATION + " -n "+filename.string()+
-                              " -f "+boost::lexical_cast<std::string>(data.GetFps());
-                         parameters_Timeseries = PYTHON + parameters_Timeseries;
-                         std::cout << parameters_Timeseries << "\n;";
-
-                         int res=system(parameters_Timeseries.c_str());
-                         Log->Write("INFO:\t time series result: %d ",res);
-                    }
                }
                else
                {
@@ -484,11 +440,7 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
                method_I.SetGeometryFileName(_geometryFileName);
                method_I.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
                method_I.SetGridSize(_grid_size_X, _grid_size_Y);
-               method_I.SetOutputVoronoiCellData(_outputGraph);
-               // method_I.SetPlotVoronoiGraph(_plotGraph);
-               method_I.SetPlotVoronoiIndex(_plotIndex);
                method_I.SetDimensional(_isOneDimensional);
-               // method_I.SetCalculateProfiles(_getProfile);
                method_I.SetTrajectoriesLocation(path);
                if(_cutByCircle)
                {
@@ -500,16 +452,6 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
                {
                     Log->Write("INFO:\tSuccess with Method I using measurement area id %d!\n",_areaForMethod_I[i]->_id);
                     std::cout << "INFO:\tSuccess with Method I using measurement area id "<< _areaForMethod_I[i]->_id << "\n";
-                    if(_plotTimeseriesI[i])
-                    {
-                         string parameters_Timeseries= " " +_scriptsLocation.string()+"/_Plot_timeseries_rho_v.py -p "+ _projectRootDir.string()+VORO_LOCATION + " -n "+filename.string()+
-                              " -f "+boost::lexical_cast<std::string>(data.GetFps());
-                         parameters_Timeseries = PYTHON + parameters_Timeseries;
-                         std::cout << parameters_Timeseries << "\n;";
-
-                         int res=system(parameters_Timeseries.c_str());
-                         Log->Write("INFO:\t time series result: %d ",res);
-                    }
                }
                else
                {

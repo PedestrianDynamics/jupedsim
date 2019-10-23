@@ -11,6 +11,8 @@ All notable changes to `jpsreport` will be documented in this file.
 
 ### Removed
 - Removed unused code
+- Removed option to plot timeseries for Methods A, B, D and I
+- Removed option to plot Voronoi diagrams with index
 
 ### Fixed
 - Cmake for macOS 10.15 (Catalina)
