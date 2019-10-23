@@ -19,3 +19,7 @@ elif [ "$TRAVIS_OS_NAME" == "osx" ]
 then
     echo "not yet implemented"
 fi
+
+pip install --user numpy
+pip install --user scipy
+pip install --user logging
