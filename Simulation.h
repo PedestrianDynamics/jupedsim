@@ -35,6 +35,7 @@
 #include "events/EventManager.h"
 #include "general/Configuration.h"
 #include "geometry/Building.h"
+#include "geometry/GoalManager.h"
 #include "geometry/SubRoom.h"
 #include "math/ODESolver.h"
 #include "math/OperationalModel.h"
@@ -84,6 +85,7 @@ private:
     bool _gotSources;       // is true if we got some sources. Otherwise, false.
     bool _trainConstraints; // true if inifile has some train constraints
 
+    GoalManager _goalManager;
     // bool _printPB; // print progressbar
 public:
     /**

@@ -38,8 +38,8 @@
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 #include "pedestrian/Pedestrian.h"
-#include "routing/mesh/RectGrid.h"
-#include "routing/mesh/Trial.h"
+#include "routing/ff_router/mesh/RectGrid.h"
+#include "routing/ff_router/mesh/Trial.h"
 
 #include <cmath>
 #include <functional>

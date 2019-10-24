@@ -33,8 +33,10 @@
 #include "IO/Trajectories.h"
 #include "IO/progress_bar.h"
 #include "general/Filesystem.h"
+#include "general/Format.h"
 #include "general/Logger.h"
 #include "general/OpenMP.h"
+#include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
@@ -43,7 +45,6 @@
 #include "pedestrian/AgentsSourcesManager.h"
 #include "routing/ff_router/ffRouter.h"
 
-#include <fmt/format.h>
 
 OutputHandler * Log;
 Trajectories * outputTXT;
@@ -244,6 +245,7 @@ bool Simulation::InitArgs()
 
     _em->ListEvents();
 
+    _goalManager.SetBuilding(_building.get());
     //everything went fine
     return true;
 }
@@ -333,8 +335,33 @@ void Simulation::UpdateRoutesAndLocations()
                 Log->incrementDeletedAgents();
             }
         }
+
+        // Set pedestrian waiting when find route temp_close
+        int goal       = ped->FindRoute();
+        Hline * target = _building->GetTransOrCrossByUID(goal);
+        int roomID     = ped->GetRoomID();
+        int subRoomID  = ped->GetSubRoomID();
+
+        if(auto cross = dynamic_cast<Crossing *>(target)) {
+            if(cross->IsInRoom(roomID) && cross->IsInSubRoom(subRoomID)) {
+                if(!ped->IsWaiting() && cross->IsTempClose()) {
+                    ped->StartWaiting();
+                }
+
+                if(ped->IsWaiting() && cross->IsOpen() && !ped->IsInsideWaitingAreaWaiting()) {
+                    ped->EndWaiting();
+                }
+            }
+        }
+
+        // Get new goal for pedestrians who are inside waiting area and wait time is over
+        // Check if current position is already waiting area
+        // yes: set next goal and return findExit(p)
+        _goalManager.ProcessPedPosition(ped);
     }
 
+
+    _goalManager.ProcessWaitingAreas(Pedestrian::GetGlobalTime());
 
 #ifdef _USE_PROTOCOL_BUFFER
     if(_hybridSimManager) {
@@ -342,7 +369,6 @@ void Simulation::UpdateRoutesAndLocations()
     } else
 #endif
     {
-
         // remove the pedestrians that have left the building
         for(auto p : pedsToRemove) {
             UpdateFlowAtDoors(*p);
@@ -350,20 +376,13 @@ void Simulation::UpdateRoutesAndLocations()
         }
         pedsToRemove.clear();
     }
-
-    //    temporary fix for the safest path router
-    //    if (dynamic_cast<SafestPathRouter*>(_routingEngine->GetRouter(1)))
-    //    {
-    //         SafestPathRouter* spr = dynamic_cast<SafestPathRouter*>(_routingEngine->GetRouter(1));
-    //         spr->ComputeAndUpdateDestinations(_allPedestians);
-    //    }
 }
 
 void Simulation::PrintStatistics(double simTime)
 {
-    Log->Write("\nRooms Egress. Simulation Time: %.2f", simTime);
-    Log->Write("==================");
-    Log->Write("id\tcaption\tegress time (s)");
+    Logging::Info(fmt::format(check_fmt("Rooms Egress. Simulation Time: {:.2f}"), simTime));
+    Logging::Info("==================");
+    Logging::Info("id\tcaption\tegress time (s)");
 
     for(const auto & it : _building->GetAllRooms()) {
         auto && room = it.second;

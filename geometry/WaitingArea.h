@@ -236,4 +236,6 @@ public:
      * @return string representation of waiting area
      */
     std::string toString();
+
+    const std::set<int> & GetPedInside() const;
 };

@@ -112,10 +112,10 @@ Building::~Building()
     //    delete _rooms[i];
 
 #ifdef _SIMULATOR
-    for(unsigned int p = 0; p < _allPedestians.size(); p++) {
-        delete _allPedestians[p];
+    for(auto & pedestrian : _allPedestrians) {
+        delete pedestrian;
     }
-    _allPedestians.clear();
+    _allPedestrians.clear();
     delete _linkedCellGrid;
 #endif
 
@@ -125,7 +125,16 @@ Building::~Building()
     for(std::map<int, Crossing *>::const_iterator iter = _crossings.begin();
         iter != _crossings.end();
         ++iter) {
-        delete iter->second;
+        // Don't delete crossings from goals
+        bool goalCrossing = false;
+        for(auto [_, goal] : _goals) {
+            if(goal->GetCentreCrossing()->GetUniqueID() == iter->second->GetUniqueID()) {
+                goalCrossing = true;
+            }
+        }
+        if(!goalCrossing) {
+            delete iter->second;
+        }
     }
     for(std::map<int, Transition *>::const_iterator iter = _transitions.begin();
         iter != _transitions.end();
@@ -1516,7 +1525,7 @@ bool Building::SanityCheck()
 void Building::UpdateGrid()
 {
     //     std::cout << Pedestrian::GetGlobalTime() <<":\t\tBuilding::UpdateGrid from: " << std::this_thread::get_id() <<std::endl;
-    _linkedCellGrid->Update(_allPedestians);
+    _linkedCellGrid->Update(_allPedestrians);
 }
 
 void Building::InitGrid()
@@ -1577,7 +1586,7 @@ void Building::InitGrid()
     //int nped= Pedestrian::GetAgentsCreated() +  for src:sources  src->GetMaxAgents()
 
     _linkedCellGrid = new LCGrid(boundaries, cellSize, Pedestrian::GetAgentsCreated());
-    _linkedCellGrid->ShallowCopy(_allPedestians);
+    _linkedCellGrid->ShallowCopy(_allPedestrians);
 
     Log->Write("INFO: \tDone with Initializing the grid ");
 }
@@ -1585,8 +1594,8 @@ void Building::InitGrid()
 void Building::DeletePedestrian(Pedestrian *& ped)
 {
     std::vector<Pedestrian *>::iterator it;
-    it = find(_allPedestians.begin(), _allPedestians.end(), ped);
-    if(it == _allPedestians.end()) {
+    it = find(_allPedestrians.begin(), _allPedestrians.end(), ped);
+    if(it == _allPedestrians.end()) {
         Log->Write("\tERROR: \tPed not found with ID %d ", ped->GetID());
         // exit(EXIT_FAILURE);
         return;
@@ -1618,33 +1627,33 @@ void Building::DeletePedestrian(Pedestrian *& ped)
     //          // he will remain in the simulation in that case
     //          //if(trans->IsOpen()==false) return;
     //     }
-    _allPedestians.erase(it);
+    _allPedestrians.erase(it);
     delete ped;
 }
 
 const std::vector<Pedestrian *> & Building::GetAllPedestrians() const
 {
-    return _allPedestians;
+    return _allPedestrians;
 }
 
 void Building::AddPedestrian(Pedestrian * ped)
 {
-    for(unsigned int p = 0; p < _allPedestians.size(); p++) {
-        Pedestrian * ped1 = _allPedestians[p];
+    for(unsigned int p = 0; p < _allPedestrians.size(); p++) {
+        Pedestrian * ped1 = _allPedestrians[p];
         if(ped->GetID() == ped1->GetID()) {
             std::cout << "Pedestrian " << ped->GetID() << " already in the room." << std::endl;
             return;
         }
     }
-    _allPedestians.push_back(ped);
+    _allPedestrians.push_back(ped);
 }
 
 void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const
 {
-    //for(unsigned int p = 0;p<_allPedestians.size();p++){
-    //     Pedestrian* ped=_allPedestians[p];
+    //for(unsigned int p = 0;p<_allPedestrians.size();p++){
+    //     Pedestrian* ped=_allPedestrians[p];
 
-    for(auto && ped : _allPedestians) {
+    for(auto && ped : _allPedestrians) {
         if((room == ped->GetRoomID()) && (subroom == ped->GetSubRoomID())) {
             peds.push_back(ped);
         }
@@ -1700,8 +1709,8 @@ void Building::StringExplode(
 
 Pedestrian * Building::GetPedestrian(int pedID) const
 {
-    for(unsigned int p = 0; p < _allPedestians.size(); p++) {
-        Pedestrian * ped = _allPedestians[p];
+    for(unsigned int p = 0; p < _allPedestrians.size(); p++) {
+        Pedestrian * ped = _allPedestrians[p];
         if(ped->GetID() == pedID) {
             return ped;
         }

@@ -318,9 +318,6 @@ set(source_files
     routing/ff_router/ffRouter.cpp
     routing/ff_router/FloorfieldViaFM.cpp
     routing/ff_router/UnivFFviaFM.cpp
-    routing/ff_router_trips/ffRouterTrips.cpp
-    routing/ff_router_trips/FloorfieldViaFMTrips.cpp
-    routing/ff_router_trips/UnivFFviaFMTrips.cpp
     routing/global_shortest/AccessPoint.cpp
     routing/global_shortest/DTriangulation.cpp
     routing/global_shortest/GlobalRouter.cpp
@@ -406,9 +403,8 @@ set(header_files
     routing/ff_router/ffRouter.h
     routing/ff_router/FloorfieldViaFM.h
     routing/ff_router/UnivFFviaFM.h
-    routing/ff_router_trips/ffRouterTrips.h
-    routing/ff_router_trips/FloorfieldViaFMTrips.h
-    routing/ff_router_trips/UnivFFviaFMTrips.h
+    routing/ff_router/mesh/RectGrid.h
+    routing/ff_router/mesh/Trial.h
     routing/global_shortest/AccessPoint.h
     routing/global_shortest/DTriangulation.h
     routing/global_shortest/GlobalRouter.h
