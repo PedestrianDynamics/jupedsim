@@ -51,16 +51,6 @@
 
 int main(int argc, char ** argv)
 {
-    Logging::Guard guard;
-    Logging::Info("Starting JuPedSim - JPScore");
-    Logging::Info(fmt::format(check_fmt("Version {}"), JPSCORE_VERSION));
-    Logging::Info(fmt::format(check_fmt("Commit id {}"), GIT_COMMIT_HASH));
-    Logging::Info(fmt::format(check_fmt("Commit date {}"), GIT_COMMIT_DATE));
-    Logging::Info(fmt::format(check_fmt("Build from branch {}"), GIT_BRANCH));
-    Logging::Info(fmt::format(check_fmt("Build with {}({})"), compiler_id, compiler_version));
-
-    // gathering some statistics about the runtime
-    time_t starttime, endtime;
 
     // default logger
     Log = new STDIOHandler();
@@ -70,9 +60,15 @@ int main(int argc, char ** argv)
        execution == ArgumentParser::Execution::ABORT) {
         return return_code;
     }
+    Logging::Guard guard;
+    Logging::Info("Starting JuPedSim - JPScore");
+    Logging::Info(fmt::format(check_fmt("Version {}"), JPSCORE_VERSION));
+    Logging::Info(fmt::format(check_fmt("Commit id {}"), GIT_COMMIT_HASH));
+    Logging::Info(fmt::format(check_fmt("Commit date {}"), GIT_COMMIT_DATE));
+    Logging::Info(fmt::format(check_fmt("Build from branch {}"), GIT_BRANCH));
+    Logging::Info(fmt::format(check_fmt("Build with {}({})"), compiler_id, compiler_version));
 
     Configuration config;
-
     // TODO remove me in refactoring
     IniFileParser iniFileParser(&config);
     if(!iniFileParser.Parse(a.IniFilePath())) {
@@ -91,6 +87,7 @@ int main(int argc, char ** argv)
 #endif
     // create and initialize the simulation engine
     // Simulation
+    time_t starttime, endtime;
     time(&starttime);
 
     Simulation sim(&config);
