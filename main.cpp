@@ -44,11 +44,6 @@
 #include <thread>
 #include <time.h>
 
-
-#ifdef _JPS_AS_A_SERVICE
-#include "hybrid/HybridSimulationManager.h"
-#endif
-
 int main(int argc, char ** argv)
 {
     Logging::Guard guard;
@@ -79,16 +74,6 @@ int main(int argc, char ** argv)
         return EXIT_FAILURE;
     }
 
-#ifdef _JPS_AS_A_SERVICE
-    if(config.GetRunAsService()) {
-        std::shared_ptr<HybridSimulationManager> hybridSimulationManager =
-            std::shared_ptr<HybridSimulationManager>(new HybridSimulationManager(configuration));
-        config.SetHybridSimulationManager(hybridSimulationManager);
-        std::thread t = std::thread(&HybridSimulationManager::Start, hybridSimulationManager);
-        hybridSimulationManager->WaitForScenarioLoaded();
-        t.detach();
-    }
-#endif
     // create and initialize the simulation engine
     // Simulation
     time(&starttime);
@@ -100,13 +85,6 @@ int main(int argc, char ** argv)
         double evacTime = 0;
         Logging::Info(
             fmt::format(check_fmt("Simulation started with {} pedestrians"), sim.GetPedsNumber()));
-
-#ifdef _JPS_AS_A_SERVICE
-
-        if(config.GetRunAsService()) {
-            config.GetHybridSimulationManager()->Run(sim);
-        } else
-#endif
             if(sim.GetAgentSrcManager().GetMaxAgentNumber()) {
             // Start the thread for managing the sources of agents if any
             // std::thread t1(sim.GetAgentSrcManager());
