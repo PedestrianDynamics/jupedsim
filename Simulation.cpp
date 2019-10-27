@@ -106,7 +106,7 @@ bool Simulation::InitArgs()
             Log = new FileHandler(_config->GetErrorLogFile());
         } break;
         default:
-            Logging::Warning("Wrong option for Logfile!\n");
+            Logging::Warning("Wrong option for Logfile!");
             return false;
     }
 
@@ -177,31 +177,31 @@ bool Simulation::InitArgs()
     if(!_operationalModel->Init(_building.get())) {
         return false;
     }
-    Logging::Info("Init Operational Model done");
-    Logging::Info(fmt::format("Got {} Train Types", _building->GetTrainTypes().size()));
+    Logging::Info("Init Operational Model done.");
+    Logging::Info(fmt::format(check_fmt("Got {} Train Types."), _building->GetTrainTypes().size()));
 
     for(auto && TT : _building->GetTrainTypes()) {
-        Logging::Info(fmt::format("type {}", TT.second->type));
-        Logging::Info(fmt::format("Max {}", TT.second->nmax));
-        Logging::Info(fmt::format("number doors {}", TT.second->doors.size()));
+        Logging::Info(fmt::format(check_fmt("Type {}"), TT.second->type));
+        Logging::Info(fmt::format(check_fmt("Max {}"), TT.second->nmax));
+        Logging::Info(fmt::format(check_fmt("Number of doors {}"), TT.second->doors.size()));
     }
 
     Logging::Info(fmt::format("Got {} Train Time Tables", _building->GetTrainTimeTables().size()));
 
     for(auto && TT : _building->GetTrainTimeTables()) {
-        Logging::Info(fmt::format("id           : {}", TT.second->id));
-        Logging::Info(fmt::format("type         : {}", TT.second->type.c_str()));
-        Logging::Info(fmt::format("room id      : {}", TT.second->rid));
-        Logging::Info(fmt::format("tin          : {:.2f}", TT.second->tin));
-        Logging::Info(fmt::format("tout         : {:.2f}", TT.second->tout));
+        Logging::Info(fmt::format(check_fmt("id           : {}"), TT.second->id));
+        Logging::Info(fmt::format(check_fmt("type         : {}"), TT.second->type.c_str()));
+        Logging::Info(fmt::format(check_fmt("room id      : {}"), TT.second->rid));
+        Logging::Info(fmt::format(check_fmt("tin          : {:.2f}"), TT.second->tin));
+        Logging::Info(fmt::format(check_fmt("tout         : {:.2f}"), TT.second->tout));
         Logging::Info(fmt::format(
             "track start  : ({:.2f}, {:.2f})", TT.second->pstart._x, TT.second->pstart._y));
-        Logging::Info(
-            fmt::format("track end    : ({:.2f}, {:.2f})", TT.second->pend._x, TT.second->pend._y));
+        Logging::Info(fmt::format(
+            check_fmt("track end    : ({:.2f}, {:.2f})"), TT.second->pend._x, TT.second->pend._y));
         Logging::Info(fmt::format(
             "train start  : ({:.2f}, {:.2f})", TT.second->tstart._x, TT.second->tstart._y));
-        Logging::Info(
-            fmt::format("train end    : ({:.2f}, {:.2f})", TT.second->tend._x, TT.second->tend._y));
+        Logging::Info(fmt::format(
+            check_fmt("train end    : ({:.2f}, {:.2f})"), TT.second->tend._x, TT.second->tend._y));
     }
 
     //TODO: these variables are global
@@ -221,14 +221,14 @@ bool Simulation::InitArgs()
     }
     _nPeds = _building->GetAllPedestrians().size();
     //_building->WriteToErrorLog();
-    Logging::Info(fmt::format("Number of peds received: {}", _nPeds));
+    Logging::Info(fmt::format(check_fmt("Number of peds received: {}"), _nPeds));
     //get the seed
     _seed = _config->GetSeed();
 
     //size of the cells/GCFM/Gompertz
     if(_config->GetDistEffMaxPed() > _config->GetLinkedCellSize()) {
         Logging::Error(fmt::format(
-            "the linked-cell size {:f} should be larger than the force range {:f}",
+            check_fmt("The linked-cell size [{}] should be larger than the force range [{}]"),
             _config->GetLinkedCellSize(),
             _config->GetDistEffMaxPed()));
         return false;
@@ -319,11 +319,11 @@ void Simulation::UpdateRoutesAndLocations()
         //finally actualize the route
         if(!_gotSources && ped->FindRoute() == -1 && !_trainConstraints) {
             //a destination could not be found for that pedestrian
-            Log->Write(
-                "ERROR: \tCould not find a route for pedestrian %d in room %d and subroom %d",
+            Logging::Error(fmt::format(
+                check_fmt("Could not find a route for pedestrian {} in room {} and subroom {}"),
                 ped->GetID(),
                 ped->GetRoomID(),
-                ped->GetSubRoomID());
+                ped->GetSubRoomID()));
             //ped->FindRoute(); //debug only, plz remove
             std::function<void(const Pedestrian &)> f =
                 std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
@@ -387,20 +387,23 @@ void Simulation::PrintStatistics(double simTime)
     for(const auto & it : _building->GetAllRooms()) {
         auto && room = it.second;
         if(room->GetCaption() != "outside")
-            Log->Write(
-                "%d\t%s\t%.2f", room->GetID(), room->GetCaption().c_str(), room->GetEgressTime());
+            Logging::Info(fmt::format(
+                check_fmt("{:d}\t{}\t{:.2f}"),
+                room->GetID(),
+                room->GetCaption(),
+                room->GetEgressTime()));
     }
 
-    Log->Write("\nUsage of Exits");
-    Log->Write("==========");
+    Logging::Info("Usage of Exits");
+    Logging::Info("==========");
     for(const auto & itr : _building->GetAllTransitions()) {
         Transition * goal = itr.second;
         if(goal->GetDoorUsage()) {
-            Log->Write(
-                "\nExit ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",
+            Logging::Info(fmt::format(
+                check_fmt("Exit ID [{}] used by [{}] pedestrians. Last passing time [{:.2f}] s"),
                 goal->GetID(),
                 goal->GetDoorUsage(),
-                goal->GetLastPassingTime());
+                goal->GetLastPassingTime()));
 
             fs::path statsfile{"flow_exit_id_" + std::to_string(goal->GetID()) + "_"};
             if(goal->GetOutflowRate() < std::numeric_limits<double>::max()) {
@@ -411,7 +414,8 @@ void Simulation::PrintStatistics(double simTime)
                 statsfile += '_';
             }
             statsfile += _config->GetOriginalTrajectoriesFile().filename().replace_extension("txt");
-            Log->Write("More Information in the file: %s", statsfile.string().c_str());
+            Logging::Info(
+                fmt::format(check_fmt("More Information in the file: {}"), statsfile.string()));
             {
                 FileHandler statOutput(statsfile);
                 statOutput.Write("#Simulation time: %.2f", simTime);
@@ -424,22 +428,23 @@ void Simulation::PrintStatistics(double simTime)
         }
     }
 
-    Log->Write("\nUsage of Crossings");
-    Log->Write("==========");
+    Logging::Info("Usage of Crossings");
+    Logging::Info("==========");
     for(const auto & itr : _building->GetAllCrossings()) {
         Crossing * goal = itr.second;
         if(goal->GetDoorUsage()) {
-            Log->Write(
-                "\nCrossing ID [%d] in Room ID [%d] used by [%d] pedestrians. Last passing time "
-                "[%0.2f] s",
+            Logging::Info(fmt::format(
+                check_fmt("Crossing ID [{}] in Room ID [{}] used by [{}] pedestrians. Last passing "
+                          "time [{:.2f}] s"),
                 goal->GetID(),
                 itr.first / 1000,
                 goal->GetDoorUsage(),
-                goal->GetLastPassingTime());
+                goal->GetLastPassingTime()));
 
             fs::path statsfile = "flow_crossing_id_" + std::to_string(itr.first / 1000) + "_" +
                                  std::to_string(itr.first % 1000) + ".dat";
-            Log->Write("More Information in the file: %s", statsfile.string().c_str());
+            Logging::Info(
+                fmt::format(check_fmt("More Information in the file: {}"), statsfile.string()));
             FileHandler output(statsfile);
             output.Write("#Simulation time: %.2f", simTime);
             output.Write(
@@ -450,8 +455,6 @@ void Simulation::PrintStatistics(double simTime)
             output.Write(goal->GetFlowCurve());
         }
     }
-
-    Log->Write("\n");
 }
 
 void Simulation::RunHeader(long nPed)
@@ -544,9 +547,9 @@ double Simulation::RunBody(double maxSimTime)
 
                 if(auto dirlocff = dynamic_cast<DirectionLocalFloorfield *>(
                        _building->GetConfig()->get_dirStrategy())) {
-                    Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
+                    Logging::Info("Init DirectionLOCALFloorfield starting ...");
                     dirlocff->Init(_building.get(), _deltaH, _wallAvoidDistance, _useWallAvoidance);
-                    Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
+                    Logging::Info("Init DirectionLOCALFloorfield done.");
                 }
             } else { // quickest needs update even if NeedsUpdate() is false
                 FFRouter * ffrouter =
@@ -582,7 +585,6 @@ double Simulation::RunBody(double maxSimTime)
         }
 
         if(!_gotSources && !_periodic && _config->print_prog_bar())
-            // Log->ProgressBar(initialnPeds, initialnPeds-_nPeds, t);
             bar.Progressed(initialnPeds - _nPeds);
         else if(
             (!_gotSources) &&
@@ -635,12 +637,13 @@ double Simulation::RunBody(double maxSimTime)
                     std::cout << "INFO:\tclosing train door " << transType.c_str() << " at "
                               << Pedestrian::GetGlobalTime() << " capacity "
                               << TrainTypes[type]->nmax << "\n";
-                    Log->Write(
-                        "INFO:\tclosing train door %s at t=%.2f. Flow = %.2f (Train Capacity %d)",
-                        transType.c_str(),
+                    Logging::Info(fmt::format(
+                        check_fmt(
+                            "Closing train door {} at t={:.2f}. Flow = {:.2f} (Train Capacity {})"),
+                        transType,
                         Pedestrian::GetGlobalTime(),
                         trainOutflow[id],
-                        TrainTypes[type]->nmax);
+                        TrainTypes[type]->nmax));
                     Trans->Close();
                 }
             }
@@ -648,7 +651,7 @@ double Simulation::RunBody(double maxSimTime)
         } // Transitions
         if(frameNr % 1000 == 0) {
             if(_config->ShowStatistics()) {
-                Log->Write("INFO:\tUpdate door statistics at t=%.2f", t);
+                Logging::Info(fmt::format(check_fmt("Update door statistics at t={:.2f}"), t));
                 PrintStatistics(t);
             }
         }
@@ -679,7 +682,7 @@ void Simulation::UpdateOutputFileName()
             extention.string().c_str());
         const fs::path abs_traj_name = parent / fs::path(tmp_traj_name);
         _config->SetTrajectoriesFile(abs_traj_name);
-        Log->Write("INFO:\tNew trajectory file <%s>", tmp_traj_name);
+        Logging::Info(fmt::format(check_fmt("New trajectory file <{}>"), tmp_traj_name));
         auto file = std::make_shared<FileHandler>(_config->GetTrajectoriesFile());
         outputTXT->SetOutputHandler(file);
         _iod->WriteHeader(_nPeds, _fps, _building.get(), _seed, _countTraj);
@@ -720,11 +723,12 @@ bool Simulation::correctGeometry(
     Room * room  = building->GetRoom(room_id);
     subroom      = room->GetSubRoom(subroom_id);
     if(subroom == nullptr) {
-        Log->Write(
-            "ERROR:\t Simulation::correctGeometry got wrong room_id|subroom_id (%d|%d). TrainId %d",
+        Logging::Error(fmt::format(
+            check_fmt(
+                "Simulation::correctGeometry got wrong room_id|subroom_id ({}|{}). TrainId {}"),
             room_id,
             subroom_id,
-            trainId);
+            trainId));
         exit(EXIT_FAILURE);
     }
     static int transition_id = 10000; // randomly high number
@@ -750,12 +754,12 @@ bool Simulation::correctGeometry(
         d.SetPoint2(Point(newX, newY));
     }
     for(auto d : doors) {
-        Log->Write(
-            "Train %s %d. Transformed coordinates of doors: %s -- %s",
-            trainType.c_str(),
+        Logging::Info(fmt::format(
+            check_fmt("Train {} {}. Transformed coordinates of doors: {} -- {}"),
+            trainType,
             trainId,
-            d.GetPoint1().toString().c_str(),
-            d.GetPoint2().toString().c_str());
+            d.GetPoint1().toString(),
+            d.GetPoint2().toString()));
     }
 
     // std::vector<std::pair<PointWall, pointWall > >
@@ -1113,17 +1117,17 @@ Simulation::correctDoorStatistics(const Pedestrian & ped, double distance, int t
     Transition * trans       = nullptr;
     double smallest_distance = 0.3;
     bool success             = false;
-    Log->Write(
-        "WARNING:\t pedestrian [%d] left room/subroom [%d/%d] in an unusual way. Please check",
+    Logging::Warning(fmt::format(
+        check_fmt("Pedestrian [{}] left room/subroom [{}/{}] in an unusual way. Please check"),
         ped.GetID(),
         ped.GetRoomID(),
-        ped.GetSubRoomID());
-    Log->Write(
-        "       :\t distance to last door (%d | %d) is %f. That should be smaller.",
+        ped.GetSubRoomID()));
+    Logging::Info(fmt::format(
+        check_fmt("Distance to last door ({} | {}) is {}. That should be smaller."),
         trans_id,
         ped.GetExitIndex(),
-        distance);
-    Log->Write("       :\t correcting the door statistics");
+        distance));
+    Logging::Info("Correcting the door statistics");
     //checking the history and picking the nearest previous destination
     for(const auto & dest : ped.GetLastDestinations()) {
         if(dest == -1)
@@ -1134,12 +1138,12 @@ Simulation::correctDoorStatistics(const Pedestrian & ped, double distance, int t
         if(auto tmp_distance = trans_tmp->DistTo(ped.GetPos()); tmp_distance < smallest_distance) {
             smallest_distance = tmp_distance;
             trans             = trans_tmp;
-            Log->Write("       :\t Best match found at door %d", dest);
+            Logging::Info(fmt::format(check_fmt("Best match found at door {}"), dest));
             success = true; //at least one door was found
         }
     }
     if(!success) {
-        Log->Write("WARNING       :\t correcting the door statistics failed!");
+        Logging::Warning("Correcting the door statistics failed!");
         //todo we need to check if the ped is in a subroom neighboring the target. If so, no problems!
     }
     return trans;
