@@ -62,13 +62,6 @@ Building::Building(Configuration * configuration, PedDistributor & pedDistributo
     _savePathway    = false;
     _linkedCellGrid = nullptr;
 
-#ifdef _JPS_AS_A_SERVICE
-    if(_configuration->GetRunAsService()) {
-        std::unique_ptr<GeometryFromProtobufLoader> parser(
-            new GeometryFromProtobufLoader(_configuration));
-        parser->LoadBuilding(this);
-    } else
-#endif
     {
         std::unique_ptr<GeoFileParser> parser(new GeoFileParser(_configuration));
         parser->LoadBuilding(this);
