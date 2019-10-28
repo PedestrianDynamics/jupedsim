@@ -1,6 +1,6 @@
 #description: experiment
 #framerate: 25
-#geometry: geometry.xml
+#geometry: geo_crossing_90_c_6_v5.xml
 #ID: the agent ID
 #FR: the current frame
 #X,Y,Z: the agents coordinates (in metres)

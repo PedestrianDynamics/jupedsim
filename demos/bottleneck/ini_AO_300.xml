@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<JPSreport project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_report.xsd">
-    <!-- geometry file -->
+<JPSreport project="AO_300" version="0.8.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_report.xsd">
+
     <geometry file = "geo_AO_300.xml" />
-    <!-- trajectories file and format -->
-    <!-- either a file name or a path location. In the latter case all files in the directory will be used-->
+
+    <logfile>log_AO_300.txt</logfile>
+
+    <output location="bottleneck_Output" />
+
     <trajectories format="txt" unit="m">
         <file name="traj_AO_300.txt" />
         <path location="./" />
     </trajectories>
-        <!-- give relative path based on the location inifile or give the absolute path -->
-        <scripts location="../../scripts/"/>
 
     <measurement_areas unit="m">
         <area_B id="1" type="BoundingBox" zPos="None">
@@ -30,14 +31,10 @@
     </measurement_areas>
 
     <velocity frame_step="10" set_movement_direction="None" ignore_backward_movement="false"/>
-    <!-- frame_step is the time interval that used to calculate instantaneous velocity  -->
-        <!-- of ped i [fr] here v_i = (X(t+frame_step/2) - X(t+frame_step/2))/frame_step. X is location. -->
 
     <!-- Method A (Zhang2011a) Flow and Vel -->
     <method_A enabled="true">
-        <!-- Time interval used to count the flow [fr] -->
-        <!-- The coordinate of the line used to calculate the flow and velocity -->
-        <measurement_area id="2" frame_interval="100" plot_time_series="true"/>
-        <measurement_area id="4" frame_interval="150" plot_time_series="true"/>
+        <measurement_area id="2" frame_interval="100"/>
+        <measurement_area id="4" frame_interval="150"/>
     </method_A>
 </JPSreport>

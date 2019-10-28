@@ -6,6 +6,12 @@ All notable changes to `jpsreport` will be documented in this file.
 ### Added
 
 ### Changed
+- Update demo-files
+    - bottleneck
+    - corridor
+    - corridor_with_obstacle
+    - crossing
+    - T-Junction
 
 ### Deprecated
 

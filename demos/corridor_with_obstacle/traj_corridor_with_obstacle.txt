@@ -1,6 +1,6 @@
 #description: experiment
 #framerate: 50
-#geometry: geometry.xml
+#geometry: geo_corridor_with_obstacle.xml
 #ID: the agent ID
 #FR: the current frame
 #X,Y,Z: the agents coordinates (in metres)
