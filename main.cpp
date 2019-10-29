@@ -56,6 +56,7 @@ int main(int argc, char ** argv)
         return return_code;
     }
     Logging::Guard guard;
+    Logging::SetLogLevel(a.LogLevel());
     Logging::Info("Starting JuPedSim - JPScore");
     Logging::Info(fmt::format(check_fmt("Version {}"), JPSCORE_VERSION));
     Logging::Info(fmt::format(check_fmt("Commit id {}"), GIT_COMMIT_HASH));
