@@ -22,6 +22,7 @@
 
 #include "OutputHandler.h"
 #include "general/Filesystem.h"
+#include "general/Format.h"
 #include "general/Logger.h"
 #include "general/OpenMP.h"
 #include "math/GCFMModel.h"
@@ -36,6 +37,7 @@
 #include "routing/quickest/QuickestPathRouter.h"
 #include "routing/smoke_router/SmokeRouter.h"
 
+#include <string>
 #include <tinyxml.h>
 
 
@@ -46,7 +48,8 @@ IniFileParser::IniFileParser(Configuration * config)
 
 bool IniFileParser::Parse(const fs::path & iniFile)
 {
-    Log->Write("INFO: \tLoading and parsing the project file <%s>", iniFile.string().c_str());
+    Logging::Info(
+        fmt::format(check_fmt("Loading and parsing the project file <{}>"), iniFile.string()));
     _config->SetProjectFile(
         iniFile); //TODO in some locations it is called iniFile and in others project file,
     // and as I just realized, I called it configuration. We should be consistent here anything else
@@ -55,8 +58,8 @@ bool IniFileParser::Parse(const fs::path & iniFile)
 
     TiXmlDocument doc(iniFile.string());
     if(!doc.LoadFile()) {
-        Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \tCould not parse the project file");
+        Logging::Error(fmt::format(check_fmt("{}"), doc.ErrorDesc()));
+        Logging::Error("Could not parse the project file");
         return false;
     }
 
@@ -64,22 +67,23 @@ bool IniFileParser::Parse(const fs::path & iniFile)
 
     TiXmlElement * xMainNode = doc.RootElement();
     if(!xMainNode) {
-        Log->Write("ERROR:\tRoot element does not exist");
+        Logging::Error("Root element does not exist");
         return false;
     }
 
     if(xMainNode->ValueStr() != "JuPedSim") {
-        Log->Write("ERROR:\tRoot element value is not 'JuPedSim'.");
+        Logging::Error("Root element value is not 'JuPedSim'.");
         return false;
     }
 
     //check the header version
     if(!xMainNode->Attribute("version")) {
-        Log->Write("WARNING:\t There is no header version. I am assuming %s", JPS_VERSION);
+        Logging::Warning(
+            fmt::format(check_fmt("There is no header version. I am assuming {}"), JPS_VERSION));
     } else if(std::stod(xMainNode->Attribute("version")) < std::stod(JPS_OLD_VERSION)) {
-        Log->Write(
-            "ERROR:\t Wrong header version. Only version greater than %s is supported.",
-            JPS_OLD_VERSION);
+        Logging::Error(fmt::format(
+            check_fmt("Wrong header version. Only version greater than {} is supported."),
+            JPS_OLD_VERSION));
         return false;
     }
 
@@ -109,8 +113,8 @@ bool IniFileParser::Parse(const fs::path & iniFile)
     //get the wanted ped model id
     _model = xmltoi(xMainNode->FirstChildElement("agents")->Attribute("operational_model_id"), -1);
     if(_model == -1) {
-        Log->Write("ERROR: \tmissing operational_model_id attribute in the agent section.");
-        Log->Write("ERROR: \tplease specify the model id to use");
+        Logging::Error("Missing operational_model_id attribute in the agent section.");
+        Logging::Error("Please specify the model id to use");
         return false;
     }
 
@@ -120,7 +124,7 @@ bool IniFileParser::Parse(const fs::path & iniFile)
         xModel;
         xModel = xModel->NextSiblingElement("model")) {
         if(!xModel->Attribute("description")) {
-            Log->Write("ERROR: \t missing attribute description in models?");
+            Logging::Error("Missing attribute description in models?");
             return false;
         }
 
@@ -129,7 +133,7 @@ bool IniFileParser::Parse(const fs::path & iniFile)
 
         if((_model == MODEL_GCFM) && (model_id == MODEL_GCFM)) {
             if(modelName != "gcfm") {
-                Log->Write("ERROR: \t mismatch model ID and description. Did you mean gcfm?");
+                Logging::Error("Mismatch model ID and description. Did you mean gcfm?");
                 return false;
             }
             if(!ParseGCFMModel(xModel, xMainNode))
@@ -139,7 +143,7 @@ bool IniFileParser::Parse(const fs::path & iniFile)
             break;
         } else if((_model == MODEL_GOMPERTZ) && (model_id == MODEL_GOMPERTZ)) {
             if(modelName != "gompertz") {
-                Log->Write("ERROR: \t mismatch model ID and description. Did you mean gompertz?");
+                Logging::Error("Mismatch model ID and description. Did you mean gompertz?");
                 return false;
             }
             //only parsing one model
@@ -149,7 +153,7 @@ bool IniFileParser::Parse(const fs::path & iniFile)
             break;
         } else if((_model == MODEL_GRADIENT) && (model_id == MODEL_GRADIENT)) {
             if(modelName != "gradnav") {
-                Log->Write("ERROR: \t mismatch model ID and description. Did you mean gradnav?");
+                Logging::Error("Mismatch model ID and description. Did you mean gradnav?");
                 return false;
             }
             //only parsing one model
@@ -159,7 +163,7 @@ bool IniFileParser::Parse(const fs::path & iniFile)
             break;
         } else if((_model == MODEL_VELOCITY) && (model_id == MODEL_VELOCITY)) {
             if(modelName != "Tordeux2015") {
-                Log->Write("ERROR:\t mismatch model ID and description. Did you mean Tordeux2015?");
+                Logging::Error("Mismatch model ID and description. Did you mean Tordeux2015?");
                 return false;
             }
             //only parsing one model
@@ -170,7 +174,7 @@ bool IniFileParser::Parse(const fs::path & iniFile)
         }
         if((_model == MODEL_KRAUSZ) && (model_id == MODEL_KRAUSZ)) {
             if(modelName != "krausz") {
-                Log->Write("ERROR: \t mismatch model ID and description. Did you mean krausz?");
+                Logging::Error("Mismatch model ID and description. Did you mean krausz?");
                 return false;
             }
             if(!ParseKrauszModel(xModel, xMainNode))
@@ -182,13 +186,13 @@ bool IniFileParser::Parse(const fs::path & iniFile)
     }
 
     if(!parsingModelSuccessful) {
-        Log->Write(
-            "ERROR: \tWrong model id [%d]. Choose 1 (GCFM), 2 (Gompertz),  3 (Tordeux2015) or 5 "
-            "(Krausz)",
-            _model);
-        Log->Write("ERROR: \tPlease make sure that all models are specified in the "
-                   "operational_models section");
-        Log->Write("ERROR: \tand make sure to use the same ID in the agent section");
+        Logging::Error(fmt::format(
+            check_fmt("Wrong model id [{}]. Choose 1 (GCFM), 2 (Gompertz),  3 (Tordeux2015) or 5 "
+                      "(Krausz)"),
+            _model));
+        Logging::Error(
+            "Please make sure that all models are specified in the operational_models section");
+        Logging::Error("And make sure to use the same ID in the agent section");
         return false;
     }
 
@@ -198,7 +202,7 @@ bool IniFileParser::Parse(const fs::path & iniFile)
 
     if(!ParseRoutingStrategies(xRouters, xAgentDistri))
         return false;
-    Log->Write("INFO: \tParsing the project file completed");
+    Logging::Info("Parsing the project file completed");
     return true;
 }
 
@@ -211,14 +215,14 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         const fs::path canonicalPath = fs::weakly_canonical(root / logPath);
         _config->SetErrorLogFile(canonicalPath);
         _config->SetLog(2);
-        Log->Write("INFO:\tlogfile <%s>", _config->GetErrorLogFile().string().c_str());
+        Logging::Info(fmt::format(check_fmt("Logfile <{}>"), _config->GetErrorLogFile().string()));
     }
-    Log->Write("----\nJuPedSim - JPScore\n");
-    Log->Write("Current date   : %s %s", __DATE__, __TIME__);
-    Log->Write("Version        : %s", JPSCORE_VERSION);
-    Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
-    Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
-    Log->Write("Branch         : %s\n----\n", GIT_BRANCH);
+    Logging::Info("JuPedSim - JPScore");
+    Logging::Info(fmt::format(check_fmt("Current date: {} {}"), __DATE__, __TIME__));
+    Logging::Info(fmt::format(check_fmt("Version     : {}"), JPSCORE_VERSION));
+    Logging::Info(fmt::format(check_fmt("Commit hash : {}"), GIT_COMMIT_HASH));
+    Logging::Info(fmt::format(check_fmt("Commit date : {}"), GIT_COMMIT_DATE));
+    Logging::Info(fmt::format(check_fmt("Branch      : {}"), GIT_BRANCH));
 
 
     //seed
@@ -232,26 +236,27 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         }
     }
     // srand(_config->GetSeed());
-    Log->Write("INFO:\trandom seed <%d>", _config->GetSeed());
+    Logging::Info(fmt::format(check_fmt("Random seed <{}>"), _config->GetSeed()));
 
     // max simulation time
     if(xHeader->FirstChild("max_sim_time")) {
         const char * tmax = xHeader->FirstChildElement("max_sim_time")->FirstChild()->Value();
         _config->SetTmax(atof(tmax));
-        Log->Write("INFO: \tMaximal simulation time <%.2f> seconds", _config->GetTmax());
+        Logging::Info(
+            fmt::format(check_fmt("Maximal simulation time <{:.2f}> seconds"), _config->GetTmax()));
     }
 
     // Progressbar
     if(xHeader->FirstChild("progressbar")) {
         _config->SetPRB(true);
-        Log->Write("INFO: \tUse Progressbar");
+        Logging::Info("Use Progressbar");
     }
 
     // geometry file name
     if(xHeader->FirstChild("geometry")) {
         std::string filename = xHeader->FirstChild("geometry")->FirstChild()->Value();
         _config->SetGeometryFile(filename);
-        Log->Write("INFO: \tgeometry <%s>", filename.c_str());
+        Logging::Info(fmt::format(check_fmt("Geometry file <{}>"), filename));
     }
 
 
@@ -269,16 +274,16 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         }
     }
     _config->SetMaxOpenMPThreads(omp_get_max_threads());
-    Log->Write(
-        "INFO:\tUsing num_threads <%d> threads (%d available)",
+    Logging::Info(fmt::format(
+        check_fmt("Using {} OpenMP threads, {} available."),
         _config->GetMaxOpenMPThreads(),
-        max_threads);
+        max_threads));
 
     //display statistics
     if(xHeader->FirstChild("show_statistics")) {
         std::string value = xHeader->FirstChild("show_statistics")->FirstChild()->Value();
         _config->SetShowStatistics(value == "true");
-        Log->Write("INFO: \tShow statistics: %s", value.c_str());
+        Logging::Info(fmt::format(check_fmt("Show statistics: {}"), value));
     }
 
     //trajectories
@@ -361,12 +366,12 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
                 _config->SetOriginalTrajectoriesFile(canonicalTrajPath);
             }
 
-            Log->Write(
-                "INFO: \toutput file  <%s>", _config->GetTrajectoriesFile().string().c_str());
-            Log->Write(
-                "INFO: \tin format <%s> at <%.0f> frames per seconds",
-                format.c_str(),
-                _config->GetFps());
+            Logging::Info(fmt::format(
+                check_fmt("Output file  <{}>"), _config->GetTrajectoriesFile().string()));
+            Logging::Info(fmt::format(
+                check_fmt("In format <{}> at <{:.0f}> frames per seconds"),
+                format,
+                _config->GetFps()));
         }
 
         if(xTrajectories->FirstChild("socket")) {
@@ -376,10 +381,10 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
             int port;
             xTrajectories->FirstChildElement("socket")->Attribute("port", &port);
             _config->SetPort(port);
-            Log->Write(
-                "INFO: \tStreaming results to output [%s:%d] ",
-                _config->GetHostname().c_str(),
-                _config->GetPort());
+            Logging::Info(fmt::format(
+                check_fmt("Streaming results to output [{}:{}]"),
+                _config->GetHostname(),
+                _config->GetPort()));
         }
 
         if(xTrajectories->FirstChild("optional_output")) {
@@ -497,20 +502,20 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
 bool IniFileParser::ParseGCFMModel(TiXmlElement * xGCFM, TiXmlElement * xMainNode)
 {
-    Log->Write("\nINFO:\tUsing the GCFM model");
-    Log->Write("INFO:\tParsing the model parameters");
+    Logging::Info("Using the GCFM model");
+    Logging::Info("Parsing the model parameters");
 
     TiXmlNode * xModelPara = xGCFM->FirstChild("model_parameters");
     if(!xModelPara) {
-        Log->Write("ERROR: \t !!!! Changes in the operational model section !!!");
-        Log->Write("ERROR: \t !!!! The new version is in inputfiles/ship_msw/ini_ship2.xml !!!");
+        Logging::Error("!!!! Changes in the operational model section !!!");
+        Logging::Error("!!!! The new version is in inputfiles/ship_msw/ini_ship2.xml !!!");
         return false;
     }
 
     // For convenience. This moved to the header as it is not model specific
     if(xModelPara->FirstChild("tmax")) {
-        Log->Write("ERROR: \tthe maximal simulation time section moved to the header!!!");
-        Log->Write("ERROR: \t\t <max_sim_time> </max_sim_time>\n");
+        Logging::Error("The maximal simulation time section moved to the header!!!");
+        Logging::Error("\t <max_sim_time> </max_sim_time>\n");
         return false;
     }
 
@@ -540,16 +545,17 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement * xGCFM, TiXmlElement * xMainNod
         std::string interpolation_width =
             xModelPara->FirstChildElement("force_ped")->Attribute("interpolation_width");
 
-        _config->SetMaxFPed(atof(dist_max.c_str()));
-        _config->SetNuPed(atof(nu.c_str()));
-        _config->SetDistEffMaxPed(atof(disteff_max.c_str()));
-        _config->SetIntPWidthPed(atof(interpolation_width.c_str()));
-        Log->Write(
-            "INFO: \tfrep_ped nu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
-            atof(nu.c_str()),
-            atof(dist_max.c_str()),
-            atof(disteff_max.c_str()),
-            atof(interpolation_width.c_str()));
+        _config->SetMaxFPed(std::stod(dist_max));
+        _config->SetNuPed(std::stod(nu));
+        _config->SetDistEffMaxPed(std::stod(disteff_max));
+        _config->SetIntPWidthPed(std::stod(interpolation_width));
+        Logging::Info(fmt::format(
+            check_fmt("Frep_ped nu={:.3f}, dist_max={:.3f}, disteff_max={:.3f}, "
+                      "interpolation_width={:.3f}"),
+            std::stod(nu),
+            std::stod(dist_max),
+            std::stod(disteff_max),
+            std::stod(interpolation_width)));
     }
 
     //force_wall
@@ -560,16 +566,17 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement * xGCFM, TiXmlElement * xMainNod
             xModelPara->FirstChildElement("force_wall")->Attribute("disteff_max");
         std::string interpolation_width =
             xModelPara->FirstChildElement("force_wall")->Attribute("interpolation_width");
-        _config->SetMaxFWall(atof(dist_max.c_str()));
-        _config->SetNuWall(atof(nu.c_str()));
-        _config->SetDistEffMaxWall(atof(disteff_max.c_str()));
-        _config->SetIntPWidthWall(atof(interpolation_width.c_str()));
-        Log->Write(
-            "INFO: \tfrep_wall mu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
-            atof(nu.c_str()),
-            atof(dist_max.c_str()),
-            atof(disteff_max.c_str()),
-            atof(interpolation_width.c_str()));
+        _config->SetMaxFWall(std::stod(dist_max));
+        _config->SetNuWall(std::stod(nu));
+        _config->SetDistEffMaxWall(std::stod(disteff_max));
+        _config->SetIntPWidthWall(std::stod(interpolation_width));
+        Logging::Info(fmt::format(
+            check_fmt("Frep_wall mu={:.3f}, dist_max={:.3f}, disteff_max={:.3f}, "
+                      "interpolation_width={:.3f}"),
+            std::stod(nu),
+            std::stod(dist_max),
+            std::stod(disteff_max),
+            std::stod(interpolation_width)));
     }
 
     //Parsing the agent parameters
@@ -593,20 +600,20 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement * xGCFM, TiXmlElement * xMainNod
 
 bool IniFileParser::ParseKrauszModel(TiXmlElement * xKrausz, TiXmlElement * xMainNode)
 {
-    Log->Write("\nINFO:\tUsing the Krausz model");
-    Log->Write("INFO:\tParsing the model parameters");
+    Logging::Info("Using the Krausz model");
+    Logging::Info("Parsing the model parameters");
 
     TiXmlNode * xModelPara = xKrausz->FirstChild("model_parameters");
     if(!xModelPara) {
-        Log->Write("ERROR: \t !!!! Changes in the operational model section !!!");
-        Log->Write("ERROR: \t !!!! The new version is in inputfiles/ship_msw/ini_ship2.xml !!!");
+        Logging::Error("!!!! Changes in the operational model section !!!");
+        Logging::Error("!!!! The new version is in inputfiles/ship_msw/ini_ship2.xml !!!");
         return false;
     }
 
     // For convenience. This moved to the header as it is not model specific
     if(xModelPara->FirstChild("tmax")) {
-        Log->Write("ERROR: \tthe maximal simulation time section moved to the header!!!");
-        Log->Write("ERROR: \t\t <max_sim_time> </max_sim_time>\n");
+        Logging::Error("The maximal simulation time section moved to the header!!!");
+        Logging::Error("\t <max_sim_time> </max_sim_time>\n");
         return false;
     }
 
@@ -636,16 +643,17 @@ bool IniFileParser::ParseKrauszModel(TiXmlElement * xKrausz, TiXmlElement * xMai
         std::string interpolation_width =
             xModelPara->FirstChildElement("force_ped")->Attribute("interpolation_width");
 
-        _config->SetMaxFPed(atof(dist_max.c_str()));
-        _config->SetNuPed(atof(nu.c_str()));
-        _config->SetDistEffMaxPed(atof(disteff_max.c_str()));
-        _config->SetIntPWidthPed(atof(interpolation_width.c_str()));
-        Log->Write(
-            "INFO: \tfrep_ped nu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
-            atof(nu.c_str()),
-            atof(dist_max.c_str()),
-            atof(disteff_max.c_str()),
-            atof(interpolation_width.c_str()));
+        _config->SetMaxFPed(std::stod(dist_max));
+        _config->SetNuPed(std::stod(nu));
+        _config->SetDistEffMaxPed(std::stod(disteff_max));
+        _config->SetIntPWidthPed(std::stod(interpolation_width));
+        Logging::Info(fmt::format(
+            check_fmt("Frep_ped nu={:.3f}, dist_max={:.3f}, disteff_max={:.3f}, "
+                      "interpolation_width={:.3f}"),
+            std::stod(nu),
+            std::stod(dist_max),
+            std::stod(disteff_max),
+            std::stod(interpolation_width)));
     }
 
     //force_wall
@@ -656,16 +664,17 @@ bool IniFileParser::ParseKrauszModel(TiXmlElement * xKrausz, TiXmlElement * xMai
             xModelPara->FirstChildElement("force_wall")->Attribute("disteff_max");
         std::string interpolation_width =
             xModelPara->FirstChildElement("force_wall")->Attribute("interpolation_width");
-        _config->SetMaxFWall(atof(dist_max.c_str()));
-        _config->SetNuWall(atof(nu.c_str()));
-        _config->SetDistEffMaxWall(atof(disteff_max.c_str()));
-        _config->SetIntPWidthWall(atof(interpolation_width.c_str()));
-        Log->Write(
-            "INFO: \tfrep_wall mu=%.3f, dist_max=%.3f, disteff_max=%.3f, interpolation_width=%.3f",
-            atof(nu.c_str()),
-            atof(dist_max.c_str()),
-            atof(disteff_max.c_str()),
-            atof(interpolation_width.c_str()));
+        _config->SetMaxFWall(std::stod(dist_max));
+        _config->SetNuWall(std::stod(nu));
+        _config->SetDistEffMaxWall(std::stod(disteff_max));
+        _config->SetIntPWidthWall(std::stod(interpolation_width));
+        Logging::Info(fmt::format(
+            check_fmt("Frep_wall mu={:.3f}, dist_max={:.3f}, disteff_max={:.3f}, "
+                      "interpolation_width={:.3f}"),
+            std::stod(nu),
+            std::stod(dist_max),
+            std::stod(disteff_max),
+            std::stod(interpolation_width)));
     }
 
     //Parsing the agent parameters
@@ -689,21 +698,20 @@ bool IniFileParser::ParseKrauszModel(TiXmlElement * xKrausz, TiXmlElement * xMai
 bool IniFileParser::ParseGompertzModel(TiXmlElement * xGompertz, TiXmlElement * xMainNode)
 {
     //parsing the model parameters
-    Log->Write("\nINFO:\tUsing the Gompertz model");
-
-    Log->Write("INFO:\tParsing the model parameters");
+    Logging::Info("Using the Gompertz model");
+    Logging::Info("Parsing the model parameters");
 
     TiXmlNode * xModelPara = xGompertz->FirstChild("model_parameters");
     if(!xModelPara) {
-        Log->Write("ERROR: \t !!!! Changes in the operational model section !!!");
-        Log->Write("ERROR: \t !!!! The new version is in inputfiles/ship_msw/ini_ship3.xml !!!");
+        Logging::Error("!!!! Changes in the operational model section !!!");
+        Logging::Error("!!!! The new version is in inputfiles/ship_msw/ini_ship3.xml !!!");
         return false;
     }
 
     // For convenience. This moved to the header as it is not model specific
     if(xModelPara->FirstChild("tmax")) {
-        Log->Write("ERROR: \tthe maximal simulation time section moved to the header!!!");
-        Log->Write("ERROR: \t\t <max_sim_time> </max_sim_time>\n");
+        Logging::Error("The maximal simulation time section moved to the header!!!");
+        Logging::Error("\t <max_sim_time> </max_sim_time>\n");
         return false;
     }
 
@@ -726,62 +734,62 @@ bool IniFileParser::ParseGompertzModel(TiXmlElement * xGompertz, TiXmlElement * 
     //force_ped
     if(xModelPara->FirstChild("force_ped")) {
         std::string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
-        _config->SetNuPed(atof(nu.c_str()));
+        _config->SetNuPed(std::stod(nu));
 
         if(!xModelPara->FirstChildElement("force_ped")->Attribute("a"))
             _config->SetaPed(1.0); // default value
         else {
             std::string a = xModelPara->FirstChildElement("force_ped")->Attribute("a");
-            _config->SetaPed(atof(a.c_str()));
+            _config->SetaPed(std::stod(a));
         }
         if(!xModelPara->FirstChildElement("force_ped")->Attribute("b"))
             _config->SetbPed(0.25); // default value
         else {
             std::string b = xModelPara->FirstChildElement("force_ped")->Attribute("b");
-            _config->SetbPed(atof(b.c_str()));
+            _config->SetbPed(std::stod(b));
         }
         if(!xModelPara->FirstChildElement("force_ped")->Attribute("c"))
             _config->SetcPed(3.0); // default value
         else {
             std::string c = xModelPara->FirstChildElement("force_ped")->Attribute("c");
-            _config->SetcPed(atof(c.c_str()));
+            _config->SetcPed(std::stod(c));
         }
-        Log->Write(
-            "INFO: \tfrep_ped mu=%s, a=%0.2f, b=%0.2f c=%0.2f",
-            nu.c_str(),
+        Logging::Info(fmt::format(
+            check_fmt("Frep_ped mu={}, a={:.2f}, b={:.2f} c={:.2f}"),
+            nu,
             _config->GetaPed(),
             _config->GetbPed(),
-            _config->GetcPed());
+            _config->GetcPed()));
     }
     //force_wall
     if(xModelPara->FirstChild("force_wall")) {
         std::string nu = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
-        _config->SetNuWall(atof(nu.c_str()));
+        _config->SetNuWall(std::stod(nu));
         if(!xModelPara->FirstChildElement("force_wall")->Attribute("a"))
             _config->SetaWall(1.0); // default value
         else {
             std::string a = xModelPara->FirstChildElement("force_wall")->Attribute("a");
-            _config->SetaWall(atof(a.c_str()));
+            _config->SetaWall(std::stod(a));
         }
         if(!xModelPara->FirstChildElement("force_wall")->Attribute("b"))
             _config->SetbWall(0.7); // default value
         else {
             std::string b = xModelPara->FirstChildElement("force_wall")->Attribute("b");
-            _config->SetbWall(atof(b.c_str()));
+            _config->SetbWall(std::stod(b));
         }
         if(!xModelPara->FirstChildElement("force_wall")->Attribute("c"))
             _config->SetcWall(3.0); // default value
         else {
             std::string c = xModelPara->FirstChildElement("force_wall")->Attribute("c");
-            _config->SetcWall(atof(c.c_str()));
+            _config->SetcWall(std::stod(c));
         }
 
-        Log->Write(
-            "INFO: \tfrep_wall mu=%s, a=%0.2f, b=%0.2f c=%0.2f",
-            nu.c_str(),
+        Logging::Info(fmt::format(
+            check_fmt("Frep_wall mu={}, a={:.2f}, b={:.2f} c={:.2f}"),
+            nu,
             _config->GetaWall(),
             _config->GetbWall(),
-            _config->GetcWall());
+            _config->GetcWall()));
     }
 
     //Parsing the agent parameters
@@ -806,22 +814,21 @@ bool IniFileParser::ParseGompertzModel(TiXmlElement * xGompertz, TiXmlElement * 
 bool IniFileParser::ParseGradientModel(TiXmlElement * xGradient, TiXmlElement * xMainNode)
 {
     //parsing the model parameters
-    Log->Write("\nINFO:\tUsing the Gradient model");
-
-    Log->Write("INFO:\tParsing the model parameters");
+    Logging::Info("Using the Gradient model");
+    Logging::Info("Parsing the model parameters");
 
     TiXmlNode * xModelPara = xGradient->FirstChild("model_parameters");
 
     if(!xModelPara) {
-        Log->Write("ERROR: \t !!!! Changes in the operational model section !!!");
-        Log->Write("ERROR: \t !!!! The new version is in inputfiles/ship_msw/ini_ship3.xml !!!");
+        Logging::Error("!!!! Changes in the operational model section !!!");
+        Logging::Error("!!!! The new version is in inputfiles/ship_msw/ini_ship3.xml !!!");
         return false;
     }
 
     // For convenience. This moved to the header as it is not model specific
     if(xModelPara->FirstChild("tmax")) {
-        Log->Write("ERROR: \tthe maximal simulation time section moved to the header!!!");
-        Log->Write("ERROR: \t\t <max_sim_time> </max_sim_time>\n");
+        Logging::Error("The maximal simulation time section moved to the header!!!");
+        Logging::Error("\t <max_sim_time> </max_sim_time>\n");
         return false;
     }
 
@@ -846,7 +853,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement * xGradient, TiXmlElement * 
             pDeltaH = 0.0625; // default value
         else {
             std::string delta_h = xModelPara->FirstChildElement("floorfield")->Attribute("delta_h");
-            pDeltaH             = atof(delta_h.c_str());
+            pDeltaH             = std::stod(delta_h);
         }
         _config->set_deltaH(pDeltaH);
 
@@ -855,7 +862,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement * xGradient, TiXmlElement * 
         else {
             std::string wall_avoid_distance =
                 xModelPara->FirstChildElement("floorfield")->Attribute("wall_avoid_distance");
-            pWallAvoidDistance = atof(wall_avoid_distance.c_str());
+            pWallAvoidDistance = std::stod(wall_avoid_distance);
         }
         _config->set_wall_avoid_distance(pWallAvoidDistance);
 
@@ -867,12 +874,12 @@ bool IniFileParser::ParseGradientModel(TiXmlElement * xGradient, TiXmlElement * 
             pUseWallAvoidance = !(use_wall_avoidance == "false");
         }
         _config->set_use_wall_avoidance(pUseWallAvoidance);
-        Log->Write(
-            "INFO: \tfloorfield <delta h=%0.4f, wall avoid distance=%0.2f>",
+        Logging::Info(fmt::format(
+            check_fmt("Floorfield <delta h={:.4f}, wall avoid distance={:.2f}>"),
             pDeltaH,
-            pWallAvoidDistance);
-        Log->Write(
-            "INFO: \tfloorfield <use wall avoidance=%s>", pUseWallAvoidance ? "true" : "false");
+            pWallAvoidDistance));
+        Logging::Info(
+            fmt::format(check_fmt("Floorfield <use wall avoidance={}>"), pUseWallAvoidance));
     }
 
     //linked-cells
@@ -883,64 +890,64 @@ bool IniFileParser::ParseGradientModel(TiXmlElement * xGradient, TiXmlElement * 
     //force_ped
     if(xModelPara->FirstChild("force_ped")) {
         std::string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
-        _config->SetNuPed(atof(nu.c_str()));
+        _config->SetNuPed(std::stod(nu));
 
         if(!xModelPara->FirstChildElement("force_ped")->Attribute("a"))
             _config->SetaPed(1.0); // default value
         else {
             std::string a = xModelPara->FirstChildElement("force_ped")->Attribute("a");
-            _config->SetaPed(atof(a.c_str()));
+            _config->SetaPed(std::stod(a));
         }
 
         if(!xModelPara->FirstChildElement("force_ped")->Attribute("b"))
             _config->SetbPed(0.25); // default value
         else {
             std::string b = xModelPara->FirstChildElement("force_ped")->Attribute("b");
-            _config->SetbPed(atof(b.c_str()));
+            _config->SetbPed(std::stod(b));
         }
         if(!xModelPara->FirstChildElement("force_ped")->Attribute("c"))
             _config->SetcPed(3.0); // default value
         else {
             std::string c = xModelPara->FirstChildElement("force_ped")->Attribute("c");
-            _config->SetcPed(atof(c.c_str()));
+            _config->SetcPed(std::stod(c));
         }
-        Log->Write(
-            "INFO: \tfrep_ped mu=%s, a=%0.2f, b=%0.2f c=%0.2f",
-            nu.c_str(),
+        Logging::Info(fmt::format(
+            check_fmt("Frep_ped mu={}, a={:.2f}, b={:.2f} c={:.2f}"),
+            nu,
             _config->GetaPed(),
             _config->GetbPed(),
-            _config->GetcPed());
+            _config->GetcPed()));
     }
     //force_wall
     if(xModelPara->FirstChild("force_wall")) {
         std::string nu = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
-        _config->SetNuWall(atof(nu.c_str()));
+        _config->SetNuWall(std::stod(nu));
 
         if(!xModelPara->FirstChildElement("force_wall")->Attribute("a"))
             _config->SetaWall(1.0); // default value
         else {
             std::string a = xModelPara->FirstChildElement("force_wall")->Attribute("a");
-            _config->SetaWall(atof(a.c_str()));
+            _config->SetaWall(std::stod(a));
         }
 
         if(!xModelPara->FirstChildElement("force_wall")->Attribute("b"))
             _config->SetbWall(0.7); // default value
         else {
             std::string b = xModelPara->FirstChildElement("force_wall")->Attribute("b");
-            _config->SetbWall(atof(b.c_str()));
+            _config->SetbWall(std::stod(b));
         }
         if(!xModelPara->FirstChildElement("force_wall")->Attribute("c"))
             _config->SetcWall(3.0); // default value
         else {
             std::string c = xModelPara->FirstChildElement("force_wall")->Attribute("c");
-            _config->SetcWall(atof(c.c_str()));
+            _config->SetcWall(std::stod(c));
         }
-        Log->Write(
-            "INFO: \tfrep_wall mu=%s, a=%0.2f, b=%0.2f c=%0.2f",
-            nu.c_str(),
+        Logging::Info(fmt::format(
+            check_fmt("Frep_wall mu={}, a={:.2f}, b={:.2f} c={:.2f}"),
+            nu,
             _config->GetaWall(),
             _config->GetbWall(),
-            _config->GetcWall());
+            _config->GetcWall()));
     }
     //anti_clipping
     if(xModelPara->FirstChild("anti_clipping")) {
@@ -949,10 +956,11 @@ bool IniFileParser::ParseGradientModel(TiXmlElement * xGradient, TiXmlElement * 
         else {
             std::string slow_down_distance =
                 xModelPara->FirstChildElement("anti_clipping")->Attribute("slow_down_distance");
-            pSlowDownDistance = atof(slow_down_distance.c_str());
+            pSlowDownDistance = std::stod(slow_down_distance);
         }
         _config->set_slow_down_distance(pSlowDownDistance);
-        Log->Write("INFO: \tAnti Clipping: SlowDown Distance=%0.2f", pSlowDownDistance);
+        Logging::Info(
+            fmt::format(check_fmt("Anti Clipping: SlowDown Distance={:.2f}"), pSlowDownDistance));
     }
 
     //Parsing the agent parameters
@@ -981,21 +989,21 @@ bool IniFileParser::ParseGradientModel(TiXmlElement * xGradient, TiXmlElement * 
 bool IniFileParser::ParseVelocityModel(TiXmlElement * xVelocity, TiXmlElement * xMainNode)
 {
     //parsing the model parameters
-    Log->Write("\nINFO:\tUsing Tordeux2015 model");
-    Log->Write("INFO:\tParsing the model parameters");
+    Logging::Info("Using Tordeux2015 model");
+    Logging::Info("Parsing the model parameters");
 
     TiXmlNode * xModelPara = xVelocity->FirstChild("model_parameters");
 
     if(!xModelPara) {
-        Log->Write("ERROR: \t !!!! Changes in the operational model section !!!");
-        Log->Write("ERROR: \t !!!! The new version is in inputfiles/ship_msw/ini_ship3.xml !!!");
+        Logging::Error("!!!! Changes in the operational model section !!!");
+        Logging::Error("!!!! The new version is in inputfiles/ship_msw/ini_ship3.xml !!!");
         return false;
     }
 
     // For convenience. This moved to the header as it is not model specific
     if(xModelPara->FirstChild("tmax")) {
-        Log->Write("ERROR: \tthe maximal simulation time section moved to the header!!!");
-        Log->Write("ERROR: \t\t <max_sim_time> </max_sim_time>\n");
+        Logging::Error("The maximal simulation time section moved to the header!!!");
+        Logging::Error("\t <max_sim_time> </max_sim_time>\n");
         return false;
     }
 
@@ -1025,16 +1033,17 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement * xVelocity, TiXmlElement * 
             _config->SetaPed(1.0); // default value
         else {
             std::string a = xModelPara->FirstChildElement("force_ped")->Attribute("a");
-            _config->SetaPed(atof(a.c_str()));
+            _config->SetaPed(std::stod(a));
         }
 
         if(!xModelPara->FirstChildElement("force_ped")->Attribute("D"))
             _config->SetDPed(0.1); // default value in [m]
         else {
             std::string D = xModelPara->FirstChildElement("force_ped")->Attribute("D");
-            _config->SetDPed(atof(D.c_str()));
+            _config->SetDPed(std::stod(D));
         }
-        Log->Write("INFO: \tfrep_ped a=%0.2f, D=%0.2f", _config->GetaPed(), _config->GetDPed());
+        Logging::Info(fmt::format(
+            check_fmt("Frep_ped a={:.2f}, D={:.2f}"), _config->GetaPed(), _config->GetDPed()));
     }
     //force_wall
     if(xModelPara->FirstChild("force_wall")) {
@@ -1042,16 +1051,17 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement * xVelocity, TiXmlElement * 
             _config->SetaWall(1.0); // default value
         else {
             std::string a = xModelPara->FirstChildElement("force_wall")->Attribute("a");
-            _config->SetaWall(atof(a.c_str()));
+            _config->SetaWall(std::stod(a));
         }
 
         if(!xModelPara->FirstChildElement("force_wall")->Attribute("D"))
             _config->SetDWall(0.1); // default value in [m]
         else {
             std::string D = xModelPara->FirstChildElement("force_wall")->Attribute("D");
-            _config->SetDWall(atof(D.c_str()));
+            _config->SetDWall(std::stod(D));
         }
-        Log->Write("INFO: \tfrep_wall a=%0.2f, D=%0.2f", _config->GetaWall(), _config->GetDWall());
+        Logging::Info(fmt::format(
+            check_fmt("Frep_wall a={:.2f}, D={:.2f}"), _config->GetaWall(), _config->GetDWall()));
     }
 
     //Parsing the agent parameters
@@ -1070,7 +1080,7 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement * xVelocity, TiXmlElement * 
 void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode * agentsDistri)
 {
     //Parsing the agent parameters
-    Log->Write("\nINFO:\tParsing agents  parameters");
+    Logging::Info("Parsing agents  parameters");
     //first get list of actually used router
     std::vector<int> usedAgentParams;
     usedAgentParams.clear();
@@ -1092,7 +1102,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
         int para_id = xmltoi(xAgentPara->Attribute("agent_parameter_id"), -1);
         if(std::find(usedAgentParams.begin(), usedAgentParams.end(), para_id) !=
            usedAgentParams.end()) {
-            Log->Write("INFO: \tParsing the group parameter id [%d]", para_id);
+            Logging::Info(fmt::format(check_fmt("Parsing the group parameter id [{}]"), para_id));
 
             auto agentParameters = std::shared_ptr<AgentsParameters>(
                 new AgentsParameters(para_id, _config->GetSeed()));
@@ -1105,7 +1115,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 agentParameters->InitV0(mu, sigma);
                 agentParameters->InitV0DownStairs(mu, sigma);
                 agentParameters->InitV0UpStairs(mu, sigma);
-                Log->Write("INFO: \tdesired speed mu=%f , sigma=%f", mu, sigma);
+                Logging::Info(fmt::format(check_fmt("Desired speed mu={} , sigma={}"), mu, sigma));
             }
 
             if(xAgentPara->FirstChild("v0_upstairs")) {
@@ -1113,7 +1123,8 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 double sigma =
                     xmltof(xAgentPara->FirstChildElement("v0_upstairs")->Attribute("sigma"));
                 agentParameters->InitV0UpStairs(mu, sigma);
-                Log->Write("INFO: \tdesired speed upstairs mu=%f , sigma=%f", mu, sigma);
+                Logging::Info(
+                    fmt::format(check_fmt("Desired speed upstairs mu={} , sigma={}"), mu, sigma));
             }
 
             if(xAgentPara->FirstChild("v0_downstairs")) {
@@ -1121,7 +1132,8 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 double sigma =
                     xmltof(xAgentPara->FirstChildElement("v0_downstairs")->Attribute("sigma"));
                 agentParameters->InitV0DownStairs(mu, sigma);
-                Log->Write("INFO: \tdesired speed downstairs mu=%f , sigma=%f", mu, sigma);
+                Logging::Info(
+                    fmt::format(check_fmt("Desired speed downstairs mu={} , sigma={}"), mu, sigma));
             } //------------------------------------------------------------------------
             if(xAgentPara->FirstChild("escalator_upstairs")) {
                 double mu =
@@ -1129,7 +1141,8 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 double sigma =
                     xmltof(xAgentPara->FirstChildElement("escalator_upstairs")->Attribute("sigma"));
                 agentParameters->InitEscalatorUpStairs(mu, sigma);
-                Log->Write("INFO: \tspeed of escalator upstairs mu=%f , sigma=%f", mu, sigma);
+                Logging::Info(fmt::format(
+                    check_fmt("speed of escalator upstairs mu={} , sigma={}"), mu, sigma));
             }
             if(xAgentPara->FirstChild("escalator_downstairs")) {
                 double mu =
@@ -1137,7 +1150,8 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 double sigma = xmltof(
                     xAgentPara->FirstChildElement("escalator_downstairs")->Attribute("sigma"));
                 agentParameters->InitEscalatorDownStairs(mu, sigma);
-                Log->Write("INFO: \tspeed of escalator downstairs mu=%f , sigma=%f", mu, sigma);
+                Logging::Info(fmt::format(
+                    check_fmt("speed of escalator downstairs mu={} , sigma={}"), mu, sigma));
             }
             if(xAgentPara->FirstChild("v0_idle_escalator_upstairs")) {
                 double mu = xmltof(
@@ -1145,8 +1159,10 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 double sigma = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_upstairs")
                                           ->Attribute("sigma"));
                 agentParameters->InitV0IdleEscalatorUpStairs(mu, sigma);
-                Log->Write(
-                    "INFO: \tdesired speed idle escalator upstairs mu=%f , sigma=%f", mu, sigma);
+                Logging::Info(fmt::format(
+                    check_fmt("Desired speed idle escalator upstairs mu={} , sigma={}"),
+                    mu,
+                    sigma));
             }
             if(xAgentPara->FirstChild("v0_idle_escalator_downstairs")) {
                 double mu = xmltof(
@@ -1154,8 +1170,10 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 double sigma = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_downstairs")
                                           ->Attribute("sigma"));
                 agentParameters->InitV0IdleEscalatorDownStairs(mu, sigma);
-                Log->Write(
-                    "INFO: \tdesired speed idle escalator downstairs mu=%f , sigma=%f", mu, sigma);
+                Logging::Info(fmt::format(
+                    check_fmt("Desired speed idle escalator downstairs mu={} , sigma={}"),
+                    mu,
+                    sigma));
             }
             //------------------------------------------------------------------------
 
@@ -1164,7 +1182,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 double mu    = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("mu"));
                 double sigma = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("sigma"));
                 agentParameters->InitBmax(mu, sigma);
-                Log->Write("INFO: \tBmax mu=%f , sigma=%f", mu, sigma);
+                Logging::Info(fmt::format(check_fmt("Bmax mu={} , sigma={}"), mu, sigma));
             }
 
             //bmin
@@ -1172,7 +1190,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 double mu    = xmltof(xAgentPara->FirstChildElement("bmin")->Attribute("mu"));
                 double sigma = xmltof(xAgentPara->FirstChildElement("bmin")->Attribute("sigma"));
                 agentParameters->InitBmin(mu, sigma);
-                Log->Write("INFO: \tBmin mu=%f , sigma=%f", mu, sigma);
+                Logging::Info(fmt::format(check_fmt("Bmin mu={} , sigma={}"), mu, sigma));
             }
 
             //amin
@@ -1180,28 +1198,28 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 double mu    = xmltof(xAgentPara->FirstChildElement("amin")->Attribute("mu"));
                 double sigma = xmltof(xAgentPara->FirstChildElement("amin")->Attribute("sigma"));
                 agentParameters->InitAmin(mu, sigma);
-                Log->Write("INFO: \tAmin mu=%f , sigma=%f", mu, sigma);
+                Logging::Info(fmt::format(check_fmt("Amin mu={} , sigma={}"), mu, sigma));
             }
             //tau
             if(xAgentPara->FirstChild("tau")) {
                 double mu    = xmltof(xAgentPara->FirstChildElement("tau")->Attribute("mu"));
                 double sigma = xmltof(xAgentPara->FirstChildElement("tau")->Attribute("sigma"));
                 agentParameters->InitTau(mu, sigma);
-                Log->Write("INFO: \tTau mu=%f , sigma=%f", mu, sigma);
+                Logging::Info(fmt::format(check_fmt("Tau mu={} , sigma={}"), mu, sigma));
             }
             //atau
             if(xAgentPara->FirstChild("atau")) {
                 double mu    = xmltof(xAgentPara->FirstChildElement("atau")->Attribute("mu"));
                 double sigma = xmltof(xAgentPara->FirstChildElement("atau")->Attribute("sigma"));
                 agentParameters->InitAtau(mu, sigma);
-                Log->Write("INFO: \tAtau mu=%f , sigma=%f", mu, sigma);
+                Logging::Info(fmt::format(check_fmt("Atau mu={} , sigma={}"), mu, sigma));
             }
             // T
             if(xAgentPara->FirstChild("T")) {
                 double mu    = xmltof(xAgentPara->FirstChildElement("T")->Attribute("mu"));
                 double sigma = xmltof(xAgentPara->FirstChildElement("T")->Attribute("sigma"));
                 agentParameters->InitT(mu, sigma);
-                Log->Write("INFO: \tT mu=%f , sigma=%f", mu, sigma);
+                Logging::Info(fmt::format(check_fmt("T mu={} , sigma={}"), mu, sigma));
             }
             // swaying parameters
             if(xAgentPara->FirstChild("sway")) {
@@ -1210,7 +1228,12 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 double ampA  = xmltof(xAgentPara->FirstChildElement("sway")->Attribute("ampA"));
                 double ampB  = xmltof(xAgentPara->FirstChildElement("sway")->Attribute("ampB"));
                 agentParameters->SetSwayParams(freqA, freqB, ampA, ampB);
-                Log->Write("INFO: \tSwaying parameters freqA=%f , freqB=%f , ampA=%f, ampB=%f");
+                Logging::Info(fmt::format(
+                    check_fmt("Swaying parameters freqA={} , freqB={} , ampA={}, ampB={}"),
+                    freqA,
+                    freqB,
+                    ampA,
+                    ampB));
             }
 
             if(_model == 2) {      // Gompertz
@@ -1257,12 +1280,12 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
 bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * agentsDistri)
 {
     if(!routingNode) {
-        Log->Write("ERROR: \t route_choice_models section is missing");
+        Logging::Error("Route_choice_models section is missing");
         return false;
     }
 
     if(!agentsDistri) {
-        Log->Write("ERROR: \t Agent Distribution section is missing");
+        Logging::Error("Agent Distribution section is missing");
         return false;
     }
     //first get list of actually used router
@@ -1320,7 +1343,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
             Router * r = new SmokeRouter(id, ROUTING_SMOKE);
             _config->GetRoutingEngine()->AddRouter(r);
 
-            Log->Write("\nINFO: \tUsing SmokeRouter");
+            Logging::Info("Using SmokeRouter");
             ///Parsing additional options
             if(!ParseCogMapOpts(e))
                 return false;
@@ -1331,7 +1354,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
             Router * r = new AIRouter(id, ROUTING_AI);
             _config->GetRoutingEngine()->AddRouter(r);
 
-            Log->Write("\nINFO: \tUsing AIRouter");
+            Logging::Info("Using AIRouter");
             ///Parsing additional options
             if(!ParseAIOpts(e))
                 return false;
@@ -1348,9 +1371,9 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
             _config->GetRoutingEngine()->AddRouter(r);
 
             if((_exit_strat_number == 8) || (_exit_strat_number == 9)) {
-                Log->Write("\nINFO: \tUsing FF Global Shortest Router");
+                Logging::Info("Using FF Global Shortest Router");
             } else {
-                Log->Write("\nWARNING: \tExit Strategy Number is not 8 or 9!!!");
+                Logging::Warning("Exit Strategy Number is not 8 or 9!!!");
                 // config object holds default values, so we omit any set operations
             }
 
@@ -1358,20 +1381,19 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
             if(!ParseFfRouterOps(e, ROUTING_FF_GLOBAL_SHORTEST)) {
                 return false;
             }
-        }
-        else if(
+        } else if(
             (strategy == "ff_local_shortest") &&
             (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
             //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
             Router * r = new FFRouter(id, ROUTING_FF_LOCAL_SHORTEST, hasSpecificGoals, _config);
             _config->GetRoutingEngine()->AddRouter(r);
-            Log->Write("\nINFO: \tUsing FF Local Shortest Router");
-            Log->Write("\nWARNING: \tFF Local Shortest is bugged!!!!");
+            Logging::Info("Using FF Local Shortest Router");
+            Logging::Warning("FF Local Shortest is bugged!!!!");
 
             if((_exit_strat_number == 8) || (_exit_strat_number == 9)) {
-                Log->Write("\nINFO: \tUsing FF Global Shortest Router");
+                Logging::Info("Using FF Global Shortest Router");
             } else {
-                Log->Write("\nWARNING: \tExit Strategy Number is not 8 or 9!!!");
+                Logging::Warning("Exit Strategy Number is not 8 or 9!!!");
                 // config object holds default values, so we omit any set operations
             }
 
@@ -1386,13 +1408,14 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
             (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
             Router * r = new FFRouter(id, ROUTING_FF_QUICKEST, hasSpecificGoals, _config);
             _config->GetRoutingEngine()->AddRouter(r);
-            Log->Write("\nINFO: \tUsing FF Quickest Router");
+            Logging::Info("Using FF Quickest Router");
 
             if(!ParseFfRouterOps(e, ROUTING_FF_QUICKEST)) {
                 return false;
             }
         } else if(std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) {
-            Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n", strategy.c_str());
+            Logging::Error(
+                fmt::format(check_fmt("Wrong value for routing strategy [{}]."), strategy));
             return false;
         }
     }
@@ -1440,7 +1463,7 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode * routingNode)
 {
     TiXmlNode * sensorNode = routingNode->FirstChild();
     if(!sensorNode) {
-        Log->Write("ERROR:\tNo sensors found.\n");
+        Logging::Error("No sensors found.\n");
         return false;
     }
 
@@ -1455,7 +1478,7 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode * routingNode)
         //adding Smoke Sensor specific parameters is executed in the class FDSFIreMeshStorage
         sensorVec.push_back(sensor);
 
-        Log->Write("INFO: \tSensor <%s> added.", sensor.c_str());
+        Logging::Info(fmt::format(check_fmt("Sensor <{}> added."), sensor));
     }
 
     r->addOption("Sensors", sensorVec);
@@ -1463,19 +1486,19 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode * routingNode)
     TiXmlElement * cogMap = routingNode->FirstChildElement("cognitive_map");
 
     if(!cogMap) {
-        Log->Write("ERROR:\tCognitive Map not specified.\n");
+        Logging::Error("Cognitive Map not specified.\n");
         return false;
     }
 
     std::vector<std::string> cogMapStatus;
     cogMapStatus.push_back(cogMap->Attribute("status"));
-    Log->Write(
-        "INFO: \tAll pedestrian starting with a(n) %s cognitive maps", cogMapStatus[0].c_str());
+    Logging::Info(fmt::format(
+        check_fmt("All pedestrian starting with a(n) {} cognitive maps"), cogMapStatus[0]));
     r->addOption("CognitiveMap", cogMapStatus);
 
     std::vector<std::string> cogMapFiles;
     if(!cogMap->Attribute("files")) {
-        Log->Write("WARNING:\tNo input files for the cognitive map specified!");
+        Logging::Warning("No input files for the cognitive map specified!");
         return true;
     }
     cogMapFiles.push_back(cogMap->Attribute("files"));
@@ -1489,7 +1512,7 @@ bool IniFileParser::ParseAIOpts(TiXmlNode * routingNode)
     TiXmlNode * sensorNode = routingNode->FirstChild();
 
     if(!sensorNode) {
-        Log->Write("ERROR:\tNo sensors found.\n");
+        Logging::Error("No sensors found.\n");
         return false;
     }
 
@@ -1503,7 +1526,7 @@ bool IniFileParser::ParseAIOpts(TiXmlNode * routingNode)
         std::string sensor = e->Attribute("description");
         sensorVec.push_back(sensor);
 
-        Log->Write("INFO: \tSensor <%s> added.", sensor.c_str());
+        Logging::Info(fmt::format(check_fmt("Sensor <{}> added."), sensor));
     }
 
     r->addOption("Sensors", sensorVec);
@@ -1511,29 +1534,29 @@ bool IniFileParser::ParseAIOpts(TiXmlNode * routingNode)
     TiXmlElement * cogMap = routingNode->FirstChildElement("cognitive_map");
 
     if(!cogMap) {
-        Log->Write("ERROR:\tCognitive Map not specified.\n");
+        Logging::Error("Cognitive Map not specified.\n");
         return false;
     }
 
     //std::vector<std::string> cogMapStatus;
     //cogMapStatus.push_back(cogMap->Attribute("status"));
-    //Log->Write("INFO: \tAll pedestrian starting with a(n) %s cognitive maps", cogMapStatus[0].c_str());
+    //Logging::Info(fmt::format(check_fmt("All pedestrian starting with a(n) {} cognitive maps"), cogMapStatus[0]));
     //r->addOption("CognitiveMap", cogMapStatus);
 
     std::vector<std::string> cogMapFiles;
     if(!cogMap->Attribute("files")) {
-        Log->Write("WARNING:\tNo input files for the cognitive map specified!");
+        Logging::Warning("No input files for the cognitive map specified!");
     } else {
         cogMapFiles.push_back(cogMap->Attribute("files"));
         r->addOption("CognitiveMapFiles", cogMapFiles);
-        Log->Write("INFO:\tinput files for the cognitive map specified!");
+        Logging::Info("Input files for the cognitive map specified!");
     }
 
     //Signs
     TiXmlElement * signs = routingNode->FirstChildElement("signage");
 
     if(!signs) {
-        Log->Write("INFO: \tNo signage specified");
+        Logging::Info("No signage specified");
     } else {
         r->addOption("SignFiles", std::vector<std::string>{signs->Attribute("file")});
     }
@@ -1552,13 +1575,14 @@ bool IniFileParser::ParseLinkedCells(const TiXmlNode & linkedCellNode)
             linkedCellNode.FirstChildElement("linkedcells")->Attribute("cell_size");
 
         if(linkedcells == "true") {
-            _config->SetLinkedCellSize(atof(cell_size.c_str()));
-            Log->Write(
-                "INFO: \tlinked cells enabled with size  <%.2f>", _config->GetLinkedCellSize());
+            _config->SetLinkedCellSize(std::stod(cell_size));
+            Logging::Info(fmt::format(
+                check_fmt("Linked cells enabled with size  <{:.2f}>"),
+                _config->GetLinkedCellSize()));
             return true;
         } else {
             _config->SetLinkedCellSize(-1.0);
-            Log->Write("WARNING: \tinvalid parameters for linkedcells");
+            Logging::Warning("Invalid parameters for linkedcells");
             return false;
         }
     }
@@ -1575,13 +1599,13 @@ bool IniFileParser::ParseStepSize(TiXmlNode & stepNode)
             if((stepNode.FirstChildElement("stepsize")->Attribute("fix")) &&
                (std::string(stepNode.FirstChildElement("stepsize")->Attribute("fix")) == "yes")) {
                 _config->Setdt(atof(stepsize));
-                Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
+                Logging::Info(fmt::format(check_fmt("Stepsize <{}>"), _config->Getdt()));
                 if(tmp < _config->Getdt()) {
-                    Log->Write(
-                        "WARNING: \tStepsize dt = %f > %f = frameinterval.\nWARNING: \tYou should "
-                        "decrease stepsize or fps!",
+                    Logging::Warning(fmt::format(
+                        check_fmt("Stepsize dt = {} > {} = frameinterval."),
                         _config->Getdt(),
-                        tmp);
+                        tmp));
+                    Logging::Warning("You should decrease stepsize or fps!");
                 }
                 return true;
             }
@@ -1590,24 +1614,22 @@ bool IniFileParser::ParseStepSize(TiXmlNode & stepNode)
                 if((tmp / i) <= stepsizeDBL) {
                     _config->Setdt(tmp / i);
                     if((tmp / i) < stepsizeDBL) {
-                        Log->Write(
-                            "WARNING: \tDecreased stepsize from <%f> to <%f> to match fps",
+                        Logging::Warning(fmt::format(
+                            check_fmt("Decreased stepsize from <{}> to <{}> to match fps"),
                             stepsizeDBL,
-                            (tmp / i));
+                            (tmp / i)));
                     }
-                    Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
+                    Logging::Info(fmt::format(check_fmt("Stepsize <{}>"), _config->Getdt()));
                     return true;
                 }
             }
             //below should never execute
             _config->Setdt(stepsizeDBL);
-            Log->Write("INFO: \tstepsize <%f>", _config->Getdt());
+            Logging::Info(fmt::format(check_fmt("Stepsize <{}>"), _config->Getdt()));
             if(tmp < _config->Getdt()) {
-                Log->Write(
-                    "WARNING: \tStepsize dt = %f > %f = frameinterval. You should decrease "
-                    "stepsize or fps!",
-                    _config->Getdt(),
-                    tmp);
+                Logging::Warning(fmt::format(
+                    check_fmt("Stepsize dt = {} > {} = frameinterval."), _config->Getdt(), tmp));
+                Logging::Warning("You should decrease stepsize or fps!");
             }
             return true;
         }
@@ -1621,7 +1643,7 @@ bool IniFileParser::ParsePeriodic(TiXmlNode & Node)
         const char * periodic = Node.FirstChild("periodic")->FirstChild()->Value();
         if(periodic)
             _config->SetIsPeriodic(atoi(periodic));
-        Log->Write("INFO: \tperiodic <%d>", _config->IsPeriodic());
+        Logging::Info(fmt::format(check_fmt("Periodic <{}>"), _config->IsPeriodic()));
         return true;
     } else {
         _config->SetIsPeriodic(0);
@@ -1640,10 +1662,10 @@ bool IniFileParser::ParseNodeToSolver(const TiXmlNode & solverNode)
         else if(solver == "leapfrog")
             _config->SetSolver(3);
         else {
-            Log->Write("ERROR: \twrong value [%s] for solver type\n", solver.c_str());
+            Logging::Error(fmt::format(check_fmt("Wrong value [{}] for solver type"), solver));
             return false;
         }
-        Log->Write("INFO: \tpSolver <%d>", _config->GetSolver());
+        Logging::Info(fmt::format(check_fmt("pSolver <{}>"), _config->GetSolver()));
         return true;
     }
     return false;
@@ -1654,8 +1676,8 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
     std::string query = "exit_crossing_strategy";
     if(!strategyNode.FirstChild(query.c_str())) {
         query = "exitCrossingStrategy";
-        Log->Write("ERROR:\t the keyword exitCrossingStrategy is deprecated. Please consider using "
-                   "\"exit_crossing_strategy\" in the ini file");
+        Logging::Error("The keyword exitCrossingStrategy is deprecated. Please consider using "
+                       "\"exit_crossing_strategy\" in the ini file");
         return false;
     }
 
@@ -1694,7 +1716,7 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                        ((router_descr == "ff_global_shortest") ||
                         (router_descr == "ff_local_shortest") || (router_descr == "ff_quickest"))) {
                         pExitStrategy = 8;
-                        Log->Write("WARNING: \tChanging Exit Strategie to work with floorfield!");
+                        Logging::Warning("Changing Exit Strategie to work with floorfield!");
                     }
                 }
             }
@@ -1733,10 +1755,10 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                     break;
                 case 7:
                     // dead end -> not supported anymore (global ff needed, but not available in 3d)
-                    Log->Write("ERROR: \tExit Strategy 7 is not supported any longer. Please refer "
-                               "to www.jupedsim.org");
-                    Log->Write("WARNING: \tChanging Exit-Strategy to #9 (Floorfields with targets "
-                               "within subroom)");
+                    Logging::Error("Exit Strategy 7 is not supported any longer. Please refer to "
+                                   "www.jupedsim.org");
+                    Logging::Warning(
+                        "Changing Exit-Strategy to #9 (Floorfields with targets within subroom)");
                     pExitStrategy      = 9;
                     _exit_strat_number = 9;
                     _exit_strategy =
@@ -1791,15 +1813,16 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                 default:
                     _exit_strategy =
                         std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
-                    Log->Write("ERROR:\t unknown exit_crossing_strategy <%d>", pExitStrategy);
-                    Log->Write("     :\t the default <%d> will be used", 2);
+                    Logging::Error(fmt::format(
+                        check_fmt("Unknown exit_crossing_strategy <{}>"), pExitStrategy));
+                    Logging::Warning("The default exit_crossing_strategy <2> will be used");
                     return true;
                     break;
             }
         } else {
             return false;
         }
-        Log->Write("INFO: \texit_crossing_strategy < %d >", pExitStrategy);
+        Logging::Info(fmt::format(check_fmt("exit_crossing_strategy <{}>"), pExitStrategy));
         _config->set_exit_strat(_exit_strat_number);
     }
     return true;
@@ -1812,7 +1835,7 @@ bool IniFileParser::ParseFfOpts(const TiXmlNode & strategyNode)
         const char * tmp = strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
         double pDeltaH   = atof(tmp);
         _config->set_deltaH(pDeltaH);
-        Log->Write("INFO: \tdeltaH:\t %f", pDeltaH);
+        Logging::Info(fmt::format(check_fmt("deltaH: {}"), pDeltaH));
     }
 
 
@@ -1821,7 +1844,7 @@ bool IniFileParser::ParseFfOpts(const TiXmlNode & strategyNode)
         const char * tmp      = strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
         double pWallAvoidance = atof(tmp);
         _config->set_wall_avoid_distance(pWallAvoidance);
-        Log->Write("INFO: \tWAD:\t %f", pWallAvoidance);
+        Logging::Info(fmt::format(check_fmt("Wall avoidance: {}"), pWallAvoidance));
     }
 
 
@@ -1831,9 +1854,9 @@ bool IniFileParser::ParseFfOpts(const TiXmlNode & strategyNode)
         bool pUseWallAvoidance = !(tmp == "false");
         _config->set_use_wall_avoidance(pUseWallAvoidance);
         if(pUseWallAvoidance)
-            Log->Write("INFO: \tUseWAD:\t yes");
+            Logging::Info("UseWAD:\t yes");
         else
-            Log->Write("INFO: \tUseWAD:\t no");
+            Logging::Info("UseWAD:\t no");
     }
     return true;
 }
