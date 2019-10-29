@@ -37,6 +37,8 @@
 #include "GeometryReader.h"
 #include "IO/GeoFileParser.h"
 #include "general/Filesystem.h"
+#include "general/Format.h"
+#include "general/Logger.h"
 #include "mpi/LCGrid.h"
 #include "pedestrian/Pedestrian.h"
 
@@ -68,7 +70,7 @@ Building::Building(Configuration * configuration, PedDistributor & pedDistributo
     }
 
     if(!InitGeometry()) {
-        Log->Write("ERROR:\t could not initialize the geometry!");
+        Logging::Error("Could not initialize the geometry!");
         exit(EXIT_FAILURE);
     }
 
@@ -78,18 +80,18 @@ Building::Building(Configuration * configuration, PedDistributor & pedDistributo
 
 
     if(!pedDistributor.Distribute(this)) {
-        Log->Write("ERROR:\tcould not distribute the pedestrians\n");
+        Logging::Error("Could not distribute the pedestrians");
         exit(EXIT_FAILURE);
     }
     InitGrid();
 
     if(!_routingEngine->Init(this)) {
-        Log->Write("ERROR:\t could not initialize the routers!");
+        Logging::Error("Could not initialize the routers!");
         exit(EXIT_FAILURE);
     }
 
     if(!SanityCheck()) {
-        Log->Write("ERROR:\t There are sanity errors in the geometry file");
+        Logging::Error("There are sanity errors in the geometry file");
         exit(EXIT_FAILURE);
     }
 
@@ -189,11 +191,11 @@ Room * Building::GetRoom(int index) const
 {
     //todo: obsolete since the check is done by .at()
     if(_rooms.count(index) == 0) {
-        Log->Write(
-            "ERROR: Wrong 'index' in CBuiling::GetRoom() Room ID: %d size: %d",
+        Logging::Error(fmt::format(
+            check_fmt("Wrong 'index' in CBuiling::GetRoom() Room ID: {} size: {}"),
             index,
-            _rooms.size());
-        Log->Write("\tControl your rooms ID and make sure they are in the order 0, 1, 2,.. ");
+            _rooms.size()));
+        Logging::Info("Control your rooms ID and make sure they are in the order 0, 1, 2,.. ");
         return nullptr;
     }
     //return _rooms[index];
@@ -212,7 +214,7 @@ void Building::AddRoom(Room * room)
 
 void Building::AddSurroundingRoom()
 {
-    Log->Write("INFO: \tAdding the room 'outside' ");
+    Logging::Info("Adding the room 'outside' ");
     // first look for the geometry boundaries
     double x_min = FLT_MAX;
     double x_max = -FLT_MAX;
@@ -283,7 +285,7 @@ void Building::AddSurroundingRoom()
 
 bool Building::InitGeometry()
 {
-    Log->Write("INFO: \tInit Geometry");
+    Logging::Info("Init Geometry");
     correct();
     for(auto && itr_room : _rooms) {
         for(auto && itr_subroom : itr_room.second->GetAllSubRooms()) {
@@ -377,7 +379,7 @@ bool Building::InitGeometry()
             }
         }
     }
-    Log->Write("INFO: \tInit Geometry successful!!!\n");
+    Logging::Info("Init Geometry successful!!!");
 
     return true;
 }
@@ -713,15 +715,15 @@ bool Building::InitInsideGoals()
         }
 
         if(!found) {
-            Log->Write(
-                "Warning: \t Goal %d seems to have no subroom and is not outside, please check "
-                "your input",
-                goal->GetId());
+            Logging::Warning(fmt::format(
+                check_fmt(
+                    "Goal {} seems to have no subroom and is not outside, please check your input"),
+                goal->GetId()));
         }
         found = false;
     }
 
-    Log->Write("INFO: \tInitInsideGoals successful!!!\n");
+    Logging::Info("InitInsideGoals successful!!!");
 
     return true;
 }
@@ -729,7 +731,7 @@ bool Building::InitInsideGoals()
 bool Building::correct() const
 {
     auto t_start = std::chrono::high_resolution_clock::now();
-    Log->Write("INFO:\tenter correct ...");
+    Logging::Info("Enter correct ...");
     bool removed      = false;
     bool removed_room = false;
     for(auto && room : this->GetAllRooms()) {
@@ -745,11 +747,9 @@ bool Building::correct() const
                                                         // after
                                                         // eliminating
                                                         // nasty exits
-#if DEBUG
-            std::cout << "\n"
-                      << KRED << "correct Room " << room.first << "  Subroom " << subroom.first
-                      << RESET << std::endl;
-#endif
+            Logging::Debug(
+                fmt::format(check_fmt("Correct Room {} SubRoom {}"), room.first, subroom.first));
+
             for(auto const & bigWall : walls) //self checking
             {
                 // std::cout << "BigWall: " << std::endl;
@@ -760,11 +760,12 @@ bool Building::correct() const
                 WallPieces = SplitWall(subroom.second, bigWall);
                 if(!WallPieces.empty())
                     removed = true;
-#if DEBUG
-                std::cout << "Wall pieces size : " << WallPieces.size() << std::endl;
+
+                Logging::Debug(fmt::format(check_fmt("Wall pieces size : {}"), WallPieces.size()));
+
                 for(auto w : WallPieces)
-                    w.WriteToErrorLog();
-#endif
+                    Logging::Debug(w.toString());
+
                 int ok = 0;
                 while(!ok) {
                     ok = 1; // ok ==1 means no new pieces are found
@@ -790,16 +791,15 @@ bool Building::correct() const
                             // std::cout << "BNow Wall peces size : " <<  WallPieces.size() << std::endl;
                         }
                     }
-#if DEBUG
-                    std::cout << "ok " << ok << std::endl;
-                    std::cout << "new while  Wall peces size : " << WallPieces.size() << std::endl;
-                    std::cout << "====" << std::endl;
 
-                    for(auto t : WallPieces) {
-                        std::cout << ">> Piece: " << std::endl;
-                        t.WriteToErrorLog();
+                    Logging::Debug(fmt::format(check_fmt("Ok: {}"), ok));
+                    Logging::Debug(fmt::format(
+                        check_fmt("New while  Wall pieces size: {}"), WallPieces.size()));
+
+                    for(const auto & t : WallPieces) {
+                        Logging::Debug(fmt::format(check_fmt("Piece: {}"), t.toString()));
                     }
-#endif
+
                     // getc(stdin);
                 } // while
                 // remove
@@ -812,13 +812,12 @@ bool Building::correct() const
                         end = std::remove(it + 1, end, *it);
                     }
                     WallPieces.erase(end, WallPieces.end());
-#if DEBUG
-                    std::cout << "..removing duplicates pieces..\n";
+
+                    Logging::Debug("Removing duplicates pieces.");
                     for(auto t : WallPieces) {
-                        std::cout << ">>>> Piece: " << std::endl;
-                        t.WriteToErrorLog();
+                        Logging::Debug(fmt::format(check_fmt("Piece: {}"), t.toString()));
                     }
-#endif
+
                     // remove big wall and add one wallpiece to walls
                     ReplaceBigWall(subroom.second, bigWall, WallPieces);
                 }
@@ -836,15 +835,17 @@ bool Building::correct() const
 
     auto t_end           = std::chrono::high_resolution_clock::now();
     double elapsedTimeMs = std::chrono::duration<double, std::milli>(t_end - t_start).count();
-    Log->Write("INFO:\tLeave geometry correct with success (%.3f s)", elapsedTimeMs);
+    Logging::Info(
+        fmt::format(check_fmt("Leave geometry correct with success ({:.3f}s)"), elapsedTimeMs));
     return true;
 }
 bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom> & subroom) const
 {
-#if DEBUG
-    std::cout << KRED << "\nEnter RemoveOverlappingDoors with subroom " << subroom->GetRoomID()
-              << "," << subroom->GetSubRoomID() << RESET << "\n";
-#endif
+    Logging::Debug(fmt::format(
+        check_fmt("Enter RemoveOverlappingDoors with SubRoom {}, {}"),
+        subroom->GetRoomID(),
+        subroom->GetSubRoomID()));
+
     bool removed               = false;               // did we remove anything?
     std::vector<Line> exits    = std::vector<Line>(); // transitions+crossings
     auto walls                 = subroom->GetAllWalls();
@@ -856,13 +857,14 @@ bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom> & subroom) 
     //collect all transitions
     for(auto && trans : subroom->GetAllTransitions())
         exits.push_back(*trans);
-#if DEBUG
-    std::cout << "subroom walls: \n";
-    for(auto w : subroom->GetAllWalls())
-        w.WriteToErrorLog();
-    std::cout << "---------------\n";
+
+    Logging::Debug("Subroom walls: ");
+    for(const auto & w : subroom->GetAllWalls()) {
+        Logging::Debug(fmt::format(check_fmt("Wall: {}"), w.toString()));
+    }
+
+
     // removing doors on walls
-#endif
     while(!walls.empty()) {
         auto wall = walls.back();
         walls.pop_back();
@@ -910,14 +912,11 @@ bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom> & subroom) 
         subroom->AddWall(wall);
     }
 
-#if DEBUG
-    std::cout << "\nnew Subroom:  " << std::endl;
-    for(auto w : subroom->GetAllWalls())
-        w.WriteToErrorLog(); // AddWall won't add existing walls
-
-    std::cout << KGRN << "\nLEAVE with removed=:   " << removed << RESET << std::endl;
-    getc(stdin);
-#endif
+    Logging::Debug("New Subroom:  ");
+    for(const auto & w : subroom->GetAllWalls()) {
+        Logging::Debug(fmt::format(check_fmt("Wall: {}"), w.toString()));
+    }
+    Logging::Debug(fmt::format(check_fmt("LEAVE with removed= {}"), removed));
 
     return removed;
 }
@@ -926,10 +925,10 @@ std::vector<Wall>
 Building::SplitWall(const std::shared_ptr<SubRoom> & subroom, const Wall & bigWall) const
 {
     std::vector<Wall> WallPieces;
-#if DEBUG
-    std::cout << subroom->GetSubRoomID() << "collect wall pieces with " << std::endl;
-    bigWall.WriteToErrorLog();
-#endif
+
+    Logging::Debug(fmt::format(check_fmt("{} collect wall pieces with "), subroom->GetSubRoomID()));
+    Logging::Debug(fmt::format(check_fmt("Wall {}"), bigWall.toString()));
+
     auto walls       = subroom->GetAllWalls();
     auto crossings   = subroom->GetAllCrossings();
     auto transitions = subroom->GetAllTransitions();
@@ -946,9 +945,8 @@ Building::SplitWall(const std::shared_ptr<SubRoom> & subroom, const Wall & bigWa
         walls_and_exits.push_back(wall);
 
     for(auto const & other : walls_and_exits) {
-#if DEBUG
-        std::cout << other.toString() << "\n";
-#endif
+        Logging::Debug(fmt::format(check_fmt("Other: {}"), other.toString()));
+
         if((bigWall == other) || (bigWall.ShareCommonPointWith(other)))
             continue;
         Point intersectionPoint;
@@ -956,16 +954,13 @@ Building::SplitWall(const std::shared_ptr<SubRoom> & subroom, const Wall & bigWa
         if(bigWall.IntersectionWith(other, intersectionPoint)) {
             if(intersectionPoint == bigWall.GetPoint1() || intersectionPoint == bigWall.GetPoint2())
                 continue;
-#if DEBUG
-            std::cout << "BIG\n";
-            std::cout << bigWall.GetPoint1()._x << " " << bigWall.GetPoint1()._y << "\n";
-            std::cout << bigWall.GetPoint2()._x << " " << bigWall.GetPoint2()._y << "\n";
-            std::cout << "intersectin with: " << std::endl;
-            std::cout << other.toString() << "\n";
-            std::cout << intersectionPoint._x << " " << intersectionPoint._y << "\n";
-            std::string s = intersectionPoint.toString();
-            std::cout << "\t >> Intersection at Point: " << s.c_str() << "\n";
-#endif
+
+            Logging::Debug(fmt::format(
+                check_fmt("BigWall: {}, Other: {}, Intersection Point: {}"),
+                bigWall.toString(),
+                other.toString(),
+                intersectionPoint.toString()));
+
             //Point NAN_p(J_NAN, J_NAN);
 
             if(std::isnan(intersectionPoint._x) || std::isnan(intersectionPoint._y))
@@ -996,32 +991,29 @@ bool Building::ReplaceBigWall(
     const Wall & bigWall,
     std::vector<Wall> & WallPieces) const
 {
-#if DEBUG
-    Log->Write(
-        "INFO Replacing big line in Room %d | Subroom %d with:",
+    Logging::Debug(fmt::format(
+        check_fmt("Replacing big line in Room {} | Subroom {} with: {}"),
         subroom->GetRoomID(),
-        subroom->GetSubRoomID());
-    bigWall.WriteToErrorLog();
+        subroom->GetSubRoomID(),
+        bigWall.toString()));
+
 
     // REMOVE BigLINE
-
-    std::cout << "\ns+ =" << subroom->GetAllWalls().size() << "\n";
-#endif
+    Logging::Debug(fmt::format(check_fmt("s+ ="), subroom->GetAllWalls().size()));
 
     bool res = subroom->RemoveWall(bigWall);
 
-#if DEBUG
-    std::cout << "s- =" << subroom->GetAllWalls().size() << "\n";
-#endif
+    Logging::Debug(fmt::format(check_fmt("s- ="), subroom->GetAllWalls().size()));
+
     if(!res) {
-        Log->Write("ERROR:  Correct fails. Could not remove wall: ");
-        bigWall.WriteToErrorLog();
+        Logging::Error(
+            fmt::format(check_fmt("Correct fails. Could not remove wall: {}"), bigWall.toString()));
         return false;
     }
     // ADD SOME LINE
     res = AddWallToSubroom(subroom, WallPieces);
     if(!res) {
-        Log->Write("ERROR:  Correct fails. Could not add new wall piece");
+        Logging::Error("Correct fails. Could not add new wall piece");
         return false;
     }
 
@@ -1085,26 +1077,22 @@ bool Building::AddWallToSubroom(
 
         if(count >= 2) {
             subroom->AddWall(w);
-#if DEBUG
-            Log->Write("INFO: Wall candidate: ");
-            w.WriteToErrorLog();
-#endif
+
+            Logging::Debug(fmt::format(check_fmt("Wall candidate: {}"), w.toString()));
+
             if(count > maxCount) {
                 maxCount    = count;
                 choosenWall = w;
             }
-#if DEBUG
-            std::cout << "\n -- count= " << count << ",  maxCount= " << maxCount << "\n";
-#endif
+
+            Logging::Debug(fmt::format(check_fmt("Count= {},  maxCount= {}"), count, maxCount));
         }
     } // WallPieces
     if(maxCount < 0)
         return false;
     else {
-#if DEBUG
-        std::cout << KGRN << "Choosen Wall: " << RESET << std::endl;
-        choosenWall.WriteToErrorLog();
-#endif
+        Logging::Debug(fmt::format(check_fmt("Choosen Wall: {}"), choosenWall.toString()));
+
         subroom->AddWall(choosenWall);
         return true;
     }
@@ -1112,12 +1100,12 @@ bool Building::AddWallToSubroom(
 
 void Building::WriteToErrorLog() const
 {
-    Log->Write("GEOMETRY: ");
+    Logging::Error("GEOMETRY: ");
     for(int i = 0; i < GetNumberOfRooms(); i++) {
         Room * r = GetRoom(i);
         r->WriteToErrorLog();
     }
-    Log->Write("ROUTING: ");
+    Logging::Error("ROUTING: ");
 
     for(std::map<int, Crossing *>::const_iterator iter = _crossings.begin();
         iter != _crossings.end();
@@ -1133,7 +1121,6 @@ void Building::WriteToErrorLog() const
         ++iter) {
         iter->second->WriteToErrorLog();
     }
-    Log->Write("\n");
 }
 
 Room * Building::GetRoom(std::string caption) const
@@ -1142,7 +1129,7 @@ Room * Building::GetRoom(std::string caption) const
         if(it.second->GetCaption() == caption)
             return it.second.get();
     }
-    Log->Write("ERROR: Room not found with caption " + caption);
+    Logging::Error(fmt::format(check_fmt("Room not found with caption {}"), caption));
     //return NULL;
     exit(EXIT_FAILURE);
 }
@@ -1153,12 +1140,9 @@ bool Building::AddCrossing(Crossing * line)
     int IDLine     = line->GetUniqueID();
     int IDCrossing = 1000 * IDRoom + IDLine;
     if(_crossings.count(IDCrossing) != 0) {
-        char tmp[CLENGTH];
-        sprintf(
-            tmp,
-            "ERROR: Duplicate index for crossing found [%d] in Routing::AddCrossing()",
-            IDCrossing);
-        Log->Write(tmp);
+        Logging::Error(fmt::format(
+            check_fmt("Duplicate index for crossing found [{}] in Routing::AddCrossing()"),
+            IDCrossing));
         exit(EXIT_FAILURE);
     }
     _crossings[IDCrossing] = line;
@@ -1180,12 +1164,9 @@ bool Building::RemoveTransition(Transition * line)
 bool Building::AddTransition(Transition * line)
 {
     if(_transitions.count(line->GetID()) != 0) {
-        char tmp[CLENGTH];
-        sprintf(
-            tmp,
-            "ERROR: Duplicate index for transition found [%d] in Routing::AddTransition()",
-            line->GetID());
-        Log->Write(tmp);
+        Logging::Error(fmt::format(
+            check_fmt("Duplicate index for transition found [{}] in Routing::AddTransition()"),
+            line->GetID()));
         exit(EXIT_FAILURE);
     }
     _transitions[line->GetID()] = line;
@@ -1199,14 +1180,15 @@ bool Building::AddHline(Hline * line)
         // check if the lines are identical
         Hline * ori = _hLines[line->GetID()];
         if(ori->operator==(*line)) {
-            Log->Write("INFO: \tSkipping identical hlines with ID [%d]", line->GetID());
+            Logging::Info(
+                fmt::format(check_fmt("Skipping identical hlines with ID [{}]"), line->GetID()));
             return false;
         } else {
-            Log->Write(
-                "ERROR: Duplicate index for hlines found [%d] in Routing::AddHline(). You have "
-                "[%d] hlines",
+            Logging::Error(fmt::format(
+                check_fmt("Duplicate index for hlines found [{}] in Routing::AddHline(). You have "
+                          "[{}] hlines"),
                 line->GetID(),
-                _hLines.size());
+                _hLines.size()));
             exit(EXIT_FAILURE);
         }
     }
@@ -1217,8 +1199,8 @@ bool Building::AddHline(Hline * line)
 bool Building::AddGoal(Goal * goal)
 {
     if(_goals.count(goal->GetId()) != 0) {
-        Log->Write(
-            "ERROR: Duplicate index for goal found [%d] in Routing::AddGoal()", goal->GetId());
+        Logging::Error(fmt::format(
+            check_fmt("Duplicate index for goal found [{}] in Routing::AddGoal()"), goal->GetId()));
         exit(EXIT_FAILURE);
     }
     _goals[goal->GetId()] = goal;
@@ -1230,7 +1212,7 @@ bool Building::AddGoal(Goal * goal)
 bool Building::AddTrainType(std::shared_ptr<TrainType> TT)
 {
     if(_trainTypes.count(TT->type) != 0) {
-        Log->Write("WARNING: Duplicate type for train found [%s]", TT->type.c_str());
+        Logging::Warning(fmt::format(check_fmt("Duplicate type for train found [{}]"), TT->type));
     }
     _trainTypes[TT->type] = TT;
     return true;
@@ -1239,7 +1221,8 @@ bool Building::AddTrainType(std::shared_ptr<TrainType> TT)
 bool Building::AddTrainTimeTable(std::shared_ptr<TrainTimeTable> TTT)
 {
     if(_trainTimeTables.count(TTT->id) != 0) {
-        Log->Write("WARNING: Duplicate id for train time table found [%d]", TTT->id);
+        Logging::Warning(
+            fmt::format(check_fmt("Duplicate id for train time table found [{}]"), TTT->id));
         exit(EXIT_FAILURE);
     }
     _trainTimeTables[TTT->id] = TTT;
@@ -1279,7 +1262,7 @@ const std::map<int, std::shared_ptr<Platform>> & Building::GetPlatforms() const
 bool Building::AddPlatform(std::shared_ptr<Platform> P)
 {
     if(_platforms.count(P->id) != 0) {
-        Log->Write("WARNING: Duplicate platform found [%d]", P->id);
+        Logging::Warning(fmt::format(check_fmt("Duplicate platform found [{}]"), P->id));
     }
     _platforms[P->id] = P;
     return true;
@@ -1299,7 +1282,7 @@ Transition * Building::GetTransition(std::string caption) const
             return itr->second;
     }
 
-    Log->Write("WARNING: No Transition with Caption: " + caption);
+    Logging::Warning(fmt::format(check_fmt("No Transition with Caption: {}"), caption));
     exit(EXIT_FAILURE);
 }
 
@@ -1311,11 +1294,11 @@ Transition * Building::GetTransition(int ID) const //ar.graf: added const 2015-1
         if(ID == -1)
             return nullptr;
         else {
-            Log->Write(
-                "ERROR: I could not find any transition with the 'ID' [%d]. You have defined [%d] "
-                "transitions",
+            Logging::Error(fmt::format(
+                check_fmt("I could not find any transition with the 'ID' [{}]. You have defined "
+                          "[{}] transitions"),
                 ID,
-                _transitions.size());
+                _transitions.size()));
             exit(EXIT_FAILURE);
         }
     }
@@ -1329,11 +1312,11 @@ Crossing * Building::GetCrossing(int ID) const
         if(ID == -1)
             return nullptr;
         else {
-            Log->Write(
-                "ERROR: I could not find any crossing with the 'ID' [%d]. You have defined [%d] "
-                "transitions",
+            Logging::Error(fmt::format(
+                check_fmt("I could not find any crossing with the 'ID' [{}]. You have defined [{}] "
+                          "transitions"),
                 ID,
-                _crossings.size());
+                _crossings.size()));
             exit(EXIT_FAILURE);
         }
     }
@@ -1347,10 +1330,11 @@ Goal * Building::GetFinalGoal(int ID) const
         if(ID == -1)
             return nullptr;
         else {
-            Log->Write(
-                "ERROR: I could not find any goal with the 'ID' [%d]. You have defined [%d] goals",
+            Logging::Error(fmt::format(
+                check_fmt(
+                    "I could not find any goal with the 'ID' [{}]. You have defined [{}] goals"),
                 ID,
-                _goals.size());
+                _goals.size()));
             exit(EXIT_FAILURE);
         }
     }
@@ -1375,7 +1359,7 @@ Crossing * Building::GetTransOrCrossByName(std::string caption) const
         }
     }
 
-    Log->Write("WARNING: No Transition or Crossing with Caption: " + caption);
+    Logging::Warning(fmt::format(check_fmt("No Transition or Crossing with Caption: {}"), caption));
     return nullptr;
 }
 
@@ -1404,7 +1388,8 @@ Hline * Building::GetTransOrCrossByUID(int id) const
                 return itr->second;
         }
     }
-    Log->Write("ERROR: No Transition or Crossing or hline with ID %d: ", id);
+    Logging::Error(
+        fmt::format(check_fmt("No Transition, Crossing or hline with ID {} found."), id));
     return nullptr;
 }
 
@@ -1416,7 +1401,7 @@ SubRoom * Building::GetSubRoomByUID(int uid) const
                 return itr_subroom.second.get();
         }
     }
-    Log->Write("ERROR:\t No subroom exits with the unique id %d", uid);
+    Logging::Error(fmt::format(check_fmt("No subroom exits with the unique id {}"), uid));
     return nullptr;
 }
 
@@ -1459,14 +1444,14 @@ bool Building::IsVisible(
 
 bool Building::Triangulate()
 {
-    Log->Write("INFO:\tTriangulating the geometry");
+    Logging::Info("Triangulating the geometry.");
     for(auto && itr_room : _rooms) {
         for(auto && itr_subroom : itr_room.second->GetAllSubRooms()) {
             if(!itr_subroom.second->Triangulate())
                 return false;
         }
     }
-    Log->Write("INFO:\tDone...");
+    Logging::Info("Done.");
     return true;
 }
 
@@ -1498,8 +1483,8 @@ std::vector<Point> Building::GetBoundaryVertices() const
 
 bool Building::SanityCheck()
 {
-    Log->Write("INFO: \tChecking the geometry for artifacts: (Ignore Warnings, if ff_[...] router "
-               "is used!)");
+    Logging::Info(
+        "Checking the geometry for artifacts: (Ignore Warnings, if ff_[...] router is used!)");
     bool status = true;
 
     for(auto && itr_room : _rooms) {
@@ -1509,7 +1494,7 @@ bool Building::SanityCheck()
         }
     }
 
-    Log->Write("INFO: \t...Done!!!\n");
+    Logging::Info("...Done.");
     return status;
 }
 
@@ -1564,7 +1549,7 @@ void Building::InitGrid()
     //no algorithms
     // the domain is made of a single cell
     if(cellSize == -1) {
-        Log->Write("INFO: \tBrute Force will be used for neighborhoods query");
+        Logging::Info("Brute Force will be used for neighborhoods query");
         if((x_max - x_min) < (y_max - y_min)) {
             cellSize = (y_max - y_min);
         } else {
@@ -1572,7 +1557,8 @@ void Building::InitGrid()
         }
 
     } else {
-        Log->Write("INFO: \tInitializing the grid with cell size: %f ", cellSize);
+        Logging::Info(
+            fmt::format(check_fmt("Initializing the grid with cell size: {}."), cellSize));
     }
 
     //TODO: the number of pedestrian should be calculated using the capacity of the sources
@@ -1581,7 +1567,7 @@ void Building::InitGrid()
     _linkedCellGrid = new LCGrid(boundaries, cellSize, Pedestrian::GetAgentsCreated());
     _linkedCellGrid->ShallowCopy(_allPedestrians);
 
-    Log->Write("INFO: \tDone with Initializing the grid ");
+    Logging::Info("Done with Initializing the grid");
 }
 
 void Building::DeletePedestrian(Pedestrian *& ped)
@@ -1589,7 +1575,7 @@ void Building::DeletePedestrian(Pedestrian *& ped)
     std::vector<Pedestrian *>::iterator it;
     it = find(_allPedestrians.begin(), _allPedestrians.end(), ped);
     if(it == _allPedestrians.end()) {
-        Log->Write("\tERROR: \tPed not found with ID %d ", ped->GetID());
+        Logging::Error(fmt::format(check_fmt("Pedestrian with ID {} not found."), ped->GetID()));
         // exit(EXIT_FAILURE);
         return;
     } else {
@@ -1660,7 +1646,7 @@ void Building::InitSavePedPathway(const std::string & filename)
     _savePathway = true;
 
     if(_pathWayStream.is_open()) {
-        Log->Write("#INFO:\tsaving pedestrian paths to [ " + filename + " ]");
+        Logging::Info(fmt::format(check_fmt("Saving pedestrian paths to [{}]"), filename));
         _pathWayStream << "##pedestrian ways" << std::endl;
         _pathWayStream << "#nomenclature roomid  caption" << std::endl;
         //              for (unsigned int r=0;r< pRooms.size();r++){
@@ -1676,8 +1662,8 @@ void Building::InitSavePedPathway(const std::string & filename)
         //
         _pathWayStream << "#data room exit_id" << std::endl;
     } else {
-        Log->Write("#INFO:\t Unable to open [ " + filename + " ]");
-        Log->Write("#INFO:\t saving to stdout");
+        Logging::Info(fmt::format(check_fmt("Unable to open [{}]"), filename));
+        Logging::Info("Writing to stdout instead.");
     }
 }
 
@@ -1840,9 +1826,10 @@ bool Building::SaveGeometry(const fs::path & filename) const
     std::ofstream geofile(filename.string());
     if(geofile.is_open()) {
         geofile << geometry.str();
-        Log->Write("INFO:\tfile saved to %s", filename.c_str());
+        Logging::Info(fmt::format(check_fmt("File saved to {}"), filename.string()));
     } else {
-        Log->Write("ERROR:\tunable to save the geometry to %s", filename.c_str());
+        Logging::Error(
+            fmt::format(check_fmt("Unable to save the geometry to {}."), filename.string()));
         return false;
     }
 
