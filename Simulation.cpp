@@ -142,7 +142,10 @@ bool Simulation::InitArgs()
         }
 
         const fs::path & trajPath(_config->GetTrajectoriesFile());
-        fs::create_directories(trajPath.parent_path());
+        const fs::path trajParentPath = trajPath.parent_path();
+        if(!trajParentPath.empty()) {
+            fs::create_directories(trajParentPath);
+        }
         auto file = std::make_shared<FileHandler>(trajPath.c_str());
         _iod->SetOutputHandler(file);
         _iod->SetOptionalOutput(_config->GetOptionalOutputOptions());
