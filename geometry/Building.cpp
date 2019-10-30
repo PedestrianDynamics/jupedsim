@@ -971,18 +971,16 @@ Building::SplitWall(const std::shared_ptr<SubRoom> & subroom, const Wall & bigWa
 
             WallPieces.push_back(NewWall);
             WallPieces.push_back(NewWall2);
-#if DEBUG
-            std::cout << "Add newwall: " << std::endl;
-            NewWall.WriteToErrorLog();
-            NewWall2.WriteToErrorLog();
-#endif
+
+            Logging::Debug(fmt::format(
+                check_fmt("Added two new wall2: {} and {}"),
+                NewWall.toString(),
+                NewWall2.toString()));
         }
     } //other walls
-#if DEBUG
-    std::cout << "size " << WallPieces.size() << "\n";
-    std::cout << "Leave collect\n--------" << std::endl;
-#endif
-    // getc(stdin);
+
+    Logging::Debug(
+        fmt::format(check_fmt("Leaving collect, WallPieces size: {}"), WallPieces.size()));
 
     return WallPieces;
 }
@@ -1037,13 +1035,14 @@ const fs::path & Building::GetGeometryFilename() const
 bool Building::AddWallToSubroom(
     const std::shared_ptr<SubRoom> & subroom,
     std::vector<Wall> WallPieces) const
-{ // CHOOSE WHICH PIECE SHOULD BE ADDED TO SUBROOM
-// this is a challngig function
-#if DEBUG
-    std::cout << "\n-----\nEnter add_wall with:\n";
+{
+    // CHOOSE WHICH PIECE SHOULD BE ADDED TO SUBROOM
+    // this is a challngig function
+
+    Logging::Debug("Entering AddWallToSubroom with following walls:");
     for(const auto & w : WallPieces)
-        w.WriteToErrorLog();
-#endif
+        Logging::Debug(fmt::format(check_fmt("Wall: {}"), w.toString()));
+
     auto walls   = subroom->GetAllWalls();
     int maxCount = -1;
     Wall choosenWall;
