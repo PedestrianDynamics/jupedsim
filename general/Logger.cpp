@@ -34,7 +34,8 @@ void Error(std::string_view msg)
     spdlog::error(msg);
 }
 
-void SetLogLevel(Level level) {
+void SetLogLevel(Level level)
+{
     switch(level) {
         case Level::Debug:
             spdlog::set_level(spdlog::level::debug);

@@ -4,14 +4,7 @@
 
 namespace Logging
 {
-
-enum class Level {
-    Debug,
-    Info,
-    Warning,
-    Error,
-    Off
-};
+enum class Level { Debug, Info, Warning, Error, Off };
 
 void Setup();
 void Teardown();
