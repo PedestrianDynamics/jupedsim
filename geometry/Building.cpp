@@ -1097,31 +1097,6 @@ bool Building::AddWallToSubroom(
     }
 }
 
-void Building::WriteToErrorLog() const
-{
-    Logging::Error("GEOMETRY: ");
-    for(int i = 0; i < GetNumberOfRooms(); i++) {
-        Room * r = GetRoom(i);
-        r->WriteToErrorLog();
-    }
-    Logging::Error("ROUTING: ");
-
-    for(std::map<int, Crossing *>::const_iterator iter = _crossings.begin();
-        iter != _crossings.end();
-        ++iter) {
-        iter->second->WriteToErrorLog();
-    }
-    for(std::map<int, Transition *>::const_iterator iter = _transitions.begin();
-        iter != _transitions.end();
-        ++iter) {
-        iter->second->WriteToErrorLog();
-    }
-    for(std::map<int, Hline *>::const_iterator iter = _hLines.begin(); iter != _hLines.end();
-        ++iter) {
-        iter->second->WriteToErrorLog();
-    }
-}
-
 Room * Building::GetRoom(std::string caption) const
 {
     for(const auto & it : _rooms) {

@@ -116,11 +116,6 @@ public:
     virtual bool IsInRoom(int roomID) const;
 
     /**
-      * Debug output
-      */
-    virtual void WriteToErrorLog() const;
-
-    /**
       * @return a nicely formatted string representation of the object
       */
     virtual std::string GetDescription() const;
