@@ -48,13 +48,6 @@ PedDistributor::PedDistributor(const Configuration * configuration) : _configura
     _start_dis_sub     = std::vector<std::shared_ptr<StartDistribution>>();
     _start_dis_sources = std::vector<std::shared_ptr<AgentsSource>>();
     PedDistributionLoader * parser;
-
-#ifdef _JPS_AS_A_SERVICE
-    if(_configuration->GetRunAsService()) {
-        parser = new PedDistributionFromProtobufLoader(_configuration);
-
-    } else
-#endif
     {
         parser = new PedDistributionParser(_configuration);
     }

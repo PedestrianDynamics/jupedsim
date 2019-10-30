@@ -121,15 +121,13 @@ static fs::path getGoalFileName(const fs::path & projectFile)
         return ret;
     }
     TiXmlNode * xRootNode = doc.RootElement();
-    if(!xRootNode->FirstChild("routing")) {
-        return ret;
-    }
-    //load goals and routes
-    TiXmlNode * xGoalsNode     = xRootNode->FirstChild("routing")->FirstChild("goals");
-    TiXmlNode * xGoalsNodeFile = xGoalsNode->FirstChild("file");
-    if(xGoalsNodeFile) {
-        ret = xGoalsNodeFile->FirstChild()->ValueStr();
-        Logging::Info(fmt::format("goal file <{}>", ret.string()));
+    if(auto routingNode = xRootNode->FirstChild("routing")) {
+        if(auto goalsNode = routingNode->FirstChild("goals")) {
+            if(auto fileNode = goalsNode->FirstChild("file")) {
+                ret = fileNode->ValueStr();
+                Logging::Info(fmt::format("goal file <{}>", ret.string()));
+            }
+        }
     }
     return ret;
 }

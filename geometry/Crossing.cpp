@@ -27,6 +27,8 @@
 #include "Crossing.h"
 
 #include "SubRoom.h"
+#include "general/Format.h"
+#include "general/Logger.h"
 
 
 Crossing::Crossing()
@@ -111,12 +113,12 @@ SubRoom * Crossing::GetOtherSubRoom(int roomID, int subroomID) const
     else if(_subRoom2->GetSubRoomID() == subroomID)
         return _subRoom1;
     else {
-        Log->Write(
-            "WARMING: \tCrossing::GetOtherSubRoom No exit found "
-            "on the other side\n ID=%hd, roomID=%hd, subroomID=%hd\n",
+        Logging::Warning(fmt::format(
+            check_fmt("Crossing::GetOtherSubroom No exit found on the other side ID={}, roomID={}, "
+                      "subroomID={}"),
             GetID(),
             roomID,
-            subroomID);
+            subroomID));
         return nullptr;
     }
 }
@@ -125,24 +127,7 @@ SubRoom * Crossing::GetOtherSubRoom(int roomID, int subroomID) const
 // Ausgabe
 void Crossing::WriteToErrorLog() const
 {
-    std::string s;
-    char tmp[CLENGTH];
-    sprintf(
-        tmp,
-        "\t\tCROSS: %d (%f, %f) -- (%f, %f)\n",
-        GetID(),
-        GetPoint1()._x,
-        GetPoint1()._y,
-        GetPoint2()._x,
-        GetPoint2()._y);
-    s.append(tmp);
-    sprintf(
-        tmp,
-        "\t\t\t\tSubRoom: %d <-> SubRoom: %d\n",
-        GetSubRoom1()->GetSubRoomID(),
-        GetSubRoom2()->GetSubRoomID());
-    s.append(tmp);
-    Log->Write(s);
+    Logging::Debug(fmt::format(check_fmt("{}"), *this));
 }
 
 // TraVisTo Ausgabe
@@ -225,7 +210,7 @@ void Crossing::ResetDoorUsage()
     if((_outflowRate >= std::numeric_limits<double>::max())) {
         if(_maxDoorUsage < std::numeric_limits<double>::max()) {
             Open();
-            Log->Write("INFO:\tReopening door %d ", _id);
+            Logging::Info(fmt::format(check_fmt("Reopening door {}"), _id));
         }
     }
 }
@@ -313,15 +298,15 @@ bool Crossing::RegulateFlow(double time)
             _closingTime = number / _outflowRate - T; //[1]
                                                       //               this->Close();
             this->TempClose();
-            Log->Write(
-                "INFO:\tClosing door %d. DoorUsage = %d (max = %d). Flow = %.2f (max =  %.2f) "
-                "Time=%.2f",
+            Logging::Info(fmt::format(
+                check_fmt(
+                    "Closing door {} DoorUsage={} (max={}) Flow={:.2f} (max={:.2f}) Time={:.2f}"),
                 GetID(),
                 GetDoorUsage(),
                 GetMaxDoorUsage(),
                 flow,
                 _outflowRate,
-                time);
+                time));
             change = true;
         }
     }
@@ -329,16 +314,14 @@ bool Crossing::RegulateFlow(double time)
     // close the door is mdu is reached
     if(_maxDoorUsage != std::numeric_limits<double>::max()) {
         if(_doorUsage >= _maxDoorUsage) {
-            Log->Write(
-                "INFO:\tClosing door %d. DoorUsage = %d (>= %d). Time=%.2f",
+            Logging::Info(fmt::format(
+                check_fmt("Closing door {} DoorUsage={} (>={}) Time={:.2f}"),
                 GetID(),
                 GetDoorUsage(),
                 GetMaxDoorUsage(),
-                time);
-            //               this->Close();
+                time));
             this->TempClose();
             change = true;
-            //          _temporaryClosed = false;
         }
     }
 
@@ -404,3 +387,30 @@ std::string Crossing::toString() const
     }
     return tmp.str();
 }
+
+namespace fmt
+{
+template <>
+struct formatter<Crossing> {
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext & ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const Crossing & cross, FormatContext & ctx)
+    {
+        return format_to(
+            ctx.out(),
+            "CROSS: {} ({}, {}) -- ({}, {}) -- Subroom {} <--> Subroom {}",
+            cross.GetID(),
+            cross.GetPoint1()._x,
+            cross.GetPoint1()._y,
+            cross.GetPoint2()._x,
+            cross.GetPoint2()._y,
+            cross.GetSubRoom1()->GetSubRoomID(),
+            cross.GetSubRoom2()->GetSubRoomID());
+    }
+};
+} // namespace fmt

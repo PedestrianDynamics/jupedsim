@@ -29,10 +29,6 @@
 #include "randomnumbergenerator.h"
 #include "routing/RoutingEngine.h"
 
-#ifdef _JPS_AS_A_SERVICE
-#include "hybrid/HybridSimulationManager.h"
-#endif
-
 #include <cstdlib>
 #include <memory>
 #include <set>
@@ -381,36 +377,6 @@ public:
 
     std::set<OptionalOutput> GetOptionalOutputOptions() { return _optionalOutput; };
 
-#ifdef _JPS_AS_A_SERVICE
-
-    const bool GetRunAsService() const { return _runAsService; };
-
-    void SetRunAsService(bool runAsService) { _runAsService = runAsService; };
-
-    const int GetServicePort() const { return _servicePort; };
-
-    void SetServicePort(int servicePort) { _servicePort = servicePort; };
-
-    std::shared_ptr<HybridSimulationManager> GetHybridSimulationManager()
-    {
-        return _hybridSimulationManager;
-    };
-
-    void
-    SetHybridSimulationManager(std::shared_ptr<HybridSimulationManager> hybridSimulationManager)
-    {
-        _hybridSimulationManager = hybridSimulationManager;
-    };
-
-    const hybridsim::Scenario * GetScenario() const { return _scenario; };
-
-    void SetScenario(const hybridsim::Scenario * scenario) { _scenario = scenario; };
-
-    const bool GetDumpScenario() const { return _dumpScenario; };
-
-    void SetDumpScenario(bool dumpScenario) { _dumpScenario = dumpScenario; };
-#endif
-
 private:
     std::shared_ptr<WalkingSpeed> _walkingSpeed;
     std::shared_ptr<ToxicityAnalysis> _ToxicityAnalysis;
@@ -478,11 +444,4 @@ private:
     std::map<int, std::shared_ptr<AgentsParameters>> _agentsParameters;
 
     std::set<OptionalOutput> _optionalOutput;
-#ifdef _JPS_AS_A_SERVICE
-    bool _runAsService;
-    int _servicePort;
-    std::shared_ptr<HybridSimulationManager> _hybridSimulationManager;
-    const hybridsim::Scenario * _scenario;
-    bool _dumpScenario;
-#endif
 };

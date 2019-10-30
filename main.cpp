@@ -44,23 +44,8 @@
 #include <thread>
 #include <time.h>
 
-
-#ifdef _JPS_AS_A_SERVICE
-#include "hybrid/HybridSimulationManager.h"
-#endif
-
 int main(int argc, char ** argv)
 {
-    Logging::Guard guard;
-    Logging::Info("Starting JuPedSim - JPScore");
-    Logging::Info(fmt::format(check_fmt("Version {}"), JPSCORE_VERSION));
-    Logging::Info(fmt::format(check_fmt("Commit id {}"), GIT_COMMIT_HASH));
-    Logging::Info(fmt::format(check_fmt("Commit date {}"), GIT_COMMIT_DATE));
-    Logging::Info(fmt::format(check_fmt("Build from branch {}"), GIT_BRANCH));
-    Logging::Info(fmt::format(check_fmt("Build with {}({})"), compiler_id, compiler_version));
-
-    // gathering some statistics about the runtime
-    time_t starttime, endtime;
 
     // default logger
     Log = new STDIOHandler();
@@ -70,27 +55,25 @@ int main(int argc, char ** argv)
        execution == ArgumentParser::Execution::ABORT) {
         return return_code;
     }
+    Logging::Guard guard;
+    Logging::SetLogLevel(a.LogLevel());
+    Logging::Info("Starting JuPedSim - JPScore");
+    Logging::Info(fmt::format(check_fmt("Version {}"), JPSCORE_VERSION));
+    Logging::Info(fmt::format(check_fmt("Commit id {}"), GIT_COMMIT_HASH));
+    Logging::Info(fmt::format(check_fmt("Commit date {}"), GIT_COMMIT_DATE));
+    Logging::Info(fmt::format(check_fmt("Build from branch {}"), GIT_BRANCH));
+    Logging::Info(fmt::format(check_fmt("Build with {}({})"), compiler_id, compiler_version));
 
     Configuration config;
-
     // TODO remove me in refactoring
     IniFileParser iniFileParser(&config);
     if(!iniFileParser.Parse(a.IniFilePath())) {
         return EXIT_FAILURE;
     }
 
-#ifdef _JPS_AS_A_SERVICE
-    if(config.GetRunAsService()) {
-        std::shared_ptr<HybridSimulationManager> hybridSimulationManager =
-            std::shared_ptr<HybridSimulationManager>(new HybridSimulationManager(configuration));
-        config.SetHybridSimulationManager(hybridSimulationManager);
-        std::thread t = std::thread(&HybridSimulationManager::Start, hybridSimulationManager);
-        hybridSimulationManager->WaitForScenarioLoaded();
-        t.detach();
-    }
-#endif
     // create and initialize the simulation engine
     // Simulation
+    time_t starttime, endtime;
     time(&starttime);
 
     Simulation sim(&config);
@@ -100,13 +83,6 @@ int main(int argc, char ** argv)
         double evacTime = 0;
         Logging::Info(
             fmt::format(check_fmt("Simulation started with {} pedestrians"), sim.GetPedsNumber()));
-
-#ifdef _JPS_AS_A_SERVICE
-
-        if(config.GetRunAsService()) {
-            config.GetHybridSimulationManager()->Run(sim);
-        } else
-#endif
             if(sim.GetAgentSrcManager().GetMaxAgentNumber()) {
             // Start the thread for managing the sources of agents if any
             // std::thread t1(sim.GetAgentSrcManager());
