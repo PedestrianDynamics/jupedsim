@@ -48,7 +48,6 @@ Method_D::Method_D()
      _grid_size_X = 0.10;
      _grid_size_Y = 0.10;
      _fps=16;
-     _outputVoronoiCellData = false;
      _getProfile = false;
      _geoMinX = 0;
      _geoMinY = 0;
@@ -61,7 +60,6 @@ Method_D::Method_D()
      _calcIndividualFD = false;
      _fVoronoiRhoV = nullptr;
      _areaForMethod_D = nullptr;
-     _plotVoronoiCellData=false;
      _isOneDimensional=false;
      _startFrame =-1;
      _stopFrame = -1;
@@ -202,10 +200,6 @@ bool Method_D::Process (const PedData& peddata,const fs::path& scriptsLocation, 
                          if(_getProfile)
                          { //	field analysis
                               GetProfiles(str_frid, polygons, VInFrame); // TODO polygons_id
-                         }
-                         if(_outputVoronoiCellData)
-                         { // output the Voronoi polygons of a frame
-                              OutputVoroGraph(str_frid, polygons_id, NumPeds, VInFrame);
                          }
                     }
                     else
@@ -499,40 +493,6 @@ void Method_D::OutputVoroGraph(const string & frameId,  std::vector<std::pair<po
           exit(EXIT_FAILURE);
      }
 
-     /*string point=voronoiLocation+"/points"+_trajName+"_id_"+_measureAreaId+"_"+frameId+".dat";
-       ofstream points (point.c_str());
-       if( points.is_open())
-       {
-       for(int pts=0; pts<numPedsInFrame; pts++)
-       {
-       points << XInFrame[pts]*CMtoM << "\t" << YInFrame[pts]*CMtoM << endl;
-       }
-       }
-       else
-       {
-       Log->Write("ERROR:\tcannot create the file <%s>",point.c_str());
-       exit(EXIT_FAILURE);
-       }*/
-
-     if(_plotVoronoiCellData)
-     {
-          //@todo: use fs::path
-          string parameters_rho=" " + _scriptsLocation.string()+"/_Plot_cell_rho.py -f \""+ voroLocPath.string() + "\" -n "+ _trajName.string()+"_id_"+_measureAreaId+"_"+frameId+
-               " -g "+_geometryFileName.string()+" -p "+_trajectoryPath.string();
-          string parameters_v=" " + _scriptsLocation.string()+"/_Plot_cell_v.py -f \""+ voroLocPath.string() + "\" -n "+ _trajName.string() + "_id_"+_measureAreaId+"_"+frameId+
-               " -g "+_geometryFileName.string()+" -p "+_trajectoryPath.string();
-
-          if(_plotVoronoiIndex)
-               parameters_rho += " -i";
-
-          Log->Write("INFO:\t%s",parameters_rho.c_str());
-          Log->Write("INFO:\tPlotting Voronoi Cell at the frame <%s>",frameId.c_str());
-          parameters_rho = PYTHON + parameters_rho;
-          parameters_v = PYTHON + parameters_v;
-          system(parameters_rho.c_str());
-          system(parameters_v.c_str());
-     }
-     //points.close();
      polys.close();
      velo.close();
 }
@@ -661,20 +621,6 @@ void Method_D::SetGridSize(double x, double y)
 void Method_D::SetCalculateProfiles(bool calcProfile)
 {
      _getProfile =calcProfile;
-}
-
-void Method_D::SetOutputVoronoiCellData(bool outputCellData)
-{
-     _outputVoronoiCellData = outputCellData;
-}
-
-void Method_D::SetPlotVoronoiGraph(bool plotVoronoiGraph)
-{
-     _plotVoronoiCellData = plotVoronoiGraph;
-}
-void Method_D::SetPlotVoronoiIndex(bool plotVoronoiIndex)
-{
-     _plotVoronoiIndex = plotVoronoiIndex;
 }
 
 void Method_D::SetMeasurementArea (MeasurementArea_B* area)

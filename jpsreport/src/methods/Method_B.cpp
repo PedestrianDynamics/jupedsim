@@ -34,8 +34,6 @@ using std::vector;
 
 Method_B::Method_B()
 {
-     _xCor(0,0);
-     _yCor(0,0);
      _tIn = nullptr;
      _tOut = nullptr;
      _entrancePoint = {};
@@ -44,7 +42,6 @@ Method_B::Method_B()
      _fps = 10;
      _NumPeds =0;
      _areaForMethod_B = nullptr;
-     _plotFundamentalDiagram = false;
 }
 
 Method_B::~Method_B()
