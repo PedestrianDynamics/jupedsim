@@ -27,6 +27,8 @@
 #include "Line.h"
 
 #include "Wall.h"
+#include "general/Format.h"
+#include "general/Logger.h"
 #include "general/Macros.h"
 #include "math/Mathematics.h"
 
@@ -156,7 +158,7 @@ Point Line::NormalVec() const
         /* Normieren */
         norm = sqrt(nx * nx + ny * ny);
         if(fabs(norm) < J_EPS) {
-            Log->Write("ERROR: \tLine::NormalVec() norm==0\n");
+            Logging::Error("Line::NormalVec() norm==0");
             exit(0);
         }
         nx /= norm;
@@ -312,12 +314,10 @@ bool Line::Overlapp(const Line & l) const
     Point vecDC = _point1 - _point2;
     if(fabs(vecAB.Determinant(vecDC)) < J_EPS) {
         if(IsInLineSegment(l.GetPoint1()) && !HasEndPoint(l.GetPoint1())) {
-            //Log->Write("ERROR: 1. Overlapping walls %s and %s ", toString().c_str(),l.toString().c_str());
             return true;
         }
 
         if(IsInLineSegment(l.GetPoint2()) && !HasEndPoint(l.GetPoint2())) {
-            //Log->Write("ERROR: 2. Overlapping walls %s and %s ", toString().c_str(),l.toString().c_str());
             return true;
         }
     }
@@ -482,16 +482,6 @@ bool Line::HasEndPoint(const Point & point) const
 
 bool Line::NearlyHasEndPoint(const Point & point) const
 {
-    // std::cout << _point1.toString() << "\n";
-    // std::cout << _point2.toString() << "\n";
-    // std::cout << point.toString() << "\n";
-
-
-    // std::cout << "--> " << (_point1-point).Norm() << "\n";
-    // std::cout << "--> " << (_point2-point).Norm() << "\n";
-    // std::cout << "<-- " << J_EPS_DIST << "\n";
-
-
     if((_point1 - point).Norm() <= J_EPS_DIST)
         return true;
     return ((_point2 - point).Norm() <= J_EPS_DIST);
@@ -524,19 +514,13 @@ bool Line::IntersectionWithCircle(const Point & centre, double radius /*cm for p
     delta = b * b - 4 * a * c;
 
     if(p1 == p2) {
-        //Log->Write("isLineCrossingCircle: Your line is a point");
         return false;
     }
     if(delta < 0.0) {
-        char tmp[CLENGTH];
-        sprintf(
-            tmp,
-            "there is a bug in 'isLineCrossingCircle', delta(%f) can t be <0 at this point.",
-            delta);
-        Log->Write(tmp);
-        Log->Write("press ENTER");
-        return false; //fixme
-                      //getc(stdin);
+        Logging::Error(fmt::format(
+            check_fmt("Line::IntersectionWithCircle does not support delta < 0. delta = {}"),
+            delta));
+        return false;
     }
 
     double t1 = (-b + sqrt(delta)) / (2 * a);
@@ -595,13 +579,14 @@ double Line::GetDistanceToIntersectionPoint(const Line & l) const
     if(!IsInLineSegment(PointF)) //is point on the line?
         return std::numeric_limits<double>::infinity();
     double dist = (_point1 - PointF).NormSquare();
-#if DEBUG
-    printf("Enter GetIntersection\n");
-    cout << "\t" << l.toString() << " intersects with " << toString() << endl;
-    cout << "\t at point " << PointF.toString() << endl;
-    cout << "\t\t --> distance is " << sqrt(dist) << "... return (squared) " << dist << endl;
-    printf("Leave GetIntersection\n");
-#endif
+
+    Logging::Debug(fmt::format(
+        check_fmt(
+            "GetDistanceToIntersectionPoint: {} intersects with {} in point {} with distance {}"),
+        l.toString(),
+        toString(),
+        PointF.toString(),
+        sqrt(dist)));
 
     return dist;
 }

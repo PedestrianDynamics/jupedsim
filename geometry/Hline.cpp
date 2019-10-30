@@ -98,24 +98,6 @@ bool Hline::IsInRoom(int roomID) const
     return _room1->GetID() == roomID;
 }
 
-void Hline::WriteToErrorLog() const
-{
-    std::string s;
-    char tmp[CLENGTH];
-    sprintf(
-        tmp,
-        "\t\tHline: %d (%f, %f) -- (%f, %f)\n",
-        GetID(),
-        GetPoint1()._x,
-        GetPoint1()._y,
-        GetPoint2()._x,
-        GetPoint2()._y);
-    s.append(tmp);
-    sprintf(tmp, "\t\t\t\tRoom: %d <-> SubRoom: %d\n", _room1->GetID(), _subRoom1->GetSubRoomID());
-    s.append(tmp);
-    Log->Write(s);
-}
-
 // TraVisTo Ausgabe
 std::string Hline::GetDescription() const
 {
