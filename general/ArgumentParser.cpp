@@ -35,18 +35,15 @@ const fs::path & ArgumentParser::IniFilePath() const
     return iniFilePath;
 }
 
+Logging::Level ArgumentParser::LogLevel() const
+{
+    return logLevel;
+}
+
 std::tuple<ArgumentParser::Execution, int> ArgumentParser::Parse(int argc, char * argv[])
 {
     try {
         app.parse(argc, argv);
-        // Silence warnigns about iniFilePathOpt declared as member but never
-        // used. iniFilePathOpt is a member to keep the declaration of all
-        // options in the header file. If there was no iniFilePathOpt member the
-        // add_option(...) call would need to be done the constructor.
-        (void) iniFilePathOpt;
-        if(auto msg = CLI::ExistingFile(iniFilePath.string()); !msg.empty()) {
-            throw CLI::ValidationError(msg);
-        }
     } catch(const CLI::ParseError & e) {
         return {Execution::ABORT, app.exit(e)};
     }

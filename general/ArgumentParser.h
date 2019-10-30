@@ -25,22 +25,44 @@
 #pragma once
 
 #include "general/Filesystem.h"
+#include "general/Logger.h"
 
 #include <CLI/CLI.hpp>
 #include <tuple>
+#include <vector>
 
 class ArgumentParser final
 {
 private:
+    std::vector<std::pair<std::string, Logging::Level>> logLevelMapping{
+        {"debug", Logging::Level::Debug},
+        {"info", Logging::Level::Info},
+        {"warning", Logging::Level::Warning},
+        {"error", Logging::Level::Error},
+        {"off", Logging::Level::Off}};
+
     fs::path iniFilePath{"ini.xml"};
+    Logging::Level logLevel{Logging::Level::Info};
+
     CLI::App app{"JuPedSim"};
-    CLI::Option * iniFilePathOpt = app.add_option("inifile", iniFilePath, "Path to your inifile");
+    CLI::Option * iniFilePathOpt =
+        app.add_option("inifile", iniFilePath, "Path to your inifile. Defaults to 'ini.xml'")
+            ->check(CLI::ExistingFile);
+    CLI::Option * logLevelOpt =
+        app.add_option(
+               "--log-level",
+               logLevel,
+               "Minimum level of log messages to show. Deafults to 'info'")
+            ->transform(CLI::CheckedTransformer(logLevelMapping, CLI::ignore_case));
 
 public:
     enum class Execution { CONTINUE, ABORT };
 
     /// @return inifile argument. If none was parsed this defaults to 'ini.xml'
     const fs::path & IniFilePath() const;
+
+    /// @return desired log level. If none was parsed this defauls to 'Info'
+    Logging::Level LogLevel() const;
 
     /// Parses command line arguments
     /// Parsing ends in one of three states:
