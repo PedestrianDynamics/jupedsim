@@ -35,7 +35,6 @@
 #include "geometry/Building.h"
 #include "pedestrian/AgentsSourcesManager.h"
 
-#include <exception>
 #include <iomanip>
 #include <memory>
 #include <ostream>
@@ -67,16 +66,9 @@ int main(int argc, char ** argv)
     Configuration config;
     // TODO remove me in refactoring
     IniFileParser iniFileParser(&config);
-    try {
-        if(!iniFileParser.Parse(a.IniFilePath())) {
-            return EXIT_FAILURE;
-        }
-    } catch(const std::exception & e) {
-        Logging::Error(
-            fmt::format(check_fmt("Exception in IniFileParser::Parse thrown, what: {}"), e.what()));
+    if(!iniFileParser.Parse(a.IniFilePath())) {
         return EXIT_FAILURE;
     }
-
 
     // create and initialize the simulation engine
     // Simulation
