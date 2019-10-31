@@ -31,12 +31,12 @@
 
 #include "GompertzModel.h"
 
+#include "direction/walking/DirectionStrategy.h"
 #include "general/OpenMP.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 #include "mpi/LCGrid.h"
 #include "pedestrian/Pedestrian.h"
-#include "routing/DirectionStrategy.h"
 
 GompertzModel::GompertzModel(
     std::shared_ptr<DirectionStrategy> dir,

@@ -20,9 +20,9 @@
 //
 #pragma once
 
+#include "direction/walking/DirectionStrategy.h"
 #include "general/Configuration.h"
 #include "general/Filesystem.h"
-#include "routing/DirectionStrategy.h"
 
 #include <string>
 

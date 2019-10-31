@@ -46,9 +46,9 @@
  **/
 #include "ffRouter.h"
 
+#include "direction/walking/DirectionStrategy.h"
 #include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
-#include "routing/DirectionStrategy.h"
 
 #include <algorithm>
 #include <cfloat>

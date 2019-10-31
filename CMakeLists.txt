@@ -267,6 +267,7 @@ endif(BUILD_DOC)
 # Build libcore
 ################################################################################
 set(source_files
+    direction/walking/DirectionStrategy.cpp
     events/Event.cpp
     events/EventManager.cpp
     forms/jpscore.rc
@@ -314,7 +315,6 @@ set(source_files
     pedestrian/Pedestrian.cpp
     pedestrian/Pedestrian.cpp
     pedestrian/StartDistribution.cpp
-    routing/DirectionStrategy.cpp
     routing/ff_router/ffRouter.cpp
     routing/ff_router/FloorfieldViaFM.cpp
     routing/ff_router/UnivFFviaFM.cpp
@@ -351,6 +351,7 @@ set(source_files
     voronoi-boost/VoronoiPositionGenerator.cpp
 )
 set(header_files
+    direction/walking/DirectionStrategy.h
     events/Event.h
     events/EventManager.h
     general/ArgumentParser.h
@@ -399,7 +400,6 @@ set(header_files
     pedestrian/Pedestrian.h
     pedestrian/Pedestrian.h
     pedestrian/StartDistribution.h
-    routing/DirectionStrategy.h
     routing/ff_router/ffRouter.h
     routing/ff_router/FloorfieldViaFM.h
     routing/ff_router/UnivFFviaFM.h
