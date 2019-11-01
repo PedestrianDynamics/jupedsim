@@ -47,7 +47,6 @@
 
 
 OutputHandler * Log;
-Trajectories * outputTXT;
 // todo: add these variables to class simulation
 std::map<std::string, std::shared_ptr<TrainType>> TrainTypes;
 std::map<int, std::shared_ptr<TrainTimeTable>> TrainTimeTables;
@@ -55,12 +54,11 @@ std::map<int, double> trainOutflow;
 //--------
 Simulation::Simulation(Configuration * args) : _config(args)
 {
-    _countTraj   = 0;
-    _maxFileSize = 10; // MB
-    _nPeds       = 0;
-    _seed        = 8091983;
-    _deltaT      = 0;
-    _building    = nullptr;
+    _countTraj = 0;
+    _nPeds     = 0;
+    _seed      = 8091983;
+    _deltaT    = 0;
+    _building  = nullptr;
     //_direction = NULL;
     _operationalModel = nullptr;
     _solver           = nullptr;
@@ -73,6 +71,7 @@ Simulation::Simulation(Configuration * args) : _config(args)
     _trainConstraints = false;
     _maxSimTime       = 100;
     //     _config = args;
+    _currentTrajectoriesFile = _config->GetTrajectoriesFile();
 }
 
 Simulation::~Simulation()
@@ -584,7 +583,7 @@ double Simulation::RunBody(double maxSimTime)
         // write the trajectories
         if(0 == frameNr % writeInterval) {
             _iod->WriteFrame(frameNr / writeInterval, _building.get());
-            UpdateOutputFileName();
+            RotateOutputFile();
         }
 
         if(!_gotSources && !_periodic && _config->print_prog_bar())
@@ -662,32 +661,26 @@ double Simulation::RunBody(double maxSimTime)
     return t;
 }
 
-void Simulation::UpdateOutputFileName()
+void Simulation::RotateOutputFile()
 {
     // FIXME ??????
     if(_config->GetFileFormat() != FileFormat::TXT) {
         return;
     }
+    static const fs::path & p       = _config->GetTrajectoriesFile();
+    static const fs::path stem      = p.stem();
+    static const fs::path extension = p.extension();
+    static const fs::path parent    = p.parent_path();
 
-    const fs::path & p = _config->GetTrajectoriesFile();
-    int sf             = fs::file_size(p);
-    if(sf > _maxFileSize * 1024 * 1024) {
-        const fs::path stem      = p.stem();
-        const fs::path extention = p.extension();
-        const fs::path parent    = p.parent_path();
+    if(fs::file_size(_currentTrajectoriesFile) > _maxFileSize) {
         incrementCountTraj();
-        char tmp_traj_name[100];
-        sprintf(
-            tmp_traj_name,
-            "%s_%.4d_%s",
-            stem.string().c_str(),
-            _countTraj,
-            extention.string().c_str());
-        const fs::path abs_traj_name = parent / fs::path(tmp_traj_name);
-        _config->SetTrajectoriesFile(abs_traj_name);
-        Logging::Info(fmt::format(check_fmt("New trajectory file <{}>"), tmp_traj_name));
-        auto file = std::make_shared<FileHandler>(_config->GetTrajectoriesFile());
-        outputTXT->SetOutputHandler(file);
+        _currentTrajectoriesFile =
+            parent / fs::path(fmt::format(
+                         check_fmt("{}_{}{}"), stem.string(), _countTraj, extension.string()));
+        Logging::Info(
+            fmt::format(check_fmt("New trajectory file <{}>"), _currentTrajectoriesFile.string()));
+        auto file = std::make_shared<FileHandler>(_currentTrajectoriesFile);
+        _iod->SetOutputHandler(file);
         _iod->WriteHeader(_nPeds, _fps, _building.get(), _seed, _countTraj);
     }
 }
