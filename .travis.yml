@@ -20,6 +20,7 @@ matrix:
        - python runtest_Method_B.py
        - python runtest_Method_C.py
        - python runtest_Method_D.py
+       - python runtest_Method_J.py
        - python runtest_Method_D_IFD.py
        - python runtest_Method_I_IFD.py
        - cat Utest_Methods.log
@@ -37,6 +38,7 @@ matrix:
        - python runtest_Method_B.py
        - python runtest_Method_C.py
        - python runtest_Method_D.py
+       - python runtest_Method_J.py
        - python runtest_Method_D_IFD.py
        - python runtest_Method_I_IFD.py
        - cat Utest_Methods.log

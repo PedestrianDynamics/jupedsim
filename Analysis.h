@@ -103,6 +103,7 @@ private:
      //polygon_2d _geoPoly;
      std::map<int, polygon_2d> _geoPolyMethodD;
      std::map<int, polygon_2d> _geoPolyMethodI;
+     std::map<int, polygon_2d> _geoPolyMethodJ;
 
      double _grid_size_X;      // the size of the grid
      double _grid_size_Y;
@@ -118,11 +119,15 @@ private:
      bool _DoesUseMethodD;       // Method D--Voronoi method
      bool _DoesUseMethodI;       // Method I--Voronoi method  modified
                                  // no measurement are)
+     bool _DoesUseMethodJ;
      std::vector<int> _StartFramesMethodD;
      std::vector<int> _StopFramesMethodD;
 
      std::vector<int> _StartFramesMethodI;
      std::vector<int> _StopFramesMethodI;
+
+     std::vector<int> _StartFramesMethodJ;
+     std::vector<int> _StopFramesMethodJ;
 
      std::vector<bool> _IndividualFDFlags;
      bool _cutByCircle;       //Adjust whether cut each original voronoi cell by a circle
@@ -148,6 +153,7 @@ private:
                                                        // the zpos of the
                                                        // measurement are, even
                                                        // if we don't use its polygon
+     std::vector<MeasurementArea_B*> _areaForMethod_J;
 };
 
 #endif /*ANALYSIS_H_*/

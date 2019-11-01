@@ -311,7 +311,59 @@
             <xs:attribute type="xs:string" name="enabled"  use="required"/>
           </xs:complexType>
         </xs:element>
-
+        <xs:element name="method_J">
+          <xs:annotation>
+            <xs:documentation>Method Voronoi density and velocity</xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="measurement_area" maxOccurs="unbounded" minOccurs="1">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute type="xs:int" name="id"  use="required"/>
+                      <xs:attribute type="xs:int" name="start_frame"  use="required"/>
+                      <xs:attribute type="xs:int" name="stop_frame"  use="required"/>
+                      <xs:attribute type="xs:string" name="get_individual_FD"  use="required"/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="one_dimensional">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute type="xs:string" name="enabled"   use="required"/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="cut_by_circle">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute type="xs:string" name="enabled"   use="required"/>
+                      <xs:attribute type="xs:double" name="radius"  use="required"/>
+                      <xs:attribute type="xs:int" name="edges"  use="required"/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="profiles">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute type="xs:string" name="enabled"  use="required"/>
+                      <xs:attribute type="xs:float" name="grid_size_x"  use="required"/>
+                      <xs:attribute type="xs:float" name="grid_size_y"  use="required"/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="enabled"  use="required"/>
+          </xs:complexType>
+        </xs:element>
       </xs:all>
       <xs:attribute type="xs:string" name="project"  use="required"/>
       <xs:attribute name="version" use="required">

@@ -130,6 +130,7 @@ ArgumentParser::ArgumentParser()
      _isMethodC =false;
      _isMethodD = false;
      _isMethodI= false;
+     _isMethodJ = false;
      _isCutByCircle = false;
      _isOneDimensional=false;
      _isGetProfile =false;
@@ -869,8 +870,113 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           }
      }
 
+    // method Voronoi
+    TiXmlElement* xMethod_J=xMainNode->FirstChildElement("method_J");
+    if(xMethod_J) {
+      if(string(xMethod_J->Attribute("enabled"))=="true")
+      {
+        _isMethodJ = true;
+        Log->Write("INFO: \tMethod Voronoi is selected" );
+
+        for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_J")->FirstChildElement("measurement_area");
+            xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
+        {
+          _areaIDforMethodJ.push_back(xmltoi(xMeasurementArea->Attribute("id")));
+          Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
+          if(xMeasurementArea->Attribute("start_frame"))
+          {
+            if(string(xMeasurementArea->Attribute("start_frame"))!="None")
+            {
+              _start_frames_MethodJ.push_back(xmltoi(xMeasurementArea->Attribute("start_frame")));
+              Log->Write("\tthe analysis starts from frame <%d>",xmltoi(xMeasurementArea->Attribute("start_frame")));
+            }
+            else
+            {
+              _start_frames_MethodJ.push_back(-1);
+            }
+          }
+          else
+          {
+            _start_frames_MethodJ.push_back(-1);
+          }
+          if(xMeasurementArea->Attribute("stop_frame"))
+          {
+            if(string(xMeasurementArea->Attribute("stop_frame"))!="None")
+            {
+              _stop_frames_MethodJ.push_back(xmltoi(xMeasurementArea->Attribute("stop_frame")));
+              Log->Write("\tthe analysis stops from frame <%d>", xmltoi(xMeasurementArea->Attribute("stop_frame")));
+            }
+            else
+            {
+              _stop_frames_MethodJ.push_back(-1);
+            }
+          }
+          else
+          {
+            _stop_frames_MethodJ.push_back(-1);
+          }
+
+          if(xMeasurementArea->Attribute("get_individual_FD"))
+          {
+            if(string(xMeasurementArea->Attribute("get_individual_FD"))=="true")
+            {
+              _individual_FD_flags.push_back(true);
+              Log->Write("INFO: \tIndividual FD will be output");
+            }
+            else
+            {
+              _individual_FD_flags.push_back(false);
+            }
+          }
+          else
+          {
+            _individual_FD_flags.push_back(false);
+          }
+        }
+        if (xMethod_J->FirstChildElement("one_dimensional"))
+        {
+          if ( string(xMethod_J->FirstChildElement("one_dimensional")->Attribute("enabled"))=="true")
+          {
+            _isOneDimensional=true;
+            Log->Write("INFO: \tThe data will be analyzed with one dimensional way!!");
+          }
+        }
+
+        if ( xMethod_J->FirstChildElement("cut_by_circle"))
+        {
+          if ( string(xMethod_J->FirstChildElement("cut_by_circle")->Attribute("enabled"))=="true")
+          {
+            _isCutByCircle=true;
+            _cutRadius=xmltof(xMethod_J->FirstChildElement("cut_by_circle")->Attribute("radius"))*M2CM;
+            _circleEdges=xmltoi(xMethod_J->FirstChildElement("cut_by_circle")->Attribute("edges"));
+            Log->Write("INFO: \tEach Voronoi cell will be cut by a circle with the radius of < %f > m!!", _cutRadius*CMtoM);
+            Log->Write("INFO: \tThe circle is discretized to a polygon with < %d> edges!!", _circleEdges);
+          }
+        }
+
+        if ( xMethod_J->FirstChildElement("steadyState"))
+        {
+          _steadyStart =xmltof(xMethod_J->FirstChildElement("steadyState")->Attribute("start"));
+          _steadyEnd =xmltof(xMethod_J->FirstChildElement("steadyState")->Attribute("end"));
+          Log->Write("INFO: \tthe steady state is from  <%f> to <%f> frames", _steadyStart, _steadyEnd);
+        }
+
+        if(xMethod_J->FirstChildElement("profiles"))
+        {
+          if ( string(xMethod_J->FirstChildElement("profiles")->Attribute("enabled"))=="true")
+          {
+            _isGetProfile = true;
+            _grid_size_X =xmltof(xMethod_J->FirstChildElement("profiles")->Attribute("grid_size_x"))*M2CM;
+            _grid_size_Y =xmltof(xMethod_J->FirstChildElement("profiles")->Attribute("grid_size_y"))*M2CM;
+            Log->Write("INFO: \tProfiles will be calculated" );
+            Log->Write("INFO: \tThe discretized grid size in x, y direction is: < %f >m by < %f >m ",_grid_size_X*CMtoM, _grid_size_Y*CMtoM);
+          }
+        }
+      }
+    }
+
      Log->Write("INFO: \tFinish parsing inifile");
-     if(!(_isMethodA || _isMethodB || _isMethodC || _isMethodD ||  _isMethodI))
+     if(!(_isMethodA || _isMethodB || _isMethodC || _isMethodD ||  _isMethodI ||  _isMethodJ))
      {
           Log->Write("WARNING: No measurement method enabled. Nothing to do.");
           exit(EXIT_SUCCESS);
@@ -959,6 +1065,12 @@ bool ArgumentParser::GetIsMethodI() const
      return _isMethodI;
 }
 
+bool ArgumentParser::GetIsMethodJ() const
+{
+  return _isMethodJ;
+}
+
+
 bool ArgumentParser::GetIsCutByCircle() const
 {
      return _isCutByCircle;
@@ -1030,6 +1142,11 @@ vector<int> ArgumentParser::GetAreaIDforMethodI() const
      return _areaIDforMethodI;
 }
 
+vector<int> ArgumentParser::GetAreaIDforMethodJ() const
+{
+  return _areaIDforMethodJ;
+}
+
 vector<int> ArgumentParser::GetStartFramesMethodD() const
 {
      return _start_frames_MethodD;
@@ -1038,6 +1155,11 @@ vector<int> ArgumentParser::GetStartFramesMethodD() const
 vector<int> ArgumentParser::GetStartFramesMethodI() const
 {
      return _start_frames_MethodI;
+}
+
+vector<int> ArgumentParser::GetStartFramesMethodJ() const
+{
+  return _start_frames_MethodJ;
 }
 
 vector<int> ArgumentParser::GetStopFramesMethodD() const
@@ -1049,6 +1171,12 @@ vector<int> ArgumentParser::GetStopFramesMethodI() const
 {
      return _stop_frames_MethodI;
 }
+
+vector<int> ArgumentParser::GetStopFramesMethodJ() const
+{
+  return _stop_frames_MethodJ;
+}
+
 
 vector<bool> ArgumentParser::GetIndividualFDFlags() const
 {

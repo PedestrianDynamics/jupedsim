@@ -32,21 +32,22 @@
 #include "geometry/Room.h"
 #include "geometry/SubRoom.h"
 
-#include "methods/VoronoiDiagram.h"
 #include "methods/Method_A.h"
 #include "methods/Method_B.h"
 #include "methods/Method_C.h"
 #include "methods/Method_D.h"
 #include "methods/Method_I.h"
+#include "methods/Method_J.h"
 #include "methods/PedData.h"
+#include "methods/VoronoiDiagram.h"
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
+#include <algorithm> // std::min_element, std::max_element
 #include <cfloat>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 #include <stdlib.h>
-#include <algorithm>    // std::min_element, std::max_element
+#include <vector>
 
 #ifdef __linux__
 #include <sys/stat.h>
@@ -77,6 +78,7 @@ Analysis::Analysis()
      _DoesUseMethodC = false;                                   // Method C //calculate and save results of classic in separate file
      _DoesUseMethodD = false;                                   // Method D--Voronoi method
      _DoesUseMethodI = false;
+     _DoesUseMethodJ = false;
      _cutByCircle = false;  //Adjust whether cut each original voronoi cell by a circle
      _getProfile = false;   // Whether make field analysis or not
      _calcIndividualFD = false; //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
@@ -174,8 +176,22 @@ void Analysis::InitArgs(ArgumentParser* args)
           _StartFramesMethodI = args->GetStartFramesMethodI();
           _StopFramesMethodI = args->GetStopFramesMethodI();
           _IndividualFDFlags = args->GetIndividualFDFlags();
-           _geoPolyMethodI = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_I);
+          _geoPolyMethodI = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_I);
      }
+
+    if(args->GetIsMethodJ()) {
+          _DoesUseMethodJ = true;
+          vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodJ();
+          for(unsigned int i=0; i<Measurement_Area_IDs.size(); i++)
+          {
+            _areaForMethod_J.push_back(dynamic_cast<MeasurementArea_B*>( args->GetMeasurementArea(Measurement_Area_IDs[i])));
+          }
+          _StartFramesMethodJ = args->GetStartFramesMethodJ();
+          _StopFramesMethodJ = args->GetStopFramesMethodJ();
+          _IndividualFDFlags = args->GetIndividualFDFlags();
+          _geoPolyMethodJ = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_J);
+
+    }
 
      _deltaF = args->GetDelatT_Vins();
      _cutByCircle = args->GetIsCutByCircle();
@@ -460,6 +476,45 @@ int Analysis::RunAnalysis(const fs::path& filename, const fs::path& path)
           }
      }
 
+    if(_DoesUseMethodJ) //Method_J
+    {
+      if(_areaForMethod_J.empty())
+      {
+        Log->Write("ERROR: Method Voronoi selected with no measurement area!");
+        exit(EXIT_FAILURE);
+      }
+
+  #pragma omp parallel for
+      for(int i=0; i<int(_areaForMethod_J.size()); i++)
+      {
+        Method_J Method_J;
+        Method_J.SetStartFrame(_StartFramesMethodJ[i]);
+        Method_J.SetStopFrame(_StopFramesMethodJ[i]);
+        Method_J.SetCalculateIndividualFD(_IndividualFDFlags[i]);
+        Method_J.SetGeometryPolygon(_geoPolyMethodJ[_areaForMethod_J[i]->_id]);
+        Method_J.SetGeometryFileName(_geometryFileName);
+        Method_J.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
+        Method_J.SetGridSize(_grid_size_X, _grid_size_Y);
+        Method_J.SetDimensional(_isOneDimensional);
+        Method_J.SetCalculateProfiles(_getProfile);
+        Method_J.SetTrajectoriesLocation(path);
+        if(_cutByCircle)
+        {
+          Method_J.Setcutbycircle(_cutRadius, _circleEdges);
+        }
+        Method_J.SetMeasurementArea(_areaForMethod_J[i]);
+        bool result_Voronoi = Method_J.Process(data,_scriptsLocation, _areaForMethod_J[i]->_zPos);
+        if(result_Voronoi)
+        {
+          Log->Write("INFO:\tSuccess with Method J using measurement area id %d!\n",_areaForMethod_J[i]->_id);
+          std::cout << "INFO:\tSuccess with Method J using measurement area id "<< _areaForMethod_J[i]->_id << "\n";
+        }
+        else
+        {
+          Log->Write("INFO:\tFailed with Method J using measurement area id %d!\n",_areaForMethod_J[i]->_id);
+        }
+      }
+    }
 
      return 0;
 }
