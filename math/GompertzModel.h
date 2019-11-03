@@ -101,7 +101,7 @@ private:
 
 public:
     GompertzModel(
-        std::shared_ptr<DirectionStrategy> dir,
+        std::shared_ptr<DirectionManager> dir,
         double nuped,
         double aped,
         double bped,
@@ -111,8 +111,6 @@ public:
         double bwall,
         double cwall);
     virtual ~GompertzModel(void);
-
-    std::shared_ptr<DirectionStrategy> GetDirection() const;
 
     /**
       * Get the parameter for the strength of the ped-PED repulsive force

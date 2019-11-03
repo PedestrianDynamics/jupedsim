@@ -1,8 +1,7 @@
 /**
  * \file        DirectionStrategy.h
  * \date        Dec 13, 2010
- * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \copyright   <2009-2025> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -29,75 +28,90 @@
 #include <map>
 #include <string>
 #include <vector>
+
 class Room;
+
 class Building;
+
 class Pedestrian;
+
 class Point;
+
 class UnivFFviaFM;
+
 class FloorfieldViaFM;
+
 class LocalFloorfieldViaFM;
+
 class SubLocalFloorfieldViaFM;
 
 class DirectionStrategy
 {
 public:
     DirectionStrategy();
+
     virtual ~DirectionStrategy();
 
+    virtual void Init(Building *){};
 
     virtual Point GetTarget(Room * room, Pedestrian * ped) const = 0;
+
     virtual double GetDistance2Wall(Pedestrian * ped) const;
+
     virtual double GetDistance2Target(Pedestrian * ped, int UID);
 };
 
 class DirectionMiddlePoint : public DirectionStrategy
 {
 public:
-    virtual Point GetTarget(Room * room, Pedestrian * ped) const;
+    Point GetTarget(Room * room, Pedestrian * ped) const override;
 };
 
 class DirectionMinSeperation : public DirectionStrategy
 {
 public:
-    virtual Point GetTarget(Room * room, Pedestrian * ped) const;
+    Point GetTarget(Room * room, Pedestrian * ped) const override;
 };
 
 class DirectionTrain : public DirectionStrategy
 {
 public:
-    virtual Point GetTarget(Room * room, Pedestrian * ped) const;
+    Point GetTarget(Room * room, Pedestrian * ped) const override;
 };
 
 class DirectionMinSeperationShorterLine : public DirectionStrategy
 {
 public:
-    virtual Point GetTarget(Room * room, Pedestrian * ped) const;
+    Point GetTarget(Room * room, Pedestrian * ped) const override;
 };
 
 class DirectionInRangeBottleneck : public DirectionStrategy
 {
 public:
-    virtual Point GetTarget(Room * room, Pedestrian * ped) const;
+    Point GetTarget(Room * room, Pedestrian * ped) const override;
 };
-
 
 class DirectionGeneral : public DirectionStrategy
 {
 public:
-    virtual Point GetTarget(Room * room, Pedestrian * ped) const;
+    Point GetTarget(Room * room, Pedestrian * ped) const override;
 };
 
 class DirectionFloorfield : public DirectionStrategy
 {
 public:
     DirectionFloorfield();
-    void Init(Building * building, double stepsize, double threshold, bool useDistancMap);
-    ~DirectionFloorfield();
-    //void Init();
-    virtual Point GetTarget(Room * room, Pedestrian * ped) const;
-    virtual Point GetDir2Wall(Pedestrian * ped) const;
-    virtual double GetDistance2Wall(Pedestrian * ped) const;
 
+    void Init(Building * building) override;
+
+    ~DirectionFloorfield();
+
+    //void Init();
+    Point GetTarget(Room * room, Pedestrian * ped) const override;
+
+    Point GetDir2Wall(Pedestrian * ped) const;
+
+    double GetDistance2Wall(Pedestrian * ped) const override;
 
 private:
     FloorfieldViaFM * _ffviafm;
@@ -108,12 +122,18 @@ class DirectionLocalFloorfield : public DirectionStrategy
 {
 public:
     DirectionLocalFloorfield();
-    void Init(Building * building, double stepsize, double threshold, bool useDistanceMap);
+
+    void Init(Building * building) override;
+
     ~DirectionLocalFloorfield();
-    virtual Point GetTarget(Room * room, Pedestrian * ped) const;
-    virtual Point GetDir2Wall(Pedestrian * ped) const;
-    virtual double GetDistance2Wall(Pedestrian * ped) const;
-    virtual double GetDistance2Target(Pedestrian * ped, int UID);
+
+    Point GetTarget(Room * room, Pedestrian * ped) const override;
+
+    Point GetDir2Wall(Pedestrian * ped) const;
+
+    double GetDistance2Wall(Pedestrian * ped) const override;
+
+    double GetDistance2Target(Pedestrian * ped, int UID) override;
 
 protected:
     std::map<int, UnivFFviaFM *> _locffviafm;
@@ -129,75 +149,18 @@ class DirectionSubLocalFloorfield : public DirectionStrategy
 {
 public:
     DirectionSubLocalFloorfield();
-    void Init(Building * building, double stepsize, double threshold, bool useDistanceMap);
+
+    void Init(Building * building) override;
+
     ~DirectionSubLocalFloorfield();
-    virtual Point GetTarget(Room * room, Pedestrian * ped) const;
+
+    Point GetTarget(Room * room, Pedestrian * ped) const override;
+
     virtual Point GetDir2Wall(Pedestrian * ped) const;
-    virtual double GetDistance2Wall(Pedestrian * ped) const;
-    virtual double GetDistance2Target(Pedestrian * ped, int UID);
 
-protected:
-    std::map<int, UnivFFviaFM *> _locffviafm;
-    bool _initDone;
-    Building * _building;
-    double _stepsize;
-    double _wallAvoidDistance;
-    bool _useDistancefield;
-    std::string _filename;
-};
+    double GetDistance2Wall(Pedestrian * ped) const override;
 
-// class DirectionLocalFloorfield : public DirectionStrategy {
-// public:
-//      DirectionLocalFloorfield();
-//      void Init(Building* building, double stepsize, double threshold,
-//                bool useDistanceMap);
-//      ~DirectionLocalFloorfield();
-//      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
-//      virtual Point GetDir2Wall(Pedestrian* ped) const;
-//      virtual double GetDistance2Wall(Pedestrian* ped) const;
-//      virtual double GetDistance2Target(Pedestrian* ped, int UID);
-
-// protected:
-//      std::map<int, UnivFFviaFM*> _locffviafm;
-//      bool _initDone;
-//      Building* _building;
-//      double _stepsize;
-//      double _wallAvoidDistance;
-//      bool _useDistancefield;
-//      std::string _filename;
-// };
-
-class DirectionSubLocalFloorfieldTrips : public DirectionStrategy
-{
-public:
-    DirectionSubLocalFloorfieldTrips();
-    void Init(Building * building, double stepsize, double threshold, bool useDistanceMap);
-    ~DirectionSubLocalFloorfieldTrips();
-    virtual Point GetTarget(Room * room, Pedestrian * ped) const;
-    virtual Point GetDir2Wall(Pedestrian * ped) const;
-    virtual double GetDistance2Wall(Pedestrian * ped) const;
-    virtual double GetDistance2Target(Pedestrian * ped, int UID);
-
-protected:
-    std::map<int, UnivFFviaFM *> _locffviafm;
-    bool _initDone;
-    Building * _building;
-    double _stepsize;
-    double _wallAvoidDistance;
-    bool _useDistancefield;
-    std::string _filename;
-};
-
-class DirectionSubLocalFloorfieldTripsVoronoi : public DirectionStrategy
-{
-public:
-    DirectionSubLocalFloorfieldTripsVoronoi();
-    void Init(Building * building, double stepsize, double threshold, bool useDistanceMap);
-    ~DirectionSubLocalFloorfieldTripsVoronoi();
-    virtual Point GetTarget(Room * room, Pedestrian * ped) const;
-    virtual Point GetDir2Wall(Pedestrian * ped) const;
-    virtual double GetDistance2Wall(Pedestrian * ped) const;
-    virtual double GetDistance2Target(Pedestrian * ped, int UID);
+    double GetDistance2Target(Pedestrian * ped, int UID) override;
 
 protected:
     std::map<int, UnivFFviaFM *> _locffviafm;

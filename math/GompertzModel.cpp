@@ -39,7 +39,7 @@
 #include "pedestrian/Pedestrian.h"
 
 GompertzModel::GompertzModel(
-    std::shared_ptr<DirectionStrategy> dir,
+    std::shared_ptr<DirectionManager> dir,
     double nuped,
     double aped,
     double bped,
@@ -67,32 +67,7 @@ GompertzModel::~GompertzModel() {}
 
 bool GompertzModel::Init(Building * building)
 {
-    if(auto dirff = dynamic_cast<DirectionFloorfield *>(_direction.get())) {
-        Log->Write("INFO:\t Init DirectionFloorfield starting ...");
-        double _deltaH            = building->GetConfig()->get_deltaH();
-        double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
-        bool _useWallAvoidance    = building->GetConfig()->get_use_wall_avoidance();
-        dirff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-        Log->Write("INFO:\t Init DirectionFloorfield done");
-    }
-
-    if(auto dirlocff = dynamic_cast<DirectionLocalFloorfield *>(_direction.get())) {
-        Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
-        double _deltaH            = building->GetConfig()->get_deltaH();
-        double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
-        bool _useWallAvoidance    = building->GetConfig()->get_use_wall_avoidance();
-        dirlocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-        Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
-    }
-
-    if(auto dirsublocff = dynamic_cast<DirectionSubLocalFloorfield *>(_direction.get())) {
-        Log->Write("INFO:\t Init DirectionSubLOCALFloorfield starting ...");
-        double _deltaH            = building->GetConfig()->get_deltaH();
-        double _wallAvoidDistance = building->GetConfig()->get_use_wall_avoidance();
-        bool _useWallAvoidance    = building->GetConfig()->get_use_wall_avoidance();
-        dirsublocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-        Log->Write("INFO:\t Init DirectionSubLOCALFloorfield done");
-    }
+    _direction->Init(building);
 
     const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
     size_t peds_size                          = allPeds.size();
@@ -591,11 +566,6 @@ std::string GompertzModel::GetDescription()
     sprintf(tmp, "\t\tc: \t\tPed: %f \tWall: %f\n", _cPed, _cWall);
     rueck.append(tmp);
     return rueck;
-}
-
-std::shared_ptr<DirectionStrategy> GompertzModel::GetDirection() const
-{
-    return _direction;
 }
 
 double GompertzModel::GetNuPed() const

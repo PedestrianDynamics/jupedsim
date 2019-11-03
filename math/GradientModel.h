@@ -118,7 +118,7 @@ private:
 
 public:
     GradientModel(
-        std::shared_ptr<DirectionStrategy> dir,
+        std::shared_ptr<DirectionManager> dir,
         double nuped,
         double aped,
         double bped,

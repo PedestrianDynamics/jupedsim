@@ -267,6 +267,10 @@ endif(BUILD_DOC)
 # Build libcore
 ################################################################################
 set(source_files
+    direction/DirectionManager.cpp
+    direction/waiting/WaitingMiddle.cpp
+    direction/waiting/WaitingRandom.cpp
+    direction/waiting/WaitingStrategy.cpp
     direction/walking/DirectionStrategy.cpp
     events/Event.cpp
     events/EventManager.cpp
@@ -351,6 +355,10 @@ set(source_files
     voronoi-boost/VoronoiPositionGenerator.cpp
 )
 set(header_files
+    direction/DirectionManager.h
+    direction/waiting/WaitingMiddle.h
+    direction/waiting/WaitingRandom.h
+    direction/waiting/WaitingStrategy.h
     direction/walking/DirectionStrategy.h
     events/Event.h
     events/EventManager.h

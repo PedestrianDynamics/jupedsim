@@ -33,7 +33,7 @@
 
 //forward declaration
 class Pedestrian;
-class DirectionStrategy;
+class DirectionManager;
 
 /*!
  * \class GCFMModel
@@ -48,7 +48,7 @@ class GCFMModel : public OperationalModel
 {
 public:
     GCFMModel(
-        std::shared_ptr<DirectionStrategy> dir,
+        std::shared_ptr<DirectionManager> dir,
         double nuped,
         double nuwall,
         double dist_effPed,
@@ -60,7 +60,6 @@ public:
     virtual ~GCFMModel(void);
 
     // Getter
-    std::shared_ptr<DirectionStrategy> GetDirection() const;
     double GetNuPed() const;
     double GetNuWall() const;
     double GetDistEffMax() const;

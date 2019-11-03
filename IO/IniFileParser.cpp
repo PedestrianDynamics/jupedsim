@@ -21,6 +21,11 @@
 #include "IniFileParser.h"
 
 #include "OutputHandler.h"
+#include "direction/DirectionManager.h"
+#include "direction/waiting/WaitingMiddle.h"
+#include "direction/waiting/WaitingRandom.h"
+#include "direction/waiting/WaitingStrategy.h"
+#include "direction/walking/DirectionStrategy.h"
 #include "general/Filesystem.h"
 #include "general/Logger.h"
 #include "general/OpenMP.h"
@@ -37,7 +42,6 @@
 #include "routing/smoke_router/SmokeRouter.h"
 
 #include <tinyxml.h>
-
 
 IniFileParser::IniFileParser(Configuration * config)
 {
@@ -578,7 +582,7 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement * xGCFM, TiXmlElement * xMainNod
 
     //TODO: models do not belong in a configuration container [gl march '16]
     _config->SetModel(std::shared_ptr<OperationalModel>(new GCFMModel(
-        _exit_strategy,
+        _directionManager,
         _config->GetNuPed(),
         _config->GetNuWall(),
         _config->GetDistEffMaxPed(),
@@ -674,7 +678,7 @@ bool IniFileParser::ParseKrauszModel(TiXmlElement * xKrausz, TiXmlElement * xMai
 
     //TODO: models do not belong in a configuration container [gl march '16]
     _config->SetModel(std::shared_ptr<OperationalModel>(new KrauszModel(
-        _exit_strategy,
+        _directionManager,
         _config->GetNuPed(),
         _config->GetNuWall(),
         _config->GetDistEffMaxPed(),
@@ -790,7 +794,7 @@ bool IniFileParser::ParseGompertzModel(TiXmlElement * xGompertz, TiXmlElement * 
 
     //TODO: models do not belong in a configuration container [gl march '16]
     _config->SetModel(std::shared_ptr<OperationalModel>(new GompertzModel(
-        _exit_strategy,
+        _directionManager,
         _config->GetNuPed(),
         _config->GetaPed(),
         _config->GetbPed(),
@@ -961,7 +965,7 @@ bool IniFileParser::ParseGradientModel(TiXmlElement * xGradient, TiXmlElement * 
 
     //TODO: models do not belong in a configuration container [gl march '16]
     _config->SetModel(std::shared_ptr<OperationalModel>(new GradientModel(
-        _exit_strategy,
+        _directionManager,
         _config->GetNuPed(),
         _config->GetaPed(),
         _config->GetbPed(),
@@ -1058,7 +1062,7 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement * xVelocity, TiXmlElement * 
     TiXmlNode * xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
     ParseAgentParameters(xVelocity, xAgentDistri);
     _config->SetModel(std::shared_ptr<OperationalModel>(new VelocityModel(
-        _exit_strategy,
+        _directionManager,
         _config->GetaPed(),
         _config->GetDPed(),
         _config->GetaWall(),
@@ -1358,8 +1362,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
             if(!ParseFfRouterOps(e, ROUTING_FF_GLOBAL_SHORTEST)) {
                 return false;
             }
-        }
-        else if(
+        } else if(
             (strategy == "ff_local_shortest") &&
             (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
             //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
@@ -1431,7 +1434,6 @@ bool IniFileParser::ParseFfRouterOps(TiXmlNode * routingNode, RoutingStrategy s)
     FFRouter * r =
         static_cast<FFRouter *>(_config->GetRoutingEngine()->GetAvailableRouters().back());
 
-
     r->SetMode(mode);
     return true;
 }
@@ -1483,6 +1485,7 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode * routingNode)
 
     return true;
 }
+
 #ifdef AIROUTER
 bool IniFileParser::ParseAIOpts(TiXmlNode * routingNode)
 {
@@ -1541,7 +1544,6 @@ bool IniFileParser::ParseAIOpts(TiXmlNode * routingNode)
     return true;
 }
 #endif
-
 
 bool IniFileParser::ParseLinkedCells(const TiXmlNode & linkedCellNode)
 {
@@ -1651,6 +1653,9 @@ bool IniFileParser::ParseNodeToSolver(const TiXmlNode & solverNode)
 
 bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
 {
+    // Init DirectionManager
+    _directionManager = std::shared_ptr<DirectionManager>(new DirectionManager);
+
     std::string query = "exit_crossing_strategy";
     if(!strategyNode.FirstChild(query.c_str())) {
         query = "exitCrossingStrategy";
@@ -1712,21 +1717,23 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
             }
             switch(pExitStrategy) {
                 case 1:
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMiddlePoint());
+                    _directionStrategy =
+                        std::shared_ptr<DirectionStrategy>(new DirectionMiddlePoint());
                     break;
                 case 2:
-                    _exit_strategy =
+                    _directionStrategy =
                         std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
                     break;
                 case 3:
-                    _exit_strategy =
+                    _directionStrategy =
                         std::shared_ptr<DirectionStrategy>(new DirectionInRangeBottleneck());
                     break;
                 case 4:
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionGeneral());
+                    _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionGeneral());
                     break;
                 case 6:
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionFloorfield());
+                    _directionStrategy =
+                        std::shared_ptr<DirectionStrategy>(new DirectionFloorfield());
                     if(!ParseFfOpts(strategyNode)) {
                         return false;
                     };
@@ -1739,57 +1746,32 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                                "within subroom)");
                     pExitStrategy      = 9;
                     _exit_strat_number = 9;
-                    _exit_strategy =
+                    _directionStrategy =
                         std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
                     if(!ParseFfOpts(strategyNode)) {
                         return false;
                     };
-                    _config->set_dirStrategy(
-                        dynamic_cast<DirectionSubLocalFloorfield *>(_exit_strategy.get()));
                     break;
                 case 8:
-                    _exit_strategy =
+                    _directionStrategy =
                         std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
                     if(!ParseFfOpts(strategyNode)) {
                         return false;
                     };
-                    _config->set_dirStrategy(
-                        dynamic_cast<DirectionLocalFloorfield *>(_exit_strategy.get()));
                     break;
                 case 9:
-                    _exit_strategy =
+                    _directionStrategy =
                         std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
                     if(!ParseFfOpts(strategyNode)) {
                         return false;
                     };
-                    _config->set_dirStrategy(
-                        dynamic_cast<DirectionSubLocalFloorfield *>(_exit_strategy.get()));
-                    break;
-                case 10:
-                    _exit_strategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfieldTrips());
-                    if(!ParseFfOpts(strategyNode)) {
-                        return false;
-                    };
-                    _config->set_dirStrategy(
-                        dynamic_cast<DirectionSubLocalFloorfieldTrips *>(_exit_strategy.get()));
-                    break;
-                case 11:
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(
-                        new DirectionSubLocalFloorfieldTripsVoronoi());
-                    if(!ParseFfOpts(strategyNode)) {
-                        return false;
-                    };
-                    _config->set_dirStrategy(
-                        dynamic_cast<DirectionSubLocalFloorfieldTripsVoronoi *>(
-                            _exit_strategy.get()));
                     break;
                 case 12:
-                    _exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionTrain());
+                    _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionTrain());
                     break;
 
                 default:
-                    _exit_strategy =
+                    _directionStrategy =
                         std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
                     Log->Write("ERROR:\t unknown exit_crossing_strategy <%d>", pExitStrategy);
                     Log->Write("     :\t the default <%d> will be used", 2);
@@ -1801,7 +1783,43 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
         }
         Log->Write("INFO: \texit_crossing_strategy < %d >", pExitStrategy);
         _config->set_exit_strat(_exit_strat_number);
+        _directionManager->SetDirectionStrategy(_directionStrategy);
     }
+
+    // Read waiting
+    std::string queryWaiting = "waiting_strategy";
+    int waitingStrategyIndex = -1;
+    if(strategyNode.FirstChild(queryWaiting)) {
+        if(const char * attribute = strategyNode.FirstChild(queryWaiting)->FirstChild()->Value();
+           attribute) {
+            if(waitingStrategyIndex = xmltoi(attribute, -1);
+               waitingStrategyIndex > -1 && attribute == std::to_string(waitingStrategyIndex)) {
+                switch(waitingStrategyIndex) {
+                    case 1:
+                        _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingMiddle());
+                        break;
+                    case 2:
+                        _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
+                        break;
+                    default:
+                        _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
+                        Log->Write("ERROR:\t unknown waiting_strategy <%d>", waitingStrategyIndex);
+                        Log->Write("     :\t the default <%d> will be used", 2);
+                }
+            }
+        }
+    }
+
+    if(waitingStrategyIndex < 0) {
+        _waitingStrategy = nullptr;
+
+        Log->Write("INFO:\tcould not parse waiting_strategy, no waiting_strategy is used");
+    }
+    Log->Write("INFO:\twaiting_strategy < %d >", waitingStrategyIndex);
+
+    _directionManager->SetWaitingStrategy(_waitingStrategy);
+    _config->SetDirectionManager(_directionManager);
+
     return true;
 }
 
@@ -1815,7 +1833,6 @@ bool IniFileParser::ParseFfOpts(const TiXmlNode & strategyNode)
         Log->Write("INFO: \tdeltaH:\t %f", pDeltaH);
     }
 
-
     query = "wall_avoid_distance";
     if(strategyNode.FirstChild(query.c_str())) {
         const char * tmp      = strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
@@ -1823,7 +1840,6 @@ bool IniFileParser::ParseFfOpts(const TiXmlNode & strategyNode)
         _config->set_wall_avoid_distance(pWallAvoidance);
         Log->Write("INFO: \tWAD:\t %f", pWallAvoidance);
     }
-
 
     query = "use_wall_avoidance";
     if(strategyNode.FirstChild(query.c_str())) {

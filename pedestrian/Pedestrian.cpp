@@ -1369,3 +1369,13 @@ bool Pedestrian::IsOutside()
     }
     return true;
 }
+
+const Point & Pedestrian::GetWaitingPos() const
+{
+    return _waitingPos;
+}
+
+void Pedestrian::SetWaitingPos(const Point & waitingPos)
+{
+    _waitingPos = waitingPos;
+}
