@@ -28,6 +28,8 @@
 
 #include "IO/OutputHandler.h"
 #include "SubRoom.h"
+#include "general/Format.h"
+#include "general/Logger.h"
 
 #include <memory>
 #include <sstream>
@@ -129,8 +131,10 @@ SubRoom * Room::GetSubRoom(int index) const
 {
     //todo: the check is done in _subRooms.at(index);
     if(_subRooms.count(index) == 0) {
-        Log->Write(
-            "ERROR: Room::GetSubRoom() No subroom id [%d] present in room id [%d] ", index, _id);
+        Logging::Error(fmt::format(
+            check_fmt("Room::GetSubRoom() No subroom id [{}] present in room id [{}]."),
+            index,
+            _id));
         return nullptr;
     }
     return _subRooms.at(index).get();
@@ -160,20 +164,6 @@ void Room::AddSubRoom(SubRoom * r)
  Ein-Ausgabe
  ************************************************************/
 
-
-void Room::WriteToErrorLog() const
-{
-    char tmp[CLENGTH];
-    std::string s;
-    sprintf(tmp, "\tRaum: %d [%s]:\n", _id, _caption.c_str());
-    s.append(tmp);
-    Log->Write(s);
-    // SubRooms
-    for(int i = 0; i < GetNumberOfSubRooms(); i++) {
-        SubRoom * sub = GetSubRoom(i);
-        sub->WriteToErrorLog();
-    }
-}
 
 const std::vector<int> & Room::GetAllTransitionsIDs() const
 {
