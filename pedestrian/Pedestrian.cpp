@@ -116,6 +116,7 @@ Pedestrian::Pedestrian()
     _FED_Heat         = 0.0;
     _WalkingSpeed     = nullptr;
     _ToxicityAnalysis = nullptr;
+    _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
 }
 
 //const shared_ptr<ToxicityAnalysis> &Pedestrian::getToxicityAnalysis() { return _ToxicityAnalysis; }
@@ -196,6 +197,7 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _FED_Heat         = 0.0;
     _ToxicityAnalysis = nullptr;
     _WalkingSpeed     = nullptr;
+    _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
 }
 
 
