@@ -1813,7 +1813,8 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
     // Read waiting
     std::string queryWaiting = "waiting_strategy";
     int waitingStrategyIndex = -1;
-    if(strategyNode.FirstChild(queryWaiting)) {
+    if(strategyNode.FirstChild(queryWaiting) &&
+       strategyNode.FirstChild(queryWaiting)->FirstChild()) {
         if(const char * attribute = strategyNode.FirstChild(queryWaiting)->FirstChild()->Value();
            attribute) {
             if(waitingStrategyIndex = xmltoi(attribute, -1);
@@ -1827,8 +1828,9 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                         break;
                     default:
                         _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
-                        Log->Write("ERROR:\t unknown waiting_strategy <%d>", waitingStrategyIndex);
-                        Log->Write("     :\t the default <%d> will be used", 2);
+                        Logging::Error(fmt::format(
+                            check_fmt("Unknown waiting_strategy <{}>"), waitingStrategyIndex));
+                        Logging::Warning("The default waiting_strategy <2> will be used");
                 }
             }
         }
@@ -1836,10 +1838,10 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
 
     if(waitingStrategyIndex < 0) {
         _waitingStrategy = nullptr;
-
-        Log->Write("INFO:\tcould not parse waiting_strategy, no waiting_strategy is used");
+        Logging::Info("Could not parse waiting_strategy, no waiting_strategy is used.");
+    } else {
+        Logging::Info(fmt::format(check_fmt("Waiting_strategy <{:d}>"), waitingStrategyIndex));
     }
-    Log->Write("INFO:\twaiting_strategy < %d >", waitingStrategyIndex);
 
     _directionManager->SetWaitingStrategy(_waitingStrategy);
     _config->SetDirectionManager(_directionManager);

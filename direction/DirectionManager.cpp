@@ -29,8 +29,6 @@
 
 void DirectionManager::Init(Building * building)
 {
-    std::cout << "DirectionManager::Init(Building*)" << std::endl;
-
     _directionStrategy->Init(building);
     if(_waitingStrategy) {
         _waitingStrategy->Init(building);

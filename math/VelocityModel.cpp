@@ -143,8 +143,8 @@ void VelocityModel::ComputeNextTimeStep(
         nThreads = 1; // not worthy to parallelize
 
 
-    //TODO richtig parallelisieren!
-    //#pragma omp parallel default(shared) num_threads(nThreads)
+//TODO richtig parallelisieren!
+#pragma omp parallel default(shared) num_threads(nThreads)
     {
         std::vector<Point> result_acc = std::vector<Point>();
         result_acc.reserve(nSize);
