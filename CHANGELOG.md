@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to `jpsreport` will be documented in this file.
 
-## v0.8.5 [under development]
+## v0.8.5 [04.11.2019]
 
 ### Added
 - Method J: calculation of Voronoi density and spatial mean velocity
