@@ -143,8 +143,8 @@ void VelocityModel::ComputeNextTimeStep(
         nThreads = 1; // not worthy to parallelize
 
 
-        //TODO richtig parallelisieren!
-#pragma omp parallel default(shared) num_threads(nThreads)
+    //TODO richtig parallelisieren!
+    //#pragma omp parallel default(shared) num_threads(nThreads)
     {
         std::vector<Point> result_acc = std::vector<Point>();
         result_acc.reserve(nSize);
@@ -327,10 +327,11 @@ void VelocityModel::ComputeNextTimeStep(
 Point VelocityModel::e0(Pedestrian * ped, Room * room) const
 {
     Point target;
-    if(_direction && ped->GetExitLine())
-        target = _direction->GetTarget(
-            room, ped); // target is where the ped wants to be after the next timestep
-    else {              //@todo: we need a model for waiting pedestrians
+
+    if(_direction && ped->GetExitLine()) {
+        // target is where the ped wants to be after the next timestep
+        target = _direction->GetTarget(room, ped);
+    } else { //@todo: we need a model for waiting pedestrians
         std::cout << ped->GetID() << " VelocityModel::e0 Ped has no navline.\n";
         //exit(EXIT_FAILURE);
         // set random destination
@@ -357,7 +358,7 @@ Point VelocityModel::e0(Pedestrian * ped, Room * room) const
        (dynamic_cast<DirectionLocalFloorfield *>(_direction->GetDirectionStrategy().get())) ||
        (dynamic_cast<DirectionSubLocalFloorfield *>(_direction->GetDirectionStrategy().get()))) {
         desired_direction = target - pos;
-        if(desired_direction.NormSquare() < 0.25) {
+        if(desired_direction.NormSquare() < 0.25 && !ped->IsWaiting()) {
             desired_direction = lastE0;
             ped->SetLastE0(lastE0);
             //              Log->Write("desired_direction: %f    %f", desired_direction._x, desired_direction._y);
