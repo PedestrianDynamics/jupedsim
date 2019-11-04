@@ -56,7 +56,6 @@ Method_I::Method_I()
      _fIndividualFD = nullptr;
      _calcIndividualFD = true;
      _areaForMethod_I = nullptr;
-     _plotVoronoiCellData=false;
      _isOneDimensional=false;
      _startFrame =-1;
      _stopFrame = -1;
@@ -66,10 +65,7 @@ Method_I::~Method_I()
 {
 
 }
-// auto outOfRange = [&](int number, int start, int end) -> bool
-// {
-//      return (number < start || number > end);
-// };
+
 bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, const double& zPos_measureArea)
 {
      bool return_value = true;
@@ -117,8 +113,6 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
           }
      }
      Log->Write("------------------------ Analyzing with Method I -----------------------------");
-     //for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
-     //for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
 
      for(auto ite: _peds_t)
      {
@@ -143,7 +137,6 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
                Log->Write("Warning:\t no pedestrians in frame <%d>", frameNr);
                continue;
           }
-          //vector int to_remove
           //------------------------------Remove peds outside geometry------------------------------------------
           for( int i=0;i<(int)IdInFrame.size();i++)
           {
@@ -160,10 +153,8 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
 
                }
           }
-          // int NumPeds = IdInFrame.size();
-          // std::cout << "numpeds = " << NumPeds << "\n";
 
-//---------------------------------------------------------------------------------------------------------------
+          //---------------------------------------------------------------------------------------------------------------
           if(_isOneDimensional)
           {
                CalcVoronoiResults1D(XInFrame, VInFrame, IdInFrame, _areaForMethod_I->_poly,str_frid);
@@ -199,16 +190,6 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
                               GetIndividualFD(polygons,VInFrame, IdInFrame,  str_frid, XInFrame, YInFrame, ZInFrame); //
                          }
                     }
-                    // ToDo: is obsolete
-//                    if(_getProfile)
-//                    { //	field analysis
-//                         GetProfiles(str_frid, polygons, VInFrame); // TODO polygons_id
-//                    }
-                    // ToDo: is obsolete
-//                    if(_outputVoronoiCellData)
-//                     { // output the Voronoi polygons of a frame
-//                         OutputVoroGraph(str_frid, polygons_id, NumPeds,VInFrame);
-//                     }
                }
                else
                {
@@ -226,39 +207,6 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
      }
     return return_value;
 }
-
-// ToDo: this function OpenFileMethodI is obsolete - can be deleted
-
-//     bool Method_I::OpenFileMethodI()
-//     {
-//
-//          std::string voroLocation(VORO_LOCATION);
-//          fs::path tmp("_id_"+_measureAreaId+".dat");
-//          tmp =  _outputLocation / voroLocation / ("rho_v_Voronoi_" + _trajName.string() + tmp.string());
-//          // _outputLocation.string() +  voroLocation+"rho_v_Voronoi_"+_trajName+"_id_"+_measureAreaId+".dat";
-//          string results_V= tmp.string();
-//
-//
-//          if((_fVoronoiRhoV=Analysis::CreateFile(results_V))==nullptr)
-//          {
-//               Log->Write("ERROR: \tcannot open the file to write Voronoi density and velocity\n");
-//               return false;
-//          }
-//          else
-//          {
-//               if(_isOneDimensional)
-//               {
-//                    fprintf(_fVoronoiRhoV,"#framerate:\t%.2f\n\n#Frame \t Voronoi density(m^(-1))\t	Voronoi velocity(m/s)\n",_fps);
-//               }
-//               else
-//               {
-//                    fprintf(_fVoronoiRhoV,"#framerate:\t%.2f\n\n#Frame \t Voronoi density(m^(-2))\t	Voronoi velocity(m/s)\n",_fps);
-//               }
-//               return true;
-//          }
-//     }
-
-
 
      bool Method_I::OpenFileIndividualFD()
      {
@@ -300,276 +248,14 @@ bool Method_I::Process(const PedData& peddata,const fs::path& scriptsLocation, c
 //todo HH
           polygons_id = vd.cutPolygonsWithGeometry(polygons_id, _geoPoly, XInFrame, YInFrame);
           // todo HH
-          // std:: cout  << dsv(_geoPoly) << "\n"; // ToDo: obsolete ?
           for(auto && p:polygons_id)
           {
                poly = p.first;
                ReducePrecision(poly);
                // TODO update polygon_id?
           }
-          // std:: cout << " GetPolygons leave " << polygons_id.size() << "\n"; // ToDo: obsolete ?
           return polygons_id;
      }
-/**
- * Output the Voronoi density and velocity in the corresponding file
- */
-
-// ToDo: this function OutputVoronoiResults is obsolete - can be deleted
-
-//     void Method_I::OutputVoronoiResults(const vector<polygon_2d>&  polygons, const string& frid, const vector<double>& VInFrame)
-//     {
-//          double VoronoiVelocity=1;
-//          double VoronoiDensity=-1;
-//          std::tie(VoronoiDensity, VoronoiVelocity) = GetVoronoiDensityVelocity(polygons,VInFrame,_areaForMethod_I->_poly);
-//          fprintf(_fVoronoiRhoV,"%s\t%.3f\t%.3f\n",frid.c_str(),VoronoiDensity, VoronoiVelocity);
-//     }
-
-/*
- * calculate the voronoi density and velocity according to voronoi cell of each pedestrian and their instantaneous velocity "Velocity".
- * input: voronoi cell and velocity of each pedestrian and the measurement area
- * output: the voronoi density and velocity in the measurement area (tuple)
- */
-
-// ToDo: this function GetVoronoiDensityVelocity obsolete - can be deleted
-
-//     std::tuple<double,double> Method_I::GetVoronoiDensityVelocity(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const polygon_2d & measureArea)
-//     {
-//          double meanV=0;
-//          double density=0;
-//          int temp=0;
-//          for (auto && polygon_iterator:polygon)
-//          {
-//               polygon_list v;
-//               intersection(measureArea, polygon_iterator, v);
-//               if(!v.empty())
-//               {
-//                    meanV+=Velocity[temp]*area(v[0]);
-//                    density+=area(v[0])/area(polygon_iterator);
-//                    if((area(v[0]) - area(polygon_iterator))>J_EPS)
-//                    {
-//                         std::cout<<"----------------------Now calculating density-velocity!!!-----------------\n ";
-//                         std::cout<<"measure area: \t"<<std::setprecision(16)<<dsv(measureArea)<<"\n";
-//                         std::cout<<"Original polygon:\t"<<std::setprecision(16)<<dsv(polygon_iterator)<<"\n";
-//                         std::cout<<"intersected polygon: \t"<<std::setprecision(16)<<dsv(v[0])<<"\n";
-//                         std::cout<<"this is a wrong result in density calculation\t "<<area(v[0])<<'\t'<<area(polygon_iterator)<<  "  (diff=" << (area(v[0]) - area(polygon_iterator)) << ")" << "\n";
-//                    }
-//               }
-//               temp++;
-//          }
-//          meanV = meanV/area(measureArea);
-//          density = density/(area(measureArea)*CMtoM*CMtoM);
-//          return std::make_tuple(density, meanV);
-//     }
-
-// ToDo: this function GetProfiles is obsolete - can be deleted
-// and velocity is calculated for every frame
-//     void Method_I::GetProfiles(const string& frameId, const vector<polygon_2d>& polygons, const vector<double>& velocity)
-//     {
-//          std::string voroLocation(VORO_LOCATION);
-//          fs::path tmp("field");
-//          fs::path vtmp ("velocity");
-//          fs::path dtmp("density");
-//          tmp = _outputLocation / voroLocation / tmp;
-//          vtmp = tmp / vtmp / ("Prf_v_"+_trajName.string()+"_id_"+_measureAreaId+"_"+frameId+".dat");
-//          dtmp = tmp / dtmp / ("Prf_d_"+_trajName.string()+"_id_"+_measureAreaId+"_"+frameId+".dat");
-//          //string voronoiLocation=_outputLocation.string() + voroLocation+"field/";
-//
-//          // string Prfvelocity=voronoiLocation+"/velocity/Prf_v_"+_trajName.string()+"_id_"+_measureAreaId+"_"+frameId+".dat";
-//          // string Prfdensity=voronoiLocation+"/density/Prf_d_"+_trajName.string()+"_id_"+_measureAreaId+"_"+frameId+".dat";
-//          string Prfvelocity = vtmp.string();
-//          string Prfdensity = dtmp.string();
-//
-//          FILE *Prf_velocity;
-//          if((Prf_velocity=Analysis::CreateFile(Prfvelocity))==nullptr) {
-//               Log->Write("cannot open the file <%s> to write the field data\n",Prfvelocity.c_str());
-//               exit(EXIT_FAILURE);
-//          }
-//          FILE *Prf_density;
-//          if((Prf_density=Analysis::CreateFile(Prfdensity))==nullptr) {
-//               Log->Write("cannot open the file to write the field density\n");
-//               exit(EXIT_FAILURE);
-//          }
-//
-//          int NRow = (int)ceil((_geoMaxY-_geoMinY)/_grid_size_Y); // the number of rows that the geometry will be discretized for field analysis
-//          int NColumn = (int)ceil((_geoMaxX-_geoMinX)/_grid_size_X); //the number of columns that the geometry will be discretized for field analysis
-//          for(int row_i=0; row_i<NRow; row_i++) { //
-//               for(int colum_j=0; colum_j<NColumn; colum_j++) {
-//                    polygon_2d measurezoneXY;
-//                    {
-//                         const double coor[][2] = {
-//                              {_geoMinX+colum_j*_grid_size_X,_geoMaxY-row_i*_grid_size_Y}, {_geoMinX+colum_j*_grid_size_X+_grid_size_X,_geoMaxY-row_i*_grid_size_Y}, {_geoMinX+colum_j*_grid_size_X+_grid_size_X, _geoMaxY-row_i*_grid_size_Y-_grid_size_Y},
-//                              {_geoMinX+colum_j*_grid_size_X, _geoMaxY-row_i*_grid_size_Y-_grid_size_Y},
-//                              {_geoMinX+colum_j*_grid_size_X,_geoMaxY-row_i*_grid_size_Y} // closing point is opening point
-//                         };
-//                         assign_points(measurezoneXY, coor);
-//                    }
-//                    correct(measurezoneXY);     // Polygons should be closed, and directed clockwise. If you're not sure if that is the case, call this function
-//
-//                    double densityXY;
-//                    double velocityXY;
-//                    std::tie(densityXY, velocityXY) = GetVoronoiDensityVelocity(polygons,velocity,measurezoneXY);
-//                    fprintf(Prf_density,"%.3f\t",densityXY);
-//                    fprintf(Prf_velocity,"%.3f\t",velocityXY);
-//               }
-//               fprintf(Prf_density,"\n");
-//               fprintf(Prf_velocity,"\n");
-//          }
-//          fclose(Prf_velocity);
-//          fclose(Prf_density);
-//     }
-
-// ToDo: this function OutputVoroGraph is obsolete - can be deleted
-
-//     void Method_I::OutputVoroGraph(const string & frameId,  std::vector<std::pair<polygon_2d, int> >& polygons_id, int numPedsInFrame,const vector<double>& VInFrame)
-//     {
-//          //string voronoiLocation=_projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/id_"+_measureAreaId;
-//
-//          fs::path voroLocPath(_outputLocation);
-//          fs::path voro_location_path (VORO_LOCATION); //
-//          // this MACRO to
-//          // path. Maybe
-//          // remove the MACRO?
-//          voroLocPath = voroLocPath / voro_location_path /  "VoronoiCell";
-//          polygon_2d poly;
-//          if(!fs::exists(voroLocPath))
-//          {
-//               if(!fs::create_directories(voroLocPath))
-//               {
-//                    Log->Write("ERROR:\tcan not create directory <%s>", voroLocPath.string().c_str());
-//                    std::cout << "can not create directory "<< voroLocPath.string().c_str() << "\n";
-//                    exit(EXIT_FAILURE);
-//               }
-//               else
-//                    std::cout << "create directory "<< voroLocPath.string().c_str() << "\n";
-//          }
-//
-//          fs::path polygonPath=voroLocPath / "polygon";
-//          if(!fs::exists(polygonPath))
-//          {
-//               if(!fs::create_directory(polygonPath))
-//               {
-//                    Log->Write("ERROR:\tcan not create directory <%s>", polygonPath.string().c_str());
-//                    exit(EXIT_FAILURE);
-//               }
-//          }
-//          fs::path trajFileName(_trajName.string()+"_id_"+_measureAreaId+"_"+frameId+".dat");
-//          fs::path p =  polygonPath / trajFileName;
-//          string polygon = p.string();
-//          ofstream polys (polygon.c_str());
-//
-//          if(polys.is_open())
-//          {
-//               //for(vector<polygon_2d> polygon_iterator=polygons.begin(); polygon_iterator!=polygons.end(); polygon_iterator++)
-//               for(auto && polygon_id:polygons_id)
-//               {
-//                    poly = polygon_id.first;
-//                    for(auto&& point:poly.outer())
-//                    {
-//                         point.x(point.x()*CMtoM);
-//                         point.y(point.y()*CMtoM);
-//                    }
-//                    for(auto&& innerpoly:poly.inners())
-//                    {
-//                         for(auto&& point:innerpoly)
-//                         {
-//                              point.x(point.x()*CMtoM);
-//                              point.y(point.y()*CMtoM);
-//                         }
-//                    }
-//                    polys << polygon_id.second << " | " << dsv(poly) << endl;
-//                    //polys  <<dsv(poly)<< endl;
-//               }
-//          }
-//          else
-//          {
-//               Log->Write("ERROR:\tcannot create the file <%s>",polygon.c_str());
-//               exit(EXIT_FAILURE);
-//          }
-//          fs::path speedPath=voroLocPath / "speed";
-//          if(!fs::exists(speedPath))
-//               if(!fs::create_directory(speedPath))
-//               {
-//                    Log->Write("ERROR:\tcan not create directory <%s>", speedPath.string().c_str());
-//                    exit(EXIT_FAILURE);
-//               }
-//          fs::path pv = speedPath /trajFileName;
-//          string v_individual= pv.string();
-//          ofstream velo (v_individual.c_str());
-//          if(velo.is_open())
-//          {
-//               for(int pts=0; pts<numPedsInFrame; pts++)
-//               {
-//                    velo << fabs(VInFrame[pts]) << endl;
-//               }
-//          }
-//          else
-//          {
-//               Log->Write("ERROR:\tcannot create the file <%s>",pv.string().c_str());
-//               exit(EXIT_FAILURE);
-//          }
-//
-//          *//*string point=voronoiLocation+"/points"+_trajName+"_id_"+_measureAreaId+"_"+frameId+".dat";
-//            ofstream points (point.c_str());
-//            if( points.is_open())
-//            {
-//            for(int pts=0; pts<numPedsInFrame; pts++)
-//            {
-//            points << XInFrame[pts]*CMtoM << "\t" << YInFrame[pts]*CMtoM << endl;
-//            }
-//            }
-//            else
-//            {
-//            Log->Write("ERROR:\tcannot create the file <%s>",point.c_str());
-//            exit(EXIT_FAILURE);
-//            }
-//
-//          if(_plotVoronoiCellData)
-//          {
-//               string parameters_rho=" " + _scriptsLocation.string()+"/_Plot_cell_rho.py -f \""+ voroLocPath.string() + "\" -n "+ _trajName.string()+"_id_"+_measureAreaId+"_"+frameId+
-//                    " -g "+_geometryFileName.string()+" -p "+_trajectoryPath.string();
-//               string parameters_v=" " + _scriptsLocation.string()+"/_Plot_cell_v.py -f \""+ voroLocPath.string() + "\" -n "+ _trajName.string() + "_id_"+_measureAreaId+"_"+frameId+
-//                    " -g "+_geometryFileName.string()+" -p "+_trajectoryPath.string();
-//
-//               if(_plotVoronoiIndex)
-//                    parameters_rho += " -i";
-//
-//               Log->Write("INFO:\t%s",parameters_rho.c_str());
-//               Log->Write("INFO:\tPlotting Voronoi Cell at the frame <%s>",frameId.c_str());
-//               parameters_rho = PYTHON + parameters_rho;
-//               parameters_v = PYTHON + parameters_v;
-//               system(parameters_rho.c_str());
-//               system(parameters_v.c_str());
-//          }
-//          //points.close();
-//          polys.close();
-//          velo.close();
-//     }
-
-
-// ToDo: this function GetIndividualFD is obsolete - can be deleted
-
-//     void Method_I::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const vector<int>& Id, const string& frid)
-//     {
-//          double uniquedensity=0;
-//          double uniquevelocity=0;
-//          int uniqueId=0;
-//          int temp=0;
-//          for (const auto & polygon_iterator:polygon)
-//          {
-//               string polygon_str = polygon_to_string(polygon_iterator);
-//               uniquedensity=1.0/(area(polygon_iterator)*CMtoM*CMtoM);
-//               uniquevelocity=Velocity[temp];
-//               uniqueId=Id[temp];
-//               fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\t%s\n",
-//                       frid.c_str(),
-//                       uniqueId,
-//                       uniquedensity,
-//                       uniquevelocity,
-//                       polygon_str.c_str()
-//                    );
-//               temp++;
-//          }
-//     }
 
 void Method_I::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const vector<int>& Id, const string& frid, vector<double>& XInFrame, vector<double>& YInFrame, vector<double>& ZInFrame)
 {
@@ -652,28 +338,9 @@ void Method_I::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<d
           _grid_size_Y = y;
      }
 
-
-// ToDo: obsolete ?
-
-//     void Method_I::SetCalculateProfiles(bool calcProfile)
-//     {
-//          _getProfile = false ;
-//     }
-
      void Method_I::SetOutputVoronoiCellData(bool outputCellData)
      {
           _outputVoronoiCellData = outputCellData;
-     }
-
-// ToDo: obsolete ?
-//     void Method_I::SetPlotVoronoiGraph(bool plotVoronoiGraph)
-//     {
-//          _plotVoronoiCellData = plotVoronoiGraph;
-//     }
-
-     void Method_I::SetPlotVoronoiIndex(bool plotVoronoiIndex)
-     {
-          _plotVoronoiIndex = plotVoronoiIndex;
      }
 
      void Method_I::SetMeasurementArea (MeasurementArea_B* area)
@@ -694,22 +361,6 @@ void Method_I::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<d
                point.y(round(point.y() * 100000000000.0) / 100000000000.0);
           }
      }
-
-// ToDo: obsolete ?
-
-//     bool Method_I::IsPedInGeometry(int frames, int peds, double **Xcor, double **Ycor, int  *firstFrame, int *lastFrame)
-//     {
-//          for(int i=0; i<peds; i++)
-//               for(int j =0; j<frames; j++)
-//               {
-//                    if (j>firstFrame[i] && j< lastFrame[i] && (false==within(point_2d(round(Xcor[i][j]), round(Ycor[i][j])), _geoPoly)))
-//                    {
-//                         Log->Write("Error:\tPedestrian at the position <x=%.4f, y=%.4f> is outside geometry. Please check the geometry or trajectory file!", Xcor[i][j]*CMtoM, Ycor[i][j]*CMtoM );
-//                         return false;
-//                    }
-//               }
-//          return true;
-//     }
 
      void Method_I::CalcVoronoiResults1D(vector<double>& XInFrame, vector<double>& VInFrame, vector<int>& IdInFrame, const polygon_2d & measureArea,const string& frid)
      {

@@ -1,6 +1,30 @@
 # Change Log
 All notable changes to `jpsreport` will be documented in this file.
 
+## v0.8.5 [04.11.2019]
+
+### Added
+- Method J: calculation of Voronoi density and spatial mean velocity
+
+### Changed
+- Update demo-files
+    - bottleneck
+    - corridor
+    - corridor_with_obstacle
+    - crossing
+    - T-Junction
+
+### Deprecated
+
+### Removed
+- Removed unused code
+- Removed option to plot timeseries for Methods A, B, D and I
+- Removed option to plot Voronoi diagrams with index
+
+### Fixed
+- Cmake for macOS 10.15 (Catalina)
+- A bug calling `method_B` is fixed.
+
 ## v0.8.4 [10.09.2019]
 ### Added
 - Option brew install ([for more information](https://github.com/JuPedSim/homebrew-jps/blob/master/README.md))

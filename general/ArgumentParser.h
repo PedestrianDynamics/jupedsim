@@ -53,7 +53,6 @@ class ArgumentParser {
 private:
 
      fs::path _geometryFileName;
-     fs::path _scriptsLocation;
      fs::path _errorLogFile;
      fs::path _trajectoriesLocation;
      fs::path _trajectoriesFilename;
@@ -70,15 +69,10 @@ private:
      bool _isMethodC;
      bool _isMethodD;
      bool _isMethodI;
+     bool _isMethodJ;
      bool _isCutByCircle;
      double _cutRadius;
      int _circleEdges;
-     bool _isOutputGraph;
-     bool _isPlotGraph;
-     bool _isPlotIndex;
-     /*bool _isPlotTimeSeriesA;
-       bool _isPlotTimeSeriesC;
-       bool _isPlotTimeSeriesD;*/
      bool _isOneDimensional;
      bool _isGetProfile;
      double _steadyStart;
@@ -90,6 +84,7 @@ private:
      std::vector<int> _areaIDforMethodC;
      std::vector<int> _areaIDforMethodD;
      std::vector<int> _areaIDforMethodI;
+     std::vector<int> _areaIDforMethodJ;
      float _grid_size_X;
      float _grid_size_Y;
      int _log;
@@ -97,11 +92,9 @@ private:
      std::vector<int> _stop_frames_MethodD;
      std::vector<int> _start_frames_MethodI;
      std::vector<int> _stop_frames_MethodI;
+     std::vector<int> _start_frames_MethodJ;
+     std::vector<int> _stop_frames_MethodJ;
      std::vector<bool> _individual_FD_flags;
-     std::vector<bool> _isPlotTimeSeriesA;
-     std::vector<bool> _isPlotTimeSeriesC;
-     std::vector<bool> _isPlotTimeSeriesD;
-     std::vector<bool> _isPlotTimeSeriesI;
      std::vector<int> _timeIntervalA;
 
 
@@ -114,7 +107,6 @@ public:
      const fs::path& GetTrajectoriesFilename() const;
      const std::vector<fs::path>& GetTrajectoriesFiles() const;
      const fs::path& GetTrajectoriesLocation() const;
-     const fs::path& GetScriptsLocation() const;
      const FileFormat& GetFileFormat() const;
      const fs::path& GetGeometryFilename() const;
      const fs::path& GetErrorLogFile() const;
@@ -137,26 +129,24 @@ public:
      bool GetIsMethodC() const;
      bool GetIsMethodD() const;
      bool GetIsMethodI() const;
+     bool GetIsMethodJ() const;
      std::vector<int> GetAreaIDforMethodA() const;
      std::vector<int> GetAreaIDforMethodB() const;
      std::vector<int> GetAreaIDforMethodC() const;
      std::vector<int> GetAreaIDforMethodD() const;
      std::vector<int> GetAreaIDforMethodI() const;
+     std::vector<int> GetAreaIDforMethodJ() const;
      std::vector<int> GetStartFramesMethodD() const;
      std::vector<int> GetStopFramesMethodD() const;
      std::vector<int> GetStartFramesMethodI() const;
      std::vector<int> GetStopFramesMethodI() const;
+     std::vector<int> GetStartFramesMethodJ() const;
+     std::vector<int> GetStopFramesMethodJ() const;
      std::vector<bool> GetIndividualFDFlags() const;
      bool GetIsCutByCircle() const;
      double GetCutRadius() const;
      int GetCircleEdges() const;
      bool GetIsOutputGraph() const;
-     bool GetIsPlotGraph() const;
-     bool GetIsPlotIndex() const;
-     std::vector<bool> GetIsPlotTimeSeriesA() const;
-     std::vector<bool> GetIsPlotTimeSeriesC() const;
-     std::vector<bool> GetIsPlotTimeSeriesD() const;
-     std::vector<bool> GetIsPlotTimeSeriesI() const;
      bool GetIsOneDimensional() const;
      bool GetIsIndividualFD() const;
      polygon_2d GetAreaIndividualFD() const;

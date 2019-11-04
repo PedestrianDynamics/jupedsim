@@ -1,6 +1,6 @@
 #description: 2009_AO_300
 #framerate: 16
-#geometry: geometry.xml
+#geometry: geo_AO_300.xml
 #ID: the agent ID
 #FR: the current frame
 #X,Y,Z: the agents coordinates (in metres)

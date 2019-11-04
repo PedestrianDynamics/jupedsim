@@ -103,6 +103,7 @@ private:
      //polygon_2d _geoPoly;
      std::map<int, polygon_2d> _geoPolyMethodD;
      std::map<int, polygon_2d> _geoPolyMethodI;
+     std::map<int, polygon_2d> _geoPolyMethodJ;
 
      double _grid_size_X;      // the size of the grid
      double _grid_size_Y;
@@ -118,27 +119,21 @@ private:
      bool _DoesUseMethodD;       // Method D--Voronoi method
      bool _DoesUseMethodI;       // Method I--Voronoi method  modified
                                  // no measurement are)
+     bool _DoesUseMethodJ;
      std::vector<int> _StartFramesMethodD;
      std::vector<int> _StopFramesMethodD;
 
      std::vector<int> _StartFramesMethodI;
      std::vector<int> _StopFramesMethodI;
 
+     std::vector<int> _StartFramesMethodJ;
+     std::vector<int> _StopFramesMethodJ;
+
      std::vector<bool> _IndividualFDFlags;
      bool _cutByCircle;       //Adjust whether cut each original voronoi cell by a circle
      double _cutRadius;
      int _circleEdges;
      bool _getProfile;        // Whether make field analysis or not
-     bool _outputGraph;       // Whether output the data for plot the voronoi diagram each frame
-     bool _plotGraph;       // Whether plot the voronoi diagram each
-                            // frame. if (outputGraph==true)
-     bool _plotIndex;       // Whether plot the voronoi diagram each
-                            // frame with index of pedesrians
-                            // if (outputGraph==true and _polotGraph==true)
-     std::vector<bool> _plotTimeseriesA;
-     std::vector<bool> _plotTimeseriesC;
-     std::vector<bool> _plotTimeseriesD;
-     std::vector<bool> _plotTimeseriesI;
      bool _isOneDimensional;
      bool _calcIndividualFD;  //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
      std::string _vComponent;        // to mark whether x, y or x and y coordinate are used when calculating the velocity
@@ -158,6 +153,7 @@ private:
                                                        // the zpos of the
                                                        // measurement are, even
                                                        // if we don't use its polygon
+     std::vector<MeasurementArea_B*> _areaForMethod_J;
 };
 
 #endif /*ANALYSIS_H_*/

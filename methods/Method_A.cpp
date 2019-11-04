@@ -45,7 +45,6 @@ Method_A::Method_A()
      _deltaT = 100;
      _fps=16;
      _areaForMethod_A = nullptr;
-     _plotTimeSeries = false;
      _minId=0;
 }
 
@@ -129,21 +128,6 @@ void Method_A::WriteFile_N_t(string data)
           string METHOD_A_LOCATION =tmp2.string();
           //string file_N_t ="Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
           string file_N_t = fN_t; //@todo: this is redundant
-          if(_plotTimeSeries)
-          {
-               string parameters_N_t=" " + _scriptsLocation.string()+"/_Plot_N_t.py -p  \""+ METHOD_A_LOCATION + "\" -n "+file_N_t;
-               parameters_N_t = PYTHON + parameters_N_t;
-               std::cout  << ">> <"<< parameters_N_t << ">\n";
-
-               int res = system(parameters_N_t.c_str());
-               if(res)
-               {
-                   Log->Write("ERROR:\tPlotting N-t diagram not success! Check your python environment.");
-               } else
-               {
-                   Log->Write("INFO:\tPlotting N-t diagram success!");
-               }
-          }
      }
      else
      {
@@ -196,7 +180,6 @@ void Method_A::FlowRate_Velocity(int fps, const vector<int>& AccumPeds, const ve
      FILE *fFD_FlowVelocity;
      fs::path tmp ("_id_"+_measureAreaId+".dat");
      tmp = _outputLocation / "Fundamental_Diagram" / "FlowVelocity" / ("FDFlowVelocity_" + _trajName.string() + tmp.string());
-     //string fdFlowVelocity = _outputLocation.string() + "Fundamental_Diagram/FlowVelocity/FDFlowVelocity_"+_trajName+"_id_"+_measureAreaId+".dat";
      string fdFlowVelocity = tmp.string();
 
      if((fFD_FlowVelocity=Analysis::CreateFile(fdFlowVelocity))==nullptr) {
@@ -256,9 +239,4 @@ void Method_A::SetMeasurementArea (MeasurementArea_L* area)
 void Method_A::SetTimeInterval(int deltaT)
 {
      _deltaT = deltaT;
-}
-
-void Method_A::SetPlotTimeSeries(bool plotTimeseries)
-{
-     _plotTimeSeries = plotTimeseries;
 }

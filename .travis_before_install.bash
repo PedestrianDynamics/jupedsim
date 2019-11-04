@@ -13,3 +13,5 @@ elif [ "$TRAVIS_OS_NAME" == "osx" ]
 then
     echo "not yet implemented."
 fi
+
+pip install --user --upgrade pip

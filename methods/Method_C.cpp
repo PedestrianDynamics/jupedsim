@@ -56,21 +56,22 @@ bool Method_C::Process (const PedData& peddata, const double& zPos_measureArea)
      _fps = peddata.GetFps();
      OpenFileMethodC();
      Log->Write("------------------------Analyzing with Method C-----------------------------");
-     for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
+     for(auto ite=_peds_t.begin();ite!=_peds_t.end();ite++)
      {
-          int frameNr = ite->first;
-          int frid = frameNr  + _minFrame;
+       int frameNr = ite->first;
+       int frid = frameNr  + _minFrame;
 
-          if(!(frid%100))
-          {
-               Log->Write("frame ID = %d",frid);
-          }
-          vector<int> ids=_peds_t[frameNr];
-          vector<int> IdInFrame = peddata.GetIdInFrame(frameNr, ids, zPos_measureArea);
-          const vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids, zPos_measureArea);
-          const vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids, zPos_measureArea);
-          const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
-          OutputClassicalResults(frameNr, IdInFrame.size(),XInFrame,YInFrame,VInFrame);
+       if(!(frid%100))
+       {
+         Log->Write("frame ID = %d",frid);
+       }
+
+       vector<int> ids=_peds_t[frameNr];
+       vector<int> IdInFrame = peddata.GetIdInFrame(frameNr, ids, zPos_measureArea);
+       const vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids, zPos_measureArea);
+       const vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids, zPos_measureArea);
+       const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
+       OutputClassicalResults(frameNr, IdInFrame.size(),XInFrame,YInFrame,VInFrame);
      }
      fclose(_fClassicRhoV);
      return true;
@@ -80,8 +81,8 @@ void Method_C::OpenFileMethodC()
 {
      fs::path tmp("_id_"+_measureAreaId+".dat");
      tmp = _outputLocation / "Fundamental_Diagram" / "Classical_Voronoi" / ("rho_v_Classic_" + _trajName.string() + tmp.string());
-//_outputLocation.string()+"Fundamental_Diagram/Classical_Voronoi/rho_v_Classic_"+_trajName+"_id_"+_measureAreaId+".dat";
      string results_C= tmp.string();
+
      if((_fClassicRhoV=Analysis::CreateFile(results_C))==nullptr) {
           Log->Write("Warning:\tcannot open file %s to write classical density and velocity\n", results_C.c_str());
           exit(EXIT_FAILURE);

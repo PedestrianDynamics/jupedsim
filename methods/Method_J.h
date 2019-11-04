@@ -1,8 +1,8 @@
 /**
- * \file        Method_D.h
- * \date        Oct 10, 2014
- * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum Juelich GmbH. All rights reserved.
+ * \file        Method_J.h
+ * \date        Oct 29, 2019
+ * \version     v0.8.5
+ * \copyright   <2009-2019> Forschungszentrum Juelich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -25,8 +25,8 @@
  *
  **/
 
-#ifndef METHOD_D_H_
-#define METHOD_D_H_
+#ifndef Method_J_H_
+#define Method_J_H_
 
 #include "PedData.h"
 #include "../Analysis.h"
@@ -39,11 +39,11 @@
 #define offset 200
 
 
-class Method_D
+class Method_J
 {
 public:
-     Method_D();
-     virtual ~Method_D();
+     Method_J();
+     virtual ~Method_J();
      bool Process (const PedData& peddata,const fs::path& scriptsLocation, const double& zPos_measureArea);
      void SetCalculateIndividualFD(bool individualFD);
      void Setcutbycircle(double radius,int edges);
@@ -61,7 +61,7 @@ public:
 private:
      std::map<int , std::vector<int> > _peds_t;
      std::string _measureAreaId;
-     MeasurementArea_B* _areaForMethod_D;
+     MeasurementArea_B* _areaForMethod_J;
      fs::path _trajName;
      fs::path _projectRootDir;
      fs::path _outputLocation;
@@ -83,7 +83,7 @@ private:
      double _grid_size_X;      // the size of the grid
      double _grid_size_Y;
      float _fps;
-     bool OpenFileMethodD();
+     bool OpenFileMethodVoronoi();
      bool OpenFileIndividualFD();
      fs::path _geometryFileName;
      fs::path _trajectoryPath;
@@ -109,4 +109,4 @@ private:
      bool IsPointsOnOneLine(std::vector<double>& XInFrame, std::vector<double>& YInFrame);
 };
 
-#endif /* METHOD_D_H_ */
+#endif /* Method_J_H_ */

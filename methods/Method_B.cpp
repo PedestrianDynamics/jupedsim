@@ -34,8 +34,6 @@ using std::vector;
 
 Method_B::Method_B()
 {
-     _xCor(0,0);
-     _yCor(0,0);
      _tIn = nullptr;
      _tOut = nullptr;
      _entrancePoint = {};
@@ -44,7 +42,6 @@ Method_B::Method_B()
      _fps = 10;
      _NumPeds =0;
      _areaForMethod_B = nullptr;
-     _plotFundamentalDiagram = false;
 }
 
 Method_B::~Method_B()
@@ -176,15 +173,6 @@ void Method_B::GetFundamentalTinTout(double *DensityPerFrame,double LengthMeasur
           fprintf(fFD_TinTout,"%d\t%f\t%f\n",i+1,density_temp,velocity_temp);
      }
      fclose(fFD_TinTout);
-// plot FD
-// @todo: write new script to plot rho-v and j-rho diagrams
-     // if(_plotFundamentalDiagram)
-     // {
-     //      string parameters_N_t=" "+_scriptsLocation+"/_Plot_N_t.py\" -p \""+ METHOD_A_LOCATION + "\" -n "+ fFD_TinTout;
-     //      parameters_N_t = PYTHON + parameters_N_t;
-     //      int res = system(parameters_N_t.c_str());
-     //      Log->Write("INFO:\tPlotting N-t diagram! Status: %d", res);
-     // }
 
 }
 
