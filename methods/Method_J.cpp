@@ -247,7 +247,7 @@ bool Method_J::OpenFileIndividualFD()
 {
      fs::path trajFileName("_id_"+_measureAreaId+".dat");
      fs::path indFDPath("Fundamental_Diagram");
-     indFDPath = _outputLocation / indFDPath / "IndividualFD" / ("IFD_Voronoi_" +_trajName.string() + trajFileName.string());
+     indFDPath = _outputLocation / indFDPath / "IndividualFD" / ("IFD_J_" +_trajName.string() + trajFileName.string());
      string Individualfundment=indFDPath.string();
      if((_fIndividualFD=Analysis::CreateFile(Individualfundment))==nullptr)
      {
