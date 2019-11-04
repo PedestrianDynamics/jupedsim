@@ -46,7 +46,6 @@
 
 int main(int argc, char ** argv)
 {
-
     // default logger
     Log = new STDIOHandler();
 
@@ -83,7 +82,7 @@ int main(int argc, char ** argv)
         double evacTime = 0;
         Logging::Info(
             fmt::format(check_fmt("Simulation started with {} pedestrians"), sim.GetPedsNumber()));
-            if(sim.GetAgentSrcManager().GetMaxAgentNumber()) {
+        if(sim.GetAgentSrcManager().GetMaxAgentNumber()) {
             // Start the thread for managing the sources of agents if any
             // std::thread t1(sim.GetAgentSrcManager());
             double simMaxTime = config.GetTmax();

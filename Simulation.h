@@ -51,6 +51,8 @@
 class Simulation
 {
 private:
+    /// Max file size 16Mb
+    static const size_t _maxFileSize{1 << 24};
     /// config
     Configuration * _config;
     ///Number of pedestrians in the simulation
@@ -86,7 +88,8 @@ private:
     bool _trainConstraints; // true if inifile has some train constraints
 
     GoalManager _goalManager;
-    // bool _printPB; // print progressbar
+    fs::path _currentTrajectoriesFile;
+
 public:
     /**
      * Constructor
@@ -201,11 +204,10 @@ public:
      * Updates the output filename if the current file exceeds 10MB.
      * Works only for FileFormat::TXT.
      */
-    void UpdateOutputFileName();
+    void RotateOutputFile();
     bool TrainTraffic();
 
-    int _countTraj = 0;  // count number of TXT trajectories to produce
-    double _maxFileSize; // in MB
+    int _countTraj = 0; // count number of TXT trajectories to produce
 };
 
 #endif /*SIMULATION_H_*/

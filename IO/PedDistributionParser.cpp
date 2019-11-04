@@ -22,6 +22,8 @@
 
 #include "IO/OutputHandler.h"
 #include "general/Filesystem.h"
+#include "general/Format.h"
+#include "general/Logger.h"
 
 #include <cstdarg> // va_start and va_end
 
@@ -40,19 +42,19 @@ bool PedDistributionParser::LoadPedDistribution(
     std::vector<std::shared_ptr<StartDistribution>> & startDisSub,
     std::vector<std::shared_ptr<AgentsSource>> & startDisSources)
 {
-    Log->Write("INFO: \tLoading and parsing the persons attributes");
+    Logging::Info("Loading and parsing the persons attributes");
 
     TiXmlDocument doc(_configuration->GetProjectFile().string());
 
     if(!doc.LoadFile()) {
-        Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \t could not parse the project file");
+        Logging::Error("Could not parse the project file");
+        Logging::Error(fmt::format(check_fmt("{}"), doc.ErrorDesc()));
         return false;
     }
 
     TiXmlNode * xRootNode = doc.RootElement()->FirstChild("agents");
     if(!xRootNode) {
-        Log->Write("ERROR:\tcould not load persons attributes");
+        Logging::Error("Could not load persons attributes");
         return false;
     }
 
@@ -86,14 +88,14 @@ bool PedDistributionParser::LoadPedDistribution(
 
         //sanity check
         if((x_max < x_min) || (y_max < y_min)) {
-            Log->Write(
-                "ERROR:\tinvalid bounds [%0.2f,%0.2f,%0.2f,%0.2f] of the group [%d]. Max and Min "
-                "values mismatched?",
-                group_id,
+            Logging::Error(fmt::format(
+                check_fmt("Invalid bounds [{:.2f}, {:.2f}, {:.2f}, {:.2f}] of the group [{}]. Max "
+                          "and Min values mismatched?"),
                 x_min,
                 x_max,
                 y_min,
-                y_max);
+                y_max,
+                group_id));
             return false;
         }
         auto dis =
@@ -116,34 +118,34 @@ bool PedDistributionParser::LoadPedDistribution(
         dis->SetUnitTraj(unit_traj);
 
         if(dis->GetPositionsDir().length()) {
-            Log->Write("INFO:\tPositions_dir = <%s>\n", dis->GetPositionsDir().c_str());
+            Logging::Info(fmt::format(check_fmt("Positions_dir = <{}>"), dis->GetPositionsDir()));
         }
         if(e->Attribute("risk_tolerance_mean") && e->Attribute("risk_tolerance_sigma")) {
             std::string distribution_type = "normal";
             double risk_tolerance_mean    = xmltof(e->Attribute("risk_tolerance_mean"), NAN);
             double risk_tolerance_sigma   = xmltof(e->Attribute("risk_tolerance_sigma"), NAN);
-            Log->Write(
-                "INFO:\trisk tolerance mu = %f, risk tolerance sigma = %f\n",
+            Logging::Info(fmt::format(
+                check_fmt("Risk tolerance mu = {}, risk tolerance sigma = {}"),
                 risk_tolerance_mean,
-                risk_tolerance_sigma);
+                risk_tolerance_sigma));
             dis->InitRiskTolerance(distribution_type, risk_tolerance_mean, risk_tolerance_sigma);
         } else if(e->Attribute("risk_tolerance_alpha") && e->Attribute("risk_tolerance_beta")) {
             std::string distribution_type = "beta";
             double risk_tolerance_alpha   = xmltof(e->Attribute("risk_tolerance_alpha"), NAN);
             double risk_tolerance_beta    = xmltof(e->Attribute("risk_tolerance_beta"), NAN);
-            Log->Write(
-                "INFO:\trisk tolerance alpha = %f, risk tolerance beta = %f\n",
+            Logging::Info(fmt::format(
+                check_fmt("Risk tolerance alpha = {}, risk tolerance beta = {}"),
                 risk_tolerance_alpha,
-                risk_tolerance_beta);
+                risk_tolerance_beta));
             dis->InitRiskTolerance(distribution_type, risk_tolerance_alpha, risk_tolerance_beta);
         } else {
             std::string distribution_type = "normal";
             double risk_tolerance_mean    = 0.;
             double risk_tolerance_sigma   = 1.;
-            Log->Write(
-                "INFO:\trisk tolerance mu = %f, risk tolerance sigma = %f\n",
+            Logging::Info(fmt::format(
+                check_fmt("Risk tolerance mu = {}, risk tolerance sigma = {}"),
                 risk_tolerance_mean,
-                risk_tolerance_sigma);
+                risk_tolerance_sigma));
             dis->InitRiskTolerance(distribution_type, risk_tolerance_mean, risk_tolerance_sigma);
         }
 
@@ -154,14 +156,15 @@ bool PedDistributionParser::LoadPedDistribution(
         }
 
         if(_configuration->GetAgentsParameters().count(agent_para_id) == 0) {
-            Log->Write(
-                "ERROR:\t Please specify which set of agents parameters (agent_parameter_id) to "
-                "use for the group [%d]!",
-                group_id);
-            Log->Write("ERROR:\t Default values are not implemented yet");
+            Logging::Error(fmt::format(
+                check_fmt("Please specify which set of agents parameters (agent_parameter_id) to "
+                          "use for the group [{}]."),
+                group_id));
+            Logging::Error("Default values are not implemented yet");
 
-            std::cout << "\n >> Exit with failure. See <" << _configuration->GetErrorLogFile()
-                      << "> for details << \n";
+            Logging::Error(fmt::format(
+                check_fmt("Exit with failure. See <{}> for details"),
+                _configuration->GetErrorLogFile().string()));
             exit(EXIT_FAILURE);
             return false;
         }
@@ -170,7 +173,7 @@ bool PedDistributionParser::LoadPedDistribution(
         if(e->Attribute("startX") && e->Attribute("startY")) {
             double startX = xmltof(e->Attribute("startX"), NAN);
             double startY = xmltof(e->Attribute("startY"), NAN);
-            Log->Write("INFO:\tstartX = %f, startY = %f\n", startX, startY);
+            Logging::Info(fmt::format(check_fmt("startX = {}, startY = {}"), startX, startY));
             dis->SetStartPosition(startX, startY, 0.0);
         }
     }
@@ -178,7 +181,7 @@ bool PedDistributionParser::LoadPedDistribution(
     //Parse the sources
     TiXmlNode * xSources = xRootNode->FirstChild("agents_sources");
     if(xSources) {
-        Log->Write("INFO:\tLoading sources");
+        Logging::Info("Loading sources");
         // ------ parse sources from inifile
         for(TiXmlElement * e = xSources->FirstChildElement("source"); e;
             e                = e->NextSiblingElement("source")) {
@@ -191,29 +194,29 @@ bool PedDistributionParser::LoadPedDistribution(
             std::string sourceFilename = xFileNode->FirstChild()->ValueStr();
             p /= sourceFilename;
             sourceFilename = p.string();
-            Log->Write("Info:\t  Source file found <%s>", sourceFilename.c_str());
+            Logging::Info(fmt::format(check_fmt("Source file found <{}>"), sourceFilename));
             TiXmlDocument docSource(sourceFilename);
             if(!docSource.LoadFile()) {
-                Log->Write("ERROR: \t%s", docSource.ErrorDesc());
-                Log->Write("ERROR: \t could not parse the sources file.");
+                Logging::Error("Could not parse the sources file.");
+                Logging::Error(fmt::format(check_fmt("{}"), docSource.ErrorDesc()));
                 return false;
             }
             TiXmlElement * xRootNodeSource = docSource.RootElement();
             if(!xRootNodeSource) {
-                Log->Write("ERROR:\tRoot element does not exist in source file.");
+                Logging::Error("Root element does not exist in source file.");
                 return false;
             }
 
             if(xRootNodeSource->ValueStr() != "JPScore") {
-                Log->Write("ERROR:\tRoot element value in source file is not 'JPScore'.");
+                Logging::Error("Root element value in source file is not 'JPScore'.");
                 return false;
             }
             TiXmlNode * xSourceF = xRootNodeSource->FirstChild("agents_sources");
             if(!xSourceF) {
-                Log->Write("ERROR:\tNo agents_sources tag in file not found.");
+                Logging::Error("No agents_sources tag in file not found.");
                 return false;
             }
-            Log->Write("INFO:\t  Loading sources from file");
+            Logging::Info("Loading sources from file");
             TiXmlNode * xSourceNodeF = xSourceF->FirstChild("source");
             if(xSourceNodeF) {
                 for(TiXmlElement * e = xSourceF->FirstChildElement("source"); e;
@@ -221,11 +224,11 @@ bool PedDistributionParser::LoadPedDistribution(
                     startDisSources.push_back(parseSourceNode(e));
                 } //for
             } else
-                Log->Write("Info:\t  no source info found in source file");
+                Logging::Info("No source info found in source file");
         } // source file found
     }     //sources
 
-    Log->Write("INFO: \t...Done");
+    Logging::Info("Done loading pedestrian distribution.");
     return true;
 }
 
@@ -256,44 +259,46 @@ std::shared_ptr<AgentsSource> PedDistributionParser::parseSourceNode(TiXmlElemen
     float SizeBB                  = 1;
     bool isBigEnough              = (abs(xmin - xmax) > SizeBB) && (abs(ymin - ymax) > SizeBB);
     if(!isBigEnough) {
-        Log->Write(
-            "Warning: Source %d got too small bounding box.\n\t BB [Dx, Dy] should be such Dx>%.2f "
-            "and Dy>%.2f. Ignoring BB!!",
-            id,
+        Logging::Warning(fmt::format(check_fmt("Source {} got too small bounding box."), id));
+        Logging::Warning(fmt::format(
+            check_fmt("BB [Dx, Dy] should be such Dx > {:.2f} and Dy > {:.2f} (ignoring BB)."),
             SizeBB,
-            SizeBB);
+            SizeBB));
         xmin = std::numeric_limits<float>::min();
         xmax = std::numeric_limits<float>::max();
         ymin = std::numeric_limits<float>::min();
         ymax = std::numeric_limits<float>::max();
     }
     if(timeMin > timeMax) {
-        Log->Write("Warning: Source %d given wrong life span. Assuming timeMin = timeMax.", id);
+        Logging::Warning(fmt::format(
+            check_fmt("Source {} given wrong life span. Assuming timeMin = timeMax."), id));
         timeMin = timeMax;
     }
     if(time > 0) {
         timeMin = std::numeric_limits<int>::min();
         timeMax = std::numeric_limits<int>::max();
-        Log->Write(
-            "Warning: Source %d. Planned time %d. Ignoring timeMin and timeMax (in case they are "
-            "specified)",
+        Logging::Warning(fmt::format(
+            check_fmt("Source {}. Planned time {}. Ignoring timeMin and timeMax (in case they are "
+                      "specified)"),
             id,
-            time);
+            time));
     }
     if(agent_id >= 0) {
         agents_max = 1;
         frequency  = 1;
     }
     if(percent > 1) {
-        Log->Write(
-            "Warning: Source %d. Passed erronuous percent <%.2f>. Set percent=1", id, percent);
+        Logging::Warning(fmt::format(
+            check_fmt("Source {}. Passed erronuous percent <{:.2f}>. Set percent=1."),
+            id,
+            percent));
         percent = 1.0;
     } else if(percent < 0) {
-        Log->Write(
-            "Warning: Source %d. Passed erronuous percent <%.2f>. Set percent=0 (this source is "
-            "kinda inactive)",
+        Logging::Warning(fmt::format(
+            check_fmt("Source {}. Passed erronuous percent <{:.2f}>. Set percent=0 (this source is "
+                      "inactive)"),
             id,
-            percent);
+            percent));
         percent = 0.0;
     }
     auto source = std::shared_ptr<AgentsSource>(new AgentsSource(
@@ -313,6 +318,7 @@ std::shared_ptr<AgentsSource> PedDistributionParser::parseSourceNode(TiXmlElemen
         boundaries,
         lifeSpan));
 
-    Log->Write("INFO:\t  Source with id %d will be parsed (greedy = %d)!", id, greedy);
+    Logging::Info(
+        fmt::format(check_fmt("Source with id {} will be parsed (greedy = {})."), id, greedy));
     return source;
 }
