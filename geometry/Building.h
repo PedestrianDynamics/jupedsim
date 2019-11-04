@@ -286,8 +286,6 @@ public:
       */
     bool SaveGeometry(const fs::path & filename) const;
 
-    void WriteToErrorLog() const;
-
     /**
       * Check the scenario for possible errors and
       * output user specific informations.

@@ -42,6 +42,11 @@ Logging::Level ArgumentParser::LogLevel() const
 
 std::tuple<ArgumentParser::Execution, int> ArgumentParser::Parse(int argc, char * argv[])
 {
+    // Silence warnigns about unused member. Opts are keept as class members
+    // so that declaration of all comand line options can be done in the header
+    // file
+    (void) iniFilePathOpt;
+    (void) logLevelOpt;
     try {
         app.parse(argc, argv);
     } catch(const CLI::ParseError & e) {
