@@ -29,6 +29,8 @@
 #include "Crossing.h"
 #include "Point.h"
 #include "Wall.h"
+#include "general/Format.h"
+#include "general/Logger.h"
 
 Goal::Goal()
 {
@@ -209,9 +211,7 @@ bool Goal::ConvertLineToPoly()
         }
     }
     if((tmpPoly[0] - point).Norm() > J_TOLERANZ) {
-        char tmp[CLENGTH];
-        sprintf(tmp, "ERROR: \tGoal::ConvertLineToPoly(): ID %d !!!\n", _id);
-        Log->Write(tmp);
+        Logging::Error(fmt::format(check_fmt("Goal::ConvertLineToPoly(): ID {}"), _id));
         return false;
     }
     _poly = tmpPoly;
@@ -318,8 +318,9 @@ bool Goal::IsClockwise()
 {
     //http://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order
     if(_poly.size() < 3) {
-        Log->Write(
-            "ERROR:\tYou need at least 3 vertices to check for orientation. Obstacle ID [%d]", _id);
+        Logging::Error(fmt::format(
+            check_fmt("You need at least 3 vertices to check for orientation. Obstacle ID [{}]"),
+            _id));
         return false;
         //exit(EXIT_FAILURE);
     }
