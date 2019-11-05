@@ -370,6 +370,7 @@ double DirectionSubLocalFloorfield::GetDistance2Target(Pedestrian * ped, int UID
 
 void DirectionSubLocalFloorfield::Init(Building * building)
 {
+    _building          = building;
     _stepsize          = building->GetConfig()->get_deltaH();
     _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
     _useDistancefield  = building->GetConfig()->get_use_wall_avoidance();
