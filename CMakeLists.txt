@@ -12,7 +12,7 @@
 # Project setup
 ################################################################################
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-project(JPScore VERSION 0.8.4 LANGUAGES CXX)
+project(JPScore VERSION 0.8.4 LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -682,6 +682,33 @@ if (BUILD_TESTING)
         )
     endforeach ()
 endif (BUILD_TESTING)
+
+################################################################################
+# JPSlib
+################################################################################
+if (BUILD_JPSLIB)
+  add_library(JPSlib SHARED
+    JPSlib/src/jps.c
+    )
+  set_target_properties(JPSlib PROPERTIES VERSION 0.0.1)
+  set_target_properties(JPSlib PROPERTIES PUBLIC_HEADER JPSlib/include/jps.h)
+
+  target_compile_options(JPSlib PRIVATE
+    ${COMMON_COMPILE_OPTIONS}
+    )
+
+  target_link_libraries(JPSlib
+    core
+    Threads::Threads
+    spdlog::spdlog
+    fmt::fmt
+    )
+
+  target_include_directories(JPSlib PUBLIC
+    ${core_include_directories}
+    ${CMAKE_CURRENT_SOURCE_DIR}/JPSlib/include
+    )
+endif (BUILD_JPSLIB)
 
 ################################################################################
 # Install targets
