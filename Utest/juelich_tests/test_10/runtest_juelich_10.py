@@ -80,12 +80,12 @@ if __name__ == "__main__":
             cell_size = float(cell_size.split("_")[0])
         else: # cell_size at the end of filename
             cell_size = float(cell_size.split(".xml")[0])
-        cmd = "%s --inifile=%s"%(executable, inifile)
+        cmd = "%s %s"%(executable, inifile)
         logging.info('start simulating with exe=<%s>'%(cmd))
         logging.info('cell_size = <%.2f>'%cell_size)
         #------------------------------------------------------
         t1_run = time.time()
-        subprocess.call([executable, "--inifile=%s"%inifile])
+        subprocess.call([executable, "%s"%inifile])
         t2_run = time.time()
         if cell_size not in timedic:
             timedic[cell_size] = [t2_run - t1_run]
@@ -193,5 +193,3 @@ if __name__ == "__main__":
     else:
         logging.info("%s exits with SUCCESS std_all = %f < %f"%(argv[0], std_all, tolerance))
         exit(SUCCESS)
-
-
