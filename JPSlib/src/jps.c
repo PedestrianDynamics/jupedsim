@@ -6,10 +6,11 @@ SimulationContext initialize(const char * geometry_file, Status * status)
     return context;
 }
 
-bool transfer_agent(
+extern bool transfer_agent(
     SimulationContext simulation_context,
     int agent_id,
     int starting_area,
+    Route route,
     Status * status)
 {
     return false;

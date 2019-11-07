@@ -57,9 +57,12 @@ extern SimulationContext initialize(const char * geometry_file, Status * status)
  * @param [in] route              The goals of the pedestrian reflecting the desired route.
  * @return                        Bool whether the agent could be added to the designated area.
  **/
-extern bool
-transfer_agent(SimulationContext simulation_context, int agent_id, int starting_area, Route route;
-               Status * status);
+extern bool transfer_agent(
+    SimulationContext simulation_context,
+    int agent_id,
+    int starting_area,
+    Route route,
+    Status * status);
 
 /**
  * Computes the trajectories for all pedestrians for a given simulation_time.
