@@ -86,7 +86,7 @@ class JPSRunTestDriver(object):
             from shutil import rmtree
             if os.path.exists(self.simDataDir):
                 rmtree(self.simDataDir)
-                
+
             if not path.exists(self.jpsreport_ini):
                 logging.critical("jpsreport_ini <%s> does not exist", self.jpsreport_ini)
                 exit(self.FAILURE)
@@ -216,9 +216,9 @@ class JPSRunTestDriver(object):
     #     return executable
 
     def __execute_test(self, executable, inifile, testfunction, *args):
-        cmd = "%s --inifile=%s"%(executable, inifile)
+        cmd = "%s %s"%(executable, inifile)
         logging.info('start simulating with exe=<%s>', cmd)
-        subprocess.call([executable, "--inifile=%s" % inifile])
+        subprocess.call([executable, "%s" % inifile])
         logging.info('end simulation ...\n--------------\n')
         trajfile = os.path.join("trajectories", "traj" + inifile.split("ini")[2])
         logging.info('trajfile = <%s>', trajfile)
@@ -227,10 +227,3 @@ class JPSRunTestDriver(object):
             exit(self.FAILURE)
         res = testfunction(inifile, trajfile, *args)
         return res
-
-
-
-
-
-
-

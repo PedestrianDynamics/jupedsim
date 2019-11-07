@@ -67,10 +67,10 @@ if __name__ == "__main__":
             exit(FAILURE)
         #--------------------- SIMULATION ------------------------
         #os.chdir(TRUNK) #cd to the simulation directory
-        cmd = "%s --inifile=%s"%(executable, inifile)
+        cmd = "%s %s"%(executable, inifile)
         logging.info('start simulating with exe=<%s>', cmd)
         #------------------------------------------------------
-        subprocess.call([executable, "--inifile=%s"%inifile])
+        subprocess.call([executable, "%s"%inifile])
         #------------------------------------------------------
         logging.info('end simulation ...\n--------------\n')
         trajfile = "trajectories/traj" + inifile.split("ini")[2]
