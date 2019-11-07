@@ -92,43 +92,43 @@ if __name__ == "__main__":
     os.chdir(DIR)
     #----------------------------------------
     logging.info("change directory back to %s"%DIR)
-    
-    
+
+
     tolerance = 0.5# todo: maybe too large
     time1 = time.clock()
     for e in ["png", "txt"]:
         if os.path.isfile("flow.%s"%e):
             os.remove("flow.%s"%e)
-        
+
     # geofile = "%s/geometry.xml"%DIR
     inifiles = glob.glob("inifiles/*.xml")
     # if not path.exists(geofile):
     #     logging.critical("geofile <%s> does not exist"%geofile)
     #     exit(FAILURE)
-        
+
     executable = "%s/bin/jpscore"%TRUNK
     if not path.exists(executable):
         logging.critical("executable <%s> does not exist yet."%executable)
         exit(FAILURE)
-        
+
     for inifile in inifiles:
         if not path.exists(inifile):
             logging.critical("inifile <%s> does not exist"%inifile)
             exit(FAILURE)
         print(inifile)
-        cmd = "%s --inifile=%s"%(executable, inifile)
-        #--------------------- SIMULATION ------------------------  
-        #os.chdir(TRUNK) #cd to the simulation directory      
-        cmd = "%s --inifile=%s"%(executable, inifile)
+        cmd = "%s %s"%(executable, inifile)
+        #--------------------- SIMULATION ------------------------
+        #os.chdir(TRUNK) #cd to the simulation directory
+        cmd = "%s %s"%(executable, inifile)
         logging.info('\n--------------\n start simulating with exe=<%s>'%(cmd))
         # logging.info('width_size = <%.2f>'%width_size)
         #------------------------------------------------------
-        subprocess.call([executable, "--inifile=%s"%inifile])
+        subprocess.call([executable, "%s"%inifile])
         #------------------------------------------------------
         logging.info('end simulation ...\n--------------\n')
 
 
-    # #--------------------- PARSING & FLOW-MEASUREMENT --------        
+    # #--------------------- PARSING & FLOW-MEASUREMENT --------
     pool = multiprocessing.Pool()
     flows = pool.map(process_inifile, inifiles)
     pool.close()
@@ -170,7 +170,7 @@ if __name__ == "__main__":
     # xticks(jexp[:, 0])
     jexp, names = get_empirical_flow()
     plt.errorbar(jexp[:, 0], jexp[:, 1], yerr=jexp[:, 2], fmt="D-", color='r', ecolor='r', linewidth=2, capthick=2, label = "%s"%", ".join(names))
-    plt.axes().set_aspect(1./plt.axes().get_data_ratio()) 
+    plt.axes().set_aspect(1./plt.axes().get_data_ratio())
     plt.xlim([np.min(jexp[:, 0]) - 0.1,  np.max(jexp[:, 0]) + 0.1])
     plt.ylim([np.min(jexp[:, 1]) - 0.3,  np.max(jexp[:, 1]) + np.max(jexp[:, 2]) + 0.3])
 
@@ -184,15 +184,15 @@ if __name__ == "__main__":
 
     err /= num
     plt.title(r"$\frac{1}{N}\sqrt{{\sum_w {(\mu(w)-E(w)})^2 }}=%.2f\; (tol=%.2f)$"%(err, tolerance), y=1.02)
-    
+
     plt.savefig("flow.png")
     #show()
     #########################################################################
-    
+
     time2 = time.clock()
     logging.info("time elapsed %.2f [s]."%(time2-time1))
     logging.info("err = %.2f, tol=%.2f"%(err, tolerance))
-    
+
     if err > tolerance:
         logging.info("exit with failure")
         exit(FAILURE)
