@@ -359,7 +359,7 @@ set(header_files
     general/Filesystem.h
     general/Logger.h
     general/Macros.h
-    general/randomnumbergenerator.h
+    general/Random.h
     geometry/Building.h
     geometry/Crossing.h
     geometry/Goal.h

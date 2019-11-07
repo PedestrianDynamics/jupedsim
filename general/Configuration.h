@@ -26,7 +26,6 @@
 #include "general/Filesystem.h"
 #include "math/OperationalModel.h"
 #include "pedestrian/AgentsParameters.h"
-#include "randomnumbergenerator.h"
 #include "routing/RoutingEngine.h"
 
 #include <cstdlib>
@@ -110,8 +109,6 @@ public:
         //          _dirSubLocal = nullptr;
         //          _dirLocal = nullptr;
         _dirStrategy = nullptr;
-        // for random numbers
-        _rdGenerator = RandomNumberGenerator();
     }
 
     std::shared_ptr<WalkingSpeed> GetWalkingSpeed() { return _walkingSpeed; };
@@ -371,8 +368,6 @@ public:
         _agentsParameters[id] = agentsParameters;
     };
 
-    RandomNumberGenerator * GetRandomNumberGenerator() const { return &_rdGenerator; };
-
     void AddOptionalOutputOption(OptionalOutput option) { _optionalOutput.insert(option); };
 
     std::set<OptionalOutput> GetOptionalOutputOptions() { return _optionalOutput; };
@@ -437,8 +432,6 @@ private:
     fs::path _geometryFile;
     fs::path _projectRootDir;
     bool _showStatistics;
-
-    mutable RandomNumberGenerator _rdGenerator;
 
     FileFormat _fileFormat;
     std::map<int, std::shared_ptr<AgentsParameters>> _agentsParameters;
