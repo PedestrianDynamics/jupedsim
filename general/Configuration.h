@@ -60,7 +60,7 @@ public:
         // ----------- GCFM repulsive force ------
         _nuPed  = 0.4;
         _nuWall = 0.2;
-        // ----------- Gompertz repulsive force ------
+        // ----------- repulsive force ------
         _aPed  = 1;    // Tordeux2015
         _bPed  = 0.25; // Tordeux2015
         _cPed  = 3;

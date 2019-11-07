@@ -20,13 +20,13 @@
     <rooms>
       <room room_id="0" state="good" />
     </rooms>
-    
+
     <!-- doors states are: close or open -->
     <doors>
     </doors>
 
   </traffic_constraints>
-  
+
   <routing>
     <goals>
       <goal id="0" final="true" caption="goal 0">
@@ -41,7 +41,7 @@
     </goals>
   </routing>
 
-  
+
   <!--persons information and distribution -->
   <agents operational_model_id="[1,2,3,5]">
     <agents_distribution>
@@ -130,34 +130,6 @@
         <tau mu="0.01" sigma="0.001" />
         <atau mu="0.5" sigma="0.001" />
         <sway ampA="0" ampB="0" />
-      </agent_parameters>
-
-      <agent_parameters agent_parameter_id="1">
-        <v0 mu="0.0" sigma="0.0" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.01" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-    </model>
-
-    <model operational_model_id="2" description="gompertz">
-      <model_parameters>
-        <solver>euler</solver>
-        <stepsize>0.01</stepsize>
-        <exit_crossing_strategy>3</exit_crossing_strategy>
-        <linkedcells enabled="true" cell_size="3" />
-        <force_ped nu="30"  b="0.25" c="3.0"/>
-        <force_wall nu="0" b="0.70" c="3.0"/>
-      </model_parameters>
-      <agent_parameters agent_parameter_id="0">
-        <v0 mu="1.0" sigma="0.0" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.01" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
       </agent_parameters>
 
       <agent_parameters agent_parameter_id="1">

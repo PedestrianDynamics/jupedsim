@@ -26,7 +26,6 @@
 #include "general/Logger.h"
 #include "general/OpenMP.h"
 #include "math/GCFMModel.h"
-#include "math/GompertzModel.h"
 #include "math/GradientModel.h"
 #include "math/KrauszModel.h"
 #include "math/VelocityModel.h"
@@ -141,16 +140,6 @@ bool IniFileParser::Parse(const fs::path & iniFile)
             parsingModelSuccessful = true;
             //only parsing one model
             break;
-        } else if((_model == MODEL_GOMPERTZ) && (model_id == MODEL_GOMPERTZ)) {
-            if(modelName != "gompertz") {
-                Logging::Error("Mismatch model ID and description. Did you mean gompertz?");
-                return false;
-            }
-            //only parsing one model
-            if(!ParseGompertzModel(xModel, xMainNode))
-                return false;
-            parsingModelSuccessful = true;
-            break;
         } else if((_model == MODEL_GRADIENT) && (model_id == MODEL_GRADIENT)) {
             if(modelName != "gradnav") {
                 Logging::Error("Mismatch model ID and description. Did you mean gradnav?");
@@ -187,7 +176,7 @@ bool IniFileParser::Parse(const fs::path & iniFile)
 
     if(!parsingModelSuccessful) {
         Logging::Error(fmt::format(
-            check_fmt("Wrong model id [{}]. Choose 1 (GCFM), 2 (Gompertz),  3 (Tordeux2015) or 5 "
+            check_fmt("Wrong model id [{}]. Choose 1 (GCFM), 3 (Tordeux2015) or 5 "
                       "(Krausz)"),
             _model));
         Logging::Error(
@@ -695,122 +684,6 @@ bool IniFileParser::ParseKrauszModel(TiXmlElement * xKrausz, TiXmlElement * xMai
     return true;
 }
 
-bool IniFileParser::ParseGompertzModel(TiXmlElement * xGompertz, TiXmlElement * xMainNode)
-{
-    //parsing the model parameters
-    Logging::Info("Using the Gompertz model");
-    Logging::Info("Parsing the model parameters");
-
-    TiXmlNode * xModelPara = xGompertz->FirstChild("model_parameters");
-    if(!xModelPara) {
-        Logging::Error("!!!! Changes in the operational model section !!!");
-        Logging::Error("!!!! The new version is in inputfiles/ship_msw/ini_ship3.xml !!!");
-        return false;
-    }
-
-    // For convenience. This moved to the header as it is not model specific
-    if(xModelPara->FirstChild("tmax")) {
-        Logging::Error("The maximal simulation time section moved to the header!!!");
-        Logging::Error("\t <max_sim_time> </max_sim_time>\n");
-        return false;
-    }
-
-    //solver
-    if(!ParseNodeToSolver(*xModelPara))
-        return false;
-
-    //stepsize
-    if(!ParseStepSize(*xModelPara))
-        return false;
-
-    //exit crossing strategy
-    if(!ParseStrategyNodeToObject(*xModelPara))
-        return false;
-
-    //linked-cells
-    if(!ParseLinkedCells(*xModelPara))
-        return false;
-
-    //force_ped
-    if(xModelPara->FirstChild("force_ped")) {
-        std::string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
-        _config->SetNuPed(std::stod(nu));
-
-        if(!xModelPara->FirstChildElement("force_ped")->Attribute("a"))
-            _config->SetaPed(1.0); // default value
-        else {
-            std::string a = xModelPara->FirstChildElement("force_ped")->Attribute("a");
-            _config->SetaPed(std::stod(a));
-        }
-        if(!xModelPara->FirstChildElement("force_ped")->Attribute("b"))
-            _config->SetbPed(0.25); // default value
-        else {
-            std::string b = xModelPara->FirstChildElement("force_ped")->Attribute("b");
-            _config->SetbPed(std::stod(b));
-        }
-        if(!xModelPara->FirstChildElement("force_ped")->Attribute("c"))
-            _config->SetcPed(3.0); // default value
-        else {
-            std::string c = xModelPara->FirstChildElement("force_ped")->Attribute("c");
-            _config->SetcPed(std::stod(c));
-        }
-        Logging::Info(fmt::format(
-            check_fmt("Frep_ped mu={}, a={:.2f}, b={:.2f} c={:.2f}"),
-            nu,
-            _config->GetaPed(),
-            _config->GetbPed(),
-            _config->GetcPed()));
-    }
-    //force_wall
-    if(xModelPara->FirstChild("force_wall")) {
-        std::string nu = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
-        _config->SetNuWall(std::stod(nu));
-        if(!xModelPara->FirstChildElement("force_wall")->Attribute("a"))
-            _config->SetaWall(1.0); // default value
-        else {
-            std::string a = xModelPara->FirstChildElement("force_wall")->Attribute("a");
-            _config->SetaWall(std::stod(a));
-        }
-        if(!xModelPara->FirstChildElement("force_wall")->Attribute("b"))
-            _config->SetbWall(0.7); // default value
-        else {
-            std::string b = xModelPara->FirstChildElement("force_wall")->Attribute("b");
-            _config->SetbWall(std::stod(b));
-        }
-        if(!xModelPara->FirstChildElement("force_wall")->Attribute("c"))
-            _config->SetcWall(3.0); // default value
-        else {
-            std::string c = xModelPara->FirstChildElement("force_wall")->Attribute("c");
-            _config->SetcWall(std::stod(c));
-        }
-
-        Logging::Info(fmt::format(
-            check_fmt("Frep_wall mu={}, a={:.2f}, b={:.2f} c={:.2f}"),
-            nu,
-            _config->GetaWall(),
-            _config->GetbWall(),
-            _config->GetcWall()));
-    }
-
-    //Parsing the agent parameters
-    TiXmlNode * xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
-    ParseAgentParameters(xGompertz, xAgentDistri);
-
-    //TODO: models do not belong in a configuration container [gl march '16]
-    _config->SetModel(std::shared_ptr<OperationalModel>(new GompertzModel(
-        _exit_strategy,
-        _config->GetNuPed(),
-        _config->GetaPed(),
-        _config->GetbPed(),
-        _config->GetcPed(),
-        _config->GetNuWall(),
-        _config->GetaWall(),
-        _config->GetbWall(),
-        _config->GetcWall())));
-
-    return true;
-}
-
 bool IniFileParser::ParseGradientModel(TiXmlElement * xGradient, TiXmlElement * xMainNode)
 {
     //parsing the model parameters
@@ -1234,19 +1107,6 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                     freqB,
                     ampA,
                     ampB));
-            }
-
-            if(_model == 2) {      // Gompertz
-                double beta_c = 1; /// @todo quick and dirty
-                double max_Ea = agentParameters->GetAmin() +
-                                agentParameters->GetAtau() * agentParameters->GetV0();
-                double max_Eb =
-                    0.5 *
-                    (agentParameters->GetBmin() +
-                     0.49); /// @todo hard-coded value should be the same as in pedestrians GetEB
-                double max_Ea_Eb = (max_Ea > max_Eb) ? max_Ea : max_Eb;
-                _config->SetDistEffMaxPed(2 * beta_c * max_Ea_Eb);
-                _config->SetDistEffMaxWall(_config->GetDistEffMaxPed());
             }
 
             if(_model == 4) {      //  Gradient

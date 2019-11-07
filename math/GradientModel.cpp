@@ -21,10 +21,6 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * \section Description
- * Implementation of classes for force-based models.
- * Actually we've got two different models:
- * 2. Gompertz Model
- *
  *
  **/
 #include "GradientModel.h"
@@ -487,7 +483,6 @@ Point GradientModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
 
     // calculate B_ij
     B_ij = 1.0 - Distance / (r1 + r2); //TODO: Simplification to avoid accelerating predecessors
-    //Gompertz-function parameter.
     //TODO: Check later if other values are more appropriate
     double b = _bPed, c = _cPed; //repped
     B_ij = exp(-b * exp(-c * B_ij));
@@ -513,7 +508,7 @@ Point GradientModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
         exit(EXIT_FAILURE);
     }
     return F_rep;
-} //END Gompertz:ForceRepPed()
+}
 
 Point GradientModel::ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const
 {
@@ -544,9 +539,7 @@ Point GradientModel::ForceRepWall(Pedestrian * ped, const Line & w) const
 {
 #define DEBUG 0
     Point F_wrep = Point(0.0, 0.0);
-#if DEBUG
-    printf("in GompertzWall\n");
-#endif
+
     // getc(stdin);
     // if direction of pedestrians does not intersect walls --> ignore
 
@@ -570,7 +563,7 @@ Point GradientModel::ForceRepWall(Pedestrian * ped, const Line & w) const
 
     if(Distance < J_EPS) {
         Log->Write(
-            "WARNING:\t Gompertz: forceRepWall() ped %d is too near to the wall. Return default "
+            "WARNING:\t Gradient: forceRepWall() ped %d is too near to the wall. Return default "
             "values",
             ped->GetID());
         return Point(0, 0); //quick and dirty. Should react to the warning and fix the model
