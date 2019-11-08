@@ -296,7 +296,6 @@ set(source_files
     IO/TraVisToClient.cpp
     math/ForceModel.cpp
     math/GCFMModel.cpp
-    math/GompertzModel.cpp
     math/GradientModel.cpp
     math/KrauszModel.cpp
     math/Mathematics.cpp
@@ -382,7 +381,6 @@ set(header_files
     IO/TraVisToClient.h
     math/ForceModel.h
     math/GCFMModel.h
-    math/GompertzModel.h
     math/GradientModel.h
     math/Mathematics.h
     math/ODESolver.h

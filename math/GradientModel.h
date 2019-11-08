@@ -87,8 +87,7 @@ private:
       */
     Point ForceDriv(Pedestrian * ped, Room * room) const;
     /**
-      * Repulsive force between two pedestrians ped1 and ped2 according to
-      * the Gompertz model (unpublished)
+      * Repulsive force between two pedestrians ped1 and ped2
       *
       * @param ped1 Pointer to Pedestrian: First pedestrian
       * @param ped2 Pointer to Pedestrian: Second pedestrian
