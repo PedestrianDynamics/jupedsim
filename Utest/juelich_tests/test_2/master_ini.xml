@@ -94,26 +94,6 @@
         <atau mu="0.5" sigma="0.00" />
       </agent_parameters>
     </model>
-
-    <model operational_model_id="5" description="krausz">
-      <model_parameters>
-        <solver>euler</solver>
-        <stepsize>0.001</stepsize>
-        <exit_crossing_strategy>range(1,6)</exit_crossing_strategy>
-        <linkedcells enabled="true" cell_size="2.2" />
-        <force_ped nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
-        <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
-      </model_parameters>
-      <agent_parameters agent_parameter_id="0">
-        <v0 mu="1" sigma="0.0" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-        <sway ampA="0" ampB="0" />
-      </agent_parameters>
-    </model>
   </operational_models>
 
   <route_choice_models>

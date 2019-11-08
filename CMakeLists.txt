@@ -278,12 +278,8 @@ set(source_files
     IO/progress_bar.cpp
     IO/Trajectories.cpp
     IO/TraVisToClient.cpp
-    math/ForceModel.cpp
     math/GCFMModel.cpp
-    math/GradientModel.cpp
-    math/KrauszModel.cpp
     math/Mathematics.cpp
-    math/ODESolver.cpp
     math/OperationalModel.cpp
     math/VelocityModel.cpp
     mpi/LCGrid.cpp
@@ -363,11 +359,8 @@ set(header_files
     IO/PedDistributionParser.h
     IO/Trajectories.h
     IO/TraVisToClient.h
-    math/ForceModel.h
     math/GCFMModel.h
-    math/GradientModel.h
     math/Mathematics.h
-    math/ODESolver.h
     math/OperationalModel.h
     math/VelocityModel.h
     mpi/LCGrid.h
