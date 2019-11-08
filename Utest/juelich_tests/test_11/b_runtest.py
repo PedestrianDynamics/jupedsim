@@ -13,7 +13,7 @@ from xml.dom import minidom
 testnr = 11
 #========================
 
-must_time = 10  # 10 m corridor with 1m/s 
+must_time = 10  # 10 m corridor with 1m/s
 SUCCESS = 0
 FAILURE = 1
 #--------------------------------------------------------
@@ -27,7 +27,7 @@ HOME = path.expanduser("~")
 CWD = os.getcwd()
 DIR = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
 #--------------------------------------------------------
-    
+
 def get_maxtime(filename):
     """
     get max sim time
@@ -37,7 +37,7 @@ def get_maxtime(filename):
         xmldoc = minidom.parse(filename)
     except:
         logging.critical('could not parse file. exit')
-        exit(FAILURE)        
+        exit(FAILURE)
     maxtime  = float(xmldoc.getElementsByTagName('max_sim_time')[0].firstChild.nodeValue)
     return maxtime
 
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     if not path.exists(geofile):
         logging.critical("geofile <%s> does not exist"%geofile)
         exit(FAILURE)
-       
+
     #-------- get directory of the code TRUNK
     os.chdir(DIR)
     os.chdir("..")
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     lib_path = os.path.abspath("%s/Utest"%TRUNK)
     sys.path.append(lib_path)
     from utils import *
-    #---------------------------------------- 
+    #----------------------------------------
     executable = "%s/bin/jpscore"%TRUNK
     if not path.exists(executable):
         logging.critical("executable <%s> does not exist yet."%executable)
@@ -69,12 +69,12 @@ if __name__ == "__main__":
         if not path.exists(inifile):
             logging.critical("inifile <%s> does not exist"%inifile)
             exit(FAILURE)
-        #--------------------- SIMULATION ------------------------  
-        #os.chdir(TRUNK) #cd to the simulation directory      
-        cmd = "%s --inifile=%s"%(executable, inifile)
+        #--------------------- SIMULATION ------------------------
+        #os.chdir(TRUNK) #cd to the simulation directory
+        cmd = "%s %s"%(executable, inifile)
         logging.info('start simulating with exe=<%s>'%(cmd))
         #------------------------------------------------------
-        subprocess.call([executable, "--inifile=%s"%inifile])
+        subprocess.call([executable, "%s"%inifile])
         #------------------------------------------------------
         logging.info('end simulation ...\n--------------\n')
         trajfile = "trajectories/traj" + inifile.split("ini")[2]

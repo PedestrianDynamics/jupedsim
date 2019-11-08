@@ -26,12 +26,10 @@
 #include "general/Logger.h"
 #include "general/OpenMP.h"
 #include "math/GCFMModel.h"
-#include "math/GompertzModel.h"
 #include "math/GradientModel.h"
 #include "math/KrauszModel.h"
 #include "math/VelocityModel.h"
 #include "pedestrian/Pedestrian.h"
-#include "routing/ai_router/AIRouter.h"
 #include "routing/ff_router/ffRouter.h"
 #include "routing/global_shortest/GlobalRouter.h"
 #include "routing/quickest/QuickestPathRouter.h"
@@ -141,16 +139,6 @@ bool IniFileParser::Parse(const fs::path & iniFile)
             parsingModelSuccessful = true;
             //only parsing one model
             break;
-        } else if((_model == MODEL_GOMPERTZ) && (model_id == MODEL_GOMPERTZ)) {
-            if(modelName != "gompertz") {
-                Logging::Error("Mismatch model ID and description. Did you mean gompertz?");
-                return false;
-            }
-            //only parsing one model
-            if(!ParseGompertzModel(xModel, xMainNode))
-                return false;
-            parsingModelSuccessful = true;
-            break;
         } else if((_model == MODEL_GRADIENT) && (model_id == MODEL_GRADIENT)) {
             if(modelName != "gradnav") {
                 Logging::Error("Mismatch model ID and description. Did you mean gradnav?");
@@ -187,7 +175,7 @@ bool IniFileParser::Parse(const fs::path & iniFile)
 
     if(!parsingModelSuccessful) {
         Logging::Error(fmt::format(
-            check_fmt("Wrong model id [{}]. Choose 1 (GCFM), 2 (Gompertz),  3 (Tordeux2015) or 5 "
+            check_fmt("Wrong model id [{}]. Choose 1 (GCFM), 3 (Tordeux2015) or 5 "
                       "(Krausz)"),
             _model));
         Logging::Error(
@@ -695,122 +683,6 @@ bool IniFileParser::ParseKrauszModel(TiXmlElement * xKrausz, TiXmlElement * xMai
     return true;
 }
 
-bool IniFileParser::ParseGompertzModel(TiXmlElement * xGompertz, TiXmlElement * xMainNode)
-{
-    //parsing the model parameters
-    Logging::Info("Using the Gompertz model");
-    Logging::Info("Parsing the model parameters");
-
-    TiXmlNode * xModelPara = xGompertz->FirstChild("model_parameters");
-    if(!xModelPara) {
-        Logging::Error("!!!! Changes in the operational model section !!!");
-        Logging::Error("!!!! The new version is in inputfiles/ship_msw/ini_ship3.xml !!!");
-        return false;
-    }
-
-    // For convenience. This moved to the header as it is not model specific
-    if(xModelPara->FirstChild("tmax")) {
-        Logging::Error("The maximal simulation time section moved to the header!!!");
-        Logging::Error("\t <max_sim_time> </max_sim_time>\n");
-        return false;
-    }
-
-    //solver
-    if(!ParseNodeToSolver(*xModelPara))
-        return false;
-
-    //stepsize
-    if(!ParseStepSize(*xModelPara))
-        return false;
-
-    //exit crossing strategy
-    if(!ParseStrategyNodeToObject(*xModelPara))
-        return false;
-
-    //linked-cells
-    if(!ParseLinkedCells(*xModelPara))
-        return false;
-
-    //force_ped
-    if(xModelPara->FirstChild("force_ped")) {
-        std::string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
-        _config->SetNuPed(std::stod(nu));
-
-        if(!xModelPara->FirstChildElement("force_ped")->Attribute("a"))
-            _config->SetaPed(1.0); // default value
-        else {
-            std::string a = xModelPara->FirstChildElement("force_ped")->Attribute("a");
-            _config->SetaPed(std::stod(a));
-        }
-        if(!xModelPara->FirstChildElement("force_ped")->Attribute("b"))
-            _config->SetbPed(0.25); // default value
-        else {
-            std::string b = xModelPara->FirstChildElement("force_ped")->Attribute("b");
-            _config->SetbPed(std::stod(b));
-        }
-        if(!xModelPara->FirstChildElement("force_ped")->Attribute("c"))
-            _config->SetcPed(3.0); // default value
-        else {
-            std::string c = xModelPara->FirstChildElement("force_ped")->Attribute("c");
-            _config->SetcPed(std::stod(c));
-        }
-        Logging::Info(fmt::format(
-            check_fmt("Frep_ped mu={}, a={:.2f}, b={:.2f} c={:.2f}"),
-            nu,
-            _config->GetaPed(),
-            _config->GetbPed(),
-            _config->GetcPed()));
-    }
-    //force_wall
-    if(xModelPara->FirstChild("force_wall")) {
-        std::string nu = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
-        _config->SetNuWall(std::stod(nu));
-        if(!xModelPara->FirstChildElement("force_wall")->Attribute("a"))
-            _config->SetaWall(1.0); // default value
-        else {
-            std::string a = xModelPara->FirstChildElement("force_wall")->Attribute("a");
-            _config->SetaWall(std::stod(a));
-        }
-        if(!xModelPara->FirstChildElement("force_wall")->Attribute("b"))
-            _config->SetbWall(0.7); // default value
-        else {
-            std::string b = xModelPara->FirstChildElement("force_wall")->Attribute("b");
-            _config->SetbWall(std::stod(b));
-        }
-        if(!xModelPara->FirstChildElement("force_wall")->Attribute("c"))
-            _config->SetcWall(3.0); // default value
-        else {
-            std::string c = xModelPara->FirstChildElement("force_wall")->Attribute("c");
-            _config->SetcWall(std::stod(c));
-        }
-
-        Logging::Info(fmt::format(
-            check_fmt("Frep_wall mu={}, a={:.2f}, b={:.2f} c={:.2f}"),
-            nu,
-            _config->GetaWall(),
-            _config->GetbWall(),
-            _config->GetcWall()));
-    }
-
-    //Parsing the agent parameters
-    TiXmlNode * xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
-    ParseAgentParameters(xGompertz, xAgentDistri);
-
-    //TODO: models do not belong in a configuration container [gl march '16]
-    _config->SetModel(std::shared_ptr<OperationalModel>(new GompertzModel(
-        _exit_strategy,
-        _config->GetNuPed(),
-        _config->GetaPed(),
-        _config->GetbPed(),
-        _config->GetcPed(),
-        _config->GetNuWall(),
-        _config->GetaWall(),
-        _config->GetbWall(),
-        _config->GetcWall())));
-
-    return true;
-}
-
 bool IniFileParser::ParseGradientModel(TiXmlElement * xGradient, TiXmlElement * xMainNode)
 {
     //parsing the model parameters
@@ -1236,19 +1108,6 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                     ampB));
             }
 
-            if(_model == 2) {      // Gompertz
-                double beta_c = 1; /// @todo quick and dirty
-                double max_Ea = agentParameters->GetAmin() +
-                                agentParameters->GetAtau() * agentParameters->GetV0();
-                double max_Eb =
-                    0.5 *
-                    (agentParameters->GetBmin() +
-                     0.49); /// @todo hard-coded value should be the same as in pedestrians GetEB
-                double max_Ea_Eb = (max_Ea > max_Eb) ? max_Ea : max_Eb;
-                _config->SetDistEffMaxPed(2 * beta_c * max_Ea_Eb);
-                _config->SetDistEffMaxWall(_config->GetDistEffMaxPed());
-            }
-
             if(_model == 4) {      //  Gradient
                 double beta_c = 2; /// @todo quick and dirty
                 double max_Ea = agentParameters->GetAmin() +
@@ -1347,22 +1206,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
             ///Parsing additional options
             if(!ParseCogMapOpts(e))
                 return false;
-        } else if(
-            (strategy == "AI") &&
-            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-#ifdef AIROUTER
-            Router * r = new AIRouter(id, ROUTING_AI);
-            _config->GetRoutingEngine()->AddRouter(r);
-
-            Logging::Info("Using AIRouter");
-            ///Parsing additional options
-            if(!ParseAIOpts(e))
-                return false;
-#else
-            std::cerr << "\nCan not use AI Router. Rerun cmake with option  -DAIROUTER=true and "
-                         "recompile.\n";
-            exit(EXIT_FAILURE);
-#endif
         } else if(
             (strategy == "ff_global_shortest") &&
             (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
@@ -1506,65 +1349,6 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode * routingNode)
 
     return true;
 }
-#ifdef AIROUTER
-bool IniFileParser::ParseAIOpts(TiXmlNode * routingNode)
-{
-    TiXmlNode * sensorNode = routingNode->FirstChild();
-
-    if(!sensorNode) {
-        Logging::Error("No sensors found.\n");
-        return false;
-    }
-
-    /// static_cast to get access to the method 'addOption' of the AIRouter
-    AIRouter * r =
-        static_cast<AIRouter *>(_config->GetRoutingEngine()->GetAvailableRouters().back());
-
-    std::vector<std::string> sensorVec;
-    for(TiXmlElement * e = sensorNode->FirstChildElement("sensor"); e;
-        e                = e->NextSiblingElement("sensor")) {
-        std::string sensor = e->Attribute("description");
-        sensorVec.push_back(sensor);
-
-        Logging::Info(fmt::format(check_fmt("Sensor <{}> added."), sensor));
-    }
-
-    r->addOption("Sensors", sensorVec);
-
-    TiXmlElement * cogMap = routingNode->FirstChildElement("cognitive_map");
-
-    if(!cogMap) {
-        Logging::Error("Cognitive Map not specified.\n");
-        return false;
-    }
-
-    //std::vector<std::string> cogMapStatus;
-    //cogMapStatus.push_back(cogMap->Attribute("status"));
-    //Logging::Info(fmt::format(check_fmt("All pedestrian starting with a(n) {} cognitive maps"), cogMapStatus[0]));
-    //r->addOption("CognitiveMap", cogMapStatus);
-
-    std::vector<std::string> cogMapFiles;
-    if(!cogMap->Attribute("files")) {
-        Logging::Warning("No input files for the cognitive map specified!");
-    } else {
-        cogMapFiles.push_back(cogMap->Attribute("files"));
-        r->addOption("CognitiveMapFiles", cogMapFiles);
-        Logging::Info("Input files for the cognitive map specified!");
-    }
-
-    //Signs
-    TiXmlElement * signs = routingNode->FirstChildElement("signage");
-
-    if(!signs) {
-        Logging::Info("No signage specified");
-    } else {
-        r->addOption("SignFiles", std::vector<std::string>{signs->Attribute("file")});
-    }
-
-    return true;
-}
-#endif
-
 
 bool IniFileParser::ParseLinkedCells(const TiXmlNode & linkedCellNode)
 {

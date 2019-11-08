@@ -13,6 +13,9 @@ become significantly larger!
 
 ### Fixed
 
+### Removed
+- Removed AI_Router
+
 ## v0.8.4 [2019-04-12]
 
 ### Added

@@ -21,7 +21,7 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * \section Description
- * Implementation of the GCFM and the Gompertz model.
+ * Implementation of the GCFM.
  *
  **/
 
@@ -31,8 +31,3 @@
 ForceModel::ForceModel() {}
 
 ForceModel::~ForceModel() {}
-
-
-/************************************************************
- Gompertz ForceModel
- ************************************************************/

@@ -24,7 +24,6 @@
  * Implementation of classes for force-based models.
  * Actually we've got two different models:
  * 1. Generalized Centrifugal Force Model
- * 2. Gompertz Model
  *
  *
  **/

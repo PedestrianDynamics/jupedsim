@@ -154,11 +154,6 @@ public:
 
 
     /**
-      * Debug output for this class
-      */
-    void WriteToErrorLog() const;
-
-    /**
       * Used by MPI in the case each room should be written in a specific file
       */
     void SetOutputHandler(OutputHandler * oh);

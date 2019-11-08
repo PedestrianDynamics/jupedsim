@@ -30,6 +30,8 @@
 #include "Line.h"
 #include "Point.h"
 #include "Wall.h"
+#include "general/Format.h"
+#include "general/Logger.h"
 
 #include <cstdlib>
 
@@ -228,15 +230,13 @@ bool Obstacle::ConvertLineToPoly()
         for(unsigned int i = itr; i < copy.size(); ++i) {
             if(it.IntersectionWith(*copy[i], pIntsct) == true) {
                 if(it.ShareCommonPointWith(*copy[i]) == false) {
-                    char tmp[CLENGTH];
-                    sprintf(tmp, "ERROR: \tObstacle::ConvertLineToPoly(): ID %d !!!\n", _id);
-                    Log->Write(tmp);
-                    sprintf(
-                        tmp,
-                        "ERROR: \tWalls %s & %s intersect: !!!\n",
-                        it.toString().c_str(),
-                        copy[i]->toString().c_str());
-                    Log->Write(tmp);
+                    Logging::Error(fmt::format(
+                        check_fmt(
+                            "Obstacle::ConvertLineToPoly(): ID {}, Walls {} and {} intersect."),
+                        _id,
+                        it.toString(),
+                        copy[i]->toString()));
+
                     return false;
                 } else
                     ++j;
@@ -245,14 +245,12 @@ bool Obstacle::ConvertLineToPoly()
         if(j <= 2)
             j = 0;
         else {
-            char tmp[CLENGTH];
-            sprintf(tmp, "ERROR: \tObstacle::ConvertLineToPoly(): ID %d !!!\n", _id);
-            Log->Write(tmp);
-            sprintf(
-                tmp,
-                "ERROR: \tWall %s shares edge with multiple walls!!!\n",
-                it.toString().c_str());
-            Log->Write(tmp);
+            Logging::Error(fmt::format(
+                check_fmt("Obstacle::ConvertLineToPoly(): ID {}, Wall {} shares edge with multiple "
+                          "walls."),
+                _id,
+                it.toString()));
+
             return false;
         }
         ++itr;
@@ -279,12 +277,11 @@ bool Obstacle::ConvertLineToPoly()
         }
     }
     if((tmpPoly[0] - point).Norm() > J_TOLERANZ) {
-        char tmp[CLENGTH];
-        sprintf(tmp, "ERROR: \tObstacle::ConvertLineToPoly(): ID %d !!!\n", _id);
-        Log->Write(tmp);
-        sprintf(
-            tmp, "ERROR: \tDistance between the points: %lf !!!\n", (tmpPoly[0] - point).Norm());
-        Log->Write(tmp);
+        Logging::Error(fmt::format(
+            check_fmt("Obstacle::ConvertLineToPoly(): ID {}, distance between the points is {}"),
+            _id,
+            (tmpPoly[0] - point).Norm()));
+
         return false;
     }
     _poly = tmpPoly;
@@ -293,9 +290,9 @@ bool Obstacle::ConvertLineToPoly()
     for(const auto & w : _walls)
         for(const auto & ptw : {w.GetPoint1(), w.GetPoint2()})
             if(IsPartOfPolygon(ptw) == false) {
-                Log->Write(
-                    "ERROR:\t Edge was not used during polygon creation for obstacle: %s",
-                    w.toString().c_str());
+                Logging::Error(fmt::format(
+                    check_fmt("Edge was not used during polygon creation for obstacle: {}"),
+                    w.toString()));
                 return false;
             }
 
@@ -346,8 +343,9 @@ bool Obstacle::IsClockwise() const
 {
     //http://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order
     if(_poly.size() < 3) {
-        Log->Write(
-            "ERROR:\tYou need at least 3 vertices to check for orientation. Obstacle ID [%d]", _id);
+        Logging::Error(fmt::format(
+            check_fmt("You need at least 3 vertices to check for orientation. Obstacle ID [{}]"),
+            _id));
         return false;
         //exit(EXIT_FAILURE);
     }

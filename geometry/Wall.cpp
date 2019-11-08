@@ -36,19 +36,6 @@ Wall::Wall(const Point & p1, const Point & p2, const std::string & type) : Line(
 {
 }
 
-void Wall::WriteToErrorLog() const
-{
-    char tmp[CLENGTH];
-    sprintf(
-        tmp,
-        "\t\tWALL: (%f, %f) -- (%f, %f)\n",
-        GetPoint1()._x,
-        GetPoint1()._y,
-        GetPoint2()._x,
-        GetPoint2()._y);
-    Log->Write(tmp);
-}
-
 std::string Wall::Write() const
 {
     std::string geometry;
