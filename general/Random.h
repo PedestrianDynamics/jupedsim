@@ -55,7 +55,7 @@ void Setup(int seed)
  * @param stddev standard deviation of the normal distribution
  * @return random number of a normal distribution with given parameters
  */
-template <class RealType = double>
+template <typename RealType = double>
 RealType GetNormal(RealType mean, RealType stddev)
 {
     if(!_init) {
@@ -74,7 +74,7 @@ RealType GetNormal(RealType mean, RealType stddev)
  * @param max max of the uniform distribution
  * @return random number of a uniform distribution with given parameters
  */
-template <class IntType = int>
+template <typename IntType = int>
 IntType GetUniformInt(IntType min, IntType max)
 {
     if(!_init) {
@@ -93,7 +93,7 @@ IntType GetUniformInt(IntType min, IntType max)
  * @param max max of the uniform distribution
  * @return random number of a uniform distribution with given parameters
  */
-template <class RealType = double>
+template <typename RealType = double>
 RealType GetUniformReal(RealType min, RealType max)
 {
     if(!_init) {
@@ -114,7 +114,7 @@ RealType GetUniformReal(RealType min, RealType max)
  * @param peak peak of the triangular distribution
  * @return random number of a triangular distribution with given parameters
  */
-template <class RealType = double>
+template <typename RealType = double>
 RealType GetTriangular(RealType min, RealType max, RealType peak)
 {
     if(!_init) {
@@ -134,7 +134,7 @@ RealType GetTriangular(RealType min, RealType max, RealType peak)
  * @param stddev standard deviation of the normal distribution
  * @return random number of a normal distribution with given parameters
  */
-template <class RealType = double>
+template <typename RealType = double>
 RealType GetLogNormal(RealType mean, RealType stddev)
 {
     if(!_init) {
