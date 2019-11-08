@@ -17,6 +17,7 @@ become significantly larger!
 - Removed AI_Router
 - Removed Krausz Model
 - Removed Gompertz Model
+- Removed GradNav Model
 
 ## v0.8.4 [2019-04-12]
 
