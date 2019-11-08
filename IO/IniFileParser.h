@@ -60,9 +60,7 @@ private:
     bool ParseFfRouterOps(TiXmlNode * routingNode, RoutingStrategy s);
 
     bool ParseCogMapOpts(TiXmlNode * routingNode);
-#ifdef AIROUTER
-    bool ParseAIOpts(TiXmlNode * routingNode);
-#endif
+
     bool ParseLinkedCells(const TiXmlNode & linkedCellNode);
 
     bool ParseStepSize(TiXmlNode & stepNode);
