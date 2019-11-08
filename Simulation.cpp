@@ -59,7 +59,6 @@ Simulation::Simulation(Configuration * args) : _config(args)
     _building  = nullptr;
     //_direction = NULL;
     _operationalModel = nullptr;
-    _solver           = nullptr;
     _fps              = 1;
     _em               = nullptr;
     _gotSources       = false;
@@ -74,7 +73,6 @@ Simulation::Simulation(Configuration * args) : _config(args)
 
 Simulation::~Simulation()
 {
-    delete _solver;
     delete _em;
 
     if(_iod) {
