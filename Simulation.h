@@ -37,7 +37,6 @@
 #include "geometry/Building.h"
 #include "geometry/GoalManager.h"
 #include "geometry/SubRoom.h"
-#include "math/ODESolver.h"
 #include "math/OperationalModel.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "pedestrian/PedDistributor.h"
@@ -71,8 +70,6 @@ private:
     std::shared_ptr<OperationalModel> _operationalModel;
     /// Manage all route choices algorithms
     std::shared_ptr<RoutingEngine> _routingEngine;
-    /// differential equation solver
-    ODESolver * _solver;
     /// writing the trajectories to file
     std::unique_ptr<Trajectories> _iod;
     /// EventManager

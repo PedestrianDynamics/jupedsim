@@ -59,19 +59,13 @@ private:
     double _riskTolerance = 0;
     std::string _gender;
 
-    //gcfm (and Krausz) specific parameters
+    //gcfm specific parameters
     double _mass;      // Mass: 1
     double _tau;       // Reaction time: 0.5
     double _T;         // OV function
     double _deltaT;    // step size
     JEllipse _ellipse; // the shape of this pedestrian
     Point _V0;         //vector V0
-
-    //Krausz specific parameters
-    double _swayFreqA;
-    double _swayFreqB;
-    double _swayAmpA;
-    double _swayAmpB;
 
 
     //double _V0;
@@ -493,16 +487,6 @@ public:
     void ConductToxicityAnalysis();
 
     bool Relocate(std::function<void(const Pedestrian &)> flowupdater);
-
-    void SetSwayParameters(double d, double d1, double d2, double d3);
-
-    double GetSwayFreqA() const;
-
-    double GetSwayFreqB() const;
-
-    double GetSwayAmpA() const;
-
-    double GetSwayAmpB() const;
 
     const std::shared_ptr<ToxicityAnalysis> & getToxicityAnalysis();
 

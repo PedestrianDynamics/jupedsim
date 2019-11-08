@@ -39,7 +39,6 @@
 #include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
 #include "math/GCFMModel.h"
-#include "math/GradientModel.h"
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "routing/ff_router/ffRouter.h"
@@ -60,7 +59,6 @@ Simulation::Simulation(Configuration * args) : _config(args)
     _building  = nullptr;
     //_direction = NULL;
     _operationalModel = nullptr;
-    _solver           = nullptr;
     _fps              = 1;
     _em               = nullptr;
     _gotSources       = false;
@@ -75,7 +73,6 @@ Simulation::Simulation(Configuration * args) : _config(args)
 
 Simulation::~Simulation()
 {
-    delete _solver;
     delete _em;
 
     if(_iod) {

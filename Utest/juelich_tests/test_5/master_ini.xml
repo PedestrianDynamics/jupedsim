@@ -108,62 +108,6 @@
         <atau mu="0.5" sigma="0.001" />
       </agent_parameters>
     </model>
-
-    <model operational_model_id="5" description="krausz">
-      <model_parameters>
-        <solver>euler</solver>
-        <stepsize>0.001</stepsize>
-        <exit_crossing_strategy>1</exit_crossing_strategy>
-        <linkedcells enabled="true" cell_size="2.2" />
-        <force_ped nu="1" dist_max="3" disteff_max="2" interpolation_width="0.1" />
-        <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
-      </model_parameters>
-      <agent_parameters agent_parameter_id="0">
-        <v0 mu="1" sigma="0.0" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-      <agent_parameters agent_parameter_id="1">
-        <v0 mu="0.0" sigma="0.0" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.40" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-    </model>
-
-    <model operational_model_id="4" description="gradnav">
-      <model_parameters>
-	<solver>euler</solver>
-	<stepsize>0.01</stepsize>
-	<exit_crossing_strategy>6</exit_crossing_strategy>
-	<floorfield delta_h="0.03125" wall_avoid_distance="0.5" use_wall_avoidance="true" />
-	<linkedcells enabled="true" cell_size="4.2" />
-        <force_ped nu="5" b="0.3" c="3.0" />
-        <force_wall nu="1" b="0.70" c="3.0" />
-	<anti_clipping slow_down_distance=".2" />
-      </model_parameters>
-      <agent_parameters agent_parameter_id="0">
-        <v0 mu="0.5" sigma="0.0" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.40" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-      <agent_parameters agent_parameter_id="1">
-        <v0 mu="0.0" sigma="0.0" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-    </model>
   </operational_models>
 
   <route_choice_models>
