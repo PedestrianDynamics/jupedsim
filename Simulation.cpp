@@ -39,7 +39,6 @@
 #include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
 #include "math/GCFMModel.h"
-#include "math/GradientModel.h"
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "routing/ff_router/ffRouter.h"

@@ -280,7 +280,6 @@ set(source_files
     IO/TraVisToClient.cpp
     math/ForceModel.cpp
     math/GCFMModel.cpp
-    math/GradientModel.cpp
     math/Mathematics.cpp
     math/ODESolver.cpp
     math/OperationalModel.cpp
@@ -364,7 +363,6 @@ set(header_files
     IO/TraVisToClient.h
     math/ForceModel.h
     math/GCFMModel.h
-    math/GradientModel.h
     math/Mathematics.h
     math/ODESolver.h
     math/OperationalModel.h
