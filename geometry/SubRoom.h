@@ -373,7 +373,6 @@ public:
 
     // virtual functions
     virtual std::string WriteSubRoom() const  = 0;
-    virtual void WriteToErrorLog() const      = 0;
     virtual std::string WritePolyLine() const = 0;
 
     /// convert all walls and transitions(doors) into a polygon representing the subroom
@@ -412,7 +411,6 @@ public:
     std::string WriteSubRoom() const;
     std::string WritePolyLine() const;
 
-    void WriteToErrorLog() const;
     bool ConvertLineToPoly(const std::vector<Line *> & goals);
     bool IsInSubRoom(const Point & ped) const;
 };
@@ -450,7 +448,6 @@ public:
 
     std::string WriteSubRoom() const;
     std::string WritePolyLine() const;
-    virtual void WriteToErrorLog() const;
     virtual bool ConvertLineToPoly(const std::vector<Line *> & goals);
 };
 
