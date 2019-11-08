@@ -121,7 +121,7 @@ enum RoutingStrategy {
 
 enum OperativModels {
     MODEL_GCFM = 1,
-    MODEL_GOMPERTZ,
+    MODEL_GOMPERTZ_REMOVED,
     MODEL_VELOCITY,
     MODEL_GRADIENT,
     MODEL_KRAUSZ

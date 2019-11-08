@@ -57,11 +57,6 @@ public:
     void SetType(const std::string & type);
 
     /**
-      *  Debug output from the object
-      */
-    void WriteToErrorLog() const;
-
-    /**
       * @return a nicely formated string of the object
       */
     std::string Write() const override;

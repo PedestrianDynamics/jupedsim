@@ -39,7 +39,6 @@
 #include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
 #include "math/GCFMModel.h"
-#include "math/GompertzModel.h"
 #include "math/GradientModel.h"
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
@@ -227,7 +226,7 @@ bool Simulation::InitArgs()
     //get the seed
     _seed = _config->GetSeed();
 
-    //size of the cells/GCFM/Gompertz
+    //size of the cells/GCFM
     if(_config->GetDistEffMaxPed() > _config->GetLinkedCellSize()) {
         Logging::Error(fmt::format(
             check_fmt("The linked-cell size [{}] should be larger than the force range [{}]"),

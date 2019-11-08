@@ -84,7 +84,5 @@ public:
     virtual bool IsInRoom(int roomID) const;
     virtual SubRoom * GetOtherSubRoom(int roomID, int subroomID) const;
 
-
-    virtual void WriteToErrorLog() const;
     virtual std::string GetDescription() const; // TraVisTo Ausgabe
 };

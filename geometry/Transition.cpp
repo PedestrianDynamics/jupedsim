@@ -28,6 +28,8 @@
 
 #include "Room.h"
 #include "SubRoom.h"
+#include "general/Format.h"
+#include "general/Logger.h"
 
 /************************************************************
  Transition (abgeleitet von Crossing)
@@ -81,9 +83,9 @@ Room * Transition::GetOtherRoom(int roomID) const
     } else if(GetRoom2() != nullptr && GetRoom2()->GetID() == roomID) {
         return GetRoom1();
     } else {
-        char msg[CLENGTH];
-        sprintf(msg, "ERROR: \tTransition::GetOtherRoom() wrong roomID [%d]", roomID);
-        Log->Write(msg);
+        Logging::Error(
+            fmt::format(check_fmt("Transition::GetOtherRoom() wrong roomID [{}]"), roomID));
+
         exit(0);
     }
 }
@@ -125,58 +127,16 @@ SubRoom * Transition::GetOtherSubRoom(int roomID, int subroomID) const
     else if((GetRoom2() != nullptr) && (GetRoom2()->GetID() == roomID))
         return GetSubRoom1();
     else {
-        Log->Write(
-            "ERROR: \tTransition::GetOtherSubRoom No exit found "
-            "on the other side\n ID=%d, roomID=%d, subroomID=%d\n",
+        Logging::Error(fmt::format(
+            check_fmt("Transition::GetOtherSubRoom No exit found on the other side, ID={}, "
+                      "roomID={}, subroomID={}."),
             GetUniqueID(),
             roomID,
-            subroomID);
+            subroomID));
         exit(EXIT_FAILURE);
     }
 }
 
-// Ein-Ausgbae
-
-void Transition::WriteToErrorLog() const
-{
-    std::string s;
-    char tmp[CLENGTH];
-    sprintf(
-        tmp,
-        "\t\tTRANS: %d [%s] (%f, %f) -- (%f, %f)\n",
-        GetID(),
-        GetCaption().c_str(),
-        GetPoint1()._x,
-        GetPoint1()._y,
-        GetPoint2()._x,
-        GetPoint2()._y);
-    s.append(tmp);
-    // erster Raum
-    if(GetRoom1() != nullptr) {
-        sprintf(
-            tmp,
-            "\t\t\t\tRoom: %d [%s] SubRoom: %d",
-            GetRoom1()->GetID(),
-            GetRoom1()->GetCaption().c_str(),
-            GetSubRoom1()->GetSubRoomID());
-    } else {
-        sprintf(tmp, "\t\t\t\tAusgang");
-    }
-    s.append(tmp);
-    // zweiter Raum
-    if(GetRoom2() != nullptr) {
-        sprintf(
-            tmp,
-            " <->\tRoom: %d [%s] SubRoom: %d\n",
-            GetRoom2()->GetID(),
-            GetRoom2()->GetCaption().c_str(),
-            GetSubRoom2()->GetSubRoomID());
-    } else {
-        sprintf(tmp, " <->\tAusgang\n");
-    }
-    s.append(tmp);
-    Log->Write(s);
-}
 
 // TraVisTo Ausgabe
 std::string Transition::GetDescription() const

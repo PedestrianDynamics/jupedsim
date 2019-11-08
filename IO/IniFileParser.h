@@ -49,8 +49,6 @@ private:
 
     bool ParseKrauszModel(TiXmlElement * xKrausz, TiXmlElement * xMain);
 
-    bool ParseGompertzModel(TiXmlElement * xGompertz, TiXmlElement * xMain);
-
     bool ParseGradientModel(TiXmlElement * xGradient, TiXmlElement * xMain);
 
     bool ParseVelocityModel(TiXmlElement * xVelocity, TiXmlElement * xMain);
