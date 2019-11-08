@@ -30,7 +30,6 @@
 #include "math/KrauszModel.h"
 #include "math/VelocityModel.h"
 #include "pedestrian/Pedestrian.h"
-#include "routing/ai_router/AIRouter.h"
 #include "routing/ff_router/ffRouter.h"
 #include "routing/global_shortest/GlobalRouter.h"
 #include "routing/quickest/QuickestPathRouter.h"
@@ -1208,22 +1207,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
             if(!ParseCogMapOpts(e))
                 return false;
         } else if(
-            (strategy == "AI") &&
-            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-#ifdef AIROUTER
-            Router * r = new AIRouter(id, ROUTING_AI);
-            _config->GetRoutingEngine()->AddRouter(r);
-
-            Logging::Info("Using AIRouter");
-            ///Parsing additional options
-            if(!ParseAIOpts(e))
-                return false;
-#else
-            std::cerr << "\nCan not use AI Router. Rerun cmake with option  -DAIROUTER=true and "
-                         "recompile.\n";
-            exit(EXIT_FAILURE);
-#endif
-        } else if(
             (strategy == "ff_global_shortest") &&
             (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
             //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
@@ -1366,65 +1349,6 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode * routingNode)
 
     return true;
 }
-#ifdef AIROUTER
-bool IniFileParser::ParseAIOpts(TiXmlNode * routingNode)
-{
-    TiXmlNode * sensorNode = routingNode->FirstChild();
-
-    if(!sensorNode) {
-        Logging::Error("No sensors found.\n");
-        return false;
-    }
-
-    /// static_cast to get access to the method 'addOption' of the AIRouter
-    AIRouter * r =
-        static_cast<AIRouter *>(_config->GetRoutingEngine()->GetAvailableRouters().back());
-
-    std::vector<std::string> sensorVec;
-    for(TiXmlElement * e = sensorNode->FirstChildElement("sensor"); e;
-        e                = e->NextSiblingElement("sensor")) {
-        std::string sensor = e->Attribute("description");
-        sensorVec.push_back(sensor);
-
-        Logging::Info(fmt::format(check_fmt("Sensor <{}> added."), sensor));
-    }
-
-    r->addOption("Sensors", sensorVec);
-
-    TiXmlElement * cogMap = routingNode->FirstChildElement("cognitive_map");
-
-    if(!cogMap) {
-        Logging::Error("Cognitive Map not specified.\n");
-        return false;
-    }
-
-    //std::vector<std::string> cogMapStatus;
-    //cogMapStatus.push_back(cogMap->Attribute("status"));
-    //Logging::Info(fmt::format(check_fmt("All pedestrian starting with a(n) {} cognitive maps"), cogMapStatus[0]));
-    //r->addOption("CognitiveMap", cogMapStatus);
-
-    std::vector<std::string> cogMapFiles;
-    if(!cogMap->Attribute("files")) {
-        Logging::Warning("No input files for the cognitive map specified!");
-    } else {
-        cogMapFiles.push_back(cogMap->Attribute("files"));
-        r->addOption("CognitiveMapFiles", cogMapFiles);
-        Logging::Info("Input files for the cognitive map specified!");
-    }
-
-    //Signs
-    TiXmlElement * signs = routingNode->FirstChildElement("signage");
-
-    if(!signs) {
-        Logging::Info("No signage specified");
-    } else {
-        r->addOption("SignFiles", std::vector<std::string>{signs->Attribute("file")});
-    }
-
-    return true;
-}
-#endif
-
 
 bool IniFileParser::ParseLinkedCells(const TiXmlNode & linkedCellNode)
 {

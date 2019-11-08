@@ -5,7 +5,6 @@
 # -DBUILD_TESTING=ON (default OFF) for python tests
 # -DBUILD_CPPUNIT_TEST=ON (default OFF) for unit tests
 # -D Boost_NO_SYSTEM_PATHS=true (default false) -D BOOST_ROOT=PATH_where_to_find_boost
-# -D AIROUTER=true (default false)
 # -D JPSFIRE=ON (default OFF)
 #--------------------------------------------------------------------------
 ################################################################################
@@ -51,9 +50,6 @@ print_var(BUILD_DOC)
 
 set(JPSFIRE OFF CACHE BOOL "Build with jpsfire support")
 print_var(JPSFIRE)
-
-set(AIROUTER OFF CACHE BOOL "Build with AI router support")
-print_var(AIROUTER)
 
 set(USE_OPENMP ON CACHE BOOL "Build with OpenMP")
 print_var(USE_OPENMP)
@@ -169,18 +165,6 @@ else()
         -Wno-unknown-pragmas
     )
 endif()
-
-if(AIROUTER)
-    set(CGAL_DO_NOT_WARN_ABOUT_CMAKE_BUILD_TYPE ON)
-    find_package(CGAL REQUIRED)
-    list(APPEND COMMON_COMPILE_OPTIONS
-        # CGAL package puts a gcc only optimization flag on the link line for
-        # all targets that use CGAL. Since we do not want to see an waring for
-        # an unknown optimization flag on clang we silence this warning.
-        $<$<CXX_COMPILER_ID:Clang>:-Wno-ignored-optimization-argument>
-    )
-endif()
-
 
 find_package(Threads REQUIRED)
 
@@ -452,44 +436,11 @@ set(JPSFIRE_SRC
     JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
     JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
 )
-set(AIROUTER_SRC
-    routing/ai_router/AIRouter.cpp
-    routing/ai_router/BrainStorage.cpp
-    routing/ai_router/cognitiveMap/associations.cpp
-    routing/ai_router/cognitiveMap/connection.cpp
-    routing/ai_router/cognitiveMap/cognitivemap.cpp
-    routing/ai_router/cognitiveMap/landmark.cpp
-    routing/ai_router/cognitiveMap/region.cpp
-    routing/ai_router/cognitiveMap/landmarknetwork.cpp
-    routing/ai_router/cognitiveMap/internnavigationnetwork.cpp
-    routing/ai_router/perception/visualsystem.cpp
-    routing/ai_router/perception/visibleenvironment.cpp
-    routing/ai_router/perception/cgalgeometry.cpp
-    routing/ai_router/perception/sign.cpp
-    routing/ai_router/Cortex.cpp
-)
-set(AIROUTER_HDR
-    routing/ai_router/AIRouter.h
-    routing/ai_router/BrainStorage.h
-    routing/ai_router/cognitiveMap/associations.h
-    routing/ai_router/cognitiveMap/connection.cpp
-    routing/ai_router/cognitiveMap/cognitivemap.h
-    routing/ai_router/cognitiveMap/landmark.h
-    routing/ai_router/cognitiveMap/region.h
-    routing/ai_router/cognitiveMap/landmarknetwork.h
-    routing/ai_router/cognitiveMap/internnavigationnetwork.h
-    routing/ai_router/perception/visualsystem.h
-    routing/ai_router/perception/visibleenvironment.h
-    routing/ai_router/perception/cgalgeometry.h
-    routing/ai_router/perception/sign.h
-    routing/ai_router/Cortex.h
-)
+
 
 add_library(core STATIC
     ${source_files}
     ${header_files}
-    $<$<BOOL:${AIROUTER}>:${AIROUTER_SRC}>
-    $<$<BOOL:${AIROUTER}>:${AIROUTER_HDR}>
     $<$<BOOL:${JPSFIRE}>:${JPSFIRE_SRC}>
     $<$<BOOL:${JPSFIRE}>:${JPSFIRE_HDR}>
 )
@@ -497,7 +448,6 @@ target_compile_options(core PRIVATE
     ${COMMON_COMPILE_OPTIONS}
 )
 target_compile_definitions(core PUBLIC
-    $<$<BOOL:${AIROUTER}>:AIROUTER>
     $<$<BOOL:${JPSFIRE}>:JPSFIRE>
     JPSCORE_VERSION="${PROJECT_VERSION}"
     ${GIT_BUILD_INFO_DEFINES}
@@ -509,7 +459,6 @@ target_link_libraries(core
     tinyxml
     visilibity
     CLI11::CLI11
-    $<$<BOOL:${AIROUTER}>:CGAL::CGAL>
     $<$<BOOL:${JPSFIRE}>:cnpy>
     fs
     spdlog::spdlog

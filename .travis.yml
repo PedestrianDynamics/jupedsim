@@ -14,7 +14,7 @@ matrix:
        - if [[ $(./third-party/clang-format-hooks/apply-format develop) ]]; then travis_terminate 1; fi
        - ./scripts/setup-deps.sh
        - mkdir build && cd build
-       - cmake  .. -DCMAKE_PREFIX_PATH=$(pwd)/../deps -DBUILD_CPPUNIT_TEST=ON -DAIROUTER=ON -DJPSFIRE=ON
+       - cmake  .. -DCMAKE_PREFIX_PATH=$(pwd)/../deps -DBUILD_CPPUNIT_TEST=ON -DJPSFIRE=ON
        - make -j $(nproc)
        - CTEST_OUTPUT_ON_FAILURE=1 ctest -j 2
        - bin/jpscore $(pwd)/../demos/scenario_2_bottleneck/bottleneck_ini.xml
@@ -27,7 +27,7 @@ matrix:
        - if [[ $(./third-party/clang-format-hooks/apply-format develop) ]]; then travis_terminate 1; fi
        - ./scripts/setup-deps.sh
        - mkdir build && cd build
-       - cmake .. -DCMAKE_PREFIX_PATH=$(pwd)/../deps -DBUILD_CPPUNIT_TEST=ON -DAIROUTER=ON -DJPSFIRE=ON
+       - cmake .. -DCMAKE_PREFIX_PATH=$(pwd)/../deps -DBUILD_CPPUNIT_TEST=ON -DJPSFIRE=ON
        - make -j $(nproc)
        - CTEST_OUTPUT_ON_FAILURE=1 ctest -j 2
        - bin/jpscore $(pwd)/../demos/scenario_2_bottleneck/bottleneck_ini.xml
@@ -39,7 +39,7 @@ matrix:
       script:
         - ./scripts/setup-deps.sh
         - mkdir build && cd build
-        - cmake .. -DCMAKE_PREFIX_PATH=$(pwd)/../deps -DBUILD_CPPUNIT_TEST=ON -DAIROUTER=ON -DJPSFIRE=ON
+        - cmake .. -DCMAKE_PREFIX_PATH=$(pwd)/../deps -DBUILD_CPPUNIT_TEST=ON -DJPSFIRE=ON
         - make -j $(nproc)
         - CTEST_OUTPUT_ON_FAILURE=1 ctest -j 2
         - bin/jpscore $(pwd)/../demos/scenario_2_bottleneck/bottleneck_ini.xml
