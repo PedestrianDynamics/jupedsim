@@ -91,7 +91,7 @@
        <router router_id="6" description="ff_quickest"/> <!-- like global quickest -->
 
        <!-- not implemented -->
-       <router router_id="8" description="local_quickest">
+       <router router_id="7" description="local_quickest">
          <parameters>
            <!-- <navigation_lines file="../routing.xml" /> -->
          </parameters>

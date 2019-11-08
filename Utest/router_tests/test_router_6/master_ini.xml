@@ -100,7 +100,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
        <router router_id="6" description="ff_quickest"/> <!-- like global quickest -->
 
        <!-- not implemented -->
-       <router router_id="8" description="local_quickest">
+       <router router_id="7" description="local_quickest">
          <parameters>
            <!-- <navigation_lines file="../routing.xml" /> -->
          </parameters>
