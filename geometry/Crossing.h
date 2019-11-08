@@ -45,7 +45,6 @@ private:
     int _partialDoorUsage; //door usage in _DT
     double _lastFlowMeasurement;
 
-
     std::string _flowAtExit;
     DoorState _state;
 

@@ -277,12 +277,22 @@ void Crossing::SetDN(int dn)
     _DN = dn;
 }
 
-// changes:
-// - _lasFlowMeasurement
-// - _closingTime
-// - state of door (close/open)
-// - _temporaryClosed (false if maxDoorUsage is reached)
-// return a change, e.g. door closed was made.
+/**
+ * Regulates the flow at a crossing. To assure a specific flow at a door the door may need to closes
+ * temporarily.
+ *
+ * If _outFlowRate is set by user:
+ *  - If the current flow between the last measurement and now is greater than _outflowRate
+ *      - change door state to temp_close
+ *
+ * If _maxDoorUsage is set by user:
+ *  - If _doorUsage is greater equal than _maxDoorUsage
+ *      - change door state to close
+ *
+ * @post changes \a _lastFlowMeasurement, \a _closingTime, \a _state
+ * @param time time the flow is regulated
+ * @return true, if a change to door state was made.
+ */
 bool Crossing::RegulateFlow(double time)
 {
     bool change   = false;
@@ -296,7 +306,7 @@ bool Crossing::RegulateFlow(double time)
             // --> [1]
             //---------------------------
             _closingTime = number / _outflowRate - T; //[1]
-                                                      //               this->Close();
+
             this->TempClose();
             Logging::Info(fmt::format(
                 check_fmt(
@@ -311,7 +321,7 @@ bool Crossing::RegulateFlow(double time)
         }
     }
 
-    // close the door is mdu is reached
+    // close the door if _maxDoorUsage is reached
     if(_maxDoorUsage != std::numeric_limits<double>::max()) {
         if(_doorUsage >= _maxDoorUsage) {
             Logging::Info(fmt::format(
@@ -320,7 +330,7 @@ bool Crossing::RegulateFlow(double time)
                 GetDoorUsage(),
                 GetMaxDoorUsage(),
                 time));
-            this->TempClose();
+            this->Close();
             change = true;
         }
     }
