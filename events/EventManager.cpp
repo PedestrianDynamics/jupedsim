@@ -116,13 +116,13 @@ bool EventManager::ReadEventsXml()
         eventfile = _config->GetProjectRootDir() /
                     xMainNode->FirstChild("events_file")->FirstChild()->Value();
         Logging::Info(fmt::format(check_fmt("events<{}>"), eventfile.string()));
-    } else if(xMainNode->FirstChild("header")) {
-        if(xMainNode->FirstChild("header")->FirstChild("events_file")) {
-            eventfile =
-                _config->GetProjectRootDir() /
-                xMainNode->FirstChild("header")->FirstChild("events_file")->FirstChild()->Value();
-            Logging::Info(fmt::format(check_fmt("events<{}>"), eventfile.string()));
-        }
+    } else if(
+        xMainNode->FirstChild("header") &&
+        xMainNode->FirstChild("header")->FirstChild("events_file")) {
+        eventfile =
+            _config->GetProjectRootDir() /
+            xMainNode->FirstChild("header")->FirstChild("events_file")->FirstChild()->Value();
+        Logging::Info(fmt::format(check_fmt("events<{}>"), eventfile.string()));
     } else {
         Logging::Info("No events found");
         return true;
@@ -786,13 +786,13 @@ bool EventManager::ReadSchedule()
         scheduleFile = _config->GetProjectRootDir() /
                        xMainNode->FirstChild("schedule_file")->FirstChild()->Value();
         Logging::Info(fmt::format(check_fmt("events<{}>"), scheduleFile.string()));
-    } else if(xMainNode->FirstChild("header")) {
-        if(xMainNode->FirstChild("header")->FirstChild("schedule_file")) {
-            scheduleFile =
-                _config->GetProjectRootDir() /
-                xMainNode->FirstChild("header")->FirstChild("schedule_file")->FirstChild()->Value();
-            Logging::Info(fmt::format(check_fmt("events<{}>"), scheduleFile.string()));
-        }
+    } else if(
+        xMainNode->FirstChild("header") &&
+        xMainNode->FirstChild("header")->FirstChild("schedule_file")) {
+        scheduleFile =
+            _config->GetProjectRootDir() /
+            xMainNode->FirstChild("header")->FirstChild("schedule_file")->FirstChild()->Value();
+        Logging::Info(fmt::format(check_fmt("events<{}>"), scheduleFile.string()));
     } else {
         Logging::Info("No events found");
         return true;
