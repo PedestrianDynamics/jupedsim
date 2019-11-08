@@ -116,7 +116,7 @@ enum OperativModels {
     MODEL_GOMPERTZ_REMOVED,
     MODEL_VELOCITY,
     MODEL_GRADIENT,
-    MODEL_KRAUSZ
+    MODEL_KRAUSZ_REMOVED
     //    MODEL_ORCA,
     //    MODEL_CFM,
     //    MODEL_GNM

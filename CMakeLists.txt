@@ -281,7 +281,6 @@ set(source_files
     math/ForceModel.cpp
     math/GCFMModel.cpp
     math/GradientModel.cpp
-    math/KrauszModel.cpp
     math/Mathematics.cpp
     math/ODESolver.cpp
     math/OperationalModel.cpp

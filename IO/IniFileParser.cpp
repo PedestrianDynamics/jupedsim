@@ -27,7 +27,6 @@
 #include "general/OpenMP.h"
 #include "math/GCFMModel.h"
 #include "math/GradientModel.h"
-#include "math/KrauszModel.h"
 #include "math/VelocityModel.h"
 #include "pedestrian/Pedestrian.h"
 #include "routing/ff_router/ffRouter.h"
@@ -160,24 +159,11 @@ bool IniFileParser::Parse(const fs::path & iniFile)
             parsingModelSuccessful = true;
             break;
         }
-        if((_model == MODEL_KRAUSZ) && (model_id == MODEL_KRAUSZ)) {
-            if(modelName != "krausz") {
-                Logging::Error("Mismatch model ID and description. Did you mean krausz?");
-                return false;
-            }
-            if(!ParseKrauszModel(xModel, xMainNode))
-                return false;
-            parsingModelSuccessful = true;
-            //only parsing one model
-            break;
-        }
     }
 
     if(!parsingModelSuccessful) {
         Logging::Error(fmt::format(
-            check_fmt("Wrong model id [{}]. Choose 1 (GCFM), 3 (Tordeux2015) or 5 "
-                      "(Krausz)"),
-            _model));
+            check_fmt("Wrong model id [{}]. Choose 1 (GCFM) or 3 (Tordeux2015)"), _model));
         Logging::Error(
             "Please make sure that all models are specified in the operational_models section");
         Logging::Error("And make sure to use the same ID in the agent section");
@@ -586,102 +572,6 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement * xGCFM, TiXmlElement * xMainNod
     return true;
 }
 
-bool IniFileParser::ParseKrauszModel(TiXmlElement * xKrausz, TiXmlElement * xMainNode)
-{
-    Logging::Info("Using the Krausz model");
-    Logging::Info("Parsing the model parameters");
-
-    TiXmlNode * xModelPara = xKrausz->FirstChild("model_parameters");
-    if(!xModelPara) {
-        Logging::Error("!!!! Changes in the operational model section !!!");
-        Logging::Error("!!!! The new version is in inputfiles/ship_msw/ini_ship2.xml !!!");
-        return false;
-    }
-
-    // For convenience. This moved to the header as it is not model specific
-    if(xModelPara->FirstChild("tmax")) {
-        Logging::Error("The maximal simulation time section moved to the header!!!");
-        Logging::Error("\t <max_sim_time> </max_sim_time>\n");
-        return false;
-    }
-
-    //solver
-    if(!ParseNodeToSolver(*xModelPara))
-        return false;
-
-    //stepsize
-    if(!ParseStepSize(*xModelPara))
-        return false;
-
-    //exit crossing strategy
-    if(!ParseStrategyNodeToObject(*xModelPara))
-        return false;
-
-    //linked-cells
-    if(!ParseLinkedCells(*xModelPara))
-        return false;
-
-    //force_ped
-    if(xModelPara->FirstChild("force_ped")) {
-        std::string nu       = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
-        std::string dist_max = xModelPara->FirstChildElement("force_ped")->Attribute("dist_max");
-        std::string disteff_max =
-            xModelPara->FirstChildElement("force_ped")
-                ->Attribute("disteff_max"); // @todo: rename disteff_max to force_max
-        std::string interpolation_width =
-            xModelPara->FirstChildElement("force_ped")->Attribute("interpolation_width");
-
-        _config->SetMaxFPed(std::stod(dist_max));
-        _config->SetNuPed(std::stod(nu));
-        _config->SetDistEffMaxPed(std::stod(disteff_max));
-        _config->SetIntPWidthPed(std::stod(interpolation_width));
-        Logging::Info(fmt::format(
-            check_fmt("Frep_ped nu={:.3f}, dist_max={:.3f}, disteff_max={:.3f}, "
-                      "interpolation_width={:.3f}"),
-            std::stod(nu),
-            std::stod(dist_max),
-            std::stod(disteff_max),
-            std::stod(interpolation_width)));
-    }
-
-    //force_wall
-    if(xModelPara->FirstChild("force_wall")) {
-        std::string nu       = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
-        std::string dist_max = xModelPara->FirstChildElement("force_wall")->Attribute("dist_max");
-        std::string disteff_max =
-            xModelPara->FirstChildElement("force_wall")->Attribute("disteff_max");
-        std::string interpolation_width =
-            xModelPara->FirstChildElement("force_wall")->Attribute("interpolation_width");
-        _config->SetMaxFWall(std::stod(dist_max));
-        _config->SetNuWall(std::stod(nu));
-        _config->SetDistEffMaxWall(std::stod(disteff_max));
-        _config->SetIntPWidthWall(std::stod(interpolation_width));
-        Logging::Info(fmt::format(
-            check_fmt("Frep_wall mu={:.3f}, dist_max={:.3f}, disteff_max={:.3f}, "
-                      "interpolation_width={:.3f}"),
-            std::stod(nu),
-            std::stod(dist_max),
-            std::stod(disteff_max),
-            std::stod(interpolation_width)));
-    }
-
-    //Parsing the agent parameters
-    TiXmlNode * xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
-    ParseAgentParameters(xKrausz, xAgentDistri);
-
-    //TODO: models do not belong in a configuration container [gl march '16]
-    _config->SetModel(std::shared_ptr<OperationalModel>(new KrauszModel(
-        _exit_strategy,
-        _config->GetNuPed(),
-        _config->GetNuWall(),
-        _config->GetDistEffMaxPed(),
-        _config->GetDistEffMaxWall(),
-        _config->GetIntPWidthPed(),
-        _config->GetIntPWidthWall(),
-        _config->GetMaxFPed(),
-        _config->GetMaxFWall())));
-    return true;
-}
 
 bool IniFileParser::ParseGradientModel(TiXmlElement * xGradient, TiXmlElement * xMainNode)
 {
@@ -1093,20 +983,6 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 agentParameters->InitT(mu, sigma);
                 Logging::Info(fmt::format(check_fmt("T mu={} , sigma={}"), mu, sigma));
             }
-            // swaying parameters
-            if(xAgentPara->FirstChild("sway")) {
-                double freqA = xmltof(xAgentPara->FirstChildElement("sway")->Attribute("freqA"));
-                double freqB = xmltof(xAgentPara->FirstChildElement("sway")->Attribute("freqB"));
-                double ampA  = xmltof(xAgentPara->FirstChildElement("sway")->Attribute("ampA"));
-                double ampB  = xmltof(xAgentPara->FirstChildElement("sway")->Attribute("ampB"));
-                agentParameters->SetSwayParams(freqA, freqB, ampA, ampB);
-                Logging::Info(fmt::format(
-                    check_fmt("Swaying parameters freqA={} , freqB={} , ampA={}, ampB={}"),
-                    freqA,
-                    freqB,
-                    ampA,
-                    ampB));
-            }
 
             if(_model == 4) {      //  Gradient
                 double beta_c = 2; /// @todo quick and dirty
@@ -1126,11 +1002,6 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 _config->SetDistEffMaxPed(
                     max_Eb + agentParameters->GetT() * agentParameters->GetV0());
                 _config->SetDistEffMaxWall(_config->GetDistEffMaxPed());
-            }
-
-            if(_model == 5) // Krausz
-            {
-                agentParameters->EnableStretch(false);
             }
         }
     }
