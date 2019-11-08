@@ -150,14 +150,6 @@ void AgentsParameters::InitT(double mean, double stdv)
 }
 
 
-void AgentsParameters::SetSwayParams(double freqA, double freqB, double ampA, double ampB)
-{
-    _swayFreqA = freqA;
-    _swayFreqB = freqB;
-    _swayAmpA  = ampA;
-    _swayAmpB  = ampB;
-}
-
 void AgentsParameters::EnableStretch(bool stretch)
 {
     _enableStretch = stretch;
@@ -281,26 +273,6 @@ double AgentsParameters::GetT()
     } else {
         return _T(_generator);
     }
-}
-
-double AgentsParameters::GetSwayFreqA() const
-{
-    return _swayFreqA;
-}
-
-double AgentsParameters::GetSwayFreqB() const
-{
-    return _swayFreqB;
-}
-
-double AgentsParameters::GetSwayAmpA() const
-{
-    return _swayAmpA;
-}
-
-double AgentsParameters::GetSwayAmpB() const
-{
-    return _swayAmpB;
 }
 
 bool AgentsParameters::StretchEnabled()

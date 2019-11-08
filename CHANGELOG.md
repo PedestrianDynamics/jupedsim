@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 ## v0.8.5 [2019-07-12]
 
 ### Added
-- Added option for additional/optional output for speed, velocity(x,y), 
+- Added option for additional/optional output for speed, velocity(x,y),
 final goal, intermediate goal, desired direction(x,y), spotlight, router, group. Thus,
 there is no need to run multiple simulation to obtain those values. Attention: File may
 become significantly larger!
@@ -15,6 +15,9 @@ become significantly larger!
 
 ### Removed
 - Removed AI_Router
+- Removed Krausz Model
+- Removed Gompertz Model
+- Removed GradNav Model
 
 ## v0.8.4 [2019-04-12]
 
