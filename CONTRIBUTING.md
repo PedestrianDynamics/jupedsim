@@ -25,9 +25,6 @@ There are only a few rules and advices we want to give to you:
     - [Documenting new features](#documenting-new-features)
     - [Sample Templates](#sample-templates)
 
-- [Committing code](#commiting-code)
-    - [Committing guidelines](#commiting-guidelines)
-
 ## Advice for new contributors
 
 ### Building from source
@@ -97,15 +94,6 @@ Make sure all tests are running after merging and you provided new tests for you
 After doing that open a merge/pull request.
 
 If your fix/feature is accepted it will be merged into the develop-branch.
-
-#################
-TODO:
-- How to make branches out of issues
-- How to work with branches
-- Board usage
-- Gitlab in general: features
-- Wiki vs Web
-#######################
 
 ### FAQ
 
