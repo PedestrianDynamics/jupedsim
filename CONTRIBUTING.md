@@ -7,7 +7,7 @@ It does not matter if you are a researcher, student or just interested in pedest
 There are only a few rules and advices we want to give to you:
 
 - [Advice for new contributors](#advice-for-new-contributors)
-    - [First steps](#first-steps)
+    - [Building from Source](#building-from-source)
     - [Workflow](#workflow)
     - [FAQ](#faq)
 
@@ -30,30 +30,64 @@ There are only a few rules and advices we want to give to you:
 
 ## Advice for new contributors
 
-### First steps
-* Clone/fork our github/gitlab repository
-~~~
-git clone https://cst.version.fz-juelich.de/jupedsim/jpscore.git
-~~~
+### Building from source
+The build is tested on Ubuntu 18.04 with gcc-8 / clang-8 and on macOS Mojave
+10.14.5 and apple clang.
 
-* Change to the developement branch and create a branch with your feature.
-~~~
-git checkout developement 
-git checkout -b feature_name
-~~~
+#### Requirements
+For the compilation of JuPedSim core you need a C++17 capable compiler and standard library.
 
-* Assuming you are in the jpscore folder type 
+Required:
+* boost (>= 1.65)
+* libomp (if you want to use OpenMP with Apple LLVm or Clang on Linux)
+* cmake (>= 3.1)
+Recommended:
+* ninja-build
+The following dependencies could be installed system wide or will be installed locally using a script:
+* spdlog (>= 1.3)
+* fmtlib (>= 6.0)
+* CLI11 (>= 1.8)
+* catch2
+
+#### How to build
+Once you have installed the dependencies continue building as follows:
+```bash
+git clone https://github.com/JuPedSim/jpscore.git
+cd jpscore
+mkdir build && cd build
+./../scripts/setup-deps.sh
+cmake -DCMAKE_PREFIX_PATH=$(pwd)/deps ..
+make -j$(nproc)
 ```
-mkdir build && cd build 
-cmake .. 
+
+Note: If you do not want to use OpenMP you have to pass `-DUSE_OPENMP=OFF` to
+cmake on generation.
+```bash
+cmake -DUSE_OPENMP=OFF -DCMAKE_PREFIX_PATH=$(pwd)/deps ..
 ```
 
-* Download all dependencies, check if cmake tells you something is missing
-    * Boost >= 1.56
-    * Qt
-    * Vtk
-    
-* If everything compiled for the first time, you are free to start
+The following configuration flags are additionally available:
+
+##### USE_OPENMP defaults to ON
+Build `jpscore` with OpenMP support, generation will fail if OpenMP cannot be
+found.
+
+##### JPSFIRE defaults to OFF
+Build `jpscore` with jpsfire features
+
+##### BUILD_DOC defaults to OFF
+Build internal Doxygen based documentation
+
+##### BUILD_CPPUNIT_TEST defaults to OFF
+Build unit tests and add them to ctest
+
+##### BUILD_TESTING defaults to OFF
+Build full system tests and add them to ctest
+
+##### BUILD_WITH_ASAN defaults to OFF (Does not support Windows)
+Build an additional target `jpscore_asan` with address and undefined behavior
+sanitizer enabled. Note there is an approx. 2x slowdown when using
+`jpscore_asan` over `jpscore`
 
 ### Workflow
 The branches **master** and **develop** are **protected**. You can **only push to your feature-branch.**
@@ -65,7 +99,7 @@ After doing that open a merge/pull request.
 If your fix/feature is accepted it will be merged into the develop-branch.
 
 #################
-TODO: 
+TODO:
 - How to make branches out of issues
 - How to work with branches
 - Board usage
@@ -224,10 +258,10 @@ To write additional tests, create a directory under *Utest/*.
    example: */Utest/test\_case1/*
 - Put in that directory an ini-file (referred to as "master-inifile")
    and all the relevant files for a simulation, e.g. geometry file, etc. In the master-inifile you can use python syntax
-   
+
    Example:
 ```xml
-   <max_sim_time>[3,4]</max_sim_time> 
+   <max_sim_time>[3,4]</max_sim_time>
    <seed>range(1, 10)</seed>
 ```
 - run the script `makeini.py` with the obligatory option `-f`: Using the
@@ -273,7 +307,7 @@ If you need a more complex example of how to use more arguments for further calc
 If a test has to fail because an error occurs or a necessary condition is not fulfilled  you can simply exit the script by using something like
 
 ```python
-if condition_fails: 
+if condition_fails:
   exit(FAILURE)
 ```
 Once you have written your test you have to make your script executable, so it has to contain a main function which calls the test:
