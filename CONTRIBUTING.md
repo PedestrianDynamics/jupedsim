@@ -38,8 +38,10 @@ Required:
 * boost (>= 1.65)
 * libomp (if you want to use OpenMP with Apple LLVm or Clang on Linux)
 * cmake (>= 3.1)
+
 Recommended:
 * ninja-build
+
 The following dependencies could be installed system wide or will be installed locally using a script:
 * spdlog (>= 1.3)
 * fmtlib (>= 6.0)
