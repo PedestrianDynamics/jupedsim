@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 final goal, intermediate goal, desired direction(x,y), spotlight, router, group. Thus,
 there is no need to run multiple simulation to obtain those values. Attention: File may
 become significantly larger!
+- Added one directional doors. Direction of opening is defined by room order in geometry file.
 
 ### Changed
 
