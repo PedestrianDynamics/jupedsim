@@ -39,8 +39,6 @@
 #include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
 #include "math/GCFMModel.h"
-#include "math/GompertzModel.h"
-#include "math/GradientModel.h"
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "routing/ff_router/ffRouter.h"
@@ -61,7 +59,6 @@ Simulation::Simulation(Configuration * args) : _config(args)
     _building  = nullptr;
     //_direction = NULL;
     _operationalModel = nullptr;
-    _solver           = nullptr;
     _fps              = 1;
     _em               = nullptr;
     _gotSources       = false;
@@ -76,7 +73,6 @@ Simulation::Simulation(Configuration * args) : _config(args)
 
 Simulation::~Simulation()
 {
-    delete _solver;
     delete _em;
 
     if(_iod) {
@@ -227,7 +223,7 @@ bool Simulation::InitArgs()
     //get the seed
     _seed = _config->GetSeed();
 
-    //size of the cells/GCFM/Gompertz
+    //size of the cells/GCFM
     if(_config->GetDistEffMaxPed() > _config->GetLinkedCellSize()) {
         Logging::Error(fmt::format(
             check_fmt("The linked-cell size [{}] should be larger than the force range [{}]"),

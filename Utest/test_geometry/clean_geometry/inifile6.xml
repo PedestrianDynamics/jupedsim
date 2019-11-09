@@ -73,28 +73,6 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
             <T mu="1" sigma="0.0" />
         </agent_parameters>
     </model>
-
-    <model operational_model_id="4" description="gradnav">
-        <model_parameters>
-            <solver>euler</solver>
-            <stepsize>0.01</stepsize>
-            <exit_crossing_strategy>8</exit_crossing_strategy>
-            <floorfield delta_h="0.0625" wall_avoid_distance="0.4" use_wall_avoidance="true" />
-            <linkedcells enabled="true" cell_size="4.2" />
-            <force_ped nu="15" b="0.25" c="3.0" />
-            <force_wall nu="0" b="0.70" c="3.0" />
-            <anti_clipping slow_down_distance="0.8" />
-        </model_parameters>
-        <agent_parameters agent_parameter_id="1">
-            <v0 mu="1.2" sigma="0.0" />
-            <bmax mu="0.15" sigma="0.001" />
-            <bmin mu="0.15" sigma="0.001" />
-            <amin mu="0.15" sigma="0.001" />
-            <tau mu="0.5" sigma="0.001" />
-            <atau mu="0.0" sigma="0.001" />
-        </agent_parameters>
-    </model>
-
 </operational_models>
 
 <route_choice_models>

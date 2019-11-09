@@ -21,7 +21,6 @@ and filesystem from boost.
 Required:
 * boost (>= 1.65)
 * libomp (if you want to use OpenMP with Apple LLVm or Clang on Linux)
-* cgal
 * spdlog (libspdlog-dev on Ubuntu, spdlog on brew)
 * fmtlib (libfmt-dev on Ubuntu, fmt on brew)
 * cmake (>= 3.1)
@@ -60,9 +59,6 @@ found.
 
 ##### JPSFIRE defaults to OFF
 Build `jpscore` with jpsfire features
-
-##### AIROUTER defaults to OFF
-Build `jpscore` with an AI based router
 
 ##### BUILD_DOC defaults to OFF
 Build internal Doxygen based documentation

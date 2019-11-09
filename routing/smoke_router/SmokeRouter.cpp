@@ -1,5 +1,5 @@
 /**
- * \file        AIRouter.cpp
+ * \file        SmokeRouter.cpp
  * \date        Feb 1, 2014
  * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
