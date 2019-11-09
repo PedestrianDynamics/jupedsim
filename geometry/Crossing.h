@@ -34,7 +34,16 @@ class Crossing : public Hline
 {
 private:
     //     /// TODO ? unique between crossings and transitions ?
+    /**
+     * Total door usage, counts all pedestrians passing the crossing
+     */
     int _doorUsage;
+
+    /**
+     * Temporary door usage, counts pedestrians until reset
+     */
+    int _tempDoorUsage;
+
     double _lastPassingTime;
     double _outflowRate; // pedestrians / second
     int _maxDoorUsage;
