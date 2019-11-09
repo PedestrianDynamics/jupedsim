@@ -547,7 +547,7 @@ Point VelocityModel::ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const
 
     // and finally the closed doors
     for(const auto & trans : subroom->GetAllTransitions()) {
-        if(!trans->IsOpen()) {
+        if(!trans->IsOpen(subroom->GetRoomID(), subroom->GetSubRoomID())) {
             f += ForceRepWall(ped, *(static_cast<Line *>(trans)), centroid, inside);
         }
         // int uid1= goal->GetUniqueID();

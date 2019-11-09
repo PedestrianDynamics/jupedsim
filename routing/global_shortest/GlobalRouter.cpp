@@ -378,6 +378,43 @@ bool GlobalRouter::Init(Building * building)
         }
     }
 
+    // deal with one directional doors
+    for(const auto & itr1 : _accessPoints) {
+        AccessPoint * ap = itr1.second;
+        int from_door    = _map_id_to_index[ap->GetID()];
+
+        if(ap->GetState() == DoorState::ONE_DIR) {
+            Transition * door = _building->GetTransitionByUID(ap->GetID());
+
+            for(auto other : ap->GetConnectingAPs()) {
+                Transition * otherDoor = _building->GetTransitionByUID(other->GetID());
+                int room1              = door->GetRoom1()->GetID();
+                int room2              = door->GetRoom2()->GetID();
+                ;
+
+                int otherRoom1 = otherDoor->GetRoom1()->GetID();
+
+                if(otherDoor->IsExit()) {
+                    if(room1 == otherRoom1) {
+                        int to_door                     = _map_id_to_index[other->GetID()];
+                        _distMatrix[from_door][to_door] = std::numeric_limits<double>::max();
+                        continue;
+                    }
+                } else {
+                    int otherRoom2 = otherDoor->GetRoom2()->GetID();
+
+                    if((room1 == otherRoom1 || room1 == otherRoom2) &&
+                       (room2 == otherRoom1 || room2 == otherRoom2)) {
+                        continue;
+                    }
+
+                    int to_door                     = _map_id_to_index[other->GetID()];
+                    _distMatrix[from_door][to_door] = std::numeric_limits<double>::max();
+                }
+            }
+        }
+    }
+
     //run the floyd warshall algorithm
     FloydWarshall();
 

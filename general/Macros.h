@@ -197,8 +197,15 @@ enum class OptionalOutput {
     group             = 7,
 }; // enum class
 
-// Describes the door
-enum class DoorState { OPEN, CLOSE, TEMP_CLOSE, Error };
+/**
+ * Describes the different door states:
+ * OPEN = open door, ped go through it
+ * CLOSE = closed door, ped look for different way
+ * TEMP_CLOSE = closed door, ped do not look for different way
+ * ONE_DIR = OPEN from room 1 to room 2, same for subroom, CLOSE for other direction
+ * ONE_DIR_TEMP = OPEN from room 1 to room 2, same for subroom, TEMP_CLOSE for other direction
+ */
+enum class DoorState { OPEN, CLOSE, TEMP_CLOSE, ONE_DIR, ONE_DIR_TEMP, Error };
 
 inline DoorState StringToDoorState(std::string name)
 {
@@ -214,6 +221,14 @@ inline DoorState StringToDoorState(std::string name)
 
     if(name.compare("close") == 0) {
         return DoorState::CLOSE;
+    }
+
+    if(name.compare("one_dir") == 0) {
+        return DoorState::ONE_DIR;
+    }
+
+    if(name.compare("one_dir_temp") == 0) {
+        return DoorState::ONE_DIR_TEMP;
     }
 
     return DoorState::Error;

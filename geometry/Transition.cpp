@@ -169,3 +169,26 @@ std::string Transition::GetDescription() const
     geometry.append("\t\t</door>\n");
     return geometry;
 }
+
+DoorState Transition::checkOneDir(int roomID, int) const
+{
+    DoorState state = this->GetState();
+
+    if(state == DoorState::ONE_DIR) {
+        if(roomID == _room1->GetID()) {
+            return DoorState::OPEN;
+        } else {
+            return DoorState::CLOSE;
+        }
+    }
+
+    if(state == DoorState::ONE_DIR_TEMP) {
+        if(roomID == _room1->GetID()) {
+            return DoorState::OPEN;
+        } else {
+            return DoorState::TEMP_CLOSE;
+        }
+    }
+
+    return state;
+}
