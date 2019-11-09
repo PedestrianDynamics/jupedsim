@@ -33,7 +33,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 
     <agents operational_model_id = "3">
         <agents_distribution>
-            <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="40" router_id = "arange(1, 8)" x_min="4.8" x_max="8.8" y_min ="0.0" y_max="4.0"/>
+            <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="40" router_id = "arange(1, 7)" x_min="4.8" x_max="8.8" y_min ="0.0" y_max="4.0"/>
             <!-- The number of participants should be (40, 38, 36) in 3 runs-->
         </agents_distribution>
     </agents>
@@ -98,15 +98,8 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
       <router router_id="5" description="ff_local_shortest"/> <!-- like local_shortest, without HLines -->
       <router router_id="6" description="ff_quickest"/> <!-- like global quickest -->
 
-      <router router_id="7" description="AI">
-        <cognitive_map status="empty" />
-        <parameters>
-          <!-- <navigation_lines file="../routing.xml" /> -->
-        </parameters>
-      </router>
-
       <!-- not implemented -->
-      <router router_id="8" description="local_quickest">
+      <router router_id="7" description="local_quickest">
         <parameters>
           <!-- <navigation_lines file="../routing.xml" /> -->
         </parameters>
