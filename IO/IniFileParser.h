@@ -40,7 +40,7 @@ public:
     IniFileParser(Configuration * config);
     ~IniFileParser(){};
 
-    bool Parse(const fs::path & iniFile);
+    void Parse(const fs::path & iniFile);
 
 private:
     bool ParseHeader(TiXmlNode * xHeader);

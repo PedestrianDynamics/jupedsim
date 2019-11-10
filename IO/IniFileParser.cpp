@@ -33,16 +33,16 @@
 #include "routing/quickest/QuickestPathRouter.h"
 #include "routing/smoke_router/SmokeRouter.h"
 
+#include <stdexcept>
 #include <string>
 #include <tinyxml.h>
-
 
 IniFileParser::IniFileParser(Configuration * config)
 {
     _config = config;
 }
 
-bool IniFileParser::Parse(const fs::path & iniFile)
+void IniFileParser::Parse(const fs::path & iniFile)
 {
     Logging::Info(
         fmt::format(check_fmt("Loading and parsing the project file <{}>"), iniFile.string()));
@@ -55,21 +55,18 @@ bool IniFileParser::Parse(const fs::path & iniFile)
     TiXmlDocument doc(iniFile.string());
     if(!doc.LoadFile()) {
         Logging::Error(fmt::format(check_fmt("{}"), doc.ErrorDesc()));
-        Logging::Error("Could not parse the project file");
-        return false;
+        throw std::runtime_error("Could not parse the project file");
     }
 
     // everything is fine. proceed with parsing
 
     TiXmlElement * xMainNode = doc.RootElement();
     if(!xMainNode) {
-        Logging::Error("Root element does not exist");
-        return false;
+        throw std::logic_error("Root element does not exist");
     }
 
     if(xMainNode->ValueStr() != "JuPedSim") {
-        Logging::Error("Root element value is not 'JuPedSim'.");
-        return false;
+        throw std::logic_error("Root element value is not 'JuPedSim'.");
     }
 
     //check the header version
@@ -77,10 +74,9 @@ bool IniFileParser::Parse(const fs::path & iniFile)
         Logging::Warning(
             fmt::format(check_fmt("There is no header version. I am assuming {}"), JPS_VERSION));
     } else if(std::stod(xMainNode->Attribute("version")) < std::stod(JPS_OLD_VERSION)) {
-        Logging::Error(fmt::format(
+        throw std::logic_error(fmt::format(
             check_fmt("Wrong header version. Only version greater than {} is supported."),
             JPS_OLD_VERSION));
-        return false;
     }
 
     //check the structure of inifile
@@ -109,9 +105,7 @@ bool IniFileParser::Parse(const fs::path & iniFile)
     //get the wanted ped model id
     _model = xmltoi(xMainNode->FirstChildElement("agents")->Attribute("operational_model_id"), -1);
     if(_model == -1) {
-        Logging::Error("Missing operational_model_id attribute in the agent section.");
-        Logging::Error("Please specify the model id to use");
-        return false;
+        throw std::logic_error("Missing operational_model_id attribute in the agent section.");
     }
 
     bool parsingModelSuccessful = false;
@@ -120,8 +114,7 @@ bool IniFileParser::Parse(const fs::path & iniFile)
         xModel;
         xModel = xModel->NextSiblingElement("model")) {
         if(!xModel->Attribute("description")) {
-            Logging::Error("Missing attribute description in models?");
-            return false;
+            throw std::logic_error("Missing attribute description in models?");
         }
 
         std::string modelName = std::string(xModel->Attribute("description"));
@@ -129,22 +122,22 @@ bool IniFileParser::Parse(const fs::path & iniFile)
 
         if((_model == MODEL_GCFM) && (model_id == MODEL_GCFM)) {
             if(modelName != "gcfm") {
-                Logging::Error("Mismatch model ID and description. Did you mean gcfm?");
-                return false;
+                throw std::logic_error("Mismatch model ID and description. Did you mean gcfm?");
             }
             if(!ParseGCFMModel(xModel, xMainNode))
-                return false;
+                throw std::logic_error("Error parsing GCFM model parameters.");
+
             parsingModelSuccessful = true;
             //only parsing one model
             break;
         } else if((_model == MODEL_VELOCITY) && (model_id == MODEL_VELOCITY)) {
             if(modelName != "Tordeux2015") {
-                Logging::Error("Mismatch model ID and description. Did you mean Tordeux2015?");
-                return false;
+                throw std::logic_error(
+                    "Mismatch model ID and description. Did you mean Tordeux2015?");
             }
             //only parsing one model
             if(!ParseVelocityModel(xModel, xMainNode))
-                return false;
+                throw std::logic_error("Error parsing Velocity model parameters.");
             parsingModelSuccessful = true;
             break;
         }
@@ -156,7 +149,7 @@ bool IniFileParser::Parse(const fs::path & iniFile)
         Logging::Error(
             "Please make sure that all models are specified in the operational_models section");
         Logging::Error("And make sure to use the same ID in the agent section");
-        return false;
+        throw std::logic_error("Parsing Model Failed.");
     }
 
     //route choice strategy
@@ -164,9 +157,9 @@ bool IniFileParser::Parse(const fs::path & iniFile)
     TiXmlNode * xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
 
     if(!ParseRoutingStrategies(xRouters, xAgentDistri))
-        return false;
+        throw std::logic_error("Error while parsing routing strategies.");
+
     Logging::Info("Parsing the project file completed");
-    return true;
 }
 
 bool IniFileParser::ParseHeader(TiXmlNode * xHeader)

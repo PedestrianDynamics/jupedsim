@@ -66,9 +66,16 @@ int main(int argc, char ** argv)
     Configuration config;
     // TODO remove me in refactoring
     IniFileParser iniFileParser(&config);
-    if(!iniFileParser.Parse(a.IniFilePath())) {
+
+    try {
+        iniFileParser.Parse(a.IniFilePath());
+    } catch(const std::exception & e) {
+        Logging::Error(
+            fmt::format(check_fmt("Exception in IniFileParser::Parse thrown, what: {}"), e.what()));
+
         return EXIT_FAILURE;
     }
+
 
     // create and initialize the simulation engine
     // Simulation

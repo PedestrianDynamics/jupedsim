@@ -35,6 +35,7 @@ Crossing::Crossing()
 {
     _id           = -1;
     _doorUsage    = 0;
+    _tempDoorUsage = 0;
     _maxDoorUsage = (std::numeric_limits<int>::max)(); //avoid name conflicts in windows winmindef.h
     _outflowRate  = (std::numeric_limits<double>::max)();
     _lastPassingTime     = 0;
@@ -179,6 +180,7 @@ int Crossing::CommonSubroomWith(Crossing * other, SubRoom *& subroom)
 void Crossing::IncreaseDoorUsage(int number, double time)
 {
     _doorUsage += number;
+    _tempDoorUsage += number;
     _lastPassingTime = time;
     _flowAtExit += std::to_string(time) + "  " + std::to_string(_doorUsage) + "\n";
 }
@@ -205,7 +207,7 @@ int Crossing::GetPartialDoorUsage() const
 
 void Crossing::ResetDoorUsage()
 {
-    _doorUsage = 0;
+    _tempDoorUsage = 0;
 
     if((_outflowRate >= std::numeric_limits<double>::max())) {
         if(_maxDoorUsage < std::numeric_limits<double>::max()) {
@@ -313,7 +315,7 @@ bool Crossing::RegulateFlow(double time)
 
     // close the door is mdu is reached
     if(_maxDoorUsage != std::numeric_limits<double>::max()) {
-        if(_doorUsage >= _maxDoorUsage) {
+        if(_tempDoorUsage >= _maxDoorUsage) {
             Logging::Info(fmt::format(
                 check_fmt("Closing door {} DoorUsage={} (>={}) Time={:.2f}"),
                 GetID(),
@@ -342,7 +344,7 @@ void Crossing::UpdateTemporaryState(double dt)
             change = (_closingTime <= dt);
         }
 
-        // Check of door is allowd to be openend due to max door usage
+        // Check of door is allowed to be opened due to max door usage
         if(_maxDoorUsage != std::numeric_limits<int>::max()) {
             change = change && (_doorUsage < _maxDoorUsage);
         }
