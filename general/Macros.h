@@ -92,12 +92,6 @@
 // Not-a-Number (NaN)
 #define J_NAN std::numeric_limits<double>::quiet_NaN()
 
-//update rate for AI router
-#ifndef AI_UPDATE_RATE
-#define AI_UPDATE_RATE 5.0 //fps
-#endif
-
-
 enum RoomState { ROOM_CLEAN = 0, ROOM_SMOKED = 1 };
 
 enum AgentType { MALE = 0, FEMALE, CHILD, ELDERLY };
@@ -110,8 +104,8 @@ enum RoutingStrategy {
     ROUTING_QUICKEST,
     ROUTING_FROM_FILE,
     ROUTING_SMOKE,
-    ROUTING_AI,
-    ROUTING_AI_TRIPS,
+    ROUTING_AI_REMOVED,
+    ROUTING_AI_TRIPS_REMOVED,
     ROUTING_FLOORFIELD,
     ROUTING_FF_GLOBAL_SHORTEST,
     ROUTING_FF_LOCAL_SHORTEST,
@@ -123,8 +117,8 @@ enum OperativModels {
     MODEL_GCFM = 1,
     MODEL_GOMPERTZ_REMOVED,
     MODEL_VELOCITY,
-    MODEL_GRADIENT,
-    MODEL_KRAUSZ
+    MODEL_GRADIENT_REMOVED,
+    MODEL_KRAUSZ_REMOVED
     //    MODEL_ORCA,
     //    MODEL_CFM,
     //    MODEL_GNM

@@ -42,8 +42,8 @@ private:
     double _Av;
     double _Bmin; //  pBmax - V *[(pBmax - pBmin) / V0]
     double _Bmax;
-    double _vel0;            // desired speed
-    bool _do_stretch = true; //Kraus-Model
+    double _vel0; // desired speed
+    bool _do_stretch = true;
 
 
 public:

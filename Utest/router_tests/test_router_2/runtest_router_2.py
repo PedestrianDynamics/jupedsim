@@ -12,7 +12,6 @@ Actually the following routers are tested:
 - ff_global_shortest
 - ff_local_shortest
 - ff_quickest
-- AI
 
 See also this issue: https://gitlab.version.fz-juelich.de/jupedsim/jpscore/issues/127
 """

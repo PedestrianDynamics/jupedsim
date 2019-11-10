@@ -95,8 +95,6 @@ public:
         _deltaH              = 0.0625;
         _wall_avoid_distance = 0.4;
         _use_wall_avoidance  = true;
-        // ---------- gradientmodel
-        _slow_down_distance = 0.2;
 
         // ff router quickest
         _recalc_interval = 3;
@@ -258,13 +256,6 @@ public:
         _use_wall_avoidance = use_wall_avoidance;
     }
 
-    double get_slow_down_distance() const { return _slow_down_distance; }
-
-    void set_slow_down_distance(double slow_down_distance)
-    {
-        _slow_down_distance = slow_down_distance;
-    }
-
     double get_recalc_interval() const { return _recalc_interval; }
 
     void set_recalc_interval(double recalc_interval) { _recalc_interval = recalc_interval; }
@@ -413,8 +404,6 @@ private:
     double _deltaH;
     double _wall_avoid_distance;
     bool _use_wall_avoidance;
-    // gradientmodel
-    double _slow_down_distance;
 
     // ff router quickest
     double _recalc_interval;

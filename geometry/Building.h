@@ -77,8 +77,6 @@ class Transition;
 
 class LCGrid;
 
-class ForceModel;
-
 class PedDistributor;
 
 class Configuration;

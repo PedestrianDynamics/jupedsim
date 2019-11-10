@@ -26,26 +26,23 @@
 #include "general/Logger.h"
 #include "general/OpenMP.h"
 #include "math/GCFMModel.h"
-#include "math/GradientModel.h"
-#include "math/KrauszModel.h"
 #include "math/VelocityModel.h"
 #include "pedestrian/Pedestrian.h"
-#include "routing/ai_router/AIRouter.h"
 #include "routing/ff_router/ffRouter.h"
 #include "routing/global_shortest/GlobalRouter.h"
 #include "routing/quickest/QuickestPathRouter.h"
 #include "routing/smoke_router/SmokeRouter.h"
 
+#include <stdexcept>
 #include <string>
 #include <tinyxml.h>
-
 
 IniFileParser::IniFileParser(Configuration * config)
 {
     _config = config;
 }
 
-bool IniFileParser::Parse(const fs::path & iniFile)
+void IniFileParser::Parse(const fs::path & iniFile)
 {
     Logging::Info(
         fmt::format(check_fmt("Loading and parsing the project file <{}>"), iniFile.string()));
@@ -58,21 +55,18 @@ bool IniFileParser::Parse(const fs::path & iniFile)
     TiXmlDocument doc(iniFile.string());
     if(!doc.LoadFile()) {
         Logging::Error(fmt::format(check_fmt("{}"), doc.ErrorDesc()));
-        Logging::Error("Could not parse the project file");
-        return false;
+        throw std::runtime_error("Could not parse the project file");
     }
 
     // everything is fine. proceed with parsing
 
     TiXmlElement * xMainNode = doc.RootElement();
     if(!xMainNode) {
-        Logging::Error("Root element does not exist");
-        return false;
+        throw std::logic_error("Root element does not exist");
     }
 
     if(xMainNode->ValueStr() != "JuPedSim") {
-        Logging::Error("Root element value is not 'JuPedSim'.");
-        return false;
+        throw std::logic_error("Root element value is not 'JuPedSim'.");
     }
 
     //check the header version
@@ -80,10 +74,9 @@ bool IniFileParser::Parse(const fs::path & iniFile)
         Logging::Warning(
             fmt::format(check_fmt("There is no header version. I am assuming {}"), JPS_VERSION));
     } else if(std::stod(xMainNode->Attribute("version")) < std::stod(JPS_OLD_VERSION)) {
-        Logging::Error(fmt::format(
+        throw std::logic_error(fmt::format(
             check_fmt("Wrong header version. Only version greater than {} is supported."),
             JPS_OLD_VERSION));
-        return false;
     }
 
     //check the structure of inifile
@@ -112,9 +105,7 @@ bool IniFileParser::Parse(const fs::path & iniFile)
     //get the wanted ped model id
     _model = xmltoi(xMainNode->FirstChildElement("agents")->Attribute("operational_model_id"), -1);
     if(_model == -1) {
-        Logging::Error("Missing operational_model_id attribute in the agent section.");
-        Logging::Error("Please specify the model id to use");
-        return false;
+        throw std::logic_error("Missing operational_model_id attribute in the agent section.");
     }
 
     bool parsingModelSuccessful = false;
@@ -123,8 +114,7 @@ bool IniFileParser::Parse(const fs::path & iniFile)
         xModel;
         xModel = xModel->NextSiblingElement("model")) {
         if(!xModel->Attribute("description")) {
-            Logging::Error("Missing attribute description in models?");
-            return false;
+            throw std::logic_error("Missing attribute description in models?");
         }
 
         std::string modelName = std::string(xModel->Attribute("description"));
@@ -132,57 +122,34 @@ bool IniFileParser::Parse(const fs::path & iniFile)
 
         if((_model == MODEL_GCFM) && (model_id == MODEL_GCFM)) {
             if(modelName != "gcfm") {
-                Logging::Error("Mismatch model ID and description. Did you mean gcfm?");
-                return false;
+                throw std::logic_error("Mismatch model ID and description. Did you mean gcfm?");
             }
             if(!ParseGCFMModel(xModel, xMainNode))
-                return false;
+                throw std::logic_error("Error parsing GCFM model parameters.");
+
             parsingModelSuccessful = true;
             //only parsing one model
-            break;
-        } else if((_model == MODEL_GRADIENT) && (model_id == MODEL_GRADIENT)) {
-            if(modelName != "gradnav") {
-                Logging::Error("Mismatch model ID and description. Did you mean gradnav?");
-                return false;
-            }
-            //only parsing one model
-            if(!ParseGradientModel(xModel, xMainNode))
-                return false;
-            parsingModelSuccessful = true;
             break;
         } else if((_model == MODEL_VELOCITY) && (model_id == MODEL_VELOCITY)) {
             if(modelName != "Tordeux2015") {
-                Logging::Error("Mismatch model ID and description. Did you mean Tordeux2015?");
-                return false;
+                throw std::logic_error(
+                    "Mismatch model ID and description. Did you mean Tordeux2015?");
             }
             //only parsing one model
             if(!ParseVelocityModel(xModel, xMainNode))
-                return false;
+                throw std::logic_error("Error parsing Velocity model parameters.");
             parsingModelSuccessful = true;
-            break;
-        }
-        if((_model == MODEL_KRAUSZ) && (model_id == MODEL_KRAUSZ)) {
-            if(modelName != "krausz") {
-                Logging::Error("Mismatch model ID and description. Did you mean krausz?");
-                return false;
-            }
-            if(!ParseKrauszModel(xModel, xMainNode))
-                return false;
-            parsingModelSuccessful = true;
-            //only parsing one model
             break;
         }
     }
 
     if(!parsingModelSuccessful) {
         Logging::Error(fmt::format(
-            check_fmt("Wrong model id [{}]. Choose 1 (GCFM), 3 (Tordeux2015) or 5 "
-                      "(Krausz)"),
-            _model));
+            check_fmt("Wrong model id [{}]. Choose 1 (GCFM) or 3 (Tordeux2015)"), _model));
         Logging::Error(
             "Please make sure that all models are specified in the operational_models section");
         Logging::Error("And make sure to use the same ID in the agent section");
-        return false;
+        throw std::logic_error("Parsing Model Failed.");
     }
 
     //route choice strategy
@@ -190,9 +157,9 @@ bool IniFileParser::Parse(const fs::path & iniFile)
     TiXmlNode * xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
 
     if(!ParseRoutingStrategies(xRouters, xAgentDistri))
-        return false;
+        throw std::logic_error("Error while parsing routing strategies.");
+
     Logging::Info("Parsing the project file completed");
-    return true;
 }
 
 bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
@@ -587,277 +554,6 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement * xGCFM, TiXmlElement * xMainNod
     return true;
 }
 
-bool IniFileParser::ParseKrauszModel(TiXmlElement * xKrausz, TiXmlElement * xMainNode)
-{
-    Logging::Info("Using the Krausz model");
-    Logging::Info("Parsing the model parameters");
-
-    TiXmlNode * xModelPara = xKrausz->FirstChild("model_parameters");
-    if(!xModelPara) {
-        Logging::Error("!!!! Changes in the operational model section !!!");
-        Logging::Error("!!!! The new version is in inputfiles/ship_msw/ini_ship2.xml !!!");
-        return false;
-    }
-
-    // For convenience. This moved to the header as it is not model specific
-    if(xModelPara->FirstChild("tmax")) {
-        Logging::Error("The maximal simulation time section moved to the header!!!");
-        Logging::Error("\t <max_sim_time> </max_sim_time>\n");
-        return false;
-    }
-
-    //solver
-    if(!ParseNodeToSolver(*xModelPara))
-        return false;
-
-    //stepsize
-    if(!ParseStepSize(*xModelPara))
-        return false;
-
-    //exit crossing strategy
-    if(!ParseStrategyNodeToObject(*xModelPara))
-        return false;
-
-    //linked-cells
-    if(!ParseLinkedCells(*xModelPara))
-        return false;
-
-    //force_ped
-    if(xModelPara->FirstChild("force_ped")) {
-        std::string nu       = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
-        std::string dist_max = xModelPara->FirstChildElement("force_ped")->Attribute("dist_max");
-        std::string disteff_max =
-            xModelPara->FirstChildElement("force_ped")
-                ->Attribute("disteff_max"); // @todo: rename disteff_max to force_max
-        std::string interpolation_width =
-            xModelPara->FirstChildElement("force_ped")->Attribute("interpolation_width");
-
-        _config->SetMaxFPed(std::stod(dist_max));
-        _config->SetNuPed(std::stod(nu));
-        _config->SetDistEffMaxPed(std::stod(disteff_max));
-        _config->SetIntPWidthPed(std::stod(interpolation_width));
-        Logging::Info(fmt::format(
-            check_fmt("Frep_ped nu={:.3f}, dist_max={:.3f}, disteff_max={:.3f}, "
-                      "interpolation_width={:.3f}"),
-            std::stod(nu),
-            std::stod(dist_max),
-            std::stod(disteff_max),
-            std::stod(interpolation_width)));
-    }
-
-    //force_wall
-    if(xModelPara->FirstChild("force_wall")) {
-        std::string nu       = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
-        std::string dist_max = xModelPara->FirstChildElement("force_wall")->Attribute("dist_max");
-        std::string disteff_max =
-            xModelPara->FirstChildElement("force_wall")->Attribute("disteff_max");
-        std::string interpolation_width =
-            xModelPara->FirstChildElement("force_wall")->Attribute("interpolation_width");
-        _config->SetMaxFWall(std::stod(dist_max));
-        _config->SetNuWall(std::stod(nu));
-        _config->SetDistEffMaxWall(std::stod(disteff_max));
-        _config->SetIntPWidthWall(std::stod(interpolation_width));
-        Logging::Info(fmt::format(
-            check_fmt("Frep_wall mu={:.3f}, dist_max={:.3f}, disteff_max={:.3f}, "
-                      "interpolation_width={:.3f}"),
-            std::stod(nu),
-            std::stod(dist_max),
-            std::stod(disteff_max),
-            std::stod(interpolation_width)));
-    }
-
-    //Parsing the agent parameters
-    TiXmlNode * xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
-    ParseAgentParameters(xKrausz, xAgentDistri);
-
-    //TODO: models do not belong in a configuration container [gl march '16]
-    _config->SetModel(std::shared_ptr<OperationalModel>(new KrauszModel(
-        _exit_strategy,
-        _config->GetNuPed(),
-        _config->GetNuWall(),
-        _config->GetDistEffMaxPed(),
-        _config->GetDistEffMaxWall(),
-        _config->GetIntPWidthPed(),
-        _config->GetIntPWidthWall(),
-        _config->GetMaxFPed(),
-        _config->GetMaxFWall())));
-    return true;
-}
-
-bool IniFileParser::ParseGradientModel(TiXmlElement * xGradient, TiXmlElement * xMainNode)
-{
-    //parsing the model parameters
-    Logging::Info("Using the Gradient model");
-    Logging::Info("Parsing the model parameters");
-
-    TiXmlNode * xModelPara = xGradient->FirstChild("model_parameters");
-
-    if(!xModelPara) {
-        Logging::Error("!!!! Changes in the operational model section !!!");
-        Logging::Error("!!!! The new version is in inputfiles/ship_msw/ini_ship3.xml !!!");
-        return false;
-    }
-
-    // For convenience. This moved to the header as it is not model specific
-    if(xModelPara->FirstChild("tmax")) {
-        Logging::Error("The maximal simulation time section moved to the header!!!");
-        Logging::Error("\t <max_sim_time> </max_sim_time>\n");
-        return false;
-    }
-
-    //solver
-    if(!ParseNodeToSolver(*xModelPara))
-        return false;
-
-    //stepsize
-    if(!ParseStepSize(*xModelPara))
-        return false;
-
-    //exit crossing strategy
-    if(!ParseStrategyNodeToObject(*xModelPara))
-        return false;
-
-    //floorfield
-    double pDeltaH = 0., pWallAvoidDistance = 0.,
-           pSlowDownDistance = 0.; //TODO: should be moved to configuration [gl march '16]
-    bool pUseWallAvoidance   = false;
-    if(xModelPara->FirstChild("floorfield")) {
-        if(!xModelPara->FirstChildElement("floorfield")->Attribute("delta_h"))
-            pDeltaH = 0.0625; // default value
-        else {
-            std::string delta_h = xModelPara->FirstChildElement("floorfield")->Attribute("delta_h");
-            pDeltaH             = std::stod(delta_h);
-        }
-        _config->set_deltaH(pDeltaH);
-
-        if(!xModelPara->FirstChildElement("floorfield")->Attribute("wall_avoid_distance"))
-            pWallAvoidDistance = .8; // default value
-        else {
-            std::string wall_avoid_distance =
-                xModelPara->FirstChildElement("floorfield")->Attribute("wall_avoid_distance");
-            pWallAvoidDistance = std::stod(wall_avoid_distance);
-        }
-        _config->set_wall_avoid_distance(pWallAvoidDistance);
-
-        if(!xModelPara->FirstChildElement("floorfield")->Attribute("use_wall_avoidance"))
-            pUseWallAvoidance = true; // default value
-        else {
-            std::string use_wall_avoidance =
-                xModelPara->FirstChildElement("floorfield")->Attribute("use_wall_avoidance");
-            pUseWallAvoidance = !(use_wall_avoidance == "false");
-        }
-        _config->set_use_wall_avoidance(pUseWallAvoidance);
-        Logging::Info(fmt::format(
-            check_fmt("Floorfield <delta h={:.4f}, wall avoid distance={:.2f}>"),
-            pDeltaH,
-            pWallAvoidDistance));
-        Logging::Info(
-            fmt::format(check_fmt("Floorfield <use wall avoidance={}>"), pUseWallAvoidance));
-    }
-
-    //linked-cells
-    if(!ParseLinkedCells(*xModelPara))
-        return false;
-
-
-    //force_ped
-    if(xModelPara->FirstChild("force_ped")) {
-        std::string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
-        _config->SetNuPed(std::stod(nu));
-
-        if(!xModelPara->FirstChildElement("force_ped")->Attribute("a"))
-            _config->SetaPed(1.0); // default value
-        else {
-            std::string a = xModelPara->FirstChildElement("force_ped")->Attribute("a");
-            _config->SetaPed(std::stod(a));
-        }
-
-        if(!xModelPara->FirstChildElement("force_ped")->Attribute("b"))
-            _config->SetbPed(0.25); // default value
-        else {
-            std::string b = xModelPara->FirstChildElement("force_ped")->Attribute("b");
-            _config->SetbPed(std::stod(b));
-        }
-        if(!xModelPara->FirstChildElement("force_ped")->Attribute("c"))
-            _config->SetcPed(3.0); // default value
-        else {
-            std::string c = xModelPara->FirstChildElement("force_ped")->Attribute("c");
-            _config->SetcPed(std::stod(c));
-        }
-        Logging::Info(fmt::format(
-            check_fmt("Frep_ped mu={}, a={:.2f}, b={:.2f} c={:.2f}"),
-            nu,
-            _config->GetaPed(),
-            _config->GetbPed(),
-            _config->GetcPed()));
-    }
-    //force_wall
-    if(xModelPara->FirstChild("force_wall")) {
-        std::string nu = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
-        _config->SetNuWall(std::stod(nu));
-
-        if(!xModelPara->FirstChildElement("force_wall")->Attribute("a"))
-            _config->SetaWall(1.0); // default value
-        else {
-            std::string a = xModelPara->FirstChildElement("force_wall")->Attribute("a");
-            _config->SetaWall(std::stod(a));
-        }
-
-        if(!xModelPara->FirstChildElement("force_wall")->Attribute("b"))
-            _config->SetbWall(0.7); // default value
-        else {
-            std::string b = xModelPara->FirstChildElement("force_wall")->Attribute("b");
-            _config->SetbWall(std::stod(b));
-        }
-        if(!xModelPara->FirstChildElement("force_wall")->Attribute("c"))
-            _config->SetcWall(3.0); // default value
-        else {
-            std::string c = xModelPara->FirstChildElement("force_wall")->Attribute("c");
-            _config->SetcWall(std::stod(c));
-        }
-        Logging::Info(fmt::format(
-            check_fmt("Frep_wall mu={}, a={:.2f}, b={:.2f} c={:.2f}"),
-            nu,
-            _config->GetaWall(),
-            _config->GetbWall(),
-            _config->GetcWall()));
-    }
-    //anti_clipping
-    if(xModelPara->FirstChild("anti_clipping")) {
-        if(!xModelPara->FirstChildElement("anti_clipping")->Attribute("slow_down_distance"))
-            pSlowDownDistance = .2; //default value
-        else {
-            std::string slow_down_distance =
-                xModelPara->FirstChildElement("anti_clipping")->Attribute("slow_down_distance");
-            pSlowDownDistance = std::stod(slow_down_distance);
-        }
-        _config->set_slow_down_distance(pSlowDownDistance);
-        Logging::Info(
-            fmt::format(check_fmt("Anti Clipping: SlowDown Distance={:.2f}"), pSlowDownDistance));
-    }
-
-    //Parsing the agent parameters
-    TiXmlNode * xAgentDistri = xMainNode->FirstChild("agents")->FirstChild("agents_distribution");
-    ParseAgentParameters(xGradient, xAgentDistri);
-
-    //TODO: models do not belong in a configuration container [gl march '16]
-    _config->SetModel(std::shared_ptr<OperationalModel>(new GradientModel(
-        _exit_strategy,
-        _config->GetNuPed(),
-        _config->GetaPed(),
-        _config->GetbPed(),
-        _config->GetcPed(),
-        _config->GetNuWall(),
-        _config->GetaWall(),
-        _config->GetbWall(),
-        _config->GetcWall(),
-        _config->get_deltaH(),
-        _config->get_wall_avoid_distance(),
-        _config->get_use_wall_avoidance(),
-        _config->get_slow_down_distance())));
-
-    return true;
-}
 
 bool IniFileParser::ParseVelocityModel(TiXmlElement * xVelocity, TiXmlElement * xMainNode)
 {
@@ -1094,44 +790,12 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 agentParameters->InitT(mu, sigma);
                 Logging::Info(fmt::format(check_fmt("T mu={} , sigma={}"), mu, sigma));
             }
-            // swaying parameters
-            if(xAgentPara->FirstChild("sway")) {
-                double freqA = xmltof(xAgentPara->FirstChildElement("sway")->Attribute("freqA"));
-                double freqB = xmltof(xAgentPara->FirstChildElement("sway")->Attribute("freqB"));
-                double ampA  = xmltof(xAgentPara->FirstChildElement("sway")->Attribute("ampA"));
-                double ampB  = xmltof(xAgentPara->FirstChildElement("sway")->Attribute("ampB"));
-                agentParameters->SetSwayParams(freqA, freqB, ampA, ampB);
-                Logging::Info(fmt::format(
-                    check_fmt("Swaying parameters freqA={} , freqB={} , ampA={}, ampB={}"),
-                    freqA,
-                    freqB,
-                    ampA,
-                    ampB));
-            }
-
-            if(_model == 4) {      //  Gradient
-                double beta_c = 2; /// @todo quick and dirty
-                double max_Ea = agentParameters->GetAmin() +
-                                agentParameters->GetAtau() * agentParameters->GetV0();
-                double max_Eb =
-                    0.5 *
-                    (agentParameters->GetBmin() +
-                     0.49); /// @todo hard-coded value should be the same as in pedestrians GetEB
-                double max_Ea_Eb = (max_Ea > max_Eb) ? max_Ea : max_Eb;
-                _config->SetDistEffMaxPed(2 * beta_c * max_Ea_Eb);
-                _config->SetDistEffMaxWall(_config->GetDistEffMaxPed());
-            }
 
             if(_model == 3) { // Tordeux2015
                 double max_Eb = 2 * agentParameters->GetBmax();
                 _config->SetDistEffMaxPed(
                     max_Eb + agentParameters->GetT() * agentParameters->GetV0());
                 _config->SetDistEffMaxWall(_config->GetDistEffMaxPed());
-            }
-
-            if(_model == 5) // Krausz
-            {
-                agentParameters->EnableStretch(false);
             }
         }
     }
@@ -1207,22 +871,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
             ///Parsing additional options
             if(!ParseCogMapOpts(e))
                 return false;
-        } else if(
-            (strategy == "AI") &&
-            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-#ifdef AIROUTER
-            Router * r = new AIRouter(id, ROUTING_AI);
-            _config->GetRoutingEngine()->AddRouter(r);
-
-            Logging::Info("Using AIRouter");
-            ///Parsing additional options
-            if(!ParseAIOpts(e))
-                return false;
-#else
-            std::cerr << "\nCan not use AI Router. Rerun cmake with option  -DAIROUTER=true and "
-                         "recompile.\n";
-            exit(EXIT_FAILURE);
-#endif
         } else if(
             (strategy == "ff_global_shortest") &&
             (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
@@ -1366,65 +1014,6 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode * routingNode)
 
     return true;
 }
-#ifdef AIROUTER
-bool IniFileParser::ParseAIOpts(TiXmlNode * routingNode)
-{
-    TiXmlNode * sensorNode = routingNode->FirstChild();
-
-    if(!sensorNode) {
-        Logging::Error("No sensors found.\n");
-        return false;
-    }
-
-    /// static_cast to get access to the method 'addOption' of the AIRouter
-    AIRouter * r =
-        static_cast<AIRouter *>(_config->GetRoutingEngine()->GetAvailableRouters().back());
-
-    std::vector<std::string> sensorVec;
-    for(TiXmlElement * e = sensorNode->FirstChildElement("sensor"); e;
-        e                = e->NextSiblingElement("sensor")) {
-        std::string sensor = e->Attribute("description");
-        sensorVec.push_back(sensor);
-
-        Logging::Info(fmt::format(check_fmt("Sensor <{}> added."), sensor));
-    }
-
-    r->addOption("Sensors", sensorVec);
-
-    TiXmlElement * cogMap = routingNode->FirstChildElement("cognitive_map");
-
-    if(!cogMap) {
-        Logging::Error("Cognitive Map not specified.\n");
-        return false;
-    }
-
-    //std::vector<std::string> cogMapStatus;
-    //cogMapStatus.push_back(cogMap->Attribute("status"));
-    //Logging::Info(fmt::format(check_fmt("All pedestrian starting with a(n) {} cognitive maps"), cogMapStatus[0]));
-    //r->addOption("CognitiveMap", cogMapStatus);
-
-    std::vector<std::string> cogMapFiles;
-    if(!cogMap->Attribute("files")) {
-        Logging::Warning("No input files for the cognitive map specified!");
-    } else {
-        cogMapFiles.push_back(cogMap->Attribute("files"));
-        r->addOption("CognitiveMapFiles", cogMapFiles);
-        Logging::Info("Input files for the cognitive map specified!");
-    }
-
-    //Signs
-    TiXmlElement * signs = routingNode->FirstChildElement("signage");
-
-    if(!signs) {
-        Logging::Info("No signage specified");
-    } else {
-        r->addOption("SignFiles", std::vector<std::string>{signs->Attribute("file")});
-    }
-
-    return true;
-}
-#endif
-
 
 bool IniFileParser::ParseLinkedCells(const TiXmlNode & linkedCellNode)
 {
