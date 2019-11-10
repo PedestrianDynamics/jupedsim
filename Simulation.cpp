@@ -268,12 +268,6 @@ void Simulation::UpdateRoutesAndLocations()
     const std::map<int, Goal *> & goals       = _building->GetAllGoals();
     auto allRooms                             = _building->GetAllRooms();
 
-    //    for (signed int p = 0; p < allPeds.size(); ++p) {
-    //        Pedestrian* ped = allPeds[p];
-    //
-    //        std::cout << "FinalDestination of [" << ped->GetID() << "] in (" << ped->GetRoomID() << ", " << ped->GetSubRoomID() << "/" <<  ped->GetSubRoomUID() << "): " << ped->GetFinalDestination() << std::endl;
-    //    }
-
 #pragma omp parallel for shared(pedsToRemove, allRooms)
     for(size_t p = 0; p < allPeds.size(); ++p) {
         auto ped       = allPeds[p];
@@ -538,17 +532,8 @@ double Simulation::RunBody(double maxSimTime)
                           << _building->GetAllTransitions().size() << " Transitions\n"
                           << RESET;
                 _building->SaveGeometry(changedGeometryFile);
-                //
-                double _deltaH            = _building->GetConfig()->get_deltaH();
-                double _wallAvoidDistance = _building->GetConfig()->get_wall_avoid_distance();
-                bool _useWallAvoidance    = _building->GetConfig()->get_use_wall_avoidance();
-
-                if(auto dirlocff = dynamic_cast<DirectionLocalFloorfield *>(
-                       _building->GetConfig()->get_dirStrategy())) {
-                    Logging::Info("Init DirectionLOCALFloorfield starting ...");
-                    dirlocff->Init(_building.get(), _deltaH, _wallAvoidDistance, _useWallAvoidance);
-                    Logging::Info("Init DirectionLOCALFloorfield done.");
-                }
+                _building->GetConfig()->GetDirectionManager()->GetDirectionStrategy()->Init(
+                    _building.get());
             } else { // quickest needs update even if NeedsUpdate() is false
                 FFRouter * ffrouter =
                     dynamic_cast<FFRouter *>(_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST));

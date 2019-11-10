@@ -132,15 +132,12 @@ private:
 
 public:
     VelocityModel(
-        std::shared_ptr<DirectionStrategy> dir,
+        std::shared_ptr<DirectionManager> dir,
         double aped,
         double Dped,
         double awall,
         double Dwall);
     virtual ~VelocityModel(void);
-
-
-    std::shared_ptr<DirectionStrategy> GetDirection() const;
 
     /**
       * @todo What is this parameter doing?

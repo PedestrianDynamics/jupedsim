@@ -20,9 +20,9 @@
 //
 #pragma once
 
+#include "direction/walking/DirectionStrategy.h"
 #include "general/Configuration.h"
 #include "general/Filesystem.h"
-#include "routing/DirectionStrategy.h"
 
 #include <string>
 
@@ -71,6 +71,8 @@ private:
 
     Configuration * _config;
     int _model;
-    std::shared_ptr<DirectionStrategy> _exit_strategy;
+    std::shared_ptr<DirectionStrategy> _directionStrategy;
+    std::shared_ptr<WaitingStrategy> _waitingStrategy;
+    std::shared_ptr<DirectionManager> _directionManager;
     int _exit_strat_number;
 };

@@ -28,19 +28,19 @@
  **/
 #include "VelocityModel.h"
 
+#include "direction/walking/DirectionStrategy.h"
 #include "general/OpenMP.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 #include "mpi/LCGrid.h"
 #include "pedestrian/Pedestrian.h"
-#include "routing/DirectionStrategy.h"
 
 double xRight = 26.0;
 double xLeft  = 0.0;
 double cutoff = 2.0;
 
 VelocityModel::VelocityModel(
-    std::shared_ptr<DirectionStrategy> dir,
+    std::shared_ptr<DirectionManager> dir,
     double aped,
     double Dped,
     double awall,
@@ -60,44 +60,10 @@ VelocityModel::~VelocityModel() {}
 
 bool VelocityModel::Init(Building * building)
 {
-    double _deltaH            = building->GetConfig()->get_deltaH();
-    double _wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
-    bool _useWallAvoidance    = building->GetConfig()->get_use_wall_avoidance();
-
-    if(auto dirff = dynamic_cast<DirectionFloorfield *>(_direction.get())) {
-        dirff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-        Log->Write("INFO:\t Init DirectionFloorfield done");
-    }
-
-    if(auto dirlocff = dynamic_cast<DirectionLocalFloorfield *>(_direction.get())) {
-        Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
-        dirlocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-        Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
-    }
-
-    if(auto dirsublocff = dynamic_cast<DirectionSubLocalFloorfield *>(_direction.get())) {
-        Log->Write("INFO:\t Init DirectionSubLOCALFloorfield starting ...");
-        dirsublocff->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-        Log->Write("INFO:\t Init DirectionSubLOCALFloorfield done");
-    }
-
-    if(auto dirsublocffTrips = dynamic_cast<DirectionSubLocalFloorfieldTrips *>(_direction.get())) {
-        Log->Write("INFO:\t Init DirectionSubLOCALFloorfieldTrips starting ...");
-        dirsublocffTrips->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-        Log->Write("INFO:\t Init DirectionSubLOCALFloorfieldTrips done");
-    }
-
-    if(auto dirsublocffTripsVoronoi =
-           dynamic_cast<DirectionSubLocalFloorfieldTripsVoronoi *>(_direction.get())) {
-        Log->Write("INFO:\t Init DirectionSubLOCALFloorfieldTripsVoronoi starting ...");
-        dirsublocffTripsVoronoi->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-        Log->Write("INFO:\t Init DirectionSubLOCALFloorfieldTripsVoronoi done");
-    }
-
+    _direction->Init(building);
 
     const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
     size_t peds_size                          = allPeds.size();
-    std::cout << "Building has " << peds_size << " peds\n";
     for(unsigned int p = 0; p < peds_size; p++) {
         Pedestrian * ped = allPeds[p];
         double cosPhi, sinPhi;
@@ -177,7 +143,7 @@ void VelocityModel::ComputeNextTimeStep(
         nThreads = 1; // not worthy to parallelize
 
 
-        //TODO richtig parallelisieren!
+//TODO richtig parallelisieren!
 #pragma omp parallel default(shared) num_threads(nThreads)
     {
         std::vector<Point> result_acc = std::vector<Point>();
@@ -361,10 +327,11 @@ void VelocityModel::ComputeNextTimeStep(
 Point VelocityModel::e0(Pedestrian * ped, Room * room) const
 {
     Point target;
-    if(_direction && ped->GetExitLine())
-        target = _direction->GetTarget(
-            room, ped); // target is where the ped wants to be after the next timestep
-    else {              //@todo: we need a model for waiting pedestrians
+
+    if(_direction && ped->GetExitLine()) {
+        // target is where the ped wants to be after the next timestep
+        target = _direction->GetTarget(room, ped);
+    } else { //@todo: we need a model for waiting pedestrians
         std::cout << ped->GetID() << " VelocityModel::e0 Ped has no navline.\n";
         //exit(EXIT_FAILURE);
         // set random destination
@@ -387,11 +354,11 @@ Point VelocityModel::e0(Pedestrian * ped, Room * room) const
     Point lastE0 = ped->GetLastE0();
     ped->SetLastE0(target - pos);
 
-    if((dynamic_cast<DirectionFloorfield *>(_direction.get())) ||
-       (dynamic_cast<DirectionLocalFloorfield *>(_direction.get())) ||
-       (dynamic_cast<DirectionSubLocalFloorfield *>(_direction.get()))) {
+    if((dynamic_cast<DirectionFloorfield *>(_direction->GetDirectionStrategy().get())) ||
+       (dynamic_cast<DirectionLocalFloorfield *>(_direction->GetDirectionStrategy().get())) ||
+       (dynamic_cast<DirectionSubLocalFloorfield *>(_direction->GetDirectionStrategy().get()))) {
         desired_direction = target - pos;
-        if(desired_direction.NormSquare() < 0.25) {
+        if(desired_direction.NormSquare() < 0.25 && !ped->IsWaiting()) {
             desired_direction = lastE0;
             ped->SetLastE0(lastE0);
             //              Log->Write("desired_direction: %f    %f", desired_direction._x, desired_direction._y);
@@ -629,12 +596,6 @@ std::string VelocityModel::GetDescription()
     rueck.append(tmp);
     return rueck;
 }
-
-std::shared_ptr<DirectionStrategy> VelocityModel::GetDirection() const
-{
-    return _direction;
-}
-
 
 double VelocityModel::GetaPed() const
 {
