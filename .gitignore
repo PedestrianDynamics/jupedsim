@@ -176,3 +176,6 @@ packages/
 !/cmake_modules
 /issues
 /latex
+
+/systemtest/test_geometry/clean_geometry/log*
+/systemtest/test_geometry/clean_geometry/traj*

@@ -1,0 +1,250 @@
+################################################################################
+# Build libcore
+################################################################################
+set(source_files
+    src/direction/DirectionManager.cpp
+    src/direction/DirectionManager.h
+    src/direction/waiting/WaitingMiddle.cpp
+    src/direction/waiting/WaitingMiddle.h
+    src/direction/waiting/WaitingRandom.cpp
+    src/direction/waiting/WaitingRandom.h
+    src/direction/waiting/WaitingStrategy.cpp
+    src/direction/waiting/WaitingStrategy.h
+    src/direction/walking/DirectionStrategy.cpp
+    src/direction/walking/DirectionStrategy.h
+    src/events/Event.cpp
+    src/events/EventManager.cpp
+    src/general/ArgumentParser.cpp
+    src/general/Filesystem.cpp
+    src/general/Logger.cpp
+    src/geometry/Building.cpp
+    src/geometry/Crossing.cpp
+    src/geometry/Goal.cpp
+    src/geometry/GoalManager.cpp
+    src/geometry/Hline.cpp
+    src/geometry/Line.cpp
+    src/geometry/NavLine.cpp
+    src/geometry/Obstacle.cpp
+    src/geometry/Point.cpp
+    src/geometry/Room.cpp
+    src/geometry/SubRoom.cpp
+    src/geometry/Transition.cpp
+    src/geometry/WaitingArea.cpp
+    src/geometry/Wall.cpp
+    src/IO/GeoFileParser.cpp
+    src/IO/IniFileParser.cpp
+    src/IO/OutputHandler.cpp
+    src/IO/PedDistributionParser.cpp
+    src/IO/progress_bar.cpp
+    src/IO/Trajectories.cpp
+    src/IO/TraVisToClient.cpp
+    src/math/GCFMModel.cpp
+    src/math/Mathematics.cpp
+    src/math/OperationalModel.cpp
+    src/math/VelocityModel.cpp
+    src/mpi/LCGrid.cpp
+    src/pedestrian/AgentsParameters.cpp
+    src/pedestrian/AgentsQueue.cpp
+    src/pedestrian/AgentsSource.cpp
+    src/pedestrian/AgentsSourcesManager.cpp
+    src/pedestrian/Ellipse.cpp
+    src/pedestrian/Knowledge.cpp
+    src/pedestrian/PedDistributor.cpp
+    src/pedestrian/Pedestrian.cpp
+    src/pedestrian/Pedestrian.cpp
+    src/pedestrian/StartDistribution.cpp
+    src/routing/ff_router/ffRouter.cpp
+    src/routing/ff_router/FloorfieldViaFM.cpp
+    src/routing/ff_router/UnivFFviaFM.cpp
+    src/routing/global_shortest/AccessPoint.cpp
+    src/routing/global_shortest/DTriangulation.cpp
+    src/routing/global_shortest/GlobalRouter.cpp
+    src/routing/quickest/QuickestPathRouter.cpp
+    src/routing/Router.cpp
+    src/routing/RoutingEngine.cpp
+    src/routing/smoke_router/Brain.cpp
+    src/routing/smoke_router/BrainStorage.cpp
+    src/routing/smoke_router/cognitiveMap/associations.cpp
+    src/routing/smoke_router/cognitiveMap/cogmapoutputhandler.cpp
+    src/routing/smoke_router/cognitiveMap/cognitivemap.cpp
+    src/routing/smoke_router/cognitiveMap/connection.cpp
+    src/routing/smoke_router/cognitiveMap/internnavigationnetwork.cpp
+    src/routing/smoke_router/cognitiveMap/landmark.cpp
+    src/routing/smoke_router/cognitiveMap/landmarknetwork.cpp
+    src/routing/smoke_router/cognitiveMap/region.cpp
+    src/routing/smoke_router/cognitiveMap/youareherepointer.cpp
+    src/routing/smoke_router/GraphNetwork.cpp
+    src/routing/smoke_router/navigation_graph/GraphEdge.cpp
+    src/routing/smoke_router/navigation_graph/GraphVertex.cpp
+    src/routing/smoke_router/NavigationGraph.cpp
+    src/routing/smoke_router/sensor/AbstractSensor.cpp
+    src/routing/smoke_router/sensor/DiscoverDoorsSensor.cpp
+    src/routing/smoke_router/sensor/JamSensor.cpp
+    src/routing/smoke_router/sensor/LastDestinationsSensor.cpp
+    src/routing/smoke_router/sensor/locater.cpp
+    src/routing/smoke_router/sensor/RoomToFloorSensor.cpp
+    src/routing/smoke_router/sensor/SensorManager.cpp
+    src/routing/smoke_router/SmokeRouter.cpp
+    src/Simulation.cpp
+    src/voronoi-boost/VoronoiPositionGenerator.cpp
+)
+set(header_files
+    src/events/Event.h
+    src/events/EventManager.h
+    src/general/ArgumentParser.h
+    src/general/Compiler.h
+    src/general/Configuration.h
+    src/general/Filesystem.h
+    src/general/Logger.h
+    src/general/Macros.h
+    src/general/randomnumbergenerator.h
+    src/geometry/Building.h
+    src/geometry/Crossing.h
+    src/geometry/Goal.h
+    src/geometry/GoalManager.h
+    src/geometry/Hline.h
+    src/geometry/Line.h
+    src/geometry/NavLine.h
+    src/geometry/Obstacle.h
+    src/geometry/Point.h
+    src/geometry/Room.h
+    src/geometry/SubRoom.h
+    src/geometry/Transition.h
+    src/geometry/WaitingArea.h
+    src/geometry/Wall.h
+    src/IO/GeoFileParser.h
+    src/IO/IniFileParser.h
+    src/IO/OutputHandler.h
+    src/IO/PedDistributionParser.h
+    src/IO/Trajectories.h
+    src/IO/TraVisToClient.h
+    src/math/GCFMModel.h
+    src/math/Mathematics.h
+    src/math/OperationalModel.h
+    src/math/VelocityModel.h
+    src/mpi/LCGrid.h
+    src/pedestrian/AgentsParameters.h
+    src/pedestrian/AgentsQueue.h
+    src/pedestrian/AgentsSource.h
+    src/pedestrian/AgentsSourcesManager.h
+    src/pedestrian/Ellipse.h
+    src/pedestrian/Knowledge.h
+    src/pedestrian/PedDistributor.h
+    src/pedestrian/Pedestrian.h
+    src/pedestrian/Pedestrian.h
+    src/pedestrian/StartDistribution.h
+    src/routing/ff_router/ffRouter.h
+    src/routing/ff_router/FloorfieldViaFM.h
+    src/routing/ff_router/UnivFFviaFM.h
+    src/routing/ff_router/mesh/RectGrid.h
+    src/routing/ff_router/mesh/Trial.h
+    src/routing/global_shortest/AccessPoint.h
+    src/routing/global_shortest/DTriangulation.h
+    src/routing/global_shortest/GlobalRouter.h
+    src/routing/quickest/QuickestPathRouter.h
+    src/routing/Router.h
+    src/routing/RoutingEngine.h
+    src/routing/smoke_router/Brain.h
+    src/routing/smoke_router/BrainStorage.h
+    src/routing/smoke_router/cognitiveMap/associations.h
+    src/routing/smoke_router/cognitiveMap/cogmapoutputhandler.h
+    src/routing/smoke_router/cognitiveMap/cognitivemap.h
+    src/routing/smoke_router/cognitiveMap/connection.cpp
+    src/routing/smoke_router/cognitiveMap/internnavigationnetwork.h
+    src/routing/smoke_router/cognitiveMap/landmark.h
+    src/routing/smoke_router/cognitiveMap/landmarknetwork.h
+    src/routing/smoke_router/cognitiveMap/region.h
+    src/routing/smoke_router/cognitiveMap/youareherepointer.h
+    src/routing/smoke_router/GraphNetwork.h
+    src/routing/smoke_router/navigation_graph/GraphEdge.h
+    src/routing/smoke_router/navigation_graph/GraphVertex.h
+    src/routing/smoke_router/NavigationGraph.h
+    src/routing/smoke_router/sensor/AbstractSensor.h
+    src/routing/smoke_router/sensor/DiscoverDoorsSensor.h
+    src/routing/smoke_router/sensor/JamSensor.h
+    src/routing/smoke_router/sensor/LastDestinationsSensor.h
+    src/routing/smoke_router/sensor/locater.h
+    src/routing/smoke_router/sensor/RoomToFloorSensor.h
+    src/routing/smoke_router/sensor/SensorManager.h
+    src/routing/smoke_router/SmokeRouter.h
+    src/voronoi-boost/VoronoiPositionGenerator.h
+)
+set(JPSFIRE_HDR
+    src/JPSfire/generic/Knot.h
+    src/JPSfire/generic/FDSMesh.h
+    src/JPSfire/generic/FDSMeshStorage.h
+    src/JPSfire/A_smoke_sensor/SmokeSensor.h
+    src/JPSfire/B_walking_speed/WalkingSpeed.h
+    src/JPSfire/C_toxicity_analysis/ToxicityAnalysis.h
+    src/JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
+)
+set(JPSFIRE_SRC
+    src/JPSfire/generic/FDSMesh.cpp
+    src/JPSfire/generic/Knot.cpp
+    src/JPSfire/generic/FDSMeshStorage.cpp
+    src/JPSfire/A_smoke_sensor/SmokeSensor.cpp
+    src/JPSfire/B_walking_speed/WalkingSpeed.cpp
+    src/JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
+    src/JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
+)
+
+
+add_library(core STATIC
+    ${source_files}
+    ${header_files}
+    $<$<BOOL:${JPSFIRE}>:${JPSFIRE_SRC}>
+    $<$<BOOL:${JPSFIRE}>:${JPSFIRE_HDR}>
+)
+target_compile_options(core PRIVATE
+    ${COMMON_COMPILE_OPTIONS}
+)
+target_compile_definitions(core PUBLIC
+    $<$<BOOL:${JPSFIRE}>:JPSFIRE>
+    JPSCORE_VERSION="${PROJECT_VERSION}"
+    ${GIT_BUILD_INFO_DEFINES}
+)
+target_link_libraries(core
+    Boost::boost
+    $<$<BOOL:${USE_OPENMP}>:OpenMP::OpenMP_CXX>
+    poly2tri
+    tinyxml
+    visilibity
+    CLI11::CLI11
+    $<$<BOOL:${JPSFIRE}>:cnpy>
+    fs
+    spdlog::spdlog
+    fmt::fmt
+)
+target_include_directories(core PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+################################################################################
+# libcore unit tests
+################################################################################
+if (BUILD_CPPUNIT_TEST)
+    find_package(Catch2 REQUIRED)
+
+    add_executable(unittests
+      test/catch2/geometry/LineTest.cpp
+      test/catch2/geometry/ObstacleTest.cpp
+      test/catch2/geometry/PointTest.cpp
+      test/catch2/geometry/RoomTest.cpp
+      test/catch2/geometry/SubRoomTest.cpp
+      test/catch2/Main.cpp
+      test/catch2/math/MathematicsTest.cpp
+      test/catch2/pedestrian/EllipseTest.cpp
+    )
+
+    target_link_libraries(unittests Catch2::Catch2 core)
+
+    target_compile_options(unittests PRIVATE
+        ${COMMON_COMPILE_OPTIONS}
+    )
+
+    include(CTest)
+    include(ParseAndAddCatchTests)
+    set(PARSE_CATCH_TESTS_ADD_TARGET_IN_TEST_NAME Off)
+    set(PARSE_CATCH_TESTS_ADD_TO_CONFIGURE_DEPENDS On)
+    ParseAndAddCatchTests(unittests)
+endif()

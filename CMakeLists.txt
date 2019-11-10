@@ -248,315 +248,6 @@ if(BUILD_DOC)
 endif(BUILD_DOC)
 
 ################################################################################
-# Build libcore
-################################################################################
-set(source_files
-    direction/DirectionManager.cpp
-    direction/waiting/WaitingMiddle.cpp
-    direction/waiting/WaitingRandom.cpp
-    direction/waiting/WaitingStrategy.cpp
-    direction/walking/DirectionStrategy.cpp
-    events/Event.cpp
-    events/EventManager.cpp
-    forms/jpscore.rc
-    general/ArgumentParser.cpp
-    general/Logger.cpp
-    general/Filesystem.cpp
-    geometry/Building.cpp
-    geometry/Crossing.cpp
-    geometry/Goal.cpp
-    geometry/GoalManager.cpp
-    geometry/Hline.cpp
-    geometry/Line.cpp
-    geometry/NavLine.cpp
-    geometry/Obstacle.cpp
-    geometry/Point.cpp
-    geometry/Room.cpp
-    geometry/SubRoom.cpp
-    geometry/Transition.cpp
-    geometry/WaitingArea.cpp
-    geometry/Wall.cpp
-    IO/GeoFileParser.cpp
-    IO/IniFileParser.cpp
-    IO/OutputHandler.cpp
-    IO/PedDistributionParser.cpp
-    IO/progress_bar.cpp
-    IO/Trajectories.cpp
-    IO/TraVisToClient.cpp
-    math/GCFMModel.cpp
-    math/Mathematics.cpp
-    math/OperationalModel.cpp
-    math/VelocityModel.cpp
-    mpi/LCGrid.cpp
-    pedestrian/AgentsParameters.cpp
-    pedestrian/AgentsQueue.cpp
-    pedestrian/AgentsSource.cpp
-    pedestrian/AgentsSourcesManager.cpp
-    pedestrian/Ellipse.cpp
-    pedestrian/Knowledge.cpp
-    pedestrian/PedDistributor.cpp
-    pedestrian/Pedestrian.cpp
-    pedestrian/Pedestrian.cpp
-    pedestrian/StartDistribution.cpp
-    routing/ff_router/ffRouter.cpp
-    routing/ff_router/FloorfieldViaFM.cpp
-    routing/ff_router/UnivFFviaFM.cpp
-    routing/global_shortest/AccessPoint.cpp
-    routing/global_shortest/DTriangulation.cpp
-    routing/global_shortest/GlobalRouter.cpp
-    routing/quickest/QuickestPathRouter.cpp
-    routing/Router.cpp
-    routing/RoutingEngine.cpp
-    routing/smoke_router/Brain.cpp
-    routing/smoke_router/BrainStorage.cpp
-    routing/smoke_router/cognitiveMap/associations.cpp
-    routing/smoke_router/cognitiveMap/cogmapoutputhandler.cpp
-    routing/smoke_router/cognitiveMap/cognitivemap.cpp
-    routing/smoke_router/cognitiveMap/connection.cpp
-    routing/smoke_router/cognitiveMap/internnavigationnetwork.cpp
-    routing/smoke_router/cognitiveMap/landmark.cpp
-    routing/smoke_router/cognitiveMap/landmarknetwork.cpp
-    routing/smoke_router/cognitiveMap/region.cpp
-    routing/smoke_router/cognitiveMap/youareherepointer.cpp
-    routing/smoke_router/GraphNetwork.cpp
-    routing/smoke_router/navigation_graph/GraphEdge.cpp
-    routing/smoke_router/navigation_graph/GraphVertex.cpp
-    routing/smoke_router/NavigationGraph.cpp
-    routing/smoke_router/sensor/AbstractSensor.cpp
-    routing/smoke_router/sensor/DiscoverDoorsSensor.cpp
-    routing/smoke_router/sensor/JamSensor.cpp
-    routing/smoke_router/sensor/LastDestinationsSensor.cpp
-    routing/smoke_router/sensor/locater.cpp
-    routing/smoke_router/sensor/RoomToFloorSensor.cpp
-    routing/smoke_router/sensor/SensorManager.cpp
-    routing/smoke_router/SmokeRouter.cpp
-    Simulation.cpp
-    voronoi-boost/VoronoiPositionGenerator.cpp
-)
-set(header_files
-    direction/DirectionManager.h
-    direction/waiting/WaitingMiddle.h
-    direction/waiting/WaitingRandom.h
-    direction/waiting/WaitingStrategy.h
-    direction/walking/DirectionStrategy.h
-    events/Event.h
-    events/EventManager.h
-    general/ArgumentParser.h
-    general/Compiler.h
-    general/Configuration.h
-    general/Filesystem.h
-    general/Logger.h
-    general/Macros.h
-    general/randomnumbergenerator.h
-    geometry/Building.h
-    geometry/Crossing.h
-    geometry/Goal.h
-    geometry/GoalManager.h
-    geometry/Hline.h
-    geometry/Line.h
-    geometry/NavLine.h
-    geometry/Obstacle.h
-    geometry/Point.h
-    geometry/Room.h
-    geometry/SubRoom.h
-    geometry/Transition.h
-    geometry/WaitingArea.h
-    geometry/Wall.h
-    IO/GeoFileParser.h
-    IO/IniFileParser.h
-    IO/OutputHandler.h
-    IO/PedDistributionParser.h
-    IO/Trajectories.h
-    IO/TraVisToClient.h
-    math/GCFMModel.h
-    math/Mathematics.h
-    math/OperationalModel.h
-    math/VelocityModel.h
-    mpi/LCGrid.h
-    pedestrian/AgentsParameters.h
-    pedestrian/AgentsQueue.h
-    pedestrian/AgentsSource.h
-    pedestrian/AgentsSourcesManager.h
-    pedestrian/Ellipse.h
-    pedestrian/Knowledge.h
-    pedestrian/PedDistributor.h
-    pedestrian/Pedestrian.h
-    pedestrian/Pedestrian.h
-    pedestrian/StartDistribution.h
-    routing/ff_router/ffRouter.h
-    routing/ff_router/FloorfieldViaFM.h
-    routing/ff_router/UnivFFviaFM.h
-    routing/ff_router/mesh/RectGrid.h
-    routing/ff_router/mesh/Trial.h
-    routing/global_shortest/AccessPoint.h
-    routing/global_shortest/DTriangulation.h
-    routing/global_shortest/GlobalRouter.h
-    routing/quickest/QuickestPathRouter.h
-    routing/Router.h
-    routing/RoutingEngine.h
-    routing/smoke_router/Brain.h
-    routing/smoke_router/BrainStorage.h
-    routing/smoke_router/cognitiveMap/associations.h
-    routing/smoke_router/cognitiveMap/cogmapoutputhandler.h
-    routing/smoke_router/cognitiveMap/cognitivemap.h
-    routing/smoke_router/cognitiveMap/connection.cpp
-    routing/smoke_router/cognitiveMap/internnavigationnetwork.h
-    routing/smoke_router/cognitiveMap/landmark.h
-    routing/smoke_router/cognitiveMap/landmarknetwork.h
-    routing/smoke_router/cognitiveMap/region.h
-    routing/smoke_router/cognitiveMap/youareherepointer.h
-    routing/smoke_router/GraphNetwork.h
-    routing/smoke_router/navigation_graph/GraphEdge.h
-    routing/smoke_router/navigation_graph/GraphVertex.h
-    routing/smoke_router/NavigationGraph.h
-    routing/smoke_router/sensor/AbstractSensor.h
-    routing/smoke_router/sensor/DiscoverDoorsSensor.h
-    routing/smoke_router/sensor/JamSensor.h
-    routing/smoke_router/sensor/LastDestinationsSensor.h
-    routing/smoke_router/sensor/locater.h
-    routing/smoke_router/sensor/RoomToFloorSensor.h
-    routing/smoke_router/sensor/SensorManager.h
-    routing/smoke_router/SmokeRouter.h
-    voronoi-boost/VoronoiPositionGenerator.h
-)
-set(JPSFIRE_HDR
-    JPSfire/generic/FDSMesh.h
-    JPSfire/generic/Knot.h
-    JPSfire/generic/FDSMeshStorage.h
-    JPSfire/A_smoke_sensor/SmokeSensor.h
-    JPSfire/B_walking_speed/WalkingSpeed.h
-    JPSfire/C_toxicity_analysis/ToxicityAnalysis.h
-    JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
-)
-set(JPSFIRE_SRC
-    JPSfire/generic/FDSMesh.cpp
-    JPSfire/generic/Knot.cpp
-    JPSfire/generic/FDSMeshStorage.cpp
-    JPSfire/A_smoke_sensor/SmokeSensor.cpp
-    JPSfire/B_walking_speed/WalkingSpeed.cpp
-    JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
-    JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
-)
-
-
-add_library(core STATIC
-    ${source_files}
-    ${header_files}
-    $<$<BOOL:${JPSFIRE}>:${JPSFIRE_SRC}>
-    $<$<BOOL:${JPSFIRE}>:${JPSFIRE_HDR}>
-)
-target_compile_options(core PRIVATE
-    ${COMMON_COMPILE_OPTIONS}
-)
-target_compile_definitions(core PUBLIC
-    $<$<BOOL:${JPSFIRE}>:JPSFIRE>
-    JPSCORE_VERSION="${PROJECT_VERSION}"
-    ${GIT_BUILD_INFO_DEFINES}
-)
-target_link_libraries(core
-    Boost::boost
-    $<$<BOOL:${USE_OPENMP}>:OpenMP::OpenMP_CXX>
-    poly2tri
-    tinyxml
-    visilibity
-    CLI11::CLI11
-    $<$<BOOL:${JPSFIRE}>:cnpy>
-    fs
-    spdlog::spdlog
-    fmt::fmt
-)
-target_include_directories(core PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-################################################################################
-# Build jspcore executable
-################################################################################
-add_executable(jpscore
-    main.cpp
-    ${CMAKE_SOURCE_DIR}/forms/JPScore.ico
-)
-target_compile_options(jpscore PRIVATE
-    ${COMMON_COMPILE_OPTIONS}
-)
-target_link_libraries(jpscore
-    core
-    Threads::Threads
-    spdlog::spdlog
-    fmt::fmt
-)
-
-if (WIN32)
-    target_link_libraries(jpscore core wsock32)
-endif (WIN32)
-
-
-if(WIN32)
-  if(MSVC)
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT jpscore)
-    message(STATUS "set start project for VS")
-  endif()
-endif()
-
-################################################################################
-# Build jspcore_asan executable - jpscore with address sanitizer
-################################################################################
-if(BUILD_WITH_ASAN)
-    get_target_property(core_source core SOURCES)
-    get_target_property(core_compile_options core COMPILE_OPTIONS)
-    get_target_property(core_compile_definitions core COMPILE_DEFINITIONS)
-    get_target_property(core_link_libraries core LINK_LIBRARIES)
-    get_target_property(core_include_directories core INCLUDE_DIRECTORIES)
-
-    add_library(core_asan STATIC
-        ${core_source}
-    )
-
-    target_compile_options(core_asan PRIVATE
-        ${core_compile_options}
-        -fno-omit-frame-pointer
-        -fno-optimize-sibling-calls
-        -fsanitize=address
-    )
-
-    target_compile_definitions(core_asan PRIVATE
-        ${core_compile_definitions}
-    )
-
-    target_link_libraries(core_asan
-        ${core_link_libraries}
-    )
-
-  target_include_directories(core_asan PUBLIC
-        ${core_include_directories}
-    )
-
-    get_target_property(jpscore_source jpscore SOURCES)
-    get_target_property(jpscore_compile_options jpscore COMPILE_OPTIONS)
-    get_target_property(jpscore_link_libraries jpscore LINK_LIBRARIES)
-    list(REMOVE_ITEM jpscore_link_libraries core)
-    list(APPEND jpscore_link_libraries core_asan)
-    add_executable(jpscore_asan
-        ${jpscore_source}
-    )
-
-    target_compile_options(jpscore_asan PRIVATE
-        ${jpscore_compile_options}
-        -fno-omit-frame-pointer
-        -fno-optimize-sibling-calls
-        -fsanitize=address
-    )
-
-    target_compile_definitions(jpscore_asan PRIVATE
-        ${core_compile_definitions}
-    )
-
-    target_link_libraries(jpscore_asan
-        ${jpscore_link_libraries}
-        -fsanitize=address
-    )
-endif()
-################################################################################
 # Testing
 ################################################################################
 if(BUILD_CPPUNIT_TEST OR BUILD_TESTING)
@@ -564,54 +255,28 @@ if(BUILD_CPPUNIT_TEST OR BUILD_TESTING)
 endif()
 
 ################################################################################
-# Unit tests
+# Add libraries / executables
 ################################################################################
-if (BUILD_CPPUNIT_TEST)
-    find_package(Catch2 REQUIRED)
+add_subdirectory(libcore)
+add_subdirectory(jpscore)
 
-    add_executable(unittests
-      test/catch2/Main.cpp
-      test/catch2/pedestrian/EllipseTest.cpp
-
-      test/catch2/math/MathematicsTest.cpp
-
-      test/catch2/geometry/LineTest.cpp
-      test/catch2/geometry/SubRoomTest.cpp
-      test/catch2/geometry/RoomTest.cpp
-      test/catch2/geometry/PointTest.cpp
-      test/catch2/geometry/ObstacleTest.cpp
-    )
-
-    target_link_libraries(unittests Catch2::Catch2 core)
-
-    target_compile_options(unittests PRIVATE
-        ${COMMON_COMPILE_OPTIONS}
-    )
-
-    include(CTest)
-    include(ParseAndAddCatchTests)
-    set(PARSE_CATCH_TESTS_ADD_TARGET_IN_TEST_NAME Off)
-    set(PARSE_CATCH_TESTS_ADD_TO_CONFIGURE_DEPENDS On)
-    ParseAndAddCatchTests(unittests)
-
-endif()
 
 ################################################################################
 # Integration tests
 ################################################################################
 if (BUILD_TESTING)
     list(APPEND clean_geometry_tests
-        ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile1.xml
-        ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile2.xml
-        ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile3.xml
-        ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile4.xml
-        ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile5.xml
-#       ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile6.xml
-        ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile7.xml
-        ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile8.xml
-        ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile9-1.xml
-        ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile9-2.xml
-        ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile10.xml
+        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile1.xml
+        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile2.xml
+        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile3.xml
+        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile4.xml
+        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile5.xml
+        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile6.xml
+        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile7.xml
+        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile8.xml
+        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile9-1.xml
+        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile9-2.xml
+        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile10.xml
     )
     foreach(file ${clean_geometry_tests})
         get_filename_component(test ${file} NAME_WE)
@@ -632,26 +297,12 @@ if (BUILD_TESTING)
 endif (BUILD_TESTING)
 
 ################################################################################
-# Install targets
-################################################################################
-install(TARGETS jpscore
-        DESTINATION bin
-        COMPONENT applications)
-if(WIN32)
-    set(CT_DATA_FILE_DIR "demos")
-    file(GLOB CT_FILES "${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/*/*")
-    install(FILES ${CT_FILES}
-            DESTINATION ${CT_DATA_FILE_DIR}
-            COMPONENT demos)
-endif()
-
-################################################################################
 # Packaging with CPack
 ################################################################################
 IF(UNIX)
     SET(CPACK_GENERATOR "DEB")
     SET(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-    SET( CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://jupedsim.org")
+    SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://jupedsim.org")
     SET(CPACK_DEBIAN_PACKAGE_SUGGESTS, "jpsvis, jpsreport, jpseditor")
     SET(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
     SET(CPACK_DEBIAN_PACKAGE_SECTION "science")
