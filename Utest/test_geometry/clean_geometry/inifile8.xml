@@ -20,7 +20,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 </routing>
 
 <!--persons information and distribution -->
-<agents operational_model_id="4">
+<agents operational_model_id="3">
     <agents_distribution>
         <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="1" number="20" goal_id="-1" router_id="1" />
     </agents_distribution>
