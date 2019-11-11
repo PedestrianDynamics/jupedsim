@@ -606,7 +606,7 @@ if (BUILD_TESTING)
         ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile3.xml
         ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile4.xml
         ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile5.xml
-        ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile6.xml
+#       ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile6.xml
         ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile7.xml
         ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile8.xml
         ${CMAKE_SOURCE_DIR}/Utest/test_geometry/clean_geometry/inifile9-1.xml
