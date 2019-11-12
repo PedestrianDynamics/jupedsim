@@ -46,9 +46,9 @@
  **/
 #include "ffRouter.h"
 
+#include "direction/walking/DirectionStrategy.h"
 #include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
-#include "routing/DirectionStrategy.h"
 
 #include <algorithm>
 #include <cfloat>
@@ -632,12 +632,9 @@ int FFRouter::FindExit(Pedestrian * p)
         //with UIDs, we can ask for shortest path
         for(int doorUID : DoorUIDsOfRoom) {
             //double locDistToDoor = _locffviafm[p->GetRoomID()]->getCostToDestination(doorUID, p->GetPos(), _mode);
-            double locDistToDoor = 0.;
-            if(_targetWithinSubroom) {
-                locDistToDoor = _config->get_dirStrategy()->GetDistance2Target(p, doorUID);
-            } else {
-                locDistToDoor = _config->get_dirStrategy()->GetDistance2Target(p, doorUID);
-            }
+            double locDistToDoor =
+                _config->GetDirectionManager()->GetDirectionStrategy()->GetDistance2Target(
+                    p, doorUID);
 
             if(locDistToDoor <
                -J_EPS) { //for old ff: //this can happen, if the point is not reachable and therefore has init val -7

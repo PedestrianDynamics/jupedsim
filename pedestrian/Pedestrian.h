@@ -146,6 +146,7 @@ private:
     int _lastGoalID  = -1;
     bool _insideGoal = false;
     bool _waiting    = false;
+    Point _waitingPos;
 
 public:
     // public member

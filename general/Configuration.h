@@ -23,6 +23,7 @@
 #include "JPSfire/B_walking_speed/WalkingSpeed.h"
 #include "JPSfire/C_toxicity_analysis/ToxicityAnalysis.h"
 #include "Macros.h"
+#include "direction/DirectionManager.h"
 #include "general/Filesystem.h"
 #include "math/OperationalModel.h"
 #include "pedestrian/AgentsParameters.h"
@@ -34,7 +35,6 @@
 #include <set>
 #include <string>
 
-class DirectionStrategy;
 
 // This class provides a data container for all configuration parameters.
 class Configuration
@@ -107,7 +107,7 @@ public:
         _write_VTK_files_direction  = false;
         //          _dirSubLocal = nullptr;
         //          _dirLocal = nullptr;
-        _dirStrategy = nullptr;
+        _dirManager = nullptr;
         // for random numbers
         _rdGenerator = RandomNumberGenerator();
     }
@@ -281,8 +281,8 @@ public:
 
     int get_exit_strat() const { return _exit_strat; }
 
-    void set_dirStrategy(DirectionStrategy * dir) { _dirStrategy = dir; }
-    DirectionStrategy * get_dirStrategy() { return _dirStrategy; }
+    void SetDirectionManager(std::shared_ptr<DirectionManager> dir) { _dirManager = dir; }
+    std::shared_ptr<DirectionManager> GetDirectionManager() { return _dirManager; }
     //     void set_dirSubLocal(DirectionSubLocalFloorfield* dir) {_dirSubLocal =
     //     dir;}
     //
@@ -416,7 +416,7 @@ private:
 
     int _exit_strat;
 
-    DirectionStrategy * _dirStrategy;
+    std::shared_ptr<DirectionManager> _dirManager;
 
     std::string _hostname;
     fs::path _trajectoriesFile;

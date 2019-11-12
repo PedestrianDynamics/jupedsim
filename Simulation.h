@@ -32,6 +32,7 @@
 
 #include "IO/OutputHandler.h"
 #include "IO/Trajectories.h"
+#include "direction/walking/DirectionStrategy.h"
 #include "events/EventManager.h"
 #include "general/Configuration.h"
 #include "geometry/Building.h"
@@ -40,7 +41,6 @@
 #include "math/OperationalModel.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "pedestrian/PedDistributor.h"
-#include "routing/DirectionStrategy.h"
 #include "routing/RoutingEngine.h"
 #include "routing/global_shortest/GlobalRouter.h"
 #include "routing/quickest/QuickestPathRouter.h"
