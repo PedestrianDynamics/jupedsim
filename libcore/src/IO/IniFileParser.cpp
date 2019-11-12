@@ -1248,7 +1248,6 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                     Logging::Error(fmt::format(
                         check_fmt("Unknown exit_crossing_strategy <{}>"), pExitStrategy));
                     Logging::Warning("The default exit_crossing_strategy <2> will be used");
-                    return true;
                     break;
             }
         } else {
