@@ -74,20 +74,27 @@ bool Crossing::IsTransition() const
     return false;
 }
 
-void Crossing::Close()
+void Crossing::Close(bool event)
 {
     _state = DoorState::CLOSE;
+    _closeByEvent = event;
 }
 
-void Crossing::TempClose()
+void Crossing::TempClose(bool event)
 {
-    _state = DoorState::TEMP_CLOSE;
+    if(_state != DoorState::TEMP_CLOSE) {
+        _state        = DoorState::TEMP_CLOSE;
+        _closeByEvent = event;
+    } else {
+        _closeByEvent = (event || _closeByEvent);
+    }
 }
 
 
-void Crossing::Open()
+void Crossing::Open(bool event)
 {
     _state = DoorState::OPEN;
+    //    _closeByEvent = event;
 }
 
 bool Crossing::IsInSubRoom(int subroomID) const
@@ -343,8 +350,11 @@ bool Crossing::RegulateFlow(double time)
 
 void Crossing::UpdateTemporaryState(double dt)
 {
+    if(_closeByEvent)
+        bool foo = false;
+
     // Only update doors which are temp closed (by flow regulation or events)
-    if(IsTempClose()) {
+    if(IsTempClose() && !_closeByEvent) {
         // States if the door has to be opened due to flow control
         bool change = false;
 
@@ -356,7 +366,7 @@ void Crossing::UpdateTemporaryState(double dt)
 
         // Check of door is allowed to be opened due to max door usage
         if(_maxDoorUsage != std::numeric_limits<int>::max()) {
-            change = change && (_doorUsage < _maxDoorUsage);
+            change = change && (_tempDoorUsage < _maxDoorUsage);
         }
 
         // If needed opens the door

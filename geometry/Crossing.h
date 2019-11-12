@@ -56,6 +56,7 @@ private:
 
     std::string _flowAtExit;
     DoorState _state;
+    bool _closeByEvent = false;
 
 public:
     // last ped that passed was in room {1,2} that many ticks
@@ -88,17 +89,17 @@ public:
     /**
      * Close the door
      */
-    void Close();
+    void Close(bool event = false);
 
     /**
      * Temporaily closes the door
      */
-    void TempClose();
+    void TempClose(bool event = false);
 
     /**
      * Open the door
      */
-    void Open();
+    void Open(bool event = false);
 
     /**
      * \return true if the subroomID is associated with the current crossing
