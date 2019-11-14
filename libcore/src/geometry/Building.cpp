@@ -756,8 +756,16 @@ bool Building::correct() const
                 // bigWall.WriteToErrorLog();
                 //special treatment for doors
                 /////
-                std::vector<Wall> WallPieces;
-                WallPieces = SplitWall(subroom.second, bigWall);
+                std::vector<Wall> WallPieces = SplitWall(subroom.second, bigWall);
+                // HACK HACK HACK
+                // This code below has to be rewritten so that it will not modifiy (grow)
+                // the vector that it is currently iterating on.
+                // The band-aid fix is to sufficiently reserve the vector before breaking
+                // down the wall segements so that it is very unlikely to grow the vector
+                // (i.e. reach its capacity)
+                // This is NOT a proper fix and should only buy some time until this can
+                // be rewritten.
+                WallPieces.reserve(16 * WallPieces.size());
                 if(!WallPieces.empty())
                     removed = true;
 
@@ -769,7 +777,7 @@ bool Building::correct() const
                 int ok = 0;
                 while(!ok) {
                     ok = 1; // ok ==1 means no new pieces are found
-                    for(auto wallPiece : WallPieces) {
+                    for(const auto & wallPiece : WallPieces) {
                         std::vector<Wall> tmpWallPieces;
                         tmpWallPieces = SplitWall(subroom.second, wallPiece);
                         if(!tmpWallPieces.empty()) {
