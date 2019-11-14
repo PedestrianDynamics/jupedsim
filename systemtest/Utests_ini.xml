@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<data>
+
+  <config>
+    <jpscore path="build/bin/jpscore"/>
+    <max_runtime short="10" middle="60"/>
+    <logfiles path="Utest/logfiles"/>
+  </config>
+
+  <Utests>
+   <develop folder="develop_tests">
+     <doors runtime="2"/>
+   </develop>
+
+   <juelich folder="juelich_tests">
+     <test_1 runtime="1"/>
+     <test_2 runtime="99999"/>
+     <test_3 runtime="99999"/>
+     <test_4 runtime="99999"/>
+     <test_5 runtime="99999"/>
+     <test_6 runtime="99999"/>
+     <test_7 runtime="99999"/>
+     <test_8 runtime="99999"/>
+     <test_9 runtime="99999"/>
+     <test_10 runtime="99999"/>
+     <test_11 runtime="99999"/>
+     <test_12 runtime="99999"/>
+     <test_13 runtime="99999"/>
+     <test_14 runtime="99999"/>
+     <test_15 runtime="99999"/>
+   </juelich>
+
+   <rimea folder="rimea_tests">
+     <test_1 runtime="1"/>
+     <test_2 runtime="1"/>
+     <test_3 runtime="1"/>
+     <test_4 runtime="2620"/>
+     <test_5 runtime="2"/>
+     <test_6 runtime="2"/>
+     <test_7 runtime="146"/>
+     <test_8 runtime="1282"/>
+     <test_9 runtime="3306"/>
+     <test_10 runtime="2"/>
+     <test_11 runtime="779"/>
+     <test_12 runtime="167"/>
+     <test_13 runtime="266"/>
+     <test_14 runtime="45"/>
+     <test_15 runtime="180"/>
+   </rimea>
+
+   <router folder="router_tests">
+     <test_router_1 runtime="1"/>
+     <test_router_2 runtime="1"/>
+     <test_router_3 runtime="1"/>
+     <test_router_4 runtime="1"/>
+     <test_router_5 runtime="1"/>
+     <test_router_6 runtime="7"/>
+     <test_router_7 runtime="1"/>
+     <test_router_8 runtime="1"/>
+     <test_router_9 runtime="1"/>
+   </router>
+ </Utests>
+</data>
