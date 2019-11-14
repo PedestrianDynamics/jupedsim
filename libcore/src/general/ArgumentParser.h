@@ -52,7 +52,7 @@ private:
         app.add_option(
                "--log-level",
                logLevel,
-               "Minimum level of log messages to show. Deafults to 'info'")
+               "Minimum level of log messages to show. Defaults to 'info'")
             ->transform(CLI::CheckedTransformer(logLevelMapping, CLI::ignore_case));
 
 public:

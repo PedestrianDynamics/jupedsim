@@ -124,7 +124,7 @@ static fs::path getGoalFileName(const fs::path & projectFile)
     if(auto routingNode = xRootNode->FirstChild("routing")) {
         if(auto goalsNode = routingNode->FirstChild("goals")) {
             if(auto fileNode = goalsNode->FirstChild("file")) {
-                ret = fileNode->ValueStr();
+                ret = fileNode->FirstChild()->ValueStr();
                 Logging::Info(fmt::format("goal file <{}>", ret.string()));
             }
         }

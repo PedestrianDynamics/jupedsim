@@ -148,7 +148,7 @@ def get_product(root):
         tag = node.tag
         if tag in tags:   # ignore tags that are not of interest
             d = get_tag(node)
-            if isinstance(d, list)  or isinstance(d, np.ndarray):
+            if isinstance(d, range) or isinstance(d, list)  or isinstance(d, np.ndarray):
                 # in case some tags have multiple values
                 if tag not in input_tags and len(d) > 1:
             # ignore lists with one element (equiv to scalars)
