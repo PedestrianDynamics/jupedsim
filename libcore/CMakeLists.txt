@@ -255,6 +255,7 @@ if (BUILD_CPPUNIT_TEST)
             test/catch2/math/MathematicsTest.cpp
             test/catch2/pedestrian/EllipseTest.cpp
             test/catch2/routing/UnivFFviaFMTest.cpp
+            test/catch2/geometry/CorrectGeometryTest.cpp
             )
 
     target_link_libraries(unittests Catch2::Catch2 core)

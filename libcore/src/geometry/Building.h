@@ -35,6 +35,8 @@
 #include "general/Configuration.h"
 #include "general/Filesystem.h"
 
+#include <optional>
+
 typedef std::pair<Point, Wall> PointWall;
 
 // train schedules: Trains get deleted and added.
@@ -295,6 +297,8 @@ public:
       */
 
     std::vector<Point> GetBoundaryVertices() const;
+
+    static std::optional<Point> GetSplitPoint(const Wall & wall, const Line & line);
 
 private:
     bool InitInsideGoals();

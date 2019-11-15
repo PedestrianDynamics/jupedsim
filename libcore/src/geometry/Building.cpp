@@ -822,7 +822,7 @@ bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom> & subroom) 
 }
 
 
-std::optional<Point> GetSplitPoint(const Wall & wall, const Line & line)
+std::optional<Point> Building::GetSplitPoint(const Wall & wall, const Line & line)
 {
     // Equal lines should not be split.
     if(wall == line) {
