@@ -27,10 +27,13 @@
 #include "Building.h"
 
 #include "general/OpenMP.h"
+#include "geometry/Point.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 
+#include <algorithm>
 #include <chrono>
+#include <optional>
 #include <tinyxml.h>
 
 #ifdef _SIMULATOR
@@ -818,61 +821,93 @@ bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom> & subroom) 
     return removed;
 }
 
+
+std::optional<Point> GetSplitPoint(const Wall & wall, const Line & line)
+{
+    // Equal lines should not be split.
+    if(wall == line) {
+        return std::nullopt;
+    }
+
+    // Walls starting or ending in common point should not be split.
+    if(wall.ShareCommonPointWith(line)) {
+        return std::nullopt;
+    }
+
+    Point intersectionPoint;
+
+    // Walls without intersection should not be split.
+    if(!wall.IntersectionWith(line, intersectionPoint)) {
+        return std::nullopt;
+    }
+
+    // Walls with intersection at beginning or end should not be split.
+    if(intersectionPoint == wall.GetPoint1() || intersectionPoint == wall.GetPoint2()) {
+        return std::nullopt;
+    }
+
+    // Intersection points with NAN cannot be split
+    if(std::isnan(intersectionPoint._x) || std::isnan(intersectionPoint._y)) {
+        return std::nullopt;
+    }
+
+    Logging::Debug(fmt::format(
+        check_fmt("BigWall {} will be split due to intersection with Line {} in {}"),
+        wall.toString(),
+        line.toString(),
+        intersectionPoint.toString()));
+
+    return {intersectionPoint};
+}
+
 std::vector<Wall>
 Building::SplitWall(const std::shared_ptr<SubRoom> & subroom, const Wall & bigWall) const
 {
-    std::vector<Wall> WallPieces;
+    Logging::Debug(fmt::format(
+        check_fmt("Building::SplitWall for BigWall {} in SubRoom {}-{}."),
+        bigWall.toString(),
+        subroom->GetRoomID(),
+        subroom->GetSubRoomID()));
 
-    LOG_DEBUG("{} collect wall pieces with ", subroom->GetSubRoomID());
-    LOG_DEBUG("Wall {}", bigWall.toString());
-
-    auto walls       = subroom->GetAllWalls();
-    auto crossings   = subroom->GetAllCrossings();
-    auto transitions = subroom->GetAllTransitions();
-    // TODO: Hlines too?
-    std::vector<Line> walls_and_exits = std::vector<Line>();
-    // TODO: check if this is GetAllGoals()?
-    //  collect all crossings
-    for(auto && cros : crossings)
-        walls_and_exits.push_back(*cros);
-    //collect all transitions
-    for(auto && trans : transitions)
-        walls_and_exits.push_back(*trans);
-    for(auto && wall : walls)
-        walls_and_exits.push_back(wall);
-
-    for(auto const & other : walls_and_exits) {
-        LOG_DEBUG("Other: {}", other.toString());
-        if((bigWall == other) || (bigWall.ShareCommonPointWith(other)))
-            continue;
-        Point intersectionPoint;
-
-        if(bigWall.IntersectionWith(other, intersectionPoint)) {
-            if(intersectionPoint == bigWall.GetPoint1() || intersectionPoint == bigWall.GetPoint2())
-                continue;
-
-            LOG_DEBUG(
-                "BigWall: {}, Other: {}, Intersection Point: {}",
-                bigWall.toString(),
-                other.toString(),
-                intersectionPoint.toString());
-            if(std::isnan(intersectionPoint._x) || std::isnan(intersectionPoint._y))
-                continue;
-
-            Wall NewWall(intersectionPoint, bigWall.GetPoint2());  // [IP -- P2]
-            Wall NewWall2(bigWall.GetPoint1(), intersectionPoint); // [IP -- P2]
-
-            WallPieces.push_back(NewWall);
-            WallPieces.push_back(NewWall2);
-
-            LOG_DEBUG("Added two new wall2: {} and {}", NewWall.toString(), NewWall2.toString());
+    std::vector<Point> splitPoints;
+    for(const auto & crossing : subroom->GetAllCrossings()) {
+        if(auto p = GetSplitPoint(bigWall, *crossing)) {
+            splitPoints.emplace_back(*p);
         }
-    } //other walls
+    }
+    for(const auto & transition : subroom->GetAllTransitions()) {
+        if(auto p = GetSplitPoint(bigWall, *transition)) {
+            splitPoints.emplace_back(*p);
+        }
+    }
+    for(const auto & wall : subroom->GetAllWalls()) {
+        if(auto p = GetSplitPoint(bigWall, wall)) {
+            splitPoints.emplace_back(*p);
+        }
+    }
 
-    LOG_DEBUG("Leaving collect, WallPieces size: {}", WallPieces.size());
+    // No split points found, bigWall cannot be split.
+    if(splitPoints.empty()) {
+        return {};
+    }
 
-    return WallPieces;
+    std::sort(
+        splitPoints.begin(), splitPoints.end(), [&bigWall](const Point & p1, const Point & p2) {
+            return Distance(bigWall.GetPoint1(), p1) < Distance(bigWall.GetPoint1(), p2);
+        });
+
+    std::vector<Wall> wallPieces;
+
+    Point lastEndPoint = bigWall.GetPoint1();
+    for(const auto & p : splitPoints) {
+        wallPieces.emplace_back(lastEndPoint, p);
+        lastEndPoint = p;
+    }
+    wallPieces.emplace_back(lastEndPoint, bigWall.GetPoint2());
+
+    return wallPieces;
 }
+
 bool Building::ReplaceBigWall(
     const std::shared_ptr<SubRoom> & subroom,
     const Wall & bigWall,
