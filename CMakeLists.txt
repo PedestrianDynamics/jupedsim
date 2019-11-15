@@ -39,12 +39,6 @@ check_prefix_path()
 ################################################################################
 # Optional features
 ################################################################################
-set(BUILD_TESTING OFF CACHE BOOL "Build with integration tests")
-print_var(BUILD_TESTING)
-
-set(BUILD_CPPUNIT_TEST OFF CACHE BOOL "Build with unit tests")
-print_var(BUILD_CPPUNIT_TEST)
-
 set(BUILD_DOC OFF CACHE BOOL "Build doxygen documentation")
 print_var(BUILD_DOC)
 
@@ -54,12 +48,6 @@ print_var(JPSFIRE)
 set(USE_OPENMP ON CACHE BOOL "Build with OpenMP")
 print_var(USE_OPENMP)
 
-set(BUILD_WITH_ASAN OFF CACHE BOOL
-  "Build with address sanitizer support. Linux / macOS only.")
-print_var(BUILD_WITH_ASAN)
-if(BUILD_WITH_ASAN AND ${CMAKE_SYSTEM} MATCHES "Windows")
-    message(FATAL_ERROR "Address sanitizer builds are not supported on Windows")
-endif()
 ################################################################################
 # Compilation flags
 ################################################################################
@@ -167,10 +155,18 @@ else()
 endif()
 
 find_package(Threads REQUIRED)
+find_package(PythonInterp 3 REQUIRED)
 
-if(BUILD_TESTING)
-    find_package(PythonInterp 3 REQUIRED)
+################################################################################
+# ASAN support clang/gcc (macOS/linux only)
+################################################################################
+if(${CMAKE_SYSTEM} MATCHES "Windows")
+    message(STATUS "Omitting unsupported asan builds on windows")
+    set(BUILD_WITH_ASAN OFF)
+else()
+    set(BUILD_WITH_ASAN ON)
 endif()
+include(asan)
 
 ################################################################################
 # VCS info
@@ -250,9 +246,7 @@ endif(BUILD_DOC)
 ################################################################################
 # Testing
 ################################################################################
-if(BUILD_CPPUNIT_TEST OR BUILD_TESTING)
-    enable_testing()
-endif()
+enable_testing()
 
 ################################################################################
 # Add libraries / executables
@@ -262,10 +256,43 @@ add_subdirectory(jpscore)
 
 
 ################################################################################
-# Integration tests
+# system tests
 ################################################################################
-if (BUILD_TESTING)
-    list(APPEND clean_geometry_tests
+list(APPEND clean_geometry_tests
+    ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile1.xml
+    ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile2.xml
+    ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile3.xml
+    ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile4.xml
+    ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile5.xml
+    ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile6.xml
+    ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile7.xml
+    ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile8.xml
+    ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile9-1.xml
+    ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile9-2.xml
+    ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile10.xml
+)
+foreach(file ${clean_geometry_tests})
+    get_filename_component(test ${file} NAME_WE)
+    add_test(
+        NAME geometry-${test}
+        COMMAND $<TARGET_FILE:jpscore> ${file}
+    )
+endforeach()
+
+file(GLOB_RECURSE test_py_files "${CMAKE_SOURCE_DIR}/Utest/*runtest_*.py")
+foreach (file ${test_py_files})
+    get_filename_component(test ${file} NAME_WE)
+    add_test(
+        NAME ${test}
+        COMMAND ${PYTHON_EXECUTABLE} ${file}
+    )
+endforeach ()
+
+################################################################################
+# system tests with asan
+################################################################################
+if(BUILD_WITH_ASAN)
+    list(APPEND asan_geometry_tests
         ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile1.xml
         ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile2.xml
         ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile3.xml
@@ -278,23 +305,14 @@ if (BUILD_TESTING)
         ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile9-2.xml
         ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile10.xml
     )
-    foreach(file ${clean_geometry_tests})
+    foreach(file ${asan_geometry_tests})
         get_filename_component(test ${file} NAME_WE)
         add_test(
-            NAME geometry-${test}
-            COMMAND $<TARGET_FILE:jpscore> ${file}
+            NAME geometry-${test}_asan
+            COMMAND $<TARGET_FILE:jpscore_asan> ${file}
         )
     endforeach()
-
-    file(GLOB_RECURSE test_py_files "${CMAKE_SOURCE_DIR}/Utest/*runtest_*.py")
-    foreach (file ${test_py_files})
-        get_filename_component(test ${file} NAME_WE)
-        add_test(
-            NAME ${test}
-            COMMAND ${PYTHON_EXECUTABLE} ${file}
-        )
-    endforeach ()
-endif (BUILD_TESTING)
+endif()
 
 ################################################################################
 # Packaging with CPack

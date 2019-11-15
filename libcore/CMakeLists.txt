@@ -235,9 +235,6 @@ if(BUILD_WITH_ASAN)
 
     target_compile_options(core_asan PRIVATE
         ${core_compile_options}
-        -fno-omit-frame-pointer
-        -fno-optimize-sibling-calls
-        -fsanitize=address
     )
 
     target_compile_definitions(core_asan PUBLIC
@@ -246,6 +243,7 @@ if(BUILD_WITH_ASAN)
 
     target_link_libraries(core_asan
         ${core_link_libraries}
+        asan
     )
 
     target_include_directories(core_asan PUBLIC
@@ -256,29 +254,31 @@ endif()
 ################################################################################
 # libcore unit tests
 ################################################################################
-if (BUILD_CPPUNIT_TEST)
-    find_package(Catch2 REQUIRED)
+find_package(Catch2 REQUIRED)
 
-    add_executable(unittests
-      test/catch2/geometry/LineTest.cpp
-      test/catch2/geometry/ObstacleTest.cpp
-      test/catch2/geometry/PointTest.cpp
-      test/catch2/geometry/RoomTest.cpp
-      test/catch2/geometry/SubRoomTest.cpp
-      test/catch2/Main.cpp
-      test/catch2/math/MathematicsTest.cpp
-      test/catch2/pedestrian/EllipseTest.cpp
-    )
+add_executable(unittests
+  test/catch2/geometry/LineTest.cpp
+  test/catch2/geometry/ObstacleTest.cpp
+  test/catch2/geometry/PointTest.cpp
+  test/catch2/geometry/RoomTest.cpp
+  test/catch2/geometry/SubRoomTest.cpp
+  test/catch2/Main.cpp
+  test/catch2/math/MathematicsTest.cpp
+  test/catch2/pedestrian/EllipseTest.cpp
+)
 
-    target_link_libraries(unittests Catch2::Catch2 core)
+target_link_libraries(unittests
+    Catch2::Catch2
+    $<$<PLATFORM_ID:Windows>:core>
+    $<$<NOT:$<PLATFORM_ID:Windows>>:core_asan>
+)
 
-    target_compile_options(unittests PRIVATE
-        ${COMMON_COMPILE_OPTIONS}
-    )
+target_compile_options(unittests PRIVATE
+    ${COMMON_COMPILE_OPTIONS}
+)
 
-    include(CTest)
-    include(ParseAndAddCatchTests)
-    set(PARSE_CATCH_TESTS_ADD_TARGET_IN_TEST_NAME Off)
-    set(PARSE_CATCH_TESTS_ADD_TO_CONFIGURE_DEPENDS On)
-    ParseAndAddCatchTests(unittests)
-endif()
+include(CTest)
+include(ParseAndAddCatchTests)
+set(PARSE_CATCH_TESTS_ADD_TARGET_IN_TEST_NAME Off)
+set(PARSE_CATCH_TESTS_ADD_TO_CONFIGURE_DEPENDS On)
+ParseAndAddCatchTests(unittests)

@@ -6,26 +6,23 @@ add_executable(jpscore
     forms/jpscore.rc
     forms/JPScore.ico
 )
+
 target_compile_options(jpscore PRIVATE
     ${COMMON_COMPILE_OPTIONS}
 )
+
 target_link_libraries(jpscore
     core
     Threads::Threads
     spdlog::spdlog
     fmt::fmt
+    $<$<PLATFORM_ID:Windows>:wsock32>
 )
 
-if (WIN32)
-    target_link_libraries(jpscore core wsock32)
-endif (WIN32)
-
-
-if(WIN32)
-  if(MSVC)
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT jpscore)
-    message(STATUS "set start project for VS")
-  endif()
+if(WIN32 AND MSVC)
+    set_property(
+        DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        PROPERTY VS_STARTUP_PROJECT jpscore)
 endif()
 
 ################################################################################
@@ -43,9 +40,6 @@ if(BUILD_WITH_ASAN)
 
     target_compile_options(jpscore_asan PRIVATE
         ${jpscore_compile_options}
-        -fno-omit-frame-pointer
-        -fno-optimize-sibling-calls
-        -fsanitize=address
     )
 
     target_compile_definitions(jpscore_asan PRIVATE
@@ -54,7 +48,7 @@ if(BUILD_WITH_ASAN)
 
     target_link_libraries(jpscore_asan
         ${jpscore_link_libraries}
-        -fsanitize=address
+        asan
     )
 endif()
 
