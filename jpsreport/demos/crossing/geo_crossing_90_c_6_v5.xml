@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?> 
+<geometry version ="0.8" caption="second life" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/jps_geometry.xsd" unit="m">
+	<rooms>
+		<room id="0" caption="hall" zpos="0.00">
+			<subroom id="0" closed="0" class="subroom">
+				<polygon caption="wall">
+					<vertex px="0.0" py="0.0"/>
+					<vertex px="0.0" py="-1.00"/>
+					<vertex px="4.00" py="-1.00"/>
+					<vertex px="4.00" py="0.0"/>
+					<vertex px="6.50" py="0.0"/>
+					<vertex px="6.50" py="4.00"/>
+					<vertex px="4.00" py="4.00"/>
+					<vertex px="4.00" py="5.00"/>
+					<vertex px="0.0" py="5.00"/>
+					<vertex px="0.0" py="4.00"/>
+					<vertex px="-4.00" py="4.00"/>
+					<vertex px="-4.00" py="0.0"/> 	
+					<vertex px="0.0" py="0.0"/>					
+				</polygon>
+				<obstacle id="1" caption="table" height="1.0" closed="1">
+					<polygon>
+						<vertex px="2.08" py="2.30"/>
+						<vertex px="2.22" py="2.22"/>
+						<vertex px="2.30" py="2.08"/>
+						<vertex px="2.30" py="1.92"/>
+						<vertex px="2.22" py="1.79"/>
+						<vertex px="2.08" py="1.70"/>	
+						<vertex px="1.92" py="1.70"/>	
+						<vertex px="1.78" py="1.78"/>	
+						<vertex px="1.70" py="1.92"/>	
+						<vertex px="1.70" py="2.08"/>	
+						<vertex px="1.78" py="2.22"/>	
+						<vertex px="1.92" py="2.30"/>	
+						<vertex px="2.08" py="2.30"/>
+					</polygon>
+				</obstacle>			
+			</subroom>
+		</room>
+	</rooms>
+</geometry>
