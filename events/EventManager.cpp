@@ -531,15 +531,11 @@ void EventManager::CloseDoor(int id)
 {
     Transition * t = _building->GetTransition(id);
 
-    if(!t->IsClose()) {
-        t->Close(true);
-        Logging::Info(fmt::format(check_fmt("Closing door {}"), id));
-        //Create and save a graph corresponding to the actual state of the building.
-        if(CreateRoutingEngine(_building) == false) {
-            Logging::Error("Cannot create a routing engine with new event");
-        }
-    } else {
-        Logging::Warning(fmt::format(check_fmt("Door {} is already closed"), id));
+    t->Close(true);
+    Logging::Info(fmt::format(check_fmt("Closing door {}"), id));
+    //Create and save a graph corresponding to the actual state of the building.
+    if(CreateRoutingEngine(_building) == false) {
+        Logging::Error("Cannot create a routing engine with new event");
     }
 }
 
@@ -547,31 +543,23 @@ void EventManager::TempCloseDoor(int id)
 {
     Transition * t = _building->GetTransition(id);
 
-    //    if(!t->IsTempClose()) {
     t->TempClose(true);
     Logging::Info(fmt::format(check_fmt("Closing door {}"), id));
     //Create and save a graph corresponding to the actual state of the building.
     if(CreateRoutingEngine(_building) == false) {
         Logging::Error("Cannot create a routing engine with new event");
     }
-    //    } else {
-    //        Logging::Warning(fmt::format(check_fmt("Door {} is already closed"), id));
-    //    }
 }
 
 //open the door if it was open and relaunch the routing procedure
 void EventManager::OpenDoor(int id)
 {
     Transition * t = _building->GetTransition(id);
-    if(!t->IsOpen()) {
-        t->Open(true);
-        Logging::Info(fmt::format(check_fmt("Closing door {}"), id));
-        //Create and save a graph corresponding to the actual state of the building.
-        if(CreateRoutingEngine(_building) == false) {
-            Logging::Error("Cannot create a routing engine with new event");
-        }
-    } else {
-        Logging::Warning(fmt::format(check_fmt("Door {} is already closed"), id));
+    t->Open(true);
+    Logging::Info(fmt::format(check_fmt("Closing door {}"), id));
+    //Create and save a graph corresponding to the actual state of the building.
+    if(CreateRoutingEngine(_building) == false) {
+        Logging::Error("Cannot create a routing engine with new event");
     }
 }
 

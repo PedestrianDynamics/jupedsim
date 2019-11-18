@@ -76,8 +76,12 @@ bool Crossing::IsTransition() const
 
 void Crossing::Close(bool event)
 {
-    _state = DoorState::CLOSE;
-    _closeByEvent = event;
+    if(_state != DoorState::CLOSE) {
+        _state        = DoorState::CLOSE;
+        _closeByEvent = event;
+    } else {
+        _closeByEvent = (event || _closeByEvent);
+    }
 }
 
 void Crossing::TempClose(bool event)
@@ -90,11 +94,10 @@ void Crossing::TempClose(bool event)
     }
 }
 
-
-void Crossing::Open(bool event)
+void Crossing::Open(bool)
 {
     _state = DoorState::OPEN;
-    //    _closeByEvent = event;
+    _closeByEvent = false;
 }
 
 bool Crossing::IsInSubRoom(int subroomID) const
@@ -220,6 +223,7 @@ void Crossing::ResetDoorUsage()
         if(_maxDoorUsage < std::numeric_limits<double>::max()) {
             Open();
             Logging::Info(fmt::format(check_fmt("Reopening door {}"), _id));
+            _closeByEvent = false;
         }
     }
 }
@@ -286,22 +290,6 @@ void Crossing::SetDN(int dn)
     _DN = dn;
 }
 
-/**
- * Regulates the flow at a crossing. To assure a specific flow at a door the door may need to closes
- * temporarily.
- *
- * If _outFlowRate is set by user:
- *  - If the current flow between the last measurement and now is greater than _outflowRate
- *      - change door state to temp_close
- *
- * If _maxDoorUsage is set by user:
- *  - If _doorUsage is greater equal than _maxDoorUsage
- *      - change door state to close
- *
- * @post changes \a _lastFlowMeasurement, \a _closingTime, \a _state
- * @param time time the flow is regulated
- * @return true, if a change to door state was made.
- */
 bool Crossing::RegulateFlow(double time)
 {
     bool change   = false;
@@ -350,10 +338,7 @@ bool Crossing::RegulateFlow(double time)
 
 void Crossing::UpdateTemporaryState(double dt)
 {
-    if(_closeByEvent)
-        bool foo = false;
-
-    // Only update doors which are temp closed (by flow regulation or events)
+    // Only update doors which are temp closed by flow regulation
     if(IsTempClose() && !_closeByEvent) {
         // States if the door has to be opened due to flow control
         bool change = false;
@@ -390,7 +375,6 @@ void Crossing::SetState(DoorState state)
 std::string Crossing::toString() const
 {
     std::stringstream tmp;
-    //     tmp << _point1.toString() << "--" << _point2.toString();
 
     tmp << this->GetPoint1().toString() << "--" << this->GetPoint2().toString();
     switch(_state) {
