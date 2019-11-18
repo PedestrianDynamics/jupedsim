@@ -220,6 +220,40 @@ target_include_directories(core PUBLIC
 )
 
 ################################################################################
+# Build jspcore_asan executable - jpscore with address sanitizer
+################################################################################
+if(BUILD_WITH_ASAN)
+    get_target_property(core_source core SOURCES)
+    get_target_property(core_compile_options core COMPILE_OPTIONS)
+    get_target_property(core_compile_definitions core COMPILE_DEFINITIONS)
+    get_target_property(core_link_libraries core LINK_LIBRARIES)
+    get_target_property(core_include_directories core INCLUDE_DIRECTORIES)
+
+    add_library(core_asan STATIC
+        ${core_source}
+    )
+
+    target_compile_options(core_asan PRIVATE
+        ${core_compile_options}
+        -fno-omit-frame-pointer
+        -fno-optimize-sibling-calls
+        -fsanitize=address
+    )
+
+    target_compile_definitions(core_asan PUBLIC
+        ${core_compile_definitions}
+    )
+
+    target_link_libraries(core_asan
+        ${core_link_libraries}
+    )
+
+    target_include_directories(core_asan PUBLIC
+        ${core_include_directories}
+    )
+endif()
+
+################################################################################
 # libcore unit tests
 ################################################################################
 if (BUILD_CPPUNIT_TEST)
