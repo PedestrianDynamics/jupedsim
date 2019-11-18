@@ -17,13 +17,50 @@
  **/
 
 #include "geometry/Building.h"
+#include "geometry/Crossing.h"
 #include "geometry/Line.h"
+#include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 
 #include <catch2/catch.hpp>
 
 TEST_CASE("geometry/Building/correct", "[geometry][Building][correct]")
 {
+    SECTION("SplitWall")
+    {
+        SECTION("No split possible")
+        {
+            NormalSubRoom subRoom;
+            REQUIRE_FALSE(Building::SplitWall(subRoom, Wall{}));
+
+            Wall bigWall(Point(0, 0), Point(20, 0));
+            REQUIRE_FALSE(Building::SplitWall(subRoom, bigWall));
+
+            Transition transition;
+            subRoom.AddTransition(&transition);
+            REQUIRE_FALSE(Building::SplitWall(subRoom, bigWall));
+
+            transition.SetPoint2(Point(0, 10));
+            REQUIRE_FALSE(Building::SplitWall(subRoom, bigWall));
+
+            Crossing crossing;
+            subRoom.AddCrossing(&crossing);
+            REQUIRE_FALSE(Building::SplitWall(subRoom, bigWall));
+            crossing.SetPoint1(Point(100, 0));
+            crossing.SetPoint2(Point(100, 1));
+
+            Wall wall;
+            subRoom.AddWall(wall);
+            REQUIRE_FALSE(Building::SplitWall(subRoom, bigWall));
+
+            wall.SetPoint1(Point(-100, 0));
+            REQUIRE_FALSE(Building::SplitWall(subRoom, bigWall));
+
+            REQUIRE_FALSE(Building::SplitWall(subRoom, Wall{}));
+        }
+    }
+
+
     SECTION("GetSplitPoint")
     {
         Wall testWall(Point(0, 0), Point(0, 10));

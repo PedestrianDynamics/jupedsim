@@ -298,6 +298,52 @@ public:
 
     std::vector<Point> GetBoundaryVertices() const;
 
+
+    /**
+      * @brief Split a wall in several small walls
+      *
+      * search all walls+crossings+transitions that intersect <bigwall>
+      * not in an endpoint
+      *
+      * @param subroom: subroom containing <bigwall>
+      * @param bigWall: wall to split
+      * @return std::vector: a vector of all small walls. Can be empty.
+      */
+    static std::optional<std::vector<Wall>>
+    SplitWall(const SubRoom & subroom, const Wall & bigWall);
+
+    /**
+      * @brief Replace BigWall with a smaller wall
+      *
+      * this function should be called after \fn SplitWall()
+      *
+      * @param subroom: subroom containing <bigwall>
+      * @param bigWall: bigWall is going to be removes from subroom
+      * @param WallPieces: vector of candidates. One of these walls is going to
+      * replace bigwall (\fn AddWallToSubroom() is called)
+      * @return bool: true if successful
+      */
+    static void
+    ReplaceBigWall(SubRoom & subroom, const Wall & bigWall, const std::vector<Wall> & wallPieces);
+
+    /**
+      * @brief Add newWall  subroom
+      *
+      *  We count for a candidate wall if it has more than 2 common points with
+      *  walls+transitions+crossings of the subroom.
+      *
+      *  Assumption: We assume one of the new lines needs to be added.
+      *
+      *  @todo Is there a case where none should be chosen?
+      *  @todo Or more than one wall *can* be choosen?
+      *
+      * @param subroom: subroom where new wall shoud be added to
+      * @param WallPieces: vector of candidates. One of these walls is going to
+      *        be added to subroom
+      *
+      */
+    static void AddWallToSubroom(SubRoom & subroom, const std::vector<Wall> & WallPieces);
+
     static std::optional<Point> GetSplitPoint(const Wall & wall, const Line & line);
 
 private:
@@ -334,55 +380,7 @@ private:
      *
      *  TODO What happens if the line is _really_ big? Here we should call the function in a recursive way..
      */
-    bool correct() const;
-    /**
-      * @brief Add newWall  subroom
-      *
-      *  We count for a candidate wall if it has more than 2 common points with
-      *  walls+transitions+crossings of the subroom.
-      *
-      *  Assumption: We assume one of the new lines needs to be added.
-      *
-      *  TODO Is there a case where none should be chosen?
-      *  TODO Or more than one wall *can* be choosen?
-      *
-      * @param subroom: subroom where new wall shoud be added to
-      * @param WallPieces: vector of candidates. One of these walls is going to
-      *        be added to subroom
-      *
-      */
-    bool
-    AddWallToSubroom(const std::shared_ptr<SubRoom> & subroom, std::vector<Wall> WallPieces) const;
-
-
-    /**
-      * @brief Split a wall in several small walls
-      *
-      * search all walls+crossings+transitions that intersect <bigwall>
-      * not in an endpoint
-      *
-      * @param subroom: subroom containing <bigwall>
-      * @param bigWall: wall to split
-      * @return std::vector: a vector of all small walls. Can be empty.
-      */
-    std::vector<Wall>
-    SplitWall(const std::shared_ptr<SubRoom> & subroom, const Wall & bigWall) const;
-
-    /**
-      * @brief Replace BigWall with a smaller wall
-      *
-      * this function should be called after \fn SplitWall()
-      *
-      * @param subroom: subroom containing <bigwall>
-      * @param bigWall: bigWall is going to be removes from subroom
-      * @param WallPieces: vector of candidates. One of these walls is going to
-      * replace bigwall (\fn AddWallToSubroom() is called)
-      * @return bool: true if successful
-      */
-    bool ReplaceBigWall(
-        const std::shared_ptr<SubRoom> & subroom,
-        const Wall & bigWall,
-        std::vector<Wall> & WallPieces) const;
+    void correct() const;
 
     /**
       * @brief Removes doors on walls
