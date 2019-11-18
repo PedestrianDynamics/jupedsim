@@ -315,7 +315,7 @@ void Simulation::UpdateRoutesAndLocations()
         if(_gotSources)
             ped->FindRoute();
         //finally actualize the route
-        if(!_gotSources && ped->FindRoute() == -1 && !_trainConstraints) {
+        if(!_gotSources && ped->FindRoute() == -1 && !_trainConstraints && sub0->IsAccessible()) {
             //a destination could not be found for that pedestrian
             Logging::Error(fmt::format(
                 check_fmt("Could not find a route for pedestrian {} in room {} and subroom {}"),
@@ -1013,6 +1013,8 @@ void Simulation::UpdateDoorticks() const {
 void Simulation::UpdateFlowAtDoors(const Pedestrian & ped) const
 {
     Transition * trans = _building->GetTransitionByUID(ped.GetExitIndex());
+    DoorState state    = trans->GetState();
+
     if(!trans)
         return;
 
@@ -1041,6 +1043,10 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian & ped) const
     Crossing * cross = _building->GetCrossingByUID(ped.GetExitIndex());
     if(cross) {
         cross->IncreaseDoorUsage(1, ped.GetGlobalTime());
+    }
+
+    if(state != trans->GetState()) {
+        _routingEngine->setNeedUpdate(true);
     }
 }
 

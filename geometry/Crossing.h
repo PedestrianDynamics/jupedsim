@@ -284,6 +284,12 @@ public:
     void UpdateTemporaryState(double dt);
 
     /**
+     * Returns the time span until the flow regulation is triggered.
+     * @return the time span until the flow regulation is triggered.
+     */
+    double GetDT();
+
+    /**
      * Sets the flow observation time.
      * @param dt time span \a _DT in which the flow is observed.
      */

@@ -53,7 +53,6 @@ bool Crossing::IsExit() const
     return false;
 }
 
-
 bool Crossing::IsOpen() const
 {
     return _state == DoorState::OPEN;
@@ -269,7 +268,6 @@ void Crossing::UpdateClosingTime(double dt)
 {
     _closingTime -= dt;
 }
-
 
 double Crossing::GetDT()
 {

@@ -414,7 +414,7 @@ bool FFRouter::ReInit()
         std::vector<int> allDoors(floorfield.second->getKnownDoorUIDs());
         for(auto firstDoor : allDoors) {
             for(auto secondDoor : allDoors) {
-                if(secondDoor <= firstDoor)
+                if(secondDoor <= firstDoor || _CroTrByUID.find(firstDoor) == _CroTrByUID.end())
                     continue; // calculate every path only once
                 // if the two doors are not within the same subroom, do not consider (ar.graf)
                 // should fix problems of oscillation caused by doorgaps in the distancegraph

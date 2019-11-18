@@ -476,8 +476,9 @@ bool EventManager::MergeKnowledge(Pedestrian * p1, Pedestrian * p2)
 
 void EventManager::ProcessEvent()
 {
-    if(_events.size() == 0)
+    if(_events.empty()) {
         return;
+    }
 
     int current_time = Pedestrian::GetGlobalTime();
 
