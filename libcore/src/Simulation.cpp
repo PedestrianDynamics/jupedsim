@@ -998,10 +998,9 @@ void Simulation::UpdateDoorticks() const {
 void Simulation::UpdateFlowAtDoors(const Pedestrian & ped) const
 {
     Transition * trans = _building->GetTransitionByUID(ped.GetExitIndex());
-    DoorState state    = trans->GetState();
-
     if(!trans)
         return;
+    DoorState state = trans->GetState();
 
     bool regulateFlow = trans->GetOutflowRate() < (std::numeric_limits<double>::max)() ||
                         trans->GetMaxDoorUsage() < std::numeric_limits<double>::max();
