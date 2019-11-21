@@ -1,0 +1,800 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<geometry version="0.8" caption="second life" unit="m"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_geoemtry.xsd">
+
+<rooms>
+	<room id ="0" caption ="floor">
+		<subroom id ="1" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="2"/>
+				<vertex px="6" py="2.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="4"/>
+				<vertex px="6" py="3.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="0"/>
+				<vertex px="2.5" py="0"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="0"/>
+				<vertex px="3.5" py="0"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="2"/>
+				<vertex px="4" py="1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="2"/>
+				<vertex px="2" py="1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="4"/>
+				<vertex px="4" py="4.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="4"/>
+				<vertex px="2" py="4.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="6"/>
+				<vertex px="3.5" py="6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="6"/>
+				<vertex px="2.5" py="6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="4"/>
+				<vertex px="0" py="3.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="2"/>
+				<vertex px="0" py="2.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="4"/>
+				<vertex px="0" py="4"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="4"/>
+				<vertex px="6" py="4"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="2"/>
+				<vertex px="2" py="2"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="2"/>
+				<vertex px="6" py="2"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="0"/>
+				<vertex px="4" py="0.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="0"/>
+				<vertex px="2" py="0.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="6"/>
+				<vertex px="4" py="5.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="6"/>
+				<vertex px="2" py="5.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="2" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="internal">
+				<vertex px="-2" py="2"/>
+				<vertex px="-2" py="2.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="-2" py="4"/>
+				<vertex px="-2" py="3.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="4"/>
+				<vertex px="0" py="3.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="2"/>
+				<vertex px="0" py="2.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="4"/>
+				<vertex px="-2" py="4"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="-2" py="2"/>
+				<vertex px="0" py="2"/>
+			</polygon>
+		</subroom>
+		<subroom id ="3" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="8"/>
+				<vertex px="3.5" py="8"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="8"/>
+				<vertex px="2.5" py="8"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="8"/>
+				<vertex px="4" py="7.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="8"/>
+				<vertex px="2" py="7.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="6"/>
+				<vertex px="3.5" py="6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="6"/>
+				<vertex px="2.5" py="6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="6"/>
+				<vertex px="4" py="6.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="6"/>
+				<vertex px="2" py="6.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="4" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="internal">
+				<vertex px="8" py="2"/>
+				<vertex px="8" py="2.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="8" py="4"/>
+				<vertex px="8" py="3.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="2"/>
+				<vertex px="6" py="2.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="4"/>
+				<vertex px="6" py="3.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="4"/>
+				<vertex px="8" py="4"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="2"/>
+				<vertex px="8" py="2"/>
+			</polygon>
+		</subroom>
+		<subroom id ="5" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="-2"/>
+				<vertex px="3.5" py="-2"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="-2"/>
+				<vertex px="2.5" py="-2"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="-2"/>
+				<vertex px="4" py="-1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="-2"/>
+				<vertex px="2" py="-1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="0"/>
+				<vertex px="2.5" py="0"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="0"/>
+				<vertex px="3.5" py="0"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="0"/>
+				<vertex px="4" py="-0.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="0"/>
+				<vertex px="2" py="-0.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="6" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="4"/>
+				<vertex px="2" py="4.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="6"/>
+				<vertex px="1.5" py="5.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="4"/>
+				<vertex px="0.5" py="4.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="4"/>
+				<vertex px="0" py="4"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="6"/>
+				<vertex px="2" py="5.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="7" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="4"/>
+				<vertex px="5.5" py="4.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="6"/>
+				<vertex px="4.5" py="5.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="4"/>
+				<vertex px="4" py="4.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="4"/>
+				<vertex px="6" py="4"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="6"/>
+				<vertex px="4" py="5.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="8" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="2"/>
+				<vertex px="4" py="1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="0"/>
+				<vertex px="4.5" py="0.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="2"/>
+				<vertex px="5.5" py="1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="2"/>
+				<vertex px="6" py="2"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="0"/>
+				<vertex px="4" py="0.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="9" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="2"/>
+				<vertex px="2" py="1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="2"/>
+				<vertex px="0.5" py="1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="0"/>
+				<vertex px="1.5" py="0.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="2"/>
+				<vertex px="2" py="2"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="0"/>
+				<vertex px="2" py="0.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="10" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="4"/>
+				<vertex px="0" py="4.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="6"/>
+				<vertex px="1.5" py="5.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="4"/>
+				<vertex px="0.5" py="4.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="6"/>
+				<vertex px="2" py="6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="6"/>
+				<vertex px="0" py="5.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="11" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="4"/>
+				<vertex px="6" py="4.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="4"/>
+				<vertex px="5.5" py="4.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="6"/>
+				<vertex px="4.5" py="5.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="6"/>
+				<vertex px="4" py="6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="6"/>
+				<vertex px="6" py="5.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="12" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="2"/>
+				<vertex px="6" py="1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="0"/>
+				<vertex px="4.5" py="0.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="2"/>
+				<vertex px="5.5" py="1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="0"/>
+				<vertex px="4" py="0"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="0"/>
+				<vertex px="6" py="0.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="13" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="2"/>
+				<vertex px="0" py="1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="2"/>
+				<vertex px="0.5" py="1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="0"/>
+				<vertex px="1.5" py="0.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="0"/>
+				<vertex px="2" py="0"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="0"/>
+				<vertex px="0" py="0.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="14" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="wall">
+				<vertex px="-2" py="4"/>
+				<vertex px="-2" py="6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="4"/>
+				<vertex px="0" py="4.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="4"/>
+				<vertex px="-2" py="4"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="-2" py="6"/>
+				<vertex px="0" py="6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="6"/>
+				<vertex px="0" py="5.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="15" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="wall">
+				<vertex px="8" py="4"/>
+				<vertex px="8" py="6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="4"/>
+				<vertex px="6" py="4.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="4"/>
+				<vertex px="8" py="4"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="8" py="6"/>
+				<vertex px="6" py="6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="6"/>
+				<vertex px="6" py="5.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="16" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="wall">
+				<vertex px="8" py="2"/>
+				<vertex px="8" py="0"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="2"/>
+				<vertex px="6" py="1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="2"/>
+				<vertex px="8" py="2"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="8" py="0"/>
+				<vertex px="6" py="0"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="0"/>
+				<vertex px="6" py="0.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="17" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="wall">
+				<vertex px="-2" py="2"/>
+				<vertex px="-2" py="0"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="2"/>
+				<vertex px="0" py="1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="-2" py="2"/>
+				<vertex px="0" py="2"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="-2" py="0"/>
+				<vertex px="0" py="0"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="0"/>
+				<vertex px="0" py="0.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="18" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="wall">
+				<vertex px="2" py="8"/>
+				<vertex px="0" py="8"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="8"/>
+				<vertex px="0" py="7.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="8"/>
+				<vertex px="2" py="7.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="6"/>
+				<vertex px="2" py="6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="6"/>
+				<vertex px="0" py="6.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="6"/>
+				<vertex px="2" py="6.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="19" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="wall">
+				<vertex px="4" py="8"/>
+				<vertex px="6" py="8"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="8"/>
+				<vertex px="6" py="7.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="8"/>
+				<vertex px="4" py="7.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="6"/>
+				<vertex px="4" py="6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="6"/>
+				<vertex px="6" py="6.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="6"/>
+				<vertex px="4" py="6.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="20" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="wall">
+				<vertex px="4" py="-2"/>
+				<vertex px="6" py="-2"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="-2"/>
+				<vertex px="6" py="-1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="-2"/>
+				<vertex px="4" py="-1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="0"/>
+				<vertex px="4" py="0"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="0"/>
+				<vertex px="6" py="-0.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4" py="0"/>
+				<vertex px="4" py="-0.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="21" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="wall">
+				<vertex px="2" py="-2"/>
+				<vertex px="0" py="-2"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="-2"/>
+				<vertex px="0" py="-1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="-2"/>
+				<vertex px="2" py="-1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="0"/>
+				<vertex px="2" py="0"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="0"/>
+				<vertex px="0" py="-0.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="2" py="0"/>
+				<vertex px="2" py="-0.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="22" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="8"/>
+				<vertex px="0" py="7.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="8"/>
+				<vertex px="-0.5" py="7.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="-2" py="6"/>
+				<vertex px="-1.5" py="6.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="-2" py="6"/>
+				<vertex px="0" py="6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="6"/>
+				<vertex px="0" py="6.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="23" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="8"/>
+				<vertex px="6" py="7.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="8" py="6"/>
+				<vertex px="7.5" py="6.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="8"/>
+				<vertex px="6.5" py="7.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="8" py="6"/>
+				<vertex px="6" py="6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="6"/>
+				<vertex px="6" py="6.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="24" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="-2"/>
+				<vertex px="6" py="-1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="8" py="0"/>
+				<vertex px="7.5" py="-0.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="-2"/>
+				<vertex px="6.5" py="-1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="8" py="0"/>
+				<vertex px="6" py="0"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6" py="0"/>
+				<vertex px="6" py="-0.5"/>
+			</polygon>
+		</subroom>
+		<subroom id ="25" caption="dummy_caption" class="Not specified" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="-2"/>
+				<vertex px="0" py="-1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="-2"/>
+				<vertex px="-0.5" py="-1.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="-2" py="0"/>
+				<vertex px="-1.5" py="-0.5"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="-2" py="0"/>
+				<vertex px="0" py="0"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0" py="0"/>
+				<vertex px="0" py="-0.5"/>
+			</polygon>
+		</subroom>
+		<crossings>
+	<crossing id ="0" subroom1_id="6" subroom2_id="10">
+		<vertex px="0.5" py="4.5"/>
+		<vertex px="1.5" py="5.5"/>
+	</crossing>
+	<crossing id ="1" subroom1_id="7" subroom2_id="11">
+		<vertex px="4.5" py="5.5"/>
+		<vertex px="5.5" py="4.5"/>
+	</crossing>
+	<crossing id ="2" subroom1_id="1" subroom2_id="6">
+		<vertex px="2" py="5.5"/>
+		<vertex px="2" py="4.5"/>
+	</crossing>
+	<crossing id ="3" subroom1_id="1" subroom2_id="7">
+		<vertex px="4" py="5.5"/>
+		<vertex px="4" py="4.5"/>
+	</crossing>
+	<crossing id ="4" subroom1_id="9" subroom2_id="13">
+		<vertex px="0.5" py="1.5"/>
+		<vertex px="1.5" py="0.5"/>
+	</crossing>
+	<crossing id ="5" subroom1_id="8" subroom2_id="12">
+		<vertex px="4.5" py="0.5"/>
+		<vertex px="5.5" py="1.5"/>
+	</crossing>
+	<crossing id ="6" subroom1_id="1" subroom2_id="8">
+		<vertex px="4" py="1.5"/>
+		<vertex px="4" py="0.5"/>
+	</crossing>
+	<crossing id ="7" subroom1_id="1" subroom2_id="9">
+		<vertex px="2" py="1.5"/>
+		<vertex px="2" py="0.5"/>
+	</crossing>
+	<crossing id ="8" subroom1_id="3" subroom2_id="1">
+		<vertex px="2.5" py="6"/>
+		<vertex px="3.5" py="6"/>
+	</crossing>
+	<crossing id ="9" subroom1_id="5" subroom2_id="1">
+		<vertex px="3.5" py="0"/>
+		<vertex px="2.5" py="0"/>
+	</crossing>
+	<crossing id ="10" subroom1_id="2" subroom2_id="1">
+		<vertex px="0" py="2.5"/>
+		<vertex px="0" py="3.5"/>
+	</crossing>
+	<crossing id ="11" subroom1_id="4" subroom2_id="1">
+		<vertex px="6" py="3.5"/>
+		<vertex px="6" py="2.5"/>
+	</crossing>
+	<crossing id ="12" subroom1_id="22" subroom2_id="18">
+		<vertex px="0" py="7.5"/>
+		<vertex px="0" py="6.5"/>
+	</crossing>
+	<crossing id ="13" subroom1_id="3" subroom2_id="18">
+		<vertex px="2" py="7.5"/>
+		<vertex px="2" py="6.5"/>
+	</crossing>
+	<crossing id ="14" subroom1_id="3" subroom2_id="19">
+		<vertex px="4" py="7.5"/>
+		<vertex px="4" py="6.5"/>
+	</crossing>
+	<crossing id ="15" subroom1_id="19" subroom2_id="23">
+		<vertex px="6" py="7.5"/>
+		<vertex px="6" py="6.5"/>
+	</crossing>
+	<crossing id ="24" subroom1_id="25" subroom2_id="21">
+		<vertex px="0" py="-0.5"/>
+		<vertex px="0" py="-1.5"/>
+	</crossing>
+	<crossing id ="25" subroom1_id="21" subroom2_id="5">
+		<vertex px="2" py="-0.5"/>
+		<vertex px="2" py="-1.5"/>
+	</crossing>
+	<crossing id ="26" subroom1_id="5" subroom2_id="20">
+		<vertex px="4" py="-0.5"/>
+		<vertex px="4" py="-1.5"/>
+	</crossing>
+	<crossing id ="27" subroom1_id="24" subroom2_id="20">
+		<vertex px="6" py="-0.5"/>
+		<vertex px="6" py="-1.5"/>
+	</crossing>
+	<crossing id ="28" subroom1_id="14" subroom2_id="10">
+		<vertex px="0" py="5.5"/>
+		<vertex px="0" py="4.5"/>
+	</crossing>
+	<crossing id ="29" subroom1_id="11" subroom2_id="15">
+		<vertex px="6" py="5.5"/>
+		<vertex px="6" py="4.5"/>
+	</crossing>
+	<crossing id ="30" subroom1_id="17" subroom2_id="13">
+		<vertex px="0" py="1.5"/>
+		<vertex px="0" py="0.5"/>
+	</crossing>
+	<crossing id ="31" subroom1_id="12" subroom2_id="16">
+		<vertex px="6" py="0.5"/>
+		<vertex px="6" py="1.5"/>
+	</crossing>
+		</crossings>
+	</room>
+</rooms>
+<transitions>
+	<transition id ="0" caption="NaN" type="NaN" room1_id="0" subroom1_id="3" room2_id="-1" subroom2_id="-1">
+		<vertex px="2.5" py="8"/>
+		<vertex px="3.5" py="8"/>
+	</transition>
+	<transition id ="1" caption="NaN" type="NaN" room1_id="0" subroom1_id="5" room2_id="-1" subroom2_id="-1">
+		<vertex px="2.5" py="-2"/>
+		<vertex px="3.5" py="-2"/>
+	</transition>
+	<transition id ="2" caption="NaN" type="NaN" room1_id="0" subroom1_id="2" room2_id="-1" subroom2_id="-1">
+		<vertex px="-2" py="3.5"/>
+		<vertex px="-2" py="2.5"/>
+	</transition>
+	<transition id ="3" caption="NaN" type="NaN" room1_id="0" subroom1_id="4" room2_id="-1" subroom2_id="-1">
+		<vertex px="8" py="2.5"/>
+		<vertex px="8" py="3.5"/>
+	</transition>
+	<transition id ="4" caption="NaN" type="NaN" room1_id="0" subroom1_id="22" room2_id="-1" subroom2_id="-1">
+		<vertex px="-1.5" py="6.5"/>
+		<vertex px="-0.5" py="7.5"/>
+	</transition>
+	<transition id ="5" caption="NaN" type="NaN" room1_id="0" subroom1_id="23" room2_id="-1" subroom2_id="-1">
+		<vertex px="6.5" py="7.5"/>
+		<vertex px="7.5" py="6.5"/>
+	</transition>
+	<transition id ="6" caption="NaN" type="NaN" room1_id="0" subroom1_id="25" room2_id="-1" subroom2_id="-1">
+		<vertex px="-1.5" py="-0.5"/>
+		<vertex px="-0.5" py="-1.5"/>
+	</transition>
+	<transition id ="7" caption="NaN" type="NaN" room1_id="0" subroom1_id="24" room2_id="-1" subroom2_id="-1">
+		<vertex px="6.5" py="-1.5"/>
+		<vertex px="7.5" py="-0.5"/>
+	</transition>
+</transitions>
+</geometry>

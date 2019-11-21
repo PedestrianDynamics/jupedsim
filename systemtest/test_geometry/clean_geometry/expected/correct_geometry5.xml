@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<geometry version="0.8" caption="second life" unit="m"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_geoemtry.xsd">
+
+<rooms>
+	<room id ="0" caption ="Raum">
+		<subroom id ="1" caption="dummy_caption" class="Corridor" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="wall">
+				<vertex px="5.06" py="9.9"/>
+				<vertex px="5.06" py="7.73"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="3.62" py="7.73"/>
+				<vertex px="3.6" py="7.4"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="3.62" py="6.27"/>
+				<vertex px="3.6" py="6.6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0.1" py="6.27"/>
+				<vertex px="1.5" py="6.3"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="3.62" py="6.27"/>
+				<vertex px="2.3" py="6.3"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="5.06" py="9.9"/>
+				<vertex px="0.1" py="9.9"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0.1" py="9.9"/>
+				<vertex px="0.1" py="6.27"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="3.62" py="7.73"/>
+				<vertex px="5.06" py="7.73"/>
+			</polygon>
+		</subroom>
+		<subroom id ="2" caption="dummy_caption" class="Corridor" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="wall">
+				<vertex px="5.06" py="9.9"/>
+				<vertex px="5.06" py="7.73"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="9.9" py="6.27"/>
+				<vertex px="7.8" py="6.3"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6.24" py="6.27"/>
+				<vertex px="7" py="6.3"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6.24" py="6.27"/>
+				<vertex px="6.2" py="6.6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6.24" py="7.73"/>
+				<vertex px="6.2" py="7.4"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="9.9" py="6.27"/>
+				<vertex px="9.9" py="9.9"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="9.9" py="9.9"/>
+				<vertex px="5.06" py="9.9"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="5.06" py="7.73"/>
+				<vertex px="6.24" py="7.73"/>
+			</polygon>
+		</subroom>
+		<subroom id ="3" caption="dummy_caption" class="Corridor" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="wall">
+				<vertex px="4.94" py="0.1"/>
+				<vertex px="4.94" py="3.67"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0.1" py="3.67"/>
+				<vertex px="2.1" py="3.7"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4.94" py="3.67"/>
+				<vertex px="2.9" py="3.7"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0.1" py="0.1"/>
+				<vertex px="4.94" py="0.1"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0.1" py="3.67"/>
+				<vertex px="0.1" py="0.1"/>
+			</polygon>
+		</subroom>
+		<subroom id ="4" caption="dummy_caption" class="Corridor" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="wall">
+				<vertex px="4.94" py="0.1"/>
+				<vertex px="4.94" py="3.67"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="9.9" py="3.67"/>
+				<vertex px="7.8" py="3.7"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4.94" py="3.67"/>
+				<vertex px="7" py="3.7"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4.94" py="0.1"/>
+				<vertex px="9.9" py="0.1"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="9.9" py="0.1"/>
+				<vertex px="9.9" py="3.67"/>
+			</polygon>
+		</subroom>
+		<subroom id ="5" caption="dummy_caption" class="Corridor" A_x="0" B_y="0" C_z="0">
+			<polygon caption="wall" type="wall">
+				<vertex px="3.62" py="7.73"/>
+				<vertex px="6.24" py="7.73"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="9.9" py="3.67"/>
+				<vertex px="7.8" py="3.7"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4.94" py="3.67"/>
+				<vertex px="7" py="3.7"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0.1" py="3.67"/>
+				<vertex px="2.1" py="3.7"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="4.94" py="3.67"/>
+				<vertex px="2.9" py="3.7"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0.1" py="6.27"/>
+				<vertex px="1.5" py="6.3"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="3.62" py="6.27"/>
+				<vertex px="2.3" py="6.3"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="3.62" py="7.73"/>
+				<vertex px="3.6" py="7.4"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="3.62" py="6.27"/>
+				<vertex px="3.6" py="6.6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6.24" py="6.27"/>
+				<vertex px="6.2" py="6.6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6.24" py="7.73"/>
+				<vertex px="6.2" py="7.4"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="9.9" py="6.27"/>
+				<vertex px="7.8" py="6.3"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="6.24" py="6.27"/>
+				<vertex px="7" py="6.3"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0.1" py="3.67"/>
+				<vertex px="0.1" py="4.6"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="0.1" py="6.27"/>
+				<vertex px="0.1" py="5.4"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="9.9" py="6.27"/>
+				<vertex px="9.9" py="5.4"/>
+			</polygon>
+			<polygon caption="wall" type="internal">
+				<vertex px="9.9" py="3.67"/>
+				<vertex px="9.9" py="4.6"/>
+			</polygon>
+		</subroom>
+		<crossings>
+	<crossing id ="9" subroom1_id="1" subroom2_id="5">
+		<vertex px="3.6" py="6.6"/>
+		<vertex px="3.6" py="7.4"/>
+	</crossing>
+	<crossing id ="11" subroom1_id="1" subroom2_id="5">
+		<vertex px="1.5" py="6.3"/>
+		<vertex px="2.3" py="6.3"/>
+	</crossing>
+	<crossing id ="0" subroom1_id="2" subroom2_id="5">
+		<vertex px="7" py="6.3"/>
+		<vertex px="7.8" py="6.3"/>
+	</crossing>
+	<crossing id ="10" subroom1_id="2" subroom2_id="5">
+		<vertex px="6.2" py="6.6"/>
+		<vertex px="6.2" py="7.4"/>
+	</crossing>
+	<crossing id ="2" subroom1_id="3" subroom2_id="5">
+		<vertex px="2.1" py="3.7"/>
+		<vertex px="2.9" py="3.7"/>
+	</crossing>
+	<crossing id ="1" subroom1_id="4" subroom2_id="5">
+		<vertex px="7" py="3.7"/>
+		<vertex px="7.8" py="3.7"/>
+	</crossing>
+		</crossings>
+	</room>
+</rooms>
+<transitions>
+	<transition id ="3" caption="NaN" type="NaN" room1_id="0" subroom1_id="5" room2_id="-1" subroom2_id="-1">
+		<vertex px="0.1" py="4.6"/>
+		<vertex px="0.1" py="5.4"/>
+	</transition>
+	<transition id ="4" caption="NaN" type="NaN" room1_id="0" subroom1_id="5" room2_id="-1" subroom2_id="-1">
+		<vertex px="9.9" py="4.6"/>
+		<vertex px="9.9" py="5.4"/>
+	</transition>
+</transitions>
+</geometry>
