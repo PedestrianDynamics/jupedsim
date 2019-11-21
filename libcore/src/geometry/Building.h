@@ -342,7 +342,9 @@ public:
       *        be added to subroom
       *
       */
-    static void AddWallToSubroom(SubRoom & subroom, const std::vector<Wall> & WallPieces);
+    static void AddWallToSubroom(SubRoom & subroom, const std::vector<Wall> & wallPieces);
+
+    static bool IsConnectedAndNewWall(const SubRoom & subroom, const Wall & wall);
 
     static std::optional<Point> GetSplitPoint(const Wall & wall, const Line & line);
 
