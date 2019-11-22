@@ -71,7 +71,7 @@ if __name__ == "__main__":
             exit(FAILURE)
         #--------------------- SIMULATION ------------------------
         #os.chdir(TRUNK) #cd to the simulation directory
-        executable = "%s/bin/jpscore"%TRUNK
+        executable = "%s/build/bin/jpscore"%TRUNK
         if not path.exists(executable):
             logging.critical("executable <%s> does not exist yet."%executable)
             exit(FAILURE)
