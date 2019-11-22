@@ -148,7 +148,7 @@ class JPSRunTestDriver(object):
         logging.info("change directory back to %s", self.DIR)
         os.chdir(self.DIR)
         if self.UTEST == "..":
-            lib_path = os.path.abspath(os.path.join(self.trunk, "Utest"))
+            lib_path = os.path.abspath(os.path.join(self.trunk, "systemtest"))
         else:
             lib_path = os.path.abspath(self.UTEST)
 
