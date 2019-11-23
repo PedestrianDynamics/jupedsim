@@ -137,7 +137,6 @@ set(header_files
     src/routing/ff_router/FloorfieldViaFM.h
     src/routing/ff_router/UnivFFviaFM.h
     src/routing/ff_router/mesh/RectGrid.h
-    src/routing/ff_router/mesh/Trial.h
     src/routing/global_shortest/AccessPoint.h
     src/routing/global_shortest/DTriangulation.h
     src/routing/global_shortest/GlobalRouter.h

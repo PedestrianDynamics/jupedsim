@@ -302,7 +302,7 @@ void Simulation::UpdateRoutesAndLocations()
                 pedsToRemove.insert(ped); //the agent left the old room
                                           //actualize the eggress time for that room
 #pragma omp critical(SetEgressTime)
-                allRooms.at(ped->GetRoomID())->SetEgressTime(ped->GetGlobalTime());
+                allRooms.at(ped->GetRoomID())->SetEgressTime(Pedestrian::GetGlobalTime());
             }
         }
         // actualize routes for sources
@@ -329,19 +329,21 @@ void Simulation::UpdateRoutesAndLocations()
         }
 
         // Set pedestrian waiting when find route temp_close
-        int goal       = ped->FindRoute();
-        Hline * target = _building->GetTransOrCrossByUID(goal);
-        int roomID     = ped->GetRoomID();
-        int subRoomID  = ped->GetSubRoomID();
+        int goal = ped->FindRoute();
+        if(goal != FINAL_DEST_OUT) {
+            Hline * target = _building->GetTransOrCrossByUID(goal);
+            int roomID     = ped->GetRoomID();
+            int subRoomID  = ped->GetSubRoomID();
 
-        if(auto cross = dynamic_cast<Crossing *>(target)) {
-            if(cross->IsInRoom(roomID) && cross->IsInSubRoom(subRoomID)) {
-                if(!ped->IsWaiting() && cross->IsTempClose()) {
-                    ped->StartWaiting();
-                }
+            if(auto cross = dynamic_cast<Crossing *>(target)) {
+                if(cross->IsInRoom(roomID) && cross->IsInSubRoom(subRoomID)) {
+                    if(!ped->IsWaiting() && cross->IsTempClose()) {
+                        ped->StartWaiting();
+                    }
 
-                if(ped->IsWaiting() && cross->IsOpen() && !ped->IsInsideWaitingAreaWaiting()) {
-                    ped->EndWaiting();
+                    if(ped->IsWaiting() && cross->IsOpen() && !ped->IsInsideWaitingAreaWaiting()) {
+                        ped->EndWaiting();
+                    }
                 }
             }
         }

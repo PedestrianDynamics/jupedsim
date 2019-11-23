@@ -563,35 +563,7 @@ int FFRouter::FindExit(Pedestrian * p)
     }
 
     std::vector<int> DoorUIDsOfRoom;
-    DoorUIDsOfRoom.clear();
-    if(_building->GetRoom(p->GetRoomID())
-           ->GetSubRoom(p->GetSubRoomID())
-           ->IsInSubRoom(p->GetPos())) {
-        //ped is in the subroom, according to its member attribs
-    } else {
-        bool located         = false;
-        SubRoom * oldSubRoom = _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID());
-        for(auto & room : _building->GetAllRooms()) {
-            if(located) {
-                break;
-            }
-            for(auto & subroom : room.second->GetAllSubRooms()) {
-                if(subroom.second->IsInSubRoom(p->GetPos()) &&
-                   subroom.second->IsDirectlyConnectedWith(oldSubRoom)) {
-                    //maybe room on wrong floor
-                    p->SetRoomID(room.second->GetID(), room.second->GetCaption());
-                    p->SetSubRoomID(subroom.second->GetSubRoomID());
-                    p->SetSubRoomUID(subroom.second->GetUID());
-                    located = true;
-                    break;
-                }
-            }
-        }
-        if(!located) { //ped is outside
-            return -1;
-        }
-    }
-    DoorUIDsOfRoom.clear();
+
     if(!_targetWithinSubroom) {
         //candidates of current room (ID) (provided by Room)
         for(auto transUID : _building->GetRoom(p->GetRoomID())->GetAllTransitionsIDs()) {
