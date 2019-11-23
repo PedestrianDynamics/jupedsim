@@ -134,7 +134,7 @@ set(header_files
     src/pedestrian/Pedestrian.h
     src/pedestrian/StartDistribution.h
     src/routing/ff_router/ffRouter.h
-    src/routing/ff_router/FloorfieldViaFM.h
+        src/routing/ff_router/FloorfieldViaFM.cpp
     src/routing/ff_router/UnivFFviaFM.h
     src/routing/ff_router/mesh/RectGrid.h
     src/routing/global_shortest/AccessPoint.h

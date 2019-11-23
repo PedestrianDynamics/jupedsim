@@ -38,11 +38,11 @@
 #include "general/OpenMP.h"
 #include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
+#include "geometry/Wall.h"
 #include "math/GCFMModel.h"
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "routing/ff_router/ffRouter.h"
-
 
 OutputHandler * Log;
 // todo: add these variables to class simulation
@@ -537,8 +537,8 @@ double Simulation::RunBody(double maxSimTime)
                 _building->GetConfig()->GetDirectionManager()->GetDirectionStrategy()->Init(
                     _building.get());
             } else { // quickest needs update even if NeedsUpdate() is false
-                FFRouter * ffrouter =
-                    dynamic_cast<FFRouter *>(_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST));
+                auto * ffrouter =
+                    dynamic_cast<FFRouter *>(_routingEngine->GetRouter(ROUTING_FF_QUICKEST));
                 if(ffrouter != nullptr)
                     if(ffrouter->MustReInit()) {
                         ffrouter->ReInit();
@@ -548,7 +548,7 @@ double Simulation::RunBody(double maxSimTime)
 
             // here the used routers are update, when needed due to external changes
             if(_routingEngine->NeedsUpdate()) {
-                std::cout << KBLU << " Init router in simulation\n" << RESET;
+                Logging::Info("Update router during simulation.");
                 _routingEngine->UpdateRouter();
             }
 

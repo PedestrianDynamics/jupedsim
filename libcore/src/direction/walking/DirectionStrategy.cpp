@@ -34,7 +34,6 @@
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 #include "pedestrian/Pedestrian.h"
-#include "routing/ff_router/FloorfieldViaFM.h"
 #include "routing/ff_router/UnivFFviaFM.h"
 
 #include <chrono>
@@ -217,49 +216,6 @@ Point DirectionGeneral::GetTarget(Room * room, Pedestrian * ped) const
     Logging::Debug(fmt::format(check_fmt("angle={:.2f}, G=[{:.2f}, {:.2f}]"), angle, G._x, G._y));
 
     return G;
-}
-
-/// 6
-Point DirectionFloorfield::GetTarget(Room *, Pedestrian * ped) const
-{
-    Point p;
-    _ffviafm->getDirectionToDestination(ped, p);
-    p = p.Normalized(); // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
-    return (p + ped->GetPos());
-}
-
-Point DirectionFloorfield::GetDir2Wall(Pedestrian * ped) const
-{
-    Point p;
-    _ffviafm->getDir2WallAt(ped->GetPos(), p);
-    return p;
-}
-
-double DirectionFloorfield::GetDistance2Wall(Pedestrian * ped) const
-{
-    return _ffviafm->getDistance2WallAt(ped->GetPos());
-}
-
-void DirectionFloorfield::Init(Building * building)
-{
-    double stepsize          = building->GetConfig()->get_deltaH();
-    double wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
-    bool useDistancefield    = building->GetConfig()->get_use_wall_avoidance();
-
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start    = std::chrono::system_clock::now();
-    _ffviafm = new FloorfieldViaFM(
-        building, stepsize, stepsize, wallAvoidDistance, useDistancefield, false);
-    end                                           = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    Logging::Info(fmt::format(
-        check_fmt("Time to construct FF in DirectionFloorfield: {:.2f}"), elapsed_seconds.count()));
-}
-
-
-DirectionFloorfield::~DirectionFloorfield()
-{
-    delete _ffviafm;
 }
 
 /// 8

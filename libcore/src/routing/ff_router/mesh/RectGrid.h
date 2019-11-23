@@ -145,8 +145,8 @@ public:
 
     long int getKeyAtPoint(const Point p) const
     {
-        long int i = (long int) (((p._x - xMin) / hx) + .5);
-        long int j = (long int) (((p._y - yMin) / hy) + .5);
+        auto i = (long int) (((p._x - xMin) / hx) + .5);
+        auto j = (long int) (((p._y - yMin) / hy) + .5);
         //if ((i >= 0) && (i <= iMax) && (j >= 0) && (j <= jMax)) //@todo: ar.graf: check in #ifdef block
         if(includesPoint(p))       //@todo: ar.graf: this if must be made work
             return (j * iMax + i); // 0-based; index of (closest gridpoint)

@@ -335,10 +335,10 @@ void UnivFFviaFM::createRectGrid(
     std::map<int, Line> & doors,
     double spacing)
 {
-    double x_min = DBL_MAX;
-    double x_max = DBL_MIN;
-    double y_min = DBL_MAX;
-    double y_max = DBL_MIN;
+    double x_min = std::numeric_limits<double>::max();
+    double x_max = std::numeric_limits<double>::min();
+    double y_min = std::numeric_limits<double>::max();
+    double y_max = std::numeric_limits<double>::min();
 
     for(auto & wall : walls) {
         if(wall.GetPoint1()._x < x_min)
@@ -1130,8 +1130,8 @@ void UnivFFviaFM::calcCost(
     const double * const speed)
 {
     //adapt from calcFloorfield
-    double row       = DBL_MAX;
-    double col       = DBL_MAX;
+    double row       = std::numeric_limits<double>::max();
+    double col       = std::numeric_limits<double>::max();
     long int aux     = -1; //will be set below
     bool pointsUp    = false;
     bool pointsRight = false;
@@ -1149,7 +1149,7 @@ void UnivFFviaFM::calcCost(
         pointsRight = true;
         if(row < 0) {
             std::cerr << "hier ist was schief " << row << " " << aux << " " << std::endl;
-            row = DBL_MAX;
+            row = std::numeric_limits<double>::max();
         }
     }
     aux = dNeigh.key[2];
@@ -1172,7 +1172,7 @@ void UnivFFviaFM::calcCost(
         pointsUp = true;
         if(col < 0) {
             std::cerr << "hier ist was schief " << col << " " << aux << " " << std::endl;
-            col = DBL_MAX;
+            col = std::numeric_limits<double>::max();
         }
     }
     aux = dNeigh.key[3];
@@ -1184,7 +1184,7 @@ void UnivFFviaFM::calcCost(
         col      = cost[aux];
         pointsUp = false;
     }
-    if(col == DBL_MAX) { //one sided update with row
+    if(col == std::numeric_limits<double>::max()) { //one sided update with row
         cost[key] = onesidedCalc(row, _grid->Gethx() / speed[key]);
         //flag[key] = FM_SINGLE;
         if(!dir) {
@@ -1201,7 +1201,7 @@ void UnivFFviaFM::calcCost(
         return;
     }
 
-    if(row == DBL_MAX) { //one sided update with col
+    if(row == std::numeric_limits<double>::max()) { //one sided update with col
         cost[key] = onesidedCalc(col, _grid->Gethy() / speed[key]);
         //flag[key] = FM_SINGLE;
         if(!dir) {
@@ -1338,8 +1338,8 @@ void UnivFFviaFM::calcDist(
     const double * const speed)
 {
     //adapt from calcFloorfield
-    double row       = DBL_MAX;
-    double col       = DBL_MAX;
+    double row       = std::numeric_limits<double>::max();
+    double col       = std::numeric_limits<double>::max();
     long int aux     = -1; //will be set below
     bool pointsUp    = false;
     bool pointsRight = false;
@@ -1357,7 +1357,7 @@ void UnivFFviaFM::calcDist(
         pointsRight = true;
         if(row < 0) {
             std::cerr << "hier ist was schief " << row << " " << aux << " " << std::endl;
-            row = DBL_MAX;
+            row = std::numeric_limits<double>::max();
         }
     }
     aux = dNeigh.key[2];
@@ -1380,7 +1380,7 @@ void UnivFFviaFM::calcDist(
         pointsUp = true;
         if(col < 0) {
             std::cerr << "hier ist was schief " << col << " " << aux << " " << std::endl;
-            col = DBL_MAX;
+            col = std::numeric_limits<double>::max();
         }
     }
     aux = dNeigh.key[3];
@@ -1393,7 +1393,7 @@ void UnivFFviaFM::calcDist(
         col      = cost[aux];
         pointsUp = false;
     }
-    if(col == DBL_MAX) { //one sided update with row
+    if(col == std::numeric_limits<double>::max()) { //one sided update with row
         cost[key] = onesidedCalc(row, _grid->Gethx() / speed[key]);
         //flag[key] = FM_SINGLE;
         if(!dir) {
@@ -1410,7 +1410,7 @@ void UnivFFviaFM::calcDist(
         return;
     }
 
-    if(row == DBL_MAX) { //one sided update with col
+    if(row == std::numeric_limits<double>::max()) { //one sided update with col
         cost[key] = onesidedCalc(col, _grid->Gethy() / speed[key]);
         //flag[key] = FM_SINGLE;
         if(!dir) {
@@ -1861,7 +1861,7 @@ double UnivFFviaFM::getCostToDestination(const int destID, const Point & positio
 #pragma omp critical(UnivFFviaFM_toDo)
         _toDo.emplace_back(destID);
     }
-    return DBL_MAX;
+    return std::numeric_limits<double>::max();
 }
 
 double UnivFFviaFM::getCostToDestination(const int destID, const Point & position)
@@ -1907,7 +1907,7 @@ double UnivFFviaFM::getCostToDestination(const int destID, const Point & positio
 #pragma omp critical(UnivFFviaFM_toDo)
         _toDo.emplace_back(destID);
     }
-    return DBL_MAX;
+    return std::numeric_limits<double>::max();
 }
 
 double UnivFFviaFM::getDistanceBetweenDoors(const int door1_ID, const int door2_ID)
@@ -1944,7 +1944,7 @@ double UnivFFviaFM::getDistanceBetweenDoors(const int door1_ID, const int door2_
 #pragma omp critical(UnivFFviaFM_toDo)
         _toDo.emplace_back(door1_ID);
     }
-    return DBL_MAX;
+    return std::numeric_limits<double>::max();
 }
 
 RectGrid * UnivFFviaFM::getGrid()
@@ -2080,7 +2080,7 @@ double UnivFFviaFM::getDistance2WallAt(const Point & pos)
             return _costFieldWithKey[0][_grid->getKeyAtPoint(pos)];
         }
     }
-    return DBL_MAX;
+    return std::numeric_limits<double>::max();
 }
 
 void UnivFFviaFM::getDir2WallAt(const Point & pos, Point & p)
