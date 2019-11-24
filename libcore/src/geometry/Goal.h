@@ -149,6 +149,8 @@ public:
 
     void SetSubRoomID(int _subRoomID);
 
+    double GetDistance(const Point & point) const;
+
 private:
     bool IsClockwise();
     bool CreateBoostPoly();

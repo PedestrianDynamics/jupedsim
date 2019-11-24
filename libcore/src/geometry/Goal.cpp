@@ -32,6 +32,8 @@
 #include "general/Format.h"
 #include "general/Logger.h"
 
+#include <boost/geometry/algorithms/distance.hpp>
+
 Goal::Goal()
 {
     _id          = -1;
@@ -355,4 +357,9 @@ int Goal::GetSubRoomID() const
 void Goal::SetSubRoomID(int subRoomID)
 {
     _subRoomID = subRoomID;
+}
+
+double Goal::GetDistance(const Point & point) const
+{
+    return boost::geometry::distance(point, _boostPoly);
 }

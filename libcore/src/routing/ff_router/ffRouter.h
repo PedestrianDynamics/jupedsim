@@ -57,7 +57,6 @@
  **/
 #pragma once
 
-#include "FloorfieldViaFM.h"
 #include "UnivFFviaFM.h"
 #include "general/Macros.h"
 #include "geometry/Building.h"
@@ -206,12 +205,6 @@ protected:
      * Map of the underlying floorfields. _locffviafm[id] gives the floorfield in room with ID==id.
      */
     std::map<int, UnivFFviaFM *> _locffviafm;
-
-    /**
-     * Floorfield used for specific goals.
-     * TODO replace by UnivFFviaFM
-     */
-    FloorfieldViaFM * _globalFF;
 
     /**
      * Map containing all the exits from the geometry.

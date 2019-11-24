@@ -54,7 +54,6 @@ set(source_files
     src/pedestrian/Pedestrian.cpp
     src/pedestrian/StartDistribution.cpp
     src/routing/ff_router/ffRouter.cpp
-    src/routing/ff_router/FloorfieldViaFM.cpp
     src/routing/ff_router/UnivFFviaFM.cpp
     src/routing/global_shortest/AccessPoint.cpp
     src/routing/global_shortest/DTriangulation.cpp
@@ -134,7 +133,6 @@ set(header_files
     src/pedestrian/Pedestrian.h
     src/pedestrian/StartDistribution.h
     src/routing/ff_router/ffRouter.h
-        src/routing/ff_router/FloorfieldViaFM.cpp
     src/routing/ff_router/UnivFFviaFM.h
     src/routing/ff_router/mesh/RectGrid.h
     src/routing/global_shortest/AccessPoint.h

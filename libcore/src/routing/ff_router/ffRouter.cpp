@@ -67,7 +67,7 @@ FFRouter::FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals, Configurati
     _targetWithinSubroom = (_config->get_exit_strat() == 9);
 
     // get extra values depending on routing strategy s
-    if(_strategy != ROUTING_FF_GLOBAL_SHORTEST || _strategy != ROUTING_FF_QUICKEST) {
+    if(_strategy != ROUTING_FF_GLOBAL_SHORTEST && _strategy != ROUTING_FF_QUICKEST) {
         throw std::runtime_error("Wrong routing strategy for this router.");
     }
 
@@ -128,20 +128,6 @@ void FFRouter::CalculateFloorFields()
     std::vector<std::pair<int, int>> roomAndCroTrVector;
     roomAndCroTrVector.clear();
 
-    if(_hasSpecificGoals) {
-        std::vector<int> goalIDs;
-        //get global field to manage goals (which are not in a subroom)
-        _globalFF = new FloorfieldViaFM(_building, 0.25, 0.25, 0.0, false, true);
-        for(auto & itrGoal : _building->GetAllGoals()) {
-            _globalFF->createMapEntryInLineToGoalID(itrGoal.first);
-            goalIDs.emplace_back(itrGoal.first);
-        }
-        _goalToLineUIDmap  = _globalFF->getGoalToLineUIDmap();
-        if(_building->GetConfig()->get_write_VTK_files()) {
-            _globalFF->writeGoalFF("goal.vtk", goalIDs);
-        }
-    }
-
     for(const auto & [_, trans] : _building->GetAllTransitions()) {
         if(!trans->IsClose()) {
             _allDoorUIDs.emplace_back(trans->GetUniqueID());
@@ -170,6 +156,29 @@ void FFRouter::CalculateFloorFields()
             if(room1)
                 roomAndCroTrVector.emplace_back(
                     std::make_pair(room1->GetID(), cross->GetUniqueID()));
+        }
+    }
+
+    if(_hasSpecificGoals) {
+        for(auto const & [goalID, goal] : _building->GetAllGoals()) {
+            // TODO add handling for waiting areas
+            // TODO add handling for doors with (almost) same distance
+            //  ========      =========      =========
+            //
+            //       ------------------------------
+            //       |           goal             |
+            //       ------------------------------
+            double minDist = std::numeric_limits<double>::max();
+            int minID      = -1;
+
+            for(auto const & [exitID, exit] : _ExitsByUID) {
+                double dist = goal->GetDistance(exit->GetCentre());
+                if(dist < minDist) {
+                    minDist = dist;
+                    minID   = exitID;
+                }
+            }
+            _goalToLineUIDmap[goalID] = minID;
         }
     }
 
