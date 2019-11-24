@@ -93,7 +93,7 @@ bool FFRouter::Init(Building * building)
 
     if(_config->get_write_VTK_files()) {
         for(auto const & [roomID, localFF] : _locffviafm) {
-            localFF->writeFF(
+            localFF->WriteFF(
                 fmt::format(
                     check_fmt("ffrouterRoom_{:d}_t_{:.2f}.vtk"),
                     roomID,
@@ -186,7 +186,7 @@ void FFRouter::CalculateFloorFields()
     std::sort(_allDoorUIDs.begin(), _allDoorUIDs.end());
     _allDoorUIDs.erase(std::unique(_allDoorUIDs.begin(), _allDoorUIDs.end()), _allDoorUIDs.end());
 
-    //init, yet no distances, only create map entries
+    //init, yet no distances, only Create map entries
     for(auto & id1 : _allDoorUIDs) {
         for(auto & id2 : _allDoorUIDs) {
             std::pair<int, int> key = std::make_pair(id1, id2);
@@ -205,17 +205,17 @@ void FFRouter::CalculateFloorFields()
     for(const auto & [id, room] : _building->GetAllRooms()) {
         UnivFFviaFM * locffptr = new UnivFFviaFM(room.get(), _building, 0.125, 0.0, false);
 
-        locffptr->setUser(DISTANCE_MEASUREMENTS_ONLY);
-        locffptr->setMode(CENTERPOINT);
-        locffptr->setSpeedMode(FF_HOMO_SPEED);
-        locffptr->addAllTargetsParallel();
+        locffptr->SetUser(DISTANCE_MEASUREMENTS_ONLY);
+        locffptr->SetMode(CENTERPOINT);
+        locffptr->SetSpeedMode(FF_HOMO_SPEED);
+        locffptr->AddAllTargetsParallel();
         Logging::Info(fmt::format(check_fmt("Adding distances in Room {:d} to matrix."), id));
         _locffviafm.insert(std::make_pair(id, locffptr));
     }
 
     // nowait, because the parallel region ends directly afterwards
     //#pragma omp for nowait
-    //@todo: @ar.graf: it would be easier to browse thru doors of each field directly after "addAllTargetsParallel" as
+    //@todo: @ar.graf: it would be easier to browse thru doors of each field directly after "AddAllTargetsParallel" as
     //                 we do only want doors of same subroom anyway. BUT the router would have to switch from room-scope
     //                 to subroom-scope. Nevertheless, we could omit the room info (used to access correct field), if we
     //                 do it like in "ReInit()".
@@ -249,9 +249,9 @@ void FFRouter::CalculateFloorFields()
             }
 
             UnivFFviaFM * locffptr = _locffviafm[roomID1];
-            double tempDistance    = locffptr->getDistanceBetweenDoors(doorUID1, doorUID2);
+            double tempDistance    = locffptr->GetDistanceBetweenDoors(doorUID1, doorUID2);
 
-            if(tempDistance < locffptr->getGrid()->Gethx()) {
+            if(tempDistance < locffptr->GetGrid()->Gethx()) {
                 Logging::Warning(fmt::format(
                     check_fmt("Ignoring distance of doors {:d} and {:d} because it is too small: "
                               "{:.2f}."),
@@ -320,7 +320,7 @@ int FFRouter::FindExit(Pedestrian * p)
     if(_strategy == ROUTING_FF_QUICKEST) {
         if(Pedestrian::GetGlobalTime() > _recalc_interval &&
            _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->IsInSubRoom(p) &&
-           _locffviafm[p->GetRoomID()]->getCostToDestination(p->GetExitIndex(), p->GetPos()) >
+           _locffviafm[p->GetRoomID()]->GetCostToDestination(p->GetExitIndex(), p->GetPos()) >
                3.0 &&
            p->GetExitIndex() != -1) {
             //delay possible
@@ -405,7 +405,7 @@ int FFRouter::FindExit(Pedestrian * p)
     for(int finalDoor : validFinalDoor) {
         //with UIDs, we can ask for shortest path
         for(int doorUID : DoorUIDsOfRoom) {
-            //double locDistToDoor = _locffviafm[p->GetRoomID()]->getCostToDestination(doorUID, p->GetPos(), _mode);
+            //double locDistToDoor = _locffviafm[p->GetRoomID()]->GetCostToDestination(doorUID, p->GetPos(), _mode);
             double locDistToDoor =
                 _config->GetDirectionManager()->GetDirectionStrategy()->GetDistance2Target(
                     p, doorUID);
