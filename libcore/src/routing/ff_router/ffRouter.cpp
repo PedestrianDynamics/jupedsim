@@ -356,8 +356,8 @@ int FFRouter::FindExit(Pedestrian * p)
     } else { //only one specific goal, goalToLineUIDmap gets
         //populated in Init()
         if((_goalToLineUIDmap.count(goalID) == 0) || (_goalToLineUIDmap[goalID] == -1)) {
-            Log->Write(
-                "ERROR: \t ffRouter: unknown/unreachable goalID: %d in FindExit(Ped)", goalID);
+            Logging::Error(fmt::format(
+                check_fmt("ffRouter: unknown/unreachable goalID: {:d} in FindExit(Ped)"), goalID));
         } else {
             validFinalDoor.emplace_back(_goalToLineUIDmap.at(goalID));
         }
@@ -418,7 +418,8 @@ int FFRouter::FindExit(Pedestrian * p)
             //auto subroomDoors = _building->GetSubRoomByUID(p->GetSubRoomUID())->GetAllGoalIDs();
             //only consider, if paths exists
             if(_pathsMatrix.count(key) == 0) {
-                Log->Write("no key for %d %d", key.first, key.second);
+                Logging::Error(fmt::format(
+                    check_fmt("ffRouter: no key for {:d} {:d}"), key.first, key.second));
                 continue;
             }
 
@@ -480,7 +481,7 @@ void FFRouter::FloydWarshall()
     if(change) {
         FloydWarshall();
     } else {
-        Log->Write("INFO:\t FloydWarshall done!");
+        Logging::Info("ffRouter: FloydWarshall done!");
     }
 }
 

@@ -3,6 +3,8 @@
 //
 #include "UnivFFviaFM.h"
 
+#include "general/Format.h"
+#include "general/Logger.h"
 #include "geometry/Building.h"
 #include "geometry/Line.h"
 #include "geometry/SubRoom.h"
@@ -143,7 +145,7 @@ UnivFFviaFM::UnivFFviaFM(
             if(subRoomPtr->IsInSubRoom(candidate02)) {
                 _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomPtr, candidate02));
             } else {
-                Log->Write("ERROR:\t In UnivFF InsidePoint Analysis");
+                Logging::Error("In UnivFF InsidePoint Analysis.");
                 bool a = subRoomPtr->IsInSubRoom(candidate01);
                 bool b = subRoomPtr->IsInSubRoom(candidate02);
                 a      = b &&
@@ -237,7 +239,7 @@ UnivFFviaFM::UnivFFviaFM(
         if(subRoomArg->IsInSubRoom(candidate02)) {
             _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomArg, candidate02));
         } else {
-            Log->Write("ERROR:\t In UnivFF InsidePoint Analysis");
+            Logging::Error("In UnivFF InsidePoint Analysis.");
             bool a = subRoomArg->IsInSubRoom(candidate01);
             bool b = subRoomArg->IsInSubRoom(candidate02);
             a      = b && a;
@@ -288,10 +290,10 @@ void UnivFFviaFM::Create(
 
     //allocate _modifiedSpeed
     if((_speedmode == FF_WALL_AVOID) || (useWallDistances)) {
-        auto * cost_alias_walldistance       = new double[_nPoints];
-        _costFieldWithKey[0]                 = cost_alias_walldistance;
-        auto * gradient_alias_walldirection  = new Point[_nPoints];
-        _directionFieldWithKey[0]            = gradient_alias_walldirection;
+        auto * cost_alias_walldistance      = new double[_nPoints];
+        _costFieldWithKey[0]                = cost_alias_walldistance;
+        auto * gradient_alias_walldirection = new Point[_nPoints];
+        _directionFieldWithKey[0]           = gradient_alias_walldirection;
 
         //Create wall distance field
         //init costarray
@@ -1025,7 +1027,8 @@ void UnivFFviaFM::CalcCost(long int key, double * cost, Point * dir, const doubl
         row         = cost[aux];
         pointsRight = true;
         if(row < 0) {
-            std::cerr << "hier ist was schief " << row << " " << aux << " " << std::endl;
+            Logging::Error(
+                fmt::format(check_fmt("In CalcCost something went wrong {:d} {:d}"), row, aux));
             row = std::numeric_limits<double>::max();
         }
     }
@@ -1048,7 +1051,8 @@ void UnivFFviaFM::CalcCost(long int key, double * cost, Point * dir, const doubl
         col      = cost[aux];
         pointsUp = true;
         if(col < 0) {
-            std::cerr << "hier ist was schief " << col << " " << aux << " " << std::endl;
+            Logging::Error(
+                fmt::format(check_fmt("In CalcCost something went wrong {:d} {:d}"), row, aux));
             col = std::numeric_limits<double>::max();
         }
     }
@@ -1120,7 +1124,7 @@ void UnivFFviaFM::CalcCost(long int key, double * cost, Point * dir, const doubl
             dir[key]._y = (-(cost[key] - cost[key - (_grid->GetiMax())]) / _grid->Gethy());
         }
     } else {
-        std::cerr << "else in twosided Dist " << std::endl;
+        Logging::Error("else in twosided Dist");
     }
     dir[key] = dir[key].Normalized();
 }
@@ -1230,7 +1234,8 @@ void UnivFFviaFM::CalcDist(long int key, double * cost, Point * dir, const doubl
         row         = cost[aux];
         pointsRight = true;
         if(row < 0) {
-            std::cerr << "hier ist was schief " << row << " " << aux << " " << std::endl;
+            Logging::Error(
+                fmt::format(check_fmt("In CalcDist something went wrong {:d} {:d}"), row, aux));
             row = std::numeric_limits<double>::max();
         }
     }
@@ -1253,7 +1258,8 @@ void UnivFFviaFM::CalcDist(long int key, double * cost, Point * dir, const doubl
         col      = cost[aux];
         pointsUp = true;
         if(col < 0) {
-            std::cerr << "hier ist was schief " << col << " " << aux << " " << std::endl;
+            Logging::Error(
+                fmt::format(check_fmt("In CalcDist something went wrong {:d} {:d}"), row, aux));
             col = std::numeric_limits<double>::max();
         }
     }
@@ -1326,7 +1332,7 @@ void UnivFFviaFM::CalcDist(long int key, double * cost, Point * dir, const doubl
             dir[key]._y = (-(cost[key] - cost[key - (_grid->GetiMax())]) / _grid->Gethy());
         }
     } else {
-        std::cerr << "else in twosided Dist " << std::endl;
+        Logging::Error("else in twosided Dist");
     }
     dir[key] = dir[key].Normalized();
 }
@@ -1349,7 +1355,8 @@ inline double UnivFFviaFM::TwosidedCalc(double x, double y, double hDivF)
 void UnivFFviaFM::AddTarget(int uid, double * costarray, Point * gradarray)
 {
     if(_doors.count(uid) == 0) {
-        Log->Write("ERROR: \tCould not find door with uid %d in Room %d", uid, _room);
+        Logging::Error(
+            fmt::format(check_fmt("Could not find door with uid {:d} in Room {:d}"), uid, _room));
         return;
     }
     Line tempTargetLine   = Line(_doors[uid]);
@@ -1432,7 +1439,7 @@ void UnivFFviaFM::AddTarget(int uid, double * costarray, Point * gradarray)
             FinalizeTargetLine(uid, tempTargetLine, newArrayPt, passvector);
 
         } else {
-            Log->Write("ERROR:\t in AddTarget: calling FinalizeTargetLine");
+            Logging::Error("in AddTarget: calling FinalizeTargetLine");
         }
         //         for (long int i = 0; i < _grid->GetnPoints(); ++i) {
         //             if ((_gridCode[i] != OUTSIDE) && (_gridCode[i] != WALL) && (newArrayPt[i] == Point(0.0, 0.0) )) {
@@ -1549,21 +1556,13 @@ void UnivFFviaFM::SetSpeedMode(int speedMode)
 
 void UnivFFviaFM::WriteFF(const fs::path & filename, std::vector<int> targetID)
 {
-    Log->Write("INFO: \tWrite Floorfield to file");
     auto floorfieldFile = _configuration->GetProjectRootDir() / filename;
-    Log->Write(floorfieldFile.string());
+    Logging::Info(fmt::format(
+        check_fmt("Write Floorfield to file: {:s} with {:d} targets."),
+        floorfieldFile.string().c_str(),
+        targetID.size()));
     std::ofstream file;
 
-    Log->Write(
-        "FloorfieldViaFM::WriteFF(): writing to file %s: There are %d targets.",
-        floorfieldFile.string().c_str(),
-        targetID.size());
-
-    // int numX = (int) ((_grid->GetxMax()-_grid->GetxMin())/_grid->Gethx());
-    // int numY = (int) ((_grid->GetyMax()-_grid->GetyMin())/_grid->Gethy());
-    //int numTotal = numX * numY;
-    //std::cerr << numTotal << " numTotal" << std::endl;
-    //std::cerr << grid->GetnPoints() << " grid" << std::endl;
     file.open(floorfieldFile.string());
 
     file << "# vtk DataFile Version 3.0" << std::endl;
@@ -1617,12 +1616,6 @@ void UnivFFviaFM::WriteFF(const fs::path & filename, std::vector<int> targetID)
                 continue;
             }
             double * costarray = _costFieldWithKey[targetID[iTarget]];
-
-            Log->Write(
-                "%s: target number %d: UID %d",
-                filename.string().c_str(),
-                iTarget,
-                targetID[iTarget]);
 
             std::string name = _building->GetTransOrCrossByUID(targetID[iTarget])->GetCaption() +
                                "-" + std::to_string(targetID[iTarget]);
@@ -1757,7 +1750,7 @@ double UnivFFviaFM::GetDistanceBetweenDoors(const int door1_ID, const int door2_
             } else if(_gridCode[key - 1] == door2_ID) {
                 key = key - 1;
             } else {
-                Log->Write("ERROR:\t In DistanceBetweenDoors");
+                Logging::Error("In DistanceBetweenDoors.")
             }
         }
         return _costFieldWithKey[door1_ID][key];
@@ -1802,7 +1795,7 @@ void UnivFFviaFM::GetDirectionToUID(int destID, long int key, Point & direction,
             (_gridCode[key + _grid->GetiMax()] != WALL)) {
             key = key + _grid->GetiMax();
         } else {
-            Log->Write("ERROR:\t In GetDirectionToUID (4 args)");
+            Logging::Error("In GetDirectionToUID (4 args)");
         }
     }
     if(_directionFieldWithKey.count(destID) == 1 && _directionFieldWithKey[destID]) {

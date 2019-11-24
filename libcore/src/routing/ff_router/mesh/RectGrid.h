@@ -27,6 +27,8 @@
  **/
 #pragma once
 
+#include "general/Format.h"
+#include "general/Logger.h"
 #include "geometry/Point.h"
 
 // geometric interpretation of index in "directNeighbor"
@@ -46,7 +48,7 @@ class RectGrid
 public:
     RectGrid() { this->isInitialized = false; }
 
-    virtual ~RectGrid() {}
+    virtual ~RectGrid() = default;
 
     RectGrid(const RectGrid & other)
     {
@@ -86,47 +88,47 @@ public:
         isInitialized = isInitializedArg;
     }
 
-    long int GetnPoints() const { return nPoints; }
+    [[nodiscard]] long int GetnPoints() const { return nPoints; }
     //void SetnPoints(long int val) { nPoints = val; }
-    double GetxMin() const { return xMin; }
+    [[nodiscard]] double GetxMin() const { return xMin; }
     void SetxMin(double val)
     {
         if(!isInitialized)
             xMin = val;
     }
-    double GetyMin() const { return yMin; }
+    [[nodiscard]] double GetyMin() const { return yMin; }
     void SetyMin(double val)
     {
         if(!isInitialized)
             yMin = val;
     }
-    double GetxMax() const { return xMax; }
+    [[nodiscard]] double GetxMax() const { return xMax; }
     void SetxMax(double val)
     {
         if(!isInitialized)
             xMax = val;
     }
-    double GetyMax() const { return yMax; }
+    [[nodiscard]] double GetyMax() const { return yMax; }
     void SetyMax(double val)
     {
         if(!isInitialized)
             yMax = val;
     }
-    long int GetiMax() const { return iMax; }
-    //void SetiMax(long int val) { iMax = val; }
-    long int GetjMax() const { return jMax; }
-    //void SetjMax(long int val) { jMax = val; }
-    double Gethx() const { return hx; }
-    //void Sethx(double val) { hx = val; }
-    double Gethy() const { return hy; }
-    //void Sethy(double val) { hy = val; }
+    [[nodiscard]] long int GetiMax() const { return iMax; }
 
-    double get_x_fromKey(long int key) const { return (key % iMax) * hx + xMin; }
-    double get_y_fromKey(long int key) const { return (key / iMax) * hy + yMin; }
-    double get_i_fromKey(long int key) const { return (key % iMax); }
-    double get_j_fromKey(long int key) const { return (key / iMax); }
+    [[nodiscard]] long int GetjMax() const { return jMax; }
 
-    long int getKeyAtXY(const double x, const double y) const
+    [[nodiscard]] double Gethx() const { return hx; }
+
+    [[nodiscard]] double Gethy() const { return hy; }
+
+
+    [[nodiscard]] double get_x_fromKey(long int key) const { return (key % iMax) * hx + xMin; }
+    [[nodiscard]] double get_y_fromKey(long int key) const { return (key / iMax) * hy + yMin; }
+    [[nodiscard]] double get_i_fromKey(long int key) const { return (key % iMax); }
+    [[nodiscard]] double get_j_fromKey(long int key) const { return (key / iMax); }
+
+    [[nodiscard]] long int getKeyAtXY(const double x, const double y) const
     { //key = index in (extern managed) array
         //Point nearest = getNearestGridPoint(Point(x,y));
         long int i = (long int) (((x - xMin) / hx) + .5);
@@ -134,16 +136,18 @@ public:
         if((i >= 0) && (i <= iMax) && (j >= 0) &&
            (j <= jMax))            //@todo: ar.graf: check in #ifdef block
             return (j * iMax + i); // 0-based; index of (closest gridpoint)
-        std::cerr << "ERROR 1 in RectGrid::getKeyAtPoint with:" << std::endl;
-        std::cerr << "   Point: " << x << ", " << y << std::endl;
-        std::cerr << "   xMin, yMin: " << xMin << ", " << yMin << std::endl;
-        std::cerr << "   xMax, yMax: " << xMax << ", " << yMax << std::endl;
-        std::cerr << "   Point is out of Grid-Scope, Tip: check if correct Floorfield is called"
-                  << std::endl;
+
+        Logging::Error(fmt::format(check_fmt("ERROR 1 in RectGrid::getKeyAtPoint with:")));
+        Logging::Error(fmt::format(check_fmt("Point: {:.2f} {:.2f}"), x, y));
+        Logging::Error(fmt::format(check_fmt("xMin, yMin: {:.2f} {:.2f}"), xMin, yMin));
+        Logging::Error(fmt::format(check_fmt("xMax, yMax: {:.2f} {:.2f}"), xMax, yMax));
+        Logging::Error(fmt::format(
+            check_fmt("Point is out of Grid-Scope, Tip: check if correct Floorfield is called")));
+
         return -1; // invalid indices
     }
 
-    long int getKeyAtPoint(const Point p) const
+    [[nodiscard]] long int getKeyAtPoint(const Point p) const
     {
         auto i = (long int) (((p._x - xMin) / hx) + .5);
         auto j = (long int) (((p._y - yMin) / hy) + .5);
@@ -152,30 +156,27 @@ public:
             return (j * iMax + i); // 0-based; index of (closest gridpoint)
         else {
             if(p._x < xMin) {
-                std::cerr << "Out of left bound by: " << (xMin - p._x) << std::endl;
+                Logging::Error(
+                    fmt::format(check_fmt("Out of left bound by: {:.2f}"), (xMin - p._x)));
                 i = 0;
             }
             if(p._x > xMax) {
-                std::cerr << "Out of right bound by: " << (p._x - xMax) << std::endl;
+                Logging::Error(
+                    fmt::format(check_fmt("Out of right bound by: {:.2f}"), (p._x - xMax)));
                 i = iMax;
             }
             if(p._y < yMin) {
-                std::cerr << "Out of lower bound by: " << (yMin - p._y) << std::endl;
+                Logging::Error(
+                    fmt::format(check_fmt("lower of lower bound by: {:.2f}"), (yMin - p._y)));
                 j = 0;
             }
             if(p._y > yMax) {
-                std::cerr << "Out of upper bound by: " << (p._y - yMax) << std::endl;
+                Logging::Error(
+                    fmt::format(check_fmt("lower of upper bound by: {:.2f}"), (p._y - yMax)));
                 j = jMax;
             }
             return (j * iMax + i);
         }
-        std::cerr << "ERROR 2 in RectGrid::getKeyAtPoint with:" << std::endl;
-        std::cerr << "   Point: " << p._x << ", " << p._y << std::endl;
-        std::cerr << "   xMin, yMin: " << xMin << ", " << yMin << std::endl;
-        std::cerr << "   xMax, yMax: " << xMax << ", " << yMax << std::endl;
-        std::cerr << "   Point is out of Grid-Scope, Tip: check if correct Floorfield is called"
-                  << std::endl;
-        return -1; // invalid indices
     }
 
     void
@@ -221,17 +222,19 @@ public:
         }
     }
 
-    Point getNearestGridPoint(const Point & currPoint) const
+    [[nodiscard]] Point getNearestGridPoint(const Point & currPoint) const
     {
         //if ((currPoint._x > xMax) || (currPoint._y > yMax) ||
         //    (currPoint._x < xMin) || (currPoint._y < yMin)) {
         if(!includesPoint(currPoint)) {
-            std::cerr << "ERROR 3 in RectGrid::getKeyAtPoint with:" << std::endl;
-            std::cerr << "   Point: " << currPoint._x << ", " << currPoint._y << std::endl;
-            std::cerr << "   xMin, yMin: " << xMin << ", " << yMin << std::endl;
-            std::cerr << "   xMax, yMax: " << xMax << ", " << yMax << std::endl;
-            std::cerr << "   Point is out of Grid-Scope, Tip: check if correct Floorfield is called"
-                      << std::endl;
+            Logging::Error(fmt::format(check_fmt("ERROR 3 in RectGrid::getKeyAtPoint with:")));
+            Logging::Error(
+                fmt::format(check_fmt("Point: {:.2f} {:.2f}"), currPoint._x, currPoint._y));
+            Logging::Error(fmt::format(check_fmt("xMin, yMin: {:.2f} {:.2f}"), xMin, yMin));
+            Logging::Error(fmt::format(check_fmt("xMax, yMax: {:.2f} {:.2f}"), xMax, yMax));
+            Logging::Error(fmt::format(check_fmt(
+                "Point is out of Grid-Scope, Tip: check if correct Floorfield is called")));
+
             return Point(-7, -7);
         }
         long int i = (long int) (((currPoint._x - xMin) / hx) + .5);
@@ -239,7 +242,7 @@ public:
         return Point(i * hx + xMin, j * hy + yMin);
     }
 
-    Point getPointFromKey(const long int key) const
+    [[nodiscard]] Point getPointFromKey(const long int key) const
     {
         long int i = key % iMax;
         long int j = key / iMax; //integer division
@@ -247,7 +250,7 @@ public:
         return Point(i * hx + xMin, j * hy + yMin);
     }
 
-    directNeighbor getNeighbors(const long int key) const
+    [[nodiscard]] directNeighbor getNeighbors(const long int key) const
     {
         directNeighbor neighbors = {{-1, -1, -1, -1}}; //curleybrackets for struct, then for int[4]
         long int i               = get_i_fromKey(key);
@@ -265,25 +268,23 @@ public:
         return neighbors;
     }
 
-    bool includesPoint(const Point & point) const
+    [[nodiscard]] bool includesPoint(const Point & point) const
     {
-        if((point._x < (xMin - hx / 2)) || (point._x > (xMax + hx / 2)) ||
-           (point._y < (yMin - hy / 2)) || (point._y > (yMax + hy / 2))) {
-            return false;
-        }
-        return true;
+        return !(
+            (point._x < (xMin - hx / 2)) || (point._x > (xMax + hx / 2)) ||
+            (point._y < (yMin - hy / 2)) || (point._y > (yMax + hy / 2)));
     }
 
 protected:
 private:
-    long int nPoints;
-    double xMin;
-    double yMin;
-    double xMax;
-    double yMax;
-    double hx;
-    double hy;
-    long int iMax; // indices must be smaller than iMax
-    long int jMax; // indices must be smaller than jMax
+    long int nPoints{};
+    double xMin{};
+    double yMin{};
+    double xMax{};
+    double yMax{};
+    double hx{};
+    double hy{};
+    long int iMax{}; // indices must be smaller than iMax
+    long int jMax{}; // indices must be smaller than jMax
     bool isInitialized;
 };
