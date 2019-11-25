@@ -185,7 +185,6 @@ set(JPSFIRE_SRC
     src/JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
 )
 
-
 add_library(core STATIC
     ${source_files}
     ${header_files}
@@ -211,6 +210,7 @@ target_link_libraries(core
     fs
     spdlog::spdlog
     fmt::fmt
+        ${GPERFTOOLS_PROFILER}
 )
 target_include_directories(core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src

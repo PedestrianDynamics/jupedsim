@@ -378,6 +378,11 @@ void UnivFFviaFM::CreateRectGrid(
             y_max = door.GetPoint2()._y;
     }
 
+    x_min -= 0.5;
+    x_max += 0.5;
+    y_min -= 0.5;
+    y_max += 0.5;
+
     //Create Rect Grid
     _grid = new RectGrid();
     _grid->setBoundaries(x_min, y_min, x_max, y_max);
