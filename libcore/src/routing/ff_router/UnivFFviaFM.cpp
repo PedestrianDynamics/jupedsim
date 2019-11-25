@@ -1028,7 +1028,7 @@ void UnivFFviaFM::CalcCost(long int key, double * cost, Point * dir, const doubl
         pointsRight = true;
         if(row < 0) {
             Logging::Error(
-                fmt::format(check_fmt("In CalcCost something went wrong {:d} {:d}"), row, aux));
+                fmt::format(check_fmt("In CalcCost something went wrong {:.2f} {:d}"), row, aux));
             row = std::numeric_limits<double>::max();
         }
     }
@@ -1052,7 +1052,7 @@ void UnivFFviaFM::CalcCost(long int key, double * cost, Point * dir, const doubl
         pointsUp = true;
         if(col < 0) {
             Logging::Error(
-                fmt::format(check_fmt("In CalcCost something went wrong {:d} {:d}"), row, aux));
+                fmt::format(check_fmt("In CalcCost something went wrong {:.2f} {:d}"), row, aux));
             col = std::numeric_limits<double>::max();
         }
     }
@@ -1235,7 +1235,7 @@ void UnivFFviaFM::CalcDist(long int key, double * cost, Point * dir, const doubl
         pointsRight = true;
         if(row < 0) {
             Logging::Error(
-                fmt::format(check_fmt("In CalcDist something went wrong {:d} {:d}"), row, aux));
+                fmt::format(check_fmt("In CalcDist something went wrong {:.2f} {:d}"), row, aux));
             row = std::numeric_limits<double>::max();
         }
     }
@@ -1259,7 +1259,7 @@ void UnivFFviaFM::CalcDist(long int key, double * cost, Point * dir, const doubl
         pointsUp = true;
         if(col < 0) {
             Logging::Error(
-                fmt::format(check_fmt("In CalcDist something went wrong {:d} {:d}"), row, aux));
+                fmt::format(check_fmt("In CalcDist something went wrong {:.2f} {:d}"), row, aux));
             col = std::numeric_limits<double>::max();
         }
     }
@@ -1750,7 +1750,7 @@ double UnivFFviaFM::GetDistanceBetweenDoors(const int door1_ID, const int door2_
             } else if(_gridCode[key - 1] == door2_ID) {
                 key = key - 1;
             } else {
-                Logging::Error("In DistanceBetweenDoors.")
+                Logging::Error("In DistanceBetweenDoors.");
             }
         }
         return _costFieldWithKey[door1_ID][key];
