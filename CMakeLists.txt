@@ -286,7 +286,7 @@ if (BUILD_TESTING)
         )
     endforeach()
 
-    file(GLOB_RECURSE test_py_files "${CMAKE_SOURCE_DIR}/Utest/*runtest_*.py")
+    file(GLOB_RECURSE test_py_files "${CMAKE_SOURCE_DIR}/systemtest/*runtest_*.py")
     foreach (file ${test_py_files})
         get_filename_component(test ${file} NAME_WE)
         add_test(
