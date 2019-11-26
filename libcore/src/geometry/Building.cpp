@@ -695,11 +695,8 @@ bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom> & subroom) 
         subroom->GetRoomID(),
         subroom->GetSubRoomID());
 
-    bool removed               = false;               // did we remove anything?
-    std::vector<Line> exits    = std::vector<Line>(); // transitions+crossings
-    auto walls                 = subroom->GetAllWalls();
-    std::vector<Wall> tmpWalls = std::vector<Wall>(); //splited big walls are stored here
-    bool isBigWall             = false; // mark walls as big. If not big, add them to tmpWalls
+    bool removed            = false;               // did we remove anything?
+    std::vector<Line> exits = std::vector<Line>(); // transitions+crossings
     //  collect all crossings
     for(auto && cros : subroom->GetAllCrossings())
         exits.push_back(*cros);
@@ -707,64 +704,40 @@ bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom> & subroom) 
     for(auto && trans : subroom->GetAllTransitions())
         exits.push_back(*trans);
 
-    LOG_DEBUG("Subroom walls: ");
-    for(const auto & w : subroom->GetAllWalls()) {
-        LOG_DEBUG("Wall: {}", w.toString());
-    }
+    for(const auto & exit : exits) {
+        Logging::Warning(
+            fmt::format("exit: {} subroom: {} ", exit.toString(), subroom->GetSubRoomID()));
 
+        const auto & overlappingWallIt = std::find_if(
+            subroom->GetAllWalls().begin(),
+            subroom->GetAllWalls().end(),
+            [&exit](const auto & wall) {
+                return wall.NearlyInLineSegment(exit.GetPoint1()) &&
+                       wall.NearlyInLineSegment(exit.GetPoint2());
+            });
+        if(overlappingWallIt != subroom->GetAllWalls().end()) {
+            Wall overlappingWall = *overlappingWallIt;
 
-    // removing doors on walls
-    while(!walls.empty()) {
-        auto wall = walls.back();
-        walls.pop_back();
-        isBigWall = false;
-        for(auto e = exits.begin(); e != exits.end();) {
-            if(wall.NearlyInLineSegment(e->GetPoint1()) &&
-               wall.NearlyInLineSegment(e->GetPoint2())) {
-                isBigWall       = true; // mark walls as big
-                double dist_pt1 = (wall.GetPoint1() - e->GetPoint1()).NormSquare();
-                double dist_pt2 = (wall.GetPoint1() - e->GetPoint2()).NormSquare();
-                Point A, B;
+            Logging::Warning("overlapping " + exit.toString());
+            Logging::Warning("with " + overlappingWall.toString());
+            double dist_pt1 = (overlappingWall.GetPoint1() - exit.GetPoint1()).NormSquare();
+            double dist_pt2 = (overlappingWall.GetPoint1() - exit.GetPoint2()).NormSquare();
+            Point A, B;
 
-                if(dist_pt1 < dist_pt2) {
-                    A = e->GetPoint1();
-                    B = e->GetPoint2();
-                } else {
-                    A = e->GetPoint2();
-                    B = e->GetPoint1();
-                }
-
-                Wall NewWall(wall.GetPoint1(), A);
-                Wall NewWall1(wall.GetPoint2(), B);
-                // add new lines to be controled against overlap with exits
-                walls.push_back(NewWall);
-                walls.push_back(NewWall1);
-                subroom->RemoveWall(wall);
-                exits.erase(e); // we don't need to check this exit again
-                removed = true;
-                break; // we are done with this wall. get next wall.
-
-            } // if
-            else {
-                e++;
+            if(dist_pt1 < dist_pt2) {
+                A = exit.GetPoint1();
+                B = exit.GetPoint2();
+            } else {
+                A = exit.GetPoint2();
+                B = exit.GetPoint1();
             }
-        } // exits
-        if(!isBigWall)
-            tmpWalls.push_back(wall);
 
-    } // while
-
-    // copy walls in subroom
-    for(auto const & wall : tmpWalls) {
-        subroom->AddWall(wall);
+            subroom->AddWall(Wall(overlappingWall.GetPoint1(), A));
+            subroom->AddWall(Wall(overlappingWall.GetPoint2(), B));
+            subroom->RemoveWall(overlappingWall);
+            removed = true;
+        }
     }
-
-    LOG_DEBUG("New Subroom:  ");
-    for(const auto & w : subroom->GetAllWalls()) {
-        LOG_DEBUG("Wall: {}", w.toString());
-    }
-    LOG_DEBUG("LEAVE with removed= {}", removed);
-
     return removed;
 }
 
