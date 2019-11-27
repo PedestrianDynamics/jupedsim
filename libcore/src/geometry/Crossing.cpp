@@ -53,7 +53,6 @@ bool Crossing::IsExit() const
     return false;
 }
 
-
 bool Crossing::IsOpen() const
 {
     return _state == DoorState::OPEN;
@@ -74,20 +73,30 @@ bool Crossing::IsTransition() const
     return false;
 }
 
-void Crossing::Close()
+void Crossing::Close(bool event)
 {
-    _state = DoorState::CLOSE;
+    if(_state != DoorState::CLOSE) {
+        _state        = DoorState::CLOSE;
+        _closeByEvent = event;
+    } else {
+        _closeByEvent = (event || _closeByEvent);
+    }
 }
 
-void Crossing::TempClose()
+void Crossing::TempClose(bool event)
 {
-    _state = DoorState::TEMP_CLOSE;
+    if(_state != DoorState::TEMP_CLOSE) {
+        _state        = DoorState::TEMP_CLOSE;
+        _closeByEvent = event;
+    } else {
+        _closeByEvent = (event || _closeByEvent);
+    }
 }
 
-
-void Crossing::Open()
+void Crossing::Open(bool)
 {
     _state = DoorState::OPEN;
+    _closeByEvent = false;
 }
 
 bool Crossing::IsInSubRoom(int subroomID) const
@@ -213,6 +222,7 @@ void Crossing::ResetDoorUsage()
         if(_maxDoorUsage < std::numeric_limits<double>::max()) {
             Open();
             Logging::Info(fmt::format(check_fmt("Reopening door {}"), _id));
+            _closeByEvent = false;
         }
     }
 }
@@ -259,7 +269,6 @@ void Crossing::UpdateClosingTime(double dt)
     _closingTime -= dt;
 }
 
-
 double Crossing::GetDT()
 {
     return _DT;
@@ -279,12 +288,6 @@ void Crossing::SetDN(int dn)
     _DN = dn;
 }
 
-// changes:
-// - _lasFlowMeasurement
-// - _closingTime
-// - state of door (close/open)
-// - _temporaryClosed (false if maxDoorUsage is reached)
-// return a change, e.g. door closed was made.
 bool Crossing::RegulateFlow(double time)
 {
     bool change   = false;
@@ -298,7 +301,7 @@ bool Crossing::RegulateFlow(double time)
             // --> [1]
             //---------------------------
             _closingTime = number / _outflowRate - T; //[1]
-                                                      //               this->Close();
+
             this->TempClose();
             Logging::Info(fmt::format(
                 check_fmt(
@@ -313,7 +316,7 @@ bool Crossing::RegulateFlow(double time)
         }
     }
 
-    // close the door is mdu is reached
+    // close the door if _maxDoorUsage is reached
     if(_maxDoorUsage != std::numeric_limits<double>::max()) {
         if(_tempDoorUsage >= _maxDoorUsage) {
             Logging::Info(fmt::format(
@@ -322,7 +325,7 @@ bool Crossing::RegulateFlow(double time)
                 GetDoorUsage(),
                 GetMaxDoorUsage(),
                 time));
-            this->TempClose();
+            this->Close();
             change = true;
         }
     }
@@ -333,8 +336,8 @@ bool Crossing::RegulateFlow(double time)
 
 void Crossing::UpdateTemporaryState(double dt)
 {
-    // Only update doors which are temp closed (by flow regulation or events)
-    if(IsTempClose()) {
+    // Only update doors which are temp closed by flow regulation
+    if(IsTempClose() && !_closeByEvent) {
         // States if the door has to be opened due to flow control
         bool change = false;
 
@@ -346,7 +349,7 @@ void Crossing::UpdateTemporaryState(double dt)
 
         // Check of door is allowed to be opened due to max door usage
         if(_maxDoorUsage != std::numeric_limits<int>::max()) {
-            change = change && (_doorUsage < _maxDoorUsage);
+            change = change && (_tempDoorUsage < _maxDoorUsage);
         }
 
         // If needed opens the door
@@ -370,7 +373,6 @@ void Crossing::SetState(DoorState state)
 std::string Crossing::toString() const
 {
     std::stringstream tmp;
-    //     tmp << _point1.toString() << "--" << _point2.toString();
 
     tmp << this->GetPoint1().toString() << "--" << this->GetPoint2().toString();
     switch(_state) {

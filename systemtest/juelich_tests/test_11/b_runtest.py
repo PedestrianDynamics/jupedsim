@@ -56,7 +56,7 @@ if __name__ == "__main__":
     os.chdir("..")
     TRUNK = os.getcwd()
     os.chdir(DIR)
-    lib_path = os.path.abspath("%s/Utest"%TRUNK)
+    lib_path = os.path.abspath("%s/systemtest"%TRUNK)
     sys.path.append(lib_path)
     from utils import *
     #----------------------------------------
