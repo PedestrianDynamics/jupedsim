@@ -557,7 +557,7 @@ void EventManager::OpenDoor(int id)
 {
     Transition * t = _building->GetTransition(id);
     t->Open(true);
-    Logging::Info(fmt::format(check_fmt("Closing door {}"), id));
+    Logging::Info(fmt::format(check_fmt("Opening door {}"), id));
     //Create and save a graph corresponding to the actual state of the building.
     if(CreateRoutingEngine(_building) == false) {
         Logging::Error("Cannot create a routing engine with new event");

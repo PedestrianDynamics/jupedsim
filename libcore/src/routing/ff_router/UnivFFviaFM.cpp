@@ -104,34 +104,18 @@ UnivFFviaFM::UnivFFviaFM(
         const std::vector<Transition *> tmpTrans = subRoomPtr->GetAllTransitions();
 
         int uidNotConst = 0;
-        bool isOpen     = false;
         for(auto & cross : tmpCross) {
-            uidNotConst = cross->GetUniqueID();
-            //TODO isOpen = cross->IsOpen();
-            isOpen = !cross->IsClose();
-            if(!isOpen) {
-                //will be added twice! is it a problem?
-                lines.emplace_back((Line) *cross);
-            } else {
                 anyDoor = Line{*cross};
                 if(tmpDoors.count(uidNotConst) == 0) {
                     tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *cross));
                 }
-            }
         }
         for(auto & trans : tmpTrans) {
             uidNotConst = trans->GetUniqueID();
-            //TODO isOpen = trans->IsOpen();
-            isOpen = !trans->IsClose();
-            if(!isOpen) {
-                //will be added twice! is it a problem?
-                lines.emplace_back((Line) *trans);
-            } else {
                 anyDoor = Line{*trans};
                 if(tmpDoors.count(uidNotConst) == 0) {
                     tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *trans));
                 }
-            }
         }
         //find insidePoint and save it, together with UID
         Point normalVec   = anyDoor.NormalVec();

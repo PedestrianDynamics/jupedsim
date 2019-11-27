@@ -129,34 +129,27 @@ void FFRouter::CalculateFloorFields()
     roomAndCroTrVector.clear();
 
     for(const auto & [_, trans] : _building->GetAllTransitions()) {
-        if(!trans->IsClose()) {
-            _allDoorUIDs.emplace_back(trans->GetUniqueID());
-            _CroTrByUID.insert(std::make_pair(trans->GetUniqueID(), trans));
-            if(trans->IsExit()) {
-                _ExitsByUID.insert(std::make_pair(trans->GetUniqueID(), trans));
-            }
-            Room * room1 = trans->GetRoom1();
-            if(room1) {
-                roomAndCroTrVector.emplace_back(
-                    std::make_pair(room1->GetID(), trans->GetUniqueID()));
-            }
-            Room * room2 = trans->GetRoom2();
-            if(room2) {
-                roomAndCroTrVector.emplace_back(
-                    std::make_pair(room2->GetID(), trans->GetUniqueID()));
-            }
+        _allDoorUIDs.emplace_back(trans->GetUniqueID());
+        _CroTrByUID.insert(std::make_pair(trans->GetUniqueID(), trans));
+        if(trans->IsExit()) {
+            _ExitsByUID.insert(std::make_pair(trans->GetUniqueID(), trans));
+        }
+        Room * room1 = trans->GetRoom1();
+        if(room1) {
+            roomAndCroTrVector.emplace_back(std::make_pair(room1->GetID(), trans->GetUniqueID()));
+        }
+        Room * room2 = trans->GetRoom2();
+        if(room2) {
+            roomAndCroTrVector.emplace_back(std::make_pair(room2->GetID(), trans->GetUniqueID()));
         }
     }
 
     for(const auto & [_, cross] : _building->GetAllCrossings()) {
-        if(!cross->IsClose()) {
-            _allDoorUIDs.emplace_back(cross->GetUniqueID());
-            _CroTrByUID.insert(std::make_pair(cross->GetUniqueID(), cross));
-            Room * room1 = cross->GetRoom1();
-            if(room1)
-                roomAndCroTrVector.emplace_back(
-                    std::make_pair(room1->GetID(), cross->GetUniqueID()));
-        }
+        _allDoorUIDs.emplace_back(cross->GetUniqueID());
+        _CroTrByUID.insert(std::make_pair(cross->GetUniqueID(), cross));
+        Room * room1 = cross->GetRoom1();
+        if(room1)
+            roomAndCroTrVector.emplace_back(std::make_pair(room1->GetID(), cross->GetUniqueID()));
     }
 
     if(_hasSpecificGoals) {
@@ -306,10 +299,31 @@ void FFRouter::CalculateFloorFields()
                 }
             }
         }
-        for(auto key : penaltyList) {
-            _distMatrix.erase(key);
-            _distMatrix.insert(std::make_pair(key, std::numeric_limits<double>::max()));
+    }
+
+    //penalize closed doors
+    for(auto doorID : _allDoorUIDs) {
+        if(auto door = dynamic_cast<Crossing *>(_building->GetTransOrCrossByUID(doorID))) {
+            if(door->IsClose()) {
+                for(auto doorID2 : _allDoorUIDs) {
+                    if(doorID == doorID2) {
+                        continue;
+                    }
+                    std::pair<int, int> connection1 = std::make_pair(doorID, doorID2);
+                    std::pair<int, int> connection2 = std::make_pair(doorID2, doorID);
+
+                    if(_distMatrix.find(connection1) != _distMatrix.end()) {
+                        penaltyList.emplace_back(connection1);
+                        penaltyList.emplace_back(connection2);
+                    }
+                }
+            }
         }
+    }
+
+    for(auto key : penaltyList) {
+        _distMatrix.erase(key);
+        _distMatrix.insert(std::make_pair(key, std::numeric_limits<double>::max()));
     }
 
     FloydWarshall();

@@ -305,11 +305,23 @@ void Simulation::UpdateRoutesAndLocations()
                 allRooms.at(ped->GetRoomID())->SetEgressTime(Pedestrian::GetGlobalTime());
             }
         }
+
+        // set ped waiting, if no target is found
+        int target = ped->FindRoute();
+
+        if(target == -1) {
+            ped->StartWaiting();
+        } else {
+            if(ped->IsWaiting() && !ped->IsInsideWaitingAreaWaiting()) {
+                ped->EndWaiting();
+            }
+        }
+
         // actualize routes for sources
         if(_gotSources)
-            ped->FindRoute();
+            target = ped->FindRoute();
         //finally actualize the route
-        if(!_gotSources && ped->FindRoute() == -1 && !_trainConstraints && sub0->IsAccessible()) {
+        if(!_gotSources && ped->FindRoute() == -1 && !_trainConstraints && !ped->IsWaiting()) {
             //a destination could not be found for that pedestrian
             Logging::Error(fmt::format(
                 check_fmt("Could not find a route for pedestrian {} in room {} and subroom {}"),
