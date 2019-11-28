@@ -29,13 +29,13 @@
 #ifndef GOAL_H_
 #define GOAL_H_
 
+#include "Point.h"
+
 #include <string>
 #include <vector>
 
 //forward declarations
 class Wall;
-class Point;
-
 
 class Goal
 {
