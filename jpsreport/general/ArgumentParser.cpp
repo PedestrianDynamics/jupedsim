@@ -101,11 +101,11 @@ void Logs()
      // first logs will go to stdout
      Log->Write("----\nJuPedSim - JPSreport\n");
      Log->Write("Current date   : %s", currentTime.c_str());
-     Log->Write("Version        : %s", JPSREPORT_VERSION);
+     // Log->Write("Version        : %s", JPSREPORT_VERSION);
      Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
-     Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
-     Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
-     Log->Write("Branch         : %s", GIT_BRANCH);
+     // Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
+     // Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
+     // Log->Write("Branch         : %s", GIT_BRANCH);
      Log->Write("Python         : %s (%s)\n----\n", PYTHON, PYTHON_VERSION);
 }
 
