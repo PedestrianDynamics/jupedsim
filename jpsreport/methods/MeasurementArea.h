@@ -28,11 +28,11 @@
 #ifndef MEASUREMENTAREA_H_
 #define MEASUREMENTAREA_H_
 
-#include <boost/geometry/geometry.hpp>
+#include <boost/geometry/geometries/adapted/c_array.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
-#include <boost/geometry/geometries/adapted/c_array.hpp>
 #include <boost/geometry/geometries/ring.hpp>
+#include <boost/geometry/geometry.hpp>
 
 using namespace boost::geometry;
 typedef model::d2::point_xy<double, cs::cartesian> point_2d;
@@ -42,28 +42,26 @@ typedef model::ring<point_2d> ring;
 class MeasurementArea
 {
 public:
-     virtual ~MeasurementArea()
-     {
-     }
-     int _id;
-     std::string _type;
-     double _zPos;
+    virtual ~MeasurementArea() {}
+    int _id;
+    std::string _type;
+    double _zPos;
 };
 
-class MeasurementArea_B: public MeasurementArea
+class MeasurementArea_B : public MeasurementArea
 {
 public:
-     polygon_2d _poly;
-     double _length = -1.0;
+    polygon_2d _poly;
+    double _length = -1.0;
 };
 
-class MeasurementArea_L: public MeasurementArea
+class MeasurementArea_L : public MeasurementArea
 {
 public:
-     double _lineStartX;
-     double _lineStartY;
-     double _lineEndX;
-     double _lineEndY;
+    double _lineStartX;
+    double _lineStartY;
+    double _lineEndX;
+    double _lineEndY;
 };
 
 #endif /* MEASUREMENTAREA_H_ */

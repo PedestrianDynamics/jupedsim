@@ -37,117 +37,115 @@ class Point;
 class Wall;
 class Line;
 
-class Obstacle {
-
+class Obstacle
+{
 private:
-     double _height;
-     int _id;
-     std::string _caption;
-     std::vector<Wall> _walls;
-     std::vector<Point> _poly;
+    double _height;
+    int _id;
+    std::string _caption;
+    std::vector<Wall> _walls;
+    std::vector<Point> _poly;
 
 public:
-     /**
+    /**
       * Constructor
       */
-     Obstacle();
+    Obstacle();
 
-     /**
+    /**
       * Destructor
       */
-     virtual ~Obstacle();
+    virtual ~Obstacle();
 
-     /**
+    /**
       * Set/Get the obstacles' caption
       */
-     std::string GetCaption() const;
+    std::string GetCaption() const;
 
-     /**
+    /**
       * Set/Get the obstacles' caption
       */
-     void SetCaption(std::string caption);
+    void SetCaption(std::string caption);
 
-     /**
+    /**
       * Set/Get the height of the obstacle.
       * Is used for computing visibility
       */
-     double GetHeight() const;
+    double GetHeight() const;
 
-     /**
+    /**
       * Set/Get the height of the obstacle.
       * Is used for computing visibility
       */
-     void SetHeight(double height);
+    void SetHeight(double height);
 
-     /**
+    /**
       * Set/Get the id of the obstacle
       */
-     int GetId() const;
+    int GetId() const;
 
-     /**
+    /**
       * Set/Get the id of the obstacle
       */
-     void SetId(int id);
+    void SetId(int id);
 
-     /**
+    /**
       * construct the obstacle by adding more walls
       */
-     void AddWall(const Wall& w);
+    void AddWall(const Wall & w);
 
-     /**
+    /**
       * @return All walls that constitute the obstacle
       */
-     const std::vector<Wall>& GetAllWalls() const;
+    const std::vector<Wall> & GetAllWalls() const;
 
-     /**
+    /**
       * @return true if the point p is contained within the Closed Obstacle
       * @see Setclose
       */
-     bool Contains(const Point& p) const;
+    bool Contains(const Point & p) const;
 
-     /**
+    /**
       * Create the obstacles polygonal structure from the walls
       */
-     bool ConvertLineToPoly();
+    bool ConvertLineToPoly();
 
-     /**
+    /**
       * @return the obstacle as a polygon
       */
-     const std::vector<Point>&  GetPolygon() const;
+    const std::vector<Point> & GetPolygon() const;
 
-     /**
+    /**
       * @return the centroid of the obstacle
       */
-     const Point GetCentroid() const;
+    const Point GetCentroid() const;
 
-     /**
+    /**
       * return true if the given line intersects
       * or share common vertex with the obstacle
       */
-     bool IntersectWithLine(const Line & line) const;
+    bool IntersectWithLine(const Line & line) const;
 
-     /**
+    /**
       * @return a nicely formatted string representation of the obstacle
       */
-     std::string Write();
+    std::string Write();
 
-     /**
+    /**
       * @return true if the polygon is clockwise oriented
       */
-     bool IsClockwise() const;
+    bool IsClockwise() const;
 
-     /**
+    /**
       * @return true if the point is part of the polygon, also considering the geometry precision.
       */
-     bool IsPartOfPolygon(const Point& ptw);
+    bool IsPartOfPolygon(const Point & ptw);
 
 private:
-     int WhichQuad(const Point& vertex, const Point& hitPos) const;
+    int WhichQuad(const Point & vertex, const Point & hitPos) const;
 
-     // x-Koordinate der Linie von einer Eccke zur nächsten
-     double Xintercept(const Point& point1, const Point& point2,
-                       double hitY) const;
-
+    // x-Koordinate der Linie von einer Eccke zur nächsten
+    double Xintercept(const Point & point1, const Point & point2, double hitY) const;
 };
 
 #endif /* OBSTACLE_H_ */

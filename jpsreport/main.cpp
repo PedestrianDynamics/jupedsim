@@ -29,54 +29,52 @@
  *
  **/
 
-#include <chrono>
-#include "geometry/Building.h"
-#include "general/ArgumentParser.h"
 #include "Analysis.h"
+#include "general/ArgumentParser.h"
+#include "geometry/Building.h"
+
+#include <chrono>
 
 using namespace std;
 using namespace std::chrono;
 
-int main(int argc, char **argv)
+int main(int argc, char ** argv)
 {
-      Log = new STDIOHandler();
-     // Parsing the arguments
-      ArgumentParser* args = new ArgumentParser();
-      std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    Log = new STDIOHandler();
+    // Parsing the arguments
+    ArgumentParser * args                       = new ArgumentParser();
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-     if(args->ParseArgs(argc, argv))
-     {
-          // get the number of file to analyse
-          const vector<fs::path>& files = args->GetTrajectoriesFiles();
-          const fs::path& Path = args->GetTrajectoriesLocation();
-          // create and initialize the analysis engine
-          for (unsigned int i = 0; i < files.size(); i++)
-          {
-               const fs::path& File = files[i];
-               Analysis analysis = Analysis();
-               Log->Write("\nINFO: \tStart Analysis for the file: %s", File.string().c_str());
-               Log->Write("**********************************************************************");
-               analysis.InitArgs(args);
-               analysis.RunAnalysis(File, Path);
-               Log->Write("**********************************************************************");
-               Log->Write("INFO: \tEnd Analysis for the file: %s\n", File.string().c_str());
-               std::cout << "INFO: \tEnd Analysis for the file: " << File.string().c_str() << "\n";
-          }
-     }
-     else
-     {
-          //Log->Write("INFO:\tFail to parse the ini file");
-          Log->Write("INFO:\tFinishing...");
-     }
+    if(args->ParseArgs(argc, argv)) {
+        // get the number of file to analyse
+        const vector<fs::path> & files = args->GetTrajectoriesFiles();
+        const fs::path & Path          = args->GetTrajectoriesLocation();
+        // create and initialize the analysis engine
+        for(unsigned int i = 0; i < files.size(); i++) {
+            const fs::path & File = files[i];
+            Analysis analysis     = Analysis();
+            Log->Write("\nINFO: \tStart Analysis for the file: %s", File.string().c_str());
+            Log->Write("**********************************************************************");
+            analysis.InitArgs(args);
+            analysis.RunAnalysis(File, Path);
+            Log->Write("**********************************************************************");
+            Log->Write("INFO: \tEnd Analysis for the file: %s\n", File.string().c_str());
+            std::cout << "INFO: \tEnd Analysis for the file: " << File.string().c_str() << "\n";
+        }
+    } else {
+        //Log->Write("INFO:\tFail to parse the ini file");
+        Log->Write("INFO:\tFinishing...");
+    }
 
-     //do the last cleaning
-      std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-      float duration = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()/1000000.0;
-      Log->Write("Time elapsed:\t %0.2f [s]\n", duration);
+    //do the last cleaning
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    float duration =
+        std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() / 1000000.0;
+    Log->Write("Time elapsed:\t %0.2f [s]\n", duration);
 
-      std::cout << "Time elapsed:\t " << duration << " [s]\n";
+    std::cout << "Time elapsed:\t " << duration << " [s]\n";
 
-      delete args;
-      delete Log;
-      return (EXIT_SUCCESS);
+    delete args;
+    delete Log;
+    return (EXIT_SUCCESS);
 }

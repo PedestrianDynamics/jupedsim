@@ -29,64 +29,74 @@
 #ifndef OUTPUT_HANDLER_H_
 #define OUTPUT_HANDLER_H_
 
-#include <iostream>
-#include <fstream>
-#include <vector>
-
 #include "../general/Macros.h"
+
+#include <fstream>
+#include <iostream>
+#include <vector>
 
 #ifdef _SIMULATOR
 #include "../IO/TraVisToClient.h"
 #endif
 
 
-class OutputHandler {
+class OutputHandler
+{
 protected:
-     int _nWarnings;
-     int _nErrors;
+    int _nWarnings;
+    int _nErrors;
+
 public:
-     OutputHandler() { _nWarnings = 0; _nErrors = 0; };
-     virtual ~OutputHandler() {};
+    OutputHandler()
+    {
+        _nWarnings = 0;
+        _nErrors   = 0;
+    };
+    virtual ~OutputHandler(){};
 
-     int GetWarnings();
-     void incrementWarnings();
-     int GetErrors();
-     void incrementErrors();
-     void ProgressBar(double TotalPeds, double NowPeds);
+    int GetWarnings();
+    void incrementWarnings();
+    int GetErrors();
+    void incrementErrors();
+    void ProgressBar(double TotalPeds, double NowPeds);
 
-     virtual void Write(const std::string& str);
-     virtual void Write(const char *string, ...);
+    virtual void Write(const std::string & str);
+    virtual void Write(const char * string, ...);
 };
 
-class STDIOHandler : public OutputHandler {
+class STDIOHandler : public OutputHandler
+{
 public:
-     void Write(const std::string& str);
-     void Write(const char *string,...);
+    void Write(const std::string & str);
+    void Write(const char * string, ...);
 };
 
-class FileHandler : public OutputHandler {
+class FileHandler : public OutputHandler
+{
 private:
-     std::ofstream _pfp;
+    std::ofstream _pfp;
+
 public:
-     FileHandler(const char *fn);
-     virtual ~FileHandler();
-     void Write(const std::string& str);
-     void Write(const char *string,...);
+    FileHandler(const char * fn);
+    virtual ~FileHandler();
+    void Write(const std::string & str);
+    void Write(const char * string, ...);
 };
 
 #ifdef _SIMULATOR
 
-class SocketHandler : public OutputHandler {
+class SocketHandler : public OutputHandler
+{
 private:
-     TraVisToClient* client;
+    TraVisToClient * client;
 
 public:
-     SocketHandler(const std::string& host, int port);
-     virtual ~SocketHandler();
-     void Write(const std::string& str);
+    SocketHandler(const std::string & host, int port);
+    virtual ~SocketHandler();
+    void Write(const std::string & str);
 
-     //Some tags are broken
-     std::vector<std::string> brokentags;
+    //Some tags are broken
+    std::vector<std::string> brokentags;
 };
 
 #endif

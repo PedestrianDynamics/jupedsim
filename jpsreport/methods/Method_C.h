@@ -28,34 +28,46 @@
 #ifndef METHOD_C_H_
 #define METHOD_C_H_
 
-#include "PedData.h"
 #include "../Analysis.h"
+#include "PedData.h"
 
 class Method_C
 {
 public:
-     Method_C();
-     virtual ~Method_C();
-     bool Process (const PedData& peddata, const double& zPos_measureArea);
-     void SetMeasurementArea (MeasurementArea_B* area);
+    Method_C();
+    virtual ~Method_C();
+    bool Process(const PedData & peddata, const double & zPos_measureArea);
+    void SetMeasurementArea(MeasurementArea_B * area);
 
 private:
-     std::map<int , std::vector<int> > _peds_t;
-     int _minFrame;
-     std::string _measureAreaId;
-     MeasurementArea_B* _areaForMethod_C;
+    std::map<int, std::vector<int>> _peds_t;
+    int _minFrame;
+    std::string _measureAreaId;
+    MeasurementArea_B * _areaForMethod_C;
 
-     fs::path _trajName;
-     fs::path _projectRootDir;
-     fs::path _outputLocation;
+    fs::path _trajName;
+    fs::path _projectRootDir;
+    fs::path _outputLocation;
 
-     float _fps;
-     FILE *_fClassicRhoV;
-     void OpenFileMethodC();
-     void OutputClassicalResults(int frmNr, int numPedsInFrame, const std::vector<double>& XInFrame,const std::vector<double>& YInFrame, const std::vector<double>& VInFrame) const;
-     double GetClassicalVelocity(const std::vector<double>& xs, const std::vector<double>& ys,  const std::vector<double>& VInFrame, int pednum) const;
-     double GetClassicalDensity(const std::vector<double>& xs, const std::vector<double>& ys, int pednum, polygon_2d measurearea) const;
-
+    float _fps;
+    FILE * _fClassicRhoV;
+    void OpenFileMethodC();
+    void OutputClassicalResults(
+        int frmNr,
+        int numPedsInFrame,
+        const std::vector<double> & XInFrame,
+        const std::vector<double> & YInFrame,
+        const std::vector<double> & VInFrame) const;
+    double GetClassicalVelocity(
+        const std::vector<double> & xs,
+        const std::vector<double> & ys,
+        const std::vector<double> & VInFrame,
+        int pednum) const;
+    double GetClassicalDensity(
+        const std::vector<double> & xs,
+        const std::vector<double> & ys,
+        int pednum,
+        polygon_2d measurearea) const;
 };
 
 #endif /* METHOD_C_H_ */

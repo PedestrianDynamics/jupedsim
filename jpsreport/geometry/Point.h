@@ -24,108 +24,95 @@
  *
  *
  **/
- 
+
 
 #ifndef _POINT_H
 #define _POINT_H
 #include <string>
 
-class Point {
+class Point
+{
 public:
-     double _x;
-     double _y;
+    double _x;
+    double _y;
 
 public:
-     // constructors
-     Point();
-     Point(double x, double y);
-     Point(const Point& orig);
+    // constructors
+    Point();
+    Point(double x, double y);
+    Point(const Point & orig);
 
 
-     /**
+    /**
       * Set/Get the x component
       */
-     void SetX(double x);
+    void SetX(double x);
 
-     /**
+    /**
       * Set/Get the y component
       */
-     void SetY(double y);
+    void SetY(double y);
 
 
-     /**
+    /**
       * Set/Get the x component
       */
-     double GetX() const;
+    double GetX() const;
 
-     /**
+    /**
       * Set/Get the y component
       */
-     double GetY() const;
+    double GetY() const;
 
-     /// Norm
-     double Norm() const;
+    /// Norm
+    double Norm() const;
 
-     /// Norm molified see Koester2013
-     double NormMolified() const;
+    /// Norm molified see Koester2013
+    double NormMolified() const;
 
-     /// Norm square
-     inline double NormSquare() const
-     {
-          return ScalarProduct(*this);
-     }
-     /// normalized vector
-     Point Normalized() const;
-     /// normalized vector usinf NormMolified
-     Point NormalizedMolified() const;
-     /// dot product
-     inline double ScalarProduct(const Point &v) const
-     {
-          return _x * v._x + _y * v._y;
-     }
+    /// Norm square
+    inline double NormSquare() const { return ScalarProduct(*this); }
+    /// normalized vector
+    Point Normalized() const;
+    /// normalized vector usinf NormMolified
+    Point NormalizedMolified() const;
+    /// dot product
+    inline double ScalarProduct(const Point & v) const { return _x * v._x + _y * v._y; }
 
-     // since we have only 2D vectors (may be changed in the future), this function returns a scalar
-     // (basically the third component of the vector (0,0,z) )
-     inline double CrossProduct(const Point &p) const
-     {
-          return Determinant(p);
-     }
+    // since we have only 2D vectors (may be changed in the future), this function returns a scalar
+    // (basically the third component of the vector (0,0,z) )
+    inline double CrossProduct(const Point & p) const { return Determinant(p); }
 
 
+    /// determinant of the square matrix formed by the vectors [ this, v]
+    inline double Determinant(const Point & v) const { return _x * v._y - _y * v._x; }
 
-     /// determinant of the square matrix formed by the vectors [ this, v]
-     inline double Determinant(const Point &v) const
-     {
-          return _x*v._y - _y*v._x;
-     }
-
-     /// translation and rotation in Ellipse coordinate system
-     Point TransformToEllipseCoordinates(const Point &center, double cphi, double sphi) const;
-     /// translation and rotation in cartesian system
-     Point TransformToCartesianCoordinates(const Point &center, double cphi, double sphi) const;
-     /// rotate the vector by theta
-     Point Rotate(double ctheta, double stheta) const;
+    /// translation and rotation in Ellipse coordinate system
+    Point TransformToEllipseCoordinates(const Point & center, double cphi, double sphi) const;
+    /// translation and rotation in cartesian system
+    Point TransformToCartesianCoordinates(const Point & center, double cphi, double sphi) const;
+    /// rotate the vector by theta
+    Point Rotate(double ctheta, double stheta) const;
 
 
-     // operators
-     /// addition
-     const Point operator+(const Point& p) const;
-     /// substraction
-     const Point operator-(const Point& p) const;
-     /// equal
-     bool operator==(const Point& p) const;
-     /// not equal
-     bool operator!=(const Point& p) const;
-     /// Assignement
-     Point& operator+=(const Point& p);
-     /// nice formating of the point
-     std::string toString() const;
+    // operators
+    /// addition
+    const Point operator+(const Point & p) const;
+    /// substraction
+    const Point operator-(const Point & p) const;
+    /// equal
+    bool operator==(const Point & p) const;
+    /// not equal
+    bool operator!=(const Point & p) const;
+    /// Assignement
+    Point & operator+=(const Point & p);
+    /// nice formating of the point
+    std::string toString() const;
 };
 
 /// multiplication
-const Point operator*(const Point& p, const double f);
+const Point operator*(const Point & p, const double f);
 /// division
-const Point operator/(const Point& p, const double f);
+const Point operator/(const Point & p, const double f);
 
-#endif  /* _POINT_H */
-
+#endif /* _POINT_H */

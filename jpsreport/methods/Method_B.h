@@ -28,43 +28,41 @@
 #ifndef METHOD_B_H_
 #define METHOD_B_H_
 
-#include "PedData.h"
 #include "MeasurementArea.h"
 #include "Method_C.h"
+#include "PedData.h"
 
-
-#include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
-namespace ub=boost::numeric::ublas;
+#include <boost/numeric/ublas/matrix.hpp>
+namespace ub = boost::numeric::ublas;
 
 
 class Method_B
 {
 public:
-     Method_B();
-     virtual ~Method_B();
-     bool Process (const PedData& peddata);
-     void SetMeasurementArea (MeasurementArea_B* area);
+    Method_B();
+    virtual ~Method_B();
+    bool Process(const PedData & peddata);
+    void SetMeasurementArea(MeasurementArea_B * area);
 
 private:
-
-     fs::path  _trajName;
-     fs::path  _projectRootDir;
-     fs::path _outputLocation;
-     std::string _measureAreaId;
-     std::map<int , std::vector<int> > _peds_t;
-     MeasurementArea_B* _areaForMethod_B;
-     int _NumPeds;
-     float _fps;
-     ub::matrix<double> _xCor;
-     ub::matrix<double> _yCor;
-     int *_tIn;           //the time for each pedestrian enter the measurement area
-     int *_tOut;          //the time for each pedestrian exit the measurement area
-     std::vector<Point> _entrancePoint ; // where pedestrian enters the measurement area
-     std::vector<Point> _exitPoint; // where pedestrian leaves the measurement area
-     double *_DensityPerFrame; // the measured density in each frame
-     void GetTinTout(int numFrames);
-     void GetFundamentalTinTout(double *DensityPerFrame,double LengthMeasurementarea);
+    fs::path _trajName;
+    fs::path _projectRootDir;
+    fs::path _outputLocation;
+    std::string _measureAreaId;
+    std::map<int, std::vector<int>> _peds_t;
+    MeasurementArea_B * _areaForMethod_B;
+    int _NumPeds;
+    float _fps;
+    ub::matrix<double> _xCor;
+    ub::matrix<double> _yCor;
+    int * _tIn;                        //the time for each pedestrian enter the measurement area
+    int * _tOut;                       //the time for each pedestrian exit the measurement area
+    std::vector<Point> _entrancePoint; // where pedestrian enters the measurement area
+    std::vector<Point> _exitPoint;     // where pedestrian leaves the measurement area
+    double * _DensityPerFrame;         // the measured density in each frame
+    void GetTinTout(int numFrames);
+    void GetFundamentalTinTout(double * DensityPerFrame, double LengthMeasurementarea);
 };
 
 #endif /* METHOD_B_H_ */

@@ -24,55 +24,54 @@
  *
  *
  **/
- 
+
 
 #ifndef _WALL_H
 #define _WALL_H
 
 #include "Line.h"
 
-class Wall : public Line {
-
+class Wall : public Line
+{
 public:
-     /**
+    /**
       * Constructor
       */
-     Wall();
+    Wall();
 
-     /**
+    /**
       * Constructor
       */
-     Wall(const Point& p1, const Point& p2, const std::string& type="internal");
+    Wall(const Point & p1, const Point & p2, const std::string & type = "internal");
 
-     /**
+    /**
       * Constructor
       */
-     Wall(const Wall& orig);
+    Wall(const Wall & orig);
 
-     /**
+    /**
       * set/get the wall type. Values are external and internal
       */
-     const std::string& GetType() const;
+    const std::string & GetType() const;
 
-     /**
+    /**
       * set/get the wall type. Values are external and internal
       */
-     void SetType(const std::string& type);
+    void SetType(const std::string & type);
 
-     /**
+    /**
       *  Debug output from the object
       */
-     void WriteToErrorLog() const;
+    void WriteToErrorLog() const;
 
-     /**
+    /**
       * @return a nicely formated string of the object
       */
-     virtual std::string Write() const;
+    virtual std::string Write() const;
 
 private:
-     std::string _type;
+    std::string _type;
 };
 
 
-#endif  /* _WALL_H */
-
+#endif /* _WALL_H */

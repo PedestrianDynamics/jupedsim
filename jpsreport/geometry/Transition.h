@@ -24,111 +24,111 @@
  *
  *
  **/
- 
+
 
 #ifndef _TRANSITION_H
 #define _TRANSITION_H
 
 #include "Crossing.h"
+
 #include <string>
 
 class Room;
 class Subroom;
 
-class Transition : public Crossing {
+class Transition : public Crossing
+{
 private:
-     Room* _room2;
-     bool _isOpen;
-     std::string _type;
-     // number of agents that passed that exit
-     int _doorUsage;
-     double _lastPassingTime;
-     std::string _flowAtExit;
+    Room * _room2;
+    bool _isOpen;
+    std::string _type;
+    // number of agents that passed that exit
+    int _doorUsage;
+    double _lastPassingTime;
+    std::string _flowAtExit;
 
 public:
-
-     /**
+    /**
       * Cosntructor
       */
-     Transition();
+    Transition();
 
-     /**
+    /**
       * Destructor
       */
-     virtual ~Transition();
+    virtual ~Transition();
 
-     /**
+    /**
       * Close the transition/door
       */
-     void Close();
+    void Close();
 
-     /**
+    /**
       * Open the transition/door
       */
-     void Open();
+    void Open();
 
-     /**
+    /**
       * Set/Get the type of the transition
       */
-     void SetType(std::string s);
+    void SetType(std::string s);
 
-     /**
+    /**
       * Set/Get the second room associated with this transition.
       * The first one is set in the crossing class.
       */
-     void SetRoom2(Room* ID);
+    void SetRoom2(Room * ID);
 
-     /**
+    /**
       * Increment the number of persons that used that exit
       * @param number, how many person have passed the door
       * @param time, at which time
       */
-     void IncreaseDoorUsage(int number, double time);
+    void IncreaseDoorUsage(int number, double time);
 
-     /**
+    /**
       * @return the number of pedestrians that used that exit.
       */
-     int GetDoorUsage() const;
+    int GetDoorUsage() const;
 
 
-     /**
+    /**
       * @return the flow curve for this exit
       */
-     const std::string & GetFlowCurve() const;
+    const std::string & GetFlowCurve() const;
 
-     /**
+    /**
       * @return the last time this door was crossed
       */
-     double GetLastPassingTime() const;
+    double GetLastPassingTime() const;
 
-     /**
+    /**
       * Set/Get the type of the transition
       */
-     std::string GetType() const;
+    std::string GetType() const;
 
-     /**
+    /**
       * Set/Get the second room associated with this transition.
       * The first one is set in the crossing class.
       */
-     Room* GetRoom2() const;
+    Room * GetRoom2() const;
 
 
-     /**
+    /**
       * @return the other room.
       */
-     Room* GetOtherRoom(int room_id) const;
+    Room * GetOtherRoom(int room_id) const;
 
-     // virtual functions
-     virtual bool IsOpen() const;
-     virtual bool IsExit() const;
-     virtual bool IsTransition() const;
-     virtual bool IsInRoom(int roomID) const;
-     virtual SubRoom* GetOtherSubRoom(int roomID, int subroomID) const;
+    // virtual functions
+    virtual bool IsOpen() const;
+    virtual bool IsExit() const;
+    virtual bool IsTransition() const;
+    virtual bool IsInRoom(int roomID) const;
+    virtual SubRoom * GetOtherSubRoom(int roomID, int subroomID) const;
 
 
-     virtual void WriteToErrorLog() const;
-     virtual std::string GetDescription() const; // TraVisTo Ausgabe
+    virtual void WriteToErrorLog() const;
+    virtual std::string GetDescription() const; // TraVisTo Ausgabe
 };
 
-#endif  /* _TRANSITION_H */
-
+#endif /* _TRANSITION_H */

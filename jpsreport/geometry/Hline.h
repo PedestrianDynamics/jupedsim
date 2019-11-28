@@ -24,110 +24,110 @@
  *
  *
  **/
- 
+
 
 #ifndef HLINE_H_
 #define HLINE_H_
 
-#include "Room.h"
 #include "NavLine.h"
+#include "Room.h"
 
 class SubRoom;
 class Room;
 
 
-class Hline: public NavLine {
-
+class Hline : public NavLine
+{
 private:
-     int _id;
-     std::string _caption;
+    int _id;
+    std::string _caption;
 
-//TODO: these should be redesigned as private
-//and accessed via functions in the derived classes.
+    //TODO: these should be redesigned as private
+    //and accessed via functions in the derived classes.
 protected:
-     Room* _room1=nullptr;
-     SubRoom* _subRoom1=nullptr;
-     SubRoom* _subRoom2=nullptr;
+    Room * _room1       = nullptr;
+    SubRoom * _subRoom1 = nullptr;
+    SubRoom * _subRoom2 = nullptr;
 
 public:
-     /**
+    /**
       * Constructor
       */
-     Hline();
+    Hline();
 
-     /**
+    /**
       * Destructor
       */
-     virtual ~Hline();
+    virtual ~Hline();
 
-     /**
+    /**
       * Set/Get the id of the line
       */
-     void SetID(int ID);
+    void SetID(int ID);
 
-     /**
+    /**
       * Set/Get the Room containing this line
       */
-     void SetRoom1(Room* r);
+    void SetRoom1(Room * r);
 
-     /**
+    /**
       * Set/Get the line caption
       */
-     void SetCaption(std::string s);
+    void SetCaption(std::string s);
 
-     /**
+    /**
       * Set/Get the subroom containing this line
       */
-     void SetSubRoom1(SubRoom* r);
-     /**
+    void SetSubRoom1(SubRoom * r);
+    /**
       * Set/Get the second subroom
       */
-     void SetSubRoom2(SubRoom* r2);
+    void SetSubRoom2(SubRoom * r2);
 
-     /**
+    /**
       * Set/Get the id of the line
       */
-     int GetID() const;
+    int GetID() const;
 
-     /**
+    /**
       * Set/Get the line caption
       */
-     virtual std::string GetCaption() const;
+    virtual std::string GetCaption() const;
 
-     /**
+    /**
       * Set/Get the Room containing this line
       */
-     Room* GetRoom1() const;
+    Room * GetRoom1() const;
 
-     /**
+    /**
       * Set/Get the subroom containing this line
       */
-     SubRoom* GetSubRoom1() const;
+    SubRoom * GetSubRoom1() const;
 
-     /**
+    /**
       * Set/Get the second subroom
       */
-     SubRoom* GetSubRoom2() const;
+    SubRoom * GetSubRoom2() const;
 
-     /**
+    /**
       * @return true if the line is in the given subroom
       */
-     virtual bool IsInSubRoom(int subroomID) const;
+    virtual bool IsInSubRoom(int subroomID) const;
 
-     /**
+    /**
       * @return true if the line is in the given room
       */
-     virtual bool IsInRoom(int roomID) const;
+    virtual bool IsInRoom(int roomID) const;
 
-     /**
+    /**
       * Debug output
       */
-     virtual void WriteToErrorLog() const;
+    virtual void WriteToErrorLog() const;
 
-     /**
+    /**
       * @return a nicely formatted string representation of the object
       */
-     virtual std::string GetDescription() const;
+    virtual std::string GetDescription() const;
 };
 
 #endif /* HLINE_H_ */

@@ -1,7 +1,8 @@
-#include<cstdlib>
 #include "../Analysis.h"
 
-extern OutputHandler* Log;
+#include <cstdlib>
+
+extern OutputHandler * Log;
 
 int testGetBasename()
 {
@@ -9,10 +10,10 @@ int testGetBasename()
     std::string strWin("winhelp.exe");
     std::string str;
     str = analysis.GetBasename(strWin);
-    return (str.compare("winhelp")==0)?EXIT_SUCCESS:EXIT_FAILURE;
+    return (str.compare("winhelp") == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-int main ()
+int main()
 {
     return testGetBasename();
 }
