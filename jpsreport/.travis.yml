@@ -1,0 +1,50 @@
+language: cpp
+dist: bionic
+
+git:
+  depth: 1
+  quiet: true
+
+matrix:
+  include:
+    - name: linux (clang8)
+      os: linux
+      env: TOOLCHAIN=clang
+      script:
+       - mkdir build && cd build
+       - cmake  ..
+       - make -j $(nproc)
+       - cd ../Utest/Methods
+       - ../../bin/jpsreport ini_Methods.xml
+       - python runtest_Method_A.py
+       - python runtest_Method_B.py
+       - python runtest_Method_C.py
+       - python runtest_Method_D.py
+       - python runtest_Method_J.py
+       - python runtest_Method_D_IFD.py
+       - python runtest_Method_I_IFD.py
+       - cat Utest_Methods.log
+
+    - name: linux (gcc9)
+      os: linux
+      env: TOOLCHAIN=gcc
+      script:
+       - mkdir build && cd build
+       - cmake ..
+       - make -j $(nproc)
+       - cd ../Utest/Methods
+       - ../../bin/jpsreport ini_Methods.xml
+       - python runtest_Method_A.py
+       - python runtest_Method_B.py
+       - python runtest_Method_C.py
+       - python runtest_Method_D.py
+       - python runtest_Method_J.py
+       - python runtest_Method_D_IFD.py
+       - python runtest_Method_I_IFD.py
+       - cat Utest_Methods.log
+
+before_install:
+    - source .travis_before_install.bash
+
+install:
+    - source .travis_install.bash

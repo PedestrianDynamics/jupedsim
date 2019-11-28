@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?> 
+<geometry version ="0.8" caption="second life" gridSizeX="20" gridSizeY="20" unit="m"> 
+    <rooms> 
+        <room id="0" caption="hall" zpos="0.00"> 
+            <subroom id="0" closed="0" class="subroom"> 
+                <polygon caption="wall"> 
+                    <vertex px="-6.50" py="0.00"/> 
+                    <vertex px="-6.50" py="2.00"/> 
+                    <vertex px="-5.15" py="1.50"/> 
+                    <vertex px="6.00" py="1.50"/> 
+                    <vertex px="6.00" py="0.00"/> 
+                    <vertex px="-6.50" py="0.00"/> 
+                </polygon> 
+            </subroom> 
+        </room> 
+    </rooms> 
+</geometry> 
