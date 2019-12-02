@@ -15,6 +15,12 @@ RUN apt-get update && apt-get install -y wget \
                        python \
                        python-pip
 
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6084F3CF814B57C1CF12EFD515CF4D18AF4F7421 && \
+    add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main" && \
+    apt-get update && \
+    apt-get install -y clang-format-9
+
+
 COPY scripts/setup-deps.sh /opt/
 
 RUN cd /opt && CXX=/usr/bin/g++-8 CC=/usr/bin/gcc-8 ./setup-deps.sh
