@@ -123,6 +123,16 @@ public:
     void TempClose(bool event = false);
 
     /**
+     * Allows one directional flow through door, ped look for different way
+     */
+    void OneDir();
+
+    /**
+     * Allows one directional flow through door, ped wait from other direction
+     */
+    void OneDirTemp();
+
+    /**
      * Open the door.
      * @param event An event lead to the opening.
      */
@@ -151,6 +161,31 @@ public:
      * @return true if \a _state == CLOSE
      */
     [[nodiscard]] virtual bool IsClose() const;
+
+    /**
+     * @return true if the state == OPEN
+     */
+    virtual bool IsOpen(int roomID, int subroomID) const;
+
+    /**
+     * @return true if the state == TEMP_CLOSE
+     */
+    virtual bool IsTempClose(int roomID, int subroomID) const;
+
+    /**
+     * @return true if the state == CLOSE
+     */
+    virtual bool IsClose(int roomID, int subroomID) const;
+
+    /**
+     * @return true if the state == ONE_DIR
+     */
+    virtual bool IsOneDir() const;
+
+    /**
+     * @return true if the state == ONE_DIR_TEMP
+     */
+    virtual bool IsOneDirTemp() const;
 
     /**
       * @return true if the crossing is an exit/transition. (Transitions are derived from this class)
@@ -342,4 +377,6 @@ public:
      * @return formatted string representing the door
      */
     [[nodiscard]] std::string toString() const override;
+
+    virtual DoorState checkOneDir(int roomID, int subroomID) const;
 };
