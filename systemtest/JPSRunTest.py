@@ -70,7 +70,7 @@ class JPSRunTestDriver(object):
     def run_test(self, testfunction, fd=0, *args): #fd==1: make fundamental diagram
         assert hasattr(testfunction, '__call__'), "run_test: testfunction has no __call__ function"
         self.__configure()
-        jpscore = os.path.join(self.trunk, "bin", "jpscore")
+        jpscore = os.path.join(self.trunk, "build", "bin", "jpscore")
         jpscore_exe = self.__find_executable(jpscore)
         results = []
         for inifile in self.inifiles:
@@ -148,7 +148,7 @@ class JPSRunTestDriver(object):
         logging.info("change directory back to %s", self.DIR)
         os.chdir(self.DIR)
         if self.UTEST == "..":
-            lib_path = os.path.abspath(os.path.join(self.trunk, "Utest"))
+            lib_path = os.path.abspath(os.path.join(self.trunk, "systemtest"))
         else:
             lib_path = os.path.abspath(self.UTEST)
 

@@ -1,0 +1,27 @@
+add_test(NAME juelich_test-1 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_1/runtest_juelich_1.py)
+add_test(NAME juelich_test-2 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_2/runtest_juelich_2.py)
+add_test(NAME juelich_test-3 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_3/runtest_juelich_3.py)
+add_test(NAME juelich_test-4 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_4/runtest_juelich_4.py)
+add_test(NAME juelich_test-5 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_5/runtest_juelich_5.py)
+add_test(NAME juelich_test-6 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_6/runtest_juelich_6.py)
+add_test(NAME juelich_test-9 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_9/runtest_juelich_9.py)
+add_test(NAME juelich_test-11 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_11/runtest_juelich_11.py)
+add_test(NAME juelich_test-12 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_12/runtest_juelich_12.py)
+add_test(NAME juelich_test-15 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_15/runtest_juelich_15.py)
+set_tests_properties(
+    juelich_test-1
+    juelich_test-2
+    juelich_test-3
+    juelich_test-4
+    juelich_test-5
+    juelich_test-6
+    juelich_test-9
+    juelich_test-11
+    juelich_test-12
+    juelich_test-15
+    PROPERTIES LABELS "CI:FAST")
+
+
+add_test(NAME juelich_test-8 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_8/runtest_juelich_8.py)
+add_test(NAME juelich_test-10 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_10/runtest_juelich_10.py)
+add_test(NAME juelich_test-14 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_14/runtest_juelich_14.py)
