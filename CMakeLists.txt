@@ -262,35 +262,7 @@ add_subdirectory(jpsreport)
 # Integration tests
 ################################################################################
 if (BUILD_TESTING)
-    list(APPEND clean_geometry_tests
-        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile1.xml
-        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile2.xml
-        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile3.xml
-        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile4.xml
-        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile5.xml
-        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile6.xml
-        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile7.xml
-        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile8.xml
-        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile9-1.xml
-        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile9-2.xml
-        ${CMAKE_SOURCE_DIR}/systemtest/test_geometry/clean_geometry/inifile10.xml
-    )
-    foreach(file ${clean_geometry_tests})
-        get_filename_component(test ${file} NAME_WE)
-        add_test(
-            NAME geometry-${test}
-            COMMAND $<TARGET_FILE:jpscore> ${file}
-        )
-    endforeach()
-
-    file(GLOB_RECURSE test_py_files "${CMAKE_SOURCE_DIR}/systemtest/*runtest_*.py")
-    foreach (file ${test_py_files})
-        get_filename_component(test ${file} NAME_WE)
-        add_test(
-            NAME ${test}
-            COMMAND ${PYTHON_EXECUTABLE} ${file}
-        )
-    endforeach ()
+  add_subdirectory(systemtest)
 endif (BUILD_TESTING)
 
 ################################################################################
