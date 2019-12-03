@@ -167,10 +167,7 @@ else()
 endif()
 
 find_package(Threads REQUIRED)
-
-if(BUILD_TESTING)
-    find_package(PythonInterp 3 REQUIRED)
-endif()
+find_package(PythonInterp 3 REQUIRED)
 
 ################################################################################
 # VCS info
@@ -259,7 +256,7 @@ endif()
 ################################################################################
 add_subdirectory(libcore)
 add_subdirectory(jpscore)
-
+add_subdirectory(jpsreport)
 
 ################################################################################
 # Integration tests
