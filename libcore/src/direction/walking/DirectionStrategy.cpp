@@ -104,9 +104,9 @@ Point DirectionGeneral::GetTarget(Room * room, Pedestrian * ped) const
     // check for intersection with walls
     // @todo: make a FUNCTION of this
 
-    Logging::Debug(fmt::format(check_fmt("Enter GetTarget() with PED = {}."), ped->GetID()));
-    Logging::Debug(fmt::format(
-        check_fmt("nextPointOn Line: {:.2f} {:.2f}."), NextPointOnLine._x, NextPointOnLine._y));
+    // Logging::Debug(fmt::format(check_fmt("Enter GetTarget() with PED = {}."), ped->GetID()));
+    // Logging::Debug(fmt::format(
+    //     check_fmt("nextPointOn Line: {:.2f} {:.2f}."), NextPointOnLine._x, NextPointOnLine._y));
 
     double dist;
     unsigned long inear = std::numeric_limits<unsigned long>::max();
