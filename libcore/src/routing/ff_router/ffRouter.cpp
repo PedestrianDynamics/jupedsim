@@ -185,7 +185,7 @@ void FFRouter::CalculateFloorFields()
             std::pair<int, int> key = std::make_pair(id1, id2);
             //distMatrix[i][j] = 0,   if i==j
             //distMatrix[i][j] = max, else
-            double value = (id1 == id2) ? 0.0 : std::numeric_limits<double>::max();
+            double value = (id1 == id2) ? 0.0 : std::numeric_limits<double>::infinity();
             _distMatrix.insert(std::make_pair(key, value));
 
             //pathsMatrix[i][j] = i or j ? (follow wiki:path_reconstruction, it should be j)
@@ -348,7 +348,7 @@ int FFRouter::FindExit(Pedestrian * p)
             _plzReInit = true;
         }
     }
-    double minDist = std::numeric_limits<double>::max();
+    double minDist = std::numeric_limits<double>::infinity();
     int bestDoor   = -1;
 
     int goalID = p->GetFinalDestination();
@@ -382,36 +382,26 @@ int FFRouter::FindExit(Pedestrian * p)
     if(!_targetWithinSubroom) {
         //candidates of current room (ID) (provided by Room)
         for(auto transUID : _building->GetRoom(p->GetRoomID())->GetAllTransitionsIDs()) {
-            // TODO if ((_CroTrByUID.count(transUID) != 0) && (_CroTrByUID[transUID]->IsOpen())) {
-            if((_CroTrByUID.count(transUID) != 0) && (!_CroTrByUID[transUID]->IsClose())) {
+            if(_CroTrByUID.count(transUID) != 0) {
                 DoorUIDsOfRoom.emplace_back(transUID);
             }
         }
         for(auto & subIPair : _building->GetRoom(p->GetRoomID())->GetAllSubRooms()) {
             for(auto & crossI : subIPair.second->GetAllCrossings()) {
-                // TODO if (crossI->IsOpen()) {
-                if(!crossI->IsClose()) {
                     DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
-                }
             }
         }
     } else {
         //candidates of current subroom only
         for(auto & crossI :
             _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->GetAllCrossings()) {
-            //TODO if (crossI->IsOpen()) {
-            if(!crossI->IsClose()) {
                 DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
-            }
         }
 
         for(auto & transI : _building->GetRoom(p->GetRoomID())
                                 ->GetSubRoom(p->GetSubRoomID())
                                 ->GetAllTransitions()) {
-            //TODO if (transI->IsClose()) {
-            if(!transI->IsClose()) {
                 DoorUIDsOfRoom.emplace_back(transI->GetUniqueID());
-            }
         }
     }
 
@@ -438,7 +428,7 @@ int FFRouter::FindExit(Pedestrian * p)
             }
 
             if((_distMatrix.count(key) != 0) &&
-               (_distMatrix.at(key) != std::numeric_limits<double>::max())) {
+               (_distMatrix.at(key) != std::numeric_limits<double>::infinity())) {
                 if((_distMatrix.at(key) + locDistToDoor) < minDist) {
                     minDist  = _distMatrix.at(key) + locDistToDoor;
                     bestDoor = key.first; //doorUID
