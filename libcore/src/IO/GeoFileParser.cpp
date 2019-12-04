@@ -837,10 +837,11 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
     // Additional checks:
     const bool waitPed =
         (wa->GetMinNumPed() > 0 && wa->GetMaxNumPed() > 0 && wa->GetWaitingTime() >= 0.);
-    const bool waitDoor = (wa->GetTransitionID() > 0);
+    const bool waitDoor   = (wa->GetTransitionID() > 0);
+    const bool waitGlobal = (wa->IsGlobalTimer() && wa->GetWaitingTime() >= 0.);
 
     // Either (minPed, maxPed, waitingTime) OR transitionID are set
-    if(!waitPed && !waitDoor) {
+    if(!waitPed && !waitDoor && !waitGlobal) {
         Logging::Error(fmt::format(
             check_fmt("waiting area {:d}: min_peds, max_peds, waiting_time, transition_id not set "
                       "properly. Set either (min_peds, max_peds, waiting_time) or transition_id."),
