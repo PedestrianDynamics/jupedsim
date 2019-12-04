@@ -50,63 +50,60 @@ namespace geometry::helper
 {
 namespace
 {
+bool RemoveOverlappingWall(const Line & exit, SubRoom & subroom)
+{
+    auto isOverlapping = [&exit](const auto & wall) {
+        return wall.NearlyInLineSegment(exit.GetPoint1()) &&
+               wall.NearlyInLineSegment(exit.GetPoint2());
+    };
+
+    // search for a wall overlapping with the exit
+    const auto & overlappingWallIt =
+        std::find_if(subroom.GetAllWalls().begin(), subroom.GetAllWalls().end(), isOverlapping);
+
+    if(overlappingWallIt == subroom.GetAllWalls().end()) {
+        return false;
+    }
+
+    // Attention: after adding Walls or removing Walls the overlappingWallIt could be invlaid!
+    Wall overlappingWall = *overlappingWallIt;
+
+    double dist_pt1 = (overlappingWall.GetPoint1() - exit.GetPoint1()).NormSquare();
+    double dist_pt2 = (overlappingWall.GetPoint1() - exit.GetPoint2()).NormSquare();
+
+    if(dist_pt1 < dist_pt2) {
+        subroom.AddWall(Wall(overlappingWall.GetPoint1(), exit.GetPoint1()));
+        subroom.AddWall(Wall(overlappingWall.GetPoint2(), exit.GetPoint2()));
+    } else {
+        subroom.AddWall(Wall(overlappingWall.GetPoint1(), exit.GetPoint2()));
+        subroom.AddWall(Wall(overlappingWall.GetPoint2(), exit.GetPoint1()));
+    }
+    subroom.RemoveWall(overlappingWall);
+    return true;
+}
+
+
 /**
  * @brief Removes doors on walls
- *
- * @param subroom
- * @return bool
  */
-bool RemoveOverlappingDoors(const std::shared_ptr<SubRoom> & subroom)
+bool RemoveOverlappingDoors(SubRoom & subroom)
 {
     Logging::Debug(fmt::format(
-        check_fmt("Enter RemoveOverlappingDoors with SubRoom {}, {}"),
-        subroom->GetRoomID(),
-        subroom->GetSubRoomID()));
+        check_fmt("Enter RemoveOverlappingDoors with SubRoom {}-{}"),
+        subroom.GetRoomID(),
+        subroom.GetSubRoomID()));
 
-    bool removed            = false;               // did we remove anything?
-    std::vector<Line> exits = std::vector<Line>(); // transitions+crossings
-    //  collect all crossings
-    for(auto && cros : subroom->GetAllCrossings())
-        exits.push_back(*cros);
-    //collect all transitions
-    for(auto && trans : subroom->GetAllTransitions())
-        exits.push_back(*trans);
+    int wallsRemoved = 0; // did we remove anything?
 
-    for(const auto & exit : exits) {
-        Logging::Warning(
-            fmt::format("exit: {} subroom: {} ", exit.toString(), subroom->GetSubRoomID()));
-
-        const auto & overlappingWallIt = std::find_if(
-            subroom->GetAllWalls().begin(),
-            subroom->GetAllWalls().end(),
-            [&exit](const auto & wall) {
-                return wall.NearlyInLineSegment(exit.GetPoint1()) &&
-                       wall.NearlyInLineSegment(exit.GetPoint2());
-            });
-        if(overlappingWallIt != subroom->GetAllWalls().end()) {
-            Wall overlappingWall = *overlappingWallIt;
-
-            Logging::Warning("overlapping " + exit.toString());
-            Logging::Warning("with " + overlappingWall.toString());
-            double dist_pt1 = (overlappingWall.GetPoint1() - exit.GetPoint1()).NormSquare();
-            double dist_pt2 = (overlappingWall.GetPoint1() - exit.GetPoint2()).NormSquare();
-            Point A, B;
-
-            if(dist_pt1 < dist_pt2) {
-                A = exit.GetPoint1();
-                B = exit.GetPoint2();
-            } else {
-                A = exit.GetPoint2();
-                B = exit.GetPoint1();
-            }
-
-            subroom->AddWall(Wall(overlappingWall.GetPoint1(), A));
-            subroom->AddWall(Wall(overlappingWall.GetPoint2(), B));
-            subroom->RemoveWall(overlappingWall);
-            removed = true;
-        }
+    for(Crossing const * const crossing : subroom.GetAllCrossings()) {
+        wallsRemoved += RemoveOverlappingWall(*crossing, subroom);
     }
-    return removed;
+
+    for(Transition const * const transition : subroom.GetAllTransitions()) {
+        wallsRemoved += RemoveOverlappingWall(*transition, subroom);
+    }
+
+    return wallsRemoved > 0;
 }
 
 
@@ -206,10 +203,41 @@ std::optional<std::vector<Wall>> SplitWall(const SubRoom & subroom, const Wall &
         wallPieces.emplace_back(splitPoints.back(), bigWall.GetPoint2());
     }
 
-
     return wallPieces;
 }
 
+bool isPointAndSubroomIncident(const SubRoom & subroom, const Point & point)
+{
+    // Incident with wall at point 1 or 2
+    for(const auto & checkWall : subroom.GetAllWalls()) {
+        if(checkWall.GetPoint1() == point || checkWall.GetPoint2() == point) {
+            return true;
+        }
+    }
+    // Incident with transition
+    for(auto transition : subroom.GetAllTransitions()) {
+        if(transition->GetPoint1() == point || transition->GetPoint2() == point) {
+            return true;
+        }
+    }
+    //Incident with crossing
+    for(auto crossing : subroom.GetAllCrossings()) {
+        if(crossing->GetPoint1() == point || crossing->GetPoint2() == point) {
+            return true;
+        }
+    }
+    // Incident with wall in any point
+    for(const auto & checkWall : subroom.GetAllWalls()) {
+        if(checkWall.IsInLineSegment(point)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * @brief Checks if the wall is inside the polygon of the subroom and does not exist already
+ */
 bool IsConnectedAndNewWall(const SubRoom & subroom, const Wall & wall)
 {
     if(subroom.GetAllWalls().end() !=
@@ -217,57 +245,20 @@ bool IsConnectedAndNewWall(const SubRoom & subroom, const Wall & wall)
         return false; // The wall already exists in subroom (not new).
     }
 
-    auto checkPoint = [](const SubRoom & subroom, const Point & point) -> bool {
-        for(const auto & checkWall : subroom.GetAllWalls()) {
-            if(checkWall.GetPoint1() == point || checkWall.GetPoint2() == point) {
-                return true;
-            }
-        }
-        for(auto transition : subroom.GetAllTransitions()) {
-            if(transition->GetPoint1() == point || transition->GetPoint2() == point) {
-                return true;
-            }
-        }
-        for(auto crossing : subroom.GetAllCrossings()) {
-            if(crossing->GetPoint1() == point || crossing->GetPoint2() == point) {
-                return true;
-            }
-        }
-        for(const auto & checkWall : subroom.GetAllWalls()) {
-            if(checkWall.IsInLineSegment(point)) {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    if(checkPoint(subroom, wall.GetPoint1()) && checkPoint(subroom, wall.GetPoint2())) {
+    if(isPointAndSubroomIncident(subroom, wall.GetPoint1()) &&
+       isPointAndSubroomIncident(subroom, wall.GetPoint2())) {
         return true;
     }
 
 
     return false;
 }
-/**
- * @brief Add newWall  subroom
- *
- *  We count for a candidate wall if it has more than 2 common points with
- *  walls+transitions+crossings of the subroom.
- *
- *  Assumption: We assume one of the new lines needs to be added.
- *
- *  @todo Is there a case where none should be chosen?
- *  @todo Or more than one wall *can* be choosen?
- *
- * @param subroom: subroom where new wall shoud be added to
- * @param WallPieces: vector of candidates. One of these walls is going to
- *        be added to subroom
- *
- */
-void AddWallToSubroom(SubRoom & subroom, const std::vector<Wall> & wallPieces)
-{
-    Logging::Debug("Entering AddWallToSubroom with following walls:");
 
+/**
+ * @brief Adds wall pieces to a subroom if they are new and connected
+ */
+int AddWallToSubroom(SubRoom & subroom, const std::vector<Wall> & wallPieces)
+{
     int wallsAdded = 0;
 
     for(const auto & w : wallPieces) {
@@ -277,36 +268,52 @@ void AddWallToSubroom(SubRoom & subroom, const std::vector<Wall> & wallPieces)
         }
     }
 
-    if(wallsAdded <= 0) {
-        throw std::runtime_error("Geometry correction failed, could not add walls to subroom.");
-    }
+    return wallsAdded;
 }
 
 /**
- * @brief Replace BigWall with a smaller wall
- *
- * this function should be called after \fn SplitWall()
- *
- * @param subroom: subroom containing <bigwall>
- * @param bigWall: bigWall is going to be removes from subroom
- * @param WallPieces: vector of candidates. One of these walls is going to
- * replace bigwall (\fn AddWallToSubroom() is called)
- * @return bool: true if successful
+ * @brief Replace BigWall with some of the wallPieces
  */
 void ReplaceBigWall(SubRoom & subroom, const Wall & bigWall, const std::vector<Wall> & wallPieces)
 {
     Logging::Debug(fmt::format(
-        check_fmt("Replacing big line {} in SubRoom {}-{}"),
+        check_fmt("Replacing big wall {} in SubRoom {}-{}"),
         bigWall.toString(),
         subroom.GetRoomID(),
         subroom.GetSubRoomID()));
 
     if(!subroom.RemoveWall(bigWall)) {
-        throw std::runtime_error(
-            fmt::format(check_fmt("Correct fails. Could not remove wall: {}"), bigWall.toString()));
+        throw std::runtime_error(fmt::format(
+            check_fmt("Correcting the geometry failed. Could not remove wall: {}"),
+            bigWall.toString()));
     }
 
-    AddWallToSubroom(subroom, wallPieces);
+    if(AddWallToSubroom(subroom, wallPieces) <= 0) {
+        throw std::runtime_error(fmt::format(
+            check_fmt("Correcting the geometry failed. Could not add any wall from splitted big "
+                      "wall: {}"),
+            bigWall.toString()));
+    }
+}
+
+bool RemoveBigWalls(SubRoom & subroom)
+{
+    bool wallsRemoved = false;
+
+    // Need to copy walls here, because we are going to change subrooms wall container
+    auto walls = subroom.GetAllWalls();
+
+    for(auto const & bigWall : walls) {
+        auto splitWallPieces = SplitWall(subroom, bigWall);
+
+        if(splitWallPieces && !splitWallPieces->empty()) {
+            // remove big wall and add one wallpiece to walls
+            ReplaceBigWall(subroom, bigWall, *splitWallPieces);
+            wallsRemoved = true;
+        }
+    }
+
+    return wallsRemoved;
 }
 
 
@@ -315,31 +322,23 @@ void ReplaceBigWall(SubRoom & subroom, const Wall & bigWall, const std::vector<W
 void correct(Building & building)
 {
     auto t_start = std::chrono::high_resolution_clock::now();
-    Logging::Info("Enter correct ...");
-    bool corrected_geometry = false;
+    Logging::Info("Starting geometry::helper::correct to fix the geometry ...");
+
+    bool geometry_changed = false;
+
     for(const auto & room : building.GetAllRooms()) {
-        for(const auto & subroom : room.second->GetAllSubRooms()) {
-            // remove exits *on* walls
-            corrected_geometry = RemoveOverlappingDoors(subroom.second);
+        for(const auto & keySubroomPair : room.second->GetAllSubRooms()) {
+            SubRoom & subroom = *keySubroomPair.second;
 
-            // Need to copy walls here, because we are going to change subrooms wall container
-            auto walls = subroom.second->GetAllWalls();
-            for(auto const & bigWall : walls) {
-                if(auto splitWallPieces = SplitWall(*subroom.second, bigWall);
-                   splitWallPieces && !splitWallPieces->empty()) {
-                    corrected_geometry = true;
-                    Logging::Debug(
-                        fmt::format(check_fmt("Wall pieces size : {}"), splitWallPieces->size()));
+            // remove wall parts overlapping with exits
+            geometry_changed = RemoveOverlappingDoors(subroom);
 
-                    // remove big wall and add one wallpiece to walls
-                    ReplaceBigWall(*subroom.second, bigWall, *splitWallPieces);
-                }
+            // remove walls reaching out of the subroom
+            geometry_changed = RemoveBigWalls(subroom);
+        }
+    }
 
-            } // bigLine
-        }     //s
-    }         //r
-
-    if(corrected_geometry) {
+    if(geometry_changed) {
         auto geometryFile = add_prefix_to_filename("correct_", building.GetGeometryFilename());
 
         if(building.SaveGeometry(geometryFile)) {
