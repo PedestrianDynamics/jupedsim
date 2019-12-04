@@ -1,5 +1,5 @@
 ---
-Checks:          'clang-diagnostic-*,clang-analyzer-*,*, -fuchsia*, -readability-isolate-declaration, -cppcoreguidelines-avoid-magic-numbers, -readability-magic-numbers'
+Checks:          'clang-diagnostic-*,clang-analyzer-*,*, -fuchsia*, -readability-isolate-declaration, -cppcoreguidelines-avoid-magic-numbers, -readability-magic-numbers,-modernize-use-trailing-return-type'
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false
