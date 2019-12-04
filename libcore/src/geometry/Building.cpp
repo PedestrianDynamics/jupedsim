@@ -34,10 +34,6 @@
 #include "geometry/helper/CorrectGeometry.h"
 
 #include <algorithm>
-#include <cassert>
-#include <chrono>
-#include <optional>
-#include <stdexcept>
 #include <tinyxml.h>
 
 #ifdef _SIMULATOR
