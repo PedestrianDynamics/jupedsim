@@ -20,6 +20,7 @@ set(source_files
     src/geometry/Crossing.cpp
     src/geometry/Goal.cpp
     src/geometry/GoalManager.cpp
+    src/geometry/helper/CorrectGeometry.cpp
     src/geometry/Hline.cpp
     src/geometry/Line.cpp
     src/geometry/NavLine.cpp
@@ -106,6 +107,7 @@ set(header_files
     src/geometry/Crossing.h
     src/geometry/Goal.h
     src/geometry/GoalManager.h
+    src/geometry/helper/CorrectGeometry.h
     src/geometry/Hline.h
     src/geometry/Line.h
     src/geometry/NavLine.h
