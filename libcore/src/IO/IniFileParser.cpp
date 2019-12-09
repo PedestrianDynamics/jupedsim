@@ -55,7 +55,11 @@ void IniFileParser::Parse(const fs::path & iniFile)
         iniFile); //TODO in some locations it is called iniFile and in others project file,
     // and as I just realized, I called it configuration. We should be consistent here anything else
     // is confusing [gl march '16]
-    _config->SetProjectRootDir(fs::absolute(iniFile.parent_path()));
+    fs::path parentPath = iniFile.parent_path();
+    if(parentPath.empty()) {
+        parentPath = fs::current_path();
+    }
+    _config->SetProjectRootDir(fs::absolute(parentPath));
 
     TiXmlDocument doc(iniFile.string());
     if(!doc.LoadFile()) {

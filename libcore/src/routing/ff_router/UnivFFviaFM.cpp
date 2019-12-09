@@ -3,6 +3,9 @@
 //
 #include "UnivFFviaFM.h"
 
+#include "general/Filesystem.h"
+#include "general/Format.h"
+#include "general/Logger.h"
 #include "geometry/Building.h"
 #include "geometry/Line.h"
 #include "geometry/SubRoom.h"
@@ -1709,21 +1712,14 @@ void UnivFFviaFM::setSpeedMode(int speedModeArg)
 
 void UnivFFviaFM::writeFF(const fs::path & filename, std::vector<int> targetID)
 {
-    Log->Write("INFO: \tWrite Floorfield to file");
-    auto floorfieldFile = _configuration->GetProjectRootDir() / filename;
-    Log->Write(floorfieldFile.string());
+    fs::create_directory(_configuration->GetProjectRootDir() / "ff_vtk_files");
+    auto floorfieldFile = _configuration->GetProjectRootDir() / "ff_vtk_files" / filename;
+    Logging::Info(fmt::format(
+        check_fmt("Write Floorfield to file: {:s} with {:d} targets."),
+        floorfieldFile.string().c_str(),
+        targetID.size()));
     std::ofstream file;
 
-    Log->Write(
-        "FloorfieldViaFM::writeFF(): writing to file %s: There are %d targets.",
-        floorfieldFile.string().c_str(),
-        targetID.size());
-
-    // int numX = (int) ((_grid->GetxMax()-_grid->GetxMin())/_grid->Gethx());
-    // int numY = (int) ((_grid->GetyMax()-_grid->GetyMin())/_grid->Gethy());
-    //int numTotal = numX * numY;
-    //std::cerr << numTotal << " numTotal" << std::endl;
-    //std::cerr << grid->GetnPoints() << " grid" << std::endl;
     file.open(floorfieldFile.string());
 
     file << "# vtk DataFile Version 3.0" << std::endl;
@@ -1777,12 +1773,6 @@ void UnivFFviaFM::writeFF(const fs::path & filename, std::vector<int> targetID)
                 continue;
             }
             double * costarray = _costFieldWithKey[targetID[iTarget]];
-
-            Log->Write(
-                "%s: target number %d: UID %d",
-                filename.string().c_str(),
-                iTarget,
-                targetID[iTarget]);
 
             std::string name = _building->GetTransOrCrossByUID(targetID[iTarget])->GetCaption() +
                                "-" + std::to_string(targetID[iTarget]);
