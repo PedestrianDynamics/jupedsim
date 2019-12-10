@@ -3,6 +3,7 @@
 //
 #include "UnivFFviaFM.h"
 
+#include "general/Filesystem.h"
 #include "general/Format.h"
 #include "general/Logger.h"
 #include "geometry/Building.h"
@@ -1545,7 +1546,8 @@ void UnivFFviaFM::SetSpeedMode(int speedMode)
 
 void UnivFFviaFM::WriteFF(const fs::path & filename, std::vector<int> targetID)
 {
-    auto floorfieldFile = _configuration->GetProjectRootDir() / filename;
+    fs::create_directory(_configuration->GetProjectRootDir() / "ff_vtk_files");
+    auto floorfieldFile = _configuration->GetProjectRootDir() / "ff_vtk_files" / filename;
     Logging::Info(fmt::format(
         check_fmt("Write Floorfield to file: {:s} with {:d} targets."),
         floorfieldFile.string().c_str(),
