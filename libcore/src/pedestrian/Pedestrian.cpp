@@ -79,8 +79,6 @@ Pedestrian::Pedestrian()
     _lastE0                    = Point(0, 0);
     _navLine                   = nullptr;
     _mentalMap                 = std::map<int, int>();
-    _destHistory               = std::vector<int>();
-    _trip                      = std::vector<int>();
     _lastPosition              = Point(0, 0);
     _lastCellPosition          = -1;
     _knownDoors.clear();
@@ -105,7 +103,6 @@ Pedestrian::Pedestrian()
     //_knownDoors = map<int, NavLineState>();
 
     _spotlight       = false;
-    _ticksInThisRoom = 0;
 
     _agentsCreated++; //increase the number of object created
     _FED_In           = 0.0;
@@ -133,7 +130,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _patienceTime(agentsParameters.GetPatience()),
     _router(building.GetRoutingEngine()->GetRouter(agentsParameters.GetRouterId())),
     _building(&building),
-    _ticksInThisRoom(0)
 {
     _roomID                  = -1;
     _subRoomID               = -1;
@@ -160,7 +156,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _patienceTime            = 5.0; // time after which the ped feels to be in jam
     _desiredFinalDestination = FINAL_DEST_OUT;
     _mentalMap               = std::map<int, int>();
-    _destHistory             = std::vector<int>();
     _deltaT                  = 0.01;
     _updateRate              = _deltaT;
     _V0                      = Point(0, 0);
@@ -172,7 +167,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _height                    = 170;
     _age                       = 30;
     _gender                    = "male";
-    _trip                      = std::vector<int>();
     _group                     = -1;
     _spotlight                 = false;
     _V0UpStairs                = 0.6;
@@ -250,7 +244,6 @@ void Pedestrian::SetExitIndex(int i)
     _exitIndex = i;
     //save that destination for that room
     _mentalMap[GetUniqueRoomID()] = i;
-    //_destHistory.push_back(i);
 }
 
 void Pedestrian::SetExitLine(const NavLine * l)
@@ -337,11 +330,6 @@ void Pedestrian::Setdt(double dt)
 double Pedestrian::Getdt()
 {
     return _deltaT;
-}
-
-void Pedestrian::SetTrip(const std::vector<int> & trip)
-{
-    _trip = trip;
 }
 
 
@@ -437,14 +425,6 @@ void Pedestrian::SetLastE0(Point E0)
     _lastE0 = E0;
 }
 
-int Pedestrian::GetLastDestination()
-{
-    if(_destHistory.size() == 0)
-        return -1;
-    else
-        return _destHistory.back();
-}
-
 bool Pedestrian::ChangedSubRoom()
 {
     if(_oldRoomID != GetRoomID() || _oldSubRoomID != GetSubRoomID()) {
@@ -481,11 +461,6 @@ void Pedestrian::ClearKnowledge()
 std::map<int, Knowledge> & Pedestrian::GetKnownledge()
 {
     return _knownDoors;
-}
-
-const std::vector<int> & Pedestrian::GetLastDestinations() const
-{
-    return _destHistory;
 }
 
 const std::string Pedestrian::GetKnowledgeAsString() const

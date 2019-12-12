@@ -48,46 +48,113 @@ class WalkingSpeed;
 class Pedestrian
 {
 private:
-    //generic parameters, independent from models
-    int _id;        //starting with 1
-    int _exitIndex; // current exit
+    /**
+     * Unique id of pedestrian, starting at 1.
+     */
+    int _id;
+
+    /**
+     * Current desired exit index.
+     */
+    int _exitIndex;
+
+    /**
+     * ID of group to which the pedestrian belongs.
+     */
     int _group;
+
+    /**
+     * Desired final goal, -1 for outside.
+     */
     int _desiredFinalDestination;
+
+    /**
+     * Height of pedestrian.
+     */
     double _height;
+
+    /**
+     * Age of pedestrian.
+     */
     double _age;
-    double _premovement   = 0;
+
+    /**
+     * Time till the pedestrian starts its initial motion.
+     */
+    double _premovement = 0;
+
+    /**
+     * Risk tolerance of the pedestrian, defines the probabilt that the ped will go through smoked areas.
+     * @todo only used in smoke router, move it there
+     */
     double _riskTolerance = 0;
+
+    /**
+     * Gender of ped
+     * @todo better as enum
+     */
     std::string _gender;
 
     //gcfm specific parameters
-    double _mass;      // Mass: 1
-    double _tau;       // Reaction time: 0.5
-    double _T;         // OV function
-    double _deltaT;    // step size
-    JEllipse _ellipse; // the shape of this pedestrian
-    Point _V0;         //vector V0
+    /**
+     * Mass of pedestrian?
+     * @todo unit
+     */
+    double _mass; // Mass: 1
 
+    /**
+     * Reaction time?
+     * @todo unit
+     */
+    double _tau; // Reaction time: 0.5
 
-    //double _V0;
+    /**
+     *
+     */
+    double _T; // OV function
+
+    /**
+     * Time step size
+     * @todo why needed in ped?
+     */
+    double _deltaT;
+
+    /**
+     * Shape of pedestrian, includes also the coordinates.
+     * @todo may be move to model and keep only position
+     */
+    JEllipse _ellipse;
+
+    /**
+     * Current velocity of ped. Point used as vector here.
+     */
+    Point _V0;
+
+    /**
+     * Velocity on upward stairs.
+     */
     double _V0UpStairs;
+
+    /**
+     * Velocity on downward stairs.
+     */
     double _V0DownStairs;
     double _EscalatorUpStairs;
     double _EscalatorDownStairs;
     double _V0IdleEscalatorUpStairs;
     double _V0IdleEscalatorDownStairs;
+
     //location parameters
-    std::string _roomCaption;
+    std::string _roomCaption; //TODO remove
     int _roomID;
     int _subRoomID;
     int _subRoomUID;
-    int _oldRoomID;
-    int _oldSubRoomID;
+    int _oldRoomID;    //TODO remove
+    int _oldSubRoomID; //TODO remove
     Point _lastE0;
 
     NavLine * _navLine;            // current exit line
     std::map<int, int> _mentalMap; // map the actual room to a destination
-    std::vector<int> _destHistory;
-    std::vector<int> _trip;
 
     Point _lastPosition;
     int _lastCellPosition;
@@ -149,9 +216,6 @@ private:
     Point _waitingPos;
 
 public:
-    // public member
-    int _ticksInThisRoom;
-
     // constructors
     Pedestrian();
     explicit Pedestrian(const StartDistribution & agentsParameters, Building & building);
@@ -199,11 +263,9 @@ public:
     void SetSmoothTurning(); // activate the smooth turning with a delay of 2 sec
     void SetPhiPed();
     void SetFinalDestination(int UID);
-    void SetTrip(const std::vector<int> & trip);
     void SetRouter(Router * router);
 
     // Getter-Funktionen
-    const std::vector<int> & GetTrip() const;
     int GetID() const;
     int GetRoomID() const;
     int GetSubRoomID() const;
@@ -250,17 +312,14 @@ public:
 
     /***
       * @return the knowledge of the pedstrian
+      * TODO remove only
       */
     std::map<int, Knowledge> & GetKnownledge();
 
     /**
-      * @return all previous destinations used by this pedestrian
-      */
-    const std::vector<int> & GetLastDestinations() const;
-
-    /**
       * For convenience
       * @return a string representation of the knowledge
+      * TODO remove
       */
     const std::string GetKnowledgeAsString() const;
 
@@ -272,7 +331,6 @@ public:
     RoutingStrategy GetRoutingStrategy() const;
     int GetUniqueRoomID() const;
     int GetNextDestination();
-    int GetLastDestination();
     double GetDistanceToNextTarget() const;
     double GetDisTanceToPreviousTarget() const;
     void SetNewOrientationFlag(bool flag);
