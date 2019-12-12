@@ -126,7 +126,6 @@ void FFRouter::CalculateFloorFields()
 
     //get all door UIDs
     std::vector<std::pair<int, int>> roomAndCroTrVector;
-    roomAndCroTrVector.clear();
 
     for(const auto & [_, trans] : _building->GetAllTransitions()) {
         _allDoorUIDs.emplace_back(trans->GetUniqueID());

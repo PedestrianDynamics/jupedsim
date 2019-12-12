@@ -80,70 +80,58 @@ UnivFFviaFM::UnivFFviaFM(
 {
     //build the vector with walls(wall or obstacle), the map with <UID, Door(Cross or Trans)>, the vector with targets(UIDs)
     //then call other constructor including the mode
-
     _configuration = confArg;
     _room          = roomArg->GetID();
-    std::vector<Line> lines;
-    std::map<int, Line> tmpDoors;
-    Line anyDoor = Line{};
-    for(auto & subroomMap : roomArg->GetAllSubRooms()) {
-        SubRoom * subRoomPtr    = subroomMap.second.get();
-        std::vector<Wall> walls = std::vector<Wall>(subRoomPtr->GetAllWalls());
-        for(auto & wall : walls) {
-            lines.emplace_back((Line) wall);
+    std::vector<Line> walls;
+    std::map<int, Line> doors;
+
+    for(auto [_, subroom] : roomArg->GetAllSubRooms()) {
+        for(auto wall : subroom->GetAllWalls()) {
+            walls.emplace_back((Line) wall);
         }
 
-        std::vector<Obstacle *> tmpObsPtrVec = subRoomPtr->GetAllObstacles();
-        for(Obstacle * ptrObs : tmpObsPtrVec) {
-            const std::vector<Wall> & obsWalls = ptrObs->GetAllWalls();
-            for(auto & owall : obsWalls) {
-                lines.emplace_back((Line) owall);
+        for(Obstacle * ptrObs : subroom->GetAllObstacles()) {
+            for(auto owall : ptrObs->GetAllWalls()) {
+                walls.emplace_back((Line) owall);
             }
         }
 
-        const std::vector<Crossing *> tmpCross   = subRoomPtr->GetAllCrossings();
-        const std::vector<Transition *> tmpTrans = subRoomPtr->GetAllTransitions();
+        for(auto const & cross : subroom->GetAllCrossings()) {
+            int id = cross->GetUniqueID();
+            if(doors.count(id) == 0) {
+                doors.emplace(std::make_pair(id, Line{*cross}));
+            }
+        }
+        for(auto const & trans : subroom->GetAllTransitions()) {
+            int id = trans->GetUniqueID();
+            if(doors.count(id) == 0) {
+                doors.emplace(std::make_pair(id, Line{*trans}));
+            }
+        }
 
-        int uidNotConst = 0;
-        for(auto & cross : tmpCross) {
-                anyDoor = Line{*cross};
-                if(tmpDoors.count(uidNotConst) == 0) {
-                    tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *cross));
-                }
-        }
-        for(auto & trans : tmpTrans) {
-            uidNotConst = trans->GetUniqueID();
-                anyDoor = Line{*trans};
-                if(tmpDoors.count(uidNotConst) == 0) {
-                    tmpDoors.emplace(std::make_pair(uidNotConst, (Line) *trans));
-                }
-        }
         //find insidePoint and save it, together with UID
-        Point normalVec   = anyDoor.NormalVec();
-        Point midPoint    = anyDoor.GetCentre();
+        Point normalVec   = doors.begin()->second.NormalVec();
+        Point midPoint    = doors.begin()->second.GetCentre();
         Point candidate01 = midPoint + (normalVec * 0.25);
         Point candidate02 = midPoint - (normalVec * 0.25);
-        if(subRoomPtr->IsInSubRoom(candidate01)) {
-            _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomPtr, candidate01));
+
+        if(subroom->IsInSubRoom(candidate01)) {
+            _subRoomPtrTOinsidePoint.emplace(std::make_pair(subroom.get(), candidate01));
         } else {
             //candidate = candidate - (normalVec * 0.25);
-            if(subRoomPtr->IsInSubRoom(candidate02)) {
-                _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomPtr, candidate02));
+            if(subroom->IsInSubRoom(candidate02)) {
+                _subRoomPtrTOinsidePoint.emplace(std::make_pair(subroom.get(), candidate02));
             } else {
                 Logging::Error("In UnivFF InsidePoint Analysis.");
-                bool a = subRoomPtr->IsInSubRoom(candidate01);
-                bool b = subRoomPtr->IsInSubRoom(candidate02);
-                a      = b &&
-                    a; //ignore this line. only to have a codeline after initialization of bools (to place a breakpoint)
             }
         }
-        //_subroomUIDtoSubRoomPtr.emplace(std::make_pair(subRoomPtr->GetUID(), subRoomPtr));
     }
+
     //this will interpret "useWallDistances" as best as possible. Users should clearify with "SetSpeedMode" before calling "AddTarget"
     if(useWallDistances) {
-        Create(lines, tmpDoors, wantedDoors, FF_WALL_AVOID, hx, wallAvoid, useWallDistances);
+        Create(walls, doors, wantedDoors, FF_WALL_AVOID, hx, wallAvoid, useWallDistances);
     } else {
-        Create(lines, tmpDoors, wantedDoors, FF_HOMO_SPEED, hx, wallAvoid, useWallDistances);
+        Create(walls, doors, wantedDoors, FF_HOMO_SPEED, hx, wallAvoid, useWallDistances);
     }
 }
 
