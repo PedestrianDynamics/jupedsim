@@ -835,15 +835,16 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
     }
 
     // Additional checks:
-    const bool waitPed =
+    const bool usesMinPedWaitingTime =
         (wa->GetMinNumPed() > 0 && wa->GetMaxNumPed() > 0 && wa->GetWaitingTime() >= 0.);
-    const bool waitDoor = (wa->GetTransitionID() > 0);
+    const bool usesTransition  = (wa->GetTransitionID() > 0);
+    const bool usesGlobalTimer = (wa->IsGlobalTimer() && wa->GetWaitingTime() >= 0.);
 
-    // Either (minPed, maxPed, waitingTime) OR transitionID are set
-    if(!waitPed && !waitDoor) {
+    if(!usesMinPedWaitingTime && !usesTransition && !usesGlobalTimer) {
         Logging::Error(fmt::format(
             check_fmt("waiting area {:d}: min_peds, max_peds, waiting_time, transition_id not set "
-                      "properly. Set either (min_peds, max_peds, waiting_time) or transition_id."),
+                      "properly. Set either (min_peds, max_peds, waiting_time) OR transition_id OR "
+                      "(waiting_time, global_timer)."),
             wa->GetId()));
         delete wa;
         return nullptr;
@@ -851,7 +852,7 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
 
     // If (minPed, maxPed, waitingTime) AND transitionID are set only
     // transitionID is considered
-    if(waitPed && waitDoor) {
+    if(usesMinPedWaitingTime && usesTransition) {
         Logging::Warning(fmt::format(
             check_fmt("waiting area {:d}: min_peds, max_peds and waiting_time not considered since "
                       "transition_id set."),
