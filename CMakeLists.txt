@@ -51,7 +51,13 @@ print_var(BUILD_DOC)
 set(JPSFIRE OFF CACHE BOOL "Build with jpsfire support")
 print_var(JPSFIRE)
 
-set(USE_OPENMP ON CACHE BOOL "Build with OpenMP")
+# Due to old OpenMP implementation in MSVC we disable OpenMP on Windows for the moment.
+if(${CMAKE_SYSTEM} MATCHES "Windows")
+    set(USE_OPENMP Off)
+    message(WARNING "OpenMP is disabled on Windows")
+else()
+    set(USE_OPENMP ON CACHE BOOL "Build with OpenMP")
+endif()
 print_var(USE_OPENMP)
 
 set(BUILD_WITH_ASAN OFF CACHE BOOL
@@ -75,8 +81,7 @@ list(APPEND COMMON_COMPILE_OPTIONS
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-Wall>
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-Wextra>
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-fdiagnostics-color=always>
-    $<$<CXX_COMPILER_ID:MSVC>:/W4>
-    $<$<CXX_COMPILER_ID:MSVC>:/WX>
+    $<$<CXX_COMPILER_ID:MSVC>:/W2>
     $<$<CXX_COMPILER_ID:MSVC>:/EHsc>
 )
 
@@ -162,7 +167,7 @@ if(USE_OPENMP)
 else()
     list(APPEND COMMON_COMPILE_OPTIONS
         # Disable warnigns about omp pragmas
-        -Wno-unknown-pragmas
+         $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-Wno-unknown-pragmas>
     )
 endif()
 
