@@ -181,35 +181,3 @@ void FileHandler::Write(const char * str_msg, ...)
         incrementWarnings();
     }
 }
-
-#ifdef _SIMULATOR
-
-SocketHandler::SocketHandler(const std::string & host, int port)
-{
-    client = new TraVisToClient(host, port);
-    brokentags.push_back("<trajectories>");
-    brokentags.push_back("</trajectories>");
-    brokentags.push_back("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-}
-
-SocketHandler::~SocketHandler()
-{
-    delete client;
-}
-
-void SocketHandler::Write(const std::string & stringRef)
-{
-    std::vector<std::string>::iterator str_it;
-    std::string str = stringRef;
-
-    //There are a few broken tags which need to be checked for and removed.
-    for(str_it = brokentags.begin(); str_it != brokentags.end(); ++str_it) {
-        int tagstart = str.find(*str_it);
-        if(tagstart != (int) std::string::npos) {
-            str.erase(str.begin() + tagstart, str.begin() + tagstart + (*str_it).size());
-        }
-    }
-    client->sendData(str.c_str());
-}
-
-#endif

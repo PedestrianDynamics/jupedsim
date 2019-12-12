@@ -48,7 +48,6 @@ public:
         _routingEngine    = std::shared_ptr<RoutingEngine>(new RoutingEngine());
         _maxOpenMPThreads = 1;
         _log              = 0;
-        _port             = -1;
         _seed             = 0;
         _fps              = 8;
         _linkedCellSize   = 2.2;     // meter
@@ -138,10 +137,6 @@ public:
     int GetLog() const { return _log; };
 
     void SetLog(int log) { _log = log; };
-
-    int GetPort() const { return _port; };
-
-    void SetPort(int port) { _port = port; };
 
     void SetPRB(bool prb) { _PRB = prb; };
     bool print_prog_bar() const { return _PRB; };
@@ -375,7 +370,6 @@ private:
     std::shared_ptr<RoutingEngine> _routingEngine;
     int _maxOpenMPThreads;
     int _log;
-    int _port;
     unsigned int _seed;
     double _fps;
     double _linkedCellSize;

@@ -37,7 +37,6 @@ set(source_files
     src/IO/PedDistributionParser.cpp
     src/IO/progress_bar.cpp
     src/IO/Trajectories.cpp
-    src/IO/TraVisToClient.cpp
     src/math/GCFMModel.cpp
     src/math/Mathematics.cpp
     src/math/OperationalModel.cpp
@@ -117,7 +116,6 @@ set(header_files
     src/IO/OutputHandler.h
     src/IO/PedDistributionParser.h
     src/IO/Trajectories.h
-    src/IO/TraVisToClient.h
     src/math/GCFMModel.h
     src/math/Mathematics.h
     src/math/OperationalModel.h
