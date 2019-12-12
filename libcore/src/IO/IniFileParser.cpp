@@ -339,19 +339,6 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
                 _config->GetFps()));
         }
 
-        if(xTrajectories->FirstChild("socket")) {
-            std::string tmp = xTrajectories->FirstChildElement("socket")->Attribute("hostname");
-            if(tmp.c_str())
-                _config->SetHostname(tmp);
-            int port;
-            xTrajectories->FirstChildElement("socket")->Attribute("port", &port);
-            _config->SetPort(port);
-            Logging::Info(fmt::format(
-                check_fmt("Streaming results to output [{}:{}]"),
-                _config->GetHostname(),
-                _config->GetPort()));
-        }
-
         if(xTrajectories->FirstChild("optional_output")) {
             Logging::Warning("These optional options do only work with plain output format!");
 

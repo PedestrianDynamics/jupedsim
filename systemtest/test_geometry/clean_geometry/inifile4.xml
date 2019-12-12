@@ -12,7 +12,6 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
   <!-- trajectories file and format -->
   <trajectories format="xml-plain" fps="8">
     <file location="traj4.xml" />
-    <!--<socket hostname="127.0.0.1" port="8989"/> -->
   </trajectories>
   <!-- where to store the logs -->
   <logfile>log4</logfile>

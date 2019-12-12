@@ -12,8 +12,7 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
   <geometry>bateau_geo.xml</geometry>
   <!-- trajectories file and format -->
   <trajectories format="xml-plain" fps="8">
-    <!-- <file location="bateau_traj2.xml" /> -->
-    <socket hostname="127.0.0.1" port="8989" />
+    <file location="bateau_traj2.xml" />
   </trajectories>
   <!-- where to store the logs -->
   <logfile>log.txt</logfile>
