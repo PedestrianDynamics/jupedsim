@@ -28,9 +28,6 @@
 
 #include "general/Filesystem.h"
 #include "general/Macros.h"
-#ifdef _SIMULATOR
-#include "IO/TraVisToClient.h"
-#endif
 
 #include <fstream>
 #include <iostream>
@@ -81,21 +78,3 @@ public:
     void Write(const std::string & str) override;
     void Write(const char * string, ...) override;
 };
-
-#ifdef _SIMULATOR
-
-class SocketHandler : public OutputHandler
-{
-private:
-    TraVisToClient * client;
-
-public:
-    SocketHandler(const std::string & host, int port);
-    ~SocketHandler() override;
-    void Write(const std::string & str) override;
-
-    //Some tags are broken
-    std::vector<std::string> brokentags;
-};
-
-#endif

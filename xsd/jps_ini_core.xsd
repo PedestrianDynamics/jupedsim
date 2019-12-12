@@ -36,16 +36,6 @@
                   </xs:simpleContent>
                 </xs:complexType>
               </xs:element>
-              <xs:element name="socket" minOccurs="0" maxOccurs="1">
-                <xs:complexType>
-                  <xs:simpleContent>
-                    <xs:extension base="xs:string">
-                      <xs:attribute type="xs:string" name="hostname" use="required" />
-                      <xs:attribute type="xs:short" name="port" use="required" />
-                    </xs:extension>
-                  </xs:simpleContent>
-                </xs:complexType>
-              </xs:element>
             </xs:sequence>
             <xs:attribute name="format">
               <xs:simpleType>
@@ -69,16 +59,6 @@
               </xs:simpleType>
             </xs:attribute>
             <xs:attribute type="xs:float" name="fps" use="required" />
-          </xs:complexType>
-        </xs:element>
-        <xs:element name="hybrid_simulation" minOccurs="0" maxOccurs="1">
-          <xs:complexType>
-            <xs:simpleContent>
-              <xs:extension base="xs:string">
-                <xs:attribute type="xs:string" name="server" use="required" />
-                <xs:attribute type="xs:short" name="port" use="required" />
-              </xs:extension>
-            </xs:simpleContent>
           </xs:complexType>
         </xs:element>
         <xs:element type="xs:string" name="logfile" minOccurs="0" maxOccurs="1">
