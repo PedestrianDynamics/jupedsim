@@ -313,6 +313,7 @@ set (header_files
 add_library(report STATIC
     ${source_files}
     ${methods}
+    Boost::boost
 )
 
 target_link_libraries(report PUBLIC
