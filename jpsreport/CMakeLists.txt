@@ -318,6 +318,7 @@ add_library(report STATIC
 target_link_libraries(report PUBLIC
     tinyxml
     fs
+    Boost::boost
 )
 
 target_compile_definitions(report PUBLIC
