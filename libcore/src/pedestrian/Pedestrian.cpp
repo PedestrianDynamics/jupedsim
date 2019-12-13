@@ -387,13 +387,8 @@ NavLine * Pedestrian::GetExitLine() const
     return _navLine;
 }
 
-const std::vector<int> & Pedestrian::GetTrip() const
-{
-    return _trip;
-}
-
 // return the unique subroom Identifier
-
+//TODO refactor, without magic number
 int Pedestrian::GetUniqueRoomID() const
 {
     return _roomID * 1000 + _subRoomID;
@@ -679,53 +674,18 @@ void Pedestrian::InitV0(const Point & target)
 #endif
 }
 
-
-const Point & Pedestrian::GetV0(const Point & target)
-{
-#define DEBUGV0 1
-    const Point & pos = GetPos();
-    Point delta       = target - pos;
+const Point &Pedestrian::GetV0(const Point &target) {
+    const Point &pos = GetPos();
+    Point delta = target - pos;
     Point new_v0;
     double t;
     // Molification around the targets makes little sense
     //new_v0 = delta.NormalizedMolified();
     new_v0 = delta.Normalized();
     // -------------------------------------- Handover new target
-    t = _newOrientationDelay++ * _deltaT / (1.0 + 100 * _distToBlockade);
+    t = _newOrientationDelay++ * _deltaT / (1.0 + 100 * _distToBlockade); // why distToBlockade
 
     _V0 = _V0 + (new_v0 - _V0) * (1 - exp(-t / _tau));
-#if DEBUGV0
-    if(0) {
-        printf(
-            "=====\nGoal Line=[%f, %f]-[%f, %f]\n",
-            _navLine->GetPoint1()._x,
-            _navLine->GetPoint1()._y,
-            _navLine->GetPoint2()._x,
-            _navLine->GetPoint2()._y);
-        printf(
-            "Ped=%d, sub=%d, room=%d pos=[%f, %f], target=[%f, %f]\n",
-            _id,
-            _subRoomID,
-            _roomID,
-            pos._x,
-            pos._y,
-            target._x,
-            target._y);
-        printf(
-            "Ped=%d : BEFORE new_v0=%f %f norm = %f\n", _id, new_v0._x, new_v0._y, new_v0.Norm());
-        printf(
-            "ped=%d: t=%f, _newOrientationFlag=%d, neworientationDelay=%d, _DistToBlockade=%f\n",
-            _id,
-            t,
-            _newOrientationFlag,
-            _newOrientationDelay,
-            _distToBlockade);
-        printf("_v0=[%f, %f] norm = %f\n=====\n", _V0._x, _V0._y, _V0.Norm());
-        getc(stdin);
-    }
-
-#endif
-    // --------------------------------------
 
     return _V0;
 }
@@ -735,21 +695,6 @@ double Pedestrian::GetTimeInJam() const
     return _timeInJam;
 }
 
-// set the new orientation flag
-// to delay sharp turn
-// TODO: maybe combine this with SetExitLine
-
-// void Pedestrian::SetSmoothTurning(bool smt)
-// {
-//      //ignoring first turn
-//      if (_tmpFirstOrientation) {
-//           _tmpFirstOrientation = false;
-//      } else {
-//           if (_newOrientationDelay <= 0)// in the case the pedestrian is still rotating
-//                _newOrientationFlag = smt;
-//      }
-
-// }
 
 void Pedestrian::SetSmoothTurning()
 {
