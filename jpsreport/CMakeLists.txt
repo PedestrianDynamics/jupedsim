@@ -313,12 +313,12 @@ set (header_files
 add_library(report STATIC
     ${source_files}
     ${methods}
-    Boost::boost
 )
 
 target_link_libraries(report PUBLIC
     tinyxml
     fs
+    Boost::boost
 )
 
 target_compile_definitions(report PUBLIC
