@@ -53,9 +53,10 @@ cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_OPENMP=OFF <path-to-cmakelists>
 
 The following configuration flags are available:
 
-##### USE_OPENMP defaults to ON
+##### USE_OPENMP defaults to ON (Disabled on Windows)
 Build `jpscore` with OpenMP support, generation will fail if OpenMP cannot be
 found.
+MSVC only support OpenMP 2.0 Standard and is therefor disabled on Windows.
 
 ##### JPSFIRE defaults to OFF
 Build `jpscore` with jpsfire features
