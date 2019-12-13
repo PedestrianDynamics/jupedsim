@@ -172,4 +172,5 @@ private:
     std::mt19937 _rdGenerator;
     std::uniform_real_distribution<double> _rdDistribution;
     std::map<int, std::vector<int>> groupDoor;
+    std::map<int, int> groupMaxAgents;
 };
