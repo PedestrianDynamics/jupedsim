@@ -70,24 +70,26 @@ Pedestrian::Pedestrian()
     _EscalatorDownStairs       = 0.8;
     _V0IdleEscalatorUpStairs   = 0.6;
     _V0IdleEscalatorDownStairs = 0.6;
-    _roomCaption               = "";
-    _roomID                    = -1;
-    _subRoomID                 = -1;
-    _subRoomUID                = -1;
-    _oldRoomID                 = -1;
-    _oldSubRoomID              = -1;
-    _lastE0                    = Point(0, 0);
-    _navLine                   = nullptr;
-    _mentalMap                 = std::map<int, int>();
-    _lastPosition              = Point(0, 0);
-    _lastCellPosition          = -1;
+    _roomCaption = "";
+    _roomID = -1;
+    _subRoomID = -1;
+    _subRoomUID = -1;
+    _oldRoomID = -1;
+    _oldSubRoomID = -1;
+    _lastE0 = Point(0, 0);
+    _navLine = nullptr;
+    _mentalMap = std::map<int, int>();
+    _destHistory = std::vector<int>();
+    _trip = std::vector<int>();
+    _lastPosition = Point(0, 0);
+    _lastCellPosition = -1;
     _knownDoors.clear();
-    _distToBlockade      = 0.0;
-    _reroutingThreshold  = 0.0; // new orientation after 10 seconds, value is incremented
+    _distToBlockade = 0.0;
+    _reroutingThreshold = 0.0; // new orientation after 10 seconds, value is incremented
     _timeBeforeRerouting = 0.0;
-    _timeInJam           = 0.0;
-    _patienceTime        = 5.0; // time after which the ped feels to be in jam
-    _recordingTime       = 20;  //seconds
+    _timeInJam = 0.0;
+    _patienceTime = 5.0; // time after which the ped feels to be in jam
+    _recordingTime = 20;  //seconds
     //_lastPosition;
     //_lastVelocities
     _routingStrategy     = ROUTING_GLOBAL_SHORTEST;
@@ -102,7 +104,8 @@ Pedestrian::Pedestrian()
 
     //_knownDoors = map<int, NavLineState>();
 
-    _spotlight       = false;
+    _spotlight = false;
+    _ticksInThisRoom = 0;
 
     _agentsCreated++; //increase the number of object created
     _FED_In           = 0.0;
@@ -115,21 +118,22 @@ Pedestrian::Pedestrian()
 //const shared_ptr<ToxicityAnalysis> &Pedestrian::getToxicityAnalysis() { return _ToxicityAnalysis; }
 
 Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & building) :
-    _group(agentsParameters.GetGroupId()),
-    _desiredFinalDestination(agentsParameters.GetGoalId()),
-    _height(agentsParameters.GetHeight()),
-    _age(agentsParameters.GetAge()),
-    _premovement(agentsParameters.GetPremovementTime()),
-    _gender(agentsParameters.GetGender()),
-    _roomCaption(""),
-    _roomID(agentsParameters.GetRoomId()),
-    _subRoomID(agentsParameters.GetSubroomID()),
-    _subRoomUID(building.GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetUID()),
-    _lastPosition(),
+        _group(agentsParameters.GetGroupId()),
+        _desiredFinalDestination(agentsParameters.GetGoalId()),
+        _height(agentsParameters.GetHeight()),
+        _age(agentsParameters.GetAge()),
+        _premovement(agentsParameters.GetPremovementTime()),
+        _gender(agentsParameters.GetGender()),
+        _roomCaption(""),
+        _roomID(agentsParameters.GetRoomId()),
+        _subRoomID(agentsParameters.GetSubroomID()),
+        _subRoomUID(building.GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetUID()),
+        _lastPosition(),
 
-    _patienceTime(agentsParameters.GetPatience()),
-    _router(building.GetRoutingEngine()->GetRouter(agentsParameters.GetRouterId())),
-    _building(&building),
+        _patienceTime(agentsParameters.GetPatience()),
+        _router(building.GetRoutingEngine()->GetRouter(agentsParameters.GetRouterId())),
+        _building(&building),
+        _ticksInThisRoom(0)
 {
     _roomID                  = -1;
     _subRoomID               = -1;
@@ -155,8 +159,9 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _timeInJam               = 0.0;
     _patienceTime            = 5.0; // time after which the ped feels to be in jam
     _desiredFinalDestination = FINAL_DEST_OUT;
-    _mentalMap               = std::map<int, int>();
-    _deltaT                  = 0.01;
+    _mentalMap = std::map<int, int>();
+    _destHistory = std::vector<int>();
+    _deltaT = 0.01;
     _updateRate              = _deltaT;
     _V0                      = Point(0, 0);
     _lastPosition            = Point(0, 0);
@@ -166,8 +171,9 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _knownDoors.clear();
     _height                    = 170;
     _age                       = 30;
-    _gender                    = "male";
-    _group                     = -1;
+    _gender = "male";
+    _trip = std::vector<int>();
+    _group = -1;
     _spotlight                 = false;
     _V0UpStairs                = 0.6;
     _V0DownStairs              = 0.6;
@@ -411,19 +417,24 @@ int Pedestrian::GetNextDestination()
     }
 }
 
-Point Pedestrian::GetLastE0() const
-{
+Point Pedestrian::GetLastE0() const {
     return _lastE0;
 }
-void Pedestrian::SetLastE0(Point E0)
-{
+
+void Pedestrian::SetLastE0(Point E0) {
     _lastE0 = E0;
 }
 
-bool Pedestrian::ChangedSubRoom()
-{
-    if(_oldRoomID != GetRoomID() || _oldSubRoomID != GetSubRoomID()) {
-        _oldRoomID    = GetRoomID();
+int Pedestrian::GetLastDestination() {
+    if (_destHistory.size() == 0)
+        return -1;
+    else
+        return _destHistory.back();
+}
+
+bool Pedestrian::ChangedSubRoom() {
+    if (_oldRoomID != GetRoomID() || _oldSubRoomID != GetSubRoomID()) {
+        _oldRoomID = GetRoomID();
         _oldSubRoomID = GetSubRoomID();
         return true;
     }
@@ -448,22 +459,23 @@ void Pedestrian::AddKnownClosedDoor(
     _knownDoors[door].SetState(door, state, ttime, quality, latency);
 }
 
-void Pedestrian::ClearKnowledge()
-{
+void Pedestrian::ClearKnowledge() {
     _knownDoors.clear();
 }
 
-std::map<int, Knowledge> & Pedestrian::GetKnownledge()
-{
+std::map<int, Knowledge> &Pedestrian::GetKnownledge() {
     return _knownDoors;
 }
 
-const std::string Pedestrian::GetKnowledgeAsString() const
-{
+const std::vector<int> &Pedestrian::GetLastDestinations() const {
+    return _destHistory;
+}
+
+const std::string Pedestrian::GetKnowledgeAsString() const {
     std::string key = "";
-    for(auto && knowledge : _knownDoors) {
+    for (auto &&knowledge : _knownDoors) {
         //skip low quality information
-        if(knowledge.second.GetQuality() < 0.2)
+        if (knowledge.second.GetQuality() < 0.2)
             continue;
 
         int door = knowledge.first;

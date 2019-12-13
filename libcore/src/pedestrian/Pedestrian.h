@@ -162,6 +162,8 @@ private:
 
     //TODO check why this is here, used by global and quickest router
     std::map<int, int> _mentalMap; // map the actual room to a destination
+    std::vector<int> _destHistory;
+    std::vector<int> _trip;
 
     Point _lastPosition; //TODO remove
     int _lastCellPosition;  //TODO remove
@@ -224,6 +226,9 @@ private:
     Point _waitingPos;
 
 public:
+    // public member
+    int _ticksInThisRoom;
+
     // constructors
     Pedestrian();
 
@@ -382,6 +387,11 @@ public:
     std::map<int, Knowledge> &GetKnownledge();
 
     /**
+      * @return all previous destinations used by this pedestrian
+      */
+    const std::vector<int> &GetLastDestinations() const;
+
+    /**
       * For convenience
       * @return a string representation of the knowledge
       */
@@ -401,7 +411,8 @@ public:
 
     int GetNextDestination();
 
-    //TODO remove, not responsibility of ped
+    int GetLastDestination();
+
     double GetDistanceToNextTarget() const;
 
     //TODO remove, never used
