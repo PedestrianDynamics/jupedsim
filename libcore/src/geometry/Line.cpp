@@ -27,7 +27,6 @@
 #include "Line.h"
 
 #include "Wall.h"
-#include "general/Format.h"
 #include "general/Logger.h"
 #include "general/Macros.h"
 #include "math/Mathematics.h"
@@ -158,7 +157,7 @@ Point Line::NormalVec() const
         /* Normieren */
         norm = sqrt(nx * nx + ny * ny);
         if(fabs(norm) < J_EPS) {
-            Logging::Error("Line::NormalVec() norm==0");
+            LOG_ERROR("Line::NormalVec() norm==0");
             exit(0);
         }
         nx /= norm;
@@ -517,9 +516,7 @@ bool Line::IntersectionWithCircle(const Point & centre, double radius /*cm for p
         return false;
     }
     if(delta < 0.0) {
-        Logging::Error(fmt::format(
-            check_fmt("Line::IntersectionWithCircle does not support delta < 0. delta = {}"),
-            delta));
+        LOG_ERROR("Line::IntersectionWithCircle does not support delta < 0. delta = {}", delta);
         return false;
     }
 
@@ -580,13 +577,12 @@ double Line::GetDistanceToIntersectionPoint(const Line & l) const
         return std::numeric_limits<double>::infinity();
     double dist = (_point1 - PointF).NormSquare();
 
-    Logging::Debug(fmt::format(
-        check_fmt(
-            "GetDistanceToIntersectionPoint: {} intersects with {} in point {} with distance {}"),
+    LOG_DEBUG(
+        "GetDistanceToIntersectionPoint: {} intersects with {} in point {} with distance {}",
         l.toString(),
         toString(),
         PointF.toString(),
-        sqrt(dist)));
+        sqrt(dist));
 
     return dist;
 }

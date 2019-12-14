@@ -27,7 +27,6 @@
 #include "direction/waiting/WaitingStrategy.h"
 #include "direction/walking/DirectionStrategy.h"
 #include "general/Filesystem.h"
-#include "general/Format.h"
 #include "general/Logger.h"
 #include "general/OpenMP.h"
 #include "math/GCFMModel.h"
@@ -49,8 +48,7 @@ IniFileParser::IniFileParser(Configuration * config)
 
 void IniFileParser::Parse(const fs::path & iniFile)
 {
-    Logging::Info(
-        fmt::format(check_fmt("Loading and parsing the project file <{}>"), iniFile.string()));
+    LOG_INFO("Loading and parsing the project file <{}>", iniFile.string());
     _config->SetProjectFile(
         iniFile); //TODO in some locations it is called iniFile and in others project file,
     // and as I just realized, I called it configuration. We should be consistent here anything else
@@ -63,7 +61,7 @@ void IniFileParser::Parse(const fs::path & iniFile)
 
     TiXmlDocument doc(iniFile.string());
     if(!doc.LoadFile()) {
-        Logging::Error(fmt::format(check_fmt("{}"), doc.ErrorDesc()));
+        LOG_ERROR("{}", doc.ErrorDesc());
         throw std::runtime_error("Could not parse the project file");
     }
 
@@ -80,11 +78,10 @@ void IniFileParser::Parse(const fs::path & iniFile)
 
     //check the header version
     if(!xMainNode->Attribute("version")) {
-        Logging::Warning(
-            fmt::format(check_fmt("There is no header version. I am assuming {}"), JPS_VERSION));
+        LOG_WARNING("There is no header version. I am assuming {}", JPS_VERSION);
     } else if(std::stod(xMainNode->Attribute("version")) < std::stod(JPS_OLD_VERSION)) {
         throw std::logic_error(fmt::format(
-            check_fmt("Wrong header version. Only version greater than {} is supported."),
+            FMT_STRING("Wrong header version. Only version greater than {} is supported."),
             JPS_OLD_VERSION));
     }
 
@@ -153,11 +150,10 @@ void IniFileParser::Parse(const fs::path & iniFile)
     }
 
     if(!parsingModelSuccessful) {
-        Logging::Error(fmt::format(
-            check_fmt("Wrong model id [{}]. Choose 1 (GCFM) or 3 (Tordeux2015)"), _model));
-        Logging::Error(
+        LOG_ERROR("Wrong model id [{}]. Choose 1 (GCFM) or 3 (Tordeux2015)", _model);
+        LOG_ERROR(
             "Please make sure that all models are specified in the operational_models section");
-        Logging::Error("And make sure to use the same ID in the agent section");
+        LOG_ERROR("And make sure to use the same ID in the agent section");
         throw std::logic_error("Parsing Model Failed.");
     }
 
@@ -168,7 +164,7 @@ void IniFileParser::Parse(const fs::path & iniFile)
     if(!ParseRoutingStrategies(xRouters, xAgentDistri))
         throw std::logic_error("Error while parsing routing strategies.");
 
-    Logging::Info("Parsing the project file completed");
+    LOG_INFO("Parsing the project file completed");
 }
 
 bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
@@ -180,14 +176,14 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         const fs::path canonicalPath = fs::weakly_canonical(root / logPath);
         _config->SetErrorLogFile(canonicalPath);
         _config->SetLog(2);
-        Logging::Info(fmt::format(check_fmt("Logfile <{}>"), _config->GetErrorLogFile().string()));
+        LOG_INFO("Logfile <{}>", _config->GetErrorLogFile().string());
     }
-    Logging::Info("JuPedSim - JPScore");
-    Logging::Info(fmt::format(check_fmt("Current date: {} {}"), __DATE__, __TIME__));
-    Logging::Info(fmt::format(check_fmt("Version     : {}"), JPSCORE_VERSION));
-    Logging::Info(fmt::format(check_fmt("Commit hash : {}"), GIT_COMMIT_HASH));
-    Logging::Info(fmt::format(check_fmt("Commit date : {}"), GIT_COMMIT_DATE));
-    Logging::Info(fmt::format(check_fmt("Branch      : {}"), GIT_BRANCH));
+    LOG_INFO("JuPedSim - JPScore");
+    LOG_INFO("Current date: {} {}", __DATE__, __TIME__);
+    LOG_INFO("Version     : {}", JPSCORE_VERSION);
+    LOG_INFO("Commit hash : {}", GIT_COMMIT_HASH);
+    LOG_INFO("Commit date : {}", GIT_COMMIT_DATE);
+    LOG_INFO("Branch      : {}", GIT_BRANCH);
 
 
     //seed
@@ -201,21 +197,20 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         }
     }
     // srand(_config->GetSeed());
-    Logging::Info(fmt::format(check_fmt("Random seed <{}>"), _config->GetSeed()));
+    LOG_INFO("Random seed <{}>", _config->GetSeed());
 
     // max simulation time
     if(xHeader->FirstChild("max_sim_time")) {
         const char * tmax = xHeader->FirstChildElement("max_sim_time")->FirstChild()->Value();
         _config->SetTmax(atof(tmax));
-        Logging::Info(
-            fmt::format(check_fmt("Maximal simulation time <{:.2f}> seconds"), _config->GetTmax()));
+        LOG_INFO("Maximal simulation time <{:.2f}> seconds", _config->GetTmax());
     }
 
     // geometry file name
     if(xHeader->FirstChild("geometry")) {
         std::string filename = xHeader->FirstChild("geometry")->FirstChild()->Value();
         _config->SetGeometryFile(filename);
-        Logging::Info(fmt::format(check_fmt("Geometry file <{}>"), filename));
+        LOG_INFO("Geometry file <{}>", filename);
     }
 
 
@@ -233,16 +228,13 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         }
     }
     _config->SetMaxOpenMPThreads(omp_get_max_threads());
-    Logging::Info(fmt::format(
-        check_fmt("Using {} OpenMP threads, {} available."),
-        _config->GetMaxOpenMPThreads(),
-        max_threads));
+    LOG_INFO("Using {} OpenMP threads, {} available.", _config->GetMaxOpenMPThreads(), max_threads);
 
     //display statistics
     if(xHeader->FirstChild("show_statistics")) {
         std::string value = xHeader->FirstChild("show_statistics")->FirstChild()->Value();
         _config->SetShowStatistics(value == "true");
-        Logging::Info(fmt::format(check_fmt("Show statistics: {}"), value));
+        LOG_INFO("Show statistics: {}", value);
     }
 
     //trajectories
@@ -262,7 +254,7 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         } else if(format == "plain") {
             _config->SetFileFormat(FileFormat::TXT);
         } else {
-            Logging::Warning("no output format specified. Using default: TXT");
+            LOG_WARNING("no output format specified. Using default: TXT");
             _config->SetFileFormat(FileFormat::TXT);
         }
 
@@ -308,14 +300,14 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
                     case FileFormat::XML: {
                         if(extension != ".xml") {
                             canonicalTrajPath.replace_extension(".xml");
-                            Logging::Warning("replaced output file extension with: .xml");
+                            LOG_WARNING("replaced output file extension with: .xml");
                         }
                         break;
                     }
                     case FileFormat::TXT: {
                         if(extension != ".txt") {
                             canonicalTrajPath.replace_extension(".txt");
-                            Logging::Warning("replaced output file extension with: .txt");
+                            LOG_WARNING("replaced output file extension with: .txt");
                         }
 
                         break;
@@ -325,16 +317,12 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
                 _config->SetOriginalTrajectoriesFile(canonicalTrajPath);
             }
 
-            Logging::Info(fmt::format(
-                check_fmt("Output file  <{}>"), _config->GetTrajectoriesFile().string()));
-            Logging::Info(fmt::format(
-                check_fmt("In format <{}> at <{:.0f}> frames per seconds"),
-                format,
-                _config->GetFps()));
+            LOG_INFO("Output file  <{}>", _config->GetTrajectoriesFile().string());
+            LOG_INFO("In format <{}> at <{:.0f}> frames per seconds", format, _config->GetFps());
         }
 
         if(xTrajectories->FirstChild("optional_output")) {
-            Logging::Warning("These optional options do only work with plain output format!");
+            LOG_WARNING("These optional options do only work with plain output format!");
 
             auto node = xTrajectories->FirstChildElement("optional_output");
             //check if speed is wanted
@@ -344,9 +332,9 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
                 if(in == "true") {
                     _config->AddOptionalOutputOption(OptionalOutput::speed);
-                    Logging::Info("speed added to output");
+                    LOG_INFO("speed added to output");
                 } else {
-                    Logging::Info("speed not added to output");
+                    LOG_INFO("speed not added to output");
                 }
             }
 
@@ -357,9 +345,9 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
                 if(in == "true") {
                     _config->AddOptionalOutputOption(OptionalOutput::velocity);
-                    Logging::Info("velocity added to output");
+                    LOG_INFO("velocity added to output");
                 } else {
-                    Logging::Info("velocity not added to output");
+                    LOG_INFO("velocity not added to output");
                 }
             }
 
@@ -370,9 +358,9 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
                 if(in == "true") {
                     _config->AddOptionalOutputOption(OptionalOutput::final_goal);
-                    Logging::Info("final_goal added to output");
+                    LOG_INFO("final_goal added to output");
                 } else {
-                    Logging::Info("final_goal not added to output");
+                    LOG_INFO("final_goal not added to output");
                 }
             }
 
@@ -383,9 +371,9 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
                 if(in == "true") {
                     _config->AddOptionalOutputOption(OptionalOutput::intermediate_goal);
-                    Logging::Info("intermediate_goal added to output");
+                    LOG_INFO("intermediate_goal added to output");
                 } else {
-                    Logging::Info("intermediate_goal not added to output");
+                    LOG_INFO("intermediate_goal not added to output");
                 }
             }
 
@@ -396,9 +384,9 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
                 if(in == "true") {
                     _config->AddOptionalOutputOption(OptionalOutput::desired_direction);
-                    Logging::Info("desired_direction added to output");
+                    LOG_INFO("desired_direction added to output");
                 } else {
-                    Logging::Info("desired_direction not added to output");
+                    LOG_INFO("desired_direction not added to output");
                 }
             }
 
@@ -409,9 +397,9 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
                 if(in == "true") {
                     _config->AddOptionalOutputOption(OptionalOutput::spotlight);
-                    Logging::Info("spotlight added to output");
+                    LOG_INFO("spotlight added to output");
                 } else {
-                    Logging::Info("spotlight not added to output");
+                    LOG_INFO("spotlight not added to output");
                 }
             }
 
@@ -422,9 +410,9 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
                 if(in == "true") {
                     _config->AddOptionalOutputOption(OptionalOutput::router);
-                    Logging::Info("router added to output");
+                    LOG_INFO("router added to output");
                 } else {
-                    Logging::Info("router not added to output");
+                    LOG_INFO("router not added to output");
                 }
             }
 
@@ -435,9 +423,9 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
                 if(in == "true") {
                     _config->AddOptionalOutputOption(OptionalOutput::group);
-                    Logging::Info("group added to output");
+                    LOG_INFO("group added to output");
                 } else {
-                    Logging::Info("group not added to output");
+                    LOG_INFO("group not added to output");
                 }
             }
         }
@@ -448,20 +436,20 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
 bool IniFileParser::ParseGCFMModel(TiXmlElement * xGCFM, TiXmlElement * xMainNode)
 {
-    Logging::Info("Using the GCFM model");
-    Logging::Info("Parsing the model parameters");
+    LOG_INFO("Using the GCFM model");
+    LOG_INFO("Parsing the model parameters");
 
     TiXmlNode * xModelPara = xGCFM->FirstChild("model_parameters");
     if(!xModelPara) {
-        Logging::Error("!!!! Changes in the operational model section !!!");
-        Logging::Error("!!!! The new version is in inputfiles/ship_msw/ini_ship2.xml !!!");
+        LOG_ERROR("!!!! Changes in the operational model section !!!");
+        LOG_ERROR("!!!! The new version is in inputfiles/ship_msw/ini_ship2.xml !!!");
         return false;
     }
 
     // For convenience. This moved to the header as it is not model specific
     if(xModelPara->FirstChild("tmax")) {
-        Logging::Error("The maximal simulation time section moved to the header!!!");
-        Logging::Error("\t <max_sim_time> </max_sim_time>\n");
+        LOG_ERROR("The maximal simulation time section moved to the header!!!");
+        LOG_ERROR("\t <max_sim_time> </max_sim_time>\n");
         return false;
     }
 
@@ -495,13 +483,13 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement * xGCFM, TiXmlElement * xMainNod
         _config->SetNuPed(std::stod(nu));
         _config->SetDistEffMaxPed(std::stod(disteff_max));
         _config->SetIntPWidthPed(std::stod(interpolation_width));
-        Logging::Info(fmt::format(
-            check_fmt("Frep_ped nu={:.3f}, dist_max={:.3f}, disteff_max={:.3f}, "
-                      "interpolation_width={:.3f}"),
+        LOG_INFO(
+            "Frep_ped nu={:.3f}, dist_max={:.3f}, disteff_max={:.3f}, "
+            "interpolation_width={:.3f}",
             std::stod(nu),
             std::stod(dist_max),
             std::stod(disteff_max),
-            std::stod(interpolation_width)));
+            std::stod(interpolation_width));
     }
 
     //force_wall
@@ -516,13 +504,13 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement * xGCFM, TiXmlElement * xMainNod
         _config->SetNuWall(std::stod(nu));
         _config->SetDistEffMaxWall(std::stod(disteff_max));
         _config->SetIntPWidthWall(std::stod(interpolation_width));
-        Logging::Info(fmt::format(
-            check_fmt("Frep_wall mu={:.3f}, dist_max={:.3f}, disteff_max={:.3f}, "
-                      "interpolation_width={:.3f}"),
+        LOG_INFO(
+            "Frep_wall mu={:.3f}, dist_max={:.3f}, disteff_max={:.3f}, "
+            "interpolation_width={:.3f}",
             std::stod(nu),
             std::stod(dist_max),
             std::stod(disteff_max),
-            std::stod(interpolation_width)));
+            std::stod(interpolation_width));
     }
 
     //Parsing the agent parameters
@@ -547,21 +535,21 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement * xGCFM, TiXmlElement * xMainNod
 bool IniFileParser::ParseVelocityModel(TiXmlElement * xVelocity, TiXmlElement * xMainNode)
 {
     //parsing the model parameters
-    Logging::Info("Using Tordeux2015 model");
-    Logging::Info("Parsing the model parameters");
+    LOG_INFO("Using Tordeux2015 model");
+    LOG_INFO("Parsing the model parameters");
 
     TiXmlNode * xModelPara = xVelocity->FirstChild("model_parameters");
 
     if(!xModelPara) {
-        Logging::Error("!!!! Changes in the operational model section !!!");
-        Logging::Error("!!!! The new version is in inputfiles/ship_msw/ini_ship3.xml !!!");
+        LOG_ERROR("!!!! Changes in the operational model section !!!");
+        LOG_ERROR("!!!! The new version is in inputfiles/ship_msw/ini_ship3.xml !!!");
         return false;
     }
 
     // For convenience. This moved to the header as it is not model specific
     if(xModelPara->FirstChild("tmax")) {
-        Logging::Error("The maximal simulation time section moved to the header!!!");
-        Logging::Error("\t <max_sim_time> </max_sim_time>\n");
+        LOG_ERROR("The maximal simulation time section moved to the header!!!");
+        LOG_ERROR("\t <max_sim_time> </max_sim_time>\n");
         return false;
     }
 
@@ -600,8 +588,7 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement * xVelocity, TiXmlElement * 
             std::string D = xModelPara->FirstChildElement("force_ped")->Attribute("D");
             _config->SetDPed(std::stod(D));
         }
-        Logging::Info(fmt::format(
-            check_fmt("Frep_ped a={:.2f}, D={:.2f}"), _config->GetaPed(), _config->GetDPed()));
+        LOG_INFO("Frep_ped a={:.2f}, D={:.2f}", _config->GetaPed(), _config->GetDPed());
     }
     //force_wall
     if(xModelPara->FirstChild("force_wall")) {
@@ -618,8 +605,7 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement * xVelocity, TiXmlElement * 
             std::string D = xModelPara->FirstChildElement("force_wall")->Attribute("D");
             _config->SetDWall(std::stod(D));
         }
-        Logging::Info(fmt::format(
-            check_fmt("Frep_wall a={:.2f}, D={:.2f}"), _config->GetaWall(), _config->GetDWall()));
+        LOG_INFO("Frep_wall a={:.2f}, D={:.2f}", _config->GetaWall(), _config->GetDWall());
     }
 
     //Parsing the agent parameters
@@ -638,7 +624,7 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement * xVelocity, TiXmlElement * 
 void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode * agentsDistri)
 {
     //Parsing the agent parameters
-    Logging::Info("Parsing agents  parameters");
+    LOG_INFO("Parsing agents  parameters");
     //first get list of actually used router
     std::vector<int> usedAgentParams;
     usedAgentParams.clear();
@@ -660,7 +646,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
         int para_id = xmltoi(xAgentPara->Attribute("agent_parameter_id"), -1);
         if(std::find(usedAgentParams.begin(), usedAgentParams.end(), para_id) !=
            usedAgentParams.end()) {
-            Logging::Info(fmt::format(check_fmt("Parsing the group parameter id [{}]"), para_id));
+            LOG_INFO("Parsing the group parameter id [{}]", para_id);
 
             auto agentParameters = std::shared_ptr<AgentsParameters>(
                 new AgentsParameters(para_id, _config->GetSeed()));
@@ -673,7 +659,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 agentParameters->InitV0(mu, sigma);
                 agentParameters->InitV0DownStairs(mu, sigma);
                 agentParameters->InitV0UpStairs(mu, sigma);
-                Logging::Info(fmt::format(check_fmt("Desired speed mu={} , sigma={}"), mu, sigma));
+                LOG_INFO("Desired speed mu={} , sigma={}", mu, sigma);
             }
 
             if(xAgentPara->FirstChild("v0_upstairs")) {
@@ -681,8 +667,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 double sigma =
                     xmltof(xAgentPara->FirstChildElement("v0_upstairs")->Attribute("sigma"));
                 agentParameters->InitV0UpStairs(mu, sigma);
-                Logging::Info(
-                    fmt::format(check_fmt("Desired speed upstairs mu={} , sigma={}"), mu, sigma));
+                LOG_INFO("Desired speed upstairs mu={} , sigma={}", mu, sigma);
             }
 
             if(xAgentPara->FirstChild("v0_downstairs")) {
@@ -690,8 +675,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 double sigma =
                     xmltof(xAgentPara->FirstChildElement("v0_downstairs")->Attribute("sigma"));
                 agentParameters->InitV0DownStairs(mu, sigma);
-                Logging::Info(
-                    fmt::format(check_fmt("Desired speed downstairs mu={} , sigma={}"), mu, sigma));
+                LOG_INFO("Desired speed downstairs mu={} , sigma={}", mu, sigma);
             } //------------------------------------------------------------------------
             if(xAgentPara->FirstChild("escalator_upstairs")) {
                 double mu =
@@ -699,8 +683,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 double sigma =
                     xmltof(xAgentPara->FirstChildElement("escalator_upstairs")->Attribute("sigma"));
                 agentParameters->InitEscalatorUpStairs(mu, sigma);
-                Logging::Info(fmt::format(
-                    check_fmt("speed of escalator upstairs mu={} , sigma={}"), mu, sigma));
+                LOG_INFO("speed of escalator upstairs mu={} , sigma={}", mu, sigma);
             }
             if(xAgentPara->FirstChild("escalator_downstairs")) {
                 double mu =
@@ -708,8 +691,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 double sigma = xmltof(
                     xAgentPara->FirstChildElement("escalator_downstairs")->Attribute("sigma"));
                 agentParameters->InitEscalatorDownStairs(mu, sigma);
-                Logging::Info(fmt::format(
-                    check_fmt("speed of escalator downstairs mu={} , sigma={}"), mu, sigma));
+                LOG_INFO("speed of escalator downstairs mu={} , sigma={}", mu, sigma);
             }
             if(xAgentPara->FirstChild("v0_idle_escalator_upstairs")) {
                 double mu = xmltof(
@@ -717,10 +699,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 double sigma = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_upstairs")
                                           ->Attribute("sigma"));
                 agentParameters->InitV0IdleEscalatorUpStairs(mu, sigma);
-                Logging::Info(fmt::format(
-                    check_fmt("Desired speed idle escalator upstairs mu={} , sigma={}"),
-                    mu,
-                    sigma));
+                LOG_INFO("Desired speed idle escalator upstairs mu={} , sigma={}", mu, sigma);
             }
             if(xAgentPara->FirstChild("v0_idle_escalator_downstairs")) {
                 double mu = xmltof(
@@ -728,19 +707,15 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 double sigma = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_downstairs")
                                           ->Attribute("sigma"));
                 agentParameters->InitV0IdleEscalatorDownStairs(mu, sigma);
-                Logging::Info(fmt::format(
-                    check_fmt("Desired speed idle escalator downstairs mu={} , sigma={}"),
-                    mu,
-                    sigma));
+                LOG_INFO("Desired speed idle escalator downstairs mu={} , sigma={}", mu, sigma);
             }
-            //------------------------------------------------------------------------
 
             //bmax
             if(xAgentPara->FirstChild("bmax")) {
                 double mu    = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("mu"));
                 double sigma = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("sigma"));
                 agentParameters->InitBmax(mu, sigma);
-                Logging::Info(fmt::format(check_fmt("Bmax mu={} , sigma={}"), mu, sigma));
+                LOG_INFO("Bmax mu={} , sigma={}", mu, sigma);
             }
 
             //bmin
@@ -748,7 +723,7 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 double mu    = xmltof(xAgentPara->FirstChildElement("bmin")->Attribute("mu"));
                 double sigma = xmltof(xAgentPara->FirstChildElement("bmin")->Attribute("sigma"));
                 agentParameters->InitBmin(mu, sigma);
-                Logging::Info(fmt::format(check_fmt("Bmin mu={} , sigma={}"), mu, sigma));
+                LOG_INFO("Bmin mu={} , sigma={}", mu, sigma);
             }
 
             //amin
@@ -756,28 +731,28 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 double mu    = xmltof(xAgentPara->FirstChildElement("amin")->Attribute("mu"));
                 double sigma = xmltof(xAgentPara->FirstChildElement("amin")->Attribute("sigma"));
                 agentParameters->InitAmin(mu, sigma);
-                Logging::Info(fmt::format(check_fmt("Amin mu={} , sigma={}"), mu, sigma));
+                LOG_INFO("Amin mu={} , sigma={}", mu, sigma);
             }
             //tau
             if(xAgentPara->FirstChild("tau")) {
                 double mu    = xmltof(xAgentPara->FirstChildElement("tau")->Attribute("mu"));
                 double sigma = xmltof(xAgentPara->FirstChildElement("tau")->Attribute("sigma"));
                 agentParameters->InitTau(mu, sigma);
-                Logging::Info(fmt::format(check_fmt("Tau mu={} , sigma={}"), mu, sigma));
+                LOG_INFO("Tau mu={} , sigma={}", mu, sigma);
             }
             //atau
             if(xAgentPara->FirstChild("atau")) {
                 double mu    = xmltof(xAgentPara->FirstChildElement("atau")->Attribute("mu"));
                 double sigma = xmltof(xAgentPara->FirstChildElement("atau")->Attribute("sigma"));
                 agentParameters->InitAtau(mu, sigma);
-                Logging::Info(fmt::format(check_fmt("Atau mu={} , sigma={}"), mu, sigma));
+                LOG_INFO("Atau mu={} , sigma={}", mu, sigma);
             }
             // T
             if(xAgentPara->FirstChild("T")) {
                 double mu    = xmltof(xAgentPara->FirstChildElement("T")->Attribute("mu"));
                 double sigma = xmltof(xAgentPara->FirstChildElement("T")->Attribute("sigma"));
                 agentParameters->InitT(mu, sigma);
-                Logging::Info(fmt::format(check_fmt("T mu={} , sigma={}"), mu, sigma));
+                LOG_INFO("T mu={} , sigma={}", mu, sigma);
             }
 
             if(_model == 3) { // Tordeux2015
@@ -793,12 +768,12 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
 bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * agentsDistri)
 {
     if(!routingNode) {
-        Logging::Error("Route_choice_models section is missing");
+        LOG_ERROR("Route_choice_models section is missing");
         return false;
     }
 
     if(!agentsDistri) {
-        Logging::Error("Agent Distribution section is missing");
+        LOG_ERROR("Agent Distribution section is missing");
         return false;
     }
     //first get list of actually used router
@@ -856,7 +831,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
             Router * r = new SmokeRouter(id, ROUTING_SMOKE);
             _config->GetRoutingEngine()->AddRouter(r);
 
-            Logging::Info("Using SmokeRouter");
+            LOG_INFO("Using SmokeRouter");
             ///Parsing additional options
             if(!ParseCogMapOpts(e))
                 return false;
@@ -868,9 +843,9 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
             _config->GetRoutingEngine()->AddRouter(r);
 
             if((_exit_strat_number == 8) || (_exit_strat_number == 9)) {
-                Logging::Info("Using FF Global Shortest Router");
+                LOG_INFO("Using FF Global Shortest Router");
             } else {
-                Logging::Warning("Exit Strategy Number is not 8 or 9!!!");
+                LOG_WARNING("Exit Strategy Number is not 8 or 9!!!");
                 // config object holds default values, so we omit any set operations
             }
 
@@ -883,14 +858,13 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
             (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
             Router * r = new FFRouter(id, ROUTING_FF_QUICKEST, hasSpecificGoals, _config);
             _config->GetRoutingEngine()->AddRouter(r);
-            Logging::Info("Using FF Quickest Router");
+            LOG_INFO("Using FF Quickest Router");
 
             if(!ParseFfRouterOps(e, ROUTING_FF_QUICKEST)) {
                 return false;
             }
         } else if(std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end()) {
-            Logging::Error(
-                fmt::format(check_fmt("Wrong value for routing strategy [{}]."), strategy));
+            LOG_ERROR("Wrong value for routing strategy [{}].", strategy);
             return false;
         }
     }
@@ -928,7 +902,7 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode * routingNode)
 {
     TiXmlNode * sensorNode = routingNode->FirstChild();
     if(!sensorNode) {
-        Logging::Error("No sensors found.\n");
+        LOG_ERROR("No sensors found.\n");
         return false;
     }
 
@@ -943,7 +917,7 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode * routingNode)
         //adding Smoke Sensor specific parameters is executed in the class FDSFIreMeshStorage
         sensorVec.push_back(sensor);
 
-        Logging::Info(fmt::format(check_fmt("Sensor <{}> added."), sensor));
+        LOG_INFO("Sensor <{}> added.", sensor);
     }
 
     r->addOption("Sensors", sensorVec);
@@ -951,19 +925,18 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode * routingNode)
     TiXmlElement * cogMap = routingNode->FirstChildElement("cognitive_map");
 
     if(!cogMap) {
-        Logging::Error("Cognitive Map not specified.\n");
+        LOG_ERROR("Cognitive Map not specified.\n");
         return false;
     }
 
     std::vector<std::string> cogMapStatus;
     cogMapStatus.push_back(cogMap->Attribute("status"));
-    Logging::Info(fmt::format(
-        check_fmt("All pedestrian starting with a(n) {} cognitive maps"), cogMapStatus[0]));
+    LOG_INFO("All pedestrian starting with a(n) {} cognitive maps", cogMapStatus[0]);
     r->addOption("CognitiveMap", cogMapStatus);
 
     std::vector<std::string> cogMapFiles;
     if(!cogMap->Attribute("files")) {
-        Logging::Warning("No input files for the cognitive map specified!");
+        LOG_WARNING("No input files for the cognitive map specified!");
         return true;
     }
     cogMapFiles.push_back(cogMap->Attribute("files"));
@@ -982,13 +955,11 @@ bool IniFileParser::ParseLinkedCells(const TiXmlNode & linkedCellNode)
 
         if(linkedcells == "true") {
             _config->SetLinkedCellSize(std::stod(cell_size));
-            Logging::Info(fmt::format(
-                check_fmt("Linked cells enabled with size  <{:.2f}>"),
-                _config->GetLinkedCellSize()));
+            LOG_INFO("Linked cells enabled with size  <{:.2f}>", _config->GetLinkedCellSize());
             return true;
         } else {
             _config->SetLinkedCellSize(-1.0);
-            Logging::Warning("Invalid parameters for linkedcells");
+            LOG_WARNING("Invalid parameters for linkedcells");
             return false;
         }
     }
@@ -1005,13 +976,10 @@ bool IniFileParser::ParseStepSize(TiXmlNode & stepNode)
             if((stepNode.FirstChildElement("stepsize")->Attribute("fix")) &&
                (std::string(stepNode.FirstChildElement("stepsize")->Attribute("fix")) == "yes")) {
                 _config->Setdt(atof(stepsize));
-                Logging::Info(fmt::format(check_fmt("Stepsize <{}>"), _config->Getdt()));
+                LOG_INFO("Stepsize <{}>", _config->Getdt());
                 if(tmp < _config->Getdt()) {
-                    Logging::Warning(fmt::format(
-                        check_fmt("Stepsize dt = {} > {} = frameinterval."),
-                        _config->Getdt(),
-                        tmp));
-                    Logging::Warning("You should decrease stepsize or fps!");
+                    LOG_WARNING("Stepsize dt = {} > {} = frameinterval.", _config->Getdt(), tmp);
+                    LOG_WARNING("You should decrease stepsize or fps!");
                 }
                 return true;
             }
@@ -1020,22 +988,21 @@ bool IniFileParser::ParseStepSize(TiXmlNode & stepNode)
                 if((tmp / i) <= stepsizeDBL) {
                     _config->Setdt(tmp / i);
                     if((tmp / i) < stepsizeDBL) {
-                        Logging::Warning(fmt::format(
-                            check_fmt("Decreased stepsize from <{}> to <{}> to match fps"),
+                        LOG_WARNING(
+                            "Decreased stepsize from <{}> to <{}> to match fps",
                             stepsizeDBL,
-                            (tmp / i)));
+                            (tmp / i));
                     }
-                    Logging::Info(fmt::format(check_fmt("Stepsize <{}>"), _config->Getdt()));
+                    LOG_INFO("Stepsize <{}>", _config->Getdt());
                     return true;
                 }
             }
             //below should never execute
             _config->Setdt(stepsizeDBL);
-            Logging::Info(fmt::format(check_fmt("Stepsize <{}>"), _config->Getdt()));
+            LOG_INFO("Stepsize <{}>", _config->Getdt());
             if(tmp < _config->Getdt()) {
-                Logging::Warning(fmt::format(
-                    check_fmt("Stepsize dt = {} > {} = frameinterval."), _config->Getdt(), tmp));
-                Logging::Warning("You should decrease stepsize or fps!");
+                LOG_WARNING("Stepsize dt = {} > {} = frameinterval.", _config->Getdt(), tmp);
+                LOG_WARNING("You should decrease stepsize or fps!");
             }
             return true;
         }
@@ -1049,7 +1016,7 @@ bool IniFileParser::ParsePeriodic(TiXmlNode & Node)
         const char * periodic = Node.FirstChild("periodic")->FirstChild()->Value();
         if(periodic)
             _config->SetIsPeriodic(atoi(periodic));
-        Logging::Info(fmt::format(check_fmt("Periodic <{}>"), _config->IsPeriodic()));
+        LOG_INFO("Periodic <{}>", _config->IsPeriodic());
         return true;
     } else {
         _config->SetIsPeriodic(0);
@@ -1068,10 +1035,10 @@ bool IniFileParser::ParseNodeToSolver(const TiXmlNode & solverNode)
         else if(solver == "leapfrog")
             _config->SetSolver(3);
         else {
-            Logging::Error(fmt::format(check_fmt("Wrong value [{}] for solver type"), solver));
+            LOG_ERROR("Wrong value [{}] for solver type", solver);
             return false;
         }
-        Logging::Info(fmt::format(check_fmt("pSolver <{}>"), _config->GetSolver()));
+        LOG_ERROR("pSolver <{}>", _config->GetSolver());
         return true;
     }
     return false;
@@ -1085,8 +1052,8 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
     std::string query = "exit_crossing_strategy";
     if(!strategyNode.FirstChild(query.c_str())) {
         query = "exitCrossingStrategy";
-        Logging::Error("The keyword exitCrossingStrategy is deprecated. Please consider using "
-                       "\"exit_crossing_strategy\" in the ini file");
+        LOG_ERROR("The keyword exitCrossingStrategy is deprecated. Please consider using "
+                  "\"exit_crossing_strategy\" in the ini file");
         return false;
     }
 
@@ -1125,7 +1092,7 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                        ((router_descr == "ff_global_shortest") ||
                         (router_descr == "ff_local_shortest") || (router_descr == "ff_quickest"))) {
                         pExitStrategy = 8;
-                        Logging::Warning("Changing Exit Strategie to work with floorfield!");
+                        LOG_WARNING("Changing Exit Strategie to work with floorfield!");
                     }
                 }
             }
@@ -1156,9 +1123,9 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                     break;
                 case 6:
                     // dead end -> not supported anymore (global ff needed, but not available in 3d)
-                    Logging::Error("Exit Strategy 6 is not supported any longer. Please refer to "
-                                   "www.jupedsim.org");
-                    Logging::Warning(
+                    LOG_ERROR("Exit Strategy 6 is not supported any longer. Please refer to "
+                              "www.jupedsim.org");
+                    LOG_WARNING(
                         "Changing Exit-Strategy to #9 (Floorfields with targets within subroom)");
                     pExitStrategy      = 9;
                     _exit_strat_number = 9;
@@ -1170,9 +1137,9 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                     break;
                 case 7:
                     // dead end -> not supported anymore (global ff needed, but not available in 3d)
-                    Logging::Error("Exit Strategy 7 is not supported any longer. Please refer to "
-                                   "www.jupedsim.org");
-                    Logging::Warning(
+                    LOG_ERROR("Exit Strategy 7 is not supported any longer. Please refer to "
+                              "www.jupedsim.org");
+                    LOG_WARNING(
                         "Changing Exit-Strategy to #9 (Floorfields with targets within subroom)");
                     pExitStrategy      = 9;
                     _exit_strat_number = 9;
@@ -1203,15 +1170,14 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                 default:
                     _directionStrategy =
                         std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
-                    Logging::Error(fmt::format(
-                        check_fmt("Unknown exit_crossing_strategy <{}>"), pExitStrategy));
-                    Logging::Warning("The default exit_crossing_strategy <2> will be used");
+                    LOG_ERROR("Unknown exit_crossing_strategy <{}>", pExitStrategy);
+                    LOG_WARNING("The default exit_crossing_strategy <2> will be used");
                     break;
             }
         } else {
             return false;
         }
-        Logging::Info(fmt::format(check_fmt("exit_crossing_strategy <{}>"), pExitStrategy));
+        LOG_INFO("exit_crossing_strategy <{}>", pExitStrategy);
         _config->set_exit_strat(_exit_strat_number);
         _directionManager->SetDirectionStrategy(_directionStrategy);
     }
@@ -1234,9 +1200,8 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                         break;
                     default:
                         _waitingStrategy = std::shared_ptr<WaitingStrategy>(new WaitingRandom());
-                        Logging::Error(fmt::format(
-                            check_fmt("Unknown waiting_strategy <{}>"), waitingStrategyIndex));
-                        Logging::Warning("The default waiting_strategy <2> will be used");
+                        LOG_ERROR("Unknown waiting_strategy <{}>", waitingStrategyIndex);
+                        LOG_WARNING("The default waiting_strategy <2> will be used");
                 }
             }
         }
@@ -1244,9 +1209,9 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
 
     if(waitingStrategyIndex < 0) {
         _waitingStrategy = nullptr;
-        Logging::Info("Could not parse waiting_strategy, no waiting_strategy is used.");
+        LOG_INFO("Could not parse waiting_strategy, no waiting_strategy is used.");
     } else {
-        Logging::Info(fmt::format(check_fmt("Waiting_strategy <{:d}>"), waitingStrategyIndex));
+        LOG_INFO("Waiting_strategy <{:d}>", waitingStrategyIndex);
     }
 
     _directionManager->SetWaitingStrategy(_waitingStrategy);
@@ -1262,7 +1227,7 @@ bool IniFileParser::ParseFfOpts(const TiXmlNode & strategyNode)
         const char * tmp = strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
         double pDeltaH   = atof(tmp);
         _config->set_deltaH(pDeltaH);
-        Logging::Info(fmt::format(check_fmt("deltaH: {}"), pDeltaH));
+        LOG_INFO("deltaH: {}", pDeltaH);
     }
 
     query = "wall_avoid_distance";
@@ -1270,7 +1235,7 @@ bool IniFileParser::ParseFfOpts(const TiXmlNode & strategyNode)
         const char * tmp      = strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
         double pWallAvoidance = atof(tmp);
         _config->set_wall_avoid_distance(pWallAvoidance);
-        Logging::Info(fmt::format(check_fmt("Wall avoidance: {}"), pWallAvoidance));
+        LOG_INFO("Wall avoidance: {}", pWallAvoidance);
     }
 
     query = "use_wall_avoidance";
@@ -1279,9 +1244,9 @@ bool IniFileParser::ParseFfOpts(const TiXmlNode & strategyNode)
         bool pUseWallAvoidance = !(tmp == "false");
         _config->set_use_wall_avoidance(pUseWallAvoidance);
         if(pUseWallAvoidance)
-            Logging::Info("UseWAD:\t yes");
+            LOG_INFO("UseWAD: yes");
         else
-            Logging::Info("UseWAD:\t no");
+            LOG_INFO("UseWAD: no");
     }
     return true;
 }

@@ -1,6 +1,5 @@
 #include "Trajectories.h"
 
-#include "general/Format.h"
 #include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "mpi/LCGrid.h"
@@ -14,13 +13,13 @@ static fs::path getSourceFileName(const fs::path & projectFile)
 
     TiXmlDocument doc(projectFile.string());
     if(!doc.LoadFile()) {
-        Logging::Error(doc.ErrorDesc());
-        Logging::Error("GetSourceFileName could not parse the project file");
+        LOG_ERROR("{}", doc.ErrorDesc());
+        LOG_ERROR("GetSourceFileName could not parse the project file");
         return ret;
     }
     TiXmlNode * xRootNode = doc.RootElement()->FirstChild("agents");
     if(!xRootNode) {
-        Logging::Error("GetSourceFileName could not load persons attributes");
+        LOG_ERROR("GetSourceFileName could not load persons attributes");
         return ret;
     }
 
@@ -42,16 +41,16 @@ static fs::path getEventFileName(const fs::path & projectFile)
 
     TiXmlDocument doc(projectFile.string());
     if(!doc.LoadFile()) {
-        Logging::Error(doc.ErrorDesc());
-        Logging::Error("GetEventFileName could not parse the project file");
+        LOG_ERROR("{}", doc.ErrorDesc());
+        LOG_ERROR("GetEventFileName could not parse the project file");
         return ret;
     }
     TiXmlNode * xMainNode = doc.RootElement();
     if(xMainNode->FirstChild("events_file")) {
         ret = xMainNode->FirstChild("events_file")->FirstChild()->ValueStr();
-        Logging::Info(fmt::format("events <{}>", ret.string()));
+        LOG_INFO("events <{}>", ret.string());
     } else {
-        Logging::Info("No events found");
+        LOG_INFO("No events found");
         return ret;
     }
     return ret;
@@ -68,8 +67,8 @@ static fs::path getTrainTimeTableFileName(const fs::path & projectFile)
 
     TiXmlDocument doc(projectFile.string());
     if(!doc.LoadFile()) {
-        Logging::Error(doc.ErrorDesc());
-        Logging::Error("GetTrainTimeTable could not parse the project file");
+        LOG_ERROR("{}", doc.ErrorDesc());
+        LOG_ERROR("GetTrainTimeTable could not parse the project file");
         return ret;
     }
     TiXmlNode * xMainNode = doc.RootElement();
@@ -77,11 +76,12 @@ static fs::path getTrainTimeTableFileName(const fs::path & projectFile)
         TiXmlNode * xFileNode =
             xMainNode->FirstChild("train_constraints")->FirstChild("train_time_table");
 
-        if(xFileNode)
+        if(xFileNode) {
             ret = xFileNode->FirstChild()->ValueStr();
-        Logging::Info(fmt::format("train_time_table <{}>", ret.string()));
+        }
+        LOG_INFO("train_time_table <{}>", ret.string());
     } else {
-        Logging::Info("No ttt file found");
+        LOG_INFO("No ttt file found");
         return ret;
     }
     return ret;
@@ -93,8 +93,8 @@ static fs::path getTrainTypeFileName(const fs::path & projectFile)
 
     TiXmlDocument doc(projectFile.string());
     if(!doc.LoadFile()) {
-        Logging::Error(doc.ErrorDesc());
-        Logging::Error("GetTrainType could not parse the project file");
+        LOG_ERROR("{}", doc.ErrorDesc());
+        LOG_ERROR("GetTrainType could not parse the project file");
         return ret;
     }
     TiXmlNode * xMainNode = doc.RootElement();
@@ -102,9 +102,9 @@ static fs::path getTrainTypeFileName(const fs::path & projectFile)
         auto xFileNode = xMainNode->FirstChild("train_constraints")->FirstChild("train_types");
         if(xFileNode)
             ret = xFileNode->FirstChild()->ValueStr();
-        Logging::Info(fmt::format("train_types <{}>", ret.string()));
+        LOG_INFO("train_types <{}>", ret.string());
     } else {
-        Logging::Info("No train types file found");
+        LOG_INFO("No train types file found");
         return ret;
     }
     return ret;
@@ -116,8 +116,8 @@ static fs::path getGoalFileName(const fs::path & projectFile)
 
     TiXmlDocument doc(projectFile.string());
     if(!doc.LoadFile()) {
-        Logging::Error(doc.ErrorDesc());
-        Logging::Error("GetGoalFileName could not parse the project file");
+        LOG_ERROR("{}", doc.ErrorDesc());
+        LOG_ERROR("GetGoalFileName could not parse the project file");
         return ret;
     }
     TiXmlNode * xRootNode = doc.RootElement();
@@ -125,7 +125,7 @@ static fs::path getGoalFileName(const fs::path & projectFile)
         if(auto goalsNode = routingNode->FirstChild("goals")) {
             if(auto fileNode = goalsNode->FirstChild("file")) {
                 ret = fileNode->FirstChild()->ValueStr();
-                Logging::Info(fmt::format("goal file <{}>", ret.string()));
+                LOG_INFO("goal file <{}>", ret.string());
             }
         }
     }
@@ -141,7 +141,7 @@ TrajectoriesTXT::TrajectoriesTXT() : Trajectories()
     _optionalOutputHeader[OptionalOutput::speed] = "V\t";
     _optionalOutputInfo[OptionalOutput::speed]   = "#V: speed of the pedestrian (in m/s)\n";
     _optionalOutput[OptionalOutput::speed]       = [](const Pedestrian * ped) {
-        return fmt::format(check_fmt("{:.2f}\t"), ped->GetV().Norm());
+        return fmt::format(FMT_STRING("{:.2f}\t"), ped->GetV().Norm());
     };
 
     // Add header, info and output for velocity
@@ -150,21 +150,21 @@ TrajectoriesTXT::TrajectoriesTXT() : Trajectories()
         "#Vx: x component of the pedestrian's velocity\n"
         "#Vy: y component of the pedestrian's velocity\n";
     _optionalOutput[OptionalOutput::velocity] = [](const Pedestrian * ped) {
-        return fmt::format(check_fmt("{:.2f}\t{:.2f}\t"), ped->GetV()._x, ped->GetV()._y);
+        return fmt::format(FMT_STRING("{:.2f}\t{:.2f}\t"), ped->GetV()._x, ped->GetV()._y);
     };
 
     // Add header, info and output for final_goal
     _optionalOutputHeader[OptionalOutput::final_goal] = "FG\t";
     _optionalOutputInfo[OptionalOutput::final_goal]   = "#FG: id of final goal\n";
     _optionalOutput[OptionalOutput::final_goal]       = [](const Pedestrian * ped) {
-        return fmt::format(check_fmt("{}\t"), ped->GetFinalDestination());
+        return fmt::format(FMT_STRING("{}\t"), ped->GetFinalDestination());
     };
 
     // Add header, info and output for intermediate_goal
     _optionalOutputHeader[OptionalOutput::intermediate_goal] = "CG\t";
     _optionalOutputInfo[OptionalOutput::intermediate_goal]   = "#CG: id of current goal\n";
     _optionalOutput[OptionalOutput::intermediate_goal]       = [](const Pedestrian * ped) {
-        return fmt::format(check_fmt("{}\t"), ped->GetExitIndex());
+        return fmt::format(FMT_STRING("{}\t"), ped->GetExitIndex());
     };
 
     // Add header, info and output for desired direction
@@ -173,14 +173,15 @@ TrajectoriesTXT::TrajectoriesTXT() : Trajectories()
         "#Dx: x component of the pedestrian's desired direction\n"
         "#Dy: y component of the pedestrian's desired direction\n";
     _optionalOutput[OptionalOutput::desired_direction] = [](const Pedestrian * ped) {
-        return fmt::format(check_fmt("{:.2f}\t{:.2f}\t"), ped->GetLastE0()._x, ped->GetLastE0()._y);
+        return fmt::format(
+            FMT_STRING("{:.2f}\t{:.2f}\t"), ped->GetLastE0()._x, ped->GetLastE0()._y);
     };
 
     // Add header, info and output for spotlight
     _optionalOutputHeader[OptionalOutput::spotlight] = "SPOT\t";
     _optionalOutputInfo[OptionalOutput::spotlight]   = "#SPOT: ped is highlighted\n";
     _optionalOutput[OptionalOutput::spotlight]       = [](Pedestrian * ped) {
-        return fmt::format(check_fmt("{}\t"), (int) ped->GetSpotlight());
+        return fmt::format(FMT_STRING("{}\t"), (int) ped->GetSpotlight());
     };
 
     // Add header, info and output for router
@@ -188,14 +189,14 @@ TrajectoriesTXT::TrajectoriesTXT() : Trajectories()
     _optionalOutputInfo[OptionalOutput::router] =
         "#ROUTER: routing strategy used during simulation\n";
     _optionalOutput[OptionalOutput::router] = [](const Pedestrian * ped) {
-        return fmt::format(check_fmt("{}\t"), ped->GetRoutingStrategy());
+        return fmt::format(FMT_STRING("{}\t"), ped->GetRoutingStrategy());
     };
 
     // Add header, info and output for group
     _optionalOutputHeader[OptionalOutput::group] = "GROUP\t";
     _optionalOutputInfo[OptionalOutput::group]   = "#GROUP: group of the pedestrian\n";
     _optionalOutput[OptionalOutput::group]       = [](const Pedestrian * ped) {
-        return fmt::format(check_fmt("{}\t"), ped->GetGroup());
+        return fmt::format(FMT_STRING("{}\t"), ped->GetGroup());
     };
 }
 

@@ -47,7 +47,6 @@
 #include "ffRouter.h"
 
 #include "direction/walking/DirectionStrategy.h"
-#include "general/Format.h"
 #include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "geometry/WaitingArea.h"
@@ -95,14 +94,14 @@ bool FFRouter::Init(Building * building)
         for(auto const & [roomID, localFF] : _locffviafm) {
             localFF->WriteFF(
                 fmt::format(
-                    check_fmt("ffrouterRoom_{:d}_t_{:.2f}.vtk"),
+                    FMT_STRING("ffrouterRoom_{:d}_t_{:.2f}.vtk"),
                     roomID,
                     Pedestrian::GetGlobalTime()),
                 _allDoorUIDs);
         }
     }
 
-    Logging::Info("FF Router init done.");
+    LOG_INFO("FF Router init done.");
     return true;
 }
 
@@ -201,7 +200,7 @@ void FFRouter::CalculateFloorFields()
         locffptr->SetMode(CENTERPOINT);
         locffptr->SetSpeedMode(FF_HOMO_SPEED);
         locffptr->AddAllTargetsParallel();
-        Logging::Info(fmt::format(check_fmt("Adding distances in Room {:d} to matrix."), id));
+        LOG_INFO("Adding distances in Room {:d} to matrix.", id);
         _locffviafm.insert(std::make_pair(id, locffptr));
     }
 
@@ -244,12 +243,12 @@ void FFRouter::CalculateFloorFields()
             double tempDistance    = locffptr->GetDistanceBetweenDoors(doorUID1, doorUID2);
 
             if(tempDistance < locffptr->GetGrid()->Gethx()) {
-                Logging::Warning(fmt::format(
-                    check_fmt("Ignoring distance of doors {:d} and {:d} because it is too small: "
-                              "{:.2f}."),
+                LOG_WARNING(
+                    "Ignoring distance of doors {:d} and {:d} because it is too small: "
+                    "{:.2f}.",
                     doorUID1,
                     doorUID2,
-                    tempDistance));
+                    tempDistance);
                 continue;
             }
 
@@ -369,8 +368,7 @@ int FFRouter::FindExit(Pedestrian * p)
     } else { //only one specific goal, goalToLineUIDmap gets
         //populated in Init()
         if((_goalToLineUIDmap.count(goalID) == 0) || (_goalToLineUIDmap[goalID] == -1)) {
-            Logging::Error(fmt::format(
-                check_fmt("ffRouter: unknown/unreachable goalID: {:d} in FindExit(Ped)"), goalID));
+            LOG_ERROR("ffRouter: unknown/unreachable goalID: {:d} in FindExit(Ped)", goalID);
         } else {
             validFinalDoor.emplace_back(_goalToLineUIDmap.at(goalID));
         }
@@ -387,20 +385,20 @@ int FFRouter::FindExit(Pedestrian * p)
         }
         for(auto & subIPair : _building->GetRoom(p->GetRoomID())->GetAllSubRooms()) {
             for(auto & crossI : subIPair.second->GetAllCrossings()) {
-                    DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
+                DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
             }
         }
     } else {
         //candidates of current subroom only
         for(auto & crossI :
             _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->GetAllCrossings()) {
-                DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
+            DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
         }
 
         for(auto & transI : _building->GetRoom(p->GetRoomID())
                                 ->GetSubRoom(p->GetSubRoomID())
                                 ->GetAllTransitions()) {
-                DoorUIDsOfRoom.emplace_back(transI->GetUniqueID());
+            DoorUIDsOfRoom.emplace_back(transI->GetUniqueID());
         }
     }
 
@@ -421,8 +419,7 @@ int FFRouter::FindExit(Pedestrian * p)
             //auto subroomDoors = _building->GetSubRoomByUID(p->GetSubRoomUID())->GetAllGoalIDs();
             //only consider, if paths exists
             if(_pathsMatrix.count(key) == 0) {
-                Logging::Error(fmt::format(
-                    check_fmt("ffRouter: no key for {:d} {:d}"), key.first, key.second));
+                LOG_ERROR("ffRouter: no key for {:d} {:d}", key.first, key.second);
                 continue;
             }
 
@@ -484,7 +481,7 @@ void FFRouter::FloydWarshall()
     if(change) {
         FloydWarshall();
     } else {
-        Logging::Info("ffRouter: FloydWarshall done!");
+        LOG_INFO("ffRouter: FloydWarshall done!");
     }
 }
 

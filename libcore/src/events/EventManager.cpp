@@ -27,7 +27,6 @@
 #include "EventManager.h"
 
 #include "Event.h"
-#include "general/Format.h"
 #include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "mpi/LCGrid.h"
@@ -83,11 +82,11 @@ EventManager::~EventManager()
 
 bool EventManager::ReadEventsXml()
 {
-    Logging::Info("Looking for pre-defined events in other files");
+    LOG_INFO("Looking for pre-defined events in other files");
     //get the geometry filename from the project file
     TiXmlDocument doc(_config->GetProjectFile().string());
     if(!doc.LoadFile()) {
-        Logging::Error(fmt::format(check_fmt("Cannot parse project file: {}"), doc.ErrorDesc()));
+        LOG_ERROR("Cannot parse project file: {}", doc.ErrorDesc());
         return false;
     }
 
@@ -98,57 +97,56 @@ bool EventManager::ReadEventsXml()
                             xMainNode->FirstChild("event_realtime")->FirstChild()->Value();
         _file = fopen(realtimefile.string().c_str(), "r");
         if(!_file) {
-            Logging::Info(fmt::format(
-                check_fmt("Realtime file missing: {} Realtime interaction with the "
-                          "simulation not possible"),
-                realtimefile.string()));
+            LOG_INFO(
+                "Realtime file missing: {} Realtime interaction with the "
+                "simulation not possible",
+                realtimefile.string());
         } else {
-            Logging::Info(
-                fmt::format(check_fmt("Monitoring {} for new events"), realtimefile.string()));
+            LOG_INFO("Monitoring {} for new events", realtimefile.string());
             _dynamic = true;
         }
     } else {
-        Logging::Info("No realtime events found");
+        LOG_INFO("No realtime events found");
     }
 
     fs::path eventfile{};
     if(xMainNode->FirstChild("events_file")) {
         eventfile = _config->GetProjectRootDir() /
                     xMainNode->FirstChild("events_file")->FirstChild()->Value();
-        Logging::Info(fmt::format(check_fmt("events<{}>"), eventfile.string()));
+        LOG_INFO("events<{}>", eventfile.string());
     } else if(
         xMainNode->FirstChild("header") &&
         xMainNode->FirstChild("header")->FirstChild("events_file")) {
         eventfile =
             _config->GetProjectRootDir() /
             xMainNode->FirstChild("header")->FirstChild("events_file")->FirstChild()->Value();
-        Logging::Info(fmt::format(check_fmt("events<{}>"), eventfile.string()));
+        LOG_INFO("events<{}>", eventfile.string());
     } else {
-        Logging::Info("No events found");
+        LOG_INFO("No events found");
         return true;
     }
 
-    Logging::Info("Parsing event file");
+    LOG_INFO("Parsing event file");
     TiXmlDocument docEvent(eventfile.string());
     if(!docEvent.LoadFile()) {
-        Logging::Error(fmt::format(check_fmt("Cannot parse event file: {}"), docEvent.ErrorDesc()));
+        LOG_ERROR("Cannot parse event file: {}", docEvent.ErrorDesc());
         return false;
     }
 
     TiXmlElement * xRootNode = docEvent.RootElement();
     if(!xRootNode) {
-        Logging::Error("Event file root element missing");
+        LOG_ERROR("Event file root element missing");
         return false;
     }
 
     if(xRootNode->ValueStr() != "JPScore") {
-        Logging::Error("Event file root element should be 'JPScore'");
+        LOG_ERROR("Event file root element should be 'JPScore'");
         return false;
     }
 
     TiXmlNode * xEvents = xRootNode->FirstChild("events");
     if(!xEvents) {
-        Logging::Error("No events found");
+        LOG_ERROR("No events found");
         return false;
     }
     _updateFrequency = xmltoi(xEvents->ToElement()->Attribute("update_frequency"), 1);
@@ -164,7 +162,7 @@ bool EventManager::ReadEventsXml()
         std::string type(e->Attribute("type"));
         _events.push_back(Event(id, zeit, type, state));
     }
-    Logging::Info("Events have been initialized");
+    LOG_INFO("Events have been initialized");
 
     //create some events
     //FIXME: creating some engine before starting is not working.
@@ -177,7 +175,7 @@ bool EventManager::ReadEventsXml()
 void EventManager::ListEvents()
 {
     for(const auto & event : _events) {
-        Logging::Info(event.GetDescription());
+        LOG_INFO("{}", event.GetDescription());
     }
 }
 
@@ -193,7 +191,7 @@ void EventManager::ReadEventsTxt(double time)
         if(cstring[0] != '#') { // skip comments
             lines++;
             if(lines > _eventCounter) {
-                Logging::Info(fmt::format(check_fmt("Event: after {:.2f}"), time));
+                LOG_INFO("Event: after {:.2f}", time);
                 GetEvent(cstring);
                 _eventCounter++;
             }
@@ -500,7 +498,7 @@ void EventManager::ProcessEvent()
     for(const auto & event : _events) {
         if(fabs(event.GetTime() - current_time_d) < J_EPS_EVENT) {
             //Event with current time stamp detected
-            Logging::Info(fmt::format(check_fmt("Event: after {:.2f} sec"), current_time_d));
+            LOG_INFO("Event: after {:.2f} sec", current_time_d);
             switch(event.GetAction()) {
                 case EventAction::OPEN:
                     OpenDoor(event.GetId());
@@ -515,8 +513,8 @@ void EventManager::ProcessEvent()
                     ResetDoor(event.GetId());
                     break;
                 case EventAction::NOTHING:
-                    Logging::Warning("Unknown event action in events. open, close, reset or "
-                                     "temp_close. Default: do nothing");
+                    LOG_WARNING("Unknown event action in events. open, close, reset or "
+                                "temp_close. Default: do nothing");
                     break;
             }
             _building->GetRoutingEngine()->setNeedUpdate(true);
@@ -533,10 +531,10 @@ void EventManager::CloseDoor(int id)
     Transition * t = _building->GetTransition(id);
 
     t->Close(true);
-    Logging::Info(fmt::format(check_fmt("Closing door {}"), id));
+    LOG_INFO("Closing door {}", id);
     //Create and save a graph corresponding to the actual state of the building.
     if(CreateRoutingEngine(_building) == false) {
-        Logging::Error("Cannot create a routing engine with new event");
+        LOG_ERROR("Cannot create a routing engine with new event");
     }
 }
 
@@ -545,10 +543,10 @@ void EventManager::TempCloseDoor(int id)
     Transition * t = _building->GetTransition(id);
 
     t->TempClose(true);
-    Logging::Info(fmt::format(check_fmt("Closing door {}"), id));
+    LOG_INFO("Closing door {}", id);
     //Create and save a graph corresponding to the actual state of the building.
     if(CreateRoutingEngine(_building) == false) {
-        Logging::Error("Cannot create a routing engine with new event");
+        LOG_ERROR("Cannot create a routing engine with new event");
     }
 }
 
@@ -557,10 +555,10 @@ void EventManager::OpenDoor(int id)
 {
     Transition * t = _building->GetTransition(id);
     t->Open(true);
-    Logging::Info(fmt::format(check_fmt("Opening door {}"), id));
+    LOG_INFO("Opening door {}", id);
     //Create and save a graph corresponding to the actual state of the building.
     if(CreateRoutingEngine(_building) == false) {
-        Logging::Error("Cannot create a routing engine with new event");
+        LOG_ERROR("Cannot create a routing engine with new event");
     }
 }
 
@@ -569,9 +567,9 @@ void EventManager::ResetDoor(int id)
 {
     Transition * t = _building->GetTransition(id);
     t->ResetDoorUsage();
-    Logging::Info(fmt::format(check_fmt("Resetting door usage {}"), id));
+    LOG_INFO("Resetting door usage {}", id);
     if(CreateRoutingEngine(_building) == false) {
-        Logging::Error("Cannot create a routing engine with new event");
+        LOG_ERROR("Cannot create a routing engine with new event");
     }
 }
 
@@ -633,7 +631,7 @@ bool EventManager::CreateRoutingEngine(Building * _b, int first_engine)
         for(auto && rout : engine->GetAvailableRouters()) {
             _availableRouters.push_back(rout->GetStrategy());
         }
-        Logging::Warning(fmt::format(check_fmt("Adding new routing engine with key {}"), key));
+        LOG_WARNING("Adding new routing engine with key {}", key);
 
 
         return true;
@@ -654,9 +652,9 @@ bool EventManager::CreateRoutingEngine(Building * _b, int first_engine)
 
         //save the configuration
         _eventEngineStorage[key] = engine;
-        Logging::Warning(fmt::format(check_fmt("Adding new routing engine with key {}"), key));
+        LOG_WARNING("Adding new routing engine with key {}", key);
     } else {
-        Logging::Warning(fmt::format(check_fmt("Routing engine with key {} already exists"), key));
+        LOG_WARNING("Routing engine with key {} already exists", key);
     }
 
     return true;
@@ -700,8 +698,7 @@ Router * EventManager::CreateRouter(const RoutingStrategy & strategy)
             break;
 
         default:
-            Logging::Error(
-                fmt::format(check_fmt("Unknown value for routing strategy: {}"), strategy));
+            LOG_ERROR("Unknown value for routing strategy: {}", strategy);
             exit(EXIT_FAILURE);
             break;
     }
@@ -710,12 +707,11 @@ Router * EventManager::CreateRouter(const RoutingStrategy & strategy)
 
 void EventManager::CreateSomeEngines()
 {
-    Logging::Info("Populating routers");
+    LOG_INFO("Populating routers");
     std::map<int, bool> doors_states;
 
     for(auto && t : _building->GetAllTransitions()) {
-        Logging::Info(
-            fmt::format(check_fmt("ID: {} IsOpen: {}"), t.second->GetID(), t.second->IsOpen()));
+        LOG_INFO("ID: {} IsOpen: {}", t.second->GetID(), t.second->IsOpen());
     }
 
     //save the doors states
@@ -748,23 +744,22 @@ void EventManager::CreateSomeEngines()
             t.second->Close();
         }
     }
-    Logging::Info("Done populating routers");
+    LOG_INFO("Done populating routers");
 
     cout << endl << endl;
     for(auto && t : _building->GetAllTransitions()) {
-        Logging::Info(
-            fmt::format(check_fmt("ID: {} IsOpen: {}"), t.second->GetID(), t.second->IsOpen()));
+        LOG_INFO("ID: {} IsOpen: {}", t.second->GetID(), t.second->IsOpen());
     }
     exit(0);
 }
 
 bool EventManager::ReadSchedule()
 {
-    Logging::Info("Reading schedule");
+    LOG_INFO("Reading schedule");
     //get the geometry filename from the project file
     TiXmlDocument doc(_config->GetProjectFile().string());
     if(!doc.LoadFile()) {
-        Logging::Error(fmt::format(check_fmt("Cannot parse project file: {}"), doc.ErrorDesc()));
+        LOG_ERROR("Cannot parse project file: {}", doc.ErrorDesc());
         return false;
     }
 
@@ -774,42 +769,41 @@ bool EventManager::ReadSchedule()
     if(xMainNode->FirstChild("schedule_file")) {
         scheduleFile = _config->GetProjectRootDir() /
                        xMainNode->FirstChild("schedule_file")->FirstChild()->Value();
-        Logging::Info(fmt::format(check_fmt("events<{}>"), scheduleFile.string()));
+        LOG_INFO("events<{}>", scheduleFile.string());
     } else if(
         xMainNode->FirstChild("header") &&
         xMainNode->FirstChild("header")->FirstChild("schedule_file")) {
         scheduleFile =
             _config->GetProjectRootDir() /
             xMainNode->FirstChild("header")->FirstChild("schedule_file")->FirstChild()->Value();
-        Logging::Info(fmt::format(check_fmt("events<{}>"), scheduleFile.string()));
+        LOG_INFO("events<{}>", scheduleFile.string());
     } else {
-        Logging::Info("No events found");
+        LOG_INFO("No events found");
         return true;
     }
 
-    Logging::Info("Parsing schedule file");
+    LOG_INFO("Parsing schedule file");
     TiXmlDocument docSchedule(scheduleFile.string());
     if(!docSchedule.LoadFile()) {
-        Logging::Error(
-            fmt::format(check_fmt("Cannot parse schedule file: {}"), docSchedule.ErrorDesc()));
+        LOG_ERROR("Cannot parse schedule file: {}", docSchedule.ErrorDesc());
         return false;
     }
 
     TiXmlElement * xRootNode = docSchedule.RootElement();
     if(!xRootNode) {
-        Logging::Error("Schedule file root element missing");
+        LOG_ERROR("Schedule file root element missing");
         return false;
     }
 
     if(xRootNode->ValueStr() != "JPScore") {
-        Logging::Error("Schedule file root element is not 'JPScore'");
+        LOG_ERROR("Schedule file root element is not 'JPScore'");
         return false;
     }
 
     // Read groups
     TiXmlNode * xGroups = xRootNode->FirstChild("groups");
     if(!xGroups) {
-        Logging::Error("No groups found in schedule file");
+        LOG_ERROR("No groups found in schedule file");
         return false;
     }
 
@@ -846,7 +840,7 @@ bool EventManager::ReadSchedule()
     // Read times
     TiXmlNode * xTimes = xRootNode->FirstChild("times");
     if(!xTimes) {
-        Logging::Error("No times found");
+        LOG_ERROR("No times found");
         return false;
     }
 
@@ -894,7 +888,6 @@ bool EventManager::ReadSchedule()
             }
         }
     }
-
-    Logging::Info("Schedule initialized");
+    LOG_INFO("Schedule initialized");
     return true;
 }
