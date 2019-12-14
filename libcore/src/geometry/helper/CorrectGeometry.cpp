@@ -166,17 +166,17 @@ std::optional<std::vector<Wall>> SplitWall(const SubRoom & subroom, const Wall &
     // Collecting all split Points
     std::vector<Point> splitPoints;
     for(const auto & crossing : subroom.GetAllCrossings()) {
-        if(auto p = GetSplitPoint(bigWall, *crossing)) {
+        if(const auto p = GetSplitPoint(bigWall, *crossing)) {
             splitPoints.emplace_back(*p);
         }
     }
     for(const auto & transition : subroom.GetAllTransitions()) {
-        if(auto p = GetSplitPoint(bigWall, *transition)) {
+        if(const auto p = GetSplitPoint(bigWall, *transition)) {
             splitPoints.emplace_back(*p);
         }
     }
     for(const auto & wall : subroom.GetAllWalls()) {
-        if(auto p = GetSplitPoint(bigWall, wall)) {
+        if(const auto p = GetSplitPoint(bigWall, wall)) {
             splitPoints.emplace_back(*p);
         }
     }
@@ -215,13 +215,13 @@ bool isPointAndSubroomIncident(const SubRoom & subroom, const Point & point)
         }
     }
     // Incident with transition
-    for(auto transition : subroom.GetAllTransitions()) {
+    for(const auto & transition : subroom.GetAllTransitions()) {
         if(transition->GetPoint1() == point || transition->GetPoint2() == point) {
             return true;
         }
     }
     //Incident with crossing
-    for(auto crossing : subroom.GetAllCrossings()) {
+    for(const auto & crossing : subroom.GetAllCrossings()) {
         if(crossing->GetPoint1() == point || crossing->GetPoint2() == point) {
             return true;
         }
@@ -301,10 +301,10 @@ bool RemoveBigWalls(SubRoom & subroom)
     bool wallsRemoved = false;
 
     // Need to copy walls here, because we are going to change subrooms wall container
-    auto walls = subroom.GetAllWalls();
+    const auto walls = subroom.GetAllWalls();
 
     for(auto const & bigWall : walls) {
-        auto splitWallPieces = SplitWall(subroom, bigWall);
+        const auto splitWallPieces = SplitWall(subroom, bigWall);
 
         if(splitWallPieces && !splitWallPieces->empty()) {
             // remove big wall and add one wallpiece to walls
@@ -321,7 +321,7 @@ bool RemoveBigWalls(SubRoom & subroom)
 
 void correct(Building & building)
 {
-    auto t_start = std::chrono::high_resolution_clock::now();
+    const auto t_start = std::chrono::high_resolution_clock::now();
     Logging::Info("Starting geometry::helper::correct to fix the geometry ...");
 
     bool geometry_changed = false;
@@ -339,14 +339,15 @@ void correct(Building & building)
     }
 
     if(geometry_changed) {
-        auto geometryFile = add_prefix_to_filename("correct_", building.GetGeometryFilename());
+        const auto geometryFile =
+            add_prefix_to_filename("correct_", building.GetGeometryFilename());
 
         if(building.SaveGeometry(geometryFile)) {
             building.GetConfig()->SetGeometryFile(geometryFile);
         }
     }
 
-    auto t_end           = std::chrono::high_resolution_clock::now();
+    const auto t_end     = std::chrono::high_resolution_clock::now();
     double elapsedTimeMs = std::chrono::duration<double, std::milli>(t_end - t_start).count();
     Logging::Info(
         fmt::format(check_fmt("Leave geometry correct with success ({:.3f}s)"), elapsedTimeMs));
