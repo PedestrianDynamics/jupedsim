@@ -1,13 +1,64 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## v0.8.4 [TBD]
+## v0.8.5 [2019-07-12]
 
 ### Added
+- Added option for additional/optional output for speed, velocity(x,y),
+final goal, intermediate goal, desired direction(x,y), spotlight, router, group. Thus,
+there is no need to run multiple simulation to obtain those values. Attention: File may
+become significantly larger!
 
 ### Changed
 
 ### Fixed
+
+### Removed
+- Removed AI_Router
+- Removed Krausz Model
+- Removed Gompertz Model
+- Removed GradNav Model
+
+## v0.8.4 [2019-04-12]
+
+### Added
+- Added waiting areas, waiting for certain time or till transition opens
+- Improve realtime event handling, new tag in ini `<event_realtime>` with commit 292b8381
+- New type of doors `{ OPEN, CLOSE, TEMP_CLOSE }` !48  #307
+- Outsource some configurations from inifile to external xml files. !46   #302
+- Add new properties to doors #299, #295
+- Add new properties to sources !41 #298
+- Added homebrew [packages](https://github.com/JuPedSim/homebrew-jps/blob/master/README.md)
+- added function `correct` to fix sloppily drawn geometries !36
+- use cmake option `-D JPSFIRE=true` (default false) !33
+- JPSfire-module: Walking speed and toxicity analysis functional (thanks to @hein1)  !31
+- Add study Fridolf2018 !29
+- Make Windows executables with CPack !28
+- New wiki page for AI-Router [WIKI](https://gitlab.version.fz-juelich.de/jupedsim/jpscore/wikis/AI-Router)
+- New model (number 6) GCVM !30
+- Distribute source agents on a fixed position. Use attributes `startX` and `startY`  6766950e
+- Feature dynamic transitions, moving danger line !32
+
+### Changed
+
+- Show statistics for crossings too. !43 #293
+- Crossing IDs don't have to be consecutive. !39
+- `jpscore` uses C++17.
+- Write door statistics  every 1000 frames. 284749ab2e6f3ed85dc40ad24e3579e92c7f7883  #309
+- Big TXT-files will be splited in 10MB files. !45  #308
+- Change `plain` format dded6083
+- Agents without any exits should not be deleted 67ce14cf
+
+### Fixed
+
+- Continuous walls are splited. Write corrected geometry  #281
+- Doors on walls are not a problem anymore #282
+- Better handle wrong group id for sources
+- Better handle parameter id in inifile. #303
+- Floorfield router reacts better on events. #294
+- Windows path compatibility for JPSfire-module d14229f7
+- Several SegFaults related to agents without navigation lines (especially agents created by sources)
+- C++11 support for XCode fbb3038a
 
 ## v0.8.3 [2018-05-18]
 ### Added
