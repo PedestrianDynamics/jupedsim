@@ -21,7 +21,6 @@
 #include "GeoFileParser.h"
 
 #include "general/Filesystem.h"
-#include "general/Format.h"
 #include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "geometry/WaitingArea.h"
@@ -35,20 +34,20 @@ void GeoFileParser::LoadBuilding(Building * building)
 {
     //todo: what happens if any of these  methods failed (return false)? throw exception ?
     if(!LoadGeometry(building)) {
-        Logging::Error("Could not load the geometry!");
+        LOG_ERROR("Could not load the geometry!");
         exit(EXIT_FAILURE);
     }
 
     if(!LoadRoutingInfo(building)) {
-        Logging::Error("Could not load extra routing information!");
+        LOG_ERROR("Could not load extra routing information!");
         exit(EXIT_FAILURE);
     }
     if(!LoadTrafficInfo(building)) {
-        Logging::Error("Could not load extra traffic information!");
+        LOG_ERROR("Could not load extra traffic information!");
         exit(EXIT_FAILURE);
     }
     if(!LoadTrainInfo(building)) {
-        Logging::Error("Could not load train information!");
+        LOG_ERROR("Could not load train information!");
         exit(EXIT_FAILURE);
     }
 }
@@ -58,40 +57,38 @@ bool GeoFileParser::LoadGeometry(Building * building)
     const fs::path & rootDir(_configuration->GetProjectRootDir());
 
     const fs::path geoFilenameWithPath = rootDir / _configuration->GetGeometryFile();
-    Logging::Info(fmt::format(check_fmt("LoadGeometry: file: {}"), geoFilenameWithPath.string()));
+    LOG_INFO("LoadGeometry: file: {}", geoFilenameWithPath.string());
 
     TiXmlDocument docGeo(geoFilenameWithPath.string());
     if(!docGeo.LoadFile()) {
-        Logging::Error("Could not parse the geometry file.");
-        Logging::Error(fmt::format(check_fmt("{}"), docGeo.ErrorDesc()));
+        LOG_ERROR("Could not parse the geometry file.");
+        LOG_ERROR("{}", docGeo.ErrorDesc());
         return false;
     }
 
     TiXmlElement * xRootNode = docGeo.RootElement();
     if(!xRootNode) {
-        Logging::Error("Root element does not exist");
+        LOG_ERROR("Root element does not exist");
         return false;
     }
 
     if(xRootNode->ValueStr() != "geometry") {
-        Logging::Error("Root element value is not 'geometry'.");
+        LOG_ERROR("Root element value is not 'geometry'.");
         return false;
     }
     if(xRootNode->Attribute("unit"))
         if(std::string(xRootNode->Attribute("unit")) != "m") {
-            Logging::Error("Only the unit m (meters) is supported.");
-            Logging::Error(
-                fmt::format(check_fmt("You supplied [{}]"), xRootNode->Attribute("unit")));
+            LOG_ERROR("Only the unit m (meters) is supported.");
+            LOG_ERROR("You supplied [{}]", xRootNode->Attribute("unit"));
             return false;
         }
 
     double version = xmltof(xRootNode->Attribute("version"), -1);
 
     if(version < std::stod(JPS_OLD_VERSION)) {
-        Logging::Error("Wrong geometry version!");
-        Logging::Error(fmt::format(check_fmt("Only version >= {:s} supported."), JPS_OLD_VERSION));
-        Logging::Error(fmt::format(
-            check_fmt("Please update the version of your geometry file to {:s}"), JPS_OLD_VERSION));
+        LOG_ERROR("Wrong geometry version!");
+        LOG_ERROR("Only version >= {:s} supported.", JPS_OLD_VERSION);
+        LOG_ERROR("Please update the version of your geometry file to {:s}", JPS_OLD_VERSION);
         return false;
     }
 
@@ -100,7 +97,7 @@ bool GeoFileParser::LoadGeometry(Building * building)
     //processing the rooms node
     TiXmlNode * xRoomsNode = xRootNode->FirstChild("rooms");
     if(!xRoomsNode) {
-        Logging::Error("The geometry should have at least one room and one subroom");
+        LOG_ERROR("The geometry should have at least one room and one subroom");
         return false;
     }
 
@@ -144,9 +141,8 @@ bool GeoFileParser::LoadGeometry(Building * building)
 
             if(type == "stair" || type == "escalator" || type == "idle_escalator") {
                 if(xSubRoom->FirstChildElement("up") == nullptr) {
-                    Logging::Error(fmt::format(
-                        check_fmt("The attribute <up> and <down> are missing for the {:s}"), type));
-                    Logging::Error("Check your geometry file");
+                    LOG_ERROR("The attribute <up> and <down> are missing for the {:s}", type);
+                    LOG_ERROR("Check your geometry file");
                     return false;
                 }
                 double up_x   = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
@@ -158,9 +154,8 @@ bool GeoFileParser::LoadGeometry(Building * building)
                 ((Stair *) subroom)->SetDown(Point(down_x, down_y));
             } else if(type == "escalator_up") {
                 if(xSubRoom->FirstChildElement("up") == nullptr) {
-                    Logging::Error(fmt::format(
-                        check_fmt("The attribute <up> and <down> are missing for the {:s}"), type));
-                    Logging::Error("Check your geometry file");
+                    LOG_ERROR("The attribute <up> and <down> are missing for the {:s}", type);
+                    LOG_ERROR("Check your geometry file");
                     return false;
                 }
                 double up_x   = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
@@ -174,9 +169,8 @@ bool GeoFileParser::LoadGeometry(Building * building)
                 _configuration->set_has_directional_escalators(true);
             } else if(type == "escalator_down") {
                 if(xSubRoom->FirstChildElement("up") == nullptr) {
-                    Logging::Error(fmt::format(
-                        check_fmt("The attribute <up> and <down> are missing for the {:s}"), type));
-                    Logging::Error("Check your geometry file");
+                    LOG_ERROR("The attribute <up> and <down> are missing for the {:s}", type);
+                    LOG_ERROR("Check your geometry file");
                     return false;
                 }
                 double up_x   = xmltof(xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
@@ -295,26 +289,25 @@ bool GeoFileParser::LoadGeometry(Building * building)
             p /= transFilename;
             transFilename = p.string();
 
-            Logging::Info(
-                fmt::format(check_fmt("Parsing transition from file <{:s}>"), transFilename));
+            LOG_INFO("Parsing transition from file <{:s}>", transFilename);
             TiXmlDocument docTrans(transFilename);
             if(!docTrans.LoadFile()) {
-                Logging::Error("Could not parse the transitions file.");
-                Logging::Error(fmt::format(check_fmt("{:s}"), docTrans.ErrorDesc()));
+                LOG_ERROR("Could not parse the transitions file.");
+                LOG_ERROR("{:s}", docTrans.ErrorDesc());
                 return false;
             }
             TiXmlElement * xRootNodeTrans = docTrans.RootElement();
             if(!xRootNodeTrans) {
-                Logging::Error("Root element does not exist in transitions file.");
+                LOG_ERROR("Root element does not exist in transitions file.");
                 return false;
             }
             if(xRootNodeTrans->ValueStr() != "JPScore") {
-                Logging::Error("Parsing transitions file. Root element value is not 'JPScore'.");
+                LOG_ERROR("Parsing transitions file. Root element value is not 'JPScore'.");
                 return false;
             }
             TiXmlNode * xTransNodeFile = xRootNodeTrans->FirstChild("transitions");
             if(!xTransNodeFile) {
-                Logging::Error("No Transitions in file found.");
+                LOG_ERROR("No Transitions in file found.");
                 return false;
             }
             for(TiXmlElement * xTrans = xTransNodeFile->FirstChildElement("transition"); xTrans;
@@ -323,13 +316,12 @@ bool GeoFileParser::LoadGeometry(Building * building)
                 building->AddTransition(t);
             }
         } else {
-            Logging::Info("Not parsing transition from file");
+            LOG_INFO("Not parsing transition from file");
         }
-        Logging::Info(
-            fmt::format(check_fmt("Got {} transitions"), building->GetAllTransitions().size()));
+        LOG_INFO("Got {} transitions", building->GetAllTransitions().size());
 
     } // xTransNode
-    Logging::Info("Loading building file successful.");
+    LOG_INFO("Loading building file successful.");
 
     //everything went fine
     return true;
@@ -341,14 +333,14 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
 
     TiXmlDocument docRouting(_configuration->GetProjectFile().string());
     if(!docRouting.LoadFile()) {
-        Logging::Error(fmt::format(check_fmt("{:s}"), docRouting.ErrorDesc()));
-        Logging::Error("Could not parse the routing file");
+        LOG_ERROR("{:s}", docRouting.ErrorDesc());
+        LOG_ERROR("Could not parse the routing file");
         return false;
     }
 
     TiXmlElement * xRootNode = docRouting.RootElement();
     if(!xRootNode) {
-        Logging::Error("Root element does not exist");
+        LOG_ERROR("Root element does not exist");
         return false;
     }
 
@@ -386,25 +378,25 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
             std::string goalFilename = xGoalsNodeFile->FirstChild()->ValueStr();
             p /= goalFilename;
             goalFilename = p.string();
-            Logging::Info(fmt::format(check_fmt("Goal file <{:s}> will be parsed."), goalFilename));
+            LOG_INFO("Goal file <{:s}> will be parsed.", goalFilename);
             TiXmlDocument docGoal(goalFilename);
             if(!docGoal.LoadFile()) {
-                Logging::Error(fmt::format(check_fmt("{}"), docGoal.ErrorDesc()));
-                Logging::Error("Could not parse the goal file.");
+                LOG_ERROR("{}", docGoal.ErrorDesc());
+                LOG_ERROR("Could not parse the goal file.");
                 return false;
             }
             TiXmlElement * xRootNodeGoal = docGoal.RootElement();
             if(!xRootNodeGoal) {
-                Logging::Error("Root element does not exist in goal file.");
+                LOG_ERROR("Root element does not exist in goal file.");
                 return false;
             }
             if(xRootNodeGoal->ValueStr() != "JPScore") {
-                Logging::Error("Parsing goal file. Root element value is not 'JPScore'.");
+                LOG_ERROR("Parsing goal file. Root element value is not 'JPScore'.");
                 return false;
             }
             TiXmlNode * xGoal = xRootNodeGoal->FirstChild("goals");
             if(!xGoal) {
-                Logging::Error("No Goals in file found.");
+                LOG_ERROR("No Goals in file found.");
                 return false;
             }
             for(TiXmlElement * e = xGoal->FirstChildElement("goal"); e;
@@ -427,10 +419,10 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
 
 
         } else
-            Logging::Info("Goal file not parsed");
+            LOG_INFO("Goal file not parsed");
     } //xgoalsNode
 
-    Logging::Info("Done with loading extra routing information");
+    LOG_INFO("Done with loading extra routing information");
     return true;
 }
 
@@ -438,8 +430,8 @@ bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building * build
 {
     bool result = false; // this return value is not needed.
                          // maybe in the future it might be...
-    Logging::Info("Parsed Door:");
-    Logging::Info(fmt::format(check_fmt(">> ID: {}"), id));
+    LOG_INFO("Parsed Door:");
+    LOG_INFO(">> ID: {}", id);
     //------------------ state
     std::string stateStr = xmltoa(xDoor->Attribute("state"), "open");
     DoorState state      = StringToDoorState(stateStr);
@@ -455,20 +447,19 @@ bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building * build
             building->GetTransition(id)->TempClose();
             break;
         case DoorState::Error:
-            Logging::Warning(fmt::format(
-                check_fmt("Unknown door state: <{}>. open, close or temp_close. Default: open"),
-                stateStr));
+            LOG_WARNING(
+                "Unknown door state: <{}>. open, close or temp_close. Default: open", stateStr);
             building->GetTransition(id)->Open();
             break;
     }
 
-    Logging::Info(fmt::format(check_fmt(">> state: {}"), stateStr));
+    LOG_INFO(">> state: {}", stateStr);
 
     //------------------ outflow
     double outflow = xmltof(xDoor->Attribute("outflow"), -1.0);
     if(outflow >= 0) {
         building->GetTransition(id)->SetOutflowRate(outflow);
-        Logging::Info(fmt::format(check_fmt(">> ouflow: {:.2f}"), outflow));
+        LOG_INFO(">> ouflow: {:.2f}", outflow);
     }
     //----------------- dt
     double DT = xmltof(xDoor->Attribute("dt"), -1.0);
@@ -479,14 +470,14 @@ bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building * build
     int DN = xmltof(xDoor->Attribute("dn"), -1.0);
     if(DN >= 0) {
         building->GetTransition(id)->SetDN(DN);
-        Logging::Info(fmt::format(check_fmt(">> dn: {}"), DN));
+        LOG_INFO(">> dn: {}", DN);
     }
 
     //------------------ max door usage
     int mdu = xmltof(xDoor->Attribute("max_agents"), -1);
     if(mdu >= 0) {
         building->GetTransition(id)->SetMaxDoorUsage(mdu);
-        Logging::Info(fmt::format(check_fmt(">> max_agents: {}"), mdu));
+        LOG_INFO(">> max_agents: {}", mdu);
     }
     //-----------------
     result = true;
@@ -495,24 +486,24 @@ bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building * build
 
 bool GeoFileParser::LoadTrafficInfo(Building * building)
 {
-    Logging::Info("Loading the traffic info");
+    LOG_INFO("Loading the traffic info");
 
     TiXmlDocument doc(_configuration->GetProjectFile().string());
     if(!doc.LoadFile()) {
-        Logging::Error(fmt::format(check_fmt("{}"), doc.ErrorDesc()));
-        Logging::Error("Could not parse the project file");
+        LOG_ERROR("{}", doc.ErrorDesc());
+        LOG_ERROR("Could not parse the project file");
         return false;
     }
 
     TiXmlNode * xRootNode = doc.RootElement()->FirstChild("traffic_constraints");
     if(!xRootNode) {
-        Logging::Warning("Could not find any traffic information");
+        LOG_WARNING("Could not find any traffic information");
         return true;
     }
 
     //processing the rooms node
     TiXmlNode * xRoomsNode = xRootNode->FirstChild("rooms");
-    if(xRoomsNode)
+    if(xRoomsNode) {
         for(TiXmlElement * xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
             xRoom                = xRoom->NextSiblingElement("room")) {
             double id         = xmltof(xRoom->Attribute("room_id"), -1);
@@ -520,8 +511,9 @@ bool GeoFileParser::LoadTrafficInfo(Building * building)
             RoomState status  = (state == "good") ? ROOM_CLEAN : ROOM_SMOKED;
             building->GetRoom(id)->SetState(status);
         }
-    else
-        Logging::Info("No room info found in inifile");
+    } else {
+        LOG_INFO("No room info found in inifile");
+    }
 
     //processing the doors node
     TiXmlNode * xDoorsNode = xRootNode->FirstChild("doors");
@@ -537,7 +529,7 @@ bool GeoFileParser::LoadTrafficInfo(Building * building)
             }
         } //for xDoor
     } else
-        Logging::Info("No door info found in inifile.");
+        LOG_INFO("No door info found in inifile.");
     // processing file node
     TiXmlNode * xFileNode = xRootNode->FirstChild("file");
     if(xFileNode) {
@@ -545,26 +537,26 @@ bool GeoFileParser::LoadTrafficInfo(Building * building)
         std::string trafficFilename = xFileNode->FirstChild()->ValueStr();
         p /= trafficFilename;
         trafficFilename = p.string();
-        Logging::Info(fmt::format(check_fmt("Traffic file found <{}>"), trafficFilename));
+        LOG_INFO("Traffic file found <{}>", trafficFilename);
         TiXmlDocument docTraffic(trafficFilename);
         if(!docTraffic.LoadFile()) {
-            Logging::Error(fmt::format(check_fmt("{}"), docTraffic.ErrorDesc()));
-            Logging::Error("Could not parse the traffic file.");
+            LOG_ERROR("{}", docTraffic.ErrorDesc());
+            LOG_ERROR("Could not parse the traffic file.");
             return false;
         }
         TiXmlElement * xRootNodeTraffic = docTraffic.RootElement();
         if(!xRootNodeTraffic) {
-            Logging::Error("Root element does not exist.");
+            LOG_ERROR("Root element does not exist.");
             return false;
         }
 
         if(xRootNodeTraffic->ValueStr() != "JPScore") {
-            Logging::Error("Root element value is not 'JPScore'.");
+            LOG_ERROR("Root element value is not 'JPScore'.");
             return false;
         }
         TiXmlNode * xTraffic = xRootNodeTraffic->FirstChild("traffic_constraints");
         if(!xTraffic) {
-            Logging::Error("No traffic constraints in file found.");
+            LOG_ERROR("No traffic constraints in file found.");
             return false;
         }
         TiXmlNode * xDoorsNodeF = xTraffic->FirstChild("doors");
@@ -580,11 +572,11 @@ bool GeoFileParser::LoadTrafficInfo(Building * building)
                 }
             } //for xDoor
         } else
-            Logging::Info("No door info found in traffic file");
+            LOG_INFO("No door info found in traffic file");
     } else
-        Logging::Info("No traffic file found.");
+        LOG_INFO("No traffic file found.");
 
-    Logging::Info("Done with loading traffic info file");
+    LOG_INFO("Done with loading traffic info file");
     return true;
 }
 
@@ -645,16 +637,16 @@ Transition * GeoFileParser::parseTransitionNode(TiXmlElement * xTrans, Building 
 
 Goal * GeoFileParser::parseGoalNode(TiXmlElement * e)
 {
-    Logging::Info("Loading goal");
+    LOG_INFO("Loading goal");
     int id              = xmltoi(e->Attribute("id"), -1);
     int isFinal         = std::string(e->Attribute("final")) == "true" ? true : false;
     std::string caption = xmltoa(e->Attribute("caption"), "-1");
     int room_id         = xmltoi(e->Attribute("room_id"), -1);
     int subroom_id      = xmltoi(e->Attribute("subroom_id"), -1);
-    Logging::Info(fmt::format(check_fmt("Goal id: {}"), id));
-    Logging::Info(fmt::format(check_fmt("Goal caption: {}"), caption));
-    Logging::Info(fmt::format(check_fmt("Goal room_id: {}"), room_id));
-    Logging::Info(fmt::format(check_fmt("Goal subroom_id: {}"), subroom_id));
+    LOG_INFO("Goal id: {}", id);
+    LOG_INFO("Goal caption: {}", caption);
+    LOG_INFO("Goal room_id: {}", room_id);
+    LOG_INFO("Goal subroom_id: {}", subroom_id);
     Goal * goal = new Goal();
     goal->SetId(id);
     goal->SetCaption(caption);
@@ -677,16 +669,16 @@ Goal * GeoFileParser::parseGoalNode(TiXmlElement * e)
     }
 
     if(!goal->ConvertLineToPoly()) {
-        Logging::Error(fmt::format(check_fmt("Parsing polygon of goal {}"), id));
+        LOG_ERROR("Parsing polygon of goal {}", id);
         return nullptr;
     }
-    Logging::Info(fmt::format(check_fmt("Finished parsing goal {}"), id));
+    LOG_INFO("Finished parsing goal {}", id);
     return goal;
 }
 
 Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
 {
-    Logging::Info("Loading Waiting Area");
+    LOG_INFO("Loading Waiting Area");
 
     WaitingArea * wa = new WaitingArea();
 
@@ -696,12 +688,12 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
         if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
             wa->SetId(value);
         } else {
-            Logging::Error(" waiting area id set but not an integer");
+            LOG_ERROR(" waiting area id set but not an integer");
             delete wa;
             return nullptr;
         }
     } else {
-        Logging::Error(" waiting area id required");
+        LOG_ERROR(" waiting area id required");
         delete wa;
         return nullptr;
     }
@@ -711,13 +703,12 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
         if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
             wa->SetRoomID(value);
         } else {
-            Logging::Error(fmt::format(
-                check_fmt("waiting area {:d}: room_id set but not an integer"), wa->GetId()));
+            LOG_ERROR("waiting area {:d}: room_id set but not an integer", wa->GetId());
             delete wa;
             return nullptr;
         }
     } else {
-        Logging::Error(fmt::format(check_fmt("waiting area {:d}: room_id required"), wa->GetId()));
+        LOG_ERROR("waiting area {:d}: room_id required", wa->GetId());
         delete wa;
         return nullptr;
     }
@@ -727,14 +718,12 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
         if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
             wa->SetSubRoomID(value);
         } else {
-            Logging::Error(fmt::format(
-                check_fmt("waiting area {:d}: subroom_id set but not an integer"), wa->GetId()));
+            LOG_ERROR("waiting area {:d}: subroom_id set but not an integer", wa->GetId());
             delete wa;
             return nullptr;
         }
     } else {
-        Logging::Error(
-            fmt::format(check_fmt("waiting area {:d}: subroom_id required"), wa->GetId()));
+        LOG_ERROR("waiting area {:d}: subroom_id required", wa->GetId());
         delete wa;
         return nullptr;
     }
@@ -748,10 +737,10 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
         }
     }
 
-    Logging::Info(fmt::format(check_fmt("Goal id: {:d}"), wa->GetId()));
-    Logging::Info(fmt::format(check_fmt("Goal caption: {:s}"), wa->GetCaption().c_str()));
-    Logging::Info(fmt::format(check_fmt("Goal room_id: {:d}"), wa->GetRoomID()));
-    Logging::Info(fmt::format(check_fmt("Goal subroom_id: {:d}"), wa->GetSubRoomID()));
+    LOG_INFO("Goal id: {:d}", wa->GetId());
+    LOG_INFO("Goal caption: {:s}", wa->GetCaption().c_str());
+    LOG_INFO("Goal room_id: {:d}", wa->GetRoomID());
+    LOG_INFO("Goal subroom_id: {:d}", wa->GetSubRoomID());
 
     // Read optional values and check for valid values, on fail write error
     // Read min_peds and check if correct value
@@ -759,9 +748,8 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
         if(int value = xmltoi(attribute, -1); value > 0 && attribute == std::to_string(value)) {
             wa->SetMinNumPed(value);
         } else {
-            Logging::Warning(fmt::format(
-                check_fmt("waiting area {:d}: input for min_peds should be positive integer."),
-                wa->GetId()));
+            LOG_WARNING(
+                "waiting area {:d}: input for min_peds should be positive integer.", wa->GetId());
         }
     }
 
@@ -770,9 +758,8 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
         if(int value = xmltoi(attribute, -1); value > 0 && attribute == std::to_string(value)) {
             wa->SetMaxNumPed(value);
         } else {
-            Logging::Warning(fmt::format(
-                check_fmt("waiting area {:d}: input for max_peds should be positive integer."),
-                wa->GetId()));
+            LOG_WARNING(
+                "waiting area {:d}: input for max_peds should be positive integer.", wa->GetId());
         }
     }
 
@@ -781,9 +768,9 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
         if(int value = xmltoi(attribute, -1); value >= 0 && attribute == std::to_string(value)) {
             wa->SetWaitingTime(value);
         } else {
-            Logging::Warning(fmt::format(
-                check_fmt("waiting area {:d}: input for waiting_time should be positive integer."),
-                wa->GetId()));
+            LOG_WARNING(
+                "waiting area {:d}: input for waiting_time should be positive integer.",
+                wa->GetId());
         }
     }
 
@@ -792,9 +779,9 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
         if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
             wa->SetTransitionID(value);
         } else {
-            Logging::Warning(fmt::format(
-                check_fmt("waiting area {:d}: input for transition_id should be positive integer."),
-                wa->GetId()));
+            LOG_WARNING(
+                "waiting area {:d}: input for transition_id should be positive integer.",
+                wa->GetId());
         }
     }
 
@@ -809,10 +796,10 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
             wa->SetOpen(true);
         } else {
             wa->SetOpen(true);
-            Logging::Warning(fmt::format(
-                check_fmt("waiting area {:d}: input for is_open neither <true> nor <false>. "
-                          "Default <true> is used."),
-                wa->GetId()));
+            LOG_WARNING(
+                "waiting area {:d}: input for is_open neither <true> nor <false>. "
+                "Default <true> is used.",
+                wa->GetId());
         }
     }
 
@@ -827,10 +814,10 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
             wa->SetGlobalTimer(true);
         } else {
             wa->SetGlobalTimer(false);
-            Logging::Warning(fmt::format(
-                check_fmt("waiting area {:d}: input for global_timer neither <true> nor <false>. "
-                          "Default <true> is used."),
-                wa->GetId()));
+            LOG_WARNING(
+                "waiting area {:d}: input for global_timer neither <true> nor <false>. "
+                "Default <true> is used.",
+                wa->GetId());
         }
     }
 
@@ -841,11 +828,11 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
     const bool usesGlobalTimer = (wa->IsGlobalTimer() && wa->GetWaitingTime() >= 0.);
 
     if(!usesMinPedWaitingTime && !usesTransition && !usesGlobalTimer) {
-        Logging::Error(fmt::format(
-            check_fmt("waiting area {:d}: min_peds, max_peds, waiting_time, transition_id not set "
-                      "properly. Set either (min_peds, max_peds, waiting_time) OR transition_id OR "
-                      "(waiting_time, global_timer)."),
-            wa->GetId()));
+        LOG_ERROR(
+            "waiting area {:d}: min_peds, max_peds, waiting_time, transition_id not set "
+            "properly. Set either (min_peds, max_peds, waiting_time) OR transition_id OR "
+            "(waiting_time, global_timer).",
+            wa->GetId());
         delete wa;
         return nullptr;
     }
@@ -853,10 +840,10 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
     // If (minPed, maxPed, waitingTime) AND transitionID are set only
     // transitionID is considered
     if(usesMinPedWaitingTime && usesTransition) {
-        Logging::Warning(fmt::format(
-            check_fmt("waiting area {:d}: min_peds, max_peds and waiting_time not considered since "
-                      "transition_id set."),
-            wa->GetId()));
+        LOG_WARNING(
+            "waiting area {:d}: min_peds, max_peds and waiting_time not considered since "
+            "transition_id set.",
+            wa->GetId());
     }
 
     // Read the succeeding goals of waiting area
@@ -870,24 +857,20 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
 
         if(nextWaId == std::numeric_limits<int>::min() ||
            nextWaP == std::numeric_limits<double>::min()) {
-            Logging::Error(fmt::format(
-                check_fmt("waiting area {:d}: check next_wa id or p not set properly."),
-                wa->GetId()));
+            LOG_ERROR("waiting area {:d}: check next_wa id or p not set properly.", wa->GetId());
             delete wa;
             return nullptr;
         }
 
         if(nextWaId < -2) {
-            Logging::Error(fmt::format(
-                check_fmt("waiting area {:d}: check next_wa id should be positive integer."),
-                wa->GetId()));
+            LOG_ERROR(
+                "waiting area {:d}: check next_wa id should be positive integer.", wa->GetId());
             delete wa;
             return nullptr;
         }
 
         if(nextWaP < 0. || nextWaP > 1. + 1e-5) {
-            Logging::Error(fmt::format(
-                check_fmt("waiting area {:d}: check next_wa p should be in [0, 1]."), wa->GetId()));
+            LOG_ERROR("waiting area {:d}: check next_wa p should be in [0, 1].", wa->GetId());
             delete wa;
             return nullptr;
         }
@@ -895,9 +878,9 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
     }
 
     if(!wa->SetNextGoals(nextGoals)) {
-        Logging::Error(fmt::format(
-            check_fmt("waiting area {:d}: check probabilities sum of p over all next_wa ids != 1."),
-            wa->GetId()));
+        LOG_ERROR(
+            "waiting area {:d}: check probabilities sum of p over all next_wa ids != 1.",
+            wa->GetId());
         delete wa;
         return nullptr;
     }
@@ -918,34 +901,32 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
 
     // Check if boundaries area a valid polygon
     if(!wa->ConvertLineToPoly()) {
-        Logging::Error(fmt::format(
-            check_fmt("waiting area {:d}: parsing polygon of waiting area."), wa->GetId()));
+        LOG_ERROR("waiting area {:d}: parsing polygon of waiting area.", wa->GetId());
         delete wa;
         return nullptr;
     }
 
-    Logging::Info(
-        fmt::format(check_fmt("waiting area {:d}: finished parsing waiting area."), wa->GetId()));
+    LOG_INFO("waiting area {:d}: finished parsing waiting area.", wa->GetId());
     return wa;
 }
 
 bool GeoFileParser::LoadTrainInfo(Building * building)
 {
-    Logging::Info("Loading the train info");
+    LOG_INFO("Loading the train info");
 
     TiXmlDocument doc(_configuration->GetProjectFile().string());
     if(!doc.LoadFile()) {
-        Logging::Error(fmt::format(check_fmt("{}"), doc.ErrorDesc()));
-        Logging::Error("Could not parse the project file");
+        LOG_ERROR("{}", doc.ErrorDesc());
+        LOG_ERROR("Could not parse the project file");
         return false;
     }
     TiXmlElement * xRootNode = doc.RootElement();
     if(!xRootNode) {
-        Logging::Error("Root element does not exist");
+        LOG_ERROR("Root element does not exist");
         return false;
     }
     if(!xRootNode->FirstChild("train_constraints")) {
-        Logging::Warning("No train constraints were found. Continue.");
+        LOG_WARNING("No train constraints were found. Continue.");
     }
     bool resTTT  = true;
     bool resType = true;
@@ -966,26 +947,24 @@ bool GeoFileParser::LoadTrainTimetable(Building * building, TiXmlElement * xRoot
         TTTFilename = xTTTNode->FirstChild()->ValueStr();
         p /= TTTFilename;
         TTTFilename = p.string();
-        Logging::Info(
-            fmt::format(check_fmt("Train Timetable file <{}> will be parsed"), TTTFilename));
+        LOG_INFO("Train Timetable file <{}> will be parsed", TTTFilename);
     } else
         return true;
 
 
     TiXmlDocument docTTT(TTTFilename);
     if(!docTTT.LoadFile()) {
-        Logging::Error(fmt::format(check_fmt("{}"), docTTT.ErrorDesc()));
-        Logging::Error("Could not parse the train timetable file.");
+        LOG_ERROR("{}", docTTT.ErrorDesc());
+        LOG_ERROR("Could not parse the train timetable file.");
         return false;
     }
     TiXmlElement * xTTT = docTTT.RootElement();
     if(!xTTT) {
-        Logging::Error("Root element does not exist in TTT file.");
+        LOG_ERROR("Root element does not exist in TTT file.");
         return false;
     }
     if(xTTT->ValueStr() != "train_time_table") {
-        Logging::Error(
-            "Parsing train timetable file. Root element value is not 'train_time_table'.");
+        LOG_ERROR("Parsing train timetable file. Root element value is not 'train_time_table'.");
         return false;
     }
     for(TiXmlElement * e = xTTT->FirstChildElement("train"); e;
@@ -1007,24 +986,24 @@ bool GeoFileParser::LoadTrainType(Building * building, TiXmlElement * xRootNode)
         TTFilename = xTTNode->FirstChild()->ValueStr();
         p /= TTFilename;
         TTFilename = p.string();
-        Logging::Info(fmt::format(check_fmt("Train Type file <{}> will be parsed"), TTFilename));
+        LOG_INFO("Train Type file <{}> will be parsed", TTFilename);
     } else
         return true;
 
 
     TiXmlDocument docTT(TTFilename);
     if(!docTT.LoadFile()) {
-        Logging::Error(fmt::format(check_fmt("{}"), docTT.ErrorDesc()));
-        Logging::Error("Could not parse the train type file.");
+        LOG_ERROR("{}", docTT.ErrorDesc());
+        LOG_ERROR("Could not parse the train type file.");
         return false;
     }
     TiXmlElement * xTT = docTT.RootElement();
     if(!xTT) {
-        Logging::Error("Root element does not exist in TT file.");
+        LOG_ERROR("Root element does not exist in TT file.");
         return false;
     }
     if(xTT->ValueStr() != "train_type") {
-        Logging::Error("Parsing train type file. Root element value is not 'train_type'.");
+        LOG_ERROR("Parsing train type file. Root element value is not 'train_type'.");
         return false;
     }
     for(TiXmlElement * e = xTT->FirstChildElement("train"); e; e = e->NextSiblingElement("train")) {
@@ -1038,7 +1017,7 @@ bool GeoFileParser::LoadTrainType(Building * building, TiXmlElement * xRootNode)
 
 std::shared_ptr<TrainTimeTable> GeoFileParser::parseTrainTimeTableNode(TiXmlElement * e)
 {
-    Logging::Info("Loading train time table NODE");
+    LOG_INFO("Loading train time table NODE");
     std::string caption = xmltoa(e->Attribute("caption"), "-1");
     int id              = xmltoi(e->Attribute("id"), -1);
     std::string type    = xmltoa(e->Attribute("type"), "-1");
@@ -1058,17 +1037,16 @@ std::shared_ptr<TrainTimeTable> GeoFileParser::parseTrainTimeTableNode(TiXmlElem
     float arrival_time   = xmltof(e->Attribute("arrival_time"), -1);
     float departure_time = xmltof(e->Attribute("departure_time"), -1);
     // @todo: check these values for correctness e.g. arrival < departure
-    Logging::Info("Train time table:");
-    Logging::Info(fmt::format(check_fmt("ID: {}"), id));
-    Logging::Info(fmt::format(check_fmt("Type: {}"), type));
-    Logging::Info(fmt::format(check_fmt("room_id: {}"), room_id));
-    Logging::Info(fmt::format(check_fmt("subroom_id: {}"), subroom_id));
-    Logging::Info(fmt::format(check_fmt("platform_id: {}"), platform_id));
-    Logging::Info(
-        fmt::format(check_fmt("track_start: [{:.2f}, {:.2f}]"), track_start_x, track_start_y));
-    Logging::Info(fmt::format(check_fmt("track_end: [{:.2f}, {:.2f}]"), track_end_x, track_end_y));
-    Logging::Info(fmt::format(check_fmt("arrival_time: {:.2f}"), arrival_time));
-    Logging::Info(fmt::format(check_fmt("departure_time: {:.2f}"), departure_time));
+    LOG_INFO("Train time table:");
+    LOG_INFO("ID: {}", id);
+    LOG_INFO("Type: {}", type);
+    LOG_INFO("room_id: {}", room_id);
+    LOG_INFO("subroom_id: {}", subroom_id);
+    LOG_INFO("platform_id: {}", platform_id);
+    LOG_INFO("track_start: [{:.2f}, {:.2f}]", track_start_x, track_start_y);
+    LOG_INFO("track_end: [{:.2f}, {:.2f}]", track_end_x, track_end_y);
+    LOG_INFO("arrival_time: {:.2f}", arrival_time);
+    LOG_INFO("departure_time: {:.2f}", departure_time);
     Point track_start(track_start_x, track_start_y);
     Point track_end(track_end_x, track_end_y);
     Point train_start(train_start_x, train_start_y);
@@ -1094,7 +1072,7 @@ std::shared_ptr<TrainTimeTable> GeoFileParser::parseTrainTimeTableNode(TiXmlElem
 
 std::shared_ptr<TrainType> GeoFileParser::parseTrainTypeNode(TiXmlElement * e)
 {
-    Logging::Info("Loading train type");
+    LOG_INFO("Loading train type");
     // int T_id = xmltoi(e->Attribute("id"), -1);
     std::string type = xmltoa(e->Attribute("type"), "-1");
     int agents_max   = xmltoi(e->Attribute("agents_max"), -1);
@@ -1123,15 +1101,12 @@ std::shared_ptr<TrainType> GeoFileParser::parseTrainTypeNode(TiXmlElement * e)
         t.SetDN(dn);
         doors.push_back(t);
     }
-    Logging::Info(fmt::format(check_fmt("type: {}"), type));
-    Logging::Info(fmt::format(check_fmt("capacity: {}"), agents_max));
-    Logging::Info(fmt::format(check_fmt("number of doors: {}"), doors.size()));
+    LOG_INFO("type: {}", type);
+    LOG_INFO("capacity: {}", agents_max);
+    LOG_INFO("number of doors: {}", doors.size());
     for(auto d : doors) {
-        Logging::Info(fmt::format(
-            check_fmt("Door ({}): {} | {}"),
-            d.GetID(),
-            d.GetPoint1().toString(),
-            d.GetPoint2().toString()));
+        LOG_INFO(
+            "Door ({}): {} | {}", d.GetID(), d.GetPoint1().toString(), d.GetPoint2().toString());
     }
 
     std::shared_ptr<TrainType> Type = std::make_shared<TrainType>(TrainType{

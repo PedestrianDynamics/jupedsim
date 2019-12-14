@@ -27,14 +27,13 @@
 #include "Crossing.h"
 
 #include "SubRoom.h"
-#include "general/Format.h"
 #include "general/Logger.h"
 
 
 Crossing::Crossing()
 {
-    _id           = -1;
-    _doorUsage    = 0;
+    _id            = -1;
+    _doorUsage     = 0;
     _tempDoorUsage = 0;
     _maxDoorUsage = (std::numeric_limits<int>::max)(); //avoid name conflicts in windows winmindef.h
     _outflowRate  = (std::numeric_limits<double>::max)();
@@ -95,7 +94,7 @@ void Crossing::TempClose(bool event)
 
 void Crossing::Open(bool)
 {
-    _state = DoorState::OPEN;
+    _state        = DoorState::OPEN;
     _closeByEvent = false;
 }
 
@@ -123,12 +122,12 @@ SubRoom * Crossing::GetOtherSubRoom(int roomID, int subroomID) const
     else if(_subRoom2->GetSubRoomID() == subroomID)
         return _subRoom1;
     else {
-        Logging::Warning(fmt::format(
-            check_fmt("Crossing::GetOtherSubroom No exit found on the other side ID={}, roomID={}, "
-                      "subroomID={}"),
+        LOG_WARNING(
+            "Crossing::GetOtherSubroom No exit found on the other side ID={}, roomID={}, "
+            "subroomID={}",
             GetID(),
             roomID,
-            subroomID));
+            subroomID);
         return nullptr;
     }
 }
@@ -137,7 +136,7 @@ SubRoom * Crossing::GetOtherSubRoom(int roomID, int subroomID) const
 // Ausgabe
 void Crossing::WriteToErrorLog() const
 {
-    Logging::Debug(fmt::format(check_fmt("{}"), *this));
+    LOG_DEBUG("{}", *this);
 }
 
 // TraVisTo Ausgabe
@@ -221,7 +220,7 @@ void Crossing::ResetDoorUsage()
     if((_outflowRate >= std::numeric_limits<double>::max())) {
         if(_maxDoorUsage < std::numeric_limits<double>::max()) {
             Open();
-            Logging::Info(fmt::format(check_fmt("Reopening door {}"), _id));
+            LOG_INFO("Reopening door {}", _id);
             _closeByEvent = false;
         }
     }
@@ -303,15 +302,14 @@ bool Crossing::RegulateFlow(double time)
             _closingTime = number / _outflowRate - T; //[1]
 
             this->TempClose();
-            Logging::Info(fmt::format(
-                check_fmt(
-                    "Closing door {} DoorUsage={} (max={}) Flow={:.2f} (max={:.2f}) Time={:.2f}"),
+            LOG_INFO(
+                "Closing door {} DoorUsage={} (max={}) Flow={:.2f} (max={:.2f}) Time={:.2f}",
                 GetID(),
                 GetDoorUsage(),
                 GetMaxDoorUsage(),
                 flow,
                 _outflowRate,
-                time));
+                time);
             change = true;
         }
     }
@@ -319,12 +317,12 @@ bool Crossing::RegulateFlow(double time)
     // close the door if _maxDoorUsage is reached
     if(_maxDoorUsage != std::numeric_limits<double>::max()) {
         if(_tempDoorUsage >= _maxDoorUsage) {
-            Logging::Info(fmt::format(
-                check_fmt("Closing door {} DoorUsage={} (>={}) Time={:.2f}"),
+            LOG_INFO(
+                "Closing door {} DoorUsage={} (>={}) Time={:.2f}",
                 GetID(),
                 GetDoorUsage(),
                 GetMaxDoorUsage(),
-                time));
+                time);
             this->Close();
             change = true;
         }

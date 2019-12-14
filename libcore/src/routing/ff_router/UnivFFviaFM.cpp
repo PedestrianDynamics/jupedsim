@@ -4,7 +4,6 @@
 #include "UnivFFviaFM.h"
 
 #include "general/Filesystem.h"
-#include "general/Format.h"
 #include "general/Logger.h"
 #include "geometry/Building.h"
 #include "geometry/Line.h"
@@ -122,7 +121,7 @@ UnivFFviaFM::UnivFFviaFM(
             if(subroom->IsInSubRoom(candidate02)) {
                 _subRoomPtrTOinsidePoint.emplace(std::make_pair(subroom.get(), candidate02));
             } else {
-                Logging::Error("In UnivFF InsidePoint Analysis.");
+                LOG_ERROR("In UnivFF InsidePoint Analysis.");
             }
         }
     }
@@ -212,7 +211,7 @@ UnivFFviaFM::UnivFFviaFM(
         if(subRoomArg->IsInSubRoom(candidate02)) {
             _subRoomPtrTOinsidePoint.emplace(std::make_pair(subRoomArg, candidate02));
         } else {
-            Logging::Error("In UnivFF InsidePoint Analysis.");
+            LOG_ERROR("In UnivFF InsidePoint Analysis.");
             bool a = subRoomArg->IsInSubRoom(candidate01);
             bool b = subRoomArg->IsInSubRoom(candidate02);
             a      = b && a;
@@ -1005,8 +1004,7 @@ void UnivFFviaFM::CalcCost(long int key, double * cost, Point * dir, const doubl
         row         = cost[aux];
         pointsRight = true;
         if(row < 0) {
-            Logging::Error(
-                fmt::format(check_fmt("In CalcCost something went wrong {:.2f} {:d}"), row, aux));
+            LOG_ERROR("In CalcCost something went wrong {:.2f} {:d}", row, aux);
             row = std::numeric_limits<double>::max();
         }
     }
@@ -1029,8 +1027,7 @@ void UnivFFviaFM::CalcCost(long int key, double * cost, Point * dir, const doubl
         col      = cost[aux];
         pointsUp = true;
         if(col < 0) {
-            Logging::Error(
-                fmt::format(check_fmt("In CalcCost something went wrong {:.2f} {:d}"), row, aux));
+            LOG_ERROR("In CalcCost something went wrong {:.2f} {:d}", row, aux);
             col = std::numeric_limits<double>::max();
         }
     }
@@ -1102,7 +1099,7 @@ void UnivFFviaFM::CalcCost(long int key, double * cost, Point * dir, const doubl
             dir[key]._y = (-(cost[key] - cost[key - (_grid->GetiMax())]) / _grid->Gethy());
         }
     } else {
-        Logging::Error("else in twosided Dist");
+        LOG_ERROR("else in twosided Dist");
     }
     dir[key] = dir[key].Normalized();
 }
@@ -1212,8 +1209,7 @@ void UnivFFviaFM::CalcDist(long int key, double * cost, Point * dir, const doubl
         row         = cost[aux];
         pointsRight = true;
         if(row < 0) {
-            Logging::Error(
-                fmt::format(check_fmt("In CalcDist something went wrong {:.2f} {:d}"), row, aux));
+            LOG_ERROR("In CalcDist something went wrong {:.2f} {:d}", row, aux);
             row = std::numeric_limits<double>::max();
         }
     }
@@ -1236,8 +1232,7 @@ void UnivFFviaFM::CalcDist(long int key, double * cost, Point * dir, const doubl
         col      = cost[aux];
         pointsUp = true;
         if(col < 0) {
-            Logging::Error(
-                fmt::format(check_fmt("In CalcDist something went wrong {:.2f} {:d}"), row, aux));
+            LOG_ERROR("In CalcDist something went wrong {:.2f} {:d}", row, aux);
             col = std::numeric_limits<double>::max();
         }
     }
@@ -1310,7 +1305,7 @@ void UnivFFviaFM::CalcDist(long int key, double * cost, Point * dir, const doubl
             dir[key]._y = (-(cost[key] - cost[key - (_grid->GetiMax())]) / _grid->Gethy());
         }
     } else {
-        Logging::Error("else in twosided Dist");
+        LOG_ERROR("else in twosided Dist");
     }
     dir[key] = dir[key].Normalized();
 }
@@ -1333,8 +1328,7 @@ inline double UnivFFviaFM::TwosidedCalc(double x, double y, double hDivF)
 void UnivFFviaFM::AddTarget(int uid, double * costarray, Point * gradarray)
 {
     if(_doors.count(uid) == 0) {
-        Logging::Error(
-            fmt::format(check_fmt("Could not find door with uid {:d} in Room {:d}"), uid, _room));
+        LOG_ERROR("Could not find door with uid {:d} in Room {:d}", uid, _room);
         return;
     }
     Line tempTargetLine   = Line(_doors[uid]);
@@ -1417,7 +1411,7 @@ void UnivFFviaFM::AddTarget(int uid, double * costarray, Point * gradarray)
             FinalizeTargetLine(uid, tempTargetLine, newArrayPt, passvector);
 
         } else {
-            Logging::Error("in AddTarget: calling FinalizeTargetLine");
+            LOG_ERROR("in AddTarget: calling FinalizeTargetLine");
         }
         //         for (long int i = 0; i < _grid->GetnPoints(); ++i) {
         //             if ((_gridCode[i] != OUTSIDE) && (_gridCode[i] != WALL) && (newArrayPt[i] == Point(0.0, 0.0) )) {
@@ -1536,10 +1530,10 @@ void UnivFFviaFM::WriteFF(const fs::path & filename, std::vector<int> targetID)
 {
     fs::create_directory(_configuration->GetProjectRootDir() / "ff_vtk_files");
     auto floorfieldFile = _configuration->GetProjectRootDir() / "ff_vtk_files" / filename;
-    Logging::Info(fmt::format(
-        check_fmt("Write Floorfield to file: {:s} with {:d} targets."),
+    LOG_INFO(
+        "Write Floorfield to file: {:s} with {:d} targets.",
         floorfieldFile.string().c_str(),
-        targetID.size()));
+        targetID.size());
     std::ofstream file;
 
     file.open(floorfieldFile.string());
@@ -1729,7 +1723,7 @@ double UnivFFviaFM::GetDistanceBetweenDoors(const int door1_ID, const int door2_
             } else if(_gridCode[key - 1] == door2_ID) {
                 key = key - 1;
             } else {
-                Logging::Error("In DistanceBetweenDoors.");
+                LOG_ERROR("In DistanceBetweenDoors.");
             }
         }
         return _costFieldWithKey[door1_ID][key];
@@ -1774,7 +1768,7 @@ void UnivFFviaFM::GetDirectionToUID(int destID, long int key, Point & direction,
             (_gridCode[key + _grid->GetiMax()] != WALL)) {
             key = key + _grid->GetiMax();
         } else {
-            Logging::Error("In GetDirectionToUID (4 args)");
+            LOG_ERROR("In GetDirectionToUID (4 args)");
         }
     }
     if(_directionFieldWithKey.count(destID) == 1 && _directionFieldWithKey[destID]) {

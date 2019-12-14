@@ -28,7 +28,6 @@
 
 #include "Room.h"
 #include "SubRoom.h"
-#include "general/Format.h"
 #include "general/Logger.h"
 
 /************************************************************
@@ -83,8 +82,7 @@ Room * Transition::GetOtherRoom(int roomID) const
     } else if(GetRoom2() != nullptr && GetRoom2()->GetID() == roomID) {
         return GetRoom1();
     } else {
-        Logging::Error(
-            fmt::format(check_fmt("Transition::GetOtherRoom() wrong roomID [{}]"), roomID));
+        LOG_ERROR("Transition::GetOtherRoom() wrong roomID [{}]", roomID);
 
         exit(0);
     }
@@ -127,12 +125,12 @@ SubRoom * Transition::GetOtherSubRoom(int roomID, int subroomID) const
     else if((GetRoom2() != nullptr) && (GetRoom2()->GetID() == roomID))
         return GetSubRoom1();
     else {
-        Logging::Error(fmt::format(
-            check_fmt("Transition::GetOtherSubRoom No exit found on the other side, ID={}, "
-                      "roomID={}, subroomID={}."),
+        LOG_ERROR(
+            "Transition::GetOtherSubRoom No exit found on the other side, ID={}, "
+            "roomID={}, subroomID={}.",
             GetUniqueID(),
             roomID,
-            subroomID));
+            subroomID);
         exit(EXIT_FAILURE);
     }
 }

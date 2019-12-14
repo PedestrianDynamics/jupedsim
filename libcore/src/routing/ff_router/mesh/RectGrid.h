@@ -27,7 +27,6 @@
  **/
 #pragma once
 
-#include "general/Format.h"
 #include "general/Logger.h"
 #include "geometry/Point.h"
 
@@ -199,22 +198,19 @@ public:
             return (j * _iMax + i); // 0-based; index of (closest gridpoint)}
         } else {
             if(x < _xMin) {
-                Logging::Error(fmt::format(check_fmt("Out of left bound by: {:.2f}"), (_xMin - x)));
+                LOG_ERROR("Out of left bound by: {:.2f}", _xMin - x);
                 i = 0;
             }
             if(x > _xMax) {
-                Logging::Error(
-                    fmt::format(check_fmt("Out of right bound by: {:.2f}"), (x - _xMax)));
+                LOG_ERROR("Out of right bound by: {:.2f}", x - _xMax);
                 i = _iMax;
             }
             if(y < _yMin) {
-                Logging::Error(
-                    fmt::format(check_fmt("lower of lower bound by: {:.2f}"), (_yMin - y)));
+                LOG_ERROR("lower of lower bound by: {:.2f}", _yMin - y);
                 j = 0;
             }
             if(y > _yMax) {
-                Logging::Error(
-                    fmt::format(check_fmt("lower of upper bound by: {:.2f}"), (y - _yMax)));
+                LOG_ERROR("lower of upper bound by: {:.2f}", y - _yMax);
                 j = _jMax;
             }
             return (j * _iMax + i);
@@ -285,13 +281,11 @@ public:
     [[nodiscard]] Point GetNearestGridPoint(const Point & currPoint) const
     {
         if(!IncludesPoint(currPoint)) {
-            Logging::Error(fmt::format(check_fmt("ERROR 3 in RectGrid::GetKeyAtPoint with:")));
-            Logging::Error(
-                fmt::format(check_fmt("Point: {:.2f} {:.2f}"), currPoint._x, currPoint._y));
-            Logging::Error(fmt::format(check_fmt("_xMin, _yMin: {:.2f} {:.2f}"), _xMin, _yMin));
-            Logging::Error(fmt::format(check_fmt("_xMax, _yMax: {:.2f} {:.2f}"), _xMax, _yMax));
-            Logging::Error(fmt::format(check_fmt(
-                "Point is out of Grid-Scope, Tip: check if correct Floorfield is called")));
+            LOG_ERROR("ERROR 3 in RectGrid::GetKeyAtPoint with:");
+            LOG_ERROR("Point: {:.2f} {:.2f}", currPoint._x, currPoint._y);
+            LOG_ERROR("_xMin, _yMin: {:.2f} {:.2f}", _xMin, _yMin);
+            LOG_ERROR("_xMax, _yMax: {:.2f} {:.2f}", _xMax, _yMax);
+            LOG_ERROR("Point is out of Grid-Scope, Tip: check if correct Floorfield is called");
 
             return Point(-7, -7);
         }

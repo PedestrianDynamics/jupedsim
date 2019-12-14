@@ -30,7 +30,6 @@
 #include "general/ArgumentParser.h"
 #include "general/Compiler.h"
 #include "general/Configuration.h"
-#include "general/Format.h"
 #include "general/Logger.h"
 #include "geometry/Building.h"
 #include "pedestrian/AgentsSourcesManager.h"
@@ -56,12 +55,12 @@ int main(int argc, char ** argv)
     }
     Logging::Guard guard;
     Logging::SetLogLevel(a.LogLevel());
-    Logging::Info("Starting JuPedSim - JPScore");
-    Logging::Info(fmt::format(check_fmt("Version {}"), JPSCORE_VERSION));
-    Logging::Info(fmt::format(check_fmt("Commit id {}"), GIT_COMMIT_HASH));
-    Logging::Info(fmt::format(check_fmt("Commit date {}"), GIT_COMMIT_DATE));
-    Logging::Info(fmt::format(check_fmt("Build from branch {}"), GIT_BRANCH));
-    Logging::Info(fmt::format(check_fmt("Build with {}({})"), compiler_id, compiler_version));
+    LOG_INFO("Starting JuPedSim - JPScore");
+    LOG_INFO("Version {}", JPSCORE_VERSION);
+    LOG_INFO("Commit id {}", GIT_COMMIT_HASH);
+    LOG_INFO("Commit date {}", GIT_COMMIT_DATE);
+    LOG_INFO("Build from branch {}", GIT_BRANCH);
+    LOG_INFO("Build with {}({})", compiler_id, compiler_version);
 
     Configuration config;
     // TODO remove me in refactoring
@@ -70,8 +69,7 @@ int main(int argc, char ** argv)
     try {
         iniFileParser.Parse(a.IniFilePath());
     } catch(const std::exception & e) {
-        Logging::Error(
-            fmt::format(check_fmt("Exception in IniFileParser::Parse thrown, what: {}"), e.what()));
+        LOG_ERROR("Exception in IniFileParser::Parse thrown, what: {}", e.what());
 
         return EXIT_FAILURE;
     }
@@ -87,8 +85,7 @@ int main(int argc, char ** argv)
     if(sim.InitArgs()) {
         // evacuation time
         double evacTime = 0;
-        Logging::Info(
-            fmt::format(check_fmt("Simulation started with {} pedestrians"), sim.GetPedsNumber()));
+        LOG_INFO("Simulation started with {} pedestrians", sim.GetPedsNumber());
         if(sim.GetAgentSrcManager().GetMaxAgentNumber()) {
             // Start the thread for managing the sources of agents if any
             // std::thread t1(sim.GetAgentSrcManager());
@@ -106,7 +103,7 @@ int main(int argc, char ** argv)
             evacTime = sim.RunStandardSimulation(config.GetTmax());
         }
 
-        Logging::Info(fmt::format(check_fmt("\n\nSimulation completed"), sim.GetPedsNumber()));
+        LOG_INFO("\n\nSimulation completed", sim.GetPedsNumber());
         time(&endtime);
 
         // some statistics output
@@ -115,23 +112,22 @@ int main(int argc, char ** argv)
         }
 
         if(sim.GetPedsNumber()) {
-            Logging::Warning(fmt::format(
-                check_fmt("Pedestrians not evacuated [{}] using [{}] threads"),
+            LOG_WARNING(
+                "Pedestrians not evacuated [{}] using [{}] threads",
                 sim.GetPedsNumber(),
-                config.GetMaxOpenMPThreads()));
+                config.GetMaxOpenMPThreads());
         }
 
         const double execTime = difftime(endtime, starttime);
-        Logging::Info(fmt::format(check_fmt("Exec Time {:.2f}s"), execTime));
-        Logging::Info(fmt::format(check_fmt("Evac Time {:.2f}s"), evacTime));
-        Logging::Info(fmt::format(check_fmt("Realtime Factor {:.2f}x"), evacTime / execTime));
-        Logging::Info(fmt::format(check_fmt("Number of Threads {}"), config.GetMaxOpenMPThreads()));
-        Logging::Info(fmt::format(check_fmt("Warnings {}"), Log->GetWarnings()));
-        Logging::Info(fmt::format(check_fmt("Errors {}"), Log->GetErrors()));
-        Logging::Info(fmt::format(check_fmt("Deleted Agents {}"), Log->GetDeletedAgents()));
+        LOG_INFO("Exec Time {:.2f}s", execTime);
+        LOG_INFO("Evac Time {:.2f}s", evacTime);
+        LOG_INFO("Realtime Factor {:.2f}x", evacTime / execTime);
+        LOG_INFO("Number of Threads {}", config.GetMaxOpenMPThreads());
+        LOG_INFO("Warnings {}", Log->GetWarnings());
+        LOG_INFO("Errors {}", Log->GetErrors());
+        LOG_INFO("Deleted Agents {}", Log->GetDeletedAgents());
     } else {
-        Logging::Error("Could not start simulation."
-                       " Check the log for prior errors");
+        LOG_ERROR("Could not start simulation. Check the log for prior errors");
     }
     // do the last cleaning
     delete Log;

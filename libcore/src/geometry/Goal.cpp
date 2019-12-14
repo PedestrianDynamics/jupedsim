@@ -29,7 +29,6 @@
 #include "Crossing.h"
 #include "Point.h"
 #include "Wall.h"
-#include "general/Format.h"
 #include "general/Logger.h"
 
 #include <boost/geometry/algorithms/distance.hpp>
@@ -213,7 +212,7 @@ bool Goal::ConvertLineToPoly()
         }
     }
     if((tmpPoly[0] - point).Norm() > J_TOLERANZ) {
-        Logging::Error(fmt::format(check_fmt("Goal::ConvertLineToPoly(): ID {}"), _id));
+        LOG_ERROR("Goal::ConvertLineToPoly(): ID {}", _id);
         return false;
     }
     _poly = tmpPoly;
@@ -320,9 +319,7 @@ bool Goal::IsClockwise()
 {
     //http://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order
     if(_poly.size() < 3) {
-        Logging::Error(fmt::format(
-            check_fmt("You need at least 3 vertices to check for orientation. Obstacle ID [{}]"),
-            _id));
+        LOG_ERROR("You need at least 3 vertices to check for orientation. Obstacle ID [{}]", _id);
         return false;
         //exit(EXIT_FAILURE);
     }

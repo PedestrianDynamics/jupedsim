@@ -28,7 +28,6 @@
 
 #include "IO/OutputHandler.h"
 #include "SubRoom.h"
-#include "general/Format.h"
 #include "general/Logger.h"
 
 #include <memory>
@@ -131,10 +130,7 @@ SubRoom * Room::GetSubRoom(int index) const
 {
     //todo: the check is done in _subRooms.at(index);
     if(_subRooms.count(index) == 0) {
-        Logging::Error(fmt::format(
-            check_fmt("Room::GetSubRoom() No subroom id [{}] present in room id [{}]."),
-            index,
-            _id));
+        LOG_ERROR("Room::GetSubRoom() No subroom id [{}] present in room id [{}].", index, _id);
         return nullptr;
     }
     return _subRooms.at(index).get();

@@ -26,7 +26,6 @@
  **/
 #include "DirectionStrategy.h"
 
-#include "general/Format.h"
 #include "general/Logger.h"
 #include "geometry/Line.h"
 #include "geometry/Point.h"
@@ -151,9 +150,7 @@ void DirectionLocalFloorfield::Init(Building * building)
 
     end                                           = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
-    Logging::Info(fmt::format(
-        check_fmt("Time to construct FF in DirectionLocalFloorfield: {:.2f}"),
-        elapsed_seconds.count()));
+    LOG_INFO("Time to construct FF in DirectionLocalFloorfield: {:.2f}", elapsed_seconds.count());
 }
 
 DirectionLocalFloorfield::~DirectionLocalFloorfield()
@@ -231,9 +228,8 @@ void DirectionSubLocalFloorfield::Init(Building * building)
     end                                           = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
 
-    Logging::Info(fmt::format(
-        check_fmt("Time to construct FF in DirectionSubLocalFloorfield: {:.2f}"),
-        elapsed_seconds.count()));
+    LOG_INFO(
+        "Time to construct FF in DirectionSubLocalFloorfield: {:.2f}", elapsed_seconds.count());
 }
 
 DirectionSubLocalFloorfield::~DirectionSubLocalFloorfield()

@@ -30,7 +30,6 @@
 #include "Line.h"
 #include "Point.h"
 #include "Wall.h"
-#include "general/Format.h"
 #include "general/Logger.h"
 
 #include <cstdlib>
@@ -230,13 +229,11 @@ bool Obstacle::ConvertLineToPoly()
         for(unsigned int i = itr; i < copy.size(); ++i) {
             if(it.IntersectionWith(*copy[i], pIntsct) == true) {
                 if(it.ShareCommonPointWith(*copy[i]) == false) {
-                    Logging::Error(fmt::format(
-                        check_fmt(
-                            "Obstacle::ConvertLineToPoly(): ID {}, Walls {} and {} intersect."),
+                    LOG_ERROR(
+                        "Obstacle::ConvertLineToPoly(): ID {}, Walls {} and {} intersect.",
                         _id,
                         it.toString(),
-                        copy[i]->toString()));
-
+                        copy[i]->toString());
                     return false;
                 } else
                     ++j;
@@ -245,11 +242,10 @@ bool Obstacle::ConvertLineToPoly()
         if(j <= 2)
             j = 0;
         else {
-            Logging::Error(fmt::format(
-                check_fmt("Obstacle::ConvertLineToPoly(): ID {}, Wall {} shares edge with multiple "
-                          "walls."),
+            LOG_ERROR(
+                "Obstacle::ConvertLineToPoly(): ID {}, Wall {} shares edge with multiple walls.",
                 _id,
-                it.toString()));
+                it.toString());
 
             return false;
         }
@@ -277,10 +273,10 @@ bool Obstacle::ConvertLineToPoly()
         }
     }
     if((tmpPoly[0] - point).Norm() > J_TOLERANZ) {
-        Logging::Error(fmt::format(
-            check_fmt("Obstacle::ConvertLineToPoly(): ID {}, distance between the points is {}"),
+        LOG_ERROR(
+            "Obstacle::ConvertLineToPoly(): ID {}, distance between the points is {}",
             _id,
-            (tmpPoly[0] - point).Norm()));
+            (tmpPoly[0] - point).Norm());
 
         return false;
     }
@@ -290,9 +286,8 @@ bool Obstacle::ConvertLineToPoly()
     for(const auto & w : _walls)
         for(const auto & ptw : {w.GetPoint1(), w.GetPoint2()})
             if(IsPartOfPolygon(ptw) == false) {
-                Logging::Error(fmt::format(
-                    check_fmt("Edge was not used during polygon creation for obstacle: {}"),
-                    w.toString()));
+                LOG_ERROR(
+                    "Edge was not used during polygon creation for obstacle: {}", w.toString());
                 return false;
             }
 
@@ -343,9 +338,7 @@ bool Obstacle::IsClockwise() const
 {
     //http://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order
     if(_poly.size() < 3) {
-        Logging::Error(fmt::format(
-            check_fmt("You need at least 3 vertices to check for orientation. Obstacle ID [{}]"),
-            _id));
+        LOG_ERROR("You need at least 3 vertices to check for orientation. Obstacle ID [{}]", _id);
         return false;
         //exit(EXIT_FAILURE);
     }
