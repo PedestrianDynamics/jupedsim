@@ -107,7 +107,6 @@ void Logs()
     Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
     Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
     Log->Write("Branch         : %s", GIT_BRANCH);
-    Log->Write("Python         : %s (%s)\n----\n", PYTHON, PYTHON_VERSION);
 }
 
 void ArgumentParser::Usage(const std::string file)
