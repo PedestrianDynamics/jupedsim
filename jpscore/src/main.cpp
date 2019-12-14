@@ -57,6 +57,8 @@ int main(int argc, char ** argv)
     Logging::Guard guard;
     Logging::SetLogLevel(a.LogLevel());
     Logging::Info("Starting JuPedSim - JPScore");
+    LOG_INFO("TEST LOG {}", "aaa");
+    LOG_INFO("TEST LOG");
     Logging::Info(fmt::format(check_fmt("Version {}"), JPSCORE_VERSION));
     Logging::Info(fmt::format(check_fmt("Commit id {}"), GIT_COMMIT_HASH));
     Logging::Info(fmt::format(check_fmt("Commit date {}"), GIT_COMMIT_DATE));
