@@ -319,11 +319,13 @@ target_link_libraries(report PUBLIC
     tinyxml
     fs
     Boost::boost
+    git-info
 )
 
 target_compile_definitions(report PUBLIC
     PYTHON="${PYTHON_EXECUTABLE}"
     PYTHON_VERSION="${PYTHON_VERSION_STRING}"
+    JPSREPORT_VERSION="${PROJECT_VERSION}"
 )
 
 add_executable(jpsreport

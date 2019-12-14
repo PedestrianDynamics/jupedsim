@@ -224,7 +224,8 @@ else()
     set(GIT_BRANCH "UNKNONW")
 endif()
 
-list(APPEND GIT_BUILD_INFO_DEFINES
+add_library(git-info INTERFACE)
+target_compile_definitions(git-info INTERFACE
     GIT_COMMIT_HASH="${GIT_SHA1}"
     GIT_COMMIT_DATE="${GIT_DATE}"
     GIT_COMMIT_SUBJECT="${GIT_COMMIT_SUBJECT}"

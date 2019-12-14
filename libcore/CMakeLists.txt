@@ -199,7 +199,6 @@ target_compile_options(core PRIVATE
 target_compile_definitions(core PUBLIC
     $<$<BOOL:${JPSFIRE}>:JPSFIRE>
     JPSCORE_VERSION="${PROJECT_VERSION}"
-    ${GIT_BUILD_INFO_DEFINES}
 )
 target_link_libraries(core
     Boost::boost
@@ -212,6 +211,7 @@ target_link_libraries(core
     fs
     spdlog::spdlog
     fmt::fmt
+    git-info
 )
 target_include_directories(core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
