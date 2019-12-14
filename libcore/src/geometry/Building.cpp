@@ -26,26 +26,44 @@
  **/
 #include "Building.h"
 
-#include "general/OpenMP.h"
-#include "geometry/Line.h"
-#include "geometry/Point.h"
-#include "geometry/SubRoom.h"
-#include "geometry/Wall.h"
-#include "geometry/helper/CorrectGeometry.h"
+#include "IO/GeoFileParser.h"                // for GeoFileP...
+#include "general/Configuration.h"           // for Configur...
+#include "general/Filesystem.h"              //
+#include "general/Format.h"                  // for check_fmt
+#include "general/Logger.h"                  // for Error, Info
+#include "general/Macros.h"                  // for _SIMULATOR
+#include "general/OpenMP.h"                  //
+#include "geometry/Building.h"               // for Building
+#include "geometry/Crossing.h"               // for Crossing
+#include "geometry/Goal.h"                   // for Goal
+#include "geometry/Hline.h"                  // for Hline
+#include "geometry/Line.h"                   // for Line
+#include "geometry/Obstacle.h"               // for Obstacle
+#include "geometry/Point.h"                  // for Point
+#include "geometry/Room.h"                   // for Room
+#include "geometry/SubRoom.h"                // for SubRoom
+#include "geometry/Transition.h"             // for Transition
+#include "geometry/Wall.h"                   // for Wall
+#include "geometry/helper/CorrectGeometry.h" // for correct
+#include "mpi/LCGrid.h"                      // for LCGrid
+#include "pedestrian/PedDistributor.h"       // for PedDistr...
+#include "pedestrian/Pedestrian.h"           // for Pedestrian
+#include "routing/RoutingEngine.h"           // for RoutingE...
 
-#include <algorithm>
-#include <tinyxml.h>
-
-#ifdef _SIMULATOR
-#include "GeometryReader.h"
-#include "IO/GeoFileParser.h"
-#include "general/Filesystem.h"
-#include "general/Logger.h"
-#include "mpi/LCGrid.h"
-#include "pedestrian/Pedestrian.h"
-
-#include <thread>
-#endif
+#include <algorithm>                                        // for max, copy
+#include <boost/algorithm/string/classification.hpp>        // for is_any_of
+#include <boost/algorithm/string/constants.hpp>             // for token_co...
+#include <boost/algorithm/string/detail/classification.hpp> // for is_any_ofF
+#include <boost/algorithm/string/split.hpp>                 // for split
+#include <cfloat>                                           // for FLT_MAX
+#include <cstdlib>                                          // for exit, atoi
+#include <exception>                                        // for exception
+#include <iostream>                                         // for operator<<
+#include <map>                                              // for map, map...
+#include <memory>                                           // for shared_ptr
+#include <string>                                           // for string
+#include <utility>                                          // for pair
+#include <vector>                                           // for vector
 
 Building::Building()
 {
