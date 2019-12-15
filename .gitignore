@@ -37,6 +37,10 @@ Utest/Validation/*/inifiles*/
 /Utest/router_tests/test_router_7/inifiles/
 /Utest/router_tests/test_router_8/inifiles/
 Matrix.txt
+
+# Python specific ignores
+__pycache__/
+
 # Compiled Object files
 *.slo
 *.lo
@@ -63,6 +67,8 @@ Matrix.txt
 # Hidden files
 .*
 !/.gitignore
+!/.clang-format
+!/.clang-tidy
 
 # Cmake
 CMakeCache.txt
@@ -104,7 +110,6 @@ vgcore.*
 /auto/veloModel9.el
 /cpu.png
 /cscope.file
-/gompertz.pdf
 /veloModel10.org
 /veloModel11.pdf
 /veloModel12.tex
@@ -150,3 +155,31 @@ idea/codeStyleSettings.xml
 /Utest/rimea_tests/figures
 
 cmake-build-debug
+*.vcxproj
+*.vcxproj.filters
+*.cmake
+*.sln
+Win32/
+*.dir/
+*.user
+packages/
+/jpscore.srctrlbm
+/jpscore.srctrldb
+/jpscore.srctrlprj
+/jpscore2.srctrlbm
+/jpscore2.srctrldb
+/jpscore2.srctrlprj
+/test.py
+/threads.cpp
+/geometry.png
+/run.py
+/Utest/Validation/7test_BO/jpsreport_ini.xml
+
+/doc*
+/cmake-*
+!/cmake_modules
+/issues
+/latex
+
+/systemtest/test_geometry/clean_geometry/log*
+/systemtest/test_geometry/clean_geometry/traj*

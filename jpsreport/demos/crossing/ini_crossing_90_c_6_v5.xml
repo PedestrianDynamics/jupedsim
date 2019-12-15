@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JPSreport project="crossing_90_c_6_v5" version="0.8.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_report.xsd">
+
+    <geometry file = "geo_crossing_90_c_6_v5.xml" />
+
+    <logfile>log_crossing_90_c_6_v5.txt</logfile>
+
+    <output location="crossing_90_c_6_v5_Output/" />
+
+    <trajectories format="txt" unit="m"> 
+        <file name="traj_crossing_90_c_6_v5.txt" /> 
+        <path location="./" /> 
+    </trajectories> 
+
+
+    <measurement_areas unit="m"> 
+        <area_B id="1" type="BoundingBox" zPos="None"> 
+            <vertex x="0.00" y="0.00" /> 
+            <vertex x="0.00" y="4.00" /> 
+            <vertex x="4.00" y="4.00" /> 
+            <vertex x="4.00" y="0.00" /> 
+            <length_in_movement_direction distance="4.0" /> 
+        </area_B> 
+        <area_L id="2" type="Line" zPos="None"> 
+            <start x="4" y="0" /> 
+            <end x="4" y="4" /> 
+        </area_L> 
+    </measurement_areas> 
+
+    <velocity frame_step="10" set_movement_direction="None" ignore_backward_movement="false"/>
+
+    <method_A enabled="true">
+        <measurement_area id="2" frame_interval="100"/>
+    </method_A> 
+
+    <method_B enabled="false">
+        <measurement_area id="1" /> 
+    </method_B> 
+
+    <method_C enabled="true">
+        <measurement_area id="1" />
+    </method_C> 
+
+	<method_D enabled="true">
+        <measurement_area id="1" start_frame="None" stop_frame="None" get_individual_FD="false"/>
+		<one_dimensional enabled="false"/>
+        <cut_by_circle enabled="false" radius="1.0" edges="10"/>
+        <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/> 
+    </method_D>
+
+</JPSreport> 

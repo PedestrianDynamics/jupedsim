@@ -2,26 +2,24 @@
 
 <JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
 
-  <!-- seed used for initialising random generator -->
-  <seed>12542</seed>
-  <!-- geometry file -->
-  <geometry>geometry.xml</geometry>
-  <max_sim_time>5000</max_sim_time>
-
-  <!-- trajectories file and format -->
-  <trajectories format="xml-plain" fps="16" color_mode="final_goal">
-	    <file location="trajectories.xml" />
-    <!-- <socket_ hostname="127.0.0.1" port="8989" /> -->
-  </trajectories>
-
-  <!-- where to store the logs -->
-  <logfile>log.txt</logfile>
-
+  <header>
+    <!-- seed used for initialising random generator -->
+    <seed>12542</seed>
+    <!-- geometry file -->
+    <geometry>geometry.xml</geometry>
+    <max_sim_time>5000</max_sim_time>
+    <!-- trajectories file and format -->
+    <trajectories format="xml-plain" fps="16" color_mode="group">
+      <file location="trajectories.xml" />
+    </trajectories>
+    <!-- where to store the logs -->
+    <logfile>log.txt</logfile>
+  </header>
   <!-- traffic information: e.g closed doors or smoked rooms -->
   <traffic_constraints>
     <!-- doors states are: close or open -->
     <doors>
-	<!-- <door trans_id="1" caption="exit" state="open" /> -->
+        <!-- <door trans_id="1" caption="exit" state="open" /> -->
     </doors>
   </traffic_constraints>
 
@@ -69,14 +67,32 @@
   <!--persons information and distribution -->
   <agents operational_model_id="3">
     <agents_distribution>
-      <group group_id="0" room_id="0" subroom_id="0" number="20" router_id="1" agent_parameter_id="1" x_min="3" x_max="5" y_min="3" y_max="5" />
+      <group group_id="5" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" x_min="3" x_max="5" y_min="3" y_max="5" />
+      <group group_id="0" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" />
+      <group group_id="1" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" />
+      <group group_id="2" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" />
+      <group group_id="3" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" />
+      <group group_id="4" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" />
     </agents_distribution>
 
     <agents_sources><!-- frequency in persons/seconds -->
-      <source id="1" frequency="2" agents_max="5" group_id="6" caption="source 1" />
-      <source id="2" agent_id="3" time="5" group_id="5" caption="source 2" />
-      <source id="3" agent_id="2" time="3" group_id="5" caption="source 3" />
-      <source id="4" agent_id="8" time="7" group_id="5" caption="source 4" />
+      <!--  <source id="1" frequency="2" agents_max="5" group_id="0" caption="source 1" /> -->
+      <!--  <source id="2" agent_id="3" time="5" group_id="0" caption="source 2" /> -->
+      <!--  <source id="3" agent_id="2" time="3" group_id="0" caption="source 3" /> -->
+      <!-- <source id="4" agent_id="8" time="7" group_id="0" caption="source 4" /> -->
+      <!-- <source id="5" agent_id="9" time="7" group_id="0" caption="source 5" startX="8" startY="5.4" /> -->
+      <!-- <source id="6" agent_id="10" time="7" group_id="0" caption="source 6" startX="13" startY="5" /> -->
+      <source id="10" caption="new-source" time_min="5" time_max="30" frequency="5" N_create="10" agents_max="300"
+      group_id="0"  x_min="0" x_max="3" y_min="0" y_max="3" percent="0.5" rate="2"  greedy="true"/>
+      <source id="11" caption="new-source 2" time_min="5" time_max="30" frequency="7" N_create="10" agents_max="300"
+      group_id="1"  x_min="6" x_max="9" y_min="6" y_max="9" percent="0.5" rate="2"  greedy="true"/>
+      <source id="12" caption="new-source 3" time_min="5" time_max="30" frequency="9" N_create="10" agents_max="300"
+      group_id="2"  x_min="6" x_max="9" y_min="0" y_max="3" percent="0.5" rate="2"  greedy="true"/>
+      <source id="13" caption="new-source 4" time_min="5" time_max="30" frequency="11" N_create="10" agents_max="300"
+      group_id="3"  x_min="0" x_max="3" y_min="6" y_max="9" percent="0.5" rate="2"  greedy="true"/>
+      <source id="14" caption="nlow-source 5" time_min="5" time_max="30" frequency="11" N_create="10" agents_max="300"
+      group_id="4"  x_min="3.5" x_max="5.5" y_min="3.5" y_max="5.5" percent="0.5" rate="2"  greedy="true"/>
+
     </agents_sources>
 
   </agents>
