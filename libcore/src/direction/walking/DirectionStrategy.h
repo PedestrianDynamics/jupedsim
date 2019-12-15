@@ -128,30 +128,6 @@ public:
 };
 
 /**
- * DirectionStrategy for exit_crossing_strategy 6
- *
- * Target is determinded by the underlying floorfield
- */
-class DirectionFloorfield : public DirectionStrategy
-{
-public:
-    DirectionFloorfield() : _ffviafm(nullptr){};
-
-    void Init(Building * building) override;
-
-    ~DirectionFloorfield() override;
-
-    Point GetTarget(Room * room, Pedestrian * ped) const override;
-
-    Point GetDir2Wall(Pedestrian * ped) const override;
-
-    double GetDistance2Wall(Pedestrian * ped) const override;
-
-private:
-    FloorfieldViaFM * _ffviafm;
-};
-
-/**
  * DirectionStrategy for exit_crossing_strategy 8
  *
  * Target is determinded by the underlying floorfield
