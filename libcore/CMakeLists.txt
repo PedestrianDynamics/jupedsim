@@ -37,7 +37,6 @@ set(source_files
     src/IO/PedDistributionParser.cpp
     src/IO/progress_bar.cpp
     src/IO/Trajectories.cpp
-    src/IO/TraVisToClient.cpp
     src/math/GCFMModel.cpp
     src/math/Mathematics.cpp
     src/math/OperationalModel.cpp
@@ -116,7 +115,6 @@ set(header_files
     src/IO/OutputHandler.h
     src/IO/PedDistributionParser.h
     src/IO/Trajectories.h
-    src/IO/TraVisToClient.h
     src/math/GCFMModel.h
     src/math/Mathematics.h
     src/math/OperationalModel.h
@@ -197,7 +195,6 @@ target_compile_options(core PRIVATE
 target_compile_definitions(core PUBLIC
     $<$<BOOL:${JPSFIRE}>:JPSFIRE>
     JPSCORE_VERSION="${PROJECT_VERSION}"
-    ${GIT_BUILD_INFO_DEFINES}
 )
 target_link_libraries(core
     Boost::boost
@@ -210,6 +207,7 @@ target_link_libraries(core
     fs
     spdlog::spdlog
     fmt::fmt
+    git-info
 )
 target_include_directories(core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src

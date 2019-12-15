@@ -128,14 +128,27 @@ public:
 };
 
 /**
- * DirectionStrategy for exit_crossing_strategy 4 BETA!
+ * DirectionStrategy for exit_crossing_strategy 6
  *
- * This strategy is still beta. It assumes that the simulation scenario has no loops or U-shaped corridors. Pedestrians, target he exit, even if it is outside their visibility range. In case of intersection with walls or obstacles, the temporary direction is rotated away from the wall.
+ * Target is determinded by the underlying floorfield
  */
-class DirectionGeneral : public DirectionStrategy
+class DirectionFloorfield : public DirectionStrategy
 {
 public:
+    DirectionFloorfield() : _ffviafm(nullptr){};
+
+    void Init(Building * building) override;
+
+    ~DirectionFloorfield() override;
+
     Point GetTarget(Room * room, Pedestrian * ped) const override;
+
+    Point GetDir2Wall(Pedestrian * ped) const override;
+
+    double GetDistance2Wall(Pedestrian * ped) const override;
+
+private:
+    FloorfieldViaFM * _ffviafm;
 };
 
 /**

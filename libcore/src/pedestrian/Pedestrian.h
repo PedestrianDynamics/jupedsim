@@ -181,9 +181,6 @@ public:
     void Setdt(double dt);
     double Getdt();
 
-    void SetDistToBlockade(double dist);
-    double GetDistToBlockade();
-
     // Eigenschaften der Ellipse
     void SetPos(const Point & pos, bool initial = false); // setzt x und y-Koordinaten
     void SetCellPos(int cp);
@@ -275,8 +272,6 @@ public:
     int GetLastDestination();
     double GetDistanceToNextTarget() const;
     double GetDisTanceToPreviousTarget() const;
-    void SetNewOrientationFlag(bool flag);
-    bool GetNewOrientationFlag();
     bool GetNewEventFlag();
     void SetNewEventFlag(bool flag);
     bool ChangedSubRoom();

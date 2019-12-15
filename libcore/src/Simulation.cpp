@@ -105,46 +105,30 @@ bool Simulation::InitArgs()
             return false;
     }
 
-    if(_config->GetPort() != -1) {
+    if(!_config->GetTrajectoriesFile().empty()) {
         switch(_config->GetFileFormat()) {
-            case FileFormat::XML: {
-                auto travisto =
-                    std::make_shared<SocketHandler>(_config->GetHostname(), _config->GetPort());
-                _iod = std::unique_ptr<Trajectories>(new TrajectoriesXML());
-                _iod->SetOutputHandler(travisto);
+            case FileFormat::XML:
+                _iod = std::make_unique<TrajectoriesXML>(TrajectoriesXML());
                 break;
-            }
+
             case FileFormat::TXT:
-                Logging::Warning("Format plain not yet supported in streaming");
-                return false;
+                _iod = std::make_unique<TrajectoriesTXT>(TrajectoriesTXT());
+                break;
+
             default:
-                return false;
+                break;
         }
-    } else {
-        if(!_config->GetTrajectoriesFile().empty()) {
-            switch(_config->GetFileFormat()) {
-                case FileFormat::XML:
-                    _iod = std::make_unique<TrajectoriesXML>(TrajectoriesXML());
-                    break;
-
-                case FileFormat::TXT:
-                    _iod = std::make_unique<TrajectoriesTXT>(TrajectoriesTXT());
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        const fs::path & trajPath(_config->GetTrajectoriesFile());
-        const fs::path trajParentPath = trajPath.parent_path();
-        if(!trajParentPath.empty()) {
-            fs::create_directories(trajParentPath);
-        }
-        auto file = std::make_shared<FileHandler>(trajPath.c_str());
-        _iod->SetOutputHandler(file);
-        _iod->SetOptionalOutput(_config->GetOptionalOutputOptions());
     }
+
+    const fs::path & trajPath(_config->GetTrajectoriesFile());
+    const fs::path trajParentPath = trajPath.parent_path();
+    if(!trajParentPath.empty()) {
+        fs::create_directories(trajParentPath);
+    }
+    auto file = std::make_shared<FileHandler>(trajPath.c_str());
+    _iod->SetOutputHandler(file);
+    _iod->SetOptionalOutput(_config->GetOptionalOutputOptions());
+
 
     _operationalModel = _config->GetModel();
     _deltaT           = _config->Getdt();
