@@ -29,10 +29,11 @@
 #include "WaitingStrategy.h"
 
 #include <cstdlib>
+#include <ctime>
 
 class WaitingRandom : public WaitingStrategy
 {
-    void Init(Building *) override { std::srand(time(0)); };
+    void Init(Building *) override { std::srand(std::time(0)); };
 
     Point GetWaitingPosition(Room * room, Pedestrian * ped) override;
 };

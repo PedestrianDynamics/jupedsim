@@ -832,25 +832,6 @@ double Pedestrian::GetReroutingTime()
     return _timeBeforeRerouting;
 }
 
-bool Pedestrian::GetNewOrientationFlag()
-{
-    return _newOrientationFlag;
-}
-
-void Pedestrian::SetDistToBlockade(double dist)
-{
-    _distToBlockade = dist;
-}
-double Pedestrian::GetDistToBlockade()
-{
-    return _distToBlockade;
-}
-
-
-void Pedestrian::SetNewOrientationFlag(bool flag)
-{
-    _newOrientationFlag = flag;
-}
 
 double Pedestrian::GetAge() const
 {

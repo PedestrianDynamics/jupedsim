@@ -1191,9 +1191,6 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                     _directionStrategy =
                         std::shared_ptr<DirectionStrategy>(new DirectionInRangeBottleneck());
                     break;
-                case 4:
-                    _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionGeneral());
-                    break;
                 case 6:
                     _directionStrategy =
                         std::shared_ptr<DirectionStrategy>(new DirectionFloorfield());

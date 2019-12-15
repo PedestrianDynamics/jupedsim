@@ -37,6 +37,10 @@ Utest/Validation/*/inifiles*/
 /Utest/router_tests/test_router_7/inifiles/
 /Utest/router_tests/test_router_8/inifiles/
 Matrix.txt
+
+# Python specific ignores
+__pycache__/
+
 # Compiled Object files
 *.slo
 *.lo
