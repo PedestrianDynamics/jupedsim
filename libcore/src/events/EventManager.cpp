@@ -813,6 +813,8 @@ bool EventManager::ReadSchedule()
         return false;
     }
 
+    std::map<int, int> groupMaxAgents;
+
     for(TiXmlElement * e = xGroups->FirstChildElement("group"); e;
         e                = e->NextSiblingElement("group")) {
         int id = atoi(e->Attribute("id"));
