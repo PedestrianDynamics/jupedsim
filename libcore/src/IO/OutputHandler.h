@@ -55,7 +55,6 @@ public:
     void incrementErrors();
     int GetDeletedAgents();
     void incrementDeletedAgents();
-    void ProgressBar(double TotalPeds, double NowPeds, double simTime);
 
     virtual void Write(const std::string & str);
     virtual void Write(const char * string, ...);
