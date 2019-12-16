@@ -66,38 +66,6 @@ void OutputHandler::Write(const std::string & str)
     std::cout << std::endl << str;
 }
 
-void OutputHandler::ProgressBar(double TotalPeds, double NowPeds, double simTime)
-{
-    // based on this answer:
-    // https://stackoverflow.com/questions/1637587/c-libcurl-console-progress-bar
-    // how wide you want the progress meter to be
-    int totaldotz   = 40;
-    double fraction = NowPeds / TotalPeds;
-    // part of the progressmeter that's already "full"
-    int dotz = static_cast<int>(round(fraction * totaldotz));
-
-    // create the "meter"
-    int ii = 0;
-    printf(
-        "\rTime: %6.2f s | Evacuated: %5d /%5d (%3.0f%% ) [",
-        simTime,
-        (int) NowPeds,
-        (int) TotalPeds,
-        fraction * 100);
-    // part  that's full already
-    for(; ii < dotz; ii++) {
-        printf("=");
-    }
-    printf(">");
-    // remaining part (spaces)
-    for(; ii < totaldotz; ii++) {
-        printf(" ");
-    }
-    // and back to line begin - do not forget the fflush to avoid output buffering problems!
-    printf("]");
-    fflush(stdout);
-}
-
 void OutputHandler::Write(const char * message, ...)
 {
     char msg[CLENGTH] = "";
