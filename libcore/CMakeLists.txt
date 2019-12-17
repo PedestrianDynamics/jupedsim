@@ -35,7 +35,6 @@ set(source_files
     src/IO/IniFileParser.cpp
     src/IO/OutputHandler.cpp
     src/IO/PedDistributionParser.cpp
-    src/IO/progress_bar.cpp
     src/IO/Trajectories.cpp
     src/math/GCFMModel.cpp
     src/math/Mathematics.cpp

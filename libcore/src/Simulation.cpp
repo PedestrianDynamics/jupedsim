@@ -31,7 +31,6 @@
 #include "Simulation.h"
 
 #include "IO/Trajectories.h"
-#include "IO/progress_bar.h"
 #include "general/Filesystem.h"
 #include "general/Format.h"
 #include "general/Logger.h"
@@ -482,7 +481,6 @@ double Simulation::RunBody(double maxSimTime)
     _nPeds = _building->GetAllPedestrians().size();
     std::cout << "\n";
     std::string description = "Evacutation ";
-    ProgressBar bar(_nPeds, description);
     int initialnPeds = _nPeds;
     // main program loop
     while((_nPeds || (!_agentSrcManager.IsCompleted() && _gotSources)) && t < maxSimTime) {
@@ -551,19 +549,16 @@ double Simulation::RunBody(double maxSimTime)
             RotateOutputFile();
         }
 
-        if(!_gotSources && !_periodic && _config->print_prog_bar())
-            bar.Progressed(initialnPeds - _nPeds);
-        else if(
-            (!_gotSources) &&
-            ((frameNr < 100 && frameNr % 10 == 0) || (frameNr > 100 && frameNr % 100 == 0)))
-            printf(
-                "time: %6.2f (%4.0f)  | Agents: %6ld / %d [%4.1f%%]\n",
+        if((!_gotSources) &&
+           ((frameNr < 100 && frameNr % 10 == 0) || (frameNr > 100 && frameNr % 100 == 0))) {
+            Logging::Info(fmt::format(
+                check_fmt("time: {:6.2f} ({:4.0f}) | Agents: {:6d} / {:d} [{:4.1f}%]"),
                 t,
                 maxSimTime,
                 _nPeds,
                 initialnPeds,
-                (double) (initialnPeds - _nPeds) / initialnPeds * 100);
-
+                (double) (initialnPeds - _nPeds) / initialnPeds * 100.));
+        }
 
         // needed to control the execution time PART 2
         // time(&endtime);
