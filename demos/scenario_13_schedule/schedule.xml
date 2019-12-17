@@ -14,7 +14,7 @@
             <member t_id="3"/>
             <member t_id="5"/>
         </group>
-        <group id="2">
+        <group id="2" max_agents="5">
             <member t_id="7"/>
             <member t_id="9"/>
         </group>
@@ -36,8 +36,8 @@
             <t t="85"/>
         </time>
 
-        <time group_id="2" closing_time="5">
-            <t t="2"/>
+        <time group_id="2" closing_time="5" reset="true">
+            <t t="10"/>
             <t t="50"/>
             <t t="90"/>
         </time>

@@ -211,12 +211,6 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
             fmt::format(check_fmt("Maximal simulation time <{:.2f}> seconds"), _config->GetTmax()));
     }
 
-    // Progressbar
-    if(xHeader->FirstChild("progressbar")) {
-        _config->SetPRB(true);
-        Logging::Info("Use Progressbar");
-    }
-
     // geometry file name
     if(xHeader->FirstChild("geometry")) {
         std::string filename = xHeader->FirstChild("geometry")->FirstChild()->Value();
