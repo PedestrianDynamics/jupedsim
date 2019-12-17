@@ -813,16 +813,34 @@ bool EventManager::ReadSchedule()
         return false;
     }
 
+    std::map<int, int> groupMaxAgents;
+
     for(TiXmlElement * e = xGroups->FirstChildElement("group"); e;
         e                = e->NextSiblingElement("group")) {
         int id = atoi(e->Attribute("id"));
+
+        int max_agents = std::numeric_limits<int>::min();
+        if(e->Attribute("max_agents")) {
+            max_agents = atoi(e->Attribute("max_agents"));
+        }
+
         std::vector<int> member;
         for(TiXmlElement * xmember = e->FirstChildElement("member"); xmember;
             xmember                = xmember->NextSiblingElement("member")) {
             int tId = atoi(xmember->Attribute("t_id"));
             member.push_back(tId);
         }
-        groupDoor[id] = member;
+        groupDoor[id]      = member;
+        groupMaxAgents[id] = max_agents;
+    }
+
+    //Set max agents
+    for(auto const [groupID, maxAgents] : groupMaxAgents) {
+        if(maxAgents > 0) {
+            for(int transID : groupDoor.at(groupID)) {
+                _building->GetTransition(transID)->SetMaxDoorUsage(maxAgents);
+            }
+        }
     }
 
     // Read times
@@ -837,13 +855,25 @@ bool EventManager::ReadSchedule()
         int id           = atoi(e->Attribute("group_id"));
         int closing_time = atoi(e->Attribute("closing_time"));
 
+        std::string resetString;
+        if(e->Attribute("reset")) {
+            resetString = e->Attribute("reset");
+            std::transform(resetString.begin(), resetString.end(), resetString.begin(), ::tolower);
+        }
+        bool resetDoor = (resetString == "true");
+
         std::vector<int> timeOpen;
         std::vector<int> timeClose;
+        std::vector<int> timeReset;
 
         for(TiXmlElement * time = e->FirstChildElement("t"); time;
             time                = time->NextSiblingElement("t")) {
             int t = atoi(time->Attribute("t"));
-            timeOpen.push_back(t);
+            if(resetDoor) {
+                timeReset.push_back(t);
+            } else {
+                timeOpen.push_back(t);
+            }
             timeClose.push_back(t + closing_time);
         }
 
@@ -857,8 +887,14 @@ bool EventManager::ReadSchedule()
                 Event event(door, close, "door", "temp_close");
                 _events.push_back(event);
             }
+
+            for(auto reset : timeReset) {
+                Event event(door, reset, "door", "reset");
+                _events.push_back(event);
+            }
         }
     }
+
     Logging::Info("Schedule initialized");
     return true;
 }
