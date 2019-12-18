@@ -354,8 +354,7 @@ Point VelocityModel::e0(Pedestrian * ped, Room * room) const
     Point lastE0 = ped->GetLastE0();
     ped->SetLastE0(target - pos);
 
-    if((dynamic_cast<DirectionFloorfield *>(_direction->GetDirectionStrategy().get())) ||
-       (dynamic_cast<DirectionLocalFloorfield *>(_direction->GetDirectionStrategy().get())) ||
+    if((dynamic_cast<DirectionLocalFloorfield *>(_direction->GetDirectionStrategy().get())) ||
        (dynamic_cast<DirectionSubLocalFloorfield *>(_direction->GetDirectionStrategy().get()))) {
         desired_direction = target - pos;
         if(desired_direction.NormSquare() < 0.25 && !ped->IsWaiting()) {

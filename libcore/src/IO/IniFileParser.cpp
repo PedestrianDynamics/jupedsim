@@ -879,28 +879,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
                 return false;
             }
         } else if(
-            (strategy == "ff_local_shortest") &&
-            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
-            Router * r = new FFRouter(id, ROUTING_FF_LOCAL_SHORTEST, hasSpecificGoals, _config);
-            _config->GetRoutingEngine()->AddRouter(r);
-            Logging::Info("Using FF Local Shortest Router");
-            Logging::Warning("FF Local Shortest is bugged!!!!");
-
-            if((_exit_strat_number == 8) || (_exit_strat_number == 9)) {
-                Logging::Info("Using FF Global Shortest Router");
-            } else {
-                Logging::Warning("Exit Strategy Number is not 8 or 9!!!");
-                // config object holds default values, so we omit any set operations
-            }
-
-            //check if the exit strat is [8 | 9]
-
-            ///Parsing additional options
-            //               if (!ParseFfRouterOps(e)) {
-            //                    return false;
-            //               }
-        } else if(
             (strategy == "ff_quickest") &&
             (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
             Router * r = new FFRouter(id, ROUTING_FF_QUICKEST, hasSpecificGoals, _config);
@@ -922,12 +900,7 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
 bool IniFileParser::ParseFfRouterOps(TiXmlNode * routingNode, RoutingStrategy s)
 {
     //set defaults
-    std::string mode;
-    if(s == ROUTING_FF_GLOBAL_SHORTEST) {
-        mode = "global_shortest";
-    }
     if(s == ROUTING_FF_QUICKEST) {
-        mode = "quickest";
         //parse ini-file-information
         if(routingNode->FirstChild("parameters")) {
             TiXmlNode * pParameters = routingNode->FirstChild("parameters");
@@ -948,10 +921,6 @@ bool IniFileParser::ParseFfRouterOps(TiXmlNode * routingNode, RoutingStrategy s)
             _config->set_write_VTK_files(tmp_write_VTK);
         }
     }
-    FFRouter * r =
-        static_cast<FFRouter *>(_config->GetRoutingEngine()->GetAvailableRouters().back());
-
-    r->SetMode(mode);
     return true;
 }
 
@@ -1186,8 +1155,15 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                         std::shared_ptr<DirectionStrategy>(new DirectionInRangeBottleneck());
                     break;
                 case 6:
+                    // dead end -> not supported anymore (global ff needed, but not available in 3d)
+                    Logging::Error("Exit Strategy 6 is not supported any longer. Please refer to "
+                                   "www.jupedsim.org");
+                    Logging::Warning(
+                        "Changing Exit-Strategy to #9 (Floorfields with targets within subroom)");
+                    pExitStrategy      = 9;
+                    _exit_strat_number = 9;
                     _directionStrategy =
-                        std::shared_ptr<DirectionStrategy>(new DirectionFloorfield());
+                        std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
                     if(!ParseFfOpts(strategyNode)) {
                         return false;
                     };

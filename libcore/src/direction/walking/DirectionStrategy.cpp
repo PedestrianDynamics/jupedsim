@@ -34,7 +34,6 @@
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 #include "pedestrian/Pedestrian.h"
-#include "routing/ff_router/FloorfieldViaFM.h"
 #include "routing/ff_router/UnivFFviaFM.h"
 
 #include <chrono>
@@ -87,56 +86,13 @@ Point DirectionInRangeBottleneck::GetTarget(Room * /*room*/, Pedestrian * ped) c
     }
 }
 
-/// 6
-Point DirectionFloorfield::GetTarget(Room *, Pedestrian * ped) const
-{
-    Point p;
-    _ffviafm->getDirectionToDestination(ped, p);
-    p = p.Normalized(); // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
-    return (p + ped->GetPos());
-}
-
-Point DirectionFloorfield::GetDir2Wall(Pedestrian * ped) const
-{
-    Point p;
-    _ffviafm->getDir2WallAt(ped->GetPos(), p);
-    return p;
-}
-
-double DirectionFloorfield::GetDistance2Wall(Pedestrian * ped) const
-{
-    return _ffviafm->getDistance2WallAt(ped->GetPos());
-}
-
-void DirectionFloorfield::Init(Building * building)
-{
-    double stepsize          = building->GetConfig()->get_deltaH();
-    double wallAvoidDistance = building->GetConfig()->get_wall_avoid_distance();
-    bool useDistancefield    = building->GetConfig()->get_use_wall_avoidance();
-
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start    = std::chrono::system_clock::now();
-    _ffviafm = new FloorfieldViaFM(
-        building, stepsize, stepsize, wallAvoidDistance, useDistancefield, false);
-    end                                           = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    Logging::Info(fmt::format(
-        check_fmt("Time to construct FF in DirectionFloorfield: {:.2f}"), elapsed_seconds.count()));
-}
-
-
-DirectionFloorfield::~DirectionFloorfield()
-{
-    delete _ffviafm;
-}
-
 /// 8
 Point DirectionLocalFloorfield::GetTarget(Room * room, Pedestrian * ped) const
 {
     Point p;
     UnivFFviaFM * floorfield = _locffviafm.at(room->GetID());
 
-    floorfield->getDirectionToUID(ped->GetExitIndex(), ped->GetPos(), p);
+    floorfield->GetDirectionToUID(ped->GetExitIndex(), ped->GetPos(), p);
 
     return (p + ped->GetPos());
 }
@@ -145,19 +101,19 @@ Point DirectionLocalFloorfield::GetDir2Wall(Pedestrian * ped) const
 {
     Point p;
     int roomID = ped->GetRoomID();
-    _locffviafm.at(roomID)->getDir2WallAt(ped->GetPos(), p);
+    _locffviafm.at(roomID)->GetDir2WallAt(ped->GetPos(), p);
     return p;
 }
 
 double DirectionLocalFloorfield::GetDistance2Wall(Pedestrian * ped) const
 {
-    return _locffviafm.at(ped->GetRoomID())->getDistance2WallAt(ped->GetPos());
+    return _locffviafm.at(ped->GetRoomID())->GetDistance2WallAt(ped->GetPos());
 }
 
 double DirectionLocalFloorfield::GetDistance2Target(Pedestrian * ped, int UID) const
 {
     int roomID = ped->GetRoomID();
-    return _locffviafm.at(roomID)->getCostToDestination(UID, ped->GetPos());
+    return _locffviafm.at(roomID)->GetCostToDestination(UID, ped->GetPos());
 }
 
 void DirectionLocalFloorfield::Init(Building * building)
@@ -174,22 +130,22 @@ void DirectionLocalFloorfield::Init(Building * building)
         auto newfield = new UnivFFviaFM(
             roomPair.second.get(), _building, _stepsize, _wallAvoidDistance, _useDistancefield);
         _locffviafm[roomPair.first] = newfield;
-        newfield->setUser(DISTANCE_AND_DIRECTIONS_USED);
-        newfield->setMode(LINESEGMENT);
+        newfield->SetUser(DISTANCE_AND_DIRECTIONS_USED);
+        newfield->SetMode(LINESEGMENT);
         if(_useDistancefield) {
-            newfield->setSpeedMode(FF_WALL_AVOID);
+            newfield->SetSpeedMode(FF_WALL_AVOID);
         } else {
-            newfield->setSpeedMode(FF_HOMO_SPEED);
+            newfield->SetSpeedMode(FF_HOMO_SPEED);
         }
-        newfield->addAllTargetsParallel();
+        newfield->AddAllTargetsParallel();
     }
 
     //TODO check writing of ff (TS)
     if(_building->GetConfig()->get_write_VTK_files_direction()) {
         for(auto locff : _locffviafm) {
             int roomNr = locff.first;
-            locff.second->writeFF(
-                "direction" + std::to_string(roomNr) + ".vtk", locff.second->getKnownDoorUIDs());
+            locff.second->WriteFF(
+                "direction" + std::to_string(roomNr) + ".vtk", locff.second->GetKnownDoorUIDs());
         }
     }
 
@@ -213,7 +169,7 @@ Point DirectionSubLocalFloorfield::GetTarget(Room *, Pedestrian * ped) const
     Point p;
     UnivFFviaFM * floorfield = _locffviafm.at(ped->GetSubRoomUID());
 
-    floorfield->getDirectionToUID(ped->GetExitIndex(), ped->GetPos(), p);
+    floorfield->GetDirectionToUID(ped->GetExitIndex(), ped->GetPos(), p);
     return (p + ped->GetPos());
 }
 
@@ -221,19 +177,19 @@ Point DirectionSubLocalFloorfield::GetDir2Wall(Pedestrian * ped) const
 {
     Point p;
     int key = ped->GetSubRoomUID();
-    _locffviafm.at(key)->getDir2WallAt(ped->GetPos(), p);
+    _locffviafm.at(key)->GetDir2WallAt(ped->GetPos(), p);
     return p;
 }
 
 double DirectionSubLocalFloorfield::GetDistance2Wall(Pedestrian * ped) const
 {
-    return _locffviafm.at(ped->GetSubRoomUID())->getDistance2WallAt(ped->GetPos());
+    return _locffviafm.at(ped->GetSubRoomUID())->GetDistance2WallAt(ped->GetPos());
 }
 
 double DirectionSubLocalFloorfield::GetDistance2Target(Pedestrian * ped, int UID) const
 {
     int subroomUID = ped->GetSubRoomUID();
-    return _locffviafm.at(subroomUID)->getCostToDestination(UID, ped->GetPos());
+    return _locffviafm.at(subroomUID)->GetCostToDestination(UID, ped->GetPos());
 }
 
 void DirectionSubLocalFloorfield::Init(Building * building)
@@ -252,14 +208,14 @@ void DirectionSubLocalFloorfield::Init(Building * building)
             auto floorfield = new UnivFFviaFM(
                 subPair.second.get(), _building, _stepsize, _wallAvoidDistance, _useDistancefield);
             _locffviafm[subUID] = floorfield;
-            floorfield->setUser(DISTANCE_AND_DIRECTIONS_USED);
-            floorfield->setMode(LINESEGMENT);
+            floorfield->SetUser(DISTANCE_AND_DIRECTIONS_USED);
+            floorfield->SetMode(LINESEGMENT);
             if(_useDistancefield) {
-                floorfield->setSpeedMode(FF_WALL_AVOID);
+                floorfield->SetSpeedMode(FF_WALL_AVOID);
             } else {
-                floorfield->setSpeedMode(FF_HOMO_SPEED);
+                floorfield->SetSpeedMode(FF_HOMO_SPEED);
             }
-            floorfield->addAllTargetsParallel();
+            floorfield->AddAllTargetsParallel();
         }
     }
 
@@ -267,8 +223,8 @@ void DirectionSubLocalFloorfield::Init(Building * building)
     if(_building->GetConfig()->get_write_VTK_files_direction()) {
         for(auto locff : _locffviafm) {
             int roomNr = locff.first;
-            locff.second->writeFF(
-                "direction" + std::to_string(roomNr) + ".vtk", locff.second->getKnownDoorUIDs());
+            locff.second->WriteFF(
+                "direction" + std::to_string(roomNr) + ".vtk", locff.second->GetKnownDoorUIDs());
         }
     }
 

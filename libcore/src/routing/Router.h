@@ -45,8 +45,6 @@ class Router
     /** @} */ // end of group
 
 private:
-    /// routing strategy ID as defined in the Macros.h file
-    RoutingStrategy _strategy;
 
     /// the id as present in the persons.xml file
     int _id;
@@ -54,6 +52,9 @@ private:
 protected:
     /// All final destinations of the pedestrians
     std::vector<int> _finalDestinations;
+
+    /// routing strategy ID as defined in the Macros.h file
+    RoutingStrategy _strategy;
 
 public:
     /**
@@ -72,12 +73,6 @@ public:
       * Destructor
       */
     virtual ~Router();
-
-    /**
-      * Add a new trip to this router
-      * @param trip A vector containing the IDs of the intermediate destination
-      */
-    //     void AddTrip(std::vector<int> trip);
 
     /**
       * Add a new final destination to this router
@@ -108,9 +103,10 @@ public:
     RoutingStrategy GetStrategy() const;
 
     /**
-      * Find the next suitable target for Pedestrian p
+      * Find the next suitable target for Pedestrian p.
+      * @post (*p).exitline/.exitindex are set (important!)
       * @param p the Pedestrian
-      * @return -1 in the case no destination could be found
+      * @return next suitable target, -1 in the case no destination could be found
       */
     virtual int FindExit(Pedestrian * p) = 0;
 

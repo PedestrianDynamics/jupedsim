@@ -37,11 +37,11 @@
 #include "general/OpenMP.h"
 #include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
+#include "geometry/Wall.h"
 #include "math/GCFMModel.h"
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "routing/ff_router/ffRouter.h"
-
 
 OutputHandler * Log;
 // todo: add these variables to class simulation
@@ -285,14 +285,26 @@ void Simulation::UpdateRoutesAndLocations()
                 pedsToRemove.insert(ped); //the agent left the old room
                                           //actualize the eggress time for that room
 #pragma omp critical(SetEgressTime)
-                allRooms.at(ped->GetRoomID())->SetEgressTime(ped->GetGlobalTime());
+                allRooms.at(ped->GetRoomID())->SetEgressTime(Pedestrian::GetGlobalTime());
             }
         }
+
+        // set ped waiting, if no target is found
+        int target = ped->FindRoute();
+
+        if(target == -1) {
+            ped->StartWaiting();
+        } else {
+            if(ped->IsWaiting() && !ped->IsInsideWaitingAreaWaiting()) {
+                ped->EndWaiting();
+            }
+        }
+
         // actualize routes for sources
         if(_gotSources)
-            ped->FindRoute();
+            target = ped->FindRoute();
         //finally actualize the route
-        if(!_gotSources && ped->FindRoute() == -1 && !_trainConstraints && sub0->IsAccessible()) {
+        if(!_gotSources && ped->FindRoute() == -1 && !_trainConstraints && !ped->IsWaiting()) {
             //a destination could not be found for that pedestrian
             Logging::Error(fmt::format(
                 check_fmt("Could not find a route for pedestrian {} in room {} and subroom {}"),
@@ -312,19 +324,21 @@ void Simulation::UpdateRoutesAndLocations()
         }
 
         // Set pedestrian waiting when find route temp_close
-        int goal       = ped->FindRoute();
-        Hline * target = _building->GetTransOrCrossByUID(goal);
-        int roomID     = ped->GetRoomID();
-        int subRoomID  = ped->GetSubRoomID();
+        int goal = ped->FindRoute();
+        if(goal != FINAL_DEST_OUT) {
+            const Hline * target = _building->GetTransOrCrossByUID(goal);
+            int roomID           = ped->GetRoomID();
+            int subRoomID  = ped->GetSubRoomID();
 
-        if(auto cross = dynamic_cast<Crossing *>(target)) {
-            if(cross->IsInRoom(roomID) && cross->IsInSubRoom(subRoomID)) {
-                if(!ped->IsWaiting() && cross->IsTempClose()) {
-                    ped->StartWaiting();
-                }
+            if(auto cross = dynamic_cast<const Crossing *>(target)) {
+                if(cross->IsInRoom(roomID) && cross->IsInSubRoom(subRoomID)) {
+                    if(!ped->IsWaiting() && cross->IsTempClose()) {
+                        ped->StartWaiting();
+                    }
 
-                if(ped->IsWaiting() && cross->IsOpen() && !ped->IsInsideWaitingAreaWaiting()) {
-                    ped->EndWaiting();
+                    if(ped->IsWaiting() && cross->IsOpen() && !ped->IsInsideWaitingAreaWaiting()) {
+                        ped->EndWaiting();
+                    }
                 }
             }
         }
@@ -517,8 +531,8 @@ double Simulation::RunBody(double maxSimTime)
                 _building->GetConfig()->GetDirectionManager()->GetDirectionStrategy()->Init(
                     _building.get());
             } else { // quickest needs update even if NeedsUpdate() is false
-                FFRouter * ffrouter =
-                    dynamic_cast<FFRouter *>(_routingEngine.get()->GetRouter(ROUTING_FF_QUICKEST));
+                auto * ffrouter =
+                    dynamic_cast<FFRouter *>(_routingEngine->GetRouter(ROUTING_FF_QUICKEST));
                 if(ffrouter != nullptr)
                     if(ffrouter->MustReInit()) {
                         ffrouter->ReInit();
@@ -528,7 +542,7 @@ double Simulation::RunBody(double maxSimTime)
 
             // here the used routers are update, when needed due to external changes
             if(_routingEngine->NeedsUpdate()) {
-                std::cout << KBLU << " Init router in simulation\n" << RESET;
+                Logging::Info("Update router during simulation.");
                 _routingEngine->UpdateRouter();
             }
 

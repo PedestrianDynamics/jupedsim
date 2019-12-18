@@ -52,7 +52,6 @@ set(source_files
     src/pedestrian/Pedestrian.cpp
     src/pedestrian/StartDistribution.cpp
     src/routing/ff_router/ffRouter.cpp
-    src/routing/ff_router/FloorfieldViaFM.cpp
     src/routing/ff_router/UnivFFviaFM.cpp
     src/routing/global_shortest/AccessPoint.cpp
     src/routing/global_shortest/DTriangulation.cpp
@@ -131,10 +130,8 @@ set(header_files
     src/pedestrian/Pedestrian.h
     src/pedestrian/StartDistribution.h
     src/routing/ff_router/ffRouter.h
-    src/routing/ff_router/FloorfieldViaFM.h
     src/routing/ff_router/UnivFFviaFM.h
     src/routing/ff_router/mesh/RectGrid.h
-    src/routing/ff_router/mesh/Trial.h
     src/routing/global_shortest/AccessPoint.h
     src/routing/global_shortest/DTriangulation.h
     src/routing/global_shortest/GlobalRouter.h
@@ -184,7 +181,6 @@ set(JPSFIRE_SRC
     src/JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
     src/JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
 )
-
 
 add_library(core STATIC
     ${source_files}

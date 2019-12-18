@@ -38,8 +38,6 @@ class Point;
 
 class UnivFFviaFM;
 
-class FloorfieldViaFM;
-
 /**
  * Interface of a direction strategy.
  * A DirectionStrategy returns the desired direction of a pedestrian at a time-step.
@@ -127,30 +125,6 @@ class DirectionInRangeBottleneck : public DirectionStrategy
 {
 public:
     Point GetTarget(Room * room, Pedestrian * ped) const override;
-};
-
-/**
- * DirectionStrategy for exit_crossing_strategy 6
- *
- * Target is determinded by the underlying floorfield
- */
-class DirectionFloorfield : public DirectionStrategy
-{
-public:
-    DirectionFloorfield() : _ffviafm(nullptr){};
-
-    void Init(Building * building) override;
-
-    ~DirectionFloorfield() override;
-
-    Point GetTarget(Room * room, Pedestrian * ped) const override;
-
-    Point GetDir2Wall(Pedestrian * ped) const override;
-
-    double GetDistance2Wall(Pedestrian * ped) const override;
-
-private:
-    FloorfieldViaFM * _ffviafm;
 };
 
 /**

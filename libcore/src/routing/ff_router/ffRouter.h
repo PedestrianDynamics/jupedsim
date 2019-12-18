@@ -57,7 +57,6 @@
  **/
 #pragma once
 
-#include "FloorfieldViaFM.h"
 #include "UnivFFviaFM.h"
 #include "general/Macros.h"
 #include "geometry/Building.h"
@@ -66,9 +65,6 @@
 class Building;
 class Pedestrian;
 class OutputHandler;
-
-//log output
-extern OutputHandler * Log;
 
 /*!
  * \class FFRouter
@@ -106,116 +102,147 @@ class FFRouter : public Router
 {
 public:
     /**
-      * A constructor.
-      *
-      */
-    FFRouter();
+     * Constructor for FFRouter.
+     * @param id id of router in simulation.
+     * @param s routing strategy which should be used to find best way.
+     * @param hasSpecificGoals specifies if the peds have specific goals (true) or head to the outside (false).
+     * @param config configuration of simulation.
+     */
     FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals, Configuration * config);
-    //FFRouter(const Building* const);
 
     /**
-      * Destructor
+      * Destructor for FFRouter.
       */
-    virtual ~FFRouter();
+    ~FFRouter() override;
 
-    /*!
+    /**
       * \brief Init the router (must be called before use)
       *
       * Init() will construct the graph (nodes = doors, edges = costs) and
-      * find shortest paths via Floyd-Warshall. It needs the floor fields
-      *
-      *
-      * \param[in] [name of input parameter] [its description]
-      * \param[out] [name of output parameter] [its description]
-      * \return [information about return value]
-      * \sa [see also section]
-      * \note [any note about the function you might have]
-      * \warning [any warning if necessary]
+      * find shortest paths via Floyd-Warshall. It needs the floor fields.
+      *  Will call CalculateFloorFields.
+      * @param building used geometry.
       */
-    virtual bool Init(Building * building);
+    bool Init(Building * building) override;
 
-    /*!
-      * \brief ReInit the router if quickest router is used. Current position of agents is considered.
+    int FindExit(Pedestrian * p) override;
+
+    void Update() override;
+
+    /**
+      * \brief ReInit the router if quickest router is used. Current position of agents is
+      * considered.
       *
       * ReInit() will reconstruct the graph (nodes = doors, edges = costs) and
       * find shortest paths via Floyd-Warshall. It will reconstruct the floorfield to
       * evaluate the best doors to certain goals as they could change.
-      *
-      *
-      * \param[in] [name of input parameter] [its description]
-      * \param[out] [name of output parameter] [its description]
-      * \return [information about return value]
-      * \sa [see also section]
-      * \note [any note about the function you might have]
-      * \warning [any warning if necessary]
+      * Will call CalculateFloorFields.
       */
-    virtual bool ReInit();
+    bool ReInit();
 
-    /*!
-      * \brief interface used by __Pedestrian__, sets (*p).exitline/.exitindex
-      *
-      * additional info: not available
-      *
-      */
-    virtual int FindExit(Pedestrian * p);
 
-    /*!
-      * \brief Perform the FloydWarshall algorithm
-      */
-    void FloydWarshall();
-
-    //     /*!
-    //      * \brief Sets the door that leaves the subroom in _pathsMatrix
-    //      *
-    //      * Due to the way we calculate door distances (entries in _pathsMatrix), pedestrians in a corridor
-    //      * tend to jump from door to door, i.e. they walk to the next door in the correct direction, but they
-    //      * do not traverse it. This algorithm searches for the door on the way that really leaves the subroom,
-    //      * and sets this door in _pathsMatrix, which in turn is needed by GetPresumableExitRoute().
-    //      */
-    //     void AvoidDoorHopping();
-
-    /*!
-      * \brief set mode (shortest, quickest, ...)
-      */
-    void SetMode(std::string s);
+    /**
+     * Returns if the router needs an update if \a _mode == "quickest".
+     *
+     * @return if the router needs an update.
+     */
     bool MustReInit();
+
+    /**
+     * Sets the time the floor field needs to be updated the next time, needed if \a _mode == "quickest".
+     * @param t current time in simulation.
+     */
     void SetRecalc(double t);
 
-    virtual void Update();
-
 private:
+    /**
+     * \brief Performs the Floyd-Warshall algorithm.
+     *
+     * Computes the distances depending on the costs and the corresponding paths with the Floyd-Warshall algoritm.
+     * @post \a _distMatrix contains the actual distance (cost dependent), _pathMatrix contains the corresponding paths.
+     */
+    void FloydWarshall();
+
+    /**
+     * \brief Computes the needed floor fields and distances.
+     *
+     * Sets up the needed maps and computes distances via FloydWarshall().
+     */
+    void CalculateFloorFields();
+
 protected:
-    Configuration * _config;
+    /**
+     * Configuration used during simulation.
+     */
+    Configuration * _config{};
+
+    /**
+     * Distance matrix: _distMatrix[<door1, door2>] returns the distance from door1 to door2.
+     */
     std::map<std::pair<int, int>, double> _distMatrix;
+
+    /**
+     * Path matrix: _pathsMatrix[<door1, door2>] returns the next target on the way from door1 to door2.
+     */
     std::map<std::pair<int, int>, int> _pathsMatrix;
-    //std::map< std::pair<int, int> , SubRoom* > _subroomMatrix;
+
+    /**
+     * Vector containing the UIDs of all doors in \a _building.
+     */
     std::vector<int> _allDoorUIDs;
-    std::vector<int> _localShortestSafedPeds;
+
+    /**
+     * Vector containing the UIDs of all rooms which are directional escalators.
+     */
     std::vector<int> _directionalEscalatorsUID;
-    std::vector<std::pair<int, int>> _penaltyList;
-    const Building * _building;
-    std::map<int, UnivFFviaFM *> _locffviafm; // the actual type might be CentrePointLocalFFViaFM
-    FloorfieldViaFM * _globalFF;
-    std::map<int, Transition *> _TransByUID;
+
+    /**
+     * Geometry used during the simulation.
+     */
+    Building * _building{};
+
+    /**
+     * Map of the underlying floorfields. _locffviafm[id] gives the floorfield in room with ID==id.
+     */
+    std::map<int, UnivFFviaFM *> _locffviafm;
+
+    /**
+     * Map containing all the exits from the geometry.
+     */
     std::map<int, Transition *> _ExitsByUID;
+
+    /**
+     * Map containing all doors in geometry.
+     */
     std::map<int, Crossing *> _CroTrByUID;
 
-    std::map<int, int>
-        _goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
-    std::map<int, int> _goalToLineUIDmap2;
-    std::map<int, int> _goalToLineUIDmap3;
-    std::map<int, int>
-        _finalDoors; // _finalDoors[i] the UID of the last door the pedestrian with ID i wants to walk through
-
-    int _mode;
+    /**
+     * Time when the next recalculation is needed when using \a _strategy=ROUTING_FF_QUICKEST.
+     */
     double _timeToRecalc = 0.;
-    double _recalc_interval;
+
+    /**
+     * Time span between calculations when using \a _strategy=ROUTING_FF_QUICKEST.
+     */
+    double _recalc_interval{};
+
+    /**
+     * Router needs a recalculation when using \a _strategy=ROUTING_FF_QUICKEST.
+     */
     bool _plzReInit = false;
-    bool _hasSpecificGoals;
-    bool _targetWithinSubroom;
-    // If we use CentrePointDistance (i.e. CentrePointLocalFFViaFM), some algorithms can maybe be simplified
-    // (AvoidDoorHopping and _subroomMatrix might be unnecessary, and some code in FindExit could go). --f.mack
-    bool _useCentrePointDistance = true;
-    //output filename counter: cnt
-    static int _cnt;
+
+    /**
+     * The pedestrian head for specific goals (true) or just for the outside (false)
+     */
+    bool _hasSpecificGoals{};
+
+    /**
+     * Defines if the router is used room or subroom wise.
+     */
+    bool _targetWithinSubroom{};
+
+    /**
+     * Map from goalID to the closest exit. It maps goals to door UID.
+     */
+    std::map<int, int> _goalToLineUIDmap;
 };
