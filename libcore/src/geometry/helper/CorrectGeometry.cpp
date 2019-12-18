@@ -35,6 +35,7 @@
 #include "geometry/Wall.h"         // for Wall
 
 #include <algorithm> // for max, find, find_if, sort
+#include <cassert>
 #include <chrono>    // for operator-, duration, high_resolut...
 #include <cmath>     // for isnan
 #include <map>       // for map
@@ -107,7 +108,7 @@ bool RemoveOverlappingDoors(SubRoom & subroom)
 }
 
 
-std::optional<Point> GetSplitPoint(const Wall & wall, const Line & line)
+std::optional<Point> ComputeSplitPoint(const Wall & wall, const Line & line)
 {
     // Equal lines should not be split.
     if(wall == line) {
@@ -166,17 +167,17 @@ std::optional<std::vector<Wall>> SplitWall(const SubRoom & subroom, const Wall &
     // Collecting all split Points
     std::vector<Point> splitPoints;
     for(const auto & crossing : subroom.GetAllCrossings()) {
-        if(const auto p = GetSplitPoint(bigWall, *crossing)) {
+        if(const auto p = ComputeSplitPoint(bigWall, *crossing)) {
             splitPoints.emplace_back(*p);
         }
     }
     for(const auto & transition : subroom.GetAllTransitions()) {
-        if(const auto p = GetSplitPoint(bigWall, *transition)) {
+        if(const auto p = ComputeSplitPoint(bigWall, *transition)) {
             splitPoints.emplace_back(*p);
         }
     }
     for(const auto & wall : subroom.GetAllWalls()) {
-        if(const auto p = GetSplitPoint(bigWall, wall)) {
+        if(const auto p = ComputeSplitPoint(bigWall, wall)) {
             splitPoints.emplace_back(*p);
         }
     }
@@ -206,7 +207,7 @@ std::optional<std::vector<Wall>> SplitWall(const SubRoom & subroom, const Wall &
     return wallPieces;
 }
 
-bool isPointAndSubroomIncident(const SubRoom & subroom, const Point & point)
+bool IsPointAndSubroomIncident(const SubRoom & subroom, const Point & point)
 {
     // Incident with wall at point 1 or 2
     for(const auto & checkWall : subroom.GetAllWalls()) {
@@ -245,8 +246,8 @@ bool IsConnectedAndNewWall(const SubRoom & subroom, const Wall & wall)
         return false; // The wall already exists in subroom (not new).
     }
 
-    if(isPointAndSubroomIncident(subroom, wall.GetPoint1()) &&
-       isPointAndSubroomIncident(subroom, wall.GetPoint2())) {
+    if(IsPointAndSubroomIncident(subroom, wall.GetPoint1()) &&
+       IsPointAndSubroomIncident(subroom, wall.GetPoint2())) {
         return true;
     }
 
@@ -306,7 +307,9 @@ bool RemoveBigWalls(SubRoom & subroom)
     for(auto const & bigWall : walls) {
         const auto splitWallPieces = SplitWall(subroom, bigWall);
 
-        if(splitWallPieces && !splitWallPieces->empty()) {
+        if(splitWallPieces) {
+            assert(!splitWallPieces->empty());
+
             // remove big wall and add one wallpiece to walls
             ReplaceBigWall(subroom, bigWall, *splitWallPieces);
             wallsRemoved = true;
@@ -319,7 +322,7 @@ bool RemoveBigWalls(SubRoom & subroom)
 
 } // namespace
 
-void correct(Building & building)
+void CorrectInputGeometry(Building & building)
 {
     const auto t_start = std::chrono::high_resolution_clock::now();
     Logging::Info("Starting geometry::helper::correct to fix the geometry ...");

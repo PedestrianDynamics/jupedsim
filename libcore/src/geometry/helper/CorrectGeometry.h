@@ -49,6 +49,6 @@ namespace geometry::helper
  *  3. `[AC]` or `[CB]` will be added to the subroom
  *
  */
-void correct(Building & building);
+void CorrectInputGeometry(Building & building);
 
 } // namespace geometry::helper

@@ -28,6 +28,9 @@
 
 TEST_CASE("geometry/Building/correct", "[geometry][Building][correct]")
 {
+    SECTION("correct") {}
+
+
     SECTION("SplitWall")
     {
         SECTION("No split possible")
@@ -63,44 +66,44 @@ TEST_CASE("geometry/Building/correct", "[geometry][Building][correct]")
     }
 
 
-    SECTION("GetSplitPoint")
+    SECTION("ComputeSplitPoint")
     {
         Wall testWall(Point(0, 0), Point(0, 10));
         SECTION("No Split Point")
         {
             // default Walls (0,0)-(0,0)
-            REQUIRE_FALSE(geometry::helper::GetSplitPoint(Wall(), Line()));
-            REQUIRE_FALSE(geometry::helper::GetSplitPoint(Wall(), Wall()));
+            REQUIRE_FALSE(geometry::helper::ComputeSplitPoint(Wall(), Line()));
+            REQUIRE_FALSE(geometry::helper::ComputeSplitPoint(Wall(), Wall()));
 
             // No intersection
-            REQUIRE_FALSE(geometry::helper::GetSplitPoint(testWall, Line()));
+            REQUIRE_FALSE(geometry::helper::ComputeSplitPoint(testWall, Line()));
             REQUIRE_FALSE(
-                geometry::helper::GetSplitPoint(testWall, Line(Point(1, 1), Point(1, 2))));
+                geometry::helper::ComputeSplitPoint(testWall, Line(Point(1, 1), Point(1, 2))));
             REQUIRE_FALSE(
-                geometry::helper::GetSplitPoint(testWall, Line(Point(0, -1), Point(1, -1))));
+                geometry::helper::ComputeSplitPoint(testWall, Line(Point(0, -1), Point(1, -1))));
 
             // Overlapping
             REQUIRE_FALSE(
-                geometry::helper::GetSplitPoint(testWall, Line(Point(0, 0), Point(0, 2))));
+                geometry::helper::ComputeSplitPoint(testWall, Line(Point(0, 0), Point(0, 2))));
             REQUIRE_FALSE(
-                geometry::helper::GetSplitPoint(testWall, Line(Point(0, -1), Point(0, 4))));
+                geometry::helper::ComputeSplitPoint(testWall, Line(Point(0, -1), Point(0, 4))));
 
             // Common starting/ending Point
             REQUIRE_FALSE(
-                geometry::helper::GetSplitPoint(testWall, Line(Point(0, 0), Point(1, 2))));
+                geometry::helper::ComputeSplitPoint(testWall, Line(Point(0, 0), Point(1, 2))));
             REQUIRE_FALSE(
-                geometry::helper::GetSplitPoint(testWall, Line(Point(0, 10), Point(1, -1))));
+                geometry::helper::ComputeSplitPoint(testWall, Line(Point(0, 10), Point(1, -1))));
 
             // Same Line
             REQUIRE_FALSE(
-                geometry::helper::GetSplitPoint(testWall, Line(Point(0, 0), Point(0, 10))));
-            REQUIRE_FALSE(geometry::helper::GetSplitPoint(testWall, testWall));
+                geometry::helper::ComputeSplitPoint(testWall, Line(Point(0, 0), Point(0, 10))));
+            REQUIRE_FALSE(geometry::helper::ComputeSplitPoint(testWall, testWall));
 
             // Line starting or ending on bigWall
             REQUIRE_FALSE(
-                geometry::helper::GetSplitPoint(testWall, Line(Point(-1, 0), Point(1, 0))));
+                geometry::helper::ComputeSplitPoint(testWall, Line(Point(-1, 0), Point(1, 0))));
             REQUIRE_FALSE(
-                geometry::helper::GetSplitPoint(testWall, Line(Point(-1, 10), Point(2, 10))));
+                geometry::helper::ComputeSplitPoint(testWall, Line(Point(-1, 10), Point(2, 10))));
         }
 
         SECTION("Split Point")
@@ -108,20 +111,22 @@ TEST_CASE("geometry/Building/correct", "[geometry][Building][correct]")
             // Some "normal" intersection points
             REQUIRE(
                 Point(0, 5) ==
-                geometry::helper::GetSplitPoint(testWall, Line(Point(-1, 5), Point(1, 5))).value());
+                geometry::helper::ComputeSplitPoint(testWall, Line(Point(-1, 5), Point(1, 5)))
+                    .value());
             REQUIRE(
                 Point(0, 0.5) ==
-                geometry::helper::GetSplitPoint(testWall, Line(Point(-0.5, 0), Point(0.5, 1)))
+                geometry::helper::ComputeSplitPoint(testWall, Line(Point(-0.5, 0), Point(0.5, 1)))
                     .value());
 
             // line starting or ending on bigwall
             REQUIRE(
                 Point(0, 0.5) ==
-                geometry::helper::GetSplitPoint(testWall, Line(Point(0, 0.5), Point(10, 1)))
+                geometry::helper::ComputeSplitPoint(testWall, Line(Point(0, 0.5), Point(10, 1)))
                     .value());
             REQUIRE(
                 Point(0, 1) ==
-                geometry::helper::GetSplitPoint(testWall, Line(Point(1, 1), Point(0, 1))).value());
+                geometry::helper::ComputeSplitPoint(testWall, Line(Point(1, 1), Point(0, 1)))
+                    .value());
         }
     }
 }

@@ -291,7 +291,7 @@ bool Building::InitGeometry()
 {
     Logging::Info("Init Geometry");
     try {
-        geometry::helper::correct(*this);
+        geometry::helper::CorrectInputGeometry(*this);
     } catch(const std::exception & e) {
         Logging::Error(fmt::format(check_fmt("Exception in Building::correct: {}"), e.what()));
         return false;
