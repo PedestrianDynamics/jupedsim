@@ -109,8 +109,19 @@ UnivFFviaFM::UnivFFviaFM(
         }
 
         //find insidePoint and save it, together with UID
-        Point normalVec   = doors.begin()->second.NormalVec();
-        Point midPoint    = doors.begin()->second.GetCentre();
+        Line * door = nullptr;
+        if(!subroom->GetAllCrossings().empty()) {
+            door = dynamic_cast<Line *>(subroom->GetAllCrossings().at(0));
+        }
+        if(!subroom->GetAllTransitions().empty()) {
+            door = dynamic_cast<Line *>(subroom->GetAllTransitions().at(0));
+        }
+        if(!door) {
+            Logging::Error("No door in room. Can not initialize floor field.");
+            return;
+        }
+        Point normalVec   = door->NormalVec();
+        Point midPoint    = door->GetCentre();
         Point candidate01 = midPoint + (normalVec * 0.25);
         Point candidate02 = midPoint - (normalVec * 0.25);
 
