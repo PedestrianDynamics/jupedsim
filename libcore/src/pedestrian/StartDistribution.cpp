@@ -58,9 +58,8 @@ StartDistribution::StartDistribution(int seed)
     _unit_traj          = "m";
     static bool _seeded = false; // seed only once, not every time
     if(!_seeded) {
-        _generator = std::default_random_engine(
-            seed); // mt19937 g(static_cast<uint32_t>(_configuration->GetSeed()));
-        _seeded = true;
+        _generator = std::default_random_engine(seed);
+        _seeded    = true;
     }
 }
 
@@ -210,7 +209,6 @@ StartDistribution::GenerateAgent(Building * building, int * pid, std::vector<Poi
     ped->SetPatienceTime(GetPatience());
     ped->SetPremovementTime(GetPremovementTime());
     ped->SetRiskTolerance(GetRiskTolerance());
-    //ped->SetTrip(); // not implemented
 
     // a und b setzen muss vor v0 gesetzt werden,
     // da sonst v0 mit Null überschrieben wird
@@ -381,7 +379,6 @@ void StartDistribution::InitRiskTolerance(std::string distribution_type, double 
 double StartDistribution::GetRiskTolerance()
 {
     if(_distribution_type == "normal") {
-        //fprintf(stderr, "%f \t %f \n", _generator, _riskTolerance(_generator));
         if(_riskTolerance.stddev() == judge) {
             return _riskTolerance.mean();
         } else {
@@ -390,7 +387,6 @@ double StartDistribution::GetRiskTolerance()
     } else {
         std::uniform_real_distribution<float> normalize(0.0, 1.0);
         float rand_norm = normalize(_generator);
-        //fprintf(stderr, "%f \n", quantile(_risk_beta_dist, rand_norm));
         if(_distribution_type == "beta") {
             return quantile(_risk_beta_dist, rand_norm);
         }

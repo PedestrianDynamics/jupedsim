@@ -93,16 +93,12 @@ std::string Obstacle::Write()
     for(unsigned int j = 0; j < _walls.size(); j++) {
         const Wall & w = _walls[j];
         s.append(w.Write());
-        //pos = pos + w.GetPoint1() + w.GetPoint2();
     }
-    //pos = pos * (0.5 / _walls.size());
 
     Point pos = GetCentroid();
 
     //add the obstacle caption
     char tmp[CLENGTH];
-    //sprintf(tmp, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%s\" color=\"100\" />\n"
-    //              , pos.GetX() * FAKTOR, pos.GetY() * FAKTOR, _caption.c_str());
 
     sprintf(
         tmp,
@@ -124,27 +120,6 @@ int Obstacle::WhichQuad(const Point & vertex, const Point & hitPos) const
 {
     return (vertex._x > hitPos._x) ? ((vertex._y > hitPos._y) ? 1 : 4) :
                                      ((vertex._y > hitPos._y) ? 2 : 3);
-
-    //     if ((vertex.GetX() - hitPos.GetX())>J_EPS)
-    //     {
-    //          if ((vertex.GetY() - hitPos.GetY())>J_EPS)
-    //          {
-    //               return 1;
-    //          } else
-    //          {
-    //               return 4;
-    //          }
-    //     } else
-    //     {
-    //          if ((vertex.GetY() - hitPos.GetY())>J_EPS)
-    //          {
-    //               return 2;
-    //          } else
-    //          {
-    //               return 3;
-    //          }
-    //
-    //     }
 }
 
 // x-Koordinate der Linie von einer Eccke zur nächsten
@@ -157,7 +132,7 @@ double Obstacle::Xintercept(const Point & point1, const Point & point2, double h
 bool Obstacle::Contains(const Point & ped) const
 {
     //case when the point is on an edge
-    // todo: this affect the runtime, and do we really need that
+    // TODO this affect the runtime, and do we really need that
     // If we do not d othis check, then for a square for instance, half the points located on the edge will be inside and
     // the other half will be outside the polygon.
     for(auto & w : _walls) {
@@ -340,7 +315,6 @@ bool Obstacle::IsClockwise() const
     if(_poly.size() < 3) {
         LOG_ERROR("You need at least 3 vertices to check for orientation. Obstacle ID [{}]", _id);
         return false;
-        //exit(EXIT_FAILURE);
     }
     double sum = 0;
     for(unsigned int i = 0; i < _poly.size() - 1; ++i) {

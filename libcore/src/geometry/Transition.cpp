@@ -30,18 +30,9 @@
 #include "SubRoom.h"
 #include "general/Logger.h"
 
-/************************************************************
- Transition (abgeleitet von Crossing)
- ************************************************************/
-
 Transition::Transition() : Crossing()
 {
-    //     _isOpen = true;
     _room2 = nullptr;
-    //     _lastTickTime1 = 0;
-    //     _lastTickTime2 = 0;
-    //     _refresh1 = 0;
-    //     _refresh2 = 0;
 }
 
 Transition::~Transition() {}
@@ -56,12 +47,6 @@ void Transition::SetRoom2(Room * r)
 {
     _room2 = r;
 }
-
-//bool Transition::IsOpen() const
-//{
-//     return Crossing::IsOpen();
-//}
-
 
 Room * Transition::GetRoom2() const
 {

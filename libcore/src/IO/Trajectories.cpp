@@ -55,11 +55,6 @@ static fs::path getEventFileName(const fs::path & projectFile)
     }
     return ret;
 }
-// <train_constraints>
-//   <train_time_table>ttt.xml</train_time_table>
-//   <train_types>train_types.xml</train_types>
-// </train_constraints>
-
 
 static fs::path getTrainTimeTableFileName(const fs::path & projectFile)
 {
@@ -321,10 +316,6 @@ void TrajectoriesXML::WriteHeader(
     tmp.append(agents);
     sprintf(agents, "\t\t<frameRate>%0.2f</frameRate>\n", fps);
     tmp.append(agents);
-    //tmp.append("\t\t<!-- Frame count HACK\n");
-    //tmp.append("replace me\n");
-    //tmp.append("\t\tFrame count HACK -->\n");
-    //tmp.append("<frameCount>xxxxxxx</frameCount>\n");
     tmp.append("\t</header>\n");
     _outputHandler->Write(tmp);
 }
@@ -354,7 +345,6 @@ void TrajectoriesXML::WriteGeometry(Building * building)
         "\t<file location= \"%s\"/>\n",
         building->GetGeometryFilename().string().c_str());
     embed_geometry.append(file_location);
-    //embed_geometry.append("\t</geometry>\n");
 
     for(auto hline : building->GetAllHlines()) {
         embed_geometry.append(hline.second->GetDescription());
@@ -364,14 +354,9 @@ void TrajectoriesXML::WriteGeometry(Building * building)
         embed_geometry.append(goal.second->Write());
     }
 
-    //write the grid
-    //embed_geometry.append(building->GetGrid()->ToXML());
 
     embed_geometry.append("\t</geometry>\n");
     _outputHandler->Write(embed_geometry);
-    //write sources
-    // if(building->G )
-    //
     _outputHandler->Write("\t<AttributeDescription>");
     _outputHandler->Write("\t\t<property tag=\"x\" description=\"xPosition\"/>");
     _outputHandler->Write("\t\t<property tag=\"y\" description=\"yPosition\"/>");

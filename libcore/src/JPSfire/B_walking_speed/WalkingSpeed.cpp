@@ -70,12 +70,7 @@ bool WalkingSpeed::LoadJPSfireInfo(const std::string & projectFilename)
             fs::path extinction_grids_path(extinction_grids);
             fs::path file_path(projectRootDir);
             file_path /= extinction_grids_path;
-            std::string filepath =
-                file_path
-                    .string(); // projectRootDir + "/" + extinction_grids; //TODO: check compatibility
-            //if (projectRootDir.empty()  ) // directory is "."
-            //    filepath =  extinction_grids;
-
+            std::string filepath   = file_path.string();
             double updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
             double finalTime       = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
             LOG_INFO(
@@ -103,21 +98,10 @@ double WalkingSpeed::GetExtinction(const Pedestrian * pedestrian)
     return ExtinctionCoefficient;
 }
 
-//void WalkingSpeed::set_FMStorage(const std::shared_ptr<FDSMeshStorage> & fmStorage)
-//{
-//    _FMStorage=fmStorage;
-//}
-
-//const std::shared_ptr<FDSMeshStorage> WalkingSpeed::get_FMStorage()
-//{
-//    return _FMStorage;
-//}
-
 double WalkingSpeed::FrantzichNilsson2003(double & walking_speed, double ExtinctionCoefficient)
 {
     //According to Frantzich+Nilsson2003
     walking_speed = std::fmax(0.3, walking_speed * (1 + (-0.057 / 0.706) * ExtinctionCoefficient));
-    //walking_speed = std::fmin(1, std::fmax(0.2, (1.0 - 0.34 * (3.0-(2.0/ExtinctionCoefficient)))));   // TODO: new Fridolf with conservative lambda = 2
     return walking_speed;
 }
 
@@ -154,14 +138,11 @@ double WalkingSpeed::Fridolf2018(double & walking_speed, double ExtinctionCoeffi
 double WalkingSpeed::WalkingInSmoke(const Pedestrian * p, double walking_speed)
 {
     double ExtinctionCoefficient = GetExtinction(p);
-    //std::cout << ExtinctionCoefficient << std::endl;
-    //fprintf(stderr, "%f\n", ExtinctionCoefficient);
-    std::string study = _FMStorage->GetStudy();
+    std::string study            = _FMStorage->GetStudy();
 
     if((ExtinctionCoefficient < 10E-6) ||
        (std::isnan(ExtinctionCoefficient))) //no obstruction by smoke or NaN check
     {
-        //fprintf(stderr, "%f \t%f\n", ExtinctionCoefficient, p->GetEllipse().GetV0());
         return walking_speed; // walking_speed is returned as V0 for plane or stairs
     } else {
         if(study == "Frantzich+Nilsson2003") {
@@ -178,7 +159,6 @@ double WalkingSpeed::WalkingInSmoke(const Pedestrian * p, double walking_speed)
             exit(EXIT_FAILURE);
         }
     }
-    //fprintf(stderr, "%f \t%f \t%f \t%f \n", p->GetGlobalTime(), ExtinctionCoefficient, walking_speed, p->GetV().Norm() );
 
     return walking_speed;
 }

@@ -119,9 +119,6 @@ enum OperativModels {
     MODEL_VELOCITY,
     MODEL_GRADIENT_REMOVED,
     MODEL_KRAUSZ_REMOVED
-    //    MODEL_ORCA,
-    //    MODEL_CFM,
-    //    MODEL_GNM
 };
 
 enum AgentColorMode {
@@ -160,7 +157,6 @@ enum FastMarchingFlags {
     FM_DOUBLE  = 2, // directions (rows and columns) when performing the fast marching algorithm
     FM_FINAL   = 3,
     FM_ADDED   = 4, // added to trial but not calculated
-    //FM_BLOCKER = -5, // currently not used
     FM_OUTSIDE = -7
 };
 
@@ -226,22 +222,7 @@ constexpr double magicnum(int i)
                (i == UNKNOWN_COST) ?
                -2.0 :
                (i == WALL_ON_COSTARRAY) ? -7.0 : (i == TARGET_REGION) ? 0.0 : J_NAN;
-    //     switch (i) {
-    //          case UNKNOWN_DISTANCE:
-    //               return -3.0;
-    //          case UNKNOWN_COST:
-    //               return -2.0;
-    //          case WALL_ON_COSTARRAY:
-    //               return -7.0;
-    //          case TARGET_REGION:
-    //               return 0.0;
-    //          default:
-    //               std::cerr << "ERROR: \tunknown magic number " << i << std::endl;
-    //               return NAN;
-    //     }
 }
-
-//global functions for convenience
 
 inline char xmltob(const char * t, char v = 0)
 {

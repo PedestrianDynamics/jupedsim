@@ -91,8 +91,6 @@ Pedestrian::Pedestrian()
     _timeInJam           = 0.0;
     _patienceTime        = 5.0; // time after which the ped feels to be in jam
     _recordingTime       = 20;  //seconds
-    //_lastPosition;
-    //_lastVelocities
     _routingStrategy     = ROUTING_GLOBAL_SHORTEST;
     _newOrientationDelay = 0; //0 seconds, in steps
     _updateRate          = _deltaT;
@@ -102,11 +100,8 @@ Pedestrian::Pedestrian()
     _newOrientationFlag  = false;
     _router              = nullptr;
     _building            = nullptr;
-
-    //_knownDoors = map<int, NavLineState>();
-
-    _spotlight       = false;
-    _ticksInThisRoom = 0;
+    _spotlight           = false;
+    _ticksInThisRoom     = 0;
 
     _agentsCreated++; //increase the number of object created
     _FED_In           = 0.0;
@@ -115,8 +110,6 @@ Pedestrian::Pedestrian()
     _ToxicityAnalysis = nullptr;
     _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
 }
-
-//const shared_ptr<ToxicityAnalysis> &Pedestrian::getToxicityAnalysis() { return _ToxicityAnalysis; }
 
 Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & building) :
     _group(agentsParameters.GetGroupId()),
@@ -168,7 +161,6 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _lastPosition            = Point(0, 0);
     _lastCellPosition        = -1;
     _recordingTime           = 20; //seconds
-    //_knownDoors = map<int, NavLineState>();
     _knownDoors.clear();
     _height                    = 170;
     _age                       = 30;
@@ -248,10 +240,8 @@ void Pedestrian::SetEllipse(const JEllipse & e)
 
 void Pedestrian::SetExitIndex(int i)
 {
-    _exitIndex = i;
-    //save that destination for that room
+    _exitIndex                    = i;
     _mentalMap[GetUniqueRoomID()] = i;
-    //_destHistory.push_back(i);
 }
 
 void Pedestrian::SetExitLine(const NavLine * l)
@@ -542,18 +532,6 @@ double Pedestrian::GetV0Norm() const
     double nav_elevation = sub->GetElevation(target);
     double delta         = nav_elevation - ped_elevation;
     double walking_speed = 0;
-    //---------------------------------------------------
-    //-----------------------------------------
-
-
-    // const Point& pos = GetPos();
-    // double distanceToTarget = (target-pos).Norm();
-    // double iniDistanceToTarget = (target-_lastPositions.front()).Norm();
-
-    // printf("delta = %f, nav_elev = %f, ped_elev= %f, ped=[%f %f] targe=[%f, %f]\n", delta, nav_elevation, ped_elevation, pos._x, pos._y, target._x, target._y);
-    // fprintf(stderr, "%f  %f front [%f, %f] nav [%f, %f] dist=%f, iniDist=%f\n", delta, ped_elevation, _lastPositions.front()._x, _lastPositions.front()._y, _navLine->GetCentre()._x, _navLine->GetCentre()._y, distanceToTarget, iniDistanceToTarget);
-
-
     // we are walking on an even plane
     //TODO: move _ellipse.GetV0() to _V0Plane
     if(fabs(delta) < J_EPS) {
@@ -587,21 +565,13 @@ double Pedestrian::GetV0Norm() const
             } else if(sub->GetType() == "idle_escalator") {
                 speed_down = _V0IdleEscalatorDownStairs;
             }
-            // fprintf(stderr, "%f  %f  %f  %f\n", pos._x, pos._y, ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_down);
-            // fprintf(stderr, "%f  %f   %f  %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_down, GetV().Norm(), ped_elevation);
-            //                  // getc(stdin);
-
             walking_speed = (1 - f * g) * _ellipse.GetV0() + f * g * speed_down;
-
-            // printf("%f  DOWN max_e=%f,  z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", _globalTime, maxSubElevation, ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f*g)*_ellipse.GetV0() + f*g*speed_down);
-
         }
         //we are walking upstairs
         else {
             double minSubElevation  = sub->GetMinElevation();
             double stairHeight      = sub->GetMaxElevation() - minSubElevation;
             double stairInclination = acos(sub->GetCosAngleWithHorizontal());
-            // double stairHorinzontalLength =  stairHeight / sub->GetTanAngleWithHorizontal();
             f = 2.0 / (1 + exp(-c * stairInclination * (minSubElevation - ped_elevation) *
                                (minSubElevation - ped_elevation))) -
                 1;
@@ -618,14 +588,6 @@ double Pedestrian::GetV0Norm() const
             } else if(sub->GetType() == "idle_escalator") {
                 speed_up = _V0IdleEscalatorUpStairs;
             }
-            // if(_id==209){
-            // printf("%f UP min_e=%f, z=%f, f=%f, g=%f, v0=%f, speed_up=%f, ret=%f, v=%f\n", _globalTime , minSubElevation, ped_elevation, f, g, _ellipse.GetV0(), speed_up, (1-f*g)*_ellipse.GetV0() + f*g*speed_up, GetV().Norm());
-            // printf("minElevation = %f, maxELevation = %f, ped_elevation = %f, stairHeight = %f, stairLength = %f, angle = %.2f pos=(%f, %f)\n", minSubElevation, sub->GetMaxElevation(), ped_elevation ,stairHeight, stairHorinzontalLength, stairInclination, pos._x, pos._y);
-            // getc(stdin);
-            // fprintf(stderr, "%f  %f   %f  %f %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_up, GetV().Norm(), ped_elevation,  stairInclination*180./3.14159265);
-            // }
-            // getc(stdin);
-
             walking_speed = (1 - f * g) * _ellipse.GetV0() + f * g * speed_up;
         }
     }
@@ -638,11 +600,7 @@ double Pedestrian::GetV0Norm() const
 #endif
     //WHERE should the call to that routine be placed properly?
     //only executed every 3 seconds
-    // fprintf(stderr, "%f\n", walking_speed);
-
     return walking_speed;
-    // orthogonal projection on the stair
-    //return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
 }
 #ifdef JPSFIRE
 void Pedestrian::ConductToxicityAnalysis()
@@ -761,31 +719,13 @@ double Pedestrian::GetTimeInJam() const
     return _timeInJam;
 }
 
-// set the new orientation flag
-// to delay sharp turn
-// TODO: maybe combine this with SetExitLine
-
-// void Pedestrian::SetSmoothTurning(bool smt)
-// {
-//      //ignoring first turn
-//      if (_tmpFirstOrientation) {
-//           _tmpFirstOrientation = false;
-//      } else {
-//           if (_newOrientationDelay <= 0)// in the case the pedestrian is still rotating
-//                _newOrientationFlag = smt;
-//      }
-
-// }
-
 void Pedestrian::SetSmoothTurning()
 {
     _newOrientationDelay = 0;
 }
 
-
 bool Pedestrian::IsFeelingLikeInJam()
 {
-    //return true;
     return (_patienceTime < _timeInJam);
 }
 
@@ -793,7 +733,6 @@ bool Pedestrian::IsFeelingLikeInJam()
 void Pedestrian::ResetTimeInJam()
 {
     _timeInJam = 0.0;
-    //_timeInJam /= 2.0;
 }
 
 void Pedestrian::UpdateTimeInJam()
@@ -912,22 +851,6 @@ int Pedestrian::GetFinalDestination() const
 {
     return _desiredFinalDestination;
 }
-
-///@deprecated
-//void Pedestrian::WritePath(ofstream& file, Building* building)
-//{
-//     map<int, int>::iterator iter;
-//
-//     if(building) {
-//          for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
-//               file<<building->GetAllRooms()[iter->first/1000]->GetCaption()<<" "<<iter->second<<endl;
-//          }
-//     } else {
-//          for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
-//               file<<iter->first/1000<<" "<<iter->second<<endl;
-//          }
-//     }
-//}
 
 std::string Pedestrian::GetPath()
 {
@@ -1055,7 +978,6 @@ int Pedestrian::FindRoute()
         LOG_ERROR("One or more routers does not exist! Check your router_ids");
         return -1;
     }
-    //bool isinsub = (_building->GetAllRooms().at(this->GetRoomID())->GetSubRoom(this->GetSubRoomID())->IsInSubRoom(this));
     return _router->FindExit(this);
 }
 

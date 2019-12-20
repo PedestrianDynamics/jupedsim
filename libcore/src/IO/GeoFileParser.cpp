@@ -32,7 +32,7 @@ GeoFileParser::GeoFileParser(Configuration * configuration) : _configuration(con
 
 void GeoFileParser::LoadBuilding(Building * building)
 {
-    //todo: what happens if any of these  methods failed (return false)? throw exception ?
+    //TODO what happens if any of these  methods failed (return false)? throw exception ?
     if(!LoadGeometry(building)) {
         LOG_ERROR("Could not load the geometry!");
         exit(EXIT_FAILURE);
@@ -104,7 +104,6 @@ bool GeoFileParser::LoadGeometry(Building * building)
     for(TiXmlElement * xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
         xRoom                = xRoom->NextSiblingElement("room")) {
         Room * room = new Room();
-        //make_unique<Song>
 
         std::string room_id = xmltoa(xRoom->Attribute("id"), "-1");
         room->SetID(xmltoi(room_id.c_str(), -1));
@@ -114,16 +113,10 @@ bool GeoFileParser::LoadGeometry(Building * building)
 
         double position = xmltof(xRoom->Attribute("zpos"), 0.0);
 
-        //if(position>6.0) position+=50;
         room->SetZPos(position);
-
-        //parsing the subrooms
-        //processing the rooms node
-        //TiXmlNode*  xSubroomsNode = xRoom->FirstChild("subroom");
 
         for(TiXmlElement * xSubRoom = xRoom->FirstChildElement("subroom"); xSubRoom;
             xSubRoom                = xSubRoom->NextSiblingElement("subroom")) {
-            //               std::string subroom_id = xmltoa(xSubRoom->Attribute("id"), "-1");
             int subroom_id = xmltoi(xSubRoom->Attribute("id"), -1);
 
             std::string SubroomClosed = xmltoa(xSubRoom->Attribute("closed"), "0");
@@ -192,8 +185,6 @@ bool GeoFileParser::LoadGeometry(Building * building)
             subroom->SetRoomID(room->GetID());
             subroom->SetSubRoomID(subroom_id);
 
-            //static int p_id=1;
-            //cout<<endl<<"wall polygon: "<< p_id++<<endl;
             //looking for polygons (walls)
             for(TiXmlElement * xPolyVertices = xSubRoom->FirstChildElement("polygon");
                 xPolyVertices;
@@ -207,22 +198,19 @@ bool GeoFileParser::LoadGeometry(Building * building)
                     double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
                     double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
                     subroom->AddWall(Wall(Point(x1, y1), Point(x2, y2), wall_type));
-                    //printf("%0.2f %0.2f %0.2f %0.2f\n",x1,y1,x2,y2);
                 }
             }
 
             //looking for obstacles
             for(TiXmlElement * xObstacle = xSubRoom->FirstChildElement("obstacle"); xObstacle;
                 xObstacle                = xObstacle->NextSiblingElement("obstacle")) {
-                int id        = xmltoi(xObstacle->Attribute("id"), -1);
-                double height = xmltof(xObstacle->Attribute("height"), 0);
-                //double ObstClosed = xmltof(xObstacle->Attribute("closed"), 0);
+                int id                  = xmltoi(xObstacle->Attribute("id"), -1);
+                double height           = xmltof(xObstacle->Attribute("height"), 0);
                 std::string ObstCaption = xmltoa(xObstacle->Attribute("caption"), "-1");
 
                 Obstacle * obstacle = new Obstacle();
                 obstacle->SetId(id);
                 obstacle->SetCaption(ObstCaption);
-                //obstacle->SetClosed(ObstClosed);
                 obstacle->SetHeight(height);
 
                 //looking for polygons (walls)
@@ -455,31 +443,26 @@ bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building * build
 
     LOG_INFO(">> state: {}", stateStr);
 
-    //------------------ outflow
     double outflow = xmltof(xDoor->Attribute("outflow"), -1.0);
     if(outflow >= 0) {
         building->GetTransition(id)->SetOutflowRate(outflow);
         LOG_INFO(">> ouflow: {:.2f}", outflow);
     }
-    //----------------- dt
     double DT = xmltof(xDoor->Attribute("dt"), -1.0);
     if(DT >= 0) {
         building->GetTransition(id)->SetDT(DT);
     }
-    //----------------- dn
     int DN = xmltof(xDoor->Attribute("dn"), -1.0);
     if(DN >= 0) {
         building->GetTransition(id)->SetDN(DN);
         LOG_INFO(">> dn: {}", DN);
     }
 
-    //------------------ max door usage
     int mdu = xmltof(xDoor->Attribute("max_agents"), -1);
     if(mdu >= 0) {
         building->GetTransition(id)->SetMaxDoorUsage(mdu);
         LOG_INFO(">> max_agents: {}", mdu);
     }
-    //-----------------
     result = true;
     return result;
 }
@@ -607,12 +590,9 @@ Transition * GeoFileParser::parseTransitionNode(TiXmlElement * xTrans, Building 
     t->SetType(type);
     //--- danger area
     if(room1_id != -1 && subroom1_id != -1) {
-        //Room* room = _rooms[room1_id];
         Room * room       = building->GetRoom(room1_id);
         SubRoom * subroom = room->GetSubRoom(subroom1_id);
 
-        //subroom->AddGoalID(t->GetUniqueID());
-        //MPI
         room->AddTransitionID(t->GetUniqueID());
         t->SetRoom1(room);
         t->SetSubRoom1(subroom);
@@ -623,8 +603,6 @@ Transition * GeoFileParser::parseTransitionNode(TiXmlElement * xTrans, Building 
     if(room2_id != -1 && subroom2_id != -1) {
         Room * room       = building->GetRoom(room2_id);
         SubRoom * subroom = room->GetSubRoom(subroom2_id);
-        //subroom->AddGoalID(t->GetUniqueID());
-        //MPI
         room->AddTransitionID(t->GetUniqueID());
         t->SetRoom2(room);
         t->SetSubRoom2(subroom);
@@ -1036,7 +1014,7 @@ std::shared_ptr<TrainTimeTable> GeoFileParser::parseTrainTimeTableNode(TiXmlElem
 
     float arrival_time   = xmltof(e->Attribute("arrival_time"), -1);
     float departure_time = xmltof(e->Attribute("departure_time"), -1);
-    // @todo: check these values for correctness e.g. arrival < departure
+    //TODO check these values for correctness e.g. arrival < departure
     LOG_INFO("Train time table:");
     LOG_INFO("ID: {}", id);
     LOG_INFO("Type: {}", type);
@@ -1073,12 +1051,9 @@ std::shared_ptr<TrainTimeTable> GeoFileParser::parseTrainTimeTableNode(TiXmlElem
 std::shared_ptr<TrainType> GeoFileParser::parseTrainTypeNode(TiXmlElement * e)
 {
     LOG_INFO("Loading train type");
-    // int T_id = xmltoi(e->Attribute("id"), -1);
     std::string type = xmltoa(e->Attribute("type"), "-1");
     int agents_max   = xmltoi(e->Attribute("agents_max"), -1);
     float length     = xmltof(e->Attribute("length"), -1);
-    // std::shared_ptr<Transition> t = new Transition();
-    // std::shared_ptr<Transition> doors;
     Transition t;
     std::vector<Transition> doors;
 

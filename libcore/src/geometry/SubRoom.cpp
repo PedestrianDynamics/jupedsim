@@ -42,10 +42,6 @@
 #include <cmath>
 
 
-/************************************************************
- SubRoom
- ************************************************************/
-
 int SubRoom::_static_uid = 1; //must be positive (sideeffect for FloorfieldViaFM::isInside())
 
 
@@ -112,29 +108,7 @@ SubRoom::~SubRoom()
     }
     _obstacles.clear();
 }
-/*
-void SubRoom::SetHelpVariables()
-{
-        unsigned int i, j= _poly.size()-1;
 
-        for( i=0; i< _poly.size(); i++)
-        {
-                if ( _poly[i]._y == _poly[j]._y ) //not important
-                {
-                        _poly_help_constatnt.push_back( _poly[i]._x ) ;
-                        _poly_help_multiple.push_back( 0 );
-                }
-                else
-                {
-                        _poly_help_constatnt.push_back( _poly[i]._x - ( _poly[i]._y*_poly[j]._x ) / ( _poly[j]._y - _poly[i]._y)
-                                                                                + ( _poly[i]._y*_poly[i]._x )/ ( _poly[j]._y - _poly[i]._y  )  );
-
-                        _poly_help_multiple.push_back( (_poly[j]._x-_poly[i]._x)/(_poly[j]._y-_poly[i]._y) );
-                }
-        j=i;
-        }
-}
-*/
 void SubRoom::SetSubRoomID(int ID)
 {
     _id = ID;
@@ -154,7 +128,6 @@ int SubRoom::GetSubRoomID() const
 int SubRoom::GetUID() const
 {
     return _uid;
-    //return pRoomID * 1000 + pID;
 }
 
 double SubRoom::GetArea() const
@@ -393,35 +366,16 @@ Point SubRoom::GetCentroid() const
 
 std::vector<Wall> SubRoom::GetVisibleWalls(const Point & position)
 {
-#define DEBUG 0
     std::vector<Wall> visible_walls;
     bool wall_is_vis;
     Point nearest_point;
-#if DEBUG
-    printf("\n---------------------------\nEnter GetVisiblewalls\n");
-#endif
     for(auto w : _walls) {
         // nearest_point = w.ShortestPoint(position);
         wall_is_vis = IsVisible(w, position);
         if(wall_is_vis) {
-#if DEBUG
-            printf(
-                "  GetVisibleWalls: Wall (%f, %f)--(%f, %f)\n",
-                w.GetPoint1()._x,
-                w.GetPoint1()._y,
-                w.GetPoint2()._x,
-                w.GetPoint2()._y);
-            printf("  GetVisibleWalls: Ped position (%f, %f)\n", position._x, position._y);
-            printf("  GetVisibleWalls: wall is visible? = %d\n", wall_is_vis);
-#endif
             visible_walls.push_back(w);
         }
     }
-#if DEBUG
-    printf(
-        "Leave GetVisiblewalls with %d visible walls\n------------------------------\n",
-        visible_walls.size());
-#endif
     return visible_walls;
 }
 
@@ -429,39 +383,28 @@ std::vector<Wall> SubRoom::GetVisibleWalls(const Point & position)
 // with the same wall. This function should check if <position> can see the <Wall>
 bool SubRoom::IsVisible(const Line & wall, const Point & position)
 {
-    // printf("\tEnter wall_is_visible\n");
-    // printf(" \t  Wall (%f, %f)--(%f, %f)\n",wall.GetPoint1()._x, wall.GetPoint1()._y,wall.GetPoint2()._x, wall.GetPoint2()._y );
-
     bool wall_is_vis = true;
     // Point nearest_point =  wall.ShortestPoint(position);
     // in cases where nearest_point is endPoint of Wall, the wall becomes visible even if it is not..
     //  try with the center. If it is not visible then the wall is definitly not.
     const Point & nearest_point = wall.GetCentre();
 
-    // printf("\t\t center of wall %f, %f\n",nearest_point._x, nearest_point._y);
     Line ped_wall = Line(position, nearest_point);
     for(auto & w : _walls) {
         if(w == wall) //ignore wall
             continue;
         if(wall_is_vis && ped_wall.IntersectionWith(w)) {
-            // fprintf (stdout, "\t\t Wall_is_visible: INTERSECTION WALL  L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), WALL(%.2f, %.2f)---(%.2f, %.2f)\n", ped_wall.GetPoint1()._x,ped_wall.GetPoint1()._y, ped_wall.GetPoint2()._x, ped_wall.GetPoint2()._y, w.GetPoint1()._x,w.GetPoint1()._y,w.GetPoint2()._x,w.GetPoint2()._y);
             wall_is_vis = false;
         }
     }
 
     for(const auto & obst : _obstacles) {
         for(const auto & w : obst->GetAllWalls()) {
-            //               if(w._height <= 1.5) {
-            //                    continue;
-            //               }
             if(wall_is_vis && ped_wall.IntersectionWith(w)) {
-                // fprintf (stdout, "\t\t Wall_is_visible INTERSECTION OBS; L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", w.GetPoint1()._x, w.GetPoint1()._y, w.GetPoint2()._x, w.GetPoint2()._y, ped_wall.GetPoint1()._x, ped_wall.GetPoint1()._y, ped_wall.GetPoint2()._x, ped_wall.GetPoint2()._y);
                 wall_is_vis = false;
             }
         }
     }
-
-    // printf("\tLeave wall_is_visible with %d\n", wall_is_vis);
     return wall_is_vis;
 }
 
@@ -477,7 +420,6 @@ bool SubRoom::IsVisible(const Point & p1, const Point & p2, bool considerHlines)
         }
     }
 
-    // printf("\t\t -- ped_is_visible; check obstacles\n");
     //check intersection with obstacles
     for(const auto & obstacle : _obstacles) {
         for(const auto & wall : obstacle->GetAllWalls()) {
@@ -496,8 +438,6 @@ bool SubRoom::IsVisible(const Point & p1, const Point & p2, bool considerHlines)
             }
         }
     }
-
-    // printf("\t\tLeave ped_is_visible with %d\n",temp);
     return true;
 }
 
@@ -514,7 +454,6 @@ void SubRoom::SetPlanEquation(double A, double B, double C)
     _planeEquation[2] = C;
     //compute and cache the cosine of angle with the plane z=h
     _cosAngleWithHorizontalPlane = (1.0 / sqrt(A * A + B * B + 1));
-    // tan = sin/cos = |n1 x n2|/|n1.n2|; n1= (A, B, -1), n2 = (0, 0, 1)
     _tanAngleWithHorizontalPlane = sqrt(A * A + B * B); // n1.n2 = -1
 }
 
@@ -646,8 +585,6 @@ bool SubRoom::SanityCheck()
             if(w1.Overlapp(*hline)) {
                 LOG_ERROR(
                     "Overlapping between wall {} and  Hline {}", w1.toString(), hline->toString());
-                // exit(EXIT_FAILURE);
-                //return false;
             }
         }
         //overlaping with crossings
@@ -682,7 +619,6 @@ bool SubRoom::SanityCheck()
             if(h->Overlapp(*c)) {
                 LOG_ERROR("Overlapping hline {} and  crossing {}", h->toString(), c->toString());
                 exit(EXIT_FAILURE);
-                //return false;
             }
         }
     }
@@ -692,7 +628,6 @@ bool SubRoom::SanityCheck()
             if(h->Overlapp(*t)) {
                 LOG_ERROR("Overlapping hline {} and  transition {}", h->toString(), t->toString());
                 exit(EXIT_FAILURE);
-                //return false;
             }
         }
     }
@@ -777,7 +712,6 @@ bool SubRoom::IsClockwise()
     if(_poly.size() < 3) {
         LOG_ERROR("You need at least 3 vertices to check for orientation. Obstacle ID [{}]", _id);
         return false;
-        //exit(EXIT_FAILURE);
     }
     double sum = 0;
     for(unsigned int i = 0; i < _poly.size() - 1; ++i) {
@@ -814,12 +748,6 @@ bool SubRoom::IsPartOfPolygon(const Point & ptw)
 
 bool SubRoom::IsInObstacle(const Point & pt)
 {
-    //write the obstacles
-    //     for (auto&& obst : _obstacles)
-    //     {
-    //          if(obst->Contains(pt)) return true;
-    //     }
-    //     return false;
     for(polygon_type obs : _boostPolyObstacles) {
         if(boost::geometry::within(pt, obs)) {
             return true;
@@ -851,9 +779,6 @@ bool SubRoom::CreateBoostPoly()
     return true;
 }
 
-/************************************************************
- NormalSubRoom
- ************************************************************/
 NormalSubRoom::NormalSubRoom() : SubRoom() {}
 
 NormalSubRoom::NormalSubRoom(const NormalSubRoom & orig) : SubRoom(orig) {}
@@ -884,7 +809,6 @@ std::string NormalSubRoom::WriteSubRoom() const
         geometry.append("\t\t</wall>\n");
 
         s.append(geometry);
-        //s.append(GetWall(j).Write());
     }
 
     //add the subroom caption
@@ -1114,58 +1038,7 @@ bool NormalSubRoom::IsInSubRoom(const Point & ped) const
     }
     // pedestrian is not in obstacle, so we can use within(...) on _boostPoly
     return boost::geometry::within(ped, _boostPoly);
-
-    // the code below is old and only works in manhatten-polygons (horizontal and vertical lines only)
-
-    //     //case when the point is on an edge
-    //     // todo: this affect the runtime, and do we really need that
-    //     // If we do not do this check, then for a square for instance, half the points located on the edge will be inside and
-    //     // the other half will be outside the polygon.
-    //     // We should also consider crossings and transitions - not only walls
-    //     for(auto& w: _walls)
-    //     {
-    //          if(w.IsInLineSegment(ped)) return true;
-    //     }
-    //
-    //     auto next_corner = _poly.begin();
-    //     short quad = WhichQuad(*next_corner, ped);
-    //     short next_quad;
-    //     short total = 0; // count of absolute sectors crossed
-    //     for (auto& corner : _poly) { // _poly contains all corner points of the walls
-    //          ++next_corner;
-    //          if (next_corner == _poly.end()) next_corner = _poly.begin();
-    //          next_quad = WhichQuad(*next_corner, ped);
-    //          short delta = next_quad - quad;
-    //
-    //          switch (delta) {
-    //               case 2:
-    //               case -2:
-    //                    // If we crossed the middle, figure out if it
-    //                    // was clockwise or counter-clockwise by using
-    //                    // the x position of the ped
-    //                    if (Xintercept(corner, *next_corner, ped._y) > ped._x)
-    //                         delta = -delta;
-    //                    break;
-    //               case 3: // moving 3 quads is like moving back 1
-    //                    delta = -1;
-    //                    break;
-    //               case -3: // moving back 3 is like moving forward 1
-    //                    delta = 1;
-    //                    break;
-    //               default:
-    //                    break;
-    //          }
-    //
-    //          total += delta;
-    //          quad = next_quad;
-    //     }
-    //
-    //     return abs(total) == 4;
 }
-
-/************************************************************
- Stair
- ************************************************************/
 
 Stair::Stair() : NormalSubRoom()
 {
@@ -1226,10 +1099,7 @@ std::string Stair::WriteSubRoom() const
         geometry.append("\t\t</wall>\n");
 
         s.append(geometry);
-        //s.append(w.Write());
     }
-    //Line tmp = Line(GetUp(), GetDown());
-    // s.append(tmp.Write());
     Point pos = GetCentroid();
     char tmp_c[CLENGTH];
     sprintf(
@@ -1302,7 +1172,6 @@ Stair::CheckCorner(const Point ** otherPoint, const Point ** aktPoint, const Poi
 
 bool Stair::ConvertLineToPoly(const std::vector<Line *> & goals)
 {
-    //return NormalSubRoom::ConvertLineToPoly(goals);
     std::vector<Line *> copy;
     std::vector<Point> orgPoly = std::vector<Point>();
     const Point * aktPoint;
@@ -1398,33 +1267,6 @@ bool Stair::ConvertLineToPoly(const std::vector<Line *> & goals)
         }
     }
     _poly = neuPoly;
-
-    //check if all walls and goals were used in the polygon
-    // will not work here, since the stairs only consist of 4 vertices
-
-    //     for (const auto& w: _walls)
-    //     {
-    //          for (const auto & ptw: {w.GetPoint1(),w.GetPoint2()})
-    //          {
-    //               if(IsPartOfPolygon(ptw)==false)
-    //               {
-    //                    return false;
-    //               }
-    //          }
-    //     }
-    //
-    //    for (const auto& g: goals)
-    //    {
-    //
-    //         for (const auto & ptw: {g->GetPoint1(),g->GetPoint2()})
-    //         {
-    //              if(IsPartOfPolygon(ptw)==false)
-    //              {
-    //                   return false;
-    //              }
-    //         }
-    //    }
-
     return true;
 }
 
@@ -1446,7 +1288,6 @@ bool SubRoom::IsInSubRoom(Pedestrian * ped) const
     const Point & pos = ped->GetPos();
     if((ped->GetExitLine()) && (ped->GetExitLine()->DistTo(pos) <= J_EPS_GOAL))
         return IsInSubRoom(pos);
-    //return true;
     else
         return IsInSubRoom(pos);
 }
@@ -1516,6 +1357,4 @@ bool Escalator::IsEscalatorDown() const
 {
     return !isEscalator_Up;
 }
-
-
 #endif // _SIMULATOR

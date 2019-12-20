@@ -95,8 +95,6 @@ void IniFileParser::Parse(const fs::path & iniFile)
     } //else header
 
 
-// JPSfire
-// -------------------------------------
 // read walkingspeed
 #ifdef JPSFIRE
     std::shared_ptr<WalkingSpeed> W(new WalkingSpeed(iniFile.string()));
@@ -105,7 +103,6 @@ void IniFileParser::Parse(const fs::path & iniFile)
     std::shared_ptr<ToxicityAnalysis> T(new ToxicityAnalysis(iniFile.string(), _config->GetFps()));
     _config->SetToxicityAnalysis(T);
 #endif
-    // -------------------------------------
 
     //pick up which model to use
     //get the wanted ped model id
@@ -187,7 +184,6 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
             _config->SetSeed((unsigned int) time(NULL));
         }
     }
-    // srand(_config->GetSeed());
     LOG_INFO("Random seed <{}>", _config->GetSeed());
 
     // max simulation time
@@ -700,7 +696,6 @@ void IniFileParser::ParseAgentParameters(TiXmlElement * operativModel, TiXmlNode
                 agentParameters->InitV0IdleEscalatorDownStairs(mu, sigma);
                 LOG_INFO("Desired speed idle escalator downstairs mu={} , sigma={}", mu, sigma);
             }
-
             //bmax
             if(xAgentPara->FirstChild("bmax")) {
                 double mu    = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("mu"));
@@ -796,19 +791,16 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
 
         if((strategy == "local_shortest") &&
            (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            //pRoutingStrategies.push_back(make_pair(id, ROUTING_LOCAL_SHORTEST));
             Router * r = new GlobalRouter(id, ROUTING_LOCAL_SHORTEST);
             _config->GetRoutingEngine()->AddRouter(r);
         } else if(
             (strategy == "global_shortest") &&
             (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            //pRoutingStrategies.push_back(make_pair(id, ROUTING_GLOBAL_SHORTEST));
             Router * r = new GlobalRouter(id, ROUTING_GLOBAL_SHORTEST);
             _config->GetRoutingEngine()->AddRouter(r);
         } else if(
             (strategy == "quickest") &&
             (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            //pRoutingStrategies.push_back(make_pair(id, ROUTING_QUICKEST));
             Router * r = new QuickestPathRouter(id, ROUTING_QUICKEST);
             _config->GetRoutingEngine()->AddRouter(r);
         } else if(
@@ -829,7 +821,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
         } else if(
             (strategy == "ff_global_shortest") &&
             (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            //pRoutingStrategies.push_back(make_pair(id, ROUTING_FF_GLOBAL_SHORTEST));
             Router * r = new FFRouter(id, ROUTING_FF_GLOBAL_SHORTEST, hasSpecificGoals, _config);
             _config->GetRoutingEngine()->AddRouter(r);
 
@@ -880,7 +871,6 @@ bool IniFileParser::ParseFfRouterOps(TiXmlNode * routingNode, RoutingStrategy s)
     if(routingNode->FirstChild("parameters")) {
         TiXmlNode * pParametersForAllFF = routingNode->FirstChild("parameters");
         if(pParametersForAllFF->FirstChild("write_VTK_files")) {
-            //remark: std::strcmp returns 0 if the strings are equal
             bool tmp_write_VTK = !std::strcmp(
                 pParametersForAllFF->FirstChild("write_VTK_files")->FirstChild()->Value(), "true");
             _config->set_write_VTK_files(tmp_write_VTK);
@@ -1094,7 +1084,6 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                 if(strategyNode.FirstChild("write_VTK_files")) {
                     const char * tmp1 =
                         strategyNode.FirstChild("write_VTK_files")->FirstChild()->Value();
-                    //remark: std::strcmp returns 0 if the strings are equal
                     bool tmp_write_VTK = !std::strcmp(tmp1, "true");
                     _config->set_write_VTK_files_direction(tmp_write_VTK);
                 }

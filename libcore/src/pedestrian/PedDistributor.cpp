@@ -39,9 +39,6 @@
 #include <cmath>
 
 using namespace boost::lambda;
-/************************************************************
- PedDistributor
- ************************************************************/
 
 PedDistributor::PedDistributor(const Configuration * configuration) : _configuration(configuration)
 {
@@ -58,20 +55,7 @@ PedDistributor::PedDistributor(const Configuration * configuration) : _configura
 }
 
 
-PedDistributor::~PedDistributor()
-{
-    //     for (unsigned int i = 0; i < _start_dis.size(); i++)
-    //     {
-    //          delete _start_dis[i];
-    //     }
-    //     for (unsigned int i = 0; i < _start_dis_sub.size(); i++)
-    //     {
-    //          delete _start_dis_sub[i];
-    //     }
-
-    //     _start_dis_sub.clear();
-    //     _start_dis.clear();
-}
+PedDistributor::~PedDistributor() {}
 
 const std::vector<std::shared_ptr<AgentsSource>> & PedDistributor::GetAgentsSources() const
 {
@@ -299,7 +283,6 @@ bool PedDistributor::Distribute(Building * building) const
             //so the last subroom ID is not necessarily the 'real' one
             // might conflicts with sources
             dist->SetSubroomID(sr->GetSubRoomID());
-            //dist->SetSubroomUID(sr->GetSubRoomUID())
             if(akt_anz[is] > 0) {
                 DistributeInSubRoom(akt_anz[is], allFreePosInRoom[is], &pid, dist.get(), building);
             }
@@ -313,20 +296,12 @@ bool PedDistributor::Distribute(Building * building) const
         for(const auto & dist : _start_dis_sub) {
             if(source->GetGroupId() == dist->GetGroupId()) {
                 source->SetStartDistribution(dist);
-                for(int i = 0; i < source->GetMaxAgents(); i++) {
-                    //source->AddToPool(dist->GenerateAgent(building, &pid,emptyPositions));
-                    //nPeds_is++;
-                }
             }
         }
 
         for(const auto & dist : _start_dis) {
             if(source->GetGroupId() == dist->GetGroupId()) {
                 source->SetStartDistribution(dist);
-                for(int i = 0; i < source->GetMaxAgents(); i++) {
-                    //source->AddToPool(dist->GenerateAgent(building, &pid,emptyPositions));
-                    //nPeds_is++;
-                }
             }
         }
     }
@@ -440,17 +415,6 @@ std::vector<Point> PedDistributor::PositionsOnFixY(
     }
     return positions;
 }
-
-// format: id fr x y
-// @todo
-// - id
-// - past_frame: should be in the header. Same for all agents
-// - entrance_frame
-// - x
-// - y
-// - z
-// - vx
-// - vy
 
 const std::vector<Point>
 PedDistributor::GetPositionsFromFile(std::string filename, int n, std::string unit) const

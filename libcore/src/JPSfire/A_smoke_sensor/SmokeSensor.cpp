@@ -64,8 +64,6 @@ bool SmokeSensor::LoadJPSfireInfo()
     TiXmlElement * JPSfireCompElem = JPSfireNode->FirstChildElement("A_smoke_sensor");
     if(JPSfireCompElem) {
         if(JPSfireCompElem->FirstAttribute()) {
-            //std::string filepath = xmltoa(JPSfireCompElem->Attribute("smoke_factor_grids"), "");
-            //std::string filepath = _building->GetProjectRootDir() + xmltoa(JPSfireCompElem->Attribute("smoke_factor_grids"), "");
             fs::path file_path(_building->GetProjectRootDir());
             file_path /= xmltoa(JPSfireCompElem->Attribute("smoke_factor_grids"), "");
             std::string filepath   = file_path.string();
@@ -115,33 +113,8 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap & cognitiv
                         item->GetCrossing()->GetCentre(),
                         pedestrian->GetGlobalTime())
                     .GetKnotValue(pedestrian->GetPos()._x, pedestrian->GetPos()._y);
-            // if(SmokeFactor > 2){
-
-            //      std::cout << "\n =================================== \n";
-            //      std::cout << "Ped: " << pedestrian->GetID() << ", at (" << pedestrian->GetPos()._x << ", " << pedestrian->GetPos()._y << ")" << std::endl;
-            //      std::cout << "\tElevation: " << pedestrian->GetElevation() << std::endl;
-            //      std::cout << "\titem->GetCrossing()->GetCentre(): " << item->GetCrossing()->GetCentre()._x << ", " << item->GetCrossing()->GetCentre()._y << std::endl;
-            //      std::cout << "\t Time: " << pedestrian->GetGlobalTime() << std::endl;
-            //      std::cout << "\tKnotValue: " << _FMStorage->GetFDSMesh(pedestrian->GetElevation(), item->GetCrossing()->GetCentre(), pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x, pedestrian->GetPos()._y) << std::endl;
-            //      std::cout << "SmokeFactor: " << SmokeFactor << std::endl;
-            //      std::cout << "Risktolerance: " << RiskTolerance << std::endl;
-            // }
             weight = 1 + (1 - RiskTolerance) * SmokeFactor;
         }
-        /// Set Edge Weight
-        //std::cout << "weight: "<< weight << std::endl;
         item->SetFactor(weight, GetName());
     }
 }
-
-//void SmokeSensor::set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage)
-//{
-//    _FMStorage=fmStorage;
-//
-//}
-
-//const std::shared_ptr<FDSMeshStorage> SmokeSensor::get_FMStorage()
-//{
-//    return _FMStorage;
-//
-//}

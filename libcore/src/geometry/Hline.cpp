@@ -113,7 +113,6 @@ std::string Hline::GetDescription() const
         GetID(),
         GetUniqueID());
     geometry.append(tmp);
-    //geometry.append("\t\t<door color=\"250\">\n");
     sprintf(
         tmp,
         "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",

@@ -84,7 +84,6 @@ public:
     void TempCloseDoor(int id);
     void OpenDoor(int id);
     void ResetDoor(int id);
-    //void ChangeRouting(int id, const std::string& state);
     void GetEvent(char * c);
 
 
