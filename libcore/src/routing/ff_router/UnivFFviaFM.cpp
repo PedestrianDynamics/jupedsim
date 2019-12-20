@@ -12,6 +12,7 @@
 #include "pedestrian/Pedestrian.h"
 #include "routing/ff_router/mesh/RectGrid.h"
 
+#include <stdexcept>
 #include <unordered_set>
 
 UnivFFviaFM::~UnivFFviaFM()
@@ -117,8 +118,7 @@ UnivFFviaFM::UnivFFviaFM(
             door = dynamic_cast<Line *>(subroom->GetAllTransitions().at(0));
         }
         if(!door) {
-            Logging::Error("No door in room. Can not initialize floor field.");
-            return;
+            throw std::logic_error("No door in room. Can not initialize floor field.");
         }
         Point normalVec   = door->NormalVec();
         Point midPoint    = door->GetCentre();
