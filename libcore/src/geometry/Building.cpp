@@ -93,18 +93,12 @@ Building::Building(Configuration * configuration, PedDistributor & pedDistributo
         LOG_ERROR("There are sanity errors in the geometry file");
         exit(EXIT_FAILURE);
     }
-
-    //     SaveGeometry("/home/laemmel/Desktop/geo.xml");
 }
 
 #endif
 
 Building::~Building()
 {
-    //
-    // for (int i = 0; i < GetNumberOfRooms(); i++)
-    //    delete _rooms[i];
-
 #ifdef _SIMULATOR
     for(auto & pedestrian : _allPedestrians) {
         delete pedestrian;
@@ -149,17 +143,10 @@ Configuration * Building::GetConfig() const
     return _configuration;
 }
 
-///************************************************************
-// setters
-// ************************************************************/
 void Building::SetCaption(const std::string & s)
 {
     _caption = s;
 }
-
-/*************************************************************
- getters
- ************************************************************/
 
 std::string Building::GetCaption() const
 {
@@ -188,14 +175,13 @@ const std::map<int, std::shared_ptr<Room>> & Building::GetAllRooms() const
 
 Room * Building::GetRoom(int index) const
 {
-    //todo: obsolete since the check is done by .at()
+    //TODO: obsolete since the check is done by .at()
     if(_rooms.count(index) == 0) {
         LOG_ERROR(
             "Wrong 'index' in CBuiling::GetRoom() Room ID: {} size: {}", index, _rooms.size());
         LOG_INFO("Control your rooms ID and make sure they are in the order 0, 1, 2,.. ");
         return nullptr;
     }
-    //return _rooms[index];
     return _rooms.at(index).get();
 }
 
@@ -304,7 +290,6 @@ bool Building::InitGeometry()
 
             //do the same for the obstacles that are closed
             for(auto && obst : itr_subroom.second->GetAllObstacles()) {
-                //if (obst->GetClosed() == 1)
                 if(!obst->ConvertLineToPoly())
                     return false;
             }
@@ -394,12 +379,10 @@ Building::GetTrackWalls(Point TrackStart, Point TrackEnd, int & room_id, int & s
         for(auto track : tracks) {
             track_id         = track.first;
             int commonPoints = 0;
-            // std::cout << "\t track " << track.first << "\n";
-            auto walls = track.second;
+            auto walls       = track.second;
             for(auto wall : walls) {
                 Point P1 = wall.GetPoint1();
                 Point P2 = wall.GetPoint2();
-                //std::cout << "\t\t wall: " << wall.GetType() << ". " << wall.GetPoint1().toString() << " | " <<  wall.GetPoint2().toString() << "\n";
                 if(P1 == TrackStart)
                     commonPoints++;
                 if(P1 == TrackEnd)
@@ -421,9 +404,6 @@ Building::GetTrackWalls(Point TrackStart, Point TrackEnd, int & room_id, int & s
         room_id    = _platforms.at(platform_id)->rid;
         subroom_id = _platforms.at(platform_id)->sid;
         mytrack    = _platforms.at(platform_id)->tracks[track_id];
-        // std::cout << "track has walls:  " << mytrack.size() << "\n";
-        // std::cout << "platform " << platform_id << " track " << track_id << "\n";
-        // std::cout << "room " << room_id << " subroom " << subroom_id << "\n";
     } else {
         std::cout << "could not find any track! Exit.\n";
         exit(-1);
@@ -441,8 +421,6 @@ const std::vector<std::pair<PointWall, PointWall>> Building::GetIntersectionPoin
     // for every point -> get pair<P, W>
     // collect pairs of pairs
     for(auto door : doors) {
-        // std::cout << "================================\n";
-        // std::cout << "door: " << door.toString() <<  "\n";
         PointWall pw1, pw2;
         int nintersections = 0;
         auto n             = door.NormalVec();
@@ -452,59 +430,38 @@ const std::vector<std::pair<PointWall, PointWall>> Building::GetIntersectionPoin
         auto p22           = door.GetPoint2() - n * scaleFactor;
         auto normalWall1   = Wall(p11, p12);
         auto normalWall2   = Wall(p21, p22);
-        // std::cout << "normal wall 1: " << normalWall1.toString() << "\n";
-        // std::cout << "normal wall 2: " << normalWall2.toString() << "\n";
         for(auto twall : mytrack) {
             Point interPoint1, interPoint2;
             auto res  = normalWall1.IntersectionWith(twall, interPoint1);
             auto res2 = normalWall2.IntersectionWith(twall, interPoint2);
-            // std::cout << " res " << res << "  res2 " << res2 << "\n";
             if(res == 1) {
                 if(!twall.NearlyHasEndPoint(interPoint1)) {
-                    // std::cout << "res  twall " << twall.toString() << "\n";
                     pw1 = std::make_pair(interPoint1, twall);
                     nintersections++;
-                    // std::cout << "intersection at :" << interPoint1.toString() << "\n";
                 } else // end point
                 {
                     if(res2 == 0) {
-                        // std::cout << "twall " << twall.toString() << "\n";
-                        // std::cout << "YY intersection 1 at :" << interPoint1.toString() << "\n";
-                        // std::cout << "YY intersection 2 at :" << interPoint2.toString() << "\n";
-
                     } else {
-                        // std::cout << "res  twall " << twall.toString() << "\n";
                         pw1 = std::make_pair(interPoint1, twall);
                         nintersections++;
-                        // std::cout << "BB: intersection at :" << interPoint1.toString() << "\n";
                     }
                 }
             }
             if(res2 == 1) {
                 if(!twall.NearlyHasEndPoint(interPoint2)) {
-                    // std::cout << "res2  twall " << twall.toString() << "\n";
                     pw2 = std::make_pair(interPoint2, twall);
                     nintersections++;
-                    // std::cout << "intersection at :" << interPoint2.toString() << "\n";
                 } else {
                     if(res == 0) {
-                        // std::cout << "twall " << twall.toString() << "\n";
-                        // std::cout << "XX intersection 1 at :" << interPoint1.toString() << "\n";
-                        // std::cout << "XX intersection 2 at :" << interPoint2.toString() << "\n";
                     } else {
-                        // std::cout << "res2  twall " << twall.toString() << "\n";
                         pw2 = std::make_pair(interPoint2, twall);
                         nintersections++;
-                        // std::cout << "CC intersection at :" << interPoint2.toString() << "\n";
                     }
                 }
             }
-            // std::cout << "door: " << door.toString() << ", intersections: " <<  nintersections << "\n";
 
 
         } // tracks
-        // std::cout << "door: " << door.toString() << ", intersections: " <<  nintersections << "\n";
-        // std::cout << "================================\n";
 
         if(nintersections == 2)
             pws.push_back(std::make_pair(pw1, pw2));
@@ -515,7 +472,6 @@ const std::vector<std::pair<PointWall, PointWall>> Building::GetIntersectionPoin
             exit(-1);
         }
     } // doors
-    // getc(stdin);
 
     return pws;
 }
@@ -526,33 +482,6 @@ bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
     // this function is composed of three copy/pasted blocks.
     int room_id, subroom_id;
 
-    // std::cout << "enter resetGeometry with tab id: " << tab->id << "\n" ;
-    // std::cout << "temp Added Walls\n";
-    // for(auto id_wall: TempAddedWalls)
-    // {
-    //      std::cout << "i " << id_wall.first << "\n";
-    //      auto walls = id_wall.second;
-    //      for(auto wall: walls )
-    //           std::cout << wall.toString() << "\n";
-    // }
-    // std::cout << "temp Removed Walls\n";
-    // for(auto id_wall: TempRemovedWalls)
-    // {
-    //      std::cout << "i " << id_wall.first << "\n";
-    //      auto walls = id_wall.second;
-    //      for(auto wall: walls )
-    //           std::cout << wall.toString() << "\n";
-    // }
-    // std::cout << "temp Added Doors\n";
-    // for(auto id_wall: TempAddedDoors)
-    // {
-    //      std::cout << "i " << id_wall.first << "\n";
-    //      auto walls = id_wall.second;
-    //      for(auto wall: walls )
-    //           std::cout << wall.toString() << "\n";
-    // }
-    // getc(stdin);
-
     // remove temp added walls
     auto tempWalls = TempAddedWalls[tab->id];
     for(auto it = tempWalls.begin(); it != tempWalls.end();) {
@@ -561,22 +490,15 @@ bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
             tempWalls.erase(it);
         }
         for(auto platform : _platforms) {
-            // auto tracks =  platform.second->tracks;
             room_id    = platform.second->rid;
             subroom_id = platform.second->sid;
-            // auto room = this->GetAllRooms().at(room_id);
             SubRoom * subroom =
                 this->GetAllRooms().at(room_id)->GetAllSubRooms().at(subroom_id).get();
-            // std::cout << "----\n";
-            // for(auto subWall: subroom->GetAllWalls())
-            //      std::cout << ">> "<< subWall.toString() << "\n";
-            // std::cout << "----\n";
             for(auto subWall : subroom->GetAllWalls()) {
                 if(subWall == wall) {
                     // if everything goes right, then we should enter this
                     // if. We already erased from tempWalls!
                     subroom->RemoveWall(wall);
-                    // std::cout << KGRN << "RESET REMOVE wall " << wall.toString() << "\n" << RESET;
                 } //if
             }     //subroom
         }         //platforms
@@ -601,7 +523,6 @@ bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
                 for(auto trackWall : walls) {
                     if(trackWall == wall) {
                         subroom->AddWall(wall);
-                        // std::cout << KGRN << "ADD BACK wall " << wall.toString() << "\n" << RESET;
                     }
                 }
             }
@@ -627,16 +548,11 @@ bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
                     // Trnasitions are added to subrooms and building!!
                     subroom->RemoveTransition(subTrans);
                     this->RemoveTransition(subTrans);
-                    // std::cout << KGRN << "RESET remove door " << door.toString() << "\n" << RESET;
                 }
             }
         }
     }
     TempAddedDoors[tab->id] = tempDoors;
-    // std::cout << "leave resetGeometry with tab id: " << tab->id << "\n" ;
-    // std::cout << "temp Added Walls: " << TempAddedWalls[tab->id].size() << "\n";
-    // std::cout << "temp Removed Walls: " << TempRemovedWalls[tab->id].size()<<  "\n";
-    // std::cout << "temp Added Doors: " <<TempAddedDoors[tab->id].size() <<  "\n";
     return true;
 }
 void Building::InitPlatforms()
@@ -660,11 +576,7 @@ void Building::InitPlatforms()
                 if(strs.size() <= 1)
                     continue;
                 int n = atoi(strs[1].c_str());
-                /* std::cout << "caption: " << wall.GetCaption().c_str() << " > " << n << "\n"; */
-                /* if(tracks.count[n] == 0) */
-                /* { */
                 tracks[n].push_back(wall);
-                /* } */
             } //walls
             std::shared_ptr<Platform> p = std::make_shared<Platform>(Platform{
                 num_platform,
@@ -747,10 +659,6 @@ bool Building::correct() const
 
             for(auto const & bigWall : walls) //self checking
             {
-                // std::cout << "BigWall: " << std::endl;
-                // bigWall.WriteToErrorLog();
-                //special treatment for doors
-                /////
                 std::vector<Wall> WallPieces;
                 WallPieces = SplitWall(subroom.second, bigWall);
                 if(!WallPieces.empty())
@@ -769,7 +677,6 @@ bool Building::correct() const
                         std::vector<Wall> tmpWallPieces;
                         tmpWallPieces = SplitWall(subroom.second, wallPiece);
                         if(!tmpWallPieces.empty()) {
-                            // std::cout << "set ok because tmp size =" << tmpWallPieces.size() << std::endl;
                             ok = 0; /// stay in the loop
                             // append tmpWallPieces to WallPiece
                             WallPieces.insert(
@@ -779,12 +686,8 @@ bool Building::correct() const
                             // remove the line since it was split already
                             auto it = std::find(WallPieces.begin(), WallPieces.end(), wallPiece);
                             if(it != WallPieces.end()) {
-                                // std::cout<< KGRN << "delete wall ..." << RESET <<std::endl;
-                                // wallPiece.WriteToErrorLog();
                                 WallPieces.erase(it);
                             }
-
-                            // std::cout << "BNow Wall peces size : " <<  WallPieces.size() << std::endl;
                         }
                     }
 
@@ -795,7 +698,6 @@ bool Building::correct() const
                         LOG_DEBUG("Piece: {}", t.toString());
                     }
 
-                    // getc(stdin);
                 } // while
                 // remove
                 // duplicates fromWllPiecs
@@ -881,8 +783,6 @@ bool Building::RemoveOverlappingDoors(const std::shared_ptr<SubRoom> & subroom) 
 
                 Wall NewWall(wall.GetPoint1(), A);
                 Wall NewWall1(wall.GetPoint2(), B);
-                // NewWall.WriteToErrorLog();
-                // NewWall1.WriteToErrorLog();
                 // add new lines to be controled against overlap with exits
                 walls.push_back(NewWall);
                 walls.push_back(NewWall1);
@@ -928,7 +828,7 @@ Building::SplitWall(const std::shared_ptr<SubRoom> & subroom, const Wall & bigWa
     auto transitions = subroom->GetAllTransitions();
     // TODO: Hlines too?
     std::vector<Line> walls_and_exits = std::vector<Line>();
-    // @todo: check if this is GetAllGoals()?
+    // TODO: check if this is GetAllGoals()?
     //  collect all crossings
     for(auto && cros : crossings)
         walls_and_exits.push_back(*cros);
@@ -953,9 +853,6 @@ Building::SplitWall(const std::shared_ptr<SubRoom> & subroom, const Wall & bigWa
                 bigWall.toString(),
                 other.toString(),
                 intersectionPoint.toString());
-
-            //Point NAN_p(J_NAN, J_NAN);
-
             if(std::isnan(intersectionPoint._x) || std::isnan(intersectionPoint._y))
                 continue;
 
@@ -1034,8 +931,6 @@ bool Building::AddWallToSubroom(
     int maxCount = -1;
     Wall choosenWall;
     for(const auto & w : WallPieces) {
-        // std::cout <<"\n check wall: \n";
-        // w.WriteToErrorLog();
         int count = 0;
         for(const auto & checkWall : walls) {
             if(checkWall == w)
@@ -1109,13 +1004,10 @@ bool Building::AddCrossing(Crossing * line)
 
 bool Building::RemoveTransition(Transition * line)
 {
-    // std::cout << "enter Building Remove Transitions with " << _transitions.size() << "\n";
     if(_transitions.count(line->GetID()) != 0) {
         _transitions.erase(line->GetID());
-        // std::cout << " enter Nuilding  Remove Transitions with " << _transitions.size() << "\n";
         return true;
     }
-    // std::cout << "2 enter Nuilding  Remove Transitions with " << _transitions.size() << "\n";
     return false;
 }
 
@@ -1357,19 +1249,6 @@ SubRoom * Building::GetSubRoomByUID(int uid) const
     return nullptr;
 }
 
-//bool Building::IsVisible(Line* l1, Line* l2, bool considerHlines)
-//{
-//
-//     for(auto&& itr_room: _rooms)
-//     {
-//          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
-//          {
-//               if(itr_subroom.second->IsVisible(l1,l2,considerHlines)==false) return false;
-//          }
-//     }
-//     return true;
-//}
-
 bool Building::IsVisible(
     const Point & p1,
     const Point & p2,
@@ -1453,7 +1332,6 @@ bool Building::SanityCheck()
 
 void Building::UpdateGrid()
 {
-    //     std::cout << Pedestrian::GetGlobalTime() <<":\t\tBuilding::UpdateGrid from: " << std::this_thread::get_id() <<std::endl;
     _linkedCellGrid->Update(_allPedestrians);
 }
 
@@ -1526,7 +1404,6 @@ void Building::DeletePedestrian(Pedestrian *& ped)
     it = find(_allPedestrians.begin(), _allPedestrians.end(), ped);
     if(it == _allPedestrians.end()) {
         LOG_ERROR("Pedestrian with ID {} not found.", ped->GetID());
-        // exit(EXIT_FAILURE);
         return;
     } else {
         // save the path history for this pedestrian before removing from the simulation
@@ -1546,16 +1423,6 @@ void Building::DeletePedestrian(Pedestrian *& ped)
             }
         }
     }
-    //update the stats before deleting
-    //     Transition* trans =GetTransitionByUID(ped->GetExitIndex());
-    //     if(trans)
-    //     {
-    //          trans->IncreaseDoorUsage(1, ped->GetGlobalTime());
-    //          //this can happen if the pedesrians is pushed too hard
-    //          // or cant stop due to high velocity
-    //          // he will remain in the simulation in that case
-    //          //if(trans->IsOpen()==false) return;
-    //     }
     _allPedestrians.erase(it);
     delete ped;
 }
@@ -1579,9 +1446,6 @@ void Building::AddPedestrian(Pedestrian * ped)
 
 void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian *> & peds) const
 {
-    //for(unsigned int p = 0;p<_allPedestrians.size();p++){
-    //     Pedestrian* ped=_allPedestrians[p];
-
     for(auto && ped : _allPedestrians) {
         if((room == ped->GetRoomID()) && (subroom == ped->GetSubRoomID())) {
             peds.push_back(ped);
@@ -1759,8 +1623,6 @@ bool Building::SaveGeometry(const fs::path & filename) const
     geometry << "</transitions>" << std::endl;
     geometry << "</geometry>" << std::endl;
     //write the routing file
-
-    //cout<<endl<<geometry.str()<<endl;
 
     std::ofstream geofile(filename.string());
     if(geofile.is_open()) {

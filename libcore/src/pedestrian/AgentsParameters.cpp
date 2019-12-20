@@ -35,7 +35,6 @@ AgentsParameters::AgentsParameters(int id, int seed)
 {
     _id        = id;
     _generator = std::default_random_engine(seed);
-    //std::mt19937 _gen(rd());
 }
 
 AgentsParameters::~AgentsParameters() {}

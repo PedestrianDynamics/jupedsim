@@ -152,7 +152,6 @@ std::string Crossing::GetDescription() const
         GetID(),
         GetUniqueID());
     geometry.append(tmp);
-    //geometry.append("\t\t<door color=\"250\">\n");
     sprintf(
         tmp,
         "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\" />\n",
@@ -295,10 +294,6 @@ bool Crossing::RegulateFlow(double time)
     double flow   = number / T;
     if(_outflowRate != std::numeric_limits<double>::max()) {
         if(flow > _outflowRate) {
-            // _outflowRate > flow (=number/deltaTime)
-            // _outflowRate = number/(deltaTime + t1)
-            // --> [1]
-            //---------------------------
             _closingTime = number / _outflowRate - T; //[1]
 
             this->TempClose();

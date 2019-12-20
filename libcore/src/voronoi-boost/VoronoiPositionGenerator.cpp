@@ -16,23 +16,7 @@ static int global_count = 0;
 #include "general/Logger.h"
 #include "geometry/Wall.h"
 
-//#include "../pedestrian/StartDistribution.h"
-//#include "../pedestrian/PedDistributor.h"
-//#include "../pedestrian/AgentsSource.h"
-//#include "../geometry/Building.h"
-//#include "../geometry/Point.h"
-
-//#include "../mpi/LCGrid.h"
-//#include <iostream>
 #include <thread>
-//#include <chrono>
-
-
-//#include "../geometry/SubRoom.h"
-//#include <stdlib.h>
-//#include <time.h>
-//#include <string>
-//#include <random>
 
 using boost::polygon::high;
 using boost::polygon::low;
@@ -84,11 +68,6 @@ bool IsEnoughInSubroom(SubRoom * subroom, Point & pt, double radius)
     return true;
 }
 
-//Point ComputeBestPositionVoronoiBoost(Goal* goal, std::vector<Pedestrian*>& pedInside)
-//{
-//
-//}
-
 bool ComputeBestPositionVoronoiBoost(
     AgentsSource * src,
     std::vector<Pedestrian *> & peds,
@@ -99,7 +78,6 @@ bool ComputeBestPositionVoronoiBoost(
     auto dist         = src->GetStartDistribution();
     int roomID        = dist->GetRoomId();
     int subroomID     = dist->GetSubroomID();
-    // std::string caption = (building->GetRoom( roomID ))->GetCaption();
 
     std::vector<Pedestrian *> existing_peds;
     std::vector<Pedestrian *> peds_without_place;
@@ -175,7 +153,6 @@ bool ComputeBestPositionVoronoiBoost(
             } else {
                 v = Point(0., 0.);
             }
-            //double speed=ped->GetV0Norm();
             double speed =
                 ped->GetEllipse()
                     .GetV0(); //@todo: some peds do not have a navline. This should not be accepted.
@@ -213,7 +190,6 @@ bool ComputeBestPositionVoronoiBoost(
             v = v / no; //this is the mean of all velocities
 
             //adding fake people to the vector for constructing voronoi diagram
-            //for (unsigned int i=0; i<subroom->GetPolygon().size(); i++ )
             for(auto fake_ped : fake_peds) {
                 discrete_positions.push_back(fake_ped);
                 velocities_vector.push_back(v);
@@ -228,7 +204,6 @@ bool ComputeBestPositionVoronoiBoost(
 #endif
             voronoi_diagram<double>::const_vertex_iterator chosen_it = vd.vertices().begin();
             double dis                                               = 0;
-            //std::default_random_engine gen = dist->GetGenerator();
             if(!src->Greedy())
                 VoronoiBestVertexRandMax(
                     src, discrete_positions, vd, subroom, factor, chosen_it, dis, radius);
@@ -257,11 +232,6 @@ bool ComputeBestPositionVoronoiBoost(
 
 
     } //for loop
-
-    // for(auto x : existing_peds)
-    //      std::cout << "-- " << x->GetPos()._x << ", " << x->GetPos()._y << "---\n";
-    // getc(stdin);
-
     //maybe not all pedestrians could find a place, requeue them in the source
     if(peds_without_place.size() > 0)
         src->AddAgentsToPool(peds_without_place);
@@ -282,7 +252,6 @@ void VoronoiAdjustVelocityNeighbour(
     const voronoi_diagram<double>::edge_type * edge     = vertex.incident_edge();
     double no1 = 0, no2 = 0;
     double backup_speed = 0;
-    //std::size_t index;
     Point v(0, 0);
     if(ped->GetExitLine() != nullptr)
         v = (ped->GetExitLine()->ShortestPoint(ped->GetPos()) - ped->GetPos())
@@ -313,70 +282,6 @@ void VoronoiAdjustVelocityNeighbour(
     v = v * speed;
     ped->SetV(v);
 }
-
-
-//gives the voronoi vertex with max distance
-//void VoronoiBestVertexMax(const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd,
-//        SubRoom* subroom, double factor, voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis,
-//        double radius)
-//{
-//     double dis = 0;
-//     double score;
-//     double max_score = -100; //calculated using distance and considering the goal
-//
-//
-//
-//     for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
-//     {
-//          Point vert_pos( it->x()/factor, it->y()/factor );
-//          if( subroom->IsInSubRoom(vert_pos) )
-//               if( IsEnoughInSubroom( subroom, vert_pos, radius ) )
-//               {
-//                    const voronoi_diagram<double>::vertex_type &vertex = *it;
-//                    const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
-//
-//                    std::size_t index = ( edge->cell() )->source_index();
-//                    Point p = discrete_positions[index];
-//
-//                    dis = ( p._x - it->x() )*( p._x - it->x() )  + ( p._y - it->y() )*( p._y - it->y() )  ;
-//
-//                    score = dis;
-//
-//
-//                    //constructing the checking line
-///*
-//                    Point p2 = (ped->GetExitLine()->ShortestPoint(vert_pos)-vert_pos).Normalized(); //problem: ped does not have a position
-//                    p2 = p2 + p2; //looking 2m in front
-//                    Line check_line(vert_pos, vert_pos + p2);  //this is the first 2m of exit line
-//
-//                    do
-//                    {
-//                      //do something
-//                      if( goal_vector[index]!=-3 &&  goal_vector[index]!=ped->GetFinalDestination() ) //
-//                              if( check_line.IntersectionWithCircle(p,1.0) )    //0.7 because the radius is around 0.3
-//                              {
-//                                      score -= 100;
-//                                      break;
-//                              }
-//
-//
-//                      //change edge
-//                      edge = edge->rot_next();
-//                      index = ( edge->cell() )->source_index();
-//                      p = discrete_positions[index]/factor;
-//
-//                    } while( edge != vertex.incident_edge() );
-//*/
-//                    if(score > max_score)
-//                    {
-//                         max_score =score;
-//                       max_dis = dis;
-//                         max_it = it;
-//                    }
-//               }
-//     }
-//     //at the end, max_it is the choosen vertex, or the first vertex - max_dis=0 assures that this position will not be taken
-//}
 
 /**
  * Returns a Voronoi vertex randomly with respect to weights proportional to distances^2
@@ -439,18 +344,14 @@ void VoronoiBestVertexRandMax(
     if(partial_sums.empty()) {
         LOG_WARNING(
             "No possible vertices. Maybe BB too small for {:d} agents?", src->GetChunkAgents());
-        //         exit(EXIT_FAILURE); // maybe not exit, just ignore
-        // dis = 0;
         return;
     }
 
     double lower_bound = 0;
     double upper_bound = partial_sums[size - 1];
     std::random_device rd;
-    //std::mt19937 gen(rd()); //@todo use seed instead of rd(). Generator should not be here
     std::mt19937 gen(1); //@todo use seed instead of rd(). Generator should not be here
-    std::uniform_real_distribution<double> distribution(
-        lower_bound, upper_bound); //std::nextafter(upper_bound, DBL_MAX));
+    std::uniform_real_distribution<double> distribution(lower_bound, upper_bound);
     std::vector<double> random_numbers;
     for(unsigned int r = 0; r < size; r++)
         random_numbers.push_back(distribution(gen));
@@ -518,7 +419,6 @@ void VoronoiBestVertexGreedy(
     if(possible_vertices.empty()) {
         LOG_WARNING(
             "No possible vertices. Maybe BB too small for {:d} agents?", src->GetChunkAgents());
-        //         exit(EXIT_FAILURE); // maybe not exit, just ignore
         dis = 0;
         return;
     }
@@ -528,42 +428,6 @@ void VoronoiBestVertexGreedy(
     chosen_it     = possible_vertices[iposition];
     dis           = distances[iposition];
 }
-
-
-//gives a random voronoi vertex
-//void VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
-//          double factor, voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis, double radius	)
-//{
-//     std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
-//     std::vector<double> distances;
-//
-//     for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
-//     {
-//          Point vert_pos = Point( it->x()/factor, it->y()/factor );
-//          if( subroom->IsInSubRoom(vert_pos) )
-//               if( IsEnoughInSubroom(subroom, vert_pos, radius) )
-//               {
-//                    const voronoi_diagram<double>::vertex_type &vertex = *it;
-//                    const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
-//
-//                    std::size_t index = ( edge->cell() )->source_index();
-//                    Point p = discrete_positions[index];
-//
-//                    dis = ( p._x - it->x() )*( p._x - it->x() )   + ( p._y - it->y() )*( p._y - it->y() )  ;
-//
-//                    possible_vertices.push_back( it );
-//                    distances.push_back( dis );
-//               }
-//     }
-//     //now we have all the possible vertices and their distances and we can choose one randomly
-//     //TODO: get the seed from the simulation/argumentparser
-//     //srand (time(NULL));
-//     unsigned int i = rand() % possible_vertices.size();
-//     chosen_it = possible_vertices[i];
-//     dis = distances[i];
-//
-//}
-
 
 void plotVoronoi(
     const std::vector<Point> & discrete_positions,
@@ -607,7 +471,6 @@ void plotVoronoi(
     const std::vector<Point> polygon = subroom->GetPolygon();
     for(auto it = polygon.begin(); it != polygon.end();) {
         Point gpoint = *(it++);
-        // Point gpointNext = *it;
         if(gpoint._x > max_x)
             max_x = gpoint._x;
         if(gpoint._y > max_y)
@@ -617,9 +480,7 @@ void plotVoronoi(
         if(gpoint._y < min_y)
             min_y = gpoint._y;
 
-        // fprintf(f, "plt.plot([%f, %f], [%f, %f], \"k-\", lw=2)\n",  gpoint._x, gpointNext._x, gpoint._y, gpointNext._y);
         if(it == polygon.end()) {
-            // fprintf(f, "plt.plot([%f, %f], [%f, %f], \"k-\", lw=2)\n",  gpointNext._x, polygon.begin()->_x,  gpointNext._y, polygon.begin()->_y );
             break;
         }
     }

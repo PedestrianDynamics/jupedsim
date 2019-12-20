@@ -181,8 +181,6 @@ private:
     Building * _building = nullptr;
     /// whether all agents have been dispatched
     static bool _isCompleted;
-    //std::atomic<bool>_isCompleted=false;
-    //     std::atomic<bool>_buildingUpdated=false;
     bool _buildingUpdated;
     bool _isRunning = false;
 };

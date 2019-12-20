@@ -51,9 +51,6 @@ class Pedestrian;
 namespace bg = boost::geometry;
 typedef bg::model::polygon<Point, false, false> polygon_type;
 
-/************************************************************
- SubRoom
-************************************************************/
 
 class SubRoom
 {
@@ -107,8 +104,6 @@ public:
       * Destructor
       */
     virtual ~SubRoom();
-
-    // void SetHelpVariables();
 
     /**
       * Set/Get the subroom id
@@ -309,9 +304,9 @@ public:
     bool IsPartOfPolygon(const Point & pt);
 
     /**
-          *
-          * @return true if the Point is inside any obstacle
-          */
+      *
+      * @return true if the Point is inside any obstacle
+      */
     bool IsInObstacle(const Point & pt);
 
     /**
@@ -392,10 +387,6 @@ public:
 #endif
 };
 
-/************************************************************
- NormalSubroom
-************************************************************/
-
 class NormalSubRoom : public SubRoom
 {
 private:
@@ -414,10 +405,6 @@ public:
     bool ConvertLineToPoly(const std::vector<Line *> & goals);
     bool IsInSubRoom(const Point & ped) const;
 };
-
-/************************************************************
- Stair
-************************************************************/
 
 class Stair : public NormalSubRoom
 {
@@ -450,10 +437,6 @@ public:
     std::string WritePolyLine() const;
     virtual bool ConvertLineToPoly(const std::vector<Line *> & goals);
 };
-
-/************************************************************
- Escalator
-************************************************************/
 
 class Escalator : public Stair
 {

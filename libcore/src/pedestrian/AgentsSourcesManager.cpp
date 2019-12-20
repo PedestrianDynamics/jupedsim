@@ -70,20 +70,14 @@ void AgentsSourcesManager::Run()
     bool finished = false;
     SetBuildingUpdated(false);
     long updateFrequency = 1; // @todo parse this from inifile
-    /* std::cout << KMAG << "RUN Starting thread manager with _lastUpdateTime " << _lastUpdateTime<< std::endl; */
     do {
         int current_time = (int) Pedestrian::GetGlobalTime();
-        // std::cout << KBLU << ">> RUN: current_time " << current_time << " last update  " << _lastUpdateTime << "\n" << RESET;
-
         if((current_time != _lastUpdateTime) && ((current_time % updateFrequency) == 0)) {
-            /* std::cout << "   ---  Enter IF  --- \n" << KRED << "QUEUE isempty: " << AgentsQueueIn::IsEmpty() << "\n" << RESET; */
             if(AgentsQueueIn::IsEmpty())
             //if queue is empty. Otherwise, wait for main thread to empty it and update _building
             {
-                /* std::cout << "   ---  Enter QUEUE EMPTY --- \n"; */
                 finished        = ProcessAllSources();
                 _lastUpdateTime = current_time;
-                //SetBuildingUpdated(false);
             }
         }
         // wait for main thread to update building
@@ -97,15 +91,11 @@ void AgentsSourcesManager::Run()
 
 bool AgentsSourcesManager::ProcessAllSources() const
 {
-    // std::cout << "\nSTART   AgentsSourcesManager::ProcessAllSources()\n";
-
     bool empty          = true;
     double current_time = (int) Pedestrian::GetGlobalTime();
     std::vector<Pedestrian *>
         source_peds; // we have to collect peds from all sources, so that we can consider them  while computing new positions
     for(const auto & src : _sources) {
-        // std::cout << KRED << "\nprocessing src: " <<  src->GetId() << " -- current time: " << current_time << " schedule time: " << src->GetPlanTime() <<". number of peds in building " << _building->GetAllPedestrians().size() << "\n" << RESET;
-
         auto srcLifeSpan = src->GetLifeSpan();
         bool inTime      = (current_time >= srcLifeSpan[0]) && (current_time <= srcLifeSpan[1]);
         // inTime is always true if src got some PlanTime (default values
@@ -121,20 +111,13 @@ bool AgentsSourcesManager::ProcessAllSources() const
             src->ResetRemainingAgents();
 
         bool timeToCreate = newCycle || subCycle;
-        // if(subCycle)
-        //      std::cout << KGRN << " freq: " << src->GetFrequency() << ", rate: " << src->GetRate() << ", " << ": remaining: " << src->GetRemainingAgents() <<"\n" << RESET;                                                                                                                                                             std::cout << " <<<<  time to create " <<  timeToCreate  << "  newCycle: " << newCycle << ", subcycle: " << subCycle << ", inTime: " << inTime<< "\n";
-
-
         if(timeToCreate && src->GetPoolSize() && (src->GetPlanTime() <= current_time) && inTime &&
            src->GetRemainingAgents()) // maybe diff<eps
         {
             std::vector<Pedestrian *> peds;
-
             src->RemoveAgentsFromPool(peds, src->GetChunkAgents() * src->GetPercent());
             src->UpdateRemainingAgents(src->GetChunkAgents() * src->GetPercent());
-
             source_peds.reserve(source_peds.size() + peds.size());
-
             LOG_INFO(
                 "Source {:d} generating {:d}agents at {:3.3f}s, {:d} ({:d} remaining in pool)",
                 src->GetId(),
@@ -155,16 +138,8 @@ bool AgentsSourcesManager::ProcessAllSources() const
                 LOG_WARNING("There was no place for some pedestrians");
 
             source_peds.insert(source_peds.end(), peds.begin(), peds.end());
-            /* std::cout << KRED << ">>  Add to queue " << peds.size() << "\n" << RESET; */
-            /* for( auto pp: peds) */
-            /*       std::cout << "id: "<< pp->GetID() << "  pos " << pp->GetPos()._x << ", " << pp->GetPos()._y << "\n"; */
-            /* std::cout << "------\n"; */
-            /* for( auto pp: source_peds) */
-            /*       std::cout  <<  "id: "<< pp->GetID() << "  POS " << pp->GetPos()._x << ", " << pp->GetPos()._y << "\n"; */
-
             AgentsQueueIn::Add(peds);
             empty = false;
-            //src->Dump();
         }
         bool timeConstraint =
             (src->GetPlanTime() > current_time) || (current_time < srcLifeSpan[1]);
@@ -172,15 +147,6 @@ bool AgentsSourcesManager::ProcessAllSources() const
             // agents coming
             empty = false;
     }
-    // std::cout << "LEAVE   AgentsSourcesManager::ProcessAllSources()\n";
-    // std::cout << current_time << "\n";
-
-    // std::cout << " Source building: "<<  _building << " size "  << _building->GetAllPedestrians().size()<< " empty = " << empty << std::endl;
-
-    // for(auto pp: _building->GetAllPedestrians())
-    //      std::cout<< KBLU << "BUL: agentssourcesManager: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl;
-    //
-    // std::cout << "========================\n";
     return empty;
 }
 
@@ -198,7 +164,6 @@ void AgentsSourcesManager::InitFixedPosition(AgentsSource * src, std::vector<Ped
             int trans_ID     = transition->GetID();
             ped->SetExitLine(transition); // set dummy line
             ped->SetExitIndex(trans_ID);
-            //ped->SetFinalDestination(trans_ID);
             v = Point(0., 0.);
         }
         double speed = ped->GetEllipse().GetV0();
@@ -238,126 +203,6 @@ void AgentsSourcesManager::ComputeBestPositionCompleteRandom(
         }
     }
 }
-
-/*
-  void AgentsSourcesManager::ComputeBestPositionVoronoi(AgentsSource* src,
-  Pedestrian* agent) const
-  {
-  auto dist = src->GetStartDistribution();
-  double bounds[4];
-  dist->Getbounds(bounds);
-  int roomID = dist->GetRoomId();
-  int subroomID = dist->GetSubroomID();
-
-  //Get all pedestrians in that location
-  vector<Pedestrian*> peds;
-  _building->GetPedestrians(roomID, subroomID, peds);
-
-  //filter the points that are not within the boundaries
-  for (auto&& iter = peds.begin(); iter != peds.end();)
-  {
-  const Point& pos = (*iter)->GetPos();
-  if ((bounds[0] <= pos._x && pos._x <= bounds[1])
-  && (bounds[1] <= pos._y && pos._y <= bounds[2]))
-  {
-  iter = peds.erase(iter);
-  cout << "removing (testing only)..." << endl;
-  exit(0);
-  } else
-  {
-  ++iter;
-  }
-  }
-
-  //special case with 1, 2 or only three pedestrians in the area
-  if (peds.size() < 3)
-  {
-  //TODO/random position in the area
-  return;
-
-  }
-  // compute the cells and cut with the bounds
-  const int count = peds.size();
-  float* xValues = new float[count];
-  float* yValues = new float[count];
-  //float xValues[count];
-  //float yValues[count];
-
-  for (int i = 0; i < count; i++)
-  {
-  xValues[i] = peds[i]->GetPos()._x;
-  yValues[i] = peds[i]->GetPos()._y;
-  }
-
-  VoronoiDiagramGenerator vdg;
-  vdg.generateVoronoi(xValues, yValues, count, bounds[0], bounds[1],
-  bounds[2], bounds[3], 3);
-  vdg.resetIterator();
-  vdg.resetVerticesIterator();
-
-  printf("\n------vertices---------\n");
-  //collect the positions
-  vector<Point> positions;
-  float x1, y1;
-  while (vdg.getNextVertex(x1, y1))
-  {
-  printf("GOT Point (%f,%f)\n", x1, y1);
-  positions.push_back(Point(x1, y1));
-  }
-
-  //look for the biggest spot
-  map<double, Point> map_dist_to_position;
-
-  for (auto&& pos : positions)
-  {
-  double min_dist = FLT_MAX;
-
-  for (auto&& ped : peds)
-  {
-  double dist = (pos - ped->GetPos()).NormSquare();
-  if (dist < min_dist)
-  {
-  min_dist = dist;
-  }
-  }
-  map_dist_to_position[min_dist] = pos;
-  }
-
-  //list the result
-  for (auto&& mp : map_dist_to_position)
-  {
-  cout << "dist: " << mp.first << " pos: " << mp.second.toString()
-  << endl;
-  //agent->SetPos(mp.second, true);
-  }
-
-  //the elements are ordered.
-  // so the last one has the largest distance
-  if (!map_dist_to_position.empty())
-  {
-  agent->SetPos(map_dist_to_position.rbegin()->second, true);
-  cout << "position:" << agent->GetPos().toString() << endl;
-  //exit(0);
-
-  } else
-  {
-  cout << "position not set:" << endl;
-  cout << "size: " << map_dist_to_position.size() << endl;
-  cout << " for " << peds.size() << " pedestrians" << endl;
-  exit(0);
-  }
-  //exit(0);
-  // float x1,y1,x2,y2;
-  //while(vdg.getNext(x1,y1,x2,y2))
-  //{
-  //     printf("GOT Line (%f,%f)->(%f,%f)\n",x1,y1,x2, y2);
-  //
-  //}
-  //compute the best position
-  //exit(0);
-  }
-*/
-
 
 void AgentsSourcesManager::ComputeBestPositionRandom(
     AgentsSource * src,
@@ -506,7 +351,6 @@ void AgentsSourcesManager::AdjustVelocityUsingWeidmann(Pedestrian * ped) const
     //density in pers per m2
     double density = 1.0;
     //radius corresponding to a surface of 1m2
-    //double radius_square=0.564*0.564;
     double radius_square = 1.0;
 
     for(const auto & p : neighbours) {
@@ -546,7 +390,6 @@ void AgentsSourcesManager::SortPositionByDensity(
     std::vector<Point> & extra_positions) const
 {
     std::multimap<double, Point> density2pt;
-    //std::map<double,Point> density2pt;
 
     for(auto && pt : positions) {
         std::vector<Pedestrian *> neighbours;
@@ -571,11 +414,9 @@ void AgentsSourcesManager::SortPositionByDensity(
         density2pt.insert(std::pair<double, Point>(density, pt));
     }
 
-    //cout<<"------------------"<<positions.size()<<"-------"<<endl;
     positions.clear();
     for(auto && d : density2pt) {
         positions.push_back(d.second);
-        //     printf("density [%lf, %s]\n",d.first, d.second.toString().c_str());
     }
 }
 

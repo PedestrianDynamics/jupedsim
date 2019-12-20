@@ -10,7 +10,6 @@ ToxicityOutputHandler::~ToxicityOutputHandler()
 
 void ToxicityOutputHandler::WriteToFileHeader()
 {
-    //nPeds=building->GetAllPedestrians().size();
     std::string tmp;
     tmp = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n"
           "<ToxicityAnalysis>\n";

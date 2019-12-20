@@ -78,5 +78,4 @@ private:
     double _PedEyeHeight;
     double _NearestHeight;
     double GetNearestHeight(double);
-    // const char * glob_str;
 };

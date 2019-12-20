@@ -47,7 +47,6 @@ void AgentsQueueIn::GetandClear(std::vector<Pedestrian *> & peds)
 
     if(_agentsQueue.size() != 0) {
         peds.insert(peds.end(), _agentsQueue.begin(), _agentsQueue.end());
-        //_agentsQueue.pop_back();
         _agentsQueue.clear();
     }
     _queueMutex.unlock();
@@ -62,9 +61,6 @@ int AgentsQueueIn::Size()
 {
     return _agentsQueue.size();
 }
-
-/////////////////////////////////////////////////////
-////////////////////////////////////////////////////
 
 void AgentsQueueOut::Add(std::vector<Pedestrian *> & peds)
 {
@@ -91,7 +87,6 @@ void AgentsQueueOut::GetandClear(std::vector<Pedestrian *> & peds)
 
     if(_agentsQueue.size() != 0) {
         peds.insert(peds.end(), _agentsQueue.begin(), _agentsQueue.end());
-        //_agentsQueue.pop_back();
         _agentsQueue.clear();
     }
     _queueMutex.unlock();

@@ -45,11 +45,8 @@ private:
     double _vel0; // desired speed
     bool _do_stretch = true;
 
-
 public:
     JEllipse();
-
-
     void SetV(const Point & v);
     void SetCenter(Point pos);
     void SetCosPhi(double c);
@@ -61,8 +58,6 @@ public:
     void SetBmax(double b_max);
     void SetV0(double v0);
     void DoStretch(bool stretch);
-
-
     const Point & GetV() const;
     const Point & GetCenter() const;
     double GetCosPhi() const;
@@ -73,15 +68,12 @@ public:
     double GetBmin() const;
     double GetBmax() const;
     double GetV0() const;
-
     double GetEA() const; // ellipse semi-axis in the direction of the velocity
     double GetEB() const; // ellipse semi-axis in the orthogonal direction of the velocity
     double GetMaxEA() const;
     double GetMaxEB() const;
     double GetArea() const;
     bool DoesStretch() const;
-
-
     // Effective distance between two ellipses
     double EffectiveDistanceToEllipse(const JEllipse & other, double * dist) const;
     // Effective distance between ellipse and line segment
@@ -90,16 +82,11 @@ public:
     Point PointOnEllipse(const Point & p) const;
     // Schnittpunkt der Ellipse mit dem Liniensegment line
     Point PointOnEllipse(const Line & line, const Point & P) const;
-    // minimal möglicher Abstand (durch Verschiebung) Ellipse <-> Segment
-    //double MinimumDistanceToLine(const Line& l)const;
-    // minimal möglicher Abstand (durch Verschiebung) Ellipse <-> Ellipse
-    //double MinimumDistanceToEllipse(const JEllipse& E) const;
     // Check if point p is inside the ellipse
     bool IsInside(const Point & p) const;
     // Check if point p is outside the ellipse
     bool IsOutside(const Point & p) const;
     // Check if point p is on the ellipse
     bool IsOn(const Point & p) const;
-
     bool IntersectionWithLine(const Line & line);
 };

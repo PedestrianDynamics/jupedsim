@@ -102,9 +102,7 @@ public:
         _write_VTK_files            = false;
         _exit_strat                 = 9;
         _write_VTK_files_direction  = false;
-        //          _dirSubLocal = nullptr;
-        //          _dirLocal = nullptr;
-        _dirManager = nullptr;
+        _dirManager                 = nullptr;
         // for random numbers
         _rdGenerator = RandomNumberGenerator();
     }
@@ -269,25 +267,6 @@ public:
 
     void SetDirectionManager(std::shared_ptr<DirectionManager> dir) { _dirManager = dir; }
     std::shared_ptr<DirectionManager> GetDirectionManager() { return _dirManager; }
-    //     void set_dirSubLocal(DirectionSubLocalFloorfield* dir) {_dirSubLocal =
-    //     dir;}
-    //
-    //    void set_dirLocal(DirectionLocalFloorfield* dir) {_dirLocal = dir;}
-    //
-    //    void set_dirSubLocalTrips(DirectionSubLocalFloorfieldTrips* dir)
-    //    {_dirSubLocalTrips = dir;}
-    //
-    //    void
-    //    set_dirSubLocalTripsVoronoi(DirectionSubLocalFloorfieldTripsVoronoi*
-    //    dir) {_dirSubLocalTripsVoronoi = dir;}
-
-    //    DirectionSubLocalFloorfield* get_dirSubLocal() const {return
-    //    _dirSubLocal;}
-    //     DirectionLocalFloorfield* get_dirLocal() const {return _dirLocal;}
-    //
-    //    DirectionSubLocalFloorfieldTrips* get_dirSubLocalTrips() const {return
-    //    _dirSubLocalTrips;} DirectionSubLocalFloorfieldTripsVoronoi*
-    //    get_dirSubLocalTripsVoronoi() const {return _dirSubLocalTripsVoronoi;}
 
     const std::string & GetHostname() const { return _hostname; };
 

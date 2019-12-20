@@ -61,15 +61,10 @@ EventManager::EventManager(Configuration * config, Building * _b, unsigned int s
 
     //generate random number between 0 and 1 uniformly distributed
     _rdDistribution = std::uniform_real_distribution<double>(0, 1);
-    //std::random_device rd;
-    //_rdGenerator=std::mt19937(rd());
-    _rdGenerator = std::mt19937(seed);
-    _file        = nullptr;
+    _rdGenerator    = std::mt19937(seed);
+    _file           = nullptr;
     //save the first graph
     CreateRoutingEngine(_b, true);
-
-    //create some events
-    //CreateSomeEngine();
 }
 
 EventManager::~EventManager()
@@ -152,8 +147,6 @@ bool EventManager::ReadEventsXml()
     _updateFrequency = xmltoi(xEvents->ToElement()->Attribute("update_frequency"), 1);
     _updateRadius    = xmltoi(xEvents->ToElement()->Attribute("update_radius"), 2);
 
-    //Pedestrian::SetColorMode(BY_SPOTLIGHT);
-
     for(TiXmlElement * e = xEvents->FirstChildElement("event"); e;
         e                = e->NextSiblingElement("event")) {
         int id      = atoi(e->Attribute("id"));
@@ -163,11 +156,6 @@ bool EventManager::ReadEventsXml()
         _events.push_back(Event(id, zeit, type, state));
     }
     LOG_INFO("Events have been initialized");
-
-    //create some events
-    //FIXME: creating some engine before starting is not working.
-    // seom doors are still perceived as beeing closed.
-    //CreateSomeEngines();
 
     return true;
 }
@@ -240,40 +228,12 @@ bool EventManager::DisseminateKnowledge(Building * _b)
                 //maybe same room and subroom ?
                 std::vector<SubRoom *> empty;
                 if(_b->IsVisible(ped1->GetPos(), ped2->GetPos(), empty)) {
-                    //if(!SynchronizeKnowledge(ped1, ped2))  //ped1->SetSpotlight(true);
-                    //if(!MergeKnowledgeUsingProbability(ped1, ped2))
-                    if(!MergeKnowledge(ped1, ped2)) {
-                        //p2 is now an informant
-                        //Log->Write("INFO:\tthe information was refused by ped %d",ped2->GetID());
-                        //ped2->SetSpotlight(true);
-                        //Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
-                    }
+                    MergeKnowledge(ped1, ped2);
                 }
             }
         }
     }
 
-
-    //TODO Was passiert hier?
-    //update the routers based on the configurations
-    //#pragma omp parallel
-    //     for(auto&& ped:_b->GetAllPedestrians())
-    //     {
-    //          if(UpdateRoute(ped)==false)
-    //          {
-    //               //Clear the memory and attempt to reroute
-    //               //this can happen if all doors are known to be closed
-    //               ped->ClearKnowledge();
-    //               Log->Write("ERROR: \t clearing ped knowledge");
-    //               //ped->Dump(ped->GetID());
-    //               if(UpdateRoute(ped)==false)
-    //               {
-    //                    Log->Write("ERROR: \t cannot reroute the pedestrian. unknown problem");
-    //                    //return false;
-    //                    exit(EXIT_FAILURE);
-    //               }
-    //          }
-    //     }
     return true;
 }
 
@@ -282,16 +242,8 @@ bool EventManager::UpdateRoute(Pedestrian * ped)
     //create the key as std::string.
     //map are sorted by default
     std::string key = ped->GetKnowledgeAsString();
-    //     std::cout << "key: <" << key << ">" << std::endl;
     //get the router engine corresponding to the actual configuration
     bool status = true;
-
-    //     for (auto event : _eventEngineStorage){
-    //          std::cout << "_eventEngineStorage " << event.first << ": " << std::endl;
-    //          for (auto router : event.second->GetAvailableRouters()){
-    //               std::cout << router->GetStrategy() << std::endl;
-    //          }
-    //     }
 
     if(_eventEngineStorage.count(key) > 0) {
         RoutingEngine * engine = _eventEngineStorage[key];
@@ -306,15 +258,9 @@ bool EventManager::UpdateRoute(Pedestrian * ped)
             //clear all previous routes
             ped->ClearMentalMap();
         }
-        //ped->ClearKnowledge();
-        //overwrite/update the pedestrian router
         if(!rout)
             status = false;
     } else {
-        //          Log->Write("WARNING: \t unknown configuration <%s>", key.c_str());
-        //          Log->Write("WARNING: \t  [%d] router available", _eventEngineStorage.size());
-        //          Log->Write("       : \t trying to create");
-        //CreateRoutingEngine(_building);
         status = false;
     }
     return status;
@@ -393,19 +339,14 @@ bool EventManager::MergeKnowledgeUsingProbability(Pedestrian * p1, Pedestrian * 
     //synchronize the knowledge
     //accept the information with a certain probability
     if(_rdDistribution(_rdGenerator) < (1 - p1->GetRiskTolerance())) {
-        //p1->ClearKnowledge();
         p2->ClearKnowledge();
         for(auto && info : merge_info) {
             p2->AddKnownClosedDoor(
                 info.first, info.second.GetTime(), info.second.GetState(), _updateFrequency, 1.0);
         }
-        //p2->SetSpotlight(false);
         return true;
     } else {
         cout << "refusing the information:" << p2->GetID() << endl;
-        //Pedestrian::SetColorMode(BY_SPOTLIGHT);
-        //p2->SetSpotlight(true);
-        //exit(0);
         return false;
     }
 }
@@ -418,9 +359,6 @@ bool EventManager::MergeKnowledge(Pedestrian * p1, Pedestrian * p2)
     //accept the new information
     if(_rdDistribution(_rdGenerator) < (1 - p1->GetRiskTolerance())) {
         for(const auto & info1 : old_info1) {
-            //I dont forward information that I refused already
-            //if(info1.second.HasBeenRefused()) continue;
-
             // Is the latency ok ?
             if(!info1.second.CanBeForwarded())
                 continue;
@@ -453,21 +391,16 @@ bool EventManager::MergeKnowledge(Pedestrian * p1, Pedestrian * p2)
             if(old_info2.count(info1.first) > 0) {
                 old_info2[info1.first].Refuse(true);
                 old_info2[info1.first].SetLatency(_updateFrequency);
-                //cout<<"refusing present: "<<p2->GetID()<<endl;
             } else { //refuse the information and set a bad quality
                 old_info2[info1.first] = info1.second;
                 //alter the quality of the info
                 old_info2[info1.first].SetQuality(0.0);
                 old_info2[info1.first].Refuse(true);
                 old_info2[info1.first].SetLatency(_updateFrequency);
-                //cout<<"refusing: "<<p2->GetID()<<endl;
             }
             //es gibt mindestens eine info zum ablehnen
             status = false;
         }
-        //p2->SetSpotlight(true);
-        //Pedestrian::SetColorMode(BY_SPOTLIGHT);
-        //cout<<"refusing..."<<p2->GetID()<<endl;
     }
     return status;
 }
@@ -488,7 +421,6 @@ void EventManager::ProcessEvent()
         DisseminateKnowledge(_building);
         //actualize based on the new knowledge
         _lastUpdateTime = current_time;
-        //cout<<"update: "<<current_time<<endl;
     }
 
     //update the building state

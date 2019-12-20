@@ -71,41 +71,28 @@ int main(int argc, char ** argv)
         return EXIT_FAILURE;
     }
 
-
-    // create and initialize the simulation engine
-    // Simulation
     time_t starttime, endtime;
     time(&starttime);
 
     Simulation sim(&config);
 
     if(sim.InitArgs()) {
-        // evacuation time
         double evacTime = 0;
         LOG_INFO("Simulation started with {} pedestrians", sim.GetPedsNumber());
         if(sim.GetAgentSrcManager().GetMaxAgentNumber()) {
-            // Start the thread for managing the sources of agents if any
-            // std::thread t1(sim.GetAgentSrcManager());
             double simMaxTime = config.GetTmax();
             std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());
-            while(!sim.GetAgentSrcManager().IsRunning()) {
-                // std::cout << "waiting...\n";
-            }
-            // main thread for the simulation
             evacTime = sim.RunStandardSimulation(simMaxTime);
-            // Join the main thread
             t1.join();
         } else {
-            // main thread for the simulation
             evacTime = sim.RunStandardSimulation(config.GetTmax());
         }
 
         LOG_INFO("\n\nSimulation completed", sim.GetPedsNumber());
         time(&endtime);
 
-        // some statistics output
         if(config.ShowStatistics()) {
-            sim.PrintStatistics(evacTime); // negative means end of simulation
+            sim.PrintStatistics(evacTime);
         }
 
         if(sim.GetPedsNumber()) {

@@ -230,7 +230,6 @@ public:
 
 private:
     int _id;
-    //std::random_device _rd;
     std::default_random_engine _generator;
     std::normal_distribution<double> _V0;
     std::normal_distribution<double> _V0UpStairs;

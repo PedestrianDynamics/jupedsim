@@ -5,10 +5,7 @@
  *      Author: gsp1502
  */
 
-#ifndef VORONOI_BOOST_VORONOIPOSITIONGENERATOR_H_
-#define VORONOI_BOOST_VORONOIPOSITIONGENERATOR_H_
-
-
+#pragma once
 #include "boost/polygon/voronoi.hpp"
 
 #include <atomic>
@@ -28,8 +25,6 @@ class Building;
 class Pedestrian;
 class Point;
 
-// TODO: bool IsSpace(SubRoom* subroom, Point& pt,Point& v1);
-
 /**
          * Calculates if a point (which is inside the subroom) is far enough from the walls, transitions, crossings ( > radius of a person)
          * @param subroom
@@ -47,20 +42,6 @@ bool ComputeBestPositionVoronoiBoost(
     std::vector<Pedestrian *> & peds,
     Building * _building,
     std::vector<Pedestrian *> & peds_queue);
-
-
-/**
-         * Position incoming pedestrian on the vertex with the greatest distance
-         * @param discrete_positions, positions of existing pedestrians + fake pedestrians (but multiplied with the factor)
-         * @param vd
-         * @param subroom
-         * @param max_it, after calling the function this will be the iterator of the best vertex
-         * @param max_dis, after calling the function this will be the (distance*factor)^2 where distance is the distance to the chosen vertex
-         * @param radius, radius of a person
-         */
-//void VoronoiBestVertexMax(AgentsSource* src, const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd,
-//        SubRoom* subroom, double factor, voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis,
-//        double radius);
 
 /**
          * Position incoming pedestrian on the vertex with greater probability for greater distances
@@ -124,6 +105,3 @@ void VoronoiAdjustVelocityNeighbour(
     Pedestrian * ped,
     const std::vector<Point> & velocities_vector,
     const std::vector<int> & goal_vector);
-
-
-#endif /* VORONOI_BOOST_VORONOIPOSITIONGENERATOR_H_ */

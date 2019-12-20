@@ -51,20 +51,14 @@ Line::Line()
 }
 
 Line::Line(const Point & p1, const Point & p2, int count) :
-    _point1(p1),
-    _point2(p2),
-    _centre((p1 + p2) * 0.5),
-    _length((p1 - p2).Norm())
+    _point1(p1), _point2(p2), _centre((p1 + p2) * 0.5), _length((p1 - p2).Norm())
 {
     if(count)
         _uid = _static_UID++;
 }
 
 Line::Line(const Point & p1, const Point & p2) :
-    _point1(p1),
-    _point2(p2),
-    _centre((p1 + p2) * 0.5),
-    _length((p1 - p2).Norm())
+    _point1(p1), _point2(p2), _centre((p1 + p2) * 0.5), _length((p1 - p2).Norm())
 {
     _uid = _static_UID++;
 }
@@ -261,12 +255,6 @@ double Line::DistToSquare(const Point & p) const
     return DistTo(p) * DistTo(p);
 }
 
-// bool Line::operator*(const Line& l) const {
-//      return ((_point1*l.GetPoint1() && _point2 == l.GetPoint2()) ||
-//                      (_point2 == l.GetPoint1() && _point1 == l.GetPoint2()));
-// }
-
-
 /* Zwei Linien sind gleich, wenn ihre beiden Punkte
  * gleich sind
  * */
@@ -372,47 +360,6 @@ int Line::IntersectionWith(const Point & p1, const Point & p2, Point & p3) const
 
     return LineIntersectType::INTERSECTION;
 }
-
-
-////FIXME no equals check with == on double or float bring in an epsilon
-//int Line::IntersectionWith(const Point &p1, const Point &p2, Point &p3) const {
-//     Point AC = _point1 - p1;
-//     Point DC = p2 - p1;
-//     Point BA = _point2 - _point1;
-//     double denominator = BA.CrossProduct(DC);
-//     double numerator = DC.CrossProduct(AC);
-//
-//     p3._x = J_NAN;
-//     p3._y = J_NAN;
-//
-//     if (denominator == 0.0) {
-//          // the lines are superposed
-//          if (numerator == 0.0) {
-//               // the segment are superposed
-//               if (this->ShareCommonPointWith(Line(p1, p2), p3))
-//                    return LineIntersectType::INTERSECTION;
-//               //IsInLineSegment(p1) || IsInLineSegment(p2);
-//               else
-//                    return LineIntersectType::OVERLAP;
-//          }
-//          else { // the lines are just parallel and do not share a common point
-//               return LineIntersectType::NO_INTERSECTION;
-//          }
-//     }
-//
-//     double r = numerator / denominator;
-//     if (r < 0.0 || r > 1.0) {
-//          return LineIntersectType::NO_INTERSECTION;
-//     }
-//
-//     double s = (BA.CrossProduct(AC)) / denominator;
-//     if (s < 0.0 || s > 1.0) {
-//          return LineIntersectType::NO_INTERSECTION;
-//     }
-//
-//     p3 = _point1 + BA * r;
-//     return LineIntersectType::INTERSECTION;
-//}
 
 int Line::IntersectionWith(const Line & L, Point & p3) const
 {
@@ -602,8 +549,6 @@ double Line::GetDistanceToIntersectionPoint(const Line & l) const
 
 double Line::GetDeviationAngle(const Line & l) const
 {
-    // const double PI = 3.14159258;
-
     Point P    = _point1;
     Point Goal = _point2;
 
@@ -619,19 +564,6 @@ double Line::GetDeviationAngle(const Line & l) const
     angleR = atan((Goal - P).CrossProduct(R - P) / (Goal - P).ScalarProduct(R - P));
 
     angle = (dist_Goal_L < dist_Goal_R) ? angleL : angleR;
-#if DEBUG
-    printf("Enter GetAngel()\n");
-    printf("\tP=[%f,%f]\n", P.GetX(), P.GetY());
-    printf("\tGoal=[%f,%f]\n", Goal.GetX(), Goal.GetY());
-    printf("\tL=[%f,%f]\n", L.GetX(), L.GetY());
-    printf("\tR=[%f,%f]\n", R.GetX(), R.GetY());
-    printf("\t\tdist_Goal_L=%f\n", dist_Goal_L);
-    printf("\t\tdist_Goal_R=%f\n", dist_Goal_R);
-    printf("\t\t --> angleL=%f\n", angleL);
-    printf("\t\t --> angleR=%f\n", angleR);
-    printf("\t\t --> angle=%f\n", angle);
-    printf("Leave GetAngel()\n");
-#endif
     return angle;
 }
 
@@ -669,9 +601,6 @@ double Line::GetObstacleDeviationAngle(
     const std::vector<Wall> & owalls,
     const std::vector<Wall> & rwalls) const
 {
-#if DEBUG
-    printf("Enter GetObstacleDeviationAngle()\n");
-#endif
     Point P    = _point1;
     Point Goal = _point2;
     Point GL, GR;
@@ -732,20 +661,15 @@ double Line::GetObstacleDeviationAngle(
             // smallest deviation.
             //----------------------- check the subroom walls
             for(unsigned int i = 0; i < rwalls.size(); i++) {
-                // printf("==Left intersection with wall[%f, %f]--[%f, %f]\n", rwalls[i].GetPoint1().GetX(), rwalls[i].GetPoint1().GetY(), rwalls[i].GetPoint2().GetX(), rwalls[i].GetPoint2().GetY());
                 distToRoomL = tmpDirectionL.GetDistanceToIntersectionPoint(rwalls[i]);
-                // printf("==Right intersection with wall[%f, %f]--[%f, %f]\n", rwalls[i].GetPoint1().GetX(),rwalls[i].GetPoint1().GetY(), rwalls[i].GetPoint2().GetX(),rwalls[i].GetPoint2().GetY());
 
                 distToRoomR = tmpDirectionR.GetDistanceToIntersectionPoint(rwalls[i]);
-                // printf("BEFORE distToRoomL = %f, minDisttoroomL =%f,\n distToRoomR=%f, mindisttoroomR=%f\n", distToRoomL, minDistToRoomL, distToRoomR, minDistToRoomR);
 
                 if(distToRoomL < minDistToRoomL)
                     minDistToRoomL = distToRoomL;
 
                 if(distToRoomR < minDistToRoomR)
                     minDistToRoomR = distToRoomR;
-                // printf("AFTER distToRoomL = %f, minDisttoroomL =%f,\n distToRoomR=%f, mindisttoroomR=%f\n", distToRoomL, minDistToRoomL, distToRoomR, minDistToRoomR);
-                // getc(stdin);
             } //for roome walls
             //-----------------------------------------------
             if(minDistToRoomR > minDistToRoomL)
@@ -763,32 +687,10 @@ double Line::GetObstacleDeviationAngle(
         } else if(!visibleR && visibleL) {
             angle = angleL;
         } else {
-            // printf("continue ");
-            // printf("VisibleL=%d, VisibleR=%d\n", visibleL, visibleR);
             continue; // both angles are not OK. check next wall
         }
-#if DEBUG
-        printf("---------\n\tP=[%f,%f]\n", P.GetX(), P.GetY());
-        printf("\tGoal=[%f,%f]\n", Goal.GetX(), Goal.GetY());
-        printf("\tL=[%f,%f]\n", L.GetX(), L.GetY());
-        printf("\tR=[%f,%f]\n", R.GetX(), R.GetY());
-        // printf("\t\tdist_Goal_L=%f\n",dist_Goal_L);
-        // printf("\t\tdist_Goal_R=%f\n",dist_Goal_R);
-        printf("VisibleL=%d, VisibleR=%d\n", visibleL, visibleR);
-        printf("distToRoomL = %f, distToRoomR = %f\n", minDistToRoomL, minDistToRoomR);
-        printf("\t\t --> angleL=%f\n", angleL);
-        printf("\t\t --> angleR=%f\n", angleR);
-        printf("\t\t --> angle=%f\n-----\n", angle);
-
-#endif
-
         if(fabs(angle) < fabs(minAngle))
             minAngle = angle;
-#if DEBUG
-        printf("\t\t --> minAngle=%f\n", minAngle);
-#endif
-
-
     } // owalls
 
 
@@ -796,8 +698,5 @@ double Line::GetObstacleDeviationAngle(
         printf("WARNING:  minAngle ist infinity\n");
         getc(stdin);
     }
-#if DEBUG
-    printf("Leave GetObstacleDeviationAngle() with  angle=%f\n", minAngle);
-#endif
     return minAngle;
 }

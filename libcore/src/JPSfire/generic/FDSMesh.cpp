@@ -18,10 +18,7 @@ split2(const std::string & s, char delim, std::vector<std::string> & elems)
 }
 
 
-FDSMesh::FDSMesh() : _statMesh(false)
-{
-    //statHeaderRead=false;
-}
+FDSMesh::FDSMesh() : _statMesh(false) {}
 
 FDSMesh::FDSMesh(
     const double & xmin,
@@ -33,15 +30,11 @@ FDSMesh::FDSMesh(
 {
     SetUpMesh(xmin, ymin, xmax, ymax, cellsize);
     std::cout << "FDSMesh set up!" << std::endl;
-    //statHeaderRead=false;
 }
 
 FDSMesh::FDSMesh(const std::string & filename) : _statMesh(false)
 {
-    //std::cout << filename << std::endl;
     SetKnotValuesFromFile(filename);
-
-    //statHeaderRead=false;
 }
 
 FDSMesh::~FDSMesh() {}
@@ -159,11 +152,8 @@ void FDSMesh::ReadMatrix(std::string line, std::ifstream & pFile)
         n      = 0;
         strVec = split2(line, ',', strVec);
         for(auto & elem : strVec) {
-            //std::cout << elem << " col " << n  << " line " << m << std::endl;
             if(elem == "nan" || elem == "NAN" || elem == "NaN" || elem == "-inf" || elem == "inf") {
                 _matrix[m][n].SetValue(1.0);
-                //Log->Write("ERROR: Mesh values consist of nan!");
-                //exit(EXIT_FAILURE);
             } else {
                 double temp = 0;
                 try {
@@ -189,7 +179,6 @@ void FDSMesh::SetKnotValuesFromFile(const std::string & filename)
     std::ifstream pFile(filename);
     if(!pFile) {
         LOG_ERROR("Could not open FDS slicefile: {}", filename);
-        //return false;
         exit(EXIT_FAILURE);
     }
 
@@ -198,21 +187,12 @@ void FDSMesh::SetKnotValuesFromFile(const std::string & filename)
     auto c_header                         = Header.data<double>();
     auto c_matrix                         = smoke_factor_grid_norm.data<double>();
 
-    // for (int i=0; i< Header.num_vals ; i++)
-    //     std::cout << "Header i: " << i << ": " << c_header[i] << std::endl;
-    // keep these for loops for debugging purpose
-
-    // for (int j=0; j< smoke_factor_grid_norm.num_vals; j++)
-    //     std::cout << "Matrix j: "<< c_matrix[j] << std::endl;
-
     /// read header
     double cellsize = c_header[0];
     double xmin     = c_header[1];
     double xmax     = c_header[2];
     double ymin     = c_header[3];
     double ymax     = c_header[4];
-
-    //std::cout << "xmin=" << xmin << " , xmax=" << xmax << " , ymin=" << ymin << ", ymax=" << ymax << " , dx=" << cellsize << std::endl;
 
     SetUpMesh(xmin, ymin, xmax, ymax, cellsize);
 
@@ -224,7 +204,6 @@ void FDSMesh::SetKnotValuesFromFile(const std::string & filename)
             double tmp_value = c_matrix[i * ncol + j];
             if(std::isnan(tmp_value) || std::isinf(tmp_value))
                 tmp_value = 1.0;
-            //std::cout << "i =  " << i  << "  j = " << j << ": " << tmp_value << std::endl;
             _matrix[i][j].SetValue(tmp_value); //TODO: implement =operator
         }
     pFile.close();

@@ -221,30 +221,13 @@ void AgentsSource::GenerateAgents(std::vector<Pedestrian *> & peds, int count, B
 {
     std::vector<Point> emptyPositions;
     int pid;
-
-    // if(this->GetAgentId() < 0)
-    // {
-    //      // TODO: get the reserved ids by other sources
-    //      std::vector<int> reserved_ids;
-    //      for (const auto &source: _start_dis_sources)
-    //           if(source->GetAgentId() >= 0)
-    //                reserved_ids.push_back(source->GetAgentId());
-
-    //      while( std::find(reserved_ids.begin(), reserved_ids.end(), pid) != reserved_ids.end() ){
-    //           std::cout << "\n\nSOURCE  SORRY " << pid << " is reserved!\n";
-    //           pid += 1;
-    //      }
-    // }
-
     pid = (this->GetAgentId() >= 0) ?
               this->GetAgentId() :
               Pedestrian::GetAgentsCreated() + building->GetAllPedestrians().size();
     for(int i = 0; i < count; i++) {
         if(GetStartDistribution()) {
-            //std::cout << "AgentsSource::GenerateAgents Generates an Agent\n";
             auto ped = GetStartDistribution()->GenerateAgent(building, &pid, emptyPositions);
             if(ped->FindRoute() == -1) {
-                // Log->Write("WARNING: Can not set destination for source agent %d", ped->GetID());
                 // Sometimes the router can not find a target for ped
                 auto transitions = building->GetAllTransitions();
                 auto transition  = transitions.begin()->second; //dummy
