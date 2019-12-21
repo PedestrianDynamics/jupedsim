@@ -180,6 +180,8 @@ packages/
 !/cmake_modules
 /issues
 /latex
-
+/_site
 /systemtest/test_geometry/clean_geometry/log*
 /systemtest/test_geometry/clean_geometry/traj*
+js
+.DS_Store
