@@ -36,9 +36,6 @@
 class OutputHandler;
 class SubRoom;
 
-// external variables
-extern OutputHandler * Log;
-
 class Room
 {
 private:

@@ -31,6 +31,7 @@
 
 #include "direction/DirectionManager.h"
 #include "direction/walking/DirectionStrategy.h"
+#include "general/Logger.h"
 #include "general/OpenMP.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
@@ -74,7 +75,7 @@ bool GCFMModel::Init(Building * building)
         //a destination could not be found for that pedestrian
         if(ped->FindRoute() == -1) {
             building->DeletePedestrian(ped);
-            Log->incrementDeletedAgents();
+            //TODO KKZ track deleted peds
             p--;
             peds_size--;
             continue;
@@ -87,8 +88,7 @@ bool GCFMModel::Init(Building * building)
             cosPhi = d._x / dist;
             sinPhi = d._y / dist;
         } else {
-            Log->Write("ERROR: \tallPeds::Init() cannot initialise phi! "
-                       "dist to target is 0\n");
+            LOG_ERROR("allPeds::Init() cannot initialise phi! dist to target is 0");
             return false;
         }
         ped->InitV0(target);
@@ -154,8 +154,8 @@ void GCFMModel::ComputeNextTimeStep(
                     periodic);
                 // remove the pedestrian and abort
                 building->DeletePedestrian(ped);
-                Log->incrementDeletedAgents();
-                Log->Write("\tERROR: one ped was removed due to high velocity");
+                // TODO KKZ track deleted peds
+                LOG_ERROR("One ped was removed due to high velocity");
                 //exit(EXIT_FAILURE);
             }
 
@@ -334,8 +334,7 @@ Point GCFMModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
         ep12 = distp12.Normalized();
 
     } else {
-        Log->Write("ERROR: \tin GCFMModel::forcePedPed() ep12 kann nicht berechnet werden!!!\n");
-        Log->Write("ERROR:\t fix this as soon as possible");
+        LOG_ERROR("GCFMModel::forcePedPed() ep12 cannot be computed.");
         return F_rep; // FIXME: should never happen
         exit(EXIT_FAILURE);
     }
@@ -385,17 +384,13 @@ Point GCFMModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2) const
         F_rep = ep12 * px;
     }
     if(F_rep._x != F_rep._x || F_rep._y != F_rep._y) {
-        char tmp1[CLENGTH];
-        sprintf(
-            tmp1,
-            "\nNAN return ----> p1=%d p2=%d Frepx=%f, Frepy=%f\n",
+        LOG_ERROR(
+            "NAN return p1{:d} p2 {:d} Frepx={:f} Frepy={:f} K_ij={:f}",
             ped1->GetID(),
             ped2->GetID(),
             F_rep._x,
-            F_rep._y);
-        Log->Write(tmp1);
-        Log->Write("ERROR:\t fix this as soon as possible");
-        printf("K_ij=%f\n", K_ij);
+            F_rep._y,
+            K_ij);
         //return Point(0,0); // FIXME: should never happen
         //exit(EXIT_FAILURE);
     }
@@ -420,8 +415,8 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const
     //then the obstacles
     for(const auto & obst : subroom->GetAllObstacles()) {
         if(obst->Contains(ped->GetPos())) {
-            Log->Write(
-                "ERROR:\t Agent [%d] is trapped in obstacle in room/subroom [%d/%d]",
+            LOG_ERROR(
+                "Agent {:d} is trapped in obstacle in room/subroom {:d}/{:d}",
                 ped->GetID(),
                 subroom->GetRoomID(),
                 subroom->GetSubRoomID());

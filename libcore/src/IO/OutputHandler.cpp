@@ -26,85 +26,7 @@
  **/
 #include "OutputHandler.h"
 
-#include <cmath>
 #include <cstdarg> // va_start and va_end
-
-void OutputHandler::incrementWarnings()
-{
-    _nWarnings += 1;
-}
-
-int OutputHandler::GetWarnings()
-{
-    return _nWarnings;
-}
-
-void OutputHandler::incrementErrors()
-{
-    _nErrors += 1;
-}
-
-int OutputHandler::GetErrors()
-{
-    return _nErrors;
-}
-
-
-void OutputHandler::incrementDeletedAgents()
-{
-    _nDeletedAgents += 1;
-}
-
-int OutputHandler::GetDeletedAgents()
-{
-    return _nDeletedAgents;
-}
-
-
-void OutputHandler::Write(const std::string & str)
-{
-    std::cout << std::endl << str;
-}
-
-void OutputHandler::Write(const char * message, ...)
-{
-    char msg[CLENGTH] = "";
-    va_list ap;
-    va_start(ap, message);
-    vsprintf(msg, message, ap);
-    va_end(ap);
-
-    std::string str(msg);
-
-    if(str.find("ERROR") != std::string::npos) {
-        std::cerr << std::endl << msg;
-        std::cerr.flush();
-        incrementErrors();
-    } else if(str.find("WARNING") != std::string::npos) {
-        std::cerr << std::endl << msg;
-        std::cerr.flush();
-        incrementWarnings();
-    } else { // infos
-        std::cout << std::endl << msg;
-        std::cout.flush();
-    }
-}
-
-void STDIOHandler::Write(const std::string & str)
-{
-    if(str.find("ERROR") != std::string::npos) {
-        std::cerr << std::endl << str;
-        std::cerr.flush();
-        incrementErrors();
-    } else if(str.find("WARNING") != std::string::npos) {
-        std::cerr << std::endl << str;
-        std::cerr.flush();
-        incrementWarnings();
-    } else { // infos
-        std::cout << std::endl << str;
-        std::cout.flush();
-    }
-}
 
 FileHandler::FileHandler(const fs::path & path)
 {
@@ -124,12 +46,6 @@ void FileHandler::Write(const std::string & str)
 {
     _pfp << str << std::endl;
     _pfp.flush();
-
-    if(str.find("ERROR") != std::string::npos) {
-        incrementErrors();
-    } else if(str.find("WARNING") != std::string::npos) {
-        incrementWarnings();
-    }
 }
 
 void FileHandler::Write(const char * str_msg, ...)
@@ -141,11 +57,4 @@ void FileHandler::Write(const char * str_msg, ...)
     va_end(ap);
     _pfp << msg << std::endl;
     _pfp.flush();
-
-    std::string str(msg);
-    if(str.find("ERROR") != std::string::npos) {
-        incrementErrors();
-    } else if(str.find("WARNING") != std::string::npos) {
-        incrementWarnings();
-    }
 }

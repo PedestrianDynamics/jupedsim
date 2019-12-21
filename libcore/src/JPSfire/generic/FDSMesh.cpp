@@ -1,6 +1,7 @@
 #include "FDSMesh.h"
 
 #include "IO/OutputHandler.h"
+#include "general/Logger.h"
 
 #include <cmath>
 #include <cnpy.h>
@@ -187,7 +188,7 @@ void FDSMesh::SetKnotValuesFromFile(const std::string & filename)
     ///open File (reading)
     std::ifstream pFile(filename);
     if(!pFile) {
-        Log->Write("ERROR:\tCould not open FDS slicefile: %s", filename.c_str());
+        LOG_ERROR("Could not open FDS slicefile: {}", filename);
         //return false;
         exit(EXIT_FAILURE);
     }

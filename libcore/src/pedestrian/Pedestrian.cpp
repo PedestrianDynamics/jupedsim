@@ -28,6 +28,7 @@
 
 #include "JPSfire/generic/FDSMeshStorage.h"
 #include "Knowledge.h"
+#include "general/Logger.h"
 #include "geometry/Building.h"
 #include "geometry/SubRoom.h"
 #include "geometry/WaitingArea.h"
@@ -1051,7 +1052,7 @@ Router * Pedestrian::GetRouter() const
 int Pedestrian::FindRoute()
 {
     if(!_router) {
-        Log->Write("ERROR:\t one or more routers does not exist! Check your router_ids");
+        LOG_ERROR("One or more routers does not exist! Check your router_ids");
         return -1;
     }
     //bool isinsub = (_building->GetAllRooms().at(this->GetRoomID())->GetSubRoom(this->GetSubRoomID())->IsInSubRoom(this));

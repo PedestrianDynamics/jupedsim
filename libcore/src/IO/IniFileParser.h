@@ -32,8 +32,6 @@ class TiXmlElement;
 
 class TiXmlNode;
 
-extern OutputHandler * Log;
-
 class IniFileParser
 {
 public:

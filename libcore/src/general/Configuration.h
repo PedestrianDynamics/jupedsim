@@ -47,7 +47,6 @@ public:
         _solver           = 1;
         _routingEngine    = std::shared_ptr<RoutingEngine>(new RoutingEngine());
         _maxOpenMPThreads = 1;
-        _log              = 0;
         _seed             = 0;
         _fps              = 8;
         _linkedCellSize   = 2.2;     // meter
@@ -132,10 +131,6 @@ public:
     int GetMaxOpenMPThreads() const { return _maxOpenMPThreads; };
 
     void SetMaxOpenMPThreads(int maxOpenMPThreads) { _maxOpenMPThreads = maxOpenMPThreads; };
-
-    int GetLog() const { return _log; };
-
-    void SetLog(int log) { _log = log; };
 
     unsigned int GetSeed() const { return _seed; };
 
@@ -365,7 +360,6 @@ private:
     int _solver;
     std::shared_ptr<RoutingEngine> _routingEngine;
     int _maxOpenMPThreads;
-    int _log;
     unsigned int _seed;
     double _fps;
     double _linkedCellSize;

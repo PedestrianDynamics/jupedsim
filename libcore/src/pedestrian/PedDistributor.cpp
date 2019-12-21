@@ -28,6 +28,7 @@
 
 #include "IO/PedDistributionParser.h"
 #include "general/Filesystem.h"
+#include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 #include "pedestrian/Pedestrian.h"
@@ -79,7 +80,7 @@ const std::vector<std::shared_ptr<AgentsSource>> & PedDistributor::GetAgentsSour
 
 bool PedDistributor::Distribute(Building * building) const
 {
-    Log->Write("INFO: \tInit Distribute");
+    LOG_INFO("Init Distribute");
     int nPeds_is       = 0;
     int nPeds_expected = 0;
 
@@ -122,24 +123,21 @@ bool PedDistributor::Distribute(Building * building) const
                         //empty. May happen if file
                         //is misformed.
                         if(tmpPositions.empty()) {
-                            Log->Write(
-                                "ERROR: \tproblems with file <%s%s>.",
-                                basename.c_str(),
-                                extention.c_str());
+                            LOG_ERROR("problems with file {}{}", basename, extention);
                             return false; //maybe just ignore?
                         } else
                             allFreePosRoom[subroomID] = tmpPositions;
                         fromDirectory = true;
-                        Log->Write(
-                            "INFO: \tDistributing %d pedestrians using file <%s%s>",
+                        LOG_INFO(
+                            "Distributing {:d} pedestrians using file {}{}",
                             dist->GetAgentsNumber(),
-                            basename.c_str(),
-                            extention.c_str());
+                            basename,
+                            extention);
                         break; //leave BOOST_FOREEACH
                     }          //regular file
                 }              // for files
                 if(fromDirectory == false) {
-                    Log->Write("ERROR: \tDistributing pedestrians using file is not successful.");
+                    LOG_ERROR("Distributing pedestrians using file is not successful.");
                     return false;
                 }
             } // check if directory
@@ -197,7 +195,7 @@ bool PedDistributor::Distribute(Building * building) const
             continue;
 
         if(N < 0) {
-            Log->Write("ERROR: \t negative  number of pedestrians!");
+            LOG_ERROR("Negative  number of pedestrians!");
             return false;
         }
 
@@ -205,8 +203,8 @@ bool PedDistributor::Distribute(Building * building) const
 
         int max_pos = allpos.size();
         if(max_pos < N) {
-            Log->Write(
-                "ERROR: \tCannot distribute %d agents in Room %d . Maximum allowed: %d\n",
+            LOG_ERROR(
+                "Cannot distribute {:d} agents in Room {:d} . Maximum allowed: {:d}",
                 N,
                 roomID,
                 allpos.size());
@@ -216,14 +214,14 @@ bool PedDistributor::Distribute(Building * building) const
             continue;
 
         // Distributing
-        Log->Write(
-            "INFO: \tDistributing %d Agents in Room/Subrom [%d/%d]! Maximum allowed: %d",
+        LOG_INFO(
+            "Distributing {:d} Agents in Room/Subrom {:d}/{:d}! Maximum allowed: {:d}",
             N,
             roomID,
             subroomID,
             max_pos);
         DistributeInSubRoom(N, allpos, &pid, dist.get(), building);
-        Log->Write("\t...Done");
+        LOG_INFO("Finished distributing pedestrians");
         nPeds_is += N;
     }
 
@@ -235,7 +233,7 @@ bool PedDistributor::Distribute(Building * building) const
             continue;
         int N = dist->GetAgentsNumber();
         if(N < 0) {
-            Log->Write("ERROR: \t negative or null number of pedestrians! Ignoring");
+            LOG_ERROR("Negative or null number of pedestrians! Ignoring");
             continue;
         }
 
@@ -257,9 +255,9 @@ bool PedDistributor::Distribute(Building * building) const
             max_pos += anz;
         }
         if(max_pos < N) {
-            Log->Write(
-                "ERROR: \t Distribution of %d pedestrians in Room %d not possible! Maximum "
-                "allowed: %d\n",
+            LOG_ERROR(
+                "Distribution of {:d} pedestrians in Room {:d} not possible! Maximum "
+                "allowed: {:d}",
                 N,
                 r->GetID(),
                 max_pos);
@@ -334,10 +332,7 @@ bool PedDistributor::Distribute(Building * building) const
     }
 
     if(nPeds_is != nPeds_expected) {
-        Log->Write(
-            "ERROR:\t only [%d] agents could be distributed out of [%d] requested",
-            nPeds_is,
-            nPeds_expected);
+        LOG_ERROR("Only {:d} of {:d} agents could be distributed", nPeds_is, nPeds_expected);
     }
 
     return (nPeds_is == nPeds_expected);
@@ -514,16 +509,16 @@ PedDistributor::GetPositionsFromFile(std::string filename, int n, std::string un
             continue;
     }
     if(first_ids.size() != (unsigned) n) {
-        Log->Write(
-            "ERROR: \tGetPositionsFromFile: number of peds <%d> does not match number of peds from "
-            "file <%d>",
+        LOG_ERROR(
+            "GetPositionsFromFile: number of peds {:d} does not match number of peds from file "
+            "{:d}",
             n,
             first_ids.size());
 
         positions.clear();
     } else
-        Log->Write(
-            "INFO: \tGetPositionsFromFile: number of peds <%d> in file. To simulate <%d>",
+        LOG_INFO(
+            "GetPositionsFromFile: number of peds {:d} in file. To simulate {:d}",
             first_ids.size(),
             n);
     return positions;

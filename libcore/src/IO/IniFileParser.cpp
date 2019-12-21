@@ -169,15 +169,6 @@ void IniFileParser::Parse(const fs::path & iniFile)
 
 bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 {
-    //logfile
-    if(xHeader->FirstChild("logfile")) {
-        const fs::path logPath(xHeader->FirstChild("logfile")->FirstChild()->Value());
-        const fs::path & root(_config->GetProjectRootDir()); // returns an absolute path already
-        const fs::path canonicalPath = fs::weakly_canonical(root / logPath);
-        _config->SetErrorLogFile(canonicalPath);
-        _config->SetLog(2);
-        LOG_INFO("Logfile <{}>", _config->GetErrorLogFile().string());
-    }
     LOG_INFO("JuPedSim - JPScore");
     LOG_INFO("Current date: {} {}", __DATE__, __TIME__);
     LOG_INFO("Version     : {}", JPSCORE_VERSION);

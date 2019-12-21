@@ -26,6 +26,7 @@
  **/
 #include "RoutingEngine.h"
 
+#include "general/Logger.h"
 #include "pedestrian/Pedestrian.h"
 
 RoutingEngine::RoutingEngine() {}
@@ -54,8 +55,7 @@ void RoutingEngine::AddRouter(Router * router)
 {
     for(unsigned int r = 0; r < _routersCollection.size(); r++) {
         if(_routersCollection[r]->GetStrategy() == router->GetStrategy()) {
-            Log->Write("ERROR: \tDuplicate router found with 'id' [%d].", router->GetID());
-            Log->Write("ERROR: \tDouble check your configuration files");
+            LOG_ERROR("Duplicate router found with 'id' [{:d}].", router->GetID());
             exit(EXIT_FAILURE);
         }
     }
@@ -97,7 +97,7 @@ Router * RoutingEngine::GetRouter(int id) const
         if(router->GetID() == id)
             return router;
     }
-    Log->Write("ERROR: \t Could not Find any router with ID:  [%d].", id);
+    LOG_ERROR("Could not Find any router with ID:  [{:d}].", id);
     return /*(Router*)*/ nullptr;
 }
 

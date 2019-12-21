@@ -41,8 +41,6 @@ class Router;
 class RoutingEngine;
 class OutputHandler;
 
-extern OutputHandler * Log;
-
 class EventManager
 {
 public:

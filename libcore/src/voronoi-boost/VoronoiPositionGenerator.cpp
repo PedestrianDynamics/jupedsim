@@ -13,6 +13,7 @@ static int global_count = 0;
 //check if all includes are necessary
 #include "../pedestrian/AgentsSourcesManager.h"
 #include "../pedestrian/Pedestrian.h"
+#include "general/Logger.h"
 #include "geometry/Wall.h"
 
 //#include "../pedestrian/StartDistribution.h"
@@ -436,9 +437,8 @@ void VoronoiBestVertexRandMax(
     //now we have the vector of possible vertices and weights and we can choose one randomly
 
     if(partial_sums.empty()) {
-        Log->Write(
-            "Warning: No possible vertices. Maybe BB too small for %d agents?",
-            src->GetChunkAgents());
+        LOG_WARNING(
+            "No possible vertices. Maybe BB too small for {:d} agents?", src->GetChunkAgents());
         //         exit(EXIT_FAILURE); // maybe not exit, just ignore
         // dis = 0;
         return;
@@ -516,9 +516,8 @@ void VoronoiBestVertexGreedy(
             }
     }
     if(possible_vertices.empty()) {
-        Log->Write(
-            "Warning: No possible vertices. Maybe BB too small for %d agents?",
-            src->GetChunkAgents());
+        LOG_WARNING(
+            "No possible vertices. Maybe BB too small for {:d} agents?", src->GetChunkAgents());
         //         exit(EXIT_FAILURE); // maybe not exit, just ignore
         dis = 0;
         return;

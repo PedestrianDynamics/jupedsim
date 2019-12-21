@@ -30,6 +30,7 @@
 
 #include "IO/OutputHandler.h"
 #include "general/Filesystem.h"
+#include "general/Logger.h"
 
 
 FDSMeshStorage::FDSMeshStorage() {}
@@ -70,7 +71,7 @@ FDSMeshStorage::FDSMeshStorage(
         CreateFDSMeshes();
         std::cout << "Success!" << std::endl;
     } else {
-        Log->Write("ERROR:\tCould not find directory <%s>\n", _filepath.c_str());
+        LOG_ERROR("Could not find directory {}", _filepath);
         exit(EXIT_FAILURE);
     }
 }
@@ -92,8 +93,7 @@ bool FDSMeshStorage::CreateQuantityList()
         }
     }
     if(_quantitylist.size() == 0) {
-        Log->Write("ERROR:\tCould not find suitable quantities in %s", _filepath.c_str());
-        exit(EXIT_FAILURE);
+        LOG_ERROR("Could not find suitable quantities in {}", _filepath);
         return false;
     }
     std::cout << "_quantitylist.size(): " << _quantitylist.size() << "\n";
@@ -117,7 +117,7 @@ bool FDSMeshStorage::CreateElevationList()
         }
     }
     if(_elevationlist.size() == 0) {
-        Log->Write("ERROR:\tCould not find suitable grid elevations in %s", _filepath.c_str());
+        LOG_ERROR("Could not find suitable grid elevations in {}", _filepath);
         exit(EXIT_FAILURE);
         return false;
     }
@@ -188,9 +188,11 @@ void FDSMeshStorage::CreateTimeList()
         }
 
         if(fs::exists(npz_file) == false) {
-            Log->Write(
-                "ERROR:\tSpecified times are not compliant with JPSfire data " + npz_file.string());
-            std::cout << "\n\nCreateTimeList(): File not found: " << npz_file.string() << std::endl;
+            LOG_ERROR(
+                "Specified times are not compliant with JPSfire data {}. CreateTimeList(): File "
+                "not found: {}",
+                npz_file.string(),
+                npz_file.string());
             exit(EXIT_FAILURE);
         }
         //std::cout << "LEAVING \n" ;

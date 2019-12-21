@@ -27,6 +27,7 @@
  **/
 #include "BrainStorage.h"
 
+#include "general/Logger.h"
 #include "pedestrian/Pedestrian.h"
 
 #include <tinyxml.h>
@@ -83,51 +84,46 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
 
     auto cogMapFilenameWithPath = _building->GetProjectRootDir() / cMFileName;
 
-    Log->Write(cogMapFilenameWithPath.string());
+    LOG_INFO("Parsing cognitive map from {}", cogMapFilenameWithPath.string());
     TiXmlDocument doccogMap(cogMapFilenameWithPath.string());
     if(!doccogMap.LoadFile()) {
-        Log->Write("ERROR: \t%s", doccogMap.ErrorDesc());
-        Log->Write("\t could not parse the cognitive map file");
-        Log->Write("Cognitive map not specified");
+        LOG_ERROR("Could not parse cognitive map file: \t%s", doccogMap.ErrorDesc());
         return;
     }
 
     TiXmlElement * xRootNode = doccogMap.RootElement();
     if(!xRootNode) {
-        Log->Write("ERROR:\tRoot element does not exist");
-        Log->Write("Cognitive map not specified");
+        LOG_ERROR("Could not parse cognitive map file: No xml root element found");
         return;
     }
 
     if(xRootNode->ValueStr() != "cognitiveMap") {
-        Log->Write("ERROR:\tRoot element value is not 'cognitiveMap'.");
-        Log->Write("Cognitive map not specified");
+        LOG_ERROR(
+            "Could not parse cognitive map file: Expected toot element <cognitiveMap>, found {} "
+            "instead",
+            xRootNode->ValueStr());
         return;
     }
     if(xRootNode->Attribute("unit"))
         if(std::string(xRootNode->Attribute("unit")) != "m") {
-            Log->Write(
-                "ERROR:\tOnly the unit m (meters) is supported. \n\tYou supplied [%s]",
+            LOG_ERROR(
+                "Only the unit m (meters) is supported. You supplied {}. Cognitive map not "
+                "specified.",
                 xRootNode->Attribute("unit"));
-            Log->Write("Cognitive map not specified");
             return;
         }
 
     double version = xmltof(xRootNode->Attribute("version"), -1);
 
     if(version != std::stod(JPS_VERSION) && version != std::stod(JPS_OLD_VERSION)) {
-        Log->Write(" \tWrong geometry version!");
-        Log->Write(" \tOnly version >= %s supported", JPS_VERSION);
-        Log->Write(" \tPlease update the version of your geometry file to %s", JPS_VERSION);
-        Log->Write("Cognitive map not specified");
+        LOG_ERROR("Wrong geometry version found. tOnly version >= %s supported", JPS_VERSION);
         return;
     }
 
     //processing the regions node
     TiXmlNode * xRegionsNode = xRootNode->FirstChild("regions");
     if(!xRegionsNode) {
-        Log->Write("ERROR: \tCognitive map file without region definition!");
-        Log->Write("Cognitive map not specified");
+        LOG_ERROR("Could not parse cognitive map file: No <regions> found");
         return;
     }
 
@@ -152,8 +148,7 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
         //processing the landmarks node
         TiXmlNode * xLandmarksNode = xRegion->FirstChild("landmarks");
         if(!xLandmarksNode) {
-            Log->Write("ERROR: \tCognitive map file without landmark definition!");
-            Log->Write("No landmarks specified");
+            LOG_ERROR("Could not parse cognitive map file: No <landmarks> found");
             return;
         }
 
@@ -174,7 +169,7 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
             ptrLandmark landmark(new Landmark(Point(std::stod(pxreal), std::stod(pyreal))));
 
             if(roomId == "NaN") {
-                Log->Write("ERROR:\t Subroom Id is NaN!");
+                LOG_ERROR("Subroom Id is NaN!");
                 return;
             }
             landmark->SetId(std::stoi(landmark_id));
@@ -189,7 +184,7 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
             //processing the rooms node
             TiXmlNode * xAssociationsNode = xLandmark->FirstChild("associations");
             if(!xAssociationsNode) {
-                Log->Write("Landmark with no association!");
+                LOG_WARNING("Landmark with no association!");
                 continue;
             }
 
@@ -222,14 +217,14 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
             }
 
             region->AddLandmark(landmark);
-            Log->Write("INFO:\tLandmark added!");
+            LOG_INFO("Landmark added!");
         }
 
         //processing the connections node
         TiXmlNode * xConnectionsNode = xRegion->FirstChild("connections");
         if(!xConnectionsNode) {
             //Log->Write("ERROR: \tGeometry file without landmark definition!");
-            Log->Write("No connections specified");
+            LOG_INFO("No connections specified");
             //return;
         }
 
@@ -252,12 +247,12 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
                     region->GetLandmarkByID(std::stoi(landmark2)));
 
                 region->AddConnection(connection);
-                Log->Write("INFO:\tConnection added!");
+                LOG_INFO("Connection added");
             }
         }
 
         _regions.push_back(region);
-        Log->Write("INFO:\tRegion added!");
+        LOG_INFO("Region added");
     }
 }
 

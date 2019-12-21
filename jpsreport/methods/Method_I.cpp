@@ -292,7 +292,7 @@ void Method_I::GetIndividualFD(
     }
 }
 
-void Method_I::SetCalculateIndividualFD(bool individualFD)
+void Method_I::SetCalculateIndividualFD(bool /*individualFD*/)
 {
     _calcIndividualFD = true;
 }
