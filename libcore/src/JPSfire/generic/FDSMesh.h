@@ -4,9 +4,6 @@
 
 #include <string>
 #include <vector>
-//log output
-class OutputHandler;
-extern OutputHandler * Log;
 
 using Matrix = std::vector<std::vector<Knot>>;
 

@@ -30,6 +30,7 @@
 #include "JPSfire/generic/FDSMesh.h"
 #include "JPSfire/generic/FDSMeshStorage.h"
 #include "general/Filesystem.h"
+#include "general/Logger.h"
 #include "pedestrian/Pedestrian.h"
 
 #include <tinyxml.h>
@@ -54,14 +55,13 @@ bool ToxicityAnalysis::LoadJPSfireInfo(const std::string projectFilename)
 
     TiXmlDocument doc(projectFilename);
     if(!doc.LoadFile()) {
-        Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \t could not parse the project file");
+        LOG_ERROR("ToxicityAnalysis, could not parse project file: {}", doc.ErrorDesc());
         return false;
     }
 
     TiXmlNode * JPSfireNode = doc.RootElement()->FirstChild("JPSfire");
     if(!JPSfireNode) {
-        Log->Write("INFO:\tcould not find any JPSfire information");
+        LOG_INFO("Could not find any JPSfire information");
         return true;
     }
 
@@ -76,10 +76,10 @@ bool ToxicityAnalysis::LoadJPSfireInfo(const std::string projectFilename)
             double finalTime       = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
             std::string study      = "";
             std::string irritant   = "";
-            Log->Write(
-                "INFO:\tJPSfire Module C_toxicity_analysis: \n \tdata: %s \n\tupdate time: %.1f s "
-                "| final time: %.1f s",
-                filepath.c_str(),
+            LOG_INFO(
+                "JPSfire Module C_toxicity_analysis, data: {}, update time: {:.1f}s, final time: "
+                "{:.1f}s",
+                filepath,
                 updateIntervall,
                 finalTime);
             //@todo Is there a posibility to pass a variable number of arguments to a function?

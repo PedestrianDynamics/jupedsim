@@ -40,8 +40,6 @@ enum RefSelectionMode { SINGLE = 1, ALL = 2 };
 
 enum DefaultStrategy { LOCAL_SHORTEST = 1, GLOBAL_SHORTEST = 2 };
 
-//log output
-extern OutputHandler * Log;
 /*!
  * \class QuickestPathRouter
  *

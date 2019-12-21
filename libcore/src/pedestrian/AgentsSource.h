@@ -37,10 +37,6 @@ class OutputHandler;
 class StartDistribution;
 class Building;
 
-// external variables
-extern OutputHandler * Log;
-
-
 class AgentsSource
 {
 public:

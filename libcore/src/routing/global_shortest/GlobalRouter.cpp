@@ -28,6 +28,7 @@
 
 #include "AccessPoint.h"
 #include "DTriangulation.h"
+#include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 
@@ -85,7 +86,7 @@ bool GlobalRouter::Init(Building * building)
 {
     //necessary if the init is called several times during the simulation
     Reset();
-    Log->Write("INFO:\tInit the Global Router Engine");
+    LOG_ERROR("Init the Global Router Engine");
     _building = building;
     //only load the information if not previously loaded
     //if(_building->GetNumberOfGoals()==0)
@@ -230,12 +231,9 @@ bool GlobalRouter::Init(Building * building)
         //set the final destination
         if(cross->IsExit() && !cross->IsClose()) {
             ap->SetFinalExitToOutside(true);
-            Log->Write(
-                "INFO: \tExit to outside found: %d [%s]",
-                ap->GetID(),
-                ap->GetFriendlyName().c_str());
+            LOG_INFO("Exit to outside found: {:d} [{}]", ap->GetID(), ap->GetFriendlyName());
         } else if((id1 == -1) && (id2 == -1)) {
-            Log->Write("INFO:\t a final destination outside the geometry was found");
+            LOG_INFO("Final destination outside the geometry was found");
             ap->SetFinalExitToOutside(true);
         } else if(cross->GetRoom1()->GetCaption() == "outside") {
             ap->SetFinalExitToOutside(true);
@@ -425,10 +423,10 @@ bool GlobalRouter::Init(Building * building)
             tmpMinDist = 0.0;
 
         if(tmpMinDist == FLT_MAX) {
-            Log->Write(
-                "ERROR: \tGlobalRouter: There is no visibility path from [%s] to the outside 1\n"
-                "       You can solve this by enabling triangulation.",
-                from_AP->GetFriendlyName().c_str());
+            LOG_ERROR(
+                "GlobalRouter: There is no visibility path from [{}] to the outside. You can "
+                "solve this by enabling triangulation.",
+                from_AP->GetFriendlyName());
             from_AP->Dump();
             return false;
         }
@@ -444,11 +442,10 @@ bool GlobalRouter::Init(Building * building)
                 FINAL_DEST_OUT, _accessPoints[_map_index_to_id[_tmpPedPath[1]]]);
         } else {
             if((!from_AP->GetFinalExitToOutside()) && (!from_AP->IsClosed())) {
-                Log->Write(
-                    "ERROR: \tGlobalRouter: There is no visibility path from [%s] to the outside "
-                    "2\n"
-                    "       \tYou can solve this by enabling triangulation.",
-                    from_AP->GetFriendlyName().c_str());
+                LOG_ERROR(
+                    "GlobalRouter: There is no visibility path from {} to the outside. You can "
+                    "solve this by enabling triangulation.",
+                    from_AP->GetFriendlyName());
                 from_AP->Dump();
                 return false;
             }
@@ -466,9 +463,8 @@ bool GlobalRouter::Init(Building * building)
 
         // thats probably a goal located outside the geometry or not an exit from the geometry
         if(to_door_uid == -1) {
-            Log->Write(
-                "ERROR: \tGlobalRouter: there is something wrong with the final destination [ %d "
-                "]\n",
+            LOG_ERROR(
+                "GlobalRouter: there is something wrong with the final destination [{:d}]",
                 _finalDestinations[p]);
             return false;
         }
@@ -493,11 +489,10 @@ bool GlobalRouter::Init(Building * building)
                     _finalDestinations[p], _accessPoints[_map_index_to_id[_tmpPedPath[1]]]);
             } else {
                 if(((!from_AP->IsClosed()))) {
-                    Log->Write(
-                        "ERROR: \tGlobalRouter: There is no visibility path from [%s] to goal "
-                        "[%d]\n"
-                        "         You can solve this by enabling triangulation.",
-                        from_AP->GetFriendlyName().c_str(),
+                    LOG_ERROR(
+                        "GlobalRouter: There is no visibility path from [{}] to goal [{:d}]. You "
+                        "can solve this by enabling triangulation.",
+                        from_AP->GetFriendlyName(),
                         _finalDestinations[p]);
                     from_AP->Dump();
                     return false;
@@ -516,7 +511,7 @@ bool GlobalRouter::Init(Building * building)
     //rooms.push_back("Verteilerebene");
     //WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms); exit(0);
     //WriteGraphGV("routing_graph.gv",4,rooms);exit(0);
-    Log->Write("INFO:\tDone with the Global Router Engine!");
+    LOG_INFO("Done with the Global Router Engine!");
     return true;
 }
 
@@ -591,16 +586,17 @@ bool GlobalRouter::GetPath(Pedestrian * ped, std::vector<NavLine *> & path)
         if(!IsElementInVector(aps_path, next_ap)) {
             aps_path.push_back(next_ap);
         } else {
-            Log->Write("WARNING:\t the line [%d] is already included in the path.");
+            LOG_WARNING("Line is already included in the path.");
         }
 
         //work arround to detect a potential infinte loop.
         if(loop_count++ > 1000) {
-            Log->Write(
-                "ERROR:\t A path could not be found for pedestrian [%d] going to destination [%d]",
+            LOG_ERROR(
+                "A path could not be found for pedestrian [{:d}] going to destination [{:d}]. "
+                "Stuck in an infinite loop [{:d}]",
                 ped->GetID(),
-                ped->GetFinalDestination());
-            Log->Write("      \t Stuck in an infinite loop [%d].", loop_count);
+                ped->GetFinalDestination(),
+                loop_count);
             return false;
         }
 
@@ -625,10 +621,7 @@ bool GlobalRouter::GetPath(Pedestrian * ped, int goalID, std::vector<SubRoom *> 
     //find the nearest APs and start from there
     int next = GetBestDefaultRandomExit(ped);
     if(next == -1) {
-        Log->Write(
-            "ERROR:\t there is an error in getting the path for ped %d to the goal %d",
-            ped->GetID(),
-            goalID);
+        LOG_ERROR("Cannot get path for ped {:d} to goal {:d}", ped->GetID(), goalID);
         return false;
     }
 
@@ -639,9 +632,7 @@ bool GlobalRouter::GetPath(Pedestrian * ped, int goalID, std::vector<SubRoom *> 
 
     // thats probably a goal located outside the geometry or not an exit from the geometry
     if(to_door_uid == -1) {
-        Log->Write(
-            "ERROR: \tGlobalRouter: there is something wrong with final destination [ %d ]\n",
-            goalID);
+        LOG_ERROR("GlobalRouter: there is something wrong with final destination {:d}", goalID);
         return false;
     }
 
@@ -730,9 +721,9 @@ int GlobalRouter::FindExit(Pedestrian * ped)
         }
 
         //something bad happens
-        Log->Write(
-            "ERROR:\t Cannot find a valid destination for ped [%d] located in room [%d] subroom "
-            "[%d] going to destination [%d]",
+        LOG_ERROR(
+            "Cannot find a valid destination for ped {:d} located in room {:d} subroom {:d} going "
+            "to destination {:d}",
             ped->GetID(),
             ped->GetRoomID(),
             ped->GetSubRoomID(),
@@ -1133,7 +1124,7 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(
 
 void GlobalRouter::TriangulateGeometry()
 {
-    Log->Write("INFO:\tUsing the triangulation in the global router");
+    LOG_INFO("Using the triangulation in the global router");
     for(auto && itr_room : _building->GetAllRooms()) {
         for(auto && itr_subroom : itr_room.second->GetAllSubRooms()) {
             auto && subroom   = (std::shared_ptr<SubRoom> &&) itr_subroom.second;
@@ -1195,12 +1186,6 @@ void GlobalRouter::TriangulateGeometry()
                             h->SetRoom1(room.get());
                             h->SetSubRoom1(subroom.get());
                             subroom->AddHline(h);
-                            Log->Write(
-                                std::to_string(h->GetPoint1()._x) + "" +
-                                std::to_string(h->GetPoint1()._y));
-                            Log->Write(
-                                std::to_string(h->GetPoint2()._x) + "" +
-                                std::to_string(h->GetPoint2()._y));
                             _building->AddHline(h);
                         }
                     }
@@ -1208,7 +1193,7 @@ void GlobalRouter::TriangulateGeometry()
             }
         }
     }
-    Log->Write("INFO:\tDone...");
+    LOG_INFO("INFO:\tDone...");
 }
 
 bool GlobalRouter::GenerateNavigationMesh()
@@ -1320,8 +1305,7 @@ fs::path GlobalRouter::GetRoutingInfoFile()
 {
     TiXmlDocument doc(_building->GetProjectFilename().string());
     if(!doc.LoadFile()) {
-        Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \t GlobalRouter: could not parse the project file");
+        LOG_ERROR("GlobalRouter, could not parse project file: {}", doc.ErrorDesc());
         return "";
     }
 
@@ -1353,7 +1337,7 @@ fs::path GlobalRouter::GetRoutingInfoFile()
                 if(para) {
                     //triangulate the geometry
                     if(!_building->Triangulate()) {
-                        Log->Write("ERROR:\t could not triangulate the geometry!");
+                        LOG_ERROR("could not triangulate the geometry!");
                         exit(EXIT_FAILURE);
                     }
 
@@ -1369,10 +1353,10 @@ fs::path GlobalRouter::GetRoutingInfoFile()
                     if(method == "triangulation") {
                         _generateNavigationMesh = true;
                     } else {
-                        Log->Write(
-                            "WARNING:\t only triangulation is supported for the mesh. You supplied "
-                            "[%s]",
-                            method.c_str());
+                        LOG_WARNING(
+                            "only triangulation is supported for the mesh. You supplied "
+                            "[{}]",
+                            method);
                     }
                     _minDistanceBetweenTriangleEdges =
                         xmltof(para->Attribute("minimum_distance_between_edges"), -FLT_MAX);
@@ -1394,31 +1378,33 @@ bool GlobalRouter::LoadRoutingInfos(const fs::path & filename)
     if(filename.empty())
         return true;
 
-    Log->Write("INFO:\tLoading extra routing information for the global/quickest path router");
-    Log->Write("INFO:\t  from the file " + filename.string());
+    LOG_INFO(
+        "Loading extra routing information for the global/quickest path routeri from file {}",
+        filename.string());
 
     TiXmlDocument docRouting(filename.string());
     if(!docRouting.LoadFile()) {
-        Log->Write("ERROR: \t%s", docRouting.ErrorDesc());
-        Log->Write("ERROR: \t could not parse the routing file [%s]", filename.c_str());
+        LOG_ERROR("GlobalRouter, could not parse routing file: {}", docRouting.ErrorDesc());
         return false;
     }
 
     TiXmlElement * xRootNode = docRouting.RootElement();
     if(!xRootNode) {
-        Log->Write("ERROR:\tRoot element does not exist");
+        LOG_ERROR("GlobalRouter, could not parse routing file: No root element found");
         return false;
     }
 
     if(xRootNode->ValueStr() != "routing") {
-        Log->Write("ERROR:\tRoot element value is not 'routing'.");
+        LOG_ERROR(
+            "GlobalRouter, could not parse routing file: Expected root element <routing>, found {} "
+            "instead",
+            xRootNode->ValueStr());
         return false;
     }
 
     std::string version = xRootNode->Attribute("version");
     if(version < JPS_OLD_VERSION) {
-        Log->Write("ERROR: \tOnly version greater than %d supported", JPS_OLD_VERSION);
-        Log->Write("ERROR: \tparsing routing file failed!");
+        LOG_ERROR("Only version greater than {} supported", JPS_OLD_VERSION);
         return false;
     }
     int HlineCount = 0;
@@ -1455,8 +1441,7 @@ bool GlobalRouter::LoadRoutingInfos(const fs::path & filename)
             }
         }
     }
-    Log->Write(
-        "INFO:\tDone with loading extra routing information. Loaded <%d> Hlines", HlineCount);
+    LOG_INFO("Done loading extra routing information. Loaded {:d} Hlines", HlineCount);
     return true;
 }
 
@@ -1560,7 +1545,7 @@ double GlobalRouter::MinAngle(const Point & p1, const Point & p2, const Point & 
         std::vector<double> vec = {alpha, beta, gamma};
         return *std::min_element(vec.begin(), vec.end()) * (180.0 / M_PI);
     } else {
-        Log->Write("ERROR:\t Error in angle calculation");
+        LOG_ERROR("Error in angle calculation");
         exit(EXIT_FAILURE);
     }
 

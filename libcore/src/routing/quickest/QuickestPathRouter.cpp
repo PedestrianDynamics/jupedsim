@@ -26,6 +26,7 @@
  **/
 #include "QuickestPathRouter.h"
 
+#include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 #include "mpi/LCGrid.h"
@@ -38,7 +39,7 @@ QuickestPathRouter::~QuickestPathRouter() {}
 
 bool QuickestPathRouter::Init(Building * building)
 {
-    Log->Write("INFO:\tInit Quickest Path Router Engine");
+    LOG_INFO("Init Quickest Path Router Engine");
 
     // prefer path through corridors to path through rooms
     SetEdgeCost(2.0);
@@ -58,7 +59,7 @@ bool QuickestPathRouter::Init(Building * building)
     //WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms);
     //DumpAccessPoints(1185);
     //exit(0);
-    Log->Write("INFO:\tDone with Quickest Path Router Engine!");
+    LOG_INFO("Done with Quickest Path Router Engine!");
     return true;
 }
 
@@ -280,9 +281,9 @@ bool QuickestPathRouter::SelectReferencePedestrian(
                 *myref = nullptr;
                 *flag  = UNREACHEABLE_EXIT;
                 //done=true; //this line has no effect, cause of return statement below
-                Log->Write(
-                    "ERROR: reference ped cannot be found for ped %d within [%f] "
-                    "m  around the exit [%d]\n",
+                LOG_ERROR(
+                    "reference ped cannot be found for ped {:d} within [{:f}] "
+                    "m  around the exit [{:d}]",
                     myself->GetID(),
                     radius,
                     crossing->GetID());
@@ -560,8 +561,7 @@ double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian * ped, int exiti
     }
 
     if((myref == nullptr) && (flag == REF_PED_FOUND)) {
-        Log->Write("ERROR:\t Fatal Error in Quickest Path Router");
-        Log->Write("      \t reference pedestrians is nullptr");
+        LOG_ERROR("Fatal Error in Quickest Path Router, ref. ped is nullptr");
         time = FLT_MAX;
     }
 
@@ -776,9 +776,9 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian * ped)
         return bestAPsID;
     } else {
         if(_building->GetRoom(ped->GetRoomID())->GetCaption() != "outside")
-            Log->Write(
-                "ERROR:\t Cannot find valid destination for ped [%d] located in room [%d] subroom "
-                "[%d] going to destination [%d]",
+            LOG_ERROR(
+                "Cannot find valid destination for ped {:d} located in room {:d} subroom {:d} "
+                "going to destination {:d}",
                 ped->GetID(),
                 ped->GetRoomID(),
                 ped->GetSubRoomID(),
@@ -792,8 +792,7 @@ bool QuickestPathRouter::ParseAdditionalParameters()
 {
     TiXmlDocument doc(_building->GetProjectFilename().string());
     if(!doc.LoadFile()) {
-        Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \t GlobalRouter: could not parse the project file");
+        LOG_ERROR("QuickestPathRouter, could not parse project file: {}", doc.ErrorDesc());
         return false;
     }
 

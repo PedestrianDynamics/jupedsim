@@ -1,5 +1,6 @@
 #include "cognitivemap.h"
 
+#include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "pedestrian/Pedestrian.h"
 
@@ -303,7 +304,7 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge * edge, const ptrLandm
     VisiLibity::Environment environment(polygons);
     //environment.reverse_holes();
     if(!environment.is_valid()) {
-        Log->Write("Error:\tEnvironment for Visibilitypolygon not valid");
+        LOG_ERROR("Environment for Visibilitypolygon not valid");
         exit(EXIT_FAILURE);
     }
 

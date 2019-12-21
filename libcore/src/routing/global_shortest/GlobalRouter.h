@@ -44,9 +44,6 @@ class AccessPoint;
 class Building;
 class OutputHandler;
 
-//log output
-extern OutputHandler * Log;
-
 
 /*!
  * \class GlobalRouter

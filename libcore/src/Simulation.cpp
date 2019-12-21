@@ -42,7 +42,6 @@
 #include "pedestrian/AgentsSourcesManager.h"
 #include "routing/ff_router/ffRouter.h"
 
-OutputHandler * Log;
 // todo: add these variables to class simulation
 std::map<std::string, std::shared_ptr<TrainType>> TrainTypes;
 std::map<int, std::shared_ptr<TrainTimeTable>> TrainTimeTables;
@@ -85,24 +84,6 @@ long Simulation::GetPedsNumber() const
 
 bool Simulation::InitArgs()
 {
-    switch(_config->GetLog()) {
-        case 0: {
-            break;
-        }
-        case 1: {
-            delete Log;
-            Log = new STDIOHandler();
-            break;
-        }
-        case 2: {
-            delete Log;
-            Log = new FileHandler(_config->GetErrorLogFile());
-        } break;
-        default:
-            LOG_WARNING("Wrong option for Logfile!");
-            return false;
-    }
-
     if(!_config->GetTrajectoriesFile().empty()) {
         switch(_config->GetFileFormat()) {
             case FileFormat::XML:
@@ -314,7 +295,7 @@ void Simulation::UpdateRoutesAndLocations()
 #pragma omp critical(Simulation_Update_pedsToRemove)
             {
                 pedsToRemove.insert(ped);
-                Log->incrementDeletedAgents();
+                // TODO KKZ track deleted peds
             }
         }
 

@@ -29,6 +29,7 @@
 #include "VelocityModel.h"
 
 #include "direction/walking/DirectionStrategy.h"
+#include "general/Logger.h"
 #include "general/OpenMP.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
@@ -75,14 +76,14 @@ bool VelocityModel::Init(Building * building)
         int res = ped->FindRoute();
         if(!ped_is_waiting && res == -1) {
             std::cout << ped->GetID() << " has no route\n";
-            Log->Write(
-                "ERROR:\tVelocityModel::Init() cannot initialise route. ped %d is deleted in Room "
+            LOG_ERROR(
+                "VelocityModel::Init() cannot initialise route. ped {:d} is deleted in Room "
                 "%d %d.\n",
                 ped->GetID(),
                 ped->GetRoomID(),
                 ped->GetSubRoomID());
             building->DeletePedestrian(ped);
-            Log->incrementDeletedAgents();
+            // TODO KKZ track deleted peds
             p--;
             peds_size--;
             continue;
@@ -106,8 +107,7 @@ bool VelocityModel::Init(Building * building)
             cosPhi = d._x / dist;
             sinPhi = d._y / dist;
         } else {
-            Log->Write("ERROR: \tallPeds::Init() cannot initialise phi! "
-                       "dist to target is 0\n");
+            LOG_ERROR("allPeds::Init() cannot initialise phi! dist to target is 0");
             return false;
         }
 
@@ -267,16 +267,16 @@ void VelocityModel::ComputeNextTimeStep(
                std::max(ped->GetMeanVelOverRecTime(), ped->GetV().Norm()) < 0.01 &&
                size == 0) // size length of peds neighbour vector
             {
-                Log->Write(
-                    "WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time "
-                    "%f s (current=%f\n",
+                LOG_WARNING(
+                    "ped {:d} with vmean {:f} has been deleted in room {:d}/{:d} after time "
+                    "{:f}s (current={:f}",
                     ped->GetID(),
                     ped->GetMeanVelOverRecTime(),
                     ped->GetRoomID(),
                     ped->GetSubRoomID(),
                     ped->GetGlobalTime(),
                     current);
-                Log->incrementDeletedAgents();
+                //TODO KKZ track deleted peds
 #pragma omp critical(VelocityModel_ComputeNextTimeStep_pedsToRemove)
                 pedsToRemove.push_back(ped);
             }
@@ -417,8 +417,10 @@ VelocityModel::GetSpacing(Pedestrian * ped1, Pedestrian * ped2, Point ei, int pe
         ep12 = distp12.Normalized();
     } else {
         //printf("ERROR: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!\n");
-        Log->Write("WARNING: \tin VelocityModel::GetSPacing() ep12 can not be calculated!!!\n");
-        Log->Write("\t\t Pedestrians are too near to each other (%f).", Distance);
+        LOG_WARNING(
+            "VelocityModel::GetSPacing() ep12 can not be calculated! Pedestrians are to close to "
+            "each other ({:f})",
+            Distance);
         my_pair(FLT_MAX, ped2->GetID());
         exit(EXIT_FAILURE); //TODO
     }
@@ -457,17 +459,15 @@ Point VelocityModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2, int perio
         ep12 = distp12.Normalized();
     } else {
         //printf("ERROR: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!\n");
-        Log->Write(
-            KRED
-            "\nWARNING: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!" RESET);
-        Log->Write("\t\t Pedestrians are too near to each other (dist=%f).", Distance);
-        Log->Write(
-            "\t\t Maybe the value of <a> in force_ped should be increased. Going to exit.\n");
-        printf("ped1 %d  ped2 %d\n", ped1->GetID(), ped2->GetID());
-        printf(
-            "ped1 at (%f, %f), ped2 at (%f, %f)\n",
+        LOG_ERROR(
+            "VelocityModel::forcePedPed() ep12 can not be calculated! Pedestrians are too near to "
+            "each other (dist={:f}). Adjust <a> value in force_ped to counter this. Affected "
+            "pedestrians ped1 {:d} at ({:f},{:f}) and ped2 {:d} at ({:f}, {:f})",
+            Distance,
+            ped1->GetID(),
             ped1->GetPos()._x,
             ped1->GetPos()._y,
+            ped2->GetID(),
             ped2->GetPos()._x,
             ped2->GetPos()._y);
         exit(EXIT_FAILURE); //TODO: quick and dirty fix for issue #158
@@ -499,8 +499,8 @@ Point VelocityModel::ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const
     //then the obstacles
     for(const auto & obst : subroom->GetAllObstacles()) {
         if(obst->Contains(ped->GetPos())) {
-            Log->Write(
-                "ERROR:\t Agent [%d] is trapped in obstacle in room/subroom [%d/%d]",
+            LOG_ERROR(
+                "Agent {:d} is trapped in obstacle in room/subroom {:d}/{:d}",
                 ped->GetID(),
                 subroom->GetRoomID(),
                 subroom->GetSubRoomID());
@@ -552,9 +552,9 @@ Point VelocityModel::ForceRepWall(
     if(Distance > min_distance_to_wall) {
         e_iw = dist / Distance;
     } else {
-        Log->Write(
-            "WARNING:\t Velocity: forceRepWall() ped %d [%f, %f] is too near to the wall [%f, "
-            "%f]-[%f, %f] (dist=%f)",
+        LOG_WARNING(
+            "Velocity: forceRepWall() ped {:d} [{:f}, {:f}] is too near to the wall [{:f}, "
+            "{:f}]-[{:f}, {:f}] (dist={:f})",
             ped->GetID(),
             ped->GetPos()._y,
             ped->GetPos()._y,

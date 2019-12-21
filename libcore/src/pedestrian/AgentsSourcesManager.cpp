@@ -30,6 +30,7 @@
 
 #include "AgentsQueue.h"
 #include "Pedestrian.h"
+#include "general/Logger.h"
 #include "mpi/LCGrid.h"
 #include "voronoi-boost/VoronoiPositionGenerator.h"
 
@@ -49,7 +50,7 @@ void AgentsSourcesManager::operator()()
 void AgentsSourcesManager::Run()
 {
     SetRunning(true);
-    Log->Write("INFO:\tStarting agent manager thread");
+    LOG_INFO("Starting agent manager thread");
     std::cout << KRED << "\n Starting agent manager thread\n"
               << ">> time: " << Pedestrian::GetGlobalTime() << RESET << "\n";
     //Generate all agents required for the complete simulation
@@ -90,7 +91,7 @@ void AgentsSourcesManager::Run()
             break; // break if max simulation time is reached.
 
     } while(!finished);
-    Log->Write("INFO:\tTerminating agent manager thread");
+    LOG_INFO("Terminating agent manager thread");
     _isCompleted = true;
 }
 
@@ -134,29 +135,24 @@ bool AgentsSourcesManager::ProcessAllSources() const
 
             source_peds.reserve(source_peds.size() + peds.size());
 
-            Log->Write(
-                "\nINFO:\tSource %d generating %d agents at %3.3f s, %d (%d remaining in pool)\n",
+            LOG_INFO(
+                "Source {:d} generating {:d}agents at {:3.3f}s, {:d} ({:d} remaining in pool)",
                 src->GetId(),
                 peds.size(),
                 current_time,
                 src->GetRemainingAgents(),
                 src->GetPoolSize());
-            printf(
-                "\nINFO:\tSource %d generating %lu agents (%d remaining)\n",
-                src->GetId(),
-                peds.size(),
-                src->GetPoolSize());
 
             //ComputeBestPositionRandom(src.get(), peds);
             //todo: here every pedestrian needs an exitline
             if(!std::isnan(src->GetStartX()) && !std::isnan(src->GetStartY())) {
-                printf(
-                    "INFO:\tSet source agent on fixed position (%.2f, %.2f)",
+                LOG_INFO(
+                    "Set source agent on fixed position ({:.2f}, {:.2f})",
                     src->GetStartX(),
                     src->GetStartY());
                 InitFixedPosition(src.get(), peds);
             } else if(!ComputeBestPositionVoronoiBoost(src.get(), peds, _building, source_peds))
-                Log->Write("WARNING:\tThere was no place for some pedestrians");
+                LOG_WARNING("There was no place for some pedestrians");
 
             source_peds.insert(source_peds.end(), peds.begin(), peds.end());
             /* std::cout << KRED << ">>  Add to queue " << peds.size() << "\n" << RESET; */
@@ -237,7 +233,7 @@ void AgentsSourcesManager::ComputeBestPositionCompleteRandom(
 
             AdjustVelocityByNeighbour(ped);
         } else {
-            Log->Write("\t No place for a pedestrian");
+            LOG_INFO("No place for a pedestrian");
             break;
         }
     }
@@ -417,15 +413,15 @@ void AgentsSourcesManager::ComputeBestPositionRandom(
         }
         if(index == -1) {
             if(positions.size()) {
-                Log->Write(
-                    "ERROR:\t AgentSourceManager Cannot distribute pedestrians in the mentioned "
-                    "area [%0.2f,%0.2f,%0.2f,%0.2f]",
+                LOG_ERROR(
+                    "AgentSourceManager Cannot distribute pedestrians in the mentioned "
+                    "area [{:.2f},{:.2f},{:.2f},{:.2f}]. Specify a subroom_if may help. {:d} "
+                    "positions where available",
                     bounds[0],
                     bounds[1],
                     bounds[2],
-                    bounds[3]);
-                Log->Write("     \t Specifying a subroom_id might help");
-                Log->Write("     \t %d positions were available", positions.size());
+                    bounds[3],
+                    positions.size());
                 //exit(EXIT_FAILURE);
             }
             //dump the pedestrian, move iterator
@@ -492,8 +488,8 @@ void AgentsSourcesManager::AdjustVelocityByNeighbour(Pedestrian * ped) const
         v       = v * speed;
         ped->SetV(v);
     } else {
-        Log->Write(
-            ">> ERROR:\t no route could be found for agent [%d] going to [%d]",
+        LOG_ERROR(
+            "No route could be found for agent {:d} going to {:d}",
             ped->GetID(),
             ped->GetFinalDestination());
         //that will be most probably be fixed in the next computation step.
@@ -536,8 +532,8 @@ void AgentsSourcesManager::AdjustVelocityUsingWeidmann(Pedestrian * ped) const
         ped->SetV(v);
         //cout<<"density: "<<density<<endl;
     } else {
-        Log->Write(
-            ">>> SOURCE ERROR:\t no route could be found for agent [%d] going to [%d]",
+        LOG_ERROR(
+            "No route could be found for agent {:d} going to {:d}",
             ped->GetID(),
             ped->GetFinalDestination());
         //that will be most probably be fixed in the next computation step.

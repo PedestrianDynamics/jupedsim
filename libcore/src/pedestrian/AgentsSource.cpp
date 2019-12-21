@@ -29,6 +29,7 @@
 #include "AgentsSource.h"
 
 #include "Pedestrian.h"
+#include "general/Logger.h"
 
 AgentsSource::AgentsSource(
     int id,
@@ -269,26 +270,30 @@ void AgentsSource::GenerateAgents(std::vector<Pedestrian *> & peds, int count, B
 
 void AgentsSource::Dump() const
 {
-    Log->Write("\n--------------------------");
-    Log->Write("Dumping Source");
-    Log->Write(">> Caption    : %s", this->GetCaption().c_str());
-    Log->Write(">> Source ID  : %d", _id);
-    Log->Write(">> Group ID   : %d", _groupID);
-    Log->Write(">> Frequency  : %d", _frequency);
-    Log->Write(">> Agents Max : %d", _maxAgents);
-    Log->Write(">> Agents Pool: %d", _agents.size());
-    Log->Write(">> Agent id   : %d", this->GetAgentId());
-    Log->Write(">> Time       : %.2f", this->GetPlanTime());
-    Log->Write(">> StartX     : %.2f", this->GetStartX());
-    Log->Write(">> StartY     : %.2f", this->GetStartY());
-    Log->Write(">> Percent    : %.2f", this->GetPercent());
-    Log->Write(">> Rate       : %.2f", this->GetRate());
-    Log->Write(">> N_create   : %d", this->GetChunkAgents());
     auto tmpB = this->GetBoundaries();
-    Log->Write(">> Boundaries : X-axis [%.4f -- %.4f]", tmpB[0], tmpB[1]);
-    Log->Write("                Y-axis [%.4f -- %.4f]", tmpB[2], tmpB[3]);
     auto tmpL = this->GetLifeSpan();
-    Log->Write(">> LifeSpan   : [%d -- %d]", tmpL[0], tmpL[1]);
-    Log->Write("\n--------------------------\n");
-    //getc(stdin);
+    LOG_DEBUG(
+        "Dumping Source: Caption={} SourceID={:d}, GroupID={:d}, Frequency={:d}, AgentsMax={:d}, "
+        "AgentsPool={:d}, AgentID={:d}, Time={:.2f}, Pos=({:.2f},{:.2f}), Percent={:.2f}, "
+        "Rate={:.2f}, N_create={:d}, Boundaries=(XAxis=({:.4f}, {:.4f}), YAxis=({:.4f},{:.4f})), "
+        "LifeSpan=({:d},{:d})",
+        this->GetCaption(),
+        _id,
+        _groupID,
+        _frequency,
+        _maxAgents,
+        _agents.size(),
+        this->GetAgentId(),
+        this->GetPlanTime(),
+        this->GetStartX(),
+        this->GetStartY(),
+        this->GetPercent(),
+        this->GetRate(),
+        this->GetChunkAgents(),
+        tmpB[0],
+        tmpB[1],
+        tmpB[2],
+        tmpB[3],
+        tmpL[0],
+        tmpL[1]);
 }

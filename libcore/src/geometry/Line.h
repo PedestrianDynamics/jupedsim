@@ -36,9 +36,6 @@
 class OutputHandler;
 class Wall;
 
-// external variables
-extern OutputHandler * Log;
-
 class Line
 {
 private:

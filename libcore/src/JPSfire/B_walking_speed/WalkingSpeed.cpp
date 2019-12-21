@@ -30,6 +30,7 @@
 #include "JPSfire/generic/FDSMesh.h"
 #include "JPSfire/generic/FDSMeshStorage.h"
 #include "general/Filesystem.h"
+#include "general/Logger.h"
 #include "pedestrian/Pedestrian.h"
 
 #include <tinyxml.h>
@@ -49,14 +50,13 @@ bool WalkingSpeed::LoadJPSfireInfo(const std::string & projectFilename)
 
     TiXmlDocument doc(projectFilename);
     if(!doc.LoadFile()) {
-        Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \t could not parse the project file");
+        LOG_ERROR("Could not parse project file: {}", doc.ErrorDesc());
         return false;
     }
 
     TiXmlNode * JPSfireNode = doc.RootElement()->FirstChild("JPSfire");
     if(!JPSfireNode) {
-        Log->Write("INFO:\tcould not find any JPSfire information");
+        LOG_INFO("Could not find any JPSfire information");
         return true;
     }
 
@@ -78,9 +78,9 @@ bool WalkingSpeed::LoadJPSfireInfo(const std::string & projectFilename)
 
             double updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
             double finalTime       = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
-            Log->Write(
-                "INFO:\tJPSfire Module B_walking_speed: \n \tstudy: %s \n\tdata: %s \n\tupdate "
-                "time: %.1f s | final time: %.1f s | irritant: %s",
+            LOG_INFO(
+                "JPSfire Module B_walking_speed, tstudy: {} tdata: {} tupdate time: {:.1f}s, final "
+                "time: {:.1f}s | irritant: {}",
                 study.c_str(),
                 filepath.c_str(),
                 updateIntervall,
@@ -137,7 +137,7 @@ double WalkingSpeed::Jin1978(double & walking_speed, double ExtinctionCoefficien
             walking_speed *
                 (-std::pow(112236.0553, (ExtinctionCoefficient - 0.532027513)) + 0.988158598));
     } else {
-        Log->Write("ERROR:\tSpecify if irritant or non-irritant smoke shall be cosidered");
+        LOG_ERROR("Specify if irritant or non-irritant smoke shall be cosidered");
         exit(EXIT_FAILURE);
     }
     return walking_speed;
@@ -171,9 +171,9 @@ double WalkingSpeed::WalkingInSmoke(const Pedestrian * p, double walking_speed)
         } else if(study == "Fridolf2018") {
             walking_speed = Fridolf2018(walking_speed, ExtinctionCoefficient);
         } else {
-            Log->Write(
-                "ERROR:\tNo study specified. Got <%s>, but only <Frantzich+Nilsson2003> and "
-                "<Jin1978> are available",
+            LOG_ERROR(
+                "No study specified. Got {}, choose from <Frantzich+Nilsson2003>, <Jin1978> or "
+                "<Fridolf2018>",
                 study.c_str());
             exit(EXIT_FAILURE);
         }

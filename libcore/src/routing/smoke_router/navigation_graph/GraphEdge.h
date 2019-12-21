@@ -36,9 +36,6 @@ class SubRoom;
 class GraphVertex;
 class Crossing;
 
-//log output
-extern OutputHandler * Log;
-
 /**
  * @brief Graph Edge.
  *

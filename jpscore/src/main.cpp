@@ -45,9 +45,6 @@
 
 int main(int argc, char ** argv)
 {
-    // default logger
-    Log = new STDIOHandler();
-
     ArgumentParser a;
     if(auto [execution, return_code] = a.Parse(argc, argv);
        execution == ArgumentParser::Execution::ABORT) {
@@ -123,14 +120,9 @@ int main(int argc, char ** argv)
         LOG_INFO("Evac Time {:.2f}s", evacTime);
         LOG_INFO("Realtime Factor {:.2f}x", evacTime / execTime);
         LOG_INFO("Number of Threads {}", config.GetMaxOpenMPThreads());
-        LOG_INFO("Warnings {}", Log->GetWarnings());
-        LOG_INFO("Errors {}", Log->GetErrors());
-        LOG_INFO("Deleted Agents {}", Log->GetDeletedAgents());
     } else {
         LOG_ERROR("Could not start simulation. Check the log for prior errors");
+        return (EXIT_FAILURE);
     }
-    // do the last cleaning
-    delete Log;
-
     return (EXIT_SUCCESS);
 }

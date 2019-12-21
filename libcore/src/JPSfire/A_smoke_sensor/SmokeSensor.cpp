@@ -30,6 +30,7 @@
 #include "JPSfire/generic/FDSMesh.h"
 #include "JPSfire/generic/FDSMeshStorage.h"
 #include "general/Filesystem.h"
+#include "general/Logger.h"
 #include "geometry/Building.h"
 #include "geometry/SubRoom.h"
 #include "pedestrian/Pedestrian.h"
@@ -50,14 +51,13 @@ bool SmokeSensor::LoadJPSfireInfo()
 {
     TiXmlDocument doc(_building->GetProjectFilename().string());
     if(!doc.LoadFile()) {
-        Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \t could not parse the project file");
+        LOG_ERROR("Could not parse project file: {}", doc.ErrorDesc());
         return false;
     }
 
     TiXmlNode * JPSfireNode = doc.RootElement()->FirstChild("JPSfire");
     if(!JPSfireNode) {
-        Log->Write("INFO:\tcould not find any JPSfire information");
+        LOG_INFO("Could not find any JPSfire information");
         return true;
     }
 
@@ -71,9 +71,9 @@ bool SmokeSensor::LoadJPSfireInfo()
             std::string filepath   = file_path.string();
             double updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
             double finalTime       = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
-            Log->Write(
-                "INFO:\tJPSfire Module A_smoke_sensor: \n\tdata: %s \n\tupdate time: %.1f s | "
-                "final time: %.1f s",
+            LOG_INFO(
+                "JPSfire Module A_smoke_sensor, tdata: {} tupdate time: {:.1f}s, final time: "
+                "{:.1f}s",
                 filepath.c_str(),
                 updateIntervall,
                 finalTime);
