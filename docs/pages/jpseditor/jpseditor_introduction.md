@@ -1,5 +1,5 @@
 ---
-title: "Editing tool for JuPedSim"
+title: "jpseditor: editing tool for JuPedSim"
 keywords: geometry
 tags: [getting_started]
 sidebar: jupedsim_sidebar

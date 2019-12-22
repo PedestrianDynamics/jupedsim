@@ -1,5 +1,5 @@
 ---
-title: "Visualisation tool for JuPedSim"
+title: "jpsvis: visualisation tool for JuPedSim"
 keywords: visualisation
 tags: [getting_started]
 sidebar: jupedsim_sidebar

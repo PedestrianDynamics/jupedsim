@@ -1,5 +1,5 @@
 ---
-title: "jpsreport: analysis module of trajectories"
+title: "jpsreport: module for analysis of trajectories"
 keywords: analysis
 tags: [jpsreport, getting_started]
 sidebar: jupedsim_sidebar
