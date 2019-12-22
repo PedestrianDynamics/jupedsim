@@ -6,11 +6,21 @@ sidebar: jupedsim_sidebar
 folder: jpsreport
 summary: Analysis of a bottleneck scenario from the demo files of jpsreport
 permalink: jpsreport_howto.html
-last_updated: Dec 21, 2019
+last_updated: Dec 22, 2019
 ---
 
 {%include note.html content="This howto can be downloaded as a [jupyter notebook](https://raw.githubusercontent.com/JuPedSim/jpscore/master/jpsreport/demos/HowTo.ipynb).
 The files are from the [bottleneck demo](https://raw.githubusercontent.com/JuPedSim/jpscore/master/jpsreport/demos/bottleneck)"%}
+
+
+
+## Getting started with JPSreport
+
+
+`JPSreport` needs three different files as input:
+- A trajectory file (txt or xml) (see [documentation](jpscore_trajectory.html))
+- A geometry file (see [documentation](jpscore_geometry.html))
+- and a project file, called inifile (see [documentation](jpsreport_inifile.html))
 
 ## Bottleneck example
 
@@ -25,40 +35,43 @@ echo "Actual directory:  $PWD"
 ls bottleneck
 ```
 
-    Actual directory:  /Users/chraibi/Workspace/jpsreport/demos
-    Output
+    Actual directory:  /Users/chraibi/Workspace/github/jpscore/jpsreport/demos
     geo_AO_300.xml
     geometry.png
     ini_AO_300.xml
     traj_AO_300.txt
 
 
-## Starting JPSreport
+## Running jpsreport
+For the rest, it is assumed that the executable file lives in `../../build/bin`.
+In the following cell you may want to change the value of `dir_binary` in order to match the directory of your executable.
 
 Calling `JPSreport` without an inifile yields:
 
 
 ```bash
 %%bash
-../bin/jpsreport
+dir_binary="../../build/bin"
+$dir_binary/jpsreport
 ```
 
     INFO: 	Trying to load the default configuration from the file <ini.xml>
     ----
     JuPedSim - JPSreport
     
-    Current date   : May 19 2018 09:09:49
-    Version        : 0.8.3
-    Compiler       : clang++ (3.5.0)
-    Commit hash    : v0.8.2-76-g561ab10-dirty
-    Commit date    : Fri May 18 18:40:14 2018
-    Branch         : develop
+    Current date   : Sun Dec 22 16:19:01 2019
+    Version        : 0.8.4
+    Compiler       : clang++ (11.0.0)
+    Commit hash    : v0.8.4-893-gf1fa6bc5-dirty
+    Commit date    : Sat Dec 14 14:36:57 2019
+    Branch         : 614_documentation
+    Python         : /usr/local/bin/python3 (3.7.4)
     ----
     
     INFO: 	Parsing the ini file <ini.xml>
     Usage: 
     
-    ../bin/jpsreport inifile.xml
+    ../../build/bin/jpsreport inifile.xml
     
 
 
@@ -70,19 +83,12 @@ Calling `JPSreport` without an inifile yields:
 
 `JPSreport` rightly complains about a missing inifile. 
 
-In the bottleneck directory, we can find the three necessary files to get us started. 
-
-Let's visualize the geometry with [JPSvis](https://gitlab.version.fz-juelich.de/jupedsim/jpsvis)
-
-![geometry](./bottleneck/geometry.png)
-
-
 ## Preparing the inifile
 
-here you may want to start with a demo inifile and check the online [documentation](http://www.jupedsim.org/jpsreport/2016-11-01-inifile)
+here you may want to start with a demo inifile and check the online [documentation](jpsreport_inifile.html)
 for options. 
 
-## Call JPSreport
+## Call JPSreport with inifile
 
 To start the analysis run from a terminal the following:
 
@@ -90,27 +96,33 @@ To start the analysis run from a terminal the following:
 
 ```bash
 %%bash
-echo "Actual directory:  $PWD"
-
-../bin/jpsreport ./bottleneck/ini_AO_300.xml
+dir_binary="../../build/bin"
+echo "Actual directory:  $PWD."
+echo "dir_bin: $dir_binary"
+$dir_binary/jpsreport ./bottleneck/ini_AO_300.xml
 ```
 
-    Actual directory:  /Users/chraibi/Workspace/jpsreport/demos
+    Actual directory:  /Users/chraibi/Workspace/github/jpscore/jpsreport/demos.
+    dir_bin: ../../build/bin
     ----
     JuPedSim - JPSreport
     
-    Current date   : May 19 2018 09:09:49
-    Version        : 0.8.3
-    Compiler       : clang++ (3.5.0)
-    Commit hash    : v0.8.2-76-g561ab10-dirty
-    Commit date    : Fri May 18 18:40:14 2018
-    Branch         : develop
+    Current date   : Sun Dec 22 16:19:36 2019
+    Version        : 0.8.4
+    Compiler       : clang++ (11.0.0)
+    Commit hash    : v0.8.4-893-gf1fa6bc5-dirty
+    Commit date    : Sat Dec 14 14:36:57 2019
+    Branch         : 614_documentation
+    Python         : /usr/local/bin/python3 (3.7.4)
     ----
     
     INFO: 	Parsing the ini file <./bottleneck/ini_AO_300.xml>
+    INFO:	logfile </Users/chraibi/Workspace/github/jpscore/jpsreport/demos/bottleneck/log_AO_300.txt>
     lineNr 100000
+    INFO:	Success with Method A using measurement area id 2
+    INFO:	Success with Method A using measurement area id 4
     INFO: 	End Analysis for the file: traj_AO_300.txt
-    Time elapsed:	 4.09673 [s]
+    Time elapsed:	 4.32952 [s]
 
 
 The output of `JPSreport` gives some logging information on its running process.  It may inform on any errors during the compilation or misconception of the input files (inifile, geometry or trajectory file).
@@ -122,26 +134,30 @@ Uppon a succesful run, the directory **output** is created with the following co
 
 ```bash
 %%bash
-tree bottleneck/Output
+tree bottleneck
 ```
 
-    bottleneck/Output
-    └── Fundamental_Diagram
-        └── FlowVelocity
-            ├── FDFlowVelocity_traj_AO_300.txt_id_2.dat
-            ├── FDFlowVelocity_traj_AO_300.txt_id_4.dat
-            ├── Flow_NT_traj_AO_300.txt_id_2.dat
-            ├── Flow_NT_traj_AO_300.txt_id_2.png
-            ├── Flow_NT_traj_AO_300.txt_id_4.dat
-            └── Flow_NT_traj_AO_300.txt_id_4.png
+    bottleneck
+    ├── bottleneck_Output
+    │   └── Fundamental_Diagram
+    │       └── FlowVelocity
+    │           ├── FDFlowVelocity_traj_AO_300.txt_id_2.dat
+    │           ├── FDFlowVelocity_traj_AO_300.txt_id_4.dat
+    │           ├── Flow_NT_traj_AO_300.txt_id_2.dat
+    │           └── Flow_NT_traj_AO_300.txt_id_4.dat
+    ├── geo_AO_300.xml
+    ├── geometry.png
+    ├── ini_AO_300.xml
+    ├── log_AO_300.txt
+    └── traj_AO_300.txt
     
-    2 directories, 6 files
+    3 directories, 9 files
 
 
 
 ```bash
 %%bash
-tail bottleneck/Output/Fundamental_Diagram/FlowVelocity/FDFlowVelocity_traj_AO_300.txt_id_2.dat
+tail bottleneck/bottleneck_Output/Fundamental_Diagram/FlowVelocity/FDFlowVelocity_traj_AO_300.txt_id_2.dat
 ```
 
     #Flow rate(1/s)		 Mean velocity(m/s)
@@ -156,13 +172,8 @@ tail bottleneck/Output/Fundamental_Diagram/FlowVelocity/FDFlowVelocity_traj_AO_3
     2.500	0.806
 
 
-![result 1](bottleneck/Output/Fundamental_Diagram/FlowVelocity/Flow_NT_traj_AO_300.txt_id_2.png)
-
-Result: 
-![](bottleneck/Output/Fundamental_Diagram/FlowVelocity/Flow_NT_traj_AO_300.txt_id_2.png)
-
 ## Problems
 
 In case something does not work, which may happen of course, please open an issue.
 
-Use for this purpose our [issue-tracker](http://gitlab.version.fz-juelich.de/jupedsim/jpsreport/issues). 
+Use for this purpose our [issue-tracker](http://github.com/jupedsim/jpscore/issues). 
