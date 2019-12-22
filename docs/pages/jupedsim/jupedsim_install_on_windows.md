@@ -26,12 +26,13 @@ In our case we need `NuGet`. So if it's not already installed then click
 
 `Tools --> Get Tools and Features`
 
-<img src="{{ site.baseurl }}/images/vs/VSInstaller.png"/>
+![Visual studio installer]({{ site.baseurl }}/images/vs/VSInstaller.png)
+
 
 This will start Visual Studio Installer and ask to make changes in Visual Studio.
 Choose the appropriate packages and proceed.
 
-<img src="{{ site.baseurl }}/images/vs/installerNuGet.png"/>
+![Visual Studio NuGet]({{ site.baseurl }}/images/vs/installerNuGet.png)
 
 ## Visual Studio: Compilation
 
@@ -40,21 +41,21 @@ and do the following
 
 1. `Right click on the Solution --> Restore NuGet Packages`
 
-    <img src="{{ site.baseurl }}/images/vs/restore.png"/>
+    ![Restore NuGet packages]({{ site.baseurl }}/images/vs/restore.png)
 
     If Visual Studio offers you to restore the packages automatically, as shown in the following screenshot, click on `Restore` (and be patient ...)
 
-    <img src="{{ site.baseurl }}/images/vs/restore_default.png" />
-
+    ![Default restore NuGet packages]({{ site.baseurl }}/images/vs/restore_default.png)
+    
 2. The project `jpscore` should be marked bold (important for running the code later on).
    If this is not the case, then `right click on jpscore --> Set as startup Project`
 
-    <img src="{{ site.baseurl }}/images/vs/startproject.png" />
+    ![Startup project]({{ site.baseurl }}/images/vs/startproject.png)
 
     After this step the project will appear bold  (**jpscore**).
 3. `View --> Other Windows --> Open Package Manager Console`
 
-    <img src="{{ site.baseurl }}/images/vs/manager.png"  />
+    ![Package manager]({{ site.baseurl }}/images/vs/manager.png)
 
     and type the following
 
@@ -68,7 +69,7 @@ and do the following
     Update-Package -reinstall -ProjectName jpscore
     ```
 
-    <img src="{{ site.baseurl }}/images/vs/nuget.png"  />
+    ![Reinstall NuGet packages]({{ site.baseurl }}/images/vs/nuget.png)
 
 4. `Build --> Build Solution`
 
@@ -76,7 +77,7 @@ and do the following
 
 5. Debug --> Start Without Debugging
 
-   <img src="{{ site.baseurl }}/images/vs/run.png" />
+       ![Run jpscore]({{ site.baseurl }}/images/vs/run.png)
 
     This will run jpscore in debug mode.
 
@@ -90,11 +91,11 @@ and do the following
      C:\Users\here full path\demos\scenario_1_corridor\corridor_ini.xml
     ```
 
-    <img src="{{ site.baseurl }}/images/vs/cmdarg.png" />
+    ![Run jpscore with demo file]({{ site.baseurl }}/images/vs/cmdarg.png)
 
 ## Result
 
-<img src="{{ site.baseurl }}/images/vs/runjpscore.png" />
+![Result]({{ site.baseurl }}/images/vs/runjpscore.png)
 
 
 ## Install using package manager vcpkg
