@@ -32,6 +32,7 @@ exclude:
   - .idea/
   - .gitignore
   - vendor
+  - jps_guide
 # these are the files and directories that jekyll will exclude from the build
 
 feedback_subject_line: JuPedSim documentation
@@ -74,7 +75,7 @@ defaults:
       layout: "page"
       comments: true
       search: true
-      sidebar: home_sidebar
+      sidebar: jupedsim_sidebar
       topnav: topnav
   -
     scope:
@@ -94,13 +95,12 @@ defaults:
       layout: "post"
       comments: true
       search: true
-      sidebar: home_sidebar
+      sidebar: jupedsim_sidebar
       topnav: topnav
 
 # these are defaults used for the frontmatter for these file types
 
 sidebars:
-- home_sidebar
 - jupedsim_sidebar
 - jpscore_sidebar
 - jpsreport_sidebar
