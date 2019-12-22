@@ -38,19 +38,8 @@
 
 bool AgentsSourcesManager::_isCompleted = true;
 
-AgentsSourcesManager::AgentsSourcesManager() {}
-
-AgentsSourcesManager::~AgentsSourcesManager() {}
-
-void AgentsSourcesManager::operator()()
+AgentsSourcesManager::AgentsSourcesManager()
 {
-    Run();
-}
-
-void AgentsSourcesManager::Run()
-{
-    SetRunning(true);
-    LOG_INFO("Starting agent manager thread");
     //Generate all agents required for the complete simulation
     //It might be more efficient to generate at each frequency step
     GenerateAgents();
@@ -59,28 +48,11 @@ void AgentsSourcesManager::Run()
 
     //the loop is updated each x second.
     //it might be better to use a timer
-    _isCompleted  = false;
-    bool finished = false;
     SetBuildingUpdated(false);
-    long updateFrequency = 1; // @todo parse this from inifile
-    do {
-        int current_time = (int) Pedestrian::GetGlobalTime();
-        if((current_time != _lastUpdateTime) && ((current_time % updateFrequency) == 0)) {
-            if(AgentsQueueIn::IsEmpty())
-            //if queue is empty. Otherwise, wait for main thread to empty it and update _building
-            {
-                finished        = ProcessAllSources();
-                _lastUpdateTime = current_time;
-            }
-        }
-        // wait for main thread to update building
-        if(current_time >= GetMaxSimTime())
-            break; // break if max simulation time is reached.
-
-    } while(!finished);
-    LOG_INFO("Terminating agent manager thread");
-    _isCompleted = true;
 }
+
+AgentsSourcesManager::~AgentsSourcesManager() {}
+
 
 bool AgentsSourcesManager::ProcessAllSources() const
 {
@@ -277,12 +249,11 @@ void AgentsSourcesManager::SetBuilding(Building * building)
 
 bool AgentsSourcesManager::IsCompleted() const
 {
-    return _isCompleted;
-}
-
-bool AgentsSourcesManager::IsRunning() const
-{
-    return _isRunning;
+    const auto remaining_agents =
+        std::accumulate(_sources.cbegin(), _sources.cend(), 0, [](auto sum, auto src) {
+            return sum + src->GetRemainingAgents();
+        });
+    return remaining_agents == 0;
 }
 
 
@@ -296,11 +267,6 @@ void AgentsSourcesManager::SetBuildingUpdated(bool update)
     _buildingUpdated = update;
 }
 
-
-void AgentsSourcesManager::SetRunning(bool running)
-{
-    _isRunning = running;
-}
 
 Building * AgentsSourcesManager::GetBuilding() const
 {

@@ -181,7 +181,8 @@ public:
     /**
      * Check if any agents are waiting to enter the simulation
      */
-    void ProcessAgentsQueue();
+    //TODO(KKZ) update doc
+    void AddNewAgents();
 
     /**
      * @return a pointer to the building object

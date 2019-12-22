@@ -45,7 +45,7 @@ public:
       */
     AgentsSource(
         int id,
-        const std::string & caption,
+        std::string caption,
         int max_agents,
         int group_id,
         int frequency,

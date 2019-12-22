@@ -429,7 +429,8 @@ void Simulation::RunHeader(long nPed)
     _iod->WriteFrame(firstframe, _building.get());
     //first initialisation needed by the linked-cells
     UpdateRoutesAndLocations();
-    ProcessAgentsQueue();
+    // KKZ: RunBody calls this as one of the firs things, hence this can be removed
+    // ProcessAgentsQueue();
 }
 
 double Simulation::RunBody(double maxSimTime)
@@ -450,7 +451,7 @@ double Simulation::RunBody(double maxSimTime)
     //process the queue for incoming pedestrians
     //important since the number of peds is used
     //to break the main simulation loop
-    ProcessAgentsQueue();
+    AddNewAgents();
     _nPeds = _building->GetAllPedestrians().size();
     std::cout << "\n";
     std::string description = "Evacutation ";
@@ -461,8 +462,7 @@ double Simulation::RunBody(double maxSimTime)
         // Handle train traffic: coorect geometry
         bool geometryChanged = TrainTraffic();
 
-        //process the queue for incoming pedestrians
-        ProcessAgentsQueue();
+        AddNewAgents();
 
         if(t > Pedestrian::GetMinPremovementTime()) {
             //update the linked cells
@@ -1011,13 +1011,11 @@ void Simulation::UpdateOutputGeometryFile()
     geoOutput.SaveFile(geoOutputPath.string());
 }
 
-void Simulation::ProcessAgentsQueue()
+void Simulation::AddNewAgents()
 {
-    //incoming pedestrians
+    _agentSrcManager.ProcessAllSources();
     std::vector<Pedestrian *> peds;
-
     AgentsQueueIn::GetandClear(peds);
-
     for(auto && ped : peds) {
         _building->AddPedestrian(ped);
     }
