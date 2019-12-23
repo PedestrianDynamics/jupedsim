@@ -7,6 +7,7 @@ folder: jpsreport
 summary: This page shows how to get profiles of density, velocity and specific flow.
 permalink: jpsreport_profiles.html
 last_updated: Dec 21, 2019
+published: false
 ---
 
 {%include note.html content="this tutorial needs links to data"%}

@@ -155,11 +155,11 @@ entries:
           url: /jpsreport_howto.html
           output: web, pdf
 
-        - title: Fundamental Diagram
-          url: /jpsreport_fd.html
-          output: web, pdf
+        # - title: Fundamental Diagram
+        #   url: /jpsreport_fd.html
+        #   output: web, pdf
           
-        - title: Density/Velocity profiles
-          url: /jpsreport_profiles.html
-          output: web, pdf
+        # - title: Density/Velocity profiles
+        #   url: /jpsreport_profiles.html
+        #   output: web, pdf
     
