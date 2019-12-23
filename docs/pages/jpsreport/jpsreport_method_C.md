@@ -9,6 +9,9 @@ permalink: jpsreport_method_C.html
 last_updated: Dec 20, 2019
 ---
 
+![Method C: Illustration of the measurement area]({{ site.baseurl }}/images/jpsreport_Method_C.png)
+
+
 The density  $$\langle \rho \rangle_{\Delta x}$$ is defined as the number of
 pedestrians divided by the area of the measurement section:
 

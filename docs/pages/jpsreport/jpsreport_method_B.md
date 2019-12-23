@@ -6,13 +6,16 @@ sidebar: jupedsim_sidebar
 folder: jpsreport
 summary: This method measures the mean value of velocity and density over space and time.
 permalink: jpsreport_method_B.html
-last_updated: Dec 20, 2019
+last_updated: Dec 23, 2019
 ---
 
 
  The spatial mean velocity and density are
 calculated by taking a segment  $$\Delta x$$ in a corridor as the
 measurement area. 
+
+![Method B: Illustration of the measurement interval.]({{ site.baseurl }}/images/jpsreport_Method_B.png)
+
 
 The velocity  $$\langle v \rangle_i$$ of each person
 is defined as the length  $$\Delta x$$ of the measurement area divided

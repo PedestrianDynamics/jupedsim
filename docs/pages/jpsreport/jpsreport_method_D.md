@@ -6,7 +6,7 @@ sidebar: jupedsim_sidebar
 folder: jpsreport
 summary: this method calculates the density based on Voronoi diagrams, which are a special kind of decomposition of a metric space determined by distances to a specified discrete set of objects in the space. 
 permalink: jpsreport_method_D.html
-last_updated: Dec 21, 2019
+last_updated: Dec 23, 2019
 ---
 
 At any time the positions of the pedestrians
@@ -14,6 +14,9 @@ can be represented as a set of points, from which the Voronoi
 diagram can be generated. 
 
 The Voronoi cell area,  $$A_i$$, for each person  $$i$$ can be obtained. 
+
+![Method D: Illustration of the Voronoi diagrams]({{ site.baseurl }}/images/jpsreport_Method_D.png)
+
 
 Then, the density and velocity distribution of the space $$\rho_{xy} $$  and  $$v_{xy}$$ can be defined as
 

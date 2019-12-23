@@ -6,12 +6,10 @@ sidebar: jupedsim_sidebar
 folder: jpsreport
 summary: This method calculates the mean value of flow and density over time. 
 permalink: jpsreport_method_A.html
-last_updated: Dec 21, 2019
+last_updated: Dec 23, 2019
 ---
 
-
-
-
+![Method A: Illustration of the measurement line.]({{ site.baseurl }}/images/jpsreport_Method_A.png)
 
 A reference line is taken and studied over a
 fixed period of time $$\Delta {t}$$.  
@@ -28,7 +26,7 @@ reference line during the time interval  $$\Delta {t}$$.
 
 $$t_N^{\Delta {t}}$$ and  $$t_1^{\Delta {t}}$$ are the times when the first and last pedestrians pass the location in $$\Delta {t}$$.
 
-Note: this time period can be different from  $$\Delta {t}$$. 
+{%include note.html content="Note: this time period can be different from  $$\Delta {t}$$."%}
 
 The time mean velocity  $$\langle v \rangle_{\Delta t}$$  is defined as the mean value of the instantaneous velocities  $$N^{\Delta t}$$ pedestrians. 
 
