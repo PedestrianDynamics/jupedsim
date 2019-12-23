@@ -9,8 +9,8 @@ permalink: jpsreport_howto.html
 last_updated: Dec 22, 2019
 ---
 
-{%include note.html content="This howto can be downloaded as a [jupyter notebook](https://raw.githubusercontent.com/JuPedSim/jpscore/master/jpsreport/demos/HowTo.ipynb).
-The files are from the [bottleneck demo](https://raw.githubusercontent.com/JuPedSim/jpscore/master/jpsreport/demos/bottleneck)"%}
+{%include note.html content="This howto can be downloaded as a [jupyter notebook](https://github.com/JuPedSim/jpscore/blob/master/jpsreport/demos/HowTo.ipynb).
+The files are from the [bottleneck demo](https://github.com/JuPedSim/jpscore/tree/master/jpsreport/demos/bottleneck)"%}
 
 
 
