@@ -119,3 +119,9 @@ li.sidebarTitle {
 .navbar-inverse .navbar-toggle {
     border-color: #015CAE;
 }
+/* max-hight is overriden somewhere so that the url icon of bibbase is very big */
+/* see also https://bibbase.userecho.com/communities/1/topics/337-icon-for-links-is-too-big */
+/* Therefore, this hack: */
+img.bibbase_icon {
+  max-height: 16px !important;
+}
