@@ -81,6 +81,9 @@ It contains the following files:
 
 **Note**: This script depends on `kramdown`.
 
+## Publications
+
+The list of publications is automatically generated based on a [Zotero](https://www.zotero.org/jupedsim/items) collection by [BitBase](https://bibbase.org/).
 
 ## Check the changes before pushing to GitHub
 
