@@ -14,21 +14,12 @@ last_updated: Dec 21, 2019
 - Project site: [Hermes](https://www.fz-juelich.de/ias/jsc/EN/Research/ModellingSimulation/CivilSecurityTraffic/Projects/Hermes/_node.html)
 
 ![Hermes]({{ site.baseurl }}/images/hermes.png)
-
+  
+![simulation]({{ site.baseurl }}/images/hermes2.png)
 
 
 ## Selected publications 
 
-- U. Kemloh, B. Steffen, A. Seyfried, M. Chraibi
-  Parallel real time computation of large scale pedestrian evacuations
-  CIVIL-COMP: Parallel, Distributed, Grid and Cloud Computing, https://doi.org/10.1016/j.advengsoft.2012.10.001, 2013
-
-- U. Kemloh, M. Chraibi, J. Mehlich, A. Seyfried and A. Schadschneider
-  Efficient and validated simulation of crowds for an evacuation assistant
-  computer animation and virtual worlds.  Comp. Anim. Virtual Worlds 2012; 23:3–15
-  DOI: 10.1002/cav.1420
-  
-![simulation]({{ site.baseurl }}/images/hermes2.png)
-
+<script src="https://bibbase.org/show?bib=https%3A%2F%2Fapi.zotero.org%2Fusers%2F6243861%2Fcollections%2FSM5QY8RD%2Fitems%3Fkey%3DHNNKAW4oeLcNjOmuvcuBDiUF%26format%3Dbibtex%26limit%3D100&jsonp=1&groupby=type&sort=-year&folding=0&nocache=1&fullnames=1&filter=keywords:hermes&theme=default"></script>
 
 {% include links.html %}

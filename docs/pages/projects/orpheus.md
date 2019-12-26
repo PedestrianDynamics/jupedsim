@@ -15,10 +15,11 @@ last_updated: Dec 21, 2019
 
 ![osloeer]({{ site.baseurl }}/images/osloer.png)
 
-## Publications 
-Schröder, Benjamin, Haensel, David, Chraibi, Mohcine, Arnold, Lukas, Seyfried, Armin and Andresen, Erik Knowledge- and Perception-based Route Choice Modelling in Case of Fire In 6th International Symposium on Human Behaviour in Fire 2015 Human Behaviour in Fire Symposium 2015, Cambridge, United Kingdom, 28 Sep 2015 - 30 Sep 2015 327-338 (2015)
-- [Talk](http://juser.fz-juelich.de/record/255940)
-
 ![jpsfire]({{ site.baseurl }}/images/jpsfire_structure.png)
+
+## Publications 
+
+<script src="https://bibbase.org/show?bib=https%3A%2F%2Fapi.zotero.org%2Fusers%2F6243861%2Fcollections%2FSM5QY8RD%2Fitems%3Fkey%3DHNNKAW4oeLcNjOmuvcuBDiUF%26format%3Dbibtex%26limit%3D100&jsonp=1&groupby=type&sort=-year&folding=0&nocache=1&fullnames=1&filter=keywords:orpheus&theme=default"></script>
+
 
 {% include links.html %}
