@@ -97,7 +97,7 @@ $$v$$ is the peed of a pedestrian.
 
 
 ## Generalized Centrifugal Force Model
-[Generalized Centrifugal Force Model][#GCFM] is a force-based model.
+[Generalized Centrifugal Force Model][#GCFM] [(preprint)][#GCFM_PREPRINT] is a force-based model.
 
 Usage:
 
@@ -108,7 +108,7 @@ Usage:
 
 
 ## Collision-free Speed Model
-[Collision-free speed model][#Tordeux2015] is a velocity-based model. See also this [talk](https://fz-juelich.sciebo.de/index.php/s/1pYFETbvJdJDusE) for more details about the model.
+[Collision-free speed model][#Tordeux2015] is a velocity-based model. See also this [talk](https://www.dropbox.com/s/fj1xud5ap2aq59o/Tordeux2015_Talk.pdf) for more details about the model.
 
 Usage:
 
@@ -182,6 +182,6 @@ In summary the relevant section for this model could look like:
 
 
 [#GCFM]: http://journals.aps.org/pre/abstract/10.1103/PhysRevE.82.046111 "Mohcine Chraibi, Armin Seyfried, and Andreas Schadschneider Phys. Rev. E 82, 046111"
-
+[#GCFM_PREPRINT]: https://arxiv.org/abs/1008.4297 "Preprint ArXiv"
 [#Tordeux2015]: http://arxiv.org/abs/1512.05597  "Tordeux, Antoine, Chraibi, Mohcine and Seyfried, Armin, Collision-free speed model for pedestrian dynamics. In Traffic and Granular Flow  '15, to appear."
 
