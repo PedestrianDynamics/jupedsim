@@ -1,7 +1,7 @@
 ---
 title: Direction strategies
 keywords: simulation
-tags: [jpscore, models]
+tags: [jpscore, model]
 sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_direction.html

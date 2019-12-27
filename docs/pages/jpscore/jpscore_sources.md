@@ -1,7 +1,7 @@
 ---
 title: Sources file
 keywords: simulation
-tags: [jpscore, files, simulation]
+tags: [jpscore, file, simulation]
 sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_sources.html

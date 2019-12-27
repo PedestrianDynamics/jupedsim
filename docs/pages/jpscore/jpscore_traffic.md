@@ -1,7 +1,7 @@
 ---
-title: Traffic file
+title: Sample for a file with traffic constraints
 keywords: simulation
-tags: [jpscore, files, simulation]
+tags: [jpscore, file, simulation]
 sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_traffic.html

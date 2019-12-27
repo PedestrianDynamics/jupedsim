@@ -1,7 +1,7 @@
 ---
-title: Goals file
+title: Sample of a file for goals
 keywords: simulation
-tags: [jpscore, files, simulation]
+tags: [jpscore, file, simulation]
 sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_goals.html

@@ -1,7 +1,7 @@
 ---
-title: Schedule
+title: Schedules
 keywords: simulation
-tags: [jpscore, files, simulation]
+tags: [jpscore, file, simulation]
 sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_schedule.html
@@ -61,7 +61,7 @@ Example for a schedule:
 
 -  `groups` groups with all door, which shoul open or close at the same time.
 -  `group id` unique id to identify the specific group.
--  `member_id` unique id of the specific door as defined in the geometry file. See [geometry](2016-11-02-geometry.html).
+-  `member_id` unique id of the specific door as defined in the geometry file. See [geometry](jpscore_geometry.html).
 -  `times` schedule times for every group.
 -  `group_id` unique id of the specific group of doors as defined above in `groups`.
 -  `closing_time` time after which the doors of the group will be closed after the doors were opened.

@@ -1,7 +1,7 @@
 ---
 title: Event file
 keywords: simulation
-tags: [jpscore, files]
+tags: [jpscore, file]
 sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_events.html

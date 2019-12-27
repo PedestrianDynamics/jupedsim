@@ -1,7 +1,7 @@
 ---
 title: Modeling the change of the desired speed
 keywords: simulation
-tags: [jpscore, models]
+tags: [jpscore, model]
 sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_desired_speed.html
