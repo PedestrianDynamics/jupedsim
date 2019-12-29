@@ -11,13 +11,15 @@ las_updated: Dec 20, 2019
 
 ## Supported compilers
 
-Any compiler with support for C++11.
+Any compiler with support for C++17.
 
-Tested with
+At the moment The following compiler are tested:
 
-- `g++` (linux/osx)
-- `clang` (osx)
-- Visual Studio 2019 (Windows)
+- g++-8 on Linux
+- clang++-8 on Linux
+- Apple Clang 11 on MacOS
+- MSVC 19 on Windows
+
 
 ## Required tools and libraries 
 
@@ -27,5 +29,5 @@ Tested with
 - libomp (if you want to use OpenMP with Apple LLVm or Clang on Linux)
 - spdlog (libspdlog-dev on Ubuntu, spdlog on brew)
 - fmtlib (libfmt-dev on Ubuntu, fmt on brew)
-- A C++ compiler with support for C++17
+
 

@@ -40,7 +40,7 @@ entries:
       url: /jupedsim_disclaimer.html
       output: web, pdf
 
-  - title: Installation
+  - title: Build from Sources
     output: web, pdf
     folderitems:
 
@@ -49,15 +49,15 @@ entries:
       output: web, pdf
 
 
-    - title: Install JuPedSim on Mac
+    - title: Build on Mac
       url: /jupedsim_install_on_mac.html
       output: web, pdf
 
-    - title: Install JuPedSim on Linux
+    - title: Build on Linux
       url: /jupedsim_install_on_linux.html
       output: web, pdf
 
-    - title: Install JuPedSim on Windows
+    - title: Build on Windows
       url: /jupedsim_install_on_windows.html
       output: web, pdf
 
@@ -76,7 +76,7 @@ entries:
     output: web
     folderitems:
 
-    - title: jpscore - Introduction
+    - title: Introduction
       url: /jpscore_introduction.html
       output: web, pdf
 
@@ -113,7 +113,7 @@ entries:
     output: web, pdf
     folderitems:
 
-    - title: jpsreport - Introduction
+    - title: Introduction
       url: /jpsreport_introduction.html
       output: web, pdf
 
