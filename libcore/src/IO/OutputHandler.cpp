@@ -26,13 +26,15 @@
  **/
 #include "OutputHandler.h"
 
+#include "general/Logger.h"
+
 #include <cstdarg> // va_start and va_end
 
 FileHandler::FileHandler(const fs::path & path)
 {
     _pfp.open(path.string());
     if(!_pfp.is_open()) {
-        std::cerr << "Error!!! File " << path << " could not be opened" << std::endl;
+        LOG_ERROR("Cannot open file {}", path.string());
         exit(0);
     }
 }
@@ -50,7 +52,7 @@ void FileHandler::Write(const std::string & str)
 
 void FileHandler::Write(const char * str_msg, ...)
 {
-    char msg[CLENGTH] = "";
+    char msg[1024] = "";
     va_list ap;
     va_start(ap, str_msg);
     vsprintf(msg, str_msg, ap);

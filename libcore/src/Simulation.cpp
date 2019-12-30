@@ -474,9 +474,8 @@ double Simulation::RunBody(double maxSimTime)
                     add_prefix_to_filename(prefix, _config->GetGeometryFile());
                 std::cout << "\nUpdate geometry. New  geometry --> " << changedGeometryFile << "\n";
 
-                std::cout << KGRN << "Enter correctGeometry: Building Has "
-                          << _building->GetAllTransitions().size() << " Transitions\n"
-                          << RESET;
+                std::cout << "Enter correctGeometry: Building Has "
+                          << _building->GetAllTransitions().size() << " Transitions\n";
                 _building->SaveGeometry(changedGeometryFile);
                 _building->GetConfig()->GetDirectionManager()->GetDirectionStrategy()->Init(
                     _building.get());
@@ -643,9 +642,8 @@ bool Simulation::correctGeometry(
     static int transition_id = 10000; // randomly high number
 
     std::cout << "enter with train " << trainType.c_str() << "\n";
-    std::cout << KBLU << "Enter correctGeometry: Building Has "
-              << building->GetAllTransitions().size() << " Transitions\n"
-              << RESET;
+    std::cout << "Enter correctGeometry: Building Has "
+              << building->GetAllTransitions().size() << " Transitions\n";
     std::cout << "room: " << room_id << " subroom_id " << subroom_id << "\n";
 
     if(mytrack.empty() || subroom == nullptr)
@@ -674,9 +672,7 @@ bool Simulation::correctGeometry(
     auto pws = building->GetIntersectionPoints(doors, mytrack);
     if(pws.empty())
         std::cout
-            << KRED
-            << "simulation::correctGeometry: pws are empty. Something went south with train doors\n"
-            << RESET;
+            << "simulation::correctGeometry: pws are empty. Something went south with train doors\n";
 
     auto walls = subroom->GetAllWalls();
     //---
@@ -729,14 +725,13 @@ bool Simulation::correctGeometry(
             }
 
             else
-                std::cout << KRED << ">> WALL did not add: " << NewWall.toString() << "\n" << RESET;
+                std::cout << ">> WALL did not add: " << NewWall.toString() << "\n";
 
             if(NewWall1.GetLength() > J_EPS_DIST) {
                 building->TempAddedWalls[trainId].push_back(NewWall1);
                 subroom->AddWall(NewWall1);
             } else
-                std::cout << KRED << ">> WALL did not add: " << NewWall1.toString() << "\n"
-                          << RESET;
+                std::cout << ">> WALL did not add: " << NewWall1.toString() << "\n";
 
             building->TempAddedDoors[trainId].push_back(*e);
             building->TempRemovedWalls[trainId].push_back(w1);
@@ -939,13 +934,11 @@ bool Simulation::TrainTraffic()
         if(!tab.second->arrival && (now >= tab.second->tin) && (now <= tab.second->tout)) {
             trainHere                            = true;
             TrainTimeTables.at(trainId)->arrival = true;
-            std::cout << KRED << "Arrival: TRAIN " << trainType << " at time: " << now << "\n"
-                      << RESET;
+            std::cout  << "Arrival: TRAIN " << trainType << " at time: " << now << "\n";
             correctGeometry(_building, tab.second);
 
         } else if(tab.second->arrival && now >= tab.second->tout) {
-            std::cout << KGRN << "Departure: TRAIN " << trainType << " at time: " << now << "\n"
-                      << RESET;
+            std::cout << "Departure: TRAIN " << trainType << " at time: " << now << "\n";
             _building->resetGeometry(tab.second);
             trainLeave                           = true;
             TrainTimeTables.at(trainId)->arrival = false;

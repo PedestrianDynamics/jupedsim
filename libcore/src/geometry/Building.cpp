@@ -467,7 +467,7 @@ const std::vector<std::pair<PointWall, PointWall>> Building::GetIntersectionPoin
             pws.push_back(std::make_pair(pw1, pw2));
 
         else {
-            std::cout << KRED << "Error in GetIntersection. Should be 2 but got  " << nintersections
+            std::cout << "Error in GetIntersection. Should be 2 but got  " << nintersections
                       << "\n";
             exit(-1);
         }

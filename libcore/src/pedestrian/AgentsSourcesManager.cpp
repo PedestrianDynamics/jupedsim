@@ -51,8 +51,8 @@ void AgentsSourcesManager::Run()
 {
     SetRunning(true);
     LOG_INFO("Starting agent manager thread");
-    std::cout << KRED << "\n Starting agent manager thread\n"
-              << ">> time: " << Pedestrian::GetGlobalTime() << RESET << "\n";
+    std::cout << "\n Starting agent manager thread\n"
+              << ">> time: " << Pedestrian::GetGlobalTime() <<  "\n";
     //Generate all agents required for the complete simulation
     //It might be more efficient to generate at each frequency step
     //TODO  this loop is exactly GenerateAgents( --> REFACTOR)

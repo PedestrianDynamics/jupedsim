@@ -125,7 +125,7 @@ SubRoom * Transition::GetOtherSubRoom(int roomID, int subroomID) const
 std::string Transition::GetDescription() const
 {
     std::string geometry;
-    char tmp[CLENGTH] = "";
+    char tmp[1024] = "";
 
     sprintf(
         tmp,
@@ -138,16 +138,16 @@ std::string Transition::GetDescription() const
     sprintf(
         tmp,
         "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-        (GetPoint1()._x) * FAKTOR,
-        (GetPoint1()._y) * FAKTOR,
-        GetSubRoom1()->GetElevation(GetPoint1()) * FAKTOR);
+        (GetPoint1()._x),
+        (GetPoint1()._y),
+        GetSubRoom1()->GetElevation(GetPoint1()));
     geometry.append(tmp);
     sprintf(
         tmp,
         "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-        (GetPoint2()._x) * FAKTOR,
-        (GetPoint2()._y) * FAKTOR,
-        GetSubRoom1()->GetElevation(GetPoint2()) * FAKTOR);
+        (GetPoint2()._x),
+        (GetPoint2()._y),
+        GetSubRoom1()->GetElevation(GetPoint2()));
     geometry.append(tmp);
     geometry.append("\t\t</door>\n");
     return geometry;

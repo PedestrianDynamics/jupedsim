@@ -45,6 +45,7 @@ class Building;
 class LCGrid
 {
 private:
+    static constexpr int LIST_EMPTY = -1;
     /// the 'first' pedestrian in each cell
     int ** _cellHead;
     ///  the next pedestrians. more efficient than the double linked- list
