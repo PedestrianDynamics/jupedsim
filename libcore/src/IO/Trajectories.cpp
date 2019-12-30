@@ -307,7 +307,7 @@ void TrajectoriesXML::WriteHeader(
     std::string tmp;
     tmp = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n"
           "<trajectories>\n";
-    char agents[CLENGTH] = "";
+    char agents[1024] = "";
     sprintf(agents, "\t<header version = \"0.5.1\">\n");
     tmp.append(agents);
     sprintf(agents, "\t\t<agents>%ld</agents>\n", nPeds);
@@ -339,7 +339,7 @@ void TrajectoriesXML::WriteGeometry(Building * building)
     // just put a link to the geometry file
     std::string embed_geometry;
     embed_geometry.append("\t<geometry>\n");
-    char file_location[CLENGTH] = "";
+    char file_location[1024] = "";
     sprintf(
         file_location,
         "\t<file location= \"%s\"/>\n",
@@ -371,7 +371,7 @@ void TrajectoriesXML::WriteGeometry(Building * building)
 void TrajectoriesXML::WriteFrame(int frameNr, Building * building)
 {
     std::string data;
-    char tmp[CLENGTH] = "";
+    char tmp[1024] = "";
     double RAD2DEG    = 180.0 / M_PI;
 
     sprintf(tmp, "<frame ID=\"%d\">\n", frameNr);
@@ -382,7 +382,7 @@ void TrajectoriesXML::WriteFrame(int frameNr, Building * building)
         Pedestrian * ped    = allPeds[p];
         Room * r            = building->GetRoom(ped->GetRoomID());
         std::string caption = r->GetCaption();
-        char s[CLENGTH]     = "";
+        char s[1024]     = "";
         int color           = ped->GetColor();
         double a            = ped->GetLargerAxis();
         double b            = ped->GetSmallerAxis();
@@ -395,11 +395,11 @@ void TrajectoriesXML::WriteFrame(int frameNr, Building * building)
             "rA=\"%.2f\"\trB=\"%.2f\"\t"
             "eO=\"%.2f\" eC=\"%d\"/>\n",
             ped->GetID(),
-            (ped->GetPos()._x) * FAKTOR,
-            (ped->GetPos()._y) * FAKTOR,
-            (ped->GetElevation()) * FAKTOR,
-            a * FAKTOR,
-            b * FAKTOR,
+            (ped->GetPos()._x),
+            (ped->GetPos()._y),
+            (ped->GetElevation()),
+            a,
+            b,
             phi * RAD2DEG,
             color);
         data.append(s);

@@ -790,21 +790,21 @@ std::string NormalSubRoom::WriteSubRoom() const
     std::string s;
     for(auto && w : _walls) {
         std::string geometry;
-        char wall[CLENGTH] = "";
+        char wall[1024] = "";
         geometry.append("\t\t<wall>\n");
         sprintf(
             wall,
             "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-            (w.GetPoint1()._x) * FAKTOR,
-            (w.GetPoint1()._y) * FAKTOR,
-            GetElevation(w.GetPoint1()) * FAKTOR);
+            (w.GetPoint1()._x),
+            (w.GetPoint1()._y),
+            GetElevation(w.GetPoint1()));
         geometry.append(wall);
         sprintf(
             wall,
             "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-            (w.GetPoint2()._x) * FAKTOR,
-            (w.GetPoint2()._y) * FAKTOR,
-            GetElevation(w.GetPoint2()) * FAKTOR);
+            (w.GetPoint2()._x),
+            (w.GetPoint2()._y),
+            GetElevation(w.GetPoint2()));
         geometry.append(wall);
         geometry.append("\t\t</wall>\n");
 
@@ -813,35 +813,35 @@ std::string NormalSubRoom::WriteSubRoom() const
 
     //add the subroom caption
     const Point & pos = GetCentroid();
-    char tmp[CLENGTH];
+    char tmp[1024];
     sprintf(
         tmp,
         "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" color=\"100\" "
         "/>\n",
-        pos._x * FAKTOR,
-        pos._y * FAKTOR,
-        GetElevation(pos) * FAKTOR,
+        pos._x,
+        pos._y,
+        GetElevation(pos),
         GetSubRoomID());
     s.append(tmp);
 
     //write the obstacles
     for(auto && obst : GetAllObstacles()) {
         for(auto && w : obst->GetAllWalls()) {
-            char wall[CLENGTH] = "";
+            char wall[1024] = "";
             s.append("\t\t<wall>\n");
             sprintf(
                 wall,
                 "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-                (w.GetPoint1()._x) * FAKTOR,
-                (w.GetPoint1()._y) * FAKTOR,
-                GetElevation(w.GetPoint1()) * FAKTOR);
+                (w.GetPoint1()._x),
+                (w.GetPoint1()._y),
+                GetElevation(w.GetPoint1()));
             s.append(wall);
             sprintf(
                 wall,
                 "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-                (w.GetPoint2()._x) * FAKTOR,
-                (w.GetPoint2()._y) * FAKTOR,
-                GetElevation(w.GetPoint2()) * FAKTOR);
+                (w.GetPoint2()._x),
+                (w.GetPoint2()._y),
+                GetElevation(w.GetPoint2()));
             s.append(wall);
             s.append("\t\t</wall>\n");
         }
@@ -849,14 +849,14 @@ std::string NormalSubRoom::WriteSubRoom() const
         const Point & obst_pos = obst->GetCentroid();
 
         //add the obstacle caption
-        char tmp1[CLENGTH];
+        char tmp1[1024];
         sprintf(
             tmp1,
             "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" "
             "color=\"100\" />\n",
-            obst_pos._x * FAKTOR,
-            obst_pos._y * FAKTOR,
-            GetElevation(obst_pos) * FAKTOR,
+            obst_pos._x,
+            obst_pos._y,
+            GetElevation(obst_pos),
             obst->GetId());
         s.append(tmp1);
     }
@@ -866,13 +866,12 @@ std::string NormalSubRoom::WriteSubRoom() const
 
 std::string NormalSubRoom::WritePolyLine() const
 {
+    char tmp[1024];
     std::string s;
-    char tmp[CLENGTH];
-
     s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
     for(const auto & p : _poly) {
         sprintf(
-            tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n", p._x * FAKTOR, p._y * FAKTOR);
+            tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n", p._x, p._y);
         s.append(tmp);
     }
     s.append("\t</Obstacle>\n");
@@ -1080,36 +1079,36 @@ std::string Stair::WriteSubRoom() const
     std::string s;
     for(auto && w : _walls) {
         std::string geometry;
-        char wall[CLENGTH] = "";
+        char wall[1024] = "";
         geometry.append("\t\t<wall>\n");
         sprintf(
             wall,
             "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-            (w.GetPoint1()._x) * FAKTOR,
-            (w.GetPoint1()._y) * FAKTOR,
-            GetElevation(w.GetPoint1()) * FAKTOR);
+            (w.GetPoint1()._x),
+            (w.GetPoint1()._y),
+            GetElevation(w.GetPoint1()));
         geometry.append(wall);
         sprintf(
             wall,
             "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-            (w.GetPoint2()._x) * FAKTOR,
-            (w.GetPoint2()._y) * FAKTOR,
-            GetElevation(w.GetPoint2()) * FAKTOR);
+            (w.GetPoint2()._x),
+            (w.GetPoint2()._y),
+            GetElevation(w.GetPoint2()));
         geometry.append(wall);
         geometry.append("\t\t</wall>\n");
 
         s.append(geometry);
     }
     Point pos = GetCentroid();
-    char tmp_c[CLENGTH];
+    char tmp_c[1024];
     sprintf(
         tmp_c,
         "\t\t<sphere centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" radius=\"%.2f\" "
         "color=\"100\" />\n",
-        GetUp()._x * FAKTOR,
-        GetUp()._y * FAKTOR,
-        GetElevation(GetUp()) * FAKTOR,
-        0.2 * FAKTOR);
+        GetUp()._x,
+        GetUp()._y,
+        GetElevation(GetUp()),
+        0.2);
     s.append(tmp_c);
 
     //add the subroom caption
@@ -1117,9 +1116,9 @@ std::string Stair::WriteSubRoom() const
         tmp_c,
         "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" color=\"100\" "
         "/>\n",
-        pos._x * FAKTOR,
-        pos._y * FAKTOR,
-        GetElevation(pos) * FAKTOR,
+        pos._x,
+        pos._y,
+        GetElevation(pos),
         GetSubRoomID());
     s.append(tmp_c);
 
@@ -1129,15 +1128,15 @@ std::string Stair::WriteSubRoom() const
 std::string Stair::WritePolyLine() const
 {
     std::string s;
-    char tmp[CLENGTH];
+    char tmp[1024];
 
     s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
     for(unsigned int j = 0; j < _poly.size(); j++) {
         sprintf(
             tmp,
             "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",
-            _poly[j]._x * FAKTOR,
-            _poly[j]._y * FAKTOR);
+            _poly[j]._x,
+            _poly[j]._y);
         s.append(tmp);
     }
     s.append("\t</Obstacle>\n");

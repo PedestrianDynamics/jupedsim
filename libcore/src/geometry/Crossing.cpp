@@ -144,7 +144,7 @@ std::string Crossing::GetDescription() const
 {
     //return "";
     std::string geometry;
-    char tmp[CLENGTH] = "";
+    char tmp[1024] = "";
     sprintf(
         tmp,
         "\t\t<crossing ID=\"%d\" color = \"250\" caption=\"%d_%d\">\n",
@@ -155,16 +155,16 @@ std::string Crossing::GetDescription() const
     sprintf(
         tmp,
         "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\" />\n",
-        (GetPoint1()._x) * FAKTOR,
-        (GetPoint1()._y) * FAKTOR,
-        _subRoom1->GetElevation(GetPoint1()) * FAKTOR);
+        (GetPoint1()._x),
+        (GetPoint1()._y),
+        _subRoom1->GetElevation(GetPoint1()));
     geometry.append(tmp);
     sprintf(
         tmp,
         "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\" />\n",
-        (GetPoint2()._x) * FAKTOR,
-        (GetPoint2()._y) * FAKTOR,
-        _subRoom1->GetElevation(GetPoint2()) * FAKTOR);
+        (GetPoint2()._x),
+        (GetPoint2()._y),
+        _subRoom1->GetElevation(GetPoint2()));
     geometry.append(tmp);
     geometry.append("\t\t</crossing>\n");
     return geometry;

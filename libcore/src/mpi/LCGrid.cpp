@@ -292,10 +292,10 @@ std::string LCGrid::ToXML()
         char wall[500] = "";
         grid.append("\t\t<wall>\n");
         sprintf(
-            wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", x * FAKTOR, _gridYmin * FAKTOR);
+            wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", x, _gridYmin);
         grid.append(wall);
         sprintf(
-            wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", x * FAKTOR, _gridYmax * FAKTOR);
+            wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", x, _gridYmax);
         grid.append(wall);
         grid.append("\t\t</wall>\n");
     }
@@ -303,10 +303,10 @@ std::string LCGrid::ToXML()
         char wall[500] = "";
         grid.append("\t\t<wall>\n");
         sprintf(
-            wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", _gridXmin * FAKTOR, y * FAKTOR);
+            wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", _gridXmin, y);
         grid.append(wall);
         sprintf(
-            wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", _gridXmax * FAKTOR, y * FAKTOR);
+            wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", _gridXmax, y);
         grid.append(wall);
         grid.append("\t\t</wall>\n");
     }

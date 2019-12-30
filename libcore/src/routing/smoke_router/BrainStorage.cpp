@@ -115,8 +115,8 @@ void BrainStorage::ParseCogMap(BStorageKeyType ped)
 
     double version = xmltof(xRootNode->Attribute("version"), -1);
 
-    if(version != std::stod(JPS_VERSION) && version != std::stod(JPS_OLD_VERSION)) {
-        LOG_ERROR("Wrong geometry version found. tOnly version >= %s supported", JPS_VERSION);
+    if(version != std::stod(JPSCORE_VERSION) && version != std::stod(JPS_OLD_VERSION)) {
+        LOG_ERROR("Wrong geometry version found. tOnly version >= %s supported", JPSCORE_VERSION);
         return;
     }
 

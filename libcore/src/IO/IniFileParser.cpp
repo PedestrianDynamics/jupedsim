@@ -78,7 +78,7 @@ void IniFileParser::Parse(const fs::path & iniFile)
 
     //check the header version
     if(!xMainNode->Attribute("version")) {
-        LOG_WARNING("There is no header version. I am assuming {}", JPS_VERSION);
+        LOG_WARNING("There is no header version. I am assuming {}", JPSCORE_VERSION);
     } else if(std::stod(xMainNode->Attribute("version")) < std::stod(JPS_OLD_VERSION)) {
         throw std::logic_error(fmt::format(
             FMT_STRING("Wrong header version. Only version greater than {} is supported."),

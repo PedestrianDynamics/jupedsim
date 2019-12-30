@@ -98,13 +98,13 @@ std::string Obstacle::Write()
     Point pos = GetCentroid();
 
     //add the obstacle caption
-    char tmp[CLENGTH];
+    char tmp[1024];
 
     sprintf(
         tmp,
         "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%d\" color=\"100\" />\n",
-        pos._x * FAKTOR,
-        pos._y * FAKTOR,
+        pos._x,
+        pos._y,
         _id);
     s.append(tmp);
 

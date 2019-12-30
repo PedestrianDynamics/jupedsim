@@ -13,7 +13,7 @@ void CogMapOutputHandler::WriteToFileHeader(const int & id, const double & fps)
     std::string tmp;
     tmp = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n"
           "<cognitiveMap>\n";
-    char agents[CLENGTH] = "";
+    char agents[1024] = "";
     sprintf(agents, "\t<header version = \"0.8\">\n");
     tmp.append(agents);
     sprintf(agents, "\t\t<agent>%d</agent>\n", id);
