@@ -5,9 +5,23 @@ tags: [jpscore, file]
 sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_events.html
-summary: These brief instructions will help you get started quickly with the theme. The other topics in this help provide additional information and detail about working with other aspects of this theme and Jekyll.
-last_updated: Dec 20, 2019
+summary: Definition of the event's file. Events occure in time and trigger certain actions on doors and crossings.
+last_updated: Dec 31, 2019
 ---
+
+## Definition of an event 
+
+Following properties define an `event`:
+
+- `id`: unique id of the specific door (transition) as defined in the geometry file. See [geometry](jpscore_geometry.html).
+- `update_frequency`:
+- `update_radius`: 
+- `agents_color_by_knowledge`:
+- `time`: time of an event
+- `state` can be `close`, `tmp_close` or `open`
+
+
+## Sample 
 
 Example of an event file: 
 
@@ -23,7 +37,3 @@ Example of an event file:
     </events>
 </JPScore>
 ```
-
-- `time`: time of event
-- `state` can be close or open
-- `id`: unique id of the specific door (transition) as defined in the geometry file. See [geometry](2016-11-02-geometry.html).
