@@ -7,7 +7,7 @@ folder: jpscore
 permalink: jpscore_tests_rimea.html
 summary: Guideline for Microscopic Evacuation Analysis according to RiMEA. The notes give hints about specific implementation in JuPedSim.
 
-last_updated: Dec 20, 2019
+last_updated: Dec 31, 2019
 ---
 
 
@@ -47,11 +47,11 @@ Distribute pedestrian's speed according to the Table in Page 6. Four different g
 3. \(v>50\)
 4. handicapped.   
 Verify whether the speed values are within the specified range.
+
 ## Test 8
 A 3D building is simulated and the influence of parametes e.g. speed is investigated.
 It should be shown how the evacuation time behaves with respect
 to the investigated parameter. [^rimeaNote1]
-    
 
 ## Test 9
 1000 pedestrians are distributed in a room with 4 exits.
@@ -77,6 +77,16 @@ Pedestrian coming out from a bottleneck along a corridor. At the end of the corr
 Since pedestrians have to reduce their speed on the stair, a jam should be observed at the beginning of the stair.
 In case of jam, flow at the beginning of the stair should be smaller than the flow in the corridor.[^rimeaNote5] 
 
+Therefore, we choose for $$v^0_{upstairs}$$ a Gauss-distribution with $$\mu = 0.675$$ and $$\sigma = 0.04$$.
+
+| Handbook | Speed Stair Up |
+|----------|----------------|
+| PM       | 0.63 m/s       |
+| WM       | 0.61 m/s       |
+| NM       | 0.8 m/s        |
+| FM       | 0.55 m/s       |
+
+
 ## Test 14
 Pedestrian's evacuation to an exit. Pedestrians have two possible routes:
 - short
@@ -89,10 +99,9 @@ There are 4 stats that should be documented:
 3. "gemischt" (*mixed*)
 4. "konfigurierbar" (*configurable*)
 
-
-
-
 ***
+
+## References
 
 [^rimeaNote1]: This is not a fail criterion. It is just for documentation purposes.
 
@@ -110,16 +119,6 @@ There are 4 stats that should be documented:
 
 [^rimeaNote5]: The reduced speed on stairs (up) is according to Tab 1 in [Burghardt2014][#Burghardt2014].
 
-| Handbook | Speed Stair Up |
-|----------|----------------|
-| PM       | 0.63 m/s       |
-| WM       | 0.61 m/s       |
-| NM       | 0.8 m/s        |
-| FM       | 0.55 m/s       |
-
-
-
-Therefore, we choose for $$v^0_{upstairs}$$ a Gauss-distribution with $$\mu = 0.675$$ and $$\sigma = 0.04$$.
 
 
 [#Burghardt2014]: http://link.springer.com/chapter/10.1007%2F978-3-319-02447-9_27 "Burghardt, Sebastian and Seyfried, Armin and Klingsch, Wolfram. Fundamental diagram of stairs: Critical review and topographical measurements. Pedestrian and Evacuation Dynamics 2012"

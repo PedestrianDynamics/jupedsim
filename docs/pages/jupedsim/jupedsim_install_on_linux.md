@@ -6,7 +6,7 @@ summary: "JuPedSim does not offer any Linux binaries. A compilation of the code 
 sidebar: jupedsim_sidebar
 permalink: jupedsim_install_on_linux.html
 folder: jupedsim
-last_updated: Dec 20, 2019
+last_updated: Dec 31, 2019
 ---
 
 ## Get the code 
@@ -24,6 +24,8 @@ cd build
 cmake -GNinja -DCMAKE_BUILD_TYPE=Debug <path-to-cmakelists>
 ninja
 ```
+
+{%include note.html content="For faster builds you may want to use -DCMAKE_BUILD_TYPE=Release instead."%}
 
 Alternatively you can generate a make based build with:
 ```bash

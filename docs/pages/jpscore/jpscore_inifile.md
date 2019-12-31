@@ -6,7 +6,7 @@ sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_inifile.html
 summary:  The project file where the settings for a jpscore simulation are defined. Within this file properties of pedestrians, model parameters, etc can be given.
-last_updated: Dec 21, 2019
+last_updated: Dec 31, 2019
 ---
 
 ## Header
@@ -94,7 +94,7 @@ Interface to trains is documented [here](jpscore_trains.html).
 ## Traffic constraints
 
 This section defines constraints related to the traffic.
-At the moment the state of the doors can be changed (`open` or `close`)
+At the moment the state of the doors can be changed (`open`, `tmp_close` or `close`)
 
 
 ```xml
@@ -113,12 +113,14 @@ At the moment the state of the doors can be changed (`open` or `close`)
 
 - `caption`: optional parameter defining the caption of the door.
 
-- `state` defines the state of the door. Options are `close` or `open`.
+- `state` defines the state of the door. Options are `close`, `tmp_close` or `open`.
 Door's properties:
 - `dn`: number of agents to pass the door before triggering the process of flow regulation.
 - `outflow`: Max flow through door. Door's state will be changed adequately.
 - `max_agents`: Max agents that can pass door. Door will be closed permanently
 - `file` (optional) file containing further constraints. See [traffic.xml](jpscore_traffic.html)
+
+{%include note.html content="the door's state *close* is permanent, meaning that the door is closed until the end of the simulation, whereas *tmp_close* means that the door is closed temporally and may be open at some time during the simulation"%}
 
 ## Routing
 

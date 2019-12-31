@@ -6,16 +6,14 @@ sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_trajectory.html
 summary: The results of jpscore simulation are written to files in different formats. Same formats can be used by other JuPedSim modules.
-last_updated: Dec 21, 2019
+last_updated: Dec 31, 2019
 ---
 
 Possible formats are:
 
-- `xml-plain` which is the default xml format
+- `xml-plain` an xml format
 - `plain` a flat format (just numbers)
 
-Note that if you are using the streaming mode or want to visualize the trajectories with `jpsvis`,
-the format should be `xml-plain`.
 
 ## XML
 The file has three main sections: `header`, `geometry` and `frames`.

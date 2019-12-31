@@ -6,7 +6,7 @@ sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_direction.html
 summary: Once the targeted door is defined in a previous step by the router, the pedestrian aims at a specific point on the door. This point defines the desired direction of the pedestrian. This pages shows different methods how to define this point.
-last_updated: Dec 21, 2019
+last_updated: Dec 31, 2019
 ---
 
 ## Introduction
@@ -45,7 +45,7 @@ For more details see this [talk](https://fz-juelich.sciebo.de/index.php/s/s1ORGT
 
 This strategy uses a floor field collection for each room.
 
-The following parameters of an enhanced floorfield can be changed:
+The following parameters of an enhanced floor field can be changed:
 - `delta_h`: discretization/stepsize of grid-points used by the floor field
 - `wall_avoid_distance`: below this wall-distance, the floor field will show a wall-repulsive character, directing agents away from the wall
 - `use_wall_avoidance`: {true, false} switch to turn on/off the enhancement of the floor field
@@ -65,7 +65,7 @@ Usage example:
 ```
 
 
-Hier the floor fields are smaller but cannot steer to targets in a different room.
+Here the floor fields are smaller but cannot steer to targets in a different room.
 The router **must** provide intermediate targets for every agent, the target being in the same room.
 
 {%include warning.html content="The projection of the room onto the ($$x,\, y$$)-plane must be non-overlapping!"%}

@@ -5,8 +5,8 @@ tags: [jpscore, model]
 sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_operativ.html
-summary: Several operational models are implemented in jpscore. An operational model defines how pedestrians moves from one time step to the next.
-last_updated: Dec 21, 2019
+summary: Several operational models are implemented in jpscore. An operational model defines how pedestrians interact with each other and with their environment.
+last_updated: Dec 31, 2019
 ---
 
 ## Introduction
@@ -31,9 +31,6 @@ sections:
        A larger time step leads to faster simulations, however it is too risky and can lead to
 numerical instabilities, collisions and overlapping among pedestrians.
      - Unit: s
-- `<periodic>0</periodic>`
-     - Set to 1 if a system with closed boundary conditions should be simulated. Default setting is 0.
-     - This option is only implemented in *Tordeux2015* and is very geometry-specific (only for corridors) with predefined settings. 
 
 - `<exit_crossing_strategy>3</exit_crossing_strategy>`
      - Positive values in $$[1, 9]$$. See [Direction strategies](jpscore_direction.html) for the definition of the strategies.
@@ -66,6 +63,17 @@ The parameters that can be specified in this section are Gauss distributed (defa
 - `<v0_idle_escalator_downstairs mu="0.6" sigma="0.0" />`
     - Speed of idle escalators downstairs
     - Unit: m/s
+
+
+The reduced speed on stairs (up) is according to Tab 1 in [Burghardt2014][#Burghardt2014].
+
+| Handbook | Speed Stair Up |
+|----------|----------------|
+| PM       | 0.63 m/s       |
+| WM       | 0.61 m/s       |
+| NM       | 0.8 m/s        |
+| FM       | 0.55 m/s       |
+
 
 ### Shape of pedestrians
 Pedestrians are modeled as ellipses with two semi-axes: $$a$$ and $$b$$, where
@@ -185,3 +193,4 @@ In summary the relevant section for this model could look like:
 [#GCFM_PREPRINT]: https://arxiv.org/abs/1008.4297 "Preprint ArXiv"
 [#Tordeux2015]: http://arxiv.org/abs/1512.05597  "Tordeux, Antoine, Chraibi, Mohcine and Seyfried, Armin, Collision-free speed model for pedestrian dynamics. In Traffic and Granular Flow  '15, to appear."
 
+[#Burghardt2014]: http://link.springer.com/chapter/10.1007%2F978-3-319-02447-9_27 "Burghardt, Sebastian and Seyfried, Armin and Klingsch, Wolfram. Fundamental diagram of stairs: Critical review and topographical measurements. Pedestrian and Evacuation Dynamics 2012"
