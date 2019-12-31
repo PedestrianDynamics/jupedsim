@@ -104,34 +104,19 @@ For detailed information see [here](jpscore_trains.html).
 
 ## Traffic constraints
 
-This section defines constraints related to the traffic.
-At the moment the state of the doors can be changed (`open`, `temp_close` or `close`)
-
+This section defines constraints related to doors.
 
 ```xml
  <traffic_constraints>
-    <!-- doors states are: close or open -->
     <doors>
-        <door trans_id="4" caption="Main-gate" state="open" />
-        <door trans_id="6" caption="Rear-gate" state="close" />
-        <door trans_id="0" caption="NaN" state="open" dn="10" outflow="2" max_agents="200"/>
         <file>traffic.xml</file>
     </doors>
  </traffic_constraints>
 ```
 
-- `trans_id`: unique id of that specific door as defined in the geometry file. See [geometry](jpscore_geometry.html).
+- `file` file containing further constraints. See [traffic.xml](jpscore_traffic.html)
 
-- `caption`: optional parameter defining the caption of the door.
-
-- `state` defines the state of the door. Options are `close`, `temp_close` or `open`.
-Door's properties:
-- `dn`: number of agents to pass the door before triggering the process of flow regulation.
-- `outflow`: Max flow through door. Door's state will be changed adequately.
-- `max_agents`: Max agents that can pass door. Door will be closed permanently
-- `file` (optional) file containing further constraints. See [traffic.xml](jpscore_traffic.html)
-
-{%include note.html content="the door's state *close* is permanent, meaning that the door is closed until the end of the simulation, whereas *temp_close* means that the door is closed temporally and may be open at some time during the simulation"%}
+{%include note.html content="although all traffic constraints can be written in the inifile, we recommend to use a seperated file and linked it in the inifile as shown above."%}
 
 ## Routing
 

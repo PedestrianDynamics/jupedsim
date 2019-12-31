@@ -88,7 +88,7 @@ The list of publications is automatically generated based on a [Zotero](https://
 ## Check the changes before pushing to GitHub
 
 Run locally jekyll and check if your changes render properly:
-
 ```
-jekull serve
+jekyll serve
 ```
+{%include note.html content="run the from within docs/."%}
