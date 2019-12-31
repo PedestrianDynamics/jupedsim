@@ -234,7 +234,7 @@ std::shared_ptr<AgentsSource> PedDistributionParser::parseSourceNode(TiXmlElemen
     std::string caption    = xmltoa(e->Attribute("caption"), "no caption");
     std::string str_greedy = xmltoa(e->Attribute("greedy"), "false");
     float percent          = xmltof(e->Attribute("percent"), 1);
-    float rate             = xmltof(e->Attribute("rate"), 1);
+    float rate             = xmltof(e->Attribute("rate"), -1);
     double time            = xmltof(e->Attribute("time"), 0);
     int agent_id           = xmltoi(e->Attribute("agent_id"), -1);
     float startx      = xmltof(e->Attribute("startX"), std::numeric_limits<float>::quiet_NaN());
@@ -289,6 +289,9 @@ std::shared_ptr<AgentsSource> PedDistributionParser::parseSourceNode(TiXmlElemen
             id,
             percent);
         percent = 0.0;
+    }
+    if(rate == -1) {
+        rate = frequency;
     }
     auto source = std::shared_ptr<AgentsSource>(new AgentsSource(
         id,
