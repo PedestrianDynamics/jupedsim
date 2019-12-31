@@ -89,12 +89,23 @@ The options for the format are
 
 ## Train constraints
 
-Interface to trains is documented [here](jpscore_trains.html).
+In the inifile the following section should be defined, where two files are specified:
+- [Train timetable](jpscore_trains.html#train-timetable)
+- [Train types](jpscore_trains.html#train-types)
+
+```
+ <train_constraints>
+   <train_time_table>ttt.xml</train_time_table>
+   <train_types>train_types.xml</train_types>
+ </train_constraints>
+```
+
+For detailed information see [here](jpscore_trains.html).
 
 ## Traffic constraints
 
 This section defines constraints related to the traffic.
-At the moment the state of the doors can be changed (`open`, `tmp_close` or `close`)
+At the moment the state of the doors can be changed (`open`, `temp_close` or `close`)
 
 
 ```xml
@@ -113,14 +124,14 @@ At the moment the state of the doors can be changed (`open`, `tmp_close` or `clo
 
 - `caption`: optional parameter defining the caption of the door.
 
-- `state` defines the state of the door. Options are `close`, `tmp_close` or `open`.
+- `state` defines the state of the door. Options are `close`, `temp_close` or `open`.
 Door's properties:
 - `dn`: number of agents to pass the door before triggering the process of flow regulation.
 - `outflow`: Max flow through door. Door's state will be changed adequately.
 - `max_agents`: Max agents that can pass door. Door will be closed permanently
 - `file` (optional) file containing further constraints. See [traffic.xml](jpscore_traffic.html)
 
-{%include note.html content="the door's state *close* is permanent, meaning that the door is closed until the end of the simulation, whereas *tmp_close* means that the door is closed temporally and may be open at some time during the simulation"%}
+{%include note.html content="the door's state *close* is permanent, meaning that the door is closed until the end of the simulation, whereas *temp_close* means that the door is closed temporally and may be open at some time during the simulation"%}
 
 ## Routing
 
@@ -261,41 +272,17 @@ Note that these two options are only considered if `number=1`.
 Besides distributing agents randomly before the simulation starts, it is
 possible to define sources in order to "inject"
 new agents in the system during the simulation.
-The parameter of the sources are as follows.
+The parameter of the sources defined [here](jpscore_sources.html).
 
-- `id`: id of the source
-- `caption`: caption
-- `frequency`: time in seconds of generation of pedestrians (default = 1).
-- `N_create`: How many agents to create at once (default = 1).
-- `percent`: percent of `N_create` to generate (default = 1).
-- `rate`: rate of generation of agents (in seconds).
-- `time_min`, `time_max`: Time lifespan of the source.
-- `agents_max`: maximal number of agents produced by that source.
-- `group_id`: group id of the agents. This `id` **should match** a predefined group in the section [Agents_distribution](#agents_distribution).
-- `time`: time of appearance of agent with id `agent_id`. Here `agents_max=1`.
-- `startX`, `startY`: Distribute one agent at a fix position.
-- `x_min`, `x_max`, `y_min`, `y_max`: Bounding box for generation of agents.
-- `greedy` (default `false`): returns a Voronoi vertex randomly with respect to weights proportional to squared distances.
-   For vertexes $$v_i$$ and distances $$d_i$$ to their surrounding seeds
-   calculate the probabilities $$p_i$$ as
-
-   $$p_i= \frac{d_i^2}{\sum_j^n d_j^2}.$$
-
-   If this attribute is set to `true`, the greedy approach is used.
-   That means new agents will be placed on the vertex with the biggest distance to the surrounding seeds.
-- `file`: a file containing further sources. See [sources.xml](jpscore_sources.html)
-
-
-Here is an example of usage:
+An example of usage:
 - Busses are coming every 10 min (600 seconds).
 - Every bus transports 100 pedestrians.
 - When the bus stops, every 2 seconds 10 pedestrians leave the bus.
 - 3 Buses at max.
 
-
 ```xml
  <source id="10" frequency="600" N_create="100" agents_max="300"
-   percent="0.1" rate="2"  greedy="true"/>
+   percent="0.1" rate="2"/>
 ```
 
 ## Operational models
