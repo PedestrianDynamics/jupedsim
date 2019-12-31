@@ -20,9 +20,6 @@ Following properties of `transitions` can be defined before the start of the sim
 - `outflow`: Max flow through door. Door's state will be changed adequately.
 - `max_agents`: Max agents that can pass door. Door will be closed permanently
 
-{%include note.html content="the door's state *close* is permanent, meaning that the door is closed until the end of the simulation, whereas *temp_close* means that the door is closed temporally and may be open at some time during the simulation"%}
-
-
 ## Sample
 
 ```xml
@@ -39,3 +36,24 @@ Following properties of `transitions` can be defined before the start of the sim
   </traffic_constraints>
  </JPScore>
 ```
+
+## Changes of door's status
+
+Doors have three statuses:
+
+* _open_
+* _close_
+* _temp_close_
+
+They can all be set and changed by an event. 
+
+Heew are the rules governing the changes from one status to another:
+
+* Events have priority before the door-flow regulation.
+* When max_agents are reached the door status is _close_.
+* Doors that are closed by max_agents can be opened again by the event "reset".
+* If the door status is _temp_close_ the agents should wait in front of the door until it opens again.
+* If a door status is _close_, the agents should look for another door and **not** wait in front of the closed door. And if there is no other open door, the agents should wait inside the room.
+
+
+![Changes of door's status]({{ site.baseurl }}/images/door_states.png)
