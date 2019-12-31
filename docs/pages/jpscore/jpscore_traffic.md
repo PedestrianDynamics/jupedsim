@@ -27,11 +27,11 @@ Following properties of `transitions` can be defined before the start of the sim
  <JPScore project="JPS-Project" version="0.8">
   <traffic_constraints>
     <doors>
-      <door trans_id="2" caption="NaN" state="open" />
-      <door trans_id="3" caption="NaN" state="open" />
-      <door trans_id="4" caption="NaN" state="open" />
-      <door trans_id="5" caption="NaN" state="open" />
-      <door trans_id="0" caption="NaN" state="open" dn="10" outflow="2" max_agents="200"/>
+      <door trans_id="2" state="open" />
+      <door trans_id="3" state="open" />
+      <door trans_id="4" state="open" />
+      <door trans_id="5" state="open" />
+      <door trans_id="0" state="open" dn="10" outflow="2" max_agents="200"/>
     </doors>
   </traffic_constraints>
  </JPScore>
