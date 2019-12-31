@@ -1,11 +1,11 @@
 ---
-title: Sample for a file with traffic constraints
+title: Traffic constraints and door statuses
 keywords: simulation
 tags: [jpscore, file, simulation]
 sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_traffic.html
-summary: Properties of doors can be defined before the start of a simulation.
+summary: Properties of doors can be defined before the start of a simulation. Doors have different statuses, which may change during the simulation.
 last_updated: Dec 20, 2019
 ---
 
