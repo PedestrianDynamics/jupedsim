@@ -5,12 +5,34 @@ tags: [jpscore, file, simulation]
 sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_schedule.html
-summary: These brief instructions will help you get started quickly with the theme. The other topics in this help provide additional information and detail about working with other aspects of this theme and Jekyll.
-last_updated: Dec 20, 2019
+summary: Schedules are events that can be used to group doors and trigger events groupwise at certain points of time.
+last_updated: Dec 31, 2019
 ---
 
+## Definition
 
-Example for a schedule: 
+In general a definition of a valide schedule is composed of two parts:
+
+- **groups**: collection of doors
+- and **times** of events that apply to the different groups.
+
+In detail the following attributes are defined:
+
+-  `groups`: groups with all door, which should open or close at the same time.
+   -  a group has an unique `id`.
+   -  member defined by a unique id `t_id`  of the specific door as defined in the geometry file. See [geometry](jpscore_geometry.html).
+   - `max_agents`: **TODO**
+
+-  `times`: schedule times for every group.
+   - `reset` (default "false"): **TODO**
+   -  `group_id`: unique id of the specific group of doors as defined above in `groups`.
+   -  `closing_time`: time after which the doors of the group will be closed after the doors were opened.
+   -  `t`: time when the doors of the group will be open again. The door will be closed again at `t + closing_time`.
+
+## Sample
+
+In this example a schedule defining four different groups 
+A schedule file could be defined as follows:
 
 ```xml
  <?xml version="1.0" encoding="UTF-8" ?>
@@ -59,11 +81,8 @@ Example for a schedule:
 </JPScore>
 ```
 
--  `groups` groups with all door, which shoul open or close at the same time.
--  `group id` unique id to identify the specific group.
--  `member_id` unique id of the specific door as defined in the geometry file. See [geometry](jpscore_geometry.html).
--  `times` schedule times for every group.
--  `group_id` unique id of the specific group of doors as defined above in `groups`.
--  `closing_time` time after which the doors of the group will be closed after the doors were opened.
--  `t` time when the doors of the group will be open again.      
-    `t`+ `closing_time`= opening time
+In this example the doors of group 3 will **open** at 10, 60 and 90
+
+and **closed** at 30, 80 and 110.
+
+{% include note.html content="all times are in seconds."%}
