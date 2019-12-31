@@ -1,5 +1,5 @@
 ---
-title: Configuration file for jpscore
+title: jpscore inifile
 keywords: simulation
 tags: [jpscore, file]
 sidebar: jupedsim_sidebar

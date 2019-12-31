@@ -1,5 +1,5 @@
 ---
-title: Interface to trains in jpscore
+title: Trains
 keywords: simulation
 tags: [jpscore, file, simulation]
 sidebar: jupedsim_sidebar

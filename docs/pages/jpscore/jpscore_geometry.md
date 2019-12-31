@@ -1,5 +1,5 @@
 ---
-title: Geometry file
+title: Geometry
 keywords: simulation
 tags: [jpscore, file]
 sidebar: jupedsim_sidebar

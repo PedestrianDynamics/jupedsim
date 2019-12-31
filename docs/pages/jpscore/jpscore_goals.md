@@ -1,5 +1,5 @@
 ---
-title: Sample of a file for goals
+title: Goals
 keywords: simulation
 tags: [jpscore, file, simulation]
 sidebar: jupedsim_sidebar
