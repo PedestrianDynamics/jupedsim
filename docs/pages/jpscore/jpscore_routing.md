@@ -44,7 +44,9 @@ Following snippet is a definition example of the routing information:
 ```xml
 <route_choice_models>
   <router router_id="1" description="ff_global_shortest">
-  <write_VTK_files>true</write_VTK_files>
+    <parameters>
+        <write_VTK_files>true</write_VTK_files>
+    </parameters>
   </router>
 </route_choice_models>
 ```
