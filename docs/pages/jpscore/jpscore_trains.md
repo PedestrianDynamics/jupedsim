@@ -5,40 +5,35 @@ tags: [jpscore, file, simulation]
 sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_trains.html
-summary: These brief instructions will help you get started quickly with the theme. The other topics in this help provide additional information and detail about working with other aspects of this theme and Jekyll.
-last_updated: Dec 20, 2019
+summary: The interaction with trains is modeled with an event-based deleting and creating of doors. When a train arrives on the plattform, doors are created and again deleting when the train departs.
+last_updated: Dec 31, 2019
 ---
 
 
 ## Train constraints
 
-In the inifile the following section should be defined, where two files are specified:
-- [Train timetable](#train-timetable)
-- [Train types](#train-types)
-
-```
- <train_constraints>
-   <train_time_table>ttt.xml</train_time_table>
-   <train_types>train_types.xml</train_types>
- </train_constraints>
-```
+Information regarding trains are ogranized in two different files:
+- [Train timetable](#train-timetable): This file defines arrival and departure times of trains.
+- [Train types](#train-types): In this file types of trains are defined.
 
 ## Geometry definition
 
+In order to process tracks correctly following constraints need to be respected.
+
+### Constraints
+
 Following constraints are to be respected when creating the geometry of a platform:
 
-- Define a subroom of *class*  `Platform`
-- A *Platform* can have more than one track.
-- A *Platform* is closed: Meaning it has whether transitions nor crossings.
+- Define a subroom of *class* `Platform`
+- A `Platform` can have more than one track.
+- A `Platform` is closed: Meaning it has whether transitions nor crossings.
 - `tracks` can be defined with walls of type `track-n`, where $$n$$ is the number of the track.
 
-<div class="alert alert-info">
-  <strong>Important! </strong>Note: Every track *should* be within one single subroom.
-</div>
+{%include important.html content="Every track *should* be within one single subroom."%}
 
+### Geometry sample
 
-
-Here is an example of a platform with two tracks
+Following is an example of a platform with **two** tracks
 
 ```
  <room id="0" caption="station">
@@ -74,13 +69,24 @@ Here is an example of a platform with two tracks
 
 ## Train timetable
 
-Here, train's coordinates are **relative** to the point `track_start`.
+### Definition 
+
+In this file the following information regarding a train are defined: 
+
+- Track where the train arrives, defines through two points: start and end of the track.
+- the start and end of the train. Trains are assumed to be linear, although tracks can have a curve.
+- Times of arrival and departure.
+
+{%include note.html content="train's coordinates are **relative** to the point `track_start`."%}
+
+### Sample
 
 ```
  <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
  <train_time_table>
   <train id="1" type="RE" room_id="0"
-      track_start_x="-10" track_start_y="10" track_end_x="0" track_end_y="10"
+      track_start_x="-10" track_start_y="10" 
+      track_end_x="0" track_end_y="10"
       train_start_x="1" train_start_y="3"
       train_end_x="7" train_end_y="3"
       arrival_time="5" departure_time="15">
@@ -95,29 +101,18 @@ Here, train's coordinates are **relative** to the point `track_start`.
 ```
 ## Train types
 
-Door's coordinates are **relative** to the point `train_start` as defined in the [Train timetable](#train-timetable) file.
+### Definition
 
-![coordinates]({{ site.baseurl }}/img/coordinates.png)
+A train is defined through the following information: 
 
-So the global coordinates of the train's door `[A,B]` will be translated as follows
+- type (string): for example RE or ICE.
+- length (int): length of the train
+- capacity (int): maximal number of passengers
+- doors: a list of doors. Every door is defined by a 2D point.
 
-$$
-A_{global} = track\_start + train\_start + A_{local},
-$$
+{%include note.html content="The parameter `length` is not used yet. Maybe it will be helpful for sanity checks. Actually, the length of the train is internally calculated as the difference between `train_start` and `train_end`."%}
 
-$$
-B_{global} = track\_start + train\_start + B_{local}
-$$
-
-
-
-The number of agents in a train are calculated every time step as the sum of
-all agents passing through the train's door.
-
-When this number exceeds the `agents_max` parameter, all train's doors are closed.
-
-Note: The parameter `length` is not used yet. Maybe it will be helpful for sanity checks.
-Actually, the length of the train is internally calculated from `train_start` and `train_end`.
+### Train example
 
 ```
  <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -144,14 +139,38 @@ Actually, the length of the train is internally calculated from `train_start` an
     </train>
  </train_type>
 ```
+### Capacity of a train
+
+The number of agents in a train is calculated every time step as the sum of
+all agents passing through the train's doors.
+
+When this number exceeds the `agents_max` parameter, all train's doors are closed.
+
+## Transformation of coordinates
+
+While train's coordinates are **relative** to the start if the track (`track_start`), 
+Door's coordinates are **relative** to the point train's start (`train_start`) as defined in the [Train timetable](#train-timetable) file.
+
+![Coordinate systems of trains.]({{ site.baseurl }}/images/coordinates.png)
+
+Therefore, the global coordinates of the train's door `[A,B]` is calculated as follows
+
+$$
+A_{global} = track\_start + train\_start + A_{local},
+$$
+
+$$
+B_{global} = track\_start + train\_start + B_{local}.
+$$
+
 
 ## Algorithm
 
-Given a `platform` with at least one `track`, the geometry will be changes every time a train arrives/leaves.
+Given a `platform` with at least one `track`, the geometry will be changes every time a train arrives and leaves the platform.
 
 This will be done by projecting the train's doors on the track. With "projection" we mean along the orthogonal direction to the door.
 
-![platform]({{ site.baseurl }}/img/platform.png)
+![platform]({{ site.baseurl }}/images/platform.png)
 
 Every projection point is mapped to the corresponding wall on the track.
 
@@ -171,4 +190,4 @@ To remove the walls between the points T1 and T2, following actions are performe
 
 - Add  to the `building` new walls to close the gaps.
 
-![trainIntersection]({{ site.baseurl }}/img/trainIntersection.png)
+![trainIntersection]({{ site.baseurl }}/images/trainIntersection.png)
