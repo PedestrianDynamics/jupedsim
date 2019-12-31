@@ -1,14 +1,40 @@
 ---
-title: Sources file
+title: Sources
 keywords: simulation
 tags: [jpscore, file, simulation]
 sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_sources.html
-summary: These brief instructions will help you get started quickly with the theme. The other topics in this help provide additional information and detail about working with other aspects of this theme and Jekyll.
-last_updated: Dec 20, 2019
+summary: Sources are used to inject agents in a running simulation.
+last_updated: Dec 31, 2019
 ---
 
+## Parameter of a source
+
+- `id`: id of the source
+- `caption`: caption
+- `frequency`: time in seconds of generation of pedestrians (default = 1).
+- `N_create`: How many agents to create at once (default = 1).
+- `percent`: percent of `N_create` to generate (default = 1).
+- `rate`: rate of generation of agents (in seconds).
+- `time_min`, `time_max`: Time lifespan of the source.
+- `agents_max`: maximal number of agents produced by that source.
+- `group_id`: group id of the agents. This `id` **should match** a predefined group in the section [Agents_distribution](jpscore_inifile.html#agents_distribution).
+- `time`: time of appearance of agent with id `agent_id`. Here `agents_max=1`.
+- `startX`, `startY`: Distribute one agent at a fix position.
+- `x_min`, `x_max`, `y_min`, `y_max`: Bounding box for generation of agents.
+- `greedy` (default `false`): returns a Voronoi vertex randomly with respect to weights proportional to squared distances.
+   For vertexes $$v_i$$ and distances $$d_i$$ to their surrounding seeds
+   calculate the probabilities $$p_i$$ as
+
+   $$p_i= \frac{d_i^2}{\sum_j^n d_j^2}.$$
+
+   If this attribute is set to `true`, the greedy approach is used.
+   That means new agents will be placed on the vertex with the biggest distance to the surrounding seeds.
+- `file`: a file containing further sources. See [sources.xml](jpscore_sources.html)
+
+
+## Sample
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>

@@ -1,5 +1,5 @@
 ---
-title: Event file
+title: Events
 keywords: simulation
 tags: [jpscore, file]
 sidebar: jupedsim_sidebar
@@ -18,7 +18,7 @@ Following properties define an `event`:
 - `update_radius`:
 - `agents_color_by_knowledge`:
 - `time`: time of an event
-- `state` can be `close`, `tmp_close` or `open`
+- `state` can be `close`, `temp_close` or `open`
 
 
 ## Sample
