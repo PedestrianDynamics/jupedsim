@@ -14,6 +14,13 @@ except ImportError:
     import xml.etree.ElementTree as ET
 
 
+def contains(item, lower, upper, err):
+    return lower-err <= item <= upper+err
+
+def equals(item, val, err):
+    return abs(item - val) <= err
+
+
 def get_polygon(poly):
     X = []
     Y = []
