@@ -36,9 +36,6 @@ The header comprises the following elements:
 
 -   `<show_statistics>true</show_statistics>` Show different aggregate statistics e.g. the usage of the doors. (default: false)
 
--   `<logfile>log</logfile>` save relevant information about the simulation to a log file with txt format.
-  Useful to keep track of warnings or errors that may rise during a simulation.
-
 
 -  The trajectory file
 
