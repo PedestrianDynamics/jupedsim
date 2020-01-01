@@ -3,6 +3,9 @@ add_test(NAME develop_sources_test-2 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE
 set_tests_properties(
     develop_doors_test-1
     develop_sources_test-2
-    PROPERTIES LABELS "CI:FAST")
+    PROPERTIES LABELS "CI:MEDIUM;DEV")
+set_tests_properties(
+    develop_sources_test-2
+    PROPERTIES LABELS "CI:FAST;DEV")
 
 
