@@ -228,8 +228,8 @@ bool PedDistributionParser::LoadPedDistribution(
 std::shared_ptr<AgentsSource> PedDistributionParser::parseSourceNode(TiXmlElement * e)
 {
     int id                 = xmltoi(e->Attribute("id"), -1);
-    int frequency          = xmltoi(e->Attribute("frequency"), -1);
-    int agents_max         = xmltoi(e->Attribute("agents_max"), -1);
+    int frequency          = xmltoi(e->Attribute("frequency"), 1);
+    int agents_max         = xmltoi(e->Attribute("agents_max"), 10);
     int group_id           = xmltoi(e->Attribute("group_id"), -1);
     std::string caption    = xmltoa(e->Attribute("caption"), "no caption");
     std::string str_greedy = xmltoa(e->Attribute("greedy"), "false");
@@ -290,7 +290,7 @@ std::shared_ptr<AgentsSource> PedDistributionParser::parseSourceNode(TiXmlElemen
             percent);
         percent = 0.0;
     }
-    if(rate == -1) {
+    if(rate < 0) {
         rate = frequency;
     }
     auto source = std::shared_ptr<AgentsSource>(new AgentsSource(
