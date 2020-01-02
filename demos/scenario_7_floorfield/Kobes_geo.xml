@@ -479,10 +479,10 @@
                 </polygon>
             </subroom>
             <crossings>
-                <!--crossing id="1" subroom1_id="0" subroom2_id="13" state="close">
+                <crossing id="1" subroom1_id="0" subroom2_id="13" state="close">
                     <vertex px="6" py="10.5"/>
                     <vertex px="7" py="10.5"/>
-                </crossing-->
+                </crossing>
                 <crossing id="2" subroom1_id="1" subroom2_id="13">
                     <vertex px="12" py="10.5"/>
                     <vertex px="13" py="10.5"/>
