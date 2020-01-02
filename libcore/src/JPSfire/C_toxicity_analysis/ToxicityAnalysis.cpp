@@ -229,7 +229,7 @@ void ToxicityAnalysis::WriteOutHazardAnalysis(
     double FED_Heat)
 {
     std::string data;
-    char tmp[CLENGTH] = "";
+    char tmp[1024] = "";
     int frameNr       = int(p->GetGlobalTime() / _fps);
 
 

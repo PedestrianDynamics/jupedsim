@@ -584,7 +584,7 @@ double GCFMModel::GetDistEffMaxWall() const
 std::string GCFMModel::GetDescription()
 {
     std::string rueck;
-    char tmp[CLENGTH];
+    char tmp[1024];
 
     sprintf(tmp, "\t\tNu: \t\tPed: %f \tWall: %f\n", _nuPed, _nuWall);
     rueck.append(tmp);

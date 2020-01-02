@@ -131,7 +131,7 @@ bool GlobalRouter::Init(Building * building)
 
         AccessPoint * ap = new AccessPoint(door, center);
         ap->SetNavLine(cross);
-        char friendlyName[CLENGTH];
+        char friendlyName[1024];
         sprintf(
             friendlyName,
             "hline_%d_room_%d_subroom_%d",
@@ -163,7 +163,7 @@ bool GlobalRouter::Init(Building * building)
 
         AccessPoint * ap = new AccessPoint(door, center);
         ap->SetNavLine(cross);
-        char friendlyName[CLENGTH];
+        char friendlyName[1024];
         sprintf(
             friendlyName,
             "cross_%d_room_%d_subroom_%d",
@@ -203,7 +203,7 @@ bool GlobalRouter::Init(Building * building)
 
         AccessPoint * ap = new AccessPoint(door, center);
         ap->SetNavLine(cross);
-        char friendlyName[CLENGTH];
+        char friendlyName[1024];
         sprintf(
             friendlyName,
             "trans_%d_room_%d_subroom_%d",
@@ -343,7 +343,7 @@ bool GlobalRouter::Init(Building * building)
         to_AP->SetNavLine(&tmpline);
         //delete tmpline;
 
-        char friendlyName[CLENGTH];
+        char friendlyName[1024];
         sprintf(friendlyName, "finalGoal_%d_located_outside", goal->GetId());
         to_AP->SetFriendlyName(friendlyName);
         to_AP->AddFinalDestination(FINAL_DEST_OUT, 0.0);

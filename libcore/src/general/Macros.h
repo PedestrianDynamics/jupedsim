@@ -28,12 +28,9 @@
 #pragma once
 
 #include <algorithm>
-#include <cstdlib>
-#include <iostream>
 #include <limits>
 #include <map>
 #include <sstream>
-#include <string.h>
 #include <vector>
 
 
@@ -41,32 +38,10 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-// define some colors
-#define KNRM "\x1B[0m"
-#define KRED "\x1B[31m"
-#define KGRN "\x1B[32m"
-#define KYEL "\x1B[33m"
-#define KBLU "\x1B[34m"
-#define KMAG "\x1B[35m"
-#define KCYN "\x1B[36m"
-#define KWHT "\x1B[37m"
-#define RESET "\033[0m"
-
 // should be true only when using this file in the simulation core
 #define _SIMULATOR 1
-//#define _USE_PROTOCOL_BUFFER 1
 
 #define JPS_OLD_VERSION "0.5" // this version is still supported
-#define JPS_VERSION_MINOR "8"
-#define JPS_VERSION_MAJOR "0"
-#define JPS_PATCH_VERSION "2"
-
-#define JPS_VERSION JPS_VERSION_MAJOR "." JPS_VERSION_MINOR "." JPS_PATCH_VERSION
-
-// disable openmp in debug mode
-#ifdef _NDEBUG
-//#undef _OPENMP
-#endif
 
 // precision error
 #define J_EPS 0.001         //0.001
@@ -77,24 +52,14 @@
 #define J_TOLERANZ 0.03  /// [m] Toleranz beim erstellen der Linien
 #define J_EPS_V 0.1      /// [m/s] wenn  v<EPS_V wird mit 0 gerechnet
 
-// Length of array
-#define CLENGTH 1000
-
-// conversion (cm <-> m)
-#define FAKTOR 1
-
 // default final destination for the pedestrians
 #define FINAL_DEST_OUT -1
-
-// Linked cells
-#define LIST_EMPTY -1
 
 // Not-a-Number (NaN)
 #define J_NAN std::numeric_limits<double>::quiet_NaN()
 
+//TODO(KKZ) Move to appropriate
 enum RoomState { ROOM_CLEAN = 0, ROOM_SMOKED = 1 };
-
-enum AgentType { MALE = 0, FEMALE, CHILD, ELDERLY };
 
 enum class FileFormat { XML, TXT };
 
@@ -115,10 +80,7 @@ enum RoutingStrategy {
 
 enum OperativModels {
     MODEL_GCFM = 1,
-    MODEL_GOMPERTZ_REMOVED,
-    MODEL_VELOCITY,
-    MODEL_GRADIENT_REMOVED,
-    MODEL_KRAUSZ_REMOVED
+    MODEL_VELOCITY = 3,
 };
 
 enum AgentColorMode {
@@ -138,8 +100,6 @@ enum LineIntersectType {
     OVERLAP // overlap, parallel, no intersection
 };
 
-enum FFRouterMode { global_shortest = 0, local_shortest, quickest };
-
 enum GridCode { //used in floor fields
     WALL    = -10,
     INSIDE  = -11,
@@ -149,15 +109,6 @@ enum GridCode { //used in floor fields
     OPEN_TRANSITION = -14,
     CLOSED_CROSSING = -15, //closed crossings and transitions are marked as walls in "parseBuilding"
     CLOSED_TRANSITION = -16
-};
-
-enum FastMarchingFlags {
-    FM_UNKNOWN = 0,
-    FM_SINGLE  = 1, // single and double indicate whether a grid point was reached from one or two
-    FM_DOUBLE  = 2, // directions (rows and columns) when performing the fast marching algorithm
-    FM_FINAL   = 3,
-    FM_ADDED   = 4, // added to trial but not calculated
-    FM_OUTSIDE = -7
 };
 
 enum FloorfieldMode {
@@ -307,68 +258,3 @@ ReplaceStringInPlace(std::string & subject, const std::string & search, const st
         pos += replace.length();
     }
 }
-//**************************************************************
-//useful colors attributes for debugging
-//**************************************************************
-
-//Text attributes
-#define OFF 0    //All attributes off
-#define BRIGHT 1 //Bold on
-//       4    Underscore (on monochrome display adapter only)
-#define BLINK 5 //Blink on
-//       7    Reverse video on
-//      8    Concealed on
-
-//   Foreground colors
-#define JPS_BLACK 30
-#define JPS_CYAN 36
-#define JPS_WHITE 37
-#define JPS_RED 31
-#define JPS_GREEN 32
-#define JPS_YELLOW 33
-#define JPS_BLUE 34
-#define JPS_MAGENTA 35
-
-//    Background colors
-#define JPS_BG_BLACK 40
-#define JPS_BG_RED 41
-#define JPS_BG_GREEN 42
-#define JPS_BG_YELLOW 43
-#define JPS_BG_BLUE 44
-#define JPS_BG_CYAN 47
-#define JPS_BG_WHITE 47
-
-// Special caracters
-#define HOME printf("\033[1;1H"); // cursor up left
-#define CLEAR printf(" \033[2J"); //clear screen
-#define RED_LINE printf("%c[%d;%d;%dm\n", 0x1B, BRIGHT, RED, BG_BLACK);
-#define GREEN_LINE printf("\t%c[%d;%d;%dm", 0x1B, BRIGHT, GREEN, BG_BLACK);
-#define BLUE_LINE printf("\t%c[%d;%d;%dm", 0x1B, BRIGHT, BLUE, BG_BLACK);
-#define MAGENTA_LINE printf("\t%c[%d;%d;%dm", 0x1B, BRIGHT, MAGENTA, BG_BLACK);
-#define YELLOW_LINE printf("\t%c[%d;%d;%dm", 0x1B, BRIGHT, YELLOW, BG_BLACK);
-#define OFF_LINE printf("%c[%dm\n", 0x1B, OFF);
-
-
-//**************************************************************
-//useful macros  for debugging
-//**************************************************************
-#ifdef TRACE_LOGGING
-
-inline void _printDebugLine(const std::string & fileName, int lineNumber)
-{
-    unsigned found = fileName.find_last_of("/\\");
-    std::cerr << "[" << lineNumber << "]: ---" << fileName.substr(found + 1) << " ---" << std::endl;
-}
-
-#define dtrace(...)                                                                                \
-    (_printDebugLine(__FILE__, __LINE__),                                                          \
-     fprintf(stderr, __VA_ARGS__),                                                                 \
-     (void) fprintf(stderr, "\n"))
-
-#define derror(...)                                                                                \
-    (_printDebugLine(__FILE__, __LINE__), fprintf(stderr, "ERROR: "), fprintf(stderr, __VA_ARGS__))
-#else
-
-#define dtrace(...) ((void) 0)
-#define derror(...) (fprintf(stderr, __VA_ARGS__))
-#endif /* TRACE_LOGGING */
