@@ -6,6 +6,6 @@ set_tests_properties(
     PROPERTIES LABELS "CI:MEDIUM;DEV")
 set_tests_properties(
     develop_sources_test-2
-    PROPERTIES  WILL_FAIL TRUE LABELS "CI:FAST;DEV")
+    PROPERTIES LABELS "CI:FAST;DEV")
 
 
