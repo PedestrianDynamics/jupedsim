@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import math as ma
 import os
 import sys
 import logging
@@ -33,6 +34,51 @@ class Source:
     agents_max: int = None
     time: int = None
     greedy: bool = None
+    def possible_creations_with_np(self) -> int:
+        """
+        How many times can we create <np> agents in a subcycle?
+        """
+        Np = int(self.N_create*self.percent)
+        return int(self.N_create%Np != 0) + self.N_create//Np
+    def num_possible_creations(self) -> int:
+        if self.rate == None:
+            return 1
+
+        max_creations_in_subcycle = ma.ceil(self.frequency/self.rate)
+        return min(self.possible_creations_with_np(), max_creations_in_subcycle)
+
+    def num_cycles(self) -> int:
+        return (self.time_max - self.time_min)//self.frequency
+
+    def sub_cycle(self) -> List[int]:
+        if self.rate == None:
+            rate = self.frequency
+        else:
+            rate = self.rate
+
+        subcycle = []
+        Np = int(self.N_create*self.percent)
+        rest = Np
+        for i in range(self.num_possible_creations()):
+            print("i", i)
+            if rest > Np:
+                L = [self.time_min+i*rate]*Np
+            else:
+                L = [self.time_min+i*rate]*rest
+
+            rest = self.N_create - Np
+            subcycle += L
+
+        return subcycle
+
+    def cycle(self) -> List[int]:
+        subcycle = self.sub_cycle()
+        print(subcycle)
+        cycle = subcycle
+        for i in range(1, self.num_cycles()+2):
+            cycle = np.hstack((cycle, subcycle + i*self.frequency*np.ones(len(subcycle))))
+
+        return cycle[cycle <= self.time_max]
 
 def test_source(d, s, time_err, pos_err):
     """
@@ -71,6 +117,9 @@ def test_source(d, s, time_err, pos_err):
         in_box_x = True
         in_box_y = True
         on_time = True
+        if not source_id in d.keys():
+            logging.error("source_id: %d is not in  data", source_id)
+            return False
 
         if s.time:
             # in sources.xml time of sources is equidistant (step=5)
@@ -103,27 +152,23 @@ def test_source(d, s, time_err, pos_err):
     if not times:
         return True
 
-    msg = ("Got: "+", ".join(map(str, times)))
+    msg = ("Got times : "+", ".join(map(str, times)))
 
     logging.info(msg)
-    times_first = []
-    # 111 222 333 ncreate*percent = 3
-    # 1 2 3: ncreate*percent = 1
-    for i in range(len(times)):
-        chunk = int(s.N_create * s.percent)
-        sub_array = times[i * chunk:(i+1) * chunk]
-        if not sub_array:
-            continue
-
-        times_first.append(sub_array[0])
-        if not np.all(np.equal(np.diff(sub_array), 0)):
-            err_msg = ("frequency mismatch. Got subtimes: "+", ".join(map(str, sub_array))
-                    )
-            logging.error(err_msg)
-            return False
-    if not np.all(np.less_equal(np.abs(np.diff(times_first) - s.frequency), time_err)):
-        err_msg = ("frequency mismatch. Got times_first: "+", ".join(map(str, times_first))
-                  )
+    should_be = s.cycle()
+    # test ids
+    if len(s.ids) != len(should_be):
+        logging.error("length of ids is not correct")
+        msg = ("ids : "+", ".join(map(str, s.ids)))
+        logging.error(msg)
+        msg = ("should be : "+", ".join(map(str, should_be)))
+        logging.error(msg)
+        return False
+    else:
+        logging.info("length of ids is fine")
+    if not np.all(np.less_equal(np.abs(times - should_be), time_err)):
+        err_msg = ("frequency mismatch!\n"
+                   "Should be: "+", ".join(map(str, should_be)))
         logging.error(err_msg)
         return False
 
@@ -185,7 +230,7 @@ def runtest(inifile, trajfile):
     success = test_source(d, source, time_err, pos_err)
     if not success:
         exit(FAILURE)
-    #----------------        
+    #----------------
     source_ids = [9, 10, 11]
     source = Source(ids = source_ids,
                     agents_max = 3,
@@ -210,13 +255,13 @@ def runtest(inifile, trajfile):
     source_ids = range(17, 24)
     source = Source(ids = source_ids,
                     N_create = 1,
-                    xmin = 4, xmax = 6.2,                   
+                    xmin = 4, xmax = 6.2,
                     ymin = 3, ymax = 6.1,
                     time_min = 10, time_max = 50,
                     frequency = 6)
     success = test_source(d, source, time_err, pos_err)
     if not success:
-        exit(FAILURE) 
+        exit(FAILURE)
     #----------------
     source_ids = range(29, 59)
     source = Source(ids = source_ids,
@@ -226,14 +271,29 @@ def runtest(inifile, trajfile):
                     xmin = 1, xmax = 6.2,                   
                     ymin = 1, ymax = 6.1,
                     time_min = 2, time_max = 30,
+                    agents_max = 100,
                     frequency = 10)
     success = test_source(d, source, time_err, pos_err)
     if not success:
         exit(FAILURE) 
     #----------------
+    source_ids = range(129, 145)
+    source = Source(ids = source_ids,
+                    N_create = 10,
+                    rate = 4,
+                    percent = 0.2,
+                    xmin = 1, xmax = 6.2,
+                    ymin = 1, ymax = 6.1,
+                    time_min = 2, time_max = 28,
+                    agents_max = 100,
+                    frequency = 10)
+    success = test_source(d, source, time_err, pos_err)
+    if not success:
+        exit(FAILURE)
+    #----------------
 
 if __name__ == "__main__":
-    test = JPSRunTestDriver(1, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
+    test = JPSRunTestDriver(2, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
     test.run_test(testfunction=runtest)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
