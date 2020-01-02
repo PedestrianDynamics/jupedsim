@@ -31,10 +31,7 @@ PedDistributionParser::PedDistributionParser(const Configuration * configuration
 {
 }
 
-PedDistributionParser::~PedDistributionParser()
-{
-    // delete _configuration;
-}
+PedDistributionParser::~PedDistributionParser() {}
 
 bool PedDistributionParser::LoadPedDistribution(
     std::vector<std::shared_ptr<StartDistribution>> & startDis,
@@ -66,17 +63,15 @@ bool PedDistributionParser::LoadPedDistribution(
         int number        = xmltoi(e->Attribute("number"), 0);
         int agent_para_id = xmltoi(e->Attribute("agent_parameter_id"), -1);
 
-        int goal_id              = xmltoi(e->Attribute("goal_id"), FINAL_DEST_OUT);
-        int router_id            = xmltoi(e->Attribute("router_id"), -1);
-        int route_id             = xmltoi(e->Attribute("route_id"), -1);
-        int age                  = xmltoi(e->Attribute("age"), -1);
-        std::string gender       = xmltoa(e->Attribute("gender"), "female");
-        double height            = xmltof(e->Attribute("height"), -1);
-        double patience          = xmltof(e->Attribute("patience"), 5);
-        double premovement_mean  = xmltof(e->Attribute("pre_movement_mean"), 0);
-        double premovement_sigma = xmltof(e->Attribute("pre_movement_sigma"), 0);
-        //double risk_tolerance_mean = xmltof(e->Attribute("risk_tolerance_mean"), 0);
-        //double risk_tolerance_sigma = xmltof(e->Attribute("risk_tolerance_sigma"), 0);
+        int goal_id               = xmltoi(e->Attribute("goal_id"), FINAL_DEST_OUT);
+        int router_id             = xmltoi(e->Attribute("router_id"), -1);
+        int route_id              = xmltoi(e->Attribute("route_id"), -1);
+        int age                   = xmltoi(e->Attribute("age"), -1);
+        std::string gender        = xmltoa(e->Attribute("gender"), "female");
+        double height             = xmltof(e->Attribute("height"), -1);
+        double patience           = xmltof(e->Attribute("patience"), 5);
+        double premovement_mean   = xmltof(e->Attribute("pre_movement_mean"), 0);
+        double premovement_sigma  = xmltof(e->Attribute("pre_movement_sigma"), 0);
         std::string positions_dir = xmltoa(e->Attribute("positions_dir"), "");
         std::string unit_traj     = xmltoa(e->Attribute("unit"), "m");
         double x_min              = xmltof(e->Attribute("x_min"), -FLT_MAX);
@@ -101,7 +96,6 @@ bool PedDistributionParser::LoadPedDistribution(
             std::shared_ptr<StartDistribution>(new StartDistribution(_configuration->GetSeed()));
         dis->SetRoomID(room_id);
         dis->SetSubroomID(subroom_id);
-        //dis->SetSubroomUID(subroom_uid);
         dis->SetGroupId(group_id);
         dis->Setbounds(bounds);
         dis->SetAgentsNumber(number);

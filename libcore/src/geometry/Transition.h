@@ -37,7 +37,6 @@ class Transition : public Crossing
 private:
     Room * _room2;
     std::string _type;
-    // number of agents that passed that exit
 
 public:
     /**
@@ -78,7 +77,6 @@ public:
      */
     Room * GetOtherRoom(int room_id) const;
 
-    // virtual functions
     virtual bool IsExit() const;
     virtual bool IsTransition() const;
     virtual bool IsInRoom(int roomID) const;

@@ -68,7 +68,6 @@ private:
     Point _V0;         //vector V0
 
 
-    //double _V0;
     double _V0UpStairs;
     double _V0DownStairs;
     double _EscalatorUpStairs;

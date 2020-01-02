@@ -55,11 +55,6 @@ static fs::path getEventFileName(const fs::path & projectFile)
     }
     return ret;
 }
-// <train_constraints>
-//   <train_time_table>ttt.xml</train_time_table>
-//   <train_types>train_types.xml</train_types>
-// </train_constraints>
-
 
 static fs::path getTrainTimeTableFileName(const fs::path & projectFile)
 {
@@ -312,7 +307,7 @@ void TrajectoriesXML::WriteHeader(
     std::string tmp;
     tmp = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n"
           "<trajectories>\n";
-    char agents[CLENGTH] = "";
+    char agents[1024] = "";
     sprintf(agents, "\t<header version = \"0.5.1\">\n");
     tmp.append(agents);
     sprintf(agents, "\t\t<agents>%ld</agents>\n", nPeds);
@@ -321,10 +316,6 @@ void TrajectoriesXML::WriteHeader(
     tmp.append(agents);
     sprintf(agents, "\t\t<frameRate>%0.2f</frameRate>\n", fps);
     tmp.append(agents);
-    //tmp.append("\t\t<!-- Frame count HACK\n");
-    //tmp.append("replace me\n");
-    //tmp.append("\t\tFrame count HACK -->\n");
-    //tmp.append("<frameCount>xxxxxxx</frameCount>\n");
     tmp.append("\t</header>\n");
     _outputHandler->Write(tmp);
 }
@@ -348,13 +339,12 @@ void TrajectoriesXML::WriteGeometry(Building * building)
     // just put a link to the geometry file
     std::string embed_geometry;
     embed_geometry.append("\t<geometry>\n");
-    char file_location[CLENGTH] = "";
+    char file_location[1024] = "";
     sprintf(
         file_location,
         "\t<file location= \"%s\"/>\n",
         building->GetGeometryFilename().string().c_str());
     embed_geometry.append(file_location);
-    //embed_geometry.append("\t</geometry>\n");
 
     for(auto hline : building->GetAllHlines()) {
         embed_geometry.append(hline.second->GetDescription());
@@ -364,14 +354,9 @@ void TrajectoriesXML::WriteGeometry(Building * building)
         embed_geometry.append(goal.second->Write());
     }
 
-    //write the grid
-    //embed_geometry.append(building->GetGrid()->ToXML());
 
     embed_geometry.append("\t</geometry>\n");
     _outputHandler->Write(embed_geometry);
-    //write sources
-    // if(building->G )
-    //
     _outputHandler->Write("\t<AttributeDescription>");
     _outputHandler->Write("\t\t<property tag=\"x\" description=\"xPosition\"/>");
     _outputHandler->Write("\t\t<property tag=\"y\" description=\"yPosition\"/>");
@@ -386,7 +371,7 @@ void TrajectoriesXML::WriteGeometry(Building * building)
 void TrajectoriesXML::WriteFrame(int frameNr, Building * building)
 {
     std::string data;
-    char tmp[CLENGTH] = "";
+    char tmp[1024] = "";
     double RAD2DEG    = 180.0 / M_PI;
 
     sprintf(tmp, "<frame ID=\"%d\">\n", frameNr);
@@ -397,7 +382,7 @@ void TrajectoriesXML::WriteFrame(int frameNr, Building * building)
         Pedestrian * ped    = allPeds[p];
         Room * r            = building->GetRoom(ped->GetRoomID());
         std::string caption = r->GetCaption();
-        char s[CLENGTH]     = "";
+        char s[1024]     = "";
         int color           = ped->GetColor();
         double a            = ped->GetLargerAxis();
         double b            = ped->GetSmallerAxis();
@@ -410,11 +395,11 @@ void TrajectoriesXML::WriteFrame(int frameNr, Building * building)
             "rA=\"%.2f\"\trB=\"%.2f\"\t"
             "eO=\"%.2f\" eC=\"%d\"/>\n",
             ped->GetID(),
-            (ped->GetPos()._x) * FAKTOR,
-            (ped->GetPos()._y) * FAKTOR,
-            (ped->GetElevation()) * FAKTOR,
-            a * FAKTOR,
-            b * FAKTOR,
+            (ped->GetPos()._x),
+            (ped->GetPos()._y),
+            (ped->GetElevation()),
+            a,
+            b,
             phi * RAD2DEG,
             color);
         data.append(s);

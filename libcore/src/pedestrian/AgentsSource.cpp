@@ -29,6 +29,7 @@
 #include "AgentsSource.h"
 
 #include "Pedestrian.h"
+#include "general/Logger.h"
 
 AgentsSource::AgentsSource(
     int id,
@@ -220,30 +221,13 @@ void AgentsSource::GenerateAgents(std::vector<Pedestrian *> & peds, int count, B
 {
     std::vector<Point> emptyPositions;
     int pid;
-
-    // if(this->GetAgentId() < 0)
-    // {
-    //      // TODO: get the reserved ids by other sources
-    //      std::vector<int> reserved_ids;
-    //      for (const auto &source: _start_dis_sources)
-    //           if(source->GetAgentId() >= 0)
-    //                reserved_ids.push_back(source->GetAgentId());
-
-    //      while( std::find(reserved_ids.begin(), reserved_ids.end(), pid) != reserved_ids.end() ){
-    //           std::cout << "\n\nSOURCE  SORRY " << pid << " is reserved!\n";
-    //           pid += 1;
-    //      }
-    // }
-
     pid = (this->GetAgentId() >= 0) ?
               this->GetAgentId() :
               Pedestrian::GetAgentsCreated() + building->GetAllPedestrians().size();
     for(int i = 0; i < count; i++) {
         if(GetStartDistribution()) {
-            //std::cout << "AgentsSource::GenerateAgents Generates an Agent\n";
             auto ped = GetStartDistribution()->GenerateAgent(building, &pid, emptyPositions);
             if(ped->FindRoute() == -1) {
-                // Log->Write("WARNING: Can not set destination for source agent %d", ped->GetID());
                 // Sometimes the router can not find a target for ped
                 auto transitions = building->GetAllTransitions();
                 auto transition  = transitions.begin()->second; //dummy
@@ -269,26 +253,30 @@ void AgentsSource::GenerateAgents(std::vector<Pedestrian *> & peds, int count, B
 
 void AgentsSource::Dump() const
 {
-    Log->Write("\n--------------------------");
-    Log->Write("Dumping Source");
-    Log->Write(">> Caption    : %s", this->GetCaption().c_str());
-    Log->Write(">> Source ID  : %d", _id);
-    Log->Write(">> Group ID   : %d", _groupID);
-    Log->Write(">> Frequency  : %d", _frequency);
-    Log->Write(">> Agents Max : %d", _maxAgents);
-    Log->Write(">> Agents Pool: %d", _agents.size());
-    Log->Write(">> Agent id   : %d", this->GetAgentId());
-    Log->Write(">> Time       : %.2f", this->GetPlanTime());
-    Log->Write(">> StartX     : %.2f", this->GetStartX());
-    Log->Write(">> StartY     : %.2f", this->GetStartY());
-    Log->Write(">> Percent    : %.2f", this->GetPercent());
-    Log->Write(">> Rate       : %.2f", this->GetRate());
-    Log->Write(">> N_create   : %d", this->GetChunkAgents());
     auto tmpB = this->GetBoundaries();
-    Log->Write(">> Boundaries : X-axis [%.4f -- %.4f]", tmpB[0], tmpB[1]);
-    Log->Write("                Y-axis [%.4f -- %.4f]", tmpB[2], tmpB[3]);
     auto tmpL = this->GetLifeSpan();
-    Log->Write(">> LifeSpan   : [%d -- %d]", tmpL[0], tmpL[1]);
-    Log->Write("\n--------------------------\n");
-    //getc(stdin);
+    LOG_DEBUG(
+        "Dumping Source: Caption={} SourceID={:d}, GroupID={:d}, Frequency={:d}, AgentsMax={:d}, "
+        "AgentsPool={:d}, AgentID={:d}, Time={:.2f}, Pos=({:.2f},{:.2f}), Percent={:.2f}, "
+        "Rate={:.2f}, N_create={:d}, Boundaries=(XAxis=({:.4f}, {:.4f}), YAxis=({:.4f},{:.4f})), "
+        "LifeSpan=({:d},{:d})",
+        this->GetCaption(),
+        _id,
+        _groupID,
+        _frequency,
+        _maxAgents,
+        _agents.size(),
+        this->GetAgentId(),
+        this->GetPlanTime(),
+        this->GetStartX(),
+        this->GetStartY(),
+        this->GetPercent(),
+        this->GetRate(),
+        this->GetChunkAgents(),
+        tmpB[0],
+        tmpB[1],
+        tmpB[2],
+        tmpB[3],
+        tmpL[0],
+        tmpL[1]);
 }

@@ -26,6 +26,8 @@
  **/
 #include "AccessPoint.h"
 
+#include "general/Logger.h"
+
 AccessPoint::AccessPoint(int id, double center[2], double radius)
 {
     _id                = id;
@@ -107,8 +109,7 @@ double AccessPoint::GetDistanceTo(int UID)
 {
     //this is probably a final destination
     if(_mapDestToDist.count(UID) == 0) {
-        Log->Write("ERROR:\tNo route to destination  [ %d ]", UID);
-        Log->Write("ERROR:\tCheck your configuration file");
+        LOG_ERROR("No route to destination  [{:d}]", UID);
         Dump();
         //return 0;
         exit(EXIT_FAILURE);
@@ -136,8 +137,7 @@ int AccessPoint::GetNextApTo(int UID)
 {
     //this is probably a final destination
     if(_mapDestToAp.count(UID) == 0) {
-        Log->Write("ERROR:\tNo route to destination  [ %d ]", UID);
-        Log->Write("ERROR:\t Did you forget to define the goal in the configuration file?");
+        LOG_ERROR("No route to destination  [{:d}]", UID);
         Dump();
         exit(EXIT_FAILURE);
     }

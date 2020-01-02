@@ -36,7 +36,6 @@
 
 class Point;
 class OutputHandler;
-extern OutputHandler * Log;
 // Container to store all FDSMeshs. Sorted by simulation's global time
 using FDSMeshContainer = std::unordered_map<std::string, FDSMesh>;
 
@@ -79,5 +78,4 @@ private:
     double _PedEyeHeight;
     double _NearestHeight;
     double GetNearestHeight(double);
-    // const char * glob_str;
 };

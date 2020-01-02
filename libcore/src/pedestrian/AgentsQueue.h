@@ -41,7 +41,6 @@ public:
     static void GetandClear(std::vector<Pedestrian *> & peds);
     static bool IsEmpty();
     static int Size();
-    //static std::vector<Pedestrian*> GetandClear();
 
 private:
     AgentsQueueIn(){};

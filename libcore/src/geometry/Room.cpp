@@ -58,15 +58,8 @@ Room::Room(const Room & orig)
     _egressTime = orig.GetEgressTime();
 }
 
-Room::~Room()
-{
-    //for (unsigned int i = 0; i < _subRooms.size(); i++)
-    //delete _subRooms[i];
-}
+Room::~Room() {}
 
-/*************************************************************
- Setter-Funktionen
- ************************************************************/
 void Room::SetID(int ID)
 {
     _id = ID;
@@ -92,9 +85,6 @@ void Room::SetEgressTime(double time)
     _egressTime = time;
 }
 
-/*************************************************************
- Getter-Functions
- ************************************************************/
 int Room::GetID() const
 {
     return _id;
@@ -107,7 +97,6 @@ const std::string & Room::GetCaption() const
 
 double Room::GetZPos() const
 {
-    //if(pCaption=="070") return pZPos+1.0;
     return _zPos;
 }
 
@@ -128,7 +117,7 @@ const std::map<int, std::shared_ptr<SubRoom>> & Room::GetAllSubRooms() const
 
 SubRoom * Room::GetSubRoom(int index) const
 {
-    //todo: the check is done in _subRooms.at(index);
+    //TODO the check is done in _subRooms.at(index);
     if(_subRooms.count(index) == 0) {
         LOG_ERROR("Room::GetSubRoom() No subroom id [{}] present in room id [{}].", index, _id);
         return nullptr;
@@ -136,30 +125,16 @@ SubRoom * Room::GetSubRoom(int index) const
     return _subRooms.at(index).get();
 }
 
-
-#ifdef _SIMULATOR
-
-#endif // _SIMULATOR
-
 const RoomState & Room::GetState() const
 {
     return _state;
 }
 
 
-/*************************************************************
- Sonstige Funktionen
- ************************************************************/
 void Room::AddSubRoom(SubRoom * r)
 {
-    //_subRooms.push_back(r);
     _subRooms[r->GetSubRoomID()] = std::shared_ptr<SubRoom>(r);
 }
-
-/*************************************************************
- Ein-Ausgabe
- ************************************************************/
-
 
 const std::vector<int> & Room::GetAllTransitionsIDs() const
 {

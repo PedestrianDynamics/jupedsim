@@ -28,6 +28,7 @@
 
 #include "AgentsParameters.h"
 #include "Pedestrian.h"
+#include "general/Logger.h"
 #include "geometry/SubRoom.h"
 
 
@@ -57,9 +58,8 @@ StartDistribution::StartDistribution(int seed)
     _unit_traj          = "m";
     static bool _seeded = false; // seed only once, not every time
     if(!_seeded) {
-        _generator = std::default_random_engine(
-            seed); // mt19937 g(static_cast<uint32_t>(_configuration->GetSeed()));
-        _seeded = true;
+        _generator = std::default_random_engine(seed);
+        _seeded    = true;
     }
 }
 
@@ -209,7 +209,6 @@ StartDistribution::GenerateAgent(Building * building, int * pid, std::vector<Poi
     ped->SetPatienceTime(GetPatience());
     ped->SetPremovementTime(GetPremovementTime());
     ped->SetRiskTolerance(GetRiskTolerance());
-    //ped->SetTrip(); // not implemented
 
     // a und b setzen muss vor v0 gesetzt werden,
     // da sonst v0 mit Null überschrieben wird
@@ -243,15 +242,16 @@ StartDistribution::GenerateAgent(Building * building, int * pid, std::vector<Poi
     }
     if(index == -1) {
         if(positions.size()) {
-            Log->Write(
-                "ERROR:\t Cannot distribute pedestrians in the mentioned area "
-                "[%0.2f,%0.2f,%0.2f,%0.2f]",
+            LOG_ERROR(
+                "Cannot distribute pedestrians in the mentioned area "
+                "[{:2f},{:2f},{:2f},{:2f}], Specifying a subroom_id may help. {:d} positions were "
+                "available. Index {:d}",
                 _xMin,
                 _xMax,
                 _yMin,
-                _yMax);
-            Log->Write("      \t Specifying a subroom_id might help");
-            Log->Write("      \t %d positions were available. Index %d ", positions.size(), index);
+                _yMax,
+                positions.size(),
+                index);
             exit(EXIT_FAILURE);
         }
     } else {
@@ -265,24 +265,22 @@ StartDistribution::GenerateAgent(Building * building, int * pid, std::vector<Poi
             if(building->GetRoom(ped->GetRoomID())
                    ->GetSubRoom(ped->GetSubRoomID())
                    ->IsInSubRoom(start_pos) == false) {
-                Log->Write(
-                    "ERROR: \tStartDistribution::GenerateAgent cannot distribute pedestrian %d in "
-                    "Room %d /Subroom %d at fixed position %s",
+                LOG_ERROR(
+                    "StartDistribution::GenerateAgent cannot distribute pedestrian {:d} in "
+                    "Room {:d} / Subroom {:d} at fixed position {}. Make sure the position is "
+                    "inside the geometry and belongs to the specified room {:d} / subroom {:d}",
                     *pid,
                     GetRoomId(),
                     GetSubroomID(),
-                    start_pos.toString().c_str());
-                Log->Write(
-                    "ERROR: \t Make sure that the position is inside the geometry "
-                    "and belongs to the specified room %d/subroom %d",
+                    start_pos.toString(),
                     ped->GetRoomID(),
                     ped->GetSubRoomID());
                 exit(EXIT_FAILURE);
             }
 
             ped->SetPos(start_pos, true); //true for the initial position
-            Log->Write(
-                "INFO: \t fixed position for ped %d in Room %d %s",
+            LOG_INFO(
+                "fixed position for ped {:d} in Room {:d} {}",
                 *pid,
                 GetRoomId(),
                 start_pos.toString().c_str());
@@ -297,8 +295,8 @@ StartDistribution::GenerateAgent(Building * building, int * pid, std::vector<Poi
 void StartDistribution::SetStartPosition(double x, double y, double z)
 {
     if(_nPeds != 1) {
-        Log->Write("INFO:\t you cannot specify the same start position for many agents");
-        Log->Write("INFO:\t Ignoring the start position");
+        LOG_WARNING("You cannot specify the same start position for many agents. This starting "
+                    "position will be ignored");
         return;
     }
     _startX = x;
@@ -381,7 +379,6 @@ void StartDistribution::InitRiskTolerance(std::string distribution_type, double 
 double StartDistribution::GetRiskTolerance()
 {
     if(_distribution_type == "normal") {
-        //fprintf(stderr, "%f \t %f \n", _generator, _riskTolerance(_generator));
         if(_riskTolerance.stddev() == judge) {
             return _riskTolerance.mean();
         } else {
@@ -390,12 +387,10 @@ double StartDistribution::GetRiskTolerance()
     } else {
         std::uniform_real_distribution<float> normalize(0.0, 1.0);
         float rand_norm = normalize(_generator);
-        //fprintf(stderr, "%f \n", quantile(_risk_beta_dist, rand_norm));
         if(_distribution_type == "beta") {
             return quantile(_risk_beta_dist, rand_norm);
         }
-        Log->Write(
-            "Warning:\tDistribution Type invalid or not set. Fallback to uniform distribution");
+        LOG_WARNING("Distribution Type invalid or not set. Fallback to uniform distribution");
         return (double) rand_norm; // todo: ar.graf: check if this quick fix executes and why
     }
 }

@@ -30,6 +30,7 @@
 #include "JPSfire/generic/FDSMesh.h"
 #include "JPSfire/generic/FDSMeshStorage.h"
 #include "general/Filesystem.h"
+#include "general/Logger.h"
 #include "geometry/Building.h"
 #include "geometry/SubRoom.h"
 #include "pedestrian/Pedestrian.h"
@@ -50,30 +51,27 @@ bool SmokeSensor::LoadJPSfireInfo()
 {
     TiXmlDocument doc(_building->GetProjectFilename().string());
     if(!doc.LoadFile()) {
-        Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \t could not parse the project file");
+        LOG_ERROR("Could not parse project file: {}", doc.ErrorDesc());
         return false;
     }
 
     TiXmlNode * JPSfireNode = doc.RootElement()->FirstChild("JPSfire");
     if(!JPSfireNode) {
-        Log->Write("INFO:\tcould not find any JPSfire information");
+        LOG_INFO("Could not find any JPSfire information");
         return true;
     }
 
     TiXmlElement * JPSfireCompElem = JPSfireNode->FirstChildElement("A_smoke_sensor");
     if(JPSfireCompElem) {
         if(JPSfireCompElem->FirstAttribute()) {
-            //std::string filepath = xmltoa(JPSfireCompElem->Attribute("smoke_factor_grids"), "");
-            //std::string filepath = _building->GetProjectRootDir() + xmltoa(JPSfireCompElem->Attribute("smoke_factor_grids"), "");
             fs::path file_path(_building->GetProjectRootDir());
             file_path /= xmltoa(JPSfireCompElem->Attribute("smoke_factor_grids"), "");
             std::string filepath   = file_path.string();
             double updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
             double finalTime       = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
-            Log->Write(
-                "INFO:\tJPSfire Module A_smoke_sensor: \n\tdata: %s \n\tupdate time: %.1f s | "
-                "final time: %.1f s",
+            LOG_INFO(
+                "JPSfire Module A_smoke_sensor, tdata: {} tupdate time: {:.1f}s, final time: "
+                "{:.1f}s",
                 filepath.c_str(),
                 updateIntervall,
                 finalTime);
@@ -115,33 +113,8 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap & cognitiv
                         item->GetCrossing()->GetCentre(),
                         pedestrian->GetGlobalTime())
                     .GetKnotValue(pedestrian->GetPos()._x, pedestrian->GetPos()._y);
-            // if(SmokeFactor > 2){
-
-            //      std::cout << "\n =================================== \n";
-            //      std::cout << "Ped: " << pedestrian->GetID() << ", at (" << pedestrian->GetPos()._x << ", " << pedestrian->GetPos()._y << ")" << std::endl;
-            //      std::cout << "\tElevation: " << pedestrian->GetElevation() << std::endl;
-            //      std::cout << "\titem->GetCrossing()->GetCentre(): " << item->GetCrossing()->GetCentre()._x << ", " << item->GetCrossing()->GetCentre()._y << std::endl;
-            //      std::cout << "\t Time: " << pedestrian->GetGlobalTime() << std::endl;
-            //      std::cout << "\tKnotValue: " << _FMStorage->GetFDSMesh(pedestrian->GetElevation(), item->GetCrossing()->GetCentre(), pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x, pedestrian->GetPos()._y) << std::endl;
-            //      std::cout << "SmokeFactor: " << SmokeFactor << std::endl;
-            //      std::cout << "Risktolerance: " << RiskTolerance << std::endl;
-            // }
             weight = 1 + (1 - RiskTolerance) * SmokeFactor;
         }
-        /// Set Edge Weight
-        //std::cout << "weight: "<< weight << std::endl;
         item->SetFactor(weight, GetName());
     }
 }
-
-//void SmokeSensor::set_FMStorage(const std::shared_ptr<FDSMeshStorage> fmStorage)
-//{
-//    _FMStorage=fmStorage;
-//
-//}
-
-//const std::shared_ptr<FDSMeshStorage> SmokeSensor::get_FMStorage()
-//{
-//    return _FMStorage;
-//
-//}

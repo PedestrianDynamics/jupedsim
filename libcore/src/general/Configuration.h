@@ -47,7 +47,6 @@ public:
         _solver           = 1;
         _routingEngine    = std::shared_ptr<RoutingEngine>(new RoutingEngine());
         _maxOpenMPThreads = 1;
-        _log              = 0;
         _seed             = 0;
         _fps              = 8;
         _linkedCellSize   = 2.2;     // meter
@@ -103,9 +102,7 @@ public:
         _write_VTK_files            = false;
         _exit_strat                 = 9;
         _write_VTK_files_direction  = false;
-        //          _dirSubLocal = nullptr;
-        //          _dirLocal = nullptr;
-        _dirManager = nullptr;
+        _dirManager                 = nullptr;
         // for random numbers
         _rdGenerator = RandomNumberGenerator();
     }
@@ -132,10 +129,6 @@ public:
     int GetMaxOpenMPThreads() const { return _maxOpenMPThreads; };
 
     void SetMaxOpenMPThreads(int maxOpenMPThreads) { _maxOpenMPThreads = maxOpenMPThreads; };
-
-    int GetLog() const { return _log; };
-
-    void SetLog(int log) { _log = log; };
 
     unsigned int GetSeed() const { return _seed; };
 
@@ -274,25 +267,6 @@ public:
 
     void SetDirectionManager(std::shared_ptr<DirectionManager> dir) { _dirManager = dir; }
     std::shared_ptr<DirectionManager> GetDirectionManager() { return _dirManager; }
-    //     void set_dirSubLocal(DirectionSubLocalFloorfield* dir) {_dirSubLocal =
-    //     dir;}
-    //
-    //    void set_dirLocal(DirectionLocalFloorfield* dir) {_dirLocal = dir;}
-    //
-    //    void set_dirSubLocalTrips(DirectionSubLocalFloorfieldTrips* dir)
-    //    {_dirSubLocalTrips = dir;}
-    //
-    //    void
-    //    set_dirSubLocalTripsVoronoi(DirectionSubLocalFloorfieldTripsVoronoi*
-    //    dir) {_dirSubLocalTripsVoronoi = dir;}
-
-    //    DirectionSubLocalFloorfield* get_dirSubLocal() const {return
-    //    _dirSubLocal;}
-    //     DirectionLocalFloorfield* get_dirLocal() const {return _dirLocal;}
-    //
-    //    DirectionSubLocalFloorfieldTrips* get_dirSubLocalTrips() const {return
-    //    _dirSubLocalTrips;} DirectionSubLocalFloorfieldTripsVoronoi*
-    //    get_dirSubLocalTripsVoronoi() const {return _dirSubLocalTripsVoronoi;}
 
     const std::string & GetHostname() const { return _hostname; };
 
@@ -365,7 +339,6 @@ private:
     int _solver;
     std::shared_ptr<RoutingEngine> _routingEngine;
     int _maxOpenMPThreads;
-    int _log;
     unsigned int _seed;
     double _fps;
     double _linkedCellSize;

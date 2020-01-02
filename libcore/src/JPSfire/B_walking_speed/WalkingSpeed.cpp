@@ -30,6 +30,7 @@
 #include "JPSfire/generic/FDSMesh.h"
 #include "JPSfire/generic/FDSMeshStorage.h"
 #include "general/Filesystem.h"
+#include "general/Logger.h"
 #include "pedestrian/Pedestrian.h"
 
 #include <tinyxml.h>
@@ -49,14 +50,13 @@ bool WalkingSpeed::LoadJPSfireInfo(const std::string & projectFilename)
 
     TiXmlDocument doc(projectFilename);
     if(!doc.LoadFile()) {
-        Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \t could not parse the project file");
+        LOG_ERROR("Could not parse project file: {}", doc.ErrorDesc());
         return false;
     }
 
     TiXmlNode * JPSfireNode = doc.RootElement()->FirstChild("JPSfire");
     if(!JPSfireNode) {
-        Log->Write("INFO:\tcould not find any JPSfire information");
+        LOG_INFO("Could not find any JPSfire information");
         return true;
     }
 
@@ -70,17 +70,12 @@ bool WalkingSpeed::LoadJPSfireInfo(const std::string & projectFilename)
             fs::path extinction_grids_path(extinction_grids);
             fs::path file_path(projectRootDir);
             file_path /= extinction_grids_path;
-            std::string filepath =
-                file_path
-                    .string(); // projectRootDir + "/" + extinction_grids; //TODO: check compatibility
-            //if (projectRootDir.empty()  ) // directory is "."
-            //    filepath =  extinction_grids;
-
+            std::string filepath   = file_path.string();
             double updateIntervall = xmltof(JPSfireCompElem->Attribute("update_time"), 0.);
             double finalTime       = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
-            Log->Write(
-                "INFO:\tJPSfire Module B_walking_speed: \n \tstudy: %s \n\tdata: %s \n\tupdate "
-                "time: %.1f s | final time: %.1f s | irritant: %s",
+            LOG_INFO(
+                "JPSfire Module B_walking_speed, tstudy: {} tdata: {} tupdate time: {:.1f}s, final "
+                "time: {:.1f}s | irritant: {}",
                 study.c_str(),
                 filepath.c_str(),
                 updateIntervall,
@@ -103,21 +98,10 @@ double WalkingSpeed::GetExtinction(const Pedestrian * pedestrian)
     return ExtinctionCoefficient;
 }
 
-//void WalkingSpeed::set_FMStorage(const std::shared_ptr<FDSMeshStorage> & fmStorage)
-//{
-//    _FMStorage=fmStorage;
-//}
-
-//const std::shared_ptr<FDSMeshStorage> WalkingSpeed::get_FMStorage()
-//{
-//    return _FMStorage;
-//}
-
 double WalkingSpeed::FrantzichNilsson2003(double & walking_speed, double ExtinctionCoefficient)
 {
     //According to Frantzich+Nilsson2003
     walking_speed = std::fmax(0.3, walking_speed * (1 + (-0.057 / 0.706) * ExtinctionCoefficient));
-    //walking_speed = std::fmin(1, std::fmax(0.2, (1.0 - 0.34 * (3.0-(2.0/ExtinctionCoefficient)))));   // TODO: new Fridolf with conservative lambda = 2
     return walking_speed;
 }
 
@@ -137,7 +121,7 @@ double WalkingSpeed::Jin1978(double & walking_speed, double ExtinctionCoefficien
             walking_speed *
                 (-std::pow(112236.0553, (ExtinctionCoefficient - 0.532027513)) + 0.988158598));
     } else {
-        Log->Write("ERROR:\tSpecify if irritant or non-irritant smoke shall be cosidered");
+        LOG_ERROR("Specify if irritant or non-irritant smoke shall be cosidered");
         exit(EXIT_FAILURE);
     }
     return walking_speed;
@@ -154,14 +138,11 @@ double WalkingSpeed::Fridolf2018(double & walking_speed, double ExtinctionCoeffi
 double WalkingSpeed::WalkingInSmoke(const Pedestrian * p, double walking_speed)
 {
     double ExtinctionCoefficient = GetExtinction(p);
-    //std::cout << ExtinctionCoefficient << std::endl;
-    //fprintf(stderr, "%f\n", ExtinctionCoefficient);
-    std::string study = _FMStorage->GetStudy();
+    std::string study            = _FMStorage->GetStudy();
 
     if((ExtinctionCoefficient < 10E-6) ||
        (std::isnan(ExtinctionCoefficient))) //no obstruction by smoke or NaN check
     {
-        //fprintf(stderr, "%f \t%f\n", ExtinctionCoefficient, p->GetEllipse().GetV0());
         return walking_speed; // walking_speed is returned as V0 for plane or stairs
     } else {
         if(study == "Frantzich+Nilsson2003") {
@@ -171,14 +152,13 @@ double WalkingSpeed::WalkingInSmoke(const Pedestrian * p, double walking_speed)
         } else if(study == "Fridolf2018") {
             walking_speed = Fridolf2018(walking_speed, ExtinctionCoefficient);
         } else {
-            Log->Write(
-                "ERROR:\tNo study specified. Got <%s>, but only <Frantzich+Nilsson2003> and "
-                "<Jin1978> are available",
+            LOG_ERROR(
+                "No study specified. Got {}, choose from <Frantzich+Nilsson2003>, <Jin1978> or "
+                "<Fridolf2018>",
                 study.c_str());
             exit(EXIT_FAILURE);
         }
     }
-    //fprintf(stderr, "%f \t%f \t%f \t%f \n", p->GetGlobalTime(), ExtinctionCoefficient, walking_speed, p->GetV().Norm() );
 
     return walking_speed;
 }

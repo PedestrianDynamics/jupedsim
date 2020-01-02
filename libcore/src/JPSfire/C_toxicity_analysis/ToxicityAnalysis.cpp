@@ -30,14 +30,14 @@
 #include "JPSfire/generic/FDSMesh.h"
 #include "JPSfire/generic/FDSMeshStorage.h"
 #include "general/Filesystem.h"
+#include "general/Logger.h"
 #include "pedestrian/Pedestrian.h"
 
 #include <tinyxml.h>
 
 
 ToxicityAnalysis::ToxicityAnalysis(const std::string & projectFileName, double fps) :
-    _projectFileName(projectFileName),
-    _fps(fps)
+    _projectFileName(projectFileName), _fps(fps)
 {
     _FMStorage = nullptr;
     _dt        = 1 / 20.; // @todo time fraction for which doses are cumulated. Parse in inifile?
@@ -54,14 +54,13 @@ bool ToxicityAnalysis::LoadJPSfireInfo(const std::string projectFilename)
 
     TiXmlDocument doc(projectFilename);
     if(!doc.LoadFile()) {
-        Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \t could not parse the project file");
+        LOG_ERROR("ToxicityAnalysis, could not parse project file: {}", doc.ErrorDesc());
         return false;
     }
 
     TiXmlNode * JPSfireNode = doc.RootElement()->FirstChild("JPSfire");
     if(!JPSfireNode) {
-        Log->Write("INFO:\tcould not find any JPSfire information");
+        LOG_INFO("Could not find any JPSfire information");
         return true;
     }
 
@@ -76,13 +75,13 @@ bool ToxicityAnalysis::LoadJPSfireInfo(const std::string projectFilename)
             double finalTime       = xmltof(JPSfireCompElem->Attribute("final_time"), 0.);
             std::string study      = "";
             std::string irritant   = "";
-            Log->Write(
-                "INFO:\tJPSfire Module C_toxicity_analysis: \n \tdata: %s \n\tupdate time: %.1f s "
-                "| final time: %.1f s",
-                filepath.c_str(),
+            LOG_INFO(
+                "JPSfire Module C_toxicity_analysis, data: {}, update time: {:.1f}s, final time: "
+                "{:.1f}s",
+                filepath,
                 updateIntervall,
                 finalTime);
-            //@todo Is there a posibility to pass a variable number of arguments to a function?
+            //TODO Is there a posibility to pass a variable number of arguments to a function?
             _FMStorage = std::make_shared<FDSMeshStorage>(
                 filepath, finalTime, updateIntervall, study, irritant);
 
@@ -97,7 +96,6 @@ bool ToxicityAnalysis::LoadJPSfireInfo(const std::string projectFilename)
 
 double ToxicityAnalysis::GetFDSQuantity(const Pedestrian * pedestrian, std::string quantity)
 {
-    //std::cout << "\n" << quantity << std::endl;
     //try to get gas components, 0 if gas component is not provided by JPSfire
     double concentration;
     try {
@@ -109,7 +107,6 @@ double ToxicityAnalysis::GetFDSQuantity(const Pedestrian * pedestrian, std::stri
         }
         return concentration;
     } catch(int e) {
-        //std::cout <<  pedestrian->GetPos()._x << pedestrian->GetPos()._y << pedestrian->GetElevation() << quantity  << std::endl;
         return 0.0;
     }
 }
@@ -232,9 +229,8 @@ void ToxicityAnalysis::WriteOutHazardAnalysis(
     double FED_Heat)
 {
     std::string data;
-    char tmp[CLENGTH] = "";
-    //_fps = 1; // fixme: why 1?
-    int frameNr = int(p->GetGlobalTime() / _fps);
+    char tmp[1024] = "";
+    int frameNr       = int(p->GetGlobalTime() / _fps);
 
 
     if(_t_prev == -1) {

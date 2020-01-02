@@ -27,6 +27,7 @@
 #include "SmokeRouter.h"
 
 #include "BrainStorage.h"
+#include "general/Logger.h"
 #include "pedestrian/Pedestrian.h"
 #include "sensor/SensorManager.h"
 
@@ -140,8 +141,7 @@ int SmokeRouter::FindDestination(Pedestrian * p)
     //if we still could not found any destination we are lost! Pedestrian will be deleted
     //no destination should just appear in bug case or closed rooms.
     if(destination == nullptr) {
-        Log->Write(
-            "ERROR: \t One Pedestrian (ID: %i) was not able to find any destination", p->GetID());
+        LOG_ERROR("Pedestrian {:d} was unable to find any destination", p->GetID());
         return -1;
     }
 
@@ -153,7 +153,7 @@ int SmokeRouter::FindDestination(Pedestrian * p)
     const NavLine * nextNavLine = (*brain_storage)[p]->GetNextNavLine(nextTarget);
 
     if(nextNavLine == nullptr) {
-        Log->Write("ERROR: \t No visible next subtarget found. PED " + std::to_string(p->GetID()));
+        LOG_ERROR("No visible next subtarget found. PED {:d}", p->GetID());
         return -1;
     }
     //setting crossing to ped
@@ -169,7 +169,7 @@ int SmokeRouter::FindDestination(Pedestrian * p)
 
 bool SmokeRouter::Init(Building * b)
 {
-    Log->Write("INFO:\tInit the Cognitive Map Router Engine");
+    LOG_INFO("Init SmokeRouter");
     building = b;
 
     LoadRoutingInfos(GetRoutingInfoFile());
@@ -181,7 +181,7 @@ bool SmokeRouter::Init(Building * b)
     else
         brain_storage = std::shared_ptr<BrainStorage>(new BrainStorage(
             building, getOptions().at("CognitiveMap")[0], getOptions().at("CognitiveMapFiles")[0]));
-    Log->Write("INFO:\tCognitiveMapStorage initialized");
+    LOG_INFO("CognitiveMapStorage initialized");
 //cm_storage->ParseCogMap();
 
 //Init Sensor Manager
@@ -189,7 +189,7 @@ bool SmokeRouter::Init(Building * b)
 #ifdef JPSFIRE
     sensor_manager = SensorManager::InitWithCertainSensors(b, brain_storage.get(), getOptions());
 #endif
-    Log->Write("INFO:\tSensorManager initialized");
+    LOG_INFO("SensorManager initialized");
     return true;
 }
 
@@ -209,31 +209,30 @@ bool SmokeRouter::LoadRoutingInfos(const fs::path & filename)
     if(filename.empty())
         return true;
 
-    Log->Write("INFO:\tLoading extra routing information for the global/quickest path router");
-    Log->Write("INFO:\t  from the file " + filename.string());
+    LOG_INFO(
+        "Loading extra routing information for the global/quickest path router from file {}",
+        filename.string());
 
     TiXmlDocument docRouting(filename.string());
     if(!docRouting.LoadFile()) {
-        Log->Write("ERROR: \t%s", docRouting.ErrorDesc());
-        Log->Write("ERROR: \t could not parse the routing file [%s]", filename.c_str());
+        LOG_ERROR("SmokeRouter, could not parse project file {}: \t%s", docRouting.ErrorDesc());
         return false;
     }
 
     TiXmlElement * xRootNode = docRouting.RootElement();
     if(!xRootNode) {
-        Log->Write("ERROR:\tRoot element does not exist");
+        LOG_ERROR("Root element not found");
         return false;
     }
 
     if(xRootNode->ValueStr() != "routing") {
-        Log->Write("ERROR:\tRoot element value is not 'routing'.");
+        LOG_ERROR("Root element value is not 'routing'.");
         return false;
     }
 
     std::string version = xRootNode->Attribute("version");
     if(version < JPS_OLD_VERSION) {
-        Log->Write("ERROR: \tOnly version greater than %d supported", JPS_OLD_VERSION);
-        Log->Write("ERROR: \tparsing routing file failed!");
+        LOG_ERROR("Only version greater than {} supported", JPS_OLD_VERSION);
         return false;
     }
     int HlineCount = 0;
@@ -270,8 +269,7 @@ bool SmokeRouter::LoadRoutingInfos(const fs::path & filename)
             }
         }
     }
-    Log->Write(
-        "INFO:\tDone with loading extra routing information. Loaded <%d> Hlines", HlineCount);
+    LOG_INFO("Done loading extra routing information. Loaded {:d} Hlines", HlineCount);
     return true;
 }
 
@@ -279,8 +277,7 @@ fs::path SmokeRouter::GetRoutingInfoFile()
 {
     TiXmlDocument doc(building->GetProjectFilename().string());
     if(!doc.LoadFile()) {
-        Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \t GlobalRouter: could not parse the project file");
+        LOG_ERROR("GlobalRouter, could not parse project file: {}", doc.ErrorDesc());
         return "";
     }
 

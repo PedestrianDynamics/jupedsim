@@ -219,7 +219,6 @@ public:
 
     void InitGrid();
 
-    //void InitRoomsAndSubroomsMap();
     void InitSavePedPathway(const std::string & filename);
 
     void AddRoom(Room * room);
@@ -270,11 +269,6 @@ public:
     const fs::path & GetProjectFilename() const;
 
     const fs::path & GetGeometryFilename() const;
-
-    //    void SetProjectFilename(const std::string &filename);
-    //
-    //    void SetProjectRootDir(const std::string &filename);
-
 
     /**
       * Write the geometry to the given file.
@@ -334,7 +328,7 @@ private:
      *  3. `[AC]` or `[CB]` will be added to the subroom
      *
      *
-     *  @todo What happens if the line is _really_ big? Here we should call the function in a recursive way..
+     *  TODO What happens if the line is _really_ big? Here we should call the function in a recursive way..
      */
     bool correct() const;
     /**
@@ -345,8 +339,8 @@ private:
       *
       *  Assumption: We assume one of the new lines needs to be added.
       *
-      *  @todo Is there a case where none should be chosen?
-      *  @todo Or more than one wall *can* be choosen?
+      *  TODO Is there a case where none should be chosen?
+      *  TODO Or more than one wall *can* be choosen?
       *
       * @param subroom: subroom where new wall shoud be added to
       * @param WallPieces: vector of candidates. One of these walls is going to

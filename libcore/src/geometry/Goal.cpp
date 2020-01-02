@@ -93,12 +93,12 @@ std::string Goal::Write()
         s.append(Wall(_poly[1], _poly[3]).Write());
     }
     //add the Goal caption
-    char tmp[CLENGTH];
+    char tmp[1024];
     sprintf(
         tmp,
         "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%s\" color=\"100\" />\n",
-        pos._x * FAKTOR,
-        pos._y * FAKTOR,
+        pos._x,
+        pos._y,
         _caption.c_str());
     s.append(tmp);
 
@@ -291,11 +291,6 @@ Crossing * Goal::GetCentreCrossing()
     return &_crossing;
 }
 
-//bool Goal::IsInsideGoal(Pedestrian* ped) const
-//{
-//     return IsInsideGoal(ped->GetPos());
-//}
-
 bool Goal::IsInsideGoal(const Point & point) const
 {
     return boost::geometry::within(point, _boostPoly);
@@ -321,7 +316,6 @@ bool Goal::IsClockwise()
     if(_poly.size() < 3) {
         LOG_ERROR("You need at least 3 vertices to check for orientation. Obstacle ID [{}]", _id);
         return false;
-        //exit(EXIT_FAILURE);
     }
     double sum = 0;
     for(unsigned int i = 0; i < _poly.size() - 1; ++i) {

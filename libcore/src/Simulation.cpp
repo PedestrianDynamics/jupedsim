@@ -42,30 +42,27 @@
 #include "pedestrian/AgentsSourcesManager.h"
 #include "routing/ff_router/ffRouter.h"
 
-OutputHandler * Log;
-// todo: add these variables to class simulation
+// TODO: add these variables to class simulation
 std::map<std::string, std::shared_ptr<TrainType>> TrainTypes;
 std::map<int, std::shared_ptr<TrainTimeTable>> TrainTimeTables;
 std::map<int, double> trainOutflow;
-//--------
+
 Simulation::Simulation(Configuration * args) : _config(args)
 {
-    _countTraj = 0;
-    _nPeds     = 0;
-    _seed      = 8091983;
-    _deltaT    = 0;
-    _building  = nullptr;
-    //_direction = NULL;
-    _operationalModel = nullptr;
-    _fps              = 1;
-    _em               = nullptr;
-    _gotSources       = false;
-    _fps              = 1;
-    _em               = nullptr;
-    _gotSources       = false;
-    _trainConstraints = false;
-    _maxSimTime       = 100;
-    //     _config = args;
+    _countTraj               = 0;
+    _nPeds                   = 0;
+    _seed                    = 8091983;
+    _deltaT                  = 0;
+    _building                = nullptr;
+    _operationalModel        = nullptr;
+    _fps                     = 1;
+    _em                      = nullptr;
+    _gotSources              = false;
+    _fps                     = 1;
+    _em                      = nullptr;
+    _gotSources              = false;
+    _trainConstraints        = false;
+    _maxSimTime              = 100;
     _currentTrajectoriesFile = _config->GetTrajectoriesFile();
 }
 
@@ -85,24 +82,6 @@ long Simulation::GetPedsNumber() const
 
 bool Simulation::InitArgs()
 {
-    switch(_config->GetLog()) {
-        case 0: {
-            break;
-        }
-        case 1: {
-            delete Log;
-            Log = new STDIOHandler();
-            break;
-        }
-        case 2: {
-            delete Log;
-            Log = new FileHandler(_config->GetErrorLogFile());
-        } break;
-        default:
-            LOG_WARNING("Wrong option for Logfile!");
-            return false;
-    }
-
     if(!_config->GetTrajectoriesFile().empty()) {
         switch(_config->GetFileFormat()) {
             case FileFormat::XML:
@@ -185,7 +164,6 @@ bool Simulation::InitArgs()
     TrainTimeTables   = _building->GetTrainTimeTables();
     _trainConstraints = !TrainTimeTables.empty();
 
-    //-----
     // Give the DirectionStrategy the chance to perform some initialization.
     // This should be done after the initialization of the operationalModel
     // because then, invalid pedestrians have been deleted and FindExit()
@@ -196,12 +174,9 @@ bool Simulation::InitArgs()
         ped->Setdt(_deltaT);
     }
     _nPeds = _building->GetAllPedestrians().size();
-    //_building->WriteToErrorLog();
     LOG_INFO("Number of peds received: {}", _nPeds);
-    //get the seed
     _seed = _config->GetSeed();
 
-    //size of the cells/GCFM
     if(_config->GetDistEffMaxPed() > _config->GetLinkedCellSize()) {
         LOG_ERROR(
             "The linked-cell size [{}] should be larger than the force range [{}]",
@@ -210,7 +185,6 @@ bool Simulation::InitArgs()
         return false;
     }
 
-    //read and initialize events
     _em = new EventManager(_config, _building.get(), _config->GetSeed());
     if(!_em->ReadEventsXml()) {
         LOG_WARNING("Could not initialize events handling");
@@ -222,7 +196,6 @@ bool Simulation::InitArgs()
     _em->ListEvents();
 
     _goalManager.SetBuilding(_building.get());
-    //everything went fine
     return true;
 }
 
@@ -239,7 +212,6 @@ void Simulation::UpdateRoutesAndLocations()
     //pedestrians to be deleted
     //you should better create this in the constructor and allocate it once.
     std::set<Pedestrian *> pedsToRemove;
-    //     pedsToRemove.reserve(500); //just reserve some space
 
     // collect all pedestrians in the simulation.
     const std::vector<Pedestrian *> & allPeds = _building->GetAllPedestrians();
@@ -306,15 +278,13 @@ void Simulation::UpdateRoutesAndLocations()
                 ped->GetID(),
                 ped->GetRoomID(),
                 ped->GetSubRoomID());
-            //ped->FindRoute(); //debug only, plz remove
             std::function<void(const Pedestrian &)> f =
                 std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
             ped->Relocate(f);
-            //exit(EXIT_FAILURE);
 #pragma omp critical(Simulation_Update_pedsToRemove)
             {
                 pedsToRemove.insert(ped);
-                Log->incrementDeletedAgents();
+                // TODO KKZ track deleted peds
             }
         }
 
@@ -455,12 +425,6 @@ void Simulation::RunHeader(long nPed)
 
 double Simulation::RunBody(double maxSimTime)
 {
-    //needed to control the execution time PART 1
-    //in the case you want to run in no faster than realtime
-    //time_t starttime, endtime;
-    //time(&starttime);
-
-    //take the current time from the pedestrian
     double t = Pedestrian::GetGlobalTime();
 
     //frame number. This function can be called many times,
@@ -469,7 +433,7 @@ double Simulation::RunBody(double maxSimTime)
     //##########
     //PROBLEMATIC: time when frame should be printed out
     // possibly skipped when using the following lines
-    // NEEDS TO BE FIXED!
+    // TODO NEEDS TO BE FIXED!
     int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
     writeInterval     = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
     // ##########
@@ -510,9 +474,8 @@ double Simulation::RunBody(double maxSimTime)
                     add_prefix_to_filename(prefix, _config->GetGeometryFile());
                 std::cout << "\nUpdate geometry. New  geometry --> " << changedGeometryFile << "\n";
 
-                std::cout << KGRN << "Enter correctGeometry: Building Has "
-                          << _building->GetAllTransitions().size() << " Transitions\n"
-                          << RESET;
+                std::cout << "Enter correctGeometry: Building Has "
+                          << _building->GetAllTransitions().size() << " Transitions\n";
                 _building->SaveGeometry(changedGeometryFile);
                 _building->GetConfig()->GetDirectionManager()->GetDirectionStrategy()->Init(
                     _building.get());
@@ -560,11 +523,6 @@ double Simulation::RunBody(double maxSimTime)
                 (double) (initialnPeds - _nPeds) / initialnPeds * 100.);
         }
 
-        // needed to control the execution time PART 2
-        // time(&endtime);
-        // double timeToWait=t-difftime(endtime, starttime);
-        // clock_t goal = timeToWait*1000 + clock();
-        // while (goal > clock());
         ++frameNr;
 
 //Trigger JPSfire Toxicity Analysis
@@ -586,7 +544,6 @@ double Simulation::RunBody(double maxSimTime)
             Transition * Trans = itr.second;
 
             Trans->UpdateTemporaryState(_deltaT);
-            //-----------
             // regulate train doorusage
             std::string transType = Trans->GetType();
             if(Trans->IsOpen() && transType.rfind("Train", 0) == 0) {
@@ -608,7 +565,6 @@ double Simulation::RunBody(double maxSimTime)
                     Trans->Close();
                 }
             }
-            //-----------
         } // Transitions
         if(frameNr % 1000 == 0) {
             if(_config->ShowStatistics()) {
@@ -665,7 +621,6 @@ bool Simulation::correctGeometry(
     std::shared_ptr<Building> building,
     std::shared_ptr<TrainTimeTable> tab)
 {
-    //auto platforms = building->GetPlatforms();
     int trainId           = tab->id;
     std::string trainType = tab->type;
     Point TrackStart      = tab->pstart;
@@ -687,9 +642,8 @@ bool Simulation::correctGeometry(
     static int transition_id = 10000; // randomly high number
 
     std::cout << "enter with train " << trainType.c_str() << "\n";
-    std::cout << KBLU << "Enter correctGeometry: Building Has "
-              << building->GetAllTransitions().size() << " Transitions\n"
-              << RESET;
+    std::cout << "Enter correctGeometry: Building Has "
+              << building->GetAllTransitions().size() << " Transitions\n";
     std::cout << "room: " << room_id << " subroom_id " << subroom_id << "\n";
 
     if(mytrack.empty() || subroom == nullptr)
@@ -715,13 +669,10 @@ bool Simulation::correctGeometry(
             d.GetPoint2().toString());
     }
 
-    // std::vector<std::pair<PointWall, pointWall > >
     auto pws = building->GetIntersectionPoints(doors, mytrack);
     if(pws.empty())
         std::cout
-            << KRED
-            << "simulation::correctGeometry: pws are empty. Something went south with train doors\n"
-            << RESET;
+            << "simulation::correctGeometry: pws are empty. Something went south with train doors\n";
 
     auto walls = subroom->GetAllWalls();
     //---
@@ -732,9 +683,6 @@ bool Simulation::correctGeometry(
         auto w1  = pw1.second;
         auto p2  = pw2.first;
         auto w2  = pw2.second;
-        // std::cout << "p1 " << p1.toString() << ", wall: " << w1.toString() << "\n";
-        // std::cout << "p2 " << p2.toString() << ", wall: " << w2.toString() << "\n";
-        // std::cout << "------\n";
         // case 1
         Point P;
         if(w1 == w2) {
@@ -752,9 +700,7 @@ bool Simulation::correctGeometry(
             e->SetSubRoom1(subroom);
             subroom->AddTransition(e);  // danger area
             building->AddTransition(e); // danger area
-            /* std::cout << KRED << "Trans added: " << e->toString() << "\n" << RESET; */
 
-            /* std::cout<< KGRN << "Transition added. Building Has " << building->GetAllTransitions().size() << " Transitions\n" << RESET; */
             double dist_pt1 = (w1.GetPoint1() - e->GetPoint1()).NormSquare();
             double dist_pt2 = (w1.GetPoint1() - e->GetPoint2()).NormSquare();
             Point A, B;
@@ -779,26 +725,18 @@ bool Simulation::correctGeometry(
             }
 
             else
-                std::cout << KRED << ">> WALL did not add: " << NewWall.toString() << "\n" << RESET;
+                std::cout << ">> WALL did not add: " << NewWall.toString() << "\n";
 
             if(NewWall1.GetLength() > J_EPS_DIST) {
                 building->TempAddedWalls[trainId].push_back(NewWall1);
                 subroom->AddWall(NewWall1);
             } else
-                std::cout << KRED << ">> WALL did not add: " << NewWall1.toString() << "\n"
-                          << RESET;
+                std::cout << ">> WALL did not add: " << NewWall1.toString() << "\n";
 
             building->TempAddedDoors[trainId].push_back(*e);
             building->TempRemovedWalls[trainId].push_back(w1);
-
             subroom->RemoveWall(w1);
 
-
-            /* std::cout << KRED << "WALL added " << NewWall1.toString() << "\n" << RESET ; */
-            /* std::cout << KRED << "WALL removed " << w1.toString() << "\n" << RESET ; */
-            /* getc(stdin); */
-
-            //room->AddTransitionID(e->GetUniqueID());
         } else if(w1.ShareCommonPointWith(w2, P)) {
             std::cout << "ONE POINT COMON\n";
             //------------ transition --------
@@ -842,11 +780,6 @@ bool Simulation::correctGeometry(
             subroom->AddWall(NewWall1);
             subroom->RemoveWall(w1);
             subroom->RemoveWall(w2);
-            /* std::cout << KRED << ". WALL added " << NewWall.toString() << "\n" << RESET ; */
-            /* std::cout << KRED << "WALL added " << NewWall1.toString() << "\n" << RESET ; */
-            /* std::cout << KRED << "WALL removed " << w1.toString() << "\n" << RESET ; */
-            /* std::cout << KRED << "WALL removed " << w2.toString() << "\n" << RESET ; */
-            /* getc(stdin); */
         } else // disjoint
         {
             std::cout << "DISJOINT\n";
@@ -906,69 +839,24 @@ bool Simulation::correctGeometry(
 
 void Simulation::RunFooter()
 {
-    // writing the footer
     _iod->WriteFooter();
 }
 
 void Simulation::ProcessAgentsQueue()
 {
-    /* std::cout << "Call Simulation::ProcessAgentsQueue() at: " << Pedestrian::GetGlobalTime() << std::endl; */
-    /* std::cout << KRED << " SIMULATION building " << _building << " size "  << _building->GetAllPedestrians().size() << "\n" << RESET; */
-    /* for(auto pp: _building->GetAllPedestrians()) */
-    /*           std::cout<< KBLU << "BUL: Simulation: " << pp->GetPos()._x << ", " << pp->GetPos()._y << RESET << std::endl; */
-
     //incoming pedestrians
     std::vector<Pedestrian *> peds;
-    //  std::cout << ">>> peds " << peds.size() << RESET<< std::endl;
 
     AgentsQueueIn::GetandClear(peds);
-    //std::cout << "SIMULATION BEFORE BOOL = " <<  _agentSrcManager.IsBuildingUpdated() << " peds size " << peds.size() << "\n" ;
-
-    //_agentSrcManager.SetBuildingUpdated(true);
-    /* std::cout << "SIMULATION AFTER BOOL = " <<  _agentSrcManager.IsBuildingUpdated() << "\n" ; */
 
     for(auto && ped : peds) {
-        /* std::cout << "Add to building : " << ped->GetPos()._x << ", " << ped->GetPos()._y << " t: "<< Pedestrian::GetGlobalTime() << std::endl; */
         _building->AddPedestrian(ped);
     }
     _building->UpdateGrid();
-    //  for(auto pp: _building->GetAllPedestrians())
-    //         std::cout<< KBLU << "BUL: Simulation: " << pp->GetPos()._x << ", " << pp->GetPos()._y  << " t: "<< Pedestrian::GetGlobalTime() <<RESET << std::endl;
-
-
-    /* std::cout << "LEAVE Simulation::ProcessAgentsQueue() with " << " size "  << _building->GetAllPedestrians().size() << "\n" << RESET; */
 }
 
 void Simulation::UpdateDoorticks() const {
-    //    int softstateDecay = 1;
-    //    //Softstate of _lastTickTime is valid for X seconds as in (X/_deltaT); here it is 2s
-    //    auto& allCross = _building->GetAllCrossings();
-    //    for (auto& crossPair : allCross) {
-    //        crossPair.second->_refresh1 += 1;
-    //        crossPair.second->_refresh2 += 1;
-    //        if (crossPair.second->_refresh1 > (softstateDecay/_deltaT)) {
-    //            crossPair.second->_lastTickTime1 = 0;
-    //            crossPair.second->_refresh1 = 0;
-    //        }
-    //        if (crossPair.second->_refresh2 > (softstateDecay/_deltaT)) {
-    //            crossPair.second->_lastTickTime2 = 0;
-    //            crossPair.second->_refresh2 = 0;
-    //        }
-    //    }
-    //
-    //    auto& allTrans = _building->GetAllTransitions();
-    //    for (auto& transPair : allTrans) {
-    //        transPair.second->_refresh1 += 1;
-    //        transPair.second->_refresh2 += 1;
-    //        if (transPair.second->_refresh1 > (softstateDecay/_deltaT)) {
-    //            transPair.second->_lastTickTime1 = 0;
-    //            transPair.second->_refresh1 = 0;
-    //        }
-    //        if (transPair.second->_refresh2 > (softstateDecay/_deltaT)) {
-    //            transPair.second->_lastTickTime2 = 0;
-    //            transPair.second->_refresh2 = 0;
-    //        }
-    //    }
+    //TODO KKZ If possible get rind of this function
 };
 
 void Simulation::UpdateFlowAtDoors(const Pedestrian & ped) const
@@ -1046,13 +934,11 @@ bool Simulation::TrainTraffic()
         if(!tab.second->arrival && (now >= tab.second->tin) && (now <= tab.second->tout)) {
             trainHere                            = true;
             TrainTimeTables.at(trainId)->arrival = true;
-            std::cout << KRED << "Arrival: TRAIN " << trainType << " at time: " << now << "\n"
-                      << RESET;
+            std::cout  << "Arrival: TRAIN " << trainType << " at time: " << now << "\n";
             correctGeometry(_building, tab.second);
 
         } else if(tab.second->arrival && now >= tab.second->tout) {
-            std::cout << KGRN << "Departure: TRAIN " << trainType << " at time: " << now << "\n"
-                      << RESET;
+            std::cout << "Departure: TRAIN " << trainType << " at time: " << now << "\n";
             _building->resetGeometry(tab.second);
             trainLeave                           = true;
             TrainTimeTables.at(trainId)->arrival = false;
@@ -1061,8 +947,6 @@ bool Simulation::TrainTraffic()
     if(trainHere || trainLeave) {
         return true;
     }
-
-    /* std::cout<< KRED << "Check: Building Has " << _building->GetAllTransitions().size() << " Transitions\n" << RESET; */
 
     return false;
 }
@@ -1102,7 +986,7 @@ Simulation::correctDoorStatistics(const Pedestrian & ped, double distance, int t
     }
     if(!success) {
         LOG_WARNING("Correcting the door statistics failed!");
-        //todo we need to check if the ped is in a subroom neighboring the target. If so, no problems!
+        //TODO we need to check if the ped is in a subroom neighboring the target. If so, no problems!
     }
     return trans;
 }

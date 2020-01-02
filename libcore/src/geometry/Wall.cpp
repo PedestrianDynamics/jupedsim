@@ -26,10 +26,6 @@
  **/
 #include "Wall.h"
 
-/************************************************************
- Wall
- ************************************************************/
-
 Wall::Wall() : Line() {}
 
 Wall::Wall(const Point & p1, const Point & p2, const std::string & type) : Line(p1, p2), _type(type)
@@ -44,14 +40,14 @@ std::string Wall::Write() const
     sprintf(
         wall,
         "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",
-        (GetPoint1()._x) * FAKTOR,
-        (GetPoint1()._y) * FAKTOR);
+        (GetPoint1()._x),
+        (GetPoint1()._y));
     geometry.append(wall);
     sprintf(
         wall,
         "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",
-        (GetPoint2()._x) * FAKTOR,
-        (GetPoint2()._y) * FAKTOR);
+        (GetPoint2()._x),
+        (GetPoint2()._y));
     geometry.append(wall);
     geometry.append("\t\t</wall>\n");
     return geometry;

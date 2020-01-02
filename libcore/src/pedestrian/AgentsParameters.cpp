@@ -35,7 +35,6 @@ AgentsParameters::AgentsParameters(int id, int seed)
 {
     _id        = id;
     _generator = std::default_random_engine(seed);
-    //std::mt19937 _gen(rd());
 }
 
 AgentsParameters::~AgentsParameters() {}
@@ -282,7 +281,7 @@ bool AgentsParameters::StretchEnabled()
 std::string AgentsParameters::writeParameter()
 {
     std::string s;
-    char tmp[CLENGTH];
+    char tmp[1024];
 
     s.append("\tPedestrians Parameter:\n");
     if(_V0.stddev() == judge) {

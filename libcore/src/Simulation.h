@@ -27,8 +27,7 @@
  *
  *
  **/
-#ifndef SIMULATION_H_
-#define SIMULATION_H_
+#pragma once
 
 #include "IO/OutputHandler.h"
 #include "IO/Trajectories.h"
@@ -46,25 +45,17 @@
 #include "routing/quickest/QuickestPathRouter.h"
 #include "routing/smoke_router/SmokeRouter.h"
 
-
 class Simulation
 {
 private:
     /// Max file size 16Mb
     static const size_t _maxFileSize{1 << 24};
-    /// config
     Configuration * _config;
-    ///Number of pedestrians in the simulation
     long _nPeds;
-    ///Maximum simulation time
-    //double _tmax;
-    /// time step
     double _deltaT;
     /// frame rate for the trajectories
     double _fps;
-    ///seed using for the random number generator
     unsigned int _seed;
-    /// building object
     std::shared_ptr<Building> _building;
     /// Force model to use
     std::shared_ptr<OperationalModel> _operationalModel;
@@ -72,21 +63,17 @@ private:
     std::shared_ptr<RoutingEngine> _routingEngine;
     /// writing the trajectories to file
     std::unique_ptr<Trajectories> _iod;
-    /// EventManager
     EventManager * _em;
-    /// Agents sources manager
     AgentsSourcesManager _agentSrcManager;
-    /// hybrid simulation manager
-    //HybridSimulationManager
     int _periodic;
     int _maxSimTime;
-
-    bool _gotSources;       // is true if we got some sources. Otherwise, false.
-    bool _trainConstraints; // true if inifile has some train constraints
-
+    /// Will be set if pedestrian sources exist
+    bool _gotSources;
+    /// Will be set if the configuration contains train constraints
+    bool _trainConstraints;
     GoalManager _goalManager;
     fs::path _currentTrajectoriesFile;
-
+    int _countTraj = 0; // count number of TXT trajectories to produce
 public:
     /**
      * Constructor
@@ -198,13 +185,9 @@ public:
     bool correctGeometry(std::shared_ptr<Building> building, std::shared_ptr<TrainTimeTable>);
 
     /**
-     * Updates the output filename if the current file exceeds 10MB.
+     * Updates the output filename if the current file exceeds _maxFileSize.
      * Works only for FileFormat::TXT.
      */
     void RotateOutputFile();
     bool TrainTraffic();
-
-    int _countTraj = 0; // count number of TXT trajectories to produce
 };
-
-#endif /*SIMULATION_H_*/

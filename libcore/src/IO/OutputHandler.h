@@ -30,41 +30,16 @@
 #include "general/Macros.h"
 
 #include <fstream>
-#include <iostream>
-#include <vector>
+#include <string>
 
 class OutputHandler
 {
-protected:
-    int _nWarnings;
-    int _nErrors;
-    int _nDeletedAgents;
-
 public:
-    OutputHandler()
-    {
-        _nWarnings      = 0;
-        _nErrors        = 0;
-        _nDeletedAgents = 0;
-    };
-    virtual ~OutputHandler(){};
-
-    int GetWarnings();
-    void incrementWarnings();
-    int GetErrors();
-    void incrementErrors();
-    int GetDeletedAgents();
-    void incrementDeletedAgents();
-
-    virtual void Write(const std::string & str);
-    virtual void Write(const char * string, ...);
+    virtual ~OutputHandler()                     = default;
+    virtual void Write(const std::string & str)  = 0;
+    virtual void Write(const char * string, ...) = 0;
 };
 
-class STDIOHandler : public OutputHandler
-{
-public:
-    void Write(const std::string & str) override;
-};
 
 class FileHandler : public OutputHandler
 {

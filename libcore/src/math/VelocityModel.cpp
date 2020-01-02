@@ -29,6 +29,7 @@
 #include "VelocityModel.h"
 
 #include "direction/walking/DirectionStrategy.h"
+#include "general/Logger.h"
 #include "general/OpenMP.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
@@ -75,14 +76,14 @@ bool VelocityModel::Init(Building * building)
         int res = ped->FindRoute();
         if(!ped_is_waiting && res == -1) {
             std::cout << ped->GetID() << " has no route\n";
-            Log->Write(
-                "ERROR:\tVelocityModel::Init() cannot initialise route. ped %d is deleted in Room "
+            LOG_ERROR(
+                "VelocityModel::Init() cannot initialise route. ped {:d} is deleted in Room "
                 "%d %d.\n",
                 ped->GetID(),
                 ped->GetRoomID(),
                 ped->GetSubRoomID());
             building->DeletePedestrian(ped);
-            Log->incrementDeletedAgents();
+            // TODO KKZ track deleted peds
             p--;
             peds_size--;
             continue;
@@ -98,7 +99,6 @@ bool VelocityModel::Init(Building * building)
             target = ped->GetExitLine()->ShortestPoint(ped->GetPos());
         else {
             std::cout << "Ped " << ped->GetID() << " has no exit line in INIT\n";
-            //exit(EXIT_FAILURE);
         }
         Point d     = target - ped->GetPos();
         double dist = d.Norm();
@@ -106,8 +106,7 @@ bool VelocityModel::Init(Building * building)
             cosPhi = d._x / dist;
             sinPhi = d._y / dist;
         } else {
-            Log->Write("ERROR: \tallPeds::Init() cannot initialise phi! "
-                       "dist to target is 0\n");
+            LOG_ERROR("allPeds::Init() cannot initialise phi! dist to target is 0");
             return false;
         }
 
@@ -136,7 +135,6 @@ void VelocityModel::ComputeNextTimeStep(
 
     int nThreads = omp_get_max_threads();
 
-    //nThreads = 1; //debug only
     int partSize;
     partSize = ((int) nSize > nThreads) ? (int) (nSize / nThreads) : (int) nSize;
     if(partSize == (int) nSize)
@@ -157,7 +155,6 @@ void VelocityModel::ComputeNextTimeStep(
         int end;
         end = (threadID < nThreads - 1) ? (threadID + 1) * partSize - 1 : (int) (nSize - 1);
         for(int p = start; p <= end; ++p) {
-            // printf("\n------------------\nid=%d (%d)\t p=%d\n", threadID, nThreads, p);
             Pedestrian * ped  = allPeds[p];
             Room * room       = building->GetRoom(ped->GetRoomID());
             SubRoom * subroom = room->GetSubRoom(ped->GetSubRoomID());
@@ -166,22 +163,8 @@ void VelocityModel::ComputeNextTimeStep(
             building->GetGrid()->GetNeighbourhood(ped, neighbours);
 
             int size = (int) neighbours.size();
-            ////                if (ped->GetID() == 71) {
-            ////                     std::cout << "------------------------------------" << std::endl;
-            //                     std::cout << Pedestrian::GetGlobalTime() << ":\t\tVelocity Model debug ped: " << ped->GetID()
-            //                               << "\t" << ped->GetPos().toString() << "\t" << size<< std::endl;
-            ////                }
-
-
             for(int i = 0; i < size; i++) {
                 Pedestrian * ped1 = neighbours[i];
-                //                     if (ped->GetID() == 71) {
-                //                         std::cout << "Velocity Model debug ped1: " << ped1->GetID() << "\t" <<  ped1->GetPos().toString() <<std::endl;
-                //                     }
-
-                //                     std::cout << "Velocity Model debug ped1: " << ped1 << std::endl;
-                //                     std::cout << ped1->GetID() << std::endl;
-
                 if(ped1 == nullptr) {
                     std::cout << "Velocity Model debug: " << size << std::endl;
                 }
@@ -228,11 +211,8 @@ void VelocityModel::ComputeNextTimeStep(
                     }
                 }
             }
-            // @todo: get spacing to walls
-            // @todo: update direction every DT?
-
-            // if(ped->GetID()==-10)
-            //       std::cout << "time: " << ped->GetGlobalTime() << "  |  updateRate  " <<ped->GetUpdateRate() << "   modulo " <<fmod(ped->GetGlobalTime(), ped->GetUpdateRate())<<std::endl;
+            //TODO get spacing to walls
+            //TODO update direction every DT?
 
             // calculate min spacing
             std::sort(spacings.begin(), spacings.end(), sort_pred());
@@ -253,8 +233,6 @@ void VelocityModel::ComputeNextTimeStep(
                 getc(stdin);
             }
             //============================================================
-            //double winkel = spacings[0].second;
-            //Point tmp;
             Point speed = direction.Normalized() * OptimalSpeed(ped, spacing);
             result_acc.push_back(speed);
 
@@ -267,16 +245,16 @@ void VelocityModel::ComputeNextTimeStep(
                std::max(ped->GetMeanVelOverRecTime(), ped->GetV().Norm()) < 0.01 &&
                size == 0) // size length of peds neighbour vector
             {
-                Log->Write(
-                    "WARNING:\tped %d with vmean  %f has been deleted in room [%i]/[%i] after time "
-                    "%f s (current=%f\n",
+                LOG_WARNING(
+                    "ped {:d} with vmean {:f} has been deleted in room {:d}/{:d} after time "
+                    "{:f}s (current={:f}",
                     ped->GetID(),
                     ped->GetMeanVelOverRecTime(),
                     ped->GetRoomID(),
                     ped->GetSubRoomID(),
                     ped->GetGlobalTime(),
                     current);
-                Log->incrementDeletedAgents();
+                //TODO KKZ track deleted peds
 #pragma omp critical(VelocityModel_ComputeNextTimeStep_pedsToRemove)
                 pedsToRemove.push_back(ped);
             }
@@ -310,11 +288,6 @@ void VelocityModel::ComputeNextTimeStep(
             }
             ped->SetV(v_neu);
         }
-        // if(threadID == -1 )
-        //      std::cout << " result_acc size " << result_acc.size() << "\n";
-        //getc(stdin);
-
-
     } //end parallel
 
     // remove the pedestrians that have left the building
@@ -333,7 +306,6 @@ Point VelocityModel::e0(Pedestrian * ped, Room * room) const
         target = _direction->GetTarget(room, ped);
     } else { //@todo: we need a model for waiting pedestrians
         std::cout << ped->GetID() << " VelocityModel::e0 Ped has no navline.\n";
-        //exit(EXIT_FAILURE);
         // set random destination
         std::mt19937 mt(ped->GetBuilding()->GetConfig()->GetSeed());
         std::uniform_real_distribution<double> dist(0, 1.0);
@@ -360,26 +332,13 @@ Point VelocityModel::e0(Pedestrian * ped, Room * room) const
         if(desired_direction.NormSquare() < 0.25 && !ped->IsWaiting()) {
             desired_direction = lastE0;
             ped->SetLastE0(lastE0);
-            //              Log->Write("desired_direction: %f    %f", desired_direction._x, desired_direction._y);
-            //_direction->GetTarget(room, ped);
         }
-        //          if (dist > 1*J_EPS_GOAL) {
-        //               desired_direction = target - pos; //ped->GetV0(target);
-        //          } else {
-        //               desired_direction = lastE0;
-        //               ped->SetLastE0(lastE0); //keep old vector (revert set operation done 9 lines above)
-        //          }
     } else if(dist > J_EPS_GOAL) {
         desired_direction = ped->GetV0(target);
     } else {
         ped->SetSmoothTurning();
         desired_direction = ped->GetV0();
     }
-    //Log->Write("%f    %f", desired_direction._x, desired_direction._y);
-    //      if (desired_direction.NormSquare() < 0.1) {
-    //           Log->Write("ERROR:\t desired_direction in VelocityModel::e0 is too small (%f, %f)", desired_direction._x, desired_direction._y);
-    //
-    //      }
     return desired_direction;
 }
 
@@ -416,9 +375,10 @@ VelocityModel::GetSpacing(Pedestrian * ped1, Pedestrian * ped2, Point ei, int pe
     if(Distance >= J_EPS) {
         ep12 = distp12.Normalized();
     } else {
-        //printf("ERROR: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!\n");
-        Log->Write("WARNING: \tin VelocityModel::GetSPacing() ep12 can not be calculated!!!\n");
-        Log->Write("\t\t Pedestrians are too near to each other (%f).", Distance);
+        LOG_WARNING(
+            "VelocityModel::GetSPacing() ep12 can not be calculated! Pedestrians are to close to "
+            "each other ({:f})",
+            Distance);
         my_pair(FLT_MAX, ped2->GetID());
         exit(EXIT_FAILURE); //TODO
     }
@@ -456,18 +416,15 @@ Point VelocityModel::ForceRepPed(Pedestrian * ped1, Pedestrian * ped2, int perio
     if(Distance >= J_EPS) {
         ep12 = distp12.Normalized();
     } else {
-        //printf("ERROR: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!\n");
-        Log->Write(
-            KRED
-            "\nWARNING: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!" RESET);
-        Log->Write("\t\t Pedestrians are too near to each other (dist=%f).", Distance);
-        Log->Write(
-            "\t\t Maybe the value of <a> in force_ped should be increased. Going to exit.\n");
-        printf("ped1 %d  ped2 %d\n", ped1->GetID(), ped2->GetID());
-        printf(
-            "ped1 at (%f, %f), ped2 at (%f, %f)\n",
+        LOG_ERROR(
+            "VelocityModel::forcePedPed() ep12 can not be calculated! Pedestrians are too near to "
+            "each other (dist={:f}). Adjust <a> value in force_ped to counter this. Affected "
+            "pedestrians ped1 {:d} at ({:f},{:f}) and ped2 {:d} at ({:f}, {:f})",
+            Distance,
+            ped1->GetID(),
             ped1->GetPos()._x,
             ped1->GetPos()._y,
+            ped2->GetID(),
             ped2->GetPos()._x,
             ped2->GetPos()._y);
         exit(EXIT_FAILURE); //TODO: quick and dirty fix for issue #158
@@ -499,8 +456,8 @@ Point VelocityModel::ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const
     //then the obstacles
     for(const auto & obst : subroom->GetAllObstacles()) {
         if(obst->Contains(ped->GetPos())) {
-            Log->Write(
-                "ERROR:\t Agent [%d] is trapped in obstacle in room/subroom [%d/%d]",
+            LOG_ERROR(
+                "Agent {:d} is trapped in obstacle in room/subroom {:d}/{:d}",
                 ped->GetID(),
                 subroom->GetRoomID(),
                 subroom->GetSubRoomID());
@@ -516,15 +473,6 @@ Point VelocityModel::ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const
         if(!trans->IsOpen()) {
             f += ForceRepWall(ped, *(static_cast<Line *>(trans)), centroid, inside);
         }
-        // int uid1= goal->GetUniqueID();
-        // int uid2=ped->GetExitIndex();
-        // // ignore my transition consider closed doors
-        // //closed doors are considered as wall
-
-        // if((uid1 != uid2) || (goal->IsOpen()==false ))
-        // {
-        //      f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)), centroid, inside);
-        // }
     }
 
     return f;
@@ -542,9 +490,7 @@ Point VelocityModel::ForceRepWall(
     Point dist       = pt - ped->GetPos(); // x- and y-coordinate of the distance between ped and p
     const double EPS = 0.000;              // molified see Koester2013
     double Distance  = dist.Norm() + EPS;  // distance between the centre of ped and point p
-    //double vn = w.NormalComp(ped->GetV()); //normal component of the velocity on the wall
     Point e_iw; // x- and y-coordinate of the normalized vector between ped and pt
-    //double K_iw;
     double l = ped->GetEllipse().GetBmax();
     double R_iw;
     double min_distance_to_wall = 0.001; // 10 cm
@@ -552,9 +498,9 @@ Point VelocityModel::ForceRepWall(
     if(Distance > min_distance_to_wall) {
         e_iw = dist / Distance;
     } else {
-        Log->Write(
-            "WARNING:\t Velocity: forceRepWall() ped %d [%f, %f] is too near to the wall [%f, "
-            "%f]-[%f, %f] (dist=%f)",
+        LOG_WARNING(
+            "Velocity: forceRepWall() ped {:d} [{:f}, {:f}] is too near to the wall [{:f}, "
+            "{:f}]-[{:f}, {:f}] (dist={:f})",
             ped->GetID(),
             ped->GetPos()._y,
             ped->GetPos()._y,
@@ -565,8 +511,7 @@ Point VelocityModel::ForceRepWall(
             Distance);
         Point new_dist = centroid - ped->GetPos();
         new_dist       = new_dist / new_dist.Norm();
-        //printf("new distance = (%f, %f) inside=%d\n", new_dist._x, new_dist._y, inside);
-        e_iw = (inside ? new_dist : new_dist * -1);
+        e_iw           = (inside ? new_dist : new_dist * -1);
     }
     //-------------------------
 
@@ -587,7 +532,7 @@ Point VelocityModel::ForceRepWall(
 std::string VelocityModel::GetDescription()
 {
     std::string rueck;
-    char tmp[CLENGTH];
+    char tmp[1024];
 
     sprintf(tmp, "\t\ta: \t\tPed: %f \tWall: %f\n", _aPed, _aWall);
     rueck.append(tmp);

@@ -30,6 +30,7 @@
 
 #include "IO/OutputHandler.h"
 #include "general/Filesystem.h"
+#include "general/Logger.h"
 
 
 FDSMeshStorage::FDSMeshStorage() {}
@@ -70,7 +71,7 @@ FDSMeshStorage::FDSMeshStorage(
         CreateFDSMeshes();
         std::cout << "Success!" << std::endl;
     } else {
-        Log->Write("ERROR:\tCould not find directory <%s>\n", _filepath.c_str());
+        LOG_ERROR("Could not find directory {}", _filepath);
         exit(EXIT_FAILURE);
     }
 }
@@ -87,13 +88,11 @@ bool FDSMeshStorage::CreateQuantityList()
         if(fs::is_directory(*iter)) {
             std::string quant_dir = iter->path().string();
             quant_dir             = quant_dir.substr(quant_dir.find_last_of("/\\") + 1);
-            //std::cout << quant_dir << std::endl;
             _quantitylist.push_back(quant_dir);
         }
     }
     if(_quantitylist.size() == 0) {
-        Log->Write("ERROR:\tCould not find suitable quantities in %s", _filepath.c_str());
-        exit(EXIT_FAILURE);
+        LOG_ERROR("Could not find suitable quantities in {}", _filepath);
         return false;
     }
     std::cout << "_quantitylist.size(): " << _quantitylist.size() << "\n";
@@ -112,12 +111,11 @@ bool FDSMeshStorage::CreateElevationList()
         if(fs::is_directory(*iter)) {
             std::string elev_dir = iter->path().string();
             double elev          = std::stod(elev_dir.substr(elev_dir.rfind("_") + 1));
-            //std::cout << elev << std::endl;
             _elevationlist.push_back(elev);
         }
     }
     if(_elevationlist.size() == 0) {
-        Log->Write("ERROR:\tCould not find suitable grid elevations in %s", _filepath.c_str());
+        LOG_ERROR("Could not find suitable grid elevations in {}", _filepath);
         exit(EXIT_FAILURE);
         return false;
     }
@@ -188,12 +186,13 @@ void FDSMeshStorage::CreateTimeList()
         }
 
         if(fs::exists(npz_file) == false) {
-            Log->Write(
-                "ERROR:\tSpecified times are not compliant with JPSfire data " + npz_file.string());
-            std::cout << "\n\nCreateTimeList(): File not found: " << npz_file.string() << std::endl;
+            LOG_ERROR(
+                "Specified times are not compliant with JPSfire data {}. CreateTimeList(): File "
+                "not found: {}",
+                npz_file.string(),
+                npz_file.string());
             exit(EXIT_FAILURE);
         }
-        //std::cout << "LEAVING \n" ;
     }
     std::cout << "_timelist.size(): " << _timelist.size() << "\n";
 }
@@ -207,7 +206,6 @@ void FDSMeshStorage::CreateFDSMeshes()
         {
             for(auto & j : _doorlist) //list of doors
             {
-                //std::cout << "door " << j << std::endl;
                 for(auto & k : _timelist) //list of times
                 {
                     fs::path npz_file(_filepath);
@@ -224,7 +222,6 @@ void FDSMeshStorage::CreateFDSMeshes()
         {
             for(auto & i : _elevationlist) //list of elevations
             {
-                //std::cout << "i " << i << std::endl;
                 for(auto & k : _timelist) //list of times
                 {
                     fs::path npz_file(_filepath);
@@ -255,27 +252,16 @@ const FDSMesh & FDSMeshStorage::GetFDSMesh(
     if(simT >= _finalTime)
         simT = _finalTime;
 
-    //std::cout << "\t" << quantity << std::endl;
     fs::path Ztime(quantity);
     Ztime = Ztime / ("Z_" + std::to_string(_NearestHeight)) /
             ("t_" + std::to_string(simT) + ".000000.npz");
     Ztime = _filepath / Ztime;
     Ztime = fs::canonical(Ztime).make_preferred();
     if(_fMContainer.count(Ztime.string()) == 0) {
-        //std::cout << str << std::endl;
         std::cout << "\n time ERROR: requested grid not available: " << Ztime.string() << std::endl;
         std::exit(EXIT_FAILURE);
     }
     return _fMContainer.at(Ztime.string());
-
-    //    TODO
-    //    if(_fMContainer.??(str) ) {
-    //        return _fMContainer.at(str);
-    //    }
-    //    else {
-    //        Log->Write("ERROR:\tCould find no appropriate FDS mesh: ", quantity.string(), pedElev, simT);
-    //        exit(EXIT_FAILURE);
-    //    }
 }
 
 const FDSMesh &
@@ -293,7 +279,7 @@ FDSMeshStorage::GetFDSMesh(const double & pedElev, const Point & doorCentre, con
 
     if(simT >= _finalTime)
         simT = _finalTime;
-    // @todo: what if the files have the format Z_%.2f ?
+    //TODO what if the files have the format Z_%.2f ?
     fs::path door_xy(quantity);
     door_xy = door_xy / ("Z_" + std::to_string(_NearestHeight)) /
               ("Door_X_" + std::to_string(doorCentre._x) + "_Y_" + std::to_string(doorCentre._y)) /
@@ -307,16 +293,13 @@ FDSMeshStorage::GetFDSMesh(const double & pedElev, const Point & doorCentre, con
         std::exit(EXIT_FAILURE);
     }
 
-    // if (_fMContainer.count(str) == 1) {
-    //      std::cout << "INFO: requested sfgrid: " << str << std::endl;
-    // }
     return _fMContainer.at(door_xy.string());
 }
 
 double FDSMeshStorage::GetNearestHeight(double PedEyeHeight)
 {
     ///find the nearest height in the JPSfire data related to the ped elevation
-    double min_val = FLT_MAX; // std::numeric_limits<double>::max();
+    double min_val = FLT_MAX;
     int index      = 0;
 
     for(unsigned int i = 0; i < _elevationlist.size(); ++i) {
@@ -327,7 +310,6 @@ double FDSMeshStorage::GetNearestHeight(double PedEyeHeight)
         }
     }
     _NearestHeight = _elevationlist[index];
-    //std::cout << "NEAREST: " << _NearestHeight << std::endl;
     return _NearestHeight;
 }
 

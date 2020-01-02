@@ -1,17 +1,19 @@
-#ifndef COMPILER_HPP
-#define COMPILER_HPP
+#pragma once
 
 #include <sstream>
 #include <string>
 
-/* https://stackoverflow.com/questions/38530981/output-compiler-version-in-a-c-program#38531037 */
+// Taken from:
+//  https://stackoverflow.com/questions/38530981/output-compiler-version-in-a-c-program#38531037
 std::string ver_string(int major, int minor, int patch)
 {
     std::ostringstream ss;
     ss << major << '.' << minor << '.' << patch;
     return ss.str();
 }
-//https://sourceforge.net/p/predef/wiki/Compilers/
+
+// Taken from:
+// https://sourceforge.net/p/predef/wiki/Compilers/
 constexpr const char * compiler_id{
 #ifdef __clang__
     "clang++"
@@ -37,6 +39,4 @@ const std::string compiler_version =
     ver_string(_MSC_VER, _MSC_FULL_VER, _MSC_BUILD);
 #else
     "";
-#endif
-
 #endif
