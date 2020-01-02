@@ -16,7 +16,8 @@
 
     <source id="10" group_id="2" time_min="15" time_max="35" frequency="5" agents_max="5"  x_min="4" x_max="6.2" y_min="3" y_max="3.5"/>
 
-    <source id="11" group_id="2"  percent="0.5" N_create="6" time_min="10" time_max="50" frequency="6" agents_max="12"  x_min="4" x_max="6.2" y_min="5" y_max="6.1"/>
-    
+    <source id="11" group_id="2"  N_create="1" time_min="10" time_max="50" frequency="6" agents_max="12"  x_min="4" x_max="6.2" y_min="3" y_max="6.1"/>
+
+    <source id="1" group_id="2"  rate="4" percent="1" N_create="10" time_min="2" time_max="30" frequency="10" agents_max="100"  x_min="1" x_max="6.2" y_min="1" y_max="6.1"/>
   </agents_sources>
 </JPScore>
