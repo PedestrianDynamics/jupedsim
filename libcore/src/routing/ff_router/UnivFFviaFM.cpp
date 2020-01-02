@@ -128,11 +128,11 @@ UnivFFviaFM::UnivFFviaFM(
         if(subroom->IsInSubRoom(candidate01)) {
             _subRoomPtrTOinsidePoint.emplace(std::make_pair(subroom.get(), candidate01));
         } else {
-            //candidate = candidate - (normalVec * 0.25);
             if(subroom->IsInSubRoom(candidate02)) {
                 _subRoomPtrTOinsidePoint.emplace(std::make_pair(subroom.get(), candidate02));
             } else {
-                LOG_ERROR("In UnivFF InsidePoint Analysis.");
+                throw std::logic_error("In UnivFF InsidePoint Analysis. No point inside the room "
+                                       "could be found, room may be too tiny.");
             }
         }
     }
