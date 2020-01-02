@@ -110,7 +110,8 @@ def test_source(d, s, time_err, pos_err):
     # 111 222 333 ncreate*percent = 3
     # 1 2 3: ncreate*percent = 1
     for i in range(len(times)):
-        sub_array = times[i * s.N_create * s.percent:(i+1) * s.N_create * s.percent]
+        chunk = int(s.N_create * s.percent)
+        sub_array = times[i * chunk:(i+1) * chunk]
         if not sub_array:
             continue
 
@@ -119,7 +120,7 @@ def test_source(d, s, time_err, pos_err):
             err_msg = ("frequency mismatch. Got subtimes: "+", ".join(map(str, sub_array))
                     )
             logging.error(err_msg)
-
+            return False
     if not np.all(np.less_equal(np.abs(np.diff(times_first) - s.frequency), time_err)):
         err_msg = ("frequency mismatch. Got times_first: "+", ".join(map(str, times_first))
                   )
@@ -221,7 +222,7 @@ def runtest(inifile, trajfile):
     source = Source(ids = source_ids,
                     N_create = 10,
                     rate = 4,
-                    percent = 1,
+                    percent = 0.5,
                     xmin = 1, xmax = 6.2,                   
                     ymin = 1, ymax = 6.1,
                     time_min = 2, time_max = 30,
