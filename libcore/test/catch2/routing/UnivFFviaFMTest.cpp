@@ -16,6 +16,7 @@
  *
  **/
 #include "routing/ff_router/UnivFFviaFM.h"
+
 #include "general/Configuration.h"
 #include "geometry/Crossing.h"
 #include "geometry/Line.h"
@@ -23,12 +24,12 @@
 #include "geometry/SubRoom.h"
 #include "geometry/Transition.h"
 #include "geometry/Wall.h"
+
 #include <catch2/catch.hpp>
 #include <cmath>
 TEST_CASE("routing/ff_router/UnivFFviaFM", "[routing][UnivFFviaFM]")
 {
-    SECTION("Constructor"){{// Test constructor with valid input data
-                            Crossing sub1sub2;
+    SECTION("Constructor"){{Crossing sub1sub2;
     sub1sub2.SetPoint1(Point{1., 0.});
     sub1sub2.SetPoint2(Point{1., 1.});
     sub1sub2.SetState(DoorState::OPEN);
