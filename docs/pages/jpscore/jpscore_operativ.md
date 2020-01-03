@@ -64,6 +64,7 @@ The parameters that can be specified in this section are Gauss distributed (defa
     - Speed of idle escalators downstairs
     - Unit: m/s
 
+{%include important.html content="The desired speed changes *smoothly* from one plane to another. See this [documentation](jpscore_desired_speed.html) for more details."%}
 
 The reduced speed on stairs (up) is according to Tab 1 in [Burghardt2014][#Burghardt2014].
 
@@ -73,7 +74,6 @@ The reduced speed on stairs (up) is according to Tab 1 in [Burghardt2014][#Burgh
 | WM       | 0.61 m/s       |
 | NM       | 0.8 m/s        |
 | FM       | 0.55 m/s       |
-
 
 ### Shape of pedestrians
 Pedestrians are modeled as ellipses with two semi-axes: $$a$$ and $$b$$, where
