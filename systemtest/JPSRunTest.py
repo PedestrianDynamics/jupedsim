@@ -220,11 +220,13 @@ class JPSRunTestDriver(object):
         logging.info('start simulating with exe=<%s>', cmd)
         subprocess.call([executable, "%s" % inifile])
         logging.info('end simulation ...\n--------------\n')
-        filename, file_extension = os.path.splitext(inifile)
-        logging.info("inifile <%s>", filename)
-        trajfile = os.path.join("trajectories", "traj" + file_extension)
+        logging.info("inifile <%s>", inifile)
+        trajfile = os.path.join("trajectories", "traj" + inifile.split("ini")[2])
         if not path.exists(trajfile):
-            trajfile = os.path.join("trajectories", "traj.txt")
+            trajfile, file_extension = os.path.splitext(trajfile)
+            logging.info("trajfile <%s> with ext=<%s> does not exist. Looking for *.txt",
+                         trajfile, file_extension)
+            trajfile = os.path.join(trajfile, ".txt")
             if not path.exists(trajfile):
                 logging.critical("trajfile <%s> does not exist", trajfile)
                 exit(self.FAILURE)
@@ -232,5 +234,6 @@ class JPSRunTestDriver(object):
                 logging.info('trajfile = <%s>', trajfile)
         else:
             logging.info('trajfile = <%s>', trajfile)
+
         res = testfunction(inifile, trajfile, *args)
         return res
