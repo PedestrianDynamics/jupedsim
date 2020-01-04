@@ -2,7 +2,7 @@
 
 <JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 
-  <seed>linspace(0, 1000, 10)</seed>
+  <seed>np.linspace(0, 1000, 10)</seed>
   <max_sim_time>1000</max_sim_time>
   <geometry>../geometry.xml</geometry>
   <trajectories format="xml-plain" fps="8">

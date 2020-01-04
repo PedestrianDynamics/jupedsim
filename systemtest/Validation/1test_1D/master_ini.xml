@@ -5,7 +5,7 @@
           xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org//jps_ini_core.xsd">
 
   <!-- seed used for initialising random generator 12542 -->
-  <seed>linspace(1,10000, 10)</seed>
+  <seed>np.linspace(1,10000, 10)</seed>
   <max_sim_time>100</max_sim_time>
   <!-- geometry file -->
   <geometry>../geometry.xml</geometry>
