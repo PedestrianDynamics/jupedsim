@@ -226,7 +226,7 @@ class JPSRunTestDriver(object):
             trajfile, file_extension = os.path.splitext(trajfile)
             logging.info("trajfile <%s> with ext=<%s> does not exist. Looking for *.txt",
                          trajfile, file_extension)
-            trajfile = os.path.join(trajfile, ".txt")
+            trajfile += ".txt"
             if not path.exists(trajfile):
                 logging.critical("trajfile <%s> does not exist", trajfile)
                 exit(self.FAILURE)
