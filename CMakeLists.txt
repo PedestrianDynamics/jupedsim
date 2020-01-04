@@ -238,7 +238,7 @@ target_compile_definitions(git-info INTERFACE
 if(BUILD_DOC)
     find_package(Doxygen REQUIRED)
     configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in
+        ${CMAKE_CURRENT_SOURCE_DIR}/docs/doxygen/Doxyfile.in
         ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
         @ONLY
     )
