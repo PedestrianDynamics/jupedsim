@@ -60,7 +60,6 @@ class Source:
         Np = int(self.N_create*self.percent)
         rest = Np
         for i in range(self.num_possible_creations()):
-            print("i", i)
             if rest > Np:
                 L = [self.time_min+i*rate]*Np
             else:
@@ -73,7 +72,6 @@ class Source:
 
     def cycle(self) -> List[int]:
         subcycle = self.sub_cycle()
-        print(subcycle)
         cycle = subcycle
         for i in range(1, self.num_cycles()+2):
             cycle = np.hstack((cycle, subcycle + i*self.frequency*np.ones(len(subcycle))))
@@ -224,8 +222,8 @@ def runtest(inifile, trajfile):
     #----------------
     source_ids = range(5, 9)
     source = Source(ids = source_ids, time = 5,
-                    xmin = 0, xmax = 1,
-                    ymin = 0, ymax =1,
+                    xmin = 0, xmax = 2,
+                    ymin = 0, ymax =2,
                     )
     success = test_source(d, source, time_err, pos_err)
     if not success:

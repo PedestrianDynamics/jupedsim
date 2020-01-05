@@ -8,9 +8,9 @@
     <source id="4" group_id="4" agent_id="4" time="20" startX="4" startY="4"/>
 
     <source id="5" group_id="4" agent_id="5" time="5" x_min="0" x_max="1" y_min="0" y_max="1"/>
-    <source id="6" group_id="4" agent_id="6" time="10" x_min="0" x_max="1" y_min="0" y_max="1"/>
-    <source id="7" group_id="4" agent_id="7" time="15" x_min="0" x_max="1" y_min="0" y_max="1"/>
-    <source id="8" group_id="4" agent_id="8" time="20" x_min="0" x_max="1" y_min="0" y_max="1"/>
+    <source id="6" group_id="4" agent_id="6" time="10" x_min="0" x_max="2" y_min="0" y_max="2"/>
+    <source id="7" group_id="4" agent_id="7" time="15" x_min="0" x_max="2" y_min="0" y_max="2"/>
+    <source id="8" group_id="4" agent_id="8" time="20" x_min="0" x_max="2" y_min="0" y_max="2"/>
 
     <source id="9" group_id="4" time_min="10" time_max="15" agents_max="3"  x_min="3" x_max="5" y_min="2" y_max="4"/>
 
