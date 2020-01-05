@@ -5,14 +5,14 @@ tags: [jpscore, file, simulation]
 sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_trains.html
-summary: The interaction with trains is modeled with an event-based deleting and creating of doors. When a train arrives on the plattform, doors are created and again deleting when the train departs.
+summary: The interaction with trains is modeled with an event-based deleting and creating of doors. When a train arrives on the platform, doors are created and again deleting when the train departs.
 last_updated: Dec 31, 2019
 ---
 
 
 ## Train constraints
 
-Information regarding trains are ogranized in two different files:
+Information regarding trains are organized in two different files:
 - [Train timetable](#train-timetable): This file defines arrival and departure times of trains.
 - [Train types](#train-types): In this file types of trains are defined.
 
@@ -190,4 +190,4 @@ To remove the walls between the points T1 and T2, following actions are performe
 
 - Add  to the `building` new walls to close the gaps.
 
-![trainIntersection]({{ site.baseurl }}/images/trainIntersection.png)
+![Train intersection]({{ site.baseurl }}/images/trainIntersection.png)
