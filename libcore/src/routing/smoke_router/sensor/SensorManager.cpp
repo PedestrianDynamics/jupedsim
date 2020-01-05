@@ -74,7 +74,7 @@ SensorManager * SensorManager::InitWithAllSensors(const Building * b, BrainStora
 
     return sensor_manager;
 }
-#ifdef JPSFIRE
+
 SensorManager * SensorManager::InitWithCertainSensors(
     const Building * b,
     BrainStorage * cm_storage,
@@ -103,7 +103,7 @@ SensorManager * SensorManager::InitWithCertainSensors(
 
     return sensor_manager;
 }
-#endif
+
 void SensorManager::SetIntVPeriodicUpdate(const double & interval)
 {
     _periodicUpdateInterval = interval;

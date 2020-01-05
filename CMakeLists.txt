@@ -5,7 +5,6 @@
 # -DBUILD_TESTING=ON (default OFF) for python tests
 # -DBUILD_CPPUNIT_TEST=ON (default OFF) for unit tests
 # -D Boost_NO_SYSTEM_PATHS=true (default false) -D BOOST_ROOT=PATH_where_to_find_boost
-# -D JPSFIRE=ON (default OFF)
 #--------------------------------------------------------------------------
 ################################################################################
 # Project setup
@@ -47,9 +46,6 @@ print_var(BUILD_CPPUNIT_TEST)
 
 set(BUILD_DOC OFF CACHE BOOL "Build doxygen documentation")
 print_var(BUILD_DOC)
-
-set(JPSFIRE OFF CACHE BOOL "Build with jpsfire support")
-print_var(JPSFIRE)
 
 # Due to old OpenMP implementation in MSVC we disable OpenMP on Windows for the moment.
 if(${CMAKE_SYSTEM} MATCHES "Windows")

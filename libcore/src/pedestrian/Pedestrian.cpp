@@ -592,24 +592,22 @@ double Pedestrian::GetV0Norm() const
         }
     }
 
-//IF execution of WalkingInSmoke depending on JPSfire section in INI file
-#ifdef JPSFIRE
+    //IF execution of WalkingInSmoke depending on JPSfire section in INI file
     if(_WalkingSpeed && _WalkingSpeed->ReduceWalkingSpeed()) {
         walking_speed = _WalkingSpeed->WalkingInSmoke(this, walking_speed);
     }
-#endif
     //WHERE should the call to that routine be placed properly?
     //only executed every 3 seconds
     return walking_speed;
 }
-#ifdef JPSFIRE
+
 void Pedestrian::ConductToxicityAnalysis()
 {
     if(_ToxicityAnalysis->ConductToxicityAnalysis()) {
         _ToxicityAnalysis->HazardAnalysis(this);
     }
 }
-#endif
+
 // get axis in the walking direction
 double Pedestrian::GetLargerAxis() const
 {

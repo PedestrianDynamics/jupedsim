@@ -525,15 +525,13 @@ double Simulation::RunBody(double maxSimTime)
 
         ++frameNr;
 
-//Trigger JPSfire Toxicity Analysis
-//only executed every 3 seconds
-#ifdef JPSFIRE
+        //Trigger JPSfire Toxicity Analysis
+        //only executed every 3 seconds
         if(fmod(Pedestrian::GetGlobalTime(), 3) == 0) {
             for(auto && ped : _building->GetAllPedestrians()) {
                 ped->ConductToxicityAnalysis();
             }
         }
-#endif
 
         //init train trainOutfloww
         for(auto tab : TrainTimeTables) {
@@ -642,8 +640,8 @@ bool Simulation::correctGeometry(
     static int transition_id = 10000; // randomly high number
 
     std::cout << "enter with train " << trainType.c_str() << "\n";
-    std::cout << "Enter correctGeometry: Building Has "
-              << building->GetAllTransitions().size() << " Transitions\n";
+    std::cout << "Enter correctGeometry: Building Has " << building->GetAllTransitions().size()
+              << " Transitions\n";
     std::cout << "room: " << room_id << " subroom_id " << subroom_id << "\n";
 
     if(mytrack.empty() || subroom == nullptr)
@@ -671,8 +669,8 @@ bool Simulation::correctGeometry(
 
     auto pws = building->GetIntersectionPoints(doors, mytrack);
     if(pws.empty())
-        std::cout
-            << "simulation::correctGeometry: pws are empty. Something went south with train doors\n";
+        std::cout << "simulation::correctGeometry: pws are empty. Something went south with train "
+                     "doors\n";
 
     auto walls = subroom->GetAllWalls();
     //---
@@ -934,7 +932,7 @@ bool Simulation::TrainTraffic()
         if(!tab.second->arrival && (now >= tab.second->tin) && (now <= tab.second->tout)) {
             trainHere                            = true;
             TrainTimeTables.at(trainId)->arrival = true;
-            std::cout  << "Arrival: TRAIN " << trainType << " at time: " << now << "\n";
+            std::cout << "Arrival: TRAIN " << trainType << " at time: " << now << "\n";
             correctGeometry(_building, tab.second);
 
         } else if(tab.second->arrival && now >= tab.second->tout) {

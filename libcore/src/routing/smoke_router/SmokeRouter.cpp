@@ -159,10 +159,6 @@ int SmokeRouter::FindDestination(Pedestrian * p)
     //setting crossing to ped
     p->SetExitLine(nextNavLine);
     p->SetExitIndex(nextNavLine->GetUniqueID());
-    //p->SetExitLine(destination->GetCrossing());
-    //p->SetExitIndex(destination->GetCrossing()->GetUniqueID());
-
-
     return 1;
 }
 
@@ -182,13 +178,9 @@ bool SmokeRouter::Init(Building * b)
         brain_storage = std::shared_ptr<BrainStorage>(new BrainStorage(
             building, getOptions().at("CognitiveMap")[0], getOptions().at("CognitiveMapFiles")[0]));
     LOG_INFO("CognitiveMapStorage initialized");
-//cm_storage->ParseCogMap();
 
-//Init Sensor Manager
-//sensor_manager = SensorManager::InitWithAllSensors(b, cm_storage);
-#ifdef JPSFIRE
+    //Init Sensor Manager
     sensor_manager = SensorManager::InitWithCertainSensors(b, brain_storage.get(), getOptions());
-#endif
     LOG_INFO("SensorManager initialized");
     return true;
 }

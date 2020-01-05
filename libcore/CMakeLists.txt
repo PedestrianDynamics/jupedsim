@@ -36,6 +36,13 @@ set(source_files
     src/IO/OutputHandler.cpp
     src/IO/PedDistributionParser.cpp
     src/IO/Trajectories.cpp
+    src/JPSfire/A_smoke_sensor/SmokeSensor.cpp
+    src/JPSfire/B_walking_speed/WalkingSpeed.cpp
+    src/JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
+    src/JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
+    src/JPSfire/generic/FDSMesh.cpp
+    src/JPSfire/generic/FDSMeshStorage.cpp
+    src/JPSfire/generic/Knot.cpp
     src/math/GCFMModel.cpp
     src/math/Mathematics.cpp
     src/math/OperationalModel.cpp
@@ -114,6 +121,13 @@ set(header_files
     src/IO/OutputHandler.h
     src/IO/PedDistributionParser.h
     src/IO/Trajectories.h
+    src/JPSfire/A_smoke_sensor/SmokeSensor.h
+    src/JPSfire/B_walking_speed/WalkingSpeed.h
+    src/JPSfire/C_toxicity_analysis/ToxicityAnalysis.h
+    src/JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
+    src/JPSfire/generic/FDSMesh.h
+    src/JPSfire/generic/FDSMeshStorage.h
+    src/JPSfire/generic/Knot.h
     src/math/GCFMModel.h
     src/math/Mathematics.h
     src/math/OperationalModel.h
@@ -127,11 +141,10 @@ set(header_files
     src/pedestrian/Knowledge.h
     src/pedestrian/PedDistributor.h
     src/pedestrian/Pedestrian.h
-    src/pedestrian/Pedestrian.h
     src/pedestrian/StartDistribution.h
     src/routing/ff_router/ffRouter.h
-    src/routing/ff_router/UnivFFviaFM.h
     src/routing/ff_router/mesh/RectGrid.h
+    src/routing/ff_router/UnivFFviaFM.h
     src/routing/global_shortest/AccessPoint.h
     src/routing/global_shortest/DTriangulation.h
     src/routing/global_shortest/GlobalRouter.h
@@ -163,36 +176,15 @@ set(header_files
     src/routing/smoke_router/SmokeRouter.h
     src/voronoi-boost/VoronoiPositionGenerator.h
 )
-set(JPSFIRE_HDR
-    src/JPSfire/generic/Knot.h
-    src/JPSfire/generic/FDSMesh.h
-    src/JPSfire/generic/FDSMeshStorage.h
-    src/JPSfire/A_smoke_sensor/SmokeSensor.h
-    src/JPSfire/B_walking_speed/WalkingSpeed.h
-    src/JPSfire/C_toxicity_analysis/ToxicityAnalysis.h
-    src/JPSfire/C_toxicity_analysis/ToxicityOutputhandler.h
-)
-set(JPSFIRE_SRC
-    src/JPSfire/generic/FDSMesh.cpp
-    src/JPSfire/generic/Knot.cpp
-    src/JPSfire/generic/FDSMeshStorage.cpp
-    src/JPSfire/A_smoke_sensor/SmokeSensor.cpp
-    src/JPSfire/B_walking_speed/WalkingSpeed.cpp
-    src/JPSfire/C_toxicity_analysis/ToxicityAnalysis.cpp
-    src/JPSfire/C_toxicity_analysis/ToxicityOutputhandler.cpp
-)
 
 add_library(core STATIC
     ${source_files}
     ${header_files}
-    $<$<BOOL:${JPSFIRE}>:${JPSFIRE_SRC}>
-    $<$<BOOL:${JPSFIRE}>:${JPSFIRE_HDR}>
 )
 target_compile_options(core PRIVATE
     ${COMMON_COMPILE_OPTIONS}
 )
 target_compile_definitions(core PUBLIC
-    $<$<BOOL:${JPSFIRE}>:JPSFIRE>
     JPSCORE_VERSION="${PROJECT_VERSION}"
 )
 target_link_libraries(core
@@ -202,7 +194,7 @@ target_link_libraries(core
     tinyxml
     visilibity
     CLI11::CLI11
-    $<$<BOOL:${JPSFIRE}>:cnpy>
+    cnpy
     fs
     spdlog::spdlog
     fmt::fmt
