@@ -1,0 +1,16 @@
+# Note:
+# If you are using the createtag script, don't leave an blank line at the end of this file.
+# In other words, the last line must be the last tag in the allowed-tags list.
+allowed-tags:
+  - jpscore
+  - jpsreport
+  - model
+  - test
+  - file
+  - measurement
+  - jpsreport_tutorial
+  - jpscore_tutorial
+  - simulation
+  - getting_started
+  - troubleshooting
+  - removed

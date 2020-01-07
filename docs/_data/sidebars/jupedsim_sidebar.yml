@@ -1,0 +1,165 @@
+# This is your sidebar TOC. The sidebar code loops through sections here and provides the appropriate formatting.
+
+entries:
+- title: sidebar
+  product: JuPedSim
+
+  folders:
+
+  - title:
+    output: pdf
+    type: frontmatter
+    folderitems:
+    - title:
+      url: /titlepage.html
+      output: pdf
+      type: frontmatter
+    - title:
+      url: /tocpage.html
+      output: pdf
+      type: frontmatter
+
+  - title: Overview
+    output: web, pdf
+    folderitems:
+
+    - title: Home
+      url: /index.html
+      output: web
+      type: homepage
+
+    - title: Introduction
+      url: /jupedsim_introduction.html
+      output: web, pdf
+
+    - title: Support
+      url: /jupedsim_support.html
+      output: web, pdf
+
+    - title: Disclaimer
+      url: /jupedsim_disclaimer.html
+      output: web, pdf
+
+  - title: Build from Sources
+    output: web, pdf
+    folderitems:
+
+    - title: Dependencies
+      url: /jupedsim_requirements.html
+      output: web, pdf
+
+
+    - title: Build on Mac
+      url: /jupedsim_install_on_mac.html
+      output: web, pdf
+
+    - title: Build on Linux
+      url: /jupedsim_install_on_linux.html
+      output: web, pdf
+
+    - title: Build on Windows
+      url: /jupedsim_install_on_windows.html
+      output: web, pdf
+
+  - title: Tests
+    output: web, pdf
+    folderitems:
+    - title: RiMEA
+      url: /jpscore_tests_rimea.html
+      output: web, pdf
+
+    - title: Juelich
+      url: /jpscore_tests_juelich.html
+      output: web, pdf
+
+  - title: Simulation
+    output: web
+    folderitems:
+
+    - title: Introduction
+      url: /jpscore_introduction.html
+      output: web, pdf
+
+      subfolders:
+      - title: Input files
+        output: web, pdf
+        subfolderitems:
+        - title: Inifile
+          url: /jpscore_inifile.html
+          output: web, pdf
+        - title: Geometry
+          url: /jpscore_geometry.html
+          output: web, pdf
+        - title: Trajectory
+          url: /jpscore_trajectory.html
+          output: web, pdf
+
+      - title: Models
+        output: web, pdf
+        subfolderitems:
+        - title: Operational models
+          url: /jpscore_operativ.html
+          output: web, pdf
+
+        - title: Routing
+          url: /jpscore_routing.html
+          output: web, pdf
+
+        - title: Direction strategies
+          url: /jpscore_direction.html
+          output: web, pdf
+
+  - title: Analysis
+    output: web, pdf
+    folderitems:
+
+    - title: Introduction
+      url: /jpsreport_introduction.html
+      output: web, pdf
+
+      subfolders:
+      - title: Input files
+        output: web, pdf
+        subfolderitems:
+        - title: Inifile
+          url: /jpsreport_inifile.html
+          output: web, pdf
+
+      - title: Measurement methods
+        output: web, pdf
+        subfolderitems:
+        - title: Method A
+          url: /jpsreport_method_A.html
+          output: web, pdf
+
+        - title: Method B
+          url: /jpsreport_method_B.html
+          output: web, pdf
+          
+        - title: Method C
+          url: /jpsreport_method_C.html
+          output: web, pdf
+    
+        - title: Method D
+          url: /jpsreport_method_D.html
+          output: web, pdf
+    
+        - title: Method J
+          url: /jpsreport_method_J.html
+          output: web, pdf
+    
+      - title: Tutorials
+        output: web, pdf      
+        subfolderitems:
+        - title: How to jpsreport
+          url: /jpsreport_howto.html
+          output: web, pdf
+
+        # - title: Fundamental Diagram
+        #   url: /jpsreport_fd.html
+        #   output: web, pdf
+          
+        # - title: Density/Velocity profiles
+        #   url: /jpsreport_profiles.html
+        #   output: web, pdf
+    
