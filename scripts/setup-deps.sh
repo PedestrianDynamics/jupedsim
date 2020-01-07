@@ -67,7 +67,8 @@ cmake .. \
     -DCMAKE_PREFIX_PATH=${INSTALL_DIR} \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_TESTING=OFF \
-    -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
+    -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
+    -DCLI11_EXAMPLES=OFF
 cmake --build . --target install -- -j${CPUS}
 cd ../..
 rm -rf CLI11-${CLI11_VER} v${CLI11_VER}.tar.gz
