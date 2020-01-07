@@ -145,7 +145,6 @@ enum RoutingStrategy {
 enum OperativModels {
     MODEL_GFCM = 1,
     MODEL_GOMPERTZ,
-    //    MODEL_ORCA,
     //    MODEL_CFM,
     //    MODEL_VELO
     //    MODEL_GNM
