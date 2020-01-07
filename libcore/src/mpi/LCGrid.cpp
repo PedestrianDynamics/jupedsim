@@ -41,9 +41,6 @@
 
 std::mutex grid_mutex;
 
-//FIXME:
-#define MAX_AGENT_COUNT 10000 // 1000000
-
 LCGrid::LCGrid(double boundaries[4], double cellsize, int nPeds)
 {
     _gridXmin = boundaries[0];
@@ -51,7 +48,7 @@ LCGrid::LCGrid(double boundaries[4], double cellsize, int nPeds)
     _gridYmin = boundaries[2];
     _gridYmax = boundaries[3];
     _cellSize = cellsize;
-    _nPeds    = nPeds + MAX_AGENT_COUNT;
+    _nPeds    = nPeds;
 
     // add 1 to ensure that the whole area is covered by cells if not divisible without remainder
     _gridSizeX = (int) ((_gridXmax - _gridXmin) / _cellSize) + 1 + 2; // 1 dummy cell on each side
@@ -72,17 +69,11 @@ LCGrid::LCGrid(double boundaries[4], double cellsize, int nPeds)
     _list = new int[_nPeds];
     for(int i = 0; i < _nPeds; i++)
         _list[i] = 0;
-
-    //allocating the place for the peds copy
-    _localPedsCopy = new Pedestrian *[_nPeds];
-    for(int i = 0; i < _nPeds; i++)
-        _localPedsCopy[i] = nullptr;
 }
 
 LCGrid::~LCGrid()
 {
     delete[] _list;
-    delete[] _localPedsCopy;
     for(int i = 0; i < _gridSizeY; ++i)
         delete[] _cellHead[i];
     delete[] _cellHead;
@@ -90,9 +81,8 @@ LCGrid::~LCGrid()
 
 void LCGrid::ShallowCopy(const std::vector<Pedestrian *> & peds)
 {
-    for(unsigned int p = 0; p < peds.size(); p++) {
-        int id             = peds[p]->GetID() - 1;
-        _localPedsCopy[id] = peds[p];
+    for(auto ped : peds) {
+        _localPedsCopy[ped->GetID()] = ped;
     }
 }
 
@@ -112,26 +102,6 @@ void LCGrid::Update(const std::vector<Pedestrian *> & peds)
         _cellHead[iy][ix]  = id;
         _localPedsCopy[id] = ped;
     }
-    grid_mutex.unlock();
-}
-
-// I hope you had called Clear() first
-// todo: can be used to solve the issue with MAX_AGENT_COUNT
-void LCGrid::Update(Pedestrian * ped)
-{
-    grid_mutex.lock();
-
-    int id = ped->GetID() - 1;
-    // determine the cell coordinates of pedestrian i
-    int ix = (int) ((ped->GetPos()._x - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
-    int iy = (int) ((ped->GetPos()._y - _gridYmin) / _cellSize) + 1;
-
-    // update the list previously created
-    _list[id]         = _cellHead[iy][ix];
-    _cellHead[iy][ix] = id;
-
-    // this is probably a pedestrian coming from the mpi routine, so made a copy
-    _localPedsCopy[id] = ped;
     grid_mutex.unlock();
 }
 

@@ -455,10 +455,10 @@ double Simulation::RunBody(double maxSimTime)
         //process the queue for incoming pedestrians
         ProcessAgentsQueue();
 
-        if(t > Pedestrian::GetMinPremovementTime()) {
-            //update the linked cells
-            _building->UpdateGrid();
+        //update the linked cells
+        _building->UpdateGrid();
 
+        if(t > Pedestrian::GetMinPremovementTime()) {
             // update the positions
             _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get(), _periodic);
 
@@ -852,7 +852,6 @@ void Simulation::ProcessAgentsQueue()
     for(auto && ped : peds) {
         _building->AddPedestrian(ped);
     }
-    _building->UpdateGrid();
 }
 
 void Simulation::UpdateDoorticks() const {

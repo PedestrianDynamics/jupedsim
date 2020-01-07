@@ -59,7 +59,7 @@ private:
     double _gridXmin, _gridXmax, _gridYmin, _gridYmax;
     /// for convenience
     /// will be delete in next versions
-    Pedestrian ** _localPedsCopy;
+    std::map<int, Pedestrian *> _localPedsCopy;
     ///total number of pedestrians
     int _nPeds;
 
@@ -86,11 +86,6 @@ public:
       *Update the cells occupation
       */
     void Update(const std::vector<Pedestrian *> & peds);
-
-    /**
-      * Update this special pedestrian on the grid
-      */
-    void Update(Pedestrian * ped);
 
     /**
       * Make a shallow copy of the initial pedestrians distribution
