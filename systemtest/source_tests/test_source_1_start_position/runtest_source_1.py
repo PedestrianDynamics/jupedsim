@@ -16,18 +16,24 @@ from source_utils import *
 def runtest(inifile, trajfile):
     pos_err = 0.15
     time_err, data = get_data(trajfile)
+    if not data:
+        logging.error("Simulation did not run properly")
+        exit(FAILURE)
     # assuming source_ids can be extracted from group ids
     source_ids = []
     for key in data.keys():
         source_ids.append(data[key][-1])
 
-    startX, startY = get_starting_position("sources.xml")
-    source = Source(ids=source_ids,
-                    startX=startX,
-                    startY=startY)                
-    success = test_source(data, source, time_err, pos_err)
-    if not success:
-        exit(FAILURE)
+    source_file = "sources.xml" #get_source_file(inifile)
+    for _id in source_ids:
+
+        startX, startY = get_starting_position(_id, source_file)
+        source = Source(ids=[_id],
+                        startX=startX,
+                        startY=startY)
+        success = test_source(data, source, time_err, pos_err)
+        if not success:
+            exit(FAILURE)
 
 if __name__ == "__main__":
     test = JPSRunTestDriver(1, argv0=argv[0], testdir=path[0], utestdir=utestdir)

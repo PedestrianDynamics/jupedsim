@@ -16,7 +16,7 @@ except ImportError:
 
 @dataclass
 class Source:
-    ids: List[int] = field(default_factory=list) # group ids
+    ids: List[int] = field(default_factory=list)
     caption: str = None
     group_id: int = None
     agent_id: int = None
@@ -212,16 +212,25 @@ def test_source(d, s, time_err, pos_err):
     return True
 
 
-def get_starting_position(filename):
+def get_starting_position(group_id, filename):
     tree = ET.parse(filename)
     root = tree.getroot()
     for source in root.iter("source"):
-        return float(source.attrib["startX"]), float(source.attrib["startY"])
+        if source.attrib["group_id"] == str(group_id):
+            return float(source.attrib["startX"]), float(source.attrib["startY"])
 
+    return list()
 
 def get_starting_time(filename):
     tree = ET.parse(filename)
     root = tree.getroot()
     for source in root.iter("source"):
         return float(source.attrib["time"])
+
+def get_source_file(filename):
+    tree = ET.parse(filename)
+    root = tree.getroot()
+    for source in root.iter("agents_sources"):
+        f = source.find("file")
+        return f.text
     
