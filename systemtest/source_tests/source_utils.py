@@ -7,6 +7,7 @@ from typing import List
 from dataclasses import dataclass, field
 import logging
 from utils import equals, contains
+import numpy as np
 
 try:
     import xml.etree.cElementTree as ET
@@ -50,7 +51,7 @@ class Source:
         return min(self.possible_creations_with_np(), max_creations_in_subcycle)
 
     def num_cycles(self) -> int:
-        return (self.time_max - self.time_min)//self.frequency
+        return int((self.time_max - self.time_min)//self.frequency)
 
     def sub_cycle(self) -> List[int]:
         if self.rate == None:
@@ -159,8 +160,7 @@ def test_source(d, s, time_err, pos_err):
             return False
 
         if s.time:
-            # in sources.xml time of sources is equidistant (step=5)
-            on_time = equals(d[source_id][0], s.time*(j+1), err=time_err)
+            on_time = equals(d[source_id][0], s.time, err=time_err)
 
         if s.time_min and s.time_max:
             in_time_interval = contains(d[source_id][0], s.time_min, s.time_max, time_err)
@@ -250,15 +250,46 @@ def get_time_limits(group_id, filename):
             return float(source.attrib["time_min"]), \
               float(source.attrib["time_max"])
 
-    logging.error("could not time limits for group id %d"%group_id)
+    logging.error("could not get time limits for group id %d"%group_id)
 
 
-def get_starting_time(filename):
+def get_starting_time(group_id, filename):
     tree = ET.parse(filename)
     root = tree.getroot()
     for source in root.iter("source"):
-        return float(source.attrib["time"])
+        if source.attrib["group_id"] == str(group_id):
+            return float(source.attrib["time"])
 
+    logging.error("could not get time for group id %d"%group_id)
+
+def get_frequency(group_id, filename):
+    tree = ET.parse(filename)
+    root = tree.getroot()
+    for source in root.iter("source"):
+        if source.attrib["group_id"] == str(group_id):
+            return int(source.attrib["frequency"])
+
+    logging.error("could not get frequency for group id %d"%group_id)
+
+
+def get_rate(group_id, filename):
+    tree = ET.parse(filename)
+    root = tree.getroot()
+    for source in root.iter("source"):
+        if source.attrib["group_id"] == str(group_id):
+            return int(source.attrib["rate"])
+
+    logging.error("could not get rate for group id %d"%group_id)
+
+
+def get_percent(group_id, filename):
+    tree = ET.parse(filename)
+    root = tree.getroot()
+    for source in root.iter("source"):
+        if source.attrib["group_id"] == str(group_id):
+            return float(source.attrib["percent"])
+
+    logging.error("could not get percent for group id %d"%group_id)
 
     
 def get_source_file(filename):
