@@ -12,6 +12,7 @@
 #include "pedestrian/Pedestrian.h"
 #include "routing/ff_router/mesh/RectGrid.h"
 
+#include <stdexcept>
 #include <unordered_set>
 
 UnivFFviaFM::~UnivFFviaFM()
@@ -109,19 +110,29 @@ UnivFFviaFM::UnivFFviaFM(
         }
 
         //find insidePoint and save it, together with UID
-        Point normalVec   = doors.begin()->second.NormalVec();
-        Point midPoint    = doors.begin()->second.GetCentre();
+        Line * door = nullptr;
+        if(!subroom->GetAllCrossings().empty()) {
+            door = dynamic_cast<Line *>(subroom->GetAllCrossings().at(0));
+        }
+        if(!subroom->GetAllTransitions().empty()) {
+            door = dynamic_cast<Line *>(subroom->GetAllTransitions().at(0));
+        }
+        if(!door) {
+            throw std::logic_error("No door in room. Can not initialize floor field.");
+        }
+        Point normalVec   = door->NormalVec();
+        Point midPoint    = door->GetCentre();
         Point candidate01 = midPoint + (normalVec * 0.25);
         Point candidate02 = midPoint - (normalVec * 0.25);
 
         if(subroom->IsInSubRoom(candidate01)) {
             _subRoomPtrTOinsidePoint.emplace(std::make_pair(subroom.get(), candidate01));
         } else {
-            //candidate = candidate - (normalVec * 0.25);
             if(subroom->IsInSubRoom(candidate02)) {
                 _subRoomPtrTOinsidePoint.emplace(std::make_pair(subroom.get(), candidate02));
             } else {
-                LOG_ERROR("In UnivFF InsidePoint Analysis.");
+                throw std::logic_error("In UnivFF InsidePoint Analysis. No point inside the room "
+                                       "could be found, room may be too tiny.");
             }
         }
     }

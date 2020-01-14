@@ -245,15 +245,16 @@ if (BUILD_CPPUNIT_TEST)
     find_package(Catch2 REQUIRED)
 
     add_executable(unittests
-      test/catch2/geometry/LineTest.cpp
-      test/catch2/geometry/ObstacleTest.cpp
-      test/catch2/geometry/PointTest.cpp
-      test/catch2/geometry/RoomTest.cpp
-      test/catch2/geometry/SubRoomTest.cpp
-      test/catch2/Main.cpp
-      test/catch2/math/MathematicsTest.cpp
-      test/catch2/pedestrian/EllipseTest.cpp
-    )
+            test/catch2/geometry/LineTest.cpp
+            test/catch2/geometry/ObstacleTest.cpp
+            test/catch2/geometry/PointTest.cpp
+            test/catch2/geometry/RoomTest.cpp
+            test/catch2/geometry/SubRoomTest.cpp
+            test/catch2/Main.cpp
+            test/catch2/math/MathematicsTest.cpp
+            test/catch2/pedestrian/EllipseTest.cpp
+            test/catch2/routing/UnivFFviaFMTest.cpp
+            )
 
     target_link_libraries(unittests Catch2::Catch2 core)
 
