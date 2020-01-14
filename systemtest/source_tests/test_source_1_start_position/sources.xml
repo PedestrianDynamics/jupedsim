@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<JPScore project="JPS-Project" version="0.8">
+  <agents_sources>
+    <source id="1" group_id="1" startX="4" startY="4"/>
+  </agents_sources>
+</JPScore>

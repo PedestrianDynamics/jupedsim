@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
-import math as ma
+# helper functions for testing sources
 import os
-import sys
-import logging
-import numpy as np
-from dataclasses import dataclass, field
+from sys import path
+from math import ceil
 from typing import List
-utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
-from sys import *
-sys.path.append(utestdir)
-from JPSRunTest import JPSRunTestDriver
-from utils import equals, contains, SUCCESS, FAILURE
+from dataclasses import dataclass, field
+import logging
+from utils import equals, contains
+
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
 
 
 @dataclass
 class Source:
-    ids: List[int] = field(default_factory=list)
+    ids: List[int] = field(default_factory=list) # group ids
     caption: str = None
     group_id: int = None
     agent_id: int = None
@@ -34,6 +35,7 @@ class Source:
     agents_max: int = None
     time: int = None
     greedy: bool = None
+
     def possible_creations_with_np(self) -> int:
         """
         How many times can we create <np> agents in a subcycle?
@@ -44,7 +46,7 @@ class Source:
         if self.rate == None:
             return 1
 
-        max_creations_in_subcycle = ma.ceil(self.frequency/self.rate)
+        max_creations_in_subcycle = ceil(self.frequency/self.rate)
         return min(self.possible_creations_with_np(), max_creations_in_subcycle)
 
     def num_cycles(self) -> int:
@@ -77,6 +79,43 @@ class Source:
             cycle = np.hstack((cycle, subcycle + i*self.frequency*np.ones(len(subcycle))))
 
         return cycle[cycle <= self.time_max]
+
+
+def get_data(_trajfile):
+    """
+    Read data from file
+    @param:
+    _trajfile: trajectory file(type: str)
+    @return
+    time_err: defined as 3/fps, if framerate is defined
+    d[ped_id] = [time, x, y, group] (type: dic)
+    """
+    _d = {}
+    _time_err = 0.01
+    f = open(_trajfile)
+    lines = f.readlines()
+    f.close()
+    for line in lines:
+        line = line.strip()
+        if line.startswith("#framerate"):
+            fps = float(line.split(":")[1])
+            _time_err = 3.0/fps
+
+        if not line or line.startswith("#"):
+            continue
+
+        line = line.split()
+        pid = int(line[0])
+        frame = int(line[1])
+        x = float(line[2])
+        y = float(line[3])
+        group_id = int(line[9])
+        time = frame/fps
+
+        if pid not in _d:
+            _d[pid] = [time, x, y, group_id]
+
+    return _time_err, _d
 
 def test_source(d, s, time_err, pos_err):
     """
@@ -173,125 +212,16 @@ def test_source(d, s, time_err, pos_err):
     return True
 
 
-def get_data(_trajfile):
-    """
-    Read data from file
-    @param:
-    _trajfile: trajectory file(type: str)
-    @return
-    time_err: defined as 3/fps
-    d[ped_id] = [time, x, y] (type: dic)
-    """
-    _d = {}
-    _time_err = 0.01
-    f = open(_trajfile)
-    lines = f.readlines()
-    f.close()
-    for line in lines:
-        line = line.strip()
-        if line.startswith("#framerate"):
-            fps = float(line.split(":")[1])
-            _time_err = 3.0/fps
+def get_starting_position(filename):
+    tree = ET.parse(filename)
+    root = tree.getroot()
+    for source in root.iter("source"):
+        return float(source.attrib["startX"]), float(source.attrib["startY"])
 
-        if not line or line.startswith("#"):
-            continue
 
-        line = line.split()
-        pid = int(line[0])
-        frame = int(line[1])
-        x = float(line[2])
-        y = float(line[3])
-        time = frame/fps
-
-        if pid not in _d:
-            _d[pid] = [time, x, y]
-
-    return _time_err, _d
-
-def runtest(inifile, trajfile):
-    pos_err = 0.15
-    time_err, d = get_data(trajfile)
-
-    # start testing sources
-    #----------------
-    source_ids = range(1, 5)
-    source = Source(ids = source_ids, startX = 4, startY = 4, time = 5)
-    success = test_source(d, source, time_err, pos_err)
-    if not success:
-        exit(FAILURE)
-    #----------------
-    source_ids = range(5, 9)
-    source = Source(ids = source_ids, time = 5,
-                    xmin = 0, xmax = 2,
-                    ymin = 0, ymax =2,
-                    )
-    success = test_source(d, source, time_err, pos_err)
-    if not success:
-        exit(FAILURE)
-    #----------------
-    source_ids = [9, 10, 11]
-    source = Source(ids = source_ids,
-                    agents_max = 3,
-                    xmin = 3, xmax = 5,
-                    ymin = 2, ymax = 4,
-                    time_min = 10, time_max = 15)
-    success = test_source(d, source, time_err, pos_err)
-    if not success:
-        exit(FAILURE)
-    #----------------
-    source_ids = range(12, 12+5)
-    source = Source(ids = source_ids,
-                    agents_max = 5,
-                    xmin = 4, xmax = 6.2,
-                    ymin = 3, ymax = 3.5,
-                    time_min = 15, time_max = 35,
-                    frequency = 5)
-    success = test_source(d, source, time_err, pos_err)
-    if not success:
-        exit(FAILURE)
-    #----------------
-    source_ids = range(17, 24)
-    source = Source(ids = source_ids,
-                    N_create = 1,
-                    xmin = 4, xmax = 6.2,
-                    ymin = 3, ymax = 6.1,
-                    time_min = 10, time_max = 50,
-                    frequency = 6)
-    success = test_source(d, source, time_err, pos_err)
-    if not success:
-        exit(FAILURE)
-    #----------------
-    source_ids = range(29, 59)
-    source = Source(ids = source_ids,
-                    N_create = 10,
-                    rate = 4,
-                    percent = 0.5,
-                    xmin = 1, xmax = 6.2,                   
-                    ymin = 1, ymax = 6.1,
-                    time_min = 2, time_max = 30,
-                    agents_max = 100,
-                    frequency = 10)
-    success = test_source(d, source, time_err, pos_err)
-    if not success:
-        exit(FAILURE) 
-    #----------------
-    source_ids = range(129, 145)
-    source = Source(ids = source_ids,
-                    N_create = 10,
-                    rate = 4,
-                    percent = 0.2,
-                    xmin = 1, xmax = 6.2,
-                    ymin = 1, ymax = 6.1,
-                    time_min = 2, time_max = 28,
-                    agents_max = 100,
-                    frequency = 10)
-    success = test_source(d, source, time_err, pos_err)
-    if not success:
-        exit(FAILURE)
-    #----------------
-
-if __name__ == "__main__":
-    test = JPSRunTestDriver(1, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
-    test.run_test(testfunction=runtest)
-    logging.info("%s exits with SUCCESS" % (argv[0]))
-    exit(SUCCESS)
+def get_starting_time(filename):
+    tree = ET.parse(filename)
+    root = tree.getroot()
+    for source in root.iter("source"):
+        return float(source.attrib["time"])
+    

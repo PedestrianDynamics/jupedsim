@@ -10,7 +10,8 @@
 
   <!-- trajectories file and format -->
   <trajectories format="plain" fps="8" color_mode="group">
-            <file location="trajectories.xml" />
+    <file location="trajectories.xml" />
+    <optional_output  group="true"/>
   </trajectories>
 
   <!-- where to store the logs -->
