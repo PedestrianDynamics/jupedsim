@@ -219,7 +219,28 @@ def get_starting_position(group_id, filename):
         if source.attrib["group_id"] == str(group_id):
             return float(source.attrib["startX"]), float(source.attrib["startY"])
 
-    return list()
+    logging.error("could not get_staring_position for group id %d"%group_id)
+
+def get_N_create(group_id, filename):
+    tree = ET.parse(filename)
+    root = tree.getroot()
+    for source in root.iter("source"):
+        if source.attrib["group_id"] == str(group_id):
+            return int(source.attrib["N_create"])
+
+    logging.error("could not N_create for group id %d"%group_id)
+
+def get_bounding_box(group_id, filename):
+    tree = ET.parse(filename)
+    root = tree.getroot()
+    for source in root.iter("source"):
+        if source.attrib["group_id"] == str(group_id):
+            return float(source.attrib["x_min"]), \
+              float(source.attrib["x_max"]), \
+              float(source.attrib["y_min"]), \
+              float(source.attrib["y_max"])
+
+    logging.error("could not get_bounding_box for group id %d"%group_id)
 
 def get_starting_time(filename):
     tree = ET.parse(filename)
@@ -227,6 +248,8 @@ def get_starting_time(filename):
     for source in root.iter("source"):
         return float(source.attrib["time"])
 
+
+    
 def get_source_file(filename):
     tree = ET.parse(filename)
     root = tree.getroot()
