@@ -156,7 +156,9 @@ def test_source(d, s, time_err, pos_err):
         in_box_y = True
         on_time = True
         if not source_id in d.keys():
-            logging.error("source_id: %d is not in  data", source_id)
+            logging.error("source_id: %d is not in data", source_id)
+            msg = ("Data keys : "+", ".join(map(str, sorted(d.keys()))))
+            logging.error(msg)
             return False
 
         if s.time:
