@@ -242,6 +242,17 @@ def get_bounding_box(group_id, filename):
 
     logging.error("could not get_bounding_box for group id %d"%group_id)
 
+def get_time_limits(group_id, filename):
+    tree = ET.parse(filename)
+    root = tree.getroot()
+    for source in root.iter("source"):
+        if source.attrib["group_id"] == str(group_id):
+            return float(source.attrib["time_min"]), \
+              float(source.attrib["time_max"])
+
+    logging.error("could not time limits for group id %d"%group_id)
+
+
 def get_starting_time(filename):
     tree = ET.parse(filename)
     root = tree.getroot()
