@@ -4,12 +4,12 @@ keywords: simulation
 tags: [jpscore, getting_started]
 sidebar: jupedsim_sidebar
 permalink: jpscore_introduction.html
-summary: jpscore is the simulation module of JuPedSim. It's a command line tool to simulate the evacuate of pedestrians in continous space.
+summary: jpscore is the simulation module of JuPedSim. It's a command line tool to simulate the evacuate of pedestrians in continuous space.
 last_updated: 20, December 2019
 toc: false
 ---
 
-`jpscore` implements models on the operational as well as on the tactical level of pedestrian dyanmics.
+`jpscore` implements models on the operational as well as on the tactical level of pedestrian dynamics.
 
 ## Demo files
 

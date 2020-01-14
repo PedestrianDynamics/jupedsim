@@ -11,7 +11,7 @@ last_updated: Dec 31, 2019
 
 ## Definition
 
-In general a definition of a valide schedule is composed of two parts:
+In general a definition of a valid schedule is composed of two parts:
 
 - **groups**: collection of doors
 - and **times** of events that apply to the different groups.
