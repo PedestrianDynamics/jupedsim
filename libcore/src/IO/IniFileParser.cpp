@@ -95,14 +95,12 @@ void IniFileParser::Parse(const fs::path & iniFile)
     } //else header
 
 
-// read walkingspeed
-#ifdef JPSFIRE
+    // read walkingspeed
     std::shared_ptr<WalkingSpeed> W(new WalkingSpeed(iniFile.string()));
     _config->SetWalkingSpeed(W);
     // read  ToxicityAnalysis
     std::shared_ptr<ToxicityAnalysis> T(new ToxicityAnalysis(iniFile.string(), _config->GetFps()));
     _config->SetToxicityAnalysis(T);
-#endif
 
     //pick up which model to use
     //get the wanted ped model id
@@ -806,11 +804,6 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
         } else if(
             (strategy == "smoke") &&
             (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-#ifndef JPSFIRE
-            std::cerr << "\nCan not use smoke router without jpsfire. Rerun cmake with option  "
-                         "-DJPSFIRE=true and recompile.\n";
-            exit(EXIT_FAILURE);
-#endif
             Router * r = new SmokeRouter(id, ROUTING_SMOKE);
             _config->GetRoutingEngine()->AddRouter(r);
 

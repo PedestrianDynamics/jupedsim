@@ -49,9 +49,6 @@ Build `jpscore` with OpenMP support, generation will fail if OpenMP cannot be
 found.
 MSVC only support OpenMP 2.0 Standard and is therefor disabled on Windows.
 
-- JPSFIRE defaults to OFF
-Build `jpscore` with jpsfire features
-
 - BUILD_DOC defaults to OFF
 Build internal Doxygen based documentation
 
