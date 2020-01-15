@@ -9,4 +9,3 @@ foreach (file ${test_py_files})
             ${test}
             PROPERTIES LABELS "CI:FAST")
 endforeach ()
-
