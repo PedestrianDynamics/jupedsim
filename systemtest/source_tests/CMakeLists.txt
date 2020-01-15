@@ -6,7 +6,7 @@ foreach (file ${test_py_files})
         COMMAND ${PYTHON_EXECUTABLE} ${file}
         )
     set_tests_properties(
-        ${NAME}
+        ${test}
         PROPERTIES LABELS "CI:FAST")
 endforeach ()
 
