@@ -39,12 +39,9 @@ class JPSRunTestDriver(object):
         assert isinstance(argv0, str), "argument <argv0> is not string"
         assert path.exists(argv0), "%s is does not exist"%argv0
         self.testno = testnumber
-        self.logfile = "log_test_%d.txt" % self.testno
-        self.logfile = os.path.join(testdir, self.logfile)
 
         # touch file if not already there
-        open(self.logfile, 'a').close()
-        logging.basicConfig(filename=self.logfile, level=logging.DEBUG,
+        logging.basicConfig(stream=sys.stdout, level=logging.DEBUG,
                             format='%(asctime)s - %(levelname)s - %(message)s')
         self.HOME = path.expanduser("~")
         self.DIR = testdir
