@@ -7,6 +7,7 @@
   <!-- geometry file -->
   <geometry>../geometry.xml</geometry>
   <max_sim_time>90</max_sim_time>
+  <num_threads>1</num_threads>
 
   <!-- trajectories file and format -->
   <trajectories format="plain" fps="8" color_mode="group">

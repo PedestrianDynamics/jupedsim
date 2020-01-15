@@ -39,7 +39,6 @@ def runtest(inifile, trajfile):
         percent = get_percent(_id, source_file)
         rate = get_rate(_id, source_file)
         ids = range(IDS[_id][0], IDS[_id][1])
-        print(ids)
         source = Source(ids=ids,
                         frequency=frequency,
                         time_min=time_min,
