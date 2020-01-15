@@ -28,4 +28,5 @@ RUN cd /opt && CXX=/usr/bin/g++-8 CC=/usr/bin/gcc-8 ./setup-deps.sh
 RUN pip3 install numpy && \
     pip3 install matplotlib && \
     pip3 install pandas && \
+    pip3 install dataclasses && \
     pip install numpy

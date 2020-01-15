@@ -51,13 +51,11 @@ void AgentsSourcesManager::Run()
 {
     SetRunning(true);
     LOG_INFO("Starting agent manager thread");
-    std::cout << "\n Starting agent manager thread\n"
-              << ">> time: " << Pedestrian::GetGlobalTime() <<  "\n";
     //Generate all agents required for the complete simulation
     //It might be more efficient to generate at each frequency step
     //TODO  this loop is exactly GenerateAgents( --> REFACTOR)
     for(const auto & src : _sources) {
-        std::cout << "Generate src: " << src->GetId() << "\n";
+        LOG_INFO("Generate src: {}", src->GetId());
         src->GenerateAgentsAndAddToPool(src->GetMaxAgents(), _building);
     }
 
@@ -101,11 +99,16 @@ bool AgentsSourcesManager::ProcessAllSources() const
         // inTime is always true if src got some PlanTime (default values
         // if src has no PlanTime, then this is set to 0. In this case inTime
         // is important in the following condition
-        bool newCycle = std::fmod(current_time, src->GetFrequency()) == 0;
+        bool frequencyTime = std::fmod(current_time - srcLifeSpan[0], src->GetFrequency()) ==
+                             0; // time of creation wrt frequency
+        bool newCycle = almostEqual(current_time, srcLifeSpan[0], 0.01) || frequencyTime;
         bool subCycle;
-        subCycle = (current_time > src->GetFrequency()) ?
-                       std::fmod((current_time - src->GetFrequency()), src->GetRate()) == 0 :
-                       false;
+        int quotient      = (int) (current_time - srcLifeSpan[0]) / (int) src->GetFrequency();
+        int timeReference = src->GetFrequency() * quotient;
+        subCycle =
+            (current_time > srcLifeSpan[0]) ?
+                std::fmod(current_time - timeReference - srcLifeSpan[0], src->GetRate()) == 0 :
+                false;
 
         if(newCycle)
             src->ResetRemainingAgents();
@@ -119,7 +122,7 @@ bool AgentsSourcesManager::ProcessAllSources() const
             src->UpdateRemainingAgents(src->GetChunkAgents() * src->GetPercent());
             source_peds.reserve(source_peds.size() + peds.size());
             LOG_INFO(
-                "Source {:d} generating {:d}agents at {:3.3f}s, {:d} ({:d} remaining in pool)",
+                "Source {:d} generating {:d} agents at {:3.3f}s, {:d} ({:d} remaining in pool)",
                 src->GetId(),
                 peds.size(),
                 current_time,
