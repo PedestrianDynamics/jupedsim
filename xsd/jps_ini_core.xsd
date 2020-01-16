@@ -36,16 +36,6 @@
                   </xs:simpleContent>
                 </xs:complexType>
               </xs:element>
-              <xs:element name="socket" minOccurs="0" maxOccurs="1">
-                <xs:complexType>
-                  <xs:simpleContent>
-                    <xs:extension base="xs:string">
-                      <xs:attribute type="xs:string" name="hostname" use="required" />
-                      <xs:attribute type="xs:short" name="port" use="required" />
-                    </xs:extension>
-                  </xs:simpleContent>
-                </xs:complexType>
-              </xs:element>
             </xs:sequence>
             <xs:attribute name="format">
               <xs:simpleType>
@@ -69,16 +59,6 @@
               </xs:simpleType>
             </xs:attribute>
             <xs:attribute type="xs:float" name="fps" use="required" />
-          </xs:complexType>
-        </xs:element>
-        <xs:element name="hybrid_simulation" minOccurs="0" maxOccurs="1">
-          <xs:complexType>
-            <xs:simpleContent>
-              <xs:extension base="xs:string">
-                <xs:attribute type="xs:string" name="server" use="required" />
-                <xs:attribute type="xs:short" name="port" use="required" />
-              </xs:extension>
-            </xs:simpleContent>
           </xs:complexType>
         </xs:element>
         <xs:element type="xs:string" name="logfile" minOccurs="0" maxOccurs="1">
@@ -153,6 +133,59 @@
                             </xs:restriction>
                           </xs:simpleType>
                         </xs:attribute>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="waiting_area" maxOccurs="unbounded" minOccurs="0">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="polygon">
+                            <xs:complexType>
+                              <xs:choice maxOccurs="unbounded" minOccurs="1">
+                                <xs:element name="vertex">
+                                  <xs:complexType>
+                                    <xs:simpleContent>
+                                      <xs:extension base="xs:string">
+                                        <xs:attribute type="xs:float" name="px" use="required" />
+                                        <xs:attribute type="xs:float" name="py" use="required" />
+                                      </xs:extension>
+                                    </xs:simpleContent>
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:choice>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="next_wa">
+                            <xs:complexType>
+                              <xs:attribute type="xs:int" name="id" use="required" />
+                              <xs:attribute type="xs:float" name="p" use="required" />
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute type="xs:int" name="id" use="required" />
+                        <xs:attribute type="xs:string" name="caption"/>
+                        <xs:attribute type="xs:int" name="room_id"  use="required"/>
+                        <xs:attribute type="xs:int" name="subroom_id"  use="required"/>
+                        <xs:attribute type="xs:int" name="transition_id" />
+                        <xs:attribute type="xs:int" name="waiting_time" />
+                        <xs:attribute type="xs:int" name="min_peds" />
+                        <xs:attribute type="xs:int" name="max_peds" />
+                        <xs:attribute name="is_open">
+                          <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                              <xs:enumeration value="true" />
+                              <xs:enumeration value="false" />
+                            </xs:restriction>
+                          </xs:simpleType>
+                        </xs:attribute>
+                        <xs:attribute name="global_timer">
+                          <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                              <xs:enumeration value="true" />
+                              <xs:enumeration value="false" />
+                            </xs:restriction>
+                          </xs:simpleType>
+                        </xs:attribute>
+
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
@@ -375,7 +408,6 @@
                   <xs:attribute name="description" use="required">
                     <xs:simpleType>
                       <xs:restriction base="xs:string">
-                        <xs:enumeration value="gompertz" />
                         <xs:enumeration value="gcfm" />
                       </xs:restriction>
                     </xs:simpleType>
@@ -468,4 +500,3 @@
     </xs:complexType>
   </xs:element>
 </xs:schema>
-

@@ -1,0 +1,311 @@
+% **************************************************
+% % Clean Thesis
+% % -- A LaTeX Style for Thesis Documents --
+% %
+% % Copyright (C) 2011-2013 Ricardo Langner
+% % **************************************************
+% %
+% % Readme:
+% % ----------------------------------------
+% % *** Clean, Simple, Elegant ***
+% % "Clean Thesis" is a LaTeX style for thesis documents, developed
+% % for my diplom thesis (Diplomarbeit). The style can be understood
+% % as my personal compromise - a typical clean looking scientific
+% % document combined and polished with minor beautifications.
+% %
+% % The design of this "Clean Thesis" style is inspired
+% % by user guide documents from Apple Inc.
+% %
+% % Note: If you are looking for an exact and correct style regarding
+% % typographic rules, please have a look at the "Classic Thesis Style"
+% % (see http://www.miede.de/index.php?page=classicthesis).
+% %
+% % *** Donation = Postcard ***
+% % Based on the idea of Andr\'e Miede: If you like the "Clean Thesis"
+% % style I would be very pleased about a donation in the form of a
+% % POSTCARD. You can find my address in the file Clean-Thesis.pdf.
+% % I am going to collect all postcards and exhibit them at the website
+% % I mentioned.
+% %
+% % *** Idea and Inspiration ***
+% % The idea of providing my customized style for thesis documents
+% % passed through my mind while writing my own thesis. Motivated and
+% % inspired by the superb "Classic Thesis Style"
+% % (see http://www.miede.de/index.php?page=classicthesis) by Andr\'e Miede
+% % (thanks to Andr\'e for doing a great job) I decided to collect all
+% % design and style related functionality in a separate LaTeX style and
+% % provide this style to other thesis writers.
+% %
+% %
+% % License Information:
+% % ----------------------------------------
+% % "Clean Thesis" is free software: you can redistribute it and/or modify
+% % it under the terms of the GNU General Public License as published by
+% % the Free Software Foundation, either version 3 of the License, or
+% % (at your option) any later version.
+% %
+% % "Clean Thesis" is distributed in the hope that it will be useful,
+% % but WITHOUT ANY WARRANTY; without even the implied warranty of
+% % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% % GNU General Public License for more details.
+% %
+% % You should have received a copy of the GNU General Public License
+% % along with this program.  If not, see <http://www.gnu.org/licenses/>.
+% % **************************************************
+
+
+% % **************************************************
+% % Document Class Definition
+% % **************************************************
+\documentclass[%
+paper=A4,					% paper size --> A4 is default in Germany
+twoside=true,				% onesite or twoside printing
+openright,					% doublepage cleaning ends up right side
+parskip=full,				% spacing value / method for paragraphs
+chapterprefix=true,			% prefix for chapter marks
+11pt,						% font size
+headings=normal,			% size of headings
+bibliography=totoc,			% include bib in toc
+listof=totoc,				% include listof entries in toc
+titlepage=on,				% own page for each title page
+captions=tableabove,		% display table captions above the float env
+draft=false,				% value for draft version
+]{scrreprt}%
+
+
+% **************************************************
+% Debug LaTeX Information
+% **************************************************
+%\listfiles
+% \usepackage{etoc}
+% \etocsetlevel{authors}{1}
+% \etocsetlevel{section}{2}
+% \etocsetlevel{subsection}{3}
+% \etocsettocdepth{subsection}
+% **************************************************
+% Information and Commands for Reuse
+% **************************************************
+\newcommand{\thesisTitle}{JuPedSim User Guide}
+\newcommand{\thesisSubject}{Documentation}
+\newcommand{\thesisDate}{May 29, 2018}
+\newcommand{\Version}{0.8.4}
+
+
+\newcommand{\thesisUniversity}{\protect{Clean Thesis Style University}}
+\newcommand{\thesisUniversityDepartment}{Department of Clean Thesis Style}
+\newcommand{\thesisUniversityInstitute}{Institut for Clean Thesis Dev}
+\newcommand{\thesisUniversityGroup}{Clean Thesis Group (CTG)}
+\newcommand{\thesisUniversityCity}{City}
+\newcommand{\thesisUniversityStreetAddress}{Street address}
+\newcommand{\thesisUniversityPostalCode}{Postal Code}
+\newcommand{\thesisName}{JuPedSim}
+% **************************************************
+% Load and Configure Packages
+% **************************************************
+\usepackage[utf8]{inputenc}		% defines file's character encoding
+\usepackage[english]{babel} % babel system, adjust the language of the content
+\usepackage{listings}             % Include the listings-package
+\usepackage{color}
+\usepackage{array, longtable}
+\usepackage{float}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{fancyhdr}
+\usepackage{emptypage} % avoid displaying of numeration on empty pages
+\usepackage{dirtree}
+% The following is a dummy icon command
+\newcommand\myicon[1]{{\color{#1}\rule{2ex}{2ex}}}
+\newcommand{\myfolder}[2]{\myicon{#1}\ {#2}}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}; should come as last argument
+  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  language=xml,                 % the language of the code
+  morekeywords={*,...},           % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,                       % sets default tabsize to 2 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+\usepackage[					% clean thesis style
+figuresep=colon,%
+sansserif=false,%
+hangfigurecaption=false,%
+hangsection=true,%
+hangsubsection=true,%
+colorize=full,%
+colortheme=bluemagenta,%
+]{cleanthesis}
+
+\hypersetup{					% setup the hyperref-package options
+  pdftitle={\thesisTitle},	%       - title (PDF meta)
+  pdfsubject={\thesisSubject},%         - subject (PDF meta)
+  pdfauthor={\thesisName},	%       - author (PDF meta)
+  plainpages=false,			%       -
+  colorlinks=true,			%       - colorize links?
+  pdfborder={0 0 0},			%       -
+  breaklinks=true,			%       - allow line break inside links
+  bookmarksnumbered=true,		%
+  bookmarksopen=true			%
+}
+
+% % **************************************************
+% % Document CONTENT
+% % **************************************************
+\begin{document}
+% --------------------------
+% rename document parts
+% --------------------------
+% \renewcaptionname{ngerman}{\figurename}{Abb.}
+% \renewcaptionname{ngerman}{\tablename}{Tab.}
+\renewcaptionname{english}{\figurename}{Fig.}
+\renewcaptionname{english}{\tablename}{Tab.}
+
+% --------------------------
+% Front matter
+% --------------------------
+\pagenumbering{arabic}			% roman page numbing (invisible for empty page style)
+\pagestyle{plain}
+% \pagestyle{fancy}
+% \fancyhf{}
+% \fancyhead[LE,RO]{JuPedSim}
+% \fancyhead[RE,LO]{User's Guide \Version}
+% \fancyfoot[CE,CO]{\leftmark}
+% \fancyfoot[LE,RO]{\thepage}
+\input{titlepage}		% INCLUDE: all titlepages
+\pdfbookmark[1]{Disclaimer}{sec:disclaimer}  % Bookmark im pdf file
+\let\cleardoublepage\clearpage
+{\hypersetup{linkbordercolor=black}
+\tableofcontents
+}
+\chapter{DISCLAIMER}
+In no event shall JuPedSim be liable to any party for direct, indirect, special, incidental, or consequential damages, including lost profits, arising out of the use of this software and its documentation, even if JuPedSim has been advised of the possibility of such damage.
+
+JuPedSim specifically disclaims any warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose. The software and accompanying documentation, if any, provided hereunder is provided ``as is''. JuPedSim has no obligation to provide maintenance, support, updates, enhancements, or modifications.
+
+
+% Forschungszentrum J\"ulich GmbH makes no warranty, expressed or implied,
+% to users of JuPedSim, and accepts no responsibility for its use. Users
+% of JuPedSim assume sole responsibility for determining the
+% appropriateness of its use; and for any actions taken or not taken as a
+% result of analyses performed using this tool.
+
+% Users are warned that JuPedSim is intended for \textbf{academic} use only. This
+% tool is an implementation of  several computer models that may or may
+% not have predictive capability when applied to a specific set of factual
+% circumstances. Lack of accurate predictions by the models could lead to erroneous
+% conclusions with regard of life safety.
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Introduction}
+\input{_tex/jupedsim/jupedsim_introduction.tex}
+ \newpage
+\section{Suport}
+\input{_tex/jupedsim/jupedsim_support.tex}
+\newpage
+\chapter{Installation}
+\section{Requirements}
+\input{_tex/jupedsim/jupedsim_requirements.tex}
+\newpage
+\section{Install JuPedSim on Mac}
+\input{_tex/jupedsim/jupedsim_install_on_mac.tex}
+\newpage
+\section{Install JuPedSim on Linux}
+\input{_tex/jupedsim/jupedsim_install_on_linux.tex}
+\newpage
+\section{Install JuPedSim on Windows}
+\input{_tex/jupedsim/jupedsim_install_on_windows.tex}
+\newpage
+
+%=============================================================
+ \chapter{JPScore}
+\section{File formats}
+\texttt{jpscore} needs as input an ``inifile'' and a geometry file. A successful simulation produces a trajectory file.
+
+\subsection{Inifile}
+\input{_tex/jpscore/jpscore_inifile.tex}
+\newpage
+\subsection{Geometry file}
+\label{sec:geo}
+\input{_tex/jpscore/jpscore_geometry.tex}
+\newpage
+\subsection{Trajectory file}
+\label{sec:traj}
+\input{_tex/jpscore/jpscore_trajectory.tex}
+
+\section{Models}
+\input{_tex/jpscore/jpscore_operativ.tex}
+\newpage
+\section{Direction strategies}
+\input{_tex/jpscore/jpscore_direction.tex}
+\newpage
+\section{Route finding}
+\input{_tex/jpscore/jpscore_routing.tex}
+%=============================================================
+\chapter{JPSreport}
+\section{File formats}
+\texttt{jpsreport} needs as input an ``inifile'', a geometry file and a trajectory file.
+Geometry and trajectory files are specified in the subsections~\ref{sec:geo} and \ref{sec:traj}. 
+\subsection{Inifile}
+\input{_tex/jpsreport/jpsreport_inifile.tex}
+\newpage
+\section{Measurement methods}
+\subsection{Method A}
+\input{_tex/jpsreport/jpsreport_method_A.tex}
+\newpage
+\subsection{Method B}
+\input{_tex/jpsreport/jpsreport_method_B.tex}
+\newpage
+\subsection{Method C}
+\input{_tex/jpsreport/jpsreport_method_C.tex}
+\newpage
+\subsection{Method D}
+\input{_tex/jpsreport/jpsreport_method_D.tex}
+\newpage
+\subsection{Method J}
+\input{_tex/jpsreport/jpsreport_method_J.tex}
+
+% =============================================================
+\newpage
+\section{Validation and Verification}
+\subsection{RiMEA tests}
+\input{_tex/jpscore/jpscore_tests_rimea.tex}
+\newpage
+\subsection{J\"ulich tests}
+\input{_tex/jpscore/jpscore_tests_juelich.tex}
+
+
+% \chapter{Publications}
+% \section{Publications}
+% \label{sec:label}
+% \input{_tex/jupedsim/jupedsim_publications.tex}
+% \input{_tex/smoke_sensor.tex}
+
+% \begin{appendix}
+%  % \listoffigures
+%  \tableofcontents
+% \end{appendix}
+\end{document}

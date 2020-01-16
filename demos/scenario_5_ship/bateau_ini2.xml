@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.6" 
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<JuPedSim project="JPS-Project" version="0.6"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
 
   <!-- seed used for initialising random generator -->
@@ -12,8 +12,7 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
   <geometry>bateau_geo.xml</geometry>
   <!-- trajectories file and format -->
   <trajectories format="xml-plain" fps="8">
-    <!-- <file location="bateau_traj2.xml" /> -->
-    <socket hostname="127.0.0.1" port="8989" />
+    <file location="bateau_traj2.xml" />
   </trajectories>
   <!-- where to store the logs -->
   <logfile>log.txt</logfile>
@@ -49,7 +48,7 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.01</stepsize>
-        <exit_crossing_strategy>4</exit_crossing_strategy>
+        <exit_crossing_strategy>2</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
         <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
@@ -63,24 +62,7 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
         <atau mu="0.5" sigma="0.001" />
       </agent_parameters>
     </model>
-    <model operational_model_id="2" description="gompertz">
-      <model_parameters>
-        <solver>euler</solver>
-        <stepsize>0.01</stepsize>
-        <exit_crossing_strategy>4</exit_crossing_strategy>
-        <linkedcells enabled="true" cell_size="2.2" />
-        <force_ped nu="0.3" />
-        <force_wall nu="0.2" />
-      </model_parameters>
-      <agent_parameters agent_parameter_id="1">
-        <v0 mu="0.5" sigma="0.0" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.5" sigma="0.001" />
-      </agent_parameters>
-    </model>
+
   </operational_models>
 
   <route_choice_models>
