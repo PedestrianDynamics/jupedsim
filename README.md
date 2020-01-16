@@ -1,9 +1,13 @@
-# JPScore
-
 [![GitHub license](https://img.shields.io/badge/license-LGPL-blue.svg)](https://raw.githubusercontent.com/JuPedSim/jpscore/master/LICENSE)
 
-The core module for performing simulations. See the [online documentation](http://jupedsim.org)
+[**documentation**](http://www.jupedsim.org) | [**jpscore**](http://www.jupedsim.org/jpscore_introduction.html) | [**jpsreport**](http://www.jupedsim.org/jpsreport_introduction.html)
 
+## Introduction
+
+This repository consists of two modules for simulating and anlyzing pedestrian dynamics. These are:
+
+1. `jpscore`: the core module computing the trajectories.
+2. `jpsreport`: a tool for analyzing the trajectories and measuring the density, flow and velocity.
 
 ## Building from source
 
@@ -72,7 +76,7 @@ sanitizer enabled. Note there is an approx. 2x slowdown when using
 
 ## Quick start
 
-See [Getting started with jupedsim](http://www.jupedsim.org/jpscore_introduction.html)
+See [Getting started with jupedsim](http://www.jupedsim.org/jpscore_introduction.html).
 
 ## Showcase and tutorials
 
