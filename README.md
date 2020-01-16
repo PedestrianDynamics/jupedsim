@@ -1,11 +1,13 @@
-# JPScore
-
-[![Build Status](https://travis-ci.org/JuPedSim/jpscore.svg?branch=develop)](https://travis-ci.org/JuPedSim/jpscore)
 [![GitHub license](https://img.shields.io/badge/license-LGPL-blue.svg)](https://raw.githubusercontent.com/JuPedSim/jpscore/master/LICENSE)
-[![DOI](https://zenodo.org/badge/36440436.svg)](https://zenodo.org/badge/latestdoi/36440436)
 
-The core module for performing simulations. See the [online documentation](http://jupedsim.org/jpscore/)
+[**documentation**](http://www.jupedsim.org) | [**jpscore**](http://www.jupedsim.org/jpscore_introduction.html) | [**jpsreport**](http://www.jupedsim.org/jpsreport_introduction.html)
 
+## Introduction
+
+This repository consists of two modules for simulating and anlyzing pedestrian dynamics. These are:
+
+1. `jpscore`: the core module computing the trajectories.
+2. `jpsreport`: a tool for analyzing the trajectories and measuring the density, flow and velocity.
 
 ## Building from source
 
@@ -74,7 +76,7 @@ sanitizer enabled. Note there is an approx. 2x slowdown when using
 
 ## Quick start
 
-See [installation and configuration](http://jupedsim.org/jpscore/2016-11-02-quickstart.html)
+See [Getting started with jupedsim](http://www.jupedsim.org/jpscore_introduction.html).
 
 ## Showcase and tutorials
 
@@ -85,7 +87,7 @@ To highlight some features of JuPedSim we have uploaded some videos on our [YouT
 
 We are heavily working on this project which means that:
 
-- It’s not done. We will be releasing new enhancements, bug fixes etc.
+- It's not done. We will be releasing new enhancements, bug fixes etc.
 - We love your support. If you find any errors or have suggestions, please write an issue in our [issue-tracker](https://github.com/JuPedSim/jpscore/issues). We will try hard to fix it.
 - Be patient. We are scientists and PhD/master students. Therefore, we primarily care about our research and theses.
 
