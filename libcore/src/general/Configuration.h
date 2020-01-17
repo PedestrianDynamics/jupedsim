@@ -286,6 +286,26 @@ public:
         _trajectoriesFile = trajectoriesFile;
     };
 
+    const fs::path & GetOutputPath() const { return _outputPath; };
+
+    void SetOutputPath(const fs::path & outputDir) { _outputPath = outputDir; };
+
+    void ConfigureOutputPath()
+    {
+        // Set default name if none was set
+        if(_outputPath.empty()) {
+            _outputPath = "results";
+        }
+
+        // make absolute path
+        if(_outputPath.is_relative()) {
+            _outputPath = fs::absolute(_outputPath);
+        }
+
+        // checks if directory exists, otherwise creates it.
+        fs::create_directories(_outputPath);
+    }
+
     const fs::path & GetOriginalTrajectoriesFile() const { return _originalTrajectoriesFile; };
 
     void SetOriginalTrajectoriesFile(const fs::path & trajectoriesFile)
@@ -387,6 +407,7 @@ private:
     fs::path _projectFile;
     fs::path _geometryFile;
     fs::path _projectRootDir;
+    fs::path _outputPath;
     bool _showStatistics;
 
     mutable RandomNumberGenerator _rdGenerator;

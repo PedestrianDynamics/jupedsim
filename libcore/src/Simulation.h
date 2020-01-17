@@ -133,6 +133,13 @@ public:
     void RunFooter();
 
     /**
+     * Copy all Input Files used to the output path.
+     *
+     * This backs up the input files and makes reproducible results possible.
+     */
+    void CopyInputFilesToOutPath();
+
+    /**
      * Run a standard simulation
      * @return the total simulated/evacuation time
      */

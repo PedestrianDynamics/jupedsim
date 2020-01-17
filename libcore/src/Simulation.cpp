@@ -362,6 +362,9 @@ void Simulation::PrintStatistics(double simTime)
                 statsfile += '_';
             }
             statsfile += _config->GetOriginalTrajectoriesFile().filename().replace_extension("txt");
+
+            statsfile = _config->GetOutputPath() / statsfile;
+
             LOG_INFO("More Information in the file: {}", statsfile.string());
             {
                 FileHandler statOutput(statsfile);
@@ -842,7 +845,20 @@ bool Simulation::correctGeometry(
 
 void Simulation::RunFooter()
 {
+    // Copy input files used for simulation to output folder for reproducibility
+    CopyInputFilesToOutPath();
+
     _iod->WriteFooter();
+}
+
+void Simulation::CopyInputFilesToOutPath()
+{
+    fs::copy(
+        _config->GetProjectRootDir() / _config->GetGeometryFile(),
+        _config->GetOutputPath(),
+        fs::copy_options::overwrite_existing);
+    fs::copy(
+        _config->GetProjectFile(), _config->GetOutputPath(), fs::copy_options::overwrite_existing);
 }
 
 void Simulation::ProcessAgentsQueue()
