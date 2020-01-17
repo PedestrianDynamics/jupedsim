@@ -146,54 +146,22 @@ bool ComputeBestPositionVoronoiBoost(
             } else {
                 ped->SetPos(center_pos, true);
             }
-
-            Point v;
-            if(ped->GetExitLine()) {
-                v = (ped->GetExitLine()->ShortestPoint(ped->GetPos()) - ped->GetPos()).Normalized();
-            } else {
-                v = Point(0., 0.);
-            }
-            double speed =
-                ped->GetEllipse()
-                    .GetV0(); //@todo: some peds do not have a navline. This should not be accepted.
-            v = v * speed;
-            ped->SetV(v);
-
             existing_peds.push_back(ped);
-
         }    //0
         else //more than one pedestrian
         {
-            //it would be better to maybe have a mapping between discrete_positions and pointers to the pedestrians
-            //then there would be no need to remember the velocities_vector and goal_vector
             std::vector<Point> discrete_positions;
-            std::vector<Point> velocities_vector;
-            std::vector<int> goal_vector;
             Point tmp(0, 0);
-            Point v(0, 0);
-            double no = 0;
-
             //points from double to integer
             for(const auto & eped : existing_peds) {
                 const Point & pos = eped->GetPos();
                 tmp._x            = (int) (pos._x * factor);
                 tmp._y            = (int) (pos._y * factor);
                 discrete_positions.push_back(tmp);
-                velocities_vector.push_back(eped->GetV());
-                goal_vector.push_back(eped->GetFinalDestination());
-
-                //calculating the mean, using it for the fake pedestrians
-                v += eped->GetV();
-                no++;
             }
-            // sum up the weighted velocity in the loop
-            v = v / no; //this is the mean of all velocities
-
             //adding fake people to the vector for constructing voronoi diagram
             for(auto fake_ped : fake_peds) {
                 discrete_positions.push_back(fake_ped);
-                velocities_vector.push_back(v);
-                goal_vector.push_back(-10);
             }
 
             //constructing the diagram
@@ -215,7 +183,6 @@ bool ComputeBestPositionVoronoiBoost(
                 Point pos(chosen_it->x() / factor, chosen_it->y() / factor); //check!
 
                 ped->SetPos(pos, true);
-                VoronoiAdjustVelocityNeighbour(chosen_it, ped, velocities_vector, goal_vector);
                 // proceed to the next pedestrian
                 existing_peds.push_back(ped);
                 ++iter_ped;
@@ -238,49 +205,6 @@ bool ComputeBestPositionVoronoiBoost(
 
 
     return return_value;
-}
-
-//gives an agent the mean velocity of his voronoi-neighbors
-void VoronoiAdjustVelocityNeighbour(
-    voronoi_diagram<double>::const_vertex_iterator & chosen_it,
-    Pedestrian * ped,
-    const std::vector<Point> & velocities_vector,
-    const std::vector<int> & goal_vector)
-{
-    //finding the neighbors (nearest pedestrians) of the chosen vertex
-    const voronoi_diagram<double>::vertex_type & vertex = *chosen_it;
-    const voronoi_diagram<double>::edge_type * edge     = vertex.incident_edge();
-    double no1 = 0, no2 = 0;
-    double backup_speed = 0;
-    Point v(0, 0);
-    if(ped->GetExitLine() != nullptr)
-        v = (ped->GetExitLine()->ShortestPoint(ped->GetPos()) - ped->GetPos())
-                .Normalized(); //the direction
-    else {
-        int gotRoute = ped->FindRoute();
-        if(gotRoute < 0)
-            printf("\nWARNING: source agent %d can not get exit\n", ped->GetID());
-    }
-    double speed = 0;
-    do {
-        std::size_t index = (edge->cell())->source_index();
-        if(ped->GetFinalDestination() == goal_vector[index]) {
-            no1++;
-            speed += velocities_vector[index].Norm();
-        } else {
-            no2++;
-            backup_speed += velocities_vector[index].Norm();
-        }
-        edge = edge->rot_next();
-    } while(edge != vertex.incident_edge());
-
-    if(no1)
-        speed = speed / no1;
-    else
-        speed = backup_speed / (no2 * 3.0); //just some small speed
-
-    v = v * speed;
-    ped->SetV(v);
 }
 
 /**
