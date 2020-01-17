@@ -12,7 +12,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
     <geometry>corner_geo.xml</geometry>
     <!-- traectories file and format -->
     <trajectories format="xml-plain" fps="8">
-      <file location="corner_trajectories.xml" />
+      <file location="corner_traj.xml" />
     </trajectories>
     <!-- where to store the logs  -->
     <logfile>log</logfile>
