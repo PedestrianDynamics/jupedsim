@@ -73,7 +73,7 @@ AgentsSource::~AgentsSource() {}
 void AgentsSource::GenerateAgentsAndAddToPool(int count, Building * building)
 {
     std::vector<Pedestrian *> peds;
-    GenerateAgents(peds, count, building); // positions are not set yet!
+    GenerateAgents(peds, count, building);
     _agents.insert(_agents.begin(), peds.begin(), peds.end());
     _agentsGenerated += count;
 }

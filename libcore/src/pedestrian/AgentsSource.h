@@ -80,17 +80,21 @@ public:
     void GenerateAgentsAndAddToPool(int count, Building * building);
 
     /**
-      * Generate agents, but do not add them to the pool
-      * @param ped, the container for the agents
-      * @param count, the number of agents to generate
-      * @param building, a pointer to the building object
+      * Generate agents, but do not add them to the pool.
+      *
+      * @attention Positions and velocities of pedestrians are not set within this function.
+      *
+      * @see AgentsSourcesManager::ProcessAllSources()
+      * @param ped: the container for the agents
+      * @param count: the number of agents to generate
+      * @param building: a pointer to the building object
       */
     void GenerateAgents(std::vector<Pedestrian *> & peds, int count, Building * building);
 
     /**
       * Generate count agents and save them in the vector
-      * @param ped, the container for the agents
-      * @param count, the number of agents to generate
+      * @param ped: the container for the agents
+      * @param count: the number of agents to generate
       */
     void RemoveAgentsFromPool(std::vector<Pedestrian *> & peds, int count);
 

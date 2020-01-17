@@ -134,9 +134,9 @@ bool AgentsSourcesManager::ProcessAllSources() const
                 LOG_WARNING("There was no place for some pedestrians");
 
             // Having set the positions, now we can set the velocity
-            for(auto ped : peds)
+            for(auto ped : peds) {
                 AdjustVelocityUsingWeidmann(ped);
-
+            }
             source_peds.insert(source_peds.end(), peds.begin(), peds.end());
             AgentsQueueIn::Add(peds);
             empty = false;
