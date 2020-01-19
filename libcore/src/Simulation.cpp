@@ -469,13 +469,18 @@ double Simulation::RunBody(double maxSimTime)
             //update quickestRouter
             if(geometryChanged) {
                 // debug
-                const std::string prefix = "tmp_" + std::to_string(t) + "_";
-                auto changedGeometryFile =
-                    add_prefix_to_filename(prefix, _config->GetGeometryFile());
-                std::cout << "\nUpdate geometry. New  geometry --> " << changedGeometryFile << "\n";
+                fs::path new_filename("tmp_" + std::to_string(t) + "_");
+                new_filename += _config->GetGeometryFile().filename();
+                fs::path changedGeometryFile = _config->GetGeometryFile();
 
-                std::cout << "Enter correctGeometry: Building Has "
-                          << _building->GetAllTransitions().size() << " Transitions\n";
+                changedGeometryFile.replace_filename(new_filename);
+
+                LOG_INFO("Update geometry. New  geometry --> {}", changedGeometryFile.string());
+
+                LOG_INFO(
+                    "Enter correctGeometry: Building Has {} Transitions.",
+                    _building->GetAllTransitions().size());
+
                 _building->SaveGeometry(changedGeometryFile);
                 _building->GetConfig()->GetDirectionManager()->GetDirectionStrategy()->Init(
                     _building.get());

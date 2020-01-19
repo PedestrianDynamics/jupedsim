@@ -723,10 +723,13 @@ bool Building::correct() const
     }         //r
 
     if(removed) {
-        auto geometryFile = add_prefix_to_filename("correct_", GetGeometryFilename());
+        fs::path newGeometryFile = GetGeometryFilename();
+        fs::path newFilename("correct_");
+        newFilename += newGeometryFile.filename();
+        newGeometryFile.replace_filename(newFilename);
 
-        if(SaveGeometry(geometryFile)) {
-            GetConfig()->SetGeometryFile(geometryFile);
+        if(SaveGeometry(newGeometryFile)) {
+            GetConfig()->SetGeometryFile(newGeometryFile);
         }
     }
 
