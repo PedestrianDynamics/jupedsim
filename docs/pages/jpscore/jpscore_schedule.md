@@ -24,10 +24,10 @@ In detail the following attributes are defined:
    - `max_agents`: sets the maximum number of agents which can pass a transition until it is closed.
 
 -  `times`: schedule times for every group.
-   - `reset` (default "false"): Instead of opening the transition, the counter of passed pedestrians is reset to 0 and the door opens again. The closing time is not needed in this case.
+   - `reset` (default "false"): Instead of opening the transition, the counter of passed pedestrians is reset to 0 and the door opens again at time `t`. 
    -  `group_id`: unique id of the specific group of doors as defined above in `groups`.
    -  `closing_time`: time after which the doors of the group will be closed after the doors were opened.
-   -  `t`: time when the doors of the group will be open again. The door will be closed again at `t + closing_time`.
+   -  `t`: time when the doors of the group will be open again. The door will be closed again at `t + closing_time` or when max_agents is reached.
 
 ## Sample
 
