@@ -1,7 +1,7 @@
 ## Description
-This demo shows 7 agents moving from one room to another lower room through stairs.
+This demo shows 7 agents moving from one room to another higher room through stairs.
 
-The height difference between the two rooms is six meters.
+The height difference between the two rooms is 6 meters.
 
 The width of the stairs is 1 meter.
 
