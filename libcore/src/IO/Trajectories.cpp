@@ -7,55 +7,6 @@
 
 #include <tinyxml.h>
 
-static fs::path getSourceFileName(const fs::path & projectFile)
-{
-    fs::path ret{};
-
-    TiXmlDocument doc(projectFile.string());
-    if(!doc.LoadFile()) {
-        LOG_ERROR("{}", doc.ErrorDesc());
-        LOG_ERROR("GetSourceFileName could not parse the project file");
-        return ret;
-    }
-    TiXmlNode * xRootNode = doc.RootElement()->FirstChild("agents");
-    if(!xRootNode) {
-        LOG_ERROR("GetSourceFileName could not load persons attributes");
-        return ret;
-    }
-
-    TiXmlNode * xSources = xRootNode->FirstChild("agents_sources");
-    if(xSources) {
-        TiXmlNode * xFileNode = xSources->FirstChild("file");
-        //------- parse sources from external file
-        if(xFileNode) {
-            ret = xFileNode->FirstChild()->ValueStr();
-        }
-        return ret;
-    }
-    return ret;
-}
-
-static fs::path getEventFileName(const fs::path & projectFile)
-{
-    fs::path ret{};
-
-    TiXmlDocument doc(projectFile.string());
-    if(!doc.LoadFile()) {
-        LOG_ERROR("{}", doc.ErrorDesc());
-        LOG_ERROR("GetEventFileName could not parse the project file");
-        return ret;
-    }
-    TiXmlNode * xMainNode = doc.RootElement();
-    if(xMainNode->FirstChild("events_file")) {
-        ret = xMainNode->FirstChild("events_file")->FirstChild()->ValueStr();
-        LOG_INFO("events <{}>", ret.string());
-    } else {
-        LOG_INFO("No events found");
-        return ret;
-    }
-    return ret;
-}
-
 static fs::path getTrainTimeTableFileName(const fs::path & projectFile)
 {
     fs::path ret{};
@@ -101,28 +52,6 @@ static fs::path getTrainTypeFileName(const fs::path & projectFile)
     } else {
         LOG_INFO("No train types file found");
         return ret;
-    }
-    return ret;
-}
-
-static fs::path getGoalFileName(const fs::path & projectFile)
-{
-    fs::path ret{};
-
-    TiXmlDocument doc(projectFile.string());
-    if(!doc.LoadFile()) {
-        LOG_ERROR("{}", doc.ErrorDesc());
-        LOG_ERROR("GetGoalFileName could not parse the project file");
-        return ret;
-    }
-    TiXmlNode * xRootNode = doc.RootElement();
-    if(auto routingNode = xRootNode->FirstChild("routing")) {
-        if(auto goalsNode = routingNode->FirstChild("goals")) {
-            if(auto fileNode = goalsNode->FirstChild("file")) {
-                ret = fileNode->FirstChild()->ValueStr();
-                LOG_INFO("goal file <{}>", ret.string());
-            }
-        }
     }
     return ret;
 }
@@ -203,27 +132,25 @@ void TrajectoriesTXT::WriteHeader(long, double fps, Building * building, int, in
     std::string header = fmt::format("#description: jpscore ({:s})\n", JPSCORE_VERSION);
     header.append(fmt::format("#count: {:d}\n", count));
     header.append(fmt::format("#framerate: {:0.2f}\n", fps));
-    header.append(fmt::format("#geometry: {:s}\n", tmpGeo.string()));
+    header.append(fmt::format(
+        "#geometry: {:s}\n", building->GetConfig()->GetGeometryFile().filename().string()));
 
     // if used: add source file name
-    if(const fs::path sourceFileName = getSourceFileName(building->GetProjectFilename());
-       !sourceFileName.empty()) {
-        const fs::path tmpSource = projRoot / sourceFileName;
-        header.append(fmt::format("#sources: {:s}\n", tmpSource.string()));
+    if(!building->GetConfig()->GetSourceFile().empty()) {
+        header.append(fmt::format(
+            "#sources: {:s}\n", building->GetConfig()->GetSourceFile().filename().string()));
     }
 
     // if used: add goal file name
-    if(const fs::path goalFileName = getGoalFileName(building->GetProjectFilename());
-       !goalFileName.empty()) {
-        const fs::path tmpGoal = projRoot / goalFileName;
-        header.append(fmt::format("#goals: {:s}\n", tmpGoal.string()));
+    if(!building->GetConfig()->GetGoalFile().empty()) {
+        header.append(fmt::format(
+            "#goals: {:s}\n", building->GetConfig()->GetGoalFile().filename().string()));
     }
 
     // if used: add event file name
-    if(const fs::path eventFileName = getEventFileName(building->GetProjectFilename());
-       !eventFileName.empty()) {
-        const fs::path tmpEvent = projRoot / eventFileName;
-        header.append(fmt::format("#events: {:s}\n", tmpEvent.string()));
+    if(!building->GetConfig()->GetEventFile().empty()) {
+        header.append(fmt::format(
+            "#events: {:s}\n", building->GetConfig()->GetEventFile().filename().string()));
     }
 
     // if used: add trainTimeTable file name
@@ -343,7 +270,7 @@ void TrajectoriesXML::WriteGeometry(Building * building)
     sprintf(
         file_location,
         "\t<file location= \"%s\"/>\n",
-        building->GetGeometryFilename().string().c_str());
+        building->GetGeometryFilename().filename().string().c_str());
     embed_geometry.append(file_location);
 
     for(auto hline : building->GetAllHlines()) {
@@ -372,7 +299,7 @@ void TrajectoriesXML::WriteFrame(int frameNr, Building * building)
 {
     std::string data;
     char tmp[1024] = "";
-    double RAD2DEG    = 180.0 / M_PI;
+    double RAD2DEG = 180.0 / M_PI;
 
     sprintf(tmp, "<frame ID=\"%d\">\n", frameNr);
     data.append(tmp);
@@ -382,7 +309,7 @@ void TrajectoriesXML::WriteFrame(int frameNr, Building * building)
         Pedestrian * ped    = allPeds[p];
         Room * r            = building->GetRoom(ped->GetRoomID());
         std::string caption = r->GetCaption();
-        char s[1024]     = "";
+        char s[1024]        = "";
         int color           = ped->GetColor();
         double a            = ped->GetLargerAxis();
         double b            = ped->GetSmallerAxis();
