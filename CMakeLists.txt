@@ -95,19 +95,12 @@ find_package(spdlog 1.3 REQUIRED CONFIG)
 # CLI11
 find_package(CLI11 1.8 REQUIRED CONFIG)
 
-# CMakes find_pacakge has no support for generator expressions hence we have to
-# do this the hard way
-if(${CMAKE_SYSTEM} MATCHES "Darwin")
-    list(APPEND BOOST_COMPONENTS
-        filesystem
-    )
-endif()
+# Boost
 find_package(Boost 1.65 REQUIRED ${BOOST_COMPONENTS})
 
-# boost filesystem / std::filesystem
+# std::filesystem needs to be linked on gcc < 9
 add_library(fs INTERFACE)
 target_link_libraries(fs INTERFACE
-    $<$<PLATFORM_ID:Darwin>:Boost::filesystem>
     $<$<PLATFORM_ID:Linux>:stdc++fs>
 )
 
