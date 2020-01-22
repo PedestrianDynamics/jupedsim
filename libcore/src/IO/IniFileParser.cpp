@@ -159,6 +159,7 @@ void IniFileParser::Parse(const fs::path & iniFile)
     if(!ParseRoutingStrategies(xRouters, xAgentDistri))
         throw std::logic_error("Error while parsing routing strategies.");
 
+    ParseExternalFiles(*xMainNode);
     LOG_INFO("Parsing the project file completed");
 }
 
@@ -1233,5 +1234,69 @@ bool IniFileParser::ParseFfOpts(const TiXmlNode & strategyNode)
         else
             LOG_INFO("UseWAD: no");
     }
+    return true;
+}
+
+bool IniFileParser::ParseExternalFiles(const TiXmlNode & mainNode)
+{
+    // read external traffic constraints file name
+    if(mainNode.FirstChild("traffic_constraints") &&
+       mainNode.FirstChild("traffic_constraints")->FirstChild("file")) {
+        fs::path trafficFile =
+            _config->GetProjectRootDir() /
+            mainNode.FirstChild("traffic_constraints")->FirstChild("file")->FirstChild()->Value();
+        _config->SetTrafficContraintFile(fs::weakly_canonical(trafficFile));
+    }
+
+    // read external goals file name
+    if(mainNode.FirstChild("routing") && mainNode.FirstChild("routing")->FirstChild("goals") &&
+       mainNode.FirstChild("routing")->FirstChild("goals")->FirstChild("file")) {
+        fs::path goalFile = _config->GetProjectRootDir() / mainNode.FirstChild("routing")
+                                                               ->FirstChild("goals")
+                                                               ->FirstChild("file")
+                                                               ->FirstChild()
+                                                               ->Value();
+        _config->SetGoalFile(fs::weakly_canonical(goalFile));
+    }
+
+    // read external sources file name
+    if(mainNode.FirstChild("agents") &&
+       mainNode.FirstChild("agents")->FirstChild("agents_sources") &&
+       mainNode.FirstChild("agents")->FirstChild("agents_sources")->FirstChild("file")) {
+        fs::path sourceFile = _config->GetProjectRootDir() / mainNode.FirstChild("agents")
+                                                                 ->FirstChild("agents_sources")
+                                                                 ->FirstChild("file")
+                                                                 ->FirstChild()
+                                                                 ->Value();
+        _config->SetSourceFile(fs::weakly_canonical(sourceFile));
+    }
+
+    // read external event file name
+    if(mainNode.FirstChild("events_file")) {
+        fs::path eventFile = _config->GetProjectRootDir() /
+                             mainNode.FirstChild("events_file")->FirstChild()->Value();
+        _config->SetEventFile(fs::weakly_canonical(eventFile));
+    } else if(
+        mainNode.FirstChild("header") && mainNode.FirstChild("header")->FirstChild("events_file")) {
+        fs::path eventFile =
+            _config->GetProjectRootDir() /
+            mainNode.FirstChild("header")->FirstChild("events_file")->FirstChild()->Value();
+        _config->SetEventFile(fs::weakly_canonical(eventFile));
+    }
+
+    // read external schedule file name
+    if(mainNode.FirstChild("schedule_file")) {
+        fs::path scheduleFile = _config->GetProjectRootDir() /
+                                mainNode.FirstChild("schedule_file")->FirstChild()->Value();
+        _config->SetScheduleFile(fs::weakly_canonical(scheduleFile));
+    } else if(
+        mainNode.FirstChild("header") &&
+        mainNode.FirstChild("header")->FirstChild("schedule_file")) {
+        fs::path scheduleFile =
+            _config->GetProjectRootDir() /
+            mainNode.FirstChild("header")->FirstChild("schedule_file")->FirstChild()->Value();
+        _config->SetScheduleFile(fs::weakly_canonical(scheduleFile));
+    }
+
     return true;
 }

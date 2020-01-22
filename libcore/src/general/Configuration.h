@@ -325,6 +325,33 @@ public:
 
     void SetGeometryFile(const fs::path & geometryFile) { _geometryFile = geometryFile; };
 
+    const fs::path & GetTransitionFile() const { return _transitionFile; }
+
+    void SetTransitionFile(const fs::path & transitionFile) { _transitionFile = transitionFile; }
+
+    const fs::path & GetGoalFile() const { return _goalFile; }
+
+    void SetGoalFile(const fs::path & goalFile) { _goalFile = goalFile; }
+
+    const fs::path & GetSourceFile() const { return _sourceFile; }
+
+    void SetSourceFile(const fs::path & sourceFile) { _sourceFile = sourceFile; }
+
+    const fs::path & GetTrafficContraintFile() const { return _trafficContraintFile; }
+
+    void SetTrafficContraintFile(const fs::path & trafficContraintFile)
+    {
+        _trafficContraintFile = trafficContraintFile;
+    }
+
+    const fs::path & GetEventFile() const { return _eventFile; }
+
+    void SetEventFile(const fs::path & eventFile) { _eventFile = eventFile; }
+
+    const fs::path & GetScheduleFile() const { return _scheduleFile; }
+
+    void SetScheduleFile(const fs::path & scheduleFile) { _scheduleFile = scheduleFile; }
+
     const fs::path & GetProjectRootDir() const { return _projectRootDir; };
 
     void SetProjectRootDir(const fs::path & projectRootDir) { _projectRootDir = projectRootDir; };
@@ -406,6 +433,12 @@ private:
     fs::path _errorLogFile;
     fs::path _projectFile;
     fs::path _geometryFile;
+    fs::path _transitionFile;
+    fs::path _goalFile;
+    fs::path _sourceFile;
+    fs::path _trafficContraintFile;
+    fs::path _eventFile;
+    fs::path _scheduleFile;
     fs::path _projectRootDir;
     fs::path _outputPath;
     bool _showStatistics;
