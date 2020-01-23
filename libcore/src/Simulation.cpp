@@ -856,10 +856,13 @@ void Simulation::RunFooter()
 
 void Simulation::CopyInputFilesToOutPath()
 {
-    fs::copy(
-        _config->GetProjectRootDir() / _config->GetGeometryFile(),
-        _config->GetOutputPath(),
-        fs::copy_options::overwrite_existing);
+    // In the case we stored the corrected Geometry already in the output path we do not need to copy it again
+    if(_config->GetOutputPath() != _config->GetGeometryFile().parent_path()) {
+        fs::copy(
+            _config->GetProjectRootDir() / _config->GetGeometryFile(),
+            _config->GetOutputPath(),
+            fs::copy_options::overwrite_existing);
+    }
 
     fs::copy(
         _config->GetProjectFile(), _config->GetOutputPath(), fs::copy_options::overwrite_existing);

@@ -723,7 +723,7 @@ bool Building::correct() const
     }         //r
 
     if(removed) {
-        fs::path newGeometryFile = GetGeometryFilename();
+        fs::path newGeometryFile = GetConfig()->GetOutputPath() / GetGeometryFilename().filename();
         fs::path newFilename("correct_");
         newFilename += newGeometryFile.filename();
         newGeometryFile.replace_filename(newFilename);
