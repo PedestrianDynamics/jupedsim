@@ -26,7 +26,7 @@ Following constraints are to be respected when creating the geometry of a platfo
 
 - Define a subroom of *class* `Platform`
 - A `Platform` can have more than one track.
-- A `Platform` is closed: Meaning it has whether transitions nor crossings.
+- A `Platform` is closed: Meaning it has whether transitions nor crossings except the platform accesses (e.g. stairs from the tunnel).
 - `tracks` can be defined with walls of type `track-n`, where $$n$$ is the number of the track.
 
 {%include important.html content="Every track *should* be within one single subroom."%}
@@ -166,7 +166,7 @@ $$
 
 ## Algorithm
 
-Given a `platform` with at least one `track`, the geometry will be changes every time a train arrives and leaves the platform.
+Given a `platform` with at least one `track`, the geometry will be changed every time a train arrives and leaves the platform.
 
 This will be done by projecting the train's doors on the track. With "projection" we mean along the orthogonal direction to the door.
 
