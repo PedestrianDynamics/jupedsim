@@ -5,7 +5,7 @@ tags: [jpscore, getting_started]
 sidebar: jupedsim_sidebar
 permalink: jpscore_introduction.html
 summary: jpscore is the simulation module of JuPedSim. It's a command line tool to simulate the evacuate of pedestrians in continuous space.
-last_updated: 20, December 2019
+last_updated: Jan 23, 2020
 toc: false
 ---
 
@@ -48,10 +48,10 @@ Taking the 7th demo as input, we run a simulation as follows:
  ./bin/jpscore  demos/corner_ini.xml
 ```
 
-which produces a trajectory file in the same directory. This can be visualized with `jpsvis`
+which produces a trajectory file in the folder `results` in the same directory. This can be visualized with `jpsvis`
 
 ```bash
- jpsvis demos/scenario_7_floorfield/Kobes_traj.xml
+ jpsvis demos/scenario_7_floorfield/results/Kobes_traj.xml
 ```
 
 

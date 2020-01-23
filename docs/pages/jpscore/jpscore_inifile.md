@@ -6,7 +6,7 @@ sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_inifile.html
 summary:  The project file where the settings for a jpscore simulation are defined. Within this file properties of pedestrians, model parameters, etc can be given.
-last_updated: Dec 31, 2019
+last_updated: Jan 23, 2020
 ---
 
 ## Header
@@ -36,7 +36,12 @@ The header comprises the following elements:
 
 -   `<show_statistics>true</show_statistics>` Show different aggregate statistics e.g. the usage of the doors. (default: false)
 
-
+-   `<output path="output_directory" />`
+    The name and location where the results of the simulation should be stored. The program creates a folder with the 
+    given name and copies all needed files of the simulation to this folder. Additionally the file names in the ini and 
+    geometry file are updated. Resulting in a folder with the results and everything to reproduce a specific simulation. 
+    If no output path is given the folder is named `results`. 
+     
 -  The trajectory file
 
 ```bash
