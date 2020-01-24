@@ -53,12 +53,7 @@ void AgentsSourcesManager::Run()
     LOG_INFO("Starting agent manager thread");
     //Generate all agents required for the complete simulation
     //It might be more efficient to generate at each frequency step
-    //TODO  this loop is exactly GenerateAgents( --> REFACTOR)
-    for(const auto & src : _sources) {
-        LOG_INFO("Generate src: {}", src->GetId());
-        src->GenerateAgentsAndAddToPool(src->GetMaxAgents(), _building);
-    }
-
+    GenerateAgents();
     //first call ignoring the return value
     ProcessAllSources();
 
@@ -129,8 +124,6 @@ bool AgentsSourcesManager::ProcessAllSources() const
                 src->GetRemainingAgents(),
                 src->GetPoolSize());
 
-            //ComputeBestPositionRandom(src.get(), peds);
-            //todo: here every pedestrian needs an exitline
             if(!std::isnan(src->GetStartX()) && !std::isnan(src->GetStartY())) {
                 LOG_INFO(
                     "Set source agent on fixed position ({:.2f}, {:.2f})",
@@ -140,6 +133,10 @@ bool AgentsSourcesManager::ProcessAllSources() const
             } else if(!ComputeBestPositionVoronoiBoost(src.get(), peds, _building, source_peds))
                 LOG_WARNING("There was no place for some pedestrians");
 
+            // Having set the positions, now we can set the velocity
+            for(auto ped : peds) {
+                AdjustVelocityUsingWeidmann(ped);
+            }
             source_peds.insert(source_peds.end(), peds.begin(), peds.end());
             AgentsQueueIn::Add(peds);
             empty = false;
@@ -158,144 +155,11 @@ void AgentsSourcesManager::InitFixedPosition(AgentsSource * src, std::vector<Ped
     const
 {
     for(auto && ped : peds) {
-        Point v;
-        if(ped->GetExitLine()) {
-            v = (ped->GetExitLine()->ShortestPoint(ped->GetPos()) - ped->GetPos()).Normalized();
-        } else {
-            auto transitions = ped->GetBuilding()->GetAllTransitions();
-            auto transition  = transitions[0];
-            int trans_ID     = transition->GetID();
-            ped->SetExitLine(transition); // set dummy line
-            ped->SetExitIndex(trans_ID);
-            v = Point(0., 0.);
-        }
-        double speed = ped->GetEllipse().GetV0();
-        v            = v * speed;
-        ped->SetV(v);
         ped->SetPos(Point(src->GetStartX(), src->GetStartY()));
     }
 }
 
-void AgentsSourcesManager::ComputeBestPositionCompleteRandom(
-    AgentsSource * src,
-    std::vector<Pedestrian *> & peds) const
-{
-    auto dist        = src->GetStartDistribution();
-    auto subroom     = _building->GetRoom(dist->GetRoomId())->GetSubRoom(dist->GetSubroomID());
-    auto config      = GetBuilding()->GetConfig();
-    auto distributor = std::unique_ptr<PedDistributor>(new PedDistributor(config));
-    std::vector<Point> positions = distributor->PossiblePositions(*subroom);
-    double seed                  = time(0);
-    //TODO: get the seed from the simulation
-    std::cout << "seed: " << seed << std::endl;
 
-    srand(seed);
-
-    for(auto & ped : peds) {
-        if(positions.size()) {
-            int index     = rand() % positions.size();
-            Point new_pos = positions[index];
-            positions.erase(positions.begin() + index);
-            ped->SetPos(new_pos, true);
-            std::cout << "pos: " << new_pos._x << new_pos._y << std::endl;
-
-            AdjustVelocityByNeighbour(ped);
-        } else {
-            LOG_INFO("No place for a pedestrian");
-            break;
-        }
-    }
-}
-
-void AgentsSourcesManager::ComputeBestPositionRandom(
-    AgentsSource * src,
-    std::vector<Pedestrian *> & peds) const
-{
-    //generate the agents with default positions
-    auto dist        = src->GetStartDistribution();
-    auto subroom     = _building->GetRoom(dist->GetRoomId())->GetSubRoom(dist->GetSubroomID());
-    auto config      = GetBuilding()->GetConfig();
-    auto distributor = std::unique_ptr<PedDistributor>(new PedDistributor(config));
-    std::vector<Point> positions = distributor->PossiblePositions(*subroom);
-    double bounds[4]             = {0, 0, 0, 0};
-    dist->Getbounds(bounds);
-
-    std::vector<Pedestrian *> peds_without_place;
-
-    std::vector<Point> extra_positions;
-
-    std::vector<Pedestrian *>::iterator iter_ped;
-    for(iter_ped = peds.begin(); iter_ped != peds.end();) {
-        //need to be called at each iteration
-        SortPositionByDensity(positions, extra_positions);
-
-        int index     = -1;
-        double radius = ((*iter_ped)->GetEllipse()).GetBmax();
-
-        //in the case a range was specified
-        //just take the first element
-        for(unsigned int a = 0; a < positions.size(); a++) {
-            Point pos = positions[a];
-            //cout<<"checking: "<<pos.toString()<<endl;
-            // for positions inside bounds, check it there is enough space
-            if((bounds[0] <= pos._x) && (pos._x <= bounds[1]) && (bounds[2] <= pos._y) &&
-               (pos._y < bounds[3])) {
-                bool enough_space = true;
-
-                //checking enough space!!
-                std::vector<Pedestrian *> neighbours;
-                _building->GetGrid()->GetNeighbourhood(pos, neighbours);
-
-                for(const auto & ngh : neighbours)
-                    if((ngh->GetPos() - pos).NormSquare() < 4 * radius * radius) {
-                        enough_space = false;
-                        break;
-                    }
-
-
-                if(enough_space) {
-                    index = a;
-                    break;
-                }
-            }
-        }
-        if(index == -1) {
-            if(positions.size()) {
-                LOG_ERROR(
-                    "AgentSourceManager Cannot distribute pedestrians in the mentioned "
-                    "area [{:.2f},{:.2f},{:.2f},{:.2f}]. Specify a subroom_if may help. {:d} "
-                    "positions where available",
-                    bounds[0],
-                    bounds[1],
-                    bounds[2],
-                    bounds[3],
-                    positions.size());
-                //exit(EXIT_FAILURE);
-            }
-            //dump the pedestrian, move iterator
-            peds_without_place.push_back(*iter_ped);
-            iter_ped = peds.erase(iter_ped);
-        } else //we found a position with enough space
-        {
-            const Point & pos = positions[index];
-
-            extra_positions.push_back(pos);
-            (*iter_ped)->SetPos(pos, true); //true for the initial position
-            positions.erase(positions.begin() + index);
-
-            //at this point we have a position
-            //so we can adjust the velocity
-            //AdjustVelocityUsingWeidmann(ped);
-            AdjustVelocityByNeighbour((*iter_ped));
-            //move iterator
-            iter_ped++;
-        }
-
-        //return the pedestrians without place
-    }
-    if(peds_without_place.size() > 0)
-        src->AddAgentsToPool(peds_without_place);
-}
 
 void AgentsSourcesManager::AdjustVelocityByNeighbour(Pedestrian * ped) const
 {
@@ -308,7 +172,7 @@ void AgentsSourcesManager::AdjustVelocityByNeighbour(Pedestrian * ped) const
     int count            = 0;
 
     for(const auto & p : neighbours) {
-        //only pedes in a sepcific rance
+        //only pedestrians in a specific range
         if((ped->GetPos() - p->GetPos()).NormSquare() <= radius_square) {
             //only peds with the same destination
             if(ped->GetExitIndex() == p->GetExitIndex()) {
@@ -377,10 +241,9 @@ void AgentsSourcesManager::AdjustVelocityUsingWeidmann(Pedestrian * ped) const
         Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos()) - ped->GetPos()).Normalized();
         v       = v * speed;
         ped->SetV(v);
-        //cout<<"density: "<<density<<endl;
     } else {
-        LOG_ERROR(
-            "No route could be found for agent {:d} going to {:d}",
+        LOG_WARNING(
+            "No route could be found for source-agent {:d} going to {:d}",
             ped->GetID(),
             ped->GetFinalDestination());
         //that will be most probably be fixed in the next computation step.
@@ -388,45 +251,10 @@ void AgentsSourcesManager::AdjustVelocityUsingWeidmann(Pedestrian * ped) const
     }
 }
 
-void AgentsSourcesManager::SortPositionByDensity(
-    std::vector<Point> & positions,
-    std::vector<Point> & extra_positions) const
-{
-    std::multimap<double, Point> density2pt;
-
-    for(auto && pt : positions) {
-        std::vector<Pedestrian *> neighbours;
-        _building->GetGrid()->GetNeighbourhood(pt, neighbours);
-        //density in pers per m2
-        double density       = 0.0;
-        double radius_square = 0.40 * 0.40;
-
-        for(const auto & p : neighbours) {
-            //FIXME: p  can be null, if deleted in the main simulation thread.
-            if(p && (pt - p->GetPos()).NormSquare() <= radius_square)
-                density += 1.0;
-        }
-
-        //consider the extra positions
-        for(const auto & ptx : extra_positions) {
-            if((ptx - pt).NormSquare() <= radius_square)
-                density += 1.0;
-        }
-        density = density / (radius_square * M_PI);
-
-        density2pt.insert(std::pair<double, Point>(density, pt));
-    }
-
-    positions.clear();
-    for(auto && d : density2pt) {
-        positions.push_back(d.second);
-    }
-}
-
-
 void AgentsSourcesManager::GenerateAgents()
 {
     for(const auto & src : _sources) {
+        LOG_INFO("Generate src: {}", src->GetId());
         src->GenerateAgentsAndAddToPool(src->GetMaxAgents(), _building);
     }
 }

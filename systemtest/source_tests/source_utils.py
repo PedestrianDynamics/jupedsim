@@ -100,7 +100,10 @@ def get_data(_trajfile):
         line = line.strip()
         if line.startswith("#framerate"):
             fps = float(line.split(":")[1])
-            _time_err = 3.0/fps
+            dt = 0.01 # TODO: Read from inifile
+            writeInterval = np.ceil(1/fps/dt + 0.5)
+            _time_err = 2*writeInterval/fps
+            logging.info("fps = %d, time_error = %.3f, writeInterval = %d", fps, _time_err, writeInterval)
 
         if not line or line.startswith("#"):
             continue
