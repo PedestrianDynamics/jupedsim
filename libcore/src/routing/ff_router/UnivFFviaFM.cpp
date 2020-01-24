@@ -1539,8 +1539,8 @@ void UnivFFviaFM::SetSpeedMode(int speedMode)
 
 void UnivFFviaFM::WriteFF(const fs::path & filename, std::vector<int> targetID)
 {
-    fs::create_directory(_configuration->GetProjectRootDir() / "ff_vtk_files");
-    auto floorfieldFile = _configuration->GetProjectRootDir() / "ff_vtk_files" / filename;
+    fs::create_directory(_configuration->GetOutputPath() / "ff_vtk_files");
+    auto floorfieldFile = _configuration->GetOutputPath() / "ff_vtk_files" / filename;
     LOG_INFO(
         "Write Floorfield to file: {:s} with {:d} targets.",
         floorfieldFile.string().c_str(),

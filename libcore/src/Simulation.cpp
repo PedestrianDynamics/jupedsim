@@ -42,6 +42,8 @@
 #include "pedestrian/AgentsSourcesManager.h"
 #include "routing/ff_router/ffRouter.h"
 
+#include <tinyxml.h>
+
 // TODO: add these variables to class simulation
 std::map<std::string, std::shared_ptr<TrainType>> TrainTypes;
 std::map<int, std::shared_ptr<TrainTimeTable>> TrainTimeTables;
@@ -362,6 +364,9 @@ void Simulation::PrintStatistics(double simTime)
                 statsfile += '_';
             }
             statsfile += _config->GetOriginalTrajectoriesFile().filename().replace_extension("txt");
+
+            statsfile = _config->GetOutputPath() / statsfile;
+
             LOG_INFO("More Information in the file: {}", statsfile.string());
             {
                 FileHandler statOutput(statsfile);
@@ -842,7 +847,168 @@ bool Simulation::correctGeometry(
 
 void Simulation::RunFooter()
 {
+    // Copy input files used for simulation to output folder for reproducibility
+    CopyInputFilesToOutPath();
+    UpdateOutputFiles();
+
     _iod->WriteFooter();
+}
+
+void Simulation::CopyInputFilesToOutPath()
+{
+    // In the case we stored the corrected Geometry already in the output path we do not need to copy it again
+    if(_config->GetOutputPath() != _config->GetGeometryFile().parent_path()) {
+        fs::copy(
+            _config->GetProjectRootDir() / _config->GetGeometryFile(),
+            _config->GetOutputPath(),
+            fs::copy_options::overwrite_existing);
+    }
+
+    fs::copy(
+        _config->GetProjectFile(), _config->GetOutputPath(), fs::copy_options::overwrite_existing);
+
+    CopyInputFileToOutPath(_config->GetTrafficContraintFile());
+    CopyInputFileToOutPath(_config->GetGoalFile());
+    CopyInputFileToOutPath(_config->GetTransitionFile());
+    CopyInputFileToOutPath(_config->GetEventFile());
+    CopyInputFileToOutPath(_config->GetScheduleFile());
+    CopyInputFileToOutPath(_config->GetSourceFile());
+}
+
+void Simulation::CopyInputFileToOutPath(fs::path file)
+{
+    if(!file.empty() && fs::exists(file)) {
+        fs::copy(file, _config->GetOutputPath(), fs::copy_options::overwrite_existing);
+    }
+}
+
+void Simulation::UpdateOutputFiles()
+{
+    UpdateOutputIniFile();
+    UpdateOutputGeometryFile();
+}
+
+void Simulation::UpdateOutputIniFile()
+{
+    fs::path iniOutputPath = _config->GetOutputPath() / _config->GetProjectFile().filename();
+
+    TiXmlDocument iniOutput(iniOutputPath.string());
+
+    if(!iniOutput.LoadFile()) {
+        LOG_ERROR("Could not parse the ini file.");
+        LOG_ERROR("{}", iniOutput.ErrorDesc());
+    }
+    TiXmlElement * mainNode = iniOutput.RootElement();
+
+    // update geometry file name
+    if(mainNode->FirstChild("geometry")) {
+        mainNode->FirstChild("geometry")
+            ->FirstChild()
+            ->SetValue(_config->GetGeometryFile().filename().string());
+    } else if(
+        mainNode->FirstChild("header") && mainNode->FirstChild("header")->FirstChild("geometry")) {
+        mainNode->FirstChild("header")
+            ->FirstChild("geometry")
+            ->FirstChild()
+            ->SetValue(_config->GetGeometryFile().filename().string());
+    }
+
+    // update new traffic constraint file name
+    if(!_config->GetTrafficContraintFile().empty()) {
+        if(mainNode->FirstChild("traffic_constraints") &&
+           mainNode->FirstChild("traffic_constraints")->FirstChild("file")) {
+            mainNode->FirstChild("traffic_constraints")
+                ->FirstChild("file")
+                ->FirstChild()
+                ->SetValue(_config->GetTrafficContraintFile().filename().string());
+        }
+    }
+
+    // update new goal file name
+    if(!_config->GetGoalFile().empty()) {
+        if(mainNode->FirstChild("routing") &&
+           mainNode->FirstChild("routing")->FirstChild("goals") &&
+           mainNode->FirstChild("routing")->FirstChild("goals")->FirstChild("file")) {
+            mainNode->FirstChild("routing")
+                ->FirstChild("goals")
+                ->FirstChild("file")
+                ->FirstChild()
+                ->SetValue(_config->GetGoalFile().filename().string());
+        }
+    }
+
+    // update new source file name
+    if(!_config->GetSourceFile().empty()) {
+        if(mainNode->FirstChild("agents") &&
+           mainNode->FirstChild("agents")->FirstChild("agents_sources") &&
+           mainNode->FirstChild("agents")->FirstChild("agents_sources")->FirstChild("file")) {
+            mainNode->FirstChild("agents")
+                ->FirstChild("agents_sources")
+                ->FirstChild("file")
+                ->FirstChild()
+                ->SetValue(_config->GetSourceFile().filename().string());
+        }
+    }
+
+    // update new event file name
+    if(!_config->GetEventFile().empty()) {
+        if(mainNode->FirstChild("events_file")) {
+            mainNode->FirstChild("events_file")
+                ->FirstChild()
+                ->SetValue(_config->GetEventFile().filename().string());
+        } else if(
+            mainNode->FirstChild("header") &&
+            mainNode->FirstChild("header")->FirstChild("events_file")) {
+            mainNode->FirstChild("header")
+                ->FirstChild("events_file")
+                ->FirstChild()
+                ->SetValue(_config->GetEventFile().filename().string());
+        }
+    }
+
+    // update new schedule file name
+    if(!_config->GetScheduleFile().empty()) {
+        if(mainNode->FirstChild("schedule_file")) {
+            mainNode->FirstChild("schedule_file")
+                ->FirstChild()
+                ->SetValue(_config->GetScheduleFile().filename().string());
+
+        } else if(
+            mainNode->FirstChild("header") &&
+            mainNode->FirstChild("header")->FirstChild("schedule_file")) {
+            mainNode->FirstChild("header")
+                ->FirstChild("schedule_file")
+                ->FirstChild()
+                ->SetValue(_config->GetScheduleFile().filename().string());
+        }
+    }
+
+    iniOutput.SaveFile(iniOutputPath.string());
+}
+
+void Simulation::UpdateOutputGeometryFile()
+{
+    fs::path geoOutputPath = _config->GetOutputPath() / _config->GetGeometryFile().filename();
+
+    TiXmlDocument geoOutput(geoOutputPath.string());
+
+    if(!geoOutput.LoadFile()) {
+        LOG_ERROR("Could not parse the ini file.");
+        LOG_ERROR("{}", geoOutput.ErrorDesc());
+    }
+    TiXmlElement * mainNode = geoOutput.RootElement();
+
+    if(!_config->GetTransitionFile().empty()) {
+        if(mainNode->FirstChild("transitions") &&
+           mainNode->FirstChild("transitions")->FirstChild("file")) {
+            mainNode->FirstChild("transitions")
+                ->FirstChild("file")
+                ->FirstChild()
+                ->SetValue(_config->GetTransitionFile().filename().string());
+        }
+    }
+
+    geoOutput.SaveFile(geoOutputPath.string());
 }
 
 void Simulation::ProcessAgentsQueue()
