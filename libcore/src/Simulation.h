@@ -133,6 +133,26 @@ public:
     void RunFooter();
 
     /**
+     * Copy all Input Files used to the output path.
+     *
+     * This backs up the input files and makes reproducible results possible.
+     */
+    void CopyInputFilesToOutPath();
+
+    /**
+     * Helper function to copy a specific file to the output path.
+     *
+     * @param file File to be copied.
+     */
+    void CopyInputFileToOutPath(fs::path file);
+
+    void UpdateOutputIniFile();
+    void UpdateOutputGeometryFile();
+    /**
+     * Updates the paths to external files in the ini and geometry file in output path.
+     */
+    void UpdateOutputFiles();
+    /**
      * Run a standard simulation
      * @return the total simulated/evacuation time
      */
