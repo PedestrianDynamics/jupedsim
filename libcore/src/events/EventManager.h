@@ -31,7 +31,6 @@
 #include <vector>
 
 class Building;
-class Configuration;
 
 class EventManager
 {
@@ -39,7 +38,7 @@ public:
     /**
       * Constructor.
       */
-    EventManager(Configuration * config, Building * _b);
+    explicit EventManager(Building * _b);
 
     /**
       * Default deconstructor.
@@ -47,20 +46,16 @@ public:
     ~EventManager() = default;
 
     /**
-      * Read and parse the events
-      * @return false if an error occurred
-      */
-    bool ReadEventsXml();
+     * Adds the events from \p events to the EventManager. This should be done before the simulation
+     * starts.
+     * @param events List of events, which should be used in the simulation
+     */
+    void AddEvents(std::vector<Event> events);
 
     /**
       * Print the parsed events.
       */
     void ListEvents();
-
-    /**
-      * Reads the schedule file
-      */
-    bool ReadSchedule();
 
     /**
      * Process the event using the current time stamp from the pedestrian class.
@@ -95,11 +90,6 @@ private:
     void ResetDoor(int id);
 
 private:
-    /**
-     * Configuration of simulation.
-     */
-    Configuration * _config;
-
     /**
      * List of all events processed by the EventManager.
      */

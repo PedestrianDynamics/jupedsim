@@ -30,6 +30,7 @@
 
 #include "Simulation.h"
 
+#include "IO/EventFileParser.h"
 #include "IO/Trajectories.h"
 #include "general/Filesystem.h"
 #include "general/Logger.h"
@@ -187,15 +188,19 @@ bool Simulation::InitArgs()
         return false;
     }
 
-    _em = new EventManager(_config, _building.get());
-    if(!_em->ReadEventsXml()) {
-        LOG_WARNING("Could not initialize events handling");
+    _em = new EventManager(_building.get());
+    if (!_config->GetEventFile().empty()) {
+        _em->AddEvents(EventFileParser::ParseEvents(_config->GetEventFile()));
     }
-    if(!_em->ReadSchedule()) {
-        LOG_WARNING("Could not initialize schedule handling");
+    if (!_config->GetScheduleFile().empty()) {
+        _em->AddEvents(EventFileParser::ParseSchedule(_config->GetScheduleFile()));
     }
 
-    _em->ListEvents();
+    // Read and set max door usage from schedule file
+    auto groupMaxAgents = EventFileParser::ParseMaxAgents(_config->GetScheduleFile());
+    for(auto const [transID, maxAgents] : groupMaxAgents) {
+        _building->GetTransition(transID)->SetMaxDoorUsage(maxAgents);
+    }
 
     _goalManager.SetBuilding(_building.get());
     return true;

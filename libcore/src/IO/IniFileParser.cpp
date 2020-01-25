@@ -165,14 +165,6 @@ void IniFileParser::Parse(const fs::path & iniFile)
 
 bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 {
-    LOG_INFO("JuPedSim - JPScore");
-    LOG_INFO("Current date: {} {}", __DATE__, __TIME__);
-    LOG_INFO("Version     : {}", JPSCORE_VERSION);
-    LOG_INFO("Commit hash : {}", GIT_COMMIT_HASH);
-    LOG_INFO("Commit date : {}", GIT_COMMIT_DATE);
-    LOG_INFO("Branch      : {}", GIT_BRANCH);
-
-
     //seed
     if(xHeader->FirstChild("seed")) {
         TiXmlNode * seedNode = xHeader->FirstChild("seed")->FirstChild();
@@ -427,6 +419,38 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
                 }
             }
         }
+    }
+
+    //event file
+    if(xHeader->FirstChild("events_file") && xHeader->FirstChild("events_file")->FirstChild()) {
+        const fs::path eventFile = xHeader->FirstChild("events_file")->FirstChild()->Value();
+        if(!eventFile.empty() && fs::exists(eventFile)) {
+            _config->SetEventFile(_config->GetProjectRootDir() / eventFile);
+            LOG_INFO("Events are read from: <{}>", _config->GetEventFile().string());
+        } else {
+            LOG_WARNING(
+                "Event file is empty or the file does not exists. No events are used in the "
+                "simulation: <{}>",
+                eventFile.string());
+        }
+    } else {
+        LOG_INFO("No event file given.");
+    }
+
+    //schedule file
+    if(xHeader->FirstChild("schedule_file") && xHeader->FirstChild("schedule_file")->FirstChild()) {
+        const fs::path scheduleFile = xHeader->FirstChild("schedule_file")->FirstChild()->Value();
+        if(!scheduleFile.empty() && fs::exists(scheduleFile)) {
+            _config->SetScheduleFile(_config->GetProjectRootDir() / scheduleFile);
+            LOG_INFO("Schedule is read from: <{}>", _config->GetScheduleFile().string());
+        } else {
+            LOG_WARNING(
+                "Schedule file is empty or the file does not exists. No schedule is used in the "
+                "simulation: <{}>",
+                scheduleFile.string());
+        }
+    } else {
+        LOG_INFO("No schedule file given.");
     }
 
     return true;
