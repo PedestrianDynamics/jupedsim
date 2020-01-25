@@ -409,6 +409,10 @@ void Simulation::PrintStatistics(double simTime)
 
 void Simulation::RunHeader(long nPed)
 {
+    // Copy input files used for simulation to output folder for reproducibility
+    CopyInputFilesToOutPath();
+    UpdateOutputFiles();
+
     // writing the header
     if(nPed == -1)
         nPed = _nPeds;
@@ -847,10 +851,6 @@ bool Simulation::correctGeometry(
 
 void Simulation::RunFooter()
 {
-    // Copy input files used for simulation to output folder for reproducibility
-    CopyInputFilesToOutPath();
-    UpdateOutputFiles();
-
     _iod->WriteFooter();
 }
 
