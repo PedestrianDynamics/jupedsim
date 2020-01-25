@@ -216,7 +216,7 @@ std::vector<Event> EventFileParser::ParseSchedule(const fs::path & scheduleFile)
         for(TiXmlElement * time = e->FirstChildElement("t"); time;
             time                = time->NextSiblingElement("t")) {
             double openingTime = xmltof(time->Attribute("t"), -1.);
-            if (openingTime < 0){
+            if(openingTime < 0) {
                 LOG_ERROR("schedule times {:d}: t has no proper input", id);
                 continue;
             }

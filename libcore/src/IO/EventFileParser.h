@@ -28,7 +28,24 @@
 class EventFileParser
 {
 public:
+    /**
+     * Reads all events from a specfic files and returns them in a vector.
+     * @param eventFile File containing the events
+     * @return All events which could be parsed from \p eventFile
+     */
     static std::vector<Event> ParseEvents(const fs::path & eventFile);
+
+    /**
+     * Reads the events from a specific schedule file and returns them in a vector.
+     * @param scheduleFile File containing the schedule
+     * @return All events which could be parsed from \p scheduleFile
+     */
     static std::vector<Event> ParseSchedule(const fs::path & scheduleFile);
+
+    /**
+     * Reads the max agents defintions from the schedule file and returns them as a map of transition ID to maxAgents.
+     * @param scheduleFile File containing the schedule
+     * @return Map of max agents defintion which could be parsed from \p scheduleFile (ID to maxAgents)
+     */
     static std::map<int, int> ParseMaxAgents(const fs::path & scheduleFile);
 };

@@ -189,10 +189,10 @@ bool Simulation::InitArgs()
     }
 
     _em = new EventManager(_building.get());
-    if (!_config->GetEventFile().empty()) {
+    if(!_config->GetEventFile().empty()) {
         _em->AddEvents(EventFileParser::ParseEvents(_config->GetEventFile()));
     }
-    if (!_config->GetScheduleFile().empty()) {
+    if(!_config->GetScheduleFile().empty()) {
         _em->AddEvents(EventFileParser::ParseSchedule(_config->GetScheduleFile()));
     }
 
