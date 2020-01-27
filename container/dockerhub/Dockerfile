@@ -20,9 +20,6 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6084F3CF814B57C1CF1
     apt-get install -y clang-format-9
 
 
-COPY scripts/setup-deps.sh /opt/
-
-RUN cd /opt && CXX=/usr/bin/g++-8 CC=/usr/bin/gcc-8 ./setup-deps.sh
 
 RUN pip3 install numpy && \
     pip3 install matplotlib && \
@@ -34,11 +31,15 @@ RUN pip3 install numpy && \
 RUN groupadd -r -g 1000 jupedsim && useradd -r -g jupedsim -u 1000 -m jupedsim
 USER jupedsim
 
-# build jpscore and jpsreport
+# clone code and build deps
 RUN mkdir -p /home/jupedsim/workspace \
     cd /home/jupedsim/workspace \
     && git clone --depth=1 https://github.com/JuPedSim/jpscore.git \
-    && cd jpscore \
+    && cp jpscore/scripts/setup-deps.sh /opt \
+    && cd /opt && CXX=/usr/bin/g++-8 CC=/usr/bin/gcc-8 ./setup-deps.sh
+
+# build jpscore and jpsreport
+RUN cd /home/jupedsim/workspace/jpscore \
     && mkdir -p build \
     && cd build \
     && cmake  ..\
