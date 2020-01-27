@@ -23,7 +23,6 @@
 
 #include "general/Configuration.h" // for Configuration
 #include "general/Filesystem.h"    // for add_prefix_to_filename
-#include "general/Format.h"        // for check_fmt
 #include "general/Logger.h"        // for Debug, Warning, Info
 #include "geometry/Building.h"     // for Building
 #include "geometry/Crossing.h"     // for Crossing
@@ -36,8 +35,9 @@
 
 #include <algorithm> // for max, find, find_if, sort
 #include <cassert>
-#include <chrono>    // for operator-, duration, high_resolut...
-#include <cmath>     // for isnan
+#include <chrono> // for operator-, duration, high_resolut...
+#include <cmath>  // for isnan
+#include <fmt/format.h>
 #include <map>       // for map
 #include <memory>    // for shared_ptr, __shared_ptr_access
 #include <optional>  // for optional, nullopt
@@ -89,10 +89,10 @@ bool RemoveOverlappingWall(const Line & exit, SubRoom & subroom)
  */
 bool RemoveOverlappingDoors(SubRoom & subroom)
 {
-    Logging::Debug(fmt::format(
-        check_fmt("Enter RemoveOverlappingDoors with SubRoom {}-{}"),
+    LOG_DEBUG(
+        "Enter RemoveOverlappingDoors with SubRoom {}-{}",
         subroom.GetRoomID(),
-        subroom.GetSubRoomID()));
+        subroom.GetSubRoomID());
 
     int wallsRemoved = 0; // did we remove anything?
 
@@ -137,11 +137,11 @@ std::optional<Point> ComputeSplitPoint(const Wall & wall, const Line & line)
         return std::nullopt;
     }
 
-    Logging::Debug(fmt::format(
-        check_fmt("BigWall {} will be split due to intersection with Line {} in {}"),
+    LOG_DEBUG(
+        "BigWall {} will be split due to intersection with Line {} in {}",
         wall.toString(),
         line.toString(),
-        intersectionPoint.toString()));
+        intersectionPoint.toString());
 
     return {intersectionPoint};
 }
@@ -158,11 +158,11 @@ std::optional<Point> ComputeSplitPoint(const Wall & wall, const Line & line)
  */
 std::optional<std::vector<Wall>> SplitWall(const SubRoom & subroom, const Wall & bigWall)
 {
-    Logging::Debug(fmt::format(
-        check_fmt("SplitWall for BigWall {} in SubRoom {}-{}."),
+    LOG_DEBUG(
+        "SplitWall for BigWall {} in SubRoom {}-{}.",
         bigWall.toString(),
         subroom.GetRoomID(),
-        subroom.GetSubRoomID()));
+        subroom.GetSubRoomID());
 
     // Collecting all split Points
     std::vector<Point> splitPoints;
@@ -277,22 +277,22 @@ int AddWallToSubroom(SubRoom & subroom, const std::vector<Wall> & wallPieces)
  */
 void ReplaceBigWall(SubRoom & subroom, const Wall & bigWall, const std::vector<Wall> & wallPieces)
 {
-    Logging::Debug(fmt::format(
-        check_fmt("Replacing big wall {} in SubRoom {}-{}"),
+    LOG_DEBUG(
+        "Replacing big wall {} in SubRoom {}-{}",
         bigWall.toString(),
         subroom.GetRoomID(),
-        subroom.GetSubRoomID()));
+        subroom.GetSubRoomID());
 
     if(!subroom.RemoveWall(bigWall)) {
         throw std::runtime_error(fmt::format(
-            check_fmt("Correcting the geometry failed. Could not remove wall: {}"),
+            FMT_STRING("Correcting the geometry failed. Could not remove wall: {}"),
             bigWall.toString()));
     }
 
     if(AddWallToSubroom(subroom, wallPieces) <= 0) {
         throw std::runtime_error(fmt::format(
-            check_fmt("Correcting the geometry failed. Could not add any wall from splitted big "
-                      "wall: {}"),
+            FMT_STRING("Correcting the geometry failed. Could not add any wall from splitted big "
+                       "wall: {}"),
             bigWall.toString()));
     }
 }
@@ -342,17 +342,19 @@ void CorrectInputGeometry(Building & building)
     }
 
     if(geometry_changed) {
-        const auto geometryFile =
-            add_prefix_to_filename("correct_", building.GetGeometryFilename());
+        fs::path newGeometryFile =
+            building.GetConfig()->GetOutputPath() / building.GetGeometryFilename();
+        fs::path newFilename("correct_");
+        newFilename += newGeometryFile.filename();
+        newGeometryFile.replace_filename(newFilename);
 
-        if(building.SaveGeometry(geometryFile)) {
-            building.GetConfig()->SetGeometryFile(geometryFile);
+        if(building.SaveGeometry(newGeometryFile)) {
+            building.GetConfig()->SetGeometryFile(newGeometryFile);
         }
     }
 
     const auto t_end     = std::chrono::high_resolution_clock::now();
     double elapsedTimeMs = std::chrono::duration<double, std::milli>(t_end - t_start).count();
-    Logging::Info(
-        fmt::format(check_fmt("Leave geometry correct with success ({:.3f}s)"), elapsedTimeMs));
+    LOG_INFO("Leave geometry correct with success ({:.3f}s)", elapsedTimeMs);
 }
 } // namespace geometry::helper

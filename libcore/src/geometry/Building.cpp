@@ -29,7 +29,6 @@
 #include "IO/GeoFileParser.h"                // for GeoFileP...
 #include "general/Configuration.h"           // for Configur...
 #include "general/Filesystem.h"              //
-#include "general/Format.h"                  // for check_fmt
 #include "general/Logger.h"                  // for Error, Info
 #include "general/Macros.h"                  // for _SIMULATOR
 #include "general/OpenMP.h"                  //
@@ -293,7 +292,7 @@ bool Building::InitGeometry()
     try {
         geometry::helper::CorrectInputGeometry(*this);
     } catch(const std::exception & e) {
-        Logging::Error(fmt::format(check_fmt("Exception in Building::correct: {}"), e.what()));
+        LOG_ERROR("Exception in Building::correct: {}", e.what());
         return false;
     }
 
