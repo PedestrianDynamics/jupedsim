@@ -28,7 +28,41 @@
 
 TEST_CASE("geometry/Building/correct", "[geometry][Building][correct]")
 {
-    SECTION("correct") {}
+    SECTION("CorrectInputGeometry")
+    {
+        Building b;
+        REQUIRE_NOTHROW(geometry::helper::CorrectInputGeometry(b));
+        REQUIRE(b.GetAllGoals().empty());
+        REQUIRE(b.GetAllRooms().empty());
+        REQUIRE(b.GetAllHlines().empty());
+        REQUIRE(b.GetAllCrossings().empty());
+        REQUIRE(b.GetAllPedestrians().empty());
+        REQUIRE(b.GetAllTransitions().empty());
+
+        Room * r = new Room();
+        auto * s = new NormalSubRoom();
+
+        r->AddSubRoom(s);
+        b.AddRoom(r);
+        REQUIRE_NOTHROW(geometry::helper::CorrectInputGeometry(b));
+        REQUIRE(b.GetAllGoals().empty());
+        REQUIRE(b.GetAllRooms().size() == 1);
+        REQUIRE(b.GetAllHlines().empty());
+        REQUIRE(b.GetAllCrossings().empty());
+        REQUIRE(b.GetAllPedestrians().empty());
+        REQUIRE(b.GetAllTransitions().empty());
+
+
+        s->AddWall(Wall(Point(0, 0), Point(0, 10)));
+        REQUIRE_NOTHROW(geometry::helper::CorrectInputGeometry(b));
+        REQUIRE(b.GetAllGoals().empty());
+        REQUIRE(b.GetAllRooms().size() == 1);
+        REQUIRE(b.GetAllHlines().empty());
+        REQUIRE(b.GetAllCrossings().empty());
+        REQUIRE(b.GetAllPedestrians().empty());
+        REQUIRE(b.GetAllTransitions().empty());
+        REQUIRE(s->GetAllWalls().size() == 1);
+    }
 
 
     SECTION("SplitWall")
