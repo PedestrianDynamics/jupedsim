@@ -1,5 +1,4 @@
 FROM ubuntu:18.04
-RUN apt-get update && apt-get install -y software-properties-common
 
 RUN apt-get update && apt-get install -y wget \
                        git \
@@ -11,8 +10,6 @@ RUN apt-get update && apt-get install -y wget \
                        python3-pip \
                        python \
                        python-pip
-
-
 
 RUN pip3 install numpy && \
     pip3 install matplotlib && \
@@ -36,5 +33,5 @@ RUN cd /home/jupedsim/workspace/jpscore \
     && mkdir -p build \
     && cd build \
     && cmake  ..\
-    && make
+    && make -j$(nproc)
 
