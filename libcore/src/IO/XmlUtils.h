@@ -49,6 +49,18 @@ double StringToDouble(const std::string & input)
     }
 }
 
+bool StringToBool(const std::string & input)
+{
+    std::string inputLower = input;
+    std::transform(inputLower.begin(), inputLower.end(), inputLower.begin(), ::tolower);
+    if(inputLower == "true") {
+        return true;
+    } else if(inputLower == "false") {
+        return false;
+    } else {
+        throw std::invalid_argument("");
+    }
+}
 } // namespace XmlUtil
 
 
@@ -107,6 +119,24 @@ public:
                 node.Parent()->Value(),
                 node.Value())};
             throw std::out_of_range(message);
+        }
+    }
+};
+
+template <>
+class Validator<bool>
+{
+public:
+    static bool GetValue(const TiXmlNode & node)
+    {
+        try {
+            return XmlUtil::StringToBool(node.Value());
+        } catch(const std::invalid_argument & ia) {
+            auto message{fmt::format(
+                FMT_STRING("In <{}> expected 'true' or 'false' as input but received: {}"),
+                node.Parent()->Value(),
+                node.Value())};
+            throw std::invalid_argument(message);
         }
     }
 };

@@ -98,6 +98,48 @@ TEST_CASE("IO/XmlUtils/XmlUtil/double", "[utils][XmlUtil][double]")
     }
 }
 
+TEST_CASE("IO/XmlUtils/XmlUtil/bool", "[utils][XmlUtil][bool]")
+{
+    SECTION("Valid")
+    {
+        {
+            std::string inputString{"true"};
+
+            bool output{XmlUtil::StringToBool(inputString)};
+            REQUIRE(output);
+        }
+        {
+            std::string inputString{"TrUe"};
+
+            bool output{XmlUtil::StringToBool(inputString)};
+            REQUIRE(output);
+        }
+        {
+            std::string inputString{"false"};
+
+            bool output{XmlUtil::StringToBool(inputString)};
+            REQUIRE(!output);
+        }
+        {
+            std::string inputString{"FalSE"};
+
+            bool output{XmlUtil::StringToBool(inputString)};
+            REQUIRE(!output);
+        }
+    }
+    SECTION("Invalid")
+    {
+        {
+            std::string inputString{"invalid"};
+            REQUIRE_THROWS(XmlUtil::StringToBool(inputString));
+        }
+        {
+            std::string inputString{"123.123123"};
+            REQUIRE_THROWS(XmlUtil::StringToBool(inputString));
+        }
+    }
+}
+
 TEST_CASE("IO/XmlUtils/Validator/int", "[utils][Validator][int]")
 {
     SECTION("Valid")
@@ -125,6 +167,7 @@ TEST_CASE("IO/XmlUtils/Validator/int", "[utils][Validator][int]")
 
             int output = Validator<int>::GetValue(*child);
             REQUIRE(output == input);
+
             delete parent;
         }
         {
@@ -305,6 +348,77 @@ TEST_CASE("IO/XmlUtils/Validator/double", "[utils][Validator][double]")
             parent->LinkEndChild(child);
             double output;
             REQUIRE_THROWS(output = Validator<double>::GetValue(*child));
+            delete parent;
+        }
+    }
+}
+
+TEST_CASE("IO/XmlUtils/Validator/bool", "[utils][Validator][bool]")
+{
+    SECTION("Valid")
+    {
+        {
+            auto * parent = new TiXmlElement("parent");
+            auto * child  = new TiXmlElement("child");
+            child->SetValue("true");
+            parent->LinkEndChild(child);
+
+            bool output = Validator<bool>::GetValue(*child);
+            REQUIRE(output);
+            delete parent;
+        }
+
+        {
+            auto * parent = new TiXmlElement("parent");
+            auto * child  = new TiXmlElement("child");
+            child->SetValue("TruE");
+            parent->LinkEndChild(child);
+
+            bool output = Validator<bool>::GetValue(*child);
+            REQUIRE(output);
+            delete parent;
+        }
+        {
+            auto * parent = new TiXmlElement("parent");
+            auto * child  = new TiXmlElement("child");
+            child->SetValue("false");
+            parent->LinkEndChild(child);
+
+            bool output = Validator<bool>::GetValue(*child);
+            REQUIRE(!output);
+            delete parent;
+        }
+        {
+            auto * parent = new TiXmlElement("parent");
+            auto * child  = new TiXmlElement("child");
+            child->SetValue("FALSE");
+            parent->LinkEndChild(child);
+
+            bool output = Validator<bool>::GetValue(*child);
+            REQUIRE(!output);
+            delete parent;
+        }
+    }
+    SECTION("Invalid")
+    {
+        // some invalid input should throw exception with helpful text message
+        {
+            auto * parent = new TiXmlElement("parent");
+            auto * child  = new TiXmlElement("child");
+            child->SetValue("NotTrueOrFalse");
+            parent->LinkEndChild(child);
+
+            bool output;
+            REQUIRE_THROWS(output = Validator<bool>::GetValue(*child));
+            delete parent;
+        }
+        {
+            auto * parent = new TiXmlElement("parent");
+            auto * child  = new TiXmlElement("child");
+            child->SetValue("012");
+            parent->LinkEndChild(child);
+            bool output;
+            REQUIRE_THROWS(output = Validator<bool>::GetValue(*child));
             delete parent;
         }
     }
