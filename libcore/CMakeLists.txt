@@ -120,6 +120,7 @@ set(header_files
     src/IO/OutputHandler.h
     src/IO/PedDistributionParser.h
     src/IO/Trajectories.h
+    src/IO/XmlUtils.h
     src/JPSfire/A_smoke_sensor/SmokeSensor.h
     src/JPSfire/B_walking_speed/WalkingSpeed.h
     src/JPSfire/C_toxicity_analysis/ToxicityAnalysis.h
@@ -244,6 +245,7 @@ if (BUILD_CPPUNIT_TEST)
     find_package(Catch2 REQUIRED)
 
     add_executable(unittests
+            test/catch2/general/XmlParsingTest.cpp
             test/catch2/geometry/LineTest.cpp
             test/catch2/geometry/ObstacleTest.cpp
             test/catch2/geometry/PointTest.cpp
