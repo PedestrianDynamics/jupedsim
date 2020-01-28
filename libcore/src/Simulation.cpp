@@ -71,8 +71,6 @@ Simulation::Simulation(Configuration * args) : _config(args)
 
 Simulation::~Simulation()
 {
-    delete _em;
-
     if(_iod) {
         _iod.reset();
     }
@@ -188,7 +186,7 @@ bool Simulation::InitArgs()
         return false;
     }
 
-    _em = new EventManager(_building.get());
+    _em = std::make_unique<EventManager>(_building.get());
     if(!_config->GetEventFile().empty()) {
         _em->AddEvents(EventFileParser::ParseEvents(_config->GetEventFile()));
     }
