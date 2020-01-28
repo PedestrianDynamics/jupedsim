@@ -37,6 +37,18 @@ int StringToInt(const std::string & input)
     }
 }
 
+double StringToDouble(const std::string & input)
+{
+    std::size_t pos;
+
+    double ret = std::stod(input, &pos);
+    if(pos == input.length()) {
+        return ret;
+    } else {
+        throw std::invalid_argument("");
+    }
+}
+
 } // namespace XmlUtil
 
 
@@ -66,6 +78,32 @@ public:
         catch(const std::out_of_range & oor) {
             auto message{fmt::format(
                 FMT_STRING("In <{}> value not in integer range: {}"),
+                node.Parent()->Value(),
+                node.Value())};
+            throw std::out_of_range(message);
+        }
+    }
+};
+
+template <>
+class Validator<double>
+{
+public:
+    static double GetValue(const TiXmlNode & node)
+    {
+        try {
+            return XmlUtil::StringToDouble(node.Value());
+        } catch(const std::invalid_argument & ia) {
+            auto message{fmt::format(
+                FMT_STRING("In <{}> expected double input but received: {}"),
+                node.Parent()->Value(),
+                node.Value())};
+            throw std::invalid_argument(message);
+        }
+
+        catch(const std::out_of_range & oor) {
+            auto message{fmt::format(
+                FMT_STRING("In <{}> value not in double range: {}"),
                 node.Parent()->Value(),
                 node.Value())};
             throw std::out_of_range(message);
