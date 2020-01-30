@@ -123,7 +123,7 @@
             <model_parameters>
                 <solver>euler</solver>
                 <stepsize>0.01</stepsize>
-                <exit_crossing_strategy>11</exit_crossing_strategy>
+                <exit_crossing_strategy>8</exit_crossing_strategy>
                 <!--<exit_crossing_strategy>8</exit_crossing_strategy>-->
                 <linkedcells enabled="true" cell_size="2.2"/>
                 <force_ped a="8" D="0.1"/>

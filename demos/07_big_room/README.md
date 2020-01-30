@@ -1,9 +1,9 @@
 ## Description
 There are two cases in this demo.
 
-*inifile_small.xml* shows 250 agents evacuating from a big room with four exits.
+*big_room_250_ini.xml* shows 250 agents evacuating from a big room with four exits.
 
-*inifile_big.xml* shows 2050 agents evacuating from the same big room.
+*big_room_2050_ini.xml* shows 2050 agents evacuating from the same big room.
 
 ## Settings
 - Model: [Collision-free Speed Model](http://www.jupedsim.org/jpscore_operativ.html#collision-free-speed-model)

@@ -6,11 +6,11 @@
     <!-- seed used for initialising random generator -->
     <seed>12542</seed>
     <!-- geometry file -->
-    <geometry>geometry.xml</geometry>
+    <geometry>source_geo.xml</geometry>
     <max_sim_time>5000</max_sim_time>
     <!-- trajectories file and format -->
     <trajectories format="xml-plain" fps="16" color_mode="group">
-      <file location="trajectories.xml" />
+      <file location="source_traj.xml" />
     </trajectories>
     <!-- where to store the logs -->
     <logfile>log.txt</logfile>

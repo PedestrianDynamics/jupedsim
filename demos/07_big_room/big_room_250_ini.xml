@@ -11,10 +11,10 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
   <show_statistics>true</show_statistics>
   <logfile>log.txt</logfile>
   <!-- geometry file -->
-  <geometry>geometry.xml</geometry>
+  <geometry>big_room_geo.xml</geometry>
   <!-- trajectories file and format -->
   <trajectories format="xml-plain" fps="8">
-    <file location="CS1_traj.xml" />
+    <file location="big_room_250_traj.xml" />
   </trajectories>
   <!-- where to store the logs -->
   <!--<logfile>log.txt</logfile> -->

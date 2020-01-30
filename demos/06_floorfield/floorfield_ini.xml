@@ -7,10 +7,10 @@
     <seed>6943</seed>
     <max_sim_time>200</max_sim_time>
     <!-- geometry file -->
-    <geometry>Kobes_geo.xml</geometry>
+    <geometry>floorfield_geo.xml</geometry>
     <!-- trajectories file and format -->
     <trajectories format="xml-plain" fps="16">
-      <file location="Kobes_traj.xml" />
+      <file location="floorfield_traj.xml" />
     </trajectories>
     <!-- where to store the logs -->
     <logfile>log.txt</logfile>
