@@ -294,6 +294,7 @@ bool RemoveBigWalls(SubRoom & subroom)
         } else {
             if(!IsConnectedWall(subroom, bigWall)) {
                 subroom.RemoveWall(bigWall);
+                wallsRemoved = true;
             }
         }
     }
