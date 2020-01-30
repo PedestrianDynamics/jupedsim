@@ -88,7 +88,7 @@ class WaitingArea;
 class Building
 {
 private:
-    Configuration * _configuration;
+    Configuration * _configuration = nullptr;
     std::shared_ptr<RoutingEngine> _routingEngine;
     std::string _caption;
     std::string _geometryFilename;
@@ -302,5 +302,4 @@ private:
     bool InitInsideGoals();
     void InitPlatforms();
     void StringExplode(std::string str, std::string separator, std::vector<std::string> * results);
-
 };

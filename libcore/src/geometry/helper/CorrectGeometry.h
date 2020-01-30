@@ -23,6 +23,13 @@
 #pragma once
 
 class Building;
+class Wall;
+class SubRoom;
+class Line;
+class Point;
+
+#include <optional>
+#include <vector>
 
 namespace geometry::helper
 {
@@ -50,5 +57,42 @@ namespace geometry::helper
  *
  */
 void CorrectInputGeometry(Building & building);
+bool RemoveOverlappingWall(const Line & exit, SubRoom & subroom);
+
+/**
+ * @brief Removes doors on walls
+ */
+bool RemoveWallsOverlappingWithDoors(SubRoom & subroom);
+std::optional<Point> ComputeSplitPoint(const Wall & wall, const Line & line);
+
+/**
+ * @brief Split a wall in several small walls
+ *
+ * search all walls+crossings+transitions that intersect <bigwall>
+ * not in an endpoint
+ *
+ * @param subroom: subroom containing <bigwall>
+ * @param bigWall: wall to split
+ * @return std::vector: a vector of all small walls. Can be empty.
+ */
+std::optional<std::vector<Wall>> SplitWall(const SubRoom & subroom, const Wall & bigWall);
+bool IsPointAndSubroomIncident(const SubRoom & subroom, const Point & point, const Wall & wall);
+bool SubroomHasWall(const SubRoom & subroom, const Wall & wall);
+
+/**
+ * @brief Checks if the wall is inside the polygon of the subroom and does not exist already
+ */
+bool IsConnectedWall(const SubRoom & subroom, const Wall & wall);
+
+/**
+ * @brief Adds wall pieces to a subroom if they are new and connected
+ */
+int AddWallToSubroom(SubRoom & subroom, const std::vector<Wall> & wallPieces);
+
+/**
+ * @brief Replace BigWall with some of the wallPieces
+ */
+void ReplaceBigWall(SubRoom & subroom, const Wall & bigWall, const std::vector<Wall> & wallPieces);
+bool RemoveBigWalls(SubRoom & subroom);
 
 } // namespace geometry::helper
