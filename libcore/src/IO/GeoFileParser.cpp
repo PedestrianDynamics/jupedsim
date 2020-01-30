@@ -311,6 +311,7 @@ bool GeoFileParser::LoadGeometry(Building * building)
     } // xTransNode
     LOG_INFO("Loading building file successful.");
 
+    ParseExternalFiles(*xRootNode);
     //everything went fine
     return true;
 }
@@ -1091,6 +1092,20 @@ std::shared_ptr<TrainType> GeoFileParser::parseTrainTypeNode(TiXmlElement * e)
         doors,
     });
     return Type;
+}
+
+bool GeoFileParser::ParseExternalFiles(const TiXmlNode & mainNode)
+{
+    // read external transition file
+    if(mainNode.FirstChild("transitions") &&
+       mainNode.FirstChild("transitions")->FirstChild("file")) {
+        fs::path transitionFile =
+            _configuration->GetProjectRootDir() /
+            mainNode.FirstChild("transitions")->FirstChild("file")->FirstChild()->Value();
+        _configuration->SetTransitionFile(fs::weakly_canonical(transitionFile));
+    }
+
+    return true;
 }
 
 GeoFileParser::~GeoFileParser() {}

@@ -159,6 +159,7 @@ void IniFileParser::Parse(const fs::path & iniFile)
     if(!ParseRoutingStrategies(xRouters, xAgentDistri))
         throw std::logic_error("Error while parsing routing strategies.");
 
+    ParseExternalFiles(*xMainNode);
     LOG_INFO("Parsing the project file completed");
 }
 
@@ -222,6 +223,17 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         LOG_INFO("Show statistics: {}", value);
     }
 
+    // Results Output Path
+    auto * xmlOutput = xHeader->FirstChildElement("output");
+    if(xmlOutput != nullptr) {
+        auto * xmlOutputPath = xmlOutput->Attribute("path");
+        if(xmlOutputPath != nullptr) {
+            _config->SetOutputPath(xmlOutputPath);
+        }
+    }
+    _config->ConfigureOutputPath();
+    LOG_INFO("Output Path configured <{}>", _config->GetOutputPath().string());
+
     //trajectories
     TiXmlNode * xTrajectories = xHeader->FirstChild("trajectories");
     if(xTrajectories) {
@@ -266,45 +278,46 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         if(color_mode == "intermediate_goal")
             Pedestrian::SetColorMode(AgentColorMode::BY_INTERMEDIATE_GOAL);
 
+        fs::path trajectoryFile = _config->GetTrajectoriesFile();
         //a file descriptor was given
         if(xTrajectories->FirstChild("file")) {
             const fs::path trajLoc(xTrajectories->FirstChildElement("file")->Attribute("location"));
             if(!trajLoc.empty()) {
-                const fs::path & root(
-                    _config->GetProjectRootDir()); // returns an absolute path already
-                fs::path canonicalTrajPath = fs::weakly_canonical(root / trajLoc);
-
-                std::string extension = (canonicalTrajPath.has_extension()) ?
-                                            (canonicalTrajPath.extension().string()) :
-                                            ("");
-                std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
-
-                // check file extension and if it is not matching the intended format,
-                // change it to correct one
-                switch(_config->GetFileFormat()) {
-                    case FileFormat::XML: {
-                        if(extension != ".xml") {
-                            canonicalTrajPath.replace_extension(".xml");
-                            LOG_WARNING("replaced output file extension with: .xml");
-                        }
-                        break;
-                    }
-                    case FileFormat::TXT: {
-                        if(extension != ".txt") {
-                            canonicalTrajPath.replace_extension(".txt");
-                            LOG_WARNING("replaced output file extension with: .txt");
-                        }
-
-                        break;
-                    }
-                }
-                _config->SetTrajectoriesFile(canonicalTrajPath);
-                _config->SetOriginalTrajectoriesFile(canonicalTrajPath);
+                trajectoryFile = trajLoc;
             }
-
-            LOG_INFO("Output file  <{}>", _config->GetTrajectoriesFile().string());
-            LOG_INFO("In format <{}> at <{:.0f}> frames per seconds", format, _config->GetFps());
         }
+        std::string extension =
+            (trajectoryFile.has_extension()) ? (trajectoryFile.extension().string()) : ("");
+        std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+
+        // check file extension and if it is not matching the intended format,
+        // change it to correct one
+        switch(_config->GetFileFormat()) {
+            case FileFormat::XML: {
+                if(extension != ".xml") {
+                    trajectoryFile.replace_extension(".xml");
+                    LOG_WARNING("replaced output file extension with: .xml");
+                }
+                break;
+            }
+            case FileFormat::TXT: {
+                if(extension != ".txt") {
+                    trajectoryFile.replace_extension(".txt");
+                    LOG_WARNING("replaced output file extension with: .txt");
+                }
+                break;
+            }
+        }
+
+        fs::path canonicalTrajPath =
+            fs::weakly_canonical(_config->GetOutputPath() / trajectoryFile);
+
+        _config->SetTrajectoriesFile(canonicalTrajPath);
+        _config->SetOriginalTrajectoriesFile(canonicalTrajPath);
+
+        LOG_INFO("Output file  <{}>", _config->GetTrajectoriesFile().string());
+        LOG_INFO("In format <{}> at <{:.0f}> frames per seconds", format, _config->GetFps());
+
 
         if(xTrajectories->FirstChild("optional_output")) {
             LOG_WARNING("These optional options do only work with plain output format!");
@@ -1221,5 +1234,69 @@ bool IniFileParser::ParseFfOpts(const TiXmlNode & strategyNode)
         else
             LOG_INFO("UseWAD: no");
     }
+    return true;
+}
+
+bool IniFileParser::ParseExternalFiles(const TiXmlNode & mainNode)
+{
+    // read external traffic constraints file name
+    if(mainNode.FirstChild("traffic_constraints") &&
+       mainNode.FirstChild("traffic_constraints")->FirstChild("file")) {
+        fs::path trafficFile =
+            _config->GetProjectRootDir() /
+            mainNode.FirstChild("traffic_constraints")->FirstChild("file")->FirstChild()->Value();
+        _config->SetTrafficContraintFile(fs::weakly_canonical(trafficFile));
+    }
+
+    // read external goals file name
+    if(mainNode.FirstChild("routing") && mainNode.FirstChild("routing")->FirstChild("goals") &&
+       mainNode.FirstChild("routing")->FirstChild("goals")->FirstChild("file")) {
+        fs::path goalFile = _config->GetProjectRootDir() / mainNode.FirstChild("routing")
+                                                               ->FirstChild("goals")
+                                                               ->FirstChild("file")
+                                                               ->FirstChild()
+                                                               ->Value();
+        _config->SetGoalFile(fs::weakly_canonical(goalFile));
+    }
+
+    // read external sources file name
+    if(mainNode.FirstChild("agents") &&
+       mainNode.FirstChild("agents")->FirstChild("agents_sources") &&
+       mainNode.FirstChild("agents")->FirstChild("agents_sources")->FirstChild("file")) {
+        fs::path sourceFile = _config->GetProjectRootDir() / mainNode.FirstChild("agents")
+                                                                 ->FirstChild("agents_sources")
+                                                                 ->FirstChild("file")
+                                                                 ->FirstChild()
+                                                                 ->Value();
+        _config->SetSourceFile(fs::weakly_canonical(sourceFile));
+    }
+
+    // read external event file name
+    if(mainNode.FirstChild("events_file")) {
+        fs::path eventFile = _config->GetProjectRootDir() /
+                             mainNode.FirstChild("events_file")->FirstChild()->Value();
+        _config->SetEventFile(fs::weakly_canonical(eventFile));
+    } else if(
+        mainNode.FirstChild("header") && mainNode.FirstChild("header")->FirstChild("events_file")) {
+        fs::path eventFile =
+            _config->GetProjectRootDir() /
+            mainNode.FirstChild("header")->FirstChild("events_file")->FirstChild()->Value();
+        _config->SetEventFile(fs::weakly_canonical(eventFile));
+    }
+
+    // read external schedule file name
+    if(mainNode.FirstChild("schedule_file")) {
+        fs::path scheduleFile = _config->GetProjectRootDir() /
+                                mainNode.FirstChild("schedule_file")->FirstChild()->Value();
+        _config->SetScheduleFile(fs::weakly_canonical(scheduleFile));
+    } else if(
+        mainNode.FirstChild("header") &&
+        mainNode.FirstChild("header")->FirstChild("schedule_file")) {
+        fs::path scheduleFile =
+            _config->GetProjectRootDir() /
+            mainNode.FirstChild("header")->FirstChild("schedule_file")->FirstChild()->Value();
+        _config->SetScheduleFile(fs::weakly_canonical(scheduleFile));
+    }
+
     return true;
 }

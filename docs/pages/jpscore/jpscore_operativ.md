@@ -37,7 +37,7 @@ numerical instabilities, collisions and overlapping among pedestrians.
 
 - `<linkedcells enabled="true" cell_size="2"/>`
      - Defines the size of the cells. This is important to get the neighbors of a pedestrians, which
-       are all pedestrians within the eight neighboring cells. Larger cells, lead so slower simulations, since
+       are all pedestrians within the eight neighboring cells. Larger cells, lead to slower simulations, since
        more pedestrian-pedestrian interactions need to be calculated.
      - Unit: m
 
@@ -88,7 +88,7 @@ $$
 b = b_{max} - (b_{max}-b_{min})\frac{v}{v^0}.
 $$
 
-$$v$$ is the peed of a pedestrian.
+$$v$$ is the speed of a pedestrian.
 
 - `<bmax mu="0.15" sigma="0.0" />`
     - Maximal length of the shoulder semi-axis
@@ -128,10 +128,10 @@ Usage:
 Besides the options defined in [Model parameters](#model-parameters-in-general) the following options are necessary for this model:
 
 - `<force_ped  a="5" D="0.2"/>`
-     - The influence of other pedestrians is triggered by $$a$$ and $$D$$ where $$a$$ is the strength if the interaction and $$D$$ gives its range. The naming may be misleading, since the model is **not** force-based, but velocity-based.
+     - The influence of other pedestrians is triggered by $$a$$ and $$D$$ where $$a$$ is the strength of the interaction and $$D$$ gives its range. The naming may be misleading, since the model is **not** force-based, but velocity-based.
      - Unit: m
 - `<force_wall a="5" D="0.02"/>`:
-     - The influence of  walls is triggered by $$a$$ and $$D$$ where $$a$$ is the strength if the interaction and $$D$$ gives its range. A larger value of $$D$$ may lead to blockades, especially when passing narrow bottlenecks.
+     - The influence of  walls is triggered by $$a$$ and $$D$$ where $$a$$ is the strength of the interaction and $$D$$ gives its range. A larger value of $$D$$ may lead to blockades, especially when passing narrow bottlenecks.
      - Unit: m
 
 The names of the aforementioned parameters might be misleading, since the model is *not* force-based. The naming will be changed in the future.

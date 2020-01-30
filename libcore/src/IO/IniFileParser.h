@@ -67,6 +67,8 @@ private:
 
     bool ParseFfOpts(const TiXmlNode & strategyNode);
 
+    bool ParseExternalFiles(const TiXmlNode & xMain);
+
     Configuration * _config;
     int _model;
     std::shared_ptr<DirectionStrategy> _directionStrategy;

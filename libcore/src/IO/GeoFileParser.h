@@ -47,6 +47,7 @@ public:
     bool LoadTrainType(Building * building, TiXmlElement * xRootNode);
     std::shared_ptr<TrainType> parseTrainTypeNode(TiXmlElement * e);
     std::shared_ptr<TrainTimeTable> parseTrainTimeTableNode(TiXmlElement * e);
+    bool ParseExternalFiles(const TiXmlNode & mainNode);
 
 private:
     Configuration * _configuration;

@@ -15,7 +15,6 @@ set(source_files
     src/events/Event.cpp
     src/events/EventManager.cpp
     src/general/ArgumentParser.cpp
-    src/general/Filesystem.cpp
     src/general/Logger.cpp
     src/geometry/Building.cpp
     src/geometry/Crossing.cpp

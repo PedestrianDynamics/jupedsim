@@ -220,6 +220,11 @@ const std::shared_ptr<StartDistribution> AgentsSource::GetStartDistribution() co
 void AgentsSource::GenerateAgents(std::vector<Pedestrian *> & peds, int count, Building * building)
 {
     std::vector<Point> emptyPositions;
+    // TODO: this vector is empty with purpose!
+    //       1. Source-Pedestrians are created without setting their positions.
+    //       2. In a second step (in AgentsSourcesManager::ProcessAllSources())
+    //          the positions will be calculated and initializes.
+    // TODO: We should reverse the order of points 1 and 2.
     int pid;
     pid = (this->GetAgentId() >= 0) ?
               this->GetAgentId() :
@@ -227,20 +232,8 @@ void AgentsSource::GenerateAgents(std::vector<Pedestrian *> & peds, int count, B
     for(int i = 0; i < count; i++) {
         if(GetStartDistribution()) {
             auto ped = GetStartDistribution()->GenerateAgent(building, &pid, emptyPositions);
-            if(ped->FindRoute() == -1) {
-                // Sometimes the router can not find a target for ped
-                auto transitions = building->GetAllTransitions();
-                auto transition  = transitions.begin()->second; //dummy
-                int trans_ID     = transition->GetID();
-                ped->SetExitLine(transition); // set dummy line
-                ped->SetExitIndex(trans_ID);
-            }
-
-            //
             peds.push_back(ped);
-        }
-
-        else {
+        } else {
             std::cout << " \n Source: StartDistribution is null!\n"
                          " This happens when group_id in <source> does not much any group_id in "
                          "<agents>\n"

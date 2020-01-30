@@ -47,7 +47,7 @@ Doors have three statuses:
 
 They can all be set and changed by an event. 
 
-Heew are the rules governing the changes from one status to another:
+Here are the rules governing the changes from one status to another:
 
 * Events have priority before the door-flow regulation.
 * When max_agents are reached the door status is _close_.

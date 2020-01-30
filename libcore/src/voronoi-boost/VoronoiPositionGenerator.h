@@ -93,15 +93,3 @@ void VoronoiBestVertexRand(
     voronoi_diagram<double>::const_vertex_iterator & max_it,
     double & max_dis,
     double radius);
-
-/**
-         * Gives a person the mean velocity of his voronoi-neighbours
-         * @param vd
-         * @param chosen_it
-         * @param velocities_vector
-         */
-void VoronoiAdjustVelocityNeighbour(
-    voronoi_diagram<double>::const_vertex_iterator & chosen_it,
-    Pedestrian * ped,
-    const std::vector<Point> & velocities_vector,
-    const std::vector<int> & goal_vector);
