@@ -81,6 +81,14 @@ bool AgentsSourcesManager::ProcessAllSources() const
             src->ResetRemainingAgents();
 
         bool timeToCreate = newCycle || subCycle;
+        LOG_DEBUG(
+            "timeToCreate: {} pool size: {} plan time < current time: {} inTime: {} "
+            "remainingAgents: {}",
+            timeToCreate,
+            src->GetPoolSize(),
+            (src->GetPlanTime() <= current_time),
+            inTime,
+            src->GetRemainingAgents());
         if(timeToCreate && src->GetPoolSize() && (src->GetPlanTime() <= current_time) && inTime &&
            src->GetRemainingAgents()) // maybe diff<eps
         {
@@ -130,7 +138,6 @@ void AgentsSourcesManager::InitFixedPosition(AgentsSource * src, std::vector<Ped
         ped->SetPos(Point(src->GetStartX(), src->GetStartY()));
     }
 }
-
 
 
 void AgentsSourcesManager::AdjustVelocityByNeighbour(Pedestrian * ped) const

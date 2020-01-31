@@ -430,7 +430,8 @@ void Simulation::RunHeader(long nPed)
     //first initialisation needed by the linked-cells
     UpdateRoutesAndLocations();
     // KKZ: RunBody calls this as one of the firs things, hence this can be removed
-    // ProcessAgentsQueue();
+    _agentSrcManager.GenerateAgents();
+    AddNewAgents();
 }
 
 double Simulation::RunBody(double maxSimTime)
