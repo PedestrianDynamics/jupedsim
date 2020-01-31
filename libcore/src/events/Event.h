@@ -19,46 +19,55 @@ public:
       * Constructor
       * @param id
       * @param time
-      * @param type
       * @param state
       */
-    Event(int id, double time, const std::string & type, const std::string & state);
+    Event(int id, double time, const std::string & state);
 
     /**
       * Destructor
       */
-    virtual ~Event();
+    ~Event() = default;
 
     /**
       * @return the id of the event
       */
-    int GetId() const;
+    [[nodiscard]] int GetId() const;
 
     /**
       * @return the type of the event
       */
-    const EventAction & GetAction() const;
+    [[nodiscard]] const EventAction & GetAction() const;
 
     /**
       * @return the time at which the event was recorded
       */
-    double GetTime() const;
+    [[nodiscard]] double GetTime() const;
 
     /**
-      * @return the type of the event (room, door)
+      * @return a description of the event
       */
-    const std::string & GetType() const;
-
-    /**
-      * return a description of the event
-      */
-    const std::string GetDescription() const;
+    [[nodiscard]] std::string GetDescription() const;
 
 private:
+    /**
+     * Time when the event should be executed.
+     */
     double _time;
+
+    /**
+     * ID of transition which is effected by event.
+     */
     int _id;
-    std::string _type;
+
+    /**
+     * Action which should be performed.
+     */
     EventAction _action;
 
-    EventAction StringToEventAction(const std::string &);
+    /**
+     * Helper function to get the Action from the input.
+     * @param input Input string
+     * @return Action which is identified by \p input
+     */
+    static EventAction StringToEventAction(const std::string & input);
 };

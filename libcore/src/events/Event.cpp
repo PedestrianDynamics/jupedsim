@@ -9,15 +9,13 @@
 
 #include <algorithm>
 
-Event::Event(int id, double time, const std::string & type, const std::string & state)
+Event::Event(int id, double time, const std::string & state)
 {
     _id     = id;
     _time   = time;
-    _type   = type;
     _action = StringToEventAction(state);
 }
 
-Event::~Event() {}
 
 int Event::GetId() const
 {
@@ -34,12 +32,7 @@ double Event::GetTime() const
     return _time;
 }
 
-const std::string & Event::GetType() const
-{
-    return _type;
-}
-
-const std::string Event::GetDescription() const
+std::string Event::GetDescription() const
 {
     char tmp[1024];
     std::string state;
