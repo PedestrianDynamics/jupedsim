@@ -192,12 +192,12 @@ bool Simulation::InitArgs()
     }
     if(!_config->GetScheduleFile().empty()) {
         _em->AddEvents(EventFileParser::ParseSchedule(_config->GetScheduleFile()));
-    }
 
-    // Read and set max door usage from schedule file
-    auto groupMaxAgents = EventFileParser::ParseMaxAgents(_config->GetScheduleFile());
-    for(auto const [transID, maxAgents] : groupMaxAgents) {
-        _building->GetTransition(transID)->SetMaxDoorUsage(maxAgents);
+        // Read and set max door usage from schedule file
+        auto groupMaxAgents = EventFileParser::ParseMaxAgents(_config->GetScheduleFile());
+        for(auto const [transID, maxAgents] : groupMaxAgents) {
+            _building->GetTransition(transID)->SetMaxDoorUsage(maxAgents);
+        }
     }
 
     _goalManager.SetBuilding(_building.get());

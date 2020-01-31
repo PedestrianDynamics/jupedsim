@@ -421,38 +421,6 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         }
     }
 
-    //event file
-    if(xHeader->FirstChild("events_file") && xHeader->FirstChild("events_file")->FirstChild()) {
-        const fs::path eventFile = xHeader->FirstChild("events_file")->FirstChild()->Value();
-        if(!eventFile.empty() && fs::exists(eventFile)) {
-            _config->SetEventFile(_config->GetProjectRootDir() / eventFile);
-            LOG_INFO("Events are read from: <{}>", _config->GetEventFile().string());
-        } else {
-            LOG_WARNING(
-                "Event file is empty or the file does not exists. No events are used in the "
-                "simulation: <{}>",
-                eventFile.string());
-        }
-    } else {
-        LOG_INFO("No event file given.");
-    }
-
-    //schedule file
-    if(xHeader->FirstChild("schedule_file") && xHeader->FirstChild("schedule_file")->FirstChild()) {
-        const fs::path scheduleFile = xHeader->FirstChild("schedule_file")->FirstChild()->Value();
-        if(!scheduleFile.empty() && fs::exists(scheduleFile)) {
-            _config->SetScheduleFile(_config->GetProjectRootDir() / scheduleFile);
-            LOG_INFO("Schedule is read from: <{}>", _config->GetScheduleFile().string());
-        } else {
-            LOG_WARNING(
-                "Schedule file is empty or the file does not exists. No schedule is used in the "
-                "simulation: <{}>",
-                scheduleFile.string());
-        }
-    } else {
-        LOG_INFO("No schedule file given.");
-    }
-
     return true;
 }
 
@@ -1296,30 +1264,39 @@ bool IniFileParser::ParseExternalFiles(const TiXmlNode & mainNode)
     }
 
     // read external event file name
-    if(mainNode.FirstChild("events_file")) {
-        fs::path eventFile = _config->GetProjectRootDir() /
-                             mainNode.FirstChild("events_file")->FirstChild()->Value();
-        _config->SetEventFile(fs::weakly_canonical(eventFile));
+    fs::path eventFile;
+    if(mainNode.FirstChild("events_file") && mainNode.FirstChild("events_file")->FirstChild()) {
+        eventFile = mainNode.FirstChild("events_file")->FirstChild()->Value();
     } else if(
-        mainNode.FirstChild("header") && mainNode.FirstChild("header")->FirstChild("events_file")) {
-        fs::path eventFile =
-            _config->GetProjectRootDir() /
-            mainNode.FirstChild("header")->FirstChild("events_file")->FirstChild()->Value();
-        _config->SetEventFile(fs::weakly_canonical(eventFile));
+        mainNode.FirstChild("header") && mainNode.FirstChild("header")->FirstChild("events_file") &&
+        mainNode.FirstChild("header")->FirstChild("events_file")->FirstChild()) {
+        eventFile = mainNode.FirstChild("header")->FirstChild("events_file")->FirstChild()->Value();
+    } else {
+        LOG_INFO("No event file given.");
+    }
+
+    if(!eventFile.empty()) {
+        _config->SetEventFile(fs::weakly_canonical(_config->GetProjectRootDir() / eventFile));
+        LOG_INFO("Events are read from: <{}>", _config->GetEventFile().string());
     }
 
     // read external schedule file name
-    if(mainNode.FirstChild("schedule_file")) {
-        fs::path scheduleFile = _config->GetProjectRootDir() /
-                                mainNode.FirstChild("schedule_file")->FirstChild()->Value();
-        _config->SetScheduleFile(fs::weakly_canonical(scheduleFile));
+    fs::path scheduleFile;
+    if(mainNode.FirstChild("schedule_file") && mainNode.FirstChild("schedule_file")->FirstChild()) {
+        scheduleFile = mainNode.FirstChild("schedule_file")->FirstChild()->Value();
     } else if(
         mainNode.FirstChild("header") &&
-        mainNode.FirstChild("header")->FirstChild("schedule_file")) {
-        fs::path scheduleFile =
-            _config->GetProjectRootDir() /
+        mainNode.FirstChild("header")->FirstChild("schedule_file") &&
+        mainNode.FirstChild("header")->FirstChild("schedule_file")->FirstChild()) {
+        scheduleFile =
             mainNode.FirstChild("header")->FirstChild("schedule_file")->FirstChild()->Value();
-        _config->SetScheduleFile(fs::weakly_canonical(scheduleFile));
+    } else {
+        LOG_INFO("No schedule file given.");
+    }
+
+    if(!scheduleFile.empty()) {
+        _config->SetScheduleFile(fs::weakly_canonical(_config->GetProjectRootDir() / scheduleFile));
+        LOG_INFO("Schedule is read from: <{}>", _config->GetScheduleFile().string());
     }
 
     return true;
