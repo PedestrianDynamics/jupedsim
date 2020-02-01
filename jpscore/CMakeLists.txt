@@ -4,7 +4,7 @@
 add_executable(jpscore
     src/main.cpp
     forms/jpscore.rc
-    forms/JPScore.ico
+    forms/JPScore.icns
 )
 target_compile_options(jpscore PRIVATE
     ${COMMON_COMPILE_OPTIONS}
@@ -64,10 +64,10 @@ endif()
 install(TARGETS jpscore
         DESTINATION bin
         COMPONENT applications)
-if(WIN32)
-    set(CT_DATA_FILE_DIR "demos")
-    file(GLOB CT_FILES "${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/*/*")
-    install(FILES ${CT_FILES}
-            DESTINATION ${CT_DATA_FILE_DIR}
-            COMPONENT demos)
-endif()
+
+set(CT_DATA_FILE_DIR "demos")
+file(GLOB CT_FILES "${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/*/*")
+install(FILES ${CT_FILES}
+  DESTINATION ${CT_DATA_FILE_DIR}
+  COMPONENT demos)
+
