@@ -263,8 +263,7 @@ endif (BUILD_TESTING)
 ################################################################################
 # Packaging with CPack
 ################################################################################
-IF(UNIX AND NOT APPLE)
-    message(STATUS "Package generation - LINUX")
+IF(UNIX)
     SET(CPACK_GENERATOR "DEB")
     SET(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
     SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://jupedsim.org")
@@ -292,30 +291,15 @@ if(WIN32 AND NOT UNIX)
     install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
             DESTINATION sys
             COMPONENT applications)
-endif()
-if(APPLE)
-  message(STATUS "Package generation - MacOS")
-# Destination paths below are relative to ${CMAKE_INSTALL_PREFIX}
-install(TARGETS jpscore
-    BUNDLE DESTINATION . COMPONENT Runtime
-    RUNTIME DESTINATION bin COMPONENT Runtime
-    )
-
-# Directories to look for dependencies
-set(DIRS ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/build/deps)
-
-install(CODE "include(BundleUtilities)
-    fixup_bundle(\"${APPS}\" \"\" \"${DIRS}\")")
-
-set(CPACK_GENERATOR "DragNDrop")
+elseif(APPLE)
+    set(DEFAULT_CPACK_GENERATOR "DragNDrop")
 endif()
 
 set(CPACK_COMPONENTS_ALL applications)
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
-set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
-set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/jpscore/forms/JPScore.ico")
-set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/jpscore/forms/JPScore.ico")
-set(CPACK_DMG_BACKGROUND_IMAGE  "${CMAKE_SOURCE_DIR}/jpscore/forms/JPScore.ico")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/LICENSE")
+set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/forms/jpscore.ico")
+set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/forms/jpscore.ico")
 set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
 set(CPACK_NSIS_MODIFY_PATH ON)
 set(CPACK_COMPONENTS_ALL applications demos)
@@ -326,9 +310,12 @@ set(CPACK_COMPONENT_DATA_FILES_DESCRIPTION "demo files to get started")
 SET(CPACK_PACKAGE_DESCRIPTION "Simulation core of JuPedSim")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The simulation core of JuPedSim, a framework for simulation and analysis of pedestrian dynamics")
 SET(CPACK_PACKAGE_VENDOR "Forschungszentrum Juelich GmbH")
-SET(CPACK_PACKAGE_NAME ${CMAKE_PROJECT_NAME})
+SET(CPACK_PACKAGE_NAME "jpscore")
 SET(CPACK_PACKAGE_CONTACT "m.chraibi@fz-juelich.de")
-SET(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${PROJECT_VERSION}")
-SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${PROJECT_VERSION}")
-print_var(CPACK_SOURCE_PACKAGE_FILE_NAME)
+SET(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_MAJOR_VERSION}")
+SET(CPACK_PACKAGE_VERSION_MINOR "${PROJET_MINOR_VERSION}")
+SET(CPACK_PACKAGE_VERSION_PATCH "${PROJET_PATCH_VERSION}")
+SET(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${PROJET_VERSION}")
+SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${PROJET_VERSION}")
+
 INCLUDE(CPack)
