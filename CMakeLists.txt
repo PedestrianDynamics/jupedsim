@@ -263,72 +263,15 @@ endif (BUILD_TESTING)
 ################################################################################
 # Packaging with CPack
 ################################################################################
+include(CPackUtilities)
 IF(UNIX AND NOT APPLE)
-    message(STATUS "Package generation - LINUX")
-    SET(CPACK_GENERATOR "DEB")
-    SET(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-    SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://jupedsim.org")
-    SET(CPACK_DEBIAN_PACKAGE_SUGGESTS, "jpsvis, jpsreport, jpseditor")
-    SET(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-    SET(CPACK_DEBIAN_PACKAGE_SECTION "science")
-    SET(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+  cpack_write_deb_config()
 endif()
 if(WIN32 AND NOT UNIX)
-    message(STATUS "Package generation - Windows")
-    set(CPACK_GENERATOR "NSIS")
-    find_program(NSIS_PATH nsis PATH_SUFFIXES nsis)
-    if(NSIS_PATH)
-        set(CPACK_GENERATOR "${CPACK_GENERATOR};NSIS")
-        message(STATUS "   + NSIS                                 YES ")
-    else(NSIS_PATH)
-        message(STATUS "   + NSIS                                 NO ")
-    endif(NSIS_PATH)
-
-    #CPACK_NSIS_URL_INFO_ABOUT
-    set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
-    include(InstallRequiredSystemLibraries)
-
-    message(STATUS "System Dependencies: " ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
-    install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
-            DESTINATION sys
-            COMPONENT applications)
+  cpack_write_windows_config()
 endif()
 if(APPLE)
-  message(STATUS "Package generation - MacOS")
-# Destination paths below are relative to ${CMAKE_INSTALL_PREFIX}
-install(TARGETS jpscore
-    BUNDLE DESTINATION . COMPONENT Runtime
-    RUNTIME DESTINATION bin COMPONENT Runtime
-    )
-
-# Directories to look for dependencies
-set(DIRS ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/build/deps)
-
-install(CODE "include(BundleUtilities)
-    fixup_bundle(\"${APPS}\" \"\" \"${DIRS}\")")
-
-set(CPACK_GENERATOR "DragNDrop")
+  cpack_write_osx_config()
 endif()
 
-set(CPACK_COMPONENTS_ALL applications)
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
-set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
-set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/jpscore/forms/JPScore.ico")
-set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/jpscore/forms/JPScore.ico")
-set(CPACK_DMG_BACKGROUND_IMAGE  "${CMAKE_SOURCE_DIR}/jpscore/forms/JPScore.ico")
-set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
-set(CPACK_NSIS_MODIFY_PATH ON)
-set(CPACK_COMPONENTS_ALL applications demos)
-set(CPACK_COMPONENT_CTDATA_GROUP "Demos")
-set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "jpscore and dlls")
-set(CPACK_COMPONENT_GROUP_DATA_DESCRIPTION "demo files")
-set(CPACK_COMPONENT_DATA_FILES_DESCRIPTION "demo files to get started")
-SET(CPACK_PACKAGE_DESCRIPTION "Simulation core of JuPedSim")
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The simulation core of JuPedSim, a framework for simulation and analysis of pedestrian dynamics")
-SET(CPACK_PACKAGE_VENDOR "Forschungszentrum Juelich GmbH")
-SET(CPACK_PACKAGE_NAME ${CMAKE_PROJECT_NAME})
-SET(CPACK_PACKAGE_CONTACT "m.chraibi@fz-juelich.de")
-SET(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${PROJECT_VERSION}")
-SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${PROJECT_VERSION}")
-print_var(CPACK_SOURCE_PACKAGE_FILE_NAME)
-INCLUDE(CPack)
+cpack_write_config()
