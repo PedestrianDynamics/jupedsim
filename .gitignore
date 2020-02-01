@@ -192,3 +192,7 @@ titlepage.tex
 
 __pycache__
 ipynb_checkpoints/
+
+# Ignore vscode workspace files
+*.code-workspace
+.vscode

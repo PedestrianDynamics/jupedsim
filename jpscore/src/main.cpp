@@ -67,7 +67,6 @@ int main(int argc, char ** argv)
         iniFileParser.Parse(a.IniFilePath());
     } catch(const std::exception & e) {
         LOG_ERROR("Exception in IniFileParser::Parse thrown, what: {}", e.what());
-
         return EXIT_FAILURE;
     }
 
