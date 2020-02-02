@@ -78,7 +78,7 @@ target_compile_definitions(report PUBLIC
 add_executable(jpsreport
     main.cpp
     forms/jpsreport.rc
-    forms/JPSreport.icns
+    forms/JPSreport.ico
 )
 
 target_compile_options(jpsreport PRIVATE
