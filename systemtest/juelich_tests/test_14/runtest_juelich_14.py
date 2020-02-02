@@ -51,8 +51,8 @@ def runtest14(inifile, trajfile):
 
 if __name__ == "__main__":
     PX = []  #p-value for x
-    PY = []  #p-value for y
-    test = JPSRunTestDriver(14, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
+    PY = []  # p-value for y
+    test = JPSRunTestDriver(14, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir, jpscore=argv[1])
     results = test.run_test(testfunction=runtest14)
     results = np.array(results)
     PX = results[:, 0]
