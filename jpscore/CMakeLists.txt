@@ -68,6 +68,6 @@ install(TARGETS jpscore
 set(CT_DATA_FILE_DIR "demos")
 file(GLOB CT_FILES "${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/*/*")
 install(FILES ${CT_FILES}
-  DESTINATION ${CT_DATA_FILE_DIR}
-  COMPONENT demos)
+  DESTINATION "jpscore_samples"
+  COMPONENT jpscore_samples)
 

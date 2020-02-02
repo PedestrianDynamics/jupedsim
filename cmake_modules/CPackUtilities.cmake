@@ -14,16 +14,11 @@ function (cpack_write_osx_config)
   message(STATUS "Package generation - MacOS")
   set(CPACK_GENERATOR "DragNDrop" PARENT_SCOPE)
   set(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_SOURCE_DIR}/jpscore/forms/background.png" PARENT_SCOPE)
+  set(CPACK_DMG_DS_STORE "${CMAKE_SOURCE_DIR}/jpscore/forms/DS_Store.scpt" PARENT_SCOPE)
+  set(CPACK_DMG_DISABLE_APPLICATIONS_SYMLINK ON  PARENT_SCOPE)
   set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/jpscore/forms/JPScore.icns" PARENT_SCOPE)
   set(CPACK_DMG_VOLUME_NAME "${PROJECT_NAME}" PARENT_SCOPE)
   set(CPACK_SYSTEM_NAME "OSX" PARENT_SCOPE)
-  set(DIRS ${CMAKE_BINARY_DIR})
-  # ${CMAKE_SOURCE_DIR}/build/deps
-
-  install(TARGETS jpscore
-    BUNDLE DESTINATION . COMPONENT Runtime
-    RUNTIME DESTINATION bin COMPONENT Runtime
-    )
 endfunction()
 
 function (cpack_write_windows_config)
@@ -70,18 +65,26 @@ function (cpack_write_config)
   set(CPACK_COMPONENTS_ALL applications PARENT_SCOPE)
   set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE" PARENT_SCOPE)
   set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md" PARENT_SCOPE)
-  set(CPACK_COMPONENTS_ALL applications demos PARENT_SCOPE)
-  set(CPACK_COMPONENT_CTDATA_GROUP "Demos" PARENT_SCOPE)
-  set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "jpscore and dlls" PARENT_SCOPE)
-  set(CPACK_COMPONENT_GROUP_DATA_DESCRIPTION "demo files" PARENT_SCOPE)
-  set(CPACK_COMPONENT_DATA_FILES_DESCRIPTION "demo files to get started" PARENT_SCOPE)
-  set(CPACK_PACKAGE_DESCRIPTION "Simulation core of JuPedSim" PARENT_SCOPE)
-  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The simulation core of JuPedSim, a framework for simulation and analysis of pedestrian dynamics" PARENT_SCOPE)
+  set(CPACK_COMPONENTS_ALL applications jpscore_samples jpsreport_samples PARENT_SCOPE)
+  set(CPACK_COMPONENT_CTDATA_GROUP "Sample files" PARENT_SCOPE)
+  set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "jpscore and jpsreport" PARENT_SCOPE)
+  set(CPACK_COMPONENT_GROUP_DATA_DESCRIPTION "Sample files" PARENT_SCOPE)
+  set(CPACK_COMPONENT_DATA_FILES_DESCRIPTION "Sample files to get started" PARENT_SCOPE)
+  set(CPACK_PACKAGE_DESCRIPTION "jpscore and jpsreport" PARENT_SCOPE)
+  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "JuPeSim: framework for simulation and analysis of pedestrian dynamics" PARENT_SCOPE)
   set(CPACK_PACKAGE_VENDOR "Forschungszentrum Juelich GmbH" PARENT_SCOPE)
   set(CPACK_PACKAGE_NAME ${CMAKE_PROJECT_NAME} PARENT_SCOPE)
   set(CPACK_PACKAGE_CONTACT "m.chraibi@fz-juelich.de" PARENT_SCOPE)
   set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${PROJECT_VERSION}" PARENT_SCOPE)
   set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${PROJECT_VERSION}")
+  install(FILES "${CMAKE_SOURCE_DIR}/LICENSE"
+    DESTINATION .
+    COMPONENT Documents)
+
+  install(FILES "${CMAKE_SOURCE_DIR}/README.md"
+    DESTINATION .
+    COMPONENT Documents)
+
   print_var(CPACK_SOURCE_PACKAGE_FILE_NAME)
   include(CPack)
 endfunction()
