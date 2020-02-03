@@ -98,5 +98,5 @@ install(TARGETS jpsreport
 set(CT_DATA_FILE_DIR "demos")
 file(GLOB CT_FILES "${CMAKE_SOURCE_DIR}/jpsreport/${CT_DATA_FILE_DIR}/*/*.xml")
 install(FILES ${CT_FILES}
-  DESTINATION "jpseport_samples"
+  DESTINATION "jpsreport_samples"
   COMPONENT jpsreport_samples)
