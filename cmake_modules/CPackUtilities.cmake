@@ -1,3 +1,14 @@
+# create win-exe, dmg, and deb
+#-------------------------------
+# Structure:
+# ├── LICENSE
+# ├── README.md
+# ├── bin
+# │   ├── jpscore
+# │   └── jpsreport
+# ├── jpscore_samples
+# └── jpsreport_samples
+#-------------------------------
 function (cpack_write_deb_config)
   message(STATUS "Package generation - LINUX")
   set(CPACK_GENERATOR "DEB" PARENT_SCOPE)
@@ -25,40 +36,43 @@ function (cpack_write_osx_config)
 endfunction()
 
 function (cpack_write_windows_config)
-    message(STATUS "Package generation - Windows")
+  # executable needs two dlls: zlib1.dll and fmt.dll
+  # these are copied along with the system dlls
+  # NOTE: Assume installation with vcpkg
+  message(STATUS "Package generation - Windows")
+  set(CPACK_GENERATOR "NSIS" PARENT_SCOPE)
+  find_program(NSIS_PATH nsis PATH_SUFFIXES nsis PARENT_SCOPE)
+  if(NSIS_PATH)
     set(CPACK_GENERATOR "NSIS" PARENT_SCOPE)
-    find_program(NSIS_PATH nsis PATH_SUFFIXES nsis PARENT_SCOPE)
-    if(NSIS_PATH)
-        set(CPACK_GENERATOR "NSIS" PARENT_SCOPE)
-        message(STATUS "   + NSIS                                 YES ")
-    else(NSIS_PATH)
-        message(STATUS "   + NSIS                                 NO ")
-    endif(NSIS_PATH)
+    message(STATUS "   + NSIS                                 YES ")
+  else(NSIS_PATH)
+    message(STATUS "   + NSIS                                 NO ")
+  endif(NSIS_PATH)
 
-    #set(CMAKE_INSTALL_MFC_LIBRARIES ON)
-    set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
-    set(VCPKG_DIR "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/")
-    set(DIRS ${VCPKG_DIR})
-    #file(GLOB DLL_FILES "${VCPKG_DIR}/*.dll")
-    set(DLL_FILES ${VCPKG_DIR}/zlib1.dll ${VCPKG_DIR}/fmt.dll)
-    set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS "${DLL_FILES}")
-    set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "${BUNDLE_RUNTIME_DESTINATION}")
-    include(InstallRequiredSystemLibraries)
+  #set(CMAKE_INSTALL_MFC_LIBRARIES ON)
+  set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+  set(VCPKG_DIR "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/")
+  set(DIRS ${VCPKG_DIR})
+  #file(GLOB DLL_FILES "${VCPKG_DIR}/*.dll")
+  set(DLL_FILES ${VCPKG_DIR}/zlib1.dll ${VCPKG_DIR}/fmt.dll)
+  set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS "${DLL_FILES}")
+  set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "${BUNDLE_RUNTIME_DESTINATION}")
+  include(InstallRequiredSystemLibraries)
 
-    install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
-      DESTINATION bin
-      COMPONENT applications)
+  install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+    DESTINATION bin
+    COMPONENT applications)
 
-    # some configs for installer
-    set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/jpscore/forms/JPScore.ico" PARENT_SCOPE)
-    set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/jpscore/forms/JPScore.ico" PARENT_SCOPE)
-    set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON PARENT_SCOPE)
-    set(CPACK_NSIS_MODIFY_PATH ON PARENT_SCOPE)
-    set(CPACK_NSIS_HELP_LINK "http://www.jupedsim.org/jupedsim_install_on_windows.html" PARENT_SCOPE)
-    set(CPACK_NSIS_URL_INFO_ABOUT "http://www.jupedsim.org/" PARENT_SCOPE)
-    set(CPACK_NSIS_DISPLAY_NAME ${CMAKE_PROJECT_NAME} PARENT_SCOPE)
-    # ----------------------------
-    # message(STATUS "System Dependencies: " ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
+  # some configs for installer
+  set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/jpscore/forms/JPScore.ico" PARENT_SCOPE)
+  set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/jpscore/forms/JPScore.ico" PARENT_SCOPE)
+  set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON PARENT_SCOPE)
+  set(CPACK_NSIS_MODIFY_PATH ON PARENT_SCOPE)
+  set(CPACK_NSIS_HELP_LINK "http://www.jupedsim.org/jupedsim_install_on_windows.html" PARENT_SCOPE)
+  set(CPACK_NSIS_URL_INFO_ABOUT "http://www.jupedsim.org/" PARENT_SCOPE)
+  set(CPACK_NSIS_DISPLAY_NAME ${CMAKE_PROJECT_NAME} PARENT_SCOPE)
+  # ----------------------------
+  # message(STATUS "System Dependencies: " ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
     
 endfunction()
 
