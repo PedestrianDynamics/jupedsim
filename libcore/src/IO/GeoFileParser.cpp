@@ -427,18 +427,18 @@ bool GeoFileParser::parseDoorNode(TiXmlElement * xDoor, int id, Building * build
     //store transition in a map and call getTransition/getCrossing
     switch(state) {
         case DoorState::OPEN:
-            building->GetTransition(id)->Open();
+            building->GetTransition(id)->Open(true);
             break;
         case DoorState::CLOSE:
-            building->GetTransition(id)->Close();
+            building->GetTransition(id)->Close(true);
             break;
         case DoorState::TEMP_CLOSE:
-            building->GetTransition(id)->TempClose();
+            building->GetTransition(id)->TempClose(true);
             break;
         case DoorState::Error:
             LOG_WARNING(
                 "Unknown door state: <{}>. open, close or temp_close. Default: open", stateStr);
-            building->GetTransition(id)->Open();
+            building->GetTransition(id)->Open(true);
             break;
     }
 
