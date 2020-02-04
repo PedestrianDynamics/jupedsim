@@ -72,7 +72,10 @@ if __name__ == "__main__":
         markdown_files = glob.glob("../pages/%s/*.md" % module)
         img_dir = ".."
         if shutil.which("kramdown") is None:
-            sys.exit("error: kramdown not found. Exit.")
+            sys.exit("error: kramdown not found.")
+
+        if shutil.which("xelatex") is None:
+            sys.exit("error: xelatex not found.")
 
         for markdown_file in markdown_files:
             latex_file = os.path.join("_tex", module, os.path.basename(os.path.splitext(markdown_file)[0]) ) + ".tex"
