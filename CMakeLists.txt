@@ -178,7 +178,6 @@ if (GIT_SCM AND GITDIR)
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     OUTPUT_VARIABLE GIT_SHA1
     ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
-
     # branch
     execute_process(
     COMMAND "${GIT_EXECUTABLE}" rev-parse --abbrev-ref HEAD
@@ -194,6 +193,12 @@ if (GIT_SCM AND GITDIR)
     OUTPUT_VARIABLE GIT_DATE
     ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+  execute_process(COMMAND
+    "${GIT_EXECUTABLE}" describe --tags --abbrev=0
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    OUTPUT_VARIABLE GIT_TAG
+    ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+
     # the subject of the commit
     execute_process(COMMAND
     "${GIT_EXECUTABLE}" log -1 --format=%s
@@ -207,20 +212,21 @@ if (GIT_SCM AND GITDIR)
 
 else()
     message(STATUS "Not in a git repo")
-    set(GIT_SHA1 "UNKNONW")
-    set(GIT_DATE "UNKNONW")
-    set(GIT_COMMIT_SUBJECT "UNKNONW")
-    set(GIT_BRANCH "UNKNONW")
+    set(GIT_SHA1 "UNKNOWN")
+    set(GIT_DATE "UNKNOWN")
+    set(GIT_COMMIT_SUBJECT "UNKNOWN")
+    set(GIT_BRANCH "UNKNOWN")
+    set(GIT_TAG "UNKNOWN")
 endif()
 
 add_library(git-info INTERFACE)
 target_compile_definitions(git-info INTERFACE
     GIT_COMMIT_HASH="${GIT_SHA1}"
     GIT_COMMIT_DATE="${GIT_DATE}"
+    GIT_TAG="${GIT_TAG}"
     GIT_COMMIT_SUBJECT="${GIT_COMMIT_SUBJECT}"
     GIT_BRANCH="${GIT_BRANCH}"
 )
-
 ################################################################################
 # Documentation
 ################################################################################
@@ -236,8 +242,14 @@ if(BUILD_DOC)
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating API documentation with Doxygen"
         VERBATIM
-    )
+        )
 endif(BUILD_DOC)
+    add_custom_target(guide
+        "${PYTHON_EXECUTABLE}" ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide/make_guide.py
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide
+        COMMENT "Generating guide"
+        VERBATIM
+        )
 
 ################################################################################
 # Testing
@@ -275,3 +287,4 @@ if(APPLE)
 endif()
 
 cpack_write_config()
+

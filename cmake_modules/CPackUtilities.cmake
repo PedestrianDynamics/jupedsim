@@ -72,10 +72,7 @@ function (cpack_write_windows_config)
   set(CPACK_NSIS_URL_INFO_ABOUT "http://www.jupedsim.org/" PARENT_SCOPE)
   set(CPACK_NSIS_DISPLAY_NAME ${CMAKE_PROJECT_NAME} PARENT_SCOPE)
   # ----------------------------
-  # message(STATUS "System Dependencies: " ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
-    
 endfunction()
-
 
 function (cpack_write_config)
   message(STATUS "Cpack write configs")
@@ -92,7 +89,7 @@ function (cpack_write_config)
   set(CPACK_PACKAGE_VENDOR "Forschungszentrum Juelich GmbH" PARENT_SCOPE)
   set(CPACK_PACKAGE_NAME ${CMAKE_PROJECT_NAME} PARENT_SCOPE)
   set(CPACK_PACKAGE_CONTACT "m.chraibi@fz-juelich.de" PARENT_SCOPE)
-  set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+  set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION} PARENT_SCOPE)
   set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${PROJECT_VERSION}" PARENT_SCOPE)
   set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${PROJECT_VERSION}")
   install(FILES "${CMAKE_SOURCE_DIR}/LICENSE"
