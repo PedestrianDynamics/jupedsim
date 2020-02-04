@@ -165,14 +165,6 @@ void IniFileParser::Parse(const fs::path & iniFile)
 
 bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 {
-    LOG_INFO("JuPedSim - JPScore");
-    LOG_INFO("Current date: {} {}", __DATE__, __TIME__);
-    LOG_INFO("Version     : {}", JPSCORE_VERSION);
-    LOG_INFO("Commit hash : {}", GIT_COMMIT_HASH);
-    LOG_INFO("Commit date : {}", GIT_COMMIT_DATE);
-    LOG_INFO("Branch      : {}", GIT_BRANCH);
-
-
     //seed
     if(xHeader->FirstChild("seed")) {
         TiXmlNode * seedNode = xHeader->FirstChild("seed")->FirstChild();
@@ -1272,30 +1264,39 @@ bool IniFileParser::ParseExternalFiles(const TiXmlNode & mainNode)
     }
 
     // read external event file name
-    if(mainNode.FirstChild("events_file")) {
-        fs::path eventFile = _config->GetProjectRootDir() /
-                             mainNode.FirstChild("events_file")->FirstChild()->Value();
-        _config->SetEventFile(fs::weakly_canonical(eventFile));
+    fs::path eventFile;
+    if(mainNode.FirstChild("events_file") && mainNode.FirstChild("events_file")->FirstChild()) {
+        eventFile = mainNode.FirstChild("events_file")->FirstChild()->Value();
     } else if(
-        mainNode.FirstChild("header") && mainNode.FirstChild("header")->FirstChild("events_file")) {
-        fs::path eventFile =
-            _config->GetProjectRootDir() /
-            mainNode.FirstChild("header")->FirstChild("events_file")->FirstChild()->Value();
-        _config->SetEventFile(fs::weakly_canonical(eventFile));
+        mainNode.FirstChild("header") && mainNode.FirstChild("header")->FirstChild("events_file") &&
+        mainNode.FirstChild("header")->FirstChild("events_file")->FirstChild()) {
+        eventFile = mainNode.FirstChild("header")->FirstChild("events_file")->FirstChild()->Value();
+    } else {
+        LOG_INFO("No event file given.");
+    }
+
+    if(!eventFile.empty()) {
+        _config->SetEventFile(fs::weakly_canonical(_config->GetProjectRootDir() / eventFile));
+        LOG_INFO("Events are read from: <{}>", _config->GetEventFile().string());
     }
 
     // read external schedule file name
-    if(mainNode.FirstChild("schedule_file")) {
-        fs::path scheduleFile = _config->GetProjectRootDir() /
-                                mainNode.FirstChild("schedule_file")->FirstChild()->Value();
-        _config->SetScheduleFile(fs::weakly_canonical(scheduleFile));
+    fs::path scheduleFile;
+    if(mainNode.FirstChild("schedule_file") && mainNode.FirstChild("schedule_file")->FirstChild()) {
+        scheduleFile = mainNode.FirstChild("schedule_file")->FirstChild()->Value();
     } else if(
         mainNode.FirstChild("header") &&
-        mainNode.FirstChild("header")->FirstChild("schedule_file")) {
-        fs::path scheduleFile =
-            _config->GetProjectRootDir() /
+        mainNode.FirstChild("header")->FirstChild("schedule_file") &&
+        mainNode.FirstChild("header")->FirstChild("schedule_file")->FirstChild()) {
+        scheduleFile =
             mainNode.FirstChild("header")->FirstChild("schedule_file")->FirstChild()->Value();
-        _config->SetScheduleFile(fs::weakly_canonical(scheduleFile));
+    } else {
+        LOG_INFO("No schedule file given.");
+    }
+
+    if(!scheduleFile.empty()) {
+        _config->SetScheduleFile(fs::weakly_canonical(_config->GetProjectRootDir() / scheduleFile));
+        LOG_INFO("Schedule is read from: <{}>", _config->GetScheduleFile().string());
     }
 
     return true;

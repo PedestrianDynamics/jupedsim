@@ -30,6 +30,7 @@
 
 #include "Simulation.h"
 
+#include "IO/EventFileParser.h"
 #include "IO/Trajectories.h"
 #include "general/Filesystem.h"
 #include "general/Logger.h"
@@ -70,8 +71,6 @@ Simulation::Simulation(Configuration * args) : _config(args)
 
 Simulation::~Simulation()
 {
-    delete _em;
-
     if(_iod) {
         _iod.reset();
     }
@@ -187,15 +186,19 @@ bool Simulation::InitArgs()
         return false;
     }
 
-    _em = new EventManager(_config, _building.get(), _config->GetSeed());
-    if(!_em->ReadEventsXml()) {
-        LOG_WARNING("Could not initialize events handling");
+    _em = std::make_unique<EventManager>(_building.get());
+    if(!_config->GetEventFile().empty()) {
+        _em->AddEvents(EventFileParser::ParseEvents(_config->GetEventFile()));
     }
-    if(!_em->ReadSchedule()) {
-        LOG_WARNING("Could not initialize schedule handling");
-    }
+    if(!_config->GetScheduleFile().empty()) {
+        _em->AddEvents(EventFileParser::ParseSchedule(_config->GetScheduleFile()));
 
-    _em->ListEvents();
+        // Read and set max door usage from schedule file
+        auto groupMaxAgents = EventFileParser::ParseMaxAgents(_config->GetScheduleFile());
+        for(auto const [transID, maxAgents] : groupMaxAgents) {
+            _building->GetTransition(transID)->SetMaxDoorUsage(maxAgents);
+        }
+    }
 
     _goalManager.SetBuilding(_building.get());
     return true;
@@ -472,7 +475,8 @@ double Simulation::RunBody(double maxSimTime)
             _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get(), _periodic);
 
             //update the events
-            _em->ProcessEvent();
+            bool eventProcessed = _em->ProcessEvent();
+            _building->GetRoutingEngine()->setNeedUpdate(eventProcessed);
 
             //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
             //update quickestRouter
