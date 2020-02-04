@@ -140,6 +140,11 @@ int SubRoom::GetRoomID() const
     return _roomID;
 }
 
+bool SubRoom::HasWall(const Wall & wall) const
+{
+    return _walls.end() != std::find(_walls.begin(), _walls.end(), wall);
+}
+
 const std::vector<Wall> & SubRoom::GetAllWalls() const
 {
     return _walls;

@@ -126,6 +126,8 @@ public:
       */
     int GetSubRoomID() const;
 
+    bool HasWall(const Wall & wall) const;
+
     /**
       * @return all walls
       */

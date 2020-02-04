@@ -226,13 +226,6 @@ bool IsPointAndSubroomIncident(const SubRoom & subroom, const Point & point, con
     return false;
 }
 
-bool SubroomHasWall(const SubRoom & subroom, const Wall & wall)
-{
-    return subroom.GetAllWalls().end() !=
-           std::find(subroom.GetAllWalls().begin(), subroom.GetAllWalls().end(), wall);
-}
-
-
 bool IsConnectedWall(const SubRoom & subroom, const Wall & wall)
 {
     return IsPointAndSubroomIncident(subroom, wall.GetPoint1(), wall) &&
@@ -244,7 +237,7 @@ int AddWallToSubroom(SubRoom & subroom, const std::vector<Wall> & wallPieces)
     int wallsAdded = 0;
 
     for(const auto & w : wallPieces) {
-        if(!SubroomHasWall(subroom, w) && IsConnectedWall(subroom, w)) {
+        if(!subroom.HasWall(w) && IsConnectedWall(subroom, w)) {
             subroom.AddWall(w);
             wallsAdded++;
         }

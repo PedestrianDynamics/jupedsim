@@ -77,7 +77,6 @@ std::optional<Point> ComputeSplitPoint(const Wall & wall, const Line & line);
  */
 std::optional<std::vector<Wall>> SplitWall(const SubRoom & subroom, const Wall & bigWall);
 bool IsPointAndSubroomIncident(const SubRoom & subroom, const Point & point, const Wall & wall);
-bool SubroomHasWall(const SubRoom & subroom, const Wall & wall);
 
 /**
  * @brief Checks if the wall is inside the polygon of the subroom and does not exist already
