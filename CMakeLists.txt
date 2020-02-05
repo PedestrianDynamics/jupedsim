@@ -243,13 +243,13 @@ if(BUILD_DOC)
         COMMENT "Generating API documentation with Doxygen"
         VERBATIM
         )
-endif(BUILD_DOC)
     add_custom_target(guide
         "${PYTHON_EXECUTABLE}" ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide/make_guide.py
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide
         COMMENT "Generating guide"
         VERBATIM
         )
+endif(BUILD_DOC)
 
 ################################################################################
 # Testing
