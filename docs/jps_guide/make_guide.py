@@ -92,28 +92,11 @@ if __name__ == "__main__":
 
 
     source_path = os.path.normpath(pathname + os.sep + os.pardir + os.sep + os.pardir)
-    post_checkout = os.path.join(source_path, ".git", "hooks", "post-checkout")
-    print(post_checkout)
-    if not os.path.exists(post_checkout):
-        print("copy <post-checkout> to <../../.git/hooks>")
-        copyfile("./post-checkout", post_checkout)
-
-    # make file executable
-    print("change permission of <post-checkout>")
-    os.chmod(post_checkout, 0o775)
-
-    # remove old titlepage.tex
-    if os.path.exists("./titlepage.tex"):
-        print("remove titlepage")
-        os.remove("./titlepage.tex")
-
-    # create titlepage
-    make_title_page = "git checkout master"
-    res = subprocess.call(shlex.split(make_title_page))
-
     if not os.path.exists("./titlepage.tex"):
         sys.exit("could not find titlepage.tex. git checkout was not successful!")
 
     # process jupedsim.tex
     subprocess.call("make")
     res = subprocess.call(shlex.split("make clean"))
+
+
