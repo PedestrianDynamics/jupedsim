@@ -35,8 +35,6 @@
 #include "general/Configuration.h"
 #include "general/Filesystem.h"
 
-#include <optional>
-
 typedef std::pair<Point, Wall> PointWall;
 
 // train schedules: Trains get deleted and added.

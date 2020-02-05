@@ -16,7 +16,7 @@
  *
  **/
 
-#include "geometry/helper/CorrectGeometry.cpp"
+#include "geometry/helper/CorrectGeometry.h"
 
 #include "general/Configuration.h"
 #include "geometry/Building.h"
@@ -63,7 +63,9 @@ TEST_CASE("geometry/Building/correct", "[geometry][Building][correct]")
 
             // A single Wall is not connected in the rooms walls and should be removed
             s->AddWall(Wall(Point(0, 0), Point(0, 10)));
-            REQUIRE_NOTHROW(geometry::helper::CorrectInputGeometry(b));
+            REQUIRE_THROWS_WITH(
+                geometry::helper::CorrectInputGeometry(b),
+                "Cannot write corrected geometry. No Configuration object found.");
             REQUIRE(b.GetAllGoals().empty());
             REQUIRE(b.GetAllRooms().size() == 1);
             REQUIRE(b.GetAllHlines().empty());

@@ -140,6 +140,37 @@ int SubRoom::GetRoomID() const
     return _roomID;
 }
 
+bool SubRoom::IsPointOnPolygon(const Point & point, const Wall & exclude_wall) const
+{
+    // Incident with wall at point 1 or 2
+    for(const auto & checkWall : _walls) {
+        if(exclude_wall != checkWall &&
+           (checkWall.GetPoint1() == point || checkWall.GetPoint2() == point)) {
+            return true;
+        }
+    }
+    // Incident with transition
+    for(const auto & transition : _transitions) {
+        if(transition->GetPoint1() == point || transition->GetPoint2() == point) {
+            return true;
+        }
+    }
+    //Incident with crossing
+    for(const auto & crossing : _crossings) {
+        if(crossing->GetPoint1() == point || crossing->GetPoint2() == point) {
+            return true;
+        }
+    }
+    // Incident with wall in any point
+    for(const auto & checkWall : _walls) {
+        if(exclude_wall != checkWall && checkWall.IsInLineSegment(point)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 bool SubRoom::HasWall(const Wall & wall) const
 {
     return _walls.end() != std::find(_walls.begin(), _walls.end(), wall);

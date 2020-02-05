@@ -21,31 +21,31 @@
 
 #include "CorrectGeometry.h"
 
-#include "general/Configuration.h" // for Configuration
-#include "general/Filesystem.h"    // for add_prefix_to_filename
-#include "general/Logger.h"        // for Debug, Warning, Info
-#include "geometry/Building.h"     // for Building
-#include "geometry/Crossing.h"     // for Crossing
-#include "geometry/Line.h"         // for Line
-#include "geometry/Point.h"        // for Point, Distance
-#include "geometry/Room.h"         // for Room
-#include "geometry/SubRoom.h"      // for SubRoom
-#include "geometry/Transition.h"   // for Transition
-#include "geometry/Wall.h"         // for Wall
+#include "general/Configuration.h"
+#include "general/Filesystem.h"
+#include "general/Logger.h"
+#include "geometry/Building.h"
+#include "geometry/Crossing.h"
+#include "geometry/Line.h"
+#include "geometry/Point.h"
+#include "geometry/Room.h"
+#include "geometry/SubRoom.h"
+#include "geometry/Transition.h"
+#include "geometry/Wall.h"
 
-#include <algorithm> // for max, find, find_if, sort
+#include <algorithm>
 #include <cassert>
-#include <chrono> // for operator-, duration, high_resolut...
-#include <cmath>  // for isnan
+#include <chrono>
+#include <cmath>
 #include <fmt/format.h>
-#include <map>       // for map
-#include <memory>    // for shared_ptr, __shared_ptr_access
-#include <optional>  // for optional, nullopt
-#include <ratio>     // for milli
-#include <stdexcept> // for runtime_error
-#include <string>    // for basic_string, operator+
-#include <utility>   // for pair
-#include <vector>    // for vector<>::iterator, vector<>::con...
+#include <map>
+#include <memory>
+#include <optional>
+#include <ratio>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace geometry::helper
 {
@@ -196,40 +196,10 @@ std::optional<std::vector<Wall>> SplitWall(const SubRoom & subroom, const Wall &
     return wallPieces;
 }
 
-bool IsPointAndSubroomIncident(const SubRoom & subroom, const Point & point, const Wall & wall)
-{
-    // Incident with wall at point 1 or 2
-    for(const auto & checkWall : subroom.GetAllWalls()) {
-        if(wall != checkWall &&
-           (checkWall.GetPoint1() == point || checkWall.GetPoint2() == point)) {
-            return true;
-        }
-    }
-    // Incident with transition
-    for(const auto & transition : subroom.GetAllTransitions()) {
-        if(transition->GetPoint1() == point || transition->GetPoint2() == point) {
-            return true;
-        }
-    }
-    //Incident with crossing
-    for(const auto & crossing : subroom.GetAllCrossings()) {
-        if(crossing->GetPoint1() == point || crossing->GetPoint2() == point) {
-            return true;
-        }
-    }
-    // Incident with wall in any point
-    for(const auto & checkWall : subroom.GetAllWalls()) {
-        if(wall != checkWall && checkWall.IsInLineSegment(point)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool IsConnectedWall(const SubRoom & subroom, const Wall & wall)
 {
-    return IsPointAndSubroomIncident(subroom, wall.GetPoint1(), wall) &&
-           IsPointAndSubroomIncident(subroom, wall.GetPoint2(), wall);
+    return subroom.IsPointOnPolygon(wall.GetPoint1(), wall) &&
+           subroom.IsPointOnPolygon(wall.GetPoint2(), wall);
 }
 
 int AddWallToSubroom(SubRoom & subroom, const std::vector<Wall> & wallPieces)
