@@ -1,6 +1,8 @@
-add_test(NAME jpsreport_method_A COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_A/runtest_method_A.py)
+add_test(NAME 01_method_A COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_A/01_method_A.py)
+add_test(NAME 01_method_B COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_B/01_method_B.py)
 set_tests_properties(
-    jpsreport_method_A
+    01_method_A
+    01_method_B
     PROPERTIES LABELS "CI:FAST;jpsreport")
 
 

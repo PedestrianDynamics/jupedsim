@@ -13,7 +13,7 @@ import subprocess
 import sys
 from os import path
 from stat import S_ISREG, ST_MODE, ST_MTIME
-
+import shutil
 __author__ = 'Oliver Schmidts'
 __email__ = 'dev@jupedsim.org'
 __credits__ = ['Oliver Schmidts', 'Mohcine Chraibi']
@@ -164,6 +164,8 @@ class JPSRunTestDriver(object):
         # os.chdir(self.DIR)
         logging.info("change directory back to %s", self.DIR)
         os.chdir(self.DIR)
+        # remove output directory
+        shutil.rmtree('Output', ignore_errors=True)
         if self.UTEST == "..":
             lib_path = os.path.abspath(os.path.join(self.trunk, "systemtest"))
         else:

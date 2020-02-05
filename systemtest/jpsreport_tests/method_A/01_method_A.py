@@ -29,6 +29,9 @@ def runtest(inifile, trajfile):
                                    'FlowVelocity',
                                    'Flow_NT_%s_id_2.dat'%trajfile
                                    )
+    if not os.path.exists(data_2_filename):
+        logging.error("jpsreport did not output results correctly.")
+        exit(FAILURE)
     data_2 = np.loadtxt(data_2_filename)
 
     # test
@@ -54,6 +57,7 @@ def runtest(inifile, trajfile):
 
     success = (Tin_exit == True) and (cumPed_exit == True)        
     if not success:
+        logging.info("%s exits with FAILURE" % (argv[0]))
         exit(FAILURE)
 
 if __name__ == "__main__":
