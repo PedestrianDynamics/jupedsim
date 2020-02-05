@@ -64,6 +64,27 @@ class JPSRunTestDriver(object):
         self.CWD = os.getcwd()
         self.FILE = os.path.join(self.DIR, "master_ini.xml")
 
+    def run_analysis(self, testfunction, trajfile="", *args):
+        assert hasattr(testfunction, '__call__'), "run_test: testfunction has no __call__ function"
+        self.__configure()
+        if len(self.jpsreportdir) == 0:
+            print("HH ", self.trunk)
+            self.jpsreportdir = os.path.join(
+                os.path.abspath(os.path.dirname(self.trunk)),
+                "jpscore")
+
+            if not path.exists(self.jpsreport_ini):
+                logging.critical("jpsreport_ini <%s> does not exist", self.jpsreport_ini)
+                exit(self.FAILURE)
+
+            jpsreport_exe = os.path.join(self.jpsreportdir,
+                                         "build",
+                                         "bin",
+                                         "jpsreport")
+
+            res = self.__execute_test(jpsreport_exe, self.jpsreport_ini, testfunction, trajfile, *args)
+            return res
+
     def run_test(self, testfunction, fd=0, *args): #fd==1: make fundamental diagram
         assert hasattr(testfunction, '__call__'), "run_test: testfunction has no __call__ function"
         self.__configure()
@@ -212,25 +233,26 @@ class JPSRunTestDriver(object):
 
     #     return executable
 
-    def __execute_test(self, executable, inifile, testfunction, *args):
+    def __execute_test(self, executable, inifile, testfunction, trajfile="", *args):
         cmd = "%s %s"%(executable, inifile)
         logging.info('start simulating with exe=<%s>', cmd)
         subprocess.call([executable, "%s" % inifile])
         logging.info('end simulation ...\n--------------\n')
         logging.info("inifile <%s>", inifile)
-        trajfile = os.path.join("trajectories", "traj" + inifile.split("ini")[2])
-        if not path.exists(trajfile):
-            trajfile, file_extension = os.path.splitext(trajfile)
-            logging.info("trajfile <%s> with ext=<%s> does not exist. Looking for *.txt",
-                         trajfile, file_extension)
-            trajfile += ".txt"
+        if not trajfile:
+            trajfile = os.path.join("trajectories", "traj" + inifile.split("ini")[2])
             if not path.exists(trajfile):
-                logging.critical("trajfile <%s> does not exist", trajfile)
-                exit(self.FAILURE)
+                trajfile, file_extension = os.path.splitext(trajfile)
+                logging.info("trajfile <%s> with ext=<%s> does not exist. Looking for *.txt",
+                            trajfile, file_extension)
+                trajfile += ".txt"
+                if not path.exists(trajfile):
+                    logging.critical("trajfile <%s> does not exist", trajfile)
+                    exit(self.FAILURE)
+                else:
+                    logging.info('trajfile = <%s>', trajfile)
             else:
                 logging.info('trajfile = <%s>', trajfile)
-        else:
-            logging.info('trajfile = <%s>', trajfile)
 
         res = testfunction(inifile, trajfile, *args)
         return res
