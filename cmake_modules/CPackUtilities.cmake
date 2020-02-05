@@ -3,6 +3,7 @@
 # Structure:
 # ├── LICENSE
 # ├── README.md
+# ├── JuPedSim.pdf
 # ├── bin
 # │   ├── jpscore
 # │   └── jpsreport
@@ -11,7 +12,8 @@
 #-------------------------------
 function (cpack_write_deb_config)
   message(STATUS "Package generation - LINUX")
-  set(CPACK_GENERATOR "DEB" PARENT_SCOPE)
+  list(APPEND CPACK_GENERATOR "DEB")
+  set (CPACK_GENERATOR  ${CPACK_GENERATOR} PARENT_SCOPE)
   set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON PARENT_SCOPE)
   set(CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-dev (>=1.65), zlib1g-dev" PARENT_SCOPE)
   set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://jupedsim.org" PARENT_SCOPE)
@@ -25,8 +27,9 @@ endfunction()
 
 function (cpack_write_osx_config)
   message(STATUS "Package generation - MacOS")
-  set(CPACK_GENERATOR "DragNDrop" PARENT_SCOPE)
-  set(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_SOURCE_DIR}/jpscore/forms/background.png" PARENT_SCOPE)
+  list(APPEND CPACK_GENERATOR "DragNDrop")
+  set (CPACK_GENERATOR  ${CPACK_GENERATOR} PARENT_SCOPE)
+  Set(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_SOURCE_DIR}/jpscore/forms/background.png" PARENT_SCOPE)
    set(CPACK_DMG_DS_STORE_SETUP_SCRIPT
      "${CMAKE_SOURCE_DIR}/jpscore/forms/DS_Store.scpt" PARENT_SCOPE)
   set(CPACK_DMG_DISABLE_APPLICATIONS_SYMLINK ON  PARENT_SCOPE)
@@ -40,10 +43,10 @@ function (cpack_write_windows_config)
   # these are copied along with the system dlls
   # NOTE: Assume installation with vcpkg
   message(STATUS "Package generation - Windows")
-  set(CPACK_GENERATOR "NSIS" PARENT_SCOPE)
-  find_program(NSIS_PATH nsis PATH_SUFFIXES nsis PARENT_SCOPE)
+  list(APPEND CPACK_GENERATOR "NSIS")
+  set (CPACK_GENERATOR  ${CPACK_GENERATOR} PARENT_SCOPE)
+  find_program(NSIS_PATH nsis PATH_SUFFIXES nsis)
   if(NSIS_PATH)
-    set(CPACK_GENERATOR "NSIS" PARENT_SCOPE)
     message(STATUS "   + NSIS                                 YES ")
   else(NSIS_PATH)
     message(STATUS "   + NSIS                                 NO ")
@@ -92,6 +95,7 @@ function (cpack_write_config)
   set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION} PARENT_SCOPE)
   set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${PROJECT_VERSION}" PARENT_SCOPE)
   set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${PROJECT_VERSION}")
+
   install(FILES "${CMAKE_SOURCE_DIR}/LICENSE"
     DESTINATION .
     COMPONENT Documents)
@@ -108,5 +112,6 @@ function (cpack_write_config)
   endif()
 
   print_var(CPACK_SOURCE_PACKAGE_FILE_NAME)
+  
   include(CPack)
 endfunction()
