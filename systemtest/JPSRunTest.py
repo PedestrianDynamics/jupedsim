@@ -68,7 +68,6 @@ class JPSRunTestDriver(object):
         assert hasattr(testfunction, '__call__'), "run_test: testfunction has no __call__ function"
         self.__configure()
         if len(self.jpsreportdir) == 0:
-            print("HH ", self.trunk)
             self.jpsreportdir = os.path.join(
                 os.path.abspath(os.path.dirname(self.trunk)),
                 "jpscore")
