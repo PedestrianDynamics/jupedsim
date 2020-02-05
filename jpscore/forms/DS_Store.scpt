@@ -33,6 +33,7 @@ on run argv
                                 set position of item "jpsreport_samples" to {300, 170}
                                 set position of item "LICENSE" to {0, 280}
                                 set position of item "README.md" to {150, 280}
+                                set position of item "JuPedSim.pdf" to {300, 280}
 				set position of item ".background" to {300, 280}
 				set position of item ".fseventsd" to {400, 280}
 			end tell

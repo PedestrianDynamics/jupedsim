@@ -100,6 +100,13 @@ function (cpack_write_config)
     DESTINATION .
     COMPONENT Documents)
 
+  set(jpsguide "${CMAKE_SOURCE_DIR}/docs/jps_guide/JuPedSim.pdf")
+  if(EXISTS "${jpsguide}")
+    install(FILES "${jpsguide}"
+      DESTINATION .
+      COMPONENT Documents)
+  endif()
+
   print_var(CPACK_SOURCE_PACKAGE_FILE_NAME)
   include(CPack)
 endfunction()
