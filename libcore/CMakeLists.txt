@@ -30,6 +30,7 @@ set(source_files
     src/geometry/Transition.cpp
     src/geometry/WaitingArea.cpp
     src/geometry/Wall.cpp
+    src/IO/EventFileParser.cpp
     src/IO/GeoFileParser.cpp
     src/IO/IniFileParser.cpp
     src/IO/OutputHandler.cpp
@@ -115,6 +116,7 @@ set(header_files
     src/geometry/Transition.h
     src/geometry/WaitingArea.h
     src/geometry/Wall.h
+    src/IO/EventFileParser.h
     src/IO/GeoFileParser.h
     src/IO/IniFileParser.h
     src/IO/OutputHandler.h
