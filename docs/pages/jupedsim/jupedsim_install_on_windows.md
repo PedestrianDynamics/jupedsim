@@ -17,17 +17,7 @@ last_updated: Jan 02, 2020
 - CMake 3.2 or newer: [download](https://cmake.org/download/)
 - Python 3. We recommend the Anaconda distribution: [download](https://repo.anaconda.com/archive/Anaconda3-2019.10-Windows-x86_64.exe) 
 
-## Install using package manager vcpkg
-
-First install [vcpkg](https://github.com/Microsoft/vcpkg):
-
-```bash
-git clone https://github.com/Microsoft/vcpkg
-cd vcpkg
-.\bootstrap-vcpkg.bat
-```
-
-For `jpscore` following C++ libraries are needed:
+For `jpscore` and `jpsreport` following C++ libraries are needed:
 
 - zlib
 - fmt
@@ -37,13 +27,25 @@ For `jpscore` following C++ libraries are needed:
 
 Additionally, for `jpseditor` and `jpsvis` `vtk` and `qt5` are needed.
 
-To install these libraries run the following:
+## Install using package manager vcpkg
+
+To install the required libraries, we recommend using windows pakage manager `vcpkg`.
+
+First install [vcpkg](https://github.com/Microsoft/vcpkg):
+
+```bash
+git clone https://github.com/Microsoft/vcpkg
+cd vcpkg
+.\bootstrap-vcpkg.bat
+```
+
+then install the required libraries as followed:
 
 ```bash
 .\vcpkg.exe install zlib:x64-windows fmt:x64-windows spdlog:x64-windows cli11:x64-windows boost:x64-windows
 ```
 
-## Build jpscore from source
+## Build jpscore and jpsreport from source
 
 First get the code
 
