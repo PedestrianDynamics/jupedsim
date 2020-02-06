@@ -3,7 +3,7 @@ foreach (file ${test_py_files})
     get_filename_component(test ${file} NAME_WE)
     add_test(
             NAME ${test}
-            COMMAND ${PYTHON_EXECUTABLE} ${file}
+            COMMAND ${PYTHON_EXECUTABLE} ${file} ${jpscore_exe}
     )
     set_tests_properties(
             ${test}
