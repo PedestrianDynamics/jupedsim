@@ -27,17 +27,18 @@ def getScriptPath():
 
 class JPSRunTestDriver(object):
 
-    def __init__(self, testnumber, argv0, testdir, utestdir="..", jpsreportdir=""):
+    def __init__(self, testnumber, argv0, testdir, utestdir="..", jpsreportdir="", jpscore=""):
         self.SUCCESS = 0
         self.FAILURE = 1
         # check if testnumber is digit
         assert isinstance(testnumber, float) or isinstance(testnumber, int), "argument <testnumber> is not digit"
         # only allow path and strings as path directory name
         assert isinstance(argv0, str), "argument <testdir> is not string"
-        assert path.exists(testdir), "%s does not exist"%testdir
-        assert path.exists(utestdir), "%s does not exist"%utestdir
+        assert path.exists(testdir), "%s does not exist" % testdir
+        assert path.exists(utestdir), "%s does not exist" % utestdir
         assert isinstance(argv0, str), "argument <argv0> is not string"
-        assert path.exists(argv0), "%s is does not exist"%argv0
+        assert path.exists(argv0), "%s is does not exist" % argv0
+        assert jpscore, "no jpscore executable given"
         self.testno = testnumber
 
         # touch file if not already there
@@ -46,6 +47,7 @@ class JPSRunTestDriver(object):
         self.HOME = path.expanduser("~")
         self.DIR = testdir
         self.jpsreportdir = jpsreportdir
+        self.jpscore = jpscore
         # Where to find the measured data from the simulations. We will use Voronoi diagrams
         # if self.testno == 101: # fix for 1dfd, since jpsreport can not be used in 1D
         self.simDataDir = os.path.join(self.DIR,
@@ -67,11 +69,11 @@ class JPSRunTestDriver(object):
     def run_test(self, testfunction, fd=0, *args): #fd==1: make fundamental diagram
         assert hasattr(testfunction, '__call__'), "run_test: testfunction has no __call__ function"
         self.__configure()
-        jpscore = os.path.join(self.trunk, "build", "bin", "jpscore")
-        jpscore_exe = self.__find_executable(jpscore)
+        assert path.exists(self.jpscore), "executable {} does not exists".format(self.jpscore)
+
         results = []
         for inifile in self.inifiles:
-            res = self.__execute_test(jpscore_exe, inifile, testfunction, *args)
+            res = self.__execute_test(self.jpscore, inifile, testfunction, *args)
             results.append(res)
 
         if fd:
