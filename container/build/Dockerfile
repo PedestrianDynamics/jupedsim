@@ -29,5 +29,5 @@ RUN pip3 install numpy && \
     pip3 install matplotlib && \
     pip3 install pandas && \
     pip3 install dataclasses && \
-    pip install numpy
+    pip install numpy && \
     pip3 install scipy
