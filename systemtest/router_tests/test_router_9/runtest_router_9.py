@@ -42,7 +42,7 @@ def runtest9(inifile, trajfile):
 
 
 if __name__ == "__main__":
-    test = JPSRunTestDriver(9, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
+    test = JPSRunTestDriver(9, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir, jpscore=argv[1])
     test.run_test(testfunction=runtest9)
     logging.info("%s exits with SUCCESS." % (argv[0]))
     exit(SUCCESS)
