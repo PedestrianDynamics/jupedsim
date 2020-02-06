@@ -23,7 +23,7 @@ def runtest12(inifile, trajfile):
         logging.info("dy2 = %f (tolerance=%f)", dy2, tolerance)
 
 if __name__ == "__main__":
-    test = JPSRunTestDriver(12, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
+    test = JPSRunTestDriver(12, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir, jpscore=argv[1])
     test.run_test(testfunction=runtest12)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)

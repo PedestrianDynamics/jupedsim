@@ -38,8 +38,8 @@ def run_rimea_test11(inifile, trajfile):
         logging.info("%d peds evacuated from exit <%s>", num_evacuated, f.split(".dat")[0].split("_id_")[1])
 
 if __name__ == "__main__":
-    start_time=time.time()
-    test = JPSRunTestDriver(11, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
+    start_time = time.time()
+    test = JPSRunTestDriver(11, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir, jpscore=argv[1])
     test.run_test(testfunction=run_rimea_test11)
     logging.info("%s exits with SUCCESS\nExecution time %.3f seconds." % (argv[0],time.time()-start_time))
     exit(SUCCESS)

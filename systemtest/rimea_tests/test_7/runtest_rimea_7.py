@@ -112,8 +112,8 @@ def run_rimea_test7(inifile, trajfile):
         exit(FAILURE)
 
 if __name__ == "__main__":
-    start_time=time.time()
-    test = JPSRunTestDriver(7, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
+    start_time = time.time()
+    test = JPSRunTestDriver(7, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir, jpscore=argv[1])
     test.run_test(testfunction=run_rimea_test7)
     logging.info("%s exits with SUCCESS\nExecution time %.3f seconds." % (argv[0],time.time()-start_time))
     exit(SUCCESS)
