@@ -232,11 +232,7 @@ def make_file(masterfile, tree, result):
         logging.info('>> %s'%newfile)
         tree.write(newfile)
 # =======================================================
-
-if __name__ == "__main__":
-    args = getParserArgs()
-
-    masterfile = args.file
+def main(masterfile):
     if not os.path.isfile(masterfile):
         logging.error("ERROR: file %s does not exist."%masterfile)
         sys.exit(FAILURE)
@@ -252,5 +248,5 @@ if __name__ == "__main__":
     result = get_product(root)
     make_file(masterfile, tree, result)
 
-    if not  os.path.isfile("%s/%s"%(directory, logfile)):
+    if not os.path.isfile("%s/%s"%(directory, logfile)):
         move(logfile, directory)
