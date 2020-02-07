@@ -13,7 +13,7 @@ import subprocess
 import sys
 from os import path
 from stat import S_ISREG, ST_MODE, ST_MTIME
-import makeini
+
 __author__ = 'Oliver Schmidts'
 __email__ = 'dev@jupedsim.org'
 __credits__ = ['Oliver Schmidts', 'Mohcine Chraibi']
@@ -141,7 +141,8 @@ class JPSRunTestDriver(object):
         # -------- get directory of the code TRUNK
         # *** Note: assume that UTEST is always a direct subdirectory of TRUNK ***
         self.trunk = os.path.dirname(os.getcwd())
-        makeini.main(self.FILE)
+        logging.info("call makeini.py with -f %s", self.FILE)
+        subprocess.call(["python", "makeini.py", "-f", "%s" % self.FILE])
         # os.chdir(self.DIR)
         logging.info("change directory back to %s", self.DIR)
         os.chdir(self.DIR)
