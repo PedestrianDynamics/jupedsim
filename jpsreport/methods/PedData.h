@@ -93,7 +93,6 @@ public:
 
 private:
     bool InitializeVariables(const fs::path & filename);
-    bool InitializeVariables(TiXmlElement * xRootNode);
     void CreateGlobalVariables(int numPeds, int numFrames);
     double GetInstantaneousVelocity(
         int Tnow,
