@@ -86,11 +86,9 @@ bool Method_A::Process(
         }
         vector<int> ids               = _peds_t[frameNr];
         vector<int> IdInFrame         = peddata.GetIdInFrame(frameNr, ids, zPos_measureArea);
-        const vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids, zPos_measureArea);
-        const vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids, zPos_measureArea);
         const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
         if(IdInFrame.size() > 0) {
-            GetAccumFlowVelocity(frameNr, IdInFrame, VInFrame);
+            GetAccumFlowVelocity(frameNr, ids, VInFrame);
             char tmp[30];
             sprintf(tmp, "%.2f\t%d\n", frid / _fps, _classicFlow);
             outputRhoV.append(tmp);
@@ -134,21 +132,20 @@ void Method_A::GetAccumFlowVelocity(
     const vector<double> & VInFrame)
 {
     for(unsigned int i = 0; i < ids.size(); i++) {
-        int id          = ids[i];
         bool IspassLine = false;
-        if(frame > _firstFrame[id - _minId] && !_passLine[id - _minId]) {
+        if(frame > _firstFrame[i - _minId] && !_passLine[i - _minId]) {
             IspassLine = IsPassLine(
                 _areaForMethod_A->_lineStartX,
                 _areaForMethod_A->_lineStartY,
                 _areaForMethod_A->_lineEndX,
                 _areaForMethod_A->_lineEndY,
-                _xCor(id - _minId, frame - 1),
-                _yCor(id - _minId, frame - 1),
-                _xCor(id - _minId, frame),
-                _yCor(id - _minId, frame));
+                _xCor(i - _minId, frame - 1),
+                _yCor(i - _minId, frame - 1),
+                _xCor(i - _minId, frame),
+                _yCor(i - _minId, frame));
         }
         if(IspassLine == true) {
-            _passLine[id - _minId] = true;
+            _passLine[i - _minId] = true;
             _classicFlow++;
             _vDeltaT += VInFrame[i];
         }
