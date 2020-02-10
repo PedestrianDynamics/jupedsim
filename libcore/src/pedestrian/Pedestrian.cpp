@@ -1146,8 +1146,6 @@ bool Pedestrian::Relocate(std::function<void(const Pedestrian &)> flowupdater)
                     iterator.second->IsInSubRoom(this));
             });
         if(sub != subrooms.end()) {
-            flowupdater(
-                *this); //@todo: ar.graf : this call should move into a critical region? check plz
             ClearMentalMap(); // reset the destination
             const int oldRoomID = _roomID;
             SetRoomID(room->GetID(), room->GetCaption());
@@ -1160,6 +1158,9 @@ bool Pedestrian::Relocate(std::function<void(const Pedestrian &)> flowupdater)
 #pragma omp critical(SetEgressTime)
                 allRooms.at(oldRoomID)->SetEgressTime(
                     GetGlobalTime()); //set Egresstime to old room //@todo: ar.graf : GetRoomID() yields NEW room
+#pragma omp critical(flowupdater)
+                flowupdater(
+                    *this); //@todo: ar.graf : this call should move into a critical region? check plz
             }
             status = true;
             break;

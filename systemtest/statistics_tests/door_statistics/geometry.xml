@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<geometry version="0.8" caption="Projectname" unit="m"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="../../xsd/jps_geometry.xsd">
+    <rooms>
+        <room id="0" caption="bottleneck">
+            <subroom id="0" closed="0" class="subroom">
+                <polygon caption="wall">
+                    <vertex px="5" py="0"/>
+                    <vertex px="0" py="0"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="0" py="0"/>
+                    <vertex px="0" py="5"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="0" py="5"/>
+                    <vertex px="5" py="5"/>
+                </polygon>
+            </subroom>
+            <subroom id="1" closed="0" class="subroom">
+                <polygon caption="wall">
+                    <vertex px="5" py="0"/>
+                    <vertex px="10" py="0"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="5" py="5"/>
+                    <vertex px="10" py="5"/>
+                </polygon>
+            </subroom>
+            <subroom id="2" closed="0" class="subroom">
+                <polygon caption="wall">
+                    <vertex px="10" py="0"/>
+                    <vertex px="15" py="0"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="15" py="0"/>
+                    <vertex px="15" py="1.5"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="15" py="3.5"/>
+                    <vertex px="15" py="5"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="15" py="5"/>
+                    <vertex px="10" py="5"/>
+                </polygon>
+            </subroom>
+            <crossings>
+                <crossing id="0" subroom1_id="0" subroom2_id="1">
+                    <vertex px="5" py="0"/>
+                    <vertex px="5" py="5"/>
+                </crossing>
+                <crossing id="1" subroom1_id="1" subroom2_id="2">
+                    <vertex px="10" py="0"/>
+                    <vertex px="10" py="5"/>
+                </crossing>
+            </crossings>
+        </room>
+    </rooms>
+    <transitions>
+        <transition id="0" caption="" type="emergency"
+                    room1_id="0" subroom1_id="2" room2_id="-1" subroom2_id="-1">
+            <vertex px="15" py="1.5"/>
+            <vertex px="15" py="3.5"/>
+        </transition>
+    </transitions>
+</geometry>
