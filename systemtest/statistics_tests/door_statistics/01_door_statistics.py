@@ -7,7 +7,6 @@ import os
 from sys import argv, path
 import logging
 import pandas as pd
-import matplotlib.pyplot as plt
 import numpy as np
 
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(path[0])))
@@ -22,7 +21,7 @@ import xml.etree.cElementTree as ET
 def readFlow(numPeds):
     filename = 'flow_exit_id_0_traj_group-number_{:d}.txt'.format(int(numPeds))
     flowfile = os.path.join('results', filename)
-    logging.error('try to read: {}'.format(flowfile))
+    logging.info('try to read: {}'.format(flowfile))
     flow = pd.read_csv(flowfile,
                        comment='#',
                        sep='\s+',
