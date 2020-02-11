@@ -72,6 +72,10 @@ entries:
       url: /jpscore_tests_juelich.html
       output: web, pdf
 
+    - title: Demos
+      url: /jpscore_demos.html
+      output: web, pdf
+
   - title: Simulation
     output: web
     folderitems:
