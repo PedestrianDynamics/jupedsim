@@ -242,7 +242,7 @@ bool PedData::InitializeVariables(const fs::path & filename)
                 actual_totalframe++;
             }
         }
-        if(lastFrameIndex <= 0 || lastFrameIndex == INT_MAX) {
+        if(lastFrameIndex <= 0 || firstFrameIndex == INT_MAX) {
             Log->Write("Warning:\tThere is no trajectory for ped with ID <%d>!", unique_ids[i]);
             continue;
         }
