@@ -6,7 +6,7 @@ sidebar: jupedsim_sidebar
 folder: jpsreport
 summary: In the configuration file, all important information needed for the analysis are defined. For example the location of the trajectory and geometry files, the measurement methods to use, etc.
 permalink: jpsreport_inifile.html
-last_updated: Dec 20, 2019
+last_updated: Feb 09, 20120
 ---
 
 
@@ -51,7 +51,10 @@ A path is considered absolute if it starts with "/" (Linux system) or contains "
 ## Trajectories
 
   indicates the location and the name of the trajectory files that will be analyzed.
-  The format of trajectory files should be `.txt` or `.xml`.
+  The format of trajectory files should be `.txt`.
+
+{%include note.html content="Trajectory files in the XML format are no longer supported."%}
+
   The supported unit of the trajectories is `m`.
   Two other sub-options `file` and `path` can be supplied.
   If only `path` is given, then all files with the corresponding format in
