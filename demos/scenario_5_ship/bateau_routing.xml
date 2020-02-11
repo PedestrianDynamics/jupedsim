@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-
-<routing version="0.5" 
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:noNamespaceSchemaLocation="../../xsd/jps_routing.xsd" >
-	<Hlines>
-	</Hlines>
-</routing>
