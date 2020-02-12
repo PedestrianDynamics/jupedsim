@@ -96,11 +96,15 @@ bool RemoveWallsOverlappingWithDoors(SubRoom & subroom)
     bool wallsRemoved = false; // did we remove anything?
 
     for(Crossing const * const crossing : subroom.GetAllCrossings()) {
-        wallsRemoved = RemoveOverlappingWall(*crossing, subroom) || wallsRemoved;
+        if(RemoveOverlappingWall(*crossing, subroom)) {
+            wallsRemoved = true;
+        }
     }
 
     for(Transition const * const transition : subroom.GetAllTransitions()) {
-        wallsRemoved = RemoveOverlappingWall(*transition, subroom) || wallsRemoved;
+        if(RemoveOverlappingWall(*transition, subroom)) {
+            wallsRemoved = true;
+        }
     }
 
     return wallsRemoved;
@@ -111,11 +115,6 @@ std::optional<Point> ComputeSplitPoint(const Wall & wall, const Line & line)
 {
     // Equal lines should not be split.
     if(wall == line) {
-        return std::nullopt;
-    }
-
-    // Walls starting or ending in common point should not be split.
-    if(wall.ShareCommonPointWith(line)) {
         return std::nullopt;
     }
 
@@ -131,7 +130,7 @@ std::optional<Point> ComputeSplitPoint(const Wall & wall, const Line & line)
         return std::nullopt;
     }
 
-    // Intersection points with NAN cannot be split
+    // Intersection points with NAN cannot be split, this means lines are parallel
     if(std::isnan(intersectionPoint._x) || std::isnan(intersectionPoint._y)) {
         return std::nullopt;
     }
@@ -218,12 +217,6 @@ int AddWallToSubroom(SubRoom & subroom, const std::vector<Wall> & wallPieces)
 
 void ReplaceBigWall(SubRoom & subroom, const Wall & bigWall, const std::vector<Wall> & wallPieces)
 {
-    LOG_DEBUG(
-        "Replacing big wall {} in SubRoom {}-{}",
-        bigWall.toString(),
-        subroom.GetRoomID(),
-        subroom.GetSubRoomID());
-
     if(!subroom.RemoveWall(bigWall)) {
         throw std::runtime_error(fmt::format(
             FMT_STRING("Correcting the geometry failed. Could not remove wall: {}"),
@@ -250,6 +243,12 @@ bool RemoveBigWalls(SubRoom & subroom)
 
         if(splitWallPieces) {
             assert(!splitWallPieces->empty());
+            LOG_DEBUG(
+                "Splitting big wall {} in SubRoom {}-{} into {} pieces.",
+                bigWall.toString(),
+                subroom.GetRoomID(),
+                subroom.GetSubRoomID(),
+                splitWallPieces->size());
 
             // remove big wall and add one wallpiece to walls
             ReplaceBigWall(subroom, bigWall, *splitWallPieces);
@@ -267,7 +266,6 @@ bool RemoveBigWalls(SubRoom & subroom)
 
 void CorrectInputGeometry(Building & building)
 {
-    const auto t_start = std::chrono::high_resolution_clock::now();
     Logging::Info("Starting geometry::helper::correct to fix the geometry ...");
 
     bool geometry_changed = false;
@@ -297,12 +295,8 @@ void CorrectInputGeometry(Building & building)
 
         if(building.SaveGeometry(newGeometryFile)) {
             building.GetConfig()->SetGeometryFile(newGeometryFile);
+            LOG_INFO("Geometry was fixed, new file is stored in: {}.", newGeometryFile.string());
         }
     }
-
-    const auto t_end = std::chrono::high_resolution_clock::now();
-    LOG_INFO(
-        "Leave geometry correct with success ({:.3f}s)",
-        std::chrono::duration<double, std::milli>(t_end - t_start).count());
 }
 } // namespace geometry::helper

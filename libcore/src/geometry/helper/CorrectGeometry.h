@@ -51,7 +51,7 @@ namespace geometry::helper
  *```
  *  Here wall `[AB]` is a big wall, then it intersects wall `[CD]` whether in A nor in B
  *  What happens in this method:
- *  1. `[AB]` will be splited in two lines `[AC]` and `[CB]`
+ *  1. `[AB]` will be splited into two segments`[AC]` and `[CB]`
  *  2. `[AB]` will be removed
  *  3. `[AC]` or `[CB]` will be added to the subroom
  *
