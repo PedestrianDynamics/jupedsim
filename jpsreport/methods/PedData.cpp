@@ -27,9 +27,10 @@
  **/
 
 #include "PedData.h"
+
 #include <cmath>
-#include<unordered_set>
 #include <string>
+#include <unordered_set>
 
 using std::ifstream;
 using std::map;
@@ -214,10 +215,8 @@ bool PedData::InitializeVariables(const fs::path & filename)
 
     std::unordered_set<int> s;
     std::vector<int> unique_ids(_IdsTXT);
-    auto end = std::remove_if(unique_ids.begin(), unique_ids.end(),
-							[&s](int const &i) {
-								return !s.insert(i).second;
-							});
+    auto end = std::remove_if(
+        unique_ids.begin(), unique_ids.end(), [&s](int const & i) { return !s.insert(i).second; });
 
     unique_ids.erase(end, unique_ids.end());
     _numPeds = unique_ids.size();
@@ -245,8 +244,8 @@ bool PedData::InitializeVariables(const fs::path & filename)
             Log->Write("Warning:\tThere is no trajectory for ped with ID <%d>!", unique_ids[i]);
             continue;
         }
-        _firstFrame[pos_i] = _FramesTXT[firstFrameIndex] - _minFrame;
-        _lastFrame[pos_i]  = _FramesTXT[lastFrameIndex] - _minFrame;
+        _firstFrame[pos_i]    = _FramesTXT[firstFrameIndex] - _minFrame;
+        _lastFrame[pos_i]     = _FramesTXT[lastFrameIndex] - _minFrame;
         int expect_totalframe = _lastFrame[pos_i] - _firstFrame[pos_i] + 1;
         if(actual_totalframe != expect_totalframe) {
             Log->Write(

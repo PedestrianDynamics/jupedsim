@@ -79,7 +79,7 @@ bool Method_A::Process(
         if(!(frid % 100)) {
             Log->Write("frame ID = %d", frid);
         }
-        vector<int> ids               = peddata.GetIndexInFrame(frameNr, _peds_t[frameNr], zPos_measureArea);
+        vector<int> ids = peddata.GetIndexInFrame(frameNr, _peds_t[frameNr], zPos_measureArea);
         const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
         if(VInFrame.size() > 0) {
             GetAccumFlowVelocity(frameNr, ids, VInFrame);
