@@ -28,7 +28,7 @@
 
 #include "PedData.h"
 #include <cmath>
-#include <set>
+#include<unordered_set>
 #include <string>
 
 using std::ifstream;
@@ -211,16 +211,15 @@ bool PedData::InitializeVariables(const fs::path & filename)
     Log->Write("INFO: numFrames: %d", _numFrames);
 
     //Total number of agents
-    std::vector<int> unique_ids = _IdsTXT;
 
-    // no need to
-    //sort. Assume that ids are ascendant
+    std::unordered_set<int> s;
+    std::vector<int> unique_ids(_IdsTXT);
+    auto end = std::remove_if(unique_ids.begin(), unique_ids.end(),
+							[&s](int const &i) {
+								return !s.insert(i).second;
+							});
 
-    std::set<int> s;
-    for(auto a : _IdsTXT) {
-        s.insert(a);
-    }
-    unique_ids.assign(s.begin(), s.end());
+    unique_ids.erase(end, unique_ids.end());
     _numPeds = unique_ids.size();
     Log->Write("INFO: Total number of Agents: %d", _numPeds);
     CreateGlobalVariables(_numPeds, _numFrames);
@@ -248,7 +247,6 @@ bool PedData::InitializeVariables(const fs::path & filename)
         }
         _firstFrame[pos_i] = _FramesTXT[firstFrameIndex] - _minFrame;
         _lastFrame[pos_i]  = _FramesTXT[lastFrameIndex] - _minFrame;
-
         int expect_totalframe = _lastFrame[pos_i] - _firstFrame[pos_i] + 1;
         if(actual_totalframe != expect_totalframe) {
             Log->Write(
