@@ -421,6 +421,21 @@ vector<int> PedData::GetIdInFrame(int frame, const vector<int> & ids) const
     return IdInFrame;
 }
 
+vector<int> PedData::GetIndexInFrame(int frame, const vector<int> & ids, double zPos) const
+{
+    vector<int> IdInFrame;
+    for(int id : ids) {
+        if(zPos < 1000000.0) {
+            if(fabs(_zCor(id, frame) - zPos * M2CM) < J_EPS_EVENT) {
+                IdInFrame.push_back(id);
+            }
+        } else {
+            IdInFrame.push_back(id);
+        }
+    }
+    return IdInFrame;
+}
+
 vector<int> PedData::GetIdInFrame(int frame, const vector<int> & ids, double zPos) const
 {
     vector<int> IdInFrame;

@@ -70,6 +70,8 @@ public:
     ub::matrix<double> GetId() const;
     int * GetFirstFrame() const;
     int * GetLastFrame() const;
+    std::vector<int>
+    GetIndexInFrame(int frame, const std::vector<int> & ids, double zPos) const;
     std::vector<int> GetIdInFrame(int frame, const std::vector<int> & ids) const;
     std::vector<int> GetIdInFrame(int frame, const std::vector<int> & ids, double zPos) const;
     std::vector<double> GetXInFrame(int frame, const std::vector<int> & ids, double zPos) const;

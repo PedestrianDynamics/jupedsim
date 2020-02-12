@@ -38,10 +38,8 @@ using std::vector;
 
 Method_A::Method_A()
 {
-    _classicFlow = 0;
-    _vDeltaT     = 0;
-    //_xCor(0,0);
-    //_yCor(0,0);
+    _classicFlow     = 0;
+    _vDeltaT         = 0;
     _firstFrame      = nullptr;
     _passLine        = nullptr;
     _deltaT          = 100;
@@ -73,21 +71,20 @@ bool Method_A::Process(
         _passLine[i] = false;
     }
     Log->Write("------------------------Analyzing with Method A-----------------------------");
-    //for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
     bool PedInGeometry = false;
     for(std::map<int, std::vector<int>>::iterator ite = _peds_t.begin(); ite != _peds_t.end();
         ite++) {
-        int frameNr = ite->first;
-        int frid    = frameNr + peddata.GetMinFrame();
+        int frameNr = ite->first;                      //index starts by 0
+        int frid    = frameNr + peddata.GetMinFrame(); // frame in traj file
         if(!(frid % 100)) {
             Log->Write("frame ID = %d", frid);
         }
-        vector<int> ids               = _peds_t[frameNr];
+        vector<int> ids               = peddata.GetIndexInFrame(frameNr, _peds_t[frameNr], zPos_measureArea);
         const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
         if(VInFrame.size() > 0) {
             GetAccumFlowVelocity(frameNr, ids, VInFrame);
             char tmp[30];
-            sprintf(tmp, "%.2f\t%d\n", frid / _fps, _classicFlow);
+            sprintf(tmp, "%.2f\t%d\n", frameNr / _fps, _classicFlow);
             outputRhoV.append(tmp);
             PedInGeometry = true;
         }
@@ -128,7 +125,7 @@ void Method_A::GetAccumFlowVelocity(
     const vector<int> & ids,
     const vector<double> & VInFrame)
 {
-    for(unsigned int i = 0; i < ids.size(); i++) {
+    for(auto const i : ids) {
         bool IspassLine = false;
         if(frame > _firstFrame[i] && !_passLine[i]) {
             IspassLine = IsPassLine(
