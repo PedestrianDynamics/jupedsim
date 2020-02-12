@@ -241,32 +241,120 @@ TEST_CASE("geometry/Building/correct", "[geometry][Building][correct]")
         SECTION("No split possible")
         {
             NormalSubRoom subRoom;
-            REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, Wall{}));
-
             Wall bigWall(Point(0, 0), Point(20, 0));
-            REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, bigWall));
 
-            Transition transition;
-            subRoom.AddTransition(&transition);
-            REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, bigWall));
+            SECTION("Empty SubRoom")
+            {
+                REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, Wall{}));
+                REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, bigWall));
+            }
 
-            transition.SetPoint2(Point(0, 10));
-            REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, bigWall));
+            SECTION("Transition")
+            {
+                Transition transition;
+                subRoom.AddTransition(&transition);
+                REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, bigWall));
 
-            Crossing crossing;
-            subRoom.AddCrossing(&crossing);
-            REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, bigWall));
-            crossing.SetPoint1(Point(100, 0));
-            crossing.SetPoint2(Point(100, 1));
+                transition.SetPoint1(Point(0, 0));
+                transition.SetPoint2(Point(0, 10));
+                REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, bigWall));
 
-            Wall wall;
-            subRoom.AddWall(wall);
-            REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, bigWall));
+                transition.SetPoint1(Point(0, -2));
+                transition.SetPoint2(Point(0, 0));
+                REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, bigWall));
 
-            wall.SetPoint1(Point(-100, 0));
-            REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, bigWall));
+                transition.SetPoint1(Point(20, 0));
+                transition.SetPoint2(Point(20, 1));
+                REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, bigWall));
 
-            REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, Wall{}));
+                transition.SetPoint1(Point(20, -1));
+                transition.SetPoint2(Point(20, 0));
+                REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, bigWall));
+            }
+
+            SECTION("Crossing")
+            {
+                Crossing crossing;
+                subRoom.AddCrossing(&crossing);
+                REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, bigWall));
+
+                crossing.SetPoint1(Point(0, 0));
+                crossing.SetPoint2(Point(0, 10));
+                REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, bigWall));
+
+                crossing.SetPoint1(Point(0, -2));
+                crossing.SetPoint2(Point(0, 0));
+                REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, bigWall));
+
+                crossing.SetPoint1(Point(20, 0));
+                crossing.SetPoint2(Point(20, 1));
+                REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, bigWall));
+
+                crossing.SetPoint1(Point(20, -1));
+                crossing.SetPoint2(Point(20, 0));
+                REQUIRE_FALSE(geometry::helper::SplitWall(subRoom, bigWall));
+            }
+        }
+
+        SECTION("Wall Splitted")
+        {
+            NormalSubRoom subRoom;
+            Wall bigWall(Point(0, 0), Point(20, 0));
+
+            SECTION("Transition")
+            {
+                // Wall should be splitted in two pieces
+                Transition transition;
+                subRoom.AddTransition(&transition);
+                transition.SetPoint1(Point(10, 0));
+                transition.SetPoint2(Point(10, 1));
+                auto walls = geometry::helper::SplitWall(subRoom, bigWall);
+                REQUIRE(walls);
+                REQUIRE(walls->size() == 2);
+                auto expected_wall1 = Wall(Point(0, 0), Point(10, 0));
+                auto expected_wall2 = Wall(Point(10, 0), Point(20, 0));
+
+                REQUIRE((expected_wall1 == walls->front() || expected_wall1 == walls->back()));
+                REQUIRE((expected_wall2 == walls->front() || expected_wall2 == walls->back()));
+
+
+                transition.SetPoint1(Point(10, -1));
+                transition.SetPoint2(Point(10, 1));
+                walls = geometry::helper::SplitWall(subRoom, bigWall);
+                REQUIRE(walls);
+                REQUIRE(walls->size() == 2);
+                REQUIRE((expected_wall1 == walls->front() || expected_wall1 == walls->back()));
+                REQUIRE((expected_wall2 == walls->front() || expected_wall2 == walls->back()));
+            }
+
+            SECTION("Crossing")
+            {
+                // Wall should be splitted in two pieces
+                Crossing crossing;
+                subRoom.AddCrossing(&crossing);
+                crossing.SetPoint1(Point(10, 0));
+                crossing.SetPoint2(Point(10, 1));
+                auto walls = geometry::helper::SplitWall(subRoom, bigWall);
+                REQUIRE(walls);
+                REQUIRE(walls->size() == 2);
+                auto expected_wall1 = Wall(Point(0, 0), Point(10, 0));
+                auto expected_wall2 = Wall(Point(10, 0), Point(20, 0));
+
+                REQUIRE((expected_wall1 == walls->front() || expected_wall1 == walls->back()));
+                REQUIRE((expected_wall2 == walls->front() || expected_wall2 == walls->back()));
+
+
+                crossing.SetPoint1(Point(10, -1));
+                crossing.SetPoint2(Point(10, 1));
+                walls = geometry::helper::SplitWall(subRoom, bigWall);
+                REQUIRE(walls);
+                REQUIRE(walls->size() == 2);
+                REQUIRE((expected_wall1 == walls->front() || expected_wall1 == walls->back()));
+                REQUIRE((expected_wall2 == walls->front() || expected_wall2 == walls->back()));
+            }
+
+            SECTION("MixedTransition and Crossing") {}
+            SECTION("More then two Splitpoints") {}
         }
     }
 
@@ -276,42 +364,51 @@ TEST_CASE("geometry/Building/correct", "[geometry][Building][correct]")
         Wall testWall(Point(0, 0), Point(0, 10));
         SECTION("No Split Point")
         {
-            // default Walls (0,0)-(0,0)
-            REQUIRE_FALSE(geometry::helper::ComputeSplitPoint(Wall(), Line()));
-            REQUIRE_FALSE(geometry::helper::ComputeSplitPoint(Wall(), Wall()));
+            SECTION("Not Intersecting")
+            {
+                // default Walls (0,0)-(0,0)
+                REQUIRE_FALSE(geometry::helper::ComputeSplitPoint(Wall(), Line()));
+                REQUIRE_FALSE(geometry::helper::ComputeSplitPoint(Wall(), Wall()));
 
-            // No intersection
-            REQUIRE_FALSE(geometry::helper::ComputeSplitPoint(testWall, Line()));
-            REQUIRE_FALSE(
-                geometry::helper::ComputeSplitPoint(testWall, Line(Point(1, 1), Point(1, 2))));
-            REQUIRE_FALSE(
-                geometry::helper::ComputeSplitPoint(testWall, Line(Point(0, -1), Point(1, -1))));
-
-            // Overlapping
-            REQUIRE_FALSE(
-                geometry::helper::ComputeSplitPoint(testWall, Line(Point(0, 0), Point(0, 2))));
-            REQUIRE_FALSE(
-                geometry::helper::ComputeSplitPoint(testWall, Line(Point(0, -1), Point(0, 4))));
-
-            // Common starting/ending Point
-            REQUIRE_FALSE(
-                geometry::helper::ComputeSplitPoint(testWall, Line(Point(0, 0), Point(1, 2))));
-            REQUIRE_FALSE(
-                geometry::helper::ComputeSplitPoint(testWall, Line(Point(0, 10), Point(1, -1))));
-
-            // Same Line
-            REQUIRE_FALSE(
-                geometry::helper::ComputeSplitPoint(testWall, Line(Point(0, 0), Point(0, 10))));
-            REQUIRE_FALSE(geometry::helper::ComputeSplitPoint(testWall, testWall));
-
-            // Line starting or ending on bigWall
-            REQUIRE_FALSE(
-                geometry::helper::ComputeSplitPoint(testWall, Line(Point(-1, 0), Point(1, 0))));
-            REQUIRE_FALSE(
-                geometry::helper::ComputeSplitPoint(testWall, Line(Point(-1, 10), Point(2, 10))));
+                REQUIRE_FALSE(geometry::helper::ComputeSplitPoint(testWall, Line()));
+                REQUIRE_FALSE(
+                    geometry::helper::ComputeSplitPoint(testWall, Line(Point(1, 1), Point(1, 2))));
+                REQUIRE_FALSE(geometry::helper::ComputeSplitPoint(
+                    testWall, Line(Point(0, -1), Point(1, -1))));
+            }
+            SECTION("Overlapping")
+            {
+                // Overlapping
+                REQUIRE_FALSE(
+                    geometry::helper::ComputeSplitPoint(testWall, Line(Point(0, 0), Point(0, 2))));
+                REQUIRE_FALSE(
+                    geometry::helper::ComputeSplitPoint(testWall, Line(Point(0, -1), Point(0, 4))));
+            }
+            SECTION("Common Start or End Point")
+            {
+                REQUIRE_FALSE(
+                    geometry::helper::ComputeSplitPoint(testWall, Line(Point(0, 0), Point(1, 2))));
+                REQUIRE_FALSE(geometry::helper::ComputeSplitPoint(
+                    testWall, Line(Point(0, 10), Point(1, -1))));
+            }
+            SECTION("Same Line")
+            {
+                // Same Line
+                REQUIRE_FALSE(
+                    geometry::helper::ComputeSplitPoint(testWall, Line(Point(0, 0), Point(0, 10))));
+                REQUIRE_FALSE(
+                    geometry::helper::ComputeSplitPoint(testWall, Line(Point(0, 10), Point(0, 0))));
+                REQUIRE_FALSE(geometry::helper::ComputeSplitPoint(testWall, testWall));
+            }
+            SECTION("Line Starting or Ending on BigWall")
+            {
+                REQUIRE_FALSE(
+                    geometry::helper::ComputeSplitPoint(testWall, Line(Point(-1, 0), Point(1, 0))));
+                REQUIRE_FALSE(geometry::helper::ComputeSplitPoint(
+                    testWall, Line(Point(-1, 10), Point(2, 10))));
+            }
         }
-
-        SECTION("Split Point")
+        SECTION("Split Points Available")
         {
             // Some "normal" intersection points
             REQUIRE(
@@ -332,6 +429,60 @@ TEST_CASE("geometry/Building/correct", "[geometry][Building][correct]")
                 Point(0, 1) ==
                 geometry::helper::ComputeSplitPoint(testWall, Line(Point(1, 1), Point(0, 1)))
                     .value());
+        }
+    }
+
+    SECTION("RemoveOverlappingWall")
+    {
+        NormalSubRoom subroom;
+        subroom.AddWall(Wall(Point(0, 0), Point(10, 0)));
+
+        SECTION("Not Overlapping")
+        {
+            REQUIRE_FALSE(
+                geometry::helper::RemoveOverlappingWall(Line(Point(0, 0), Point(-6, 0)), subroom));
+            REQUIRE_FALSE(
+                geometry::helper::RemoveOverlappingWall(Line(Point(-3, 0), Point(-6, 0)), subroom));
+            REQUIRE_FALSE(
+                geometry::helper::RemoveOverlappingWall(Line(Point(-3, 3), Point(-6, 0)), subroom));
+        }
+
+
+        SECTION("Simple Overlapping")
+        {
+            REQUIRE(
+                geometry::helper::RemoveOverlappingWall(Line(Point(5, 0), Point(6, 0)), subroom));
+            REQUIRE(subroom.GetAllWalls().size() == 2);
+            auto it = std::find(
+                subroom.GetAllWalls().begin(),
+                subroom.GetAllWalls().end(),
+                Wall(Point(0, 0), Point(5, 0)));
+            REQUIRE(it != subroom.GetAllWalls().end());
+            it = std::find(
+                subroom.GetAllWalls().begin(),
+                subroom.GetAllWalls().end(),
+                Wall(Point(6, 0), Point(10, 0)));
+            REQUIRE(it != subroom.GetAllWalls().end());
+        }
+
+        SECTION("Overlapping at End of Wall")
+        {
+            REQUIRE(
+                geometry::helper::RemoveOverlappingWall(Line(Point(0, 0), Point(1, 0)), subroom));
+            REQUIRE(subroom.GetAllWalls().size() == 1);
+            REQUIRE(subroom.GetAllWalls().front() == Line(Point(1, 0), Point(10, 0)));
+
+            REQUIRE(
+                geometry::helper::RemoveOverlappingWall(Line(Point(10, 0), Point(5, 0)), subroom));
+            REQUIRE(subroom.GetAllWalls().size() == 1);
+            REQUIRE(subroom.GetAllWalls().front() == Line(Point(1, 0), Point(5, 0)));
+        }
+
+        SECTION("Completely Overlapping")
+        {
+            REQUIRE(
+                geometry::helper::RemoveOverlappingWall(Line(Point(0, 0), Point(10, 0)), subroom));
+            REQUIRE(subroom.GetAllWalls().empty());
         }
     }
 }
