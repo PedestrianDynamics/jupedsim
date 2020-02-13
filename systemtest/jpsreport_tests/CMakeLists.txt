@@ -6,7 +6,7 @@ list(APPEND METHODS
   "I"
   "J")
 foreach (METHOD ${METHODS})
-  add_test(NAME 01_method_${METHOD} COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_${METHOD}/01_method_${METHOD}.py)
+  add_test(NAME 01_method_${METHOD} COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_${METHOD}/01_method_${METHOD}.py ${jpscore_exe})
 
   set_tests_properties(
     01_method_${METHOD}
