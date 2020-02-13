@@ -216,12 +216,9 @@ void Crossing::ResetDoorUsage()
 {
     _tempDoorUsage = 0;
 
-    if((_outflowRate >= std::numeric_limits<double>::max())) {
-        if(_maxDoorUsage < std::numeric_limits<double>::max()) {
-            Open();
-            LOG_INFO("Reopening door {}", _id);
-            _closeByEvent = false;
-        }
+    if(_maxDoorUsage < std::numeric_limits<double>::max()) {
+        Open();
+        LOG_INFO("Reopening door {}", _id);
     }
 }
 

@@ -64,7 +64,7 @@ def run_test_9(inifile, trajfile):
 if __name__ == "__main__":
     test = JPSRunTestDriver(9, argv0=argv[0],
                             testdir=sys.path[0],
-                            utestdir=utestdir)
+                            utestdir=utestdir, jpscore=argv[1])
 
     results = test.run_test(testfunction=run_test_9)
     eval_results(results)
