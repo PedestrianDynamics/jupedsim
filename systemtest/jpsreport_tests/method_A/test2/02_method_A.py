@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 #---------
 # one pedestrian created at frame 0
+# pedestrian starts in position (0, 1) and moves forward
+# in a straight corridor with a speed of 1 m/s
+#
+# arrival times should be:
+# - 7s at line in x=7
+# - 9s at line in x=9
 #---------
 import os
 from sys import argv, path

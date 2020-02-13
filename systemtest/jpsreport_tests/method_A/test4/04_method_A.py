@@ -2,6 +2,7 @@
 #---------
 # 6 pedestrians created at frame >= 9
 # ids are discontinuous
+# creation times in sources are 1, 5, 10, 15, 25, 30
 #---------
 import os
 from sys import argv, path
