@@ -39,9 +39,6 @@ function (cpack_write_osx_config)
 endfunction()
 
 function (cpack_write_windows_config)
-  # executable needs two dlls: zlib1.dll and fmt.dll
-  # these are copied along with the system dlls
-  # NOTE: Assume installation with vcpkg
   message(STATUS "Package generation - Windows")
   list(APPEND CPACK_GENERATOR "NSIS")
   set (CPACK_GENERATOR  ${CPACK_GENERATOR} PARENT_SCOPE)
@@ -52,11 +49,9 @@ function (cpack_write_windows_config)
     message(STATUS "   + NSIS                                 NO ")
   endif(NSIS_PATH)
 
-  #set(CMAKE_INSTALL_MFC_LIBRARIES ON)
   set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
   set(VCPKG_DIR "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/")
   set(DIRS ${VCPKG_DIR})
-  #file(GLOB DLL_FILES "${VCPKG_DIR}/*.dll")
   set(DLL_FILES ${VCPKG_DIR}/zlib1.dll ${VCPKG_DIR}/fmt.dll)
   set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS "${DLL_FILES}")
   set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "${BUNDLE_RUNTIME_DESTINATION}")
