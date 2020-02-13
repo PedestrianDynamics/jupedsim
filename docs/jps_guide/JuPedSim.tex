@@ -74,30 +74,10 @@ draft=false,				% value for draft version
 
 
 % **************************************************
-% Debug LaTeX Information
-% **************************************************
-%\listfiles
-% \usepackage{etoc}
-% \etocsetlevel{authors}{1}
-% \etocsetlevel{section}{2}
-% \etocsetlevel{subsection}{3}
-% \etocsettocdepth{subsection}
-% **************************************************
 % Information and Commands for Reuse
 % **************************************************
 \newcommand{\thesisTitle}{JuPedSim User Guide}
 \newcommand{\thesisSubject}{Documentation}
-\newcommand{\thesisDate}{May 29, 2018}
-\newcommand{\Version}{0.8.4}
-
-
-\newcommand{\thesisUniversity}{\protect{Clean Thesis Style University}}
-\newcommand{\thesisUniversityDepartment}{Department of Clean Thesis Style}
-\newcommand{\thesisUniversityInstitute}{Institut for Clean Thesis Dev}
-\newcommand{\thesisUniversityGroup}{Clean Thesis Group (CTG)}
-\newcommand{\thesisUniversityCity}{City}
-\newcommand{\thesisUniversityStreetAddress}{Street address}
-\newcommand{\thesisUniversityPostalCode}{Postal Code}
 \newcommand{\thesisName}{JuPedSim}
 % **************************************************
 % Load and Configure Packages
@@ -177,8 +157,6 @@ colortheme=bluemagenta,%
 % --------------------------
 % rename document parts
 % --------------------------
-% \renewcaptionname{ngerman}{\figurename}{Abb.}
-% \renewcaptionname{ngerman}{\tablename}{Tab.}
 \renewcaptionname{english}{\figurename}{Fig.}
 \renewcaptionname{english}{\tablename}{Tab.}
 
@@ -187,12 +165,6 @@ colortheme=bluemagenta,%
 % --------------------------
 \pagenumbering{arabic}			% roman page numbing (invisible for empty page style)
 \pagestyle{plain}
-% \pagestyle{fancy}
-% \fancyhf{}
-% \fancyhead[LE,RO]{JuPedSim}
-% \fancyhead[RE,LO]{User's Guide \Version}
-% \fancyfoot[CE,CO]{\leftmark}
-% \fancyfoot[LE,RO]{\thepage}
 \input{titlepage}		% INCLUDE: all titlepages
 \pdfbookmark[1]{Disclaimer}{sec:disclaimer}  % Bookmark im pdf file
 \let\cleardoublepage\clearpage

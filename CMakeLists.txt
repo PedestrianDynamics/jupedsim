@@ -178,7 +178,6 @@ if (GIT_SCM AND GITDIR)
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     OUTPUT_VARIABLE GIT_SHA1
     ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
-
     # branch
     execute_process(
     COMMAND "${GIT_EXECUTABLE}" rev-parse --abbrev-ref HEAD
@@ -194,6 +193,12 @@ if (GIT_SCM AND GITDIR)
     OUTPUT_VARIABLE GIT_DATE
     ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+  execute_process(COMMAND
+    "${GIT_EXECUTABLE}" describe --tags --abbrev=0
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    OUTPUT_VARIABLE GIT_TAG
+    ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+
     # the subject of the commit
     execute_process(COMMAND
     "${GIT_EXECUTABLE}" log -1 --format=%s
@@ -207,20 +212,21 @@ if (GIT_SCM AND GITDIR)
 
 else()
     message(STATUS "Not in a git repo")
-    set(GIT_SHA1 "UNKNONW")
-    set(GIT_DATE "UNKNONW")
-    set(GIT_COMMIT_SUBJECT "UNKNONW")
-    set(GIT_BRANCH "UNKNONW")
+    set(GIT_SHA1 "UNKNOWN")
+    set(GIT_DATE "UNKNOWN")
+    set(GIT_COMMIT_SUBJECT "UNKNOWN")
+    set(GIT_BRANCH "UNKNOWN")
+    set(GIT_TAG "UNKNOWN")
 endif()
 
 add_library(git-info INTERFACE)
 target_compile_definitions(git-info INTERFACE
     GIT_COMMIT_HASH="${GIT_SHA1}"
     GIT_COMMIT_DATE="${GIT_DATE}"
+    GIT_TAG="${GIT_TAG}"
     GIT_COMMIT_SUBJECT="${GIT_COMMIT_SUBJECT}"
     GIT_BRANCH="${GIT_BRANCH}"
 )
-
 ################################################################################
 # Documentation
 ################################################################################
@@ -236,7 +242,20 @@ if(BUILD_DOC)
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating API documentation with Doxygen"
         VERBATIM
-    )
+        )
+    # generate file titlepage.tex based on titlepage.tex.in
+    configure_file(
+      ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide/titlepage.tex.in
+            ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide/titlepage.tex
+      @ONLY
+      )
+    add_custom_target(guide
+        "${PYTHON_EXECUTABLE}" ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide/make_guide.py
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/docs/jps_guide
+        COMMENT "Generating guide"
+        VERBATIM
+        )
+
 endif(BUILD_DOC)
 
 ################################################################################
@@ -263,59 +282,16 @@ endif (BUILD_TESTING)
 ################################################################################
 # Packaging with CPack
 ################################################################################
-IF(UNIX)
-    SET(CPACK_GENERATOR "DEB")
-    SET(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-    SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://jupedsim.org")
-    SET(CPACK_DEBIAN_PACKAGE_SUGGESTS, "jpsvis, jpsreport, jpseditor")
-    SET(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-    SET(CPACK_DEBIAN_PACKAGE_SECTION "science")
-    SET(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+include(CPackUtilities)
+IF(UNIX AND NOT APPLE)
+  cpack_write_deb_config()
 endif()
 if(WIN32 AND NOT UNIX)
-    message(STATUS "Package generation - Windows")
-    set(CPACK_GENERATOR "NSIS")
-    find_program(NSIS_PATH nsis PATH_SUFFIXES nsis)
-    if(NSIS_PATH)
-        set(CPACK_GENERATOR "${CPACK_GENERATOR};NSIS")
-        message(STATUS "   + NSIS                                 YES ")
-    else(NSIS_PATH)
-        message(STATUS "   + NSIS                                 NO ")
-    endif(NSIS_PATH)
-
-    #CPACK_NSIS_URL_INFO_ABOUT
-    set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
-    include(InstallRequiredSystemLibraries)
-
-    message(STATUS "System Dependencies: " ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
-    install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
-            DESTINATION sys
-            COMPONENT applications)
-elseif(APPLE)
-    set(DEFAULT_CPACK_GENERATOR "DragNDrop")
+  cpack_write_windows_config()
+endif()
+if(APPLE)
+  cpack_write_osx_config()
 endif()
 
-set(CPACK_COMPONENTS_ALL applications)
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
-set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/LICENSE")
-set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/forms/jpscore.ico")
-set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/forms/jpscore.ico")
-set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
-set(CPACK_NSIS_MODIFY_PATH ON)
-set(CPACK_COMPONENTS_ALL applications demos)
-set(CPACK_COMPONENT_CTDATA_GROUP "Demos")
-set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "jpscore and dlls")
-set(CPACK_COMPONENT_GROUP_DATA_DESCRIPTION "demo files")
-set(CPACK_COMPONENT_DATA_FILES_DESCRIPTION "demo files to get started")
-SET(CPACK_PACKAGE_DESCRIPTION "Simulation core of JuPedSim")
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The simulation core of JuPedSim, a framework for simulation and analysis of pedestrian dynamics")
-SET(CPACK_PACKAGE_VENDOR "Forschungszentrum Juelich GmbH")
-SET(CPACK_PACKAGE_NAME "jpscore")
-SET(CPACK_PACKAGE_CONTACT "m.chraibi@fz-juelich.de")
-SET(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_MAJOR_VERSION}")
-SET(CPACK_PACKAGE_VERSION_MINOR "${PROJET_MINOR_VERSION}")
-SET(CPACK_PACKAGE_VERSION_PATCH "${PROJET_PATCH_VERSION}")
-SET(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${PROJET_VERSION}")
-SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${PROJET_VERSION}")
+cpack_write_config()
 
-INCLUDE(CPack)
