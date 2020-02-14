@@ -29,8 +29,8 @@
 #include "PedData.h"
 
 #include <cmath>
-#include <set>
 #include <string>
+#include <unordered_set>
 
 using std::ifstream;
 using std::map;
@@ -67,17 +67,7 @@ bool PedData::ReadData(
         "INFO:\tfull name of the trajectory is: <%s>", fullTrajectoriesPathName.string().c_str());
     bool result = true;
     if(trajformat == FORMAT_XML_PLAIN) {
-        TiXmlDocument docGeo(fullTrajectoriesPathName.string());
-        if(!docGeo.LoadFile()) {
-            Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
-            Log->Write(
-                "ERROR: \tcould not parse the trajectories file <%s>",
-                fullTrajectoriesPathName.string().c_str());
-            return false;
-        }
-        TiXmlElement * xRootNode = docGeo.RootElement();
-        result                   = InitializeVariables(xRootNode); //initialize some global
-                                                                   //variables using xml format
+        Log->Write("WARNING: Input trajectory file for jpsreport should be in txt format");
     }
 
     else if(trajformat == FORMAT_PLAIN) {
@@ -114,7 +104,7 @@ bool PedData::InitializeVariables(const fs::path & filename)
         int fps_found = 0;
         while(getline(fdata, line)) {
             boost::algorithm::trim(line);
-            //looking for the framerate which is suppposed to be at the second position
+            //looking for the framerate which is supposed to be at the second position
             if(line[0] == '#') {
                 if(line.find("framerate") != std::string::npos) {
                     std::vector<std::string> strs;
@@ -222,16 +212,13 @@ bool PedData::InitializeVariables(const fs::path & filename)
     Log->Write("INFO: numFrames: %d", _numFrames);
 
     //Total number of agents
-    std::vector<int> unique_ids = _IdsTXT;
 
-    // no need to
-    //sort. Assume that ids are ascendant
+    std::unordered_set<int> s;
+    std::vector<int> unique_ids(_IdsTXT);
+    auto end = std::remove_if(
+        unique_ids.begin(), unique_ids.end(), [&s](int const & i) { return !s.insert(i).second; });
 
-    std::set<int> s;
-    for(auto a : _IdsTXT) {
-        s.insert(a);
-    }
-    unique_ids.assign(s.begin(), s.end());
+    unique_ids.erase(end, unique_ids.end());
     _numPeds = unique_ids.size();
     Log->Write("INFO: Total number of Agents: %d", _numPeds);
     CreateGlobalVariables(_numPeds, _numFrames);
@@ -253,13 +240,12 @@ bool PedData::InitializeVariables(const fs::path & filename)
                 actual_totalframe++;
             }
         }
-        if(lastFrameIndex <= 0 || lastFrameIndex == INT_MAX) {
+        if(lastFrameIndex <= 0 || firstFrameIndex == INT_MAX) {
             Log->Write("Warning:\tThere is no trajectory for ped with ID <%d>!", unique_ids[i]);
             continue;
         }
-        _firstFrame[pos_i] = _FramesTXT[firstFrameIndex] - _minFrame;
-        _lastFrame[pos_i]  = _FramesTXT[lastFrameIndex] - _minFrame;
-
+        _firstFrame[pos_i]    = _FramesTXT[firstFrameIndex] - _minFrame;
+        _lastFrame[pos_i]     = _FramesTXT[lastFrameIndex] - _minFrame;
         int expect_totalframe = _lastFrame[pos_i] - _firstFrame[pos_i] + 1;
         if(actual_totalframe != expect_totalframe) {
             Log->Write(
@@ -325,133 +311,6 @@ bool PedData::InitializeVariables(const fs::path & filename)
 
         _peds_t[t].push_back(id_pos);
         // std::cout << "frame: " << _FramesTXT[i] << " t: " << t << " > " << id_pos << "\n";
-    }
-
-    return true;
-}
-// initialize the global variables. xml format
-bool PedData::InitializeVariables(TiXmlElement * xRootNode)
-{
-    if(!xRootNode) {
-        Log->Write("ERROR:\tPedData::InitializeVariables: Root element does not exist");
-        return false;
-    }
-    if(xRootNode->ValueStr() != "trajectories") {
-        Log->Write(
-            "ERROR:\tPedData::InitializeVariables. Root element value is not 'trajectories'.");
-        return false;
-    }
-
-    //Number of agents
-
-    TiXmlNode * xHeader = xRootNode->FirstChild("header"); // header
-    if(xHeader->FirstChild("agents")) {
-        _numPeds = atoi(xHeader->FirstChild("agents")->FirstChild()->Value());
-        Log->Write("INFO:\tmax num of peds N=%d", _numPeds);
-    }
-
-    //framerate
-    if(xHeader->FirstChild("frameRate")) {
-        _fps = atoi(xHeader->FirstChild("frameRate")->FirstChild()->Value());
-        Log->Write("INFO:\tFrame rate fps: <%.2f>", _fps);
-    }
-
-
-    //processing the frames node
-    TiXmlNode * xFramesNode = xRootNode->FirstChild("frame");
-    if(!xFramesNode) {
-        Log->Write("ERROR: \tThe geometry should have at least one frame");
-        return false;
-    }
-
-    // obtaining the minimum id and minimum frame
-    int maxFrame = 0;
-    for(TiXmlElement * xFrame = xRootNode->FirstChildElement("frame"); xFrame;
-        xFrame                = xFrame->NextSiblingElement("frame")) {
-        int frm = atoi(xFrame->Attribute("ID"));
-        if(frm < _minFrame) {
-            _minFrame = frm;
-        }
-        if(frm > maxFrame) {
-            maxFrame = frm;
-        }
-        for(TiXmlElement * xAgent = xFrame->FirstChildElement("agent"); xAgent;
-            xAgent                = xAgent->NextSiblingElement("agent")) {
-            int id = atoi(xAgent->Attribute("ID"));
-            if(id < _minID) {
-                _minID = id;
-            }
-        }
-    }
-
-    //counting the number of frames
-    _numFrames = maxFrame - _minFrame + 1;
-    Log->Write("INFO:\tnum Frames = %d", _numFrames);
-    CreateGlobalVariables(_numPeds, _numFrames);
-    vector<int> totalframes;
-    for(int i = 0; i < _numPeds; i++) {
-        totalframes.push_back(0);
-    }
-    //int frameNr=0;
-    for(TiXmlElement * xFrame = xRootNode->FirstChildElement("frame"); xFrame;
-        xFrame                = xFrame->NextSiblingElement("frame")) {
-        int frameNr = atoi(xFrame->Attribute("ID")) - _minFrame;
-        //todo: can be parallelized with OpenMP
-        for(TiXmlElement * xAgent = xFrame->FirstChildElement("agent"); xAgent;
-            xAgent                = xAgent->NextSiblingElement("agent")) {
-            //get agent id, x, y, z
-            double x = atof(xAgent->Attribute("x"));
-            double y = atof(xAgent->Attribute("y"));
-            double z = atof(xAgent->Attribute("z"));
-            int ID   = atoi(xAgent->Attribute("ID")) - _minID;
-            if(ID >= _numPeds) {
-                Log->Write("ERROR:\t The number of agents are not corresponding to IDs. Maybe Ped "
-                           "IDs are not continuous in the first frame, please check!!");
-                return false;
-            }
-
-            _peds_t[frameNr].push_back(ID);
-            //_xCor[ID][frameNr] =  x*M2CM;
-            _xCor(ID, frameNr) = x * M2CM;
-            _yCor(ID, frameNr) = y * M2CM;
-            _zCor(ID, frameNr) = z * M2CM;
-            _id(ID, frameNr)   = ID + _minID;
-            if(_vComponent == "F") {
-                if(xAgent->Attribute("VD")) {
-                    _vComp(ID, frameNr) = *string(xAgent->Attribute("VD")).c_str();
-                } else {
-                    Log->Write("ERROR:\t There is no indicator for velocity component in "
-                               "trajectory file or ini file!!");
-                    return false;
-                }
-            } else {
-                _vComp(ID, frameNr) = _vComponent;
-            }
-
-            if(frameNr < _firstFrame[ID]) {
-                _firstFrame[ID] = frameNr;
-            }
-            if(frameNr > _lastFrame[ID]) {
-                _lastFrame[ID] = frameNr;
-            }
-            totalframes[ID] += 1;
-        }
-        //frameNr++;
-    }
-    for(int id = 0; id < _numPeds; id++) {
-        int actual_totalframe = totalframes[id];
-        int expect_totalframe = _lastFrame[id] - _firstFrame[id] + 1;
-        if(actual_totalframe != expect_totalframe) {
-            Log->Write(
-                "Error:\tThe trajectory of ped with ID <%d> is not continuous. Please modify the "
-                "trajectory file!",
-                id + _minID);
-            Log->Write(
-                "Error:\t actual_totalfame = <%d>, expected_totalframe = <%d> ",
-                actual_totalframe,
-                expect_totalframe);
-            return false;
-        }
     }
 
     return true;
@@ -557,6 +416,21 @@ vector<int> PedData::GetIdInFrame(int frame, const vector<int> & ids) const
     vector<int> IdInFrame;
     for(int id : ids) {
         IdInFrame.push_back(_id(id, frame));
+    }
+    return IdInFrame;
+}
+
+vector<int> PedData::GetIndexInFrame(int frame, const vector<int> & ids, double zPos) const
+{
+    vector<int> IdInFrame;
+    for(int id : ids) {
+        if(zPos < 1000000.0) {
+            if(fabs(_zCor(id, frame) - zPos * M2CM) < J_EPS_EVENT) {
+                IdInFrame.push_back(id);
+            }
+        } else {
+            IdInFrame.push_back(id);
+        }
     }
     return IdInFrame;
 }

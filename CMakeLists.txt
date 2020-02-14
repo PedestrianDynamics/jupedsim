@@ -206,10 +206,9 @@ if (GIT_SCM AND GITDIR)
     OUTPUT_VARIABLE GIT_COMMIT_SUBJECT
     ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
     # remove # from subject
-    string(REGEX REPLACE "\#"
+    string(REGEX REPLACE "[\#\"]+"
        "" GIT_COMMIT_SUBJECT
        ${GIT_COMMIT_SUBJECT})
-
 else()
     message(STATUS "Not in a git repo")
     set(GIT_SHA1 "UNKNOWN")
