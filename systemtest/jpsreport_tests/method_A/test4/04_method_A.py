@@ -13,7 +13,8 @@ path.append(os.path.dirname(path[0])) # source helper file
 from utils import SUCCESS, FAILURE
 import numpy as np
 import subprocess
-should_be_7 = np.array([7, 11, 16, 21, 31, 36])
+# adding 9 frames (fps=8). The distance for the first agent takes exactly 7 seconds.
+should_be_7 = np.array([7 + 1.125, 11 + 1.125, 16 + 1.125, 21 + 1.125, 31 + 1.125, 36 + 1.125])
 should_be_9 = should_be_7 + 2
 
 def runtest(trajfile):
@@ -49,7 +50,7 @@ def runtest(trajfile):
     if np.all(np.abs(time_change_7 - should_be_7) < 0.5):
         print("Got", time_change_7, ", expected", should_be_7)
     else:
-        print("Got", time_change_7, ", expected", should_be_7)
+        print("Error. Got", time_change_7, ", expected", should_be_7)
         exit(FAILURE)
 
 
@@ -59,6 +60,6 @@ if __name__ == "__main__":
     jpsreport = argv[1]
     inifile = argv[2]
     trajfile = argv[3]
-    # subprocess.call([jpsreport, "%s" % inifile])
+    subprocess.call([jpsreport, "%s" % inifile])
     runtest(trajfile)
     exit(SUCCESS)

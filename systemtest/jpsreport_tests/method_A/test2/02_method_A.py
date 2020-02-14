@@ -18,6 +18,10 @@ from utils import SUCCESS, FAILURE
 import numpy as np
 import subprocess
 
+should_be_7 = 7.0
+should_be_9 = 9.0
+
+
 def runtest(trajfile):
     logging.info("===== Method A - Flow-NT ===============")
     data_9_filename = os.path.join('./Output',
@@ -33,10 +37,10 @@ def runtest(trajfile):
     print("*****")
     print(data_9[np.nonzero(np.diff(data_9[:,1]) >0)][0][0])
     time_change_9 = data_9[np.nonzero(np.diff(data_9[:,1]) >0)][0][0]
-    if np.abs(time_change_9 - 9.0) < 0.5:
+    if np.abs(time_change_9 - should_be_9) < 0.5:
         print("OK")
     else:
-        print("Got", time_change_9, ", expected", 9)
+        print("Got", time_change_9, ", expected", should_be_9)
 
     data_7_filename = os.path.join('./Output',
                                    'Fundamental_Diagram',
@@ -50,10 +54,10 @@ def runtest(trajfile):
     data_7 = np.loadtxt(data_7_filename)
     time_change_7 = data_7[np.nonzero(np.diff(data_7[:, 1]) >0)][0][0]
     print(data_7[np.nonzero(np.diff(data_7[:,1]) >0)][0][0])
-    if np.abs(time_change_7 - 7.0) < 0.5:
+    if np.abs(time_change_7 - should_be_7) < 0.5:
         print("OK")
     else:
-        print("Got OK", time_change_7, ", expected", 7)
+        print("Got OK", time_change_7, ", expected", should_be_7)
 
 
 
