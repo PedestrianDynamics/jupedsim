@@ -84,7 +84,7 @@ bool Method_A::Process(
         if(VInFrame.size() > 0) {
             GetAccumFlowVelocity(frameNr, ids, VInFrame);
             char tmp[30];
-            sprintf(tmp, "%.2f\t%d\n", frameNr / _fps, _classicFlow);
+            sprintf(tmp, "%.2f\t%d\n", frid / _fps, _classicFlow);
             outputRhoV.append(tmp);
             PedInGeometry = true;
         }
