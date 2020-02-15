@@ -20,7 +20,7 @@ FAILURE = 1
 
 ego = os.path.basename(sys.argv[0]).split(".")[0] + ".txt"
 print("ego: ", ego)
-logging.basicConfig(filename=sys.stdout, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 # ============= some directories =============
 #HOME = os.path.expanduser("~")
 #TRUNK =  HOME + "/Workspace/ped|ynamics/JuPedSim/jpscore/"
