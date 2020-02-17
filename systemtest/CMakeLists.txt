@@ -1,5 +1,6 @@
 # get used jpscore executable
 set(jpscore_exe $<TARGET_FILE:jpscore>)
+set(jpsreport_exe $<TARGET_FILE:jpsreport>)
 
 add_subdirectory(test_geometry)
 add_subdirectory(juelich_tests)

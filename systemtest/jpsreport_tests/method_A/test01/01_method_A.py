@@ -1,17 +1,11 @@
 #!/usr/bin/env python3
 #####################################################################
-# For every source, check  if agents are generated within the bounding box defined
-# with xmin, x_max, y_min, y_max
-#
-# Note:
-# In this test N_Create == agents_max
-# To add new cases increment the group_id by 1.
-# source_id == group_id
+# Check if the result of jpsreport matches a reference file.
 #####################################################################
 import os
 from sys import argv, path
 import logging
-utestdir = os.path.abspath(os.path.dirname(os.path.dirname(path[0])))
+utestdir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(path[0]))))
 path.append(utestdir)
 path.append(os.path.dirname(path[0])) # source helper file
 from utils import SUCCESS, FAILURE
@@ -45,23 +39,23 @@ def runtest(inifile, trajfile):
         logging.info('--> T_in: same dist  -- p-value: {0:.4f}'.format(Tin_p_value))
         Tin_exit = True
     else:
-        logging.info('--> T_in: different dist -- p-value: {0:.4f}'.format(Tin_p_value))
+        logging.critical('--> T_in: different dist -- p-value: {0:.4f}'.format(Tin_p_value))
         Tin_exit = False
 
     if cumPed_p_value > alpha:
-        logging.info('--> cum_Ped: same dist (fail to reject H0) -- p-value: {0:.4f}'.format(cumPed_p_value))
+        logging.info('--> cum_Ped: same dist -- p-value: {0:.4f}'.format(cumPed_p_value))
         cumPed_exit = True
     else:
-        logging.info('--> cum_Ped: different dist (reject H0) -- p-value: {0:.4f}'.format(cumPed_p_value))
+        logging.critical('--> cum_Ped: different dist -- p-value: {0:.4f}'.format(cumPed_p_value))
         cumPed_exit = False
 
-    success = (Tin_exit == True) and (cumPed_exit == True)        
+    success = Tin_exit and cumPed_exit
     if not success:
-        logging.info("%s exits with FAILURE" % (argv[0]))
+        logging.critical("%s exits with FAILURE" % (argv[0]))
         exit(FAILURE)
 
 if __name__ == "__main__":
-    test = JPSRunTestDriver(2, argv0=argv[0], testdir=path[0], utestdir=utestdir, jpscore=argv[1])
+    test = JPSRunTestDriver(1, argv0=argv[0], testdir=path[0], utestdir=utestdir, jpsreport=argv[1])
     test.run_analysis(trajfile="traj.txt", testfunction=runtest)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+# Test results method I using a reference file
 import os
 from sys import argv, path
 import logging
-utestdir = os.path.abspath(os.path.dirname(os.path.dirname(path[0])))
+utestdir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(path[0]))))
 path.append(utestdir)
 path.append(os.path.dirname(path[0])) # source helper file
 from utils import SUCCESS, FAILURE
@@ -24,7 +25,7 @@ def runtest(inifile, trajfile):
                                    'IFD_I_%s_id_1.dat'%trajfile
                                    )
     if not os.path.exists(data_2_filename):
-        logging.error("jpsreport did not output results correctly.")
+        logging.critical("jpsreport did not output results correctly.")
         exit(FAILURE)
 
     data_2 = np.loadtxt(data_2_filename, usecols = (0,1,2,3,4,5,6))
@@ -49,7 +50,7 @@ def runtest(inifile, trajfile):
                      format(Frame_p_value))
         Frame_exit = True
     else:
-        logging.info('--> Frame: different dist -- p-value: {0:.4f}'.
+        logging.critical('--> Frame: different dist -- p-value: {0:.4f}'.
                      format(Frame_p_value))
         Frame_exit = False
 
@@ -58,7 +59,7 @@ def runtest(inifile, trajfile):
                      format(PersID_p_value))
         PersID_exit = True
     else:
-        logging.info('--> PersID: different dist -- p-value: {0:.4f}'.
+        logging.critical('--> PersID: different dist -- p-value: {0:.4f}'.
                      format(PersID_p_value))
         PersID_exit = False
         
@@ -67,7 +68,7 @@ def runtest(inifile, trajfile):
                      format(x_p_value))
         x_exit = True
     else:
-        logging.info('--> x-coordinate: different dist -- p-value: {0:.4f}'.
+        logging.critical('--> x-coordinate: different dist -- p-value: {0:.4f}'.
                      format(x_p_value))
         x_exit = False
         
@@ -76,7 +77,7 @@ def runtest(inifile, trajfile):
                      format(y_p_value))
         y_exit = True
     else:
-        logging.info('--> y-coordinate: different dist -- p-value: {0:.4f}'.
+        logging.critical('--> y-coordinate: different dist -- p-value: {0:.4f}'.
                      format(y_p_value))
         y_exit = False
         
@@ -85,7 +86,7 @@ def runtest(inifile, trajfile):
                      format(z_p_value))
         z_exit = True
     else:
-        logging.info('--> z-coordinate: different dist -- p-value: {0:.4f}'.
+        logging.critical('--> z-coordinate: different dist -- p-value: {0:.4f}'.
                      format(z_p_value))
         z_exit = False
         
@@ -94,7 +95,7 @@ def runtest(inifile, trajfile):
                      format(density_p_value))
         density_exit = True
     else:
-        logging.info('--> density: different dist -- p-value: {0:.4f}'.
+        logging.critical('--> density: different dist -- p-value: {0:.4f}'.
                      format(density_p_value))
         density_exit = False
 
@@ -103,21 +104,24 @@ def runtest(inifile, trajfile):
                      format(velocity_p_value))
         velocity_exit = True
     else:
-        logging.info('--> velocity: different dist -- p-value: {0:.4f}'.
+        logging.critical('--> velocity: different dist -- p-value: {0:.4f}'.
                      format(velocity_p_value))
         velocity_exit = False
 
 
-    success = (Frame_exit == True) and (PersID_exit == True) and \
-    (x_exit == True) and (y_exit == True) and \
-     (z_exit == True) and (velocity_exit == True) and \
-     (density_exit == True)
+    success = Frame_exit and \
+      PersID_exit and \
+      x_exit and \
+      y_exit and \
+      z_exit and \
+      velocity_exit and \
+      density_exit
     if not success:
-        logging.info("%s exits with FAILURE" % (argv[0]))
+        logging.critical("%s exits with FAILURE" % (argv[0]))
         exit(FAILURE)
 
 if __name__ == "__main__":
-    test = JPSRunTestDriver(1, argv0=argv[0], testdir=path[0], utestdir=utestdir, jpscore=argv[1])
+    test = JPSRunTestDriver(1, argv0=argv[0], testdir=path[0], utestdir=utestdir, jpsreport=argv[1])
     test.run_analysis(trajfile="traj.txt", testfunction=runtest)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
