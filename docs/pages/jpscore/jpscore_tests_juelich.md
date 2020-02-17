@@ -6,7 +6,7 @@ sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_tests_juelich.html
 summary: These tests are largely similar to the RiMEA tests. They are extendend by verification tests to verify the validy of some algorithms implemented in JuPedSim and some validation tests based on experimental data.
-last_updated: Dec 20, 2019
+last_updated: Feb 17, 2020
 ---
 
 ## Verification
@@ -73,17 +73,6 @@ last_updated: Dec 20, 2019
     - The run time should scale with the number of cores.
 
 
-- **Test 10**: runtime optimization using Verlet neighbor lists or cell-linked list method
-
-    This test maybe specific for force-based models. In order to reduce the complexity of calculating interactions among $$N$$ pedestrians from $$\mathcal{O}(N^2)$$, several techniques can be used to keep track of the neighbors.
-<!-- In Fig. \ref{fig:test10} a partition of the simulation domain by means of cells is shown. -->
-    The edge length of one cell is bigger than the cut-off radius of the interaction force.
-
-    - Expected results:
-    The simulation results (flow, ...) should be the same, for the same initial conditions, with cell size bigger than the cut-off radius of the force-based model used.
-    The simulation should fail for a cell size smaller than the cut-off radius of the forces.
-    The simulation time should scale with the cell size.
-
 - **Test 11**: Test the room/subroom construct [^note1]
 
     The same geometry is constructed differently
@@ -134,11 +123,6 @@ py = scipy.stats.chisquare(ny)[1]
 
    Expected result: The mean value of the 1000 p-values of the $$\chi^2$$-test should be around 0.5.
 
-- **Test 15**: Runtime of the code
-    The purpose of this test is to make sure that the code is not getting slower! The test scenario is set up such that
-    the **evacuation times is larger that the execution time**. This test is ideally run in form of a nightly build.
-
-    Expected result: $$t_{\text{evac}}\ge t_{\text{exec}}$$.
 
 
 ## Validation
