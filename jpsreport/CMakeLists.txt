@@ -77,6 +77,8 @@ target_compile_definitions(report PUBLIC
 
 add_executable(jpsreport
     main.cpp
+    forms/jpsreport.rc
+    forms/JPSreport.ico
 )
 
 target_compile_options(jpsreport PRIVATE
@@ -86,3 +88,15 @@ target_compile_options(jpsreport PRIVATE
 target_link_libraries(jpsreport
     report
 )
+################################################################################
+# Install targets
+################################################################################
+install(TARGETS jpsreport
+        DESTINATION bin
+        COMPONENT applications)
+
+set(CT_DATA_FILE_DIR "demos")
+file(GLOB CT_FILES "${CMAKE_SOURCE_DIR}/jpsreport/${CT_DATA_FILE_DIR}/*/*.xml")
+install(FILES ${CT_FILES}
+  DESTINATION "jpsreport_samples"
+  COMPONENT jpsreport_samples)

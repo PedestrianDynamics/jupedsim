@@ -15,6 +15,7 @@ import glob
 import os
 import re
 import shlex
+import shutil
 import subprocess
 from shutil import copyfile
 
@@ -58,6 +59,7 @@ def clean_file(filename, img_dir):
 
 
 if __name__ == "__main__":
+    pathname = os.path.dirname(sys.argv[0])
     if not os.path.exists("_tex"):
         os.makedirs("_tex")
         print("make _tex")
@@ -69,6 +71,12 @@ if __name__ == "__main__":
 
         markdown_files = glob.glob("../pages/%s/*.md" % module)
         img_dir = ".."
+        if shutil.which("kramdown") is None:
+            sys.exit("error: kramdown not found.")
+
+        if shutil.which("xelatex") is None:
+            sys.exit("error: xelatex not found.")
+
         for markdown_file in markdown_files:
             latex_file = os.path.join("_tex", module, os.path.basename(os.path.splitext(markdown_file)[0]) ) + ".tex"
             print("markdown_file %s " % markdown_file)
@@ -83,28 +91,12 @@ if __name__ == "__main__":
             clean_file(latex_file, img_dir)
 
 
-
-    post_checkout = "../../.git/hooks/post-checkout"
-    if not os.path.exists(post_checkout):
-        print("copy <post-checkout> to <../../.git/hooks>")
-        copyfile("./post-checkout", post_checkout)
-
-    # make file executable
-    print("change permission of <post-checkout>")
-    os.chmod(post_checkout, 0o775)
-
-    # remove old titlepage.tex
-    if os.path.exists("./titlepage.tex"):
-        print("remove titlepage")
-        os.remove("./titlepage.tex")
-
-    # create titlepage
-    make_title_page = "git checkout master"
-    res = subprocess.call(shlex.split(make_title_page))
-
+    source_path = os.path.normpath(pathname + os.sep + os.pardir + os.sep + os.pardir)
     if not os.path.exists("./titlepage.tex"):
         sys.exit("could not find titlepage.tex. git checkout was not successful!")
 
     # process jupedsim.tex
     subprocess.call("make")
     res = subprocess.call(shlex.split("make clean"))
+
+
