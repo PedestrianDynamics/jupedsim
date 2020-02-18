@@ -197,8 +197,8 @@ std::optional<std::vector<Wall>> SplitWall(const SubRoom & subroom, const Wall &
 
 bool IsConnectedWall(const SubRoom & subroom, const Wall & wall)
 {
-    return subroom.IsPointOnPolygon(wall.GetPoint1(), wall) &&
-           subroom.IsPointOnPolygon(wall.GetPoint2(), wall);
+    return subroom.IsPointOnPolygonBoundaries(wall.GetPoint1(), wall) &&
+           subroom.IsPointOnPolygonBoundaries(wall.GetPoint2(), wall);
 }
 
 int AddWallToSubroom(SubRoom & subroom, const std::vector<Wall> & wallPieces)
