@@ -85,7 +85,7 @@ bool IsConnectedWall(const SubRoom & subroom, const Wall & wall);
 /**
  * @brief Adds wall pieces to a subroom if they are new and connected
  */
-int AddWallToSubroom(SubRoom & subroom, const std::vector<Wall> & wallPieces);
+int AddConnectedWallsToSubroom(SubRoom & subroom, const std::vector<Wall> & wallPieces);
 
 /**
  * @brief Replace BigWall with some of the wallPieces

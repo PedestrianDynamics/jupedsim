@@ -201,7 +201,7 @@ bool IsConnectedWall(const SubRoom & subroom, const Wall & wall)
            subroom.IsPointOnPolygonBoundaries(wall.GetPoint2(), wall);
 }
 
-int AddWallToSubroom(SubRoom & subroom, const std::vector<Wall> & wallPieces)
+int AddConnectedWallsToSubroom(SubRoom & subroom, const std::vector<Wall> & wallPieces)
 {
     int wallsAdded = 0;
 
@@ -223,7 +223,7 @@ void ReplaceBigWall(SubRoom & subroom, const Wall & bigWall, const std::vector<W
             bigWall.toString()));
     }
 
-    if(AddWallToSubroom(subroom, wallPieces) <= 0) {
+    if(AddConnectedWallsToSubroom(subroom, wallPieces) <= 0) {
         throw std::runtime_error(fmt::format(
             FMT_STRING("Correcting the geometry failed. Could not add any wall from splitted big "
                        "wall: {}"),
