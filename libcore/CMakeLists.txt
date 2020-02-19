@@ -20,6 +20,7 @@ set(source_files
     src/geometry/Crossing.cpp
     src/geometry/Goal.cpp
     src/geometry/GoalManager.cpp
+    src/geometry/helper/CorrectGeometry.cpp
     src/geometry/Hline.cpp
     src/geometry/Line.cpp
     src/geometry/NavLine.cpp
@@ -106,6 +107,7 @@ set(header_files
     src/geometry/Crossing.h
     src/geometry/Goal.h
     src/geometry/GoalManager.h
+    src/geometry/helper/CorrectGeometry.h
     src/geometry/Hline.h
     src/geometry/Line.h
     src/geometry/NavLine.h
@@ -255,6 +257,7 @@ if (BUILD_CPPUNIT_TEST)
             test/catch2/math/MathematicsTest.cpp
             test/catch2/pedestrian/EllipseTest.cpp
             test/catch2/routing/UnivFFviaFMTest.cpp
+            test/catch2/geometry/CorrectGeometryTest.cpp
             )
 
     target_link_libraries(unittests Catch2::Catch2 core)

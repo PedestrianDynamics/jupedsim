@@ -177,7 +177,6 @@ void Analysis::InitArgs(ArgumentParser * args)
         }
         _StartFramesMethodI = args->GetStartFramesMethodI();
         _StopFramesMethodI  = args->GetStopFramesMethodI();
-        _IndividualFDFlags  = args->GetIndividualFDFlags();
         _geoPolyMethodI     = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_I);
     }
 
@@ -453,7 +452,6 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
             Method_I method_I;
             method_I.SetStartFrame(_StartFramesMethodI[i]);
             method_I.SetStopFrame(_StopFramesMethodI[i]);
-            method_I.SetCalculateIndividualFD(_IndividualFDFlags[i]);
             method_I.SetGeometryPolygon(_geoPolyMethodI[_areaForMethod_I[i]->_id]);
             method_I.SetGeometryFileName(_geometryFileName);
             method_I.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);

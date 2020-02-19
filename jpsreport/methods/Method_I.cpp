@@ -54,7 +54,6 @@ Method_I::Method_I()
     _cutRadius             = -1;
     _circleEdges           = -1;
     _fIndividualFD         = nullptr;
-    _calcIndividualFD      = true;
     _areaForMethod_I       = nullptr;
     _isOneDimensional      = false;
     _startFrame            = -1;
@@ -102,11 +101,10 @@ bool Method_I::Process(
         }
     }
 
-    if(_calcIndividualFD) {
-        if(!OpenFileIndividualFD()) {
-            return_value = false;
-        }
+    if(!OpenFileIndividualFD()) {
+        return_value = false;
     }
+
     Log->Write("------------------------ Analyzing with Method I -----------------------------");
 
     for(auto ite : _peds_t) {
@@ -168,18 +166,16 @@ bool Method_I::Process(
             }
 
             if(!polygons.empty()) {
-                if(_calcIndividualFD) {
-                    if(!_isOneDimensional) {
-                        // GetIndividualFD(polygons,VInFrame, IdInFrame,  str_frid); // TODO polygons_id
-                        GetIndividualFD(
-                            polygons,
-                            VInFrame,
-                            IdInFrame,
-                            str_frid,
-                            XInFrame,
-                            YInFrame,
-                            ZInFrame); //
-                    }
+                if(!_isOneDimensional) {
+                    // GetIndividualFD(polygons,VInFrame, IdInFrame,  str_frid); // TODO polygons_id
+                    GetIndividualFD(
+                        polygons,
+                        VInFrame,
+                        IdInFrame,
+                        str_frid,
+                        XInFrame,
+                        YInFrame,
+                        ZInFrame); //
                 }
             } else {
                 for(int i = 0; i < (int) IdInFrame.size(); i++) {
@@ -193,9 +189,9 @@ bool Method_I::Process(
             }
         }
     } //peds
-    if(_calcIndividualFD) {
-        fclose(_fIndividualFD);
-    }
+
+    fclose(_fIndividualFD);
+
     return return_value;
 }
 
@@ -290,11 +286,6 @@ void Method_I::GetIndividualFD(
             polygon_str.c_str());
         temp++;
     }
-}
-
-void Method_I::SetCalculateIndividualFD(bool /*individualFD*/)
-{
-    _calcIndividualFD = true;
 }
 
 void Method_I::SetStartFrame(int startFrame)
@@ -420,18 +411,17 @@ void Method_I::CalcVoronoiResults1D(
             right_boundary);
         VoronoiDensity += ratio;
         VoronoiVelocity += (VInFrame[i] * voronoi_distance[i] * ratio * CMtoM);
-        if(_calcIndividualFD) {
-            double headway           = (XRightNeighbor[i] - XInFrame[i]) * CMtoM;
-            double individualDensity = 2.0 / ((XRightNeighbor[i] - XLeftNeighbor[i]) * CMtoM);
-            fprintf(
-                _fIndividualFD,
-                "%s\t%d\t%.3f\t%.3f\t%.3f\n",
-                frid.c_str(),
-                IdInFrame[i],
-                individualDensity,
-                VInFrame[i],
-                headway);
-        }
+
+        double headway           = (XRightNeighbor[i] - XInFrame[i]) * CMtoM;
+        double individualDensity = 2.0 / ((XRightNeighbor[i] - XLeftNeighbor[i]) * CMtoM);
+        fprintf(
+            _fIndividualFD,
+            "%s\t%d\t%.3f\t%.3f\t%.3f\n",
+            frid.c_str(),
+            IdInFrame[i],
+            individualDensity,
+            VInFrame[i],
+            headway);
     }
     VoronoiDensity /= ((right_boundary - left_boundary) * CMtoM);
     VoronoiVelocity /= ((right_boundary - left_boundary) * CMtoM);
