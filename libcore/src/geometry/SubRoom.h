@@ -127,6 +127,18 @@ public:
     int GetSubRoomID() const;
 
     /**
+      * Checks if a Point is on the polygon boundaries of the subroom.
+      *
+      * The boundary includes all walls, crossings and transitions.
+      * One Wall could be excluded.
+      * Only the exact same wall is excluded, no parts of walls or similar.
+      */
+    bool IsPointOnPolygonBoundaries(const Point & point, const Wall & exclude_wall) const;
+
+    bool HasWall(const Wall & wall) const;
+
+
+    /**
       * @return all walls
       */
     const std::vector<Wall> & GetAllWalls() const;
