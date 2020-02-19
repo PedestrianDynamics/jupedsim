@@ -290,6 +290,18 @@ public:
 
     std::vector<Point> GetBoundaryVertices() const;
 
+    /**
+     * Find the closest transition which is in max. \p cutoff metres distance to the pedestrian.
+     * @pre \p ped is in room specified by ped._roomID
+     *
+     * @param ped Pedestrians for which is the closest distance should be found
+     * @param cutoff cutoff distance, ignore all transitions which are further away (should be positive)
+     * @return closest transition to \p ped, nothing if all transitions are further away than \p cutoff metres
+     */
+    std::optional<Transition *> FindClosestTransition(
+        const Pedestrian & ped,
+        double cutoff = std::numeric_limits<double>::max()) const;
+
 private:
     bool InitInsideGoals();
     void InitPlatforms();

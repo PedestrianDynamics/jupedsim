@@ -33,6 +33,7 @@
 #include "PedDistributor.h"
 #include "general/Macros.h"
 #include "geometry/NavLine.h"
+#include "pedestrian/Knowledge.h"
 
 #include <map>
 #include <queue>
@@ -43,7 +44,6 @@
 class Building;
 class NavLine;
 class Router;
-class Knowledge;
 class WalkingSpeed;
 class Pedestrian
 {

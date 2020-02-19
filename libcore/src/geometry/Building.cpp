@@ -664,6 +664,34 @@ bool Building::InitInsideGoals()
     return true;
 }
 
+std::optional<Transition *>
+Building::FindClosestTransition(const Pedestrian & ped, double cutoff) const
+{
+    std::vector<Transition *> transitionsWithinCutoff;
+
+    auto room = _rooms.at(ped.GetRoomID());
+    for(auto const & [_, subroom] : room->GetAllSubRooms()) {
+        std::copy_if(
+            std::begin(subroom->GetAllTransitions()),
+            std::end(subroom->GetAllTransitions()),
+            std::back_inserter(transitionsWithinCutoff),
+            [ped, cutoff](const Transition * trans) -> bool {
+              return trans->DistTo(ped.GetPos()) < cutoff;
+            });
+    }
+
+    if(transitionsWithinCutoff.empty()) {
+        return std::nullopt;
+    } else {
+        auto closestTrans = std::min_element(
+            std::begin(transitionsWithinCutoff),
+            std::end(transitionsWithinCutoff),
+            [ped](const Transition * lhs, const Transition * rhs) {
+              return lhs->DistTo(ped.GetPos()) < rhs->DistTo(ped.GetPos());
+            });
+        return *closestTrans;
+    }
+}
 
 const fs::path & Building::GetProjectFilename() const
 {
