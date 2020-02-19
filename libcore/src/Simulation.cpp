@@ -106,7 +106,7 @@ bool Simulation::InitArgs()
     _routingEngine   = _config->GetRoutingEngine();
     auto distributor = std::make_unique<PedDistributor>(PedDistributor(_config));
     // IMPORTANT: do not change the order in the following..
-    _building = std::shared_ptr<Building>(new Building(_config, *distributor));
+    _building = std::make_shared<Building>(_config, *distributor);
 
     // Initialize the agents sources that have been collected in the pedestrians distributor
     _agentSrcManager.SetBuilding(_building.get());

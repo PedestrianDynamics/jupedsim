@@ -291,12 +291,12 @@ void Building::AddSurroundingRoom()
 bool Building::InitGeometry()
 {
     Logging::Info("Init Geometry");
-    try {
-        geometry::helper::CorrectInputGeometry(*this);
-    } catch(const std::exception & e) {
-        LOG_ERROR("Exception in Building::correct: {}", e.what());
-        return false;
-    }
+    //    try {
+    //        geometry::helper::CorrectInputGeometry(*this);
+    //    } catch(const std::exception & e) {
+    //        LOG_ERROR("Exception in Building::correct: {}", e.what());
+    //        return false;
+    //    }
 
     for(auto && itr_room : _rooms) {
         for(auto && itr_subroom : itr_room.second->GetAllSubRooms()) {
@@ -676,7 +676,7 @@ Building::FindClosestTransition(const Pedestrian & ped, double cutoff) const
             std::end(subroom->GetAllTransitions()),
             std::back_inserter(transitionsWithinCutoff),
             [ped, cutoff](const Transition * trans) -> bool {
-              return trans->DistTo(ped.GetPos()) < cutoff;
+                return trans->DistTo(ped.GetPos()) < cutoff;
             });
     }
 
@@ -687,7 +687,7 @@ Building::FindClosestTransition(const Pedestrian & ped, double cutoff) const
             std::begin(transitionsWithinCutoff),
             std::end(transitionsWithinCutoff),
             [ped](const Transition * lhs, const Transition * rhs) {
-              return lhs->DistTo(ped.GetPos()) < rhs->DistTo(ped.GetPos());
+                return lhs->DistTo(ped.GetPos()) < rhs->DistTo(ped.GetPos());
             });
         return *closestTrans;
     }
