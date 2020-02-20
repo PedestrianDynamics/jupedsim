@@ -275,6 +275,10 @@ add_subdirectory(jpsreport)
 # Integration tests
 ################################################################################
 if (BUILD_TESTING)
+  # Find libraries needed by python tests
+  find_python_library(numpy)
+  find_python_library(scipy)
+  find_python_library(pandas)
   add_subdirectory(systemtest)
 endif (BUILD_TESTING)
 
