@@ -96,6 +96,6 @@ confirm_retrieved_agents(SimulationContext simulation_context, Agents agents, St
 /**
  * Finalizes the simulation and cleans up memory.
  **/
-extern void finalize(SimulationContext simulationContext, Status * status);
+extern void finalize(SimulationContext simulation_context, Status * status);
 /** @} */
 #endif /* _JPS_H_ */
