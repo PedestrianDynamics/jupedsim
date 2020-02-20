@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 #---------
-# one pedestrian created at frame 0
+# one pedestrian created at frame 9
 # pedestrian starts in position (0, 1) and moves forward
 # in a straight corridor with a speed of 1 m/s
 #
 # arrival times should be:
-# - 7s at line in x=7
-# - 9s at line in x=9
+# - 7s + 9/fps at line in x=7
+# - 9s + 9/fps at line in x=9
 #---------
 import os
 from sys import argv, path
@@ -15,14 +15,13 @@ utestdir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(path[
 path.append(utestdir)
 path.append(os.path.dirname(path[0])) # source helper file
 from utils import SUCCESS, FAILURE
+from JPSRunTest import JPSRunTestDriver
 import numpy as np
-import subprocess
 
-should_be_7 = 7.0
-should_be_9 = 9.0
-
-
-def runtest(trajfile):
+# fps=8
+should_be_7 = 8.125  # 7s for distance + 1.125s start (9 frames)
+should_be_9 = 10.125 # 9s for distance + 1.125s start (9 frames)
+def runtest(inifile, trajfile):
     logging.info("===== Method A - Flow-NT ===============")
     data_9_filename = os.path.join('./Output',
                                    'Fundamental_Diagram',
@@ -31,16 +30,16 @@ def runtest(trajfile):
                                    )
     
     if not os.path.exists(data_9_filename):
-        logging.error("jpsreport did not output results correctly.")
+        logging.critical("jpsreport did not output results correctly.")
         exit(FAILURE)
     data_9 = np.loadtxt(data_9_filename)
-    print("*****")
-    print(data_9[np.nonzero(np.diff(data_9[:,1]) >0)][0][0])
     time_change_9 = data_9[np.nonzero(np.diff(data_9[:,1]) >0)][0][0]
     if np.abs(time_change_9 - should_be_9) < 0.5:
-        print("OK")
+        logging.info("should_be_9 OK.")
     else:
-        print("Got", time_change_9, ", expected", should_be_9)
+        logging.critical("should_be_9 did not match result. Got {}. Expected {}".format(time_change_9, should_be_9))
+        exit(FAILURE)
+
 
     data_7_filename = os.path.join('./Output',
                                    'Fundamental_Diagram',
@@ -53,19 +52,14 @@ def runtest(trajfile):
 
     data_7 = np.loadtxt(data_7_filename)
     time_change_7 = data_7[np.nonzero(np.diff(data_7[:, 1]) >0)][0][0]
-    print(data_7[np.nonzero(np.diff(data_7[:,1]) >0)][0][0])
     if np.abs(time_change_7 - should_be_7) < 0.5:
-        print("OK")
+        logging.info("should_be_7 OK.")
     else:
-        print("Got OK", time_change_7, ", expected", should_be_7)
-
-
+        logging.critical("should_be_7 did not match result. Got {}. Expected {}".format(time_change_7, should_be_7))
+        exit(FAILURE)
 
 if __name__ == "__main__":
-    if len(argv) < 4:
-        exit("usage: %s jpsreport_path inifile trajfile"%argv[0])
-    jpsreport = argv[1]
-    inifile = argv[2]
-    trajfile = argv[3]
-    subprocess.call([jpsreport, "%s" % inifile])
-    runtest(trajfile)
+    test = JPSRunTestDriver(3, argv0=argv[0], testdir=path[0], utestdir=utestdir, jpsreport=argv[1])
+    test.run_analysis(trajfile="traj.txt", testfunction=runtest)
+    logging.info("%s exits with SUCCESS" % (argv[0]))
+    exit(SUCCESS)
