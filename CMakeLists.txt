@@ -281,6 +281,7 @@ add_subdirectory(libshared)
 add_subdirectory(libcore)
 add_subdirectory(jpscore)
 add_subdirectory(jpsreport)
+add_subdirectory(libjps)
 
 ################################################################################
 # Code formating
@@ -345,13 +346,6 @@ if (BUILD_TESTING)
 endif (BUILD_TESTING)
 
 ################################################################################
-# libjps
-################################################################################
-if (BUILD_LIBJPS)
-  add_subdirectory(libjps)
-endif (BUILD_LIBJPS)
-
-################################################################################
 # Packaging with CPack
 ################################################################################
 include(CPackUtilities)
@@ -366,4 +360,3 @@ if(APPLE)
 endif()
 
 cpack_write_config()
-
