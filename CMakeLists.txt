@@ -10,7 +10,7 @@
 # Project setup
 ################################################################################
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-project(JPScore VERSION 0.8.4 LANGUAGES CXX)
+project(JPScore VERSION 0.8.4 LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -343,6 +343,13 @@ if (BUILD_TESTING)
   find_python_library(pandas)
   add_subdirectory(systemtest)
 endif (BUILD_TESTING)
+
+################################################################################
+# libjps
+################################################################################
+if (BUILD_LIBJPS)
+  add_subdirectory(libjps)
+endif (BUILD_LIBJPS)
 
 ################################################################################
 # Packaging with CPack
