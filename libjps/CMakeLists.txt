@@ -10,9 +10,6 @@ target_compile_options(jps PRIVATE
 
 target_link_libraries(jps
     core
-    Threads::Threads
-    spdlog::spdlog
-    fmt::fmt
     )
 
 target_include_directories(jps PUBLIC
