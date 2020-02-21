@@ -38,16 +38,13 @@ using std::vector;
 
 Method_A::Method_A()
 {
-    _classicFlow = 0;
-    _vDeltaT     = 0;
-    //_xCor(0,0);
-    //_yCor(0,0);
+    _classicFlow     = 0;
+    _vDeltaT         = 0;
     _firstFrame      = nullptr;
     _passLine        = nullptr;
     _deltaT          = 100;
     _fps             = 16;
     _areaForMethod_A = nullptr;
-    _minId           = 0;
 }
 
 Method_A::~Method_A() {}
@@ -66,7 +63,6 @@ bool Method_A::Process(
     _yCor            = peddata.GetYCor();
     _firstFrame      = peddata.GetFirstFrame();
     _fps             = peddata.GetFps();
-    _minId           = peddata.GetMinID();
     _measureAreaId   = boost::lexical_cast<string>(_areaForMethod_A->_id);
     _passLine        = new bool[peddata.GetNumPeds()];
     string outputRhoV;
@@ -75,22 +71,18 @@ bool Method_A::Process(
         _passLine[i] = false;
     }
     Log->Write("------------------------Analyzing with Method A-----------------------------");
-    //for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
     bool PedInGeometry = false;
     for(std::map<int, std::vector<int>>::iterator ite = _peds_t.begin(); ite != _peds_t.end();
         ite++) {
-        int frameNr = ite->first;
-        int frid    = frameNr + peddata.GetMinFrame();
+        int frameNr = ite->first;                      //index starts by 0
+        int frid    = frameNr + peddata.GetMinFrame(); // frame in traj file
         if(!(frid % 100)) {
             Log->Write("frame ID = %d", frid);
         }
-        vector<int> ids               = _peds_t[frameNr];
-        vector<int> IdInFrame         = peddata.GetIdInFrame(frameNr, ids, zPos_measureArea);
-        const vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids, zPos_measureArea);
-        const vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids, zPos_measureArea);
+        vector<int> ids = peddata.GetIndexInFrame(frameNr, _peds_t[frameNr], zPos_measureArea);
         const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
-        if(IdInFrame.size() > 0) {
-            GetAccumFlowVelocity(frameNr, IdInFrame, VInFrame);
+        if(VInFrame.size() > 0) {
+            GetAccumFlowVelocity(frameNr, ids, VInFrame);
             char tmp[30];
             sprintf(tmp, "%.2f\t%d\n", frid / _fps, _classicFlow);
             outputRhoV.append(tmp);
@@ -133,22 +125,21 @@ void Method_A::GetAccumFlowVelocity(
     const vector<int> & ids,
     const vector<double> & VInFrame)
 {
-    for(unsigned int i = 0; i < ids.size(); i++) {
-        int id          = ids[i];
+    for(auto const i : ids) {
         bool IspassLine = false;
-        if(frame > _firstFrame[id - _minId] && !_passLine[id - _minId]) {
+        if(frame > _firstFrame[i] && !_passLine[i]) {
             IspassLine = IsPassLine(
                 _areaForMethod_A->_lineStartX,
                 _areaForMethod_A->_lineStartY,
                 _areaForMethod_A->_lineEndX,
                 _areaForMethod_A->_lineEndY,
-                _xCor(id - _minId, frame - 1),
-                _yCor(id - _minId, frame - 1),
-                _xCor(id - _minId, frame),
-                _yCor(id - _minId, frame));
+                _xCor(i, frame - 1),
+                _yCor(i, frame - 1),
+                _xCor(i, frame),
+                _yCor(i, frame));
         }
         if(IspassLine == true) {
-            _passLine[id - _minId] = true;
+            _passLine[i] = true;
             _classicFlow++;
             _vDeltaT += VInFrame[i];
         }

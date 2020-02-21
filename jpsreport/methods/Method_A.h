@@ -79,7 +79,6 @@ private:
         _vDeltaT; // define this is to measure cumulative velocity each pedestrian pass a measure line each time step to calculate the <v>delat T=sum<vi>/N
     int _deltaT;
 
-    int _minId;
     /**
       * Calculate the Flow rate during a certain time interval DeltaT and the mean velocity passing a line.
       * Note: here the time interval in calculating the flow rate is modified.

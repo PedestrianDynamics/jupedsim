@@ -15,3 +15,20 @@ function(check_prefix_path)
         endforeach()
     endif()
 endfunction()
+
+function(find_python_library python_lib)
+    execute_process(
+        COMMAND
+        ${PYTHON_EXECUTABLE} "-c" "import ${python_lib}; print(${python_lib}.__version__)"
+        RESULT_VARIABLE status
+        OUTPUT_VARIABLE version
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    if(NOT status)
+        print_var(python_lib)
+        print_var(version)
+    else()
+        message(FATAL_ERROR "Did not find package ${python_lib}")
+    endif()
+endfunction()
