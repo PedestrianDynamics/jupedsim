@@ -794,18 +794,8 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 } else {
                     _stop_frames_MethodI.push_back(-1);
                 }
-
-                if(xMeasurementArea->Attribute("get_individual_FD")) {
-                    if(string(xMeasurementArea->Attribute("get_individual_FD")) == "true") {
-                        _individual_FD_flags.push_back(true);
-                        Log->Write("INFO: \tIndividual FD will be output");
-                    } else {
-                        _individual_FD_flags.push_back(false);
-                    }
-                } else {
-                    _individual_FD_flags.push_back(false);
-                }
             }
+
             if(xMethod_I->FirstChildElement("one_dimensional")) {
                 if(string(xMethod_I->FirstChildElement("one_dimensional")->Attribute("enabled")) ==
                    "true") {

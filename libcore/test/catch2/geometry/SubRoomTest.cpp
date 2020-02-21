@@ -19,8 +19,10 @@
 #include "geometry/SubRoom.h"
 
 #include "IO/OutputHandler.h"
+#include "geometry/Crossing.h"
 #include "geometry/Line.h"
 #include "geometry/Point.h"
+#include "geometry/Transition.h"
 #include "geometry/Wall.h"
 
 #include <catch2/catch.hpp>
@@ -166,5 +168,146 @@ TEST_CASE("geometry/SubRoom", "[geometry][SubRoom]")
         door.push_back(&exit);
 
         REQUIRE_FALSE(sub1.ConvertLineToPoly(door));
+    }
+}
+
+TEST_CASE(
+    "geometry/SubRoom/IsPointOnPolygonBoundaries",
+    "[geometry][SubRoom][IsPointOnPolygonBoundaries]")
+{
+    SECTION("Is NOT on boundaries")
+    {
+        NormalSubRoom subroom;
+        subroom.AddWall(Wall(Point(0, 10), Point(0, 0)));
+
+        SECTION("No on Wall")
+        {
+            REQUIRE_FALSE(subroom.IsPointOnPolygonBoundaries(Point(-1, 1), Wall()));
+            REQUIRE_FALSE(subroom.IsPointOnPolygonBoundaries(Point(-1, -1), Wall()));
+            REQUIRE_FALSE(
+                subroom.IsPointOnPolygonBoundaries(Point(-1, 1), Wall(Point(0, 10), Point(0, 0))));
+        }
+        SECTION("On excluded Wall")
+        {
+            // Wall Excluded
+            REQUIRE_FALSE(
+                subroom.IsPointOnPolygonBoundaries(Point(0, 10), Wall(Point(0, 10), Point(0, 0))));
+            REQUIRE_FALSE(
+                subroom.IsPointOnPolygonBoundaries(Point(0, 9), Wall(Point(0, 10), Point(0, 0))));
+        }
+
+        SECTION("With Crossing")
+        {
+            Crossing crossing;
+            crossing.SetPoint1(Point(10, 10));
+            crossing.SetPoint2(Point(0, 10));
+            subroom.AddCrossing(&crossing);
+
+            REQUIRE_FALSE(subroom.IsPointOnPolygonBoundaries(Point(-1, 1), Wall()));
+            REQUIRE_FALSE(subroom.IsPointOnPolygonBoundaries(Point(-1, -1), Wall()));
+            // exclude wall
+            REQUIRE_FALSE(
+                subroom.IsPointOnPolygonBoundaries(Point(-1, 1), Wall(Point(0, 10), Point(0, 0))));
+            REQUIRE_FALSE(
+                subroom.IsPointOnPolygonBoundaries(Point(0, 0), Wall(Point(0, 10), Point(0, 0))));
+            REQUIRE_FALSE(
+                subroom.IsPointOnPolygonBoundaries(Point(0, 9), Wall(Point(0, 10), Point(0, 0))));
+        }
+        SECTION("With Transition")
+        {
+            Transition transition;
+            transition.SetPoint1(Point(10, 10));
+            transition.SetPoint2(Point(0, 10));
+            subroom.AddTransition(&transition);
+
+            REQUIRE_FALSE(subroom.IsPointOnPolygonBoundaries(Point(-1, 1), Wall()));
+            REQUIRE_FALSE(subroom.IsPointOnPolygonBoundaries(Point(-1, -1), Wall()));
+            // exclude wall
+            REQUIRE_FALSE(
+                subroom.IsPointOnPolygonBoundaries(Point(-1, 1), Wall(Point(0, 10), Point(0, 0))));
+            REQUIRE_FALSE(
+                subroom.IsPointOnPolygonBoundaries(Point(0, 0), Wall(Point(0, 10), Point(0, 0))));
+            REQUIRE_FALSE(
+                subroom.IsPointOnPolygonBoundaries(Point(0, 9), Wall(Point(0, 10), Point(0, 0))));
+        }
+    }
+    SECTION("Is on boundaries")
+    {
+        NormalSubRoom subroom;
+        subroom.AddWall(Wall(Point(0, 10), Point(0, 0)));
+
+        SECTION("Without excluded wall")
+        {
+            REQUIRE(subroom.IsPointOnPolygonBoundaries(Point(0, 0), Wall()));
+            REQUIRE(subroom.IsPointOnPolygonBoundaries(Point(0, 10), Wall()));
+            REQUIRE(subroom.IsPointOnPolygonBoundaries(Point(0, 3.4), Wall()));
+
+            SECTION("Crossing")
+            {
+                Crossing crossing;
+                crossing.SetPoint1(Point(10, 10));
+                crossing.SetPoint2(Point(0, 10));
+                subroom.AddCrossing(&crossing);
+
+                REQUIRE(subroom.IsPointOnPolygonBoundaries(Point(10, 10), Wall()));
+                REQUIRE(subroom.IsPointOnPolygonBoundaries(Point(0, 10), Wall()));
+                REQUIRE(subroom.IsPointOnPolygonBoundaries(Point(2.4, 10), Wall()));
+            }
+
+            SECTION("Transition")
+            {
+                Transition transition;
+                transition.SetPoint1(Point(10, 10));
+                transition.SetPoint2(Point(0, 10));
+                subroom.AddTransition(&transition);
+
+                REQUIRE(subroom.IsPointOnPolygonBoundaries(Point(10, 10), Wall()));
+                REQUIRE(subroom.IsPointOnPolygonBoundaries(Point(0, 10), Wall()));
+                REQUIRE(subroom.IsPointOnPolygonBoundaries(Point(2.4, 10), Wall()));
+            }
+        }
+
+        SECTION("Wall excluded")
+        {
+            subroom.AddWall(Wall(Point(0, 10), Point(2, 10)));
+
+            REQUIRE(
+                subroom.IsPointOnPolygonBoundaries(Point(0, 0), Wall(Point(0, 10), Point(2, 10))));
+            // Wall is excluded, but Point(0,10) is also incident with the other wall
+            REQUIRE(
+                subroom.IsPointOnPolygonBoundaries(Point(0, 10), Wall(Point(0, 10), Point(2, 10))));
+            REQUIRE(subroom.IsPointOnPolygonBoundaries(
+                Point(0, 3.4), Wall(Point(0, 10), Point(2, 10))));
+
+            SECTION("Crossing")
+            {
+                Crossing crossing;
+                crossing.SetPoint1(Point(2, 10));
+                crossing.SetPoint2(Point(2, 0));
+                subroom.AddCrossing(&crossing);
+
+                REQUIRE(subroom.IsPointOnPolygonBoundaries(
+                    Point(2, 10), Wall(Point(0, 10), Point(2, 10))));
+                REQUIRE(subroom.IsPointOnPolygonBoundaries(
+                    Point(2, 0), Wall(Point(0, 10), Point(2, 10))));
+                REQUIRE(subroom.IsPointOnPolygonBoundaries(
+                    Point(2, 2.3), Wall(Point(0, 10), Point(2, 10))));
+            }
+
+            SECTION("Transition")
+            {
+                Transition transition;
+                transition.SetPoint1(Point(2, 10));
+                transition.SetPoint2(Point(2, 0));
+                subroom.AddTransition(&transition);
+
+                REQUIRE(subroom.IsPointOnPolygonBoundaries(
+                    Point(2, 10), Wall(Point(0, 10), Point(2, 10))));
+                REQUIRE(subroom.IsPointOnPolygonBoundaries(
+                    Point(2, 0), Wall(Point(0, 10), Point(2, 10))));
+                REQUIRE(subroom.IsPointOnPolygonBoundaries(
+                    Point(2, 2.3), Wall(Point(0, 10), Point(2, 10))));
+            }
+        }
     }
 }
