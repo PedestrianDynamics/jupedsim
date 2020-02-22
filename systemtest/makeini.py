@@ -233,7 +233,7 @@ def make_file(masterfile, tree, result):
 # =======================================================
 def main(masterfile):
     if not os.path.isfile(masterfile):
-        logging.error("ERROR: file %s does not exist."%masterfile)
+        logging.error("file %s does not exist."%masterfile)
         sys.exit(FAILURE)
 
     directory = os.path.dirname(os.path.abspath(masterfile))    #args.directory

@@ -120,7 +120,12 @@ class JPSRunTestDriver(object):
         # -------- get directory of the code TRUNK
         # *** Note: assume that UTEST is always a direct subdirectory of TRUNK ***
         self.trunk = os.path.dirname(os.getcwd())
-        makeini.main(self.FILE)
+        self.jpsreport_ini = os.path.join(self.DIR, "jpsreport_ini.xml")
+        if path.exists(self.FILE):
+            makeini.main(self.FILE)
+        elif not path.exists(self.jpsreport_ini):
+            logging.critical("Did not find master_ini nor jpsreport_ini.")
+
         # os.chdir(self.DIR)
         logging.info("change directory back to %s", self.DIR)
         os.chdir(self.DIR)
@@ -135,7 +140,6 @@ class JPSRunTestDriver(object):
         # initialise the inputfiles for jpscore
         self.geofile = os.path.join(self.DIR, "geometry.xml") # FIXME: sometimes we have geometries/
         self.inifiles = glob.glob(os.path.join("inifiles", "*.xml"))
-        self.jpsreport_ini = os.path.join(self.DIR, "jpsreport_ini.xml")
         if not path.exists(self.geofile):
             geometries = os.path.join(self.DIR, "geometries/") #maybe we habe a dir with geometries?
             if os.path.exists(geometries) and os.listdir(geometries):
