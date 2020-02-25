@@ -13,18 +13,6 @@ set(source_files
     Analysis.cpp
     IO/OutputHandler.cpp
     general/ArgumentParser.cpp
-    geometry/Building.cpp
-    geometry/Line.cpp
-    geometry/Point.cpp
-    geometry/Transition.cpp
-    geometry/Crossing.cpp
-    geometry/NavLine.cpp
-    geometry/Room.cpp
-    geometry/Wall.cpp
-    geometry/Hline.cpp
-    geometry/Obstacle.cpp
-    geometry/SubRoom.cpp
-    geometry/Goal.cpp
 )
 
 set (header_files
@@ -41,18 +29,6 @@ set (header_files
     IO/OutputHandler.h
     general/ArgumentParser.h
     general/Macros.h
-    geometry/Building.h
-    geometry/Line.h
-    geometry/Point.h
-    geometry/Transition.h
-    geometry/Crossing.h
-    geometry/NavLine.h
-    geometry/Room.h
-    geometry/Wall.h
-    geometry/Hline.h
-    geometry/Obstacle.h
-    geometry/SubRoom.h
-    geometry/Goal.h
 )
 
 add_library(report STATIC
@@ -61,6 +37,7 @@ add_library(report STATIC
 )
 
 target_link_libraries(report PUBLIC
+    core
     tinyxml
     fs
     Boost::boost
