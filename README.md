@@ -74,6 +74,9 @@ Build an additional target `jpscore_asan` with address and undefined behavior
 sanitizer enabled. Note there is an approx. 2x slowdown when using
 `jpscore_asan` over `jpscore`
 
+##### CODE_COVERAGE defaults to OFF (Does not support Windows)
+Build unittests with code coverage.
+
 ## Quick start
 
 See [Getting started with jupedsim](http://www.jupedsim.org/jpscore_introduction.html).
