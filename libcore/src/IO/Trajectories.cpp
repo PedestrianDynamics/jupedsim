@@ -2,7 +2,6 @@
 
 #include "general/Logger.h"
 #include "geometry/SubRoom.h"
-#include "mpi/LCGrid.h"
 #include "pedestrian/Pedestrian.h"
 
 #include <tinyxml.h>
