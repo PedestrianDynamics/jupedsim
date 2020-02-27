@@ -8,7 +8,7 @@
   <num_threads>4</num_threads>
   <max_sim_time unit="sec">100</max_sim_time>
   <!-- geometry file -->
-  <geometry>../geometry/geometry_test11_a.xml</geometry>
+  <geometry>../geometry.xml</geometry>
   <!-- traectories file and format -->
   <trajectories format="xml-plain" embed_mesh="false" fps="8">
     <file location="Traj_test_11.xml"/>
