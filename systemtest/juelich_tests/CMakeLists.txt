@@ -7,7 +7,6 @@ add_test(NAME juelich_test-6 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/sy
 add_test(NAME juelich_test-9 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_9/runtest_juelich_9.py ${jpscore_exe})
 add_test(NAME juelich_test-11 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_11/runtest_juelich_11.py ${jpscore_exe})
 add_test(NAME juelich_test-12 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_12/runtest_juelich_12.py ${jpscore_exe})
-add_test(NAME juelich_test-15 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_15/runtest_juelich_15.py ${jpscore_exe})
 set_tests_properties(
         juelich_test-1
         juelich_test-2
@@ -18,10 +17,8 @@ set_tests_properties(
         juelich_test-9
         juelich_test-11
         juelich_test-12
-        juelich_test-15
         PROPERTIES LABELS "CI:FAST")
 
 
 add_test(NAME juelich_test-8 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_8/runtest_juelich_8.py ${jpscore_exe})
-add_test(NAME juelich_test-10 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_10/runtest_juelich_10.py ${jpscore_exe})
 add_test(NAME juelich_test-14 COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/systemtest/juelich_tests/test_14/runtest_juelich_14.py ${jpscore_exe})

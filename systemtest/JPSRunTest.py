@@ -13,7 +13,7 @@ import subprocess
 import sys
 from os import path
 from stat import S_ISREG, ST_MODE, ST_MTIME
-
+import shutil
 __author__ = 'Oliver Schmidts'
 __email__ = 'dev@jupedsim.org'
 __credits__ = ['Oliver Schmidts', 'Mohcine Chraibi']
@@ -27,7 +27,7 @@ def getScriptPath():
 
 class JPSRunTestDriver(object):
 
-    def __init__(self, testnumber, argv0, testdir, utestdir="..", jpsreportdir="", jpscore=""):
+    def __init__(self, testnumber, argv0, testdir, utestdir="..", jpsreport="", jpscore=""):
         self.SUCCESS = 0
         self.FAILURE = 1
         # check if testnumber is digit
@@ -38,7 +38,7 @@ class JPSRunTestDriver(object):
         assert path.exists(utestdir), "%s does not exist" % utestdir
         assert isinstance(argv0, str), "argument <argv0> is not string"
         assert path.exists(argv0), "%s is does not exist" % argv0
-        assert jpscore, "no jpscore executable given"
+        assert jpscore or jpsreport, "no executable given (jpscore or jpsreport)"
         self.testno = testnumber
 
         # touch file if not already there
@@ -46,7 +46,7 @@ class JPSRunTestDriver(object):
                             format='%(asctime)s - %(levelname)s - %(message)s')
         self.HOME = path.expanduser("~")
         self.DIR = testdir
-        self.jpsreportdir = jpsreportdir
+        self.jpsreport = jpsreport
         self.jpscore = jpscore
         # Where to find the measured data from the simulations. We will use Voronoi diagrams
         # if self.testno == 101: # fix for 1dfd, since jpsreport can not be used in 1D
@@ -54,56 +54,34 @@ class JPSRunTestDriver(object):
                                        "Output",
                                        "Fundamental_Diagram",
                                        "Classical_Voronoi")
-        # else:
-        #     self.simDataDir = os.path.join(self.DIR,
-        #                                    "Output",
-        #                                    "Fundamental_Diagram",
-        #                                    "Individual_FD")
-        # Where to find the measured data from the experiments.
         # Assume that this directory is always data/
         self.expDataDir = os.path.join(self.DIR, "data")
         self.UTEST = utestdir
         self.CWD = os.getcwd()
         self.FILE = os.path.join(self.DIR, "master_ini.xml")
 
+    def run_analysis(self, testfunction, trajfile="", *args):
+        assert hasattr(testfunction, '__call__'), "run_test: testfunction has no __call__ function"
+        self.__configure()
+        assert path.exists(self.jpsreport), "executable {} does not exist".format(self.jpsreport)
+
+        if not path.exists(self.jpsreport_ini):
+            logging.critical("jpsreport_ini <{}> does not exist".format(self.jpsreport_ini))
+            exit(self.FAILURE)
+
+        res = self.__execute_test(self.jpsreport, self.jpsreport_ini, testfunction, trajfile, *args)
+        return res
+
     def run_test(self, testfunction, fd=0, *args): #fd==1: make fundamental diagram
         assert hasattr(testfunction, '__call__'), "run_test: testfunction has no __call__ function"
         self.__configure()
-        assert path.exists(self.jpscore), "executable {} does not exists".format(self.jpscore)
+        assert path.exists(self.jpscore), "executable {} does not exist.".format(self.jpscore)
 
         results = []
         for inifile in self.inifiles:
             res = self.__execute_test(self.jpscore, inifile, testfunction, *args)
             results.append(res)
 
-        if fd:
-            # in case no jpsreportdir, assume it exists on the same level as jpscore
-            if len(self.jpsreportdir) == 0:
-                self.jpsreportdir = os.path.join(os.path.abspath(os.path.dirname(self.trunk)), "jpsreport")
-
-            # remove any existing simulation files
-            from shutil import rmtree
-            if os.path.exists(self.simDataDir):
-                rmtree(self.simDataDir)
-
-            if not path.exists(self.jpsreport_ini):
-                logging.critical("jpsreport_ini <%s> does not exist", self.jpsreport_ini)
-                exit(self.FAILURE)
-
-            jpsreport = os.path.join(self.jpsreportdir, "bin", "jpsreport")
-            jpsreport_exe = self.__find_executable(jpsreport)
-            # if self.testno == 100: # fix for 1dfd, since jpsreport can not be used in 1D
-            #     fd_script = os.path.join(self.DIR, "fd.py")
-            #     print(fd_script)
-            #     subprocess.call(["python", "%s" % fd_script])
-            # else:
-            subprocess.call([jpsreport_exe, "%s" % self.jpsreport_ini])
-
-            fd_sim = self.__get_FD_data(self.simDataDir)
-            fd_exp = self.__get_FD_data(self.expDataDir)
-            results = []
-            results.append(fd_exp)
-            results.append(fd_sim)
         return results
 
     def __get_FD_data(self, data_dir):
@@ -146,6 +124,8 @@ class JPSRunTestDriver(object):
         # os.chdir(self.DIR)
         logging.info("change directory back to %s", self.DIR)
         os.chdir(self.DIR)
+        # remove output directory
+        shutil.rmtree('Output', ignore_errors=True)
         if self.UTEST == "..":
             lib_path = os.path.abspath(os.path.join(self.trunk, "systemtest"))
         else:
@@ -192,47 +172,26 @@ class JPSRunTestDriver(object):
 
         return executable
 
-    # def __find_jpsreport_executable(self):
-    #     executable = os.path.join(self.jpsreportdir, "bin", "jpsreport")
-
-    #     # fix for windows
-    #     if not path.exists(executable):
-    #         matches = []
-    #         for root, dirname, filenames in os.walk(os.path.join(self.trunk, 'bin')):
-    #             for filename in fnmatch.filter(filenames, 'jpsreport.exe'):
-    #                 matches.append(os.path.join(root, filename))
-    #         if len(matches) == 0:
-    #             logging.critical("executable <%s> or jpsreport.exe does not exist yet.", executable)
-    #             exit(self.FAILURE)
-    #         elif len(matches) > 1:
-    #             matches = ((os.stat(file_path), file_path) for file_path in matches)
-    #             matches = ((stat[ST_MTIME], file_path)
-    #                        for stat, file_path in matches if S_ISREG(stat[ST_MODE]))
-    #             matches = sorted(matches)
-    #         executable = matches[0]
-    #     # end fix for windows
-
-    #     return executable
-
-    def __execute_test(self, executable, inifile, testfunction, *args):
+    def __execute_test(self, executable, inifile, testfunction, trajfile="", *args):
         cmd = "%s %s"%(executable, inifile)
         logging.info('start simulating with exe=<%s>', cmd)
         subprocess.call([executable, "%s" % inifile])
         logging.info('end simulation ...\n--------------\n')
         logging.info("inifile <%s>", inifile)
-        trajfile = os.path.join("trajectories", "traj" + inifile.split("ini")[2])
-        if not path.exists(trajfile):
-            trajfile, file_extension = os.path.splitext(trajfile)
-            logging.info("trajfile <%s> with ext=<%s> does not exist. Looking for *.txt",
-                         trajfile, file_extension)
-            trajfile += ".txt"
+        if not trajfile:
+            trajfile = os.path.join("trajectories", "traj" + inifile.split("ini")[2])
             if not path.exists(trajfile):
-                logging.critical("trajfile <%s> does not exist", trajfile)
-                exit(self.FAILURE)
+                trajfile, file_extension = os.path.splitext(trajfile)
+                logging.info("trajfile <%s> with ext=<%s> does not exist. Looking for *.txt",
+                            trajfile, file_extension)
+                trajfile += ".txt"
+                if not path.exists(trajfile):
+                    logging.critical("trajfile <%s> does not exist", trajfile)
+                    exit(self.FAILURE)
+                else:
+                    logging.info('trajfile = <%s>', trajfile)
             else:
                 logging.info('trajfile = <%s>', trajfile)
-        else:
-            logging.info('trajfile = <%s>', trajfile)
 
         res = testfunction(inifile, trajfile, *args)
         return res

@@ -15,7 +15,7 @@ last_updated: Jan 02, 2020
 - Visual Studio 2019 or newer
 - Git: [download](https://git-scm.com/downloads)
 - CMake 3.2 or newer: [download](https://cmake.org/download/)
-- Python 3. We recommend the Anaconda distribution: [download](https://repo.anaconda.com/archive/Anaconda3-2019.10-Windows-x86_64.exe) 
+- Python 3. We recommend the Anaconda distribution: [download](https://repo.anaconda.com/archive/Anaconda3-2019.10-Windows-x86_64.exe)
 
 For `jpscore` and `jpsreport` following C++ libraries are needed:
 
