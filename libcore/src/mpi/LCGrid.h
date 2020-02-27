@@ -63,6 +63,12 @@ private:
     ///total number of pedestrians
     int _nPeds;
 
+
+    /**
+      * Clear the grid.
+      */
+    void ClearGrid();
+
 public:
     /**
       * Constructor
@@ -78,46 +84,15 @@ public:
     ~LCGrid();
 
     /**
-      *Get pCellSize
-      */
-    double GetCellSize();
-
-    /**
       *Update the cells occupation
       */
     void Update(const std::vector<Pedestrian *> & peds);
 
-    /**
-      * Update this special pedestrian on the grid
-      */
-    void Update(Pedestrian * ped);
 
     /**
       * Make a shallow copy of the initial pedestrians distribution
       */
     void ShallowCopy(const std::vector<Pedestrian *> & peds);
-
-    /**
-      * Clear the grid.
-      */
-    void ClearGrid();
-
-    /**
-      * Dump the content of the cells, output cells and corresponding pedestrians information
-      */
-    void Dump();
-
-    /**
-      * Dump the cells positions
-      */
-    void dumpCellsOnly();
-
-    /**
-      * Return the pedestrians in the neighborhood of a specific location
-      * @param position
-      * @param neighbourhood
-      */
-    void GetNeighbourhood(const Point & position, std::vector<Pedestrian *> & neighbourhood);
 
     /**
       * Returns neighbourhood of the pedestrians ped
@@ -126,14 +101,5 @@ public:
       */
     void GetNeighbourhood(const Pedestrian * ped, std::vector<Pedestrian *> & neighbourhood);
 
-    /**
-      * Highlight the neighborhood of the given pedestrian
-      * @param pedID
-      */
-    void HighlightNeighborhood(int pedID, Building * building);
 
-    /**
-      * @return an xml representation of the grid, compatible with the geometry format
-      */
-    std::string ToXML();
 };
