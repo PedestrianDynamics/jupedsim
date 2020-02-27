@@ -271,4 +271,8 @@ if (BUILD_CPPUNIT_TEST)
     set(PARSE_CATCH_TESTS_ADD_TARGET_IN_TEST_NAME Off)
     set(PARSE_CATCH_TESTS_ADD_TO_CONFIGURE_DEPENDS On)
     ParseAndAddCatchTests(unittests)
+
+    if (CODE_COVERAGE)
+        target_code_coverage(unittests)
+    endif ()
 endif()
