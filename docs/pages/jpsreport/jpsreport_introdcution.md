@@ -5,10 +5,10 @@ tags: [jpsreport, getting_started]
 sidebar: jupedsim_sidebar
 permalink: jpsreport_introduction.html
 summary: This module implements different measurement methods to analyze pedestrian movement in different aspects and scales.
-last_updated: 21, December 2019
+last_updated: 21, February 2020
 ---
 
-
+{%include note.html content="jpsreport has been integrated in the jpscore-repository, although it still can be used independently of jpscore."%}
 
 ## Get started with jpsreport
 
@@ -27,7 +27,7 @@ Three input files are required to run `jpsreport`:
   the location of measurement areas, the chosen measurement method, etc. 
   This file should be in `.xml` format.
 - A [Trajectory file](jpscore_trajectory.html): Pedestrian's 2D position information over time. 
-Both `.xml` and `.txt` formats are supported.
+  Only `.txt` format is supported.
 - A [Geometry file](jpscore_geometry.html): Geometry for a certain trajectory data. This file should be in `.xml` format.
   
 

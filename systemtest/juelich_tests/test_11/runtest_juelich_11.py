@@ -1,78 +1,45 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 import logging
-import numpy as np
 import os
 import subprocess
+import sys
 from os import path
-from sys import argv, exit
-
+from shutil import copyfile
+utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
+sys.path.append(utestdir)
+from JPSRunTest import JPSRunTestDriver
+from utils import *
 #=========================
 testnr = 11
 #========================
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+PATH = os.path.dirname(os.path.abspath(__file__))
 
-SUCCESS = 0
-FAILURE = 1
-#--------------------------------------------------------
+def get_evak_time(inifile, trajfile):
+    fps, N, traj = parse_file(trajfile)
+    etime =  (max( traj[:, 1] ) - min(traj[:, 1])) / float(fps)
+    return etime
 
-logfile="log_test_%d.txt"%testnr
-f=open(logfile, "w")
-f.close()
-logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+def call_test(num, suffix):
+    logging.info("copy master_ini_%s.xml"%suffix)
+    logging.info("copy geometry/geometry_test11_%s.xml"%suffix,)
+    copyfile("%s/master_ini_%s.xml"%(PATH, suffix), "%s/master_ini.xml"%PATH)
+    copyfile("%s/geometry/geometry_test11_%s.xml"%(PATH, suffix), "%s/geometry.xml"%PATH)
+    test = JPSRunTestDriver(num, argv0=sys.argv[0], testdir=sys.path[0], utestdir=utestdir, jpscore=sys.argv[1])
+    return test.run_test(testfunction=get_evak_time)
 
-
-# https://stackoverflow.com/questions/1994488/copy-file-or-directory-in-python
-import shutil, errno
-def copyanything(src, dst):
-    if os.path.exists(dst):
-        shutil.rmtree(dst)
-    try:
-        shutil.copytree(src, dst)
-    except OSError as exc: # python >2.5
-        if exc.errno == errno.ENOTDIR:
-            print(dst)
-            shutil.copy(src, dst)
-        else: raise
-
-import sys
-#-------------------- DIRS ------------------------------
-HOME = path.expanduser("~")
-CWD = os.getcwd()
-DIR= os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
-#--------------------------------------------------------
-    
 if __name__ == "__main__":
-    if CWD != DIR:
-        logging.info("working dir is %s. Change to %s"%(os.getcwd(), DIR))
-        os.chdir(DIR)
-    results = []
-    TRUNK = os.getcwd()
-    lib_path = TRUNK
-    juelich_dir = lib_path  + os.sep + "juelich_tests" + os.sep + "test_11"
-
-    for e in ["a", "b"]:
-        os.chdir(DIR)
-        logging.info("Change directory to %s for %s", os.getcwd(), e)
-        Masterfile = "%s/master_ini_%c.xml"%(juelich_dir, e)
-        logging.info('makeini files with = <%s>'%Masterfile)
-        #subprocess.call(["python", "makeini.py", "-f %s"%Masterfile])
-        subprocess.call(["python", "makeini.py", "-f", "%s"%Masterfile])
-        os.chdir(juelich_dir)
-        logging.info("Change directory to %s"%juelich_dir)
-        logging.info('copy inifiles to  = inifiles_%c'%e)
-        if not path.exists("inifiles"):
-            logging.critical("inifiles was not created")
-            exit(FAILURE)
-        copyanything("inifiles", "inifiles_%c"%e)
-        
-        logging.info('run %c_runtest.py'%e)
-        result  = subprocess.call(["python", "%c_runtest.py"%e])
-        results.append(result)
-        logging.info('copy trajectories to trajectories_%c'%e)
-        copyanything("trajectories", "trajectories_%c"%e)
-    logging.info('results [%.2f --- %.2f]'%(results[0], results[1]))
-    if np.fabs(results[0]-results[1] ) >0.01:
-        logging.critical('%s returns with FAILURE'%(argv[0]))
-        exit(FAILURE)
+    threashold = 0.001
+    result_a = call_test(111, "a")
+    result_b = call_test(112, "b")
+    diff = [a - b for a, b in zip(result_a, result_b)]
+    success = all(v <= threashold for v in diff)
+    if success:
+        logging.info("%s exits with SUCCESS" % (sys.argv[0]))
+        sys.exit(SUCCESS)
     else:
-        logging.info('%s returns with SUCCESS'%(argv[0]))
-        exit(SUCCESS)
+        logging.critical("%s exits with FAILURE" % (sys.argv[0]))
+        logging.debug("result_a {}".format(", ".join(map(str, result_a))))
+        logging.debug("result_b {}".format(", ".join(map(str, result_a))))
+        logging.debug("diff {} (threashold = {})".format(", ".join(map(str, diff)), threashold))
+        sys.exit(FAILURE)
