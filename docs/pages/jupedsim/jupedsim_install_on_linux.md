@@ -6,7 +6,7 @@ summary: "JuPedSim does not offer any Linux binaries. A compilation of the code 
 sidebar: jupedsim_sidebar
 permalink: jupedsim_install_on_linux.html
 folder: jupedsim
-last_updated: Dec 31, 2019
+last_updated: Feb 21, 2020
 ---
 
 ## Get the code 
@@ -15,13 +15,27 @@ last_updated: Dec 31, 2019
 git clone https://github.com/JuPedSim/jpscore.git
 ```
 
+## Get dependencies
+
+Before starting building `jpscore` and `jpsreport` it is necessary to install the required [dependencies](jupedsim_requirements.html).
+
+To do so, run the script `scripts/setup-deps.sh`, for example as follows:
+
+```bash
+mkdir build
+cd build
+../scripts/setup-deps.sh
+```
+
+This creates a new directory `deps` inside `build` with the required libraries.
+
 ## How to build
 Once you have installed all dependencies and cloned the repository continue
 with a ninja based build:
 ```bash
 mkdir build
 cd build
-cmake -GNinja -DCMAKE_BUILD_TYPE=Debug <path-to-cmakelists>
+cmake -GNinja -DCMAKE_BUILD_TYPE=Debug <path-to-cmakelists> -DCMAKE_PREFIX_PATH=$(pwd)/deps
 ninja
 ```
 
