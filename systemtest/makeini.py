@@ -20,8 +20,7 @@ FAILURE = 1
 
 ego = os.path.basename(sys.argv[0]).split(".")[0] + ".txt"
 print("ego: ", ego)
-logfile = "log_%s"%ego
-logging.basicConfig(filename=logfile, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 # ============= some directories =============
 #HOME = os.path.expanduser("~")
 #TRUNK =  HOME + "/Workspace/ped|ynamics/JuPedSim/jpscore/"
@@ -232,13 +231,9 @@ def make_file(masterfile, tree, result):
         logging.info('>> %s'%newfile)
         tree.write(newfile)
 # =======================================================
-
-if __name__ == "__main__":
-    args = getParserArgs()
-
-    masterfile = args.file
+def main(masterfile):
     if not os.path.isfile(masterfile):
-        logging.error("ERROR: file %s does not exist."%masterfile)
+        logging.error("file %s does not exist."%masterfile)
         sys.exit(FAILURE)
 
     directory = os.path.dirname(os.path.abspath(masterfile))    #args.directory
@@ -251,6 +246,3 @@ if __name__ == "__main__":
     root = tree.getroot()
     result = get_product(root)
     make_file(masterfile, tree, result)
-
-    if not  os.path.isfile("%s/%s"%(directory, logfile)):
-        move(logfile, directory)
