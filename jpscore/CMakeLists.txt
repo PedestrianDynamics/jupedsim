@@ -66,7 +66,34 @@ install(TARGETS jpscore
         COMPONENT applications)
 
 set(CT_DATA_FILE_DIR "demos")
-file(GLOB CT_FILES "${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/*/*")
+set(CT_FILES
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/01_corridor/corridor_ini.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/01_corridor/corridor_geo.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/02_bottleneck/bottleneck_ini.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/02_bottleneck/bottleneck_geo.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/03_corner/corner_ini.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/03_corner/corner_geo.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/03_corner/corner_routing.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/04_stairs/stairs_geo.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/04_stairs/stairs_ini.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/04_stairs/stairs_routing.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/05_events/events_ini.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/05_events/events_geo.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/05_events/events_list.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/05_events/events_routing.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/06_floorfield/floorfield_ini.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/06_floorfield/floorfield_geo.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/07_big_room/big_room_ini.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/07_big_room/big_room_geo.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/08_sources/source_ini.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/08_sources/source_geo.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/09_area/wa_triangle_ini.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/09_area/wa_triangle_geo.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/10_schedule/schedule_ini.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/10_schedule/schedule_geo.xml
+        ${CMAKE_SOURCE_DIR}/${CT_DATA_FILE_DIR}/10_schedule/schedule.xml
+        )
+
 install(FILES ${CT_FILES}
   DESTINATION "jpscore_samples"
   COMPONENT jpscore_samples)
