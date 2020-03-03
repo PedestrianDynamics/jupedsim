@@ -88,18 +88,10 @@ public:
       */
     void Update(const std::vector<Pedestrian *> & peds);
 
-
-    /**
-      * Make a shallow copy of the initial pedestrians distribution
-      */
-    void ShallowCopy(const std::vector<Pedestrian *> & peds);
-
     /**
       * Returns neighbourhood of the pedestrians ped
       * @param ped
       * @param neighbourhood
       */
     void GetNeighbourhood(const Pedestrian * ped, std::vector<Pedestrian *> & neighbourhood);
-
-
 };

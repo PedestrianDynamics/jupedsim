@@ -1093,7 +1093,6 @@ void Building::InitGrid()
     //int nped= Pedestrian::GetAgentsCreated() +  for src:sources  src->GetMaxAgents()
 
     _linkedCellGrid = new LCGrid(boundaries, cellSize, Pedestrian::GetAgentsCreated());
-    _linkedCellGrid->ShallowCopy(_allPedestrians);
 
     LOG_INFO("Done with Initializing the grid");
 }

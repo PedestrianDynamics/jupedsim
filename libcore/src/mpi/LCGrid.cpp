@@ -88,14 +88,6 @@ LCGrid::~LCGrid()
     delete[] _cellHead;
 }
 
-void LCGrid::ShallowCopy(const std::vector<Pedestrian *> & peds)
-{
-    for(unsigned int p = 0; p < peds.size(); p++) {
-        int id             = peds[p]->GetID() - 1;
-        _localPedsCopy[id] = peds[p];
-    }
-}
-
 void LCGrid::Update(const std::vector<Pedestrian *> & peds)
 {
     grid_mutex.lock();
