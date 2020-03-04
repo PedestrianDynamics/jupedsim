@@ -29,8 +29,7 @@ TEST_CASE("geometry/NeighborSearch", "[geometry][neightbor-search][lcgrid]")
 {
     SECTION("GetNeighbors")
     {
-        double boundaries[4] = {0, 10, 0, 10};
-        LCGrid lcgrid(boundaries, 2.2, 100);
+        LCGrid lcgrid(0, 10, 0, 10, 2.2);
 
         std::vector<Pedestrian> pedestrians(10);
         for(auto & ped : pedestrians) {

@@ -1073,7 +1073,6 @@ void Building::InitGrid()
     y_min = y_min - 1 * cellSize;
     y_max = y_max + 1 * cellSize;
 
-    double boundaries[4] = {x_min, x_max, y_min, y_max};
 
     //no algorithms
     // the domain is made of a single cell
@@ -1092,7 +1091,7 @@ void Building::InitGrid()
     //TODO: the number of pedestrian should be calculated using the capacity of the sources
     //int nped= Pedestrian::GetAgentsCreated() +  for src:sources  src->GetMaxAgents()
 
-    _linkedCellGrid = new LCGrid(boundaries, cellSize, Pedestrian::GetAgentsCreated());
+    _linkedCellGrid = new LCGrid(x_min, x_max, y_min, y_max, cellSize);
 
     LOG_INFO("Done with Initializing the grid");
 }

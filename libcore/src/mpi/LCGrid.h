@@ -35,6 +35,7 @@
 
 #include "geometry/Point.h"
 
+#include <deque>
 #include <string>
 #include <vector>
 
@@ -45,24 +46,18 @@ class Building;
 class LCGrid
 {
 private:
-    static constexpr int LIST_EMPTY = -1;
-    /// the 'first' pedestrian in each cell
-    int ** _cellHead;
-    ///  the next pedestrians. more efficient than the double linked- list
-    int * _list;
+    /// rectangular area for linked cells which covers the whole geometry
+    double _gridXmin, _gridYmin;
+    double _cellSize;
+
+
     /// number of cells in x- and y-direction respectively.
     /// Also to be interpreted as cell coordinates in the grid
     int _gridSizeX, _gridSizeY;
-    /// the cell size default to 2.2 metres
-    double _cellSize;
-    /// rectangular area for linked cells which covers the whole geometry
-    double _gridXmin, _gridXmax, _gridYmin, _gridYmax;
-    /// for convenience
-    /// will be delete in next versions
-    Pedestrian ** _localPedsCopy;
-    ///total number of pedestrians
-    int _nPeds;
 
+    using grid_elem_t = std::deque<Pedestrian *>;
+
+    std::vector<std::vector<grid_elem_t>> grid;
 
     /**
       * Clear the grid.
@@ -76,7 +71,7 @@ public:
       * @param cellsize the cell size
       * @param nPeds the number of pedestrians
       */
-    LCGrid(double boundaries[4], double cellsize, int nPeds);
+    LCGrid(double gridXmin, double gridXmax, double gridYmin, double gridYmax, double cellSize);
 
     /**
       * Desctructor
