@@ -6,7 +6,7 @@ summary: "JuPedSim does not offer any Linux binaries. A compilation of the code 
 sidebar: jupedsim_sidebar
 permalink: jupedsim_install_on_linux.html
 folder: jupedsim
-last_updated: Feb 21, 2020
+last_updated: Mar 02, 2020
 ---
 
 ## Get the code 
@@ -77,6 +77,10 @@ Build an additional target `jpscore_asan` with address and undefined behavior
 sanitizer enabled. Note there is an approx. 2x slowdown when using
 `jpscore_asan` over `jpscore`
 
+- CODE_COVERAGE defaults to OFF (Does not support Windows)
+Build unittests with code coverage. Following additional libraries are needed:
+    - gcc: `lcov`
+    - clang: `llvm-cov` and `llvm-profdata`
 
 {% include links.html %}
 
