@@ -74,6 +74,9 @@ private:
     GoalManager _goalManager;
     fs::path _currentTrajectoriesFile;
     int _countTraj = 0; // count number of TXT trajectories to produce
+
+    std::set<Pedestrian *> _pedsToRemove;
+
 public:
     /**
      * Constructor
@@ -99,6 +102,11 @@ public:
      * Update the route of the pedestrians and reassign rooms, in the case a room change happens
      */
     void UpdateRoutesAndLocations();
+
+    /**
+     * Remove the pedestrians, which are marked to remove (are in \a _pedsToRemove), from the simulation.
+     */
+    void RemovePedestrians();
 
     /**
      * Update the routes (intermediate destinations) of the pedestrians.

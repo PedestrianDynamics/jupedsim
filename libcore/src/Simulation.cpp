@@ -197,16 +197,12 @@ double Simulation::RunStandardSimulation(double maxSimTime)
 
 void Simulation::UpdateRoutesAndLocations()
 {
-    //pedestrians to be deleted
-    //you should better create this in the constructor and allocate it once.
-    std::set<Pedestrian *> pedsToRemove;
-
     // collect all pedestrians in the simulation.
     const std::vector<Pedestrian *> & allPeds = _building->GetAllPedestrians();
     const std::map<int, Goal *> & goals       = _building->GetAllGoals();
     auto allRooms                             = _building->GetAllRooms();
 
-#pragma omp parallel for shared(pedsToRemove, allRooms)
+#pragma omp parallel for shared(_pedsToRemove, allRooms)
     for(size_t p = 0; p < allPeds.size(); ++p) {
         auto ped       = allPeds[p];
         Room * room    = _building->GetRoom(ped->GetRoomID());
@@ -216,13 +212,13 @@ void Simulation::UpdateRoutesAndLocations()
         if((ped->GetFinalDestination() == FINAL_DEST_OUT) &&
            (room->GetCaption() == "outside")) { //TODO Hier aendern fuer inside goals?
 #pragma omp critical(Simulation_Update_pedsToRemove)
-            pedsToRemove.insert(ped);
+            _pedsToRemove.insert(ped);
         } else if(
             (ped->GetFinalDestination() != FINAL_DEST_OUT) &&
             (goals.at(ped->GetFinalDestination())->Contains(ped->GetPos())) &&
             (goals.at(ped->GetFinalDestination())->GetIsFinalGoal())) {
 #pragma omp critical(Simulation_Update_pedsToRemove)
-            pedsToRemove.insert(ped);
+            _pedsToRemove.insert(ped);
         }
 
         // reposition in the case the pedestrians "accidentally left the room" not via the intended exit.
@@ -237,8 +233,8 @@ void Simulation::UpdateRoutesAndLocations()
 
             if(!assigned) {
 #pragma omp critical(Simulation_Update_pedsToRemove)
-                pedsToRemove.insert(ped); //the agent left the old room
-                                          //actualize the eggress time for that room
+                _pedsToRemove.insert(ped); //the agent left the old room
+                                           //actualize the eggress time for that room
 #pragma omp critical(SetEgressTime)
                 allRooms.at(ped->GetRoomID())->SetEgressTime(Pedestrian::GetGlobalTime());
             }
@@ -271,7 +267,7 @@ void Simulation::UpdateRoutesAndLocations()
             ped->Relocate(f);
 #pragma omp critical(Simulation_Update_pedsToRemove)
             {
-                pedsToRemove.insert(ped);
+                _pedsToRemove.insert(ped);
                 // TODO KKZ track deleted peds
             }
         }
@@ -307,17 +303,18 @@ void Simulation::UpdateRoutesAndLocations()
 
 #ifdef _USE_PROTOCOL_BUFFER
     if(_hybridSimManager) {
-        AgentsQueueOut::Add(pedsToRemove); //this should be critical region (and it is)
-    } else
-#endif
-    {
-        // remove the pedestrians that have left the building
-        for(auto p : pedsToRemove) {
-            UpdateFlowAtDoors(*p);
-            _building->DeletePedestrian(p);
-        }
-        pedsToRemove.clear();
+        AgentsQueueOut::Add(_pedsToRemove); //this should be critical region (and it is)
     }
+#endif
+}
+
+void Simulation::RemovePedestrians()
+{
+    for(auto p : _pedsToRemove) {
+        UpdateFlowAtDoors(*p);
+        _building->DeletePedestrian(p);
+    }
+    _pedsToRemove.clear();
 }
 
 void Simulation::PrintStatistics(double simTime)
@@ -413,9 +410,12 @@ void Simulation::RunHeader(long nPed)
     _iod->WriteFrame(firstframe, _building.get());
     //first initialisation needed by the linked-cells
     UpdateRoutesAndLocations();
+    RemovePedestrians();
+
     // KKZ: RunBody calls this as one of the firs things, hence this can be removed
     _agentSrcManager.GenerateAgents();
     AddNewAgents();
+
 }
 
 double Simulation::RunBody(double maxSimTime)
@@ -497,7 +497,7 @@ double Simulation::RunBody(double maxSimTime)
 
             //update the routes and locations
             UpdateRoutesAndLocations();
-
+            RemovePedestrians();
             //other updates
             //someone might have left the building
             _nPeds = _building->GetAllPedestrians().size();
