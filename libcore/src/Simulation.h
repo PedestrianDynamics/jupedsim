@@ -109,18 +109,24 @@ public:
     void RemovePedestrians();
 
     /**
+     * Find all Pedestrians who have left the simulation scope, e.g. have left the building.
+     * @return all pedestrians, who have left the simulation scope
+     */
+    std::set<Pedestrian *> FindOutsidePedestrians();
+
+    /**
      * Update the routes (intermediate destinations) of the pedestrians.
      * Based on the route choice algorithm used, the next doors or the next decision points is set.
-     * TODO:
      */
     void UpdateRoutes();
+
 
     /**
      * Update the location of the agents and remove the agents from the simulation who have left the building.
      * Locations includes room/subrooms.
      * TODO:
      */
-    void UpdateLocations();
+    std::set<Pedestrian *> UpdateLocations();
 
     /**
      * Perform some initialisation for the simulation.

@@ -197,34 +197,33 @@ double Simulation::RunStandardSimulation(double maxSimTime)
 
 void Simulation::UpdateRoutesAndLocations()
 {
+    auto outsidePeds = FindOutsidePedestrians();
+    _pedsToRemove.insert(outsidePeds.begin(), outsidePeds.end());
+    auto notRelocatedPeds = UpdateLocations();
+    _pedsToRemove.insert(notRelocatedPeds.begin(), notRelocatedPeds.end());
+
+    UpdateRoutes();
+    RemovePedestrians();
+}
+
+std::set<Pedestrian *> Simulation::UpdateLocations()
+{
+    std::set<Pedestrian *> notRelocatedPeds;
+
     // collect all pedestrians in the simulation.
     const std::vector<Pedestrian *> & allPeds = _building->GetAllPedestrians();
-    const std::map<int, Goal *> & goals       = _building->GetAllGoals();
     auto allRooms                             = _building->GetAllRooms();
 
-#pragma omp parallel for shared(_pedsToRemove, allRooms)
+#pragma omp parallel for shared(notRelocatedPeds, allRooms) default(none)
     for(size_t p = 0; p < allPeds.size(); ++p) {
         auto ped       = allPeds[p];
         Room * room    = _building->GetRoom(ped->GetRoomID());
         SubRoom * sub0 = room->GetSubRoom(ped->GetSubRoomID());
 
-        //set the new room if needed
-        if((ped->GetFinalDestination() == FINAL_DEST_OUT) &&
-           (room->GetCaption() == "outside")) { //TODO Hier aendern fuer inside goals?
-#pragma omp critical(Simulation_Update_pedsToRemove)
-            _pedsToRemove.insert(ped);
-        } else if(
-            (ped->GetFinalDestination() != FINAL_DEST_OUT) &&
-            (goals.at(ped->GetFinalDestination())->Contains(ped->GetPos())) &&
-            (goals.at(ped->GetFinalDestination())->GetIsFinalGoal())) {
-#pragma omp critical(Simulation_Update_pedsToRemove)
-            _pedsToRemove.insert(ped);
-        }
-
         // reposition in the case the pedestrians "accidentally left the room" not via the intended exit.
         // That may happen if the forces are too high for instance
         // the ped is removed from the simulation, if it could not be reassigned
-        else if(!sub0->IsInSubRoom(ped)) {
+        if(!sub0->IsInSubRoom(ped)) {
             bool assigned = false;
             std::function<void(const Pedestrian &)> f =
                 std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
@@ -233,53 +232,35 @@ void Simulation::UpdateRoutesAndLocations()
 
             if(!assigned) {
 #pragma omp critical(Simulation_Update_pedsToRemove)
-                _pedsToRemove.insert(ped); //the agent left the old room
-                                           //actualize the eggress time for that room
+                notRelocatedPeds.insert(ped); //the agent left the old room
+                                              //actualize the eggress time for that room
 #pragma omp critical(SetEgressTime)
                 allRooms.at(ped->GetRoomID())->SetEgressTime(Pedestrian::GetGlobalTime());
             }
         }
+    }
+    return notRelocatedPeds;
+}
 
+void Simulation::UpdateRoutes()
+{
+    for(auto ped : _building->GetAllPedestrians()) {
         // set ped waiting, if no target is found
         int target = ped->FindRoute();
 
-        if(target == -1) {
+        if(target == FINAL_DEST_OUT) {
             ped->StartWaiting();
         } else {
             if(ped->IsWaiting() && !ped->IsInsideWaitingAreaWaiting()) {
                 ped->EndWaiting();
             }
         }
+        if(target != FINAL_DEST_OUT) {
+            const Hline * door = _building->GetTransOrCrossByUID(target);
+            int roomID         = ped->GetRoomID();
+            int subRoomID      = ped->GetSubRoomID();
 
-        // actualize routes for sources
-        if(_gotSources)
-            target = ped->FindRoute();
-        //finally actualize the route
-        if(!_gotSources && ped->FindRoute() == -1 && !_trainConstraints && !ped->IsWaiting()) {
-            //a destination could not be found for that pedestrian
-            LOG_ERROR(
-                "Could not find a route for pedestrian {} in room {} and subroom {}",
-                ped->GetID(),
-                ped->GetRoomID(),
-                ped->GetSubRoomID());
-            std::function<void(const Pedestrian &)> f =
-                std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
-            ped->Relocate(f);
-#pragma omp critical(Simulation_Update_pedsToRemove)
-            {
-                _pedsToRemove.insert(ped);
-                // TODO KKZ track deleted peds
-            }
-        }
-
-        // Set pedestrian waiting when find route temp_close
-        int goal = ped->FindRoute();
-        if(goal != FINAL_DEST_OUT) {
-            const Hline * target = _building->GetTransOrCrossByUID(goal);
-            int roomID           = ped->GetRoomID();
-            int subRoomID        = ped->GetSubRoomID();
-
-            if(auto cross = dynamic_cast<const Crossing *>(target)) {
+            if(auto cross = dynamic_cast<const Crossing *>(door)) {
                 if(cross->IsInRoom(roomID) && cross->IsInSubRoom(subRoomID)) {
                     if(!ped->IsWaiting() && cross->IsTempClose()) {
                         ped->StartWaiting();
@@ -292,20 +273,49 @@ void Simulation::UpdateRoutesAndLocations()
             }
         }
 
-        // Get new goal for pedestrians who are inside waiting area and wait time is over
-        // Check if current position is already waiting area
-        // yes: set next goal and return findExit(p)
-        _goalManager.ProcessPedPosition(ped);
+        //        //finally actualize the route
+        //        // TODO if will never be true: target == -1 -> ped->IsWaiting == true
+        //        if(!_gotSources && target == -1 && !_trainConstraints && !ped->IsWaiting()) {
+        //            //a destination could not be found for that pedestrian
+        //            LOG_ERROR(
+        //                "Could not find a route for pedestrian {} in room {} and subroom {}",
+        //                ped->GetID(),
+        //                ped->GetRoomID(),
+        //                ped->GetSubRoomID());
+        //            std::function<void(const Pedestrian &)> f =
+        //                std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
+        //            ped->Relocate(f);
+        //#pragma omp critical(Simulation_Update_pedsToRemove)
+        //            {
+        //                _pedsToRemove.insert(ped);
+        //                // TODO KKZ track deleted peds
+        //            }
+        //        }
     }
+}
 
+std::set<Pedestrian *> Simulation::FindOutsidePedestrians()
+{
+    const std::vector<Pedestrian *> & allPeds = _building->GetAllPedestrians();
+    const std::map<int, Goal *> & goals       = _building->GetAllGoals();
 
-    _goalManager.ProcessWaitingAreas(Pedestrian::GetGlobalTime());
+    std::set<Pedestrian *> outsidePeds;
 
-#ifdef _USE_PROTOCOL_BUFFER
-    if(_hybridSimManager) {
-        AgentsQueueOut::Add(_pedsToRemove); //this should be critical region (and it is)
+    for(auto ped : allPeds) {
+        Room * room = _building->GetRoom(ped->GetRoomID());
+
+        //set the new room if needed
+        if((ped->GetFinalDestination() == FINAL_DEST_OUT) &&
+           (room->GetCaption() == "outside")) { //TODO Hier aendern fuer inside goals?
+            outsidePeds.insert(ped);
+        } else if(
+            (ped->GetFinalDestination() != FINAL_DEST_OUT) &&
+            (goals.at(ped->GetFinalDestination())->Contains(ped->GetPos())) &&
+            (goals.at(ped->GetFinalDestination())->GetIsFinalGoal())) {
+            outsidePeds.insert(ped);
+        }
     }
-#endif
+    return outsidePeds;
 }
 
 void Simulation::RemovePedestrians()
@@ -415,7 +425,6 @@ void Simulation::RunHeader(long nPed)
     // KKZ: RunBody calls this as one of the firs things, hence this can be removed
     _agentSrcManager.GenerateAgents();
     AddNewAgents();
-
 }
 
 double Simulation::RunBody(double maxSimTime)
@@ -497,7 +506,11 @@ double Simulation::RunBody(double maxSimTime)
 
             //update the routes and locations
             UpdateRoutesAndLocations();
-            RemovePedestrians();
+
+            // Checks if position of pedestrians is inside waiting area and should be waiting or if
+            // left waiting area and assign new goal
+            _goalManager.Process(Pedestrian::GetGlobalTime(), _building->GetAllPedestrians());
+
             //other updates
             //someone might have left the building
             _nPeds = _building->GetAllPedestrians().size();
