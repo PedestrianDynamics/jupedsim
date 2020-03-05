@@ -86,7 +86,7 @@ bool GlobalRouter::Init(Building * building)
 {
     //necessary if the init is called several times during the simulation
     Reset();
-    LOG_ERROR("Init the Global Router Engine");
+    LOG_DEBUG("Init the Global Router Engine");
     _building = building;
     //only load the information if not previously loaded
     //if(_building->GetNumberOfGoals()==0)
@@ -511,7 +511,7 @@ bool GlobalRouter::Init(Building * building)
     //rooms.push_back("Verteilerebene");
     //WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms); exit(0);
     //WriteGraphGV("routing_graph.gv",4,rooms);exit(0);
-    LOG_INFO("Done with the Global Router Engine!");
+    LOG_DEBUG("Done with the Global Router Engine!");
     return true;
 }
 

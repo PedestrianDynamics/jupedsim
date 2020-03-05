@@ -57,17 +57,6 @@ public:
     virtual ~AgentsSourcesManager();
 
     /**
-      * Make the class "runnable" by overloading the operator
-      * @param value
-      */
-    void operator()();
-
-    /**
-      *
-      */
-    void Run();
-
-    /**
       *  Add a new agent source
       */
     void AddSource(std::shared_ptr<AgentsSource> src);
@@ -81,7 +70,6 @@ public:
       * Set the building object
       */
     void SetBuilding(Building * building);
-    void SetRunning(bool running);
 
     /**
       * @return true if all agents have been generated
@@ -123,7 +111,6 @@ public:
 
     int GetMaxSimTime() const;
     void SetMaxSimTime(int t);
-    bool IsRunning() const;
 
 private:
     /**
@@ -182,5 +169,4 @@ private:
     /// whether all agents have been dispatched
     static bool _isCompleted;
     bool _buildingUpdated;
-    bool _isRunning = false;
 };

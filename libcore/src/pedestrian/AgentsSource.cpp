@@ -33,7 +33,7 @@
 
 AgentsSource::AgentsSource(
     int id,
-    const std::string & caption,
+    std::string caption,
     int max_agents,
     int group_id,
     int frequency,
@@ -51,7 +51,7 @@ AgentsSource::AgentsSource(
     _frequency(frequency),
     _maxAgents(max_agents),
     _groupID(group_id),
-    _caption(caption),
+    _caption(std::move(caption)),
     _greedy(greedy),
     _agent_id(agent_id),
     _time(time),
