@@ -57,7 +57,7 @@ AgentsSourcesManager::~AgentsSourcesManager() {}
 bool AgentsSourcesManager::ProcessAllSources() const
 {
     bool empty          = true;
-    double current_time = (int) Pedestrian::GetGlobalTime();
+    double current_time = Pedestrian::GetGlobalTime();
     std::vector<Pedestrian *>
         source_peds; // we have to collect peds from all sources, so that we can consider them  while computing new positions
     for(const auto & src : _sources) {
@@ -68,7 +68,7 @@ bool AgentsSourcesManager::ProcessAllSources() const
         // is important in the following condition
         bool frequencyTime = std::fmod(current_time - srcLifeSpan[0], src->GetFrequency()) ==
                              0; // time of creation wrt frequency
-        bool newCycle = almostEqual(current_time, srcLifeSpan[0], 0.01) || frequencyTime;
+        bool newCycle = almostEqual(current_time, srcLifeSpan[0], 1.e-5) || frequencyTime;
         bool subCycle;
         int quotient      = (int) (current_time - srcLifeSpan[0]) / (int) src->GetFrequency();
         int timeReference = src->GetFrequency() * quotient;
