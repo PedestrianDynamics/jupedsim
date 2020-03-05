@@ -71,45 +71,36 @@ int main(int argc, char ** argv)
         return EXIT_FAILURE;
     }
 
-    time_t starttime, endtime;
-    time(&starttime);
-
     Simulation sim(&config);
 
-    if(sim.InitArgs()) {
-        double evacTime = 0;
-        LOG_INFO("Simulation started with {} pedestrians", sim.GetPedsNumber());
-        if(sim.GetAgentSrcManager().GetMaxAgentNumber()) {
-            double simMaxTime = config.GetTmax();
-            std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());
-            evacTime = sim.RunStandardSimulation(simMaxTime);
-            t1.join();
-        } else {
-            evacTime = sim.RunStandardSimulation(config.GetTmax());
-        }
-
-        LOG_INFO("\n\nSimulation completed", sim.GetPedsNumber());
-        time(&endtime);
-
-        if(config.ShowStatistics()) {
-            sim.PrintStatistics(evacTime);
-        }
-
-        if(sim.GetPedsNumber()) {
-            LOG_WARNING(
-                "Pedestrians not evacuated [{}] using [{}] threads",
-                sim.GetPedsNumber(),
-                config.GetMaxOpenMPThreads());
-        }
-
-        const double execTime = difftime(endtime, starttime);
-        LOG_INFO("Exec Time {:.2f}s", execTime);
-        LOG_INFO("Evac Time {:.2f}s", evacTime);
-        LOG_INFO("Realtime Factor {:.2f}x", evacTime / execTime);
-        LOG_INFO("Number of Threads {}", config.GetMaxOpenMPThreads());
-    } else {
+    if(!sim.InitArgs()) {
         LOG_ERROR("Could not start simulation. Check the log for prior errors");
-        return (EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
+    time_t starttime{};
+    time(&starttime);
+    LOG_INFO("Simulation started with {} pedestrians", sim.GetPedsNumber());
+    const auto evacTime = sim.RunStandardSimulation(config.GetTmax());
+    LOG_INFO("Simulation completed");
+    time_t endtime{};
+    time(&endtime);
+
+    // some statistics output
+    if(config.ShowStatistics()) {
+        sim.PrintStatistics(evacTime); // negative means end of simulation
+    }
+
+    if(sim.GetPedsNumber()) {
+        LOG_WARNING(
+            "Pedestrians not evacuated [{}] using [{}] threads",
+            sim.GetPedsNumber(),
+            config.GetMaxOpenMPThreads());
+    }
+
+    const double execTime = difftime(endtime, starttime);
+    LOG_INFO("Exec Time {:.2f}s", execTime);
+    LOG_INFO("Evac Time {:.2f}s", evacTime);
+    LOG_INFO("Realtime Factor {:.2f}x", evacTime / execTime);
+    LOG_INFO("Number of Threads {}", config.GetMaxOpenMPThreads());
     return (EXIT_SUCCESS);
 }
