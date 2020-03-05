@@ -99,7 +99,7 @@ if __name__ == "__main__":
     y1 = np.random.random(N);
     x2 = np.random.random(M);
     y2 = np.random.random(M);
-    validity_factor = CDFDistance2(x1, y1, x2, y2, 0.0, 1.0);
+    validity_factor = 1 - CDFDistance2(x1, y1, x2, y2, 0.0, 1.0);
     print(validity_factor);
 #    print(x, test(x))
 
