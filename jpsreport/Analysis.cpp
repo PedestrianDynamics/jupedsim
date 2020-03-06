@@ -70,7 +70,6 @@ OutputHandler * Log = new STDIOHandler();
 
 Analysis::Analysis()
 {
-    _building       = NULL;
     _projectRootDir = "";
     _deltaF =
         5; // half of the time interval that used to calculate instantaneous velocity of ped i. Here v_i = (X(t+deltaF) - X(t+deltaF))/(2*deltaF).   X is location.
@@ -101,7 +100,6 @@ Analysis::Analysis()
 
 Analysis::~Analysis()
 {
-    delete _building;
 }
 
 // file.txt ---> file
@@ -122,12 +120,8 @@ std::string Analysis::GetFilename(const std::string & str)
 void Analysis::InitArgs(ArgumentParser * args)
 {
     string s  = "Parameter:\n";
-    _building = new Building();
-    _building->LoadGeometry(args->GetGeometryFilename().string());
-    // create the polygons
-    _building->InitGeometry();
-    // _building->AddSurroundingRoom();
-
+    // @todo: read geometry file and init geometry
+    //InitGeometry(args->GetGeometryFilename().string());
     if(args->GetIsMethodA()) {
         _DoesUseMethodA                  = true;
         vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodA();
@@ -209,7 +203,7 @@ void Analysis::InitArgs(ArgumentParser * args)
     _outputLocation         = args->GetOutputLocation();
 }
 
-
+// todo init convex hull of geometry. Consider obstacles.
 std::map<int, polygon_2d> Analysis::ReadGeometry(
     const fs::path & geometryFile,
     const std::vector<MeasurementArea_B *> & areas)
@@ -224,48 +218,49 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(
 
     //loop over all areas
     for(auto && area : areas) {
-        //search for the subroom that contains that area
-        for(auto && it_room : _building->GetAllRooms()) {
-            for(auto && it_sub : it_room.second->GetAllSubRooms()) {
-                SubRoom * subroom = it_sub.second.get();
-                point_2d point(0, 0);
-                boost::geometry::centroid(area->_poly, point);
-                //check if the area is contained in the obstacle
-                if(subroom->IsInSubRoom(Point(point.x() / M2CM, point.y() / M2CM))) {
-                    for(auto && tmp_point : subroom->GetPolygon()) {
-                        append(
-                            geoPoly[area->_id],
-                            make<point_2d>(tmp_point._x * M2CM, tmp_point._y * M2CM));
-                        geo_minX =
-                            (tmp_point._x * M2CM <= geo_minX) ? (tmp_point._x * M2CM) : geo_minX;
-                        geo_minY =
-                            (tmp_point._y * M2CM <= geo_minY) ? (tmp_point._y * M2CM) : geo_minY;
-                        geo_maxX =
-                            (tmp_point._x * M2CM >= geo_maxX) ? (tmp_point._x * M2CM) : geo_maxX;
-                        geo_maxY =
-                            (tmp_point._y * M2CM >= geo_maxY) ? (tmp_point._y * M2CM) : geo_maxY;
-                    }
-                    correct(geoPoly[area->_id]);
-                    //cout<<"this is:\t"<<subroom->GetAllObstacles().size()<<endl;
-                    //appen the holes/obstacles if any
-                    int k = 1;
-                    for(auto && obst : subroom->GetAllObstacles()) {
-                        geoPoly[area->_id].inners().resize(k++);
-                        geoPoly[area->_id].inners().back();
-                        model::ring<point_2d> & inner = geoPoly[area->_id].inners().back();
-                        for(auto && tmp_point : obst->GetPolygon()) {
-                            append(inner, make<point_2d>(tmp_point._x * M2CM, tmp_point._y * M2CM));
-                        }
-                        correct(geoPoly[area->_id]);
-                    }
-                }
-            }
-        } //room
+          // Todo init gePoly and boundaries of the geometry
+        // //search for the subroom that contains that area
+        // for(auto && it_room : _building->GetAllRooms()) {
+        //     for(auto && it_sub : it_room.second->GetAllSubRooms()) {
+        //         SubRoom * subroom = it_sub.second.get();
+        //         point_2d point(0, 0);
+        //         boost::geometry::centroid(area->_poly, point);
+        //         //check if the area is contained in the obstacle
+        //         if(subroom->IsInSubRoom(Point(point.x() / M2CM, point.y() / M2CM))) {
+        //             for(auto && tmp_point : subroom->GetPolygon()) {
+        //                 append(
+        //                     geoPoly[area->_id],
+        //                     make<point_2d>(tmp_point._x * M2CM, tmp_point._y * M2CM));
+        //                 geo_minX =
+        //                     (tmp_point._x * M2CM <= geo_minX) ? (tmp_point._x * M2CM) : geo_minX;
+        //                 geo_minY =
+        //                     (tmp_point._y * M2CM <= geo_minY) ? (tmp_point._y * M2CM) : geo_minY;
+        //                 geo_maxX =
+        //                     (tmp_point._x * M2CM >= geo_maxX) ? (tmp_point._x * M2CM) : geo_maxX;
+        //                 geo_maxY =
+        //                     (tmp_point._y * M2CM >= geo_maxY) ? (tmp_point._y * M2CM) : geo_maxY;
+        //             }
+        //             correct(geoPoly[area->_id]);
+        //             //cout<<"this is:\t"<<subroom->GetAllObstacles().size()<<endl;
+        //             //appen the holes/obstacles if any
+        //             int k = 1;
+        //             for(auto && obst : subroom->GetAllObstacles()) {
+        //                 geoPoly[area->_id].inners().resize(k++);
+        //                 geoPoly[area->_id].inners().back();
+        //                 model::ring<point_2d> & inner = geoPoly[area->_id].inners().back();
+        //                 for(auto && tmp_point : obst->GetPolygon()) {
+        //                     append(inner, make<point_2d>(tmp_point._x * M2CM, tmp_point._y * M2CM));
+        //                 }
+        //                 correct(geoPoly[area->_id]);
+        //             }
+        //         }
+        //     }
+        // } //room
 
-        if(geoPoly.count(area->_id) == 0) {
-            Log->Write("ERROR: \t No polygon containing the measurement id [%d]", area->_id);
-            geoPoly[area->_id] = area->_poly;
-        }
+        // if(geoPoly.count(area->_id) == 0) {
+        //     Log->Write("ERROR: \t No polygon containing the measurement id [%d]", area->_id);
+        //     geoPoly[area->_id] = area->_poly;
+        // }
     }
 
     _highVertexX = geo_maxX;
@@ -301,18 +296,7 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
         vector<double> YInFrame = data.GetYInFrame(frameNr, ids);
         for(unsigned int i = 0; i < IdInFrame.size(); i++) {
             bool IsInBuilding = false;
-            for(auto && it_room : _building->GetAllRooms()) {
-                for(auto && it_sub : it_room.second->GetAllSubRooms()) {
-                    SubRoom * subroom = it_sub.second.get();
-                    if(subroom->IsInSubRoom(Point(XInFrame[i] * CMtoM, YInFrame[i] * CMtoM))) {
-                        IsInBuilding = true;
-                        break;
-                    }
-                }
-                if(IsInBuilding) {
-                    break;
-                }
-            }
+            // IsInBuilding = isPedInGeometry();
             if(false == IsInBuilding) {
                 Log->Write(
                     "Warning:\tAt %dth frame pedestrian at <x=%.4f, y=%.4f> is not in geometry!",

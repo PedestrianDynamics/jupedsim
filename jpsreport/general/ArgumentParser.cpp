@@ -440,16 +440,19 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 // loading geometry is done in  analysis.cpp
                 // so this is done twice, which is not nice.
                 // For big geometries it could be slow.
-                Building * building = new Building();
-                building->LoadGeometry(GetGeometryFilename().string());
-                building->InitGeometry();
-                building->AddSurroundingRoom(); // this is a big reactagle
+                //Building * building = new Building();
+                //building->LoadGeometry(GetGeometryFilename().string());
+                
+                //building->InitGeometry();
+                //building->AddSurroundingRoom(); // this is a big reactagle
                 // slightly bigger than the
                 // geometry boundaries
-                double geo_minX = building->_xMin;
-                double geo_minY = building->_yMin;
-                double geo_maxX = building->_xMax;
-                double geo_maxY = building->_yMax;
+                // todo: get boundaries of geometry
+                //dummy initialisation
+                double geo_minX = std::numeric_limits<double>::min();
+                double geo_minY = std::numeric_limits<double>::min();
+                double geo_maxX = std::numeric_limits<double>::max();
+                double geo_maxY = std::numeric_limits<double>::max();
                 Log->Write(
                     "INFO: \tBounding box:\n \t\tminX = %.2f\n \t\tmaxX = %.2f \n \t\tminY = %.2f "
                     "\n\t\tmaxY = %.2f",

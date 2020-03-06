@@ -98,7 +98,6 @@ public:
     static FILE * CreateFile(const std::string & filename);
 
 private:
-    Building * _building;
     //polygon_2d _geoPoly;
     std::map<int, polygon_2d> _geoPolyMethodD;
     std::map<int, polygon_2d> _geoPolyMethodI;

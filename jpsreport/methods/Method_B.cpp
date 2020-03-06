@@ -61,15 +61,15 @@ bool Method_B::Process(const PedData & peddata)
     _measureAreaId = boost::lexical_cast<string>(_areaForMethod_B->_id);
     _tIn  = new int[_NumPeds]; // Record the time of each pedestrian entering measurement area
     _tOut = new int[_NumPeds];
-    std::vector<Point> entp(_NumPeds);
-    std::vector<Point> extp(_NumPeds);
-    _entrancePoint = entp;
-    _exitPoint     = extp;
+    // std::vector<point_2d> entp(_NumPeds);
+    //   std::vector<point_2d> extp(_NumPeds);
+//    _entrancePoint = entp;
+//    _exitPoint     = extp;
     for(int i = 0; i < _NumPeds; i++) {
         _tIn[i]           = 0;
         _tOut[i]          = 0;
-        _entrancePoint[i] = Point(0, 0);
-        _exitPoint[i]     = Point(0, 0);
+        _entrancePoint.push_back(point_2d(0, 0));
+        _exitPoint.push_back(point_2d(0, 0));
     }
     GetTinTout(peddata.GetNumFrames());
 
@@ -108,16 +108,16 @@ void Method_B::GetTinTout(int numFrames)
                !(IsinMeasurezone[ID])) {
                 _tIn[ID]              = frameNr;
                 IsinMeasurezone[ID]   = true;
-                _entrancePoint[ID]._x = x * CMtoM;
-                _entrancePoint[ID]._y = y * CMtoM;
+                _entrancePoint[ID].set<0>(x * CMtoM);
+                _entrancePoint[ID].set<1>(y * CMtoM);
                 std::cout << "ID: " << ID << " x: " << x * CMtoM << " y: " << y * CMtoM
                           << std::endl;
             }
             if((!within(make<point_2d>((x), (y)), _areaForMethod_B->_poly)) &&
                IsinMeasurezone[ID]) {
                 _tOut[ID]           = frameNr;
-                _exitPoint[ID]._x   = x * CMtoM;
-                _exitPoint[ID]._y   = y * CMtoM;
+                _exitPoint[ID].set<0> (x * CMtoM);
+                _exitPoint[ID].set<1>(y * CMtoM);
                 IsinMeasurezone[ID] = false;
                 std::cout << "ID: " << ID << " OUT x: " << x * CMtoM << " y: " << y * CMtoM
                           << std::endl;
@@ -145,16 +145,18 @@ void Method_B::GetFundamentalTinTout(double * DensityPerFrame, double LengthMeas
     }
     fprintf(fFD_TinTout, "#person Index\t	density_i(m^(-2))\t	velocity_i(m/s)\n");
     for(int i = 0; i < _NumPeds; i++) {
+        double etPtX = _entrancePoint[i].get<0>();
+        double etPtY = _entrancePoint[i].get<1>();
+        double exPtX  = _exitPoint[i].get<0>();
+        double exPtY  = _exitPoint[i].get<1>();
         if(LengthMeasurementarea < 0) {
-            double dxq = (_entrancePoint[i]._x - _exitPoint[i]._x) *
-                         (_entrancePoint[i]._x - _exitPoint[i]._x);
-            double dyq = (_entrancePoint[i]._y - _exitPoint[i]._y) *
-                         (_entrancePoint[i]._y - _exitPoint[i]._y);
+            double dxq = (etPtX - exPtX) * (etPtX - exPtX);
+            double dyq = (etPtY - exPtY) * (etPtY - exPtY);
             LengthMeasurementarea = std::sqrt(dxq + dyq);
         }
         std::cout << "i: " << i << ", Tin: " << _tIn[i] << ", Tout: " << _tOut[i] << ", PointIn ("
-                  << _entrancePoint[i]._x << ", " << _entrancePoint[i]._y << "), PointOut ("
-                  << _exitPoint[i]._x << ", " << _exitPoint[i]._y
+                  << etPtX << ", " << etPtY << "), PointOut ("
+                  << exPtX << ", " << exPtY
                   << "), L: " << LengthMeasurementarea << std::endl;
 
         double velocity_temp = _fps * LengthMeasurementarea / (_tOut[i] - _tIn[i]);
