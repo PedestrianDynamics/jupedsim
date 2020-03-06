@@ -44,7 +44,7 @@ LCGrid::LCGrid(
     _cellSize(cellSize),
     _gridSizeX((int) ((gridXmax - _gridXmin) / _cellSize) + 1 + 2), // 1 dummy cell on each side
     _gridSizeY((int) ((gridYmax - _gridYmin) / _cellSize) + 1 + 2), // 1 dummy cell on each side
-    grid(_gridSizeY, std::vector<grid_elem_t>(_gridSizeX))
+    grid(_gridSizeY, _gridSizeX)
 {
 }
 
@@ -67,11 +67,7 @@ void LCGrid::Update(const std::vector<Pedestrian *> & peds)
 
 void LCGrid::ClearGrid()
 {
-    for(auto & v : grid) {
-        for(auto & elem : v) {
-            elem.clear();
-        }
-    }
+    grid.clear();
 }
 
 

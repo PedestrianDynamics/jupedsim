@@ -23,6 +23,7 @@
  **/
 #pragma once
 
+#include "Grid2D.h"
 #include "geometry/Point.h"
 
 #include <deque>
@@ -45,9 +46,7 @@ private:
     /// Also to be interpreted as cell coordinates in the grid
     int _gridSizeX, _gridSizeY;
 
-    using grid_elem_t = std::deque<Pedestrian *>;
-
-    std::vector<std::vector<grid_elem_t>> grid;
+    Grid2D<std::deque<Pedestrian *>> grid;
 
     /**
       * Clear the grid.

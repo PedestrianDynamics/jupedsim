@@ -49,6 +49,7 @@ set(source_files
     src/math/OperationalModel.cpp
     src/math/VelocityModel.cpp
     src/mpi/LCGrid.cpp
+    src/mpi/Grid2D.cpp
     src/pedestrian/AgentsParameters.cpp
     src/pedestrian/AgentsQueue.cpp
     src/pedestrian/AgentsSource.cpp
@@ -136,6 +137,7 @@ set(header_files
     src/math/OperationalModel.h
     src/math/VelocityModel.h
     src/mpi/LCGrid.h
+    src/mpi/Grid2D.h
     src/pedestrian/AgentsParameters.h
     src/pedestrian/AgentsQueue.h
     src/pedestrian/AgentsSource.h

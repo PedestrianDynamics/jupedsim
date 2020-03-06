@@ -18,10 +18,12 @@
 
 
 #include "geometry/Point.h"
+#include "mpi/Grid2D.h"
 #include "mpi/LCGrid.h"
 #include "pedestrian/Pedestrian.h"
 
 #include <catch2/catch.hpp>
+#include <deque>
 #include <iostream>
 #include <vector>
 
@@ -65,5 +67,20 @@ TEST_CASE("geometry/NeighborSearch", "[geometry][neightbor-search][lcgrid]")
         special_ped.SetPos(Point(0, 4.3));
         lcgrid.GetNeighbourhood(&special_ped, neighborhood);
         REQUIRE_THAT(ped_pointers, Catch::Matchers::UnorderedEquals(neighborhood));
+    }
+
+    SECTION("Grid2D")
+    {
+        Grid2D<std::deque<Pedestrian *>> grid(10, 100);
+
+        for(unsigned i = 0; i < 10; ++i) {
+            REQUIRE(grid[i].size() == 100);
+        }
+
+        // clear should only delete the content, not the size or dimension of the grid.
+        grid.clear();
+        for(unsigned i = 0; i < 10; ++i) {
+            REQUIRE(grid[i].size() == 100);
+        }
     }
 }
