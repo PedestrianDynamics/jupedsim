@@ -20,16 +20,6 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * \section Description
- * This class implements the Linked-Cells algorithm
- * \ref{cacs.usc.edu/education/cs596/01-1LinkedListCell.pdf}
- * A grid is laid on the complete geometry and the pedestrians are assigned the cells
- * at each simulation step. Only pedestrians in the neighbouring cells are involved
- * in the force computations.
- * The class is static as only one instance is needed per simulation round.
- * This solution is fine for parallelisation as well, at least for OpenMP.
- *
- *
  **/
 #pragma once
 
