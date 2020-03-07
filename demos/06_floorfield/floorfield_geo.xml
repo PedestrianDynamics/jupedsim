@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<geometry version="0.8" caption="second life" unit="m" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_geoemtry.xsd">
+<geometry version="0.8" caption="second life" unit="m" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <rooms>
         <room id="0" caption="hall">
             <subroom id="0" caption="dummy_caption" class="Office" A_x="0" B_y="0" C_z="0">
