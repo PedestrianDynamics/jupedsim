@@ -260,7 +260,10 @@ if (BUILD_CPPUNIT_TEST)
             test/catch2/geometry/CorrectGeometryTest.cpp
             )
 
-    target_link_libraries(unittests Catch2::Catch2 core)
+    target_link_libraries(unittests PRIVATE
+        Catch2::Catch2
+        core
+    )
 
     target_compile_options(unittests PRIVATE
         ${COMMON_COMPILE_OPTIONS}
