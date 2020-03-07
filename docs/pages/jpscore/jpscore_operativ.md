@@ -23,8 +23,6 @@ sections:
     or other pedestrian properties like desired speed, reaction time etc.
 
 ## Model parameters (in general)
-- `<solver>euler</solver>`
-     - The solver for the ODE. Only *Euler*. No other options.
 - `<stepsize>0.001</stepsize>`:
      - The time step for the solver. This should be choosed with care. For force-based model it is recommended to take a value between $$ 10^{-2} $$ and $$10^{-3}$$ s.
        For first-order models, a value of 0.05 s should be OK.
