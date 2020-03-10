@@ -443,10 +443,6 @@ bool IniFileParser::ParseGCFMModel(TiXmlElement * xGCFM, TiXmlElement * xMainNod
         return false;
     }
 
-    //solver
-    if(!ParseNodeToSolver(*xModelPara))
-        return false;
-
     //stepsize
     if(!ParseStepSize(*xModelPara))
         return false;
@@ -542,10 +538,6 @@ bool IniFileParser::ParseVelocityModel(TiXmlElement * xVelocity, TiXmlElement * 
         LOG_ERROR("\t <max_sim_time> </max_sim_time>\n");
         return false;
     }
-
-    //solver
-    if(!ParseNodeToSolver(*xModelPara))
-        return false;
 
     //stepsize
     if(!ParseStepSize(*xModelPara))
@@ -1001,26 +993,6 @@ bool IniFileParser::ParsePeriodic(TiXmlNode & Node)
         _config->SetIsPeriodic(0);
     }
     return true; //default is periodic=0. If not specified than is OK
-}
-
-bool IniFileParser::ParseNodeToSolver(const TiXmlNode & solverNode)
-{
-    if(solverNode.FirstChild("solver")) {
-        std::string solver = solverNode.FirstChild("solver")->FirstChild()->Value();
-        if(solver == "euler") {
-            _config->SetSolver(1);
-        } else if(solver == "verlet")
-            _config->SetSolver(2);
-        else if(solver == "leapfrog")
-            _config->SetSolver(3);
-        else {
-            LOG_ERROR("Wrong value [{}] for solver type", solver);
-            return false;
-        }
-        LOG_ERROR("pSolver <{}>", _config->GetSolver());
-        return true;
-    }
-    return false;
 }
 
 bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)

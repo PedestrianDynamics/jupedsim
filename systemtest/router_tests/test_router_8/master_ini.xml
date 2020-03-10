@@ -46,7 +46,6 @@
           
           <model description="Tordeux2015" operational_model_id="3">
             <model_parameters>
-              <solver>euler</solver>
               <stepsize>0.05</stepsize>
               <periodic>0</periodic>
               <exit_crossing_strategy>8</exit_crossing_strategy>

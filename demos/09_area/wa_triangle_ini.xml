@@ -95,7 +95,6 @@
     <operational_models>
         <model operational_model_id="1" description="gcfm">
             <model_parameters>
-                <solver>euler</solver>
                 <stepsize>0.01</stepsize>
                 <exit_crossing_strategy>9</exit_crossing_strategy>
                 <linkedcells enabled="true" cell_size="2.2"/>
@@ -121,7 +120,6 @@
         </model>
         <model operational_model_id="3" description="Tordeux2015">
             <model_parameters>
-                <solver>euler</solver>
                 <stepsize>0.01</stepsize>
                 <exit_crossing_strategy>8</exit_crossing_strategy>
                 <!--<exit_crossing_strategy>8</exit_crossing_strategy>-->

@@ -61,8 +61,6 @@ private:
 
     bool ParsePeriodic(TiXmlNode & Node);
 
-    bool ParseNodeToSolver(const TiXmlNode & solverNode);
-
     bool ParseStrategyNodeToObject(const TiXmlNode & strategyNode);
 
     bool ParseFfOpts(const TiXmlNode & strategyNode);
