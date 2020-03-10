@@ -39,7 +39,6 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
  <operational_models>
     <model operational_model_id="1" description="gcfm">
       <model_parameters>
-        <solver>euler</solver>
         <stepsize>0.01</stepsize>
          <exit_crossing_strategy>4</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />

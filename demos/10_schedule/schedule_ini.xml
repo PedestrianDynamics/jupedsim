@@ -139,7 +139,6 @@
 
         <model operational_model_id="3" description="Tordeux2015">
             <model_parameters>
-                <solver>euler</solver>
                 <stepsize>0.01</stepsize>
                 <exit_crossing_strategy>8</exit_crossing_strategy>
                 <linkedcells enabled="true" cell_size="2.2"/>
