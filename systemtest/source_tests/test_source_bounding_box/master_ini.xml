@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
+<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-  <!-- seed used for initialising random generator -->
-  <seed>1254</seed>
-  <!-- geometry file -->
-  <geometry>../geometry.xml</geometry>
-  <max_sim_time>90</max_sim_time>
-  <num_threads>1</num_threads>
+    <!-- seed used for initialising random generator -->
+    <seed>1254</seed>
+    <!-- geometry file -->
+    <geometry>../geometry.xml</geometry>
+    <max_sim_time>90</max_sim_time>
+    <num_threads>1</num_threads>
 
-  <!-- trajectories file and format -->
-  <trajectories format="plain" fps="8" color_mode="group">
+    <!-- trajectories file and format -->
+    <trajectories format="plain" fps="8" color_mode="group">
     <file location="trajectories.xml" />
     <optional_output  group="true"/>
   </trajectories>

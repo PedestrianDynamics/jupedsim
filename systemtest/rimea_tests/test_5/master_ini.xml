@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
+<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 	<seed>1254</seed>
 	<max_sim_time>1000</max_sim_time>
@@ -8,7 +8,7 @@
 	<geometry>../geometry.xml</geometry>
 
 	<trajectories format="xml-plain" fps="10">
-		<file location="RiMEATest5_traj.xml" />
+		<file location="RiMEATest5_traj.xml"/>
 	</trajectories>
 
 	<traffic_constraints>

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<geometry version="0.8" caption="second life" unit="m" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_geometry.xsd">
-	<rooms>
-		<room id="0" caption="long">
-			<subroom id="0" closed="0" class="subroom">
-				<polygon caption="wall">
-					<vertex px="0" py="0"/>
-					<vertex px="0" py="81"/>
-				</polygon>
-				<polygon caption="wall">
-					<vertex px="0" py="81"/>
-					<vertex px="20" py="81"/>
+<geometry version="0.8" caption="second life" unit="m" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <rooms>
+        <room id="0" caption="long">
+            <subroom id="0" closed="0" class="subroom">
+                <polygon caption="wall">
+                    <vertex px="0" py="0"/>
+                    <vertex px="0" py="81"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="0" py="81"/>
+                    <vertex px="20" py="81"/>
 				</polygon>
 				<polygon caption="wall">
 					<vertex px="20" py="81"/>

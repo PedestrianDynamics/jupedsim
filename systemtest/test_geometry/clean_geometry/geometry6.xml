@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<geometry version="0.8" caption="corner" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/jps_geometry.xsd" unit="m">
+<geometry version="0.8" caption="corner" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" unit="m">
     <rooms>
-<!-- Tunnel -->
+        <!-- Tunnel -->
         <room id="0" caption="Tunnel">
             <subroom id="1" caption="Tunnel" class="Corridor" A_x="0" B_y="0" C_z="0">
                 <polygon caption="wall">

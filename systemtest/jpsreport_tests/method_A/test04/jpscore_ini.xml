@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<JuPedSim project="JPS-Project" version="0.7" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
+<JuPedSim project="JPS-Project" version="0.7" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <header>
         <!-- seed used for initialising random generator -->
         <seed>1254</seed>
@@ -8,7 +8,7 @@
         <geometry>geometry.xml</geometry>
         <!-- trajectories file and format -->
         <trajectories format="plain" fps="8">
-            <file location="traj.txt" />
+            <file location="traj.txt"/>
         </trajectories>
         <!-- where to store the logs -->
         <!--<logfile>log.txt</logfile> -->

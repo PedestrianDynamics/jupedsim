@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
+<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-  <seed>12542</seed>
-  <max_sim_time>1000</max_sim_time>
-  <geometry>../geometry.xml</geometry>
-  <trajectories format="xml-plain" fps="8">
-    <file location="2.0_TrajBottleneck.xml"/>
-  </trajectories>
-  <logfile>log</logfile>
+    <seed>12542</seed>
+    <max_sim_time>1000</max_sim_time>
+    <geometry>../geometry.xml</geometry>
+    <trajectories format="xml-plain" fps="8">
+        <file location="2.0_TrajBottleneck.xml"/>
+    </trajectories>
+    <logfile>log</logfile>
 
-  <traffic_constraints>
+    <traffic_constraints>
   </traffic_constraints>
   <routing>
     <goals>

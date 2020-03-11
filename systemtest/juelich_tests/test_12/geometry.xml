@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<geometry version="0.8" caption="corner" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/jps_geometry.xsd" unit="m">
-  <rooms>
-    <room id="0" caption="hall">
-      <subroom id="0" caption="Room 0" class="subroom">
-        <polygon caption="wall">
-          <vertex px="5.42159" py="6.78707"/>
-          <vertex px="8.42159" py="6.78707"/>
-        </polygon>
-        <polygon caption="wall">
-          <vertex px="5.42159" py="6.78707"/>
-          <vertex px="5.42159" py="4.78707"/>
+<geometry version="0.8" caption="corner" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" unit="m">
+    <rooms>
+        <room id="0" caption="hall">
+            <subroom id="0" caption="Room 0" class="subroom">
+                <polygon caption="wall">
+                    <vertex px="5.42159" py="6.78707"/>
+                    <vertex px="8.42159" py="6.78707"/>
+                </polygon>
+                <polygon caption="wall">
+                    <vertex px="5.42159" py="6.78707"/>
+                    <vertex px="5.42159" py="4.78707"/>
         </polygon>
         <polygon caption="wall">
           <vertex px="5.42159" py="4.78707"/>
