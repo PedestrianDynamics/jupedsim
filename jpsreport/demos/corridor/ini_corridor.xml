@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<JPSreport project="corridor" version="0.8.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_report.xsd">
+<JPSreport project="corridor" version="0.8.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-	<geometry file = "geo_corridor.xml" />
+	<geometry file="geo_corridor.xml"/>
 
 	<logfile>log_corridor.txt</logfile>
 
-	<output location="corridor_Output" />
+	<output location="corridor_Output"/>
 
 	<trajectories format="txt" unit="m">
-		<file name="traj_corridor.txt" />
-		<path location="./" />
+		<file name="traj_corridor.txt"/>
+		<path location="./"/>
 	</trajectories>
 
 	<measurement_areas unit="m">
