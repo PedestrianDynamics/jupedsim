@@ -32,6 +32,7 @@
 
 #include "IO/EventFileParser.h"
 #include "IO/Trajectories.h"
+#include "SimulationHelper.h"
 #include "general/Filesystem.h"
 #include "general/Logger.h"
 #include "general/OpenMP.h"
@@ -197,7 +198,8 @@ double Simulation::RunStandardSimulation(double maxSimTime)
 
 void Simulation::UpdateRoutesAndLocations()
 {
-    auto outsidePeds = FindOutsidePedestrians();
+    auto outsidePeds =
+        SimulationHelper::FindPedsReachedFinalGoal(*_building, _building->GetAllPedestrians());
     _pedsToRemove.insert(outsidePeds.begin(), outsidePeds.end());
     auto notRelocatedPeds = UpdateLocations();
     _pedsToRemove.insert(notRelocatedPeds.begin(), notRelocatedPeds.end());
@@ -294,29 +296,6 @@ void Simulation::UpdateRoutes()
     }
 }
 
-std::set<Pedestrian *> Simulation::FindOutsidePedestrians()
-{
-    const std::vector<Pedestrian *> & allPeds = _building->GetAllPedestrians();
-    const std::map<int, Goal *> & goals       = _building->GetAllGoals();
-
-    std::set<Pedestrian *> outsidePeds;
-
-    for(auto ped : allPeds) {
-        Room * room = _building->GetRoom(ped->GetRoomID());
-
-        //set the new room if needed
-        if((ped->GetFinalDestination() == FINAL_DEST_OUT) &&
-           (room->GetCaption() == "outside")) { //TODO Hier aendern fuer inside goals?
-            outsidePeds.insert(ped);
-        } else if(
-            (ped->GetFinalDestination() != FINAL_DEST_OUT) &&
-            (goals.at(ped->GetFinalDestination())->Contains(ped->GetPos())) &&
-            (goals.at(ped->GetFinalDestination())->GetIsFinalGoal())) {
-            outsidePeds.insert(ped);
-        }
-    }
-    return outsidePeds;
-}
 
 void Simulation::RemovePedestrians()
 {

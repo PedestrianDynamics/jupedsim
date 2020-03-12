@@ -22,7 +22,9 @@
 #include "geometry/Room.h"
 #include "geometry/SubRoom.h"
 
-std::optional<bool> SimulationHelper::RelocatePedestrian(Building & building, Pedestrian & ped)
+#include <algorithm>
+
+std::optional<bool> SimulationHelper::UpdateRoom(Building & building, Pedestrian & ped)
 {
     // No relocation needed, ped is in its assigned room/subroom
     // TODO add check if room/subroom really exist
@@ -55,10 +57,65 @@ std::optional<bool> SimulationHelper::RelocatePedestrian(Building & building, Pe
 
     // pedestrian is in one of the neighboring rooms/subrooms
     if(currentSubRoom != subroomsConnected.end()) {
-        ped.SetRoomID(currentSubRoom->second->GetRoomID(), "");
-        ped.SetSubRoomID(currentSubRoom->second->GetSubRoomID());
+        ped.UpdateRoom(currentSubRoom->second->GetRoomID(), currentSubRoom->second->GetSubRoomID());
         return true;
     } else {
         return std::nullopt;
     }
+}
+
+std::set<Pedestrian *> SimulationHelper::FindPedsReachedFinalGoal(
+    Building & building,
+    const std::vector<Pedestrian *> & peds)
+{
+    std::set<Pedestrian *> pedsAtFinalGoal;
+    const auto & goals = building.GetAllGoals();
+
+    std::copy_if(
+        std::begin(peds),
+        std::end(peds),
+        std::inserter(pedsAtFinalGoal, std::end(pedsAtFinalGoal)),
+        [goals](auto const ped) -> bool {
+            return ped->GetFinalDestination() != FINAL_DEST_OUT &&
+                   goals.at(ped->GetFinalDestination())->Contains(ped->GetPos()) &&
+                   goals.at(ped->GetFinalDestination())->GetIsFinalGoal();
+        });
+    return pedsAtFinalGoal;
+}
+
+std::tuple<std::set<Pedestrian *>, std::set<Pedestrian *>>
+SimulationHelper::UpdateLocations(Building & building, const std::vector<Pedestrian *> & peds)
+{
+    std::set<Pedestrian *> pedsNotRelocated;
+    std::set<Pedestrian *> pedsChangedRoom;
+
+    // Check for peds, where relocation failed
+    for(auto const ped : peds) {
+        int oldRoomID = ped->GetRoomID();
+        if(auto relocated = UpdateRoom(building, *ped); relocated.has_value()) {
+            if(relocated && oldRoomID != ped->GetRoomID()) {
+                pedsChangedRoom.insert(ped);
+            }
+        } else {
+            pedsNotRelocated.insert(ped);
+        }
+    }
+
+    return {pedsChangedRoom, pedsNotRelocated};
+}
+
+std::set<Pedestrian *>
+SimulationHelper::FindOutsidePedestrians(Building & building, std::set<Pedestrian *> & peds)
+{
+    // Check for peds, which went outside
+    std::set<Pedestrian *> pedsOutside;
+    std::copy_if(
+        std::move_iterator(std::begin(peds)),
+        std::move_iterator(std::end(peds)),
+        std::inserter(pedsOutside, std::end(pedsOutside)),
+        [&building](auto const ped) -> bool {
+            auto trans = building.FindClosestTransition(*ped, 0.2);
+            return trans.has_value() && trans.value()->IsExit();
+        });
+    return pedsOutside;
 }

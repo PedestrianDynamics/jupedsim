@@ -29,7 +29,7 @@
 
 #include <catch2/catch.hpp>
 
-TEST_CASE("Simulation", "[simulation][RelocatePedestrian]")
+TEST_CASE("Simulation", "[simulation][UpdateRoom]")
 {
     SECTION("Relocation Pedestrian")
     {
@@ -205,7 +205,7 @@ TEST_CASE("Simulation", "[simulation][RelocatePedestrian]")
             ped.SetRoomID(1, "");
             ped.SetSubRoomID(1);
 
-            auto ret = SimulationHelper::RelocatePedestrian(building, ped);
+            auto ret = SimulationHelper::UpdateRoom(building, ped);
             REQUIRE(ret.has_value());
             REQUIRE_FALSE(ret.value());
         }
@@ -217,7 +217,7 @@ TEST_CASE("Simulation", "[simulation][RelocatePedestrian]")
             ped.SetRoomID(1, "");
             ped.SetSubRoomID(2);
 
-            auto ret = SimulationHelper::RelocatePedestrian(building, ped);
+            auto ret = SimulationHelper::UpdateRoom(building, ped);
             REQUIRE(ret.has_value());
             REQUIRE(ret.value());
             REQUIRE(ped.GetRoomID() == 1);
@@ -231,7 +231,7 @@ TEST_CASE("Simulation", "[simulation][RelocatePedestrian]")
             ped.SetRoomID(2, "");
             ped.SetSubRoomID(1);
 
-            auto ret = SimulationHelper::RelocatePedestrian(building, ped);
+            auto ret = SimulationHelper::UpdateRoom(building, ped);
             REQUIRE(ret.has_value());
             REQUIRE(ret.value());
             REQUIRE(ped.GetRoomID() == 1);
@@ -245,7 +245,7 @@ TEST_CASE("Simulation", "[simulation][RelocatePedestrian]")
             ped.SetRoomID(1, "");
             ped.SetSubRoomID(3);
 
-            auto ret = SimulationHelper::RelocatePedestrian(building, ped);
+            auto ret = SimulationHelper::UpdateRoom(building, ped);
             REQUIRE_FALSE(ret.has_value());
         }
 
@@ -256,8 +256,255 @@ TEST_CASE("Simulation", "[simulation][RelocatePedestrian]")
             ped.SetRoomID(3, "");
             ped.SetSubRoomID(1);
 
-            auto ret = SimulationHelper::RelocatePedestrian(building, ped);
+            auto ret = SimulationHelper::UpdateRoom(building, ped);
             REQUIRE_FALSE(ret.has_value());
         }
     };
+}
+
+TEST_CASE("FindPedsReachedFinalGoal", "[simulation][FindPedsReachedFinalGoal]")
+{
+    SECTION("Setup")
+    {
+        // Create following geometry:
+        // -| = Walls
+        // +  = Transition
+        // x  = Goal
+        //
+        // (-5, 2) |----------| (5, 2)
+        //         |    xxx   +  xxx
+        //         |          +  xxx
+        //         |    xxx   +  xxx
+        // (-5,-2) |----------| (5, -2)
+        Wall wall111;
+        wall111.SetPoint1(Point{5., -2.});
+        wall111.SetPoint2(Point{-5., -2.});
+        Wall wall112;
+        wall112.SetPoint1(Point{-5., -2.});
+        wall112.SetPoint2(Point{-5., 2.});
+        Wall wall113;
+        wall113.SetPoint1(Point{-5., 2.});
+        wall113.SetPoint2(Point{5., 2.});
+        auto trans11 = new Transition();
+        trans11->SetID(1);
+        trans11->SetPoint1(Point{5., -2.});
+        trans11->SetPoint2(Point{5., 2.});
+
+        auto sub11 = new NormalSubRoom();
+        sub11->SetRoomID(1);
+        sub11->SetSubRoomID(1);
+        sub11->AddTransition(trans11);
+        sub11->AddWall(wall111);
+        sub11->AddWall(wall112);
+        sub11->AddWall(wall113);
+        sub11->ConvertLineToPoly(std::vector<Line *>{trans11});
+        sub11->CreateBoostPoly();
+
+        // Create room
+        auto room1 = new Room();
+        room1->SetID(1);
+        room1->AddSubRoom(sub11);
+
+        // Create goals
+        auto goalInsideFinal = new Goal();
+        goalInsideFinal->SetIsFinalGoal(true);
+        goalInsideFinal->SetId(1);
+        goalInsideFinal->SetRoomID(1);
+        goalInsideFinal->SetSubRoomID(1);
+        goalInsideFinal->AddWall(Wall({-2, 0.5}, {-2, 1.5}));
+        goalInsideFinal->AddWall(Wall({-2, 1.5}, {2, 1.5}));
+        goalInsideFinal->AddWall(Wall({2, 1.5}, {2, 0.5}));
+        goalInsideFinal->AddWall(Wall({2, 0.5}, {-2, 0.5}));
+        goalInsideFinal->ConvertLineToPoly();
+
+        auto goalInside = new Goal();
+        goalInside->SetIsFinalGoal(false);
+        goalInside->SetId(2);
+        goalInside->SetRoomID(1);
+        goalInside->SetSubRoomID(1);
+        goalInside->AddWall(Wall({-2, -0.5}, {-2, -1.5}));
+        goalInside->AddWall(Wall({-2, -1.5}, {2, -1.5}));
+        goalInside->AddWall(Wall({2, -1.5}, {2, -0.5}));
+        goalInside->AddWall(Wall({2, -0.5}, {-2, -0.5}));
+        goalInside->ConvertLineToPoly();
+
+        auto goalOutside = new Goal();
+        goalOutside->SetIsFinalGoal(true);
+        goalOutside->SetId(3);
+        goalOutside->SetRoomID(1);
+        goalOutside->SetSubRoomID(1);
+        goalOutside->AddWall(Wall({6, -1}, {6, 1}));
+        goalOutside->AddWall(Wall({6, 1}, {8, 1}));
+        goalOutside->AddWall(Wall({8, 1}, {8, -1}));
+        goalOutside->AddWall(Wall({8, -1}, {6, -1}));
+        goalOutside->ConvertLineToPoly();
+
+        sub11->AddGoalID(1);
+        sub11->AddGoalID(2);
+
+        Building building;
+        building.AddRoom(room1);
+        building.AddTransition(trans11);
+        building.AddGoal(goalInside);
+        building.AddGoal(goalInsideFinal);
+        building.AddGoal(goalOutside);
+
+        REQUIRE(building.InitGeometry());
+        REQUIRE(building.GetAllRooms().size() == 1);
+        REQUIRE(building.GetAllTransitions().size() == 1);
+        REQUIRE(building.GetAllGoals().size() == 3);
+
+        // Goal outside
+        Pedestrian pedOutsideGoalOutsideInGoalOutside;
+        pedOutsideGoalOutsideInGoalOutside.SetPos({7, 1.5});
+        pedOutsideGoalOutsideInGoalOutside.SetFinalDestination(goalOutside->GetId());
+        Pedestrian pedOutsideGoalOutsideNotInGoalOutside;
+        pedOutsideGoalOutsideNotInGoalOutside.SetPos({5.5, -1.5});
+        pedOutsideGoalOutsideNotInGoalOutside.SetFinalDestination(goalOutside->GetId());
+        Pedestrian pedInsideGoalOutsideInGoalFinal;
+        pedInsideGoalOutsideInGoalFinal.SetPos({-0.5, 1.});
+        pedInsideGoalOutsideInGoalFinal.SetFinalDestination(goalOutside->GetId());
+        pedInsideGoalOutsideInGoalFinal.SetRoomID(1, "");
+        pedInsideGoalOutsideInGoalFinal.SetSubRoomID(1);
+        Pedestrian pedInsideGoalOutsideInGoalNotFinal;
+        pedInsideGoalOutsideInGoalNotFinal.SetPos({-1.5, -1.});
+        pedInsideGoalOutsideInGoalNotFinal.SetFinalDestination(goalOutside->GetId());
+        pedInsideGoalOutsideInGoalNotFinal.SetRoomID(1, "");
+        pedInsideGoalOutsideInGoalNotFinal.SetSubRoomID(1);
+        Pedestrian pedInsideGoalOutsideInRoomLeft;
+        pedInsideGoalOutsideInRoomLeft.SetPos({-3.5, -0.5});
+        pedInsideGoalOutsideInRoomLeft.SetFinalDestination(goalOutside->GetId());
+        pedInsideGoalOutsideInRoomLeft.SetRoomID(1, "");
+        pedInsideGoalOutsideInRoomLeft.SetSubRoomID(1);
+        Pedestrian pedInsideGoalOutsideInRoomRight;
+        pedInsideGoalOutsideInRoomRight.SetPos({3.5, 0.5});
+        pedInsideGoalOutsideInRoomRight.SetFinalDestination(goalOutside->GetId());
+        pedInsideGoalOutsideInRoomRight.SetRoomID(1, "");
+        pedInsideGoalOutsideInRoomRight.SetSubRoomID(1);
+
+        // no goal
+        Pedestrian pedOutsideNoGoalOutsideInGoalOutside;
+        pedOutsideNoGoalOutsideInGoalOutside.SetPos({7, 0.5});
+        pedOutsideNoGoalOutsideInGoalOutside.SetFinalDestination(FINAL_DEST_OUT);
+        Pedestrian pedOutsideNoGoalOutsideNotInGoalOutside;
+        pedOutsideNoGoalOutsideNotInGoalOutside.SetPos({5.5, 1.5});
+        pedOutsideNoGoalOutsideNotInGoalOutside.SetFinalDestination(FINAL_DEST_OUT);
+        Pedestrian pedInsideNoGoalOutsideInGoalFinal;
+        pedInsideNoGoalOutsideInGoalFinal.SetPos({-1.5, 1.});
+        pedInsideNoGoalOutsideInGoalFinal.SetFinalDestination(FINAL_DEST_OUT);
+        pedInsideNoGoalOutsideInGoalFinal.SetRoomID(1, "");
+        pedInsideNoGoalOutsideInGoalFinal.SetSubRoomID(1);
+        Pedestrian pedInsideNoGoalOutsideInGoalNotFinal;
+        pedInsideNoGoalOutsideInGoalNotFinal.SetPos({0.5, -1.});
+        pedInsideNoGoalOutsideInGoalNotFinal.SetFinalDestination(FINAL_DEST_OUT);
+        pedInsideNoGoalOutsideInGoalNotFinal.SetRoomID(1, "");
+        pedInsideNoGoalOutsideInGoalNotFinal.SetSubRoomID(1);
+        Pedestrian pedInsideNoGoalOutsideInRoomLeft;
+        pedInsideNoGoalOutsideInRoomLeft.SetPos({-3.5, 1.5});
+        pedInsideNoGoalOutsideInRoomLeft.SetFinalDestination(FINAL_DEST_OUT);
+        pedInsideNoGoalOutsideInRoomLeft.SetRoomID(1, "");
+        pedInsideNoGoalOutsideInRoomLeft.SetSubRoomID(1);
+        Pedestrian pedInsideNoGoalOutsideInRoomRight;
+        pedInsideNoGoalOutsideInRoomRight.SetPos({3.5, -1.5});
+        pedInsideNoGoalOutsideInRoomRight.SetFinalDestination(FINAL_DEST_OUT);
+        pedInsideNoGoalOutsideInRoomRight.SetRoomID(1, "");
+        pedInsideNoGoalOutsideInRoomRight.SetSubRoomID(1);
+
+
+        // goal final inside
+        Pedestrian pedOutsideGoalFinalInsideInGoalOutside;
+        pedOutsideGoalFinalInsideInGoalOutside.SetPos({7, -0.5});
+        pedOutsideGoalFinalInsideInGoalOutside.SetFinalDestination(goalInsideFinal->GetId());
+        Pedestrian pedOutsideGoalFinalInsideNotInGoalOutside;
+        pedOutsideGoalFinalInsideNotInGoalOutside.SetPos({5.5, 0.5});
+        pedOutsideGoalFinalInsideNotInGoalOutside.SetFinalDestination(goalInsideFinal->GetId());
+        Pedestrian pedInsideGoalFinalInsideInGoalFinal;
+        pedInsideGoalFinalInsideInGoalFinal.SetPos({1.5, 1.});
+        pedInsideGoalFinalInsideInGoalFinal.SetFinalDestination(goalInsideFinal->GetId());
+        pedInsideGoalFinalInsideInGoalFinal.SetRoomID(1, "");
+        pedInsideGoalFinalInsideInGoalFinal.SetSubRoomID(1);
+        Pedestrian pedInsideGoalFinalInsideInGoalNotFinal;
+        pedInsideGoalFinalInsideInGoalNotFinal.SetPos({-0.5, -1.});
+        pedInsideGoalFinalInsideInGoalNotFinal.SetFinalDestination(goalInsideFinal->GetId());
+        pedInsideGoalFinalInsideInGoalNotFinal.SetRoomID(1, "");
+        pedInsideGoalFinalInsideInGoalNotFinal.SetSubRoomID(1);
+        Pedestrian pedInsideGoalFinalInsideInRoomLeft;
+        pedInsideGoalFinalInsideInRoomLeft.SetPos({-3.5, 0.5});
+        pedInsideGoalFinalInsideInRoomLeft.SetFinalDestination(goalInsideFinal->GetId());
+        pedInsideGoalFinalInsideInRoomLeft.SetRoomID(1, "");
+        pedInsideGoalFinalInsideInRoomLeft.SetSubRoomID(1);
+        Pedestrian pedInsideGoalFinalInsideInRoomRight;
+        pedInsideGoalFinalInsideInRoomRight.SetPos({3.5, -0.5});
+        pedInsideGoalFinalInsideInRoomRight.SetFinalDestination(goalInsideFinal->GetId());
+        pedInsideGoalFinalInsideInRoomRight.SetRoomID(1, "");
+        pedInsideGoalFinalInsideInRoomRight.SetSubRoomID(1);
+
+
+        // goal not final inside
+        Pedestrian pedOutsideGoalNotFinalInsideInGoalOutside;
+        pedOutsideGoalNotFinalInsideInGoalOutside.SetPos({7, -1.5});
+        pedOutsideGoalNotFinalInsideInGoalOutside.SetFinalDestination(goalInside->GetId());
+        Pedestrian pedOutsideGoalNotFinalInsideNotInGoalOutside;
+        pedOutsideGoalNotFinalInsideNotInGoalOutside.SetPos({5.5, -0.5});
+        pedOutsideGoalNotFinalInsideNotInGoalOutside.SetFinalDestination(goalInside->GetId());
+        Pedestrian pedInsideGoalNotFinalInsideInGoalFinal;
+        pedInsideGoalNotFinalInsideInGoalFinal.SetPos({0.5, 1.});
+        pedInsideGoalNotFinalInsideInGoalFinal.SetFinalDestination(goalInside->GetId());
+        pedInsideGoalNotFinalInsideInGoalFinal.SetRoomID(1, "");
+        pedInsideGoalNotFinalInsideInGoalFinal.SetSubRoomID(1);
+        Pedestrian pedInsideGoalNotFinalInsideInGoalNotFinal;
+        pedInsideGoalNotFinalInsideInGoalNotFinal.SetPos({1.5, -1.});
+        pedInsideGoalNotFinalInsideInGoalNotFinal.SetFinalDestination(goalInside->GetId());
+        pedInsideGoalNotFinalInsideInGoalNotFinal.SetRoomID(1, "");
+        pedInsideGoalNotFinalInsideInGoalNotFinal.SetSubRoomID(1);
+        Pedestrian pedInsideGoalNotFinalInsideInRoomLeft;
+        pedInsideGoalNotFinalInsideInRoomLeft.SetPos({-3.5, -1.5});
+        pedInsideGoalNotFinalInsideInRoomLeft.SetFinalDestination(goalInside->GetId());
+        pedInsideGoalNotFinalInsideInRoomLeft.SetRoomID(1, "");
+        pedInsideGoalNotFinalInsideInRoomLeft.SetSubRoomID(1);
+        Pedestrian pedInsideGoalNotFinalInsideInRoomRight;
+        pedInsideGoalNotFinalInsideInRoomRight.SetPos({3.5, 1.5});
+        pedInsideGoalNotFinalInsideInRoomRight.SetFinalDestination(goalInside->GetId());
+        pedInsideGoalNotFinalInsideInRoomRight.SetRoomID(1, "");
+        pedInsideGoalNotFinalInsideInRoomRight.SetSubRoomID(1);
+
+
+        SECTION("Without outside room")
+        {
+            SECTION("No peds reached final goal")
+            {
+                auto pedsReachedFinalGoal = SimulationHelper::FindPedsReachedFinalGoal(
+                    building,
+                    {&pedInsideGoalOutsideInGoalFinal,
+                     &pedInsideGoalOutsideInGoalNotFinal,
+                     &pedInsideGoalOutsideInRoomLeft,
+                     &pedInsideGoalOutsideInRoomRight,
+                     &pedInsideNoGoalOutsideInGoalFinal,
+                     &pedInsideNoGoalOutsideInGoalNotFinal,
+                     &pedInsideNoGoalOutsideInRoomLeft,
+                     &pedInsideNoGoalOutsideInRoomRight,
+                     &pedInsideGoalFinalInsideInGoalNotFinal,
+                     &pedInsideGoalFinalInsideInRoomLeft,
+                     &pedInsideGoalFinalInsideInRoomRight,
+                     &pedInsideGoalNotFinalInsideInGoalFinal,
+                     &pedInsideGoalNotFinalInsideInRoomLeft,
+                     &pedInsideGoalNotFinalInsideInRoomRight});
+                REQUIRE(pedsReachedFinalGoal.empty());
+            }
+
+            SECTION("Multiple peds inside final goal, one wants to get there")
+            {
+                auto pedsReachedFinalGoal = SimulationHelper::FindPedsReachedFinalGoal(
+                    building,
+                    {&pedInsideGoalOutsideInGoalFinal,
+                     &pedInsideNoGoalOutsideInGoalFinal,
+                     &pedInsideGoalFinalInsideInGoalFinal,
+                     &pedInsideGoalNotFinalInsideInGoalFinal});
+                REQUIRE(pedsReachedFinalGoal.size() == 1);
+                REQUIRE(
+                    pedsReachedFinalGoal.find(&pedInsideGoalFinalInsideInGoalFinal) !=
+                    pedsReachedFinalGoal.end());
+            }
+        }
+    }
 }
