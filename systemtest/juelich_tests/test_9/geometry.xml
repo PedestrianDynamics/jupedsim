@@ -2,7 +2,7 @@
 
 <geometry version="0.8" caption="Test 9" unit="m" 
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_geometry.xsd">
+>
 	<rooms>
 		<room id="0" caption="bottleneck">
 			<subroom id="0" closed="0" class="subroom">

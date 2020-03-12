@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<JuPedSim project="JPS-Project" version="0.7" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
+<JuPedSim project="JPS-Project" version="0.7" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <!-- seed used for initialising random generator -->
     <header>
         <seed>1254</seed>
@@ -9,7 +9,7 @@
         <geometry>../geometry.xml</geometry>
         <!-- trajectories file and format -->
         <trajectories format="xml-plain" fps="8">
-            <file location="traj.xml" />
+            <file location="traj.xml"/>
         </trajectories>
         <events_file>../events.xml</events_file>
         <show_statistics>true</show_statistics>

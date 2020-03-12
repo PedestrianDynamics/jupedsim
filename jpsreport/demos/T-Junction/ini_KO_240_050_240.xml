@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<JPSreport project="KO_240_050_240" version="0.8.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_report.xsd">
+<JPSreport project="KO_240_050_240" version="0.8.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-    <geometry file = "geo_KO_240_050_240.xml" />
+    <geometry file="geo_KO_240_050_240.xml"/>
 
     <logfile>log_KO_240_050_240.txt</logfile>
 
     <output location="Output_KO_240_050_240/"/>
 
     <trajectories format="txt" unit="m">
-        <file name="traj_KO_240_050_240.txt" />
-        <path location="./" />
+        <file name="traj_KO_240_050_240.txt"/>
+        <path location="./"/>
     </trajectories>
 
     <measurement_areas unit="m">

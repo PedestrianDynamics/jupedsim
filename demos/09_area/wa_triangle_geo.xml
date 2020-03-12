@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <geometry version="0.8" caption="second life" unit="m"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_geoemtry.xsd">
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 <rooms>
 	<room id ="0" caption ="start">

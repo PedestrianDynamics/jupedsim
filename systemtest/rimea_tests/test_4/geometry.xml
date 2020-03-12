@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<geometry version="0.8" caption="FD1d" unit="m" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_geometry.xsd">
-	<rooms>
-		<room id="0" caption="corridor">
-			<subroom id="0" closed="0" class="subroom">
-				<polygon>
-					<vertex px="26" py="0" />
-					<vertex px="-1" py="0" />
-					<vertex px="-1" py="2" />
-					<vertex px="26" py="2" />
-				</polygon>
-			</subroom>
+<geometry version="0.8" caption="FD1d" unit="m" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <rooms>
+        <room id="0" caption="corridor">
+            <subroom id="0" closed="0" class="subroom">
+                <polygon>
+                    <vertex px="26" py="0"/>
+                    <vertex px="-1" py="0"/>
+                    <vertex px="-1" py="2"/>
+                    <vertex px="26" py="2"/>
+                </polygon>
+            </subroom>
 		</room>
 	</rooms>
 

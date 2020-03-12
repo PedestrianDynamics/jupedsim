@@ -2,7 +2,7 @@
 
 <JuPedSim project="JPS-Project" version="0.8"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
+>
 
     
     <seed>12541</seed>

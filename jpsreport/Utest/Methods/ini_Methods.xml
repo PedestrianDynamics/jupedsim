@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<JPSreport project="JPS-Project" version="0.8.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_report.xsd">
-  <geometry file = "geo_Methods.xml" />
+<JPSreport project="JPS-Project" version="0.8.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <geometry file="geo_Methods.xml"/>
 
   <logfile>logfile_Methods.txt</logfile>
 
   <trajectories format="txt" unit="m">
-    <file name="traj_Methods.txt" />
+    <file name="traj_Methods.txt"/>
     <!-- <path location="../data" /> -->
   </trajectories>
 

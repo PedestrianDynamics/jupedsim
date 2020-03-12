@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <JPScore project="JPS-Project" version="0.6"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_events.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <groups>
         <group id="0">

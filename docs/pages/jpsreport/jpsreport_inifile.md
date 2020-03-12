@@ -17,7 +17,7 @@ In the configuration file, the following sections should be defined:
 
 ```xml
   <?xml version="1.0" encoding="UTF-8" ?>
-  <JPSreport project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/JuPedSim/jpsreport/blob/develop/xsd/jps_report.xsd">
+  <JPSreport project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
 ```
 
 ## Logfile

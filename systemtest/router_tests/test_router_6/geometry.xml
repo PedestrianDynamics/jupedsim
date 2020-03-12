@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<geometry version="0.8" caption="Basigo3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/jps_geometry.xsd" unit="m">
+<geometry version="0.8" caption="Basigo3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" unit="m">
     <rooms>
         <room id="0" caption="hall">
             <subroom id="0" caption="holding area 1">
-                <polygon >
+                <polygon>
                     <vertex px="3.0" py="8.0"/>
                     <vertex px="3.0" py="20.0"/>
                 </polygon>
-                <polygon >
+                <polygon>
                     <vertex px="1.0" py="20.0"/>
                     <vertex px="3.0" py="20.0"/>
                 </polygon>

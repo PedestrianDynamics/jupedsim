@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
+<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-  <!-- seed used for initialising random generator -->
-  <seed>12542</seed>
-  <!-- geometry file -->
-  <geometry>Validation/3test_UO/geometries/</geometry>
-  <max_sim_time>4000</max_sim_time>
+    <!-- seed used for initialising random generator -->
+    <seed>12542</seed>
+    <!-- geometry file -->
+    <geometry>Validation/3test_UO/geometries/</geometry>
+    <max_sim_time>4000</max_sim_time>
 
-  <!-- trajectories file and format -->
-  <trajectories format="xml-plain" fps="8">
-	    <file location="traj_10.xml" />
+    <!-- trajectories file and format -->
+    <trajectories format="xml-plain" fps="8">
+        <file location="traj_10.xml"/>
   </trajectories>
 
   <!-- Parameters for the hybrid (matsim) server mode -->

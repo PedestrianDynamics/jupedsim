@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?> 
-<geometry version ="0.8" caption="second life" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/jps_geometry.xsd" unit="m">
+<geometry version="0.8" caption="second life" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" unit="m">
 	<rooms>
 		<room id="0" caption="hall" zpos="0.00">
 			<subroom id="0" closed="0" class="subroom">

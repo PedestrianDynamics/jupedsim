@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
+<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-  <seed>1</seed>
-  <num_threads>4</num_threads>
-  <max_sim_time unit="sec">100</max_sim_time>
-  <!-- geometry file -->
-  <geometry>../geometry.xml</geometry>
-  <!-- traectories file and format -->
-  <trajectories format="xml-plain" embed_mesh="false" fps="20">
-    <file location="Traj_test_1.xml" />
-  </trajectories>
+    <seed>1</seed>
+    <num_threads>4</num_threads>
+    <max_sim_time unit="sec">100</max_sim_time>
+    <!-- geometry file -->
+    <geometry>../geometry.xml</geometry>
+    <!-- traectories file and format -->
+    <trajectories format="xml-plain" embed_mesh="false" fps="20">
+        <file location="Traj_test_1.xml"/>
+    </trajectories>
   <!-- where to store the logs -->
   <logfile>log</logfile>
 

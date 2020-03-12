@@ -1,14 +1,14 @@
-<JuPedSim xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" project="JPS-Project" version="0.8" xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
-     
-     
-     <seed>1586</seed>
-     <max_sim_time>100</max_sim_time>
-     <geometry>../geometry.xml</geometry>
-     <show_statistics>false</show_statistics>
-     
-     <trajectories format="xml-plain" fps="16">
-          <file location="traj_Test8.xml" />
-     </trajectories>
+<JuPedSim xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" project="JPS-Project" version="0.8">
+
+
+    <seed>1586</seed>
+    <max_sim_time>100</max_sim_time>
+    <geometry>../geometry.xml</geometry>
+    <show_statistics>false</show_statistics>
+
+    <trajectories format="xml-plain" fps="16">
+        <file location="traj_Test8.xml"/>
+    </trajectories>
      
      <logfile>log</logfile>
      <num_threads>8</num_threads>

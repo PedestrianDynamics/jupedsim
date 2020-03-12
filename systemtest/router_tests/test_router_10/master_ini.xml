@@ -2,7 +2,7 @@
 
 <JuPedSim project="Subway-Project" version="0.7"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:noNamespaceSchemaLocation="../../../xsd/jps_ini_core.xsd">
+          >
 
     <header>
         <seed>1234</seed>

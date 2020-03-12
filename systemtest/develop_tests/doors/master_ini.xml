@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <JuPedSim project="Subway-Project" version="0.7"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-<!-- seed used for initialising random generator -->
-<seed>1254</seed>
-<max_sim_time>600</max_sim_time>
-<!-- geometry file -->
-<geometry>../geometry.xml</geometry>
-<!-- trajectories file and format -->
-<trajectories format="xml-plain" fps="64">
-    <file location="traj-door_capacity.xml" />
-</trajectories>
+    <!-- seed used for initialising random generator -->
+    <seed>1254</seed>
+    <max_sim_time>600</max_sim_time>
+    <!-- geometry file -->
+    <geometry>../geometry.xml</geometry>
+    <!-- trajectories file and format -->
+    <trajectories format="xml-plain" fps="64">
+        <file location="traj-door_capacity.xml"/>
+    </trajectories>
 <!-- where to store the logs -->
 <logfile>log.txt</logfile>
 <show_statistics>true</show_statistics>
