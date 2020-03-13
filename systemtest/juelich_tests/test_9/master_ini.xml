@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
+<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-  <!-- seed used for initialising random generator -->
-  <seed>1234</seed>
-  <num_threads>[1, 2, 4, 8, 16, 24]</num_threads>
-  <max_sim_time unit="sec">900</max_sim_time>
-  <!-- geometry file -->
-  <geometry>../geometry.xml</geometry>
-  <!-- traectories file and format -->
-  <trajectories format="xml-plain" embed_mesh="false" fps="8">
-    <file location="trajectories.xml"/>
+    <!-- seed used for initialising random generator -->
+    <seed>1234</seed>
+    <num_threads>[1, 2, 4, 8, 16, 24]</num_threads>
+    <max_sim_time unit="sec">900</max_sim_time>
+    <!-- geometry file -->
+    <geometry>../geometry.xml</geometry>
+    <!-- traectories file and format -->
+    <trajectories format="xml-plain" embed_mesh="false" fps="8">
+        <file location="trajectories.xml"/>
   </trajectories>
   <!-- where to store the logs -->
   <logfile>log</logfile>
@@ -56,7 +56,6 @@
   <operational_models>
     <model operational_model_id="3" description="Tordeux2015">
       <model_parameters>
-        <solver>euler</solver>
         <stepsize>0.05</stepsize>
         <exit_crossing_strategy>3</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
@@ -76,7 +75,6 @@
 
     <model operational_model_id="1" description="gcfm">
       <model_parameters>
-        <solver>euler</solver>
         <stepsize>0.001</stepsize>
         <exit_crossing_strategy>4</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />

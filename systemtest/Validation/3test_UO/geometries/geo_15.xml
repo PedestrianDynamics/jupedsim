@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<geometry version="0.5" caption="hybrid test" unit="m" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_geometry.xsd">
-  <rooms>
-    <room id="0" caption="hall0">
-      <subroom id="0" closed="0" class="floor">
-        <polygon caption="wall">
-          <vertex px="2.5" py="1.300" />
-          <vertex px="2.5" py="0.0" />
-          <vertex px="-1.0" py="0.0" />
-        <!-- <vertex px="0.0" py="1.5" />
-          </polygon>
-        <polygon caption="wall">
-          <vertex px="0.0" py="3.5" />  --> 
+<geometry version="0.5" caption="hybrid test" unit="m" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <rooms>
+        <room id="0" caption="hall0">
+            <subroom id="0" closed="0" class="floor">
+                <polygon caption="wall">
+                    <vertex px="2.5" py="1.300"/>
+                    <vertex px="2.5" py="0.0"/>
+                    <vertex px="-1.0" py="0.0"/>
+                    <!-- <vertex px="0.0" py="1.5" />
+                      </polygon>
+                    <polygon caption="wall">
+                      <vertex px="0.0" py="3.5" />  -->
           <vertex px="-1.0" py="5.0" />
           <vertex px="2.5" py="5.0" />
           <vertex px="2.5" py="3.700" />

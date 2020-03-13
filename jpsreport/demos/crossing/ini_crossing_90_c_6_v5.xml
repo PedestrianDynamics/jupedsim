@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<JPSreport project="crossing_90_c_6_v5" version="0.8.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_report.xsd">
+<JPSreport project="crossing_90_c_6_v5" version="0.8.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-    <geometry file = "geo_crossing_90_c_6_v5.xml" />
+    <geometry file="geo_crossing_90_c_6_v5.xml"/>
 
     <logfile>log_crossing_90_c_6_v5.txt</logfile>
 
-    <output location="crossing_90_c_6_v5_Output/" />
+    <output location="crossing_90_c_6_v5_Output/"/>
 
-    <trajectories format="txt" unit="m"> 
-        <file name="traj_crossing_90_c_6_v5.txt" /> 
-        <path location="./" /> 
+    <trajectories format="txt" unit="m">
+        <file name="traj_crossing_90_c_6_v5.txt"/>
+        <path location="./"/>
     </trajectories> 
 
 

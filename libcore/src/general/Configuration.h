@@ -44,7 +44,6 @@ public:
     {
         _walkingSpeed     = nullptr;
         _ToxicityAnalysis = nullptr;
-        _solver           = 1;
         _routingEngine    = std::shared_ptr<RoutingEngine>(new RoutingEngine());
         _maxOpenMPThreads = 1;
         _seed             = 0;
@@ -112,10 +111,6 @@ public:
 
     std::shared_ptr<ToxicityAnalysis> GetToxicityAnalysis() { return _ToxicityAnalysis; };
     void SetToxicityAnalysis(std::shared_ptr<ToxicityAnalysis> & t) { _ToxicityAnalysis = t; };
-
-    int GetSolver() const { return _solver; };
-
-    void SetSolver(int solver) { _solver = solver; };
 
     std::shared_ptr<RoutingEngine> GetRoutingEngine() const { return _routingEngine; };
 
@@ -383,7 +378,6 @@ public:
 private:
     std::shared_ptr<WalkingSpeed> _walkingSpeed;
     std::shared_ptr<ToxicityAnalysis> _ToxicityAnalysis;
-    int _solver;
     std::shared_ptr<RoutingEngine> _routingEngine;
     int _maxOpenMPThreads;
     unsigned int _seed;

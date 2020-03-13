@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?> 
-<JPSreport project="JPS-Project" version="0.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_report.xsd">
+<JPSreport project="JPS-Project" version="0.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <!-- geometry file -->
-  <geometry file = "geo_UO_180.xml" />
+  <geometry file="geo_UO_180.xml"/>
   <!-- trajectories file and format -->
   <!-- either a file name or a path location. In the latter case all files in the directory will be used-->
   <trajectories format="txt" unit="m">
-    <file name="uo-180-180-180.txt" />
-    <path location="./" />
+    <file name="uo-180-180-180.txt"/>
+    <path location="./"/>
   </trajectories>
   <!-- all files in the directories will be used -->
 

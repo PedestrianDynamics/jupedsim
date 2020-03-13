@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
 <JPScore project="JPS-Project" version="0.6" 
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_events.xsd">
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <events>
     <event time="0" type="door" state="close" id="0" caption="door0" />
     <event time="9" type="door" state="open" id="0" caption="door0" />

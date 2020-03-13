@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?> 
-<geometry version ="0.8" caption="second life" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/jps_geometry.xsd" unit="m"> 
-    <rooms> 
-        <room id="0" caption="hall"> 
-            <subroom id="0" closed="0" class="subroom"> 
-                <polygon caption="wall"> 
-                    <vertex px="4.00" py="6.25"/> 
-                    <vertex px="4.00" py="0.53"/> 
-                    <vertex px="2.40" py="0.53"/> 
-                    <vertex px="2.40" py="-0.53"/> 
-                    <vertex px="4.00" py="-0.53"/> 
-                    <vertex px="4.00" py="-8.00"/> 
+<geometry version="0.8" caption="second life" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" unit="m">
+    <rooms>
+        <room id="0" caption="hall">
+            <subroom id="0" closed="0" class="subroom">
+                <polygon caption="wall">
+                    <vertex px="4.00" py="6.25"/>
+                    <vertex px="4.00" py="0.53"/>
+                    <vertex px="2.40" py="0.53"/>
+                    <vertex px="2.40" py="-0.53"/>
+                    <vertex px="4.00" py="-0.53"/>
+                    <vertex px="4.00" py="-8.00"/>
                     <vertex px="-2.25" py="-8.00"/> 
                     <vertex px="-2.25" py="-0.53"/> 
                     <vertex px="-0.60" py="-0.53"/> 

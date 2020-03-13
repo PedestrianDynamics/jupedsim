@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <JuPedSim project="JPS-Project" version="0.8"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
   <!-- seed used for initialising random generator -->
   <seed>12542</seed>
@@ -44,7 +43,6 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 <operational_models>
     <model operational_model_id="1" description="gcfm">
         <model_parameters>
-            <solver>euler</solver>
             <stepsize>0.01</stepsize>
             <exit_crossing_strategy>2</exit_crossing_strategy>
             <linkedcells enabled="true" cell_size="2.2" />
@@ -71,7 +69,6 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 
     <model operational_model_id="3" description="Tordeux2015">
         <model_parameters>
-            <solver>euler</solver>
             <stepsize>0.05</stepsize>
             <exit_crossing_strategy>3</exit_crossing_strategy>
             <linkedcells enabled="true" cell_size="2" />

@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<geometry version ="0.5" caption="second life" gridSizeX="20" gridSizeY="20" unit="m" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_geoemtry.xsd"> >
+<geometry version="0.5" caption="second life" gridSizeX="20" gridSizeY="20" unit="m"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+>>
   <rooms>
     <room id="0" caption="hall" zpos="0.00">
       <subroom id="0" closed="0" class="subroom">
         <polygon caption="wall">
           <vertex px="-8.00" py="-0.70"/>
           <vertex px="-8.00" py="2.80"/>
-		  <vertex px="-4.00" py="2.80"/>
+          <vertex px="-4.00" py="2.80"/>
           <vertex px="-4.00" py="1.80"/>
-          <vertex px="4.00" py="1.80"/>	
-          <vertex px="4.00" py="2.80"/>					
+          <vertex px="4.00" py="1.80"/>
+          <vertex px="4.00" py="2.80"/>
           <vertex px="6.00" py="2.80"/>
           <vertex px="6.00" py="-0.70"/>
           <vertex px="4.00" py="-0.70"/>

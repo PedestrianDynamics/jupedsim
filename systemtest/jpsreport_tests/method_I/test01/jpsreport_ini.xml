@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<JPSreport project="JPS-Project" version="0.8.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_report.xsd">
-  <geometry file = "geometry.xml" />
-  <logfile>logfile_Method_I.txt</logfile>
-  <trajectories format="txt" unit="m">
-    <file name="traj.txt" />
-  </trajectories>
-  <output location="Output"/>
-  <measurement_areas unit="m">
-    <area_B id="1" type="BoundingBox" zPos="None">
-    </area_B>
-  </measurement_areas>
+<JPSreport project="JPS-Project" version="0.8.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <geometry file="geometry.xml"/>
+    <logfile>logfile_Method_I.txt</logfile>
+    <trajectories format="txt" unit="m">
+        <file name="traj.txt"/>
+    </trajectories>
+    <output location="Output"/>
+    <measurement_areas unit="m">
+        <area_B id="1" type="BoundingBox" zPos="None">
+        </area_B>
+    </measurement_areas>
   <velocity frame_step="10" set_movement_direction="None" ignore_backward_movement="false"/>
   <method_I enabled="true">
     <measurement_area id="1" start_frame="None" stop_frame="None" get_individual_FD="true"/>

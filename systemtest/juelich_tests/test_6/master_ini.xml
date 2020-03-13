@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
+<JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-  <max_sim_time>90</max_sim_time>
-  <!-- seed used for initialising random generator -->
-  <seed>1</seed>
-  <!-- geometry file -->
-  <geometry>../geometry.xml</geometry>
-  <!-- traectories file and format -->
-  <trajectories format="xml-plain" embed_mesh="false" fps="50">
-    <file location="Traj_test_6.xml"/>
-  </trajectories>
+    <max_sim_time>90</max_sim_time>
+    <!-- seed used for initialising random generator -->
+    <seed>1</seed>
+    <!-- geometry file -->
+    <geometry>../geometry.xml</geometry>
+    <!-- traectories file and format -->
+    <trajectories format="xml-plain" embed_mesh="false" fps="50">
+        <file location="Traj_test_6.xml"/>
+    </trajectories>
   <!-- where to store the logs -->
   <logfile>log</logfile>
 
@@ -52,7 +52,6 @@
   <operational_models >
     <model operational_model_id="3" description="Tordeux2015">
       <model_parameters>
-        <solver>euler</solver>
         <stepsize>0.001</stepsize>
         <exit_crossing_strategy>3</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
@@ -72,7 +71,6 @@
 
     <model operational_model_id="1" description="gcfm">
       <model_parameters>
-        <solver>euler</solver>
         <stepsize>0.001</stepsize>
         <exit_crossing_strategy>range(1,6)</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />

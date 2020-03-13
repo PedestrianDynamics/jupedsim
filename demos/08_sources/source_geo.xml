@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<geometry version="0.8" caption="hybrid test" unit="m" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_geometry.xsd">
+<geometry version="0.8" caption="hybrid test" unit="m" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <rooms>
     <room id="0" caption="hall0">
       <subroom id="0" closed="0" class="floor">

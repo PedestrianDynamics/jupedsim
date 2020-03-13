@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<JPSreport project="AO_300" version="0.8.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_report.xsd">
+<JPSreport project="AO_300" version="0.8.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-    <geometry file = "geo_AO_300.xml" />
+    <geometry file="geo_AO_300.xml"/>
 
     <logfile>log_AO_300.txt</logfile>
 
-    <output location="bottleneck_Output" />
+    <output location="bottleneck_Output"/>
 
     <trajectories format="txt" unit="m">
-        <file name="traj_AO_300.txt" />
-        <path location="./" />
+        <file name="traj_AO_300.txt"/>
+        <path location="./"/>
     </trajectories>
 
     <measurement_areas unit="m">
