@@ -273,7 +273,13 @@ public:
     double GetDisTanceToPreviousTarget() const;
     bool GetNewEventFlag();
     void SetNewEventFlag(bool flag);
-    bool ChangedSubRoom();
+
+    /**
+     * Checks if between the last two calls of 'UpdateRoom(int, int)' the Suboom of the pedestrian
+     * has changed. Changing the SubRoom means, the pedestrian has moved to a different SubRoom or Room.
+     * @return pedestrians has moved to a different SubRoom.
+     */
+    bool ChangedSubRoom() const;
     void RecordActualPosition();
     double GetDistanceSinceLastRecord();
 
@@ -376,10 +382,9 @@ public:
       */
     double GetPremovementTime();
 
-    /***
+    /**
       * Get min Premovement time of all pedestrians
       */
-
     static double GetMinPremovementTime();
 
     /**
@@ -505,4 +510,33 @@ public:
     void EndWaiting();
 
     bool IsOutside();
+
+    /**
+     * Updates the room information the pedestrian is located. The information the pedestrian was
+     * in before is saved in \m _old
+     * @param roomID
+     * @param subRoomID
+     */
+    void UpdateRoom(int roomID, int subRoomID);
+
+    /**
+     * Checks if between the last two calls of 'UpdateRoom(int, int)' the Room of the pedestrian
+     * has changed.
+     * @return pedestrians has moved to a different Room.
+     */
+    bool ChangedRoom() const;
+
+    /**
+     * Returns the ID of the room before the last call of 'UpdateRoom(int, int)'
+     * @return ID of the former room the pedestrian was in
+     */
+    int GetOldRoomID() const;
+
+    /**
+     * Returns the ID of the subroom before the last call of 'UpdateRoom(int, int)'
+     * @return ID of the former room the pedestrian was in
+     */
+    int GetOldSubRoomID() const;
+
+    const std::queue<Point> & GetLastPositions() const;
 };

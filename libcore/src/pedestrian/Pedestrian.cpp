@@ -255,7 +255,7 @@ void Pedestrian::SetExitLine(const NavLine * l)
 
 void Pedestrian::SetPos(const Point & pos, bool initial)
 {
-    if((_globalTime >= _premovement) || (initial == true)) {
+    if((_globalTime >= _premovement) || initial) {
         _ellipse.SetCenter(pos);
         //save the last values for the records
         _lastPositions.push(pos);
@@ -355,6 +355,16 @@ int Pedestrian::GetSubRoomID() const
     return _subRoomID;
 }
 
+int Pedestrian::GetOldRoomID() const
+{
+    return _oldRoomID;
+}
+
+int Pedestrian::GetOldSubRoomID() const
+{
+    return _oldSubRoomID;
+}
+
 int Pedestrian::GetSubRoomUID() const
 {
     return _subRoomUID;
@@ -436,14 +446,14 @@ int Pedestrian::GetLastDestination()
         return _destHistory.back();
 }
 
-bool Pedestrian::ChangedSubRoom()
+bool Pedestrian::ChangedSubRoom() const
 {
-    if(_oldRoomID != GetRoomID() || _oldSubRoomID != GetSubRoomID()) {
-        _oldRoomID    = GetRoomID();
-        _oldSubRoomID = GetSubRoomID();
-        return true;
-    }
-    return false;
+    return ChangedRoom() || _oldSubRoomID != _subRoomID;
+}
+
+bool Pedestrian::ChangedRoom() const
+{
+    return _oldRoomID != _roomID;
 }
 
 void Pedestrian::ClearMentalMap()
@@ -1244,4 +1254,17 @@ const Point & Pedestrian::GetWaitingPos() const
 void Pedestrian::SetWaitingPos(const Point & waitingPos)
 {
     _waitingPos = waitingPos;
+}
+
+void Pedestrian::UpdateRoom(int roomID, int subRoomID)
+{
+    _oldRoomID    = _roomID;
+    _oldSubRoomID = _subRoomID;
+    _roomID       = roomID;
+    _subRoomID    = subRoomID;
+}
+
+const std::queue<Point> & Pedestrian::GetLastPositions() const
+{
+    return _lastPositions;
 }
