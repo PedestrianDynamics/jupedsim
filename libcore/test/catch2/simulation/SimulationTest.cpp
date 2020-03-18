@@ -29,7 +29,7 @@
 
 #include <catch2/catch.hpp>
 
-TEST_CASE("Simulation", "[simulation][UpdateRoom]")
+TEST_CASE("SimulationHelper::UpdateRoom", "[SimulationHelper][UpdateRoom]")
 {
     SECTION("Relocation Pedestrian")
     {
@@ -236,6 +236,7 @@ TEST_CASE("Simulation", "[simulation][UpdateRoom]")
             REQUIRE(ret.value());
             REQUIRE(ped.GetRoomID() == 1);
             REQUIRE(ped.GetSubRoomID() == 3);
+            REQUIRE(ped.ChangedSubRoom());
         }
 
         SECTION("Pedestrian not in neighboring subroom")
@@ -262,7 +263,9 @@ TEST_CASE("Simulation", "[simulation][UpdateRoom]")
     };
 }
 
-TEST_CASE("FindPedsReachedFinalGoal", "[simulation][FindPedsReachedFinalGoal]")
+TEST_CASE(
+    "SimulationHelper::FindPedsReachedFinalGoal",
+    "[SimulationHelper][FindPedsReachedFinalGoal]")
 {
     SECTION("Setup")
     {
