@@ -21,8 +21,6 @@
 #include <catch2/catch.hpp>
 #include <cmath>
 #include <cstdlib>
-#include <stdio.h>
-#include <time.h>
 
 TEST_CASE("Pedestrian::UpdateRoom", "[Pedestrian][UpdateRoom]")
 {

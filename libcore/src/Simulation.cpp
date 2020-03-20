@@ -198,9 +198,9 @@ double Simulation::RunStandardSimulation(double maxSimTime)
 
 void Simulation::UpdateRoutesAndLocations()
 {
-    auto outsidePeds =
+    auto pedsAtFinalGoal =
         SimulationHelper::FindPedsReachedFinalGoal(*_building, _building->GetAllPedestrians());
-    _pedsToRemove.insert(outsidePeds.begin(), outsidePeds.end());
+    _pedsToRemove.insert(pedsAtFinalGoal.begin(), pedsAtFinalGoal.end());
     auto notRelocatedPeds = UpdateLocations();
     _pedsToRemove.insert(notRelocatedPeds.begin(), notRelocatedPeds.end());
 

@@ -60,6 +60,7 @@ std::optional<bool> SimulationHelper::UpdateRoom(Building & building, Pedestrian
         ped.UpdateRoom(currentSubRoom->second->GetRoomID(), currentSubRoom->second->GetSubRoomID());
         return true;
     } else {
+        ped.UpdateRoom(-1, -1);
         return std::nullopt;
     }
 }
@@ -113,9 +114,23 @@ SimulationHelper::FindOutsidePedestrians(Building & building, std::set<Pedestria
         std::move_iterator(std::begin(peds)),
         std::move_iterator(std::end(peds)),
         std::inserter(pedsOutside, std::end(pedsOutside)),
-        [&building](auto const ped) -> bool {
-            auto trans = building.FindClosestTransition(*ped, 0.2);
-            return trans.has_value() && trans.value()->IsExit();
+        [&building](const Pedestrian * ped) -> bool {
+            auto trans = building.GetAllRooms().at(ped->GetOldRoomID())->GetAllTransitionsIDs();
+
+            for(auto transID : trans) {
+                auto t = building.GetTransition(transID);
+                if(t->IsOpen() && t->IsExit()) {
+                    auto distance = t->DistTo(ped->GetPos());
+                    if(distance < 0.5) {
+                        Line step{ped->GetLastPositions().back(), ped->GetPos()};
+                        auto intersect = t->IntersectionWith(step);
+                        if(intersect == 1) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
         });
     return pedsOutside;
 }
