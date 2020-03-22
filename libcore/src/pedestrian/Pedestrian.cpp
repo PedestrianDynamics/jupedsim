@@ -82,7 +82,7 @@ Pedestrian::Pedestrian()
     _mentalMap                 = std::map<int, int>();
     _destHistory               = std::vector<int>();
     _trip                      = std::vector<int>();
-    _lastPosition              = Point(0, 0);
+    _lastPosition              = Point(J_NAN, J_NAN);
     _lastCellPosition          = -1;
     _knownDoors.clear();
     _distToBlockade      = 0.0;
@@ -256,6 +256,7 @@ void Pedestrian::SetExitLine(const NavLine * l)
 void Pedestrian::SetPos(const Point & pos, bool initial)
 {
     if((_globalTime >= _premovement) || initial) {
+        _lastPosition = _ellipse.GetCenter();
         _ellipse.SetCenter(pos);
         //save the last values for the records
         _lastPositions.push(pos);
@@ -1267,4 +1268,9 @@ void Pedestrian::UpdateRoom(int roomID, int subRoomID)
 const std::queue<Point> & Pedestrian::GetLastPositions() const
 {
     return _lastPositions;
+}
+
+const Point Pedestrian::GetLastPosition() const
+{
+    return _lastPosition;
 }

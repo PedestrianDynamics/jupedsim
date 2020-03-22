@@ -539,4 +539,6 @@ public:
     int GetOldSubRoomID() const;
 
     const std::queue<Point> & GetLastPositions() const;
+
+    const Point GetLastPosition() const;
 };

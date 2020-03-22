@@ -118,9 +118,8 @@ public:
     /**
      * Update the location of the agents and remove the agents from the simulation who have left the building.
      * Locations includes room/subrooms.
-     * TODO:
      */
-    std::set<Pedestrian *> UpdateLocations();
+    std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>> UpdateLocations();
 
     /**
      * Perform some initialisation for the simulation.

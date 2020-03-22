@@ -51,7 +51,7 @@ std::optional<bool> SimulationHelper::UpdateRoom(Building & building, Pedestrian
     auto currentSubRoom = std::find_if(
         std::begin(subroomsConnected),
         std::end(subroomsConnected),
-        [ped](auto const & iterator) -> bool {
+        [&ped](auto const & iterator) -> bool {
             return iterator.second->IsInSubRoom(ped.GetPos());
         });
 
@@ -65,11 +65,11 @@ std::optional<bool> SimulationHelper::UpdateRoom(Building & building, Pedestrian
     }
 }
 
-std::set<Pedestrian *> SimulationHelper::FindPedsReachedFinalGoal(
+std::vector<Pedestrian *> SimulationHelper::FindPedsReachedFinalGoal(
     Building & building,
     const std::vector<Pedestrian *> & peds)
 {
-    std::set<Pedestrian *> pedsAtFinalGoal;
+    std::vector<Pedestrian *> pedsAtFinalGoal;
     const auto & goals = building.GetAllGoals();
 
     std::copy_if(
@@ -84,53 +84,58 @@ std::set<Pedestrian *> SimulationHelper::FindPedsReachedFinalGoal(
     return pedsAtFinalGoal;
 }
 
-std::tuple<std::set<Pedestrian *>, std::set<Pedestrian *>>
+std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>>
 SimulationHelper::UpdateLocations(Building & building, const std::vector<Pedestrian *> & peds)
 {
-    std::set<Pedestrian *> pedsNotRelocated;
-    std::set<Pedestrian *> pedsChangedRoom;
+    std::vector<Pedestrian *> pedsNotRelocated;
+    std::vector<Pedestrian *> pedsChangedRoom;
 
     // Check for peds, where relocation failed
     for(auto const ped : peds) {
-        int oldRoomID = ped->GetRoomID();
         if(auto relocated = UpdateRoom(building, *ped); relocated.has_value()) {
-            if(relocated && oldRoomID != ped->GetRoomID()) {
-                pedsChangedRoom.insert(ped);
+            if(relocated && ped->ChangedRoom()) {
+                pedsChangedRoom.push_back(ped);
             }
         } else {
-            pedsNotRelocated.insert(ped);
+            pedsNotRelocated.push_back(ped);
         }
     }
 
     return {pedsChangedRoom, pedsNotRelocated};
 }
 
-std::set<Pedestrian *>
-SimulationHelper::FindOutsidePedestrians(Building & building, std::set<Pedestrian *> & peds)
+std::vector<Pedestrian *>
+SimulationHelper::FindOutsidePedestrians(Building & building, std::vector<Pedestrian *> & peds)
 {
-    // Check for peds, which went outside
-    std::set<Pedestrian *> pedsOutside;
-    std::copy_if(
-        std::move_iterator(std::begin(peds)),
-        std::move_iterator(std::end(peds)),
-        std::inserter(pedsOutside, std::end(pedsOutside)),
-        [&building](const Pedestrian * ped) -> bool {
-            auto trans = building.GetAllRooms().at(ped->GetOldRoomID())->GetAllTransitionsIDs();
+    std::vector<Pedestrian *> pedsOutside;
+    std::vector<Pedestrian *> newPeds;
 
-            for(auto transID : trans) {
-                auto t = building.GetTransition(transID);
-                if(t->IsOpen() && t->IsExit()) {
-                    auto distance = t->DistTo(ped->GetPos());
-                    if(distance < 0.5) {
-                        Line step{ped->GetLastPositions().back(), ped->GetPos()};
-                        auto intersect = t->IntersectionWith(step);
-                        if(intersect == 1) {
-                            return true;
+    std::partition_copy(
+        std::make_move_iterator(std::begin(peds)),
+        std::make_move_iterator(std::end(peds)),
+        std::back_inserter(pedsOutside),
+        std::back_inserter(newPeds),
+        [&building](auto const ped) -> bool {
+            if(building.GetAllRooms().find(ped->GetOldRoomID()) != building.GetAllRooms().end()) {
+                for(auto [transID, trans] : building.GetAllTransitions()) {
+                    if(trans->GetRoom1()->GetID() == ped->GetOldRoomID() ||
+                       trans->GetRoom2()->GetID() == ped->GetOldRoomID()) {
+                        if(trans->IsOpen() && trans->IsExit()) {
+                            auto distance = trans->DistTo(ped->GetPos());
+                            if(distance < 0.5) {
+                                Line step{ped->GetLastPosition(), ped->GetPos()};
+                                auto intersect = trans->IntersectionWith(step);
+                                if(intersect == 1) {
+                                    return true;
+                                }
+                            }
                         }
                     }
                 }
             }
             return false;
         });
+    peds = std::move(newPeds);
     return pedsOutside;
 }
+

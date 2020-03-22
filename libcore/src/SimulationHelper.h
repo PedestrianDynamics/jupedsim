@@ -23,7 +23,7 @@
 #include "pedestrian/Pedestrian.h"
 
 #include <optional>
-#include <set>
+#include <vector>
 
 namespace SimulationHelper
 {
@@ -46,10 +46,11 @@ std::optional<bool> UpdateRoom(Building & building, Pedestrian & ped);
  * @param peds list of pedestrians, which is checked
  * @return All pedestrians who have left the geometry in an usual way
  */
-std::set<Pedestrian *>
+std::vector<Pedestrian *>
 FindPedsReachedFinalGoal(Building & building, const std::vector<Pedestrian *> & peds);
 
-std::set<Pedestrian *> FindOutsidePedestrians(Building & building, std::set<Pedestrian *> & peds);
+std::vector<Pedestrian *>
+FindOutsidePedestrians(Building & building, std::vector<Pedestrian *> & peds);
 
 /**
  *
@@ -57,7 +58,7 @@ std::set<Pedestrian *> FindOutsidePedestrians(Building & building, std::set<Pede
  * @param peds
  * @return relocated peds
  */
-std::tuple<std::set<Pedestrian *>, std::set<Pedestrian *>>
+std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>>
 UpdateLocations(Building & building, const std::vector<Pedestrian *> & peds);
 
 } //namespace SimulationHelper

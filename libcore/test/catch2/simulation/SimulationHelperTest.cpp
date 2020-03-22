@@ -18,6 +18,7 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  **/
 #include "SimulationHelper.h"
+
 #include "general/Configuration.h"
 #include "geometry/Crossing.h"
 #include "geometry/Line.h"
@@ -506,8 +507,10 @@ TEST_CASE(
                  &pedInsideGoalNotFinalInsideInGoalFinal});
             REQUIRE(pedsReachedFinalGoal.size() == 1);
             REQUIRE(
-                pedsReachedFinalGoal.find(&pedInsideGoalFinalInsideInGoalFinal) !=
-                pedsReachedFinalGoal.end());
+                std::find(
+                    std::begin(pedsReachedFinalGoal),
+                    std::end(pedsReachedFinalGoal),
+                    &pedInsideGoalFinalInsideInGoalFinal) != pedsReachedFinalGoal.end());
         }
     }
 }
@@ -520,18 +523,18 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
     // x  = Goal
     //
     // (-5, 2) |----------| (5, 2)
-    //         |    xxx   +  xxx
-    //         |          +  xxx
-    //         |    xxx   +  xxx
+    //         |   +      +
+    //         |   +      +
+    //         |   +      +
     // (-5,-2) |----------| (5, -2)
     Wall wall111;
     wall111.SetPoint1(Point{5., -2.});
-    wall111.SetPoint2(Point{-5., -2.});
+    wall111.SetPoint2(Point{-2., -2.});
     Wall wall112;
-    wall112.SetPoint1(Point{-5., -2.});
-    wall112.SetPoint2(Point{-5., 2.});
+    wall112.SetPoint1(Point{-2., -2.});
+    wall112.SetPoint2(Point{-2., 2.});
     Wall wall113;
-    wall113.SetPoint1(Point{-5., 2.});
+    wall113.SetPoint1(Point{-2., 2.});
     wall113.SetPoint2(Point{5., 2.});
     auto trans11 = new Transition();
     trans11->SetID(1);
@@ -548,66 +551,174 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
     sub11->ConvertLineToPoly(std::vector<Line *>{trans11});
     sub11->CreateBoostPoly();
 
-    // Create room
     auto room1 = new Room();
     room1->SetID(1);
     room1->AddSubRoom(sub11);
+    room1->AddTransitionID(trans11->GetUniqueID());
 
-    // Create goals
-    auto goalInsideFinal = new Goal();
-    goalInsideFinal->SetIsFinalGoal(true);
-    goalInsideFinal->SetId(1);
-    goalInsideFinal->SetRoomID(1);
-    goalInsideFinal->SetSubRoomID(1);
-    goalInsideFinal->AddWall(Wall({-2, 0.5}, {-2, 1.5}));
-    goalInsideFinal->AddWall(Wall({-2, 1.5}, {2, 1.5}));
-    goalInsideFinal->AddWall(Wall({2, 1.5}, {2, 0.5}));
-    goalInsideFinal->AddWall(Wall({2, 0.5}, {-2, 0.5}));
-    goalInsideFinal->ConvertLineToPoly();
+    Wall wall211;
+    wall211.SetPoint1(Point{-2., -2.});
+    wall211.SetPoint2(Point{-5., -2.});
+    Wall wall212;
+    wall212.SetPoint1(Point{-5., -2.});
+    wall212.SetPoint2(Point{-5., 2.});
+    Wall wall213;
+    wall213.SetPoint1(Point{-5., 2.});
+    wall213.SetPoint2(Point{-2., 2.});
+    auto trans12 = new Transition();
+    trans12->SetID(2);
+    trans12->SetPoint1(Point{-2., -2.});
+    trans12->SetPoint2(Point{-2., 2.});
 
-    auto goalInside = new Goal();
-    goalInside->SetIsFinalGoal(false);
-    goalInside->SetId(2);
-    goalInside->SetRoomID(1);
-    goalInside->SetSubRoomID(1);
-    goalInside->AddWall(Wall({-2, -0.5}, {-2, -1.5}));
-    goalInside->AddWall(Wall({-2, -1.5}, {2, -1.5}));
-    goalInside->AddWall(Wall({2, -1.5}, {2, -0.5}));
-    goalInside->AddWall(Wall({2, -0.5}, {-2, -0.5}));
-    goalInside->ConvertLineToPoly();
+    auto sub21 = new NormalSubRoom();
+    sub21->SetRoomID(2);
+    sub21->SetSubRoomID(1);
+    sub21->AddTransition(trans12);
+    sub21->AddWall(wall211);
+    sub21->AddWall(wall212);
+    sub21->AddWall(wall213);
+    sub21->ConvertLineToPoly(std::vector<Line *>{trans12});
+    sub21->CreateBoostPoly();
 
-    auto goalOutside = new Goal();
-    goalOutside->SetIsFinalGoal(true);
-    goalOutside->SetId(3);
-    goalOutside->SetRoomID(1);
-    goalOutside->SetSubRoomID(1);
-    goalOutside->AddWall(Wall({6, -1}, {6, 1}));
-    goalOutside->AddWall(Wall({6, 1}, {8, 1}));
-    goalOutside->AddWall(Wall({8, 1}, {8, -1}));
-    goalOutside->AddWall(Wall({8, -1}, {6, -1}));
-    goalOutside->ConvertLineToPoly();
-
-    sub11->AddGoalID(1);
-    sub11->AddGoalID(2);
+    auto room2 = new Room();
+    room2->SetID(2);
+    room2->AddSubRoom(sub21);
+    room2->AddTransitionID(trans12->GetUniqueID());
 
     Building building;
     building.AddRoom(room1);
+    building.AddRoom(room2);
     building.AddTransition(trans11);
-    building.AddGoal(goalInside);
-    building.AddGoal(goalInsideFinal);
-    building.AddGoal(goalOutside);
+    building.AddTransition(trans12);
 
+    trans11->SetRoom1(room1);
+    trans12->SetRoom1(room1);
+    trans12->SetRoom2(room2);
     REQUIRE(building.InitGeometry());
-    REQUIRE(building.GetAllRooms().size() == 1);
-    REQUIRE(building.GetAllTransitions().size() == 1);
-    REQUIRE(building.GetAllGoals().size() == 3);
+    REQUIRE(building.GetAllRooms().size() == 2);
+    REQUIRE(building.GetAllTransitions().size() == 2);
+    REQUIRE(building.GetAllGoals().empty());
+
+    SECTION("Normal transition crossed")
+    {
+        Pedestrian ped;
+        ped.SetRoomID(1, "");
+        ped.SetSubRoomID(1);
+        ped.SetPos({-1.7, -1.}, false);
+        ped.SetPos({-2.2, -1.}, false);
+        ped.UpdateRoom(-1, -1);
+
+        std::vector<Pedestrian *> peds{&ped};
+        auto outsidePeds = SimulationHelper::FindOutsidePedestrians(building, peds);
+        REQUIRE(peds.size() == 1);
+        REQUIRE(outsidePeds.empty());
+    }
+
+    SECTION("Exit crossed")
+    {
+        Pedestrian ped;
+        ped.SetRoomID(1, "");
+        ped.SetSubRoomID(1);
+        ped.SetPos({4., -1.}, false);
+        ped.SetPos({5.2, -1.}, false);
+        ped.UpdateRoom(-1, -1);
+
+        std::vector<Pedestrian *> peds{&ped};
+        auto outsidePeds = SimulationHelper::FindOutsidePedestrians(building, peds);
+        REQUIRE(peds.empty());
+        REQUIRE(outsidePeds.size() == 1);
+    }
+
+    SECTION("Runtime")
+    {
+        long largeNumber = 100000;
+        std::vector<Pedestrian *> peds;
+        for(long i = 0; i < largeNumber; ++i) {
+            auto ped = std::make_unique<Pedestrian>();
+            ped->SetRoomID(1, "");
+            ped->SetSubRoomID(1);
+            ped->SetPos({4., -1.}, false);
+            ped->SetPos({5.2, -1.}, false);
+            ped->UpdateRoom(-1, -1);
+            peds.push_back(ped.get());
+        }
+
+        auto outsidePeds = SimulationHelper::FindOutsidePedestrians(building, peds);
+        REQUIRE(peds.empty());
+        REQUIRE(outsidePeds.size() == largeNumber);
+    }
 
 
-    SECTION("No exit crossed") {}
+    SECTION("Walked through wall")
+    {
+        Pedestrian ped;
+        ped.SetRoomID(1, "");
+        ped.SetSubRoomID(1);
+        ped.SetPos({4., -1.}, false);
+        ped.SetPos({4, -3.}, false);
+        ped.UpdateRoom(-1, -1);
 
-    SECTION("Exit crossed") {}
+        std::vector<Pedestrian *> peds{&ped};
+        auto outsidePeds = SimulationHelper::FindOutsidePedestrians(building, peds);
+        REQUIRE(peds.size() == 1);
+        REQUIRE(outsidePeds.empty());
+    }
 
-    SECTION("Walked through wall") {}
+    SECTION("Walked through closed door")
+    {
+        Pedestrian ped;
+        ped.SetRoomID(1, "");
+        ped.SetSubRoomID(1);
+        ped.SetPos({4., -1.}, false);
+        ped.SetPos({5.2, -1.}, false);
+        ped.UpdateRoom(-1, -1);
+        trans11->Close();
 
-    SECTION("Walked through closed door") {}
+        std::vector<Pedestrian *> peds{&ped};
+        auto outsidePeds = SimulationHelper::FindOutsidePedestrians(building, peds);
+        REQUIRE(peds.size() == 1);
+        REQUIRE(outsidePeds.empty());
+    }
+
+    SECTION("Old room ID does not exist")
+    {
+        Pedestrian ped;
+        ped.SetRoomID(5, "");
+        ped.SetSubRoomID(1);
+        ped.SetPos({4., -1.}, false);
+        ped.SetPos({5.2, -1.}, false);
+        ped.UpdateRoom(-1, -1);
+
+        std::vector<Pedestrian *> peds{&ped};
+        auto outsidePeds = SimulationHelper::FindOutsidePedestrians(building, peds);
+        REQUIRE(peds.size() == 1);
+        REQUIRE(outsidePeds.empty());
+    }
+
+    SECTION("Old room ID not set via UpdateRoom")
+    {
+        Pedestrian ped;
+        ped.SetRoomID(1, "");
+        ped.SetSubRoomID(1);
+        ped.SetPos({4., -1.}, false);
+        ped.SetPos({5.2, -1.}, false);
+
+        std::vector<Pedestrian *> peds{&ped};
+        auto outsidePeds = SimulationHelper::FindOutsidePedestrians(building, peds);
+        REQUIRE(peds.size() == 1);
+        REQUIRE(outsidePeds.empty());
+    }
+
+    SECTION("Peds has no last position")
+    {
+        Pedestrian ped;
+        ped.SetRoomID(5, "");
+        ped.SetSubRoomID(1);
+        ped.SetPos({4., -1.}, false);
+
+        std::vector<Pedestrian *> peds{&ped};
+        auto outsidePeds = SimulationHelper::FindOutsidePedestrians(building, peds);
+        REQUIRE(peds.size() == 1);
+        REQUIRE(outsidePeds.empty());
+    }
 }
