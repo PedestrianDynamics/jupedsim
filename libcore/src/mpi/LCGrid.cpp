@@ -71,7 +71,7 @@ void LCGrid::ClearGrid()
 }
 
 
-std::vector<Pedestrian *> LCGrid::GetNeighbourhood(const Pedestrian * ped)
+std::vector<Pedestrian *> LCGrid::GetNeighbourhood(const Pedestrian * ped) const
 {
     std::vector<Pedestrian *> neighbourhood;
 
@@ -81,7 +81,13 @@ std::vector<Pedestrian *> LCGrid::GetNeighbourhood(const Pedestrian * ped)
     int l = (int) ((xPed - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
     int k = (int) ((yPed - _gridYmin) / _cellSize) + 1;
 
+    /**
+     * We only aquire a shared lock here for reading data in the grid.
+     * It is not allowed to write data using a shared lock.
+     * Otherwise thread safety is lost.
+     */
     std::shared_lock shared_lock(grid_mutex);
+
     // all neighbor cells
     for(int i = l - 1; i <= l + 1; ++i) {
         for(int j = k - 1; j <= k + 1; ++j) {

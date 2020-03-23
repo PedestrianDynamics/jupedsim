@@ -77,5 +77,5 @@ public:
       * @param ped
       * @return neighbourhood
       */
-    std::vector<Pedestrian *> GetNeighbourhood(const Pedestrian * ped);
+    std::vector<Pedestrian *> GetNeighbourhood(const Pedestrian * ped) const;
 };
