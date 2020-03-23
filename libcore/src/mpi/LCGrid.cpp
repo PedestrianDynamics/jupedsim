@@ -28,10 +28,10 @@
 
 #include <algorithm>
 #include <iterator>
-#include <mutex>
+#include <shared_mutex>
 
 
-std::mutex grid_mutex;
+std::shared_mutex grid_mutex;
 
 LCGrid::LCGrid(
     double gridXmin,
@@ -52,7 +52,7 @@ LCGrid::~LCGrid() {}
 
 void LCGrid::Update(const std::vector<Pedestrian *> & peds)
 {
-    std::lock_guard lock(grid_mutex);
+    std::unique_lock exclusive_lock(grid_mutex);
     ClearGrid();
 
     for(auto & ped : peds) {
@@ -73,8 +73,6 @@ void LCGrid::ClearGrid()
 
 std::vector<Pedestrian *> LCGrid::GetNeighbourhood(const Pedestrian * ped)
 {
-    std::lock_guard lock(grid_mutex);
-
     std::vector<Pedestrian *> neighbourhood;
 
     double xPed = ped->GetPos()._x;
@@ -83,6 +81,7 @@ std::vector<Pedestrian *> LCGrid::GetNeighbourhood(const Pedestrian * ped)
     int l = (int) ((xPed - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
     int k = (int) ((yPed - _gridYmin) / _cellSize) + 1;
 
+    std::shared_lock shared_lock(grid_mutex);
     // all neighbor cells
     for(int i = l - 1; i <= l + 1; ++i) {
         for(int j = k - 1; j <= k + 1; ++j) {
