@@ -75,7 +75,7 @@ public:
     /**
       * Returns neighbourhood of the pedestrians ped
       * @param ped
-      * @param neighbourhood
+      * @return neighbourhood
       */
-    void GetNeighbourhood(const Pedestrian * ped, std::vector<Pedestrian *> & neighbourhood);
+    std::vector<Pedestrian *> GetNeighbourhood(const Pedestrian * ped);
 };

@@ -71,9 +71,11 @@ void LCGrid::ClearGrid()
 }
 
 
-void LCGrid::GetNeighbourhood(const Pedestrian * ped, std::vector<Pedestrian *> & neighbourhood)
+std::vector<Pedestrian *> LCGrid::GetNeighbourhood(const Pedestrian * ped)
 {
     std::lock_guard lock(grid_mutex);
+
+    std::vector<Pedestrian *> neighbourhood;
 
     double xPed = ped->GetPos()._x;
     double yPed = ped->GetPos()._y;
@@ -91,4 +93,6 @@ void LCGrid::GetNeighbourhood(const Pedestrian * ped, std::vector<Pedestrian *> 
                 [ped](auto & other_ped) { return other_ped->GetID() != ped->GetID(); });
         }
     }
+
+    return neighbourhood;
 }

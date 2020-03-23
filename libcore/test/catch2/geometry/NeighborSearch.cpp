@@ -50,22 +50,19 @@ TEST_CASE("geometry/NeighborSearch", "[geometry][neightbor-search][lcgrid]")
         Pedestrian special_ped;
         special_ped.SetPos(Point(0, 0));
 
-        lcgrid.GetNeighbourhood(&special_ped, neighborhood);
+        neighborhood = lcgrid.GetNeighbourhood(&special_ped);
         REQUIRE_THAT(ped_pointers, Catch::Matchers::UnorderedEquals(neighborhood));
 
-        neighborhood.clear();
         special_ped.SetPos(Point(10, 10));
-        lcgrid.GetNeighbourhood(&special_ped, neighborhood);
+        neighborhood = lcgrid.GetNeighbourhood(&special_ped);
         REQUIRE(neighborhood.empty());
 
-        neighborhood.clear();
         special_ped.SetPos(Point(0, 4.4));
-        lcgrid.GetNeighbourhood(&special_ped, neighborhood);
+        neighborhood = lcgrid.GetNeighbourhood(&special_ped);
         REQUIRE(neighborhood.empty());
 
-        neighborhood.clear();
         special_ped.SetPos(Point(0, 4.3));
-        lcgrid.GetNeighbourhood(&special_ped, neighborhood);
+        neighborhood = lcgrid.GetNeighbourhood(&special_ped);
         REQUIRE_THAT(ped_pointers, Catch::Matchers::UnorderedEquals(neighborhood));
     }
 
