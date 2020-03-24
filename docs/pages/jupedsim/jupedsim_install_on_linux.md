@@ -45,18 +45,20 @@ Alternatively you can generate a make based build with:
 ```bash
 mkdir build
 cd build
-cmake -DCMAKE_BUILD_TYPE=Debug <path-to-cmakelists>
+cmake -DCMAKE_BUILD_TYPE=Debug <path-to-cmakelists> -DCMAKE_PREFIX_PATH=$(pwd)/deps
 make -j$(nproc)
 ```
 
 {% include note.html content="If you do not want to use OpenMP you have to pass `-DUSE_OPENMP=OFF` to cmake on generation." %}
 ```bash
-cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_OPENMP=OFF <path-to-cmakelists>
+cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_OPENMP=OFF <path-to-cmakelists> -DCMAKE_PREFIX_PATH=$(pwd)/deps
 ```
 
 ## CMake configuration flags
 
 The following configuration flags are available:
+
+- CMAKE_PREFIX_PATH must always be set to directory `deps`, where the dependencies are installed. See [CMake documentation](https://cmake.org/cmake/help/latest/variable/CMAKE_PREFIX_PATH.html) for detailed information.
 
 - USE_OPENMP defaults to ON (Disabled on Windows)
 Build `jpscore` with OpenMP support, generation will fail if OpenMP cannot be
