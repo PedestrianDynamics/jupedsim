@@ -58,7 +58,7 @@ cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_OPENMP=OFF <path-to-cmakelists> -DCMAKE_PRE
 
 The following configuration flags are available:
 
-- CMAKE_PREFIX_PATH must always be set to directory `deps` to consider dependencies. See [CMake documentation](https://cmake.org/cmake/help/latest/variable/CMAKE_PREFIX_PATH.html) for detailed information.
+- CMAKE_PREFIX_PATH must always be set to directory `deps`, where the dependencies are installed. See [CMake documentation](https://cmake.org/cmake/help/latest/variable/CMAKE_PREFIX_PATH.html) for detailed information.
 
 - USE_OPENMP defaults to ON (Disabled on Windows)
 Build `jpscore` with OpenMP support, generation will fail if OpenMP cannot be
