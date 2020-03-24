@@ -202,11 +202,9 @@ void Simulation::UpdateRoutesAndLocations()
     // ------------------------------------------------
     auto peds = _building->GetAllPedestrians();
 
-    auto [pedsChangedRoom, pedsNotRelocated] =
-        SimulationHelper::UpdateLocations(*_building, _building->GetAllPedestrians());
+    auto [pedsChangedRoom, pedsNotRelocated] = SimulationHelper::UpdateLocations(*_building, peds);
 
-    auto pedsAtFinalGoal =
-        SimulationHelper::FindPedsReachedFinalGoal(*_building, _building->GetAllPedestrians());
+    auto pedsAtFinalGoal = SimulationHelper::FindPedsReachedFinalGoal(*_building, peds);
     _pedsToRemove.insert(pedsAtFinalGoal.begin(), pedsAtFinalGoal.end());
 
     auto pedsOutside = SimulationHelper::FindOutsidePedestrians(*_building, pedsNotRelocated);

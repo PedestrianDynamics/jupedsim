@@ -25,7 +25,7 @@
 
 #include <algorithm>
 
-std::optional<bool> SimulationHelper::UpdateRoom(Building & building, Pedestrian & ped)
+std::optional<bool> SimulationHelper::UpdateRoom(const Building & building, Pedestrian & ped)
 {
     // No relocation needed, ped is in its assigned room/subroom
     // TODO add check if room/subroom really exist
@@ -67,7 +67,7 @@ std::optional<bool> SimulationHelper::UpdateRoom(Building & building, Pedestrian
 }
 
 std::vector<Pedestrian *> SimulationHelper::FindPedsReachedFinalGoal(
-    Building & building,
+    const Building & building,
     const std::vector<Pedestrian *> & peds)
 {
     std::vector<Pedestrian *> pedsAtFinalGoal;
@@ -86,7 +86,7 @@ std::vector<Pedestrian *> SimulationHelper::FindPedsReachedFinalGoal(
 }
 
 std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>>
-SimulationHelper::UpdateLocations(Building & building, const std::vector<Pedestrian *> & peds)
+SimulationHelper::UpdateLocations(const Building & building, const std::vector<Pedestrian *> & peds)
 {
     std::vector<Pedestrian *> pedsNotRelocated;
     std::vector<Pedestrian *> pedsChangedRoom;
@@ -105,8 +105,9 @@ SimulationHelper::UpdateLocations(Building & building, const std::vector<Pedestr
     return {pedsChangedRoom, pedsNotRelocated};
 }
 
-std::vector<Pedestrian *>
-SimulationHelper::FindOutsidePedestrians(Building & building, std::vector<Pedestrian *> & peds)
+std::vector<Pedestrian *> SimulationHelper::FindOutsidePedestrians(
+    const Building & building,
+    std::vector<Pedestrian *> & peds)
 {
     std::vector<Pedestrian *> pedsOutside;
     std::vector<Pedestrian *> newPeds;
@@ -160,7 +161,7 @@ void SimulationHelper::UpdateFlowAtDoors(
 }
 
 std::optional<Transition *>
-SimulationHelper::FindPassedDoor(Building & building, const Pedestrian & ped)
+SimulationHelper::FindPassedDoor(const Building & building, const Pedestrian & ped)
 {
     std::vector<Transition *> transitions;
 

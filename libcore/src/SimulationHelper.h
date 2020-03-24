@@ -37,27 +37,64 @@ namespace SimulationHelper
  * @return true if relocation was successful, false if no reloaction was needed. Nullopt if
  * relocation failed.
  */
-std::optional<bool> UpdateRoom(Building & building, Pedestrian & ped);
+std::optional<bool> UpdateRoom(const Building & building, Pedestrian & ped);
 
 /**
- * Checks for pedestrians which have left the simulation scope in a usual way, e.g., left the
- * building through one of the exits.
+ * Checks for pedestrians who have reached their final goal
  * @param building geometry used in the simulation
- * @param peds list of pedestrians, which is checked
- * @return All pedestrians who have left the geometry in an usual way
+ * @param peds list of pedestrians to check
+ * @return All pedestrians who have reached their final goal in the geometry
+ * @deprecated
+ * TODO discuss if needed, as we do not allow inside goals at the moment
  */
 std::vector<Pedestrian *>
-FindPedsReachedFinalGoal(Building & building, const std::vector<Pedestrian *> & peds);
+FindPedsReachedFinalGoal(const Building & building, const std::vector<Pedestrian *> & peds);
 
+/**
+ * Find pedestrians who have moved to outside of the geometry, and are no longer in the simulation
+ * scope.
+ * @pre For each ped in peds at least once UpdateRoom(-1,-1) is called, should be done by
+ * SimulationHelper::UpdateLocations. Meaning that the pedestrian could not be located to one of
+ * the neighboring rooms.
+ * @param building geometry used in the simulation
+ * @param peds[in,out] in: list of all pedestrians that could not be relocated, out: list of
+ *  pedestrians which moved in an unusual manner
+ * @return list of pedestrians who have moved to outside of the geometry
+ */
 std::vector<Pedestrian *>
-FindOutsidePedestrians(Building & building, std::vector<Pedestrian *> & peds);
+FindOutsidePedestrians(const Building & building, std::vector<Pedestrian *> & peds);
 
+/**
+ * Updates the locations (room information) of the pedestrians.
+ * @param building geometry used in the simulation
+ * @param peds list of pedestrians
+ * @return [list of pedestrian who have changed their room,
+ * list of pedestrians who moved out of their assigned room but to none of the neighboring rooms]
+ */
 std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>>
-UpdateLocations(Building & building, const std::vector<Pedestrian *> & peds);
+UpdateLocations(const Building & building, const std::vector<Pedestrian *> & peds);
 
+/**
+ * Increments the door usage of the doors by the peds in \p peds.
+ * @param building geometry used in the simulation
+ * @param peds list of pedestrians who have changed their room
+ */
 void UpdateFlowAtDoors(Building & building, const std::vector<Pedestrian *> & peds);
 
+/**
+ * Triggers the flow regulation, and closes/opens doors accordingly
+ * @param building geometry used in the simulation
+ * @return a change to the geometry was made
+ */
 bool UpdateFlowRegulation(Building & building);
 
-std::optional<Transition *> FindPassedDoor(Building & building, const Pedestrian & ped);
+/**
+ * Finds the transition that was passed by a pedestrian \p ped in the last time step.
+ *
+ * @pre ped._lastPosition is set, hence at least one time step was triggered before
+ * @param building geometry used in the simulation
+ * @param ped pedestrian to find the transition
+ * @return transition passed by \p in the last time step, nullopt if no transition could be found
+ */
+std::optional<Transition *> FindPassedDoor(const Building & building, const Pedestrian & ped);
 } //namespace SimulationHelper
