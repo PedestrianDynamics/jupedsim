@@ -52,13 +52,12 @@ FindPedsReachedFinalGoal(Building & building, const std::vector<Pedestrian *> & 
 std::vector<Pedestrian *>
 FindOutsidePedestrians(Building & building, std::vector<Pedestrian *> & peds);
 
-/**
- *
- * @param building
- * @param peds
- * @return relocated peds
- */
 std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>>
 UpdateLocations(Building & building, const std::vector<Pedestrian *> & peds);
 
+void UpdateFlowAtDoors(Building & building, const std::vector<Pedestrian *> & peds);
+
+bool UpdateFlowRegulation(Building & building);
+
+std::optional<Transition *> FindPassedDoor(Building & building, const Pedestrian & ped);
 } //namespace SimulationHelper

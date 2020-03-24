@@ -116,6 +116,14 @@ TEST_CASE("Pedestrian::ChangedRoom", "[Pedestrian][ChangedRoom]")
         REQUIRE(ped.GetSubRoomID() == newSubRoomID);
         REQUIRE(ped.ChangedRoom());
     }
+
+    SECTION("Old RoomID not set yet")
+    {
+        Pedestrian ped;
+        ped.SetRoomID(1, "");
+        ped.SetSubRoomID(1);
+        REQUIRE_FALSE(ped.ChangedRoom());
+    }
 }
 
 TEST_CASE("Pedestrian::ChangedSubRoom", "[Pedestrian][ChangedSubRoom]")
@@ -190,6 +198,23 @@ TEST_CASE("Pedestrian::ChangedSubRoom", "[Pedestrian][ChangedSubRoom]")
         REQUIRE(ped.GetRoomID() == newRoomID);
         REQUIRE(ped.GetSubRoomID() == newSubRoomID);
         REQUIRE(ped.ChangedSubRoom());
+    }
+
+    SECTION("Old RoomID not set yet")
+    {
+        Pedestrian ped;
+        ped.SetRoomID(1, "");
+        ped.SetSubRoomID(1);
+        REQUIRE_FALSE(ped.ChangedSubRoom());
+    }
+
+    SECTION("Old SubRoomID not set yet")
+    {
+        Pedestrian ped;
+        ped.SetRoomID(1, "");
+        ped.SetSubRoomID(std::numeric_limits<int>::min());
+        ped.UpdateRoom(1, 1);
+        REQUIRE_FALSE(ped.ChangedSubRoom());
     }
 }
 

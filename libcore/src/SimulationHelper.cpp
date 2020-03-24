@@ -19,6 +19,7 @@
  **/
 #include "SimulationHelper.h"
 
+#include "general/Logger.h"
 #include "geometry/Room.h"
 #include "geometry/SubRoom.h"
 
@@ -93,7 +94,7 @@ SimulationHelper::UpdateLocations(Building & building, const std::vector<Pedestr
     // Check for peds, where relocation failed
     for(auto const ped : peds) {
         if(auto relocated = UpdateRoom(building, *ped); relocated.has_value()) {
-            if(relocated && ped->ChangedRoom()) {
+            if(relocated.value() && ped->ChangedRoom()) {
                 pedsChangedRoom.push_back(ped);
             }
         } else {
@@ -116,26 +117,98 @@ SimulationHelper::FindOutsidePedestrians(Building & building, std::vector<Pedest
         std::back_inserter(pedsOutside),
         std::back_inserter(newPeds),
         [&building](auto const ped) -> bool {
-            if(building.GetAllRooms().find(ped->GetOldRoomID()) != building.GetAllRooms().end()) {
-                for(auto [transID, trans] : building.GetAllTransitions()) {
-                    if(trans->GetRoom1()->GetID() == ped->GetOldRoomID() ||
-                       trans->GetRoom2()->GetID() == ped->GetOldRoomID()) {
-                        if(trans->IsOpen() && trans->IsExit()) {
-                            auto distance = trans->DistTo(ped->GetPos());
-                            if(distance < 0.5) {
-                                Line step{ped->GetLastPosition(), ped->GetPos()};
-                                auto intersect = trans->IntersectionWith(step);
-                                if(intersect == 1) {
-                                    return true;
-                                }
-                            }
-                        }
-                    }
-                }
+            auto transPassed = SimulationHelper::FindPassedDoor(building, *ped);
+            if(!transPassed.has_value()) {
+                return false;
             }
-            return false;
+
+            //TODO maxDistance should depend on vmax
+            double maxDistance = 0.5;
+            return transPassed.value()->IsExit() && transPassed.value()->IsOpen() &&
+                   transPassed.value()->DistTo(ped->GetPos()) < maxDistance;
         });
     peds = std::move(newPeds);
     return pedsOutside;
 }
 
+void SimulationHelper::UpdateFlowAtDoors(
+    Building & building,
+    const std::vector<Pedestrian *> & peds)
+{
+    for(const auto ped : peds) {
+        auto closestTransition = SimulationHelper::FindPassedDoor(building, *ped);
+
+        if(!closestTransition.has_value()) {
+            LOG_WARNING("Ped {} did not cross any transition", ped->GetID());
+            return;
+        }
+
+        //TODO check if exitindex is set and transition exists?
+        if(closestTransition.value()->GetUniqueID() !=
+           building.GetTransitionByUID(ped->GetExitIndex())->GetUniqueID()) {
+            LOG_WARNING(
+                "Ped {}: used an indented door {}, but wanted to go to {}.",
+                ped->GetID(),
+                closestTransition.value()->GetUniqueID(),
+                ped->GetExitIndex());
+            return;
+        }
+
+        closestTransition.value()->IncreaseDoorUsage(1, Pedestrian::GetGlobalTime());
+        closestTransition.value()->IncreasePartialDoorUsage(1);
+    }
+}
+
+std::optional<Transition *>
+SimulationHelper::FindPassedDoor(Building & building, const Pedestrian & ped)
+{
+    std::vector<Transition *> transitions;
+
+    // TODO check if room exists?
+    auto room = (ped.GetRoomID() != -1) ? (building.GetAllRooms().at(ped.GetRoomID())) :
+                                          (building.GetAllRooms().at(ped.GetOldRoomID()));
+
+    for(auto const & [_, subroom] : room->GetAllSubRooms()) {
+        transitions.insert(
+            std::end(transitions),
+            std::begin(subroom->GetAllTransitions()),
+            std::end(subroom->GetAllTransitions()));
+    }
+
+    Line step{ped.GetLastPosition(), ped.GetPos()};
+    // TODO check for closed doors and distance?
+    auto passedTrans = std::find_if(
+        std::begin(transitions), std::end(transitions), [&step](auto const & trans) -> bool {
+            return trans->IntersectionWith(step) == 1;
+        });
+
+    if(passedTrans == transitions.end()) {
+        return std::nullopt;
+    } else {
+        return *passedTrans;
+    }
+}
+
+bool SimulationHelper::UpdateFlowRegulation(Building & building)
+{
+    bool stateChanged = false;
+
+    for(auto [transID, trans] : building.GetAllTransitions()) {
+        DoorState state = trans->GetState();
+
+        bool regulateFlow = trans->GetOutflowRate() < (std::numeric_limits<double>::max)() ||
+                            trans->GetMaxDoorUsage() < std::numeric_limits<double>::max();
+
+        if(regulateFlow) {
+            // when <dn> agents pass <trans>, we start evaluating the flow
+            // .. and maybe close the <trans>
+            if(trans->GetPartialDoorUsage() == trans->GetDN()) {
+                trans->RegulateFlow(Pedestrian::GetGlobalTime());
+                trans->ResetPartialDoorUsage();
+            }
+        }
+
+        stateChanged = stateChanged || (state != trans->GetState());
+    }
+    return stateChanged;
+}

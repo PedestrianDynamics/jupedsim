@@ -254,7 +254,6 @@ if (BUILD_CPPUNIT_TEST)
     find_package(Catch2 REQUIRED)
 
     add_executable(unittests
-            test/catch2/geometry/BuildingTest.cpp
             test/catch2/geometry/LineTest.cpp
             test/catch2/geometry/ObstacleTest.cpp
             test/catch2/geometry/PointTest.cpp

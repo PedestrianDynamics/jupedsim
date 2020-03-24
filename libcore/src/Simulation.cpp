@@ -198,14 +198,13 @@ double Simulation::RunStandardSimulation(double maxSimTime)
 
 void Simulation::UpdateRoutesAndLocations()
 {
+    //TODO update egress time of room
+    // ------------------------------------------------
     auto peds = _building->GetAllPedestrians();
 
     auto [pedsChangedRoom, pedsNotRelocated] =
         SimulationHelper::UpdateLocations(*_building, _building->GetAllPedestrians());
 
-    if(!pedsChangedRoom.empty() || !pedsNotRelocated.empty()) {
-        std::string foo("asda");
-    }
     auto pedsAtFinalGoal =
         SimulationHelper::FindPedsReachedFinalGoal(*_building, _building->GetAllPedestrians());
     _pedsToRemove.insert(pedsAtFinalGoal.begin(), pedsAtFinalGoal.end());
@@ -214,56 +213,19 @@ void Simulation::UpdateRoutesAndLocations()
     _pedsToRemove.insert(pedsNotRelocated.begin(), pedsNotRelocated.end());
     _pedsToRemove.insert(pedsOutside.begin(), pedsOutside.end());
 
-    if(!_pedsToRemove.empty()) {
-        std::string foo("asda");
-    }
+
+    SimulationHelper::UpdateFlowAtDoors(*_building, pedsChangedRoom);
+    SimulationHelper::UpdateFlowAtDoors(*_building, pedsOutside);
+
 
     RemovePedestrians();
 
+    // TODO check if working
+    // TODO discuss simulation flow -> better move to main loop, does not belong here
+    SimulationHelper::UpdateFlowRegulation(*_building);
+
     UpdateRoutes();
 }
-
-//std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>> Simulation::UpdateLocations()
-//{
-//    std::vector<Pedestrian *> notRelocatedPeds;
-//
-//    // collect all pedestrians in the simulation.
-//    const std::vector<Pedestrian *> & allPeds = _building->GetAllPedestrians();
-//    auto allRooms                             = _building->GetAllRooms();
-//
-//#pragma omp parallel for shared(notRelocatedPeds, allRooms) default(none)
-//    for(size_t p = 0; p < allPeds.size(); ++p) {
-//        auto ped       = allPeds[p];
-//        Room * room    = _building->GetRoom(ped->GetRoomID());
-//        SubRoom * sub0 = room->GetSubRoom(ped->GetSubRoomID());
-//
-//        // reposition in the case the pedestrians "accidentally left the room" not via the intended exit.
-//        // That may happen if the forces are too high for instance
-//        // the ped is removed from the simulation, if it could not be reassigned
-//        if(!sub0->IsInSubRoom(ped)) {
-//            bool assigned = false;
-//            std::function<void(const Pedestrian &)> f =
-//                std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
-//            assigned = ped->Relocate(f);
-//            //this will delete agents, that are pushed outside (maybe even if inside obstacles??)
-//
-//            if(!assigned) {
-//#pragma omp critical(Simulation_Update_pedsToRemove)
-//                notRelocatedPeds.push_back(ped); //the agent left the old room
-//                                              //actualize the eggress time for that room
-//#pragma omp critical(SetEgressTime)
-//                allRooms.at(ped->GetRoomID())->SetEgressTime(Pedestrian::GetGlobalTime());
-//            }
-//        }
-//    }
-//    if (!notRelocatedPeds.empty()){
-//        LOG_ERROR("FOO");
-//    }
-//    return notRelocatedPeds;
-//    auto [pedsChangedRoom, pedsNotRelocated] = SimulationHelper::UpdateLocations(*_building, _building->GetAllPedestrians());
-//
-//
-//}
 
 void Simulation::UpdateRoutes()
 {
@@ -295,33 +257,12 @@ void Simulation::UpdateRoutes()
                 }
             }
         }
-
-        //        //finally actualize the route
-        //        // TODO if will never be true: target == -1 -> ped->IsWaiting == true
-        //        if(!_gotSources && target == -1 && !_trainConstraints && !ped->IsWaiting()) {
-        //            //a destination could not be found for that pedestrian
-        //            LOG_ERROR(
-        //                "Could not find a route for pedestrian {} in room {} and subroom {}",
-        //                ped->GetID(),
-        //                ped->GetRoomID(),
-        //                ped->GetSubRoomID());
-        //            std::function<void(const Pedestrian &)> f =
-        //                std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
-        //            ped->Relocate(f);
-        //#pragma omp critical(Simulation_Update_pedsToRemove)
-        //            {
-        //                _pedsToRemove.insert(ped);
-        //                // TODO KKZ track deleted peds
-        //            }
-        //        }
     }
 }
-
 
 void Simulation::RemovePedestrians()
 {
     for(auto p : _pedsToRemove) {
-        UpdateFlowAtDoors(*p);
         _building->DeletePedestrian(p);
     }
     _pedsToRemove.clear();
@@ -373,6 +314,7 @@ void Simulation::PrintStatistics(double simTime)
         }
     }
 
+    //TODO discuss deletion
     LOG_INFO("Usage of Crossings");
     for(const auto & itr : _building->GetAllCrossings()) {
         Crossing * goal = itr.second;

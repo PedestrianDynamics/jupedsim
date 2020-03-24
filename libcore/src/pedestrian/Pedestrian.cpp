@@ -75,8 +75,8 @@ Pedestrian::Pedestrian()
     _roomID                    = -1;
     _subRoomID                 = -1;
     _subRoomUID                = -1;
-    _oldRoomID                 = -1;
-    _oldSubRoomID              = -1;
+    _oldRoomID                 = std::numeric_limits<int>::min();
+    _oldSubRoomID              = std::numeric_limits<int>::min();
     _lastE0                    = Point(0, 0);
     _navLine                   = nullptr;
     _mentalMap                 = std::map<int, int>();
@@ -326,7 +326,7 @@ void Pedestrian::Setdt(double dt)
 {
     _deltaT = dt;
 }
-double Pedestrian::Getdt()
+double Pedestrian::Getdt() const
 {
     return _deltaT;
 }
@@ -449,12 +449,13 @@ int Pedestrian::GetLastDestination()
 
 bool Pedestrian::ChangedSubRoom() const
 {
-    return ChangedRoom() || _oldSubRoomID != _subRoomID;
+    return (ChangedRoom() || _oldSubRoomID != _subRoomID) &&
+           _oldSubRoomID != std::numeric_limits<int>::min();
 }
 
 bool Pedestrian::ChangedRoom() const
 {
-    return _oldRoomID != _roomID;
+    return _oldRoomID != _roomID && _oldRoomID != std::numeric_limits<int>::min();
 }
 
 void Pedestrian::ClearMentalMap()
