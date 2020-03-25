@@ -201,42 +201,48 @@ TEST_CASE("SimulationHelper::UpdateRoom", "[SimulationHelper][UpdateRoom]")
     {
         Pedestrian ped;
         ped.SetPos({-8, -1}, true);
-        ped.SetRoomID(1, "");
-        ped.SetSubRoomID(1);
+        ped.SetRoomID(sub11->GetRoomID(), "");
+        ped.SetSubRoomID(sub11->GetSubRoomID());
+        ped.SetSubRoomUID(sub11->GetUID());
 
         auto ret = SimulationHelper::UpdateRoom(building, ped);
         REQUIRE(ret.has_value());
         REQUIRE_FALSE(ret.value());
-        REQUIRE(ped.GetRoomID() == 1);
-        REQUIRE(ped.GetSubRoomID() == 1);
+        REQUIRE(ped.GetRoomID() == sub11->GetRoomID());
+        REQUIRE(ped.GetSubRoomID() == sub11->GetSubRoomID());
+        REQUIRE(ped.GetSubRoomUID() == sub11->GetUID());
     }
 
     SECTION("Pedestrian in neighboring subroom")
     {
         Pedestrian ped;
         ped.SetPos({-8, -1}, true);
-        ped.SetRoomID(1, "");
-        ped.SetSubRoomID(2);
+        ped.SetRoomID(sub12->GetRoomID(), "");
+        ped.SetSubRoomID(sub12->GetSubRoomID());
+        ped.SetSubRoomUID(sub12->GetUID());
 
         auto ret = SimulationHelper::UpdateRoom(building, ped);
         REQUIRE(ret.has_value());
         REQUIRE(ret.value());
-        REQUIRE(ped.GetRoomID() == 1);
-        REQUIRE(ped.GetSubRoomID() == 1);
+        REQUIRE(ped.GetRoomID() == sub11->GetRoomID());
+        REQUIRE(ped.GetSubRoomID() == sub11->GetSubRoomID());
+        REQUIRE(ped.GetSubRoomUID() == sub11->GetUID());
     }
 
     SECTION("Pedestrian in neighboring room")
     {
         Pedestrian ped;
         ped.SetPos({1, -1}, true);
-        ped.SetRoomID(2, "");
-        ped.SetSubRoomID(1);
+        ped.SetRoomID(sub21->GetRoomID(), "");
+        ped.SetSubRoomID(sub21->GetSubRoomID());
+        ped.SetSubRoomUID(sub21->GetUID());
 
         auto ret = SimulationHelper::UpdateRoom(building, ped);
         REQUIRE(ret.has_value());
         REQUIRE(ret.value());
-        REQUIRE(ped.GetRoomID() == 1);
-        REQUIRE(ped.GetSubRoomID() == 3);
+        REQUIRE(ped.GetRoomID() == sub13->GetRoomID());
+        REQUIRE(ped.GetSubRoomID() == sub13->GetSubRoomID());
+        REQUIRE(ped.GetSubRoomUID() == sub13->GetUID());
         REQUIRE(ped.ChangedSubRoom());
     }
 
@@ -244,26 +250,30 @@ TEST_CASE("SimulationHelper::UpdateRoom", "[SimulationHelper][UpdateRoom]")
     {
         Pedestrian ped;
         ped.SetPos({-8, -1}, true);
-        ped.SetRoomID(1, "");
-        ped.SetSubRoomID(3);
+        ped.SetRoomID(sub13->GetRoomID(), "");
+        ped.SetSubRoomID(sub13->GetSubRoomID());
+        ped.SetSubRoomUID(sub13->GetUID());
 
         auto ret = SimulationHelper::UpdateRoom(building, ped);
         REQUIRE_FALSE(ret.has_value());
         REQUIRE(ped.GetRoomID() == -1);
         REQUIRE(ped.GetSubRoomID() == -1);
+        REQUIRE(ped.GetSubRoomUID() == -1);
     }
 
     SECTION("Pedestrian not in neighboring room")
     {
         Pedestrian ped;
         ped.SetPos({1, -1}, true);
-        ped.SetRoomID(3, "");
-        ped.SetSubRoomID(1);
+        ped.SetRoomID(sub31->GetRoomID(), "");
+        ped.SetSubRoomID(sub31->GetSubRoomID());
+        ped.SetSubRoomUID(sub31->GetUID());
 
         auto ret = SimulationHelper::UpdateRoom(building, ped);
         REQUIRE_FALSE(ret.has_value());
         REQUIRE(ped.GetRoomID() == -1);
         REQUIRE(ped.GetSubRoomID() == -1);
+        REQUIRE(ped.GetSubRoomUID() == -1);
     }
 }
 
@@ -835,9 +845,8 @@ TEST_CASE("SimulationHelper::UpdateFlowAtDoors", "[SimulationHelper][UpdateFlowA
 
         SECTION("no transition within max distance found")
         {
-            double dt      = 1e-3;
-            double v       = 1.;
-            double maxStep = 2 * dt * v;
+            double dt = 1e-3;
+            double v  = 1.;
 
             Pedestrian ped;
             ped.Setdt(dt);

@@ -59,9 +59,11 @@ std::optional<bool> SimulationHelper::UpdateRoom(const Building & building, Pede
     // pedestrian is in one of the neighboring rooms/subrooms
     if(currentSubRoom != subroomsConnected.end()) {
         ped.UpdateRoom(currentSubRoom->second->GetRoomID(), currentSubRoom->second->GetSubRoomID());
+        ped.SetSubRoomUID(currentSubRoom->second->GetUID());
         return true;
     } else {
         ped.UpdateRoom(-1, -1);
+        ped.SetSubRoomUID(-1);
         return std::nullopt;
     }
 }

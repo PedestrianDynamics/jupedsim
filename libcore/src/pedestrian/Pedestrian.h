@@ -513,9 +513,10 @@ public:
 
     /**
      * Updates the room information the pedestrian is located. The information the pedestrian was
-     * in before is saved in \m _old
+     * in before is saved in \m _oldRoomID, _oldSubRoomID
      * @param roomID
      * @param subRoomID
+     * @param
      */
     void UpdateRoom(int roomID, int subRoomID);
 
