@@ -1,5 +1,5 @@
 /**
- * \file        LCGrid.cpp
+ * \file        NeighborhoodSearch.cpp
  * \date        Nov 16, 2010
  * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum J?lich GmbH. All rights reserved.
@@ -22,7 +22,7 @@
  *
  *
  **/
-#include "LCGrid.h"
+#include "NeighborhoodSearch.h"
 
 #include "pedestrian/Pedestrian.h"
 
@@ -33,7 +33,7 @@
 
 std::shared_mutex grid_mutex;
 
-LCGrid::LCGrid(
+NeighborhoodSearch::NeighborhoodSearch(
     double gridXmin,
     double gridXmax,
     double gridYmin,
@@ -48,9 +48,9 @@ LCGrid::LCGrid(
 {
 }
 
-LCGrid::~LCGrid() {}
+NeighborhoodSearch::~NeighborhoodSearch() {}
 
-void LCGrid::Update(const std::vector<Pedestrian *> & peds)
+void NeighborhoodSearch::Update(const std::vector<Pedestrian *> & peds)
 {
     std::unique_lock exclusive_lock(grid_mutex);
     ClearGrid();
@@ -65,13 +65,13 @@ void LCGrid::Update(const std::vector<Pedestrian *> & peds)
     }
 }
 
-void LCGrid::ClearGrid()
+void NeighborhoodSearch::ClearGrid()
 {
     grid.clear();
 }
 
 
-std::vector<Pedestrian *> LCGrid::GetNeighbourhood(const Pedestrian * ped) const
+std::vector<Pedestrian *> NeighborhoodSearch::GetNeighbourhood(const Pedestrian * ped) const
 {
     std::vector<Pedestrian *> neighbourhood;
 

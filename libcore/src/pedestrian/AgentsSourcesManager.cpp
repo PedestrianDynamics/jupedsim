@@ -31,7 +31,7 @@
 #include "AgentsQueue.h"
 #include "Pedestrian.h"
 #include "general/Logger.h"
-#include "mpi/LCGrid.h"
+#include "neighborhood/NeighborhoodSearch.h"
 #include "voronoi-boost/VoronoiPositionGenerator.h"
 
 #include <thread>

@@ -18,8 +18,8 @@
 
 
 #include "geometry/Point.h"
-#include "mpi/Grid2D.h"
-#include "mpi/LCGrid.h"
+#include "neighborhood/Grid2D.h"
+#include "neighborhood/NeighborhoodSearch.h"
 #include "pedestrian/Pedestrian.h"
 
 #include <catch2/catch.hpp>
@@ -31,7 +31,7 @@ TEST_CASE("geometry/NeighborSearch", "[geometry][neightbor-search][lcgrid]")
 {
     SECTION("GetNeighbors")
     {
-        LCGrid lcgrid(0, 10, 0, 10, 2.2);
+        NeighborhoodSearch lcgrid(0, 10, 0, 10, 2.2);
 
         std::vector<Pedestrian> pedestrians(10);
         for(auto & ped : pedestrians) {

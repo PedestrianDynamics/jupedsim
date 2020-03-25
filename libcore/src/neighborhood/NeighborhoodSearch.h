@@ -1,5 +1,5 @@
 /**
- * \file        LCGrid.h
+ * \file        NeighborhoodSearch.h
  * \date        Nov 16, 2010
  * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum J?lich GmbH. All rights reserved.
@@ -34,7 +34,7 @@
 class Pedestrian;
 class Building;
 
-class LCGrid
+class NeighborhoodSearch
 {
 private:
     /// rectangular area for linked cells which covers the whole geometry
@@ -60,12 +60,17 @@ public:
       * @param cellsize the cell size
       * @param nPeds the number of pedestrians
       */
-    LCGrid(double gridXmin, double gridXmax, double gridYmin, double gridYmax, double cellSize);
+    NeighborhoodSearch(
+        double gridXmin,
+        double gridXmax,
+        double gridYmin,
+        double gridYmax,
+        double cellSize);
 
     /**
       * Desctructor
       */
-    ~LCGrid();
+    ~NeighborhoodSearch();
 
     /**
       *Update the cells occupation

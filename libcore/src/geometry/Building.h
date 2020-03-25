@@ -75,7 +75,7 @@ class Pedestrian;
 
 class Transition;
 
-class LCGrid;
+class NeighborhoodSearch;
 
 class PedDistributor;
 
@@ -90,7 +90,7 @@ private:
     std::shared_ptr<RoutingEngine> _routingEngine;
     std::string _caption;
     std::string _geometryFilename;
-    LCGrid * _linkedCellGrid;
+    NeighborhoodSearch * _linkedCellGrid;
     std::vector<Pedestrian *> _allPedestrians;
     std::map<int, std::shared_ptr<Room>> _rooms;
     std::map<int, Crossing *> _crossings;
@@ -211,7 +211,7 @@ public:
     /**
       * @return the linked-cell grid used for spatial query
       */
-    LCGrid * GetGrid() const;
+    NeighborhoodSearch * GetGrid() const;
 
     // convenience methods
     bool InitGeometry();

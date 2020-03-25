@@ -33,7 +33,7 @@
 #include "general/OpenMP.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
-#include "mpi/LCGrid.h"
+#include "neighborhood/NeighborhoodSearch.h"
 #include "pedestrian/Pedestrian.h"
 
 double xRight = 26.0;

@@ -44,7 +44,7 @@
 #include "geometry/Transition.h"
 #include "geometry/Wall.h"
 #include "geometry/helper/CorrectGeometry.h"
-#include "mpi/LCGrid.h"
+#include "neighborhood/NeighborhoodSearch.h"
 #include "pedestrian/PedDistributor.h"
 #include "pedestrian/Pedestrian.h"
 #include "routing/RoutingEngine.h"
@@ -205,7 +205,7 @@ Room * Building::GetRoom(int index) const
     return _rooms.at(index).get();
 }
 
-LCGrid * Building::GetGrid() const
+NeighborhoodSearch * Building::GetGrid() const
 {
     return _linkedCellGrid;
 }
@@ -1091,7 +1091,7 @@ void Building::InitGrid()
     //TODO: the number of pedestrian should be calculated using the capacity of the sources
     //int nped= Pedestrian::GetAgentsCreated() +  for src:sources  src->GetMaxAgents()
 
-    _linkedCellGrid = new LCGrid(x_min, x_max, y_min, y_max, cellSize);
+    _linkedCellGrid = new NeighborhoodSearch(x_min, x_max, y_min, y_max, cellSize);
 
     LOG_INFO("Done with Initializing the grid");
 }
