@@ -843,28 +843,6 @@ TEST_CASE("SimulationHelper::UpdateFlowAtDoors", "[SimulationHelper][UpdateFlowA
             REQUIRE(trans12->GetPartialDoorUsage() == 1);
         }
 
-        SECTION("no transition within max distance found")
-        {
-            double dt = 1e-3;
-            double v  = 1.;
-
-            Pedestrian ped;
-            ped.Setdt(dt);
-            ped.SetV0Norm(v, v, v, v, v, v, v);
-            ped.SetRoomID(1, "");
-            ped.SetSubRoomID(1);
-            ped.SetExitIndex(trans12->GetUniqueID());
-            ped.SetPos({-2. - 1., -1.}, false);
-            ped.SetPos({-2. + 1., -1.}, false);
-            ped.UpdateRoom(-1, -1);
-            std::vector<Pedestrian *> peds{&ped};
-            SimulationHelper::UpdateFlowAtDoors(building, peds);
-            REQUIRE(trans11->GetDoorUsage() == 0);
-            REQUIRE(trans11->GetPartialDoorUsage() == 0);
-            REQUIRE(trans12->GetDoorUsage() == 0);
-            REQUIRE(trans12->GetPartialDoorUsage() == 0);
-        }
-
         SECTION("used unindented door")
         {
             double dt      = 1e-3;
