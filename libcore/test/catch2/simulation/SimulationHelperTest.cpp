@@ -643,18 +643,23 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
         long largeNumber = 100000;
         std::vector<Pedestrian *> peds;
         for(long i = 0; i < largeNumber; ++i) {
-            auto ped = std::make_unique<Pedestrian>();
+            auto ped = new Pedestrian();
             ped->SetRoomID(1, "");
             ped->SetSubRoomID(1);
             ped->SetPos({4., -1.}, false);
             ped->SetPos({5.2, -1.}, false);
             ped->UpdateRoom(-1, -1);
-            peds.push_back(ped.get());
+            peds.push_back(ped);
         }
 
         auto outsidePeds = SimulationHelper::FindOutsidePedestrians(building, peds);
         REQUIRE(peds.empty());
         REQUIRE(outsidePeds.size() == largeNumber);
+
+        for(auto ped : peds) {
+            delete ped;
+        }
+        peds.clear();
     }
 
 
