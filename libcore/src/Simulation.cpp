@@ -199,11 +199,13 @@ double Simulation::RunStandardSimulation(double maxSimTime)
 void Simulation::UpdateRoutesAndLocations()
 {
     //TODO update egress time of room
+    //TODO discuss program flow of main loop
     // ------------------------------------------------
     auto peds = _building->GetAllPedestrians();
 
     auto [pedsChangedRoom, pedsNotRelocated] = SimulationHelper::UpdateLocations(*_building, peds);
 
+    // TODO not needed at the moment, as we do not have inside final goals yet
     auto pedsAtFinalGoal = SimulationHelper::FindPedsReachedFinalGoal(*_building, peds);
     _pedsToRemove.insert(pedsAtFinalGoal.begin(), pedsAtFinalGoal.end());
 
@@ -211,17 +213,17 @@ void Simulation::UpdateRoutesAndLocations()
     _pedsToRemove.insert(pedsNotRelocated.begin(), pedsNotRelocated.end());
     _pedsToRemove.insert(pedsOutside.begin(), pedsOutside.end());
 
-
+    //TODO see if this can be merged
     SimulationHelper::UpdateFlowAtDoors(*_building, pedsChangedRoom);
     SimulationHelper::UpdateFlowAtDoors(*_building, pedsOutside);
 
-
+    //TODO free function?
     RemovePedestrians();
 
-    // TODO check if working
-    // TODO discuss simulation flow -> better move to main loop, does not belong here
+    //TODO check if working
+    //TODO discuss simulation flow -> better move to main loop, does not belong here
     SimulationHelper::UpdateFlowRegulation(*_building);
-
+    //TODO check if better move to main loop, does not belong here
     UpdateRoutes();
 }
 
