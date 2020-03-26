@@ -203,9 +203,10 @@ bool SimulationHelper::UpdateFlowRegulation(Building & building)
                             trans->GetMaxDoorUsage() < std::numeric_limits<double>::max();
 
         if(regulateFlow) {
-            // when <dn> agents pass <trans>, we start evaluating the flow
+            // when more than <dn> agents pass <trans>, we start evaluating the flow
             // .. and maybe close the <trans>
-            if(trans->GetPartialDoorUsage() == trans->GetDN()) {
+            // need to be more than <dn> as multiple ped can pass a transition in one time step
+            if(trans->GetPartialDoorUsage() >= trans->GetDN()) {
                 trans->RegulateFlow(Pedestrian::GetGlobalTime());
                 trans->ResetPartialDoorUsage();
             }
