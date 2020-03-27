@@ -69,7 +69,7 @@ Building::Building()
     _caption          = "no_caption";
     _geometryFilename = "";
     _routingEngine    = nullptr;
-    _linkedCellGrid   = nullptr;
+    _neighborhoodSearch = nullptr;
     _savePathway      = false;
 }
 
@@ -81,7 +81,7 @@ Building::Building(Configuration * configuration, PedDistributor & pedDistributo
     _caption("no_caption")
 {
     _savePathway    = false;
-    _linkedCellGrid = nullptr;
+    _neighborhoodSearch = nullptr;
 
     {
         std::unique_ptr<GeoFileParser> parser(new GeoFileParser(_configuration));
@@ -124,7 +124,7 @@ Building::~Building()
         delete pedestrian;
     }
     _allPedestrians.clear();
-    delete _linkedCellGrid;
+    delete _neighborhoodSearch;
 #endif
 
     if(_pathWayStream.is_open())
@@ -207,7 +207,7 @@ Room * Building::GetRoom(int index) const
 
 NeighborhoodSearch * Building::GetGrid() const
 {
-    return _linkedCellGrid;
+    return _neighborhoodSearch;
 }
 
 void Building::AddRoom(Room * room)
@@ -1032,7 +1032,7 @@ bool Building::SanityCheck()
 
 void Building::UpdateGrid()
 {
-    _linkedCellGrid->Update(_allPedestrians);
+    _neighborhoodSearch->Update(_allPedestrians);
 }
 
 void Building::InitGrid()
@@ -1088,10 +1088,7 @@ void Building::InitGrid()
         LOG_INFO("Initializing the grid with cell size: {}.", cellSize);
     }
 
-    //TODO: the number of pedestrian should be calculated using the capacity of the sources
-    //int nped= Pedestrian::GetAgentsCreated() +  for src:sources  src->GetMaxAgents()
-
-    _linkedCellGrid = new NeighborhoodSearch(x_min, x_max, y_min, y_max, cellSize);
+    _neighborhoodSearch = new NeighborhoodSearch(x_min, x_max, y_min, y_max, cellSize);
 
     LOG_INFO("Done with Initializing the grid");
 }

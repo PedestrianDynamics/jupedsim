@@ -68,14 +68,10 @@ TEST_CASE("geometry/NeighborSearch", "[geometry][neightbor-search][lcgrid]")
 
     SECTION("Grid2D")
     {
-        Grid2D<std::deque<Pedestrian *>> grid(10, 100);
+        Grid2D<std::deque<Pedestrian *>> grid;
+        grid.resize(10, 100);
 
-        for(unsigned i = 0; i < 10; ++i) {
-            REQUIRE(grid[i].size() == 100);
-        }
 
-        // clear should only delete the content, not the size or dimension of the grid.
-        grid.clear();
         for(unsigned i = 0; i < 10; ++i) {
             REQUIRE(grid[i].size() == 100);
         }

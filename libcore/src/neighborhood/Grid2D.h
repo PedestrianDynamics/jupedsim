@@ -37,17 +37,17 @@ public:
     using row_type   = container_type<value_type>;
     using grid_type  = container_type<row_type>;
 
-    Grid2D() = delete;
+    Grid2D() = default;
 
-    Grid2D(const Grid2D &) = delete;
-    Grid2D(Grid2D &&)      = delete;
+    Grid2D(const Grid2D &) = default;
+    Grid2D(Grid2D &&)      = default;
 
-    Grid2D & operator=(const Grid2D &) = delete;
-    Grid2D & operator=(Grid2D &&) = delete;
+    Grid2D & operator=(const Grid2D &) = default;
+    Grid2D & operator=(Grid2D &&) = default;
 
-    Grid2D(size_type num_rows, size_type num_columns) :
-        _grid(num_rows, row_type(num_columns)), _num_rows(num_rows), _num_columns(num_columns)
+    void resize(size_type num_rows, size_type num_columns)
     {
+        _grid.resize(num_rows, row_type(num_columns));
     }
 
     row_type const & operator[](size_type row) const { return _grid[row]; }
@@ -59,10 +59,8 @@ public:
     void clear()
     {
         _grid.clear();
-        _grid.insert(_grid.begin(), _num_rows, row_type(_num_columns));
     }
 
 private:
     grid_type _grid;
-    size_type _num_rows, _num_columns;
 };

@@ -48,11 +48,6 @@ private:
 
     Grid2D<std::deque<Pedestrian *>> grid;
 
-    /**
-      * Clear the grid.
-      */
-    void ClearGrid();
-
 public:
     /**
       * Constructor

@@ -90,7 +90,7 @@ private:
     std::shared_ptr<RoutingEngine> _routingEngine;
     std::string _caption;
     std::string _geometryFilename;
-    NeighborhoodSearch * _linkedCellGrid;
+    NeighborhoodSearch * _neighborhoodSearch;
     std::vector<Pedestrian *> _allPedestrians;
     std::map<int, std::shared_ptr<Room>> _rooms;
     std::map<int, Crossing *> _crossings;

@@ -43,9 +43,9 @@ NeighborhoodSearch::NeighborhoodSearch(
     _gridYmin(gridYmin),
     _cellSize(cellSize),
     _gridSizeX((int) ((gridXmax - _gridXmin) / _cellSize) + 1 + 2), // 1 dummy cell on each side
-    _gridSizeY((int) ((gridYmax - _gridYmin) / _cellSize) + 1 + 2), // 1 dummy cell on each side
-    grid(_gridSizeY, _gridSizeX)
+    _gridSizeY((int) ((gridYmax - _gridYmin) / _cellSize) + 1 + 2)  // 1 dummy cell on each side
 {
+    grid.resize(_gridSizeY, _gridSizeX);
 }
 
 NeighborhoodSearch::~NeighborhoodSearch() {}
@@ -53,7 +53,8 @@ NeighborhoodSearch::~NeighborhoodSearch() {}
 void NeighborhoodSearch::Update(const std::vector<Pedestrian *> & peds)
 {
     std::unique_lock exclusive_lock(grid_mutex);
-    ClearGrid();
+    grid.clear();
+    grid.resize(_gridSizeY, _gridSizeX);
 
     for(auto & ped : peds) {
         // determine the cell coordinates of pedestrian i
@@ -63,11 +64,6 @@ void NeighborhoodSearch::Update(const std::vector<Pedestrian *> & peds)
 
         grid[iy][ix].push_back(ped);
     }
-}
-
-void NeighborhoodSearch::ClearGrid()
-{
-    grid.clear();
 }
 
 
