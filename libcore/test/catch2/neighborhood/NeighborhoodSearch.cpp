@@ -18,16 +18,14 @@
 
 
 #include "geometry/Point.h"
-#include "neighborhood/Grid2D.h"
 #include "neighborhood/NeighborhoodSearch.h"
 #include "pedestrian/Pedestrian.h"
 
 #include <catch2/catch.hpp>
 #include <deque>
-#include <iostream>
 #include <vector>
 
-TEST_CASE("geometry/NeighborSearch", "[geometry][neightbor-search][lcgrid]")
+TEST_CASE("neighborhood/NeighborSearch", "[neighborhood][neightbor-search]")
 {
     SECTION("GetNeighbors")
     {
@@ -64,16 +62,5 @@ TEST_CASE("geometry/NeighborSearch", "[geometry][neightbor-search][lcgrid]")
         special_ped.SetPos(Point(0, 4.3));
         neighborhood = lcgrid.GetNeighbourhood(&special_ped);
         REQUIRE_THAT(ped_pointers, Catch::Matchers::UnorderedEquals(neighborhood));
-    }
-
-    SECTION("Grid2D")
-    {
-        Grid2D<std::deque<Pedestrian *>> grid;
-        grid.resize(10, 100);
-
-
-        for(unsigned i = 0; i < 10; ++i) {
-            REQUIRE(grid[i].size() == 100);
-        }
     }
 }

@@ -45,10 +45,7 @@ public:
     Grid2D & operator=(const Grid2D &) = default;
     Grid2D & operator=(Grid2D &&) = default;
 
-    void resize(size_type num_rows, size_type num_columns)
-    {
-        _grid.resize(num_rows, row_type(num_columns));
-    }
+    Grid2D(size_type num_rows, size_type num_columns) : _grid(num_rows, row_type(num_columns)) {}
 
     row_type const & operator[](size_type row) const { return _grid[row]; }
     row_type & operator[](size_type row)
@@ -58,7 +55,11 @@ public:
 
     void clear()
     {
-        _grid.clear();
+        for(auto & row : _grid) {
+            for(auto & elem : row) {
+                elem.clear();
+            }
+        }
     }
 
 private:

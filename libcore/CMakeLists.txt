@@ -255,7 +255,8 @@ if (BUILD_CPPUNIT_TEST)
             test/catch2/geometry/PointTest.cpp
             test/catch2/geometry/RoomTest.cpp
             test/catch2/geometry/SubRoomTest.cpp
-            test/catch2/geometry/NeighborSearch.cpp
+            test/catch2/neighborhood/NeighborhoodSearch.cpp
+            test/catch2/neighborhood/Grid2D.cpp
             test/catch2/Main.cpp
             test/catch2/math/MathematicsTest.cpp
             test/catch2/pedestrian/EllipseTest.cpp
