@@ -159,7 +159,8 @@ void VelocityModel::ComputeNextTimeStep(
             Room * room       = building->GetRoom(ped->GetRoomID());
             SubRoom * subroom = room->GetSubRoom(ped->GetSubRoomID());
             Point repPed      = Point(0, 0);
-            std::vector<Pedestrian *> neighbours = building->GetGrid()->GetNeighbourhood(ped);
+            std::vector<Pedestrian *> neighbours =
+                building->GetNeighborhoodSearch().GetNeighbourhood(ped);
 
             int size = (int) neighbours.size();
             for(int i = 0; i < size; i++) {

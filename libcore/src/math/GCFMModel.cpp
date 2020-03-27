@@ -155,7 +155,8 @@ void GCFMModel::ComputeNextTimeStep(
             }
 
             Point F_rep;
-            std::vector<Pedestrian *> neighbours = building->GetGrid()->GetNeighbourhood(ped);
+            std::vector<Pedestrian *> neighbours =
+                building->GetNeighborhoodSearch().GetNeighbourhood(ped);
             std::vector<SubRoom *> emptyVector;
 
             int neighborsSize = neighbours.size();

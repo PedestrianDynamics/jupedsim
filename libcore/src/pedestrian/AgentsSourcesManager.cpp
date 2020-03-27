@@ -143,7 +143,7 @@ void AgentsSourcesManager::InitFixedPosition(AgentsSource * src, std::vector<Ped
 void AgentsSourcesManager::AdjustVelocityByNeighbour(Pedestrian * ped) const
 {
     //get the density
-    std::vector<Pedestrian *> neighbours = _building->GetGrid()->GetNeighbourhood(ped);
+    std::vector<Pedestrian *> neighbours = _building->GetNeighborhoodSearch().GetNeighbourhood(ped);
 
     double speed         = 0.0;
     double radius_square = 0.56 * 0.56; //corresponding to an area of 1m3
@@ -190,7 +190,7 @@ void AgentsSourcesManager::AdjustVelocityByNeighbour(Pedestrian * ped) const
 void AgentsSourcesManager::AdjustVelocityUsingWeidmann(Pedestrian * ped) const
 {
     //get the density
-    std::vector<Pedestrian *> neighbours = _building->GetGrid()->GetNeighbourhood(ped);
+    std::vector<Pedestrian *> neighbours = _building->GetNeighborhoodSearch().GetNeighbourhood(ped);
 
     //density in pers per m2
     double density = 1.0;

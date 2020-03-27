@@ -45,7 +45,7 @@ NeighborhoodSearch::NeighborhoodSearch(
     _gridSizeX((int) ((gridXmax - _gridXmin) / _cellSize) + 1 + 2), // 1 dummy cell on each side
     _gridSizeY((int) ((gridYmax - _gridYmin) / _cellSize) + 1 + 2)  // 1 dummy cell on each side
 {
-    grid.resize(_gridSizeY, _gridSizeX);
+    _grid.resize(_gridSizeY, _gridSizeX);
 }
 
 NeighborhoodSearch::~NeighborhoodSearch() {}
@@ -53,8 +53,8 @@ NeighborhoodSearch::~NeighborhoodSearch() {}
 void NeighborhoodSearch::Update(const std::vector<Pedestrian *> & peds)
 {
     std::unique_lock exclusive_lock(grid_mutex);
-    grid.clear();
-    grid.resize(_gridSizeY, _gridSizeX);
+    _grid.clear();
+    _grid.resize(_gridSizeY, _gridSizeX);
 
     for(auto & ped : peds) {
         // determine the cell coordinates of pedestrian i
@@ -62,7 +62,7 @@ void NeighborhoodSearch::Update(const std::vector<Pedestrian *> & peds)
             (int) ((ped->GetPos()._x - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
         int iy = (int) ((ped->GetPos()._y - _gridYmin) / _cellSize) + 1;
 
-        grid[iy][ix].push_back(ped);
+        _grid[iy][ix].push_back(ped);
     }
 }
 
@@ -88,8 +88,8 @@ std::vector<Pedestrian *> NeighborhoodSearch::GetNeighbourhood(const Pedestrian 
     for(int i = l - 1; i <= l + 1; ++i) {
         for(int j = k - 1; j <= k + 1; ++j) {
             std::copy_if(
-                grid[j][i].begin(),
-                grid[j][i].end(),
+                _grid[j][i].begin(),
+                _grid[j][i].end(),
                 std::back_inserter(neighbourhood),
                 [ped](auto & other_ped) { return other_ped->GetID() != ped->GetID(); });
         }

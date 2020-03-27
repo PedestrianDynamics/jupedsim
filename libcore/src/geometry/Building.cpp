@@ -69,7 +69,6 @@ Building::Building()
     _caption          = "no_caption";
     _geometryFilename = "";
     _routingEngine    = nullptr;
-    _neighborhoodSearch = nullptr;
     _savePathway      = false;
 }
 
@@ -80,8 +79,7 @@ Building::Building(Configuration * configuration, PedDistributor & pedDistributo
     _routingEngine(configuration->GetRoutingEngine()),
     _caption("no_caption")
 {
-    _savePathway    = false;
-    _neighborhoodSearch = nullptr;
+    _savePathway = false;
 
     {
         std::unique_ptr<GeoFileParser> parser(new GeoFileParser(_configuration));
@@ -124,7 +122,6 @@ Building::~Building()
         delete pedestrian;
     }
     _allPedestrians.clear();
-    delete _neighborhoodSearch;
 #endif
 
     if(_pathWayStream.is_open())
@@ -205,7 +202,7 @@ Room * Building::GetRoom(int index) const
     return _rooms.at(index).get();
 }
 
-NeighborhoodSearch * Building::GetGrid() const
+const NeighborhoodSearch & Building::GetNeighborhoodSearch() const
 {
     return _neighborhoodSearch;
 }
@@ -1032,7 +1029,7 @@ bool Building::SanityCheck()
 
 void Building::UpdateGrid()
 {
-    _neighborhoodSearch->Update(_allPedestrians);
+    _neighborhoodSearch.Update(_allPedestrians);
 }
 
 void Building::InitGrid()
@@ -1088,7 +1085,7 @@ void Building::InitGrid()
         LOG_INFO("Initializing the grid with cell size: {}.", cellSize);
     }
 
-    _neighborhoodSearch = new NeighborhoodSearch(x_min, x_max, y_min, y_max, cellSize);
+    _neighborhoodSearch = NeighborhoodSearch(x_min, x_max, y_min, y_max, cellSize);
 
     LOG_INFO("Done with Initializing the grid");
 }

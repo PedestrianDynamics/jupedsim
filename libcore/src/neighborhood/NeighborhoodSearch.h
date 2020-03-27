@@ -37,18 +37,18 @@ class Building;
 class NeighborhoodSearch
 {
 private:
-    /// rectangular area for linked cells which covers the whole geometry
-    double _gridXmin, _gridYmin;
-    double _cellSize;
-
-
-    /// number of cells in x- and y-direction respectively.
-    /// Also to be interpreted as cell coordinates in the grid
+    double _gridXmin, _gridYmin, _cellSize;
     int _gridSizeX, _gridSizeY;
 
-    Grid2D<std::deque<Pedestrian *>> grid;
+    Grid2D<std::deque<Pedestrian *>> _grid;
 
 public:
+    NeighborhoodSearch()                           = default;
+    NeighborhoodSearch(const NeighborhoodSearch &) = default;
+    NeighborhoodSearch(NeighborhoodSearch &&)      = default;
+    NeighborhoodSearch & operator=(const NeighborhoodSearch &) = default;
+    NeighborhoodSearch & operator=(NeighborhoodSearch &&) = default;
+
     /**
       * Constructor
       * @param boundaries the boundaries of the grid [xmin xmax ymin ymax]
