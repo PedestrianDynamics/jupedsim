@@ -138,7 +138,7 @@ ArgumentParser::ArgumentParser()
     _grid_size_X            = 10;
     _grid_size_Y            = 10;
     _errorLogFile           = "log.txt";
-    _log                    = 0; //console output only
+    _log                    = 0; //stdio as default
     _trajectoriesLocation   = "./";
     _trajectoriesFilename   = "";
     _projectRootDir         = "./";
