@@ -138,7 +138,7 @@ ArgumentParser::ArgumentParser()
     _grid_size_X            = 10;
     _grid_size_Y            = 10;
     _errorLogFile           = "log.txt";
-    _log                    = 2; //no output wanted
+    _log                    = 0; //stdio as default
     _trajectoriesLocation   = "./";
     _trajectoriesFilename   = "";
     _projectRootDir         = "./";
@@ -223,36 +223,34 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
     }
     if(xMainNode->FirstChild("logfile")) {
         fs::path logfile(xMainNode->FirstChild("logfile")->FirstChild()->Value());
+        // logfile is created at location of .ini-file
         logfile = GetProjectRootDir() / logfile;
         this->SetErrorLogFile(logfile);
-        this->SetLog(2);
+        this->SetLog(1);
         Log->Write("INFO:\tlogfile <%s>", GetErrorLogFile().string().c_str());
     }
     switch(this->GetLog()) {
         case 0:
-            // no log file
-            //Log = new OutputHandler();
-            break;
-        case 1:
             if(Log)
                 delete Log;
             Log = new STDIOHandler();
             break;
-        case 2: {
+        case 1: {
             char name[CLENGTH] = "";
             sprintf(name, "%s", GetErrorLogFile().string().c_str());
             if(Log)
                 delete Log;
             Log = new FileHandler(name);
+
+            //write basic information to file
+            Logs(); //Logging to file starts now
+
         } break;
         default:
             Log->Write("ERROR: \tWrong option for Log file!");
             exit(0);
     }
-    // from this point if case 2, the logs will go to a logfile
-    if(this->GetLog() == 2) {
-        Logs();
-    }
+
     //geometry
     if(xMainNode->FirstChild("geometry")) {
         fs::path pathGeo(xMainNode->FirstChildElement("geometry")->Attribute("file"));
