@@ -25,6 +25,17 @@ It might be useful to define a logfile (for debugging purposes):
 ```xml
     <logfile>log.txt</logfile>
 ```
+The logfile is created at the location of the inifile by default. Logfile can be written to another **existing** directory if needed, e.g. to results:
+
+```xml
+    <logfile>results/log.txt</logfile>
+```
+
+If no logfile is defined the information is written to the [stdio streams](http://www.cplusplus.com/reference/cstdio/) and can be redirected when executing jpsreport if required.
+
+```bash
+./jpsreport <path_to_inifile> &> log_example.txt
+``` 
 
 ## Geometry
 indicates the file name  corresponding to the trajectory files to analyze.
@@ -60,6 +71,7 @@ A path is considered absolute if it starts with "/" (Linux system) or contains "
   If only `path` is given, then all files with the corresponding format in
   the given folder will be considered as the upcoming trajectories
   and `JPSreport` will try to load them one by one.
+  If `path`is not defined, the trajectory files must be located in the same directory as the inifile.
   If both `file ` and `path` are given, then only the given trajectories
   will be considered (several `file` tags can be given at the same time).
 
@@ -75,6 +87,15 @@ A path is considered absolute if it starts with "/" (Linux system) or contains "
       <path location="./" />
   </trajectories>
   ```
+
+Do not define path information in `file` as in   
+
+```xml
+ <trajectories format="txt" unit="m">
+     <file name="data/traj.txt" />
+ </trajectories>
+ ````  
+ since this can cause issues with the output files.
 
 ## Scripts [depricated since 0.8.5]
 
