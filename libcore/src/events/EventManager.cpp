@@ -26,7 +26,7 @@
  **/
 #include "EventManager.h"
 
-#include "Event.h"
+#include "DoorEvent.h"
 #include "general/Logger.h"
 #include "geometry/Building.h"
 #include "pedestrian/Pedestrian.h"
@@ -38,15 +38,19 @@ EventManager::EventManager(Building * _b)
     _building = _b;
 }
 
-void EventManager::AddEvents(std::vector<Event> events)
+void EventManager::AddEvent(std::unique_ptr<Event> event)
 {
-    _events.insert(_events.end(), events.begin(), events.end());
+    event->SetBuilding(_building);
+    _events.emplace_back(std::move(event));
+    std::sort(std::begin(_events), std::end(_events), [](auto & event1, auto & event2) {
+        return event1->GetTime() < event2->GetTime();
+    });
 }
 
 void EventManager::ListEvents()
 {
     for(const auto & event : _events) {
-        LOG_INFO("{}", event.GetDescription());
+        LOG_INFO("{}", event->GetDescription());
     }
 }
 
@@ -54,58 +58,33 @@ bool EventManager::ProcessEvent()
 {
     bool eventProcessed = false;
 
-    for(const auto & event : _events) {
-        if(fabs(event.GetTime() - Pedestrian::GetGlobalTime()) < J_EPS_EVENT) {
-            //Event with current time stamp detected
-            LOG_INFO("Event: after {:.2f} sec", Pedestrian::GetGlobalTime());
-            switch(event.GetAction()) {
-                case EventAction::OPEN:
-                    OpenDoor(event.GetId());
-                    break;
-                case EventAction::CLOSE:
-                    CloseDoor(event.GetId());
-                    break;
-                case EventAction::TEMP_CLOSE:
-                    TempCloseDoor(event.GetId());
-                    break;
-                case EventAction::RESET_USAGE:
-                    ResetDoor(event.GetId());
-                    break;
-                case EventAction::NOTHING:
-                    LOG_WARNING("Unknown event action in events. open, close, reset or "
-                                "temp_close. Default: do nothing");
-                    break;
-            }
-            eventProcessed = true;
-        }
+    double timeMin = Pedestrian::GetGlobalTime() - J_EPS_EVENT;
+    double timeMax = Pedestrian::GetGlobalTime() + J_EPS_EVENT;
+
+    std::unique_ptr<Event> eventMin =
+        std::make_unique<DoorEvent>(-1, timeMin, EventAction::DOOR_OPEN);
+    std::unique_ptr<Event> eventMax =
+        std::make_unique<DoorEvent>(-1, timeMax, EventAction::DOOR_OPEN);
+
+    //TODO check if possible with std::equal_range
+    auto lower = std::upper_bound(
+        std::begin(_events), std::end(_events), eventMin, [](auto & val, auto & event) {
+            return val->GetTime() < event->GetTime();
+        });
+
+    if(lower == std::end(_events)) {
+        return false;
     }
+
+    auto upper = std::lower_bound(
+        std::begin(_events), std::end(_events), eventMax, [](auto & event, auto & val) {
+            return event->GetTime() <= val->GetTime();
+        });
+    if(upper == std::end(_events)) {
+        return false;
+    }
+
+    std::for_each(lower, upper, [](auto & event) { event->Process(); });
+
     return eventProcessed;
-}
-
-void EventManager::CloseDoor(int id)
-{
-    Transition * t = _building->GetTransition(id);
-    t->Close(true);
-    LOG_INFO("Closing door {}", id);
-}
-
-void EventManager::TempCloseDoor(int id)
-{
-    Transition * t = _building->GetTransition(id);
-    t->TempClose(true);
-    LOG_INFO("Closing door {}", id);
-}
-
-void EventManager::OpenDoor(int id)
-{
-    Transition * t = _building->GetTransition(id);
-    t->Open(true);
-    LOG_INFO("Opening door {}", id);
-}
-
-void EventManager::ResetDoor(int id)
-{
-    Transition * t = _building->GetTransition(id);
-    t->ResetDoorUsage();
-    LOG_INFO("Resetting door usage {}", id);
 }

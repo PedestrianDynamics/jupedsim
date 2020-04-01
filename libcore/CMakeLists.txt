@@ -12,7 +12,8 @@ set(source_files
     src/direction/waiting/WaitingStrategy.h
     src/direction/walking/DirectionStrategy.cpp
     src/direction/walking/DirectionStrategy.h
-    src/events/Event.cpp
+    src/events/DoorEvent.cpp
+    src/events/EventHelper.cpp
     src/events/EventManager.cpp
     src/general/ArgumentParser.cpp
     src/general/Logger.cpp
@@ -96,7 +97,9 @@ set(source_files
     src/voronoi-boost/VoronoiPositionGenerator.cpp
 )
 set(header_files
+    src/events/DoorEvent.h
     src/events/Event.h
+    src/events/EventHelper.h
     src/events/EventManager.h
     src/general/ArgumentParser.h
     src/general/Compiler.h

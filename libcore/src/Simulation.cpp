@@ -173,10 +173,10 @@ bool Simulation::InitArgs()
 
     _em = std::make_unique<EventManager>(_building.get());
     if(!_config->GetEventFile().empty()) {
-        _em->AddEvents(EventFileParser::ParseEvents(_config->GetEventFile()));
+        EventFileParser::ParseDoorEvents(*_em, _config->GetEventFile());
     }
     if(!_config->GetScheduleFile().empty()) {
-        _em->AddEvents(EventFileParser::ParseSchedule(_config->GetScheduleFile()));
+        EventFileParser::ParseSchedule(*_em, _config->GetScheduleFile());
 
         // Read and set max door usage from schedule file
         auto groupMaxAgents = EventFileParser::ParseMaxAgents(_config->GetScheduleFile());
@@ -185,6 +185,7 @@ bool Simulation::InitArgs()
         }
     }
 
+    _em->ListEvents();
     _goalManager.SetBuilding(_building.get());
     return true;
 }

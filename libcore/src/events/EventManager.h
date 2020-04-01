@@ -25,7 +25,7 @@
  **/
 #pragma once
 
-#include "Event.h"
+#include "DoorEvent.h"
 
 #include <string>
 #include <vector>
@@ -45,12 +45,16 @@ public:
       */
     ~EventManager() = default;
 
+    // NOTE: disable copy constructor and assignment operator
+    EventManager(const EventManager &) = delete;
+    EventManager & operator=(const EventManager &) & = delete;
+
     /**
      * Adds the events from \p events to the EventManager. This should be done before the simulation
      * starts.
      * @param events List of events, which should be used in the simulation
      */
-    void AddEvents(std::vector<Event> events);
+    void AddEvent(std::unique_ptr<Event> event);
 
     /**
       * Print the parsed events.
@@ -66,34 +70,9 @@ public:
 
 private:
     /**
-     * Closes the transition identified by \p id.
-     * @param id ID of the transition to close.
-     */
-    void CloseDoor(int id);
-
-    /**
-     * Temp closes the transition identified by \p id.
-     * @param id ID of the transition to temp close.
-     */
-    void TempCloseDoor(int id);
-
-    /**
-     * Opens the transition identified by \p id.
-     * @param id ID of the transition to close.
-     */
-    void OpenDoor(int id);
-
-    /**
-     * Resets the door usage of transition identified by \p id.
-     * @param id ID of the transition to close.
-     */
-    void ResetDoor(int id);
-
-private:
-    /**
      * List of all events processed by the EventManager.
      */
-    std::vector<Event> _events;
+    std::vector<std::unique_ptr<Event>> _events;
 
     /**
      * Geometry the events will be processed on.
