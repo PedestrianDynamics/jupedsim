@@ -17,19 +17,38 @@
  **/
 
 
-#include "geometry/Point.h"
 #include "neighborhood/NeighborhoodSearch.h"
+
+#include "geometry/Point.h"
 #include "pedestrian/Pedestrian.h"
 
+#include <algorithm>
 #include <catch2/catch.hpp>
 #include <deque>
 #include <vector>
 
 TEST_CASE("neighborhood/NeighborSearch", "[neighborhood][neightbor-search]")
 {
-    SECTION("GetNeighbors")
+    SECTION("Empty NeighborhoodSearch")
     {
         NeighborhoodSearch lcgrid(0, 10, 0, 10, 2.2);
+
+        Pedestrian special_ped;
+        special_ped.SetPos(Point(0, 0));
+
+        REQUIRE(lcgrid.GetNeighbourhood(&special_ped).empty());
+
+        special_ped.SetPos(Point(10, 0));
+        REQUIRE(lcgrid.GetNeighbourhood(&special_ped).empty());
+        special_ped.SetPos(Point(5, 5));
+        REQUIRE(lcgrid.GetNeighbourhood(&special_ped).empty());
+        special_ped.SetPos(Point(0, 10));
+        REQUIRE(lcgrid.GetNeighbourhood(&special_ped).empty());
+    }
+
+    SECTION("GetNeighbors")
+    {
+        NeighborhoodSearch neighborhood_search(0, 10, 0, 10, 2.2);
 
         std::vector<Pedestrian> pedestrians(10);
         for(auto & ped : pedestrians) {
@@ -37,30 +56,32 @@ TEST_CASE("neighborhood/NeighborSearch", "[neighborhood][neightbor-search]")
         }
 
         std::vector<Pedestrian *> ped_pointers;
-        for(auto & ped : pedestrians) {
-            ped_pointers.push_back(&ped);
-        }
+        std::transform(
+            pedestrians.begin(),
+            pedestrians.end(),
+            std::back_inserter(ped_pointers),
+            [](Pedestrian & ped) -> Pedestrian * { return &ped; });
 
-        lcgrid.Update(ped_pointers);
+        neighborhood_search.Update(ped_pointers);
 
         std::vector<Pedestrian *> neighborhood;
 
         Pedestrian special_ped;
         special_ped.SetPos(Point(0, 0));
 
-        neighborhood = lcgrid.GetNeighbourhood(&special_ped);
+        neighborhood = neighborhood_search.GetNeighbourhood(&special_ped);
         REQUIRE_THAT(ped_pointers, Catch::Matchers::UnorderedEquals(neighborhood));
 
         special_ped.SetPos(Point(10, 10));
-        neighborhood = lcgrid.GetNeighbourhood(&special_ped);
+        neighborhood = neighborhood_search.GetNeighbourhood(&special_ped);
         REQUIRE(neighborhood.empty());
 
         special_ped.SetPos(Point(0, 4.4));
-        neighborhood = lcgrid.GetNeighbourhood(&special_ped);
+        neighborhood = neighborhood_search.GetNeighbourhood(&special_ped);
         REQUIRE(neighborhood.empty());
 
         special_ped.SetPos(Point(0, 4.3));
-        neighborhood = lcgrid.GetNeighbourhood(&special_ped);
+        neighborhood = neighborhood_search.GetNeighbourhood(&special_ped);
         REQUIRE_THAT(ped_pointers, Catch::Matchers::UnorderedEquals(neighborhood));
     }
 }
