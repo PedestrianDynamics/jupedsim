@@ -32,10 +32,10 @@ private:
     using container_type = std::vector<element_type>;
 
 public:
-    using size_type  = std::size_t;
-    using value_type = T;
-    using row_type   = container_type<value_type>;
-    using grid_type  = container_type<row_type>;
+    using size_type          = std::size_t;
+    using value_type         = T;
+    using row_type           = container_type<value_type>;
+    using row_container_type = container_type<row_type>;
 
     Grid2D() = default;
 
@@ -45,9 +45,9 @@ public:
     Grid2D & operator=(const Grid2D &) = default;
     Grid2D & operator=(Grid2D &&) = default;
 
-    Grid2D(size_type num_rows, size_type num_columns) : _grid(num_rows, row_type(num_columns)) {}
+    Grid2D(size_type num_rows, size_type num_columns) : _rows(num_rows, row_type(num_columns)) {}
 
-    row_type const & operator[](size_type row) const { return _grid[row]; }
+    row_type const & operator[](size_type row) const { return _rows[row]; }
     row_type & operator[](size_type row)
     {
         return const_cast<row_type &>(const_cast<const Grid2D *>(this)->operator[](row));
@@ -55,13 +55,24 @@ public:
 
     void clear()
     {
-        for(auto & row : _grid) {
+        for(auto & row : _rows) {
             for(auto & elem : row) {
                 elem.clear();
             }
         }
     }
 
+    size_type num_rows() const { return _rows.size(); }
+    size_type num_columns() const
+    {
+        if(_rows.empty()) {
+            return 0;
+        } else {
+            return _rows.front().size();
+        }
+    }
+
+
 private:
-    grid_type _grid;
+    row_container_type _rows;
 };
