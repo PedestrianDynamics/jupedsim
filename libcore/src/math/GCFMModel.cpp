@@ -35,7 +35,7 @@
 #include "general/OpenMP.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
-#include "mpi/LCGrid.h"
+#include "neighborhood/NeighborhoodSearch.h"
 #include "pedestrian/Pedestrian.h"
 
 GCFMModel::GCFMModel(
@@ -155,8 +155,8 @@ void GCFMModel::ComputeNextTimeStep(
             }
 
             Point F_rep;
-            std::vector<Pedestrian *> neighbours;
-            building->GetGrid()->GetNeighbourhood(ped, neighbours);
+            std::vector<Pedestrian *> neighbours =
+                building->GetNeighborhoodSearch().GetNeighbourhood(ped);
             std::vector<SubRoom *> emptyVector;
 
             int neighborsSize = neighbours.size();

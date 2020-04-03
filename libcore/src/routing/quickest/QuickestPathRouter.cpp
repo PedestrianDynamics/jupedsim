@@ -29,7 +29,6 @@
 #include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
-#include "mpi/LCGrid.h"
 
 #include <tinyxml.h>
 

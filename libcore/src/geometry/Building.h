@@ -34,6 +34,7 @@
 #include "Transition.h"
 #include "general/Configuration.h"
 #include "general/Filesystem.h"
+#include "neighborhood/NeighborhoodSearch.h"
 
 typedef std::pair<Point, Wall> PointWall;
 
@@ -75,8 +76,6 @@ class Pedestrian;
 
 class Transition;
 
-class LCGrid;
-
 class PedDistributor;
 
 class Configuration;
@@ -90,7 +89,7 @@ private:
     std::shared_ptr<RoutingEngine> _routingEngine;
     std::string _caption;
     std::string _geometryFilename;
-    LCGrid * _linkedCellGrid;
+    NeighborhoodSearch _neighborhoodSearch;
     std::vector<Pedestrian *> _allPedestrians;
     std::map<int, std::shared_ptr<Room>> _rooms;
     std::map<int, Crossing *> _crossings;
@@ -208,10 +207,7 @@ public:
     //TOD0: rename later to GetGoal
     Goal * GetFinalGoal(int id) const;
 
-    /**
-      * @return the linked-cell grid used for spatial query
-      */
-    LCGrid * GetGrid() const;
+    const NeighborhoodSearch & GetNeighborhoodSearch() const;
 
     // convenience methods
     bool InitGeometry();

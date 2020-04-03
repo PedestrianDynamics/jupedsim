@@ -44,7 +44,7 @@
 #include "geometry/Transition.h"
 #include "geometry/Wall.h"
 #include "geometry/helper/CorrectGeometry.h"
-#include "mpi/LCGrid.h"
+#include "neighborhood/NeighborhoodSearch.h"
 #include "pedestrian/PedDistributor.h"
 #include "pedestrian/Pedestrian.h"
 #include "routing/RoutingEngine.h"
@@ -69,7 +69,6 @@ Building::Building()
     _caption          = "no_caption";
     _geometryFilename = "";
     _routingEngine    = nullptr;
-    _linkedCellGrid   = nullptr;
     _savePathway      = false;
 }
 
@@ -80,8 +79,7 @@ Building::Building(Configuration * configuration, PedDistributor & pedDistributo
     _routingEngine(configuration->GetRoutingEngine()),
     _caption("no_caption")
 {
-    _savePathway    = false;
-    _linkedCellGrid = nullptr;
+    _savePathway = false;
 
     {
         std::unique_ptr<GeoFileParser> parser(new GeoFileParser(_configuration));
@@ -124,7 +122,6 @@ Building::~Building()
         delete pedestrian;
     }
     _allPedestrians.clear();
-    delete _linkedCellGrid;
 #endif
 
     if(_pathWayStream.is_open())
@@ -205,9 +202,9 @@ Room * Building::GetRoom(int index) const
     return _rooms.at(index).get();
 }
 
-LCGrid * Building::GetGrid() const
+const NeighborhoodSearch & Building::GetNeighborhoodSearch() const
 {
-    return _linkedCellGrid;
+    return _neighborhoodSearch;
 }
 
 void Building::AddRoom(Room * room)
@@ -1032,7 +1029,7 @@ bool Building::SanityCheck()
 
 void Building::UpdateGrid()
 {
-    _linkedCellGrid->Update(_allPedestrians);
+    _neighborhoodSearch.Update(_allPedestrians);
 }
 
 void Building::InitGrid()
@@ -1073,7 +1070,6 @@ void Building::InitGrid()
     y_min = y_min - 1 * cellSize;
     y_max = y_max + 1 * cellSize;
 
-    double boundaries[4] = {x_min, x_max, y_min, y_max};
 
     //no algorithms
     // the domain is made of a single cell
@@ -1089,11 +1085,7 @@ void Building::InitGrid()
         LOG_INFO("Initializing the grid with cell size: {}.", cellSize);
     }
 
-    //TODO: the number of pedestrian should be calculated using the capacity of the sources
-    //int nped= Pedestrian::GetAgentsCreated() +  for src:sources  src->GetMaxAgents()
-
-    _linkedCellGrid = new LCGrid(boundaries, cellSize, Pedestrian::GetAgentsCreated());
-    _linkedCellGrid->ShallowCopy(_allPedestrians);
+    _neighborhoodSearch = NeighborhoodSearch(x_min, x_max, y_min, y_max, cellSize);
 
     LOG_INFO("Done with Initializing the grid");
 }

@@ -33,7 +33,7 @@
 #include "general/OpenMP.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
-#include "mpi/LCGrid.h"
+#include "neighborhood/NeighborhoodSearch.h"
 #include "pedestrian/Pedestrian.h"
 
 double xRight = 26.0;
@@ -159,8 +159,8 @@ void VelocityModel::ComputeNextTimeStep(
             Room * room       = building->GetRoom(ped->GetRoomID());
             SubRoom * subroom = room->GetSubRoom(ped->GetSubRoomID());
             Point repPed      = Point(0, 0);
-            std::vector<Pedestrian *> neighbours;
-            building->GetGrid()->GetNeighbourhood(ped, neighbours);
+            std::vector<Pedestrian *> neighbours =
+                building->GetNeighborhoodSearch().GetNeighbourhood(ped);
 
             int size = (int) neighbours.size();
             for(int i = 0; i < size; i++) {

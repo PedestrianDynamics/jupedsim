@@ -48,7 +48,7 @@ set(source_files
     src/math/Mathematics.cpp
     src/math/OperationalModel.cpp
     src/math/VelocityModel.cpp
-    src/mpi/LCGrid.cpp
+    src/neighborhood/NeighborhoodSearch.cpp
     src/pedestrian/AgentsParameters.cpp
     src/pedestrian/AgentsQueue.cpp
     src/pedestrian/AgentsSource.cpp
@@ -135,7 +135,8 @@ set(header_files
     src/math/Mathematics.h
     src/math/OperationalModel.h
     src/math/VelocityModel.h
-    src/mpi/LCGrid.h
+    src/neighborhood/NeighborhoodSearch.h
+    src/neighborhood/Grid2D.h
     src/pedestrian/AgentsParameters.h
     src/pedestrian/AgentsQueue.h
     src/pedestrian/AgentsSource.h
@@ -253,6 +254,8 @@ if (BUILD_CPPUNIT_TEST)
             test/catch2/geometry/PointTest.cpp
             test/catch2/geometry/RoomTest.cpp
             test/catch2/geometry/SubRoomTest.cpp
+            test/catch2/neighborhood/NeighborhoodSearch.cpp
+            test/catch2/neighborhood/Grid2D.cpp
             test/catch2/Main.cpp
             test/catch2/math/MathematicsTest.cpp
             test/catch2/pedestrian/EllipseTest.cpp
