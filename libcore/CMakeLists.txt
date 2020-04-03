@@ -49,7 +49,6 @@ set(source_files
     src/math/OperationalModel.cpp
     src/math/VelocityModel.cpp
     src/neighborhood/NeighborhoodSearch.cpp
-    src/neighborhood/Grid2D.cpp
     src/pedestrian/AgentsParameters.cpp
     src/pedestrian/AgentsQueue.cpp
     src/pedestrian/AgentsSource.cpp

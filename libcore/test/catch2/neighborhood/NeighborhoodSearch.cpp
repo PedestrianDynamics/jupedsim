@@ -27,7 +27,7 @@
 #include <deque>
 #include <vector>
 
-TEST_CASE("neighborhood/NeighborSearch", "[neighborhood][neightbor-search]")
+TEST_CASE("neighborhood/NeighborSearch", "[neighborhood][neightor-search]")
 {
     SECTION("Empty NeighborhoodSearch")
     {

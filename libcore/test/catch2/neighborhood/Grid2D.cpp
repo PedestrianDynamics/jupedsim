@@ -24,7 +24,7 @@
 #include <catch2/catch.hpp>
 #include <deque>
 
-TEST_CASE("neighborhood/Grid2D", "[neighborhood][neightbor-search][grid2d]")
+TEST_CASE("neighborhood/Grid2D", "[neighborhood][neighbor-search][grid2d]")
 {
     SECTION("ctors")
     {
