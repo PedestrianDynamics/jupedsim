@@ -52,6 +52,7 @@ void EventManager::ListEvents()
     for(const auto & event : _events) {
         LOG_INFO("{}", event->GetDescription());
     }
+
 }
 
 bool EventManager::ProcessEvent()

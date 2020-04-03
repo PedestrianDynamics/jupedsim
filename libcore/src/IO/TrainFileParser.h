@@ -8,7 +8,8 @@
 
 namespace TrainFileParser
 {
-std::map<int, TrainTimeTable> ParseTrainTimetable(const fs::path & trainTimeTableFile);
+std::map<int, TrainTimeTable>
+ParseTrainTimetable(const fs::path & trainTimeTableFile);
 
 std::optional<TrainTimeTable> ParseTrainTimeTableNode(TiXmlElement * node);
 

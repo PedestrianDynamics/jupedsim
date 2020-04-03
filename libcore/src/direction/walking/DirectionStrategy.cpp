@@ -254,8 +254,9 @@ Point DirectionTrain::GetTarget(Room * /*room*/, Pedestrian * ped) const
         if(ped->GetRoomID() != t.second.rid)
             continue;
 
+
         if((now >= t.second.tin) && (now <= t.second.tout)) {
-            auto doors = TrainTypes[t.second.type].doors;
+            auto doors = TrainTypes[t.second.type]._doors;
             int i = -1, imin = 0;
             double dist_min = 10000;
             for(const auto & door : doors) {

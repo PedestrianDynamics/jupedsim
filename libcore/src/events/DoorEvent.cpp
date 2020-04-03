@@ -11,9 +11,9 @@
 
 #include <algorithm>
 
-DoorEvent::DoorEvent(int id, double time, EventAction action)
+DoorEvent::DoorEvent(int doorID, double time, EventAction action)
 {
-    _doorID = id;
+    _doorID = doorID;
     _time   = time;
     _action = action;
 }

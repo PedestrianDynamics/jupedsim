@@ -1046,7 +1046,7 @@ bool Simulation::TrainTraffic()
         trackStart = tab.pstart;
         trackEnd   = tab.pend;
         if(!tab.arrival && (now >= tab.tin) && (now <= tab.tout)) {
-            trainHere = true;
+            trainHere   = true;
             _building->SetTrainArrived(trainId, true);
             std::cout << "Arrival: TRAIN " << trainType << " at time: " << now << "\n";
             correctGeometry(_building, tab);
@@ -1054,7 +1054,7 @@ bool Simulation::TrainTraffic()
         } else if(tab.arrival && now >= tab.tout) {
             std::cout << "Departure: TRAIN " << trainType << " at time: " << now << "\n";
             _building->resetGeometry(tab);
-            trainLeave = true;
+            trainLeave  = true;
             _building->SetTrainArrived(trainId, false);
         }
     }

@@ -7,7 +7,14 @@
 #include <string>
 
 // Describes the event
-enum class EventAction { DOOR_OPEN, DOOR_CLOSE, DOOR_TEMP_CLOSE, DOOR_RESET_USAGE };
+enum class EventAction {
+    DOOR_OPEN,
+    DOOR_CLOSE,
+    DOOR_TEMP_CLOSE,
+    DOOR_RESET_USAGE,
+    TRAIN_ARRIVAL,
+    TRAIN_DEPARTURE
+};
 
 class Event
 {

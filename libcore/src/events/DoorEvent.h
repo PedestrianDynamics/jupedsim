@@ -13,14 +13,20 @@
 
 class DoorEvent : public Event
 {
+private:
+    /**
+     * ID of transition which is effected by event.
+     */
+    int _doorID;
+
 public:
     /**
       * Constructor
-      * @param id
+      * @param doorID
       * @param time
       * @param state
       */
-    DoorEvent(int id, double time, EventAction action);
+    DoorEvent(int doorID, double time, EventAction action);
 
     /**
       * Destructor
@@ -33,11 +39,6 @@ public:
     [[nodiscard]] std::string GetDescription() const override;
 
 private:
-    /**
-     * ID of transition which is effected by event.
-     */
-    int _doorID;
-
     /**
      * Closes the transition identified by \a _doorID.
      */
