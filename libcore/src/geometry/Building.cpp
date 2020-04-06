@@ -565,7 +565,6 @@ bool Building::resetGeometry(const TrainTimeTable & tab)
 
     /*       // remove added doors */
     auto tempDoors = TempAddedDoors[tab.id];
-
     for(auto it = tempDoors.begin(); it != tempDoors.end();) {
         auto door = *it;
         if(it != tempDoors.end()) {

@@ -302,7 +302,6 @@ void Simulation::PrintStatistics(double simTime)
         }
     }
 
-    //TODO discuss deletion
     LOG_INFO("Usage of Crossings");
     for(const auto & itr : _building->GetAllCrossings()) {
         Crossing * goal = itr.second;
@@ -428,7 +427,7 @@ double Simulation::RunBody(double maxSimTime)
             }
 
             // here the used routers are update, when needed due to external changes
-            if(_routingEngine->NeedsUpdate() || geometryChanged) {
+            if(_routingEngine->NeedsUpdate()) {
                 LOG_INFO("Update router during simulation.");
                 _routingEngine->UpdateRouter();
             }
