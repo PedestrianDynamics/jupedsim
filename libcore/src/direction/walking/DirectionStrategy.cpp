@@ -251,11 +251,11 @@ Point DirectionTrain::GetTarget(Room * /*room*/, Pedestrian * ped) const
     std::string type_delme;
 
     for(auto && t : TrainTimeTables) {
-        if(ped->GetRoomID() != t.second->rid)
+        if(ped->GetRoomID() != t.second.rid)
             continue;
 
-        if((now >= t.second->tin) && (now <= t.second->tout)) {
-            auto doors = TrainTypes[t.second->type]->doors;
+        if((now >= t.second.tin) && (now <= t.second.tout)) {
+            auto doors = TrainTypes[t.second.type].doors;
             int i = -1, imin = 0;
             double dist_min = 10000;
             for(const auto & door : doors) {
@@ -269,7 +269,7 @@ Point DirectionTrain::GetTarget(Room * /*room*/, Pedestrian * ped) const
                 if(dist <= dist_min) {
                     dist_min   = dist;
                     imin       = i;
-                    type_delme = t.second->type;
+                    type_delme = t.second.type;
                 }
             } // doors
             p1 = doors[imin].GetPoint1();

@@ -96,8 +96,8 @@ private:
     std::map<int, Transition *> _transitions;
     std::map<int, Hline *> _hLines;
     std::map<int, Goal *> _goals;
-    std::map<std::string, std::shared_ptr<TrainType>> _trainTypes;
-    std::map<int, std::shared_ptr<TrainTimeTable>> _trainTimeTables;
+    std::map<std::string, TrainType> _trainTypes;
+    std::map<int, TrainTimeTable> _trainTimeTables;
     std::map<int, std::shared_ptr<Platform>> _platforms;
     /// pedestrians pathway
     bool _savePathway;
@@ -111,7 +111,7 @@ public:
     std::map<int, std::vector<Transition>> TempAddedDoors;
 
     Building(Configuration * config, PedDistributor & pedDistributor);
-    bool resetGeometry(std::shared_ptr<TrainTimeTable> tab);
+    bool resetGeometry(const TrainTimeTable & tab);
     /// destructor
     virtual ~Building();
 
@@ -232,9 +232,11 @@ public:
 
     const std::map<int, Goal *> & GetAllGoals() const;
     // --------------- Trains interface
-    const std::map<std::string, std::shared_ptr<TrainType>> & GetTrainTypes() const;
+    const std::map<std::string, TrainType> & GetTrainTypes() const;
 
-    const std::map<int, std::shared_ptr<TrainTimeTable>> & GetTrainTimeTables() const;
+    const std::map<int, TrainTimeTable> & GetTrainTimeTables() const;
+
+    void SetTrainArrived(int timeTableID, bool arrived);
 
     const std::map<int, std::shared_ptr<Platform>> & GetPlatforms() const;
 
@@ -253,10 +255,6 @@ public:
     bool AddHline(Hline * line);
 
     bool AddGoal(Goal * goal);
-
-    bool AddTrainType(std::shared_ptr<TrainType> TT);
-
-    bool AddTrainTimeTable(std::shared_ptr<TrainTimeTable> TTT);
 
     bool AddPlatform(std::shared_ptr<Platform> P);
 
