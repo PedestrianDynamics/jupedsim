@@ -79,7 +79,7 @@ std::vector<Pedestrian *> SimulationHelper::FindPedsReachedFinalGoal(
         std::begin(peds),
         std::end(peds),
         std::inserter(pedsAtFinalGoal, std::end(pedsAtFinalGoal)),
-        [goals](auto const ped) -> bool {
+        [goals](const Pedestrian * ped) -> bool {
             return ped->GetFinalDestination() != FINAL_DEST_OUT &&
                    goals.at(ped->GetFinalDestination())->Contains(ped->GetPos()) &&
                    goals.at(ped->GetFinalDestination())->GetIsFinalGoal();
@@ -107,7 +107,7 @@ SimulationHelper::UpdateLocations(const Building & building, const std::vector<P
     return {pedsChangedRoom, pedsNotRelocated};
 }
 
-std::vector<Pedestrian *> SimulationHelper::FindOutsidePedestrians(
+std::vector<Pedestrian *> SimulationHelper::FindPedestriansOutside(
     const Building & building,
     std::vector<Pedestrian *> & peds)
 {
