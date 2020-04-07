@@ -608,7 +608,7 @@ void Simulation::RotateOutputFile()
         incrementCountTraj();
         _currentTrajectoriesFile =
             parent / fs::path(fmt::format(
-                         FMT_STRING("{}_{}{}"), stem.string(), _countTraj, extension.string()));
+                         FMT_STRING("{}_{:04d}{}"), stem.string(), _countTraj, extension.string()));
         LOG_INFO("New trajectory file <{}>", _currentTrajectoriesFile.string());
         auto file = std::make_shared<FileHandler>(_currentTrajectoriesFile);
         _iod->SetOutputHandler(file);
