@@ -278,10 +278,10 @@ TEST_CASE("Pedestrian::SetPos", "[Pedestrian][SetPos]")
 
         double min  = -10;
         double max  = 10;
-        int steps   = 5;
+        size_t steps   = 5;
         double step = std::abs(max - min) / steps;
 
-        for(int i = 0; i < steps; ++i) {
+        for(size_t i = 0; i < steps; ++i) {
             Point p{i * step, -1. * i * step};
             ped.SetPos(p, false);
             REQUIRE(ped.GetLastPositions().back() == p);
@@ -296,12 +296,12 @@ TEST_CASE("Pedestrian::SetPos", "[Pedestrian][SetPos]")
         ped.SetPremovementTime(Pedestrian::GetGlobalTime() - 1.);
         ped.SetRecordingTime(10.);
 
-        int steps   = std::floor(ped.GetRecordingTime() / ped.Getdt());
+        size_t steps   = std::floor(ped.GetRecordingTime() / ped.Getdt());
         double min  = -10;
         double max  = 10;
         double step = std::abs(max - min) / steps;
 
-        for(int i = 0; i < steps; ++i) {
+        for(size_t i = 0; i < steps; ++i) {
             Point p{i * step, -1. * i * step};
             ped.SetPos(p, false);
             REQUIRE(ped.GetLastPositions().back() == p);
@@ -316,7 +316,7 @@ TEST_CASE("Pedestrian::SetPos", "[Pedestrian][SetPos]")
         ped.SetPremovementTime(Pedestrian::GetGlobalTime() - 1.);
         ped.SetRecordingTime(10.);
 
-        int maxSize = std::floor(ped.GetRecordingTime() / ped.Getdt());
+        size_t maxSize = std::floor(ped.GetRecordingTime() / ped.Getdt());
         int steps   = maxSize + 1;
         double min  = -10;
         double max  = 10;

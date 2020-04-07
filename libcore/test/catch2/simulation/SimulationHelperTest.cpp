@@ -30,7 +30,7 @@
 
 #include <catch2/catch.hpp>
 
-TEST_CASE("SimulationHelper::UpdateRoom", "[SimulationHelper][UpdateRoom]")
+TEST_CASE("SimulationHelper::UpdatePedestrianRoomInformation", "[SimulationHelper][UpdatePedestrianRoomInformation]")
 {
     // Create following geometry:
     // -| = Walls
@@ -205,9 +205,8 @@ TEST_CASE("SimulationHelper::UpdateRoom", "[SimulationHelper][UpdateRoom]")
         ped.SetSubRoomID(sub11->GetSubRoomID());
         ped.SetSubRoomUID(sub11->GetUID());
 
-        auto ret = SimulationHelper::UpdateRoom(building, ped);
-        REQUIRE(ret.has_value());
-        REQUIRE_FALSE(ret.value());
+        auto ret = SimulationHelper::UpdatePedestrianRoomInformation(building, ped);
+        REQUIRE(ret == PedRelocation::NOT_NEEDED);
         REQUIRE(ped.GetRoomID() == sub11->GetRoomID());
         REQUIRE(ped.GetSubRoomID() == sub11->GetSubRoomID());
         REQUIRE(ped.GetSubRoomUID() == sub11->GetUID());
@@ -221,9 +220,8 @@ TEST_CASE("SimulationHelper::UpdateRoom", "[SimulationHelper][UpdateRoom]")
         ped.SetSubRoomID(sub12->GetSubRoomID());
         ped.SetSubRoomUID(sub12->GetUID());
 
-        auto ret = SimulationHelper::UpdateRoom(building, ped);
-        REQUIRE(ret.has_value());
-        REQUIRE(ret.value());
+        auto ret = SimulationHelper::UpdatePedestrianRoomInformation(building, ped);
+        REQUIRE(ret == PedRelocation::SUCCESSFUL);
         REQUIRE(ped.GetRoomID() == sub11->GetRoomID());
         REQUIRE(ped.GetSubRoomID() == sub11->GetSubRoomID());
         REQUIRE(ped.GetSubRoomUID() == sub11->GetUID());
@@ -237,9 +235,8 @@ TEST_CASE("SimulationHelper::UpdateRoom", "[SimulationHelper][UpdateRoom]")
         ped.SetSubRoomID(sub21->GetSubRoomID());
         ped.SetSubRoomUID(sub21->GetUID());
 
-        auto ret = SimulationHelper::UpdateRoom(building, ped);
-        REQUIRE(ret.has_value());
-        REQUIRE(ret.value());
+        auto ret = SimulationHelper::UpdatePedestrianRoomInformation(building, ped);
+        REQUIRE(ret == PedRelocation::SUCCESSFUL);
         REQUIRE(ped.GetRoomID() == sub13->GetRoomID());
         REQUIRE(ped.GetSubRoomID() == sub13->GetSubRoomID());
         REQUIRE(ped.GetSubRoomUID() == sub13->GetUID());
@@ -254,8 +251,8 @@ TEST_CASE("SimulationHelper::UpdateRoom", "[SimulationHelper][UpdateRoom]")
         ped.SetSubRoomID(sub13->GetSubRoomID());
         ped.SetSubRoomUID(sub13->GetUID());
 
-        auto ret = SimulationHelper::UpdateRoom(building, ped);
-        REQUIRE_FALSE(ret.has_value());
+        auto ret = SimulationHelper::UpdatePedestrianRoomInformation(building, ped);
+        REQUIRE(ret == PedRelocation::FAILED);
         REQUIRE(ped.GetRoomID() == -1);
         REQUIRE(ped.GetSubRoomID() == -1);
         REQUIRE(ped.GetSubRoomUID() == -1);
@@ -269,8 +266,8 @@ TEST_CASE("SimulationHelper::UpdateRoom", "[SimulationHelper][UpdateRoom]")
         ped.SetSubRoomID(sub31->GetSubRoomID());
         ped.SetSubRoomUID(sub31->GetUID());
 
-        auto ret = SimulationHelper::UpdateRoom(building, ped);
-        REQUIRE_FALSE(ret.has_value());
+        auto ret = SimulationHelper::UpdatePedestrianRoomInformation(building, ped);
+        REQUIRE(ret == PedRelocation::FAILED);
         REQUIRE(ped.GetRoomID() == -1);
         REQUIRE(ped.GetSubRoomID() == -1);
         REQUIRE(ped.GetSubRoomUID() == -1);
@@ -618,7 +615,7 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
         ped.UpdateRoom(-1, -1);
 
         std::vector<Pedestrian *> peds{&ped};
-        auto outsidePeds = SimulationHelper::FindOutsidePedestrians(building, peds);
+        auto outsidePeds = SimulationHelper::FindPedestriansOutside(building, peds);
         REQUIRE(peds.size() == 1);
         REQUIRE(outsidePeds.empty());
     }
@@ -633,16 +630,16 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
         ped.UpdateRoom(-1, -1);
 
         std::vector<Pedestrian *> peds{&ped};
-        auto outsidePeds = SimulationHelper::FindOutsidePedestrians(building, peds);
+        auto outsidePeds = SimulationHelper::FindPedestriansOutside(building, peds);
         REQUIRE(peds.empty());
         REQUIRE(outsidePeds.size() == 1);
     }
 
     SECTION("Runtime")
     {
-        long largeNumber = 100000;
+        size_t largeNumber = 100000;
         std::vector<Pedestrian *> peds;
-        for(long i = 0; i < largeNumber; ++i) {
+        for(size_t i = 0; i < largeNumber; ++i) {
             auto ped = new Pedestrian();
             ped->SetRoomID(1, "");
             ped->SetSubRoomID(1);
@@ -652,7 +649,7 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
             peds.push_back(ped);
         }
 
-        auto outsidePeds = SimulationHelper::FindOutsidePedestrians(building, peds);
+        auto outsidePeds = SimulationHelper::FindPedestriansOutside(building, peds);
         REQUIRE(peds.empty());
         REQUIRE(outsidePeds.size() == largeNumber);
 
@@ -673,7 +670,7 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
         ped.UpdateRoom(-1, -1);
 
         std::vector<Pedestrian *> peds{&ped};
-        auto outsidePeds = SimulationHelper::FindOutsidePedestrians(building, peds);
+        auto outsidePeds = SimulationHelper::FindPedestriansOutside(building, peds);
         REQUIRE(peds.size() == 1);
         REQUIRE(outsidePeds.empty());
     }
@@ -689,52 +686,11 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
         trans11->Close();
 
         std::vector<Pedestrian *> peds{&ped};
-        auto outsidePeds = SimulationHelper::FindOutsidePedestrians(building, peds);
+        auto outsidePeds = SimulationHelper::FindPedestriansOutside(building, peds);
         REQUIRE(peds.size() == 1);
         REQUIRE(outsidePeds.empty());
     }
 
-    //    SECTION("Old room ID does not exist")
-    //    {
-    //        Pedestrian ped;
-    //        ped.SetRoomID(5, "");
-    //        ped.SetSubRoomID(1);
-    //        ped.SetPos({4., -1.}, false);
-    //        ped.SetPos({5.2, -1.}, false);
-    //        ped.UpdateRoom(-1, -1);
-    //
-    //        std::vector<Pedestrian *> peds{&ped};
-    //        auto outsidePeds = SimulationHelper::FindOutsidePedestrians(building, peds);
-    //        REQUIRE(peds.size() == 1);
-    //        REQUIRE(outsidePeds.empty());
-    //    }
-    //
-    //    SECTION("Old room ID not set via UpdateRoom")
-    //    {
-    //        Pedestrian ped;
-    //        ped.SetRoomID(1, "");
-    //        ped.SetSubRoomID(1);
-    //        ped.SetPos({4., -1.}, false);
-    //        ped.SetPos({5.2, -1.}, false);
-    //
-    //        std::vector<Pedestrian *> peds{&ped};
-    //        auto outsidePeds = SimulationHelper::FindOutsidePedestrians(building, peds);
-    //        REQUIRE(peds.size() == 1);
-    //        REQUIRE(outsidePeds.empty());
-    //    }
-    //
-    //    SECTION("Peds has no last position")
-    //    {
-    //        Pedestrian ped;
-    //        ped.SetRoomID(5, "");
-    //        ped.SetSubRoomID(1);
-    //        ped.SetPos({4., -1.}, false);
-    //
-    //        std::vector<Pedestrian *> peds{&ped};
-    //        auto outsidePeds = SimulationHelper::FindOutsidePedestrians(building, peds);
-    //        REQUIRE(peds.size() == 1);
-    //        REQUIRE(outsidePeds.empty());
-    //    }
 }
 
 TEST_CASE("SimulationHelper::UpdateFlowAtDoors", "[SimulationHelper][UpdateFlowAtDoors]")

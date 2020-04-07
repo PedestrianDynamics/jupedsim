@@ -116,12 +116,6 @@ public:
 
 
     /**
-     * Update the location of the agents and remove the agents from the simulation who have left the building.
-     * Locations includes room/subrooms.
-     */
-    std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>> UpdateLocations();
-
-    /**
      * Perform some initialisation for the simulation.
      * such as writing the headers for the trajectories.
      * @param the maximal number of pedestrian

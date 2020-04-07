@@ -203,13 +203,14 @@ void Simulation::UpdateRoutesAndLocations()
     // ------------------------------------------------
     auto peds = _building->GetAllPedestrians();
 
-    auto [pedsChangedRoom, pedsNotRelocated] = SimulationHelper::UpdateLocations(*_building, peds);
+    auto [pedsChangedRoom, pedsNotRelocated] =
+        SimulationHelper::UpdatePedestrianLocation(*_building, peds);
 
     // TODO not needed at the moment, as we do not have inside final goals yet
     auto pedsAtFinalGoal = SimulationHelper::FindPedsReachedFinalGoal(*_building, peds);
     _pedsToRemove.insert(pedsAtFinalGoal.begin(), pedsAtFinalGoal.end());
 
-    auto pedsOutside = SimulationHelper::FindOutsidePedestrians(*_building, pedsNotRelocated);
+    auto pedsOutside = SimulationHelper::FindPedestriansOutside(*_building, pedsNotRelocated);
     _pedsToRemove.insert(pedsNotRelocated.begin(), pedsNotRelocated.end());
     _pedsToRemove.insert(pedsOutside.begin(), pedsOutside.end());
 
