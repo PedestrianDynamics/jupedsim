@@ -83,7 +83,10 @@ A sample trajectory in the xml format is
  </trajectories>
 ```
 ## TXT
-The other format of the trajectory file is `plain`
+The other format of the trajectory file is `plain`.
+
+{%include note.html content="If a file size of 16Mb is exceeded, `jpscore` automatically splits the output into several files. The files are numbered in ascending order and contain the information of consecutive frames. If you wish to analyze the data with `jpsreport` the output data need to be merged. "%}
+
 ### Default output
 A sample trajectory in the plain format is as follows:
 

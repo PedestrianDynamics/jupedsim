@@ -26,8 +26,8 @@ Three input files are required to run `jpsreport`:
 - A [Configuration file](jpsreport_inifile): This inifile gives some information related to each measurement method. e. g. 
   the location of measurement areas, the chosen measurement method, etc. 
   This file should be in `.xml` format.
-- A [Trajectory file](jpscore_trajectory.html): Pedestrian's 2D position information over time. 
-  Only `.txt` format is supported.
+- A [Trajectory file](jpscore_trajectory.html): Pedestrian's 3D position information over time. 
+  Only `.txt` format is supported. The file must contain the data sorted by time/frames.
 - A [Geometry file](jpscore_geometry.html): Geometry for a certain trajectory data. This file should be in `.xml` format.
   
 
