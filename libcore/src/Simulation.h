@@ -127,12 +127,6 @@ public:
     double RunBody(double maxSimTime);
 
     /**
-     * Perform some finalization like writing the
-     * footers for the trajectories.
-     */
-    void RunFooter();
-
-    /**
      * Copy all Input Files used to the output path.
      *
      * This backs up the input files and makes reproducible results possible.
