@@ -6,20 +6,20 @@
     <geometry>../geometry.xml</geometry>
     <show_statistics>false</show_statistics>
 
-    <trajectories format="xml-plain" fps="16">
-        <file location="traj_Test4.xml"/>
+    <trajectories format="plain" fps="16">
+        <file location="traj_Test4.txt"/>
     </trajectories>
-     
+
      <logfile>log</logfile>
      <num_threads>8</num_threads>
-     
-     
+
+
      <traffic_constraints>
           <doors>
                <door state="open" trans_id="0" />
           </doors>
      </traffic_constraints>
-     
+
      <routing>
           <goals>
                <goal caption="goal 1" final="false" id="0">
@@ -39,8 +39,8 @@
           </agents_distribution>
      </agents>
      <operational_models>
-          
-          
+
+
           <model description="Tordeux2015" operational_model_id="3">
                <model_parameters>
                     <stepsize>0.1</stepsize>
@@ -52,7 +52,7 @@
                </model_parameters>
                <agent_parameters agent_parameter_id="1">
                     <v0 mu="1.34" sigma="0.0" />
-                    <bmax mu="0.15" sigma="0.0" /> 
+                    <bmax mu="0.15" sigma="0.0" />
                     <bmin mu="0.15" sigma="0.0" />
                     <amin mu="0.15" sigma="0.0" />
                     <tau mu="0.5" sigma="0.0" />
@@ -68,20 +68,20 @@
            <!-- <navigation_lines file="../routing.xml" /> -->
          </parameters>
        </router>
-       
+
        <router router_id="2" description="global_shortest">
          <parameters>
            <!-- <navigation_lines file="../routing.xml" /> -->
          </parameters>
        </router>
-       
+
        <router router_id="3" description="quickest"> <!-- global quickest -->
          <parameters>
            <!-- <navigation_lines file="../routing.xml" /> -->
          </parameters>
        </router>
 
-       
+
        <router router_id="4" description="ff_global_shortest"/> <!-- like global_shortest, without HLines -->
        <router router_id="5" description="ff_local_shortest"/> <!-- like local_shortest, without HLines -->
        <router router_id="6" description="ff_quickest"/> <!-- like global quickest -->

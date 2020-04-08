@@ -2,6 +2,7 @@
 import logging
 import numpy as np
 import pandas as pd
+import re
 from xml.dom import minidom
 SUCCESS = 0
 FAILURE = -1
@@ -178,7 +179,7 @@ def get_outflow(filename):
 
 def parse_file(filename):
     """
-    parse trajectories in Travisto-format and output results
+    parse trajectories in txt plain format
     in the following  format: id    frame    x    y
     (no sorting of the data is performed)
     returns:
@@ -188,11 +189,22 @@ def parse_file(filename):
     """
     logging.info("parsing <%s>"%filename)
 
-    tree = ET.parse(filename)
-    root = tree.getroot()
 
-    for header in root.iter('header'):
-        fps = header.find('frameRate').text
+    f = open(filename)
+    for i, line in enumerate(f):
+        if '#agents' in line:
+            N = re.search(r'\d+', line).group()
+        if '#framerate' in line:
+            fps = re.search(r'\d+.\d+', line).group()
+        if '#ID\tFR' in line:
+            header = line.rstrip().strip("#").split("\t")
+            header.append('dummy')
+            break
+    try:
+        N = int(N)
+    except:
+        print ("ERROR: could not read <agents>")
+        exit()
 
     try:
         fps = float(fps)
@@ -200,31 +212,8 @@ def parse_file(filename):
         print ("ERROR: could not read <fps>")
         exit()
 
-    for header in root.iter('header'):
-        N = header.find('agents').text
+    data = pd.read_table(filename,  comment="#", skip_blank_lines=True, names=header, usecols=['ID', 'FR', 'X', 'Y', 'Z']).to_numpy()
 
-    try:
-        N = int(N)
-    except:
-        print ("ERROR: could not read <agents>")
-        exit()
-
-    data = np.empty(shape=[0, 5])
-    for node in root.iter():
-        tag = node.tag
-        if tag == "frame":
-            frame = node.attrib['ID']
-            for agent in node.getchildren():
-                x = agent.attrib['x']
-                y = agent.attrib['y']
-                z = agent.attrib['z']
-                ID = agent.attrib['ID']
-                data = np.vstack((data, list(map(float, [ID, frame, x, y, z]) ) ) )
-
-
-                # data += [ID, frame, x, y, z]
-
-    # data = np.array(data, dtype=float).reshape((-1, 5))
     return fps, N, data
 
 def parse_file_deprecated(filename):

@@ -9,8 +9,8 @@
         <max_sim_time>200</max_sim_time>
         <num_threads>1</num_threads>
         <geometry>../geometry.xml</geometry>
-        <trajectories format="xml-plain" fps="8">
-            <file location="traj.xml"/>
+        <trajectories format="plain" fps="8">
+            <file location="traj.txt"/>
         </trajectories>
         <show_statistics>false</show_statistics>
         <logfile>log</logfile>

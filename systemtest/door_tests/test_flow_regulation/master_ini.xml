@@ -8,8 +8,8 @@
         <!-- geometry file -->
         <geometry>../geometry.xml</geometry>
         <!-- trajectories file and format -->
-        <trajectories format="xml-plain" fps="8">
-            <file location="traj.xml"/>
+        <trajectories format="plain" fps="8">
+            <file location="traj.txt"/>
         </trajectories>
         <events_file>../events.xml</events_file>
         <show_statistics>true</show_statistics>

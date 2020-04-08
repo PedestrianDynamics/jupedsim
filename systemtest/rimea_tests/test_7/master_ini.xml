@@ -7,8 +7,8 @@
 
     <geometry>../geometry.xml</geometry>
 
-    <trajectories format="xml-plain" fps="8" color_mode="group">
-        <file location="RiMEATest7_traj.xml"/>
+    <trajectories format="plain" fps="8" color_mode="group">
+        <file location="RiMEATest7_traj.txt"/>
     </trajectories>
 
     <traffic_constraints>

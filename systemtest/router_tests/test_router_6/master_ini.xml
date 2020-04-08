@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <JuPedSim project="JPS-Project" version="0.8"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 >
 
-    
+
     <seed>12541</seed>
     <max_sim_time>100</max_sim_time>
     <geometry>../geometry.xml</geometry>
@@ -13,10 +13,10 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     <show_statistics>true</show_statistics>
     <logfile>Test5_log.txt</logfile>
 
-    <trajectories format="xml-plain" fps="16" color_mode="verlocity">
-        <file location = "Test5_trajectory.xml"/>
+    <trajectories format="plain" fps="16" color_mode="verlocity">
+        <file location = "Test5_trajectory.txt"/>
     </trajectories>
-    
+
     <traffic_constraints>
         <doors>
             <door trans_id="1" caption="exit west 1" state="open"/>
@@ -80,20 +80,20 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            <!-- <navigation_lines file="../routing.xml" /> -->
          </parameters>
        </router>
-       
+
        <router router_id="2" description="global_shortest">
          <parameters>
            <!-- <navigation_lines file="../routing.xml" /> -->
          </parameters>
        </router>
-       
+
        <router router_id="3" description="quickest"> <!-- global quickest -->
          <parameters>
            <!-- <navigation_lines file="../routing.xml" /> -->
          </parameters>
        </router>
 
-       
+
        <router router_id="4" description="ff_global_shortest"/> <!-- like global_shortest, without HLines -->
        <router router_id="5" description="ff_local_shortest"/> <!-- like local_shortest, without HLines -->
        <router router_id="6" description="ff_quickest"/> <!-- like global quickest -->
