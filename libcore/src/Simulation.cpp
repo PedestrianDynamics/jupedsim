@@ -88,9 +88,6 @@ bool Simulation::InitArgs()
             case FileFormat::TXT:
                 _iod = std::make_unique<TrajectoriesTXT>(TrajectoriesTXT());
                 break;
-
-            default:
-                break;
         }
     }
 

@@ -283,13 +283,6 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         // check file extension and if it is not matching the intended format,
         // change it to correct one
         switch(_config->GetFileFormat()) {
-            case FileFormat::XML: {
-                if(extension != ".xml") {
-                    trajectoryFile.replace_extension(".xml");
-                    LOG_WARNING("replaced output file extension with: .xml");
-                }
-                break;
-            }
             case FileFormat::TXT: {
                 if(extension != ".txt") {
                     trajectoryFile.replace_extension(".txt");
