@@ -212,6 +212,22 @@ TEST_CASE("SimulationHelper::UpdatePedestrianRoomInformation", "[SimulationHelpe
         REQUIRE(ped.GetSubRoomUID() == sub11->GetUID());
     }
 
+    SECTION("Pedestrian in same room on crossing")
+    {
+        Pedestrian ped;
+        ped.SetPos({-6, -1}, true);
+        ped.SetRoomID(sub11->GetRoomID(), "");
+        ped.SetSubRoomID(sub11->GetSubRoomID());
+        ped.SetSubRoomUID(sub11->GetUID());
+
+        auto ret = SimulationHelper::UpdatePedestrianRoomInformation(building, ped);
+        REQUIRE(ret == PedRelocation::NOT_NEEDED);
+        REQUIRE(ped.GetRoomID() == sub11->GetRoomID());
+        REQUIRE(ped.GetSubRoomID() == sub11->GetSubRoomID());
+        REQUIRE(ped.GetSubRoomUID() == sub11->GetUID());
+    }
+
+
     SECTION("Pedestrian in neighboring subroom")
     {
         Pedestrian ped;
