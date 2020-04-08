@@ -415,7 +415,14 @@ public:
     std::string WritePolyLine() const;
 
     bool ConvertLineToPoly(const std::vector<Line *> & goals);
-    bool IsInSubRoom(const Point & ped) const;
+
+    /**
+     * Checks whether the point \p  lies inside the subroom. Crossings and Transitions belong to the
+     * subroom, whereas walls are excluded.
+     * @param p Point to check
+     * @return \p is inside subroom
+     */
+    bool IsInSubRoom(const Point & p) const;
 };
 
 class Stair : public NormalSubRoom

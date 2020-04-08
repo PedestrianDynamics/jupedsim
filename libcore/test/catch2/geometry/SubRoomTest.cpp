@@ -21,6 +21,7 @@
 #include "IO/OutputHandler.h"
 #include "geometry/Crossing.h"
 #include "geometry/Line.h"
+#include "geometry/Obstacle.h"
 #include "geometry/Point.h"
 #include "geometry/Transition.h"
 #include "geometry/Wall.h"
@@ -307,6 +308,259 @@ TEST_CASE(
                     Point(2, 0), Wall(Point(0, 10), Point(2, 10))));
                 REQUIRE(subroom.IsPointOnPolygonBoundaries(
                     Point(2, 2.3), Wall(Point(0, 10), Point(2, 10))));
+            }
+        }
+    }
+}
+
+TEST_CASE("geometry/SubRoom/IsInSubRoom", "[geometry][SubRoom][IsInSubRoom]")
+{
+    //Subroom
+    Wall wall1;
+    wall1.SetPoint1(Point{-2., -2.});
+    wall1.SetPoint2(Point{2., -2.});
+    Wall wall2;
+    wall2.SetPoint1(Point{-2., 2.});
+    wall2.SetPoint2(Point{2., 2.});
+    auto crossing = new Crossing();
+    crossing->SetPoint1(Point{-2., -2.});
+    crossing->SetPoint2(Point{-2., 2.});
+    auto transition = new Transition();
+    transition->SetID(1);
+    transition->SetPoint1(Point{2., -2.});
+    transition->SetPoint2(Point{2., 2.});
+    NormalSubRoom subRoom;
+    subRoom.SetRoomID(1);
+    subRoom.SetSubRoomID(3);
+    subRoom.AddCrossing(crossing);
+    subRoom.AddTransition(transition);
+    subRoom.AddWall(wall1);
+    subRoom.AddWall(wall2);
+    subRoom.ConvertLineToPoly(std::vector<Line *>{crossing, transition});
+    subRoom.CreateBoostPoly();
+
+    std::random_device rd;
+    std::mt19937 mt(rd());
+
+    SECTION("without obstacles")
+    {
+        SECTION("in subroom")
+        {
+            std::uniform_real_distribution<double> dist(
+                -2. + std::numeric_limits<double>::epsilon(), 2.0);
+            for(int i = 0; i < 1000; ++i) {
+                auto isIn = subRoom.IsInSubRoom({dist(mt), dist(mt)});
+                REQUIRE(isIn);
+            }
+        }
+
+        SECTION("not in subroom")
+        {
+            std::uniform_real_distribution<double> dist(
+                std::numeric_limits<double>::min(), std::numeric_limits<double>::max());
+            for(int i = 0; i < 1000; ++i) {
+                double x = dist(mt);
+                double y = dist(mt);
+                if(std::abs(x) < 2. || std::abs(y) < 2.) {
+                    continue;
+                }
+                auto isIn = subRoom.IsInSubRoom({x, y});
+                REQUIRE_FALSE(isIn);
+            }
+        }
+
+        SECTION("on wall")
+        {
+            std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
+
+            for(auto & wall : subRoom.GetAllWalls()) {
+                REQUIRE(subRoom.IsInSubRoom({wall.GetPoint1()}));
+                REQUIRE(subRoom.IsInSubRoom({wall.GetPoint2()}));
+                for(int i = 0; i < 10; ++i) {
+                    Point line({wall.GetPoint2()._x - wall.GetPoint1()._x,
+                                wall.GetPoint2()._y - wall.GetPoint1()._y});
+                    Point p = wall.GetPoint1() + (line * dist(mt));
+                    REQUIRE(wall.IsInLineSegment(p));
+                    REQUIRE_FALSE(subRoom.IsInSubRoom(p));
+                }
+                REQUIRE_FALSE(subRoom.IsInSubRoom({wall.GetCentre()}));
+            }
+        }
+
+        SECTION("on transition")
+        {
+            std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
+
+            for(auto & trans : subRoom.GetAllTransitions()) {
+                REQUIRE(subRoom.IsInSubRoom({trans->GetPoint1()}));
+                REQUIRE(subRoom.IsInSubRoom({trans->GetPoint2()}));
+                REQUIRE(subRoom.IsInSubRoom({trans->GetCentre()}));
+                for(int i = 0; i < 10; ++i) {
+                    Point line({trans->GetPoint2()._x - trans->GetPoint1()._x,
+                                trans->GetPoint2()._y - trans->GetPoint1()._y});
+                    Point p = trans->GetPoint1() + (line * dist(mt));
+                    REQUIRE(trans->IsInLineSegment(p));
+                    REQUIRE(subRoom.IsInSubRoom(p));
+                }
+            }
+        }
+
+        SECTION("on crossing")
+        {
+            std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
+
+            for(auto & cross : subRoom.GetAllCrossings()) {
+                REQUIRE(subRoom.IsInSubRoom({cross->GetPoint1()}));
+                REQUIRE(subRoom.IsInSubRoom({cross->GetPoint2()}));
+                REQUIRE(subRoom.IsInSubRoom({cross->GetCentre()}));
+                for(int i = 0; i < 10; ++i) {
+                    Point line({cross->GetPoint2()._x - cross->GetPoint1()._x,
+                                cross->GetPoint2()._y - cross->GetPoint1()._y});
+                    Point p = cross->GetPoint1() + (line * dist(mt));
+                    REQUIRE(cross->IsInLineSegment(p));
+                    REQUIRE(subRoom.IsInSubRoom(p));
+                }
+            }
+        }
+    }
+
+    SECTION("with obstacles")
+    {
+        Wall obs1;
+        obs1.SetPoint1({-1., -1.});
+        obs1.SetPoint2({-1., 1.});
+        Wall obs2;
+        obs2.SetPoint1({-1., 1.});
+        obs2.SetPoint2({1., 1.});
+        Wall obs3;
+        obs3.SetPoint1({1., 1.});
+        obs3.SetPoint2({1., -1.});
+        Wall obs4;
+        obs4.SetPoint1({1., -1.});
+        obs4.SetPoint2({-1., -1.});
+
+
+        auto obstacle = new Obstacle();
+        obstacle->AddWall(obs1);
+        obstacle->AddWall(obs2);
+        obstacle->AddWall(obs3);
+        obstacle->AddWall(obs4);
+        obstacle->ConvertLineToPoly();
+
+        subRoom.AddObstacle(obstacle);
+        subRoom.CreateBoostPoly();
+
+        SECTION("in subroom")
+        {
+            std::uniform_real_distribution<double> dist(
+                -2. + std::numeric_limits<double>::epsilon(), 2.0);
+            for(int i = 0; i < 1000; ++i) {
+                double x = dist(mt);
+                double y = dist(mt);
+                if(std::abs(x) < 1. || std::abs(y) < 1.) {
+                    continue;
+                }
+
+                auto isIn = subRoom.IsInSubRoom({x, y});
+                REQUIRE(isIn);
+            }
+        }
+
+        SECTION("in obstacle")
+        {
+            std::uniform_real_distribution<double> dist(
+                -1. + std::numeric_limits<double>::epsilon(), 1.0);
+            for(int i = 0; i < 1000; ++i) {
+                auto isIn = subRoom.IsInSubRoom({dist(mt), dist(mt)});
+                REQUIRE_FALSE(isIn);
+            }
+        }
+        SECTION("on obstacle")
+        {
+            std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
+
+            for(auto & obs : subRoom.GetAllObstacles()) {
+                for(auto & wall : obs->GetAllWalls()) {
+                    REQUIRE_FALSE(subRoom.IsInSubRoom({wall.GetPoint1()}));
+                    REQUIRE_FALSE(subRoom.IsInSubRoom({wall.GetPoint2()}));
+                    for(int i = 0; i < 10; ++i) {
+                        Point line({wall.GetPoint2()._x - wall.GetPoint1()._x,
+                                    wall.GetPoint2()._y - wall.GetPoint1()._y});
+                        Point p = wall.GetPoint1() + (line * dist(mt));
+                        REQUIRE(wall.IsInLineSegment(p));
+                        REQUIRE_FALSE(subRoom.IsInSubRoom(p));
+                    }
+                    REQUIRE_FALSE(subRoom.IsInSubRoom({wall.GetCentre()}));
+                }
+            }
+        }
+
+        SECTION("not in subroom")
+        {
+            std::uniform_real_distribution<double> dist(
+                std::numeric_limits<double>::min(), std::numeric_limits<double>::max());
+            for(int i = 0; i < 1000; ++i) {
+                double x = dist(mt);
+                double y = dist(mt);
+                if(std::abs(x) < 2. || std::abs(y) < 2.) {
+                    continue;
+                }
+                auto isIn = subRoom.IsInSubRoom({x, y});
+                REQUIRE_FALSE(isIn);
+            }
+        }
+
+        SECTION("on wall")
+        {
+            std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
+
+            for(auto & wall : subRoom.GetAllWalls()) {
+                REQUIRE(subRoom.IsInSubRoom({wall.GetPoint1()}));
+                REQUIRE(subRoom.IsInSubRoom({wall.GetPoint2()}));
+                for(int i = 0; i < 10; ++i) {
+                    Point line({wall.GetPoint2()._x - wall.GetPoint1()._x,
+                                wall.GetPoint2()._y - wall.GetPoint1()._y});
+                    Point p = wall.GetPoint1() + (line * dist(mt));
+                    REQUIRE(wall.IsInLineSegment(p));
+                    REQUIRE_FALSE(subRoom.IsInSubRoom(p));
+                }
+                REQUIRE_FALSE(subRoom.IsInSubRoom({wall.GetCentre()}));
+            }
+        }
+
+        SECTION("on transition")
+        {
+            std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
+
+            for(auto & trans : subRoom.GetAllTransitions()) {
+                REQUIRE(subRoom.IsInSubRoom({trans->GetPoint1()}));
+                REQUIRE(subRoom.IsInSubRoom({trans->GetPoint2()}));
+                REQUIRE(subRoom.IsInSubRoom({trans->GetCentre()}));
+                for(int i = 0; i < 10; ++i) {
+                    Point line({trans->GetPoint2()._x - trans->GetPoint1()._x,
+                                trans->GetPoint2()._y - trans->GetPoint1()._y});
+                    Point p = trans->GetPoint1() + (line * dist(mt));
+                    REQUIRE(trans->IsInLineSegment(p));
+                    REQUIRE(subRoom.IsInSubRoom(p));
+                }
+            }
+        }
+
+        SECTION("on crossing")
+        {
+            std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
+
+            for(auto & cross : subRoom.GetAllCrossings()) {
+                REQUIRE(subRoom.IsInSubRoom({cross->GetPoint1()}));
+                REQUIRE(subRoom.IsInSubRoom({cross->GetPoint2()}));
+                REQUIRE(subRoom.IsInSubRoom({cross->GetCentre()}));
+                for(int i = 0; i < 10; ++i) {
+                    Point line({cross->GetPoint2()._x - cross->GetPoint1()._x,
+                                cross->GetPoint2()._y - cross->GetPoint1()._y});
+                    Point p = cross->GetPoint1() + (line * dist(mt));
+                    REQUIRE(cross->IsInLineSegment(p));
+                    REQUIRE(subRoom.IsInSubRoom(p));
+                }
             }
         }
     }
