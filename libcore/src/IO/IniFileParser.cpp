@@ -235,12 +235,10 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
         std::string format = xHeader->FirstChildElement("trajectories")->Attribute("format") ?
                                  xHeader->FirstChildElement("trajectories")->Attribute("format") :
-                                 "xml-plain";
+                                 "plain";
         std::transform(format.begin(), format.end(), format.begin(), ::tolower);
 
-        if(format == "xml-plain") {
-            _config->SetFileFormat(FileFormat::XML);
-        } else if(format == "plain") {
+        if(format == "plain") {
             _config->SetFileFormat(FileFormat::TXT);
         } else {
             LOG_WARNING("no output format specified. Using default: TXT");

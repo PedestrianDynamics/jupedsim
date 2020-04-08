@@ -123,12 +123,13 @@ TrajectoriesTXT::TrajectoriesTXT() : Trajectories()
     };
 }
 
-void TrajectoriesTXT::WriteHeader(long, double fps, Building * building, int, int count)
+void TrajectoriesTXT::WriteHeader(long nPeds, double fps, Building * building, int, int count)
 {
     const fs::path & projRoot(building->GetProjectRootDir());
     const fs::path tmpGeo = projRoot / building->GetGeometryFilename();
 
     std::string header = fmt::format("#description: jpscore ({:s})\n", JPSCORE_VERSION);
+    header.append(fmt::format("#agents: {:d}\n", nPeds));
     header.append(fmt::format("#count: {:d}\n", count));
     header.append(fmt::format("#framerate: {:0.2f}\n", fps));
     header.append(fmt::format(
@@ -220,121 +221,4 @@ void TrajectoriesTXT::WriteFrame(int frameNr, Building * building)
 
         Write(frame);
     }
-}
-
-void TrajectoriesXML::WriteHeader(
-    long nPeds,
-    double fps,
-    Building * building,
-    int seed,
-    int /*count*/)
-{
-    building->GetCaption();
-    std::string tmp;
-    tmp = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n"
-          "<trajectories>\n";
-    char agents[1024] = "";
-    sprintf(agents, "\t<header version = \"0.5.1\">\n");
-    tmp.append(agents);
-    sprintf(agents, "\t\t<agents>%ld</agents>\n", nPeds);
-    tmp.append(agents);
-    sprintf(agents, "\t\t<seed>%d</seed>\n", seed);
-    tmp.append(agents);
-    sprintf(agents, "\t\t<frameRate>%0.2f</frameRate>\n", fps);
-    tmp.append(agents);
-    tmp.append("\t</header>\n");
-    _outputHandler->Write(tmp);
-}
-
-void TrajectoriesXML::WriteSources(const std::vector<std::shared_ptr<AgentsSource>> & sources)
-{
-    std::string tmp("");
-
-    for(const auto & src : sources) {
-        auto BB = src->GetBoundaries();
-        tmp += "<source  id=\"" + std::to_string(src->GetId()) + "\"  caption=\"" +
-               src->GetCaption() + "\"" + "  x_min=\"" + std::to_string(BB[0]) + "\"" +
-               "  x_max=\"" + std::to_string(BB[1]) + "\"" + "  y_min=\"" + std::to_string(BB[2]) +
-               "\"" + "  y_max=\"" + std::to_string(BB[3]) + "\" />\n";
-    }
-    _outputHandler->Write(tmp);
-}
-
-void TrajectoriesXML::WriteGeometry(Building * building)
-{
-    // just put a link to the geometry file
-    std::string embed_geometry;
-    embed_geometry.append("\t<geometry>\n");
-    char file_location[1024] = "";
-    sprintf(
-        file_location,
-        "\t<file location= \"%s\"/>\n",
-        building->GetGeometryFilename().filename().string().c_str());
-    embed_geometry.append(file_location);
-
-    for(auto hline : building->GetAllHlines()) {
-        embed_geometry.append(hline.second->GetDescription());
-    }
-
-    for(auto goal : building->GetAllGoals()) {
-        embed_geometry.append(goal.second->Write());
-    }
-
-
-    embed_geometry.append("\t</geometry>\n");
-    _outputHandler->Write(embed_geometry);
-    _outputHandler->Write("\t<AttributeDescription>");
-    _outputHandler->Write("\t\t<property tag=\"x\" description=\"xPosition\"/>");
-    _outputHandler->Write("\t\t<property tag=\"y\" description=\"yPosition\"/>");
-    _outputHandler->Write("\t\t<property tag=\"z\" description=\"zPosition\"/>");
-    _outputHandler->Write("\t\t<property tag=\"rA\" description=\"radiusA\"/>");
-    _outputHandler->Write("\t\t<property tag=\"rB\" description=\"radiusB\"/>");
-    _outputHandler->Write("\t\t<property tag=\"eC\" description=\"ellipseColor\"/>");
-    _outputHandler->Write("\t\t<property tag=\"eO\" description=\"ellipseOrientation\"/>");
-    _outputHandler->Write("\t</AttributeDescription>\n");
-}
-
-void TrajectoriesXML::WriteFrame(int frameNr, Building * building)
-{
-    std::string data;
-    char tmp[1024] = "";
-    double RAD2DEG = 180.0 / M_PI;
-
-    sprintf(tmp, "<frame ID=\"%d\">\n", frameNr);
-    data.append(tmp);
-
-    const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
-    for(unsigned int p = 0; p < allPeds.size(); p++) {
-        Pedestrian * ped    = allPeds[p];
-        Room * r            = building->GetRoom(ped->GetRoomID());
-        std::string caption = r->GetCaption();
-        char s[1024]        = "";
-        int color           = ped->GetColor();
-        double a            = ped->GetLargerAxis();
-        double b            = ped->GetSmallerAxis();
-        double phi          = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
-        sprintf(
-            s,
-            "<agent ID=\"%d\"\t"
-            "x=\"%.6f\"\ty=\"%.6f\"\t"
-            "z=\"%.6f\"\t"
-            "rA=\"%.2f\"\trB=\"%.2f\"\t"
-            "eO=\"%.2f\" eC=\"%d\"/>\n",
-            ped->GetID(),
-            (ped->GetPos()._x),
-            (ped->GetPos()._y),
-            (ped->GetElevation()),
-            a,
-            b,
-            phi * RAD2DEG,
-            color);
-        data.append(s);
-    }
-    data.append("</frame>\n");
-    _outputHandler->Write(data);
-}
-
-void TrajectoriesXML::WriteFooter()
-{
-    _outputHandler->Write("</trajectories>\n");
 }
