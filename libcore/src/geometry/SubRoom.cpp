@@ -1058,13 +1058,21 @@ double NormalSubRoom::Xintercept(const Point & point1, const Point & point2, dou
 //@todo: ar.graf: UnivFF have subroomPtr Info for every gridpoint. Info should be used in DirectionFF instead of this
 bool NormalSubRoom::IsInSubRoom(const Point & p) const
 {
+    // if pedestrian is stuck in obstacle or on obstacle line, return false
     for(polygon_type obs : _boostPolyObstacles) {
-        // if pedestrian is stuck in obstacle, please return false
         if(boost::geometry::within(p, obs)) {
             return false;
         }
     }
-    // pedestrian is not in obstacle, so we can use within(...) on _boostPoly
+    for (auto & obs : _obstacles){
+        for (auto & wall : obs->GetAllWalls()){
+            if (wall.IsInLineSegment(p)){
+                return false;
+            }
+        }
+    }
+
+    // check if point is on one of the doors
     for (auto & trans : GetAllTransitions()){
         if (trans->IsInLineSegment(p)){
             return true;
@@ -1076,6 +1084,7 @@ bool NormalSubRoom::IsInSubRoom(const Point & p) const
         }
     }
 
+    // point is not in obstacle and on no door, so we can use within(...) on _boostPoly
     return boost::geometry::within(p, _boostPoly);
 }
 
