@@ -30,7 +30,9 @@
 
 #include <catch2/catch.hpp>
 
-TEST_CASE("SimulationHelper::UpdatePedestrianRoomInformation", "[SimulationHelper][UpdatePedestrianRoomInformation]")
+TEST_CASE(
+    "SimulationHelper::UpdatePedestrianRoomInformation",
+    "[SimulationHelper][UpdatePedestrianRoomInformation]")
 {
     // Create following geometry:
     // -| = Walls
@@ -227,6 +229,20 @@ TEST_CASE("SimulationHelper::UpdatePedestrianRoomInformation", "[SimulationHelpe
         REQUIRE(ped.GetSubRoomUID() == sub11->GetUID());
     }
 
+    SECTION("Pedestrian in same room on transition")
+    {
+        Pedestrian ped;
+        ped.SetPos({2, -1}, true);
+        ped.SetRoomID(sub13->GetRoomID(), "");
+        ped.SetSubRoomID(sub13->GetSubRoomID());
+        ped.SetSubRoomUID(sub13->GetUID());
+
+        auto ret = SimulationHelper::UpdatePedestrianRoomInformation(building, ped);
+        REQUIRE(ret == PedRelocation::NOT_NEEDED);
+        REQUIRE(ped.GetRoomID() == sub13->GetRoomID());
+        REQUIRE(ped.GetSubRoomID() == sub13->GetSubRoomID());
+        REQUIRE(ped.GetSubRoomUID() == sub13->GetUID());
+    }
 
     SECTION("Pedestrian in neighboring subroom")
     {
@@ -706,7 +722,6 @@ TEST_CASE("SimulationHelper::FindOutsidePedestrians", "[SimulationHelper][FindOu
         REQUIRE(peds.size() == 1);
         REQUIRE(outsidePeds.empty());
     }
-
 }
 
 TEST_CASE("SimulationHelper::UpdateFlowAtDoors", "[SimulationHelper][UpdateFlowAtDoors]")
@@ -799,18 +814,12 @@ TEST_CASE("SimulationHelper::UpdateFlowAtDoors", "[SimulationHelper][UpdateFlowA
     {
         SECTION("inside ped passed transition")
         {
-            double dt      = 1e-3;
-            double v       = 1.;
-            double maxStep = 2 * dt * v;
-
             Pedestrian ped;
-            ped.Setdt(dt);
-            ped.SetV0Norm(v, v, v, v, v, v, v);
             ped.SetRoomID(2, "");
             ped.SetSubRoomID(1);
             ped.SetExitIndex(trans12->GetUniqueID());
-            ped.SetPos({-2. - maxStep / 4., -1.}, false);
-            ped.SetPos({-2. + maxStep / 4., -1.}, false);
+            ped.SetPos({-2.05, -1.}, false);
+            ped.SetPos({-1.95, -1.}, false);
             ped.UpdateRoom(1, 1);
             std::vector<Pedestrian *> peds{&ped};
             SimulationHelper::UpdateFlowAtDoors(building, peds);
@@ -822,18 +831,12 @@ TEST_CASE("SimulationHelper::UpdateFlowAtDoors", "[SimulationHelper][UpdateFlowA
 
         SECTION("used unindented door")
         {
-            double dt      = 1e-3;
-            double v       = 1.;
-            double maxStep = 2 * dt * v;
-
             Pedestrian ped;
-            ped.Setdt(dt);
-            ped.SetV0Norm(v, v, v, v, v, v, v);
             ped.SetRoomID(1, "");
             ped.SetSubRoomID(1);
             ped.SetExitIndex(trans11->GetUniqueID());
-            ped.SetPos({-2. - maxStep / 4., -1.}, false);
-            ped.SetPos({-2. + maxStep / 4., -1.}, false);
+            ped.SetPos({-2.05, -1.}, false);
+            ped.SetPos({-1.95, -1.}, false);
             ped.UpdateRoom(-1, -1);
             std::vector<Pedestrian *> peds{&ped};
             SimulationHelper::UpdateFlowAtDoors(building, peds);
@@ -848,25 +851,19 @@ TEST_CASE("SimulationHelper::UpdateFlowAtDoors", "[SimulationHelper][UpdateFlowA
     {
         SECTION("outside ped passed exit")
         {
-            double dt      = 1e-3;
-            double v       = 1.;
-            double maxStep = 2 * dt * v;
-
             Pedestrian ped;
-            ped.Setdt(dt);
-            ped.SetV0Norm(v, v, v, v, v, v, v);
             ped.SetRoomID(1, "");
             ped.SetSubRoomID(1);
-            ped.SetExitIndex(trans12->GetUniqueID());
-            ped.SetPos({-2. - maxStep / 4., -1.}, false);
-            ped.SetPos({-2. + maxStep / 4., -1.}, false);
+            ped.SetExitIndex(trans11->GetUniqueID());
+            ped.SetPos({4.95, -1.}, false);
+            ped.SetPos({5.05, -1.}, false);
             ped.UpdateRoom(-1, -1);
             std::vector<Pedestrian *> peds{&ped};
             SimulationHelper::UpdateFlowAtDoors(building, peds);
-            REQUIRE(trans11->GetDoorUsage() == 0);
-            REQUIRE(trans11->GetPartialDoorUsage() == 0);
-            REQUIRE(trans12->GetDoorUsage() == 1);
-            REQUIRE(trans12->GetPartialDoorUsage() == 1);
+            REQUIRE(trans11->GetDoorUsage() == 1);
+            REQUIRE(trans11->GetPartialDoorUsage() == 1);
+            REQUIRE(trans12->GetDoorUsage() == 0);
+            REQUIRE(trans12->GetPartialDoorUsage() == 0);
         }
     }
 }
@@ -1024,6 +1021,41 @@ TEST_CASE("SimulationHelper::FindPassedDoor", "[SimulationHelper][FindPassedDoor
             REQUIRE(passedTrans.has_value());
             REQUIRE(passedTrans.value()->GetUniqueID() == trans12->GetUniqueID());
         }
+
+        SECTION("step ends on transition")
+        {
+            Pedestrian ped;
+            ped.SetRoomID(1, "");
+            ped.SetSubRoomID(3);
+            ped.SetPos({1.95, -1.2});
+            ped.SetPos({2.00, -1.2});
+            auto passedTrans = SimulationHelper::FindPassedDoor(building, ped);
+            REQUIRE_FALSE(passedTrans.has_value());
+        }
+
+        SECTION("step starts on transition")
+        {
+            Pedestrian ped;
+            ped.SetRoomID(1, "");
+            ped.SetSubRoomID(3);
+            ped.SetPos({2.00, -1.2});
+            ped.SetPos({2.05, -1.2});
+            auto passedTrans = SimulationHelper::FindPassedDoor(building, ped);
+            REQUIRE(passedTrans.has_value());
+            REQUIRE(passedTrans.value()->GetUniqueID() == trans12->GetUniqueID());
+        }
+
+        SECTION("step on transition")
+        {
+            Pedestrian ped;
+            ped.SetRoomID(1, "");
+            ped.SetSubRoomID(3);
+            ped.SetPos({2.00, -1.2});
+            ped.SetPos({2.00, -1.15});
+            auto passedTrans = SimulationHelper::FindPassedDoor(building, ped);
+            REQUIRE_FALSE(passedTrans.has_value());
+        }
+
 
         SECTION("crossing passed")
         {

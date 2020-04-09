@@ -174,7 +174,7 @@ SimulationHelper::FindPassedDoor(const Building & building, const Pedestrian & p
             return trans->IntersectionWith(step) == 1;
         });
 
-    if(passedTrans == transitions.end()) {
+    if(passedTrans == transitions.end() || (*passedTrans)->IsInLineSegment(ped.GetPos())) {
         return std::nullopt;
     } else {
         return *passedTrans;
