@@ -899,8 +899,7 @@ std::string NormalSubRoom::WritePolyLine() const
     std::string s;
     s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
     for(const auto & p : _poly) {
-        sprintf(
-            tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n", p._x, p._y);
+        sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n", p._x, p._y);
         s.append(tmp);
     }
     s.append("\t</Obstacle>\n");
@@ -1064,22 +1063,22 @@ bool NormalSubRoom::IsInSubRoom(const Point & p) const
             return false;
         }
     }
-    for (auto & obs : _obstacles){
-        for (auto & wall : obs->GetAllWalls()){
-            if (wall.IsInLineSegment(p)){
+    for(auto & obs : _obstacles) {
+        for(auto & wall : obs->GetAllWalls()) {
+            if(wall.IsInLineSegment(p)) {
                 return false;
             }
         }
     }
 
     // check if point is on one of the doors
-    for (auto & trans : GetAllTransitions()){
-        if (trans->IsInLineSegment(p)){
+    for(auto & trans : GetAllTransitions()) {
+        if(trans->IsInLineSegment(p)) {
             return true;
         }
     }
-    for (auto & cross : GetAllCrossings()){
-        if (cross->IsInLineSegment(p)){
+    for(auto & cross : GetAllCrossings()) {
+        if(cross->IsInLineSegment(p)) {
             return true;
         }
     }
@@ -1181,11 +1180,7 @@ std::string Stair::WritePolyLine() const
 
     s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
     for(unsigned int j = 0; j < _poly.size(); j++) {
-        sprintf(
-            tmp,
-            "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",
-            _poly[j]._x,
-            _poly[j]._y);
+        sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n", _poly[j]._x, _poly[j]._y);
         s.append(tmp);
     }
     s.append("\t</Obstacle>\n");
