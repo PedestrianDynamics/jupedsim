@@ -1095,5 +1095,19 @@ TEST_CASE("SimulationHelper::FindPassedDoor", "[SimulationHelper][FindPassedDoor
             REQUIRE(passedTrans.has_value());
             REQUIRE(passedTrans.value()->GetUniqueID() == trans23->GetUniqueID());
         }
+
+        SECTION("step starts on transition")
+        {
+            Pedestrian ped;
+            ped.SetRoomID(2, "");
+            ped.SetSubRoomID(1);
+            ped.SetPos({6.00, -1.2});
+            ped.UpdateRoom(-1, -1);
+            ped.SetPos({6.05, -1.2});
+            auto passedTrans = SimulationHelper::FindPassedDoor(building, ped);
+            REQUIRE(passedTrans.has_value());
+            REQUIRE(passedTrans.value()->GetUniqueID() == trans23->GetUniqueID());
+        }
+
     }
 }
