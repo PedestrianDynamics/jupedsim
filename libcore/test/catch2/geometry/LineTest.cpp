@@ -278,5 +278,4 @@ TEST_CASE("geometry/Line/IsInLineSegment", "[geometry][Line][IsInLineSegment]")
         REQUIRE_FALSE(L3.IsInLineSegment(P1));
         REQUIRE_FALSE(L3.IsInLineSegment(P2));
     }
-
 }
