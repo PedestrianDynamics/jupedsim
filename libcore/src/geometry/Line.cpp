@@ -115,16 +115,10 @@ std::string Line::Write() const
     char wall[500] = "";
     geometry.append("\t\t<wall color=\"100\">\n");
     sprintf(
-        wall,
-        "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",
-        (GetPoint1()._x),
-        (GetPoint1()._y));
+        wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", (GetPoint1()._x), (GetPoint1()._y));
     geometry.append(wall);
     sprintf(
-        wall,
-        "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",
-        (GetPoint2()._x),
-        (GetPoint2()._y));
+        wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n", (GetPoint2()._x), (GetPoint2()._y));
     geometry.append(wall);
     geometry.append("\t\t</wall>\n");
     return geometry;
@@ -232,9 +226,27 @@ Point Line::ShortestPoint(const Point & p) const
  * */
 bool Line::IsInLineSegment(const Point & p) const
 {
-    return fabs((_point1 - p).Norm() + (_point2 - p).Norm() - (_point2 - _point1).Norm()) <
-           J_EPS; // old version
+    Point differenceTwoAndOne = _point2 - _point1;
+    Point differencePAndOne   = p - _point1;
+
+    // cross product to check if point i colinear
+    auto crossProduct = differenceTwoAndOne.CrossProduct(differencePAndOne);
+    if(std::abs(crossProduct) > J_EPS)
+        return false;
+
+    // dotproduct and distSquared to check if point is in segment and not just in line
+    double dotp = differencePAndOne.ScalarProduct(differenceTwoAndOne);
+
+    if(dotp < 0.) {
+        return false;
+    }
+
+    if(dotp > (differenceTwoAndOne).NormSquare()) {
+        return false;
+    }
+    return true;
 }
+
 bool Line::NearlyInLineSegment(const Point & p) const
 {
     return fabs((_point1 - p).Norm() + (_point2 - p).Norm() - (_point2 - _point1).Norm()) <
