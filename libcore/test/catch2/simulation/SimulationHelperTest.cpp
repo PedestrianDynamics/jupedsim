@@ -1108,6 +1108,5 @@ TEST_CASE("SimulationHelper::FindPassedDoor", "[SimulationHelper][FindPassedDoor
             REQUIRE(passedTrans.has_value());
             REQUIRE(passedTrans.value()->GetUniqueID() == trans23->GetUniqueID());
         }
-
     }
 }
