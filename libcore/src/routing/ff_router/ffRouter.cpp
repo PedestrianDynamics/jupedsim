@@ -387,18 +387,14 @@ int FFRouter::FindExit(Pedestrian * p)
         }
         for(auto & subIPair : _building->GetRoom(p->GetRoomID())->GetAllSubRooms()) {
             for(auto & crossI : subIPair.second->GetAllCrossings()) {
-                if(!crossI->IsClose()) {
-                    DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
-                }
+                DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
             }
         }
     } else {
         //candidates of current subroom only
         for(auto & crossI :
             _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->GetAllCrossings()) {
-            if(!crossI->IsClose()) {
-                DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
-            }
+            DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
         }
 
         for(auto & transI : _building->GetRoom(p->GetRoomID())
