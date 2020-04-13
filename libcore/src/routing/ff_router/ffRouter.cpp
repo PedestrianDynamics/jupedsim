@@ -362,8 +362,10 @@ int FFRouter::FindExit(Pedestrian * p)
     validFinalDoor.clear();
     if(goalID == -1) {
         for(auto & pairDoor : _ExitsByUID) {
-            //we add the all exits,
-            validFinalDoor.emplace_back(pairDoor.first); //UID
+            //we add the all exits
+            if(!_building->GetTransitionByUID(pairDoor.first)->IsClose()) {
+                validFinalDoor.emplace_back(pairDoor.first); //UID
+            }
         }
     } else { //only one specific goal, goalToLineUIDmap gets
         //populated in Init()
@@ -385,20 +387,26 @@ int FFRouter::FindExit(Pedestrian * p)
         }
         for(auto & subIPair : _building->GetRoom(p->GetRoomID())->GetAllSubRooms()) {
             for(auto & crossI : subIPair.second->GetAllCrossings()) {
-                DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
+                if(!crossI->IsClose()) {
+                    DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
+                }
             }
         }
     } else {
         //candidates of current subroom only
         for(auto & crossI :
             _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->GetAllCrossings()) {
-            DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
+            if(!crossI->IsClose()) {
+                DoorUIDsOfRoom.emplace_back(crossI->GetUniqueID());
+            }
         }
 
         for(auto & transI : _building->GetRoom(p->GetRoomID())
                                 ->GetSubRoom(p->GetSubRoomID())
                                 ->GetAllTransitions()) {
-            DoorUIDsOfRoom.emplace_back(transI->GetUniqueID());
+            if(!transI->IsClose()) {
+                DoorUIDsOfRoom.emplace_back(transI->GetUniqueID());
+            }
         }
     }
 
