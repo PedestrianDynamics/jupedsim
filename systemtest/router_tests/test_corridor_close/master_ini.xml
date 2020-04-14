@@ -9,7 +9,7 @@
         <!-- geometry file -->
         <geometry>../geometry.xml</geometry>
         <!-- traectories file and format -->
-        <trajectories format="xml-plain" embed_mesh="false" fps="10">
+        <trajectories format="xml-plain" embed_mesh="false" fps="20">
             <file location="Traj_test_7.xml"/>
         </trajectories>
     </header>
