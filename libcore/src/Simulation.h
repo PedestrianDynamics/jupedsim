@@ -193,7 +193,7 @@ public:
     int GetMaxSimTime() const;
     void incrementCountTraj();
 
-    bool correctGeometry(std::shared_ptr<Building> building, const TrainTimeTable & trainTimeTable);
+    //    bool correctGeometry(std::shared_ptr<Building> building, const TrainTimeTable & trainTimeTable);
 
     /**
      * Updates the output filename if the current file exceeds _maxFileSize.

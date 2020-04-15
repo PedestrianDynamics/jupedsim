@@ -31,6 +31,7 @@
 #include "Simulation.h"
 
 #include "IO/EventFileParser.h"
+#include "IO/TrainFileParser.h"
 #include "IO/Trajectories.h"
 #include "SimulationHelper.h"
 #include "general/Filesystem.h"
@@ -128,26 +129,12 @@ bool Simulation::InitArgs()
         return false;
     }
     LOG_INFO("Init Operational Model done.");
-    LOG_INFO("Got {} Train Types.", _building->GetTrainTypes().size());
+    LOG_INFO("Got {} Train Types.", _building->GetTrains().GetTrainTypes().size());
 
-    for(auto && TT : _building->GetTrainTypes()) {
-        LOG_INFO("Type {}", TT.second._name);
+    for(auto && TT : _building->GetTrains().GetTrainTypes()) {
+        LOG_INFO("Type {}", TT.second._type);
         LOG_INFO("Max {}", TT.second._maxAgents);
         LOG_INFO("Number of doors {}", TT.second._doors.size());
-    }
-
-    LOG_INFO("Got {} Train Time Tables", _building->GetTrainTimeTables().size());
-
-    for(auto && TT : _building->GetTrainTimeTables()) {
-        LOG_INFO("id           : {}", TT.second.id);
-        LOG_INFO("type         : {}", TT.second.type.c_str());
-        LOG_INFO("room id      : {}", TT.second.rid);
-        LOG_INFO("tin          : {:.2f}", TT.second.tin);
-        LOG_INFO("tout         : {:.2f}", TT.second.tout);
-        LOG_INFO("track start  : ({:.2f}, {:.2f})", TT.second.pstart._x, TT.second.pstart._y);
-        LOG_INFO("track end    : ({:.2f}, {:.2f})", TT.second.pend._x, TT.second.pend._y);
-        LOG_INFO("train start  : ({:.2f}, {:.2f})", TT.second.tstart._x, TT.second.tstart._y);
-        LOG_INFO("train end    : ({:.2f}, {:.2f})", TT.second.tend._x, TT.second.tend._y);
     }
 
     // Give the DirectionStrategy the chance to perform some initialization.
@@ -183,6 +170,13 @@ bool Simulation::InitArgs()
         for(auto const [transID, maxAgents] : groupMaxAgents) {
             _building->GetTransition(transID)->SetMaxDoorUsage(maxAgents);
         }
+    }
+    if(!_config->GetTrainTypeFile().empty()) {
+        TrainFileParser::ParseTrainTypes(*_building, _config->GetTrainTypeFile());
+    }
+    if(!_config->GetTrainTimeTableFile().empty()) {
+        TrainFileParser::ParseTrainTimeTable(
+            *_em, _building->GetTrains(), _config->GetTrainTimeTableFile());
     }
 
     _em->ListEvents();
@@ -383,7 +377,6 @@ double Simulation::RunBody(double maxSimTime)
     while((_nPeds || (!_agentSrcManager.IsCompleted() && _gotSources)) && t < maxSimTime) {
         t = 0 + (frameNr - 1) * _deltaT;
         // Handle train traffic: coorect geometry
-        bool geometryChanged = TrainTraffic();
 
         AddNewAgents();
 
@@ -400,7 +393,7 @@ double Simulation::RunBody(double maxSimTime)
 
             //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
             //update quickestRouter
-            if(geometryChanged) {
+            if(eventProcessed) {
                 // debug
                 fs::path new_filename("tmp_" + std::to_string(t) + "_");
                 new_filename += _config->GetGeometryFile().filename();
@@ -428,7 +421,7 @@ double Simulation::RunBody(double maxSimTime)
             }
 
             // here the used routers are update, when needed due to external changes
-            if(_routingEngine->NeedsUpdate() || geometryChanged) {
+            if(_routingEngine->NeedsUpdate()) {
                 LOG_INFO("Update router during simulation.");
                 _routingEngine->UpdateRouter();
             }
@@ -475,10 +468,10 @@ double Simulation::RunBody(double maxSimTime)
             }
         }
 
-        //init train trainOutfloww
-        for(auto tab : _building->GetTrainTimeTables()) {
-            trainOutflow[tab.first] = 0;
-        }
+        //init train trainOutflow
+        //        for(auto tab : _building->GetTrainTimeTables()) {
+        //            trainOutflow[tab.first] = 0;
+        //        }
         // regulate flow
         for(auto & itr : _building->GetAllTransitions()) {
             Transition * Trans = itr.second;
@@ -492,16 +485,16 @@ double Simulation::RunBody(double maxSimTime)
                 int id           = atoi(strs[1].c_str());
                 std::string type = Trans->GetCaption();
                 trainOutflow[id] += Trans->GetDoorUsage();
-                if(trainOutflow[id] >= _building->GetTrainTypes().at(type)._maxAgents) {
+                if(trainOutflow[id] >= _building->GetTrains().GetTrainTypes().at(type)._maxAgents) {
                     std::cout << "INFO:\tclosing train door " << transType.c_str() << " at "
                               << Pedestrian::GetGlobalTime() << " capacity "
-                              << _building->GetTrainTypes().at(type)._maxAgents << "\n";
+                              << _building->GetTrains().GetTrainTypes().at(type)._maxAgents << "\n";
                     LOG_INFO(
                         "Closing train door {} at t={:.2f}. Flow = {:.2f} (Train Capacity {})",
                         transType,
                         Pedestrian::GetGlobalTime(),
                         trainOutflow[id],
-                        _building->GetTrainTypes().at(type)._maxAgents);
+                        _building->GetTrains().GetTrainTypes().at(type)._maxAgents);
                     Trans->Close();
                 }
             }
@@ -1030,39 +1023,6 @@ Building * Simulation::GetBuilding()
 int Simulation::GetMaxSimTime() const
 {
     return _maxSimTime;
-}
-// return true is changes are made to the geometry
-bool Simulation::TrainTraffic()
-{
-    bool trainHere        = false;
-    bool trainLeave       = false;
-    std::string trainType = "";
-    Point trackStart, trackEnd;
-    int trainId = 0;
-    auto now    = Pedestrian::GetGlobalTime();
-    for(const auto & [id, tab] : _building->GetTrainTimeTables()) {
-        trainType  = tab.type;
-        trainId    = tab.id;
-        trackStart = tab.pstart;
-        trackEnd   = tab.pend;
-        if(!tab.arrival && (now >= tab.tin) && (now <= tab.tout)) {
-            trainHere   = true;
-            _building->SetTrainArrived(trainId, true);
-            std::cout << "Arrival: TRAIN " << trainType << " at time: " << now << "\n";
-            correctGeometry(_building, tab);
-
-        } else if(tab.arrival && now >= tab.tout) {
-            std::cout << "Departure: TRAIN " << trainType << " at time: " << now << "\n";
-            _building->resetGeometry(tab);
-            trainLeave  = true;
-            _building->SetTrainArrived(trainId, false);
-        }
-    }
-    if(trainHere || trainLeave) {
-        return true;
-    }
-
-    return false;
 }
 
 Transition *

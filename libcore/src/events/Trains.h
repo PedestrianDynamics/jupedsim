@@ -8,7 +8,7 @@
 #include <vector>
 
 struct TrainType {
-    std::string _name;
+    std::string _type;
     int _maxAgents;
     float _length;
     std::vector<Transition> _doors;
@@ -27,7 +27,27 @@ public:
     Trains & operator=(const Trains &) = default;
     Trains & operator=(Trains &&) = default;
 
-
+    /**
+     *
+     * @param name
+     * @param maxAgents
+     * @param length
+     * @param doors
+     */
     void AddTrainType(std::string name, int maxAgents, float length, std::vector<Transition> doors);
-    std::optional<TrainType> GetTrainType(std::string name);
+
+    /**
+     *
+     * @param trainType
+     */
+    void AddTrainType(TrainType trainType);
+
+    /**
+     *
+     * @param name
+     * @return
+     */
+    std::optional<TrainType> GetTrainType(std::string name) const;
+
+    const std::map<std::string, TrainType> & GetTrainTypes() const;
 };

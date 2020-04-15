@@ -39,29 +39,11 @@
 
 typedef std::pair<Point, Wall> PointWall;
 
-// train schedules: Trains get deleted and added.
-
 struct Platform {
     int id;
     int rid;
     int sid;
     std::map<int, std::vector<Wall>> tracks;
-};
-
-struct TrainTimeTable {
-    int id;
-    std::string type;
-    int rid;      // room id
-    int sid;      // subroom id
-    double tin;   // arrival time
-    double tout;  //leaving time
-    Point pstart; // track start
-    Point pend;   // track end
-    Point tstart; // train start
-    Point tend;   // train end
-    int pid;      // Platform id
-    bool arrival;
-    bool departure;
 };
 
 
@@ -91,12 +73,11 @@ private:
     std::map<int, Transition *> _transitions;
     std::map<int, Hline *> _hLines;
     std::map<int, Goal *> _goals;
-    std::map<std::string, TrainType> _trainTypes;
-    std::map<int, TrainTimeTable> _trainTimeTables;
     std::map<int, std::shared_ptr<Platform>> _platforms;
     /// pedestrians pathway
     bool _savePathway;
     std::ofstream _pathWayStream;
+    Trains _trains;
 
 public:
     /// constructor
@@ -106,7 +87,7 @@ public:
     std::map<int, std::vector<Transition>> TempAddedDoors;
 
     Building(Configuration * config, PedDistributor & pedDistributor);
-    bool resetGeometry(const TrainTimeTable & tab);
+    //    bool resetGeometry(const TrainTimeTable & tab);
     /// destructor
     virtual ~Building();
 
@@ -227,12 +208,6 @@ public:
 
     const std::map<int, Goal *> & GetAllGoals() const;
     // --------------- Trains interface
-    const std::map<std::string, TrainType> & GetTrainTypes() const;
-
-    const std::map<int, TrainTimeTable> & GetTrainTimeTables() const;
-
-    void SetTrainArrived(int timeTableID, bool arrived);
-
     const std::map<int, std::shared_ptr<Platform>> & GetPlatforms() const;
 
     const std::vector<Wall>
@@ -284,6 +259,10 @@ public:
       */
 
     std::vector<Point> GetBoundaryVertices() const;
+
+
+    const Trains & GetTrains() const;
+    void AddTrainType(TrainType trainType);
 
 private:
     bool InitInsideGoals();

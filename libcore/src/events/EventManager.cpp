@@ -52,7 +52,6 @@ void EventManager::ListEvents()
     for(const auto & event : _events) {
         LOG_INFO("{}", event->GetDescription());
     }
-
 }
 
 bool EventManager::ProcessEvent()
@@ -66,6 +65,9 @@ bool EventManager::ProcessEvent()
         std::make_unique<DoorEvent>(-1, timeMin, EventAction::DOOR_OPEN);
     std::unique_ptr<Event> eventMax =
         std::make_unique<DoorEvent>(-1, timeMax, EventAction::DOOR_OPEN);
+
+    std::unique_ptr<Event> eventTime =
+        std::make_unique<DoorEvent>(-1, Pedestrian::GetGlobalTime(), EventAction::DOOR_OPEN);
 
     //TODO check if possible with std::equal_range
     auto lower = std::upper_bound(
@@ -84,8 +86,23 @@ bool EventManager::ProcessEvent()
     if(upper == std::end(_events)) {
         return false;
     }
+    if(upper == lower) {
+        return false;
+    }
+    //    auto [lower, upper] = std::equal_range(
+    //        std::begin(_events), std::end(_events), eventTime, [](const auto & a, const auto & b) {
+    //            return std::abs(a->GetTime() - b->GetTime()) < J_EPS_EVENT;
+    //        });
+    //    auto lower = std::find_if()
 
+    //    if (lower == std::end(_events) || upper == std::end(_events)){
+    //        return false;
+    //    }
+    LOG_INFO("{}", Pedestrian::GetGlobalTime());
+    LOG_INFO("{}", lower->get()->GetDescription());
+    LOG_INFO("{}", upper->get()->GetDescription());
+    LOG_INFO("distance {}", std::distance(lower, upper));
     std::for_each(lower, upper, [](auto & event) { event->Process(); });
 
-    return eventProcessed;
+    return true;
 }
