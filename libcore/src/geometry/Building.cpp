@@ -114,7 +114,8 @@ Building::Building(Configuration * configuration, PedDistributor & pedDistributo
     }
 
     _trainTypes = TrainFileParser::ParseTrainType(_configuration->GetTrainTypeFile());
-    _trainTimeTables = TrainFileParser::ParseTrainTimetable(_configuration->GetTrainTimeTableFile());
+    _trainTimeTables =
+        TrainFileParser::ParseTrainTimetable(_configuration->GetTrainTimeTableFile());
 }
 
 #endif
