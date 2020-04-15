@@ -29,9 +29,9 @@ function (cpack_write_osx_config)
   message(STATUS "Package generation - MacOS")
   list(APPEND CPACK_GENERATOR "DragNDrop")
   set (CPACK_GENERATOR  ${CPACK_GENERATOR} PARENT_SCOPE)
-  Set(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_SOURCE_DIR}/jpscore/forms/background.png" PARENT_SCOPE)
-   set(CPACK_DMG_DS_STORE_SETUP_SCRIPT
-     "${CMAKE_SOURCE_DIR}/jpscore/forms/DS_Store.scpt" PARENT_SCOPE)
+  set(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_SOURCE_DIR}/jpscore/forms/background.png" PARENT_SCOPE)
+  # set(CPACK_DMG_DS_STORE_SETUP_SCRIPT
+  #   "${CMAKE_SOURCE_DIR}/jpscore/forms/DS_Store.scpt" PARENT_SCOPE)
   set(CPACK_DMG_DISABLE_APPLICATIONS_SYMLINK ON  PARENT_SCOPE)
   set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/jpscore/forms/JPScore.icns" PARENT_SCOPE)
   set(CPACK_DMG_VOLUME_NAME "${PROJECT_NAME}" PARENT_SCOPE)
@@ -107,6 +107,6 @@ function (cpack_write_config)
   endif()
 
   print_var(CPACK_SOURCE_PACKAGE_FILE_NAME)
-  
+
   include(CPack)
 endfunction()
