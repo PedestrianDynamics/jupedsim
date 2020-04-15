@@ -111,11 +111,11 @@ std::map<std::string, TrainType> TrainFileParser::ParseTrainType(const fs::path 
     for(TiXmlElement * e = xTT->FirstChildElement("train"); e; e = e->NextSiblingElement("train")) {
         auto trainType = ParseTrainTypeNode(e);
         if(trainType) {
-            if(trainTypes.find(trainType.value().type) != std::end(trainTypes)) {
-                LOG_WARNING("Duplicate type for train found [{}]", trainType.value().type);
+            if(trainTypes.find(trainType.value()._name) != std::end(trainTypes)) {
+                LOG_WARNING("Duplicate type for train found [{}]", trainType.value()._name);
                 continue;
             }
-            trainTypes.insert(std::make_pair(trainType.value().type, trainType.value()));
+            trainTypes.insert(std::make_pair(trainType.value()._name, trainType.value()));
         }
     }
     return trainTypes;

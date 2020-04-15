@@ -32,6 +32,7 @@
 #include "Obstacle.h"
 #include "Room.h"
 #include "Transition.h"
+#include "events/Trains.h"
 #include "general/Configuration.h"
 #include "general/Filesystem.h"
 #include "neighborhood/NeighborhoodSearch.h"
@@ -61,12 +62,6 @@ struct TrainTimeTable {
     int pid;      // Platform id
     bool arrival;
     bool departure;
-};
-struct TrainType {
-    std::string type;
-    int nmax;  // agents_max
-    float len; //length
-    std::vector<Transition> doors;
 };
 
 

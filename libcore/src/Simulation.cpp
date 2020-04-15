@@ -131,9 +131,9 @@ bool Simulation::InitArgs()
     LOG_INFO("Got {} Train Types.", _building->GetTrainTypes().size());
 
     for(auto && TT : _building->GetTrainTypes()) {
-        LOG_INFO("Type {}", TT.second.type);
-        LOG_INFO("Max {}", TT.second.nmax);
-        LOG_INFO("Number of doors {}", TT.second.doors.size());
+        LOG_INFO("Type {}", TT.second._name);
+        LOG_INFO("Max {}", TT.second._maxAgents);
+        LOG_INFO("Number of doors {}", TT.second._doors.size());
     }
 
     LOG_INFO("Got {} Train Time Tables", _building->GetTrainTimeTables().size());
@@ -492,16 +492,16 @@ double Simulation::RunBody(double maxSimTime)
                 int id           = atoi(strs[1].c_str());
                 std::string type = Trans->GetCaption();
                 trainOutflow[id] += Trans->GetDoorUsage();
-                if(trainOutflow[id] >= _building->GetTrainTypes().at(type).nmax) {
+                if(trainOutflow[id] >= _building->GetTrainTypes().at(type)._maxAgents) {
                     std::cout << "INFO:\tclosing train door " << transType.c_str() << " at "
                               << Pedestrian::GetGlobalTime() << " capacity "
-                              << _building->GetTrainTypes().at(type).nmax << "\n";
+                              << _building->GetTrainTypes().at(type)._maxAgents << "\n";
                     LOG_INFO(
                         "Closing train door {} at t={:.2f}. Flow = {:.2f} (Train Capacity {})",
                         transType,
                         Pedestrian::GetGlobalTime(),
                         trainOutflow[id],
-                        _building->GetTrainTypes().at(type).nmax);
+                        _building->GetTrainTypes().at(type)._maxAgents);
                     Trans->Close();
                 }
             }
@@ -590,7 +590,7 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, const Train
 
 
     auto train = building->GetTrainTypes().at(trainType);
-    auto doors = train.doors;
+    auto doors = train._doors;
     for(auto && d : doors) {
         auto newX = d.GetPoint1()._x + TrainStart._x + TrackStart._x;
         auto newY = d.GetPoint1()._y + TrainStart._y + TrackStart._y;
