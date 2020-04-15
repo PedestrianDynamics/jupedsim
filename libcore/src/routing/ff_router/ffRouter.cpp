@@ -362,8 +362,9 @@ int FFRouter::FindExit(Pedestrian * p)
     validFinalDoor.clear();
     if(goalID == -1) {
         for(auto & pairDoor : _ExitsByUID) {
-            //we add the all exits
-            if(!_building->GetTransitionByUID(pairDoor.first)->IsClose()) {
+            // we add all open/temp_close exits
+            if(_building->GetTransitionByUID(pairDoor.first)->IsOpen() ||
+               _building->GetTransitionByUID(pairDoor.first)->IsTempClose()) {
                 validFinalDoor.emplace_back(pairDoor.first); //UID
             }
         }
@@ -400,7 +401,7 @@ int FFRouter::FindExit(Pedestrian * p)
         for(auto & transI : _building->GetRoom(p->GetRoomID())
                                 ->GetSubRoom(p->GetSubRoomID())
                                 ->GetAllTransitions()) {
-            if(!transI->IsClose()) {
+            if(transI->IsOpen() || transI->IsTempClose()) {
                 DoorUIDsOfRoom.emplace_back(transI->GetUniqueID());
             }
         }
