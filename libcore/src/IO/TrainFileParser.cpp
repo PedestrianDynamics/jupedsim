@@ -6,7 +6,7 @@ std::map<int, TrainTimeTable>
 TrainFileParser::ParseTrainTimetable(const fs::path & trainTimeTableFile)
 {
     std::map<int, TrainTimeTable> trainTimeTable;
-    TiXmlDocument docTTT(trainTimeTableFile);
+    TiXmlDocument docTTT(trainTimeTableFile.string());
     if(!docTTT.LoadFile()) {
         LOG_ERROR("{}", docTTT.ErrorDesc());
         LOG_ERROR("Could not parse the train timetable file.");
@@ -93,7 +93,7 @@ std::map<std::string, TrainType> TrainFileParser::ParseTrainType(const fs::path 
 {
     std::map<std::string, TrainType> trainTypes;
 
-    TiXmlDocument docTT(trainTypeFile);
+    TiXmlDocument docTT(trainTypeFile.string());
     if(!docTT.LoadFile()) {
         LOG_ERROR("{}", docTT.ErrorDesc());
         LOG_ERROR("Could not parse the train type file.");
