@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 """
-Simple test if the simulation time till the platform is empty does not change (reference value 44s with
-master (c0931492a18a52aa925b84091d77f42731ca5894)).
+Simple test if the simulation time till the platform is empty does not change (reference value 50s with
+master (869817f961d8ba66618d920e1e48fc39dd7a5fea)).
 """
 
 import os
@@ -22,7 +22,7 @@ def runtest(inifile, trajfile):
     maxFrame = np.max(traj[:, 1])
     time = maxFrame / fps
 
-    if time > 44:
+    if time > 50:
         logging.critical("%s exists with failure!" % argv[0])
         logging.critical("simulation took longer than 44s")
         exit(FAILURE)
