@@ -6,7 +6,7 @@ sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_inifile.html
 summary:  The project file where the settings for a jpscore simulation are defined. Within this file properties of pedestrians, model parameters, etc can be given.
-last_updated: Jan 23, 2020
+last_updated: April 17, 2020
 ---
 
 ## Header
@@ -25,34 +25,32 @@ The header comprises the following elements:
 -   `<geometry>geometry.xml</geometry>`
     The name and location of the geometry file. All file locations are relative
     to the actual location of the project file. See [specification](jpscore_geometry.html) of the geometry format.
-    
+
 -   `<events_file>events.xml</events_file>`
-    The name and location of the event file. Events can be used to open or close doors at a certain point of time. 
+    The name and location of the event file. Events can be used to open or close doors at a certain point of time.
     See [event_file](jpscore_events.html).
-    
+
 -   `<schedule_file>schedule.xml</schedule_file>`
-    The name and location of the schedule file. Schedules can be used to group doors and open or close this 
+    The name and location of the schedule file. Schedules can be used to group doors and open or close this
     groups of door at certain points of time. See [schedule_file](jpscore_schedule.html)
 
 -   `<show_statistics>true</show_statistics>` Show different aggregate statistics e.g. the usage of the doors. (default: false)
 
 -   `<output path="output_directory" />`
-    The name and location where the results of the simulation should be stored. The program creates a folder with the 
-    given name and copies all needed files of the simulation to this folder. Additionally the file names in the ini and 
-    geometry file are updated. Resulting in a folder with the results and everything to reproduce a specific simulation. 
-    If no output path is given the folder is named `results`. 
-     
+    The name and location where the results of the simulation should be stored. The program creates a folder with the
+    given name and copies all needed files of the simulation to this folder. Additionally the file names in the ini and
+    geometry file are updated. Resulting in a folder with the results and everything to reproduce a specific simulation.
+    If no output path is given the folder is named `results`.
+
 -  The trajectory file
 
 ```bash
- <trajectories format="xml-plain" fps="8" color_mode="velocity">
-    <file location="trajectories.xml" />   
+ <trajectories format="plain" fps="8" color_mode="velocity">
+    <file location="trajectories.txt" />
  </trajectories>
 ```
 
 The options for the format are
-
--   `xml-plain`: the default xml format. It can lead to large files. See section [xml-plain](jpscore_trajectory#xml).
 
 -   `plain`: simple text format. See section [plain](jpscore_trajectory#txt).
     - `optional_output`: possibility to give additional output. Set any of these values to `TRUE` (not case sensitive) to get the according value. `FALSE`, any other value and ignoring the option will lead to no output.
@@ -64,14 +62,14 @@ The options for the format are
         - `group`: group of the pedestrian
         - `router`: router used by the pedestrian (id accoriding to ini-file)
         - `spotlight`: pedestrian is highlighted.
-        
+
         ```xml
             <trajectories format="plain"  fps="8">
               <file location="bottleneck_traj.txt" />
               <optional_output speed="FALSE" velocity="TRUE" final_goal="NoOutputWrongValue"  intermediate_goal="false" desired_direction="true" group="TRUE" router="TRUE" spotlight="TRUE"/>
             </trajectories>
         ```
-        
+
 {%include warning.html content="xml trajectories tend to become large and hence slow down parsing and visualisation." %}
 
 - The value `fps` defines the frame rate per second for the trajectories.
@@ -122,7 +120,7 @@ This section defines constraints related to doors.
 
 ## Routing
 
-The routing comprises additional goals, which might be defined **inside** or **outside** the geometry.     
+The routing comprises additional goals, which might be defined **inside** or **outside** the geometry.
 
 ```xml
  <routing>
@@ -169,7 +167,7 @@ Addional goals, which are defined **inside** the geometry.
 
 Here are some use cases:
 - Waiting: Designated waiting areas where pedestrians wait for a specific time or till an specific door opens. After waiting is over the move to one of the specified next goal (decided individually for each ped).
-- Manual routing: Goals which should be passed before leaving the building without waiting (`waiting_time="0"`). Can be used to reduce jam in front of bottlenecks or ensuring pedestrian walk through certain paths. 
+- Manual routing: Goals which should be passed before leaving the building without waiting (`waiting_time="0"`). Can be used to reduce jam in front of bottlenecks or ensuring pedestrian walk through certain paths.
 {%include warning.html content="Unexpected behaviour might be observed if the shortest distance to the next goal does not match the desired route. In such a case consider placing the waiting area at an other place. "%}
 
 - Waiting areas are defined as closed polygons, with  *the last vertex is equal to the first one*.
@@ -177,7 +175,7 @@ Here are some use cases:
 - `file`: file containing further goals/waiting areas. See [goals.xml](jpscore_goal.html)
 - `waiting_time`: the time pedestrians wait inside the waiting area
 - `min_peds`: the number of pedestrians needed in the waiting area to start the timer (if `global_timer` = false)
-- `max_peds`: the max number of pedestrians allowed inside the waiting area. 
+- `max_peds`: the max number of pedestrians allowed inside the waiting area.
 {%include note.html content="to avoid undefined behaviour `max_peds` should not exceed the number of pedestrians heading for an other waiting area. Hence `max_peds(WA1)` <= `max_peds(WA2)`."%}
 - `is_open`: defines whether the waiting area is open for pedestrians
 - `room_id`: ID of room containg waiting area
@@ -207,12 +205,12 @@ There are two ways to distribute agents for a simulation:
         <source id="2" time="10" agent_id="50" group_id="1" caption="caption" greedy="true"/>
         <source id="10" caption="new-source" time_min="5" time_max="30" frequency="5" N_create="10" agents_max="300" group_id="0"  x_min="0" x_max="3" y_min="0" y_max="3" percent="0.5" rate="2"  greedy="true"/>
     <file>sources.xml</file>
-    </agents_sources>	 
+    </agents_sources>
  </agents>
 ```
 
 ### Agents_distribution
-Above is an example how to define agent's characteristics with different number of 
+Above is an example how to define agent's characteristics with different number of
 attributes, which are as follows:
 
 - `group_id`: mandatory parameter defining the unique id of that group.
