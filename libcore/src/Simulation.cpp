@@ -852,6 +852,8 @@ void Simulation::CopyInputFilesToOutPath()
     CopyInputFileToOutPath(_config->GetEventFile());
     CopyInputFileToOutPath(_config->GetScheduleFile());
     CopyInputFileToOutPath(_config->GetSourceFile());
+    CopyInputFileToOutPath(_config->GetTrainTimeTableFile());
+    CopyInputFileToOutPath(_config->GetTrainTypeFile());
 }
 
 void Simulation::CopyInputFileToOutPath(fs::path file)
@@ -959,6 +961,28 @@ void Simulation::UpdateOutputIniFile()
                 ->FirstChild("schedule_file")
                 ->FirstChild()
                 ->SetValue(_config->GetScheduleFile().filename().string());
+        }
+    }
+
+    // update new train time table file name
+    if(!_config->GetTrainTimeTableFile().empty()) {
+        if(mainNode->FirstChild("train_constraints") &&
+           mainNode->FirstChild("train_constraints")->FirstChild("train_time_table")) {
+            mainNode->FirstChild("train_constraints")
+                ->FirstChild("train_time_table")
+                ->FirstChild()
+                ->SetValue(_config->GetTrainTimeTableFile().filename().string());
+        }
+    }
+
+    // update new train types file name
+    if(!_config->GetTrainTypeFile().empty()) {
+        if(mainNode->FirstChild("train_constraints") &&
+           mainNode->FirstChild("train_constraints")->FirstChild("train_types")) {
+            mainNode->FirstChild("train_constraints")
+                ->FirstChild("train_types")
+                ->FirstChild()
+                ->SetValue(_config->GetTrainTypeFile().filename().string());
         }
     }
 
