@@ -9,8 +9,8 @@
     <!-- geometry file -->
     <geometry>../geometry.xml</geometry>
     <!-- traectories file and format -->
-    <trajectories format="xml-plain" embed_mesh="false" fps="33">
-        <file location="Traj_test_3.xml"/>
+    <trajectories format="plain" embed_mesh="false" fps="33">
+        <file location="Traj_test_3.txt"/>
   </trajectories>
   <!-- where to store the logs -->
   <logfile>log.txt</logfile>
@@ -62,20 +62,20 @@
         <navigation_lines file="../routing.xml" />
       </parameters>
     </router>
-    
+
     <router router_id="2" description="global_shortest">
       <parameters>
         <navigation_lines file="../routing.xml" />
       </parameters>
     </router>
-    
+
     <router router_id="3" description="quickest"> <!-- global quickest -->
       <parameters>
         <navigation_lines file="../routing.xml" />
       </parameters>
     </router>
 
-        
+
     <router router_id="4" description="ff_global_shortest"/> <!-- like global_shortest, without HLines -->
     <router router_id="5" description="ff_local_shortest"/> <!-- like local_shortest, without HLines -->
     <router router_id="6" description="ff_quickest"/> <!-- like global quickest -->
@@ -88,7 +88,7 @@
     </router>
 
 
-    
+
   </route_choice_models>
 
 </JuPedSim>

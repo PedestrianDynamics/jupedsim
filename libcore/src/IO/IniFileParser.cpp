@@ -235,12 +235,10 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
         std::string format = xHeader->FirstChildElement("trajectories")->Attribute("format") ?
                                  xHeader->FirstChildElement("trajectories")->Attribute("format") :
-                                 "xml-plain";
+                                 "plain";
         std::transform(format.begin(), format.end(), format.begin(), ::tolower);
 
-        if(format == "xml-plain") {
-            _config->SetFileFormat(FileFormat::XML);
-        } else if(format == "plain") {
+        if(format == "plain") {
             _config->SetFileFormat(FileFormat::TXT);
         } else {
             LOG_WARNING("no output format specified. Using default: TXT");
@@ -282,23 +280,11 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
             (trajectoryFile.has_extension()) ? (trajectoryFile.extension().string()) : ("");
         std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
 
-        // check file extension and if it is not matching the intended format,
-        // change it to correct one
-        switch(_config->GetFileFormat()) {
-            case FileFormat::XML: {
-                if(extension != ".xml") {
-                    trajectoryFile.replace_extension(".xml");
-                    LOG_WARNING("replaced output file extension with: .xml");
-                }
-                break;
-            }
-            case FileFormat::TXT: {
-                if(extension != ".txt") {
-                    trajectoryFile.replace_extension(".txt");
-                    LOG_WARNING("replaced output file extension with: .txt");
-                }
-                break;
-            }
+        // At the moment we only suport plain txt file format.
+        // Check file extension and if it is not txt, change it to correct one
+        if(extension != ".txt") {
+            trajectoryFile.replace_extension(".txt");
+            LOG_WARNING("replaced output file extension with: .txt");
         }
 
         fs::path canonicalTrajPath =

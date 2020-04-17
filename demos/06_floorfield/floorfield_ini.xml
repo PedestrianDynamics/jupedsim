@@ -9,8 +9,8 @@
     <!-- geometry file -->
     <geometry>floorfield_geo.xml</geometry>
     <!-- trajectories file and format -->
-    <trajectories format="xml-plain" fps="16">
-      <file location="floorfield_traj.xml" />
+    <trajectories format="plain" fps="16">
+      <file location="floorfield_traj.txt" />
     </trajectories>
     <!-- where to store the logs -->
     <logfile>log.txt</logfile>

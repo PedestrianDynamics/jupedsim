@@ -11,8 +11,8 @@
         <geometry>schedule_geo.xml</geometry>
         <num_threads>1</num_threads>
         <!-- traectories file and format -->
-        <trajectories format="xml-plain" fps="8">
-            <file location="schedule_traj.xml"/>
+        <trajectories format="plain" fps="8">
+            <file location="schedule_traj.txt" />
         </trajectories>
         <!-- where to store the logs -->
         <logfile>log.txt</logfile>

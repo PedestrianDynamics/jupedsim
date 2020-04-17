@@ -10,8 +10,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 <!-- geometry file -->
 <geometry>geometry7.xml</geometry>
 <!-- trajectories file and format -->
-<trajectories format="xml-plain" fps="8">
-    <file location="traj7.xml" />
+<trajectories format="plain" fps="8">
+    <file location="traj7.txt" />
 </trajectories>
 <!-- where to store the logs -->
 <logfile>log7</logfile>

@@ -9,8 +9,8 @@
     <geometry>source_geo.xml</geometry>
     <max_sim_time>5000</max_sim_time>
     <!-- trajectories file and format -->
-    <trajectories format="xml-plain" fps="16" color_mode="group">
-      <file location="source_traj.xml" />
+    <trajectories format="plain" fps="16" color_mode="group">
+      <file location="source_traj.txt" />
     </trajectories>
     <!-- where to store the logs -->
     <logfile>log.txt</logfile>

@@ -84,18 +84,8 @@ long Simulation::GetPedsNumber() const
 bool Simulation::InitArgs()
 {
     if(!_config->GetTrajectoriesFile().empty()) {
-        switch(_config->GetFileFormat()) {
-            case FileFormat::XML:
-                _iod = std::make_unique<TrajectoriesXML>(TrajectoriesXML());
-                break;
-
-            case FileFormat::TXT:
-                _iod = std::make_unique<TrajectoriesTXT>(TrajectoriesTXT());
-                break;
-
-            default:
-                break;
-        }
+        // At the moment we only support plain txt format
+        _iod = std::make_unique<TrajectoriesTXT>(TrajectoriesTXT());
     }
 
     const fs::path & trajPath(_config->GetTrajectoriesFile());
@@ -208,7 +198,6 @@ double Simulation::RunStandardSimulation(double maxSimTime)
 {
     RunHeader(_nPeds + _agentSrcManager.GetMaxAgentNumber());
     double t = RunBody(maxSimTime);
-    RunFooter();
     return t;
 }
 
@@ -422,8 +411,6 @@ void Simulation::RunHeader(long nPed)
     _iod->WriteHeader(nPed, _fps, _building.get(), _seed, 0); // first trajectory
                                                               // count = 0
     _iod->WriteGeometry(_building.get());
-    if(_gotSources)
-        _iod->WriteSources(GetAgentSrcManager().GetSources());
 
     int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
     writeInterval     = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
@@ -852,11 +839,6 @@ bool Simulation::correctGeometry(
     }
     _routingEngine->setNeedUpdate(true);
     return true;
-}
-
-void Simulation::RunFooter()
-{
-    _iod->WriteFooter();
 }
 
 void Simulation::CopyInputFilesToOutPath()
