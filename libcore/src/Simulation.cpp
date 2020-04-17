@@ -427,7 +427,7 @@ double Simulation::RunBody(double maxSimTime)
             }
 
             // here the used routers are update, when needed due to external changes
-            if(_routingEngine->NeedsUpdate()) {
+            if(_routingEngine->NeedsUpdate() || geometryChanged) {
                 LOG_INFO("Update router during simulation.");
                 _routingEngine->UpdateRouter();
             }
