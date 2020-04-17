@@ -84,11 +84,8 @@ long Simulation::GetPedsNumber() const
 bool Simulation::InitArgs()
 {
     if(!_config->GetTrajectoriesFile().empty()) {
-        switch(_config->GetFileFormat()) {
-            case FileFormat::TXT:
-                _iod = std::make_unique<TrajectoriesTXT>(TrajectoriesTXT());
-                break;
-        }
+        // At the moment we only support plain txt format
+        _iod = std::make_unique<TrajectoriesTXT>(TrajectoriesTXT());
     }
 
     const fs::path & trajPath(_config->GetTrajectoriesFile());
