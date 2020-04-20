@@ -30,7 +30,7 @@ TrainFileParser::ParseTrainTimetable(const fs::path & trainTimeTableFile)
                 LOG_WARNING("Duplicate id for train time table found [{}]", TTT.value().id);
                 continue;
             }
-            trainTimeTable.insert(std::make_pair(TTT.value().id, TTT.value()));
+            trainTimeTable.emplace(TTT.value().id, TTT.value());
         }
     }
     return trainTimeTable;
