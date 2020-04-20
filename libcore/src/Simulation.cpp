@@ -1096,7 +1096,7 @@ bool Simulation::TrainTraffic()
     Point trackStart, trackEnd;
     int trainId = 0;
     auto now    = Pedestrian::GetGlobalTime();
-    for(auto & [id, tab] : _building->GetTrainTimeTables()) {
+    for(const auto & [id, tab] : _building->GetTrainTimeTables()) {
         trainType  = tab.type;
         trainId    = tab.id;
         trackStart = tab.pstart;
