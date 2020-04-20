@@ -24,7 +24,7 @@ def runtest(inifile, trajfile):
 
     if time > 50:
         logging.critical("%s exists with failure!" % argv[0])
-        logging.critical("simulation took longer than 44s")
+        logging.critical("simulation took longer than 50s")
         exit(FAILURE)
 
 
