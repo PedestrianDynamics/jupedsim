@@ -8,7 +8,7 @@
     <max_sim_time>120</max_sim_time>
 
     <!-- trajectories file and format -->
-    <trajectories format="xml-plain" fps="33">
+    <trajectories format="plain" fps="33">
         <file location="trajectories.txt"/>
     </trajectories>
 
