@@ -307,8 +307,8 @@ TEST_CASE(
 }
 
 TEST_CASE(
-    "SimulationHelper::FindPedsReachedFinalGoal",
-    "[SimulationHelper][FindPedsReachedFinalGoal]")
+    "SimulationHelper::FindPedestriansReachedFinalGoal",
+    "[SimulationHelper][FindPedestriansReachedFinalGoal]")
 {
     // Create following geometry:
     // -| = Walls
@@ -517,7 +517,7 @@ TEST_CASE(
     {
         SECTION("No peds reached final goal")
         {
-            auto pedsReachedFinalGoal = SimulationHelper::FindPedsReachedFinalGoal(
+            auto pedsReachedFinalGoal = SimulationHelper::FindPedestriansReachedFinalGoal(
                 building,
                 {&pedInsideGoalOutsideInGoalFinal,
                  &pedInsideGoalOutsideInGoalNotFinal,
@@ -538,7 +538,7 @@ TEST_CASE(
 
         SECTION("Multiple peds inside final goal, one wants to get there")
         {
-            auto pedsReachedFinalGoal = SimulationHelper::FindPedsReachedFinalGoal(
+            auto pedsReachedFinalGoal = SimulationHelper::FindPedestriansReachedFinalGoal(
                 building,
                 {&pedInsideGoalOutsideInGoalFinal,
                  &pedInsideNoGoalOutsideInGoalFinal,
@@ -1108,5 +1108,106 @@ TEST_CASE("SimulationHelper::FindPassedDoor", "[SimulationHelper][FindPassedDoor
             REQUIRE(passedTrans.has_value());
             REQUIRE(passedTrans.value()->GetUniqueID() == trans23->GetUniqueID());
         }
+    }
+}
+
+TEST_CASE("SimulationHelper::RemovePedestrians", "[SimulationHelper][RemovePedestrians]")
+{
+    // Create following geometry:
+    // -| = Walls
+    // +  = Transition
+    //
+    // (-5, 2) |----------| (5, 2)
+    //         |          +
+    //         |          +
+    //         |          +
+    // (-5,-2) |----------| (5, -2)
+
+    Wall wall111;
+    wall111.SetPoint1(Point{5., -2.});
+    wall111.SetPoint2(Point{-5., -2.});
+    Wall wall112;
+    wall112.SetPoint1(Point{-5., -2.});
+    wall112.SetPoint2(Point{-5., 2.});
+    Wall wall113;
+    wall113.SetPoint1(Point{-5., 2.});
+    wall113.SetPoint2(Point{5., 2.});
+    auto trans11 = new Transition();
+    trans11->SetID(1);
+    trans11->SetPoint1(Point{5., -2.});
+    trans11->SetPoint2(Point{5., 2.});
+
+    auto sub11 = new NormalSubRoom();
+    sub11->SetRoomID(1);
+    sub11->SetSubRoomID(1);
+    sub11->AddTransition(trans11);
+    sub11->AddWall(wall111);
+    sub11->AddWall(wall112);
+    sub11->AddWall(wall113);
+    sub11->ConvertLineToPoly(std::vector<Line *>{trans11});
+    sub11->CreateBoostPoly();
+
+    // Create room
+    auto room1 = new Room();
+    room1->SetID(1);
+    room1->AddSubRoom(sub11);
+
+    Building building;
+    building.AddRoom(room1);
+    building.AddTransition(trans11);
+
+    REQUIRE(building.InitGeometry());
+    REQUIRE(building.GetAllRooms().size() == 1);
+    REQUIRE(building.GetAllTransitions().size() == 1);
+
+    std::vector<Pedestrian *> pedsToRemove;
+
+    SECTION("Remove all pedestrians")
+    {
+        for(unsigned int i = 0; i < 10; ++i) {
+            auto ped = new Pedestrian();
+            building.AddPedestrian(ped);
+            pedsToRemove.emplace_back(ped);
+        }
+        REQUIRE(building.GetAllPedestrians().size() == 10);
+        REQUIRE(pedsToRemove.size() == 10);
+        SimulationHelper::RemovePedestrians(building, pedsToRemove);
+        REQUIRE(building.GetAllPedestrians().empty());
+        REQUIRE(pedsToRemove.empty());
+    }
+
+    SECTION("Remove no pedestrians")
+    {
+        for(unsigned int i = 0; i < 10; ++i) {
+            auto ped = new Pedestrian();
+            building.AddPedestrian(ped);
+        }
+        REQUIRE(building.GetAllPedestrians().size() == 10);
+        REQUIRE(pedsToRemove.empty());
+        SimulationHelper::RemovePedestrians(building, pedsToRemove);
+        REQUIRE(building.GetAllPedestrians().size() == 10);
+        REQUIRE(pedsToRemove.empty());
+    }
+
+    SECTION("Remove 5 of 10 pedestrians")
+    {
+        std::vector<Pedestrian *> pedsRemaining;
+
+        for(unsigned int i = 0; i < 10; ++i) {
+            auto ped = new Pedestrian();
+            building.AddPedestrian(ped);
+            if(i < 5) {
+                pedsToRemove.emplace_back(ped);
+            } else {
+                pedsRemaining.emplace_back(ped);
+            }
+        }
+        REQUIRE(building.GetAllPedestrians().size() == 10);
+        REQUIRE(pedsToRemove.size() == 5);
+        REQUIRE(pedsRemaining.size() == 5);
+        SimulationHelper::RemovePedestrians(building, pedsToRemove);
+        REQUIRE(building.GetAllPedestrians().size() == 5);
+        REQUIRE(pedsToRemove.empty());
+        REQUIRE_THAT(building.GetAllPedestrians(), Catch::Matchers::UnorderedEquals(pedsRemaining));
     }
 }

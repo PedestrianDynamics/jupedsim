@@ -56,7 +56,7 @@ SimulationHelper::UpdatePedestrianRoomInformation(const Building & building, Ped
     }
 }
 
-std::vector<Pedestrian *> SimulationHelper::FindPedsReachedFinalGoal(
+std::vector<Pedestrian *> SimulationHelper::FindPedestriansReachedFinalGoal(
     const Building & building,
     const std::vector<Pedestrian *> & peds)
 {
@@ -76,7 +76,7 @@ std::vector<Pedestrian *> SimulationHelper::FindPedsReachedFinalGoal(
 }
 
 std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>>
-SimulationHelper::UpdatePedestrianLocation(
+SimulationHelper::UpdatePedestriansLocations(
     const Building & building,
     const std::vector<Pedestrian *> & peds)
 {
@@ -204,4 +204,25 @@ bool SimulationHelper::UpdateFlowRegulation(Building & building)
         stateChanged = stateChanged || (state != trans->GetState());
     }
     return stateChanged;
+}
+
+void SimulationHelper::RemoveFaultyPedestrians(
+    Building & building,
+    std::vector<Pedestrian *> & pedsFaulty,
+    std::string message)
+{
+    std::for_each(std::begin(pedsFaulty), std::end(pedsFaulty), [&message](Pedestrian * ped) {
+        LOG_ERROR("Pedestrian {}: {}", ped->GetID(), message);
+    });
+
+    SimulationHelper::RemovePedestrians(building, pedsFaulty);
+}
+
+void SimulationHelper::RemovePedestrians(Building & building, std::vector<Pedestrian *> & peds)
+{
+    std::for_each(std::begin(peds), std::end(peds), [&building](Pedestrian * ped) {
+        building.DeletePedestrian(ped);
+    });
+
+    peds.clear();
 }

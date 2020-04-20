@@ -50,13 +50,13 @@ PedRelocation UpdatePedestrianRoomInformation(const Building & building, Pedestr
  * TODO discuss if needed, as we do not allow inside goals at the moment
  */
 std::vector<Pedestrian *>
-FindPedsReachedFinalGoal(const Building & building, const std::vector<Pedestrian *> & peds);
+FindPedestriansReachedFinalGoal(const Building & building, const std::vector<Pedestrian *> & peds);
 
 /**
  * Find pedestrians who have moved to outside of the geometry, and are no longer in the simulation
  * scope.
  * @pre For each ped in peds at least once UpdateRoom(-1,-1) is called, should be done by
- * SimulationHelper::UpdatePedestrianLocation. Meaning that the pedestrian could not be located to one of
+ * SimulationHelper::UpdatePedestriansLocations. Meaning that the pedestrian could not be located to one of
  * the neighboring rooms.
  * @param building geometry used in the simulation
  * @param peds[in,out] in: list of all pedestrians that could not be relocated, out: list of
@@ -74,7 +74,7 @@ FindPedestriansOutside(const Building & building, std::vector<Pedestrian *> & pe
  * list of pedestrians who moved out of their assigned room but to none of the neighboring rooms]
  */
 std::tuple<std::vector<Pedestrian *>, std::vector<Pedestrian *>>
-UpdatePedestrianLocation(const Building & building, const std::vector<Pedestrian *> & peds);
+UpdatePedestriansLocations(const Building & building, const std::vector<Pedestrian *> & peds);
 
 /**
  * Increments the door usage of the doors by the peds in \p pedsChangedRoom.
@@ -99,4 +99,24 @@ bool UpdateFlowRegulation(Building & building);
  * @return transition passed by \p in the last time step, nullopt if no transition could be found
  */
 std::optional<Transition *> FindPassedDoor(const Building & building, const Pedestrian & ped);
+
+/**
+ * Removes the pedestrians \p pedsFaulty from the simulation, e.g., the building. Additionally
+ * prints an error message to the log, containing the pedestrians ID and a \p message.
+ * @post pedsFaulty will be cleared
+ * @param building geometry used in the simulation
+ * @param pedsFaulty list of faulty pedestrians, which should be deleted
+ * @param message error message to be displayed to add additional information to the user
+ */
+void RemoveFaultyPedestrians(
+    Building & building,
+    std::vector<Pedestrian *> & pedsFaulty,
+    std::string message);
+
+/**
+ * Removes the pedestrians \p pedsFaulty from the simulation, e.g., the building.
+ * @param building geometry used in the simulation
+ * @param peds list of faulty pedestrians, which should be deleted
+ */
+void RemovePedestrians(Building & building, std::vector<Pedestrian *> & peds);
 } //namespace SimulationHelper

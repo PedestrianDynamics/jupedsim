@@ -198,30 +198,25 @@ double Simulation::RunStandardSimulation(double maxSimTime)
 
 void Simulation::UpdateRoutesAndLocations()
 {
-    //TODO update egress time of room
-    //TODO discuss program flow of main loop
-    // ------------------------------------------------
     auto peds = _building->GetAllPedestrians();
 
     auto [pedsChangedRoom, pedsNotRelocated] =
-        SimulationHelper::UpdatePedestrianLocation(*_building, peds);
+        SimulationHelper::UpdatePedestriansLocations(*_building, peds);
 
-    // TODO not needed at the moment, as we do not have inside final goals yet
-    auto pedsAtFinalGoal = SimulationHelper::FindPedsReachedFinalGoal(*_building, peds);
-    _pedsToRemove.insert(pedsAtFinalGoal.begin(), pedsAtFinalGoal.end());
+    // not needed at the moment, as we do not have inside final goals yet
+    auto pedsAtFinalGoal = SimulationHelper::FindPedestriansReachedFinalGoal(*_building, peds);
+    _pedsToRemove.insert(_pedsToRemove.end(), pedsAtFinalGoal.begin(), pedsAtFinalGoal.end());
 
     auto pedsOutside = SimulationHelper::FindPedestriansOutside(*_building, pedsNotRelocated);
-    _pedsToRemove.insert(pedsNotRelocated.begin(), pedsNotRelocated.end());
-    _pedsToRemove.insert(pedsOutside.begin(), pedsOutside.end());
+    _pedsToRemove.insert(_pedsToRemove.end(), pedsOutside.begin(), pedsOutside.end());
 
-    //TODO see if this can be merged
     SimulationHelper::UpdateFlowAtDoors(*_building, pedsChangedRoom);
     SimulationHelper::UpdateFlowAtDoors(*_building, pedsOutside);
 
-    //TODO free function?
-    RemovePedestrians();
+    SimulationHelper::RemoveFaultyPedestrians(
+        *_building, pedsNotRelocated, "Could not be properly relocated");
+    SimulationHelper::RemovePedestrians(*_building, _pedsToRemove);
 
-    //TODO check if working
     //TODO discuss simulation flow -> better move to main loop, does not belong here
     SimulationHelper::UpdateFlowRegulation(*_building);
     //TODO check if better move to main loop, does not belong here
@@ -259,14 +254,6 @@ void Simulation::UpdateRoutes()
             }
         }
     }
-}
-
-void Simulation::RemovePedestrians()
-{
-    for(auto p : _pedsToRemove) {
-        _building->DeletePedestrian(p);
-    }
-    _pedsToRemove.clear();
 }
 
 void Simulation::PrintStatistics(double simTime)
@@ -363,7 +350,6 @@ void Simulation::RunHeader(long nPed)
     _iod->WriteFrame(firstframe, _building.get());
     //first initialisation needed by the linked-cells
     UpdateRoutesAndLocations();
-    RemovePedestrians();
 
     // KKZ: RunBody calls this as one of the firs things, hence this can be removed
     _agentSrcManager.GenerateAgents();
