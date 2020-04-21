@@ -79,8 +79,16 @@ int main(int argc, char ** argv)
     }
     time_t starttime{};
     time(&starttime);
+
+    double evacTime;
     LOG_INFO("Simulation started with {} pedestrians", sim.GetPedsNumber());
-    const auto evacTime = sim.RunStandardSimulation(config.GetTmax());
+    try {
+        evacTime = sim.RunStandardSimulation(config.GetTmax());
+    } catch(const std::exception & e) {
+        LOG_ERROR("Exception in Simulation::RunStandardSimulation thrown, what: {}", e.what());
+
+        return EXIT_FAILURE;
+    }
     LOG_INFO("Simulation completed");
     time_t endtime{};
     time(&endtime);
