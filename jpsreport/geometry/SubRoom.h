@@ -343,7 +343,7 @@ public:
 
     void WriteToErrorLog() const;
     bool ConvertLineToPoly(const std::vector<Line *> & goals);
-    bool IsInSubRoom(const Point & ped) const;
+    bool IsInSubRoom(const Point & p) const;
 };
 
 /************************************************************

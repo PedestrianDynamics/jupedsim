@@ -85,28 +85,6 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
         }
     }
 
-    SECTION("Line is in LineSegment")
-    {
-        Line L1(Point(1, 0), Point(10, 0));
-        for(int i = 1; i <= 10; ++i) {
-            REQUIRE(L1.IsInLineSegment(Point(i, 0)));
-        }
-
-        for(int i = 0; i < 20; ++i) {
-            REQUIRE_FALSE(L1.IsInLineSegment(Point(i, i)));
-        }
-
-        Point P1(30.1379, 124.485);
-        Point P2(41.4647, 124.485);
-        Point P3(38.4046, 104.715);
-        Point P4(33.7146, 104.715);
-        Line L2(P1, P2);
-        Line L3(P3, P4);
-        REQUIRE_FALSE(L2.IsInLineSegment(P3));
-        REQUIRE_FALSE(L2.IsInLineSegment(P4));
-        REQUIRE_FALSE(L3.IsInLineSegment(P1));
-        REQUIRE_FALSE(L3.IsInLineSegment(P2));
-    }
 
     SECTION("Line Dist To")
     {
@@ -244,5 +222,60 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
         REQUIRE(L1.NearlyInLineSegment(P2));
         REQUIRE(L2.NearlyInLineSegment(P3));
         REQUIRE(L2.NearlyInLineSegment(P4));
+    }
+}
+
+TEST_CASE("geometry/Line/IsInLineSegment", "[geometry][Line][IsInLineSegment]")
+{
+    Line line({-1.5, 1.2}, {1.6, -2.});
+    std::random_device rd;
+    std::mt19937 mt(rd());
+
+    SECTION("Is on line segment")
+    {
+        std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
+        for(int i = 0; i < 100; ++i) {
+            Point connection({line.GetPoint2()._x - line.GetPoint1()._x,
+                              line.GetPoint2()._y - line.GetPoint1()._y});
+            Point p = line.GetPoint1() + (connection * dist(mt));
+            REQUIRE(line.IsInLineSegment(p));
+        }
+    }
+
+    SECTION("Is on line segment")
+    {
+        std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
+        for(int i = 0; i < 100; ++i) {
+            Point connection({line.GetPoint2()._x - line.GetPoint1()._x,
+                              line.GetPoint2()._y - line.GetPoint1()._y});
+            Point p = line.GetPoint1() + (connection * dist(mt));
+            p._x += J_EPS / 5.;
+            p._y += J_EPS / 5.;
+
+            REQUIRE_FALSE(line.IsInLineSegment(p));
+        }
+    }
+
+    SECTION("old test from bug")
+    {
+        Line L1(Point(1, 0), Point(10, 0));
+        for(int i = 1; i <= 10; ++i) {
+            REQUIRE(L1.IsInLineSegment(Point(i, 0)));
+        }
+
+        for(int i = 0; i < 20; ++i) {
+            REQUIRE_FALSE(L1.IsInLineSegment(Point(i, i)));
+        }
+
+        Point P1(30.1379, 124.485);
+        Point P2(41.4647, 124.485);
+        Point P3(38.4046, 104.715);
+        Point P4(33.7146, 104.715);
+        Line L2(P1, P2);
+        Line L3(P3, P4);
+        REQUIRE_FALSE(L2.IsInLineSegment(P3));
+        REQUIRE_FALSE(L2.IsInLineSegment(P4));
+        REQUIRE_FALSE(L3.IsInLineSegment(P1));
+        REQUIRE_FALSE(L3.IsInLineSegment(P2));
     }
 }

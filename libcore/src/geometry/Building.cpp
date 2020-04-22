@@ -664,7 +664,6 @@ bool Building::InitInsideGoals()
     return true;
 }
 
-
 const fs::path & Building::GetProjectFilename() const
 {
     return _configuration->GetProjectFile();

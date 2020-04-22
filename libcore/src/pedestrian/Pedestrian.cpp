@@ -75,14 +75,14 @@ Pedestrian::Pedestrian()
     _roomID                    = -1;
     _subRoomID                 = -1;
     _subRoomUID                = -1;
-    _oldRoomID                 = -1;
-    _oldSubRoomID              = -1;
+    _oldRoomID                 = std::numeric_limits<int>::min();
+    _oldSubRoomID              = std::numeric_limits<int>::min();
     _lastE0                    = Point(0, 0);
     _navLine                   = nullptr;
     _mentalMap                 = std::map<int, int>();
     _destHistory               = std::vector<int>();
     _trip                      = std::vector<int>();
-    _lastPosition              = Point(0, 0);
+    _lastPosition              = Point(J_NAN, J_NAN);
     _lastCellPosition          = -1;
     _knownDoors.clear();
     _distToBlockade      = 0.0;
@@ -255,7 +255,8 @@ void Pedestrian::SetExitLine(const NavLine * l)
 
 void Pedestrian::SetPos(const Point & pos, bool initial)
 {
-    if((_globalTime >= _premovement) || (initial == true)) {
+    if((_globalTime >= _premovement) || initial) {
+        _lastPosition = _ellipse.GetCenter();
         _ellipse.SetCenter(pos);
         //save the last values for the records
         _lastPositions.push(pos);
@@ -325,7 +326,7 @@ void Pedestrian::Setdt(double dt)
 {
     _deltaT = dt;
 }
-double Pedestrian::Getdt()
+double Pedestrian::Getdt() const
 {
     return _deltaT;
 }
@@ -353,6 +354,16 @@ int Pedestrian::GetRoomID() const
 int Pedestrian::GetSubRoomID() const
 {
     return _subRoomID;
+}
+
+int Pedestrian::GetOldRoomID() const
+{
+    return _oldRoomID;
+}
+
+int Pedestrian::GetOldSubRoomID() const
+{
+    return _oldSubRoomID;
 }
 
 int Pedestrian::GetSubRoomUID() const
@@ -436,14 +447,15 @@ int Pedestrian::GetLastDestination()
         return _destHistory.back();
 }
 
-bool Pedestrian::ChangedSubRoom()
+bool Pedestrian::ChangedSubRoom() const
 {
-    if(_oldRoomID != GetRoomID() || _oldSubRoomID != GetSubRoomID()) {
-        _oldRoomID    = GetRoomID();
-        _oldSubRoomID = GetSubRoomID();
-        return true;
-    }
-    return false;
+    return (ChangedRoom() || _oldSubRoomID != _subRoomID) &&
+           _oldSubRoomID != std::numeric_limits<int>::min();
+}
+
+bool Pedestrian::ChangedRoom() const
+{
+    return _oldRoomID != _roomID && _oldRoomID != std::numeric_limits<int>::min();
 }
 
 void Pedestrian::ClearMentalMap()
@@ -1244,4 +1256,22 @@ const Point & Pedestrian::GetWaitingPos() const
 void Pedestrian::SetWaitingPos(const Point & waitingPos)
 {
     _waitingPos = waitingPos;
+}
+
+void Pedestrian::UpdateRoom(int roomID, int subRoomID)
+{
+    _oldRoomID    = _roomID;
+    _oldSubRoomID = _subRoomID;
+    _roomID       = roomID;
+    _subRoomID    = subRoomID;
+}
+
+const std::queue<Point> & Pedestrian::GetLastPositions() const
+{
+    return _lastPositions;
+}
+
+const Point Pedestrian::GetLastPosition() const
+{
+    return _lastPosition;
 }

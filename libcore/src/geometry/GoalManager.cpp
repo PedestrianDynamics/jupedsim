@@ -113,3 +113,11 @@ void GoalManager::SetState(int goalID, bool state)
         }
     }
 }
+
+void GoalManager::Process(double time, const std::vector<Pedestrian *> & peds)
+{
+    for(auto ped : peds) {
+        ProcessPedPosition(ped);
+    }
+    ProcessWaitingAreas(time);
+}

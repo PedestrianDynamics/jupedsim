@@ -74,6 +74,9 @@ private:
     GoalManager _goalManager;
     fs::path _currentTrajectoriesFile;
     int _countTraj = 0; // count number of TXT trajectories to produce
+
+    std::vector<Pedestrian *> _pedsToRemove;
+
 public:
     /**
      * Constructor
@@ -103,16 +106,9 @@ public:
     /**
      * Update the routes (intermediate destinations) of the pedestrians.
      * Based on the route choice algorithm used, the next doors or the next decision points is set.
-     * TODO:
      */
     void UpdateRoutes();
 
-    /**
-     * Update the location of the agents and remove the agents from the simulation who have left the building.
-     * Locations includes room/subrooms.
-     * TODO:
-     */
-    void UpdateLocations();
 
     /**
      * Perform some initialisation for the simulation.
