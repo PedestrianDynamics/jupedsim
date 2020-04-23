@@ -485,18 +485,18 @@ double Simulation::RunBody(double maxSimTime)
                 int id           = atoi(strs[1].c_str());
                 std::string type = Trans->GetCaption();
                 trainOutflow[id] += Trans->GetDoorUsage();
-                if(trainOutflow[id] >= _building->GetTrains().GetTrainTypes().at(type)._maxAgents) {
-                    std::cout << "INFO:\tclosing train door " << transType.c_str() << " at "
-                              << Pedestrian::GetGlobalTime() << " capacity "
-                              << _building->GetTrains().GetTrainTypes().at(type)._maxAgents << "\n";
-                    LOG_INFO(
-                        "Closing train door {} at t={:.2f}. Flow = {:.2f} (Train Capacity {})",
-                        transType,
-                        Pedestrian::GetGlobalTime(),
-                        trainOutflow[id],
-                        _building->GetTrains().GetTrainTypes().at(type)._maxAgents);
-                    Trans->Close();
-                }
+                //                if(trainOutflow[id] >= _building->GetTrains().GetTrainTypes().at(type)._maxAgents) {
+                //                    std::cout << "INFO:\tclosing train door " << transType.c_str() << " at "
+                //                              << Pedestrian::GetGlobalTime() << " capacity "
+                //                              << _building->GetTrains().GetTrainTypes().at(type)._maxAgents << "\n";
+                //                    LOG_INFO(
+                //                        "Closing train door {} at t={:.2f}. Flow = {:.2f} (Train Capacity {})",
+                //                        transType,
+                //                        Pedestrian::GetGlobalTime(),
+                //                        trainOutflow[id],
+                //                        _building->GetTrains().GetTrainTypes().at(type)._maxAgents);
+                //                    Trans->Close();
+                //                }
             }
         } // Transitions
         if(frameNr % 1000 == 0) {

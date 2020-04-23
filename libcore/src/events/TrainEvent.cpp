@@ -245,13 +245,14 @@ void TrainEvent::TrainArrival()
             subroom->AddWall(NewWall1);
         }
     }
+    subroom->Update();
 }
 
 void TrainEvent::TrainDeparture()
 {
     // this function is composed of three copy/pasted blocks.
     int room_id, subroom_id;
-
+    std::set<SubRoom *> subRoomsToUpdate;
     // remove temp added walls
     auto tempWalls = _building->TempAddedWalls[_trainID];
     for(auto it = tempWalls.begin(); it != tempWalls.end();) {
@@ -271,7 +272,8 @@ void TrainEvent::TrainDeparture()
                     subroom->RemoveWall(wall);
                 } //if
             }     //subroom
-        }         //platforms
+            subRoomsToUpdate.insert(subroom);
+        } //platforms
     }
     _building->TempAddedWalls[_trainID] = tempWalls;
 
@@ -296,6 +298,7 @@ void TrainEvent::TrainDeparture()
                     }
                 }
             }
+            subRoomsToUpdate.insert(subroom);
         }
     }
     _building->TempRemovedWalls[_trainID] = tempRemovedWalls;
@@ -320,7 +323,12 @@ void TrainEvent::TrainDeparture()
                     _building->RemoveTransition(subTrans);
                 }
             }
+            subRoomsToUpdate.insert(subroom);
         }
     }
     _building->TempAddedDoors[_trainID] = tempDoors;
+
+    std::for_each(std::begin(subRoomsToUpdate), std::end(subRoomsToUpdate), [](SubRoom * subroom) {
+        subroom->Update();
+    });
 }
