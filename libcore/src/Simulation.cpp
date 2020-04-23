@@ -569,6 +569,7 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, const Train
     auto mytrack = building->GetTrackWalls(TrackStart, TrackEnd, room_id, subroom_id);
     Room * room  = building->GetRoom(room_id);
     subroom      = room->GetSubRoom(subroom_id);
+
     if(subroom == nullptr) {
         LOG_ERROR(
             "Simulation::correctGeometry got wrong room_id|subroom_id ({}|{}). TrainId {}",
@@ -771,6 +772,7 @@ bool Simulation::correctGeometry(std::shared_ptr<Building> building, const Train
             // remove walls w1 and w2
         }
     }
+    subroom->Update();
     _routingEngine->setNeedUpdate(true);
     return true;
 }
