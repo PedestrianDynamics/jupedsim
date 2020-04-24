@@ -500,86 +500,6 @@ const std::vector<std::pair<PointWall, PointWall>> Building::GetIntersectionPoin
     return pws;
 }
 
-// reset changes made by trainTimeTable[id]
-//bool Building::resetGeometry(const TrainTimeTable & tab)
-//{
-//    // this function is composed of three copy/pasted blocks.
-//    int room_id, subroom_id;
-//
-//    // remove temp added walls
-//    auto tempWalls = TempAddedWalls[tab.id];
-//    for(auto it = tempWalls.begin(); it != tempWalls.end();) {
-//        auto wall = *it;
-//        if(it != tempWalls.end()) {
-//            tempWalls.erase(it);
-//        }
-//        for(auto platform : _platforms) {
-//            room_id    = platform.second->rid;
-//            subroom_id = platform.second->sid;
-//            SubRoom * subroom =
-//                this->GetAllRooms().at(room_id)->GetAllSubRooms().at(subroom_id).get();
-//            for(auto subWall : subroom->GetAllWalls()) {
-//                if(subWall == wall) {
-//                    // if everything goes right, then we should enter this
-//                    // if. We already erased from tempWalls!
-//                    subroom->RemoveWall(wall);
-//                } //if
-//            }     //subroom
-//        }         //platforms
-//    }
-//    TempAddedWalls[tab.id] = tempWalls;
-//
-//    /*       // add remove walls */
-//    auto tempRemovedWalls = TempRemovedWalls[tab.id];
-//    for(auto it = tempRemovedWalls.begin(); it != tempRemovedWalls.end();) {
-//        auto wall = *it;
-//        if(it != tempRemovedWalls.end()) {
-//            tempRemovedWalls.erase(it);
-//        }
-//        for(auto platform : _platforms) {
-//            auto tracks = platform.second->tracks;
-//            room_id     = platform.second->rid;
-//            subroom_id  = platform.second->sid;
-//            SubRoom * subroom =
-//                this->GetAllRooms().at(room_id)->GetAllSubRooms().at(subroom_id).get();
-//            for(auto track : tracks) {
-//                auto walls = track.second;
-//                for(auto trackWall : walls) {
-//                    if(trackWall == wall) {
-//                        subroom->AddWall(wall);
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    TempRemovedWalls[tab.id] = tempRemovedWalls;
-//
-//    /*       // remove added doors */
-//    auto tempDoors = TempAddedDoors[tab.id];
-//    for(auto it = tempDoors.begin(); it != tempDoors.end();) {
-//        auto door = *it;
-//        if(it != tempDoors.end()) {
-//            tempDoors.erase(it);
-//        }
-//        for(auto platform : _platforms) {
-//            auto tracks = platform.second->tracks;
-//            room_id     = platform.second->rid;
-//            subroom_id  = platform.second->sid;
-//            SubRoom * subroom =
-//                this->GetAllRooms().at(room_id)->GetAllSubRooms().at(subroom_id).get();
-//            for(auto subTrans : subroom->GetAllTransitions()) {
-//                if(*subTrans == door) {
-//                    // Trnasitions are added to subrooms and building!!
-//                    subroom->RemoveTransition(subTrans);
-//                    this->RemoveTransition(subTrans);
-//                }
-//            }
-//        }
-//    }
-//    TempAddedDoors[tab.id] = tempDoors;
-//    return true;
-//}
-
 void Building::InitPlatforms()
 {
     int num_platform = -1;
@@ -1300,7 +1220,7 @@ bool Building::SaveGeometry(const fs::path & filename) const
     return true;
 }
 
-const Trains & Building::GetTrains() const
+const TrainTypes & Building::GetTrains() const
 {
     return _trains;
 }

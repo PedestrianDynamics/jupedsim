@@ -69,8 +69,7 @@ private:
     int _maxSimTime;
     /// Will be set if pedestrian sources exist
     bool _gotSources;
-    /// Will be set if the configuration contains train constraints
-    bool _trainConstraints;
+
     GoalManager _goalManager;
     fs::path _currentTrajectoriesFile;
     int _countTraj = 0; // count number of TXT trajectories to produce
@@ -193,12 +192,9 @@ public:
     int GetMaxSimTime() const;
     void incrementCountTraj();
 
-    //    bool correctGeometry(std::shared_ptr<Building> building, const TrainTimeTable & trainTimeTable);
-
     /**
      * Updates the output filename if the current file exceeds _maxFileSize.
      * Works only for FileFormat::TXT.
      */
     void RotateOutputFile();
-    bool TrainTraffic();
 };

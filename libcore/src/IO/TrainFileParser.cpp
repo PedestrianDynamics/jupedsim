@@ -4,7 +4,7 @@
 
 void TrainFileParser::ParseTrainTimeTable(
     EventManager & eventManager,
-    const Trains & trainTypes,
+    const TrainTypes & trainTypes,
     const fs::path & trainTimeTableFile)
 {
     TiXmlDocument docTTT(trainTimeTableFile.string());

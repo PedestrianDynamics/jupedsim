@@ -1099,10 +1099,6 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                         return false;
                     };
                     break;
-                case 12:
-                    _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionTrain());
-                    break;
-
                 default:
                     _directionStrategy =
                         std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
@@ -1259,25 +1255,35 @@ bool IniFileParser::ParseExternalFiles(const TiXmlNode & mainNode)
 
     // read train type
     fs::path trainTypeFile;
-    if (mainNode.FirstChild("train_constraints") && mainNode.FirstChild("train_constraints")->FirstChild("train_types")){
-        trainTypeFile = mainNode.FirstChild("train_constraints")->FirstChild("train_types")->FirstChild()->Value();
+    if(mainNode.FirstChild("train_constraints") &&
+       mainNode.FirstChild("train_constraints")->FirstChild("train_types")) {
+        trainTypeFile = mainNode.FirstChild("train_constraints")
+                            ->FirstChild("train_types")
+                            ->FirstChild()
+                            ->Value();
     } else {
         LOG_INFO("No train type file given.");
     }
     if(!trainTypeFile.empty()) {
-        _config->SetTrainTypeFile(fs::weakly_canonical(_config->GetProjectRootDir() / trainTypeFile));
+        _config->SetTrainTypeFile(
+            fs::weakly_canonical(_config->GetProjectRootDir() / trainTypeFile));
         LOG_INFO("Train type is read from: <{}>", _config->GetTrainTypeFile().string());
     }
 
     // read train time table
     fs::path trainTimeTableFile;
-    if (mainNode.FirstChild("train_constraints") && mainNode.FirstChild("train_constraints")->FirstChild("train_time_table")){
-        trainTimeTableFile = mainNode.FirstChild("train_constraints")->FirstChild("train_time_table")->FirstChild()->Value();
+    if(mainNode.FirstChild("train_constraints") &&
+       mainNode.FirstChild("train_constraints")->FirstChild("train_time_table")) {
+        trainTimeTableFile = mainNode.FirstChild("train_constraints")
+                                 ->FirstChild("train_time_table")
+                                 ->FirstChild()
+                                 ->Value();
     } else {
         LOG_INFO("No train type file given.");
     }
     if(!trainTimeTableFile.empty()) {
-        _config->SetTrainTimeTableFile(fs::weakly_canonical(_config->GetProjectRootDir() / trainTimeTableFile));
+        _config->SetTrainTimeTableFile(
+            fs::weakly_canonical(_config->GetProjectRootDir() / trainTimeTableFile));
         LOG_INFO("Train time table is read from: <{}>", _config->GetTrainTimeTableFile().string());
     }
 

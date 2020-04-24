@@ -13,7 +13,7 @@ namespace TrainFileParser
 {
 void ParseTrainTimeTable(
     EventManager & eventManager,
-    const Trains & trainTypes,
+    const TrainTypes & trainTypes,
     const fs::path & trainTimeTableFile);
 
 void ParseTrainTypes(Building & building, const fs::path & trainTypeFile);

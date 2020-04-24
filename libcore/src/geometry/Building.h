@@ -32,7 +32,7 @@
 #include "Obstacle.h"
 #include "Room.h"
 #include "Transition.h"
-#include "events/Trains.h"
+#include "events/TrainTypes.h"
 #include "general/Configuration.h"
 #include "general/Filesystem.h"
 #include "neighborhood/NeighborhoodSearch.h"
@@ -77,7 +77,7 @@ private:
     /// pedestrians pathway
     bool _savePathway;
     std::ofstream _pathWayStream;
-    Trains _trains;
+    TrainTypes _trains;
 
 public:
     /// constructor
@@ -87,7 +87,7 @@ public:
     std::map<int, std::vector<Transition>> TempAddedDoors;
 
     Building(Configuration * config, PedDistributor & pedDistributor);
-    //    bool resetGeometry(const TrainTimeTable & tab);
+
     /// destructor
     virtual ~Building();
 
@@ -257,11 +257,18 @@ public:
     /**
       * @return Vector with the vertices of the geometry's outer boundary rect
       */
-
     std::vector<Point> GetBoundaryVertices() const;
 
+    /**
+     *
+     * @return
+     */
+    const TrainTypes & GetTrains() const;
 
-    const Trains & GetTrains() const;
+    /**
+     * Adds a train type to the building
+     * @param trainType Train type to add
+     */
     void AddTrainType(TrainType trainType);
 
 private:

@@ -209,6 +209,16 @@ bool SimulationHelper::UpdateFlowRegulation(Building & building)
     return stateChanged;
 }
 
+//bool UpdateTrainFlowRegulation(Building & building)
+//{
+//    std::map<int, double> trainUsage;
+//
+//    for (auto const & [trainID])
+//    std::for_each(std::begin(building.TempAddedDoors), std::end(building.TempAddedDoors), [&trainUsage, &building](std::pair<int, std::ee trans]){
+//        trainUsage += building.GetTransition(trans.GetID())->GetDoorUsage();
+//    });
+//}
+
 void SimulationHelper::RemoveFaultyPedestrians(
     Building & building,
     std::vector<Pedestrian *> & pedsFaulty,
