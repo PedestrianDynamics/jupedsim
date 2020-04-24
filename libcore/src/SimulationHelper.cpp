@@ -102,22 +102,24 @@ std::vector<Pedestrian *> SimulationHelper::FindPedestriansOutside(
 {
     std::vector<Pedestrian *> pedsOutside;
     std::vector<Pedestrian *> newPeds;
+    double maxDistance = 0.5;
 
     std::partition_copy(
         std::begin(peds),
         std::end(peds),
         std::back_inserter(pedsOutside),
         std::back_inserter(newPeds),
-        [&building](const Pedestrian * ped) -> bool {
+        [&building, maxDistance](const Pedestrian * ped) -> bool {
             auto transPassed = SimulationHelper::FindPassedDoor(building, *ped);
             if(!transPassed.has_value()) {
                 return false;
             }
 
             //TODO maxDistance should depend on vmax
-            double maxDistance = 0.5;
-            return transPassed.value()->IsExit() && transPassed.value()->IsOpen() &&
-                   transPassed.value()->DistTo(ped->GetPos()) < maxDistance;
+            bool passedExit     = transPassed.value()->IsExit();
+            bool passedOpenDoor = transPassed.value()->IsOpen();
+            bool doorIsClose    = transPassed.value()->DistTo(ped->GetPos()) < maxDistance;
+            return passedExit && passedOpenDoor && doorIsClose;
         });
     peds = std::move(newPeds);
     return pedsOutside;
@@ -135,9 +137,10 @@ void SimulationHelper::UpdateFlowAtDoors(
             return;
         }
 
-        //TODO check if exitindex is set and transition exists?
-        if(closestTransition.value()->GetUniqueID() !=
-           building.GetTransitionByUID(ped->GetExitIndex())->GetUniqueID()) {
+        if(ped->GetExitIndex() >= 0 &&
+           (building.GetTransitionByUID(ped->GetExitIndex()) != nullptr) &&
+           closestTransition.value()->GetUniqueID() !=
+               building.GetTransitionByUID(ped->GetExitIndex())->GetUniqueID()) {
             LOG_WARNING(
                 "Ped {}: used an unindented door {}, but wanted to go to {}.",
                 ped->GetID(),
@@ -212,7 +215,12 @@ void SimulationHelper::RemoveFaultyPedestrians(
     std::string message)
 {
     std::for_each(std::begin(pedsFaulty), std::end(pedsFaulty), [&message](Pedestrian * ped) {
-        LOG_ERROR("Pedestrian {}: {}", ped->GetID(), message);
+        LOG_ERROR(
+            "Pedestrian {} at ({:.3f} | {:.3f}): {}",
+            ped->GetID(),
+            ped->GetPos()._x,
+            ped->GetPos()._y,
+            message);
     });
 
     SimulationHelper::RemovePedestrians(building, pedsFaulty);
