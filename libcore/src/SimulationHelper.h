@@ -31,13 +31,15 @@ namespace SimulationHelper
 {
 /**
  * Checks whether the pedestrian \p ped is still in the assigned room. If not check if \p ped is
- * in an neighbouring room/subroom and update the information. If no relocation is possible,
- * nullopt is returned. When this happens the pedestrian has not moved to one of the neighboring
- * rooms, but somewhere else.
- * @param building
+ * in an neighbouring room/subroom and update the information. If \p ped has moved to a
+ * non-neighbouring room or to the outside, the information will be set to roomID = -1, and
+ * subroomID = -1.
+ * @param building geometry used in the simulation
  * @param ped Pedestrian, whose position is checked and information may be updated
- * @return true if relocation was successful, false if no reloaction was needed. Nullopt if
- * relocation failed.
+ * @return PedRelocation::SUCCESSFUL if \p ped moved to a neighbouring room and the information was
+ * updated accordingly, PedRelocation::NOT_NEEDED if the \p ped has not changed the room or subroom,
+ * PEDRELOCATION::FAILED if \p moved to the outside or any room that is no neighbour of the current
+ * one.
  */
 PedRelocation UpdatePedestrianRoomInformation(const Building & building, Pedestrian & ped);
 

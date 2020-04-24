@@ -1372,6 +1372,32 @@ bool SubRoom::HasGoal(int id)
     return std::find(_goalIDs.begin(), _goalIDs.end(), id) != _goalIDs.end();
 }
 
+void SubRoom::Update()
+{
+    std::vector<Line *> goals;
+    goals.insert(goals.end(), _crossings.begin(), _crossings.end());
+    goals.insert(goals.end(), _transitions.begin(), _transitions.end());
+    if(!ConvertLineToPoly(goals)) {
+        std::string message =
+            fmt::format(FMT_STRING("SubRoom {}, {} could not converted to polygon"), _roomID, _id);
+        throw std::runtime_error(message);
+    }
+
+    std::for_each(std::begin(_obstacles), std::end(_obstacles), [this](Obstacle * obstacle) {
+        if(!obstacle->ConvertLineToPoly()) {
+            std::string message = fmt::format(
+                FMT_STRING("obstacle {}  in SubRoom {}, {} could not converted to polygon"),
+                _roomID,
+                _id,
+                obstacle->GetId());
+            throw std::runtime_error(message);
+        }
+    });
+
+    CalculateArea();
+    CreateBoostPoly();
+}
+
 
 /// Escalator
 

@@ -392,6 +392,13 @@ public:
     std::vector<WaitingArea *> GetAllWaitingAreas();
 
     bool HasGoal(int id);
+
+    /**
+     * Updates the subroom. Create the poly from the given transitions, crossings, obstacles.
+     * Recomputation of the are as well as the polygons describing the subroom.
+     */
+    void Update();
+
 #ifdef _SIMULATOR
 
     virtual bool IsInSubRoom(Pedestrian * ped) const;
