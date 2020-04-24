@@ -6,6 +6,9 @@ add_test(NAME 05_method_A COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DI
 add_test(NAME 01_method_B COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_B/test01/01_method_B.py ${jpsreport_exe})
 add_test(NAME 01_method_C COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_C/test01/01_method_C.py ${jpsreport_exe})
 add_test(NAME 01_method_D COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/test01/01_method_D.py ${jpsreport_exe})
+add_test(NAME D02_corridor_low_density COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D02_corridor_low_density/D02_corridor_low_density.py ${jpsreport_exe})
+add_test(NAME D03_corridor_medium_density COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D03_corridor_medium_density/D03_corridor_medium_density.py ${jpsreport_exe})
+add_test(NAME D04_corridor_high_density COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D04_corridor_high_density/D04_corridor_high_density.py ${jpsreport_exe})
 add_test(NAME 01_method_I COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_I/test01/01_method_I.py ${jpsreport_exe})
 add_test(NAME 01_method_J COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/test01/01_method_J.py ${jpsreport_exe})
 
@@ -18,6 +21,9 @@ set_tests_properties(
   01_method_B
   01_method_C
   01_method_D
+        D02_corridor_low_density
+        D03_corridor_medium_density
+        D04_corridor_high_density
   01_method_I
   01_method_J
   PROPERTIES LABELS "CI:FAST;jpsreport")
