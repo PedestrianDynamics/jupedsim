@@ -11,7 +11,9 @@ last_updated: Apr 23, 2020
 
 {% include note.html content="Tested on Windows 10 and OSX Catalina (10.5)"%}
 
-## OSX: download
+## OSX
+
+Download the following dmg-files :
 
 - [Installer for simulation](https://fz-juelich.sciebo.de/s/0xCVR1zYXao1YDW)
 - [Installer for visualisation](https://fz-juelich.sciebo.de/s/L2M9VR4TdRrmV0c)
@@ -20,15 +22,31 @@ last_updated: Apr 23, 2020
 
 ![OSX: Install jpscore 1]({{ site.baseurl }}/images/osx/jpscore0.png)
 
+
+In the `bin` directory, right-click on the binary `jpscore` and open with a Terminal as shown in the following screenshot:
+
 ![OSX: Install jpscore 2]({{ site.baseurl }}/images/osx/jpscore1.png)
 
-![OSX: Install jpscore 3]({{ site.baseurl }}/images/osx/jpscore2.png)
+This step runs `jpscore` without any input file. This is a workaround to prevent osx from 
+warning about not verified developer. 
+
+![OSX: Install jpscore 3]({{ site.baseurl }}/images/osx/jpscore3.png)
+
+Copy the `bin`-directory and the sample files to some directory, where you have right permissions, e.g. Desktop and run 
+`jpscore` as follows 
+
+```bash
+./jpscore jpscore_samples/bottleneck_ini.xml
+```
+
 
 ### Open jpsvis
 
 ![OSX: Install jpsvis]({{ site.baseurl }}/images/osx/jpsvis.png)
 
-## Windows: download
+## Windows
+
+First, Download the following files:
 
 - [Installer for the simulation](https://fz-juelich.sciebo.de/s/D5ZzrpCiGYYyM5I)
 - [ZIP-directory for visualisation](https://fz-juelich.sciebo.de/s/1CQ12M7RjXPwefu)
@@ -54,7 +72,7 @@ Finally, complete the installation by clicking on `Finish`
 
 {%include important.html content="Before starting a simulation make sure to copy the directory jpscore_samples files to a direction, where you have write permissions, e.g. Desktop."%}
 
-Open a Powershell windows in the directory `jpscore_samples` as shown in the following screenshot:
+Open `Powershell` in the directory `jpscore_samples` as shown in the following screenshot:
 
 ![Windows: run simulation 1]({{ site.baseurl }}/images/win/run_sim1.png)
 
@@ -98,7 +116,7 @@ A directory called `results` should be produced in the same directory as the ini
 ## Visualize results
 
 To visualize the trajectory file produced in the simulation, you can use `jpsvis`.
-Please extract the compressed zip-file you downloaded [here](jupedsim_install_executables.html#windows-download). 
+Please extract the compressed zip-file you downloaded [here](jupedsim_install_executables.html#windows). 
 
 ![Windows: jpsvis 1]({{ site.baseurl }}/images/win/jpsvis1.png)
 
