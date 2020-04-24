@@ -231,10 +231,8 @@ bool Line::IsInLineSegment(const Point & p) const
 
     // cross product to check if point i colinear
     auto crossProduct = differenceTwoAndOne.CrossProduct(differencePAndOne);
-
-    if(std::abs(crossProduct) > 5. * std::numeric_limits<double>::epsilon()) {
+    if(std::abs(crossProduct) > J_EPS)
         return false;
-    }
 
     // dotproduct and distSquared to check if point is in segment and not just in line
     double dotp = differencePAndOne.ScalarProduct(differenceTwoAndOne);
@@ -243,7 +241,10 @@ bool Line::IsInLineSegment(const Point & p) const
         return false;
     }
 
-    return dotp <= (differenceTwoAndOne).NormSquare();
+    if(dotp > (differenceTwoAndOne).NormSquare()) {
+        return false;
+    }
+    return true;
 }
 
 bool Line::NearlyInLineSegment(const Point & p) const
