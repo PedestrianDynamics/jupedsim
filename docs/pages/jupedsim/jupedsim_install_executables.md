@@ -32,13 +32,13 @@ warning about not verified developer.
 
 ![OSX: Install jpscore 3]({{ site.baseurl }}/images/osx/jpscore3.png)
 
-Copy the `bin`-directory and the sample files to some directory, where you have right permissions, e.g. Desktop and run 
-`jpscore` as follows 
+{%include important.html content="Before starting a simulation make sure to copy the `bin`-directory as well as the directory of jpscore_samples to a directory, where you have write permissions, e.g. Desktop."%}
+
+Finally, run `jpscore` as follows 
 
 ```bash
 ./jpscore jpscore_samples/bottleneck_ini.xml
 ```
-
 
 ### Open jpsvis
 
@@ -72,7 +72,7 @@ Finally, complete the installation by clicking on `Finish`
 
 {%include important.html content="Before starting a simulation make sure to copy the directory jpscore_samples files to a direction, where you have write permissions, e.g. Desktop."%}
 
-Open `Powershell` in the directory `jpscore_samples` as shown in the following screenshot:
+Open `Powershell` in the directory of `jpscore_samples` as shown in the following screenshot:
 
 ![Windows: run simulation 1]({{ site.baseurl }}/images/win/run_sim1.png)
 
