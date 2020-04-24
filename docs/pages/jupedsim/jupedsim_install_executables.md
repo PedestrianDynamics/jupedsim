@@ -35,23 +35,23 @@ last_updated: Apr 23, 2020
 
 ### Install jpscore
 
-![Windows: Install jpscore 1]({{ site.baseurl }}/images/win/jpscore_install1.png)
+![Windows: Install jpscore 1]({{ site.baseurl }}/images/win/jpscore_install1.PNG)
 
-![Windows: Install jpscore 2]({{ site.baseurl }}/images/win/jpscore_install2.png)
+![Windows: Install jpscore 2]({{ site.baseurl }}/images/win/jpscore_install2.PNG)
 
-![Windows: Install jpscore 3]({{ site.baseurl }}/images/win/jpscore_install3.png)
+![Windows: Install jpscore 3]({{ site.baseurl }}/images/win/jpscore_install3.PNG)
 
-![Windows: Install jpscore 4]({{ site.baseurl }}/images/win/jpscore_install4.png)
+![Windows: Install jpscore 4]({{ site.baseurl }}/images/win/jpscore_install4.PNG)
 
-![Windows: Install jpscore 5]({{ site.baseurl }}/images/win/jpscore_install5.png)
+![Windows: Install jpscore 5]({{ site.baseurl }}/images/win/jpscore_install5.PNG)
 
-![Windows: Install jpscore 6]({{ site.baseurl }}/images/win/jpscore_install6.png)
+![Windows: Install jpscore 6]({{ site.baseurl }}/images/win/jpscore_install6.PNG)
 
-![Windows: Install jpscore 7]({{ site.baseurl }}/images/win/jpscore_install7.png)
+![Windows: Install jpscore 7]({{ site.baseurl }}/images/win/jpscore_install7.PNG)
 
-![Windows: Install jpscore 8]({{ site.baseurl }}/images/win/jpscore_install8.png)
+![Windows: Install jpscore 8]({{ site.baseurl }}/images/win/jpscore_install8.PNG)
 
-![Windows: Install jpscore 9]({{ site.baseurl }}/images/win/jpscore_install9.png)
+![Windows: Install jpscore 9]({{ site.baseurl }}/images/win/jpscore_install9.PNG)
 
 ### Copy sample files 
 
