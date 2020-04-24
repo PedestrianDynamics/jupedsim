@@ -32,6 +32,10 @@ entries:
       url: /jupedsim_introduction.html
       output: web, pdf
 
+    - title: Installation
+      url: /jupedsim_install_executables.html
+      output: web, pdf
+
     - title: Support
       url: /jupedsim_support.html
       output: web, pdf

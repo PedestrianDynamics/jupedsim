@@ -1,13 +1,15 @@
 ---
-title: Install JuPedSim on Windows
+title: Build JuPedSim on Windows
 tags: [getting_started, troubleshooting]
-summary: "Windows executables will be released. This page gives instructions how to compile the code on windows using Visual Studio"
+summary: "Instructions how to compile the code on windows using Visual Studio"
 keywords: installation
 sidebar: jupedsim_sidebar
 folder: jupedsim
 permalink: jupedsim_install_on_windows.html
-last_updated: Jan 02, 2020
+last_updated: Apr 23, 2020
 ---
+
+{% include note.html content="To use executables rather than build the code, follow this [link](jupedsim_exe_windows.html"%}
 
 ## Prerequisites:
 
