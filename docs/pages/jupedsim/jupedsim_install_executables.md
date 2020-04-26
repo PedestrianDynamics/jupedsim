@@ -57,7 +57,7 @@ Double-click the `JPScore` installer and click on `next` a couple of times.
 {%include note.html content="You will have to accept the [license agreement](https://raw.githubusercontent.com/JuPedSim/jpscore/master/LICENSE)."%}
 ![Windows: Install jpscore 1]({{ site.baseurl }}/images/win/jpscore_install1.png)
 
-Make sure to add `JPScore` to the PATH as shown in the following screenshot.
+{%include important.html content="Make sure to add `JPScore` to the PATH as shown in the following screenshot. In case you don't have sufficient rights to change the system path, you will have to call jpscore using its full path."%}
 
 ![Windows: Install jpscore 2]({{ site.baseurl }}/images/win/jpscore_install2.png)
 
