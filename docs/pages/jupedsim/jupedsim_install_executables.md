@@ -6,14 +6,14 @@ keywords: installation
 sidebar: jupedsim_sidebar
 folder: jupedsim
 permalink: jupedsim_install_executables.html
-last_updated: Apr 23, 2020
+last_updated: Apr 26, 2020
 ---
 
-{% include note.html content="Tested on Windows 10 and OSX Catalina (10.5)"%}
+{% include note.html content="Tested on Windows 10 and OSX Catalina (10.5)."%}
 
 ## OSX
 
-Download the following dmg-files :
+Download the following dmg-files:
 
 - [Installer for simulation](https://fz-juelich.sciebo.de/s/0xCVR1zYXao1YDW)
 - [Installer for visualisation](https://fz-juelich.sciebo.de/s/L2M9VR4TdRrmV0c)
@@ -27,22 +27,23 @@ In the `bin` directory, right-click on the binary `jpscore` and open with a Term
 
 ![OSX: Install jpscore 2]({{ site.baseurl }}/images/osx/jpscore1.png)
 
-This step runs `jpscore` without any input file. This is a workaround to prevent osx from 
+This step runs `jpscore` without any input file. This is a workaround to prevent OSX from 
 warning about not verified developer. 
 
 ![OSX: Install jpscore 3]({{ site.baseurl }}/images/osx/jpscore3.png)
 
-Copy the `bin`-directory and the sample files to some directory, where you have right permissions, e.g. Desktop and run 
-`jpscore` as follows 
+{%include important.html content="Before starting a simulation make sure to copy the `bin`-directory as well as the directory of jpscore_samples to a directory, where you have write permissions, e.g. Desktop."%}
+
+Finally, run `jpscore` as follows 
 
 ```bash
 ./jpscore jpscore_samples/bottleneck_ini.xml
 ```
 
-
 ### Open jpsvis
 
-![OSX: Install jpsvis]({{ site.baseurl }}/images/osx/jpsvis.png)
+Open the resulting trajectory file with `jpsvis`. The results should look like the following screenshot:
+![OSX: jpsvis]({{ site.baseurl }}/images/osx/jpsvis.png)
 
 ## Windows
 
@@ -64,7 +65,7 @@ Double-click the `JPScore` installer and click on `next` a couple of times.
 In the final installation-step, you can install all the components including the sample files. See:
 ![Windows: Install jpscore 3]({{ site.baseurl }}/images/win/jpscore_install3.png)
 
-Finally, complete the installation by clicking on `Finish`
+Finally, complete the installation by clicking on `Finish`.
 
 ![Windows: Install jpscore 4]({{ site.baseurl }}/images/win/jpscore_install4.png)
 
@@ -72,7 +73,7 @@ Finally, complete the installation by clicking on `Finish`
 
 {%include important.html content="Before starting a simulation make sure to copy the directory jpscore_samples files to a direction, where you have write permissions, e.g. Desktop."%}
 
-Open `Powershell` in the directory `jpscore_samples` as shown in the following screenshot:
+Open `Powershell` in the directory of `jpscore_samples` as shown in the following screenshot:
 
 ![Windows: run simulation 1]({{ site.baseurl }}/images/win/run_sim1.png)
 
@@ -124,7 +125,7 @@ In `JPSvis` click on File -> Open file
 and choose the trajectory file you produced previously.
 ![Windows: jpsvis 2]({{ site.baseurl }}/images/win/jpsvis2.png)
 
-Finally, the results should look as follows
+Finally, the result should look like in the following screenshot
 
 ![Windows: jpsvis 3]({{ site.baseurl }}/images/win/jpsvis3.png)
 

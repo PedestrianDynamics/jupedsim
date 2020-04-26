@@ -179,7 +179,11 @@ class JPSRunTestDriver(object):
     def __execute_test(self, executable, inifile, testfunction, trajfile="", *args):
         cmd = "%s %s"%(executable, inifile)
         logging.info('start simulating with exe=<%s>', cmd)
-        subprocess.call([executable, "%s" % inifile])
+        returncode = subprocess.call([executable, "%s" % inifile])
+        if returncode:
+            logging.error("Simulation returned with error code: " + str(returncode) + ".")
+            exit(self.FAILURE)
+
         logging.info('end simulation ...\n--------------\n')
         logging.info("inifile <%s>", inifile)
         if not trajfile:
