@@ -74,6 +74,9 @@ private:
     GoalManager _goalManager;
     fs::path _currentTrajectoriesFile;
     int _countTraj = 0; // count number of TXT trajectories to produce
+
+    std::vector<Pedestrian *> _pedsToRemove;
+
 public:
     /**
      * Constructor
@@ -103,16 +106,9 @@ public:
     /**
      * Update the routes (intermediate destinations) of the pedestrians.
      * Based on the route choice algorithm used, the next doors or the next decision points is set.
-     * TODO:
      */
     void UpdateRoutes();
 
-    /**
-     * Update the location of the agents and remove the agents from the simulation who have left the building.
-     * Locations includes room/subrooms.
-     * TODO:
-     */
-    void UpdateLocations();
 
     /**
      * Perform some initialisation for the simulation.
@@ -125,12 +121,6 @@ public:
      * Run the main part of the simulation
      */
     double RunBody(double maxSimTime);
-
-    /**
-     * Perform some finalization like writing the
-     * footers for the trajectories.
-     */
-    void RunFooter();
 
     /**
      * Copy all Input Files used to the output path.
@@ -203,7 +193,7 @@ public:
     int GetMaxSimTime() const;
     void incrementCountTraj();
 
-    bool correctGeometry(std::shared_ptr<Building> building, std::shared_ptr<TrainTimeTable>);
+    bool correctGeometry(std::shared_ptr<Building> building, const TrainTimeTable & trainTimeTable);
 
     /**
      * Updates the output filename if the current file exceeds _maxFileSize.

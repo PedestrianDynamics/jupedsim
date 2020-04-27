@@ -5,8 +5,8 @@
     <seed>linspace(0, 1000, 10)</seed>
     <max_sim_time>1000</max_sim_time>
     <geometry>../geometry.xml</geometry>
-    <trajectories format="xml-plain" fps="8">
-        <file location="RiMEATest13_traj.xml"/>
+    <trajectories format="plain" fps="8">
+        <file location="RiMEATest13_traj.txt"/>
     </trajectories>
 
 

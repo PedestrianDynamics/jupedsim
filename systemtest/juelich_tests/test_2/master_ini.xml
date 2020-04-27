@@ -10,8 +10,8 @@
     <!-- geometry file -->
     <geometry>../geometry.xml</geometry>
     <!-- traectories file and format -->
-    <trajectories format="xml-plain" embed_mesh="false" fps="20">
-    <file location="Traj_test_2.xml" />
+    <trajectories format="plain" embed_mesh="false" fps="20">
+    <file location="Traj_test_2.txt" />
   </trajectories>n
   <!-- where to store the logs -->
   <!--logfile>log</logfile-->

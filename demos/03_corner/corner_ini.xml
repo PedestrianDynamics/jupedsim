@@ -10,8 +10,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <!-- geometry file -->
     <geometry>corner_geo.xml</geometry>
     <!-- traectories file and format -->
-    <trajectories format="xml-plain" fps="8">
-      <file location="corner_traj.xml" />
+    <trajectories format="plain" fps="8">
+      <file location="corner_traj.txt" />
     </trajectories>
     <!-- where to store the logs  -->
     <logfile>log</logfile>

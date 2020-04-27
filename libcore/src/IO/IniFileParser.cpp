@@ -235,12 +235,10 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
 
         std::string format = xHeader->FirstChildElement("trajectories")->Attribute("format") ?
                                  xHeader->FirstChildElement("trajectories")->Attribute("format") :
-                                 "xml-plain";
+                                 "plain";
         std::transform(format.begin(), format.end(), format.begin(), ::tolower);
 
-        if(format == "xml-plain") {
-            _config->SetFileFormat(FileFormat::XML);
-        } else if(format == "plain") {
+        if(format == "plain") {
             _config->SetFileFormat(FileFormat::TXT);
         } else {
             LOG_WARNING("no output format specified. Using default: TXT");
@@ -282,23 +280,11 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
             (trajectoryFile.has_extension()) ? (trajectoryFile.extension().string()) : ("");
         std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
 
-        // check file extension and if it is not matching the intended format,
-        // change it to correct one
-        switch(_config->GetFileFormat()) {
-            case FileFormat::XML: {
-                if(extension != ".xml") {
-                    trajectoryFile.replace_extension(".xml");
-                    LOG_WARNING("replaced output file extension with: .xml");
-                }
-                break;
-            }
-            case FileFormat::TXT: {
-                if(extension != ".txt") {
-                    trajectoryFile.replace_extension(".txt");
-                    LOG_WARNING("replaced output file extension with: .txt");
-                }
-                break;
-            }
+        // At the moment we only suport plain txt file format.
+        // Check file extension and if it is not txt, change it to correct one
+        if(extension != ".txt") {
+            trajectoryFile.replace_extension(".txt");
+            LOG_WARNING("replaced output file extension with: .txt");
         }
 
         fs::path canonicalTrajPath =
@@ -1269,6 +1255,40 @@ bool IniFileParser::ParseExternalFiles(const TiXmlNode & mainNode)
     if(!scheduleFile.empty()) {
         _config->SetScheduleFile(fs::weakly_canonical(_config->GetProjectRootDir() / scheduleFile));
         LOG_INFO("Schedule is read from: <{}>", _config->GetScheduleFile().string());
+    }
+
+    // read train type
+    fs::path trainTypeFile;
+    if(mainNode.FirstChild("train_constraints") &&
+       mainNode.FirstChild("train_constraints")->FirstChild("train_types")) {
+        trainTypeFile = mainNode.FirstChild("train_constraints")
+                            ->FirstChild("train_types")
+                            ->FirstChild()
+                            ->Value();
+    } else {
+        LOG_INFO("No train type file given.");
+    }
+    if(!trainTypeFile.empty()) {
+        _config->SetTrainTypeFile(
+            fs::weakly_canonical(_config->GetProjectRootDir() / trainTypeFile));
+        LOG_INFO("Train type is read from: <{}>", _config->GetTrainTypeFile().string());
+    }
+
+    // read train time table
+    fs::path trainTimeTableFile;
+    if(mainNode.FirstChild("train_constraints") &&
+       mainNode.FirstChild("train_constraints")->FirstChild("train_time_table")) {
+        trainTimeTableFile = mainNode.FirstChild("train_constraints")
+                                 ->FirstChild("train_time_table")
+                                 ->FirstChild()
+                                 ->Value();
+    } else {
+        LOG_INFO("No train type file given.");
+    }
+    if(!trainTimeTableFile.empty()) {
+        _config->SetTrainTimeTableFile(
+            fs::weakly_canonical(_config->GetProjectRootDir() / trainTimeTableFile));
+        LOG_INFO("Train time table is read from: <{}>", _config->GetTrainTimeTableFile().string());
     }
 
     return true;

@@ -11,8 +11,8 @@
         <geometry>wa_triangle_geo.xml</geometry>
         <num_threads>1</num_threads>
         <!-- traectories file and format -->
-        <trajectories format="xml-plain" fps="8">
-            <file location="wa_triangle_traj.xml"/>
+        <trajectories format="plain" fps="8">
+            <file location="wa_triangle_traj.txt" />
         </trajectories>
         <!-- where to store the logs -->
         <logfile>log.txt</logfile>

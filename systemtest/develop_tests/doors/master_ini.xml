@@ -9,8 +9,8 @@
     <!-- geometry file -->
     <geometry>../geometry.xml</geometry>
     <!-- trajectories file and format -->
-    <trajectories format="xml-plain" fps="64">
-        <file location="traj-door_capacity.xml"/>
+    <trajectories format="plain" fps="64">
+        <file location="traj-door_capacity.txt"/>
     </trajectories>
 <!-- where to store the logs -->
 <logfile>log.txt</logfile>

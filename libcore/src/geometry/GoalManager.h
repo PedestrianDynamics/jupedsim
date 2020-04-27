@@ -26,6 +26,7 @@
 #pragma once
 
 #include <map>
+#include <vector>
 
 class Goal;
 class Pedestrian;
@@ -41,18 +42,21 @@ private:
 
 public:
     /**
-     * Checks whether a pedestrian has entered or left a goal/wa and
-     * perform the corresponding actions
-     * @param[in] ped pedestrian, which position is checked
-     */
-    void ProcessPedPosition(Pedestrian * ped);
-
-    /**
      * Sets the building which should be managed by the GoalManager
      * @param[in] building building which should be managed
      */
     void SetBuilding(Building * building);
 
+    /**
+     * Checks if the pedestrians have entered a goal/wa or if the waiting inside a waiting area is
+     * over. Sets the pedestrian waiting if inside a `waiting` waiting area. Unset waiting if
+     * waiting time is exceeded and update the goal of the pedestrian.
+     * @param time Current in-simulation time
+     * @param peds Vector of pedestrians which are currently in the simulation.
+     */
+    void Process(double time, const std::vector<Pedestrian *> & peds);
+
+private:
     /**
      * Processes the waiting area. The state of the waiting area will be set
      * according to the time and number of peds inside
@@ -60,7 +64,13 @@ public:
      */
     void ProcessWaitingAreas(double time);
 
-private:
+    /**
+     * Checks whether a pedestrian has entered or left a goal/wa and
+     * perform the corresponding actions
+     * @param[in] ped pedestrian, which position is checked
+     */
+    void ProcessPedPosition(Pedestrian * ped);
+
     /**
      * Checks if pedestrian is inside a specific goal
      * @param[in] ped pedestrians, which position is checked

@@ -11,8 +11,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <max_sim_time>900</max_sim_time>
     <events_file>events_list.xml</events_file>
     <!-- trajectories file and format -->
-    <trajectories format="xml-plain" fps="8">
-      <file location="events_traj.xml" />
+    <trajectories format="plain" fps="8">
+      <file location="events_traj.txt" />
     </trajectories>
     <!-- where to store the logs -->
     <logfile>log.txt</logfile>

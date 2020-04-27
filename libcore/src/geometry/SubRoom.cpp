@@ -899,8 +899,7 @@ std::string NormalSubRoom::WritePolyLine() const
     std::string s;
     s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
     for(const auto & p : _poly) {
-        sprintf(
-            tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n", p._x, p._y);
+        sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n", p._x, p._y);
         s.append(tmp);
     }
     s.append("\t</Obstacle>\n");
@@ -1056,16 +1055,36 @@ double NormalSubRoom::Xintercept(const Point & point1, const Point & point2, dou
 // This method is called very often in DirectionFloorField, so it should be fast.
 // we ignore
 //@todo: ar.graf: UnivFF have subroomPtr Info for every gridpoint. Info should be used in DirectionFF instead of this
-bool NormalSubRoom::IsInSubRoom(const Point & ped) const
+bool NormalSubRoom::IsInSubRoom(const Point & p) const
 {
+    // if pedestrian is stuck in obstacle or on obstacle line, return false
     for(polygon_type obs : _boostPolyObstacles) {
-        // if pedestrian is stuck in obstacle, please return false
-        if(boost::geometry::within(ped, obs)) {
+        if(boost::geometry::within(p, obs)) {
             return false;
         }
     }
-    // pedestrian is not in obstacle, so we can use within(...) on _boostPoly
-    return boost::geometry::within(ped, _boostPoly);
+    for(auto & obs : _obstacles) {
+        for(auto & wall : obs->GetAllWalls()) {
+            if(wall.IsInLineSegment(p)) {
+                return false;
+            }
+        }
+    }
+
+    // check if point is on one of the doors
+    for(auto & trans : GetAllTransitions()) {
+        if(trans->IsInLineSegment(p)) {
+            return true;
+        }
+    }
+    for(auto & cross : GetAllCrossings()) {
+        if(cross->IsInLineSegment(p)) {
+            return true;
+        }
+    }
+
+    // point is not in obstacle and on no door, so we can use within(...) on _boostPoly
+    return boost::geometry::within(p, _boostPoly);
 }
 
 Stair::Stair() : NormalSubRoom()
@@ -1161,11 +1180,7 @@ std::string Stair::WritePolyLine() const
 
     s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
     for(unsigned int j = 0; j < _poly.size(); j++) {
-        sprintf(
-            tmp,
-            "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",
-            _poly[j]._x,
-            _poly[j]._y);
+        sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n", _poly[j]._x, _poly[j]._y);
         s.append(tmp);
     }
     s.append("\t</Obstacle>\n");
@@ -1355,6 +1370,32 @@ std::vector<WaitingArea *> SubRoom::GetAllWaitingAreas()
 bool SubRoom::HasGoal(int id)
 {
     return std::find(_goalIDs.begin(), _goalIDs.end(), id) != _goalIDs.end();
+}
+
+void SubRoom::Update()
+{
+    std::vector<Line *> goals;
+    goals.insert(goals.end(), _crossings.begin(), _crossings.end());
+    goals.insert(goals.end(), _transitions.begin(), _transitions.end());
+    if(!ConvertLineToPoly(goals)) {
+        std::string message =
+            fmt::format(FMT_STRING("SubRoom {}, {} could not converted to polygon"), _roomID, _id);
+        throw std::runtime_error(message);
+    }
+
+    std::for_each(std::begin(_obstacles), std::end(_obstacles), [this](Obstacle * obstacle) {
+        if(!obstacle->ConvertLineToPoly()) {
+            std::string message = fmt::format(
+                FMT_STRING("obstacle {}  in SubRoom {}, {} could not converted to polygon"),
+                _roomID,
+                _id,
+                obstacle->GetId());
+            throw std::runtime_error(message);
+        }
+    });
+
+    CalculateArea();
+    CreateBoostPoly();
 }
 
 

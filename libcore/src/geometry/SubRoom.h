@@ -392,6 +392,13 @@ public:
     std::vector<WaitingArea *> GetAllWaitingAreas();
 
     bool HasGoal(int id);
+
+    /**
+     * Updates the subroom. Create the poly from the given transitions, crossings, obstacles.
+     * Recomputation of the are as well as the polygons describing the subroom.
+     */
+    void Update();
+
 #ifdef _SIMULATOR
 
     virtual bool IsInSubRoom(Pedestrian * ped) const;
@@ -415,7 +422,14 @@ public:
     std::string WritePolyLine() const;
 
     bool ConvertLineToPoly(const std::vector<Line *> & goals);
-    bool IsInSubRoom(const Point & ped) const;
+
+    /**
+     * Checks whether the point \p  lies inside the subroom. Crossings and Transitions belong to the
+     * subroom, whereas walls are excluded.
+     * @param p Point to check
+     * @return \p is inside subroom
+     */
+    bool IsInSubRoom(const Point & p) const;
 };
 
 class Stair : public NormalSubRoom

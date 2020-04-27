@@ -10,8 +10,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <max_sim_time>100</max_sim_time>
     <geometry>bottleneck_geo.xml</geometry>
     <!-- traectories file and format -->
-    <trajectories format="xml-plain"  fps="8">
-      <file location="bottleneck_traj.xml" />
+    <trajectories format="plain"  fps="8">
+      <file location="bottleneck_traj.txt" />
     </trajectories>
     <!-- where to store the logs -->
     <logfile>log.txt</logfile>

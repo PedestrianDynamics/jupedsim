@@ -27,6 +27,7 @@
 #include "Building.h"
 
 #include "IO/GeoFileParser.h"
+#include "IO/TrainFileParser.h"
 #include "general/Configuration.h"
 #include "general/Filesystem.h"
 #include "general/Logger.h"
@@ -110,6 +111,15 @@ Building::Building(Configuration * configuration, PedDistributor & pedDistributo
     if(!SanityCheck()) {
         LOG_ERROR("There are sanity errors in the geometry file");
         exit(EXIT_FAILURE);
+    }
+
+    if(!_configuration->GetTrainTypeFile().empty()) {
+        _trainTypes = TrainFileParser::ParseTrainType(_configuration->GetTrainTypeFile());
+    }
+
+    if(!_configuration->GetTrainTimeTableFile().empty()) {
+        _trainTimeTables =
+            TrainFileParser::ParseTrainTimetable(_configuration->GetTrainTimeTableFile());
     }
 }
 
@@ -500,13 +510,13 @@ const std::vector<std::pair<PointWall, PointWall>> Building::GetIntersectionPoin
 }
 
 // reset changes made by trainTimeTable[id]
-bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
+bool Building::resetGeometry(const TrainTimeTable & tab)
 {
     // this function is composed of three copy/pasted blocks.
     int room_id, subroom_id;
 
     // remove temp added walls
-    auto tempWalls = TempAddedWalls[tab->id];
+    auto tempWalls = TempAddedWalls[tab.id];
     for(auto it = tempWalls.begin(); it != tempWalls.end();) {
         auto wall = *it;
         if(it != tempWalls.end()) {
@@ -526,10 +536,10 @@ bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
             }     //subroom
         }         //platforms
     }
-    TempAddedWalls[tab->id] = tempWalls;
+    TempAddedWalls[tab.id] = tempWalls;
 
     /*       // add remove walls */
-    auto tempRemovedWalls = TempRemovedWalls[tab->id];
+    auto tempRemovedWalls = TempRemovedWalls[tab.id];
     for(auto it = tempRemovedWalls.begin(); it != tempRemovedWalls.end();) {
         auto wall = *it;
         if(it != tempRemovedWalls.end()) {
@@ -551,10 +561,11 @@ bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
             }
         }
     }
-    TempRemovedWalls[tab->id] = tempRemovedWalls;
+    TempRemovedWalls[tab.id] = tempRemovedWalls;
 
     /*       // remove added doors */
-    auto tempDoors = TempAddedDoors[tab->id];
+    auto tempDoors = TempAddedDoors[tab.id];
+
     for(auto it = tempDoors.begin(); it != tempDoors.end();) {
         auto door = *it;
         if(it != tempDoors.end()) {
@@ -566,6 +577,7 @@ bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
             subroom_id  = platform.second->sid;
             SubRoom * subroom =
                 this->GetAllRooms().at(room_id)->GetAllSubRooms().at(subroom_id).get();
+
             for(auto subTrans : subroom->GetAllTransitions()) {
                 if(*subTrans == door) {
                     // Trnasitions are added to subrooms and building!!
@@ -575,9 +587,27 @@ bool Building::resetGeometry(std::shared_ptr<TrainTimeTable> tab)
             }
         }
     }
-    TempAddedDoors[tab->id] = tempDoors;
+    TempAddedDoors[tab.id] = tempDoors;
+
+    std::set<SubRoom *> subRoomsToReInit;
+    std::for_each(
+        std::begin(_platforms),
+        std::end(_platforms),
+        [&subRoomsToReInit, this](const std::pair<int, std::shared_ptr<Platform>> & platform) {
+            int roomID    = platform.second->rid;
+            int subroomID = platform.second->sid;
+
+            SubRoom * subroom =
+                this->GetAllRooms().at(roomID)->GetAllSubRooms().at(subroomID).get();
+            subRoomsToReInit.insert(subroom);
+        });
+
+    std::for_each(std::begin(subRoomsToReInit), std::end(subRoomsToReInit), [](SubRoom * subroom) {
+        subroom->Update();
+    });
     return true;
 }
+
 void Building::InitPlatforms()
 {
     int num_platform = -1;
@@ -658,7 +688,6 @@ bool Building::InitInsideGoals()
 
     return true;
 }
-
 
 const fs::path & Building::GetProjectFilename() const
 {
@@ -753,25 +782,6 @@ bool Building::AddGoal(Goal * goal)
     return true;
 }
 
-bool Building::AddTrainType(std::shared_ptr<TrainType> TT)
-{
-    if(_trainTypes.count(TT->type) != 0) {
-        LOG_WARNING("Duplicate type for train found [{}]", TT->type);
-    }
-    _trainTypes[TT->type] = TT;
-    return true;
-}
-
-bool Building::AddTrainTimeTable(std::shared_ptr<TrainTimeTable> TTT)
-{
-    if(_trainTimeTables.count(TTT->id) != 0) {
-        LOG_WARNING("Duplicate id for train time table found [{}]", TTT->id);
-        exit(EXIT_FAILURE);
-    }
-    _trainTimeTables[TTT->id] = TTT;
-    return true;
-}
-
 const std::map<int, Crossing *> & Building::GetAllCrossings() const
 {
     return _crossings;
@@ -787,14 +797,19 @@ const std::map<int, Hline *> & Building::GetAllHlines() const
     return _hLines;
 }
 
-const std::map<std::string, std::shared_ptr<TrainType>> & Building::GetTrainTypes() const
+const std::map<std::string, TrainType> & Building::GetTrainTypes() const
 {
     return _trainTypes;
 }
 
-const std::map<int, std::shared_ptr<TrainTimeTable>> & Building::GetTrainTimeTables() const
+const std::map<int, TrainTimeTable> & Building::GetTrainTimeTables() const
 {
     return _trainTimeTables;
+}
+
+void Building::SetTrainArrived(int timeTableID, bool arrived)
+{
+    _trainTimeTables.at(timeTableID).arrival = arrived;
 }
 
 const std::map<int, std::shared_ptr<Platform>> & Building::GetPlatforms() const

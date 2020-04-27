@@ -48,8 +48,6 @@ public:
     virtual void WriteHeader(long nPeds, double fps, Building * building, int seed, int count) = 0;
     virtual void WriteGeometry(Building * building)                                            = 0;
     virtual void WriteFrame(int frameNr, Building * building)                                  = 0;
-    virtual void WriteFooter()                                                                 = 0;
-    virtual void WriteSources(const std::vector<std::shared_ptr<AgentsSource>> &)              = 0;
     virtual void AddOptionalOutput(OptionalOutput option) { _optionalOutputOptions.insert(option); }
     virtual void SetOptionalOutput(std::set<OptionalOutput> options)
     {
@@ -64,19 +62,6 @@ public:
     }
 };
 
-class TrajectoriesXML : public Trajectories
-{
-public:
-    TrajectoriesXML() = default;
-
-    void WriteHeader(long nPeds, double fps, Building * building, int seed, int count) override;
-    void WriteGeometry(Building * building) override;
-    void WriteFrame(int frameNr, Building * building) override;
-    void WriteFooter() override;
-    void WriteSources(const std::vector<std::shared_ptr<AgentsSource>> &) override;
-};
-
-
 class TrajectoriesTXT : public Trajectories
 {
 public:
@@ -85,6 +70,4 @@ public:
     void WriteHeader(long nPeds, double fps, Building * building, int seed, int count) override;
     void WriteGeometry(Building * building) override;
     void WriteFrame(int frameNr, Building * building) override;
-    void WriteFooter() override{};
-    void WriteSources(const std::vector<std::shared_ptr<AgentsSource>> &) override{};
 };

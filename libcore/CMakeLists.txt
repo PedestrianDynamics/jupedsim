@@ -36,6 +36,7 @@ set(source_files
     src/IO/IniFileParser.cpp
     src/IO/OutputHandler.cpp
     src/IO/PedDistributionParser.cpp
+    src/IO/TrainFileParser.cpp
     src/IO/Trajectories.cpp
     src/JPSfire/A_smoke_sensor/SmokeSensor.cpp
     src/JPSfire/B_walking_speed/WalkingSpeed.cpp
@@ -91,6 +92,7 @@ set(source_files
     src/routing/smoke_router/sensor/SensorManager.cpp
     src/routing/smoke_router/SmokeRouter.cpp
     src/Simulation.cpp
+    src/SimulationHelper.cpp
     src/voronoi-boost/VoronoiPositionGenerator.cpp
 )
 set(header_files
@@ -123,6 +125,7 @@ set(header_files
     src/IO/IniFileParser.h
     src/IO/OutputHandler.h
     src/IO/PedDistributionParser.h
+    src/IO/TrainFileParser.h
     src/IO/Trajectories.h
     src/JPSfire/A_smoke_sensor/SmokeSensor.h
     src/JPSfire/B_walking_speed/WalkingSpeed.h
@@ -178,6 +181,8 @@ set(header_files
     src/routing/smoke_router/sensor/RoomToFloorSensor.h
     src/routing/smoke_router/sensor/SensorManager.h
     src/routing/smoke_router/SmokeRouter.h
+    src/Simulation.h
+    src/SimulationHelper.h
     src/voronoi-boost/VoronoiPositionGenerator.h
 )
 
@@ -256,9 +261,11 @@ if (BUILD_CPPUNIT_TEST)
             test/catch2/geometry/SubRoomTest.cpp
             test/catch2/neighborhood/NeighborhoodSearch.cpp
             test/catch2/neighborhood/Grid2D.cpp
+            test/catch2/simulation/SimulationHelperTest.cpp
             test/catch2/Main.cpp
             test/catch2/math/MathematicsTest.cpp
             test/catch2/pedestrian/EllipseTest.cpp
+            test/catch2/pedestrian/PedestrianTest.cpp
             test/catch2/routing/UnivFFviaFMTest.cpp
             test/catch2/geometry/CorrectGeometryTest.cpp
             )

@@ -347,6 +347,14 @@ public:
 
     void SetScheduleFile(const fs::path & scheduleFile) { _scheduleFile = scheduleFile; }
 
+    const fs::path & GetTrainTypeFile() const { return _trainTypeFile; }
+    void SetTrainTypeFile(const fs::path & trainTypeFile) { _trainTypeFile = trainTypeFile; }
+    const fs::path & GetTrainTimeTableFile() const { return _trainTimeTableFile; }
+    void SetTrainTimeTableFile(const fs::path & trainTimeTableFile)
+    {
+        _trainTimeTableFile = trainTimeTableFile;
+    }
+
     const fs::path & GetProjectRootDir() const { return _projectRootDir; };
 
     void SetProjectRootDir(const fs::path & projectRootDir) { _projectRootDir = projectRootDir; };
@@ -433,6 +441,10 @@ private:
     fs::path _trafficContraintFile;
     fs::path _eventFile;
     fs::path _scheduleFile;
+    fs::path _trainTypeFile;
+    fs::path _trainTimeTableFile;
+
+private:
     fs::path _projectRootDir;
     fs::path _outputPath;
     bool _showStatistics;

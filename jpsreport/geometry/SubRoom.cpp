@@ -909,14 +909,14 @@ double NormalSubRoom::Xintercept(const Point & point1, const Point & point2, dou
 
 // neue Version auch für konkave Polygone
 
-bool NormalSubRoom::IsInSubRoom(const Point & ped) const
+bool NormalSubRoom::IsInSubRoom(const Point & p) const
 {
     //case when the point is on an edge
     // todo: this affect the runtime, and do we really need that
     // If we do not d othis check, then for a square for instance, half the points located on the edge will be inside and
     // the other half will be outside the polygon.
     for(auto & w : _walls) {
-        if(w.IsInLineSegment(ped))
+        if(w.IsInLineSegment(p))
             return true;
     }
 
@@ -926,12 +926,12 @@ bool NormalSubRoom::IsInSubRoom(const Point & ped) const
 
     /////////////////////////////////////////////////////////////
     edge = first = 0;
-    quad         = (short) WhichQuad(_poly[edge], ped);
+    quad         = (short) WhichQuad(_poly[edge], p);
     total        = 0; // COUNT OF ABSOLUTE SECTORS CROSSED
     /* LOOP THROUGH THE VERTICES IN A SECTOR */
     do {
         next      = (edge + 1) % _poly.size();
-        next_quad = WhichQuad(_poly[next], ped);
+        next_quad = WhichQuad(_poly[next], p);
         delta     = next_quad - quad; // HOW MANY QUADS HAVE I MOVED
 
         // SPECIAL CASES TO HANDLE CROSSINGS OF MORE THEN ONE
@@ -942,7 +942,7 @@ bool NormalSubRoom::IsInSubRoom(const Point & ped) const
                      //WAS CLOCKWISE OR COUNTER
             case -2: // US THE X POSITION AT THE HIT POINT TO
                 // DETERMINE WHICH WAY AROUND
-                if(Xintercept(_poly[edge], _poly[next], ped._y) > ped._x)
+                if(Xintercept(_poly[edge], _poly[next], p._y) > p._x)
                     delta = -(delta);
                 break;
             case 3: // MOVING 3 QUADS IS LIKE MOVING BACK 1

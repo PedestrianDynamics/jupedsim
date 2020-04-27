@@ -9,8 +9,8 @@
     <max_sim_time>4000</max_sim_time>
 
     <!-- trajectories file and format -->
-    <trajectories format="xml-plain" fps="8">
-        <file location="traj_10.xml"/>
+    <trajectories format="plain" fps="8">
+        <file location="traj_10.txt"/>
   </trajectories>
 
   <!-- Parameters for the hybrid (matsim) server mode -->

@@ -7,8 +7,8 @@
 
     <geometry>../geometry.xml</geometry>
 
-    <trajectories format="xml-plain" fps="8">
-        <file location="RiMEATest14_traj.xml"/>
+    <trajectories format="plain" fps="8">
+        <file location="RiMEATest14_traj.txt"/>
     </trajectories>
 
     <logfile>log.txt</logfile>

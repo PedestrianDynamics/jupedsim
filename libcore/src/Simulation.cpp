@@ -32,6 +32,7 @@
 
 #include "IO/EventFileParser.h"
 #include "IO/Trajectories.h"
+#include "SimulationHelper.h"
 #include "general/Filesystem.h"
 #include "general/Logger.h"
 #include "general/OpenMP.h"
@@ -45,9 +46,8 @@
 
 #include <tinyxml.h>
 
+
 // TODO: add these variables to class simulation
-std::map<std::string, std::shared_ptr<TrainType>> TrainTypes;
-std::map<int, std::shared_ptr<TrainTimeTable>> TrainTimeTables;
 std::map<int, double> trainOutflow;
 
 Simulation::Simulation(Configuration * args) : _config(args)
@@ -84,18 +84,8 @@ long Simulation::GetPedsNumber() const
 bool Simulation::InitArgs()
 {
     if(!_config->GetTrajectoriesFile().empty()) {
-        switch(_config->GetFileFormat()) {
-            case FileFormat::XML:
-                _iod = std::make_unique<TrajectoriesXML>(TrajectoriesXML());
-                break;
-
-            case FileFormat::TXT:
-                _iod = std::make_unique<TrajectoriesTXT>(TrajectoriesTXT());
-                break;
-
-            default:
-                break;
-        }
+        // At the moment we only support plain txt format
+        _iod = std::make_unique<TrajectoriesTXT>(TrajectoriesTXT());
     }
 
     const fs::path & trajPath(_config->GetTrajectoriesFile());
@@ -117,7 +107,7 @@ bool Simulation::InitArgs()
     _routingEngine   = _config->GetRoutingEngine();
     auto distributor = std::make_unique<PedDistributor>(PedDistributor(_config));
     // IMPORTANT: do not change the order in the following..
-    _building = std::shared_ptr<Building>(new Building(_config, *distributor));
+    _building = std::make_shared<Building>(_config, *distributor);
 
     // Initialize the agents sources that have been collected in the pedestrians distributor
     _agentSrcManager.SetBuilding(_building.get());
@@ -141,29 +131,24 @@ bool Simulation::InitArgs()
     LOG_INFO("Got {} Train Types.", _building->GetTrainTypes().size());
 
     for(auto && TT : _building->GetTrainTypes()) {
-        LOG_INFO("Type {}", TT.second->type);
-        LOG_INFO("Max {}", TT.second->nmax);
-        LOG_INFO("Number of doors {}", TT.second->doors.size());
+        LOG_INFO("Type {}", TT.second.type);
+        LOG_INFO("Max {}", TT.second.nmax);
+        LOG_INFO("Number of doors {}", TT.second.doors.size());
     }
 
     LOG_INFO("Got {} Train Time Tables", _building->GetTrainTimeTables().size());
 
     for(auto && TT : _building->GetTrainTimeTables()) {
-        LOG_INFO("id           : {}", TT.second->id);
-        LOG_INFO("type         : {}", TT.second->type.c_str());
-        LOG_INFO("room id      : {}", TT.second->rid);
-        LOG_INFO("tin          : {:.2f}", TT.second->tin);
-        LOG_INFO("tout         : {:.2f}", TT.second->tout);
-        LOG_INFO("track start  : ({:.2f}, {:.2f})", TT.second->pstart._x, TT.second->pstart._y);
-        LOG_INFO("track end    : ({:.2f}, {:.2f})", TT.second->pend._x, TT.second->pend._y);
-        LOG_INFO("train start  : ({:.2f}, {:.2f})", TT.second->tstart._x, TT.second->tstart._y);
-        LOG_INFO("train end    : ({:.2f}, {:.2f})", TT.second->tend._x, TT.second->tend._y);
+        LOG_INFO("id           : {}", TT.second.id);
+        LOG_INFO("type         : {}", TT.second.type.c_str());
+        LOG_INFO("room id      : {}", TT.second.rid);
+        LOG_INFO("tin          : {:.2f}", TT.second.tin);
+        LOG_INFO("tout         : {:.2f}", TT.second.tout);
+        LOG_INFO("track start  : ({:.2f}, {:.2f})", TT.second.pstart._x, TT.second.pstart._y);
+        LOG_INFO("track end    : ({:.2f}, {:.2f})", TT.second.pend._x, TT.second.pend._y);
+        LOG_INFO("train start  : ({:.2f}, {:.2f})", TT.second.tstart._x, TT.second.tstart._y);
+        LOG_INFO("train end    : ({:.2f}, {:.2f})", TT.second.tend._x, TT.second.tend._y);
     }
-
-    //TODO: these variables are global
-    TrainTypes        = _building->GetTrainTypes();
-    TrainTimeTables   = _building->GetTrainTimeTables();
-    _trainConstraints = !TrainTimeTables.empty();
 
     // Give the DirectionStrategy the chance to perform some initialization.
     // This should be done after the initialization of the operationalModel
@@ -208,99 +193,55 @@ double Simulation::RunStandardSimulation(double maxSimTime)
 {
     RunHeader(_nPeds + _agentSrcManager.GetMaxAgentNumber());
     double t = RunBody(maxSimTime);
-    RunFooter();
     return t;
 }
 
 void Simulation::UpdateRoutesAndLocations()
 {
-    //pedestrians to be deleted
-    //you should better create this in the constructor and allocate it once.
-    std::set<Pedestrian *> pedsToRemove;
+    auto peds = _building->GetAllPedestrians();
 
-    // collect all pedestrians in the simulation.
-    const std::vector<Pedestrian *> & allPeds = _building->GetAllPedestrians();
-    const std::map<int, Goal *> & goals       = _building->GetAllGoals();
-    auto allRooms                             = _building->GetAllRooms();
+    auto [pedsChangedRoom, pedsNotRelocated] =
+        SimulationHelper::UpdatePedestriansLocations(*_building, peds);
 
-#pragma omp parallel for shared(pedsToRemove, allRooms)
-    for(size_t p = 0; p < allPeds.size(); ++p) {
-        auto ped       = allPeds[p];
-        Room * room    = _building->GetRoom(ped->GetRoomID());
-        SubRoom * sub0 = room->GetSubRoom(ped->GetSubRoomID());
+    // not needed at the moment, as we do not have inside final goals yet
+    auto pedsAtFinalGoal = SimulationHelper::FindPedestriansReachedFinalGoal(*_building, peds);
+    _pedsToRemove.insert(_pedsToRemove.end(), pedsAtFinalGoal.begin(), pedsAtFinalGoal.end());
 
-        //set the new room if needed
-        if((ped->GetFinalDestination() == FINAL_DEST_OUT) &&
-           (room->GetCaption() == "outside")) { //TODO Hier aendern fuer inside goals?
-#pragma omp critical(Simulation_Update_pedsToRemove)
-            pedsToRemove.insert(ped);
-        } else if(
-            (ped->GetFinalDestination() != FINAL_DEST_OUT) &&
-            (goals.at(ped->GetFinalDestination())->Contains(ped->GetPos())) &&
-            (goals.at(ped->GetFinalDestination())->GetIsFinalGoal())) {
-#pragma omp critical(Simulation_Update_pedsToRemove)
-            pedsToRemove.insert(ped);
-        }
+    auto pedsOutside = SimulationHelper::FindPedestriansOutside(*_building, pedsNotRelocated);
+    _pedsToRemove.insert(_pedsToRemove.end(), pedsOutside.begin(), pedsOutside.end());
 
-        // reposition in the case the pedestrians "accidentally left the room" not via the intended exit.
-        // That may happen if the forces are too high for instance
-        // the ped is removed from the simulation, if it could not be reassigned
-        else if(!sub0->IsInSubRoom(ped)) {
-            bool assigned = false;
-            std::function<void(const Pedestrian &)> f =
-                std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
-            assigned = ped->Relocate(f);
-            //this will delete agents, that are pushed outside (maybe even if inside obstacles??)
+    SimulationHelper::UpdateFlowAtDoors(*_building, pedsChangedRoom);
+    SimulationHelper::UpdateFlowAtDoors(*_building, pedsOutside);
 
-            if(!assigned) {
-#pragma omp critical(Simulation_Update_pedsToRemove)
-                pedsToRemove.insert(ped); //the agent left the old room
-                                          //actualize the eggress time for that room
-#pragma omp critical(SetEgressTime)
-                allRooms.at(ped->GetRoomID())->SetEgressTime(Pedestrian::GetGlobalTime());
-            }
-        }
+    SimulationHelper::RemoveFaultyPedestrians(
+        *_building, pedsNotRelocated, "Could not be properly relocated");
+    SimulationHelper::RemovePedestrians(*_building, _pedsToRemove);
 
+    //TODO discuss simulation flow -> better move to main loop, does not belong here
+    SimulationHelper::UpdateFlowRegulation(*_building);
+    //TODO check if better move to main loop, does not belong here
+    UpdateRoutes();
+}
+
+void Simulation::UpdateRoutes()
+{
+    for(auto ped : _building->GetAllPedestrians()) {
         // set ped waiting, if no target is found
         int target = ped->FindRoute();
 
-        if(target == -1) {
+        if(target == FINAL_DEST_OUT) {
             ped->StartWaiting();
         } else {
             if(ped->IsWaiting() && !ped->IsInsideWaitingAreaWaiting()) {
                 ped->EndWaiting();
             }
         }
+        if(target != FINAL_DEST_OUT) {
+            const Hline * door = _building->GetTransOrCrossByUID(target);
+            int roomID         = ped->GetRoomID();
+            int subRoomID      = ped->GetSubRoomID();
 
-        // actualize routes for sources
-        if(_gotSources)
-            target = ped->FindRoute();
-        //finally actualize the route
-        if(!_gotSources && ped->FindRoute() == -1 && !_trainConstraints && !ped->IsWaiting()) {
-            //a destination could not be found for that pedestrian
-            LOG_ERROR(
-                "Could not find a route for pedestrian {} in room {} and subroom {}",
-                ped->GetID(),
-                ped->GetRoomID(),
-                ped->GetSubRoomID());
-            std::function<void(const Pedestrian &)> f =
-                std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
-            ped->Relocate(f);
-#pragma omp critical(Simulation_Update_pedsToRemove)
-            {
-                pedsToRemove.insert(ped);
-                // TODO KKZ track deleted peds
-            }
-        }
-
-        // Set pedestrian waiting when find route temp_close
-        int goal = ped->FindRoute();
-        if(goal != FINAL_DEST_OUT) {
-            const Hline * target = _building->GetTransOrCrossByUID(goal);
-            int roomID           = ped->GetRoomID();
-            int subRoomID        = ped->GetSubRoomID();
-
-            if(auto cross = dynamic_cast<const Crossing *>(target)) {
+            if(auto cross = dynamic_cast<const Crossing *>(door)) {
                 if(cross->IsInRoom(roomID) && cross->IsInSubRoom(subRoomID)) {
                     if(!ped->IsWaiting() && cross->IsTempClose()) {
                         ped->StartWaiting();
@@ -312,28 +253,6 @@ void Simulation::UpdateRoutesAndLocations()
                 }
             }
         }
-
-        // Get new goal for pedestrians who are inside waiting area and wait time is over
-        // Check if current position is already waiting area
-        // yes: set next goal and return findExit(p)
-        _goalManager.ProcessPedPosition(ped);
-    }
-
-
-    _goalManager.ProcessWaitingAreas(Pedestrian::GetGlobalTime());
-
-#ifdef _USE_PROTOCOL_BUFFER
-    if(_hybridSimManager) {
-        AgentsQueueOut::Add(pedsToRemove); //this should be critical region (and it is)
-    } else
-#endif
-    {
-        // remove the pedestrians that have left the building
-        for(auto p : pedsToRemove) {
-            UpdateFlowAtDoors(*p);
-            _building->DeletePedestrian(p);
-        }
-        pedsToRemove.clear();
     }
 }
 
@@ -383,6 +302,7 @@ void Simulation::PrintStatistics(double simTime)
         }
     }
 
+    //TODO discuss deletion
     LOG_INFO("Usage of Crossings");
     for(const auto & itr : _building->GetAllCrossings()) {
         Crossing * goal = itr.second;
@@ -422,8 +342,6 @@ void Simulation::RunHeader(long nPed)
     _iod->WriteHeader(nPed, _fps, _building.get(), _seed, 0); // first trajectory
                                                               // count = 0
     _iod->WriteGeometry(_building.get());
-    if(_gotSources)
-        _iod->WriteSources(GetAgentSrcManager().GetSources());
 
     int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
     writeInterval     = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
@@ -432,6 +350,7 @@ void Simulation::RunHeader(long nPed)
     _iod->WriteFrame(firstframe, _building.get());
     //first initialisation needed by the linked-cells
     UpdateRoutesAndLocations();
+
     // KKZ: RunBody calls this as one of the firs things, hence this can be removed
     _agentSrcManager.GenerateAgents();
     AddNewAgents();
@@ -509,13 +428,17 @@ double Simulation::RunBody(double maxSimTime)
             }
 
             // here the used routers are update, when needed due to external changes
-            if(_routingEngine->NeedsUpdate()) {
+            if(_routingEngine->NeedsUpdate() || geometryChanged) {
                 LOG_INFO("Update router during simulation.");
                 _routingEngine->UpdateRouter();
             }
 
             //update the routes and locations
             UpdateRoutesAndLocations();
+
+            // Checks if position of pedestrians is inside waiting area and should be waiting or if
+            // left waiting area and assign new goal
+            _goalManager.Process(Pedestrian::GetGlobalTime(), _building->GetAllPedestrians());
 
             //other updates
             //someone might have left the building
@@ -553,7 +476,7 @@ double Simulation::RunBody(double maxSimTime)
         }
 
         //init train trainOutfloww
-        for(auto tab : TrainTimeTables) {
+        for(auto tab : _building->GetTrainTimeTables()) {
             trainOutflow[tab.first] = 0;
         }
         // regulate flow
@@ -569,16 +492,16 @@ double Simulation::RunBody(double maxSimTime)
                 int id           = atoi(strs[1].c_str());
                 std::string type = Trans->GetCaption();
                 trainOutflow[id] += Trans->GetDoorUsage();
-                if(trainOutflow[id] >= TrainTypes[type]->nmax) {
+                if(trainOutflow[id] >= _building->GetTrainTypes().at(type).nmax) {
                     std::cout << "INFO:\tclosing train door " << transType.c_str() << " at "
                               << Pedestrian::GetGlobalTime() << " capacity "
-                              << TrainTypes[type]->nmax << "\n";
+                              << _building->GetTrainTypes().at(type).nmax << "\n";
                     LOG_INFO(
                         "Closing train door {} at t={:.2f}. Flow = {:.2f} (Train Capacity {})",
                         transType,
                         Pedestrian::GetGlobalTime(),
                         trainOutflow[id],
-                        TrainTypes[type]->nmax);
+                        _building->GetTrainTypes().at(type).nmax);
                     Trans->Close();
                 }
             }
@@ -634,20 +557,19 @@ void Simulation::RotateOutputFile()
 * add doors
 * set _routingEngine->setNeedUpdate(true);
 */
-bool Simulation::correctGeometry(
-    std::shared_ptr<Building> building,
-    std::shared_ptr<TrainTimeTable> tab)
+bool Simulation::correctGeometry(std::shared_ptr<Building> building, const TrainTimeTable & tab)
 {
-    int trainId           = tab->id;
-    std::string trainType = tab->type;
-    Point TrackStart      = tab->pstart;
-    Point TrainStart      = tab->tstart;
-    Point TrackEnd        = tab->pend;
+    int trainId           = tab.id;
+    std::string trainType = tab.type;
+    Point TrackStart      = tab.pstart;
+    Point TrainStart      = tab.tstart;
+    Point TrackEnd        = tab.pend;
     SubRoom * subroom;
     int room_id, subroom_id;
     auto mytrack = building->GetTrackWalls(TrackStart, TrackEnd, room_id, subroom_id);
     Room * room  = building->GetRoom(room_id);
     subroom      = room->GetSubRoom(subroom_id);
+
     if(subroom == nullptr) {
         LOG_ERROR(
             "Simulation::correctGeometry got wrong room_id|subroom_id ({}|{}). TrainId {}",
@@ -668,7 +590,7 @@ bool Simulation::correctGeometry(
 
 
     auto train = building->GetTrainTypes().at(trainType);
-    auto doors = train->doors;
+    auto doors = train.doors;
     for(auto && d : doors) {
         auto newX = d.GetPoint1()._x + TrainStart._x + TrackStart._x;
         auto newY = d.GetPoint1()._y + TrainStart._y + TrackStart._y;
@@ -709,8 +631,8 @@ bool Simulation::correctGeometry(
             e->SetCaption(trainType);
             e->SetPoint1(p1);
             e->SetPoint2(p2);
-            std::string transType = "Train_" + std::to_string(tab->id) + "_" +
-                                    std::to_string(tab->tin) + "_" + std::to_string(tab->tout);
+            std::string transType = "Train_" + std::to_string(tab.id) + "_" +
+                                    std::to_string(tab.tin) + "_" + std::to_string(tab.tout);
             e->SetType(transType);
             room->AddTransitionID(e->GetUniqueID()); // danger area
             e->SetRoom1(room);
@@ -762,8 +684,8 @@ bool Simulation::correctGeometry(
             e->SetCaption(trainType);
             e->SetPoint1(p1);
             e->SetPoint2(p2);
-            std::string transType = "Train_" + std::to_string(tab->id) + "_" +
-                                    std::to_string(tab->tin) + "_" + std::to_string(tab->tout);
+            std::string transType = "Train_" + std::to_string(tab.id) + "_" +
+                                    std::to_string(tab.tin) + "_" + std::to_string(tab.tout);
             e->SetType(transType);
             room->AddTransitionID(e->GetUniqueID()); // danger area
             e->SetRoom1(room);
@@ -806,8 +728,8 @@ bool Simulation::correctGeometry(
             e->SetCaption(trainType);
             e->SetPoint1(p1);
             e->SetPoint2(p2);
-            std::string transType = "Train_" + std::to_string(tab->id) + "_" +
-                                    std::to_string(tab->tin) + "_" + std::to_string(tab->tout);
+            std::string transType = "Train_" + std::to_string(tab.id) + "_" +
+                                    std::to_string(tab.tin) + "_" + std::to_string(tab.tout);
             e->SetType(transType);
             room->AddTransitionID(e->GetUniqueID()); // danger area
             e->SetRoom1(room);
@@ -850,13 +772,9 @@ bool Simulation::correctGeometry(
             // remove walls w1 and w2
         }
     }
+    subroom->Update();
     _routingEngine->setNeedUpdate(true);
     return true;
-}
-
-void Simulation::RunFooter()
-{
-    _iod->WriteFooter();
 }
 
 void Simulation::CopyInputFilesToOutPath()
@@ -878,6 +796,8 @@ void Simulation::CopyInputFilesToOutPath()
     CopyInputFileToOutPath(_config->GetEventFile());
     CopyInputFileToOutPath(_config->GetScheduleFile());
     CopyInputFileToOutPath(_config->GetSourceFile());
+    CopyInputFileToOutPath(_config->GetTrainTimeTableFile());
+    CopyInputFileToOutPath(_config->GetTrainTypeFile());
 }
 
 void Simulation::CopyInputFileToOutPath(fs::path file)
@@ -985,6 +905,28 @@ void Simulation::UpdateOutputIniFile()
                 ->FirstChild("schedule_file")
                 ->FirstChild()
                 ->SetValue(_config->GetScheduleFile().filename().string());
+        }
+    }
+
+    // update new train time table file name
+    if(!_config->GetTrainTimeTableFile().empty()) {
+        if(mainNode->FirstChild("train_constraints") &&
+           mainNode->FirstChild("train_constraints")->FirstChild("train_time_table")) {
+            mainNode->FirstChild("train_constraints")
+                ->FirstChild("train_time_table")
+                ->FirstChild()
+                ->SetValue(_config->GetTrainTimeTableFile().filename().string());
+        }
+    }
+
+    // update new train types file name
+    if(!_config->GetTrainTypeFile().empty()) {
+        if(mainNode->FirstChild("train_constraints") &&
+           mainNode->FirstChild("train_constraints")->FirstChild("train_types")) {
+            mainNode->FirstChild("train_constraints")
+                ->FirstChild("train_types")
+                ->FirstChild()
+                ->SetValue(_config->GetTrainTypeFile().filename().string());
         }
     }
 
@@ -1098,22 +1040,22 @@ bool Simulation::TrainTraffic()
     Point trackStart, trackEnd;
     int trainId = 0;
     auto now    = Pedestrian::GetGlobalTime();
-    for(auto && tab : TrainTimeTables) {
-        trainType  = tab.second->type;
-        trainId    = tab.second->id;
-        trackStart = tab.second->pstart;
-        trackEnd   = tab.second->pend;
-        if(!tab.second->arrival && (now >= tab.second->tin) && (now <= tab.second->tout)) {
-            trainHere                            = true;
-            TrainTimeTables.at(trainId)->arrival = true;
+    for(const auto & [id, tab] : _building->GetTrainTimeTables()) {
+        trainType  = tab.type;
+        trainId    = tab.id;
+        trackStart = tab.pstart;
+        trackEnd   = tab.pend;
+        if(!tab.arrival && (now >= tab.tin) && (now <= tab.tout)) {
+            trainHere = true;
+            _building->SetTrainArrived(trainId, true);
             std::cout << "Arrival: TRAIN " << trainType << " at time: " << now << "\n";
-            correctGeometry(_building, tab.second);
+            correctGeometry(_building, tab);
 
-        } else if(tab.second->arrival && now >= tab.second->tout) {
+        } else if(tab.arrival && now >= tab.tout) {
             std::cout << "Departure: TRAIN " << trainType << " at time: " << now << "\n";
-            _building->resetGeometry(tab.second);
-            trainLeave                           = true;
-            TrainTimeTables.at(trainId)->arrival = false;
+            _building->resetGeometry(tab);
+            trainLeave = true;
+            _building->SetTrainArrived(trainId, false);
         }
     }
     if(trainHere || trainLeave) {
