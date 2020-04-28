@@ -232,7 +232,7 @@ bool Line::IsInLineSegment(const Point & p) const
     // cross product to check if point i colinear
     auto crossProduct = differenceTwoAndOne.CrossProduct(differencePAndOne);
 
-    if(std::abs(crossProduct) > J_EPS) {
+    if(std::abs(crossProduct) > 0.0001) {
         return false;
     }
 
