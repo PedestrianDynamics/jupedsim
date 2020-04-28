@@ -71,7 +71,7 @@ Finally, complete the installation by clicking on `Finish`.
 
 ### Start a simulation 
 
-{%include important.html content="Before starting a simulation make sure to copy the directory jpscore_samples files to a direction, where you have write permissions, e.g. Desktop."%}
+{%include important.html content="Before starting a simulation make sure to copy the directory jpscore_samples files to a directory, where you have write permissions, e.g. Desktop."%}
 
 Open `Powershell` in the directory of `jpscore_samples` as shown in the following screenshot:
 
