@@ -57,7 +57,6 @@ void EventManager::ListEvents()
 bool EventManager::ProcessEvent()
 {
     double timeMin = Pedestrian::GetGlobalTime() - J_EPS_EVENT;
-
     std::unique_ptr<Event> eventMin =
         std::make_unique<DoorEvent>(-1, timeMin, EventAction::DOOR_OPEN);
 
@@ -65,10 +64,6 @@ bool EventManager::ProcessEvent()
         std::begin(_events), std::end(_events), eventMin, [](auto & val, auto & event) {
             return val->GetTime() < event->GetTime();
         });
-
-    if(lower == std::end(_events)) {
-        return false;
-    }
 
     double timeMax = Pedestrian::GetGlobalTime() + J_EPS_EVENT;
     std::unique_ptr<Event> eventMax =
@@ -78,15 +73,7 @@ bool EventManager::ProcessEvent()
             return event->GetTime() <= val->GetTime();
         });
 
-    if(upper == std::end(_events)) {
-        return false;
-    }
-
-    if(upper == lower) {
-        return false;
-    }
-
     std::for_each(lower, upper, [](auto & event) { event->Process(); });
 
-    return true;
+    return std::distance(lower, upper) != 0;
 }
