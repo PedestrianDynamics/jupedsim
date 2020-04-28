@@ -393,20 +393,10 @@ double Simulation::RunBody(double maxSimTime)
             //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
             //update quickestRouter
             if(eventProcessed) {
-                // debug
-                fs::path new_filename("tmp_" + std::to_string(t) + "_");
-                new_filename += _config->GetGeometryFile().filename();
-                fs::path changedGeometryFile = _config->GetGeometryFile();
-
-                changedGeometryFile.replace_filename(new_filename);
-
-                LOG_INFO("Update geometry. New  geometry --> {}", changedGeometryFile.string());
-
                 LOG_INFO(
                     "Enter correctGeometry: Building Has {} Transitions.",
                     _building->GetAllTransitions().size());
 
-                _building->SaveGeometry(changedGeometryFile);
                 _building->GetConfig()->GetDirectionManager()->GetDirectionStrategy()->Init(
                     _building.get());
             } else { // quickest needs update even if NeedsUpdate() is false
