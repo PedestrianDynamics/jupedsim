@@ -10,6 +10,7 @@
 import os
 from sys import argv, path
 import logging
+import math
 
 path.append(os.path.dirname(path[0]))  # source helper file
 from utils import SUCCESS, FAILURE
@@ -18,7 +19,7 @@ import numpy as np
 
 # ---------
 # Test of classical voronoi output for Method D, I and J
-# Real voronoi density can be calculated by 1 person / (d*d)
+# Real voronoi density can be calculated by 1 person / (ped_distance^2)
 # Real velocity is 1.0 m/s for all frames (since cut off is false parts of the outer voronoi cells lay in the measurement area)
 # ---------
 
@@ -71,7 +72,7 @@ def test_classical_voronoi(trajfile, ped_distance):
 # ---------
 # Test of IFD output for Method D, I and J
 # IDs of pedestrians that are in the measurement area for frame 109 are checked
-# Their individual density must be 1 person / (d*d)
+# Their individual density must be 1 person / (ped_distance^2)
 # ---------
 def test_IFD(method, trajfile, ped_distance):
     jpsreport_result_file = os.path.join('./Output',
@@ -110,7 +111,7 @@ def test_IFD(method, trajfile, ped_distance):
                 real_ped_IDs_sorted))
         exit(FAILURE)
 
-    # check density for all frames for pedestrians in measurement area for specified frame
+    # check density for for pedestrians in measurement area for specified frame
     jpsreport_density = jpsreport_data[jpsreport_data[:, 0] == frame][:, 5]
     real_density_array = np.ones(np.size(jpsreport_density)) * real_density
 
@@ -119,4 +120,52 @@ def test_IFD(method, trajfile, ped_distance):
     else:
         logging.critical(
             "density values did not match result. Got {}. Expected {}".format(jpsreport_density, real_density_array))
+        exit(FAILURE)
+
+
+# ---------
+# Test of cut off option for Method D, I and J
+# Densities of pedestrians that are in the measurement area for frame 109 are checked
+# Cut off voronoi cells are approximated by circles
+# If the area of the circle is smaller than the area of the square, the cut off option has an effect on the inner voronoi cells
+# If the area of the circle is larger than the area of the square, the cut off option has no effect on the inner voronoi cells
+# Both scenarios can be tested with this function by setting `cut_off_has_effect`
+# ---------
+def test_cut_off(method, trajfile, ped_distance, cut_off_has_effect=True):
+    jpsreport_result_file = os.path.join('./Output',
+                                         'Fundamental_Diagram',
+                                         'IndividualFD',
+                                         'IFD_%s_%s_id_1.dat' % (method, trajfile)
+                                         )
+
+    if not os.path.exists(jpsreport_result_file):
+        logging.critical("jpsreport did not output results correctly.")
+        exit(FAILURE)
+
+    # set test configuration
+    # real density is based on the square for circumcircle or based on the circle for incircle
+    if cut_off_has_effect:
+        # cut off is applied: density is higher than for square voronoi cell.
+        real_density = 1 / (math.pi * (ped_distance / 2) ** 2)
+    else:
+        # no cut off is applied: density remains the same
+        real_density = 1 / (ped_distance ** 2)
+
+    # accepted error
+    acceptance_range = 0.001
+    # frame when inner voronoi cells of 16 people are entirely in the measurement area
+    frame = 109
+
+    jpsreport_data = np.loadtxt(jpsreport_result_file, usecols=(0, 1, 2, 3, 4, 5))
+
+    # check density for pedestrians in measurement area for specified frame
+    jpsreport_density = jpsreport_data[jpsreport_data[:, 0] == frame][:, 5]
+    real_density_array = np.ones(np.size(jpsreport_density)) * real_density  #
+
+    if np.all(np.abs(jpsreport_density - real_density_array) < acceptance_range):
+        logging.info("density calculation with cut off option should be OK.")
+    else:
+        logging.critical(
+            "density values with cut off option did not match result. Got {}. Expected {}".format(jpsreport_density,
+                                                                                                  real_density_array))
         exit(FAILURE)
