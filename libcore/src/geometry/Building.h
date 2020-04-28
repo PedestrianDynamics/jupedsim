@@ -32,7 +32,6 @@
 #include "Obstacle.h"
 #include "Room.h"
 #include "Transition.h"
-#include "events/TrainTypes.h"
 #include "general/Configuration.h"
 #include "general/Filesystem.h"
 #include "neighborhood/NeighborhoodSearch.h"
@@ -46,6 +45,12 @@ struct Platform {
     std::map<int, std::vector<Wall>> tracks;
 };
 
+struct TrainType {
+    std::string _type;
+    int _maxAgents;
+    float _length;
+    std::vector<Transition> _doors;
+};
 
 class RoutingEngine;
 
@@ -77,7 +82,8 @@ private:
     /// pedestrians pathway
     bool _savePathway;
     std::ofstream _pathWayStream;
-    TrainTypes _trains;
+    std::map<int, TrainType> _trains;
+    std::map<int, std::vector<Transition *>> _trainDoors;
 
 public:
     /// constructor
@@ -259,17 +265,18 @@ public:
       */
     std::vector<Point> GetBoundaryVertices() const;
 
-    /**
-     *
-     * @return
-     */
-    const TrainTypes & GetTrains() const;
 
-    /**
-     * Adds a train type to the building
-     * @param trainType Train type to add
-     */
-    void AddTrainType(TrainType trainType);
+    void AddTrain(int trainID, TrainType type);
+
+    TrainType GetTrain(int trainID);
+
+    std::map<int, TrainType> GetTrains() const;
+
+    std::vector<TrainType> GetTrainTypes();
+
+    void AddTrainDoors(int trainID, std::vector<Transition *> doors);
+
+    std::map<int, std::vector<Transition *>> GetTrainDoors() const;
 
 private:
     bool InitInsideGoals();

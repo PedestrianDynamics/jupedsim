@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 
 """
-Test to check if max agents of train are working correctly. In this scenario 2 trains arrive
+Test to check if max agents of train are working correctly. In this scenario 2 trains arrive where the capacity is exceeded.
+Train 1: arrives at 5, departs at 15, capacity 15
+Train 2: arrives at 35, departs at 50, capacity 20
+As the simulation starts with 50 pedestrians following is tested:
+- Num peds between 15 and 35 should be around 35 (as multiple may pass a door in one time step)
+- Num peds between 50 and end of simulation should be around 15
 """
 
 import os
@@ -47,15 +52,16 @@ def runtest(inifile, trajfile):
             logging.critical("There are no pedestrians left, there should be %d pedestrians in the simulation" % allowedAgents)
             success = False
         elif maxAgents != minAgents:
-            logging.critical("The number of pedestrians changes during waiting time from %d to %" % (maxAgents, minAgents))
+            logging.critical("The number of pedestrians changes during waiting time from %d to %d" % (maxAgents, minAgents))
             success = False
-        elif allowedAgents != maxAgents:
+        elif abs(allowedAgents - maxAgents) > 2:
+            print(abs(allowedAgents - maxAgents))
             logging.critical("Train capacity exceeded, there should be %d pedestrians in the simulation but found max. %d pedestrians"
                              %(allowedAgents, maxAgents))
             success = False
 
+        N = maxAgents
 
-        N = N - trainTimes[i][2]
     if not success:
         exit(FAILURE)
 

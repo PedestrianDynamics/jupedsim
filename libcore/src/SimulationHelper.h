@@ -93,7 +93,7 @@ void UpdateFlowAtDoors(Building & building, const std::vector<Pedestrian *> & pe
 bool UpdateFlowRegulation(Building & building);
 
 /**
- * Triggers the flow regulation for trainsd, and closes/opens doors accordingly
+ * Triggers the flow regulation for trains, and closes/opens doors accordingly
  * @param building geometry used in the simulation
  * @return a change to the geometry was made
  */

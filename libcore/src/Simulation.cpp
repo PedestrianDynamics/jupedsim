@@ -128,13 +128,6 @@ bool Simulation::InitArgs()
         return false;
     }
     LOG_INFO("Init Operational Model done.");
-    LOG_INFO("Got {} Train Types.", _building->GetTrains().GetTrainTypes().size());
-
-    for(auto && TT : _building->GetTrains().GetTrainTypes()) {
-        LOG_INFO("Type {}", TT.second._type);
-        LOG_INFO("Max {}", TT.second._maxAgents);
-        LOG_INFO("Number of doors {}", TT.second._doors.size());
-    }
 
     // Give the DirectionStrategy the chance to perform some initialization.
     // This should be done after the initialization of the operationalModel
@@ -170,12 +163,19 @@ bool Simulation::InitArgs()
             _building->GetTransition(transID)->SetMaxDoorUsage(maxAgents);
         }
     }
-    if(!_config->GetTrainTypeFile().empty()) {
-        TrainFileParser::ParseTrainTypes(*_building, _config->GetTrainTypeFile());
-    }
-    if(!_config->GetTrainTimeTableFile().empty()) {
+
+    if(!_config->GetTrainTypeFile().empty() && !_config->GetTrainTimeTableFile().empty()) {
+        auto trainTypes = TrainFileParser::ParseTrainTypes(_config->GetTrainTypeFile());
         TrainFileParser::ParseTrainTimeTable(
-            *_em, _building->GetTrains(), _config->GetTrainTimeTableFile());
+            *_em, *_building, trainTypes, _config->GetTrainTimeTableFile());
+    }
+
+    LOG_INFO("Got {} Trains", _building->GetTrainTypes().size());
+
+    for(auto && TT : _building->GetTrainTypes()) {
+        LOG_INFO("Type {}", TT._type);
+        LOG_INFO("Max {}", TT._maxAgents);
+        LOG_INFO("Number of doors {}", TT._doors.size());
     }
 
     _em->ListEvents();
@@ -212,7 +212,11 @@ void Simulation::UpdateRoutesAndLocations()
     SimulationHelper::RemovePedestrians(*_building, _pedsToRemove);
 
     //TODO discuss simulation flow -> better move to main loop, does not belong here
-    SimulationHelper::UpdateFlowRegulation(*_building);
+    bool geometryChangedFlow  = SimulationHelper::UpdateFlowRegulation(*_building);
+    bool geometryChangedTrain = SimulationHelper::UpdateTrainFlowRegulation(*_building);
+
+    _routingEngine->setNeedUpdate(geometryChangedFlow || geometryChangedTrain);
+
     //TODO check if better move to main loop, does not belong here
     UpdateRoutes();
 }

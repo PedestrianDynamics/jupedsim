@@ -1220,14 +1220,46 @@ bool Building::SaveGeometry(const fs::path & filename) const
     return true;
 }
 
-const TrainTypes & Building::GetTrains() const
+void Building::AddTrain(int trainID, TrainType type)
+{
+    _trains.emplace(trainID, type);
+}
+
+TrainType Building::GetTrain(int trainID)
+{
+    return _trains.at(trainID);
+}
+
+std::map<int, TrainType> Building::GetTrains() const
 {
     return _trains;
 }
 
-void Building::AddTrainType(TrainType trainType)
+std::vector<TrainType> Building::GetTrainTypes()
 {
-    _trains.AddTrainType(trainType);
+    std::vector<TrainType> trainTypes;
+    trainTypes.reserve(_trains.size());
+
+    for(auto const & [trainID, trainType] : _trains) {
+        trainTypes.emplace_back(trainType);
+    }
+
+    std::unique(
+        std::begin(trainTypes), std::end(trainTypes), [](const TrainType & a, const TrainType & b) {
+            return a._type == b._type;
+        });
+
+    return trainTypes;
+}
+
+void Building::AddTrainDoors(int trainID, std::vector<Transition *> doors)
+{
+    _trainDoors.emplace(trainID, doors);
+}
+
+std::map<int, std::vector<Transition *>> Building::GetTrainDoors() const
+{
+    return _trainDoors;
 }
 
 #endif // _SIMULATOR

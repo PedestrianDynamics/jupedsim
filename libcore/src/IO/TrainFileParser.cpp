@@ -4,7 +4,8 @@
 
 void TrainFileParser::ParseTrainTimeTable(
     EventManager & eventManager,
-    const TrainTypes & trainTypes,
+    Building & building,
+    const std::map<std::string, TrainType> & trainTypes,
     const fs::path & trainTimeTableFile)
 {
     TiXmlDocument docTTT(trainTimeTableFile.string());
@@ -56,15 +57,15 @@ void TrainFileParser::ParseTrainTimeTable(
         Point train_start(train_start_x, train_start_y);
         Point train_end(train_end_x, train_end_y);
 
-        auto trainType = trainTypes.GetTrainType(type);
-        if(trainType.has_value()) {
+        if(trainTypes.find(type) != std::end(trainTypes)) {
+            auto trainType = trainTypes.at(type);
             // Arriving train
             eventManager.AddEvent(std::make_unique<TrainEvent>(
                 arrival_time,
                 EventAction::TRAIN_ARRIVAL,
                 id,
                 platform_id,
-                trainType.value(),
+                trainType,
                 room_id,
                 subroom_id,
                 track_start,
@@ -78,19 +79,23 @@ void TrainFileParser::ParseTrainTimeTable(
                 EventAction::TRAIN_DEPARTURE,
                 id,
                 platform_id,
-                trainType.value(),
+                trainType,
                 room_id,
                 subroom_id,
                 track_start,
                 track_end,
                 train_start,
                 train_end));
+
+            building.AddTrain(id, trainType);
         }
     }
 }
 
-void TrainFileParser::ParseTrainTypes(Building & building, const fs::path & trainTypeFile)
+std::map<std::string, TrainType> TrainFileParser::ParseTrainTypes(const fs::path & trainTypeFile)
+//void TrainFileParser::ParseTrainTypes(Building & building, const fs::path & trainTypeFile)
 {
+    std::map<std::string, TrainType> trainTypes;
     TiXmlDocument docTT(trainTypeFile.string());
     if(!docTT.LoadFile()) {
         LOG_ERROR("{}", docTT.ErrorDesc());
@@ -105,14 +110,15 @@ void TrainFileParser::ParseTrainTypes(Building & building, const fs::path & trai
     }
     for(TiXmlElement * e = xTT->FirstChildElement("train"); e; e = e->NextSiblingElement("train")) {
         auto trainType = ParseTrainTypeNode(e);
-        if(trainType) {
-            if(building.GetTrains().GetTrainType(trainType->_type).has_value()) {
+        if(trainType.has_value()) {
+            if(trainTypes.find(trainType.value()._type) != std::end(trainTypes)) {
                 LOG_WARNING("Duplicate type for train found [{}]", trainType.value()._type);
                 continue;
             }
-            building.AddTrainType(trainType.value());
+            trainTypes.emplace(trainType.value()._type, trainType.value());
         }
     }
+    return trainTypes;
 }
 
 //std::map<int, TrainTimeTable>

@@ -209,15 +209,32 @@ bool SimulationHelper::UpdateFlowRegulation(Building & building)
     return stateChanged;
 }
 
-//bool UpdateTrainFlowRegulation(Building & building)
-//{
-//    std::map<int, double> trainUsage;
-//
-//    for (auto const & [trainID])
-//    std::for_each(std::begin(building.TempAddedDoors), std::end(building.TempAddedDoors), [&trainUsage, &building](std::pair<int, std::ee trans]){
-//        trainUsage += building.GetTransition(trans.GetID())->GetDoorUsage();
-//    });
-//}
+bool SimulationHelper::UpdateTrainFlowRegulation(Building & building)
+{
+    bool geometryChanged = false;
+    for(auto const & [trainID, trainType] : building.GetTrains()) {
+        if(building.TempAddedDoors.find(trainID) != std::end(building.TempAddedDoors)) {
+            auto trainDoors = building.TempAddedDoors.at(trainID);
+
+            int sum = std::accumulate(
+                std::begin(trainDoors),
+                std::end(trainDoors),
+                0,
+                [&building](int i, Transition trans) {
+                    return building.GetTransition(trans.GetID())->GetDoorUsage() + i;
+                });
+
+            if(sum > trainType._maxAgents) {
+                std::for_each(
+                    std::begin(trainDoors), std::end(trainDoors), [&building](Transition trans) {
+                        building.GetTransition(trans.GetID())->Close();
+                    });
+                geometryChanged = true;
+            }
+        }
+    }
+    return geometryChanged;
+}
 
 void SimulationHelper::RemoveFaultyPedestrians(
     Building & building,

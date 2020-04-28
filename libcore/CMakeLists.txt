@@ -15,7 +15,6 @@ set(source_files
     src/events/DoorEvent.cpp
     src/events/EventHelper.cpp
     src/events/EventManager.cpp
-        src/events/TrainTypes.cpp
     src/events/TrainEvent.cpp
     src/general/ArgumentParser.cpp
     src/general/Logger.cpp
@@ -104,7 +103,6 @@ set(header_files
     src/events/EventHelper.h
     src/events/EventManager.h
     src/events/TrainEvent.h
-        src/events/TrainTypes.h
     src/general/ArgumentParser.h
     src/general/Compiler.h
     src/general/Configuration.h
