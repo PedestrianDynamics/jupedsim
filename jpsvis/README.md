@@ -11,7 +11,7 @@ To highlight some features of JuPedSim we have uploaded some videos on our [YouT
 
 We are heavily working on this project which means that:
 
-- It’s not done. We will be releasing new enhancements, bug fixes etc.
+- It’s not done. This package is not actively developed.
 - We love your support. If you find any errors or have suggestions, please write an issue in our [issue-tracker](https://github.com/jupedsim/jpsvis/issues). We will try hard to fix it.
 - Be patient. We are scientists and PhD/master students. Therefore, we primarily care about our research and theses. 
 
@@ -28,12 +28,12 @@ brew update
 brew install vtk --with-qt --without-python --with-python3 --without-boost  --build-from-source
 ```
 
-### Install packages for Debian 7.7 (Ubuntu)
+We recommend using brew to install `jpsvis`. See [here](https://github.com/JuPedSim/homebrew-jps).
+
+### Install packages for Ubuntu
 
 ```
-sudo apt-get install libmgl-qt5
-sudo apt-get install libvtk5-dev
-sudo apt-get install libvtk5.8-qt4
+sudo apt-get install qt5-default libvtk7-dev
 ```
 
 Alternatively, you can download the latest version of QT [here](https://www.qt.io/download/) and the latest version of VTK [here](http://www.vtk.org/download/).
@@ -53,7 +53,6 @@ The only requirement is a compiler supporting the new standard c++11.
 
 ### Linux (tested on Ubuntu 14.04 with gcc 4.8)
 
-
     cmake CMakeLists.txt
     make
 
@@ -63,4 +62,4 @@ The only requirement is a compiler supporting the new standard c++11.
     cmake   CMakeLists.txt
     make
 
-Note that the OpenMP acceleration might be missing under OSX
+Note that the OpenMP acceleration might be missing under OSX.
