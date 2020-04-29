@@ -35,9 +35,10 @@ std::string TrainEvent::GetDescription() const
         FMT_STRING("After {} sec: {}, type: {}, platform: {}"),
         _time,
         action,
-        _train._type,
+        _trainType._type,
         _platformID);
 }
+
 void TrainEvent::TrainArrival()
 {
     SubRoom * subroom;
@@ -55,16 +56,11 @@ void TrainEvent::TrainArrival()
     }
     static int transition_id = 10000; // randomly high number
 
-    std::cout << "enter with train " << _train._type << "\n";
-    std::cout << "Enter correctGeometry: Building Has " << _building->GetAllTransitions().size()
-              << " Transitions\n";
-    std::cout << "room: " << room_id << " subroom_id " << subroom_id << "\n";
-
     if(mytrack.empty()) {
         return;
     }
 
-    auto doors = _train._doors;
+    auto doors = _trainType._doors;
     for(auto && door : doors) {
         auto newX = door.GetPoint1()._x + _trainStart._x + _trackStart._x;
         auto newY = door.GetPoint1()._y + _trainStart._y + _trackStart._y;
@@ -77,17 +73,13 @@ void TrainEvent::TrainArrival()
     for(const auto & door : doors) {
         LOG_INFO(
             "Train {} {}. Transformed coordinates of doors: {} -- {}",
-            _train._type,
+            _trainType._type,
             _trainID,
             door.GetPoint1().toString(),
             door.GetPoint2().toString());
     }
 
-    auto pws = _building->GetIntersectionPoints(doors, mytrack);
-    if(pws.empty())
-        std::cout << "simulation::correctGeometry: pws are empty. Something went south with train "
-                     "doors\n";
-
+    auto pws   = _building->GetIntersectionPoints(doors, mytrack);
     auto walls = subroom->GetAllWalls();
     //---
     for(auto pw : pws) {
@@ -100,10 +92,9 @@ void TrainEvent::TrainArrival()
         // case 1
         Point P;
         if(w1 == w2) {
-            std::cout << "EQUAL\n";
             Transition * e = new Transition();
             e->SetID(transition_id++);
-            e->SetCaption(_train._type);
+            e->SetCaption(_trainType._type);
             e->SetPoint1(p1);
             e->SetPoint2(p2);
             std::string transType =
@@ -138,25 +129,21 @@ void TrainEvent::TrainArrival()
                 subroom->AddWall(NewWall);
             }
 
-            else
-                std::cout << ">> WALL did not add: " << NewWall.toString() << "\n";
 
             if(NewWall1.GetLength() > J_EPS_DIST) {
                 _building->TempAddedWalls[_trainID].push_back(NewWall1);
                 subroom->AddWall(NewWall1);
-            } else
-                std::cout << ">> WALL did not add: " << NewWall1.toString() << "\n";
+            }
 
             _building->TempAddedDoors[_trainID].push_back(*e);
             _building->TempRemovedWalls[_trainID].push_back(w1);
             subroom->RemoveWall(w1);
 
         } else if(w1.ShareCommonPointWith(w2, P)) {
-            std::cout << "ONE POINT COMON\n";
             //------------ transition --------
             Transition * e = new Transition();
             e->SetID(transition_id++);
-            e->SetCaption(_train._type);
+            e->SetCaption(_trainType._type);
             e->SetPoint1(p1);
             e->SetPoint2(p2);
             std::string transType =
@@ -196,11 +183,10 @@ void TrainEvent::TrainArrival()
             subroom->RemoveWall(w2);
         } else // disjoint
         {
-            std::cout << "DISJOINT\n";
             //------------ transition --------
             Transition * e = new Transition();
             e->SetID(transition_id++);
-            e->SetCaption(_train._type);
+            e->SetCaption(_trainType._type);
             e->SetPoint1(p1);
             e->SetPoint2(p2);
             std::string transType =
@@ -260,12 +246,12 @@ void TrainEvent::TrainDeparture()
         if(it != tempWalls.end()) {
             tempWalls.erase(it);
         }
-        for(auto platform : _building->GetPlatforms()) {
+        for(const auto & platform : _building->GetPlatforms()) {
             room_id    = platform.second->rid;
             subroom_id = platform.second->sid;
             SubRoom * subroom =
                 _building->GetAllRooms().at(room_id)->GetAllSubRooms().at(subroom_id).get();
-            for(auto subWall : subroom->GetAllWalls()) {
+            for(const auto & subWall : subroom->GetAllWalls()) {
                 if(subWall == wall) {
                     // if everything goes right, then we should enter this
                     // if. We already erased from tempWalls!
@@ -284,15 +270,15 @@ void TrainEvent::TrainDeparture()
         if(it != tempRemovedWalls.end()) {
             tempRemovedWalls.erase(it);
         }
-        for(auto platform : _building->GetPlatforms()) {
+        for(const auto & platform : _building->GetPlatforms()) {
             auto tracks = platform.second->tracks;
             room_id     = platform.second->rid;
             subroom_id  = platform.second->sid;
             SubRoom * subroom =
                 _building->GetAllRooms().at(room_id)->GetAllSubRooms().at(subroom_id).get();
-            for(auto track : tracks) {
+            for(const auto & track : tracks) {
                 auto walls = track.second;
-                for(auto trackWall : walls) {
+                for(const auto & trackWall : walls) {
                     if(trackWall == wall) {
                         subroom->AddWall(wall);
                     }
@@ -310,7 +296,7 @@ void TrainEvent::TrainDeparture()
         if(it != tempDoors.end()) {
             tempDoors.erase(it);
         }
-        for(auto platform : _building->GetPlatforms()) {
+        for(const auto & platform : _building->GetPlatforms()) {
             auto tracks = platform.second->tracks;
             room_id     = platform.second->rid;
             subroom_id  = platform.second->sid;

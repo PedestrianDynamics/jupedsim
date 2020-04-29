@@ -179,12 +179,6 @@ public:
     Building * GetBuilding();
 
     /**
-     * Update the flow for the door that the pedestrian just crossed
-     * @param ped
-     */
-    void UpdateFlowAtDoors(const Pedestrian & ped) const;
-
-    /**
      * Update the refresh ticks for all doors. they count up and measure the age of the tickvalue (ffRouter, quickest)
      *
      */

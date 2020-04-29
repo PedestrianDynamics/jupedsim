@@ -22,9 +22,9 @@ private:
 public:
     /**
       * Constructor
-      * @param doorID
-      * @param time
-      * @param state
+      * @param doorID ID of transition this event acting on
+      * @param time time at which the event is triggered
+      * @param action Action which is performed at \p time on door \p doorID
       */
     DoorEvent(int doorID, double time, EventAction action);
 
@@ -35,7 +35,6 @@ public:
 
     void Process() override;
 
-    [[nodiscard]] int GetDoorID() const;
     [[nodiscard]] std::string GetDescription() const override;
 
 private:

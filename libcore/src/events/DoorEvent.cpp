@@ -40,11 +40,6 @@ std::string DoorEvent::GetDescription() const
     return fmt::format(FMT_STRING("After {} sec: {} door {}"), _time, action, _doorID);
 }
 
-int DoorEvent::GetDoorID() const
-{
-    return _doorID;
-}
-
 void DoorEvent::Process()
 {
     LOG_INFO("{}", GetDescription());

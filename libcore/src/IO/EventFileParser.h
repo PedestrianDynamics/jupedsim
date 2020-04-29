@@ -29,18 +29,17 @@
 namespace EventFileParser
 {
 /**
- * Reads all events from a specfic files and returns them in a vector.
- * @param eventFile File containing the events
- * @return All events which could be parsed from \p eventFile
- * TODO change documentation
- */
+  * Reads the events from a specific file and adds them directly to \p eventManager
+  * @param eventManager Manager for handling the events
+  * @param eventFile File containing the events
+  */
 void ParseDoorEvents(EventManager & eventManager, const fs::path & eventFile);
 
+
 /**
- * Reads the events from a specific schedule file and returns them in a vector.
+ * Reads the events from a specific schedule file and adds them directly to \p eventManager
+ * @param eventManager Manager for handling the events
  * @param scheduleFile File containing the schedule
- * @return All events which could be parsed from \p scheduleFile
- * TODO change documentation
  */
 void ParseSchedule(EventManager & eventManager, const fs::path & scheduleFile);
 

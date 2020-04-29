@@ -461,37 +461,6 @@ double Simulation::RunBody(double maxSimTime)
             }
         }
 
-        //init train trainOutflow
-        //        for(auto tab : _building->GetTrainTimeTables()) {
-        //            trainOutflow[tab.first] = 0;
-        //        }
-        // regulate flow
-        for(auto & itr : _building->GetAllTransitions()) {
-            Transition * Trans = itr.second;
-
-            Trans->UpdateTemporaryState(_deltaT);
-            // regulate train doorusage
-            std::string transType = Trans->GetType();
-            if(Trans->IsOpen() && transType.rfind("Train", 0) == 0) {
-                std::vector<std::string> strs;
-                boost::split(strs, transType, boost::is_any_of("_"), boost::token_compress_on);
-                int id           = atoi(strs[1].c_str());
-                std::string type = Trans->GetCaption();
-                trainOutflow[id] += Trans->GetDoorUsage();
-                //                if(trainOutflow[id] >= _building->GetTrains().GetTrainTypes().at(type)._maxAgents) {
-                //                    std::cout << "INFO:\tclosing train door " << transType.c_str() << " at "
-                //                              << Pedestrian::GetGlobalTime() << " capacity "
-                //                              << _building->GetTrains().GetTrainTypes().at(type)._maxAgents << "\n";
-                //                    LOG_INFO(
-                //                        "Closing train door {} at t={:.2f}. Flow = {:.2f} (Train Capacity {})",
-                //                        transType,
-                //                        Pedestrian::GetGlobalTime(),
-                //                        trainOutflow[id],
-                //                        _building->GetTrains().GetTrainTypes().at(type)._maxAgents);
-                //                    Trans->Close();
-                //                }
-            }
-        } // Transitions
         if(frameNr % 1000 == 0) {
             if(_config->ShowStatistics()) {
                 LOG_INFO("Update door statistics at t={:.2f}", t);
@@ -720,45 +689,6 @@ void Simulation::AddNewAgents()
 void Simulation::UpdateDoorticks() const {
     //TODO KKZ If possible get rind of this function
 };
-
-void Simulation::UpdateFlowAtDoors(const Pedestrian & ped) const
-{
-    Transition * trans = _building->GetTransitionByUID(ped.GetExitIndex());
-    if(!trans)
-        return;
-    DoorState state = trans->GetState();
-
-    bool regulateFlow = trans->GetOutflowRate() < (std::numeric_limits<double>::max)() ||
-                        trans->GetMaxDoorUsage() < std::numeric_limits<double>::max();
-    // flow of trans does not need regulation
-    // and we don't want to have statistics
-    if(!(regulateFlow || _config->ShowStatistics()))
-        return;
-    if(auto new_trans =
-           correctDoorStatistics(ped, trans->DistTo(ped.GetPos()), trans->GetUniqueID());
-       new_trans)
-        trans = new_trans;
-
-    trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
-    trans->IncreasePartialDoorUsage(1);
-    if(regulateFlow) {
-        // when <dn> agents pass <trans>, we start evaluating the flow
-        // .. and maybe close the <trans>
-        if(trans->GetPartialDoorUsage() == trans->GetDN()) {
-            trans->RegulateFlow(Pedestrian::GetGlobalTime());
-            trans->ResetPartialDoorUsage();
-        }
-    }
-    // no flow regulation for crossings
-    Crossing * cross = _building->GetCrossingByUID(ped.GetExitIndex());
-    if(cross) {
-        cross->IncreaseDoorUsage(1, ped.GetGlobalTime());
-    }
-
-    if(state != trans->GetState()) {
-        _routingEngine->setNeedUpdate(true);
-    }
-}
 
 void Simulation::incrementCountTraj()
 {

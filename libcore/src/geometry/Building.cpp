@@ -1252,14 +1252,4 @@ std::vector<TrainType> Building::GetTrainTypes()
     return trainTypes;
 }
 
-void Building::AddTrainDoors(int trainID, std::vector<Transition *> doors)
-{
-    _trainDoors.emplace(trainID, doors);
-}
-
-std::map<int, std::vector<Transition *>> Building::GetTrainDoors() const
-{
-    return _trainDoors;
-}
-
 #endif // _SIMULATOR

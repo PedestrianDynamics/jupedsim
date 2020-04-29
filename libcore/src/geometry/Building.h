@@ -83,7 +83,6 @@ private:
     bool _savePathway;
     std::ofstream _pathWayStream;
     std::map<int, TrainType> _trains;
-    std::map<int, std::vector<Transition *>> _trainDoors;
 
 public:
     /// constructor
@@ -257,7 +256,6 @@ public:
     /**
       * Triangulate the geometry
       */
-
     bool Triangulate();
 
     /**
@@ -265,18 +263,31 @@ public:
       */
     std::vector<Point> GetBoundaryVertices() const;
 
-
+    /**
+     * Adds a train to the building
+     * @param trainID ID of the added train
+     * @param type type of the train
+     */
     void AddTrain(int trainID, TrainType type);
 
+    /**
+     * Get the type of train with ID \p trainID
+     * @param trainID ID of the train
+     * @return Type of train with ID \p trainID
+     */
     TrainType GetTrain(int trainID);
 
+    /**
+     * Get the train types as map
+     * @return train types of the building with trainID as key
+     */
     std::map<int, TrainType> GetTrains() const;
 
+    /**
+     * Get the train types as vector, each type only once
+     * @return vector of train types in \a _trains
+     */
     std::vector<TrainType> GetTrainTypes();
-
-    void AddTrainDoors(int trainID, std::vector<Transition *> doors);
-
-    std::map<int, std::vector<Transition *>> GetTrainDoors() const;
 
 private:
     bool InitInsideGoals();

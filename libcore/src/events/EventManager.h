@@ -21,7 +21,7 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * \section Description
- * The EventManager is responsible for handling events related to the door in the simulations.
+ * The EventManager is responsible for handling events in the simulations.
  **/
 #pragma once
 
@@ -34,6 +34,17 @@ class Building;
 
 class EventManager
 {
+private:
+    /**
+     * List of all events processed by the EventManager.
+     */
+    std::vector<std::unique_ptr<Event>> _events;
+
+    /**
+     * Geometry the events will be processed on.
+     */
+    Building * _building;
+
 public:
     /**
       * Constructor.
@@ -50,14 +61,14 @@ public:
     EventManager & operator=(const EventManager &) & = delete;
 
     /**
-     * Adds the events from \p events to the EventManager. This should be done before the simulation
+     * Adds \p event to the EventManager. This should be done before the simulation
      * starts.
-     * @param events List of events, which should be used in the simulation
+     * @param event Event which should be handled by the event manager
      */
     void AddEvent(std::unique_ptr<Event> event);
 
     /**
-      * Print the parsed events.
+      * Print the events handled by EventManager.
       */
     void ListEvents();
 
@@ -67,15 +78,4 @@ public:
      * @return Any event was processed.
      */
     bool ProcessEvent();
-
-private:
-    /**
-     * List of all events processed by the EventManager.
-     */
-    std::vector<std::unique_ptr<Event>> _events;
-
-    /**
-     * Geometry the events will be processed on.
-     */
-    Building * _building;
 };

@@ -19,15 +19,33 @@ enum class EventAction {
 class Event
 {
 protected:
+    /**
+     * Time the event is triggered
+     */
     double _time;
+
+    /**
+     * Type of event
+     */
     EventAction _action;
+
+    /**
+     * Geometry where the event should be applied to
+     */
     Building * _building;
 
 public:
     virtual ~Event() = default;
 
+    /**
+     * Processes the given \a _action at \a time on \a _building.
+     */
     virtual void Process() = 0;
 
+    /**
+     * Sets the geometry for the event
+     * @param building Geometry, on which the event should be applied
+     */
     void SetBuilding(Building * building) { _building = building; }
 
     /**
