@@ -169,3 +169,63 @@ def test_cut_off(method, trajfile, ped_distance, cut_off_has_effect=True):
             "density values with cut off option did not match result. Got {}. Expected {}".format(jpsreport_density,
                                                                                                   real_density_array))
         exit(FAILURE)
+
+
+# ---------
+# Test of IFD output when intersecting with geoemetry for Method D, I and J
+# IDs of pedestrians that are in the measurement area for frame 109 are checked
+# Corridor is choosen more narrow so that vornoi cells next to walls should intersect with the geometry
+# Measurement area contains first and last row of these pedestrians
+# Their individual density must be 1 person / (area of the rectangle)
+# Note: Function is only applicable for one specified scenario since the distance to the gemoetry needs to be known
+# ---------
+def test_IFD_geometry_intersection(method, trajfile):
+    jpsreport_result_file = os.path.join('./Output',
+                                         'Fundamental_Diagram',
+                                         'IndividualFD',
+                                         'IFD_%s_%s_id_1.dat' % (method, trajfile)
+                                         )
+
+    if not os.path.exists(jpsreport_result_file):
+        logging.critical("jpsreport did not output results correctly.")
+        exit(FAILURE)
+
+    # set test configuration
+    # accepted error
+    acceptance_range = 0.001
+    # frame when inner voronoi cells of 16 people are entirely in the measurement area
+    frame = 109
+
+    # density can be calculated based on the geometry and the corresponding rectangle
+    real_density_first_row = 1 / (1.25 * 1.5)
+    real_density_last_row = 1 / 1.5
+
+    jpsreport_data = np.loadtxt(jpsreport_result_file, usecols=(0, 1, 2, 3, 4, 5))
+
+    # get data for specified frame
+    jpsreport_frame_data = jpsreport_data[jpsreport_data[:, 0] == frame][:, :]
+
+    # get density data for first and last row
+    jpsreport_density_first_row = jpsreport_frame_data[jpsreport_frame_data[:, 1] < 6][:,
+                                  5]  # ped IDs of first row in measurement area: 2,3,4,5
+    jpsreport_density_last_row = jpsreport_frame_data[jpsreport_frame_data[:, 1] > 31][:,
+                                 5]  # ped IDs of last row in measurement area: 32,33,34,35
+
+    real_density_array_first_row = np.ones(np.size(jpsreport_density_first_row)) * real_density_first_row
+    real_density_array_last_row = np.ones(np.size(jpsreport_density_first_row)) * real_density_last_row
+
+    if np.all(np.abs(jpsreport_density_first_row - real_density_array_first_row) < acceptance_range):
+        logging.info("density calculation when intersecting geometry should be OK.")
+    else:
+        logging.critical(
+            "density values for pedestrians in first row did not match result. Got {}. Expected {}".format(
+                jpsreport_density_first_row, real_density_array_first_row))
+        exit(FAILURE)
+
+    if np.all(np.abs(jpsreport_density_last_row - real_density_array_last_row) < acceptance_range):
+        logging.info("density calculation when intersecting geometry should be OK.")
+    else:
+        logging.critical(
+            "density values for pedestrians in last row did not match result. Got {}. Expected {}".format(
+                jpsreport_density_last_row, real_density_array_last_row))
+        exit(FAILURE)
