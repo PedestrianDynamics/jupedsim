@@ -14,7 +14,7 @@ add_test(NAME D06_corridor_medium_density_IFD COMMAND ${PYTHON_EXECUTABLE} ${CMA
 add_test(NAME D07_corridor_high_density_IFD COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D07_corridor_high_density_IFD/D07_corridor_high_density_IFD.py ${jpsreport_exe})
 add_test(NAME D08_corridor_low_cut_off COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D08_corridor_low_cut_off/D08_corridor_low_cut_off.py ${jpsreport_exe})
 add_test(NAME D09_corridor_high_cut_off COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D09_corridor_high_cut_off/D09_corridor_high_cut_off.py ${jpsreport_exe})
-add_test(NAME D10_corridor_geometry_intersection COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D10_geometry_intersection/D10_geometry_intersection.py ${jpsreport_exe})
+add_test(NAME D10_corridor_geometry_intersection COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D10_corridor_geometry_intersection/D10_corridor_geometry_intersection.py ${jpsreport_exe})
 add_test(NAME 01_method_I COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_I/test01/01_method_I.py ${jpsreport_exe})
 add_test(NAME 01_method_J COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/test01/01_method_J.py ${jpsreport_exe})
 
