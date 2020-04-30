@@ -394,7 +394,7 @@
                     <vertex px="-0.2" py="30.768"/>
                 </polygon>
                 <polygon caption="wall">
-                    <vertex px="-0.2" py="34.368"/>
+                    <vertex px="-0.2" py="34.365"/>
                     <vertex px="0" py="34.368"/>
                 </polygon>
                 <polygon caption="wall">
@@ -536,16 +536,16 @@
     </rooms>
     <transitions>
         <transition id="0" caption="NaN" type="NaN" room1_id="0" subroom1_id="2" room2_id="-1" subroom2_id="-1">
-            <vertex px="67.5801" py="3.772"/>
-            <vertex px="70.9801" py="3.772"/>
+            <vertex px="67.5801" py="3.775"/>
+            <vertex px="70.9801" py="3.775"/>
         </transition>
         <transition id="1" caption="NaN" type="NaN" room1_id="0" subroom1_id="2" room2_id="-1" subroom2_id="-1">
-            <vertex px="21.1699" py="3.772"/>
-            <vertex px="24.7699" py="3.772"/>
+            <vertex px="21.1699" py="3.775"/>
+            <vertex px="24.7699" py="3.775"/>
         </transition>
         <transition id="2" caption="NaN" type="NaN" room1_id="0" subroom1_id="2" room2_id="-1" subroom2_id="-1">
             <vertex px="125.832" py="9.59867"/>
-            <vertex px="120.773" py="4.47454"/>
+            <vertex px="120.773" py="4.47754"/>
         </transition>
         <transition id="3" caption="NaN" type="NaN" room1_id="0" subroom1_id="2" room2_id="-1" subroom2_id="-1">
             <vertex px="-0.2" py="30.768"/>
