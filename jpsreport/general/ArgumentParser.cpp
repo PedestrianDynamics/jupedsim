@@ -418,7 +418,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             int num_verteces = 0;
             for(TiXmlElement * xVertex = xMeasurementArea_B->FirstChildElement("vertex"); xVertex;
                 xVertex                = xVertex->NextSiblingElement("vertex")) {
-                // Note: Attributes are optional, their existence needs to be checked
+                // Note: Attributes are optional, their existence needs to be checked since xmltof returns 0.0 if unknown
                 if(xVertex->Attribute("x") != NULL and xVertex->Attribute("y") != NULL) {
                     // DEPRECATED FORMAT should be removed in future
                     double box_px = xmltof(xVertex->Attribute("x")) * M2CM;
@@ -436,7 +436,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                         "\t\tMeasure area points  < %.3f, %.3f>", box_px * CMtoM, box_py * CMtoM);
                     num_verteces++;
                 } else {
-                    Log->Write("\tWARNING: Unvalid vertex format given.");
+                    Log->Write("\tWARNING: Invalid vertex format given.");
                 }
             }
             if(num_verteces < 3 && num_verteces > 0)
@@ -516,14 +516,49 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             }
             Log->Write(
                 "INFO: \tMeasure area id  <%d> with type <%s>", areaL->_id, areaL->_type.c_str());
-            areaL->_lineStartX =
-                xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("x")) * M2CM;
-            areaL->_lineStartY =
-                xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("y")) * M2CM;
-            areaL->_lineEndX =
-                xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("x")) * M2CM;
-            areaL->_lineEndY =
-                xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("y")) * M2CM;
+
+            if(xMeasurementArea_L->FirstChildElement("start")->Attribute("x") != NULL and
+               xMeasurementArea_L->FirstChildElement("start")->Attribute("y") != NULL) {
+                areaL->_lineStartX =
+                    xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("x")) * M2CM;
+                areaL->_lineStartY =
+                    xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("y")) * M2CM;
+            } else if(
+                xMeasurementArea_L->FirstChildElement("start")->Attribute("px") != NULL and
+                xMeasurementArea_L->FirstChildElement("start")->Attribute("py") != NULL) {
+                // NEW FORMAT
+                // Note: argument can be changed to "required" (once the deprecated format is removed), existence would no longer need to be checked
+                areaL->_lineStartX =
+                    xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("px")) * M2CM;
+                areaL->_lineStartY =
+                    xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("py")) * M2CM;
+            } else {
+                Log->Write("ERROR:\t Invalid definition of measurement line start");
+                Log->Write("      \t check inifile");
+                exit(EXIT_FAILURE);
+            }
+
+            if(xMeasurementArea_L->FirstChildElement("end")->Attribute("x") != NULL and
+               xMeasurementArea_L->FirstChildElement("end")->Attribute("y") != NULL) {
+                // DEPRECATED FORMAT should be removed in future
+                areaL->_lineEndX =
+                    xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("x")) * M2CM;
+                areaL->_lineEndY =
+                    xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("y")) * M2CM;
+            } else if(
+                xMeasurementArea_L->FirstChildElement("end")->Attribute("px") != NULL and
+                xMeasurementArea_L->FirstChildElement("end")->Attribute("py") != NULL) {
+                // NEW FORMAT
+                // Note: argument can be changed to "required" (once the deprecated format is removed), existence would no longer need to be checked
+                areaL->_lineEndX =
+                    xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("px")) * M2CM;
+                areaL->_lineEndY =
+                    xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("py")) * M2CM;
+            } else {
+                Log->Write("ERROR:\t Invalid definition of measurement line end");
+                Log->Write("      \t check inifile");
+                exit(EXIT_FAILURE);
+            }
 
             _measurementAreas[areaL->_id] = areaL;
             Log->Write(
