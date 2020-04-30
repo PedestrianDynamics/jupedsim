@@ -124,22 +124,23 @@ The parameter `zPos` is used to indicate the position of measurement area in z a
   ```xml
   <measurement_areas unit="m">
       <area_B id="1" type="BoundingBox" zPos="None">
-          <vertex x="-2.40" y="1.00" /> <!-- Clockwise -->
-          <vertex x="-2.40" y="3.00" />
-          <vertex x="0" y="3.00" />
-          <vertex x="0" y="1.00" />
+          <vertex px="-2.40" py="1.00" /> <!-- Clockwise -->
+          <vertex px="-2.40" py="3.00" />
+          <vertex px="0" py="3.00" />
+          <vertex px="0" py="1.00" />
           <length_in_movement_direction distance="2.0" />
       </area_B>
       <area_L id="2" type="Line" zPos="None">
-          <start x="-2.40" y="1.00" />
-          <end x="0" y="1.00" />
+          <start px="-2.40" py="1.00" />
+          <end px="0" py="1.00" />
       </area_L>
       <area_L id="3" type="Line" zPos="None">
-          <start x="-2.40" y="2.00" />
-          <end x="0" y="2.00" />
+          <start px="-2.40" py="2.00" />
+          <end px="0" py="2.00" />
       </area_L>
   </measurement_areas>
   ```
+{%include note.html content="The old definition of points with the format `x=-2.40 y=1.00` is still working but deprecated. This input format will be removed in future.  "%}
 
 ## Velocity
 precises the method for calculating the instantaneous velocity $$v_i(t)$$
