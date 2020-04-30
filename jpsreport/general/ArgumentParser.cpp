@@ -418,12 +418,26 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             int num_verteces = 0;
             for(TiXmlElement * xVertex = xMeasurementArea_B->FirstChildElement("vertex"); xVertex;
                 xVertex                = xVertex->NextSiblingElement("vertex")) {
-                double box_px = xmltof(xVertex->Attribute("x")) * M2CM;
-                double box_py = xmltof(xVertex->Attribute("y")) * M2CM;
-                boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
-                Log->Write(
-                    "\t\tMeasure area points  < %.3f, %.3f>", box_px * CMtoM, box_py * CMtoM);
-                num_verteces++;
+                // Note: Attributes are optional, their existence needs to be checked
+                if(xVertex->Attribute("x") != NULL and xVertex->Attribute("y") != NULL) {
+                    // DEPRECATED FORMAT should be removed in future
+                    double box_px = xmltof(xVertex->Attribute("x")) * M2CM;
+                    double box_py = xmltof(xVertex->Attribute("y")) * M2CM;
+                    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+                    Log->Write(
+                        "\t\tMeasure area points  < %.3f, %.3f>", box_px * CMtoM, box_py * CMtoM);
+                    num_verteces++;
+                } else if(xVertex->Attribute("px") != NULL and xVertex->Attribute("py") != NULL) {
+                    // NEW FORMAT
+                    double box_px = xmltof(xVertex->Attribute("px")) * M2CM;
+                    double box_py = xmltof(xVertex->Attribute("py")) * M2CM;
+                    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+                    Log->Write(
+                        "\t\tMeasure area points  < %.3f, %.3f>", box_px * CMtoM, box_py * CMtoM);
+                    num_verteces++;
+                } else {
+                    Log->Write("\tWARNING: Unvalid vertex format given.");
+                }
             }
             if(num_verteces < 3 && num_verteces > 0)
                 Log->Write(
