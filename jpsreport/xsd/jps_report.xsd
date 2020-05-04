@@ -78,6 +78,8 @@
                           <xs:extension base="xs:string">
                             <xs:attribute type="xs:float" name="x"  use="optional"/>
                             <xs:attribute type="xs:float" name="y"  use="optional"/>
+                            <xs:attribute type="xs:float" name="px" use="optional"/>
+                            <xs:attribute type="xs:float" name="py" use="optional"/>
                           </xs:extension>
                         </xs:simpleContent>
                       </xs:complexType>
@@ -104,8 +106,10 @@
                       <xs:complexType>
                         <xs:simpleContent>
                           <xs:extension base="xs:string">
-                            <xs:attribute type="xs:float" name="x" use="required"/>
-                            <xs:attribute type="xs:float" name="y" use="required"/>
+                            <xs:attribute type="xs:float" name="x" use="optional"/>
+                            <xs:attribute type="xs:float" name="y" use="optional"/>
+                            <xs:attribute type="xs:float" name="px" use="optional"/>
+                            <xs:attribute type="xs:float" name="py" use="optional"/>
                           </xs:extension>
                         </xs:simpleContent>
                       </xs:complexType>
@@ -114,8 +118,10 @@
                       <xs:complexType>
                         <xs:simpleContent>
                           <xs:extension base="xs:string">
-                            <xs:attribute type="xs:float" name="x" use="required"/>
-                            <xs:attribute type="xs:float" name="y" use="required"/>
+                            <xs:attribute type="xs:float" name="x" use="optional"/>
+                            <xs:attribute type="xs:float" name="y" use="optional"/>
+                            <xs:attribute type="xs:float" name="px" use="optional"/>
+                            <xs:attribute type="xs:float" name="py" use="optional"/>
                           </xs:extension>
                         </xs:simpleContent>
                       </xs:complexType>
