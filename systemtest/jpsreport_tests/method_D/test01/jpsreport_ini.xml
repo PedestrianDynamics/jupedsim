@@ -8,18 +8,18 @@
     <output location="Output"/>
     <measurement_areas unit="m">
         <area_B id="5" type="BoundingBox" zPos="None">
-            <vertex x="20" y="12"/>
-            <vertex x="24" y="12"/>
-      <vertex x="24" y="8" />
-      <vertex x="20" y="8" />
-    </area_B>
-    <area_B id="8" type="BoundingBox" zPos="None">
-      <vertex x="24" y="12" />
-      <vertex x="28" y="12" />
-      <vertex x="28" y="8" />
-      <vertex x="24" y="8" />
-    </area_B>
-  </measurement_areas>
+            <vertex px="20" py="12"/>
+            <vertex px="24" py="12"/>
+            <vertex px="24" py="8"/>
+            <vertex px="20" py="8"/>
+        </area_B>
+        <area_B id="8" type="BoundingBox" zPos="None">
+            <vertex px="24" py="12"/>
+            <vertex px="28" py="12"/>
+            <vertex px="28" py="8"/>
+            <vertex px="24" py="8"/>
+        </area_B>
+    </measurement_areas>
   <velocity frame_step="10" set_movement_direction="None" ignore_backward_movement="false"/>
   <method_D enabled="true">
     <measurement_area id="5" start_frame="None" stop_frame="None" get_individual_FD="true"/>

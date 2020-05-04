@@ -9,10 +9,10 @@
 
     <measurement_areas unit="m">
         <area_B id="1" type="BoundingBox" zPos="None">
-            <vertex x="9.25" y="0.75"/>
-            <vertex x="9.25" y="2.75"/>
-            <vertex x="11.25" y="2.75"/>
-            <vertex x="11.25" y="0.75"/>
+            <vertex px="9.25" py="0.75"/>
+            <vertex px="9.25" py="2.75"/>
+            <vertex px="11.25" py="2.75"/>
+            <vertex px="11.25" py="0.75"/>
         </area_B>
     </measurement_areas>
 
