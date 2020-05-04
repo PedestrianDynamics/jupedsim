@@ -419,7 +419,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             for(TiXmlElement * xVertex = xMeasurementArea_B->FirstChildElement("vertex"); xVertex;
                 xVertex                = xVertex->NextSiblingElement("vertex")) {
                 // Note: Attributes are optional, their existence needs to be checked since xmltof returns 0.0 if unknown
-                if(xVertex->Attribute("x") != NULL and xVertex->Attribute("y") != NULL) {
+                if(xVertex->Attribute("x") != NULL && xVertex->Attribute("y") != NULL) {
                     // DEPRECATED FORMAT should be removed in future
                     double box_px = xmltof(xVertex->Attribute("x")) * M2CM;
                     double box_py = xmltof(xVertex->Attribute("y")) * M2CM;
@@ -427,7 +427,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                     Log->Write(
                         "\t\tMeasure area points  < %.3f, %.3f>", box_px * CMtoM, box_py * CMtoM);
                     num_verteces++;
-                } else if(xVertex->Attribute("px") != NULL and xVertex->Attribute("py") != NULL) {
+                } else if(xVertex->Attribute("px") != NULL && xVertex->Attribute("py") != NULL) {
                     // NEW FORMAT
                     double box_px = xmltof(xVertex->Attribute("px")) * M2CM;
                     double box_py = xmltof(xVertex->Attribute("py")) * M2CM;
@@ -517,14 +517,14 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             Log->Write(
                 "INFO: \tMeasure area id  <%d> with type <%s>", areaL->_id, areaL->_type.c_str());
 
-            if(xMeasurementArea_L->FirstChildElement("start")->Attribute("x") != NULL and
+            if(xMeasurementArea_L->FirstChildElement("start")->Attribute("x") != NULL &&
                xMeasurementArea_L->FirstChildElement("start")->Attribute("y") != NULL) {
                 areaL->_lineStartX =
                     xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("x")) * M2CM;
                 areaL->_lineStartY =
                     xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("y")) * M2CM;
             } else if(
-                xMeasurementArea_L->FirstChildElement("start")->Attribute("px") != NULL and
+                xMeasurementArea_L->FirstChildElement("start")->Attribute("px") != NULL &&
                 xMeasurementArea_L->FirstChildElement("start")->Attribute("py") != NULL) {
                 // NEW FORMAT
                 // Note: argument can be changed to "required" (once the deprecated format is removed), existence would no longer need to be checked
@@ -538,7 +538,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 exit(EXIT_FAILURE);
             }
 
-            if(xMeasurementArea_L->FirstChildElement("end")->Attribute("x") != NULL and
+            if(xMeasurementArea_L->FirstChildElement("end")->Attribute("x") != NULL &&
                xMeasurementArea_L->FirstChildElement("end")->Attribute("y") != NULL) {
                 // DEPRECATED FORMAT should be removed in future
                 areaL->_lineEndX =
@@ -546,7 +546,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 areaL->_lineEndY =
                     xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("y")) * M2CM;
             } else if(
-                xMeasurementArea_L->FirstChildElement("end")->Attribute("px") != NULL and
+                xMeasurementArea_L->FirstChildElement("end")->Attribute("px") != NULL &&
                 xMeasurementArea_L->FirstChildElement("end")->Attribute("py") != NULL) {
                 // NEW FORMAT
                 // Note: argument can be changed to "required" (once the deprecated format is removed), existence would no longer need to be checked
