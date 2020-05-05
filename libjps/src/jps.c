@@ -9,20 +9,15 @@ SimulationContext initialize(const char * geometry_file, Status * status)
     return context;
 }
 
-extern bool add_agent(
-    SimulationContext simulation_context,
-    int agent_id,
-    int starting_area,
-    Route route,
-    Status * status)
+extern int
+add_agent(SimulationContext simulation_context, int starting_area, Route route, Status * status)
 {
     (void) simulation_context;
-    (void) agent_id;
     (void) starting_area;
     (void) route;
     (void) status;
 
-    return false;
+    return -1;
 }
 
 void simulate(SimulationContext simulation_context, double simulation_time, Status * status)

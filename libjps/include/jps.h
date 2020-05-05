@@ -52,17 +52,12 @@ extern SimulationContext initialize(const char * geometry_file, Status * status)
 /**
  * Adds a new agent to the pedestrian simulation.
  *
- * @param [in] agent_id           The unique identifier for the newly created agent.
  * @param [in] starting_area      The unique identifier of the starting area to place the new agent.
  * @param [in] route              The goals of the pedestrian reflecting the desired route.
- * @return                        Bool whether the agent could be added to the designated area.
+ * @return                        Returns the ID of the newly added agent or -1 if agent could not be added.
  **/
-extern bool add_agent(
-    SimulationContext simulation_context,
-    int agent_id,
-    int starting_area,
-    Route route,
-    Status * status);
+extern int
+add_agent(SimulationContext simulation_context, int starting_area, Route route, Status * status);
 
 /**
  * Computes the trajectories for all pedestrians for a given simulation_time.
