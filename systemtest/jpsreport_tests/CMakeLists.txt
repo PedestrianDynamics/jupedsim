@@ -26,16 +26,16 @@ set_tests_properties(
   05_method_A
   01_method_B
   01_method_C
-        D01_test_reference_data
-        D02_corridor_low_density
-        D03_corridor_medium_density
-        D04_corridor_high_density
-        D05_corridor_low_density_IFD
-        D06_corridor_medium_density_IFD
-        D07_corridor_high_density_IFD
-        D08_corridor_low_cut_off
-        D09_corridor_high_cut_off
-        D10_corridor_geometry_intersection
+  D01_test_reference_data
+  D02_corridor_low_density
+  D03_corridor_medium_density
+  D04_corridor_high_density
+  D05_corridor_low_density_IFD
+  D06_corridor_medium_density_IFD
+  D07_corridor_high_density_IFD
+  D08_corridor_low_cut_off
+  D09_corridor_high_cut_off
+  D10_corridor_geometry_intersection
   01_method_I
   01_method_J
   PROPERTIES LABELS "CI:FAST;jpsreport")
