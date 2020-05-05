@@ -48,7 +48,7 @@ set_tests_properties(
   I04_corridor_high_density_IFD
   I05_corridor_low_cut_off
   I06_corridor_high_cut_off
-        I07_corridor_geometry_intersection
+  I07_corridor_geometry_intersection
   01_method_J
   PROPERTIES LABELS "CI:FAST;jpsreport")
 
