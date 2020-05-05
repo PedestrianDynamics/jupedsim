@@ -70,7 +70,7 @@ def test_classical_voronoi(trajfile, ped_distance):
 
 
 # ---------
-# Test of IFD output for Method D, I and J
+# Test of IFD output for Method D and J
 # IDs of pedestrians that are in the measurement area for frame 109 are checked
 # Their individual density must be 1 person / (ped_distance^2)
 # ---------
@@ -113,6 +113,44 @@ def test_IFD(method, trajfile, ped_distance):
 
     # check density for for pedestrians in measurement area for specified frame
     jpsreport_density = jpsreport_data[jpsreport_data[:, 0] == frame][:, 5]
+    real_density_array = np.ones(np.size(jpsreport_density)) * real_density
+
+    if np.all(np.abs(jpsreport_density - real_density_array) < acceptance_range):
+        logging.info("density calculation should be OK.")
+    else:
+        logging.critical(
+            "density values did not match result. Got {}. Expected {}".format(jpsreport_density, real_density_array))
+        exit(FAILURE)
+
+
+# ---------
+# Test of IFD output for Method I
+# Individual density for inner pedestrians must be 1 person / (ped_distance^2) for all frames
+# ---------
+def test_IFD_all_frames(trajfile, ped_distance):
+    jpsreport_result_file = os.path.join('./Output',
+                                         'Fundamental_Diagram',
+                                         'IndividualFD',
+                                         'IFD_I_%s_id_1.dat' % trajfile)
+
+    if not os.path.exists(jpsreport_result_file):
+        logging.critical("jpsreport did not output results correctly.")
+        exit(FAILURE)
+
+    # set test configuration
+    # real density can be calculated based on the square/distance to each other
+    real_density = 1 / (ped_distance ** 2)
+    # accepted error
+    acceptance_range = 0.001
+    # ids of inner pedestrians
+
+    jpsreport_data = np.loadtxt(jpsreport_result_file, usecols=(0, 1, 2, 3, 4, 5))
+
+    # ids of inner pedestrians
+    ped_IDs = np.array([8.0, 9.0, 10.0, 11.0, 14.0, 15.0, 16.0, 17.0, 20.0, 21.0, 22.0, 23.0, 26.0, 27.0, 28.0, 29.0])
+
+    # check density for pedestrians in measurement area for all frames
+    jpsreport_density = jpsreport_data[np.isin(jpsreport_data[:, 1], ped_IDs)][:, 5]
     real_density_array = np.ones(np.size(jpsreport_density)) * real_density
 
     if np.all(np.abs(jpsreport_density - real_density_array) < acceptance_range):
