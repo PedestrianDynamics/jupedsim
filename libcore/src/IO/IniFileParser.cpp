@@ -176,7 +176,7 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         }
     } else {
         _config->SetSeed((unsigned int) time(NULL));
-	}
+    }
     LOG_INFO("Random seed <{}>", _config->GetSeed());
 
     // max simulation time
