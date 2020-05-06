@@ -21,11 +21,11 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * \section Description
- * The EventManager is responsible for handling events related to the door in the simulations.
+ * The EventManager is responsible for handling events in the simulations.
  **/
 #pragma once
 
-#include "Event.h"
+#include "DoorEvent.h"
 
 #include <string>
 #include <vector>
@@ -34,6 +34,17 @@ class Building;
 
 class EventManager
 {
+private:
+    /**
+     * List of all events processed by the EventManager.
+     */
+    std::vector<std::unique_ptr<Event>> _events;
+
+    /**
+     * Geometry the events will be processed on.
+     */
+    Building * _building;
+
 public:
     /**
       * Constructor.
@@ -45,15 +56,19 @@ public:
       */
     ~EventManager() = default;
 
-    /**
-     * Adds the events from \p events to the EventManager. This should be done before the simulation
-     * starts.
-     * @param events List of events, which should be used in the simulation
-     */
-    void AddEvents(std::vector<Event> events);
+    // NOTE: disable copy constructor and assignment operator
+    EventManager(const EventManager &) = delete;
+    EventManager & operator=(const EventManager &) & = delete;
 
     /**
-      * Print the parsed events.
+     * Adds \p event to the EventManager. This should be done before the simulation
+     * starts.
+     * @param event Event which should be handled by the event manager
+     */
+    void AddEvent(std::unique_ptr<Event> event);
+
+    /**
+      * Print the events handled by EventManager.
       */
     void ListEvents();
 
@@ -63,40 +78,4 @@ public:
      * @return Any event was processed.
      */
     bool ProcessEvent();
-
-private:
-    /**
-     * Closes the transition identified by \p id.
-     * @param id ID of the transition to close.
-     */
-    void CloseDoor(int id);
-
-    /**
-     * Temp closes the transition identified by \p id.
-     * @param id ID of the transition to temp close.
-     */
-    void TempCloseDoor(int id);
-
-    /**
-     * Opens the transition identified by \p id.
-     * @param id ID of the transition to close.
-     */
-    void OpenDoor(int id);
-
-    /**
-     * Resets the door usage of transition identified by \p id.
-     * @param id ID of the transition to close.
-     */
-    void ResetDoor(int id);
-
-private:
-    /**
-     * List of all events processed by the EventManager.
-     */
-    std::vector<Event> _events;
-
-    /**
-     * Geometry the events will be processed on.
-     */
-    Building * _building;
 };

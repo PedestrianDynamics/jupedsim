@@ -19,37 +19,38 @@
  **/
 #include "EventFileParser.h"
 
+#include "events/DoorEvent.h"
+#include "events/EventHelper.h"
 #include "general/Logger.h"
 #include "general/Macros.h"
 #include "tinyxml.h"
 
-std::vector<Event> EventFileParser::ParseEvents(const fs::path & eventFile)
+void EventFileParser::ParseDoorEvents(EventManager & eventManager, const fs::path & eventFile)
 {
     LOG_INFO("Parsing event file");
     TiXmlDocument docEvent(eventFile.string());
     if(!docEvent.LoadFile()) {
         LOG_ERROR("Cannot parse event file: {}", docEvent.ErrorDesc());
-        return std::vector<Event>();
+        return;
     }
 
     TiXmlElement * xRootNode = docEvent.RootElement();
     if(!xRootNode) {
-        LOG_ERROR("Event file root element missing");
-        return std::vector<Event>();
+        LOG_ERROR("DoorEvent file root element missing");
+        return;
     }
 
     if(xRootNode->ValueStr() != "JPScore") {
-        LOG_ERROR("Event file root element should be 'JPScore'");
-        return std::vector<Event>();
+        LOG_ERROR("DoorEvent file root element should be 'JPScore'");
+        return;
     }
 
     TiXmlNode * xEvents = xRootNode->FirstChild("events");
     if(!xEvents) {
         LOG_ERROR("No events found");
-        return std::vector<Event>();
+        return;
     }
 
-    std::vector<Event> events;
     for(TiXmlElement * e = xEvents->FirstChildElement("event"); e;
         e                = e->NextSiblingElement("event")) {
         // Read id and check for correct value
@@ -96,42 +97,44 @@ std::vector<Event> EventFileParser::ParseEvents(const fs::path & eventFile)
             continue;
         }
 
-        events.emplace_back(id, time, state);
+        if(auto action = EventHelper::StringToEventAction(state); !action.has_value()) {
+            LOG_ERROR("event {:d}: unknown event {}", id, state);
+        } else {
+            eventManager.AddEvent(std::make_unique<DoorEvent>(id, time, action.value()));
+        }
     }
     LOG_INFO("Events have been initialized");
-    return events;
 }
 
-std::vector<Event> EventFileParser::ParseSchedule(const fs::path & scheduleFile)
+void EventFileParser::ParseSchedule(EventManager & eventManager, const fs::path & scheduleFile)
 {
     LOG_INFO("Parsing schedule file");
     TiXmlDocument docSchedule(scheduleFile.string());
     if(!docSchedule.LoadFile()) {
         LOG_ERROR("Cannot parse schedule file: {}", docSchedule.ErrorDesc());
-        return std::vector<Event>();
+        return;
     }
 
     TiXmlElement * xRootNode = docSchedule.RootElement();
     if(!xRootNode) {
         LOG_ERROR("Schedule file root element missing");
-        return std::vector<Event>();
+        return;
     }
 
     if(xRootNode->ValueStr() != "JPScore") {
         LOG_ERROR("Schedule file root element is not 'JPScore'");
-        return std::vector<Event>();
+        return;
     }
 
     // Read groups
     TiXmlNode * xGroups = xRootNode->FirstChild("groups");
     if(!xGroups) {
         LOG_ERROR("No groups found in schedule file");
-        return std::vector<Event>();
+        return;
     }
 
     std::map<int, int> groupMaxAgents;
     std::map<int, std::vector<int>> groupDoor;
-    std::vector<Event> events;
 
     for(TiXmlElement * e = xGroups->FirstChildElement("group"); e;
         e                = e->NextSiblingElement("group")) {
@@ -163,7 +166,7 @@ std::vector<Event> EventFileParser::ParseSchedule(const fs::path & scheduleFile)
     TiXmlNode * xTimes = xRootNode->FirstChild("times");
     if(!xTimes) {
         LOG_ERROR("No times found");
-        return std::vector<Event>();
+        return;
     }
 
     for(TiXmlElement * e = xTimes->FirstChildElement("time"); e;
@@ -231,22 +234,21 @@ std::vector<Event> EventFileParser::ParseSchedule(const fs::path & scheduleFile)
 
         for(auto door : groupDoor[id]) {
             for(auto open : timeOpen) {
-                Event event(door, open, "open");
-                events.push_back(event);
+                eventManager.AddEvent(
+                    std::make_unique<DoorEvent>(door, open, EventAction::DOOR_OPEN));
             }
 
             for(auto close : timeClose) {
-                Event event(door, close, "temp_close");
-                events.push_back(event);
+                eventManager.AddEvent(
+                    std::make_unique<DoorEvent>(door, close, EventAction::DOOR_TEMP_CLOSE));
             }
 
             for(auto reset : timeReset) {
-                Event event(door, reset, "reset");
-                events.push_back(event);
+                eventManager.AddEvent(
+                    std::make_unique<DoorEvent>(door, reset, EventAction::DOOR_RESET_USAGE));
             }
         }
     }
-    return events;
 }
 
 std::map<int, int> EventFileParser::ParseMaxAgents(const fs::path & scheduleFile)
@@ -280,7 +282,7 @@ std::map<int, int> EventFileParser::ParseMaxAgents(const fs::path & scheduleFile
 
     for(TiXmlElement * e = xGroups->FirstChildElement("group"); e;
         e                = e->NextSiblingElement("group")) {
-        int maxAgents = std::numeric_limits<int>::min();
+        int maxAgents;
         if(const char * attribute = e->Attribute("max_agents"); attribute) {
             if(int value = xmltoi(attribute, -1); value > 0 && attribute == std::to_string(value)) {
                 maxAgents = value;
@@ -295,7 +297,7 @@ std::map<int, int> EventFileParser::ParseMaxAgents(const fs::path & scheduleFile
 
         for(TiXmlElement * xmember = e->FirstChildElement("member"); xmember;
             xmember                = xmember->NextSiblingElement("member")) {
-            int transID = std::numeric_limits<int>::min();
+            int transID;
             if(const char * attribute = e->Attribute("t"); attribute) {
                 if(int value = xmltoi(attribute, -1);
                    value >= 0 && attribute == std::to_string(value)) {

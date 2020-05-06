@@ -182,14 +182,3 @@ protected:
     double _wallAvoidDistance;
     bool _useDistancefield;
 };
-
-/**
- * DirectionStrategy for exit_crossing_strategy 12
- *
- * Target is determined by the closest train door
- */
-class DirectionTrain : public DirectionStrategy
-{
-public:
-    Point GetTarget(Room * room, Pedestrian * ped) const override;
-};

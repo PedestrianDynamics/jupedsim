@@ -190,6 +190,7 @@ bool SimulationHelper::UpdateFlowRegulation(Building & building)
 
     for(auto [transID, trans] : building.GetAllTransitions()) {
         DoorState state = trans->GetState();
+        trans->UpdateTemporaryState(building.GetConfig()->Getdt());
 
         bool regulateFlow = trans->GetOutflowRate() < std::numeric_limits<double>::max() ||
                             trans->GetMaxDoorUsage() < std::numeric_limits<double>::max();
@@ -207,6 +208,46 @@ bool SimulationHelper::UpdateFlowRegulation(Building & building)
         stateChanged = stateChanged || (state != trans->GetState());
     }
     return stateChanged;
+}
+
+bool SimulationHelper::UpdateTrainFlowRegulation(Building & building)
+{
+    bool geometryChanged = false;
+    for(auto const & [trainID, trainType] : building.GetTrains()) {
+        if(building.TempAddedDoors.find(trainID) != std::end(building.TempAddedDoors)) {
+            auto trainDoors = building.TempAddedDoors.at(trainID);
+
+            int trainUsage = std::accumulate(
+                std::begin(trainDoors),
+                std::end(trainDoors),
+                0,
+                [&building](int i, const Transition & trans) {
+                    return building.GetTransition(trans.GetID())->GetDoorUsage() + i;
+                });
+
+            int maxAgents = trainType._maxAgents;
+            if(trainUsage > maxAgents) {
+                std::for_each(
+                    std::begin(trainDoors),
+                    std::end(trainDoors),
+                    [&building, trainUsage, maxAgents](Transition trans) {
+                        if(!building.GetTransition(trans.GetID())->IsClose()) {
+                            building.GetTransition(trans.GetID())->Close();
+                            LOG_INFO(
+                                "Closing train door {} with ID {} at t={:.2f}. Door usage = {} "
+                                "(Train Capacity {})",
+                                trans.GetType(),
+                                trans.GetID(),
+                                Pedestrian::GetGlobalTime(),
+                                trainUsage,
+                                maxAgents);
+                        }
+                    });
+                geometryChanged = true;
+            }
+        }
+    }
+    return geometryChanged;
 }
 
 void SimulationHelper::RemoveFaultyPedestrians(

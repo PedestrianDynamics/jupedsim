@@ -1099,10 +1099,6 @@ bool IniFileParser::ParseStrategyNodeToObject(const TiXmlNode & strategyNode)
                         return false;
                     };
                     break;
-                case 12:
-                    _directionStrategy = std::shared_ptr<DirectionStrategy>(new DirectionTrain());
-                    break;
-
                 default:
                     _directionStrategy =
                         std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
