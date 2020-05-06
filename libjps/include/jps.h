@@ -14,13 +14,9 @@ typedef struct {
 } Status;
 
 typedef struct {
+    int id;
     double x;
     double y;
-} Coordinate;
-
-typedef struct {
-    int id;
-    Coordinate coordinate;
     double velocity;
     double v_phi;
 } Agent;
