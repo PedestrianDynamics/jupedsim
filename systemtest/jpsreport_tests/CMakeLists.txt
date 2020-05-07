@@ -16,7 +16,7 @@ add_test(NAME D08_corridor_low_cut_off COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURR
 add_test(NAME D09_corridor_high_cut_off COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D09_corridor_high_cut_off/D09_corridor_high_cut_off.py ${jpsreport_exe})
 add_test(NAME D10_corridor_geometry_intersection COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_D/D10_corridor_geometry_intersection/D10_corridor_geometry_intersection.py ${jpsreport_exe})
 add_test(NAME 01_method_I COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_I/test01/01_method_I.py ${jpsreport_exe})
-add_test(NAME 01_method_J COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/test01/01_method_J.py ${jpsreport_exe})
+add_test(NAME J01_test_reference_data COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J01_test_reference_data/J01_test_reference_data.py ${jpsreport_exe})
 
 set_tests_properties(
   01_method_A
@@ -37,6 +37,6 @@ set_tests_properties(
   D09_corridor_high_cut_off
   D10_corridor_geometry_intersection
   01_method_I
-  01_method_J
+  J01_test_reference_data
   PROPERTIES LABELS "CI:FAST;jpsreport")
 
