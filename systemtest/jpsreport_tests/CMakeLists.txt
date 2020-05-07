@@ -22,6 +22,7 @@ add_test(NAME I04_corridor_high_density_IFD COMMAND ${PYTHON_EXECUTABLE} ${CMAKE
 add_test(NAME I05_corridor_low_cut_off COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_I/I05_corridor_low_cut_off/I05_corridor_low_cut_off.py ${jpsreport_exe})
 add_test(NAME I06_corridor_high_cut_off COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_I/I06_corridor_high_cut_off/I06_corridor_high_cut_off.py ${jpsreport_exe})
 add_test(NAME I07_corridor_geometry_intersection COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_I/I07_corridor_geometry_intersection/I07_corridor_geometry_intersection.py ${jpsreport_exe})
+add_test(NAME I08_corridor_one_person COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_I/I08_corridor_one_person/I08_corridor_one_person.py ${jpsreport_exe})
 add_test(NAME 01_method_J COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/test01/01_method_J.py ${jpsreport_exe})
 
 set_tests_properties(
@@ -49,6 +50,7 @@ set_tests_properties(
   I05_corridor_low_cut_off
   I06_corridor_high_cut_off
   I07_corridor_geometry_intersection
+  I08_corridor_one_person
   01_method_J
   PROPERTIES LABELS "CI:FAST;jpsreport")
 

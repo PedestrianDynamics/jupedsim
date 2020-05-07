@@ -5,6 +5,7 @@
 # They have a fixed horizontal and vertical distance (ped_distance)
 # Due to the alignment the inner voronoi cells should be squares
 # The inner voronoi cells should lay entirely in the specified square measurement area for frame 109 (after a travelled distance of 9m)
+# For method I a 1x1 grid scenario was implemented to test the voronoi cell calculation with blind points
 # ---------
 
 import os
@@ -142,8 +143,7 @@ def test_IFD_all_frames(trajfile, ped_distance):
     real_density = 1 / (ped_distance ** 2)
     # accepted error
     acceptance_range = 0.001
-    # ids of inner pedestrians
-
+    
     jpsreport_data = np.loadtxt(jpsreport_result_file, usecols=(0, 1, 2, 3, 4, 5))
 
     # ids of inner pedestrians
@@ -217,8 +217,9 @@ def test_cut_off(method, trajfile, ped_distance, cut_off_has_effect=True):
 # If the area of the circle is smaller than the area of the square, the cut off option has an effect on the inner voronoi cells
 # If the area of the circle is larger than the area of the square, the cut off option has no effect on the inner voronoi cells
 # Both scenarios can be tested with this function by setting `cut_off_has_effect`
+# ped_IDs as parameter so that this test can be applied for the one person scneario as well and not for inner pedestrians only
 # ---------
-def test_cut_off_all_frames(trajfile, ped_distance, cut_off_has_effect=True):
+def test_cut_off_all_frames(trajfile, ped_distance, ped_IDs, cut_off_has_effect=True):
     jpsreport_result_file = os.path.join('./Output',
                                          'Fundamental_Diagram',
                                          'IndividualFD',
@@ -240,9 +241,6 @@ def test_cut_off_all_frames(trajfile, ped_distance, cut_off_has_effect=True):
     acceptance_range = 0.001
 
     jpsreport_data = np.loadtxt(jpsreport_result_file, usecols=(0, 1, 2, 3, 4, 5))
-
-    # ids of inner pedestrians
-    ped_IDs = np.array([8.0, 9.0, 10.0, 11.0, 14.0, 15.0, 16.0, 17.0, 20.0, 21.0, 22.0, 23.0, 26.0, 27.0, 28.0, 29.0])
 
     # check density for pedestrians in measurement area for all frames
     jpsreport_density = jpsreport_data[np.isin(jpsreport_data[:, 1], ped_IDs)][:, 5]
