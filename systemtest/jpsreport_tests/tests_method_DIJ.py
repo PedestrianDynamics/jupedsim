@@ -18,16 +18,17 @@ import numpy as np
 
 
 # ---------
-# Test of classical voronoi output for Method D, I and J
+# Test of classical voronoi output for Method D and J
 # Real voronoi density can be calculated by 1 person / (ped_distance^2)
 # Real velocity is 1.0 m/s for all frames (since cut off is false parts of the outer voronoi cells lay in the measurement area)
 # ---------
 
-def test_classical_voronoi(trajfile, ped_distance):
+def test_classical_voronoi(trajfile, ped_distance, file_extension=""):
+
     jpsreport_result_file = os.path.join('./Output',
                                          'Fundamental_Diagram',
                                          'Classical_Voronoi',
-                                         'rho_v_Voronoi_%s_id_1.dat' % trajfile
+                                         'rho_v_Voronoi_%s%s_id_1.dat' % (file_extension, trajfile)
                                          )
 
     if not os.path.exists(jpsreport_result_file):
