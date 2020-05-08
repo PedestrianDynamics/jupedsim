@@ -1,73 +1,65 @@
-/*
- * Event.h
- *
- *  Created on: Jul 21, 2015
- *      Author: piccolo
- */
-
 #pragma once
 
+#include "general/Logger.h"
+#include "geometry/Building.h"
+
+#include <algorithm>
 #include <string>
 
 // Describes the event
-enum class EventAction { OPEN, CLOSE, TEMP_CLOSE, RESET_USAGE, NOTHING };
+enum class EventAction {
+    DOOR_OPEN,
+    DOOR_CLOSE,
+    DOOR_TEMP_CLOSE,
+    DOOR_RESET_USAGE,
+    TRAIN_ARRIVAL,
+    TRAIN_DEPARTURE
+};
 
 class Event
 {
-public:
+protected:
     /**
-      * Constructor
-      * @param id
-      * @param time
-      * @param state
-      */
-    Event(int id, double time, const std::string & state);
-
-    /**
-      * Destructor
-      */
-    ~Event() = default;
-
-    /**
-      * @return the id of the event
-      */
-    [[nodiscard]] int GetId() const;
-
-    /**
-      * @return the type of the event
-      */
-    [[nodiscard]] const EventAction & GetAction() const;
-
-    /**
-      * @return the time at which the event was recorded
-      */
-    [[nodiscard]] double GetTime() const;
-
-    /**
-      * @return a description of the event
-      */
-    [[nodiscard]] std::string GetDescription() const;
-
-private:
-    /**
-     * Time when the event should be executed.
+     * Time the event is triggered
      */
     double _time;
 
     /**
-     * ID of transition which is effected by event.
-     */
-    int _id;
-
-    /**
-     * Action which should be performed.
+     * Type of event
      */
     EventAction _action;
 
     /**
-     * Helper function to get the Action from the input.
-     * @param input Input string
-     * @return Action which is identified by \p input
+     * Geometry where the event should be applied to
      */
-    static EventAction StringToEventAction(const std::string & input);
+    Building * _building;
+
+public:
+    virtual ~Event() = default;
+
+    /**
+     * Processes the given \a _action at \a time on \a _building.
+     */
+    virtual void Process() = 0;
+
+    /**
+     * Sets the geometry for the event
+     * @param building Geometry, on which the event should be applied
+     */
+    void SetBuilding(Building * building) { _building = building; }
+
+    /**
+      * @return the type of the event
+      */
+    [[nodiscard]] const EventAction & GetAction() const { return _action; };
+
+    /**
+      * @return the time at which the event was recorded
+      */
+    [[nodiscard]] double GetTime() const { return _time; };
+
+    /**
+      * @return a description of the event
+      */
+    [[nodiscard]] virtual std::string GetDescription() const = 0;
 };

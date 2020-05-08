@@ -112,15 +112,6 @@ Building::Building(Configuration * configuration, PedDistributor & pedDistributo
         LOG_ERROR("There are sanity errors in the geometry file");
         exit(EXIT_FAILURE);
     }
-
-    if(!_configuration->GetTrainTypeFile().empty()) {
-        _trainTypes = TrainFileParser::ParseTrainType(_configuration->GetTrainTypeFile());
-    }
-
-    if(!_configuration->GetTrainTimeTableFile().empty()) {
-        _trainTimeTables =
-            TrainFileParser::ParseTrainTimetable(_configuration->GetTrainTimeTableFile());
-    }
 }
 
 #endif
@@ -406,14 +397,14 @@ Building::GetTrackWalls(Point TrackStart, Point TrackEnd, int & room_id, int & s
     int track_id    = -1;
     int platform_id = -1;
     std::vector<Wall> mytrack;
-    for(auto platform : _platforms) {
+    for(const auto & platform : _platforms) {
         platform_id = platform.second->id;
         auto tracks = platform.second->tracks;
-        for(auto track : tracks) {
+        for(const auto & track : tracks) {
             track_id         = track.first;
             int commonPoints = 0;
             auto walls       = track.second;
-            for(auto wall : walls) {
+            for(const auto & wall : walls) {
                 Point P1 = wall.GetPoint1();
                 Point P2 = wall.GetPoint2();
                 if(P1 == TrackStart)
@@ -507,105 +498,6 @@ const std::vector<std::pair<PointWall, PointWall>> Building::GetIntersectionPoin
     } // doors
 
     return pws;
-}
-
-// reset changes made by trainTimeTable[id]
-bool Building::resetGeometry(const TrainTimeTable & tab)
-{
-    // this function is composed of three copy/pasted blocks.
-    int room_id, subroom_id;
-
-    // remove temp added walls
-    auto tempWalls = TempAddedWalls[tab.id];
-    for(auto it = tempWalls.begin(); it != tempWalls.end();) {
-        auto wall = *it;
-        if(it != tempWalls.end()) {
-            tempWalls.erase(it);
-        }
-        for(auto platform : _platforms) {
-            room_id    = platform.second->rid;
-            subroom_id = platform.second->sid;
-            SubRoom * subroom =
-                this->GetAllRooms().at(room_id)->GetAllSubRooms().at(subroom_id).get();
-            for(auto subWall : subroom->GetAllWalls()) {
-                if(subWall == wall) {
-                    // if everything goes right, then we should enter this
-                    // if. We already erased from tempWalls!
-                    subroom->RemoveWall(wall);
-                } //if
-            }     //subroom
-        }         //platforms
-    }
-    TempAddedWalls[tab.id] = tempWalls;
-
-    /*       // add remove walls */
-    auto tempRemovedWalls = TempRemovedWalls[tab.id];
-    for(auto it = tempRemovedWalls.begin(); it != tempRemovedWalls.end();) {
-        auto wall = *it;
-        if(it != tempRemovedWalls.end()) {
-            tempRemovedWalls.erase(it);
-        }
-        for(auto platform : _platforms) {
-            auto tracks = platform.second->tracks;
-            room_id     = platform.second->rid;
-            subroom_id  = platform.second->sid;
-            SubRoom * subroom =
-                this->GetAllRooms().at(room_id)->GetAllSubRooms().at(subroom_id).get();
-            for(auto track : tracks) {
-                auto walls = track.second;
-                for(auto trackWall : walls) {
-                    if(trackWall == wall) {
-                        subroom->AddWall(wall);
-                    }
-                }
-            }
-        }
-    }
-    TempRemovedWalls[tab.id] = tempRemovedWalls;
-
-    /*       // remove added doors */
-    auto tempDoors = TempAddedDoors[tab.id];
-
-    for(auto it = tempDoors.begin(); it != tempDoors.end();) {
-        auto door = *it;
-        if(it != tempDoors.end()) {
-            tempDoors.erase(it);
-        }
-        for(auto platform : _platforms) {
-            auto tracks = platform.second->tracks;
-            room_id     = platform.second->rid;
-            subroom_id  = platform.second->sid;
-            SubRoom * subroom =
-                this->GetAllRooms().at(room_id)->GetAllSubRooms().at(subroom_id).get();
-
-            for(auto subTrans : subroom->GetAllTransitions()) {
-                if(*subTrans == door) {
-                    // Trnasitions are added to subrooms and building!!
-                    subroom->RemoveTransition(subTrans);
-                    this->RemoveTransition(subTrans);
-                }
-            }
-        }
-    }
-    TempAddedDoors[tab.id] = tempDoors;
-
-    std::set<SubRoom *> subRoomsToReInit;
-    std::for_each(
-        std::begin(_platforms),
-        std::end(_platforms),
-        [&subRoomsToReInit, this](const std::pair<int, std::shared_ptr<Platform>> & platform) {
-            int roomID    = platform.second->rid;
-            int subroomID = platform.second->sid;
-
-            SubRoom * subroom =
-                this->GetAllRooms().at(roomID)->GetAllSubRooms().at(subroomID).get();
-            subRoomsToReInit.insert(subroom);
-        });
-
-    std::for_each(std::begin(subRoomsToReInit), std::end(subRoomsToReInit), [](SubRoom * subroom) {
-        subroom->Update();
-    });
-    return true;
 }
 
 void Building::InitPlatforms()
@@ -795,21 +687,6 @@ const std::map<int, Transition *> & Building::GetAllTransitions() const
 const std::map<int, Hline *> & Building::GetAllHlines() const
 {
     return _hLines;
-}
-
-const std::map<std::string, TrainType> & Building::GetTrainTypes() const
-{
-    return _trainTypes;
-}
-
-const std::map<int, TrainTimeTable> & Building::GetTrainTimeTables() const
-{
-    return _trainTimeTables;
-}
-
-void Building::SetTrainArrived(int timeTableID, bool arrived)
-{
-    _trainTimeTables.at(timeTableID).arrival = arrived;
 }
 
 const std::map<int, std::shared_ptr<Platform>> & Building::GetPlatforms() const
@@ -1341,6 +1218,38 @@ bool Building::SaveGeometry(const fs::path & filename) const
     }
 
     return true;
+}
+
+void Building::AddTrain(int trainID, TrainType type)
+{
+    _trains.emplace(trainID, type);
+}
+
+TrainType Building::GetTrain(int trainID)
+{
+    return _trains.at(trainID);
+}
+
+std::map<int, TrainType> Building::GetTrains() const
+{
+    return _trains;
+}
+
+std::vector<TrainType> Building::GetTrainTypes()
+{
+    std::vector<TrainType> trainTypes;
+    trainTypes.reserve(_trains.size());
+
+    for(auto const & [trainID, trainType] : _trains) {
+        trainTypes.emplace_back(trainType);
+    }
+
+    std::unique(
+        std::begin(trainTypes), std::end(trainTypes), [](const TrainType & a, const TrainType & b) {
+            return a._type == b._type;
+        });
+
+    return trainTypes;
 }
 
 #endif // _SIMULATOR

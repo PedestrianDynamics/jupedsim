@@ -1,1 +1,0 @@
-# example: door 1 close
