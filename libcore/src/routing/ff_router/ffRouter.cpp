@@ -503,4 +503,14 @@ void FFRouter::SetRecalc(double t)
 void FFRouter::Update()
 {
     this->CalculateFloorFields();
+    if(_config->get_write_VTK_files()) {
+        for(auto const & [roomID, localFF] : _locffviafm) {
+            localFF->WriteFF(
+                fmt::format(
+                    FMT_STRING("ffrouterRoom_{:d}_t_{:.2f}.vtk"),
+                    roomID,
+                    Pedestrian::GetGlobalTime()),
+                _allDoorUIDs);
+        }
+    }
 }
