@@ -27,6 +27,7 @@ class Wall;
 class SubRoom;
 class Line;
 class Point;
+class Transition;
 
 #include <optional>
 #include <vector>
@@ -57,6 +58,9 @@ namespace geometry::helper
  *
  */
 void CorrectInputGeometry(Building & building);
+
+bool CorrectSubRoom(SubRoom & subRoom);
+
 bool RemoveOverlappingWall(const Line & exit, SubRoom & subroom);
 
 /**
@@ -92,5 +96,15 @@ int AddConnectedWallsToSubroom(SubRoom & subroom, const std::vector<Wall> & wall
  */
 void ReplaceBigWall(SubRoom & subroom, const Wall & bigWall, const std::vector<Wall> & wallPieces);
 bool RemoveBigWalls(SubRoom & subroom);
+
+/**
+ * Projects the door coordinates to the walls of the track.
+ * @param trackWalls walls of the track
+ * @param trainDoors doors of the train
+ * @return Vector containing: [[Point1 of door, wall containing Point1],
+ *                             [Point2 of door, wall containing Point2]]
+ */
+std::vector<std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>>
+ComputeTrainDoorCoordinates(std::vector<Wall> trackWalls, std::vector<Transition> trainDoors);
 
 } // namespace geometry::helper

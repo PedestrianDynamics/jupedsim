@@ -169,6 +169,7 @@ std::optional<std::vector<Wall>> SplitWall(const SubRoom & subroom, const Wall &
             splitPoints.emplace_back(*p);
         }
     }
+    LOG_DEBUG("splitpoints: {}", splitPoints.size());
 
     // No split points found, bigWall cannot be split.
     if(splitPoints.empty()) {
@@ -298,5 +299,80 @@ void CorrectInputGeometry(Building & building)
             LOG_INFO("Geometry was fixed, new file is stored in: {}.", newGeometryFile.string());
         }
     }
+}
+
+bool CorrectSubRoom(SubRoom & subroom)
+{
+    bool geometry_changed = false;
+    geometry_changed      = RemoveWallsOverlappingWithDoors(subroom) || geometry_changed;
+
+    // remove walls reaching out of the subroom
+    geometry_changed = RemoveBigWalls(subroom) || geometry_changed;
+
+    return geometry_changed;
+}
+
+std::vector<std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>>
+ComputeTrainDoorCoordinates(std::vector<Wall> trackWalls, std::vector<Transition> trainDoors)
+{
+    const int scaleFactor = 1000; // very long orthogonal walls to train's doors
+    std::vector<std::pair<PointWall, PointWall>> pws;
+    // every door has two points.
+    // for every point -> get pair<P, W>
+    // collect pairs of pairs
+    for(auto door : trainDoors) {
+        PointWall pw1, pw2;
+        int nintersections = 0;
+        auto n             = door.NormalVec();
+        auto p11           = door.GetPoint1() + n * scaleFactor;
+        auto p12           = door.GetPoint1() - n * scaleFactor;
+        auto p21           = door.GetPoint2() + n * scaleFactor;
+        auto p22           = door.GetPoint2() - n * scaleFactor;
+        auto normalWall1   = Wall(p11, p12);
+        auto normalWall2   = Wall(p21, p22);
+        for(auto twall : trackWalls) {
+            Point interPoint1, interPoint2;
+            auto res  = normalWall1.IntersectionWith(twall, interPoint1);
+            auto res2 = normalWall2.IntersectionWith(twall, interPoint2);
+            if(res == 1) {
+                if(!twall.NearlyHasEndPoint(interPoint1)) {
+                    pw1 = std::make_pair(interPoint1, twall);
+                    nintersections++;
+                } else // end point
+                {
+                    if(res2 == 0) {
+                    } else {
+                        pw1 = std::make_pair(interPoint1, twall);
+                        nintersections++;
+                    }
+                }
+            }
+            if(res2 == 1) {
+                if(!twall.NearlyHasEndPoint(interPoint2)) {
+                    pw2 = std::make_pair(interPoint2, twall);
+                    nintersections++;
+                } else {
+                    if(res == 0) {
+                    } else {
+                        pw2 = std::make_pair(interPoint2, twall);
+                        nintersections++;
+                    }
+                }
+            }
+
+
+        } // tracks
+
+        if(nintersections == 2)
+            pws.push_back(std::make_pair(pw1, pw2));
+
+        else {
+            std::string message{fmt::format(
+                FMT_STRING("Error in GetIntersection. Should be 2 but got {}."), nintersections)};
+            throw std::runtime_error(message);
+        }
+    } // doors
+
+    return pws;
 }
 } // namespace geometry::helper

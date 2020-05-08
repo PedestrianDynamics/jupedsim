@@ -217,8 +217,6 @@ public:
 
     const std::vector<Wall>
     GetTrackWalls(Point TrackStart, Point TrackEnd, int & room_id, int & subroom_id) const;
-    const std::vector<std::pair<PointWall, PointWall>>
-    GetIntersectionPoints(const std::vector<Transition> doors, const std::vector<Wall>) const;
 
     // ------------------------------------
     bool AddCrossing(Crossing * line);
