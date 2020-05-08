@@ -37,27 +37,26 @@ def read_obstacle(xml_doc):
     for o_num, o_elem in enumerate(xml_doc.getElementsByTagName('obstacle')):
 
         N_polygon = len(o_elem.getElementsByTagName('polygon'))
-
         if len(o_elem.getElementsByTagName('polygon')) == 1:
             pass
         else:
-            array_temp = np.zeros((N_polygon, 2))
+            points = np.zeros((0, 2))
 
         for p_num, p_elem in enumerate(o_elem.getElementsByTagName('polygon')):
+            for v_num, v_elem in enumerate(p_elem.getElementsByTagName('vertex')):
+                vertex_x = float(p_elem.getElementsByTagName('vertex')[v_num].attributes['px'].value)
+                vertex_y = float(p_elem.getElementsByTagName('vertex')[v_num].attributes['py'].value)
+                points = np.vstack([points , [vertex_x, vertex_y]])
 
-            N_vertex = len(p_elem.getElementsByTagName('vertex'))
-            if len(p_elem.getElementsByTagName('vertex')) == 2:
-
-                array_temp[p_num, 0] = p_elem.getElementsByTagName('vertex')[0].attributes['px'].value
-                array_temp[p_num, 1] = p_elem.getElementsByTagName('vertex')[0].attributes['py'].value
-            else:
-                array_temp = np.zeros((N_vertex, 2))
-
-                for v_num, v_elem in enumerate(p_elem.getElementsByTagName('vertex')):
-                    array_temp[v_num, 0] = p_elem.getElementsByTagName('vertex')[v_num].attributes['px'].value
-                    array_temp[v_num, 1] = p_elem.getElementsByTagName('vertex')[v_num].attributes['py'].value
-
-        return_dict[o_num] = array_temp
+        points = np.unique(points, axis=0)
+        x = points[:, 0]
+        y = points[:, 1]
+        n = len(points)
+        center_point = [np.sum(x)/n, np.sum(y)/n]
+        angles = np.arctan2(x-center_point[0],y-center_point[1])
+        ##sorting the points:
+        sort_tups = sorted([(i,j,k) for i,j,k in zip(x,y,angles)], key = lambda t: t[2])
+        return_dict[o_num] = np.array(sort_tups)[:,0:2]
 
     return return_dict
 
