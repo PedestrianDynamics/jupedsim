@@ -23,6 +23,9 @@ add_test(NAME J04_corridor_high_density COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CUR
 add_test(NAME J05_corridor_low_density_IFD COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J05_corridor_low_density_IFD/J05_corridor_low_density_IFD.py ${jpsreport_exe})
 add_test(NAME J06_corridor_medium_density_IFD COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J06_corridor_medium_density_IFD/J06_corridor_medium_density_IFD.py ${jpsreport_exe})
 add_test(NAME J07_corridor_high_density_IFD COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J07_corridor_high_density_IFD/J07_corridor_high_density_IFD.py ${jpsreport_exe})
+add_test(NAME J08_corridor_low_cut_off COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J08_corridor_low_cut_off/J08_corridor_low_cut_off.py ${jpsreport_exe})
+add_test(NAME J09_corridor_high_cut_off COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J09_corridor_high_cut_off/J09_corridor_high_cut_off.py ${jpsreport_exe})
+add_test(NAME J10_corridor_cut_off_velocity COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/method_J/J10_corridor_cut_off_velocity/J10_corridor_cut_off_velocity.py ${jpsreport_exe})
 
 
 set_tests_properties(
@@ -51,5 +54,8 @@ set_tests_properties(
   J05_corridor_low_density_IFD
   J06_corridor_medium_density_IFD
   J07_corridor_high_density_IFD
+  J08_corridor_low_cut_off
+  J09_corridor_high_cut_off
+  J10_corridor_cut_off_velocity
   PROPERTIES LABELS "CI:FAST;jpsreport")
 
