@@ -312,15 +312,16 @@ bool CorrectSubRoom(SubRoom & subroom)
     return geometry_changed;
 }
 
-std::vector<std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>>
-ComputeTrainDoorCoordinates(std::vector<Wall> trackWalls, std::vector<Transition> trainDoors)
+std::vector<std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>> ComputeTrainDoorCoordinates(
+    const std::vector<Wall> & trackWalls,
+    const std::vector<Transition> & trainDoors)
 {
     const int scaleFactor = 1000; // very long orthogonal walls to train's doors
     std::vector<std::pair<PointWall, PointWall>> pws;
     // every door has two points.
     // for every point -> get pair<P, W>
     // collect pairs of pairs
-    for(auto door : trainDoors) {
+    for(const auto & door : trainDoors) {
         PointWall pw1, pw2;
         int nintersections = 0;
         auto n             = door.NormalVec();
@@ -330,7 +331,7 @@ ComputeTrainDoorCoordinates(std::vector<Wall> trackWalls, std::vector<Transition
         auto p22           = door.GetPoint2() - n * scaleFactor;
         auto normalWall1   = Wall(p11, p12);
         auto normalWall2   = Wall(p21, p22);
-        for(auto twall : trackWalls) {
+        for(const auto & twall : trackWalls) {
             Point interPoint1, interPoint2;
             auto res  = normalWall1.IntersectionWith(twall, interPoint1);
             auto res2 = normalWall2.IntersectionWith(twall, interPoint2);
@@ -363,10 +364,9 @@ ComputeTrainDoorCoordinates(std::vector<Wall> trackWalls, std::vector<Transition
 
         } // tracks
 
-        if(nintersections == 2)
-            pws.push_back(std::make_pair(pw1, pw2));
-
-        else {
+        if(nintersections == 2) {
+            pws.emplace_back(std::make_pair(pw1, pw2));
+        } else {
             std::string message{fmt::format(
                 FMT_STRING("Error in GetIntersection. Should be 2 but got {}."), nintersections)};
             throw std::runtime_error(message);

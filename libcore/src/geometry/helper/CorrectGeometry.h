@@ -104,7 +104,8 @@ bool RemoveBigWalls(SubRoom & subroom);
  * @return Vector containing: [[Point1 of door, wall containing Point1],
  *                             [Point2 of door, wall containing Point2]]
  */
-std::vector<std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>>
-ComputeTrainDoorCoordinates(std::vector<Wall> trackWalls, std::vector<Transition> trainDoors);
+std::vector<std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>> ComputeTrainDoorCoordinates(
+    const std::vector<Wall> & trackWalls,
+    const std::vector<Transition> & trainDoors);
 
 } // namespace geometry::helper
