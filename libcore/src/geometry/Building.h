@@ -84,12 +84,24 @@ private:
     std::ofstream _pathWayStream;
     std::map<int, TrainType> _trains;
 
+    /**
+     * Map of walls added temporarily for a specific train
+     */
+    std::map<int, std::vector<Wall>> _trainAddedWalls;
+
+    /**
+     * Map of walls removed temporarily for a specific train
+     */
+    std::map<int, std::vector<Wall>> _trainRemovedWalls;
+
+    /**
+     * Map of doors added temporarily for a specific train
+     */
+    std::map<int, std::vector<Transition>> _trainAddedDoors;
+
 public:
     /// constructor
     Building();
-    std::map<int, std::vector<Wall>> TempAddedWalls; // map to trainTimeTable
-    std::map<int, std::vector<Wall>> TempRemovedWalls;
-    std::map<int, std::vector<Transition>> TempAddedDoors;
 
     Building(Configuration * config, PedDistributor & pedDistributor);
 
@@ -217,6 +229,21 @@ public:
 
     const std::vector<Wall>
     GetTrackWalls(Point TrackStart, Point TrackEnd, int & room_id, int & subroom_id) const;
+
+    void AddTrainAddedWall(int trainID, Wall trainAddedWall);
+    void SetTrainAddedWalls(int trainID, std::vector<Wall> trainAddedWalls);
+    std::optional<std::vector<Wall>> GetTrainAddedWalls(int trainID);
+    void RemoveTrainAddedWalls(int trainID);
+
+    void AddTrainRemovedWall(int trainID, Wall trainRemovedWall);
+    void SetTrainRemovedWalls(int trainID, std::vector<Wall> trainRemovedWalls);
+    std::optional<std::vector<Wall>> GetTrainRemovedWalls(int trainID);
+    void RemoveTrainRemovedWalls(int trainID);
+
+    void AddTrainAddedDoor(int trainID, Transition trainAddedDoor);
+    void SetTrainAddedDoors(int trainID, std::vector<Transition> trainAddedDoors);
+    std::optional<std::vector<Transition>> GetTrainAddedDoors(int trainID);
+    void RemovedTrainAddedDoors(int trainID);
 
     // ------------------------------------
     bool AddCrossing(Crossing * line);

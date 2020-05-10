@@ -1187,4 +1187,100 @@ std::vector<TrainType> Building::GetTrainTypes()
     return trainTypes;
 }
 
+void Building::AddTrainAddedWall(int trainID, Wall trainAddedWall)
+{
+    auto iter = _trainAddedWalls.find(trainID);
+
+    if(iter != _trainAddedWalls.end()) {
+        iter->second.emplace_back(trainAddedWall);
+    } else {
+        _trainAddedWalls.emplace(trainID, std::vector<Wall>{trainAddedWall});
+    }
+}
+
+void Building::SetTrainAddedWalls(int trainID, std::vector<Wall> trainAddedWalls)
+{
+    _trainAddedWalls[trainID] = trainAddedWalls;
+}
+
+std::optional<std::vector<Wall>> Building::GetTrainAddedWalls(int trainID)
+{
+    auto iter = _trainAddedWalls.find(trainID);
+
+    if(iter != _trainAddedWalls.end()) {
+        return iter->second;
+    }
+
+    return std::nullopt;
+}
+
+void Building::RemoveTrainAddedWalls(int trainID)
+{
+    _trainAddedWalls.erase(trainID);
+}
+
+void Building::AddTrainRemovedWall(int trainID, Wall trainRemovedWall)
+{
+    auto iter = _trainRemovedWalls.find(trainID);
+
+    if(iter != _trainRemovedWalls.end()) {
+        iter->second.emplace_back(trainRemovedWall);
+    } else {
+        _trainRemovedWalls.emplace(trainID, std::vector<Wall>{trainRemovedWall});
+    }
+}
+
+void Building::SetTrainRemovedWalls(int trainID, std::vector<Wall> trainRemovedWalls)
+{
+    _trainRemovedWalls[trainID] = trainRemovedWalls;
+}
+
+std::optional<std::vector<Wall>> Building::GetTrainRemovedWalls(int trainID)
+{
+    auto iter = _trainRemovedWalls.find(trainID);
+
+    if(iter != _trainRemovedWalls.end()) {
+        return iter->second;
+    }
+
+    return std::nullopt;
+}
+
+void Building::RemoveTrainRemovedWalls(int trainID)
+{
+    _trainRemovedWalls.erase(trainID);
+}
+
+void Building::AddTrainAddedDoor(int trainID, Transition trainAddedDoor)
+{
+    auto iter = _trainAddedDoors.find(trainID);
+
+    if(iter != _trainAddedDoors.end()) {
+        iter->second.emplace_back(trainAddedDoor);
+    } else {
+        _trainAddedDoors.emplace(trainID, std::vector<Transition>{trainAddedDoor});
+    }
+}
+
+void Building::SetTrainAddedDoors(int trainID, std::vector<Transition> trainAddedDoors)
+{
+    _trainAddedDoors[trainID] = trainAddedDoors;
+}
+
+std::optional<std::vector<Transition>> Building::GetTrainAddedDoors(int trainID)
+{
+    auto iter = _trainAddedDoors.find(trainID);
+
+    if(iter != _trainAddedDoors.end()) {
+        return iter->second;
+    }
+
+    return std::nullopt;
+}
+
+void Building::RemovedTrainAddedDoors(int trainID)
+{
+    _trainAddedDoors.erase(trainID);
+}
+
 #endif // _SIMULATOR
