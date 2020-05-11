@@ -45,7 +45,6 @@ class Router
     /** @} */ // end of group
 
 private:
-
     /// the id as present in the persons.xml file
     int _id;
 
