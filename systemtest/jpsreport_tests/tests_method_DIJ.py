@@ -19,16 +19,17 @@ import numpy as np
 
 
 # ---------
-# Test of classical voronoi output for Method D, I and J
+# Test of classical voronoi output for Method D and J
 # Real voronoi density can be calculated by 1 person / (ped_distance^2)
 # Real velocity is 1.0 m/s for all frames (since cut off is false parts of the outer voronoi cells lay in the measurement area)
 # ---------
 
-def test_classical_voronoi(trajfile, ped_distance):
+def test_classical_voronoi(trajfile, ped_distance, file_extension=""):
+
     jpsreport_result_file = os.path.join('./Output',
                                          'Fundamental_Diagram',
                                          'Classical_Voronoi',
-                                         'rho_v_Voronoi_%s_id_1.dat' % trajfile
+                                         'rho_v_Voronoi_%s%s_id_1.dat' % (file_extension, trajfile)
                                          )
 
     if not os.path.exists(jpsreport_result_file):
@@ -209,6 +210,56 @@ def test_cut_off(method, trajfile, ped_distance, cut_off_has_effect=True):
                                                                                                   real_density_array))
         exit(FAILURE)
 
+# ---------
+# Test velocity calcuation with cut off option for Method J
+# Voronoi cells are approximated by a circle with radius =0.75
+# Velocity in MA should be 1 when vornoi cells are intersecting or 0 when no pedestrians are in MA
+# Voronoi cells in the last column of the grid reach the MA at frame 19 (only one point on MA is not recognized as intersection)
+# Voronoi cells in first column of the grid leave the MA at frame 199
+# Note: Function is only applicable for one specified scenario since the shape of the voronoi cells needs to be known
+# ---------
+def test_cut_off_velocity(trajfile):
+    jpsreport_result_file = os.path.join('./Output',
+                                         'Fundamental_Diagram',
+                                         'Classical_Voronoi',
+                                         'rho_v_Voronoi_J_%s_id_1.dat' %trajfile
+                                         )
+
+    if not os.path.exists(jpsreport_result_file):
+        logging.critical("jpsreport did not output results correctly.")
+        exit(FAILURE)
+
+    # set test configuration
+    # define frame range for which the velocity must be 1
+    start_frame = 20
+    end_frame = 198
+
+    jpsreport_data = np.loadtxt(jpsreport_result_file)
+
+    frames = np.arange(start_frame, end_frame+1)
+    # check velocites for given frame range
+    jpsreport_velocity = jpsreport_data[np.isin(jpsreport_data[:, 0], frames)][:, 2]
+
+    if np.all(np.equal(jpsreport_velocity, np.ones(jpsreport_velocity.size))):
+        logging.info("velocity calculation with cut off option when pedestirans are in the MA should be OK.")
+    else:
+        logging.critical(
+            "velocity values with cut off option did not match result. Got {}. Expected {} for all values".format(jpsreport_velocity,
+                                                                                                  1.0))
+        exit(FAILURE)
+
+    #check velocities outside given frame range
+    jpsreport_velocity_before = jpsreport_data[jpsreport_data[:, 0]<start_frame][:, 2]
+    jpsreport_velocity_after = jpsreport_data[jpsreport_data[:, 0]>end_frame][:, 2]
+    jpsreport_velocity_outside = np.concatenate((jpsreport_velocity_before, jpsreport_velocity_after))
+
+    if np.all(np.equal(jpsreport_velocity_outside, np.ones(jpsreport_velocity_outside.size)*0.0)):
+        logging.info("velocity calculation with cut off option when no pedestrians are in the MA should be OK.")
+    else:
+        logging.critical(
+            "velocity values with cut off option did not match result. Got {}. Expected {} for all values".format(jpsreport_velocity,
+                                                                                                  0.0))
+        exit(FAILURE)
 
 # ---------
 # Test of cut off option for Method I
