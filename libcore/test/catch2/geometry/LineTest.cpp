@@ -235,8 +235,9 @@ TEST_CASE("geometry/Line/IsInLineSegment", "[geometry][Line][IsInLineSegment]")
     {
         std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
         for(int i = 0; i < 100; ++i) {
-            Point connection({line.GetPoint2()._x - line.GetPoint1()._x,
-                              line.GetPoint2()._y - line.GetPoint1()._y});
+            Point connection(
+                {line.GetPoint2()._x - line.GetPoint1()._x,
+                 line.GetPoint2()._y - line.GetPoint1()._y});
             Point p = line.GetPoint1() + (connection * dist(mt));
             REQUIRE(line.IsInLineSegment(p));
         }
@@ -246,8 +247,9 @@ TEST_CASE("geometry/Line/IsInLineSegment", "[geometry][Line][IsInLineSegment]")
     {
         std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
         for(int i = 0; i < 100; ++i) {
-            Point connection({line.GetPoint2()._x - line.GetPoint1()._x,
-                              line.GetPoint2()._y - line.GetPoint1()._y});
+            Point connection(
+                {line.GetPoint2()._x - line.GetPoint1()._x,
+                 line.GetPoint2()._y - line.GetPoint1()._y});
             Point p = line.GetPoint1() + (connection * dist(mt));
             p._x += J_EPS / 5.;
             p._y += J_EPS / 5.;

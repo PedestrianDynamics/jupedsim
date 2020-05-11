@@ -44,9 +44,7 @@ GraphEdge::GraphEdge(
     const GraphVertex * const s,
     const GraphVertex * const d,
     const Crossing * const crossing) :
-    _src(s),
-    _dest(d),
-    _crossing(crossing)
+    _src(s), _dest(d), _crossing(crossing)
 {
     CalcApproximateDistance();
 }

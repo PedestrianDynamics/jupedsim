@@ -36,8 +36,7 @@
  */
 
 GraphNetwork::GraphNetwork(const Building * buildg, const Pedestrian * ped) :
-    building(buildg),
-    pedestrian(ped)
+    building(buildg), pedestrian(ped)
 {
     navigation_graph = new NavigationGraph(buildg);
 }
