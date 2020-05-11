@@ -75,6 +75,9 @@ target_compile_definitions(report PUBLIC
     JPSREPORT_VERSION="${PROJECT_VERSION}"
 )
 
+set_property(TARGET report PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+set_property(TARGET report PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
+
 add_executable(jpsreport
     main.cpp
     forms/jpsreport.rc
@@ -88,6 +91,9 @@ target_compile_options(jpsreport PRIVATE
 target_link_libraries(jpsreport
     report
 )
+
+set_property(TARGET jpsreport PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+set_property(TARGET jpsreport PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 ################################################################################
 # Install targets
 ################################################################################
