@@ -79,7 +79,7 @@ enum RoutingStrategy {
 };
 
 enum OperativModels {
-    MODEL_GCFM = 1,
+    MODEL_GCFM     = 1,
     MODEL_VELOCITY = 3,
 };
 
