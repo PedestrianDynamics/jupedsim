@@ -1,6 +1,6 @@
 # Using JuPedSim with Jupyter notebooks 
 
-[![YouTube](https://img.youtube.com/vi/lnpRJK-W44E/0.jpg)](https://www.youtube.com/watch?v=lnpRJK-W44E)
+[![YouTube](https://img.youtube.com/vi/ZI3zBBR4c8w/0.jpg)](https://www.youtube.com/watch?v=ZI3zBBR4c8w)
 
 ## Requirements
 
