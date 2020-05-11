@@ -96,10 +96,11 @@ TEST_CASE("routing/ff_router/UnivFFviaFM", "[routing][UnivFFviaFM]")
             double hx              = 0.125;
             double wallAvoid       = 0.8;
             bool useWallDistance   = false;
-            std::vector<int> doors = {trans1.GetUniqueID(),
-                                      trans3.GetUniqueID(),
-                                      sub1sub2.GetUniqueID(),
-                                      sub2sub3.GetUniqueID()};
+            std::vector<int> doors = {
+                trans1.GetUniqueID(),
+                trans3.GetUniqueID(),
+                sub1sub2.GetUniqueID(),
+                sub2sub3.GetUniqueID()};
             REQUIRE_NOTHROW(UnivFFviaFM(room, &config, hx, wallAvoid, useWallDistance, doors));
             UnivFFviaFM univ(room, &config, hx, wallAvoid, useWallDistance, doors);
         }
