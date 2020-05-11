@@ -112,9 +112,9 @@ void AddTrainDoors(
     int trainID,
     Building & building,
     SubRoom & subroom,
-    const std::vector<Wall>& trackWalls,
-    const std::vector<std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>>&
-    wallDoorIntersectionPoints);
+    const std::vector<Wall> & trackWalls,
+    const std::vector<std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>> &
+        wallDoorIntersectionPoints);
 
 std::tuple<std::vector<Wall>, std::vector<Wall>> SplitWall(
     const std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>> & wallDoorIntersectionPoints,

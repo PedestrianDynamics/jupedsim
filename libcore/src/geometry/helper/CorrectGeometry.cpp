@@ -380,8 +380,8 @@ void AddTrainDoors(
     int trainID,
     Building & building,
     SubRoom & subroom,
-    const std::vector<Wall>& trackWalls,
-    const std::vector<std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>>&
+    const std::vector<Wall> & trackWalls,
+    const std::vector<std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>> &
         wallDoorIntersectionPoints)
 {
     static int transition_id = 10000; // randomly high number
@@ -410,14 +410,18 @@ void AddTrainDoors(
         auto [addedWalls, removedWalls] = SplitWall(wallDoorIntersection, trackWalls, *trainDoor);
 
         std::for_each(
-            std::begin(addedWalls), std::end(addedWalls), [trainID, &building, &subroom](const Wall & wall) {
+            std::begin(addedWalls),
+            std::end(addedWalls),
+            [trainID, &building, &subroom](const Wall & wall) {
                 building.AddTrainAddedWall(trainID, wall);
                 subroom.AddWall(wall);
             });
         std::for_each(
-            std::begin(removedWalls), std::end(removedWalls), [trainID, &building, &subroom](const Wall & wall) {
-              building.AddTrainRemovedWall(trainID, wall);
-              subroom.RemoveWall(wall);
+            std::begin(removedWalls),
+            std::end(removedWalls),
+            [trainID, &building, &subroom](const Wall & wall) {
+                building.AddTrainRemovedWall(trainID, wall);
+                subroom.RemoveWall(wall);
             });
         building.AddTrainAddedDoor(trainID, *trainDoor);
     }
