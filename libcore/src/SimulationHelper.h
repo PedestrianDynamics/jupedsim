@@ -93,6 +93,13 @@ void UpdateFlowAtDoors(Building & building, const std::vector<Pedestrian *> & pe
 bool UpdateFlowRegulation(Building & building);
 
 /**
+ * Triggers the flow regulation for trains, and closes/opens doors accordingly
+ * @param building geometry used in the simulation
+ * @return a change to the geometry was made
+ */
+bool UpdateTrainFlowRegulation(Building & building);
+
+/**
  * Finds the transition that was passed by a pedestrian \p ped in the last time step.
  *
  * @pre ped._lastPosition is set, hence at least one time step was triggered before

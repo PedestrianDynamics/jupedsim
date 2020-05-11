@@ -14,8 +14,8 @@ The header comprises the following elements:
 
 -   `<seed>seed</seed>`
 
-    Set the  `seed` value of the random number generator to `s`. If missing the
-    current time (`time(NULL)`), is used i.e. random initial conditions.
+    Set the  `seed` value of the random number generator to `s`. If the tag is empty or missing, the
+    current time (`time(NULL)`) is used i.e. random initial conditions.
 
 -   `<max_sim_time>t</max_sim_time>`
     the maximal simulation time in seconds.

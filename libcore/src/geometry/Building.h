@@ -38,8 +38,6 @@
 
 typedef std::pair<Point, Wall> PointWall;
 
-// train schedules: Trains get deleted and added.
-
 struct Platform {
     int id;
     int rid;
@@ -47,28 +45,12 @@ struct Platform {
     std::map<int, std::vector<Wall>> tracks;
 };
 
-struct TrainTimeTable {
-    int id;
-    std::string type;
-    int rid;      // room id
-    int sid;      // subroom id
-    double tin;   // arrival time
-    double tout;  //leaving time
-    Point pstart; // track start
-    Point pend;   // track end
-    Point tstart; // train start
-    Point tend;   // train end
-    int pid;      // Platform id
-    bool arrival;
-    bool departure;
-};
 struct TrainType {
-    std::string type;
-    int nmax;  // agents_max
-    float len; //length
-    std::vector<Transition> doors;
+    std::string _type;
+    int _maxAgents;
+    float _length;
+    std::vector<Transition> _doors;
 };
-
 
 class RoutingEngine;
 
@@ -96,12 +78,11 @@ private:
     std::map<int, Transition *> _transitions;
     std::map<int, Hline *> _hLines;
     std::map<int, Goal *> _goals;
-    std::map<std::string, TrainType> _trainTypes;
-    std::map<int, TrainTimeTable> _trainTimeTables;
     std::map<int, std::shared_ptr<Platform>> _platforms;
     /// pedestrians pathway
     bool _savePathway;
     std::ofstream _pathWayStream;
+    std::map<int, TrainType> _trains;
 
 public:
     /// constructor
@@ -111,7 +92,7 @@ public:
     std::map<int, std::vector<Transition>> TempAddedDoors;
 
     Building(Configuration * config, PedDistributor & pedDistributor);
-    bool resetGeometry(const TrainTimeTable & tab);
+
     /// destructor
     virtual ~Building();
 
@@ -232,12 +213,6 @@ public:
 
     const std::map<int, Goal *> & GetAllGoals() const;
     // --------------- Trains interface
-    const std::map<std::string, TrainType> & GetTrainTypes() const;
-
-    const std::map<int, TrainTimeTable> & GetTrainTimeTables() const;
-
-    void SetTrainArrived(int timeTableID, bool arrived);
-
     const std::map<int, std::shared_ptr<Platform>> & GetPlatforms() const;
 
     const std::vector<Wall>
@@ -281,14 +256,38 @@ public:
     /**
       * Triangulate the geometry
       */
-
     bool Triangulate();
 
     /**
       * @return Vector with the vertices of the geometry's outer boundary rect
       */
-
     std::vector<Point> GetBoundaryVertices() const;
+
+    /**
+     * Adds a train to the building
+     * @param trainID ID of the added train
+     * @param type type of the train
+     */
+    void AddTrain(int trainID, TrainType type);
+
+    /**
+     * Get the type of train with ID \p trainID
+     * @param trainID ID of the train
+     * @return Type of train with ID \p trainID
+     */
+    TrainType GetTrain(int trainID);
+
+    /**
+     * Get the train types as map
+     * @return train types of the building with trainID as key
+     */
+    std::map<int, TrainType> GetTrains() const;
+
+    /**
+     * Get the train types as vector, each type only once
+     * @return vector of train types in \a _trains
+     */
+    std::vector<TrainType> GetTrainTypes();
 
 private:
     bool InitInsideGoals();
