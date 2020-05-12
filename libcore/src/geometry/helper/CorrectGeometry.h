@@ -108,6 +108,16 @@ std::vector<std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>> ComputeTr
     const std::vector<Wall> & trackWalls,
     const std::vector<Transition> & trainDoors);
 
+/**
+ * Interface for adding trains to the geometry. Adds the \p trainDoors to the given \p subroom and
+ * updates afterwards. \p trainDoors will also be add to \p building. Geometry changes added/removed
+ * walls and added doors will be saved with \p trainID as identifier.
+ * @param trainID ID of the arriving train
+ * @param building simulation geometry
+ * @param subroom subroom containing the platform the train is arriving
+ * @param trackWalls platform edges where the train might arrive
+ * @param trainDoors doors of the train
+ */
 void AddTrainDoors(
     int trainID,
     Building & building,
@@ -115,6 +125,16 @@ void AddTrainDoors(
     const std::vector<Wall> & trackWalls,
     const std::vector<Transition> & trainDoors);
 
+/**
+ * Splits the given \p trackWalls at the \p wallDoorIntersectionPoints. The new line segments to
+ * create a closed polygon are returned in addedWalls (size 2). Each wall between the door points is
+ * returned in removedDoors.
+ * @param wallDoorIntersectionPoints door coordinates and the corresponding wall containings these
+ * points
+ * @param trackWalls platform edges where the train might arrive
+ * @param door train door to add
+ * @return [addedWalls, removedWalls]
+ */
 std::tuple<std::vector<Wall>, std::vector<Wall>> SplitWall(
     const std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>> & wallDoorIntersectionPoints,
     const std::vector<Wall> & trackWalls,
