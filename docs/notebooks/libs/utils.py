@@ -4,8 +4,7 @@ import numpy as np
 from xml.dom.minidom import parse
 
 def read_IFD(IFD_filename):
-    file_IFD = '{0}.dat'.format(IFD_filename)
-    df = pd.read_csv('{0}'.format(file_IFD),
+    df = pd.read_csv(IFD_filename,
                      comment='#',sep='\t',
                      names=['Frame','PersID','x/m','y/m','z/m','rho','vel','Voronoi_Polygon'],
                      index_col=False)
@@ -81,6 +80,26 @@ def read_subroom_walls(xml_doc):
     return dict_polynom_wall
 
 
-
+def geo_limits(geo_xml):
+    geometry_wall = read_subroom_walls(geo_xml)
+    geominX=1000
+    geomaxX=-1000
+    geominY=1000
+    geomaxY=-1000
+    Xmin = []
+    Ymin = []
+    Xmax = []
+    Ymax = []
+    for k in geometry_wall.keys():
+        Xmin.append(np.min(geometry_wall[k][:,0]))
+        Ymin.append(np.min(geometry_wall[k][:,1]))  
+        Xmax.append(np.max(geometry_wall[k][:,0]))
+        Ymax.append(np.max(geometry_wall[k][:,1]))
+               
+    geominX = np.min(Xmin)
+    geomaxX = np.max(Xmax)
+    geominY = np.min(Ymin)
+    geomaxY = np.max(Ymax)
+    return geominX, geomaxX, geominY, geomaxY
 
         
