@@ -80,8 +80,7 @@ void TrainEvent::TrainArrival()
             door.GetPoint2().toString());
     }
 
-    auto wallDoorIntersections = geometry::helper::ComputeTrainDoorCoordinates(mytrack, doors);
-    geometry::helper::AddTrainDoors(_trainID, *_building, *subroom, mytrack, wallDoorIntersections);
+    geometry::helper::AddTrainDoors(_trainID, *_building, *subroom, mytrack, doors);
 }
 
 void TrainEvent::TrainDeparture()

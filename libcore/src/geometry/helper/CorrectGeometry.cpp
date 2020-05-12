@@ -381,9 +381,10 @@ void AddTrainDoors(
     Building & building,
     SubRoom & subroom,
     const std::vector<Wall> & trackWalls,
-    const std::vector<std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>> &
-        wallDoorIntersectionPoints)
+    const std::vector<Transition> & trainDoors)
 {
+    auto wallDoorIntersectionPoints = geometry::helper::ComputeTrainDoorCoordinates(trackWalls, trainDoors);
+
     static int transition_id = 10000; // randomly high number
 
     auto room      = building.GetRoom(subroom.GetRoomID());
