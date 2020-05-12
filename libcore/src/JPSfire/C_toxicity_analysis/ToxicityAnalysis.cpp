@@ -230,7 +230,7 @@ void ToxicityAnalysis::WriteOutHazardAnalysis(
 {
     std::string data;
     char tmp[1024] = "";
-    int frameNr       = int(p->GetGlobalTime() / _fps);
+    int frameNr    = int(p->GetGlobalTime() / _fps);
 
 
     if(_t_prev == -1) {

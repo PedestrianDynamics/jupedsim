@@ -15,6 +15,8 @@ target_link_libraries(jpscore
     spdlog::spdlog
     fmt::fmt
 )
+set_property(TARGET jpscore PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+set_property(TARGET jpscore PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 
 if (WIN32)
     target_link_libraries(jpscore core wsock32)
@@ -56,6 +58,8 @@ if(BUILD_WITH_ASAN)
         ${jpscore_link_libraries}
         -fsanitize=address
     )
+  set_property(TARGET jpscore_asan PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+  set_property(TARGET jpscore_asan PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 endif()
 
 ################################################################################

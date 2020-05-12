@@ -172,8 +172,10 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
             const char * seedValue = seedNode->Value();
             _config->SetSeed((unsigned int) atoi(seedValue)); //strtol
         } else {
-            _config->SetSeed((unsigned int) time(NULL));
+            _config->SetSeed(static_cast<unsigned int>(time(NULL)));
         }
+    } else {
+        _config->SetSeed(static_cast<unsigned int>(time(NULL)));
     }
     LOG_INFO("Random seed <{}>", _config->GetSeed());
 
