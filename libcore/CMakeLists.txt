@@ -217,6 +217,8 @@ target_link_libraries(core
 target_include_directories(core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+set_property(TARGET core PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+set_property(TARGET core PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 
 ################################################################################
 # Build jspcore_asan executable - jpscore with address sanitizer
@@ -250,6 +252,9 @@ if(BUILD_WITH_ASAN)
     target_include_directories(core_asan PUBLIC
         ${core_include_directories}
     )
+
+    set_property(TARGET core_asan PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+    set_property(TARGET core_asan PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 endif()
 
 ################################################################################
@@ -283,6 +288,9 @@ if (BUILD_CPPUNIT_TEST)
     target_compile_options(unittests PRIVATE
         ${COMMON_COMPILE_OPTIONS}
     )
+
+    set_property(TARGET unittests PROPERTY INTERPROCEDURAL_OPTIMIZATION ${USE_IPO})
+    set_property(TARGET unittests PROPERTY INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 
     include(CTest)
     include(ParseAndAddCatchTests)

@@ -58,6 +58,14 @@ else()
 endif()
 print_var(USE_OPENMP)
 
+if(POLICY CMP0069)
+    cmake_policy(SET CMP0069 NEW)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT USE_IPO)
+else()
+    set(USE_IPO ON)
+endif()
+
 set(BUILD_WITH_ASAN OFF CACHE BOOL
   "Build with address sanitizer support. Linux / macOS only.")
 print_var(BUILD_WITH_ASAN)
