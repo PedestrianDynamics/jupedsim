@@ -32,6 +32,10 @@ entries:
       url: /jupedsim_introduction.html
       output: web, pdf
 
+    - title: Tutorials
+      url: /jupedsim_notebooks.html
+      output: web, pdf
+
     - title: Installation
       url: /jupedsim_install_executables.html
       output: web, pdf
@@ -156,12 +160,6 @@ entries:
           url: /jpsreport_method_J.html
           output: web, pdf
     
-      - title: Tutorials
-        output: web, pdf      
-        subfolderitems:
-        - title: How to jpsreport
-          url: /jpsreport_howto.html
-          output: web, pdf
 
         # - title: Fundamental Diagram
         #   url: /jpsreport_fd.html
