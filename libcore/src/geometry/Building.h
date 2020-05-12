@@ -36,6 +36,8 @@
 #include "general/Filesystem.h"
 #include "neighborhood/NeighborhoodSearch.h"
 
+#include <optional>
+
 typedef std::pair<Point, Wall> PointWall;
 
 struct Platform {
