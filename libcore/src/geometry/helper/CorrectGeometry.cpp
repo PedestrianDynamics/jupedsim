@@ -383,7 +383,8 @@ void AddTrainDoors(
     const std::vector<Wall> & trackWalls,
     const std::vector<Transition> & trainDoors)
 {
-    auto wallDoorIntersectionPoints = geometry::helper::ComputeTrainDoorCoordinates(trackWalls, trainDoors);
+    auto wallDoorIntersectionPoints =
+        geometry::helper::ComputeTrainDoorCoordinates(trackWalls, trainDoors);
 
     static int transition_id = 10000; // randomly high number
 
