@@ -32,6 +32,8 @@ from ipywidgets import IntSlider
 
 from utils import * 
 
+from xml.dom.minidom import parse
+
 
 
 

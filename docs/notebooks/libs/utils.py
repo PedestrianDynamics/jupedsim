@@ -1,7 +1,4 @@
-import re
-import pandas as pd
-import numpy as np
-from xml.dom.minidom import parse
+from imports import *
 
 def read_IFD(IFD_filename):
     df = pd.read_csv(IFD_filename,
