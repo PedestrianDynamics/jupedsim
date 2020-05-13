@@ -5,26 +5,6 @@ This project is mainly developed by a small group of researchers and students fr
 However you are kindly invited not only to use JuPedSim but also contributing to our open-source-project.
 It does not matter if you are a researcher, student or just interested in pedestrian dynamics.
 
-- [Workflow](#workflow)
-
-- [Reporting bugs and requesting features](#reporting-bugs-and-requesting-features)
-    - [Using the issue tracker](#using-the-issue-tracker)
-    - [Reporting bugs](#reporting-bugs)
-    - [Requesting features](#requesting-features)
-
-- [Writing code](#writing-code)
-    - [Coding style](#coding-style)
-    - [Unit tests](#unit-tests)
-
-- [Writing documentation](#writing-documentation)
-    - [Comments](#comments)
-    - [Documenting new features](#documenting-new-features)
-    - [Sample Templates](#sample-templates)
-
-- [Committing code](#commiting-code)
-    - [Committing guidelines](#commiting-guidelines)
-
-
 ## Workflow
 The branches **master** and **develop** are **protected**. You can **only push to your feature-branch.**
 Whenever you want to add a feature or fix an issue create a new feature-branch and only work on this branch.
