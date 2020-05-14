@@ -7,7 +7,6 @@ set(methods
     methods/Method_D.cpp
     methods/Method_I.cpp
     methods/Method_J.cpp
-        methods/ConfigData_DIJ.cpp
 )
 
 set(source_files
@@ -39,7 +38,7 @@ set (header_files
     methods/Method_D.h
     methods/Method_I.h
     methods/Method_J.h
-        methods/ConfigData_DIJ.h
+    methods/ConfigData_DIJ.h
     IO/OutputHandler.h
     general/ArgumentParser.h
     general/Macros.h

@@ -23,37 +23,28 @@
  *
  **/
 
-#ifndef JPSCORE_CONFIGDATA_DIJ_H
-#define JPSCORE_CONFIGDATA_DIJ_H
+#pragma once
 
 #include <vector>
 
-class ConfigData_DIJ
-{
-public:
-    //constructor
-    ConfigData_DIJ();
-
+struct ConfigData_DIJ {
     //parameters that are provided for measurement areas
     std::vector<bool> _individual_FD_flags;
     std::vector<int> _start_frames;
     std::vector<int> _stop_frames;
 
     //parameters for creating profiles
-    bool _getProfile;
-    float _grid_size_X;
-    float _grid_size_Y;
+    bool _getProfile   = false;
+    float _grid_size_X = 0.1;
+    float _grid_size_Y = 0.1;
 
     //parameters for cutting voronoi cells
-    bool _cutByCircle;
-    float _cutRadius;
-    int _circleEdges;
+    bool _cutByCircle = false;
+    float _cutRadius  = -1;
+    int _circleEdges  = -1;
 
     //general parameters
-    bool _isOneDimensional;
+    bool _isOneDimensional = false;
 
     //TODO Does it make sense to include the configs of measurement areas here as well?
 };
-
-
-#endif //JPSCORE_CONFIGDATA_DIJ_H
