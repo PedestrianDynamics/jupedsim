@@ -445,7 +445,7 @@ bool Line::NearlyHasEndPoint(const Point & point) const
 }
 
 
-bool Line::IntersectionWithCircle(const Point & centre, double radius /*cm for pedestrians*/)
+bool Line::IntersectionWithCircle(const Point & centre, double radius /*cm for pedestrians*/) const
 {
     //this formula assumes that the circle is centered the origin.
     // so we translate the complete stuff such that the circle ends up at the origin

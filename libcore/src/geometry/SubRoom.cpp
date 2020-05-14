@@ -240,7 +240,22 @@ bool SubRoom::AddCrossing(Crossing * line)
     _goalIDs.push_back(line->GetUniqueID());
     return true;
 }
-// return true is walls was erased, otherwise false.
+
+bool SubRoom::RemoveTransitionByUID(int uid)
+{
+    auto it = std::find_if(
+        _transitions.begin(), _transitions.end(), [&uid](const Transition * transition) {
+            return uid == transition->GetUniqueID();
+        });
+
+    if(it != _transitions.end()) {
+        _transitions.erase(it);
+        RemoveGoalID(uid);
+        return true;
+    }
+    return false;
+}
+
 bool SubRoom::RemoveTransition(Transition * t)
 {
     auto it = std::find(_transitions.begin(), _transitions.end(), t);
@@ -251,6 +266,7 @@ bool SubRoom::RemoveTransition(Transition * t)
     }
     return false;
 }
+
 bool SubRoom::AddTransition(Transition * line)
 {
     _transitions.push_back(line);
@@ -549,7 +565,7 @@ bool SubRoom::Overlapp(const std::vector<Line *> & goals) const
 {
     for(const auto & wall : _walls) {
         for(const auto & goal : goals) {
-            if(wall.Overlapp(*goal)) {
+            if(wall.IntersectionWith(*goal) == LineIntersectType::OVERLAP) {
                 LOG_INFO(
                     "Wall: ({}, {}) -- ({}, {})",
                     wall.GetPoint1()._x,

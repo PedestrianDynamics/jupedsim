@@ -229,7 +229,8 @@ public:
     /**
       * @return true if the segment intersects with the circle of radius r
       */
-    bool IntersectionWithCircle(const Point & centre, double radius = 0.30 /*m for pedestrians*/);
+    bool
+    IntersectionWithCircle(const Point & centre, double radius = 0.30 /*m for pedestrians*/) const;
 
     /**
      * Checks if the segment has intersections with a circle centered at \p centre

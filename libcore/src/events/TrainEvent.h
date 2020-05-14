@@ -14,44 +14,18 @@ private:
     int _trainID;
 
     /**
-     * ID of platform the train is acting on
+     * ID of the track the train is acting on
      */
-    int _platformID;
+    int _trackID;
 
     /**
      * Type of train
      */
     TrainType _trainType;
 
-    /**
-     * ID of room where the train is located
-     */
-    int _roomID;
+    double _trainStartOffset;
 
-    /**
-     * ID of the subroom where the train is located
-     */
-    int _subroomID;
-
-    /**
-     * Starting point of the track
-     */
-    Point _trackStart;
-
-    /**
-     * End point of the track
-     */
-    Point _trackEnd;
-
-    /**
-     * Starting point of the train
-     */
-    Point _trainStart;
-
-    /**
-     * End point of the train
-     */
-    Point _trainEnd;
+    bool _fromEnd;
 
 public:
     /**
@@ -59,10 +33,8 @@ public:
      * @param time time at which the event is triggered
      * @param action action of event
      * @param trainID ID of train
-     * @param platformID ID of platform, where the train is located
+     * @param trackID ID of track, where the train is located
      * @param trainType Type of train
-     * @param roomID ID of room, where the train is located
-     * @param subroom ID of subroom, where the train is located
      * @param trackStart starting point of track
      * @param trackEnd end point of track
      * @param trainStart starting point of train
@@ -72,23 +44,15 @@ public:
         double time,
         EventAction action,
         int trainID,
-        int platformID,
+        int trackID,
         TrainType trainType,
-        int roomID,
-        int subroomID,
-        Point trackStart,
-        Point trackEnd,
-        Point trainStart,
-        Point trainEnd) :
+        double trainStartOffset,
+        bool fromEnd) :
         _trainID(trainID),
-        _platformID(platformID),
+        _trackID(trackID),
         _trainType(trainType),
-        _roomID(roomID),
-        _subroomID(subroomID),
-        _trackStart(trackStart),
-        _trackEnd(trackEnd),
-        _trainStart(trainStart),
-        _trainEnd(trainEnd)
+        _trainStartOffset(trainStartOffset),
+        _fromEnd(fromEnd)
     {
         _time   = time;
         _action = action;

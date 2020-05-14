@@ -28,6 +28,8 @@ class SubRoom;
 class Line;
 class Point;
 class Transition;
+class Track;
+class TrainType;
 
 #include <optional>
 #include <vector>
@@ -58,8 +60,6 @@ namespace geometry::helper
  *
  */
 void CorrectInputGeometry(Building & building);
-
-bool CorrectSubRoom(SubRoom & subRoom);
 
 bool RemoveOverlappingWall(const Line & exit, SubRoom & subroom);
 
@@ -104,9 +104,11 @@ bool RemoveBigWalls(SubRoom & subroom);
  * @return Vector containing: [[Point1 of door, wall containing Point1],
  *                             [Point2 of door, wall containing Point2]]
  */
-std::vector<std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>> ComputeTrainDoorCoordinates(
-    const std::vector<Wall> & trackWalls,
-    const std::vector<Transition> & trainDoors);
+std::vector<std::pair<Point, Point>> ComputeTrainDoorCoordinates(
+    const TrainType & train,
+    const Track & track,
+    double trainStartOffset,
+    bool fromEnd);
 
 /**
  * Interface for adding trains to the geometry. Adds the \p trainDoors to the given \p subroom and
@@ -122,8 +124,10 @@ void AddTrainDoors(
     int trainID,
     Building & building,
     SubRoom & subroom,
-    const std::vector<Wall> & trackWalls,
-    const std::vector<Transition> & trainDoors);
+    const TrainType & train,
+    const Track & track,
+    double trainStartOffset,
+    bool fromEnd);
 
 /**
  * Splits the given \p trackWalls at the \p wallDoorIntersectionPoints. The new line segments to
@@ -135,16 +139,19 @@ void AddTrainDoors(
  * @param door train door to add
  * @return [addedWalls, removedWalls]
  */
-std::tuple<std::vector<Wall>, std::vector<Wall>> SplitWall(
-    const std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>> & wallDoorIntersectionPoints,
-    const std::vector<Wall> & trackWalls,
-    const Transition & door);
+//std::tuple<std::vector<Wall>, std::vector<Wall>> SplitWalls(
+//    const std::vector<std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>> &
+//        wallDoorIntersectionPoints,
+//    const std::vector<Wall> & trackWalls,
+//    const std::vector<Transition> & doors);
+std::tuple<std::vector<Wall>, std::vector<Wall>>
+SplitWalls(const std::vector<Wall> & trackWalls, const std::vector<Transition> & doors);
 
 /**
  * Sort the walls such that first element contains track start, last element contains
  * track end. [trackStart] -> [wall] -> ... -> [trackEnd]
  * @param trackWalls in: unsorted track walls, out: unsorted track walls
- * @param start start of the sorted walls
+ * @param start start point of the sorted walls
  */
 void SortWalls(std::vector<Wall> & walls, const Point & start);
 
