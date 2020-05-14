@@ -818,7 +818,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                     xmltoi(xMeasurementArea->Attribute("id")));
                 if(xMeasurementArea->Attribute("start_frame")) {
                     if(string(xMeasurementArea->Attribute("start_frame")) != "None") {
-                        _start_frames_MethodD.push_back(
+                        _start_frames_MethodI.push_back(
                             xmltoi(xMeasurementArea->Attribute("start_frame")));
                         Log->Write(
                             "\tthe analysis starts from frame <%d>",
