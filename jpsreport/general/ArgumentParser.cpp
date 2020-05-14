@@ -130,21 +130,35 @@ ArgumentParser::ArgumentParser()
     _isMethodD              = false;
     _isMethodI              = false;
     _isMethodJ              = false;
-    _isCutByCircle          = false;
-    _isOneDimensional       = false;
-    _isGetProfile           = false;
+    _isCutByCircle_MethodD          = false;
+    _isCutByCircle_MethodI          = false;
+    _isCutByCircle_MethodJ          = false;
+    _cutRadius_MethodD              = 50;
+    _cutRadius_MethodI              = 50;
+    _cutRadius_MethodJ              = 50;
+    _circleEdges_MethodD            = 6;
+    _circleEdges_MethodI            = 6;
+    _circleEdges_MethodJ            = 6;
+    _isOneDimensional_MethodD       = false;
+    _isOneDimensional_MethodI       = false;
+    _isOneDimensional_MethodJ       = false;
+    _isGetProfile_MethodD           = false;
+    _isGetProfile_MethodI           = false;
+    _isGetProfile_MethodJ           = false;
     _steadyStart            = 100;
     _steadyEnd              = 1000;
-    _grid_size_X            = 10;
-    _grid_size_Y            = 10;
+    _grid_size_X_MethodD            = 10;
+    _grid_size_X_MethodI            = 10;
+    _grid_size_X_MethodJ            = 10;
+    _grid_size_Y_MethodD            = 10;
+    _grid_size_Y_MethodI            = 10;
+    _grid_size_Y_MethodJ            = 10;
     _errorLogFile           = "log.txt";
     _log                    = 0; //stdio as default
     _trajectoriesLocation   = "./";
     _trajectoriesFilename   = "";
     _projectRootDir         = "./";
     _fileFormat             = FORMAT_XML_PLAIN;
-    _cutRadius              = 50;
-    _circleEdges            = 6;
 }
 
 
@@ -735,19 +749,19 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
 
                 if(xMeasurementArea->Attribute("get_individual_FD")) {
                     if(string(xMeasurementArea->Attribute("get_individual_FD")) == "true") {
-                        _individual_FD_flags.push_back(true);
+                        _individual_FD_flags_MethodD.push_back(true);
                         Log->Write("INFO: \tIndividual FD will be output");
                     } else {
-                        _individual_FD_flags.push_back(false);
+                        _individual_FD_flags_MethodD.push_back(false);
                     }
                 } else {
-                    _individual_FD_flags.push_back(false);
+                    _individual_FD_flags_MethodD.push_back(false);
                 }
             }
             if(xMethod_D->FirstChildElement("one_dimensional")) {
                 if(string(xMethod_D->FirstChildElement("one_dimensional")->Attribute("enabled")) ==
                    "true") {
-                    _isOneDimensional = true;
+                    _isOneDimensional_MethodD = true;
                     Log->Write("INFO: \tThe data will be analyzed with one dimensional way!!");
                 }
             }
@@ -755,19 +769,19 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             if(xMethod_D->FirstChildElement("cut_by_circle")) {
                 if(string(xMethod_D->FirstChildElement("cut_by_circle")->Attribute("enabled")) ==
                    "true") {
-                    _isCutByCircle = true;
-                    _cutRadius =
+                    _isCutByCircle_MethodD = true;
+                    _cutRadius_MethodD =
                         xmltof(xMethod_D->FirstChildElement("cut_by_circle")->Attribute("radius")) *
                         M2CM;
-                    _circleEdges =
+                    _circleEdges_MethodD =
                         xmltoi(xMethod_D->FirstChildElement("cut_by_circle")->Attribute("edges"));
                     Log->Write(
                         "INFO: \tEach Voronoi cell will be cut by a circle with the radius of < %f "
                         "> m!!",
-                        _cutRadius * CMtoM);
+                        _cutRadius_MethodD * CMtoM);
                     Log->Write(
                         "INFO: \tThe circle is discretized to a polygon with < %d> edges!!",
-                        _circleEdges);
+                        _circleEdges_MethodD);
                 }
             }
 
@@ -784,19 +798,19 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             if(xMethod_D->FirstChildElement("profiles")) {
                 if(string(xMethod_D->FirstChildElement("profiles")->Attribute("enabled")) ==
                    "true") {
-                    _isGetProfile = true;
-                    _grid_size_X =
+                    _isGetProfile_MethodD = true;
+                    _grid_size_X_MethodD =
                         xmltof(xMethod_D->FirstChildElement("profiles")->Attribute("grid_size_x")) *
                         M2CM;
-                    _grid_size_Y =
+                    _grid_size_Y_MethodD =
                         xmltof(xMethod_D->FirstChildElement("profiles")->Attribute("grid_size_y")) *
                         M2CM;
                     Log->Write("INFO: \tProfiles will be calculated");
                     Log->Write(
                         "INFO: \tThe discretized grid size in x, y direction is: < %f >m by < %f "
                         ">m ",
-                        _grid_size_X * CMtoM,
-                        _grid_size_Y * CMtoM);
+                        _grid_size_X_MethodD * CMtoM,
+                        _grid_size_Y_MethodD * CMtoM);
                 }
             }
         }
@@ -847,7 +861,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             if(xMethod_I->FirstChildElement("one_dimensional")) {
                 if(string(xMethod_I->FirstChildElement("one_dimensional")->Attribute("enabled")) ==
                    "true") {
-                    _isOneDimensional = true;
+                    _isOneDimensional_MethodI = true;
                     Log->Write("INFO: \tThe data will be analyzed with one dimensional way!!");
                 }
             }
@@ -855,19 +869,19 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             if(xMethod_I->FirstChildElement("cut_by_circle")) {
                 if(string(xMethod_I->FirstChildElement("cut_by_circle")->Attribute("enabled")) ==
                    "true") {
-                    _isCutByCircle = true;
-                    _cutRadius =
+                    _isCutByCircle_MethodI = true;
+                    _cutRadius_MethodI =
                         xmltof(xMethod_I->FirstChildElement("cut_by_circle")->Attribute("radius")) *
                         M2CM;
-                    _circleEdges =
+                    _circleEdges_MethodI =
                         xmltoi(xMethod_I->FirstChildElement("cut_by_circle")->Attribute("edges"));
                     Log->Write(
                         "INFO: \tEach Voronoi cell will be cut by a circle with the radius of < %f "
                         "> m!!",
-                        _cutRadius * CMtoM);
+                        _cutRadius_MethodI * CMtoM);
                     Log->Write(
                         "INFO: \tThe circle is discretized to a polygon with < %d> edges!!",
-                        _circleEdges);
+                        _circleEdges_MethodI);
                 }
             }
 
@@ -884,19 +898,19 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             if(xMethod_I->FirstChildElement("profiles")) {
                 if(string(xMethod_I->FirstChildElement("profiles")->Attribute("enabled")) ==
                    "true") {
-                    _isGetProfile = true;
-                    _grid_size_X =
+                    _isGetProfile_MethodI = true;
+                    _grid_size_X_MethodI =
                         xmltof(xMethod_I->FirstChildElement("profiles")->Attribute("grid_size_x")) *
                         M2CM;
-                    _grid_size_Y =
+                    _grid_size_Y_MethodI =
                         xmltof(xMethod_I->FirstChildElement("profiles")->Attribute("grid_size_y")) *
                         M2CM;
                     Log->Write("INFO: \tProfiles will be calculated");
                     Log->Write(
                         "INFO: \tThe discretized grid size in x, y direction is: < %f >m by < %f "
                         ">m ",
-                        _grid_size_X * CMtoM,
-                        _grid_size_Y * CMtoM);
+                        _grid_size_X_MethodI * CMtoM,
+                        _grid_size_Y_MethodI * CMtoM);
                 }
             }
         }
@@ -946,19 +960,19 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
 
                 if(xMeasurementArea->Attribute("get_individual_FD")) {
                     if(string(xMeasurementArea->Attribute("get_individual_FD")) == "true") {
-                        _individual_FD_flags.push_back(true);
+                        _individual_FD_flags_MethodJ.push_back(true);
                         Log->Write("INFO: \tIndividual FD will be output");
                     } else {
-                        _individual_FD_flags.push_back(false);
+                        _individual_FD_flags_MethodJ.push_back(false);
                     }
                 } else {
-                    _individual_FD_flags.push_back(false);
+                    _individual_FD_flags_MethodJ.push_back(false);
                 }
             }
             if(xMethod_J->FirstChildElement("one_dimensional")) {
                 if(string(xMethod_J->FirstChildElement("one_dimensional")->Attribute("enabled")) ==
                    "true") {
-                    _isOneDimensional = true;
+                    _isOneDimensional_MethodJ = true;
                     Log->Write("INFO: \tThe data will be analyzed with one dimensional way!!");
                 }
             }
@@ -966,19 +980,19 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             if(xMethod_J->FirstChildElement("cut_by_circle")) {
                 if(string(xMethod_J->FirstChildElement("cut_by_circle")->Attribute("enabled")) ==
                    "true") {
-                    _isCutByCircle = true;
-                    _cutRadius =
+                    _isCutByCircle_MethodJ = true;
+                    _cutRadius_MethodJ =
                         xmltof(xMethod_J->FirstChildElement("cut_by_circle")->Attribute("radius")) *
                         M2CM;
-                    _circleEdges =
+                    _circleEdges_MethodJ =
                         xmltoi(xMethod_J->FirstChildElement("cut_by_circle")->Attribute("edges"));
                     Log->Write(
                         "INFO: \tEach Voronoi cell will be cut by a circle with the radius of < %f "
                         "> m!!",
-                        _cutRadius * CMtoM);
+                        _cutRadius_MethodJ * CMtoM);
                     Log->Write(
                         "INFO: \tThe circle is discretized to a polygon with < %d> edges!!",
-                        _circleEdges);
+                        _circleEdges_MethodJ);
                 }
             }
 
@@ -995,19 +1009,19 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             if(xMethod_J->FirstChildElement("profiles")) {
                 if(string(xMethod_J->FirstChildElement("profiles")->Attribute("enabled")) ==
                    "true") {
-                    _isGetProfile = true;
-                    _grid_size_X =
+                    _isGetProfile_MethodJ = true;
+                    _grid_size_X_MethodJ =
                         xmltof(xMethod_J->FirstChildElement("profiles")->Attribute("grid_size_x")) *
                         M2CM;
-                    _grid_size_Y =
+                    _grid_size_Y_MethodJ =
                         xmltof(xMethod_J->FirstChildElement("profiles")->Attribute("grid_size_y")) *
                         M2CM;
                     Log->Write("INFO: \tProfiles will be calculated");
                     Log->Write(
                         "INFO: \tThe discretized grid size in x, y direction is: < %f >m by < %f "
                         ">m ",
-                        _grid_size_X * CMtoM,
-                        _grid_size_Y * CMtoM);
+                        _grid_size_X_MethodJ * CMtoM,
+                        _grid_size_Y_MethodJ * CMtoM);
                 }
             }
         }
@@ -1107,30 +1121,79 @@ bool ArgumentParser::GetIsMethodJ() const
     return _isMethodJ;
 }
 
-
-bool ArgumentParser::GetIsCutByCircle() const
+bool ArgumentParser::GetIsCutByCircleMethodD() const
 {
-    return _isCutByCircle;
+    return _isCutByCircle_MethodD;
 }
 
-double ArgumentParser::GetCutRadius() const
+bool ArgumentParser::GetIsCutByCircleMethodI() const
 {
-    return _cutRadius;
+    return _isCutByCircle_MethodI;
 }
 
-int ArgumentParser::GetCircleEdges() const
+bool ArgumentParser::GetIsCutByCircleMethodJ() const
 {
-    return _circleEdges;
+    return _isCutByCircle_MethodJ;
 }
 
-bool ArgumentParser::GetIsOneDimensional() const
+double ArgumentParser::GetCutRadiusMethodD() const
 {
-    return _isOneDimensional;
+    return _cutRadius_MethodD;
 }
 
-bool ArgumentParser::GetIsGetProfile() const
+double ArgumentParser::GetCutRadiusMethodI() const
 {
-    return _isGetProfile;
+    return _cutRadius_MethodI;
+}
+
+double ArgumentParser::GetCutRadiusMethodJ() const
+{
+    return _cutRadius_MethodJ;
+}
+
+int ArgumentParser::GetCircleEdgesMethodD() const
+{
+    return _circleEdges_MethodD;
+}
+
+int ArgumentParser::GetCircleEdgesMethodI() const
+{
+    return _circleEdges_MethodI;
+}
+
+int ArgumentParser::GetCircleEdgesMethodJ() const
+{
+    return _circleEdges_MethodJ;
+}
+
+bool ArgumentParser::GetIsOneDimensionalMethodD() const
+{
+    return _isOneDimensional_MethodD;
+}
+
+bool ArgumentParser::GetIsOneDimensionalMethodI() const
+{
+    return _isOneDimensional_MethodI;
+}
+
+bool ArgumentParser::GetIsOneDimensionalMethodJ() const
+{
+    return _isOneDimensional_MethodJ;
+}
+
+bool ArgumentParser::GetIsGetProfileMethodD() const
+{
+    return _isGetProfile_MethodD;
+}
+
+bool ArgumentParser::GetIsGetProfileMethodI() const
+{
+    return _isGetProfile_MethodI;
+}
+
+bool ArgumentParser::GetIsGetProfileMethodJ() const
+{
+    return _isGetProfile_MethodJ;
 }
 
 double ArgumentParser::GetSteadyStart() const
@@ -1143,15 +1206,34 @@ double ArgumentParser::GetSteadyEnd() const
     return _steadyEnd;
 }
 
-
-float ArgumentParser::GetGridSizeX() const
+float ArgumentParser::GetGridSizeXMethodD() const
 {
-    return _grid_size_X;
+    return _grid_size_X_MethodD;
 }
 
-float ArgumentParser::GetGridSizeY() const
+float ArgumentParser::GetGridSizeXMethodI() const
 {
-    return _grid_size_Y;
+    return _grid_size_X_MethodD;
+}
+
+float ArgumentParser::GetGridSizeXMethodJ() const
+{
+    return _grid_size_X_MethodD;
+}
+
+float ArgumentParser::GetGridSizeYMethodD() const
+{
+    return _grid_size_Y_MethodD;
+}
+
+float ArgumentParser::GetGridSizeYMethodI() const
+{
+    return _grid_size_Y_MethodI;
+}
+
+float ArgumentParser::GetGridSizeYMethodJ() const
+{
+    return _grid_size_Y_MethodJ;
 }
 
 vector<int> ArgumentParser::GetAreaIDforMethodA() const
@@ -1215,9 +1297,14 @@ vector<int> ArgumentParser::GetStopFramesMethodJ() const
 }
 
 
-vector<bool> ArgumentParser::GetIndividualFDFlags() const
+vector<bool> ArgumentParser::GetIndividualFDFlagsMethodD() const
 {
-    return _individual_FD_flags;
+    return _individual_FD_flags_MethodD;
+}
+
+vector<bool> ArgumentParser::GetIndividualFDFlagsMethodJ() const
+{
+    return _individual_FD_flags_MethodJ;
 }
 
 MeasurementArea * ArgumentParser::GetMeasurementArea(int id)
