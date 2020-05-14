@@ -724,3 +724,213 @@ TEST_CASE("geometry/helper/SortTrackWalls", "[geometry][helper][SortWalls]")
         }
     }
 }
+
+TEST_CASE(
+    "geometry/helper/FindWallPointWithDistanceOnWall",
+    "[geometry][helper][FindWallPointWithDistanceOnWall]")
+{
+    SECTION("Error handling")
+    {
+        Wall trackWall1{{-10., -10.}, {-8., -8.}};
+        Wall trackWall2{{-8., -8.}, {-6., -6.}};
+        Wall trackWall3{{-6., -6.}, {-4., -4.}};
+        Wall trackWall4{{-4., -4.}, {-2., -2.}};
+        Wall trackWall5{{-2., -2.}, {0., 0.}};
+
+        std::vector<Wall> trackWalls{trackWall1, trackWall2, trackWall3, trackWall4, trackWall5};
+
+        SECTION("trackWalls empty")
+        {
+            auto result = geometry::helper::FindWallPointWithDistanceOnWall(
+                std::vector<Wall>{}, Point{0, 0}, 0);
+            REQUIRE_FALSE(result.has_value());
+        }
+
+        SECTION("starting point not in track walls")
+        {
+            std::pair<Point, Wall> start{{-5., -5.}, {{-6., -5.}, {-4., -5.}}};
+            auto result =
+                geometry::helper::FindWallPointWithDistanceOnWall(trackWalls, Point{0, 0}, 0);
+            REQUIRE_FALSE(result.has_value());
+        }
+
+        SECTION("distance too large")
+        {
+            std::pair<Point, Wall> start{{-5., -5.}, {{-6., -5.}, {-4., -5.}}};
+            auto result =
+                geometry::helper::FindWallPointWithDistanceOnWall(trackWalls, Point{0, 0}, 20.);
+            REQUIRE_FALSE(result.has_value());
+        }
+    }
+
+    SECTION("straight walls")
+    {
+        Wall trackWall1{{-10., -10.}, {-8., -8.}};
+        Wall trackWall2{{-8., -8.}, {-6., -6.}};
+        Wall trackWall3{{-6., -6.}, {-4., -4.}};
+        Wall trackWall4{{-4., -4.}, {-2., -2.}};
+        Wall trackWall5{{-2., -2.}, {0., 0.}};
+        //        Wall trackWall1{{-10., -10.}, {-8., -10.}};
+        //        Wall trackWall2{{-8., -10.}, {-6., -10.}};
+        //        Wall trackWall3{{-6., -10.}, {-4., -10.}};
+        //        Wall trackWall4{{-4., -10.}, {-2., -10.}};
+        //        Wall trackWall5{{-2., -10.}, {0., -10.}};
+        //
+        std::vector<Wall> trackWalls{trackWall1, trackWall2, trackWall3, trackWall4, trackWall5};
+
+        SECTION("point on same wall")
+        {
+            Point start{-5., -5.};
+            double distance = 0.5;
+            auto result =
+                geometry::helper::FindWallPointWithDistanceOnWall(trackWalls, start, distance);
+            REQUIRE(result.has_value());
+            auto point = result.value();
+            REQUIRE(Distance(start, point) == Approx(distance));
+            REQUIRE(trackWall3.IsInLineSegment(point));
+        }
+
+        SECTION("point on neighbor wall")
+        {
+            Point start{-5., -5.};
+            double distance = 2.;
+            auto result =
+                geometry::helper::FindWallPointWithDistanceOnWall(trackWalls, start, distance);
+            REQUIRE(result.has_value());
+            auto point = result.value();
+            REQUIRE(trackWall4.IsInLineSegment(point));
+            double computedDistance = 0.;
+            Point startPoint        = start;
+            auto startItr           = std::find_if(
+                std::begin(trackWalls), std::end(trackWalls), [&start](const Wall & wall) {
+                    return wall.IsInLineSegment(start) && wall.GetPoint2() != start;
+                });
+
+            for(auto wallItr = startItr; wallItr != std::end(trackWalls); ++wallItr) {
+                if(wallItr->IsInLineSegment(point)) {
+                    computedDistance += Distance(startPoint, point);
+                    break;
+                }
+                computedDistance += Distance(startPoint, wallItr->GetPoint2());
+                startPoint = wallItr->GetPoint2();
+            }
+            REQUIRE(computedDistance == Approx(distance));
+        }
+
+        SECTION("starts on wall endpoint")
+        {
+            Point start{-6., -6.};
+            double distance = 2.;
+            auto result =
+                geometry::helper::FindWallPointWithDistanceOnWall(trackWalls, start, distance);
+            REQUIRE(result.has_value());
+        }
+
+        SECTION("point on not neighbor wall")
+        {
+            Point start{-5., -5.};
+            double distance = 5.;
+            auto result =
+                geometry::helper::FindWallPointWithDistanceOnWall(trackWalls, start, distance);
+
+            REQUIRE(result.has_value());
+
+            auto point = result.value();
+            REQUIRE(trackWall5.IsInLineSegment(point));
+
+            double computedDistance = 0.;
+            Point startPoint        = start;
+            auto startItr           = std::find_if(
+                std::begin(trackWalls), std::end(trackWalls), [&start](const Wall & wall) {
+                    return wall.IsInLineSegment(start) && wall.GetPoint2() != start;
+                });
+            for(auto wallItr = startItr; wallItr != std::end(trackWalls); ++wallItr) {
+                if(wallItr->IsInLineSegment(point)) {
+                    computedDistance += Distance(startPoint, point);
+                    break;
+                }
+                computedDistance += Distance(startPoint, wallItr->GetPoint2());
+                startPoint = wallItr->GetPoint2();
+            }
+            REQUIRE(computedDistance == Approx(distance));
+        }
+    }
+
+    SECTION("curved walls")
+    {
+        Wall trackWall1{{-10., -10.}, {-8., -8.}};
+        Wall trackWall2{{-8., -8.}, {-6., -7.}};
+        Wall trackWall3{{-6., -7.}, {-4., -2.}};
+        Wall trackWall4{{-4., -2.}, {-2., -0.}};
+        Wall trackWall5{{-2., 0.}, {0., 0.}};
+
+        std::vector<Wall> trackWalls{trackWall1, trackWall2, trackWall3, trackWall4, trackWall5};
+
+        SECTION("point on same wall")
+        {
+            Point start{-5., -4.5};
+            double distance = 0.5;
+            auto result =
+                geometry::helper::FindWallPointWithDistanceOnWall(trackWalls, start, distance);
+            REQUIRE(result.has_value());
+            auto point = result.value();
+            REQUIRE(Distance(start, point) == Approx(distance));
+            REQUIRE(trackWall3.IsInLineSegment(point));
+        }
+
+        SECTION("point on neighbor wall")
+        {
+            Point start{-5., -4.5};
+            double distance = 4.;
+            auto result =
+                geometry::helper::FindWallPointWithDistanceOnWall(trackWalls, start, distance);
+            REQUIRE(result.has_value());
+            auto point = result.value();
+            REQUIRE(trackWall4.IsInLineSegment(point));
+            double computedDistance = 0.;
+            Point startPoint        = start;
+            auto startItr           = std::find_if(
+                std::begin(trackWalls), std::end(trackWalls), [&start](const Wall & wall) {
+                    return wall.IsInLineSegment(start) && wall.GetPoint2() != start;
+                });
+            for(auto wallItr = startItr; wallItr != std::end(trackWalls); ++wallItr) {
+                if(wallItr->IsInLineSegment(point)) {
+                    computedDistance += Distance(startPoint, point);
+                    break;
+                }
+                computedDistance += Distance(startPoint, wallItr->GetPoint2());
+                startPoint = wallItr->GetPoint2();
+            }
+            REQUIRE(computedDistance == Approx(distance));
+        }
+
+        SECTION("point on not neighbor wall")
+        {
+            Point start{-5., -4.5};
+            double distance = 7.;
+            auto result =
+                geometry::helper::FindWallPointWithDistanceOnWall(trackWalls, start, distance);
+
+            REQUIRE(result.has_value());
+
+            auto point = result.value();
+            REQUIRE(trackWall5.IsInLineSegment(point));
+
+            double computedDistance = 0.;
+            Point startPoint        = start;
+            auto startItr           = std::find_if(
+                std::begin(trackWalls), std::end(trackWalls), [&start](const Wall & wall) {
+                    return wall.IsInLineSegment(start) && wall.GetPoint2() != start;
+                });
+            for(auto wallItr = startItr; wallItr != std::end(trackWalls); ++wallItr) {
+                if(wallItr->IsInLineSegment(point)) {
+                    computedDistance += Distance(startPoint, point);
+                    break;
+                }
+                computedDistance += Distance(startPoint, wallItr->GetPoint2());
+                startPoint = wallItr->GetPoint2();
+            }
+            REQUIRE(computedDistance == Approx(distance));
+        }
+    }
+}

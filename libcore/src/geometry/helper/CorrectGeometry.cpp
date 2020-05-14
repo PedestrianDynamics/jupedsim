@@ -597,4 +597,41 @@ void SortWalls(std::vector<Wall> & walls, const Point & start)
         throw std::runtime_error(message);
     }
 }
+
+std::optional<Point> FindWallPointWithDistanceOnWall(
+    const std::vector<Wall> & walls,
+    const Point & origin,
+    double distance)
+{
+    auto startItr = std::find_if(std::begin(walls), std::end(walls), [&origin](const Wall & wall) {
+        return wall.IsInLineSegment(origin) && wall.GetPoint2() != origin;
+    });
+
+    if(startItr == std::end(walls)) {
+        LOG_WARNING("Starting point does not belong to given walls.");
+        return std::nullopt;
+    }
+
+    std::vector<Point> intersections;
+
+    for(auto itr = startItr; itr != std::end(walls); ++itr) {
+        Point start;
+        if(itr == startItr) {
+            start = origin;
+        } else {
+            start = itr->GetPoint1();
+        }
+
+        if(Distance(start, itr->GetPoint2()) >= distance) {
+            Point connection     = (itr->GetPoint2() - itr->GetPoint1()).Normalized();
+            Point distConnection = connection * distance;
+            Point distPoint      = start + distConnection;
+
+            return distPoint;
+        }
+        distance -= Distance(start, itr->GetPoint2());
+    }
+
+    return std::nullopt;
+}
 } // namespace geometry::helper

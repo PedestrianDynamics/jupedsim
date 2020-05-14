@@ -147,4 +147,22 @@ std::tuple<std::vector<Wall>, std::vector<Wall>> SplitWall(
  * @param start start of the sorted walls
  */
 void SortWalls(std::vector<Wall> & walls, const Point & start);
+
+/**
+ * @brief Finds a point with \p distance to starting point along the \p walls.
+ * @pre trackWalls sorted, such that first element contains track start, last element contains
+ * track end. [trackStart] -> [wall] -> ... -> [trackEnd]
+ * @warning: only looks for the point in walls following (including) wall containing \p starting
+ * point
+ *
+ * @param walls walls to look for point with \p distance.
+ * @param origin reference point the distance is measured from.
+ * @param distance distance from origin to desired point
+ * @return if point with \p distance exist desired point, else std::nullopt
+ */
+std::optional<Point> FindWallPointWithDistanceOnWall(
+    const std::vector<Wall> & walls,
+    const Point & origin,
+    double distance);
+
 } // namespace geometry::helper
