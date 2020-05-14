@@ -603,3 +603,124 @@ TEST_CASE("geometry/helper/SplitWall", "[geometry][helper][SplitWall]")
         }
     }
 }
+
+TEST_CASE("geometry/helper/SortTrackWalls", "[geometry][helper][SortWalls]")
+{
+    SECTION("straight walls")
+    {
+        Wall trackWall1{{-10., -10.}, {-8., -8.}};
+        Wall trackWall2{{-6., -6.}, {-8., -8.}};
+        Wall trackWall3{{-6., -6.}, {-4., -4.}};
+        Wall trackWall4{{-2., -2.}, {-4., -4.}};
+        Wall trackWall5{{-2., -2.}, {0., 0.}};
+
+        std::vector<Wall> trackWallsOrdered{
+            trackWall1, trackWall2, trackWall3, trackWall4, trackWall5};
+
+        Point trackStart = trackWall1.GetPoint1();
+
+        SECTION("one wall")
+        {
+            std::vector<Wall> trackWallOne{trackWall1};
+            std::vector<Wall> trackWalls{trackWall1};
+            REQUIRE_NOTHROW(geometry::helper::SortWalls(trackWalls, trackStart));
+            CHECK_THAT(trackWalls, Catch::Equals(trackWallOne));
+            REQUIRE(trackWallOne.begin()->GetPoint1() == trackStart);
+        }
+
+        SECTION("continuous wall")
+        {
+            std::vector<Wall> trackWalls{
+                trackWall2, trackWall5, trackWall1, trackWall4, trackWall3};
+
+            REQUIRE_NOTHROW(geometry::helper::SortWalls(trackWalls, trackStart));
+            CHECK_THAT(trackWalls, Catch::Equals(trackWallsOrdered));
+            for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls) - 1;
+                ++wallItr) {
+                REQUIRE(wallItr->GetPoint2() == std::next(wallItr)->GetPoint1());
+            }
+
+
+            std::vector<Wall> trackWallsReversed{
+                trackWall5, trackWall4, trackWall3, trackWall2, trackWall1};
+
+            REQUIRE_NOTHROW(geometry::helper::SortWalls(trackWallsReversed, trackStart));
+            CHECK_THAT(trackWallsReversed, Catch::Equals(trackWallsOrdered));
+            for(auto wallItr = std::begin(trackWallsReversed);
+                wallItr != std::end(trackWallsReversed) - 1;
+                ++wallItr) {
+                REQUIRE(wallItr->GetPoint2() == std::next(wallItr)->GetPoint1());
+            }
+        }
+
+        SECTION("non-continuous wall")
+        {
+            std::vector<Wall> trackWalls{trackWall5, trackWall1, trackWall4, trackWall3};
+
+            REQUIRE_THROWS_WITH(
+                geometry::helper::SortWalls(trackWalls, trackStart),
+                "Track walls could not be sorted. Could not find a wall succeeding ( -10 : -10 "
+                ")--( -8 : -8 ) in track walls. Please check your geometry");
+        }
+
+        SECTION("Start not on track wall")
+        {
+            std::vector<Wall> trackWalls{
+                trackWall2, trackWall5, trackWall1, trackWall4, trackWall3};
+            Point start{-25., 10.};
+
+            REQUIRE_THROWS_WITH(
+                geometry::helper::SortWalls(trackWalls, start),
+                "Track walls could not be sorted. Start ( -25 : 10 ) is not on one of the track "
+                "walls. Please check your geometry.");
+        }
+    }
+
+    SECTION("curved walls")
+    {
+        Wall trackWall1{{-8., -8.}, {-10., -10.}};
+        Wall trackWall2{{-8., -8.}, {-6., -7.}};
+        Wall trackWall3{{-6., -7.}, {-4., -2.}};
+        Wall trackWall4{{-2., -0.}, {-4., -2.}};
+        Wall trackWall5{{0., 0.}, {-2., 0.}};
+
+        std::vector<Wall> trackWallsOrdered{
+            trackWall1, trackWall2, trackWall3, trackWall4, trackWall5};
+
+        Point trackStart = trackWall1.GetPoint2();
+
+        SECTION("continuous wall")
+        {
+            std::vector<Wall> trackWalls{
+                trackWall2, trackWall5, trackWall1, trackWall4, trackWall3};
+
+            REQUIRE_NOTHROW(geometry::helper::SortWalls(trackWalls, trackStart));
+            CHECK_THAT(trackWalls, Catch::Equals(trackWallsOrdered));
+            for(auto wallItr = std::begin(trackWalls); wallItr != std::end(trackWalls) - 1;
+                ++wallItr) {
+                REQUIRE(wallItr->GetPoint2() == std::next(wallItr)->GetPoint1());
+            }
+
+            std::vector<Wall> trackWallsReversed{
+                trackWall5, trackWall4, trackWall3, trackWall2, trackWall1};
+
+            REQUIRE_NOTHROW(geometry::helper::SortWalls(trackWallsReversed, trackStart));
+            CHECK_THAT(trackWallsReversed, Catch::Equals(trackWallsOrdered));
+            for(auto wallItr = std::begin(trackWallsReversed);
+                wallItr != std::end(trackWallsReversed) - 1;
+                ++wallItr) {
+                REQUIRE(wallItr->GetPoint2() == std::next(wallItr)->GetPoint1());
+            }
+        }
+
+        SECTION("non-continuous wall")
+        {
+            std::vector<Wall> trackWalls{trackWall2, trackWall5, trackWall1, trackWall4};
+
+            REQUIRE_THROWS_WITH(
+                geometry::helper::SortWalls(trackWalls, trackStart),
+                "Track walls could not be sorted. Could not find a wall succeeding ( -8 : -8 )--( "
+                "-6 : -7 ) in track walls. Please check your geometry");
+        }
+    }
+}

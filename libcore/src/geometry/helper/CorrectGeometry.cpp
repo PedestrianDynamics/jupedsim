@@ -535,4 +535,66 @@ std::tuple<std::vector<Wall>, std::vector<Wall>> SplitWall(
 
     return std::tuple{addedWalls, removedWalls};
 }
+
+void SortWalls(std::vector<Wall> & walls, const Point & start)
+{
+    auto startItr = std::find_if(std::begin(walls), std::end(walls), [&start](const Wall & wall) {
+        return wall.HasEndPoint(start);
+    });
+
+    if(startItr == std::end(walls)) {
+        std::string message{fmt::format(
+            FMT_STRING("Track walls could not be sorted. Start {} is not on one of the track "
+                       "walls. Please check your geometry."),
+            start.toString())};
+        throw std::runtime_error(message);
+    }
+
+    std::rotate(startItr, std::begin(walls), std::begin(walls) + 1);
+
+    bool sane = true;
+    std::string message{};
+
+    for(size_t i = 1; i < walls.size(); ++i) {
+        auto compare = std::begin(walls) + i - 1;
+
+        // find element that succeeds compare
+        auto nextItr = std::find_if(compare + 1, std::end(walls), [&compare](const Wall & wall) {
+            return wall.ShareCommonPointWith(*compare);
+        });
+
+        if(nextItr != std::end(walls)) {
+            // move found element such that it follows compare in vector
+            std::rotate(nextItr, compare + 1, compare + 2);
+        } else {
+            // if no suceeding element found, there is an issue
+            sane    = false;
+            message = fmt::format(
+                FMT_STRING("Track walls could not be sorted. Could not find a wall succeeding {} "
+                           "in track walls. Please check your geometry"),
+                compare->toString());
+        }
+    }
+
+    // rotate walls such that walls[n]->P2 == wall[n+1]->P1
+    auto wallStart = std::begin(walls);
+    if(wallStart->GetPoint2() == start) {
+        Point tmp = wallStart->GetPoint2();
+        wallStart->SetPoint2(wallStart->GetPoint1());
+        wallStart->SetPoint1(tmp);
+    }
+
+    for(auto wallItr = std::begin(walls) + 1; wallItr != std::end(walls); ++wallItr) {
+        auto prev = std::prev(wallItr);
+        if(prev->GetPoint2() != wallItr->GetPoint1()) {
+            Point tmp = wallItr->GetPoint2();
+            wallItr->SetPoint2(wallItr->GetPoint1());
+            wallItr->SetPoint1(tmp);
+        }
+    }
+
+    if(!sane) {
+        throw std::runtime_error(message);
+    }
+}
 } // namespace geometry::helper

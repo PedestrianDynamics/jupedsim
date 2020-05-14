@@ -140,4 +140,11 @@ std::tuple<std::vector<Wall>, std::vector<Wall>> SplitWall(
     const std::vector<Wall> & trackWalls,
     const Transition & door);
 
+/**
+ * Sort the walls such that first element contains track start, last element contains
+ * track end. [trackStart] -> [wall] -> ... -> [trackEnd]
+ * @param trackWalls in: unsorted track walls, out: unsorted track walls
+ * @param start start of the sorted walls
+ */
+void SortWalls(std::vector<Wall> & walls, const Point & start);
 } // namespace geometry::helper
