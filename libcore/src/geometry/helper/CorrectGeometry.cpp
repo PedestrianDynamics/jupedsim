@@ -415,17 +415,17 @@ void AddTrainDoors(
             std::begin(addedWalls),
             std::end(addedWalls),
             [trainID, &building, &subroom](const Wall & wall) {
-                building.AddTrainAddedWall(trainID, wall);
+                building.AddTrainWallAdded(trainID, wall);
                 subroom.AddWall(wall);
             });
         std::for_each(
             std::begin(removedWalls),
             std::end(removedWalls),
             [trainID, &building, &subroom](const Wall & wall) {
-                building.AddTrainRemovedWall(trainID, wall);
+                building.AddTrainWallRemoved(trainID, wall);
                 subroom.RemoveWall(wall);
             });
-        building.AddTrainAddedDoor(trainID, *trainDoor);
+        building.AddTrainDoorAdded(trainID, *trainDoor);
     }
     subroom.Update();
 }

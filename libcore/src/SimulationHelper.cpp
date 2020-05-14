@@ -214,7 +214,7 @@ bool SimulationHelper::UpdateTrainFlowRegulation(Building & building)
 {
     bool geometryChanged = false;
     for(auto const & [trainID, trainType] : building.GetTrains()) {
-        auto trainAddedDoors = building.GetTrainAddedDoors(trainID);
+        auto trainAddedDoors = building.GetTrainDoorsAdded(trainID);
         if(trainAddedDoors.has_value()) {
             auto trainDoors = trainAddedDoors.value();
 

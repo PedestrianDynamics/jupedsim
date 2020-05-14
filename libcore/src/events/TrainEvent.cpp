@@ -90,7 +90,7 @@ void TrainEvent::TrainDeparture()
     std::set<SubRoom *> subRoomsToUpdate;
 
     // remove temp added walls
-    auto tempWalls = _building->GetTrainAddedWalls(_trainID);
+    auto tempWalls = _building->GetTrainWallsAdded(_trainID);
 
     if(tempWalls.has_value()) {
         for(auto it = tempWalls.value().begin(); it != tempWalls.value().end();) {
@@ -113,11 +113,11 @@ void TrainEvent::TrainDeparture()
                 subRoomsToUpdate.insert(subroom);
             } //platforms
         }
-        _building->SetTrainAddedWalls(_trainID, tempWalls.value());
+        _building->SetTrainWallsAdded(_trainID, tempWalls.value());
     }
 
     // add removed walls
-    auto tempRemovedWalls = _building->GetTrainRemovedWalls(_trainID);
+    auto tempRemovedWalls = _building->GetTrainWallsRemoved(_trainID);
 
     if(tempRemovedWalls.has_value()) {
         for(auto it = tempRemovedWalls.value().begin(); it != tempRemovedWalls.value().end();) {
@@ -142,11 +142,11 @@ void TrainEvent::TrainDeparture()
                 subRoomsToUpdate.insert(subroom);
             }
         }
-        _building->SetTrainRemovedWalls(_trainID, tempRemovedWalls.value());
+        _building->SetTrainWallsRemoved(_trainID, tempRemovedWalls.value());
     }
 
     // remove added doors
-    auto tempDoors = _building->GetTrainAddedDoors(_trainID);
+    auto tempDoors = _building->GetTrainDoorsAdded(_trainID);
 
     if(tempDoors.has_value()) {
         for(auto it = tempDoors.value().begin(); it != tempDoors.value().end();) {
@@ -170,7 +170,7 @@ void TrainEvent::TrainDeparture()
                 subRoomsToUpdate.insert(subroom);
             }
         }
-        _building->SetTrainAddedDoors(_trainID, tempDoors.value());
+        _building->SetTrainDoorsAdded(_trainID, tempDoors.value());
     }
 
 

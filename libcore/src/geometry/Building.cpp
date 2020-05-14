@@ -1187,100 +1187,85 @@ std::vector<TrainType> Building::GetTrainTypes()
     return trainTypes;
 }
 
-void Building::AddTrainAddedWall(int trainID, Wall trainAddedWall)
+void Building::AddTrainWallAdded(int trainID, Wall trainAddedWall)
 {
-    auto iter = _trainAddedWalls.find(trainID);
+    auto iter = _trainWallsAdded.find(trainID);
 
-    if(iter != _trainAddedWalls.end()) {
+    if(iter != _trainWallsAdded.end()) {
         iter->second.emplace_back(trainAddedWall);
     } else {
-        _trainAddedWalls.emplace(trainID, std::vector<Wall>{trainAddedWall});
+        _trainWallsAdded.emplace(trainID, std::vector<Wall>{trainAddedWall});
     }
 }
 
-void Building::SetTrainAddedWalls(int trainID, std::vector<Wall> trainAddedWalls)
+void Building::SetTrainWallsAdded(int trainID, std::vector<Wall> trainAddedWalls)
 {
-    _trainAddedWalls[trainID] = trainAddedWalls;
+    _trainWallsAdded[trainID] = trainAddedWalls;
 }
 
-std::optional<std::vector<Wall>> Building::GetTrainAddedWalls(int trainID)
+std::optional<std::vector<Wall>> Building::GetTrainWallsAdded(int trainID)
 {
-    auto iter = _trainAddedWalls.find(trainID);
+    auto iter = _trainWallsAdded.find(trainID);
 
-    if(iter != _trainAddedWalls.end()) {
+    if(iter != _trainWallsAdded.end()) {
         return iter->second;
     }
 
     return std::nullopt;
 }
 
-void Building::RemoveTrainAddedWalls(int trainID)
+void Building::AddTrainWallRemoved(int trainID, Wall trainRemovedWall)
 {
-    _trainAddedWalls.erase(trainID);
-}
+    auto iter = _trainWallsRemoved.find(trainID);
 
-void Building::AddTrainRemovedWall(int trainID, Wall trainRemovedWall)
-{
-    auto iter = _trainRemovedWalls.find(trainID);
-
-    if(iter != _trainRemovedWalls.end()) {
+    if(iter != _trainWallsRemoved.end()) {
         iter->second.emplace_back(trainRemovedWall);
     } else {
-        _trainRemovedWalls.emplace(trainID, std::vector<Wall>{trainRemovedWall});
+        _trainWallsRemoved.emplace(trainID, std::vector<Wall>{trainRemovedWall});
     }
 }
 
-void Building::SetTrainRemovedWalls(int trainID, std::vector<Wall> trainRemovedWalls)
+void Building::SetTrainWallsRemoved(int trainID, std::vector<Wall> trainRemovedWalls)
 {
-    _trainRemovedWalls[trainID] = trainRemovedWalls;
+    _trainWallsRemoved[trainID] = trainRemovedWalls;
 }
 
-std::optional<std::vector<Wall>> Building::GetTrainRemovedWalls(int trainID)
+std::optional<std::vector<Wall>> Building::GetTrainWallsRemoved(int trainID)
 {
-    auto iter = _trainRemovedWalls.find(trainID);
+    auto iter = _trainWallsRemoved.find(trainID);
 
-    if(iter != _trainRemovedWalls.end()) {
+    if(iter != _trainWallsRemoved.end()) {
         return iter->second;
     }
 
     return std::nullopt;
 }
 
-void Building::RemoveTrainRemovedWalls(int trainID)
+void Building::AddTrainDoorAdded(int trainID, Transition trainAddedDoor)
 {
-    _trainRemovedWalls.erase(trainID);
-}
+    auto iter = _trainDoorsAdded.find(trainID);
 
-void Building::AddTrainAddedDoor(int trainID, Transition trainAddedDoor)
-{
-    auto iter = _trainAddedDoors.find(trainID);
-
-    if(iter != _trainAddedDoors.end()) {
+    if(iter != _trainDoorsAdded.end()) {
         iter->second.emplace_back(trainAddedDoor);
     } else {
-        _trainAddedDoors.emplace(trainID, std::vector<Transition>{trainAddedDoor});
+        _trainDoorsAdded.emplace(trainID, std::vector<Transition>{trainAddedDoor});
     }
 }
 
-void Building::SetTrainAddedDoors(int trainID, std::vector<Transition> trainAddedDoors)
+void Building::SetTrainDoorsAdded(int trainID, std::vector<Transition> trainAddedDoors)
 {
-    _trainAddedDoors[trainID] = trainAddedDoors;
+    _trainDoorsAdded[trainID] = trainAddedDoors;
 }
 
-std::optional<std::vector<Transition>> Building::GetTrainAddedDoors(int trainID)
+std::optional<std::vector<Transition>> Building::GetTrainDoorsAdded(int trainID)
 {
-    auto iter = _trainAddedDoors.find(trainID);
+    auto iter = _trainDoorsAdded.find(trainID);
 
-    if(iter != _trainAddedDoors.end()) {
+    if(iter != _trainDoorsAdded.end()) {
         return iter->second;
     }
 
     return std::nullopt;
-}
-
-void Building::RemovedTrainAddedDoors(int trainID)
-{
-    _trainAddedDoors.erase(trainID);
 }
 
 #endif // _SIMULATOR

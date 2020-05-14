@@ -89,17 +89,17 @@ private:
     /**
      * Map of walls added temporarily for a specific train
      */
-    std::map<int, std::vector<Wall>> _trainAddedWalls;
+    std::map<int, std::vector<Wall>> _trainWallsAdded;
 
     /**
      * Map of walls removed temporarily for a specific train
      */
-    std::map<int, std::vector<Wall>> _trainRemovedWalls;
+    std::map<int, std::vector<Wall>> _trainWallsRemoved;
 
     /**
      * Map of doors added temporarily for a specific train
      */
-    std::map<int, std::vector<Transition>> _trainAddedDoors;
+    std::map<int, std::vector<Transition>> _trainDoorsAdded;
 
 public:
     /// constructor
@@ -232,20 +232,17 @@ public:
     const std::vector<Wall>
     GetTrackWalls(Point TrackStart, Point TrackEnd, int & room_id, int & subroom_id) const;
 
-    void AddTrainAddedWall(int trainID, Wall trainAddedWall);
-    void SetTrainAddedWalls(int trainID, std::vector<Wall> trainAddedWalls);
-    std::optional<std::vector<Wall>> GetTrainAddedWalls(int trainID);
-    void RemoveTrainAddedWalls(int trainID);
+    void AddTrainWallAdded(int trainID, Wall trainAddedWall);
+    void SetTrainWallsAdded(int trainID, std::vector<Wall> trainAddedWalls);
+    std::optional<std::vector<Wall>> GetTrainWallsAdded(int trainID);
 
-    void AddTrainRemovedWall(int trainID, Wall trainRemovedWall);
-    void SetTrainRemovedWalls(int trainID, std::vector<Wall> trainRemovedWalls);
-    std::optional<std::vector<Wall>> GetTrainRemovedWalls(int trainID);
-    void RemoveTrainRemovedWalls(int trainID);
+    void AddTrainWallRemoved(int trainID, Wall trainRemovedWall);
+    void SetTrainWallsRemoved(int trainID, std::vector<Wall> trainRemovedWalls);
+    std::optional<std::vector<Wall>> GetTrainWallsRemoved(int trainID);
 
-    void AddTrainAddedDoor(int trainID, Transition trainAddedDoor);
-    void SetTrainAddedDoors(int trainID, std::vector<Transition> trainAddedDoors);
-    std::optional<std::vector<Transition>> GetTrainAddedDoors(int trainID);
-    void RemovedTrainAddedDoors(int trainID);
+    void AddTrainDoorAdded(int trainID, Transition trainAddedDoor);
+    void SetTrainDoorsAdded(int trainID, std::vector<Transition> trainAddedDoors);
+    std::optional<std::vector<Transition>> GetTrainDoorsAdded(int trainID);
 
     // ------------------------------------
     bool AddCrossing(Crossing * line);
