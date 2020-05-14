@@ -28,7 +28,9 @@
 #ifndef ARGUMENTPARSER_H_
 #define ARGUMENTPARSER_H_
 
+#include "../methods/ConfigData_DIJ.h"
 #include "../methods/MeasurementArea.h"
+#include "../tinyxml/tinyxml.h"
 #include "Macros.h"
 
 #include <boost/geometry/geometries/adapted/c_array.hpp>
@@ -36,6 +38,7 @@
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/geometry/geometry.hpp>
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -70,21 +73,6 @@ private:
     bool _isMethodD;
     bool _isMethodI;
     bool _isMethodJ;
-    bool _isCutByCircle_MethodD;
-    bool _isCutByCircle_MethodI;
-    bool _isCutByCircle_MethodJ;
-    double _cutRadius_MethodD;
-    double _cutRadius_MethodI;
-    double _cutRadius_MethodJ;
-    int _circleEdges_MethodD;
-    int _circleEdges_MethodI;
-    int _circleEdges_MethodJ;
-    bool _isOneDimensional_MethodD;
-    bool _isOneDimensional_MethodI;
-    bool _isOneDimensional_MethodJ;
-    bool _isGetProfile_MethodD;
-    bool _isGetProfile_MethodI;
-    bool _isGetProfile_MethodJ;
     double _steadyStart;
     double _steadyEnd;
     int _delatTVInst;
@@ -92,29 +80,15 @@ private:
     std::vector<int> _areaIDforMethodA;
     std::vector<int> _areaIDforMethodB;
     std::vector<int> _areaIDforMethodC;
-    std::vector<int> _areaIDforMethodD;
-    std::vector<int> _areaIDforMethodI;
-    std::vector<int> _areaIDforMethodJ;
-    float _grid_size_X_MethodD;
-    float _grid_size_X_MethodI;
-    float _grid_size_X_MethodJ;
-    float _grid_size_Y_MethodD;
-    float _grid_size_Y_MethodI;
-    float _grid_size_Y_MethodJ;
     int _log;
-    std::vector<int> _start_frames_MethodD;
-    std::vector<int> _stop_frames_MethodD;
-    std::vector<int> _start_frames_MethodI;
-    std::vector<int> _stop_frames_MethodI;
-    std::vector<int> _start_frames_MethodJ;
-    std::vector<int> _stop_frames_MethodJ;
-    std::vector<bool> _individual_FD_flags_MethodD;
-    std::vector<bool> _individual_FD_flags_MethodJ;
     std::vector<int> _timeIntervalA;
 
+    ConfigData_DIJ _configDataD, _configDataI, _configDataJ;
 
     std::map<int, MeasurementArea *> _measurementAreas;
     void Usage(const std::string file);
+
+    std::optional<ConfigData_DIJ> ParseDIJParams(TiXmlElement * xMethod);
 
 public:
     // Konstruktor
