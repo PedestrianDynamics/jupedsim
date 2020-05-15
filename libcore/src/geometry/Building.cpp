@@ -435,71 +435,6 @@ Building::GetTrackWalls(Point TrackStart, Point TrackEnd, int & room_id, int & s
     return mytrack;
 }
 
-const std::vector<std::pair<PointWall, PointWall>> Building::GetIntersectionPoints(
-    const std::vector<Transition> doors,
-    const std::vector<Wall> mytrack) const
-{
-    const int scaleFactor = 1000; // very long orthogonal walls to train's doors
-    std::vector<std::pair<PointWall, PointWall>> pws;
-    // every door has two points.
-    // for every point -> get pair<P, W>
-    // collect pairs of pairs
-    for(auto door : doors) {
-        PointWall pw1, pw2;
-        int nintersections = 0;
-        auto n             = door.NormalVec();
-        auto p11           = door.GetPoint1() + n * scaleFactor;
-        auto p12           = door.GetPoint1() - n * scaleFactor;
-        auto p21           = door.GetPoint2() + n * scaleFactor;
-        auto p22           = door.GetPoint2() - n * scaleFactor;
-        auto normalWall1   = Wall(p11, p12);
-        auto normalWall2   = Wall(p21, p22);
-        for(auto twall : mytrack) {
-            Point interPoint1, interPoint2;
-            auto res  = normalWall1.IntersectionWith(twall, interPoint1);
-            auto res2 = normalWall2.IntersectionWith(twall, interPoint2);
-            if(res == 1) {
-                if(!twall.NearlyHasEndPoint(interPoint1)) {
-                    pw1 = std::make_pair(interPoint1, twall);
-                    nintersections++;
-                } else // end point
-                {
-                    if(res2 == 0) {
-                    } else {
-                        pw1 = std::make_pair(interPoint1, twall);
-                        nintersections++;
-                    }
-                }
-            }
-            if(res2 == 1) {
-                if(!twall.NearlyHasEndPoint(interPoint2)) {
-                    pw2 = std::make_pair(interPoint2, twall);
-                    nintersections++;
-                } else {
-                    if(res == 0) {
-                    } else {
-                        pw2 = std::make_pair(interPoint2, twall);
-                        nintersections++;
-                    }
-                }
-            }
-
-
-        } // tracks
-
-        if(nintersections == 2)
-            pws.push_back(std::make_pair(pw1, pw2));
-
-        else {
-            std::cout << "Error in GetIntersection. Should be 2 but got  " << nintersections
-                      << "\n";
-            exit(-1);
-        }
-    } // doors
-
-    return pws;
-}
-
 void Building::InitPlatforms()
 {
     int num_platform = -1;
@@ -1250,6 +1185,87 @@ std::vector<TrainType> Building::GetTrainTypes()
         });
 
     return trainTypes;
+}
+
+void Building::AddTrainWallAdded(int trainID, Wall trainAddedWall)
+{
+    auto iter = _trainWallsAdded.find(trainID);
+
+    if(iter != _trainWallsAdded.end()) {
+        iter->second.emplace_back(trainAddedWall);
+    } else {
+        _trainWallsAdded.emplace(trainID, std::vector<Wall>{trainAddedWall});
+    }
+}
+
+void Building::SetTrainWallsAdded(int trainID, std::vector<Wall> trainAddedWalls)
+{
+    _trainWallsAdded[trainID] = trainAddedWalls;
+}
+
+std::optional<std::vector<Wall>> Building::GetTrainWallsAdded(int trainID)
+{
+    auto iter = _trainWallsAdded.find(trainID);
+
+    if(iter != _trainWallsAdded.end()) {
+        return iter->second;
+    }
+
+    return std::nullopt;
+}
+
+void Building::AddTrainWallRemoved(int trainID, Wall trainRemovedWall)
+{
+    auto iter = _trainWallsRemoved.find(trainID);
+
+    if(iter != _trainWallsRemoved.end()) {
+        iter->second.emplace_back(trainRemovedWall);
+    } else {
+        _trainWallsRemoved.emplace(trainID, std::vector<Wall>{trainRemovedWall});
+    }
+}
+
+void Building::SetTrainWallsRemoved(int trainID, std::vector<Wall> trainRemovedWalls)
+{
+    _trainWallsRemoved[trainID] = trainRemovedWalls;
+}
+
+std::optional<std::vector<Wall>> Building::GetTrainWallsRemoved(int trainID)
+{
+    auto iter = _trainWallsRemoved.find(trainID);
+
+    if(iter != _trainWallsRemoved.end()) {
+        return iter->second;
+    }
+
+    return std::nullopt;
+}
+
+void Building::AddTrainDoorAdded(int trainID, Transition trainAddedDoor)
+{
+    auto iter = _trainDoorsAdded.find(trainID);
+
+    if(iter != _trainDoorsAdded.end()) {
+        iter->second.emplace_back(trainAddedDoor);
+    } else {
+        _trainDoorsAdded.emplace(trainID, std::vector<Transition>{trainAddedDoor});
+    }
+}
+
+void Building::SetTrainDoorsAdded(int trainID, std::vector<Transition> trainAddedDoors)
+{
+    _trainDoorsAdded[trainID] = trainAddedDoors;
+}
+
+std::optional<std::vector<Transition>> Building::GetTrainDoorsAdded(int trainID)
+{
+    auto iter = _trainDoorsAdded.find(trainID);
+
+    if(iter != _trainDoorsAdded.end()) {
+        return iter->second;
+    }
+
+    return std::nullopt;
 }
 
 #endif // _SIMULATOR

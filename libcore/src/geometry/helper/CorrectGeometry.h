@@ -27,6 +27,7 @@ class Wall;
 class SubRoom;
 class Line;
 class Point;
+class Transition;
 
 #include <optional>
 #include <vector>
@@ -57,6 +58,9 @@ namespace geometry::helper
  *
  */
 void CorrectInputGeometry(Building & building);
+
+bool CorrectSubRoom(SubRoom & subRoom);
+
 bool RemoveOverlappingWall(const Line & exit, SubRoom & subroom);
 
 /**
@@ -92,5 +96,48 @@ int AddConnectedWallsToSubroom(SubRoom & subroom, const std::vector<Wall> & wall
  */
 void ReplaceBigWall(SubRoom & subroom, const Wall & bigWall, const std::vector<Wall> & wallPieces);
 bool RemoveBigWalls(SubRoom & subroom);
+
+/**
+ * Projects the door coordinates to the walls of the track.
+ * @param trackWalls walls of the track
+ * @param trainDoors doors of the train
+ * @return Vector containing: [[Point1 of door, wall containing Point1],
+ *                             [Point2 of door, wall containing Point2]]
+ */
+std::vector<std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>> ComputeTrainDoorCoordinates(
+    const std::vector<Wall> & trackWalls,
+    const std::vector<Transition> & trainDoors);
+
+/**
+ * Interface for adding trains to the geometry. Adds the \p trainDoors to the given \p subroom and
+ * updates afterwards. \p trainDoors will also be add to \p building. Geometry changes added/removed
+ * walls and added doors will be saved with \p trainID as identifier.
+ * @param trainID ID of the arriving train
+ * @param building simulation geometry
+ * @param subroom subroom containing the platform the train is arriving
+ * @param trackWalls platform edges where the train might arrive
+ * @param trainDoors doors of the train
+ */
+void AddTrainDoors(
+    int trainID,
+    Building & building,
+    SubRoom & subroom,
+    const std::vector<Wall> & trackWalls,
+    const std::vector<Transition> & trainDoors);
+
+/**
+ * Splits the given \p trackWalls at the \p wallDoorIntersectionPoints. The new line segments to
+ * create a closed polygon are returned in addedWalls (size 2). Each wall between the door points is
+ * returned in removedDoors.
+ * @param wallDoorIntersectionPoints door coordinates and the corresponding wall containings these
+ * points
+ * @param trackWalls platform edges where the train might arrive
+ * @param door train door to add
+ * @return [addedWalls, removedWalls]
+ */
+std::tuple<std::vector<Wall>, std::vector<Wall>> SplitWall(
+    const std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>> & wallDoorIntersectionPoints,
+    const std::vector<Wall> & trackWalls,
+    const Transition & door);
 
 } // namespace geometry::helper

@@ -36,6 +36,8 @@
 #include "general/Filesystem.h"
 #include "neighborhood/NeighborhoodSearch.h"
 
+#include <optional>
+
 typedef std::pair<Point, Wall> PointWall;
 
 struct Platform {
@@ -84,12 +86,24 @@ private:
     std::ofstream _pathWayStream;
     std::map<int, TrainType> _trains;
 
+    /**
+     * Map of walls added temporarily for a specific train
+     */
+    std::map<int, std::vector<Wall>> _trainWallsAdded;
+
+    /**
+     * Map of walls removed temporarily for a specific train
+     */
+    std::map<int, std::vector<Wall>> _trainWallsRemoved;
+
+    /**
+     * Map of doors added temporarily for a specific train
+     */
+    std::map<int, std::vector<Transition>> _trainDoorsAdded;
+
 public:
     /// constructor
     Building();
-    std::map<int, std::vector<Wall>> TempAddedWalls; // map to trainTimeTable
-    std::map<int, std::vector<Wall>> TempRemovedWalls;
-    std::map<int, std::vector<Transition>> TempAddedDoors;
 
     Building(Configuration * config, PedDistributor & pedDistributor);
 
@@ -217,8 +231,18 @@ public:
 
     const std::vector<Wall>
     GetTrackWalls(Point TrackStart, Point TrackEnd, int & room_id, int & subroom_id) const;
-    const std::vector<std::pair<PointWall, PointWall>>
-    GetIntersectionPoints(const std::vector<Transition> doors, const std::vector<Wall>) const;
+
+    void AddTrainWallAdded(int trainID, Wall trainAddedWall);
+    void SetTrainWallsAdded(int trainID, std::vector<Wall> trainAddedWalls);
+    std::optional<std::vector<Wall>> GetTrainWallsAdded(int trainID);
+
+    void AddTrainWallRemoved(int trainID, Wall trainRemovedWall);
+    void SetTrainWallsRemoved(int trainID, std::vector<Wall> trainRemovedWalls);
+    std::optional<std::vector<Wall>> GetTrainWallsRemoved(int trainID);
+
+    void AddTrainDoorAdded(int trainID, Transition trainAddedDoor);
+    void SetTrainDoorsAdded(int trainID, std::vector<Transition> trainAddedDoors);
+    std::optional<std::vector<Transition>> GetTrainDoorsAdded(int trainID);
 
     // ------------------------------------
     bool AddCrossing(Crossing * line);
