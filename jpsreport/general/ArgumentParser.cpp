@@ -810,6 +810,8 @@ std::optional<ConfigData_DIJ> ArgumentParser::ParseDIJParams(TiXmlElement * xMet
             configData.grid_size_X * CMtoM,
             configData.grid_size_Y * CMtoM);
     }
+
+    return configData;
 }
 
 
