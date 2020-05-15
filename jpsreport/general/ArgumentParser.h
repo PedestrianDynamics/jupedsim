@@ -83,13 +83,10 @@ private:
     int _log;
     std::vector<int> _timeIntervalA;
 
-    ConfigData_DIJ _configDataD, _configDataI, _configDataJ;
-
     std::map<int, MeasurementArea *> _measurementAreas;
     void Usage(const std::string file);
 
     std::optional<ConfigData_DIJ> ParseDIJParams(TiXmlElement * xMethod);
-
 public:
     // Konstruktor
     ArgumentParser();
@@ -137,6 +134,8 @@ public:
       * @param inifile
       */
     bool ParseIniFile(const std::string & inifile);
+
+    ConfigData_DIJ _configDataD, _configDataI, _configDataJ;
 };
 
 #endif /*ARGPARSER_H_*/

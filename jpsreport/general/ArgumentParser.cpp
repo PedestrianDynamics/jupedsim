@@ -798,7 +798,7 @@ std::optional<ConfigData_DIJ> ArgumentParser::ParseDIJParams(TiXmlElement * xMet
 
     if(xMethod->FirstChildElement("profiles") &&
        string(xMethod->FirstChildElement("profiles")->Attribute("enabled")) == "true") {
-        configData.isGetProfile = true;
+        configData.getProfile = true;
         configData.grid_size_X =
             xmltof(xMethod->FirstChildElement("profiles")->Attribute("grid_size_x")) * M2CM;
         configData.grid_size_Y =

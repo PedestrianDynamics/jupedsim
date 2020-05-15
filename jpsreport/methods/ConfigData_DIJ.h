@@ -46,10 +46,5 @@ struct ConfigData_DIJ {
 
     //general parameters
     bool isOneDimensional = false;
-
-    bool _isGetProfile = false;
-    float _grid_size_X = 10;
-    float _grid_size_Y = 10;
-
     //TODO Does it make sense to include the configs of measurement areas here as well?
 };
