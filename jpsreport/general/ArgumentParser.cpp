@@ -122,44 +122,23 @@ ArgumentParser::ArgumentParser()
     // Default parameter values
     _geometryFileName = "geo.xml";
 
-    _vComponent               = "B";
-    _IgnoreBackwardMovement   = false;
-    _isMethodA                = false;
-    _delatTVInst              = 5;
-    _isMethodB                = false;
-    _isMethodC                = false;
-    _isMethodD                = false;
-    _isMethodI                = false;
-    _isMethodJ                = false;
-    _isCutByCircle_MethodD    = false;
-    _isCutByCircle_MethodI    = false;
-    _isCutByCircle_MethodJ    = false;
-    _cutRadius_MethodD        = 50;
-    _cutRadius_MethodI        = 50;
-    _cutRadius_MethodJ        = 50;
-    _circleEdges_MethodD      = 6;
-    _circleEdges_MethodI      = 6;
-    _circleEdges_MethodJ      = 6;
-    _isOneDimensional_MethodD = false;
-    _isOneDimensional_MethodI = false;
-    _isOneDimensional_MethodJ = false;
-    _isGetProfile_MethodD     = false;
-    _isGetProfile_MethodI     = false;
-    _isGetProfile_MethodJ     = false;
-    _steadyStart              = 100;
-    _steadyEnd                = 1000;
-    _grid_size_X_MethodD      = 10;
-    _grid_size_X_MethodI      = 10;
-    _grid_size_X_MethodJ      = 10;
-    _grid_size_Y_MethodD      = 10;
-    _grid_size_Y_MethodI      = 10;
-    _grid_size_Y_MethodJ      = 10;
-    _errorLogFile             = "log.txt";
-    _log                      = 0; //stdio as default
-    _trajectoriesLocation     = "./";
-    _trajectoriesFilename     = "";
-    _projectRootDir           = "./";
-    _fileFormat               = FORMAT_XML_PLAIN;
+    _vComponent             = "B";
+    _IgnoreBackwardMovement = false;
+    _isMethodA              = false;
+    _delatTVInst            = 5;
+    _isMethodB              = false;
+    _isMethodC              = false;
+    _isMethodD              = false;
+    _isMethodI              = false;
+    _isMethodJ              = false;
+    _steadyStart            = 100;
+    _steadyEnd              = 1000;
+    _errorLogFile           = "log.txt";
+    _log                    = 0; //stdio as default
+    _trajectoriesLocation   = "./";
+    _trajectoriesFilename   = "";
+    _projectRootDir         = "./";
+    _fileFormat             = FORMAT_XML_PLAIN;
 }
 
 
@@ -919,81 +898,6 @@ bool ArgumentParser::GetIsMethodJ() const
     return _isMethodJ;
 }
 
-bool ArgumentParser::GetIsCutByCircleMethodD() const
-{
-    return _isCutByCircle_MethodD;
-}
-
-bool ArgumentParser::GetIsCutByCircleMethodI() const
-{
-    return _isCutByCircle_MethodI;
-}
-
-bool ArgumentParser::GetIsCutByCircleMethodJ() const
-{
-    return _isCutByCircle_MethodJ;
-}
-
-double ArgumentParser::GetCutRadiusMethodD() const
-{
-    return _cutRadius_MethodD;
-}
-
-double ArgumentParser::GetCutRadiusMethodI() const
-{
-    return _cutRadius_MethodI;
-}
-
-double ArgumentParser::GetCutRadiusMethodJ() const
-{
-    return _cutRadius_MethodJ;
-}
-
-int ArgumentParser::GetCircleEdgesMethodD() const
-{
-    return _circleEdges_MethodD;
-}
-
-int ArgumentParser::GetCircleEdgesMethodI() const
-{
-    return _circleEdges_MethodI;
-}
-
-int ArgumentParser::GetCircleEdgesMethodJ() const
-{
-    return _circleEdges_MethodJ;
-}
-
-bool ArgumentParser::GetIsOneDimensionalMethodD() const
-{
-    return _isOneDimensional_MethodD;
-}
-
-bool ArgumentParser::GetIsOneDimensionalMethodI() const
-{
-    return _isOneDimensional_MethodI;
-}
-
-bool ArgumentParser::GetIsOneDimensionalMethodJ() const
-{
-    return _isOneDimensional_MethodJ;
-}
-
-bool ArgumentParser::GetIsGetProfileMethodD() const
-{
-    return _isGetProfile_MethodD;
-}
-
-bool ArgumentParser::GetIsGetProfileMethodI() const
-{
-    return _isGetProfile_MethodI;
-}
-
-bool ArgumentParser::GetIsGetProfileMethodJ() const
-{
-    return _isGetProfile_MethodJ;
-}
-
 double ArgumentParser::GetSteadyStart() const
 {
     return _steadyStart;
@@ -1002,36 +906,6 @@ double ArgumentParser::GetSteadyStart() const
 double ArgumentParser::GetSteadyEnd() const
 {
     return _steadyEnd;
-}
-
-float ArgumentParser::GetGridSizeXMethodD() const
-{
-    return _grid_size_X_MethodD;
-}
-
-float ArgumentParser::GetGridSizeXMethodI() const
-{
-    return _grid_size_X_MethodD;
-}
-
-float ArgumentParser::GetGridSizeXMethodJ() const
-{
-    return _grid_size_X_MethodD;
-}
-
-float ArgumentParser::GetGridSizeYMethodD() const
-{
-    return _grid_size_Y_MethodD;
-}
-
-float ArgumentParser::GetGridSizeYMethodI() const
-{
-    return _grid_size_Y_MethodI;
-}
-
-float ArgumentParser::GetGridSizeYMethodJ() const
-{
-    return _grid_size_Y_MethodJ;
 }
 
 vector<int> ArgumentParser::GetAreaIDforMethodA() const
@@ -1047,62 +921,6 @@ vector<int> ArgumentParser::GetAreaIDforMethodB() const
 vector<int> ArgumentParser::GetAreaIDforMethodC() const
 {
     return _areaIDforMethodC;
-}
-
-vector<int> ArgumentParser::GetAreaIDforMethodD() const
-{
-    return _areaIDforMethodD;
-}
-
-vector<int> ArgumentParser::GetAreaIDforMethodI() const
-{
-    return _areaIDforMethodI;
-}
-
-vector<int> ArgumentParser::GetAreaIDforMethodJ() const
-{
-    return _areaIDforMethodJ;
-}
-
-vector<int> ArgumentParser::GetStartFramesMethodD() const
-{
-    return _start_frames_MethodD;
-}
-
-vector<int> ArgumentParser::GetStartFramesMethodI() const
-{
-    return _start_frames_MethodI;
-}
-
-vector<int> ArgumentParser::GetStartFramesMethodJ() const
-{
-    return _start_frames_MethodJ;
-}
-
-vector<int> ArgumentParser::GetStopFramesMethodD() const
-{
-    return _stop_frames_MethodD;
-}
-
-vector<int> ArgumentParser::GetStopFramesMethodI() const
-{
-    return _stop_frames_MethodI;
-}
-
-vector<int> ArgumentParser::GetStopFramesMethodJ() const
-{
-    return _stop_frames_MethodJ;
-}
-
-
-vector<bool> ArgumentParser::GetIndividualFDFlagsMethodD() const
-{
-    return _individual_FD_flags_MethodD;
-}
-
-vector<bool> ArgumentParser::GetIndividualFDFlagsMethodJ() const
-{
-    return _individual_FD_flags_MethodJ;
 }
 
 MeasurementArea * ArgumentParser::GetMeasurementArea(int id)

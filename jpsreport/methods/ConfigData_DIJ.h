@@ -41,15 +41,15 @@ struct ConfigData_DIJ {
 
     //parameters for cutting voronoi cells
     bool cutByCircle = false;
-    float cutRadius  = -1.;
-    int circleEdges  = -1;
+    float cutRadius  = 50;
+    int circleEdges  = 6;
 
     //general parameters
     bool isOneDimensional = false;
 
     bool _isGetProfile = false;
-    float _grid_size_X = 10.;
-    float _grid_size_Y = 10.;
+    float _grid_size_X = 10;
+    float _grid_size_Y = 10;
 
     //TODO Does it make sense to include the configs of measurement areas here as well?
 };
