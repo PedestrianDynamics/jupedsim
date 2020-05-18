@@ -214,8 +214,9 @@ bool SimulationHelper::UpdateTrainFlowRegulation(Building & building)
 {
     bool geometryChanged = false;
     for(auto const & [trainID, trainType] : building.GetTrains()) {
-        if(building.TempAddedDoors.find(trainID) != std::end(building.TempAddedDoors)) {
-            auto trainDoors = building.TempAddedDoors.at(trainID);
+        auto trainAddedDoors = building.GetTrainDoorsAdded(trainID);
+        if(trainAddedDoors.has_value()) {
+            auto trainDoors = trainAddedDoors.value();
 
             int trainUsage = std::accumulate(
                 std::begin(trainDoors),

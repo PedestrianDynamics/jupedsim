@@ -169,6 +169,7 @@ std::optional<std::vector<Wall>> SplitWall(const SubRoom & subroom, const Wall &
             splitPoints.emplace_back(*p);
         }
     }
+    LOG_DEBUG("splitpoints: {}", splitPoints.size());
 
     // No split points found, bigWall cannot be split.
     if(splitPoints.empty()) {
@@ -298,5 +299,240 @@ void CorrectInputGeometry(Building & building)
             LOG_INFO("Geometry was fixed, new file is stored in: {}.", newGeometryFile.string());
         }
     }
+}
+
+bool CorrectSubRoom(SubRoom & subroom)
+{
+    bool geometry_changed = false;
+    geometry_changed      = RemoveWallsOverlappingWithDoors(subroom) || geometry_changed;
+
+    // remove walls reaching out of the subroom
+    geometry_changed = RemoveBigWalls(subroom) || geometry_changed;
+
+    return geometry_changed;
+}
+
+std::vector<std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>>> ComputeTrainDoorCoordinates(
+    const std::vector<Wall> & trackWalls,
+    const std::vector<Transition> & trainDoors)
+{
+    const int scaleFactor = 1000; // very long orthogonal walls to train's doors
+    std::vector<std::pair<PointWall, PointWall>> pws;
+    // every door has two points.
+    // for every point -> get pair<P, W>
+    // collect pairs of pairs
+    for(const auto & door : trainDoors) {
+        PointWall pw1, pw2;
+        int nintersections = 0;
+        auto n             = door.NormalVec();
+        auto p11           = door.GetPoint1() + n * scaleFactor;
+        auto p12           = door.GetPoint1() - n * scaleFactor;
+        auto p21           = door.GetPoint2() + n * scaleFactor;
+        auto p22           = door.GetPoint2() - n * scaleFactor;
+        auto normalWall1   = Wall(p11, p12);
+        auto normalWall2   = Wall(p21, p22);
+        for(const auto & twall : trackWalls) {
+            Point interPoint1, interPoint2;
+            auto res  = normalWall1.IntersectionWith(twall, interPoint1);
+            auto res2 = normalWall2.IntersectionWith(twall, interPoint2);
+            if(res == 1) {
+                if(!twall.NearlyHasEndPoint(interPoint1)) {
+                    pw1 = std::make_pair(interPoint1, twall);
+                    nintersections++;
+                } else // end point
+                {
+                    if(res2 == 0) {
+                    } else {
+                        pw1 = std::make_pair(interPoint1, twall);
+                        nintersections++;
+                    }
+                }
+            }
+            if(res2 == 1) {
+                if(!twall.NearlyHasEndPoint(interPoint2)) {
+                    pw2 = std::make_pair(interPoint2, twall);
+                    nintersections++;
+                } else {
+                    if(res == 0) {
+                    } else {
+                        pw2 = std::make_pair(interPoint2, twall);
+                        nintersections++;
+                    }
+                }
+            }
+
+
+        } // tracks
+
+        if(nintersections == 2) {
+            pws.emplace_back(std::make_pair(pw1, pw2));
+        } else {
+            std::string message{fmt::format(
+                FMT_STRING("Error in GetIntersection. Should be 2 but got {}."), nintersections)};
+            throw std::runtime_error(message);
+        }
+    } // doors
+
+    return pws;
+}
+
+void AddTrainDoors(
+    int trainID,
+    Building & building,
+    SubRoom & subroom,
+    const std::vector<Wall> & trackWalls,
+    const std::vector<Transition> & trainDoors)
+{
+    auto wallDoorIntersectionPoints =
+        geometry::helper::ComputeTrainDoorCoordinates(trackWalls, trainDoors);
+
+    static int transition_id = 10000; // randomly high number
+
+    auto room      = building.GetRoom(subroom.GetRoomID());
+    auto trainType = building.GetTrain(trainID);
+
+    auto walls = subroom.GetAllWalls();
+    //---
+    for(const auto & wallDoorIntersection : wallDoorIntersectionPoints) {
+        //------------ transition --------
+        auto * trainDoor = new Transition();
+        trainDoor->SetID(transition_id++);
+        trainDoor->SetCaption(trainType._type);
+        trainDoor->SetPoint1(wallDoorIntersection.first.first);
+        trainDoor->SetPoint2(wallDoorIntersection.second.first);
+        std::string transType = "Train_" + std::to_string(trainID);
+        trainDoor->SetType(transType);
+        trainDoor->SetRoom1(room);
+        trainDoor->SetSubRoom1(&subroom);
+
+        room->AddTransitionID(trainDoor->GetUniqueID()); // danger area
+        subroom.AddTransition(trainDoor);                // danger area
+        building.AddTransition(trainDoor);               // danger area
+
+        auto [addedWalls, removedWalls] = SplitWall(wallDoorIntersection, trackWalls, *trainDoor);
+
+        std::for_each(
+            std::begin(addedWalls),
+            std::end(addedWalls),
+            [trainID, &building, &subroom](const Wall & wall) {
+                building.AddTrainWallAdded(trainID, wall);
+                subroom.AddWall(wall);
+            });
+        std::for_each(
+            std::begin(removedWalls),
+            std::end(removedWalls),
+            [trainID, &building, &subroom](const Wall & wall) {
+                building.AddTrainWallRemoved(trainID, wall);
+                subroom.RemoveWall(wall);
+            });
+        building.AddTrainDoorAdded(trainID, *trainDoor);
+    }
+    subroom.Update();
+}
+
+std::tuple<std::vector<Wall>, std::vector<Wall>> SplitWall(
+    const std::pair<std::pair<Point, Wall>, std::pair<Point, Wall>> & wallDoorIntersectionPoints,
+    const std::vector<Wall> & trackWalls,
+    const Transition & door)
+{
+    std::vector<Wall> addedWalls;
+    std::vector<Wall> removedWalls;
+
+    auto pw1 = wallDoorIntersectionPoints.first;
+    auto pw2 = wallDoorIntersectionPoints.second;
+    auto p1  = pw1.first;
+    auto w1  = pw1.second;
+    auto p2  = pw2.first;
+    auto w2  = pw2.second;
+
+    // case 1
+    Point P;
+    if(w1 == w2) {
+        double dist_pt1 = (w1.GetPoint1() - door.GetPoint1()).NormSquare();
+        double dist_pt2 = (w1.GetPoint1() - door.GetPoint2()).NormSquare();
+        Point A, B;
+
+        if(dist_pt1 < dist_pt2) {
+            A = door.GetPoint1();
+            B = door.GetPoint2();
+        } else {
+            A = door.GetPoint2();
+            B = door.GetPoint1();
+        }
+
+        Wall NewWall(w1.GetPoint1(), A);
+        Wall NewWall1(w1.GetPoint2(), B);
+        NewWall.SetType(w1.GetType());
+        NewWall1.SetType(w1.GetType());
+
+        // add new lines to be controled against overlap with exits
+        if(NewWall.GetLength() > J_EPS_DIST) {
+            addedWalls.emplace_back(NewWall);
+        }
+
+
+        if(NewWall1.GetLength() > J_EPS_DIST) {
+            addedWalls.emplace_back(NewWall1);
+        }
+
+        removedWalls.emplace_back(w1);
+
+    } else if(w1.ShareCommonPointWith(w2, P)) {
+        //--------------------------------
+        Point N, M;
+        if(w1.GetPoint1() == P) {
+            N = w1.GetPoint2();
+        } else {
+            N = w1.GetPoint1();
+        }
+
+        if(w2.GetPoint1() == P) {
+            M = w2.GetPoint2();
+        } else {
+            M = w2.GetPoint1();
+        }
+        Wall NewWall(N, p1);
+        Wall NewWall1(M, p2);
+        NewWall.SetType(w1.GetType());
+        NewWall1.SetType(w2.GetType());
+        // changes to building
+        addedWalls.emplace_back(NewWall);
+        addedWalls.emplace_back(NewWall1);
+
+        removedWalls.emplace_back(w1);
+        removedWalls.emplace_back(w2);
+    } else // disjoint
+    {
+        //--------------------------------
+        // find points on w1 and w2 between p1 and p2
+        // (A, B)
+        Point A, B;
+        if(door.isBetween(w1.GetPoint1())) {
+            A = w1.GetPoint2();
+        } else {
+            A = w1.GetPoint1();
+        }
+
+        if(door.isBetween(w2.GetPoint1())) {
+            B = w2.GetPoint2();
+        } else {
+            B = w2.GetPoint1();
+        }
+        Wall NewWall(A, p1);
+        Wall NewWall1(B, p2);
+        NewWall.SetType(w1.GetType());
+        NewWall1.SetType(w2.GetType());
+        // remove walls between
+        for(const auto & wall : trackWalls) {
+            if(door.isBetween(wall.GetPoint1()) || door.isBetween(wall.GetPoint2())) {
+                removedWalls.emplace_back(wall);
+            }
+        }
+        // changes to building
+        addedWalls.emplace_back(NewWall);
+        addedWalls.emplace_back(NewWall1);
+    }
+
+    return std::tuple{addedWalls, removedWalls};
 }
 } // namespace geometry::helper
