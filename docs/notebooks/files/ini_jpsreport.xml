@@ -13,16 +13,18 @@
 
   <measurement_areas unit="m">
     <area_B id="6" type="BoundingBox" zPos="None">
-      <vertex x="0" y="0.0" />
-      <vertex x="8" y="0.0" />
-      <vertex x="8" y="5.0" />
-      <vertex x="0" y="5.0" />
+      <vertex x="2" y="1.0" />
+      <vertex x="3" y="1.0" />
+      <vertex x="3" y="2.0" />
+      <vertex x="2" y="2.0" />
+      <vertex x="2" y="1.0" />  
       <length_in_movement_direction distance="1.0" />
     </area_B>
     <area_B id="1" type="BoundingBox" zPos="None">
       <vertex x="2.7" y="3.0" />
       <vertex x="3.7" y="3.0" />
       <vertex x="3.7" y="4.0" />
+      <vertex x="2.7" y="4.0" />
       <vertex x="2.7" y="3.0" />
       <length_in_movement_direction distance="1.0" />
     </area_B>
@@ -30,7 +32,8 @@
       <vertex x="4.3" y="3.0" />
       <vertex x="5.3" y="3.0" />
       <vertex x="5.3" y="4.0" />
-      <vertex x="4.3" y="3.0" />
+      <vertex x="4.3" y="4.0" />
+      <vertex x="4.3" y="3.0" />   
       <length_in_movement_direction distance="1.0" />
     </area_B>
     <area_L id="2" type="Line" zPos="None">

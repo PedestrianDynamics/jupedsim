@@ -13,6 +13,8 @@ from matplotlib.animation import FuncAnimation
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes #colorbar
 from matplotlib.patches import Polygon as ppolygon # polygons
 from mpl_toolkits.axes_grid1 import make_axes_locatable # profiles
+from matplotlib.collections import PatchCollection
+
 #-----------------------------------------------------------------
 
 # Visualisation
