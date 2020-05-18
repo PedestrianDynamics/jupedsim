@@ -36,6 +36,7 @@
 #include "general/ArgumentParser.h"
 #include "general/Macros.h"
 #include "geometry/Building.h"
+#include "methods/ConfigData_DIJ.h"
 #include "methods/PedData.h"
 
 #include <boost/geometry/geometries/adapted/c_array.hpp>
@@ -118,8 +119,6 @@ private:
                               // no measurement are)
     bool _DoesUseMethodJ;
 
-    bool
-        _calcIndividualFD; //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
     std::string
         _vComponent; // to mark whether x, y or x and y coordinate are used when calculating the velocity
     bool _IgnoreBackwardMovement;
@@ -139,6 +138,8 @@ private:
                                                        // measurement are, even
                                                        // if we don't use its polygon
     std::vector<MeasurementArea_B *> _areaForMethod_J;
+
+    ConfigData_DIJ configData_D, configData_I, configData_J;
 };
 
 #endif /*ANALYSIS_H_*/

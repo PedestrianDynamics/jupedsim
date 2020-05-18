@@ -187,6 +187,10 @@ void Analysis::InitArgs(ArgumentParser * args)
     _projectRootDir         = args->GetProjectRootDir();
     _trajFormat             = args->GetFileFormat();
     _outputLocation         = args->GetOutputLocation();
+
+    configData_D = args->_configDataD;
+    configData_I = args->_configDataI;
+    configData_J = args->_configDataJ;
 }
 
 
@@ -396,7 +400,8 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
             method_D.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
             method_D.SetTrajectoriesLocation(path);
             method_D.SetMeasurementArea(_areaForMethod_D[i]);
-            bool result_D = method_D.Process(data, _scriptsLocation, _areaForMethod_D[i]->_zPos);
+            bool result_D = method_D.Process(
+                configData_D, i, data, _scriptsLocation, _areaForMethod_D[i]->_zPos);
             if(result_D) {
                 Log->Write(
                     "INFO:\tSuccess with Method D using measurement area id %d!\n",
