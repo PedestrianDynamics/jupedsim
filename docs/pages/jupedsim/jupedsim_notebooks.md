@@ -4,17 +4,17 @@ sidebar: jupedsim_sidebar
 permalink: jupedsim_notebooks.html
 summary: Notebooks to demonstrate the use of JuPedSim
 folder: jupedsim
-last_updated: Mai 12, 2020
+last_updated: Mai 19, 2020
 ---
 
 ## Requirements
 
-See [README]({{ site.baseurl }}/docs/pages/notebooks/README.md) for more information about requirements.
+See [README](https://github.com/JuPedSim/jpscore/blob/master/docs/notebooks/README.md) for more information about requirements.
 
 
 ## Simuation and analysis with notebooks
 
-These [demonstration notebooks]({{ site.baseurl }}/docs/pages/notebooks/) provide an overview of the main functionalities, including:
+These [demonstration notebooks](https://github.com/JuPedSim/jpscore/tree/master/docs/notebooks) provide an overview of the main functionalities, including:
 
 - Running a simulation with `jpscore`
 
