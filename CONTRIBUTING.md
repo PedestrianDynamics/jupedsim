@@ -1,12 +1,12 @@
 Contributing to JuPedSim
 ========================
 
-This project is mainly developed by a small group of researchers and students from [Jülich Research Center](http://www.fz-juelich.de/en) and [BUW](http://www.uni-wuppertal.de/).
+This project is mainly developed by a small group of researchers and students from [Jülich Research Center](https://www.fz-juelich.de/ias/ias-7/EN/Home/home_node.html) and [BUW](https://www.asim.uni-wuppertal.de/en.html).
 However you are kindly invited not only to use JuPedSim but also contributing to our open-source-project.
 It does not matter if you are a researcher, student or just interested in pedestrian dynamics.
 
 ## Workflow
-The branches **master** and **develop** are **protected**. You can **only push to your feature-branch.**
+The branch **master** is **protected**. You can **only push to your feature-branch.**
 Whenever you want to add a feature or fix an issue create a new feature-branch and only work on this branch.
 If you change what you wanted to merge the develop-branch into your feature-branch.
 Make sure all tests are running after merging and you provided new tests for your feature.
@@ -15,10 +15,7 @@ After doing that open a merge/pull request.
 If your fix/feature is accepted it will be merged into the develop-branch.
 
 ## Reporting bugs and requesting features
-If you got a question or a problem and need support from our team feel free to contact us.
-You can do this via [email](mailto:dev@jupedsim.org).
-
-If you think you found an issue or bug in JuPedSim please use our issue tracker.
+If you got a question or a problem and need support from our team feel free to contact via the issue tracker.
 
 ### Reporting bugs
 
