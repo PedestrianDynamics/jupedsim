@@ -189,3 +189,6 @@ JuPedSim-blx.bib
 _tex/
 titlepage.tex
 /demos/*/results
+
+__pycache__
+ipynb_checkpoints/
