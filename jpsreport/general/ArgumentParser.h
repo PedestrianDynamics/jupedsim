@@ -87,6 +87,7 @@ private:
     void Usage(const std::string file);
 
     std::optional<ConfigData_DIJ> ParseDIJParams(TiXmlElement * xMethod);
+
 public:
     // Konstruktor
     ArgumentParser();

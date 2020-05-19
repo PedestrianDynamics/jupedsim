@@ -431,7 +431,8 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
             method_I.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
             method_I.SetTrajectoriesLocation(path);
             method_I.SetMeasurementArea(_areaForMethod_I[i]);
-            bool result_I = method_I.Process(data, _scriptsLocation, _areaForMethod_I[i]->_zPos);
+            bool result_I = method_I.Process(
+                configData_I, i, data, _scriptsLocation, _areaForMethod_I[i]->_zPos);
             if(result_I) {
                 Log->Write(
                     "INFO:\tSuccess with Method I using measurement area id %d!\n",
