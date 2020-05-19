@@ -50,14 +50,10 @@ public:
         const PedData & peddata,
         const fs::path & scriptsLocation,
         const double & zPos_measureArea);
-    void Setcutbycircle(double radius, int edges);
     void SetGeometryPolygon(polygon_2d geometryPolygon);
     void SetGeometryFileName(const fs::path & geometryFile);
     void SetGeometryBoundaries(double minX, double minY, double maxX, double maxY);
-    void SetGridSize(double x, double y);
-    void SetCalculateProfiles(bool calcProfile);
     void SetMeasurementArea(MeasurementArea_B * area);
-    void SetDimensional(bool dimension);
     void SetTrajectoriesLocation(const fs::path & trajectoryPath);
 
 private:
