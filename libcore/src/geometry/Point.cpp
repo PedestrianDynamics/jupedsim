@@ -26,6 +26,7 @@
  **/
 #include "Point.h"
 
+#include "general/Logger.h"
 #include "general/Macros.h"
 
 #include <sstream>
@@ -219,8 +220,7 @@ const Point operator/(const Point & p, double f)
     if(f > J_EPS * J_EPS)
         return Point(p._x / f, p._y / f);
     else {
-        std::cout << "Warning: Point::/operator. dividand " << f
-                  << " is too small. Set it to 1 instead" << std::endl;
+        LOG_WARNING("Point::/operator. dividand is smaller than {:.2f}", J_EPS * J_EPS);
         return Point(p._x, p._y);
     }
 }

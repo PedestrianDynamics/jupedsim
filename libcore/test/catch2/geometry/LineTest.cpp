@@ -231,18 +231,36 @@ TEST_CASE("geometry/Line/IsInLineSegment", "[geometry][Line][IsInLineSegment]")
     std::random_device rd;
     std::mt19937 mt(rd());
 
-
-    SECTION("Issue762")
+    SECTION("Line length")
     {
         Point point{4.00026, 0.};
-        Line shortLine{{4., -0.4}, {4., 0.4}};
-        bool isInShort = shortLine.IsInLineSegment(point);
-
-        Line longLine{{4., -1.95}, {4., 1.95}};
-        bool isInLong = longLine.IsInLineSegment(point);
-
-        REQUIRE(isInShort);
-        REQUIRE(isInLong);
+        double delta = 0.1;
+        // vertical line
+        for(int j = 0; j < 100; j++) {
+            Line vLine{{4., -0.4}, {4., 0.4 + j * delta}};
+            REQUIRE(vLine.IsInLineSegment(point));
+        }
+        // horizontal line
+        for(int j = 0; j < 100; j++) {
+            Line hLine{{3., 0.0}, {5. + j * delta, 0.0}};
+            REQUIRE(hLine.IsInLineSegment(point));
+        }
+        // inclined
+        for(int j = 0; j < 100; j++) {
+            const Point p1(5, 1);
+            const Point p2(3, -1);
+            Line tmp(p1, p2);
+            line = Line(p1, p2 + (p2 - p1) * delta * j);
+            REQUIRE(line.IsInLineSegment(point));
+        }
+        // inclined
+        for(int j = 0; j < 100; j++) {
+            const Point p1(3, 1);
+            const Point p2(5, -1);
+            Line tmp(p1, p2);
+            line = Line(p1, p2 + (p2 - p1) * delta * j);
+            REQUIRE(line.IsInLineSegment(point));
+        }
     }
 
     SECTION("Is on line segment")
