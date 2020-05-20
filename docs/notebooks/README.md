@@ -22,3 +22,10 @@ For Windows using anaconda, run
 ```
 conda install --yes --file requirements.txt
 ```
+
+
+These notebooks use interactive elements based on `ipywidgets`. Therefore, they should be activated as follows:
+
+```
+jupyter labextension install @jupyter-widgets/jupyterlab-manager
+```
