@@ -231,6 +231,20 @@ TEST_CASE("geometry/Line/IsInLineSegment", "[geometry][Line][IsInLineSegment]")
     std::random_device rd;
     std::mt19937 mt(rd());
 
+
+    SECTION("Issue762")
+    {
+        Point point{4.00026, 0.};
+        Line shortLine{{4., -0.4}, {4., 0.4}};
+        bool isInShort = shortLine.IsInLineSegment(point);
+
+        Line longLine{{4., -1.95}, {4., 1.95}};
+        bool isInLong = longLine.IsInLineSegment(point);
+
+        REQUIRE(isInShort);
+        REQUIRE(isInLong);
+    }
+
     SECTION("Is on line segment")
     {
         std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
@@ -243,7 +257,7 @@ TEST_CASE("geometry/Line/IsInLineSegment", "[geometry][Line][IsInLineSegment]")
         }
     }
 
-    SECTION("Is on line segment")
+    SECTION("Not on line segment")
     {
         std::uniform_real_distribution<double> dist(std::numeric_limits<double>::epsilon(), 1);
         for(int i = 0; i < 100; ++i) {
@@ -251,8 +265,8 @@ TEST_CASE("geometry/Line/IsInLineSegment", "[geometry][Line][IsInLineSegment]")
                 {line.GetPoint2()._x - line.GetPoint1()._x,
                  line.GetPoint2()._y - line.GetPoint1()._y});
             Point p = line.GetPoint1() + (connection * dist(mt));
-            p._x += J_EPS / 5.;
-            p._y += J_EPS / 5.;
+            p._x += J_EPS_DIST;
+            p._y += J_EPS_DIST;
 
             REQUIRE_FALSE(line.IsInLineSegment(p));
         }

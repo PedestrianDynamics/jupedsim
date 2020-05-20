@@ -260,7 +260,7 @@ const Point operator/(const Point & p, double f)
         return Point(p._x / f, p._y / f);
     else {
         std::cout << "Warning: Point::/operator. dividand " << f
-                  << " is to small. Set it to 1 instead" << std::endl;
+                  << " is too small. Set it to 1 instead" << std::endl;
         return Point(p._x, p._y);
     }
     //return Point(p.GetX() / f, p.GetY() / f);

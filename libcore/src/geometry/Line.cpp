@@ -219,31 +219,11 @@ Point Line::ShortestPoint(const Point & p) const
 }
 
 /*
- *  Prüft, ob Punkt p im Liniensegment enthalten ist
- * algorithm from:
- * http://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
- *
- * */
+ * Check within if a point is on a segment line (tol < 1E-6)
+ * * */
 bool Line::IsInLineSegment(const Point & p) const
 {
-    Point differenceTwoAndOne = _point2 - _point1;
-    Point differencePAndOne   = p - _point1;
-
-    // cross product to check if point i colinear
-    auto crossProduct = differenceTwoAndOne.CrossProduct(differencePAndOne);
-
-    if(std::abs(crossProduct) > 0.0001) {
-        return false;
-    }
-
-    // dotproduct and distSquared to check if point is in segment and not just in line
-    double dotp = differencePAndOne.ScalarProduct(differenceTwoAndOne);
-
-    if(dotp < 0.) {
-        return false;
-    }
-
-    return dotp <= (differenceTwoAndOne).NormSquare();
+    return fabs((_point1 - p).Norm() + (_point2 - p).Norm() - (_point2 - _point1).Norm()) < 1E-6;
 }
 
 bool Line::NearlyInLineSegment(const Point & p) const
