@@ -124,11 +124,11 @@ public:
 
     /**
       * @see IsInLine
-      * @return true if the point p is within the line segment defined the line end points
+      * @param p Point to be cheked
+      * @param tolerance. Defaults to 1E-6
+      * @return true if the point p is within the line segment.
       */
-    bool IsInLineSegment(const Point & p) const;
-
-    bool NearlyInLineSegment(const Point & p) const;
+    bool IsInLineSegment(const Point & p, double tolerance = 1E-6) const;
     bool NearlyHasEndPoint(const Point & point) const;
 
     /**

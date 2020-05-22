@@ -218,19 +218,11 @@ Point Line::ShortestPoint(const Point & p) const
         return _point2 + t * lambda;
 }
 
-/*
- * Check within if a point is on a segment line (tol < 1E-6)
- * * */
-bool Line::IsInLineSegment(const Point & p) const
+bool Line::IsInLineSegment(const Point & p, double tolerance) const
 {
-    return fabs((_point1 - p).Norm() + (_point2 - p).Norm() - (_point2 - _point1).Norm()) < 1E-6;
+    return fabs((_point1 - p).Norm() + (_point2 - p).Norm() - (_point2 - _point1).Norm()) < tolerance;
 }
 
-bool Line::NearlyInLineSegment(const Point & p) const
-{
-    return fabs((_point1 - p).Norm() + (_point2 - p).Norm() - (_point2 - _point1).Norm()) <
-           J_EPS_DIST; // old version
-}
 
 /* Berechnet direkt den Abstand von p zum Segment l
  * dazu wird die Funktion Line::ShortestPoint()

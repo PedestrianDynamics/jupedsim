@@ -52,8 +52,8 @@ namespace geometry::helper
 bool RemoveOverlappingWall(const Line & exit, SubRoom & subroom)
 {
     auto isOverlapping = [&exit](const auto & wall) {
-        return wall.NearlyInLineSegment(exit.GetPoint1()) &&
-               wall.NearlyInLineSegment(exit.GetPoint2());
+        return wall.IsInLineSegment(exit.GetPoint1(), J_EPS_DIST) &&
+               wall.IsInLineSegment(exit.GetPoint2(), J_EPS_DIST);
     };
 
     // search for a wall overlapping with the exit

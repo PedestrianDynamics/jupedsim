@@ -218,10 +218,10 @@ TEST_CASE("geometry/Line", "[geometry][Line]")
         Point P4(3.6, 7.6);
         Line L3(P1, P2);
         Line L4(P3, P4);
-        REQUIRE(L1.NearlyInLineSegment(P1));
-        REQUIRE(L1.NearlyInLineSegment(P2));
-        REQUIRE(L2.NearlyInLineSegment(P3));
-        REQUIRE(L2.NearlyInLineSegment(P4));
+        REQUIRE(L1.IsInLineSegment(P1, J_EPS_DIST));
+        REQUIRE(L1.IsInLineSegment(P2, J_EPS_DIST));
+        REQUIRE(L2.IsInLineSegment(P3, J_EPS_DIST));
+        REQUIRE(L2.IsInLineSegment(P4, J_EPS_DIST));
     }
 }
 
