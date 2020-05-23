@@ -41,28 +41,21 @@ using namespace std;
 
 Method_I::Method_I()
 {
-    _grid_size_X           = 0.10;
-    _grid_size_Y           = 0.10;
     _fps                   = 16;
     _outputVoronoiCellData = false;
-    _getProfile            = false;
     _geoMinX               = 0;
     _geoMinY               = 0;
     _geoMaxX               = 0;
     _geoMaxY               = 0;
-    _cutByCircle           = false;
-    _cutRadius             = -1;
-    _circleEdges           = -1;
     _fIndividualFD         = nullptr;
     _areaForMethod_I       = nullptr;
-    _isOneDimensional      = false;
-    _startFrame            = -1;
-    _stopFrame             = -1;
 }
 
 Method_I::~Method_I() {}
 
 bool Method_I::Process(
+    const ConfigData_DIJ & configData,
+    int measurementAreaID,
     const PedData & peddata,
     const fs::path & scriptsLocation,
     const double & zPos_measureArea)
@@ -77,6 +70,11 @@ bool Method_I::Process(
     _fps              = peddata.GetFps();
     int mycounter     = 0;
     int minFrame      = peddata.GetMinFrame();
+
+    int _startFrame        = configData.start_frames[measurementAreaID];
+    int _stopFrame         = configData.stop_frames[measurementAreaID];
+    bool _isOneDimensional = configData.isOneDimensional;
+
     Log->Write(
         "INFO:\tMethod I: frame rate fps: <%.2f>, start: <%d>, stop: <%d> (minFrame = %d)",
         _fps,
@@ -101,7 +99,7 @@ bool Method_I::Process(
         }
     }
 
-    if(!OpenFileIndividualFD()) {
+    if(!OpenFileIndividualFD(_isOneDimensional)) {
         return_value = false;
     }
 
@@ -158,7 +156,7 @@ bool Method_I::Process(
                 }
             }
             std::vector<std::pair<polygon_2d, int>> polygons_id =
-                GetPolygons(XInFrame, YInFrame, VInFrame, IdInFrame);
+                GetPolygons(configData, XInFrame, YInFrame, VInFrame, IdInFrame);
             // std::cout << ">> polygons_id " << polygons_id.size() << "\n";
             vector<polygon_2d> polygons;
             for(auto p : polygons_id) {
@@ -195,7 +193,7 @@ bool Method_I::Process(
     return return_value;
 }
 
-bool Method_I::OpenFileIndividualFD()
+bool Method_I::OpenFileIndividualFD(bool _isOneDimensional)
 {
     fs::path trajFileName("_id_" + _measureAreaId + ".dat");
     fs::path indFDPath("Fundamental_Diagram");
@@ -224,6 +222,7 @@ bool Method_I::OpenFileIndividualFD()
 }
 
 std::vector<std::pair<polygon_2d, int>> Method_I::GetPolygons(
+    const ConfigData_DIJ & configData,
     vector<double> & XInFrame,
     vector<double> & YInFrame,
     vector<double> & VInFrame,
@@ -236,9 +235,9 @@ std::vector<std::pair<polygon_2d, int>> Method_I::GetPolygons(
     std::vector<std::pair<polygon_2d, int>> polygons_id;
     polygons_id = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame, IdInFrame, boundpoint);
     polygon_2d poly;
-    if(_cutByCircle) {
-        polygons_id =
-            vd.cutPolygonsWithCircle(polygons_id, XInFrame, YInFrame, _cutRadius, _circleEdges);
+    if(configData.cutByCircle) {
+        polygons_id = vd.cutPolygonsWithCircle(
+            polygons_id, XInFrame, YInFrame, configData.cutRadius, configData.circleEdges);
     }
     //todo HH
     polygons_id = vd.cutPolygonsWithGeometry(polygons_id, _geoPoly, XInFrame, YInFrame);
@@ -288,23 +287,6 @@ void Method_I::GetIndividualFD(
     }
 }
 
-void Method_I::SetStartFrame(int startFrame)
-{
-    _startFrame = startFrame;
-}
-
-void Method_I::SetStopFrame(int stopFrame)
-{
-    _stopFrame = stopFrame;
-}
-
-void Method_I::Setcutbycircle(double radius, int edges)
-{
-    _cutByCircle = true;
-    _cutRadius   = radius;
-    _circleEdges = edges;
-}
-
 void Method_I::SetGeometryPolygon(polygon_2d geometryPolygon)
 {
     _geoPoly = geometryPolygon;
@@ -328,12 +310,6 @@ void Method_I::SetTrajectoriesLocation(const fs::path & trajectoryPath)
     _trajectoryPath = trajectoryPath;
 }
 
-void Method_I::SetGridSize(double x, double y)
-{
-    _grid_size_X = x;
-    _grid_size_Y = y;
-}
-
 void Method_I::SetOutputVoronoiCellData(bool outputCellData)
 {
     _outputVoronoiCellData = outputCellData;
@@ -342,11 +318,6 @@ void Method_I::SetOutputVoronoiCellData(bool outputCellData)
 void Method_I::SetMeasurementArea(MeasurementArea_B * area)
 {
     _areaForMethod_I = area;
-}
-
-void Method_I::SetDimensional(bool dimension)
-{
-    _isOneDimensional = dimension;
 }
 
 void Method_I::ReducePrecision(polygon_2d & polygon)

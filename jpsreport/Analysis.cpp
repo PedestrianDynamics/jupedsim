@@ -80,23 +80,15 @@ Analysis::Analysis()
     _DoesUseMethodD = false; // Method D--Voronoi method
     _DoesUseMethodI = false;
     _DoesUseMethodJ = false;
-    _cutByCircle    = false; //Adjust whether cut each original voronoi cell by a circle
-    _getProfile     = false; // Whether make field analysis or not
-    _calcIndividualFD =
-        false; //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
+
     _vComponent =
         "B"; // to mark whether x, y or x and y coordinate are used when calculating the velocity
     _IgnoreBackwardMovement = false;
-    _grid_size_X            = 0.10; // the size of the grid
-    _grid_size_Y            = 0.10;
     _lowVertexX             = 0;  // LOWest vertex of the geometry (x coordinate)
     _lowVertexY             = 0;  //  LOWest vertex of the geometry (y coordinate)
     _highVertexX            = 10; // Highest vertex of the geometry
     _highVertexY            = 10;
-    _cutRadius              = 1.0;
-    _circleEdges            = 6;
     _trajFormat             = FileFormat::FORMAT_PLAIN;
-    _isOneDimensional       = false;
 }
 
 Analysis::~Analysis()
@@ -157,56 +149,48 @@ void Analysis::InitArgs(ArgumentParser * args)
     }
 
     if(args->GetIsMethodD()) {
-        _DoesUseMethodD                  = true;
-        vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodD();
-        for(unsigned int i = 0; i < Measurement_Area_IDs.size(); i++) {
+        _DoesUseMethodD = true;
+        // TODO[DH]: modernize loops
+        for(unsigned int i = 0; i < args->_configDataD.areaIDs.size(); i++) {
             _areaForMethod_D.push_back(dynamic_cast<MeasurementArea_B *>(
-                args->GetMeasurementArea(Measurement_Area_IDs[i])));
+                args->GetMeasurementArea(args->_configDataD.areaIDs[i])));
         }
-        _StartFramesMethodD = args->GetStartFramesMethodD();
-        _StopFramesMethodD  = args->GetStopFramesMethodD();
-        _IndividualFDFlags  = args->GetIndividualFDFlags();
-        _geoPolyMethodD     = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_D);
+
+        _geoPolyMethodD = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_D);
     }
     if(args->GetIsMethodI()) {
-        _DoesUseMethodI                  = true;
-        vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodI();
-        for(unsigned int i = 0; i < Measurement_Area_IDs.size(); i++) {
+        _DoesUseMethodI = true;
+        // TODO[DH]: modernize loops
+        for(unsigned int i = 0; i < args->_configDataI.areaIDs.size(); i++) {
             _areaForMethod_I.push_back(dynamic_cast<MeasurementArea_B *>(
-                args->GetMeasurementArea(Measurement_Area_IDs[i])));
+                args->GetMeasurementArea(args->_configDataI.areaIDs[i])));
         }
-        _StartFramesMethodI = args->GetStartFramesMethodI();
-        _StopFramesMethodI  = args->GetStopFramesMethodI();
-        _geoPolyMethodI     = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_I);
+
+        _geoPolyMethodI = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_I);
     }
 
     if(args->GetIsMethodJ()) {
-        _DoesUseMethodJ                  = true;
-        vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodJ();
-        for(unsigned int i = 0; i < Measurement_Area_IDs.size(); i++) {
+        _DoesUseMethodJ = true;
+        // TODO[DH]: modernize loops
+        for(unsigned int i = 0; i < args->_configDataJ.areaIDs.size(); i++) {
             _areaForMethod_J.push_back(dynamic_cast<MeasurementArea_B *>(
-                args->GetMeasurementArea(Measurement_Area_IDs[i])));
+                args->GetMeasurementArea(args->_configDataJ.areaIDs[i])));
         }
-        _StartFramesMethodJ = args->GetStartFramesMethodJ();
-        _StopFramesMethodJ  = args->GetStopFramesMethodJ();
-        _IndividualFDFlags  = args->GetIndividualFDFlags();
-        _geoPolyMethodJ     = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_J);
+
+        _geoPolyMethodJ = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_J);
     }
 
     _deltaF                 = args->GetDelatT_Vins();
-    _cutByCircle            = args->GetIsCutByCircle();
-    _getProfile             = args->GetIsGetProfile();
-    _isOneDimensional       = args->GetIsOneDimensional();
     _vComponent             = args->GetVComponent();
     _IgnoreBackwardMovement = args->GetIgnoreBackwardMovement();
-    _grid_size_X            = int(args->GetGridSizeX());
-    _grid_size_Y            = int(args->GetGridSizeY());
     _geometryFileName       = args->GetGeometryFilename();
     _projectRootDir         = args->GetProjectRootDir();
     _trajFormat             = args->GetFileFormat();
-    _cutRadius              = args->GetCutRadius();
-    _circleEdges            = args->GetCircleEdges();
     _outputLocation         = args->GetOutputLocation();
+
+    configData_D = args->_configDataD;
+    configData_I = args->_configDataI;
+    configData_J = args->_configDataJ;
 }
 
 
@@ -411,21 +395,13 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
 #pragma omp parallel for
         for(int i = 0; i < int(_areaForMethod_D.size()); i++) {
             Method_D method_D;
-            method_D.SetStartFrame(_StartFramesMethodD[i]);
-            method_D.SetStopFrame(_StopFramesMethodD[i]);
-            method_D.SetCalculateIndividualFD(_IndividualFDFlags[i]);
             method_D.SetGeometryPolygon(_geoPolyMethodD[_areaForMethod_D[i]->_id]);
             method_D.SetGeometryFileName(_geometryFileName);
             method_D.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
-            method_D.SetGridSize(_grid_size_X, _grid_size_Y);
-            method_D.SetDimensional(_isOneDimensional);
-            method_D.SetCalculateProfiles(_getProfile);
             method_D.SetTrajectoriesLocation(path);
-            if(_cutByCircle) {
-                method_D.Setcutbycircle(_cutRadius, _circleEdges);
-            }
             method_D.SetMeasurementArea(_areaForMethod_D[i]);
-            bool result_D = method_D.Process(data, _scriptsLocation, _areaForMethod_D[i]->_zPos);
+            bool result_D = method_D.Process(
+                configData_D, i, data, _scriptsLocation, _areaForMethod_D[i]->_zPos);
             if(result_D) {
                 Log->Write(
                     "INFO:\tSuccess with Method D using measurement area id %d!\n",
@@ -450,19 +426,13 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
 #pragma omp parallel for
         for(int i = 0; i < int(_areaForMethod_I.size()); i++) {
             Method_I method_I;
-            method_I.SetStartFrame(_StartFramesMethodI[i]);
-            method_I.SetStopFrame(_StopFramesMethodI[i]);
             method_I.SetGeometryPolygon(_geoPolyMethodI[_areaForMethod_I[i]->_id]);
             method_I.SetGeometryFileName(_geometryFileName);
             method_I.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
-            method_I.SetGridSize(_grid_size_X, _grid_size_Y);
-            method_I.SetDimensional(_isOneDimensional);
             method_I.SetTrajectoriesLocation(path);
-            if(_cutByCircle) {
-                method_I.Setcutbycircle(_cutRadius, _circleEdges);
-            }
             method_I.SetMeasurementArea(_areaForMethod_I[i]);
-            bool result_I = method_I.Process(data, _scriptsLocation, _areaForMethod_I[i]->_zPos);
+            bool result_I = method_I.Process(
+                configData_I, i, data, _scriptsLocation, _areaForMethod_I[i]->_zPos);
             if(result_I) {
                 Log->Write(
                     "INFO:\tSuccess with Method I using measurement area id %d!\n",
@@ -487,22 +457,13 @@ int Analysis::RunAnalysis(const fs::path & filename, const fs::path & path)
 #pragma omp parallel for
         for(int i = 0; i < int(_areaForMethod_J.size()); i++) {
             Method_J Method_J;
-            Method_J.SetStartFrame(_StartFramesMethodJ[i]);
-            Method_J.SetStopFrame(_StopFramesMethodJ[i]);
-            Method_J.SetCalculateIndividualFD(_IndividualFDFlags[i]);
             Method_J.SetGeometryPolygon(_geoPolyMethodJ[_areaForMethod_J[i]->_id]);
             Method_J.SetGeometryFileName(_geometryFileName);
             Method_J.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
-            Method_J.SetGridSize(_grid_size_X, _grid_size_Y);
-            Method_J.SetDimensional(_isOneDimensional);
-            Method_J.SetCalculateProfiles(_getProfile);
             Method_J.SetTrajectoriesLocation(path);
-            if(_cutByCircle) {
-                Method_J.Setcutbycircle(_cutRadius, _circleEdges);
-            }
             Method_J.SetMeasurementArea(_areaForMethod_J[i]);
-            bool result_Voronoi =
-                Method_J.Process(data, _scriptsLocation, _areaForMethod_J[i]->_zPos);
+            bool result_Voronoi = Method_J.Process(
+                configData_J, i, data, _scriptsLocation, _areaForMethod_J[i]->_zPos);
             if(result_Voronoi) {
                 Log->Write(
                     "INFO:\tSuccess with Method J using measurement area id %d!\n",

@@ -28,7 +28,9 @@
 #ifndef ARGUMENTPARSER_H_
 #define ARGUMENTPARSER_H_
 
+#include "../methods/ConfigData_DIJ.h"
 #include "../methods/MeasurementArea.h"
+#include "../tinyxml/tinyxml.h"
 #include "Macros.h"
 
 #include <boost/geometry/geometries/adapted/c_array.hpp>
@@ -36,6 +38,7 @@
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/geometry/geometry.hpp>
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -70,11 +73,6 @@ private:
     bool _isMethodD;
     bool _isMethodI;
     bool _isMethodJ;
-    bool _isCutByCircle;
-    double _cutRadius;
-    int _circleEdges;
-    bool _isOneDimensional;
-    bool _isGetProfile;
     double _steadyStart;
     double _steadyEnd;
     int _delatTVInst;
@@ -82,24 +80,13 @@ private:
     std::vector<int> _areaIDforMethodA;
     std::vector<int> _areaIDforMethodB;
     std::vector<int> _areaIDforMethodC;
-    std::vector<int> _areaIDforMethodD;
-    std::vector<int> _areaIDforMethodI;
-    std::vector<int> _areaIDforMethodJ;
-    float _grid_size_X;
-    float _grid_size_Y;
     int _log;
-    std::vector<int> _start_frames_MethodD;
-    std::vector<int> _stop_frames_MethodD;
-    std::vector<int> _start_frames_MethodI;
-    std::vector<int> _stop_frames_MethodI;
-    std::vector<int> _start_frames_MethodJ;
-    std::vector<int> _stop_frames_MethodJ;
-    std::vector<bool> _individual_FD_flags;
     std::vector<int> _timeIntervalA;
-
 
     std::map<int, MeasurementArea *> _measurementAreas;
     void Usage(const std::string file);
+
+    std::optional<ConfigData_DIJ> ParseDIJParams(TiXmlElement * xMethod);
 
 public:
     // Konstruktor
@@ -133,28 +120,10 @@ public:
     std::vector<int> GetAreaIDforMethodA() const;
     std::vector<int> GetAreaIDforMethodB() const;
     std::vector<int> GetAreaIDforMethodC() const;
-    std::vector<int> GetAreaIDforMethodD() const;
-    std::vector<int> GetAreaIDforMethodI() const;
-    std::vector<int> GetAreaIDforMethodJ() const;
-    std::vector<int> GetStartFramesMethodD() const;
-    std::vector<int> GetStopFramesMethodD() const;
-    std::vector<int> GetStartFramesMethodI() const;
-    std::vector<int> GetStopFramesMethodI() const;
-    std::vector<int> GetStartFramesMethodJ() const;
-    std::vector<int> GetStopFramesMethodJ() const;
-    std::vector<bool> GetIndividualFDFlags() const;
-    bool GetIsCutByCircle() const;
-    double GetCutRadius() const;
-    int GetCircleEdges() const;
+
     bool GetIsOutputGraph() const;
-    bool GetIsOneDimensional() const;
-    bool GetIsIndividualFD() const;
-    polygon_2d GetAreaIndividualFD() const;
     double GetSteadyStart() const;
     double GetSteadyEnd() const;
-    bool GetIsGetProfile() const;
-    float GetGridSizeX() const;
-    float GetGridSizeY() const;
     int GetLog() const;
     bool ParseArgs(int argc, char ** argv);
     void SetErrorLogFile(fs::path errorLogFile);
@@ -166,6 +135,8 @@ public:
       * @param inifile
       */
     bool ParseIniFile(const std::string & inifile);
+
+    ConfigData_DIJ _configDataD, _configDataI, _configDataJ;
 };
 
 #endif /*ARGPARSER_H_*/

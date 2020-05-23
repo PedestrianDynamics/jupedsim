@@ -28,6 +28,8 @@
 
 #include "Method_D.h"
 
+#include "ConfigData_DIJ.h"
+
 #include <cmath>
 #include <iostream>
 #include <map>
@@ -41,29 +43,21 @@ using namespace std;
 
 Method_D::Method_D()
 {
-    _grid_size_X      = 0.10;
-    _grid_size_Y      = 0.10;
-    _fps              = 16;
-    _getProfile       = false;
-    _geoMinX          = 0;
-    _geoMinY          = 0;
-    _geoMaxX          = 0;
-    _geoMaxY          = 0;
-    _cutByCircle      = false;
-    _cutRadius        = -1;
-    _circleEdges      = -1;
-    _fIndividualFD    = nullptr;
-    _calcIndividualFD = false;
-    _fVoronoiRhoV     = nullptr;
-    _areaForMethod_D  = nullptr;
-    _isOneDimensional = false;
-    _startFrame       = -1;
-    _stopFrame        = -1;
+    _fps             = 16;
+    _geoMinX         = 0;
+    _geoMinY         = 0;
+    _geoMaxX         = 0;
+    _geoMaxY         = 0;
+    _fIndividualFD   = nullptr;
+    _fVoronoiRhoV    = nullptr;
+    _areaForMethod_D = nullptr;
 }
 
 Method_D::~Method_D() {}
 
 bool Method_D::Process(
+    const ConfigData_DIJ & configData,
+    int measurementAreaID,
     const PedData & peddata,
     const fs::path & scriptsLocation,
     const double & zPos_measureArea)
@@ -78,6 +72,13 @@ bool Method_D::Process(
     _fps              = peddata.GetFps();
     int mycounter     = 0;
     int minFrame      = peddata.GetMinFrame();
+
+    int _startFrame        = configData.start_frames[measurementAreaID];
+    int _stopFrame         = configData.stop_frames[measurementAreaID];
+    bool _isOneDimensional = configData.isOneDimensional;
+    bool _getProfile       = configData.getProfile;
+    bool _calcIndividualFD = configData.individual_FD_flags[measurementAreaID];
+
     Log->Write(
         "INFO:\tMethod D: frame rate fps: <%.2f>, start: <%d>, stop: <%d> (minFrame = %d)",
         _fps,
@@ -102,11 +103,11 @@ bool Method_D::Process(
         }
     }
 
-    if(!OpenFileMethodD()) {
+    if(!OpenFileMethodD(_isOneDimensional)) {
         return_value = false;
     }
     if(_calcIndividualFD) {
-        if(!OpenFileIndividualFD()) {
+        if(!OpenFileIndividualFD(_isOneDimensional)) {
             return_value = false;
         }
     }
@@ -149,7 +150,12 @@ bool Method_D::Process(
         if(NumPeds > 3) {
             if(_isOneDimensional) {
                 CalcVoronoiResults1D(
-                    XInFrame, VInFrame, IdInFrame, _areaForMethod_D->_poly, str_frid);
+                    XInFrame,
+                    VInFrame,
+                    IdInFrame,
+                    _areaForMethod_D->_poly,
+                    str_frid,
+                    _calcIndividualFD);
             } else {
                 if(IsPointsOnOneLine(XInFrame, YInFrame)) {
                     if(fabs(XInFrame[1] - XInFrame[0]) < dmin) {
@@ -159,7 +165,7 @@ bool Method_D::Process(
                     }
                 }
                 std::vector<std::pair<polygon_2d, int>> polygons_id =
-                    GetPolygons(XInFrame, YInFrame, VInFrame, IdInFrame);
+                    GetPolygons(configData, XInFrame, YInFrame, VInFrame, IdInFrame);
                 // std::cout << ">> polygons_id " << polygons_id.size() << "\n";
                 vector<polygon_2d> polygons;
                 for(auto p : polygons_id)
@@ -181,8 +187,8 @@ bool Method_D::Process(
                                 ZInFrame);
                         }
                     }
-                    if(_getProfile) {                              //	field analysis
-                        GetProfiles(str_frid, polygons, VInFrame); // TODO polygons_id
+                    if(_getProfile) {                                          //	field analysis
+                        GetProfiles(configData, str_frid, polygons, VInFrame); // TODO polygons_id
                     }
                 } else {
                     for(int i = 0; i < (int) IdInFrame.size(); i++) {
@@ -212,7 +218,7 @@ bool Method_D::Process(
     return return_value;
 }
 
-bool Method_D::OpenFileMethodD()
+bool Method_D::OpenFileMethodD(bool _isOneDimensional)
 {
     std::string voroLocation(VORO_LOCATION);
     fs::path tmp("_id_" + _measureAreaId + ".dat");
@@ -240,7 +246,7 @@ bool Method_D::OpenFileMethodD()
     }
 }
 
-bool Method_D::OpenFileIndividualFD()
+bool Method_D::OpenFileIndividualFD(bool _isOneDimensional)
 {
     fs::path trajFileName("_id_" + _measureAreaId + ".dat");
     fs::path indFDPath("Fundamental_Diagram");
@@ -270,6 +276,7 @@ bool Method_D::OpenFileIndividualFD()
 }
 
 std::vector<std::pair<polygon_2d, int>> Method_D::GetPolygons(
+    const ConfigData_DIJ & configData,
     vector<double> & XInFrame,
     vector<double> & YInFrame,
     vector<double> & VInFrame,
@@ -284,9 +291,9 @@ std::vector<std::pair<polygon_2d, int>> Method_D::GetPolygons(
     // std:: cout << " GetPolygons " << polygons_id.size() << "\n";
 
     polygon_2d poly;
-    if(_cutByCircle) {
-        polygons_id =
-            vd.cutPolygonsWithCircle(polygons_id, XInFrame, YInFrame, _cutRadius, _circleEdges);
+    if(configData.cutByCircle) {
+        polygons_id = vd.cutPolygonsWithCircle(
+            polygons_id, XInFrame, YInFrame, configData.cutRadius, configData.circleEdges);
     }
 
     polygons_id = vd.cutPolygonsWithGeometry(polygons_id, _geoPoly, XInFrame, YInFrame);
@@ -355,10 +362,14 @@ std::tuple<double, double> Method_D::GetVoronoiDensityVelocity(
 }
 // and velocity is calculated for every frame
 void Method_D::GetProfiles(
+    const ConfigData_DIJ & configData,
     const string & frameId,
     const vector<polygon_2d> & polygons,
     const vector<double> & velocity)
 {
+    float _grid_size_X = configData.grid_size_X;
+    float _grid_size_Y = configData.grid_size_Y;
+
     std::string voroLocation(VORO_LOCATION);
     fs::path tmp("field");
     fs::path vtmp("velocity");
@@ -543,28 +554,6 @@ void Method_D::GetIndividualFD(
     }
 }
 
-void Method_D::SetCalculateIndividualFD(bool individualFD)
-{
-    _calcIndividualFD = individualFD;
-}
-
-void Method_D::SetStartFrame(int startFrame)
-{
-    _startFrame = startFrame;
-}
-
-void Method_D::SetStopFrame(int stopFrame)
-{
-    _stopFrame = stopFrame;
-}
-
-void Method_D::Setcutbycircle(double radius, int edges)
-{
-    _cutByCircle = true;
-    _cutRadius   = radius;
-    _circleEdges = edges;
-}
-
 void Method_D::SetGeometryPolygon(polygon_2d geometryPolygon)
 {
     _geoPoly = geometryPolygon;
@@ -588,25 +577,9 @@ void Method_D::SetTrajectoriesLocation(const fs::path & trajectoryPath)
     _trajectoryPath = trajectoryPath;
 }
 
-void Method_D::SetGridSize(double x, double y)
-{
-    _grid_size_X = x;
-    _grid_size_Y = y;
-}
-
-void Method_D::SetCalculateProfiles(bool calcProfile)
-{
-    _getProfile = calcProfile;
-}
-
 void Method_D::SetMeasurementArea(MeasurementArea_B * area)
 {
     _areaForMethod_D = area;
-}
-
-void Method_D::SetDimensional(bool dimension)
-{
-    _isOneDimensional = dimension;
 }
 
 void Method_D::ReducePrecision(polygon_2d & polygon)
@@ -622,7 +595,8 @@ void Method_D::CalcVoronoiResults1D(
     vector<double> & VInFrame,
     vector<int> & IdInFrame,
     const polygon_2d & measureArea,
-    const string & frid)
+    const string & frid,
+    bool _calcIndividualFD)
 {
     vector<double> measurearea_x;
     for(unsigned int i = 0; i < measureArea.outer().size(); i++) {
