@@ -25,9 +25,11 @@ set(source_files
     geometry/Obstacle.cpp
     geometry/SubRoom.cpp
     geometry/Goal.cpp
+    ../libcore/src/general/Logger.cpp
 )
 
 set (header_files
+    ../libcore/src/general/Logger.h
     Analysis.h
     methods/MeasurementArea.h
     methods/VoronoiDiagram.h
@@ -61,6 +63,8 @@ add_library(report STATIC
 )
 
 target_link_libraries(report PUBLIC
+    spdlog::spdlog
+    fmt::fmt
     tinyxml
     fs
     Boost::boost
