@@ -20,11 +20,36 @@
 #include "EventFileParser.h"
 
 #include "events/DoorEvent.h"
-#include "events/EventHelper.h"
 #include "general/Macros.h"
 #include "tinyxml.h"
 
 #include <Logger.h>
+
+namespace
+{
+std::unique_ptr<Event>
+MakeDoorEvent(Building * building, int doorID, double time, const std::string & type)
+{
+    if(type == "open") {
+        return std::make_unique<DoorOpenEvent>(building, doorID, time);
+    }
+
+    if(type == "temp_close") {
+        return std::make_unique<DoorTempCloseEvent>(building, doorID, time);
+    }
+
+    if(type == "close") {
+        return std::make_unique<DoorCloseEvent>(building, doorID, time);
+    }
+
+    if(type == "reset") {
+        return std::make_unique<DoorResetEvent>(building, doorID, time);
+    }
+
+    throw std::runtime_error(
+        fmt::format(FMT_STRING("Error parsing events. Unknown door event type {:s}"), type));
+}
+} // namespace
 
 void EventFileParser::ParseDoorEvents(
     EventManager & eventManager,
@@ -101,11 +126,7 @@ void EventFileParser::ParseDoorEvents(
             continue;
         }
 
-        if(auto action = EventHelper::StringToEventAction(state); !action.has_value()) {
-            LOG_ERROR("event {:d}: unknown event {}", id, state);
-        } else {
-            eventManager.AddEvent(std::make_unique<DoorEvent>(building, id, time, action.value()));
-        }
+        eventManager.AddEvent(MakeDoorEvent(building, id, time, state));
     }
     LOG_INFO("Events have been initialized");
 }
@@ -241,18 +262,15 @@ void EventFileParser::ParseSchedule(
 
         for(auto door : groupDoor[id]) {
             for(auto open : timeOpen) {
-                eventManager.AddEvent(
-                    std::make_unique<DoorEvent>(building, door, open, EventAction::DOOR_OPEN));
+                eventManager.AddEvent(std::make_unique<DoorOpenEvent>(building, door, open));
             }
 
             for(auto close : timeClose) {
-                eventManager.AddEvent(std::make_unique<DoorEvent>(
-                    building, door, close, EventAction::DOOR_TEMP_CLOSE));
+                eventManager.AddEvent(std::make_unique<DoorTempCloseEvent>(building, door, close));
             }
 
             for(auto reset : timeReset) {
-                eventManager.AddEvent(std::make_unique<DoorEvent>(
-                    building, door, reset, EventAction::DOOR_RESET_USAGE));
+                eventManager.AddEvent(std::make_unique<DoorResetEvent>(building, door, reset));
             }
         }
     }

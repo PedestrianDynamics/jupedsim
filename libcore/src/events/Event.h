@@ -7,16 +7,6 @@
 #include <iostream>
 #include <string>
 
-// Describes the event
-enum class EventAction {
-    DOOR_OPEN,
-    DOOR_CLOSE,
-    DOOR_TEMP_CLOSE,
-    DOOR_RESET_USAGE,
-    TRAIN_ARRIVAL,
-    TRAIN_DEPARTURE
-};
-
 class Event
 {
 protected:
@@ -25,17 +15,12 @@ protected:
      * @param time when the event shall take place
      * @param action type of the event
      */
-    Event(double time, EventAction action);
+    explicit Event(double time);
 
     /**
      * Time the event is triggered
      */
     double _time;
-
-    /**
-     * Type of event
-     */
-    EventAction _action;
 
 public:
     virtual ~Event() = default;
