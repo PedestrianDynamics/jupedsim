@@ -36,9 +36,7 @@
 void EventManager::AddEvent(std::unique_ptr<Event> event)
 {
     _events.emplace_back(std::move(event));
-    std::sort(std::begin(_events), std::end(_events), [](auto & event1, auto & event2) {
-        return event1->GetTime() < event2->GetTime();
-    });
+    _needs_sorting = true;
 }
 
 void EventManager::ListEvents()
@@ -50,6 +48,13 @@ void EventManager::ListEvents()
 
 bool EventManager::ProcessEvent(double now)
 {
+    if(_needs_sorting) {
+        std::sort(std::begin(_events), std::end(_events), [](auto & event1, auto & event2) {
+            return event1->GetTime() < event2->GetTime();
+        });
+        _needs_sorting = false;
+    }
+
     double timeMin = now - J_EPS_EVENT;
     std::unique_ptr<Event> eventMin =
         std::make_unique<DoorEvent>(nullptr, -1, timeMin, EventAction::DOOR_OPEN);

@@ -45,6 +45,11 @@ private:
      */
     Building * _building;
 
+    /**
+     * Indicates if Events need to be sorted when calling ProcessEvent() 
+     */
+    bool _needs_sorting{false};
+
 public:
     /**
       * Constructor.
