@@ -47,7 +47,7 @@ public:
     virtual ~Trajectories() = default;
     virtual void WriteHeader(long nPeds, double fps, Building * building, int seed, int count) = 0;
     virtual void WriteGeometry(Building * building)                                            = 0;
-    virtual void WriteFrame(int frameNr, Building * building)                                  = 0;
+    virtual void WriteFrame(int frameNr, int precision, Building * building)                   = 0;
     virtual void AddOptionalOutput(OptionalOutput option) { _optionalOutputOptions.insert(option); }
     virtual void SetOptionalOutput(std::set<OptionalOutput> options)
     {
@@ -69,5 +69,5 @@ public:
 
     void WriteHeader(long nPeds, double fps, Building * building, int seed, int count) override;
     void WriteGeometry(Building * building) override;
-    void WriteFrame(int frameNr, Building * building) override;
+    void WriteFrame(int frameNr, int precision, Building * building) override;
 };

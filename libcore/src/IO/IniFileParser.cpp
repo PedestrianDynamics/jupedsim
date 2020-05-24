@@ -235,6 +235,10 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         xHeader->FirstChildElement("trajectories")->Attribute("fps", &fps);
         _config->SetFps(fps);
 
+        int precision = 2;
+        xHeader->FirstChildElement("trajectories")->Attribute("precision", &precision);
+        _config->SetPrecision(precision);
+
         std::string format = xHeader->FirstChildElement("trajectories")->Attribute("format") ?
                                  xHeader->FirstChildElement("trajectories")->Attribute("format") :
                                  "plain";
@@ -296,7 +300,11 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         _config->SetOriginalTrajectoriesFile(canonicalTrajPath);
 
         LOG_INFO("Output file  <{}>", _config->GetTrajectoriesFile().string());
-        LOG_INFO("In format <{}> at <{:.0f}> frames per seconds", format, _config->GetFps());
+        LOG_INFO(
+            "In format <{}> at <{:.0f}> frames per seconds. Precision: <{:d}>",
+            format,
+            _config->GetFps(),
+            _config->GetPrecision());
 
 
         if(xTrajectories->FirstChild("optional_output")) {
