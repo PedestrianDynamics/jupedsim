@@ -33,14 +33,8 @@
 #include <Logger.h>
 #include <cmath>
 
-EventManager::EventManager(Building * _b)
-{
-    _building = _b;
-}
-
 void EventManager::AddEvent(std::unique_ptr<Event> event)
 {
-    event->SetBuilding(_building);
     _events.emplace_back(std::move(event));
     std::sort(std::begin(_events), std::end(_events), [](auto & event1, auto & event2) {
         return event1->GetTime() < event2->GetTime();
@@ -58,7 +52,7 @@ bool EventManager::ProcessEvent()
 {
     double timeMin = Pedestrian::GetGlobalTime() - J_EPS_EVENT;
     std::unique_ptr<Event> eventMin =
-        std::make_unique<DoorEvent>(-1, timeMin, EventAction::DOOR_OPEN);
+        std::make_unique<DoorEvent>(nullptr, -1, timeMin, EventAction::DOOR_OPEN);
 
     auto firstEventAtTime = std::upper_bound(
         std::begin(_events), std::end(_events), eventMin, [](auto & val, auto & event) {
@@ -67,7 +61,7 @@ bool EventManager::ProcessEvent()
 
     double timeMax = Pedestrian::GetGlobalTime() + J_EPS_EVENT;
     std::unique_ptr<Event> eventMax =
-        std::make_unique<DoorEvent>(-1, timeMax, EventAction::DOOR_OPEN);
+        std::make_unique<DoorEvent>(nullptr, -1, timeMax, EventAction::DOOR_OPEN);
     auto lastEventAtTime = std::lower_bound(
         std::begin(_events), std::end(_events), eventMax, [](auto & event, auto & val) {
             return event->GetTime() <= val->GetTime();

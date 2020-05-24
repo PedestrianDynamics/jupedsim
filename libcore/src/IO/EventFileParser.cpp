@@ -26,7 +26,10 @@
 
 #include <Logger.h>
 
-void EventFileParser::ParseDoorEvents(EventManager & eventManager, const fs::path & eventFile)
+void EventFileParser::ParseDoorEvents(
+    EventManager & eventManager,
+    Building * building,
+    const fs::path & eventFile)
 {
     LOG_INFO("Parsing event file");
     TiXmlDocument docEvent(eventFile.string());
@@ -101,13 +104,16 @@ void EventFileParser::ParseDoorEvents(EventManager & eventManager, const fs::pat
         if(auto action = EventHelper::StringToEventAction(state); !action.has_value()) {
             LOG_ERROR("event {:d}: unknown event {}", id, state);
         } else {
-            eventManager.AddEvent(std::make_unique<DoorEvent>(id, time, action.value()));
+            eventManager.AddEvent(std::make_unique<DoorEvent>(building, id, time, action.value()));
         }
     }
     LOG_INFO("Events have been initialized");
 }
 
-void EventFileParser::ParseSchedule(EventManager & eventManager, const fs::path & scheduleFile)
+void EventFileParser::ParseSchedule(
+    EventManager & eventManager,
+    Building * building,
+    const fs::path & scheduleFile)
 {
     LOG_INFO("Parsing schedule file");
     TiXmlDocument docSchedule(scheduleFile.string());
@@ -236,17 +242,17 @@ void EventFileParser::ParseSchedule(EventManager & eventManager, const fs::path 
         for(auto door : groupDoor[id]) {
             for(auto open : timeOpen) {
                 eventManager.AddEvent(
-                    std::make_unique<DoorEvent>(door, open, EventAction::DOOR_OPEN));
+                    std::make_unique<DoorEvent>(building, door, open, EventAction::DOOR_OPEN));
             }
 
             for(auto close : timeClose) {
-                eventManager.AddEvent(
-                    std::make_unique<DoorEvent>(door, close, EventAction::DOOR_TEMP_CLOSE));
+                eventManager.AddEvent(std::make_unique<DoorEvent>(
+                    building, door, close, EventAction::DOOR_TEMP_CLOSE));
             }
 
             for(auto reset : timeReset) {
-                eventManager.AddEvent(
-                    std::make_unique<DoorEvent>(door, reset, EventAction::DOOR_RESET_USAGE));
+                eventManager.AddEvent(std::make_unique<DoorEvent>(
+                    building, door, reset, EventAction::DOOR_RESET_USAGE));
             }
         }
     }

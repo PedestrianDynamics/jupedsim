@@ -19,6 +19,8 @@ enum class EventAction {
 class Event
 {
 protected:
+    Event(double time, EventAction action) : _time(time), _action(action) {}
+
     /**
      * Time the event is triggered
      */
@@ -29,11 +31,6 @@ protected:
      */
     EventAction _action;
 
-    /**
-     * Geometry where the event should be applied to
-     */
-    Building * _building;
-
 public:
     virtual ~Event() = default;
 
@@ -41,12 +38,6 @@ public:
      * Processes the given \a _action at \a time on \a _building.
      */
     virtual void Process() = 0;
-
-    /**
-     * Sets the geometry for the event
-     * @param building Geometry, on which the event should be applied
-     */
-    void SetBuilding(Building * building) { _building = building; }
 
     /**
       * @return the time at which the event was recorded

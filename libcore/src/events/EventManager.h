@@ -49,7 +49,7 @@ public:
     /**
       * Constructor.
       */
-    explicit EventManager(Building * _b);
+    EventManager() = default;
 
     /**
       * Default deconstructor.

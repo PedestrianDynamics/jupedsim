@@ -15,6 +15,11 @@ class DoorEvent : public Event
 {
 private:
     /**
+     * Building to operate on
+     */
+    Building * _building;
+
+    /**
      * ID of transition which is effected by event.
      */
     int _doorID;
@@ -26,7 +31,7 @@ public:
       * @param time time at which the event is triggered
       * @param action Action which is performed at \p time on door \p doorID
       */
-    DoorEvent(int doorID, double time, EventAction action);
+    DoorEvent(Building * building, int doorID, double time, EventAction action);
 
     /**
       * Destructor

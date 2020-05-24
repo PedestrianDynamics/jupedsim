@@ -9,6 +9,11 @@ class TrainEvent : public Event
 {
 private:
     /**
+     * Building to operate on
+     */
+    Building * _building;
+
+    /**
      * ID of the train handled by this event
      */
     int _trainID;
@@ -56,6 +61,7 @@ private:
 public:
     /**
      * Constructs a TrainEvent
+     * @param building the building to operate on
      * @param time time at which the event is triggered
      * @param action action of event
      * @param trainID ID of train
@@ -69,6 +75,7 @@ public:
      * @param trainEnd end point of train
      */
     TrainEvent(
+        Building * building,
         double time,
         EventAction action,
         int trainID,
@@ -80,6 +87,8 @@ public:
         Point trackEnd,
         Point trainStart,
         Point trainEnd) :
+        Event(time, action),
+        _building(building),
         _trainID(trainID),
         _platformID(platformID),
         _trainType(trainType),
@@ -88,11 +97,7 @@ public:
         _trackStart(trackStart),
         _trackEnd(trackEnd),
         _trainStart(trainStart),
-        _trainEnd(trainEnd)
-    {
-        _time   = time;
-        _action = action;
-    };
+        _trainEnd(trainEnd){};
 
     virtual ~TrainEvent() = default;
 

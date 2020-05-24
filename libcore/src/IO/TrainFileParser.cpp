@@ -61,6 +61,7 @@ void TrainFileParser::ParseTrainTimeTable(
             auto trainType = trainTypes.at(type);
             // Arriving train
             eventManager.AddEvent(std::make_unique<TrainEvent>(
+                &building,
                 arrival_time,
                 EventAction::TRAIN_ARRIVAL,
                 id,
@@ -75,6 +76,7 @@ void TrainFileParser::ParseTrainTimeTable(
 
             // Departing train
             eventManager.AddEvent(std::make_unique<TrainEvent>(
+                &building,
                 departure_time,
                 EventAction::TRAIN_DEPARTURE,
                 id,

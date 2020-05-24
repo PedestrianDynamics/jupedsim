@@ -11,11 +11,9 @@
 
 #include <algorithm>
 
-DoorEvent::DoorEvent(int doorID, double time, EventAction action)
+DoorEvent::DoorEvent(Building * building, int doorID, double time, EventAction action) :
+    Event(time, action), _building(building), _doorID(doorID)
 {
-    _doorID = doorID;
-    _time   = time;
-    _action = action;
 }
 
 std::string DoorEvent::GetDescription() const
