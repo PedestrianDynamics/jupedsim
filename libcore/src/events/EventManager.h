@@ -41,11 +41,6 @@ private:
     std::vector<std::unique_ptr<Event>> _events;
 
     /**
-     * Geometry the events will be processed on.
-     */
-    Building * _building;
-
-    /**
      * Indicates if Events need to be sorted when calling ProcessEvent() 
      */
     bool _needs_sorting{false};
