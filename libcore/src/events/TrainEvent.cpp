@@ -4,9 +4,11 @@
 #include "geometry/Wall.h"
 #include "geometry/helper/CorrectGeometry.h"
 
+#include <fmt/format.h>
+
 void TrainEvent::Process()
 {
-    LOG_INFO("{}", GetDescription());
+    LOG_INFO("{}", *this);
     switch(_action) {
         case EventAction::TRAIN_ARRIVAL:
             TrainArrival();
@@ -19,7 +21,7 @@ void TrainEvent::Process()
     }
 }
 
-std::string TrainEvent::GetDescription() const
+std::string TrainEvent::ToString() const
 {
     std::string action;
     switch(_action) {

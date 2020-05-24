@@ -103,7 +103,7 @@ public:
 
     virtual void Process() override;
 
-    [[nodiscard]] std::string GetDescription() const override;
+    [[nodiscard]] std::string ToString() const override;
 
 private:
     /**

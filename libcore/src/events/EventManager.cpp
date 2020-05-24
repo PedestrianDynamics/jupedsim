@@ -44,7 +44,7 @@ void EventManager::AddEvent(std::unique_ptr<Event> event)
 void EventManager::ListEvents()
 {
     for(const auto & event : _events) {
-        LOG_INFO("{}", event->GetDescription());
+        LOG_INFO("{}", *event);
     }
 }
 

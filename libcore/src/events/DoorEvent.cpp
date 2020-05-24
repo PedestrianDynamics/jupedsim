@@ -10,13 +10,14 @@
 #include "pedestrian/Pedestrian.h"
 
 #include <algorithm>
+#include <fmt/format.h>
 
 DoorEvent::DoorEvent(Building * building, int doorID, double time, EventAction action) :
     Event(time, action), _building(building), _doorID(doorID)
 {
 }
 
-std::string DoorEvent::GetDescription() const
+std::string DoorEvent::ToString() const
 {
     std::string action;
     switch(_action) {
@@ -40,7 +41,7 @@ std::string DoorEvent::GetDescription() const
 
 void DoorEvent::Process()
 {
-    LOG_INFO("{}", GetDescription());
+    LOG_INFO("{}", *this);
     switch(_action) {
         case EventAction::DOOR_OPEN:
             OpenDoor();

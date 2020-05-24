@@ -4,6 +4,7 @@
 
 #include <Logger.h>
 #include <algorithm>
+#include <iostream>
 #include <string>
 
 // Describes the event
@@ -19,7 +20,12 @@ enum class EventAction {
 class Event
 {
 protected:
-    Event(double time, EventAction action) : _time(time), _action(action) {}
+    /**
+     * Creates an Event.
+     * @param time when the event shall take place
+     * @param action type of the event
+     */
+    Event(double time, EventAction action);
 
     /**
      * Time the event is triggered
@@ -45,7 +51,9 @@ public:
     [[nodiscard]] double GetTime() const { return _time; };
 
     /**
-      * @return a description of the event
+      * @return human readable string representation
       */
-    [[nodiscard]] virtual std::string GetDescription() const = 0;
+    [[nodiscard]] virtual std::string ToString() const = 0;
 };
+
+std::ostream & operator<<(std::ostream & out, const Event & event);
