@@ -84,5 +84,5 @@ public:
      * @param now timestamp until which all events will be processed.
      * @return Any event was processed.
      */
-    bool ProcessEvent(double now);
+    bool ProcessEvents(double now);
 };
