@@ -77,8 +77,8 @@ bool Method_I::Process(
     _fps              = peddata.GetFps();
     int mycounter     = 0;
     int minFrame      = peddata.GetMinFrame();
-    Log->Write(
-        "INFO:\tMethod I: frame rate fps: <%.2f>, start: <%d>, stop: <%d> (minFrame = %d)",
+    LOG_INFO(
+        "Method I: frame rate fps: <{:.2f}>, start: <{}>, stop: <{}> (minFrame = {})",
         _fps,
         _startFrame,
         _stopFrame,
@@ -105,7 +105,7 @@ bool Method_I::Process(
         return_value = false;
     }
 
-    Log->Write("------------------------ Analyzing with Method I -----------------------------");
+    LOG_INFO("------------------------ Analyzing with Method I -----------------------------");
 
     for(auto ite : _peds_t) {
         int frameNr = ite.first;
@@ -115,7 +115,7 @@ bool Method_I::Process(
         ss << std::setw(5) << std::setfill('0') << std::internal << frid;
         const std::string str_frid = ss.str();
         if(!(frid % 50)) {
-            Log->Write("INFO:\tframe ID = %d", frid);
+            LOG_INFO("frame ID = {}", frid);
         }
         vector<int> ids         = _peds_t[frameNr];
         vector<int> IdInFrame   = peddata.GetIdInFrame(frameNr, ids, zPos_measureArea);
@@ -124,15 +124,16 @@ bool Method_I::Process(
         vector<double> ZInFrame = peddata.GetZInFrame(frameNr, ids, zPos_measureArea);
         vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
         if(XInFrame.size() == 0) {
-            Log->Write("Warning:\t no pedestrians in frame <%d>", frameNr);
+            LOG_WARNING("no pedestrians in frame <{}>", frameNr);
             continue;
         }
         //------------------------------Remove peds outside geometry------------------------------------------
         for(int i = 0; i < (int) IdInFrame.size(); i++) {
             if(false == within(point_2d(round(XInFrame[i]), round(YInFrame[i])), _geoPoly)) {
-                Log->Write(
-                    "Warning:\tPedestrian at <x=%.4f, y=%.4f, , z=%.4f> is not in geometry and not "
-                    "considered in analysis!",
+                LOG_WARNING(
+                    "Pedestrian at <x={:.4f}, y={:.4f}, z={:.4f}> is not in the geometry and will "
+                    "not be "
+                    "considered in the analysis!",
                     XInFrame[i] * CMtoM,
                     YInFrame[i] * CMtoM,
                     ZInFrame[i] * CMtoM);
@@ -141,7 +142,7 @@ bool Method_I::Process(
                 YInFrame.erase(YInFrame.begin() + i);
                 ZInFrame.erase(ZInFrame.begin() + i);
                 VInFrame.erase(VInFrame.begin() + i);
-                Log->Write("Warning:\t Pedestrian removed");
+                LOG_WARNING("Pedestrian removed");
                 i--;
             }
         }
@@ -152,9 +153,9 @@ bool Method_I::Process(
         } else {
             if(IsPointsOnOneLine(XInFrame, YInFrame)) {
                 if(fabs(XInFrame[1] - XInFrame[0]) < dmin) {
-                    XInFrame[1] += offset;
+                    XInFrame[1] += joffset;
                 } else {
-                    YInFrame[1] += offset;
+                    YInFrame[1] += joffset;
                 }
             }
             std::vector<std::pair<polygon_2d, int>> polygons_id =
@@ -177,13 +178,13 @@ bool Method_I::Process(
                         YInFrame,
                         ZInFrame); //
                 }
-            } else {
-                for(int i = 0; i < (int) IdInFrame.size(); i++) {
-                    std::cout << XInFrame[i] * CMtoM << "   " << YInFrame[i] * CMtoM << "   "
-                              << IdInFrame[i] << "\n";
+                if(_getProfile) {                              //	field analysis
+                    GetProfiles(str_frid, polygons, VInFrame); // TODO polygons_id
                 }
-                Log->Write(
-                    "WARNING: \tVoronoi Diagrams are not obtained!. Frame: %d (minFrame = %d)\n",
+
+            } else {
+                LOG_WARNING(
+                    "Voronoi Diagrams are not obtained!. Frame: {} (minFrame = {})",
                     frid,
                     minFrame);
             }
@@ -195,6 +196,111 @@ bool Method_I::Process(
     return return_value;
 }
 
+std::tuple<double, double> Method_I::GetVoronoiDensityVelocity(
+    const vector<polygon_2d> & polygon,
+    const vector<double> & Velocity,
+    const polygon_2d & measureArea)
+{
+    double meanV   = 0;
+    double density = 0;
+    int temp       = 0;
+    for(auto && polygon_iterator : polygon) {
+        polygon_list v;
+        intersection(measureArea, polygon_iterator, v);
+        if(!v.empty()) {
+            meanV += Velocity[temp] * area(v[0]);
+            density += area(v[0]) / area(polygon_iterator);
+            if((area(v[0]) - area(polygon_iterator)) > J_EPS) {
+                std::cout << "----------------------Now calculating "
+                             "density-velocity!!!-----------------\n ";
+                std::cout << "measure area: \t" << std::setprecision(16) << dsv(measureArea)
+                          << "\n";
+                std::cout << "Original polygon:\t" << std::setprecision(16) << dsv(polygon_iterator)
+                          << "\n";
+                std::cout << "intersected polygon: \t" << std::setprecision(16) << dsv(v[0])
+                          << "\n";
+                std::cout << "this is a wrong result in density calculation\t " << area(v[0])
+                          << '\t' << area(polygon_iterator)
+                          << "  (diff=" << (area(v[0]) - area(polygon_iterator)) << ")"
+                          << "\n";
+            }
+        }
+        temp++;
+    }
+    meanV   = meanV / area(measureArea);
+    density = density / (area(measureArea) * CMtoM * CMtoM);
+    return std::make_tuple(density, meanV);
+}
+
+void Method_I::GetProfiles(
+    const string & frameId,
+    const vector<polygon_2d> & polygons,
+    const vector<double> & velocity)
+{
+    std::string voroLocation(VORO_LOCATION);
+    fs::path tmp("field");
+    fs::path vtmp("velocity");
+    fs::path dtmp("density");
+    tmp  = _outputLocation / voroLocation / tmp;
+    vtmp = tmp / vtmp /
+           ("Prf_v_" + _trajName.string() + "_id_" + _measureAreaId + "_" + frameId + ".dat");
+    dtmp = tmp / dtmp /
+           ("Prf_d_" + _trajName.string() + "_id_" + _measureAreaId + "_" + frameId + ".dat");
+    string Prfvelocity = vtmp.string();
+    string Prfdensity  = dtmp.string();
+
+    FILE * Prf_velocity;
+    if((Prf_velocity = Analysis::CreateFile(Prfvelocity)) == nullptr) {
+        LOG_ERROR("cannot open the file <{}> to write the field data\n", Prfvelocity.c_str());
+        exit(EXIT_FAILURE);
+    }
+    FILE * Prf_density;
+    if((Prf_density = Analysis::CreateFile(Prfdensity)) == nullptr) {
+        LOG_ERROR("cannot open the file to write the field density");
+        exit(EXIT_FAILURE);
+    }
+
+    int NRow = (int) ceil(
+        (_geoMaxY - _geoMinY) /
+        _grid_size_Y); // the number of rows that the geometry will be discretized for field analysis
+    int NColumn = (int) ceil(
+        (_geoMaxX - _geoMinX) /
+        _grid_size_X); //the number of columns that the geometry will be discretized for field analysis
+    for(int row_i = 0; row_i < NRow; row_i++) { //
+        for(int colum_j = 0; colum_j < NColumn; colum_j++) {
+            polygon_2d measurezoneXY;
+            {
+                const double coor[][2] = {
+                    {_geoMinX + colum_j * _grid_size_X, _geoMaxY - row_i * _grid_size_Y},
+                    {_geoMinX + colum_j * _grid_size_X + _grid_size_X,
+                     _geoMaxY - row_i * _grid_size_Y},
+                    {_geoMinX + colum_j * _grid_size_X + _grid_size_X,
+                     _geoMaxY - row_i * _grid_size_Y - _grid_size_Y},
+                    {_geoMinX + colum_j * _grid_size_X,
+                     _geoMaxY - row_i * _grid_size_Y - _grid_size_Y},
+                    {_geoMinX + colum_j * _grid_size_X,
+                     _geoMaxY - row_i * _grid_size_Y} // closing point is opening point
+                };
+                assign_points(measurezoneXY, coor);
+            }
+            correct(
+                measurezoneXY); // Polygons should be closed, and directed clockwise. If you're not sure if that is the case, call this function
+
+            double densityXY;
+            double velocityXY;
+            std::tie(densityXY, velocityXY) =
+                GetVoronoiDensityVelocity(polygons, velocity, measurezoneXY);
+            fprintf(Prf_density, "%.3f\t", densityXY);
+            fprintf(Prf_velocity, "%.3f\t", velocityXY);
+        }
+        fprintf(Prf_density, "\n");
+        fprintf(Prf_velocity, "\n");
+    }
+    fclose(Prf_velocity);
+    fclose(Prf_density);
+}
+
+
 bool Method_I::OpenFileIndividualFD()
 {
     fs::path trajFileName("_id_" + _measureAreaId + ".dat");
@@ -203,7 +309,7 @@ bool Method_I::OpenFileIndividualFD()
                 ("IFD_I_" + _trajName.string() + trajFileName.string());
     string Individualfundment = indFDPath.string();
     if((_fIndividualFD = Analysis::CreateFile(Individualfundment)) == nullptr) {
-        Log->Write("ERROR:\tcannot open the file individual\n");
+        LOG_ERROR("cannot open the file individual");
         return false;
     } else {
         if(_isOneDimensional) {
@@ -333,6 +439,12 @@ void Method_I::SetGridSize(double x, double y)
     _grid_size_X = x;
     _grid_size_Y = y;
 }
+
+void Method_I::SetCalculateProfiles(bool calcProfile)
+{
+    _getProfile = calcProfile;
+}
+
 
 void Method_I::SetOutputVoronoiCellData(bool outputCellData)
 {

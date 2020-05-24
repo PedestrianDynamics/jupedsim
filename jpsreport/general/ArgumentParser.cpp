@@ -42,7 +42,7 @@
 #define omp_get_thread_num() 0
 #define omp_get_max_threads() 1
 #endif
-
+#include "../../libcore/src/general/Compiler.h"
 #include "../Analysis.h"
 #include "../IO/OutputHandler.h"
 #include "../tinyxml/tinyxml.h"
@@ -52,39 +52,6 @@
 
 using namespace std;
 
-/* https://stackoverflow.com/questions/38530981/output-compiler-version-in-a-c-program#38531037 */
-std::string ver_string(int a, int b, int c)
-{
-    std::ostringstream ss;
-    ss << a << '.' << b << '.' << c;
-    return ss.str();
-}
-//https://sourceforge.net/p/predef/wiki/Compilers/
-std::string true_cxx =
-#ifdef __clang__
-    "clang++";
-#elif defined(__GNUC__)
-    "g++";
-#elif defined(__MINGW32__)
-    "MinGW";
-#elif defined(_MSC_VER)
-    "Visual Studio";
-#else
-    "Compiler not identified";
-#endif
-
-std::string true_cxx_ver =
-#ifdef __clang__
-    ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__);
-#elif defined(__GNUC__)
-    ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
-#elif defined(__MINGW32__)
-    ver_string(__MINGW32__, __MINGW32_MAJOR_VERSION, __MINGW32_MINOR_VERSION);
-#elif defined(_MSC_VER)
-    ver_string(_MSC_VER, _MSC_FULL_VER, _MSC_BUILD);
-#else
-    "";
-#endif
 
 void Logs()
 {
@@ -100,19 +67,18 @@ void Logs()
     auto currentTime = oss.str();
 
     // first logs will go to stdout
-    Log->Write("----\nJuPedSim - JPSreport\n");
-    Log->Write("Current date   : %s", currentTime.c_str());
-    Log->Write("Version        : %s", JPSREPORT_VERSION);
-    Log->Write("Compiler       : %s (%s)", true_cxx.c_str(), true_cxx_ver.c_str());
-    Log->Write("Commit hash    : %s", GIT_COMMIT_HASH);
-    Log->Write("Commit date    : %s", GIT_COMMIT_DATE);
-    Log->Write("Branch         : %s", GIT_BRANCH);
+    LOG_INFO("Starting JuPedSim - JPSreport");
+    LOG_INFO("Version {}", JPSREPORT_VERSION);
+    LOG_INFO("Commit id {}", GIT_COMMIT_HASH);
+    LOG_INFO("Commit date {}", GIT_COMMIT_DATE);
+    LOG_INFO("Build from branch {}", GIT_BRANCH);
+    LOG_INFO("Build with {}({})", compiler_id, compiler_version);
 }
 
 void ArgumentParser::Usage(const std::string file)
 {
-    Log->Write("Usage: \n");
-    Log->Write("%s inifile.xml\n", file.c_str());
+    LOG_INFO("Usage: \n");
+    LOG_INFO("{} inifile.xml\n", file.c_str());
     exit(EXIT_SUCCESS);
 }
 
@@ -152,7 +118,7 @@ bool ArgumentParser::ParseArgs(int argc, char ** argv)
 {
     //special case of the default configuration ini.xml
     if(argc == 1) {
-        Log->Write("INFO: \tTrying to load the default configuration from the file <ini.xml>");
+        LOG_INFO("Trying to load the default configuration from the file <ini.xml>");
         if(ParseIniFile("ini.xml") == false) {
             Usage(argv[0]);
         }
@@ -201,24 +167,24 @@ const fs::path & ArgumentParser::GetProjectRootDir() const
 bool ArgumentParser::ParseIniFile(const string & inifile)
 {
     Logs();
-    Log->Write("INFO: \tParsing the ini file <%s>", inifile.c_str());
+    LOG_INFO("Parsing the ini file <{}>", inifile.c_str());
     //extract and set the project root dir
     fs::path p(inifile);
     _projectRootDir = weakly_canonical(p).parent_path();
     TiXmlDocument doc(inifile);
     if(!doc.LoadFile()) {
-        Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \tCould not parse the ini file");
+        LOG_ERROR("{}", doc.ErrorDesc());
+        LOG_ERROR("Could not parse the ini file");
         return false;
     }
     TiXmlElement * xMainNode = doc.RootElement();
     if(!xMainNode) {
-        Log->Write("ERROR:\tRoot element does not exist");
+        LOG_ERROR("Root element does not exist");
         return false;
     }
 
     if(xMainNode->ValueStr() != "JPSreport") {
-        Log->Write("ERROR:\tRoot element value is not 'JPSreport'.");
+        LOG_ERROR("Root element value is not 'JPSreport'.");
         return false;
     }
     if(xMainNode->FirstChild("logfile")) {
@@ -227,7 +193,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
         logfile = GetProjectRootDir() / logfile;
         this->SetErrorLogFile(logfile);
         this->SetLog(1);
-        Log->Write("INFO:\tlogfile <%s>", GetErrorLogFile().string().c_str());
+        LOG_INFO("logfile <{}>", GetErrorLogFile().string().c_str());
     }
     switch(this->GetLog()) {
         case 0:
@@ -247,7 +213,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
 
         } break;
         default:
-            Log->Write("ERROR: \tWrong option for Log file!");
+            LOG_ERROR("Wrong option for Log file!");
             exit(0);
     }
 
@@ -256,12 +222,11 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
         fs::path pathGeo(xMainNode->FirstChildElement("geometry")->Attribute("file"));
         _geometryFileName = GetProjectRootDir() / pathGeo;
         if(!fs::exists(_geometryFileName)) {
-            Log->Write(
-                "ERROR: \tGeometry File <%s> does not exist", _geometryFileName.string().c_str());
+            LOG_ERROR("Geometry File <{}> does not exist", _geometryFileName.string().c_str());
             return false;
         }
         _geometryFileName = fs::canonical(_geometryFileName);
-        Log->Write("INFO: \tGeometry File is: <%s>", _geometryFileName.string().c_str());
+        LOG_INFO("Geometry File is: <{}>", _geometryFileName.string().c_str());
     }
 
     //trajectories
@@ -270,20 +235,20 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
         //add the extension point
         string fmt =
             "." + string(xmltoa(xMainNode->FirstChildElement("trajectories")->Attribute("format")));
-        Log->Write("INFO: \tFormat of the trajectory file is: <%s>", fmt.c_str());
+        LOG_INFO("Format of the trajectory file is: <{}>", fmt.c_str());
         if(fmt == ".xml") {
             _fileFormat = FORMAT_XML_PLAIN;
         } else if(fmt == ".txt") {
             _fileFormat = FORMAT_PLAIN;
         } else {
-            Log->Write("Error: \tthe given trajectory format is not supported. Supply '.xml' or "
-                       "'.txt' format!");
+            LOG_ERROR("the given trajectory format is not supported. Supply '.xml' or "
+                      "'.txt' format!");
             return false;
         }
 
         string unit = xmltoa(xMainNode->FirstChildElement("trajectories")->Attribute("unit"), "m");
         if(unit != "m") {
-            Log->Write("WARNING: \tonly <m> unit is supported. Convert your units.");
+            LOG_WARNING("only <m> unit is supported. Convert your units.");
             return false;
         }
         //a file descriptor was given
@@ -295,12 +260,10 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
 
             //check if the given file match the format
             if(boost::algorithm::ends_with(_trajectoriesFilename.string(), fmt)) {
-                Log->Write(
-                    "INFO: \tInput trajectory file is <%s>",
-                    _trajectoriesFilename.string().c_str());
+                LOG_INFO("Input trajectory file is <{}>", _trajectoriesFilename.string().c_str());
             } else {
-                Log->Write(
-                    "ERROR: \tWrong file extension\t<%s> for file <%s>",
+                LOG_ERROR(
+                    "Wrong file extension\t<{}> for file <{}>",
                     fmt.c_str(),
                     _trajectoriesFilename.string().c_str());
                 return false;
@@ -318,8 +281,8 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             path_root             = canonical(path_root);
             _trajectoriesLocation = path_root.string();
         }
-        Log->Write(
-            "INFO: \tInput directory for loading trajectory is <%s>",
+        LOG_INFO(
+            "Input directory for loading trajectory is <{}>",
             _trajectoriesLocation.string().c_str());
 
         // in the case no file was specified, collect all files in the specified directory
@@ -336,14 +299,13 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                     s        = pos == -1 ? s : s.substr(pos + 1);
                     if(boost::algorithm::ends_with(s, fmt)) {
                         _trajectoriesFiles.push_back(s);
-                        Log->Write("INFO: \tInput trajectory file is <%s>", s.c_str());
+                        LOG_INFO("Input trajectory file is <{}>", s.c_str());
                     }
                 }
             } else {
                 /* could not open directory */
-                Log->Write(
-                    "ERROR: \tcould not open the directory <%s>",
-                    _trajectoriesLocation.string().c_str());
+                LOG_ERROR(
+                    "could not open the directory <{}>", _trajectoriesLocation.string().c_str());
                 return false;
             }
         }
@@ -357,7 +319,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             omp_set_num_threads(xmltoi(numthreads->Value(), omp_get_max_threads()));
 #endif
         }
-        Log->Write("INFO: \t Using <%d> threads", omp_get_max_threads());
+        LOG_INFO("Using <{}> threads", omp_get_max_threads());
     }
 
     // output directory
@@ -373,17 +335,17 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             _outputDir = _projectRootDir / _outputDir;
         }
     } else
-        Log->Write("INFO: \tDefault output directory");
+        LOG_INFO("Default output directory");
     if(!exists(_outputDir)) {
         // does not exist yet. mkdir
         bool res = fs::create_directory(_outputDir);
         if(res == false) {
-            Log->Write("ERROR: \tcould not create the directory <" + _outputDir.string() + ">");
+            LOG_ERROR("Could not create the directory <{}>", _outputDir.string());
             return false;
         } else
-            Log->Write("INFO: \tcreated directory <" + _outputDir.string() + ">");
+            LOG_INFO("created directory <{}>", _outputDir.string());
     }
-    Log->Write("INFO: \tOutput directory for results is:\t<" + _outputDir.string() + ">");
+    LOG_INFO("Output directory for results is: <{}>", _outputDir.string());
 
     //measurement area
     if(xMainNode->FirstChild("measurement_areas")) {
@@ -391,7 +353,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
         if(xMainNode->FirstChildElement("measurement_areas")->Attribute("unit"))
             unit = xMainNode->FirstChildElement("measurement_areas")->Attribute("unit");
         if(unit != "m") {
-            Log->Write("WARNING: \tonly <m> unit is supported. Convert your units.");
+            LOG_WARNING("only <m> unit is supported. Convert your units.");
             return false;
         }
 
@@ -413,8 +375,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             }
             std::map<int, polygon_2d> geoPoly;
             polygon_2d poly;
-            Log->Write(
-                "INFO: \tMeasure area id  <%d> with type <%s>", areaB->_id, areaB->_type.c_str());
+            LOG_INFO("Measure area id  <{}> with type <{}>", areaB->_id, areaB->_type.c_str());
             int num_verteces = 0;
             for(TiXmlElement * xVertex = xMeasurementArea_B->FirstChildElement("vertex"); xVertex;
                 xVertex                = xVertex->NextSiblingElement("vertex")) {
@@ -424,8 +385,8 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                     double box_px = xmltof(xVertex->Attribute("x")) * M2CM;
                     double box_py = xmltof(xVertex->Attribute("y")) * M2CM;
                     boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
-                    Log->Write(
-                        "\t\tMeasure area points  < %.3f, %.3f>", box_px * CMtoM, box_py * CMtoM);
+                    LOG_INFO(
+                        "Measure area points  <{:.3f}, {:.3f}>", box_px * CMtoM, box_py * CMtoM);
                     num_verteces++;
                 } else if(
                     xVertex->Attribute("px") != nullptr && xVertex->Attribute("py") != nullptr) {
@@ -433,22 +394,21 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                     double box_px = xmltof(xVertex->Attribute("px")) * M2CM;
                     double box_py = xmltof(xVertex->Attribute("py")) * M2CM;
                     boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
-                    Log->Write(
-                        "\t\tMeasure area points  < %.3f, %.3f>", box_px * CMtoM, box_py * CMtoM);
+                    LOG_INFO(
+                        "Measure area points  <{:.3f}, {:.3f}>", box_px * CMtoM, box_py * CMtoM);
                     num_verteces++;
                 } else {
-                    Log->Write("\tWARNING: Invalid vertex format given.");
+                    LOG_WARNING("Invalid vertex format given.");
                 }
             }
             if(num_verteces < 3 && num_verteces > 0)
-                Log->Write(
-                    "\tWARNING: Less than 3 measure area points given (%d). At least 3 or nothing "
+                LOG_WARNING(
+                    "Less than 3 measure area points given ({}). At least 3 or nothing "
                     "at all!!",
                     num_verteces);
             if(num_verteces == 0) // big bounding box
             {
-                Log->Write(
-                    "\tWARNING: NO measure area points given (%d). default BB!!", num_verteces);
+                LOG_WARNING("Measurement are with 0 points. Default bounding box!!");
                 // get bounding box
                 // loading geometry is done in  analysis.cpp
                 // so this is done twice, which is not nice.
@@ -463,9 +423,9 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 double geo_minY = building->_yMin;
                 double geo_maxX = building->_xMax;
                 double geo_maxY = building->_yMax;
-                Log->Write(
-                    "INFO: \tBounding box:\n \t\tminX = %.2f\n \t\tmaxX = %.2f \n \t\tminY = %.2f "
-                    "\n\t\tmaxY = %.2f",
+                LOG_INFO(
+                    "Bounding box:\n \t\tminX = {:.2f}\n \t\tmaxX = {:.2f} \n \t\tminY = {:.2f} "
+                    "\n\t\tmaxY = {:.2f}",
                     geo_minX,
                     geo_maxX,
                     geo_minY,
@@ -495,7 +455,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 xMeasurementArea_B->FirstChildElement("length_in_movement_direction");
             if(xLength) {
                 areaB->_length = xmltof(xLength->Attribute("distance"));
-                Log->Write("\t\tLength in movement direction %.3f", areaB->_length);
+                LOG_INFO("Length in movement direction {:.3f}", areaB->_length);
             }
             _measurementAreas[areaB->_id] = areaB;
         }
@@ -515,8 +475,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
             } else {
                 areaL->_zPos = 10000001.0;
             }
-            Log->Write(
-                "INFO: \tMeasure area id  <%d> with type <%s>", areaL->_id, areaL->_type.c_str());
+            LOG_INFO("Measurement area id  <{}> with type <{}>", areaL->_id, areaL->_type.c_str());
 
             if(xMeasurementArea_L->FirstChildElement("start")->Attribute("x") != nullptr &&
                xMeasurementArea_L->FirstChildElement("start")->Attribute("y") != nullptr) {
@@ -534,8 +493,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 areaL->_lineStartY =
                     xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("py")) * M2CM;
             } else {
-                Log->Write("ERROR:\t Invalid definition of measurement line start");
-                Log->Write("      \t check inifile");
+                LOG_ERROR("Invalid definition of measurement line start");
                 exit(EXIT_FAILURE);
             }
 
@@ -556,14 +514,13 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 areaL->_lineEndY =
                     xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("py")) * M2CM;
             } else {
-                Log->Write("ERROR:\t Invalid definition of measurement line end");
-                Log->Write("      \t check inifile");
+                LOG_ERROR("Invalid definition of measurement line end");
                 exit(EXIT_FAILURE);
             }
 
             _measurementAreas[areaL->_id] = areaL;
-            Log->Write(
-                "\t\tMeasurement line starts from  <%.3f, %.3f> to <%.3f, %.3f>",
+            LOG_INFO(
+                "Measurement line starts from  <{:.3f}, {:.3f}> to <{:.3f}, {:.3f}>",
                 areaL->_lineStartX * CMtoM,
                 areaL->_lineStartY * CMtoM,
                 areaL->_lineEndX * CMtoM,
@@ -584,8 +541,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 xMainNode->FirstChildElement("velocity")->Attribute("set_movement_direction");
             if(atof(MovementDirection.c_str()) < 0 && atof(MovementDirection.c_str()) > 360 &&
                MovementDirection != "None" && MovementDirection != "SeeTraj") {
-                Log->Write(
-                    "WARNING: \tThe movement direction should be set between 0 to 360 or None!");
+                LOG_WARNING("The movement direction should be set between 0 to 360 or None!");
                 return false;
             }
         }
@@ -600,21 +556,23 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
         if(MovementDirection == "None") {
             _vComponent             = "B"; // both components
             _IgnoreBackwardMovement = false;
-            Log->Write(
-                "INFO: \tBoth x and y-component of coordinates will be used to calculate "
-                "instantaneous velocity over <" +
-                FrameSteps + " frames>");
+            LOG_INFO(
+                "Both x and y-component of coordinates will be used to calculate instantaneous "
+                "velocity over <{}> frames",
+                FrameSteps);
         } else if(MovementDirection == "SeeTraj") {
             _vComponent = "F";
-            Log->Write(
-                "INFO: \tThe component defined in the trajectory file will be used to calculate "
-                "instantaneous velocity over <" +
-                FrameSteps + " frames>");
+            LOG_INFO(
+                "The component defined in the trajectory file will be used to calculate "
+                "instantaneous velocity over <{}> frames",
+                FrameSteps);
         } else {
             _vComponent = MovementDirection;
-            Log->Write(
-                "INFO: \tThe instantaneous velocity in the direction of <" + MovementDirection +
-                ">  will be calculated over <" + FrameSteps + " frames>");
+            LOG_INFO(
+                "The instantaneous velocity in the direction of <{}>"
+                " will be calculated over <{}> frames",
+                MovementDirection,
+                FrameSteps);
         }
     }
     // Method A
@@ -622,7 +580,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
     if(xMethod_A) {
         if(string(xMethod_A->Attribute("enabled")) == "true") {
             _isMethodA = true;
-            Log->Write("INFO: \tMethod A is selected");
+            LOG_INFO("Method A is selected");
             /*               _timeIntervalA = xmltoi(xMethod_A->FirstChildElement("frame_interval")->GetText());
                  Log->Write("INFO: \tFrame interval used for calculating flow in Method A is <%d> frame",_timeIntervalA);*/
             for(TiXmlElement * xMeasurementArea =
@@ -633,11 +591,11 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
 
                 if(_measurementAreas[id]->_type == "Line") {
                     _areaIDforMethodA.push_back(id);
-                    Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", id);
+                    LOG_INFO("Measurement area id <{}> will be used for analysis", id);
                 } else {
-                    Log->Write(
-                        "WARNING: \tMeasurement area id <%d> will NOT be used for analysis (Type "
-                        "<%s> is not Line)",
+                    LOG_WARNING(
+                        "Measurement area id <{}> will NOT be used for analysis (Type "
+                        "<{}> is not Line)",
                         id,
                         _measurementAreas[id]->_type.c_str());
                 }
@@ -646,8 +604,8 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                     if(string(xMeasurementArea->Attribute("frame_interval")) != "None") {
                         _timeIntervalA.push_back(
                             xmltoi(xMeasurementArea->Attribute("frame_interval")));
-                        Log->Write(
-                            "\tFrame interval used for calculating flow is <%d> frame",
+                        LOG_INFO(
+                            "Frame interval used for calculating flow is <{}> frame",
                             xmltoi(xMeasurementArea->Attribute("frame_interval")));
                     } else {
                         _timeIntervalA.push_back(100);
@@ -664,14 +622,14 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
 
         if(string(xMethod_B->Attribute("enabled")) == "true") {
             _isMethodB = true;
-            Log->Write("INFO: \tMethod B is selected");
+            LOG_INFO("Method B is selected");
             for(TiXmlElement * xMeasurementArea =
                     xMainNode->FirstChildElement("method_B")->FirstChildElement("measurement_area");
                 xMeasurementArea;
                 xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area")) {
                 _areaIDforMethodB.push_back(xmltoi(xMeasurementArea->Attribute("id")));
-                Log->Write(
-                    "INFO: \tMeasurement area id <%d> will be used for analysis",
+                LOG_INFO(
+                    "Measurement area id <{}> will be used for analysis",
                     xmltoi(xMeasurementArea->Attribute("id")));
             }
         }
@@ -680,14 +638,14 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
     if(xMethod_C)
         if(string(xMethod_C->Attribute("enabled")) == "true") {
             _isMethodC = true;
-            Log->Write("INFO: \tMethod C is selected");
+            LOG_INFO("Method C is selected");
             for(TiXmlElement * xMeasurementArea =
                     xMainNode->FirstChildElement("method_C")->FirstChildElement("measurement_area");
                 xMeasurementArea;
                 xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area")) {
                 _areaIDforMethodC.push_back(xmltoi(xMeasurementArea->Attribute("id")));
-                Log->Write(
-                    "INFO: \tMeasurement area id <%d> will be used for analysis",
+                LOG_INFO(
+                    "Measurement area id <{}> will be used for analysis",
                     xmltoi(xMeasurementArea->Attribute("id")));
             }
         }
@@ -696,22 +654,22 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
     if(xMethod_D) {
         if(string(xMethod_D->Attribute("enabled")) == "true") {
             _isMethodD = true;
-            Log->Write("INFO: \tMethod D is selected");
+            LOG_INFO("Method D is selected");
 
             for(TiXmlElement * xMeasurementArea =
                     xMainNode->FirstChildElement("method_D")->FirstChildElement("measurement_area");
                 xMeasurementArea;
                 xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area")) {
                 _areaIDforMethodD.push_back(xmltoi(xMeasurementArea->Attribute("id")));
-                Log->Write(
-                    "INFO: \tMeasurement area id <%d> will be used for analysis",
+                LOG_INFO(
+                    "Measurement area id <{}> will be used for analysis",
                     xmltoi(xMeasurementArea->Attribute("id")));
                 if(xMeasurementArea->Attribute("start_frame")) {
                     if(string(xMeasurementArea->Attribute("start_frame")) != "None") {
                         _start_frames_MethodD.push_back(
                             xmltoi(xMeasurementArea->Attribute("start_frame")));
-                        Log->Write(
-                            "\tthe analysis starts from frame <%d>",
+                        LOG_INFO(
+                            "the analysis starts from frame <{}>",
                             xmltoi(xMeasurementArea->Attribute("start_frame")));
                     } else {
                         _start_frames_MethodD.push_back(-1);
@@ -723,8 +681,8 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                     if(string(xMeasurementArea->Attribute("stop_frame")) != "None") {
                         _stop_frames_MethodD.push_back(
                             xmltoi(xMeasurementArea->Attribute("stop_frame")));
-                        Log->Write(
-                            "\tthe analysis stops from frame <%d>",
+                        LOG_INFO(
+                            "the analysis stops from frame <{}>",
                             xmltoi(xMeasurementArea->Attribute("stop_frame")));
                     } else {
                         _stop_frames_MethodD.push_back(-1);
@@ -736,7 +694,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 if(xMeasurementArea->Attribute("get_individual_FD")) {
                     if(string(xMeasurementArea->Attribute("get_individual_FD")) == "true") {
                         _individual_FD_flags.push_back(true);
-                        Log->Write("INFO: \tIndividual FD will be output");
+                        LOG_INFO("Individual FD will be output");
                     } else {
                         _individual_FD_flags.push_back(false);
                     }
@@ -748,7 +706,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 if(string(xMethod_D->FirstChildElement("one_dimensional")->Attribute("enabled")) ==
                    "true") {
                     _isOneDimensional = true;
-                    Log->Write("INFO: \tThe data will be analyzed with one dimensional way!!");
+                    LOG_INFO("The data will be analyzed with one dimensional way!!");
                 }
             }
 
@@ -761,13 +719,11 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                         M2CM;
                     _circleEdges =
                         xmltoi(xMethod_D->FirstChildElement("cut_by_circle")->Attribute("edges"));
-                    Log->Write(
-                        "INFO: \tEach Voronoi cell will be cut by a circle with the radius of < %f "
-                        "> m!!",
+                    LOG_INFO(
+                        "Each Voronoi cell will be cut by a circle with the radius of <{}> m.",
                         _cutRadius * CMtoM);
-                    Log->Write(
-                        "INFO: \tThe circle is discretized to a polygon with < %d> edges!!",
-                        _circleEdges);
+                    LOG_INFO(
+                        "The circle is discretized to a polygon with <{}> edges!!", _circleEdges);
                 }
             }
 
@@ -775,10 +731,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 _steadyStart =
                     xmltof(xMethod_D->FirstChildElement("steadyState")->Attribute("start"));
                 _steadyEnd = xmltof(xMethod_D->FirstChildElement("steadyState")->Attribute("end"));
-                Log->Write(
-                    "INFO: \tthe steady state is from  <%f> to <%f> frames",
-                    _steadyStart,
-                    _steadyEnd);
+                LOG_INFO("the steady state is from  <{}> to <{}> frames", _steadyStart, _steadyEnd);
             }
 
             if(xMethod_D->FirstChildElement("profiles")) {
@@ -791,10 +744,9 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                     _grid_size_Y =
                         xmltof(xMethod_D->FirstChildElement("profiles")->Attribute("grid_size_y")) *
                         M2CM;
-                    Log->Write("INFO: \tProfiles will be calculated");
-                    Log->Write(
-                        "INFO: \tThe discretized grid size in x, y direction is: < %f >m by < %f "
-                        ">m ",
+                    LOG_INFO("Profiles will be calculated");
+                    LOG_INFO(
+                        "The discretized grid size in x, y direction is: <{}>x<{}>m^2",
                         _grid_size_X * CMtoM,
                         _grid_size_Y * CMtoM);
                 }
@@ -806,22 +758,22 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
     if(xMethod_I) {
         if(string(xMethod_I->Attribute("enabled")) == "true") {
             _isMethodI = true;
-            Log->Write("INFO: \tMethod I is selected");
+            LOG_INFO("Method I is selected");
 
             for(TiXmlElement * xMeasurementArea =
                     xMainNode->FirstChildElement("method_I")->FirstChildElement("measurement_area");
                 xMeasurementArea;
                 xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area")) {
                 _areaIDforMethodI.push_back(xmltoi(xMeasurementArea->Attribute("id")));
-                Log->Write(
-                    "INFO: \tMeasurement area id <%d> will be used for analysis",
+                LOG_INFO(
+                    "Measurement area id <{}> will be used for analysis",
                     xmltoi(xMeasurementArea->Attribute("id")));
                 if(xMeasurementArea->Attribute("start_frame")) {
                     if(string(xMeasurementArea->Attribute("start_frame")) != "None") {
                         _start_frames_MethodD.push_back(
                             xmltoi(xMeasurementArea->Attribute("start_frame")));
-                        Log->Write(
-                            "\tthe analysis starts from frame <%d>",
+                        LOG_INFO(
+                            "the analysis starts from frame <{}>",
                             xmltoi(xMeasurementArea->Attribute("start_frame")));
                     } else {
                         _start_frames_MethodI.push_back(-1);
@@ -833,8 +785,8 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                     if(string(xMeasurementArea->Attribute("stop_frame")) != "None") {
                         _stop_frames_MethodI.push_back(
                             xmltoi(xMeasurementArea->Attribute("stop_frame")));
-                        Log->Write(
-                            "\tthe analysis stops from frame <%d>",
+                        LOG_INFO(
+                            "the analysis stops at frame <{}>",
                             xmltoi(xMeasurementArea->Attribute("stop_frame")));
                     } else {
                         _stop_frames_MethodI.push_back(-1);
@@ -848,7 +800,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 if(string(xMethod_I->FirstChildElement("one_dimensional")->Attribute("enabled")) ==
                    "true") {
                     _isOneDimensional = true;
-                    Log->Write("INFO: \tThe data will be analyzed with one dimensional way!!");
+                    LOG_INFO("The data will be analyzed with one dimensional way!!");
                 }
             }
 
@@ -861,13 +813,11 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                         M2CM;
                     _circleEdges =
                         xmltoi(xMethod_I->FirstChildElement("cut_by_circle")->Attribute("edges"));
-                    Log->Write(
-                        "INFO: \tEach Voronoi cell will be cut by a circle with the radius of < %f "
-                        "> m!!",
+                    LOG_INFO(
+                        "Each Voronoi cell will be cut by a circle with the radius of <{}> m.",
                         _cutRadius * CMtoM);
-                    Log->Write(
-                        "INFO: \tThe circle is discretized to a polygon with < %d> edges!!",
-                        _circleEdges);
+                    LOG_INFO(
+                        "The circle is discretized to a polygon with <{}> edges.", _circleEdges);
                 }
             }
 
@@ -875,10 +825,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 _steadyStart =
                     xmltof(xMethod_I->FirstChildElement("steadyState")->Attribute("start"));
                 _steadyEnd = xmltof(xMethod_I->FirstChildElement("steadyState")->Attribute("end"));
-                Log->Write(
-                    "INFO: \tthe steady state is from  <%f> to <%f> frames",
-                    _steadyStart,
-                    _steadyEnd);
+                LOG_INFO("the steady state is from  <{}> to <{}> frames", _steadyStart, _steadyEnd);
             }
 
             if(xMethod_I->FirstChildElement("profiles")) {
@@ -891,10 +838,9 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                     _grid_size_Y =
                         xmltof(xMethod_I->FirstChildElement("profiles")->Attribute("grid_size_y")) *
                         M2CM;
-                    Log->Write("INFO: \tProfiles will be calculated");
-                    Log->Write(
-                        "INFO: \tThe discretized grid size in x, y direction is: < %f >m by < %f "
-                        ">m ",
+                    LOG_INFO("Profiles will be calculated");
+                    LOG_INFO(
+                        "The discretized grid size in x, y direction is: <{}>x<{}> m^2",
                         _grid_size_X * CMtoM,
                         _grid_size_Y * CMtoM);
                 }
@@ -907,22 +853,22 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
     if(xMethod_J) {
         if(string(xMethod_J->Attribute("enabled")) == "true") {
             _isMethodJ = true;
-            Log->Write("INFO: \tMethod Voronoi is selected");
+            LOG_INFO("Method Voronoi is selected");
 
             for(TiXmlElement * xMeasurementArea =
                     xMainNode->FirstChildElement("method_J")->FirstChildElement("measurement_area");
                 xMeasurementArea;
                 xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area")) {
                 _areaIDforMethodJ.push_back(xmltoi(xMeasurementArea->Attribute("id")));
-                Log->Write(
-                    "INFO: \tMeasurement area id <%d> will be used for analysis",
+                LOG_INFO(
+                    "Measurement area id <{}> will be used for analysis",
                     xmltoi(xMeasurementArea->Attribute("id")));
                 if(xMeasurementArea->Attribute("start_frame")) {
                     if(string(xMeasurementArea->Attribute("start_frame")) != "None") {
                         _start_frames_MethodJ.push_back(
                             xmltoi(xMeasurementArea->Attribute("start_frame")));
-                        Log->Write(
-                            "\tthe analysis starts from frame <%d>",
+                        LOG_INFO(
+                            "the analysis starts from frame <{}>",
                             xmltoi(xMeasurementArea->Attribute("start_frame")));
                     } else {
                         _start_frames_MethodJ.push_back(-1);
@@ -934,8 +880,8 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                     if(string(xMeasurementArea->Attribute("stop_frame")) != "None") {
                         _stop_frames_MethodJ.push_back(
                             xmltoi(xMeasurementArea->Attribute("stop_frame")));
-                        Log->Write(
-                            "\tthe analysis stops from frame <%d>",
+                        LOG_INFO(
+                            "the analysis stops at frame <{}>",
                             xmltoi(xMeasurementArea->Attribute("stop_frame")));
                     } else {
                         _stop_frames_MethodJ.push_back(-1);
@@ -947,7 +893,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 if(xMeasurementArea->Attribute("get_individual_FD")) {
                     if(string(xMeasurementArea->Attribute("get_individual_FD")) == "true") {
                         _individual_FD_flags.push_back(true);
-                        Log->Write("INFO: \tIndividual FD will be output");
+                        LOG_INFO("Individual FD will be output");
                     } else {
                         _individual_FD_flags.push_back(false);
                     }
@@ -959,7 +905,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 if(string(xMethod_J->FirstChildElement("one_dimensional")->Attribute("enabled")) ==
                    "true") {
                     _isOneDimensional = true;
-                    Log->Write("INFO: \tThe data will be analyzed with one dimensional way!!");
+                    LOG_INFO("The data will be analyzed with one dimensional way.");
                 }
             }
 
@@ -972,13 +918,12 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                         M2CM;
                     _circleEdges =
                         xmltoi(xMethod_J->FirstChildElement("cut_by_circle")->Attribute("edges"));
-                    Log->Write(
-                        "INFO: \tEach Voronoi cell will be cut by a circle with the radius of < %f "
-                        "> m!!",
+                    LOG_INFO(
+                        "Each Voronoi cell will be cut by a circle with the radius of "
+                        "<{}>m.",
                         _cutRadius * CMtoM);
-                    Log->Write(
-                        "INFO: \tThe circle is discretized to a polygon with < %d> edges!!",
-                        _circleEdges);
+                    LOG_INFO(
+                        "The circle is discretized to a polygon with <{}> edges.", _circleEdges);
                 }
             }
 
@@ -986,10 +931,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                 _steadyStart =
                     xmltof(xMethod_J->FirstChildElement("steadyState")->Attribute("start"));
                 _steadyEnd = xmltof(xMethod_J->FirstChildElement("steadyState")->Attribute("end"));
-                Log->Write(
-                    "INFO: \tthe steady state is from  <%f> to <%f> frames",
-                    _steadyStart,
-                    _steadyEnd);
+                LOG_INFO("the steady state is from  <{}> to <{}> frames", _steadyStart, _steadyEnd);
             }
 
             if(xMethod_J->FirstChildElement("profiles")) {
@@ -1002,10 +944,9 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
                     _grid_size_Y =
                         xmltof(xMethod_J->FirstChildElement("profiles")->Attribute("grid_size_y")) *
                         M2CM;
-                    Log->Write("INFO: \tProfiles will be calculated");
-                    Log->Write(
-                        "INFO: \tThe discretized grid size in x, y direction is: < %f >m by < %f "
-                        ">m ",
+                    LOG_INFO("Profiles will be calculated");
+                    LOG_INFO(
+                        "The discretized grid size in x, y direction is: <{}>x<{}>m^2.",
                         _grid_size_X * CMtoM,
                         _grid_size_Y * CMtoM);
                 }
@@ -1015,7 +956,7 @@ bool ArgumentParser::ParseIniFile(const string & inifile)
 
     Log->Write("INFO: \tFinish parsing inifile");
     if(!(_isMethodA || _isMethodB || _isMethodC || _isMethodD || _isMethodI || _isMethodJ)) {
-        Log->Write("WARNING: No measurement method enabled. Nothing to do.");
+        LOG_WARNING("No measurement method enabled. Nothing to do.");
         exit(EXIT_SUCCESS);
     }
     return true;
@@ -1223,10 +1164,8 @@ vector<bool> ArgumentParser::GetIndividualFDFlags() const
 MeasurementArea * ArgumentParser::GetMeasurementArea(int id)
 {
     if(_measurementAreas.count(id) == 0) {
-        Log->Write("ERROR:\t measurement id [%d] not found.", id);
-        Log->Write("      \t check your configuration files");
+        LOG_ERROR("Measurement id [%d] not found.", id);
         exit(EXIT_FAILURE);
-        //return NULL;
     }
     return _measurementAreas[id];
 }

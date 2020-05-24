@@ -35,7 +35,7 @@
 
 //handle more than two person are in one line
 #define dmin 200
-#define offset 200
+#define joffset 200
 
 
 class Method_I
@@ -53,7 +53,7 @@ public:
     void SetGeometryFileName(const fs::path & geometryFile);
     void SetGeometryBoundaries(double minX, double minY, double maxX, double maxY);
     void SetGridSize(double x, double y);
-    void SetCalculateProfiles(bool calcProfile); // ToDo: obsolete ?
+    void SetCalculateProfiles(bool calcProfile);
     void SetOutputVoronoiCellData(bool outputCellData);
     void SetMeasurementArea(MeasurementArea_B * area);
     void SetDimensional(bool dimension);
