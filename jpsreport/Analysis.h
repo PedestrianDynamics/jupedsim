@@ -32,6 +32,7 @@
 #ifndef ANALYSIS_H_
 #define ANALYSIS_H_
 
+#include "../libcore/src/general/Logger.h"
 #include "IO/OutputHandler.h"
 #include "general/ArgumentParser.h"
 #include "general/Macros.h"

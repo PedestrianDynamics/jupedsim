@@ -29,7 +29,7 @@
 #ifndef PEDDATA_H_
 #define PEDDATA_H_
 
-#include "../IO/OutputHandler.h"
+#include "../../libcore/src/general/Logger.h"
 #include "../general/Macros.h"
 #include "../tinyxml/tinyxml.h"
 
@@ -37,6 +37,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
+#include <fstream>
 #include <map>
 #include <string>
 #include <vector>
@@ -46,7 +47,6 @@ namespace ub = boost::numeric::ublas;
 
 namespace fs = std::filesystem;
 
-extern OutputHandler * Log;
 
 #define CMtoM 0.0001
 #define M2CM 10000

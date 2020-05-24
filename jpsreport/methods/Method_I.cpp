@@ -77,8 +77,8 @@ bool Method_I::Process(
     _fps              = peddata.GetFps();
     int mycounter     = 0;
     int minFrame      = peddata.GetMinFrame();
-    Log->Write(
-        "INFO:\tMethod I: frame rate fps: <%.2f>, start: <%d>, stop: <%d> (minFrame = %d)",
+    LOG_INFO(
+        "Method I: frame rate fps: <{:.2f}>, start: <{}>, stop: <{}> (minFrame = {})",
         _fps,
         _startFrame,
         _stopFrame,
@@ -105,7 +105,7 @@ bool Method_I::Process(
         return_value = false;
     }
 
-    Log->Write("------------------------ Analyzing with Method I -----------------------------");
+    LOG_INFO("------------------------ Analyzing with Method I -----------------------------");
 
     for(auto ite : _peds_t) {
         int frameNr = ite.first;
@@ -115,7 +115,7 @@ bool Method_I::Process(
         ss << std::setw(5) << std::setfill('0') << std::internal << frid;
         const std::string str_frid = ss.str();
         if(!(frid % 50)) {
-            Log->Write("INFO:\tframe ID = %d", frid);
+            LOG_INFO("frame ID = {}", frid);
         }
         vector<int> ids         = _peds_t[frameNr];
         vector<int> IdInFrame   = peddata.GetIdInFrame(frameNr, ids, zPos_measureArea);
@@ -124,15 +124,16 @@ bool Method_I::Process(
         vector<double> ZInFrame = peddata.GetZInFrame(frameNr, ids, zPos_measureArea);
         vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids, zPos_measureArea);
         if(XInFrame.size() == 0) {
-            Log->Write("Warning:\t no pedestrians in frame <%d>", frameNr);
+            LOG_WARNING("no pedestrians in frame <{}>", frameNr);
             continue;
         }
         //------------------------------Remove peds outside geometry------------------------------------------
         for(int i = 0; i < (int) IdInFrame.size(); i++) {
             if(false == within(point_2d(round(XInFrame[i]), round(YInFrame[i])), _geoPoly)) {
-                Log->Write(
-                    "Warning:\tPedestrian at <x=%.4f, y=%.4f, , z=%.4f> is not in geometry and not "
-                    "considered in analysis!",
+                LOG_WARNING(
+                    "Pedestrian at <x={:.4f}, y={:.4f}, z={:.4f}> is not in the geometry and will "
+                    "not be "
+                    "considered in the analysis!",
                     XInFrame[i] * CMtoM,
                     YInFrame[i] * CMtoM,
                     ZInFrame[i] * CMtoM);
@@ -141,7 +142,7 @@ bool Method_I::Process(
                 YInFrame.erase(YInFrame.begin() + i);
                 ZInFrame.erase(ZInFrame.begin() + i);
                 VInFrame.erase(VInFrame.begin() + i);
-                Log->Write("Warning:\t Pedestrian removed");
+                LOG_WARNING("Pedestrian removed");
                 i--;
             }
         }
@@ -152,9 +153,9 @@ bool Method_I::Process(
         } else {
             if(IsPointsOnOneLine(XInFrame, YInFrame)) {
                 if(fabs(XInFrame[1] - XInFrame[0]) < dmin) {
-                    XInFrame[1] += offset;
+                    XInFrame[1] += joffset;
                 } else {
-                    YInFrame[1] += offset;
+                    YInFrame[1] += joffset;
                 }
             }
             std::vector<std::pair<polygon_2d, int>> polygons_id =
@@ -177,13 +178,11 @@ bool Method_I::Process(
                         YInFrame,
                         ZInFrame); //
                 }
-            } else {
-                for(int i = 0; i < (int) IdInFrame.size(); i++) {
-                    std::cout << XInFrame[i] * CMtoM << "   " << YInFrame[i] * CMtoM << "   "
-                              << IdInFrame[i] << "\n";
                 }
-                Log->Write(
-                    "WARNING: \tVoronoi Diagrams are not obtained!. Frame: %d (minFrame = %d)\n",
+
+            } else {
+                LOG_WARNING(
+                    "Voronoi Diagrams are not obtained!. Frame: {} (minFrame = {})",
                     frid,
                     minFrame);
             }
@@ -203,7 +202,7 @@ bool Method_I::OpenFileIndividualFD()
                 ("IFD_I_" + _trajName.string() + trajFileName.string());
     string Individualfundment = indFDPath.string();
     if((_fIndividualFD = Analysis::CreateFile(Individualfundment)) == nullptr) {
-        Log->Write("ERROR:\tcannot open the file individual\n");
+        LOG_ERROR("cannot open the file individual");
         return false;
     } else {
         if(_isOneDimensional) {
