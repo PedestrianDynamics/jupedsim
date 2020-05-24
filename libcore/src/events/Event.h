@@ -49,11 +49,6 @@ public:
     void SetBuilding(Building * building) { _building = building; }
 
     /**
-      * @return the type of the event
-      */
-    [[nodiscard]] const EventAction & GetAction() const { return _action; };
-
-    /**
       * @return the time at which the event was recorded
       */
     [[nodiscard]] double GetTime() const { return _time; };
