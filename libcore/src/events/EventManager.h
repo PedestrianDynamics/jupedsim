@@ -25,12 +25,11 @@
  **/
 #pragma once
 
-#include "DoorEvent.h"
+#include "Event.h"
 
+#include <memory>
 #include <string>
 #include <vector>
-
-class Building;
 
 class EventManager
 {
@@ -52,13 +51,29 @@ public:
     EventManager() = default;
 
     /**
-      * Default deconstructor.
+      * Destructor.
       */
     ~EventManager() = default;
 
-    // NOTE: disable copy constructor and assignment operator
+    /**
+     * Not copyable.
+     */
     EventManager(const EventManager &) = delete;
+
+    /**
+     * Not copyable.
+     */
     EventManager & operator=(const EventManager &) & = delete;
+
+    /**
+     * Not movable.
+     */
+    EventManager(EventManager &&) = delete;
+
+    /**
+     * Not movable.
+     */
+    EventManager & operator=(EventManager &&) = delete;
 
     /**
      * Adds \p event to the EventManager. This should be done before the simulation

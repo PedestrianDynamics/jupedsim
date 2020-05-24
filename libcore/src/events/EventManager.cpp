@@ -26,12 +26,7 @@
  **/
 #include "EventManager.h"
 
-#include "DoorEvent.h"
-#include "geometry/Building.h"
-#include "pedestrian/Pedestrian.h"
-
 #include <Logger.h>
-#include <cmath>
 
 void EventManager::AddEvent(std::unique_ptr<Event> event)
 {
