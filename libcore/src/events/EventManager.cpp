@@ -48,9 +48,9 @@ void EventManager::ListEvents()
     }
 }
 
-bool EventManager::ProcessEvent()
+bool EventManager::ProcessEvent(double now)
 {
-    double timeMin = Pedestrian::GetGlobalTime() - J_EPS_EVENT;
+    double timeMin = now - J_EPS_EVENT;
     std::unique_ptr<Event> eventMin =
         std::make_unique<DoorEvent>(nullptr, -1, timeMin, EventAction::DOOR_OPEN);
 
@@ -59,7 +59,7 @@ bool EventManager::ProcessEvent()
             return val->GetTime() < event->GetTime();
         });
 
-    double timeMax = Pedestrian::GetGlobalTime() + J_EPS_EVENT;
+    double timeMax = now + J_EPS_EVENT;
     std::unique_ptr<Event> eventMax =
         std::make_unique<DoorEvent>(nullptr, -1, timeMax, EventAction::DOOR_OPEN);
     auto lastEventAtTime = std::lower_bound(

@@ -390,7 +390,7 @@ double Simulation::RunBody(double maxSimTime)
             _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get(), _periodic);
 
             //update the events
-            bool eventProcessed = _em->ProcessEvent();
+            bool eventProcessed = _em->ProcessEvent(Pedestrian::GetGlobalTime());
             _building->GetRoutingEngine()->setNeedUpdate(eventProcessed);
 
             //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'

@@ -73,9 +73,11 @@ public:
     void ListEvents();
 
     /**
-     * Process the event using the current time stamp from the pedestrian class.
-     *
+     * Process all events until the now timestamp.
+     * Processing is done for all events where time <=now.
+     * Processed events will be discared.
+     * @param now timestamp until which all events will be processed.
      * @return Any event was processed.
      */
-    bool ProcessEvent();
+    bool ProcessEvent(double now);
 };
