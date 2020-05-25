@@ -18,7 +18,7 @@ def plot_nt(measurement_id, files):
     args:
     measurement area id (int)
     """
-    legend = False
+    legend = False #show legend if more than one measurement_id is plotted
     fig = plt.figure(dpi=300)
     ax1 = fig.add_subplot(111, aspect='auto')
     for f in files:
@@ -32,11 +32,11 @@ def plot_nt(measurement_id, files):
         if Id == measurement_id:
             plt.plot(data[:, 0], data[:, 1])
 
-    plt.xlabel("$t$", size=18)
-    plt.ylabel("$N$", size=18)
+    plt.xlabel("t")
+    plt.ylabel("N")
     if legend:
         plt.legend()
-    plt.grid(alpha=0.7)
+
     figname = "Nt_{}.png".format(measurement_id)
     plt.savefig(figname)
     print("---> ", figname)
