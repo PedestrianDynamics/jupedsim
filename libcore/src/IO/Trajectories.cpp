@@ -190,29 +190,33 @@ void TrajectoriesTXT::WriteHeader(long nPeds, double fps, Building * building, i
 
 void TrajectoriesTXT::WriteGeometry(Building *) {}
 
-void TrajectoriesTXT::WriteFrame(int frameNr, int precision, Building * building)
+void TrajectoriesTXT::WriteFrame(int frameNr, Building * building)
 {
     const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
+    unsigned int precision                    = this->GetPrecision();
     for(auto ped : allPeds) {
-        double x       = ped->GetPos()._x;
-        double y       = ped->GetPos()._y;
-        double z       = ped->GetElevation();
-        int color      = ped->GetColor();
-        double a       = ped->GetLargerAxis();
-        double b       = ped->GetSmallerAxis();
-        double phi     = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
-        double RAD2DEG = 180.0 / M_PI;
-        char buf[100];
-        sprintf(
-            buf,
-            "{:d}\t{:d}\t{:0.%df}\t{:0.%df}\t{:0.%df}\t{:0.2f}\t{:0.2f}\t{:0.2f}\t{:d}\t",
+        double x          = ped->GetPos()._x;
+        double y          = ped->GetPos()._y;
+        double z          = ped->GetElevation();
+        int color         = ped->GetColor();
+        double a          = ped->GetLargerAxis();
+        double b          = ped->GetSmallerAxis();
+        double phi        = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
+        double RAD2DEG    = 180.0 / M_PI;
+        std::string frame = fmt::format(
+            "{:d}\t{:d}\t{:0.{}f}\t{:0.{}f}\t{:0.{}f}\t{:0.2f}\t{:0.2f}\t{:0.2f}\t{:d}\t",
+            ped->GetID(),
+            frameNr,
+            x,
             precision,
+            y,
             precision,
-            precision);
-        std::string format = buf;
-        std::string frame =
-            fmt::format(format, ped->GetID(), frameNr, x, y, z, a, b, phi * RAD2DEG, color);
-
+            z,
+            precision,
+            a,
+            b,
+            phi * RAD2DEG,
+            color);
         for(const auto & option : _optionalOutputOptions) {
             frame.append(_optionalOutput[option](ped));
         }
