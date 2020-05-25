@@ -134,9 +134,9 @@ public:
 
     void SetFps(double fps) { _fps = fps; };
 
-    int GetPrecision() const { return _precision; };
+    unsigned int GetPrecision() const { return _precision; };
 
-    void SetPrecision(int precision) { _precision = precision; };
+    void SetPrecision(unsigned int precision) { _precision = precision; };
 
     double GetLinkedCellSize() const { return _linkedCellSize; };
 
@@ -395,7 +395,7 @@ private:
     int _maxOpenMPThreads;
     unsigned int _seed;
     double _fps;
-    int _precision;
+    unsigned int _precision;
     double _linkedCellSize;
     std::shared_ptr<OperationalModel> _model;
     double _tMax;
