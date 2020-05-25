@@ -24,6 +24,10 @@ if __name__ == '__main__':
 
     # setup important directories/files
     d = parse(jpsreport_inifile)
+    method_D =  d.getElementsByTagName('method_D')[0].attributes.items()[0][1]
+    if method_D.lower() == "false":
+        sys.exit("method D ist false. Nothing to plot")
+
     output_dir =  d.getElementsByTagName('output')[0].attributes.items()[0][1]
     jpsreport_ini_dir = os.path.dirname(jpsreport_inifile)
     field_dir = os.path.join(jpsreport_ini_dir, output_dir, "Fundamental_Diagram", "Classical_Voronoi", "field")
