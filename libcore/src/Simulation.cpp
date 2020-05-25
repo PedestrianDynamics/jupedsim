@@ -86,6 +86,7 @@ bool Simulation::InitArgs()
     if(!_config->GetTrajectoriesFile().empty()) {
         // At the moment we only support plain txt format
         _iod = std::make_unique<TrajectoriesTXT>(TrajectoriesTXT());
+        _iod->SetPrecision(_config->GetPrecision());
     }
 
     const fs::path & trajPath(_config->GetTrajectoriesFile());
@@ -344,7 +345,7 @@ void Simulation::RunHeader(long nPed)
     writeInterval     = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
     int firstframe    = (Pedestrian::GetGlobalTime() / _deltaT) / writeInterval;
 
-    _iod->WriteFrame(firstframe, _config->GetPrecision(), _building.get());
+    _iod->WriteFrame(firstframe, _building.get());
     //first initialisation needed by the linked-cells
     UpdateRoutesAndLocations();
 
@@ -436,7 +437,7 @@ double Simulation::RunBody(double maxSimTime)
 
         // write the trajectories
         if(0 == frameNr % writeInterval) {
-            _iod->WriteFrame(frameNr / writeInterval, _config->GetPrecision(), _building.get());
+            _iod->WriteFrame(frameNr / writeInterval, _building.get());
             RotateOutputFile();
         }
 
