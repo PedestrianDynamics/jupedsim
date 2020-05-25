@@ -36,6 +36,7 @@
 #include "general/ArgumentParser.h"
 #include "general/Macros.h"
 #include "geometry/Building.h"
+#include "methods/ConfigData_DIJ.h"
 #include "methods/PedData.h"
 
 #include <boost/geometry/geometries/adapted/c_array.hpp>
@@ -104,8 +105,6 @@ private:
     std::map<int, polygon_2d> _geoPolyMethodI;
     std::map<int, polygon_2d> _geoPolyMethodJ;
 
-    double _grid_size_X; // the size of the grid
-    double _grid_size_Y;
     double _lowVertexX;  // LOWest vertex of the geometry (x coordinate)
     double _lowVertexY;  //  LOWest vertex of the geometry (y coordinate)
     double _highVertexX; // Highest vertex of the geometry
@@ -119,23 +118,7 @@ private:
     bool _DoesUseMethodI;     // Method I--Voronoi method  modified
                               // no measurement are)
     bool _DoesUseMethodJ;
-    std::vector<int> _StartFramesMethodD;
-    std::vector<int> _StopFramesMethodD;
 
-    std::vector<int> _StartFramesMethodI;
-    std::vector<int> _StopFramesMethodI;
-
-    std::vector<int> _StartFramesMethodJ;
-    std::vector<int> _StopFramesMethodJ;
-
-    std::vector<bool> _IndividualFDFlags;
-    bool _cutByCircle; //Adjust whether cut each original voronoi cell by a circle
-    double _cutRadius;
-    int _circleEdges;
-    bool _getProfile; // Whether make field analysis or not
-    bool _isOneDimensional;
-    bool
-        _calcIndividualFD; //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
     std::string
         _vComponent; // to mark whether x, y or x and y coordinate are used when calculating the velocity
     bool _IgnoreBackwardMovement;
@@ -155,6 +138,8 @@ private:
                                                        // measurement are, even
                                                        // if we don't use its polygon
     std::vector<MeasurementArea_B *> _areaForMethod_J;
+
+    ConfigData_DIJ configData_D, configData_I, configData_J;
 };
 
 #endif /*ANALYSIS_H_*/
