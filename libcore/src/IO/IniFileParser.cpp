@@ -235,10 +235,17 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         xHeader->FirstChildElement("trajectories")->Attribute("fps", &fps);
         _config->SetFps(fps);
 
-        int precision = 2;
-        xHeader->FirstChildElement("trajectories")->Attribute("precision", &precision);
-        _config->SetPrecision(precision);
 
+        unsigned int precision = 0;
+        auto ret               = xHeader->FirstChildElement("trajectories")
+                       ->QueryUnsignedAttribute("precision", &precision);
+
+        if(ret == TIXML_SUCCESS || (ret == TIXML_WRONG_TYPE)) {
+            if(precision < 1 || precision > 6)
+                LOG_WARNING("Invalid value for precision (should be in [1, 6])", precision);
+            else
+                _config->SetPrecision(precision);
+        }
         std::string format = xHeader->FirstChildElement("trajectories")->Attribute("format") ?
                                  xHeader->FirstChildElement("trajectories")->Attribute("format") :
                                  "plain";
