@@ -6,7 +6,7 @@ sidebar: jupedsim_sidebar
 folder: jpscore
 permalink: jpscore_inifile.html
 summary:  The project file where the settings for a jpscore simulation are defined. Within this file properties of pedestrians, model parameters, etc can be given.
-last_updated: April 17, 2020
+last_updated: May 25, 2020
 ---
 
 ## Header
@@ -54,7 +54,7 @@ The options for the format are
 
 - `plain`: simple text format. See section [plain](jpscore_trajectory#txt).
 - `fps`: defines the frame rate per second for the trajectories.
-- `precision`: define the precision of the trajectories' points. (default: 2).
+- `precision`: define the precision of the trajectories' points. Value can be between 1 and 6. (default: 2).
 - `color_mode`: coloring agents in the trajectories. Options are:
     - `velocity` (default): color is proportional to speed (slow --> red).
     - `spotlight`
