@@ -44,21 +44,16 @@ public:
     Method_J();
     virtual ~Method_J();
     bool Process(
+        const ConfigData_DIJ & configData,
+        int measurementAreaID,
         const PedData & peddata,
         const fs::path & scriptsLocation,
         const double & zPos_measureArea);
-    void SetCalculateIndividualFD(bool individualFD);
-    void Setcutbycircle(double radius, int edges);
     void SetGeometryPolygon(polygon_2d geometryPolygon);
     void SetGeometryFileName(const fs::path & geometryFile);
     void SetGeometryBoundaries(double minX, double minY, double maxX, double maxY);
-    void SetGridSize(double x, double y);
-    void SetCalculateProfiles(bool calcProfile);
     void SetMeasurementArea(MeasurementArea_B * area);
-    void SetDimensional(bool dimension);
     void SetTrajectoriesLocation(const fs::path & trajectoryPath);
-    void SetStartFrame(int startFrame);
-    void SetStopFrame(int stopFrame);
 
 private:
     std::map<int, std::vector<int>> _peds_t;
@@ -68,13 +63,7 @@ private:
     fs::path _projectRootDir;
     fs::path _outputLocation;
     fs::path _scriptsLocation;
-    bool _calcIndividualFD;
     polygon_2d _areaIndividualFD;
-    bool _getProfile;
-    bool _isOneDimensional;
-    bool _cutByCircle; //Adjust whether cut each original voronoi cell by a circle
-    double _cutRadius;
-    int _circleEdges;
     polygon_2d _geoPoly;
     double _geoMinX; // LOWest vertex of the geometry (x coordinate)
     double _geoMinY; //  LOWest vertex of the geometry (y coordinate)
@@ -82,18 +71,14 @@ private:
     double _geoMaxY;
     FILE * _fVoronoiRhoV;
     FILE * _fIndividualFD;
-    double _grid_size_X; // the size of the grid
-    double _grid_size_Y;
     float _fps;
-    bool OpenFileMethodVoronoi();
-    bool OpenFileIndividualFD();
+    bool OpenFileMethodVoronoi(bool _isOneDimensional);
+    bool OpenFileIndividualFD(bool _isOneDimensional);
     fs::path _geometryFileName;
     fs::path _trajectoryPath;
-    int _startFrame;
-    int _stopFrame;
-
 
     std::vector<std::pair<polygon_2d, int>> GetPolygons(
+        const ConfigData_DIJ & configData,
         std::vector<double> & XInFrame,
         std::vector<double> & YInFrame,
         std::vector<double> & VInFrame,
@@ -107,6 +92,7 @@ private:
         const std::vector<double> & Velocity,
         const polygon_2d & measureArea);
     void GetProfiles(
+        const ConfigData_DIJ & configData,
         const std::string & frameId,
         const std::vector<polygon_2d> & polygons,
         const std::vector<double> & velocity);
@@ -133,7 +119,8 @@ private:
         std::vector<double> & VInFrame,
         std::vector<int> & IdInFrame,
         const polygon_2d & measureArea,
-        const std::string & frid);
+        const std::string & frid,
+        bool _calcIndividualFD);
     void ReducePrecision(polygon_2d & polygon);
     bool IsPedInGeometry(
         int frames,
