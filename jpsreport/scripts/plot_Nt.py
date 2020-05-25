@@ -1,4 +1,4 @@
-# Usage: 
+# Usage:
 # plot_Nt.py --help
 #------------------
 import sys
