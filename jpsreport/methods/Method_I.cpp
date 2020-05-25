@@ -178,8 +178,6 @@ bool Method_I::Process(
                         YInFrame,
                         ZInFrame); //
                 }
-                }
-
             } else {
                 LOG_WARNING(
                     "Voronoi Diagrams are not obtained!. Frame: {} (minFrame = {})",
