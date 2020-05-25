@@ -110,8 +110,39 @@ Usage:
 ```xml
  <model operational_model_id="1" description="gcfm">
 ```
+### Model parameters (GCFM)
 
+- `<force_ped nu="0.6" dist_max="3" disteff_max="2" interpolation_width="0.1" />`
+  The repulsive force between two agents. See [Fig. 7](https://arxiv.org/pdf/1008.4297.pdf).
+    - `nu` is the strength of the force ($$\nu$$ in Eq. (19)). 
+    - `dist_max` is the maximum force at contact ($$f_m$$)
+    - `disteff_max`: cut-off radius ($$r_c$$)
+    - `interpolation_width` ($$r_{eps}$$)
+- `<force_wall nu="0.1" dist_max="1" disteff_max="2" interpolation_width="0.1" />`
+The parameters for the repulsive force between a wall and an agent are defined in analogy to the agent-agent repulsive force.
 
+A definition of this model could look like:
+
+```xml
+<model operational_model_id="1" description="gcfm">
+      <model_parameters>
+        <stepsize>0.01</stepsize>
+         <exit_crossing_strategy>3</exit_crossing_strategy>
+        <linkedcells enabled="true" cell_size="2.2" />
+        <force_ped nu="0.6" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+        <force_wall nu="0.1" dist_max="1" disteff_max="2" interpolation_width="0.1" />
+      </model_parameters>
+      <agent_parameters agent_parameter_id="1">
+        <v0 mu="1.0" sigma="0.0" />
+        <bmax mu="0.15" sigma="0.001" />
+        <bmin mu="0.15" sigma="0.001" />
+        <amin mu="0.15" sigma="0.001" />
+        <tau mu="0.5" sigma="0.001" />
+        <atau mu="0.0" sigma="0.000" />
+      </agent_parameters>
+    </model>
+ ```   
+    
 
 ## Collision-free Speed Model
 [Collision-free speed model][#Tordeux2015] is a velocity-based model. See also this [talk](https://www.dropbox.com/s/fj1xud5ap2aq59o/Tordeux2015_Talk.pdf) for more details about the model.
