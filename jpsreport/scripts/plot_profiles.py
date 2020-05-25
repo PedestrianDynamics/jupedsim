@@ -1,4 +1,4 @@
-# Usage: 
+# Usage:
 # plot_profiles.py --help
 #------------------
 import sys
