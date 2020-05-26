@@ -49,6 +49,7 @@
 #include "pedestrian/Pedestrian.h"
 #include "routing/RoutingEngine.h"
 
+#include <Logger.h>
 #include <algorithm>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/constants.hpp>
@@ -63,7 +64,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <libshared>
 
 Building::Building()
 {

@@ -28,7 +28,7 @@
 #include "routing/quickest/QuickestPathRouter.h"
 #include "routing/smoke_router/SmokeRouter.h"
 
-#include <libshared>
+#include <Logger.h>
 
 const fs::path & ArgumentParser::IniFilePath() const
 {

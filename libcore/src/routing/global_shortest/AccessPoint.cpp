@@ -26,7 +26,7 @@
  **/
 #include "AccessPoint.h"
 
-#include <libshared>
+#include <Logger.h>
 
 AccessPoint::AccessPoint(int id, double center[2], double radius)
 {

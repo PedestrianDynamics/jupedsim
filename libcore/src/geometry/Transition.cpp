@@ -28,7 +28,8 @@
 
 #include "Room.h"
 #include "SubRoom.h"
-#include <libshared>
+
+#include <Logger.h>
 
 Transition::Transition() : Crossing()
 {

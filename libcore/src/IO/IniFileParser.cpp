@@ -36,10 +36,10 @@
 #include "routing/quickest/QuickestPathRouter.h"
 #include "routing/smoke_router/SmokeRouter.h"
 
+#include <Logger.h>
 #include <stdexcept>
 #include <string>
 #include <tinyxml.h>
-#include <libshared>
 
 IniFileParser::IniFileParser(Configuration * config)
 {

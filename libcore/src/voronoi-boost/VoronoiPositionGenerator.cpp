@@ -15,8 +15,8 @@ static int global_count = 0;
 #include "../pedestrian/Pedestrian.h"
 #include "geometry/Wall.h"
 
+#include <Logger.h>
 #include <thread>
-#include <libshared>
 
 using boost::polygon::high;
 using boost::polygon::low;

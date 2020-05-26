@@ -32,6 +32,7 @@
 #include "geometry/Transition.h"
 #include "geometry/Wall.h"
 
+#include <Logger.h>
 #include <algorithm>
 #include <cassert>
 #include <chrono>
@@ -45,7 +46,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <libshared>
 
 namespace geometry::helper
 {

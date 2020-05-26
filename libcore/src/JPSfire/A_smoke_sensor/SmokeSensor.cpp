@@ -36,8 +36,8 @@
 #include "routing/smoke_router/NavigationGraph.h"
 #include "routing/smoke_router/cognitiveMap/cognitivemap.h"
 
+#include <Logger.h>
 #include <tinyxml.h>
-#include <libshared>
 
 SmokeSensor::SmokeSensor(const Building * b) : AbstractSensor(b)
 {

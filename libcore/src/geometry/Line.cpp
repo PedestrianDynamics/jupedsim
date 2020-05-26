@@ -30,8 +30,8 @@
 #include "general/Macros.h"
 #include "math/Mathematics.h"
 
+#include <Logger.h>
 #include <vector>
-#include <libshared>
 
 int Line::_static_UID = 0;
 

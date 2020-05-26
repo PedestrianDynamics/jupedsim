@@ -31,8 +31,8 @@
 #include "Point.h"
 #include "Wall.h"
 
+#include <Logger.h>
 #include <cstdlib>
-#include <libshared>
 
 Obstacle::Obstacle()
 {

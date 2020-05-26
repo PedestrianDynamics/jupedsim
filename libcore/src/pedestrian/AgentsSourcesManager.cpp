@@ -33,8 +33,8 @@
 #include "neighborhood/NeighborhoodSearch.h"
 #include "voronoi-boost/VoronoiPositionGenerator.h"
 
+#include <Logger.h>
 #include <thread>
-#include <libshared>
 
 bool AgentsSourcesManager::_isCompleted = true;
 

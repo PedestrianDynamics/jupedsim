@@ -3,8 +3,8 @@
 #include "geometry/SubRoom.h"
 #include "pedestrian/Pedestrian.h"
 
+#include <Logger.h>
 #include <tinyxml.h>
-#include <libshared>
 
 static fs::path getTrainTimeTableFileName(const fs::path & projectFile)
 {

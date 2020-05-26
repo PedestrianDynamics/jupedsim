@@ -35,7 +35,7 @@
 #include "neighborhood/NeighborhoodSearch.h"
 #include "pedestrian/Pedestrian.h"
 
-#include <libshared>
+#include <Logger.h>
 
 double xRight = 26.0;
 double xLeft  = 0.0;

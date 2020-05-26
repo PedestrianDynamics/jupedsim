@@ -22,7 +22,7 @@
 #include "geometry/Room.h"
 #include "geometry/SubRoom.h"
 
-#include <libshared>
+#include <Logger.h>
 #include <algorithm>
 
 PedRelocation
