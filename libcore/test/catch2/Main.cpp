@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_RUNNER
 
+#include <Logger.h>
 #include <catch2/catch.hpp>
-#include <libshared>
 
 int main(int argc, char * argv[])
 {
