@@ -2,9 +2,9 @@
 
 #include "geometry/Building.h"
 
+#include <Logger.h>
 #include <algorithm>
 #include <string>
-#include <libshared>
 
 // Describes the event
 enum class EventAction {

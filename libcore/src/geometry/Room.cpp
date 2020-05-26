@@ -29,9 +29,9 @@
 #include "IO/OutputHandler.h"
 #include "SubRoom.h"
 
+#include <Logger.h>
 #include <memory>
 #include <sstream>
-#include <libshared>
 
 
 /************************************************************

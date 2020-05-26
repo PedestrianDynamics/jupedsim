@@ -27,9 +27,9 @@
 #include "general/Filesystem.h"
 
 #include <CLI/CLI.hpp>
+#include <Logger.h>
 #include <tuple>
 #include <vector>
-#include <libshared>
 
 class ArgumentParser final
 {

@@ -34,8 +34,8 @@
 #include "pedestrian/Pedestrian.h"
 #include "routing/ff_router/UnivFFviaFM.h"
 
+#include <Logger.h>
 #include <chrono>
-#include <libshared>
 
 /// 1
 Point DirectionMiddlePoint::GetTarget(Room * /*room*/, Pedestrian * ped) const

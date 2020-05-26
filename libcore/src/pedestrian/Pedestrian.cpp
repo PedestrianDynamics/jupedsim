@@ -32,8 +32,8 @@
 #include "geometry/SubRoom.h"
 #include "geometry/WaitingArea.h"
 
+#include <Logger.h>
 #include <cassert>
-#include <libshared>
 
 // initialize the static variables
 double Pedestrian::_globalTime         = 0.0;

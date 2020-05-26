@@ -24,7 +24,7 @@
 #include "general/Macros.h"
 #include "tinyxml.h"
 
-#include <libshared>
+#include <Logger.h>
 
 void EventFileParser::ParseDoorEvents(EventManager & eventManager, const fs::path & eventFile)
 {

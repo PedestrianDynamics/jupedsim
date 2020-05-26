@@ -52,8 +52,8 @@
 #include "pedestrian/Pedestrian.h"
 #include "routing/ff_router/mesh/RectGrid.h"
 
+#include <Logger.h>
 #include <stdexcept>
-#include <libshared>
 
 FFRouter::FFRouter(int id, RoutingStrategy s, bool hasSpecificGoals, Configuration * config) :
     Router(id, s)

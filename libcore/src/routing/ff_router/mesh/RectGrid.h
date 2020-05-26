@@ -27,9 +27,9 @@
  **/
 #pragma once
 
-#include "general/Logger.h"
 #include "geometry/Point.h"
 
+#include <Logger.h>
 #include <cmath>
 
 // geometric interpretation of index in "directNeighbor"

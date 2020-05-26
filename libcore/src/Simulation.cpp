@@ -44,8 +44,8 @@
 #include "pedestrian/AgentsSourcesManager.h"
 #include "routing/ff_router/ffRouter.h"
 
+#include <Logger.h>
 #include <tinyxml.h>
-#include <libshared>
 
 // TODO: add these variables to class simulation
 std::map<int, double> trainOutflow;

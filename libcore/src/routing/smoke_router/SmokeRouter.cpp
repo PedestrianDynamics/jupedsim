@@ -30,8 +30,8 @@
 #include "pedestrian/Pedestrian.h"
 #include "sensor/SensorManager.h"
 
+#include <Logger.h>
 #include <tinyxml.h>
-#include <libshared>
 
 SmokeRouter::SmokeRouter()
 {

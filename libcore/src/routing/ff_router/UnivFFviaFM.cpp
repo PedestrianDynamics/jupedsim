@@ -11,9 +11,9 @@
 #include "pedestrian/Pedestrian.h"
 #include "routing/ff_router/mesh/RectGrid.h"
 
+#include <Logger.h>
 #include <stdexcept>
 #include <unordered_set>
-#include <libshared>
 
 UnivFFviaFM::~UnivFFviaFM()
 {

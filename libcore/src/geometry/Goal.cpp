@@ -30,8 +30,8 @@
 #include "Point.h"
 #include "Wall.h"
 
+#include <Logger.h>
 #include <boost/geometry/algorithms/distance.hpp>
-#include <libshared>
 
 Goal::Goal()
 {

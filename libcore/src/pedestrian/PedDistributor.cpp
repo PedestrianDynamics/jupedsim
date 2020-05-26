@@ -32,11 +32,11 @@
 #include "geometry/Wall.h"
 #include "pedestrian/Pedestrian.h"
 
+#include <Logger.h>
 #include <boost/foreach.hpp>
 #include <boost/lambda/bind.hpp>
 #include <boost/range/combine.hpp>
 #include <cmath>
-#include <libshared>
 
 using namespace boost::lambda;
 

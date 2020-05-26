@@ -25,8 +25,8 @@
 #include "geometry/WaitingArea.h"
 #include "geometry/Wall.h"
 
+#include <Logger.h>
 #include <tinyxml.h>
-#include <libshared>
 
 GeoFileParser::GeoFileParser(Configuration * configuration) : _configuration(configuration) {}
 

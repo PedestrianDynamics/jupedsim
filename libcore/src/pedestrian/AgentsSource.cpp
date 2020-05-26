@@ -30,7 +30,7 @@
 
 #include "Pedestrian.h"
 
-#include <libshared>
+#include <Logger.h>
 
 AgentsSource::AgentsSource(
     int id,

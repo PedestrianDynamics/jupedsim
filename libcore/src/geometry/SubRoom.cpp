@@ -38,8 +38,8 @@
 #include "pedestrian/Pedestrian.h"
 #endif //_SIMULATOR
 
+#include <Logger.h>
 #include <cmath>
-#include <libshared>
 
 int SubRoom::_static_uid = 1; //must be positive (sideeffect for FloorfieldViaFM::isInside())
 

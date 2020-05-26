@@ -31,8 +31,8 @@
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 
+#include <Logger.h>
 #include <tinyxml.h>
-#include <libshared>
 
 GlobalRouter::GlobalRouter() : Router()
 {

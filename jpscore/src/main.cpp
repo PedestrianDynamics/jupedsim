@@ -33,6 +33,7 @@
 #include "geometry/Building.h"
 #include "pedestrian/AgentsSourcesManager.h"
 
+#include <Logger.h>
 #include <iomanip>
 #include <memory>
 #include <ostream>
@@ -41,7 +42,6 @@
 #include <string>
 #include <thread>
 #include <time.h>
-#include <libshared>
 
 int main(int argc, char ** argv)
 {

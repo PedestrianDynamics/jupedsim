@@ -37,7 +37,7 @@
 #include "neighborhood/NeighborhoodSearch.h"
 #include "pedestrian/Pedestrian.h"
 
-#include <libshared>
+#include <Logger.h>
 
 GCFMModel::GCFMModel(
     std::shared_ptr<DirectionManager> dir,

@@ -31,7 +31,7 @@
 #include "IO/OutputHandler.h"
 #include "general/Filesystem.h"
 
-#include <libshared>
+#include <Logger.h>
 
 FDSMeshStorage::FDSMeshStorage() {}
 

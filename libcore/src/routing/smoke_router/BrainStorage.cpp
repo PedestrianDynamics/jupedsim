@@ -29,8 +29,8 @@
 
 #include "pedestrian/Pedestrian.h"
 
+#include <Logger.h>
 #include <tinyxml.h>
-#include <libshared>
 
 BrainStorage::BrainStorage(
     const Building * const b,

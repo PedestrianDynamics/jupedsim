@@ -30,7 +30,7 @@
 #include "Pedestrian.h"
 #include "geometry/SubRoom.h"
 
-#include <libshared>
+#include <Logger.h>
 
 StartDistribution::StartDistribution(int seed)
 {

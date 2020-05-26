@@ -32,8 +32,8 @@
 #include "general/Filesystem.h"
 #include "pedestrian/Pedestrian.h"
 
+#include <Logger.h>
 #include <tinyxml.h>
-#include <libshared>
 
 
 ToxicityAnalysis::ToxicityAnalysis(const std::string & projectFileName, double fps) :
