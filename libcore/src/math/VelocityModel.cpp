@@ -29,12 +29,13 @@
 #include "VelocityModel.h"
 
 #include "direction/walking/DirectionStrategy.h"
-#include "general/Logger.h"
 #include "general/OpenMP.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 #include "neighborhood/NeighborhoodSearch.h"
 #include "pedestrian/Pedestrian.h"
+
+#include <libshared>
 
 double xRight = 26.0;
 double xLeft  = 0.0;

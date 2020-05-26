@@ -28,10 +28,10 @@
 
 #include "IO/OutputHandler.h"
 #include "SubRoom.h"
-#include "general/Logger.h"
 
 #include <memory>
 #include <sstream>
+#include <libshared>
 
 
 /************************************************************

@@ -25,11 +25,11 @@
 #pragma once
 
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 
 #include <CLI/CLI.hpp>
 #include <tuple>
 #include <vector>
+#include <libshared>
 
 class ArgumentParser final
 {

@@ -4,7 +4,6 @@
 #include "UnivFFviaFM.h"
 
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 #include "geometry/Building.h"
 #include "geometry/Line.h"
 #include "geometry/SubRoom.h"
@@ -14,6 +13,7 @@
 
 #include <stdexcept>
 #include <unordered_set>
+#include <libshared>
 
 UnivFFviaFM::~UnivFFviaFM()
 {

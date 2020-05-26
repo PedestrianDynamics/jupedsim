@@ -27,7 +27,8 @@
 #include "Crossing.h"
 
 #include "SubRoom.h"
-#include "general/Logger.h"
+
+#include <libshared>
 
 
 Crossing::Crossing()

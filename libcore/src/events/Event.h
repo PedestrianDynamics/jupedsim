@@ -1,10 +1,10 @@
 #pragma once
 
-#include "general/Logger.h"
 #include "geometry/Building.h"
 
 #include <algorithm>
 #include <string>
+#include <libshared>
 
 // Describes the event
 enum class EventAction {

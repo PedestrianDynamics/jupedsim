@@ -30,7 +30,6 @@
 #include "general/ArgumentParser.h"
 #include "general/Compiler.h"
 #include "general/Configuration.h"
-#include "general/Logger.h"
 #include "geometry/Building.h"
 #include "pedestrian/AgentsSourcesManager.h"
 
@@ -42,6 +41,7 @@
 #include <string>
 #include <thread>
 #include <time.h>
+#include <libshared>
 
 int main(int argc, char ** argv)
 {

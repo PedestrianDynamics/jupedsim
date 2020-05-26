@@ -31,12 +31,13 @@
 
 #include "direction/DirectionManager.h"
 #include "direction/walking/DirectionStrategy.h"
-#include "general/Logger.h"
 #include "general/OpenMP.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 #include "neighborhood/NeighborhoodSearch.h"
 #include "pedestrian/Pedestrian.h"
+
+#include <libshared>
 
 GCFMModel::GCFMModel(
     std::shared_ptr<DirectionManager> dir,

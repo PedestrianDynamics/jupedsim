@@ -28,9 +28,9 @@
 
 #include "AgentsParameters.h"
 #include "Pedestrian.h"
-#include "general/Logger.h"
 #include "geometry/SubRoom.h"
 
+#include <libshared>
 
 StartDistribution::StartDistribution(int seed)
 {

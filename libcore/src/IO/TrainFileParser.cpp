@@ -1,6 +1,6 @@
 #include "TrainFileParser.h"
 
-#include "general/Logger.h"
+#include <libshared>
 
 void TrainFileParser::ParseTrainTimeTable(
     EventManager & eventManager,

@@ -35,7 +35,6 @@
 #include "IO/Trajectories.h"
 #include "SimulationHelper.h"
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 #include "general/OpenMP.h"
 #include "geometry/GoalManager.h"
 #include "geometry/WaitingArea.h"
@@ -46,7 +45,7 @@
 #include "routing/ff_router/ffRouter.h"
 
 #include <tinyxml.h>
-
+#include <libshared>
 
 // TODO: add these variables to class simulation
 std::map<int, double> trainOutflow;

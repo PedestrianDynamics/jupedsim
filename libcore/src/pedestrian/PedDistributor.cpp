@@ -28,7 +28,6 @@
 
 #include "IO/PedDistributionParser.h"
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 #include "pedestrian/Pedestrian.h"
@@ -37,6 +36,7 @@
 #include <boost/lambda/bind.hpp>
 #include <boost/range/combine.hpp>
 #include <cmath>
+#include <libshared>
 
 using namespace boost::lambda;
 

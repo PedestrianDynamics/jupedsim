@@ -277,6 +277,7 @@ endif()
 ################################################################################
 # Add libraries / executables
 ################################################################################
+add_subdirectory(libshared)
 add_subdirectory(libcore)
 add_subdirectory(jpscore)
 add_subdirectory(jpsreport)

@@ -19,10 +19,10 @@
  **/
 #include "SimulationHelper.h"
 
-#include "general/Logger.h"
 #include "geometry/Room.h"
 #include "geometry/SubRoom.h"
 
+#include <libshared>
 #include <algorithm>
 
 PedRelocation

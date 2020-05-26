@@ -25,13 +25,12 @@
  *
  **/
 #include "EventManager.h"
-
 #include "DoorEvent.h"
-#include "general/Logger.h"
 #include "geometry/Building.h"
 #include "pedestrian/Pedestrian.h"
 
 #include <cmath>
+#include <libshared>
 
 EventManager::EventManager(Building * _b)
 {

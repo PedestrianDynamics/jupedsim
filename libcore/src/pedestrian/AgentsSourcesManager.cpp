@@ -30,11 +30,11 @@
 
 #include "AgentsQueue.h"
 #include "Pedestrian.h"
-#include "general/Logger.h"
 #include "neighborhood/NeighborhoodSearch.h"
 #include "voronoi-boost/VoronoiPositionGenerator.h"
 
 #include <thread>
+#include <libshared>
 
 bool AgentsSourcesManager::_isCompleted = true;
 

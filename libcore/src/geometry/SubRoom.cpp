@@ -33,14 +33,13 @@
 #include "Transition.h"
 #include "WaitingArea.h"
 #include "Wall.h"
-#include "general/Logger.h"
 
 #ifdef _SIMULATOR
 #include "pedestrian/Pedestrian.h"
 #endif //_SIMULATOR
 
 #include <cmath>
-
+#include <libshared>
 
 int SubRoom::_static_uid = 1; //must be positive (sideeffect for FloorfieldViaFM::isInside())
 

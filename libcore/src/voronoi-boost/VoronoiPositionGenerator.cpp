@@ -13,10 +13,10 @@ static int global_count = 0;
 //check if all includes are necessary
 #include "../pedestrian/AgentsSourcesManager.h"
 #include "../pedestrian/Pedestrian.h"
-#include "general/Logger.h"
 #include "geometry/Wall.h"
 
 #include <thread>
+#include <libshared>
 
 using boost::polygon::high;
 using boost::polygon::low;

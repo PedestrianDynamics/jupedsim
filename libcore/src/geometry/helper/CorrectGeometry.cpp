@@ -23,7 +23,6 @@
 
 #include "general/Configuration.h"
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 #include "geometry/Building.h"
 #include "geometry/Crossing.h"
 #include "geometry/Line.h"
@@ -46,6 +45,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <libshared>
 
 namespace geometry::helper
 {
