@@ -30,7 +30,6 @@
 #include "JPSfire/generic/FDSMesh.h"
 #include "JPSfire/generic/FDSMeshStorage.h"
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 #include "geometry/Building.h"
 #include "geometry/SubRoom.h"
 #include "pedestrian/Pedestrian.h"
@@ -38,6 +37,7 @@
 #include "routing/smoke_router/cognitiveMap/cognitivemap.h"
 
 #include <tinyxml.h>
+#include <libshared>
 
 SmokeSensor::SmokeSensor(const Building * b) : AbstractSensor(b)
 {

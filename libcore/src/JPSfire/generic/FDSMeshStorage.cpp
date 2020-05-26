@@ -30,8 +30,8 @@
 
 #include "IO/OutputHandler.h"
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 
+#include <libshared>
 
 FDSMeshStorage::FDSMeshStorage() {}
 

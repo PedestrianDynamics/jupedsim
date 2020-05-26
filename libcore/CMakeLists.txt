@@ -17,7 +17,6 @@ set(source_files
     src/events/EventManager.cpp
     src/events/TrainEvent.cpp
     src/general/ArgumentParser.cpp
-    src/general/Logger.cpp
     src/geometry/Building.cpp
     src/geometry/Crossing.cpp
     src/geometry/Goal.cpp
@@ -107,7 +106,6 @@ set(header_files
     src/general/Compiler.h
     src/general/Configuration.h
     src/general/Filesystem.h
-    src/general/Logger.h
     src/general/Macros.h
     src/general/randomnumbergenerator.h
     src/geometry/Building.h
@@ -213,6 +211,7 @@ target_link_libraries(core
     spdlog::spdlog
     fmt::fmt
     git-info
+    libshared
 )
 target_include_directories(core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src

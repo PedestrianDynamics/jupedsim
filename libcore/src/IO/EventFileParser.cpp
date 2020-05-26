@@ -21,9 +21,10 @@
 
 #include "events/DoorEvent.h"
 #include "events/EventHelper.h"
-#include "general/Logger.h"
 #include "general/Macros.h"
 #include "tinyxml.h"
+
+#include <libshared>
 
 void EventFileParser::ParseDoorEvents(EventManager & eventManager, const fs::path & eventFile)
 {

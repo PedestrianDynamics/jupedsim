@@ -30,7 +30,6 @@
 #include "IO/TrainFileParser.h"
 #include "general/Configuration.h"
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 #include "general/Macros.h"
 #include "general/OpenMP.h"
 #include "geometry/Building.h"
@@ -64,6 +63,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <libshared>
 
 Building::Building()
 {

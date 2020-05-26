@@ -1,10 +1,10 @@
 #include "Trajectories.h"
 
-#include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "pedestrian/Pedestrian.h"
 
 #include <tinyxml.h>
+#include <libshared>
 
 static fs::path getTrainTimeTableFileName(const fs::path & projectFile)
 {

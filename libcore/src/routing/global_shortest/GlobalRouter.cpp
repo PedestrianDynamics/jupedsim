@@ -28,11 +28,11 @@
 
 #include "AccessPoint.h"
 #include "DTriangulation.h"
-#include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 
 #include <tinyxml.h>
+#include <libshared>
 
 GlobalRouter::GlobalRouter() : Router()
 {

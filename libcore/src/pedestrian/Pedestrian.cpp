@@ -28,12 +28,13 @@
 
 #include "JPSfire/generic/FDSMeshStorage.h"
 #include "Knowledge.h"
-#include "general/Logger.h"
 #include "geometry/Building.h"
 #include "geometry/SubRoom.h"
 #include "geometry/WaitingArea.h"
 
 #include <cassert>
+#include <libshared>
+
 // initialize the static variables
 double Pedestrian::_globalTime         = 0.0;
 int Pedestrian::_agentsCreated         = 1;

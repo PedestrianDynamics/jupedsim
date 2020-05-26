@@ -29,9 +29,9 @@
 #include "Crossing.h"
 #include "Point.h"
 #include "Wall.h"
-#include "general/Logger.h"
 
 #include <boost/geometry/algorithms/distance.hpp>
+#include <libshared>
 
 Goal::Goal()
 {

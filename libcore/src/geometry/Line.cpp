@@ -27,11 +27,11 @@
 #include "Line.h"
 
 #include "Wall.h"
-#include "general/Logger.h"
 #include "general/Macros.h"
 #include "math/Mathematics.h"
 
 #include <vector>
+#include <libshared>
 
 int Line::_static_UID = 0;
 

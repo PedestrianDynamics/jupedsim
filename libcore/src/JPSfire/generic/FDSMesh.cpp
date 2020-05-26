@@ -1,10 +1,10 @@
 #include "FDSMesh.h"
 
 #include "IO/OutputHandler.h"
-#include "general/Logger.h"
 
 #include <cmath>
 #include <cnpy.h>
+#include <libshared>
 
 std::vector<std::string> &
 split2(const std::string & s, char delim, std::vector<std::string> & elems)

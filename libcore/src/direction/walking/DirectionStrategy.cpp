@@ -26,7 +26,6 @@
  **/
 #include "DirectionStrategy.h"
 
-#include "general/Logger.h"
 #include "geometry/Line.h"
 #include "geometry/Point.h"
 #include "geometry/Room.h"
@@ -36,6 +35,7 @@
 #include "routing/ff_router/UnivFFviaFM.h"
 
 #include <chrono>
+#include <libshared>
 
 /// 1
 Point DirectionMiddlePoint::GetTarget(Room * /*room*/, Pedestrian * ped) const

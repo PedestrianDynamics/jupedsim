@@ -30,9 +30,9 @@
 #include "Line.h"
 #include "Point.h"
 #include "Wall.h"
-#include "general/Logger.h"
 
 #include <cstdlib>
+#include <libshared>
 
 Obstacle::Obstacle()
 {

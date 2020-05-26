@@ -27,10 +27,10 @@
  **/
 #include "BrainStorage.h"
 
-#include "general/Logger.h"
 #include "pedestrian/Pedestrian.h"
 
 #include <tinyxml.h>
+#include <libshared>
 
 BrainStorage::BrainStorage(
     const Building * const b,

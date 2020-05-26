@@ -27,7 +27,6 @@
 #include "direction/waiting/WaitingStrategy.h"
 #include "direction/walking/DirectionStrategy.h"
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 #include "general/OpenMP.h"
 #include "math/GCFMModel.h"
 #include "math/VelocityModel.h"
@@ -40,6 +39,7 @@
 #include <stdexcept>
 #include <string>
 #include <tinyxml.h>
+#include <libshared>
 
 IniFileParser::IniFileParser(Configuration * config)
 {

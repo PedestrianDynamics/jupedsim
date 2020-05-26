@@ -30,10 +30,10 @@
 #include "JPSfire/generic/FDSMesh.h"
 #include "JPSfire/generic/FDSMeshStorage.h"
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 #include "pedestrian/Pedestrian.h"
 
 #include <tinyxml.h>
+#include <libshared>
 
 
 ToxicityAnalysis::ToxicityAnalysis(const std::string & projectFileName, double fps) :
