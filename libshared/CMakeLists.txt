@@ -10,21 +10,20 @@ set(header_files
    Logger.h
 )
 
-add_library(libshared STATIC
+add_library(shared STATIC
         ${source_files}
         ${header_files}
 )
 
-target_link_libraries(libshared PUBLIC
+target_link_libraries(shared PUBLIC
         spdlog::spdlog
         fmt::fmt
-        git-info
 )
 
-target_compile_options(libshared PRIVATE
+target_include_directories(shared
+        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_compile_options(shared PRIVATE
         ${COMMON_COMPILE_OPTIONS}
-)
-
-target_compile_definitions(libshared PUBLIC
-        JPSCORE_VERSION="${PROJECT_VERSION}"
 )
