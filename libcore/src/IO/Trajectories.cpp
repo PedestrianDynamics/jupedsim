@@ -207,7 +207,7 @@ void TrajectoriesTXT::WriteFrame(int frameNr, Building * building)
             ped->GetID(),
             frameNr,
             x,
-            precision,
+            _precision,
             y,
             _precision,
             z,
