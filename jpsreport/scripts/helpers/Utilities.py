@@ -2,7 +2,7 @@ import os
 import glob
 import re
 import numpy as np
-
+import pandas as pd
 
 def str_to_array(p):
     """
@@ -128,3 +128,23 @@ def geo_limits(geo_xml):
     geominY = np.min(Ymin)
     geomaxY = np.max(Ymax)
     return geominX, geomaxX, geominY, geomaxY
+
+def plot_peds(ax):
+    for i in ids:
+        d = data[data['i']==i]
+        x = d['x']
+        y = d['y']
+        ax.plot(x, y, 'k', lw=0.05)
+
+def plot_geometry(ax, _geometry_wall):
+    for gw in _geometry_wall.keys():
+        ax.plot(_geometry_wall[gw][:, 0], _geometry_wall[gw][:, 1], color='white', lw=1)
+        ax.plot(_geometry_wall[gw][:, 0], _geometry_wall[gw][:, 1], color='white', lw=1)
+        ax.plot(_geometry_wall[gw][:, 0], _geometry_wall[gw][:, 1], color='white', lw=1)
+
+def read_IFD(IFD_filename):
+    df = pd.read_csv(IFD_filename,
+                     comment='#',sep='\t',
+                     names=['f','i','x','y','z/m','d','v','p'],
+                     index_col=False)
+    return df

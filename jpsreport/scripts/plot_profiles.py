@@ -43,6 +43,6 @@ if __name__ == '__main__':
 
     if Id == -1:
         for Id in ids:
-            plot_profiles(Id, field_dir, geo_filename, beginsteady, endsteady)
+            get_profiles(Id, field_dir, geo_filename, beginsteady, endsteady)
     else:
-        plot_profiles(Id, field_dir, geo_filename, beginsteady, endsteady)
+        get_profiles(Id, field_dir, geo_filename, beginsteady, endsteady)
