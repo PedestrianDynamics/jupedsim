@@ -58,7 +58,7 @@ static fs::path getTrainTypeFileName(const fs::path & projectFile)
 /**
  * TXT format implementation
  */
-TrajectoriesTXT::TrajectoriesTXT() : Trajectories()
+TrajectoriesTXT::TrajectoriesTXT(unsigned int precision) : Trajectories{precision}
 {
     // Add header, info and output for speed
     _optionalOutputHeader[OptionalOutput::speed] = "V\t";
@@ -194,24 +194,25 @@ void TrajectoriesTXT::WriteFrame(int frameNr, Building * building)
 {
     const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
     for(auto ped : allPeds) {
-        double x          = ped->GetPos()._x;
-        double y          = ped->GetPos()._y;
-        double z          = ped->GetElevation();
-        int color         = ped->GetColor();
-        double a          = ped->GetLargerAxis();
-        double b          = ped->GetSmallerAxis();
-        double phi        = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
-        double RAD2DEG    = 180.0 / M_PI;
-        std::string frame = fmt::format(
+        double x       = ped->GetPos()._x;
+        double y       = ped->GetPos()._y;
+        double z       = ped->GetElevation();
+        int color      = ped->GetColor();
+        double a       = ped->GetLargerAxis();
+        double b       = ped->GetSmallerAxis();
+        double phi     = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
+        double RAD2DEG = 180.0 / M_PI;
+        unsigned int precision = GetPrecision();
+        std::string frame      = fmt::format(
             "{:d}\t{:d}\t{:0.{}f}\t{:0.{}f}\t{:0.{}f}\t{:0.2f}\t{:0.2f}\t{:0.2f}\t{:d}\t",
             ped->GetID(),
             frameNr,
             x,
-            _precision,
+            precision,
             y,
-            _precision,
+            precision,
             z,
-            _precision,
+            precision,
             a,
             b,
             phi * RAD2DEG,

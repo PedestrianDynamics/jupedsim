@@ -84,8 +84,7 @@ bool Simulation::InitArgs()
 {
     if(!_config->GetTrajectoriesFile().empty()) {
         // At the moment we only support plain txt format
-        _iod = std::make_unique<TrajectoriesTXT>(TrajectoriesTXT());
-        _iod->SetPrecision(_config->GetPrecision());
+        _iod = std::make_unique<TrajectoriesTXT>(TrajectoriesTXT(_config->GetPrecision()));
     }
 
     const fs::path & trajPath(_config->GetTrajectoriesFile());
