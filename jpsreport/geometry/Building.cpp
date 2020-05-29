@@ -1163,7 +1163,6 @@ void Building::DeletePedestrian(Pedestrian *& ped)
         _allPedestians.erase(it);
 
         int nowPeds = _allPedestians.size();
-        Log->ProgressBar(totalPeds, totalPeds - nowPeds);
     }
     //update the stats before deleting
     Transition * trans = GetTransitionByUID(ped->GetExitIndex());
