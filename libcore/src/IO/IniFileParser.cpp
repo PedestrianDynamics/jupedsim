@@ -240,12 +240,10 @@ bool IniFileParser::ParseHeader(TiXmlNode * xHeader)
         auto ret               = xHeader->FirstChildElement("trajectories")
                        ->QueryUnsignedAttribute("precision", &precision);
 
-        if(ret == TIXML_SUCCESS || (ret == TIXML_WRONG_TYPE)) {
-            if(precision < 1 || precision > 6) {
-                LOG_WARNING("Invalid value for precision (should be in [1, 6])", precision);
-            } else {
-                _config->SetPrecision(precision);
-            }
+        if((ret == TIXML_SUCCESS && (precision < 1 || precision > 6)) || (ret == TIXML_WRONG_TYPE)) {
+            LOG_WARNING("Invalid value for precision (should be in [1, 6])", precision);            
+        }else{
+             _config->SetPrecision(precision);
         }
         std::string format = xHeader->FirstChildElement("trajectories")->Attribute("format") ?
                                  xHeader->FirstChildElement("trajectories")->Attribute("format") :
