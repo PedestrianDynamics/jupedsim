@@ -32,14 +32,8 @@
 #include "../IO/OutputHandler.h"
 #include "Point.h"
 
+#include <Logger.h>
 #include <string>
-
-//forward declarations
-class OutputHandler;
-
-// external variables
-extern OutputHandler * Log;
-
 
 class Line
 {

@@ -31,6 +31,7 @@
 
 #include "Point.h"
 
+#include <Logger.h>
 #include <string>
 #include <vector>
 

@@ -29,10 +29,10 @@
 #ifndef PEDDATA_H_
 #define PEDDATA_H_
 
-#include "../../libcore/src/general/Logger.h"
 #include "../general/Macros.h"
 #include "../tinyxml/tinyxml.h"
 
+#include <Logger.h>
 #include <algorithm> // std::min_element, std::max_element
 #include <boost/algorithm/string.hpp>
 #include <boost/numeric/ublas/io.hpp>

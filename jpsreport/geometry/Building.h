@@ -36,6 +36,7 @@
 #include "Room.h"
 #include "Transition.h"
 
+#include <Logger.h>
 #include <cfloat>
 #include <fstream>
 #include <map>

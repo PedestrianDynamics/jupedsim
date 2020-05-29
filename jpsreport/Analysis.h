@@ -32,20 +32,19 @@
 #ifndef ANALYSIS_H_
 #define ANALYSIS_H_
 
-#include "../libcore/src/general/Logger.h"
 #include "general/ArgumentParser.h"
 #include "general/Macros.h"
 #include "geometry/Building.h"
 #include "methods/ConfigData_DIJ.h"
 #include "methods/PedData.h"
 
+#include <Logger.h>
 #include <boost/geometry/geometries/adapted/c_array.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/geometry/geometries/ring.hpp>
 #include <boost/geometry/geometry.hpp>
 #include <tinyxml.h>
-
 
 using namespace boost::geometry;
 typedef model::d2::point_xy<double, cs::cartesian> point_2d;

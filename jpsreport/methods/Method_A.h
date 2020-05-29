@@ -34,6 +34,7 @@
 #include "MeasurementArea.h"
 #include "PedData.h"
 
+#include <Logger.h>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 

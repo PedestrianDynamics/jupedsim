@@ -33,6 +33,7 @@
 #include "PedData.h"
 #include "VoronoiDiagram.h"
 
+#include <Logger.h>
 
 //handle more than two person are in one line
 #define dmin 200

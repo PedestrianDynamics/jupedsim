@@ -30,6 +30,7 @@
 
 #include "../general/Macros.h"
 
+#include <Logger.h>
 #include <algorithm>
 #include <memory>
 #include <string>

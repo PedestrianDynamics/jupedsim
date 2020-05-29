@@ -841,7 +841,7 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line *> & goals)
             tmpPoly[0].GetY(),
             point.GetX(),
             point.GetY());
-        LOG_ERROR("Distance between the points: {:.2f} !!!\n", (tmpPoly[0] - point).Norm())
+        LOG_ERROR("Distance between the points: {:.2f} !!!\n", (tmpPoly[0] - point).Norm());
         return false;
     }
     _poly = tmpPoly;
