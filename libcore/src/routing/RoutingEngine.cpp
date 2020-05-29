@@ -26,8 +26,9 @@
  **/
 #include "RoutingEngine.h"
 
-#include "general/Logger.h"
 #include "pedestrian/Pedestrian.h"
+
+#include <Logger.h>
 
 RoutingEngine::RoutingEngine() {}
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "general/Logger.h"
 #include "geometry/Building.h"
 
+#include <Logger.h>
 #include <algorithm>
 #include <string>
 

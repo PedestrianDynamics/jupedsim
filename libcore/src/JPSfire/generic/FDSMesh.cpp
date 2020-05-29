@@ -1,8 +1,8 @@
 #include "FDSMesh.h"
 
 #include "IO/OutputHandler.h"
-#include "general/Logger.h"
 
+#include <Logger.h>
 #include <cmath>
 #include <cnpy.h>
 

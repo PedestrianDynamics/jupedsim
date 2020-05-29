@@ -29,7 +29,8 @@
 #include "AgentsSource.h"
 
 #include "Pedestrian.h"
-#include "general/Logger.h"
+
+#include <Logger.h>
 
 AgentsSource::AgentsSource(
     int id,

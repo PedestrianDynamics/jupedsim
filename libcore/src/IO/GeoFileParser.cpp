@@ -21,11 +21,11 @@
 #include "GeoFileParser.h"
 
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "geometry/WaitingArea.h"
 #include "geometry/Wall.h"
 
+#include <Logger.h>
 #include <tinyxml.h>
 
 GeoFileParser::GeoFileParser(Configuration * configuration) : _configuration(configuration) {}

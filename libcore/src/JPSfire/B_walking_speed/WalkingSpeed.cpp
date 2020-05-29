@@ -30,9 +30,9 @@
 #include "JPSfire/generic/FDSMesh.h"
 #include "JPSfire/generic/FDSMeshStorage.h"
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 #include "pedestrian/Pedestrian.h"
 
+#include <Logger.h>
 #include <tinyxml.h>
 
 WalkingSpeed::WalkingSpeed(const std::string & projectFileName)

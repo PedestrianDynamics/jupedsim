@@ -27,7 +27,6 @@
 #include "direction/waiting/WaitingStrategy.h"
 #include "direction/walking/DirectionStrategy.h"
 #include "general/Filesystem.h"
-#include "general/Logger.h"
 #include "general/OpenMP.h"
 #include "math/GCFMModel.h"
 #include "math/VelocityModel.h"
@@ -37,6 +36,7 @@
 #include "routing/quickest/QuickestPathRouter.h"
 #include "routing/smoke_router/SmokeRouter.h"
 
+#include <Logger.h>
 #include <stdexcept>
 #include <string>
 #include <tinyxml.h>

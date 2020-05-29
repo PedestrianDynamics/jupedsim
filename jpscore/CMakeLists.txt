@@ -11,6 +11,7 @@ target_compile_options(jpscore PRIVATE
 )
 target_link_libraries(jpscore
     core
+    shared
     Threads::Threads
     spdlog::spdlog
     fmt::fmt
