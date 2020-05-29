@@ -121,22 +121,25 @@ xs
         axs[1].plot(geometry_wall[gw][:, 0], geometry_wall[gw][:, 1], color='white', lw=1)
         axs[2].plot(geometry_wall[gw][:, 0], geometry_wall[gw][:, 1], color='white', lw=1)
 
+    vmax_density = np.mean(density)+np.std(density)
+    vmax_velocity = np.mean(velocity)+np.std(velocity)
+
     im1 = axs[0].imshow(density,
-                    cmap=cm.jet,
-                    interpolation='nearest', origin='lower',
-                    vmin=0, vmax=2, #np.amax(density)
-                    extent=[geominX, geomaxX, geominY, geomaxY])
+                        cmap=cm.jet,
+                        interpolation='nearest', origin='lower',
+                        vmin=0, vmax=vmax_density,
+                        extent=[geominX, geomaxX, geominY, geomaxY])
 
     im2 = axs[1].imshow(velocity,
-                    cmap=cm.jet,
-                    interpolation='nearest', origin='lower',
-                    vmin=0, vmax=1.2, #np.amax(velocity)
-                    extent=[geominX, geomaxX, geominY, geomaxY])
+                        cmap=cm.jet,
+                        interpolation='nearest', origin='lower',
+                        vmin=0, vmax=vmax_velocity,
+                        extent=[geominX, geomaxX, geominY, geomaxY])
 
     im3 = axs[2].imshow(flow,
-                    cmap=cm.jet, interpolation='nearest', origin='lower',
-                    vmin=0, vmax=2, #np.amax(flow)
-                    extent=[geominX, geomaxX, geominY, geomaxY])
+                        cmap=cm.jet, interpolation='nearest', origin='lower',
+                        vmin=0, vmax=vmax_density*vmax_velocity,
+                        extent=[geominX, geomaxX, geominY, geomaxY])
 
     axs[0].set_xlabel("x [m]")
     axs[0].set_ylabel("y [m]")
