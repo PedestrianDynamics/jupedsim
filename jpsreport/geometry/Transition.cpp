@@ -94,9 +94,7 @@ Room * Transition::GetOtherRoom(int roomID) const
     } else if(GetRoom2() != NULL && GetRoom2()->GetID() == roomID) {
         return GetRoom1();
     } else {
-        char msg[CLENGTH];
-        sprintf(msg, "ERROR: \tTransition::GetOtherRoom() wrong roomID [%d]", roomID);
-        Log->Write(msg);
+        LOG_ERROR("Transition::GetOtherRoom() wrong roomID [{}]", roomID);
         exit(0);
     }
 }
@@ -138,9 +136,9 @@ SubRoom * Transition::GetOtherSubRoom(int roomID, int subroomID) const
     else if((GetRoom2() != NULL) && (GetRoom2()->GetID() == roomID))
         return GetSubRoom1();
     else {
-        Log->Write(
-            "ERROR: \tTransition::GetOtherSubRoom No exit found "
-            "on the other side\n ID=%d, roomID=%d, subroomID=%d\n",
+        LOG_ERROR(
+            "Transition::GetOtherSubRoom No exit found "
+            "on the other side\n ID={}, roomID={}, subroomID={}\n",
             GetUniqueID(),
             roomID,
             subroomID);
@@ -152,43 +150,35 @@ SubRoom * Transition::GetOtherSubRoom(int roomID, int subroomID) const
 
 void Transition::WriteToErrorLog() const
 {
-    string s;
-    char tmp[CLENGTH];
-    sprintf(
-        tmp,
-        "\t\tTRANS: %d [%s] (%f, %f) -- (%f, %f)\n",
+    LOG_ERROR(
+        "\t\tTRANS: {} [{}] ({:.2f}, {:.2f}) -- ({:.2f}, {:.2f})\n",
         GetID(),
         GetCaption().c_str(),
         GetPoint1().GetX(),
         GetPoint1().GetY(),
         GetPoint2().GetX(),
         GetPoint2().GetY());
-    s.append(tmp);
     // erster Raum
     if(GetRoom1() != NULL) {
-        sprintf(
-            tmp,
-            "\t\t\t\tRoom: %d [%s] SubRoom: %d",
+        LOG_ERROR(
+            "\t\t\t\tRoom: {} [{}] SubRoom: {}",
             GetRoom1()->GetID(),
             GetRoom1()->GetCaption().c_str(),
             GetSubRoom1()->GetSubRoomID());
     } else {
-        sprintf(tmp, "\t\t\t\tAusgang");
+        LOG_ERROR("\t\t\t\tAusgang");
     }
-    s.append(tmp);
+
     // zweiter Raum
     if(GetRoom2() != NULL) {
-        sprintf(
-            tmp,
-            " <->\tRoom: %d [%s] SubRoom: %d\n",
+        LOG_ERROR(
+            " <->\tRoom: {} [{}] SubRoom: {}\n",
             GetRoom2()->GetID(),
             GetRoom2()->GetCaption().c_str(),
             GetSubRoom2()->GetSubRoomID());
     } else {
-        sprintf(tmp, " <->\tAusgang\n");
+        LOG_ERROR("\t\t\t\tAusgang");
     }
-    s.append(tmp);
-    Log->Write(s);
 }
 
 // TraVisTo Ausgabe
