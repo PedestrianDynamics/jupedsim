@@ -139,8 +139,6 @@ def plot_peds(ax):
 def plot_geometry(ax, _geometry_wall):
     for gw in _geometry_wall.keys():
         ax.plot(_geometry_wall[gw][:, 0], _geometry_wall[gw][:, 1], color='white', lw=1)
-        ax.plot(_geometry_wall[gw][:, 0], _geometry_wall[gw][:, 1], color='white', lw=1)
-        ax.plot(_geometry_wall[gw][:, 0], _geometry_wall[gw][:, 1], color='white', lw=1)
 
 def read_IFD(IFD_filename):
     df = pd.read_csv(IFD_filename,

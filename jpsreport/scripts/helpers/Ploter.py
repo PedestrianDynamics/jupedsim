@@ -44,7 +44,7 @@ def plot_nt(measurement_id, files):
 
 def get_profiles(Id, field_dir, geo_filename, beginsteady=None, endsteady=None):
     """ Plot density, velocity and flow
-xs
+
     Note: J = rho*v
 
     :param Id: measurement area
@@ -64,7 +64,7 @@ xs
     # get frames
     frames = []
     for f in v_Voronoi:
-        frame = int(f.split("_")[-1].split(".")[0]) #Prf_d_*_id_%d_%.5d.dat)
+        frame = int(f.split("_")[-1].split(".")[0]) #Prf_d_*_id_%d_%.5d.dat
         frames.append(frame)
 
     frames = sorted(frames)
@@ -111,16 +111,10 @@ xs
     figs, axs = plt.subplots(3, 1)
     axs[0].set_aspect('equal')
 
-    for g in geometry_obst.keys():
-        axs[0].add_patch(ppolygon(geometry_obst[g], color='white'))
-        axs[1].add_patch(ppolygon(geometry_obst[g], color='white'))
-        axs[2].add_patch(ppolygon(geometry_obst[g], color='white'))
-
-    for gw in geometry_wall.keys():
-        axs[0].plot(geometry_wall[gw][:, 0], geometry_wall[gw][:, 1], color='white', lw=1)
-        axs[1].plot(geometry_wall[gw][:, 0], geometry_wall[gw][:, 1], color='white', lw=1)
-        axs[2].plot(geometry_wall[gw][:, 0], geometry_wall[gw][:, 1], color='white', lw=1)
-
+    for i in range(3):
+        plot_geometry(axs[i], geometry_obst)
+        plot_geometry(axs[i], geometry_wall)
+        
     vmax_density = np.mean(density)+np.std(density)
     vmax_velocity = np.mean(velocity)+np.std(velocity)
 
