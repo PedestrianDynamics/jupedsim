@@ -193,7 +193,6 @@ void TrajectoriesTXT::WriteGeometry(Building *) {}
 void TrajectoriesTXT::WriteFrame(int frameNr, Building * building)
 {
     const std::vector<Pedestrian *> & allPeds = building->GetAllPedestrians();
-    unsigned int precision                    = this->GetPrecision();
     for(auto ped : allPeds) {
         double x          = ped->GetPos()._x;
         double y          = ped->GetPos()._y;
