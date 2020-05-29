@@ -211,7 +211,7 @@ void TrajectoriesTXT::WriteFrame(int frameNr, Building * building)
             y,
             _precision,
             z,
-            precision,
+            _precision,
             a,
             b,
             phi * RAD2DEG,
