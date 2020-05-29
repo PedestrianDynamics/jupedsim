@@ -380,7 +380,7 @@ void Method_D::GetProfiles(
 
     FILE * Prf_velocity;
     if((Prf_velocity = Analysis::CreateFile(Prfvelocity)) == nullptr) {
-        LOG_ERROR("cannot open the file <%s> to write the field data", Prfvelocity.c_str());
+        LOG_ERROR("cannot open the file {} to write the field data", Prfvelocity.c_str());
         exit(EXIT_FAILURE);
     }
     FILE * Prf_density;
