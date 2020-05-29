@@ -26,10 +26,10 @@
  **/
 #include "QuickestPathRouter.h"
 
-#include "general/Logger.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Wall.h"
 
+#include <Logger.h>
 #include <tinyxml.h>
 
 QuickestPathRouter::QuickestPathRouter() : GlobalRouter() {}

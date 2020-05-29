@@ -27,10 +27,10 @@
 #include "EventManager.h"
 
 #include "DoorEvent.h"
-#include "general/Logger.h"
 #include "geometry/Building.h"
 #include "pedestrian/Pedestrian.h"
 
+#include <Logger.h>
 #include <cmath>
 
 EventManager::EventManager(Building * _b)

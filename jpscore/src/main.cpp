@@ -30,10 +30,10 @@
 #include "general/ArgumentParser.h"
 #include "general/Compiler.h"
 #include "general/Configuration.h"
-#include "general/Logger.h"
 #include "geometry/Building.h"
 #include "pedestrian/AgentsSourcesManager.h"
 
+#include <Logger.h>
 #include <iomanip>
 #include <memory>
 #include <ostream>

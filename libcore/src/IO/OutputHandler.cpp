@@ -26,8 +26,7 @@
  **/
 #include "OutputHandler.h"
 
-#include "general/Logger.h"
-
+#include <Logger.h>
 #include <cstdarg> // va_start and va_end
 
 FileHandler::FileHandler(const fs::path & path)
