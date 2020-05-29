@@ -209,7 +209,7 @@ void TrajectoriesTXT::WriteFrame(int frameNr, Building * building)
             x,
             precision,
             y,
-            precision,
+            _precision,
             z,
             precision,
             a,
