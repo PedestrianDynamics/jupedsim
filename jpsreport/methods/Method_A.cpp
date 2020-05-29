@@ -70,7 +70,7 @@ bool Method_A::Process(
     for(int i = 0; i < peddata.GetNumPeds(); i++) {
         _passLine[i] = false;
     }
-    Log->Write("------------------------Analyzing with Method A-----------------------------");
+    LOG_INFO("------------------------Analyzing with Method A-----------------------------");
     bool PedInGeometry = false;
     for(std::map<int, std::vector<int>>::iterator ite = _peds_t.begin(); ite != _peds_t.end();
         ite++) {
@@ -181,7 +181,7 @@ void Method_A::FlowRate_Velocity(
     string fdFlowVelocity = tmp.string();
 
     if((fFD_FlowVelocity = Analysis::CreateFile(fdFlowVelocity)) == nullptr) {
-        Log->Write("cannot open the file to write the Flow-Velocity data\n");
+        LOG_ERROR("cannot open the file to write the Flow-Velocity data\n");
         exit(EXIT_FAILURE);
     }
     fprintf(fFD_FlowVelocity, "#Flow rate(1/s)	\t Mean velocity(m/s)\n");
