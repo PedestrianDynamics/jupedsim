@@ -26,6 +26,9 @@
 #include <algorithm>
 #include <catch2/catch.hpp>
 #include <cmath>
+#include <numeric>
+#include <utility>
+#include <vector>
 
 TEST_CASE(
     "geometry/helper/ComputeTrainDoorCoordinates",
