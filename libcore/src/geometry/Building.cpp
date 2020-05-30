@@ -371,20 +371,6 @@ bool Building::InitGeometry()
 
     InitInsideGoals();
     InitPlatforms();
-    //---
-    //    for(auto platform : _platforms) {
-    //        std::cout << "\n platform " << platform.first << ", " << platform.second->id << "\n";
-    //        std::cout << "\t rid " << platform.second->rid << "\n";
-    //        auto tracks = platform.second->tracks;
-    //        for(auto track : tracks) {
-    //            std::cout << "\t track " << track.first << "\n";
-    //            auto walls = track.second;
-    //            for(auto wall : walls) {
-    //                std::cout << "\t\t wall: " << wall.GetType() << ". " << wall.GetPoint1().toString()
-    //                          << " | " << wall.GetPoint2().toString() << "\n";
-    //            }
-    //        }
-    //    }
     LOG_INFO("Init Geometry successful!!!");
 
     return true;
