@@ -3,14 +3,17 @@
 <JuPedSim project="JPS-Project" version="0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
 
-    <seed>12542</seed>
-    <geometry>../geometry.xml</geometry>
-    <max_sim_time>60</max_sim_time>
+    <header>
+        <seed>12542</seed>
+        <geometry>../geometry.xml</geometry>
+        <max_sim_time>50</max_sim_time>
 
-    <!-- trajectories file and format -->
-    <trajectories format="plain" fps="33">
-        <file location="trajectories.txt"/>
-    </trajectories>
+        <!-- trajectories file and format -->
+        <trajectories format="plain" fps="33">
+            <file location="trajectories.txt"/>
+        </trajectories>
+    </header>
+
 
     <train_constraints>
         <train_time_table>../train_time_table.xml</train_time_table>
