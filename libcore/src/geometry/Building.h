@@ -31,6 +31,7 @@
 #include "NavLine.h"
 #include "Obstacle.h"
 #include "Room.h"
+#include "TrainGeometryInterface.h"
 #include "Transition.h"
 #include "Wall.h"
 #include "general/Configuration.h"
@@ -40,26 +41,6 @@
 #include <optional>
 
 using PointWall = std::pair<Point, Wall>;
-
-struct Track {
-    int _id;
-    int _roomID;
-    int _subRoomID;
-    std::vector<Wall> _walls;
-};
-
-struct TrainDoor {
-    double _distance;
-    double _width;
-    double _outflow;
-};
-
-struct TrainType {
-    std::string _type;
-    int _maxAgents;
-    double _length;
-    std::vector<TrainDoor> _doors;
-};
 
 class RoutingEngine;
 

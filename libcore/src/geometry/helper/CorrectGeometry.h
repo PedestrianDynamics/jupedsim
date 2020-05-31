@@ -28,8 +28,8 @@ class SubRoom;
 class Line;
 class Point;
 class Transition;
-class Track;
-class TrainType;
+
+#include "geometry/TrainGeometryInterface.h"
 
 #include <optional>
 #include <vector>

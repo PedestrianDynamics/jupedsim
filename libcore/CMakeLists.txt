@@ -120,7 +120,8 @@ set(header_files
     src/geometry/Point.h
     src/geometry/Room.h
     src/geometry/SubRoom.h
-    src/geometry/Transition.h
+        src/geometry/TrainGeometryInterface.h
+        src/geometry/Transition.h
     src/geometry/WaitingArea.h
     src/geometry/Wall.h
     src/IO/EventFileParser.h
