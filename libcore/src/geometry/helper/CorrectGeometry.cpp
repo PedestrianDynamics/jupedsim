@@ -529,6 +529,10 @@ SplitWalls(const std::vector<Wall> & trackWalls, const std::vector<Transition> &
 
 void SortWalls(std::vector<Wall> & walls, const Point & start)
 {
+    if(walls.size() == 1) {
+        return;
+    }
+
     auto startItr = std::find_if(std::begin(walls), std::end(walls), [&start](const Wall & wall) {
         return wall.HasEndPoint(start);
     });
@@ -541,30 +545,34 @@ void SortWalls(std::vector<Wall> & walls, const Point & start)
         throw std::runtime_error(message);
     }
 
-    std::rotate(startItr, std::begin(walls), std::begin(walls) + 1);
-
+    //    std::rotate(startItr, std::begin(walls), std::begin(walls) + 1);
+    std::iter_swap(startItr, std::begin(walls));
     bool sane = true;
     std::string message{};
 
-    for(size_t i = 1; i < walls.size(); ++i) {
-        auto compare = std::begin(walls) + i - 1;
-
+    for(auto compare = std::begin(walls); compare != std::prev(std::end(walls)); ++compare) {
         // find element that succeeds compare
-        auto nextItr = std::find_if(compare + 1, std::end(walls), [&compare](const Wall & wall) {
-            return wall.ShareCommonPointWith(*compare);
-        });
+        auto nextItr =
+            std::find_if(std::next(compare), std::end(walls), [&compare](const Wall & wall) {
+                return wall.ShareCommonPointWith(*compare);
+            });
 
         if(nextItr != std::end(walls)) {
             // move found element such that it follows compare in vector
-            std::rotate(nextItr, compare + 1, compare + 2);
+            std::iter_swap(nextItr, std::next(compare));
         } else {
-            // if no suceeding element found, there is an issue
+            // if no succeeding element found, there is an issue
             sane    = false;
             message = fmt::format(
                 FMT_STRING("Track walls could not be sorted. Could not find a wall succeeding {} "
                            "in track walls. Please check your geometry"),
                 compare->toString());
+            break;
         }
+    }
+
+    if(!sane) {
+        throw std::runtime_error(message);
     }
 
     // rotate walls such that walls[n]->P2 == wall[n+1]->P1
@@ -582,10 +590,6 @@ void SortWalls(std::vector<Wall> & walls, const Point & start)
             wallItr->SetPoint2(wallItr->GetPoint1());
             wallItr->SetPoint1(tmp);
         }
-    }
-
-    if(!sane) {
-        throw std::runtime_error(message);
     }
 }
 
