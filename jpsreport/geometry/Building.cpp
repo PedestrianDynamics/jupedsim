@@ -69,7 +69,9 @@ Building::Building(
     RoutingEngine & engine,
     PedDistributor & distributor,
     double linkedCellSize) :
-    _projectFilename(filename), _projectRootDir(rootDir), _routingEngine(&engine)
+    _projectFilename(filename),
+    _projectRootDir(rootDir),
+    _routingEngine(&engine)
 {
     _caption        = "no_caption";
     _savePathway    = false;
@@ -170,8 +172,7 @@ Room * Building::GetRoom(int index) const
     //todo: obsolete since the check is done by .at()
     if(_rooms.count(index) == 0) {
         LOG_ERROR(
-            "Wrong 'index' in CBuiling::GetRoom() Room ID: {} size: {}", index,
-            _rooms.size());
+            "Wrong 'index' in CBuiling::GetRoom() Room ID: {} size: {}", index, _rooms.size());
         LOG_ERROR("\tControl your rooms ID and make sure they are in the order 0, 1, 2,.. ");
         return nullptr;
     }

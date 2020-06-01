@@ -48,7 +48,7 @@ Method_B::~Method_B() {}
 
 bool Method_B::Process(const PedData & peddata)
 {
-   LOG_INFO("------------------------Analyzing with Method B-----------------------------");
+    LOG_INFO("------------------------Analyzing with Method B-----------------------------");
     _trajName       = peddata.GetTrajName();
     _projectRootDir = peddata.GetProjectRootDir();
     _outputLocation = peddata.GetOutputLocation();
