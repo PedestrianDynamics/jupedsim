@@ -69,9 +69,7 @@ Building::Building(
     RoutingEngine & engine,
     PedDistributor & distributor,
     double linkedCellSize) :
-    _projectFilename(filename),
-    _projectRootDir(rootDir),
-    _routingEngine(&engine)
+    _projectFilename(filename), _projectRootDir(rootDir), _routingEngine(&engine)
 {
     _caption        = "no_caption";
     _savePathway    = false;
@@ -373,6 +371,7 @@ const string & Building::GetProjectRootDir() const
 {
     return _projectRootDir;
 }
+
 const std::string & Building::GetGeometryFilename() const
 {
     return _geometryFilename;
